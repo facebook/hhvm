@@ -278,46 +278,17 @@ Type allocObjReturn(const IRInstruction* inst) {
 }
 
 Type arrElemReturn(const IRInstruction* inst) {
-  assertx(inst->is(ArrayGet, MixedArrayGetK));
-  assertx(!inst->hasTypeParam() || inst->typeParam() <= TGen);
+  assertx(inst->is(ArrayGet, MixedArrayGetK, ArrayIdx, LdPackedElem));
+  assertx(inst->src(0)->isA(TArr));
 
-  auto resultType = inst->hasTypeParam() ? inst->typeParam() : TGen;
-  if (inst->is(ArrayGet, MixedArrayGetK)) {
-    resultType &= TInitGen;
+  auto elem =
+    arrElemType(inst->src(0)->type(), inst->src(1)->type(), inst->ctx());
+  if (!elem.second) {
+    if (inst->is(ArrayGet)) elem.first |= TInitNull;
+    if (inst->is(ArrayIdx)) elem.first |= inst->src(2)->type();
   }
-
-  // Elements of a noncounted array are uncounted
-  if (inst->src(0)->isA(TPersistentArr)) {
-    resultType &= TUncountedInit;
-  }
-
-  auto const arrTy = inst->src(0)->type().arrSpec().type();
-  if (!arrTy) return resultType;
-
-  using T = RepoAuthType::Array::Tag;
-  using E = RepoAuthType::Array::Empty;
-
-  switch (arrTy->tag()) {
-    case T::Packed:
-    {
-      auto const idx = inst->src(1);
-      if (idx->hasConstVal(TInt) &&
-          idx->intVal() >= 0 &&
-          idx->intVal() < arrTy->size()) {
-        resultType &= typeFromRAT(arrTy->packedElem(idx->intVal()),
-                                  inst->ctx());
-      }
-      break;
-    }
-    case T::PackedN:
-      resultType &= typeFromRAT(arrTy->elemType(), inst->ctx());
-      break;
-  }
-
-  if (arrTy->emptiness() == E::Maybe) {
-    resultType |= TInitNull;
-  }
-  return resultType;
+  if (inst->hasTypeParam()) elem.first &= inst->typeParam();
+  return elem.first;
 }
 
 Type vecElemReturn(const IRInstruction* inst) {
@@ -325,7 +296,8 @@ Type vecElemReturn(const IRInstruction* inst) {
   assertx(inst->src(0)->isA(TVec));
   assertx(inst->src(1)->isA(TInt));
 
-  auto resultType = vecElemType(inst->src(0), inst->src(1));
+  auto resultType =
+    vecElemType(inst->src(0)->type(), inst->src(1)->type()).first;
   if (inst->hasTypeParam()) resultType &= inst->typeParam();
   return resultType;
 }
@@ -335,11 +307,13 @@ Type dictElemReturn(const IRInstruction* inst) {
   assertx(inst->src(0)->isA(TDict));
   assertx(inst->src(1)->isA(TInt | TStr));
 
-  auto resultType = dictElemType(inst->src(0), inst->src(1));
-  if (inst->is(DictGetQuiet)) resultType |= TInitNull;
-  if (inst->is(DictIdx)) resultType |= inst->src(2)->type();
-  if (inst->hasTypeParam()) resultType &= inst->typeParam();
-  return resultType;
+  auto elem = dictElemType(inst->src(0)->type(), inst->src(1)->type());
+  if (!elem.second) {
+    if (inst->is(DictGetQuiet)) elem.first |= TInitNull;
+    if (inst->is(DictIdx)) elem.first |= inst->src(2)->type();
+  }
+  if (inst->hasTypeParam()) elem.first &= inst->typeParam();
+  return elem.first;
 }
 
 Type keysetElemReturn(const IRInstruction* inst) {
@@ -347,11 +321,13 @@ Type keysetElemReturn(const IRInstruction* inst) {
   assertx(inst->src(0)->isA(TKeyset));
   assertx(inst->src(1)->isA(TInt | TStr));
 
-  auto resultType = keysetElemType(inst->src(0), inst->src(1));
-  if (inst->is(KeysetGetQuiet)) resultType |= TInitNull;
-  if (inst->is(KeysetIdx)) resultType |= inst->src(2)->type();
-  if (inst->hasTypeParam()) resultType &= inst->typeParam();
-  return resultType;
+  auto elem = keysetElemType(inst->src(0)->type(), inst->src(1)->type());
+  if (!elem.second) {
+    if (inst->is(KeysetGetQuiet)) elem.first |= TInitNull;
+    if (inst->is(KeysetIdx)) elem.first |= inst->src(2)->type();
+  }
+  if (inst->hasTypeParam()) elem.first &= inst->typeParam();
+  return elem.first;
 }
 
 Type ctxReturn(const IRInstruction* inst) {

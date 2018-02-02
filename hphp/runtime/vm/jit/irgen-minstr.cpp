@@ -477,14 +477,30 @@ SSATmp* emitPropSpecialized(
 //////////////////////////////////////////////////////////////////////
 // "Simple op" handlers.
 
-void checkBounds(IRGS& env, SSATmp* base, SSATmp* idx, SSATmp* limit) {
-  assertx(base->isA(TArrLike) || base->isA(TObj));
+void checkCollectionBounds(IRGS& env, SSATmp* base,
+                           SSATmp* idx, SSATmp* limit) {
+  assertx(base->isA(TObj));
 
   ifThen(
     env,
     [&](Block* taken) {
       auto ok = gen(env, CheckRange, idx, limit);
       gen(env, JmpZero, taken, ok);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, ThrowOutOfBounds, base, idx);
+    }
+  );
+}
+
+void checkVecBounds(IRGS& env, SSATmp* base, SSATmp* idx) {
+  assertx(base->isA(TVec));
+
+  ifThen(
+    env,
+    [&](Block* taken) {
+      gen(env, CheckPackedArrayDataBounds, taken, base, idx);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
@@ -506,57 +522,20 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
     return unboxed;
   };
 
-  auto doLdElem = [&] {
-    auto const type = packedArrayElemType(
-      base, key, curClass(env)).ptr(Ptr::Elem);
-    auto addr = gen(env, LdPackedArrayDataElemAddr, type, base, key);
-    auto res = gen(env, LdMem, type.deref(), addr);
-    auto pres = profiledType(env, res, [&] { finish(finishMe(res)); });
-    return finishMe(pres);
-  };
-
-  auto const inout = mode == MOpMode::InOut;
-
-  if (key->hasConstVal()) {
-    int64_t idx = key->intVal();
-    if (base->hasConstVal()) {
-      const ArrayData* arr = base->arrVal();
-      if (idx < 0 || idx >= arr->size()) {
-        if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
-          gen(env, RaiseArrayIndexNotice,
-              RaiseArrayIndexNoticeData { inout }, key);
-        }
-        return cns(env, TInitNull);
-      }
-      auto const value = arr->at(idx);
-      return cns(env, value);
-    }
-
-    switch (packedArrayBoundsStaticCheck(base->type(), idx)) {
-    case PackedBounds::In:
-      return doLdElem();
-    case PackedBounds::Out:
-      if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
-        gen(env, RaiseArrayIndexNotice,
-            RaiseArrayIndexNoticeData { inout }, key);
-      }
-      return cns(env, TInitNull);
-    case PackedBounds::Unknown:
-      break;
-    }
-  }
-
   return cond(
     env,
     [&] (Block* taken) {
       gen(env, CheckPackedArrayDataBounds, taken, base, key);
     },
     [&] { // Next:
-      return doLdElem();
+      auto const res = gen(env, LdPackedElem, base, key);
+      auto const pres = profiledType(env, res, [&] { finish(finishMe(res)); });
+      return finishMe(pres);
     },
     [&] { // Taken:
       hint(env, Block::Hint::Unlikely);
       if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
+        auto const inout = mode == MOpMode::InOut;
         gen(env, RaiseArrayIndexNotice,
             RaiseArrayIndexNoticeData { inout }, key);
       }
@@ -575,8 +554,7 @@ SSATmp* emitVecArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
     return cns(env, TBottom);
   }
 
-  auto const limit = gen(env, CountVec, base);
-  checkBounds(env, base, key, limit);
+  checkVecBounds(env, base, key);
 
   auto finishMe = [&](SSATmp* elem) {
     gen(env, IncRef, elem);
@@ -602,9 +580,7 @@ SSATmp* emitVecArrayQuietGet(IRGS& env, SSATmp* base, SSATmp* key,
   auto const elem = cond(
     env,
     [&] (Block* taken) {
-      auto const length = gen(env, CountVec, base);
-      auto const cmp = gen(env, CheckRange, key, length);
-      gen(env, JmpZero, taken, cmp);
+      gen(env, CheckPackedArrayDataBounds, taken, base, key);
     },
     [&] { return gen(env, LdVecElem, base, key); },
     [&] { return cns(env, TInitNull); }
@@ -711,7 +687,7 @@ SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
 
 SSATmp* emitVectorGet(IRGS& env, SSATmp* base, SSATmp* key) {
   auto const size = gen(env, LdVectorSize, base);
-  checkBounds(env, base, key, size);
+  checkCollectionBounds(env, base, key, size);
   base = gen(env, LdVectorBase, base);
   static_assert(sizeof(TypedValue) == 16,
                 "TypedValue size expected to be 16 bytes");
@@ -735,7 +711,7 @@ SSATmp* emitPairGet(IRGS& env, SSATmp* base, SSATmp* key) {
 
     static_assert(sizeof(TypedValue) == 16,
                   "TypedValue size expected to be 16 bytes");
-    checkBounds(env, base, key, cns(env, 2));
+    checkCollectionBounds(env, base, key, cns(env, 2));
     return gen(env, Shl, key, cns(env, 4));
   }();
 
@@ -748,24 +724,11 @@ SSATmp* emitPairGet(IRGS& env, SSATmp* base, SSATmp* key) {
 SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
   assertx(base->type().arrSpec().kind() == ArrayData::kPackedKind);
 
-  auto const type = packedArrayElemType(base, key, curClass(env));
-  if (type <= TNull) return cns(env, false);
-
-  if (key->hasConstVal()) {
-    auto const idx = key->intVal();
-    switch (packedArrayBoundsStaticCheck(base->type(), idx)) {
-    case PackedBounds::In: {
-      if (!type.maybe(TNull)) return cns(env, true);
-
-      auto const elemAddr = gen(env, LdPackedArrayDataElemAddr,
-                                type.ptr(Ptr::Elem), base, key);
-      return gen(env, IsNTypeMem, TNull, elemAddr);
-    }
-    case PackedBounds::Out:
-      return cns(env, false);
-    case PackedBounds::Unknown:
-      break;
-    }
+  auto const elem = arrElemType(base->type(), key->type(), curClass(env));
+  if (elem.first <= TNull) {
+    return cns(env, false);
+  } else if (elem.second) {
+    return cns(env, true);
   }
 
   return cond(
@@ -774,9 +737,8 @@ SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
       gen(env, CheckPackedArrayDataBounds, taken, base, key);
     },
     [&] { // Next:
-      auto const elemAddr = gen(env, LdPackedArrayDataElemAddr,
-                                type.ptr(Ptr::Elem), base, key);
-      return gen(env, IsNTypeMem, TNull, elemAddr);
+      auto const packedElem = gen(env, LdPackedElem, base, key);
+      return gen(env, IsNType, TNull, packedElem);
     },
     [&] { // Taken:
       return cns(env, false);
@@ -796,9 +758,7 @@ SSATmp* emitVecArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
   return cond(
     env,
     [&] (Block* taken) {
-      auto const length = gen(env, CountVec, base);
-      auto const cmp = gen(env, CheckRange, key, length);
-      gen(env, JmpZero, taken, cmp);
+      gen(env, CheckPackedArrayDataBounds, taken, base, key);
     },
     [&] {
       auto const elem = gen(env, LdVecElem, base, key);
@@ -838,9 +798,7 @@ SSATmp* emitVecArrayEmptyElem(IRGS& env, SSATmp* base, SSATmp* key) {
   return cond(
     env,
     [&] (Block* taken) {
-      auto const length = gen(env, CountVec, base);
-      auto const cmp = gen(env, CheckRange, key, length);
-      gen(env, JmpZero, taken, cmp);
+      gen(env, CheckPackedArrayDataBounds, taken, base, key);
     },
     [&] {
       auto const elem = gen(env, LdVecElem, base, key);
@@ -871,7 +829,7 @@ SSATmp* emitKeysetEmptyElem(IRGS& env, SSATmp* base, SSATmp* key) {
 
 void emitVectorSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* value) {
   auto const size = gen(env, LdVectorSize, base);
-  checkBounds(env, base, key, size);
+  checkCollectionBounds(env, base, key, size);
 
   ifThen(
     env,
@@ -1324,9 +1282,9 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   if (warn) {
     if (key->isA(TInt)) {
       auto const base = extractBase(env);
-      auto const elemType = vecElemType(base, key).ptr(Ptr::Elem);
-      auto const length = gen(env, CountVec, base);
-      checkBounds(env, base, key, length);
+      checkVecBounds(env, base, key);
+      auto const elemType =
+        vecElemType(base->type(), key->type()).first.ptr(Ptr::Elem);
       return gen(env, LdPackedArrayDataElemAddr, elemType, base, key);
     }
     return invalid_key();
@@ -1334,15 +1292,16 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 
   if (key->isA(TInt)) {
     auto const base = extractBase(env);
-    auto const elemType = vecElemType(base, key).ptr(Ptr::Elem);
     return cond(
       env,
       [&] (Block* taken) {
-        auto const length = gen(env, CountVec, base);
-        auto const cmp = gen(env, CheckRange, key, length);
-        gen(env, JmpZero, taken, cmp);
+        gen(env, CheckPackedArrayDataBounds, taken, base, key);
       },
-      [&] { return gen(env, LdPackedArrayDataElemAddr, elemType, base, key); },
+      [&] {
+        auto const elemType =
+          vecElemType(base->type(), key->type()).first.ptr(Ptr::Elem);
+        return gen(env, LdPackedArrayDataElemAddr, elemType, base, key);
+      },
       [&] { return ptrToInitNull(env); }
     );
   }

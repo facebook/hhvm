@@ -923,11 +923,23 @@ void cgLdPackedArrayDataElemAddr(IRLS& env, const IRInstruction* inst) {
   vmain(env) << lea{addr, dstLoc(env, inst, 0).reg()};
 }
 
-void cgLdVecElem(IRLS& env, const IRInstruction* inst) {
+namespace {
+
+void packedLayoutLoadImpl(IRLS& env, const IRInstruction* inst) {
   auto const arrLoc = srcLoc(env, inst, 0);
   auto const idxLoc = srcLoc(env, inst, 1);
   auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
   loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), addr);
+}
+
+}
+
+void cgLdVecElem(IRLS& env, const IRInstruction* inst) {
+  packedLayoutLoadImpl(env, inst);
+}
+
+void cgLdPackedElem(IRLS& env, const IRInstruction* inst) {
+  packedLayoutLoadImpl(env, inst);
 }
 
 IMPL_OPCODE_CALL(ElemVecD)

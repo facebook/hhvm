@@ -1148,11 +1148,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.src(1)
     };
 
-  case LdVecElem: {
+  case LdVecElem:
+  case LdPackedElem: {
     auto const base = inst.src(0);
     auto const key  = inst.src(1);
-    always_assert(base->isA(TVec));
-    always_assert(key->isA(TInt));
     return PureLoad {
       key->hasConstVal() ? AElemI { base, key->intVal() } : AElemIAny
     };

@@ -35,14 +35,21 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PackedBounds packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
-  if (idxVal < 0 || idxVal > MixedArray::MaxSize) return PackedBounds::Out;
+PackedBounds packedArrayBoundsStaticCheck(Type arrayType,
+                                          folly::Optional<int64_t> idx) {
+  assertx(arrayType.subtypeOfAny(TArr, TVec));
+  if (idx && (*idx < 0 || *idx > MixedArray::MaxSize)) return PackedBounds::Out;
 
-  if (arrayType.hasConstVal()) {
-    return idxVal < arrayType.arrVal()->size()
-      ? PackedBounds::In
-      : PackedBounds::Out;
-  }
+  auto const const_check = [&] (const ArrayData* val) {
+    assertx(val->hasPackedLayout());
+    if (val->empty()) return PackedBounds::Out;
+    if (!idx) return PackedBounds::Unknown;
+    return *idx < val->size() ? PackedBounds::In : PackedBounds::Out;
+  };
+  if (arrayType.hasConstVal(TArr)) return const_check(arrayType.arrVal());
+  if (arrayType.hasConstVal(TVec)) return const_check(arrayType.vecVal());
+
+  if (!idx) return PackedBounds::Unknown;
 
   auto const at = arrayType.arrSpec().type();
   if (!at) return PackedBounds::Unknown;
@@ -50,12 +57,14 @@ PackedBounds packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
   using A = RepoAuthType::Array;
   switch (at->tag()) {
   case A::Tag::Packed:
-    if (idxVal < at->size() && at->emptiness() == A::Empty::No) {
-      return PackedBounds::In;
+    if (at->emptiness() == A::Empty::No) {
+      return *idx < at->size() ? PackedBounds::In : PackedBounds::Out;
+    } else if (*idx >= at->size()) {
+      return PackedBounds::Out;
     }
-    // fallthrough
+    return PackedBounds::Unknown;
   case A::Tag::PackedN:
-    if (idxVal == 0 && at->emptiness() == A::Empty::No) {
+    if (*idx == 0 && at->emptiness() == A::Empty::No) {
       return PackedBounds::In;
     }
   }
@@ -64,169 +73,223 @@ PackedBounds packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Type packedArrayElemType(SSATmp* arr, SSATmp* idx, const Class* ctx) {
-  assertx(arr->isA(TArr) &&
-          arr->type().arrSpec().kind() == ArrayData::kPackedKind &&
-          idx->isA(TInt));
+std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx) {
+  assertx(arr <= TArr);
 
-  if (arr->hasConstVal() && idx->hasConstVal()) {
-    auto const idxVal = idx->intVal();
-    if (idxVal >= 0 && idxVal < arr->arrVal()->size()) {
-      return Type(arr->arrVal()->at(idxVal).m_type);
+  auto const dissected = [&]{
+    if (idx.hasConstVal(TStr)) {
+      int64_t val;
+      if (idx.strVal()->isStrictlyInteger(val)) return Type::cns(val);
+      return idx;
     }
-    return TInitNull;
-  }
+    if (idx <= TInt) return idx;
+    return TInt | TStr;
+  }();
 
-  Type t = arr->isA(TPersistentArr) ? TInitCell : TGen;
+  if (arr.hasConstVal()) {
+    if (dissected.hasConstVal(TInt)) {
+      auto const rval = arr.arrVal()->rval(dissected.intVal());
+      if (rval) return {Type::cns(rval.tv()), true};
+      return {TBottom, false};
+    }
 
-  auto const at = arr->type().arrSpec().type();
-  if (!at) return t;
+    if (dissected.hasConstVal(TStr)) {
+      auto const rval = arr.arrVal()->rval(dissected.strVal());
+      if (rval) return {Type::cns(rval.tv()), true};
+      return {TBottom, false};
+    }
 
-  switch (at->tag()) {
-    case RepoAuthType::Array::Tag::Packed:
-    {
-      if (idx->hasConstVal(TInt)) {
-        auto const idxVal = idx->intVal();
-        if (idxVal >= 0 && idxVal < at->size()) {
-          return typeFromRAT(at->packedElem(idxVal), ctx) & t;
+    auto type = TBottom;
+    IterateKV(
+      arr.arrVal(),
+      [&](Cell k, TypedValue v) {
+        // Ignore values which can't correspond to the key's type
+        if (isIntType(k.m_type)) {
+          if (dissected.maybe(TInt)) type |= Type::cns(v);
+        } else if (isStringType(k.m_type)) {
+          if (dissected.maybe(TStr)) type |= Type::cns(v);
         }
-        return TInitNull;
       }
-      Type elemType = TBottom;
-      for (uint32_t i = 0; i < at->size(); ++i) {
-        elemType |= typeFromRAT(at->packedElem(i), ctx);
-      }
-      return elemType & t;
-    }
-    case RepoAuthType::Array::Tag::PackedN:
-      return typeFromRAT(at->elemType(), ctx) & t;
+    );
+    return {type, false};
   }
-  not_reached();
+
+  if (arr <= Type::Array(ArrayData::kPackedKind)) {
+    if (!dissected.maybe(TInt)) return {TBottom, false};
+    if (dissected.hasConstVal(TInt)) {
+      auto const intIdx = dissected.intVal();
+      if (intIdx < 0 || intIdx > MixedArray::MaxSize) return {TBottom, false};
+    }
+  }
+
+  auto type = (arr <= TPersistentArr) ? TUncountedInit : TInitGen;
+
+  auto const arrTy = arr.arrSpec().type();
+  if (!arrTy) return {type, false};
+
+  using E = RepoAuthType::Array::Empty;
+  using T = RepoAuthType::Array::Tag;
+  auto const maybeEmpty = arrTy->emptiness() == E::Maybe;
+
+  switch (arrTy->tag()) {
+    case T::Packed: {
+      if (!dissected.maybe(TInt)) return {TBottom, false};
+      if (dissected.hasConstVal(TInt)) {
+        auto const intIdx = dissected.intVal();
+        if (intIdx < 0 || intIdx >= arrTy->size()) return {TBottom, false};
+        type &= typeFromRAT(arrTy->packedElem(intIdx), ctx);
+        return {type, !maybeEmpty};
+      }
+      auto all = TBottom;
+      for (auto i = 0; i < arrTy->size(); ++i) {
+        all |= typeFromRAT(arrTy->packedElem(i), ctx);
+      }
+      type &= all;
+      break;
+    }
+    case T::PackedN: {
+      auto present = false;
+      if (!dissected.maybe(TInt)) return {TBottom, false};
+      if (dissected.hasConstVal(TInt)) {
+        auto const intIdx = dissected.intVal();
+        if (intIdx < 0 || intIdx > MixedArray::MaxSize) {
+          return {TBottom, false};
+        }
+        present = !maybeEmpty && (intIdx == 0);
+      }
+      type &= typeFromRAT(arrTy->elemType(), ctx);
+      return {type, present};
+    }
+  }
+
+  return {type, false};
 }
 
-Type vecElemType(SSATmp* arr, SSATmp* idx) {
-  assertx(arr->isA(TVec));
-  assertx(!idx || idx->isA(TInt));
+std::pair<Type, bool> vecElemType(Type arr, Type idx) {
+  assertx(arr <= TVec);
+  assertx(idx <= TInt);
 
-  if (arr->hasConstVal()) {
+  if (idx.hasConstVal()) {
+    auto const idxVal = idx.intVal();
+    if (idxVal < 0 || idxVal > MixedArray::MaxSize) return {TBottom, false};
+  }
+
+  if (arr.hasConstVal()) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
-    if (idx && idx->hasConstVal()) {
-      auto const idxVal = idx->intVal();
-      if (idxVal >= 0 && idxVal < arr->vecVal()->size()) {
-        auto const rval = PackedArray::RvalIntVec(arr->vecVal(), idxVal);
-        return rval ? Type(rval.type()) : TBottom;
+    if (idx.hasConstVal()) {
+      auto const idxVal = idx.intVal();
+      if (idxVal >= 0 && idxVal < arr.vecVal()->size()) {
+        auto const rval = PackedArray::RvalIntVec(arr.vecVal(), idxVal);
+        return {Type::cns(rval.tv()), true};
       }
-      return TBottom;
+      return {TBottom, false};
     }
 
     // Otherwise we can constrain the type according to the union of all the
     // types present in the vec.
-    Type type{TBottom};
+    auto type = TBottom;
     PackedArray::IterateV(
-      arr->vecVal(),
-      [&](TypedValue v) { type |= Type(v.m_type); }
+      arr.vecVal(),
+      [&](TypedValue v) { type |= Type::cns(v); }
     );
-    return type;
+    return {type, false};
   }
 
   // Vecs always contain initialized cells
-  return arr->isA(TPersistentVec) ? TUncountedInit : TInitCell;
+  auto const type = (arr <= TPersistentVec) ? TUncountedInit : TInitCell;
+  return {type, false};
 }
 
-Type dictElemType(SSATmp* arr, SSATmp* idx) {
-  assertx(arr->isA(TDict));
-  assertx(!idx || idx->isA(TInt | TStr));
+std::pair<Type, bool> dictElemType(Type arr, Type idx) {
+  assertx(arr <= TDict);
+  assertx(idx <= (TInt | TStr));
 
-  if (arr->hasConstVal()) {
+  if (arr.hasConstVal()) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
-    if (idx && idx->hasConstVal(TInt)) {
-      auto const idxVal = idx->intVal();
-      auto const rval = MixedArray::RvalIntDict(arr->dictVal(), idxVal);
-      return rval ? Type(rval.type()) : TBottom;
+    if (idx.hasConstVal(TInt)) {
+      auto const idxVal = idx.intVal();
+      auto const rval = MixedArray::RvalIntDict(arr.dictVal(), idxVal);
+      if (rval) return {Type::cns(rval.tv()), true};
+      return {TBottom, false};
     }
 
-    if (idx && idx->hasConstVal(TStr)) {
-      auto const idxVal = idx->strVal();
-      auto const rval = MixedArray::RvalStrDict(arr->dictVal(), idxVal);
-      return rval ? Type(rval.type()) : TBottom;
+    if (idx.hasConstVal(TStr)) {
+      auto const idxVal = idx.strVal();
+      auto const rval = MixedArray::RvalStrDict(arr.dictVal(), idxVal);
+      if (rval) return {Type::cns(rval.tv()), true};
+      return {TBottom, false};
     }
 
     // Otherwise we can constrain the type according to the union of all the
     // types present in the dict.
-    Type type{TBottom};
+    auto type = TBottom;
     MixedArray::IterateKV(
-      MixedArray::asMixed(arr->dictVal()),
+      MixedArray::asMixed(arr.dictVal()),
       [&](Cell k, TypedValue v) {
         // Ignore values which can't correspond to the key's type
         if (isIntType(k.m_type)) {
-          if (!idx || idx->type().maybe(TInt)) type |= Type(v.m_type);
+          if (idx.maybe(TInt)) type |= Type::cns(v);
         } else if (isStringType(k.m_type)) {
-          if (!idx || idx->type().maybe(TStr)) type |= Type(v.m_type);
+          if (idx.maybe(TStr)) type |= Type::cns(v);
         }
       }
     );
-    return type;
+    return {type, false};
   }
 
   // Dicts always contain initialized cells
-  return arr->isA(TPersistentDict) ? TUncountedInit : TInitCell;
+  auto const type = (arr <= TPersistentDict) ? TUncountedInit : TInitCell;
+  return {type, false};
 }
 
-Type keysetElemType(SSATmp* arr, SSATmp* idx) {
-  assertx(arr->isA(TKeyset));
-  assertx(!idx || idx->isA(TInt | TStr));
+std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
+  assertx(arr <= TKeyset);
+  assertx(idx <= (TInt | TStr));
 
-  if (arr->hasConstVal()) {
+  if (arr.hasConstVal()) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
-    if (idx && idx->hasConstVal(TInt)) {
-      auto const idxVal = idx->intVal();
-      auto const rval = SetArray::RvalInt(arr->keysetVal(), idxVal);
-      return rval ? Type(rval.type()) : TBottom;
+    if (idx.hasConstVal(TInt)) {
+      auto const idxVal = idx.intVal();
+      auto const rval = SetArray::RvalInt(arr.keysetVal(), idxVal);
+      if (rval) return {Type::cns(rval.tv()), true};
+      return {TBottom, false};
     }
 
-    if (idx && idx->hasConstVal(TStr)) {
-      auto const idxVal = idx->strVal();
-      auto const rval = SetArray::RvalStr(arr->keysetVal(), idxVal);
-      return rval ? Type(rval.type()) : TBottom;
+    if (idx.hasConstVal(TStr)) {
+      auto const idxVal = idx.strVal();
+      auto const rval = SetArray::RvalStr(arr.keysetVal(), idxVal);
+      if (rval) return {Type::cns(rval.tv()), true};
+      return {TBottom, false};
     }
 
     // Otherwise we can constrain the type according to the union of all the
     // types present in the keyset.
-    Type type{TBottom};
+    auto type = TBottom;
     SetArray::Iterate(
-      SetArray::asSet(arr->keysetVal()),
+      SetArray::asSet(arr.keysetVal()),
       [&](TypedValue v) {
         // Ignore values which can't correspond to the key's type
         if (isIntType(v.m_type)) {
-          if (!idx || idx->type().maybe(TInt)) type |= Type(v.m_type);
+          if (idx.maybe(TInt)) type |= Type::cns(v);
         } else {
           assertx(isStringType(v.m_type));
-          if (!idx || idx->type().maybe(TStr)) type |= Type(v.m_type);
+          if (idx.maybe(TStr)) type |= Type::cns(v);
         }
       }
     );
-
-    // The key is always the value, so, for instance, if there's nothing but
-    // strings in the keyset, we know an int idx can't access a valid value.
-    if (idx) {
-      if (idx->isA(TInt)) type &= TInt;
-      if (idx->isA(TStr)) type &= TStr;
-    }
-    return type;
+    return {type, false};
   }
 
   // Keysets always contain strings or integers. We can further constrain this
   // if we know the idx type, as the key is always the value.
   auto type = TStr | TInt;
-  if (idx) {
-    if (idx->isA(TInt)) type &= TInt;
-    if (idx->isA(TStr)) type &= TStr;
-  }
-  if (arr->isA(TPersistentKeyset)) type &= TUncountedInit;
-  return type;
+  if (idx <= TInt) type &= TInt;
+  if (idx <= TStr) type &= TStr;
+  if (arr <= TPersistentKeyset) type &= TUncountedInit;
+  return {type, false};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

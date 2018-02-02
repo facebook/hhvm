@@ -77,11 +77,23 @@ void cgCheckPackedArrayDataBounds(IRLS& env, const IRInstruction* inst) {
   auto idx = srcLoc(env, inst, 1).reg();
   auto& v = vmain(env);
 
-  // ArrayData::m_size is a uint32_t but we need to do a 64-bit comparison
-  // since idx is KindOfInt64.
-  auto const size = v.makeReg();
+  auto const size = [&]{
+    auto const arrTmp = inst->src(0);
+    if (arrTmp->hasConstVal(TArr)) return v.cns(arrTmp->arrVal()->size());
+    if (arrTmp->hasConstVal(TVec)) return v.cns(arrTmp->vecVal()->size());
+    auto const at = arrTmp->type().arrSpec().type();
+    using A = RepoAuthType::Array;
+    if (at && at->tag() == A::Tag::Packed && at->emptiness() == A::Empty::No) {
+      return v.cns(at->size());
+    }
+    // ArrayData::m_size is a uint32_t but we need to do a 64-bit comparison
+    // since idx is KindOfInt64.
+    auto const size = v.makeReg();
+    v << loadzlq{arr[ArrayData::offsetofSize()], size};
+    return size;
+  }();
+
   auto const sf = v.makeReg();
-  v << loadzlq{arr[ArrayData::offsetofSize()], size};
   v << cmpq{idx, size, sf};
   v << jcc{CC_BE, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }

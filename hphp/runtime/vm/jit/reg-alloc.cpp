@@ -71,6 +71,7 @@ bool loadsCell(Opcode op) {
   case DictIdx:
   case KeysetIdx:
   case LdVecElem:
+  case LdPackedElem:
     switch (arch()) {
     case Arch::X64: return true;
     case Arch::ARM: return true;

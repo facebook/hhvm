@@ -2760,9 +2760,10 @@ SSATmp* simplifyCheckPackedArrayDataBounds(State& env,
                                            const IRInstruction* inst) {
   auto const array = inst->src(0);
   auto const idx   = inst->src(1);
-  if (!idx->hasConstVal()) return mergeBranchDests(env, inst);
 
-  auto const idxVal = idx->intVal();
+  auto const idxVal = idx->hasConstVal()
+    ? folly::Optional<int64_t>(idx->intVal())
+    : folly::none;
   switch (packedArrayBoundsStaticCheck(array->type(), idxVal)) {
   case PackedBounds::In:       return gen(env, Nop);
   case PackedBounds::Out:      return gen(env, Jmp, inst->taken());
@@ -3263,19 +3264,35 @@ SSATmp* simplifyLdStrLen(State& env, const IRInstruction* inst) {
   return src->hasConstVal(TStr) ? cns(env, src->strVal()->size()) : nullptr;
 }
 
-SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
+namespace {
+
+SSATmp* packedLayoutLoadImpl(State& env,
+                             const IRInstruction* inst,
+                             bool isVec) {
   auto const src0 = inst->src(0);
   auto const src1 = inst->src(1);
-  if (src0->hasConstVal(TVec) && src1->hasConstVal(TInt)) {
-    auto const vec = src0->vecVal();
+  if (src0->hasConstVal() && src1->hasConstVal(TInt)) {
+    auto const arr = isVec ? src0->vecVal() : src0->arrVal();
     auto const idx = src1->intVal();
-    assertx(vec->isVecArray());
+    assertx(arr->hasPackedLayout());
     if (idx >= 0) {
-      auto const rval = PackedArray::RvalIntVec(vec, idx);
+      auto const rval = isVec
+        ? PackedArray::RvalIntVec(arr, idx)
+        : PackedArray::RvalInt(arr, idx);
       return rval ? cns(env, rval.tv()) : nullptr;
     }
   }
   return nullptr;
+}
+
+}
+
+SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
+  return packedLayoutLoadImpl(env, inst, true);
+}
+
+SSATmp* simplifyLdPackedElem(State& env, const IRInstruction* inst) {
+  return packedLayoutLoadImpl(env, inst, false);
 }
 
 template <class F>
@@ -3602,6 +3619,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdClsMethod)
   X(LdStrLen)
   X(LdVecElem)
+  X(LdPackedElem)
   X(MethodExists)
   X(CheckCtxThis)
   X(CheckFuncStatic)

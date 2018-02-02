@@ -1,9 +1,0 @@
-hello!
-goodbye!
-int(42)
-hello!
-goodbye!
-
-Fatal error: Uncaught exception %s
-Stack trace:
-#0 {main}

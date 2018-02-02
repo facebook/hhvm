@@ -507,8 +507,6 @@ struct RuntimeOption {
   /* Whether the HackC compiler should inherit the compiler config of the
      HHVM process that launches it. */                                  \
   F(bool, HackCompilerInheritConfig,   true)                            \
-  F(bool, PHP7CompilerEnabled,         false)                           \
-  F(string, PHP7CompilerCommand,       "")                              \
   F(bool, EmitSwitch,                  true)                            \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
@@ -705,7 +703,7 @@ struct RuntimeOption {
   F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \
   F(bool, Verify,                      (getenv("HHVM_VERIFY") ||        \
-    !EvalHackCompilerCommand.empty() || EvalPHP7CompilerEnabled))       \
+    !EvalHackCompilerCommand.empty()))                                  \
   F(bool, VerifyOnly,                  false)                           \
   F(uint32_t, StaticContentsLogRate,   100)                             \
   F(uint32_t, LogUnitLoadRate,         0)                               \

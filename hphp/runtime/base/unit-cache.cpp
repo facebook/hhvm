@@ -632,9 +632,6 @@ const std::string mangleExternCompilerVersions() {
   if (HackcMode::kNever != hackc_mode()) {
     s += hackc_version();
   }
-  if (RuntimeOption::EvalPHP7CompilerEnabled) {
-    s += php7c_version();
-  }
   return s;
 }
 

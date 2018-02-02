@@ -371,9 +371,8 @@ bool Package::parseImpl(const std::string* fileName) {
     }
   };
 
-  if ((RuntimeOption::EvalHackCompilerDefault &&
-      !RuntimeOption::EvalHackCompilerCommand.empty()) ||
-      RuntimeOption::EvalPHP7CompilerEnabled) {
+  if (RuntimeOption::EvalHackCompilerDefault &&
+      !RuntimeOption::EvalHackCompilerCommand.empty()) {
     std::ifstream s(fullPath);
     std::string content {
       std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };

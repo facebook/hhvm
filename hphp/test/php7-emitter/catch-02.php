@@ -1,5 +1,0 @@
-<?php
-
-try {
-  echo "bad";
-}

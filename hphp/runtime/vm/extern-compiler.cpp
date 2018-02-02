@@ -404,15 +404,12 @@ struct CompilerManager final {
   void detach_after_fork();
   bool hackc_enabled() { return (bool)m_hackc_pool; }
   CompilerPool& get_hackc_pool();
-  bool php7_enabled() { return (bool)m_php7_pool; }
-  CompilerPool& get_php7_pool();
 private:
   void stop(bool detach_compilers);
   int m_delegate{kInvalidPid};
   std::mutex m_delegateLock;
 
   std::unique_ptr<CompilerPool> m_hackc_pool;
-  std::unique_ptr<CompilerPool> m_php7_pool;
 
   std::atomic<bool> m_started{false};
   std::mutex m_compilers_start_lock;
@@ -596,21 +593,6 @@ folly::Optional<CompilerOptions> hackcConfiguration() {
   };
 }
 
-folly::Optional<CompilerOptions> php7Configuration() {
-  if (RuntimeOption::EnableHipHopSyntax ||
-      !RuntimeOption::EvalPHP7CompilerEnabled) {
-    return folly::none;
-  }
-
-  return CompilerOptions{
-    true, // verboseErrors
-    0, // maxRetries
-    1, // workers
-    RuntimeOption::EvalPHP7CompilerCommand, // command
-    false, // inheritConfig
-  };
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 }
 
@@ -641,19 +623,14 @@ void CompilerManager::ensure_started() {
   if (m_started.load(std::memory_order_relaxed)) {
     return;
   }
-  auto php7Config = php7Configuration();
   auto hackConfig = hackcConfiguration();
 
-  if (php7Config || hackConfig) {
+  if (hackConfig) {
     m_delegate = LightProcess::createDelegate();
   }
 
   if (hackConfig) {
     m_hackc_pool = std::make_unique<CompilerPool>(std::move(*hackConfig));
-  }
-
-  if (php7Config) {
-    m_php7_pool = std::make_unique<CompilerPool>(std::move(*php7Config));
   }
 
   if (m_delegate != kInvalidPid && m_username) {
@@ -662,7 +639,6 @@ void CompilerManager::ensure_started() {
   }
 
   if (m_hackc_pool) m_hackc_pool->start();
-  if (m_php7_pool) m_php7_pool->start();
 
   m_started.store(true, std::memory_order_release);
 }
@@ -671,11 +647,6 @@ void CompilerManager::stop(bool detach_compilers) {
   if (m_hackc_pool) {
     m_hackc_pool->shutdown(detach_compilers);
     m_hackc_pool = nullptr;
-  }
-
-  if (m_php7_pool) {
-    m_php7_pool->shutdown(detach_compilers);
-    m_php7_pool = nullptr;
   }
 
   close(m_delegate);
@@ -694,11 +665,6 @@ void CompilerManager::detach_after_fork() {
 CompilerPool& CompilerManager::get_hackc_pool() {
   ensure_started();
   return *m_hackc_pool;
-}
-
-CompilerPool& CompilerManager::get_php7_pool() {
-  ensure_started();
-  return *m_php7_pool;
 }
 
 void compilers_start() {
@@ -727,22 +693,8 @@ CompilerResult hackc_compile(
   return s_manager.get_hackc_pool().compile(code, len, filename,md5, callbacks);
 }
 
-CompilerResult php7_compile(
-  const char* code,
-  int len,
-  const char* filename,
-  const MD5& md5,
-  AsmCallbacks* callbacks
-) {
-  return s_manager.get_php7_pool().compile(code, len, filename, md5, callbacks);
-}
-
 std::string hackc_version() {
   return s_manager.get_hackc_pool().getVersionString();
-}
-
-std::string php7c_version() {
-  return s_manager.get_php7_pool().getVersionString();
 }
 
 bool startsWith(const char* big, const char* small) {
@@ -775,41 +727,13 @@ std::unique_ptr<UnitCompiler> UnitCompiler::create(const char* code,
   s_manager.ensure_started();
   if (SystemLib::s_inited) {
     auto const hcMode = hackc_mode();
-    if (!isFileHack(code, codeLen) &&
-        !RuntimeOption::EnableHipHopSyntax &&
-        RuntimeOption::EvalPHP7CompilerEnabled &&
-        s_manager.php7_enabled()) {
-        return std::make_unique<Php7UnitCompiler> (
-          code, codeLen, filename, md5);
-    } else if (hcMode != HackcMode::kNever && s_manager.hackc_enabled()) {
+    if (hcMode != HackcMode::kNever && s_manager.hackc_enabled()) {
       return std::make_unique<HackcUnitCompiler>(
         code, codeLen, filename, md5, hcMode);
     }
   }
 
   return nullptr;
-}
-
-std::unique_ptr<UnitEmitter> Php7UnitCompiler::compile(
-  AsmCallbacks* callbacks) const {
-  auto res = php7_compile(m_code, m_codeLen, m_filename, m_md5, callbacks);
-  std::unique_ptr<UnitEmitter> unitEmitter;
-  match<void>(
-    res,
-    [&] (std::unique_ptr<UnitEmitter>& ue) {
-      unitEmitter = std::move(ue);
-    },
-    [&] (std::string& err) {
-      unitEmitter = createFatalUnit(
-        makeStaticString(m_filename),
-        m_md5,
-        FatalOp::Runtime,
-        makeStaticString(err)
-      );
-    }
-  );
-
-  return unitEmitter;
 }
 
 std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(

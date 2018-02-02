@@ -1,4 +1,0 @@
-
-Fatal error: Uncaught Error: 'continue' not in the 'loop' or 'switch' context in %s/continue-outside-of-loop.php:%i
-Stack trace:
-#0 {main}

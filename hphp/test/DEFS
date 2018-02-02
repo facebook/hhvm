@@ -4,7 +4,7 @@ include_defs("//hphp/DEFS")
 
 def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
                     cli_server=0, hhcodegen=False, use_hackc=False,
-                    use_php7=False, hhas_roundtrip=False, target_suffix='',
+                    hhas_roundtrip=False, target_suffix='',
                     extra_args=[], runtime_dir_prefix=''):
   target_name = 'verify_' + suite + '_' + mode + \
        ('_repo' if repo else '') + \
@@ -14,7 +14,6 @@ def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
        ('_hhcodegen-compare' if hhcodegen else '') + \
        ('_hackc' if use_hackc else '') + \
        ('_hhas_roundtrip' if hhas_roundtrip else '') + \
-       ('_phpc' if use_php7 else '') + \
        target_suffix
 
   target_name = target_name.replace('/', '_')
@@ -64,17 +63,10 @@ def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
       deplist.extend(['//hphp/hack/src:hh_single_compile'])
       runtimefiles.extend(['hackc_failing_tests_' + suite])
 
-  if use_php7 == True:
-    command.extend(['-x', 'hphp/test/zend7/failures'])
-    deplist.extend(['//hphp/php7:php7'])
-    runtimefiles.extend(['zend7/failures'])
-
   if hhcodegen == True:
     command.extend(['--compare-hh-codegen'])
   elif use_hackc == True:
     command.extend(['--hackc', '--exclude-pattern', '=/debugger|ext_vsdebug/='])
-  elif use_php7 == True:
-    command.append('--php7')
 
   custom_unittest(
     name=target_name,

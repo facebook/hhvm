@@ -134,6 +134,7 @@ let parse_options () =
   let deregister_attributes = ref false in
   let disable_optional_and_unknown_shape_fields = ref false in
   let disallow_destruct = ref false in
+  let no_fallback_in_namespaces = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -241,6 +242,9 @@ let parse_options () =
     "--disallow-destruct",
       Arg.Set disallow_destruct,
       " Disallow definition of destructors without __OptionalDestruct.";
+    "--no-fallback-in-namespaces",
+      Arg.Set no_fallback_in_namespaces,
+      " Treat foo() as namespace\\foo() and MY_CONST as namespace\\MY_CONST.";
     "--infer-return-types",
       Arg.Unit (set_mode Infer_return_types),
       " Infers return types of functions and methods.";
@@ -268,6 +272,8 @@ let parse_options () =
         then !forbid_nullable_cast
         else if x = GlobalOptions.tco_experimental_disable_optional_and_unknown_shape_fields
         then !disable_optional_and_unknown_shape_fields
+        else if x = GlobalOptions.tco_experimental_no_fallback_in_namespaces
+        then !no_fallback_in_namespaces
         else true
       end tcopt.GlobalOptions.tco_experimental_features;
   } in

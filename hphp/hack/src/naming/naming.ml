@@ -433,7 +433,15 @@ end = struct
     let need_fallback =
       genv.namespace.Namespace_env.ns_name <> None &&
       not (String.contains (snd x) '\\') in
-    if need_fallback then begin
+    let use_fallback =
+      need_fallback &&
+      (
+        (not (TypecheckerOptions.experimental_feature_enabled
+          genv.tcopt
+          TypecheckerOptions.experimental_no_fallback_in_namespaces)) ||
+        ((string_starts_with (snd x) "__") && (string_ends_with (snd x) "__"))
+      ) in
+    if use_fallback then begin
       let global_x = (fst x, "\\" ^ (snd x)) in
       (* Explicitly add dependencies on both of the consts we could be
        * referring to here. Normally naming doesn't have to deal with
@@ -466,7 +474,12 @@ end = struct
     let need_fallback =
       genv.namespace.Namespace_env.ns_name <> None &&
       not (String.contains (snd x) '\\') in
-    if need_fallback then begin
+    let use_fallback =
+      need_fallback &&
+      not (TypecheckerOptions.experimental_feature_enabled
+        genv.tcopt
+        TypecheckerOptions.experimental_no_fallback_in_namespaces) in
+    if use_fallback then begin
       let global_x = (fst x, "\\" ^ (snd x)) in
       (* Explicitly add dependencies on both of the functions we could be
        * referring to here. Normally naming doesn't have to deal with deps at

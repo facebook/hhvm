@@ -506,42 +506,51 @@ let do_shutdown (state: state) : state =
 
 let do_rage (state: state) : Rage.result =
   let open Rage in
-  let logItems = match get_root_opt () with
-    | None -> []
-    | Some root ->
-      let monitor_log_link = ServerFiles.monitor_log_link root in
-      let log_link = ServerFiles.log_link root in
-      [
-        {
-          title = Some log_link;
-          data = Sys_utils.cat log_link;
-        };
-        {
-          title = Some monitor_log_link;
-          data = Sys_utils.cat monitor_log_link;
-        }
-      ]
+  let items: rageItem list ref = ref [] in
+  let add item = items := item :: !items in
+  let add_data data = add { title = None; data; } in
+  let add_fn fn =  if Sys.file_exists fn then add { title = Some fn; data = Sys_utils.cat fn; } in
+  let add_stack (pid, reason) =
+    let pid = string_of_int pid in
+    let stack = try Sys_utils.exec_read_lines ~reverse:true ("pstack " ^ pid)
+    with _ -> begin
+      try Sys_utils.exec_read_lines ~reverse:true ("gstack " ^ pid)
+      with e -> ["unable to pstack - " ^ (Printexc.to_string e)]
+    end in
+    add_data (Printf.sprintf "PSTACK %s (%s) - %s\n\n" pid reason (String.concat "\n" stack))
   in
-  let clientItems = [
-    {
-      title = None;
-      data = "LSP adapter state: " ^ (state_to_string state);
-    };
-  ]
-  in
-  let serverItems = match state with
-    | Main_loop menv ->
-      let open Main_env in
-      let items = rpc menv.conn ServerCommandTypes.RAGE in
-      let hack_to_lsp item = {
-        title = item.ServerRageTypes.title;
-        data = item.ServerRageTypes.data;
-        } in
-      List.map items ~f:hack_to_lsp
-    | _ ->
-      []
-  in
-  clientItems @ logItems @ serverItems
+  (* logfiles *)
+  begin match get_root_opt () with
+    | Some root -> begin
+        add_fn (ServerFiles.log_link root);
+        add_fn ((ServerFiles.log_link root) ^ ".old");
+        add_fn (ServerFiles.monitor_log_link root);
+        add_fn ((ServerFiles.monitor_log_link root) ^ ".old");
+        try
+          let pids = PidLog.get_pids (ServerFiles.pids_file root) in
+          let is_interesting (_, reason) = not (String_utils.string_starts_with reason "slave") in
+          List.filter pids ~f:is_interesting |> List.iter ~f:add_stack
+        with e ->
+          let message = Printexc.to_string e in
+          let stack = Printexc.get_backtrace () in
+          add_data (Printf.sprintf "Failed to get PIDs: %s - %s" message stack)
+      end
+    | None -> ()
+  end;
+  (* client *)
+  add_data ("LSP adapter state: " ^ (state_to_string state) ^ "\n");
+  (* server *)
+  begin match state with
+    | Main_loop menv -> begin
+        let open Main_env in
+        let items = rpc menv.conn ServerCommandTypes.RAGE in
+        let add i = add { title = i.ServerRageTypes.title; data = i.ServerRageTypes.data; } in
+        List.iter items ~f:add
+      end
+    | _ -> ()
+  end;
+  (* that's it! *)
+  !items
 
 
 let do_didOpen (conn: server_conn) (params: DidOpen.params) : unit =

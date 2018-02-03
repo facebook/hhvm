@@ -33,12 +33,13 @@ let start_server_daemon ~informant_managed options name log_link daemon_entry =
   in
   let start_t = Unix.time () in
   let state = ServerGlobalState.save () in
+  let monitor_pid = Unix.getpid () in
   let {Daemon.pid; Daemon.channels = (ic, oc)} =
     Daemon.spawn
       ~channel_mode:`socket
       log_fds
       daemon_entry
-      (informant_managed, state, options) in
+      (informant_managed, state, options, monitor_pid) in
   Hh_logger.log "Just started %s server with pid: %d." name pid;
   let server =
     SP.({

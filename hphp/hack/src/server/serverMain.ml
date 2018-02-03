@@ -448,7 +448,7 @@ let program_init genv =
     ~init_error init_type;
   env
 
-let setup_server ~informant_managed options handle =
+let setup_server ~informant_managed ~monitor_pid options handle =
   let init_id = Random_id.short_string () in
   Hh_logger.log "Version: %s" Build_id.build_id_ohai;
   Hh_logger.log "Hostname: %s" (Unix.gethostname ());
@@ -504,12 +504,13 @@ let setup_server ~informant_managed options handle =
    *)
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
   PidLog.init (ServerFiles.pids_file root);
+  Option.iter monitor_pid ~f:(fun monitor_pid -> PidLog.log ~reason:"monitor" monitor_pid);
   PidLog.log ~reason:"main" (Unix.getpid());
   ServerEnvBuild.make_genv options config local_config handle, init_id
 
 
 let save_state options handle =
-  let genv, _ = setup_server ~informant_managed:false options handle in
+  let genv, _ = setup_server ~informant_managed:false ~monitor_pid:None options handle in
   let env = ServerInit.init_to_save_state genv in
   Option.iter (ServerArgs.save_filename genv.options)
     (ServerInit.save_state env);
@@ -518,7 +519,7 @@ let save_state options handle =
 
 
 let run_once options handle =
-  let genv, _ = setup_server ~informant_managed:false options handle in
+  let genv, _ = setup_server ~informant_managed:false ~monitor_pid:None options handle in
   if not (ServerArgs.check_mode genv.options) then
     (Hh_logger.log "ServerMain run_once only supported in check mode.";
     Exit_status.(exit Input_error));
@@ -532,7 +533,7 @@ let run_once options handle =
  * The server monitor will pass client connections to this process
  * via ic.
  *)
-let daemon_main_exn ~informant_managed options (ic, oc) =
+let daemon_main_exn ~informant_managed options monitor_pid (ic, oc) =
   Printexc.record_backtrace true;
   let in_fd = Daemon.descr_of_in_channel ic in
   let out_fd = Daemon.descr_of_out_channel oc in
@@ -540,14 +541,14 @@ let daemon_main_exn ~informant_managed options (ic, oc) =
   let handle = SharedMem.init (ServerConfig.sharedmem_config config) in
   SharedMem.connect handle ~is_master:true;
 
-  let genv, init_id = setup_server ~informant_managed options handle in
+  let genv, init_id = setup_server ~informant_managed ~monitor_pid:(Some monitor_pid) options handle in
   if ServerArgs.check_mode genv.options then
     (Hh_logger.log "Invalid program args - can't run daemon in check mode.";
     Exit_status.(exit Input_error));
   let env = MainInit.go genv options init_id (fun () -> program_init genv) in
   serve genv env in_fd out_fd
 
-let daemon_main (informant_managed, state, options) (ic, oc) =
+let daemon_main (informant_managed, state, options, monitor_pid) (ic, oc) =
   (* Restore the root directory and other global states from monitor *)
   ServerGlobalState.restore state;
   (* Restore hhi files every time the server restarts
@@ -555,7 +556,7 @@ let daemon_main (informant_managed, state, options) (ic, oc) =
   ignore (Hhi.get_hhi_root());
 
   ServerUtils.with_exit_on_exception @@ fun () ->
-  daemon_main_exn ~informant_managed options (ic, oc)
+  daemon_main_exn ~informant_managed options monitor_pid (ic, oc)
 
 
 let entry =

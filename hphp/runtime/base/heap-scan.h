@@ -153,6 +153,7 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     }
     case HeaderKind::String:
     case HeaderKind::Free:
+    case HeaderKind::Hole:
       // these don't have pointers. some clients might generically
       // scan them even if they aren't interesting.
       return;
@@ -161,7 +162,6 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       break;
     case HeaderKind::BigObj:
     case HeaderKind::Slab:
-    case HeaderKind::Hole:
       // these aren't legitimate headers, and heap iteration should skip them.
       break;
   }

@@ -173,6 +173,26 @@ inline size_t ffs64(size_t x) {
   return __builtin_ffsll(x) - 1;
 #endif
 }
+
+inline void bitvec_set(uint64_t* bits, size_t index) {
+#if defined(__x86_64__)
+  asm ("bts %1,%0" : "+m"(*bits) : "r"(index));
+#else
+  bits[index / 64] |= 1ull << (index % 64);
+#endif
+}
+
+inline bool bitvec_test(const uint64_t* bits, size_t index) {
+#if defined(__x86_64__)
+  bool b;
+  asm ("bt %2,%1\n"
+       "setc %0\n" : "=r"(b) : "m"(*bits), "r"(index));
+  return b;
+#else
+  return (bits[index / 64] & (1ull << (index % 64))) != 0;
+#endif
+}
+
 } // HPHP
 
 #endif

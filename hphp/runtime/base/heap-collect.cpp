@@ -174,6 +174,12 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::Empty:
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc:
+    case HeaderKind::String:
+      break;
+    case HeaderKind::Free:
+    case HeaderKind::Hole:
+      // these can be on the worklist because we don't expect to find
+      // dangling pointers. they are ignored when popped from the worklist.
       break;
     case HeaderKind::Object:
     case HeaderKind::Vector:
@@ -193,9 +199,6 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::ClosureHdr:
       // these have inner objects, but we queued the outer one.
       break;
-    case HeaderKind::String:
-      // nothing to queue since strings don't have pointers
-      break;
     case HeaderKind::Closure:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::NativeObject:
@@ -203,8 +206,6 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
       // they are appended to ClosureHdr, AsyncFuncFrame, or NativeData.
     case HeaderKind::BigObj:
     case HeaderKind::Slab:
-    case HeaderKind::Free:
-    case HeaderKind::Hole:
       // These header types are not allocated objects; they are handled
       // earlier and should never be queued on the gc worklist.
       always_assert(false && "bad header kind");
@@ -241,24 +242,21 @@ void Collector::checkedEnqueue(const void* p) {
   }
 }
 
+// It is correct to ignore willScanConservative(h) in phase 2 because:
+// * target is !type_scan::isKnownType, making it an "unknown" root,
+// and scanned & pinned in phase 1; OR
+// * target is a marked (thus pinned) req::container buffer, found in phase 1,
+// so we can disregard this pointer to it, since it won't move; OR
+// * target is an unmarked req::container buffer. p is a (possibly interior)
+// pointer into it. p shouldn't keep the buffer alive, since whoever
+// owns it, will scan it using the container's iterator api; OR
+// * p could be a stale pointer of any interesting type, that randomly
+// is pointing to recycled memory. ignoring it is actually desireable.
 template <bool apcgc>
 void Collector::exactEnqueue(const void* p) {
   if (auto h = find(p)) {
-    if (willScanConservative(h)) {
-      // exact->conservative ptr (p). Safe to ignore in phase 2 because:
-      // * target is !type_scan::isKnownType, making it an "unknown" root,
-      // and scanned & pinned in phase 1; OR
-      // * target is a pinned req::container buffer, found in phase 1,
-      // so we can disregard this pointer to it, since it won't move; OR
-      // * target is an unmarked req::container buffer. p is an interior
-      // pointer into it. p shouldn't keep the buffer alive, since whoever
-      // owns it, will scan it; OR
-      // * p could be a stale pointer of any interesting type, that randomly
-      // is pointing to recycled memory. ignoring it is actually desireable.
-      return;
-    }
     auto old = h->marks();
-    if (old != mark_version_) {
+    if (old != mark_version_ && !willScanConservative(h)) {
       h->setmarks(mark_version_);
       ++marked_;
       xwork_.push_back(h);
@@ -321,7 +319,6 @@ NEVER_INLINE void Collector::init() {
 
   heap_.iterate(
     [&](HeapObject* h, size_t size) { // onBig
-      ++num_big_;
       if (h->kind() == HeaderKind::BigMalloc) {
         ptrs_.insert(h, size);
         if (!type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
@@ -336,8 +333,6 @@ NEVER_INLINE void Collector::init() {
       }
     },
     [&](HeapObject* h, size_t size) { // onSlab
-      ++num_slabs_;
-      num_small_ += Slab::fromHeader(h)->initStartBits();
       slab_map_.set(slab_index(h));
     }
   );
@@ -534,6 +529,7 @@ NEVER_INLINE void Collector::sweep() {
 
   heap_.iterate(
     [&](HeapObject* big, size_t big_size) { // onBig
+      ++num_big_;
       if (big->kind() == HeaderKind::BigObj) {
         HeapObject* h2 = static_cast<MallocNode*>(big) + 1;
         if (!marked(h2) && h2->kind() != HeaderKind::SmallMalloc) {
@@ -542,8 +538,10 @@ NEVER_INLINE void Collector::sweep() {
       }
     },
     [&](HeapObject* big, size_t /*big_size*/) { // onSlab
+      ++num_slabs_;
       auto slab = Slab::fromHeader(big);
       slab->iter_starts([&](HeapObject* h) {
+        ++num_small_;
         auto kind = h->kind();
         if (!isFreeKind(kind) && kind != HeaderKind::SmallMalloc &&
             !marked(h)) {
@@ -627,7 +625,7 @@ void logCollection(const char* phase, const Collector& collector) {
   sample.setInt("roots_micros", collector.roots_ns_/1000);
   sample.setInt("mark_micros", collector.mark_ns_/1000);
   sample.setInt("sweep_micros", collector.sweep_ns_/1000);
-  // object metrics
+  // object metrics counted at sweep time
   sample.setInt("slab_count", collector.num_slabs_);
   sample.setInt("small_count", collector.num_small_);
   sample.setInt("big_count", collector.num_big_);

@@ -447,6 +447,7 @@ void MemoryManager::initHole(void* ptr, uint32_t size) {
 void MemoryManager::initFree() {
   if ((char*)m_front < (char*)m_limit) {
     initHole(m_front, (char*)m_limit - (char*)m_front);
+    Slab::fromPtr(m_front)->setStart(m_front);
   }
   m_heap.sort();
   reinitFree();
@@ -593,7 +594,53 @@ void MemoryManager::checkHeap(const char* phase) {
   }
 }
 
+// Filling the start bits one word at a time requires writing the mask for
+// the appropriate size class, and left-shifting the mask each time to insert
+// any necessary zeros not included in the previous word, for size classes
+// that don't pack perfectly into 64 bits.  Suppose:
+//
+//   d = size / kSmallSizeAlign = number of bits for the given size class
+//
+// In other words, when d%64 != 0, we need to shift the mask slightly after
+// each store, until the shift amount wraps. For example, using 8-bit words
+// for brevity, the sequence of stores would be:
+//
+// 11111111 11111111 11111111 11111111          size=16 d=1 shift 0,0,0,0
+// 10101010 10101010 10101010 10101010          size=32 d=2 shift 0,0,0,0
+// 10010010 01001001 00100100 10010010          size=48 d=3 shift 0,1,2,0
+// 10001000 10001000 10001000 10001000          size=64 d=4 shift 0,0,0,0
+// 10000100 00100001 00001000 01000010 00010000 size=80 d=5 shift 0,2,4,1,3,0
+// 10000010 00001000 00100000 10000010          size=96 d=6 shift 0,4,2,0
+// 10000001 00000010 00000100 00001000 00010000 00100000 01000000 10000001
+//                                          size=112 d=7 shift 0,6,5,4,3,2,1,0
+// 10000000 10000000                        size=128 d=8 shift 0,0
+
+// build a bitmask-init table for size classes that fit at least one
+// object per 64*kSmallSizeAlign bytes; this means they fit at least
+// one start bit per 64 bits, supporting fast nContig initialization.
+
+// masks_[i] = bitmask to store each time
+std::array<uint64_t,Slab::kNumMasks> Slab::masks_;
+
+// shifts_[i] = how much to shift masks_[i] after each store
+std::array<uint8_t,Slab::kNumMasks> Slab::shifts_;
+
+struct Slab::InitMasks {
+  InitMasks() {
+    static_assert(kSizeIndex2Size[kNumMasks - 1] <= 64 * kSmallSizeAlign, "");
+    for (size_t i = 0; i < kNumMasks; i++) {
+      auto const d = kSizeIndex2Size[i] / kSmallSizeAlign;
+      for (size_t j = 0; j < 64; j += d) {
+        masks_[i] |= 1ull << j;
+      }
+      shifts_[i] = d - 64 % d; // # of high-order zeros not in mask
+    }
+  }
+};
+
 namespace {
+
+Slab::InitMasks s_init_masks;
 
 using FreelistArray = MemoryManager::FreelistArray;
 
@@ -616,7 +663,8 @@ alignas(64) const uint8_t kContigIndexTab[] = {
  * Store slab tail bytes (if any) in freelists.
  */
 inline
-void storeTail(FreelistArray& freelists, void* tail, size_t tailBytes) {
+void storeTail(FreelistArray& freelists, void* tail, size_t tailBytes,
+               Slab* slab) {
   void* rem = tail;
   for (auto remBytes = tailBytes; remBytes > 0;) {
     auto fragBytes = remBytes;
@@ -632,21 +680,26 @@ void storeTail(FreelistArray& freelists, void* tail, size_t tailBytes) {
               frag, (void*)uintptr_t(fragBytes), (void*)uintptr_t(fragUsable),
               fragInd);
     freelists[fragInd].push(frag);
+    slab->setStart(frag);
     remBytes -= fragUsable;
   }
 }
 
 /*
  * Create split_bytes worth of contiguous regions, each of size splitUsable,
- * and store them in the appropriate freelist.
+ * and store them in the appropriate freelist. In addition, initialize the
+ * start-bits for the new objects.
  */
 inline
 void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
-               size_t split_bytes, size_t splitUsable, size_t index) {
+               size_t split_bytes, size_t splitUsable, size_t index,
+               Slab* slab) {
   assert(tailBytes >= kSmallSizeAlign);
   assert((tailBytes & kSmallSizeAlignMask) == 0);
   assert((splitUsable & kSmallSizeAlignMask) == 0);
   assert(split_bytes <= tailBytes);
+
+  // initialize the free objects, and push them onto the freelist.
   auto head = freelists[index].head;
   auto rem = (char*)tail + split_bytes;
   for (auto next = rem - splitUsable; next >= tail; next -= splitUsable) {
@@ -658,9 +711,13 @@ void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
     head = FreeNode::UninitFrom(split, head);
   }
   freelists[index].head = head;
+
+  // initialize the start-bits for each object.
+  slab->setStarts(tail, rem, splitUsable, index);
+
   auto remBytes = tailBytes - split_bytes;
   assert(uintptr_t(rem) + remBytes == uintptr_t(tail) + tailBytes);
-  storeTail(freelists, rem, remBytes);
+  storeTail(freelists, rem, remBytes, slab);
 }
 }
 
@@ -671,7 +728,10 @@ void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
 NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   refreshStats();
   checkGC();
-  storeTail(m_freelists, m_front, (char*)m_limit - (char*)m_front);
+  if (m_front < m_limit) {
+    storeTail(m_freelists, m_front, (char*)m_limit - (char*)m_front,
+              Slab::fromPtr(m_front));
+  }
   auto mem = m_heap.allocSlab(m_stats);
   assert(reinterpret_cast<uintptr_t>(mem) % kSlabAlign == 0);
   auto slab = static_cast<Slab*>(mem);
@@ -681,6 +741,7 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   // (indiciated by mem.size), because of the fixed-sized crossing map.
   m_limit = slab->end();
   FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab_start, m_limit);
+  slab->setStart(slab_start);
   return slab_start;
 }
 
@@ -710,13 +771,15 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
   }
 
   auto ptr = m_front;
-  {
-    auto next = (void*)(uintptr_t(ptr) + nbytes);
-    if (uintptr_t(next) <= uintptr_t(m_limit)) {
-      m_front = next;
-    } else {
-      ptr = newSlab(nbytes);
-    }
+  auto next = (void*)(uintptr_t(ptr) + nbytes);
+  Slab* slab;
+  if (uintptr_t(next) <= uintptr_t(m_limit)) {
+    m_front = next;
+    slab = Slab::fromPtr(ptr);
+    slab->setStart(ptr);
+  } else {
+    ptr = newSlab(nbytes); // sets start bit at ptr
+    slab = Slab::fromPtr(ptr);
   }
   // Preallocate more of the same in order to amortize entry into this method.
   auto split_bytes = kContigTab[index] - nbytes;
@@ -727,7 +790,7 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
   if (split_bytes > 0) {
     auto tail = m_front;
     m_front = (void*)(uintptr_t(tail) + split_bytes);
-    splitTail(m_freelists, tail, split_bytes, split_bytes, nbytes, index);
+    splitTail(m_freelists, tail, split_bytes, split_bytes, nbytes, index, slab);
   }
   FTRACE(4, "slabAlloc({}, {}) --> ptr={}, m_front={}, m_limit={}\n", nbytes,
             index, ptr, m_front, m_limit);
@@ -744,13 +807,14 @@ void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
               contigInd, i);
     if (auto p = m_freelists[i].unlikelyPop()) {
       assert(i > index); // because freelist[index] was empty
+      assert(Slab::fromPtr(p)->isStart(p));
       FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): "
                 "contigMin={}, contigInd={}, use i={}, size={}, p={}\n",
                 nbytes, index, kContigTab[index], contigInd, i,
                 sizeIndex2Size(i), p);
       // Split tail into preallocations and store them back into freelists.
       splitTail(m_freelists, (char*)p + nbytes, sizeIndex2Size(i) - nbytes,
-                kContigTab[index] - nbytes, nbytes, index);
+                kContigTab[index] - nbytes, nbytes, index, Slab::fromPtr(p));
       return p;
     }
   }

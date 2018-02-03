@@ -1106,7 +1106,7 @@ and string_of_param_default_value ~env expr =
   | A.Null -> "NULL"
   | A.True -> "true"
   | A.False -> "false"
-  (* For arrays and collections, we are making a concious decision to not
+  (* For arrays and collections, we are making a conscious decision to not
    * match HHMV has HHVM's emitter has inconsistencies in the pretty printer
    * https://fburl.com/tzom2qoe *)
   | A.Array afl ->
@@ -1119,7 +1119,10 @@ and string_of_param_default_value ~env expr =
     begin match name with
     | "Set" | "Pair" | "Vector" | "Map"
     | "ImmSet" | "ImmVector" | "ImmMap" ->
-      "HH\\\\" ^ name ^ " {" ^ string_of_afield_list ~env afl ^ "}"
+      let elems = string_of_afield_list ~env afl in
+      let elems =
+        if String.length elems <> 0 then " " ^ elems ^ " " else elems in
+      "HH\\\\" ^ name ^ " {" ^ elems ^ "}"
     | _ ->
       nyi ^ " - Default value for an unknown collection - " ^ name
     end

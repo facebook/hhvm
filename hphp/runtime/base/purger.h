@@ -35,9 +35,9 @@ namespace HPHP {
  *
  * There are a few tuning parameters in Purger:
  * kNumBuckets: 16,     the number of time slices over the decay time window
- * RuntimeOption::ContiguousHeapThreshold: (bytes) max retained dirty memory
+ * RuntimeOption::HeapPurgeThreshold: (bytes) max retained dirty memory
  *   anything over this is eagerly purged. default 128MB.
- * RuntimeOption::ContiguousHeapWindowSize: (ns) decay time window. default 5s.
+ * RuntimeOption::HeapPurgeWindowSize: (ns) decay time window. default 5s.
  */
 
 struct Purger {

@@ -38,15 +38,6 @@ inline bool SparseHeap::empty() const {
   return m_slabs.empty() && m_bigs.empty();
 }
 
-inline bool ContiguousHeap::empty() const {
-  return m_base == m_front;
-}
-
-inline size_t ContiguousHeap::chunk_index(char* p) const {
-  assert(p >= m_base);
-  return (p - m_base) / ChunkSize;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MemoryManager::MaskAlloc {

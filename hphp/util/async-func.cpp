@@ -127,7 +127,6 @@ void AsyncFuncImpl::start() {
     auto const nHugePages =
       hugeStackSize / size2m /* number of pages purely for stack */
       + (stackPartialPageSize != 0) /* partly stack and partly heap */;
-#ifndef USE_CONTIGUOUS_HEAP
     auto slabSize =
       size2m * (stackPartialPageSize != 0) - stackPartialPageSize;
     // We don't want the first slab to be too small.
@@ -135,9 +134,6 @@ void AsyncFuncImpl::start() {
     if (slabSize != 0 && slabSize < kMinSlabSize) {
       slabSize = kMinSlabSize;
     }
-#else
-    constexpr size_t slabSize = 0;
-#endif
     m_stackAllocSize = rlim.rlim_cur + slabSize;
     m_threadStack = mmap_end_aligned(m_stackAllocSize, size2m);
     auto const end = m_threadStack + rlim.rlim_cur + slabSize;

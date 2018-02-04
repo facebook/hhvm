@@ -60,8 +60,8 @@ const int64_t kPageSize{sysconf(_SC_PAGESIZE)};
 }
 
 Purger::Purger()
-  : window_{RuntimeOption::EvalContiguousHeapWindowSize}
-  , threshold_{RuntimeOption::EvalContiguousHeapThreshold}
+  : window_{RuntimeOption::EvalHeapPurgeWindowSize}
+  , threshold_{RuntimeOption::EvalHeapPurgeThreshold}
   , bucket_slice_{window_ / kNumBuckets}
   , dirty_{0}
   , id_{kNextid++}

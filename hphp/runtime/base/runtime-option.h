@@ -686,8 +686,8 @@ struct RuntimeOption {
   F(bool, UncountedMixedArrayHuge,     true)                            \
   F(bool, UncountedStringHuge,         true)                            \
   F(bool, RandomHotFuncs,              false)                           \
-  F(int64_t, ContiguousHeapWindowSize, 5 * 1000000)                     \
-  F(uint64_t,ContiguousHeapThreshold,  128 * 1024 * 1024)               \
+  F(int64_t, HeapPurgeWindowSize,      5 * 1000000)                     \
+  F(uint64_t, HeapPurgeThreshold,      128 * 1024 * 1024)               \
   /* GC Options: See heap-collect.cpp for more details */               \
   F(bool, EagerGC,                     eagerGcDefault())                \
   F(bool, FilterGCPoints,              true)                            \

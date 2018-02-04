@@ -148,10 +148,6 @@ struct Collector {
   APCGCManager* const apcgc_;
 };
 
-// TODO(T20460162): The contiguous heap has a bitmap of which chunks of memory
-// are allocated/free. And it can efficiently find the start of an allocated
-// object using bit operations. So there is an opportunity to speed this up by
-// directly accessing the bitmap instead of using PtrMap.
 HeapObject* Collector::find(const void* ptr) {
   if (uintptr_t(ptr) - uintptr_t(slabs_range_.ptr) < slabs_range_.size &&
       slab_map_.test(slab_index(ptr))) {

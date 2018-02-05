@@ -58,6 +58,64 @@ module WithExpressionAndDeclAndTypeParser
   include Parser
   include ParserHelper.WithParser(Parser)
 
+  let parse_type_specifier parser =
+    let type_parser =
+      TypeParser.make
+        parser.env
+        parser.lexer
+        parser.errors
+        parser.context
+        parser.sc_state in
+    let (type_parser, spec) = TypeParser.parse_type_specifier type_parser in
+    let env = TypeParser.env type_parser in
+    let lexer = TypeParser.lexer type_parser in
+    let errors = TypeParser.errors type_parser in
+    let context = TypeParser.context type_parser in
+    let sc_state = TypeParser.sc_state type_parser in
+    let parser = { env; lexer; errors; context; sc_state } in
+    (parser, spec)
+
+  let with_expr_parser
+  : 'a . t -> (ExpressionParser.t -> ExpressionParser.t * 'a) -> t * 'a
+  = fun parser f ->
+    let expr_parser =
+      ExpressionParser.make
+        parser.env
+        parser.lexer
+        parser.errors
+        parser.context
+        parser.sc_state in
+    let (expr_parser, node) = f expr_parser in
+    let env = ExpressionParser.env expr_parser in
+    let lexer = ExpressionParser.lexer expr_parser in
+    let errors = ExpressionParser.errors expr_parser in
+    let context = ExpressionParser.context expr_parser in
+    let sc_state = ExpressionParser.sc_state expr_parser in
+    let parser = { env; lexer; errors; context; sc_state } in
+    (parser, node)
+
+  let parse_expression parser =
+    with_expr_parser parser ExpressionParser.parse_expression
+
+  let with_decl_parser : 'a . t -> (DeclParser.t -> DeclParser.t * 'a) -> t * 'a
+  = fun parser f ->
+    let decl_parser =
+      DeclParser.make
+        parser.env
+        parser.lexer
+        parser.errors
+        parser.context
+        parser.sc_state
+    in
+    let (decl_parser, node) = f decl_parser in
+    let env = DeclParser.env decl_parser in
+    let lexer = DeclParser.lexer decl_parser in
+    let errors = DeclParser.errors decl_parser in
+    let context = DeclParser.context decl_parser in
+    let sc_state = DeclParser.sc_state decl_parser in
+    let parser = { env; lexer; errors; context; sc_state } in
+    (parser, node)
+
   let rec parse_statement parser =
     match peek_token_kind parser with
     | Async
@@ -168,9 +226,6 @@ module WithExpressionAndDeclAndTypeParser
     let s = make_markup_section prefix markup suffix expression in
     parser, s
 
-  and parse_php_function parser =
-    use_decl_parser DeclParser.parse_function parser
-
   and parse_possible_php_function parser =
     (* ERROR RECOVERY: PHP supports nested named functions, but Hack does not.
     (Hack only supports anonymous nested functions as expressions.)
@@ -197,27 +252,14 @@ module WithExpressionAndDeclAndTypeParser
     | (Async | Coroutine), LeftParen (* Async / coroutine, compact-style lambda *)
     | Async, LeftBrace (* Async block *)
       -> parse_expression_statement parser
-    | _ -> parse_php_function parser
+    | _ -> with_decl_parser parser DeclParser.parse_function
 
   and parse_php_class parser =
     (* PHP allows classes nested inside of functions, but hack does not *)
     (* TODO check for hack error: no classish declarations inside functions *)
     let missing = make_missing parser in
-    let f decl_parser =
-      DeclParser.parse_classish_declaration decl_parser missing
-    in
-    use_decl_parser f parser
-
-  and use_decl_parser
-      (f : DeclParser.t -> DeclParser.t * Syntax.t)
-      parser =
-    let decl_parser = DeclParser.make
-      parser.env parser.lexer parser.errors parser.context parser.sc_state in
-    let decl_parser, node = f decl_parser in
-    let lexer = DeclParser.lexer decl_parser in
-    let errors = DeclParser.errors decl_parser in
-    let parser = { parser with lexer; errors } in
-    parser, node
+    with_decl_parser parser
+      (fun parser -> DeclParser.parse_classish_declaration parser missing)
 
   (* Helper: parses ( expr ) *)
   and parse_paren_expr parser =
@@ -363,7 +405,9 @@ module WithExpressionAndDeclAndTypeParser
       since it might parse (expr) { smth() } as subscript expression $expr{$index}
     *)
     let (parser1, expr) =
-      if token_kind = LeftParen then parse_cast_or_parenthesized_or_lambda_expression parser
+      if token_kind = LeftParen then
+        with_expr_parser parser
+          ExpressionParser.parse_cast_or_parenthesized_or_lambda_expression
       else parse_expression parser in
     let (parser1, token) = next_token parser1 in
     match Token.kind token with
@@ -623,17 +667,7 @@ module WithExpressionAndDeclAndTypeParser
           let parser = with_error parser SyntaxError.error1007 in
           let missing = make_missing parser in
           (parser, missing)
-        | _ ->
-          let type_parser =
-            TypeParser.make
-            parser.env parser.lexer parser.errors parser.context parser.sc_state
-          in
-          let (type_parser, node) =
-            TypeParser.parse_type_specifier type_parser
-          in
-          let lexer = TypeParser.lexer type_parser in
-          let errors = TypeParser.errors type_parser in
-          { parser with lexer; errors }, node
+        | _ -> parse_type_specifier parser
       in
       let (parser, catch_var) = require_variable parser in
       let (parser, right_paren) = require_right_paren parser in
@@ -810,8 +844,12 @@ module WithExpressionAndDeclAndTypeParser
       | _ -> false
     in
     if is_global_statement then
+      let parse_simple_variable parser =
+        with_expr_parser parser ExpressionParser.parse_simple_variable
+      in
       let (parser, variables) = parse_comma_list
-        parser1 Semicolon SyntaxError.error1008 parse_simple_variable in
+        parser1 Semicolon SyntaxError.error1008 parse_simple_variable
+      in
       let (parser, semicolon) = require_semicolon parser in
       let result = make_global_statement keyword variables semicolon in
       (parser, result)
@@ -925,25 +963,6 @@ module WithExpressionAndDeclAndTypeParser
       let syntax = make_compound_statement
         left_brace_token statement_list right_brace_token in
       (parser, syntax)
-
-  and parse_expression parser =
-    with_expression_parser parser ExpressionParser.parse_expression
-
-  and parse_simple_variable parser =
-    with_expression_parser parser ExpressionParser.parse_simple_variable
-
-  and parse_cast_or_parenthesized_or_lambda_expression parser =
-    with_expression_parser parser
-      ExpressionParser.parse_cast_or_parenthesized_or_lambda_expression
-
-  and with_expression_parser parser f =
-    let expression_parser = ExpressionParser.make
-      parser.env parser.lexer parser.errors parser.context parser.sc_state in
-    let (expression_parser, node) = f expression_parser in
-    let lexer = ExpressionParser.lexer expression_parser in
-    let errors = ExpressionParser.errors expression_parser in
-    let parser = { parser with lexer; errors } in
-    (parser, node)
 
 end
 end (* WithSmartConstructors *)

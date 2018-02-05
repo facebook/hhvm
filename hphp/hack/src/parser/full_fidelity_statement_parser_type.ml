@@ -9,6 +9,7 @@
  *)
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
+  module Context = Full_fidelity_parser_context.WithToken(Syntax.Token)
   module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S
   module WithLexer(Lexer : Lexer_S) = struct
     module type StatementParser_S = sig
@@ -23,6 +24,9 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val sc_call : t -> (SC.t -> SC.t * SC.r) -> t * SC.r
       val lexer : t -> Lexer.t
       val errors : t -> Full_fidelity_syntax_error.t list
+      val context : t -> Context.t
+      val env : t -> Full_fidelity_parser_env.t
+      val sc_state : t -> SC.t
       val parse_compound_statement : t -> t * Syntax.t
       val parse_statement : t -> t * Syntax.t
       val parse_markup_section: t ->

@@ -67,65 +67,81 @@ module WithStatementAndDeclAndTypeParser
   type binary_expression_prefix_kind =
     | Prefix_byref_assignment | Prefix_assignment | Prefix_none
 
-  let with_type_parser parser f =
-    let type_parser = TypeParser.make
-      parser.env parser.lexer parser.errors parser.context parser.sc_state in
+  let with_type_parser : 'a . t -> (TypeParser.t -> TypeParser.t * 'a) -> t * 'a
+  = fun parser f ->
+    let type_parser =
+      TypeParser.make
+        parser.env
+        parser.lexer
+        parser.errors
+        parser.context
+        parser.sc_state
+    in
     let (type_parser, node) = f type_parser in
+    let env = TypeParser.env type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
-    let parser = { parser with lexer; errors } in
+    let context = TypeParser.context type_parser in
+    let sc_state = TypeParser.sc_state type_parser in
+    let parser = { parser with env; lexer; errors; context; sc_state } in
     (parser, node)
-
-  let parse_type_specifier parser =
-    with_type_parser parser TypeParser.parse_type_specifier
-
-  let parse_remaining_type_specifier parser name =
-    with_type_parser parser (TypeParser.parse_remaining_type_specifier name)
 
   let parse_generic_type_arguments_opt parser =
-    let type_parser = TypeParser.make
-      parser.env parser.lexer parser.errors parser.context parser.sc_state in
-    let (type_parser, node) =
-      TypeParser.parse_generic_type_argument_list_opt type_parser
+    with_type_parser parser TypeParser.parse_generic_type_argument_list_opt
+
+  let with_decl_parser : 'a . t -> (DeclParser.t -> DeclParser.t * 'a) -> t * 'a
+  = fun parser f ->
+    let decl_parser =
+      DeclParser.make
+        parser.env
+        parser.lexer
+        parser.errors
+        parser.context
+        parser.sc_state
     in
-    let lexer = TypeParser.lexer type_parser in
-    let errors = TypeParser.errors type_parser in
-    let parser = { parser with lexer; errors } in
+    let (decl_parser, node) = f decl_parser in
+    let env = DeclParser.env decl_parser in
+    let lexer = DeclParser.lexer decl_parser in
+    let errors = DeclParser.errors decl_parser in
+    let context = DeclParser.context decl_parser in
+    let sc_state = DeclParser.sc_state decl_parser in
+    let parser = { parser with env; lexer; errors; context; sc_state } in
     (parser, node)
+
+  let parse_compound_statement parser =
+    let statement_parser =
+      StatementParser.make
+        parser.env
+        parser.lexer
+        parser.errors
+        parser.context
+        parser.sc_state
+    in
+    let (statement_parser, statement) =
+      StatementParser.parse_compound_statement statement_parser in
+    let env = StatementParser.env statement_parser in
+    let lexer = StatementParser.lexer statement_parser in
+    let errors = StatementParser.errors statement_parser in
+    let context = StatementParser.context statement_parser in
+    let sc_state = StatementParser.sc_state statement_parser in
+    let parser = { parser with env; lexer; errors; context; sc_state } in
+    (parser, statement)
 
   let is_valid_type_argument_list type_arguments parser0 parser1 =
     kind type_arguments = SyntaxKind.TypeArguments
     && List.for_all (fun c -> not (is_missing c)) (children type_arguments)
     && parser0.errors = parser1.errors
 
-  let parse_return_type parser =
-    let type_parser = TypeParser.make
-      parser.env parser.lexer parser.errors parser.context parser.sc_state in
-    let (type_parser, node) = TypeParser.parse_return_type type_parser in
-    let lexer = TypeParser.lexer type_parser in
-    let errors = TypeParser.errors type_parser in
-    let parser = { parser with lexer; errors } in
-    (parser, node)
-
   let parse_parameter_list_opt parser =
-    let decl_parser = DeclParser.make
-      parser.env parser.lexer parser.errors parser.context parser.sc_state in
-    let (decl_parser, right, params, left ) =
-      DeclParser.parse_parameter_list_opt decl_parser in
-    let lexer = DeclParser.lexer decl_parser in
-    let errors = DeclParser.errors decl_parser in
-    let parser = { parser with lexer; errors } in
-    (parser, right, params, left)
-
-  let parse_compound_statement parser =
-    let statement_parser = StatementParser.make
-      parser.env parser.lexer parser.errors parser.context parser.sc_state in
-    let (statement_parser, node) =
-      StatementParser.parse_compound_statement statement_parser in
-    let lexer = StatementParser.lexer statement_parser in
-    let errors = StatementParser.errors statement_parser in
-    let parser = { parser with lexer; errors } in
-    (parser, node)
+    let (parser, (left, token, right)) = with_decl_parser parser
+      (fun decl_parser ->
+        let (parser, left, token, right) =
+          DeclParser.parse_parameter_list_opt decl_parser
+        in
+        parser, (left, token, right)
+      )
+    in
+    (parser, left, token, right)
 
   let rec parse_expression parser =
     let (parser, term) = parse_term parser in
@@ -1073,7 +1089,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
       | Some (parser, name) ->
         (* We want to parse new C() and new C<int>() as types, but
         new C::$x() as an expression. *)
-        parse_remaining_type_specifier parser name
+        with_type_parser parser (TypeParser.parse_remaining_type_specifier name)
       | None ->
         default parser
       end
@@ -1109,19 +1125,32 @@ TODO: This will need to be fixed to allow situations where the qualified name
         let missing3 = make_missing parser in
         (parser, missing1, missing2, missing3)
     in
-    let decl_parser = DeclParser.make
-      parser.env parser.lexer parser.errors parser.context parser.sc_state in
-    let (decl_parser, classish_extends, classish_extends_list) =
-      DeclParser.parse_classish_extends_opt decl_parser in
-    let (decl_parser, classish_implements, classish_implements_list) =
-      DeclParser.parse_classish_implements_opt decl_parser in
-    let (decl_parser, body) = DeclParser.parse_classish_body decl_parser in
+    let parser
+        , ( classish_extends
+          , classish_extends_list
+          , classish_implements
+          , classish_implements_list
+          , body
+          )
+    = with_decl_parser parser
+      (fun decl_parser ->
+        let (decl_parser, classish_extends, classish_extends_list) =
+          DeclParser.parse_classish_extends_opt decl_parser in
+        let (decl_parser, classish_implements, classish_implements_list) =
+          DeclParser.parse_classish_implements_opt decl_parser in
+        let (decl_parser, body) = DeclParser.parse_classish_body decl_parser in
+        decl_parser
+        , ( classish_extends
+          , classish_extends_list
+          , classish_implements
+          , classish_implements_list
+          , body
+          )
+      )
+    in
     let result = make_anonymous_class class_token left args right
       classish_extends classish_extends_list classish_implements
       classish_implements_list body in
-    let lexer = DeclParser.lexer decl_parser in
-    let errors = DeclParser.errors decl_parser in
-    let parser = { parser with lexer; errors } in
     (parser, result)
 
   and parse_constructor_call parser =
@@ -1696,7 +1725,9 @@ TODO: This will need to be fixed to allow situations where the qualified name
       expression
     *)
     let (parser, op) = assert_token parser Is in
-    let (parser, right) = parse_type_specifier parser in
+    let (parser, right) =
+      with_type_parser parser TypeParser.parse_type_specifier
+    in
     let result = make_is_expression left op right in
     parse_remaining_expression parser result
 
@@ -2243,7 +2274,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
         let missing = make_missing parser in
         (parser, missing)
       else
-        parse_return_type parser
+        with_type_parser parser TypeParser.parse_return_type
     in
     (parser, colon, return_type)
 

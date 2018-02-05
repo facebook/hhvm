@@ -47,14 +47,22 @@ module Parser = SimpleParser.WithSmartConstructors (SCI)
 include Parser
 include ParserHelper.WithParser(Parser)
 
-let parse_expression parser =
-  let expr_parser = ExpressionParser.make
-    parser.env parser.lexer parser.errors parser.context parser.sc_state in
-  let (expr_parser, node) = ExpressionParser.parse_expression expr_parser in
-  let lexer = ExpressionParser.lexer expr_parser in
-  let errors = ExpressionParser.errors expr_parser in
-  let parser = { parser with lexer; errors } in
-  (parser, node)
+  let parse_expression parser =
+    let expr_parser =
+      ExpressionParser.make
+        parser.env
+        parser.lexer
+        parser.errors
+        parser.context
+        parser.sc_state in
+    let (expr_parser, expr) = ExpressionParser.parse_expression expr_parser in
+    let env = ExpressionParser.env expr_parser in
+    let lexer = ExpressionParser.lexer expr_parser in
+    let errors = ExpressionParser.errors expr_parser in
+    let context = ExpressionParser.context expr_parser in
+    let sc_state = ExpressionParser.sc_state expr_parser in
+    let parser = { env; lexer; errors; context; sc_state } in
+    (parser, expr)
 
 (* TODO: What about something like for::for? Is that a legal
   type constant?  *)

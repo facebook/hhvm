@@ -67,61 +67,72 @@ module WithExpressionAndStatementAndTypeParser
     Hh_core.List.exists (Token.leading token)
       ~f:(fun trivia ->  Token.Trivia.kind trivia = TriviaKind.EndOfLine)
 
-  (* Types *)
-
-  let parse_in_type_parser parser type_parser_function =
-    let type_parser = TypeParser.make
-      parser.env parser.lexer parser.errors parser.context parser.sc_state in
-    let (type_parser, node) = type_parser_function type_parser in
+  let with_type_parser : 'a . t -> (TypeParser.t -> TypeParser.t * 'a) -> t * 'a
+  = fun parser f ->
+    let type_parser =
+      TypeParser.make
+        parser.env
+        parser.lexer
+        parser.errors
+        parser.context
+        parser.sc_state in
+    let (type_parser, node) = f type_parser in
+    let env = TypeParser.env type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
-    let parser = { parser with lexer; errors } in
+    let context = TypeParser.context type_parser in
+    let sc_state = TypeParser.sc_state type_parser in
+    let parser = { env; lexer; errors; context; sc_state } in
     (parser, node)
-
-  let parse_generic_parameter_list_opt parser =
-    parse_in_type_parser parser TypeParser.parse_generic_parameter_list_opt
 
   let parse_possible_generic_specifier parser =
-    parse_in_type_parser parser TypeParser.parse_possible_generic_specifier
+    with_type_parser parser TypeParser.parse_possible_generic_specifier
 
   let parse_type_specifier ?(allow_var=false) parser =
-    parse_in_type_parser parser (TypeParser.parse_type_specifier ~allow_var)
-
-  let parse_return_type parser =
-    parse_in_type_parser parser TypeParser.parse_return_type
+    with_type_parser parser (TypeParser.parse_type_specifier ~allow_var)
 
   let parse_type_constraint_opt parser =
-    parse_in_type_parser parser TypeParser.parse_type_constraint_opt
+    with_type_parser parser TypeParser.parse_type_constraint_opt
 
-  (* Expressions *)
-  let parse_in_expression_parser parser expression_parser_function =
-    let expr_parser = ExpressionParser.make
-      parser.env parser.lexer parser.errors parser.context parser.sc_state in
-    let (expr_parser, node) = expression_parser_function expr_parser in
-    let lexer = ExpressionParser.lexer expr_parser in
-    let errors = ExpressionParser.errors expr_parser in
-    let parser = { parser with lexer; errors } in
-    (parser, node)
-
-  let parse_expression parser =
-    parse_in_expression_parser parser ExpressionParser.parse_expression
-
-  (* Statements *)
-  let parse_in_statement_parser parser statement_parser_function =
-    let statement_parser = StatementParser.make
-      parser.env parser.lexer parser.errors parser.context parser.sc_state in
-    let (statement_parser, node) = statement_parser_function
-       statement_parser in
+  let with_statement_parser
+  : 'a . t -> (StatementParser.t -> StatementParser.t * 'a) -> t * 'a
+  = fun parser f ->
+    let statement_parser =
+      StatementParser.make
+        parser.env
+        parser.lexer
+        parser.errors
+        parser.context
+        parser.sc_state in
+    let (statement_parser, node) = f statement_parser in
+    let env = StatementParser.env statement_parser in
     let lexer = StatementParser.lexer statement_parser in
     let errors = StatementParser.errors statement_parser in
-    let parser = { parser with lexer; errors } in
+    let context = StatementParser.context statement_parser in
+    let sc_state = StatementParser.sc_state statement_parser in
+    let parser = { env; lexer; errors; context; sc_state } in
     (parser, node)
 
   let parse_compound_statement parser =
-    parse_in_statement_parser parser StatementParser.parse_compound_statement
+    with_statement_parser parser StatementParser.parse_compound_statement
 
-  let parse_statement parser =
-    parse_in_statement_parser parser StatementParser.parse_statement
+  let parse_expression parser =
+    let expr_parser =
+      ExpressionParser.make
+        parser.env
+        parser.lexer
+        parser.errors
+        parser.context
+        parser.sc_state in
+    let (expr_parser, expr) = ExpressionParser.parse_expression expr_parser in
+    let env = ExpressionParser.env expr_parser in
+    let lexer = ExpressionParser.lexer expr_parser in
+    let errors = ExpressionParser.errors expr_parser in
+    let context = ExpressionParser.context expr_parser in
+    let sc_state = ExpressionParser.sc_state expr_parser in
+    let parser = { env; lexer; errors; context; sc_state } in
+    (parser, expr)
+
 
   (* Declarations *)
 
@@ -172,7 +183,9 @@ module WithExpressionAndStatementAndTypeParser
      * files.
      *)
     let (parser, name) = require_name_allow_keywords parser in
-    let (parser, generic) = parse_generic_parameter_list_opt parser in
+    let (parser, generic) =
+      with_type_parser parser TypeParser.parse_generic_parameter_list_opt
+    in
     let (parser, constr) = parse_type_constraint_opt parser in
     let (parser, equal) = require_equal parser in
     let (parser, ty) = parse_type_specifier parser in
@@ -1298,15 +1311,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser1, open_angle) = next_token parser in
     let kind = Token.kind open_angle in
     if kind = LessThan then
-        let type_parser = TypeParser.make
-          parser.env parser.lexer parser.errors parser.context parser.sc_state
-        in
-        let (type_parser, node) =
-          TypeParser.parse_generic_type_parameter_list type_parser in
-        let lexer = TypeParser.lexer type_parser in
-        let errors = TypeParser.errors type_parser in
-        let parser = { parser with lexer; errors } in
-        (parser, node)
+      with_type_parser parser TypeParser.parse_generic_type_parameter_list
     else
       let missing = make_missing parser in
       (parser, missing)
@@ -1314,7 +1319,9 @@ module WithExpressionAndStatementAndTypeParser
   and parse_return_type_hint_opt parser =
     let (parser1, colon_token) = next_token parser in
     if (Token.kind colon_token) = Colon then
-      let (parser2, return_type) = parse_return_type parser1 in
+      let (parser2, return_type) =
+        with_type_parser parser1 TypeParser.parse_return_type
+      in
       (parser2, make_token colon_token, return_type)
     else
       let missing1 = make_missing parser in
@@ -1486,7 +1493,7 @@ module WithExpressionAndStatementAndTypeParser
          function declaration or expression statement containing
          anonymous function - use statement parser to determine in which case
          we are currently in *)
-      parse_in_statement_parser parser StatementParser.parse_possible_php_function
+      with_statement_parser parser StatementParser.parse_possible_php_function
     else
       parse_function_declaration parser attribute_specification
 
@@ -1776,14 +1783,15 @@ module WithExpressionAndStatementAndTypeParser
         parse_const_declaration parser1 missing
               (make_token token)
       | _ ->
-        parse_statement parser in
+        with_statement_parser parser StatementParser.parse_statement
         (* TODO: What if it's not a legal statement? Do we still make progress
         here? *)
+    in
     let parser1 = Parser.pop_scope parser recovery_tokens in
     (parser1, result)
 
   let parse_leading_markup_section parser =
-    let parser1, markup_section = parse_in_statement_parser parser
+    let parser1, markup_section = with_statement_parser parser
       (StatementParser.parse_markup_section ~is_leading_section:true)
     in
     let valid =

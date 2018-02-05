@@ -31,7 +31,11 @@ type t = {
 
   let sc_call parser f =
     let (sc_state, result) = f parser.sc_state in
-    ({parser with sc_state}, result)
+    {parser with sc_state}, result
+
+  let sc_state parser =
+    parser.sc_state
+
 
 let make env lexer errors context sc_state =
   { lexer; errors; context; precedence = 0; env; sc_state }

@@ -514,14 +514,23 @@ module Full = struct
     ty (ISet.add n ISet.empty) env (Buffer.add_string buf) x;
     Buffer.contents buf
 
-  let to_string_strip_ns env x =
+  let get_string (f : (string -> unit) -> unit) : string =
     let buf = Buffer.create 50 in
     let add_string str =
       let str = Utils.strip_ns str in
       Buffer.add_string buf str
-      in
-    ty ISet.empty env add_string x;
+    in
+    f add_string;
     Buffer.contents buf
+
+  let to_string_strip_ns env x =
+    get_string (fun add_string -> ty ISet.empty env add_string x)
+
+  let func_to_string_strip_ns env ft name =
+    Printf.sprintf
+      "%s%s"
+      (Utils.strip_ns name)
+      (get_string (fun add_string -> fun_type ISet.empty env add_string ft))
 
   let to_string_decl tcopt (x: decl ty) =
     let env =
@@ -894,6 +903,7 @@ let suggest: type a. a ty -> _ =  fun ty -> Suggest.type_ ty
 let full env ty = Full.to_string env ty
 let full_rec env n ty = Full.to_string_rec env n ty
 let full_strip_ns env ty = Full.to_string_strip_ns env ty
+let full_func_strip_ns env ft name = Full.func_to_string_strip_ns env ft name
 let debug env ty =
   Full.debug_mode := true;
   let f_str = full_strip_ns env ty in

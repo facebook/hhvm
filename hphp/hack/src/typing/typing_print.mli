@@ -18,6 +18,7 @@ val suggest: 'a Typing_defs.ty -> string
 val full: Typing_env.env -> 'a Typing_defs.ty -> string
 val full_rec: Typing_env.env -> int -> 'a Typing_defs.ty -> string
 val full_strip_ns: Typing_env.env -> 'a Typing_defs.ty -> string
+val full_func_strip_ns: Typing_env.env -> 'a Typing_defs.fun_type -> string -> string
 val debug: Typing_env.env -> 'a Typing_defs.ty -> string
 val debug_with_tvars: Typing_env.env -> 'a Typing_defs.ty -> string
 val class_: TypecheckerOptions.t -> Typing_defs.class_type -> string

@@ -55,7 +55,7 @@ let helper tcopt acc pos_infos =
       Relative_path.Map.get tasts fn
       |> Core_result.of_option ~error:"No such file or directory"
       |> Core_result.map ~f:begin fun tast ->
-        ServerInferType.type_at_pos tast line char
+        ServerInferType.returned_type_at_pos tast line char
         |> Option.map ~f:(fun (env, ty) -> Typing_print.to_json env ty)
       end
     in

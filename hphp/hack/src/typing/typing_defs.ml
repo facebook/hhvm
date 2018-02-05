@@ -359,7 +359,7 @@ and 'phase fun_type = {
   ft_reactive   : reactivity          ;
   ft_return_disposable : bool         ;
   ft_mutable : bool                   ;
-  ft_returns_mutable : bool          ;
+  ft_returns_mutable : bool           ;
 }
 
 (* Arity information for a fun_type; indicating the minimum number of

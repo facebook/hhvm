@@ -18,6 +18,7 @@ open Lsp_fmt
 type env = {
   from: string; (* The source where the client was spawned from, i.e. nuclide, vim, emacs, etc. *)
   use_ffp_autocomplete: bool; (* Flag to turn on the (experimental) FFP based autocomplete *)
+  use_enhanced_hover: bool; (* Flag to turn on enhanced hover information *)
 }
 
 
@@ -590,9 +591,6 @@ let do_didChange
   ()
 
 let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
-  (* TODO: should return MarkedCode, once Nuclide supports it *)
-  (* TODO: should return doc-comment as well *)
-  (* TODO: should return signature of what we hovered on, not just type. *)
   let (file, line, column) = lsp_file_position_to_hack params in
   let command = ServerCommandTypes.INFER_TYPE (ServerUtils.FileName file, line, column) in
   let inferred_type = rpc conn command in
@@ -603,6 +601,25 @@ let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
   | Some ("_", _)
   | Some ("", _) -> { Hover.contents = []; range = None; }
   | Some (s, _) -> { Hover.contents = [MarkedString s]; range = None; }
+
+let do_enhanced_hover (conn: server_conn) (params: Hover.params) : Hover.result =
+  (* todo(wipi): return doc blocks too. *)
+  let (file, line, column) = lsp_file_position_to_hack params in
+  let command = ServerCommandTypes.IDE_HOVER (ServerUtils.FileName file, line, column) in
+  let contents = rpc conn command
+    |> List.map ~f:begin fun hoverInfo ->
+      (* Hack server uses both None and "_" to indicate absence of a result. *)
+      (* We're also catching the non-result "" just in case...               *)
+      match hoverInfo with
+      | { HoverService.info = ""; _ }
+      | { HoverService.info = "_"; _ } -> []
+      | { HoverService.info; doc_block = None } -> [MarkedCode ("hack", info)]
+      | { HoverService.info; doc_block = Some s } -> [MarkedCode ("hack", info); MarkedString s]
+    end
+    |> List.concat
+    |> List.remove_consecutive_duplicates ~equal:(=)
+  in
+  { Hover.contents; range = None; }
 
 let do_definition (conn: server_conn) (params: Definition.params)
   : Definition.result =
@@ -1702,7 +1719,8 @@ let handle_event
   (* textDocument/hover request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/hover" ->
     cancel_if_stale client c short_timeout;
-    parse_hover c.params |> do_hover menv.conn |> print_hover |> Jsonrpc.respond to_stdout c
+    let hover_command = if env.use_enhanced_hover then do_enhanced_hover else do_hover in
+    parse_hover c.params |> hover_command menv.conn |> print_hover |> Jsonrpc.respond to_stdout c
 
   (* textDocument/definition request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/definition" ->

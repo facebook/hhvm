@@ -2773,6 +2773,9 @@ module GenerateFFTokenKind = struct
     sprintf ("  | " ^^ token_kind_fmt ^^ " -> \"%s\"\n")
       x.token_kind token_text
 
+  let to_is_variable_text x =
+    sprintf "  | %s -> true\n" x.token_kind
+
   let full_fidelity_token_kind_template = make_header MLStyle "" ^ "
 
 type t =
@@ -2793,6 +2796,10 @@ let to_string kind =
 TO_STRING_NO_TEXT  (* Given text tokens *)
 TO_STRING_GIVEN_TEXT  (* Variable text tokens *)
 TO_STRING_VARIABLE_TEXT
+
+let is_variable_text kind =
+  match kind with
+IS_VARIABLE_TEXT_VARIABLE_TEXT  | _ -> false
 "
   let full_fidelity_token_kind =
   {
@@ -2815,7 +2822,9 @@ TO_STRING_VARIABLE_TEXT
       { token_pattern = "KIND_DECLARATIONS_VARIABLE_TEXT";
         token_func = map_and_concat to_kind_declaration };
       { token_pattern = "TO_STRING_VARIABLE_TEXT";
-        token_func = map_and_concat to_to_string }];
+        token_func = map_and_concat to_to_string };
+      { token_pattern = "IS_VARIABLE_TEXT_VARIABLE_TEXT";
+        token_func = map_and_concat to_is_variable_text }];
     trivia_transformations = [];
     aggregate_transformations = [];
   }

@@ -610,3 +610,35 @@ let to_string kind =
   | XHPComment                    -> "XHP_comment"
   | Markup                        -> "markup"
 
+
+let is_variable_text kind =
+  match kind with
+  | ErrorToken -> true
+  | Name -> true
+  | Variable -> true
+  | DecimalLiteral -> true
+  | OctalLiteral -> true
+  | HexadecimalLiteral -> true
+  | BinaryLiteral -> true
+  | FloatingLiteral -> true
+  | ExecutionStringLiteral -> true
+  | ExecutionStringLiteralHead -> true
+  | ExecutionStringLiteralTail -> true
+  | SingleQuotedStringLiteral -> true
+  | DoubleQuotedStringLiteral -> true
+  | DoubleQuotedStringLiteralHead -> true
+  | StringLiteralBody -> true
+  | DoubleQuotedStringLiteralTail -> true
+  | HeredocStringLiteral -> true
+  | HeredocStringLiteralHead -> true
+  | HeredocStringLiteralTail -> true
+  | NowdocStringLiteral -> true
+  | BooleanLiteral -> true
+  | XHPCategoryName -> true
+  | XHPElementName -> true
+  | XHPClassName -> true
+  | XHPStringLiteral -> true
+  | XHPBody -> true
+  | XHPComment -> true
+  | Markup -> true
+  | _ -> false

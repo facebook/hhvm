@@ -21,7 +21,7 @@
  
  *)
 
-module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
+module type SC_S = SmartConstructors.SmartConstructors_S
 module SourceText = Full_fidelity_source_text
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S)

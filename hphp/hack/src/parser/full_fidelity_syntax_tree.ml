@@ -17,7 +17,7 @@
  *
  *)
 
-module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
+module type SC_S = SmartConstructors.SmartConstructors_S
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S ) = struct
 module WithSmartConstructors (SCI : SC_S with type token = Syntax.Token.t)

@@ -22,7 +22,7 @@ module PrecedenceSyntax = Full_fidelity_precedence_parser
   .WithSyntax(Syntax)
 module PrecedenceParser = PrecedenceSyntax
   .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
-module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
+module type SC_S = SmartConstructors.SmartConstructors_S
 
 module type StatementParser_S = Full_fidelity_statement_parser_type
   .WithSyntax(Syntax)

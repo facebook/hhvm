@@ -12,7 +12,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S
   module WithLexer(Lexer : Lexer_S) = struct
     module type StatementParser_S = sig
-      module SC : Full_fidelity_smart_constructors_sig.SmartConstructors_S
+      module SC : SmartConstructors.SmartConstructors_S
       type t
       val make : Full_fidelity_parser_env.t
         -> Lexer.t

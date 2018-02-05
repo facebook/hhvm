@@ -18,7 +18,7 @@ module SyntaxError = Full_fidelity_syntax_error
 module SimpleParserSyntax = Full_fidelity_simple_parser.WithSyntax(Syntax)
 module SimpleParser = SimpleParserSyntax.WithLexer(
   Full_fidelity_type_lexer.WithToken(Syntax.Token))
-module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
+module type SC_S = SmartConstructors.SmartConstructors_S
 
 module type ExpressionParser_S = Full_fidelity_expression_parser_type
   .WithSyntax(Syntax)

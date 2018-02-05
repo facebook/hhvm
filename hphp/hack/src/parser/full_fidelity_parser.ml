@@ -9,7 +9,7 @@
  *)
 
 module Env = Full_fidelity_parser_env
-module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
+module type SC_S = SmartConstructors.SmartConstructors_S
 
 [@@@ocaml.warning "-60"] (* https://caml.inria.fr/mantis/view.php?id=7522 *)
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) :

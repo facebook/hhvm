@@ -8,7 +8,7 @@
  *
  *)
 
-module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
+module type SC_S = SmartConstructors.SmartConstructors_S
 
 module WithSyntax : functor (Syntax : Syntax_sig.Syntax_S) -> sig
 module WithSmartConstructors

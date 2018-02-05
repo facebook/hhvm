@@ -21,7 +21,7 @@ module SimpleParser = SimpleParserSyntax.WithLexer(
 module ParserHelperSyntax = Full_fidelity_parser_helpers.WithSyntax(Syntax)
 module ParserHelper = ParserHelperSyntax
   .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
-module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
+module type SC_S = SmartConstructors.SmartConstructors_S
 
 module type ExpressionParser_S = Full_fidelity_expression_parser_type
   .WithSyntax(Syntax)

@@ -562,13 +562,20 @@ end (* Syntax_S *)
   }
 end (* GenerateFFSyntaxSig *)
 
-module GenerateFFSmartConstructorsSig = struct
+module GenerateFFSmartConstructors = struct
   let to_constructor_methods x =
     let args = map_and_concat_separated " -> " (fun _ -> "r") x.fields in
     (* We put state as the last argument to use currying *)
     sprintf "  val make_%s : %s -> t -> t * r\n" x.type_name args
 
-  let full_fidelity_smart_constructors_sig_template: string =
+  let to_make_methods x =
+    let fields = Core_list.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i)
+    in
+    let stack = String.concat " " fields in
+    sprintf "    let %s parser %s = call parser (SCI.make_%s %s)\n"
+      x.type_name stack x.type_name stack
+
+  let full_fidelity_smart_constructors_template: string =
   (make_header MLStyle "
  * This module contains a signature which can be used to describe smart
  * constructors.
@@ -585,15 +592,32 @@ module type SmartConstructors_S = sig
   val make_list : Full_fidelity_source_text.t -> int -> r list -> t -> t * r
 CONSTRUCTOR_METHODS
 end (* SmartConstructors_S *)
+
+module ParserWrapper (Parser : sig
+  type parser_type
+  module SCI : SmartConstructors_S
+  val call : parser_type -> (SCI.t -> SCI.t * SCI.r) -> parser_type * SCI.r
+end) = struct
+
+  module Make = struct
+    open Parser
+
+    let token parser token = call parser (SCI.make_token token)
+    let missing parser s o = call parser (SCI.make_missing s o)
+    let list parser s o items = call parser (SCI.make_list s o items)
+MAKE_METHODS
+  end (* Make *)
+end (* ParserWrapper *)
 "
 
-  let full_fidelity_smart_constructors_sig =
+  let full_fidelity_smart_constructors =
   {
     filename = full_fidelity_path_prefix ^
-      "smart_constructors/full_fidelity_smart_constructors_sig.ml";
-    template = full_fidelity_smart_constructors_sig_template;
+      "smart_constructors/smartConstructors.ml";
+    template = full_fidelity_smart_constructors_template;
     transformations = [
-      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
+      { pattern = "MAKE_METHODS"; func = to_make_methods }
     ];
     token_no_text_transformations = [];
     token_given_text_transformations = [];
@@ -601,7 +625,68 @@ end (* SmartConstructors_S *)
     trivia_transformations = [];
     aggregate_transformations = [];
   }
-end (* GenerateFFSmartConstructorsSig *)
+end (* GenerateFFSmartConstructors *)
+
+module GenerateFFParserSig = struct
+  let to_make_methods x =
+    let args = map_and_concat_separated " -> " (fun _ -> "SC.r") x.fields in
+    (* We put state as the last argument to use currying *)
+    sprintf "        val %s : t -> %s -> t * SC.r\n" x.type_name args
+
+  let full_fidelity_parser_sig_template: string =
+  (make_header MLStyle "
+ * This module contains a signature which can be used to describe smart
+ * constructors.
+  ") ^ "
+
+module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
+  module Token = Syntax.Token
+  module TokenKind = Full_fidelity_token_kind
+  module SyntaxError = Full_fidelity_syntax_error
+  module Env = Full_fidelity_parser_env
+  module type SC_S = SmartConstructors.SmartConstructors_S
+  module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S
+
+  module WithLexer(Lexer : Lexer_S) = struct
+    module type Parser_S = sig
+      module SC : SC_S with type token = Token.t
+      type t
+      val sc_call : t -> (SC.t -> SC.t * SC.r) -> t * SC.r
+      val errors : t -> SyntaxError.t list
+      val with_errors : t -> SyntaxError.t list -> t
+      val lexer : t -> Lexer.t
+      val with_lexer : t -> Lexer.t -> t
+      val expect : t -> TokenKind.t list -> t
+      val skipped_tokens : t -> Token.t list
+      val with_skipped_tokens : t -> Token.t list -> t
+      val clear_skipped_tokens : t -> t
+      val env : t -> Env.t
+
+      module Make : sig
+        val token : t -> Token.t -> t * SC.r
+        val missing : t -> Full_fidelity_source_text.t -> int -> t * SC.r
+        val list : t -> Full_fidelity_source_text.t -> int -> SC.r list -> t * SC.r
+MAKE_METHODS
+      end (* Make *)
+    end (* Parser_S *)
+  end (* WithLexer *)
+end (* WithSyntax *)
+"
+
+  let full_fidelity_parser_sig =
+  {
+    filename = full_fidelity_path_prefix ^ "parserSig.ml";
+    template = full_fidelity_parser_sig_template;
+    transformations = [
+      { pattern = "MAKE_METHODS"; func = to_make_methods }
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+end (* GenerateFFParserSig *)
 
 module GenerateFFVerifySmartConstructors = struct
   let to_constructor_methods x =
@@ -622,7 +707,7 @@ module GenerateFFVerifySmartConstructors = struct
  * build AST.
  ") ^ "
 
-module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
+module type SC_S = SmartConstructors.SmartConstructors_S
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S)
 : (SC_S with type token = Syntax.Token.t) = struct
@@ -671,7 +756,7 @@ module GenerateFFSyntaxSmartConstructors = struct
  * build AST.
  ") ^ "
 
-module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
+module type SC_S = SmartConstructors.SmartConstructors_S
 module SourceText = Full_fidelity_source_text
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S)
@@ -2748,8 +2833,10 @@ let () =
   generate_file GenerateFFTokenKind.full_fidelity_token_kind;
   generate_file GenerateFFJSONSchema.full_fidelity_json_schema;
   generate_file
-    GenerateFFSmartConstructorsSig.full_fidelity_smart_constructors_sig;
+    GenerateFFSmartConstructors.full_fidelity_smart_constructors;
   generate_file
     GenerateFFVerifySmartConstructors.full_fidelity_verify_smart_constructors;
   generate_file
-    GenerateFFSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors
+    GenerateFFSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
+  generate_file
+    GenerateFFParserSig.full_fidelity_parser_sig

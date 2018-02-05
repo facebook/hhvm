@@ -17,27 +17,14 @@ module SyntaxError = Full_fidelity_syntax_error
 module Trivia = Token.Trivia
 module SourceText = Full_fidelity_source_text
 module Env = Full_fidelity_parser_env
-module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
+module type SC_S = SmartConstructors.SmartConstructors_S
 
 open Syntax
 
 module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S
 
 module WithLexer(Lexer : Lexer_S) = struct
-module type Parser_S = sig
-  module SC : SC_S with type token = Token.t
-  type t
-  val sc_call : t -> (SC.t -> SC.t * SC.r) -> t * SC.r
-  val errors : t -> SyntaxError.t list
-  val with_errors : t -> SyntaxError.t list -> t
-  val lexer : t -> Lexer.t
-  val with_lexer : t -> Lexer.t -> t
-  val expect : t -> TokenKind.t list -> t
-  val skipped_tokens : t -> Token.t list
-  val with_skipped_tokens : t -> Token.t list -> t
-  val clear_skipped_tokens : t -> t
-  val env : t -> Env.t
-end
+module type Parser_S = ParserSig.WithSyntax(Syntax).WithLexer(Lexer).Parser_S
 
 module WithParser(Parser : Parser_S) = struct
   open Parser

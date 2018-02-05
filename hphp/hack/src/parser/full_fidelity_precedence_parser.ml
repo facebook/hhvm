@@ -11,7 +11,7 @@
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S
 module Context = Full_fidelity_parser_context.WithToken(Syntax.Token)
-module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
+module type SC_S = SmartConstructors.SmartConstructors_S
 
 module WithLexer(Lexer : Lexer_S) = struct
   module Lexer = Lexer
@@ -122,6 +122,11 @@ let next_xhp_body_token parser =
   let parser = { parser with lexer } in
   (parser, token)
 
+  include SmartConstructors.ParserWrapper(struct
+    type parser_type = t
+    module SCI = SC
+    let call = sc_call
+  end)
 end (* WithSmartConstructors *)
 end (* WithLexer *)
 end (* WithSyntax *)

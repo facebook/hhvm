@@ -6962,72 +6962,26 @@ bool EmitterVisitor::emitInlineGena(
   const SimpleFunctionCallPtr& call
 ) {
   assert(call->isCallToFunction("gena"));
-  const auto params = call->getParams();
+  auto const params = call->getParams();
 
   if (params->getCount() != 1) return false;
 
   //
-  // Convert input into an array of WH (inline this?)
-  // Two elements is the most common size.
+  // Convert input into a darray.
   //
-  e.NewDArray(2);
-  const auto array = emitSetUnnamedL(e);
-  const auto arrayStart = m_ue.bcPos();
-
-  //
-  // Iterate over input and store wait handles for all elements in
-  // a new array.
-  //
-  const auto key = m_curFunc->allocUnnamedLocal();
-  const auto item = m_curFunc->allocUnnamedLocal();
-  {
-    emitVirtualLocal(key);
-    emitVirtualLocal(item);
-
-    visit((*params)[0]);
-    emitConvertToCell(e);
-
-    Label endloop;
-    const auto initItId = m_curFunc->allocIterator();
-    e.IterInitK(initItId, endloop, item, key);
-    const auto iterStart = m_ue.bcPos();
-    {
-      Label loop(e);
-
-      emitVirtualLocal(array); // for Set below
-      emitVirtualLocal(key); // for Set below
-      markElem(e);
-
-      emitVirtualLocal(item);
-      emitCGet(e);
-
-      emitSet(e);   // array[$key] = $item;
-      emitPop(e);
-
-      emitVirtualLocal(key);
-      emitVirtualLocal(item);
-      e.IterNextK(initItId, loop, item, key);
-      endloop.set(e);
-    }
-    // Clear item and key.  Free iterator.
-    emitUnsetL(e, item);
-    emitUnsetL(e, key);
-    m_curFunc->freeIterator(initItId);
-
-    newFaultRegionAndFunclet(iterStart, m_ue.bcPos(),
-                             new UnsetUnnamedLocalsThunklet({item, key}));
-    newFaultRegionAndFunclet(iterStart, m_ue.bcPos(),
-                             new IterFreeThunklet(initItId, false),
-                             { initItId, KindOfIter });
-  }
+  visit((*params)[0]);
+  emitConvertToCell(e);
+  e.CastDArray();
+  auto const array = emitSetUnnamedL(e);
+  auto const arrayStart = m_ue.bcPos();
 
   //
   // Construct an AAWH from the array.
   //
-  const auto fromArrayStart = m_ue.bcPos();
+  auto const fromDArrayStart = m_ue.bcPos();
   e.FPushClsMethodD(1, s_fromDArray.get(), s_AwaitAllWaitHandle.get());
   {
-    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fromArrayStart);
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fromDArrayStart);
     emitVirtualLocal(array);
     e.FPassL(0, array, FPassHint::Cell);
   }
@@ -7044,6 +6998,8 @@ bool EmitterVisitor::emitInlineGena(
   // Iterate over results and store in array.  Reuse same temporary array.
   //
   {
+    auto const key = m_curFunc->allocUnnamedLocal();
+    auto const item = m_curFunc->allocUnnamedLocal();
     emitVirtualLocal(key);
     emitVirtualLocal(item);
 
@@ -7051,9 +7007,9 @@ bool EmitterVisitor::emitInlineGena(
     emitCGet(e);
 
     Label endloop2;
-    const auto resultItId = m_curFunc->allocIterator();
+    auto const resultItId = m_curFunc->allocIterator();
     e.IterInitK(resultItId, endloop2, item, key);
-    const auto iterStart2 = m_ue.bcPos();
+    auto const iterStart2 = m_ue.bcPos();
     {
       Label loop2(e);
 
@@ -7084,11 +7040,11 @@ bool EmitterVisitor::emitInlineGena(
     newFaultRegionAndFunclet(iterStart2, m_ue.bcPos(),
                              new IterFreeThunklet(resultItId, false),
                              { resultItId, KindOfIter });
-  }
 
-  // clean up locals
-  m_curFunc->freeUnnamedLocal(item);
-  m_curFunc->freeUnnamedLocal(key);
+    // clean up locals
+    m_curFunc->freeUnnamedLocal(item);
+    m_curFunc->freeUnnamedLocal(key);
+  }
 
   // Leave result array on the stack.
   emitPushAndFreeUnnamedL(e, array, arrayStart);

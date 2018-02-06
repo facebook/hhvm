@@ -247,3 +247,4 @@ val redeclaration_of_function : name:string -> loc:string -> string
 val redeclaration_of_method : name:string -> string
 val self_or_parent_colon_colon_class_outside_of_class : string -> string
 val variadic_param_with_type_in_php : string -> string -> string
+val final_property : string

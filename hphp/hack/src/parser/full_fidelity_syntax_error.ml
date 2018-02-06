@@ -397,3 +397,4 @@ let variadic_param_with_type_in_php name type_ =
   "Parameter " ^ name ^ " is variadic and has a type constraint ("
   ^ type_ ^ "); variadic params with type constraints are not "
   ^ "supported in non-Hack files"
+let final_property = "Properties cannot be declared final"

@@ -1427,7 +1427,6 @@ let property_errors node is_strict is_hack hhvm_compat_mode errors =
   | PropertyDeclaration p ->
       let missing_property_check is_strict hhvm_compat_mode _ =
         not hhvm_compat_mode && is_strict && is_missing (p.property_type) in
-
       let invalid_var_check is_hack hhvm_compat_mode _ =
         not hhvm_compat_mode && is_hack && (is_var p.property_modifiers) in
 
@@ -1437,6 +1436,11 @@ let property_errors node is_strict is_hack hhvm_compat_mode errors =
       let errors =
         produce_error errors (invalid_var_check is_hack hhvm_compat_mode) ()
         SyntaxError.error2053 p.property_modifiers in
+
+      let modifiers = syntax_to_list_no_separators p.property_modifiers in
+      let errors = if Hh_core.List.exists ~f:is_final modifiers then
+        make_error_from_node node SyntaxError.final_property :: errors
+        else errors in
       errors
   | _ -> errors
 

@@ -154,7 +154,7 @@ let summarize_method class_name m =
     modifiers;
     children = None;
     params;
-    docblock = None;
+    docblock = m.Ast.m_doc_comment;
   }
 
 (* Parser synthesizes AST nodes for implicit properties (defined in constructor
@@ -323,11 +323,14 @@ let should_add_docblock = function
 
 let add_def_docblock finder previous_def_line def =
   let line = Pos.line def.pos in
-  let docblock = if should_add_docblock def.kind
-    then Docblock_finder.find_docblock finder previous_def_line line
-    else None
+  let def =
+    match def.docblock with
+    | None when should_add_docblock def.kind ->
+      let docblock = Docblock_finder.find_docblock finder previous_def_line line in
+      { def with docblock }
+    | _ -> def
   in
-  line, { def with docblock }
+  line, def
 
 let add_docblocks defs comments =
   let finder = Docblock_finder.make_docblock_finder comments in
@@ -354,14 +357,14 @@ let add_docblocks defs comments =
   snd (map_def_list (add_def_docblock finder) 0 defs)
 
 let outline popt content =
-  let {Parser_hack.ast; comments; _} =
-    Parser_hack.program
-      popt
-      Relative_path.default
-      content
-      ~include_line_comments:true
-      ~keep_errors:false
+  let open Full_fidelity_ast in
+  let env = make_env
+    ~parser_options:popt
+    ~include_line_comments:true
+    ~keep_errors:false
+    Relative_path.default
   in
+  let {Parser_hack.ast; comments; _} = from_text_with_legacy env content in
   let result = outline_ast ast in
   add_docblocks result comments
 

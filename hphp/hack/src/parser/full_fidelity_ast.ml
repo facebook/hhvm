@@ -1057,9 +1057,10 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | BinaryExpression
       { binary_left_operand; binary_operator; binary_right_operand }
       ->
-        pBop binary_operator env
-          (pExpr binary_left_operand  env)
-          (pExpr binary_right_operand env)
+        let lhs = pExpr binary_left_operand env in
+        let op  = pBop binary_operator env in
+        let rhs = pExpr binary_right_operand env in
+        op lhs rhs
 
     | Token t ->
       (match location with
@@ -1847,13 +1848,19 @@ and extract_docblock = fun node ->
       let mk (start : int) (end_ : int) : string =
         String.sub source_text start (end_ - start + 1)
       in
+      let lines = ref [] in
       let rec go start state idx : string option =
         if idx = length (* finished? *)
-        then None
+        then
+          match state, List.rev !lines with
+          | `Free, (_ :: _ as l) -> Some (String.concat "\n" l)
+          | _ -> None
         else begin
           let next = idx + 1 in
           match state, str.[idx] with
-          | `LineCmt,     '\n' -> go next `Free next
+          | `LineCmt,     '\n' ->
+            lines := mk start (idx-1) :: !lines;
+            go start `Free next
           | `EndEmbedded, '/'  -> go next `Free next
           | `EndDoc, '/' -> begin match go next `Free next with
             | Some doc -> Some doc
@@ -1864,8 +1871,10 @@ and extract_docblock = fun node ->
           (* All other comment delimiters start with a / *)
           | `Free,     '/'              -> go idx   `SawSlash    next
           (* After a / in trivia, we must see either another / or a * *)
-          | `SawSlash, '/'              -> go next  `LineCmt     next
-          | `SawSlash, '*'              -> go start `MaybeDoc    next
+          | `SawSlash, '/'              -> go (idx - 1) `LineCmt     next
+          | `SawSlash, '*'              ->
+            lines := [];
+            go start `MaybeDoc next
           | `MaybeDoc, '*'              -> go start `MaybeDoc2   next
           | `MaybeDoc, _                -> go start `EmbeddedCmt next
           | `MaybeDoc2, '/'             -> go next  `Free        next
@@ -2119,9 +2128,12 @@ and pClassElt : class_elt list parser = fun node env ->
         ; xhp_attribute_decl_required    = req
         } ->
           let (p, name) = pos_name name env in
+          let pname = (p, ":" ^ name) in
+          let p = if is_missing init then p else Pos.btw p (pPos init env) in
+          let init = mpOptional pSimpleInitializer init env in
           XhpAttr
           ( mpOptional pHint ty env
-          , (Pos.none, (p, ":" ^ name), mpOptional pSimpleInitializer init env)
+          , (p, pname, init)
           , not (is_missing req)
           , match syntax ty with
             | XHPEnumType { xhp_enum_optional; xhp_enum_values; _ } ->

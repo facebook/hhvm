@@ -519,6 +519,7 @@ match arg with
                | "Str" -> OpStr
                | "Arr" -> OpArr
                | "Obj" -> OpObj
+               | "Res" -> OpRes
                | "Scalar" -> OpScalar
                | "Keyset" -> OpKeyset
                | "Dict" -> OpDict

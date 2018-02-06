@@ -322,6 +322,7 @@ type istype_op =
   | OpStr
   | OpArr
   | OpObj
+  | OpRes
   | OpScalar (* Int or Dbl or Str or Bool *)
   | OpKeyset
   | OpDict

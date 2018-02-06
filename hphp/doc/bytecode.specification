@@ -1826,6 +1826,7 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
       Obj      | Obj
       ArrLike  | Arr or Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
+      Res      | Res
 
   If t is Obj, this instruction checks if the operand in an object.
     Instances of a special class __PHP_Incomplete_Class are not considered
@@ -1853,6 +1854,7 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
       Obj      | Obj
       ArrLike  | Arr or Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
+      Res      | Res
 
   If the local variable given by %1 is defined, the logic is the same as for
     IsTypeC (see above).

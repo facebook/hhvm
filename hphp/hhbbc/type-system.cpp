@@ -2761,6 +2761,7 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Int:    return TInt;
   case IsTypeOp::Dbl:    return TDbl;
   case IsTypeOp::Str:    return TStr;
+  case IsTypeOp::Res:    return TRes;
   case IsTypeOp::Arr:    return TArr;
   case IsTypeOp::Vec:    return TVec;
   case IsTypeOp::Dict:   return TDict;

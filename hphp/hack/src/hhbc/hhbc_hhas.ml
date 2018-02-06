@@ -269,6 +269,7 @@ let string_of_istype_op op =
   | OpStr -> "Str"
   | OpArr -> "Arr"
   | OpObj -> "Obj"
+  | OpRes -> "Res"
   | OpScalar -> "Scalar"
   | OpVec -> "Vec"
   | OpDict -> "Dict"

@@ -3938,6 +3938,7 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
   case IsTypeOp::Keyset: return is_keyset(tvAsCVarRef(tv));
   case IsTypeOp::Obj:    return is_object(tvAsCVarRef(tv));
   case IsTypeOp::Str:    return is_string(tvAsCVarRef(tv));
+  case IsTypeOp::Res:    return tv->m_type == KindOfResource;
   case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(tv));
   case IsTypeOp::ArrLike: return isArrayLikeType(tv->m_type);
   case IsTypeOp::VArray: return is_varray(tvAsCVarRef(tv));

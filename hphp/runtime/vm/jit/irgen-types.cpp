@@ -372,6 +372,7 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::Arr:     return TArr;
   case IsTypeOp::Obj:     return TObj;
   case IsTypeOp::ArrLike: return TArrLike;
+  case IsTypeOp::Res:     return TRes;
   case IsTypeOp::VArray:
   case IsTypeOp::DArray:
   case IsTypeOp::Scalar: not_reached();

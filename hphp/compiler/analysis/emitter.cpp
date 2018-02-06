@@ -6123,6 +6123,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   TYPE_CHECK_INSTR(real, Dbl)
   TYPE_CHECK_INSTR(float, Dbl)
   TYPE_CHECK_INSTR(scalar, Scalar)
+  // We don't use IsType with the resource type because `is_resource()` does
+  // validation in addition to a simple type check.
+  // TYPE_CHECK_INSTR(resource, Res)
 #undef TYPE_CHECK_INSTR
     else if (emitConstantFuncCall(e, call)) {
       return true;

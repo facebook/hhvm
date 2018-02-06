@@ -355,6 +355,10 @@ let istype_op lower_fq_id =
   | "is_array" -> Some OpArr
   | "is_object" -> Some OpObj
   | "is_null" -> Some OpNull
+  (* We don't use IsType with the resource type because `is_resource()` does
+     validation in addition to a simple type check. We will use it for
+     is-expressions because they only do type checks.
+  | "is_resource" -> Some OpRes *)
   | "is_scalar" -> Some OpScalar
   | "hh\\is_keyset" -> Some OpKeyset
   | "hh\\is_dict" -> Some OpDict

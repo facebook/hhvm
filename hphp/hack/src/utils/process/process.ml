@@ -259,8 +259,9 @@ let run_entry ?input entry params =
     Process_types.name = Daemon.name_of_entry entry;
     args = [];
   } in
-  let { Daemon.pid; _ } = Daemon.spawn
+  let { Daemon.pid; _ } as daemon = Daemon.spawn
     (stdin_child, stdout_child, stderr_child) entry params in
+  Daemon.close daemon;
   send_input_and_form_result ?input ~info ~pid ~stdin_parent
     ~stdout_parent ~stderr_parent
 

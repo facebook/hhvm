@@ -40,5 +40,9 @@ let run (name, f) =
   else Printf.printf "fail\n%!");
   result
 
+(** List.for_all but without shortcircuiting "&&", so runs all failures too. *)
+let for_all_non_shortcircuit tests f =
+  List.fold_left tests ~init:true ~f:(fun acc test -> (f test) && acc)
+
 let run_all (tests: (string * (unit -> bool)) list ) =
-  exit (if List.for_all tests run then 0 else 1)
+  exit (if for_all_non_shortcircuit tests run then 0 else 1)

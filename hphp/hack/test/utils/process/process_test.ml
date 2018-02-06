@@ -140,19 +140,60 @@ let test_chdir () =
       Printf.eprintf "See stderr: %s\n" stderr;
       false
 
+let open_an_fd () =
+  Unix.openfile "/dev/null" [Unix.O_RDONLY] 0o440
+
+let int_of_fd (x : Unix.file_descr) : int = Obj.magic x
+
+let close_fds fds =
+  List.iter Unix.close fds
+
+(** Returns true if the next opened file descriptor is exactly 1 greater
+ * than the "last_fd". Repeats this "repeats" times. Accumulates all opened
+ * FDs into all_fds and closes all of them at the end. *)
+let rec is_next_fd_incremental ~repeats all_fds last_fd =
+  if repeats <= 0 then
+    let () = close_fds all_fds in
+    true
+  else
+    let fd = open_an_fd () in
+    try
+      let () = Int_asserter.assert_equals ((int_of_fd last_fd) + 1) (int_of_fd fd)
+        "Test unexpectedly leaked a File Descriptor." in
+      is_next_fd_incremental ~repeats:(repeats - 1) (fd :: all_fds) fd
+    with
+    | Assert_failure _ ->
+      false
+
+(** Opens one FD before running a test, and then opens 1000 FDs after the test
+ * and asserts that all the FD numbers are sequential (i.e. no holes).
+ *
+ * This catches leaks during the test because if the test opened n FDs
+ * and closed none of them, then the first opened file descriptor after the
+ * test finishes will be number n+1 instead of one greater than the first
+ * one (the one opened before running the test). If instead the test failed
+ * to close the k'th descriptor, then this will discover after k
+ * iterations that the next FD opened is non-sequential.
+ *)
+let assert_no_fd_leaked test = fun () ->
+  let first_fd = open_an_fd () in
+  let result = test () in
+  let incremental = is_next_fd_incremental ~repeats:1000 [first_fd] first_fd in
+  incremental && result
+
 let tests = [
-  ("test_echo", test_echo);
-  ("test_echo_in_a_loop", test_echo_in_a_loop);
-  ("test_process_read_idempotent", test_process_read_idempotent);
-  ("test_env_variable", test_env_variable);
-  ("test_process_timeout", test_process_timeout);
+  ("test_echo", assert_no_fd_leaked test_echo);
+  ("test_echo_in_a_loop", assert_no_fd_leaked test_echo_in_a_loop);
+  ("test_process_read_idempotent", assert_no_fd_leaked test_process_read_idempotent);
+  ("test_env_variable", assert_no_fd_leaked test_env_variable);
+  ("test_process_timeout", assert_no_fd_leaked test_process_timeout);
   ("test_process_finishes_within_timeout",
-    test_process_finishes_within_timeout);
-  ("test_future", test_future);
-  ("test_future_is_ready", test_future_is_ready);
-  ("test_stdin_input", test_stdin_input);
-  ("test_entry_point", test_entry_point);
-  ("test_chdir", test_chdir);
+    assert_no_fd_leaked test_process_finishes_within_timeout);
+  ("test_future", assert_no_fd_leaked test_future);
+  ("test_future_is_ready", assert_no_fd_leaked test_future_is_ready);
+  ("test_stdin_input", assert_no_fd_leaked test_stdin_input);
+  ("test_entry_point", assert_no_fd_leaked test_entry_point);
+  ("test_chdir", assert_no_fd_leaked test_chdir);
 ]
 
 let () =

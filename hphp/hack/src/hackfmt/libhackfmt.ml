@@ -94,7 +94,7 @@ let format_tree ?config tree =
   let source_text = SourceText.text (SyntaxTree.text tree) in
   let env = env_from_tree config tree in
   tree
-  |> EditableSyntax.from_tree
+  |> SyntaxTransforms.editable_from_positioned
   |> Hack_format.transform env
   |> Chunk_builder.build
   |> Line_splitter.solve env source_text
@@ -134,7 +134,7 @@ let format_range ?config range tree =
   let source_text = SourceText.text (SyntaxTree.text tree) in
   let env = env_from_tree config tree in
   tree
-  |> EditableSyntax.from_tree
+  |> SyntaxTransforms.editable_from_positioned
   |> Hack_format.transform env
   |> Chunk_builder.build
   |> Line_splitter.solve env ~range source_text
@@ -149,7 +149,7 @@ let format_intervals ?config intervals tree =
   let env = env_from_tree config tree in
   let chunk_groups =
     tree
-    |> EditableSyntax.from_tree
+    |> SyntaxTransforms.editable_from_positioned
     |> Hack_format.transform env
     |> Chunk_builder.build
   in
@@ -200,7 +200,7 @@ let format_at_offset ?config (tree : SyntaxTree.t) offset =
   let env = env_from_tree config tree in
   let chunk_groups =
     tree
-    |> EditableSyntax.from_tree
+    |> SyntaxTransforms.editable_from_positioned
     |> Hack_format.transform env
     |> Chunk_builder.build
   in

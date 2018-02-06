@@ -2696,14 +2696,13 @@ let lower ~source_text ~script env : result =
   }
 
 let from_text (env : env) (source_text : SourceText.t) : result =
-  let open SyntaxTree in
   let tree =
     let env =
       Full_fidelity_parser_env.make
         ~hhvm_compat_mode:env.hhvm_compat_mode
         ~php5_compat_mode:env.php5_compat_mode
         () in
-    make ~env source_text in
+    SyntaxTree.make ~env source_text in
   let () = if env.hhvm_compat_mode then
     let errors =
       ParserErrors.parse_errors
@@ -2729,8 +2728,8 @@ let from_text (env : env) (source_text : SourceText.t) : result =
       Coroutine_lowerer.lower_coroutines script
     else
       script in
-  let fi_mode = if is_php tree then FileInfo.Mphp else
-    let mode_string = String.trim (mode tree) in
+  let fi_mode = if SyntaxTree.is_php tree then FileInfo.Mphp else
+    let mode_string = String.trim (SyntaxTree.mode tree) in
     let mode_word =
       try List.hd (Str.split (Str.regexp " +") mode_string) with
       | _ -> None
@@ -2745,7 +2744,7 @@ let from_text (env : env) (source_text : SourceText.t) : result =
     )
   in
   let env = if env.fi_mode = fi_mode then env else { env with fi_mode } in
-  let env = { env with is_hh_file = is_hack tree } in
+  let env = { env with is_hh_file = SyntaxTree.is_hack tree } in
   (* If we are generating code and this is an hh file or hh syntax is enabled,
    * then we want to inject auto import types into HH namespace during namespace
    * resolution.

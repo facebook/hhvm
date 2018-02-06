@@ -21,7 +21,7 @@ let get_expr src =
   (prefix ^ src)
   |> SourceText.make Relative_path.(create Dummy "<format_node>")
   |> SyntaxTree.make
-  |> EditableSyntax.from_tree
+  |> SyntaxTransforms.editable_from_positioned
   |> (fun node -> EditableSyntax.parentage node (String.length prefix))
   |> List.find (fun node -> EditableSyntax.kind node = ExpressionStatement)
 

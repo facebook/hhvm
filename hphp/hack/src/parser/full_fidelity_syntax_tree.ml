@@ -17,18 +17,12 @@
  *
  *)
 
-module type SC_S = SmartConstructors.SmartConstructors_S
-
-module WithSyntax(Syntax : Syntax_sig.Syntax_S ) = struct
-module WithSmartConstructors (SCI : SC_S with type token = Syntax.Token.t)
-= struct
-
 module SourceText = Full_fidelity_source_text
 module Env = Full_fidelity_parser_env
-module Parser_ = Full_fidelity_parser.WithSyntax(Syntax)
-module Parser = Parser_.WithSmartConstructors(SCI)
 module SyntaxError = Full_fidelity_syntax_error
 module TK = Full_fidelity_token_kind
+
+module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 open Syntax
 
 type t = {
@@ -112,6 +106,7 @@ let remove_duplicates errors equals =
   List.rev result
 
 let make_impl ?(env = Env.default) text =
+  let module Parser = Full_fidelity_parser.WithSyntax(Syntax) in
   let parser = Parser.make env text in
   let (parser, root) = Parser.parse_script parser in
   (* We've got the lexical errors and the parser errors together, both
@@ -192,9 +187,4 @@ let to_json ?with_value tree =
     "version", Hh_json.JSON_String version
   ]
 
-end (* WithSmartConstructors *)
-
-(* For compatibility reasons *)
-module SC = Full_fidelity_syntax_smart_constructors.WithSyntax(Syntax)
-include WithSmartConstructors(SC)
 end (* WithSyntax *)

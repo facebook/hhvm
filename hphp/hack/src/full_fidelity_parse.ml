@@ -212,7 +212,7 @@ let handle_existing_file args filename =
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
   let syntax_tree = SyntaxTree.make source_text in
-  let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
+  let editable = SyntaxTransforms.editable_from_positioned syntax_tree in
 
   (* Parse with the original parser *)
   let (original_errors, original_parse) = Errors.do_

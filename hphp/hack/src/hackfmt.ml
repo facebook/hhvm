@@ -348,12 +348,11 @@ let format_diff_intervals ?config env intervals tree =
   | Invalid_argument s -> raise (InvalidDiff s)
 
 let debug_print ?range ?config text_source =
-  let module EditableSyntax = Full_fidelity_editable_syntax in
   let tree = parse text_source in
   let source_text = SyntaxTree.text tree in
   let range = Option.map range (expand_or_convert_range source_text) in
   let env = Libhackfmt.env_from_config config in
-  let doc = Hack_format.transform env (EditableSyntax.from_tree tree) in
+  let doc = Hack_format.transform env (SyntaxTransforms.editable_from_positioned tree) in
   let chunk_groups = Chunk_builder.build doc in
   Hackfmt_debug.debug env ~range source_text tree doc chunk_groups
 

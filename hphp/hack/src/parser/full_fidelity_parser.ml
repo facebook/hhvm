@@ -12,19 +12,15 @@ module Env = Full_fidelity_parser_env
 module type SC_S = SmartConstructors.SmartConstructors_S
 
 [@@@ocaml.warning "-60"] (* https://caml.inria.fr/mantis/view.php?id=7522 *)
-module WithSyntax(Syntax : Syntax_sig.Syntax_S) :
-  sig
-    module WithSmartConstructors
-    : functor (SCI : SC_S with type token = Syntax.Token.t) -> sig
-      type t
-      val make : Env.t -> Full_fidelity_source_text.t -> t
-      val errors : t -> Full_fidelity_syntax_error.t list
-      val env : t -> Env.t
-      val parse_script : t -> t * Syntax.t
-    end
-  end = struct
-module WithSmartConstructors (SCI : SC_S with type token = Syntax.Token.t)
-= struct
+module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
+module WithSmartConstructors (SCI : SC_S with type token = Syntax.Token.t) :
+sig
+  type t
+  val make : Env.t -> Full_fidelity_source_text.t -> t
+  val errors : t -> Full_fidelity_syntax_error.t list
+  val env : t -> Env.t
+  val parse_script : t -> t * Syntax.t
+end = struct
 
 module Lexer = Full_fidelity_lexer.WithToken(Syntax.Token)
 module SyntaxError = Full_fidelity_syntax_error
@@ -114,4 +110,8 @@ let parse_script parser =
   (parser, node)
 
 end (* WithSmartConstructors *)
+
+module SC = Full_fidelity_syntax_smart_constructors.WithSyntax(Syntax)
+include WithSmartConstructors(SC)
+
 end (* WithSyntax *)

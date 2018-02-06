@@ -14,10 +14,7 @@
  *  new nodes without having to back them with a source text.
  *)
 
-module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_positioned_syntax)
 module EditableToken = Full_fidelity_editable_token
-module PositionedSyntax = Full_fidelity_positioned_syntax
 module SyntaxWithEditableToken = Full_fidelity_syntax.WithToken(EditableToken)
 
 (**
@@ -25,7 +22,7 @@ module SyntaxWithEditableToken = Full_fidelity_syntax.WithToken(EditableToken)
  * than the "positioned" syntax tree, which needs to know the width of the node.
  **)
 
-module EditableSyntaxValue = struct
+module Value = struct
   type t = NoValue
   let to_json value =
     let open Hh_json in
@@ -33,42 +30,21 @@ module EditableSyntaxValue = struct
 end
 
 module EditableSyntax =
-  SyntaxWithEditableToken.WithSyntaxValue(EditableSyntaxValue)
+  SyntaxWithEditableToken.WithSyntaxValue(Value)
 
 module EditableValueBuilder = struct
   let value_from_children _ _ _ _ =
-    EditableSyntaxValue.NoValue
+    Value.NoValue
 
   let value_from_token _ =
-    EditableSyntaxValue.NoValue
+    Value.NoValue
 
   let value_from_syntax _ =
-    EditableSyntaxValue.NoValue
+    Value.NoValue
 end
 
 include EditableSyntax
 include EditableSyntax.WithValueBuilder(EditableValueBuilder)
-
-let rec from_positioned text positioned_node offset =
-  match PositionedSyntax.syntax positioned_node with
-  | PositionedSyntax.Token token ->
-    let editable_token = EditableToken.from_positioned text token offset in
-    let syntax = Token editable_token in
-    make syntax EditableSyntaxValue.NoValue
-  | _ ->
-    let folder (acc, offset) child =
-      let new_child = from_positioned text child offset in
-      let w = PositionedSyntax.full_width child in
-      (new_child :: acc, offset + w) in
-    let kind = PositionedSyntax.kind positioned_node in
-    let positioneds = PositionedSyntax.children positioned_node in
-    let (editables, _) = List.fold_left folder ([], offset) positioneds in
-    let editables = List.rev editables in
-    let syntax = syntax_from_children kind editables in
-    make syntax EditableSyntaxValue.NoValue
-
-let from_tree tree =
-  from_positioned (SyntaxTree.text tree) (SyntaxTree.root tree) 0
 
 let text node =
   let buffer = Buffer.create 100 in

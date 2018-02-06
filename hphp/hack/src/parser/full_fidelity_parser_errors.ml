@@ -461,9 +461,7 @@ let class_constructor_destructor_has_non_void_type hhvm_compat_node node parents
   | _ -> false
 
 (* whether a methodish has duplicate modifiers *)
-let methodish_duplicate_modifier hhvm_compat_mode node =
-  if hhvm_compat_mode then false
-  else
+let methodish_duplicate_modifier node =
   get_modifiers_of_methodish_declaration node
     |> Option.value_map ~default:false ~f:list_contains_duplicate
 
@@ -611,8 +609,8 @@ let xhp_errors node _parents hhvm_compat_mode errors =
       ~close_tag:(text xhp_close_name)) :: errors
   | _ -> errors
 
-let classish_duplicate_modifiers hhvm_compat_mode node =
-  not hhvm_compat_mode && list_contains_duplicate node
+let classish_duplicate_modifiers node =
+  list_contains_duplicate node
 
 let type_contains_array_in_strict is_strict hhvm_compat_mode node =
   not hhvm_compat_mode && is_array node && is_strict
@@ -1071,7 +1069,7 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
       produce_error errors (methodish_multiple_visibility hhvm_compat_mode) node
       SyntaxError.error2017 modifiers in
     let errors =
-      produce_error errors (methodish_duplicate_modifier hhvm_compat_mode) node
+      produce_error errors methodish_duplicate_modifier node
       SyntaxError.error2013 modifiers in
     let fun_body = md.methodish_function_body in
     let errors =
@@ -1810,7 +1808,7 @@ let classish_errors node parents syntax_tree is_hack hhvm_compat_mode namespace_
 
     let errors =
       produce_error errors
-      (classish_duplicate_modifiers hhvm_compat_mode) cd.classish_modifiers
+      classish_duplicate_modifiers cd.classish_modifiers
       SyntaxError.error2031 cd.classish_modifiers in
     let errors =
       produce_error errors

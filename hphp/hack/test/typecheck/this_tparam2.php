@@ -9,12 +9,20 @@
  *
  */
 
-class Preparable implements Awaitable<this> {}
+interface IPreparable<T> {
+  public function run(): Awaitable<T>;
+}
+
+class Preparable implements IPreparable<this> {
+  public async function run(): Awaitable<this> {
+    return $this;
+  }
+}
 
 class MyPreparable extends Preparable {}
 
 class OtherPreparable extends Preparable {}
 
 async function foo(MyPreparable $x): Awaitable<OtherPreparable> {
-  return await $x;
+  return await $x->run();
 }

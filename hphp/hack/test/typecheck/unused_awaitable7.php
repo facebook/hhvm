@@ -1,11 +1,5 @@
 <?hh // strict
 
-class Implementor implements Awaitable<int> {
-  public function getWaitHandle(): WaitHandle<int> {
-    return f()->getWaitHandle();
-  }
-}
-
 async function f(): Awaitable<int> {
   return 1;
 }
@@ -25,7 +19,7 @@ function i(): void {
 
   if ($f instanceof Awaitable) {
   }
-  if ($g instanceof Implementor) {
+  if ($g instanceof Awaitable) {
   }
   if ($h === null) {
   }

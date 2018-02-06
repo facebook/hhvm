@@ -9,8 +9,12 @@
  *
  */
 
-class Foo implements Awaitable<Awaitable<this>> {
-  public function getWaitHandle(): WaitHandle<Awaitable<this>> {
+interface IFoo<T> {
+  public function run(): Awaitable<T>;
+}
+
+class Foo implements IFoo<Awaitable<this>> {
+  public function run(): Awaitable<Awaitable<this>> {
     // UNSAFE
   }
 }

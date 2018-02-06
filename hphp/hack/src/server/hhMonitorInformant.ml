@@ -17,6 +17,7 @@ module type State_loader_prefetcher_sig = sig
   val fetch :
     hhconfig_hash:string ->
     is_tiny:bool ->
+    cache_limit:int ->
     State_loader.mini_state_handle ->
       unit Future.t
 end
@@ -24,7 +25,7 @@ end
 module State_loader_prefetcher_real = struct
 
   (** Main entry point for a new package fetcher process. Exits with 0 on success. *)
-  let main (hhconfig_hash, handle, is_tiny) =
+  let main (hhconfig_hash, handle, is_tiny, cache_limit) =
     EventLogger.init EventLogger.Event_logger_fake 0.0;
     let cached = State_loader.cached_state
       ~mini_state_handle:handle
@@ -37,6 +38,7 @@ module State_loader_prefetcher_real = struct
       ()
     else
       let result = State_loader.fetch_mini_state
+        ~cache_limit
         ~config:(State_loader_config.default_timeouts)
         ~config_hash:hhconfig_hash
         handle in
@@ -47,14 +49,15 @@ module State_loader_prefetcher_real = struct
 
   let prefetch_package_entry = Process.register_entry_point "State_loader_prefetcher_entry" main
 
-  let fetch ~hhconfig_hash ~is_tiny handle =
-    Future.make (Process.run_entry prefetch_package_entry (hhconfig_hash, handle, is_tiny)) ignore
+  let fetch ~hhconfig_hash ~is_tiny ~cache_limit handle =
+    Future.make (Process.run_entry prefetch_package_entry
+      (hhconfig_hash, handle, is_tiny, cache_limit)) ignore
 
 end;;
 
 
 module State_loader_prefetcher_fake = struct
-  let fetch ~hhconfig_hash:_ ~is_tiny:_ _ = Future.of_value ()
+  let fetch ~hhconfig_hash:_ ~is_tiny:_ ~cache_limit:_ _ = Future.of_value ()
 end
 
 
@@ -84,14 +87,16 @@ module Revision_map = struct
           (** Prefetcher *) (unit Future.t) option ref)) Hashtbl.t;
         use_xdb : bool;
         ignore_hh_version : bool;
+        saved_state_cache_limit : int;
       }
 
-    let create use_xdb ignore_hh_version =
+    let create ~saved_state_cache_limit use_xdb ignore_hh_version =
       {
         svn_queries = Hashtbl.create 200;
         xdb_queries = Hashtbl.create 200;
         use_xdb;
         ignore_hh_version;
+        saved_state_cache_limit;
       }
 
     let add_query ~hg_rev root t =
@@ -173,7 +178,10 @@ module Revision_map = struct
           State_loader.mini_state_for_rev = Hg.Svn_rev (xdb_result.Xdb.svn_rev);
           mini_state_everstore_handle = xdb_result.Xdb.everstore_handle;
         } in
-        State_loader_prefetcher.fetch ~hhconfig_hash:xdb_result.Xdb.hhconfig_hash ~is_tiny handle
+        State_loader_prefetcher.fetch
+          ~hhconfig_hash:xdb_result.Xdb.hhconfig_hash
+          ~is_tiny ~cache_limit:t.saved_state_cache_limit
+          handle
       in
       let not_yet_ready =
         (** We use None to represent a not yet ready result. Check again later *)
@@ -299,6 +307,7 @@ module Revision_tracker = struct
     root : Path.t;
     prefetcher : State_prefetcher.t;
     min_distance_restart : int;
+    saved_state_cache_limit : int;
     use_xdb : bool;
     ignore_hh_version : bool;
   }
@@ -343,12 +352,17 @@ module Revision_tracker = struct
    * make it responsible for maintaining its own instance. *)
   type t = instance ref
 
-  let init ~min_distance_restart ~use_xdb ~ignore_hh_version watchman prefetcher root =
+  let init
+  ~min_distance_restart
+  ~use_xdb ~ignore_hh_version
+  ~saved_state_cache_limit
+  watchman prefetcher root =
     let init_settings = {
       watchman = ref watchman;
       prefetcher;
       root;
       min_distance_restart;
+      saved_state_cache_limit;
       use_xdb;
       ignore_hh_version;
   } in
@@ -367,6 +381,7 @@ module Revision_tracker = struct
       inits = init_settings;
       current_base_revision = ref base_svn_rev;
       rev_map = Revision_map.create
+        ~saved_state_cache_limit:init_settings.saved_state_cache_limit
         init_settings.use_xdb
         init_settings.ignore_hh_version;
       state_changes = Queue.create() ;
@@ -686,6 +701,7 @@ let init {
   state_prefetcher;
   use_dummy;
   min_distance_restart;
+  saved_state_cache_limit;
   use_xdb;
   ignore_hh_version;
 } =
@@ -714,6 +730,7 @@ let init {
           ~min_distance_restart
           ~use_xdb
           ~ignore_hh_version
+          ~saved_state_cache_limit
           (Watchman.Watchman_alive watchman_env)
           (** TODO: Put the prefetcher here. *)
           state_prefetcher root;

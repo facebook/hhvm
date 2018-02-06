@@ -34,6 +34,7 @@ type t = {
   search_chunk_size: int;
   io_priority: int;
   cpu_priority: int;
+  saved_state_cache_limit: int;
   shm_dirs: string list;
   start_with_recorder_on : bool;
   state_loader_timeouts : State_loader_config.timeouts;
@@ -67,6 +68,7 @@ let default = {
   search_chunk_size = 0;
   io_priority = 7;
   cpu_priority = 10;
+  saved_state_cache_limit = 20;
   shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir;];
   max_workers = GlobalConfig.nbr_procs;
   max_bucket_size = Bucket.max_size ();
@@ -157,6 +159,8 @@ let load_ fn ~silent =
     ~default:default.io_priority config in
   let cpu_priority = int_ "cpu_priority"
     ~default:default.cpu_priority config in
+  let saved_state_cache_limit = int_ "saved_state_cache_limit"
+    ~default:default.saved_state_cache_limit config in
   let shm_dirs = string_list
     ~delim:(Str.regexp ",")
     "shm_dirs"
@@ -193,6 +197,7 @@ let load_ fn ~silent =
     search_chunk_size;
     io_priority;
     cpu_priority;
+    saved_state_cache_limit;
     shm_dirs;
     max_workers;
     max_bucket_size;

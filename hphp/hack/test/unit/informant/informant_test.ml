@@ -62,6 +62,7 @@ let test_informant_restarts_significant_move temp_dir =
     min_distance_restart = 100;
     use_dummy = false;
     use_xdb = true;
+    saved_state_cache_limit = 20;
     ignore_hh_version = false;
   } in
   let report = HhMonitorInformant.report
@@ -173,6 +174,7 @@ let test_informant_restarts_significant_move_delayed temp_dir =
     min_distance_restart = 100;
     use_dummy = false;
     use_xdb = false;
+    saved_state_cache_limit = 20;
     ignore_hh_version = false;
   } in
   let report = HhMonitorInformant.report
@@ -225,6 +227,7 @@ let test_informant_no_saved_state_no_restart temp_dir =
     min_distance_restart = 100;
     use_dummy = false;
     use_xdb = true;
+    saved_state_cache_limit = 20;
     ignore_hh_version = false;
   } in
   let report = HhMonitorInformant.report
@@ -259,6 +262,7 @@ let test_informant_xdb_saved_state_too_far temp_dir =
     min_distance_restart = 100;
     use_dummy = false;
     use_xdb = true;
+    saved_state_cache_limit = 20;
     ignore_hh_version = false;
   } in
   let report = HhMonitorInformant.report
@@ -292,6 +296,7 @@ let test_repo_starts_midupdate temp_dir =
     allow_subscriptions = true;
     use_dummy = false;
     use_xdb = false;
+    saved_state_cache_limit = 20;
     ignore_hh_version = false;
   } in
   let should_start_first_server =
@@ -325,6 +330,7 @@ let test_watcher_in_unknown_state temp_dir =
     allow_subscriptions = true;
     use_dummy = false;
     use_xdb = false;
+    saved_state_cache_limit = 20;
     ignore_hh_version = false;
   } in
   let should_start_first_server =

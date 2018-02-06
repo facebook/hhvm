@@ -12,6 +12,8 @@ module Types = struct
     (** Don't trigger a server restart if the distance between two
      * revisions we are moving between is less than this. *)
     min_distance_restart : int;
+    (** Keep at most this many saved states, and delete older ones. *)
+    saved_state_cache_limit : int;
     (** Informant should check the XDB table for a saved state when
      * making a decision. *)
     use_xdb : bool;

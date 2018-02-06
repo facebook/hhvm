@@ -23,6 +23,7 @@ let cached_state
 exception Not_supported
 
 let fetch_mini_state
+  ~cache_limit:_
   ~config:_
   ~config_hash:_
   _ = raise Not_supported

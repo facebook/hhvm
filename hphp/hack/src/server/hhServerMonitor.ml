@@ -88,6 +88,8 @@ let monitor_daemon_main (options: ServerArgs.options) =
       use_dummy = local_config.ServerLocalConfig.use_dummy_informant;
       min_distance_restart =
         local_config.ServerLocalConfig.informant_min_distance_restart;
+      saved_state_cache_limit =
+        local_config.ServerLocalConfig.saved_state_cache_limit;
       use_xdb = local_config.ServerLocalConfig.informant_use_xdb;
       ignore_hh_version = ServerArgs.ignore_hh_version options;
     } in

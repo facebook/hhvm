@@ -4874,10 +4874,10 @@ and call_ ~expected pos env fty el uel =
     begin match Env.env_reactivity env, ft.ft_reactive with
     (* error if reactive function is calling into something non-strictly-reactive *)
     | Reactive, (Shallow | Local | Nonreactive) ->
-      Errors.nonreactive_function_call pos
+      Errors.nonreactive_function_call pos (Reason.to_pos r2)
     (* error if shallow reactive function is calling into non-reactive *)
     | Shallow, Nonreactive ->
-      Errors.nonreactive_call_from_shallow pos
+      Errors.nonreactive_call_from_shallow pos (Reason.to_pos r2)
     | _ -> ()
     end;
 

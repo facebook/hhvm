@@ -3059,15 +3059,17 @@ let invalid_return_disposable pos =
     "Return expression must be new disposable in function marked <<__ReturnDisposable>>" in
   add Typing.invalid_return_disposable pos msg
 
-let nonreactive_function_call pos =
-  let msg =
-    "Reactive functions can only call other reactive functions" in
-  add Typing.nonreactive_function_call pos msg
+let nonreactive_function_call pos decl_pos =
+  add_list Typing.nonreactive_function_call [
+    pos, "Reactive functions can only call other reactive functions.";
+    decl_pos, "This function is not reactive."
+  ]
 
-let nonreactive_call_from_shallow pos =
-  let msg =
-    "Shallow reactive functions cannot call non-reactive functions" in
-  add Typing.nonreactive_call_from_shallow pos msg
+let nonreactive_call_from_shallow pos decl_pos =
+  add_list Typing.nonreactive_call_from_shallow [
+      pos, "Shallow reactive functions cannot call non-reactive functions.";
+      decl_pos, "This function is not reactive."
+  ]
 
 let nonreactive_append pos =
   let msg = "Cannot append to a Hack Collection types in a reactive context" in

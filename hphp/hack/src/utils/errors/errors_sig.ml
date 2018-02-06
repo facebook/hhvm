@@ -470,10 +470,10 @@ module type S = sig
   val inout_params_ret_by_ref : Pos.t -> Pos.t -> unit
   val xhp_required : Pos.t -> string -> (Pos.t * string) list -> unit
   val illegal_xhp_child : Pos.t -> (Pos.t * string) list -> unit
-  val nonreactive_function_call : Pos.t -> unit
+  val nonreactive_function_call : Pos.t -> Pos.t -> unit
   val nonreactive_append : Pos.t -> unit
   val inout_argument_bad_expr : Pos.t -> unit
   val inout_argument_bad_type : Pos.t -> (Pos.t * string) list -> unit
-  val nonreactive_call_from_shallow : Pos.t -> unit
+  val nonreactive_call_from_shallow : Pos.t -> Pos.t -> unit
   val illegal_destructor : Pos.t -> unit
 end

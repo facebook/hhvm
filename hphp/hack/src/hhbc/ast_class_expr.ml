@@ -48,7 +48,11 @@ let get_original_parent_class_name ~check_traits ~resolve_self scope =
   match Ast_scope.Scope.get_class scope with
   | None -> None
   | Some cd ->
-    if (cd.Ast.c_kind = Ast.Ctrait && not check_traits) || not resolve_self
+    (* Parent doesn't make sense on an interface, so we treat
+      "parent" as the literal class id to grab from *)
+    if cd.Ast.c_kind = Ast.Cinterface then Some SN.Classes.cParent else
+    if (cd.Ast.c_kind = Ast.Ctrait && not check_traits)
+      || not resolve_self
     then None
     else
     let class_name = snd cd.Ast.c_name in

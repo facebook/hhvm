@@ -1,5 +1,4 @@
 spec/tests/constants/core_predefined_constants2.php
-spec/tests/expressions/postfix_operators/scope_resolution_operator.php
 spec/tests/functions/variable_functions.php
 spec/tests/lexical_structure/tokens/heredoc_string_literals.php
 spec/tests/lexical_structure/tokens/string_literals.php

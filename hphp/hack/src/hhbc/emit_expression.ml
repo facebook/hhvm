@@ -1453,6 +1453,11 @@ and is_packed_init ?(hack_arr_compat=true) es =
          and should be emitted via NewArray *)
       | A.AFkvalue ((_, A.String (_, k)), _) when not hack_arr_compat ->
         (try int_of_string k = i with Failure _ -> false)
+      (* True and False are considered 1 and 0, respectively *)
+      | A.AFkvalue ((_, A.True), _) ->
+        i = 1
+      | A.AFkvalue ((_, A.False), _) ->
+        i = 0
       | A.AFvalue _ ->
         true
       | _ -> false)

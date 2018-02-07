@@ -1,0 +1,5 @@
+File "trait_construct_override.php", line 17, characters 19-29:
+Class MyChild does not initialize all of its members; member is not always initialized.
+Make sure you systematically set $this->member when the method __construct is called.
+Alternatively, you can define the member as optional (?...)
+ (NastCheck[3015])

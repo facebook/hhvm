@@ -81,6 +81,10 @@ module Env = struct
     let props = List.fold_left c.c_vars
       ~f:(DICheck.prop_needs_init adder) ~init:SSet.empty in
     let props = DICheck.parent_props tenv.Typing_env.decl_env props c in
+    (* If we define our own constructor, we need to pretend any traits we use
+     * did *not* define a constructor, because they are not reachable through
+     * parent::__construct or similar functions. *)
+    let props = DICheck.trait_props tenv.Typing_env.decl_env props c in
     let props = DICheck.parent tenv.Typing_env.decl_env props c in
     { methods = methods; props = props; tenv = tenv }
 

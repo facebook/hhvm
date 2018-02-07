@@ -52,7 +52,7 @@ let prop_needs_init add_to_acc acc cv =
   end
 
 let parent_props decl_env acc c =
-  List.fold_left (c.c_extends @ c.c_uses) ~f:begin fun acc parent ->
+  List.fold_left c.c_extends ~f:begin fun acc parent ->
     match parent with
     | _, Happly ((_, parent), _) ->
       let tc = Decl_env.get_class_dep decl_env parent in
@@ -62,6 +62,32 @@ let parent_props decl_env acc c =
           SSet.union members acc)
     | _ -> acc
   end ~init:acc
+
+let trait_props decl_env props c =
+  List.fold_left c.c_uses ~f:begin fun acc -> function
+    | _, Happly ((_, trait), _) -> begin
+      let class_ = Decl_env.get_class_dep decl_env trait in
+      match class_ with
+      | None -> acc
+      | Some { dc_construct = cstr; dc_deferred_init_members = members; _ } -> begin
+        (* If our current class defines its own constructor, completely ignore
+         * the fact that the trait may have had one defined and merge in all of
+         * its members.
+         * If the curr. class does not have its own constructor, only fold in
+         * the trait members if it would not have had its own constructor when
+         * defining `dc_deferred_init_members`. See logic in `class_` for
+         * Ast.Cabstract to see where this deviated for traits.
+         *)
+        match fst cstr with
+          | None -> SSet.union members acc
+          | Some cstr when cstr.elt_origin <> trait || cstr.elt_abstract ->
+              SSet.union members acc
+          | _ when c.c_constructor <> None -> SSet.union members acc
+          | _ -> acc
+      end
+    end
+    | _ -> acc
+  end ~init:props
 
 (* return a tuple of the private init-requiring props of the class
  * and the other init-requiring props of the class and its ancestors *)
@@ -81,13 +107,15 @@ let classify_props_for_decl decl_env c =
   priv_props, props
 
 let class_ ~has_own_cstr decl_env c =
-  if not has_own_cstr && (c.c_kind = Ast.Ctrait || c.c_kind = Ast.Cabstract)
-  then
-    (* private properties cannot be initialized without a constructor *)
+  match c.c_kind with
+  | Ast.Cabstract when not has_own_cstr ->
     let priv_props, props = classify_props_for_decl decl_env c in
-    if priv_props <> SSet.empty && (c.c_kind = Ast.Cabstract) then
+    if priv_props <> SSet.empty then
       (* XXX: should priv_props be checked for a trait?
-       *  see chown_privates in typing_inherit *)
+       * see chown_privates in typing_inherit *)
       Errors.constructor_required c.c_name priv_props;
     SSet.union priv_props props
-  else SSet.empty
+  | Ast.Ctrait ->
+    let priv_props, props = classify_props_for_decl decl_env c in
+    SSet.union priv_props props
+  | _ -> SSet.empty

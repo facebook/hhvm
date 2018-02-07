@@ -30,6 +30,8 @@
 
 open Full_fidelity_syntax_type
 module SyntaxKind = Full_fidelity_syntax_kind
+module TokenKind = Full_fidelity_token_kind
+module TriviaKind = Full_fidelity_trivia_kind
 module Operator = Full_fidelity_operator
 
 module WithToken(Token: TokenType) = struct
@@ -406,7 +408,7 @@ module WithToken(Token: TokenType) = struct
     let is_separable_prefix node =
       match syntax node with
       | Token t -> begin
-        Full_fidelity_token_kind.(match Token.kind t with
+        TokenKind.(match Token.kind t with
         | PlusPlus | MinusMinus -> false
         | _ -> true) end
       | _ -> true
@@ -429,27 +431,30 @@ module WithToken(Token: TokenType) = struct
         end
       | _ -> false
 
+    let has_leading_end_of_line token =
+      Hh_core.List.exists (Token.leading token)
+        ~f:(fun trivia ->  Token.Trivia.kind trivia = TriviaKind.EndOfLine)
 
-    let is_semicolon  = is_specific_token Full_fidelity_token_kind.Semicolon
-    let is_name       = is_specific_token Full_fidelity_token_kind.Name
-    let is_construct  = is_specific_token Full_fidelity_token_kind.Construct
-    let is_destruct   = is_specific_token Full_fidelity_token_kind.Destruct
-    let is_static     = is_specific_token Full_fidelity_token_kind.Static
-    let is_private    = is_specific_token Full_fidelity_token_kind.Private
-    let is_public     = is_specific_token Full_fidelity_token_kind.Public
-    let is_protected  = is_specific_token Full_fidelity_token_kind.Protected
-    let is_abstract   = is_specific_token Full_fidelity_token_kind.Abstract
-    let is_final      = is_specific_token Full_fidelity_token_kind.Final
-    let is_async      = is_specific_token Full_fidelity_token_kind.Async
-    let is_coroutine  = is_specific_token Full_fidelity_token_kind.Coroutine
-    let is_void       = is_specific_token Full_fidelity_token_kind.Void
-    let is_left_brace = is_specific_token Full_fidelity_token_kind.LeftBrace
-    let is_ellipsis   = is_specific_token Full_fidelity_token_kind.DotDotDot
-    let is_comma      = is_specific_token Full_fidelity_token_kind.Comma
-    let is_array      = is_specific_token Full_fidelity_token_kind.Array
-    let is_var        = is_specific_token Full_fidelity_token_kind.Var
-    let is_ampersand  = is_specific_token Full_fidelity_token_kind.Ampersand
-    let is_inout      = is_specific_token Full_fidelity_token_kind.Inout
+    let is_semicolon  = is_specific_token TokenKind.Semicolon
+    let is_name       = is_specific_token TokenKind.Name
+    let is_construct  = is_specific_token TokenKind.Construct
+    let is_destruct   = is_specific_token TokenKind.Destruct
+    let is_static     = is_specific_token TokenKind.Static
+    let is_private    = is_specific_token TokenKind.Private
+    let is_public     = is_specific_token TokenKind.Public
+    let is_protected  = is_specific_token TokenKind.Protected
+    let is_abstract   = is_specific_token TokenKind.Abstract
+    let is_final      = is_specific_token TokenKind.Final
+    let is_async      = is_specific_token TokenKind.Async
+    let is_coroutine  = is_specific_token TokenKind.Coroutine
+    let is_void       = is_specific_token TokenKind.Void
+    let is_left_brace = is_specific_token TokenKind.LeftBrace
+    let is_ellipsis   = is_specific_token TokenKind.DotDotDot
+    let is_comma      = is_specific_token TokenKind.Comma
+    let is_array      = is_specific_token TokenKind.Array
+    let is_var        = is_specific_token TokenKind.Var
+    let is_ampersand  = is_specific_token TokenKind.Ampersand
+    let is_inout      = is_specific_token TokenKind.Inout
 
     let fold_over_children f acc syntax =
       match syntax with

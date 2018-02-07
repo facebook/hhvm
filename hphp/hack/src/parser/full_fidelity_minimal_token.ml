@@ -17,7 +17,6 @@
 
 module TokenKind = Full_fidelity_token_kind
 module Trivia = Full_fidelity_minimal_trivia
-module TriviaKind = Full_fidelity_trivia_kind
 
 type t = {
   kind: TokenKind.t;

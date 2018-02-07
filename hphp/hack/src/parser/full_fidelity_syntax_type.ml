@@ -59,9 +59,11 @@
  *)
 
 module type TokenType = sig
+  module Trivia : Lexable_trivia_sig.LexableTrivia_S
   type t
   val kind: t -> Full_fidelity_token_kind.t
   val to_json: t -> Hh_json.json
+  val leading : t -> Trivia.t list
 end
 
 module type SyntaxValueType = sig

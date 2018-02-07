@@ -9,7 +9,6 @@
  *)
 
 module PositionedSyntax = Full_fidelity_positioned_syntax
-module FFUtils = Full_fidelity_syntax_utilities.WithSyntax(PositionedSyntax)
 open FfpAutocompleteContextParser
 open AutocompleteTypes
 open Hh_core
@@ -118,7 +117,11 @@ let get_same_file_definitions (positioned_tree:PositionedSyntax.t)
     classes, interfaces, (PositionedSyntax.text classish_name)::traits
   | _ -> (classes, interfaces, traits)
   in
-  FFUtils.fold aux ([], [], []) positioned_tree
+  let rec fold acc node =
+    let acc = aux acc node in
+    List.fold_left ~f:fold ~init:acc (PositionedSyntax.children node)
+  in
+  fold ([], [], []) positioned_tree
 
 let get_globals (context:context) (input:string) (positioned_tree:PositionedSyntax.t)
   : complete_autocomplete_result list =

@@ -63,10 +63,6 @@ module WithExpressionAndStatementAndTypeParser
 
   (* Tokens *)
 
-  let has_leading_end_of_line token =
-    Hh_core.List.exists (Token.leading token)
-      ~f:(fun trivia ->  Token.Trivia.kind trivia = TriviaKind.EndOfLine)
-
   let with_type_parser : 'a . t -> (TypeParser.t -> TypeParser.t * 'a) -> t * 'a
   = fun parser f ->
     let type_parser =
@@ -990,7 +986,7 @@ module WithExpressionAndStatementAndTypeParser
        * we should be parsing a methodish. Throw an error, process the token
        * as an extra, and keep going. *)
       | _, (Async | Coroutine | Function)
-        when not (has_leading_end_of_line next_token) ->
+        when not (Syntax.has_leading_end_of_line next_token) ->
         let parser = with_error parser SyntaxError.error1056
           ~on_whole_token:true in
         let parser = skip_and_log_unexpected_token parser

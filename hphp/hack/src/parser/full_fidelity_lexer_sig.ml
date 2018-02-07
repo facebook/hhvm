@@ -48,5 +48,3 @@ module WithToken(Token : Lexable_token_sig.LexableToken_S) = struct
     val rescan_halt_compiler : t -> Token.t -> t * Token.t
   end (* Lexer_S *)
 end (* WithToken *)
-
-module type MinimalLexer_S = WithToken(Full_fidelity_minimal_token).Lexer_S

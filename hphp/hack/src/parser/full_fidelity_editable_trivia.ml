@@ -22,17 +22,68 @@ type t = {
   text: string
 }
 
-let make_whitespace text =
-  { kind = TriviaKind.WhiteSpace; text }
+let make_ignore_error source_text offset width =
+  { kind = TriviaKind.IgnoreError
+  ; text = SourceText.sub source_text offset width
+  }
 
-let make_eol text =
-  { kind = TriviaKind.EndOfLine; text }
+let make_unsafe source_text offset width =
+  { kind = TriviaKind.Unsafe
+  ; text = SourceText.sub source_text offset width
+  }
 
-let make_single_line_comment text =
-  { kind = TriviaKind.SingleLineComment; text }
+let make_unsafe_expression source_text offset width =
+  { kind = TriviaKind.UnsafeExpression
+  ; text = SourceText.sub source_text offset width
+  }
 
-let make_delimited_comment text =
-  { kind = TriviaKind.DelimitedComment; text }
+let make_extra_token_error source_text offset width =
+  { kind = TriviaKind.ExtraTokenError
+  ; text = SourceText.sub source_text offset width
+  }
+
+let make_fallthrough source_text offset width =
+  { kind = TriviaKind.FallThrough
+  ; text = SourceText.sub source_text offset width
+  }
+
+let make_fix_me source_text offset width =
+  { kind = TriviaKind.FixMe
+  ; text = SourceText.sub source_text offset width
+  }
+
+let make_whitespace source_text offset width =
+  { kind = TriviaKind.WhiteSpace
+  ; text = SourceText.sub source_text offset width
+  }
+
+let make_eol source_text offset width =
+  { kind = TriviaKind.EndOfLine
+  ; text = SourceText.sub source_text offset width
+  }
+
+let make_single_line_comment source_text offset width =
+  { kind = TriviaKind.SingleLineComment
+  ; text = SourceText.sub source_text offset width
+  }
+
+let make_delimited_comment source_text offset width =
+  { kind = TriviaKind.DelimitedComment
+  ; text = SourceText.sub source_text offset width
+  }
+
+let make_after_halt_compiler source_text offset width =
+  { kind = TriviaKind.AfterHaltCompiler
+  ; text = SourceText.sub source_text offset width
+  }
+
+(* HackFormat is using this to create trivia. It's deeply manipulating strings
+ * so it was easier to create this helper function to avoid ad-hoc
+ * SourceText construction.*)
+let create_delimited_comment text =
+  { kind = TriviaKind.DelimitedComment
+  ; text
+  }
 
 let width trivia =
   String.length trivia.text

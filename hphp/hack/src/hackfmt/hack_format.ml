@@ -2836,8 +2836,9 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
             else prefix_space_count str
           in
           let len = String.length str - start_index in
-          let dc = Trivia.make_delimited_comment @@
-            String.sub str start_index len in
+          let dc =
+            Trivia.create_delimited_comment @@ String.sub str start_index len
+          in
           Concat [
             Ignore ("\n", 1);
             Newline;

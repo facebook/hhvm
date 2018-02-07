@@ -13,9 +13,7 @@ module Syntax = Full_fidelity_editable_positioned_syntax
 module Token = Syntax.Token
 module TokenKind = Full_fidelity_token_kind
 module SyntaxKind = Full_fidelity_syntax_kind
-module Utils = Full_fidelity_syntax_utilities.WithSyntax(Syntax)
 open Syntax
-open Utils
 
 (*
  We have a lambda in hand, and the chain of parents in its parse tree.
@@ -64,12 +62,15 @@ work correctly. String identity on locals doesn't really work here.
 *)
 
 let fold_no_lambdas folder acc node =
-  let predicate node =
-    match kind node with
-    | SyntaxKind.LambdaExpression
-    | SyntaxKind.AnonymousFunction -> false
-    | _ -> true in
-  fold_where folder predicate acc node
+  let rec aux acc node =
+    if is_lambda_expression node || is_anonymous_function node
+    then
+      acc
+    else
+      let acc = folder acc node in
+      List.fold_left ~f:aux ~init:acc (Syntax.children node)
+  in
+  aux acc node
 
 let token_to_string node =
   match syntax node with

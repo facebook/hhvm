@@ -10,7 +10,6 @@
 module Syntax = Full_fidelity_editable_positioned_syntax
 module CoroutineSyntax = Coroutine_syntax
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
-module Utils = Full_fidelity_syntax_utilities.WithSyntax(Syntax)
 
 open Syntax
 open CoroutineSyntax
@@ -41,8 +40,12 @@ let matches_suspend node =
   | _ -> false
 
 (* Determines if a function contains no suspend statements *)
-let has_no_suspends body = not @@
-  Utils.fold (fun a n -> a || matches_suspend n) false body
+let has_no_suspends body =
+  (* This depth-first traversal to see whether anything matches_suspend. *)
+  let rec any_matches_suspend node =
+    matches_suspend node || List.exists any_matches_suspend (Syntax.children node)
+  in
+  not @@ any_matches_suspend body
 
 (**
  * lambda bodies implicitly return if not a CompoundStatement
@@ -125,23 +128,25 @@ let rec is_in_tail_position_truncated node parents =
 let only_tail_call_suspends body =
   (* Checks that all suspends in a return statement are tail calls *)
   let return_helper body =
-    let folder acc node parents =
-      if matches_suspend node
-      then acc && is_in_tail_position_truncated node parents
-      else acc
+    let rec any_non_tail_suspend ps n =
+      let not_in_tail_suspend =
+        matches_suspend n && not (is_in_tail_position_truncated n ps)
+      in
+      not (not_in_tail_suspend) &&
+        List.for_all (any_non_tail_suspend (n :: ps)) (Syntax.children n)
     in
-    Utils.parented_fold_pre folder true body
+    any_non_tail_suspend [] body
   in
-  let rec aux acc node =
-    if matches_suspend node
-    then false
-    else
+  let rec aux node =
+    not (matches_suspend node)
+    &&
       match syntax node with
       (* All suspends in the try block are not tail calls *)
       | TryStatement { try_compound_statement; _ } ->
-        acc && has_no_suspends try_compound_statement
-      | ReturnStatement {return_expression; _ } -> acc && return_helper return_expression
-      | _ -> List.fold_left aux acc (Syntax.children node)
+        has_no_suspends try_compound_statement
+      | ReturnStatement {return_expression; _ } ->
+        return_helper return_expression
+      | _ -> List.for_all aux (Syntax.children node)
   in
   let body =
     match syntax body with
@@ -153,7 +158,7 @@ let only_tail_call_suspends body =
       fix_up_lambda_body lambda_body
     | _ -> body
   in
-  aux true body
+  aux body
 
 (* Returns pair:
     - n elements from the beginning of the list in reverse order

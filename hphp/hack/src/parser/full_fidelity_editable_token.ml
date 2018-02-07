@@ -14,26 +14,26 @@
  *)
 
 module PositionedToken = Full_fidelity_positioned_token
-module EditableTrivia = Full_fidelity_editable_trivia
+module Trivia = Full_fidelity_editable_trivia
 module SourceText = Full_fidelity_source_text
 module TokenKind = Full_fidelity_token_kind
 
 type t = {
   kind: TokenKind.t;
   text: string;
-  leading: EditableTrivia.t list;
-  trailing: EditableTrivia.t list
+  leading: Trivia.t list;
+  trailing: Trivia.t list
 }
 
 let make kind text leading trailing =
   { kind; text; leading; trailing }
 
 let leading_width token =
-  let folder sum t = sum + (EditableTrivia.width t) in
+  let folder sum t = sum + (Trivia.width t) in
   List.fold_left folder 0 token.leading
 
 let trailing_width token =
-  let folder sum t = sum + (EditableTrivia.width t) in
+  let folder sum t = sum + (Trivia.width t) in
   List.fold_left folder 0 token.trailing
 
 let width token =
@@ -75,10 +75,10 @@ let with_kind token kind =
   { token with kind }
 
 let leading_text token =
-  EditableTrivia.text_from_trivia_list (leading token)
+  Trivia.text_from_trivia_list (leading token)
 
 let trailing_text token =
-  EditableTrivia.text_from_trivia_list (trailing token)
+  Trivia.text_from_trivia_list (trailing token)
 
 let full_text token =
   (leading_text token) ^ (text token) ^ (trailing_text token)
@@ -86,10 +86,10 @@ let full_text token =
 let from_positioned source_text positioned_token offset =
   let lw = PositionedToken.leading_width positioned_token in
   let w = PositionedToken.width positioned_token in
-  let leading = EditableTrivia.from_positioned_list source_text
+  let leading = Trivia.from_positioned_list source_text
     (PositionedToken.leading positioned_token) offset in
   let text = SourceText.sub source_text (offset + lw) w in
-  let trailing = EditableTrivia.from_positioned_list source_text
+  let trailing = Trivia.from_positioned_list source_text
     (PositionedToken.trailing positioned_token) (offset + lw + w) in
   make (PositionedToken.kind positioned_token) text leading trailing
 
@@ -98,5 +98,5 @@ let to_json token =
   JSON_Object [
     ("kind", JSON_String (TokenKind.to_string token.kind));
     ("text", JSON_String token.text);
-    ("leading", JSON_Array (List.map EditableTrivia.to_json token.leading));
-    ("trailing", JSON_Array (List.map EditableTrivia.to_json token.trailing)) ]
+    ("leading", JSON_Array (List.map Trivia.to_json token.leading));
+    ("trailing", JSON_Array (List.map Trivia.to_json token.trailing)) ]

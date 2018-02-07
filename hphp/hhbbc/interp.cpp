@@ -772,11 +772,8 @@ void sameImpl(ISS& env) {
   push(env, std::move(pair.first));
 }
 
-}
-
 template<class Same, class JmpOp>
-void group(ISS& env, const Same& same, const JmpOp& jmp) {
-
+void sameJmpImpl(ISS& env, const Same& same, const JmpOp& jmp) {
   auto bail = [&] { impl(env, same, jmp); };
 
   constexpr auto NSame = Same::op == Op::NSame;
@@ -873,6 +870,21 @@ void group(ISS& env, const Same& same, const JmpOp& jmp) {
   env.propagate(jmp.target, &env.state);
   env.state = std::move(save);
   sameIsJmpTarget ? handle_differ() : handle_same();
+}
+
+bc::JmpNZ invertJmp(const bc::JmpZ& jmp) { return bc::JmpNZ { jmp.target }; }
+bc::JmpZ invertJmp(const bc::JmpNZ& jmp) { return bc::JmpZ { jmp.target }; }
+
+}
+
+template<class Same, class JmpOp>
+void group(ISS& env, const Same& same, const JmpOp& jmp) {
+  sameJmpImpl(env, same, jmp);
+}
+
+template<class Same, class JmpOp>
+void group(ISS& env, const Same& same, const bc::Not&, const JmpOp& jmp) {
+  sameJmpImpl(env, same, invertJmp(jmp));
 }
 
 void in(ISS& env, const bc::Same&)  { sameImpl<false>(env); }
@@ -1286,12 +1298,12 @@ void typeTestPropagate(ISS& env, Type valTy, Type testTy,
   push(env, std::move(takenOnSuccess ? failTy : testTy));
 }
 
-}
-
 // After a StaticLocCheck, we know the local is bound on the true path,
 // and not changed on the false path.
 template<class JmpOp>
-void group(ISS& env, const bc::StaticLocCheck& slc, const JmpOp& jmp) {
+void staticLocCheckJmpImpl(ISS& env,
+                           const bc::StaticLocCheck& slc,
+                           const JmpOp& jmp) {
   auto const takenOnInit = jmp.op == Op::JmpNZ;
   auto save = env.state;
 
@@ -1319,9 +1331,28 @@ void group(ISS& env, const bc::StaticLocCheck& slc, const JmpOp& jmp) {
   }
 }
 
+}
+
+template<class JmpOp>
+void group(ISS& env, const bc::StaticLocCheck& slc, const JmpOp& jmp) {
+  staticLocCheckJmpImpl(env, slc, jmp);
+}
+
+template<class JmpOp>
+void group(ISS& env, const bc::StaticLocCheck& slc,
+           const bc::Not&, const JmpOp& jmp) {
+  staticLocCheckJmpImpl(env, slc, invertJmp(jmp));
+}
+
 template<class JmpOp>
 void group(ISS& env, const bc::IsTypeL& istype, const JmpOp& jmp) {
   isTypeHelper(env, istype.subop2, istype.loc1, istype, jmp);
+}
+
+template<class JmpOp>
+void group(ISS& env, const bc::IsTypeL& istype,
+           const bc::Not&, const JmpOp& jmp) {
+  isTypeHelper(env, istype.subop2, istype.loc1, istype, invertJmp(jmp));
 }
 
 // If we duplicate a value, and then test its type and Jmp based on that result,
@@ -1334,6 +1365,14 @@ void group(ISS& env, const bc::IsTypeC& istype, const JmpOp& jmp) {
   isTypeHelper(env, istype.subop1, location, istype, jmp);
 }
 
+template<class JmpOp>
+void group(ISS& env, const bc::IsTypeC& istype,
+           const bc::Not& negate, const JmpOp& jmp) {
+  auto const location = topStkEquiv(env);
+  if (location == NoLocalId) return impl(env, istype, negate, jmp);
+  isTypeHelper(env, istype.subop1, location, istype, invertJmp(jmp));
+}
+
 // If we do an IsUninit check and then Jmp based on the check, one branch will
 // be the original type minus the Uninit, and the other will be
 // Uninit. (IsUninit does not pop the value).
@@ -1341,6 +1380,12 @@ template<class JmpOp>
 void group(ISS& env, const bc::IsUninit&, const JmpOp& jmp) {
   auto const valTy = popCU(env);
   typeTestPropagate(env, valTy, TUninit, remove_uninit(valTy), jmp);
+}
+
+template<class JmpOp>
+void group(ISS& env, const bc::IsUninit&, const bc::Not&, const JmpOp& jmp) {
+  auto const valTy = popCU(env);
+  typeTestPropagate(env, valTy, TUninit, remove_uninit(valTy), invertJmp(jmp));
 }
 
 // A MemoGet, followed by an IsUninit, followed by a Jmp, can have the type of
@@ -1359,10 +1404,12 @@ void group(ISS& env, const bc::MemoGet& get, const bc::IsUninit& /*isuninit*/,
   typeTestPropagate(env, popCU(env), TUninit, memoizeImplRetType(env), jmp);
 }
 
+namespace {
+
 template<class JmpOp>
-void group(ISS& env,
-           const bc::InstanceOfD& inst,
-           const JmpOp& jmp) {
+void instanceOfJmpImpl(ISS& env,
+                       const bc::InstanceOfD& inst,
+                       const JmpOp& jmp) {
   auto bail = [&] { impl(env, inst, jmp); };
 
   auto const locId = topStkEquiv(env);
@@ -1392,6 +1439,23 @@ void group(ISS& env,
   auto const pre  = [&] (Type t) { return result(t, negate); };
   auto const post = [&] (Type t) { return result(t, !negate); };
   refineLocation(env, locId, pre, jmp.target, post);
+}
+
+}
+
+template<class JmpOp>
+void group(ISS& env,
+           const bc::InstanceOfD& inst,
+           const JmpOp& jmp) {
+  instanceOfJmpImpl(env, inst, jmp);
+}
+
+template<class JmpOp>
+void group(ISS& env,
+           const bc::InstanceOfD& inst,
+           const bc::Not&,
+           const JmpOp& jmp) {
+  instanceOfJmpImpl(env, inst, invertJmp(jmp));
 }
 
 void in(ISS& env, const bc::Switch& op) {
@@ -3992,6 +4056,15 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
   switch (o1) {
   case Op::InstanceOfD:
     switch (o2) {
+    case Op::Not:
+      switch (o3) {
+      case Op::JmpZ:
+        return group(env, it, it[0].InstanceOfD, it[1].Not, it[2].JmpZ);
+      case Op::JmpNZ:
+        return group(env, it, it[0].InstanceOfD, it[1].Not, it[2].JmpNZ);
+      default: break;
+      }
+      break;
     case Op::JmpZ:
       return group(env, it, it[0].InstanceOfD, it[1].JmpZ);
     case Op::JmpNZ:
@@ -4001,6 +4074,15 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
     break;
   case Op::IsTypeL:
     switch (o2) {
+    case Op::Not:
+      switch (o3) {
+      case Op::JmpZ:
+        return group(env, it, it[0].IsTypeL, it[1].Not, it[2].JmpZ);
+      case Op::JmpNZ:
+        return group(env, it, it[0].IsTypeL, it[1].Not, it[2].JmpNZ);
+      default: break;
+      }
+      break;
     case Op::JmpZ:   return group(env, it, it[0].IsTypeL, it[1].JmpZ);
     case Op::JmpNZ:  return group(env, it, it[0].IsTypeL, it[1].JmpNZ);
     default: break;
@@ -4008,6 +4090,15 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
     break;
   case Op::IsUninit:
     switch (o2) {
+    case Op::Not:
+      switch (o3) {
+      case Op::JmpZ:
+        return group(env, it, it[0].IsUninit, it[1].Not, it[2].JmpZ);
+      case Op::JmpNZ:
+        return group(env, it, it[0].IsUninit, it[1].Not, it[2].JmpNZ);
+      default: break;
+      }
+      break;
     case Op::JmpZ:   return group(env, it, it[0].IsUninit, it[1].JmpZ);
     case Op::JmpNZ:  return group(env, it, it[0].IsUninit, it[1].JmpNZ);
     default: break;
@@ -4015,6 +4106,15 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
     break;
   case Op::IsTypeC:
     switch (o2) {
+    case Op::Not:
+      switch (o3) {
+      case Op::JmpZ:
+        return group(env, it, it[0].IsTypeC, it[1].Not, it[2].JmpZ);
+      case Op::JmpNZ:
+        return group(env, it, it[0].IsTypeC, it[1].Not, it[2].JmpNZ);
+      default: break;
+      }
+      break;
     case Op::JmpZ:
       return group(env, it, it[0].IsTypeC, it[1].JmpZ);
     case Op::JmpNZ:
@@ -4038,6 +4138,15 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
     break;
   case Op::StaticLocCheck:
     switch (o2) {
+    case Op::Not:
+      switch (o3) {
+      case Op::JmpZ:
+        return group(env, it, it[0].StaticLocCheck, it[1].Not, it[2].JmpZ);
+      case Op::JmpNZ:
+        return group(env, it, it[0].StaticLocCheck, it[1].Not, it[2].JmpNZ);
+      default: break;
+      }
+      break;
     case Op::JmpZ:
       return group(env, it, it[0].StaticLocCheck, it[1].JmpZ);
     case Op::JmpNZ:
@@ -4047,6 +4156,15 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
     break;
   case Op::Same:
     switch (o2) {
+    case Op::Not:
+      switch (o3) {
+      case Op::JmpZ:
+        return group(env, it, it[0].Same, it[1].Not, it[2].JmpZ);
+      case Op::JmpNZ:
+        return group(env, it, it[0].Same, it[1].Not, it[2].JmpNZ);
+      default: break;
+      }
+      break;
     case Op::JmpZ:
       return group(env, it, it[0].Same, it[1].JmpZ);
     case Op::JmpNZ:
@@ -4056,6 +4174,15 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
     break;
   case Op::NSame:
     switch (o2) {
+    case Op::Not:
+      switch (o3) {
+      case Op::JmpZ:
+        return group(env, it, it[0].NSame, it[1].Not, it[2].JmpZ);
+      case Op::JmpNZ:
+        return group(env, it, it[0].NSame, it[1].Not, it[2].JmpNZ);
+      default: break;
+      }
+      break;
     case Op::JmpZ:
       return group(env, it, it[0].NSame, it[1].JmpZ);
     case Op::JmpNZ:

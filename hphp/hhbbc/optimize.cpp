@@ -335,6 +335,16 @@ void insert_assertions(const Index& index,
       FTRACE(2, "   + {}\n", show(ctx.func, newBCs.back()));
     };
 
+    if (state.unreachable) {
+      blk->fallthrough = NoBlockId;
+      if (!(instrFlags(op.op) & TF)) {
+        gen(bc::BreakTraceHint {});
+        gen(bc::String { s_unreachable.get() });
+        gen(bc::Fatal { FatalOp::Runtime });
+      }
+      break;
+    }
+
     auto const preState = state;
     auto const flags    = step(interp, op);
 

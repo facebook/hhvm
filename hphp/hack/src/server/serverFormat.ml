@@ -52,7 +52,7 @@ let go_hackfmt genv ?filename ~content args =
   in
   Hh_logger.log "%s" (String.concat " " args);
   let path = match ServerConfig.formatter_override genv.ServerEnv.config with
-    | None -> Path.make "/usr/local/bin/hackfmt"
+    | None -> Path.make BuildOptions.default_hackfmt_path
     | Some p -> p
   in
   let path = Path.to_string path in

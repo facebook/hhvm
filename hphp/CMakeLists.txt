@@ -108,6 +108,10 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/tools/oss-repo-mode
 
 add_definitions("-DUSE_CMAKE")
 
+if (ENABLE_FOLLY_SYMBOLIZER)
+    add_definitions(-DUSE_FOLLY_SYMBOLIZER)
+endif()
+
 enable_language(ASM)
 
 link_libraries(folly)

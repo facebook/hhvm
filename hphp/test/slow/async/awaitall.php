@@ -11,7 +11,7 @@ function reschedule() {
   );
 }
 
-function t(WaitHandle $wh, $a): void {
+function t(Awaitable $wh, $a): void {
   echo $wh->getName(), ' ', count($a), "\nbefore: ";
   foreach ($a as $k => $aa) {
     echo "$k:", HH\Asio\has_finished($aa) ? 1 : 0, ",";

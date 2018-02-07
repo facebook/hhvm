@@ -214,7 +214,7 @@ let emit_deprecation_warning scope = function
 
 let rec is_awaitable h =
   match h with
-  | _, A.Happly ((_, ("WaitHandle" | "Awaitable")), ([] | [_])) -> true
+  | _, A.Happly ((_, "Awaitable"), ([] | [_])) -> true
   | _, (A.Hsoft h | A.Hoption h) -> is_awaitable h
   | _ -> false
 

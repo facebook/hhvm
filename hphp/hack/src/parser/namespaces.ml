@@ -52,7 +52,6 @@ let autoimport_classes = [
   "AsyncKeyedIterator";
   "InvariantException";
   "AsyncGenerator";
-  "WaitHandle";
   "StaticWaitHandle";
   "WaitableWaitHandle";
   "ResumableWaitHandle";

@@ -1,10 +1,10 @@
 <?hh
 
-WaitHandle::setOnIOWaitEnterCallback(function() {
+WaitableWaitHandle::setOnIOWaitEnterCallback(function() {
   echo "io wait enter\n";
 });
 
-WaitHandle::setOnIOWaitExitCallback(function() {
+WaitableWaitHandle::setOnIOWaitExitCallback(function() {
   echo "io wait exit\n";
 });
 

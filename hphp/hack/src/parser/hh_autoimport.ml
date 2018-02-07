@@ -64,7 +64,6 @@ let alias_map = List.fold_left ~f:add_alias ~init:SMap.empty
 
   HH_ONLY_TYPE("Awaitable");
   HH_ONLY_TYPE("AsyncGenerator");
-  HH_ONLY_TYPE("WaitHandle");
   HH_ONLY_TYPE("StaticWaitHandle");
   HH_ONLY_TYPE("WaitableWaitHandle");
   HH_ONLY_TYPE("ResumableWaitHandle");

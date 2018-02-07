@@ -106,17 +106,16 @@ final class Generator<Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
   public function rewind(): void {}
 }
 
-abstract class WaitHandle<+T> implements Awaitable<T> {
-  public function getWaitHandle(): this {}
+abstract class Awaitable<+T> {
   public static function setOnIOWaitEnterCallback(?(function(): void) $callback) {}
   public static function setOnIOWaitExitCallback(?(function(): void) $callback) {}
   public static function setOnJoinCallback(?(function(WaitableWaitHandle<mixed>): void) $callback) {}
 }
 
-final class StaticWaitHandle<+T> extends WaitHandle<T> {
+final class StaticWaitHandle<+T> extends Awaitable<T> {
 }
 
-abstract class WaitableWaitHandle<+T> extends WaitHandle<T> {
+abstract class WaitableWaitHandle<+T> extends Awaitable<T> {
 }
 
 abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {
@@ -135,27 +134,27 @@ final class AsyncGeneratorWaitHandle<Tk, +Tv>
 
 final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
   public static function fromArray<T>(
-    array<WaitHandle<T>> $deps
-  ): WaitHandle<void>;
+    array<Awaitable<T>> $deps
+  ): Awaitable<void>;
   public static function fromDict<Tk, Tv>(
-    dict<Tk, WaitHandle<Tv>> $deps
-  ): WaitHandle<void>;
+    dict<Tk, Awaitable<Tv>> $deps
+  ): Awaitable<void>;
   public static function fromMap<Tk, Tv>(
-    ConstMap<Tk, WaitHandle<Tv>> $deps
-  ): WaitHandle<void>;
+    ConstMap<Tk, Awaitable<Tv>> $deps
+  ): Awaitable<void>;
   public static function fromVec<T>(
-    vec<WaitHandle<T>> $deps
-  ): WaitHandle<void>;
+    vec<Awaitable<T>> $deps
+  ): Awaitable<void>;
   public static function fromVector<T>(
-    ConstVector<WaitHandle<T>> $deps
-  ): WaitHandle<void>;
+    ConstVector<Awaitable<T>> $deps
+  ): Awaitable<void>;
   public static function setOnCreateCallback(
     ?(function(AwaitAllWaitHandle, Vector<mixed>): void) $callback
   ): void {}
 }
 
 final class ConditionWaitHandle<T> extends WaitableWaitHandle<T> {
-  public static function create(WaitHandle<void> $child): ConditionWaitHandle<T> {}
+  public static function create(Awaitable<void> $child): ConditionWaitHandle<T> {}
   public static function setOnCreateCallback(?(function(ConditionWaitHandle<T>, WaitableWaitHandle<void>): void) $callback) {}
   public function succeed(T $result): void {}
   public function fail(Exception $exception): void {}

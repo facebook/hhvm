@@ -827,10 +827,6 @@ interface ArrayAccess<Tk, Tv> {
   public function offsetUnset(Tk $key): void;
 }
 
-interface Awaitable<+T> {
-  public function getWaitHandle(): WaitHandle<T>;
-}
-
 /**
  * @see http://www.php.net/manual/en/jsonserializable.jsonserialize.php
  */

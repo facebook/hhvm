@@ -27,6 +27,7 @@ and shape_field_info_to_shape_field_type env { sfi_optional; sfi_hint } =
 and hint_ p env = function
   | Hany -> Tany
   | Hmixed -> Tmixed
+  | Hnonnull -> Tnonnull
   | Hthis -> Tthis
   | Harray (h1, h2) ->
     if env.Decl_env.mode = FileInfo.Mstrict && h1 = None

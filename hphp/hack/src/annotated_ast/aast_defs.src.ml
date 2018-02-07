@@ -64,6 +64,7 @@ and hint_ =
   (* The following constructors don't exist in the AST hint type *)
   | Hany
   | Hmixed
+  | Hnonnull
   | Habstr of string
   | Harray of hint option * hint option
   | Hdarray of hint * hint

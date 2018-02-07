@@ -121,6 +121,7 @@ and hint f (p, h) = f p, hint_ f h
 and hint_ f = function
   | Hany -> Hany
   | Hmixed -> Hmixed
+  | Hnonnull -> Hnonnull
   | Hthis -> Hthis
   | Htuple hl -> Htuple (List.map hl (hint f))
   | Habstr s ->

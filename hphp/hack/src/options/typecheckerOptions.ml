@@ -51,6 +51,7 @@ let experimental_no_trait_reuse = GlobalOptions.tco_experimental_no_trait_reuse
 let experimental_is_expression = GlobalOptions.tco_experimental_is_expression
 let experimental_no_fallback_in_namespaces =
   GlobalOptions.tco_experimental_no_fallback_in_namespaces
+let experimental_nonnull = GlobalOptions.tco_experimental_nonnull
 
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

@@ -30,6 +30,7 @@ let unwrap_class_type = function
       Terr
       | Tany
       | Tmixed
+      | Tnonnull
       | Tarray (_, _)
       | Tdarray (_, _)
       | Tvarray _

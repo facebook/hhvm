@@ -80,7 +80,7 @@ let save_type hint_kind env x arg =
             let x_pos = Reason.to_pos (fst x) in
             add_type env x_pos hint_kind arg;
         )
-    | _, (Terr | Tmixed | Tarraykind _ | Tprim _ | Toption _
+    | _, (Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> ()
   end
@@ -136,6 +136,7 @@ let get_implements tcopt (_, x) =
             Tany
             | Terr
             | Tmixed
+            | Tnonnull
             | Tarray (_, _)
             | Tdarray (_, _)
             | Tvarray _
@@ -168,7 +169,7 @@ and normalize_ tcopt = function
     (function _, (Tany | Tunresolved []) -> true | _ -> false) ->
       let tyl = List.filter tyl begin function
         |  _, (Tany |  Tunresolved []) -> false
-        | _, (Terr | Tmixed | Tarraykind _ | Tprim _ | Toption _
+        | _, (Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _
           | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject | Tshape _
              ) -> true
@@ -180,7 +181,7 @@ and normalize_ tcopt = function
        *)
       let rl = List.map rl begin function
         | _, Tclass (x, []) -> x
-        | _, (Terr | Tany | Tmixed | Tarraykind _ | Tprim _
+        | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _
           | Toption _ | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
           | Tshape _) -> raise Exit
@@ -197,6 +198,7 @@ and normalize_ tcopt = function
       normalize_ tcopt (Tunresolved rl)
   | Tunresolved _ | Tany -> raise Exit
   | Tmixed -> Tmixed                       (* ' with Nothing (mixed type) *)
+  | Tnonnull -> Tnonnull
   | Terr -> Terr
   | Tarraykind akind -> begin
     try

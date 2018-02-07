@@ -745,7 +745,7 @@ and stmt env = function
           let env, rty = TUtils.unresolved env rty in
           let env = Type.sub_type pos Reason.URreturn env rty return_type in
           env, T.Return(p, Some te)
-      | _, (Terr | Tany | Tmixed | Tarraykind _ | Toption _ | Tprim _
+      | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
         | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
         | Tanon (_, _) | Tobject | Tshape _) ->
           Typing_suggest.save_return env return_type rty;
@@ -914,9 +914,9 @@ and check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
       Typing_enum.check_enum_exhaustiveness pos tc
         caselist enum_coming_from_unresolved;
       env
-    | Terr | Tany | Tmixed | Tarraykind _ | Tclass _ | Toption _ | Tprim _
-    | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _ | Tanon (_, _)
-    | Tobject | Tshape _ -> env
+    | Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tclass _ | Toption _
+      | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _ | Tanon (_, _)
+      | Tobject | Tshape _ -> env
 
 and case_list parent_lenv ty env cl =
   let env = { env with Env.lenv = parent_lenv } in
@@ -3120,6 +3120,7 @@ and call_parent_construct pos env el uel =
       (
         Tany
         | Tmixed
+        | Tnonnull
         | Tarray (_, _)
         | Tdarray (_, _)
         | Tvarray _
@@ -3151,7 +3152,7 @@ and call_parent_construct pos env el uel =
               else Errors.undefined_parent pos;
               default
             | None -> assert false)
-        | _, (Terr | Tany | Tmixed | Tarraykind _ | Toption _
+        | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tvar _
               | Tabstract (_, _) | Tanon (_, _) | Tunresolved _ | Tobject
              ) ->
@@ -3167,7 +3168,7 @@ and check_abstract_parent_meth mname pos fty =
 
 and is_abstract_ft fty = match fty with
   | _r, Tfun { ft_abstract = true; _ } -> true
-  | _r, (Terr | Tany | Tmixed | Tarraykind _ | Toption _ | Tprim _
+  | _r, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
             | Tvar _ | Tfun _ | Tclass (_, _) | Tabstract (_, _) | Ttuple _
             | Tanon _ | Tunresolved _ | Tobject | Tshape _
         )
@@ -4052,7 +4053,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       when List.for_all rest ~f:(fun x -> ty_equal (snd x) (snd res)) -> res
     | _ -> error_array env p ety1
     end
-  | Tmixed | Tprim _ | Tvar _ | Tfun _
+  | Tmixed | Tnonnull | Tprim _ | Tvar _ | Tfun _
   | Tclass (_, _) | Tanon (_, _) ->
       error_array env p ety1
 
@@ -4106,7 +4107,7 @@ and array_append p env ty1 =
             if Env.is_strict env
             then error_array_append env p ty1
             else env, (Reason.Rnone, Tany)
-        | Tmixed | Tarraykind _ | Toption _ | Tprim _
+        | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
         | Tvar _ | Tfun _ | Tclass (_, _) | Ttuple _
         | Tanon (_, _) | Tunresolved _ | Tshape _ | Tabstract _ ->
           error_array_append env p ty1
@@ -4253,7 +4254,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
             env, method_, None
         end
       )
-  | _, (Tmixed | Tarraykind _ | Toption _
+  | _, (Tmixed | Tnonnull | Tarraykind _ | Toption _
         | Tprim _ | Tvar _ | Tfun _ | Ttuple _ | Tanon (_, _) | Tobject
        | Tshape _) ->
       (* should never happen; static_class_id takes care of these *)
@@ -4526,7 +4527,7 @@ and type_could_be_null env ty1 =
         Toption _ | Tunresolved _ | Tmixed | Tany | Terr -> true
       | Tarraykind _ | Tprim _ | Tvar _ | Tfun _ | Tabstract _
       | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tobject
-      | Tshape _ -> false)
+      | Tshape _ | Tnonnull -> false)
 
 and class_id_for_new p env cid =
   let env, te, ty = static_class_id p env cid in
@@ -4550,9 +4551,10 @@ and class_id_for_new p env cid =
             | None -> get_info res tyl
             | Some class_info -> get_info ((sid, class_info, ty)::res) tyl
           end
-        | _, (Tany | Terr | Tmixed | Tarraykind _ | Toption _ | Tprim _
-        | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _ | Tanon (_, _)
-             | Tunresolved _ | Tobject | Tshape _) -> get_info res tyl in
+        | _, (Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Toption _
+              | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _
+              | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _) ->
+          get_info res tyl in
   get_info [] [ty]
 
 (* To be a valid trait declaration, all of its 'require extends' must
@@ -4670,7 +4672,7 @@ and static_class_id p env =
             (* parent is still technically the same object. *)
             make_result env T.CIparent (r, TUtils.this_of (r, snd parent))
           )
-      | _, (Terr | Tany | Tmixed | Tarraykind _ | Toption _ | Tprim _
+      | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
             | Tfun _ | Ttuple _ | Tshape _ | Tvar _
             | Tanon (_, _) | Tunresolved _ | Tabstract (_, _) | Tobject
            ) ->
@@ -4714,7 +4716,7 @@ and static_class_id p env =
         | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tmixed | Tobject)
               when not (Env.is_strict env) ->
           Reason.Rnone, Tany
-        | _, (Terr | Tany | Tmixed | Tarraykind _ | Toption _
+        | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _
                  | Tprim _ | Tfun _ | Ttuple _
                  | Tabstract ((AKenum _ | AKdependent _ | AKnewtype _), _)
                  | Tanon (_, _) | Tobject | Tshape _ as ty
@@ -5185,7 +5187,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
       | (_, Tarraykind _), (_, Tany) ->
           let env, ty = Type.unify p Reason.URnone env ty1 ty2 in
           make_result env te1 te2 ty
-      | (_, (Tany | Terr | Tmixed | Tarraykind _ | Toption _
+      | (_, (Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Toption _
         | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
             )
@@ -5397,7 +5399,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
       (match ety with
       | _, Tarraykind (AKany | AKempty)
       | _, Tprim Tbool -> env
-      | _, (Terr | Tany | Tmixed | Tarraykind _ | Toption _
+      | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _
         | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
         ) ->
@@ -5584,8 +5586,8 @@ and condition ?lhs_of_null_coalesce env tparamet =
         | r, Tunresolved tyl ->
           let env, tyl = List.map_env env tyl resolve_obj in
           env, (r, Tunresolved tyl)
-        | _, (Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Tvar _ | Tfun _
-            | Tabstract ((AKenum _ | AKnewtype _ | AKdependent _), _)
+        | _, (Terr | Tany | Tmixed | Tnonnull| Tarraykind _ | Tprim _ | Tvar _
+            | Tfun _ | Tabstract ((AKenum _ | AKnewtype _ | AKdependent _), _)
             | Ttuple _ | Tanon (_, _) | Toption _ | Tobject | Tshape _) ->
           env, (Reason.Rwitness ivar_pos, Tobject)
       in
@@ -5637,7 +5639,7 @@ and check_null_wtf env p ty =
         (* Find sketchy nulls hidden under singleton Tunresolved *)
         let env, ty = TUtils.fold_unresolved env ty in
         (match ty with
-          | _, Tmixed ->
+          | _, (Tmixed | Tnonnull) ->
             Errors.sketchy_null_check p
           | _, Tprim _ ->
             Errors.sketchy_null_check_primitive p
@@ -5645,7 +5647,7 @@ and check_null_wtf env p ty =
           | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
           | Tunresolved _ | Tobject | Tshape _ ) -> ());
         env
-      | _, (Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Tvar _
+      | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
         | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
         | Tunresolved _ | Tobject | Tshape _ ) -> env
 
@@ -5961,6 +5963,7 @@ and check_extend_abstract_const ~is_final p smap =
         Terr
         | Tany
         | Tmixed
+        | Tnonnull
         | Tarray (_, _)
         | Tdarray (_, _)
         | Tvarray _

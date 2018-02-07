@@ -289,6 +289,7 @@ module type S = sig
   val enum_constant_type_bad : Pos.t -> Pos.t -> string -> Pos.t list -> unit
   val enum_type_bad : Pos.t -> string -> Pos.t list -> unit
   val enum_type_typedef_mixed : Pos.t -> unit
+  val enum_type_typedef_nonnull : Pos.t -> unit
   val enum_switch_redundant : string -> Pos.t -> Pos.t -> unit
   val enum_switch_nonexhaustive : Pos.t -> string list -> Pos.t -> unit
   val enum_switch_redundant_default : Pos.t -> Pos.t -> unit
@@ -414,6 +415,7 @@ module type S = sig
   val get_applied_fixmes : t -> applied_fixme list
   val darray_not_supported : Pos.t -> unit
   val varray_not_supported : Pos.t -> unit
+  val nonnull_not_supported : Pos.t -> unit
   val too_few_type_arguments : Pos.t -> unit
   val required_field_is_optional : Pos.t -> Pos.t -> string -> unit
   val array_get_with_optional_field : Pos.t -> Pos.t -> string -> unit

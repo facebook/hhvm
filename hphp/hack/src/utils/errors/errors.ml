@@ -626,6 +626,7 @@ module Temporary = struct
   (* DEPRECATED let unknown_fields_not_supported = 3 *)
   let varray_or_darray_not_supported = 4
   (* DEPRECATED let goto_not_supported = 5 *)
+  let nonnull_not_supported = 6
 end
 
 module Parsing = struct
@@ -1001,7 +1002,7 @@ module Typing                               = struct
   let invalid_mutable_return_result         = 4216 (* DONT MODIFY!!!! *)
   let mutable_return_result_mismatch        = 4217 (* DONT MODIFY!!!! *)
   let nonreactive_call_from_shallow         = 4218 (* DONT MODIFY!!!! *)
-
+  let enum_type_typedef_nonnull             = 4219 (* DONT MODIFy!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1029,6 +1030,9 @@ let varray_or_darray_not_supported pos =
     Temporary.varray_or_darray_not_supported
     pos
     "varray_or_darray is not supported."
+
+let nonnull_not_supported pos =
+  add Temporary.nonnull_not_supported pos "nonnull is not supported."
 
 (*****************************************************************************)
 (* Parsing errors. *)
@@ -1815,6 +1819,10 @@ let enum_type_bad pos ty trail =
 let enum_type_typedef_mixed pos =
   add Typing.enum_type_typedef_mixed pos
     "Can't use typedef that resolves to mixed in enum"
+
+let enum_type_typedef_nonnull pos =
+  add Typing.enum_type_typedef_nonnull pos
+    "Can't use typedef that resolves to nonnull in enum"
 
 let enum_switch_redundant const first_pos second_pos =
   add_list Typing.enum_switch_redundant [

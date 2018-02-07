@@ -819,7 +819,16 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       )
     end
   | _, (_, Tmixed) -> env
-
+  | _, (_, Toption (_, Tnonnull)) -> env
+  | (_,
+     (Tprim Nast.(Tint | Tbool | Tfloat | Tstring
+                  | Tresource | Tnum | Tarraykey | Tnoreturn)
+      | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _
+      | Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _))),
+    (_, Tnonnull) -> env
+  | (_, (Tprim Nast.Tvoid | Tmixed | Toption _ | Tvar _
+         | Tabstract ((AKnewtype _ | AKdependent _), None))),
+    (_, Tnonnull) -> fst (Unify.unify env ty_super ty_sub)
   | (_, Tprim (Nast.Tint | Nast.Tfloat)), (_, Tprim Nast.Tnum) -> env
   | (_, Tprim (Nast.Tint | Nast.Tstring)), (_, Tprim Nast.Tarraykey) -> env
   | (_, Tabstract ((AKenum _), _)), (_, Tprim Nast.Tarraykey) -> env
@@ -1254,7 +1263,7 @@ and sub_string p env ty2 =
   | _, (Tany | Terr) ->
     env (* Unifies with anything *)
   | _, Tobject -> env
-  | _, (Tmixed | Tarraykind _ | Tvar _
+  | _, (Tmixed | Tnonnull | Tarraykind _ | Tvar _
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
       fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
 

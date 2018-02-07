@@ -1,0 +1,4 @@
+File "nullsafe_member_access_on_nonnull.php", line 4, characters 8-17:
+You are using the ?-> operator but this object cannot be null.  (Typing[4117])
+File "nullsafe_member_access_on_nonnull.php", line 3, characters 12-18:
+This is what makes me believe it cannot be null

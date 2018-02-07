@@ -59,11 +59,7 @@ and instantiate_ subst x =
       Tvarray (instantiate subst ty)
   | Tvarray_or_darray ty ->
       Tvarray_or_darray (instantiate subst ty)
-  | Tthis -> Tthis
-  | Tmixed -> Tmixed
-  | Tany
-  | Terr
-  | Tprim _ as x -> x
+  | Tthis | Tmixed | Tnonnull | Tany | Terr | Tprim _ as x -> x
   | Ttuple tyl ->
       let tyl = List.map tyl (instantiate subst) in
       Ttuple tyl

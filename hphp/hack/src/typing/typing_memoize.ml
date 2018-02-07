@@ -27,8 +27,8 @@ let check_param : Env.env -> Nast.fun_param -> unit =
     let env, ty = Env.expand_type env ty in
     match ty with
     | _, (Tprim (Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum)
-         | Tmixed | Tany | Terr | Tabstract (AKenum _, _)) ->
-      ()
+         | Tmixed | Tnonnull | Tany | Terr | Tabstract (AKenum _, _)) ->
+       ()
     | _, Tprim (Tvoid | Tresource | Tnoreturn) -> error ty
     | _, Toption ty -> check_memoizable env ty
     | _, Ttuple tyl -> List.iter tyl (check_memoizable env)

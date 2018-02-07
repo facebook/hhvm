@@ -228,6 +228,7 @@ module Typehints = struct
   let arraykey = "arraykey"
   let noreturn = "noreturn"
   let mixed    = "mixed"
+  let nonnull  = "nonnull"
   let this     = "this"
 
   let int     = "int"

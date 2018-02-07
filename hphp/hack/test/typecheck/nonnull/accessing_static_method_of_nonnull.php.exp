@@ -1,0 +1,2 @@
+File "accessing_static_method_of_nonnull.php", line 4, characters 3-4:
+Was expecting a class, but got a nonnull value (Typing[4026])

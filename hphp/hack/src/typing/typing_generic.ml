@@ -33,7 +33,7 @@ end = struct
     | Tabstract (AKgeneric x, cstr) when AbstractKind.is_generic_dep_ty x ->
       ty_opt cstr
     | Tabstract (AKgeneric x, _) -> raise (Found x)
-    | Tanon _ | Tany | Terr | Tmixed | Tprim _ -> ()
+    | Tanon _ | Tany | Terr | Tmixed | Tnonnull | Tprim _ -> ()
     | Tarraykind akind ->
       begin match akind with
         | AKany -> ()

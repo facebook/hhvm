@@ -129,6 +129,12 @@ let tco_experimental_is_expression = "is_expression"
 let tco_experimental_no_fallback_in_namespaces =
   "no_fallback_in_namespaces"
 
+(**
+ * Typechecker support for `nonnull` type. This feature is incomplete and is
+ * under development, see T25474893 for details and progress.
+ *)
+let tco_experimental_nonnull = "nonnull"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -150,6 +156,7 @@ let tco_experimental_all =
      tco_experimental_no_trait_reuse;
      tco_experimental_is_expression;
      tco_experimental_no_fallback_in_namespaces;
+     tco_experimental_nonnull;
    ]
 
 let tco_migration_flags_all =

@@ -824,7 +824,7 @@ module Make (GetLocals : GetLocals) = struct
           env is_static_var id
           hl in
       (match hint_id with
-      | N.Hprim _ | N.Hmixed ->
+      | N.Hprim _ | N.Hmixed | N.Hnonnull ->
         if hl <> [] then Errors.unexpected_type_arguments p
       | _ -> ()
       );
@@ -892,6 +892,7 @@ module Make (GetLocals : GetLocals) = struct
           || x = ("\\"^SN.Typehints.string)
           || x = ("\\"^SN.Typehints.resource)
           || x = ("\\"^SN.Typehints.mixed)
+          || x = ("\\"^SN.Typehints.nonnull)
           || x = ("\\"^SN.Typehints.array)
           || x = ("\\"^SN.Typehints.arraykey)
           || x = ("\\"^SN.Typehints.integer)
@@ -913,6 +914,13 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
       | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey
       | x when x = SN.Typehints.mixed -> N.Hmixed
+      | x when x = SN.Typehints.nonnull ->
+        let nonnull_allowed =
+          TypecheckerOptions.experimental_feature_enabled
+            (fst env).tcopt
+            TypecheckerOptions.experimental_nonnull in
+        if nonnull_allowed then N.Hnonnull
+        else (Errors.nonnull_not_supported p; N.Hany)
       | x when x = SN.Typehints.this && not forbid_this ->
           if hl != []
           then Errors.this_no_argument p;

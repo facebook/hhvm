@@ -160,7 +160,7 @@ module ExprDepTy = struct
           ~default:false
           ~f:(fun class_ty ->
               not (TUtils.class_is_final_and_not_contravariant class_ty))
-    | Tanon _ | Tobject | Tmixed | Tprim _ | Tshape _ | Ttuple _
+    | Tanon _ | Tobject | Tmixed | Tnonnull | Tprim _ | Tshape _ | Ttuple _
     | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany | Tvar _ | Terr ->
         false
 

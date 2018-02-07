@@ -72,6 +72,7 @@ module ErrorString = struct
                          -> "an array (used like a tuple)"
     | Ttuple _           -> "a tuple"
     | Tmixed             -> "a mixed value"
+    | Tnonnull           -> "a nonnull value"
     | Toption _          -> "a nullable type"
     | Tprim tp           -> tprim tp
     | Tvar _             -> "some value"
@@ -189,6 +190,7 @@ module Suggest = struct
     | Tany                   -> "..."
     | Terr                   -> "..."
     | Tmixed                 -> "mixed"
+    | Tnonnull               -> "nonnull"
     | Tgeneric s             -> s
     | Tabstract (AKgeneric s, _) -> s
     | Toption ty             -> "?" ^ type_ ty
@@ -284,6 +286,7 @@ module Full = struct
     | Terr -> o "_"
     | Tthis -> o SN.Typehints.this
     | Tmixed -> o "mixed"
+    | Tnonnull -> o "nonnull"
     | Tdarray (x, y) -> o "darray<"; k x; o ", "; k y; o ">"
     | Tvarray x -> o "varray<"; k x; o ">"
     | Tvarray_or_darray x -> o "varray_or_darray<"; k x; o ">"
@@ -599,6 +602,8 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "any"
   | Tmixed ->
     obj @@ kind "mixed"
+  | Tnonnull ->
+    obj @@ kind "nonnull"
   | Tgeneric s ->
     obj @@ kind "generic" @ name s
   | Tabstract (AKgeneric s, _) ->

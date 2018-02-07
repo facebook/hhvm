@@ -152,7 +152,7 @@ and expand env (root_reason, root_ty as root) =
             Env.expand_type env.tenv root in
           let env = { env with tenv = tenv } in
           expand env ty
-      | Tanon _ | Tobject | Tmixed | Tprim _ | Tshape _ | Ttuple _
+      | Tanon _ | Tobject | Tmixed | Tnonnull | Tprim _ | Tshape _ | Ttuple _
       | Tarraykind _ | Tfun _ | Tabstract (_, _) ->
           let pos, tconst = head in
           let ty = Typing_print.error root_ty in

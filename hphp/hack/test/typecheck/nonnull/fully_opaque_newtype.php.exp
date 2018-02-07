@@ -1,0 +1,6 @@
+File "fully_opaque_newtype.php--file2.php", line 6, characters 10-11:
+Invalid return type (Typing[4110])
+File "fully_opaque_newtype.php--file2.php", line 5, characters 19-25:
+This is a nonnull value
+File "fully_opaque_newtype.php--file2.php", line 5, characters 12-12:
+It is incompatible with an object of type t

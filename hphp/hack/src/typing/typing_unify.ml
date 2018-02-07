@@ -270,7 +270,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
              ~when_: begin fun () ->
                match ty2 with
                | Tclass ((_, y), _) -> y = x
-               | Tany | Terr | Tmixed | Tarraykind _ | Tprim _
+               | Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _
                | Toption _ | Tvar _ | Tabstract (_, _) | Ttuple _
                | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
                | Tshape _ -> false
@@ -306,6 +306,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
         let env, tyl = List.map2_env env tyl1 tyl2 unify in
         env, Ttuple tyl
   | Tmixed, Tmixed -> env, Tmixed
+  | Tnonnull, Tnonnull -> env, Tnonnull
   | Tanon (_, id1), Tanon (_, id2) when id1 = id2 -> env, ty1
   | Tanon _, Tanon _ ->
       (* This could be smarter, but the only place where we currently compare
@@ -401,7 +402,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
     when generic_param_matches ~opts env x (r1,ty1) ->
     env, ty1
 
-  | (Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
+  | (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _), _ ->
         (* Make sure to add a dependency on any classes referenced here, even if

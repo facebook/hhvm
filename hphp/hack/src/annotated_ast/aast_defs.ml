@@ -1,6 +1,6 @@
 (* @generated from aast_defs.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<1b972644f5c9a617b8717e040600b04f0e610f7b>> *)
+(* SourceShasum<<a7b5e6331b3e08547d87510a3599fd49615f75cd>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -56,6 +56,7 @@ and hint_ =
   | Haccess of hint * sid list 
   | Hany 
   | Hmixed 
+  | Hnonnull 
   | Habstr of string 
   | Harray of hint option * hint option 
   | Hdarray of hint * hint 
@@ -395,6 +396,7 @@ and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
              Format.fprintf fmt "@,))@]")
         | Hany  -> Format.pp_print_string fmt "Hany"
         | Hmixed  -> Format.pp_print_string fmt "Hmixed"
+        | Hnonnull  -> Format.pp_print_string fmt "Hnonnull"
         | Habstr a0 ->
             (Format.fprintf fmt "(@[<2>Habstr@ ";
              (Format.fprintf fmt "%S") a0;
@@ -727,6 +729,7 @@ include
           let _visitors_r1 = self#on_list self#on_sid env _visitors_c1  in ()
         method on_Hany env = ()
         method on_Hmixed env = ()
+        method on_Hnonnull env = ()
         method on_Habstr env _visitors_c0 =
           let _visitors_r0 = self#on_string env _visitors_c0  in ()
         method on_Harray env _visitors_c0 _visitors_c1 =
@@ -759,6 +762,7 @@ include
               self#on_Haccess env _visitors_c0 _visitors_c1
           | Hany  -> self#on_Hany env
           | Hmixed  -> self#on_Hmixed env
+          | Hnonnull  -> self#on_Hnonnull env
           | Habstr _visitors_c0 -> self#on_Habstr env _visitors_c0
           | Harray (_visitors_c0,_visitors_c1) ->
               self#on_Harray env _visitors_c0 _visitors_c1
@@ -913,6 +917,7 @@ include
           self#plus _visitors_s0 _visitors_s1
         method on_Hany env = self#zero
         method on_Hmixed env = self#zero
+        method on_Hnonnull env = self#zero
         method on_Habstr env _visitors_c0 =
           let _visitors_s0 = self#on_string env _visitors_c0  in _visitors_s0
         method on_Harray env _visitors_c0 _visitors_c1 =
@@ -946,6 +951,7 @@ include
               self#on_Haccess env _visitors_c0 _visitors_c1
           | Hany  -> self#on_Hany env
           | Hmixed  -> self#on_Hmixed env
+          | Hnonnull  -> self#on_Hnonnull env
           | Habstr _visitors_c0 -> self#on_Habstr env _visitors_c0
           | Harray (_visitors_c0,_visitors_c1) ->
               self#on_Harray env _visitors_c0 _visitors_c1
@@ -1101,6 +1107,7 @@ include
           Haccess (_visitors_r0, _visitors_r1)
         method on_Hany env = Hany
         method on_Hmixed env = Hmixed
+        method on_Hnonnull env = Hnonnull
         method on_Habstr env _visitors_c0 =
           let _visitors_r0 = self#on_string env _visitors_c0  in
           Habstr _visitors_r0
@@ -1138,6 +1145,7 @@ include
               self#on_Haccess env _visitors_c0 _visitors_c1
           | Hany  -> self#on_Hany env
           | Hmixed  -> self#on_Hmixed env
+          | Hnonnull  -> self#on_Hnonnull env
           | Habstr _visitors_c0 -> self#on_Habstr env _visitors_c0
           | Harray (_visitors_c0,_visitors_c1) ->
               self#on_Harray env _visitors_c0 _visitors_c1
@@ -1340,6 +1348,8 @@ include
           if true then _visitors_this else Hany
         method on_Hmixed env _visitors_this =
           if true then _visitors_this else Hmixed
+        method on_Hnonnull env _visitors_this =
+          if true then _visitors_this else Hnonnull
         method on_Habstr env _visitors_this _visitors_c0 =
           let _visitors_r0 = self#on_string env _visitors_c0  in
           if Pervasives.(==) _visitors_c0 _visitors_r0
@@ -1397,6 +1407,8 @@ include
               self#on_Haccess env _visitors_this _visitors_c0 _visitors_c1
           | Hany  as _visitors_this -> self#on_Hany env _visitors_this
           | Hmixed  as _visitors_this -> self#on_Hmixed env _visitors_this
+          | Hnonnull  as _visitors_this ->
+              self#on_Hnonnull env _visitors_this
           | Habstr _visitors_c0 as _visitors_this ->
               self#on_Habstr env _visitors_this _visitors_c0
           | Harray (_visitors_c0,_visitors_c1) as _visitors_this ->

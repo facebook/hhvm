@@ -104,6 +104,7 @@ and _ ty_ =
    *)
   | Tany
   | Tmixed
+  | Tnonnull
 
   | Terr
 

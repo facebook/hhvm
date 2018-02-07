@@ -1,7 +1,0 @@
-object(bad)#%d (1) {
-  ["_private"]=>
-  array(1) {
-    [0]=>
-    string(3) "php"
-  }
-}

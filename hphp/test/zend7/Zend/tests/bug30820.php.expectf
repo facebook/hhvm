@@ -1,6 +1,0 @@
-
-Notice: %s
-Blah::$x = 1
-
-Notice: %s
-$this->x = 5

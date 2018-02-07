@@ -1,7 +1,0 @@
-
-Notice: %s
-object(test)#%d (1) {
-  ["foo"]=>
-  int(5)
-}
-Done

@@ -1,3 +1,0 @@
-<?php
-if (!PHP_DEBUG) die("skip only run in debug version");
-?>

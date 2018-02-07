@@ -1,4 +1,0 @@
-Exception: Using $this when not in object context in %sexception_016.php on line %d
-
-Fatal error: %s
-Stack trace:%A

@@ -1,1 +1,0 @@
-<?php if (!extension_loaded("xml")) print "skip the xml extension not available"; ?>

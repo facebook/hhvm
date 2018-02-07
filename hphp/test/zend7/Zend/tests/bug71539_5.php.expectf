@@ -1,9 +1,0 @@
-array(2) {
-  [0]=>
-  &int(42)
-  [""]=>
-  object(stdClass)#%d (1) {
-    ["prop"]=>
-    &int(42)
-  }
-}

@@ -1,7 +1,0 @@
-foo
-From foo::__callStatic:
-123
-------
-foo
-From foo::__call:
-123

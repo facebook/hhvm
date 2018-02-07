@@ -1,5 +1,0 @@
-<?php
-
-$"*** Testing function() :  ***\n";
-
-?>

@@ -1,5 +1,0 @@
-<?php
-
-$a = clone array();
-
-?>

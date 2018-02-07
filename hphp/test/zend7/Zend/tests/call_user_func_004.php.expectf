@@ -1,4 +1,0 @@
-Deprecated: %son-static method foo::teste() should not be called statically in %s on line %d
-
-Fatal error: %s
-Stack trace:%A

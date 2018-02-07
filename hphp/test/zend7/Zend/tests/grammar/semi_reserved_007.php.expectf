@@ -1,8 +1,0 @@
-From Foo::__construct:
-self
-parent
-From Bar::__construct:
-self
-parent
-
-Done

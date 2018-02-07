@@ -1,7 +1,0 @@
-object(stdClass)#%d (1) {
-  [""]=>
-  string(10) "string('')"
-}
-
-Fatal error: %s
-Stack trace:%A

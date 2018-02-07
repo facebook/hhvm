@@ -1,5 +1,0 @@
-<?php
-	if ("cli" != php_sapi_name()) {
-		echo "skip CLI only";
-	}
-?>

@@ -1,3 +1,0 @@
-string(%s) "Exception: aaa in %sbug72581.php:%d
-Stack trace:
-#0 {main}"

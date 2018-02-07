@@ -1,7 +1,0 @@
-array(1) {
-  [0]=>
-  string(2) "ok"
-}
-
-Fatal error: %s
-Stack trace:%A

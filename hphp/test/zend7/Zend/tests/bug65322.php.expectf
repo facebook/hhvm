@@ -1,3 +1,0 @@
-string(62) "Declaration of B::test($a) should be compatible with A::test()"
-string(%d) "%s(%d) : eval()'d code"
-string(1) "X"

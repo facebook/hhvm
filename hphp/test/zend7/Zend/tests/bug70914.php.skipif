@@ -1,5 +1,0 @@
-<?php
-if (!extension_loaded("pdo_sqlite")) {
-	die("skip pdo_sqlite required");
-}
-?>

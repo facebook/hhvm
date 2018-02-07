@@ -1,8 +1,0 @@
-Deprecated: Non-static method ErrorHandling::error_handler() should not be called statically in %sbug74408.php on line %d
-
-Deprecated: Non-static method ErrorHandling::error_handler() should not be called statically in %sbug74408.php on line %d
-
-Deprecated: Non-static method ErrorHandling::error_handler() should not be called statically in Unknown on line 0
-
-Fatal error: %s
-Stack trace:%A

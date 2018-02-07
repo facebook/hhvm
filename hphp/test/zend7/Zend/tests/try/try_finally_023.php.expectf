@@ -1,4 +1,0 @@
-Exception: 1 in %s:%d
-Stack trace:
-#0 %s(%d): test()
-#1 {main}

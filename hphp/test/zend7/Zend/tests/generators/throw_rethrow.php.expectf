@@ -1,8 +1,0 @@
-before yield
-Caught: RuntimeException: throw in %s:%d
-Stack trace:
-#0 {main}
-
-
-Fatal error: %s
-Stack trace:%A

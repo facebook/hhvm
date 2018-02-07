@@ -613,7 +613,6 @@ function find_test_files($file) {
     'http'       => 'hphp/test/server/http/tests',
     'fastcgi'    => 'hphp/test/server/fastcgi/tests',
     'zend'       => 'hphp/test/zend/good',
-    'zend7'       => 'hphp/test/zend7',
     'facebook'   => 'hphp/facebook/test',
 
     // Subsets of zend tests.

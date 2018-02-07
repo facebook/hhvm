@@ -1,7 +1,0 @@
-Non-static method A::A_ftk() should not be called statically
-1 %sbug38047.php:13 get_error_context()
-2 %sbug38047.php:36 kalus_error_handler()
-
-
-Fatal error: %s
-Stack trace:%A

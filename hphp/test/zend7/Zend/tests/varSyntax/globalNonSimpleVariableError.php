@@ -1,5 +1,0 @@
-<?php
-
-global $$foo->bar;
-
-?>

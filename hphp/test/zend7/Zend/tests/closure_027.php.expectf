@@ -1,9 +1,0 @@
-object(stdClass)#%d (0) {
-}
-NULL
-
-Notice: %s
-Exception: Too few arguments to function {closure}(), 0 passed and exactly 1 expected
-
-Fatal error: %s
-Stack trace:%A

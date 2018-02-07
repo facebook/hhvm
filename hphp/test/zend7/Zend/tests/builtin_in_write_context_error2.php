@@ -1,5 +1,0 @@
-<?php
-
-$ref =& strlen("foo");
-
-?>

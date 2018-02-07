@@ -1,1 +1,0 @@
-<?php if (!extension_loaded("spl")) print "skip SPL extension required"; ?>

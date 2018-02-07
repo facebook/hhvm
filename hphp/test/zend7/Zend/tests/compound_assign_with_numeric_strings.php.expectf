@@ -1,9 +1,0 @@
-int(0)
-
-Exception: Bit shift by negative number
-int(0)
-
-Exception: Bit shift by negative number
-
-Exception: Modulo by zero
-int(0)

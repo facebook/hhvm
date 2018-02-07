@@ -1056,8 +1056,8 @@ module WithStatementAndDeclAndTypeParser
           subscript-expression
           variable-name
 
-TODO: Update the spec to allow qualified-name < type arguments >
-TODO: This will need to be fixed to allow situations where the qualified name
+    TODO: Update the spec to allow qualified-name < type arguments >
+    TODO: This will need to be fixed to allow situations where the qualified name
       is also a non-reserved token.
     *)
     let default parser =
@@ -1219,7 +1219,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
       parser, make_yield_expression yield_kw operand
 
   and parse_cast_or_parenthesized_or_lambda_expression parser =
-  (* We need to disambiguate between casts, lambdas and ordinary
+    (* We need to disambiguate between casts, lambdas and ordinary
     parenthesized expressions. *)
     match possible_cast_expression parser with
     | Some (parser, left, cast_type, right) ->
@@ -2566,7 +2566,12 @@ TODO: This will need to be fixed to allow situations where the qualified name
         let parser1, e = parse_variable_in_php5_compat_mode parser in
         (* for :: only do PHP5 transform for call expressions
            in other cases fall back to the regular parsing logic *)
-        if peek_token_kind parser1 = LeftParen
+        if peek_token_kind parser1 = LeftParen &&
+          (* make sure the left parenthesis means a call
+             for the expression we are currently parsing, and
+             are not for example for a constructor call whose
+             name would be the result of this expression. *)
+          not @@ operator_has_lower_precedence LeftParen parser
         then parser1, e
         else require_name_or_variable_or_error parser SyntaxError.error1048
       | _ ->

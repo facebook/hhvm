@@ -34,19 +34,8 @@ async function foo3(MyPreparable $x): Awaitable<Preparable> {
 }
 
 abstract class GeneratorLegacyPreparable implements IPreparable<this> {
-  private ?Awaitable<this> $wh = null;
-  private bool $started = false;
 
-  final public function getWaitHandle(): Awaitable<this> {
-    if ($this->wh === null) {
-      invariant($this->started === false, 'cannot depend on $this');
-      $this->started = true;
-      $wh = $this->__genGen();
-      $this->wh = $wh;
-    }
-    return $this->wh;
-  }
-
+  <<__Memoize>>
   private async function __genGen(): Awaitable<this> {
     await $this->gen();
     return $this;

@@ -42,7 +42,7 @@ class D {
 }
 
 one();
-two()->getWaitHandle()->join();
+HH\Asio\join(two());
 $d = new D();
 $d->one();
-$d->two()->getWaitHandle()->join();
+HH\Asio\join($d->two());

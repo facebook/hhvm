@@ -1,5 +1,5 @@
 <?hh
 
-function f(Awaitable<int> $a): void {
+function f(Generator<int, int, int> $a): void {
   $a->AUTO332
 }

@@ -60,7 +60,7 @@ void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold);
 /*
  * Report jit warmup statistics to scribe via StructuredLog.
  */
-void reportJitMaturity(const CodeCache& code);
+void reportJitMaturity();
 
 /*
  * Get a code size counter for the named code block ("main", "cold", etc.)

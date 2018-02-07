@@ -262,8 +262,6 @@ publishTranslationInternal(TransMetaInfo info, OptView optSrcView) {
     Trace::traceRelease("%s", getTCSpace().c_str());
   }
 
-  reportJitMaturity(code());
-
   return loc;
 }
 
@@ -438,7 +436,6 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
     if (RuntimeOption::EvalJitUseVtuneAPI) {
       reportTraceletToVtune(sk.unit(), sk.func(), tr);
     }
-    reportJitMaturity(code());
 
     assertx(!transdb::enabled() ||
             transdb::getTransRec(coldStart)->kind == TransKind::Anchor);

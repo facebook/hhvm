@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-
 #include "hphp/runtime/vm/jit/tc-record.h"
 
 #include "hphp/runtime/vm/jit/tc-internal.h"
@@ -149,9 +148,10 @@ static ServiceData::CounterCallback s_warmedUpCounter(
  * If the jit maturity counter is enabled, update it with the current amount of
  * emitted code.
  */
-void reportJitMaturity(const CodeCache& code) {
+void reportJitMaturity() {
   auto static jitMaturityCounter = ServiceData::createCounter("jit.maturity");
   if (!jitMaturityCounter) return;
+  if (jitMaturityCounter->getValue() == 100) return;
   // Optimized translations are faster than profiling translations, which are
   // faster than the interpreter.  But when optimized translations are
   // generated, some profiling translations will become dead.  We assume the
@@ -159,10 +159,10 @@ void reportJitMaturity(const CodeCache& code) {
   // profiling translations is comparable to the incremental value of a
   // profiling translation of similar size; thus we don't have to apply
   // different weights to code in different regions.
-  auto codeSize = code.prof().used() + code.main().used();
-  // When retranslateAll is used, we only add code.hot() after retranslateAll
+  auto codeSize = code().prof().used() + code().main().used();
+  // When retranslateAll is used, we only add ahot after retranslateAll
   // finishes.
-  if (!mcgen::retranslateAllPending()) codeSize += code.hot().used();
+  if (!mcgen::retranslateAllPending()) codeSize += code().hot().used();
   // EvalJitMatureSize is supposed to to be set to approximately 20% of the
   // code that will give us full performance, so recover the "fully mature"
   // size with some math.
@@ -183,7 +183,7 @@ void reportJitMaturity(const CodeCache& code) {
     }
   }
   // Make sure jit maturity is less than 100 before the JIT stops.
-  if (after > 99 && code.main().used() < CodeCache::AMaxUsage && !warmedUp) {
+  if (after > 99 && code().main().used() < CodeCache::AMaxUsage && !warmedUp) {
     after = 99;
   }
 
@@ -201,7 +201,7 @@ void reportJitMaturity(const CodeCache& code) {
     }
   }
 
-  code.forEachBlock([&] (const char* name, const CodeBlock& a) {
+  code().forEachBlock([&] (const char* name, const CodeBlock& a) {
     auto codeUsed = s_counters.at(name);
     // Add delta
     codeUsed->addValue(a.used() - codeUsed->getSum());
@@ -209,7 +209,7 @@ void reportJitMaturity(const CodeCache& code) {
 
   // Manually add code.data.
   auto codeUsed = s_counters.at("data");
-  codeUsed->addValue(code.data().used() - codeUsed->getSum());
+  codeUsed->addValue(code().data().used() - codeUsed->getSum());
 }
 
 static void logFrame(const Vunit& unit, const size_t frame) {

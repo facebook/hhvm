@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/stub-alloc.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -231,6 +232,8 @@ void requestExit() {
   Timer::RequestExit();
   if (profData()) profData()->maybeResetCounters();
   requestExitProfData();
+
+  reportJitMaturity();
 
   if (Trace::moduleEnabledRelease(Trace::mcgstats, 1)) {
     Trace::traceRelease("MCGenerator perf counters for %s:\n",

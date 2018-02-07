@@ -164,7 +164,6 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(func->unit(), func, tr);
   }
-  reportJitMaturity(code());
 
   recordGdbTranslation(funcBody, func, codeView.main(), loc.mainStart(),
                        loc.mainEnd(), false, true);

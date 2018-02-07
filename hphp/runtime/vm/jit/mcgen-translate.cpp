@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
@@ -372,6 +373,7 @@ void retranslateAll() {
   tc::publishSortedOptFunctions(std::move(infos));
 
   s_retranslateAllComplete.store(true, std::memory_order_release);
+  tc::reportJitMaturity();
 
   if (serverMode) {
     ProfData::Session pds;

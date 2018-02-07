@@ -156,43 +156,6 @@ module WorkerApi = struct
           f, t, _a
         end in
     SS.WorkerApi.update fn trie fuzzy auto
-
-  (* Called by a worker after the file is parsed *)
-  let update fn ast =
-    let fuzzy_defs, trie_defs =
-      List.fold_left ast ~f:begin fun (fuzzy_defs, trie_defs) def ->
-      match def with
-      | Ast.Fun f ->
-          update_defs
-            (FileInfo.pos_full f.Ast.f_name)
-            Function
-            fuzzy_defs
-            trie_defs
-      | Ast.Class c ->
-          (* Still index methods for trie search *)
-          let trie_defs = update_class c trie_defs in
-          update_defs (FileInfo.pos_full c.Ast.c_name)
-                      (Class (Some c.Ast.c_kind))
-                      fuzzy_defs
-                      trie_defs
-      | Ast.Typedef td ->
-          update_defs (FileInfo.pos_full td.Ast.t_id)
-            Typedef fuzzy_defs trie_defs
-      | Ast.Constant cst ->
-          update_defs (FileInfo.pos_full cst.Ast.cst_name)
-            Constant fuzzy_defs trie_defs
-      | _ -> fuzzy_defs, trie_defs
-    end ~init:(SS.Fuzzy.TMap.empty, []) in
-    let autocomplete_defs = List.fold_left ast ~f:begin fun acc def ->
-      match def with
-      | Ast.Fun f ->
-        add_autocomplete_term (FileInfo.pos_full f.Ast.f_name) Function acc
-      | Ast.Class c -> add_autocomplete_term
-          (FileInfo.pos_full c.Ast.c_name)
-          (Class (Some c.Ast.c_kind)) acc
-      | _ -> acc
-    end ~init:[] in
-    SS.WorkerApi.update fn trie_defs fuzzy_defs autocomplete_defs
 end
 
 module MasterApi = struct

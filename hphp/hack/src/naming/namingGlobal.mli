@@ -14,7 +14,6 @@
  *)
 
 module GEnv: sig
-  val get_full_pos : ParserOptions.t -> FileInfo.pos * string -> Pos.t * string
   val type_pos: ParserOptions.t -> string -> Pos.t option
   val type_canon_name: string -> string option
   val type_info:
@@ -27,9 +26,6 @@ module GEnv: sig
 
   val gconst_pos: ParserOptions.t -> string -> Pos.t option
 end
-
-(* Canonicalizes a key *)
-val canon_key: String.t -> String.t
 
 (* Function building the original naming environment.
  * This pass "declares" all the global names. The only checks done

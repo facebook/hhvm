@@ -41,9 +41,6 @@ let set_is_hh_file v = is_hh_file_ := v
 let is_hh_syntax_enabled () =
   !is_hh_file_ || Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options
 
-let is_xhp_syntax_enabled () =
-  !is_hh_file_ || Hhbc_options.enable_xhp !Hhbc_options.compiler_options
-
 let get_explicit_use_set () = (!global_state_).global_explicit_use_set
 let get_closure_namespaces () = (!global_state_).global_closure_namespaces
 let get_closure_enclosing_classes () =

@@ -111,5 +111,3 @@ val is_binary_operator_token : TokenKind.t -> bool
 val is_assignment : t -> bool
 
 val is_comparison : t -> bool
-
-val to_string : t -> string

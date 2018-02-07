@@ -162,13 +162,6 @@ let env_with_tpenv env tpenv =
 let env_with_global_tpenv env global_tpenv =
   { env with global_tpenv }
 
-let union_global_tpenv tp1 tp2 =
-  SMap.union tp1 tp2 ~combine:(fun _ v1 v2 ->
-    let {lower_bounds=low1; upper_bounds=up1} = v1 in
-    let {lower_bounds=low2; upper_bounds=up2} = v2 in
-    Some  {lower_bounds=TySet.union low1 low2; upper_bounds=TySet.union up1 up2}
-  )
-
 
 let add_upper_bound_global env name ty =
   let tpenv =
@@ -179,16 +172,6 @@ let add_upper_bound_global env name ty =
     | _ -> env.global_tpenv
     end in
    { env with global_tpenv=(add_upper_bound_ tpenv name ty) }
-
-let add_lower_bound_global env name ty =
- let tpenv =
-   begin match ty with
-   | (r, Tabstract (AKgeneric formal_sub, _)) ->
-     add_upper_bound_ env.global_tpenv formal_sub
-       (r, Tabstract (AKgeneric name, None))
-   | _ -> env.global_tpenv
-   end in
-  { env with global_tpenv=(add_lower_bound_ tpenv name ty) }
 
 let add_upper_bound env name ty =
   let tpenv =
@@ -577,11 +560,6 @@ let add_anonymous env x =
   let anon_id = Ident.tmp() in
   let genv = { genv with anons = IMap.add anon_id x genv.anons } in
   { env with genv = genv }, anon_id
-
-let set_anonymous env anon_id x =
-  let genv = env.genv in
-  let genv = { genv with anons = IMap.add anon_id x genv.anons } in
-  { env with genv = genv }
 
 let get_anonymous env x =
   IMap.get x env.genv.anons

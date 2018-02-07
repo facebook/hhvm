@@ -194,14 +194,7 @@ let from_token x =
 let make_simple x = (nil, false, x, nil, false)
 let indt = 2
 let missing = make_simple nil
-let error_header = make_simple (text "Error:")
 let space = make_simple (text " ")
-let colon = make_simple (text ":")
-let comma = make_simple (text ",")
-let l_square = make_simple (text "[")
-let r_square = make_simple (text "]")
-let question = make_simple (text "?")
-let ellipsis = make_simple (text "...")
 
 let rec get_doc node =
   match syntax node with
@@ -1690,11 +1683,6 @@ and get_from_children_with_sep sep children =
   let fold_fun acc el = (acc ^^^ sep) ^| get_doc el in
   group_doc (List.fold_left fold_fun (make_simple nil) children)
 and get_from_children node = get_from_children_with_sep (make_simple nil) node
-(* if it is a compound statement, the curly braces do not need indent *)
-and peek_and_decide_indent x default =
-  match syntax x with
-  | CompoundStatement _ -> 0
-  | _ -> default
 (* puts [prefix] on the same line as a compound brace. If the statement is not
  * compound, put an optional newline and group the result *)
 and handle_compound_inline_brace prefix statement postfix =

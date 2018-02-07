@@ -44,7 +44,6 @@ end)
 (* Some useful constants *)
 let zero = Int Int64.zero
 let null = Null
-let one = Int Int64.one
 
 module StringOps = struct
   let make_with op s1 s2 =
@@ -220,37 +219,8 @@ let add v1 v2 =
   | Int i1, Int i2 -> add_int i1 i2
   | _, _ -> None
 
-let sub v1 v2 =
-  match v1, v2 with
-  | Float f1, Float f2 -> Some (Float (f1 -. f2))
-  | Int i1, Int i2 -> sub_int i1 i2
-  | _, _ -> None
 
-let mul v1 v2 =
-  match v1, v2 with
-  | Float f1, Float f2 -> Some (Float (f1 *. f2))
-  | Int i1, Int i2 -> mul_int i1 i2
-  | _, _ -> None
 
-let rem v1 v2 =
-  match v1, v2 with
-  | Int i1, Int i2 ->
-    Some (Int (Int64.rem i1 i2))
-  | _, _ ->
-    None
-
-let div v1 v2 =
-  match v1, v2 with
-  | Int left, Int right ->
-    if Int64.rem left right = Int64.zero then
-      Some (Int (Int64.div left right))
-    else
-      let left = Int64.to_float left in
-      let right = Int64.to_float right in
-      let quotient = left /. right in
-      Some (Float quotient)
-  | Float f1, Float f2 -> Some (Float (f1 /. f2))
-  | _, _ -> None
 
 let shift f v1 v2 =
   match Option.both (to_int v1) (to_int v2) with
@@ -258,9 +228,6 @@ let shift f v1 v2 =
     Some (Int (f l (Int64.to_int r)))
   | _ -> None
 
-let shift_left v1 v2 = shift Int64.shift_left v1 v2
-
-let shift_right v1 v2 = shift Int64.shift_right v1 v2
 
 (* String concatenation *)
 let concat v1 v2 =
@@ -275,45 +242,12 @@ let bitwise_not v =
   | String s -> Some (String (StringOps.bitwise_not s))
   | _ -> None
 
-let bitwise_and v1 v2 =
-  match v1, v2 with
-  | (Int _ | Bool _ | Null), (Int _ | Bool _ | Null) ->
-    (match Option.both (to_int v1) (to_int v2) with
-    | Some (i1, i2) -> Some (Int (Int64.logand i1 i2))
-    | None -> None)
-  | String s1, String s2 -> Some (String (StringOps.bitwise_and s1 s2))
-  | _ -> None
 
-let bitwise_or v1 v2 =
-  match v1, v2 with
-  | (Int _ | Bool _ | Null), (Int _ | Bool _ | Null) ->
-    (match Option.both (to_int v1) (to_int v2) with
-    | Some (i1, i2) -> Some (Int (Int64.logor i1 i2))
-    | None -> None)
-  | String s1, String s2 -> Some (String (StringOps.bitwise_or s1 s2))
-  | _ -> None
-
-let bitwise_xor v1 v2 =
-  match v1, v2 with
-  | (Int _ | Bool _ | Null), (Int _ | Bool _ | Null) ->
-    (match Option.both (to_int v1) (to_int v2) with
-    | Some (i1, i2) -> Some (Int (Int64.logxor i1 i2))
-    | None -> None)
-  | String s1, String s2 -> Some (String (StringOps.bitwise_xor s1 s2))
-  | _ -> None
 
 (* Logical operators *)
 let not v =
   Some (Bool (not (to_bool v)))
 
-let logical_or v1 v2 =
-  Some (Bool (to_bool v1 || to_bool v2))
-
-let logical_and v1 v2 =
-  Some (Bool (to_bool v1 && to_bool v2))
-
-let logical_xor v1 v2 =
-  Some (Bool (to_bool v1 <> to_bool v2))
 
 (*
   returns (t * t) option option
@@ -413,10 +347,6 @@ let eqeq v1 v2 =
       Some (Bool false)
   )
 
-let diff v1 v2 = Option.bind (eqeq v1 v2) not
-
-let diff2 v1 v2 = Option.bind (eqeqeq v1 v2) not
-
 let less_than v1 v2 =
   let compare v1 v2 =
     match v1, v2 with
@@ -456,10 +386,6 @@ let less_than_equals v1 v2 =
     | Some (l, r) -> compare l r
     | None -> None
   )
-
-let greater_than v1 v2 = less_than v2 v1
-
-let greater_than_equals v1 v2 = less_than_equals v2 v1
 
 let cast_to_string v = Option.map (to_string v) (fun x -> String x)
 

@@ -177,10 +177,6 @@ let get_value_from_config_int config key =
   | "" -> 0
   | x -> int_of_string x)
 
-let get_value_from_config_str config key =
-  let json_opt = get_value_from_config_ config key in
-  Option.map json_opt ~f:(fun json -> J.get_string_exn json)
-
 let get_value_from_config_kv_list config key =
   let json_opt = get_value_from_config_ config key in
   Option.map json_opt ~f:(fun json ->

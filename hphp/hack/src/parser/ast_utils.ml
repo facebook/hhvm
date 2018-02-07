@@ -39,22 +39,6 @@ let get_defs ast =
 in
   get_defs ast ([],[],[],[])
 
-let class_elt_type_to_string = function
-  | Ast.Const _ -> "const"
-  | Ast.AbsConst _ -> "absConst"
-  | Ast.Attributes _ -> "attributes"
-  | Ast.TypeConst _ -> "typeConst"
-  | Ast.ClassUse _ -> "classUse"
-  | Ast.ClassUseAlias _ -> "classUseAlias"
-  | Ast.ClassUsePrecedence _ -> "ClassUsePrecedence"
-  | Ast.XhpAttrUse _ -> "xhpAttrUse"
-  | Ast.ClassTraitRequire _ -> "classTraitRequire"
-  | Ast.ClassVars _ -> "classVars"
-  | Ast.XhpAttr _ -> "xhpAttr"
-  | Ast.Method _ -> "method"
-  | Ast.XhpCategory _ -> "xhpCategory"
-  | Ast.XhpChild _ -> "xhpChild"
-
 (* Utility functions for getting all nodes of a particular type *)
 class ast_get_defs_visitor = object (this)
   inherit [Ast.def list] Ast_visitor.ast_visitor
@@ -133,13 +117,6 @@ let generate_ast_decl_hash ast =
 let get_def_nodes ast =
   List.rev ((new ast_get_defs_visitor)#on_program [] ast)
 
-let rec get_classes ast =
-  List.concat_map (get_def_nodes ast) ~f:(function
-    | Ast.Class c -> [c]
-    | Ast.Namespace(_, ast) -> get_classes ast
-    | _ -> []
-  )
-
 class ast_get_class_elts_visitor = object (this)
   inherit [Ast.class_elt list] Ast_visitor.ast_visitor
 
@@ -149,24 +126,6 @@ end
 
 let get_class_elts ast =
   List.rev ((new ast_get_class_elts_visitor)#on_program [] ast)
-
-let get_methods ast =
-  List.filter_map (get_class_elts ast) ~f:(function
-    | Ast.Method m -> Some m
-    | _ -> None
-  )
-
-let get_typeConsts ast =
-  List.filter_map (get_class_elts ast) ~f:(function
-    | Ast.TypeConst tc -> Some tc
-    | _ -> None
-  )
-
-let get_classUses ast =
-  List.filter_map (get_class_elts ast) ~f:(function
-    | Ast.ClassUse h -> Some h
-    | _ -> None
-  )
 
 type break_continue_level =
   | Level_ok of int option

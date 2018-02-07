@@ -126,13 +126,6 @@ module WithParser(Parser : Parser_S) = struct
   let peek_token_kind ?(lookahead=0) parser =
     Token.kind (peek_token ~lookahead parser)
 
-  let peek_token_kind_as_name ?(lookahead=0) parser =
-    Token.kind (peek_token_as_name ~lookahead parser)
-
-  let skip_token parser =
-    let (parser, _) = next_token parser in
-    parser
-
   let scan_markup parser ~is_leading_section =
     let (lexer, markup, suffix) =
       Lexer.scan_markup (lexer parser) ~is_leading_section
@@ -323,18 +316,6 @@ module WithParser(Parser : Parser_S) = struct
     let parser = with_lexer parser lexer in
     (parser, token)
 
-  let require_xhp_class_name parser =
-    if is_next_xhp_class_name parser then
-      let (parser, token) = next_xhp_class_name parser in
-      (parser, make_token token)
-    else
-      (* ERROR RECOVERY: Create a missing token for the expected token,
-         and continue on from the current token. Don't skip it. *)
-      (* TODO: Different error? *)
-      let parser = with_error parser SyntaxError.error1004 in
-      let missing = make_missing parser in
-      (parser, missing)
-
   let require_xhp_name parser =
     if is_next_name parser then
       let (parser, token) = next_xhp_name parser in
@@ -479,11 +460,6 @@ module WithParser(Parser : Parser_S) = struct
   let require_right_angle parser =
     require_token parser TokenKind.GreaterThan SyntaxError.error1013
 
-  let require_right_double_angle parser =
-    require_token parser TokenKind.GreaterThanGreaterThan SyntaxError.error1029
-
-  let require_left_bracket parser =
-    require_token parser TokenKind.LeftBracket SyntaxError.error1026
 
   let require_right_bracket parser =
     require_token parser TokenKind.RightBracket SyntaxError.error1032
@@ -503,8 +479,6 @@ module WithParser(Parser : Parser_S) = struct
   let require_while parser =
     require_token parser TokenKind.While SyntaxError.error1018
 
-  let require_comma parser =
-    require_token parser TokenKind.Comma SyntaxError.error1054
 
   let require_coloncolon parser =
     require_token parser TokenKind.ColonColon SyntaxError.error1047
@@ -531,21 +505,6 @@ module WithParser(Parser : Parser_S) = struct
     else
       require_name_or_variable parser
 
-  let require_xhp_class_name_or_qualified_name_or_variable parser =
-    if is_next_xhp_class_name parser then
-      let (parser, token) = next_xhp_class_name parser in
-      (parser, make_token token)
-    else
-      let (parser1, token) = next_token_as_name parser in
-      match Token.kind token with
-      | TokenKind.Variable -> (parser1, make_token token)
-      | TokenKind.Name -> scan_remaining_qualified_name parser1 (make_token token)
-      | _ ->
-        (* ERROR RECOVERY: Create a missing token for the expected token,
-           and continue on from the current token. Don't skip it. *)
-        let parser = with_error parser SyntaxError.error1050 in
-        let missing = make_missing parser in
-        (parser, missing)
 
   let optional_token parser kind =
     let (parser1, token) = next_token parser in
@@ -712,12 +671,6 @@ module WithParser(Parser : Parser_S) = struct
   let parse_comma_list_opt_items_opt parser =
     parse_separated_list_opt parser TokenKind.Comma ItemsOptional
 
-  let parse_semi_list parser =
-    parse_separated_list parser TokenKind.Semicolon NoTrailing
-
-  let parse_semi_list_opt parser =
-    parse_separated_list_opt parser TokenKind.Semicolon NoTrailing
-
   let parse_delimited_list
       parser left_kind left_error right_kind right_error parse_items =
     let (parser, left) = require_token parser left_kind left_error in
@@ -732,12 +685,6 @@ module WithParser(Parser : Parser_S) = struct
   let parse_parenthesized_comma_list parser parse_item =
     let parse_items parser =
       parse_comma_list
-        parser TokenKind.RightParen SyntaxError.error1011 parse_item in
-    parse_parenthesized_list parser parse_items
-
-  let parse_parenthesized_comma_list_opt parser parse_item =
-    let parse_items parser =
-      parse_comma_list_opt
         parser TokenKind.RightParen SyntaxError.error1011 parse_item in
     parse_parenthesized_list parser parse_items
 
@@ -756,12 +703,6 @@ module WithParser(Parser : Parser_S) = struct
   let parse_braced_list parser parse_items =
     parse_delimited_list parser TokenKind.LeftBrace SyntaxError.error1034
       TokenKind.RightBrace SyntaxError.error1006 parse_items
-
-  let parse_braced_comma_list_opt parser parse_item =
-    let parse_items parser =
-      parse_comma_list_opt
-        parser TokenKind.RightBrace SyntaxError.error1006 parse_item in
-    parse_braced_list parser parse_items
 
   let parse_braced_comma_list_opt_allow_trailing parser parse_item =
     let parse_items parser =

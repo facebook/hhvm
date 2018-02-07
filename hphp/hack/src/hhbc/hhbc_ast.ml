@@ -289,8 +289,6 @@ type instruct_control_flow =
   | Unwind
   | Throw
 
-type iterator_list = (bool * Iterator.t) list
-
 type instruct_special_flow =
   | Continue of int
   | Break of int

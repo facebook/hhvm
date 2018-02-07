@@ -44,7 +44,6 @@ let get_or_allocate_unnamed r =
   | Some l -> l
 
 let get_label_id_local () = get_or_allocate_unnamed label_id_local
-let has_retval_local () = Option.is_some !retval_local
 let get_retval_local () = get_or_allocate_unnamed retval_local
 
 let reserve_retval_and_label_id_locals () =

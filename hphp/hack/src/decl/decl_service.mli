@@ -24,5 +24,4 @@ type lazy_decl_result = Errors.t
 (*****************************************************************************)
 val go: Worker.t list option -> bucket_size:int -> TypecheckerOptions.t ->
   FileInfo.fast -> result
-val merge_decl: result -> result -> result
 val merge_lazy_decl: lazy_decl_result -> lazy_decl_result -> lazy_decl_result

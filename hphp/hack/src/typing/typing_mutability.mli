@@ -10,7 +10,6 @@
 module T = Tast
 
 val handle_assignment_mutability : Typing_env.env -> T.expr -> T.expr -> Typing_env.env
-val expr_is_mutable : Typing_env.env -> T.expr -> bool
 val freeze_local : Pos.t -> Typing_env.env -> T.expr list -> Typing_env.env
 val enforce_mutable_call : Typing_env.env -> T.expr -> unit
 val verify_valid_mutable_return_value: Typing_env.env -> Pos.t -> T.expr -> unit

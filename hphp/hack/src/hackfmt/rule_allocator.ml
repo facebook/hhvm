@@ -32,11 +32,6 @@ let get_rule_kind t id =
   let r = IMap.find_unsafe id t.rule_map in
   r.Rule.kind
 
-let set_rule_kind t id rule_kind =
-  let r = IMap.find_unsafe id t.rule_map in
-  let r = { r with Rule.kind = rule_kind } in
-  { t with rule_map = IMap.add id r t.rule_map }
-
 let mark_dependencies t lazy_rules active_rule_ids child_id =
   let lazy_rule_list = ISet.elements lazy_rules in
   let rule_ids = lazy_rule_list @ active_rule_ids in

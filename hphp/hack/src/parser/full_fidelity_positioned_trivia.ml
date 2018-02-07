@@ -79,12 +79,6 @@ let source_text trivia =
 let text trivia =
   SourceText.sub (source_text trivia) (start_offset trivia) (width trivia)
 
-let start_position trivia =
-  SourceText.offset_to_position (source_text trivia) (start_offset trivia)
-
-let end_position trivia =
-  SourceText.offset_to_position (source_text trivia) (end_offset trivia)
-
 let from_minimal source_text minimal_trivia offset =
   let kind = MinimalTrivia.kind minimal_trivia in
   let width = MinimalTrivia.width minimal_trivia in

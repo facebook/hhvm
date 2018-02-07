@@ -94,9 +94,6 @@ let kind trivia =
 let text trivia =
   trivia.text
 
-let with_text trivia text =
-  { trivia with text }
-
 let text_from_trivia_list trivia_list =
   (* TODO: Better way to accumulate a string? *)
   let folder str trivia =

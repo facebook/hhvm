@@ -6356,9 +6356,6 @@ and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
     | _ ->
       raw_expr ~in_cond:false ?lhs_of_null_coalesce env e1
 
-(* Optional ~expected *)
-let expr ?allow_uref env e = expr ?allow_uref env e
-
 let nast_to_tast opts nast =
   let convert_def = function
     | Nast.Fun f       -> T.Fun (fun_def opts f)

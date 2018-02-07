@@ -20,9 +20,7 @@ type t =
 
 (* Some helper constructors *)
 let str x = String_list [x]
-let strs x = String_list x
 let gather x = String_concat x
-let empty = String_list []
 
 let rec string_seq_to_list_aux sl result =
   match sl with

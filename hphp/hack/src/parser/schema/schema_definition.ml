@@ -2155,7 +2155,6 @@ let string_of_aggregate_type = function
 module AggregateKey = struct
   type t = aggregate_type
   let compare (x: t) (y: t) = compare x y
-  let to_string = string_of_aggregate_type
 end
 module AggMap = MyMap.Make(AggregateKey)
 
@@ -2250,28 +2249,3 @@ let string_of_child_spec =
   | ZeroOrOne  c  -> p "ZeroOrOne (%s)" (aux c)
   in
   aux
-
-let string_of_schema s : string =
-  let open Printf in
-  let print_entry (a,b,c,d,(e : string list),fs) = sprintf
-"( \"%s\"
-    , \"%s\"
-    , \"%s\"
-    , \"%s\"
-    , [%s%s]
-    , [ %s%s]
-    )"
-    a
-    b
-    c
-    d
-    (String.concat ";" @@ List.map (sprintf " \"%s\"") e)
-    (if e = [] then "" else " ")
-    (String.concat "\n      ; " @@ List.map (fun (f,t) ->
-      sprintf "\"%s\", %s" f (string_of_child_spec t)
-    ) fs) @@ match fs with
-    | [] -> ""
-    | [_] -> " "
-    | _ -> "\n      "
-  in
-  sprintf "  [ %s\n  ]" @@ String.concat "\n  ; " @@ List.map print_entry s

@@ -332,12 +332,6 @@ let map_and_concat f items =
 let transform_schema f =
   map_and_concat f schema
 
-let transform_tokens token_list f =
-  map_and_concat f token_list
-
-let transform_trivia trivia_list f =
-  map_and_concat f trivia_list
-
 let transform_aggregate f =
   map_and_concat f generated_aggregate_types
 

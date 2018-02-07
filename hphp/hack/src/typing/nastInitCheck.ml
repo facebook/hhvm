@@ -35,10 +35,6 @@ module SN = Naming_special_names
  *)
 exception InitReturn of SSet.t
 
-type prop_status =
-  | Vnull (* The value is still potentially null *)
-  | Vinit (* Yay! it has been initialized *)
-
 (* Module initializing the environment
    Originally, every class member has 2 possible states,
    Vok  ==> when it is declared as optional, it is the job of the

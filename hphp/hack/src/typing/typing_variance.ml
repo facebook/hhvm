@@ -89,8 +89,6 @@ type variance =
    *)
   | Vboth
 
-type env = variance SMap.t
-
 (*****************************************************************************)
 (* Reason pretty-printing *)
 (*****************************************************************************)
@@ -160,15 +158,6 @@ let detailed_message variance pos stack =
       (pos, reason_stack_to_string variance stack) ::
       List.map stack (fun (p, _, _ as r) -> p, reason_to_string ~sign:true r)
 
-(*****************************************************************************)
-(* Debug *)
-(*****************************************************************************)
-
-let to_string = function
-  | Vcovariant _     -> "Vcovariant"
-  | Vcontravariant _ -> "Vcontravariant"
-  | Vinvariant _     -> "Vinvariant"
-  | Vboth            -> "Vboth"
 
 (*****************************************************************************)
 (* Converts an annotation (+/-) to a type. *)

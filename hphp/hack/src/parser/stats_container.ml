@@ -40,8 +40,6 @@ let record_float t k v =
   let cell = find_or_add t k in
   (cell.count <- 1.0 +. cell.count; cell.sum <- v +. cell.sum)
 
-let record_int t k v = record_float t k (float v)
-
 let get_count_exn t k = match Hashtbl.find_all t k with
   | [{count; _}] -> count
   | [] -> raise (NoSuchEntry ("count: " ^ k))

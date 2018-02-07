@@ -10,15 +10,11 @@
 module Config = Random_ast_generator_config
 
 module type AstGenerator = sig
-  type t
   (* generate a program from the root non-terminal with given number of tokens*)
-  val generate : int -> Config.t -> string
   val generate_with_exact_count : int -> Config.t -> string * int
 end
 
 module Make (G : Hack_grammar_descriptor_helper.Grammar) : AstGenerator = struct
-  type t = G.nonterm
-
   module NontermCount = struct
     type t = string * int
     let compare = compare
@@ -251,10 +247,6 @@ module Make (G : Hack_grammar_descriptor_helper.Grammar) : AstGenerator = struct
   let generate_all count config =
     let memory = {count_mem = CountMem.empty; post_mem = PostfixMem.empty} in
     get_string_simple memory (G.NonTerm G.start) count config
-
-  let generate count config =
-    let (_, program, _) = generate_all count config in
-    Printf.sprintf "<?hh\n%s" program
 
   let generate_with_exact_count count config =
     let (_, program, real_count) = generate_all count config in

@@ -39,18 +39,3 @@ let restore state =
   Utils.profile := state.profile_log;
   Errors.ignored_fixme_codes := state.fixme_codes;
   FilesToIgnore.set_paths_to_ignore state.paths_to_ignore
-
-
-let get_hhi_path state = state.saved_hhi
-let get_root_path state = state.saved_root
-
-let fake_state = {
-    saved_root = Path.make ".";
-    saved_hhi = Path.make ".";
-    saved_tmp = Path.make ".";
-    trace = false;
-    fuzzy = false;
-    profile_log = false;
-    fixme_codes = ISet.empty;
-    paths_to_ignore = [];
-  }

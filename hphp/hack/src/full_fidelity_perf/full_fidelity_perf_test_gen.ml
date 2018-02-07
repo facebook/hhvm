@@ -116,16 +116,6 @@ let save_to_file seed size target_folder source max_file mem no_error =
     close_out channel;
     mem
 
-let put_in_store result_store real_count time_new time_old =
-  if IntStore.mem real_count result_store then
-    let (num, total_time_new, total_time_old) =
-      IntStore.find real_count result_store in
-    let new_aggregate =
-      (num + 1, total_time_new +. time_new, total_time_old +. time_old) in
-    IntStore.add real_count new_aggregate result_store
-  else
-    IntStore.add real_count (1, time_new, time_old) result_store
-
 let rec n_times f x acc n =
   if n = 0 then acc
   else

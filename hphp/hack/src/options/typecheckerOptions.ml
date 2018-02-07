@@ -12,7 +12,6 @@ type t = GlobalOptions.t
 let assume_php = GlobalOptions.tco_assume_php
 let safe_array = GlobalOptions.tco_safe_array
 let safe_vector_array = GlobalOptions.tco_safe_vector_array
-let user_attrs = GlobalOptions.tco_user_attrs
 let allowed_attribute = GlobalOptions.tco_allowed_attribute
 let disallow_destruct = GlobalOptions.tco_disallow_destruct
 let experimental_feature_enabled =

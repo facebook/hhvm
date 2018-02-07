@@ -55,9 +55,6 @@ let get_next_label () =
 let next_regular () =
   Regular (get_next_label())
 
-let next_catch () =
-  Catch (get_next_label())
-
 let next_fault () =
   Fault (get_next_label())
 

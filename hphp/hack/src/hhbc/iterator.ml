@@ -10,8 +10,6 @@
 
 type t = Id of int
 
-let to_int (Id i) = i
-
 let to_string (Id i) = string_of_int i
 
 let next_iterator = ref 0

@@ -78,12 +78,6 @@ let is_abstract method_def = method_def.method_is_abstract
 let no_injection method_def = method_def.method_no_injection
 let inout_wrapper method_def = method_def.method_inout_wrapper
 let name method_def = method_def.method_name
-let with_name method_def method_name = { method_def with method_name }
-let make_private method_def =
-  { method_def with
-    method_is_protected = false;
-    method_is_public = false;
-    method_is_private = true }
 let body method_def = method_def.method_body
 let span method_def = method_def.method_span
 let is_async method_def = method_def.method_is_async
@@ -95,4 +89,3 @@ let is_interceptable method_def = method_def.method_is_interceptable
 let with_body method_def method_body = { method_def with method_body }
 let params m = m.method_body.Hhas_body.body_params
 let return_type m = m.method_body.Hhas_body.body_return_type
-let with_is_async m method_is_async = { m with method_is_async }

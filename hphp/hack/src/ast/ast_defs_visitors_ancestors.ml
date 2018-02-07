@@ -13,18 +13,6 @@ class virtual ['e] monoid = object (self)
   method private virtual plus: 'e -> 'e -> 'e
 end
 
-class ['e] monoid_sum = object
-  inherit ['e] monoid
-  method private zero = 0
-  method private plus = (+)
-end
-
-class ['e] monoid_product = object
-  inherit ['e] monoid
-  method private zero = 1
-  method private plus = ( * )
-end
-
 class virtual ['a] option_monoid = object (self)
   inherit ['a option] monoid
   method private virtual merge: 'a -> 'a -> 'a

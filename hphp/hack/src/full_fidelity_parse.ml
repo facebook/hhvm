@@ -187,26 +187,6 @@ let print_full_fidelity_errors ~syntax_tree ~source_text ~level =
   let errors = ParserErrors.parse_errors ~level syntax_tree in
   List.iter (print_full_fidelity_error source_text) errors
 
-(* returns a tuple of functions, classes, typedefs and consts *)
-let parse_file filename =
-  let path = Relative_path.create Relative_path.Dummy filename in
-  let options = ParserOptions.default in
-  let { Parser_hack.ast; _} = Parser_hack.from_file options path in
-  Ast_utils.get_defs ast
-
-let type_file filename (funs, classes, typedefs, consts) =
-  NamingGlobal.make_env ParserOptions.default ~funs ~classes ~typedefs ~consts;
-  let path = Relative_path.create Relative_path.Dummy filename in
-  let name_function (_, fun_) =
-    Typing_check_service.type_fun TypecheckerOptions.default path fun_ in
-  let named_funs = Hh_core.List.filter_map funs name_function in
-  let name_class (_, class_) =
-    Typing_check_service.type_class TypecheckerOptions.default path class_ in
-  let named_classes = Hh_core.List.filter_map classes name_class in
-  let named_typedefs = [] in (* TODO *)
-  let named_consts = [] in (* TODO *)
-  (named_funs, named_classes, named_typedefs, named_consts)
-
 let handle_existing_file args filename =
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

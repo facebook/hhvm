@@ -97,15 +97,6 @@ module WithSyntax(Syntax: RewritableType) = struct
     let (acc, result) = parented_aggregating_rewrite_post f node [] in
     result
 
-  (* Here f is a function node -> node opt, with the semantics of
-     "returning None means retain current node, returning Some node
-     means replace it " *)
-  let rewrite_post_opt f node =
-    let f node =
-      match f node with
-    | None -> Keep
-    | Some node -> Replace node in
-    rewrite_post f node
 
   (* As above, but the rewrite happens to the node first and then
      recurses on the children. *)
@@ -146,17 +137,6 @@ module WithSyntax(Syntax: RewritableType) = struct
       | Remove -> failwith "rewriter removed the root node!" in
     (acc, result_node)
 
-    (* The same as the above, except that f does not take parents. *)
-    let aggregating_rewrite_pre f node init_acc =
-      let f parents node acc = f node acc in
-      parented_aggregating_rewrite_pre f node init_acc
-
-    (* The same as the above, except that f does not take or return an
-       accumulator. *)
-    let parented_rewrite_pre f node =
-      let f parents node acc = ([], f parents node) in
-      let (acc, result) = parented_aggregating_rewrite_pre f node [] in
-      result
 
     (* The same as the above, except that f does not take or return an
        accumulator, and f does not take parents *)
@@ -164,15 +144,5 @@ module WithSyntax(Syntax: RewritableType) = struct
       let f parents node acc = ([], f node) in
       let (acc, result) = parented_aggregating_rewrite_pre f node [] in
       result
-
-  (* Here f is a function node -> node opt, with the semantics of
-     "returning None means retain current node, returning Some node
-     means replace it " *)
-  let rewrite_pre_opt f node =
-    let f node =
-      match f node with
-      | None -> Keep
-      | Some node -> Replace node in
-    rewrite_pre f node
 
 end

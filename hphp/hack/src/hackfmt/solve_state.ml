@@ -237,9 +237,6 @@ let from_source env source_text chunk_group =
 let is_rule_bound t rule_id =
   IMap.mem rule_id t.rbm
 
-let is_rule_unbound t rule_id =
-  not (is_rule_bound t rule_id)
-
 let get_candidate_rules t = t.candidate_rules
 
 let get_unprocessed_overflow t = Lazy.force t.unprocessed_overflow

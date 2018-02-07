@@ -128,6 +128,3 @@ let find_typedef_in_file ?(full = false) popt file_name name =
 
 let find_const_in_file ?(full = false) popt file_name name =
   get_const (get_from_parser_heap ~full popt file_name) name
-
-let find_statements_in_file ?(full = false) popt file_name =
-  get_statements (get_from_parser_heap ~full popt file_name)

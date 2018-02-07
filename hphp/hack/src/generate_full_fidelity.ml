@@ -794,10 +794,6 @@ end (* WithSyntax *)
 end (* GenerateFFSyntaxSmartConstructors *)
 
 module GenerateFFSyntax = struct
-  let to_syntax x =
-    sprintf ("    | " ^^ kind_name_fmt ^^ " of %s\n")
-      x.kind_name x.type_name
-
   let to_to_kind x =
     sprintf ("      | " ^^ kind_name_fmt ^^ " _ -> SyntaxKind.%s\n")
       x.kind_name x.kind_name

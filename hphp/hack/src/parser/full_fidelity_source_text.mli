@@ -54,12 +54,3 @@ val position_to_offset : t -> int * int -> int
 
 (** construct a relative position associated with the source_text.t virtual file *)
 val relative_pos : Relative_path.t -> t -> int -> int -> Pos.t
-
-(** is there a newline at absolute offset i? *)
-val is_newline : t -> int -> bool
-
-(** get the absolute offset corresponding to the start of the line containing offset i *)
-val start_of_line : t -> int -> int
-
-(** get the absolute offset corresponding to the end of the line containing offset i *)
-val end_of_line : t -> int -> int

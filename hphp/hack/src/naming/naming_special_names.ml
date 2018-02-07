@@ -20,12 +20,8 @@ module Classes = struct
   let cUnknown = "\\*Unknown*" (* Used for dynamic classnames, e.g. new $foo(); *)
 
   let cAwaitable = "\\Awaitable"
-  let cWaitHandle = "\\WaitHandle"
-  let cWaitableWaitHandle = "\\WaitableWaitHandle"
   let cGenerator = "\\Generator"
   let cAsyncGenerator = "\\AsyncGenerator"
-  let cFormatString = "\\FormatString" (* deprecated - defined in user code *)
-  let cHackFormatString = "\\HH\\FormatString" (* Same thing, but in core HHI *)
   let is_format_string x = match x with
     "\\FormatString" | "\\HH\\FormatString" -> true
     | _ -> false
@@ -62,17 +58,12 @@ module Collections = struct
   let cPair      = "\\Pair"
 
   (* interfaces *)
-  let cIterator         = "\\Iterator"
-  let cKeyedIterator    = "\\KeyedIterator"
   let cContainer        = "\\Container"
   let cKeyedContainer   = "\\KeyedContainer"
   let cTraversable      = "\\Traversable"
   let cKeyedTraversable = "\\KeyedTraversable"
-  let cIterable         = "\\Iterable"
-  let cKeyedIterable    = "\\KeyedIterable"
   let cIndexish         = "\\Indexish"
 
-  let cCollection       = "\\Collection"
   let cConstVector      = "\\ConstVector"
   let cConstMap         = "\\ConstMap"
   let cDict             = "\\dict"
@@ -190,8 +181,6 @@ module PseudoFunctions = struct
   let isset = "\\isset"
   let unset = "\\unset"
   let freeze = "\\freeze"
-  let exit_ = "\\exit"
-  let die = "\\die"
   let hh_show = "\\hh_show"
   let hh_show_env = "\\hh_show_env"
   let hh_log_level = "\\hh_log_level"
@@ -303,9 +292,6 @@ module FB = struct
 
   let cEnum                  = "\\Enum"
   let cUncheckedEnum         = "\\UncheckedEnum"
-
-  let cDynamicYield          = "\\DynamicYield"
-  let cIUseDynamicYield      = "\\IUseDynamicYield"
 
   let fgena                  = "\\gena"
   let fgenva                 = "\\genva"

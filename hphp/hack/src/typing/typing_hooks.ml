@@ -98,9 +98,6 @@ let attach_id_hook hook =
 let attach_lvar_hook hook =
   lvar_hooks := hook :: !lvar_hooks
 
-let attach_fun_call_hook hook =
-  fun_call_hooks := hook :: !fun_call_hooks
-
 let attach_new_id_hook hook =
   new_id_hooks := hook :: !new_id_hooks
 

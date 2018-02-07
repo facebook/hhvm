@@ -169,8 +169,6 @@ module Closures = struct
   let mangle_closure scope ix count =
     Classes.mangle_class "Closure" scope ix count
 
-  let split_scope_name s = Str.split (Str.regexp "::") s
-  let join_method class_name method_name = class_name ^ "::" ^ method_name
 end
 
 (* XHP name mangling *)

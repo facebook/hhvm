@@ -46,8 +46,6 @@ let unwrap_class_type = function
     ) ->
     raise @@ Invalid_argument "unwrap_class_type got non-class"
 
-let try_unwrap_class_type x = Option.try_with (fun () -> unwrap_class_type x)
-
 (* Given sets A and B return a tuple (AnB, A\B), i.e split A into the part
  * that is common with B, and which is unique to A *)
 let split_sets defs split_if_in_defs =

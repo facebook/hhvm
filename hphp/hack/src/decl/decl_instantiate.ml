@@ -14,8 +14,6 @@ open Typing_defs
 module SN     = Naming_special_names
 module Subst = Decl_subst
 
-type subst = decl ty SMap.t
-
 let make_subst tparams tyl = Subst.make tparams tyl
 
 (*****************************************************************************)

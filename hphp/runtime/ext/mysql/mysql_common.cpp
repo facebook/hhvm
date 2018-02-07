@@ -1418,19 +1418,19 @@ Variant mysql_makevalue(const String& data, enum_field_types field_type) {
 #ifdef FACEBOOK
 extern "C" {
 struct MEM_ROOT;
-unsigned long cli_safe_read(MYSQL *);
-unsigned long net_field_length(unsigned char **);
-void free_root(::MEM_ROOT *, int);
+unsigned long net_field_length(unsigned char**);
+void free_root(::MEM_ROOT*, int);
 }
 
 static bool php_mysql_read_rows(MYSQL *mysql, const Variant& result) {
   unsigned long pkt_len;
   unsigned char *cp;
   unsigned int fields = mysql->field_count;
-  NET *net = &mysql->net;
+  NET* net = &mysql->net;
   auto res = php_mysql_extract_result(result);
+  my_bool is_data = 0;
 
-  if ((pkt_len = cli_safe_read(mysql)) == packet_error) {
+  if ((pkt_len = cli_safe_read(mysql, &is_data)) == packet_error) {
     return false;
   }
 
@@ -1453,7 +1453,7 @@ static bool php_mysql_read_rows(MYSQL *mysql, const Variant& result) {
       }
       res->addField(std::move(data));
     }
-    if ((pkt_len = cli_safe_read(mysql)) == packet_error) {
+    if ((pkt_len = cli_safe_read(mysql, &is_data)) == packet_error) {
       return false;
     }
   }

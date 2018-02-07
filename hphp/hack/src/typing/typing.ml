@@ -2085,9 +2085,9 @@ and expr_
           else (Reason.Rwitness p, Tfun { ft with ft_ret = ty }) in
         Typing_log.log_types 1 p env
           [Typing_log.Log_sub
-          ("Typing.check_body_under_known_params",
-          [Typing_log.Log_type ("ft", (Reason.Rwitness p, Tfun ft));
-           Typing_log.Log_type ("inferred_ty", inferred_ty)])];
+            ("Typing.check_body_under_known_params",
+              [Typing_log.Log_type ("ft", (Reason.Rwitness p, Tfun ft));
+               Typing_log.Log_type ("inferred_ty", inferred_ty)])];
         env, tefun, inferred_ty in
       let env, eexpected = expand_expected env expected in
       begin match eexpected with
@@ -2097,22 +2097,22 @@ and expr_
         (* Use declared types for parameters in preference to those determined
          * by the context: they might be more general. *)
         let rec replace_non_declared_types params declared_ft_params expected_ft_params =
-        match params, declared_ft_params, expected_ft_params with
-        | param::params, declared_ft_param::declared_ft_params,
+          match params, declared_ft_params, expected_ft_params with
+          | param::params, declared_ft_param::declared_ft_params,
             expected_ft_param::expected_ft_params ->
-          let rest = replace_non_declared_types params declared_ft_params expected_ft_params in
-          let resolved_ft_param = if Option.is_some param.param_hint
-            then declared_ft_param
-            else { declared_ft_param with fp_type = expected_ft_param.fp_type } in
-          resolved_ft_param :: rest
-        | _, _, _ ->
-          (* This means the expected_ft params list can have more parameters
-           * than declared parameters in the lambda. For variadics, this is OK,
-           * for non-variadics, this will be caught elsewhere in arity checks.
-           *)
-          expected_ft_params
+            let rest = replace_non_declared_types params declared_ft_params expected_ft_params in
+            let resolved_ft_param = if Option.is_some param.param_hint
+              then declared_ft_param
+              else { declared_ft_param with fp_type = expected_ft_param.fp_type } in
+            resolved_ft_param :: rest
+          | _, _, _ ->
+            (* This means the expected_ft params list can have more parameters
+             * than declared parameters in the lambda. For variadics, this is OK,
+             * for non-variadics, this will be caught elsewhere in arity checks.
+             *)
+            expected_ft_params
         in
-      let replace_non_declared_arity variadic declared_arity expected_arity =
+        let replace_non_declared_arity variadic declared_arity expected_arity =
           match variadic with
           | FVvariadicArg {param_hint = Some(_); _} -> declared_arity
           | FVvariadicArg _ ->
@@ -2156,39 +2156,39 @@ and expr_
           check_body_under_known_params declared_ft
         end
         else begin
-        match expected with
-        | Some (_, _, (_, Tany)) ->
-          (* If the expected type is Tany then we're passing a lambda to an untyped
-           * function and we just assume every parameter has type Tany *)
-          Measure.sample "Lambda [untyped context]" 1.0;
-          check_body_under_known_params declared_ft
-        | _ ->
-        Measure.sample "Lambda [unknown params]" 1.0;
-        Typing_log.log_types 1 p env
-          [Typing_log.Log_sub
-          ("Typing.expr Efun unknown params",
-          [Typing_log.Log_type ("declared_ft", (Reason.Rwitness p, Tfun declared_ft))])];
-        (* check for recursive function calls *)
-        let is_coroutine, anon = anon_make env p f declared_ft idl in
-        let env, tefun, _, anon_id = Errors.try_with_error
-          (fun () ->
-            let reactivity, (_, tefun, ty) =
-              Env.check_lambda_reactive
-                (fun () -> anon env declared_ft.ft_params declared_ft.ft_arity) in
-            let anon_fun = reactivity, is_coroutine, anon in
-            let env, anon_id = Env.add_anonymous env anon_fun in
-            env, tefun, ty, anon_id)
-          (fun () ->
-            (* If the anonymous function declaration has errors itself, silence
-               them in any subsequent usages. *)
-            let anon_ign ?el:_ ?ret_ty:_ env fun_params =
-              Errors.ignore_ (fun () -> (anon env fun_params)) in
-            let reactivity, (_, tefun, ty)
-              = Env.check_lambda_reactive (fun () -> anon_ign env declared_ft.ft_params declared_ft.ft_arity) in
-            let anon_fun = reactivity, is_coroutine, anon in
-            let env, anon_id = Env.add_anonymous env anon_fun in
-            env, tefun, ty, anon_id) in
-          env, tefun, (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id))
+          match expected with
+          | Some (_, _, (_, Tany)) ->
+            (* If the expected type is Tany then we're passing a lambda to an untyped
+             * function and we just assume every parameter has type Tany *)
+            Measure.sample "Lambda [untyped context]" 1.0;
+            check_body_under_known_params declared_ft
+          | _ ->
+            Measure.sample "Lambda [unknown params]" 1.0;
+            Typing_log.log_types 1 p env
+              [Typing_log.Log_sub
+                ("Typing.expr Efun unknown params",
+                  [Typing_log.Log_type ("declared_ft", (Reason.Rwitness p, Tfun declared_ft))])];
+            (* check for recursive function calls *)
+            let is_coroutine, anon = anon_make env p f declared_ft idl in
+            let env, tefun, _, anon_id = Errors.try_with_error
+              (fun () ->
+                let reactivity, (_, tefun, ty) =
+                  Env.check_lambda_reactive
+                    (fun () -> anon env declared_ft.ft_params declared_ft.ft_arity) in
+                let anon_fun = reactivity, is_coroutine, anon in
+                let env, anon_id = Env.add_anonymous env anon_fun in
+                env, tefun, ty, anon_id)
+              (fun () ->
+                (* If the anonymous function declaration has errors itself, silence
+                   them in any subsequent usages. *)
+                let anon_ign ?el:_ ?ret_ty:_ env fun_params =
+                  Errors.ignore_ (fun () -> (anon env fun_params)) in
+                let reactivity, (_, tefun, ty)
+                  = Env.check_lambda_reactive (fun () -> anon_ign env declared_ft.ft_params declared_ft.ft_arity) in
+                let anon_fun = reactivity, is_coroutine, anon in
+                let env, anon_id = Env.add_anonymous env anon_fun in
+                env, tefun, ty, anon_id) in
+            env, tefun, (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id))
         end
       end
   | Xml (sid, attrl, el) ->

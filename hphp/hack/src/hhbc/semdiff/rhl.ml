@@ -939,6 +939,10 @@ let equiv prog prog' startlabelpairs =
     (* Catch instructions have to match up because they affect the stack *)
     | ITry TryCatchMiddle, ITry TryCatchMiddle -> nextins()
 
+    (* NativeImpl behaves like return - we don't want to look at the next instruction *)
+    | IMisc NativeImpl, IMisc NativeImpl ->
+          donext assumed todo
+
     | IContFlow ins, IContFlow ins' ->
         begin match ins, ins' with
         | JmpZ lab, JmpZ lab'

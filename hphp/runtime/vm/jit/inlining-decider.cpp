@@ -39,6 +39,7 @@
 
 #include <folly/RWSpinLock.h>
 #include <folly/Synchronized.h>
+#include <cmath>
 #include <vector>
 
 namespace HPHP { namespace jit {
@@ -375,12 +376,20 @@ int computeTranslationCost(SrcKey at, Op callerFPushOp,
   return cost;
 }
 
-uint64_t adjustedMaxVasmCost(uint64_t curProfCount) {
+uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
+                             const RegionDesc& calleeRegion) {
   const auto baseVasmCost = RuntimeOption::EvalHHIRInliningVasmCostLimit;
-  if (s_baseProfCount.load() == 0) return baseVasmCost;
   const auto baseProfCount = s_baseProfCount.load();
-  const auto costFactor = RuntimeOption::EvalHHIRInliningVasmCostFactor;
-  auto adjustedCost = costFactor * baseVasmCost * curProfCount / baseProfCount;
+  if (baseProfCount == 0) return baseVasmCost;
+  auto const callerProfCount = irgen::curProfCount(env);
+  auto adjustedCost = baseVasmCost *
+    std::pow((double)callerProfCount / baseProfCount,
+             RuntimeOption::EvalHHIRInliningVasmCallerExp);
+  auto const calleeProfCount = irgen::calleeProfCount(env, calleeRegion);
+  if (calleeProfCount) {
+    adjustedCost *= std::pow((double)callerProfCount / calleeProfCount,
+                             RuntimeOption::EvalHHIRInliningVasmCalleeExp);
+  }
   if (adjustedCost < RuntimeOption::EvalHHIRInliningMinVasmCostLimit) {
     adjustedCost = RuntimeOption::EvalHHIRInliningMinVasmCostLimit;
   }
@@ -388,8 +397,8 @@ uint64_t adjustedMaxVasmCost(uint64_t curProfCount) {
     adjustedCost = RuntimeOption::EvalHHIRInliningMaxVasmCostLimit;
   }
   FTRACE(3, "adjustedMaxVasmCost: adjustedCost ({}) = baseVasmCost ({}) * "
-         "curProfCount ({}) / baseProfCount ({})\n",
-         adjustedCost, baseVasmCost, curProfCount, baseProfCount);
+         "callerProfCount ({}) / baseProfCount ({})\n",
+         adjustedCost, baseVasmCost, callerProfCount, baseProfCount);
   return adjustedCost;
 }
 
@@ -404,7 +413,7 @@ int InliningDecider::accountForInlining(SrcKey callerSk,
                                         const Func* callee,
                                         const RegionDesc& region,
                                         const irgen::IRGS& irgs) {
-  const auto maxCost = adjustedMaxVasmCost(curProfCount(irgs));
+  const auto maxCost = adjustedMaxVasmCost(irgs, region);
   int cost = computeTranslationCost(callerSk, callerFPushOp, region, maxCost);
   m_costStack.push_back(cost);
   m_cost       += cost;
@@ -694,13 +703,13 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
 
   const auto mode = RuntimeOption::EvalInlineRegionMode;
 
-  const auto adjustedMaxCost = adjustedMaxVasmCost(curProfCount(irgs));
   if (mode == "cfg" || mode == "both") {
     if (profData()) {
       auto region = selectCalleeCFG(callee, numArgs, ctx, argTypes,
                                     maxBCInstrs);
       if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
-                                     callee, *region, adjustedMaxCost)) {
+                                     callee, *region,
+                                     adjustedMaxVasmCost(irgs, *region))) {
         return region;
       }
     }
@@ -717,7 +726,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   );
 
   if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
-                                 callee, *region, adjustedMaxCost)) {
+                                 callee, *region,
+                                 adjustedMaxVasmCost(irgs, *region))) {
     return region;
   }
 

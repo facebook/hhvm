@@ -56,11 +56,17 @@ void check_catch_stack_state(IRGS& env, const IRInstruction* inst) {
 }
 
 uint64_t curProfCount(const IRGS& env) {
-  auto tid = env.profTransID;
+  auto const tid = env.profTransID;
   assertx(tid == kInvalidTransID ||
           (env.region != nullptr && profData() != nullptr));
   return env.profFactor *
-         (tid != kInvalidTransID ? env.region->blockProfCount(tid) : 1);
+    (tid != kInvalidTransID ? env.region->blockProfCount(tid) : 1);
+}
+
+uint64_t calleeProfCount(const IRGS& env, const RegionDesc& calleeRegion) {
+  auto const tid = calleeRegion.entry()->id();
+  if (tid == kInvalidTransID) return 0;
+  return env.profFactor * calleeRegion.blockProfCount(tid);
 }
 
 //////////////////////////////////////////////////////////////////////

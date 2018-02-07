@@ -49,12 +49,13 @@ struct StringData;
 namespace jit {
 
 struct Block;
-struct IRGS;
 struct IRInstruction;
 struct NormalizedInstruction;
 struct SSATmp;
 
 namespace irgen {
+
+struct IRGS;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -152,6 +153,7 @@ void incProfCounter(IRGS&, TransID);
 void checkCold(IRGS&, TransID);
 
 uint64_t curProfCount(const IRGS& env);
+uint64_t calleeProfCount(const IRGS& env, const RegionDesc& calleeRegion);
 
 /*
  * If ringbuffer tracing is enabled, generate a ringbuffer entry associated

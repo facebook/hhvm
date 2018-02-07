@@ -23,7 +23,8 @@
 
 namespace HPHP { namespace jit {
 
-struct IRGS;
+namespace irgen { struct IRGS; }
+
 struct IRUnit;
 struct TransContext;
 

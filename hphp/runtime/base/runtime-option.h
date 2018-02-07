@@ -616,7 +616,8 @@ struct RuntimeOption {
   F(uint32_t, HHIRInliningVasmCostLimit, 175)                           \
   F(uint32_t, HHIRInliningMinVasmCostLimit, 100)                        \
   F(uint32_t, HHIRInliningMaxVasmCostLimit, 400)                        \
-  F(double,   HHIRInliningVasmCostFactor, 0.1)                          \
+  F(double,   HHIRInliningVasmCallerExp, .5)                            \
+  F(double,   HHIRInliningVasmCalleeExp, .5)                            \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 12)                         \
   F(uint32_t, HHIRInliningMaxReturnLocals, 20)                          \
   F(bool, HHIRInlineFrameOpts,         true)                            \

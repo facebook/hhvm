@@ -126,6 +126,24 @@ let test_rename_target_is_dir_ends_with_slash dir =
 let test_rename_src_ends_with_slash_target_is_dir dir =
   test_rename_target_is_dir ~append_slash_on_src:true dir
 
+let test_readdir dir =
+  let subdir = Path.concat dir "subdir" in
+  setup_dir subdir [("foo.txt", "foo"); ("bar", "hello")];
+  Sys_utils.mkdir_p (Path.to_string (Path.concat subdir "subsubdir"));
+  let names = Path.to_string dir
+    |> Disk.readdir
+    |> Array.to_list
+    |> List.sort String.compare in
+  Asserter.String_asserter.assert_list_equals ["subdir"] names
+    "temp dir only has one name, the subdir";
+  let names = Path.to_string subdir
+    |> Disk.readdir
+    |> Array.to_list
+    |> List.sort String.compare in
+  Asserter.String_asserter.assert_list_equals ["bar"; "foo.txt"; "subsubdir"] names
+    "subdir has 3 names";
+  true
+
 let test_rm_dir dir =
   let subdir = Path.concat dir "subdir" in
   setup_dir subdir [("a.txt", "hello")];
@@ -168,6 +186,8 @@ let tests = [
     with_temp_dir test_rename_target_is_dir_ends_with_slash);
   ("test_rename_src_ends_with_slash_target_is_dir",
     with_temp_dir test_rename_src_ends_with_slash_target_is_dir);
+  ("test_readdir",
+    with_temp_dir test_readdir);
   ("test_rm_dir",
     with_temp_dir test_rm_dir);
 ]

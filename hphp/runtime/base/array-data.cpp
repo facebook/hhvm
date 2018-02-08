@@ -114,7 +114,7 @@ struct ScalarHash {
   bool equal(const ArrayData* ad1, const ArrayData* ad2) const {
     if (ad1 == ad2) return true;
     if (ad1->size() != ad2->size()) return false;
-    if (ad1->dvArray() != ad2->dvArray()) return false;
+    if (!ArrayData::dvArrayEqual(ad1, ad2)) return false;
     if (ad1->isHackArray()) {
       if (!ad2->isHackArray()) return false;
       if (ad1->kind() != ad2->kind()) return false;
@@ -883,7 +883,7 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   if (ad1 == ad2) return true;
 
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatDVCmpNotices &&
-               ad1->dvArray() != ad2->dvArray())) {
+               !ArrayData::dvArrayEqual(ad1, ad2))) {
     raiseHackArrCompatDVArrCmp(ad1, ad2);
   }
 
@@ -923,7 +923,7 @@ int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
   assert(ad2->isPHPArray());
 
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatDVCmpNotices &&
-               ad1->dvArray() != ad2->dvArray())) {
+               !ArrayData::dvArrayEqual(ad1, ad2))) {
     raiseHackArrCompatDVArrCmp(ad1, ad2);
   }
 

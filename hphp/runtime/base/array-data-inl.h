@@ -159,23 +159,29 @@ inline bool ArrayData::isHackArray() const {
 }
 
 inline ArrayData::DVArray ArrayData::dvArray() const {
-  // The darray/varray state is stored in the lower 8-bits of m_aux16. The
-  // array is free to store whatever it wants in the upper 8-bits.
-  return static_cast<DVArray>(m_aux16);
+  // The darray/varray state is stored in the lower 2-bits of m_aux16. The
+  // array is free to store whatever it wants in the upper 14-bits.
+  return static_cast<DVArray>(m_aux16 & kDVArrayMask);
 }
 
 inline void ArrayData::setDVArray(DVArray d) {
-  m_aux16 = (m_aux16 & 0xFF00) | d;
+  assertx(!(d & ~kDVArrayMask));
+  m_aux16 = (m_aux16 & ~kDVArrayMask) | d;
 }
 
-inline bool ArrayData::isVArray() const { return dvArray() == kVArray; }
-inline bool ArrayData::isDArray() const { return dvArray() == kDArray; }
+inline bool ArrayData::isVArray() const { return dvArray() & kVArray; }
+inline bool ArrayData::isDArray() const { return dvArray() & kDArray; }
 inline bool ArrayData::isNotDVArray() const { return dvArray() == kNotDVArray; }
+
+// gcc doesn't optimize (a & 3) == (b & 3) very well; help it a little.
+inline bool ArrayData::dvArrayEqual(const ArrayData* a, const ArrayData* b) {
+  return ((a->m_aux16 ^ b->m_aux16) & kDVArrayMask) == 0;
+}
 
 inline bool ArrayData::dvArraySanityCheck() const {
   auto const dv = dvArray();
-  if (isPacked()) return dv == kVArray || dv == kNotDVArray;
-  if (isMixed())  return dv == kDArray || dv == kNotDVArray;
+  if (isPacked()) return !(dv & kDArray);
+  if (isMixed())  return !(dv & kVArray);
   return dv == kNotDVArray;
 }
 

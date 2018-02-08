@@ -81,10 +81,11 @@ struct ArrayData : MaybeCountable {
    * arrays.
    */
   enum DVArray : uint8_t {
-    kNotDVArray,
-    kVArray,
-    kDArray
+    kNotDVArray = 0,
+    kVArray     = 1,
+    kDArray     = 2
   };
+  static auto constexpr kDVArrayMask = static_cast<DVArray>(3);
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -258,6 +259,7 @@ public:
   bool isVArray() const;
   bool isDArray() const;
   bool isNotDVArray() const;
+  static bool dvArrayEqual(const ArrayData* a, const ArrayData* b);
 
   /*
    * Check whether the array has an sane DVArray setting for its kind.

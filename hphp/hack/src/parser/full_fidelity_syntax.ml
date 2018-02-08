@@ -31,7 +31,6 @@
 open Full_fidelity_syntax_type
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
-module TriviaKind = Full_fidelity_trivia_kind
 module Operator = Full_fidelity_operator
 
 module WithToken(Token: TokenType) = struct
@@ -431,9 +430,9 @@ module WithToken(Token: TokenType) = struct
         end
       | _ -> false
 
-    let has_leading_end_of_line token =
+    let has_leading_trivia kind token =
       Hh_core.List.exists (Token.leading token)
-        ~f:(fun trivia ->  Token.Trivia.kind trivia = TriviaKind.EndOfLine)
+        ~f:(fun trivia ->  Token.Trivia.kind trivia = kind)
 
     let is_semicolon  = is_specific_token TokenKind.Semicolon
     let is_name       = is_specific_token TokenKind.Name

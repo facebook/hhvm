@@ -21,6 +21,8 @@
   
  *)
 
+module TriviaKind = Full_fidelity_trivia_kind
+
 module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
   type value
@@ -983,7 +985,7 @@ module type Syntax_S = sig
     }
 
 
-  val has_leading_end_of_line : Token.t -> bool
+  val has_leading_trivia : TriviaKind.t -> Token.t -> bool
   val to_json : ?with_value:bool -> t -> Hh_json.json
   val extract_text : t -> string option
   val is_in_body : t -> int -> bool

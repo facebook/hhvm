@@ -487,6 +487,8 @@ module GenerateFFSyntaxSig = struct
 * surface area of a constructable syntax tree.
   ") ^ "
 
+module TriviaKind = Full_fidelity_trivia_kind
+
 module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
   type value
@@ -888,7 +890,6 @@ module GenerateFFSyntax = struct
 open Full_fidelity_syntax_type
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
-module TriviaKind = Full_fidelity_trivia_kind
 module Operator = Full_fidelity_operator
 
 module WithToken(Token: TokenType) = struct

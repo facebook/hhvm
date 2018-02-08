@@ -986,7 +986,7 @@ module WithExpressionAndStatementAndTypeParser
        * we should be parsing a methodish. Throw an error, process the token
        * as an extra, and keep going. *)
       | _, (Async | Coroutine | Function)
-        when not (Syntax.has_leading_end_of_line next_token) ->
+        when not (Syntax.has_leading_trivia TriviaKind.EndOfLine next_token) ->
         let parser = with_error parser SyntaxError.error1056
           ~on_whole_token:true in
         let parser = skip_and_log_unexpected_token parser

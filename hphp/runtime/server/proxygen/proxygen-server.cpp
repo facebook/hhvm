@@ -223,34 +223,54 @@ void ProxygenServer::start() {
     throw FailedToListenException(addr.getAddressStr(), addr.getPort());
   };
 
-  try {
-    if (m_accept_sock >= 0) {
-      Logger::Info("inheritfd: using inherited fd %d for server",
-                   m_accept_sock);
+  /*
+   * Order of setting up m_httpServerSocket (for the main server only, not
+   * including admin server, etc.).
+   * (1) Try to use RuntimeOption::ServerPortFd (the inherited socket should
+   * have already been bound to a proper port, but isn't listening yet).
+   * (2) If (1) fails, and try to take over the socket of an old server.
+   * (3) If both (1) and (2) fail, try to bind to RuntimeOption::ServerPort.
+   */
+  bool socketSetupSucceeded = false;
+  if (m_accept_sock >= 0) {
+    try {
       m_httpServerSocket->useExistingSocket(m_accept_sock);
-    } else {
-      // make it possible to quickly reuse the port
-      m_httpServerSocket->setReusePortEnabled(RuntimeOption::StopOldServer);
-      m_httpServerSocket->bind(m_httpConfig.bindAddress);
+      socketSetupSucceeded = true;
+      Logger::Info("inheritfd: successfully inherited fd %d for server",
+                   m_accept_sock);
+    } catch (const std::exception& ex) {
+      Logger::Warning("inheritfd: failed to inherit fd %d for server",
+                      m_accept_sock);
     }
-  } catch (const std::system_error& ex) {
-    bool takoverSucceeded = false;
-    if (ex.code().value() == EADDRINUSE &&
-        m_takeover_agent) {
-      m_accept_sock = m_takeover_agent->takeover();
-      if (m_accept_sock >= 0) {
-        Logger::Info("takeover: using takeover fd %d for server",
-                     m_accept_sock);
+  }
+  if (!socketSetupSucceeded && m_takeover_agent) {
+    m_accept_sock = m_takeover_agent->takeover();
+    if (m_accept_sock >= 0) {
+      try {
         m_httpServerSocket->useExistingSocket(m_accept_sock);
         needListen = false;
         m_takeover_agent->requestShutdown();
-        takoverSucceeded = true;
+        socketSetupSucceeded = true;
+        Logger::Info("takeover: using takeover fd %d for server",
+                     m_accept_sock);
+      } catch (const std::exception& ex) {
+        Logger::Warning("takeover: failed to takeover fd %d for server",
+                        m_accept_sock);
       }
     }
-    if (!takoverSucceeded) {
+  }
+  if (!socketSetupSucceeded) {
+    // make it possible to quickly reuse the port when needed.
+    auto const allowReuse =
+      RuntimeOption::StopOldServer || m_takeover_agent;
+    m_httpServerSocket->setReusePortEnabled(allowReuse);
+    try {
+      m_httpServerSocket->bind(m_httpConfig.bindAddress);
+    } catch (const std::exception& ex) {
       failedToListen(ex, m_httpConfig.bindAddress);
     }
   }
+
   if (m_takeover_agent) {
     m_takeover_agent->setupFdServer(m_worker.getEventBase()->getLibeventBase(),
                                     m_httpServerSocket->getSocket(), this);

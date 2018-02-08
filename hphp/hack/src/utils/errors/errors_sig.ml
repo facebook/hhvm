@@ -478,4 +478,6 @@ module type S = sig
   val inout_argument_bad_type : Pos.t -> (Pos.t * string) list -> unit
   val nonreactive_call_from_shallow : Pos.t -> Pos.t -> unit
   val illegal_destructor : Pos.t -> unit
+  val rx_enabled_in_non_rx_context : Pos.t -> unit
+  val rx_enabled_in_lambdas : Pos.t -> unit
 end

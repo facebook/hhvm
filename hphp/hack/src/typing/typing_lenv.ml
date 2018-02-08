@@ -61,6 +61,7 @@ let intersect env parent_lenv lenv1 lenv2 =
   let parent_locals_with_hist = Env.merge_locals_and_history parent_lenv in
   let local_mutability = Typing_mutability_env.intersect_mutability
     parent_lenv.local_mutability lenv1.local_mutability lenv2.local_mutability in
+  let local_reactive = parent_lenv.local_reactive in
   let env, new_locals =
     LMap.fold begin fun local_id (all_types1, ty1, eid1) (env, locals) ->
       match LMap.get local_id lenv2_locals_with_hist with
@@ -92,6 +93,7 @@ let intersect env parent_lenv lenv1 lenv2 =
       local_using_vars;
       tpenv;
       local_mutability;
+      local_reactive;
     }
   }
 
@@ -158,6 +160,8 @@ let integrate env parent_lenv child_lenv =
       tpenv = env.lenv.tpenv;
       (* The mutability of the entire block is always that of the child *)
       local_mutability = child_lenv.local_mutability;
+      (* always grab reactive context from child *)
+      local_reactive = child_lenv.local_reactive;
     }
   }
 
@@ -236,6 +240,7 @@ let fully_integrate env parent_lenv =
       local_using_vars;
       tpenv = child_lenv.tpenv;
       local_mutability = child_lenv.local_mutability;
+      local_reactive = child_lenv.local_reactive;
       } }
 
 let env_with_empty_fakes env =

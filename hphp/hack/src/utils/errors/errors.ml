@@ -1003,6 +1003,8 @@ module Typing                               = struct
   let mutable_return_result_mismatch        = 4217 (* DONT MODIFY!!!! *)
   let nonreactive_call_from_shallow         = 4218 (* DONT MODIFY!!!! *)
   let enum_type_typedef_nonnull             = 4219 (* DONT MODIFy!!!! *)
+  let rx_enabled_in_non_rx_context          = 4220 (* DONT MODIFY!!!! *)
+  let rx_enabled_in_lambdas                 = 4221 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -3078,6 +3080,16 @@ let nonreactive_call_from_shallow pos decl_pos =
       pos, "Shallow reactive functions cannot call non-reactive functions.";
       decl_pos, "This function is not reactive."
   ]
+
+let rx_enabled_in_non_rx_context pos =
+  add Typing.rx_enabled_in_non_rx_context pos (
+    "\\HH\\Rx\\IS_ENABLED can only be used in reactive functions."
+  )
+
+let rx_enabled_in_lambdas pos =
+  add Typing.rx_enabled_in_lambdas pos (
+    "\\HH\\Rx\\IS_ENABLED cannot be used inside lambdas."
+  )
 
 let nonreactive_append pos =
   let msg = "Cannot append to a Hack Collection types in a reactive context" in

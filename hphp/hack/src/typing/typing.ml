@@ -1525,6 +1525,13 @@ and expr_
       | None ->
           make_result env (T.Id id) (Reason.Rnone, Tany)
       | Some ty ->
+        if cst_name = SN.HH.rx_is_enabled
+        then begin
+          if Env.is_checking_lambda ()
+          then Errors.rx_enabled_in_lambdas cst_pos
+          else if Env.env_reactivity env = Nonreactive
+          then Errors.rx_enabled_in_non_rx_context cst_pos
+        end;
         let env, ty =
           Phase.localize_with_self env ty in
         make_result env (T.Id id) ty
@@ -5419,6 +5426,11 @@ and condition ?lhs_of_null_coalesce env tparamet =
   | p, Binop ((Ast.Diff | Ast.Diff2 as op), e1, e2) ->
       let op = if op = Ast.Diff then Ast.Eqeq else Ast.EQeqeq in
       condition env (not tparamet) (p, Binop (op, e1, e2))
+  | _, Id (_, s) when s = SN.HH.rx_is_enabled ->
+      (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
+      if not tparamet
+      then Env.set_env_reactive env Nonreactive
+      else env
   | _, Binop (Ast.AMpamp, e1, e2) when tparamet ->
       let env = condition env true e1 in
       let env = condition env true e2 in

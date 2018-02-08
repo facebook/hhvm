@@ -25,6 +25,7 @@ val expand_type : env -> locl ty -> env * locl ty
 val make_ft : Pos.t -> reactivity -> bool -> decl fun_params -> decl ty -> decl fun_type
 val get_shape_field_name : Nast.shape_field_name -> string
 val empty_fake_members : fake_members
+val empty_local : tpenv -> reactivity -> local_env
 val empty : TypecheckerOptions.t -> Relative_path.t ->
   droot: Typing_deps.Dep.variant option -> env
 val is_typedef : Typedefs.key -> bool
@@ -111,6 +112,7 @@ val add_generic_parameters : env -> Nast.tparam list -> env
 val get_generic_parameters : env -> string list
 val check_lambda_reactive : (unit -> 'a) -> reactivity * 'a
 val not_lambda_reactive : unit -> unit
+val is_checking_lambda : unit -> bool
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val add_fresh_generic_parameter : env -> string -> env * string
 val get_tpenv_size : env -> int

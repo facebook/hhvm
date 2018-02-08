@@ -308,6 +308,7 @@ module HH = struct
   let asio_va                = "\\HH\\Asio\\va"
   let lib_tuple_from_async   = "\\HH\\Lib\\Tuple\\from_async"
   let lib_tuple_gen          = "\\HH\\Lib\\Tuple\\gen"
+  let rx_is_enabled          = "\\HH\\Rx\\IS_ENABLED"
 
 end
 

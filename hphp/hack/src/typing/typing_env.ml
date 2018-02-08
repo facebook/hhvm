@@ -243,13 +243,14 @@ let empty_fake_members = {
   valid     = SSet.empty;
 }
 
-let empty_local tpenv = {
+let empty_local tpenv local_reactive = {
   tpenv = tpenv;
   fake_members = empty_fake_members;
   local_types = Typing_continuations.Map.empty;
   local_using_vars = Local_id.Set.empty;
   local_type_history = Local_id.Map.empty;
   local_mutability = Local_id.Map.empty;
+  local_reactive = local_reactive;
 }
 
 let empty tcopt file ~droot = {
@@ -259,7 +260,7 @@ let empty tcopt file ~droot = {
   outer_reason = Reason.URnone;
   tenv    = IMap.empty;
   subst   = IMap.empty;
-  lenv    = empty_local SMap.empty;
+  lenv    = empty_local SMap.empty Nonreactive;
   todo    = [];
   in_loop = false;
   inside_constructor = false;
@@ -282,7 +283,6 @@ let empty tcopt file ~droot = {
     parent_id = "";
     parent  = Reason.none, Tany;
     fun_kind = Ast.FSync;
-    fun_reactive = Nonreactive;
     fun_mutable = false;
     anons   = IMap.empty;
     file    = file;
@@ -291,7 +291,7 @@ let empty tcopt file ~droot = {
 }
 
 let set_env_reactive env reactive =
-  { env with genv = {env.genv with fun_reactive = reactive }}
+  { env with lenv = {env.lenv with local_reactive = reactive }}
 
 let set_env_function_pos env function_pos =
   { env with function_pos }
@@ -299,7 +299,7 @@ let set_env_function_pos env function_pos =
 let lambda_reactive = ref None
 
 let env_reactivity env =
-  Option.value !lambda_reactive ~default:env.genv.fun_reactive
+  Option.value !lambda_reactive ~default:env.lenv.local_reactive
 
 (* Some form (strict/shallow/local) of reactivity *)
 let env_local_reactive env =
@@ -327,6 +327,9 @@ let not_lambda_reactive () =
   lambda_reactive := (match !lambda_reactive with
   | Some _ -> Some Nonreactive
   | None -> None)
+
+let is_checking_lambda () =
+  Option.is_some !lambda_reactive
 
 let error_if_reactive_context env f =
   not_lambda_reactive ();
@@ -374,7 +377,7 @@ let get_env_mutability env =
 let fresh_tenv env f =
   f { env with
       todo = [];
-      lenv = empty_local env.lenv.tpenv;
+      lenv = empty_local env.lenv.tpenv env.lenv.local_reactive;
       tenv = IMap.empty;
       in_loop = false
     }
@@ -753,7 +756,7 @@ let unbind = unbind []
  *)
 let set_local env x new_type =
   let {fake_members; local_types; local_type_history; local_using_vars;
-       tpenv; local_mutability;} = env.lenv in
+       tpenv; local_mutability; local_reactive} = env.lenv in
   let env, new_type = unbind env new_type in
   let next_cont = LEnvC.get_cont Cont.Next local_types in
   let all_types, expr_id =
@@ -775,7 +778,7 @@ let set_local env x new_type =
   let local_type_history = Local_id.Map.add x all_types local_type_history in
   let env = { env with
     lenv = {fake_members; local_types; local_type_history; local_using_vars;
-            tpenv; local_mutability;} }
+            tpenv; local_mutability; local_reactive; } }
   in
   env
 
@@ -787,13 +790,15 @@ let set_using_var env x =
     env.lenv with local_using_vars = Local_id.Set.add x env.lenv.local_using_vars } }
 
 let unset_local env local =
-  let {fake_members; local_types ; local_type_history; local_using_vars; tpenv; local_mutability;} = env.lenv in
+  let {fake_members; local_types ; local_type_history;
+       local_using_vars; tpenv; local_mutability;local_reactive; } = env.lenv in
   let local_types = LEnvC.remove_from_cont Cont.Next local local_types in
   let local_using_vars = Local_id.Set.remove local local_using_vars in
   let local_type_history = Local_id.Map.remove local local_type_history in
   let local_mutability = Local_id.Map.remove local local_mutability in
   let env = { env with
-    lenv = {fake_members; local_types; local_type_history; local_using_vars; tpenv; local_mutability} }
+    lenv = {fake_members; local_types; local_type_history; local_using_vars;
+            tpenv; local_mutability; local_reactive} }
   in
   env
 

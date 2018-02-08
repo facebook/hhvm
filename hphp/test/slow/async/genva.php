@@ -1,7 +1,5 @@
 <?hh
 
-require "gen-stubs.inc";
-
 async function f() { return 42; }
 async function g() { throw new Exception(__FUNCTION__); }
 async function h() { return 37; }

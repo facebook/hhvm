@@ -711,12 +711,24 @@ let check_instruct_special_flow i i' =
   | Continue _, _ | Break _, _ | Goto _, _->
     if i = i' then Some () else None
 
-let check_instruct_async_functions i i' =
+let check_instruct_async_functions asn i i' =
   match i, i' with
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
   | WHResult, _ | Await, _ ->
-    if i = i' then Some () else None
+    if i = i' then Some asn else None
+  | AwaitAll (Local.Unnamed first1, count1),
+    AwaitAll (Local.Unnamed first2, count2) when count1 = count2 ->
+    let rec loop loop_asn local local' count =
+      match reads loop_asn (Local.Unnamed local) (Local.Unnamed local') with
+      | None -> None
+      | Some new_asn ->
+        if count = 1 then Some new_asn
+        else loop new_asn (local + 1) (local' + 1) (count - 1)
+      in
+    loop asn first1 first2 count1
+  | AwaitAll _, AwaitAll _ -> failwith "AwaitAll requires unnamed locals"
+  | _ -> None
 
 let check_instruct_gen_creation_execution i i' =
   match i, i' with
@@ -1013,9 +1025,9 @@ let equiv prog prog' startlabelpairs =
       | Some () -> nextins ()
       end
     | IAsync ins, IAsync ins' ->
-      begin match check_instruct_async_functions ins ins' with
+      begin match check_instruct_async_functions asn ins ins' with
       | None -> try_specials ()
-      | Some () -> nextins ()
+      | Some newasn -> nextinsnewasn newasn
       end
     | IGenerator ins, IGenerator ins' ->
       begin match check_instruct_gen_creation_execution ins ins' with

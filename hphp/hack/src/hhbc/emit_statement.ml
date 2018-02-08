@@ -19,6 +19,7 @@ module TC = Hhas_type_constraint
 module SN = Naming_special_names
 module TFR = Try_finally_rewriter
 module JT = Jump_targets
+module Opts = Hhbc_options
 
 (* Context for code generation. It would be more elegant to pass this
  * around in an environment parameter. *)
@@ -36,7 +37,7 @@ let set_verify_out i = verify_out := i
 let set_function_pos p = function_pos := p
 
 let create_inout_wrapper_functions () =
-  Hhbc_options.create_inout_wrapper_functions !Hhbc_options.compiler_options
+  Opts.create_inout_wrapper_functions !Opts.compiler_options
 
 let emit_return ~need_ref env =
   TFR.emit_return
@@ -148,12 +149,19 @@ let rec emit_stmt env (pos, st_) =
       emit_return ~need_ref:false env;
     ]
   | A.Expr (_, A.Await e) ->
+    begin match try_inline_genva_call env e GI_ignore_result with
+    | Some r -> r
+    | None ->
     gather [
       emit_await env e;
       instr_popc;
     ]
+    end
   | A.Expr
     (_, A.Binop ((A.Eq None), ((_, A.List l) as e1), (_, A.Await e_await))) ->
+    begin match try_inline_genva_call env e_await (GI_list_assignment l) with
+    | Some r -> r
+    | None ->
     let has_elements =
       List.exists l ~f: (function
         | _, A.Omitted -> false
@@ -188,6 +196,7 @@ let rec emit_stmt env (pos, st_) =
           instr_pushl temp;
           instr_popc;
         ]
+    end
   | A.Expr (_, A.Binop (A.Eq None, e_lhs, (_, A.Await e_await))) ->
     let result = Local.scope @@ fun () -> emit_await env e_await in
     Local.scope @@ fun () ->

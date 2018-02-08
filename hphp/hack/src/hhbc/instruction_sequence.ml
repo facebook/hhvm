@@ -40,6 +40,11 @@ let optional b instrs = if b then gather instrs else empty
 
 let class_ref_rewrite_sentinel = -100
 
+let instr_lit_const l =
+  instr (ILitConst l)
+
+let instr_lit_empty_varray =
+  instr_lit_const (TypedValue (Typed_value.VArray []))
 let instr_iterinit iter_id label value =
   instr (IIterator (IterInit (iter_id, label, value)))
 let instr_iterinitk id label key value =
@@ -60,6 +65,8 @@ let instr_miternextk id label key value =
   instr (IIterator (MIterNextK (id, label, key, value)))
 let instr_miterfree id =
   instr (IIterator (MIterFree id))
+let instr_whresult =
+  instr (IAsync WHResult)
 
 let instr_jmp label = instr (IContFlow (Jmp label))
 let instr_jmpz label = instr (IContFlow (JmpZ label))
@@ -78,6 +85,7 @@ let instr_eq = instr (IOp Eq)
 let instr_gt = instr (IOp Gt)
 let instr_concat = instr (IOp Concat)
 let instr_print = instr (IOp Print)
+let instr_cast_darray = instr (IOp CastDArray)
 let instr_retc = instr (IContFlow RetC)
 let instr_retv = instr (IContFlow RetV)
 let instr_null = instr (ILitConst Null)
@@ -193,6 +201,7 @@ let instr_entrynop = instr (IBasic EntryNop)
 let instr_typedvalue xs = instr (ILitConst (TypedValue xs))
 let instr_staticlocinit local text = instr (IMisc (StaticLocInit(local, text)))
 let instr_basel local mode = instr (IBase(BaseL(local, mode)))
+let instr_basec stack_index = instr (IBase (BaseC stack_index))
 let instr_basenl local mode = instr (IBase(BaseNL(local, mode)))
 let instr_basenc idx mode = instr (IBase(BaseNC(idx, mode)))
 let instr_basesc y =
@@ -247,6 +256,7 @@ let instr_await = instr (IAsync Await)
 let instr_yield = instr (IGenerator Yield)
 let instr_yieldk = instr (IGenerator YieldK)
 let instr_createcont = instr (IGenerator CreateCont)
+let instr_awaitall l count = instr (IAsync (AwaitAll (l, count)))
 
 let instr_static_loc_check name =
   instr (IMisc (StaticLocCheck (Local.Named name,
@@ -737,6 +747,7 @@ let get_input_output_count i =
   | IAsync i ->
     begin match i with
     | WHResult | Await -> (1, 1)
+    | AwaitAll _ -> (0, 1)
     end
   | ISrcLoc _ | IComment _ -> (0, 0)
   | IOp i ->

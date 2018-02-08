@@ -33,6 +33,7 @@ type t = {
   option_dynamic_invoke_functions         : SSet.t;
   option_repo_authoritative               : bool;
   option_jit_enable_rename_function       : bool;
+  option_can_inline_gen_functions         : bool;
 }
 
 let default = {
@@ -58,6 +59,7 @@ let default = {
   option_dynamic_invoke_functions = SSet.empty;
   option_repo_authoritative = false;
   option_jit_enable_rename_function = false;
+  option_can_inline_gen_functions = true;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -79,6 +81,7 @@ let hack_arr_compat_notices o = o.option_hack_arr_compat_notices
 let dynamic_invoke_functions o = o.option_dynamic_invoke_functions
 let repo_authoritative o = o.option_repo_authoritative
 let jit_enable_rename_function o = o.option_jit_enable_rename_function
+let can_inline_gen_functions o = o.option_can_inline_gen_functions
 
 let to_string o =
   let dynamic_invokes =
@@ -105,6 +108,7 @@ let to_string o =
     ; Printf.sprintf "repo_authoritative: %B" @@ repo_authoritative o
     ; Printf.sprintf "jit_enable_rename_function: %B"
       @@ jit_enable_rename_function o
+    ; Printf.sprintf "can_inline_gen_functions: %B" @@ can_inline_gen_functions o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -157,7 +161,8 @@ let set_option options name value =
   | "eval.disablehphpcopts" ->
     let v = not (as_bool value) in
     { options with option_optimize_cuf = v;
-                   option_constant_folding = v}
+                   option_constant_folding = v;
+                   option_can_inline_gen_functions = v}
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -218,7 +223,8 @@ let value_setters = [
     fun opts v -> { opts with option_optimize_null_check = (v = 1) });
   (set_value "hhvm.disable_hphpc_opts" get_value_from_config_int @@
     fun opts v -> { opts with option_optimize_cuf = (v = 0);
-                              option_constant_folding = (v = 0) });
+                              option_constant_folding = (v = 0);
+                              option_can_inline_gen_functions = (v = 0) });
   (set_value "hack.compiler.optimize_cuf" get_value_from_config_int @@
     fun opts v -> { opts with option_optimize_cuf = (v = 1) });
   (set_value "hhvm.php7.uvs" get_value_from_config_int @@

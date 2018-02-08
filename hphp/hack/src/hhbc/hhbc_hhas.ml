@@ -663,6 +663,9 @@ let string_of_try instruction =
 let string_of_async = function
   | Await -> "Await"
   | WHResult -> "WHResult"
+  | AwaitAll (Local.Unnamed local, count) ->
+    Printf.sprintf "AwaitAll L:%d+%d" local count
+  | AwaitAll _ -> failwith "AwaitAll needs an unnamed local"
 
 let string_of_generator = function
   | CreateCont -> "CreateCont"

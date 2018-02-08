@@ -1,7 +1,5 @@
 <?hh
 
-require "gen-stubs.inc";
-
 async function foo($x, $suspend = false, $throw = false) {
   if ($suspend) await RescheduleWaitHandle::Create(0, 0);
   if ($throw) throw new Exception;

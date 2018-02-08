@@ -20,6 +20,22 @@ module TC = Hhas_type_constraint
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
 module ULS = Unique_list_string
+module Opts = Hhbc_options
+
+let can_inline_gen_functions () =
+  let opts = !Opts.compiler_options in
+  Emit_env.is_hh_syntax_enabled () &&
+  (Opts.enable_hiphop_syntax opts) &&
+  (Opts.can_inline_gen_functions opts) &&
+  not (Opts.jit_enable_rename_function opts)
+
+let max_array_elem_on_stack () =
+  Hhbc_options.max_array_elem_size_on_the_stack !Hhbc_options.compiler_options
+
+type genva_inline_context =
+  | GI_expression
+  | GI_ignore_result
+  | GI_list_assignment of A.expr list
 
 (* Locals, array elements, and properties all support the same range of l-value
  * operations. *)
@@ -1215,16 +1231,250 @@ and emit_class_alias es =
     instr_alias_cls c1 c2
   ]
 
-and emit_await env e =
-  let after_await = Label.next_regular () in
+and try_inline_gen_call env e =
+  if not (can_inline_gen_functions ()) then None
+  else match snd e with
+  | A.Call ((_, A.Id (_, s)), _, [arg], [])
+    when String.lowercase_ascii s = "gena"->
+    Some (inline_gena_call env arg)
+  | _ ->
+    try_inline_genva_call env e GI_expression
+
+and try_inline_genva_call env e inline_context =
+  if not (can_inline_gen_functions ()) then None
+  else match e with
+  | pos, A.Call ((_, A.Id (_, s)), _, args, uargs)
+    when String.lowercase_ascii s = "genva"->
+    try_inline_genva_call_ env pos args uargs inline_context
+  | _ -> None
+
+and try_fault b f =
+  let label = Label.next_fault () in
+  let body = b () in
+  let fault = f () in
+  instr_try_fault label body fault
+
+and unset_in_fault temps b =
+  try_fault b @@ fun () ->
+    gather [
+      gather @@ List.map temps ~f:instr_unsetl;
+      instr_unwind
+    ]
+
+(* emits iteration over the ~collection where loop body is
+   produced by ~f *)
+and emit_iter ~collection f = Local.scope @@ fun () ->
+  let loop_end = Label.next_regular () in
+  let key_local = Local.get_unnamed_local () in
+  let value_local = Local.get_unnamed_local () in
+  let iter = Iterator.get_iterator () in
+  let iter_init = gather [
+    collection;
+    instr_iterinitk iter loop_end value_local key_local;
+  ] in
+  let loop_next = Label.next_regular () in
+  let iterate =
+    (* try-fault to release temp locals *)
+    unset_in_fault [value_local; key_local] @@ begin fun () ->
+      (* try-fault to release iterator *)
+      try_fault
+        begin fun () ->
+          gather [
+            instr_label loop_next;
+            f value_local key_local;
+            instr_iternextk iter loop_next value_local key_local;
+            instr_label loop_end;
+            instr_unsetl value_local;
+            instr_unsetl key_local;
+          ]
+        end
+        begin fun () ->
+          gather [
+            instr_iterfree iter;
+            instr_unwind;
+          ]
+        end
+      end in
+  Iterator.free_iterator ();
   gather [
-    emit_expr ~need_ref:false env e;
-    instr_dup;
-    instr_istypec OpNull;
-    instr_jmpnz after_await;
-    instr_await;
-    instr_label after_await;
+    iter_init;
+    iterate;
   ]
+
+and inline_gena_call env arg = Local.scope @@ fun () ->
+  let arr_local = Local.get_unnamed_local () in
+  gather [
+    (* convert input to array *)
+    emit_expr ~need_ref:false env arg;
+    instr_cast_darray;
+    instr_setl arr_local;
+    instr_popc;
+    begin
+      unset_in_fault [arr_local] @@ fun () ->
+        gather [
+          instr_fpushclsmethodd 1
+            (Hhbc_id.Method.from_raw_string "fromDArray")
+            (Hhbc_id.Class.from_raw_string "HH\\AwaitAllWaitHandle");
+          instr_fpassl 0 arr_local Cell;
+          instr_fcall 1;
+          instr_unboxr;
+          instr_await;
+          instr_popc;
+          emit_iter ~collection:(instr_cgetl arr_local) @@
+          begin fun value_local key_local ->
+            gather [
+              (* generate code for
+                 arr_local[key_local] = WHResult (value_local) *)
+              instr_cgetl value_local;
+              instr_whresult;
+              instr_basel arr_local MemberOpMode.Define;
+              instr_setm 0 (MemberKey.EL key_local);
+              instr_popc;
+            ]
+          end;
+        ]
+    end;
+    instr_pushl arr_local;
+  ]
+
+and try_inline_genva_call_ env pos args uargs inline_context =
+  let args_count = List.length args in
+  let is_valid_list_assignment l =
+    Core_list.findi l ~f:(fun i (_, x) -> i >= args_count && x <> A.Omitted)
+    |> Option.is_none in
+  let emit_list_assignment lhs rhs =
+    let rec combine lhs rhs =
+      (* ensure that list of values on left hand side and right hand size
+         has the same length *)
+      match lhs, rhs with
+      | l :: lhs, r :: rhs -> (l, r) :: combine lhs rhs
+      (* left hand size is smaller - pad with omitted expression *)
+      | [], r :: rhs -> ((Pos.none, A.Omitted), r) :: combine [] rhs
+      | _, [] -> [] in
+    let generate values ~is_ltr =
+      let rec aux acc = function
+      | [] -> List.rev acc
+      | ((_, A.Omitted), _) :: tail -> aux acc tail
+      | (lhs, rhs) :: tail ->
+        let lhs_instrs, set_instrs =
+          emit_lval_op_list ~last_usage:true env (Some rhs) [] lhs in
+        let set = gather [
+          lhs_instrs;
+          set_instrs;
+        ] in
+        aux (set :: acc) tail in
+      aux [] (if is_ltr then values else List.rev values) in
+    let reify = gather @@ Core_list.map rhs ~f:begin fun l ->
+      gather [
+        instr_pushl l;
+        instr_whresult;
+        instr_popl l;
+      ]
+    end in
+    let pairs = combine lhs rhs in
+    let assign =
+      pairs
+      |> generate ~is_ltr:(php7_ltr_assign ())
+      |> gather in
+    gather [
+      reify;
+      assign;
+      gather @@ Core_list.map pairs
+        ~f:(function (_, A.Omitted), l -> instr_unsetl l | _ -> empty);
+    ] in
+  match inline_context with
+  | GI_list_assignment l when not (is_valid_list_assignment l) ->
+    None
+  | _ when not (List.is_empty uargs) ->
+    Emit_fatal.raise_fatal_runtime pos "do not use ...$args with genva()"
+  | GI_ignore_result | GI_list_assignment _ when args_count = 0 ->
+    Some empty
+  | GI_expression when args_count = 0 ->
+    Some instr_lit_empty_varray
+  | _ when args_count > max_array_elem_on_stack () ->
+    None
+  | _ ->
+  Local.scope @@ begin fun () ->
+  let load_args =
+    gather @@ Core_list.map args ~f:begin fun arg ->
+      let label_done = Label.next_regular () in
+      gather [
+        emit_expr ~need_ref:false env arg;
+        instr_dup;
+        instr_istypec OpNull;
+        instr_jmpz label_done;
+        instr_popc;
+        instr_fpushfuncd 0 (Hhbc_id.Function.from_raw_string "HH\\Asio\\null");
+        instr_fcall 0;
+        instr_unboxr;
+        instr_label label_done;
+      ]
+    end in
+  let reserved_locals =
+    List.init args_count (fun _ -> Local.get_unnamed_local ()) in
+  let reserved_locals_reversed =
+    List.rev reserved_locals in
+  let init_locals =
+    gather @@ Core_list.map reserved_locals_reversed ~f:begin fun l ->
+      gather [
+        instr_setl l;
+        instr_popc;
+      ]
+    end in
+  let await_and_process_results =
+    unset_in_fault reserved_locals @@ begin fun () ->
+      let await_all =
+        gather [
+          instr_awaitall (List.hd_exn reserved_locals_reversed) (args_count - 1);
+          instr_popc;
+        ] in
+      let process_results =
+        let reify ~pop_result =
+          gather @@ Core_list.map reserved_locals ~f:begin fun l ->
+            gather [
+              instr_pushl l;
+              instr_whresult;
+              if pop_result then instr_popc else empty;
+            ]
+          end in
+        match inline_context with
+        | GI_ignore_result ->
+          reify ~pop_result:true
+        | GI_expression ->
+          gather [
+            reify ~pop_result:false;
+            instr_lit_const (NewVArray args_count);
+          ]
+        | GI_list_assignment l ->
+          emit_list_assignment l reserved_locals in
+      gather [
+        await_all;
+        process_results;
+      ]
+    end in
+  let result =
+    gather [
+      load_args;
+      init_locals;
+      await_and_process_results;
+    ] in
+  Some result
+  end
+
+and emit_await env e =
+  begin match try_inline_gen_call env e with
+  | Some r -> r
+  | None ->
+    let after_await = Label.next_regular () in
+    gather [
+      emit_expr ~need_ref:false env e;
+      instr_dup;
+      instr_istypec OpNull;
+      instr_jmpnz after_await;
+      instr_await;
+      instr_label after_await;
+    ]
+  end
 
 and emit_callconv _env kind _e =
   match kind with
@@ -1385,9 +1635,7 @@ and emit_static_collection ~transform_to_collection tv =
   ]
 
 and emit_value_only_collection env es constructor =
-  let limit =
-    Hhbc_options.max_array_elem_size_on_the_stack !Hhbc_options.compiler_options
-  in
+  let limit = max_array_elem_on_stack () in
   let inline exprs =
     gather
     [gather @@ List.map exprs
@@ -1498,9 +1746,7 @@ and is_struct_init es allow_numerics =
   let has_duplicate_keys =
     ULS.cardinal keys <> num_keys
   in
-  let limit =
-    Hhbc_options.max_array_elem_size_on_the_stack !Hhbc_options.compiler_options
-  in
+  let limit = max_array_elem_on_stack () in
   (allow_numerics || are_all_keys_non_numeric_strings)
   && not has_duplicate_keys
   && not has_references
@@ -2999,15 +3245,25 @@ and emit_final_static_op cid prop op =
  *   Dim Warn EI:i_2
  *   QueryM 0 CGet EI:i_1
  *)
-and emit_array_get_fixed local indices =
-  gather (
-    instr (IBase (BaseL (local, MemberOpMode.Warn))) ::
-    List.rev_mapi indices (fun i ix ->
-      let mk = MemberKey.EI (Int64.of_int ix) in
-      if i = 0
-      then instr (IFinal (QueryM (0, QueryOp.CGet, mk)))
-      else instr (IBase (Dim (MemberOpMode.Warn, mk))))
-      )
+and emit_array_get_fixed last_usage local indices =
+  let base, stack_count =
+    if last_usage then gather [
+      instr_pushl local;
+      instr_basec 0;
+    ], 1
+    else instr_basel local MemberOpMode.Warn, 0 in
+  let indices =
+    gather @@ List.rev_mapi indices
+      begin fun i ix ->
+        let mk = MemberKey.EI (Int64.of_int ix) in
+        if i = 0
+        then instr (IFinal (QueryM (stack_count, QueryOp.CGet, mk)))
+        else instr (IBase (Dim (MemberOpMode.Warn, mk)))
+      end in
+  gather [
+    base;
+    indices;
+  ]
 
 and can_use_as_rhs_in_list_assignment expr =
   match expr with
@@ -3050,13 +3306,32 @@ and can_use_as_rhs_in_list_assignment expr =
  * list($a[$f()]) = b();
  * here f() should be invoked before b()
  *)
- and emit_lval_op_list env local indices expr =
+and emit_lval_op_list ?(last_usage=false) env local indices expr =
   let is_ltr = php7_ltr_assign () in
   match snd expr with
   | A.List exprs ->
+    let last_non_omitted =
+      (* last usage of the local will happen when processing last non-omitted
+         element in the list - find it *)
+      if last_usage
+      then begin
+        if is_ltr
+        then
+          exprs
+          |> Core_list.foldi ~init:None
+            ~f:(fun i acc (_, v) -> if v = A.Omitted then acc else Some i)
+        (* in right-to-left case result list will be reversed
+           so we need to find first non-omitted expression *)
+        else
+          exprs
+          |> Core_list.findi ~f:(fun _ (_, v) -> v <> A.Omitted)
+          |> Option.map ~f:fst
+      end
+      else None in
     let lhs_instrs, set_instrs =
       List.mapi exprs (fun i expr ->
-        emit_lval_op_list env local (i::indices) expr)
+        emit_lval_op_list ~last_usage:(Some i = last_non_omitted)
+          env local (i::indices) expr)
       |> List.unzip in
     gather lhs_instrs,
     gather (if not is_ltr then List.rev set_instrs else set_instrs)
@@ -3064,9 +3339,12 @@ and can_use_as_rhs_in_list_assignment expr =
   | _ ->
     (* Generate code to access the element from the array *)
     let access_instrs =
-      match local with
-      | Some local -> emit_array_get_fixed local indices
-      | None -> instr_null
+      match local, indices with
+      | Some local, _ :: _ -> emit_array_get_fixed last_usage local indices
+      | Some local, [] ->
+        if last_usage then instr_pushl local
+        else instr_cgetl local
+      | None, _ -> instr_null
     in
     (* Generate code to assign to the lvalue *)
     (* Return pair: side effects to initialize lhs + assignment *)
@@ -3078,7 +3356,7 @@ and can_use_as_rhs_in_list_assignment expr =
         if is_ltr then lhs_instrs else empty;
         rhs_instrs;
         set_op;
-        instr_popc
+        instr_popc;
       ]
     in
     lhs, rest

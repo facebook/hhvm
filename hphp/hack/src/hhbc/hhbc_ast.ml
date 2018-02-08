@@ -571,6 +571,7 @@ type gen_delegation =
 type async_functions =
   | WHResult
   | Await
+  | AwaitAll of Local.t * int
 
 type instruct_try =
   | TryCatchBegin

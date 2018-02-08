@@ -85,7 +85,6 @@ inline bool haveCount(HeaderKind k) {
  * generates shorter cmp instructions while still being far enough from 0 to be
  * safe.
  *
- *
  * One-bit reference counting:
  *
  * When one_bit_refcount == true, HHVM's reference counting primitives behave
@@ -125,13 +124,39 @@ using UnsignedRefCount = std::make_unsigned<RefCount>::type;
 enum class GCBits : uint8_t {};
 
 /*
- * Common header for all heap-allocated objects. Layout is carefully
- * designed to allow overlapping with the second word of a TypedValue,
- * or to follow a C++ defined vptr.
+ * Header Layout
  *
- * T can be any simple 16-bit type. CNT is Maybe for copy-on-write
- * objects that support being allocated outside the request heap with
- * a count field containing StaticValue or UncountedValue
+ * Refcounted types have a 32-bit RefCount normally, or 8-bit plus 24 bits of
+ * padding with ONE_BIT_REFCOUNT.
+ *
+ * 0         32     40      48          56
+ * [ count | kind | marks | DVArray   | sizeClass ] Packed, VecArray
+ * [ count | kind | marks | DVArray   |           ] Mixed, Dict
+ * [ count | kind | marks |                       ] Empty, Apc, Globals, Keyset
+ * [ count | kind | marks | sizeClass:16          ] String
+ * [ count | kind | marks | heapSize:16           ] Resource (ResourceHdr)
+ * [ count | kind | marks |                       ] Ref (RefData)
+ * [ count | kind | marks | Attribute |           ] Object..ImmSet (ObjectData)
+ *
+ * Note: when an ObjectData is preceded by a special header (AsyncFuncFrame,
+ * NativeData, or ClosureHeader), only the special header is marked using
+ * the m_marks field; the m_marks field on the interior ObjectData is unused.
+ *
+ * Special headers have non-refcount uses for m_aux32:
+ *
+ * 0          32     40      48
+ * [ ar_off | kind | marks |              ] AsyncFuncFrame (NativeNode)
+ * [ ar_off | kind | marks | tyindex:16   ] NativeData (NativeNode)
+ * [ size   | kind | marks |              ] ClosureHeader (ClosureHdr)
+ * [ index  | kind | marks | tyindex:16   ] Small/BigMalloc (MallocNode)
+ * [ index  | kind | marks | kIndexUnkown ] BigObj (MallocNode)
+ * [ size   | kind | marks |              ] Free, Hole (FreeNode)
+ * [        | kind |       |              ] Slab
+ */
+
+/*
+ * Common header for all heap-allocated objects. Layout is carefully
+ * designed to fit in one 64-bit word.
  */
 struct HeapObject {
 protected:

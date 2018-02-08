@@ -399,7 +399,7 @@ private:
   friend struct c_ImmSet;
   friend struct c_AwaitAllWaitHandle;
 
-  friend size_t getMemSize(const ArrayData*);
+  friend size_t getMemSize(const ArrayData*, bool);
   template <typename AccessorT, class ArrayT>
   friend SortFlavor genericPreSort(ArrayT&, const AccessorT&, bool);
 

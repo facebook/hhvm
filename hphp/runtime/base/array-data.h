@@ -764,7 +764,7 @@ protected:
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  friend size_t getMemSize(const ArrayData*);
+  friend size_t getMemSize(const ArrayData*, bool);
 
   static bool EqualHelper(const ArrayData*, const ArrayData*, bool);
   static int64_t CompareHelper(const ArrayData*, const ArrayData*);

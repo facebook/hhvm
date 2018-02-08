@@ -73,6 +73,27 @@ struct MaybeCountable : HeapObject {
   bool decWillRelease() const;
   bool decReleaseCheck();
   bool cowCheck() const;
+  /*
+   * Uncounted types still record how many references there are to
+   * them from apc, or other uncounted types. Generally, there will
+   * only be one thing manipulating their refcounts at any given time,
+   * but if eg multiple threads store the same uncounted array in apc
+   * at the same time, it might happen.
+   *
+   * uncountedIncRef() will attempt to increment the refcount (in
+   * one_bit_refcount builds there are only 127 ref counts available,
+   * so it can fail) and return true on success. uncountedDecRef()
+   * will decrement the refcount, and return true if the caller is
+   * responsible for freeing it. When it returns false, the caller
+   * cannot do anything further with the uncounted object, since
+   * another thread might already be destroying it.
+   *
+   * Note that in non one_bit_refcount builds, uncountedIncRef
+   * actually subtracts one from the refcount, and uncountedDecRef
+   * adds one to it; but callers shouldn't care.
+   */
+  bool uncountedIncRef() const;
+  bool uncountedDecRef() const;
 };
 
 /*
@@ -93,13 +114,39 @@ struct Countable : MaybeCountable {
   bool cowCheck() const;
 };
 
-ALWAYS_INLINE bool MaybeCountable::checkCount() const {
+ALWAYS_INLINE bool MaybeCountable::uncountedIncRef() const {
+  assertx(isUncounted());
+  auto& count = m_atomic_count;
   if (one_bit_refcount) {
-    return m_count == OneReference || m_count == MultiReference ||
-      m_count == UncountedValue || m_count == StaticValue;
+    auto val = count.load(std::memory_order_relaxed);
+    while (val != -1) {
+      assertx(val < 0);
+      if (count.compare_exchange_weak(val, val + 1,
+                                      std::memory_order_relaxed)) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  return m_count >= 1 || m_count == UncountedValue || m_count == StaticValue;
+  auto const DEBUG_ONLY val = count.fetch_sub(1, std::memory_order_relaxed);
+  assertx(val <= UncountedValue);
+  return true;
+}
+
+ALWAYS_INLINE bool MaybeCountable::uncountedDecRef() const {
+  assertx(isUncounted());
+  auto const val = m_atomic_count.fetch_add(one_bit_refcount ? -1 : 1,
+                                            std::memory_order_relaxed);
+  return val == UncountedValue;
+}
+
+ALWAYS_INLINE bool MaybeCountable::checkCount() const {
+  if (one_bit_refcount) {
+    return m_count == OneReference || m_count == MultiReference || m_count < 0;
+  }
+
+  return m_count >= 1 || m_count <= UncountedValue || m_count == StaticValue;
 }
 
 ALWAYS_INLINE bool Countable::checkCount() const {
@@ -250,7 +297,8 @@ ALWAYS_INLINE bool Countable::isStatic() const {
 
 ALWAYS_INLINE bool MaybeCountable::isUncounted() const {
   assert(checkCount());
-  return m_count == UncountedValue;
+  return one_bit_refcount ?
+    m_count < 0 && m_count != StaticValue : m_count <= UncountedValue;
 }
 
 ALWAYS_INLINE bool Countable::isUncounted() const {

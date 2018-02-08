@@ -85,18 +85,20 @@ public:
     return features;
   }
 
-  DataFeature traverseData(ArrayData* data) const {
+  DataFeature traverseData(ArrayData* data,
+                           PointerMap* seenArrs = nullptr) const {
     // keep track of visited nodes in an array or object graph
     PointerSet visited;
     DataFeature features;
-    traverseData(data, features, visited);
+    traverseData(data, features, visited, seenArrs);
     return features;
   }
 
 private:
   void traverseData(ArrayData* data,
                     DataFeature& features,
-                    PointerSet& visited) const;
+                    PointerSet& visited,
+                    PointerMap* seenArrs = nullptr) const;
   void traverseData(ObjectData* data,
                     DataFeature& features,
                     PointerSet& visited) const;

@@ -496,7 +496,7 @@ struct CacheDeleter final {
   void operator()(ArrayData* ad) const {
     if (!ad->isUncounted()) return;
     Treadmill::enqueue([ad] {
-      PackedArray::ReleaseUncounted(ad, 0);
+      PackedArray::ReleaseUncounted(ad);
     });
   }
 };

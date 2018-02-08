@@ -47,9 +47,12 @@ struct APCArray {
                                           APCHandleLevel level,
                                           bool unserializeObj);
 
-  static APCHandle* MakeUncountedArray(ArrayData* array);
-  static APCHandle* MakeUncountedVec(ArrayData* vec);
-  static APCHandle* MakeUncountedDict(ArrayData* dict);
+  static APCHandle* MakeUncountedArray(ArrayData* array,
+                                       PointerMap* m = nullptr);
+  static APCHandle* MakeUncountedVec(ArrayData* vec,
+                                     PointerMap* m = nullptr);
+  static APCHandle* MakeUncountedDict(ArrayData* dict,
+                                      PointerMap* m = nullptr);
   static APCHandle* MakeUncountedKeyset(ArrayData* dict);
 
   static APCHandle::Pair MakeSharedEmptyArray();

@@ -38,10 +38,11 @@ TRACE_SET_MOD(apc);
 
 namespace {
 
-size_t getMemSize(const TypedValue* tv) {
+size_t getMemSize(const TypedValue* tv, bool recurse = true) {
   const auto& v = tvAsCVarRef(tv);
   auto type = v.getType();
   if (isArrayLikeType(type)) {
+    if (!recurse) return 0;
     auto a = v.getArrayData();
     return a->isStatic() ? sizeof(v) : getMemSize(a);
   }
@@ -160,7 +161,7 @@ size_t getMemSize(const APCObject* obj) {
   return size;
 }
 
-size_t getMemSize(const ArrayData* arr) {
+size_t getMemSize(const ArrayData* arr, bool recurse) {
   switch (arr->kind()) {
   case ArrayData::ArrayKind::kPackedKind:
   case ArrayData::ArrayKind::kVecKind: {
@@ -169,7 +170,7 @@ size_t getMemSize(const ArrayData* arr) {
     auto const values = packedData(arr);
     auto const last = values + arr->m_size;
     for (auto ptr = values; ptr != last; ++ptr) {
-      size += getMemSize(ptr);
+      size += getMemSize(ptr, recurse);
     }
     return size;
   }
@@ -186,7 +187,7 @@ size_t getMemSize(const ArrayData* arr) {
         continue;
       }
       size += ptr->hasStrKey() ? getMemSize(ptr->skey) : sizeof(int64_t);
-      size += getMemSize(&ptr->data);
+      size += getMemSize(&ptr->data, recurse);
     }
     return size;
   }

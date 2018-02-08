@@ -357,7 +357,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
         ad->m_size = i;
         ad->m_pos = 0;
         if (ad->isRefCounted()) Release(ad);
-        else if (ad->isUncounted()) ReleaseUncounted(ad);
+        else assert(ad->isStatic());
         throwRefInvalidArrayValueException(staticEmptyDictArray());
       }
     }
@@ -397,7 +397,20 @@ ALWAYS_INLINE static bool UncountedMixedArrayOnHugePage() {
 #endif
 }
 
-ArrayData* MixedArray::MakeUncounted(ArrayData* array, size_t extra) {
+ArrayData* MixedArray::MakeUncounted(ArrayData* array,
+                                     size_t extra,
+                                     PointerMap* seen) {
+  void** seenVal = nullptr;
+  if (seen) {
+    auto it = seen->find(array);
+    assert(it != seen->end());
+    seenVal = &it->second;
+    if (auto const arr = static_cast<ArrayData*>(*seenVal)) {
+      if (arr->uncountedIncRef()) {
+        return arr;
+      }
+    }
+  }
   auto a = asMixed(array);
   assertx(!a->empty());
   auto const scale = a->scale();
@@ -428,11 +441,12 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array, size_t extra) {
       te.skey = st != nullptr ? st
                               : StringData::MakeUncounted(te.skey->slice());
     }
-    ConvertTvToUncounted(&te.data);
+    ConvertTvToUncounted(&te.data, seen);
   }
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().addAPCUncountedBlock();
   }
+  if (seenVal) *seenVal = ad;
   return ad;
 }
 
@@ -489,9 +503,10 @@ void MixedArray::Release(ArrayData* in) {
 }
 
 NEVER_INLINE
-void MixedArray::ReleaseUncounted(ArrayData* in, size_t extra) {
+bool MixedArray::ReleaseUncounted(ArrayData* in, size_t extra) {
+
   auto const ad = asMixed(in);
-  assert(ad->isUncounted());
+  if (!ad->uncountedDecRef()) return false;
 
   if (!ad->isZombie()) {
     auto const data = ad->data();
@@ -519,6 +534,7 @@ void MixedArray::ReleaseUncounted(ArrayData* in, size_t extra) {
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
+  return true;
 }
 
 //=============================================================================

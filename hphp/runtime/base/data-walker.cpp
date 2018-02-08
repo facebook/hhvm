@@ -27,7 +27,17 @@ namespace HPHP {
 
 void DataWalker::traverseData(ArrayData* data,
                               DataFeature& features,
-                              PointerSet& visited) const {
+                              PointerSet& visited,
+                              PointerMap* seenArrs) const {
+  // At this point we're just using seenArrs to keep track of arrays
+  // we've seen, and prevent traversing them multiple times. We'll
+  // also use this map to compute the size of the uncounted array to
+  // avoid another recursive walk later. The values will be filled in
+  // as we create uncounted arrays for the keys.
+  if (seenArrs && !seenArrs->emplace(data, nullptr).second) {
+    return;
+  }
+
   for (ArrayIter iter(data); iter; ++iter) {
     auto const rval = iter.secondRval();
 
@@ -50,7 +60,7 @@ void DataWalker::traverseData(ArrayData* data,
       features.hasObjectOrResource = true;
       traverseData(inner.val().pobj, features, visited);
     } else if (isArrayLikeType(inner.type())) {
-      traverseData(inner.val().parr, features, visited);
+      traverseData(inner.val().parr, features, visited, seenArrs);
     } else if (inner.type() == KindOfResource) {
       features.hasObjectOrResource = true;
     }

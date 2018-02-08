@@ -20,6 +20,7 @@
 #include "hphp/util/compilation-flags.h"
 
 #include <array>
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
@@ -113,8 +114,12 @@ enum RefCount : std::conditional<one_bit_refcount, int8_t, int32_t>::type {
   // something above RefCountMaxRealistic to trip asserts.
   MultiReference = one_bit_refcount ? 1 : 0x40000000,
 
-  UncountedValue = -128,
-  StaticValue    = -127,
+  // In one_bit_refcount builds, uncountedIncRef will count upwards
+  // from UncountedValue to -1, so it needs to be above StaticValue;
+  // in regular builds, its going to count downwards towards
+  // INT_MIN, so needs to be below StaticValue.
+  UncountedValue = one_bit_refcount ? -127 : -128,
+  StaticValue    = one_bit_refcount ? -128 : -127,
 
   RefCountMaxRealistic = one_bit_refcount ? MultiReference : (1 << 30) - 1,
 };
@@ -170,6 +175,7 @@ protected:
       mutable GCBits m_marks;
       mutable uint16_t m_aux16;
     };
+    mutable std::atomic<std::underlying_type<RefCount>::type> m_atomic_count;
     struct {
       uint32_t m_aux32; // usable if the subclass is not refcounted
       uint32_t m_hi32;

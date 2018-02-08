@@ -614,9 +614,9 @@ void PackedArray::Release(ArrayData* ad) {
 }
 
 NEVER_INLINE
-void PackedArray::ReleaseUncounted(ArrayData* ad, size_t extra) {
+bool PackedArray::ReleaseUncounted(ArrayData* ad, size_t extra) {
   assert(checkInvariants(ad));
-  assert(ad->isUncounted());
+  if (!ad->uncountedDecRef()) return false;
 
   auto const data = packedData(ad);
   auto const stop = data + ad->m_size;
@@ -631,6 +631,7 @@ void PackedArray::ReleaseUncounted(ArrayData* ad, size_t extra) {
   }
 
   free_huge(reinterpret_cast<char*>(ad) - extra);
+  return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1372,7 +1373,20 @@ bool PackedArray::Uasort(ArrayData* ad, const Variant&) {
   return true;
 }
 
-ArrayData* PackedArray::MakeUncounted(ArrayData* array, size_t extra) {
+ArrayData* PackedArray::MakeUncounted(ArrayData* array,
+                                      size_t extra,
+                                      PointerMap* seen) {
+  void** seenVal = nullptr;
+  if (seen) {
+    auto it = seen->find(array);
+    assert(it != seen->end());
+    seenVal = &it->second;
+    if (auto const arr = static_cast<ArrayData*>(*seenVal)) {
+      if (arr->uncountedIncRef()) {
+        return arr;
+      }
+    }
+  }
   assert(checkInvariants(array));
   assert(!array->empty());
   if (APCStats::IsCreated()) {
@@ -1398,7 +1412,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array, size_t extra) {
   auto dst = packedData(ad);
   memcpy16_inline(dst, src, sizeof(TypedValue) * size);
   for (auto end = dst + size; dst < end; ++dst) {
-    ConvertTvToUncounted(dst);
+    ConvertTvToUncounted(dst, seen);
   }
 
   assert(ad->kind() == array->kind());
@@ -1408,6 +1422,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array, size_t extra) {
   assert(ad->m_pos == array->m_pos);
   assert(ad->isUncounted());
   assert(checkInvariants(ad));
+  if (seenVal) *seenVal = ad;
   return ad;
 }
 

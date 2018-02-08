@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/typed-value.h"
 
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
@@ -61,8 +62,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static void Release(ArrayData*);
   // Recursively register {allocation, rootAPCHandle} with APCGCManager
   static void RegisterUncountedAllocations(ArrayData* ad,
-                                            APCHandle* rootAPCHandle);
-  static void ReleaseUncounted(ArrayData*, size_t extra = 0);
+                                           APCHandle* rootAPCHandle);
+  static bool ReleaseUncounted(ArrayData*, size_t extra = 0);
   static member_rval::ptr_u NvGetInt(const ArrayData*, int64_t ki);
   static constexpr auto NvTryGetInt = &NvGetInt;
   static member_rval::ptr_u NvGetStr(const ArrayData*, const StringData*);
@@ -272,7 +273,10 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* MakeUninitializedVArray(uint32_t size);
   static ArrayData* MakeUninitializedVec(uint32_t size);
 
-  static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
+  static ArrayData* MakeUncounted(ArrayData* array,
+                                  size_t extra = 0,
+                                  PointerMap* seen = nullptr);
+  static ArrayData* MakeUncountedHelper(ArrayData* array, size_t extra);
 
   static ArrayData* MakeVecFromAPC(const APCArray* apc);
   static ArrayData* MakeVArrayFromAPC(const APCArray* apc);

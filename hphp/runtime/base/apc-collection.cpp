@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"

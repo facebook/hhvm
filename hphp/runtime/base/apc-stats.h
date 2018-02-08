@@ -42,7 +42,8 @@ struct ArrayData;
 size_t getMemSize(const APCHandle*);
 size_t getMemSize(const APCArray*);
 size_t getMemSize(const APCObject*);
-size_t getMemSize(const ArrayData*);
+/* Recurses on array/object values iff 'recurse'. Always includes strings. */
+size_t getMemSize(const ArrayData*, bool recurse = true);
 
 inline
 size_t getMemSize(const StringData* string) {

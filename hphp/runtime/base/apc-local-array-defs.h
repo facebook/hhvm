@@ -55,7 +55,6 @@ APCLocalArray* APCLocalArray::asApcArray(ArrayData* ad) {
 ALWAYS_INLINE
 const APCLocalArray* APCLocalArray::asApcArray(const ArrayData* ad) {
   assert(ad->kind() == kApcKind);
-  assert(checkInvariants(ad));
   return static_cast<const APCLocalArray*>(ad);
 }
 

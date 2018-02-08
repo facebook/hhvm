@@ -121,31 +121,36 @@ void APCTypedValue::deleteUncounted() {
     assert(m_data.arr->isPHPArray());
     if (m_data.arr->hasPackedLayout()) {
       auto arr = m_data.arr;
-      this->~APCTypedValue();
+      static_assert(std::is_trivially_destructible<APCTypedValue>::value,
+                    "APCTypedValue must be trivially destructible");
       PackedArray::ReleaseUncounted(arr, sizeof(APCTypedValue));
       return;  // Uncounted PackedArray frees the joint allocation.
     } else {
       auto arr = m_data.arr;
-      this->~APCTypedValue();
+      static_assert(std::is_trivially_destructible<APCTypedValue>::value,
+                    "APCTypedValue must be trivially destructible");
       MixedArray::ReleaseUncounted(arr, sizeof(APCTypedValue));
       return;  // Uncounted MixedArray frees the joint allocation.
     }
   } else if (kind == APCKind::UncountedVec) {
     auto vec = m_data.vec;
     assert(vec->isVecArray());
-    this->~APCTypedValue();
+    static_assert(std::is_trivially_destructible<APCTypedValue>::value,
+                  "APCTypedValue must be trivially destructible");
     PackedArray::ReleaseUncounted(vec, sizeof(APCTypedValue));
     return;
   } else if (kind == APCKind::UncountedDict) {
     auto dict = m_data.dict;
     assert(dict->isDict());
-    this->~APCTypedValue();
+    static_assert(std::is_trivially_destructible<APCTypedValue>::value,
+                  "APCTypedValue must be trivially destructible");
     MixedArray::ReleaseUncounted(dict, sizeof(APCTypedValue));
     return;
   } else if (kind == APCKind::UncountedKeyset) {
     auto keyset = m_data.keyset;
     assert(keyset->isKeyset());
-    this->~APCTypedValue();
+    static_assert(std::is_trivially_destructible<APCTypedValue>::value,
+                  "APCTypedValue must be trivially destructible");
     SetArray::ReleaseUncounted(keyset, sizeof(APCTypedValue));
     return;
   }

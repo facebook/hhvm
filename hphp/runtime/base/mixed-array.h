@@ -24,6 +24,8 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
+#include "hphp/util/hash-map-typedefs.h"
+
 #include <folly/portability/Constexpr.h>
 
 namespace HPHP {
@@ -248,7 +250,9 @@ struct MixedArray final : ArrayData,
    * must be a multiple of 16, and later be passed to ReleaseUncounted.
    * (This is used to co-allocate a TypedValue with its array data.)
    */
-  static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
+  static ArrayData* MakeUncounted(ArrayData* array,
+                                  size_t extra = 0,
+                                  PointerMap* seen = nullptr);
 
   static ArrayData* MakeDictFromAPC(const APCArray* apc);
   static ArrayData* MakeDArrayFromAPC(const APCArray* apc);
@@ -373,8 +377,8 @@ public:
   static void Release(ArrayData*);
   // Recursively register {allocation, rootAPCHandle} with APCGCManager
   static void RegisterUncountedAllocations(ArrayData* ad,
-                                                APCHandle* rootAPCHandle);
-  static void ReleaseUncounted(ArrayData*, size_t extra = 0);
+                                           APCHandle* rootAPCHandle);
+  static bool ReleaseUncounted(ArrayData*, size_t extra = 0);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static ArrayData* Escalate(const ArrayData* ad) {
@@ -534,7 +538,7 @@ private:
   enum class ClonePacked {};
   enum class CloneMixed {};
 
-  friend size_t getMemSize(const ArrayData*);
+  friend size_t getMemSize(const ArrayData*, bool);
   template <typename AccessorT, class ArrayT>
   friend SortFlavor genericPreSort(ArrayT&, const AccessorT&, bool);
 

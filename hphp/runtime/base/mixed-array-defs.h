@@ -305,7 +305,7 @@ private:
 // array elements (without manipulating refcounts, as an uncounted won't hold
 // any reference to refcounted values.
 ALWAYS_INLINE
-void ConvertTvToUncounted(TypedValue* source) {
+void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
   if (source->m_type == KindOfRef) {
     // unbox
     auto const inner = source->m_data.pref->tv();
@@ -338,7 +338,7 @@ void ConvertTvToUncounted(TypedValue* source) {
       assert(ad->isVecArray());
       if (ad->isStatic()) break;
       else if (ad->empty()) ad = staticEmptyVecArray();
-      else ad = PackedArray::MakeUncounted(ad);
+      else ad = PackedArray::MakeUncounted(ad, 0, seen);
       break;
     }
 
@@ -350,7 +350,7 @@ void ConvertTvToUncounted(TypedValue* source) {
       assert(ad->isDict());
       if (ad->isStatic()) break;
       else if (ad->empty()) ad = staticEmptyDictArray();
-      else ad = MixedArray::MakeUncounted(ad);
+      else ad = MixedArray::MakeUncounted(ad, 0, seen);
       break;
     }
 
@@ -378,9 +378,9 @@ void ConvertTvToUncounted(TypedValue* source) {
         else if (ad->isDArray()) ad = staticEmptyDArray();
         else ad = staticEmptyArray();
       } else if (ad->hasPackedLayout()) {
-        ad = PackedArray::MakeUncounted(ad);
+        ad = PackedArray::MakeUncounted(ad, 0, seen);
       } else {
-        ad = MixedArray::MakeUncounted(ad);
+        ad = MixedArray::MakeUncounted(ad, 0, seen);
       }
       break;
     }

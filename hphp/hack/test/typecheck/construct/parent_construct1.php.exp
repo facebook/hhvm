@@ -1,1 +1,4 @@
-No errors
+File "parent_construct1.php", line 36, characters 9-37:
+Too few arguments (Typing[4104])
+File "parent_construct1.php", line 15, characters 19-29:
+Definition is here

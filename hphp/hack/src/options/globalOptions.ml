@@ -135,6 +135,20 @@ let tco_experimental_no_fallback_in_namespaces =
  *)
 let tco_experimental_nonnull = "nonnull"
 
+(*
+ * Check that the minimum number of arguments to a variadic
+ * function are passed in, e.g. given the function:
+ *
+ * function max<T as num>(T $first, T $second, T ...$rest): T;
+ *
+ * The following calls will be errors if this option is enabled:
+ *
+ * $max = max(...$my_numbers);
+ * $max = max($first, ...$my_numbers);
+ *)
+let tco_unpacking_check_arity =
+  "unpacking_check_arity"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -157,6 +171,7 @@ let tco_experimental_all =
      tco_experimental_is_expression;
      tco_experimental_no_fallback_in_namespaces;
      tco_experimental_nonnull;
+     tco_unpacking_check_arity;
    ]
 
 let tco_migration_flags_all =

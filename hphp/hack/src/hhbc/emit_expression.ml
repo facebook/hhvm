@@ -12,7 +12,6 @@ open Hh_core
 open Hhbc_ast
 open Instruction_sequence
 open Ast_class_expr
-open Ast_scope
 
 module A = Ast
 module H = Hhbc_ast
@@ -610,38 +609,44 @@ and emit_box_if_necessary need_ref instr =
   else
     instr
 
-and emit_maybe_classname env (p,name) with_string with_instr =
-  let from_str s =
-    let e_id, _ =
-      Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) (p,s) in
-    with_string e_id in
-  if SU.is_static name then
-    let get_static =
-      gather [ instr_fcallbuiltin 0 0 "get_called_class"; instr_unboxr_nop ] in
-    with_instr get_static
-  else if SU.is_self name || SU.is_parent name then
-    let cls = Scope.get_class (Emit_env.get_scope env) in
-    match cls with
-    | Some c when c.A.c_kind = A.Ctrait ->
-      let get_cls =
-        if SU.is_self name then instr_self else instr_parent in
-      with_instr (gather [get_cls; instr_clsrefname])
-    | Some c when SU.is_self name -> from_str (snd c.A.c_name)
-    | Some c ->
-        begin match c.A.c_extends with
-        | (_, A.Happly ((_, parent), _)) :: _ -> from_str parent
-        | _ -> from_str name
-        end
-    | _ -> from_str name
-  else from_str name
-
 and emit_instanceof env e1 e2 =
   match (e1, e2) with
-  | (_, (_, A.Id id)) ->
+  | (_, (_, A.Id _)) ->
     let lhs = emit_expr ~need_ref:false env e1 in
-    emit_maybe_classname env id
-      (fun id -> gather [ lhs; instr_instanceofd id ])
-      (fun instr -> gather [ lhs; instr; instr_instanceof ])
+    let from_class_ref instrs =
+      gather [
+        lhs;
+        instrs;
+        instr_instanceof;
+      ] in
+    let scope = Emit_env.get_scope env in
+    begin match expr_to_class_expr ~resolve_self:true scope e2 with
+    | Class_static ->
+      from_class_ref @@ gather [
+        instr_fcallbuiltin 0 0 "get_called_class";
+        instr_unboxr_nop;
+      ]
+    | Class_parent ->
+      from_class_ref @@ gather [
+        instr_parent;
+        instr_clsrefname;
+      ]
+    | Class_self ->
+      from_class_ref @@ gather [
+        instr_self;
+        instr_clsrefname;
+      ]
+    | Class_id name ->
+      let n, _ =
+        Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) name in
+      gather [
+        lhs;
+        instr_instanceofd n;
+      ]
+    | Class_expr _
+    | Class_unnamed_local _ ->
+      failwith "cannot get this shape from from A.Id"
+    end
   | _ ->
     gather [
       emit_expr ~need_ref:false env e1;

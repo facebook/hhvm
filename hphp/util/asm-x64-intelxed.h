@@ -503,6 +503,8 @@ namespace reg {
 
 #define SZ_TO_BITS(sz)                    (sz << 3)
 #define BITS_TO_SZ(bits)                  (bits >> 3)
+#define IMMFITFUNC_SIGNED                 deltaFits
+#define IMMFITFUNC_UNSIGNED               (XedOperand::immFitFunc) magFits
 
 struct XedOperand
 {
@@ -603,6 +605,13 @@ struct XedOperand
     op = xed_imm0(xed_imm_value(immed, immSize).uq, SZ_TO_BITS(immSize));
   }
 
+  explicit XedOperand(CodeAddress address, int size) {
+    int64_t target = (int64_t)address;
+    assert(deltaFits(target, size) &&
+           "Relative address doesn't fit selected size");
+    op = xed_relbr((int32_t)target, SZ_TO_BITS(size));
+  }
+
   template<typename immtype>
   explicit XedOperand(const immtype& immed, int immSizes, immFitFunc func) {
     immSizes = reduceImmSize(immed.q(), immSizes, func);
@@ -620,13 +629,12 @@ struct XedOperand
   }
 };
 
-#define IMMFITFUNC_SIGNED                 deltaFits
-#define IMMFITFUNC_UNSIGNED               (XedOperand::immFitFunc) magFits
 #define XED_REG(reg)                      XedOperand(reg).op
 #define XED_IMM(imm, size)                XedOperand(imm, size).op
 #define XED_IMM_RED(imm, sizes, redfunc)  XedOperand(imm, sizes, redfunct).op
 #define XED_MEMREF(m, size)               XedOperand(m, size).op
 #define XED_MEMREF_RIP(m, size, offset)   XedOperand(m, size, offset).op
+#define XED_BRREL(p, size)                XedOperand((CodeAddress)p, size).op
 //////////////////////////////////////////////////////////////////////
 
 enum X64InstrFlags {
@@ -1178,24 +1186,23 @@ public:
   void call(MemoryRef m)       { xedInstrM(XED_ICLASS_CALL_NEAR,  m); }
   void call(RIPRelativeRef m)  { xedInstrM(XED_ICLASS_CALL_NEAR,  m); }
 
-  void jmp8(CodeAddress dest)  { emitJ8(instr_jmp, ssize_t(dest)); }
+  void jmp8(CodeAddress dest)  { xedInstrRelBr(XED_ICLASS_JMP,
+                                               dest, sz::byte); }
 
   void jmp(CodeAddress dest) {
-    always_assert_flog(dest && jmpDeltaFits(dest), "Bad Jmp: {}", dest);
-    emitJ32(instr_jmp, ssize_t(dest));
+    xedInstrRelBr(XED_ICLASS_JMP, dest, sz::dword);
   }
 
   void call(CodeAddress dest) {
-    always_assert(dest && jmpDeltaFits(dest));
-    emitJ32(instr_call, ssize_t(dest));
+    xedInstrRelBr(XED_ICLASS_CALL_NEAR, dest, sz::dword);
   }
 
   void jcc(ConditionCode cond, CodeAddress dest) {
-    emitCJ32(instr_jcc, cond, (ssize_t)dest);
+    xedInstrRelBr(ccToXedJump(cond), dest, sz::dword);
   }
 
   void jcc8(ConditionCode cond, CodeAddress dest) {
-    emitCJ8(instr_jcc, cond, (ssize_t)dest);
+    xedInstrRelBr(ccToXedJump(cond), dest, sz::dword);
   }
 
   void jmpAuto(CodeAddress dest) {
@@ -1255,9 +1262,8 @@ public:
   void j ## _nm ## 8(Label&);
   CCS
 #undef CC
-
   void setcc(int cc, Reg8 byteReg) {
-    emitCR(instr_setcc, cc, rn(byteReg), sz::byte);
+    xedInstrR(ccToXedSetCC(cc), byteReg);
   }
 
 #define CC(_nm, _cond)                          \
@@ -1358,6 +1364,48 @@ public:
     assert(call[0] == 0xE8);
     ssize_t diff = dest - (from + 5);
     *(int32_t*)(call + 1) = safe_cast<int32_t>(diff);
+  }
+
+private:
+  //Xed conversion funcs
+  #define CC_TO_XED_ARRAY(xed_instr) {                            \
+      XED_ICLASS_##xed_instr##O,    /*CC_O                  */    \
+      XED_ICLASS_##xed_instr##NO,   /*CC_NO                 */    \
+      XED_ICLASS_##xed_instr##B,    /*CC_B, CC_NAE          */    \
+      XED_ICLASS_##xed_instr##NB,   /*CC_AE, CC_NB, CC_NC   */    \
+      XED_ICLASS_##xed_instr##Z,    /*CC_E, CC_Z            */    \
+      XED_ICLASS_##xed_instr##NZ,   /*CC_NE, CC_NZ          */    \
+      XED_ICLASS_##xed_instr##BE,   /*CC_BE, CC_NA          */    \
+      XED_ICLASS_##xed_instr##NBE,  /*CC_A, CC_NBE          */    \
+      XED_ICLASS_##xed_instr##S,    /*CC_S                  */    \
+      XED_ICLASS_##xed_instr##NS,   /*CC_NS                 */    \
+      XED_ICLASS_##xed_instr##P,    /*CC_P                  */    \
+      XED_ICLASS_##xed_instr##NP,   /*CC_NP                 */    \
+      XED_ICLASS_##xed_instr##L,    /*CC_L, CC_NGE          */    \
+      XED_ICLASS_##xed_instr##NL,   /*CC_GE, CC_NL          */    \
+      XED_ICLASS_##xed_instr##LE,   /*CC_LE, CC_NG          */    \
+      XED_ICLASS_##xed_instr##NLE   /*CC_G, CC_NLE          */    \
+    }
+
+  ALWAYS_INLINE
+  xed_iclass_enum_t ccToXedJump(ConditionCode c) {
+    assert(c != CC_None);
+    static xed_iclass_enum_t jumps[] = CC_TO_XED_ARRAY(J);
+    return jumps[(int)c];
+  }
+
+  ALWAYS_INLINE
+  xed_iclass_enum_t ccToXedSetCC(int c) {
+    assert(c != -1);
+    static xed_iclass_enum_t setccs[] = CC_TO_XED_ARRAY(SET);
+    return setccs[c];
+  }
+
+  ALWAYS_INLINE
+  xed_iclass_enum_t ccToXedCMov(ConditionCode c) {
+    assert(c != CC_None);
+    static xed_iclass_enum_t cmovs[] = CC_TO_XED_ARRAY(CMOV);
+    return cmovs[(int)c];
   }
 
   //Xed Emit funcs
@@ -1470,7 +1518,7 @@ public:
           m_xedInstrBuff);
   }
 
-
+public:
   void emitInt3s(int n) {
     for (auto i = 0; i < n; ++i) {
       byte(0xcc);
@@ -2179,20 +2227,16 @@ public:
   // CMOVcc [rbase + off], rdest
   inline void cload_reg64_disp_reg64(ConditionCode cc, Reg64 rbase,
                                      int off, Reg64 rdest) {
-    emitCMX(instr_cmovcc, cc, rn(rbase), noreg, sz::byte, off, rn(rdest),
-            false /*reverse*/);
-
+    MemoryRef m(DispReg(rbase, off));
+    xedInstrMR(ccToXedCMov(cc), m, rdest);
   }
   inline void cload_reg64_disp_reg32(ConditionCode cc, Reg64 rbase,
                                      int off, Reg32 rdest) {
-    emitCMX(instr_cmovcc, cc, rn(rbase), noreg, sz::byte, off, rn(rdest),
-            false /*reverse*/,
-            0 /*imm*/,
-            false /*hasImmediate*/,
-            sz::dword /*opSz*/);
+    MemoryRef m(DispReg(rbase, off));
+    xedInstrMR(ccToXedCMov(cc), m, rdest);
   }
   inline void cmov_reg64_reg64(ConditionCode cc, Reg64 rsrc, Reg64 rdest) {
-    emitCRR(instr_cmovcc, cc, rn(rsrc), rn(rdest));
+    xedInstrRR(ccToXedCMov(cc), rsrc, rdest);
   }
 
 private:
@@ -2488,7 +2532,7 @@ private:
 #undef XED_WRAP_X
 
   ALWAYS_INLINE
-  void xedInstrRM(xed_iclass_enum_t instr,  const RegXMM& r,
+  void xedInstrRM(xed_iclass_enum_t instr, const RegXMM& r,
                   const MemoryRef& m, int memSize = sz::qword) {
     xedEmit2(instr, XED_MEMREF(m, memSize), XED_REG(r));
   }
@@ -2497,8 +2541,18 @@ private:
 
   ALWAYS_INLINE
   void xedInstrIRR(xed_iclass_enum_t instr, const RegXMM& r1, const RegXMM& r2,
-                   const Immed& i,  int immSize) {
+                   const Immed& i, int immSize) {
     xedEmit3(instr, XED_REG(r1), XED_REG(r2), XED_IMM(i, immSize));
+  }
+
+// instr(relbr)
+
+  void xedInstrRelBr(xed_iclass_enum_t instr, CodeAddress dest, int size)
+  {
+    auto target = dest - (codeBlock.frontier() +
+                  xedEmit1Prep(instr,
+                  XED_BRREL((CodeAddress)0, size)));
+    xedEmit1(instr, XED_BRREL(target, size));
   }
 
 // instr()

@@ -434,11 +434,7 @@ let unempty_str = function
 let unesc_dbl s = unempty_str @@ Php_escaping.unescape_double s
 let unesc_xhp s =
   let whitespace = Str.regexp "[ \t\n\r\012]+" in
-  let s = Str.global_replace whitespace " " s in
-  let quotes = Str.regexp " ?\"\\([^\"]*\\)\" ?" in
-  if Str.string_match quotes s 0
-  then Str.matched_group 1 s
-  else s
+  Str.global_replace whitespace " " s
 let unesc_xhp_attr s =
   let open Str in
   unesc_dbl @@

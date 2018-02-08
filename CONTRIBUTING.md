@@ -6,6 +6,9 @@ If you want to help but don't know where to start, try fixing some of the ["prob
 
 All the open issues tagged [PHP5 incompatibility](https://github.com/facebook/hhvm/issues?labels=php5+incompatibility&page=1&state=open) are real issues reported by the community in existing PHP code and [frameworks](https://github.com/facebook/hhvm/wiki/OSS-PHP-Frameworks-Unit-Testing:-General) that could use some attention.
 
+## Code of Conduct
+The code of conduct is described in [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)
+
 ## Submitting Pull Requests
 
 Before changes can be accepted a [Contributor Licensing Agreement](http://code.facebook.com/cla) must be completed. You will be prompted to accept the CLA when you submit your first pull request. If you prefer a hard copy, you can print the [pdf](https://github.com/facebook/hhvm/raw/master/hphp/doc/FB_Individual_CLA.pdf), sign it, scan it, and send it to <cla@fb.com>.

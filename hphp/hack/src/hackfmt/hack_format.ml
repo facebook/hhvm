@@ -68,7 +68,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
     | SyntaxList _ ->
       failwith (Printf.sprintf
         "Error: SyntaxList should never be handled directly;
-        offending text is '%s'." (text node));
+        offending text is '%s'." (Syntax.text node));
     | EndOfFile x ->
       t x.end_of_file_token
     | Script x ->

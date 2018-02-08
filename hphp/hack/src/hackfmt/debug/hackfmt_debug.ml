@@ -102,7 +102,7 @@ let debug_chunk_groups env ~range source_text chunk_groups =
     if !debug_config.print_nesting_graph then debug_nesting cg;
 
     Printf.printf "%s\n"
-      (Line_splitter.solve env ~range (SourceText.text source_text) [cg]);
+      (Line_splitter.solve env ~range ~source_text:(SourceText.text source_text) [cg]);
   )
 
 let debug_full_text source_text =

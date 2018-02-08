@@ -253,159 +253,194 @@ end
 module Full = struct
   module Env = Typing_env
 
+  let format_env = Format_env.{default with line_width = 30}
+
+  let text_strip_ns s = Doc.text (Utils.strip_ns s)
+
   let debug_mode = ref false
   let show_tvars = ref false
 
-  let rec list_sep o s f l =
-    match l with
-    | [] -> ()
-    | [x] -> f x
-    | x :: rl -> f x; o s; list_sep o s f rl
+  let list_sep (to_doc : string -> Doc.t) (s : string) (f : 'a -> Doc.t) (l : 'a list) : Doc.t =
+    let open Doc in
+    let max_idx = List.length l - 1 in
+    let elements = List.mapi l ~f:begin fun idx element ->
+      if idx = max_idx
+      then f element
+      else Concat [f element; to_doc s; Split]
+    end in
+    match elements with
+    | [] -> Nothing
+    | xs-> Nest xs
 
-  let shape_map o fdm o_field =
-  let cmp = (fun (k1, _) (k2, _) ->
-     compare (Env.get_shape_field_name k1) (Env.get_shape_field_name k2)) in
-  let fields = List.sort ~cmp (Nast.ShapeMap.elements fdm) in
-  (match fields with
-  | [] -> ()
-  | f::l ->
-    o_field f;
-    List.iter l (fun f -> o ", "; o_field f;))
+  let shape_map to_doc fdm f_field =
+    let cmp = (fun (k1, _) (k2, _) ->
+       compare (Env.get_shape_field_name k1) (Env.get_shape_field_name k2)) in
+    let fields = List.sort ~cmp (Nast.ShapeMap.elements fdm) in
+    list_sep to_doc ", " f_field fields
 
+  let rec ty: type a. _ -> _ -> _ -> a ty -> Doc.t =
+    fun to_doc st env (_, x) -> ty_ to_doc st env x
 
-  let rec ty: type a. _ -> _ -> _ -> a ty -> _ =
-    fun st env o (_, x) -> ty_ st env o x
-
-  and ty_: type a. _ -> _ -> _ -> a ty_ -> _ =
-    fun st env o x ->
-    let k: type b. b ty -> _ = fun x -> ty st env o x in
-    let list: type c. (c ty -> unit) -> c ty list -> _ =
-      fun x y -> list_sep o ", " x y in
+  and ty_: type a. _ -> _ -> _ -> a ty_ -> Doc.t =
+    let open Doc in
+    fun to_doc st env x ->
+    let k: type b. b ty -> _ = fun x -> ty to_doc st env x in
+    let list: type c. (c ty -> Doc.t) -> c ty list -> _ =
+      fun x y -> list_sep to_doc ", " x y in
     match x with
-    | Tany -> o "_"
-    | Terr -> o "_"
-    | Tthis -> o SN.Typehints.this
-    | Tmixed -> o "mixed"
-    | Tnonnull -> o "nonnull"
-    | Tdarray (x, y) -> o "darray<"; k x; o ", "; k y; o ">"
-    | Tvarray x -> o "varray<"; k x; o ">"
-    | Tvarray_or_darray x -> o "varray_or_darray<"; k x; o ">"
-    | Tarraykind (AKvarray_or_darray x) -> o "varray_or_darray<"; k x; o ">"
-    | Tarraykind AKany -> o "array"
-    | Tarraykind AKempty -> o "array (empty)"
-    | Tarray (None, None) -> o "array"
-    | Tarraykind AKvarray x -> o "varray<"; k x; o ">"
-    | Tarraykind (AKvec x) -> o "array<"; k x; o ">"
-    | Tarray (Some x, None) -> o "array<"; k x; o ">"
-    | Tarray (Some x, Some y) -> o "array<"; k x; o ", "; k y; o ">"
-    | Tarraykind AKdarray (x, y) -> o "darray<"; k x; o ", "; k y; o ">"
-    | Tarraykind (AKmap (x, y)) -> o "array<"; k x; o ", "; k y; o ">"
+    | Tany -> to_doc "_"
+    | Terr -> to_doc "_"
+    | Tthis -> to_doc SN.Typehints.this
+    | Tmixed -> to_doc "mixed"
+    | Tnonnull -> to_doc "nonnull"
+    | Tdarray (x, y) -> Concat [to_doc "darray<"; k x; to_doc ", "; k y; to_doc ">"]
+    | Tvarray x -> Concat [to_doc "varray<"; k x; to_doc ">"]
+    | Tvarray_or_darray x -> Concat [to_doc "varray_or_darray<"; k x; to_doc ">"]
+    | Tarraykind (AKvarray_or_darray x) -> Concat [to_doc "varray_or_darray<"; k x; to_doc ">"]
+    | Tarraykind AKany -> to_doc "array"
+    | Tarraykind AKempty -> to_doc "array (empty)"
+    | Tarray (None, None) -> to_doc "array"
+    | Tarraykind AKvarray x -> Concat [to_doc "varray<"; k x; to_doc ">"]
+    | Tarraykind (AKvec x) -> Concat [to_doc "array<"; k x; to_doc ">"]
+    | Tarray (Some x, None) -> Concat [to_doc "array<"; k x; to_doc ">"]
+    | Tarray (Some x, Some y) -> Concat [to_doc "array<"; k x; to_doc ", "; k y; to_doc ">"]
+    | Tarraykind AKdarray (x, y) -> Concat [to_doc "darray<"; k x; to_doc ", "; k y; to_doc ">"]
+    | Tarraykind (AKmap (x, y)) -> Concat [to_doc "array<"; k x; to_doc ", "; k y; to_doc ">"]
     | Tarraykind (AKshape fdm) ->
-      let o_field (shape_map_key, (_tk, tv)) =
-        o (Env.get_shape_field_name shape_map_key);
-        o " => ";
-        k tv in
-      o "shape-like-array(";
-      shape_map o fdm o_field;
-      o ")"
-    | Tarraykind (AKtuple fields) ->
-      o "tuple-like-array("; list k (List.rev (IMap.values fields)); o ")"
+      let f_field (shape_map_key, (_tk, tv)) = Concat [
+          to_doc (Env.get_shape_field_name shape_map_key);
+          to_doc " => ";
+          k tv
+        ] in
+      Concat [
+        to_doc "shape-like-array(";
+        shape_map to_doc fdm f_field;
+        to_doc ")"
+      ]
+    | Tarraykind (AKtuple fields) -> Concat [
+        to_doc "tuple-like-array(";
+        list k (List.rev (IMap.values fields));
+        to_doc ")"
+      ]
     | Tarray (None, Some _) -> assert false
-    | Tclass ((_, s), []) -> o s
-    | Tapply ((_, s), []) -> o s
-    | Tgeneric s -> o s
-    | Taccess (root_ty, ids) ->
+    | Tclass ((_, s), []) -> to_doc s
+    | Tapply ((_, s), []) -> to_doc s
+    | Tgeneric s -> to_doc s
+    | Taccess (root_ty, ids) -> Concat [
         k root_ty;
-        o (List.fold_left ids
+        to_doc (List.fold_left ids
           ~f:(fun acc (_, sid) -> acc ^ "::" ^ sid) ~init:"")
-    | Toption x -> o "?"; k x
-    | Tprim x -> prim o x
+      ]
+    | Toption x -> Concat [to_doc "?"; k x]
+    | Tprim x -> prim to_doc x
     | Tvar n ->
       let _, n' = Env.get_var env n in
-      if ISet.mem n' st then o "[rec]"
-      else
-      (* For hh_show_env we further show the type variable number *)
-      if !show_tvars then (o "#"; o (string_of_int n))
-      (* In debug mode just show where type variables appear *)
-      else if !debug_mode then o "^";
+      let prepend =
+        if ISet.mem n' st then to_doc "[rec]"
+        else
+        (* For hh_show_env we further show the type variable number *)
+        if !show_tvars then (to_doc ("#" ^ (string_of_int n)))
+        (* In debug mode just show where type variables appear *)
+        else if !debug_mode then to_doc "^"
+        else Nothing
+      in
       let _, ety = Env.expand_type env (Reason.Rnone, x) in
       let st = ISet.add n' st in
-      ty st env o ety
-    | Tfun ft ->
-      if ft.ft_abstract then o "abs " else ();
-      o "("; if ft.ft_is_coroutine then o "coroutine ";
-      o "function"; fun_type st env o ft; o ")";
-      (match ft.ft_ret with
-        | (Reason.Rdynamic_yield _, _) -> o " [DynamicYield]"
-        | _ -> ())
-    | Tclass ((_, s), tyl) -> o s; o "<"; list k tyl; o ">"
-    | Tabstract (AKnewtype (s, []), _) -> o s
-    | Tabstract (AKnewtype (s, tyl), _) -> o s; o "<"; list k tyl; o ">"
-    | Tabstract (ak, cstr) -> o @@ AbstractKind.to_string ak;
-      (if !debug_mode
-       then Option.iter cstr ~f:(fun ty -> o " as "; k ty))
+      Concat [prepend; ty to_doc st env ety]
+    | Tfun ft -> Concat [
+        if ft.ft_abstract then to_doc "abs " else Nothing;
+        to_doc "(";
+        if ft.ft_is_coroutine then to_doc "coroutine " else Nothing;
+        to_doc "function";
+        fun_type to_doc st env ft;
+        to_doc ")";
+        (match ft.ft_ret with
+          | (Reason.Rdynamic_yield _, _) -> to_doc " [DynamicYield]"
+          | _ -> Nothing)
+      ]
+    | Tclass ((_, s), tyl) -> Concat [to_doc s; to_doc "<"; list k tyl; to_doc ">"]
+    | Tabstract (AKnewtype (s, []), _) -> to_doc s
+    | Tabstract (AKnewtype (s, tyl), _) ->
+      Concat [to_doc s; to_doc "<"; list k tyl; to_doc ">"]
+    | Tabstract (ak, cstr) ->
+      let debug_info = if !debug_mode then
+        match cstr with
+        | None -> Nothing
+        | Some ty -> Concat [to_doc " as "; k ty]
+      else Nothing
+      in
+      Concat [to_doc @@ AbstractKind.to_string ak; debug_info]
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
     *)
-    | Tapply ((_, s), tyl) -> o s; o "<"; list k tyl; o ">"
-    | Ttuple tyl -> o "("; list k tyl; o ")"
+    | Tapply ((_, s), tyl) -> Concat [to_doc s; to_doc "<"; list k tyl; to_doc ">"]
+    | Ttuple tyl -> Concat [to_doc "("; list k tyl; to_doc ")"]
     | Tanon (_, id) ->
       begin match Env.get_anonymous env id with
-      | Some (Reactive, true, _) -> o "[coroutine rx fun]"
-      | Some (Nonreactive, true, _) -> o "[coroutine fun]"
-      | Some (Reactive, false, _) -> o "[rx fun]"
-      | _ -> o "[fun]"
+      | Some (Reactive, true, _) -> to_doc "[coroutine rx fun]"
+      | Some (Nonreactive, true, _) -> to_doc "[coroutine fun]"
+      | Some (Reactive, false, _) -> to_doc "[rx fun]"
+      | _ -> to_doc "[fun]"
       end
-    | Tunresolved [] -> o "[unresolved]"
-    | Tunresolved [ty] -> if !debug_mode then (o "("; k ty; o ")") else k ty
-    | Tunresolved tyl -> o "("; list_sep o " | " k tyl; o ")"
-    | Tobject -> o "object"
-    | Tshape (fields_known, fdm) ->
-      o "shape";
-      o "(";
-      let optional_shape_field_enabled =
+    | Tunresolved [] -> to_doc "[unresolved]"
+    | Tunresolved [ty] ->
+      if !debug_mode then Concat [to_doc "("; k ty; to_doc ")"] else k ty
+    | Tunresolved tyl -> Concat [to_doc "("; list_sep to_doc " | " k tyl; to_doc ")"]
+    | Tobject -> to_doc "object"
+    | Tshape (fields_known, fdm) -> Concat [
+      to_doc "shape";
+      to_doc "(";
+      (let optional_shape_field_enabled =
         not @@
           TypecheckerOptions.experimental_feature_enabled
             (Env.get_options env)
             TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields in
-      let o_field (shape_map_key, { sft_optional; sft_ty }) =
+      let f_field (shape_map_key, { sft_optional; sft_ty }) =
         if optional_shape_field_enabled then
-          begin
-            if sft_optional then o "?";
-            o "'"; o (Env.get_shape_field_name shape_map_key); o "'";
-            o " => ";
+          Concat [
+            if sft_optional then to_doc "?" else Nothing;
+            to_doc "'";
+            to_doc (Env.get_shape_field_name shape_map_key);
+            to_doc "'";
+            to_doc " => ";
             k sft_ty;
-          end
+          ]
         else
-          begin
-            o "'"; o (Env.get_shape_field_name shape_map_key); o "'";
-            o " => ";
+          Concat [
+            to_doc "'";
+            to_doc (Env.get_shape_field_name shape_map_key);
+            to_doc "'";
+            to_doc " => ";
             k sft_ty
-          end in
-      shape_map o fdm o_field;
-      begin match fields_known with
-      | FieldsFullyKnown -> ()
-      | FieldsPartiallyKnown _ -> (match Nast.ShapeMap.elements fdm with
-        | [] -> ()
-        | _ -> o ", "
-        );
-        o "..."
-      end;
-      o ")";
-      begin match fields_known with
-      | FieldsFullyKnown -> ()
+          ] in
+      shape_map to_doc fdm f_field);
+      (match fields_known with
+      | FieldsFullyKnown -> Nothing
+      | FieldsPartiallyKnown _ -> Concat [
+          (match Nast.ShapeMap.elements fdm with
+          | [] -> Nothing
+          | _ -> to_doc ", "
+          );
+          to_doc "..."
+        ]);
+      to_doc ")";
+      (match fields_known with
+      | FieldsFullyKnown -> Nothing
       | FieldsPartiallyKnown unset_fields ->
         (match Nast.ShapeMap.elements unset_fields with
-          | [] -> ()
-          | _ -> o "(unset fields: ";
-              Nast.ShapeMap.iter begin fun k _ ->
-                o (Env.get_shape_field_name k); o " "
-              end unset_fields;
-            o ")"
+          | [] -> Nothing
+          | _ -> Concat [
+              to_doc "(unset fields: ";
+              Concat (List.map (Nast.ShapeMap.ordered_keys unset_fields) begin fun k ->
+                Concat [to_doc (Env.get_shape_field_name k); to_doc " "]
+              end);
+              to_doc ")"
+            ]
         )
-      end;
+      );
+    ]
 
-  and prim o x =
-    o (match x with
+  and prim to_doc x =
+    to_doc (match x with
     | Nast.Tvoid   -> "void"
     | Nast.Tint    -> "int"
     | Nast.Tbool   -> "bool"
@@ -418,53 +453,69 @@ module Full = struct
     )
 
   and fun_type: type a. _ -> _ -> _ -> a fun_type -> _ =
-    fun st env o ft ->
-    (match ft.ft_tparams with
-      | [] -> ()
-      | l -> (o "<"; list_sep o ", " (tparam st o env) l; o ">")
-    );
-    o "("; list_sep o ", " (fun_param st env o) ft.ft_params;
-    begin match ft.ft_arity with
-      | Fstandard _ -> ()
-      | _ ->
-        if not (List.is_empty ft.ft_params) then o ", ";
+    fun to_doc st env ft ->
+    let open Doc in
+    Concat [
+      (match ft.ft_tparams with
+        | [] -> Nothing
+        | l -> Concat [to_doc "<"; list_sep to_doc ", " (tparam to_doc st env) l; to_doc ">"]
+      );
+      to_doc "(";
+      WithRule (Rule.Parental, Concat [
+        (if List.length ft.ft_params > 0 then Split else Nothing);
+        list_sep to_doc ", " (fun_param to_doc st env) ft.ft_params;
         begin match ft.ft_arity with
-        | Fvariadic(_, p) ->
-          begin match p.fp_type with
-          | _, Tany -> ()
-          | _, _ -> fun_param st env o p
-          end
-        | _ -> ()
-        end; o "..."
-    end;
-    o "): ";
-    ty st env o ft.ft_ret
+          | Fstandard _ -> Nothing
+          | _ -> Concat [
+              if not (List.is_empty ft.ft_params) then to_doc ", " else Nothing;
+              begin match ft.ft_arity with
+              | Fvariadic(_, p) ->
+                begin match p.fp_type with
+                | _, Tany -> Nothing
+                | _, _ -> fun_param to_doc st env p
+                end
+              | _ -> Nothing
+              end;
+              to_doc "..."
+            ]
+        end;
+        (if List.length ft.ft_params > 0 then Split else Nothing);
+        to_doc "): ";
+        ]);
+      ty to_doc st env ft.ft_ret
+    ]
 
   and fun_param: type a. _ -> _ -> _ -> a fun_param -> _ =
-    fun st env o { fp_name; fp_type; fp_kind; _ } ->
-    (match fp_kind with
-    | FPinout -> o "inout "
-    | _ -> ()
-    );
-    match fp_name, fp_type with
-    | None, _ -> ty st env o fp_type
-    | Some param_name, (_, Tany) -> o param_name
-    | Some param_name, _ ->
-        ty st env o fp_type; o " "; o param_name
+    let open Doc in
+    fun to_doc st env { fp_name; fp_type; fp_kind; _ } ->
+    Concat [
+      (match fp_kind with
+      | FPinout -> to_doc "inout "
+      | _ -> Nothing
+      );
+      match fp_name, fp_type with
+      | None, _ -> ty to_doc st env fp_type
+      | Some param_name, (_, Tany) -> to_doc param_name
+      | Some param_name, _ ->
+          Concat [ty to_doc st env fp_type; to_doc " "; to_doc param_name]
+    ]
 
   and tparam: type a. _ -> _ -> _ ->  a Typing_defs.tparam -> _ =
-    fun st o env (_, (_, x), cstrl) ->
-      (o x; list_sep o " " (tparam_constraint st env o) cstrl)
+    fun to_doc st env (_, (_, x), cstrl) ->
+      let open Doc in
+      Concat [to_doc x; list_sep to_doc " " (tparam_constraint to_doc st env) cstrl]
 
   and tparam_constraint:
     type a. _ -> _ -> _ -> (Ast.constraint_kind * a ty) -> _ =
-    fun st env o (ck, cty) ->
-      begin (match ck with
-      | Ast.Constraint_as -> o " as "
-      | Ast.Constraint_super -> o " super "
-      | Ast.Constraint_eq -> o " = ");
-        ty st env o cty
-      end
+    fun to_doc st env (ck, cty) ->
+      let open Doc in
+      Concat [
+        (match ck with
+        | Ast.Constraint_as -> to_doc " as "
+        | Ast.Constraint_super -> to_doc " super "
+        | Ast.Constraint_eq -> to_doc " = ");
+        ty to_doc st env cty
+      ]
 
   let visitor env =
     object(this)
@@ -493,53 +544,49 @@ module Full = struct
       @
       List.map (TySet.elements upper) (fun ty -> (tparam, Ast.Constraint_as, ty))
 
-  let to_string env x =
-    let buf = Buffer.create 50 in
-    ty ISet.empty env (Buffer.add_string buf) x;
-    Buffer.contents buf
+  let to_string to_doc env x =
+    ty to_doc ISet.empty env x
+    |> Libhackfmt.format_doc_unbroken format_env
+    |> String.trim
 
-  let constraints_for_type env ty =
+  let constraints_for_type to_doc env ty =
+    let open Doc in
     let tparams = get_tparams env ty in
     let constraints = List.concat_map tparams (get_constraints_on_tparam env) in
     if List.is_empty constraints
     then None
     else
-      let buf = Buffer.create 50 in
-      let o = Buffer.add_string buf in
-      o "where "; list_sep o ", "
-      (fun (tparam, ck, ty) ->
-        (o tparam; tparam_constraint ISet.empty env o (ck, ty)))
-      constraints;
-      Some (Buffer.contents buf)
+      Some (Concat [
+        to_doc "where ";
+        list_sep to_doc ", " begin fun (tparam, ck, ty) ->
+          Concat [to_doc tparam; tparam_constraint to_doc ISet.empty env (ck, ty)]
+        end constraints;
+      ]
+      |> Libhackfmt.format_doc_unbroken format_env
+      |> String.trim)
 
   let to_string_rec env n x =
-    let buf = Buffer.create 50 in
-    ty (ISet.add n ISet.empty) env (Buffer.add_string buf) x;
-    Buffer.contents buf
-
-  let get_string (f : (string -> unit) -> unit) : string =
-    let buf = Buffer.create 50 in
-    let add_string str =
-      let str = Utils.strip_ns str in
-      Buffer.add_string buf str
-    in
-    f add_string;
-    Buffer.contents buf
+    ty Doc.text (ISet.add n ISet.empty) env x
+    |> Libhackfmt.format_doc_unbroken format_env
+    |> String.trim
 
   let to_string_strip_ns env x =
-    get_string (fun add_string -> ty ISet.empty env add_string x)
+    to_string text_strip_ns env x
 
   let func_to_string_strip_ns env ft name =
-    Printf.sprintf
-      "%s%s"
-      (Utils.strip_ns name)
-      (get_string (fun add_string -> fun_type ISet.empty env add_string ft))
+    let open Doc in
+    Concat [
+      text_strip_ns name;
+      fun_type text_strip_ns ISet.empty env ft;
+    ]
+    |> Libhackfmt.format_doc format_env
+    |> String.trim
 
   let to_string_decl tcopt (x: decl ty) =
     let env =
       Typing_env.empty tcopt Relative_path.default
         ~droot:None in
-    to_string   env x
+    to_string Doc.text env x
 
 end
 
@@ -905,7 +952,7 @@ end
 
 let error: type a. a ty_ -> _ = fun ty -> ErrorString.type_ ty
 let suggest: type a. a ty -> _ =  fun ty -> Suggest.type_ ty
-let full env ty = Full.to_string env ty
+let full env ty = Full.to_string Doc.text env ty
 let full_rec env n ty = Full.to_string_rec env n ty
 let full_strip_ns env ty = Full.to_string_strip_ns env ty
 let full_func_strip_ns env ft name = Full.func_to_string_strip_ns env ft name
@@ -925,5 +972,5 @@ let class_ tcopt c = PrintClass.class_type tcopt c
 let gconst tcopt gc = Full.to_string_decl tcopt gc
 let fun_ tcopt f = PrintFun.fun_type tcopt f
 let typedef tcopt td = PrintTypedef.typedef tcopt td
-let constraints_for_type env ty = Full.constraints_for_type env ty
+let constraints_for_type env ty = Full.constraints_for_type Doc.text env ty
 let class_kind c_kind final = ErrorString.class_kind c_kind final

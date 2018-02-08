@@ -234,6 +234,14 @@ let from_source env source_text chunk_group =
   let rbm = rbm_from_source source_text chunk_group in
   make env chunk_group rbm
 
+(** Every rule is broken. Everything is going hog wild. *)
+let rbm_broken_everywhere chunk_group =
+  Chunk_group.get_rules chunk_group
+  |> List.fold ~init:IMap.empty ~f:(fun acc k -> IMap.add k true acc)
+
+let from_rbm env rbm chunk_group =
+  make env chunk_group rbm
+
 let is_rule_bound t rule_id =
   IMap.mem rule_id t.rbm
 

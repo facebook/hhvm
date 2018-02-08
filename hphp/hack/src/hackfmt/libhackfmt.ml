@@ -97,7 +97,7 @@ let format_tree ?config tree =
   |> SyntaxTransforms.editable_from_positioned
   |> Hack_format.transform env
   |> Chunk_builder.build
-  |> Line_splitter.solve env source_text
+  |> Line_splitter.solve env ~source_text
 
 (** Format a single node.
  *
@@ -113,7 +113,7 @@ let format_node ?config ?(indent=0) node =
   |> Hack_format.transform env
   |> nest indent
   |> Chunk_builder.build
-  |> Line_splitter.solve env source_text
+  |> Line_splitter.solve env ~source_text
 
 (** Format a given range in a file.
  *
@@ -137,7 +137,7 @@ let format_range ?config range tree =
   |> SyntaxTransforms.editable_from_positioned
   |> Hack_format.transform env
   |> Chunk_builder.build
-  |> Line_splitter.solve env ~range source_text
+  |> Line_splitter.solve env ~range ~source_text
 
 (** Return the source of the entire file with the given intervals formatted.
  *
@@ -163,7 +163,7 @@ let format_intervals ?config intervals tree =
     |> List.sort ~cmp:Interval.comparator
   in
   let solve_states = Line_splitter.find_solve_states env
-    (SourceText.text source_text) chunk_groups in
+    ~source_text:(SourceText.text source_text) chunk_groups in
   let formatted_intervals = List.map ranges (fun range ->
     (range,
       Line_splitter.print
@@ -240,7 +240,18 @@ let format_at_offset ?config (tree : SyntaxTree.t) offset =
       env
       ~range
       ~include_surrounding_whitespace:false
-      (SourceText.text source_text)
+      ~source_text:(SourceText.text source_text)
       chunk_groups
   in
   range, formatted
+
+let format_doc (env : Env.t) (doc : Doc.t) =
+  doc
+  |> Chunk_builder.build
+  |> Line_splitter.solve env
+
+let format_doc_unbroken (env : Env.t) (doc : Doc.t) =
+  doc
+  |> Chunk_builder.build
+  |> Line_splitter.unbroken env
+  |> Line_splitter.print env

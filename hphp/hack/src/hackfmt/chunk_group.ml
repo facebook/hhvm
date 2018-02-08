@@ -20,6 +20,10 @@ type t = {
 let get_rule_count t =
   IMap.cardinal t.rule_map
 
+let get_rules t =
+  (* TODO verify or log if there are unused rules *)
+  List.map (IMap.bindings t.rule_map) ~f:fst
+
 let get_rule_kind t id =
   let r = IMap.find_unsafe id t.rule_map in
   r.Rule.kind

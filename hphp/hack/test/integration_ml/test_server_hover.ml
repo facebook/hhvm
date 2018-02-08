@@ -146,6 +146,8 @@ function test_callback((function(int): string) $cb): void {
 //^3:3
   $cb(5);
 //^5:3 ^5:8
+  test_callback($cb);
+//^7:3
 }
 "
 
@@ -153,6 +155,8 @@ let callback_cases = [
   ("callback.php", 3, 3), [{ info = "(function(int): string)"; doc_block = None }];
   ("callback.php", 5, 3), [{ info = "(function(int): string)"; doc_block = None }];
   ("callback.php", 5, 8), [{ info = "string"; doc_block = None }];
+  ("callback.php", 7, 3), [
+    { info = "test_callback(\n  (function(int): string) $cb\n): void"; doc_block = None }];
 ]
 
 let invariant_violation = "<?hh // strict

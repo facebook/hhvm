@@ -85,6 +85,7 @@ let space () = Space
 let split () = Split
 let space_split () = Concat [Space; Split]
 let newline () = Newline
+let text s = Text (s, String.length s)
 
 let rec has_printable_content node =
   match node with

@@ -714,7 +714,7 @@ public:
   template<class F>
   void listAssignmentAssignElements(Emitter& e,
                                     std::vector<IndexPair>& indexChains,
-                                    F&& emitSrc, int popAll = -1);
+                                    F&& emitSrc);
 
   void visitIfCondition(ExpressionPtr cond, Emitter& e, Label& tru, Label& fals,
                         bool truFallthrough);
@@ -4024,18 +4024,19 @@ template<class F>
 typename std::enable_if<
   std::is_same<typename std::decay<F>::type, std::nullptr_t>::value,
   int
->::type emit_list_assign_src(int i, F&& null) {
+>::type emit_list_assign_src(int i, bool, F&& null) {
   always_assert(false);
 }
 
 template<class F>
-auto emit_list_assign_src(int i, F&& func) -> decltype(func(0), 1) {
-  func(i);
+auto emit_list_assign_src(int i, bool last, F&& func) ->
+  decltype(func(0, false), 1) {
+  func(i, last);
   return 1;
 }
 
 template<class F>
-auto emit_list_assign_src(int i, F&& func) -> decltype(func(), 0) {
+auto emit_list_assign_src(int i, bool last, F&& func) -> decltype(func(), 0) {
   func();
   return 0;
 }
@@ -4044,12 +4045,10 @@ template<class F>
 void EmitterVisitor::listAssignmentAssignElements(
   Emitter& e,
   std::vector<IndexPair>& indexPairs,
-  F&& emitSrc,
-  int popAll
+  F&& emitSrc
 ) {
 
   auto const ltr = RuntimeOption::PHP7_LTR_assign;
-  int next = ltr ? 0 : popAll - 1;
 
   // PHP5 does list() assignments RTL, PHP7 does them LTR, so this loop can go
   // either way and looks a little ugly. The assignment order normally isn't
@@ -4070,17 +4069,23 @@ void EmitterVisitor::listAssignmentAssignElements(
       continue;
     }
 
+    auto const isLast = [&] {
+      for (auto j = ltr ? i + 1 : i - 1;
+           j >= 0 && j < (int)indexPairs.size();
+           ltr ? j++ : j--) {
+        auto const& next = indexPairs[j].second;
+        if (next.size()) {
+          return next[0] != currIndexChain[0];
+        }
+      }
+      return true;
+    }();
+
     if (std::is_same<F, std::nullptr_t>::value) {
       e.Null();
     } else {
       auto const cur = currIndexChain[0];
-      for (;0 <= next && next < popAll && next != cur; ltr ? next++ : next--) {
-        emit_list_assign_src(next, emitSrc);
-        emitCGet(e);
-        emitPop(e);
-      }
-      next = ltr ? cur + 1 : cur - 1;
-      auto const start = emit_list_assign_src(cur, emitSrc);
+      auto const start = emit_list_assign_src(cur, isLast, emitSrc);
       for (int j = start; j < (int)currIndexChain.size(); ++j) {
         m_evalStack.push(StackSym::I);
         m_evalStack.setInt(currIndexChain[j]);
@@ -4090,12 +4095,6 @@ void EmitterVisitor::listAssignmentAssignElements(
     }
 
     emitSet(e);
-    emitPop(e);
-  }
-
-  for (;0 <= next && next < popAll; ltr ? next++ : next--) {
-    emit_list_assign_src(next, emitSrc);
-    emitCGet(e);
     emitPop(e);
   }
 }
@@ -6931,21 +6930,39 @@ bool EmitterVisitor::emitInlineGenva(
     }
     e.NewVArray(num_params);
   } else {
+    for (const auto wh : waithandles) {
+      emitVirtualLocal(wh); // immediate for PopL
+      emitVirtualLocal(wh); // immediate for PushL
+      emitPushL(e);
+      e.WHResult();
+      e.PopL(wh);
+    }
     std::vector<IndexPair> indexPairs;
     IndexChain workingChain;
+    auto num_killed = 0;
     listAssignmentVisitLHS(e, assign, workingChain, indexPairs);
     listAssignmentAssignElements(
       e, indexPairs,
-      [&] (uint32_t i) {
+      [&] (uint32_t i, bool last) {
         emitVirtualLocal(waithandles[i]);
-        emitCGet(e);
-        e.WHResult();
-      },
-      waithandles.size() /* popAll */
+        if (last) {
+          emitPushL(e);
+          num_killed++;
+        }
+      }
     );
 
-    for (const auto wh : waithandles) {
-      emitUnsetL(e, wh);
+    if (num_killed < waithandles.size()) {
+      // There must have been blanks in the list assignment, and some
+      // of the unnamed locals weren't PushL'd in
+      // listAssignmentAssignElements, so they still need unsetting.
+      auto done = std::vector<bool>(waithandles.size());
+      for (auto& ip : indexPairs) {
+        if (ip.second.size()) done[ip.second.front()] = true;
+      }
+      for (auto i = done.size(); i--; ) {
+        if (!done[i]) emitUnsetL(e, waithandles[i]);
+      }
     }
   }
 

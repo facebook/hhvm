@@ -406,7 +406,11 @@ let check_instruct_call asn i i' =
      we have created an alias, we won't do anything unsound because of it.
      If, as I suspect, these FPassL's are just used as short-lived temporaries
      then this will probably work...
-     Note that we *add* the locals to vs, vs' because we don't know their values *)
+     Note that we *add* the locals to vs, vs' because we don't know their values.
+     TODO: check that adding back equality between the two original variables is
+     actually sound. There might be a counterexample involving funky aliases
+     being created in the called function, but I can't construct one that would
+     lead to a semdiff bug at the moment. *)
   | FPassL (param_id, (Local.Unnamed _n as l), h),
     FPassL (param_id', (Local.Unnamed _n' as l'), h')
     when param_id=param_id' && h=h' ->
@@ -414,7 +418,8 @@ let check_instruct_call asn i i' =
       | None -> None
       | Some (props,vs,vs') ->
          let stripped = PropSet.filter (fun (x,x') -> x <> l && x' <> l') props in
-           Some (stripped, VarSet.add l vs, VarSet.add l' vs')
+         let addedback = PropSet.add (l,l') stripped in
+           Some (addedback, VarSet.add l vs, VarSet.add l' vs')
      end
   | FPassL (_,_,_), _
   | _, FPassL (_,_,_) ->

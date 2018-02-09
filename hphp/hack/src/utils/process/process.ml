@@ -113,6 +113,14 @@ let is_ready process =
   | Process_aborted Input_too_large
   | Process_exited _ -> true
 
+let kill_and_cleanup_fds pid fds =
+  Unix.kill pid Sys.sigkill;
+  let maybe_close fd_ref = Option.iter !fd_ref ~f:begin fun fd ->
+    Unix.close fd;
+    fd_ref := None
+  end in
+  List.iter fds ~f:maybe_close
+
 (**
  * Consumes from stdout and stderr pipes and waitpids on the process.
  * Returns immediately if process has already been waited on (so this
@@ -166,6 +174,7 @@ let rec read_and_wait_pid ~retries process =
     match Unix.waitpid [Unix.WNOHANG] pid with
     | 0, _ ->
       if retries <= 0 then
+        let () = kill_and_cleanup_fds pid [stdout_fd; stderr_fd] in
         Error (Timed_out
           ((Stack.merge_bytes acc), (Stack.merge_bytes acc_err)))
       else

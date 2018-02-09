@@ -148,22 +148,17 @@ let int_of_fd (x : Unix.file_descr) : int = Obj.magic x
 let close_fds fds =
   List.iter Unix.close fds
 
-(** Returns true if the next opened file descriptor is exactly 1 greater
+(** Asserts the next opened file descriptor is exactly 1 greater
  * than the "last_fd". Repeats this "repeats" times. Accumulates all opened
  * FDs into all_fds and closes all of them at the end. *)
-let rec is_next_fd_incremental ~repeats all_fds last_fd =
+let rec assert_next_fd_incremental ~repeats all_fds last_fd =
   if repeats <= 0 then
-    let () = close_fds all_fds in
-    true
+    close_fds all_fds
   else
     let fd = open_an_fd () in
-    try
-      let () = Int_asserter.assert_equals ((int_of_fd last_fd) + 1) (int_of_fd fd)
-        "Test unexpectedly leaked a File Descriptor." in
-      is_next_fd_incremental ~repeats:(repeats - 1) (fd :: all_fds) fd
-    with
-    | Assert_failure _ ->
-      false
+    let () = Int_asserter.assert_equals ((int_of_fd last_fd) + 1) (int_of_fd fd)
+      "Test unexpectedly leaked a File Descriptor." in
+    assert_next_fd_incremental ~repeats:(repeats - 1) (fd :: all_fds) fd
 
 (** Opens one FD before running a test, and then opens 1000 FDs after the test
  * and asserts that all the FD numbers are sequential (i.e. no holes).
@@ -178,8 +173,8 @@ let rec is_next_fd_incremental ~repeats all_fds last_fd =
 let assert_no_fd_leaked test = fun () ->
   let first_fd = open_an_fd () in
   let result = test () in
-  let incremental = is_next_fd_incremental ~repeats:1000 [first_fd] first_fd in
-  incremental && result
+  assert_next_fd_incremental ~repeats:1000 [first_fd] first_fd;
+  result
 
 let tests = [
   ("test_echo", assert_no_fd_leaked test_echo);

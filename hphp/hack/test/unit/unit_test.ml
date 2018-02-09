@@ -45,4 +45,5 @@ let for_all_non_shortcircuit tests f =
   List.fold_left tests ~init:true ~f:(fun acc test -> (f test) && acc)
 
 let run_all (tests: (string * (unit -> bool)) list ) =
+  Printexc.record_backtrace true;
   exit (if for_all_non_shortcircuit tests run then 0 else 1)

@@ -2762,7 +2762,7 @@ let from_file (env : env) : result =
 )*****************************************************************************)
 
 let legacy (x : result) : Parser_hack.parser_return =
-  { Parser_hack.file_mode = Some x.fi_mode
+  { Parser_hack.file_mode = Option.some_if (x.fi_mode <> FileInfo.Mphp) x.fi_mode
   ; Parser_hack.is_hh_file = x.is_hh_file
   ; Parser_hack.comments  = x.comments
   ; Parser_hack.ast       = x.ast

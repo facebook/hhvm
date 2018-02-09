@@ -123,7 +123,7 @@ void* SparseHeap::allocBig(size_t bytes, HeaderKind kind,
   auto cap = malloc_usable_size(n);
 #endif
   enlist(n, kind, bytes + sizeof(MallocNode), tyindex);
-  stats.mmUsage += cap;
+  stats.mm_debt -= cap;
   stats.malloc_cap += cap;
   return n + 1;
 }
@@ -143,7 +143,7 @@ void* SparseHeap::callocBig(size_t nbytes, HeaderKind kind,
   auto cap = malloc_usable_size(n);
 #endif
   enlist(n, kind, nbytes + sizeof(MallocNode), tyindex);
-  stats.mmUsage += cap;
+  stats.mm_debt -= cap;
   stats.malloc_cap += cap;
   return n + 1;
 }
@@ -175,7 +175,7 @@ void SparseHeap::freeBig(void* ptr, MemoryUsageStats& stats) {
 #endif
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
-  stats.mmUsage -= cap;
+  stats.mm_freed += cap;
   stats.malloc_cap -= cap;
 }
 
@@ -202,7 +202,7 @@ void* SparseHeap::resizeBig(void* ptr, size_t nbytes,
   if (newNode != n) {
     m_bigs[newNode->index()] = newNode;
   }
-  stats.mmUsage += new_cap - old_cap;
+  stats.mm_debt -= new_cap - old_cap;
   stats.malloc_cap += new_cap - old_cap;
   return newNode + 1;
 }

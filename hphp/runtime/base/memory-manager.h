@@ -775,6 +775,15 @@ struct MemoryManager {
   MemoryUsageStats getStatsCopy();
 
   /*
+   * Get a reference to the current stats data. This does not require any
+   * computation, like getStats() and getStatsCopy() do, but some fields may be
+   * out of date.
+   *
+   * Currently only used for testing; see runtime/test/memmgr-test.cpp
+   */
+  const MemoryUsageStats& getStatsRaw() const;
+
+  /*
    * Open and close respectively a stats-tracking interval.
    *
    * Return whether or not the tracking state was changed as a result of the
@@ -980,6 +989,8 @@ private:
 private:
   void* slabAlloc(size_t bytes, size_t index);
   void* newSlab(size_t nbytes);
+  void* mallocSmallIndexTail(size_t bytes, size_t index);
+  void* mallocSmallIndexSlow(size_t bytes, size_t index);
   void* mallocSmallSizeSlow(size_t bytes, size_t index);
   void  updateBigStats();
 
@@ -990,13 +1001,13 @@ private:
   void refreshStatsHelperExceeded();
   void resetAllStats();
   void traceStats(const char* when);
+  void updateMMDebt();
 
   static void initHole(void* ptr, uint32_t size);
 
   void requestEagerGC();
   void resetEagerGC();
   void checkGC();
-  void requestGC();
 
   /////////////////////////////////////////////////////////////////////////////
 

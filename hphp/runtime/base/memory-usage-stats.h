@@ -26,14 +26,30 @@ namespace HPHP {
 /*
  * Usage stats for a request, all in bytes.
  *
+ * Current usage is conceptually determined by subtracting total deallocations
+ * from total allocations (both are measured since the beginning of the current
+ * request). In practice, the latter value is split into mm_debt and
+ * mm_allocated, with the requirement that at all times, (mm_allocated -
+ * mm_debt) gives the actual allocation volume. The runtime is free to
+ * arbitrarily add or subtract from mm_debt as long as it makes the same
+ * adjustments to mm_allocated.
+ *
+ * This allows for cheap GC trigger checks in the allocator fast path: instead
+ * of adding to mm_allocated, we subtract from mm_debt. "Subtract and check if
+ * negative" can be done with just two instructions (on x86, at least),
+ * allowing us to use mm_debt to force the allocator into a slow path after a
+ * certain number of bytes are allocated.
+ *
  * If jemalloc is being used, then usage and peakUsage also include bytes that
  * are reported by jemalloc's per-thread stats that are allocated outside of
  * the MemoryManager APIs (mallocSmallSize, mallocBigSize, objMalloc.)
  * totalAlloc will also be maintained, otherwise it will be 0.
  */
 struct MemoryUsageStats {
-  int64_t mmUsage;    // bytes are currently in use via MM apis
-  int64_t extUsage;   // cumulative allocations via jemalloc
+  int64_t mm_debt;      // Allocation debt
+  int64_t mm_allocated; // Total allocation volume for MM APIs, including debt
+  int64_t mm_freed;     // Total deallocation volume for MM APIs
+  int64_t extUsage;     // cumulative allocations via jemalloc
 
   int64_t malloc_cap; // capacity of malloc'd slabs & big objects
   int64_t mmap_cap;   // capacity of mmap'd slabs & big objects
@@ -48,7 +64,9 @@ struct MemoryUsageStats {
   int64_t mmap_volume; // how many bytes have cumulatively been mmap'd
                        // by the HeapImpl, not counting munmaps or madvises.
 
-  int64_t usage() const { return mmUsage + auxUsage(); }
+  int64_t mmAllocated() const { return mm_allocated - mm_debt; }
+  int64_t mmUsage() const { return mmAllocated() - mm_freed; }
+  int64_t usage() const { return mmUsage() + auxUsage(); }
   int64_t capacity() const { return mmap_cap + malloc_cap; }
   int64_t auxUsage() const { return extUsage - malloc_cap; }
 };

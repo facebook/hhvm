@@ -215,8 +215,14 @@ inline void* MemoryManager::mallocSmallIndex(size_t index) {
   if (debug) requestEagerGC();
 
   auto bytes = sizeIndex2Size(index);
-  m_stats.mmUsage += bytes;
+  m_stats.mm_debt -= bytes;
+  if (UNLIKELY(m_stats.mm_debt < 0)) return mallocSmallIndexSlow(bytes, index);
 
+  return mallocSmallIndexTail(bytes, index);
+}
+
+ALWAYS_INLINE
+void* MemoryManager::mallocSmallIndexTail(size_t bytes, size_t index) {
   auto p = m_freelists[index].likelyPop();
   if (!p) {
     p = mallocSmallSizeSlow(bytes, index);
@@ -247,7 +253,7 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
   FTRACE(3, "freeSmallIndex({}, {}), freelist {}\n", ptr, bytes, index);
 
   m_freelists[index].push(ptr);
-  m_stats.mmUsage -= bytes;
+  m_stats.mm_freed += bytes;
 }
 
 inline void MemoryManager::freeSmallSize(void* ptr, size_t bytes) {
@@ -300,7 +306,7 @@ inline int64_t MemoryManager::getDeallocated() const {
 }
 
 inline int64_t MemoryManager::currentUsage() const {
-  return m_stats.mmUsage;
+  return m_stats.mmUsage();
 }
 
 inline MemoryUsageStats MemoryManager::getStats() {
@@ -312,6 +318,10 @@ inline MemoryUsageStats MemoryManager::getStatsCopy() {
   auto copy = m_stats;
   refreshStatsImpl(copy);
   return copy;
+}
+
+inline const MemoryUsageStats& MemoryManager::getStatsRaw() const {
+  return m_stats;
 }
 
 inline bool MemoryManager::startStatsInterval() {
@@ -354,10 +364,6 @@ inline void MemoryManager::forceOOM() {
   if (m_couldOOM) {
     refreshStatsHelperExceeded();
   }
-}
-
-inline void MemoryManager::checkGC() {
-  if (UNLIKELY(m_stats.mmUsage > m_nextGC)) requestGC();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

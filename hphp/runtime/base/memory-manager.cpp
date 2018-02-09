@@ -144,7 +144,7 @@ void MemoryManager::traceStats(const char* event) {
   FTRACE(1, "heap-id {} {} ", tl_heap_id, event);
   if (use_jemalloc) {
     FTRACE(1, "mm-usage {} extUsage {} ",
-           m_stats.mmUsage, m_stats.extUsage);
+           m_stats.mmUsage(), m_stats.extUsage);
     FTRACE(1, "capacity {} peak usage {} peak capacity {} ",
            m_stats.capacity(), m_stats.peakUsage, m_stats.peakCap);
     FTRACE(1, "total {} reset alloc-dealloc {} cur alloc-dealloc {}\n",
@@ -162,7 +162,9 @@ void MemoryManager::traceStats(const char* event) {
 void MemoryManager::resetAllStats() {
   traceStats("resetAllStats pre");
   m_statsIntervalActive = false;
-  m_stats.mmUsage = 0;
+  m_stats.mm_debt = 0;
+  m_stats.mm_allocated = 0;
+  m_stats.mm_freed = 0;
   m_stats.extUsage = 0;
   m_stats.malloc_cap = 0;
   m_stats.mmap_cap = 0;
@@ -263,7 +265,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       resetUsage, curUsage, curAllocated - m_resetAllocated);
     FTRACE(1, "dealloc-change: {} ", curDeallocated - m_resetDeallocated);
     FTRACE(1, "mm usage {} extUsage {} totalAlloc {} capacity {}\n",
-      stats.mmUsage, stats.extUsage, stats.totalAlloc, stats.capacity());
+      stats.mmUsage(), stats.extUsage, stats.totalAlloc, stats.capacity());
 
     // External usage (allocated-deallocated) since the last resetStats().
     stats.extUsage = curUsage - resetUsage;
@@ -301,6 +303,16 @@ void MemoryManager::refreshStats() {
     m_memThresholdCallbackPeakUsage = SIZE_MAX;
     setSurpriseFlag(MemThresholdFlag);
   }
+}
+
+/*
+ * Calculate how many bytes of allocation should happen before the next
+ * time the fast path is interrupted.
+ */
+void MemoryManager::updateMMDebt() {
+  auto const new_debt = m_nextGC - m_stats.mmUsage();
+  m_stats.mm_allocated = m_stats.mm_allocated - m_stats.mm_debt + new_debt;
+  m_stats.mm_debt = new_debt;
 }
 
 void MemoryManager::sweep() {
@@ -727,7 +739,6 @@ void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
  */
 NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   refreshStats();
-  checkGC();
   if (m_front < m_limit) {
     storeTail(m_freelists, m_front, (char*)m_limit - (char*)m_front,
               Slab::fromPtr(m_front));
@@ -765,8 +776,10 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
           RuntimeOption::PerAllocSampleF);
     }
 
-    // Stats correction; mallocBigSize() pulls stats from jemalloc.
-    m_stats.mmUsage -= nbytes;
+    // Stats correction; mallocBigSize() updates m_stats. Add to mm_debt rather
+    // than adding to mm_freed because we're adjusting for double-counting, not
+    // actually freeing anything.
+    m_stats.mm_debt += nbytes;
     return mallocBigSize<Unzeroed>(nbytes);
   }
 
@@ -795,6 +808,13 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
   FTRACE(4, "slabAlloc({}, {}) --> ptr={}, m_front={}, m_limit={}\n", nbytes,
             index, ptr, m_front, m_limit);
   return ptr;
+}
+
+NEVER_INLINE
+void* MemoryManager::mallocSmallIndexSlow(size_t bytes, size_t index) {
+  checkGC();
+  updateMMDebt();
+  return mallocSmallIndexTail(bytes, index);
 }
 
 void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
@@ -839,6 +859,7 @@ void* MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
   auto ptr = Mode == Zeroed ? m_heap.callocBig(bytes, kind, ty, m_stats) :
              m_heap.allocBig(bytes, kind, ty, m_stats);
   updateBigStats();
+  checkGC();
   FTRACE(3, "mallocBigSize: {} ({} requested)\n", ptr, bytes);
   return ptr;
 }

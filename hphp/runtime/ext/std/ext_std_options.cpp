@@ -909,7 +909,7 @@ static int64_t HHVM_FUNCTION(memory_get_usage, bool real_usage /*=false */) {
 static int64_t HHVM_FUNCTION(hphp_memory_heap_usage) {
   // This corresponds to PHP memory_get_usage(false), only counting
   // allocations via MemoryManager.
-  return tl_heap->getStatsCopy().mmUsage;
+  return tl_heap->getStatsCopy().mmUsage();
 }
 
 static int64_t HHVM_FUNCTION(hphp_memory_heap_capacity) {

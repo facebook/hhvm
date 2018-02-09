@@ -561,7 +561,8 @@ thread_local std::atomic<size_t> g_req_num;
 __thread size_t t_req_num; // snapshot thread-local copy of g_req_num;
 __thread size_t t_gc_num; // nth collection in this request.
 __thread bool t_enable_samples;
-__thread size_t t_trigger;
+__thread int64_t t_trigger;
+__thread int64_t t_trigger_allocated;
 __thread int64_t t_req_age;
 __thread MemoryUsageStats t_pre_stats;
 
@@ -571,7 +572,8 @@ StructuredLogEntry logCommon() {
   // MemoryUsageStats
   sample.setInt("memory_limit", tl_heap->getMemoryLimit());
   sample.setInt("usage", t_pre_stats.usage());
-  sample.setInt("mm_usage", t_pre_stats.mmUsage);
+  sample.setInt("mm_usage", t_pre_stats.mmUsage());
+  sample.setInt("mm_allocated", t_pre_stats.mmAllocated());
   sample.setInt("aux_usage", t_pre_stats.auxUsage());
   sample.setInt("mm_capacity", t_pre_stats.capacity());
   sample.setInt("peak_usage", t_pre_stats.peakUsage);
@@ -594,7 +596,7 @@ void traceCollection(const Collector& collector) {
     "marked {} pinned {} free {:.1f}M "
     "cscan-heap {:.1f}M xscan-heap {:.1f}M\n",
     t_req_age,
-    t_pre_stats.mmUsage / MB,
+    t_pre_stats.mmUsage() / MB,
     t_trigger / MB,
     collector.init_ns_ / 1000000,
     collector.mark_ns_ / 1000000,
@@ -632,6 +634,7 @@ void logCollection(const char* phase, const Collector& collector) {
   sample.setInt("unknown_count", collector.unknown_);
   sample.setInt("freed_bytes", collector.freed_bytes_);
   sample.setInt("trigger_bytes", t_trigger);
+  sample.setInt("trigger_allocated", t_trigger_allocated);
   sample.setInt("cscanned_roots", collector.cscanned_roots_.bytes);
   sample.setInt("xscanned_roots", collector.xscanned_roots_.bytes);
   sample.setInt("cscanned_heap",
@@ -712,10 +715,14 @@ void MemoryManager::requestEagerGC() {
   }
 }
 
-NEVER_INLINE
-void MemoryManager::requestGC() {
-  assertx(rds::header());
-  setSurpriseFlag(PendingGCFlag);
+void MemoryManager::checkGC() {
+  if (m_stats.mmUsage() > m_nextGC) {
+    assertx(rds::header());
+    setSurpriseFlag(PendingGCFlag);
+    if (t_trigger_allocated == -1) {
+      t_trigger_allocated = m_stats.mmAllocated();
+    }
+  }
 }
 
 /*
@@ -724,21 +731,24 @@ void MemoryManager::requestGC() {
  * against the request for the sake of OOM. To accomplish this, subtract
  * auxUsage from the heap limit, before our calculations.
  *
- * GC will then be triggered the next time we notice mmUsage > m_nextGc
- * (see checkGC() in memory-manager-inl.h).
+ * GC will then be triggered the next time we notice mmUsage > m_nextGc (see
+ * checkGC()).
  */
 void MemoryManager::updateNextGc() {
+  t_trigger_allocated = -1;
   if (!isGCEnabled()) {
     m_nextGC = kNoNextGC;
+    updateMMDebt();
     return;
   }
 
   auto stats = getStatsCopy();
   auto mm_limit = m_usageLimit - stats.auxUsage();
-  int64_t delta = (mm_limit - stats.mmUsage) *
+  int64_t delta = (mm_limit - stats.mmUsage()) *
                   RuntimeOption::EvalGCTriggerPct;
   delta = std::max(delta, RuntimeOption::EvalGCMinTrigger);
-  m_nextGC = stats.mmUsage + delta;
+  m_nextGC = stats.mmUsage() + delta;
+  updateMMDebt();
 }
 
 void MemoryManager::collect(const char* phase) {

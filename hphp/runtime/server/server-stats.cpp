@@ -513,7 +513,7 @@ void ServerStats::ReportStatus(std::string& output, Writer::Format format) {
       w->writeEntry("peak usage", stats.peakUsage);
       w->writeEntry("peak alloc", stats.peakCap);
       w->writeEntry("limit", ts.m_mm->getMemoryLimit());
-      w->writeEntry("current mm usage", stats.mmUsage);
+      w->writeEntry("current mm usage", stats.mmUsage());
       w->endObject("memory");
     }
     w->writeEntry("io", ts.m_ioInProcess);

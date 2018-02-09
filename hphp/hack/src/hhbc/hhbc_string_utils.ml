@@ -143,6 +143,9 @@ module Classes = struct
 end
 
 module Closures = struct
+
+  let is_closure_name s =
+    String_utils.string_starts_with s "Closure$"
   (* Closure classes have names of the form
    *   Closure$ scope ix ; num
    * where
@@ -154,7 +157,7 @@ module Closures = struct
    *     # <digits>
    *)
   let unmangle_closure s =
-    if String_utils.string_starts_with s "Closure$"
+    if is_closure_name s
     then
       let suffix = String_utils.lstrip s "Closure$" in
       match Str.split_delim (Str.regexp ";") suffix with
@@ -173,40 +176,54 @@ end
 
 (* XHP name mangling *)
 module Xhp = struct
-
   let is_xhp s = String.length s <> 0 && s.[0] = ':'
 
   let strip_colon s = String_utils.lstrip s ":"
 
   let clean s = if not (is_xhp s) then s else strip_colon s
 
+  let ignore_id s =
+    Classes.is_anonymous_class_name s || Closures.is_closure_name s
+
   (* Mangle an unqualified ID *)
+  let mangle_id_worker s =
+    if ignore_id s then s
+    else
+    let need_prefix = is_xhp s in
+    let s = if need_prefix then (strip_colon s) else s in
+    let s =
+      s
+      |> Str.global_replace (Str.regexp ":") "__"
+      |> Str.global_replace (Str.regexp "-") "_" in
+    if need_prefix then "xhp_" ^ s else s
+
   let mangle_id s =
-    if not (is_xhp s) then s else
-      "xhp_" ^
-        String_utils.lstrip s ":" |>
-        Str.global_replace (Str.regexp ":") "__" |>
-        Str.global_replace (Str.regexp "-") "_"
+    if ignore_id s then s else mangle_id_worker s
 
   (* Mangle a possibly-qualified ID *)
   let mangle s =
+    if ignore_id s then s
+    else
     match List.rev (Str.split_delim (Str.regexp "\\") s) with
     | [] -> ""
     | id::rest ->
-      String.concat "\\" (List.rev (mangle_id id :: rest))
+      String.concat "\\" (List.rev (mangle_id_worker id :: rest))
 
-  let unmangle_id s =
-    if String_utils.string_starts_with s "xhp_"
-    then
-      ":" ^ String_utils.lstrip s "xhp_" |>
-      Str.global_replace (Str.regexp "__") ":" |>
-      Str.global_replace (Str.regexp "_") "-"
-    else s
+  let unmangle_id_worker s =
+    let has_prefix = String_utils.string_starts_with s "xhp_" in
+    let s = if has_prefix then String_utils.lstrip s "xhp_" else s in
+    let s =
+      s
+      |> Str.global_replace (Str.regexp "__") ":"
+      |>Str.global_replace (Str.regexp "_") "-" in
+    if has_prefix then ":" ^ s else s
 
   let unmangle s =
+    if ignore_id s then s
+    else
     match List.rev (Str.split_delim (Str.regexp "\\") s) with
     | [] -> ""
     | id::rest ->
-      String.concat "\\" (List.rev (unmangle_id id :: rest))
+      String.concat "\\" (List.rev (unmangle_id_worker id :: rest))
 
 end

@@ -122,6 +122,11 @@ class ZipArchive {
   public function setArchiveComment(string $comment): bool;
   public function setCommentIndex(int $index, string $comment): bool;
   public function setCommentName(string $name, string $comment): bool;
+  public function setCompressionIndex(
+    int $index,
+    int $comp_method,
+    int $comp_flags = 0,
+  ): bool;
   public function statIndex(int $index, int $flags = 0): array;
   public function statName(string $name, int $flags = 0): array;
   public function unchangeAll(): bool;

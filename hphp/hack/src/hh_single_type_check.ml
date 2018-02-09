@@ -607,8 +607,12 @@ let handle_mode mode filename tcopt popt files_contents files_info errors =
   | Ai _ -> ()
   | Autocomplete ->
       let file = cat (Relative_path.to_absolute filename) in
-      let result =
-        ServerAutoComplete.auto_complete ~tcopt ~delimit_on_namespaces:false file in
+      let autocomplete_context = { AutocompleteTypes.
+        is_xhp_classname = false;
+        is_instance_member = false;
+      } in (* feature not implemented here; it only works for LSP *)
+      let result = ServerAutoComplete.auto_complete
+        ~tcopt ~delimit_on_namespaces:false ~autocomplete_context file in
       List.iter ~f: begin fun r ->
         let open AutocompleteTypes in
         Printf.printf "%s %s\n" r.res_name r.res_ty

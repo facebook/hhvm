@@ -132,6 +132,9 @@ let get_class_elt_types env class_ cid elts =
 
 let autocomplete_method is_static class_ ~targs:_ ~pos_params:_ id env cid
     ~is_method:_ ~is_const:_ =
+  (* This is used for instance "$x->|" and static "Class1::|" members. *)
+  (* It's also used for "<nt:fb:text |" XHP attributes, in which case  *)
+  (* class_ is ":nt:fb:text" and its attributes are in tc_props.       *)
   if is_auto_complete (snd id)
   then begin
     ac_env := Some env;
@@ -153,6 +156,7 @@ let autocomplete_smethod = autocomplete_method true
 let autocomplete_cmethod = autocomplete_method false
 
 let autocomplete_lvar id env =
+  (* This is used for "$|" and "$x = $|" local variables. *)
   if is_auto_complete (Local_id.get_name (snd id))
   then begin
     argument_global_type := Some Acprop;
@@ -222,15 +226,24 @@ let search_funs_and_classes input ~limit ~on_class ~on_function =
 (* namespaces as first class entities; 'false' means that it treats them     *)
 (* purely as part of long identifier names where the symbol '\\' is not      *)
 (* really any different from the symbol '_' for example.                     *)
+(*                                                                           *)
+(* XHP note:                                                                 *)
+(* This function is also called for "<foo|", with gname="foo".               *)
+(* This is a Hack shorthand for referring to the global classname ":foo".    *)
+(* Our global dictionary of classnames stores the authoritative name ":foo", *)
+(* and inside autocompleteService we do the job of inserting a leading ":"   *)
+(* from the user's prefix, and stripping the leading ":" when we emit.       *)
 let compute_complete_global
   ~(tcopt: TypecheckerOptions.t)
   ~(delimit_on_namespaces: bool)
+  ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
   ~(content_funs: Reordered_argument_collections.SSet.t)
   ~(content_classes: Reordered_argument_collections.SSet.t)
   : unit =
   let completion_type = !argument_global_type in
   let gname = Utils.strip_ns !auto_complete_for_global in
   let gname = strip_suffix gname in
+  let gname = if autocomplete_context.is_xhp_classname then (":" ^ gname) else gname in
 
   (* Objective: given "fo|", we should suggest functions in both the current *)
   (* namespace and also in the global namespace. We'll use gname_gns to      *)
@@ -334,6 +347,7 @@ let compute_complete_global
   in
 
   let on_function name ~seen =
+    if autocomplete_context.is_xhp_classname then None else
     if SSet.mem seen name then None else
     if not (should_complete_fun completion_type) then None else
     if not (does_fully_qualified_name_match_prefix ~funky_gns_rules:true name) then None else
@@ -347,6 +361,7 @@ let compute_complete_global
   let on_namespace name : autocomplete_result option =
     (* name will have the form "Str" or "HH\\Lib\\Str" *)
     (* Our autocomplete will show up in the list as "Str". *)
+    if autocomplete_context.is_xhp_classname then None else
     if not delimit_on_namespaces then None else
     if not (does_fully_qualified_name_match_prefix name) then None else
     Some (Complete {
@@ -423,8 +438,11 @@ let compute_complete_global
 
 (* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
 (* by using typing environment to convert ty information into strings. *)
-let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
-    : complete_autocomplete_result =
+let resolve_ty
+    (env: Typing_env.env)
+    (autocomplete_context: legacy_autocomplete_context)
+    (x: partial_autocomplete_result)
+  : complete_autocomplete_result =
   let env, ty = match x.ty with
     | DeclTy ty -> Phase.localize_with_self env ty
     | LoclTy ty -> env, ty
@@ -468,29 +486,50 @@ let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
       }
     | _ -> None
   in
+  (* XHP class+attribute names are stored internally with a leading colon.    *)
+  (* We'll render them without it if and only if we're in an XHP context.     *)
+  (*   $x = new :class1() -- do strip the colon in front of :class1           *)
+  (*   $x = <:class1      -- don't strip it                                   *)
+  (*   $x->:attr1         -- don't strip the colon in front of :attr1         *)
+  (*   <class1 :attr="a"  -- do strip it                                      *)
+  (* The logic is thorny here because we're relying upon regexes to figure    *)
+  (* out the context. Once we switch autocomplete to FFP, it'll be cleaner.   *)
+  let name = match x.kind_, autocomplete_context with
+    | Property_kind, { AutocompleteTypes.is_instance_member = false; _ } -> lstrip x.name ":"
+    | Abstract_class_kind, { AutocompleteTypes.is_xhp_classname = true; _ }
+    | Class_kind, { AutocompleteTypes.is_xhp_classname = true; _ } -> lstrip x.name ":"
+    | _ -> x.name
+  in
   {
     res_pos      = (fst ty) |> Typing_reason.to_pos |> Pos.to_absolute;
     res_ty       = desc_string;
-    res_name     = x.name;
+    res_name     = name;
     res_kind     = x.kind_;
     func_details = func_details;
   }
 
 
-let get_results ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes =
+let get_results
+    ~tcopt
+    ~delimit_on_namespaces
+    ~content_funs
+    ~content_classes
+    ~autocomplete_context
+  =
   Errors.ignore_ begin fun () ->
     let completion_type = !argument_global_type in
     if completion_type = Some Acid ||
        completion_type = Some Acnew ||
        completion_type = Some Actype
-    then compute_complete_global ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes;
+    then compute_complete_global
+      ~tcopt ~delimit_on_namespaces ~autocomplete_context ~content_funs ~content_classes;
     let env = match !ac_env with
       | Some e -> e
       | None -> Typing_env.empty tcopt Relative_path.default ~droot:None
     in
     let resolve (result: autocomplete_result) : complete_autocomplete_result =
       match result with
-      | Partial res -> resolve_ty env res
+      | Partial res -> resolve_ty env autocomplete_context res
       | Complete res -> res
     in
     {

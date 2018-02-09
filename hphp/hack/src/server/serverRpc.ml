@@ -31,7 +31,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerHover.go env (fn, line, char)
     | AUTOCOMPLETE content ->
         let result = try
-          ServerAutoComplete.auto_complete ~tcopt:env.tcopt ~delimit_on_namespaces:false content
+          let autocomplete_context = { AutocompleteTypes.
+            is_xhp_classname = false;
+            is_instance_member = false;
+          } in (* feature not implemented here; it only works for LSP *)
+          ServerAutoComplete.auto_complete
+            ~tcopt:env.tcopt ~delimit_on_namespaces:false ~autocomplete_context content
           with Decl.Decl_not_found s ->
             let s = s ^ "-- Autocomplete File contents: " ^ content in
             Printexc.print_backtrace stderr;
@@ -131,10 +136,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let fc = ServerFileSync.get_file_content (ServerUtils.FileName path) in
         let offset = File_content.get_offset fc pos in (* will raise if out of bounds *)
         let char_at_pos = File_content.get_char fc offset in
+        let autocomplete_context = ServerAutoComplete.get_autocomplete_context fc pos in
         let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
         let content = File_content.edit_file_unsafe fc edits in
-        let results =
-          ServerAutoComplete.auto_complete ~tcopt:env.tcopt ~delimit_on_namespaces content in
+        let results = ServerAutoComplete.auto_complete
+          ~tcopt:env.tcopt ~delimit_on_namespaces ~autocomplete_context content in
         let completions = results.value in
         let is_complete = results.is_complete in
         env, { AutocompleteTypes.completions; char_at_pos; is_complete; }

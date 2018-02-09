@@ -171,6 +171,11 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         self.load_and_run('initialize_shutdown',
                           {'root_path': self.repo_dir})
 
+    def test_completion(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('completion.php')
+        self.load_and_run('completion', variables)
+
     def test_definition(self):
         self.prepare_environment()
         variables = self.setup_php_file('definition.php')

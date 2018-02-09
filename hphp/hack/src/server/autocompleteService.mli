@@ -21,6 +21,7 @@ val get_results :
   delimit_on_namespaces:bool ->
   content_funs:Reordered_argument_collections.SSet.t ->
   content_classes:Reordered_argument_collections.SSet.t ->
+  autocomplete_context: AutocompleteTypes.legacy_autocomplete_context ->
   AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t
 
 val attach_hooks : unit -> unit

@@ -20,7 +20,8 @@
             "$",
             ">",
             "\\",
-            ":"
+            ":",
+            "<"
           ]
         },
         "definitionProvider": true,

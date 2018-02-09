@@ -12,7 +12,7 @@
 # pull_requests: a list of maps of pull requests (see pear)
 # blacklist: a list of tests that will cause the runner to behave badly
 # clowns: a list of tests that are clowny (e.g. fail both HHVM and Zend)
-# flakey: a list of tests that intermently fail
+# flakey: a list of tests that intermittently fail
 # test_name_regex: A custom regex for test names beyond the normal default:
 #      /[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\".*?\"|#[0-9]+))?/
 # test_file_regex: A custom regex for test file names beyond the normal default:
@@ -427,6 +427,8 @@
     hhvm_config_file: php_notice.ini
     install_root: slim
     test_root: slim
+    flakey:
+      - slim/tests/Http/UtilTest.php
   smarty:
     url: https://github.com/smarty-php/smarty-dev
     branch: master

@@ -1,20 +1,3 @@
-set(FREEBSD FALSE)
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
-  set(FREEBSD TRUE)
-endif()
-set(LINUX FALSE)
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-  set(LINUX TRUE)
-endif()
-set(DARWIN FALSE)
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-  set(DARWIN TRUE)
-endif()
-set(WINDOWS FALSE)
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-  set(WINDOWS TRUE)
-endif()
-
 # Do this until cmake has a define for ARMv8
 INCLUDE(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("

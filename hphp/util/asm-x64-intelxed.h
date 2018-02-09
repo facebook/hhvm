@@ -272,9 +272,20 @@ struct DispRIP {
 
 // *(reg + x)
 struct MemoryRef {
-  explicit MemoryRef(DispReg dr) : r(dr) {}
-  explicit MemoryRef(IndexedDispReg idr) : r(idr) {}
+  /*
+   * The default value of MemoryRef::segment should be XED_REG_DS, but Xed fails
+   * to encode lea(r, m) if the value of m.segment is not XED_REG_INVALID.
+   * XED_RED_INVALID is a safe default value for m.segment, it will produce
+   * the same output as assigning it XED_REG_DS when emitting all other
+   * instructions and it will also work for lea(r ,m).
+   */
+  explicit MemoryRef(DispReg dr) : r(dr), segment(XED_REG_INVALID) {}
+  explicit MemoryRef(IndexedDispReg idr) : r(idr),
+                                           segment(XED_REG_INVALID) {}
   IndexedDispReg r;
+  xed_reg_enum_t segment;
+  void fs() { segment = XED_REG_FS; }
+  void gs() { segment = XED_REG_GS; }
 };
 
 // *(rip + x)
@@ -588,11 +599,8 @@ struct XedOperand
                             xedFromReg(m.r.base) : XED_REG_INVALID);
     xed_reg_enum_t index = (int(m.r.index) != -1 ?
                             xedFromReg(m.r.index) : XED_REG_INVALID);
-    op = xed_mem_bisd(base,
-                      index,
-                      m.r.scale,
-                      xedDispFromValue(m.r.disp),
-                      SZ_TO_BITS(memSize));
+    op = xed_mem_gbisd(m.segment, base, index, m.r.scale,
+                       xedDispFromValue(m.r.disp), SZ_TO_BITS(memSize));
   }
 
   explicit XedOperand(const RIPRelativeRef& r, int memSize, int64_t offset) {
@@ -823,7 +831,7 @@ public:
 #define XED_INVERSE(x, y)   y, x
 
 #define BYTE_LOAD_OP(name, instr)                                     \
-  void name##b(MemoryRef m, Reg8 r)     { xedInstrMR(instr, m, r); }  \
+  void name##b(MemoryRef m, Reg8 r)     { xedInstrMR(instr, m, r); }
 
 #define LOAD_OP(name, instr)                                          \
   void name##q(MemoryRef m, Reg64 r) { xedInstrMR(instr, m, r); }     \
@@ -849,7 +857,7 @@ public:
 
 #define BYTE_REG_OP(name, instr)                                      \
   void name##b(Reg8 r1, Reg8 r2) { xedInstrRR(instr, r1, r2);}        \
-  void name##b(Immed i, Reg8 r)  { xedInstrIR(instr, i, r); }         \
+  void name##b(Immed i, Reg8 r)  { xedInstrIR(instr, i, r); }
 
 #define REG_OP(name, instr)                                           \
   void name##q(Reg64 r1, Reg64 r2)   { xedInstrRR(instr, r1, r2); }   \
@@ -1271,19 +1279,29 @@ private:
   }
 
   //Xed Emit funcs
+  #define DECLARE_UNUSED(type, name)  type name; static_cast<void>(name)
+
   #define XED_EMIT_PREP_BEGIN                                                 \
     xed_encoder_instruction_t instruction;                                    \
     xed_encoder_request_t request;                                            \
     uint32_t encodedSize = 0;                                                 \
-    xed_error_enum_t xedError;                                                \
-    xed_bool_t convert_ok;                                                    \
+    DECLARE_UNUSED(xed_error_enum_t, xedError);                               \
+    DECLARE_UNUSED(xed_bool_t, convert_ok);
 
   #define XED_EMIT_PREP_ENCODE                                                \
     xed_encoder_request_zero_set_mode(&request, &m_xedState);                 \
     convert_ok = xed_convert_to_encoder_request(&request, &instruction);      \
     assert(convert_ok);                                                       \
     xedError = xed_encode(&request, m_xedInstrBuff, XED_MAX_INSTRUCTION_BYTES,\
-                          &encodedSize);                                      \
+                          &encodedSize);
+
+  #define XED_ASSERT_ERR(args)                                                \
+    assert_flog(xedError == XED_ERROR_NONE,                                   \
+                "XED: Error when encoding {}(" args ")"                       \
+                "with effOpSize({}): {}",                                     \
+                xed_iclass_enum_t2str(instr),                                 \
+                effOperandSizeBits,                                           \
+                xed_error_enum_t2str(xedError));
 
   ALWAYS_INLINE
   uint32_t xedEmit0Prep(xed_iclass_enum_t instr,
@@ -1291,10 +1309,7 @@ private:
     XED_EMIT_PREP_BEGIN
     xed_inst0(&instruction, m_xedState, instr, effOperandSizeBits);
     XED_EMIT_PREP_ENCODE
-    assert_flog(xedError == XED_ERROR_NONE,
-                "XED: Error when encoding {}(): {}",
-                xed_iclass_enum_t2str(instr),
-                xed_error_enum_t2str(xedError));
+    XED_ASSERT_ERR("")
     return encodedSize;
   }
 
@@ -1310,11 +1325,7 @@ private:
     XED_EMIT_PREP_BEGIN
     xed_inst1(&instruction, m_xedState, instr, effOperandSizeBits, op);
     XED_EMIT_PREP_ENCODE
-    assert_flog(xedError == XED_ERROR_NONE,
-                "XED: Error when encoding {}(arg) with effOpSize({}): {}",
-                xed_iclass_enum_t2str(instr),
-                effOperandSizeBits,
-                xed_error_enum_t2str(xedError));
+    XED_ASSERT_ERR("arg")
     return encodedSize;
   }
 
@@ -1328,24 +1339,18 @@ private:
   uint32_t xedEmit2Prep(xed_iclass_enum_t instr,
                         const xed_encoder_operand_t& op_1,
                         const xed_encoder_operand_t& op_2,
-                        xed_uint_t effOperandSizeBits = 0)
-  {
+                        xed_uint_t effOperandSizeBits = 0) {
     XED_EMIT_PREP_BEGIN
     xed_inst2(&instruction, m_xedState, instr, effOperandSizeBits, op_1, op_2);
     XED_EMIT_PREP_ENCODE
-    assert_flog(xedError == XED_ERROR_NONE,
-                "XED: Error when encoding {}(arg, arg) with effOpSize({}): {}",
-                xed_iclass_enum_t2str(instr),
-                effOperandSizeBits,
-                xed_error_enum_t2str(xedError));
+    XED_ASSERT_ERR("arg, arg")
     return encodedSize;
   }
 
   ALWAYS_INLINE
   void xedEmit2(xed_iclass_enum_t instr, const xed_encoder_operand_t& op_1,
                 const xed_encoder_operand_t& op_2,
-                xed_uint_t effOperandSizeBits = 0)
-  {
+                xed_uint_t effOperandSizeBits = 0) {
     bytes(xedEmit2Prep(instr, op_1, op_2, effOperandSizeBits), m_xedInstrBuff);
   }
 
@@ -1354,18 +1359,12 @@ private:
                         const xed_encoder_operand_t& op_1,
                         const xed_encoder_operand_t& op_2,
                         const xed_encoder_operand_t& op_3,
-                        xed_uint_t effOperandSizeBits = 0)
-  {
+                        xed_uint_t effOperandSizeBits = 0) {
     XED_EMIT_PREP_BEGIN
     xed_inst3(&instruction, m_xedState, instr, effOperandSizeBits,
               op_1, op_2, op_3);
     XED_EMIT_PREP_ENCODE
-    assert_flog(xedError == XED_ERROR_NONE,
-                "XED: Error when encoding {}(arg, arg, arg)"
-                "with effOpSize({}): {}",
-                xed_iclass_enum_t2str(instr),
-                effOperandSizeBits,
-                xed_error_enum_t2str(xedError));
+    XED_ASSERT_ERR("arg, arg, arg")
     return encodedSize;
   }
 
@@ -1374,39 +1373,45 @@ private:
                 const xed_encoder_operand_t& op_1,
                 const xed_encoder_operand_t& op_2,
                 const xed_encoder_operand_t& op_3,
-                xed_uint_t effOperandSizeBits = 0)
-  {
+                xed_uint_t effOperandSizeBits = 0) {
     bytes(xedEmit3Prep(instr, op_1, op_2, op_3, effOperandSizeBits),
           m_xedInstrBuff);
   }
 
 public:
   void emitInt3s(int n) {
+    if (n == 0) return;
+    DECLARE_UNUSED(uint32_t, int3size);
+    int3size = xedEmit0Prep(XED_ICLASS_INT3, sz::byte);
+    assert(int3size == 1);
     for (auto i = 0; i < n; ++i) {
-      byte(0xcc);
+      byte(m_xedInstrBuff[0]);
     }
   }
 
   void emitNop(int n) {
     if (n == 0) return;
-    static const uint8_t nops[][9] = {
-      { },
-      { 0x90 },
-      { 0x66, 0x90 },
-      { 0x0f, 0x1f, 0x00 },
-      { 0x0f, 0x1f, 0x40, 0x00 },
-      { 0x0f, 0x1f, 0x44, 0x00, 0x00 },
-      { 0x66, 0x0f, 0x1f, 0x44, 0x00, 0x00 },
-      { 0x0f, 0x1f, 0x80, 0x00, 0x00, 0x00, 0x00 },
-      { 0x0f, 0x1f, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00 },
-      { 0x66, 0x0f, 0x1f, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00 },
+    static const xed_iclass_enum_t nops[] = {
+      XED_ICLASS_INVALID,
+      XED_ICLASS_NOP,
+      XED_ICLASS_NOP2,
+      XED_ICLASS_NOP3,
+      XED_ICLASS_NOP4,
+      XED_ICLASS_NOP5,
+      XED_ICLASS_NOP6,
+      XED_ICLASS_NOP7,
+      XED_ICLASS_NOP8,
+      XED_ICLASS_NOP9,
     };
     // While n >= 9, emit 9 byte NOPs
     while (n >= 9) {
-      bytes(9, nops[9]);
+      xedInstr(XED_ICLASS_NOP9, 9);
       n -= 9;
     }
-    bytes(n, nops[n]);
+    // Emit remaining NOPs (if any)
+    if(n) {
+      xedInstr(nops[n], n);
+    }
   }
 
   /*
@@ -1431,10 +1436,6 @@ public:
   void bytes(size_t n, const uint8_t* bs) {
     codeBlock.bytes(n, bs);
   }
-
-  // Segment register prefixes.
-  X64Assembler& fs()  { byte(0x64); return *this; }
-  X64Assembler& gs()  { byte(0x65); return *this; }
 
 public:
   /*
@@ -1470,10 +1471,10 @@ private:
   // the emit functions eventually.
 
 #define XED_WRAP_IMPL() \
-  XED_WRAP_X(64) \
-  XED_WRAP_X(32) \
-  XED_WRAP_X(16) \
-  XED_WRAP_X(8)  \
+  XED_WRAP_X(64)        \
+  XED_WRAP_X(32)        \
+  XED_WRAP_X(16)        \
+  XED_WRAP_X(8)
 
   // instr(reg)
 

@@ -353,7 +353,8 @@ template<class Inst> void Vgen::commute(Inst& i) {
 /*
  * Helper for emitting instructions whose Vptr operand specifies a segment.
  */
-X64Assembler& prefix(X64Assembler& a, const Vptr& ptr) {
+template<class Prefixable>
+Prefixable& prefix(Prefixable& a, const Vptr& ptr) {
   if (ptr.seg == Vptr::Segment::FS) {
     a.fs();
   } else if (ptr.seg == Vptr::Segment::GS) {
@@ -589,8 +590,12 @@ void Vgen::emit(const ldimmq& i) {
 }
 
 void Vgen::emit(const load& i) {
-  prefix(a, i.s);
   auto mref = i.s.mr();
+#ifdef HAVE_LIBXED
+  prefix(mref, i.s);
+#else
+  prefix(a, i.s);
+#endif
   if (i.d.isGP()) {
     a.loadq(mref, i.d);
   } else {
@@ -757,11 +762,21 @@ void Vgen::emit(andqi i) {
 }
 
 void Vgen::emit(const addlim& i) {
+#if HAVE_LIBXED
+  auto mref = i.m.mr();
+  a.addl(i.s0, prefix(mref, i.m));
+#else
   prefix(a, i.m).addl(i.s0, i.m.mr());
+#endif
 }
 
 void Vgen::emit(const addqim& i) {
+#if HAVE_LIBXED
+  auto mref = i.m.mr();
+  a.addq(i.s0, prefix(mref, i.m));
+#else
   prefix(a, i.m).addq(i.s0, i.m.mr());
+#endif
 }
 
 void Vgen::emit(const cloadq& i) {
@@ -847,11 +862,21 @@ void Vgen::emit(const lea& i) {
 }
 
 void Vgen::emit(const storebi& i) {
+#if HAVE_LIBXED
+  auto mref = i.m.mr();
+  a.storeb(i.s, prefix(mref, i.m));
+#else
   prefix(a, i.m).storeb(i.s, i.m.mr());
+#endif
 }
 
 void Vgen::emit(const storeqi& i) {
+#if HAVE_LIBXED
+  auto mref = i.m.mr();
+  a.storeq(i.s, prefix(mref, i.m));
+#else
   prefix(a, i.m).storeq(i.s, i.m.mr());
+#endif
 }
 
 template<typename Inst>

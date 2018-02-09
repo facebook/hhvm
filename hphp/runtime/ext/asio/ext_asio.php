@@ -347,6 +347,17 @@ function has_finished<T>(Awaitable<T> $awaitable): bool {
 }
 
 /**
+ * Get the name of the Awaitable
+ */
+function name<T>(Awaitable<T> $awaitable): string {
+  invariant(
+    $awaitable instanceof WaitHandle,
+    'unsupported user-land Awaitable',
+  );
+  return $awaitable->getName();
+}
+
+/**
  * Cancel Awaitable, if it's still pending.
  *
  * If Awaitable has not been completed yet, fails Awaitable with

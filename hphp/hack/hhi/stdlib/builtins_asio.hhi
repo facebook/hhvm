@@ -15,6 +15,7 @@ function asio_get_running();
 namespace HH\Asio {
   function join<T>(Awaitable<T> $awaitable): T;
   function result<T>(Awaitable<T> $awaitable): T;
+  function name<T>(Awaitable<T> $awaitable): string;
   function has_finished<T>(Awaitable<T> $awaitable): bool;
   function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
   function backtrace<T>(Awaitable<T> $awaitable,

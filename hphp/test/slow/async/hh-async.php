@@ -15,6 +15,6 @@ function makeWaitHandles(): array<string,Awaitable<mixed>> {
 
 $handles = makeWaitHandles();
 foreach($handles as $h) {
-  var_dump($h->getName());
+  var_dump(\HH\Asio\name($h));
   var_dump(\HH\Asio\join($h));
 }

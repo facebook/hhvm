@@ -2248,20 +2248,21 @@ and get_elem_member_key env stack_index opt_expr =
   (* Special case for literal string *)
   | Some (_, A.String (_, str)) -> MemberKey.ET str
   (* Special case for class name *)
-  | Some (_, (A.Class_const ((_, A.Id (_, cName as cid)), (_, id))))
+  | Some (_, (A.Class_const ((_, A.Id (p, cName as cid)), (_, id))))
     when is_special_class_constant_accessed_with_class_id env cid id ->
     (* Special case for self::class in traits *)
     (* TODO(T21932293): HHVM does not match Zend here.
      * Eventually remove this to match PHP7 *)
     let cName =
       match SU.is_self cName,
-            SU.is_class id,
             Ast_scope.Scope.get_class (Emit_env.get_scope env)
       with
-      | true, true, Some cd -> SU.strip_global_ns @@ snd cd.A.c_name
+      | true, Some cd -> SU.strip_global_ns @@ snd cd.A.c_name
       | _ -> cName
     in
-    MemberKey.ET cName
+    let fq_id, _ =
+      Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) (p, cName) in
+    MemberKey.ET (Hhbc_id.Class.to_raw_string fq_id)
   (* General case *)
   | Some _ -> MemberKey.EC stack_index
   (* ELement missing (so it's array append) *)

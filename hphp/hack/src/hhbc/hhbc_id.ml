@@ -56,8 +56,12 @@ module Class = struct
       (SU.strip_global_ns s)
   let from_raw_string s = s
   let to_raw_string s = s
-  let elaborate_id ns id =
-    let mangled_name = SU.Xhp.mangle (snd id) in
+  let elaborate_id ns ((_, n) as id) =
+    let ns =
+      if SU.Xhp.is_xhp n
+      then Namespace_env.empty ns.Namespace_env.ns_popt
+      else ns in
+    let mangled_name = SU.Xhp.mangle n in
     let stripped_mangled_name = SU.strip_global_ns mangled_name in
     let was_renamed, id, fallback_id =
       elaborate_id ns Namespaces.ElaborateClass (fst id, mangled_name) in

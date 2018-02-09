@@ -220,8 +220,8 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
           env.progress_callback None
         with
         | Server_hung_up ->
-          (Printf.eprintf "hh_server died unexpectedly. Maybe you recently \
-          launched a different version of hh_server. Now exiting hh_client.\n%!";
+          (Printf.eprintf ("Hack server disconnected suddenly. Most likely a new one" ^^
+          " is being initialized with a better saved state after a large rebase/update.");
           raise Exit_status.(Exit_with No_server_running))
       end;
       (ic, oc)

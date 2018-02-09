@@ -1757,6 +1757,13 @@ module WithExpressionAndStatementAndTypeParser
       | Enum ->
         let missing = make_missing parser in
         parse_enum_declaration parser missing
+      (* The keyword namespace before a name should be parsed as
+        "the current namespace we are in", essentially a no op.
+        example:
+        namespace\f1(); should be parsed as a call to the function f1 in
+        the current namespace.      *)
+      | Namespace when peek_token_kind parser1 = Backslash ->
+        with_statement_parser parser1 StatementParser.parse_statement
       | Namespace -> parse_namespace_declaration parser
       | Use -> parse_namespace_use_declaration parser
       | Trait

@@ -20,7 +20,7 @@ function id(int $x): int {
 "
 
 let id_cases = [
-  ("id.php", 3, 10), "int";
+  ("id.php", 3, 10), ("int", "int");
 ]
 
 let class_A = "<?hh // strict
@@ -36,8 +36,8 @@ class A {
 "
 
 let class_A_cases = [
-  ("A.php", 7, 12), "<static>";
-  ("A.php", 7, 19), "int";
+  ("A.php", 7, 12), ("<static>", "<static>");
+  ("A.php", 7, 19), ("int", "int");
 ]
 
 let pair = "<?hh // strict
@@ -81,14 +81,14 @@ function test_pair(Pair<A> $v): Pair<A> {
 "
 
 let test_pair_cases = [
-  ("test_pair.php", 6, 8), "Pair<A>";
-  ("test_pair.php", 6, 15), "A";
-  ("test_pair.php", 8, 4), "Pair";
-  ("test_pair.php", 8, 17), "B";
-  ("test_pair.php", 10, 14), "A";
-  ("test_pair.php", 12, 10), "Pair<A>";
-  ("test_pair.php", 12, 19), "Pair<A>";
-  ("test_pair.php", 12, 20), "Pair";
+  ("test_pair.php", 6, 8), ("Pair<A>", "Pair<A>");
+  ("test_pair.php", 6, 15), ("(function(): A)", "A");
+  ("test_pair.php", 8, 4), ("Pair", "Pair");
+  ("test_pair.php", 8, 17), ("B", "B");
+  ("test_pair.php", 10, 14), ("A", "A");
+  ("test_pair.php", 12, 10), ("(function(Pair<A> $v): Pair<A>)", "Pair<A>");
+  ("test_pair.php", 12, 19), ("Pair<A>", "Pair<A>");
+  ("test_pair.php", 12, 20), ("Pair", "Pair");
 ]
 
 let loop_assignment = "<?hh // strict
@@ -110,10 +110,10 @@ function loop_assignment(): void {
 "
 
 let loop_assignment_cases = [
-  ("loop_assignment.php", 5, 4), "int";
-  ("loop_assignment.php", 8, 9), "(string | int)";
-  ("loop_assignment.php", 11, 7), "string";
-  ("loop_assignment.php", 14, 7), "(string | int)";
+  ("loop_assignment.php", 5, 4), ("int", "int");
+  ("loop_assignment.php", 8, 9), ("(string | int)", "(string | int)");
+  ("loop_assignment.php", 11, 7), ("string", "string");
+  ("loop_assignment.php", 14, 7), ("(string | int)", "(string | int)");
 ]
 
 let lambda1 = "<?hh // strict
@@ -129,14 +129,14 @@ function test_lambda1(): void {
 "
 
 let lambda_cases = [
-  ("lambda1.php", 4, 3), "[fun]";
-  ("lambda1.php", 4, 29), "string";
-  ("lambda1.php", 6, 3), "string";
-  ("lambda1.php", 6, 8), "string";
-  ("lambda1.php", 6, 11), "int";
-  ("lambda1.php", 8, 3), "string";
-  ("lambda1.php", 8, 8), "string";
-  ("lambda1.php", 8, 11), "string";
+  ("lambda1.php", 4, 3), ("[fun]", "[fun]");
+  ("lambda1.php", 4, 29), ("string", "string");
+  ("lambda1.php", 6, 3), ("string", "string");
+  ("lambda1.php", 6, 8), ("[fun]", "string");
+  ("lambda1.php", 6, 11), ("int", "int");
+  ("lambda1.php", 8, 3), ("string", "string");
+  ("lambda1.php", 8, 8), ("[fun]", "string");
+  ("lambda1.php", 8, 11), ("string", "string");
 ]
 
 let callback = "<?hh // strict
@@ -149,9 +149,9 @@ function test_callback((function(int): string) $cb): void {
 "
 
 let callback_cases = [
-  ("callback.php", 3, 3), "(function(int): string)";
-  ("callback.php", 5, 3), "string";
-  ("callback.php", 5, 8), "string";
+  ("callback.php", 3, 3), ("(function(int): string)", "(function(int): string)");
+  ("callback.php", 5, 3), ("(function(int): string)", "string");
+  ("callback.php", 5, 8), ("string", "string");
 ]
 
 let invariant_violation = "<?hh // strict
@@ -171,8 +171,8 @@ function nullthrows<T>(?T $x): T {
 "
 
 let nullthrows_cases = [
-  ("nullthrows.php", 3, 13), "?T";
-  ("nullthrows.php", 5, 10), "T";
+  ("nullthrows.php", 3, 13), ("?T", "?T");
+  ("nullthrows.php", 5, 10), ("T", "T");
 ]
 
 let curried = "<?hh // strict
@@ -187,8 +187,14 @@ function test_curried(bool $cond): void {
 "
 
 let curried_cases = [
-  ("curried.php", 6, 3), "(function(): (function(int): (function(bool): string)))";
-  ("curried.php", 7, 3), "string";
+  ("curried.php", 6, 3), (
+"(function(): (function(int): (function(bool): string)))",
+        "(function(): (function(int): (function(bool): string)))"
+  );
+  ("curried.php", 7, 3), (
+"(function(): (function(int): (function(bool): string)))",
+        "string"
+  );
 ]
 
 let multiple_type = "<?hh // strict
@@ -202,8 +208,8 @@ function test_multiple_type(C1 $c1, C2 $c2, bool $cond): arraykey {
 "
 
 let multiple_type_cases = [
-  ("multiple_type.php", 6, 10), "(C1 | C2)";
-  ("multiple_type.php", 6, 14), "(int | string)";
+  ("multiple_type.php", 6, 10), ("(C1 | C2)", "(C1 | C2)");
+  ("multiple_type.php", 6, 14), ("((function(): string) | (function(): int))", "(int | string)");
 ]
 
 let files = [
@@ -237,15 +243,30 @@ let () =
 
   Test.assert_no_errors env;
 
-  List.iter cases ~f:begin fun ((file, line, col), expected_type) ->
-    let fn = ServerUtils.FileName ("/" ^ file) in
-    let ty = ServerInferType.go env (fn, line, col) in
-    let ty_name, _ty_json =
-      match ty with
-      | Some ty -> ty
-      | None ->
-        Test.fail (Printf.sprintf "No type inferred at %s:%d:%d" file line col);
-        failwith "unreachable"
+  List.iter cases ~f:begin fun
+    ((file, line, col), (expected_type, expected_returned_type))
+  ->
+
+    let compare_type expected type_at =
+      let ty_str =
+        match type_at with
+        | Some (env, ty) -> Typing_print.full_strip_ns env ty
+        | None ->
+          Test.fail (Printf.sprintf "No type inferred at %s:%d:%d" file line col);
+          failwith "unreachable"
+      in
+      let fmt = Printf.sprintf "%s:%d:%d %s" file line col in
+      Test.assertEqual (fmt expected) (fmt ty_str)
     in
-    Test.assertEqual expected_type ty_name
+
+    let fn = ServerUtils.FileName ("/" ^ file) in
+
+    let ServerEnv.{tcopt; files_info; _} = env in
+    let _, tast = ServerIdeUtils.check_file_input tcopt files_info fn in
+
+    let ty = ServerInferType.type_at_pos tast line col in
+    compare_type expected_type ty;
+
+    let ty = ServerInferType.returned_type_at_pos tast line col in
+    compare_type expected_returned_type ty
   end

@@ -16,6 +16,7 @@
   * --full-fidelity-errors
   * --full-fidelity-errors-all
   * --full-fidelity-s-expression
+  * --full-fidelity-ast-s-expression
   * --original-parser-errors
   * --original-parser-s-expression
   * --program-text
@@ -43,6 +44,7 @@ module FullFidelityParseArgs = struct
     full_fidelity_errors : bool;
     full_fidelity_errors_all : bool;
     full_fidelity_s_expr : bool;
+    full_fidelity_ast_s_expr : bool;
     original_parser_errors : bool;
     original_parser_s_expr : bool;
     program_text : bool;
@@ -59,6 +61,7 @@ module FullFidelityParseArgs = struct
     full_fidelity_errors
     full_fidelity_errors_all
     full_fidelity_s_expr
+    full_fidelity_ast_s_expr
     original_parser_errors
     original_parser_s_expr
     program_text
@@ -72,6 +75,7 @@ module FullFidelityParseArgs = struct
     full_fidelity_errors;
     full_fidelity_errors_all;
     full_fidelity_s_expr;
+    full_fidelity_ast_s_expr;
     original_parser_errors;
     original_parser_s_expr;
     program_text;
@@ -93,7 +97,9 @@ module FullFidelityParseArgs = struct
     let set_full_fidelity_errors_all () =
       full_fidelity_errors_all := true in
     let full_fidelity_s_expr = ref false in
+    let full_fidelity_ast_s_expr = ref false in
     let set_full_fidelity_s_expr () = full_fidelity_s_expr := true in
+    let set_full_fidelity_ast_s_expr () = full_fidelity_ast_s_expr := true in
     let original_parser_errors = ref false in
     let set_original_parser_errors () = original_parser_errors := true in
     let original_parser_s_expr = ref false in
@@ -129,6 +135,9 @@ No errors are filtered out.";
       "--full-fidelity-s-expression",
         Arg.Unit set_full_fidelity_s_expr,
         "Displays the full-fidelity parse tree in S-expression format.";
+      "--full-fidelity-ast-s-expression",
+        Arg.Unit set_full_fidelity_ast_s_expr,
+        "Displays the AST produced by the FFP in S-expression format.";
       "--original-parser-errors",
         Arg.Unit set_original_parser_errors,
         "Displays the original parse tree errors, if any.";
@@ -158,6 +167,7 @@ No errors are filtered out.";
       !full_fidelity_errors
       !full_fidelity_errors_all
       !full_fidelity_s_expr
+      !full_fidelity_ast_s_expr
       !original_parser_errors
       !original_parser_s_expr
       !program_text
@@ -224,6 +234,13 @@ let handle_existing_file args filename =
   end;
   if args.full_fidelity_s_expr then begin
     let str = Debug.dump_full_fidelity syntax_tree in
+    Printf.printf "%s" str
+  end;
+  if args.full_fidelity_ast_s_expr then begin
+    let module Lowerer = Full_fidelity_ast in
+    let env = Lowerer.make_env file in
+    let res = Lowerer.from_file env in
+    let str = Debug.dump_ast @@ Ast.AProgram res.Lowerer.ast in
     Printf.printf "%s" str
   end;
   if args.original_parser_errors then begin

@@ -396,9 +396,22 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
   if (adjustedCost > RuntimeOption::EvalHHIRInliningMaxVasmCostLimit) {
     adjustedCost = RuntimeOption::EvalHHIRInliningMaxVasmCostLimit;
   }
-  FTRACE(3, "adjustedMaxVasmCost: adjustedCost ({}) = baseVasmCost ({}) * "
-         "callerProfCount ({}) / baseProfCount ({})\n",
-         adjustedCost, baseVasmCost, callerProfCount, baseProfCount);
+  if (calleeProfCount) {
+    FTRACE(3, "adjustedMaxVasmCost: adjustedCost ({}) = baseVasmCost ({}) * "
+           "(callerProfCount ({}) / baseProfCount ({})) ^ {} * "
+           "(callerProfCount ({}) / calleeProfCount ({})) ^ {}\n",
+           adjustedCost, baseVasmCost,
+           callerProfCount, baseProfCount,
+           RuntimeOption::EvalHHIRInliningVasmCallerExp,
+           callerProfCount, calleeProfCount,
+           RuntimeOption::EvalHHIRInliningVasmCalleeExp);
+  } else {
+    FTRACE(3, "adjustedMaxVasmCost: adjustedCost ({}) = baseVasmCost ({}) * "
+           "(callerProfCount ({}) / baseProfCount ({})) ^ {}\n",
+           adjustedCost, baseVasmCost,
+           callerProfCount, baseProfCount,
+           RuntimeOption::EvalHHIRInliningVasmCallerExp);
+  }
   return adjustedCost;
 }
 

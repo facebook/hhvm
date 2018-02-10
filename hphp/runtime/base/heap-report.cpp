@@ -79,6 +79,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
       out << "[" << getContainerSize(make_tv<KindOfObject>(obj)) << "]";
       break;
     }
+    case HeaderKind::Cpp:
     case HeaderKind::BigMalloc:
     case HeaderKind::SmallMalloc:
       out << "[" << static_cast<const MallocNode*>(h)->nbytes << "]";

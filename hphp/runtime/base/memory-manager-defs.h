@@ -18,10 +18,11 @@
 #define incl_HPHP_MEMORY_MANAGER_DEFS_H
 
 #include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/set-array.h"
-#include "hphp/runtime/base/apc-local-array-defs.h"
+
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -269,6 +270,7 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* AsyncFuncFrame */
     0, /* NativeData */
     0, /* ClosureHdr */
+    0, /* Cpp */
     0, /* SmallMalloc */
     0, /* BigMalloc */
     0, /* BigObj */
@@ -309,6 +311,7 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(AsyncFuncFrame)
   CHECKSIZE(NativeData)
   CHECKSIZE(ClosureHdr)
+  CHECKSIZE(Cpp)
   CHECKSIZE(SmallMalloc)
   CHECKSIZE(BigMalloc)
   CHECKSIZE(BigObj)
@@ -379,6 +382,7 @@ inline size_t allocSize(const HeapObject* h) {
       // [ResourceHdr][ResourceData subclass]
       size = static_cast<const ResourceHdr*>(h)->heapSize();
       break;
+    case HeaderKind::Cpp:
     case HeaderKind::SmallMalloc: // [MallocNode][bytes...]
       // size = h->nbytes // 64-bit
       size = static_cast<const MallocNode*>(h)->nbytes;

@@ -555,6 +555,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::AsyncFuncFrame:
       case HeaderKind::NativeData:
       case HeaderKind::ClosureHdr:
+      case HeaderKind::Cpp:
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
         break;
@@ -991,6 +992,9 @@ void free(void* ptr) {
   auto const n = static_cast<MallocNode*>(ptr) - 1;
   if (LIKELY(n->kind() == HeaderKind::SmallMalloc)) {
     return tl_heap->freeSmallSize(n, n->nbytes);
+  }
+  if (n->kind() == HeaderKind::Cpp) {
+    return tl_heap->objFree(n, n->nbytes);
   }
   assert(n->kind() == HeaderKind::BigMalloc);
   tl_heap->freeBigSize(ptr);

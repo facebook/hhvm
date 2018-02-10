@@ -332,11 +332,11 @@ let is_magic =
   fun (_, s) ->
     Hashtbl.mem h s
 
-(* During NastCheck, reactivity and local reactivity are the same *)
+(* During NastCheck, all reactivity kinds are the same *)
 let fun_is_reactive user_attributes =
   Attributes.mem SN.UserAttributes.uaReactive user_attributes ||
-  Attributes.mem SN.UserAttributes.uaLocalReactive user_attributes
-
+  Attributes.mem SN.UserAttributes.uaLocalReactive user_attributes ||
+  Attributes.mem SN.UserAttributes.uaShallowReactive user_attributes
 
 let rec fun_ tenv f named_body =
   if !auto_complete then ()

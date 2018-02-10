@@ -108,6 +108,8 @@ and genv = {
 and anon =
   reactivity *
   Nast.is_coroutine *
+  int ref *
+  Pos.t *
   (?el:Nast.expr list ->
   ?ret_ty: locl ty ->
   env ->

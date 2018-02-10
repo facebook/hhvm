@@ -1005,6 +1005,7 @@ module Typing                               = struct
   let enum_type_typedef_nonnull             = 4219 (* DONT MODIFy!!!! *)
   let rx_enabled_in_non_rx_context          = 4220 (* DONT MODIFY!!!! *)
   let rx_enabled_in_lambdas                 = 4221 (* DONT MODIFY!!!! *)
+  let ambiguous_lambda                      = 4219 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -3106,6 +3107,15 @@ let inout_argument_bad_type pos msgl =
     "a value-typed container (e.g. vec, dict, keyset, array). " ^
     "To use inout here, assign to/from a temporary local variable." in
   add_list Typing.inout_argument_bad_type ((pos, msg) :: msgl)
+
+let ambiguous_lambda pos n =
+  let msg =
+    Printf.sprintf
+      "Lambda has parameter types that could not be determined at definition-site: \
+       body was checked %d times. Please add type hints"
+      n in
+  add Typing.ambiguous_lambda pos msg
+
 
 
 (*****************************************************************************)

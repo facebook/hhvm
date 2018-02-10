@@ -28,6 +28,7 @@ let global_opts = GlobalOptions.make
   ~po_auto_namespace_map: []
   ~po_deregister_php_stdlib:true
   ~tco_disallow_destruct:false
+  ~tco_disallow_ambiguous_lambda:false
   ~ignored_fixme_codes: ISet.empty
 
 let server_config = ServerConfig.set_tc_options server_config global_opts

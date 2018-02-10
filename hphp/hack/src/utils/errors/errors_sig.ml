@@ -480,4 +480,5 @@ module type S = sig
   val illegal_destructor : Pos.t -> unit
   val rx_enabled_in_non_rx_context : Pos.t -> unit
   val rx_enabled_in_lambdas : Pos.t -> unit
+  val ambiguous_lambda : Pos.t -> int -> unit
 end

@@ -65,6 +65,7 @@ val set_fn_kind : env -> Ast.fun_kind -> env
 val add_todo : env -> tfun -> env
 val add_anonymous : env -> anon -> env * int
 val get_anonymous : env -> int -> anon option
+val log_anonymous : env -> unit
 val set_self_id : env -> string -> env
 val set_self : env -> locl ty -> env
 val set_parent_id : env -> string -> env

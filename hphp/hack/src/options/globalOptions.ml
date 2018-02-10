@@ -19,6 +19,7 @@ type t = {
   po_enable_hh_syntax_for_hhvm : bool;
   po_deregister_php_stdlib : bool;
   tco_disallow_destruct : bool;
+  tco_disallow_ambiguous_lambda : bool;
   ignored_fixme_codes : ISet.t;
 }
 
@@ -147,7 +148,7 @@ let tco_experimental_nonnull = "nonnull"
  * $max = max($first, ...$my_numbers);
  *)
 let tco_unpacking_check_arity =
-  "unpacking_check_arity"
+"unpacking_check_arity"
 
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
@@ -193,6 +194,7 @@ let default = {
  po_enable_hh_syntax_for_hhvm = false;
  po_deregister_php_stdlib = false;
  tco_disallow_destruct = false;
+ tco_disallow_ambiguous_lambda = false;
  ignored_fixme_codes = ISet.empty;
 }
 
@@ -218,6 +220,7 @@ let make ~tco_assume_php
          ~tco_migration_flags
          ~po_auto_namespace_map
          ~tco_disallow_destruct
+         ~tco_disallow_ambiguous_lambda
          ~ignored_fixme_codes = {
                    tco_assume_php;
                    tco_safe_array;
@@ -230,6 +233,7 @@ let make ~tco_assume_php
                    ignored_fixme_codes;
                    po_deregister_php_stdlib;
                    tco_disallow_destruct;
+                   tco_disallow_ambiguous_lambda;
         }
 let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
@@ -246,4 +250,6 @@ let po_auto_namespace_map t = t.po_auto_namespace_map
 let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
 let po_enable_hh_syntax_for_hhvm t = t.po_enable_hh_syntax_for_hhvm
 let tco_disallow_destruct t = t.tco_disallow_destruct
+let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda
+
 let ignored_fixme_codes t = t.ignored_fixme_codes

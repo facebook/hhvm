@@ -507,6 +507,7 @@ and fun_def tcopt f =
         | FVnonVariadic -> env, T.FVnonVariadic in
       let env, tb = fun_ env return pos nb f.f_fun_kind in
       let env = Env.check_todo env in
+      if Env.is_strict env then Env.log_anonymous env;
       begin match f.f_ret with
         | None when Env.is_strict env -> suggest_return env pos return.Env.return_type
         | None -> Typing_suggest.save_fun_or_method f.f_name
@@ -2080,7 +2081,7 @@ and expr_
       (* Is the return type declared? *)
       let is_explicit_ret = Option.is_some f.f_ret in
       let check_body_under_known_params ?ret_ty ft =
-        let (is_coroutine, anon) = anon_make env p f ft idl in
+        let (is_coroutine, _counter, _, anon) = anon_make env p f ft idl in
         let ft = { ft with ft_is_coroutine = is_coroutine } in
         let ft = { ft with ft_reactive = Nonreactive } in
         let is_reactive, (env, tefun, ty) =
@@ -2176,13 +2177,13 @@ and expr_
                 ("Typing.expr Efun unknown params",
                   [Typing_log.Log_type ("declared_ft", (Reason.Rwitness p, Tfun declared_ft))])];
             (* check for recursive function calls *)
-            let is_coroutine, anon = anon_make env p f declared_ft idl in
+            let is_coroutine, counter, pos, anon = anon_make env p f declared_ft idl in
             let env, tefun, _, anon_id = Errors.try_with_error
               (fun () ->
                 let reactivity, (_, tefun, ty) =
                   Env.check_lambda_reactive
                     (fun () -> anon env declared_ft.ft_params declared_ft.ft_arity) in
-                let anon_fun = reactivity, is_coroutine, anon in
+                let anon_fun = reactivity, is_coroutine, counter, pos, anon in
                 let env, anon_id = Env.add_anonymous env anon_fun in
                 env, tefun, ty, anon_id)
               (fun () ->
@@ -2192,7 +2193,7 @@ and expr_
                   Errors.ignore_ (fun () -> (anon env fun_params)) in
                 let reactivity, (_, tefun, ty)
                   = Env.check_lambda_reactive (fun () -> anon_ign env declared_ft.ft_params declared_ft.ft_arity) in
-                let anon_fun = reactivity, is_coroutine, anon in
+                let anon_fun = reactivity, is_coroutine, counter, pos, anon in
                 let env, anon_id = Env.add_anonymous env anon_fun in
                 env, tefun, ty, anon_id) in
             env, tefun, (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id))
@@ -2472,6 +2473,8 @@ and anon_make tenv p f ft idl =
   let nb = Nast.assert_named_body f.f_body in
   let is_coroutine = f.f_fun_kind = Ast.FCoroutine in
   is_coroutine,
+  ref 0,
+  p,
   fun ?el ?ret_ty env supplied_params supplied_arity ->
     if !is_typing_self
     then begin
@@ -3205,7 +3208,7 @@ and is_abstract_ft fty = match fty with
       | Tfun { ft_is_coroutine = true; _ } ->
         Some true
       | Tanon (_, id) ->
-        Some (Option.value_map (Env.get_anonymous env id) ~default:false ~f:(fun (_,b,_) -> b) )
+        Some (Option.value_map (Env.get_anonymous env id) ~default:false ~f:(fun (_,b,_,_,_) -> b) )
       | Tunresolved ts ->
         begin match List.map ts ~f:is_coroutine with
         | None :: _ -> None
@@ -4851,7 +4854,9 @@ and call_ ~expected pos env fty el uel =
   | _, (Terr | Tany | Tunresolved []) ->
     let el = el @ uel in
     let env, tel = List.map_env env el begin fun env elt ->
-      let env, te, arg_ty = expr ~allow_uref:true env elt in
+      let env, te, arg_ty =
+        expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Tany)) ~allow_uref:true env elt
+      in
       let env, _arg_ty = check_valid_rvalue pos env arg_ty in
       env, te
     end in
@@ -4923,7 +4928,8 @@ and call_ ~expected pos env fty el uel =
               let env = call_param env param (e, ty) in
               env, Some (te, ty)
             | None ->
-              let env, te, ty = expr ~allow_uref:true env e in
+              let env, te, ty = expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Tany))
+                ~allow_uref:true env e in
               env, Some (te, ty)
             end in
         let env, rl, paraml = check_args check_lambdas env el paraml in
@@ -5048,9 +5054,10 @@ and call_ ~expected pos env fty el uel =
       | None ->
         Errors.anonymous_recursive_call pos;
         env, tel, tuel, err_none
-      | Some (_, _, anon) ->
+      | Some (_, _, counter, _, anon) ->
         let () = check_arity pos fpos (Typing_defs.arity_min call_arity) arity in
         let tyl = List.map tyl TUtils.default_fun_param in
+        counter := !counter + 1;
         let env, _, ty = anon ~el env tyl call_arity in
         env, tel, tuel, ty)
   | _, Tarraykind _ when not (Env.is_strict env) ->
@@ -6228,6 +6235,7 @@ and method_def env m =
               Typing_suggest.save_fun_or_method (pos, id);
               m.m_ret
     | Some hint -> async_suggest_return (m.m_fun_kind) hint (fst m.m_name); m.m_ret in
+  Env.log_anonymous env;
   let m = { m with m_ret = m_ret; } in
   Typing_hooks.dispatch_exit_method_def_hook m;
   {

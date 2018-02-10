@@ -75,6 +75,12 @@ type t = {
   *)
  tco_disallow_destruct : bool;
 
+ (*
+  * Flag to disalow any lambda that has to be checked using the legacy
+  * per-use technique
+  *)
+ tco_disallow_ambiguous_lambda : bool;
+
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
 }
@@ -88,6 +94,7 @@ val make :
   tco_migration_flags: SSet.t ->
   po_auto_namespace_map: (string * string) list ->
   tco_disallow_destruct: bool ->
+  tco_disallow_ambiguous_lambda: bool ->
   ignored_fixme_codes: ISet.t -> t
 val tco_assume_php : t -> bool
 val tco_safe_array : t -> bool
@@ -100,6 +107,7 @@ val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool
 val po_enable_hh_syntax_for_hhvm : t -> bool
 val tco_disallow_destruct : t -> bool
+val tco_disallow_ambiguous_lambda : t -> bool
 val default : t
 val make_permissive : t -> t
 val tco_experimental_instanceof : string

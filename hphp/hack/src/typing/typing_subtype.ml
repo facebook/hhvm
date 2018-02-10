@@ -966,7 +966,7 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       | None ->
           Errors.anonymous_recursive_call (Reason.to_pos r_sub);
           env
-      | Some (reactivity, is_coroutine, anon) ->
+      | Some (reactivity, is_coroutine, counter, _, anon) ->
           let p_super = Reason.to_pos r_super in
           let p_sub = Reason.to_pos r_sub in
           if not (subtype_reactivity reactivity ft.ft_reactive)
@@ -978,6 +978,7 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
           if not (Unify.unify_arities
                     ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
           then Errors.fun_arity_mismatch p_super p_sub;
+          counter := !counter + 1;
           let env, _, ret = anon env ft.ft_params ft.ft_arity in
           let env = sub_type env ret ft.ft_ret in
           env

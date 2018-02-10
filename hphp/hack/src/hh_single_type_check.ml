@@ -134,6 +134,7 @@ let parse_options () =
   let deregister_attributes = ref false in
   let disable_optional_and_unknown_shape_fields = ref false in
   let disallow_destruct = ref false in
+  let disallow_ambiguous_lambda = ref false in
   let no_fallback_in_namespaces = ref false in
   let options = [
     "--ai",
@@ -242,6 +243,9 @@ let parse_options () =
     "--disallow-destruct",
       Arg.Set disallow_destruct,
       " Disallow definition of destructors without __OptionalDestruct.";
+    "--disallow-ambiguous-lambda",
+      Arg.Set disallow_ambiguous_lambda,
+      " Disallow definition of lambdas that require use-site checking.";
     "--no-fallback-in-namespaces",
       Arg.Set no_fallback_in_namespaces,
       " Treat foo() as namespace\\foo() and MY_CONST as namespace\\MY_CONST.";
@@ -264,6 +268,7 @@ let parse_options () =
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
       GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;
       GlobalOptions.tco_disallow_destruct = !disallow_destruct;
+      GlobalOptions.tco_disallow_ambiguous_lambda = !disallow_ambiguous_lambda;
   } in
   let tcopt = {
     tcopt with

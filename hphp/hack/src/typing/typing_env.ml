@@ -604,6 +604,11 @@ let is_decl env = get_mode env = FileInfo.Mdecl
 
 let get_options env = env.genv.tcopt
 
+let log_anonymous env =
+  if TypecheckerOptions.disallow_ambiguous_lambda (get_options env)
+  then IMap.iter (fun _ (_, _, counter, pos, _) ->
+    Errors.ambiguous_lambda pos !counter) env.genv.anons
+
 (*
 let debug_env env =
   Classes.iter begin fun cid class_ ->

@@ -451,7 +451,7 @@ function rel_path($to) {
     // find first non-matching dir.
     if ($dir === $to[$depth]) {
       // ignore this directory.
-      array_shift($relPath);
+      array_shift(&$relPath);
     } else {
       // get number of remaining dirs to $from.
       $remaining = count($from) - $depth;
@@ -709,7 +709,7 @@ function find_tests($files, array $options = null) {
           "the right expect files for the tests you are trying to run.\n" .
           usage());
   }
-  asort($tests);
+  asort(&$tests);
   $tests = array_filter($tests);
   if (!empty($options['exclude'])) {
     $exclude = $options['exclude'];
@@ -853,8 +853,8 @@ function extra_args($options) {
 
 function hhvm_cmd_impl() {
   $args = func_get_args();
-  $options = array_shift($args);
-  $config = array_shift($args);
+  $options = array_shift(&$args);
+  $config = array_shift(&$args);
   $extra_args = $args;
   $modes = (array)mode_cmd($options);
   $cmds = array();
@@ -1259,7 +1259,7 @@ class Status {
   }
 
   public static function fail($test, $time, $stime, $etime) {
-    array_push(self::$results, array(
+    array_push(&self::$results, array(
       'name' => $test,
       'status' => 'failed',
       'details' => self::utf8Sanitize(@file_get_contents("$test.diff")),
@@ -1290,13 +1290,13 @@ class Status {
     $args = func_get_args();
     while (count($args)) {
       $color = null;
-      $str = array_shift($args);
+      $str = array_shift(&$args);
       if (is_integer($str)) {
         $color = $str;
         if (self::$use_color) {
           print "\033[0;${color}m";
         }
-        $str = array_shift($args);
+        $str = array_shift(&$args);
       }
 
       print $str;
@@ -1348,7 +1348,7 @@ class Status {
   public static function getSTTY() {
     $descriptorspec = array(1 => array("pipe", "w"), 2 => array("pipe", "w"));
     $process = proc_open(
-      'stty -a', $descriptorspec, $pipes, null, null,
+      'stty -a', $descriptorspec, &$pipes, null, null,
       array('suppress_errors' => true)
     );
     $stty = stream_get_contents($pipes[1]);
@@ -1602,27 +1602,27 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w) {
     }
   }
 
-  reset($old1); $k1 = key($old1); $l1 = -2;
-  reset($old2); $k2 = key($old2); $l2 = -2;
+  reset(&$old1); $k1 = key(&$old1); $l1 = -2;
+  reset(&$old2); $k2 = key(&$old2); $l2 = -2;
 
   while ($k1 !== null || $k2 !== null) {
 
     if ($k1 == $l1 + 1 || $k2 === null) {
       $l1 = $k1;
-      $diff[] = current($old1);
-      $k1 = next($old1) ? key($old1) : null;
+      $diff[] = current(&$old1);
+      $k1 = next(&$old1) ? key(&$old1) : null;
     } else if ($k2 == $l2 + 1 || $k1 === null) {
       $l2 = $k2;
-      $diff[] = current($old2);
-      $k2 = next($old2) ? key($old2) : null;
+      $diff[] = current(&$old2);
+      $k2 = next(&$old2) ? key(&$old2) : null;
     } else if ($k1 < $k2) {
       $l1 = $k1;
-      $diff[] = current($old1);
-      $k1 = next($old1) ? key($old1) : null;
+      $diff[] = current(&$old1);
+      $k1 = next(&$old1) ? key(&$old1) : null;
     } else {
       $l2 = $k2;
-      $diff[] = current($old2);
-      $k2 = next($old2) ? key($old2) : null;
+      $diff[] = current(&$old2);
+      $k2 = next(&$old2) ? key(&$old2) : null;
     }
   }
 
@@ -1837,7 +1837,7 @@ function run_config_cli($options, $test, $cmd, $cmd_env) {
       "$cmd 2>/dev/null", $descriptorspec, $pipes, null, $cmd_env
     );
   } else {
-    $process = proc_open("$cmd 2>&1", $descriptorspec, $pipes, null, $cmd_env);
+    $process = proc_open("$cmd 2>&1", $descriptorspec, &$pipes, null, $cmd_env);
   }
   if (!is_resource($process)) {
     file_put_contents("$test.diff", "Couldn't invoke $cmd");
@@ -2375,7 +2375,7 @@ function msg_loop($num_tests, $queue) {
 
   if ($do_progress) {
     $stty = strtolower(Status::getSTTY());
-    preg_match_all("/columns ([0-9]+);/", $stty, $output);
+    preg_match_all("/columns ([0-9]+);/", $stty, &$output);
     if (!isset($output[1][0])) {
       // because BSD has to be different
       preg_match_all("/([0-9]+) columns;/", $stty, $output);
@@ -2388,7 +2388,7 @@ function msg_loop($num_tests, $queue) {
   }
 
   while (true) {
-    if (!msg_receive($queue, 0, $type, 1024, $message)) {
+    if (!msg_receive($queue, 0, &$type, 1024, &$message)) {
       error("msg_receive failed");
     }
 
@@ -2652,7 +2652,7 @@ function print_failure($argv, $results, $options) {
       $passed[] = $result['name'];
     }
   }
-  asort($failed);
+  asort(&$failed);
   print "\n".count($failed)." tests failed\n";
   if (empty($options['no-fun'])) {
     print "(╯°□°）╯︵ ┻━┻\n";
@@ -3090,7 +3090,7 @@ function main($argv) {
 
   $return_value = 0;
   while (count($children) && $printer_pid != 0) {
-    $pid = pcntl_wait($status);
+    $pid = pcntl_wait(&$status);
     if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
       error("Unexpected exit status from child");
     }

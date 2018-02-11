@@ -298,7 +298,6 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       case HeaderKind::String:
       case HeaderKind::Resource:
       case HeaderKind::BigMalloc:
-      case HeaderKind::Cpp:
       case HeaderKind::SmallMalloc:
       case HeaderKind::Free:
       case HeaderKind::BigObj:

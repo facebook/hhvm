@@ -16,39 +16,36 @@
 #ifndef HPHP_HEAP_SCAN_H
 #define HPHP_HEAP_SCAN_H
 
-#include "hphp/runtime/base/apc-local-array.h"
-#include "hphp/runtime/base/apc-local-array-defs.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/heap-graph.h"
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/resource-data.h"
+#include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/rds-header.h"
-#include "hphp/runtime/base/ref-data.h"
-#include "hphp/runtime/base/req-root.h"
-#include "hphp/runtime/base/resource-data.h"
-#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/thread-info.h"
-
-#include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
-#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_async-generator.h"
-#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
-#include "hphp/runtime/ext/extension-registry.h"
-#include "hphp/runtime/ext/generator/ext_generator.h"
-
-#include "hphp/runtime/server/server-note.h"
-
+#include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/req-root.h"
+#include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/ext/extension-registry.h"
+#include "hphp/runtime/server/server-note.h"
+#include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
+#include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
+#include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 
 #include "hphp/util/hphp-config.h"
 
@@ -148,7 +145,6 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     case HeaderKind::Ref:
       scanner.scan(*static_cast<const RefData*>(h)->tv());
       return;
-    case HeaderKind::Cpp:
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc: {
       auto n = static_cast<const MallocNode*>(h);

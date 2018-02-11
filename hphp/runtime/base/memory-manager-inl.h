@@ -401,28 +401,6 @@ inline StringDataNode& MemoryManager::getStringList() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace req {
-template<class T, class... Args> T* make_raw(Args&&... args) {
-  static_assert(alignof(T) <= std::min(sizeof(MallocNode),kSmallSizeAlign),"");
-  auto constexpr size = sizeof(MallocNode) + sizeof(T);
-  auto n = static_cast<MallocNode*>(tl_heap->objMalloc(size));
-  n->initHeader_32_16(HeaderKind::Cpp, size,
-                      type_scan::getIndexForMalloc<T>());
-  n->nbytes = size;
-  try {
-    return new (n + 1) T(std::forward<Args>(args)...);
-  } catch (...) {
-    tl_heap->objFree(n, size);
-    throw;
-  }
 }
 
-template<class T> void destroy_raw(T* t) {
-  t->~T();
-  auto n = reinterpret_cast<MallocNode*>(t) - 1;
-  tl_heap->objFree(n, n->nbytes);
-}
-}
-
-}
 #endif

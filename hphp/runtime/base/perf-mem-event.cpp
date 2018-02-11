@@ -327,7 +327,6 @@ bool record_request_heap_mem_event(const void* addr,
     case HeaderKind::ClosureHdr:
       break;
 
-    case HeaderKind::Cpp:
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc:
     case HeaderKind::BigObj:

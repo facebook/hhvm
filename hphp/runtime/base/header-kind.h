@@ -61,7 +61,6 @@ enum class HeaderKind : uint8_t {
   AsyncFuncFrame, // NativeNode followed by Frame, Resumable, AFWH
   NativeData, // a NativeData header preceding an HNI ObjectData
   ClosureHdr, // a ClosureHdr preceding a Closure ObjectData
-  Cpp, // a managed object with associated C++ type
   SmallMalloc, // small req::malloc'd block
   BigMalloc, // big req::malloc'd block
   BigObj, // big size-tracked object (valid header follows MallocNode)
@@ -154,8 +153,7 @@ enum class GCBits : uint8_t {};
  * [ ar_off | kind | marks |              ] AsyncFuncFrame (NativeNode)
  * [ ar_off | kind | marks | tyindex:16   ] NativeData (NativeNode)
  * [ size   | kind | marks |              ] ClosureHeader (ClosureHdr)
- * [        | kind | marks | tyindex:16   ] Cpp, SmallMalloc (MallocNode)
- * [ index  | kind | marks | tyindex:16   ] BigMalloc (MallocNode)
+ * [ index  | kind | marks | tyindex:16   ] Small/BigMalloc (MallocNode)
  * [ index  | kind | marks | kIndexUnkown ] BigObj (MallocNode)
  * [ size   | kind | marks |              ] Free, Hole (FreeNode)
  * [        | kind |       |              ] Slab

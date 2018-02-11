@@ -646,7 +646,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
         euState.typeAliasInfo.size() - 1;
     };
 
-    auto emit_lar = [&](const LocalRange& range) {
+    auto emit_lar  = [&](const LocalRange& range) {
       always_assert(range.first + range.restCount < func.locals.size());
       auto const first = map_local(range.first);
       DEBUG_ONLY auto const last = map_local(range.first + range.restCount);
@@ -807,6 +807,22 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     // deal with fpiRegions that were ended by terminal instructions
     assert(*info.expectedFPIDepth <= fpiStack.size());
     while (*info.expectedFPIDepth < fpiStack.size()) end_fpi(lastOff);
+
+    // If the block ends with JmpZ or JmpNZ to the next block, flip
+    // the condition to make the fallthrough the next block
+    if (b->hhbcs.back().op == Op::JmpZ ||
+        b->hhbcs.back().op == Op::JmpNZ) {
+      auto& bc = b->hhbcs.back();
+      auto const target = bc.op == Op::JmpNZ ? bc.JmpNZ.target : bc.JmpZ.target;
+      if (std::next(blockIt) != endBlockIt && blockIt[1]->id == target) {
+        if (bc.op == Op::JmpNZ) {
+          bc = bc_with_loc(bc.srcLoc, bc::JmpZ { b->fallthrough });
+        } else {
+          bc = bc_with_loc(bc.srcLoc, bc::JmpNZ { b->fallthrough });
+        }
+        b->fallthrough = target;
+      }
+    }
 
     for (auto& inst : b->hhbcs) emit_inst(inst);
 

@@ -116,12 +116,125 @@ php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
 }
 
 /*
+ * We need to ensure that all blocks in an fpi region are
+ * congiguous. This will normally be guaranteed by rpo order (since
+ * the blocks are dominated by the FPush and post-dominated by the
+ * FCall). If there are exceptional edges from the fpi region,
+ * however, but the FCall is still reachable its possible that the
+ * block(s) ending in the exceptional edge get sorted after the block
+ * containing the FCall.
+ *
+ * To solve this, we need to find all exceptional exits from fpi
+ * regions, and insert "fake" edges to the block containing the
+ * corresponding call.
+ */
+std::vector<borrowed_ptr<php::Block>> initial_sort(const php::Func& f) {
+  auto sorted = rpoSortFromMain(f);
+
+  FTRACE(4, "Initial sort {}\n", f.name);
+
+  // We give each fpi region a unique id
+  auto nextFpi = 0;
+  // Map from fpi region id to the block containing its FCall
+  std::unordered_map<int, borrowed_ptr<php::Block>> fpiToCallBlkMap;
+  // Map from the ids of terminal blocks within fpi regions to the
+  // entries in fpiToCallBlkMap corresponding to the active fpi regions.
+  std::unordered_map<BlockId,
+                     std::vector<borrowed_ptr<php::Block>*>> extraEdges;
+  // The fpi state at the start of each block
+  std::vector<folly::Optional<std::vector<int>>> blkFpiState(f.blocks.size());
+  for (auto blk : sorted) {
+    auto& fpiState = blkFpiState[blk->id];
+    if (!fpiState) fpiState.emplace();
+    auto curState = *fpiState;
+    for (auto const& bc : blk->hhbcs) {
+      if (isFPush(bc.op)) {
+        FTRACE(4, "blk:{} FPush {} (nesting {})\n",
+               blk->id, nextFpi, curState.size());
+        curState.push_back(nextFpi++);
+      } else if (isFCallStar(bc.op)) {
+        FTRACE(4, "blk:{} FCall {} (nesting {})\n",
+               blk->id, curState.back(), curState.size() - 1);
+        fpiToCallBlkMap[curState.back()] = blk;
+        curState.pop_back();
+      }
+    }
+    auto hasNormalSucc = false;
+    forEachNormalSuccessor(
+      *blk,
+      [&] (BlockId id) {
+        hasNormalSucc = true;
+        auto &succState = blkFpiState[id];
+        FTRACE(4, "blk:{} propagate state to {}\n",
+               blk->id, id);
+        if (!succState) {
+          succState = curState;
+        } else {
+          assertx(succState == curState);
+        }
+      }
+    );
+    if (!hasNormalSucc) {
+      for (auto fpi : curState) {
+        // We may or may not have seen the FCall yet; if we've not
+        // seen it, either there is none (in which case there's
+        // nothing to do), or the blocks happen to be in the right
+        // order anyway (so again there's apparently nothing to
+        // do). But in the latter case its possible that adding edges
+        // for another fpi region (or another exceptional exit in this
+        // fpi region) might perturb the order; so we record a pointer
+        // to the unordered_map element, in case it gets filled in
+        // later.
+        auto curBlkPtr = &fpiToCallBlkMap[fpi];
+        extraEdges[blk->id].push_back(curBlkPtr);
+      }
+    }
+  }
+
+  if (extraEdges.size()) {
+    auto changes = false;
+    for (auto& elm : extraEdges) {
+      auto const blk = borrow(f.blocks[elm.first]);
+      for (auto const blkPtr : elm.second) {
+        if (!*blkPtr) {
+          // There was no FCall, so no need to do anything
+          continue;
+        }
+        changes = true;
+        FTRACE(4, "blk:{} add factored edge to {}\n",
+               blk->id, (*blkPtr)->id);
+        blk->factoredExits.push_back((*blkPtr)->id);
+      }
+    }
+    if (changes) {
+      // redo the sort with the extra edges in place
+      sorted = rpoSortFromMain(f);
+      // Remove all the extra edges
+      for (auto& elm : extraEdges) {
+        auto const blk = borrow(f.blocks[elm.first]);
+        for (auto const blkPtr : elm.second) {
+          if (*blkPtr) {
+            blk->factoredExits.pop_back();
+          }
+        }
+      }
+    }
+  }
+
+  return sorted;
+}
+
+/*
  * Order the blocks for bytecode emission.
  *
  * Rules about block order:
  *
  *   - The "primary function body" must come first.  This is all blocks
  *     that aren't part of a fault funclet.
+ *
+ *   - All bytecodes corresponding to a given FPI region must be
+ *     contiguous. Note that an FPI region can start or end part way
+ *     through a block, so this constraint is on bytecodes, not blocks
  *
  *   - Each funclet must have all of its blocks contiguous, with the
  *     entry block first.
@@ -134,7 +247,7 @@ php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
  * next, with the block jumping back to the main entry point.
  */
 std::vector<borrowed_ptr<php::Block>> order_blocks(const php::Func& f) {
-  auto sorted = rpoSortFromMain(f);
+  auto sorted = initial_sort(f);
 
   // Get the DV blocks, without the rest of the primary function body,
   // and then add them to the end of sorted.

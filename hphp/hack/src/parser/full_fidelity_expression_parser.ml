@@ -67,6 +67,20 @@ module WithStatementAndDeclAndTypeParser
   type binary_expression_prefix_kind =
     | Prefix_byref_assignment | Prefix_assignment | Prefix_none
 
+  let make_and_track_prefix_unary_expression parser operator kind operand =
+    let node = make_prefix_unary_expression operator operand in
+    let prefix_unary_expression_stack =
+      {node; operator_kind = kind; operand} ::
+        parser.prefix_unary_expression_stack
+    in
+    {parser with prefix_unary_expression_stack}, node
+
+  let find_in_prefix_unary_expression_stack parser node =
+    List.find_opt (fun {node = n; _} -> n == node)
+      parser.prefix_unary_expression_stack
+
+  (* [Trick] *)
+
   let with_type_parser : 'a . t -> (TypeParser.t -> TypeParser.t * 'a) -> t * 'a
   = fun parser f ->
     let type_parser =
@@ -731,49 +745,33 @@ module WithStatementAndDeclAndTypeParser
     else
       parse_remaining_binary_expression parser term prefix_kind
 
-  (* checks if t is a prefix unary expression where operator has expected kind
-     and and operand matched predicate *)
-  and check_prefix_unary_expression t expected_kind operand_predicate =
-    match syntax t with
-    | PrefixUnaryExpression {
-        prefix_unary_operator;
-        prefix_unary_operand
-      } ->
-      begin
-      match syntax prefix_unary_operator with
-      | Token t when Token.kind t = expected_kind ->
-        operand_predicate prefix_unary_operand
-      | _ -> false
-      end
-    | _ -> false
-
   (* Checks if given expression is a PHP variable.
   per PHP grammar:
   https://github.com/php/php-langspec/blob/master/spec/10-expressions.md#grammar-variable
    A variable is an expression that can in principle be used as an lvalue *)
-  and can_be_used_as_lvalue t =
-    match syntax t with
-    | VariableExpression _ | SubscriptExpression _
-    | MemberSelectionExpression _ | ScopeResolutionExpression _ -> true
-    | BracedExpression {
-        braced_expression_left_brace = lb;
-        braced_expression_right_brace = rb;
-        braced_expression_expression = e
-      } when is_missing lb && is_missing rb -> can_be_used_as_lvalue e
-    | PrefixUnaryExpression {
-        prefix_unary_operator = op;
-        prefix_unary_operand = e
-      } ->
-      begin match syntax op with
-      | Token t -> Token.kind t = Dollar && can_be_used_as_lvalue e
-      | _ -> false
-      end
-    | _ -> false
+  and can_be_used_as_lvalue parser t =
+    if is_variable_expression t
+    || is_subscript_expression t
+    || is_member_selection_expression t
+    || is_scope_resolution_expression t
+    then true
+    else prefix_unary_expression_checker_helper parser t Dollar
+
+  (* Checks if given node is prefix unary expression and verifies operator kind.
+  Recursively run can_be_used_as_lvalue *)
+  and prefix_unary_expression_checker_helper parser t kind =
+    match find_in_prefix_unary_expression_stack parser t with
+    | Some { operator_kind; operand; _ } ->
+      if operator_kind = kind then
+        can_be_used_as_lvalue parser operand
+      else
+        false
+    | None -> false
 
   (* checks if expression is a valid right hand side in by-ref assignment
    which is '&'PHP variable *)
-  and is_byref_assignment_source t =
-    check_prefix_unary_expression t Ampersand can_be_used_as_lvalue
+  and is_byref_assignment_source parser t =
+    prefix_unary_expression_checker_helper parser t Ampersand
 
   (*detects if left_term and operator can be treated as a beginning of
    assignment (respecting the precedence of operator on the left of
@@ -785,7 +783,8 @@ module WithStatementAndDeclAndTypeParser
    prefix of assignment
    - Prefix_byref_assignment - left_term and operator can be interpreted as a
    prefix of byref assignment.*)
-  and check_if_parsable_as_assignment left_term operator left_precedence =
+  and check_if_parsable_as_assignment parser left_term operator left_precedence
+  =
     (* in PHP precedence of assignment in expression is bumped up to
        recognize cases like !$x = ... or $a == $b || $c = ...
        which should be parsed as !($x = ...) and $a == $b || ($c = ...)
@@ -793,13 +792,14 @@ module WithStatementAndDeclAndTypeParser
     if left_precedence >= Operator.precedence_for_assignment_in_expressions then
       Prefix_none
     else match operator with
-    | Equal when can_be_used_as_lvalue left_term -> Prefix_byref_assignment
+    | Equal when can_be_used_as_lvalue parser left_term ->
+      Prefix_byref_assignment
     | Equal when is_list_expression left_term -> Prefix_assignment
     | PlusEqual | MinusEqual | StarEqual | SlashEqual |
       StarStarEqual | DotEqual | PercentEqual | AmpersandEqual |
       BarEqual | CaratEqual | LessThanLessThanEqual |
       GreaterThanGreaterThanEqual
-      when can_be_used_as_lvalue left_term ->
+      when can_be_used_as_lvalue parser left_term ->
       Prefix_assignment
     | _ -> Prefix_none
 
@@ -817,7 +817,7 @@ module WithStatementAndDeclAndTypeParser
     | None -> (parser, term)
     | Some token ->
     let assignment_prefix_kind =
-      check_if_parsable_as_assignment term token parser.precedence
+      check_if_parsable_as_assignment parser term token parser.precedence
     in
     (* stop parsing expression if:
     - precedence of the operator is less than precedence of the operator
@@ -1590,12 +1590,12 @@ module WithStatementAndDeclAndTypeParser
   and parse_prefix_unary_expression parser =
     (* TODO: Operand to ++ and -- must be an lvalue. *)
     let (parser, token) = next_token parser in
-    let operator = Operator.prefix_unary_from_token (Token.kind token) in
+    let kind = Token.kind token in
+    let operator = Operator.prefix_unary_from_token kind in
     let token = make_token token in
     let (parser, operand) = parse_expression_with_operator_precedence
       parser operator in
-    let result = make_prefix_unary_expression token operand in
-    (parser, result)
+    make_and_track_prefix_unary_expression parser token kind operand
 
   and parse_simple_variable parser =
     match peek_token_kind parser with
@@ -1615,9 +1615,8 @@ module WithStatementAndDeclAndTypeParser
         parse_variable_in_php5_compat_mode parser
       | _ ->
         parse_expression_with_operator_precedence parser
-          (Operator.prefix_unary_from_token TokenKind.Dollar) in
-    let result = make_prefix_unary_expression dollar operand in
-    (parser, result)
+          (Operator.prefix_unary_from_token Dollar) in
+    make_and_track_prefix_unary_expression parser dollar Dollar operand
 
   and parse_instanceof_expression parser left =
     (* SPEC:
@@ -1803,7 +1802,7 @@ module WithStatementAndDeclAndTypeParser
           parse_term @@ with_precedence
             parser1
             Operator.precedence_for_assignment_in_expressions in
-        if is_byref_assignment_source right_term then
+        if is_byref_assignment_source parser2 right_term then
           let left_term = make_binary_expression
             left_term (make_token token) right_term
           in
@@ -1844,7 +1843,10 @@ module WithStatementAndDeclAndTypeParser
           right hand side of the assignment to make sure it is consumed.
           *)
         check_if_parsable_as_assignment
-          right_term kind left_precedence <> Prefix_none
+          parser
+          right_term
+          kind
+          left_precedence <> Prefix_none
       in
       if right_precedence > left_precedence ||
         (associativity = Operator.RightAssociative &&
@@ -2208,8 +2210,7 @@ module WithStatementAndDeclAndTypeParser
     if is_missing ampersand then
       (parser, variable)
     else
-      let result = make_prefix_unary_expression ampersand variable in
-      (parser, result)
+      make_and_track_prefix_unary_expression parser ampersand Ampersand variable
 
   and parse_anon_or_lambda_or_awaitable parser =
     (* TODO: The original Hack parser accepts "async" as an identifier, and

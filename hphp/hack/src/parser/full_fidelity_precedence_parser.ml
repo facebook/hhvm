@@ -12,6 +12,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S
 module Context = Full_fidelity_parser_context.WithToken(Syntax.Token)
 module type SC_S = SmartConstructors.SmartConstructors_S
+module TokenKind = Full_fidelity_token_kind
 
 module WithLexer(Lexer : Lexer_S) = struct
   module Lexer = Lexer
@@ -20,6 +21,14 @@ module WithLexer(Lexer : Lexer_S) = struct
   = struct
     module SC = SC
 
+    (* [Trick] Hack to keep track of prefix unary expressions created and change
+    parser behavior based on this knowledge *)
+    type prefix_unary_expression_type = {
+      node : Syntax.t;
+      operator_kind : TokenKind.t;
+      operand : Syntax.t;
+    }
+
 type t = {
   lexer : Lexer.t;
   errors : Full_fidelity_syntax_error.t list;
@@ -27,18 +36,26 @@ type t = {
   precedence : int;
   env : Full_fidelity_parser_env.t;
   sc_state : SC.t;
+  prefix_unary_expression_stack : prefix_unary_expression_type list;
 }
 
-let sc_call parser f =
-  let (sc_state, result) = f parser.sc_state in
-  {parser with sc_state}, result
+    let sc_call parser f =
+      let (sc_state, result) = f parser.sc_state in
+      {parser with sc_state}, result
 
-let sc_state parser =
-  parser.sc_state
+    let sc_state parser =
+      parser.sc_state
 
 
 let make env lexer errors context sc_state =
-  { lexer; errors; context; precedence = 0; env; sc_state }
+  { lexer
+  ; errors
+  ; context
+  ; precedence = 0
+  ; env
+  ; sc_state
+  ; prefix_unary_expression_stack = []
+  }
 
 let errors parser =
   parser.errors @ (Lexer.errors parser.lexer)

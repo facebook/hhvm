@@ -345,20 +345,17 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, _) = parse_namespace_use_kind_opt parser in
     let (parser, token) = next_token parser in
     match Token.kind token with
-    | Backslash
+    | Backslash ->
+      let token = make_token token in
+      let (parser, name) = scan_qualified_name parser token in
+      Syntax.is_namespace_prefix name || peek_token_kind parser = LeftBrace
     | Name ->
-      let (parser, name) =
-        if Token.kind token = Backslash
-        then scan_qualified_name parser (make_token token)
-        else scan_remaining_qualified_name parser (make_token token) in
-      begin match syntax name with
-      | Token t when Token.kind t = Name ->
+      let token = make_token token in
+      let (parser, name) = scan_remaining_qualified_name parser token in
+      if name == token then
         peek_token_kind parser = LeftBrace
-      | QualifiedName _ ->
-        Syntax.is_namespace_prefix name ||
-        peek_token_kind parser = LeftBrace
-      | _ -> false
-      end
+      else
+        Syntax.is_namespace_prefix name || peek_token_kind parser = LeftBrace
     | _ -> false
 
   and parse_group_use parser =
@@ -503,14 +500,14 @@ module WithExpressionAndStatementAndTypeParser
       let comma = make_token token in
       let missing = make_missing parser in
       let list_item = make_list_item missing comma in
-      (parser, list_item)
+      (parser, list_item, comma)
     | Backslash
     | Name
     | XHPClassName ->
       let (parser, item) = parse_type_specifier parser in
       let (parser, comma) = optional_token parser Comma in
       let list_item = make_list_item item comma in
-      (parser, list_item)
+      (parser, list_item, comma)
     | _ ->
       (* ERROR RECOVERY: We are expecting a type; give an error as above.
       Don't eat the offending token.
@@ -519,7 +516,7 @@ module WithExpressionAndStatementAndTypeParser
       let missing1 = make_missing parser in
       let missing2 = make_missing parser in
       let list_item = make_list_item missing1 missing2 in
-      (parser, list_item)
+      (parser, list_item, missing2)
 
   and parse_special_type_list parser =
     (*
@@ -541,7 +538,16 @@ module WithExpressionAndStatementAndTypeParser
       should keep the rule as-is, and disallow the trailing comma; it makes
       parsing and error recovery easier.
     *)
-    parse_list_until_no_comma parser parse_special_type
+    let rec aux parser acc =
+      let (parser, item, separator) = parse_special_type parser in
+      if is_missing separator then
+        (parser, item :: acc)
+      else
+        aux parser (item :: acc)
+    in
+    let (parser, items) = aux parser [] in
+    (parser, make_list parser (List.rev items))
+
 
   and parse_classish_body parser =
     let (parser, left_brace_token) = require_left_brace parser in
@@ -1794,20 +1800,21 @@ module WithExpressionAndStatementAndTypeParser
     (parser1, result)
 
   let parse_leading_markup_section parser =
-    let parser1, markup_section = with_statement_parser parser
-      (StatementParser.parse_markup_section ~is_leading_section:true)
+    let (parser1, (markup_section, has_suffix)) =
+      with_statement_parser parser
+      (fun p ->
+        let (p, s, has_suffix) =
+          StatementParser.parse_markup_section ~is_leading_section:true p
+        in
+        p, (s, has_suffix)
+      )
     in
-    let valid =
-      match syntax markup_section with
       (* proceed successfully if we've consumed <?... *)
       (* We purposefully ignore leading trivia before the <?hh, and handle
       the error on a later pass *)
       (* TODO: Handle the case where the langauge is not a Name. *)
-      | MarkupSection { markup_suffix; _ } -> not (is_missing markup_suffix)
-      | _ -> false
-    in
     (* Do not attempt to recover in HHVM compatibility mode *)
-    if valid || Env.hhvm_compat_mode (env parser) then
+    if has_suffix || Env.hhvm_compat_mode (env parser) then
       parser1, markup_section
     else
       let parser = with_error parser SyntaxError.error1001 in

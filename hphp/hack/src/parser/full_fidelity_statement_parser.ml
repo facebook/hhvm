@@ -167,7 +167,8 @@ module WithExpressionAndDeclAndTypeParser
       parse_goto_label parser
     | Goto -> parse_goto_statement parser
     | QuestionGreaterThan ->
-      parse_markup_section parser ~is_leading_section:false
+      let (p, s, _) = parse_markup_section parser ~is_leading_section:false in
+      (p, s)
     | Semicolon -> parse_expression_statement parser
     (* ERROR RECOVERY: when encountering a token that's invalid now but the
      * context says is expected later, make the whole statement missing
@@ -194,7 +195,7 @@ module WithExpressionAndDeclAndTypeParser
     in
     let parser, markup, suffix_opt = scan_markup parser ~is_leading_section in
     let markup = make_token markup in
-    let suffix, is_echo_tag =
+    let (suffix, is_echo_tag, has_suffix) =
       match suffix_opt with
       | Some (less_than_question, language_opt) ->
         let less_than_question_token = make_token less_than_question in
@@ -214,8 +215,8 @@ module WithExpressionAndDeclAndTypeParser
           | None -> make_missing parser, false
         in
         make_markup_suffix less_than_question_token language,
-        is_echo_tag
-      | None -> make_missing parser, false
+        is_echo_tag, true
+      | None -> make_missing parser, false, false
     in
     let parser, expression =
       if is_echo_tag then parse_statement parser
@@ -224,7 +225,7 @@ module WithExpressionAndDeclAndTypeParser
         (parser, missing)
     in
     let s = make_markup_section prefix markup suffix expression in
-    parser, s
+    parser, s, has_suffix
 
   and parse_possible_php_function parser =
     (* ERROR RECOVERY: PHP supports nested named functions, but Hack does not.
@@ -485,9 +486,9 @@ module WithExpressionAndDeclAndTypeParser
     (* do not eat token and return Missing if first token is not Else *)
     let parse_else_opt parser_else =
       let (parser_else, else_token) = optional_token parser_else Else in
-      match syntax else_token with
-      | Missing -> (parser_else, else_token)
-      | _ ->
+      if is_missing else_token then
+        (parser_else, else_token)
+      else
         let (parser_else, else_consequence) = parse_statement parser_else in
         let else_syntax = make_else_clause else_token else_consequence in
         (parser_else, else_syntax)
@@ -941,13 +942,18 @@ module WithExpressionAndDeclAndTypeParser
     | _ ->
       let parser = Parser.expect_in_new_scope parser [ Semicolon ] in
       let (parser, expression) = parse_expression parser in
-      let (parser, token) = require_semicolon parser in
       let (parser, token) =
-        match syntax expression, syntax token with
-        | HaltCompilerExpression _, Token t ->
-          let parser, token = rescan_halt_compiler parser t in
-          parser, make_token token
-        | _ -> parser, token in
+        let (parser, token) = require_semicolon_token parser in
+        match token with
+        | Some t ->
+          if is_halt_compiler_expression expression then
+            let (parser, token) = rescan_halt_compiler parser t in
+            (parser, make_token token)
+          else
+            (parser, make_token t)
+        | None ->
+          parser, make_missing parser
+      in
       let parser = Parser.pop_scope parser [ Semicolon ] in
       (parser, make_expression_statement expression token)
 

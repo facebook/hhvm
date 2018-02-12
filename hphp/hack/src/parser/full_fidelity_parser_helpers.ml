@@ -225,6 +225,33 @@ module WithParser(Parser : Parser_S) = struct
       (SyntaxError.error1058 received_str required_str) ~on_whole_token:true in
     skip_and_log_unexpected_token ~generate_error:false parser
 
+  let require_and_return_token parser kind error =
+    let (parser1, token) = next_token parser in
+    if (Token.kind token) = kind then
+      (parser1, Some token)
+    else begin
+      (* ERROR RECOVERY: Look at the next token after this. Is it the one we
+       * require? If so, process the current token as extra and return the next
+       * one. Otherwise, create a missing token for what we required,
+       * and continue on from the current token (don't skip it). *)
+      let next_kind = peek_token_kind ~lookahead:1 parser in
+      if next_kind = kind then
+        let parser = skip_and_log_unexpected_token parser in
+        let (parser, token) = next_token parser in
+        (parser, Some token)
+      else begin
+        (* ERROR RECOVERY: We know we didn't encounter an extra token.
+         * So, as a second line of defense, check if the current token
+         * is a misspelling, by our existing narrow definition of misspelling. *)
+        if is_misspelled_kind kind (current_token_text parser) then
+          let parser = skip_and_log_misspelled_token parser kind in
+          (parser, None)
+        else
+          let parser = with_error parser error in
+          (parser, None)
+      end
+    end
+
   let require_token parser kind error =
     let (parser1, token) = next_token parser in
     if (Token.kind token) = kind then
@@ -430,6 +457,13 @@ module WithParser(Parser : Parser_S) = struct
 
   let require_variable parser =
     require_token parser TokenKind.Variable SyntaxError.error1008
+
+  let require_semicolon_token parser =
+    (* TODO: Kill PHPism; no semicolon required right before ?> *)
+    match peek_token_kind parser with
+    | TokenKind.QuestionGreaterThan ->
+      parser, None
+    | _ -> require_and_return_token parser TokenKind.Semicolon SyntaxError.error1010
 
   let require_semicolon parser =
     (* TODO: Kill PHPism; no semicolon required right before ?> *)
@@ -757,22 +791,6 @@ module WithParser(Parser : Parser_S) = struct
       match maybe_item with
       | None -> (parser, acc)
       | Some item -> aux parser (item :: acc) in
-    let (parser, items) = aux parser [] in
-    (parser, make_list parser (List.rev items))
-
-  (* Parse a comma-separated list of items until there is an item that
-  does not end in a comma. *)
-  let parse_list_until_no_comma parser parse_item =
-    let rec aux parser acc =
-      let (parser, item) = parse_item parser in
-      match syntax item with
-      | ListItem { list_item; list_separator } ->
-        if is_missing list_separator then
-          (parser, item :: acc)
-        else
-          aux parser (item :: acc)
-      | _ ->
-        (parser, item :: acc) in
     let (parser, items) = aux parser [] in
     (parser, make_list parser (List.rev items))
 

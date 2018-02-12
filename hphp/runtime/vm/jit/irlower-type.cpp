@@ -300,8 +300,8 @@ void cgCheckVArray(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
   auto const sf = v.makeReg();
-  v << cmpbim{ArrayData::kVArray, src + ArrayData::offsetofDVArray(), sf};
-  fwdJcc(v, env, CC_NZ, sf, inst->taken());
+  v << testbim{ArrayData::kVArray, src + ArrayData::offsetofDVArray(), sf};
+  fwdJcc(v, env, CC_Z, sf, inst->taken());
   v << copy{src, dst};
 }
 
@@ -310,8 +310,8 @@ void cgCheckDArray(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
   auto const sf = v.makeReg();
-  v << cmpbim{ArrayData::kDArray, src + ArrayData::offsetofDVArray(), sf};
-  fwdJcc(v, env, CC_NZ, sf, inst->taken());
+  v << testbim{ArrayData::kDArray, src + ArrayData::offsetofDVArray(), sf};
+  fwdJcc(v, env, CC_Z, sf, inst->taken());
   v << copy{src, dst};
 }
 
@@ -320,7 +320,7 @@ void cgIsDVArray(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
   auto const sf = v.makeReg();
-  v << cmpbim{ArrayData::kNotDVArray, src + ArrayData::offsetofDVArray(), sf};
+  v << testbim{ArrayData::kDVArrayMask, src + ArrayData::offsetofDVArray(), sf};
   v << setcc{CC_NZ, sf, dst};
 }
 

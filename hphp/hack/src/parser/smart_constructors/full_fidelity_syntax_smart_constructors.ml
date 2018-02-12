@@ -25,8 +25,8 @@ module type SC_S = SmartConstructors.SmartConstructors_S
 module SourceText = Full_fidelity_source_text
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S)
-: (SC_S with type token = Syntax.Token.t) = struct
-  type token = Syntax.Token.t
+: (SC_S with module Token = Syntax.Token) = struct
+  module Token = Syntax.Token
   type t = unit
   type r = Syntax.t
 

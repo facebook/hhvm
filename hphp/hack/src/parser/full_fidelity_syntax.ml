@@ -56,7 +56,7 @@ module WithToken(Token: TokenType) = struct
     let to_kind syntax =
       match syntax with
       | Missing                             -> SyntaxKind.Missing
-      | Token                             _ -> SyntaxKind.Token
+      | Token                             t -> SyntaxKind.Token (Token.kind t)
       | SyntaxList                        _ -> SyntaxKind.SyntaxList
       | EndOfFile                               _ -> SyntaxKind.EndOfFile
       | Script                                  _ -> SyntaxKind.Script

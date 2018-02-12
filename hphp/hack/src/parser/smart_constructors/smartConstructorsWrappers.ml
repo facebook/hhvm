@@ -22,13 +22,13 @@
  *)
 
 module type SC_S = SmartConstructors.SmartConstructors_S
-module SourceText = Full_fidelity_source_text
 module SK = Full_fidelity_syntax_kind
 
 module type SyntaxKind_S = sig
   include SC_S
   type original_sc_r
   val extract : r -> original_sc_r
+  val is_name : r -> bool
   val is_missing : r -> bool
   val is_list : r -> bool
   val is_end_of_file : r -> bool
@@ -197,10 +197,10 @@ module type SyntaxKind_S = sig
 end
 
 module SyntaxKind(SC : SC_S) :
-  (SyntaxKind_S with type token = SC.token and type original_sc_r = SC.r)
+  (SyntaxKind_S with module Token = SC.Token and type original_sc_r = SC.r)
 = struct
+  module Token = SC.Token
   type original_sc_r = SC.r
-  type token = SC.token
   type t = SC.t
   type r = SK.t * SC.r
 
@@ -210,7 +210,7 @@ module SyntaxKind(SC : SC_S) :
     state, (kind, res)
   let initial_state = SC.initial_state
 
-  let make_token token state = compose SK.Token (SC.make_token token state)
+  let make_token token state = compose (SK.Token (SC.Token.kind token)) (SC.make_token token state)
   let make_missing s o state = compose SK.Missing (SC.make_missing s o state)
   let make_list s o items state =
     compose SK.SyntaxList (SC.make_list s o (List.map snd items) state)
@@ -379,6 +379,7 @@ module SyntaxKind(SC : SC_S) :
 
 
   let has_kind kind node = kind_of node = kind
+  let is_name = has_kind (SK.Token Full_fidelity_token_kind.Name)
   let is_missing = has_kind SK.Missing
   let is_list = has_kind SK.Missing
   let is_end_of_file                                  = has_kind SK.EndOfFile

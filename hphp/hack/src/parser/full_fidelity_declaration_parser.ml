@@ -49,7 +49,7 @@ module type DeclarationParser_S = Full_fidelity_declaration_parser_type
 open TokenKind
 open Syntax
 
-module WithSmartConstructors (SCI : SCWithKind_S with type token = Token.t)
+module WithSmartConstructors (SCI : SCWithKind_S with module Token = Syntax.Token)
 = struct
 
 module WithExpressionAndStatementAndTypeParser

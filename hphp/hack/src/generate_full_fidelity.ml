@@ -115,7 +115,7 @@ module GenerateFFValidatedSyntax = struct
   | { Syntax.syntax = Syntax.%s x; value = v } -> v,
     { %s
     }
-  | s -> validation_fail SyntaxKind.%s s
+  | s -> validation_fail (Some SyntaxKind.%s) s
   and invalidate_%s : %s invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.%s
@@ -198,7 +198,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   type 'a validator = Syntax.t -> 'a value
   type 'a invalidator = 'a value -> Syntax.t
 
-  exception Validation_failure of SyntaxKind.t * Syntax.t
+  exception Validation_failure of SyntaxKind.t option * Syntax.t
   let validation_fail k t = raise (Validation_failure (k, t))
 
   exception Aggregation_failure of Def.aggregate_type * Syntax.syntax
@@ -221,7 +221,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   let validate_token : Token.t validator = fun node ->
     match Syntax.syntax node with
     | Syntax.Token t -> Syntax.value node, t
-    | _ -> validation_fail SyntaxKind.Token node
+    | _ -> validation_fail None node
   let invalidate_token : Token.t invalidator = fun (value, token) ->
     { Syntax.syntax = Syntax.Token token; value }
 
@@ -233,11 +233,11 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
           let item = validate list_item in
           let separator = validate_option_with validate_token list_separator in
           i.Syntax.value, (item, separator)
-        | _ -> validation_fail SyntaxKind.ListItem i
+        | _ -> validation_fail (Some SyntaxKind.ListItem) i
       in
       let validate_list l =
         try Syntactic (List.map validate_item l) with
-        | Validation_failure (SyntaxKind.ListItem, _) ->
+        | Validation_failure (Some SyntaxKind.ListItem, _) ->
           NonSyntactic (List.map validate l)
       in
       let result =
@@ -587,12 +587,12 @@ module GenerateFFSmartConstructors = struct
   ") ^ "
 
 module type SmartConstructors_S = sig
-  type token
+  module Token : Lexable_token_sig.LexableToken_S
   type t (* state *)
   type r (* smart constructor return type *)
 
   val initial_state : unit -> t
-  val make_token : token -> t -> t * r
+  val make_token : Token.t -> t -> t * r
   val make_missing : Full_fidelity_source_text.t -> int -> t -> t * r
   val make_list : Full_fidelity_source_text.t -> int -> r list -> t -> t * r
 CONSTRUCTOR_METHODS
@@ -654,7 +654,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
   module WithLexer(Lexer : Lexer_S) = struct
     module type Parser_S = sig
-      module SC : SCWithKind_S with type token = Token.t
+      module SC : SCWithKind_S with module Token = Token
       type t
       val sc_call : t -> (SC.t -> SC.t * SC.r) -> t * SC.r
       val lexer : t -> Lexer.t
@@ -716,8 +716,8 @@ module GenerateFFVerifySmartConstructors = struct
 module type SC_S = SmartConstructors.SmartConstructors_S
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S)
-: (SC_S with type token = Syntax.Token.t) = struct
-  type token = Syntax.Token.t
+: (SC_S with module Token = Syntax.Token) = struct
+  module Token = Syntax.Token
   type t = Syntax.t list
   type r = unit
 
@@ -766,8 +766,8 @@ module type SC_S = SmartConstructors.SmartConstructors_S
 module SourceText = Full_fidelity_source_text
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S)
-: (SC_S with type token = Syntax.Token.t) = struct
-  type token = Syntax.Token.t
+: (SC_S with module Token = Syntax.Token) = struct
+  module Token = Syntax.Token
   type t = unit
   type r = Syntax.t
 
@@ -822,23 +822,23 @@ module GenerateFFSmartConstructorsWrappers = struct
  ") ^ "
 
 module type SC_S = SmartConstructors.SmartConstructors_S
-module SourceText = Full_fidelity_source_text
 module SK = Full_fidelity_syntax_kind
 
 module type SyntaxKind_S = sig
   include SC_S
   type original_sc_r
   val extract : r -> original_sc_r
+  val is_name : r -> bool
   val is_missing : r -> bool
   val is_list : r -> bool
 TYPE_TESTS_SIG
 end
 
 module SyntaxKind(SC : SC_S) :
-  (SyntaxKind_S with type token = SC.token and type original_sc_r = SC.r)
+  (SyntaxKind_S with module Token = SC.Token and type original_sc_r = SC.r)
 = struct
+  module Token = SC.Token
   type original_sc_r = SC.r
-  type token = SC.token
   type t = SC.t
   type r = SK.t * SC.r
 
@@ -848,13 +848,14 @@ module SyntaxKind(SC : SC_S) :
     state, (kind, res)
   let initial_state = SC.initial_state
 
-  let make_token token state = compose SK.Token (SC.make_token token state)
+  let make_token token state = compose (SK.Token (SC.Token.kind token)) (SC.make_token token state)
   let make_missing s o state = compose SK.Missing (SC.make_missing s o state)
   let make_list s o items state =
     compose SK.SyntaxList (SC.make_list s o (List.map snd items) state)
 CONSTRUCTOR_METHODS
 
   let has_kind kind node = kind_of node = kind
+  let is_name = has_kind (SK.Token Full_fidelity_token_kind.Name)
   let is_missing = has_kind SK.Missing
   let is_list = has_kind SK.Missing
 TYPE_TESTS
@@ -1000,7 +1001,7 @@ module WithToken(Token: TokenType) = struct
     let to_kind syntax =
       match syntax with
       | Missing                             -> SyntaxKind.Missing
-      | Token                             _ -> SyntaxKind.Token
+      | Token                             t -> SyntaxKind.Token (Token.kind t)
       | SyntaxList                        _ -> SyntaxKind.SyntaxList
 TO_KIND
 
@@ -1296,15 +1297,15 @@ module GenerateFFSyntaxKind = struct
   let full_fidelity_syntax_kind_template = make_header MLStyle "" ^ "
 
 type t =
-  | Token
+  | Token of Full_fidelity_token_kind.t
   | Missing
   | SyntaxList
 TOKENS
 
 let to_string kind =
   match kind with
+  | Token _                           -> \"token\"
   | Missing                           -> \"missing\"
-  | Token                             -> \"token\"
   | SyntaxList                        -> \"list\"
 TO_STRING"
 

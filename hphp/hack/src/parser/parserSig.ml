@@ -31,7 +31,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
   module WithLexer(Lexer : Lexer_S) = struct
     module type Parser_S = sig
-      module SC : SCWithKind_S with type token = Token.t
+      module SC : SCWithKind_S with module Token = Token
       type t
       val sc_call : t -> (SC.t -> SC.t * SC.r) -> t * SC.r
       val lexer : t -> Lexer.t

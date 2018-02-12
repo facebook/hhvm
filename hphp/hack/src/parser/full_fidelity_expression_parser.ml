@@ -48,7 +48,7 @@ module ParserHelperSyntax = Full_fidelity_parser_helpers.WithSyntax(Syntax)
 module ParserHelper =
   ParserHelperSyntax.WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
 
-module WithSmartConstructors (SCI : SCWithKind_S with type token = Token.t)
+module WithSmartConstructors (SCI : SCWithKind_S with module Token = Syntax.Token)
 = struct
 
 module WithStatementAndDeclAndTypeParser
@@ -814,13 +814,11 @@ module WithStatementAndDeclAndTypeParser
     | _ -> Prefix_none
 
   and can_term_take_type_args term =
-    match kind term with
-    | SyntaxKind.Token -> is_name term
-    | SyntaxKind.QualifiedName
-    | SyntaxKind.MemberSelectionExpression
-    | SyntaxKind.SafeMemberSelectionExpression
-    | SyntaxKind.ScopeResolutionExpression -> true
-    | _ -> false
+    is_name term
+    || is_qualified_name term
+    || is_member_selection_expression term
+    || is_safe_member_selection_expression term
+    || is_scope_resolution_expression term
 
   and parse_remaining_expression parser term =
     match peek_next_kind_if_operator parser with

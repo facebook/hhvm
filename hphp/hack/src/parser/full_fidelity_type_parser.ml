@@ -37,7 +37,7 @@ module ParserHelper = ParserHelperSyntax
 open TokenKind
 open Syntax
 
-module WithSmartConstructors (SCI : SCWithKind_S with type token = Token.t)
+module WithSmartConstructors (SCI : SCWithKind_S with module Token = Syntax.Token)
 = struct
 
 module WithExpressionParser

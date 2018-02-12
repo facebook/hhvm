@@ -14,7 +14,7 @@ module type SCWithToken_S = SmartConstructorsWrappers.SyntaxKind_S
 
 [@@@ocaml.warning "-60"] (* https://caml.inria.fr/mantis/view.php?id=7522 *)
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
-module WithSmartConstructors (SCI : SC_S with type token = Syntax.Token.t) :
+module WithSmartConstructors (SCI : SC_S with module Token = Syntax.Token) :
 sig
   type t
   val make : Env.t -> Full_fidelity_source_text.t -> t

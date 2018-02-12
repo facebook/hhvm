@@ -32,7 +32,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   type 'a validator = Syntax.t -> 'a value
   type 'a invalidator = 'a value -> Syntax.t
 
-  exception Validation_failure of SyntaxKind.t * Syntax.t
+  exception Validation_failure of SyntaxKind.t option * Syntax.t
   let validation_fail k t = raise (Validation_failure (k, t))
 
   exception Aggregation_failure of Def.aggregate_type * Syntax.syntax
@@ -55,7 +55,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   let validate_token : Token.t validator = fun node ->
     match Syntax.syntax node with
     | Syntax.Token t -> Syntax.value node, t
-    | _ -> validation_fail SyntaxKind.Token node
+    | _ -> validation_fail None node
   let invalidate_token : Token.t invalidator = fun (value, token) ->
     { Syntax.syntax = Syntax.Token token; value }
 
@@ -67,11 +67,11 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
           let item = validate list_item in
           let separator = validate_option_with validate_token list_separator in
           i.Syntax.value, (item, separator)
-        | _ -> validation_fail SyntaxKind.ListItem i
+        | _ -> validation_fail (Some SyntaxKind.ListItem) i
       in
       let validate_list l =
         try Syntactic (List.map validate_item l) with
-        | Validation_failure (SyntaxKind.ListItem, _) ->
+        | Validation_failure (Some SyntaxKind.ListItem, _) ->
           NonSyntactic (List.map validate l)
       in
       let result =
@@ -688,7 +688,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.EndOfFile x; value = v } -> v,
     { end_of_file_token = validate_token x.end_of_file_token
     }
-  | s -> validation_fail SyntaxKind.EndOfFile s
+  | s -> validation_fail (Some SyntaxKind.EndOfFile) s
   and invalidate_end_of_file : end_of_file invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.EndOfFile
@@ -700,7 +700,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.Script x; value = v } -> v,
     { script_declarations = validate_list_with (validate_top_level_declaration) x.script_declarations
     }
-  | s -> validation_fail SyntaxKind.Script s
+  | s -> validation_fail (Some SyntaxKind.Script) s
   and invalidate_script : script invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.Script
@@ -712,7 +712,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.QualifiedName x; value = v } -> v,
     { qualified_name_parts = validate_list_with (validate_token) x.qualified_name_parts
     }
-  | s -> validation_fail SyntaxKind.QualifiedName s
+  | s -> validation_fail (Some SyntaxKind.QualifiedName) s
   and invalidate_qualified_name : qualified_name invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.QualifiedName
@@ -724,7 +724,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.SimpleTypeSpecifier x; value = v } -> v,
     { simple_type_specifier = validate_name_aggregate x.simple_type_specifier
     }
-  | s -> validation_fail SyntaxKind.SimpleTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.SimpleTypeSpecifier) s
   and invalidate_simple_type_specifier : simple_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.SimpleTypeSpecifier
@@ -736,7 +736,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.LiteralExpression x; value = v } -> v,
     { literal_expression = validate_list_with (validate_expression) x.literal_expression
     }
-  | s -> validation_fail SyntaxKind.LiteralExpression s
+  | s -> validation_fail (Some SyntaxKind.LiteralExpression) s
   and invalidate_literal_expression : literal_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.LiteralExpression
@@ -748,7 +748,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.VariableExpression x; value = v } -> v,
     { variable_expression = validate_token x.variable_expression
     }
-  | s -> validation_fail SyntaxKind.VariableExpression s
+  | s -> validation_fail (Some SyntaxKind.VariableExpression) s
   and invalidate_variable_expression : variable_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.VariableExpression
@@ -760,7 +760,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.PipeVariableExpression x; value = v } -> v,
     { pipe_variable_expression = validate_token x.pipe_variable_expression
     }
-  | s -> validation_fail SyntaxKind.PipeVariableExpression s
+  | s -> validation_fail (Some SyntaxKind.PipeVariableExpression) s
   and invalidate_pipe_variable_expression : pipe_variable_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.PipeVariableExpression
@@ -780,7 +780,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; enum_keyword = validate_token x.enum_keyword
     ; enum_attribute_spec = validate_option_with (validate_attribute_specification) x.enum_attribute_spec
     }
-  | s -> validation_fail SyntaxKind.EnumDeclaration s
+  | s -> validation_fail (Some SyntaxKind.EnumDeclaration) s
   and invalidate_enum_declaration : enum_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.EnumDeclaration
@@ -803,7 +803,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; enumerator_equal = validate_token x.enumerator_equal
     ; enumerator_name = validate_token x.enumerator_name
     }
-  | s -> validation_fail SyntaxKind.Enumerator s
+  | s -> validation_fail (Some SyntaxKind.Enumerator) s
   and invalidate_enumerator : enumerator invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.Enumerator
@@ -825,7 +825,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; alias_keyword = validate_token x.alias_keyword
     ; alias_attribute_spec = validate_option_with (validate_attribute_specification) x.alias_attribute_spec
     }
-  | s -> validation_fail SyntaxKind.AliasDeclaration s
+  | s -> validation_fail (Some SyntaxKind.AliasDeclaration) s
   and invalidate_alias_declaration : alias_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.AliasDeclaration
@@ -847,7 +847,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; property_type = validate_option_with (validate_specifier) x.property_type
     ; property_modifiers = validate_list_with (validate_token) x.property_modifiers
     }
-  | s -> validation_fail SyntaxKind.PropertyDeclaration s
+  | s -> validation_fail (Some SyntaxKind.PropertyDeclaration) s
   and invalidate_property_declaration : property_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.PropertyDeclaration
@@ -863,7 +863,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { property_initializer = validate_option_with (validate_simple_initializer) x.property_initializer
     ; property_name = validate_token x.property_name
     }
-  | s -> validation_fail SyntaxKind.PropertyDeclarator s
+  | s -> validation_fail (Some SyntaxKind.PropertyDeclarator) s
   and invalidate_property_declarator : property_declarator invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.PropertyDeclarator
@@ -878,7 +878,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; namespace_name = validate_option_with (validate_name_aggregate) x.namespace_name
     ; namespace_keyword = validate_token x.namespace_keyword
     }
-  | s -> validation_fail SyntaxKind.NamespaceDeclaration s
+  | s -> validation_fail (Some SyntaxKind.NamespaceDeclaration) s
   and invalidate_namespace_declaration : namespace_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.NamespaceDeclaration
@@ -894,7 +894,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; namespace_declarations = validate_list_with (validate_top_level_declaration) x.namespace_declarations
     ; namespace_left_brace = validate_token x.namespace_left_brace
     }
-  | s -> validation_fail SyntaxKind.NamespaceBody s
+  | s -> validation_fail (Some SyntaxKind.NamespaceBody) s
   and invalidate_namespace_body : namespace_body invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.NamespaceBody
@@ -908,7 +908,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.NamespaceEmptyBody x; value = v } -> v,
     { namespace_semicolon = validate_token x.namespace_semicolon
     }
-  | s -> validation_fail SyntaxKind.NamespaceEmptyBody s
+  | s -> validation_fail (Some SyntaxKind.NamespaceEmptyBody) s
   and invalidate_namespace_empty_body : namespace_empty_body invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.NamespaceEmptyBody
@@ -923,7 +923,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; namespace_use_kind = validate_option_with (validate_token) x.namespace_use_kind
     ; namespace_use_keyword = validate_token x.namespace_use_keyword
     }
-  | s -> validation_fail SyntaxKind.NamespaceUseDeclaration s
+  | s -> validation_fail (Some SyntaxKind.NamespaceUseDeclaration) s
   and invalidate_namespace_use_declaration : namespace_use_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.NamespaceUseDeclaration
@@ -944,7 +944,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; namespace_group_use_kind = validate_option_with (validate_token) x.namespace_group_use_kind
     ; namespace_group_use_keyword = validate_token x.namespace_group_use_keyword
     }
-  | s -> validation_fail SyntaxKind.NamespaceGroupUseDeclaration s
+  | s -> validation_fail (Some SyntaxKind.NamespaceGroupUseDeclaration) s
   and invalidate_namespace_group_use_declaration : namespace_group_use_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.NamespaceGroupUseDeclaration
@@ -965,7 +965,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; namespace_use_name = validate_name_aggregate x.namespace_use_name
     ; namespace_use_clause_kind = validate_option_with (validate_token) x.namespace_use_clause_kind
     }
-  | s -> validation_fail SyntaxKind.NamespaceUseClause s
+  | s -> validation_fail (Some SyntaxKind.NamespaceUseClause) s
   and invalidate_namespace_use_clause : namespace_use_clause invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.NamespaceUseClause
@@ -982,7 +982,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_declaration_header = validate_function_declaration_header x.function_declaration_header
     ; function_attribute_spec = validate_option_with (validate_attribute_specification) x.function_attribute_spec
     }
-  | s -> validation_fail SyntaxKind.FunctionDeclaration s
+  | s -> validation_fail (Some SyntaxKind.FunctionDeclaration) s
   and invalidate_function_declaration : function_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.FunctionDeclaration
@@ -1006,7 +1006,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_keyword = validate_token x.function_keyword
     ; function_modifiers = validate_list_with (validate_token) x.function_modifiers
     }
-  | s -> validation_fail SyntaxKind.FunctionDeclarationHeader s
+  | s -> validation_fail (Some SyntaxKind.FunctionDeclarationHeader) s
   and invalidate_function_declaration_header : function_declaration_header invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.FunctionDeclarationHeader
@@ -1029,7 +1029,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { where_clause_constraints = validate_list_with (validate_where_constraint) x.where_clause_constraints
     ; where_clause_keyword = validate_token x.where_clause_keyword
     }
-  | s -> validation_fail SyntaxKind.WhereClause s
+  | s -> validation_fail (Some SyntaxKind.WhereClause) s
   and invalidate_where_clause : where_clause invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.WhereClause
@@ -1044,7 +1044,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; where_constraint_operator = validate_token x.where_constraint_operator
     ; where_constraint_left_type = validate_specifier x.where_constraint_left_type
     }
-  | s -> validation_fail SyntaxKind.WhereConstraint s
+  | s -> validation_fail (Some SyntaxKind.WhereConstraint) s
   and invalidate_where_constraint : where_constraint invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.WhereConstraint
@@ -1061,7 +1061,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; methodish_function_decl_header = validate_function_declaration_header x.methodish_function_decl_header
     ; methodish_attribute = validate_option_with (validate_attribute_specification) x.methodish_attribute
     }
-  | s -> validation_fail SyntaxKind.MethodishDeclaration s
+  | s -> validation_fail (Some SyntaxKind.MethodishDeclaration) s
   and invalidate_methodish_declaration : methodish_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.MethodishDeclaration
@@ -1085,7 +1085,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; classish_modifiers = validate_list_with (validate_token) x.classish_modifiers
     ; classish_attribute = validate_option_with (validate_attribute_specification) x.classish_attribute
     }
-  | s -> validation_fail SyntaxKind.ClassishDeclaration s
+  | s -> validation_fail (Some SyntaxKind.ClassishDeclaration) s
   and invalidate_classish_declaration : classish_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ClassishDeclaration
@@ -1108,7 +1108,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; classish_body_elements = validate_list_with (validate_class_body_declaration) x.classish_body_elements
     ; classish_body_left_brace = validate_token x.classish_body_left_brace
     }
-  | s -> validation_fail SyntaxKind.ClassishBody s
+  | s -> validation_fail (Some SyntaxKind.ClassishBody) s
   and invalidate_classish_body : classish_body invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ClassishBody
@@ -1124,7 +1124,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; trait_use_precedence_item_keyword = validate_token x.trait_use_precedence_item_keyword
     ; trait_use_precedence_item_name = validate_specifier x.trait_use_precedence_item_name
     }
-  | s -> validation_fail SyntaxKind.TraitUsePrecedenceItem s
+  | s -> validation_fail (Some SyntaxKind.TraitUsePrecedenceItem) s
   and invalidate_trait_use_precedence_item : trait_use_precedence_item invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TraitUsePrecedenceItem
@@ -1141,7 +1141,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; trait_use_alias_item_keyword = validate_token x.trait_use_alias_item_keyword
     ; trait_use_alias_item_aliasing_name = validate_specifier x.trait_use_alias_item_aliasing_name
     }
-  | s -> validation_fail SyntaxKind.TraitUseAliasItem s
+  | s -> validation_fail (Some SyntaxKind.TraitUseAliasItem) s
   and invalidate_trait_use_alias_item : trait_use_alias_item invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TraitUseAliasItem
@@ -1160,7 +1160,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; trait_use_conflict_resolution_names = validate_list_with (validate_specifier) x.trait_use_conflict_resolution_names
     ; trait_use_conflict_resolution_keyword = validate_token x.trait_use_conflict_resolution_keyword
     }
-  | s -> validation_fail SyntaxKind.TraitUseConflictResolution s
+  | s -> validation_fail (Some SyntaxKind.TraitUseConflictResolution) s
   and invalidate_trait_use_conflict_resolution : trait_use_conflict_resolution invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TraitUseConflictResolution
@@ -1178,7 +1178,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; trait_use_names = validate_list_with (validate_specifier) x.trait_use_names
     ; trait_use_keyword = validate_token x.trait_use_keyword
     }
-  | s -> validation_fail SyntaxKind.TraitUse s
+  | s -> validation_fail (Some SyntaxKind.TraitUse) s
   and invalidate_trait_use : trait_use invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TraitUse
@@ -1195,7 +1195,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; require_kind = validate_token x.require_kind
     ; require_keyword = validate_token x.require_keyword
     }
-  | s -> validation_fail SyntaxKind.RequireClause s
+  | s -> validation_fail (Some SyntaxKind.RequireClause) s
   and invalidate_require_clause : require_clause invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.RequireClause
@@ -1214,7 +1214,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; const_keyword = validate_token x.const_keyword
     ; const_abstract = validate_option_with (validate_token) x.const_abstract
     }
-  | s -> validation_fail SyntaxKind.ConstDeclaration s
+  | s -> validation_fail (Some SyntaxKind.ConstDeclaration) s
   and invalidate_const_declaration : const_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ConstDeclaration
@@ -1231,7 +1231,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { constant_declarator_initializer = validate_option_with (validate_simple_initializer) x.constant_declarator_initializer
     ; constant_declarator_name = validate_token x.constant_declarator_name
     }
-  | s -> validation_fail SyntaxKind.ConstantDeclarator s
+  | s -> validation_fail (Some SyntaxKind.ConstantDeclarator) s
   and invalidate_constant_declarator : constant_declarator invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ConstantDeclarator
@@ -1252,7 +1252,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_const_keyword = validate_token x.type_const_keyword
     ; type_const_abstract = validate_option_with (validate_token) x.type_const_abstract
     }
-  | s -> validation_fail SyntaxKind.TypeConstDeclaration s
+  | s -> validation_fail (Some SyntaxKind.TypeConstDeclaration) s
   and invalidate_type_const_declaration : type_const_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TypeConstDeclaration
@@ -1273,7 +1273,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { decorated_expression_expression = validate_expression x.decorated_expression_expression
     ; decorated_expression_decorator = validate_token x.decorated_expression_decorator
     }
-  | s -> validation_fail SyntaxKind.DecoratedExpression s
+  | s -> validation_fail (Some SyntaxKind.DecoratedExpression) s
   and invalidate_decorated_expression : decorated_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.DecoratedExpression
@@ -1291,7 +1291,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; parameter_visibility = validate_option_with (validate_token) x.parameter_visibility
     ; parameter_attribute = validate_option_with (validate_attribute_specification) x.parameter_attribute
     }
-  | s -> validation_fail SyntaxKind.ParameterDeclaration s
+  | s -> validation_fail (Some SyntaxKind.ParameterDeclaration) s
   and invalidate_parameter_declaration : parameter_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ParameterDeclaration
@@ -1310,7 +1310,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; variadic_parameter_type = validate_option_with (validate_simple_type_specifier) x.variadic_parameter_type
     ; variadic_parameter_call_convention = validate_option_with (validate_token) x.variadic_parameter_call_convention
     }
-  | s -> validation_fail SyntaxKind.VariadicParameter s
+  | s -> validation_fail (Some SyntaxKind.VariadicParameter) s
   and invalidate_variadic_parameter : variadic_parameter invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.VariadicParameter
@@ -1326,7 +1326,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; attribute_specification_attributes = validate_list_with (validate_attribute) x.attribute_specification_attributes
     ; attribute_specification_left_double_angle = validate_token x.attribute_specification_left_double_angle
     }
-  | s -> validation_fail SyntaxKind.AttributeSpecification s
+  | s -> validation_fail (Some SyntaxKind.AttributeSpecification) s
   and invalidate_attribute_specification : attribute_specification invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.AttributeSpecification
@@ -1343,7 +1343,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; attribute_left_paren = validate_option_with (validate_token) x.attribute_left_paren
     ; attribute_name = validate_token x.attribute_name
     }
-  | s -> validation_fail SyntaxKind.Attribute s
+  | s -> validation_fail (Some SyntaxKind.Attribute) s
   and invalidate_attribute : attribute invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.Attribute
@@ -1359,7 +1359,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { inclusion_filename = validate_expression x.inclusion_filename
     ; inclusion_require = validate_token x.inclusion_require
     }
-  | s -> validation_fail SyntaxKind.InclusionExpression s
+  | s -> validation_fail (Some SyntaxKind.InclusionExpression) s
   and invalidate_inclusion_expression : inclusion_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.InclusionExpression
@@ -1373,7 +1373,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { inclusion_semicolon = validate_token x.inclusion_semicolon
     ; inclusion_expression = validate_inclusion_expression x.inclusion_expression
     }
-  | s -> validation_fail SyntaxKind.InclusionDirective s
+  | s -> validation_fail (Some SyntaxKind.InclusionDirective) s
   and invalidate_inclusion_directive : inclusion_directive invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.InclusionDirective
@@ -1388,7 +1388,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; compound_statements = validate_list_with (validate_statement) x.compound_statements
     ; compound_left_brace = validate_token x.compound_left_brace
     }
-  | s -> validation_fail SyntaxKind.CompoundStatement s
+  | s -> validation_fail (Some SyntaxKind.CompoundStatement) s
   and invalidate_compound_statement : compound_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.CompoundStatement
@@ -1403,7 +1403,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { expression_statement_semicolon = validate_token x.expression_statement_semicolon
     ; expression_statement_expression = validate_option_with (validate_expression) x.expression_statement_expression
     }
-  | s -> validation_fail SyntaxKind.ExpressionStatement s
+  | s -> validation_fail (Some SyntaxKind.ExpressionStatement) s
   and invalidate_expression_statement : expression_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ExpressionStatement
@@ -1419,7 +1419,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; markup_text = validate_token x.markup_text
     ; markup_prefix = validate_option_with (validate_token) x.markup_prefix
     }
-  | s -> validation_fail SyntaxKind.MarkupSection s
+  | s -> validation_fail (Some SyntaxKind.MarkupSection) s
   and invalidate_markup_section : markup_section invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.MarkupSection
@@ -1435,7 +1435,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { markup_suffix_name = validate_option_with (validate_token) x.markup_suffix_name
     ; markup_suffix_less_than_question = validate_token x.markup_suffix_less_than_question
     }
-  | s -> validation_fail SyntaxKind.MarkupSuffix s
+  | s -> validation_fail (Some SyntaxKind.MarkupSuffix) s
   and invalidate_markup_suffix : markup_suffix invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.MarkupSuffix
@@ -1452,7 +1452,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; unset_left_paren = validate_token x.unset_left_paren
     ; unset_keyword = validate_token x.unset_keyword
     }
-  | s -> validation_fail SyntaxKind.UnsetStatement s
+  | s -> validation_fail (Some SyntaxKind.UnsetStatement) s
   and invalidate_unset_statement : unset_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.UnsetStatement
@@ -1473,7 +1473,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; using_block_using_keyword = validate_token x.using_block_using_keyword
     ; using_block_await_keyword = validate_option_with (validate_token) x.using_block_await_keyword
     }
-  | s -> validation_fail SyntaxKind.UsingStatementBlockScoped s
+  | s -> validation_fail (Some SyntaxKind.UsingStatementBlockScoped) s
   and invalidate_using_statement_block_scoped : using_statement_block_scoped invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.UsingStatementBlockScoped
@@ -1493,7 +1493,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; using_function_using_keyword = validate_token x.using_function_using_keyword
     ; using_function_await_keyword = validate_option_with (validate_token) x.using_function_await_keyword
     }
-  | s -> validation_fail SyntaxKind.UsingStatementFunctionScoped s
+  | s -> validation_fail (Some SyntaxKind.UsingStatementFunctionScoped) s
   and invalidate_using_statement_function_scoped : using_statement_function_scoped invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.UsingStatementFunctionScoped
@@ -1512,7 +1512,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; declare_directive_left_paren = validate_token x.declare_directive_left_paren
     ; declare_directive_keyword = validate_token x.declare_directive_keyword
     }
-  | s -> validation_fail SyntaxKind.DeclareDirectiveStatement s
+  | s -> validation_fail (Some SyntaxKind.DeclareDirectiveStatement) s
   and invalidate_declare_directive_statement : declare_directive_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.DeclareDirectiveStatement
@@ -1532,7 +1532,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; declare_block_left_paren = validate_token x.declare_block_left_paren
     ; declare_block_keyword = validate_token x.declare_block_keyword
     }
-  | s -> validation_fail SyntaxKind.DeclareBlockStatement s
+  | s -> validation_fail (Some SyntaxKind.DeclareBlockStatement) s
   and invalidate_declare_block_statement : declare_block_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.DeclareBlockStatement
@@ -1552,7 +1552,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; while_left_paren = validate_token x.while_left_paren
     ; while_keyword = validate_token x.while_keyword
     }
-  | s -> validation_fail SyntaxKind.WhileStatement s
+  | s -> validation_fail (Some SyntaxKind.WhileStatement) s
   and invalidate_while_statement : while_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.WhileStatement
@@ -1574,7 +1574,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; if_left_paren = validate_token x.if_left_paren
     ; if_keyword = validate_token x.if_keyword
     }
-  | s -> validation_fail SyntaxKind.IfStatement s
+  | s -> validation_fail (Some SyntaxKind.IfStatement) s
   and invalidate_if_statement : if_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.IfStatement
@@ -1596,7 +1596,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; elseif_left_paren = validate_token x.elseif_left_paren
     ; elseif_keyword = validate_token x.elseif_keyword
     }
-  | s -> validation_fail SyntaxKind.ElseifClause s
+  | s -> validation_fail (Some SyntaxKind.ElseifClause) s
   and invalidate_elseif_clause : elseif_clause invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ElseifClause
@@ -1613,7 +1613,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { else_statement = validate_statement x.else_statement
     ; else_keyword = validate_token x.else_keyword
     }
-  | s -> validation_fail SyntaxKind.ElseClause s
+  | s -> validation_fail (Some SyntaxKind.ElseClause) s
   and invalidate_else_clause : else_clause invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ElseClause
@@ -1635,7 +1635,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; if_endif_left_paren = validate_token x.if_endif_left_paren
     ; if_endif_keyword = validate_token x.if_endif_keyword
     }
-  | s -> validation_fail SyntaxKind.IfEndIfStatement s
+  | s -> validation_fail (Some SyntaxKind.IfEndIfStatement) s
   and invalidate_if_endif_statement : if_endif_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.IfEndIfStatement
@@ -1661,7 +1661,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; elseif_colon_left_paren = validate_token x.elseif_colon_left_paren
     ; elseif_colon_keyword = validate_token x.elseif_colon_keyword
     }
-  | s -> validation_fail SyntaxKind.ElseifColonClause s
+  | s -> validation_fail (Some SyntaxKind.ElseifColonClause) s
   and invalidate_elseif_colon_clause : elseif_colon_clause invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ElseifColonClause
@@ -1680,7 +1680,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; else_colon_colon = validate_token x.else_colon_colon
     ; else_colon_keyword = validate_token x.else_colon_keyword
     }
-  | s -> validation_fail SyntaxKind.ElseColonClause s
+  | s -> validation_fail (Some SyntaxKind.ElseColonClause) s
   and invalidate_else_colon_clause : else_colon_clause invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ElseColonClause
@@ -1697,7 +1697,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; try_compound_statement = validate_compound_statement x.try_compound_statement
     ; try_keyword = validate_token x.try_keyword
     }
-  | s -> validation_fail SyntaxKind.TryStatement s
+  | s -> validation_fail (Some SyntaxKind.TryStatement) s
   and invalidate_try_statement : try_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TryStatement
@@ -1717,7 +1717,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; catch_left_paren = validate_token x.catch_left_paren
     ; catch_keyword = validate_token x.catch_keyword
     }
-  | s -> validation_fail SyntaxKind.CatchClause s
+  | s -> validation_fail (Some SyntaxKind.CatchClause) s
   and invalidate_catch_clause : catch_clause invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.CatchClause
@@ -1735,7 +1735,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { finally_body = validate_compound_statement x.finally_body
     ; finally_keyword = validate_token x.finally_keyword
     }
-  | s -> validation_fail SyntaxKind.FinallyClause s
+  | s -> validation_fail (Some SyntaxKind.FinallyClause) s
   and invalidate_finally_clause : finally_clause invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.FinallyClause
@@ -1754,7 +1754,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; do_body = validate_statement x.do_body
     ; do_keyword = validate_token x.do_keyword
     }
-  | s -> validation_fail SyntaxKind.DoStatement s
+  | s -> validation_fail (Some SyntaxKind.DoStatement) s
   and invalidate_do_statement : do_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.DoStatement
@@ -1780,7 +1780,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; for_left_paren = validate_token x.for_left_paren
     ; for_keyword = validate_token x.for_keyword
     }
-  | s -> validation_fail SyntaxKind.ForStatement s
+  | s -> validation_fail (Some SyntaxKind.ForStatement) s
   and invalidate_for_statement : for_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ForStatement
@@ -1809,7 +1809,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; foreach_left_paren = validate_token x.foreach_left_paren
     ; foreach_keyword = validate_token x.foreach_keyword
     }
-  | s -> validation_fail SyntaxKind.ForeachStatement s
+  | s -> validation_fail (Some SyntaxKind.ForeachStatement) s
   and invalidate_foreach_statement : foreach_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ForeachStatement
@@ -1836,7 +1836,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; switch_left_paren = validate_token x.switch_left_paren
     ; switch_keyword = validate_token x.switch_keyword
     }
-  | s -> validation_fail SyntaxKind.SwitchStatement s
+  | s -> validation_fail (Some SyntaxKind.SwitchStatement) s
   and invalidate_switch_statement : switch_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.SwitchStatement
@@ -1856,7 +1856,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; switch_section_statements = validate_list_with (validate_top_level_declaration) x.switch_section_statements
     ; switch_section_labels = validate_list_with (validate_switch_label) x.switch_section_labels
     }
-  | s -> validation_fail SyntaxKind.SwitchSection s
+  | s -> validation_fail (Some SyntaxKind.SwitchSection) s
   and invalidate_switch_section : switch_section invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.SwitchSection
@@ -1871,7 +1871,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { fallthrough_semicolon = validate_token x.fallthrough_semicolon
     ; fallthrough_keyword = validate_token x.fallthrough_keyword
     }
-  | s -> validation_fail SyntaxKind.SwitchFallthrough s
+  | s -> validation_fail (Some SyntaxKind.SwitchFallthrough) s
   and invalidate_switch_fallthrough : switch_fallthrough invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.SwitchFallthrough
@@ -1886,7 +1886,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; case_expression = validate_expression x.case_expression
     ; case_keyword = validate_token x.case_keyword
     }
-  | s -> validation_fail SyntaxKind.CaseLabel s
+  | s -> validation_fail (Some SyntaxKind.CaseLabel) s
   and invalidate_case_label : case_label invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.CaseLabel
@@ -1901,7 +1901,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { default_colon = validate_token x.default_colon
     ; default_keyword = validate_token x.default_keyword
     }
-  | s -> validation_fail SyntaxKind.DefaultLabel s
+  | s -> validation_fail (Some SyntaxKind.DefaultLabel) s
   and invalidate_default_label : default_label invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.DefaultLabel
@@ -1916,7 +1916,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; return_expression = validate_option_with (validate_expression) x.return_expression
     ; return_keyword = validate_token x.return_keyword
     }
-  | s -> validation_fail SyntaxKind.ReturnStatement s
+  | s -> validation_fail (Some SyntaxKind.ReturnStatement) s
   and invalidate_return_statement : return_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ReturnStatement
@@ -1931,7 +1931,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { goto_label_colon = validate_token x.goto_label_colon
     ; goto_label_name = validate_token x.goto_label_name
     }
-  | s -> validation_fail SyntaxKind.GotoLabel s
+  | s -> validation_fail (Some SyntaxKind.GotoLabel) s
   and invalidate_goto_label : goto_label invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.GotoLabel
@@ -1946,7 +1946,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; goto_statement_label_name = validate_token x.goto_statement_label_name
     ; goto_statement_keyword = validate_token x.goto_statement_keyword
     }
-  | s -> validation_fail SyntaxKind.GotoStatement s
+  | s -> validation_fail (Some SyntaxKind.GotoStatement) s
   and invalidate_goto_statement : goto_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.GotoStatement
@@ -1962,7 +1962,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; throw_expression = validate_expression x.throw_expression
     ; throw_keyword = validate_token x.throw_keyword
     }
-  | s -> validation_fail SyntaxKind.ThrowStatement s
+  | s -> validation_fail (Some SyntaxKind.ThrowStatement) s
   and invalidate_throw_statement : throw_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ThrowStatement
@@ -1978,7 +1978,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; break_level = validate_option_with (validate_literal_expression) x.break_level
     ; break_keyword = validate_token x.break_keyword
     }
-  | s -> validation_fail SyntaxKind.BreakStatement s
+  | s -> validation_fail (Some SyntaxKind.BreakStatement) s
   and invalidate_break_statement : break_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.BreakStatement
@@ -1994,7 +1994,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; continue_level = validate_option_with (validate_literal_expression) x.continue_level
     ; continue_keyword = validate_token x.continue_keyword
     }
-  | s -> validation_fail SyntaxKind.ContinueStatement s
+  | s -> validation_fail (Some SyntaxKind.ContinueStatement) s
   and invalidate_continue_statement : continue_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ContinueStatement
@@ -2010,7 +2010,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; static_declarations = validate_list_with (validate_static_declarator) x.static_declarations
     ; static_static_keyword = validate_token x.static_static_keyword
     }
-  | s -> validation_fail SyntaxKind.FunctionStaticStatement s
+  | s -> validation_fail (Some SyntaxKind.FunctionStaticStatement) s
   and invalidate_function_static_statement : function_static_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.FunctionStaticStatement
@@ -2025,7 +2025,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { static_initializer = validate_option_with (validate_simple_initializer) x.static_initializer
     ; static_name = validate_token x.static_name
     }
-  | s -> validation_fail SyntaxKind.StaticDeclarator s
+  | s -> validation_fail (Some SyntaxKind.StaticDeclarator) s
   and invalidate_static_declarator : static_declarator invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.StaticDeclarator
@@ -2040,7 +2040,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; echo_expressions = validate_list_with (validate_expression) x.echo_expressions
     ; echo_keyword = validate_token x.echo_keyword
     }
-  | s -> validation_fail SyntaxKind.EchoStatement s
+  | s -> validation_fail (Some SyntaxKind.EchoStatement) s
   and invalidate_echo_statement : echo_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.EchoStatement
@@ -2056,7 +2056,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; global_variables = validate_list_with (validate_token) x.global_variables
     ; global_keyword = validate_token x.global_keyword
     }
-  | s -> validation_fail SyntaxKind.GlobalStatement s
+  | s -> validation_fail (Some SyntaxKind.GlobalStatement) s
   and invalidate_global_statement : global_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.GlobalStatement
@@ -2071,7 +2071,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { simple_initializer_value = validate_expression x.simple_initializer_value
     ; simple_initializer_equal = validate_token x.simple_initializer_equal
     }
-  | s -> validation_fail SyntaxKind.SimpleInitializer s
+  | s -> validation_fail (Some SyntaxKind.SimpleInitializer) s
   and invalidate_simple_initializer : simple_initializer invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.SimpleInitializer
@@ -2092,7 +2092,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_class_left_paren = validate_option_with (validate_token) x.anonymous_class_left_paren
     ; anonymous_class_class_keyword = validate_token x.anonymous_class_class_keyword
     }
-  | s -> validation_fail SyntaxKind.AnonymousClass s
+  | s -> validation_fail (Some SyntaxKind.AnonymousClass) s
   and invalidate_anonymous_class : anonymous_class invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.AnonymousClass
@@ -2122,7 +2122,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_async_keyword = validate_option_with (validate_token) x.anonymous_async_keyword
     ; anonymous_static_keyword = validate_option_with (validate_token) x.anonymous_static_keyword
     }
-  | s -> validation_fail SyntaxKind.AnonymousFunction s
+  | s -> validation_fail (Some SyntaxKind.AnonymousFunction) s
   and invalidate_anonymous_function : anonymous_function invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.AnonymousFunction
@@ -2154,7 +2154,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; php7_anonymous_async_keyword = validate_option_with (validate_token) x.php7_anonymous_async_keyword
     ; php7_anonymous_static_keyword = validate_option_with (validate_token) x.php7_anonymous_static_keyword
     }
-  | s -> validation_fail SyntaxKind.Php7AnonymousFunction s
+  | s -> validation_fail (Some SyntaxKind.Php7AnonymousFunction) s
   and invalidate_php7_anonymous_function : php7_anonymous_function invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.Php7AnonymousFunction
@@ -2179,7 +2179,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_use_left_paren = validate_token x.anonymous_use_left_paren
     ; anonymous_use_keyword = validate_token x.anonymous_use_keyword
     }
-  | s -> validation_fail SyntaxKind.AnonymousFunctionUseClause s
+  | s -> validation_fail (Some SyntaxKind.AnonymousFunctionUseClause) s
   and invalidate_anonymous_function_use_clause : anonymous_function_use_clause invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.AnonymousFunctionUseClause
@@ -2198,7 +2198,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; lambda_coroutine = validate_option_with (validate_token) x.lambda_coroutine
     ; lambda_async = validate_option_with (validate_token) x.lambda_async
     }
-  | s -> validation_fail SyntaxKind.LambdaExpression s
+  | s -> validation_fail (Some SyntaxKind.LambdaExpression) s
   and invalidate_lambda_expression : lambda_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.LambdaExpression
@@ -2218,7 +2218,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; lambda_parameters = validate_list_with (validate_parameter) x.lambda_parameters
     ; lambda_left_paren = validate_token x.lambda_left_paren
     }
-  | s -> validation_fail SyntaxKind.LambdaSignature s
+  | s -> validation_fail (Some SyntaxKind.LambdaSignature) s
   and invalidate_lambda_signature : lambda_signature invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.LambdaSignature
@@ -2237,7 +2237,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; cast_type = validate_token x.cast_type
     ; cast_left_paren = validate_token x.cast_left_paren
     }
-  | s -> validation_fail SyntaxKind.CastExpression s
+  | s -> validation_fail (Some SyntaxKind.CastExpression) s
   and invalidate_cast_expression : cast_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.CastExpression
@@ -2254,7 +2254,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; scope_resolution_operator = validate_token x.scope_resolution_operator
     ; scope_resolution_qualifier = validate_expression x.scope_resolution_qualifier
     }
-  | s -> validation_fail SyntaxKind.ScopeResolutionExpression s
+  | s -> validation_fail (Some SyntaxKind.ScopeResolutionExpression) s
   and invalidate_scope_resolution_expression : scope_resolution_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ScopeResolutionExpression
@@ -2270,7 +2270,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; member_operator = validate_token x.member_operator
     ; member_object = validate_expression x.member_object
     }
-  | s -> validation_fail SyntaxKind.MemberSelectionExpression s
+  | s -> validation_fail (Some SyntaxKind.MemberSelectionExpression) s
   and invalidate_member_selection_expression : member_selection_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.MemberSelectionExpression
@@ -2286,7 +2286,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; safe_member_operator = validate_token x.safe_member_operator
     ; safe_member_object = validate_expression x.safe_member_object
     }
-  | s -> validation_fail SyntaxKind.SafeMemberSelectionExpression s
+  | s -> validation_fail (Some SyntaxKind.SafeMemberSelectionExpression) s
   and invalidate_safe_member_selection_expression : safe_member_selection_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.SafeMemberSelectionExpression
@@ -2302,7 +2302,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; embedded_member_operator = validate_token x.embedded_member_operator
     ; embedded_member_object = validate_variable_expression x.embedded_member_object
     }
-  | s -> validation_fail SyntaxKind.EmbeddedMemberSelectionExpression s
+  | s -> validation_fail (Some SyntaxKind.EmbeddedMemberSelectionExpression) s
   and invalidate_embedded_member_selection_expression : embedded_member_selection_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.EmbeddedMemberSelectionExpression
@@ -2317,7 +2317,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { yield_operand = validate_constructor_expression x.yield_operand
     ; yield_keyword = validate_token x.yield_keyword
     }
-  | s -> validation_fail SyntaxKind.YieldExpression s
+  | s -> validation_fail (Some SyntaxKind.YieldExpression) s
   and invalidate_yield_expression : yield_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.YieldExpression
@@ -2332,7 +2332,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; yield_from_from_keyword = validate_token x.yield_from_from_keyword
     ; yield_from_yield_keyword = validate_token x.yield_from_yield_keyword
     }
-  | s -> validation_fail SyntaxKind.YieldFromExpression s
+  | s -> validation_fail (Some SyntaxKind.YieldFromExpression) s
   and invalidate_yield_from_expression : yield_from_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.YieldFromExpression
@@ -2347,7 +2347,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { prefix_unary_operand = validate_expression x.prefix_unary_operand
     ; prefix_unary_operator = validate_token x.prefix_unary_operator
     }
-  | s -> validation_fail SyntaxKind.PrefixUnaryExpression s
+  | s -> validation_fail (Some SyntaxKind.PrefixUnaryExpression) s
   and invalidate_prefix_unary_expression : prefix_unary_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.PrefixUnaryExpression
@@ -2361,7 +2361,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { postfix_unary_operator = validate_token x.postfix_unary_operator
     ; postfix_unary_operand = validate_expression x.postfix_unary_operand
     }
-  | s -> validation_fail SyntaxKind.PostfixUnaryExpression s
+  | s -> validation_fail (Some SyntaxKind.PostfixUnaryExpression) s
   and invalidate_postfix_unary_expression : postfix_unary_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.PostfixUnaryExpression
@@ -2376,7 +2376,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; binary_operator = validate_token x.binary_operator
     ; binary_left_operand = validate_expression x.binary_left_operand
     }
-  | s -> validation_fail SyntaxKind.BinaryExpression s
+  | s -> validation_fail (Some SyntaxKind.BinaryExpression) s
   and invalidate_binary_expression : binary_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.BinaryExpression
@@ -2392,7 +2392,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; instanceof_operator = validate_token x.instanceof_operator
     ; instanceof_left_operand = validate_expression x.instanceof_left_operand
     }
-  | s -> validation_fail SyntaxKind.InstanceofExpression s
+  | s -> validation_fail (Some SyntaxKind.InstanceofExpression) s
   and invalidate_instanceof_expression : instanceof_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.InstanceofExpression
@@ -2408,7 +2408,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; is_operator = validate_token x.is_operator
     ; is_left_operand = validate_expression x.is_left_operand
     }
-  | s -> validation_fail SyntaxKind.IsExpression s
+  | s -> validation_fail (Some SyntaxKind.IsExpression) s
   and invalidate_is_expression : is_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.IsExpression
@@ -2426,7 +2426,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; conditional_question = validate_token x.conditional_question
     ; conditional_test = validate_expression x.conditional_test
     }
-  | s -> validation_fail SyntaxKind.ConditionalExpression s
+  | s -> validation_fail (Some SyntaxKind.ConditionalExpression) s
   and invalidate_conditional_expression : conditional_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ConditionalExpression
@@ -2445,7 +2445,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; eval_left_paren = validate_token x.eval_left_paren
     ; eval_keyword = validate_token x.eval_keyword
     }
-  | s -> validation_fail SyntaxKind.EvalExpression s
+  | s -> validation_fail (Some SyntaxKind.EvalExpression) s
   and invalidate_eval_expression : eval_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.EvalExpression
@@ -2463,7 +2463,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; empty_left_paren = validate_token x.empty_left_paren
     ; empty_keyword = validate_token x.empty_keyword
     }
-  | s -> validation_fail SyntaxKind.EmptyExpression s
+  | s -> validation_fail (Some SyntaxKind.EmptyExpression) s
   and invalidate_empty_expression : empty_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.EmptyExpression
@@ -2481,7 +2481,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; define_left_paren = validate_token x.define_left_paren
     ; define_keyword = validate_token x.define_keyword
     }
-  | s -> validation_fail SyntaxKind.DefineExpression s
+  | s -> validation_fail (Some SyntaxKind.DefineExpression) s
   and invalidate_define_expression : define_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.DefineExpression
@@ -2499,7 +2499,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; halt_compiler_left_paren = validate_token x.halt_compiler_left_paren
     ; halt_compiler_keyword = validate_token x.halt_compiler_keyword
     }
-  | s -> validation_fail SyntaxKind.HaltCompilerExpression s
+  | s -> validation_fail (Some SyntaxKind.HaltCompilerExpression) s
   and invalidate_halt_compiler_expression : halt_compiler_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.HaltCompilerExpression
@@ -2517,7 +2517,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; isset_left_paren = validate_token x.isset_left_paren
     ; isset_keyword = validate_token x.isset_keyword
     }
-  | s -> validation_fail SyntaxKind.IssetExpression s
+  | s -> validation_fail (Some SyntaxKind.IssetExpression) s
   and invalidate_isset_expression : isset_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.IssetExpression
@@ -2535,7 +2535,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_call_left_paren = validate_token x.function_call_left_paren
     ; function_call_receiver = validate_expression x.function_call_receiver
     }
-  | s -> validation_fail SyntaxKind.FunctionCallExpression s
+  | s -> validation_fail (Some SyntaxKind.FunctionCallExpression) s
   and invalidate_function_call_expression : function_call_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.FunctionCallExpression
@@ -2554,7 +2554,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_call_with_type_arguments_type_args = validate_type_arguments x.function_call_with_type_arguments_type_args
     ; function_call_with_type_arguments_receiver = validate_expression x.function_call_with_type_arguments_receiver
     }
-  | s -> validation_fail SyntaxKind.FunctionCallWithTypeArgumentsExpression s
+  | s -> validation_fail (Some SyntaxKind.FunctionCallWithTypeArgumentsExpression) s
   and invalidate_function_call_with_type_arguments_expression : function_call_with_type_arguments_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.FunctionCallWithTypeArgumentsExpression
@@ -2572,7 +2572,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; parenthesized_expression_expression = validate_expression x.parenthesized_expression_expression
     ; parenthesized_expression_left_paren = validate_token x.parenthesized_expression_left_paren
     }
-  | s -> validation_fail SyntaxKind.ParenthesizedExpression s
+  | s -> validation_fail (Some SyntaxKind.ParenthesizedExpression) s
   and invalidate_parenthesized_expression : parenthesized_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ParenthesizedExpression
@@ -2588,7 +2588,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; braced_expression_expression = validate_expression x.braced_expression_expression
     ; braced_expression_left_brace = validate_token x.braced_expression_left_brace
     }
-  | s -> validation_fail SyntaxKind.BracedExpression s
+  | s -> validation_fail (Some SyntaxKind.BracedExpression) s
   and invalidate_braced_expression : braced_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.BracedExpression
@@ -2604,7 +2604,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; embedded_braced_expression_expression = validate_expression x.embedded_braced_expression_expression
     ; embedded_braced_expression_left_brace = validate_token x.embedded_braced_expression_left_brace
     }
-  | s -> validation_fail SyntaxKind.EmbeddedBracedExpression s
+  | s -> validation_fail (Some SyntaxKind.EmbeddedBracedExpression) s
   and invalidate_embedded_braced_expression : embedded_braced_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.EmbeddedBracedExpression
@@ -2621,7 +2621,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; list_left_paren = validate_token x.list_left_paren
     ; list_keyword = validate_token x.list_keyword
     }
-  | s -> validation_fail SyntaxKind.ListExpression s
+  | s -> validation_fail (Some SyntaxKind.ListExpression) s
   and invalidate_list_expression : list_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ListExpression
@@ -2639,7 +2639,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; collection_literal_left_brace = validate_token x.collection_literal_left_brace
     ; collection_literal_name = validate_specifier x.collection_literal_name
     }
-  | s -> validation_fail SyntaxKind.CollectionLiteralExpression s
+  | s -> validation_fail (Some SyntaxKind.CollectionLiteralExpression) s
   and invalidate_collection_literal_expression : collection_literal_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.CollectionLiteralExpression
@@ -2655,7 +2655,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { object_creation_object = validate_object_creation_what x.object_creation_object
     ; object_creation_new_keyword = validate_token x.object_creation_new_keyword
     }
-  | s -> validation_fail SyntaxKind.ObjectCreationExpression s
+  | s -> validation_fail (Some SyntaxKind.ObjectCreationExpression) s
   and invalidate_object_creation_expression : object_creation_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ObjectCreationExpression
@@ -2671,7 +2671,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; constructor_call_left_paren = validate_option_with (validate_token) x.constructor_call_left_paren
     ; constructor_call_type = validate_todo_aggregate x.constructor_call_type
     }
-  | s -> validation_fail SyntaxKind.ConstructorCall s
+  | s -> validation_fail (Some SyntaxKind.ConstructorCall) s
   and invalidate_constructor_call : constructor_call invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ConstructorCall
@@ -2688,7 +2688,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; array_creation_members = validate_list_with (validate_constructor_expression) x.array_creation_members
     ; array_creation_left_bracket = validate_token x.array_creation_left_bracket
     }
-  | s -> validation_fail SyntaxKind.ArrayCreationExpression s
+  | s -> validation_fail (Some SyntaxKind.ArrayCreationExpression) s
   and invalidate_array_creation_expression : array_creation_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ArrayCreationExpression
@@ -2705,7 +2705,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; array_intrinsic_left_paren = validate_token x.array_intrinsic_left_paren
     ; array_intrinsic_keyword = validate_token x.array_intrinsic_keyword
     }
-  | s -> validation_fail SyntaxKind.ArrayIntrinsicExpression s
+  | s -> validation_fail (Some SyntaxKind.ArrayIntrinsicExpression) s
   and invalidate_array_intrinsic_expression : array_intrinsic_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ArrayIntrinsicExpression
@@ -2723,7 +2723,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; darray_intrinsic_left_bracket = validate_token x.darray_intrinsic_left_bracket
     ; darray_intrinsic_keyword = validate_token x.darray_intrinsic_keyword
     }
-  | s -> validation_fail SyntaxKind.DarrayIntrinsicExpression s
+  | s -> validation_fail (Some SyntaxKind.DarrayIntrinsicExpression) s
   and invalidate_darray_intrinsic_expression : darray_intrinsic_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.DarrayIntrinsicExpression
@@ -2741,7 +2741,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; dictionary_intrinsic_left_bracket = validate_token x.dictionary_intrinsic_left_bracket
     ; dictionary_intrinsic_keyword = validate_token x.dictionary_intrinsic_keyword
     }
-  | s -> validation_fail SyntaxKind.DictionaryIntrinsicExpression s
+  | s -> validation_fail (Some SyntaxKind.DictionaryIntrinsicExpression) s
   and invalidate_dictionary_intrinsic_expression : dictionary_intrinsic_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.DictionaryIntrinsicExpression
@@ -2759,7 +2759,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; keyset_intrinsic_left_bracket = validate_token x.keyset_intrinsic_left_bracket
     ; keyset_intrinsic_keyword = validate_token x.keyset_intrinsic_keyword
     }
-  | s -> validation_fail SyntaxKind.KeysetIntrinsicExpression s
+  | s -> validation_fail (Some SyntaxKind.KeysetIntrinsicExpression) s
   and invalidate_keyset_intrinsic_expression : keyset_intrinsic_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.KeysetIntrinsicExpression
@@ -2777,7 +2777,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; varray_intrinsic_left_bracket = validate_token x.varray_intrinsic_left_bracket
     ; varray_intrinsic_keyword = validate_token x.varray_intrinsic_keyword
     }
-  | s -> validation_fail SyntaxKind.VarrayIntrinsicExpression s
+  | s -> validation_fail (Some SyntaxKind.VarrayIntrinsicExpression) s
   and invalidate_varray_intrinsic_expression : varray_intrinsic_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.VarrayIntrinsicExpression
@@ -2795,7 +2795,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; vector_intrinsic_left_bracket = validate_token x.vector_intrinsic_left_bracket
     ; vector_intrinsic_keyword = validate_token x.vector_intrinsic_keyword
     }
-  | s -> validation_fail SyntaxKind.VectorIntrinsicExpression s
+  | s -> validation_fail (Some SyntaxKind.VectorIntrinsicExpression) s
   and invalidate_vector_intrinsic_expression : vector_intrinsic_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.VectorIntrinsicExpression
@@ -2812,7 +2812,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; element_arrow = validate_token x.element_arrow
     ; element_key = validate_expression x.element_key
     }
-  | s -> validation_fail SyntaxKind.ElementInitializer s
+  | s -> validation_fail (Some SyntaxKind.ElementInitializer) s
   and invalidate_element_initializer : element_initializer invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ElementInitializer
@@ -2829,7 +2829,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; subscript_left_bracket = validate_token x.subscript_left_bracket
     ; subscript_receiver = validate_expression x.subscript_receiver
     }
-  | s -> validation_fail SyntaxKind.SubscriptExpression s
+  | s -> validation_fail (Some SyntaxKind.SubscriptExpression) s
   and invalidate_subscript_expression : subscript_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.SubscriptExpression
@@ -2847,7 +2847,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; embedded_subscript_left_bracket = validate_token x.embedded_subscript_left_bracket
     ; embedded_subscript_receiver = validate_variable_expression x.embedded_subscript_receiver
     }
-  | s -> validation_fail SyntaxKind.EmbeddedSubscriptExpression s
+  | s -> validation_fail (Some SyntaxKind.EmbeddedSubscriptExpression) s
   and invalidate_embedded_subscript_expression : embedded_subscript_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.EmbeddedSubscriptExpression
@@ -2864,7 +2864,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; awaitable_coroutine = validate_option_with (validate_token) x.awaitable_coroutine
     ; awaitable_async = validate_token x.awaitable_async
     }
-  | s -> validation_fail SyntaxKind.AwaitableCreationExpression s
+  | s -> validation_fail (Some SyntaxKind.AwaitableCreationExpression) s
   and invalidate_awaitable_creation_expression : awaitable_creation_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.AwaitableCreationExpression
@@ -2880,7 +2880,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_children_expression = validate_expression x.xhp_children_expression
     ; xhp_children_keyword = validate_token x.xhp_children_keyword
     }
-  | s -> validation_fail SyntaxKind.XHPChildrenDeclaration s
+  | s -> validation_fail (Some SyntaxKind.XHPChildrenDeclaration) s
   and invalidate_xhp_children_declaration : xhp_children_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPChildrenDeclaration
@@ -2896,7 +2896,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_children_list_xhp_children = validate_list_with (validate_expression) x.xhp_children_list_xhp_children
     ; xhp_children_list_left_paren = validate_token x.xhp_children_list_left_paren
     }
-  | s -> validation_fail SyntaxKind.XHPChildrenParenthesizedList s
+  | s -> validation_fail (Some SyntaxKind.XHPChildrenParenthesizedList) s
   and invalidate_xhp_children_parenthesized_list : xhp_children_parenthesized_list invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPChildrenParenthesizedList
@@ -2912,7 +2912,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_category_categories = validate_list_with (validate_token) x.xhp_category_categories
     ; xhp_category_keyword = validate_token x.xhp_category_keyword
     }
-  | s -> validation_fail SyntaxKind.XHPCategoryDeclaration s
+  | s -> validation_fail (Some SyntaxKind.XHPCategoryDeclaration) s
   and invalidate_xhp_category_declaration : xhp_category_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPCategoryDeclaration
@@ -2930,7 +2930,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_enum_keyword = validate_token x.xhp_enum_keyword
     ; xhp_enum_optional = validate_option_with (validate_token) x.xhp_enum_optional
     }
-  | s -> validation_fail SyntaxKind.XHPEnumType s
+  | s -> validation_fail (Some SyntaxKind.XHPEnumType) s
   and invalidate_xhp_enum_type : xhp_enum_type invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPEnumType
@@ -2947,7 +2947,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { xhp_required_keyword = validate_token x.xhp_required_keyword
     ; xhp_required_at = validate_token x.xhp_required_at
     }
-  | s -> validation_fail SyntaxKind.XHPRequired s
+  | s -> validation_fail (Some SyntaxKind.XHPRequired) s
   and invalidate_xhp_required : xhp_required invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPRequired
@@ -2962,7 +2962,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_attribute_attributes = validate_list_with (validate_todo_aggregate) x.xhp_attribute_attributes
     ; xhp_attribute_keyword = validate_token x.xhp_attribute_keyword
     }
-  | s -> validation_fail SyntaxKind.XHPClassAttributeDeclaration s
+  | s -> validation_fail (Some SyntaxKind.XHPClassAttributeDeclaration) s
   and invalidate_xhp_class_attribute_declaration : xhp_class_attribute_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPClassAttributeDeclaration
@@ -2979,7 +2979,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_attribute_decl_name = validate_token x.xhp_attribute_decl_name
     ; xhp_attribute_decl_type = validate_specifier x.xhp_attribute_decl_type
     }
-  | s -> validation_fail SyntaxKind.XHPClassAttribute s
+  | s -> validation_fail (Some SyntaxKind.XHPClassAttribute) s
   and invalidate_xhp_class_attribute : xhp_class_attribute invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPClassAttribute
@@ -2994,7 +2994,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.XHPSimpleClassAttribute x; value = v } -> v,
     { xhp_simple_class_attribute_type = validate_simple_type_specifier x.xhp_simple_class_attribute_type
     }
-  | s -> validation_fail SyntaxKind.XHPSimpleClassAttribute s
+  | s -> validation_fail (Some SyntaxKind.XHPSimpleClassAttribute) s
   and invalidate_xhp_simple_class_attribute : xhp_simple_class_attribute invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPSimpleClassAttribute
@@ -3008,7 +3008,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_simple_attribute_equal = validate_token x.xhp_simple_attribute_equal
     ; xhp_simple_attribute_name = validate_token x.xhp_simple_attribute_name
     }
-  | s -> validation_fail SyntaxKind.XHPSimpleAttribute s
+  | s -> validation_fail (Some SyntaxKind.XHPSimpleAttribute) s
   and invalidate_xhp_simple_attribute : xhp_simple_attribute invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPSimpleAttribute
@@ -3025,7 +3025,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_spread_attribute_spread_operator = validate_token x.xhp_spread_attribute_spread_operator
     ; xhp_spread_attribute_left_brace = validate_token x.xhp_spread_attribute_left_brace
     }
-  | s -> validation_fail SyntaxKind.XHPSpreadAttribute s
+  | s -> validation_fail (Some SyntaxKind.XHPSpreadAttribute) s
   and invalidate_xhp_spread_attribute : xhp_spread_attribute invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPSpreadAttribute
@@ -3043,7 +3043,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_open_name = validate_token x.xhp_open_name
     ; xhp_open_left_angle = validate_token x.xhp_open_left_angle
     }
-  | s -> validation_fail SyntaxKind.XHPOpen s
+  | s -> validation_fail (Some SyntaxKind.XHPOpen) s
   and invalidate_xhp_open : xhp_open invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPOpen
@@ -3060,7 +3060,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_body = validate_list_with (validate_expression) x.xhp_body
     ; xhp_open = validate_xhp_open x.xhp_open
     }
-  | s -> validation_fail SyntaxKind.XHPExpression s
+  | s -> validation_fail (Some SyntaxKind.XHPExpression) s
   and invalidate_xhp_expression : xhp_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPExpression
@@ -3076,7 +3076,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_close_name = validate_token x.xhp_close_name
     ; xhp_close_left_angle = validate_token x.xhp_close_left_angle
     }
-  | s -> validation_fail SyntaxKind.XHPClose s
+  | s -> validation_fail (Some SyntaxKind.XHPClose) s
   and invalidate_xhp_close : xhp_close invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPClose
@@ -3092,7 +3092,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_constant_separator = validate_token x.type_constant_separator
     ; type_constant_left_type = validate_specifier x.type_constant_left_type
     }
-  | s -> validation_fail SyntaxKind.TypeConstant s
+  | s -> validation_fail (Some SyntaxKind.TypeConstant) s
   and invalidate_type_constant : type_constant invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TypeConstant
@@ -3110,7 +3110,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; vector_type_left_angle = validate_token x.vector_type_left_angle
     ; vector_type_keyword = validate_token x.vector_type_keyword
     }
-  | s -> validation_fail SyntaxKind.VectorTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.VectorTypeSpecifier) s
   and invalidate_vector_type_specifier : vector_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.VectorTypeSpecifier
@@ -3130,7 +3130,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; keyset_type_left_angle = validate_token x.keyset_type_left_angle
     ; keyset_type_keyword = validate_token x.keyset_type_keyword
     }
-  | s -> validation_fail SyntaxKind.KeysetTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.KeysetTypeSpecifier) s
   and invalidate_keyset_type_specifier : keyset_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.KeysetTypeSpecifier
@@ -3149,7 +3149,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; tuple_type_left_angle = validate_token x.tuple_type_left_angle
     ; tuple_type_keyword = validate_token x.tuple_type_keyword
     }
-  | s -> validation_fail SyntaxKind.TupleTypeExplicitSpecifier s
+  | s -> validation_fail (Some SyntaxKind.TupleTypeExplicitSpecifier) s
   and invalidate_tuple_type_explicit_specifier : tuple_type_explicit_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TupleTypeExplicitSpecifier
@@ -3168,7 +3168,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; varray_left_angle = validate_token x.varray_left_angle
     ; varray_keyword = validate_token x.varray_keyword
     }
-  | s -> validation_fail SyntaxKind.VarrayTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.VarrayTypeSpecifier) s
   and invalidate_varray_type_specifier : varray_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.VarrayTypeSpecifier
@@ -3187,7 +3187,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; vector_array_left_angle = validate_token x.vector_array_left_angle
     ; vector_array_keyword = validate_token x.vector_array_keyword
     }
-  | s -> validation_fail SyntaxKind.VectorArrayTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.VectorArrayTypeSpecifier) s
   and invalidate_vector_array_type_specifier : vector_array_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.VectorArrayTypeSpecifier
@@ -3204,7 +3204,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_name = validate_token x.type_name
     ; type_variance = validate_option_with (validate_token) x.type_variance
     }
-  | s -> validation_fail SyntaxKind.TypeParameter s
+  | s -> validation_fail (Some SyntaxKind.TypeParameter) s
   and invalidate_type_parameter : type_parameter invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TypeParameter
@@ -3219,7 +3219,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { constraint_type = validate_specifier x.constraint_type
     ; constraint_keyword = validate_token x.constraint_keyword
     }
-  | s -> validation_fail SyntaxKind.TypeConstraint s
+  | s -> validation_fail (Some SyntaxKind.TypeConstraint) s
   and invalidate_type_constraint : type_constraint invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TypeConstraint
@@ -3238,7 +3238,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; darray_left_angle = validate_token x.darray_left_angle
     ; darray_keyword = validate_token x.darray_keyword
     }
-  | s -> validation_fail SyntaxKind.DarrayTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.DarrayTypeSpecifier) s
   and invalidate_darray_type_specifier : darray_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.DarrayTypeSpecifier
@@ -3261,7 +3261,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; map_array_left_angle = validate_token x.map_array_left_angle
     ; map_array_keyword = validate_token x.map_array_keyword
     }
-  | s -> validation_fail SyntaxKind.MapArrayTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.MapArrayTypeSpecifier) s
   and invalidate_map_array_type_specifier : map_array_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.MapArrayTypeSpecifier
@@ -3281,7 +3281,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; dictionary_type_left_angle = validate_token x.dictionary_type_left_angle
     ; dictionary_type_keyword = validate_token x.dictionary_type_keyword
     }
-  | s -> validation_fail SyntaxKind.DictionaryTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.DictionaryTypeSpecifier) s
   and invalidate_dictionary_type_specifier : dictionary_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.DictionaryTypeSpecifier
@@ -3304,7 +3304,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; closure_coroutine = validate_option_with (validate_token) x.closure_coroutine
     ; closure_outer_left_paren = validate_token x.closure_outer_left_paren
     }
-  | s -> validation_fail SyntaxKind.ClosureTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.ClosureTypeSpecifier) s
   and invalidate_closure_type_specifier : closure_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ClosureTypeSpecifier
@@ -3325,7 +3325,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { closure_parameter_type = validate_specifier x.closure_parameter_type
     ; closure_parameter_call_convention = validate_option_with (validate_token) x.closure_parameter_call_convention
     }
-  | s -> validation_fail SyntaxKind.ClosureParameterTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.ClosureParameterTypeSpecifier) s
   and invalidate_closure_parameter_type_specifier : closure_parameter_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ClosureParameterTypeSpecifier
@@ -3342,7 +3342,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; classname_left_angle = validate_token x.classname_left_angle
     ; classname_keyword = validate_token x.classname_keyword
     }
-  | s -> validation_fail SyntaxKind.ClassnameTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.ClassnameTypeSpecifier) s
   and invalidate_classname_type_specifier : classname_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ClassnameTypeSpecifier
@@ -3361,7 +3361,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; field_name = validate_expression x.field_name
     ; field_question = validate_option_with (validate_token) x.field_question
     }
-  | s -> validation_fail SyntaxKind.FieldSpecifier s
+  | s -> validation_fail (Some SyntaxKind.FieldSpecifier) s
   and invalidate_field_specifier : field_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.FieldSpecifier
@@ -3378,7 +3378,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; field_initializer_arrow = validate_token x.field_initializer_arrow
     ; field_initializer_name = validate_expression x.field_initializer_name
     }
-  | s -> validation_fail SyntaxKind.FieldInitializer s
+  | s -> validation_fail (Some SyntaxKind.FieldInitializer) s
   and invalidate_field_initializer : field_initializer invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.FieldInitializer
@@ -3396,7 +3396,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; shape_type_left_paren = validate_token x.shape_type_left_paren
     ; shape_type_keyword = validate_token x.shape_type_keyword
     }
-  | s -> validation_fail SyntaxKind.ShapeTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.ShapeTypeSpecifier) s
   and invalidate_shape_type_specifier : shape_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ShapeTypeSpecifier
@@ -3415,7 +3415,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; shape_expression_left_paren = validate_token x.shape_expression_left_paren
     ; shape_expression_keyword = validate_token x.shape_expression_keyword
     }
-  | s -> validation_fail SyntaxKind.ShapeExpression s
+  | s -> validation_fail (Some SyntaxKind.ShapeExpression) s
   and invalidate_shape_expression : shape_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ShapeExpression
@@ -3433,7 +3433,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; tuple_expression_left_paren = validate_token x.tuple_expression_left_paren
     ; tuple_expression_keyword = validate_token x.tuple_expression_keyword
     }
-  | s -> validation_fail SyntaxKind.TupleExpression s
+  | s -> validation_fail (Some SyntaxKind.TupleExpression) s
   and invalidate_tuple_expression : tuple_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TupleExpression
@@ -3449,7 +3449,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { generic_argument_list = validate_type_arguments x.generic_argument_list
     ; generic_class_type = validate_token x.generic_class_type
     }
-  | s -> validation_fail SyntaxKind.GenericTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.GenericTypeSpecifier) s
   and invalidate_generic_type_specifier : generic_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.GenericTypeSpecifier
@@ -3463,7 +3463,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { nullable_type = validate_specifier x.nullable_type
     ; nullable_question = validate_token x.nullable_question
     }
-  | s -> validation_fail SyntaxKind.NullableTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.NullableTypeSpecifier) s
   and invalidate_nullable_type_specifier : nullable_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.NullableTypeSpecifier
@@ -3477,7 +3477,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { soft_type = validate_specifier x.soft_type
     ; soft_at = validate_token x.soft_at
     }
-  | s -> validation_fail SyntaxKind.SoftTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.SoftTypeSpecifier) s
   and invalidate_soft_type_specifier : soft_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.SoftTypeSpecifier
@@ -3492,7 +3492,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_arguments_types = validate_list_with (validate_specifier) x.type_arguments_types
     ; type_arguments_left_angle = validate_token x.type_arguments_left_angle
     }
-  | s -> validation_fail SyntaxKind.TypeArguments s
+  | s -> validation_fail (Some SyntaxKind.TypeArguments) s
   and invalidate_type_arguments : type_arguments invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TypeArguments
@@ -3508,7 +3508,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_parameters_parameters = validate_list_with (validate_type_parameter) x.type_parameters_parameters
     ; type_parameters_left_angle = validate_token x.type_parameters_left_angle
     }
-  | s -> validation_fail SyntaxKind.TypeParameters s
+  | s -> validation_fail (Some SyntaxKind.TypeParameters) s
   and invalidate_type_parameters : type_parameters invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TypeParameters
@@ -3524,7 +3524,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; tuple_types = validate_list_with (validate_option_with (validate_specifier)) x.tuple_types
     ; tuple_left_paren = validate_token x.tuple_left_paren
     }
-  | s -> validation_fail SyntaxKind.TupleTypeSpecifier s
+  | s -> validation_fail (Some SyntaxKind.TupleTypeSpecifier) s
   and invalidate_tuple_type_specifier : tuple_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TupleTypeSpecifier

@@ -19,7 +19,7 @@
  *)
 
 type t =
-  | Token
+  | Token of Full_fidelity_token_kind.t
   | Missing
   | SyntaxList
   | EndOfFile
@@ -188,8 +188,8 @@ type t =
 
 let to_string kind =
   match kind with
+  | Token _                           -> "token"
   | Missing                           -> "missing"
-  | Token                             -> "token"
   | SyntaxList                        -> "list"
   | EndOfFile                               -> "end_of_file"
   | Script                                  -> "script"

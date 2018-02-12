@@ -22,12 +22,12 @@
  *)
 
 module type SmartConstructors_S = sig
-  type token
+  module Token : Lexable_token_sig.LexableToken_S
   type t (* state *)
   type r (* smart constructor return type *)
 
   val initial_state : unit -> t
-  val make_token : token -> t -> t * r
+  val make_token : Token.t -> t -> t * r
   val make_missing : Full_fidelity_source_text.t -> int -> t -> t * r
   val make_list : Full_fidelity_source_text.t -> int -> r list -> t -> t * r
   val make_end_of_file : r -> t -> t * r

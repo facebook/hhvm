@@ -74,7 +74,7 @@ let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
     with
     | Syntax.Validated.Validation_failure (k,s) as e -> begin
       Printf.eprintf "FAILURE: expected: %s  actual: %s\n"
-        (SyntaxKind.to_string k)
+        (Option.value_map ~f:SyntaxKind.to_string ~default:"Some token" k)
         (SyntaxKind.to_string (Syntax.kind s));
       raise e
     end

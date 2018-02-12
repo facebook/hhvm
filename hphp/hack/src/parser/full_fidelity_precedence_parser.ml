@@ -17,8 +17,8 @@ module type SCWithToken_S = SmartConstructorsWrappers.SyntaxKind_S
 module WithLexer(Lexer : Lexer_S) = struct
   module Lexer = Lexer
 
-  module WithSmartConstructors (SC : SCWithToken_S with type token = Syntax.Token.t)
-  = struct
+  module WithSmartConstructors
+  (SC : SCWithToken_S with module Token = Syntax.Token) = struct
     module SC = SC
 
     (* [Trick] Hack to keep track of prefix unary expressions created and change

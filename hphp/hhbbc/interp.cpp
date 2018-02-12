@@ -3044,12 +3044,12 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs) {
 
   if (options.ConstantFoldBuiltins && ar.foldable) {
     auto ty = [&] () {
-      if (ar.func->isFoldable()) {
+      auto const func = ar.func->exactFunc();
+      assertx(func);
+      if (func->attrs & AttrBuiltin && func->attrs & AttrIsFoldable) {
         auto ret = const_fold(env, numArgs, *ar.func);
         return ret ? *ret : TBottom;
       }
-      auto const func = ar.func->exactFunc();
-      assertx(func);
       std::vector<Type> args(numArgs);
       for (auto i = uint32_t{0}; i < numArgs; ++i) {
         args[numArgs - i - 1] = scalarize(topT(env, i));

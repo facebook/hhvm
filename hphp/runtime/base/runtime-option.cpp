@@ -594,6 +594,8 @@ using std::string;
 EVALFLAGS();
 #undef F
 std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
+hphp_string_imap<Cell> RuntimeOption::ConstantFunctions;
+
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
 

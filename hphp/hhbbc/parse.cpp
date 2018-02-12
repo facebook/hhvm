@@ -44,6 +44,7 @@
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
 
@@ -873,6 +874,43 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isMemoizeImpl      = Func::isMemoizeImplName(fe.name);
 
   add_frame_variables(*ret, fe);
+
+  if (!RuntimeOption::ConstantFunctions.empty()) {
+    auto const name = [&] {
+      if (!cls) return fe.name->toCppString();
+      return folly::sformat("{}::{}", cls->name, ret->name);
+    }();
+    auto const it = RuntimeOption::ConstantFunctions.find(name);
+    if (it != RuntimeOption::ConstantFunctions.end()) {
+      ret->locals.resize(fe.params.size());
+      ret->numIters = 0;
+      ret->numClsRefSlots = 0;
+      ret->staticLocals.clear();
+      ret->attrs |= AttrIsFoldable;
+
+      auto const mainEntry = BlockId{0};
+
+      auto blk          = std::make_unique<php::Block>();
+      blk->id           = mainEntry;
+      blk->section      = php::Block::Section::Main;
+      blk->exnNode      = nullptr;
+
+      blk->hhbcs.push_back(gen_constant(it->second));
+      blk->hhbcs.push_back(bc::RetC {});
+      ret->blocks.push_back(std::move(blk));
+
+      ret->dvEntries.resize(fe.params.size(), NoBlockId);
+      ret->mainEntry = mainEntry;
+
+      for (size_t i = 0, sz = fe.params.size(); i < sz; ++i) {
+        if (fe.params[i].hasDefaultValue()) {
+          ret->params[i].dvEntryPoint = mainEntry;
+          ret->dvEntries[i] = mainEntry;
+        }
+      }
+      return ret;
+    }
+  }
 
   /*
    * Builtin functions get some extra information.  The returnType flag is only

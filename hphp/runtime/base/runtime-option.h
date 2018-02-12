@@ -28,6 +28,7 @@
 #include <memory>
 
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/functional.h"
@@ -442,6 +443,7 @@ struct RuntimeOption {
   static int GetScannerType();
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
+  static hphp_string_imap<Cell> ConstantFunctions;
 
   static const uint32_t kPCREInitialTableSize = 96 * 1024;
 

@@ -1202,7 +1202,6 @@ public:
   void emitFuncCall(Emitter& e, FunctionCallPtr node,
                     const char* nameOverride = nullptr,
                     ExpressionListPtr paramsOverride = nullptr);
-  bool emitConstantFuncCall(Emitter& e, SimpleFunctionCallPtr call);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                        bool isUnpack);
   void emitClosureUseVar(Emitter& e, ExpressionPtr exp, int paramId,
@@ -6126,9 +6125,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   // validation in addition to a simple type check.
   // TYPE_CHECK_INSTR(resource, Res)
 #undef TYPE_CHECK_INSTR
-    else if (emitConstantFuncCall(e, call)) {
-      return true;
-    }
   }
   // fall through
   case Construct::KindOfDynamicFunctionCall: {
@@ -10542,34 +10538,6 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   emitCall(e, node, params, fpiStart);
 }
 
-bool EmitterVisitor::emitConstantFuncCall(Emitter& e,
-                                          SimpleFunctionCallPtr call) {
-  if (!Option::WholeProgram || Option::ConstantFunctions.empty()) return false;
-
-  if (call->getClass()) {
-    // The class expression was either non-scalar or static, neither of which
-    // we want to optimize.
-    return false;
-  }
-
-  auto const name = call->getFullName();
-  auto const it = Option::ConstantFunctions.find(name);
-  if (it == Option::ConstantFunctions.end()) return false;
-
-  VariableUnserializer uns{
-    it->second.data(), it->second.size(), VariableUnserializer::Type::Internal,
-    false, empty_array()
-  };
-
-  try {
-    return emitScalarValue(e, uns.unserialize());
-  } catch (const Exception& e) {
-    throw IncludeTimeFatalException(call,
-                                    "Bad ConstantValue for %s: '%s'",
-                                    name.c_str(), it->second.c_str());
-  }
-}
-
 void EmitterVisitor::emitClassTraitPrecRule(PreClassEmitter* pce,
                                             TraitPrecStatementPtr stmt) {
   StringData* traitName  = makeStaticString(stmt->getTraitName());
@@ -12377,6 +12345,9 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));
+  }
+  for (auto const& elm : RuntimeOption::ConstantFunctions) {
+    gd.ConstantFunctions.push_back(elm);
   }
   if (arrTable) globalArrayTypeTable().repopulate(*arrTable);
   Repo::get().saveGlobalData(gd);

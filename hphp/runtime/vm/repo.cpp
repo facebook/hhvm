@@ -136,7 +136,7 @@ size_t Repo::stringLengthLimit() const {
 
 void Repo::loadGlobalData(bool allowFailure /* = false */,
                           bool readArrayTable /* = true */) {
-  m_lsrp.load();
+  if (readArrayTable) m_lsrp.load();
 
   if (!RuntimeOption::RepoAuthoritative) return;
 
@@ -177,6 +177,7 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
       if (readArrayTable) {
         auto& arrayTypeTable = globalArrayTypeTable();
         decoder(arrayTypeTable);
+        decoder(s_globalData.ConstantFunctions);
         decoder.assertDone();
       }
       txn.commit();
@@ -211,6 +212,10 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
     }
     if (s_globalData.ThisTypeHintLevel == 3) {
       RuntimeOption::EvalThisTypeHintLevel = s_globalData.ThisTypeHintLevel;
+    }
+    RuntimeOption::ConstantFunctions.clear();
+    for (auto const& elm : s_globalData.ConstantFunctions) {
+      RuntimeOption::ConstantFunctions.insert(elm);
     }
 
     return;
@@ -251,6 +256,7 @@ void Repo::saveGlobalData(GlobalData newData) {
   BlobEncoder encoder;
   encoder(s_globalData);
   encoder(globalArrayTypeTable());
+  encoder(s_globalData.ConstantFunctions);
   query.bindBlob("@data", encoder, /* static */ true);
   query.exec();
 

@@ -180,6 +180,8 @@ struct Repo::GlobalData {
 
   std::vector<const StringData*> APCProfile;
 
+  std::vector<std::pair<std::string,Cell>> ConstantFunctions;
+
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
       (EnableHipHopSyntax)

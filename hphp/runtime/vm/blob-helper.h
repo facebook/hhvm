@@ -149,6 +149,16 @@ struct BlobEncoder {
     std::copy(sd->data(), sd->data() + sz, &m_blob[start]);
   }
 
+  void encode(const std::string& s) {
+    uint32_t sz = s.size();
+    encode(sz + 1);
+    if (!sz) { return; }
+
+    const size_t start = m_blob.size();
+    m_blob.resize(start + sz);
+    std::copy(s.data(), s.data() + sz, &m_blob[start]);
+  }
+
   void encode(const TypedValue& tv) {
     if (tv.m_type == KindOfUninit) {
       return encode(staticEmptyString());
@@ -284,6 +294,11 @@ struct BlobDecoder {
     const StringData* sd;
     decode(sd);
     s = sd;
+  }
+
+  void decode(std::string& s) {
+    String str(decodeString());
+    s = str.toCppString();
   }
 
   void decode(TypedValue& tv) {

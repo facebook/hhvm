@@ -333,7 +333,9 @@ void write_global_data(
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
-
+  for (auto const& elm : RuntimeOption::ConstantFunctions) {
+    gd.ConstantFunctions.push_back(elm);
+  }
   globalArrayTypeTable().repopulate(*arrTable);
   // NOTE: There's no way to tell if saveGlobalData() fails for some reason.
   Repo::get().saveGlobalData(gd);

@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/variable-unserializer.h"
 
 #include "hphp/util/hdf.h"
 #include "hphp/util/logger.h"
@@ -57,7 +58,6 @@ std::vector<std::string> Option::ParseOnDemandDirs;
 std::map<std::string, std::string> Option::IncludeRoots;
 std::map<std::string, std::string> Option::AutoloadRoots;
 std::vector<std::string> Option::IncludeSearchPaths;
-hphp_string_imap<std::string> Option::ConstantFunctions;
 
 bool Option::GeneratePickledPHP = false;
 bool Option::GenerateInlinedPHP = false;
@@ -164,10 +164,21 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     std::string func;
     std::string value;
     if (folly::split('|', str, func, value)) {
-      ConstantFunctions[func] = value;
-    } else {
-      std::cerr << folly::format("Invalid ConstantFunction: '{}'\n", str);
+      VariableUnserializer uns{
+        value.data(), value.size(),
+        VariableUnserializer::Type::Internal,
+        false, empty_array()
+      };
+      try {
+        auto v = uns.unserialize();
+        v.setEvalScalar();
+        RuntimeOption::ConstantFunctions[func] = *v.asCell();
+        continue;
+      } catch (const Exception& e) {
+        // fall through and log
+      }
     }
+    Logger::FError("Invalid ConstantFunction: '{}'\n", str);
   }
 
   // build map from function names to sections

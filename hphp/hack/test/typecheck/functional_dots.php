@@ -9,13 +9,13 @@
  *
  */
 
-function f((function(int, ...): string) $g): string {
+function f((function(int, mixed...): string) $g): string {
   return $g(5, 23);
 }
 
 function test(): void {
   f(
-    function(int $x, string $y, ...): string {
+    function(int $x, string $y, mixed ...$args): string {
       return $x."<-";
     },
   );

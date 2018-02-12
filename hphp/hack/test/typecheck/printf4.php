@@ -15,7 +15,7 @@ interface Dummy {
   public function format_s(string $s) : string;
 }
 
-function f(FormatString<Dummy> $x, ...) : void {
+function f(FormatString<Dummy> $x, mixed...$args) : void {
 }
 
 function _(string $x) : void {

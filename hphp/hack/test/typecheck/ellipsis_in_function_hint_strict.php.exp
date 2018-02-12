@@ -1,0 +1,2 @@
+File "ellipsis_in_function_hint_strict.php", line 3, characters 14-34:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])

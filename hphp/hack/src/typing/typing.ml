@@ -417,6 +417,8 @@ let rec bind_param env (ty1, param) =
 and check_param env param ty =
   match param.param_hint with
   | None -> suggest env param.param_pos ty
+  | Some (pos, Hfun (_, _, _, _, Hvariadic None, _)) ->
+    Errors.ellipsis_strict_mode ~require_param_name:false pos
   | Some _ ->
     (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
     enforce_param_not_disposable env param ty
@@ -503,7 +505,10 @@ and fun_def tcopt f =
             check_param env vparam ty;
           let env, t_vparam = bind_param env (ty, vparam) in
           env, T.FVvariadicArg t_vparam
-        | FVellipsis -> env, T.FVellipsis
+        | FVellipsis ->
+          if Env.is_strict env then
+            Errors.ellipsis_strict_mode ~require_param_name:true pos;
+          env, T.FVellipsis
         | FVnonVariadic -> env, T.FVnonVariadic in
       let env, tb = fun_ env return pos nb f.f_fun_kind in
       let env = Env.check_todo env in

@@ -12,7 +12,7 @@
 interface FormatString<T> { }
 interface X { }
 
-function f(FormatString<X> $fs, ...) : void {
+function f(FormatString<X> $fs, mixed...$args) : void {
 }
 
 function _(string $s) {

@@ -1005,7 +1005,9 @@ module Typing                               = struct
   let enum_type_typedef_nonnull             = 4219 (* DONT MODIFy!!!! *)
   let rx_enabled_in_non_rx_context          = 4220 (* DONT MODIFY!!!! *)
   let rx_enabled_in_lambdas                 = 4221 (* DONT MODIFY!!!! *)
-  let ambiguous_lambda                      = 4219 (* DONT MODIFY!!!! *)
+  let ambiguous_lambda                      = 4222 (* DONT MODIFY!!!! *)
+  let ellipsis_strict_mode                  = 4223 (* DONT MODIFY!!!! *)
+
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2448,6 +2450,16 @@ let fun_variadicity_hh_vs_php56 pos1 pos2 =
   pos1, "Variadic arguments: ...-style is not a subtype of ...$args";
   pos2, "Because of this definition";
 ]
+
+let ellipsis_strict_mode ~require_param_name pos =
+  let msg =
+    if require_param_name then
+      "Cannot use ... without a type hint and parameter name in strict mode. \
+      Please add a type hint and parameter name."
+    else
+      "Cannot use ... without a type hint in strict mode. Please add a type hint."
+    in
+  add Typing.ellipsis_strict_mode pos msg
 
 let expected_tparam pos n =
   add Typing.expected_tparam pos (

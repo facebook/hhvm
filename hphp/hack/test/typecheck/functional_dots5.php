@@ -12,7 +12,7 @@
 class A {}
 class B extends A {}
 
-function f((function(B, ...): string) $g): string {
+function f((function(B, mixed...): string) $g): string {
   return $g(new B());
 }
 

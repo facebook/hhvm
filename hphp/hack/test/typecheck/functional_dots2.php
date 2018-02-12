@@ -9,7 +9,7 @@
  *
  */
 
-function f((function(int, string, ...): string) $g): string {
+function f((function(int, string, mixed...): string) $g): string {
   return $g(5, 'five');
 }
 

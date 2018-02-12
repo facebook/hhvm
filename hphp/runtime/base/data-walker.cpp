@@ -29,6 +29,11 @@ void DataWalker::traverseData(ArrayData* data,
                               DataFeature& features,
                               PointerSet& visited,
                               PointerMap* seenArrs) const {
+  // Static and Uncounted arrays are never circular, never contain
+  // KindOfRef, and never contain objects or resources, so there's no
+  // need to traverse them.
+  if (!data->isRefCounted()) return;
+
   // At this point we're just using seenArrs to keep track of arrays
   // we've seen, and prevent traversing them multiple times. If we're
   // not using jemalloc, we'll also use this map to compute the size
@@ -40,11 +45,6 @@ void DataWalker::traverseData(ArrayData* data,
       !seenArrs->emplace(data, nullptr).second) {
     return;
   }
-
-  // Static arrays are never circular, never contain KindOfRef, and
-  // never contain objects or resources, so there's no need to
-  // traverse them.
-  if (data->isStatic()) return;
 
   auto const fn = [&] (TypedValue rval) {
     if (rval.m_type == KindOfRef) {

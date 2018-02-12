@@ -614,7 +614,7 @@ void PackedArray::Release(ArrayData* ad) {
 }
 
 NEVER_INLINE
-bool PackedArray::ReleaseUncounted(ArrayData* ad, size_t extra) {
+bool PackedArray::ReleaseUncounted(ArrayData* ad) {
   assert(checkInvariants(ad));
   if (!ad->uncountedDecRef()) return false;
 
@@ -630,7 +630,8 @@ bool PackedArray::ReleaseUncounted(ArrayData* ad, size_t extra) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
 
-  free_huge(reinterpret_cast<char*>(ad) - extra);
+  free_huge(reinterpret_cast<char*>(ad) -
+            (ad->hasApcTv() ? sizeof(APCTypedValue) : 0));
   return true;
 }
 
@@ -1374,7 +1375,7 @@ bool PackedArray::Uasort(ArrayData* ad, const Variant&) {
 }
 
 ArrayData* PackedArray::MakeUncounted(ArrayData* array,
-                                      size_t extra,
+                                      bool withApcTypedValue,
                                       PointerMap* seen) {
   void** seenVal = nullptr;
   if (seen && array->hasMultipleRefs()) {
@@ -1393,6 +1394,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
     APCStats::getAPCStats().addAPCUncountedBlock();
   }
 
+  auto const extra = withApcTypedValue ? sizeof(APCTypedValue) : 0;
   auto const size = array->m_size;
   auto const sizeIndex = capacityToSizeIndex(size);
   auto const mem = static_cast<char*>(
@@ -1402,7 +1404,8 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
   ad->initHeader_16(
     array->m_kind,
     UncountedValue,
-    packSizeIndexAndDV(sizeIndex, array->dvArray())
+    packSizeIndexAndDV(sizeIndex, array->dvArray()) |
+    (withApcTypedValue ? ArrayData::kHasApcTv : 0)
   );
   ad->m_sizeAndPos = array->m_sizeAndPos;
 

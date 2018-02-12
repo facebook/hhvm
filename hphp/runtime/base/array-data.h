@@ -86,6 +86,7 @@ struct ArrayData : MaybeCountable {
     kDArray     = 2
   };
   static auto constexpr kDVArrayMask = static_cast<DVArray>(3);
+  static auto constexpr kHasApcTv    = 4;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -252,6 +253,12 @@ public:
    */
   DVArray dvArray() const;
   void setDVArray(DVArray);
+
+  /*
+   * Only used for uncounted arrays. Indicates that there's a
+   * co-allocated APCTypedValue preceding this array.
+   */
+  bool hasApcTv() const;
 
   /*
    * Is the array a varray, darray, or neither?

@@ -398,7 +398,7 @@ ALWAYS_INLINE static bool UncountedMixedArrayOnHugePage() {
 }
 
 ArrayData* MixedArray::MakeUncounted(ArrayData* array,
-                                     size_t extra,
+                                     bool withApcTypedValue,
                                      PointerMap* seen) {
   void** seenVal = nullptr;
   if (seen && array->hasMultipleRefs()) {
@@ -413,6 +413,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
   }
   auto a = asMixed(array);
   assertx(!a->empty());
+  auto const extra = withApcTypedValue ? sizeof(APCTypedValue) : 0;
   auto const scale = a->scale();
   auto const allocSize = extra + computeAllocBytes(scale);
   auto const mem = static_cast<char*>(
@@ -428,6 +429,11 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
   assert((extra & 0xf) == 0);
   bcopy32_inline(ad, a, sizeof(MixedArray) + sizeof(Elm) * used + 24);
   ad->m_count = UncountedValue; // after bcopy, update count
+  if (withApcTypedValue) {
+    ad->m_aux16 |= kHasApcTv;
+  } else {
+    ad->m_aux16 &= ~kHasApcTv;
+  }
   CopyHash(ad->hashTab(), a->hashTab(), scale);
 
   // Need to make sure keys and values are all uncounted.
@@ -515,7 +521,7 @@ void MixedArray::Release(ArrayData* in) {
 }
 
 NEVER_INLINE
-bool MixedArray::ReleaseUncounted(ArrayData* in, size_t extra) {
+bool MixedArray::ReleaseUncounted(ArrayData* in) {
 
   auto const ad = asMixed(in);
   if (!ad->uncountedDecRef()) return false;
@@ -538,6 +544,7 @@ bool MixedArray::ReleaseUncounted(ArrayData* in, size_t extra) {
     // We better not have strong iterators associated with uncounted arrays.
     assert(!has_strong_iterator(ad));
   }
+  auto const extra = ad->hasApcTv() ? sizeof(APCTypedValue) : 0;
   if (UncountedMixedArrayOnHugePage()) {
     free_huge(reinterpret_cast<char*>(ad) - extra);
   } else {

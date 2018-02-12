@@ -311,23 +311,26 @@ void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
     auto const inner = source->m_data.pref->tv();
     tvCopy(*inner, *source);
   }
+
+  auto const handlePersistent = [&] (MaybeCountable* elm) {
+    if (elm->isRefCounted()) return false;
+    if (elm->isStatic()) return true;
+    if (elm->uncountedIncRef()) return true;
+    if (seen) seen->emplace(elm, nullptr);
+    return false;
+  };
+
   auto type = source->m_type;
   // `source' cannot be Ref here as we already did an unbox.  It won't be
   // Object or Resource, as these should never appear in an uncounted array.
-  // Thus we only need to deal with strings/arrays.  Note that even if the
-  // string/array is already uncounted but not static, we still have to make a
-  // copy, as we have no idea about the lifetime of the other uncounted item
-  // here.
+  // Thus we only need to deal with strings/arrays.
   switch (type) {
     case KindOfString:
       source->m_type = KindOfPersistentString;
       // Fall-through.
     case KindOfPersistentString: {
       auto& str = source->m_data.pstr;
-      if (!str->isRefCounted()) {
-        if (str->isStatic()) break;
-        if (str->uncountedIncRef()) break;
-      }
+      if (handlePersistent(str)) break;
       if (str->empty()) str = staticEmptyString();
       else if (auto const st = lookupStaticString(str)) str = st;
       else {
@@ -352,9 +355,9 @@ void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
     case KindOfPersistentVec: {
       auto& ad = source->m_data.parr;
       assert(ad->isVecArray());
-      if (ad->isStatic()) break;
-      else if (ad->empty()) ad = staticEmptyVecArray();
-      else ad = PackedArray::MakeUncounted(ad, 0, seen);
+      if (handlePersistent(ad)) break;
+      if (ad->empty()) ad = staticEmptyVecArray();
+      else ad = PackedArray::MakeUncounted(ad, false, seen);
       break;
     }
 
@@ -364,9 +367,9 @@ void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
     case KindOfPersistentDict: {
       auto& ad = source->m_data.parr;
       assert(ad->isDict());
-      if (ad->isStatic()) break;
-      else if (ad->empty()) ad = staticEmptyDictArray();
-      else ad = MixedArray::MakeUncounted(ad, 0, seen);
+      if (handlePersistent(ad)) break;
+      if (ad->empty()) ad = staticEmptyDictArray();
+      else ad = MixedArray::MakeUncounted(ad, false, seen);
       break;
     }
 
@@ -376,9 +379,9 @@ void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
     case KindOfPersistentKeyset: {
       auto& ad = source->m_data.parr;
       assert(ad->isKeyset());
-      if (ad->isStatic()) break;
-      else if (ad->empty()) ad = staticEmptyKeysetArray();
-      else ad = SetArray::MakeUncounted(ad);
+      if (handlePersistent(ad)) break;
+      if (ad->empty()) ad = staticEmptyKeysetArray();
+      else ad = SetArray::MakeUncounted(ad, false, seen);
       break;
     }
 
@@ -388,15 +391,15 @@ void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
     case KindOfPersistentArray: {
       auto& ad = source->m_data.parr;
       assert(ad->isPHPArray());
-      if (ad->isStatic()) break;
+      if (handlePersistent(ad)) break;
       if (ad->empty()) {
         if (ad->isVArray()) ad = staticEmptyVArray();
         else if (ad->isDArray()) ad = staticEmptyDArray();
         else ad = staticEmptyArray();
       } else if (ad->hasPackedLayout()) {
-        ad = PackedArray::MakeUncounted(ad, 0, seen);
+        ad = PackedArray::MakeUncounted(ad, false, seen);
       } else {
-        ad = MixedArray::MakeUncounted(ad, 0, seen);
+        ad = MixedArray::MakeUncounted(ad, false, seen);
       }
       break;
     }

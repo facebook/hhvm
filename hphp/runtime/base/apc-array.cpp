@@ -82,6 +82,10 @@ APCHandle::Pair
 APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
                           bool unserializeObj) {
   assertx(arr->isPHPArray());
+  if (auto const value = APCTypedValue::HandlePersistent(
+        APCTypedValue::StaticArr{}, APCTypedValue::UncountedArr{}, arr)) {
+    return value;
+  }
   return MakeSharedImpl(
     arr,
     level,
@@ -105,6 +109,10 @@ APCHandle::Pair
 APCArray::MakeSharedVec(ArrayData* vec, APCHandleLevel level,
                         bool unserializeObj) {
   assertx(vec->isVecArray());
+  if (auto const value = APCTypedValue::HandlePersistent(
+        APCTypedValue::StaticVec{}, APCTypedValue::UncountedVec{}, vec)) {
+    return value;
+  }
   return MakeSharedImpl(
     vec,
     level,
@@ -118,6 +126,10 @@ APCHandle::Pair
 APCArray::MakeSharedDict(ArrayData* dict, APCHandleLevel level,
                          bool unserializeObj) {
   assertx(dict->isDict());
+  if (auto const value = APCTypedValue::HandlePersistent(
+        APCTypedValue::StaticDict{}, APCTypedValue::UncountedDict{}, dict)) {
+    return value;
+  }
   return MakeSharedImpl(
     dict,
     level,
@@ -131,6 +143,11 @@ APCHandle::Pair
 APCArray::MakeSharedKeyset(ArrayData* keyset, APCHandleLevel level,
                            bool unserializeObj) {
   assertx(keyset->isKeyset());
+  if (auto const value = APCTypedValue::HandlePersistent(
+        APCTypedValue::StaticKeyset{}, APCTypedValue::UncountedKeyset{},
+        keyset)) {
+    return value;
+  }
   return MakeSharedImpl(
     keyset,
     level,
@@ -185,28 +202,24 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
 APCHandle* APCArray::MakeUncountedArray(ArrayData* array, PointerMap* m) {
   assertx(apcExtension::UseUncounted);
   assertx(array->isPHPArray());
-  APCTypedValue* value;
-  if (array->isPacked()) {
-    auto const data = PackedArray::MakeUncounted(array,
-                                                 sizeof(APCTypedValue),
-                                                 m);
-    auto const mem = reinterpret_cast<APCTypedValue*>(data) - 1;
-    value = new(mem) APCTypedValue(APCTypedValue::UncountedArr{}, data);
-  } else {
+  auto const value = [&] {
+    if (array->isPacked()) {
+      auto const data = PackedArray::MakeUncounted(array, true, m);
+      auto const mem = reinterpret_cast<APCTypedValue*>(data) - 1;
+      return new(mem) APCTypedValue(APCTypedValue::UncountedArr{}, data);
+    }
     assert(array->isMixed());
-    auto const data = MixedArray::MakeUncounted(array,
-                                                sizeof(APCTypedValue),
-                                                m);
+    auto const data = MixedArray::MakeUncounted(array, true, m);
     auto const mem = reinterpret_cast<APCTypedValue*>(data) - 1;
-    value = new(mem) APCTypedValue(APCTypedValue::UncountedArr{}, data);
-  }
+    return new(mem) APCTypedValue(APCTypedValue::UncountedArr{}, data);
+  }();
   return value->getHandle();
 }
 
 APCHandle* APCArray::MakeUncountedVec(ArrayData* vec, PointerMap* m) {
   assertx(apcExtension::UseUncounted);
   assertx(vec->isVecArray());
-  auto data = PackedArray::MakeUncounted(vec, sizeof(APCTypedValue), m);
+  auto data = PackedArray::MakeUncounted(vec, true, m);
   auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
   auto value = new(mem) APCTypedValue(APCTypedValue::UncountedVec{}, data);
   return value->getHandle();
@@ -215,7 +228,7 @@ APCHandle* APCArray::MakeUncountedVec(ArrayData* vec, PointerMap* m) {
 APCHandle* APCArray::MakeUncountedDict(ArrayData* dict, PointerMap* m) {
   assertx(apcExtension::UseUncounted);
   assertx(dict->isDict());
-  auto data = MixedArray::MakeUncounted(dict, sizeof(APCTypedValue), m);
+  auto data = MixedArray::MakeUncounted(dict, true, m);
   auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
   auto value = new(mem) APCTypedValue(APCTypedValue::UncountedDict{}, data);
   return value->getHandle();
@@ -224,7 +237,7 @@ APCHandle* APCArray::MakeUncountedDict(ArrayData* dict, PointerMap* m) {
 APCHandle* APCArray::MakeUncountedKeyset(ArrayData* keyset) {
   assertx(apcExtension::UseUncounted);
   assertx(keyset->isKeyset());
-  auto data = SetArray::MakeUncounted(keyset, sizeof(APCTypedValue));
+  auto data = SetArray::MakeUncounted(keyset, true);
   auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
   auto value = new(mem) APCTypedValue(APCTypedValue::UncountedKeyset{}, data);
   return value->getHandle();

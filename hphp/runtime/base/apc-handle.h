@@ -137,6 +137,7 @@ struct APCHandle {
   struct Pair {
     APCHandle* handle;
     size_t size;
+    explicit operator bool() const { return handle != nullptr; }
   };
 
   explicit APCHandle(APCKind kind, DataType type = kInvalidDataType)
@@ -267,6 +268,10 @@ struct APCHandle {
            m_kind == APCKind::UncountedVec ||
            m_kind == APCKind::UncountedDict ||
            m_kind == APCKind::UncountedKeyset;
+  }
+
+  bool isTypedValue() const {
+    return m_type != kInvalidDataType;
   }
 
   /*

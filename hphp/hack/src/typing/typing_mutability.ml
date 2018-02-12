@@ -141,8 +141,10 @@ let rec check_param_mutability (env : Typing_env.env)
   | param::ps, e::es ->
     if param.fp_mutable then
       if not (expr_is_mutable env e) then
-        Errors.mutable_argument_mismatch (param.fp_pos) (T.get_position e)
-;
+        Env.error_if_reactive_context env @@ begin fun () ->
+          Errors.mutable_argument_mismatch (param.fp_pos) (T.get_position e)
+        end;
+
     (* Check the rest *)
     check_param_mutability env ps es
 
@@ -154,7 +156,9 @@ let check_mutability_fun_params env fty el =
     begin match List.find remaining_exprs
       ~f:(fun e -> not (expr_is_mutable env e)) with
     | Some expr ->
+      Env.error_if_reactive_context env @@ begin fun () ->
         Errors.mutable_argument_mismatch (param.fp_pos) (T.get_position expr)
+      end
     | None -> ()
     end
   | _ -> () end
@@ -172,8 +176,10 @@ let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
   (* $x->method() where method is mutable *)
   | T.Call (_, ((pos, (Some (r, Tfun fty))), T.Obj_get (expr, _, _)), _, el, _) ->
     (if fty.ft_mutable && not (expr_is_mutable env expr) then
-      let fpos = Reason.to_pos r in
-      Errors.mutable_call_on_immutable fpos pos);
+      Env.error_if_reactive_context env @@ begin fun () ->
+        let fpos = Reason.to_pos r in
+        Errors.mutable_call_on_immutable fpos pos
+      end);
     check_mutability_fun_params env fty el
   (* TAny, T.Calls that don't have types, etc *)
   | _ -> ()

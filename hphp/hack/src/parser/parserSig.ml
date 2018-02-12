@@ -26,12 +26,12 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module TokenKind = Full_fidelity_token_kind
   module SyntaxError = Full_fidelity_syntax_error
   module Env = Full_fidelity_parser_env
-  module type SC_S = SmartConstructors.SmartConstructors_S
+  module type SCWithKind_S = SmartConstructorsWrappers.SyntaxKind_S
   module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Token).Lexer_S
 
   module WithLexer(Lexer : Lexer_S) = struct
     module type Parser_S = sig
-      module SC : SC_S with type token = Token.t
+      module SC : SCWithKind_S with type token = Token.t
       type t
       val sc_call : t -> (SC.t -> SC.t * SC.r) -> t * SC.r
       val lexer : t -> Lexer.t

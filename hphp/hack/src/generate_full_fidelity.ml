@@ -649,12 +649,12 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module TokenKind = Full_fidelity_token_kind
   module SyntaxError = Full_fidelity_syntax_error
   module Env = Full_fidelity_parser_env
-  module type SC_S = SmartConstructors.SmartConstructors_S
+  module type SCWithKind_S = SmartConstructorsWrappers.SyntaxKind_S
   module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Token).Lexer_S
 
   module WithLexer(Lexer : Lexer_S) = struct
     module type Parser_S = sig
-      module SC : SC_S with type token = Token.t
+      module SC : SCWithKind_S with type token = Token.t
       type t
       val sc_call : t -> (SC.t -> SC.t * SC.r) -> t * SC.r
       val lexer : t -> Lexer.t
@@ -794,6 +794,91 @@ end (* WithSyntax *)
     aggregate_transformations = [];
   }
 end (* GenerateFFSyntaxSmartConstructors *)
+
+module GenerateFFSmartConstructorsWrappers = struct
+  let to_constructor_methods x =
+    let fields = Core_list.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i)
+    in
+    let stack = String.concat " " fields in
+    let raw_stack =
+      map_and_concat_separated " " (fun x -> "(snd " ^ x ^ ")") fields
+    in
+    sprintf
+      "  let make_%s %s state = compose SK.%s (SC.make_%s %s state)\n"
+      x.type_name stack x.kind_name x.type_name raw_stack
+
+  let to_type_tests_sig x =
+    sprintf ("  val is_%s : r -> bool\n")
+      x.type_name
+
+  let to_type_tests x =
+    sprintf ("  let is_" ^^ type_name_fmt ^^ " = has_kind SK.%s\n")
+      x.type_name x.kind_name
+
+  let full_fidelity_smart_constructors_wrappers_template: string =
+    (make_header MLStyle "
+ * This module contains smart constructors implementation that can be used to
+ * build AST.
+ ") ^ "
+
+module type SC_S = SmartConstructors.SmartConstructors_S
+module SourceText = Full_fidelity_source_text
+module SK = Full_fidelity_syntax_kind
+
+module type SyntaxKind_S = sig
+  include SC_S
+  type original_sc_r
+  val extract : r -> original_sc_r
+  val is_missing : r -> bool
+  val is_list : r -> bool
+TYPE_TESTS_SIG
+end
+
+module SyntaxKind(SC : SC_S) :
+  (SyntaxKind_S with type token = SC.token and type original_sc_r = SC.r)
+= struct
+  type original_sc_r = SC.r
+  type token = SC.token
+  type t = SC.t
+  type r = SK.t * SC.r
+
+  let extract (_, r) = r
+  let kind_of (kind, _) = kind
+  let compose : SK.t -> t * SC.r -> t * r = fun kind (state, res) ->
+    state, (kind, res)
+  let initial_state = SC.initial_state
+
+  let make_token token state = compose SK.Token (SC.make_token token state)
+  let make_missing s o state = compose SK.Missing (SC.make_missing s o state)
+  let make_list s o items state =
+    compose SK.SyntaxList (SC.make_list s o (List.map snd items) state)
+CONSTRUCTOR_METHODS
+
+  let has_kind kind node = kind_of node = kind
+  let is_missing = has_kind SK.Missing
+  let is_list = has_kind SK.Missing
+TYPE_TESTS
+
+end (* SyntaxKind *)
+"
+
+  let full_fidelity_smart_constructors_wrappers =
+  {
+    filename = full_fidelity_path_prefix ^
+      "smart_constructors/smartConstructorsWrappers.ml";
+    template = full_fidelity_smart_constructors_wrappers_template;
+    transformations = [
+      { pattern = "TYPE_TESTS_SIG"; func = to_type_tests_sig };
+      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
+      { pattern = "TYPE_TESTS"; func = to_type_tests }
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+end (* GenerateFFSmartConstructorsWrappers *)
 
 module GenerateFFSyntax = struct
   let to_to_kind x =
@@ -2854,4 +2939,7 @@ let () =
   generate_file
     GenerateFFSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
   generate_file
-    GenerateFFParserSig.full_fidelity_parser_sig
+    GenerateFFParserSig.full_fidelity_parser_sig;
+  generate_file
+    GenerateFFSmartConstructorsWrappers
+      .full_fidelity_smart_constructors_wrappers

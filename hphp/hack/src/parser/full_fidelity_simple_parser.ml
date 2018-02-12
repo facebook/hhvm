@@ -11,12 +11,12 @@
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S
 module Context = Full_fidelity_parser_context.WithToken(Syntax.Token)
-module type SC_S = SmartConstructors.SmartConstructors_S
+module type SCWithToken_S = SmartConstructorsWrappers.SyntaxKind_S
 
 module WithLexer(Lexer : Lexer_S) = struct
   module Lexer = Lexer
 
-  module WithSmartConstructors (SC : SC_S with type token = Syntax.Token.t)
+  module WithSmartConstructors (SC : SCWithToken_S with type token = Syntax.Token.t)
   = struct
     module SC = SC
 

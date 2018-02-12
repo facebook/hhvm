@@ -514,12 +514,10 @@ end
 
 let parse tcopt content =
   Errors.ignore_ begin fun () ->
-    let {Parser_hack.ast; comments = _; file_mode = _; content = _; is_hh_file = _ } =
-      Parser_hack.program
-        tcopt
-        Relative_path.default
-        content
-    in ast
+    let open Full_fidelity_ast in
+    let env = make_env ~parser_options:tcopt Relative_path.default in
+    let {Parser_hack.ast; _} = from_text_with_legacy env content in
+    ast
   end
 
 let go_from_ast ast line char =

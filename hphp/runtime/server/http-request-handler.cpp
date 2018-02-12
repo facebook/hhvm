@@ -471,7 +471,8 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                     error, errorMsg,
                     true /* once */,
                     false /* warmupOnly */,
-                    false /* richErrorMessage */);
+                    false /* richErrorMessage */,
+                    RuntimeOption::EvalPreludePath);
 
   if (ret) {
     String content = context->obDetachContents();
@@ -495,7 +496,8 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                         error, errorMsg,
                         true /* once */,
                         false /* warmupOnly */,
-                        false /* richErrorMessage */);
+                        false /* richErrorMessage */,
+                        RuntimeOption::EvalPreludePath);
       if (ret) {
         String content = context->obDetachContents();
         transport->sendRaw((void*)content.data(), content.size());

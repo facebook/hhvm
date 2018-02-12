@@ -112,7 +112,8 @@ bool hphp_invoke(ExecutionContext *context,
                  std::string &errorMsg,
                  bool once,
                  bool warmupOnly,
-                 bool richErrorMsg);
+                 bool richErrorMsg,
+                 const std::string& prelude);
 void hphp_context_shutdown();
 void hphp_context_exit(bool shutdown = true);
 

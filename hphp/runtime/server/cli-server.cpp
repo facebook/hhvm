@@ -953,6 +953,8 @@ MonitorThread::MonitorThread(int client) {
   m_wpipe = wpipe;
 }
 
+const StaticString s_hhvm_prelude_path("hhvm.prelude_path");
+
 void CLIWorker::doJob(int client) {
   FTRACE(1, "CLIWorker::doJob({}): starting job...\n", client);
   try {
@@ -1076,7 +1078,42 @@ void CLIWorker::doJob(int client) {
 
       MonitorThread monitor(client);
       FTRACE(1, "CLIWorker::doJob({}): invoking {}...\n", client, args[0]);
-      if (hphp_invoke_simple(args[0], false /* warmup only */)) {
+      auto const prelude = [&] () -> std::string {
+        if (!ini.exists(s_hhvm_prelude_path, true)) {
+          return RuntimeOption::EvalPreludePath;
+        }
+        auto const pp = ini[s_hhvm_prelude_path];
+        if (!pp.isArray()) return RuntimeOption::EvalPreludePath;
+
+        auto const ppArr = pp.toArray();
+        if (!ppArr.exists(s_local_value, true)) {
+          return RuntimeOption::EvalPreludePath;
+        }
+
+        auto const lv = ppArr[s_local_value];
+        if (!lv.isString()) return RuntimeOption::EvalPreludePath;
+
+        return lv.toString().toCppString();
+      }();
+
+      bool error;
+      std::string errorMsg;
+      auto const invoke_result = hphp_invoke(
+        g_context.getNoCheck(),
+        args[0],
+        false,
+        null_array,
+        uninit_null(),
+        "",
+        "",
+        error,
+        errorMsg,
+        true /* once */,
+        false /* warmup only */,
+        false /* richErrorMsg */,
+        prelude
+      );
+      if (invoke_result) {
         ret = tl_exit_code;
       }
       FTRACE(2, "CLIWorker::doJob({}): waiting for monitor...\n", client);

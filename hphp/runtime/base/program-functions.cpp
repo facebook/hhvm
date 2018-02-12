@@ -2368,7 +2368,8 @@ bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
                      uninit_null(), "", "", error, errorMsg,
                      true /* once */,
                      warmupOnly,
-                     false /* richErrorMsg */);
+                     false /* richErrorMsg */,
+                     RuntimeOption::EvalPreludePath);
 }
 
 const StaticString s_slash("/");
@@ -2397,7 +2398,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  const std::string &reqInitFunc, const std::string &reqInitDoc,
                  bool &error, std::string &errorMsg,
                  bool once, bool warmupOnly,
-                 bool richErrorMsg) {
+                 bool richErrorMsg, const std::string& prelude) {
   bool isServer =
     RuntimeOption::ServerExecutionMode() && !is_cli_mode();
   error = false;
@@ -2430,7 +2431,6 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
         require(RuntimeOption::AutoPrependFile, false,
                 context->getCwd().data(), true);
       }
-      auto const& prelude = RuntimeOption::EvalPreludePath;
       if (!prelude.empty()) {
         run_prelude(prelude, String(cmd, CopyString), context->getCwd().data());
       }

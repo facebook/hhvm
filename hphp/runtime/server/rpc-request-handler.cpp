@@ -359,7 +359,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         ret = hphp_invoke(m_context, rpcFile, false, Array(), uninit_null(),
                           reqInitFunc, reqInitDoc, error, errorMsg, runOnce,
                           false /* warmupOnly */,
-                          false /* richErrorMessage */);
+                          false /* richErrorMessage */,
+                          RuntimeOption::EvalPreludePath);
       }
       // no need to do the initialization for a second time
       reqInitFunc.clear();
@@ -370,7 +371,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
                         reqInitFunc, reqInitDoc, error, errorMsg,
                         true /* once */,
                         false /* warmupOnly */,
-                        false /* richErrorMessage */);
+                        false /* richErrorMessage */,
+                        RuntimeOption::EvalPreludePath);
     }
     if (ret) {
       bool serializeFailed = false;

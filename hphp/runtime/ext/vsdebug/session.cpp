@@ -77,7 +77,8 @@ void DebuggerSession::invokeDummyStartupDocument() {
                          errorMsg,
                          true,
                          false,
-                         true);
+                         true,
+                         RuntimeOption::EvalPreludePath);
 
   if (!ret || error) {
     std::string displayError =

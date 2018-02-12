@@ -25,6 +25,10 @@ namespace legal2 {
   use \foo;
 }
 
+namespace legal2 {
+  use \foo as false;
+}
+
 namespace legal3 {
   use type \foo\C, \foo\D;
 }

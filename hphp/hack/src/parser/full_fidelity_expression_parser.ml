@@ -221,14 +221,14 @@ module WithStatementAndDeclAndTypeParser
       (* We have a heredoc string literal but it might contain embedded
          expressions. Start over. *)
       let (parser, token, name) = next_docstring_header parser in
-      parse_heredoc_string parser (make_token token) name
+      parse_heredoc_string parser token name
     | HeredocStringLiteralHead
     | DoubleQuotedStringLiteralHead ->
       parse_double_quoted_like_string
-        parser1 (make_token token) Lexer.Literal_double_quoted
+        parser1 token Lexer.Literal_double_quoted
     | ExecutionStringLiteralHead ->
       parse_double_quoted_like_string
-        parser1 (make_token token) Lexer.Literal_execution_string
+        parser1 token Lexer.Literal_execution_string
     | Variable -> parse_variable_or_lambda parser
     | XHPClassName ->
       parse_name_or_collection_literal_expression parser1 (make_token token)
@@ -505,20 +505,21 @@ module WithStatementAndDeclAndTypeParser
 
     *)
 
-    let merge token head =
-      (* TODO: Assert that new head has no leading trivia, old head has no
-      trailing trivia. *)
-      (* Invariant: A token inside a list of string fragments is always a head,
-      body or tail. *)
-      (* TODO: Is this invariant what we want? We could preserve the parse of
-         the string. That is, something like "a${b}c${d}e" is at present
-         represented as head, expr, body, expr, tail.  It could be instead
-         head, dollar, left brace, expr, right brace, body, dollar, left
-         brace, expr, right brace, tail. Is that better?
+    let merge token = function
+    (* TODO: Assert that new head has no leading trivia, old head has no
+    trailing trivia. *)
+    (* Invariant: A token inside a list of string fragments is always a head,
+    body or tail. *)
+    (* TODO: Is this invariant what we want? We could preserve the parse of
+       the string. That is, something like "a${b}c${d}e" is at present
+       represented as head, expr, body, expr, tail.  It could be instead
+       head, dollar, left brace, expr, right brace, body, dollar, left
+       brace, expr, right brace, tail. Is that better?
 
-         TODO: Similarly we might want to preserve the structure of
-         heredoc strings in the parse: that there is a header consisting of
-         an identifier, and so on, and then body text, etc. *)
+       TODO: Similarly we might want to preserve the structure of
+       heredoc strings in the parse: that there is a header consisting of
+       an identifier, and so on, and then body text, etc. *)
+    | Some head ->
       let k = match (Token.kind head, Token.kind token) with
       | (DoubleQuotedStringLiteralHead, DoubleQuotedStringLiteralTail) ->
         DoubleQuotedStringLiteral
@@ -526,39 +527,44 @@ module WithStatementAndDeclAndTypeParser
         ExecutionStringLiteral
       | (HeredocStringLiteralHead, HeredocStringLiteralTail) ->
         HeredocStringLiteral
-      | (DoubleQuotedStringLiteralHead, _) -> DoubleQuotedStringLiteralHead
-      | (ExecutionStringLiteralHead, _) -> ExecutionStringLiteralHead
-      | (HeredocStringLiteralHead, _) -> HeredocStringLiteralHead
-      | (_, DoubleQuotedStringLiteralTail) -> DoubleQuotedStringLiteralTail
-      | (_, HeredocStringLiteralTail) -> HeredocStringLiteralTail
-      | (_, ExecutionStringLiteralTail) -> ExecutionStringLiteralTail
-      | _ -> StringLiteralBody in
+      | (DoubleQuotedStringLiteralHead, _) ->
+        DoubleQuotedStringLiteralHead
+      | (ExecutionStringLiteralHead, _) ->
+        ExecutionStringLiteralHead
+      | (HeredocStringLiteralHead, _) ->
+        HeredocStringLiteralHead
+      | (_, DoubleQuotedStringLiteralTail) ->
+        DoubleQuotedStringLiteralTail
+      | (_, HeredocStringLiteralTail) ->
+        HeredocStringLiteralTail
+      | (_, ExecutionStringLiteralTail) ->
+        ExecutionStringLiteralTail
+      | _ ->
+        StringLiteralBody
+      in
       let s = Token.source_text head in
       let o = Token.leading_start_offset head in
       let w = (Token.width head) + (Token.width token) in
       let l = Token.leading head in
       let t = Token.trailing token in
       (* TODO: Make a "position" type that is a tuple of source and offset. *)
-      let result = Token.make k s o w l t in
-      make_token result in
+      Some (Token.make k s o w l t)
+    | None ->
+      let token = match Token.kind token with
+      | StringLiteralBody
+      | HeredocStringLiteralTail
+      | DoubleQuotedStringLiteralTail
+      | ExecutionStringLiteralTail ->
+        token
+      | _ ->
+        Token.with_kind token StringLiteralBody
+      in
+      Some token
+    in
 
-    let merge_head token acc =
-      match acc with
-      | h :: t ->
-        begin
-        match Syntax.get_token h with
-        | None ->
-          let k = Token.kind token in
-          let token = match k with
-            | StringLiteralBody
-            | HeredocStringLiteralTail
-            | DoubleQuotedStringLiteralTail
-            | ExecutionStringLiteralTail -> token
-            | _ -> Token.with_kind token StringLiteralBody in
-          (make_token token) :: acc
-        | Some head -> (merge token head) :: t
-        end
-      | _ -> (make_token token) :: acc in
+    let put_opt head acc =
+      Option.value_map ~default:acc ~f:(fun h -> make_token h :: acc) head
+    in
 
     let parse_embedded_expression parser token =
       let var_expr = make_variable_expression (make_token token) in
@@ -589,22 +595,16 @@ module WithStatementAndDeclAndTypeParser
           (make_token token1) (make_literal_expression (make_token token2))
           (make_token token3) in
         (parser3, expr)
-      | _ -> (parser, var_expr) in
+      | _ -> (parser, var_expr)
+    in
 
-    let rec handle_left_brace parser acc =
+    let rec handle_left_brace parser head acc =
       (* Note that here we use next_token_in_string because we need to know
       whether there is trivia between the left brace and the $x which follows.*)
       let (parser1, left_brace) = next_token_in_string parser literal_kind in
       let (_, token) = next_token_in_string parser1 literal_kind in
       (* TODO: What about "{$$}" ? *)
       match Token.kind token with
-      | Dollar ->
-        (* We do not support {$ inside a string unless the $ begins a
-        variable name. Append the { and start again on the $. *)
-        (* TODO: Is this right? Suppose we have "{${x}".  Is that the same
-        as "{"."${x}" ? Double check this. *)
-        (* TODO: Give an error. *)
-        aux parser1 (merge_head left_brace acc)
       | Variable ->
         (* Parse any expression followed by a close brace.
            TODO: We do not actually support all possible expressions;
@@ -612,13 +612,18 @@ module WithStatementAndDeclAndTypeParser
                  (2) catch it in a later pass, or (3) just allow any
                  expression here? *)
         let (parser, expr) = parse_braced_expression_in_string parser in
-        aux parser (expr :: acc)
+        aux parser None (expr :: (put_opt head acc))
       | _ ->
+        (* We do not support {$ inside a string unless the $ begins a
+        variable name. Append the { and start again on the $. *)
+        (* TODO: Is this right? Suppose we have "{${x}".  Is that the same
+        as "{"."${x}" ? Double check this. *)
+        (* TODO: Give an error. *)
         (* We got a { not followed by a $. Ignore it. *)
         (* TODO: Give a warning? *)
-        aux parser1 (merge_head left_brace acc)
+        aux parser1 (merge left_brace head) acc
 
-    and handle_dollar parser dollar acc =
+    and handle_dollar parser dollar head acc =
       (* We need to parse ${x} as though it was {$x} *)
       (* TODO: This should be an error in strict mode. *)
       (* We must not have trivia between the $ and the {, but we can have
@@ -639,27 +644,31 @@ module WithStatementAndDeclAndTypeParser
         a variable expression, not a qualified name expression. *)
 
         let (parser, expr) = parse_braced_expression_in_string parser in
-        aux parser (expr :: (make_token dollar) :: acc)
-
+        aux parser None (expr :: (make_token dollar) :: (put_opt head acc))
       | _ ->
         (* We got a $ not followed by a { or variable name. Ignore it. *)
         (* TODO: Give a warning? *)
-        aux parser (merge_head dollar acc)
+        aux parser (merge dollar head) acc
 
-    and aux parser acc =
+    and aux parser head acc =
       let (parser1, token) = next_token_in_string parser literal_kind in
       match Token.kind token with
       | HeredocStringLiteralTail
       | DoubleQuotedStringLiteralTail
-      | ExecutionStringLiteralTail -> (parser1, (merge_head token acc))
-      | LeftBrace -> handle_left_brace parser acc
+      | ExecutionStringLiteralTail ->
+        parser1, (put_opt (merge token head) acc)
+      | LeftBrace ->
+        handle_left_brace parser head acc
       | Variable ->
         let (parser, expr) = parse_embedded_expression parser1 token in
-        aux parser (expr :: acc)
-      | Dollar -> handle_dollar parser1 token acc
-      | _ -> aux parser1 (merge_head token acc) in
+        aux parser None (expr :: (put_opt head acc))
+      | Dollar ->
+        handle_dollar parser1 token head acc
+      | _ ->
+        aux parser1 (merge token head) acc
+    in
 
-    let (parser, results) = aux parser [head] in
+    let (parser, results) = aux parser (Some head) [] in
     (* If we've ended up with a single string literal with no internal
     structure, do not represent that as a list with one item. *)
     let results = match results with

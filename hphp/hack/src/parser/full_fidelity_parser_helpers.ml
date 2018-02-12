@@ -33,13 +33,13 @@ module WithParser(Parser : Parser_S) = struct
     let l = lexer parser in
     let s = Lexer.source l in
     let o = Lexer.end_offset l in
-    Syntax.make_missing s o
+    make_missing s o
 
   let make_list parser items =
     let l = lexer parser in
     let s = Lexer.source l in
     let o = Lexer.end_offset l in
-    Syntax.make_list s o items
+    make_list s o items
 
   module NextToken : sig
     val next_token : t -> t * Syntax.Token.t
@@ -299,19 +299,14 @@ module WithParser(Parser : Parser_S) = struct
       (parser, missing)
 
   let require_name_allow_std_constants parser =
+    let start_offset = Lexer.end_offset @@ lexer parser in
     let (parser1, token) = require_name_allow_keywords parser in
-    let is_std_constant token =
-      match Syntax.extract_text token with
-      | Some text ->
-          let str = String.lowercase_ascii text in
-          begin match str with
-          | "true" | "false" | "null" -> true
-          | _ -> false
-          end
-      | None -> false in
-    if not @@ is_std_constant token
-    then require_name parser
-    else (parser1, token)
+    let end_offset = Lexer.end_offset @@ lexer parser1 in
+    let source = Lexer.source @@ lexer parser in
+    let text = SourceText.sub source start_offset (end_offset - start_offset) in
+    match String.lowercase_ascii text with
+    | "true" | "false" | "null" -> (parser1, token)
+    | _ -> require_name parser
 
   let next_xhp_category_name parser =
     let lexer = lexer parser in
@@ -358,43 +353,59 @@ module WithParser(Parser : Parser_S) = struct
   let is_next_xhp_category_name parser =
     Lexer.is_next_xhp_category_name (lexer parser)
 
-  let rec scan_qualified_name_worker parser name_opt acc =
+  (* Also returns whether last token was '\' *)
+  let rec scan_qualified_name_worker parser name_opt acc is_backslash =
     let parser1, token = next_token_as_name parser in
     match name_opt, Token.kind token, acc with
     | Some name, TokenKind.Backslash, _ ->
       (* found backslash, create item and recurse *)
       let part = make_list_item name (make_token token) in
-      scan_qualified_name_worker parser1 None (part :: acc)
+      scan_qualified_name_worker parser1 None (part :: acc) true
     | None, TokenKind.Name, _ ->
       (* found a name, recurse to look for backslash *)
-      scan_qualified_name_worker parser1 (Some (make_token token)) acc
+      scan_qualified_name_worker
+        parser1 (Some (make_token token)) acc false
     | Some name, _, [] ->
       (* have not found anything - return [] to indicate failure *)
-      parser, []
+      parser, [], false
     | Some name, _, _ ->
       (* next token is not part of qualified name but we've consume some
          part of the input - create part for name with missing backslash
          and return accumulated result *)
       let missing = make_missing parser in
       let part = make_list_item name missing in
-      parser, List.rev (part :: acc)
+      parser, List.rev (part :: acc), false
     | _ ->
       (* next token is not part of qualified name - return accumulated result *)
-      parser, List.rev acc
+      parser, List.rev acc, is_backslash
 
-  let scan_remaining_qualified_name parser name_token =
-    let parser, parts = scan_qualified_name_worker parser (Some name_token) [] in
+  let scan_remaining_qualified_name_extended parser name_token =
+    let (parser, parts, is_backslash) =
+      scan_qualified_name_worker parser (Some name_token) [] false
+    in
     match parts with
     | [] ->
-      parser, name_token
+      (parser, name_token, is_backslash)
     | parts ->
-      parser, make_qualified_name (make_list parser parts)
+      parser, make_qualified_name (make_list parser parts), is_backslash
 
-  let scan_qualified_name parser backslash =
+  let scan_remaining_qualified_name parser name_token =
+    let (parser, name, _) =
+      scan_remaining_qualified_name_extended parser name_token
+    in
+    (parser, name)
+
+  let scan_qualified_name_extended parser backslash =
     let missing = make_missing parser in
     let head = make_list_item missing backslash in
-    let parser, parts = scan_qualified_name_worker parser None [head] in
-    parser, make_qualified_name (make_list parser parts)
+    let (parser, parts, is_backslash) =
+      scan_qualified_name_worker parser None [head] false
+    in
+    parser, make_qualified_name (make_list parser parts), is_backslash
+
+  let scan_qualified_name parser backslash =
+    let (parser, name, _) = scan_qualified_name_extended parser backslash in
+    (parser, name)
 
   let scan_name_or_qualified_name parser =
     let parser1, token = next_token parser in

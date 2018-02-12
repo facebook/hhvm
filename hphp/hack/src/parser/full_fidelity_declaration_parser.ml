@@ -348,15 +348,19 @@ module WithExpressionAndStatementAndTypeParser
     match Token.kind token with
     | Backslash ->
       let token = make_token token in
-      let (parser, name) = scan_qualified_name parser token in
-      Syntax.is_namespace_prefix name || peek_token_kind parser = LeftBrace
+      let (parser, name, is_backslash) =
+        scan_qualified_name_extended parser token
+      in
+      is_backslash || peek_token_kind parser = LeftBrace
     | Name ->
       let token = make_token token in
-      let (parser, name) = scan_remaining_qualified_name parser token in
-      if name == token then
-        peek_token_kind parser = LeftBrace
-      else
-        Syntax.is_namespace_prefix name || peek_token_kind parser = LeftBrace
+      let (parser, name, is_backslash) =
+        scan_remaining_qualified_name_extended parser token
+      in
+      (* Here we rely on the implementation details of
+      scan_remaining_qualified_name_extended. It's returning
+      *exactly* token if there is nothing except it in the name. *)
+      is_backslash && name <> token || peek_token_kind parser = LeftBrace
     | _ -> false
 
   and parse_group_use parser =

@@ -1516,6 +1516,8 @@ inline void raiseIncompat(const PreClass* implementor,
 
 static bool checkTypeConstraint(const PreClass* implCls, const Class* iface,
                                 TypeConstraint tc, TypeConstraint itc) {
+  if (!RuntimeOption::CheckParamTypeInvariance) return true;
+
   const StringData* iSelf;
   const StringData* iParent;
   if (isTrait(iface)) {

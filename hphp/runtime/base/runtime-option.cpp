@@ -105,6 +105,7 @@ bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
 bool RuntimeOption::AutoprimeGenerators = true;
+bool RuntimeOption::CheckParamTypeInvariance = true;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
 uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
@@ -1144,6 +1145,9 @@ void RuntimeOption::Load(
     Config::Bind(EvalInitialStaticStringTableSize, ini, config,
                  "Eval.InitialStaticStringTableSize",
                  EvalInitialStaticStringTableSize);
+    Config::Bind(CheckParamTypeInvariance, ini, config,
+                 "Eval.CheckParamTypeInvariance",
+                 !EnableHipHopSyntax);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true

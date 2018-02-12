@@ -210,7 +210,6 @@ struct Repo::GlobalData {
       (ReffinessInvariance)
       (NoticeOnAllDynamicCalls)
       (NoticeOnBuiltinDynamicCalls)
-      (APCProfile)
       ;
   }
 };

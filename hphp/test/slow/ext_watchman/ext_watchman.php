@@ -113,9 +113,6 @@ class WatchmanInstance {
       $this->proc = null;
     }
   }
-  function __destruct() {
-    $this->terminateProcess();
-  }
 }
 
 function waitFor(string $filename, WatchmanInstance $wminst): void {
@@ -133,14 +130,13 @@ function waitFor(string $filename, WatchmanInstance $wminst): void {
   }
 }
 
-function test_core(string $tmpdir): void {
+function test_core(WatchmanInstance $wminst): void {
   if ((int)HH\ext_watchman_version()) {
     print "PASSED version get test\n";
   } else {
     print "FAILED version get test\n";
   }
 
-  $wminst = new WatchmanInstance($tmpdir);
   $sock = $wminst->getFullSockName();
   // Test one-shot
   print("Testing one-shot\n");
@@ -441,13 +437,16 @@ $tmpdir = tempnam(sys_get_temp_dir(), 'wmt');
 if (!mkdir($tmpdir)) {
   throw new Exception("FAIL failed creating dir '$tmpdir'\n");
 }
+$wminst = null;
 try {
   if (!chdir($tmpdir)) {
     throw new Exception("FAIL (creating temporary directory)\n");
   }
-  test_core($tmpdir);
+  $wminst = new WatchmanInstance($tmpdir);
+  test_core($wminst);
 } finally {
   apc_delete('stress_counter');  // Stops async callback_checksub() if running
+  $wminst->terminateProcess();
   if (is_dir($tmpdir)) {
     foreach (glob($tmpdir.'/*') as $file) {
       unlink($file);

@@ -30,42 +30,49 @@ void DataWalker::traverseData(ArrayData* data,
                               PointerSet& visited,
                               PointerMap* seenArrs) const {
   // At this point we're just using seenArrs to keep track of arrays
-  // we've seen, and prevent traversing them multiple times. We'll
-  // also use this map to compute the size of the uncounted array to
-  // avoid another recursive walk later. The values will be filled in
-  // as we create uncounted arrays for the keys.
-  if (seenArrs && !seenArrs->emplace(data, nullptr).second) {
+  // we've seen, and prevent traversing them multiple times. If we're
+  // not using jemalloc, we'll also use this map to compute the size
+  // of the uncounted array to avoid another recursive walk later, but
+  // otherwise we only need to record arrays that might occur more
+  // than once. The values will be filled in as we create uncounted
+  // arrays for the keys.
+  if (seenArrs && (!use_jemalloc || data->hasMultipleRefs()) &&
+      !seenArrs->emplace(data, nullptr).second) {
     return;
   }
 
-  for (ArrayIter iter(data); iter; ++iter) {
-    auto const rval = iter.secondRval();
+  // Static arrays are never circular, never contain KindOfRef, and
+  // never contain objects or resources, so there's no need to
+  // traverse them.
+  if (data->isStatic()) return;
 
-    if (rval.type() == KindOfRef &&
-        rval.val().pref->isReferenced()) {
-      if (markVisited(rval.val().pref->var(), features, visited)) {
-        if (canStopWalk(features)) return;
-        continue; // don't recurse forever; we already went down this path
+  auto const fn = [&] (TypedValue rval) {
+    if (rval.m_type == KindOfRef) {
+      if (rval.m_data.pref->isReferenced()) {
+        if (markVisited(rval.m_data.pref->var(), features, visited)) {
+          // Don't recurse forever; we already went down this path, and
+          // stop the walk if we've already got everything we need.
+          return canStopWalk(features);
+        }
+        // Right now consider it circular even if the referenced variant
+        // only showed up in one spot.  This could be revisted later.
+        features.isCircular = true;
+        if (canStopWalk(features)) return true;
       }
-      // Right now consider it circular even if the referenced variant only
-      // showed up in one spot.  This could be revisted later.
-      features.isCircular = true;
-      if (canStopWalk(features)) return;
+      rval = *rval.m_data.pref->tv();
     }
 
-    auto const inner = rval.unboxed();
-    // cheap enough, do it always
-    features.hasRefCountReference = isRefcountedType(inner.type());
-    if (inner.type() == KindOfObject) {
+    if (rval.m_type == KindOfObject) {
       features.hasObjectOrResource = true;
-      traverseData(inner.val().pobj, features, visited);
-    } else if (isArrayLikeType(inner.type())) {
-      traverseData(inner.val().parr, features, visited, seenArrs);
-    } else if (inner.type() == KindOfResource) {
+      traverseData(rval.m_data.pobj, features, visited);
+    } else if (isArrayLikeType(rval.m_type)) {
+      traverseData(rval.m_data.parr, features, visited, seenArrs);
+    } else if (rval.m_type == KindOfResource) {
       features.hasObjectOrResource = true;
     }
-    if (canStopWalk(features)) return;
-  }
+    return canStopWalk(features);
+  };
+  IterateV<decltype(fn), false>(data, fn);
 }
 
 void DataWalker::traverseData(
@@ -102,14 +109,11 @@ inline void DataWalker::objectFeature(ObjectData* pobj, DataFeature& features,
 }
 
 inline bool DataWalker::canStopWalk(DataFeature& features) const {
-  auto refCountCheck =
-    features.hasRefCountReference ||
-    !(m_features & LookupFeature::RefCountedReference);
   auto objectCheck =
     features.hasObjectOrResource ||
     !(m_features & LookupFeature::HasObjectOrResource);
   auto defaultChecks = features.isCircular || features.hasSerializable;
-  return refCountCheck && objectCheck && defaultChecks;
+  return objectCheck && defaultChecks;
 }
 
 //////////////////////////////////////////////////////////////////////

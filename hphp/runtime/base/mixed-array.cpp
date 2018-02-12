@@ -401,7 +401,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
                                      size_t extra,
                                      PointerMap* seen) {
   void** seenVal = nullptr;
-  if (seen) {
+  if (seen && array->hasMultipleRefs()) {
     auto it = seen->find(array);
     assert(it != seen->end());
     seenVal = &it->second;

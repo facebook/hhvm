@@ -41,8 +41,7 @@ struct DataWalker {
   enum class LookupFeature {
     Default                  = 0x0,
     DetectSerializable       = 0x1,
-    RefCountedReference      = 0x2,
-    HasObjectOrResource      = 0x4
+    HasObjectOrResource      = 0x2
   };
 
   /*
@@ -53,7 +52,6 @@ struct DataWalker {
     DataFeature()
       : isCircular(false)
       , hasSerializable(false)
-      , hasRefCountReference(false)
       , hasObjectOrResource(false) {
     }
 
@@ -62,9 +60,6 @@ struct DataWalker {
     unsigned isCircular : 1;
     // whether the data graph contains serializable objects
     unsigned hasSerializable : 1;
-    // whether the data graph contains some ref counted reference
-    // (*not* one of: bool, int, double and static string)
-    unsigned hasRefCountReference : 1;
     // whether the data graph contains any object or resource
     unsigned hasObjectOrResource : 1;
   };

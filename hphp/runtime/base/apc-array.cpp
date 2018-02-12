@@ -33,6 +33,7 @@ namespace HPHP {
 namespace {
 
 size_t getMemSize(PointerMap* seenArrs) {
+  always_assert(!use_jemalloc);
   size_t total = 0;
   for (auto kv : *seenArrs) {
     total += ::HPHP::getMemSize(static_cast<ArrayData*>(kv.first), false);
@@ -62,8 +63,14 @@ APCArray::MakeSharedImpl(ArrayData* arr,
 
     if (apcExtension::UseUncounted && !features.hasObjectOrResource &&
         !arr->empty()) {
-      return {uncounted(seenArrs.get()),
-              getMemSize(seenArrs.get()) + sizeof(APCTypedValue)};
+      auto const base_size =
+        tl_heap->getAllocated() - tl_heap->getDeallocated();
+      auto const uncounted_arr = uncounted(seenArrs.get());
+      auto const size = use_jemalloc ?
+        tl_heap->getAllocated() - tl_heap->getDeallocated() - base_size :
+        getMemSize(seenArrs.get());
+      assertx(size > 0);
+      return {uncounted_arr, size + sizeof(APCTypedValue)};
     }
   }
 

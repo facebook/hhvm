@@ -1,4 +1,0 @@
-*** Testing curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); ***
-string(25) "Hello World!
-Hello World!"
-===DONE===

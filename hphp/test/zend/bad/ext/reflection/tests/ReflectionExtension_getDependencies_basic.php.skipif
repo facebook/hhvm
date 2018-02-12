@@ -1,3 +1,0 @@
-<?php
-if (!extension_loaded("dom")) die("skip no dom extension");
-?>

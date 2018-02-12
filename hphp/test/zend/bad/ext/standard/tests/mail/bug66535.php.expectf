@@ -1,8 +1,0 @@
-*** Testing mail() : send email without additional headers ***
-bool(true)
-To: user@company.com
-Subject: Test Subject
-X-PHP-Originating-Script: %d:bug66535.php
-
-A Message
-===DONE===

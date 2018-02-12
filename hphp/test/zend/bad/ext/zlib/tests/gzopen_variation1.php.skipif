@@ -1,5 +1,0 @@
-<?php 
-if (!extension_loaded("zlib")) {
-	print "skip - zlib extension not loaded"; 
-}	 
-?>

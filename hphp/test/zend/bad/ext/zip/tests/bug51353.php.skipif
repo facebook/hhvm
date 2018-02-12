@@ -1,3 +1,0 @@
-<?php
-if(!extension_loaded('zip')) die('skip');
-die('skip the test might get very long, activate it manually');

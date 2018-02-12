@@ -621,7 +621,6 @@ function find_test_files($file) {
     'zend_ext_nz' => 'hphp/test/zend/good/ext/[n-z]*',
     'zend_Zend'   => 'hphp/test/zend/good/Zend',
     'zend_tests'  => 'hphp/test/zend/good/tests',
-    'zend_bad'    => 'hphp/test/zend/bad',
   );
 
   if (isset($mappage[$file])) {

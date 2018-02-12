@@ -1,4 +1,0 @@
-<?php
-include("skipif.inc");
-skip_bytea_not_escape();
-?>

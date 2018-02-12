@@ -1,9 +1,0 @@
-Testing emulated PS...
-
-Warning: %s
-string(5) "42S02"
-Testing native PS...
-
-Warning: %s
-
-Fatal error: %s

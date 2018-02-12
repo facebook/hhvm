@@ -1,7 +1,0 @@
-<?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-if (!$IS_MYSQLND) {
-	die("skip: test applies only to mysqlnd");
-}
-?>

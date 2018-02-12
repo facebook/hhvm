@@ -1,8 +1,0 @@
--- Testing vfprintf() function with other strangeties  --
-
-Warning: %s
-bool(false)
-
-Warning: %s
-bool(false)
-===DONE===

@@ -1,6 +1,0 @@
-array(0) {
-}
-array(1) {
-  [%u|b%"foobar"]=>
-  %unicode|string%(1) "1"
-}

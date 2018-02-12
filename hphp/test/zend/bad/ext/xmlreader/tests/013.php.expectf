@@ -1,6 +1,0 @@
-string(3) "123"
-string(3) "456"
-===FAIL===
-
-Warning: %s
-===DONE===

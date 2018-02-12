@@ -1,4 +1,0 @@
-Testing include_once using file symbolic link
-I am included
-Testing include_once using directory symbolic link
-Testing include_once using junction points

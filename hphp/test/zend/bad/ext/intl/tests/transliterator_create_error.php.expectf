@@ -1,7 +1,0 @@
-
-Warning: %s
-transliterator_create: unable to open ICU transliterator with id "inexistent id": U_INVALID_ID
-
-Warning: %s
-String conversion of id to UTF-16 failed: U_INVALID_CHAR_FOUND
-Done.

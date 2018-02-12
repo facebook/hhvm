@@ -1,3 +1,0 @@
-<?php 
-if (spl_autoload_functions() !== false) die('skip __autoload() registered by php.ini'); 
-?>

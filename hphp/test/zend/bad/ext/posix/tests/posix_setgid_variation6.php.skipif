@@ -1,3 +1,0 @@
-<?php 
-        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
-?>

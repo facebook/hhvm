@@ -1,2 +1,0 @@
-Deprecated: Non-static method A::foo() should not be called statically, assuming $this from incompatible context in %s on line %d
-string(1) "B"

@@ -1,9 +1,0 @@
-
-Warning: %s
-bool(false)
-
-Warning: %s
-NULL
-array(%d) {
-%a
-}

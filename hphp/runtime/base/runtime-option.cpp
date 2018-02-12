@@ -56,6 +56,7 @@
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/server/files-match.h"
 #include "hphp/runtime/server/access-log.h"
+#include "hphp/runtime/server/cli-server.h"
 
 #include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/autoload-handler.h"
@@ -2014,6 +2015,11 @@ void RuntimeOption::Load(
                    IniSetting::SetAndGet<std::string>(
                      [](const std::string& /*value*/) { return false; },
                      []() { return getHphpCompilerVersion(); }));
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.cli_server_api_version",
+                   IniSetting::SetAndGet<uint64_t>(
+                     [](const uint64_t /*value*/) { return false; },
+                     []() { return CLI_SERVER_API_VERSION; }));
   IniSetting::Bind(
     IniSetting::CORE, IniSetting::PHP_INI_NONE, "hphp.build_id",
     IniSetting::SetAndGet<std::string>(

@@ -167,6 +167,21 @@ TRACE_SET_MOD(clisrv);
 
 namespace HPHP {
 
+/*
+ *               READ BEFORE MODIFYING THE CLI SERVER PROTOCOL
+ * ===== WARNING ===== WARNING ===== WARNING ===== WARNING ===== WARNING =====
+ *
+ * The CLI client and server use CLI_SERVER_API_VERSION to negotiate a
+ * conncection, any changes to their API must include a bump of this version.
+ * Version is not tied to HHVM compiler-id because changes rarely affect
+ * communication between the server and client.
+ *
+ * ===== WARNING ===== WARNING ===== WARNING ===== WARNING ===== WARNING =====
+ */
+const uint64_t CLI_SERVER_API_VERSION = 0;
+
+const StaticString s_hphp_cli_server_api_version("hphp.cli_server_api_version");
+
 struct CLIClientGuardedFile : PlainFile {
   explicit CLIClientGuardedFile(int fd) :
     PlainFile(fd)
@@ -1019,6 +1034,29 @@ void CLIWorker::doJob(int client) {
 
       auto ini = init_ini_settings(iniSettings);
 
+      auto const api_version = [&] () -> uint64_t {
+        // Treat the absence of a version as being the same as version 0.
+        if (!ini.exists(s_hphp_cli_server_api_version)) return 0;
+        auto const detail = ini[s_hphp_cli_server_api_version];
+        if (!detail.isArray()) return 0;
+        auto const detailArr = detail.toArray();
+        if (!detailArr.exists(s_local_value)) return 0;
+        auto const val = detailArr[s_local_value];
+        return val.isString() ? val.toString().toInt64() : 0;
+      }();
+
+      if (api_version != CLI_SERVER_API_VERSION) {
+        cli_write(client, "version_bad");
+        throw Exception(
+          "CLI_SERVER_API_VERSION (%lu) does not match client (%lu)",
+          CLI_SERVER_API_VERSION, api_version
+        );
+      } else {
+        // Even if the client is too old to understand this command, unknown
+        // commands are handled silently.
+        cli_write(client, "version_ok");
+      }
+
       envArr = init_cli_globals(args.size(), buf.get(), xhprofFlags, ini,
                                 envp.get());
       tl_env = &envArr;
@@ -1258,10 +1296,24 @@ int mkdir_recursive(const char* path, int mode) {
 
 void cli_process_command_loop(int fd) {
   FTRACE(1, "cli_process_command_loop({}): starting...\n", fd);
-  for (;;) {
-    std::string cmd;
-    cli_read(fd, cmd);
+  std::string cmd;
+  cli_read(fd, cmd);
 
+  if (cmd == "version_bad") {
+    // Returning will cause us to re-run the script locally when not in force
+    // server mode.
+    return;
+  }
+
+  if (cmd != "version_ok") {
+    // Server is too old / didn't send a version. Only version 0 is compatible
+    // with an unversioned server.
+    if (CLI_SERVER_API_VERSION != 0) return;
+  } else {
+    cli_read(fd, cmd);
+  }
+
+  for (;; cli_read(fd, cmd)) {
     FTRACE(2, "cli_process_command_loop({}): got command: {}\n", fd, cmd);
 
     if (cmd == "exit") {

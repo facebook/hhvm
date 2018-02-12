@@ -73,8 +73,6 @@ bool MmapFile::init() {
     return false;
   }
 
-  backing_mem_end_ = (char*) backing_mem_ + backing_mem_size_;
-
   read_ptr_ = static_cast<char*>(backing_mem_);
   initialized_ = true;
   return true;
@@ -121,12 +119,12 @@ bool MmapFile::makePointer(uint64_t offset, uint64_t len,
 
   const char* temp = (const char*) backing_mem_;
 
-  if (temp + offset > backing_mem_end_) {
+  if (offset >= backing_mem_size_) {
     Logger::Error("Unable to make pointer: beginning beyond EOF");
     return false;
   }
 
-  if (temp + offset + len > backing_mem_end_) {
+  if (offset + len >= backing_mem_size_) {
     Logger::Error("Unable to make pointer: would end beyond EOF");
     return false;
   }
@@ -138,7 +136,7 @@ bool MmapFile::makePointer(uint64_t offset, uint64_t len,
 // --- Private functions.
 
 bool MmapFile::wouldExceedMem(uint64_t len) const {
-  return (read_ptr_ + len) > backing_mem_end_;
+  return (read_ptr_ - (const char*) backing_mem_ + len) >= backing_mem_size_;
 }
 
 }  // namespace HPHP

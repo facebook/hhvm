@@ -51,7 +51,6 @@ struct MmapFile {
 
   int backing_fd_;
   void* backing_mem_;
-  void* backing_mem_end_;
 
   off_t backing_mem_size_;
   char* read_ptr_;

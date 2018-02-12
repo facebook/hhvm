@@ -146,6 +146,9 @@ void DebuggerSession::runDummy() {
   );
 
   hphp_session_init();
+  init_command_line_globals(0, nullptr, environ, 0,
+                            RuntimeOption::ServerVariables,
+                            RuntimeOption::EnvVariables);
   SCOPE_EXIT {
     if (m_dummyRequestInfo->m_flags.hookAttached) {
       DebuggerHook::detach();

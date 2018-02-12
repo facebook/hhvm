@@ -43,7 +43,7 @@ let get_kind_num ~tparams p =
   | "hh\\keyset" -> 21
   | "hh\\vec_or_dict" -> 22
   | "typeaccess" -> 102
-  | "xhp" -> 103
+  | "xhp_xhp" -> 103
   | "unresolved"
   | _ -> 101
 

@@ -13,6 +13,10 @@ open ServerCommandTypes
 
 module TLazyHeap = Typing_lazy_heap
 
+exception Nonfatal_rpc_exception of
+  exn * string * ServerEnv.env * ServerEnv.recheck_iteration_flag option
+
+
 (* Some client commands require full check to be run in order to update global
  * state that they depend on *)
 let rpc_command_needs_full_check : type a. a t -> bool = function
@@ -82,7 +86,8 @@ let full_recheck_if_needed genv env msg =
 (* Called by the client *)
 (****************************************************************************)
 
-exception Remote_exception of Marshal_tools.remote_exception_data
+exception Remote_fatal_exception of Marshal_tools.remote_exception_data
+exception Remote_nonfatal_exception of Marshal_tools.remote_exception_data
 
 let rpc : type a. Timeout.in_channel * out_channel -> a t -> a
 = fun (_, oc) cmd ->
@@ -95,7 +100,9 @@ let rec wait_for_rpc_response fd push_messages =
   match Marshal_tools.from_fd_with_preamble fd with
   | Response r -> r, List.rev push_messages
   | Push (ServerCommandTypes.FATAL_EXCEPTION remote_e_data) ->
-    raise (Remote_exception remote_e_data)
+    raise (Remote_fatal_exception remote_e_data)
+  | Push (ServerCommandTypes.NONFATAL_EXCEPTION remote_e_data) ->
+    raise (Remote_nonfatal_exception remote_e_data)
   | Push m -> wait_for_rpc_response fd (m :: push_messages)
   | Hello -> failwith "unexpected hello after connection already established"
 
@@ -240,13 +247,18 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
       end);
     true
 
-let handle genv env client =
+let handle
+    (genv: ServerEnv.genv)
+    (env: ServerEnv.env)
+    (client: ClientProvider.client)
+  : (ServerEnv.env * ServerEnv.recheck_iteration_flag option) =
   let msg = ClientProvider.read_client_msg client in
   let d_event = Debug_event.HandleServerCommand msg in
   let _ = Debug_port.write_opt d_event genv.ServerEnv.debug_port in
   let env = full_recheck_if_needed genv env msg in
   match msg with
   | Rpc cmd ->
+    begin try
       let t = Unix.gettimeofday () in
       let new_env, response = ServerRpc.handle
         ~is_stale:env.ServerEnv.recent_recheck_loop_stats.ServerEnv.updates_stale
@@ -259,6 +271,11 @@ let handle genv env client =
         then ClientProvider.shutdown_client client;
       if ServerCommandTypes.is_kill_rpc cmd then ServerUtils.die_nicely ();
       new_env, None
+    with e ->
+      let stack = Printexc.get_backtrace () in
+      if ServerCommandTypes.is_critical_rpc cmd then raise e
+      else raise (Nonfatal_rpc_exception (e, stack, env, None))
+    end
   | Stream cmd ->
       let ic, oc = ClientProvider.get_channels client in
       let needs_flush = stream_response genv env (ic, oc) ~cmd in

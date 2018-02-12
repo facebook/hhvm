@@ -174,6 +174,7 @@ let handle_push_message = function
     end errors
   | ServerCommandTypes.BUSY_STATUS _ ->
     ()
+  | ServerCommandTypes.NONFATAL_EXCEPTION _
   | ServerCommandTypes.FATAL_EXCEPTION _ ->
     Printf.eprintf "Fatal server error. Exiting.\n";
     raise Exit_status.(Exit_with Uncaught_exception)

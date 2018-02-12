@@ -151,6 +151,22 @@ let handle_connection_ genv env client =
     ClientProvider.shutdown_client client;
     env, None
 
+
+let report_persistent_exception
+    ~(e: exn)
+    ~(stack: string)
+    ~(client: ClientProvider.client)
+    ~(is_fatal: bool)
+  : unit =
+  let open Marshal_tools in
+  let message = Printexc.to_string e in
+  let push = if is_fatal then ServerCommandTypes.FATAL_EXCEPTION { message; stack; }
+  else ServerCommandTypes.NONFATAL_EXCEPTION { message; stack; } in
+  begin try ClientProvider.send_push_message_to_client client push with _ -> () end;
+  EventLogger.master_exception e;
+  Printf.eprintf "Error: %s\n%s\n%!" message stack
+
+
 let handle_persistent_connection_ genv env client =
    try
     let env = { env with ide_idle = false; } in
@@ -163,18 +179,12 @@ let handle_persistent_connection_ genv env client =
    | ServerCommandTypes.Read_command_timeout
    | ServerClientProvider.Client_went_away ->
      shutdown_persistent_client env client, None
+   | ServerCommand.Nonfatal_rpc_exception (e, stack, env, flag) ->
+     report_persistent_exception ~e ~stack ~client ~is_fatal:false;
+     env, flag
    | e ->
-     let open Marshal_tools in
      let stack = Printexc.get_backtrace () in
-     let message = Printexc.to_string e in
-     begin try
-       ClientProvider.send_push_message_to_client
-         client (ServerCommandTypes.FATAL_EXCEPTION { message; stack; })
-     with _ -> ()
-     end;
-     EventLogger.master_exception e;
-     Printf.eprintf "Error: %s\n%!" message;
-     Printexc.print_backtrace stderr;
+     report_persistent_exception ~e ~stack ~client ~is_fatal:true;
      shutdown_persistent_client env client, None
 
 let handle_connection genv env client is_from_existing_persistent_client =

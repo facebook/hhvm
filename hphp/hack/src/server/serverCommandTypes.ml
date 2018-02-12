@@ -93,6 +93,20 @@ let is_kill_rpc : type a. a t -> bool = function
   | KILL -> true
   | _ -> false
 
+let is_critical_rpc : type a. a t -> bool = function
+  (* An exception during any critical rpc should shutdown the persistent connection. *)
+  (* The critical ones are those that affect the state.                              *)
+  | DISCONNECT -> true
+  | KILL -> true
+  | CREATE_CHECKPOINT _ -> true
+  | DELETE_CHECKPOINT _ -> true
+  | OPEN_FILE _ -> true
+  | CLOSE_FILE _ -> true
+  | EDIT_FILE _ -> true
+  | SUBSCRIBE_DIAGNOSTIC _ -> true
+  | UNSUBSCRIBE_DIAGNOSTIC _ -> true
+  | _ -> false
+
 type 'a command =
   | Rpc of 'a t
   | Stream of streamed
@@ -109,6 +123,7 @@ type push =
   | BUSY_STATUS of busy_status
   | NEW_CLIENT_CONNECTED
   | FATAL_EXCEPTION of Marshal_tools.remote_exception_data
+  | NONFATAL_EXCEPTION of Marshal_tools.remote_exception_data
 
 and busy_status =
   | Needs_local_typecheck

@@ -138,6 +138,7 @@ let exit_fail () = exit 1
 exception Client_fatal_connection_exception of Marshal_tools.remote_exception_data
 exception Client_recoverable_connection_exception of Marshal_tools.remote_exception_data
 exception Server_fatal_connection_exception of Marshal_tools.remote_exception_data
+exception Server_nonfatal_exception of Marshal_tools.remote_exception_data
 
 
 let event_to_string (event: event) : string =
@@ -148,6 +149,7 @@ let event_to_string (event: event) : string =
   | Server_message ServerCommandTypes.BUSY_STATUS _ -> "Server BUSY_STATUS"
   | Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED -> "Server NEW_CLIENT_CONNECTED"
   | Server_message ServerCommandTypes.FATAL_EXCEPTION _ -> "Server FATAL_EXCEPTION"
+  | Server_message ServerCommandTypes.NONFATAL_EXCEPTION _ -> "Server NONFATAL_EXCEPTION"
   | Client_message c -> Printf.sprintf "Client %s %s" (kind_to_string c.kind) c.method_
   | Tick -> "Tick"
 
@@ -214,8 +216,10 @@ let rpc
       ~f:(fun x -> Queue.push x server_conn.pending_messages);
     res
   with
-  | ServerCommand.Remote_exception remote_e_data ->
+  | ServerCommand.Remote_fatal_exception remote_e_data ->
     raise (Server_fatal_connection_exception remote_e_data)
+  | ServerCommand.Remote_nonfatal_exception remote_e_data ->
+    raise (Server_nonfatal_exception remote_e_data)
   | e ->
     let message = Printexc.to_string e in
     let stack = Printexc.get_backtrace () in
@@ -1839,6 +1843,9 @@ let handle_event
   | _, Server_message ServerCommandTypes.FATAL_EXCEPTION e ->
     raise (Server_fatal_connection_exception e)
 
+  | _, Server_message ServerCommandTypes.NONFATAL_EXCEPTION e ->
+    raise (Server_nonfatal_exception e)
+
   (* idle tick. No-op. *)
   | _, Tick ->
     EventLogger.flush ()
@@ -1929,6 +1936,10 @@ let main (env: env) : 'a =
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
       hack_log_error !ref_event edata.message stack "from_client" start_handle_t;
       Lsp_helpers.telemetry_error to_stdout (edata.message ^ ", from_client\n" ^ stack);
+    | Server_nonfatal_exception edata ->
+      let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
+      hack_log_error !ref_event edata.message stack "from_server" start_handle_t;
+      respond_to_error !ref_event (Error.Unknown edata.message) stack
     | e ->
       let message = Printexc.to_string e in
       let stack = Printexc.get_backtrace () in

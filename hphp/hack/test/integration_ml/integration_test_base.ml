@@ -295,9 +295,10 @@ let assert_has_diagnostics loop_output =
     fail msg
   | Some NEW_CLIENT_CONNECTED ->
     fail "Expected DIAGNOSTIC, but got NEW_CLIENT_CONNECTED."
-  | Some FATAL_EXCEPTION e ->
+  | Some FATAL_EXCEPTION e
+  | Some NONFATAL_EXCEPTION e ->
     let msg = Printf.sprintf
-      "Expected DIAGNOSTIC, but got FATAL_EXCEPTION:\n%s"
+      "Expected DIAGNOSTIC, but got NON/FATAL_EXCEPTION:\n%s"
       e.Marshal_tools.message
     in
     fail msg

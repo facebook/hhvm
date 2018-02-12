@@ -436,10 +436,22 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
     auto& te = dstElem[i];
     auto const type = te.data.m_type;
     if (UNLIKELY(isTombstone(type))) continue;
-    if (te.hasStrKey() && !te.skey->isStatic()) {
-      auto const st = lookupStaticString(te.skey);
-      te.skey = st != nullptr ? st
-                              : StringData::MakeUncounted(te.skey->slice());
+    if (te.hasStrKey() &&
+        !te.skey->isStatic() &&
+        (!te.skey->isUncounted() || !te.skey->uncountedIncRef())) {
+      te.skey = [&] {
+        if (auto const st = lookupStaticString(te.skey)) return st;
+        void** seenStr = nullptr;
+        if (seen && te.skey->hasMultipleRefs()) {
+          seenStr = &(*seen)[te.skey];
+          if (auto const st = static_cast<StringData*>(*seenStr)) {
+            if (st->uncountedIncRef()) return st;
+          }
+        }
+        auto const st = StringData::MakeUncounted(te.skey->slice());
+        if (seenStr) *seenStr = st;
+        return st;
+      }();
     }
     ConvertTvToUncounted(&te.data, seen);
   }
@@ -517,7 +529,7 @@ bool MixedArray::ReleaseUncounted(ArrayData* in, size_t extra) {
       if (ptr->hasStrKey()) {
         assert(!ptr->skey->isRefCounted());
         if (ptr->skey->isUncounted()) {
-          ptr->skey->destructUncounted();
+          StringData::ReleaseUncounted(ptr->skey);
         }
       }
       ReleaseUncountedTv(ptr->data);

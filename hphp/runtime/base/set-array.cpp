@@ -149,10 +149,11 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array, size_t extra) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     assert(!elm.isEmpty());
-    StringData*& skey = elm.tv.m_data.pstr;
     if (elm.hasStrKey()) {
       elm.tv.m_type = KindOfPersistentString;
-      if (!skey->isStatic()) {
+      StringData*& skey = elm.tv.m_data.pstr;
+      if (!skey->isStatic() &&
+          (!skey->isUncounted() || !skey->uncountedIncRef())) {
         if (auto const st = lookupStaticString(skey)) {
           skey = st;
         } else {
@@ -294,7 +295,7 @@ void SetArray::ReleaseUncounted(ArrayData* in, size_t extra) {
         auto const skey = elm.strKey();
         assert(!skey->isRefCounted());
         if (skey->isUncounted()) {
-          skey->destructUncounted();
+          StringData::ReleaseUncounted(skey);
         }
       }
     }

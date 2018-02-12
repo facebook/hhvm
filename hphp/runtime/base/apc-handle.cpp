@@ -59,24 +59,31 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
     }
     case KindOfPersistentString:
     case KindOfString: {
-      StringData* s = source.getStringData();
+      auto const s = source.getStringData();
       if (serialized) {
         // It is priming, and there might not be the right class definitions
         // for unserialization.
         return APCString::MakeSerializedObject(apc_reserialize(String{s}));
       }
-      if (s->isStatic()) {
-        auto value = new APCTypedValue(APCTypedValue::StaticStr{}, s);
-        return APCHandle::Pair{value->getHandle(), sizeof(APCTypedValue)};
+      if (!s->isRefCounted()) {
+        if (s->isStatic()) {
+          auto const value = new APCTypedValue(APCTypedValue::StaticStr{}, s);
+          return APCHandle::Pair{value->getHandle(), sizeof(APCTypedValue)};
+        }
+        if (s->uncountedIncRef()) {
+          auto const value = new APCTypedValue(APCTypedValue::UncountedStr{},
+                                               s);
+          return {value->getHandle(), sizeof(APCTypedValue)};
+        }
       }
       auto const st = lookupStaticString(s);
       if (st) {
-        auto value = new APCTypedValue(APCTypedValue::StaticStr{}, st);
+        auto const value = new APCTypedValue(APCTypedValue::StaticStr{}, st);
         return {value->getHandle(), sizeof(APCTypedValue)};
       }
       if (apcExtension::UseUncounted) {
-        auto st = StringData::MakeUncounted(s->slice());
-        auto value = new APCTypedValue(APCTypedValue::UncountedStr{}, st);
+        auto const st = StringData::MakeUncounted(s->slice());
+        auto const value = new APCTypedValue(APCTypedValue::UncountedStr{}, st);
         return {value->getHandle(), st->size() + sizeof(APCTypedValue)};
       }
       return APCString::MakeSharedString(s);

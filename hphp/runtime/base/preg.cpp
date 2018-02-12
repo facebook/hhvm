@@ -376,7 +376,7 @@ void PCRECache::DestroyStatic(StaticCache* cache) {
       "StaticCache must be an AtomicHashArray or this destructor is wrong.");
   for (auto& it : *cache) {
     if (it.first->isUncounted()) {
-      const_cast<StringData*>(it.first)->destructUncounted();
+      StringData::ReleaseUncounted(it.first);
     }
     delete it.second;
   }
@@ -478,17 +478,18 @@ void PCRECache::insert(
         if (time(nullptr) > m_expire) {
           clearStatic();
         }
-        auto cache = m_staticCache.load(std::memory_order_acquire);
-        auto key = regex->isStatic()
-          ? regex
-          : StringData::MakeUncounted(regex->slice());
+        auto const cache = m_staticCache.load(std::memory_order_acquire);
+        auto const key =
+          regex->isStatic() ||
+          (regex->isUncounted() && regex->uncountedIncRef()) ?
+          regex : StringData::MakeUncounted(regex->slice());
         auto pair = cache->insert(StaticCachePair(key, ent));
         if (pair.second) {
           // Inserted, container owns the pointer
           accessor = ent;
         } else {
           // Not inserted, caller needs to own the pointer
-          if (key != regex) const_cast<StringData*>(key)->destructUncounted();
+          if (regex->isUncounted()) StringData::ReleaseUncounted(key);
           accessor = EntryPtr(ent);
         }
       }

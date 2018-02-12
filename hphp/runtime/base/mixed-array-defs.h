@@ -324,10 +324,26 @@ void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
       // Fall-through.
     case KindOfPersistentString: {
       auto& str = source->m_data.pstr;
-      if (str->isStatic()) break;
-      else if (str->empty()) str = staticEmptyString();
+      if (!str->isRefCounted()) {
+        if (str->isStatic()) break;
+        if (str->uncountedIncRef()) break;
+      }
+      if (str->empty()) str = staticEmptyString();
       else if (auto const st = lookupStaticString(str)) str = st;
-      else str = StringData::MakeUncounted(str->slice());
+      else {
+        void** seenStr = nullptr;
+        if (seen && str->hasMultipleRefs()) {
+          seenStr = &(*seen)[str];
+          if (auto const st = static_cast<StringData*>(*seenStr)) {
+            if (st->uncountedIncRef()) {
+              str = st;
+              break;
+            }
+          }
+        }
+        str = StringData::MakeUncounted(str->slice());
+        if (seenStr) *seenStr = str;
+      }
       break;
     }
     case KindOfVec:
@@ -406,7 +422,7 @@ void ReleaseUncountedTv(TypedValue& tv) {
   if (isStringType(tv.m_type)) {
     assert(!tv.m_data.pstr->isRefCounted());
     if (tv.m_data.pstr->isUncounted()) {
-      tv.m_data.pstr->destructUncounted();
+      StringData::ReleaseUncounted(tv.m_data.pstr);
     }
     return;
   }

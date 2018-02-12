@@ -63,12 +63,13 @@ APCArray::MakeSharedImpl(ArrayData* arr,
 
     if (apcExtension::UseUncounted && !features.hasObjectOrResource &&
         !arr->empty()) {
-      auto const base_size =
-        tl_heap->getAllocated() - tl_heap->getDeallocated();
+      auto const base_size = use_jemalloc ?
+        tl_heap->getAllocated() - tl_heap->getDeallocated() :
+        getMemSize(seenArrs.get());
       auto const uncounted_arr = uncounted(seenArrs.get());
       auto const size = use_jemalloc ?
         tl_heap->getAllocated() - tl_heap->getDeallocated() - base_size :
-        getMemSize(seenArrs.get());
+        base_size;
       assertx(size > 0);
       return {uncounted_arr, size + sizeof(APCTypedValue)};
     }

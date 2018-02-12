@@ -204,7 +204,7 @@ struct APCStats {
     m_uncountedBlocks->increment();
   }
 
-  // Only call this method from ::destructUncounted() or ::releaseUncounted()
+  // Only call this method from ::ReleaseUncounted()
   void removeAPCUncountedBlock() {
     m_uncountedBlocks->decrement();
   }

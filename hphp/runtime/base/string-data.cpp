@@ -154,18 +154,23 @@ void StringData::destructStatic() {
   low_free_data(this);
 }
 
-void StringData::destructUncounted() {
-  assert(checkSane() && isUncounted());
-  assert(isFlat());
+bool StringData::ReleaseUncounted(const StringData* str) {
+  assert(str->checkSane());
+  assert(str->isFlat());
+  if (!str->uncountedDecRef()) {
+    return false;
+  }
+
 
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
   if (UncountedStringOnHugePage()) {
-    free_huge(this);
+    free_huge(const_cast<StringData*>(str));
   } else {
-    free(this);
+    free(const_cast<StringData*>(str));
   }
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////

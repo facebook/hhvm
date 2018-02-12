@@ -116,7 +116,7 @@ void APCTypedValue::deleteUncounted() {
          kind == APCKind::UncountedDict ||
          kind == APCKind::UncountedKeyset);
   if (kind == APCKind::UncountedString) {
-    m_data.str->destructUncounted();
+    StringData::ReleaseUncounted(m_data.str);
   } else if (kind == APCKind::UncountedArray) {
     assert(m_data.arr->isPHPArray());
     if (m_data.arr->hasPackedLayout()) {

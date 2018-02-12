@@ -155,7 +155,7 @@ struct StringData final : MaybeCountable,
   /*
    * Same as MakeStatic but the string allocated will *not* be in the static
    * string table, will not be in low-memory, and should be deleted using
-   * destructUncounted once the root goes out of scope.
+   * ReleaseUncounted once the root goes out of scope.
    */
   static StringData* MakeUncounted(folly::StringPiece);
 
@@ -203,9 +203,11 @@ struct StringData final : MaybeCountable,
 
   /*
    * StringData objects allocated with MakeUncounted should be freed
-   * using this function.
+   * using this function. It will remove a reference via
+   * uncountedDecRef, and if necessary destroy the StringData and
+   * return true.
    */
-  void destructUncounted();
+  static bool ReleaseUncounted(const StringData*);
 
   /*
    * root is the address of the top-level APCHandle which contains this string

@@ -2022,7 +2022,10 @@ and pClassElt : class_elt list parser = fun node env ->
       in
       let pBody = fun node env ->
         let body = pFunctionBody node env in
-        List.rev member_init @ body
+        let member_init =
+          if env.hhvm_compat_mode then List.rev member_init else member_init
+        in
+        member_init @ body
       in
       let body, body_has_yield = mpYielding pBody methodish_function_body env in
       let kind = pKinds h.function_modifiers env in

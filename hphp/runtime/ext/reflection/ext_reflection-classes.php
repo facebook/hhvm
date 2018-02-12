@@ -593,7 +593,6 @@ class ReflectionProperty implements Reflector {
   const IS_PROTECTED = 512;
   const IS_PRIVATE = 1024;
 
-  public $info;
   public $name;
   public $class;
 

@@ -1862,16 +1862,6 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
                    make_tv<KindOfPersistentString>(prop->cls->name()));
     this_->setProp(nullptr, s_name.get(),
                    make_tv<KindOfPersistentString>(prop->name));
-
-    cls->initialize();
-    auto const& propInitVec = cls->getPropData()
-      ? *cls->getPropData()
-      : cls->declPropInit();
-
-    auto info = Array::Create();
-    auto const& default_val = tvAsCVarRef(&propInitVec[propIdx]);
-    set_instance_prop_info(info, prop, default_val);
-    this_->setProp(nullptr, s_info.get(), make_tv<KindOfArray>(info.get()));
     return;
   }
 
@@ -1885,10 +1875,6 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
                    make_tv<KindOfPersistentString>(prop->cls->name()));
     this_->setProp(nullptr, s_name.get(),
                    make_tv<KindOfPersistentString>(prop->name));
-
-    auto info = Array::Create();
-    set_static_prop_info(info, prop);
-    this_->setProp(nullptr, s_info.get(), make_tv<KindOfArray>(info.get()));
     return;
   }
 
@@ -1901,10 +1887,6 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
       this_->setProp(nullptr, s_class.get(),
                      make_tv<KindOfPersistentString>(cls->name()));
       this_->setProp(nullptr, s_name.get(), prop_name.asCell());
-
-      auto info = Array::Create();
-      set_dyn_prop_info(info, prop_name, cls->name());
-      this_->setProp(nullptr, s_info.get(), make_tv<KindOfArray>(info.get()));
       return;
     }
   }

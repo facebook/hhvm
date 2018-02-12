@@ -150,6 +150,7 @@ type expr_location =
   | MemberSelect
   | InDoubleQuotedString
   | InBacktickedString
+  | InGlobalVar
 
 let in_string l =
   l = InDoubleQuotedString || l = InBacktickedString
@@ -1045,7 +1046,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           Call ((pos, Id (pos, fname)), [], [expr], [])
         | Some TK.Dollar                  ->
           (match snd expr with
-          | String (p, s) -> Lvar (p, "$" ^ s)
+          | String (p, s)
+          | Int (p, s)
+          | Float (p, s) when location <> InGlobalVar -> Lvar (p, "$" ^ s)
           | _ -> Dollar expr
           )
         | _ -> missing_syntax "unary operator" node env
@@ -1063,6 +1066,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       | InDoubleQuotedString -> String (pos, unesc_dbl (text node))
       | InBacktickedString -> String (pos, Php_escaping.unescape_backtick (text node))
       | MemberSelect
+      | InGlobalVar
       | TopLevel -> Id (pos_name node env)
       )
 
@@ -1416,7 +1420,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
          then
            (* We elide the braces in {$x}, as it makes compilation easier *)
            begin match inner with
-           | _, (Lvar _ | String _) -> inner
+           | _, (Lvar _ | String _ | Int _ | Float _ ) -> inner
            | p, _ -> p, BracedExpr inner
            end
          else inner
@@ -1692,7 +1696,7 @@ and pStmt : stmt parser = fun node env ->
   | ContinueStatement { continue_level=level; _ } ->
     pos, Continue (pBreak_or_continue_level env level)
   | GlobalStatement { global_variables; _ } ->
-    pos, Global_var (couldMap ~f:pExpr global_variables env)
+    pos, Global_var (couldMap ~f:(pExpr ~location:InGlobalVar) global_variables env)
   | MarkupSection _ -> pMarkup node env
   | _ when env.max_depth > 0 ->
     (* OCaml optimisers; Forgive them, for they know not what they do!

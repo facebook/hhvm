@@ -10,4 +10,3 @@ spec/tests/statements/iteration/foreach.php
 spec/tests/statements/iteration/while.php
 spec/tests/statements/selection/if.php
 spec/tests/statements/selection/switch.php
-spec/tests/variables/variable_variables.php

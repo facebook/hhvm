@@ -204,21 +204,6 @@ using ConservativeAllocator = Allocator<T, type_scan::Action::Conservative<T>>;
 
 /////////////////////////////////////////////////////////////////////
 
-template<class T, class... Args> T* make_raw(Args&&... args) {
-  auto const mem = req::malloc(sizeof(T), type_scan::getIndexForMalloc<T>());
-  try {
-    return new (mem) T(std::forward<Args>(args)...);
-  } catch (...) {
-    req::free(mem);
-    throw;
-  }
-}
-
-template<class T> void destroy_raw(T* t) {
-  t->~T();
-  req::free(t);
-}
-
 template<class T> T* make_raw_array(size_t count) {
   T* ret = static_cast<T*>(
     req::malloc(count * sizeof(T), type_scan::getIndexForMalloc<T>())

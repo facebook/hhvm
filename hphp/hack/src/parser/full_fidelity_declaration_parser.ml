@@ -413,8 +413,13 @@ module WithExpressionAndStatementAndTypeParser
     else
       let (parser, use_token) = assert_token parser Use in
       let (parser, use_kind) = parse_namespace_use_kind_opt parser in
-      let (parser, clauses) = parse_comma_list_allow_trailing
-        parser Semicolon SyntaxError.error1004 parse_namespace_use_clause in
+      let (parser, clauses, _) =
+        parse_comma_list_allow_trailing
+          parser
+          Semicolon
+          SyntaxError.error1004
+          parse_namespace_use_clause
+      in
       let (parser, semi) = require_semicolon parser in
       let result = make_namespace_use_declaration
         use_token use_kind clauses semi in
@@ -793,8 +798,13 @@ module WithExpressionAndStatementAndTypeParser
       xhp-category-list  ,  xhp-category-name
     *)
     let (parser, category) = assert_token parser Category in
-    let (parser, items) = parse_comma_list_allow_trailing parser Semicolon
-      SyntaxError.error1052 parse_xhp_category in
+    let (parser, items, _) =
+      parse_comma_list_allow_trailing
+        parser
+        Semicolon
+        SyntaxError.error1052
+        parse_xhp_category
+    in
     let (parser, semi) = require_semicolon parser in
     let result = make_xhp_category_declaration category items semi in
     (parser, result)
@@ -1102,13 +1112,16 @@ module WithExpressionAndStatementAndTypeParser
       trait-name-list  ,  qualified-name  generic-type-parameter-listopt
   *)
   and parse_trait_name_list parser predicate =
-    parse_separated_list_predicate
-      parser
-      Comma
-      NoTrailing
-      predicate
-      SyntaxError.error1004
-      parse_qualified_name_type
+    let (parser, items, _) =
+      parse_separated_list_predicate
+        parser
+        Comma
+        NoTrailing
+        predicate
+        SyntaxError.error1004
+        parse_qualified_name_type
+    in
+    (parser, items)
 
   and parse_trait_use parser =
     let (parser, use_token) = assert_token parser Use in

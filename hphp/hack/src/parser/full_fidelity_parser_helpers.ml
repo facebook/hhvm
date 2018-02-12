@@ -665,7 +665,8 @@ module WithParser(Parser : Parser_S) = struct
           let list_item = make_list_item item separator in
           (parser, (list_item :: acc)) in
     let (parser, items) = aux parser [] in
-    (parser, make_list parser (List.rev items))
+    let no_arg_is_missing = not (List.exists is_missing items) in
+    parser, make_list parser (List.rev items), no_arg_is_missing
 
   let parse_separated_list parser separator_kind list_kind
       close_kind error parse_item =
@@ -685,8 +686,16 @@ module WithParser(Parser : Parser_S) = struct
       let missing = make_missing parser in
       (parser, missing)
     else
+      let (parser, items, _) =
       parse_separated_list_predicate
-        parser separator_kind allow_trailing close_predicate error parse_item
+        parser
+        separator_kind
+        allow_trailing
+        close_predicate
+        error
+        parse_item
+      in
+      (parser, items)
 
   let parse_separated_list_opt
       parser separator_kind allow_trailing close_kind error parse_item =
@@ -698,8 +707,17 @@ module WithParser(Parser : Parser_S) = struct
       error
       parse_item
 
-  let parse_comma_list parser =
-    parse_separated_list parser TokenKind.Comma NoTrailing
+  let parse_comma_list parser close_kind error parse_item =
+    let (parser, items, _) =
+      parse_separated_list
+        parser
+        TokenKind.Comma
+        NoTrailing
+        close_kind
+        error
+        parse_item
+    in
+    (parser, items)
 
   let parse_comma_list_allow_trailing parser =
     parse_separated_list parser TokenKind.Comma TrailingAllowed
@@ -771,8 +789,15 @@ module WithParser(Parser : Parser_S) = struct
 
   let parse_double_angled_comma_list_allow_trailing parser parse_item =
     let parse_items parser =
-      parse_comma_list_allow_trailing parser
-        TokenKind.GreaterThanGreaterThan SyntaxError.error1029 parse_item in
+      let (parser, items, _) =
+        parse_comma_list_allow_trailing
+          parser
+          TokenKind.GreaterThanGreaterThan
+          SyntaxError.error1029
+          parse_item
+      in
+      (parser, items)
+    in
     parse_double_angled_list parser parse_items
 
   (* Parse with parse_item while a condition is met. *)

@@ -102,7 +102,13 @@ module WithStatementAndDeclAndTypeParser
     (parser, node)
 
   let parse_generic_type_arguments_opt parser =
-    with_type_parser parser TypeParser.parse_generic_type_argument_list_opt
+    with_type_parser parser
+      (fun p ->
+        let (p, items, no_arg_is_missing) =
+          TypeParser.parse_generic_type_argument_list_opt p
+        in
+        (p, (items, no_arg_is_missing))
+      )
 
   let with_decl_parser : 'a . t -> (DeclParser.t -> DeclParser.t * 'a) -> t * 'a
   = fun parser f ->
@@ -141,11 +147,6 @@ module WithStatementAndDeclAndTypeParser
     let sc_state = StatementParser.sc_state statement_parser in
     let parser = { parser with env; lexer; errors; context; sc_state } in
     (parser, statement)
-
-  let is_valid_type_argument_list type_arguments parser0 parser1 =
-    kind type_arguments = SyntaxKind.TypeArguments
-    && List.for_all (fun c -> not (is_missing c)) (children type_arguments)
-    && parser0.errors = parser1.errors
 
   let parse_parameter_list_opt parser =
     let (parser, (left, token, right)) = with_decl_parser parser
@@ -736,8 +737,12 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_remaining_expression_or_specified_function_call parser term
       prefix_kind =
-    let parser1, type_arguments = parse_generic_type_arguments_opt parser in
-    if is_valid_type_argument_list type_arguments parser parser1
+    let (parser1, (type_arguments, no_arg_is_missing)) =
+      parse_generic_type_arguments_opt parser
+    in
+    if no_arg_is_missing
+    && is_type_arguments type_arguments
+    && parser.errors = parser1.errors
     then
       let parser, result =
         begin match peek_token_kind parser1 with
@@ -1077,9 +1082,12 @@ module WithStatementAndDeclAndTypeParser
       begin match peek_token_kind parser1 with
       | LeftParen -> (parser1, make_token token)
       | LessThan ->
-        let parser1, type_arguments =
-          parse_generic_type_arguments_opt parser1 in
-        if is_valid_type_argument_list type_arguments parser parser1
+        let (parser1, (type_arguments, no_arg_is_missing)) =
+          parse_generic_type_arguments_opt parser1
+        in
+        if no_arg_is_missing
+        && is_type_arguments type_arguments
+        && parser.errors = parser1.errors
         then
           let type_specifier =
             make_generic_type_specifier (make_token token) type_arguments in
@@ -1943,10 +1951,13 @@ module WithStatementAndDeclAndTypeParser
       let name = make_simple_type_specifier name in
       parse_collection_literal_expression parser name
     | LessThan ->
-      let parser1, type_arguments =
-        parse_generic_type_arguments_opt parser in
-      if is_valid_type_argument_list type_arguments parser parser1
-         && peek_token_kind parser1 = LeftBrace
+      let (parser1, (type_arguments, no_arg_is_missing)) =
+        parse_generic_type_arguments_opt parser
+      in
+      if no_arg_is_missing
+      && is_type_arguments type_arguments
+      && parser.errors = parser1.errors
+      && peek_token_kind parser1 = LeftBrace
       then
         let name = make_generic_type_specifier name type_arguments in
         parse_collection_literal_expression parser1 name

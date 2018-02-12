@@ -173,7 +173,7 @@ and parse_possible_generic_specifier_or_type_const parser =
   parse_remaining_possible_generic_specifier_or_type_const parser name
 
 and parse_remaining_possible_generic_specifier_or_type_const parser name =
-  let (parser, arguments) = parse_generic_type_argument_list_opt parser in
+  let (parser, arguments, _) = parse_generic_type_argument_list_opt parser in
   if (kind arguments) = SyntaxKind.Missing then
     let token = peek_token parser in
     match Token.kind token with
@@ -188,7 +188,7 @@ and parse_remaining_possible_generic_specifier_or_type_const parser name =
 *)
 and parse_possible_generic_specifier parser =
   let (parser, name) = next_xhp_class_name_or_other parser in
-  let (parser, arguments) = parse_generic_type_argument_list_opt parser in
+  let (parser, arguments, _) = parse_generic_type_argument_list_opt parser in
   if (kind arguments) = SyntaxKind.Missing then
     (parser, make_simple_type_specifier name)
   else
@@ -259,8 +259,13 @@ and parse_type_parameter parser =
 *)
 and parse_generic_type_parameter_list parser =
   let (parser, left) = assert_token parser LessThan in
-  let (parser, params) =  parse_comma_list_allow_trailing parser GreaterThan
-    SyntaxError.error1007 parse_type_parameter in
+  let (parser, params, _) =
+    parse_comma_list_allow_trailing
+      parser
+      GreaterThan
+      SyntaxError.error1007
+      parse_type_parameter
+  in
   let (parser, right) = require_right_angle parser in
   let result = make_type_parameters left params right in
   (parser, result)
@@ -278,7 +283,7 @@ and parse_generic_type_argument_list_opt parser =
     parse_generic_type_argument_list parser
   else
     let missing = make_missing parser in
-    (parser, missing)
+    (parser, missing, false)
 
 and parse_type_list parser close_kind =
   (* SPEC:
@@ -289,8 +294,14 @@ and parse_type_list parser close_kind =
       type-specifier
       type-specifiers  ,  type-specifier
   *)
-  parse_comma_list_allow_trailing parser close_kind SyntaxError.error1007
-    parse_type_specifier
+  let (parser, items, _) =
+    parse_comma_list_allow_trailing
+      parser
+      close_kind
+      SyntaxError.error1007
+      parse_type_specifier
+  in
+  (parser, items)
 
 (* SPEC
 
@@ -321,8 +332,14 @@ and parse_call_convention_opt parser =
     closure-param-type-specifiers  ,  closure-param-type-specifier
 *)
 and parse_closure_param_list parser close_kind =
-  parse_comma_list_allow_trailing parser close_kind SyntaxError.error1007
-  parse_closure_param_type_or_ellipsis
+  let (parser, items, _) =
+    parse_comma_list_allow_trailing
+      parser
+      close_kind
+      SyntaxError.error1007
+      parse_closure_param_type_or_ellipsis
+  in
+  (parser, items)
 
 (* SPEC
 
@@ -378,12 +395,17 @@ and parse_generic_type_argument_list parser =
   *)
   let (parser, open_angle) = next_token parser in
   let open_angle = make_token open_angle in
-  let (parser, args) = parse_comma_list_allow_trailing parser GreaterThan
-    SyntaxError.error1007 parse_return_type in
+  let (parser, args, no_arg_is_missing) =
+    parse_comma_list_allow_trailing
+      parser
+      GreaterThan
+      SyntaxError.error1007
+      parse_return_type
+  in
   let (parser1, close_angle) = next_token parser in
   if (Token.kind close_angle) = GreaterThan then
     let result = make_type_arguments open_angle args (make_token close_angle) in
-    (parser1, result)
+    (parser1, result, no_arg_is_missing)
   else
     (* ERROR RECOVERY: Don't eat the token that is in the place of the
        missing > or ,.  Assume that it is the > that is missing and
@@ -391,7 +413,7 @@ and parse_generic_type_argument_list parser =
     let parser = with_error parser SyntaxError.error1014 in
     let missing = make_missing parser in
     let type_args = make_type_arguments open_angle args missing in
-    (parser, type_args)
+    (parser, type_args, no_arg_is_missing)
 
 and parse_array_type_specifier parser =
   (* We allow
@@ -576,9 +598,13 @@ and parse_array_type_specifier parser =
       (* TODO: This allows "noreturn" as a type argument. Should we
       disallow that at parse time? *)
       let (parser, left) = require_left_angle parser in
-      let (parser, arguments) =
-        parse_comma_list_allow_trailing parser GreaterThan
-        SyntaxError.error1007 parse_return_type in
+      let (parser, arguments, _) =
+        parse_comma_list_allow_trailing
+          parser
+          GreaterThan
+          SyntaxError.error1007
+          parse_return_type
+      in
       let (parser, right) = require_right_angle parser in
       let result = make_dictionary_type_specifier
         keyword left arguments right in

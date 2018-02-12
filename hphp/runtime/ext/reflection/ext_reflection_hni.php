@@ -2019,9 +2019,10 @@ class ReflectionClass implements Reflector {
    *
    * Gets default properties from a class (including inherited properties).
    *
-   * This method only works for static properties when used on internal
-   * classes. The default value of a static class property can not be tracked
-   * when using this method on user defined classes.
+   * This method only works for static properties when the default value is
+   * known statically. If it is not known statically you will get null instead
+   * of the correct value. Do not rely on this API for default values of
+   * static properties.
    *
    * @return     mixed   An array of default properties, with the key being
    *                     the name of the property and the value being the
@@ -2035,7 +2036,7 @@ class ReflectionClass implements Reflector {
     $ret = array();
     foreach ($this->getProperties() as $prop) {
       if ($prop->isDefault()) {
-        $ret[$prop->name] = $prop->info['defaultValue'];
+        $ret[$prop->name] = $prop->getDefaultValue();
       }
     }
     return $ret;

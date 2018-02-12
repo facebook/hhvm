@@ -86,7 +86,7 @@ array(4) {
     ["name"]=>
     string(9) "extension"
     ["class"]=>
-    string(1) "B"
+    string(1) "A"
     ["forceAccessible":"ReflectionProperty":private]=>
     bool(false)
   }
@@ -116,7 +116,7 @@ array(4) {
     ["name"]=>
     string(5) "apple"
     ["class"]=>
-    string(1) "B"
+    string(1) "A"
     ["forceAccessible":"ReflectionProperty":private]=>
     bool(false)
   }

@@ -1833,97 +1833,253 @@ static String HHVM_METHOD(ReflectionTypeConstant, getClassname) {
 // class ReflectionProperty
 
 const StaticString s_ReflectionPropHandle("ReflectionPropHandle");
-const StaticString s_ReflectionSPropHandle("ReflectionSPropHandle");
 
-// helper for __construct:
-// returns -1 if class not defined;
-// returns -2 if class::property not found (then caller raises exception);
-// returns the info array for ReflectionProperty if successfully initialized.
-static Variant HHVM_METHOD(ReflectionProperty, __init,
-                           const Variant& cls_or_obj, const String& prop_name) {
+static void HHVM_METHOD(ReflectionProperty, __construct,
+                        const Variant& cls_or_obj, const String& prop_name) {
   auto const cls = get_cls(cls_or_obj);
   if (!cls) {
-    // caller raises exception
-    return Variant(-1);
+    Reflection::ThrowReflectionExceptionObject(folly::sformat(
+      "Class {} does not exist",
+      cls_or_obj.toString().toCppString()
+    ));
   }
   if (prop_name.isNull()) {
-    return Variant(-2);
+    Reflection::ThrowReflectionExceptionObject(folly::sformat(
+      "Property {}:: does not exist",
+      cls->name()->toCppString()
+    ));
   }
 
-  cls->initialize();
-  auto const& propInitVec = cls->getPropData()
-    ? *cls->getPropData()
-    : cls->declPropInit();
+  auto data = Native::data<ReflectionPropHandle>(this_);
 
-  auto const nProps = cls->numDeclProperties();
-  auto const properties = cls->declProperties();
+  // is there a declared instance property?
+  auto lookup = cls->getDeclPropIndex(cls, prop_name.get());
+  auto propIdx = lookup.prop;
+  if (propIdx != kInvalidSlot) {
+    auto const prop = &cls->declProperties()[propIdx];
+    data->setInstanceProp(prop);
+    this_->setProp(nullptr, s_class.get(),
+                   make_tv<KindOfPersistentString>(prop->cls->name()));
+    this_->setProp(nullptr, s_name.get(),
+                   make_tv<KindOfPersistentString>(prop->name));
 
-  // index for the candidate property
-  Slot cInd = -1;
-  const Class::Prop* cProp = nullptr;
+    cls->initialize();
+    auto const& propInitVec = cls->getPropData()
+      ? *cls->getPropData()
+      : cls->declPropInit();
 
-  for (Slot i = 0; i < nProps; i++) {
-    auto const& prop = properties[i];
-    if (prop_name.same(prop.name)) {
-      if (cls == prop.cls.get()) {
-        // found match for the exact child class
-        cInd = i;
-        cProp = &prop;
-        break;
-      } else if (!(prop.attrs & AttrPrivate)) {
-        // only inherit non-private properties
-        cInd = i;
-        cProp = &prop;
-      }
-    }
-  }
-
-  if (cProp != nullptr) {
-    ReflectionPropHandle::Get(this_)->setProp(cProp);
     auto info = Array::Create();
-    auto const& default_val = tvAsCVarRef(&propInitVec[cInd]);
-    set_instance_prop_info(info, cProp, default_val);
-    return Variant(info);
+    auto const& default_val = tvAsCVarRef(&propInitVec[propIdx]);
+    set_instance_prop_info(info, prop, default_val);
+    this_->setProp(nullptr, s_info.get(), make_tv<KindOfArray>(info.get()));
+    return;
   }
 
-  // for static property
-  const Class::SProp* cSProp = nullptr;
+  // is there a declared static property?
+  lookup = cls->findSProp(cls, prop_name.get());
+  propIdx = lookup.prop;
+  if (propIdx != kInvalidSlot) {
+    auto const prop = &cls->staticProperties()[propIdx];
+    data->setStaticProp(prop);
+    this_->setProp(nullptr, s_class.get(),
+                   make_tv<KindOfPersistentString>(prop->cls->name()));
+    this_->setProp(nullptr, s_name.get(),
+                   make_tv<KindOfPersistentString>(prop->name));
 
-  for (auto const& sprop : cls->staticProperties()) {
-    if (prop_name.same(sprop.name)) {
-      if (cls == sprop.cls.get()) {
-        cSProp = &sprop;
-        break;
-      } else if (!(sprop.attrs & AttrPrivate)) {
-        cSProp = &sprop;
-      }
-    }
-  }
-  if (cSProp != nullptr) {
-    ReflectionSPropHandle::Get(this_)->setSProp(cSProp);
     auto info = Array::Create();
-    set_static_prop_info(info, cSProp);
-    return Variant(info);
+    set_static_prop_info(info, prop);
+    this_->setProp(nullptr, s_info.get(), make_tv<KindOfArray>(info.get()));
+    return;
   }
 
-  // check for dynamic properties
+  // is there a dynamic property?
   if (cls_or_obj.is(KindOfObject)) {
     auto obj = cls_or_obj.toCObjRef().get();
     assert(cls == obj->getVMClass());
-    if (obj->hasDynProps()) {
-      auto const dynPropArray = obj->dynPropArray().get();
-      for (ArrayIter it(dynPropArray); !it.end(); it.next()) {
-        if (prop_name.same(it.first().getStringData())) {
-          auto info = Array::Create();
-          set_dyn_prop_info(info, it.first(), cls->name());
-          return Variant(info);
-        }
-      }
+    if (obj->hasDynProps() && obj->dynPropArray().exists(prop_name)) {
+      data->setDynamicProp();
+      this_->setProp(nullptr, s_class.get(),
+                     make_tv<KindOfPersistentString>(cls->name()));
+      this_->setProp(nullptr, s_name.get(), prop_name.asCell());
+
+      auto info = Array::Create();
+      set_dyn_prop_info(info, prop_name, cls->name());
+      this_->setProp(nullptr, s_info.get(), make_tv<KindOfArray>(info.get()));
+      return;
     }
   }
 
-  // caller raises exception
-  return Variant(-2);
+  Reflection::ThrowReflectionExceptionObject(folly::sformat(
+    "Property {}::{} does not exist",
+    cls->name()->toCppString(),
+    prop_name.toCppString()
+  ));
+}
+
+namespace {
+
+[[noreturn]] void reflection_property_internal_error() {
+  raise_fatal_error("Internal error: Failed to retrieve the reflection object");
+}
+
+}
+
+static bool HHVM_METHOD(ReflectionProperty, isPublic) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Instance:
+      return data->getProp()->attrs & AttrPublic;
+    case ReflectionPropHandle::Type::Static:
+      return data->getSProp()->attrs & AttrPublic;
+    case ReflectionPropHandle::Type::Dynamic:
+      return true;
+    default:
+      reflection_property_internal_error();
+  }
+}
+
+static bool HHVM_METHOD(ReflectionProperty, isProtected) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Instance:
+      return data->getProp()->attrs & AttrProtected;
+    case ReflectionPropHandle::Type::Static:
+      return data->getSProp()->attrs & AttrProtected;
+    case ReflectionPropHandle::Type::Dynamic:
+      return false;
+    default:
+      reflection_property_internal_error();
+  }
+}
+
+static bool HHVM_METHOD(ReflectionProperty, isPrivate) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Instance:
+      return data->getProp()->attrs & AttrPrivate;
+    case ReflectionPropHandle::Type::Static:
+      return data->getSProp()->attrs & AttrPrivate;
+    case ReflectionPropHandle::Type::Dynamic:
+      return false;
+    default:
+      reflection_property_internal_error();
+  }
+}
+
+static bool HHVM_METHOD(ReflectionProperty, isStatic) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Static:
+      return true;
+    case ReflectionPropHandle::Type::Instance:
+    case ReflectionPropHandle::Type::Dynamic:
+      return false;
+    default:
+      reflection_property_internal_error();
+  }
+}
+
+static bool HHVM_METHOD(ReflectionProperty, isDefault) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Instance:
+    case ReflectionPropHandle::Type::Static:
+      return true;
+    case ReflectionPropHandle::Type::Dynamic:
+      return false;
+    default:
+      reflection_property_internal_error();
+  }
+}
+
+static int HHVM_METHOD(ReflectionProperty, getModifiers) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Instance:
+      return get_modifiers(data->getProp()->attrs, false);
+    case ReflectionPropHandle::Type::Static:
+      return get_modifiers(data->getSProp()->attrs, false);
+    case ReflectionPropHandle::Type::Dynamic:
+      return get_modifiers(AttrPublic, false);
+    default:
+      reflection_property_internal_error();
+  }
+}
+
+static TypedValue HHVM_METHOD(ReflectionProperty, getDocComment) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  const StringData *comment = nullptr;
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Instance:
+      comment = data->getProp()->docComment;
+      break;
+    case ReflectionPropHandle::Type::Static:
+      comment = data->getSProp()->docComment;
+      break;
+    case ReflectionPropHandle::Type::Dynamic:
+      break;
+    default:
+      reflection_property_internal_error();
+  }
+  if (comment == nullptr || comment->empty()) {
+    return tvReturn(false);
+  } else {
+    Variant vComment{comment, Variant::PersistentStrInit{}};
+    return tvReturn(std::move(vComment));
+  }
+}
+
+static String HHVM_METHOD(ReflectionProperty, getTypeText) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  const StringData *type = nullptr;
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Instance:
+      type = data->getProp()->typeConstraint;
+      break;
+    case ReflectionPropHandle::Type::Static:
+      type = data->getSProp()->typeConstraint;
+      break;
+    case ReflectionPropHandle::Type::Dynamic:
+      break;
+    default:
+      reflection_property_internal_error();
+  }
+  if (type == nullptr || type->empty()) {
+    return empty_string();
+  } else {
+    return StrNR(type);
+  }
+}
+
+static TypedValue HHVM_METHOD(ReflectionProperty, getDefaultValue) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Instance: {
+      auto const prop = data->getProp();
+      // We can't get propIdx from prop->idx (that's not what that is) or by
+      // doing prop - prop->cls->declProperties().begin() (the prop can be in
+      // the prop vector of a child class but it will always point to the class
+      // it was declared in); so if we don't want to store propIdx we have to
+      // look it up by name.
+      auto lookup = prop->cls->getDeclPropIndex(prop->cls, prop->name);
+      auto propIdx = lookup.prop;
+      assert(propIdx != kInvalidSlot);
+      prop->cls->initialize();
+      auto const& propInitVec = prop->cls->getPropData()
+        ? *prop->cls->getPropData()
+        : prop->cls->declPropInit();
+      return tvReturn(tvAsCVarRef(&propInitVec[propIdx]));
+    }
+    case ReflectionPropHandle::Type::Static: {
+      auto const prop = data->getSProp();
+      prop->cls->initialize();
+      return tvReturn(tvAsCVarRef(&prop->val));
+    }
+    case ReflectionPropHandle::Type::Dynamic:
+      return make_tv<KindOfNull>();
+    default:
+      reflection_property_internal_error();
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2045,7 +2201,16 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionTypeConstant, getDeclaringClassname);
     HHVM_ME(ReflectionTypeConstant, getClassname);
 
-    HHVM_ME(ReflectionProperty, __init);
+    HHVM_ME(ReflectionProperty, __construct);
+    HHVM_ME(ReflectionProperty, isPublic);
+    HHVM_ME(ReflectionProperty, isProtected);
+    HHVM_ME(ReflectionProperty, isPrivate);
+    HHVM_ME(ReflectionProperty, isStatic);
+    HHVM_ME(ReflectionProperty, isDefault);
+    HHVM_ME(ReflectionProperty, getModifiers);
+    HHVM_ME(ReflectionProperty, getDocComment);
+    HHVM_ME(ReflectionProperty, getTypeText);
+    HHVM_ME(ReflectionProperty, getDefaultValue);
 
     HHVM_ME(ReflectionTypeAlias, __init);
     HHVM_ME(ReflectionTypeAlias, getTypeStructure);
@@ -2098,8 +2263,6 @@ struct ReflectionExtension final : Extension {
       s_ReflectionConstHandle.get());
     Native::registerNativeDataInfo<ReflectionPropHandle>(
       s_ReflectionPropHandle.get());
-    Native::registerNativeDataInfo<ReflectionSPropHandle>(
-      s_ReflectionSPropHandle.get());
     Native::registerNativeDataInfo<ReflectionTypeAliasHandle>(
       s_ReflectionTypeAliasHandle.get(), Native::NO_SWEEP);
 

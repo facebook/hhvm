@@ -166,6 +166,11 @@ void Debugger::setClientConnected(bool connected) {
         interruptAllThreads();
       }
 
+      DebuggerHook::setActiveDebuggerInstance(
+        VSDebugHook::GetInstance(),
+        false
+      );
+
       resumeTarget();
     }
   }

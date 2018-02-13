@@ -2322,7 +2322,8 @@ let mixed_namespace_errors node parents namespace_type errors =
             when width markup_text = 0 || is_hashbang markup_text ->
             is_first rest
           | { syntax = DeclareDirectiveStatement _; _} :: rest
-          | { syntax = DeclareBlockStatement _; _} :: rest -> is_first rest
+          | { syntax = DeclareBlockStatement _; _} :: rest
+          | { syntax = NamespaceUseDeclaration _; _} :: rest -> is_first rest
           | { syntax = NamespaceDeclaration _; _} :: _ -> true
           | _ -> false
         in
@@ -2335,7 +2336,8 @@ let mixed_namespace_errors node parents namespace_type errors =
                          | { syntax = NamespaceDeclaration _; _}
                          | { syntax = DeclareDirectiveStatement _; _}
                          | { syntax = DeclareBlockStatement _; _}
-                         | { syntax = EndOfFile _; _} -> false
+                         | { syntax = EndOfFile _; _}
+                         | { syntax = NamespaceUseDeclaration _; _} -> false
                          | _ -> true)
         in
         is_first decls, has_code_outside_namespace

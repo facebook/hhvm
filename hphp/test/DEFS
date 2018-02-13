@@ -1,11 +1,14 @@
 # -*- mode: python -*-
 
+import os
+
 include_defs("//hphp/DEFS")
 
-def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
+def verify_unittest(suite, repo, dir, mode='interp,jit',
+                    relocate=0, recycle_tc=0,
                     cli_server=0, hhcodegen=False, use_hackc=False,
                     hhas_roundtrip=False, target_suffix='',
-                    extra_args=[], runtime_dir_prefix=''):
+                    extra_args=[], blacklist=None):
   target_name = 'verify_' + suite + '_' + mode + \
        ('_repo' if repo else '') + \
        ('_relocate' if relocate else '') + \
@@ -47,21 +50,25 @@ def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
 
   deplist=[
     '//hphp/hhvm:hhvm',
-    '//hphp/hhvm:hhvm_link',
     '//hphp/hhvm:symlinks',
+    '//hphp/test:run',
+    ('' if dir.startswith('//') else '//hphp/test:') + dir,
   ]
-  runtimefiles = ['run', dir]
 
   if hhcodegen == True:
-    command.extend(['-x', 'hphp/test/hhcodegen_failing_tests_' + suite])
-    deplist.extend(['//hphp/hack/src:hh_single_compile'])
-    deplist.extend(['//hphp/hack/src/hhbc/semdiff:semdiff'])
-    runtimefiles.extend(['hhcodegen_failing_tests_' + suite])
-
+    blacklist = 'hphp/test/hhcodegen_failing_tests_' + suite
+    deplist.extend([
+        '//hphp/hack/src:hh_single_compile',
+        '//hphp/hack/src/hhbc/semdiff:semdiff',
+    ])
   elif use_hackc == True:
-      command.extend(['-x', 'hphp/test/hackc_failing_tests_' + suite])
-      deplist.extend(['//hphp/hack/src:hh_single_compile'])
-      runtimefiles.extend(['hackc_failing_tests_' + suite])
+      blacklist = 'hphp/test/hackc_failing_tests_' + suite
+      deplist.append('//hphp/hack/src:hh_single_compile')
+
+  if blacklist is not None:
+      command.extend(['-x', blacklist])
+      head, tail = os.path.split(blacklist)
+      deplist.append('//' + head + ':' + tail)
 
   if hhcodegen == True:
     command.extend(['--compare-hh-codegen'])
@@ -71,7 +78,6 @@ def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
   custom_unittest(
     name=target_name,
     command=command,
-    runtime_files=[runtime_dir_prefix + file for file in runtimefiles],
     deps=deplist,
     tags=['serialize', 'run_as_bundle', 'hphp-test'],
   )

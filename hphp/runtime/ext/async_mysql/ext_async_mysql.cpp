@@ -1779,6 +1779,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlQueryResult, mapRowsTyped);
     HHVM_ME(AsyncMysqlQueryResult, vectorRowsTyped);
     HHVM_ME(AsyncMysqlQueryResult, rowBlocks);
+    HHVM_ME(AsyncMysqlQueryResult, noIndexUsed);
     Native::registerNativeDataInfo<AsyncMysqlQueryResult>(
       AsyncMysqlQueryResult::s_className.get(), Native::NDIFlags::NO_COPY);
 

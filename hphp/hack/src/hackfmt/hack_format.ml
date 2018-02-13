@@ -8,16 +8,17 @@
  *
  *)
 
-module SyntaxKind = Full_fidelity_syntax_kind
-module Syntax = Full_fidelity_editable_syntax
-module TriviaKind = Full_fidelity_trivia_kind
-module Trivia = Full_fidelity_editable_trivia
-module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 module Env = Format_env
 module SourceText = Full_fidelity_source_text
+module Syntax = Full_fidelity_editable_syntax
+module SyntaxKind = Full_fidelity_syntax_kind
+module Token = Full_fidelity_editable_token
+module TokenKind = Full_fidelity_token_kind
+module Trivia = Full_fidelity_editable_trivia
+module TriviaKind = Full_fidelity_trivia_kind
+module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 
 open Hh_core
-open Syntax
 open Doc
 
 let make_list = Syntax.make_list SourceText.empty 0
@@ -28,11 +29,11 @@ let make_missing () = Syntax.make_missing SourceText.empty 0
  *
  * Exported via the `transform` alias below. *)
 let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
-  match syntax node with
-  | Missing ->
+  match Syntax.syntax node with
+  | Syntax.Missing ->
     Nothing
-  | Token x ->
-    let open EditableToken in
+  | Syntax.Token x ->
+    let open Token in
     let token_kind = kind x in
     Concat [
       begin
@@ -67,15 +68,16 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       end;
       transform_trailing_trivia (trailing x);
     ]
-  | SyntaxList _ ->
+  | Syntax.SyntaxList _ ->
     failwith (Printf.sprintf
       "Error: SyntaxList should never be handled directly;
       offending text is '%s'." (Syntax.text node));
-  | EndOfFile x ->
+  | Syntax.EndOfFile x ->
     t env x.end_of_file_token
-  | Script x ->
-    begin match x.script_declarations.syntax with
-    | SyntaxList (header::declarations) when is_markup_section header ->
+  | Syntax.Script x ->
+    begin match Syntax.syntax x.script_declarations with
+    | Syntax.SyntaxList (header::declarations)
+      when Syntax.is_markup_section header ->
       Concat [
         t env header;
         Newline;
@@ -86,9 +88,9 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         handle_possible_list env x.script_declarations;
       ]
     end
-  | LiteralExpression { literal_expression } ->
+  | Syntax.LiteralExpression { literal_expression } ->
     (* Double quoted string literals can create a list *)
-    let open EditableToken in
+    let open Token in
     let wrap_with_literal_type token transformed =
       let open TokenKind in
       match kind token with
@@ -103,31 +105,32 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       | FloatingLiteral -> NumericLiteral transformed
       | _ -> transformed
     in
-    begin match syntax literal_expression with
-      | Token tok -> wrap_with_literal_type tok (t env literal_expression)
-      | SyntaxList l ->
-        let last = trailing_token literal_expression in
+    begin match Syntax.syntax literal_expression with
+      | Syntax.Token tok ->
+        wrap_with_literal_type tok (t env literal_expression)
+      | Syntax.SyntaxList l ->
+        let last = Syntax.trailing_token literal_expression in
         begin match last with
           | Some tok -> wrap_with_literal_type tok (Concat (List.map l (t env)))
           | _ -> failwith "Expected Token"
         end
       | _ -> failwith "Expected Token or SyntaxList"
     end
-  | MarkupSection {
+  | Syntax.MarkupSection {
       markup_prefix = prefix;
       markup_text = text;
       markup_suffix = suffix;
       _ } ->
-    if is_missing prefix
+    if Syntax.is_missing prefix
     then
       (* leading markup section
          for hh files - strip leading whitespaces\newlines - they are not
          emitted and having them in Hack file is illegal anyways *)
-      let is_hh_script = match suffix.syntax with
-        | MarkupSuffix { markup_suffix_name = {
+      let is_hh_script = match Syntax.syntax suffix with
+        | Syntax.MarkupSuffix { markup_suffix_name = Syntax.{
             syntax = Token t; _
           }; _ } ->
-          (EditableToken.text t) = "hh"
+          (Token.text t) = "hh"
         | _ -> false
       in
       let rec all_whitespaces s i =
@@ -136,39 +139,39 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
             | ' ' | '\t' | '\r' | '\n' -> all_whitespaces s (i + 1)
             | _ -> false)
       in
-      let text_contains_only_whitespaces = match text.syntax with
-        | Token t -> all_whitespaces (EditableToken.text t) 0
+      let text_contains_only_whitespaces = match Syntax.syntax text with
+        | Syntax.Token t -> all_whitespaces (Token.text t) 0
         | _ -> false
       in
       if is_hh_script && text_contains_only_whitespaces
       then t env suffix
       else transform_simple env node
     else transform_simple env node
-  | MarkupSuffix _
-  | SimpleTypeSpecifier _
-  | VariableExpression _
-  | PipeVariableExpression _
-  | PropertyDeclarator _
-  | ConstantDeclarator _
-  | StaticDeclarator _
-  | ScopeResolutionExpression _
-  | EmbeddedMemberSelectionExpression _
-  | EmbeddedSubscriptExpression _
-  | PostfixUnaryExpression _
-  | XHPRequired _
-  | XHPSimpleClassAttribute _
-  | XHPClose _
-  | TypeConstant _
-  | GenericTypeSpecifier _
-  | NullableTypeSpecifier _
-  | SoftTypeSpecifier _
-  | ListItem _ ->
+  | Syntax.MarkupSuffix _
+  | Syntax.SimpleTypeSpecifier _
+  | Syntax.VariableExpression _
+  | Syntax.PipeVariableExpression _
+  | Syntax.PropertyDeclarator _
+  | Syntax.ConstantDeclarator _
+  | Syntax.StaticDeclarator _
+  | Syntax.ScopeResolutionExpression _
+  | Syntax.EmbeddedMemberSelectionExpression _
+  | Syntax.EmbeddedSubscriptExpression _
+  | Syntax.PostfixUnaryExpression _
+  | Syntax.XHPRequired _
+  | Syntax.XHPSimpleClassAttribute _
+  | Syntax.XHPClose _
+  | Syntax.TypeConstant _
+  | Syntax.GenericTypeSpecifier _
+  | Syntax.NullableTypeSpecifier _
+  | Syntax.SoftTypeSpecifier _
+  | Syntax.ListItem _ ->
     transform_simple env node
-  | QualifiedName { qualified_name_parts; } ->
+  | Syntax.QualifiedName { qualified_name_parts; } ->
     handle_possible_list env qualified_name_parts
-  | ExpressionStatement _ ->
+  | Syntax.ExpressionStatement _ ->
     transform_simple_statement env node
-  | EnumDeclaration {
+  | Syntax.EnumDeclaration {
       enum_attribute_spec = attr;
       enum_keyword = kw;
       enum_name = name;
@@ -199,7 +202,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       ];
       Newline;
     ]
-  | Enumerator {
+  | Syntax.Enumerator {
       enumerator_name = name;
       enumerator_equal = eq_kw;
       enumerator_value = value;
@@ -214,7 +217,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | AliasDeclaration {
+  | Syntax.AliasDeclaration {
       alias_attribute_spec = attr;
       alias_keyword = kw;
       alias_name = name;
@@ -241,7 +244,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | PropertyDeclaration {
+  | Syntax.PropertyDeclaration {
       property_modifiers = modifiers;
       property_type = prop_type;
       property_declarators = declarators;
@@ -253,7 +256,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | NamespaceDeclaration {
+  | Syntax.NamespaceDeclaration {
       namespace_keyword = kw;
       namespace_name = name;
       namespace_body = body } ->
@@ -264,7 +267,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env body;
       Newline;
     ]
-  | NamespaceBody {
+  | Syntax.NamespaceBody {
       namespace_left_brace = left_b;
       namespace_declarations = decls;
       namespace_right_brace = right_b } ->
@@ -272,12 +275,12 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Space;
       braced_block_nest env left_b right_b [handle_possible_list env decls];
     ]
-  | NamespaceEmptyBody {
+  | Syntax.NamespaceEmptyBody {
       namespace_semicolon = semi } ->
     Concat [
       t env semi;
     ]
-  | NamespaceUseDeclaration {
+  | Syntax.NamespaceUseDeclaration {
       namespace_use_keyword = kw;
       namespace_use_kind = use_kind;
       namespace_use_clauses = clauses;
@@ -293,7 +296,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | NamespaceGroupUseDeclaration {
+  | Syntax.NamespaceGroupUseDeclaration {
       namespace_group_use_keyword = kw;
       namespace_group_use_kind = use_kind;
       namespace_group_use_prefix = prefix;
@@ -311,7 +314,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | NamespaceUseClause {
+  | Syntax.NamespaceUseClause {
       namespace_use_clause_kind = use_kind;
       namespace_use_name = name;
       namespace_use_as = as_kw;
@@ -325,7 +328,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       when_present alias space;
       t env alias;
     ]
-  | FunctionDeclaration {
+  | Syntax.FunctionDeclaration {
       function_attribute_spec = attr;
       function_declaration_header = header;
       function_body = body } ->
@@ -336,7 +339,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       handle_possible_compound_statement env ~allow_collapse:true body;
       Newline;
     ]
-  | FunctionDeclarationHeader {
+  | Syntax.FunctionDeclarationHeader {
       function_modifiers = modifiers;
       function_keyword = kw;
       function_ampersand = amp;
@@ -353,7 +356,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         transform_fn_decl_name env modifiers kw amp name type_params leftp);
       transform_fn_decl_args env params rightp colon ret_type where;
     ]
-  | WhereClause {
+  | Syntax.WhereClause {
       where_clause_keyword = where;
       where_clause_constraints = constraints } ->
     Concat [
@@ -361,7 +364,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Space;
       handle_possible_list env constraints ~after_each:(fun _ -> Space);
     ]
-  | WhereConstraint {
+  | Syntax.WhereConstraint {
       where_constraint_left_type = left;
       where_constraint_operator = op;
       where_constraint_right_type = right } ->
@@ -372,7 +375,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Space;
       t env right;
     ]
-  | MethodishDeclaration {
+  | Syntax.MethodishDeclaration {
       methodish_attribute = attr;
       methodish_function_decl_header = func_decl;
       methodish_function_body = body;
@@ -381,8 +384,8 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env attr;
       when_present attr newline;
       (
-        let fn_name, args_and_where = match syntax func_decl with
-          | FunctionDeclarationHeader {
+        let fn_name, args_and_where = match Syntax.syntax func_decl with
+          | Syntax.FunctionDeclarationHeader {
               function_modifiers = modifiers;
               function_keyword = kw;
               function_ampersand = amp;
@@ -417,7 +420,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | ClassishDeclaration {
+  | Syntax.ClassishDeclaration {
       classish_attribute = attr;
       classish_modifiers = modifiers;
       classish_keyword = kw;
@@ -471,7 +474,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       ]);
       t env body;
     ]
-  | ClassishBody {
+  | Syntax.ClassishBody {
       classish_body_left_brace = left_b;
       classish_body_elements = body;
       classish_body_right_brace = right_b } ->
@@ -482,7 +485,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       ];
       Newline;
     ]
-  | TraitUsePrecedenceItem {
+  | Syntax.TraitUsePrecedenceItem {
       trait_use_precedence_item_name = name;
       trait_use_precedence_item_keyword = kw;
       trait_use_precedence_item_removed_names = removed_names } ->
@@ -494,7 +497,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env removed_names;
       Newline;
     ]
-  | TraitUseAliasItem {
+  | Syntax.TraitUseAliasItem {
       trait_use_alias_item_aliasing_name = aliasing_name;
       trait_use_alias_item_keyword = kw;
       trait_use_alias_item_modifiers = visibility;
@@ -509,7 +512,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env aliased_name;
       Newline;
     ]
-  | TraitUseConflictResolution {
+  | Syntax.TraitUseConflictResolution {
       trait_use_conflict_resolution_keyword = kw;
       trait_use_conflict_resolution_names = elements;
       trait_use_conflict_resolution_left_brace = lb;
@@ -528,7 +531,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Newline;
       t env rb;
     ]
-  | TraitUse {
+  | Syntax.TraitUse {
       trait_use_keyword = kw;
       trait_use_names = elements;
       trait_use_semicolon = semi } ->
@@ -540,7 +543,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | RequireClause {
+  | Syntax.RequireClause {
       require_keyword = kw;
       require_kind = kind;
       require_name = name;
@@ -555,7 +558,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | ConstDeclaration {
+  | Syntax.ConstDeclaration {
       const_abstract = abstr;
       const_keyword = kw;
       const_type_specifier = const_type;
@@ -573,7 +576,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | TypeConstDeclaration {
+  | Syntax.TypeConstDeclaration {
       type_const_abstract = abs;
       type_const_keyword = kw;
       type_const_type_keyword = type_kw ;
@@ -604,7 +607,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | ParameterDeclaration {
+  | Syntax.ParameterDeclaration {
       parameter_attribute = attr;
       parameter_visibility = visibility;
       parameter_call_convention = callconv;
@@ -618,7 +621,9 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env callconv;
       when_present callconv space;
       t env param_type;
-      if is_missing visibility && is_missing callconv && is_missing param_type
+      if Syntax.is_missing visibility
+      && Syntax.is_missing callconv
+      && Syntax.is_missing param_type
       then t env name
       else Concat [
         Space;
@@ -627,7 +632,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       ];
       t env default;
     ]
-  | VariadicParameter {
+  | Syntax.VariadicParameter {
       variadic_parameter_call_convention = callconv;
       variadic_parameter_type = type_var;
       variadic_parameter_ellipsis = ellipsis } ->
@@ -637,12 +642,12 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env type_var;
       t env ellipsis;
     ]
-  | AttributeSpecification {
+  | Syntax.AttributeSpecification {
       attribute_specification_left_double_angle = left_da;
       attribute_specification_attributes = attrs;
       attribute_specification_right_double_angle = right_da; } ->
     transform_argish env ~allow_trailing:false left_da attrs right_da
-  | Attribute {
+  | Syntax.Attribute {
       attribute_name = name;
       attribute_left_paren = left_p;
       attribute_values = values;
@@ -651,19 +656,19 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env name;
       transform_argish env left_p values right_p;
     ]
-  | InclusionExpression {
+  | Syntax.InclusionExpression {
       inclusion_require = kw;
       inclusion_filename = expr; } ->
     Concat [
       t env kw;
-      (match syntax expr with
-      | ParenthesizedExpression _ -> Nothing
+      (match Syntax.syntax expr with
+      | Syntax.ParenthesizedExpression _ -> Nothing
       | _ -> Space
       );
       SplitWith Cost.Base;
       t env expr;
     ]
-  | InclusionDirective {
+  | Syntax.InclusionDirective {
       inclusion_expression = expr;
       inclusion_semicolon = semi; } ->
     Concat [
@@ -671,7 +676,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | CompoundStatement {
+  | Syntax.CompoundStatement {
       compound_left_brace;
       compound_statements;
       compound_right_brace; } ->
@@ -682,7 +687,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         compound_right_brace;
       Newline;
     ]
-  | AlternateLoopStatement {
+  | Syntax.AlternateLoopStatement {
       alternate_loop_opening_colon;
       alternate_loop_statements;
       alternate_loop_closing_keyword;
@@ -695,7 +700,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         alternate_loop_closing_semicolon;
       Newline;
     ]
-  | UnsetStatement {
+  | Syntax.UnsetStatement {
       unset_keyword = kw;
       unset_left_paren = left_p;
       unset_variables = args;
@@ -707,7 +712,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | WhileStatement x ->
+  | Syntax.WhileStatement x ->
     Concat [
       t env x.while_keyword;
       Space;
@@ -721,7 +726,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       handle_possible_compound_statement env x.while_body;
       Newline;
     ]
-  | DeclareDirectiveStatement x ->
+  | Syntax.DeclareDirectiveStatement x ->
     Concat [
       t env x.declare_directive_keyword;
       Space;
@@ -735,7 +740,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env x.declare_directive_semicolon;
       Newline;
     ]
-  | DeclareBlockStatement x ->
+  | Syntax.DeclareBlockStatement x ->
     Concat [
       t env x.declare_block_keyword;
       Space;
@@ -749,7 +754,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       handle_possible_compound_statement env x.declare_block_body;
       Newline;
     ]
-  | UsingStatementBlockScoped x ->
+  | Syntax.UsingStatementBlockScoped x ->
     Concat [
       t env x.using_block_await_keyword;
       when_present x.using_block_await_keyword space;
@@ -765,7 +770,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       handle_possible_compound_statement env x.using_block_body;
       Newline;
     ]
-  | UsingStatementFunctionScoped x ->
+  | Syntax.UsingStatementFunctionScoped x ->
     Concat [
       t env x.using_function_await_keyword;
       when_present x.using_function_await_keyword space;
@@ -775,7 +780,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env x.using_function_semicolon;
       Newline;
     ]
-  | IfStatement {
+  | Syntax.IfStatement {
       if_keyword = kw;
       if_left_paren = left_p;
       if_condition = condition;
@@ -792,7 +797,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env else_clause;
       Newline;
     ]
-  | ElseifClause {
+  | Syntax.ElseifClause {
       elseif_keyword = kw;
       elseif_left_paren = left_p;
       elseif_condition = condition;
@@ -804,18 +809,18 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       transform_condition env left_p condition right_p;
       handle_possible_compound_statement env body;
     ]
-  | ElseClause x ->
+  | Syntax.ElseClause x ->
     Concat [
       t env x.else_keyword;
-      match syntax x.else_statement with
-      | IfStatement _ -> Concat [
+      match Syntax.syntax x.else_statement with
+      | Syntax.IfStatement _ -> Concat [
           Space;
           t env x.else_statement;
           Space;
         ]
       | _ -> handle_possible_compound_statement env x.else_statement
     ]
-  | IfEndIfStatement {
+  | Syntax.IfEndIfStatement {
       if_endif_keyword = kw;
       if_endif_left_paren = left_p;
       if_endif_condition = condition;
@@ -838,7 +843,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semicolon;
       Newline;
     ]
-  | ElseifColonClause {
+  | Syntax.ElseifColonClause {
       elseif_colon_keyword = kw;
       elseif_colon_left_paren = left_p;
       elseif_colon_condition = condition;
@@ -852,18 +857,18 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env colon;
       handle_possible_compound_statement env body;
     ]
-  | ElseColonClause x ->
+  | Syntax.ElseColonClause x ->
     Concat [
       t env x.else_colon_keyword;
-      match syntax x.else_colon_statement with
-      | IfStatement _ -> Concat [
+      match Syntax.syntax x.else_colon_statement with
+      | Syntax.IfStatement _ -> Concat [
           Space;
           t env x.else_colon_statement;
           Space;
         ]
       | _ -> handle_possible_compound_statement env x.else_colon_statement
     ]
-  | TryStatement {
+  | Syntax.TryStatement {
       try_keyword = kw;
       try_compound_statement = body;
       try_catch_clauses = catch_clauses;
@@ -876,7 +881,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env finally_clause;
       Newline;
     ]
-  | CatchClause {
+  | Syntax.CatchClause {
       catch_keyword = kw;
       catch_left_paren = left_p;
       catch_type = ex_type;
@@ -896,7 +901,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       ];
       handle_possible_compound_statement env body;
     ]
-  | FinallyClause {
+  | Syntax.FinallyClause {
       finally_keyword = kw;
       finally_body = body; } ->
     Concat [
@@ -904,7 +909,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Space;
       handle_possible_compound_statement env body;
     ]
-  | DoStatement {
+  | Syntax.DoStatement {
       do_keyword = do_kw;
       do_body = body;
       do_while_keyword = while_kw;
@@ -922,7 +927,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | ForStatement {
+  | Syntax.ForStatement {
       for_keyword = kw;
       for_left_paren = left_p;
       for_initializer = init;
@@ -955,7 +960,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       handle_possible_compound_statement env body;
       Newline;
     ]
-  | ForeachStatement {
+  | Syntax.ForeachStatement {
       foreach_keyword = kw;
       foreach_left_paren = left_p;
       foreach_collection = collection;
@@ -993,7 +998,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       handle_possible_compound_statement env body;
       Newline;
     ]
-  | SwitchStatement {
+  | Syntax.SwitchStatement {
       switch_keyword = kw;
       switch_left_paren = left_p;
       switch_expression = expr;
@@ -1001,7 +1006,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       switch_left_brace = left_b;
       switch_sections = sections;
       switch_right_brace = right_b; } ->
-    let sections = syntax_node_to_list sections in
+    let sections = Syntax.syntax_node_to_list sections in
     Concat [
       t env kw;
       Space;
@@ -1010,7 +1015,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       braced_block_nest env left_b right_b (List.map sections (t env));
       Newline;
     ]
-  | SwitchSection {
+  | Syntax.SwitchSection {
       switch_section_labels = labels;
       switch_section_statements = statements;
       switch_section_fallthrough = fallthrough; } ->
@@ -1024,14 +1029,14 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
     in
     let upto_fallthrough = List.rev upto_fallthrough in
     let after_fallthrough = List.rev after_fallthrough in
-    let labels = syntax_node_to_list labels in
-    let statements = syntax_node_to_list statements in
+    let labels = Syntax.syntax_node_to_list labels in
+    let statements = Syntax.syntax_node_to_list statements in
     (* When the statements in the SwitchSection are wrapped in a single
      * CompoundStatement, special-case the opening curly brace to appear on
      * the same line as the case label. *)
     let is_scoped_section =
       match statements with
-      | [{ syntax = CompoundStatement _; _ }] -> true
+      | [Syntax.{ syntax = CompoundStatement _; _ }] -> true
       | _ -> false
     in
     Concat [
@@ -1051,7 +1056,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       else BlockNest [handle_list env statements];
       t env fallthrough;
     ]
-  | CaseLabel {
+  | Syntax.CaseLabel {
       case_keyword = kw;
       case_expression = expr;
       case_colon = colon; } ->
@@ -1062,32 +1067,32 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env expr;
       t env colon;
     ]
-  | DefaultLabel {
+  | Syntax.DefaultLabel {
       default_keyword = kw;
       default_colon = colon; } ->
     Concat [
       t env kw;
       t env colon;
     ]
-  | SwitchFallthrough {
+  | Syntax.SwitchFallthrough {
       fallthrough_keyword = kw;
       fallthrough_semicolon = semi; } ->
     Concat [
       t env kw;
       t env semi;
     ]
-  | ReturnStatement {
+  | Syntax.ReturnStatement {
       return_keyword = kw;
       return_expression = expr;
       return_semicolon = semi; } ->
     transform_keyword_expression_statement env kw expr semi
-  | GotoLabel { goto_label_name; goto_label_colon } ->
+  | Syntax.GotoLabel { goto_label_name; goto_label_colon } ->
     Concat [
       t env goto_label_name;
       t env goto_label_colon;
       Newline;
     ]
-  | GotoStatement {
+  | Syntax.GotoStatement {
       goto_statement_keyword;
       goto_statement_label_name;
       goto_statement_semicolon; } ->
@@ -1098,33 +1103,34 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env goto_statement_semicolon;
       Newline;
     ]
-  | ThrowStatement {
+  | Syntax.ThrowStatement {
       throw_keyword = kw;
       throw_expression = expr;
       throw_semicolon = semi; } ->
     transform_keyword_expression_statement env kw expr semi
-  | BreakStatement {
+  | Syntax.BreakStatement {
       break_keyword = kw;
       break_level = expr;
       break_semicolon = semi; } ->
     transform_keyword_expression_statement env kw expr semi
-  | ContinueStatement {
+  | Syntax.ContinueStatement {
       continue_keyword = kw;
       continue_level = level;
       continue_semicolon = semi; } ->
     transform_keyword_expression_statement env kw level semi
-  | FunctionStaticStatement {
+  | Syntax.FunctionStaticStatement {
       static_static_keyword = static_kw;
       static_declarations = declarators;
       static_semicolon = semi; } ->
     transform_keyword_expr_list_statement env static_kw declarators semi
-  | EchoStatement {
+  | Syntax.EchoStatement {
       echo_keyword = kw;
       echo_expressions = expr_list;
       echo_semicolon = semi; } ->
-    (match syntax expr_list with
-    | SyntaxList [{ syntax = ListItem { list_item = expr; _ }; _ }]
-      when kind expr = SyntaxKind.ParenthesizedExpression ->
+    (match Syntax.syntax expr_list with
+    | Syntax.SyntaxList [
+        Syntax.{ syntax = ListItem { list_item = expr; _ }; _ }]
+      when Syntax.kind expr = SyntaxKind.ParenthesizedExpression ->
       Concat [
         t env kw;
         t env expr;
@@ -1134,12 +1140,12 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
     | _ ->
       transform_keyword_expr_list_statement env kw expr_list semi
     )
-  | GlobalStatement {
+  | Syntax.GlobalStatement {
       global_keyword = kw;
       global_variables = var_list;
       global_semicolon = semi; } ->
     transform_keyword_expr_list_statement env kw var_list semi
-  | SimpleInitializer {
+  | Syntax.SimpleInitializer {
       simple_initializer_equal = eq_kw;
       simple_initializer_value = value; } ->
     Concat [
@@ -1149,7 +1155,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       SplitWith Cost.Base;
       Nest [t env value];
     ]
-  | AnonymousFunction {
+  | Syntax.AnonymousFunction {
       anonymous_static_keyword = static_kw;
       anonymous_async_keyword = async_kw;
       anonymous_coroutine_keyword = coroutine_kw;
@@ -1176,7 +1182,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         ~allow_collapse:true
         body;
     ]
-  | Php7AnonymousFunction {
+  | Syntax.Php7AnonymousFunction {
       php7_anonymous_static_keyword = static_kw;
       php7_anonymous_async_keyword = async_kw;
       php7_anonymous_coroutine_keyword = coroutine_kw;
@@ -1206,7 +1212,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         ~allow_collapse:true
         body;
     ]
-  | AnonymousFunctionUseClause {
+  | Syntax.AnonymousFunctionUseClause {
       anonymous_use_keyword = kw;
       anonymous_use_left_paren = left_p;
       anonymous_use_variables = vars;
@@ -1218,7 +1224,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Space;
       transform_argish env left_p vars right_p;
     ]
-  | LambdaExpression {
+  | Syntax.LambdaExpression {
       lambda_async = async;
       lambda_coroutine = coroutine;
       lambda_signature = signature;
@@ -1234,16 +1240,16 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env arrow;
       handle_lambda_body env body;
     ]
-  | LambdaSignature {
+  | Syntax.LambdaSignature {
       lambda_left_paren = lp;
       lambda_parameters = params;
       lambda_right_paren = rp;
       lambda_colon = colon;
       lambda_type = ret_type; } ->
     transform_argish_with_return_type env lp params rp colon ret_type
-  | CastExpression _ ->
-    Span (List.map (children node) (t env))
-  | MemberSelectionExpression {
+  | Syntax.CastExpression _ ->
+    Span (List.map (Syntax.children node) (t env))
+  | Syntax.MemberSelectionExpression {
       member_object;
       member_operator;
       member_name; } ->
@@ -1254,7 +1260,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
           member_name
         )
       None
-  | SafeMemberSelectionExpression {
+  | Syntax.SafeMemberSelectionExpression {
       safe_member_object;
       safe_member_operator;
       safe_member_name; } ->
@@ -1265,7 +1271,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
             safe_member_name
           )
       None
-  | YieldExpression {
+  | Syntax.YieldExpression {
       yield_keyword = kw;
       yield_operand = operand; } ->
     Concat [
@@ -1274,7 +1280,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       SplitWith Cost.Base;
       Nest [t env operand];
     ]
-  | YieldFromExpression {
+  | Syntax.YieldFromExpression {
       yield_from_yield_keyword = yield_kw;
       yield_from_from_keyword = from_kw;
       yield_from_operand = operand; } ->
@@ -1286,20 +1292,20 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       SplitWith Cost.Base;
       Nest [t env operand];
     ]
-  | PrefixUnaryExpression {
+  | Syntax.PrefixUnaryExpression {
       prefix_unary_operator = operator;
       prefix_unary_operand = operand; } ->
     Concat [
       t env operator;
-      (match syntax operator with
-        | Token x ->
+      (match Syntax.syntax operator with
+        | Syntax.Token x ->
           let is_parenthesized =
-            match syntax operand with
-            | ParenthesizedExpression _ -> true
+            match Syntax.syntax operand with
+            | Syntax.ParenthesizedExpression _ -> true
             | _ -> false
           in
-          let open EditableToken.TokenKind in
-          (match EditableToken.kind x with
+          let open TokenKind in
+          (match Token.kind x with
           | Await | Clone | Suspend -> Space
           | Print -> if is_parenthesized then Nothing else Space
           | _ -> Nothing
@@ -1308,13 +1314,13 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       );
       t env operand;
     ]
-  | BinaryExpression {
+  | Syntax.BinaryExpression {
       binary_left_operand;
       binary_operator;
       binary_right_operand; } ->
     transform_binary_expression env ~is_nested:false
       (binary_left_operand, binary_operator, binary_right_operand)
-  | InstanceofExpression {
+  | Syntax.InstanceofExpression {
       instanceof_left_operand = left;
       instanceof_operator = kw;
       instanceof_right_operand = right; } ->
@@ -1326,7 +1332,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       SplitWith Cost.Base;
       Nest [t env right];
     ]
-  | IsExpression {
+  | Syntax.IsExpression {
       is_left_operand = left;
       is_operator = kw;
       is_right_operand = right; } ->
@@ -1338,7 +1344,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       SplitWith Cost.Base;
       Nest [t env right];
     ]
-  | ConditionalExpression {
+  | Syntax.ConditionalExpression {
       conditional_test = test_expr;
       conditional_question = q_kw;
       conditional_consequence = true_expr;
@@ -1360,11 +1366,11 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         ]);
         t env c_kw;
         Space;
-        if not (is_missing true_expr) && env.Env.indent_width = 2
+        if not (Syntax.is_missing true_expr) && env.Env.indent_width = 2
           then Nest [t env false_expr]
           else t env false_expr;
       ])
-  | FunctionCallExpression {
+  | Syntax.FunctionCallExpression {
       function_call_receiver;
       function_call_left_paren;
       function_call_argument_list;
@@ -1374,7 +1380,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       function_call_left_paren
       function_call_argument_list
       function_call_right_paren
-  | FunctionCallWithTypeArgumentsExpression {
+  | Syntax.FunctionCallWithTypeArgumentsExpression {
       function_call_with_type_arguments_receiver;
       function_call_with_type_arguments_type_args;
       function_call_with_type_arguments_left_paren;
@@ -1386,7 +1392,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       function_call_with_type_arguments_left_paren
       function_call_with_type_arguments_argument_list
       function_call_with_type_arguments_right_paren
-  | EvalExpression {
+  | Syntax.EvalExpression {
       eval_keyword = kw;
       eval_left_paren = left_p;
       eval_argument = arg;
@@ -1395,7 +1401,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       transform_braced_item env left_p arg right_p;
     ]
-  | EmptyExpression {
+  | Syntax.EmptyExpression {
       empty_keyword = kw;
       empty_left_paren = left_p;
       empty_argument = arg;
@@ -1404,7 +1410,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       transform_braced_item env left_p arg right_p;
     ]
-  | IssetExpression {
+  | Syntax.IssetExpression {
       isset_keyword = kw;
       isset_left_paren = left_p;
       isset_argument_list = args;
@@ -1413,7 +1419,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       transform_argish env ~allow_trailing:false left_p args right_p;
     ]
-  | DefineExpression {
+  | Syntax.DefineExpression {
       define_keyword = kw;
       define_left_paren = left_p;
       define_argument_list = args;
@@ -1422,7 +1428,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       transform_argish env left_p args right_p;
     ]
-  | HaltCompilerExpression {
+  | Syntax.HaltCompilerExpression {
       halt_compiler_keyword = kw;
       halt_compiler_left_paren = left_p;
       halt_compiler_argument_list = args;
@@ -1431,7 +1437,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       transform_argish env left_p args right_p;
     ]
-  | ParenthesizedExpression {
+  | Syntax.ParenthesizedExpression {
       parenthesized_expression_left_paren = left_p;
       parenthesized_expression_expression = expr;
       parenthesized_expression_right_paren = right_p; } ->
@@ -1444,7 +1450,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         t env right_p
       ]);
     ]
-  | BracedExpression {
+  | Syntax.BracedExpression {
       braced_expression_left_brace = left_b;
       braced_expression_expression = expr;
       braced_expression_right_brace = right_b; } ->
@@ -1453,8 +1459,8 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env left_b;
       Split;
       let rule =
-        if List.is_empty (trailing_trivia left_b)
-        && List.is_empty (trailing_trivia expr)
+        if List.is_empty (Syntax.trailing_trivia left_b)
+        && List.is_empty (Syntax.trailing_trivia expr)
           then Rule.Simple Cost.Base
           else Rule.Parental
       in
@@ -1464,7 +1470,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         t env right_b
       ])
     ]
-  | EmbeddedBracedExpression {
+  | Syntax.EmbeddedBracedExpression {
       embedded_braced_expression_left_brace = left_b;
       embedded_braced_expression_expression = expr;
       embedded_braced_expression_right_brace = right_b; } ->
@@ -1479,7 +1485,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Nest [t env expr];
       t env right_b;
     ]
-  | ListExpression {
+  | Syntax.ListExpression {
       list_keyword = kw;
       list_left_paren = lp;
       list_members = members;
@@ -1488,14 +1494,14 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       transform_argish env lp members rp;
     ]
-  | CollectionLiteralExpression {
+  | Syntax.CollectionLiteralExpression {
       collection_literal_name = name;
       collection_literal_left_brace = left_b;
       collection_literal_initializers = initializers;
       collection_literal_right_brace = right_b; } ->
     transform_container_literal
       env ~spaces:true name left_b initializers right_b
-  | ObjectCreationExpression {
+  | Syntax.ObjectCreationExpression {
       object_creation_new_keyword = newkw;
       object_creation_object = what; } ->
     Concat [
@@ -1503,7 +1509,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Space;
       t env what;
     ]
-  | ConstructorCall {
+  | Syntax.ConstructorCall {
       constructor_call_type = obj_type;
       constructor_call_left_paren = left_p;
       constructor_call_argument_list = arg_list;
@@ -1512,7 +1518,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env obj_type;
       transform_argish env left_p arg_list right_p;
     ]
-  | AnonymousClass {
+  | Syntax.AnonymousClass {
       anonymous_class_class_keyword = classkw;
       anonymous_class_left_paren = left_p;
       anonymous_class_argument_list = arg_list;
@@ -1554,53 +1560,53 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       ]);
       t env body;
     ]
-  | ArrayCreationExpression {
+  | Syntax.ArrayCreationExpression {
       array_creation_left_bracket = left_b;
       array_creation_members = members;
       array_creation_right_bracket = right_b; } ->
     transform_argish env left_b members right_b
-  | ArrayIntrinsicExpression {
+  | Syntax.ArrayIntrinsicExpression {
       array_intrinsic_keyword = kw;
       array_intrinsic_left_paren = left_p;
       array_intrinsic_members = members;
       array_intrinsic_right_paren = right_p; } ->
     transform_container_literal env kw left_p members right_p
-  | DarrayIntrinsicExpression {
+  | Syntax.DarrayIntrinsicExpression {
       darray_intrinsic_keyword = kw;
       darray_intrinsic_left_bracket = left_p;
       darray_intrinsic_members = members;
       darray_intrinsic_right_bracket = right_p; } ->
     transform_container_literal env kw left_p members right_p
-  | DictionaryIntrinsicExpression {
+  | Syntax.DictionaryIntrinsicExpression {
       dictionary_intrinsic_keyword = kw;
       dictionary_intrinsic_left_bracket = left_p;
       dictionary_intrinsic_members = members;
       dictionary_intrinsic_right_bracket = right_p; } ->
     transform_container_literal env kw left_p members right_p
-  | KeysetIntrinsicExpression {
+  | Syntax.KeysetIntrinsicExpression {
       keyset_intrinsic_keyword = kw;
       keyset_intrinsic_left_bracket = left_p;
       keyset_intrinsic_members = members;
       keyset_intrinsic_right_bracket = right_p; } ->
     transform_container_literal env kw left_p members right_p
-  | VarrayIntrinsicExpression {
+  | Syntax.VarrayIntrinsicExpression {
       varray_intrinsic_keyword = kw;
       varray_intrinsic_left_bracket = left_p;
       varray_intrinsic_members = members;
       varray_intrinsic_right_bracket = right_p; } ->
     transform_container_literal env kw left_p members right_p
-  | VectorIntrinsicExpression {
+  | Syntax.VectorIntrinsicExpression {
       vector_intrinsic_keyword = kw;
       vector_intrinsic_left_bracket = left_p;
       vector_intrinsic_members = members;
       vector_intrinsic_right_bracket = right_p; } ->
     transform_container_literal env kw left_p members right_p
-  | ElementInitializer {
+  | Syntax.ElementInitializer {
       element_key = key;
       element_arrow = arrow;
       element_value = value; } ->
     transform_mapish_entry env key arrow value
-  | SubscriptExpression {
+  | Syntax.SubscriptExpression {
       subscript_receiver = receiver;
       subscript_left_bracket = lb;
       subscript_index = expr;
@@ -1609,7 +1615,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env receiver;
       transform_braced_item env lb expr rb;
     ]
-  | AwaitableCreationExpression {
+  | Syntax.AwaitableCreationExpression {
       awaitable_async = async_kw;
       awaitable_coroutine = coroutine_kw;
       awaitable_compound_statement = body; } ->
@@ -1622,7 +1628,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       (* TODO: correctly handle spacing after the closing brace *)
       handle_possible_compound_statement env ~space:false body;
     ]
-  | XHPChildrenDeclaration {
+  | Syntax.XHPChildrenDeclaration {
       xhp_children_keyword = kw;
       xhp_children_expression = expr;
       xhp_children_semicolon = semi; } ->
@@ -1633,14 +1639,14 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | XHPChildrenParenthesizedList {
+  | Syntax.XHPChildrenParenthesizedList {
       xhp_children_list_left_paren = left_p;
       xhp_children_list_xhp_children = expressions;
       xhp_children_list_right_paren = right_p; } ->
     Concat [
       transform_argish env ~allow_trailing:false left_p expressions right_p;
     ]
-  | XHPCategoryDeclaration {
+  | Syntax.XHPCategoryDeclaration {
       xhp_category_keyword = kw;
       xhp_category_categories = categories;
       xhp_category_semicolon = semi; } ->
@@ -1653,7 +1659,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | XHPEnumType {
+  | Syntax.XHPEnumType {
       xhp_enum_optional = opt;
       xhp_enum_keyword = kw;
       xhp_enum_left_brace = left_b;
@@ -1665,24 +1671,24 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Space;
       transform_argish env left_b values right_b;
     ]
-  | XHPClassAttributeDeclaration {
+  | Syntax.XHPClassAttributeDeclaration {
       xhp_attribute_keyword = kw;
       xhp_attribute_attributes = xhp_attributes;
       xhp_attribute_semicolon = semi; } ->
     Concat [
       t env kw;
-      (match syntax xhp_attributes with
-      | Missing -> Nothing
-      | SyntaxList [attr] ->
+      (match Syntax.syntax xhp_attributes with
+      | Syntax.Missing -> Nothing
+      | Syntax.SyntaxList [attr] ->
         WithRule (Rule.Parental, Nest [Space; Split; t env attr])
-      | SyntaxList attrs ->
+      | Syntax.SyntaxList attrs ->
         Nest [handle_list env ~before_each:newline attrs]
       | _ -> failwith "Expected SyntaxList"
       );
       t env semi;
       Newline;
     ]
-  | XHPClassAttribute {
+  | Syntax.XHPClassAttribute {
       xhp_attribute_decl_type = attr_type;
       xhp_attribute_decl_name = name;
       xhp_attribute_decl_initializer = init;
@@ -1697,7 +1703,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       when_present req space;
       t env req;
     ]
-  | XHPSimpleAttribute {
+  | Syntax.XHPSimpleAttribute {
       xhp_simple_attribute_name = name;
       xhp_simple_attribute_equal = eq;
       xhp_simple_attribute_expression = expr; } ->
@@ -1707,7 +1713,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       SplitWith Cost.Base;
       Nest [t env expr];
     ]
-  | XHPSpreadAttribute {
+  | Syntax.XHPSpreadAttribute {
       xhp_spread_attribute_left_brace =l_brace;
       xhp_spread_attribute_spread_operator =spread;
       xhp_spread_attribute_expression =expr;
@@ -1719,7 +1725,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Nest [t env expr];
       t env r_brace;
     ]
-  | XHPOpen {
+  | Syntax.XHPOpen {
       xhp_open_left_angle = left_a;
       xhp_open_name = name;
       xhp_open_attributes = attrs;
@@ -1727,8 +1733,8 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
     Concat [
       t env left_a;
       t env name;
-      match syntax attrs with
-      | Missing -> handle_xhp_open_right_angle_token env attrs right_a
+      match Syntax.syntax attrs with
+      | Syntax.Missing -> handle_xhp_open_right_angle_token env attrs right_a
       | _ ->
         Concat [
           Space;
@@ -1743,14 +1749,14 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
           ])
         ]
     ]
-  | XHPExpression {
+  | Syntax.XHPExpression {
       xhp_open = xhp_open;
       xhp_body = body;
       xhp_close = close; } ->
     let handle_xhp_body body =
-      match syntax body with
-      | Missing -> Nothing, true
-      | SyntaxList xs ->
+      match Syntax.syntax body with
+      | Syntax.Missing -> Nothing, true
+      | Syntax.SyntaxList xs ->
         (* XHP breaks the normal rules of trivia. All trailing trivia (except
          * on XHPBody tokens) is lexed as leading trivia for the next token.
          *
@@ -1776,17 +1782,18 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
               then transform_leading_trivia leading
               else begin
                 let v =
-                  match syntax node with
-                  | Token _ -> if has_invisibles leading then Split else Nothing
+                  match Syntax.syntax node with
+                  | Syntax.Token _ ->
+                    if has_invisibles leading then Split else Nothing
                   | _ -> Split in
                 Concat [v; transform_xhp_leading_trivia leading]
               end;
             t env node;
           ] in
-          let open EditableToken in
+          let open Token in
           prev_token_was_xhpbody := begin
-            match syntax node with
-            | Token t -> kind t = TokenKind.XHPBody
+            match Syntax.syntax node with
+            | Syntax.Token t -> kind t = TokenKind.XHPBody
             | _ -> false
           end;
           (* Here, we preserve newlines after XHPBody tokens and don't add
@@ -1799,8 +1806,8 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
            * solving too expensive. *)
           let trailing = Syntax.trailing_trivia node in
           let trailing_whitespace =
-            match syntax node with
-            | Token _ when has_newline trailing -> Newline
+            match Syntax.syntax node with
+            | Syntax.Token _ when has_newline trailing -> Newline
             | _ when has_whitespace trailing -> Space
             | _ -> Nothing
           in
@@ -1812,7 +1819,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
           | Some token -> token
         in
         let can_split_before_first_token =
-          let open EditableToken in
+          let open Token in
           kind leading_token <> TokenKind.XHPBody ||
           has_invisibles (leading leading_token)
         in
@@ -1837,7 +1844,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
           ]
         end;
       ])
-  | VarrayTypeSpecifier {
+  | Syntax.VarrayTypeSpecifier {
       varray_keyword = kw;
       varray_left_angle = left_a;
       varray_type = varray_type;
@@ -1848,7 +1855,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       transform_braced_item_with_trailer env
         left_a varray_type trailing_comma right_a;
     ]
-  | VectorArrayTypeSpecifier {
+  | Syntax.VectorArrayTypeSpecifier {
       vector_array_keyword = kw;
       vector_array_left_angle = left_a;
       vector_array_type = vec_type;
@@ -1857,7 +1864,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       transform_braced_item env left_a vec_type right_a;
     ]
-  | VectorTypeSpecifier {
+  | Syntax.VectorTypeSpecifier {
       vector_type_keyword = kw;
       vector_type_left_angle = left_a;
       vector_type_type = vec_type;
@@ -1868,7 +1875,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       transform_braced_item_with_trailer env
         left_a vec_type trailing_comma right_a;
     ]
-  | KeysetTypeSpecifier {
+  | Syntax.KeysetTypeSpecifier {
       keyset_type_keyword = kw;
       keyset_type_left_angle = left_a;
       keyset_type_type = ks_type;
@@ -1879,7 +1886,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       transform_braced_item_with_trailer env
         left_a ks_type trailing_comma right_a;
     ]
-  | TypeParameter {
+  | Syntax.TypeParameter {
       type_variance = variance;
       type_name = name;
       type_constraints = constraints; } ->
@@ -1890,7 +1897,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       handle_possible_list env constraints
         ~after_each:(fun is_last -> if is_last then Nothing else Space);
     ]
-  | TypeConstraint {
+  | Syntax.TypeConstraint {
       constraint_keyword = kw;
       constraint_type = constraint_type; } ->
     Concat [
@@ -1898,7 +1905,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Space;
       t env constraint_type;
     ]
-  | DarrayTypeSpecifier {
+  | Syntax.DarrayTypeSpecifier {
       darray_keyword = kw;
       darray_left_angle = left_a;
       darray_key = key;
@@ -1906,14 +1913,14 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       darray_value = value;
       darray_trailing_comma = trailing_comma;
       darray_right_angle = right_a; } ->
-    let key_list_item = make_list_item key comma_kw in
-    let val_list_item = make_list_item value trailing_comma in
+    let key_list_item = Syntax.make_list_item key comma_kw in
+    let val_list_item = Syntax.make_list_item value trailing_comma in
     let args = make_list [key_list_item; val_list_item] in
     Concat [
       t env kw;
       transform_argish env ~allow_trailing:true left_a args right_a;
     ]
-  | MapArrayTypeSpecifier {
+  | Syntax.MapArrayTypeSpecifier {
       map_array_keyword = kw;
       map_array_left_angle = left_a;
       map_array_key = key;
@@ -1922,12 +1929,12 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       map_array_right_angle = right_a; } ->
     Concat [
       t env kw;
-      let key_list_item = make_list_item key comma_kw in
-      let val_list_item = make_list_item value (make_missing ()) in
+      let key_list_item = Syntax.make_list_item key comma_kw in
+      let val_list_item = Syntax.make_list_item value (make_missing ()) in
       let args = make_list [key_list_item; val_list_item] in
       transform_argish env ~allow_trailing:false left_a args right_a;
     ]
-  | DictionaryTypeSpecifier {
+  | Syntax.DictionaryTypeSpecifier {
       dictionary_type_keyword = kw;
       dictionary_type_left_angle = left_a;
       dictionary_type_members = members;
@@ -1936,7 +1943,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       transform_argish env left_a members right_a;
     ]
-  | ClosureTypeSpecifier {
+  | Syntax.ClosureTypeSpecifier {
       closure_outer_left_paren = outer_left_p;
       closure_coroutine = coroutine;
       closure_function_keyword = kw;
@@ -1955,7 +1962,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         inner_left_p param_list inner_right_p colon ret_type;
       t env outer_right_p;
     ]
-  | ClosureParameterTypeSpecifier {
+  | Syntax.ClosureParameterTypeSpecifier {
       closure_parameter_call_convention = callconv;
       closure_parameter_type = cp_type; } ->
     Concat [
@@ -1963,7 +1970,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       when_present callconv space;
       t env cp_type;
     ]
-  | ClassnameTypeSpecifier {
+  | Syntax.ClassnameTypeSpecifier {
       classname_keyword = kw;
       classname_left_angle = left_a;
       classname_type = class_type;
@@ -1974,7 +1981,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       transform_braced_item_with_trailer env
         left_a class_type trailing_comma right_a;
     ]
-  | FieldSpecifier {
+  | Syntax.FieldSpecifier {
       field_question = question;
       field_name = name;
       field_arrow = arrow_kw;
@@ -1983,32 +1990,33 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env question;
       transform_mapish_entry env name arrow_kw field_type;
     ]
-  | FieldInitializer {
+  | Syntax.FieldInitializer {
       field_initializer_name = name;
       field_initializer_arrow = arrow_kw;
       field_initializer_value = value; } ->
     transform_mapish_entry env name arrow_kw value
-  | ShapeTypeSpecifier {
+  | Syntax.ShapeTypeSpecifier {
       shape_type_keyword = shape_kw;
       shape_type_left_paren = left_p;
       shape_type_fields = type_fields;
       shape_type_ellipsis = ellipsis;
       shape_type_right_paren = right_p; } ->
-    let fields = if is_missing ellipsis
+    let fields = if Syntax.is_missing ellipsis
       then type_fields
       else
         let missing_separator = make_missing () in
-        let ellipsis_list = [make_list_item ellipsis missing_separator] in
-        make_list (children type_fields @ ellipsis_list) in
-    transform_container_literal env
-      ~allow_trailing:(is_missing ellipsis) shape_kw left_p fields right_p
-  | ShapeExpression {
+        let ellipsis_list =
+          [Syntax.make_list_item ellipsis missing_separator] in
+        make_list (Syntax.children type_fields @ ellipsis_list) in
+    transform_container_literal env shape_kw left_p fields right_p
+      ~allow_trailing:(Syntax.is_missing ellipsis)
+  | Syntax.ShapeExpression {
       shape_expression_keyword = shape_kw;
       shape_expression_left_paren = left_p;
       shape_expression_fields = fields;
       shape_expression_right_paren = right_p; } ->
     transform_container_literal env shape_kw left_p fields right_p
-  | TupleExpression {
+  | Syntax.TupleExpression {
       tuple_expression_keyword = kw;
       tuple_expression_left_paren = left_p;
       tuple_expression_items = items;
@@ -2017,22 +2025,22 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       transform_argish env left_p items right_p;
     ]
-  | TypeArguments {
+  | Syntax.TypeArguments {
       type_arguments_left_angle = left_a;
       type_arguments_types = type_list;
       type_arguments_right_angle = right_a; } ->
     transform_argish env left_a type_list right_a
-  | TypeParameters {
+  | Syntax.TypeParameters {
       type_parameters_left_angle = left_a;
       type_parameters_parameters = param_list;
       type_parameters_right_angle = right_a; } ->
     transform_argish env left_a param_list right_a
-  | TupleTypeSpecifier {
+  | Syntax.TupleTypeSpecifier {
       tuple_left_paren = left_p;
       tuple_types = types;
       tuple_right_paren = right_p; } ->
     transform_argish env left_p types right_p
-  | TupleTypeExplicitSpecifier {
+  | Syntax.TupleTypeExplicitSpecifier {
       tuple_type_keyword = kw;
       tuple_type_left_angle = left_a;
       tuple_type_types = types;
@@ -2041,38 +2049,37 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       transform_argish env left_a types right_a
     ]
-  | DecoratedExpression {
+  | Syntax.DecoratedExpression {
       decorated_expression_decorator = op;
       decorated_expression_expression = expr; } ->
     Concat [
       t env op;
       begin
-        let open EditableToken in
-        match syntax op with
-        | Token t when kind t = TokenKind.Inout -> Space
+        match Syntax.syntax op with
+        | Syntax.Token t when Token.kind t = TokenKind.Inout -> Space
         | _ -> Nothing
       end;
       t env expr;
     ]
-  | ErrorSyntax _ ->
+  | Syntax.ErrorSyntax _ ->
     raise Hackfmt_error.InvalidSyntax
 
 and when_present node f =
-  match syntax node with
-  | Missing -> Nothing
+  match Syntax.syntax node with
+  | Syntax.Missing -> Nothing
   | _ -> f ()
 
 and transform_simple env node =
-  Concat (List.map (children node) (t env))
+  Concat (List.map (Syntax.children node) (t env))
 
 and transform_simple_statement env node =
-  Concat ((List.map (children node) (t env)) @ [Newline])
+  Concat ((List.map (Syntax.children node) (t env)) @ [Newline])
 
 and braced_block_nest env ?(allow_collapse=true) open_b close_b nodes =
   let nodes = Concat nodes in
-  match allow_collapse, has_printable_content nodes, syntax open_b with
-  | true, false, Token ob
-    when List.for_all (EditableToken.trailing ob)
+  match allow_collapse, has_printable_content nodes, Syntax.syntax open_b with
+  | true, false, Syntax.Token ob
+    when List.for_all (Token.trailing ob)
       (fun t -> Trivia.kind t <> TriviaKind.EndOfLine) ->
     Concat [
       t env open_b;
@@ -2157,14 +2164,14 @@ and after_each_argument is_last =
   else space_split ()
 
 and handle_lambda_body env node =
-  match syntax node with
-  | CompoundStatement {
+  match Syntax.syntax node with
+  | Syntax.CompoundStatement {
       compound_left_brace;
       compound_statements;
       compound_right_brace; } ->
     handle_compound_statement env ~allow_collapse:true
       compound_left_brace compound_statements compound_right_brace;
-  | XHPExpression _ ->
+  | Syntax.XHPExpression _ ->
     WithRule (Rule.Parental, Concat [
       Space;
       Split;
@@ -2182,8 +2189,8 @@ and handle_possible_compound_statement env
     ?(allow_collapse=false)
     node
   =
-  match syntax node with
-  | CompoundStatement {
+  match Syntax.syntax node with
+  | Syntax.CompoundStatement {
       compound_left_brace;
       compound_statements;
       compound_right_brace; } ->
@@ -2195,7 +2202,7 @@ and handle_possible_compound_statement env
         compound_right_brace;
       if space then Space else Nothing;
     ]
-  | AlternateLoopStatement {
+  | Syntax.AlternateLoopStatement {
       alternate_loop_opening_colon;
       alternate_loop_statements;
       alternate_loop_closing_keyword;
@@ -2248,9 +2255,9 @@ and handle_alternate_loop_statement env
  * its children break.
  *)
 and handle_declarator_list env declarators =
-  match syntax declarators with
-  | Missing -> Nothing
-  | SyntaxList [declarator] ->
+  match Syntax.syntax declarators with
+  | Syntax.Missing -> Nothing
+  | Syntax.SyntaxList [declarator] ->
     Nest [
       Space;
       (* Use an independent split, so we don't break just because a line break
@@ -2258,7 +2265,7 @@ and handle_declarator_list env declarators =
       SplitWith Cost.Base;
       t env declarator;
     ];
-  | SyntaxList xs ->
+  | Syntax.SyntaxList xs ->
     (* Use Rule.Parental to break each declarator onto its own line if any
      * line break occurs in a declarator, or if they can't all fit onto one
      * line. *)
@@ -2298,16 +2305,17 @@ and handle_possible_list env
     ?(after_each=(fun _is_last -> Nothing))
     ?(handle_last=t env)
     node =
-  match syntax node with
-  | Missing -> Nothing
-  | SyntaxList x -> handle_list env x ~before_each ~after_each ~handle_last
+  match Syntax.syntax node with
+  | Syntax.Missing -> Nothing
+  | Syntax.SyntaxList x ->
+    handle_list env x ~before_each ~after_each ~handle_last
   | _ -> handle_list env [node] ~before_each ~after_each ~handle_last
 
 and handle_xhp_open_right_angle_token env attrs node =
-  match syntax node with
-  | Token token ->
+  match Syntax.syntax node with
+  | Syntax.Token token ->
     Concat [
-      if EditableToken.text token = "/>"
+      if Token.text token = "/>"
         then Concat [Space; when_present attrs split]
         else Nothing;
       t env node
@@ -2320,15 +2328,15 @@ and handle_function_call_expression env
     args
     rp
   =
-  match syntax receiver with
-  | MemberSelectionExpression {
+  match Syntax.syntax receiver with
+  | Syntax.MemberSelectionExpression {
       member_object;
       member_operator;
       member_name; } ->
     handle_possible_chaining env
       (member_object, member_operator, member_name)
       (Some (lp, args, rp))
-  | SafeMemberSelectionExpression {
+  | Syntax.SafeMemberSelectionExpression {
       safe_member_object;
       safe_member_operator;
       safe_member_name; } ->
@@ -2348,15 +2356,15 @@ and handle_function_call_with_type_arguments_expression env
     args
     rp
   =
-  match syntax receiever with
-  | MemberSelectionExpression {
+  match Syntax.syntax receiever with
+  | Syntax.MemberSelectionExpression {
       member_object;
       member_operator;
       member_name; } ->
     handle_possible_chaining env
       (member_object, member_operator, member_name)
       (Some (lp, args, rp))
-  | SafeMemberSelectionExpression {
+  | Syntax.SafeMemberSelectionExpression {
       safe_member_object;
       safe_member_operator;
       safe_member_name; } ->
@@ -2376,21 +2384,21 @@ and handle_possible_chaining env (obj, arrow1, member1) argish =
       let (obj, l) = handle_chaining obj in
       obj, l @ [(arrow, member, fun_paren_args)]
     in
-    match syntax obj with
-    | FunctionCallExpression {
+    match Syntax.syntax obj with
+    | Syntax.FunctionCallExpression {
         function_call_receiver = receiver;
         function_call_left_paren = lp;
         function_call_argument_list = args;
         function_call_right_paren = rp; } ->
-      (match syntax receiver with
-        | MemberSelectionExpression {
+      (match Syntax.syntax receiver with
+        | Syntax.MemberSelectionExpression {
             member_object;
             member_operator;
             member_name; } ->
           handle_mse_or_smse
             (member_object, member_operator, member_name)
             (Some (lp, args, rp))
-        | SafeMemberSelectionExpression {
+        | Syntax.SafeMemberSelectionExpression {
             safe_member_object;
             safe_member_operator;
             safe_member_name; } ->
@@ -2399,14 +2407,14 @@ and handle_possible_chaining env (obj, arrow1, member1) argish =
             (Some (lp, args, rp))
         | _ -> obj, []
       )
-    | MemberSelectionExpression {
+    | Syntax.MemberSelectionExpression {
         member_object;
         member_operator;
         member_name; } ->
       handle_mse_or_smse
         (member_object, member_operator, member_name)
         None
-    | SafeMemberSelectionExpression {
+    | Syntax.SafeMemberSelectionExpression {
         safe_member_object;
         safe_member_operator;
         safe_member_name; } ->
@@ -2477,25 +2485,25 @@ and transform_fn_decl_args env params rightp colon ret_type where =
   (* It is a syntax error to follow a variadic parameter with a trailing
    * comma, so suppress trailing commas in that case. *)
   let allow_trailing =
-    match syntax params with
-    | SyntaxList params ->
-      let open EditableToken in
-      let open EditableToken.TokenKind in
+    match Syntax.syntax params with
+    | Syntax.SyntaxList params ->
+      let open Token in
+      let open TokenKind in
       let last_param =
-        match syntax (List.last_exn params) with
-        | ListItem { list_item; _ } -> list_item
+        match Syntax.syntax (List.last_exn params) with
+        | Syntax.ListItem { list_item; _ } -> list_item
         | _ -> failwith "Expected ListItem"
       in
       begin
-        match syntax last_param with
-        | VariadicParameter _
-        | ParameterDeclaration {
+        match Syntax.syntax last_param with
+        | Syntax.VariadicParameter _
+        | Syntax.(ParameterDeclaration {
             parameter_name = { syntax = DecoratedExpression {
               decorated_expression_decorator = {
                 syntax = Token { kind = DotDotDot; _ }; _
               }; _
             }; _ }; _
-          } ->
+          }) ->
           false
         | _ -> true
       end
@@ -2530,35 +2538,35 @@ and transform_argish env
    * line breaks within the argument (normally these would force the splits
    * around the argument to break). *)
   let split_when_children_split =
-    match spaces, syntax arg_list with
-    | false, SyntaxList [x] ->
+    match spaces, Syntax.syntax arg_list with
+    | false, Syntax.SyntaxList [x] ->
       let has_surrounding_whitespace =
         not (
-          List.is_empty (trailing_trivia left_p) &&
-          List.is_empty (trailing_trivia x)
+          List.is_empty (Syntax.trailing_trivia left_p) &&
+          List.is_empty (Syntax.trailing_trivia x)
         )
       in
       let item =
-        match syntax x with
-        | ListItem x -> x.list_item
+        match Syntax.syntax x with
+        | Syntax.ListItem { list_item; _ } -> list_item
         | _ -> failwith "Expected ListItem"
       in
       (* Blacklist constructs which look ugly when we try to preserve the
        * lack-of-whitespace style. *)
-      (match syntax item with
-      | LambdaExpression
-          { lambda_body = { syntax = CompoundStatement _; _ }; _ } ->
+      (match Syntax.syntax item with
+      | Syntax.(LambdaExpression
+          { lambda_body = { syntax = CompoundStatement _; _ }; _ }) ->
         has_surrounding_whitespace
-      | FunctionCallExpression { function_call_receiver; _ } ->
+      | Syntax.FunctionCallExpression { function_call_receiver; _ } ->
         Syntax.is_member_selection_expression function_call_receiver ||
           has_surrounding_whitespace
-      | ConditionalExpression _
-      | BinaryExpression _
-      | MemberSelectionExpression _
-      | FieldSpecifier _
-      | FieldInitializer _
-      | ElementInitializer _
-      | LambdaExpression _
+      | Syntax.ConditionalExpression _
+      | Syntax.BinaryExpression _
+      | Syntax.MemberSelectionExpression _
+      | Syntax.FieldSpecifier _
+      | Syntax.FieldInitializer _
+      | Syntax.ElementInitializer _
+      | Syntax.LambdaExpression _
         -> true
       | _ -> has_surrounding_whitespace
       )
@@ -2576,13 +2584,13 @@ and transform_braced_item env left_p item right_p =
   delimited_nest env left_p right_p [t env item]
 
 and transform_trailing_comma env ~allow_trailing item comma =
-  let open EditableToken in
+  let open Token in
   (* PHP does not permit trailing commas in function calls. Rather than try to
    * account for where PHP's parser permits trailing commas, we just never add
    * them in PHP files. *)
   let allow_trailing = allow_trailing && env.Env.add_trailing_commas in
-  match syntax comma with
-  | Token tok ->
+  match Syntax.syntax comma with
+  | Syntax.Token tok ->
     Concat [
       t env item;
       transform_leading_trivia (leading tok);
@@ -2590,7 +2598,7 @@ and transform_trailing_comma env ~allow_trailing item comma =
       Ignore (text tok, width tok);
       transform_trailing_trivia (trailing tok);
     ]
-  | Missing ->
+  | Syntax.Missing ->
     let item, item_trailing = remove_trailing_trivia item in
     Concat [
       t env item;
@@ -2631,30 +2639,30 @@ and remove_leading_trivia node =
   | None -> [], node
   | Some leading_token ->
     let rewritten_node = Rewriter.rewrite_pre (fun rewrite_node ->
-      match syntax rewrite_node with
-      | Token t when t == leading_token ->
+      match Syntax.syntax rewrite_node with
+      | Syntax.Token t when t == leading_token ->
         Rewriter.Replace
-          (Syntax.make_token {t with EditableToken.leading = []})
+          (Syntax.make_token {t with Token.leading = []})
       | _  -> Rewriter.Keep
     ) node in
-    EditableToken.leading leading_token, rewritten_node
+    Token.leading leading_token, rewritten_node
 
 and remove_trailing_trivia node =
   match Syntax.trailing_token node with
   | None -> node, []
   | Some trailing_token ->
     let rewritten_node = Rewriter.rewrite_pre (fun rewrite_node ->
-      match syntax rewrite_node with
-      | Token t when t == trailing_token ->
+      match Syntax.syntax rewrite_node with
+      | Syntax.Token t when t == trailing_token ->
         Rewriter.Replace
-          (Syntax.make_token {t with EditableToken.trailing = []})
+          (Syntax.make_token {t with Token.trailing = []})
       | _  -> Rewriter.Keep
     ) node in
-    rewritten_node, EditableToken.trailing trailing_token
+    rewritten_node, Token.trailing trailing_token
 
 and transform_last_arg env ~allow_trailing node =
-  match syntax node with
-  | ListItem {
+  match Syntax.syntax node with
+  | Syntax.ListItem {
       list_item = item;
       list_separator = separator; } ->
     transform_trailing_comma env ~allow_trailing item separator
@@ -2704,9 +2712,9 @@ and transform_condition env left_p condition right_p =
 
 and transform_binary_expression env ~is_nested (left, operator, right) =
   let get_operator_type op =
-    match syntax op with
-    | Token t -> Full_fidelity_operator.trailing_from_token
-      (EditableToken.kind t)
+    match Syntax.syntax op with
+    | Syntax.Token t -> Full_fidelity_operator.trailing_from_token
+      (Token.kind t)
     | _ -> failwith "Operator should always be a token"
   in
   let is_concat op =
@@ -2745,8 +2753,8 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
       let precedence = Full_fidelity_operator.precedence operator_t in
 
       let rec flatten_expression expr =
-        match syntax expr with
-        | BinaryExpression {
+        match Syntax.syntax expr with
+        | Syntax.BinaryExpression {
             binary_left_operand = left;
             binary_operator = operator;
             binary_right_operand = right; } ->
@@ -2759,8 +2767,8 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
       in
 
       let transform_operand operand =
-        match syntax operand with
-        | BinaryExpression {
+        match Syntax.syntax operand with
+        | Syntax.BinaryExpression {
             binary_left_operand;
             binary_operator;
             binary_right_operand; } ->
@@ -2770,7 +2778,8 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
       in
 
       let binary_expression_syntax_list =
-        flatten_expression (make_binary_expression left operator right) in
+        flatten_expression (Syntax.make_binary_expression left operator right)
+      in
       match binary_expression_syntax_list with
       | hd :: tl ->
         WithLazyRule (Rule.Parental,

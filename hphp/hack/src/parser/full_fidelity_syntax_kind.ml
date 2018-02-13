@@ -63,6 +63,7 @@ type t =
   | InclusionExpression
   | InclusionDirective
   | CompoundStatement
+  | AlternateLoopStatement
   | ExpressionStatement
   | MarkupSection
   | MarkupSuffix
@@ -232,6 +233,7 @@ let to_string kind =
   | InclusionExpression                     -> "inclusion_expression"
   | InclusionDirective                      -> "inclusion_directive"
   | CompoundStatement                       -> "compound_statement"
+  | AlternateLoopStatement                  -> "alternate_loop_statement"
   | ExpressionStatement                     -> "expression_statement"
   | MarkupSection                           -> "markup_section"
   | MarkupSuffix                            -> "markup_suffix"

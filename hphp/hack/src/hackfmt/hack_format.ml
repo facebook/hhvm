@@ -680,6 +680,17 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
           compound_right_brace);
         Newline;
       ]
+    | AlternateLoopStatement {
+        alternate_loop_opening_colon;
+        alternate_loop_statements;
+        alternate_loop_closing_keyword;
+        alternate_loop_closing_semicolon; } ->
+      Concat [
+        handle_alternate_loop_statement alternate_loop_opening_colon
+          alternate_loop_statements alternate_loop_closing_keyword
+          alternate_loop_closing_semicolon;
+        Newline;
+      ]
     | UnsetStatement {
         unset_keyword = kw;
         unset_left_paren = left_p;
@@ -2077,6 +2088,22 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         t close_b;
       ]
 
+  and coloned_block_nest open_colon close_token close_semi nodes =
+    let leading, close_token = remove_leading_trivia close_token in
+    let close_token, trailing = remove_trailing_trivia close_token in
+    Concat [
+      t open_colon;
+      Newline;
+      BlockNest [
+        Concat nodes;
+        transform_leading_trivia leading;
+        Newline;
+      ];
+      t close_token;
+      t close_semi;
+      transform_trailing_trivia trailing;
+    ]
+
   and delimited_nest
       ?(spaces=false)
       ?(split_when_children_split=true)
@@ -2160,6 +2187,17 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
           (compound_left_brace, compound_statements, compound_right_brace);
         if space then Space else Nothing;
       ]
+    | AlternateLoopStatement {
+        alternate_loop_opening_colon;
+        alternate_loop_statements;
+        alternate_loop_closing_keyword;
+        alternate_loop_closing_semicolon; } ->
+      Concat [
+        handle_alternate_loop_statement alternate_loop_opening_colon
+          alternate_loop_statements alternate_loop_closing_keyword
+          alternate_loop_closing_semicolon;
+        if space then Space else Nothing;
+      ]
     | _ ->
       Concat [
         Newline;
@@ -2172,6 +2210,13 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
     Concat [
       Space;
       braced_block_nest ~allow_collapse left_b right_b [
+        handle_possible_list statements
+      ];
+    ]
+
+  and handle_alternate_loop_statement open_colon statements close_keyword close_semi =
+    Concat [
+      coloned_block_nest open_colon close_keyword close_semi [
         handle_possible_list statements
       ];
     ]

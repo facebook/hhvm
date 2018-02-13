@@ -830,6 +830,16 @@
         { "field_name" : "statements" },
         { "field_name" : "right_brace" }
       ] },
+    { "kind_name" : "AlternateLoopStatement",
+      "type_name" : "alternate_loop_statement",
+      "description" : "alternate_loop_statement",
+      "prefix" : "alternate_loop",
+      "fields" : [
+        { "field_name" : "opening_colon" },
+        { "field_name" : "statements" },
+        { "field_name" : "closing_keyword" },
+        { "field_name" : "closing_semicolon" }
+      ] },
     { "kind_name" : "ExpressionStatement",
       "type_name" : "expression_statement",
       "description" : "expression_statement",

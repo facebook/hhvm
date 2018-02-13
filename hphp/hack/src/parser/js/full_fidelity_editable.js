@@ -167,6 +167,8 @@ class EditableSyntax
       return InclusionDirective.from_json(json, position, source);
     case 'compound_statement':
       return CompoundStatement.from_json(json, position, source);
+    case 'alternate_loop_statement':
+      return AlternateLoopStatement.from_json(json, position, source);
     case 'expression_statement':
       return ExpressionStatement.from_json(json, position, source);
     case 'markup_section':
@@ -7163,6 +7165,110 @@ class CompoundStatement extends EditableSyntax
         'statements',
         'right_brace'];
     return CompoundStatement._children_keys;
+  }
+}
+class AlternateLoopStatement extends EditableSyntax
+{
+  constructor(
+    opening_colon,
+    statements,
+    closing_keyword,
+    closing_semicolon)
+  {
+    super('alternate_loop_statement', {
+      opening_colon: opening_colon,
+      statements: statements,
+      closing_keyword: closing_keyword,
+      closing_semicolon: closing_semicolon });
+  }
+  get opening_colon() { return this.children.opening_colon; }
+  get statements() { return this.children.statements; }
+  get closing_keyword() { return this.children.closing_keyword; }
+  get closing_semicolon() { return this.children.closing_semicolon; }
+  with_opening_colon(opening_colon){
+    return new AlternateLoopStatement(
+      opening_colon,
+      this.statements,
+      this.closing_keyword,
+      this.closing_semicolon);
+  }
+  with_statements(statements){
+    return new AlternateLoopStatement(
+      this.opening_colon,
+      statements,
+      this.closing_keyword,
+      this.closing_semicolon);
+  }
+  with_closing_keyword(closing_keyword){
+    return new AlternateLoopStatement(
+      this.opening_colon,
+      this.statements,
+      closing_keyword,
+      this.closing_semicolon);
+  }
+  with_closing_semicolon(closing_semicolon){
+    return new AlternateLoopStatement(
+      this.opening_colon,
+      this.statements,
+      this.closing_keyword,
+      closing_semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var opening_colon = this.opening_colon.rewrite(rewriter, new_parents);
+    var statements = this.statements.rewrite(rewriter, new_parents);
+    var closing_keyword = this.closing_keyword.rewrite(rewriter, new_parents);
+    var closing_semicolon = this.closing_semicolon.rewrite(rewriter, new_parents);
+    if (
+      opening_colon === this.opening_colon &&
+      statements === this.statements &&
+      closing_keyword === this.closing_keyword &&
+      closing_semicolon === this.closing_semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new AlternateLoopStatement(
+        opening_colon,
+        statements,
+        closing_keyword,
+        closing_semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let opening_colon = EditableSyntax.from_json(
+      json.alternate_loop_opening_colon, position, source);
+    position += opening_colon.width;
+    let statements = EditableSyntax.from_json(
+      json.alternate_loop_statements, position, source);
+    position += statements.width;
+    let closing_keyword = EditableSyntax.from_json(
+      json.alternate_loop_closing_keyword, position, source);
+    position += closing_keyword.width;
+    let closing_semicolon = EditableSyntax.from_json(
+      json.alternate_loop_closing_semicolon, position, source);
+    position += closing_semicolon.width;
+    return new AlternateLoopStatement(
+        opening_colon,
+        statements,
+        closing_keyword,
+        closing_semicolon);
+  }
+  get children_keys()
+  {
+    if (AlternateLoopStatement._children_keys == null)
+      AlternateLoopStatement._children_keys = [
+        'opening_colon',
+        'statements',
+        'closing_keyword',
+        'closing_semicolon'];
+    return AlternateLoopStatement._children_keys;
   }
 }
 class ExpressionStatement extends EditableSyntax
@@ -20291,6 +20397,7 @@ exports.Attribute = Attribute;
 exports.InclusionExpression = InclusionExpression;
 exports.InclusionDirective = InclusionDirective;
 exports.CompoundStatement = CompoundStatement;
+exports.AlternateLoopStatement = AlternateLoopStatement;
 exports.ExpressionStatement = ExpressionStatement;
 exports.MarkupSection = MarkupSection;
 exports.MarkupSuffix = MarkupSuffix;

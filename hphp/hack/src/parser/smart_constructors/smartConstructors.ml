@@ -71,6 +71,7 @@ module type SmartConstructors_S = sig
   val make_inclusion_expression : r -> r -> t -> t * r
   val make_inclusion_directive : r -> r -> t -> t * r
   val make_compound_statement : r -> r -> r -> t -> t * r
+  val make_alternate_loop_statement : r -> r -> r -> r -> t -> t * r
   val make_expression_statement : r -> r -> t -> t * r
   val make_markup_section : r -> r -> r -> r -> t -> t * r
   val make_markup_suffix : r -> r -> t -> t * r
@@ -248,6 +249,7 @@ end) = struct
     let inclusion_expression parser arg0 arg1 = call parser (SCI.make_inclusion_expression arg0 arg1)
     let inclusion_directive parser arg0 arg1 = call parser (SCI.make_inclusion_directive arg0 arg1)
     let compound_statement parser arg0 arg1 arg2 = call parser (SCI.make_compound_statement arg0 arg1 arg2)
+    let alternate_loop_statement parser arg0 arg1 arg2 arg3 = call parser (SCI.make_alternate_loop_statement arg0 arg1 arg2 arg3)
     let expression_statement parser arg0 arg1 = call parser (SCI.make_expression_statement arg0 arg1)
     let markup_section parser arg0 arg1 arg2 arg3 = call parser (SCI.make_markup_section arg0 arg1 arg2 arg3)
     let markup_suffix parser arg0 arg1 = call parser (SCI.make_markup_suffix arg0 arg1)

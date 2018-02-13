@@ -230,6 +230,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return InclusionDirective::from_json($json, $position, $source);
     case 'compound_statement':
       return CompoundStatement::from_json($json, $position, $source);
+    case 'alternate_loop_statement':
+      return AlternateLoopStatement::from_json($json, $position, $source);
     case 'expression_statement':
       return ExpressionStatement::from_json($json, $position, $source);
     case 'markup_section':
@@ -9095,6 +9097,115 @@ final class CompoundStatement extends EditableSyntax {
     yield $this->_left_brace;
     yield $this->_statements;
     yield $this->_right_brace;
+    yield break;
+  }
+}
+final class AlternateLoopStatement extends EditableSyntax {
+  private EditableSyntax $_opening_colon;
+  private EditableSyntax $_statements;
+  private EditableSyntax $_closing_keyword;
+  private EditableSyntax $_closing_semicolon;
+  public function __construct(
+    EditableSyntax $opening_colon,
+    EditableSyntax $statements,
+    EditableSyntax $closing_keyword,
+    EditableSyntax $closing_semicolon) {
+    parent::__construct('alternate_loop_statement');
+    $this->_opening_colon = $opening_colon;
+    $this->_statements = $statements;
+    $this->_closing_keyword = $closing_keyword;
+    $this->_closing_semicolon = $closing_semicolon;
+  }
+  public function opening_colon(): EditableSyntax {
+    return $this->_opening_colon;
+  }
+  public function statements(): EditableSyntax {
+    return $this->_statements;
+  }
+  public function closing_keyword(): EditableSyntax {
+    return $this->_closing_keyword;
+  }
+  public function closing_semicolon(): EditableSyntax {
+    return $this->_closing_semicolon;
+  }
+  public function with_opening_colon(EditableSyntax $opening_colon): AlternateLoopStatement {
+    return new AlternateLoopStatement(
+      $opening_colon,
+      $this->_statements,
+      $this->_closing_keyword,
+      $this->_closing_semicolon);
+  }
+  public function with_statements(EditableSyntax $statements): AlternateLoopStatement {
+    return new AlternateLoopStatement(
+      $this->_opening_colon,
+      $statements,
+      $this->_closing_keyword,
+      $this->_closing_semicolon);
+  }
+  public function with_closing_keyword(EditableSyntax $closing_keyword): AlternateLoopStatement {
+    return new AlternateLoopStatement(
+      $this->_opening_colon,
+      $this->_statements,
+      $closing_keyword,
+      $this->_closing_semicolon);
+  }
+  public function with_closing_semicolon(EditableSyntax $closing_semicolon): AlternateLoopStatement {
+    return new AlternateLoopStatement(
+      $this->_opening_colon,
+      $this->_statements,
+      $this->_closing_keyword,
+      $closing_semicolon);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $opening_colon = $this->opening_colon()->rewrite($rewriter, $new_parents);
+    $statements = $this->statements()->rewrite($rewriter, $new_parents);
+    $closing_keyword = $this->closing_keyword()->rewrite($rewriter, $new_parents);
+    $closing_semicolon = $this->closing_semicolon()->rewrite($rewriter, $new_parents);
+    if (
+      $opening_colon === $this->opening_colon() &&
+      $statements === $this->statements() &&
+      $closing_keyword === $this->closing_keyword() &&
+      $closing_semicolon === $this->closing_semicolon()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new AlternateLoopStatement(
+        $opening_colon,
+        $statements,
+        $closing_keyword,
+        $closing_semicolon), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $opening_colon = EditableSyntax::from_json(
+      $json->alternate_loop_opening_colon, $position, $source);
+    $position += $opening_colon->width();
+    $statements = EditableSyntax::from_json(
+      $json->alternate_loop_statements, $position, $source);
+    $position += $statements->width();
+    $closing_keyword = EditableSyntax::from_json(
+      $json->alternate_loop_closing_keyword, $position, $source);
+    $position += $closing_keyword->width();
+    $closing_semicolon = EditableSyntax::from_json(
+      $json->alternate_loop_closing_semicolon, $position, $source);
+    $position += $closing_semicolon->width();
+    return new AlternateLoopStatement(
+        $opening_colon,
+        $statements,
+        $closing_keyword,
+        $closing_semicolon);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_opening_colon;
+    yield $this->_statements;
+    yield $this->_closing_keyword;
+    yield $this->_closing_semicolon;
     yield break;
   }
 }

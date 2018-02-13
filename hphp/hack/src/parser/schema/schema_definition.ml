@@ -549,6 +549,19 @@ let schema : schema_node list =
       ; "right_brace", Token
       ]
     }
+  ; { kind_name   = "AlternateLoopStatement"
+    ; type_name   = "alternate_loop_statement"
+    ; func_name   = "alternate_loop_statement"
+    ; description = "alternate_loop_statement"
+    ; prefix      = "alternate_loop"
+    ; aggregates  = [ Statement ]
+    ; fields =
+      [ "opening_colon", Token
+      ; "statements", ZeroOrMore (Aggregate Statement)
+      ; "closing_keyword", Token
+      ; "closing_semicolon", Token
+      ]
+    }
   ; { kind_name   = "ExpressionStatement"
     ; type_name   = "expression_statement"
     ; func_name   = "expression_statement"

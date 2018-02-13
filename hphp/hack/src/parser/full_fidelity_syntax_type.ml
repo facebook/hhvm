@@ -378,6 +378,12 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; compound_statements                                : t
     ; compound_right_brace                               : t
     }
+  | AlternateLoopStatement                  of
+    { alternate_loop_opening_colon                       : t
+    ; alternate_loop_statements                          : t
+    ; alternate_loop_closing_keyword                     : t
+    ; alternate_loop_closing_semicolon                   : t
+    }
   | ExpressionStatement                     of
     { expression_statement_expression                    : t
     ; expression_statement_semicolon                     : t
@@ -1232,6 +1238,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and statement =
   | StmtInclusionDirective           of inclusion_directive
   | StmtCompound                     of compound_statement
+  | StmtAlternateLoop                of alternate_loop_statement
   | StmtExpression                   of expression_statement
   | StmtMarkupSection                of markup_section
   | StmtMarkupSuffix                 of markup_suffix
@@ -1608,6 +1615,12 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { compound_left_brace: Token.t value
     ; compound_statements: statement listesque value
     ; compound_right_brace: Token.t value
+    }
+  and alternate_loop_statement =
+    { alternate_loop_opening_colon: Token.t value
+    ; alternate_loop_statements: statement listesque value
+    ; alternate_loop_closing_keyword: Token.t value
+    ; alternate_loop_closing_semicolon: Token.t value
     }
   and expression_statement =
     { expression_statement_expression: expression option value

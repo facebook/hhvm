@@ -90,6 +90,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val inclusion_expression : t -> SC.r -> SC.r -> t * SC.r
         val inclusion_directive : t -> SC.r -> SC.r -> t * SC.r
         val compound_statement : t -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val alternate_loop_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val expression_statement : t -> SC.r -> SC.r -> t * SC.r
         val markup_section : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val markup_suffix : t -> SC.r -> SC.r -> t * SC.r

@@ -117,6 +117,8 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S)
   
   let make_compound_statement arg0 arg1 arg2 () = (), Syntax.make_compound_statement arg0 arg1 arg2
   
+  let make_alternate_loop_statement arg0 arg1 arg2 arg3 () = (), Syntax.make_alternate_loop_statement arg0 arg1 arg2 arg3
+  
   let make_expression_statement arg0 arg1 () = (), Syntax.make_expression_statement arg0 arg1
   
   let make_markup_section arg0 arg1 arg2 arg3 () = (), Syntax.make_markup_section arg0 arg1 arg2 arg3

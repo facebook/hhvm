@@ -99,6 +99,7 @@ module WithToken(Token: TokenType) = struct
       | InclusionExpression                     _ -> SyntaxKind.InclusionExpression
       | InclusionDirective                      _ -> SyntaxKind.InclusionDirective
       | CompoundStatement                       _ -> SyntaxKind.CompoundStatement
+      | AlternateLoopStatement                  _ -> SyntaxKind.AlternateLoopStatement
       | ExpressionStatement                     _ -> SyntaxKind.ExpressionStatement
       | MarkupSection                           _ -> SyntaxKind.MarkupSection
       | MarkupSuffix                            _ -> SyntaxKind.MarkupSuffix
@@ -275,6 +276,7 @@ module WithToken(Token: TokenType) = struct
     let is_inclusion_expression                         = has_kind SyntaxKind.InclusionExpression
     let is_inclusion_directive                          = has_kind SyntaxKind.InclusionDirective
     let is_compound_statement                           = has_kind SyntaxKind.CompoundStatement
+    let is_alternate_loop_statement                     = has_kind SyntaxKind.AlternateLoopStatement
     let is_expression_statement                         = has_kind SyntaxKind.ExpressionStatement
     let is_markup_section                               = has_kind SyntaxKind.MarkupSection
     let is_markup_suffix                                = has_kind SyntaxKind.MarkupSuffix
@@ -887,6 +889,17 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc compound_left_brace in
          let acc = f acc compound_statements in
          let acc = f acc compound_right_brace in
+         acc
+      | AlternateLoopStatement {
+        alternate_loop_opening_colon;
+        alternate_loop_statements;
+        alternate_loop_closing_keyword;
+        alternate_loop_closing_semicolon;
+      } ->
+         let acc = f acc alternate_loop_opening_colon in
+         let acc = f acc alternate_loop_statements in
+         let acc = f acc alternate_loop_closing_keyword in
+         let acc = f acc alternate_loop_closing_semicolon in
          acc
       | ExpressionStatement {
         expression_statement_expression;
@@ -2639,6 +2652,17 @@ module WithToken(Token: TokenType) = struct
         compound_statements;
         compound_right_brace;
       ]
+      | AlternateLoopStatement {
+        alternate_loop_opening_colon;
+        alternate_loop_statements;
+        alternate_loop_closing_keyword;
+        alternate_loop_closing_semicolon;
+      } -> [
+        alternate_loop_opening_colon;
+        alternate_loop_statements;
+        alternate_loop_closing_keyword;
+        alternate_loop_closing_semicolon;
+      ]
       | ExpressionStatement {
         expression_statement_expression;
         expression_statement_semicolon;
@@ -4390,6 +4414,17 @@ module WithToken(Token: TokenType) = struct
         "compound_left_brace";
         "compound_statements";
         "compound_right_brace";
+      ]
+      | AlternateLoopStatement {
+        alternate_loop_opening_colon;
+        alternate_loop_statements;
+        alternate_loop_closing_keyword;
+        alternate_loop_closing_semicolon;
+      } -> [
+        "alternate_loop_opening_colon";
+        "alternate_loop_statements";
+        "alternate_loop_closing_keyword";
+        "alternate_loop_closing_semicolon";
       ]
       | ExpressionStatement {
         expression_statement_expression;
@@ -6238,6 +6273,18 @@ module WithToken(Token: TokenType) = struct
           compound_left_brace;
           compound_statements;
           compound_right_brace;
+        }
+      | (SyntaxKind.AlternateLoopStatement, [
+          alternate_loop_opening_colon;
+          alternate_loop_statements;
+          alternate_loop_closing_keyword;
+          alternate_loop_closing_semicolon;
+        ]) ->
+        AlternateLoopStatement {
+          alternate_loop_opening_colon;
+          alternate_loop_statements;
+          alternate_loop_closing_keyword;
+          alternate_loop_closing_semicolon;
         }
       | (SyntaxKind.ExpressionStatement, [
           expression_statement_expression;
@@ -8311,6 +8358,21 @@ module WithToken(Token: TokenType) = struct
           compound_left_brace;
           compound_statements;
           compound_right_brace;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_alternate_loop_statement
+        alternate_loop_opening_colon
+        alternate_loop_statements
+        alternate_loop_closing_keyword
+        alternate_loop_closing_semicolon
+      =
+        let syntax = AlternateLoopStatement {
+          alternate_loop_opening_colon;
+          alternate_loop_statements;
+          alternate_loop_closing_keyword;
+          alternate_loop_closing_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

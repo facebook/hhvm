@@ -1541,30 +1541,9 @@ and pStmt : stmt parser = fun node env ->
       | Some t when Token.has_trivia_kind t TriviaKind.Unsafe -> [pos, Unsafe]
       | _ -> []
     in
-    let rec conv acc stmts =
-      match stmts with
-      | [] -> List.concat @@ List.rev acc
-      | { syntax = UsingStatementFunctionScoped
-          { using_function_await_keyword = await_kw
-          ; using_function_expression = expression
-          ; _ }
-        ; _ } :: rest ->
-        let body = conv [] rest in
-        let using = Using {
-          us_is_block_scoped = false;
-          us_has_await = not (is_missing await_kw);
-          us_expr = pExprL expression env;
-          us_block = [pos, Block body]; } in
-        List.concat @@ List.rev ([pos, using] :: acc)
-      | h :: rest ->
-        let h = pStmtUnsafe h env in
-        conv (h :: acc) rest
-    in
-    let blk = conv [] (as_list compound_statements) in
-    begin match List.filter ~f:(fun (_, x) -> x <> Noop) blk @ tail with
-    | [] -> pos, Block [Pos.none, Noop]
-    | blk -> pos, Block blk
-    end
+    handle_loop_body pos compound_statements tail env
+  | AlternateLoopStatement { alternate_loop_statements; _ } ->
+    handle_loop_body pos alternate_loop_statements [] env
   | ThrowStatement { throw_expression; _ } ->
     pos, Throw (pExpr throw_expression env)
   | DoStatement { do_body; do_condition; _ } ->
@@ -1893,6 +1872,32 @@ and extract_docblock = fun node ->
 and extract_and_push_docblock node =
   let docblock = extract_docblock node in
   Stack.push docblock docblock_stack
+
+and handle_loop_body pos stmts tail env =
+  let rec conv acc stmts =
+    match stmts with
+    | [] -> List.concat @@ List.rev acc
+    | { syntax = UsingStatementFunctionScoped
+        { using_function_await_keyword = await_kw
+        ; using_function_expression = expression
+        ; _ }
+      ; _ } :: rest ->
+      let body = conv [] rest in
+      let using = Using {
+        us_is_block_scoped = false;
+        us_has_await = not (is_missing await_kw);
+        us_expr = pExprL expression env;
+        us_block = [pos, Block body]; } in
+      List.concat @@ List.rev ([pos, using] :: acc)
+    | h :: rest ->
+      let h = pStmtUnsafe h env in
+      conv (h :: acc) rest
+  in
+  let blk = conv [] (as_list stmts) in
+  begin match List.filter ~f:(fun (_, x) -> x <> Noop) blk @ tail with
+  | [] -> pos, Block [Pos.none, Noop]
+  | blk -> pos, Block blk
+  end
 
 and pop_docblock () =
   try

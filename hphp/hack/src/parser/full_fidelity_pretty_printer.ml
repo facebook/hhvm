@@ -615,6 +615,13 @@ let rec get_doc node =
     let right = get_doc x.compound_right_brace in
     let body = get_doc x.compound_statements in
     indent_block_no_space left body right indt |> add_break
+  | AlternateLoopStatement x ->
+    let left = get_doc x.alternate_loop_opening_colon in
+    let close_keyword = get_doc x.alternate_loop_closing_keyword in
+    let close_semi = get_doc x.alternate_loop_closing_semicolon in
+    let right = group_doc (close_keyword ^^| close_semi) in
+    let body = get_doc x.alternate_loop_statements in
+    indent_block_no_space left body right indt |> add_break
   | ExpressionStatement {
     expression_statement_expression;
     expression_statement_semicolon } ->

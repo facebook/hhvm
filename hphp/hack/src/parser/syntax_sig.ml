@@ -265,6 +265,12 @@ module type Syntax_S = sig
     ; compound_statements                                : t
     ; compound_right_brace                               : t
     }
+  | AlternateLoopStatement                  of
+    { alternate_loop_opening_colon                       : t
+    ; alternate_loop_statements                          : t
+    ; alternate_loop_closing_keyword                     : t
+    ; alternate_loop_closing_semicolon                   : t
+    }
   | ExpressionStatement                     of
     { expression_statement_expression                    : t
     ; expression_statement_semicolon                     : t
@@ -1044,6 +1050,7 @@ module type Syntax_S = sig
   val make_inclusion_expression : t -> t -> t
   val make_inclusion_directive : t -> t -> t
   val make_compound_statement : t -> t -> t -> t
+  val make_alternate_loop_statement : t -> t -> t -> t -> t
   val make_expression_statement : t -> t -> t
   val make_markup_section : t -> t -> t -> t -> t
   val make_markup_suffix : t -> t -> t
@@ -1211,6 +1218,7 @@ module type Syntax_S = sig
   val is_inclusion_expression : t -> bool
   val is_inclusion_directive : t -> bool
   val is_compound_statement : t -> bool
+  val is_alternate_loop_statement : t -> bool
   val is_expression_statement : t -> bool
   val is_markup_section : t -> bool
   val is_markup_suffix : t -> bool

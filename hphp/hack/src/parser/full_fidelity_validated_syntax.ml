@@ -368,6 +368,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match Syntax.syntax x with
     | Syntax.InclusionDirective _ -> tag validate_inclusion_directive (fun x -> StmtInclusionDirective x) x
     | Syntax.CompoundStatement _ -> tag validate_compound_statement (fun x -> StmtCompound x) x
+    | Syntax.AlternateLoopStatement _ -> tag validate_alternate_loop_statement (fun x -> StmtAlternateLoop x) x
     | Syntax.ExpressionStatement _ -> tag validate_expression_statement (fun x -> StmtExpression x) x
     | Syntax.MarkupSection _ -> tag validate_markup_section (fun x -> StmtMarkupSection x) x
     | Syntax.MarkupSuffix _ -> tag validate_markup_suffix (fun x -> StmtMarkupSuffix x) x
@@ -400,6 +401,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match thing with
     | StmtInclusionDirective           thing -> invalidate_inclusion_directive            (value, thing)
     | StmtCompound                     thing -> invalidate_compound_statement             (value, thing)
+    | StmtAlternateLoop                thing -> invalidate_alternate_loop_statement       (value, thing)
     | StmtExpression                   thing -> invalidate_expression_statement           (value, thing)
     | StmtMarkupSection                thing -> invalidate_markup_section                 (value, thing)
     | StmtMarkupSuffix                 thing -> invalidate_markup_suffix                  (value, thing)
@@ -1395,6 +1397,24 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { compound_left_brace = invalidate_token x.compound_left_brace
       ; compound_statements = invalidate_list_with (invalidate_statement) x.compound_statements
       ; compound_right_brace = invalidate_token x.compound_right_brace
+      }
+    ; Syntax.value = v
+    }
+  and validate_alternate_loop_statement : alternate_loop_statement validator = function
+  | { Syntax.syntax = Syntax.AlternateLoopStatement x; value = v } -> v,
+    { alternate_loop_closing_semicolon = validate_token x.alternate_loop_closing_semicolon
+    ; alternate_loop_closing_keyword = validate_token x.alternate_loop_closing_keyword
+    ; alternate_loop_statements = validate_list_with (validate_statement) x.alternate_loop_statements
+    ; alternate_loop_opening_colon = validate_token x.alternate_loop_opening_colon
+    }
+  | s -> validation_fail SyntaxKind.AlternateLoopStatement s
+  and invalidate_alternate_loop_statement : alternate_loop_statement invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.AlternateLoopStatement
+      { alternate_loop_opening_colon = invalidate_token x.alternate_loop_opening_colon
+      ; alternate_loop_statements = invalidate_list_with (invalidate_statement) x.alternate_loop_statements
+      ; alternate_loop_closing_keyword = invalidate_token x.alternate_loop_closing_keyword
+      ; alternate_loop_closing_semicolon = invalidate_token x.alternate_loop_closing_semicolon
       }
     ; Syntax.value = v
     }

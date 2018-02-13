@@ -296,7 +296,11 @@ module WithExpressionAndDeclAndTypeParser
     let parser, for_end_of_loop_expr = parse_comma_list_opt
       parser RightParen SyntaxError.error1015 parse_expression in
     let parser, for_right_paren = require_right_paren parser in
-    let parser, for_statement = parse_statement parser in
+    let parser, for_statement =
+      let _, open_token = next_token parser in
+      match Token.kind open_token with
+      | Colon -> parse_alternate_loop_statement parser ~terminator:Endfor
+      | _ -> parse_statement parser in
     let syntax = make_for_statement for_keyword_token for_left_paren
       for_initializer_expr for_first_semicolon for_control_expr
       for_second_semicolon for_end_of_loop_expr for_right_paren for_statement
@@ -970,6 +974,16 @@ module WithExpressionAndDeclAndTypeParser
       let syntax = make_compound_statement
         left_brace_token statement_list right_brace_token in
       (parser, syntax)
+
+  and parse_alternate_loop_statement parser ~terminator =
+    let (parser, colon_token) = assert_token parser Colon in
+    let (parser, statement_list) =
+      parse_terminated_list parser parse_statement terminator in
+    let (parser, terminate_token) = assert_token parser terminator in
+    let (parser, semicolon_token) = assert_token parser Semicolon in
+    let syntax = make_alternate_loop_statement
+      colon_token statement_list terminate_token semicolon_token in
+    (parser, syntax)
 
 end
 end (* WithSmartConstructors *)

@@ -1,97 +1,97 @@
 (* @generated from ast_defs.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<d1c8b7bb10a148220cf9d9d912dba33a41672dfe>> *)
+(* SourceShasum<<4dc4a2f28aa6aa046b889b636c1c593238775a64>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
   "\n * Copyright (c) 2017, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the BSD-style license found in the\n * LICENSE file in the \"hack\" directory of this source tree. An additional grant\n * of patent rights can be found in the PATENTS file in the same directory.\n *\n "]
 include Ast_defs_visitors_ancestors
 type cst_kind =
-  | Cst_define
-  | Cst_const
+  | Cst_define 
+  | Cst_const 
 and pos = ((Pos.t)[@visitors.opaque ])
 and id = (pos * string)
 and pstring = (pos * string)
 and shape_field_name =
-  | SFlit of pstring
-  | SFclass_const of id * pstring
+  | SFlit of pstring 
+  | SFclass_const of id * pstring 
 and variance =
-  | Covariant
-  | Contravariant
-  | Invariant
+  | Covariant 
+  | Contravariant 
+  | Invariant 
 and ns_kind =
-  | NSNamespace
-  | NSClass
-  | NSClassAndNamespace
-  | NSFun
-  | NSConst
+  | NSNamespace 
+  | NSClass 
+  | NSClassAndNamespace 
+  | NSFun 
+  | NSConst 
 and constraint_kind =
-  | Constraint_as
-  | Constraint_eq
-  | Constraint_super
+  | Constraint_as 
+  | Constraint_eq 
+  | Constraint_super 
 and class_kind =
-  | Cabstract
-  | Cnormal
-  | Cinterface
-  | Ctrait
-  | Cenum
+  | Cabstract 
+  | Cnormal 
+  | Cinterface 
+  | Ctrait 
+  | Cenum 
 and trait_req_kind =
-  | MustExtend
-  | MustImplement
+  | MustExtend 
+  | MustImplement 
 and kind =
-  | Final
-  | Static
-  | Abstract
-  | Private
-  | Public
-  | Protected
+  | Final 
+  | Static 
+  | Abstract 
+  | Private 
+  | Public 
+  | Protected 
 and param_kind =
-  | Pinout
+  | Pinout 
 and og_null_flavor =
-  | OG_nullthrows
-  | OG_nullsafe
+  | OG_nullthrows 
+  | OG_nullsafe 
 and fun_kind =
-  | FSync
-  | FAsync
-  | FGenerator
-  | FAsyncGenerator
-  | FCoroutine
+  | FSync 
+  | FAsync 
+  | FGenerator 
+  | FAsyncGenerator 
+  | FCoroutine 
 and bop =
-  | Plus
-  | Minus
-  | Star
-  | Slash
-  | Eqeq
-  | EQeqeq
-  | Starstar
-  | Diff
-  | Diff2
-  | AMpamp
-  | BArbar
-  | LogXor
-  | Lt
-  | Lte
-  | Gt
-  | Gte
-  | Dot
-  | Amp
-  | Bar
-  | Ltlt
-  | Gtgt
-  | Percent
-  | Xor
-  | Cmp
-  | Eq of bop option
+  | Plus 
+  | Minus 
+  | Star 
+  | Slash 
+  | Eqeq 
+  | EQeqeq 
+  | Starstar 
+  | Diff 
+  | Diff2 
+  | AMpamp 
+  | BArbar 
+  | LogXor 
+  | Lt 
+  | Lte 
+  | Gt 
+  | Gte 
+  | Dot 
+  | Amp 
+  | Bar 
+  | Ltlt 
+  | Gtgt 
+  | Percent 
+  | Xor 
+  | Cmp 
+  | Eq of bop option 
 and uop =
-  | Utild
-  | Unot
-  | Uplus
-  | Uminus
-  | Uincr
-  | Udecr
-  | Upincr
-  | Updecr
-  | Uref
+  | Utild 
+  | Unot 
+  | Uplus 
+  | Uminus 
+  | Uincr 
+  | Udecr 
+  | Upincr 
+  | Updecr 
+  | Uref 
   | Usilence [@@deriving
                (show,
                  (visitors
@@ -180,9 +180,9 @@ and show_pstring : pstring -> Ppx_deriving_runtime.string =
 and pp_shape_field_name :
   Format.formatter -> shape_field_name -> Ppx_deriving_runtime.unit =
   let __2 () = pp_pstring
-
+  
   and __1 () = pp_id
-
+  
   and __0 () = pp_pstring
    in
   ((let open! Ppx_deriving_runtime in
@@ -1271,8 +1271,8 @@ include
     [@@@VISITORS.END ]
   end
 type fun_decl_kind =
-  | FDeclAsync
-  | FDeclSync
+  | FDeclAsync 
+  | FDeclSync 
   | FDeclCoroutine [@@deriving show]
 let rec (pp_fun_decl_kind :
           Format.formatter -> fun_decl_kind -> Ppx_deriving_runtime.unit)
@@ -1294,7 +1294,7 @@ let string_of_class_kind =
   | Cnormal  -> "a class"
   | Cinterface  -> "an interface"
   | Ctrait  -> "a trait"
-  | Cenum  -> "an enum"
+  | Cenum  -> "an enum" 
 let string_of_kind =
   function
   | Final  -> "final"
@@ -1302,8 +1302,8 @@ let string_of_kind =
   | Abstract  -> "abstract"
   | Private  -> "private"
   | Public  -> "public"
-  | Protected  -> "protected"
-let string_of_param_kind = function | Pinout  -> "inout"
+  | Protected  -> "protected" 
+let string_of_param_kind = function | Pinout  -> "inout" 
 module ShapeField =
   struct
     type t = shape_field_name
@@ -1314,12 +1314,12 @@ module ShapeField =
       | (SFlit (_,s1),SFlit (_,s2)) -> Pervasives.compare s1 s2
       | (SFclass_const ((_,s1),(_,s1')),SFclass_const ((_,s2),(_,s2'))) ->
           Pervasives.compare (s1, s1') (s2, s2')
-
+      
   end
 module ShapeMap =
   struct
     include (MyMap.Make)(ShapeField)
     let map_and_rekey m f1 f2 =
-      fold (fun k  -> fun v  -> fun acc  -> add (f1 k) (f2 v) acc) m empty
-    let pp _ fmt _ = Format.pp_print_string fmt "[ShapeMap]"
+      fold (fun k  -> fun v  -> fun acc  -> add (f1 k) (f2 v) acc) m empty 
+    let pp _ fmt _ = Format.pp_print_string fmt "[ShapeMap]" 
   end

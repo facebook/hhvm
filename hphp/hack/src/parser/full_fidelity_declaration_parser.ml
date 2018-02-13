@@ -1766,7 +1766,6 @@ module WithExpressionAndStatementAndTypeParser
     let (parser1, token) = next_token parser in
     let (parser, result) =
       match (Token.kind token) with
-      | TokenKind.EndOfFile -> (parser1, make_end_of_file (make_token token))
       | Include
       | Include_once
       | Require
@@ -1849,18 +1848,22 @@ module WithExpressionAndStatementAndTypeParser
 
   let parse_script parser =
     let rec aux parser acc =
-      let (parser, declaration) = parse_declaration parser in
-      (* TODO: Assert that we either made progress, or we're at the end of
-      the file. *)
-      if kind declaration = SyntaxKind.EndOfFile then
+      let (parser1, token) = next_token parser in
+      match Token.kind token with
+      | TokenKind.EndOfFile when Token.leading token <> [] ->
         (* The only time an end-of-file node is useful is when there is
            leading trivia in the end-of-file token. *)
-        match leading_token declaration with
-        | Some token ->
-          if Token.leading token = [] then (parser, acc)
-          else (parser, declaration :: acc)
-        | _ -> (parser, acc)
-      else aux parser (declaration :: acc) in
+        let end_of_file = make_end_of_file (make_token token) in
+        (parser1, end_of_file :: acc)
+      | TokenKind.EndOfFile ->
+        (* With smart constructors we still want to signal user that end-of-file
+        is reached. *)
+        let _ = make_end_of_file (make_token token) in
+        (parser1, acc)
+      | _ ->
+        let (parser, declaration) = parse_declaration parser in
+        aux parser (declaration :: acc)
+    in
     (* parse leading markup section *)
     let (parser, header) = parse_leading_markup_section parser in
     let (parser, declarations) = aux parser [] in

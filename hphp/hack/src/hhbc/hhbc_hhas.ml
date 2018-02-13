@@ -1126,6 +1126,7 @@ and string_of_param_default_value ~env expr =
     "array(" ^ string_of_afield_list ~env afl ^ ")"
   | A.Collection ((_, name), afl) when
     name = "vec" || name = "dict" || name = "keyset" ->
+    let env = { env with use_single_quote = false } in
     name ^ "[" ^ string_of_afield_list ~env afl ^ "]"
   | A.Collection ((_, name), afl) ->
     let name = SU.Types.fix_casing @@ SU.strip_ns name in

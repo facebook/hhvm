@@ -31,7 +31,7 @@ let collect_jump_instructions instrseq env =
       IMap.add (get_label_id ~is_break:true l) i map
     | ISpecialFlow Continue l ->
       IMap.add (get_label_id ~is_break:false l) i map
-    | IContFlow (RetC | RetV) ->
+    | IContFlow (RetC | RetV | RetM _) ->
       IMap.add (JT.get_id_for_return ()) i map
     | ISpecialFlow Goto l ->
       IMap.add (JT.get_id_for_label (Label.named l)) i map
@@ -44,7 +44,7 @@ let collect_jump_instructions instrseq env =
 let cleanup_try_body instrseq =
   let rewriter i =
     match i with
-    | ISpecialFlow _ | IContFlow (RetC | RetV) -> None
+    | ISpecialFlow _ | IContFlow (RetC | RetV | RetM _) -> None
     | _ -> Some i
   in
   InstrSeq.filter_map instrseq ~f:rewriter
@@ -159,6 +159,7 @@ let emit_return
   let ret_instr = if need_ref then instr_retv else instr_retc in
   (* check if there are try/finally region *)
   let jump_targets = Emit_env.get_jump_targets env in
+  let msrv = Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
   begin match JT.get_closest_enclosing_finally_label jump_targets with
   (* no finally blocks, but there might be some iterators that should be
       released before exit - do it *)
@@ -186,13 +187,13 @@ let emit_return
         load_retval_instr;
         verify_return_instr;
         verify_out;
-        ret_instr;
+        if msrv && verify_out != empty then empty else ret_instr
       ]
     else gather [
       verify_return_instr;
       release_iterators_instr;
       verify_out;
-      ret_instr;
+      if msrv && verify_out != empty then empty else ret_instr
     ]
   (* ret is in finally block and there might be iterators to release -
     jump to finally block via Jmp/IterBreak *)
@@ -260,6 +261,7 @@ let emit_finally_epilogue
   ~verify_return ~verify_out env pos jump_instructions finally_end =
   let emit_instr i =
     match i with
+    | IContFlow RetM _
     | IContFlow RetC ->
       emit_return
         ~need_ref:false ~verify_return ~verify_out ~in_finally_epilogue:true env

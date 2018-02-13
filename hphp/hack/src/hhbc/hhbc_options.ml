@@ -34,6 +34,7 @@ type t = {
   option_repo_authoritative               : bool;
   option_jit_enable_rename_function       : bool;
   option_can_inline_gen_functions         : bool;
+  option_use_msrv_for_inout               : bool;
 }
 
 let default = {
@@ -60,6 +61,7 @@ let default = {
   option_repo_authoritative = false;
   option_jit_enable_rename_function = false;
   option_can_inline_gen_functions = true;
+  option_use_msrv_for_inout = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -82,6 +84,7 @@ let dynamic_invoke_functions o = o.option_dynamic_invoke_functions
 let repo_authoritative o = o.option_repo_authoritative
 let jit_enable_rename_function o = o.option_jit_enable_rename_function
 let can_inline_gen_functions o = o.option_can_inline_gen_functions
+let use_msrv_for_inout o = o.option_use_msrv_for_inout
 
 let to_string o =
   let dynamic_invokes =
@@ -109,6 +112,7 @@ let to_string o =
     ; Printf.sprintf "jit_enable_rename_function: %B"
       @@ jit_enable_rename_function o
     ; Printf.sprintf "can_inline_gen_functions: %B" @@ can_inline_gen_functions o
+    ; Printf.sprintf "use_msrv_for_inout: %B" @@ use_msrv_for_inout o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -163,6 +167,8 @@ let set_option options name value =
     { options with option_optimize_cuf = v;
                    option_constant_folding = v;
                    option_can_inline_gen_functions = v}
+  | "hhvm.use_msrv_for_in_out" ->
+    { options with option_use_msrv_for_inout = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -244,6 +250,8 @@ let value_setters = [
     fun opts v -> { opts with option_repo_authoritative = (v = 1) });
   (set_value "hhvm.jit_enable_rename_function" get_value_from_config_int @@
     fun opts v -> { opts with option_jit_enable_rename_function = (v = 1) });
+  (set_value "hhvm.use_msrv_for_in_out" get_value_from_config_int @@
+    fun opts v -> { opts with option_use_msrv_for_inout = (v = 1) });
 ]
 
 let extract_config_options_from_json ~init config_json =

@@ -41,6 +41,9 @@ let uFPassN = pa (function | ICall (FPassN (param, hint)) -> Some (param,hint) |
 let uFPassG = pa (function | ICall (FPassG (param, hint)) -> Some (param,hint) | _ -> None)
 let uFPassS = pa (function | ICall (FPassS (param, cref, hint)) -> Some (param, cref, hint) | _ -> None)
 let uFCall = pa (function | ICall (FCall np) -> Some np | _ -> None)
+let uFCallM = pa (function | ICall (FCallM (np, nr)) -> Some (np, nr) | _ -> None)
+let uFCallDM = pa (function | ICall (FCallDM (np, nr, clid, fid)) -> Some (np, nr, clid, fid) | _ -> None)
+let uFCallUnpackM = pa (function | ICall (FCallUnpackM (np, nr)) -> Some (np, nr) | _ -> None)
 let uFCallD = pa (function | ICall (FCallD (np, clid, fid)) -> Some (np, clid, fid) | _ -> None)
 let uFCallAwait =
   pa (function | ICall (FCallAwait (np, clid, fid)) -> Some (np, clid, fid) | _ -> None)

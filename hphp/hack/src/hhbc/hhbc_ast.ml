@@ -285,6 +285,7 @@ type instruct_control_flow =
   (* litstr id / offset vector *)
   | SSwitch of (Litstr.id * Label.t) list
   | RetC
+  | RetM of num_params
   | RetV
   | Unwind
   | Throw
@@ -430,6 +431,9 @@ type instruct_call =
   | FPassG of param_num * fpass_hint
   | FPassS of param_num * classref_id * fpass_hint
   | FCall of num_params
+  | FCallM of num_params * num_params
+  | FCallDM of num_params * num_params * class_id * function_id
+  | FCallUnpackM of num_params * num_params
   | FCallD of num_params * class_id * function_id
   | FCallArray
   | FCallAwait of num_params * class_id * function_id

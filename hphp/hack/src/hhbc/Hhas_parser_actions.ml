@@ -869,6 +869,7 @@ let makeunaryinst s arg = match s with
    | "FPushCuf" -> ICall(FPushCuf (intofiarg arg))
    | "FPushCufF" -> ICall(FPushCufF (intofiarg arg))
    | "FPushCufSafe" -> ICall(FPushCufSafe (intofiarg arg))
+   | "RetM" -> IContFlow(RetM (intofiarg arg))
    | "FCall" -> ICall(FCall (intofiarg arg))
    | "FCallUnpack" -> ICall(FCallUnpack (intofiarg arg))
 
@@ -996,6 +997,8 @@ match s with
  | "AssertRATL" -> IMisc (AssertRATL (localidofiarg arg1, stringofiarg arg2))
  | "AssertRATStk" -> IMisc (AssertRATStk (intofiarg arg1, stringofiarg arg2))
  | "Silence" -> IMisc (Silence (localidofiarg arg1, opsilenceofiarg arg2))
+ | "FCallM" -> ICall (FCallM (intofiarg arg1, intofiarg arg2))
+ | "FCallUnpackM" -> ICall (FCallUnpackM (intofiarg arg1, intofiarg arg2))
  | _ -> IComment (Hhbc_ast.nyi ^ " binary: " ^ s)
 
 let maketernaryinst s arg1 arg2 arg3 =
@@ -1075,4 +1078,7 @@ match s with
                      labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
  | "FPassM" ->
     IFinal(FPassM (intofiarg arg1, intofiarg arg2, memberkeyofiarg arg3, fpasshintof arg4))
+ | "FCallDM" ->
+    ICall(FCallDM (intofiarg arg1, intofiarg arg2,
+      class_id_of_iarg arg3, function_id_of_iarg arg4))
  | _ -> IComment (Hhbc_ast.nyi ^ " quaternary: " ^ s)

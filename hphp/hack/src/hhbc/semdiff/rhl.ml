@@ -441,7 +441,8 @@ let check_instruct_call asn i i' =
   | CufSafeArray, _ | CufSafeReturn, _ | FPassC _, _ | FPassCW _, _
   | FPassCE _, _ | FPassV _, _ | FPassVNop _, _ | FPassR _, _ | FPassN _, _
   | FPassG _, _ | FPassS _, _ | FCall _, _ | FCallD _, _ | FCallArray, _
-  | FCallAwait _, _ | FCallUnpack _, _ | FCallBuiltin _, _ ->
+  | FCallAwait _, _ | FCallUnpack _, _ | FCallBuiltin _, _
+  | FCallM _, _ | FCallUnpackM _, _ | FCallDM _, _ ->
     if i=i' then Some asn else None
   | _, _ -> None
 
@@ -968,6 +969,8 @@ let equiv prog prog' startlabelpairs =
             (add_assumption (pc,pc') asn assumed)
             (add_todo ((hs_of_pc pc, LabelMap.find lab labelmap),
               (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)
+        | RetM n, RetM m ->
+          if n=m then donext assumed todo else try_specials ()
         | RetC, RetC
         | RetV, RetV ->
           donext assumed todo
@@ -1341,6 +1344,9 @@ let equiv prog prog' startlabelpairs =
     let any_pass_list_pattern = greedy_kleene any_pass_pattern in
     let any_call_pattern =
       uFCall
+      $| (uFCallM $> (fun (np,_) -> np))
+      $| (uFCallUnpackM $> (fun (np,_) -> np))
+      $| (uFCallDM $> (fun (np,_,_,_) -> np))
       $| (uFCallD $> (fun (np,_,_) -> np))
       $| (uFCallAwait $> (fun (np,_,_) -> np))
       $| uFCallUnpack

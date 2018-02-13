@@ -337,6 +337,7 @@ let string_of_control_flow instruction =
   | JmpZ l -> "JmpZ " ^ string_of_label l
   | JmpNZ l -> "JmpNZ " ^ string_of_label l
   | RetC -> "RetC"
+  | RetM p -> "RetM " ^ string_of_int p
   | RetV -> "RetV"
   | Throw -> "Throw"
   | Unwind -> "Unwind"
@@ -532,6 +533,14 @@ let string_of_call instruction =
     sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; SU.quote_string id]
   | RaiseFPassWarning (h, f, n) ->
     sep ["RaiseFPassWarning"; string_of_fpasshint h; "\"" ^ f ^ "\""; string_of_param_id n]
+  | FCallM (n1, n2) ->
+    sep ["FCallM"; string_of_int n1; string_of_int n2]
+  | FCallUnpackM (n1, n2) ->
+    sep ["FCallUnpackM"; string_of_int n1; string_of_int n2]
+  | FCallDM (n1, n2, c, f) ->
+    sep ["FCallDM";
+      string_of_int n1; string_of_int n2; string_of_class_id c;
+      string_of_function_id f]
 
 let string_of_barethis_op i =
   match i with

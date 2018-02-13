@@ -87,8 +87,10 @@ let instr_concat = instr (IOp Concat)
 let instr_print = instr (IOp Print)
 let instr_cast_darray = instr (IOp CastDArray)
 let instr_retc = instr (IContFlow RetC)
+let instr_retm p = instr (IContFlow (RetM p))
 let instr_retv = instr (IContFlow RetV)
 let instr_null = instr (ILitConst Null)
+let instr_nulluninit = instr (ILitConst NullUninit)
 let instr_catch = instr (IMisc Catch)
 let instr_dup = instr (IBasic Dup)
 let instr_instanceofd s = instr (IOp (InstanceOfD s))
@@ -775,7 +777,8 @@ let get_input_output_count i =
     | FPassC _ | FPassCW _ | FPassCE _ | FPassV _ | FPassVNop _ | FPassR _
     | FPassN _ | FPassG _ | FPassS _ | FCallArray -> (1, 1)
     | FCall n | FCallD (n, _, _) | FCallAwait (n, _, _)| FCallUnpack n
-    | FCallBuiltin (n, _, _) -> (n, 1)
+    | FCallBuiltin (n, _, _) -> (n, 1) | FCallM (n1, n2) -> (n1, n2)
+    | FCallDM (n1, n2, _, _) -> (n1, n2) | FCallUnpackM (n1, n2) -> (n1, n2)
     end
   | IMisc i ->
     begin match i with
@@ -947,6 +950,7 @@ let get_estimated_stack_depth instrs =
         let acc = List.fold_left ls ~init:acc ~f:aux in
         (* depth after switch is 0 *)
         { acc with depth = 0 }
+      | RetM _
       | RetC
       | RetV
       | Unwind

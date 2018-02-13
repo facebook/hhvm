@@ -10,6 +10,7 @@
 
 open Instruction_sequence
 open Hh_core
+open Hhbc_ast
 
 module H = Hhbc_ast
 
@@ -30,22 +31,30 @@ let emit_body_instrs_inout params call_instrs =
   let inout_params = List.filter_map params ~f:(fun p ->
       if not @@ Hhas_param.is_inout p then None else
         Some (instr_setl @@ Local.Named (Hhas_param.name p))) in
+  let msrv = Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
   let local = Local.get_unnamed_local () in
   let last_p = List.nth_exn params (param_count - 1) in
   let has_variadic = Hhas_param.is_variadic last_p in
+  let num_inout = List.length inout_params in
+  let num_uninit = if msrv then num_inout else 0 in
   gather [
+    gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
     call_instrs;
     param_instrs;
-    if has_variadic
-      then instr_fcallunpack param_count
-      else instr_fcall param_count;
-    instr_unboxr_nop;
+    begin match (msrv, has_variadic) with
+    | (false, false) -> instr (ICall (FCall param_count))
+    | (false, true) -> instr (ICall (FCallUnpack param_count))
+    | (true, false) -> instr (ICall (FCallM (param_count, num_inout + 1)))
+    | (true, true) -> instr (ICall (FCallUnpackM (param_count, num_inout + 1)))
+    end;
+    begin if msrv then empty else instr_unboxr_nop end;
     Emit_inout_helpers.emit_list_set_for_inout_call local inout_params;
     instr_retc
   ]
 
 let emit_body_instrs_ref params call_instrs =
   let param_count = List.length params in
+  let msrv = Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
   let param_instrs = gather @@
     List.mapi params ~f:(fun i p ->
       let local = Local.Named (Hhas_param.name p) in
@@ -59,6 +68,7 @@ let emit_body_instrs_ref params call_instrs =
           instr_pushl local;
           instr_fpassc i H.Any
         ]) in
+  let params = if msrv then List.rev params else params in
   let param_get_instrs =
     List.filter_map params ~f:(fun p ->
         if Hhas_param.is_reference p
@@ -70,8 +80,13 @@ let emit_body_instrs_ref params call_instrs =
     instr_fcall param_count;
     instr_unboxr_nop;
     gather param_get_instrs;
-    instr_new_vec_array (List.length param_get_instrs + 1);
-    instr_retc;
+    if msrv then
+      instr_retm (List.length param_get_instrs + 1)
+    else
+      gather [
+        instr_new_vec_array (List.length param_get_instrs + 1);
+        instr_retc;
+      ]
   ]
 
 let emit_body_instrs ~wrapper_type env params call_instrs =

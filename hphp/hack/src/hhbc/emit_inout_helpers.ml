@@ -39,13 +39,18 @@ let inout_suffix param_location =
   ^ (String.concat ";" param_location)
   ^ "$inout"
 
-let emit_set_instrs ?(is_last=false) base (index, set_instrs) =
+let emit_set_instrs ?(is_last=false) opt_base (index, set_instrs) =
   let index = if is_last then 0 else index in
   gather [
     set_instrs;
     instr_popc;
-    instr_basel base H.MemberOpMode.Warn;
-    instr_querym 0 H.QueryOp.CGet (H.MemberKey.EI (Int64.of_int index))
+    match opt_base with
+    | Some base ->
+      gather [
+        instr_basel base H.MemberOpMode.Warn;
+        instr_querym 0 H.QueryOp.CGet (H.MemberKey.EI (Int64.of_int index))
+      ]
+    | None -> empty
   ]
 
 let emit_list_set_for_inout_call local inout_params = Local.scope @@ fun () ->
@@ -55,17 +60,29 @@ let emit_list_set_for_inout_call local inout_params = Local.scope @@ fun () ->
   let all_but_last, last =
     List.split_n inout_params (List.length inout_params - 1) in
   let last = List.hd_exn last in
-  let try_body =
+  let msrv =
+    Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
+  match msrv with
+  | false ->
+    let try_body =
+      gather [
+        emit_set_instrs (Some local) (1, instr_setl local);
+        gather @@ List.map all_but_last ~f:(emit_set_instrs (Some local));
+        emit_set_instrs ~is_last:true (Some local) last
+      ]
+    in
+    let unset_instr = instr_unsetl local in
+    let f_label = Label.next_fault () in
+    let fault_body = gather [ unset_instr; instr_unwind ] in
     gather [
-      emit_set_instrs local (1, instr_setl local);
-      gather @@ List.map all_but_last ~f:(emit_set_instrs local);
-      emit_set_instrs ~is_last:true local last
+      instr_try_fault f_label try_body fault_body;
+      unset_instr
     ]
-  in
-  let unset_instr = instr_unsetl local in
-  let f_label = Label.next_fault () in
-  let fault_body = gather [ unset_instr; instr_unwind ] in
-  gather [
-    instr_try_fault f_label try_body fault_body;
-    unset_instr
-  ]
+  | true ->
+    gather [
+      instr_setl local;
+      instr_popc;
+      gather @@ List.map all_but_last ~f:(emit_set_instrs None);
+      emit_set_instrs ~is_last:true None last;
+      instr_pushl local
+    ]

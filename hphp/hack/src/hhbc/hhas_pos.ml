@@ -8,9 +8,6 @@
  *
 *)
 
-(* Source location, emitted in .srcloc *)
-type srcloc = (int*int) * (int*int)
-
 (* Span, emitted as prefix to classes and functions *)
 type span = int*int
 

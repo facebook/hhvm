@@ -273,13 +273,6 @@ and key_expr_to_typed_value ?(restrict_keys=false) ns expr =
   | Some tv -> tv
   | None -> raise NotLiteral
 
-and array_afield_to_typed_value_pair ns index afield =
-  match afield with
-  | A.AFvalue e ->
-    (TV.Int (Int64.of_int index), expr_to_typed_value ns e)
-  | A.AFkvalue (key, value) ->
-    (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
-
 and afield_to_typed_value_pair ?(restrict_keys=false) ns afield =
   match afield with
   | A.AFvalue (_value) ->
@@ -463,14 +456,6 @@ end
 
 let fold_expr ns e =
   folder_visitor#on_expr ns e
-let fold_function fd =
-  folder_visitor#on_fun_ fd.Ast.f_namespace fd
-let fold_stmt ns s =
-  folder_visitor#on_stmt ns s
-let fold_gconst c =
-  folder_visitor#on_gconst c.Ast.cst_namespace c
-let fold_class_elt ns ce =
-  folder_visitor#on_class_elt ns ce
 let fold_program p =
   folder_visitor#on_program Namespace_env.empty_with_default_popt p
 

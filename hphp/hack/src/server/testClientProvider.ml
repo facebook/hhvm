@@ -119,8 +119,6 @@ let not_implemented () = failwith "not implemented"
 
 let accept_client _ = Non_persistent
 
-let say_hello _ = not_implemented ()
-
 let read_connection_type _ = Utils.unsafe_opt (get_mocked_new_client_type ())
 
 let send_response_to_client c x = record_client_response x c

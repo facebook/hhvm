@@ -171,7 +171,6 @@ module Closures = struct
 
   let mangle_closure scope ix count =
     Classes.mangle_class "Closure" scope ix count
-
 end
 
 (* XHP name mangling *)

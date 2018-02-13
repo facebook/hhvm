@@ -9,10 +9,6 @@
  *)
 
 open Hh_core
-open Hh_json
-
-let to_json res =
-  JSON_Array (List.map res (Pos.json))
 
 let print_json res =
   let response = Ide_message.Highlight_references_response res in

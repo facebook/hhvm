@@ -24,9 +24,6 @@ let get_occurrence_and_map tcopt content line char ~f =
     f path file_info !result
   end tcopt
 
-let get_occurrence content line char =
-  get_occurrence_and_map content line char ~f:(fun _ _ x -> x)
-
 let go content line char (tcopt : TypecheckerOptions.t) =
   (* Order symbols from innermost to outermost *)
   let by_nesting x y =

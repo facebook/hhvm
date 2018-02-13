@@ -25,8 +25,6 @@ val update :
   full_check_done:bool ->
   t
 
-val is_error_source : t -> Relative_path.t -> bool
-
 val error_sources : t -> Relative_path.Set.t
 
 (* Errors ready for sending to client *)

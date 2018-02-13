@@ -183,10 +183,6 @@ let string_no_whitespace_no_casing_comparer =
       String.lowercase_ascii s)
 let bool_comparer = primitive_comparer string_of_bool
 
-let int_list_comparer = list_comparer int_comparer "; "
-
-let int_list_list_comparer = list_comparer int_list_comparer "; "
-
 
 (* wrap takes a function a->b,a function a->string->string, a b-comparer and
    returns an a-comparer
@@ -219,13 +215,6 @@ let rec joindiffs diffs = match diffs with
     in (d+d1, (s+s1, e1 @ e))
 
 let joinmap f l = joindiffs (List.map f l)
-
-(* the comparer that says everything is equal *)
-let true_comparer vtostring = {
-  comparer = (fun _v1 _v2 -> (0,(0,[])));
-  size_of = (fun _v -> 0);
-  string_of = vtostring
-}
 
 (* comparer for sets represented as lists
    this only works properly for primitive types
@@ -372,8 +361,6 @@ let function_flags_comparer =
      function_is_top_comparer; function_no_injection_comparer;
      function_inout_wrapper_comparer; function_is_return_by_ref_comparer;
      function_is_interceptable_comparer]
-
-let params_to_string ps = "(" ^ (concatstrs (List.map Hhas_param.name ps)) ^ ")"
 
 (* map of function names to functions
    now only selects the top-level ones - others are compared dynamically
@@ -561,12 +548,6 @@ let class_is_trait_comparer =
   wrap Hhas_class.is_trait (fun _f s -> s) (flag_comparer "trait")
 let class_is_xhp_comparer =
   wrap Hhas_class.is_xhp (fun _f s -> s) (flag_comparer "xhp")
-let class_uses_comparer =
-  wrap Hhas_class.class_uses (fun _ s -> "uses " ^ s)
-    (list_comparer string_comparer " ")
-let class_enum_type_comparer =
-  wrap Hhas_class.enum_type (fun _ s -> "enumtype " ^ s)
-    (option_comparer type_info_comparer)
 
 (* TODO: sensible formatting, split uses and enumtype off from flags *)
 let class_flags_comparer =

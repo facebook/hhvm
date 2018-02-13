@@ -219,15 +219,11 @@ let add v1 v2 =
   | Int i1, Int i2 -> add_int i1 i2
   | _, _ -> None
 
-
-
-
 let shift f v1 v2 =
   match Option.both (to_int v1) (to_int v2) with
   | Some (l, r) when r > 0L ->
     Some (Int (f l (Int64.to_int r)))
   | _ -> None
-
 
 (* String concatenation *)
 let concat v1 v2 =
@@ -242,12 +238,9 @@ let bitwise_not v =
   | String s -> Some (String (StringOps.bitwise_not s))
   | _ -> None
 
-
-
 (* Logical operators *)
 let not v =
   Some (Bool (not (to_bool v)))
-
 
 (*
   returns (t * t) option option

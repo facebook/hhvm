@@ -26,9 +26,3 @@ let print_readable_definition res =
   match res with
   | Some res -> FileOutline.print_def "" res
   | None -> print_endline "None"
-
-let aprint_definition res output_json =
-  if output_json then
-    print_json_definition res
-  else
-    print_readable_definition res

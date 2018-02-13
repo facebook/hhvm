@@ -36,9 +36,6 @@ let set_return_by_ref b = return_by_ref := b
 let set_verify_out i = verify_out := i
 let set_function_pos p = function_pos := p
 
-let create_inout_wrapper_functions () =
-  Opts.create_inout_wrapper_functions !Opts.compiler_options
-
 let emit_return ~need_ref env =
   TFR.emit_return
     ~need_ref

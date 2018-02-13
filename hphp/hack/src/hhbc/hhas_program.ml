@@ -56,9 +56,3 @@ let with_fun hhas_prog hhas_fun =
 
 let with_classes hhas_prog hhas_classes =
   {hhas_prog with hhas_classes}
-
-let with_typedefs hhas_prog hhas_typedefs =
-  {hhas_prog with hhas_typedefs}
-
-let with_adata hhas_prog hhas_adata =
-  {hhas_prog with hhas_adata}

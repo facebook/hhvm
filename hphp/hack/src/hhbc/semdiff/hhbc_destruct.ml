@@ -131,9 +131,3 @@ let rec greedy_kleene p inp =
         | Some (rest,endinp) -> Some (v::rest, endinp)
         | None -> None) (* can't happen *)
   | None -> Some ([],inp)
-
-(* optional, always succeeds *)
-let maybe p inp =
- match p inp with
-  | Some (v,newinp) -> Some(Some v,newinp)
-  | None -> Some(None,inp)

@@ -287,10 +287,6 @@ let php7_ltr_assign () =
 let emit_nyi description =
   instr (IComment (H.nyi ^ ": " ^ description))
 
-let make_vec_like_array p es = p, A.Array (List.map es ~f:(fun e -> A.AFvalue e))
-let make_kvarray p kvs =
-  p, A.Array (List.map kvs ~f:(fun (k, v) -> A.AFkvalue (k, v)))
-
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
   let ints_overflow_to_ints =
@@ -414,12 +410,6 @@ let get_queryMOpMode need_ref op =
   | QueryOp.CGet -> MemberOpMode.Warn
   | QueryOp.Empty when need_ref -> MemberOpMode.Define
   | _ -> MemberOpMode.ModeNone
-
-let is_legal_lval_op_on_this op =
-  match op with
-  | LValOp.Unset -> true
-  | LValOp.IncDec _ -> true
-  | _ -> false
 
 let check_shape_key (pos,name) =
   if String.length name > 0 && String_utils.is_decimal_digit name.[0]

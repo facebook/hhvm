@@ -60,8 +60,6 @@ let get_id ds = ds.id
 
 let error_sources ds = ds.sources
 
-let is_error_source ds = RP.Set.mem ds.sources
-
 
 (* Update diagnostics subscription based on an incremental recheck that
  * was done. *)

@@ -33,8 +33,6 @@ module Args = struct
         get_sockname = !get_sockname;
       }
 
-  let root args = args.root
-
 end;;
 
 

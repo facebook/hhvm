@@ -121,9 +121,6 @@ let from_constant env (_hint, name, const_init) =
         Some (Emit_expression.emit_expr ~need_ref:false env init) in
     Hhas_constant.make constant_name constant_value initializer_instrs
 
-let from_constants env ast_constants =
-  List.map ast_constants (from_constant env)
-
 let from_type_constant ~namespace ast_type_constant =
   let type_constant_name = Litstr.to_string @@
     snd ast_type_constant.A.tconst_name
@@ -137,9 +134,6 @@ let from_type_constant ~namespace ast_type_constant =
       Some (Emit_type_constant.hint_to_type_constant ~tparams:[] ~namespace init)
     in
     Hhas_type_constant.make type_constant_name type_constant_initializer
-
-let from_type_constants ~namespace ast_type_constants =
-  List.map ast_type_constants (from_type_constant ~namespace)
 
 let ast_methods ast_class_body =
   let mapper elt =

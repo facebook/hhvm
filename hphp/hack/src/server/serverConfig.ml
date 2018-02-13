@@ -251,8 +251,6 @@ let default_config = {
 
 let set_parser_options config popt = { config with parser_options = popt }
 let set_tc_options config tcopt = { config with tc_options = tcopt }
-let load_script config = config.load_script
-let load_script_timeout config = config.load_script_timeout
 let gc_control config = config.gc_control
 let sharedmem_config config = config.sharedmem_config
 let state_prefetcher_script config = config.state_prefetcher_script

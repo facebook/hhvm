@@ -141,19 +141,6 @@ exception Server_fatal_connection_exception of Marshal_tools.remote_exception_da
 exception Server_nonfatal_exception of Marshal_tools.remote_exception_data
 
 
-let event_to_string (event: event) : string =
-  let open Jsonrpc in
-  match event with
-  | Server_hello -> "Server hello"
-  | Server_message ServerCommandTypes.DIAGNOSTIC _ -> "Server DIAGNOSTIC"
-  | Server_message ServerCommandTypes.BUSY_STATUS _ -> "Server BUSY_STATUS"
-  | Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED -> "Server NEW_CLIENT_CONNECTED"
-  | Server_message ServerCommandTypes.FATAL_EXCEPTION _ -> "Server FATAL_EXCEPTION"
-  | Server_message ServerCommandTypes.NONFATAL_EXCEPTION _ -> "Server NONFATAL_EXCEPTION"
-  | Client_message c -> Printf.sprintf "Client %s %s" (kind_to_string c.kind) c.method_
-  | Tick -> "Tick"
-
-
 let state_to_string (state: state) : string =
   match state with
   | Pre_init -> "Pre_init"

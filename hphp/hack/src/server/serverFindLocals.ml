@@ -168,9 +168,6 @@ module LocalMap = struct
   let previous_scopechain localmap =
     ScopeChains.previous localmap.scopechains
 
-  let previous_scopechains localmap =
-    ScopeChains.pop localmap.scopechains
-
   let replace_head scopechain localmap =
     let scopechains =
       ScopeChains.replace_head scopechain localmap.scopechains in

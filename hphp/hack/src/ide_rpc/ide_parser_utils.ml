@@ -46,16 +46,6 @@ let get_field ~getter ~transform field_name message =
   transform |>
   json_result_to_api_result
 
-let maybe_get_number_field =
-  get_field
-    ~getter:Hh_json.Access.get_number
-    ~transform:missing_key_error_to_none
-
-let get_number_field =
-  get_field
-    ~getter:Hh_json.Access.get_number
-    ~transform:no_transform
-
 let get_int_field field_name message =
   get_field field_name message
     ~getter:Hh_json.Access.get_number
@@ -92,5 +82,3 @@ let opt_field ~v_opt ~label ~f =
   Option.value_map v_opt
     ~f:(fun x -> [label, f x])
     ~default:[]
-
-let not_implemented = Error (Internal_error "Not implemented")

@@ -75,8 +75,6 @@ module DE = Debug_event
  * and identifying and summarizing version control checkout changes
  * (to avoid catting file contents between checkouts). *)
 
-let file_extension = "hrec"
-
 type env = {
   start_time : float;
   (** Reversed list of events. i.e., the most-recent event is first in the
@@ -115,8 +113,6 @@ let start init_env =
   let start = Unix.gettimeofday () in
   let buffer = [Start_recording init_env] in
   Active ({ start_time = start; rev_buffered_recording = buffer; })
-
-let default_instance = Switched_off
 
 (** Use fixed buffer to minimize heap allocations. *)
 let chunk_size = 65536

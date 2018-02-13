@@ -74,11 +74,6 @@ let apply_patches_to_file fn patch_list =
   let new_file_contents = Buffer.contents buf in
   write_string_to_file fn new_file_contents
 
-let input_prompt str =
-  print_string str;
-  flush stdout;
-  input_line stdin
-
 let apply_patches file_map =
   SMap.iter apply_patches_to_file file_map;
   print_endline

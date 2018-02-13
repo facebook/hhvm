@@ -114,18 +114,3 @@ let restore_saved_env env saved_env =
 
 module ExpandAST =
   Aast_mapper.MapAnnotatedAST(Tast.Annotations)(ExpandedTypeAnnotations)
-
-(* Replace all types in a program AST by their expansions *)
-let expand_program env =
-  ExpandAST.map_program
-    ~map_env_annotation:(fun _ -> ())
-    ~map_class_id_annotation:begin fun saved_env annotation ->
-      Option.map annotation begin fun ty ->
-        let env = restore_saved_env env saved_env in
-        expand_ty env ty
-      end
-    end
-    ~map_expr_annotation:begin fun saved_env annotation ->
-      let env = restore_saved_env env saved_env in
-      expand_annotation env annotation
-    end

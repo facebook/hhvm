@@ -73,7 +73,6 @@ module ShapeMap = Nast.ShapeMap
  * 'a ty' is), and we rely on the caller passing in an appropriate function that
  * converts into the 'phase_ty' when we need to hop into phase specific code.
  *)
-type 'a t = 'a ty -> phase_ty
 let decl ty = DeclTy ty
 let locl ty = LoclTy ty
 

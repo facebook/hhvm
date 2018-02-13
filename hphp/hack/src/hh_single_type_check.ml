@@ -476,14 +476,6 @@ let n_class_fold _tcopt _fn acc _class_name = acc
 let n_type_fold _tcopt _fn acc _type_name = acc
 let n_const_fold _tcopt _fn acc _const_name = acc
 
-(** Load the Nast for the file from the Nast heaps. *)
-let nast_for_file opts fn
-{ FileInfo.funs; classes; typedefs; consts; _} =
-  List.fold_left funs ~init:[] ~f:(n_fun_fold opts fn),
-  List.fold_left classes ~init:[] ~f:(n_class_fold opts fn),
-  List.fold_left typedefs ~init:[] ~f:(n_type_fold opts fn),
-  List.fold_left consts ~init:[] ~f:(n_const_fold opts fn)
-
 let parse_name_and_decl popt files_contents tcopt =
   Errors.do_ begin fun () ->
     let parsed_files =

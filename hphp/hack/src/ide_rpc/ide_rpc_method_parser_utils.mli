@@ -15,12 +15,6 @@ open Hh_json
 val assert_params_required :
   string -> 'a option -> ('a, error_t) result
 
-val get_line_field :
-  json -> (int, error_t) result
-
-val get_column_field :
-  json -> (int, error_t) result
-
 val get_text_field :
   json -> (string, error_t) result
 

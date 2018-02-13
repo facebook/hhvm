@@ -96,22 +96,6 @@ let measure : ('a -> 'b) -> 'a -> 'b * float = fun f x ->
   let stop = Unix.gettimeofday () in
   res, stop -. start
 
-let diff_comments : (Pos.t * string) list -> (Pos.t * string) list -> string
-  = fun exp act ->
-    let open Printf in
-    let f (p, x) =
-      sprintf "'%s' (%s)" (String.escaped x) (Pos.string_no_file p)
-    in
-    let exp_comments = String.concat "\n    -> " @@ List.map f exp in
-    let act_comments = String.concat "\n    -> " @@ List.map f act in
-    sprintf "
->> %d elements expected, found %d elements.
-  Expected:
-    -> %s
-  Actual:
-    -> %s
-" (List.length exp) (List.length act) exp_comments act_comments
-
 let compare_asts dumper filename diff_cmd ast_result ffp_result =
   let open Unix in
   let open Printf in

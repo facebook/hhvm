@@ -14,9 +14,6 @@ open Ide_rpc_protocol_parser_types
 val get_string_field :
   string -> json -> (string, error_t) result
 
-val maybe_get_number_field :
-  string -> json -> (string option, error_t) result
-
 val get_int_field :
   string -> json -> (int, error_t) result
 
@@ -29,9 +26,6 @@ val maybe_get_obj_field :
 val get_obj_field :
   string -> json -> (json, error_t) result
 
-val get_number_field :
-  string -> json -> (string, error_t) result
-
 val get_array_field :
   string -> json -> (json list, error_t) result
 
@@ -41,6 +35,3 @@ val opt_field:
   label:string ->
   f:('a -> Hh_json.json) ->
   (string * Hh_json.json) list
-
-val not_implemented :
-  ('a, error_t) result

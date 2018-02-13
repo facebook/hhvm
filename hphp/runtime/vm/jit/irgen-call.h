@@ -44,7 +44,7 @@ void fpushActRec(IRGS& env,
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
                     SSATmp* const* const args);
 
-SSATmp* implFCall(IRGS& env, uint32_t numParams);
+SSATmp* implFCall(IRGS& env, uint32_t numParams, uint32_t numOut);
 
 Type callReturnType(const Func* callee);
 

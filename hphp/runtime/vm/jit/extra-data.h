@@ -578,6 +578,7 @@ struct SyncReturnBCData : IRExtraData {
 struct CallArrayData : IRExtraData {
   explicit CallArrayData(IRSPRelOffset spOffset,
                          uint32_t numParams,
+                         uint32_t numOut,
                          Offset pcOffset,
                          Offset after,
                          const Func* callee,
@@ -585,6 +586,7 @@ struct CallArrayData : IRExtraData {
                          bool readLocals)
     : spOffset(spOffset)
     , numParams(numParams)
+    , numOut(numOut)
     , pc(pcOffset)
     , after(after)
     , callee(callee)
@@ -605,6 +607,7 @@ struct CallArrayData : IRExtraData {
 
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
   uint32_t numParams;
+  uint32_t numOut;
   Offset pc;     // XXX why isn't this available in the marker?
   Offset after;  // offset from unit m_bc (unlike m_soff in ActRec)
   const Func* callee; // nullptr if not statically known
@@ -648,6 +651,7 @@ struct CallBuiltinData : IRExtraData {
 struct CallData : IRExtraData {
   explicit CallData(IRSPRelOffset spOffset,
                     uint32_t numParams,
+                    uint32_t numOut,
                     Offset after,
                     const Func* callee,
                     bool writeLocals,
@@ -656,6 +660,7 @@ struct CallData : IRExtraData {
                     bool fcallAwait)
     : spOffset(spOffset)
     , numParams(numParams)
+    , numOut(numOut)
     , after(after)
     , callee(callee)
     , writeLocals(writeLocals)
@@ -679,6 +684,7 @@ struct CallData : IRExtraData {
 
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
   uint32_t numParams;
+  uint32_t numOut;     // number of values returned via stack from the callee
   Offset after;        // m_soff style: offset from func->base()
   const Func* callee;  // nullptr if not statically known
   bool writeLocals;
@@ -1405,6 +1411,7 @@ X(SpillFrame,                   ActRecInfo);
 X(CheckStk,                     IRSPRelOffsetData);
 X(HintStkInner,                 IRSPRelOffsetData);
 X(StStk,                        IRSPRelOffsetData);
+X(StOutValue,                   IndexData);
 X(CastStk,                      IRSPRelOffsetData);
 X(CoerceStk,                    CoerceStkData);
 X(CoerceMem,                    CoerceMemData);

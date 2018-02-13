@@ -794,7 +794,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         // Stack. The act-rec, incoming parameters, and everything below.
         stack_below(
           inst.src(0),
-          extra->spOffset + extra->numParams + kNumActRecCells - 1
+          extra->spOffset + extra->numParams + kNumActRecCells +
+          extra->numOut - 1
         ),
         // Locals.
         (extra->writeLocals || extra->readLocals)
@@ -830,7 +831,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         // Stack. The act-rec, incoming parameters, and everything below.
         stack_below(
           inst.src(0),
-          extra->spOffset + extra->numParams + kNumActRecCells - 1
+          extra->spOffset + extra->numParams + kNumActRecCells +
+          extra->numOut - 1
         ),
         // Locals.
         (extra->writeLocals || extra->readLocals)
@@ -1436,6 +1438,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AStack { inst.src(0), inst.extra<StStk>()->offset, 1 },
       inst.src(1)
     };
+
+  case StOutValue:
+    // Technically these writes affect the caller's stack, but there is no way
+    // to actually observe them from within the callee. They can also only
+    // occur once on any exit path from a function.
+    return may_load_store(AEmpty, AEmpty);
 
   case SpillFrame:
     {

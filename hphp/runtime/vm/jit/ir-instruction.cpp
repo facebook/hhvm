@@ -403,10 +403,12 @@ Type callReturn(const IRInstruction* inst) {
   if (inst->is(Call)) {
     // FCallAwait needs to load TVAux
     if (inst->extra<Call>()->fcallAwait) return TInitGen;
+    if (inst->extra<Call>()->numOut) return TInitCell;
     auto callee = inst->extra<Call>()->callee;
     return callee ? irgen::callReturnType(callee) : TInitGen;
   }
   if (inst->is(CallArray)) {
+    if (inst->extra<CallArray>()->numOut) return TInitCell;
     auto callee = inst->extra<CallArray>()->callee;
     return callee ? irgen::callReturnType(callee) : TInitGen;
   }

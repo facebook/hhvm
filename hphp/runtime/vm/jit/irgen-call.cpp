@@ -1569,6 +1569,7 @@ void emitFCallArray(IRGS& env) {
   auto const data = CallArrayData {
     spOffBCFromIRSP(env),
     0,
+    0,
     bcOff(env),
     nextBcOff(env),
     callee,
@@ -1579,7 +1580,7 @@ void emitFCallArray(IRGS& env) {
   push(env, retVal);
 }
 
-void emitFCallUnpack(IRGS& env, uint32_t numParams) {
+void implFCallUnpack(IRGS& env, uint32_t numParams, uint32_t numOut) {
   auto const callee = env.currentNormalizedInstruction->funcd;
 
   auto const writeLocals = callee
@@ -1592,6 +1593,7 @@ void emitFCallUnpack(IRGS& env, uint32_t numParams) {
   auto const data = CallArrayData {
     spOffBCFromIRSP(env),
     numParams,
+    numOut,
     bcOff(env),
     nextBcOff(env),
     callee,
@@ -1602,14 +1604,19 @@ void emitFCallUnpack(IRGS& env, uint32_t numParams) {
   push(env, retVal);
 }
 
-void emitFCallD(IRGS& env,
-                uint32_t numParams,
-                const StringData*,
-                const StringData*) {
-  emitFCall(env, numParams);
+void emitFCallUnpack(IRGS& env, uint32_t numParams) {
+  implFCallUnpack(env, numParams, 0);
 }
 
-SSATmp* implFCall(IRGS& env, uint32_t numParams) {
+void emitFCallUnpackM(IRGS& env, uint32_t numParams, uint32_t numOut) {
+  if (!RuntimeOption::EvalHHIRGenerateCallM) {
+    interpOne(env, *env.currentNormalizedInstruction);
+    return;
+  }
+  implFCallUnpack(env, numParams, numOut - 1);
+}
+
+SSATmp* implFCall(IRGS& env, uint32_t numParams, uint32_t numOut) {
   auto const returnBcOffset = nextBcOff(env) - curFunc(env)->base();
   auto const callee = env.currentNormalizedInstruction->funcd;
 
@@ -1633,6 +1640,7 @@ SSATmp* implFCall(IRGS& env, uint32_t numParams) {
     CallData {
       spOffBCFromIRSP(env),
       static_cast<uint32_t>(numParams),
+      numOut,
       returnBcOffset,
       callee,
       writeLocals,
@@ -1649,7 +1657,34 @@ SSATmp* implFCall(IRGS& env, uint32_t numParams) {
 }
 
 void emitFCall(IRGS& env, uint32_t numParams) {
-  implFCall(env, numParams);
+  implFCall(env, numParams, 0);
+}
+
+void emitFCallD(IRGS& env,
+                uint32_t numParams,
+                const StringData*,
+                const StringData*) {
+  implFCall(env, numParams, 0);
+}
+
+void emitFCallM(IRGS& env, uint32_t numParams, uint32_t numOut) {
+  if (!RuntimeOption::EvalHHIRGenerateCallM) {
+    interpOne(env, *env.currentNormalizedInstruction);
+    return;
+  }
+  implFCall(env, numParams, numOut - 1);
+}
+
+void emitFCallDM(IRGS& env,
+                 uint32_t numParams,
+                 uint32_t numOut,
+                 const StringData*,
+                 const StringData*) {
+  if (!RuntimeOption::EvalHHIRGenerateCallM) {
+    interpOne(env, *env.currentNormalizedInstruction);
+    return;
+  }
+  implFCall(env, numParams, numOut - 1);
 }
 
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
@@ -1679,6 +1714,7 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
     CallData {
       spOffBCFromIRSP(env),
       static_cast<uint32_t>(numParams),
+      0,
       returnBcOffset,
       callee,
       funcWritesLocals(callee),

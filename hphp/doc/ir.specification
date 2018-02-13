@@ -1799,6 +1799,11 @@ To string conversions:
 
   Store S1 to the stack pointed to by S0, at a given offset (in cells).
 
+| StOutValue<index>, ND, S(FramePtr) S(Gen), NF
+
+  Store S1 in a caller allocated out-value vm stack cell index cells above
+  S0 on the stack.
+
 | DbgTrashStk<offset>, ND, S(StkPtr), NF
 
   For debugging purposes.  Store kTVTrashJITStk to the stack slot pointed to

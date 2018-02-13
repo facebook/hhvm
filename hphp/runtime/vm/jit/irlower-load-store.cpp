@@ -142,6 +142,14 @@ void cgStStk(IRLS& env, const IRInstruction* inst) {
   storeTV(vmain(env), sp[off], srcLoc(env, inst, 1), inst->src(1));
 }
 
+void cgStOutValue(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const off = cellsToBytes(
+    inst->extra<StOutValue>()->index + kNumActRecCells
+  );
+  storeTV(vmain(env), fp[off], srcLoc(env, inst, 1), inst->src(1));
+}
+
 void cgDbgTrashStk(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(inst->extra<DbgTrashStk>()->offset.offset);

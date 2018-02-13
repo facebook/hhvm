@@ -245,6 +245,26 @@ void emitRetV(IRGS& env) {
   }
 }
 
+void emitRetM(IRGS& env, uint32_t nvals) {
+  assertx(!isInlining(env));
+  assertx(resumeMode(env) == ResumeMode::None);
+  assertx(!curFunc(env)->isResumable());
+  assertx(nvals > 1);
+
+  if (!RuntimeOption::EvalHHIRGenerateRetM) {
+    interpOne(env, *env.currentNormalizedInstruction);
+    return;
+  }
+
+  // Pop the return values. Since they will be teleported to their places in
+  // memory, we don't care about their types.
+  for (int i = 0; i < nvals - 1; i++) {
+    gen(env, StOutValue, IndexData(i), fp(env), pop(env, DataTypeGeneric));
+  }
+
+  implRet(env);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}}

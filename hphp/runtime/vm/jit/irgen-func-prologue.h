@@ -41,6 +41,8 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs);
 
 void emitDynamicCallCheck(IRGS& env);
 
+void emitCallMCheck(IRGS& env);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

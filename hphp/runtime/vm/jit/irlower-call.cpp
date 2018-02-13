@@ -88,6 +88,14 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     };
   }
 
+  if (extra->numOut) {
+    v << orlim{
+      static_cast<int32_t>(ActRec::Flags::MultiReturn),
+      calleeAR + AROFF(m_numArgsAndFlags),
+      v.makeReg()
+    };
+  }
+
   auto const isNativeImplCall = callee &&
                                 callee->builtinFuncPtr() &&
                                 !callee->nativeFuncPtr() &&
@@ -193,6 +201,15 @@ void cgCallArray(IRLS& env, const IRInstruction* inst) {
   auto const syncSP = v.makeReg();
   v << lea{sp[cellsToBytes(extra->spOffset.offset)], syncSP};
   v << syncvmsp{syncSP};
+
+  if (extra->numOut) {
+    auto const calleeAR = syncSP + cellsToBytes(extra->numParams);
+    v << orlim{
+      static_cast<int32_t>(ActRec::Flags::MultiReturn),
+      calleeAR + AROFF(m_numArgsAndFlags),
+      v.makeReg()
+    };
+  }
 
   auto const target = extra->numParams == 0
     ? tc::ustubs().fcallArrayHelper

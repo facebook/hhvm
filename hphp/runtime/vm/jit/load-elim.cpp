@@ -575,6 +575,9 @@ Flags handle_call_effects(Local& env,
     env.state.tracked[aloc].knownValue = nullptr;
   }
 
+  // Any stack locations modified by the callee are no longer valid
+  store(env, effects.stack, nullptr);
+
   return flags;
 }
 

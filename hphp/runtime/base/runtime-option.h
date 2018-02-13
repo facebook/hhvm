@@ -759,6 +759,8 @@ struct RuntimeOption {
   /* Use the CallM/RetM ABI to return multiple values via the stack for \
      inout functions */                                                 \
   F(bool, UseMSRVForInOut, true)                                        \
+  F(bool, HHIRGenerateCallM, true)                                      \
+  F(bool, HHIRGenerateRetM, true)                                       \
   F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \
   F(std::string, UseRemoteUnixServer, "no")                             \
   F(std::string, UnixServerPath, "")                                    \

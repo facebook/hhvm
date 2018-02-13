@@ -332,6 +332,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   }
 
   emitDynamicCallCheck(env);
+  emitCallMCheck(env);
 
   prologDispatch(
     env, func,
@@ -524,6 +525,33 @@ void emitDynamicCallCheck(IRGS& env) {
         );
         gen(env, RaiseNotice, cns(env, makeStaticString(msg)));
       }
+    }
+  );
+}
+
+const StaticString
+  s_inoutError("In/out function called dynamically without inout annotations");
+
+void emitCallMCheck(IRGS& env) {
+  auto const func = curFunc(env);
+
+  if (!RuntimeOption::EvalUseMSRVForInOut || !func->takesInOutParams()) {
+    return;
+  }
+
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto flags = gen(env, LdARNumArgsAndFlags, fp(env));
+      auto test = gen(
+        env, AndInt, flags,
+        cns(env, static_cast<int32_t>(ActRec::Flags::MultiReturn))
+      );
+      gen(env, JmpZero, taken, test);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, RaiseError, cns(env, s_inoutError.get()));
     }
   );
 }

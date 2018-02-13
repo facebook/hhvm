@@ -493,13 +493,6 @@ void emitYieldFromDelegate(IRGS& env, int32_t, int32_t)
                                               { INTERP }
 void emitContUnsetDelegate(IRGS& env, CudOp, int32_t)
                                               { INTERP }
-void emitRetM(IRGS& env, uint32_t)            { INTERP }
-void emitFCallM(IRGS& env, uint32_t, uint32_t){ INTERP }
-void emitFCallUnpackM(IRGS& env, uint32_t,
-                      uint32_t)               { INTERP }
-void emitFCallDM(IRGS& env, uint32_t, uint32_t,
-                 const StringData*,
-                 const StringData*)           { INTERP }
 
 //////////////////////////////////////////////////////////////////////
 

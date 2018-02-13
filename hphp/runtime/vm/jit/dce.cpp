@@ -276,6 +276,7 @@ bool canDCE(IRInstruction* inst) {
   case DbgTraceCall:
   case AKExistsObj:
   case StStk:
+  case StOutValue:
   case SpillFrame:
   case CheckType:
   case CheckNullptr:

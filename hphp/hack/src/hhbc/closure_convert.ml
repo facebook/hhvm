@@ -877,25 +877,14 @@ and convert_case env st case =
     let st, b = convert_block env st b in
     st, Case (e, b)
 
-and convert_lvalue_expr env st (p, expr_ as expr) =
-  match expr_ with
-  | Lvar _ ->
-    st, expr
-  | List exprs ->
-    let st, exprs = List.map_env st exprs (convert_lvalue_expr env) in
-    st, (p, List exprs)
-  | _ ->
-    convert_expr env st expr
-
-(* Everything here is an l-value *)
 and convert_as_expr env st aexpr =
   match aexpr with
   | As_v e ->
-    let st, e = convert_lvalue_expr env st e in
+    let st, e = convert_expr env st e in
     st, As_v e
   | As_kv (e1, e2) ->
-    let st, e1 = convert_lvalue_expr env st e1 in
-    let st, e2 = convert_lvalue_expr env st e2 in
+    let st, e1 = convert_expr env st e1 in
+    let st, e2 = convert_expr env st e2 in
     st, As_kv (e1, e2)
 
 and convert_afield env st afield =

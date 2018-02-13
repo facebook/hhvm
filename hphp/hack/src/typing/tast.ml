@@ -14,13 +14,12 @@
  * identifiers.
  *)
 type ty = Typing_defs.locl Typing_defs.ty
-let pp_ty fmt _ = Format.pp_print_string fmt "<type>"
 
 let pp_ty_option fmt = function
   | None -> Format.pp_print_string fmt "None"
   | Some ty ->
     Format.pp_print_string fmt "(Some ";
-    pp_ty fmt ty;
+    Pp_type.pp_ty fmt ty;
     Format.pp_print_string fmt ")"
 
 type saved_env = {
@@ -28,7 +27,25 @@ type saved_env = {
   tenv : ty IMap.t;
   subst : int IMap.t;
 }
-let pp_saved_env fmt _ = Format.pp_print_string fmt "<env>"
+
+let pp_saved_env fmt env =
+  Format.fprintf fmt "@[<hv 2>{ ";
+
+  Format.fprintf fmt "@[%s =@ " "tcopt";
+  Format.fprintf fmt "<opaque>";
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "tenv";
+  IMap.pp Pp_type.pp_ty fmt env.tenv;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "subst";
+  IMap.pp Format.pp_print_int fmt env.subst;
+  Format.fprintf fmt "@]";
+
+  Format.fprintf fmt " }@]"
 
 (* Typed AST.
  * We re-use the NAST but annotate expressions with position *and*
@@ -49,15 +66,17 @@ let pp_saved_env fmt _ = Format.pp_print_string fmt "<env>"
 module Annotations = struct
   module ExprAnnotation = struct
     type t = Pos.t * ty option
-    let pp fmt (_, ty) = pp_ty_option fmt ty
+    let pp fmt (pos, ty) =
+      Format.fprintf fmt "(@[";
+      Pos.pp fmt pos;
+      Format.fprintf fmt ",@ ";
+      pp_ty_option fmt ty;
+      Format.fprintf fmt "@])"
   end
 
   module EnvAnnotation = struct
     type t = saved_env
-    let pp fmt env =
-      Format.pp_print_string fmt "(Some ";
-      pp_saved_env fmt env;
-      Format.pp_print_string fmt ")"
+    let pp = pp_saved_env
   end
 
   module ClassIdAnnotation = struct

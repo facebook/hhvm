@@ -16,7 +16,7 @@ fi
 
 DIFF=`command -v colordiff || echo diff`
 
-for f in $@; do
+for f in "$@"; do
   nl --body-numbering=a $f
   if [ -e "$f$EXP_EXT" ]; then
     EXP="$f$EXP_EXT"
@@ -25,7 +25,11 @@ for f in $@; do
   fi
   cat $EXP
   $DIFF $EXP "$f$OUT_EXT"
-  read -p "Copy output to expected output? (y|n|q)" -n 1 -r
+  if [ "$TERM" = "dumb" ]; then
+      read -r -p "Copy output to expected output? (y|n|q)"
+  else
+      read -p "Copy output to expected output? (y|n|q)" -n 1 -r
+  fi
   echo ""
   if [ "$REPLY" = "y" ]; then
     cp "$f$OUT_EXT" "$f$EXP_EXT"

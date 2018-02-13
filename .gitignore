@@ -72,6 +72,10 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
+# CMake-generated files that need to stay in the source tree because
+# of ocamlbuild
+hphp/hack/src/options/buildOptions.ml
+
 # CPack
 CPackConfig.cmake
 CPackSourceConfig.cmake

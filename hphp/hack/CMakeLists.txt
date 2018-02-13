@@ -142,6 +142,12 @@ if(NOT PC_SQLITE3_FOUND)
   add_dependencies(hack_test sqlite3)
 endif()
 
+configure_file(
+  "src/options/buildOptions.ml.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/options/buildOptions.ml"
+  ESCAPE_QUOTES
+)
+
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client
   DESTINATION bin
   COMPONENT dev)

@@ -646,7 +646,7 @@ module WithExpressionAndStatementAndTypeParser
       (* Parse "methodish" declarations: methods, ctors and dtors *)
       (* TODO: Consider whether properties ought to allow attributes. *)
       let (parser, attr) = parse_attribute_specification_opt parser in
-      let (parser, modifiers) = parse_modifiers parser in
+      let (parser, modifiers, _) = parse_modifiers parser in
       parse_methodish parser attr modifiers
     | Require ->
       (* We give an error if these are found where they should not be,
@@ -988,7 +988,7 @@ module WithExpressionAndStatementAndTypeParser
        TODO: ought to be (1) parsed, with an error, or (2) perhaps
        TODO: simply make it legal? A property seems like something that could
        TODO: reasonably have an attribute. *)
-    let (parser, modifiers) = parse_modifiers parser in
+    let (parser, modifiers, contains_abstract) = parse_modifiers parser in
     if is_missing attribute_spec then
       (* ERROR RECOVERY: match against two tokens, because if one token is
        * in error but the next isn't, then it's likely that the user is
@@ -1002,7 +1002,7 @@ module WithExpressionAndStatementAndTypeParser
       | (Async | Coroutine | Function) , _ ->
         parse_methodish parser attribute_spec modifiers
       | LeftParen, _ ->
-        parse_property_declaration parser modifiers
+        parse_property_declaration parser modifiers ~contains_abstract
       (* We encountered one unexpected token, but the next still indicates that
        * we should be parsing a methodish. Throw an error, process the token
        * as an extra, and keep going. *)
@@ -1014,7 +1014,8 @@ module WithExpressionAndStatementAndTypeParser
           ~generate_error:false in
         parse_methodish parser attribute_spec modifiers
       (* Otherwise, continue parsing as a property (which might be a lambda). *)
-      | ( _ , _ ) -> parse_property_declaration parser modifiers
+      | ( _ , _ ) ->
+        parse_property_declaration parser modifiers ~contains_abstract
     else
       parse_methodish parser attribute_spec modifiers
 
@@ -1035,7 +1036,7 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_trait_use_alias_item parser aliasing_name =
     let (parser, keyword) = assert_token parser As in
-    let (parser, visibility) = parse_modifiers parser in
+    let (parser, visibility, _) = parse_modifiers parser in
     let (parser, aliased_name) = parse_qualified_name_type_opt parser in
     let trait_use_alias_item =
       make_trait_use_alias_item
@@ -1148,7 +1149,7 @@ module WithExpressionAndStatementAndTypeParser
     | _, _ ->
       parse_const_declaration parser abstr const
 
-  and parse_property_declaration parser modifiers =
+  and parse_property_declaration ?(contains_abstract=false) parser modifiers =
     (* SPEC:
         property-declaration:
           property-modifier  type-specifier  property-declarator-list  ;
@@ -1159,8 +1160,6 @@ module WithExpressionAndStatementAndTypeParser
      *)
      (* The type specifier is optional in non-strict mode and required in
         strict mode. We give an error in a later pass. *)
-     let has_abstract_modifier =
-         modifiers |> syntax_node_to_list |> Core_list.exists ~f:is_abstract in
      let (parser, prop_type) = match peek_token_kind parser with
      | Variable ->
        let missing = make_missing parser in
@@ -1170,8 +1169,9 @@ module WithExpressionAndStatementAndTypeParser
        parser Semicolon SyntaxError.error1008 parse_property_declarator in
      let (parser, semi) = require_semicolon parser in
      let result = make_property_declaration modifiers prop_type decls semi in
+     (* TODO: Move this to Full_fidelity_parser_errors. *)
      let parser =
-       if has_abstract_modifier then
+       if contains_abstract then
          with_error parser SyntaxError.error2058
        else
          parser in
@@ -1522,7 +1522,7 @@ module WithExpressionAndStatementAndTypeParser
     parse_function_declaration parser missing
 
   and parse_function_declaration parser attribute_specification =
-    let (parser, modifiers) = parse_modifiers parser in
+    let (parser, modifiers, _) = parse_modifiers parser in
     let (parser, header) =
       parse_function_declaration_header parser ~is_methodish:false modifiers in
     let (parser, body) = parse_compound_statement parser in
@@ -1686,7 +1686,7 @@ module WithExpressionAndStatementAndTypeParser
     if peek_token_kind parser1 = Const then
       parse_const_or_type_const_declaration parser1 abstract
     else
-      let (parser, modifiers) = parse_modifiers parser in
+      let (parser, modifiers, _) = parse_modifiers parser in
       let missing = make_missing parser in
       parse_methodish parser missing modifiers
 
@@ -1721,21 +1721,25 @@ module WithExpressionAndStatementAndTypeParser
       let parser = with_error parser1 SyntaxError.error1041 in
       (parser, syntax)
 
-  and parse_modifier parser =
-    let (parser1, token) = next_token parser in
-    match Token.kind token with
-    | Abstract
-    | Static
-    | Public
-    | Protected
-    | Private
-    | Async
-    | Coroutine
-    | Final -> (parser1, Some (make_token token))
-    | _ -> (parser, None)
-
   and parse_modifiers parser =
-    parse_list_until_none parser parse_modifier
+    let rec aux parser acc =
+      let (parser1, token) = next_token parser in
+      match Token.kind token with
+      | Abstract
+      | Static
+      | Public
+      | Protected
+      | Private
+      | Async
+      | Coroutine
+      | Final ->
+        let item = make_token token in
+        aux parser1 (item :: acc)
+      | _ -> (parser, List.rev acc)
+    in
+    let (parser, items) = aux parser [] in
+    let contains_abstract = List.exists is_abstract items in
+    (parser, make_list parser items, contains_abstract)
 
   and parse_enum_or_classish_or_function_declaration parser =
     (* An enum, type alias, function, interface, trait or class may all

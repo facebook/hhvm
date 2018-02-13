@@ -1,6 +1,6 @@
 (* @generated from aast_defs.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<4abf5411ea3e5a9e9575618555fb7c6103e45623>> *)
+(* SourceShasum<<a7b5e6331b3e08547d87510a3599fd49615f75cd>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text

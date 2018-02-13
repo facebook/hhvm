@@ -183,10 +183,10 @@ let emit_return
         else instr_cgetl (Local.get_retval_local ())
       in
       gather [
-        release_iterators_instr;
         load_retval_instr;
         verify_return_instr;
         verify_out;
+        release_iterators_instr;
         if msrv && verify_out != empty then empty else ret_instr
       ]
     else gather [

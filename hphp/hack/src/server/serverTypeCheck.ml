@@ -634,6 +634,10 @@ end = functor(CheckKind:CheckKindType) -> struct
     (* PARSING *)
 
     debug_print_path_set genv "files_to_parse" files_to_parse;
+    (* log line basically says the same as previous, but easier to parse for
+     * client *)
+    let logstring = Printf.sprintf "Parsing %d files" reparse_count in
+    Hh_logger.log "Begin %s" logstring;
     let fast_parsed, errorl, failed_parsing =
       parsing genv env files_to_parse ~stop_at_errors in
 
@@ -644,13 +648,15 @@ end = functor(CheckKind:CheckKindType) -> struct
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.parsing_end t hs ~parsed_count:reparse_count;
-    let t = Hh_logger.log_duration "Parsing" t in
+    let t = Hh_logger.log_duration logstring t in
 
     (* UPDATE FILE INFO *)
+    let logstring = "Updating deps" in
+    Hh_logger.log "Begin %s" logstring;
     let old_env = env in
     let files_info = update_file_info env fast_parsed in
     HackEventLogger.updating_deps_end t;
-    let t = Hh_logger.log_duration "Updating deps" t in
+    let t = Hh_logger.log_duration logstring t in
 
     (* BUILDING AUTOLOADMAP *)
     Option.iter !hook_after_parsing begin fun f ->
@@ -660,6 +666,8 @@ end = functor(CheckKind:CheckKindType) -> struct
     let t = Hh_logger.log_duration "Parsing Hook" t in
 
     (* NAMING *)
+    let logstring = "Naming" in
+    Hh_logger.log "Begin %s" logstring;
     let errorl', failed_naming, fast = declare_names env fast_parsed in
     let errors = Errors.(incremental_update_map errors errorl' fast Naming) in
     (* failed_naming can be a superset of keys in fast - see comment in
@@ -673,7 +681,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
 
     HackEventLogger.naming_end t;
-    let t = Hh_logger.log_duration "Naming" t in
+    let t = Hh_logger.log_duration logstring t in
 
     let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
     debug_print_fast_keys genv "to_redecl_phase1" fast;
@@ -700,6 +708,9 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     let fast_redecl_phase2_now = remove_failed_parsing
       fast_redecl_phase2_now stop_at_errors env failed_parsing in
+    let count = Relative_path.Map.cardinal fast_redecl_phase2_now in
+    let logstring = Printf.sprintf "Type-decl %d files" count in
+    Hh_logger.log "Begin %s" logstring;
 
     debug_print_fast_keys genv "to_redecl_phase2" fast_redecl_phase2_now;
     debug_print_fast_keys genv "lazy_decl_later" lazy_decl_later;
@@ -735,12 +746,15 @@ end = functor(CheckKind:CheckKindType) -> struct
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.second_redecl_end t hs;
-    let t = Hh_logger.log_duration "Type-decl" t in
+    let t = Hh_logger.log_duration logstring t in
 
     (* TYPE CHECKING *)
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck genv
       files_to_parse fast files_info to_recheck env in
     let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
+    let total_rechecked_count = Relative_path.Map.cardinal fast in
+    let logstring = Printf.sprintf "Type-check %d files" total_rechecked_count in
+    Hh_logger.log "Begin %s" logstring;
     ServerCheckpoint.process_updates fast;
     debug_print_fast_keys genv "to_recheck" fast;
     debug_print_path_set genv "lazy_check_later" lazy_check_later;
@@ -767,9 +781,8 @@ end = functor(CheckKind:CheckKindType) -> struct
         ~full_check_done:CheckKind.is_full
     end in
 
-    let total_rechecked_count = Relative_path.Map.cardinal fast in
     HackEventLogger.type_check_end total_rechecked_count t;
-    let t = Hh_logger.log_duration "Type-check" t in
+    let t = Hh_logger.log_duration logstring t in
 
     Hh_logger.log "Total: %f\n%!" (t -. start_t);
     ServerDebug.info genv "incremental_done";

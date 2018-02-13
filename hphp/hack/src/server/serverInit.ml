@@ -200,13 +200,20 @@ module ServerInitCommon = struct
     ServerArgs.save_filename options = None
 
   let indexing genv =
+    let logstring = "Indexing" in
+    Hh_logger.log "Begin %s" logstring;
     let t = Unix.gettimeofday () in
     let get_next = make_next_files genv in
     HackEventLogger.indexing_end t;
-    let t = Hh_logger.log_duration "Indexing" t in
+    let t = Hh_logger.log_duration logstring t in
     get_next, t
 
-  let parsing ~lazy_parse genv env ~get_next t =
+  let parsing ~lazy_parse genv env ~get_next ?count t =
+    let logstring =
+      match count with
+      | None -> "Parsing"
+      | Some c -> Printf.sprintf "Parsing %d files" c in
+    Hh_logger.log "Begin %s" logstring;
     let quick = lazy_parse in
     let files_info, errorl, _=
       Parsing_service.go
@@ -225,7 +232,7 @@ module ServerInitCommon = struct
       files_info;
       errorl = Errors.merge errorl env.errorl;
     } in
-    env, (Hh_logger.log_duration "Parsing" t)
+    env, (Hh_logger.log_duration logstring t)
 
   let update_files genv files_info t =
     if is_check_mode genv.options then t else begin
@@ -235,6 +242,8 @@ module ServerInitCommon = struct
     end
 
   let naming env t =
+    let logstring = "Naming" in
+    Hh_logger.log "Begin %s" logstring;
     let env =
       Relative_path.Map.fold env.files_info ~f:begin fun k v env ->
         let errorl, failed_naming = NamingGlobal.ndecl_file env.tcopt k v in
@@ -248,9 +257,11 @@ module ServerInitCommon = struct
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.global_naming_end t;
-    env, (Hh_logger.log_duration "Naming" t)
+    env, (Hh_logger.log_duration logstring t)
 
   let type_decl genv env fast t =
+    let logstring = "Type-decl" in
+    Hh_logger.log "Begin %s" logstring;
     let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
     let errorl =
       Decl_service.go ~bucket_size genv.workers env.tcopt fast in
@@ -258,7 +269,7 @@ module ServerInitCommon = struct
     Hh_logger.log "Heap size: %d" hs;
     Stats.(stats.init_heap_size <- hs);
     HackEventLogger.type_decl_end t;
-    let t = Hh_logger.log_duration "Type-decl" t in
+    let t = Hh_logger.log_duration logstring t in
     let env = {
       env with
       errorl = Errors.merge errorl env.errorl;
@@ -309,6 +320,8 @@ module ServerInitCommon = struct
     if ServerArgs.ai_mode genv.options = None
     then begin
       let count = Relative_path.Map.cardinal fast in
+      let logstring = Printf.sprintf "Type-check %d files" count in
+      Hh_logger.log "Begin %s" logstring;
       let errorl =
         Typing_check_service.go genv.workers env.tcopt fast in
       let hs = SharedMem.heap_size () in
@@ -317,7 +330,7 @@ module ServerInitCommon = struct
       let env = { env with
         errorl = Errors.merge errorl env.errorl;
       } in
-      env, (Hh_logger.log_duration "Type-check" t)
+      env, (Hh_logger.log_duration logstring t)
     end else env, t
 
   let get_dirty_fast old_fast fast dirty =
@@ -748,6 +761,7 @@ module ServerLazyInit : InitKind = struct
 
   let init ~load_mini_approach genv lazy_level env root =
     assert(lazy_level = Init);
+    Hh_logger.log "Begin loading mini-state";
     let tiny = genv.local_config.SLC.load_tiny_state in
     let state_future =
       load_mini_approach >>= invoke_approach genv root ~tiny in
@@ -800,7 +814,8 @@ module ServerLazyInit : InitKind = struct
       let old_info = FileInfo.saved_to_info old_saved in
       (* Parse dirty files only *)
       let next = MultiWorker.next genv.workers parsing_files_list in
-      let env, t = parsing genv env ~lazy_parse:true ~get_next:next t in
+      let env, t = parsing genv env ~lazy_parse:true ~get_next:next
+        ~count:(List.length parsing_files_list) t in
       SearchServiceRunner.update_fileinfo_map env.files_info;
 
       let t = update_files genv env.files_info t in

@@ -1321,7 +1321,7 @@ let rec connect (state: state) : state =
         uris_with_unsaved_changes = get_uris_with_unsaved_changes state;
         (* Similarly, file_edits will be empty: *)
         file_edits = ImmQueue.empty;
-        tail_env = Some (Tail.create_env (Sys_utils.readlink_no_fail (ServerFiles.log_link root)));
+        tail_env = Some (Tail.create_env (ServerFiles.log_link root));
         has_reported_progress = false;
         dialog = ShowMessageRequest.None;
         progress = Progress.None;

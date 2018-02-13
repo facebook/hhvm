@@ -9,6 +9,6 @@
  *)
 
 let load_state_not_found_msg =
-  "WARNING: Load state not found. Restart the Hack server?"
+  "WARNING: Saved state not found."
 
 let ignore_ide_from _ = false

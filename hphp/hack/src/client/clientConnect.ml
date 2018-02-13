@@ -35,11 +35,13 @@ let tty_progress_reporter (status: string option) : unit =
 let null_progress_reporter (_status: string option) : unit =
   ()
 
-let running_load_script_re = Str.regexp_string "Running load script"
+let loading_mini_re = Str.regexp_string "loading mini-state"
 
-let load_state_found_re = Str.regexp_string "Load state found"
+let success_loaded_mini_re = Str.regexp_string "loaded mini-state"
 
-let load_state_not_found_re = Str.regexp_string "Load state not found"
+let could_not_load_mini_state_re = Str.regexp_string "Could not load mini state"
+
+let indexing_re = Str.regexp_string "Indexing"
 
 let parsing_re = Str.regexp_string "Parsing"
 
@@ -53,14 +55,21 @@ let type_check_re = Str.regexp_string "Type-check"
 
 let server_ready_re = Str.regexp_string "Server is READY"
 
+let begin_re = Str.regexp_string "Begin"
+
+let count_re = Str.regexp "\\([0-9]+\\) files"
+
 let matches_re re s =
   let pos = try Str.search_forward re s 0 with Not_found -> -1 in
   pos > -1
 
 let re_list =
-  [running_load_script_re;
-   load_state_found_re;
-   load_state_not_found_re;
+  [
+   loading_mini_re;
+   success_loaded_mini_re;
+   could_not_load_mini_state_re;
+   begin_re;
+   indexing_re;
    parsing_re;
    naming_re;
    determining_changes_re;
@@ -72,40 +81,49 @@ let re_list =
 let is_valid_line s =
   List.exists (fun re -> matches_re re s) re_list
 
+let saved_state_failed : bool ref = ref false
 
-let rec is_load_state_not_found l =
+let rec did_loading_saved_state_fail l =
   match l with
   | [] -> false
   | s::ss ->
-     if matches_re load_state_found_re s then
+     if matches_re success_loaded_mini_re s then
        false
-     else if matches_re load_state_not_found_re s then
+     else if matches_re could_not_load_mini_state_re s then
        true
-     else if matches_re server_ready_re s then
-       false
+     else if matches_re server_ready_re s then begin
+       saved_state_failed := false; false end
      else
-       is_load_state_not_found ss
+       did_loading_saved_state_fail ss
 
 let msg_of_tail tail_env =
+  let count_suffix line =
+    if matches_re count_re line then
+      try let c = Str.matched_group 1 line in " " ^ c ^ " files"
+        with Not_found -> ""
+    else "" in
+  let final_suffix = if !saved_state_failed
+    then " - this can take a long time because loading saved state failed]"
+    else "]" in
   let line = Tail.last_line tail_env in
-  if matches_re running_load_script_re line then
-    "[running load script]"
-  else if matches_re load_state_found_re line then
-    "[load state found]"
-  else if matches_re load_state_not_found_re line then
-    "[load state not found]"
+  if matches_re loading_mini_re line then
+    "[loading saved state]"
+  else if matches_re success_loaded_mini_re line then
+    "[loading saved state succeeded]"
+  else if matches_re could_not_load_mini_state_re line then
+    "[loading saved state failed]"
+  else if matches_re indexing_re line then
+    "[indexing" ^ final_suffix
   else if matches_re parsing_re line then
-    "[parsing]"
+    "[parsing" ^ (count_suffix line) ^ final_suffix
   else if matches_re naming_re line then
-    "[naming]"
+    "[naming" ^ final_suffix
   else if matches_re determining_changes_re line then
     "[determining changes]"
   else if matches_re type_decl_re line then
-    "[type decl]"
+    "[type decl" ^ (count_suffix line) ^ final_suffix
   else if matches_re type_check_re line then
-    "[type check]"
-  else if matches_re server_ready_re line then
-    "[server is ready]"
+    "[type check" ^ (count_suffix line) ^ final_suffix
   else
     "[processing]"
 
@@ -120,7 +138,8 @@ let open_and_get_tail_msg start_time tail_env =
     end else if Tail.is_open_env tail_env then
     Tail.update_env is_valid_line tail_env;
   let load_state_not_found =
-    is_load_state_not_found (Tail.get_lines tail_env) in
+    let l = (Tail.get_lines tail_env) in
+    did_loading_saved_state_fail l in
   Tail.set_lines tail_env [];
   let tail_msg = msg_of_tail tail_env in
   load_state_not_found, tail_msg
@@ -128,8 +147,9 @@ let open_and_get_tail_msg start_time tail_env =
 let print_wait_msg progress_callback start_time tail_env =
   let load_state_not_found, tail_msg =
     open_and_get_tail_msg start_time tail_env in
-  if load_state_not_found then
-    Printf.eprintf "%s\n%!" ClientMessages.load_state_not_found_msg;
+  if load_state_not_found then begin
+    saved_state_failed := true;
+    Printf.eprintf "%s\n%!" ClientMessages.load_state_not_found_msg end;
   progress_callback (Some tail_msg)
 
 (** Sleeps until the server says hello. While waiting, prints out spinner and
@@ -315,9 +335,8 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
 
 let connect env =
   let link_file = ServerFiles.log_link env.root in
-  let log_file = Sys_utils.readlink_no_fail link_file in
   let start_time = Unix.time () in
-  let tail_env = Tail.create_env log_file in
+  let tail_env = Tail.create_env link_file in
   try
     let (ic, oc) =
       connect ~first_attempt:true env env.retries start_time tail_env in

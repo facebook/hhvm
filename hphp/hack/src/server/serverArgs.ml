@@ -69,7 +69,7 @@ module Messages = struct
     "   {\n" ^
     "      \"state\" : <saved state filename>\n" ^
     "      \"corresponding_base_revision\" : <SVN rev #>\n" ^
-    "      \"deptable_fn\" : <dependency table filename>\n" ^
+    "      \"deptable\" : <dependency table filename>\n" ^
     "      \"changes\" : [array of files changed since that saved state]\n" ^
     "   }"
   let with_mini_state = " init with the given saved state instead of getting" ^

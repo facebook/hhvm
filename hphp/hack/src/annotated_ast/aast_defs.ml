@@ -1,6 +1,6 @@
 (* @generated from aast_defs.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<a7b5e6331b3e08547d87510a3599fd49615f75cd>> *)
+(* SourceShasum<<1b972644f5c9a617b8717e040600b04f0e610f7b>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -44,36 +44,35 @@ and is_coroutine = bool
 and is_reactive = bool
 and hint = (pos * hint_)
 and variadic_hint =
-  | Hvariadic of hint option 
-  | Hnon_variadic 
+  | Hvariadic of hint option
+  | Hnon_variadic
 and hint_ =
-  | Hoption of hint 
+  | Hoption of hint
   | Hfun of is_reactive * is_coroutine * hint list * Ast.param_kind option
-  list * variadic_hint * hint 
-  | Htuple of hint list 
-  | Happly of sid * hint list 
-  | Hshape of nast_shape_info 
-  | Haccess of hint * sid list 
-  | Hany 
-  | Hmixed 
-  | Hnonnull 
-  | Habstr of string 
-  | Harray of hint option * hint option 
-  | Hdarray of hint * hint 
-  | Hvarray of hint 
-  | Hvarray_or_darray of hint 
-  | Hprim of tprim 
-  | Hthis 
+  list * variadic_hint * hint
+  | Htuple of hint list
+  | Happly of sid * hint list
+  | Hshape of nast_shape_info
+  | Haccess of hint * sid list
+  | Hany
+  | Hmixed
+  | Habstr of string
+  | Harray of hint option * hint option
+  | Hdarray of hint * hint
+  | Hvarray of hint
+  | Hvarray_or_darray of hint
+  | Hprim of tprim
+  | Hthis
 and tprim =
-  | Tvoid 
-  | Tint 
-  | Tbool 
-  | Tfloat 
-  | Tstring 
-  | Tresource 
-  | Tnum 
-  | Tarraykey 
-  | Tnoreturn 
+  | Tvoid
+  | Tint
+  | Tbool
+  | Tfloat
+  | Tstring
+  | Tresource
+  | Tnum
+  | Tarraykey
+  | Tnoreturn
 and shape_field_info = {
   sfi_optional: bool ;
   sfi_hint: hint }
@@ -91,8 +90,8 @@ and visibility =
   | Public [@visitors.name "visibility_Public"]
   | Protected [@visitors.name "visibility_Protected"]
 and typedef_visibility =
-  | Transparent 
-  | Opaque 
+  | Transparent
+  | Opaque
 and enum_ = {
   e_base: hint ;
   e_constraint: hint option }
@@ -166,7 +165,7 @@ and show_local_id : local_id -> Ppx_deriving_runtime.string =
 
 and pp_lid : Format.formatter -> lid -> Ppx_deriving_runtime.unit =
   let __1 () = pp_local_id
-  
+
   and __0 () = pp_pos
    in
   ((let open! Ppx_deriving_runtime in
@@ -227,7 +226,7 @@ and show_is_reactive : is_reactive -> Ppx_deriving_runtime.string =
 
 and pp_hint : Format.formatter -> hint -> Ppx_deriving_runtime.unit =
   let __1 () = pp_hint_
-  
+
   and __0 () = pp_pos
    in
   ((let open! Ppx_deriving_runtime in
@@ -264,43 +263,43 @@ and show_variadic_hint : variadic_hint -> Ppx_deriving_runtime.string =
 
 and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
   let __19 () = pp_tprim
-  
+
   and __18 () = pp_hint
-  
+
   and __17 () = pp_hint
-  
+
   and __16 () = pp_hint
-  
+
   and __15 () = pp_hint
-  
+
   and __14 () = pp_hint
-  
+
   and __13 () = pp_hint
-  
+
   and __12 () = pp_sid
-  
+
   and __11 () = pp_hint
-  
+
   and __10 () = pp_nast_shape_info
-  
+
   and __9 () = pp_hint
-  
+
   and __8 () = pp_sid
-  
+
   and __7 () = pp_hint
-  
+
   and __6 () = pp_hint
-  
+
   and __5 () = pp_variadic_hint
-  
+
   and __4 () = Ast.pp_param_kind
-  
+
   and __3 () = pp_hint
-  
+
   and __2 () = pp_is_coroutine
-  
+
   and __1 () = pp_is_reactive
-  
+
   and __0 () = pp_hint
    in
   ((let open! Ppx_deriving_runtime in
@@ -396,7 +395,6 @@ and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
              Format.fprintf fmt "@,))@]")
         | Hany  -> Format.pp_print_string fmt "Hany"
         | Hmixed  -> Format.pp_print_string fmt "Hmixed"
-        | Hnonnull  -> Format.pp_print_string fmt "Hnonnull"
         | Habstr a0 ->
             (Format.fprintf fmt "(@[<2>Habstr@ ";
              (Format.fprintf fmt "%S") a0;
@@ -482,7 +480,7 @@ and show_shape_field_info : shape_field_info -> Ppx_deriving_runtime.string =
 and pp_nast_shape_info :
   Format.formatter -> nast_shape_info -> Ppx_deriving_runtime.unit =
   let __1 () = pp_shape_map
-  
+
   and __0 () = pp_shape_field_info
    in
   ((let open! Ppx_deriving_runtime in
@@ -533,11 +531,11 @@ and show_vc_kind : vc_kind -> Ppx_deriving_runtime.string =
 
 and pp_tparam : Format.formatter -> tparam -> Ppx_deriving_runtime.unit =
   let __3 () = pp_hint
-  
+
   and __2 () = Ast.pp_constraint_kind
-  
+
   and __1 () = pp_sid
-  
+
   and __0 () = Ast.pp_variance
    in
   ((let open! Ppx_deriving_runtime in
@@ -597,7 +595,7 @@ and show_typedef_visibility :
 
 and pp_enum_ : Format.formatter -> enum_ -> Ppx_deriving_runtime.unit =
   let __1 () = pp_hint
-  
+
   and __0 () = pp_hint
    in
   ((let open! Ppx_deriving_runtime in
@@ -625,7 +623,7 @@ and show_enum_ : enum_ -> Ppx_deriving_runtime.string =
 and pp_instantiated_sid :
   Format.formatter -> instantiated_sid -> Ppx_deriving_runtime.unit =
   let __1 () = pp_hint
-  
+
   and __0 () = pp_sid
    in
   ((let open! Ppx_deriving_runtime in
@@ -653,9 +651,9 @@ and show_instantiated_sid : instantiated_sid -> Ppx_deriving_runtime.string =
 and pp_where_constraint :
   Format.formatter -> where_constraint -> Ppx_deriving_runtime.unit =
   let __2 () = pp_hint
-  
+
   and __1 () = Ast.pp_constraint_kind
-  
+
   and __0 () = pp_hint
    in
   ((let open! Ppx_deriving_runtime in
@@ -729,7 +727,6 @@ include
           let _visitors_r1 = self#on_list self#on_sid env _visitors_c1  in ()
         method on_Hany env = ()
         method on_Hmixed env = ()
-        method on_Hnonnull env = ()
         method on_Habstr env _visitors_c0 =
           let _visitors_r0 = self#on_string env _visitors_c0  in ()
         method on_Harray env _visitors_c0 _visitors_c1 =
@@ -762,7 +759,6 @@ include
               self#on_Haccess env _visitors_c0 _visitors_c1
           | Hany  -> self#on_Hany env
           | Hmixed  -> self#on_Hmixed env
-          | Hnonnull  -> self#on_Hnonnull env
           | Habstr _visitors_c0 -> self#on_Habstr env _visitors_c0
           | Harray (_visitors_c0,_visitors_c1) ->
               self#on_Harray env _visitors_c0 _visitors_c1
@@ -917,7 +913,6 @@ include
           self#plus _visitors_s0 _visitors_s1
         method on_Hany env = self#zero
         method on_Hmixed env = self#zero
-        method on_Hnonnull env = self#zero
         method on_Habstr env _visitors_c0 =
           let _visitors_s0 = self#on_string env _visitors_c0  in _visitors_s0
         method on_Harray env _visitors_c0 _visitors_c1 =
@@ -951,7 +946,6 @@ include
               self#on_Haccess env _visitors_c0 _visitors_c1
           | Hany  -> self#on_Hany env
           | Hmixed  -> self#on_Hmixed env
-          | Hnonnull  -> self#on_Hnonnull env
           | Habstr _visitors_c0 -> self#on_Habstr env _visitors_c0
           | Harray (_visitors_c0,_visitors_c1) ->
               self#on_Harray env _visitors_c0 _visitors_c1
@@ -1107,7 +1101,6 @@ include
           Haccess (_visitors_r0, _visitors_r1)
         method on_Hany env = Hany
         method on_Hmixed env = Hmixed
-        method on_Hnonnull env = Hnonnull
         method on_Habstr env _visitors_c0 =
           let _visitors_r0 = self#on_string env _visitors_c0  in
           Habstr _visitors_r0
@@ -1145,7 +1138,6 @@ include
               self#on_Haccess env _visitors_c0 _visitors_c1
           | Hany  -> self#on_Hany env
           | Hmixed  -> self#on_Hmixed env
-          | Hnonnull  -> self#on_Hnonnull env
           | Habstr _visitors_c0 -> self#on_Habstr env _visitors_c0
           | Harray (_visitors_c0,_visitors_c1) ->
               self#on_Harray env _visitors_c0 _visitors_c1
@@ -1348,8 +1340,6 @@ include
           if true then _visitors_this else Hany
         method on_Hmixed env _visitors_this =
           if true then _visitors_this else Hmixed
-        method on_Hnonnull env _visitors_this =
-          if true then _visitors_this else Hnonnull
         method on_Habstr env _visitors_this _visitors_c0 =
           let _visitors_r0 = self#on_string env _visitors_c0  in
           if Pervasives.(==) _visitors_c0 _visitors_r0
@@ -1407,8 +1397,6 @@ include
               self#on_Haccess env _visitors_this _visitors_c0 _visitors_c1
           | Hany  as _visitors_this -> self#on_Hany env _visitors_this
           | Hmixed  as _visitors_this -> self#on_Hmixed env _visitors_this
-          | Hnonnull  as _visitors_this ->
-              self#on_Hnonnull env _visitors_this
           | Habstr _visitors_c0 as _visitors_this ->
               self#on_Habstr env _visitors_this _visitors_c0
           | Harray (_visitors_c0,_visitors_c1) as _visitors_this ->
@@ -1593,13 +1581,13 @@ and show_shape_field_name : shape_field_name -> Ppx_deriving_runtime.string =
   fun x  -> Format.asprintf "%a" pp_shape_field_name x
 
 type og_null_flavor = Ast.og_null_flavor =
-  | OG_nullthrows 
-  | OG_nullsafe 
+  | OG_nullthrows
+  | OG_nullsafe
 let pp_og_null_flavor fmt flavor =
   (Format.pp_print_string fmt) @@
     (match flavor with
      | OG_nullthrows  -> "OG_nullthrows"
      | OG_nullsafe  -> "OG_nullsafe")
-  
-let pp_kvc_kind fmt _ = Format.pp_print_string fmt "<kvc_kind>" 
-let pp_vc_kind fmt _ = Format.pp_print_string fmt "<vc_kind>" 
+
+let pp_kvc_kind fmt _ = Format.pp_print_string fmt "<kvc_kind>"
+let pp_vc_kind fmt _ = Format.pp_print_string fmt "<vc_kind>"

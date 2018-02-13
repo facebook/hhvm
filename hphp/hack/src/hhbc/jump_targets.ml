@@ -228,6 +228,9 @@ let with_loop is_hh_file label_break label_continue iterator t s f =
 
 let with_switch is_hh_file end_label t cl f =
   let labels = collect_valid_target_labels_for_switch_cases is_hh_file cl in
+  (* CONSIDER: now HHVM eagerly reserves state id for the switch end label
+    which does not seem to be necessary - do it for now for HHVM compatibility *)
+  let _ = get_id_for_label end_label in
   Switch (end_label, labels) :: t
   |> run_and_release_ids labels f ()
 

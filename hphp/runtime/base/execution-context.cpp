@@ -1251,7 +1251,7 @@ ActRec* ExecutionContext::getFrameAtDepth(int frame) {
   }
   if (UNLIKELY(fp->localsDecRefd())) return nullptr;
   auto const curOp = fp->func()->unit()->getOp(pc);
-  if (UNLIKELY(curOp == Op::RetC || curOp == Op::RetV ||
+  if (UNLIKELY(curOp == Op::RetC || curOp == Op::RetV || curOp == Op::RetM ||
                curOp == Op::CreateCont || curOp == Op::Await)) {
     return nullptr;
   }

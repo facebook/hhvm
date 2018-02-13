@@ -733,6 +733,7 @@ public:
   void popSymbolicClassRef(OpEmitContext& ctx);
   void popEvalStackMMany();
   void popEvalStackMany(int len, char symFlavor);
+  void pushEvalStackMany(int len, char symFlavor);
   void popEvalStackCVMany(int len);
   void pushEvalStack(char symFlavor);
   void pushEvalStackFromOp(char symFlavor, OpEmitContext& ctx);
@@ -1090,6 +1091,7 @@ public:
     ErrorOnCell,
   };
   PassByRefKind getPassByRefKind(ExpressionPtr exp);
+  void emitPrePush(Emitter& e, ExpressionListPtr params);
   void emitCall(Emitter& e, FunctionCallPtr func,
                 ExpressionListPtr params, Offset fpiStart);
   void emitAGet(Emitter& e);
@@ -1234,7 +1236,7 @@ public:
   void emitGoto(Emitter& e, StringData* name, StatementPtr s);
 
   // InOut functions return a tuple of the return value and inout parameters.
-  void emitInOutReturn(Emitter& e);
+  bool emitInOutReturn(Emitter& e);
 
   // Emit the post-call stub the unpack the tuple returned by a call to an
   // inout function.
@@ -1503,6 +1505,7 @@ struct OpEmitContext {
 #define COUNT_C_MFINAL 0
 #define COUNT_V_MFINAL 0
 #define COUNT_FMANY 0
+#define COUNT_UFMANY 0
 #define COUNT_CVUMANY 0
 #define COUNT_CMANY 0
 #define COUNT_SMANY 0
@@ -1562,6 +1565,9 @@ struct OpEmitContext {
   getEmitterVisitor().popEvalStackMMany()
 #define POP_FMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
+#define POP_UFMANY \
+  getEmitterVisitor().popEvalStackMany(a1, StackSym::F); \
+  getEmitterVisitor().popEvalStackMany(a2 - 1, StackSym::C)
 #define POP_CVUMANY \
   getEmitterVisitor().popEvalStackCVMany(a1)
 #define POP_CMANY \
@@ -1708,6 +1714,7 @@ struct OpEmitContext {
   PUSH_##t2; \
   PUSH_##t1
 #define PUSH_INS_1(t) PUSH_INS_1_##t
+#define PUSH_CMANY getEmitterVisitor().pushEvalStackMany(a2, StackSym::C)
 
 #define PUSH_CV getEmitterVisitor().pushEvalStackFromOp(StackSym::C, ctx)
 #define PUSH_UV PUSH_CV
@@ -1940,6 +1947,7 @@ struct OpEmitContext {
 #undef POP_FV
 #undef POP_LREST
 #undef POP_FMANY
+#undef POP_UFMANY
 #undef POP_CVUMANY
 #undef POP_CMANY
 #undef POP_SMANY
@@ -2008,6 +2016,8 @@ struct OpEmitContext {
 #undef PUSH_TWO
 #undef PUSH_THREE
 #undef PUSH_FOUR
+#undef PUSH_INS_1
+#undef PUSH_CMANY
 #undef PUSH_CV
 #undef PUSH_UV
 #undef PUSH_CUV
@@ -2790,8 +2800,20 @@ void EmitterVisitor::emitJump(Emitter& e, IterVec& iters, Label& target) {
   }
 }
 
-void EmitterVisitor::emitInOutReturn(Emitter& e) {
-  if (!(m_curFunc->attrs & AttrTakesInOutParams)) return;
+bool EmitterVisitor::emitInOutReturn(Emitter& e) {
+  if (!(m_curFunc->attrs & AttrTakesInOutParams)) return false;
+  if (RuntimeOption::EvalUseMSRVForInOut) {
+    for (int i = m_curFunc->params.size() - 1; i >= 0; i--) {
+      auto const& p = m_curFunc->params[i];
+      if (!p.inout) continue;
+      emitVirtualLocal(i);
+      emitCGet(e);
+      if (p.typeConstraint.hasConstraint()) {
+        e.VerifyOutType(i);
+      }
+    }
+    return true;
+  }
   Id paramId = 0;
   int elems = 1;
   for (auto p : m_curFunc->params) {
@@ -2806,6 +2828,7 @@ void EmitterVisitor::emitInOutReturn(Emitter& e) {
     paramId++;
   }
   e.NewVecArray(elems);
+  return false;
 }
 
 void EmitterVisitor::emitReturn(Emitter& e, char sym, StatementPtr s) {
@@ -2823,11 +2846,12 @@ void EmitterVisitor::emitReturn(Emitter& e, char sym, StatementPtr s) {
         if (shouldEmitVerifyRetType()) {
           e.VerifyRetTypeC();
         }
-        emitInOutReturn(e);
+        auto retm = emitInOutReturn(e);
         // IterFree must come after VerifyRetType, because VerifyRetType may
         // throw, in which case any Iters will be freed by the fault funclet.
         emitIterFree(e, iters);
-        e.RetC();
+        if (retm) e.RetM(getEvalStack().size());
+        else e.RetC();
       } else {
         assert(sym == StackSym::V);
         if (shouldEmitVerifyRetType()) {
@@ -3232,9 +3256,10 @@ void EmitterVisitor::emitReturnTrampoline(Emitter& e,
         if (shouldEmitVerifyRetType()) {
           e.VerifyRetTypeC();
         }
-        emitInOutReturn(e);
+        auto retm = emitInOutReturn(e);
         emitIterFree(e, iters);
-        e.RetC();
+        if (retm) e.RetM(m_evalStack.size());
+        else e.RetC();
       } else {
         assert(sym == StackSym::V);
         emitVGet(e);
@@ -3725,6 +3750,12 @@ void EmitterVisitor::popEvalStackMMany() {
 void EmitterVisitor::popEvalStackMany(int len, char symFlavor) {
   for (int i = 0; i < len; ++i) {
     popEvalStack(symFlavor);
+  }
+}
+
+void EmitterVisitor::pushEvalStackMany(int len, char symFlavor) {
+  for (int i = 0; i < len; ++i) {
+    pushEvalStack(symFlavor);
   }
 }
 
@@ -4542,6 +4573,27 @@ bool isStructInit(ExpressionPtr init_expr,
 template<class F>
 void EmitterVisitor::emitUnpackInOutCall(Emitter& e, uint32_t nargs, F getArg) {
   emitConvertToCell(e);
+  if (RuntimeOption::EvalUseMSRVForInOut) {
+    auto const retVal = emitSetUnnamedL(e);
+    for (int i = 0; i < nargs; i++) {
+      assertx(m_evalStack.top() == StackSym::C);
+      m_evalStack.pop();
+      getArg(i);
+      emitClsIfSPropBase(e);
+      m_evalStack.push(StackSym::C);
+      emitSet(e);
+      emitPop(e);
+    }
+    // Explicitly not creating a fault region here to cover the unnamed local,
+    // none of the above instructions can throw, and hhbbc always optimizes it
+    // away as unreachable, this is problematic as exceptions thrown from the
+    // preceding FCallM will trigger this block (as FCallM is not paired with an
+    // UnboxR instruction).
+    emitVirtualLocal(retVal);
+    emitPushL(e);
+    m_curFunc->freeUnnamedLocal(retVal);
+    return;
+  }
   auto const start = m_ue.bcPos();
   auto const tempLocal = emitSetUnnamedL(e);
 
@@ -4592,6 +4644,21 @@ static void collect_written_variables(
   }
 }
 
+void EmitterVisitor::emitPrePush(Emitter& e, ExpressionListPtr params) {
+  if (!RuntimeOption::EvalUseMSRVForInOut || !params) return;
+
+  auto const numInOut = [&] {
+    uint32_t num = 0;
+    for (int i = 0; i < params->getCount(); i++) {
+      if ((*params)[i]->hasContext(Expression::InOutParameter)) num++;
+    }
+    return num;
+  }();
+  if (!numInOut) return;
+
+  for (int i = 0; i < numInOut; i++) e.NullUninit();
+}
+
 void EmitterVisitor::emitCall(Emitter& e,
                               FunctionCallPtr func,
                               ExpressionListPtr params,
@@ -4636,6 +4703,8 @@ void EmitterVisitor::emitCall(Emitter& e,
     }
   }
 
+  auto const callm = anyInOut && RuntimeOption::EvalUseMSRVForInOut;
+
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     for (int i = 0; i < numParams; i++) {
@@ -4653,9 +4722,11 @@ void EmitterVisitor::emitCall(Emitter& e,
   }
 
   if (unpack) {
-    e.FCallUnpack(numParams);
+    if (callm) e.FCallUnpackM(numParams, chains.size() + 1);
+    else e.FCallUnpack(numParams);
   } else {
-    e.FCall(numParams);
+    if (callm) e.FCallM(numParams, chains.size() + 1);
+    else e.FCall(numParams);
   }
 
   if (!chains.empty()) {
@@ -6272,12 +6343,13 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
   case Construct::KindOfObjectMethodExpression: {
     auto om = static_pointer_cast<ObjectMethodExpression>(node);
+    ExpressionListPtr params(om->getParams());
+    emitPrePush(e, params);
     // $obj->name(...)
     // ^^^^
     visit(om->getObject());
     m_tempLoc = om->getRange();
     emitConvertToCell(e);
-    ExpressionListPtr params(om->getParams());
     int numParams = params ? params->getCount() : 0;
 
     Offset fpiStart = 0;
@@ -8963,6 +9035,16 @@ void EmitterVisitor::emitFuncWrapper(PostponedMeth& p, FuncEmitter* fe,
   FuncFinisher ff(this, e, m_curFunc);
   Label topOfBody(e, Label::NoEntryNopFlag{});
 
+  int32_t numOut = 0;
+  for (auto& p : fe->params) {
+    if (isInOut) numOut += p.byRef ? 1 : 0;
+    else         numOut += p.inout ? 1 : 0;
+  }
+
+  auto const callm = !isInOut && RuntimeOption::EvalUseMSRVForInOut;
+
+  if (callm) for (int i = 0; i < numOut; i++) e.NullUninit();
+
   // If we wrap an inout function we may need to mangle its name on the fly
   std::vector<uint32_t> iovec;
   auto methName = [&] {
@@ -9016,13 +9098,22 @@ void EmitterVisitor::emitFuncWrapper(PostponedMeth& p, FuncEmitter* fe,
   }
 
   if (!fe->params.empty() && fe->params.back().variadic) {
-    e.FCallUnpack(fe->params.size());
+    if (callm) e.FCallUnpackM(fe->params.size(), numOut + 1);
+    else e.FCallUnpack(fe->params.size());
   } else {
-    e.FCall(fe->params.size());
+    if (callm) e.FCallM(fe->params.size(), numOut + 1);
+    else e.FCall(fe->params.size());
   }
-  e.UnboxRNop();
-  getReturn(e);
-  e.RetC();
+
+  if (isInOut && RuntimeOption::EvalUseMSRVForInOut) {
+    e.UnboxRNop();
+    getReturn(e);
+    e.RetM(numOut + 1);
+  } else {
+    if (!callm) e.UnboxRNop();
+    getReturn(e);
+    e.RetC();
+  }
 
   emitMethodDVInitializers(e, fe, meth, topOfBody);
 }
@@ -9054,7 +9145,9 @@ void EmitterVisitor::emitInOutToRefWrapper(PostponedMeth& p,
         emitVirtualLocal(iop);
         emitCGet(e);
       }
-      e.NewVecArray(inoutParams.size() + 1);
+      if (!RuntimeOption::EvalUseMSRVForInOut) {
+        e.NewVecArray(inoutParams.size() + 1);
+      }
     },
     true
   );
@@ -9675,8 +9768,8 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
     if (shouldEmitVerifyRetType()) {
       e.VerifyRetTypeC();
     }
-    emitInOutReturn(e);
-    e.RetC();
+    if (emitInOutReturn(e)) e.RetM(m_evalStack.size());
+    else e.RetC();
     e.setTempLocation(OptLocation());
   }
 
@@ -10487,6 +10580,8 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   ExpressionPtr nameExp = node->getNameExp();
   ExpressionListPtr params(paramsOverride ? paramsOverride :
                                             node->getParams());
+  emitPrePush(e, params);
+
   auto const nameStr = mangleInOutFuncName(
     nameOverride ? nameOverride : node->getOriginalName(), params
   );
@@ -12342,6 +12437,7 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
     RuntimeOption::EvalHackArrCompatTypeHintNotices;
   gd.HackArrCompatDVCmpNotices =
     RuntimeOption::EvalHackArrCompatDVCmpNotices;
+  gd.UseMSRVForInOut = RuntimeOption::EvalUseMSRVForInOut;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

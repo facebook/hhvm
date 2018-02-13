@@ -1582,6 +1582,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->m_func, 0);
   checkForDynamicCall(enterFnAr);
+  checkForRequiredCallM(enterFnAr);
   assert(vmfp()->func()->contains(vmpc()));
 
   if (useJit) {
@@ -3080,6 +3081,56 @@ OPTBLD_INLINE TCA iopRetV(PC& pc) {
   assert(!vmfp()->resumed());
   assert(!vmfp()->func()->isResumable());
   return ret(pc);
+}
+
+OPTBLD_INLINE TCA iopRetM(PC& pc, intva_t numRet) {
+  auto const jitReturn = jitReturnPre(vmfp());
+
+  req::vector<TypedValue> retvals;
+  retvals.reserve(numRet);
+
+  for (int i = numRet - 1; i >= 0; i--) {
+    retvals.push_back(*vmStack().indC(i));
+  }
+
+  vmStack().ndiscard(numRet);
+
+  // Free $this and local variables. Calls FunctionReturn hook. The return
+  // value must be removed from the stack, or the unwinder would try to free it
+  // if the hook throws---but the event hook routine decrefs the return value
+  // in that case if necessary.
+  frame_free_locals_inl(vmfp(), vmfp()->func()->numLocals(), &retvals[0]);
+
+  assertx(!vmfp()->func()->isGenerator() && !vmfp()->func()->isAsync());
+
+  if (isProfileRequest()) {
+    profileIncrementFuncCounter(vmfp()->func());
+  }
+
+  // Grab caller info from ActRec.
+  ActRec* sfp = vmfp()->sfp();
+  Offset soff = vmfp()->m_soff;
+
+  // Free ActRec and store the return value.
+  vmStack().ndiscard(vmfp()->func()->numSlotsInFrame());
+  vmStack().ret();
+
+  // Discard scratch space for return values allocated for FCallM
+  vmStack().ndiscard(numRet - 1);
+  *vmStack().topTV() = retvals[1];
+
+  for (int i = 2; i < numRet; i++) {
+    *vmStack().allocTV() = retvals[i];
+  }
+
+  // Store the actual return value at the top of the stack
+  *vmStack().allocTV() = retvals[0];
+
+  // Return control to the caller.
+  vmfp() = sfp;
+  pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
+
+  return jitReturnPost(jitReturn);
 }
 
 OPTBLD_INLINE void iopUnwind() {
@@ -5149,6 +5200,7 @@ bool doFCall(ActRec* ar, PC& pc) {
     return false;
   }
   checkForDynamicCall(ar);
+  checkForRequiredCallM(ar);
   return true;
 }
 
@@ -5308,6 +5360,7 @@ static bool doFCallArray(PC& pc, int numStackValues,
     return false;
   }
   checkForDynamicCall(ar);
+  checkForRequiredCallM(ar);
   return true;
 }
 
@@ -5334,6 +5387,25 @@ OPTBLD_INLINE void iopFCallUnpack(PC& pc, intva_t numArgs) {
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
   doFCallArray(pc, numArgs, CallArrOnInvalidContainer::WarnAndContinue);
+}
+
+OPTBLD_FLT_INLINE
+void iopFCallM(PC& pc, intva_t numArgs, intva_t /* numRet */) {
+  arFromSp(numArgs)->setFCallM();
+  iopFCall(pc, numArgs);
+}
+
+OPTBLD_FLT_INLINE
+void iopFCallDM(PC& pc, intva_t numArgs, intva_t /* numRet */,
+                const StringData* clsName, const StringData* funcName) {
+  arFromSp(numArgs)->setFCallM();
+  iopFCallD(pc, numArgs, clsName, funcName);
+}
+
+OPTBLD_INLINE void iopFCallUnpackM(PC& pc, intva_t numArgs,
+                                   intva_t /* numRet */) {
+  arFromSp(numArgs)->setFCallM();
+  iopFCallUnpack(pc, numArgs);
 }
 
 OPTBLD_INLINE void iopCufSafeArray() {
@@ -6689,6 +6761,12 @@ TCA iopWrapper(Op, TCA(*fn)(PC& pc), PC& pc) {
 }
 
 OPTBLD_INLINE static
+TCA iopWrapper(Op, TCA(*fn)(PC& pc, intva_t), PC& pc) {
+  auto n = decode_intva(pc);
+  return fn(pc, n);
+}
+
+OPTBLD_INLINE static
 TCA iopWrapper(Op, TCA(*fn)(PC& pc, LocalRange locals), PC& pc) {
   auto n = decodeLocalRange(pc);
   return fn(pc, n);
@@ -6928,6 +7006,14 @@ OPTBLD_INLINE static TCA
 iopWrapper(Op /*op*/, void (*fn)(PC&, intva_t), PC& pc) {
   auto n = decode_intva(pc);
   fn(pc, n);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA
+iopWrapper(Op /*op*/, void (*fn)(PC&, intva_t, intva_t), PC& pc) {
+  auto n1 = decode_intva(pc);
+  auto n2 = decode_intva(pc);
+  fn(pc, n1, n2);
   return nullptr;
 }
 
@@ -7325,6 +7411,18 @@ iopWrapper(Op /*op*/,
   auto s1 = decode_litstr(pc);
   auto s2 = decode_litstr(pc);
   fn(pc, n, s1, s2);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA
+iopWrapper(Op /*op*/,
+           void (*fn)(PC&,intva_t,intva_t,const StringData*,const StringData*),
+           PC& pc) {
+  auto n1 = decode_intva(pc);
+  auto n2 = decode_intva(pc);
+  auto s1 = decode_litstr(pc);
+  auto s2 = decode_litstr(pc);
+  fn(pc, n1, n2, s1, s2);
   return nullptr;
 }
 

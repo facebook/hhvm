@@ -1598,6 +1598,14 @@ RetV    [V]  ->  []
   Return a ref. Returns $1 to the caller. This instruction may not be used
   inside fault funclets, async functions and generators.
 
+RetM <num returns> [C..C] -> []
+
+  RetM is a variant of RetC that allows multiple cells to be returned. The RetM
+  bytecode must be the only form of return used in a single function, and all
+  callers must used FCallM, FCallDM, or FCallUnpackM to invoke the function.
+  Lastly, the number of arguments expected by the FCallM instruction must match
+  the number returned by RetM.
+
 Unwind    []  ->  []
 
   Unwind. Transfers control back to the unwinder. This instruction may only be
@@ -2368,6 +2376,16 @@ FCallUnpack <num params> [F..F] -> [R]
 
   When the callee returns, it will transfer the return value onto the caller's
   evaluation stack using the R flavor.
+
+FCallM <num params> <num returns> [F..F] -> [C..C]
+FCallDM <num params> <num returns> <class name> <func name> [F..F] -> [C..C]
+FCallUnpackM <num params> <num returns> [F..F] -> [C..C]
+
+  These "M" variants of FCall behave similarly to FCall, FCallD, and FCallUnpack
+  respectively. These instructions must be used iff the callee returns via the
+  RetM bytecode. The callee may only return cell values, and the number of
+  values returned via RetM must match the number expected by the FCallM
+  instruction.
 
 FCallBuiltin  <total params> <passed params> <litstr id> [C|V|U..C|V|U]  -> [R]
 

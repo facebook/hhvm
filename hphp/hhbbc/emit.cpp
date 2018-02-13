@@ -616,7 +616,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       end_fpi(startOffset);
     };
 
-    auto ret_assert = [&] { assert(currentStackDepth == 1); };
+    auto ret_assert = [&] { assert(currentStackDepth == inst.numPop()); };
 
     auto defcls_impl = [&] (const uint32_t& id, bool closure) {
       if (euState.classOffsets[id] != kInvalidOffset) {
@@ -693,6 +693,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_CMANY      pop(data.arg##1);
 #define POP_SMANY      pop(data.keys.size());
 #define POP_FMANY      pop(data.arg##1);
+#define POP_UFMANY     pop(data.arg##1 + data.arg##2 - 1);
 #define POP_CVUMANY    pop(data.arg##1);
 
 #define PUSH_NOV
@@ -700,6 +701,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define PUSH_TWO(x, y)         push(2);
 #define PUSH_THREE(x, y, z)    push(3);
 #define PUSH_INS_1(x)          push(1);
+#define PUSH_CMANY             push(data.arg2);
 
 #define O(opcode, imms, inputs, outputs, flags)         \
     auto emit_##opcode = [&] (const bc::opcode& data) { \
@@ -759,6 +761,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef POP_CMANY
 #undef POP_SMANY
 #undef POP_FMANY
+#undef POP_UFMANY
 #undef POP_CVUMANY
 #undef POP_MFINAL
 #undef POP_F_MFINAL
@@ -770,6 +773,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef PUSH_TWO
 #undef PUSH_THREE
 #undef PUSH_INS_1
+#undef PUSH_CMANY
 
 #define O(opcode, ...)                                        \
     case Op::opcode:                                          \

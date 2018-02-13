@@ -240,7 +240,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     auto const curUnit = fp->func()->unit();
     auto const curOp = curUnit->getOp(pc);
     auto const isReturning =
-      curOp == Op::RetC || curOp == Op::RetV ||
+      curOp == Op::RetC || curOp == Op::RetV || curOp == Op::RetM ||
       curOp == Op::CreateCont || curOp == Op::Await ||
       fp->localsDecRefd();
 
@@ -535,7 +535,7 @@ void CompactTrace::Key::insert(const ActRec* fp, int32_t prevPc) {
   auto const curUnit = fp->func()->unit();
   auto const curOp = curUnit->getOp(prevPc);
   auto const isReturning =
-    curOp == Op::RetC || curOp == Op::RetV ||
+    curOp == Op::RetC || curOp == Op::RetV || curOp == Op::RetM ||
     curOp == Op::CreateCont || curOp == Op::Await ||
     fp->localsDecRefd();
   m_frames.push_back(Frame{

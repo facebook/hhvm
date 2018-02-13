@@ -100,6 +100,10 @@ struct ActRec {
   enum Flags : uint32_t {
     None          = 0,
 
+    // Set if the function was called using one of the FCallM instructions and
+    // must return a value via RetM.
+    MultiReturn = (1u << 26),
+
     // Set if this corresponds to a dynamic call
     DynamicCall = (1u << 27),
 
@@ -119,11 +123,11 @@ struct ActRec {
     // MayNeedStaticWaitHandle, if neither bit is set.
   };
 
-  static constexpr int kNumArgsBits = 27;
+  static constexpr int kNumArgsBits = 26;
   static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
   static constexpr int kFlagsMask = ~kNumArgsMask;
   static constexpr int kExecutionModeMask =
-    ~(LocalsDecRefd | UseWeakTypes | DynamicCall);
+    ~(LocalsDecRefd | UseWeakTypes | DynamicCall | MultiReturn);
 
   /*
    * To conserve space, we use unions for pairs of mutually exclusive fields
@@ -191,6 +195,7 @@ struct ActRec {
   bool mayNeedStaticWaitHandle() const;
   bool magicDispatch() const;
   bool isDynamicCall() const;
+  bool isFCallM() const;
 
   /*
    * Pack `numArgs' and `flags' into the format expected by m_numArgsAndFlags.
@@ -214,6 +219,7 @@ struct ActRec {
   void setResumed();
   void setFCallAwait();
   void setDynamicCall();
+  void setFCallM();
 
   /*
    * Set or clear both m_invName and the MagicDispatch flag.

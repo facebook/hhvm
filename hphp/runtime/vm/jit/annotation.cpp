@@ -165,12 +165,18 @@ const void annotate(NormalizedInstruction* i,
 void annotate(NormalizedInstruction* i) {
   switch (i->op()) {
   case Op::FCall:
+  case Op::FCallM:
     annotate(i, nullptr, nullptr);
     break;
   case Op::FCallD:
     annotate(i,
              i->m_unit->lookupLitstrId(i->imm[1].u_SA),
              i->m_unit->lookupLitstrId(i->imm[2].u_SA));
+    break;
+  case Op::FCallDM:
+    annotate(i,
+             i->m_unit->lookupLitstrId(i->imm[2].u_SA),
+             i->m_unit->lookupLitstrId(i->imm[3].u_SA));
     break;
   default:
     break;

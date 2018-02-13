@@ -756,6 +756,9 @@ struct RuntimeOption {
   F(bool, ReffinessInvariance, false)                                   \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
   F(std::string, PreludePath, "")                                       \
+  /* Use the CallM/RetM ABI to return multiple values via the stack for \
+     inout functions */                                                 \
+  F(bool, UseMSRVForInOut, true)                                        \
   F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \
   F(std::string, UseRemoteUnixServer, "no")                             \
   F(std::string, UnixServerPath, "")                                    \

@@ -748,6 +748,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][4] = {
   #define NOV { },
   #define FMANY { },
+  #define UFMANY { },
   #define CVUMANY { },
   #define CMANY { },
   #define SMANY { },
@@ -767,6 +768,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef C_MFINAL
   #undef V_MFINAL
   #undef FMANY
+  #undef UFMANY
   #undef CVUMANY
   #undef CMANY
   #undef SMANY
@@ -799,12 +801,22 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = i == n - 1 ? VV : CRV;
     }
     return m_tmp_sig;
-  case Op::FCall:       // ONE(IVA),            FMANY,   ONE(RV)
-  case Op::FCallD:      // THREE(IVA,SA,SA),    FMANY,   ONE(RV)
-  case Op::FCallAwait:  // THREE(IVA,SA,SA),    FMANY,   ONE(CV)
-  case Op::FCallUnpack: // ONE(IVA),            FMANY,   ONE(RV)
-  case Op::FCallArray:  // NA,                  ONE(FV), ONE(RV)
+  case Op::FCall:        // ONE(IVA),            FMANY,   ONE(RV)
+  case Op::FCallD:       // THREE(IVA,SA,SA),    FMANY,   ONE(RV)
+  case Op::FCallAwait:   // THREE(IVA,SA,SA),    FMANY,   ONE(CV)
+  case Op::FCallUnpack:  // ONE(IVA),            FMANY,   ONE(RV)
+  case Op::FCallArray:   // NA,                  ONE(FV), ONE(RV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+      m_tmp_sig[i] = FV;
+    }
+    return m_tmp_sig;
+  case Op::FCallM:       // TWO(IVA,IVA),        UFMANY,   CMANY
+  case Op::FCallDM:      // FOUR(IVA,IVA,SA,SA), UFMANY,   CMANY
+  case Op::FCallUnpackM: // TWO(IVA,IVA),        UFMANY,   CMANY
+    for (int i = 0, n = getImm(pc, 1).u_IVA - 1; i < n; ++i) {
+      m_tmp_sig[i] = UV;
+    }
+    for (int i = getImm(pc, 1).u_IVA - 1, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
     }
     return m_tmp_sig;
@@ -826,6 +838,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::NewKeysetArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewVArray:       // ONE(IVA),     CMANY,   ONE(CV)
   case Op::ConcatN:         // ONE(IVA),     CMANY,   ONE(CV)
+  case Op::RetM:            // ONE(IVA),     CMANY,   NA
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CV;
     }
@@ -879,7 +892,10 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
 
 bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
   StackTransInfo info = instrStackTransInfo(pc);
-  int min = cur->fpilen > 0 ? cur->fpi[cur->fpilen - 1].stkmin : 0;
+  auto fpiAdj = isFCallStar(peek_op(pc)) ? 2 : 1;
+  int min = cur->fpilen > fpiAdj - 1
+    ? cur->fpi[cur->fpilen - fpiAdj].stkmin
+    : 0;
   if (info.numPops > 0 && cur->stklen - info.numPops < min) {
     reportStkUnderflow(b, *cur, pc);
     cur->stklen = 0;
@@ -989,7 +1005,10 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* /*b*/) {
              fpi.next, push_params);
       ok = false;
     }
-    if (cur->stklen != fpi.stkmin) {
+    auto const adjust =
+      op == OpFCallM || op == OpFCallDM || op == OpFCallUnpackM
+      ? getImm(pc, 1).u_IVA - 1 : 0;
+    if (cur->stklen != fpi.stkmin - adjust) {
       error("%s", "FCall didn't consume the proper param count\n");
       ok = false;
     }
@@ -1479,6 +1498,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   static const FlavorDesc outputSigs[][4] = {
   #define NOV { },
   #define FMANY { },
+  #define UFMANY { },
   #define CMANY { },
   #define SMANY { },
   #define ONE(a) { a },
@@ -1490,6 +1510,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     OPCODES
   #undef O
   #undef FMANY
+  #undef UFMANY
   #undef CMANY
   #undef SMANY
   #undef INS_1
@@ -1519,6 +1540,11 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     cur->stklen += pushes;
     if (op == Op::BaseSC || op == Op::BaseSL) {
       if (pushes == 1) outs[0] = outs[1];
+    } else if (op == Op::FCallM || op == Op::FCallDM ||
+               op == Op::FCallUnpackM) {
+      for (int i = 0; i < pushes; ++i) {
+        outs[i] = CV;
+      }
     } else {
       for (int i = 0; i < pushes; ++i) {
         outs[i] = outputSigs[size_t(op)][i];
@@ -1551,7 +1577,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     cur->mbr_mode.clear();
   }
 
-  if (cur->fpilen > 0 && (op == Op::RetC || op == Op::RetV ||
+  if (cur->fpilen > 0 && (op == Op::RetC || op == Op::RetV || op == Op::RetM ||
                           op == Op::Unwind || op == Op::Throw)) {
     error("%s instruction encountered inside of FPI region\n",
           opcodeToName(op));

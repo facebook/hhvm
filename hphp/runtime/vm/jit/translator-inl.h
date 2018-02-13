@@ -66,6 +66,7 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
     case Op::FCallAwait:
     case Op::RetC:
     case Op::RetV:
+    case Op::RetM:
     case Op::Exit:
     case Op::Fatal:
     case Op::IterNext:
@@ -92,6 +93,9 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
     case Op::FCallD:
     case Op::FCallArray:
     case Op::FCallUnpack:
+    case Op::FCallM:
+    case Op::FCallDM:
+    case Op::FCallUnpackM:
     case Op::ContEnter:
     case Op::ContRaise:
     case Op::ContEnterDelegate:

@@ -260,6 +260,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     gd.HackArrCompatTypeHintNotices;
   RuntimeOption::EvalHackArrCompatDVCmpNotices =
     gd.HackArrCompatDVCmpNotices;
+  RuntimeOption::EvalUseMSRVForInOut = gd.UseMSRVForInOut;
 
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
@@ -336,6 +337,8 @@ void write_global_data(
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     gd.ConstantFunctions.push_back(elm);
   }
+  gd.UseMSRVForInOut = RuntimeOption::EvalUseMSRVForInOut;
+
   globalArrayTypeTable().repopulate(*arrTable);
   // NOTE: There's no way to tell if saveGlobalData() fails for some reason.
   Repo::get().saveGlobalData(gd);

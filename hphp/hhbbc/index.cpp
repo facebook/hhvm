@@ -4534,29 +4534,43 @@ void Index::refine_local_static_types(
 }
 
 void Index::init_return_type(const php::Func* func) {
-  if (func->attrs & (AttrReference | AttrBuiltin | AttrTakesInOutParams) ||
-      func->isMemoizeWrapper) {
+  if (func->attrs & (AttrReference | AttrBuiltin) || func->isMemoizeWrapper) {
     return;
   }
 
-  auto const constraint = func->retTypeConstraint;
-  if (constraint.isSoft() ||
-      (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis())) {
-    return;
-  }
+  auto make_type = [&] (const TypeConstraint& tc) {
+    if (tc.isSoft() ||
+        (RuntimeOption::EvalThisTypeHintLevel != 3 && tc.isThis())) {
+      return TBottom;
+    }
+    return loosen_dvarrayness(
+      lookup_constraint(
+        Context {
+          func->unit,
+            const_cast<php::Func*>(func),
+            func->cls && func->cls->closureContextCls ?
+            func->cls->closureContextCls : func->cls
+            },
+        tc)
+    );
+  };
 
   auto const finfo = create_func_info(*m_data, func);
 
-  auto tcT = loosen_dvarrayness(
-    lookup_constraint(
-      Context {
-        func->unit,
-          const_cast<php::Func*>(func),
-          func->cls && func->cls->closureContextCls ?
-          func->cls->closureContextCls : func->cls
-          },
-      constraint)
-  );
+  auto tcT = make_type(func->retTypeConstraint);
+  if (tcT == TBottom) return;
+
+  if (func->attrs & AttrTakesInOutParams) {
+    std::vector<Type> types;
+    types.emplace_back(intersection_of(TInitCell, std::move(tcT)));
+    for (auto& p : func->params) {
+      if (!p.inout) continue;
+      auto t = make_type(p.typeConstraint);
+      if (t == TBottom) return;
+      types.emplace_back(intersection_of(TInitCell, std::move(t)));
+    }
+    tcT = vec(std::move(types));
+  }
 
   if (!tcT.subtypeOf(TCell)) {
     tcT = TInitCell;

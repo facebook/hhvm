@@ -397,6 +397,7 @@ int instrNumPops(PC pc) {
 #define C_MFINAL -5
 #define V_MFINAL C_MFINAL
 #define FMANY -3
+#define UFMANY -4
 #define CVUMANY -3
 #define CMANY -3
 #define SMANY -1
@@ -412,6 +413,7 @@ int instrNumPops(PC pc) {
 #undef C_MFINAL
 #undef V_MFINAL
 #undef FMANY
+#undef UFMANY
 #undef CVUMANY
 #undef CMANY
 #undef SMANY
@@ -425,6 +427,9 @@ int instrNumPops(PC pc) {
   // FCall, NewPackedArray, and some final member operations specify how many
   // values are popped in their first immediate
   if (n == -3) return getImm(pc, 0).u_IVA;
+  // FCallM, FCallDM, and FCallUnpackM pop uninit values from the stack and
+  // push multiple returned values.
+  if (n == -4) return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA - 1;
   // FPassM final operations have paramId as imm 0 and stackCount as imm1
   if (n == -6) return getImm(pc, 1).u_IVA;
   // Other final member operations pop their first immediate + 1
@@ -451,6 +456,7 @@ int instrNumPushes(PC pc) {
 #define THREE(...) 3
 #define FOUR(...) 4
 #define INS_1(...) 0
+#define CMANY -1
 #define O(name, imm, pop, push, flags) push,
     OPCODES
 #undef NOV
@@ -459,10 +465,16 @@ int instrNumPushes(PC pc) {
 #undef THREE
 #undef FOUR
 #undef INS_1
+#undef CMANY
 #undef O
   };
   auto const op = peek_op(pc);
-  return numberOfPushes[size_t(op)];
+  int n = numberOfPushes[size_t(op)];
+
+  // The FCallM call flavors push a tuple of arguments onto the stack
+  if (n == -1) return getImm(pc, 1).u_IVA;
+
+  return n;
 }
 
 namespace {
@@ -477,6 +489,11 @@ FlavorDesc doFlavor(uint32_t i, FlavorDesc f, Args&&... args) {
 FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
   always_assert(i < uint32_t(instrNumPops(op)));
   return flavor;
+}
+
+FlavorDesc ufFlavor(PC op, uint32_t i) {
+  always_assert(i < uint32_t(instrNumPops(op)));
+  return i < getImm(op, 0).u_IVA ? FV : UV;
 }
 
 }
@@ -495,6 +512,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define C_MFINAL return idx == 0 ? CV : CRV;
 #define V_MFINAL return idx == 0 ? VV : CRV;
 #define FMANY return manyFlavor(op, idx, FV);
+#define UFMANY return ufFlavor(op, idx);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);
@@ -513,6 +531,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef C_MFINAL
 #undef V_MFINAL
 #undef FMANY
+#undef UFMANY
 #undef CVUMANY
 #undef CMANY
 #undef SMANY
@@ -526,6 +545,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #define TWO(...) StackTransInfo::Kind::PushPop
 #define THREE(...) StackTransInfo::Kind::PushPop
 #define FOUR(...) StackTransInfo::Kind::PushPop
+#define CMANY StackTransInfo::Kind::PushPop
 #define INS_1(...) StackTransInfo::Kind::InsertMid
 #define O(name, imm, pop, push, flags) push,
     OPCODES
@@ -535,6 +555,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #undef THREE
 #undef FOUR
 #undef INS_1
+#undef CMANY
 #undef O
   };
   static const int8_t peekPokeType[] = {
@@ -543,6 +564,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #define TWO(...) -1
 #define THREE(...) -1
 #define FOUR(...) -1
+#define CMANY -1
 #define INS_1(...) 0
 #define O(name, imm, pop, push, flags) push,
     OPCODES
@@ -552,6 +574,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #undef THREE
 #undef FOUR
 #undef INS_1
+#undef CMANY
 #undef O
   };
   StackTransInfo ret;

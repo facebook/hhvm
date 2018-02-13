@@ -495,6 +495,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(SSwitch,         ONE(SLA),         ONE(CV),         NOV,        CF_TF) \
   O(RetC,            NA,               ONE(CV),         NOV,        CF_TF) \
   O(RetV,            NA,               ONE(VV),         NOV,        CF_TF) \
+  O(RetM,            ONE(IVA),         CMANY,           NOV,        CF_TF) \
   O(Unwind,          NA,               NOV,             NOV,        TF) \
   O(Throw,           NA,               ONE(CV),         NOV,        TF) \
   O(CGetL,           ONE(LA),          NOV,             ONE(CV),    NF) \
@@ -600,6 +601,9 @@ constexpr uint32_t kMaxConcatN = 4;
   O(RaiseFPassWarning, THREE(OA(FPassHint),SA,IVA),                     \
                                        NOV,             NOV,        NF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
+  O(FCallM,          TWO(IVA,IVA),     UFMANY,          CMANY,      CF_FF) \
+  O(FCallDM,         FOUR(IVA,IVA,SA,SA),UFMANY,        CMANY,      CF_FF) \
+  O(FCallUnpackM,    TWO(IVA,IVA),     UFMANY,          CMANY,      CF_FF) \
   O(FCallAwait,      THREE(IVA,SA,SA), FMANY,           ONE(CV),    CF_FF) \
   O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
   O(FCallUnpack,     ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
@@ -1048,6 +1052,9 @@ inline bool isFCallStar(Op opcode) {
     case Op::FCallAwait:
     case Op::FCallArray:
     case Op::FCallUnpack:
+    case Op::FCallM:
+    case Op::FCallDM:
+    case Op::FCallUnpackM:
       return true;
     default:
       return false;
@@ -1073,7 +1080,7 @@ inline bool isFPassStar(Op opcode) {
 }
 
 constexpr bool isRet(Op op) {
-  return op == OpRetC || op == OpRetV;
+  return op == OpRetC || op == OpRetV || op == OpRetM;
 }
 
 constexpr bool isReturnish(Op op) {
@@ -1173,7 +1180,7 @@ inline MOpMode finalMemberOpMode(Op op) {
 constexpr bool instrCanHalt(Op op) {
   return op == OpRetC || op == OpRetV || op == OpNativeImpl ||
          op == OpAwait || op == OpAwaitAll || op == OpCreateCont ||
-         op == OpYield || op == OpYieldK ||
+         op == OpYield || op == OpYieldK || op == OpRetM ||
          op == OpYieldFromDelegate;
 }
 

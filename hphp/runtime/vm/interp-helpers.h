@@ -72,6 +72,15 @@ inline void checkForDynamicCall(const ActRec* ar) {
   }
 }
 
+inline void checkForRequiredCallM(const ActRec* ar) {
+  if (!RuntimeOption::EvalUseMSRVForInOut) return;
+  if (!ar->func()->takesInOutParams()) return;
+
+  if (!ar->isFCallM()) {
+    raise_error("In/out function called dynamically without inout annotations");
+  }
+}
+
 /*
  * This helper only does a stack overflow check for the native stack.
  * Both native and VM stack overflows are independently possible.

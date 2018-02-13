@@ -1525,6 +1525,14 @@ void in(ISS& env, const bc::RetC& /*op*/) {
 void in(ISS& env, const bc::RetV& /*op*/) {
   doRet(env, popV(env), false);
 }
+void in(ISS& env, const bc::RetM& op) {
+  std::vector<Type> ret(op.arg1);
+  for (int i = 0; i < op.arg1; i++) {
+    ret[op.arg1 - i - 1] = popC(env);
+  }
+  doRet(env, vec(std::move(ret)), false);
+}
+
 void in(ISS& /*env*/, const bc::Unwind& /*op*/) {}
 void in(ISS& env, const bc::Throw& /*op*/) {
   popC(env);
@@ -3027,10 +3035,24 @@ void in(ISS& env, const bc::FPassCE& op) {
   fpassCXHelper(env, op.arg1, true, op.subop2);
 }
 
-void pushCallReturnType(ISS& env, Type&& ty) {
+constexpr int32_t kNoUnpack = -1;
+
+void pushCallReturnType(ISS& env, Type&& ty, int32_t unpack = kNoUnpack) {
   if (ty == TBottom) {
     // The callee function never returns.  It might throw, or loop forever.
     unreachable(env);
+  }
+  if (unpack != kNoUnpack) {
+    for (auto i = uint32_t{0}; i < unpack - 1; ++i) popU(env);
+    if (is_specialized_vec(ty)) {
+      for (int32_t i = 1; i < unpack; i++) {
+        push(env, vec_elem(ty, ival(i)).first);
+      }
+      push(env, vec_elem(ty, ival(0)).first);
+    } else {
+      for (int32_t i = 0; i < unpack; i++) push(env, TInitCell);
+    }
+    return;
   }
   return push(env, std::move(ty));
 }
@@ -3038,36 +3060,42 @@ void pushCallReturnType(ISS& env, Type&& ty) {
 const StaticString s_defined { "defined" };
 const StaticString s_function_exists { "function_exists" };
 
-void fcallKnownImpl(ISS& env, uint32_t numArgs) {
+void fcallKnownImpl(ISS& env, uint32_t numArgs, int32_t unpack = kNoUnpack) {
   auto const ar = fpiTop(env);
   always_assert(ar.func.hasValue());
 
   if (options.ConstantFoldBuiltins && ar.foldable) {
-    auto ty = [&] () {
-      auto const func = ar.func->exactFunc();
-      assertx(func);
-      if (func->attrs & AttrBuiltin && func->attrs & AttrIsFoldable) {
-        auto ret = const_fold(env, numArgs, *ar.func);
-        return ret ? *ret : TBottom;
-      }
-      std::vector<Type> args(numArgs);
-      for (auto i = uint32_t{0}; i < numArgs; ++i) {
-        args[numArgs - i - 1] = scalarize(topT(env, i));
-      }
+    if (unpack == kNoUnpack) {
+      auto ty = [&] () {
+        auto const func = ar.func->exactFunc();
+        assertx(func);
+        if (func->attrs & AttrBuiltin && func->attrs & AttrIsFoldable) {
+          auto ret = const_fold(env, numArgs, *ar.func);
+          return ret ? *ret : TBottom;
+        }
+        std::vector<Type> args(numArgs);
+        for (auto i = uint32_t{0}; i < numArgs; ++i) {
+          args[numArgs - i - 1] = scalarize(topT(env, i));
+        }
 
-      return env.index.lookup_foldable_return_type(
-        env.ctx, func, std::move(args));
-    }();
-    if (auto v = tv(ty)) {
-      std::vector<Bytecode> repl { numArgs, bc::PopC {} };
-      repl.push_back(gen_constant(*v));
-      repl.push_back(bc::RGetCNop {});
-      fpiPop(env);
-      return reduce(env, std::move(repl));
+        return env.index.lookup_foldable_return_type(
+          env.ctx, func, std::move(args));
+      }();
+      if (auto v = tv(ty)) {
+        std::vector<Bytecode> repl { numArgs, bc::PopC {} };
+        repl.push_back(gen_constant(*v));
+        repl.push_back(bc::RGetCNop {});
+        fpiPop(env);
+        return reduce(env, std::move(repl));
+      }
     }
     fpiNotFoldable(env);
     fpiPop(env);
     discard(env, numArgs);
+    if (unpack != kNoUnpack) {
+      while (unpack--) push(env, TBottom);
+      return;
+    }
     return push(env, TBottom);
   }
 
@@ -3101,14 +3129,14 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs) {
     *ar.func
   );
   if (!ar.fallbackFunc) {
-    pushCallReturnType(env, std::move(ty));
+    pushCallReturnType(env, std::move(ty), unpack);
     return;
   }
   auto ty2 = env.index.lookup_return_type(
     CallContext { env.ctx, args, ar.context },
     *ar.fallbackFunc
   );
-  pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)));
+  pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)), unpack);
 }
 
 void in(ISS& env, const bc::FCall& op) {
@@ -3175,8 +3203,9 @@ void in(ISS& env, const bc::FCallD& op) {
     return finish_builtin(env, ar.func->exactFunc(), op.arg1, false);
   }
   if (ar.func) return fcallKnownImpl(env, op.arg1);
-  specialFunctionEffects(env, ar);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
+  fpiPop(env);
+  specialFunctionEffects(env, ar);
   push(env, TInitGen);
 }
 
@@ -3204,9 +3233,10 @@ void in(ISS& env, const bc::FCallAwait& op) {
        bc::Await {});
 }
 
-void fcallArrayImpl(ISS& env, int arg) {
+void fcallArrayImpl(ISS& env, int arg, int32_t unpack = kNoUnpack) {
   auto const ar = fpiTop(env);
   if (ar.kind == FPIKind::Builtin) {
+    always_assert(unpack == kNoUnpack);
     return finish_builtin(env, ar.func->exactFunc(), arg, true);
   }
   if (ar.foldable) {
@@ -3221,11 +3251,16 @@ void fcallArrayImpl(ISS& env, int arg) {
   if (ar.func) {
     auto ty = env.index.lookup_return_type(env.ctx, *ar.func);
     if (!ar.fallbackFunc) {
-      pushCallReturnType(env, std::move(ty));
+      pushCallReturnType(env, std::move(ty), unpack);
       return;
     }
     auto ty2 = env.index.lookup_return_type(env.ctx, *ar.fallbackFunc);
-    pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)));
+    pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)), unpack);
+    return;
+  }
+  if (unpack != kNoUnpack) {
+    for (int i = 0; i < unpack - 1; i++) popU(env);
+    while (unpack--) push(env, TInitCell);
     return;
   }
   return push(env, TInitGen);
@@ -3237,6 +3272,73 @@ void in(ISS& env, const bc::FCallArray& /*op*/) {
 
 void in(ISS& env, const bc::FCallUnpack& op) {
   fcallArrayImpl(env, op.arg1);
+}
+
+void in(ISS& env, const bc::FCallM& op) {
+  auto const ar = fpiTop(env);
+  if (ar.func && !ar.fallbackFunc) {
+    switch (ar.kind) {
+    case FPIKind::Unknown:
+    case FPIKind::CallableArr:
+    case FPIKind::ObjInvoke:
+    case FPIKind::Builtin:
+    case FPIKind::Ctor:
+      not_reached();
+    case FPIKind::Func:
+      return reduce(
+        env,
+        bc::FCallDM { op.arg1, op.arg2, s_empty.get(), ar.func->name() }
+      );
+      break;
+    case FPIKind::ObjMeth:
+    case FPIKind::ClsMeth:
+      if (ar.cls.hasValue() && ar.func->cantBeMagicCall()) {
+        return reduce(
+          env,
+          bc::FCallDM { op.arg1, op.arg2, ar.cls->name(), ar.func->name() }
+        );
+      }
+
+      // If we didn't return a reduce above, we still can compute a
+      // partially-known FCall effect with our res::Func.
+      return fcallKnownImpl(env, op.arg1, op.arg2);
+    }
+  }
+
+  for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
+  fpiPop(env);
+  specialFunctionEffects(env, ar);
+  for (auto i = uint32_t{0}; i < op.arg2 - 1; ++i) popU(env);
+  for (auto i = uint32_t{0}; i < op.arg2; ++i) push(env, TInitCell);
+}
+
+void in(ISS& env, const bc::FCallDM& op) {
+  auto const ar = fpiTop(env);
+  if ((ar.func && ar.func->name() != op.str4) ||
+      (ar.cls && ar.cls->name() != op.str3)) {
+    // We've found a more precise type for the call, so update it
+    return reduce(
+      env,
+      bc::FCallDM {
+        op.arg1,
+        op.arg2,
+        ar.cls ? ar.cls->name() : s_empty.get(),
+        ar.func->name()
+      }
+    );
+  }
+  always_assert(ar.kind != FPIKind::Builtin);
+  if (ar.func) return fcallKnownImpl(env, op.arg1, op.arg2);
+
+  for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
+  fpiPop(env);
+  specialFunctionEffects(env, ar);
+  for (auto i = uint32_t{0}; i < op.arg2 - 1; ++i) popU(env);
+  for (auto i = uint32_t{0}; i < op.arg2; ++i) push(env, TInitCell);
+}
+
+void in(ISS& env, const bc::FCallUnpackM& op) {
+  fcallArrayImpl(env, op.arg1, op.arg2);
 }
 
 void in(ISS& env, const bc::CufSafeArray&) {

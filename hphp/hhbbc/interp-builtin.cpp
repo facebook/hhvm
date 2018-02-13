@@ -378,7 +378,8 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
 
 bool can_emit_builtin(borrowed_ptr<const php::Func> func,
                       int numArgs, bool hasUnpack) {
-  if (func->attrs & (AttrInterceptable | AttrNoFCallBuiltin) ||
+  if (func->attrs & (AttrInterceptable | AttrNoFCallBuiltin |
+                     AttrTakesInOutParams) ||
       func->cls ||
       !func->nativeInfo ||
       func->params.size() >= Native::maxFCallBuiltinArgs() ||

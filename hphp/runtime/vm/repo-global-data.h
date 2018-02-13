@@ -178,6 +178,12 @@ struct Repo::GlobalData {
    */
   bool ReffinessInvariance = false;
 
+  /*
+   * Should we use the multiple stack return value optimization for inout
+   * function calls?
+   */
+  bool UseMSRVForInOut = false;
+
   std::vector<const StringData*> APCProfile;
 
   std::vector<std::pair<std::string,Cell>> ConstantFunctions;
@@ -210,6 +216,7 @@ struct Repo::GlobalData {
       (ReffinessInvariance)
       (NoticeOnAllDynamicCalls)
       (NoticeOnBuiltinDynamicCalls)
+      (UseMSRVForInOut)
       ;
   }
 };

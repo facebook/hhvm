@@ -221,6 +221,7 @@ static const struct {
    */
   { OpRetC,        {AllLocals,        None,         OutNone         }},
   { OpRetV,        {AllLocals,        None,         OutNone         }},
+  { OpRetM,        {AllLocals,        None,         OutNone         }},
   { OpThrow,       {Stack1,           None,         OutNone         }},
   { OpUnwind,      {None,             None,         OutNone         }},
 
@@ -333,6 +334,9 @@ static const struct {
    * runtime stack are outside the boundaries of the tracelet abstraction.
    */
   { OpFCall,       {FStack,           Stack1,       OutUnknown      }},
+  { OpFCallM,      {FStack,           StackN,       OutUnknown      }},
+  { OpFCallDM,     {FStack,           StackN,       OutUnknown      }},
+  { OpFCallUnpackM,{FStack,           StackN,       OutUnknown      }},
   { OpFCallD,      {FStack,           Stack1,       OutUnknown      }},
   { OpFCallAwait,  {FStack,           Stack1,       OutUnknown      }},
   { OpFCallUnpack, {FStack,           Stack1,       OutUnknown      }},
@@ -560,6 +564,10 @@ int64_t getStackPopped(PC pc) {
     case Op::FCall:        return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCallD:       return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCallAwait:   return getImm(pc, 0).u_IVA + kNumActRecCells;
+    case Op::FCallM:
+    case Op::FCallDM:
+    case Op::FCallUnpackM:
+      return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA + kNumActRecCells - 1;
     case Op::FCallArray:   return kNumActRecCells + 1;
 
     case Op::QueryM:
@@ -605,7 +613,19 @@ int64_t getStackPopped(PC pc) {
 
 int64_t getStackPushed(PC pc) {
   auto const op = peek_op(pc);
-  return countOperands(getInstrInfo(op).out);
+  switch (op) {
+    case Op::FCallM:       return getImm(pc, 1).u_IVA;
+    case Op::FCallDM:      return getImm(pc, 1).u_IVA;
+    case Op::FCallUnpackM: return getImm(pc, 1).u_IVA;
+    default:               break;
+  }
+
+  uint64_t mask = getInstrInfo(op).out;
+
+  // All instructions with these properties are handled above
+  assertx((mask & (StackN | BStackN)) == 0);
+
+  return countOperands(mask);
 }
 
 bool isAlwaysNop(const NormalizedInstruction& ni) {
@@ -1089,6 +1109,10 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::SetWithRefRML:
   case Op::MemoGet:
   case Op::MemoSet:
+  case Op::RetM:
+  case Op::FCallM:
+  case Op::FCallDM:
+  case Op::FCallUnpackM:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.
@@ -1276,6 +1300,14 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
   }
   auto pc = ni.pc();
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
+    if (ni.op() == OpFCallM || ni.op() == OpFCallDM ||
+        ni.op() == OpFCallUnpackM) {
+      // This is a hack to deal with the fact that these instructions are
+      // actually popping an ActRec in the middle of their "pops." We could
+      // assert on the Uninit values on the stack, but the call is going to
+      // override them anyway so it's not worth guarding on them.
+      if (instrInputFlavor(pc, i) == UV) break;
+    }
     auto const type =
       !builtinFunc ? flavorToType(instrInputFlavor(pc, i)) :
       builtinFunc->byRef(num - i - 1) ? TGen : TCell;

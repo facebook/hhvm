@@ -363,6 +363,7 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
     if (maybeDynamic && ar.func->mightCareAboutDynCalls()) return false;
     auto const func = ar.func->exactFunc();
     if (!func) return false;
+    if (func->attrs & AttrTakesInOutParams) return false;
     if (env.collect.unfoldableFuncs.count(func)) return false;
     // Foldable builtins are always worth trying
     if (ar.func->isFoldable()) return true;

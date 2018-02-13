@@ -543,7 +543,8 @@ void phpAddBreakPointFuncExit(const Func* f) {
   const Unit* unit = f->unit();
   for (PC pc = unit->at(f->base()); pc < unit->at(f->past());
        pc += instrLen(pc)) {
-    if (peek_op(pc) != OpRetC) {
+    if (peek_op(pc) != OpRetC && peek_op(pc) != OpRetV &&
+        peek_op(pc) != OpRetM) {
       continue;
     }
 
@@ -615,7 +616,8 @@ void phpRemoveBreakPointFuncExit(const Func* f) {
   auto& req_data = RID();
   for (PC pc = unit->at(f->base()); pc < unit->at(f->past());
        pc += instrLen(pc)) {
-    if (peek_op(pc) == OpRetC) {
+    if (peek_op(pc) == OpRetC || peek_op(pc) == OpRetV ||
+        peek_op(pc) == OpRetM) {
       req_data.m_retBreakPointFilter.removePC(pc);
     }
   }

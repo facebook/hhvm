@@ -99,6 +99,25 @@ bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool simplify(Env& env, const ldimmq& inst, Vlabel b, size_t i) {
+  return if_inst<Vinstr::lea>(env, b, i + 1, [&] (const lea& ea) {
+    // ldimmq{s, index}; lea{base[index], d} -> lea{base[s],d}
+    if (!(env.use_counts[inst.d] == 1 &&
+          inst.s.q() <= 4095  &&
+          inst.s.q() >= -4095 &&
+          inst.d == ea.s.index &&
+          ea.s.disp == 0 &&
+          ea.s.base.isValid())) return false;
+
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << lea{ea.s.base[inst.s.l()], ea.d};
+      return 2;
+    });
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {
   // movzbl{s, d}; shrli{2, s, d} --> ubfmli{2, 7, s, d}
   return if_inst<Vinstr::shrli>(env, b, i + 1, [&](const shrli& sh) {

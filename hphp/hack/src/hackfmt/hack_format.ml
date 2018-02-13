@@ -33,40 +33,38 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
   | Syntax.Missing ->
     Nothing
   | Syntax.Token x ->
-    let open Token in
-    let token_kind = kind x in
+    let token_kind = Token.kind x in
     Concat [
       begin
         match token_kind with
         | TokenKind.EndOfFile ->
-          let leading_trivia = leading x in
+          let leading_trivia = Token.leading x in
           let trivia_without_trailing_invisibles =
             let reversed = List.rev leading_trivia in
             List.rev (List.drop_while reversed ~f:is_invisible)
           in
           transform_leading_trivia trivia_without_trailing_invisibles
-        | _ -> transform_leading_trivia (leading x)
+        | _ -> transform_leading_trivia (Token.leading x)
       end;
       begin
-        let open TokenKind in
         match token_kind with
-        | SingleQuotedStringLiteral
-        | DoubleQuotedStringLiteral
-        | DoubleQuotedStringLiteralHead
-        | StringLiteralBody
-        | DoubleQuotedStringLiteralTail
-        | HeredocStringLiteral
-        | HeredocStringLiteralHead
-        | HeredocStringLiteralTail
-        | NowdocStringLiteral ->
-          let split_text = (Str.split_delim (Str.regexp "\n") (text x)) in
+        | TokenKind.SingleQuotedStringLiteral
+        | TokenKind.DoubleQuotedStringLiteral
+        | TokenKind.DoubleQuotedStringLiteralHead
+        | TokenKind.StringLiteralBody
+        | TokenKind.DoubleQuotedStringLiteralTail
+        | TokenKind.HeredocStringLiteral
+        | TokenKind.HeredocStringLiteralHead
+        | TokenKind.HeredocStringLiteralTail
+        | TokenKind.NowdocStringLiteral ->
+          let split_text = (Str.split_delim (Str.regexp "\n") (Token.text x)) in
           begin match split_text with
-            | [_] -> Text (text x, width x)
-            | _ -> MultilineString (split_text, width x)
+            | [_] -> Text (Token.text x, Token.width x)
+            | _ -> MultilineString (split_text, Token.width x)
           end
-        | _ -> Text (text x, width x)
+        | _ -> Text (Token.text x, Token.width x)
       end;
-      transform_trailing_trivia (trailing x);
+      transform_trailing_trivia (Token.trailing x);
     ]
   | Syntax.SyntaxList _ ->
     failwith (Printf.sprintf
@@ -90,19 +88,17 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
     end
   | Syntax.LiteralExpression { literal_expression } ->
     (* Double quoted string literals can create a list *)
-    let open Token in
     let wrap_with_literal_type token transformed =
-      let open TokenKind in
-      match kind token with
-      | HeredocStringLiteral
-      | HeredocStringLiteralHead
-      | HeredocStringLiteralTail
-      | NowdocStringLiteral -> DocLiteral transformed
-      | DecimalLiteral
-      | OctalLiteral
-      | HexadecimalLiteral
-      | BinaryLiteral
-      | FloatingLiteral -> NumericLiteral transformed
+      match Token.kind token with
+      | TokenKind.HeredocStringLiteral
+      | TokenKind.HeredocStringLiteralHead
+      | TokenKind.HeredocStringLiteralTail
+      | TokenKind.NowdocStringLiteral -> DocLiteral transformed
+      | TokenKind.DecimalLiteral
+      | TokenKind.OctalLiteral
+      | TokenKind.HexadecimalLiteral
+      | TokenKind.BinaryLiteral
+      | TokenKind.FloatingLiteral -> NumericLiteral transformed
       | _ -> transformed
     in
     begin match Syntax.syntax literal_expression with
@@ -1790,10 +1786,9 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
               end;
             t env node;
           ] in
-          let open Token in
           prev_token_was_xhpbody := begin
             match Syntax.syntax node with
-            | Syntax.Token t -> kind t = TokenKind.XHPBody
+            | Syntax.Token t -> Token.kind t = TokenKind.XHPBody
             | _ -> false
           end;
           (* Here, we preserve newlines after XHPBody tokens and don't add
@@ -1819,9 +1814,8 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
           | Some token -> token
         in
         let can_split_before_first_token =
-          let open Token in
-          kind leading_token <> TokenKind.XHPBody ||
-          has_invisibles (leading leading_token)
+          Token.kind leading_token <> TokenKind.XHPBody ||
+          has_invisibles (Token.leading leading_token)
         in
         let transformed_body = Concat [
           if can_split_before_first_token then Split else Nothing;
@@ -2487,8 +2481,6 @@ and transform_fn_decl_args env params rightp colon ret_type where =
   let allow_trailing =
     match Syntax.syntax params with
     | Syntax.SyntaxList params ->
-      let open Token in
-      let open TokenKind in
       let last_param =
         match Syntax.syntax (List.last_exn params) with
         | Syntax.ListItem { list_item; _ } -> list_item
@@ -2500,7 +2492,7 @@ and transform_fn_decl_args env params rightp colon ret_type where =
         | Syntax.(ParameterDeclaration {
             parameter_name = { syntax = DecoratedExpression {
               decorated_expression_decorator = {
-                syntax = Token { kind = DotDotDot; _ }; _
+                syntax = Token { Token.kind = TokenKind.DotDotDot; _ }; _
               }; _
             }; _ }; _
           }) ->
@@ -2584,7 +2576,6 @@ and transform_braced_item env left_p item right_p =
   delimited_nest env left_p right_p [t env item]
 
 and transform_trailing_comma env ~allow_trailing item comma =
-  let open Token in
   (* PHP does not permit trailing commas in function calls. Rather than try to
    * account for where PHP's parser permits trailing commas, we just never add
    * them in PHP files. *)
@@ -2593,10 +2584,10 @@ and transform_trailing_comma env ~allow_trailing item comma =
   | Syntax.Token tok ->
     Concat [
       t env item;
-      transform_leading_trivia (leading tok);
+      transform_leading_trivia (Token.leading tok);
       if allow_trailing then TrailingComma true else Nothing;
-      Ignore (text tok, width tok);
-      transform_trailing_trivia (trailing tok);
+      Ignore (Token.text tok, Token.width tok);
+      transform_trailing_trivia (Token.trailing tok);
     ]
   | Syntax.Missing ->
     let item, item_trailing = remove_trailing_trivia item in

@@ -51,7 +51,6 @@ class UConverter {
   const CESU8 = 0;
   const IMAP_MAILBOX = 0;
   public function __construct($toEncoding = "utf-8", $fromEncoding = "utf-8") { }
-  public function __destruct() { }
   public function getSourceEncoding() { }
   public function setSourceEncoding($encoding) { }
   public function getDestinationEncoding() { }

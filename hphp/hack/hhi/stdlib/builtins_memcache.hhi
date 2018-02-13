@@ -69,5 +69,4 @@ class Memcache {
   public function getextendedstats($type = null, $slabid = 0, $limit = 100) { }
   public function setserverparams($host, $port = 11211, $timeout = 0, $retry_interval = 0, $status = true, $failure_callback = null) { }
   public function addserver($host, $port = 11211, $persistent = false, $weight = 0, $timeout = 0, $retry_interval = 0, $status = true, $failure_callback = null, $timeoutms = 0) { }
-  public function __destruct() { }
 }

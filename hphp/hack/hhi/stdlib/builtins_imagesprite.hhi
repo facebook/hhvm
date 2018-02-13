@@ -20,5 +20,4 @@ class ImageSprite {
   public function css($css_namespace, $sprite_file = null, $output_file = null, $verbose = false) { }
   public function getErrors() { }
   public function mapping() { }
-  public function __destruct() { }
 }

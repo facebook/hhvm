@@ -129,8 +129,9 @@ and hint_to_type_constant_list ~tparams ~namespace h =
   | A.Happly (s, l) ->
     let classname, s_res = resolve_classname ~tparams ~namespace s in
     let kind = get_kind ~tparams s_res in
+    let n = String.lowercase_ascii @@ snd s in
     let generic_types =
-      if snd s = "classname" then []
+      if n = "classname" || n = "typename" then []
       else get_generic_types ~tparams ~namespace l in
     kind @ classname @ generic_types
   | A.Hshape (si) ->

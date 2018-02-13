@@ -1407,7 +1407,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; alternate_loop_statements = validate_list_with (validate_statement) x.alternate_loop_statements
     ; alternate_loop_opening_colon = validate_token x.alternate_loop_opening_colon
     }
-  | s -> validation_fail SyntaxKind.AlternateLoopStatement s
+  | s -> validation_fail (Some SyntaxKind.AlternateLoopStatement) s
   and invalidate_alternate_loop_statement : alternate_loop_statement invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.AlternateLoopStatement

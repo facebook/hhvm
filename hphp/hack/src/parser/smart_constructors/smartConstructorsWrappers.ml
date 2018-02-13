@@ -72,6 +72,7 @@ module type SyntaxKind_S = sig
   val is_inclusion_expression : r -> bool
   val is_inclusion_directive : r -> bool
   val is_compound_statement : r -> bool
+  val is_alternate_loop_statement : r -> bool
   val is_expression_statement : r -> bool
   val is_markup_section : r -> bool
   val is_markup_suffix : r -> bool
@@ -255,6 +256,7 @@ module SyntaxKind(SC : SC_S) :
   let make_inclusion_expression arg0 arg1 state = compose SK.InclusionExpression (SC.make_inclusion_expression (snd arg0) (snd arg1) state)
   let make_inclusion_directive arg0 arg1 state = compose SK.InclusionDirective (SC.make_inclusion_directive (snd arg0) (snd arg1) state)
   let make_compound_statement arg0 arg1 arg2 state = compose SK.CompoundStatement (SC.make_compound_statement (snd arg0) (snd arg1) (snd arg2) state)
+  let make_alternate_loop_statement arg0 arg1 arg2 arg3 state = compose SK.AlternateLoopStatement (SC.make_alternate_loop_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_expression_statement arg0 arg1 state = compose SK.ExpressionStatement (SC.make_expression_statement (snd arg0) (snd arg1) state)
   let make_markup_section arg0 arg1 arg2 arg3 state = compose SK.MarkupSection (SC.make_markup_section (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_markup_suffix arg0 arg1 state = compose SK.MarkupSuffix (SC.make_markup_suffix (snd arg0) (snd arg1) state)
@@ -423,6 +425,7 @@ module SyntaxKind(SC : SC_S) :
   let is_inclusion_expression                         = has_kind SK.InclusionExpression
   let is_inclusion_directive                          = has_kind SK.InclusionDirective
   let is_compound_statement                           = has_kind SK.CompoundStatement
+  let is_alternate_loop_statement                     = has_kind SK.AlternateLoopStatement
   let is_expression_statement                         = has_kind SK.ExpressionStatement
   let is_markup_section                               = has_kind SK.MarkupSection
   let is_markup_suffix                                = has_kind SK.MarkupSuffix

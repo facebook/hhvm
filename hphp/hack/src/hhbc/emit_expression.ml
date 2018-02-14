@@ -378,6 +378,21 @@ let istype_op lower_fq_id =
   | "hh\\is_darray" -> Some OpDArray
   | _ -> None
 
+(* Return the IsType op associated with a given primitive typehint. *)
+let is_expr_primitive_op id =
+  match id with
+  | "bool" -> Some OpBool
+  | "int" -> Some OpInt
+  | "float" -> Some OpDbl
+  | "string" -> Some OpStr
+  | "resource" -> Some OpRes
+  | "vec" -> Some OpVec
+  | "dict" -> Some OpDict
+  | "keyset" -> Some OpKeyset
+  | "varray" -> Some OpVArray
+  | "darray" -> Some OpDArray
+  | _ -> None
+
 (* See EmitterVisitor::getPassByRefKind in emitter.cpp *)
 let get_passByRefKind is_splatted expr  =
   let open PassByRefKind in
@@ -643,8 +658,17 @@ and emit_instanceof env e1 e2 =
       emit_expr ~need_ref:false env e2;
       instr_instanceof ]
 
-and emit_is _env _e _h =
-  emit_nyi "is expression"
+and emit_is env e h =
+  match snd h with
+    | A.Happly ((_, id), _) ->
+      begin match is_expr_primitive_op id with
+        | Some op ->
+          gather [
+            emit_expr ~need_ref:false env e;
+            instr_istypec op ]
+        | None -> emit_nyi "is expression"
+      end
+    | _ -> emit_nyi "is expression"
 
 and emit_null_coalesce env e1 e2 =
   let end_label = Label.next_regular () in

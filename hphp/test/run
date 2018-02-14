@@ -2096,6 +2096,14 @@ function run_test($options, $test) {
     if (substr($test, -5) === ".hhas") return 'skip';
   }
 
+  // Skip any tests tht would require HPHPC for HackC-only features
+  $only_hackc = file_exists($test.'.onlyhackc');
+  if ($only_hackc) {
+    if (!isset($options['hackc']) || isset($options['compare-hh-codegen'])) {
+      return 'skip-onlyhackc';
+    }
+  }
+
   $test_ext = pathinfo($test, PATHINFO_EXTENSION);
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
   if ((isset($options['relocate']) || isset($options['recycle-tc'])) &&

@@ -41,6 +41,7 @@ module Phase        = Typing_phase
 module Subst        = Decl_subst
 module ExprDepTy    = Typing_dependent_type.ExprDepTy
 module TCO          = TypecheckerOptions
+module EnvFromDef   = Typing_env_from_def.EnvFromDef(Nast.Annotations)
 
 (*****************************************************************************)
 (* Debugging *)
@@ -448,8 +449,7 @@ and fun_def tcopt f =
   Typing_hooks.dispatch_enter_fun_def_hook f;
   let pos = fst f.f_name in
   let nb = TNBody.func_body tcopt f in
-  let dep = Typing_deps.Dep.Fun (snd f.f_name) in
-  let env = Env.empty tcopt (Pos.filename pos) (Some dep) in
+  let env = EnvFromDef.fun_env tcopt f in
   let env = Env.set_env_function_pos env pos in
   let reactive = fun_reactivity f.f_user_attributes in
   let mut = TUtils.fun_mutable f.f_user_attributes in
@@ -5885,9 +5885,7 @@ and check_parent_abstract position parent_type class_type =
   end else ()
 
 and class_def tcopt c =
-  let filename = Pos.filename (fst c.Nast.c_name) in
-  let dep = Dep.Class (snd c.c_name) in
-  let env = Env.empty tcopt filename (Some dep) in
+  let env = EnvFromDef.class_env tcopt c in
   (* Set up self identifier and type *)
   let env = Env.set_self_id env (snd c.c_name) in
   let self = get_self_from_c c in
@@ -6324,11 +6322,7 @@ and method_def env m =
   }
 
 and typedef_def tcopt typedef  =
-  let tid = (snd typedef.t_name) in
-  let filename = Pos.filename (fst typedef.t_kind) in
-  let dep = Typing_deps.Dep.Class tid in
-  let env =
-    Typing_env.empty tcopt filename (Some dep) in
+  let env = EnvFromDef.typedef_env tcopt typedef in
   (* Mode for typedefs themselves doesn't really matter right now, but
    * they can expand hints, so make it loose so that the typedef doesn't
    * fail. (The hint will get re-checked with the proper mode anyways.)
@@ -6377,9 +6371,7 @@ and typedef_def tcopt typedef  =
 
 and gconst_def tcopt cst =
   Typing_hooks.dispatch_global_const_hook cst.cst_name;
-  let filename = Pos.filename (fst cst.cst_name) in
-  let dep = Typing_deps.Dep.GConst (snd cst.cst_name) in
-  let env = Typing_env.empty tcopt filename (Some dep) in
+  let env = EnvFromDef.gconst_env tcopt cst in
   let env = Typing_env.set_mode env cst.cst_mode in
   let typed_cst_value, env =
     match cst.cst_value with

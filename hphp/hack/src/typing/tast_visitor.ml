@@ -8,37 +8,24 @@
  *
  *)
 
-module TEnv = Typing_env
-module Dep = Typing_deps.Dep
+module EnvFromDef = Typing_env_from_def.EnvFromDef(Tast.Annotations)
 
 open Tast
 
 let fun_env f =
-  let tcopt = f.f_annotation.tcopt in
-  let filename = Pos.filename (fst f.f_name) in
-  let dep = Dep.Fun (snd f.f_name) in
-  let env = TEnv.empty tcopt filename (Some dep) in
+  let env = EnvFromDef.fun_env f.f_annotation.tcopt f in
   Tast_expand.restore_saved_env env f.f_annotation
 
 let class_env c =
-  let tcopt = c.c_annotation.tcopt in
-  let filename = Pos.filename (fst c.c_name) in
-  let dep = Dep.Class (snd c.c_name) in
-  let env = TEnv.empty tcopt filename (Some dep) in
+  let env = EnvFromDef.class_env c.c_annotation.tcopt c in
   Tast_expand.restore_saved_env env c.c_annotation
 
 let typedef_env t =
-  let tcopt = t.t_annotation.tcopt in
-  let filename = Pos.filename (fst t.t_kind) in
-  let dep = Dep.Class (snd t.t_name) in
-  let env = TEnv.empty tcopt filename (Some dep) in
+  let env = EnvFromDef.typedef_env t.t_annotation.tcopt t in
   Tast_expand.restore_saved_env env t.t_annotation
 
 let gconst_env cst =
-  let tcopt = cst.cst_annotation.tcopt in
-  let filename = Pos.filename (fst cst.cst_name) in
-  let dep = Dep.GConst (snd cst.cst_name) in
-  let env = TEnv.empty tcopt filename (Some dep) in
+  let env = EnvFromDef.gconst_env cst.cst_annotation.tcopt cst in
   Tast_expand.restore_saved_env env cst.cst_annotation
 
 let method_env env m =

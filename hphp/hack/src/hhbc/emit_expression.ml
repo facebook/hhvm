@@ -1697,9 +1697,14 @@ and emit_keyvalue_collection name env es constructor =
 and emit_struct_array env es ctor =
   let es =
     List.map es
-      ~f:(function A.AFkvalue ((_, A.String (_, s)), v) ->
-         s, emit_expr ~need_ref:false env v
-                 | _ -> failwith "impossible")
+      ~f:(function A.AFkvalue (k, v) ->
+            let ns = Emit_env.get_namespace env in
+            (* TODO: Consider reusing folded keys from is_struct_init *)
+            begin match snd @@ Ast_constant_folder.fold_expr ns k with
+            | A.String (_, s) -> s, emit_expr ~need_ref:false env v
+            | _ -> failwith "impossible"
+            end
+          | _ -> failwith "impossible")
   in
   gather [
     gather @@ List.map es ~f:snd;
@@ -1744,7 +1749,7 @@ and is_packed_init ?(hack_arr_compat=true) es =
   && not has_references
   && (List.length es) > 0
 
-and is_struct_init es allow_numerics =
+and is_struct_init env es allow_numerics =
   let has_references =
     (* Reference can only exist as a value *)
     List.exists es
@@ -1755,11 +1760,16 @@ and is_struct_init es allow_numerics =
   let are_all_keys_non_numeric_strings, keys =
     List.fold_right es ~init:(true, keys) ~f:(fun field (b, keys) ->
       match field with
-        | A.AFkvalue ((_, A.String (_, s)), _) ->
+      | A.AFkvalue (key, _) ->
+        let ns = Emit_env.get_namespace env in
+        begin match snd @@ Ast_constant_folder.fold_expr ns key with
+        | A.String (_, s) ->
           b && (Option.is_none
             @@ Typed_value.string_to_int_opt ~allow_following:false s),
           ULS.add keys s
-        | _ -> false, keys)
+        | _ -> false, keys
+        end
+      | _ -> false, keys)
   in
   let num_keys = List.length es in
   let has_duplicate_keys =
@@ -1782,7 +1792,7 @@ and emit_dynamic_collection env expr es =
   | A.Collection ((_, "keyset"), _) ->
     emit_value_only_collection env es (fun n -> NewKeysetArray n)
   | A.Collection ((_, "dict"), _) ->
-     if is_struct_init es true then
+     if is_struct_init env es true then
        emit_struct_array env es instr_newstructdict
      else
        emit_keyvalue_collection "dict" env es (NewDictArray count)
@@ -1791,7 +1801,7 @@ and emit_dynamic_collection env expr es =
       || SU.strip_ns name = "ImmSet"
       || SU.strip_ns name = "Map"
       || SU.strip_ns name = "ImmMap" ->
-     if is_struct_init es true then
+     if is_struct_init env es true then
        gather [
            emit_struct_array env es instr_newstructdict;
            instr_colfromarray (collection_type (SU.strip_ns name));
@@ -1802,7 +1812,7 @@ and emit_dynamic_collection env expr es =
   | A.Varray _ ->
     emit_value_only_collection env es (fun n -> NewVArray n)
   | A.Darray _ ->
-     if is_struct_init es false then
+     if is_struct_init env es false then
        emit_struct_array env es instr_newstructdarray
      else
        emit_keyvalue_collection "array" env es (NewDArray count)
@@ -1810,7 +1820,7 @@ and emit_dynamic_collection env expr es =
   (* From here on, we're only dealing with PHP arrays *)
   if is_packed_init es then
     emit_value_only_collection env es (fun n -> NewPackedArray n)
-  else if is_struct_init es false then
+  else if is_struct_init env es false then
     emit_struct_array env es instr_newstructarray
   else if is_packed_init ~hack_arr_compat:false es then
     emit_keyvalue_collection "array" env es (NewArray count)

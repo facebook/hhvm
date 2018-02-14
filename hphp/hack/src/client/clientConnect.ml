@@ -160,8 +160,9 @@ let rec wait_for_server_hello
   ~progress_callback
   ~start_time
   ~tail_env =
+  let elapsed_t = int_of_float (Unix.time () -. start_time) in
   match retries with
-  | Some n when n < 0 ->
+  | Some n when elapsed_t > n ->
       (if Option.is_some tail_env then
         Printf.eprintf "\nError: Ran out of retries, giving up!\n");
       raise Exit_status.(Exit_with Out_of_retries)
@@ -174,7 +175,7 @@ let rec wait_for_server_hello
       (fun t -> print_wait_msg progress_callback start_time t);
     wait_for_server_hello
       ~ic
-      ~retries:(Option.map retries (fun x -> x - 1))
+      ~retries
       ~progress_callback
       ~start_time
       ~tail_env
@@ -188,7 +189,7 @@ let rec wait_for_server_hello
       | _ ->
         Option.iter tail_env
           (fun t -> print_wait_msg progress_callback start_time t);
-        wait_for_server_hello ic (Option.map retries (fun x -> x - 1))
+        wait_for_server_hello ic retries
           progress_callback start_time tail_env
       )
     with
@@ -197,8 +198,9 @@ let rec wait_for_server_hello
       raise Server_hung_up
 
 let rec connect ?(first_attempt=false) env retries start_time tail_env =
+  let elapsed_t = int_of_float (Unix.time () -. start_time) in
   match retries with
-  | Some n when n < 0 ->
+  | Some n when elapsed_t > n ->
       Printf.eprintf "\nError: Ran out of retries, giving up!\n";
       raise Exit_status.(Exit_with Out_of_retries)
   | Some _
@@ -253,7 +255,8 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
     match e with
     | SMUtils.Server_died
     | SMUtils.Monitor_connection_failure ->
-      connect env (Option.map retries (fun x -> x - 1)) start_time tail_env
+      Unix.sleepf 0.1;
+      connect env retries start_time tail_env
     | SMUtils.Server_missing ->
       if env.autostart then begin
         ClientStart.start_server { ClientStart.
@@ -290,7 +293,8 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
       let _, tail_msg = open_and_get_tail_msg start_time tail_env in
       env.progress_callback (Some tail_msg);
       HackEventLogger.client_connect_once_busy start_time;
-      connect env (Option.map retries pred) start_time tail_env
+      Unix.sleepf 0.1;
+      connect env retries start_time tail_env
     | SMUtils.Monitor_establish_connection_timeout ->
       (** This should only happen if the Monitor is being DDOSed or has
        * wedged itself. To ameliorate inadvertent self DDOSing by hh_clients,

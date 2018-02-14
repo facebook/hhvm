@@ -63,7 +63,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   // Recursively register {allocation, rootAPCHandle} with APCGCManager
   static void RegisterUncountedAllocations(ArrayData* ad,
                                            APCHandle* rootAPCHandle);
-  static bool ReleaseUncounted(ArrayData*);
+  static void ReleaseUncounted(ArrayData*);
   static member_rval::ptr_u NvGetInt(const ArrayData*, int64_t ki);
   static constexpr auto NvTryGetInt = &NvGetInt;
   static member_rval::ptr_u NvGetStr(const ArrayData*, const StringData*);

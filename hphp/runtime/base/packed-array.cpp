@@ -614,9 +614,9 @@ void PackedArray::Release(ArrayData* ad) {
 }
 
 NEVER_INLINE
-bool PackedArray::ReleaseUncounted(ArrayData* ad) {
+void PackedArray::ReleaseUncounted(ArrayData* ad) {
   assert(checkInvariants(ad));
-  if (!ad->uncountedDecRef()) return false;
+  if (!ad->uncountedDecRef()) return;
 
   auto const data = packedData(ad);
   auto const stop = data + ad->m_size;
@@ -632,7 +632,6 @@ bool PackedArray::ReleaseUncounted(ArrayData* ad) {
 
   free_huge(reinterpret_cast<char*>(ad) -
             (ad->hasApcTv() ? sizeof(APCTypedValue) : 0));
-  return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -383,7 +383,7 @@ public:
   // Recursively register {allocation, rootAPCHandle} with APCGCManager
   static void RegisterUncountedAllocations(ArrayData* ad,
                                            APCHandle* rootAPCHandle);
-  static bool ReleaseUncounted(ArrayData*);
+  static void ReleaseUncounted(ArrayData*);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static ArrayData* Escalate(const ArrayData* ad) {

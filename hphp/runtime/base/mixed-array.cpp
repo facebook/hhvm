@@ -521,10 +521,10 @@ void MixedArray::Release(ArrayData* in) {
 }
 
 NEVER_INLINE
-bool MixedArray::ReleaseUncounted(ArrayData* in) {
+void MixedArray::ReleaseUncounted(ArrayData* in) {
 
   auto const ad = asMixed(in);
-  if (!ad->uncountedDecRef()) return false;
+  if (!ad->uncountedDecRef()) return;
 
   if (!ad->isZombie()) {
     auto const data = ad->data();
@@ -553,7 +553,6 @@ bool MixedArray::ReleaseUncounted(ArrayData* in) {
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
-  return true;
 }
 
 //=============================================================================

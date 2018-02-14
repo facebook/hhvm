@@ -154,13 +154,10 @@ void StringData::destructStatic() {
   low_free_data(this);
 }
 
-bool StringData::ReleaseUncounted(const StringData* str) {
+void StringData::ReleaseUncounted(const StringData* str) {
   assert(str->checkSane());
   assert(str->isFlat());
-  if (!str->uncountedDecRef()) {
-    return false;
-  }
-
+  if (!str->uncountedDecRef()) return;
 
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
@@ -170,7 +167,6 @@ bool StringData::ReleaseUncounted(const StringData* str) {
   } else {
     free(const_cast<StringData*>(str));
   }
-  return true;
 }
 
 //////////////////////////////////////////////////////////////////////

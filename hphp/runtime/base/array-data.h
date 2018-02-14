@@ -86,6 +86,10 @@ struct ArrayData : MaybeCountable {
     kDArray     = 2
   };
   static auto constexpr kDVArrayMask = static_cast<DVArray>(3);
+  /*
+   * For uncounted Packed, Mixed, Dict and Vec, indicates that the
+   * array was co-allocated with an APCTypedValue (at apctv+1).
+   */
   static auto constexpr kHasApcTv    = 4;
 
   /////////////////////////////////////////////////////////////////////////////

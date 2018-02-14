@@ -21,6 +21,7 @@ open Hhas_parser_actions
 %token <string> DOUBLE
 %token <string> TRIPLEQUOTEDSTRING
 %token <string> INCLUDESDIRECTIVE
+%token <string> ASSERTCONSTRAINT
 %token FUNCTIONDIRECTIVE MAINDIRECTIVE CLASSDIRECTIVE DECLVARSDIRECTIVE
 %token CONSTANTREFSDIRECTIVE FUNCTIONREFSDIRECTIVE CLASSREFSDIRECTIVE
 %token DATADECLDIRECTIVE NUMITERSDIRECTIVE NUMCLSREFSLOTSDIRECTIVE
@@ -524,17 +525,23 @@ instruction:
 ;
 iarg:
     | ID     {IAId $1}
+    | ASSERTCONSTRAINT {IAString $1}
     | vname  {IAId $1}
     | INT    {IAInt64 $1}
     | STRING {IAString $1}
     | DOUBLE {IADouble $1}
     | AT ID  {IAArrayno $2}
+    | ID COLON INT PLUS INT {IAMemberkey ($1,IAArglist[IAInt64 $3; IAInt64 $5])}
     | ID COLON iarg {IAMemberkey ($1,$3)}
     | MINUS ID {match to_inf_nan $2 with
                  | None -> report_error "bad negated pseudo-float"
                  | Some s -> IADouble ("-" ^ s)}
     | LANGLE iarglist RANGLE {IAArglist $2}
     | LANGLE iterbreaklist RANGLE {IAArglist $2}
+    | ID LPAR iarglist RPAR
+      {let inner_string_list = List.map
+        (function | IAString s -> s | _ -> report_error "bad AssertRATL list") $3 in
+       IAString ($1 ^ "(" ^ String.concat "," inner_string_list ^ ")")}
 ;
 iarglist:
     | /* empty */ {[]}

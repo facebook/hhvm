@@ -546,6 +546,7 @@ let string_of_barethis_op i =
   match i with
   | Notice -> "Notice"
   | NoNotice -> "NoNotice"
+  | NeverNull -> "NeverNull"
 
 let string_of_op_silence op =
   match op with
@@ -596,6 +597,10 @@ let string_of_misc instruction =
     | OODeclExists ck -> sep ["OODeclExists"; string_of_class_kind ck]
     | Silence (local, op) ->
       sep ["Silence"; string_of_local_id local; string_of_op_silence op]
+    | AssertRATL (local, s) ->
+      sep ["AssertRATL"; string_of_local_id local; s]
+    | AssertRATStk (n, s) ->
+      sep ["AssertRATStk"; string_of_int n; s]
     | _ -> failwith "instruct_misc Not Implemented"
 
 let iterator_instruction_name_prefix instruction =

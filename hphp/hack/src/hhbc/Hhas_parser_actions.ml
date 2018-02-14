@@ -643,6 +643,7 @@ let barethisopofiarg arg =
   match arg with
   | IAId "Notice" -> Notice
   | IAId "NoNotice" -> NoNotice
+  | IAId "NeverNull" -> NeverNull
   | _ ->
     report_error "bad bare this op"
 

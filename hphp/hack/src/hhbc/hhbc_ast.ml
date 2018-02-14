@@ -507,6 +507,7 @@ type instruct_include_eval_define =
 type bare_this_op =
   | Notice
   | NoNotice
+  | NeverNull
 
 type class_kind =
   | KClass

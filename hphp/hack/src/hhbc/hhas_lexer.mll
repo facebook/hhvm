@@ -47,7 +47,8 @@ let white = [' ' '\t']+
 let newline = '\r' | '\n' | "\r\n"
 let sillyend = ';' digit+
 let inoutend = '$' ['0' - '9' ';']+ '$' "inout"
-let id = '?'? (digit* ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '0'-'9' '_' '\\' '$' '#' '@' '\x7f'-'\xff' ] | "::")* inoutend? sillyend?)
+let id = '?'? (digit* ['a'-'z' 'A'-'Z' '_']
+     (['a'-'z' 'A'-'Z' '0'-'9' '_' '\\' '$' '#' '@' '\x7f'-'\xff' ] | "::")* inoutend? sillyend?)
 let vname = (['\x21'-'\xff'] # [';' ')' ','])*
 let escapequote = "\\\""
 let comment = '#' [^ '\r' '\n']* newline
@@ -56,6 +57,7 @@ let quote = '"'
 let nontriple = (nonquote | quote nonquote | quote quote nonquote)* quote? quote?
 let triplequoted = quote quote quote nontriple quote quote quote
 let doccomment = ".doc" white triplequoted ';'
+let assertconstraint = id '<'? '=' id
 
 rule read =
   parse
@@ -90,6 +92,7 @@ rule read =
   | ".static"           {STATICDIRECTIVE}
   | ".require"          {REQUIREDIRECTIVE}
   | ".srcloc"           {SRCLOCDIRECTIVE}
+  | assertconstraint    {ASSERTCONSTRAINT (Lexing.lexeme lexbuf)}
   | id                  {ID (Lexing.lexeme lexbuf)}
   | triplequoted as lxm {TRIPLEQUOTEDSTRING (String.sub lxm 3 (String.length lxm - 6))}
   | escapequote         {read_php_escaped_string (Buffer.create 17) lexbuf}

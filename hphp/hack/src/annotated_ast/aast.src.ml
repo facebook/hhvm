@@ -258,6 +258,9 @@ and user_attribute = {
   ua_params: expr list (* user attributes are restricted to scalar values *)
 }
 
+and static_var = class_var
+and static_method = method_
+
 and class_ = {
   c_annotation     : env_annotation   ;
   c_mode           : FileInfo.mode [@opaque];
@@ -280,10 +283,10 @@ and class_ = {
   c_implements     : hint list        ;
   c_consts         : class_const list ;
   c_typeconsts     : class_typeconst list   ;
-  c_static_vars    : class_var list   ;
+  c_static_vars    : static_var list  ;
   c_vars           : class_var list   ;
   c_constructor    : method_ option   ;
-  c_static_methods : method_ list     ;
+  c_static_methods : static_method list;
   c_methods        : method_ list     ;
   c_user_attributes : user_attribute list;
   c_enum           : enum_ option     ;

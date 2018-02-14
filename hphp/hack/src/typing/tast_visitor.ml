@@ -50,6 +50,11 @@ class virtual ['self] iter = object (self : 'self)
   method go_gconst  x = self#on_gconst (gconst_env x) x
 
   method! on_method_ env x = super#on_method_ (method_env env x) x
+
+  method! on_static_var env x =
+    super#on_static_var (Typing_env.set_static env) x
+  method! on_static_method env x =
+    super#on_static_method (Typing_env.set_static env) x
 end
 
 class virtual ['self] reduce = object (self : 'self)
@@ -71,6 +76,11 @@ class virtual ['self] reduce = object (self : 'self)
   method go_gconst  x = self#on_gconst (gconst_env x) x
 
   method! on_method_ env x = super#on_method_ (method_env env x) x
+
+  method! on_static_var env x =
+    super#on_static_var (Typing_env.set_static env) x
+  method! on_static_method env x =
+    super#on_static_method (Typing_env.set_static env) x
 end
 
 class virtual ['self] map = object (self : 'self)
@@ -92,6 +102,11 @@ class virtual ['self] map = object (self : 'self)
   method go_gconst  x = self#on_gconst (gconst_env x) x
 
   method! on_method_ env x = super#on_method_ (method_env env x) x
+
+  method! on_static_var env x =
+    super#on_static_var (Typing_env.set_static env) x
+  method! on_static_method env x =
+    super#on_static_method (Typing_env.set_static env) x
 end
 
 class virtual ['self] endo = object (self : 'self)
@@ -121,4 +136,9 @@ class virtual ['self] endo = object (self : 'self)
   method go_gconst  x = self#on_gconst (gconst_env x) x
 
   method! on_method_ env x = super#on_method_ (method_env env x) x
+
+  method! on_static_var env x =
+    super#on_static_var (Typing_env.set_static env) x
+  method! on_static_method env x =
+    super#on_static_method (Typing_env.set_static env) x
 end

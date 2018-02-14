@@ -1,6 +1,6 @@
 (* @generated from aast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<de1a0f1ad036abdb1eeca6eea9ce3c6765a223cd>> *)
+(* SourceShasum<<11246975af85dd6783212caab19851017c760b9b>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -202,6 +202,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     and user_attribute = {
       ua_name: sid ;
       ua_params: expr list }
+    and static_var = class_var
+    and static_method = method_
     and class_ =
       {
       c_annotation: env_annotation ;
@@ -221,10 +223,10 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       c_implements: hint list ;
       c_consts: class_const list ;
       c_typeconsts: class_typeconst list ;
-      c_static_vars: class_var list ;
+      c_static_vars: static_var list ;
       c_vars: class_var list ;
       c_constructor: method_ option ;
-      c_static_methods: method_ list ;
+      c_static_methods: static_method list ;
       c_methods: method_ list ;
       c_user_attributes: user_attribute list ;
       c_enum: enum_ option }
@@ -1764,6 +1766,24 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     and show_user_attribute : user_attribute -> Ppx_deriving_runtime.string =
       fun x  -> Format.asprintf "%a" pp_user_attribute x
     
+    and pp_static_var :
+      Format.formatter -> static_var -> Ppx_deriving_runtime.unit =
+      let __0 () = pp_class_var  in
+      ((let open! Ppx_deriving_runtime in fun fmt  -> (__0 ()) fmt)
+        [@ocaml.warning "-A"])
+    
+    and show_static_var : static_var -> Ppx_deriving_runtime.string =
+      fun x  -> Format.asprintf "%a" pp_static_var x
+    
+    and pp_static_method :
+      Format.formatter -> static_method -> Ppx_deriving_runtime.unit =
+      let __0 () = pp_method_  in
+      ((let open! Ppx_deriving_runtime in fun fmt  -> (__0 ()) fmt)
+        [@ocaml.warning "-A"])
+    
+    and show_static_method : static_method -> Ppx_deriving_runtime.string =
+      fun x  -> Format.asprintf "%a" pp_static_method x
+    
     and pp_class_ : Format.formatter -> class_ -> Ppx_deriving_runtime.unit =
       let __18 () = pp_enum_
       
@@ -1771,13 +1791,13 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __16 () = pp_method_
       
-      and __15 () = pp_method_
+      and __15 () = pp_static_method
       
       and __14 () = pp_method_
       
       and __13 () = pp_class_var
       
-      and __12 () = pp_class_var
+      and __12 () = pp_static_var
       
       and __11 () = pp_class_typeconst
       
@@ -3049,6 +3069,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_r1 =
                 self#on_list self#on_expr env _visitors_this.ua_params  in
               ()
+            method on_static_var env = self#on_class_var env
+            method on_static_method env = self#on_method_ env
             method on_class_ env _visitors_this =
               let _visitors_r0 =
                 self#on_env_annotation env _visitors_this.c_annotation  in
@@ -3088,7 +3110,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   _visitors_this.c_typeconsts
                  in
               let _visitors_r16 =
-                self#on_list self#on_class_var env
+                self#on_list self#on_static_var env
                   _visitors_this.c_static_vars
                  in
               let _visitors_r17 =
@@ -3098,7 +3120,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   _visitors_this.c_constructor
                  in
               let _visitors_r19 =
-                self#on_list self#on_method_ env
+                self#on_list self#on_static_method env
                   _visitors_this.c_static_methods
                  in
               let _visitors_r20 =
@@ -3880,6 +3902,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_s1 =
                 self#on_list self#on_expr env _visitors_this.ua_params  in
               self#plus _visitors_s0 _visitors_s1
+            method on_static_var env = self#on_class_var env
+            method on_static_method env = self#on_method_ env
             method on_class_ env _visitors_this =
               let _visitors_s0 =
                 self#on_env_annotation env _visitors_this.c_annotation  in
@@ -3920,7 +3944,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   _visitors_this.c_typeconsts
                  in
               let _visitors_s16 =
-                self#on_list self#on_class_var env
+                self#on_list self#on_static_var env
                   _visitors_this.c_static_vars
                  in
               let _visitors_s17 =
@@ -3930,7 +3954,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   _visitors_this.c_constructor
                  in
               let _visitors_s19 =
-                self#on_list self#on_method_ env
+                self#on_list self#on_static_method env
                   _visitors_this.c_static_methods
                  in
               let _visitors_s20 =
@@ -4795,6 +4819,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_r1 =
                 self#on_list self#on_expr env _visitors_this.ua_params  in
               { ua_name = _visitors_r0; ua_params = _visitors_r1 }
+            method on_static_var env = self#on_class_var env
+            method on_static_method env = self#on_method_ env
             method on_class_ env _visitors_this =
               let _visitors_r0 =
                 self#on_env_annotation env _visitors_this.c_annotation  in
@@ -4837,7 +4863,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   _visitors_this.c_typeconsts
                  in
               let _visitors_r16 =
-                self#on_list self#on_class_var env
+                self#on_list self#on_static_var env
                   _visitors_this.c_static_vars
                  in
               let _visitors_r17 =
@@ -4847,7 +4873,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   _visitors_this.c_constructor
                  in
               let _visitors_r19 =
-                self#on_list self#on_method_ env
+                self#on_list self#on_static_method env
                   _visitors_this.c_static_methods
                  in
               let _visitors_r20 =
@@ -6213,6 +6239,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   (Pervasives.(==) _visitors_this.ua_params _visitors_r1)
               then _visitors_this
               else { ua_name = _visitors_r0; ua_params = _visitors_r1 }
+            method on_static_var env = self#on_class_var env
+            method on_static_method env = self#on_method_ env
             method on_class_ env _visitors_this =
               let _visitors_r0 =
                 self#on_env_annotation env _visitors_this.c_annotation  in
@@ -6255,7 +6283,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   _visitors_this.c_typeconsts
                  in
               let _visitors_r16 =
-                self#on_list self#on_class_var env
+                self#on_list self#on_static_var env
                   _visitors_this.c_static_vars
                  in
               let _visitors_r17 =
@@ -6265,7 +6293,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   _visitors_this.c_constructor
                  in
               let _visitors_r19 =
-                self#on_list self#on_method_ env
+                self#on_list self#on_static_method env
                   _visitors_this.c_static_methods
                  in
               let _visitors_r20 =

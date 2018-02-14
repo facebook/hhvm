@@ -24,35 +24,40 @@ struct
     map_class_id_annotation : SourceEnv.t -> SourceCI.t -> TargetCI.t;
   }
 
-  let rec map_expr menv (p,e) =
-  let map_afield af =
+  let rec map_afield menv af =
     match af with
     | S.AFvalue e -> T.AFvalue (map_expr menv e)
-    | S.AFkvalue (e1, e2) -> T.AFkvalue (map_expr menv e1, map_expr menv e2) in
-  let map_field (e1, e2) = (map_expr menv e1, map_expr menv e2) in
-  let map_special_func sf =
+    | S.AFkvalue (e1, e2) -> T.AFkvalue (map_expr menv e1, map_expr menv e2)
+
+  and map_field menv (e1, e2) = (map_expr menv e1, map_expr menv e2)
+
+  and map_special_func menv sf =
     match sf with
     | S.Gena e -> T.Gena (map_expr menv e)
     | S.Genva el -> T.Genva (map_exprl menv el)
-    | S.Gen_array_rec e -> T.Gen_array_rec (map_expr menv e) in
-  let map_class_id_ ci =
+    | S.Gen_array_rec e -> T.Gen_array_rec (map_expr menv e)
+
+  and map_class_id_ menv ci =
     match ci with
     | S.CIparent -> T.CIparent
     | S.CIself -> T.CIself
     | S.CIstatic -> T.CIstatic
     | S.CIexpr e -> T.CIexpr (map_expr menv e)
-    | S.CI x -> T.CI x in
-  let map_class_id (ca, ci) =
-    (menv.map_class_id_annotation menv.env ca, map_class_id_ ci) in
+    | S.CI x -> T.CI x
+
+  and map_class_id menv (ca, ci) =
+    (menv.map_class_id_annotation menv.env ca, map_class_id_ menv ci)
+
+  and map_expr menv (p,e) =
   let e' =
     match e with
-    | S.Array afl -> T.Array (List.map afl map_afield)
-    | S.Darray fl -> T.Darray (List.map fl map_field)
+    | S.Array afl -> T.Array (List.map afl (map_afield menv))
+    | S.Darray fl -> T.Darray (List.map fl (map_field menv))
     | S.Varray el -> T.Varray (map_exprl menv el)
     | S.Shape sm -> T.Shape (ShapeMap.map (map_expr menv) sm)
     | S.ValCollection (k, el) -> T.ValCollection (k, map_exprl menv el)
     | S.KeyValCollection (k, fl) ->
-      T.KeyValCollection (k, List.map fl map_field)
+      T.KeyValCollection (k, List.map fl (map_field menv))
     | S.This -> T.This
     | S.Any -> T.Any
     | S.Id id -> T.Id id
@@ -68,11 +73,11 @@ struct
     | S.Yield_break -> T.Yield_break
     | S.Method_caller (x,y) -> T.Method_caller (x,y)
     | S.Smethod_id (x,y) -> T.Smethod_id (x,y)
-    | S.Class_get (ci,y) -> T.Class_get (map_class_id ci, y)
-    | S.Class_const (ci,y) -> T.Class_const (map_class_id ci, y)
+    | S.Class_get (ci,y) -> T.Class_get (map_class_id menv ci, y)
+    | S.Class_const (ci,y) -> T.Class_const (map_class_id menv ci, y)
     | S.Dollardollar x -> T.Dollardollar x
     | S.Typename x -> T.Typename x
-    | S.Special_func sf -> T.Special_func (map_special_func sf)
+    | S.Special_func sf -> T.Special_func (map_special_func menv sf)
     | S.Method_id(e, id) -> T.Method_id(map_expr menv e, id)
     | S.Obj_get(e1, e2, fl) -> T.Obj_get(map_expr menv e1, map_expr menv e2, fl)
     | S.Array_get(e1, e2) ->
@@ -81,7 +86,7 @@ struct
       T.Call(t, map_expr menv e1, hl, map_exprl menv el1, map_exprl menv el2)
     | S.String2 el -> T.String2 (map_exprl menv el)
     | S.Dollar e -> T.Dollar (map_expr menv e)
-    | S.Yield af -> T.Yield (map_afield af)
+    | S.Yield af -> T.Yield (map_afield menv af)
     | S.Await e -> T.Await (map_expr menv e)
     | S.Suspend e -> T.Suspend (map_expr menv e)
     | S.List el -> T.List (map_exprl menv el)
@@ -94,10 +99,10 @@ struct
     | S.Eif(e1, e2, e3) ->
       T.Eif(map_expr menv e1, Option.map e2 (map_expr menv), map_expr menv e3)
     | S.NullCoalesce (e1, e2) -> T.NullCoalesce (map_expr menv e1, map_expr menv e2)
-    | S.InstanceOf (e, ci) -> T.InstanceOf (map_expr menv e, map_class_id ci)
+    | S.InstanceOf (e, ci) -> T.InstanceOf (map_expr menv e, map_class_id menv ci)
     | S.Is (e, h) -> T.Is (map_expr menv e, h)
     | S.New (ci, el1, el2) ->
-      T.New (map_class_id ci, map_exprl menv el1, map_exprl menv el2)
+      T.New (map_class_id menv ci, map_exprl menv el1, map_exprl menv el2)
     | S.Efun (ef, ids) -> T.Efun(map_fun menv ef, ids)
     | S.Xml (id, pl, el) ->
       T.Xml (id, List.map pl (fun attr -> match attr with

@@ -1287,9 +1287,10 @@ module WithStatementAndDeclAndTypeParser
     | Else
     | Elseif
     | Empty
-    | Endif
     | Endfor
     | Endforeach
+    | Endif
+    | Endwhile
     | Enum
     | Eval
     | Extends

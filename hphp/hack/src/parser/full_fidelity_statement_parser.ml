@@ -366,7 +366,10 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, left_paren_token, expr_node, right_paren_token) =
       parse_paren_expr parser in
     let (parser, statement_node) =
-      parse_statement parser in
+      let _, open_token = next_token parser in
+      match Token.kind open_token with
+      | Colon -> parse_alternate_loop_statement parser ~terminator:Endwhile
+      | _ -> parse_statement parser in
     let syntax = make_while_statement while_keyword_token left_paren_token
       expr_node right_paren_token statement_node in
     (parser, syntax)

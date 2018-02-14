@@ -873,12 +873,14 @@ abstract class EditableToken extends EditableSyntax {
        return new ElseifToken($leading, $trailing);
     case 'empty':
        return new EmptyToken($leading, $trailing);
-    case 'endif':
-       return new EndifToken($leading, $trailing);
     case 'endfor':
        return new EndforToken($leading, $trailing);
     case 'endforeach':
        return new EndforeachToken($leading, $trailing);
+    case 'endif':
+       return new EndifToken($leading, $trailing);
+    case 'endwhile':
+       return new EndwhileToken($leading, $trailing);
     case 'enum':
        return new EnumToken($leading, $trailing);
     case 'eval':
@@ -1798,21 +1800,6 @@ final class EmptyToken extends EditableToken {
     return new EmptyToken($this->leading(), $trailing);
   }
 }
-final class EndifToken extends EditableToken {
-  public function __construct(
-    EditableSyntax $leading,
-    EditableSyntax $trailing) {
-    parent::__construct('endif', $leading, $trailing, 'endif');
-  }
-
-  public function with_leading(EditableSyntax $leading): EndifToken {
-    return new EndifToken($leading, $this->trailing());
-  }
-
-  public function with_trailing(EditableSyntax $trailing): EndifToken {
-    return new EndifToken($this->leading(), $trailing);
-  }
-}
 final class EndforToken extends EditableToken {
   public function __construct(
     EditableSyntax $leading,
@@ -1841,6 +1828,36 @@ final class EndforeachToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): EndforeachToken {
     return new EndforeachToken($this->leading(), $trailing);
+  }
+}
+final class EndifToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('endif', $leading, $trailing, 'endif');
+  }
+
+  public function with_leading(EditableSyntax $leading): EndifToken {
+    return new EndifToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): EndifToken {
+    return new EndifToken($this->leading(), $trailing);
+  }
+}
+final class EndwhileToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('endwhile', $leading, $trailing, 'endwhile');
+  }
+
+  public function with_leading(EditableSyntax $leading): EndwhileToken {
+    return new EndwhileToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): EndwhileToken {
+    return new EndwhileToken($this->leading(), $trailing);
   }
 }
 final class EnumToken extends EditableToken {

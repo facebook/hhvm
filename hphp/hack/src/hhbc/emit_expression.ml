@@ -669,7 +669,8 @@ and emit_cast env hint expr =
             || id = SN.Typehints.integer -> instr (IOp CastInt)
       | _ when id = SN.Typehints.bool
             || id = SN.Typehints.boolean -> instr (IOp CastBool)
-      | _ when id = SN.Typehints.string -> instr (IOp CastString)
+      | _ when id = SN.Typehints.string ||
+               id = "binary" -> instr (IOp CastString)
       | _ when id = SN.Typehints.object_cast -> instr (IOp CastObject)
       | _ when id = SN.Typehints.array -> instr (IOp CastArray)
       | _ when id = SN.Typehints.real
@@ -678,7 +679,6 @@ and emit_cast env hint expr =
       | _ when id = "unset" -> gather [ instr_popc; instr_null ]
       | _ -> emit_nyi "cast type"
       end
-      (* TODO: unset *)
     | _ ->
       emit_nyi "cast type"
     end in

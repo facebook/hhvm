@@ -260,7 +260,7 @@ let is_special_function env e args =
       end
     | "eval" -> n = 1
     | "idx" -> not (jit_enable_rename_function ()) && (n = 2 || n = 3)
-    | "class_alias" ->
+    | "class_alias" when is_global_namespace env ->
       begin
         match args with
         | [_, A.String _; _, A.String _]
@@ -1569,7 +1569,8 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     emit_box_if_necessary need_ref @@ emit_define env s e
   | A.Call ((_, A.Id (_, "eval")), _, [expr], _) ->
     emit_box_if_necessary need_ref @@ emit_eval env expr
-  | A.Call ((_, A.Id (_, "class_alias")), _, es, _) ->
+  | A.Call ((_, A.Id (_, "class_alias")), _, es, _)
+    when is_global_namespace env ->
     emit_box_if_necessary need_ref @@ emit_class_alias es
   | A.Call ((_, A.Id (_, "get_class")), _, [], _) ->
     emit_box_if_necessary need_ref @@ emit_get_class_no_args ()

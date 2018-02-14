@@ -11,11 +11,6 @@ zend/good/Zend/tests/bug45147.php
 zend/good/Zend/tests/bug48930.php
 zend/good/Zend/tests/bug55086.php
 zend/good/Zend/tests/bug55156.php
-zend/good/Zend/tests/class_alias_014.php
-zend/good/Zend/tests/class_alias_015.php
-zend/good/Zend/tests/class_alias_016.php
-zend/good/Zend/tests/class_alias_019.php
-zend/good/Zend/tests/class_alias_021.php
 zend/good/Zend/tests/class_name_as_scalar_error_001.php
 zend/good/Zend/tests/class_name_as_scalar_error_002.php
 zend/good/Zend/tests/closure_005.php

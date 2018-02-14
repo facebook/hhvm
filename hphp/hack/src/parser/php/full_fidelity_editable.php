@@ -877,6 +877,8 @@ abstract class EditableToken extends EditableSyntax {
        return new EndifToken($leading, $trailing);
     case 'endfor':
        return new EndforToken($leading, $trailing);
+    case 'endforeach':
+       return new EndforeachToken($leading, $trailing);
     case 'enum':
        return new EnumToken($leading, $trailing);
     case 'eval':
@@ -1824,6 +1826,21 @@ final class EndforToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): EndforToken {
     return new EndforToken($this->leading(), $trailing);
+  }
+}
+final class EndforeachToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('endforeach', $leading, $trailing, 'endforeach');
+  }
+
+  public function with_leading(EditableSyntax $leading): EndforeachToken {
+    return new EndforeachToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): EndforeachToken {
+    return new EndforeachToken($this->leading(), $trailing);
   }
 }
 final class EnumToken extends EditableToken {

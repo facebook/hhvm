@@ -335,7 +335,11 @@ module WithExpressionAndDeclAndTypeParser
     in
     let parser, right_paren_token = require_right_paren parser in
     let parser = Parser.pop_scope parser [ RightParen ] in
-    let parser, foreach_statement = parse_statement parser in
+    let parser, foreach_statement =
+      let _, open_token = next_token parser in
+      match Token.kind open_token with
+      | Colon -> parse_alternate_loop_statement parser ~terminator:Endforeach
+      | _ -> parse_statement parser in
     let syntax =
       make_foreach_statement foreach_keyword_token foreach_left_paren
       foreach_collection_name await_token as_token foreach_key foreach_arrow

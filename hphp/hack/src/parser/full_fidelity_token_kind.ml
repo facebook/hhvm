@@ -58,6 +58,7 @@ type t =
   | Empty
   | Endif
   | Endfor
+  | Endforeach
   | Enum
   | Eval
   | Extends
@@ -266,6 +267,7 @@ let from_string keyword =
   | "empty"           -> Some Empty
   | "endif"           -> Some Endif
   | "endfor"          -> Some Endfor
+  | "endforeach"      -> Some Endforeach
   | "enum"            -> Some Enum
   | "eval"            -> Some Eval
   | "extends"         -> Some Extends
@@ -446,6 +448,7 @@ let to_string kind =
   | Empty                         -> "empty"
   | Endif                         -> "endif"
   | Endfor                        -> "endfor"
+  | Endforeach                    -> "endforeach"
   | Enum                          -> "enum"
   | Eval                          -> "eval"
   | Extends                       -> "extends"

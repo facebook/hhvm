@@ -772,6 +772,8 @@ class EditableToken extends EditableSyntax
        return new EndifToken(leading, trailing);
     case 'endfor':
        return new EndforToken(leading, trailing);
+    case 'endforeach':
+       return new EndforeachToken(leading, trailing);
     case 'enum':
        return new EnumToken(leading, trailing);
     case 'eval':
@@ -1417,6 +1419,13 @@ class EndforToken extends EditableToken
   constructor(leading, trailing)
   {
     super('endfor', leading, trailing, 'endfor');
+  }
+}
+class EndforeachToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('endforeach', leading, trailing, 'endforeach');
   }
 }
 class EnumToken extends EditableToken
@@ -20176,6 +20185,7 @@ exports.ElseifToken = ElseifToken;
 exports.EmptyToken = EmptyToken;
 exports.EndifToken = EndifToken;
 exports.EndforToken = EndforToken;
+exports.EndforeachToken = EndforeachToken;
 exports.EnumToken = EnumToken;
 exports.EvalToken = EvalToken;
 exports.ExtendsToken = ExtendsToken;

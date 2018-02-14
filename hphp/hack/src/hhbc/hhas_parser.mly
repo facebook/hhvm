@@ -29,6 +29,7 @@ open Hhas_parser_actions
 %token TRYFAULTDIRECTIVE PROPERTYDIRECTIVE FILEPATHDIRECTIVE
 %token ISMEMOIZEWRAPPERDIRECTIVE STATICDIRECTIVE REQUIREDIRECTIVE
 %token SRCLOCDIRECTIVE
+%token METADATADIRECTIVE
 %token LANGLE
 %token RANGLE
 %token COLONCOLON
@@ -290,6 +291,13 @@ srcloc:
  | SRCLOCDIRECTIVE INT COLON INT COMMA INT COLON INT SEMI
    { (($2, $4), ($6, $8)) }
 ;
+
+metadata:
+ | METADATADIRECTIVE ID EQUALS ID SEMI nl { (* do nothing *) }
+ | METADATADIRECTIVE ID EQUALS STRING SEMI nl { (* do nothing *) }
+ | METADATADIRECTIVE ID EQUALS TRIPLEQUOTEDSTRING SEMI nl { (* do nothing *) }
+;
+
 staticdirective:
  | STATICDIRECTIVE VNAME EQUALS ID
    { ($2, $4) }
@@ -561,6 +569,7 @@ decllist:
     | FILEPATHDIRECTIVE STRING SEMI nl decllist {$5}
     | STRICTDIRECTIVE INT SEMI nl decllist { StrictTypes_decl ($2 = 1L) :: $5}
     | HHFILE INT SEMI nl decllist { HHFile_decl ($2 = 1L) :: $5 }
+    | metadata decllist { $2 }
 ;
 includesdecl:
     | INCLUDESDIRECTIVE {

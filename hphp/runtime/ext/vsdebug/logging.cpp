@@ -28,11 +28,11 @@ namespace VSDEBUG {
 static VSDebugLogger s_logger;
 bool VSDebugLogger::s_loggerDestroyed {false};
 
-void VSDebugLogger::InitializeLogging(const std::string& logFilePath) {
+int VSDebugLogger::InitializeLogging(const std::string& logFilePath) {
   std::unique_lock<std::recursive_mutex> lock(s_logger.m_lock);
 
   if (logFilePath.empty()) {
-    return;
+    return 0;
   }
 
   if (!s_logger.m_logFilePath.empty()) {
@@ -45,20 +45,21 @@ void VSDebugLogger::InitializeLogging(const std::string& logFilePath) {
 
   s_logger.m_logFilePath = logFilePath;
 
-  OpenLogFile();
+  return OpenLogFile();
 }
 
-void VSDebugLogger::OpenLogFile() {
+int VSDebugLogger::OpenLogFile() {
   const char* path = s_logger.m_logFilePath.c_str();
   s_logger.m_logFile = fopen(path, "a");
   if (s_logger.m_logFile == nullptr) {
-    return;
+    return errno;
   }
 
   // Start with a visual delimiter so it's easy to see where
   // the session started.
   Log(VSDebugLogger::LogLevelInfo, "-------------------------------");
   Log(VSDebugLogger::LogLevelInfo, "Created new log file.");
+  return 0;
 }
 
 void VSDebugLogger::SetLogRotationEnabled(bool enabled) {

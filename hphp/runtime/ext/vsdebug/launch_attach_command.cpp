@@ -51,7 +51,17 @@ bool LaunchAttachCommand::executeImpl(
 
   if (!logFilePath.empty()) {
     // Re-open logging using the file path specified by the client.
-    VSDebugLogger::InitializeLogging(logFilePath);
+    int result = VSDebugLogger::InitializeLogging(logFilePath);
+    if (result != 0) {
+      std::string msg = "Opening log file ";
+      msg += logFilePath.c_str();
+      msg += " failed: ";
+      msg += strerror(result);
+      m_debugger->sendUserMessage(
+        msg.c_str(),
+        DebugTransport::OutputLevelWarning
+      );
+    }
   }
 
   // Send the InitializedEvent to indicate to the front-end that we are up

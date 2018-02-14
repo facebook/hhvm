@@ -54,7 +54,9 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   }
   // Subtract unused size in hugetlb arenas
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
-  auto const unused = ManagedArena::totalUnusedSize();
+  size_t unused = 0;
+  if (auto a = alloc::low_huge_arena()) unused += a->unusedSize();
+  if (auto a = alloc::high_arena()) unused += a->unusedSize();
   procStatus.registerUnused(unused >> 10); // convert to kB
 #endif
   w->beginObject("Memory");

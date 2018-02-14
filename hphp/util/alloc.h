@@ -155,7 +155,14 @@ inline int low_dallocx_flags() {
 #endif
 
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
+
+#ifndef MAX_MANAGED_ARENA_COUNT
+#define MAX_MANAGED_ARENA_COUNT 8
+#endif
+static_assert(MAX_MANAGED_ARENA_COUNT >= 1, "");
+
 extern unsigned low_huge1g_arena;
+extern unsigned low_huge1g_arena_real;
 extern unsigned high_huge1g_arena;
 extern unsigned high_huge1g_arena_real;
 // Address range in the high1g arena is less than 16G.

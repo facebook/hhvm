@@ -34,6 +34,8 @@
 #include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>
 
+#include "hphp/util/bump-mapper.h"
+#include "hphp/util/extent-hooks.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/kernel-version.h"
 #include "hphp/util/managed-arena.h"
@@ -463,7 +465,7 @@ static void numa_purge_arena() {}
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
 static void set_arena_retain_grow_limit(unsigned id) {
   size_t mib[3];
-  size_t miblen = sizeof(mib)/sizeof(size_t);
+  size_t miblen = sizeof(mib) / sizeof(size_t);
 
   if (mallctlnametomib("arena.0.retain_grow_limit", mib, &miblen) == 0) {
     // Limit grow_retained to reduce fragmentation on 1g pages.
@@ -486,27 +488,23 @@ void setup_low_1g_arena(int pages) {
 #else
   constexpr int max_node = 0;
 #endif
-  try {
-    ManagedArena* ma = nullptr;
-    if (max_node < 1) {
-      // We either don't have libnuma, or run on a single-node system.  In
-      // either case, no need to worry about NUMA.
-      ma = new ManagedArena(reinterpret_cast<void*>(size1g * 4),
-                            size1g * pages);
-    } else {
-#ifdef HAVE_NUMA
-      // Tell the arena hook to interleave between all possible nodes, and try
-      // to grab the first page from Node 0 if it is allowed.
-      ma = new ManagedArena(reinterpret_cast<void*>(size1g * 4),
-                            size1g * pages, 0);
-#endif
-    }
-    if (ma) {
-      set_arena_retain_grow_limit(ma->id());
-      low_huge1g_arena = low_huge1g_arena_real = ma->id();
-    }
-  } catch (...) {
+  using namespace alloc;
+  BumpMapper* mapper = nullptr;
+  if (max_node < 1) {
+    // We either don't have libnuma, or run on a single-socket CPU.  In either
+    // case, no need to worry about NUMA.
+    mapper = new Bump1GMapper(pages);
+    // mapper->append(new Bump4KMapper);
+  } else {
+    mapper = new Bump1GMapper(pages, numa_node_set,
+                              0 /* starting from Node 0 */);
+    // mapper->append(new Bump4KMapper(numa_node_set));
   }
+  auto ma =
+    LowHugeArena::CreateAt(&g_lowHugeArena,
+                           size1g * 4, size1g * pages, false, mapper);
+  set_arena_retain_grow_limit(ma->id());
+  low_huge1g_arena = low_huge1g_arena_real = ma->id();
 }
 
 /*
@@ -521,27 +519,25 @@ void setup_high_1g_arena(int pages) {
 #else
   constexpr int max_node = 0;
 #endif
-  try {
-    ManagedArena* ma = nullptr;
-    if (max_node < 1) {
-      // We either don't have libnuma, or run on a single-node system.
-      ma = new ManagedArena(reinterpret_cast<void*>(kHigh1GArenaMaxAddr),
-                            size1g * pages);
-    } else {
-#ifdef HAVE_NUMA
-      // Tell the arena hook to interleave between all possible nodes, and try
-      // to grab the first page from a node other than the one where the first
-      // page for low-1G arena lives.
-      ma = new ManagedArena(reinterpret_cast<void*>(size1g * 16),
-                            size1g * pages, max_node / 2 + 1);
-#endif
-    }
-    if (ma) {
-      set_arena_retain_grow_limit(ma->id());
-      high_huge1g_arena = high_huge1g_arena_real = ma->id();
-    }
-  } catch (...) {
+  using namespace alloc;
+  BumpMapper* mapper;
+  if (max_node < 1) {
+    // We either don't have libnuma, or run on a single-node system.  In
+    // either case, no need to worry about NUMA.
+    mapper = new Bump1GMapper(pages);
+    // mapper->append(new Bump4KMapper);
+  } else {
+    // start grabbing 1G huge pages from a node different from the one for low
+    // arena.
+    mapper = new Bump1GMapper(pages, numa_node_set,
+                              max_node / 2 + 1);
+    // mapper->append(new Bump4KMapper(numa_node_set));
   }
+  auto ma = HighArena::CreateAt(&g_highArena,
+                                kHigh1GArenaMaxAddr, size1g * pages,
+                                false, mapper);
+  set_arena_retain_grow_limit(ma->id());
+  high_huge1g_arena = high_huge1g_arena_real = ma->id();
 }
 
 void* huge_page_extent_alloc(extent_hooks_t* extent_hooks, void* addr,
@@ -572,9 +568,8 @@ void* huge_page_extent_alloc(extent_hooks_t* extent_hooks, void* addr,
                                    (a0MetadataReservedSize - oldValue));
       }
     }
-  } else {
+  } else if (auto ma = alloc::high_arena()) {
     // For non arena 0: malloc / free allowed in this branch.
-    ManagedArena* ma = ManagedArena::GetArenaById(high_huge1g_arena_real);
     void* ret = ma->extent_alloc(extent_hooks, addr, size, alignment, zero,
                                  commit, high_huge1g_arena_real);
     if (ret != nullptr) return ret;
@@ -597,13 +592,13 @@ void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
   enableNumaArenaMetadata1GPage = enable_numa_arena;
   a0MetadataReservedSize = reserved;
 
-  if (!high_huge1g_arena_real) return;
+  auto ma = alloc::high_arena();
+  if (!ma) return;
   bool retain_enabled = false;
   mallctlRead("opt.retain", &retain_enabled);
   if (!enableArenaMetadata1GPage || !retain_enabled) return;
 
   bool zero = true, commit = true;
-  ManagedArena* ma = ManagedArena::GetArenaById(high_huge1g_arena_real);
   void* ret = ma->extent_alloc(nullptr, nullptr, a0MetadataReservedSize, size2m,
                                &zero, &commit, high_huge1g_arena_real);
   if (!ret) return;

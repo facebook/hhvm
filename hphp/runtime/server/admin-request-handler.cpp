@@ -57,6 +57,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/hphp-config.h"
+#include "hphp/util/hugetlb.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/mutex.h"
@@ -616,7 +617,15 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "hugepage", 9) == 0) {
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
-      transport->sendString(ManagedArena::reportStats(), 200);
+      std::string msg =
+        folly::sformat("{} 1G huge pages active\n", num_1g_pages());
+      if (auto a = alloc::low_huge_arena()) {
+        msg += a->reportStats();
+      }
+      if (auto a = alloc::high_arena()) {
+        msg += a->reportStats();
+      }
+      transport->sendString(msg, 200);
 #else
       transport->sendString("", 200);
 #endif

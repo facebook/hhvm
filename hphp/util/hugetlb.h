@@ -21,8 +21,9 @@
 
 namespace HPHP {
 
-constexpr size_t size1g = 1u << 30;
-constexpr size_t size2m = 1u << 21;
+constexpr size_t size1g = 1ul << 30;
+constexpr size_t size2m = 1ul << 21;
+constexpr size_t size4k = 1ul << 12;
 
 // Note: these functions for managing 1GB huge pages are not designed to be
 // thread-safe.  They should execute during program initialization where only
@@ -42,7 +43,7 @@ bool find_hugetlbfs_path();
 bool auto_mount_hugetlbfs();
 
 // Get a huge page from NUMA node `node`, and return the mapped address
-// suggested by `addr` or nullptr on failure.  If `addr` is nullptr, the system
+// specified by `addr` or nullptr on failure.  If `addr` is nullptr, the system
 // will choose a proper address.  If the address range [addr, addr+1G) already
 // contains address in the process address space, nullptr is returned and the
 // mapping won't be changed.  If `node` is -1, any NUMA node is OK.

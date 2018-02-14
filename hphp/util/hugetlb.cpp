@@ -277,6 +277,12 @@ inline void* mmap_2m_impl(void* addr, int prot, bool shared, bool fixed) {
     record_err_msg("mmap() with MAP_HUGE_2MB failed: ");
     return nullptr;
   }
+  if (addr && ret != addr) {
+    assert(fixed == false);
+    // Didn't get the intended address.
+    munmap(ret, size2m);
+    return nullptr;
+  }
 
   // Fault the page in.  This guarantees availablility of memory, and avoids
   // subsequent errors when the huge page isn't really available.  Ideally the

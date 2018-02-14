@@ -1087,7 +1087,8 @@ and bind_as_expr env ty aexpr =
   let env, ety = Env.expand_type env ty in
   let p, ty1, ty2 =
     match ety with
-    | _, Tclass ((p, _), [ty2]) -> (p, (Reason.Rnone, Tmixed), ty2)
+    | _, Tclass ((p, _), [ty2]) ->
+      (p, (Reason.Rnone, TUtils.desugar_mixed env Reason.Rnone), ty2)
     | _, Tclass ((p, _), [ty1; ty2]) -> (p, ty1, ty2)
     | _ -> assert false in
   match aexpr with
@@ -2052,7 +2053,7 @@ and expr_
       if (TypecheckerOptions.experimental_feature_enabled
         (Env.get_options env)
         TypecheckerOptions.experimental_forbid_nullable_cast)
-        && TUtils.is_option env ty2
+        && TUtils.is_option_non_mixed env ty2
       then begin
         let (r, ty2) = ty2 in
         Errors.nullable_cast p (Typing_print.error ty2) (Reason.to_pos r)

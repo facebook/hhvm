@@ -122,8 +122,8 @@ module LeastUpperBound = struct
     match types with
     | [] -> None
     | [t] -> Some t
-    | ty1 :: ty2 :: ts ->
-      let default = (fst ty1, Tmixed) in
+    | (r, _ as ty1) :: ty2 :: ts ->
+      let default = (r, TUtils.desugar_mixed env r) in
       let ty =
         type_visitor
           ~f:(pairwise_least_upper_bound env ~default)
@@ -135,8 +135,8 @@ module LeastUpperBound = struct
     match types with
     | [] -> None
     | [t] ->  Some t
-    | (tenv, p, k, ty1) :: (_, _, _, ty2) :: ts  ->
-      let default = (fst ty1, Tmixed) in
+    | (tenv, p, k, (r, _ as ty1)) :: (_, _, _, ty2) :: ts  ->
+      let default = (r, TUtils.desugar_mixed tenv r) in
       let ty =
         type_visitor
           ~f:(pairwise_least_upper_bound tenv ~default)

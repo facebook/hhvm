@@ -77,6 +77,15 @@ let rec is_option env ty =
       List.exists tyl (is_option env)
   | _ -> false
 
+let rec is_option_non_mixed env ty =
+  let _, ety = Env.expand_type env ty in
+  match snd ety with
+  | Toption (_, Tnonnull) -> false
+  | Toption _ -> true
+  | Tunresolved tyl ->
+      List.exists tyl (is_option_non_mixed env)
+  | _ -> false
+
 let is_shape_field_optional env { sft_optional; sft_ty } =
   let optional_shape_field_enabled =
     not @@
@@ -415,13 +424,7 @@ let rec non_null env ty =
         env, (r, Tabstract (ak, Some ty))
       | env, _ -> env, ty
     end
-  | r, Tmixed ->
-    let nonnull_allowed =
-      TypecheckerOptions.experimental_feature_enabled
-        (Env.get_options env)
-        TypecheckerOptions.experimental_nonnull in
-    if nonnull_allowed then env, (r, Tnonnull) else env, ty
-  | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
+  | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
     | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
     | Tobject | Tshape _ | Tdynamic) ->
       env, ty
@@ -688,3 +691,10 @@ let default_fun_param ty : 'a fun_param = {
 
 let fun_mutable user_attributes =
   Attributes.mem SN.UserAttributes.uaMutable user_attributes
+
+let desugar_mixed env r =
+  let nonnull_allowed =
+    TypecheckerOptions.experimental_feature_enabled
+      (Typing_env.get_tcopt env)
+      TypecheckerOptions.experimental_nonnull in
+  if nonnull_allowed then Toption (r, Tnonnull) else Tmixed

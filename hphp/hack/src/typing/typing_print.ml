@@ -74,6 +74,7 @@ module ErrorString = struct
     | Ttuple _           -> "a tuple"
     | Tmixed             -> "a mixed value"
     | Tnonnull           -> "a nonnull value"
+    | Toption (_, Tnonnull) -> "a mixed value"
     | Toption _          -> "a nullable type"
     | Tprim tp           -> tprim tp
     | Tvar _             -> "some value"
@@ -195,6 +196,7 @@ module Suggest = struct
     | Tnonnull               -> "nonnull"
     | Tgeneric s             -> s
     | Tabstract (AKgeneric s, _) -> s
+    | Toption (_, Tnonnull)  -> "mixed"
     | Toption ty             -> "?" ^ type_ ty
     | Tprim tp               -> prim tp
     | Tvar _                 -> "..."
@@ -334,6 +336,7 @@ module Full = struct
         to_doc (List.fold_left ids
           ~f:(fun acc (_, sid) -> acc ^ "::" ^ sid) ~init:"")
       ]
+    | Toption (_, Tnonnull) -> to_doc "mixed"
     | Toption x -> Concat [to_doc "?"; k x]
     | Tprim x -> prim to_doc x
     | Tvar n ->
@@ -676,6 +679,8 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   | Tabstract (AKdependent (`static, ids), opt_ty) ->
     obj @@ kind "path" @ ["type", obj @@ kind "static"]
       @ path ids @ as_type opt_ty
+  | Toption (_, Tnonnull) ->
+    obj @@ kind "mixed"
   | Toption ty ->
     obj @@ kind "nullable" @ args [ty]
   | Tprim tp ->

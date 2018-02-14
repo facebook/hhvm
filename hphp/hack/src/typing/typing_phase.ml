@@ -100,7 +100,9 @@ let env_with_self env =
 
 let rec localize_with_env ~ety_env env (dty: decl ty) =
   match dty with
-  | _, (Terr | Tany | Tmixed | Tnonnull | Tprim _  | Tdynamic) as x -> env, (ety_env, x)
+  | _, (Terr | Tany | Tnonnull | Tprim _ | Tdynamic) as x -> env, (ety_env, x)
+  | r, Tmixed ->
+      env, (ety_env, (r, TUtils.desugar_mixed env r))
   | r, Tthis ->
       let ty = match ety_env.this_ty with
         | Reason.Rnone, ty -> r, ty

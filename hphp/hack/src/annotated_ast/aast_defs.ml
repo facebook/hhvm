@@ -1,6 +1,6 @@
 (* @generated from aast_defs.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<a7b5e6331b3e08547d87510a3599fd49615f75cd>> *)
+(* SourceShasum<<39eff6124821587f9a18a273598b78e69a68b43b>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -64,6 +64,7 @@ and hint_ =
   | Hvarray_or_darray of hint 
   | Hprim of tprim 
   | Hthis 
+  | Hdynamic 
 and tprim =
   | Tvoid 
   | Tint 
@@ -435,7 +436,8 @@ and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
             (Format.fprintf fmt "(@[<2>Hprim@ ";
              ((__19 ()) fmt) a0;
              Format.fprintf fmt "@])")
-        | Hthis  -> Format.pp_print_string fmt "Hthis")
+        | Hthis  -> Format.pp_print_string fmt "Hthis"
+        | Hdynamic  -> Format.pp_print_string fmt "Hdynamic")
     [@ocaml.warning "-A"])
 
 and show_hint_ : hint_ -> Ppx_deriving_runtime.string =
@@ -746,6 +748,7 @@ include
         method on_Hprim env _visitors_c0 =
           let _visitors_r0 = self#on_tprim env _visitors_c0  in ()
         method on_Hthis env = ()
+        method on_Hdynamic env = ()
         method on_hint_ env _visitors_this =
           match _visitors_this with
           | Hoption _visitors_c0 -> self#on_Hoption env _visitors_c0
@@ -773,6 +776,7 @@ include
               self#on_Hvarray_or_darray env _visitors_c0
           | Hprim _visitors_c0 -> self#on_Hprim env _visitors_c0
           | Hthis  -> self#on_Hthis env
+          | Hdynamic  -> self#on_Hdynamic env
         method on_Tvoid env = ()
         method on_Tint env = ()
         method on_Tbool env = ()
@@ -935,6 +939,7 @@ include
         method on_Hprim env _visitors_c0 =
           let _visitors_s0 = self#on_tprim env _visitors_c0  in _visitors_s0
         method on_Hthis env = self#zero
+        method on_Hdynamic env = self#zero
         method on_hint_ env _visitors_this =
           match _visitors_this with
           | Hoption _visitors_c0 -> self#on_Hoption env _visitors_c0
@@ -962,6 +967,7 @@ include
               self#on_Hvarray_or_darray env _visitors_c0
           | Hprim _visitors_c0 -> self#on_Hprim env _visitors_c0
           | Hthis  -> self#on_Hthis env
+          | Hdynamic  -> self#on_Hdynamic env
         method on_Tvoid env = self#zero
         method on_Tint env = self#zero
         method on_Tbool env = self#zero
@@ -1129,6 +1135,7 @@ include
           let _visitors_r0 = self#on_tprim env _visitors_c0  in
           Hprim _visitors_r0
         method on_Hthis env = Hthis
+        method on_Hdynamic env = Hdynamic
         method on_hint_ env _visitors_this =
           match _visitors_this with
           | Hoption _visitors_c0 -> self#on_Hoption env _visitors_c0
@@ -1156,6 +1163,7 @@ include
               self#on_Hvarray_or_darray env _visitors_c0
           | Hprim _visitors_c0 -> self#on_Hprim env _visitors_c0
           | Hthis  -> self#on_Hthis env
+          | Hdynamic  -> self#on_Hdynamic env
         method on_Tvoid env = Tvoid
         method on_Tint env = Tint
         method on_Tbool env = Tbool
@@ -1388,6 +1396,8 @@ include
           else Hprim _visitors_r0
         method on_Hthis env _visitors_this =
           if true then _visitors_this else Hthis
+        method on_Hdynamic env _visitors_this =
+          if true then _visitors_this else Hdynamic
         method on_hint_ env _visitors_this =
           match _visitors_this with
           | Hoption _visitors_c0 as _visitors_this ->
@@ -1422,6 +1432,8 @@ include
           | Hprim _visitors_c0 as _visitors_this ->
               self#on_Hprim env _visitors_this _visitors_c0
           | Hthis  as _visitors_this -> self#on_Hthis env _visitors_this
+          | Hdynamic  as _visitors_this ->
+              self#on_Hdynamic env _visitors_this
         method on_Tvoid env _visitors_this =
           if true then _visitors_this else Tvoid
         method on_Tint env _visitors_this =

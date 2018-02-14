@@ -95,6 +95,7 @@ and unify_unwrapped ?(opts=TUtils.default_unify_opt) env
 
 and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
   match ty1, ty2 with
+  | Tdynamic, Tdynamic -> env, Tdynamic
   | Tprim x, Tprim y ->
     if x == y then env, Tprim x
     else
@@ -273,7 +274,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
                | Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _
                | Toption _ | Tvar _ | Tabstract (_, _) | Ttuple _
                | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
-               | Tshape _ -> false
+               | Tshape _ | Tdynamic -> false
              end
              ~do_: begin fun error ->
                if expr_dep = `cls x then
@@ -403,7 +404,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
     when generic_param_matches ~opts env x (r1,ty1) ->
     env, ty1
 
-  | (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _
+  | (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _), _ ->
         (* Make sure to add a dependency on any classes referenced here, even if

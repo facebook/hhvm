@@ -150,6 +150,11 @@ let tco_experimental_nonnull = "nonnull"
 let tco_unpacking_check_arity =
 "unpacking_check_arity"
 
+ (*
+  * Typechecker support for `dynamic` expressions.
+  *)
+let tco_experimental_dynamic_types = "dynamic_types"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -170,6 +175,7 @@ let tco_experimental_all =
      tco_experimental_disable_optional_and_unknown_shape_fields;
      tco_experimental_no_trait_reuse;
      tco_experimental_is_expression;
+     tco_experimental_dynamic_types;
      tco_experimental_no_fallback_in_namespaces;
      tco_experimental_nonnull;
      tco_unpacking_check_arity;

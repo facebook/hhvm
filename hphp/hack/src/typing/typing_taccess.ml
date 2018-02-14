@@ -153,7 +153,7 @@ and expand env (root_reason, root_ty as root) =
           let env = { env with tenv = tenv } in
           expand env ty
       | Tanon _ | Tobject | Tmixed | Tnonnull | Tprim _ | Tshape _ | Ttuple _
-      | Tarraykind _ | Tfun _ | Tabstract (_, _) ->
+      | Tarraykind _ | Tfun _ | Tabstract (_, _)  | Tdynamic ->
           let pos, tconst = head in
           let ty = Typing_print.error root_ty in
           Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos;

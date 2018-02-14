@@ -105,7 +105,13 @@ and _ ty_ =
   | Tany
   | Tmixed
   | Tnonnull
-
+  (* A dynamic type is a special type which, similar to mixed, is considered the
+   * supertype of all types (except mixed), can be used in any operation like
+   * TAny, but, unlike TAny, does not subtype or unify with regular types:
+   * it captures dynamicism within function scope.
+   * See tests in typecheck/dynamic/ for more examples.
+   *)
+  | Tdynamic
   | Terr
 
   (* Nullable, called "option" in the ML parlance. *)

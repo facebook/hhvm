@@ -80,7 +80,7 @@ let save_type hint_kind env x arg =
             let x_pos = Reason.to_pos (fst x) in
             add_type env x_pos hint_kind arg;
         )
-    | _, (Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _
+    | _, (Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> ()
   end
@@ -134,6 +134,7 @@ let get_implements tcopt (_, x) =
         | _,
           (
             Tany
+            | Tdynamic
             | Terr
             | Tmixed
             | Tnonnull
@@ -172,6 +173,7 @@ and normalize_ tcopt = function
         | _, (Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _
           | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject | Tshape _
+          | Tdynamic
              ) -> true
       end in
       normalize_ tcopt (Tunresolved tyl)
@@ -181,7 +183,7 @@ and normalize_ tcopt = function
        *)
       let rl = List.map rl begin function
         | _, Tclass (x, []) -> x
-        | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _
+        | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tdynamic
           | Toption _ | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
           | Tshape _) -> raise Exit
@@ -243,6 +245,7 @@ and normalize_ tcopt = function
       in
       Tclass ((pos, name), List.map tyl (normalize tcopt))
   | Ttuple tyl -> Ttuple (List.map tyl (normalize tcopt))
+  | Tdynamic -> Tdynamic
   | Tanon _ -> raise Exit
   | Tobject -> raise Exit
   | Tabstract _ -> raise Exit

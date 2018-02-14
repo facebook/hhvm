@@ -819,6 +819,7 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       )
     end
   | _, (_, Tmixed) -> env
+  | _, (_, Tdynamic) -> env
   | _, (_, Toption (_, Tnonnull)) -> env
   | (_,
      (Tprim Nast.(Tint | Tbool | Tfloat | Tstring
@@ -826,7 +827,7 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _
       | Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _))),
     (_, Tnonnull) -> env
-  | (_, (Tprim Nast.Tvoid | Tmixed | Toption _ | Tvar _
+  | (_, (Tprim Nast.Tvoid | Tmixed | Tdynamic | Toption _ | Tvar _
          | Tabstract ((AKnewtype _ | AKdependent _), None))),
     (_, Tnonnull) -> fst (Unify.unify env ty_super ty_sub)
   | (_, Tprim (Nast.Tint | Nast.Tfloat)), (_, Tprim Nast.Tnum) -> env
@@ -1261,8 +1262,8 @@ and sub_string p env ty2 =
         Errors.object_string p (Reason.to_pos r2);
         env
       )
-  | _, (Tany | Terr) ->
-    env (* Unifies with anything *)
+  | _, (Tany | Terr | Tdynamic) ->
+    env (* Tany, Terr and Tdynamic are considered Stringish by default *)
   | _, Tobject -> env
   | _, (Tmixed | Tnonnull | Tarraykind _ | Tvar _
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->

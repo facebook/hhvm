@@ -219,6 +219,7 @@ module Typehints = struct
   let mixed    = "mixed"
   let nonnull  = "nonnull"
   let this     = "this"
+  let dynamic  = "dynamic"
 
   let int     = "int"
   let bool    = "bool"
@@ -245,7 +246,8 @@ module Typehints = struct
     let x = String.lowercase_ascii x in
     x = void     || x = noreturn || x = int      || x = bool     || x = float ||
     x = num      || x = string   || x = resource || x = mixed    || x = array ||
-    x = arraykey || x = integer  || x = boolean  || x = double   || x = real
+    x = arraykey || x = integer  || x = boolean  || x = double   || x = real  ||
+    x = dynamic
 
   let is_namespace_with_reserved_hh_name x =
     let unqualify qualified_name =

@@ -37,7 +37,8 @@ let rec walk_and_gather_xhp_ ~env ~ureason ~pos cty =
   let env, cty = Env.expand_type env cty in
   match (snd cty) with
   | Tany
-  | Terr -> env, []
+  | Terr
+  | Tdynamic -> env, []
   | Tunresolved tyl ->
       (* If it's unresolved, make sure it can only be XHP and add every
        * possible class. *)

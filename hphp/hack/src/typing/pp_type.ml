@@ -55,6 +55,7 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
   | Terr -> Format.pp_print_string fmt "Terr"
   | Tthis -> Format.pp_print_string fmt "Tthis"
   | Tmixed -> Format.pp_print_string fmt "Tmixed"
+  | Tdynamic -> Format.pp_print_string fmt "Tdynamic"
   | Tnonnull -> Format.pp_print_string fmt "Tnonnull"
   | Tapply (a0,a1) ->
     Format.fprintf fmt "(@[<2>Tapply (@,";

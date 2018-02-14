@@ -29,6 +29,7 @@ class type type_mapper_type = object
   method on_infinite_tvar : env -> Reason.t -> int -> result
   method on_tmixed : env -> Reason.t -> result
   method on_tnonnull : env -> Reason.t -> result
+  method on_tdynamic : env -> Reason.t -> result
   method on_tany : env -> Reason.t -> result
   method on_terr : env -> Reason.t -> result
   method on_tanon : env -> Reason.t -> locl fun_arity -> Ident.t -> result
@@ -70,6 +71,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
   method on_infinite_tvar = this#on_tvar
   method on_tmixed env r = env, (r, Tmixed)
   method on_tnonnull env r = env, (r, Tnonnull)
+  method on_tdynamic env r = env, (r, Tdynamic)
   method on_tany env r = env, (r, Tany)
   method on_terr env r = env, (r, Terr)
   method on_tanon env r fun_arity id = env, (r, Tanon (fun_arity, id))
@@ -120,6 +122,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
     | Tfun fun_type -> this#on_tfun env r fun_type
     | Tabstract (ak, opt_ty) -> this#on_tabstract env r ak opt_ty
     | Tclass (x, tyl) -> this#on_tclass env r x tyl
+    | Tdynamic -> this#on_tdynamic env r
     | Tobject -> this#on_tobject env r
     | Tshape (fields_known, fdm) -> this#on_tshape env r fields_known fdm
 end

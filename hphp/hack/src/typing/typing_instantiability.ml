@@ -26,6 +26,7 @@ class type ['a] hint_visitor_type = object
   method on_hint_  : 'a -> Nast.hint_ -> 'a
 
   method on_any    : 'a -> 'a
+  method on_dynamic  : 'a -> 'a
   method on_mixed  : 'a -> 'a
   method on_nonnull : 'a -> 'a
   method on_this   : 'a -> 'a
@@ -58,6 +59,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
 
   method on_hint_ acc h = match h with
     | Hany                  -> this#on_any    acc
+    | Hdynamic              -> this#on_dynamic acc
     | Hmixed                -> this#on_mixed  acc
     | Hnonnull              -> this#on_nonnull acc
     | Hthis                 -> this#on_this   acc
@@ -77,6 +79,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
   method on_any acc = acc
   method on_mixed acc = acc
   method on_nonnull acc = acc
+  method on_dynamic acc = acc
   method on_this acc = acc
   method on_tuple acc hl =
     List.fold_left ~f:this#on_hint ~init:acc (hl:Nast.hint list)
@@ -131,7 +134,7 @@ end
 module CheckInstantiability = struct
 
   let validate_classname = function
-    | _, (Happly _ | Hthis | Hany | Hmixed | Hnonnull | Habstr _ | Haccess _) -> ()
+    | _, (Happly _ | Hthis | Hany | Hmixed | Hnonnull | Habstr _ | Haccess _ | Hdynamic) -> ()
     | p,
       (
         Htuple _

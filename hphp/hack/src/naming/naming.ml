@@ -921,6 +921,15 @@ module Make (GetLocals : GetLocals) = struct
             TypecheckerOptions.experimental_nonnull in
         if nonnull_allowed then N.Hnonnull
         else (Errors.nonnull_not_supported p; N.Hany)
+      | x when x = SN.Typehints.dynamic ->
+          if TypecheckerOptions.experimental_feature_enabled
+              (fst env).tcopt
+              TypecheckerOptions.experimental_dynamic_types
+          then
+            N.Hdynamic
+          else
+            let _ = Errors.experimental_feature p "dynamic as a keyword is experimental" in
+            N.Hany
       | x when x = SN.Typehints.this && not forbid_this ->
           if hl != []
           then Errors.this_no_argument p;

@@ -42,6 +42,7 @@ let unwrap_class_type = function
       | Ttuple _
       | Tshape _
       | Taccess (_, _)
+      | Tdynamic
       | Tthis
     ) ->
     raise @@ Invalid_argument "unwrap_class_type got non-class"

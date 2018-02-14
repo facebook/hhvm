@@ -17,6 +17,7 @@ class type ['a] type_visitor_type = object
   method on_terr : 'a -> Reason.t -> 'a
   method on_tmixed : 'a -> Reason.t -> 'a
   method on_tnonnull : 'a -> Reason.t -> 'a
+  method on_tdynamic : 'a -> Reason.t -> 'a
   method on_tthis : 'a -> Reason.t -> 'a
   method on_tarray : 'a -> Reason.t -> 'b ty option -> 'b ty option -> 'a
   method on_tvarray_or_darray : 'a -> Reason.t -> decl ty -> 'a
@@ -48,6 +49,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
   method on_terr acc _ = acc
   method on_tmixed acc _ = acc
   method on_tnonnull acc _ = acc
+  method on_tdynamic acc _ = acc
   method on_tthis acc _ = acc
   method on_tarray: type a. _ -> Reason.t -> a ty option -> a ty option -> _ =
     fun acc _ ty1_opt ty2_opt ->
@@ -118,6 +120,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     | Terr -> this#on_terr acc r
     | Tmixed -> this#on_tmixed acc r
     | Tnonnull -> this#on_tnonnull acc r
+    | Tdynamic -> this#on_tdynamic acc r
     | Tthis -> this#on_tthis acc r
     | Tarray (ty1_opt, ty2_opt) ->
       this#on_tarray acc r ty1_opt ty2_opt

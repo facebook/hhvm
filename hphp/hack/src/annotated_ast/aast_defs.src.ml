@@ -72,6 +72,8 @@ and hint_ =
   | Hvarray_or_darray of hint
   | Hprim of tprim
   | Hthis
+  | Hdynamic
+
 
 (* AST types such as Happly("int", []) are resolved to Hprim values *)
 and tprim =

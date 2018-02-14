@@ -119,6 +119,7 @@ and class_id_ f = function
 and hint f (p, h) = f p, hint_ f h
 
 and hint_ f = function
+  | Hdynamic -> Hdynamic
   | Hany -> Hany
   | Hmixed -> Hmixed
   | Hnonnull -> Hnonnull

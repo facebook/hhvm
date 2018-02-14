@@ -423,7 +423,7 @@ let rec non_null env ty =
     if nonnull_allowed then env, (r, Tnonnull) else env, ty
   | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
     | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tobject | Tshape _) ->
+    | Tobject | Tshape _ | Tdynamic) ->
       env, ty
 
 (*****************************************************************************)
@@ -531,6 +531,7 @@ let unwrap_class_type = function
   | _,
     (
       Terr
+      | Tdynamic
       | Tany
       | Tmixed
       | Tnonnull

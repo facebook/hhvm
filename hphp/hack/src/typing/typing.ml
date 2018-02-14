@@ -753,7 +753,7 @@ and stmt env = function
           env, T.Return(p, Some te)
       | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
         | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
-        | Tanon (_, _) | Tobject | Tshape _) ->
+        | Tanon (_, _) | Tobject | Tshape _ | Tdynamic) ->
           Typing_suggest.save_return env return_type rty;
           let env = Type.sub_type pos Reason.URreturn env rty return_type in
           env, T.Return(p, Some te)
@@ -840,12 +840,24 @@ and stmt env = function
       let env = LEnv.intersect_list env parent_lenv cl in
       env, T.Switch(te, tcl)
   | Foreach (e1, e2, b) as st ->
+      let rec is_dynamic ty =
+        match Env.expand_type env ty with
+        | (_, (_, Tdynamic)) -> true
+        | (_, (_, Tunresolved tyl)) -> tyl <> [] && List.for_all tyl is_dynamic
+        | _ -> false in
+      let check_dynamic env ty ~f =
+        if is_dynamic ty then
+          env
+        else f() in
       (* It's safe to do foreach over a disposable, as no leaking is possible *)
       let env, te1, ty1 = expr ~accept_using_var:true env e1 in
       let parent_lenv = env.Env.lenv in
       let env = Env.freeze_local_env env in
       let env, ty2 = as_expr env (fst e1) e2 in
-      let env = Type.sub_type (fst e1) Reason.URforeach env ty1 ty2 in
+      let env =
+        check_dynamic env ty1 ~f:begin fun () ->
+          Type.sub_type (fst e1) Reason.URforeach env ty1 ty2
+        end in
       let alias_depth =
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
       let env, (te2, tb) = Env.in_loop env begin
@@ -922,7 +934,7 @@ and check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
       env
     | Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tclass _ | Toption _
       | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _ | Tanon (_, _)
-      | Tobject | Tshape _ -> env
+      | Tobject | Tshape _ | Tdynamic -> env
 
 and case_list parent_lenv ty env cl =
   let env = { env with Env.lenv = parent_lenv } in
@@ -2927,6 +2939,12 @@ and assign_ p ur env e1 ty2 =
               env, te
             end in
             make_result env (T.List tel) ty2
+          | (r, (Tdynamic)) ->
+            let env, tel = List.map_env env el begin fun env e ->
+              let env, te, _ = assign (fst e) env e (r, Tdynamic) in
+              env, te
+            end in
+            make_result env (T.List tel) ty2
           (* Pair<t1,t2> *)
           | ((r, Tclass ((_, coll), [ty1; ty2])) as folded_ety2)
             when coll = SN.Collections.cPair ->
@@ -3134,6 +3152,7 @@ and call_parent_construct pos env el uel =
     | _,
       (
         Tany
+        | Tdynamic
         | Tmixed
         | Tnonnull
         | Tarray (_, _)
@@ -3168,7 +3187,7 @@ and call_parent_construct pos env el uel =
               default
             | None -> assert false)
         | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _
-              | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tvar _
+              | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
               | Tabstract (_, _) | Tanon (_, _) | Tunresolved _ | Tobject
              ) ->
            Errors.parent_outside_class pos;
@@ -3185,7 +3204,7 @@ and is_abstract_ft fty = match fty with
   | _r, Tfun { ft_abstract = true; _ } -> true
   | _r, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
             | Tvar _ | Tfun _ | Tclass (_, _) | Tabstract (_, _) | Ttuple _
-            | Tanon _ | Tunresolved _ | Tobject | Tshape _
+            | Tanon _ | Tunresolved _ | Tobject | Tshape _ | Tdynamic
         )
     -> false
 
@@ -3962,6 +3981,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
           array_get is_lvalue p env ty1 e2 ty2
       end
   | Terr -> env, (Reason.Rnone, Terr)
+  | Tdynamic -> env, ety1
   | Tany | Tarraykind (AKany | AKempty) ->
       env, (Reason.Rnone, Tany)
   | Tprim Tstring ->
@@ -4118,6 +4138,7 @@ and array_append p env ty1 =
               Tclass ((p, SN.Collections.cPair), []))
         | Tarraykind (AKvec ty | AKvarray ty) ->
             env, ty
+        | Tdynamic -> env, ty
         | Tobject ->
             if Env.is_strict env
             then error_array_append env p ty1
@@ -4185,6 +4206,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
   match cty with
   | _, Tany -> env, (Reason.Rnone, Tany), None
   | _, Terr -> env, err_none, None
+  | _, Tdynamic -> env, cty, None
   | _, Tunresolved tyl ->
       let env, tyl = List.map_env env tyl begin fun env ty ->
       let env, ty, _ =
@@ -4441,7 +4463,7 @@ and obj_get_concrete_ty ~is_method ~valkind ~pos_params ?(explicit_tparams=[])
 
       env, member_ty, Some (mem_pos, vis)
     end
-
+  | _, Tdynamic -> env, concrete_ty, None
   | _, Tobject
   | _, Tany
   | _, Terr ->
@@ -4539,7 +4561,7 @@ and type_could_be_null env ty1 =
   List.exists tyl
     (fun ety ->
       match snd ety with
-        Toption _ | Tunresolved _ | Tmixed | Tany | Terr -> true
+        Toption _ | Tunresolved _ | Tmixed | Tany | Terr | Tdynamic -> true
       | Tarraykind _ | Tprim _ | Tvar _ | Tfun _ | Tabstract _
       | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tobject
       | Tshape _ | Tnonnull -> false)
@@ -4568,7 +4590,7 @@ and class_id_for_new p env cid =
           end
         | _, (Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _
-              | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _) ->
+              | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _ | Tdynamic ) ->
           get_info res tyl in
   get_info [] [ty]
 
@@ -4688,7 +4710,7 @@ and static_class_id p env =
             make_result env T.CIparent (r, TUtils.this_of (r, snd parent))
           )
       | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
-            | Tfun _ | Ttuple _ | Tshape _ | Tvar _
+            | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
             | Tanon (_, _) | Tunresolved _ | Tabstract (_, _) | Tobject
            ) ->
         let parent = Env.get_parent env in
@@ -4728,6 +4750,7 @@ and static_class_id p env =
         | _, Tclass _ -> ty
         | r, Tunresolved tyl -> r, Tunresolved (List.map tyl resolve_ety)
         | _, Tvar _ as ty -> resolve_ety ty
+        | _, Tdynamic as ty -> ty
         | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tmixed | Tobject)
               when not (Env.is_strict env) ->
           Reason.Rnone, Tany
@@ -4856,7 +4879,7 @@ and call_ ~expected pos env fty el uel =
   in
   let env, efty = Env.expand_type env fty in
   (match efty with
-  | _, (Terr | Tany | Tunresolved []) ->
+  | _, (Terr | Tany | Tunresolved [] | Tdynamic) ->
     let el = el @ uel in
     let env, tel = List.map_env env el begin fun env elt ->
       let env, te, arg_ty =
@@ -4867,7 +4890,12 @@ and call_ ~expected pos env fty el uel =
     end in
     let env = call_untyped_unpack env uel in
     Typing_hooks.dispatch_fun_call_hooks [] (List.map (el @ uel) fst) env;
-    env, tel, [], (Reason.Rnone, Tany)
+    let ty =
+      if snd efty = Tdynamic then
+        efty
+      else (Reason.Rnone, Tany)
+    in
+    env, tel, [], ty
   | r, Tunresolved tyl ->
     let env, retl = List.map_env env tyl begin fun env ty ->
       let env, _, _, ty = call ~expected pos env ty el uel in env, ty
@@ -5114,6 +5142,16 @@ and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)
 
 and unop ?(allow_uref=false) p env uop te ty =
+let rec is_dynamic ty =
+  match Env.expand_type env ty with
+  | (_, (_, Tdynamic)) -> true
+  | (_, (_, Tunresolved tyl)) -> List.exists tyl is_dynamic
+  | _ -> false in
+  let check_dynamic env ty ~f =
+    if is_dynamic ty then
+      env, (fst ty, Tdynamic)
+    else f()
+  in
   let make_result env te result_ty =
     env, T.make_typed_expr p result_ty (T.Unop(uop, te)), result_ty in
   match uop with
@@ -5123,9 +5161,13 @@ and unop ?(allow_uref=false) p env uop te ty =
       make_result env te (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.Utild ->
       (* ~$x (bitwise not) only works with int *)
-      let env = Type.sub_type p Reason.URnone env ty
-        (Reason.Rarith p, Tprim Tint) in
-      make_result env te (Reason.Rarith p, Tprim Tint)
+      let env, ty =
+        check_dynamic env ty ~f:begin fun () ->
+          let int_ty = (Reason.Rarith p, Tprim Tint) in
+          Type.sub_type p Reason.URnone env ty int_ty, int_ty
+        end
+      in
+      make_result env te ty
   | Ast.Uincr
   | Ast.Upincr
   | Ast.Updecr
@@ -5133,8 +5175,10 @@ and unop ?(allow_uref=false) p env uop te ty =
   | Ast.Uplus
   | Ast.Uminus ->
       (* math operators work with int or floats, so we call sub_type *)
-      let env = Type.sub_type p Reason.URnone env ty
-        (Reason.Rarith p, Tprim Tnum) in
+      let env, ty = check_dynamic env ty ~f:begin fun () ->
+          Type.sub_type p Reason.URnone env ty (Reason.Rarith p, Tprim Tnum), ty
+        end
+      in
       make_result env te ty
   | Ast.Uref ->
       (* We basically just ignore references in non-strict files *)
@@ -5146,6 +5190,11 @@ and unop ?(allow_uref=false) p env uop te ty =
       make_result env te ty
 
 and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
+  let rec is_dynamic ty =
+    match Env.expand_type env ty with
+    | (_, (_, Tdynamic)) -> true
+    | (_, (_, Tunresolved tyl)) -> List.exists tyl is_dynamic
+    | _ -> false in
   let rec is_any ty =
     match Env.expand_type env ty with
     | (_, (_, (Tany | Terr))) -> true
@@ -5171,8 +5220,15 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
     Env.expand_type env ty1 in
   let make_result env te1 te2 ty =
     env, T.make_typed_expr p ty (T.Binop(bop, te1, te2)), ty in
+  let check_dynamic f =
+    if is_dynamic ty1 then
+      make_result env te1 te2 (fst ty1, Tdynamic)
+    else if is_dynamic ty2 then
+      make_result env te1 te2 (fst ty2, Tdynamic)
+    else f ()
+  in
   match bop with
-  | Ast.Plus ->
+  | Ast.Plus -> check_dynamic begin fun () ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
       let env, ty2 = TUtils.fold_unresolved env ty2 in
       let env, ety1 = Env.expand_type env ty1 in
@@ -5211,7 +5267,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
       | (_, Tarraykind _), (_, Tany) ->
           let env, ty = Type.unify p Reason.URnone env ty1 ty2 in
           make_result env te1 te2 ty
-      | (_, (Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Toption _
+      | (_, (Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
         | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
             )
@@ -5222,8 +5278,8 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
           | T.Binop (_, te1, te2) -> make_result env te1 te2 ty
           | _ -> assert false
       )
-  | Ast.Minus | Ast.Star ->
-    begin
+      end
+  | Ast.Minus | Ast.Star -> check_dynamic begin fun () ->
       let env, ty1 = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tnum) in
       let env, ty2 = enforce_sub_ty env ty2 (Reason.Rarith p2, Tprim Tnum) in
       (* If either side is a float then float: 1.0 - 1 -> float *)
@@ -5254,8 +5310,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
           (* Otherwise? *)
           | _, _ -> make_result env te1 te2 ty1
     end
-  | Ast.Slash | Ast.Starstar ->
-    begin
+  | Ast.Slash | Ast.Starstar -> check_dynamic begin fun () ->
       let env, ty1 = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tnum) in
       let env, ty2 = enforce_sub_ty env ty2 (Reason.Rarith p2, Tprim Tnum) in
       (* If either side is a float then float *)
@@ -5277,7 +5332,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
         | _ -> Reason.Rarith_ret p in
       make_result env te1 te2 (r, Tprim Tnum)
     end
-  | Ast.Percent ->
+  | Ast.Percent -> check_dynamic begin fun () ->
      (* Integer remainder function has type
       *   function(int, int) : int
       * [Actually, result can be false if second arg is zero]
@@ -5285,8 +5340,8 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
       let env, _ = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tint) in
       let env, _ = enforce_sub_ty env ty2 (Reason.Rarith p1, Tprim Tint) in
       make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
-  | Ast.Xor ->
-    begin
+    end
+  | Ast.Xor -> check_dynamic begin fun () ->
       match is_sub_prim env ty1 Tbool, is_sub_prim env ty2 Tbool with
       | (Some _, _) | (_, Some _) ->
         (* Logical xor:
@@ -5335,8 +5390,10 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
         (* This is universal:
          *   function<T>(T, T): bool
          *)
-        let env, _ = Type.unify p Reason.URnone env ty1 ty2 in
-        make_result env te1 te2 (Reason.Rcomp p, ty_result)
+        check_dynamic begin fun () ->
+          let env, _ = Type.unify p Reason.URnone env ty1 ty2 in
+          make_result env te1 te2 (Reason.Rcomp p, ty_result)
+        end
   | Ast.Dot ->
     (* A bit weird, this one:
      *   function(Stringish | string, Stringish | string) : string)
@@ -5348,10 +5405,11 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast.AMpamp
   | Ast.BArbar ->
       make_result env te1 te2 (Reason.Rlogic_ret p, Tprim Tbool)
-  | Ast.Amp | Ast.Bar | Ast.Ltlt | Ast.Gtgt ->
+  | Ast.Amp | Ast.Bar | Ast.Ltlt | Ast.Gtgt -> check_dynamic begin fun () ->
       let env, _ = enforce_sub_ty env ty1 (Reason.Rbitwise p1, Tprim Tint) in
       let env, _ = enforce_sub_ty env ty2 (Reason.Rbitwise p2, Tprim Tint) in
       make_result env te1 te2 (Reason.Rbitwise_ret p, Tprim Tint)
+    end
   | Ast.Eq _ ->
       assert false
 
@@ -5423,7 +5481,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
       (match ety with
       | _, Tarraykind (AKany | AKempty)
       | _, Tprim Tbool -> env
-      | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _
+      | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
         | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
         ) ->
@@ -5617,7 +5675,8 @@ and condition ?lhs_of_null_coalesce env tparamet =
           env, (r, Tunresolved tyl)
         | _, (Terr | Tany | Tmixed | Tnonnull| Tarraykind _ | Tprim _ | Tvar _
             | Tfun _ | Tabstract ((AKenum _ | AKnewtype _ | AKdependent _), _)
-            | Ttuple _ | Tanon (_, _) | Toption _ | Tobject | Tshape _) ->
+            | Ttuple _ | Tanon (_, _) | Toption _ | Tobject | Tshape _
+            | Tdynamic) ->
           env, (Reason.Rwitness ivar_pos, Tobject)
       in
       let env, x_ty = resolve_obj env obj_ty in
@@ -5674,9 +5733,9 @@ and check_null_wtf env p ty =
             Errors.sketchy_null_check_primitive p
           | _, (Terr | Tany | Tarraykind _ | Toption _ | Tvar _ | Tfun _
           | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
-          | Tunresolved _ | Tobject | Tshape _ ) -> ());
+          | Tunresolved _ | Tobject | Tshape _ | Tdynamic) -> ());
         env
-      | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
+      | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _ | Tdynamic
         | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
         | Tunresolved _ | Tobject | Tshape _ ) -> env
 
@@ -5990,6 +6049,7 @@ and check_extend_abstract_const ~is_final p smap =
     | _,
       (
         Terr
+        | Tdynamic
         | Tany
         | Tmixed
         | Tnonnull

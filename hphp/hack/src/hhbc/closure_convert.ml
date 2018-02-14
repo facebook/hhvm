@@ -373,6 +373,7 @@ let make_closure ~class_num
       ClassVars
       { cv_kinds = [Private]
       ; cv_hint = None
+      ; cv_is_promoted_variadic = false
       ; cv_names = cvl
       ; cv_doc_comment = None
       ; cv_user_attributes = []};

@@ -1702,6 +1702,7 @@ and class_member_def env =
       ClassVars
       { cv_kinds = modifiers
       ; cv_hint = None
+      ; cv_is_promoted_variadic = false
       ; cv_names = cvars
       ; cv_doc_comment = None
       ; cv_user_attributes = attrs
@@ -1718,6 +1719,7 @@ and class_member_def env =
       ClassVars
       { cv_kinds = modifiers
       ; cv_hint = Some h
+      ; cv_is_promoted_variadic = false
       ; cv_names = cvars
       ; cv_doc_comment = None
       ; cv_user_attributes = attrs
@@ -1893,6 +1895,7 @@ and class_member_word env member_start ~attrs ~modifiers = function
       ClassVars
       { cv_kinds = modifiers
       ; cv_hint = Some h
+      ; cv_is_promoted_variadic = false
       ; cv_names = cvars
       ; cv_doc_comment = None
       ; cv_user_attributes = attrs
@@ -1996,6 +1999,7 @@ and param_implicit_field vis p =
   let member = ClassVars
   { cv_kinds = [vis]
   ; cv_hint = p.param_hint
+  ; cv_is_promoted_variadic = p.param_is_variadic
   ; cv_names = [span, cvname, None]
   ; cv_doc_comment = None
   ; cv_user_attributes = p.param_user_attributes

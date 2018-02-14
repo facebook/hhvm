@@ -1,6 +1,6 @@
 (* @generated from ast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<c51276e77467498002c4b788d183ab6288eafc15>> *)
+(* SourceShasum<<36ea0f8d69ba93a3cfa3229d612370640d610fa8>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -134,6 +134,7 @@ and class_vars_ =
   {
   cv_kinds: kind list ;
   cv_hint: hint option ;
+  cv_is_promoted_variadic: is_variadic ;
   cv_names: class_var list ;
   cv_doc_comment: string option ;
   cv_user_attributes: user_attribute list }
@@ -1244,9 +1245,11 @@ and show_class_var : class_var -> Ppx_deriving_runtime.string =
 
 and pp_class_vars_ :
   Format.formatter -> class_vars_ -> Ppx_deriving_runtime.unit =
-  let __3 () = pp_user_attribute
+  let __4 () = pp_user_attribute
   
-  and __2 () = pp_class_var
+  and __3 () = pp_class_var
+  
+  and __2 () = pp_is_variadic
   
   and __1 () = pp_hint
   
@@ -1256,26 +1259,30 @@ and pp_class_vars_ :
       fun fmt  ->
         fun x  ->
           Format.fprintf fmt "@[<2>{ ";
-          (((((Format.fprintf fmt "@[%s =@ " "cv_kinds";
-               ((fun x  ->
-                   Format.fprintf fmt "@[<2>[";
-                   ignore
-                     (List.fold_left
-                        (fun sep  ->
-                           fun x  ->
-                             if sep then Format.fprintf fmt ";@ ";
-                             ((__0 ()) fmt) x;
-                             true) false x);
-                   Format.fprintf fmt "@,]@]")) x.cv_kinds;
+          ((((((Format.fprintf fmt "@[%s =@ " "cv_kinds";
+                ((fun x  ->
+                    Format.fprintf fmt "@[<2>[";
+                    ignore
+                      (List.fold_left
+                         (fun sep  ->
+                            fun x  ->
+                              if sep then Format.fprintf fmt ";@ ";
+                              ((__0 ()) fmt) x;
+                              true) false x);
+                    Format.fprintf fmt "@,]@]")) x.cv_kinds;
+                Format.fprintf fmt "@]");
+               Format.fprintf fmt ";@ ";
+               Format.fprintf fmt "@[%s =@ " "cv_hint";
+               ((function
+                 | None  -> Format.pp_print_string fmt "None"
+                 | Some x ->
+                     (Format.pp_print_string fmt "(Some ";
+                      ((__1 ()) fmt) x;
+                      Format.pp_print_string fmt ")"))) x.cv_hint;
                Format.fprintf fmt "@]");
               Format.fprintf fmt ";@ ";
-              Format.fprintf fmt "@[%s =@ " "cv_hint";
-              ((function
-                | None  -> Format.pp_print_string fmt "None"
-                | Some x ->
-                    (Format.pp_print_string fmt "(Some ";
-                     ((__1 ()) fmt) x;
-                     Format.pp_print_string fmt ")"))) x.cv_hint;
+              Format.fprintf fmt "@[%s =@ " "cv_is_promoted_variadic";
+              ((__2 ()) fmt) x.cv_is_promoted_variadic;
               Format.fprintf fmt "@]");
              Format.fprintf fmt ";@ ";
              Format.fprintf fmt "@[%s =@ " "cv_names";
@@ -1286,7 +1293,7 @@ and pp_class_vars_ :
                       (fun sep  ->
                          fun x  ->
                            if sep then Format.fprintf fmt ";@ ";
-                           ((__2 ()) fmt) x;
+                           ((__3 ()) fmt) x;
                            true) false x);
                  Format.fprintf fmt "@,]@]")) x.cv_names;
              Format.fprintf fmt "@]");
@@ -1308,7 +1315,7 @@ and pp_class_vars_ :
                     (fun sep  ->
                        fun x  ->
                          if sep then Format.fprintf fmt ";@ ";
-                         ((__3 ()) fmt) x;
+                         ((__4 ()) fmt) x;
                          true) false x);
                Format.fprintf fmt "@,]@]")) x.cv_user_attributes;
            Format.fprintf fmt "@]");
@@ -3732,11 +3739,14 @@ include
           let _visitors_r1 =
             self#on_option self#on_hint env _visitors_this.cv_hint  in
           let _visitors_r2 =
-            self#on_list self#on_class_var env _visitors_this.cv_names  in
+            self#on_is_variadic env _visitors_this.cv_is_promoted_variadic
+             in
           let _visitors_r3 =
+            self#on_list self#on_class_var env _visitors_this.cv_names  in
+          let _visitors_r4 =
             self#on_option self#on_string env _visitors_this.cv_doc_comment
              in
-          let _visitors_r4 =
+          let _visitors_r5 =
             self#on_list self#on_user_attribute env
               _visitors_this.cv_user_attributes
              in
@@ -3746,20 +3756,24 @@ include
               (Pervasives.(&&)
                  (Pervasives.(==) _visitors_this.cv_hint _visitors_r1)
                  (Pervasives.(&&)
-                    (Pervasives.(==) _visitors_this.cv_names _visitors_r2)
+                    (Pervasives.(==) _visitors_this.cv_is_promoted_variadic
+                       _visitors_r2)
                     (Pervasives.(&&)
-                       (Pervasives.(==) _visitors_this.cv_doc_comment
-                          _visitors_r3)
-                       (Pervasives.(==) _visitors_this.cv_user_attributes
-                          _visitors_r4))))
+                       (Pervasives.(==) _visitors_this.cv_names _visitors_r3)
+                       (Pervasives.(&&)
+                          (Pervasives.(==) _visitors_this.cv_doc_comment
+                             _visitors_r4)
+                          (Pervasives.(==) _visitors_this.cv_user_attributes
+                             _visitors_r5)))))
           then _visitors_this
           else
             {
               cv_kinds = _visitors_r0;
               cv_hint = _visitors_r1;
-              cv_names = _visitors_r2;
-              cv_doc_comment = _visitors_r3;
-              cv_user_attributes = _visitors_r4
+              cv_is_promoted_variadic = _visitors_r2;
+              cv_names = _visitors_r3;
+              cv_doc_comment = _visitors_r4;
+              cv_user_attributes = _visitors_r5
             }
         method on_method_ env _visitors_this =
           let _visitors_r0 =
@@ -5377,18 +5391,22 @@ include
           let _visitors_s1 =
             self#on_option self#on_hint env _visitors_this.cv_hint  in
           let _visitors_s2 =
-            self#on_list self#on_class_var env _visitors_this.cv_names  in
+            self#on_is_variadic env _visitors_this.cv_is_promoted_variadic
+             in
           let _visitors_s3 =
+            self#on_list self#on_class_var env _visitors_this.cv_names  in
+          let _visitors_s4 =
             self#on_option self#on_string env _visitors_this.cv_doc_comment
              in
-          let _visitors_s4 =
+          let _visitors_s5 =
             self#on_list self#on_user_attribute env
               _visitors_this.cv_user_attributes
              in
           self#plus
             (self#plus
-               (self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2)
-               _visitors_s3) _visitors_s4
+               (self#plus
+                  (self#plus (self#plus _visitors_s0 _visitors_s1)
+                     _visitors_s2) _visitors_s3) _visitors_s4) _visitors_s5
         method on_method_ env _visitors_this =
           let _visitors_s0 =
             self#on_list self#on_kind env _visitors_this.m_kind  in
@@ -6426,20 +6444,24 @@ include
           let _visitors_r1 =
             self#on_option self#on_hint env _visitors_this.cv_hint  in
           let _visitors_r2 =
-            self#on_list self#on_class_var env _visitors_this.cv_names  in
+            self#on_is_variadic env _visitors_this.cv_is_promoted_variadic
+             in
           let _visitors_r3 =
+            self#on_list self#on_class_var env _visitors_this.cv_names  in
+          let _visitors_r4 =
             self#on_option self#on_string env _visitors_this.cv_doc_comment
              in
-          let _visitors_r4 =
+          let _visitors_r5 =
             self#on_list self#on_user_attribute env
               _visitors_this.cv_user_attributes
              in
           {
             cv_kinds = _visitors_r0;
             cv_hint = _visitors_r1;
-            cv_names = _visitors_r2;
-            cv_doc_comment = _visitors_r3;
-            cv_user_attributes = _visitors_r4
+            cv_is_promoted_variadic = _visitors_r2;
+            cv_names = _visitors_r3;
+            cv_doc_comment = _visitors_r4;
+            cv_user_attributes = _visitors_r5
           }
         method on_method_ env _visitors_this =
           let _visitors_r0 =
@@ -7439,11 +7461,14 @@ include
           let _visitors_r1 =
             self#on_option self#on_hint env _visitors_this.cv_hint  in
           let _visitors_r2 =
-            self#on_list self#on_class_var env _visitors_this.cv_names  in
+            self#on_is_variadic env _visitors_this.cv_is_promoted_variadic
+             in
           let _visitors_r3 =
+            self#on_list self#on_class_var env _visitors_this.cv_names  in
+          let _visitors_r4 =
             self#on_option self#on_string env _visitors_this.cv_doc_comment
              in
-          let _visitors_r4 =
+          let _visitors_r5 =
             self#on_list self#on_user_attribute env
               _visitors_this.cv_user_attributes
              in

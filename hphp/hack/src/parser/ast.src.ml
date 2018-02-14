@@ -199,6 +199,7 @@ and class_var = pos * id * expr option
 and class_vars_ = {
   cv_kinds: kind list;
   cv_hint: hint option;
+  cv_is_promoted_variadic: is_variadic;
   cv_names: class_var list;
   cv_doc_comment: string option;
   cv_user_attributes: user_attribute list;

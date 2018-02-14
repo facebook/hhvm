@@ -9,6 +9,8 @@
  *)
 module WithSyntax(Syntax: Syntax_sig.Syntax_S) = struct
 module Token = Syntax.Token
+module Trivia = Token.Trivia
+module TriviaKind = Full_fidelity_trivia_kind
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
@@ -628,8 +630,45 @@ module WithExpressionAndDeclAndTypeParser
     if is_switch_fallthrough parser then
       parse_switch_fallthrough parser
     else
-      let missing = make_missing parser in
-      (parser, missing)
+      (**
+       * As long as we have FALLTHROUGH comments, insert a faux-statement as if
+       * there was a fallthrough statement. For example, the code
+       *
+       * > case 22:
+       * >   $x = 0;
+       * >   // FALLTHROUGH because we want all the other functionality as well
+       * > case 42:
+       * >   foo($x);
+       * >   break;
+       *
+       * Should be parsed as if it were
+       *
+       * > case 22:
+       * >   $x = 0;
+       * >   // FALLTHROUGH because we want all the other functionality as well
+       * >   fallthrough;
+       * > case 43:
+       * >   foo($x);
+       * >   break;
+       *
+       * But since we have no actual occurrence (i.e. no position, no string) of
+       * that `fallthrough;` statement, we construct a `switch_fallthrough`, but
+       * fill it with `missing`.
+       *)
+      let next = peek_token parser in
+      let commented_fallthrough =
+        List.exists
+          (fun t -> Trivia.kind t = TriviaKind.FallThrough)
+          (Token.leading next)
+      in
+       let missing = make_missing parser in
+      let result =
+        if commented_fallthrough
+        then let missing1 = make_missing parser in
+             make_switch_fallthrough missing missing1
+        else missing
+      in
+      parser, result
 
   and parse_switch_section parser =
     (* See parse_switch_statement for grammar *)

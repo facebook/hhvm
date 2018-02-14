@@ -147,9 +147,14 @@ let from_class_elt_classvars ast_class tparams namespace elt =
   | A.ClassVars cv ->
     (* TODO: we need to emit doc comments for each property,
      * not one per all properties on the same line *)
+    let hint = if cv.A.cv_is_promoted_variadic then
+      let hint_list = Option.value_map ~f:(fun h -> [h]) ~default:[] cv.A.cv_hint in
+      Some (Pos.none, A.Happly((Pos.none, "array"), hint_list))
+      else cv.A.cv_hint
+    in
     List.map cv.A.cv_names
       (Emit_property.from_ast
-        ast_class cv.A.cv_kinds cv.A.cv_hint tparams namespace cv.A.cv_doc_comment)
+        ast_class cv.A.cv_kinds hint tparams namespace cv.A.cv_doc_comment)
   | _ -> []
 
 let from_class_elt_constants ns elt =

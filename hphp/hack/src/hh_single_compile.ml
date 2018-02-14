@@ -321,7 +321,7 @@ let log_fail compiler_options filename exc =
   Logger.fail
     ~filename:(Relative_path.to_absolute filename)
     ~mode:(mode_to_string compiler_options.mode)
-    ~exc:(Printexc.to_string exc)
+    ~exc:(Printexc.to_string exc ^ "\n" ^ Printexc.get_backtrace ())
 
 
 let do_compile filename compiler_options text fail_or_ast debug_time =

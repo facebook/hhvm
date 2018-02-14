@@ -744,7 +744,7 @@ enum class Op : uint16_t {
 };
 
 #define O(...) + 1
-constexpr size_t Op_count = 0 OPCODES;
+constexpr size_t Op_count = OPCODES;
 #undef O
 
 /*

@@ -1539,7 +1539,9 @@ and expr_
       (match Env.get_gconst env cst_name with
       | None when Env.is_strict env ->
           Errors.unbound_global cst_pos;
-          expr_error env (Reason.Rwitness cst_pos)
+          let ty = (Reason.Rwitness cst_pos, Terr) in
+          let te = T.make_implicitly_typed_expr cst_pos (T.Id id) in
+          env, te, ty
       | None ->
           make_result env (T.Id id) (Reason.Rnone, Tany)
       | Some ty ->

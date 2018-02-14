@@ -1,0 +1,19 @@
+Errors:
+  [4:3-4:17] Unbound name: unbound_global (a global constant)
+  [4:3-4:17] Unbound global constant (Typing)
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:18-3:22], (Hprim Tvoid)));
+      f_name = ([3:10-3:14], "\\test"); f_tparams = [];
+      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_params = [];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast =
+           [(AnnotatedAST.Expr
+               (([4:3-4:17], None),
+                (AnnotatedAST.Id ([4:3-4:17], "\\unbound_global"))))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+  ]

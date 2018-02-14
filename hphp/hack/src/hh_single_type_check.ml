@@ -595,9 +595,11 @@ let test_decl_compare filename popt files_contents tcopt files_info =
 
 (* Returns a list of Tast defs, along with associated type environments. *)
 let get_tast opts filename files_info =
-  let nasts = create_nasts opts files_info in
-  let nast = Relative_path.Map.find filename nasts in
-  Typing.nast_to_tast opts nast
+  Errors.do_ begin fun () ->
+    let nasts = create_nasts opts files_info in
+    let nast = Relative_path.Map.find filename nasts in
+    Typing.nast_to_tast opts nast
+  end
 
 let handle_mode mode filename tcopt popt files_contents files_info errors =
   match mode with
@@ -750,7 +752,15 @@ let handle_mode mode filename tcopt popt files_contents files_info errors =
     let nast = Relative_path.Map.find filename nasts in
     Printf.printf "%s\n" (Nast.show_program nast)
   | Dump_tast ->
-    let tast = get_tast tcopt filename files_info in
+    let errors, tast = get_tast tcopt filename files_info in
+    (match Errors.get_error_list errors with
+    | [] -> ()
+    | errors ->
+      Printf.printf "Errors:\n";
+      List.iter errors (fun err ->
+        List.iter (Errors.to_list err) (fun (pos, msg) ->
+          Format.printf "  %a %s\n" Pos.pp pos msg))
+    );
     let env = Typing_env.empty tcopt filename ~droot:None in
     let stringify_types =
       TASTStringMapper.map_program
@@ -772,7 +782,7 @@ let handle_mode mode filename tcopt popt files_contents files_info errors =
     let string_ast = stringify_types tast in
     Printf.printf "%s\n" (StringNAST.show_program string_ast)
   | Dump_stripped_tast ->
-    let tast = get_tast tcopt filename files_info in
+    let _, tast = get_tast tcopt filename files_info in
     let strip_types =
       TASTTypeStripper.map_program
         ~map_env_annotation:(fun _ -> ())

@@ -5886,16 +5886,6 @@ and check_parent_abstract position parent_type class_type =
 
 and class_def tcopt c =
   let env = EnvFromDef.class_env tcopt c in
-  (* Set up self identifier and type *)
-  let env = Env.set_self_id env (snd c.c_name) in
-  let self = get_self_from_c c in
-  (* For enums, localize makes self:: into an abstract type, which we don't
-   * want *)
-  let env, self = match c.c_kind with
-    | Ast.Cenum -> env, (fst self, Tclass (c.c_name, []))
-    | Ast.Cinterface | Ast.Cabstract | Ast.Ctrait
-    | Ast.Cnormal -> Phase.localize_with_self env self in
-  let env = Env.set_self env self in
   let c = TNBody.class_meth_bodies tcopt c in
   if not !auto_complete then begin
     NastCheck.class_ env c;
@@ -5910,15 +5900,6 @@ and class_def tcopt c =
   | Some tc ->
     Typing_requirements.check_class env tc;
     Some (class_def_ env c tc)
-
-(* Given a class definition construct a type consisting of the
- * class instantiated at its generic parameters.
-*)
-and get_self_from_c c =
-  let tparams = List.map (fst c.c_tparams) begin fun (_, (p, s), _) ->
-    Reason.Rwitness p, Tgeneric s
-  end in
-  Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams)
 
 and enforce_is_disposable env hint =
   match hint with

@@ -20,7 +20,3 @@ val typedef_def  : TypecheckerOptions.t -> Nast.typedef -> Tast.typedef
 val gconst_def   : TypecheckerOptions.t -> Nast.gconst  -> Tast.gconst
 
 val nast_to_tast : TypecheckerOptions.t -> Nast.program -> Tast.program
-
-val get_self_from_c:
-  Nast.class_ ->
-  Typing_defs.decl Typing_defs.ty

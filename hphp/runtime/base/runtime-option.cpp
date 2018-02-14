@@ -419,8 +419,10 @@ HackStrictOption
   RuntimeOption::DisallowDynamicVarEnvFuncs = HackStrictOption::OFF,
   RuntimeOption::IconvIgnoreCorrect = HackStrictOption::OFF,
   RuntimeOption::MinMaxAllowDegenerate = HackStrictOption::OFF;
-bool RuntimeOption::LookForTypechecker = true;
-bool RuntimeOption::AutoTypecheck = true;
+
+// defaults set when the INI option is bound - values below are irrelevant.
+bool RuntimeOption::LookForTypechecker = false;
+bool RuntimeOption::AutoTypecheck = false;
 
 #ifdef FACEBOOK
 const static bool s_PHP7_default = false;
@@ -1302,19 +1304,8 @@ void RuntimeOption::Load(
     Config::Bind(MinMaxAllowDegenerate, ini, config,
                  "Hack.Lang.MinMaxAllowDegenerate", def);
 
-#ifdef FACEBOOK
-    // Force off for Facebook unless you explicitly turn on; folks here both
-    // disproportionately know what they are doing, and are doing work on HHVM
-    // where this gets in the way.
-    const bool aggroHackChecksDefault = false;
-#else
-    // Defaults to EnableHHSyntax since, if you have that on, you are
-    // assumed to know what you're doing.
-    const bool aggroHackChecksDefault = !EnableHipHopSyntax;
-#endif
-
     Config::Bind(LookForTypechecker, ini, config,
-                 "Hack.Lang.LookForTypechecker", aggroHackChecksDefault);
+                 "Hack.Lang.LookForTypechecker", false);
 
     // If you turn off LookForTypechecker, you probably want to turn this off
     // too -- basically, make the two look like the same option to external

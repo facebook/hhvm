@@ -2190,6 +2190,14 @@ and expr_
              * function and we just assume every parameter has type Tany *)
             Measure.sample "Lambda [untyped context]" 1.0;
             check_body_under_known_params declared_ft
+          | Some _ ->
+            (* If the expected type is something concrete but not a function
+             * then we should reject in strict mode. Check body anyway *)
+            if Env.is_strict env && TypecheckerOptions.experimental_feature_enabled (Env.get_options env)
+              TypecheckerOptions.experimental_disallow_untyped_lambda_as_non_function_type
+            then Errors.untyped_lambda_strict_mode p;
+            Measure.sample "Lambda [non-function typed context]" 1.0;
+            check_body_under_known_params declared_ft
           | _ ->
             Measure.sample "Lambda [unknown params]" 1.0;
             Typing_log.log_types 1 p env

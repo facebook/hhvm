@@ -1,7 +1,7 @@
 <?hh // strict
 
 function f(): nonnull {
-  return function($x) {
+  return function(int $x) {
     return $x;
   };
 }

@@ -136,6 +136,13 @@ let tco_experimental_no_fallback_in_namespaces =
  *)
 let tco_experimental_nonnull = "nonnull"
 
+(**
+ * Disallow untyped lambdas in strict mode that are passed to a typed context
+ * that isn't a function type
+ *)
+let tco_experimental_disallow_untyped_lambda_as_non_function_type =
+  "disallow_untyped_lambda_as_non_function_type"
+
 (*
  * Check that the minimum number of arguments to a variadic
  * function are passed in, e.g. given the function:
@@ -179,6 +186,7 @@ let tco_experimental_all =
      tco_experimental_no_fallback_in_namespaces;
      tco_experimental_nonnull;
      tco_unpacking_check_arity;
+     tco_experimental_disallow_untyped_lambda_as_non_function_type;
    ]
 
 let tco_migration_flags_all =

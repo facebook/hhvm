@@ -130,6 +130,7 @@ val tco_experimental_no_trait_reuse : string
 val tco_experimental_is_expression : string
 val tco_experimental_no_fallback_in_namespaces : string
 val tco_experimental_nonnull : string
+val tco_experimental_disallow_untyped_lambda_as_non_function_type : string
 val tco_unpacking_check_arity : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t

@@ -1007,7 +1007,7 @@ module Typing                               = struct
   let rx_enabled_in_lambdas                 = 4221 (* DONT MODIFY!!!! *)
   let ambiguous_lambda                      = 4222 (* DONT MODIFY!!!! *)
   let ellipsis_strict_mode                  = 4223 (* DONT MODIFY!!!! *)
-
+  let untyped_lambda_strict_mode            = 4224 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2460,6 +2460,13 @@ let ellipsis_strict_mode ~require_param_name pos =
       "Cannot use ... without a type hint in strict mode. Please add a type hint."
     in
   add Typing.ellipsis_strict_mode pos msg
+
+let untyped_lambda_strict_mode pos =
+  let msg =
+    "Cannot determine types of lambda parameters in strict mode. \
+     Please add type hints on parameters."
+  in
+    add Typing.untyped_lambda_strict_mode pos msg
 
 let expected_tparam pos n =
   add Typing.expected_tparam pos (

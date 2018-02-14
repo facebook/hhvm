@@ -482,4 +482,5 @@ module type S = sig
   val rx_enabled_in_lambdas : Pos.t -> unit
   val ambiguous_lambda : Pos.t -> int -> unit
   val ellipsis_strict_mode : require_param_name:bool -> Pos.t -> unit
+  val untyped_lambda_strict_mode : Pos.t -> unit
 end

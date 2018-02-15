@@ -45,7 +45,7 @@ let () =
   "File \"/foo1.php\", line 2, characters 9-11:\n" ^
   "Did you mean foo?\n\n"
   in
-  Test.assert_errors env expected_error;
+  Test.assert_env_errors env expected_error;
   (* Change a wholly unrelated file. *)
   let env, loop_output = Test.(run_loop_once env { default_loop_input with
     disk_changes = [
@@ -55,4 +55,4 @@ let () =
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
   (* The same errors should still be there *)
-  Test.assert_errors env expected_error;
+  Test.assert_env_errors env expected_error;

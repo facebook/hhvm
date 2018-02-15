@@ -70,7 +70,9 @@ val assertEqual: string -> string -> unit
 
 val assert_no_errors: ServerEnv.env -> unit
 
-val assert_errors: ServerEnv.env -> string -> unit
+val assert_errors: Errors.t -> string -> unit
+
+val assert_env_errors: ServerEnv.env -> string -> unit
 
 val assertSingleError: string -> Errors.error list -> unit
 

@@ -309,11 +309,14 @@ let errors_to_string buf x =
     Printf.bprintf buf "%s\n" (Errors.to_string error)
   end
 
-let assert_errors env expected =
+let assert_errors errors expected =
   let buf = Buffer.create 1024 in
-  (Errors.get_error_list env.ServerEnv.errorl)
-    |> List.map ~f:(Errors.to_absolute) |> errors_to_string buf;
+  (Errors.get_error_list errors)
+  |> List.map ~f:(Errors.to_absolute) |> errors_to_string buf;
   assertEqual expected (Buffer.contents buf)
+
+let assert_env_errors env expected =
+  assert_errors env.ServerEnv.errorl expected
 
 let diagnostics_to_string x =
   let buf = Buffer.create 1024 in

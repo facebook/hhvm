@@ -50,4 +50,4 @@ let () =
       f1, "";
     ]
   }) in
-  Test.assert_errors env errors
+  Test.assert_env_errors env errors

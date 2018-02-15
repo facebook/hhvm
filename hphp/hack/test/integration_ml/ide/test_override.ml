@@ -77,7 +77,7 @@ let () =
   Test.assert_no_diagnostics loop_output;
 
   let env, _ = Test.status env in
-  Test.assert_errors env c_errors;
+  Test.assert_env_errors env c_errors;
   let env = Test.wait env in
 
   let env, loop_output = Test.(run_loop_once env default_loop_input) in

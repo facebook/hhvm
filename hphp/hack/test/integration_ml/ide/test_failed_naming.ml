@@ -50,7 +50,7 @@ let () =
     "bar.php", bar_contents;
   ] in
 
-  Test.assert_errors env init_errors;
+  Test.assert_env_errors env init_errors;
 
   let env = Test.connect_persistent_client env in
   let env = Test.subscribe_diagnostic env in

@@ -97,6 +97,8 @@
       "token_text" : "endfor" },
     { "token_kind" : "Endforeach",
       "token_text" : "endforeach" },
+    { "token_kind" : "Enddeclare",
+      "token_text" : "enddeclare" },
     { "token_kind" : "Endif",
       "token_text" : "endif" },
     { "token_kind" : "Endwhile",

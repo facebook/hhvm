@@ -381,6 +381,8 @@ module WithExpressionAndDeclAndTypeParser
       declare   (   expression   )   ;
       declare   (   expression   )   compound-statement
 
+      declare   (   expression   ):
+            compound-statement enddeclare;
     TODO: Update the specification of the grammar
    *)
   and parse_declare_statement parser =
@@ -388,11 +390,17 @@ module WithExpressionAndDeclAndTypeParser
       assert_token parser Declare in
     let (parser, left_paren_token, expr_node, right_paren_token) =
       parse_paren_expr parser in
-    if peek_token_kind parser = Semicolon then
+    match peek_token_kind parser with
+    | Semicolon ->
       let (parser, semi) = assert_token parser Semicolon in
       parser, make_declare_directive_statement
         declare_keyword_token left_paren_token expr_node right_paren_token semi
-    else
+    | Colon ->
+      let (parser, statement_node) = parse_alternate_loop_statement parser ~terminator:Enddeclare in
+      parser, make_declare_block_statement
+        declare_keyword_token left_paren_token expr_node right_paren_token
+        statement_node
+    | _ ->
       let (parser, statement_node) = parse_statement parser in
       parser, make_declare_block_statement
         declare_keyword_token

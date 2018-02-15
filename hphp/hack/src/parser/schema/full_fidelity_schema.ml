@@ -168,6 +168,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Empty"; "empty" ];
   [ "Endfor"; "endfor" ];
   [ "Endforeach"; "endforeach" ];
+  [ "Enddeclare"; "enddeclare" ];
   [ "Endif"; "endif" ];
   [ "Endwhile"; "endwhile" ];
   [ "Enum"; "enum" ];

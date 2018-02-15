@@ -44,13 +44,6 @@ zend/good/Zend/tests/instanceof_001.php
 zend/good/Zend/tests/inter_02.php
 zend/good/Zend/tests/jump12.php
 zend/good/Zend/tests/list_003.php
-zend/good/Zend/tests/magic_by_ref_001.php
-zend/good/Zend/tests/magic_by_ref_002.php
-zend/good/Zend/tests/magic_by_ref_003.php
-zend/good/Zend/tests/magic_by_ref_004.php
-zend/good/Zend/tests/magic_by_ref_005.php
-zend/good/Zend/tests/magic_by_ref_006.php
-zend/good/Zend/tests/magic_by_ref_007.php
 zend/good/Zend/tests/nowdoc_016.php
 zend/good/Zend/tests/ns_034.php
 zend/good/Zend/tests/ns_036.php

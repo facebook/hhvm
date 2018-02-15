@@ -999,6 +999,20 @@ let abstract_final_with_method hhvm_compat_mode cd parents =
   not hhvm_compat_mode &&
   (abstract_final_parent_class parents) && not (methodish_contains_static cd)
 
+let is_byref_expression node =
+  is_decorated_expression ~f:is_ampersand node
+
+let is_byref_parameter_variable node =
+  (* TODO: This shouldn't be a decorated *expression* because we are not
+  expecting an expression at all. We're expecting a declaration. *)
+  is_byref_expression node
+
+let is_param_by_ref node =
+  match syntax node with
+  | ParameterDeclaration { parameter_name; _ } ->
+    is_byref_parameter_variable parameter_name
+  | _ -> false
+
 let special_method_param_errors node parents errors =
   match syntax node with
   | FunctionDeclarationHeader {function_name; function_parameter_list; _}
@@ -1011,22 +1025,35 @@ let special_method_param_errors node parents errors =
       | None -> name
       | Some c_name -> c_name ^ "::" ^ name ^ "()"
     in
+    let s = String.lowercase_ascii name in
     let num_args_opt =
-      match String.lowercase_ascii name with
-      | s when s = SN.Members.__call && len <> 2 -> Some 2
-      | s when s = SN.Members.__callStatic && len <> 2 -> Some 2
-      | s when s = SN.Members.__get && len <> 1 -> Some 1
-      | s when s = SN.Members.__set && len <> 2 -> Some 2
-      | s when s = SN.Members.__isset && len <> 1 -> Some 1
-      | s when s = SN.Members.__unset && len <> 1 -> Some 1
+      match s with
+      | _ when s = SN.Members.__call && len <> 2 -> Some 2
+      | _ when s = SN.Members.__callStatic && len <> 2 -> Some 2
+      | _ when s = SN.Members.__get && len <> 1 -> Some 1
+      | _ when s = SN.Members.__set && len <> 2 -> Some 2
+      | _ when s = SN.Members.__isset && len <> 1 -> Some 1
+      | _ when s = SN.Members.__unset && len <> 1 -> Some 1
       | _ -> None
     in
-    begin match num_args_opt with
+    let errors = match num_args_opt with
       | None -> errors
       | Some n ->
         make_error_from_node
           node (SyntaxError.invalid_number_of_args full_name n) :: errors
-    end
+    in
+    let errors = if (s = SN.Members.__call
+                  || s = SN.Members.__callStatic
+                  || s = SN.Members.__get
+                  || s = SN.Members.__set
+                  || s = SN.Members.__isset
+                  || s = SN.Members.__unset)
+                  && Hh_core.List.exists ~f:is_param_by_ref params then
+        make_error_from_node
+          node (SyntaxError.invalid_args_by_ref full_name) :: errors
+      else errors
+    in
+    errors
   | _ -> errors
 
 let methodish_errors node parents is_hack hhvm_compat_mode errors =
@@ -1216,14 +1243,6 @@ let param_with_callconv_has_default node =
     is_parameter_with_default_value node -> Some parameter_default_value
   | _ -> None
 
-let is_byref_expression node =
-  is_decorated_expression ~f:is_ampersand node
-
-let is_byref_parameter_variable node =
-  (* TODO: This shouldn't be a decorated *expression* because we are not
-  expecting an expression at all. We're expecting a declaration. *)
-  is_byref_expression node
-
 (* If an inout parameter is passed by reference, return it *)
 let param_with_callconv_is_byref node =
   match syntax node with
@@ -1231,12 +1250,6 @@ let param_with_callconv_is_byref node =
     is_parameter_with_callconv node &&
     is_byref_parameter_variable parameter_name -> Some node
   | _ -> None
-
-let is_param_by_ref node =
-  match syntax node with
-  | ParameterDeclaration { parameter_name; _ } ->
-    is_byref_parameter_variable parameter_name
-  | _ -> false
 
 let params_errors params is_hack hhvm_compat_mode namespace_name names errors =
   let errors =

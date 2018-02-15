@@ -31,8 +31,12 @@ void SparseHeap::reset() {
   TRACE(1, "heap-id %lu SparseHeap-reset: slabs %lu bigs %lu\n",
         tl_heap_id, m_slabs.size(), m_bigs.size());
   if (RuntimeOption::EvalTrashFillOnRequestExit) {
-    for (auto slab : m_slabs) memset(slab.ptr, kSmallFreeFill, slab.size);
-    for (auto n : m_bigs) memset(n, kSmallFreeFill, n->nbytes);
+    for (auto slab : m_slabs) {
+      memset(slab.ptr, kSmallFreeFill, slab.size);
+    }
+    for (auto n : m_bigs) {
+      memset(n + 1, kSmallFreeFill, n->nbytes - sizeof(*n));
+    }
   }
   auto const do_free = [](void* ptr, size_t size) {
 #if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 4)

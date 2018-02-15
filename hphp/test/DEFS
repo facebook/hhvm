@@ -50,6 +50,17 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
 
   deplist=[
     '//hphp/hhvm:hhvm',
+    # This dependency on hhvm_link shouldn't be necessary, since hhvm already
+    # depends (indirectly) on hhvm_link. But we have it here for two reasons:
+    #
+    # 1) Our test targets need to be within 6 dependency hops of all of our
+    #    source files (see https://fburl.com/3dpob2w2).
+    #
+    # 2) In a dev build, when Buck gets the hhvm binary from cache, it doesn't
+    #    build all the necessary .so files (this is an issue with hhvm:hhvm
+    #    being a custom_rule). A direct dependency on hhvm_link forces Buck to
+    #    build them.
+    '//hphp/hhvm:hhvm_link',
     '//hphp/hhvm:symlinks',
     '//hphp/test:run',
     ('' if dir.startswith('//') else '//hphp/test:') + dir,

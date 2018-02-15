@@ -110,6 +110,9 @@ let string_to_int_opt ~allow_following s =
     end
   | x -> x
 
+let php7_int_semantics () =
+  Hhbc_options.php7_int_semantics !Hhbc_options.compiler_options
+
 (* Cast to an integer: the (int) operator in PHP. Return None if we can't
  * or won't produce the correct value *)
 let to_int v =
@@ -136,14 +139,22 @@ let to_int v =
 
     let fpClass = classify_float f in
     begin match fpClass with
-      (* If the source type is float, for the value of NAN,
-       * the result value is min int
-       * TODO: This is only true in HHVM and PHP 4-5.
-       * PHP 7 no longer follows this. *)
-      | FP_nan -> Some Int64.min_int (* -9223372036854775808 *)
-      (* If the source type is float, for the values INF and -INF,
-      the result value is zero *)
-      | FP_infinite -> Some Int64.zero
+      (* Here's a handy dandy chart of all possible values based on language
+       * | float | PHP 5   | HHVM    | PHP 7
+       * ----------------------------------------
+       * |  NaN  | int_min | int_min | 0
+       * |  INF  | int_min |  0      | 0
+       * | -INF  | int_min | int_min | 0
+       * For NaN, the value is min_int in HHVM
+       * For positive infinity, the value is 0 in HHVM
+       * For negative infinity the value is min_int in HHVM
+       * For PHP7, the value is always 0
+       * Thus if the float is infinity OR we're in PHP7, set it to 0
+       *)
+      | FP_nan
+      | FP_infinite ->
+        if f = infinity || php7_int_semantics () then
+        Some Int64.zero else Some Int64.min_int
       | _ ->
       (* TODO: get this right. It's unlikely that Caml and
        * PHP semantics match up *)

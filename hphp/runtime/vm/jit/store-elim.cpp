@@ -764,7 +764,7 @@ IRInstruction* resolve_ts(Global& genv, Block* blk,
                           StoreKey::Where w, uint32_t id,
                           const ALocBits** sfp = nullptr);
 
-IRInstruction* resolve_cycle(Global& genv, Block* blk, uint32_t id) {
+void resolve_cycle(Global& genv, TrackedStore& ts, Block* blk, uint32_t id) {
   genv.needsReflow = true;
   jit::vector<IRInstruction*> stores;
   jit::hash_set<Block*> seen;
@@ -786,7 +786,8 @@ IRInstruction* resolve_cycle(Global& genv, Block* blk, uint32_t id) {
   }
   auto const cand = stores[0];
   if (stores.size() == 1) {
-    return cand;
+    ts.set(cand);
+    return;
   }
   jit::vector<uint32_t> srcsToPhi;
   for (uint32_t i = 0; i < cand->numSrcs(); i++) {
@@ -803,7 +804,8 @@ IRInstruction* resolve_cycle(Global& genv, Block* blk, uint32_t id) {
   if (!srcsToPhi.size()) {
     // the various stores all had the same inputs
     // so nothing to do.
-    return cand;
+    ts.set(cand);
+    return;
   }
   auto const inst = genv.unit.clone(cand);
   for (auto i : srcsToPhi) {
@@ -819,7 +821,7 @@ IRInstruction* resolve_cycle(Global& genv, Block* blk, uint32_t id) {
     mv->setSrc(0, mv->dst());
     ITRACE(7, "  + created {} for {}\n", mv->toString(), inst->toString());
   }
-  return inst;
+  ts.setProcessed(inst);
 }
 
 IRInstruction* resolve_flat(Global& genv, Block* blk, uint32_t id,
@@ -902,6 +904,12 @@ IRInstruction* resolve_ts(Global& genv, Block* blk,
          blk->id(), show(w), id, show(ts));
   Trace::Indent _i;
 
+  if (ts.pending()) {
+    always_assert(ts.pending() == blk);
+    resolve_cycle(genv, ts, blk, id);
+    assertx(ts.instruction() || ts.processed());
+  }
+
   if (auto inst = ts.instruction()) {
     ITRACE(7, "-> inst: {}\n", inst->toString());
     return inst;
@@ -911,23 +919,15 @@ IRInstruction* resolve_ts(Global& genv, Block* blk,
     return inst;
   }
 
-  auto rep = [&]() {
-    if (ts.pending()) {
-      always_assert(ts.pending() == blk);
-      ts.setProcessed(resolve_cycle(genv, blk, id));
-      return ts.processed();
-    }
-
-    always_assert(ts.block());
-    if (w != StoreKey::In || blk != ts.block()) {
-      ITRACE(7, "direct recur: B{}:{} -> B{}:In\n",
-             blk->id(), show(w), ts.block()->id());
-      ts.set(resolve_ts(genv, ts.block(), StoreKey::In, id));
-    } else {
-      ts.set(resolve_flat(genv, blk, id, ts));
-    }
-    return ts.instruction();
-  }();
+  always_assert(ts.block());
+  if (w != StoreKey::In || blk != ts.block()) {
+    ITRACE(7, "direct recur: B{}:{} -> B{}:In\n",
+           blk->id(), show(w), ts.block()->id());
+    ts.set(resolve_ts(genv, ts.block(), StoreKey::In, id));
+  } else {
+    ts.set(resolve_flat(genv, blk, id, ts));
+  }
+  auto const rep = ts.instruction();
 
   if (sf) genv.spillFrameMap[ts] = *sf;
   ITRACE(7, "-> {} (resolve_ts B{}, store {})\n",

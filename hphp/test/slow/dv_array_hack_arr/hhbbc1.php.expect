@@ -1,0 +1,7 @@
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+bool(true)
+bool(false)

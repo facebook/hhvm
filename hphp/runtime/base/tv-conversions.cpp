@@ -885,6 +885,7 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
 }
 
 void tvCastToVArrayInPlace(TypedValue* tv) {
+  assert(!RuntimeOption::EvalHackArrDVArrs);
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   ArrayData* a;
@@ -986,6 +987,7 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
 }
 
 void tvCastToDArrayInPlace(TypedValue* tv) {
+  assert(!RuntimeOption::EvalHackArrDVArrs);
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   ArrayData* a;

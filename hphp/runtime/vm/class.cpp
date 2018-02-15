@@ -1109,12 +1109,17 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
     if (cns.isType()) {
       // Type constants with the low bit set are already resolved and can be
       // returned after masking out that bit.
-      assert(cnsVal->m_type == KindOfPersistentArray);
+      assert(cnsVal->m_type ==
+             (RuntimeOption::EvalHackArrDVArrs
+              ? KindOfPersistentDict
+              : KindOfPersistentArray)
+            );
       typeCns = cnsVal->m_data.parr;
       auto const rawData = reinterpret_cast<intptr_t>(typeCns);
       if (rawData & 0x1) {
-        return make_tv<KindOfPersistentArray>(
-          reinterpret_cast<ArrayData*>(rawData ^ 0x1));
+        auto const resolved = reinterpret_cast<ArrayData*>(rawData ^ 0x1);
+        assert(resolved->isDictOrDArray());
+        return make_persistent_array_like_tv(resolved);
       }
     } else {
       return *cnsVal;
@@ -1180,7 +1185,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
       cnsCopy.val.m_data.parr = typeCns;
 
       resolvedTS = TypeStructure::resolve(cnsCopy, this, persistent);
-      assertx(resolvedTS.isDArray());
+      assertx(resolvedTS.isDictOrDArray());
     } catch (const Exception& e) {
       raise_error(e.getMessage());
     }
@@ -1196,10 +1201,10 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
       // GetScalarArray(). We could avoid a little duplicated work during
       // warmup with more complexity but it's not worth it.
       const_cast<TypedValueAux&>(cns.val).m_data.parr = taggedData;
-      return make_tv<KindOfPersistentArray>(ad);
+      return make_persistent_array_like_tv(ad);
     }
 
-    auto tv = make_tv<KindOfPersistentArray>(ad);
+    auto tv = make_persistent_array_like_tv(ad);
     makeCache();
     clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(&tv), true /* isKey */);
     return tv;

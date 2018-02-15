@@ -158,6 +158,11 @@ struct Repo::GlobalData {
   bool HackArrCompatDVCmpNotices = false;
 
   /*
+   * Are d/varrays dicts and vecs?
+   */
+  bool HackArrDVArrs = false;
+
+  /*
    * Should the extension containing HHVM intrinsics be enabled?
    */
   bool EnableIntrinsicsExtension = false;
@@ -212,6 +217,7 @@ struct Repo::GlobalData {
       (HackArrCompatPromoteNotices)
       (HackArrCompatTypeHintNotices)
       (HackArrCompatDVCmpNotices)
+      (HackArrDVArrs)
       (EnableIntrinsicsExtension)
       (ReffinessInvariance)
       (NoticeOnAllDynamicCalls)

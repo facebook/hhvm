@@ -2977,7 +2977,7 @@ Array HHVM_FUNCTION(merge_xhp_attr_declarations,
         raise_param_type_warning(
           "__SystemLib\\merge_xhp_attr_declarations",
           idx+1,
-          KindOfArray,
+          RuntimeOption::EvalHackArrDVArrs ? KindOfDict : KindOfArray,
           arr.m_type
         );
         ret = Array{};

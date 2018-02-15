@@ -69,7 +69,7 @@ struct PackedArray::VArrayInitializer {
       StaticValue,
       packSizeIndexAndDV(0, ArrayData::kVArray)
     );
-    assert(checkInvariants(ad));
+    assert(RuntimeOption::EvalHackArrDVArrs || checkInvariants(ad));
   }
 };
 PackedArray::VArrayInitializer PackedArray::s_varr_initializer;
@@ -95,6 +95,7 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
   assert(arr->m_pos >= 0 && arr->m_pos <= arr->m_size);
   assert(!arr->isPacked() || !arr->isDArray());
   assert(!arr->isVecArray() || arr->isNotDVArray());
+  assert(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
   static_assert(ArrayData::kPackedKind == 0, "");
   // Note that m_pos < m_size is not an invariant, because an array
   // that grows will only adjust m_size to zero on the old array.
@@ -394,6 +395,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
 
 ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   assert(arr->isVectorData());
+  assert(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
   assert(!arr->isDArray());
 
   auto const sizeIndex = capacityToSizeIndex(arr->m_size);
@@ -430,6 +432,8 @@ ALWAYS_INLINE
 ArrayData* PackedArray::MakeReserveImpl(uint32_t cap,
                                         HeaderKind hk,
                                         ArrayData::DVArray dvarray) {
+  assert(!RuntimeOption::EvalHackArrDVArrs ||
+         dvarray == ArrayData::kNotDVArray);
   auto const sizeIndex = capacityToSizeIndex(cap);
   auto ad = static_cast<ArrayData*>(tl_heap->objMallocIndex(sizeIndex));
   ad->initHeader_16(
@@ -522,6 +526,7 @@ ArrayData* PackedArray::MakePacked(uint32_t size, const Cell* values) {
 ArrayData* PackedArray::MakeVArray(uint32_t size, const Cell* values) {
   // Values are in reverse order since they come from the stack, which
   // grows down.
+  assert(!RuntimeOption::EvalHackArrDVArrs);
   auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed,
                                  ArrayData::kVArray);
   assert(ad->isPacked());
@@ -558,6 +563,7 @@ ArrayData* PackedArray::MakeUninitialized(uint32_t size) {
 }
 
 ArrayData* PackedArray::MakeUninitializedVArray(uint32_t size) {
+  assert(!RuntimeOption::EvalHackArrDVArrs);
   auto ad = MakeReserveImpl(size, HeaderKind::Packed, ArrayData::kVArray);
   ad->m_sizeAndPos = size; // pos = 0
   assert(ad->isPacked());
@@ -589,6 +595,7 @@ ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
 }
 
 ArrayData* PackedArray::MakeVArrayFromAPC(const APCArray* apc) {
+  assert(!RuntimeOption::EvalHackArrDVArrs);
   assert(apc->isVArray());
   auto const apcSize = apc->size();
   VArrayInit init{apcSize};
@@ -1224,6 +1231,7 @@ ArrayData* PackedArray::ToPHPArray(ArrayData* adIn, bool copy) {
 ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
+  if (RuntimeOption::EvalHackArrDVArrs) return ToVec(adIn, copy);
   if (adIn->isVArray()) return adIn;
   if (adIn->getSize() == 0) return staticEmptyVArray();
   ArrayData* ad = copy ? Copy(adIn) : adIn;
@@ -1257,6 +1265,7 @@ ArrayData* PackedArray::ToPHPArrayVec(ArrayData* adIn, bool copy) {
 ArrayData* PackedArray::ToVArrayVec(ArrayData* adIn, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
+  if (RuntimeOption::EvalHackArrDVArrs) return adIn;
   if (adIn->getSize() == 0) return staticEmptyVArray();
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Packed;

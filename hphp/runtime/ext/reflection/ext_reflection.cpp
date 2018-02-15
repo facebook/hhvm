@@ -651,7 +651,7 @@ Array HHVM_FUNCTION(type_structure,
 
     auto const typeStructure = typeAlias->typeStructure;
     assertx(!typeStructure.empty());
-    assertx(typeStructure.isDArray());
+    assertx(typeStructure.isDictOrDArray());
     Array resolved;
     try {
       bool persistent = true;
@@ -662,7 +662,7 @@ Array HHVM_FUNCTION(type_structure,
                   name.get()->data());
     }
     assertx(!resolved.empty());
-    assertx(resolved.isDArray());
+    assertx(resolved.isDictOrDArray());
     return resolved;
   }
 
@@ -684,8 +684,8 @@ Array HHVM_FUNCTION(type_structure,
     }
   }
 
-  assertx(isArrayType(typeCns.m_type));
-  assertx(typeCns.m_data.parr->isDArray());
+  assertx(isArrayLikeType(typeCns.m_type));
+  assertx(typeCns.m_data.parr->isDictOrDArray());
   assertx(typeCns.m_data.parr->isStatic());
   return Array::attach(typeCns.m_data.parr);
 }
@@ -2087,7 +2087,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
   assert(req);
   auto const typeStructure = req->typeStructure;
   assertx(!typeStructure.empty());
-  assertx(typeStructure.isDArray());
+  assertx(typeStructure.isDictOrDArray());
   return typeStructure;
 }
 
@@ -2096,7 +2096,7 @@ static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
   assert(req);
   auto const typeStructure = req->typeStructure;
   assertx(!typeStructure.empty());
-  assertx(typeStructure.isDArray());
+  assertx(typeStructure.isDictOrDArray());
   return TypeStructure::toString(typeStructure);
 }
 

@@ -77,8 +77,8 @@ const EnumValues* EnumCache::cachePersistentEnumValues(
   bool recurse,
   Array&& names,
   Array&& values) {
-  assertx(names.isDArray());
-  assertx(values.isDArray());
+  assertx(names.isDictOrDArray());
+  assertx(values.isDictOrDArray());
 
   std::unique_ptr<EnumValues> enums(new EnumValues());
   enums->values = ArrayData::GetScalarArray(std::move(values));
@@ -102,8 +102,8 @@ const EnumValues* EnumCache::cacheRequestEnumValues(
   Array&& names,
   Array&& values) {
 
-  assertx(names.isDArray());
-  assertx(values.isDArray());
+  assertx(names.isDictOrDArray());
+  assertx(values.isDictOrDArray());
 
   m_nonScalarEnumValuesMap.bind();
   if (!m_nonScalarEnumValuesMap.isInit()) {
@@ -161,8 +161,8 @@ const EnumValues* EnumCache::loadEnumValues(const Class* klass,
     }
   }
 
-  assertx(names.isDArray());
-  assertx(values.isDArray());
+  assertx(names.isDictOrDArray());
+  assertx(values.isDictOrDArray());
 
   // If we saw dynamic constants we cannot cache the enum values across requests
   // as they may not be the same in every request.

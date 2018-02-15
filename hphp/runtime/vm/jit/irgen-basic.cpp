@@ -304,6 +304,8 @@ void emitCastArray(IRGS& env) {
 }
 
 void emitCastVArray(IRGS& env) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+
   auto const src = popC(env);
 
   auto const raise = [&](const char* type) {
@@ -347,6 +349,8 @@ void emitCastVArray(IRGS& env) {
 }
 
 void emitCastDArray(IRGS& env) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+
   auto const src = popC(env);
 
   auto const raise = [&](const char* type) {
@@ -556,6 +560,7 @@ void emitDup(IRGS& env)    { pushIncRef(env, topC(env)); }
 
 void emitArray(IRGS& env, const ArrayData* x) {
   assertx(x->isPHPArray());
+  assertx(!RuntimeOption::EvalHackArrDVArrs || x->isNotDVArray());
   push(env, cns(env, x));
 }
 

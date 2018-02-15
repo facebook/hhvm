@@ -234,7 +234,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   for (unsigned i = 0; i < params.size(); ++i) {
     Func::ParamInfo pi = params[i];
     if (pi.isVariadic()) {
-      pi.builtinType = KindOfArray;
+      pi.builtinType = RuntimeOption::EvalHackArrDVArrs
+        ? KindOfVec : KindOfArray;
     }
     f->appendParam(params[i].byRef, pi, fParams);
   }

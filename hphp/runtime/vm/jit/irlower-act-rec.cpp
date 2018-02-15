@@ -467,8 +467,7 @@ void shuffleExtraArgsVariadic(ActRec* ar) {
 
   // Write into the last (variadic) param.
   auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
-  tv->m_type = KindOfArray;
-  tv->m_data.parr = ai.create();
+  *tv = make_array_like_tv(ai.create());
   assertx(tv->m_data.parr->hasExactlyOneRef());
 
   // No incref is needed, since extra values are being transferred from the
@@ -496,8 +495,7 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
     );
     // Write into the last (variadic) param.
     auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
-    tv->m_type = KindOfArray;
-    tv->m_data.parr = ai.create();
+    *tv = make_array_like_tv(ai.create());
     assertx(tv->m_data.parr->hasExactlyOneRef());
     // Before, for each arg: refcount = n + 1 (stack).
     // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray).
@@ -577,8 +575,16 @@ void cgPackMagicArgs(IRLS& env, const IRInstruction* inst) {
     .reg(num_args)
     .reg(values);
 
-  cgCallHelper(v, env, CallSpec::direct(PackedArray::MakeVArray),
-               callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(
+    v,
+    env,
+    RuntimeOption::EvalHackArrDVArrs
+      ? CallSpec::direct(PackedArray::MakeVec)
+      : CallSpec::direct(PackedArray::MakeVArray),
+    callDest(env, inst),
+    SyncOptions::Sync,
+    args
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

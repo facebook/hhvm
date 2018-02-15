@@ -298,6 +298,7 @@ IMPL_OPCODE_CALL(ConvCellToDbl);
 // ConvToVArray
 
 static ArrayData* convArrToVArrImpl(ArrayData* adIn) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(adIn->isPHPArray());
   auto a = adIn->toVArray(adIn->cowCheck());
   assertx(a->isPacked());
@@ -307,6 +308,7 @@ static ArrayData* convArrToVArrImpl(ArrayData* adIn) {
 }
 
 static ArrayData* convVecToVArrImpl(ArrayData* adIn) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(adIn->isVecArray());
   auto a = PackedArray::ToVArrayVec(adIn, adIn->cowCheck());
   assertx(a->isPacked());
@@ -316,6 +318,7 @@ static ArrayData* convVecToVArrImpl(ArrayData* adIn) {
 }
 
 static ArrayData* convDictToVArrImpl(ArrayData* adIn) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(adIn->isDict());
   auto a = MixedArray::ToVArrayDict(adIn, adIn->cowCheck());
   assertx(a != adIn);
@@ -326,6 +329,7 @@ static ArrayData* convDictToVArrImpl(ArrayData* adIn) {
 }
 
 static ArrayData* convKeysetToVArrImpl(ArrayData* adIn) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(adIn->isKeyset());
   auto a = SetArray::ToVArray(adIn, adIn->cowCheck());
   assertx(a != adIn);
@@ -336,6 +340,7 @@ static ArrayData* convKeysetToVArrImpl(ArrayData* adIn) {
 }
 
 static ArrayData* convObjToVArrImpl(ObjectData* obj) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto a = castObjToVArray(obj);
   assertx(a->isPacked());
   assertx(a->isVArray());
@@ -384,6 +389,7 @@ void cgConvObjToVArr(IRLS& env, const IRInstruction* inst) {
 // ConvToDArray
 
 static ArrayData* convArrToDArrImpl(ArrayData* adIn) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(adIn->isPHPArray());
   auto a = adIn->toDArray(adIn->cowCheck());
   assertx(a->isMixed());
@@ -393,6 +399,7 @@ static ArrayData* convArrToDArrImpl(ArrayData* adIn) {
 }
 
 static ArrayData* convVecToDArrImpl(ArrayData* adIn) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(adIn->isVecArray());
   auto a = PackedArray::ToDArrayVec(adIn, adIn->cowCheck());
   assertx(a != adIn);
@@ -403,6 +410,7 @@ static ArrayData* convVecToDArrImpl(ArrayData* adIn) {
 }
 
 static ArrayData* convDictToDArrImpl(ArrayData* adIn) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(adIn->isDict());
   auto a = MixedArray::ToDArrayDict(adIn, adIn->cowCheck());
   assertx(a->isMixed());
@@ -412,6 +420,7 @@ static ArrayData* convDictToDArrImpl(ArrayData* adIn) {
 }
 
 static ArrayData* convKeysetToDArrImpl(ArrayData* adIn) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(adIn->isKeyset());
   auto a = SetArray::ToDArray(adIn, adIn->cowCheck());
   assertx(a != adIn);
@@ -422,6 +431,7 @@ static ArrayData* convKeysetToDArrImpl(ArrayData* adIn) {
 }
 
 static ArrayData* convObjToDArrImpl(ObjectData* obj) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto a = castObjToDArray(obj);
   assertx(a->isMixed());
   assertx(a->isDArray());

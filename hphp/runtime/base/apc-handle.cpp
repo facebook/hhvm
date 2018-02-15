@@ -200,10 +200,12 @@ Variant APCHandle::toLocal() const {
         APCLocalArray::Make(APCArray::fromHandle(this))->asArrayData()
       );
     case APCKind::SharedVArray:
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalVArray()
       );
     case APCKind::SharedDArray:
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalDArray()
       );
@@ -257,10 +259,11 @@ void APCHandle::deleteShared() {
       APCString::Delete(APCString::fromHandle(this));
       return;
 
-    case APCKind::SharedPackedArray:
-    case APCKind::SharedArray:
     case APCKind::SharedVArray:
     case APCKind::SharedDArray:
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
+    case APCKind::SharedPackedArray:
+    case APCKind::SharedArray:
     case APCKind::SharedVec:
     case APCKind::SharedDict:
     case APCKind::SharedKeyset:
@@ -323,11 +326,12 @@ bool APCHandle::checkInvariants() const {
     case APCKind::UncountedKeyset:
       assert(m_type == KindOfPersistentKeyset);
       return true;
+    case APCKind::SharedVArray:
+    case APCKind::SharedDArray:
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
     case APCKind::SharedString:
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:
-    case APCKind::SharedVArray:
-    case APCKind::SharedDArray:
     case APCKind::SharedVec:
     case APCKind::SharedDict:
     case APCKind::SharedKeyset:

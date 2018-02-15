@@ -270,6 +270,9 @@ public:
   bool isVArray() const;
   bool isDArray() const;
   bool isNotDVArray() const;
+  bool isVecOrVArray() const;
+  bool isDictOrDArray() const;
+
   static bool dvArrayEqual(const ArrayData* a, const ArrayData* b);
 
   /*

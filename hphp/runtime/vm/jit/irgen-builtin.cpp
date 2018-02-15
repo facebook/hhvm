@@ -610,14 +610,14 @@ SSATmp* opt_foldable(IRGS& env,
     variadicArgs = variadic->variantVal().asCArrRef().get();
     numVariadicArgs = variadicArgs->size();
     assertx(variadicArgs->isStatic() &&
-            (!numVariadicArgs || variadicArgs->hasPackedLayout()));
+            (!numVariadicArgs || variadicArgs->isVecOrVArray()));
     numNonDefaultArgs = func->numNonVariadicParams();
   }
 
   // Don't pop the args yet---if the builtin throws at compile time (because
   // it would raise a warning or something at runtime) we're going to leave
   // the call alone.
-  PackedArrayInit args(numNonDefaultArgs + numVariadicArgs);
+  VArrayInit args(numNonDefaultArgs + numVariadicArgs);
   for (auto i = 0; i < numNonDefaultArgs; ++i) {
     auto const t = params[i].value->type();
     if (!t.hasConstVal() && !t.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
@@ -794,7 +794,7 @@ Type param_coerce_type(const Func* callee, uint32_t paramIdx) {
   if (callee->byRef(paramIdx) && pi.nativeArg) {
     return TBoxedCell;
   }
-  if (!pi.builtinType) return TBottom;
+  if (!pi.builtinType) return tc.isVArrayOrDArray() ? TArr : TBottom;
   if (pi.builtinType == KindOfObject &&
       pi.defaultValue.m_type == KindOfNull) {
     return TNullableObj;

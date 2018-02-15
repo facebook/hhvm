@@ -391,6 +391,7 @@ void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
     case KindOfPersistentArray: {
       auto& ad = source->m_data.parr;
       assert(ad->isPHPArray());
+      assert(!RuntimeOption::EvalHackArrDVArrs || ad->isNotDVArray());
       if (handlePersistent(ad)) break;
       if (ad->empty()) {
         if (ad->isVArray()) ad = staticEmptyVArray();

@@ -3226,7 +3226,7 @@ fields of that struct for holding intermediate values.
 
   Store S1 to m_invName on the ActRec pointed to by the frame pointer S0.
 
-| PackMagicArgs, DArrPacked, S(FramePtr), PRc
+| PackMagicArgs, DVArr, S(FramePtr), PRc
 
   Call PackedArray::MakeVArray() with the value of numArgs() on the ActRec
   pointed to by the frame pointer S0 as the first argument, and the pointer to

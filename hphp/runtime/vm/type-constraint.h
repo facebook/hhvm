@@ -226,6 +226,7 @@ struct TypeConstraint {
   bool isDict()     const { return m_type == Type::Dict; }
   bool isVec()      const { return m_type == Type::Vec; }
   bool isKeyset()   const { return m_type == Type::Keyset; }
+  bool isVecOrDict() const { return m_type == Type::VecOrDict; }
 
   bool isObject()   const { return m_type == Type::Object; }
 

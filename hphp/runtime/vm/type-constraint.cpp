@@ -43,7 +43,14 @@ TRACE_SET_MOD(runtime);
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s___invoke("__invoke");
+const StaticString s___invoke("__invoke"),
+  s_array{"array"},
+  s_varray{"HH\\varray"},
+  s_darray{"HH\\darray"},
+  s_varray_or_darray{"HH\\varray_or_darray"},
+  s_vec{"HH\\vec"},
+  s_dict{"HH\\dict"},
+  s_vec_or_dict{"HH\\vec_or_dict"};
 
 void TypeConstraint::init() {
   if (m_typeName == nullptr || isTypeVar() || isTypeConstant()) {
@@ -56,6 +63,18 @@ void TypeConstraint::init() {
   if (mptr) {
     m_type = *mptr;
     assert(getAnnotDataType(m_type) != KindOfPersistentString);
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      assert(m_type != AnnotType::VArray &&
+             m_type != AnnotType::DArray &&
+             m_type != AnnotType::VArrOrDArr);
+      if (m_typeName->isame(s_varray.get())) {
+        m_typeName = s_vec.get();
+      } else if (m_typeName->isame(s_darray.get())) {
+        m_typeName = s_dict.get();
+      } else if (m_typeName->isame(s_varray_or_darray.get())) {
+        m_typeName = s_vec_or_dict.get();
+      }
+    }
     return;
   }
   if (m_flags & Flags::Resolved) {
@@ -151,11 +170,6 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/,
   }
   return name;
 }
-
-const StaticString s_array{"array"},
-  s_varray{"HH\\varray"},
-  s_darray{"HH\\darray"},
-  s_varray_or_darray{"HH\\varray_or_darray"};
 
 bool TypeConstraint::compat(const TypeConstraint& other) const {
   if (other.isExtended() || isExtended()) {

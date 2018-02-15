@@ -40,7 +40,7 @@ ClassConstant::ClassConstant
   // for now only store TypeAnnotation info for type constants
   if (typeconst && typeAnnot) {
     m_typeStructure = Array(typeAnnot->getScalarArrayRep());
-    assertx(m_typeStructure.isDArray());
+    assertx(m_typeStructure.isDictOrDArray());
   }
 }
 

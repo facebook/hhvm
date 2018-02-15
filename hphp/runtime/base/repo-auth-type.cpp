@@ -247,6 +247,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (initNull) return true;
     // fallthrough
   case T::SVArr:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
     if (!isArrayType(tv.m_type) ||
         !tv.m_data.parr->isStatic() ||
         !tv.m_data.parr->isVArray()) {
@@ -261,6 +262,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (initNull) return true;
     // fallthrough
   case T::VArr:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
     if (!isArrayType(tv.m_type) || !tv.m_data.parr->isVArray()) return false;
     if (auto const arr = ty.array()) {
       if (!tvMatchesArrayType(tv, arr)) return false;
@@ -271,6 +273,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (initNull) return true;
     // fallthrough
   case T::SDArr:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
     if (!isArrayType(tv.m_type) ||
         !tv.m_data.parr->isStatic() ||
         !tv.m_data.parr->isDArray()) {
@@ -285,6 +288,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (initNull) return true;
     // fallthrough
   case T::DArr:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
     if (!isArrayType(tv.m_type) || !tv.m_data.parr->isDArray()) return false;
     if (auto const arr = ty.array()) {
       if (!tvMatchesArrayType(tv, arr)) return false;

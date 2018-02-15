@@ -227,6 +227,8 @@ public:
   bool isPHPArray() const { return !m_arr || m_arr->isPHPArray(); }
   bool isVArray() const { return m_arr && m_arr->isVArray(); }
   bool isDArray() const { return m_arr && m_arr->isDArray(); }
+  bool isVecOrVArray() const { return m_arr && m_arr->isVecOrVArray(); }
+  bool isDictOrDArray() const { return m_arr && m_arr->isDictOrDArray(); }
 
   /////////////////////////////////////////////////////////////////////////////
 

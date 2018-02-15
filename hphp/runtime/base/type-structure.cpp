@@ -359,7 +359,7 @@ Array getAlias(const String& aliasName, bool& persistent) {
   if (!typeAliasReq) return Array::CreateDArray();
 
   // this returned type structure is unresolved.
-  assertx(typeAliasReq->typeStructure.isDArray());
+  assertx(typeAliasReq->typeStructure.isDictOrDArray());
   persistent &= persistentTA;
   return typeAliasReq->typeStructure;
 }
@@ -643,9 +643,9 @@ Array resolveTS(const Array& arr,
             cnsName.data());
         }
         auto tv = cls->clsCnsGet(cnsName.get(), /* includeTypeCns = */ true);
-        assertx(isArrayType(tv.m_type));
+        assertx(isArrayLikeType(tv.m_type));
         typeCnsVal = Array(tv.m_data.parr);
-        assertx(typeCnsVal.isDArray());
+        assertx(typeCnsVal.isDictOrDArray());
         if (i == sz - 1) break;
 
         // if there are more accesses, keep resolving

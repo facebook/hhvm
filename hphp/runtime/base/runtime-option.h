@@ -752,6 +752,7 @@ struct RuntimeOption {
   F(bool, HackArrCompatPromoteNotices, false)                           \
   F(bool, HackArrCompatTypeHintNotices, false)                          \
   F(bool, HackArrCompatDVCmpNotices, false)                             \
+  F(bool, HackArrDVArrs, false)                                         \
   F(bool, CreateInOutWrapperFunctions, true)                            \
   F(bool, ReffinessInvariance, false)                                   \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \

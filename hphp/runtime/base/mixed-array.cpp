@@ -81,7 +81,7 @@ struct MixedArray::DArrayInitializer {
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
     ad->initHeader_16(HeaderKind::Mixed, StaticValue, ArrayData::kDArray);
-    assert(ad->checkInvariants());
+    assert(RuntimeOption::EvalHackArrDVArrs || ad->checkInvariants());
   }
 };
 MixedArray::DArrayInitializer MixedArray::s_darr_initializer;
@@ -95,6 +95,8 @@ ArrayData* MixedArray::MakeReserveImpl(uint32_t size,
   assert(hk == HeaderKind::Mixed || hk == HeaderKind::Dict);
   assert(dvArray == ArrayData::kNotDVArray || dvArray == ArrayData::kDArray);
   assert(hk != HeaderKind::Dict || dvArray == ArrayData::kNotDVArray);
+  assert(!RuntimeOption::EvalHackArrDVArrs ||
+         dvArray == ArrayData::kNotDVArray);
 
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
@@ -128,6 +130,7 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
 }
 
 ArrayData* MixedArray::MakeReserveDArray(uint32_t size) {
+  assert(!RuntimeOption::EvalHackArrDVArrs);
   auto ad = MakeReserveImpl(size, HeaderKind::Mixed, ArrayData::kDArray);
   assert(ad->isMixed());
   assert(ad->isDArray());
@@ -185,6 +188,8 @@ MixedArray* MixedArray::MakeStructImpl(uint32_t size,
   assertx(dvArray == ArrayData::kNotDVArray ||
           dvArray == ArrayData::kDArray);
   assertx(hk != HeaderKind::Dict || dvArray == ArrayData::kNotDVArray);
+  assertx(!RuntimeOption::EvalHackArrDVArrs ||
+          dvArray == ArrayData::kNotDVArray);
 
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
@@ -244,6 +249,7 @@ MixedArray* MixedArray::MakeStructDict(uint32_t size,
 MixedArray* MixedArray::MakeStructDArray(uint32_t size,
                                          const StringData* const* keys,
                                          const TypedValue* values) {
+  assert(!RuntimeOption::EvalHackArrDVArrs);
   return MakeStructImpl(size, keys, values,
                         HeaderKind::Mixed,
                         ArrayData::kDArray);
@@ -479,6 +485,7 @@ ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
 }
 
 ArrayData* MixedArray::MakeDArrayFromAPC(const APCArray* apc) {
+  assert(!RuntimeOption::EvalHackArrDVArrs);
   assert(apc->isDArray());
   auto const apcSize = apc->size();
   DArrayInit init{apcSize};
@@ -609,6 +616,7 @@ bool MixedArray::checkInvariants() const {
   assert(hasMixedLayout());
   assert(!isMixed() || !isVArray());
   assert(!isDict() || isNotDVArray());
+  assert(!RuntimeOption::EvalHackArrDVArrs || isNotDVArray());
   assert(checkCount());
   assert(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assert(MixedArray::HashSize(m_scale) ==
@@ -1630,6 +1638,7 @@ ArrayData* MixedArray::ToPHPArrayDict(ArrayData* adIn, bool copy) {
 ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
   auto a = asMixed(in);
   assert(a->isMixed());
+  if (RuntimeOption::EvalHackArrDVArrs) return ToDict(in, copy);
   if (a->isDArray()) return a;
   if (a->getSize() == 0) return staticEmptyDArray();
   auto out = copy ? a->copyMixed() : a;
@@ -1639,6 +1648,7 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
 }
 
 ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
+  if (RuntimeOption::EvalHackArrDVArrs) return in;
   auto out = FromDictImpl(in, copy, true);
   assertx(out->isDArray());
   return out;

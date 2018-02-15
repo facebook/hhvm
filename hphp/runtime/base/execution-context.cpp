@@ -1681,7 +1681,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   auto const doInitArgs = [&] (ActRec* ar, TypedValue& retval) {
     if (!varEnv) {
       auto const& prepArgs = cellIsNull(&args)
-        ? make_tv<KindOfArray>(staticEmptyArray())
+        ? make_array_like_tv(staticEmptyVArray())
         : args;
       auto prepResult = prepareArrayArgs(ar, prepArgs, vmStack(), 0,
                                          flags & InvokeCuf, &retval,

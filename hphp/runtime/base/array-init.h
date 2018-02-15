@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_ARRAY_INIT_H_
 #define incl_HPHP_ARRAY_INIT_H_
 
+#include <boost/variant.hpp>
 #include <type_traits>
 
 #include "hphp/runtime/base/array-data-defs.h"
@@ -27,6 +28,7 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/util/match.h"
 
 namespace HPHP {
 
@@ -482,13 +484,6 @@ struct MixedArrayInit : ArrayInit {
   MixedArrayInit(MixedArrayInit&& o) noexcept : ArrayInit(std::move(o)) {}
 };
 
-struct DArrayInit : MixedPHPArrayInitBase<detail::DArray> {
-  using Base = MixedPHPArrayInitBase<detail::DArray>;
-  explicit DArrayInit(size_t n) : Base(n, Map{}) {}
-  DArrayInit(size_t n, CheckAllocation c) : Base(n, Map{}, c) {}
-  DArrayInit(DArrayInit&& o) noexcept : Base(std::move(o)) {}
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
 struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
@@ -560,6 +555,8 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
   DictInit& setValidKey(const Variant& name, const Variant& v) {
     return setValidKey(*name.asTypedValue(), *v.asTypedValue());
   }
+
+  friend struct DArrayInit;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -625,7 +622,6 @@ struct PackedPHPArrayInitBase : PackedArrayInitBase<TArray, KindOfArray> {
 };
 
 using PackedArrayInit = PackedPHPArrayInitBase<PackedArray>;
-using VArrayInit = PackedPHPArrayInitBase<detail::VArray>;
 
 /*
  * Initializer for a Hack vector array.
@@ -642,6 +638,187 @@ struct VecArrayInit : PackedArrayInitBase<detail::VecArray, KindOfVec> {
   VecArrayInit& append(const Variant& v) {
     return append(*v.asTypedValue());
   }
+
+  friend struct VArrayInit;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct VArrayInit {
+  explicit VArrayInit(size_t n)
+    : init{
+       RuntimeOption::EvalHackArrDVArrs
+         ? Init{VecArrayInit{n}} : Init{VArrayInitImpl{n}}
+      }
+  {}
+
+  template <typename V>
+  VArrayInit& append(const V& val) {
+    match<void>(
+      init,
+      [&](VArrayInitImpl& v) { v.append(val); },
+      [&](VecArrayInit& v) { v.append(val); }
+    );
+    return *this;
+  }
+
+  VArrayInit& appendWithRef(TypedValue tv) {
+    match<void>(
+      init,
+      [&](VArrayInitImpl& v) { v.appendWithRef(tv); },
+      [&](VecArrayInit& v) {
+        if (tvIsReferenced(tv)) throwRefInvalidArrayValueException(v.m_arr);
+        v.append(tvToInitCell(tv));
+      }
+    );
+    return *this;
+  }
+  VArrayInit& appendWithRef(const Variant& v) {
+    return append(*v.asTypedValue());
+  }
+
+  Array toArray() {
+    return match<Array>(
+      init,
+      [&](VArrayInitImpl& v) { return v.toArray(); },
+      [&](VecArrayInit& v) { return v.toArray(); }
+    );
+  }
+
+  Variant toVariant() {
+    return match<Variant>(
+      init,
+      [&](VArrayInitImpl& v) { return v.toVariant(); },
+      [&](VecArrayInit& v) { return v.toVariant(); }
+    );
+  }
+
+  ArrayData* create() {
+    return match<ArrayData*>(
+      init,
+      [&](VArrayInitImpl& v) { return v.create(); },
+      [&](VecArrayInit& v) { return v.create(); }
+    );
+  }
+
+private:
+  using VArrayInitImpl = PackedPHPArrayInitBase<detail::VArray>;
+  using Init = boost::variant<VArrayInitImpl, VecArrayInit>;
+  Init init;
+};
+
+namespace detail {
+
+struct DArrayInitImpl : MixedPHPArrayInitBase<detail::DArray> {
+  using Base = MixedPHPArrayInitBase<detail::DArray>;
+  explicit DArrayInitImpl(size_t n) : Base(n, Map{}) {}
+  DArrayInitImpl(size_t n, CheckAllocation c) : Base(n, Map{}, c) {}
+};
+
+}
+
+struct DArrayInit {
+  explicit DArrayInit(size_t n)
+    : init{
+       RuntimeOption::EvalHackArrDVArrs
+         ? Init{DictInit{n}} : Init{DArrayInitImpl{n}}
+      }
+  {}
+
+  DArrayInit(size_t n, CheckAllocation c)
+   : init{
+       RuntimeOption::EvalHackArrDVArrs
+         ? Init{DictInit{n, c}} : Init{DArrayInitImpl{n, c}}
+      }
+  {}
+
+  template <typename V>
+  DArrayInit& append(const V& val) {
+    match<void>(
+      init,
+      [&](DArrayInitImpl& v) { v.append(val); },
+      [&](DictInit& v) { v.append(val); }
+    );
+    return *this;
+  }
+
+  template <typename K, typename V>
+  DArrayInit& add(const K& name, const V& val, bool keyConverted = false) {
+    match<void>(
+      init,
+      [&](DArrayInitImpl& v) { v.add(name, val, keyConverted); },
+      [&](DictInit& v) { v.set(name, val); }
+    );
+    return *this;
+  }
+
+  template <typename K, typename V>
+  DArrayInit& set(const K& name, const V& val) {
+    match<void>(
+      init,
+      [&](DArrayInitImpl& v) { v.set(name, val); },
+      [&](DictInit& v) { v.set(name, val); }
+    );
+    return *this;
+  }
+
+  template <typename K, typename V>
+  DArrayInit& setValidKey(const K& name, const V& val) {
+    match<void>(
+      init,
+      [&](DArrayInitImpl& v) { v.setValidKey(name, val); },
+      [&](DictInit& v) { v.setValidKey(name, val); }
+    );
+    return *this;
+  }
+
+  DArrayInit& setUnknownKey(const Variant& name, const Variant& val) {
+    match<void>(
+      init,
+      [&](DArrayInitImpl& v) { v.setUnknownKey(name, val); },
+      [&](DictInit& v) {
+        if (name.isInteger()) {
+          v.set(name.toInt64Val(), val);
+          return;
+        }
+        if (name.isString()) {
+          v.set(name.toCStrRef(), val);
+          return;
+        }
+        throwInvalidArrayKeyException(val.asCell(), v.m_arr);
+      }
+    );
+    return *this;
+  }
+
+  Array toArray() {
+    return match<Array>(
+      init,
+      [&](DArrayInitImpl& v) { return v.toArray(); },
+      [&](DictInit& v) { return v.toArray(); }
+    );
+  }
+
+  Variant toVariant() {
+    return match<Variant>(
+      init,
+      [&](DArrayInitImpl& v) { return v.toVariant(); },
+      [&](DictInit& v) { return v.toVariant(); }
+    );
+  }
+
+  ArrayData* create() {
+    return match<ArrayData*>(
+      init,
+      [&](DArrayInitImpl& v) { return v.create(); },
+      [&](DictInit& v) { return v.create(); }
+    );
+  }
+
+private:
+  using DArrayInitImpl = detail::DArrayInitImpl;
+  using Init = boost::variant<DArrayInitImpl, DictInit>;
+  Init init;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -71,10 +71,14 @@ inline bool is_vec(const Variant& v)    { return v.isVecArray();}
 inline bool is_dict(const Variant& v)   { return v.isDict();}
 inline bool is_keyset(const Variant& v) { return v.isKeyset();}
 inline bool is_varray(const Variant& v) {
-  return v.isArray() && v.asCArrRef().isVArray();
+  return RuntimeOption::EvalHackArrDVArrs
+    ? v.isVecArray()
+    : (v.isArray() && v.asCArrRef().isVArray());
 }
 inline bool is_darray(const Variant& v) {
-  return v.isArray() && v.asCArrRef().isDArray();
+  return RuntimeOption::EvalHackArrDVArrs
+    ? v.isDict()
+    : (v.isArray() && v.asCArrRef().isDArray());
 }
 
 inline bool is_object(const Variant& var) {

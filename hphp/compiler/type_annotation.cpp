@@ -43,7 +43,17 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_shape(false),
                                 m_allowsUnknownFields(false),
                                 m_clsCnsShapeField(false),
-                                m_optionalShapeField(false) { }
+                                m_optionalShapeField(false) {
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    if (!strcasecmp(m_name.c_str(), "HH\\varray")) {
+      m_name = "HH\\vec";
+    } else if (!strcasecmp(m_name.c_str(), "HH\\darray")) {
+      m_name = "HH\\dict";
+    } else if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) {
+      m_name = "HH\\vec_or_dict";
+    }
+  }
+}
 
 std::string TypeAnnotation::vanillaName() const {
   // filter out types that should not be exposed to the runtime
@@ -94,7 +104,7 @@ MaybeDataType TypeAnnotation::dataType() const {
     if (!strcasecmp(m_name.c_str(), "HH\\keyset")) return KindOfKeyset;
     if (!strcasecmp(m_name.c_str(), "HH\\varray")) return KindOfArray;
     if (!strcasecmp(m_name.c_str(), "HH\\darray")) return KindOfArray;
-    if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) return KindOfArray;
+    if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) return folly::none;
     if (!strcasecmp(m_name.c_str(), "HH\\vec_or_dict")) return folly::none;
     return KindOfObject;
   }
@@ -117,7 +127,7 @@ MaybeDataType TypeAnnotation::dataType() const {
   if (!strcasecmp(m_name.c_str(), "HH\\keyset"))   return KindOfKeyset;
   if (!strcasecmp(m_name.c_str(), "HH\\varray"))   return KindOfArray;
   if (!strcasecmp(m_name.c_str(), "HH\\darray"))   return KindOfArray;
-  if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) return KindOfArray;
+  if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) return folly::none;
   if (!strcasecmp(m_name.c_str(), "HH\\vec_or_dict")) return folly::none;
   if (!strcasecmp(m_name.c_str(), "HH\\resource")) return KindOfResource;
   if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return folly::none;
@@ -302,23 +312,25 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
   if (m_tuple) {
     return TypeStructure::Kind::T_tuple;
   }
+  if (m_shape) {
+    return TypeStructure::Kind::T_shape;
+  }
   if (m_function) {
     return TypeStructure::Kind::T_fun;
   }
   if (!strcasecmp(m_name.c_str(), "array")) {
-    return m_shape
-      ? TypeStructure::Kind::T_shape
-      : TypeStructure::Kind::T_array;
+    return TypeStructure::Kind::T_array;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\varray")) {
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
     return TypeStructure::Kind::T_array;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\darray")) {
-    return m_shape
-      ? TypeStructure::Kind::T_shape
-      : TypeStructure::Kind::T_array;
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    return TypeStructure::Kind::T_array;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) {
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
     return TypeStructure::Kind::T_array;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\vec_or_dict")) {

@@ -89,9 +89,11 @@ struct APCArray {
   void unreference() const { m_handle.unreferenceNonRoot(); }
 
   ArrayData* toLocalVArray() const {
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
     return PackedArray::MakeVArrayFromAPC(this);
   }
   ArrayData* toLocalDArray() const {
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
     return MixedArray::MakeDArrayFromAPC(this);
   }
   ArrayData* toLocalVec() const { return PackedArray::MakeVecFromAPC(this); }

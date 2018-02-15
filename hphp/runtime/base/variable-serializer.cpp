@@ -96,6 +96,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
 
 VariableSerializer::ArrayKind
 VariableSerializer::getKind(const ArrayData* arr) const {
+  assertx(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
   if (arr->isDict()) return VariableSerializer::ArrayKind::Dict;
   if (arr->isVecArray()) return VariableSerializer::ArrayKind::Vec;
   if (arr->isKeyset()) return VariableSerializer::ArrayKind::Keyset;

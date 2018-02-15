@@ -1177,7 +1177,7 @@ TypeAliasReq typeAliasFromClass(Unit* unit, const TypeAlias* thisType,
     req.klass = klass;
   }
   req.userAttrs = thisType->userAttrs;
-  assertx(thisType->typeStructure.isDArray());
+  assertx(thisType->typeStructure.isDictOrDArray());
   req.typeStructure = thisType->typeStructure;
   return req;
 }

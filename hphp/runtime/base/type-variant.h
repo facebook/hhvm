@@ -871,6 +871,7 @@ struct Variant : private TypedValue {
   }
 
   Array toVArray() const {
+    if (RuntimeOption::EvalHackArrDVArrs) return toVecArray();
     if (isArrayType(m_type)) return asCArrRef().toVArray();
     auto copy = *this;
     tvCastToVArrayInPlace(copy.asTypedValue());
@@ -879,6 +880,7 @@ struct Variant : private TypedValue {
   }
 
   Array toDArray() const {
+    if (RuntimeOption::EvalHackArrDVArrs) return toDict();
     if (isArrayType(m_type)) return asCArrRef().toDArray();
     auto copy = *this;
     tvCastToDArrayInPlace(copy.asTypedValue());

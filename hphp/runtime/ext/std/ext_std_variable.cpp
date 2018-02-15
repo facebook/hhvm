@@ -154,10 +154,12 @@ bool HHVM_FUNCTION(HH_is_keyset, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(HH_is_varray, const Variant& val) {
+  if (RuntimeOption::EvalHackArrDVArrs) return is_vec(val);
   return val.isPHPArray() && val.asCArrRef().isVArray();
 }
 
 bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
+  if (RuntimeOption::EvalHackArrDVArrs) return is_dict(val);
   return val.isPHPArray() && val.asCArrRef().isDArray();
 }
 
@@ -320,6 +322,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
     case KindOfArray: {
       ArrayData *arr = value.getArrayData();
       assert(arr->isPHPArray());
+      assert(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
       if (arr->empty()) {
         if (keepDVArrays) {
           if (arr->isVArray()) return s_EmptyVArray;

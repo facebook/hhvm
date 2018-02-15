@@ -290,6 +290,7 @@ void emitNewMixedArray(IRGS& env, uint32_t capacity) {
 }
 
 void emitNewDArray(IRGS& env, uint32_t capacity) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   if (capacity == 0) {
     push(env, cns(env, staticEmptyDArray()));
   } else {
@@ -379,6 +380,7 @@ void emitNewVecArray(IRGS& env, uint32_t numArgs) {
 }
 
 void emitNewVArray(IRGS& env, uint32_t numArgs) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   emitNewPackedLayoutArray(env, numArgs, AllocVArray);
 }
 
@@ -407,6 +409,7 @@ void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
 }
 
 void emitNewStructDArray(IRGS& env, const ImmVector& immVec) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   newStructImpl(env, immVec, NewStructDArray);
 }
 

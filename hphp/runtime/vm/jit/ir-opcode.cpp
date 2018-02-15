@@ -60,6 +60,7 @@ TRACE_SET_MOD(hhir);
 #define DKeysetElem    HasDest
 #define DArrPacked     HasDest
 #define DArrMixed      HasDest
+#define DVArr          HasDest
 #define DCol           HasDest
 #define DCtx           HasDest
 #define DCtxCls        HasDest
@@ -125,6 +126,7 @@ OpInfo g_opInfo[] = {
 #undef DKeysetElem
 #undef DArrPacked
 #undef DArrMixed
+#undef DVArr
 #undef DCol
 #undef DAllocObj
 #undef DCtx

@@ -42,8 +42,9 @@ ALWAYS_INLINE ArrayData* staticEmptyArray() {
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyVArray() {
-  void* vp = &s_theEmptyVArray;
-  return static_cast<ArrayData*>(vp);
+  void* vp1 = &s_theEmptyVArray;
+  void* vp2 = &s_theEmptyVecArray;
+  return static_cast<ArrayData*>(RuntimeOption::EvalHackArrDVArrs ? vp2 : vp1);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyVecArray() {
@@ -52,8 +53,9 @@ ALWAYS_INLINE ArrayData* staticEmptyVecArray() {
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyDArray() {
-  void* vp = &s_theEmptyDArray;
-  return static_cast<ArrayData*>(vp);
+  void* vp1 = &s_theEmptyDArray;
+  void* vp2 = &s_theEmptyDictArray;
+  return static_cast<ArrayData*>(RuntimeOption::EvalHackArrDVArrs ? vp2 : vp1);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
@@ -165,6 +167,7 @@ inline ArrayData::DVArray ArrayData::dvArray() const {
 }
 
 inline void ArrayData::setDVArray(DVArray d) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs || d == kNotDVArray);
   assertx(!(d & ~kDVArrayMask));
   m_aux16 = (m_aux16 & ~kDVArrayMask) | d;
 }
@@ -172,6 +175,12 @@ inline void ArrayData::setDVArray(DVArray d) {
 inline bool ArrayData::isVArray() const { return dvArray() & kVArray; }
 inline bool ArrayData::isDArray() const { return dvArray() & kDArray; }
 inline bool ArrayData::isNotDVArray() const { return dvArray() == kNotDVArray; }
+inline bool ArrayData::isVecOrVArray() const {
+  return RuntimeOption::EvalHackArrDVArrs ? isVecArray() : isVArray();
+}
+inline bool ArrayData::isDictOrDArray() const {
+  return RuntimeOption::EvalHackArrDVArrs ? isDict() : isDArray();
+}
 
 // gcc doesn't optimize (a & 3) == (b & 3) very well; help it a little.
 inline bool ArrayData::dvArrayEqual(const ArrayData* a, const ArrayData* b) {
@@ -180,8 +189,10 @@ inline bool ArrayData::dvArrayEqual(const ArrayData* a, const ArrayData* b) {
 
 inline bool ArrayData::dvArraySanityCheck() const {
   auto const dv = dvArray();
-  if (isPacked()) return !(dv & kDArray);
-  if (isMixed())  return !(dv & kVArray);
+  if (!RuntimeOption::EvalHackArrDVArrs) {
+    if (isPacked()) return !(dv & kDArray);
+    if (isMixed())  return !(dv & kVArray);
+  }
   return dv == kNotDVArray;
 }
 

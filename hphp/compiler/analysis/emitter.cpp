@@ -10728,7 +10728,7 @@ Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
 
   TypeAlias record;
   record.typeStructure = td->annot->getScalarArrayRep();
-  assertx(record.typeStructure.isDArray());
+  assertx(record.typeStructure.isDictOrDArray());
   record.name = name;
   record.value = value;
   record.type = type;
@@ -12438,6 +12438,7 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.HackArrCompatDVCmpNotices =
     RuntimeOption::EvalHackArrCompatDVCmpNotices;
   gd.UseMSRVForInOut = RuntimeOption::EvalUseMSRVForInOut;
+  gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

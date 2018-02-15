@@ -65,7 +65,10 @@ struct TypeAlias {
       (userAttrs)
       (attrs)
       ;
-    TypedValue tv = make_tv<KindOfArray>(typeStructure.get());
+    // Can't use make_array_like_tv because of include ordering issues
+    auto tv = RuntimeOption::EvalHackArrDVArrs
+      ? make_tv<KindOfDict>(typeStructure.get())
+      : make_tv<KindOfArray>(typeStructure.get());
     sd(tv);
   }
 
@@ -82,7 +85,12 @@ struct TypeAlias {
 
     TypedValue tv;
     sd(tv);
-    assert(isArrayType(tv.m_type));
+    assert(tvIsPlausible(tv));
+    assert(
+      RuntimeOption::EvalHackArrDVArrs
+        ? isDictType(tv.m_type)
+        : isArrayType(tv.m_type)
+    );
     typeStructure = tv.m_data.parr;
   }
 

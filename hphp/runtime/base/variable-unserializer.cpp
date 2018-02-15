@@ -888,7 +888,7 @@ void VariableUnserializer::unserializeVariant(
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto a = unserializeDArray();
-      tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
+      tvMove(make_array_like_tv(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
   case 'y': // VArray
@@ -896,7 +896,7 @@ void VariableUnserializer::unserializeVariant(
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto a = unserializeVArray();
-      tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
+      tvMove(make_array_like_tv(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
   case 'v':
@@ -1347,7 +1347,10 @@ Array VariableUnserializer::unserializeVArray() {
     if (m_type != Type::Serialize) return Array::CreateVArray();
     return m_forceDArrays
       ? Array::CreateDArray()
-      : Array::Create();
+      : (RuntimeOption::EvalHackArrDVArrs
+         ? Array::CreateVec()
+         : Array::Create()
+        );
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1372,6 +1375,12 @@ Array VariableUnserializer::unserializeVArray() {
         MixedArray::computeAllocBytes(MixedArray::computeScaleFromSize(size))
       );
       return DArrayInit(size).toArray();
+    }
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      oomCheck(
+        kSizeIndex2PackedArrayCapacity[PackedArray::capacityToSizeIndex(size)]
+      );
+      return VecArrayInit(size).toArray();
     }
     oomCheck(
       kSizeIndex2PackedArrayCapacity[PackedArray::capacityToSizeIndex(size)]
@@ -1406,7 +1415,9 @@ Array VariableUnserializer::unserializeDArray() {
   expectChar('{');
   if (size == 0) {
     expectChar('}');
-    return (m_type != Type::Serialize || m_forceDArrays)
+    return (m_type != Type::Serialize ||
+            m_forceDArrays ||
+            RuntimeOption::EvalHackArrDVArrs)
       ? Array::CreateDArray()
       : Array::Create();
   }
@@ -1421,7 +1432,9 @@ Array VariableUnserializer::unserializeDArray() {
     check_non_safepoint_surprise();
   }
 
-  auto arr = (m_type != Type::Serialize || m_forceDArrays)
+  auto arr = (m_type != Type::Serialize ||
+              m_forceDArrays ||
+              RuntimeOption::EvalHackArrDVArrs)
     ? DArrayInit(size).toArray()
     : MixedArrayInit(size).toArray();
   reserveForAdd(size);

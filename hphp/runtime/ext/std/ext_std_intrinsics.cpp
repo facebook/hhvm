@@ -49,22 +49,25 @@ TypedValue HHVM_FUNCTION(launder_value, const Variant& val) {
 }
 
 Array HHVM_FUNCTION(dummy_varray_builtin, const Array& arr) {
-  if (arr.isVArray()) return arr;
+  if (arr.isVecOrVArray()) return arr;
   return Array::CreateVArray();
 }
 
 Array HHVM_FUNCTION(dummy_darray_builtin, const Array& arr) {
-  if (arr.isDArray()) return arr;
+  if (arr.isDictOrDArray()) return arr;
   return Array::CreateDArray();
 }
 
-Array HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Array& arr) {
-  if (arr.isVArray() || arr.isDArray()) return arr;
-  return Array::CreateVArray();
+TypedValue HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Variant& var) {
+  if (var.isArray()) {
+    auto const& arr = var.asCArrRef();
+    if (arr.isVecOrVArray() || arr.isDictOrDArray()) return tvReturn(arr);
+  }
+  return tvReturn(staticEmptyVArray());
 }
 
 Array HHVM_FUNCTION(dummy_array_builtin, const Array& arr) {
-  if (!arr.isVArray() && !arr.isDArray()) return arr;
+  if (!arr.isVecOrVArray() && !arr.isDictOrDArray()) return arr;
   return Array::Create();
 }
 

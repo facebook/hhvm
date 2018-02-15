@@ -1106,7 +1106,11 @@ static void shuffleExtraStackArgs(ActRec* ar) {
         }
         // Remove them from the stack
         stack.ndiscard(numVarArgs);
-        stack.pushArrayNoRc(ai.create());
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          stack.pushVecNoRc(ai.create());
+        } else {
+          stack.pushArrayNoRc(ai.create());
+        }
         // Before, for each arg: refcount = n + 1 (stack)
         // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray)
       } catch (...) {
@@ -1129,7 +1133,11 @@ static void shuffleExtraStackArgs(ActRec* ar) {
     }
     // Discard the arguments from the stack
     for (uint32_t i = 0; i < numVarArgs; ++i) stack.popTV();
-    stack.pushArrayNoRc(ai.create());
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      stack.pushVecNoRc(ai.create());
+    } else {
+      stack.pushArrayNoRc(ai.create());
+    }
     assert(func->numParams() == (numArgs - numVarArgs + 1));
     ar->setNumArgs(func->numParams());
   }
@@ -1145,9 +1153,15 @@ static void shuffleMagicArgs(ActRec* ar) {
   // We need to make an array containing all the arguments passed by
   // the caller and put it where the second argument is.
   auto argArray = Array::attach(
-    nargs ? PackedArray::MakeVArray(
-              nargs, reinterpret_cast<TypedValue*>(ar) - nargs)
-          : staticEmptyVArray()
+    [&]{
+      auto const args = reinterpret_cast<TypedValue*>(ar) - nargs;
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return nargs
+          ? PackedArray::MakeVec(nargs, args)
+          : staticEmptyVecArray();
+      }
+      return nargs ? PackedArray::MakeVArray(nargs, args) : staticEmptyVArray();
+    }()
   );
 
   auto& stack = vmStack();
@@ -1161,7 +1175,11 @@ static void shuffleMagicArgs(ActRec* ar) {
 
   // Move argArray to where the second argument belongs. We've already
   // incReffed the array above so we don't need to do it here.
-  stack.pushArrayNoRc(argArray.detach());
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    stack.pushVecNoRc(argArray.detach());
+  } else {
+    stack.pushArrayNoRc(argArray.detach());
+  }
 
   ar->setNumArgs(2);
   ar->setVarEnv(nullptr);
@@ -1210,10 +1228,17 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
     // We need to make an array containing all the arguments passed by
     // the caller and put it where the second argument is.
     auto argArray = Array::attach(
-      nregular
-      ? PackedArray::MakeVArray(
-        nregular, reinterpret_cast<TypedValue*>(ar) - nregular)
-      : staticEmptyVArray()
+      [&]{
+        auto const args = reinterpret_cast<TypedValue*>(ar) - nregular;
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          return nregular
+            ? PackedArray::MakeVec(nregular, args)
+            : staticEmptyVecArray();
+        }
+        return nregular
+          ? PackedArray::MakeVArray(nregular, args)
+          : staticEmptyVArray();
+      }()
     );
 
     // Remove the arguments from the stack; they were moved into the
@@ -1227,14 +1252,25 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
 
     // Move argArray to where the second argument belongs. We've already
     // incReffed the array above so we don't need to do it here.
-    stack.pushArrayNoRc(argArray.detach());
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      stack.pushVecNoRc(argArray.detach());
+    } else {
+      stack.pushArrayNoRc(argArray.detach());
+    }
   } else {
-    if (nregular == 0
-        && isArrayType(args.m_type)
-        && args.m_data.parr->isVArray()) {
+    if (nregular == 0 &&
+        !RuntimeOption::EvalHackArrDVArrs &&
+        isArrayType(args.m_type) &&
+        args.m_data.parr->isVArray()) {
       assert(stack.top() == (void*) ar);
       stack.pushStringNoRc(invName);
       stack.pushArray(args.m_data.parr);
+    } else if (nregular == 0 &&
+               RuntimeOption::EvalHackArrDVArrs &&
+               isVecType(args.m_type)) {
+      assert(stack.top() == (void*) ar);
+      stack.pushStringNoRc(invName);
+      stack.pushVec(args.m_data.parr);
     } else {
       VArrayInit ai(nargs + nregular);
       // The arguments are pushed in order, so we should refer them by
@@ -1252,7 +1288,11 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
       for (ArrayIter iter(args); iter; ++iter) {
         ai.appendWithRef(iter.secondValPlus());
       }
-      stack.pushArrayNoRc(ai.create());
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        stack.pushVecNoRc(ai.create());
+      } else {
+        stack.pushArrayNoRc(ai.create());
+      }
     }
   }
 
@@ -1410,16 +1450,25 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
     if (hasVarParam) {
       auto const ad = ai.create();
       assert(ad->hasExactlyOneRef());
-      stack.pushArrayNoRc(ad);
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        stack.pushVecNoRc(ad);
+      } else {
+        stack.pushArrayNoRc(ad);
+      }
     }
     ar->setNumArgs(nargs);
     ar->setExtraArgs(extraArgs);
   } else {
     assert(hasVarParam);
     if (nparams == nregular &&
+        !RuntimeOption::EvalHackArrDVArrs &&
         isArrayType(args.m_type) &&
         args.m_data.parr->isVArray()) {
       stack.pushArray(args.m_data.parr);
+    } else if (nparams == nregular &&
+               RuntimeOption::EvalHackArrDVArrs &&
+               isVecType(args.m_type)) {
+      stack.pushVec(args.m_data.parr);
     } else {
       VArrayInit ai(extra);
       if (UNLIKELY(nextra_regular > 0)) {
@@ -1442,7 +1491,11 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
       assert(!iter); // iter should now be exhausted
       auto const ad = ai.create();
       assert(ad->hasExactlyOneRef());
-      stack.pushArrayNoRc(ad);
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        stack.pushVecNoRc(ad);
+      } else {
+        stack.pushArrayNoRc(ad);
+      }
     }
     ar->setNumArgs(f->numParams());
   }
@@ -1503,7 +1556,11 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
         }
       }
       if (UNLIKELY(func->hasVariadicCaptureParam())) {
-        stack.pushArrayNoRc(staticEmptyVArray());
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          stack.pushVecNoRc(staticEmptyVecArray());
+        } else {
+          stack.pushArrayNoRc(staticEmptyVArray());
+        }
       }
       if (func->attrs() & AttrMayUseVV) {
         ar->setVarEnv(nullptr);
@@ -1966,6 +2023,7 @@ OPTBLD_INLINE void iopString(const StringData* s) {
 
 OPTBLD_INLINE void iopArray(const ArrayData* a) {
   assert(a->isPHPArray());
+  assert(!RuntimeOption::EvalHackArrDVArrs || a->isNotDVArray());
   vmStack().pushStaticArray(a);
 }
 
@@ -2054,6 +2112,7 @@ OPTBLD_INLINE void iopNewStructArray(int32_t n, imm_array<int32_t> ids) {
 }
 
 OPTBLD_INLINE void iopNewStructDArray(int32_t n, imm_array<int32_t> ids) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto const a = newStructArrayImpl(n, ids, MixedArray::MakeStructDArray);
   vmStack().pushArrayNoRc(a);
 }
@@ -2078,6 +2137,7 @@ OPTBLD_INLINE void iopNewKeysetArray(intva_t n) {
 }
 
 OPTBLD_INLINE void iopNewVArray(intva_t n) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   // This constructor moves values, no inc/decref is necessary.
   auto a = PackedArray::MakeVArray(n, vmStack().topC());
   vmStack().ndiscard(n);
@@ -2085,6 +2145,7 @@ OPTBLD_INLINE void iopNewVArray(intva_t n) {
 }
 
 OPTBLD_INLINE void iopNewDArray(intva_t capacity) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   if (capacity == 0) {
     vmStack().pushArrayNoRc(staticEmptyDArray());
   } else {
@@ -2500,11 +2561,13 @@ OPTBLD_INLINE void iopCastVec() {
 }
 
 OPTBLD_INLINE void iopCastVArray() {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   Cell* c1 = vmStack().topC();
   tvCastToVArrayInPlace(c1);
 }
 
 OPTBLD_INLINE void iopCastDArray() {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   Cell* c1 = vmStack().topC();
   tvCastToDArrayInPlace(c1);
 }
@@ -3992,8 +4055,12 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
   case IsTypeOp::Res:    return tv->m_type == KindOfResource;
   case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(tv));
   case IsTypeOp::ArrLike: return isArrayLikeType(tv->m_type);
-  case IsTypeOp::VArray: return is_varray(tvAsCVarRef(tv));
-  case IsTypeOp::DArray: return is_darray(tvAsCVarRef(tv));
+  case IsTypeOp::VArray:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    return is_varray(tvAsCVarRef(tv));
+  case IsTypeOp::DArray:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    return is_darray(tvAsCVarRef(tv));
   }
   not_reached();
 }
@@ -5268,7 +5335,11 @@ void iopFCallBuiltin(intva_t numArgs, intva_t numNonDefault, Id id) {
   if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func, strict)) {
     if (func->hasVariadicCaptureParam()) {
       assertx(numArgs > 0);
-      assertx(isArrayType(args[1 - safe_cast<int32_t>(numArgs.n)].m_type));
+      assertx(
+        RuntimeOption::EvalHackArrDVArrs
+          ? isVecType(args[1 - safe_cast<int32_t>(numArgs.n)].m_type)
+          : isArrayType(args[1 - safe_cast<int32_t>(numArgs.n)].m_type)
+      );
     }
     Native::callFunc<true>(func, nullptr, args, numNonDefault, ret);
   } else {
@@ -5317,8 +5388,7 @@ static bool doFCallArray(PC& pc, int numStackValues,
         Cell tmp = *c1;
         // argument_unpacking RFC dictates "containers and Traversables"
         raise_warning_unsampled("Only containers may be unpacked");
-        c1->m_type = KindOfPersistentArray;
-        c1->m_data.parr = staticEmptyVArray();
+        *c1 = make_persistent_array_like_tv(staticEmptyVArray());
         tvDecRefGen(&tmp);
         break;
       }

@@ -242,6 +242,7 @@ ArrayData* castObjToKeyset(ObjectData* obj) {
 }
 
 ArrayData* castObjToVArray(ObjectData* obj) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   return castObjToHackArrImpl(
     obj,
     Array::CreateVArray,
@@ -253,6 +254,7 @@ ArrayData* castObjToVArray(ObjectData* obj) {
 
 
 ArrayData* castObjToDArray(ObjectData* obj) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   return castObjToHackArrImpl(
     obj,
     Array::CreateDArray,

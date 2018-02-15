@@ -912,7 +912,8 @@ ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
   return out;
 }
 
-ArrayData* SetArray::ToDArray(ArrayData* ad, bool) {
+ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
+  if (RuntimeOption::EvalHackArrDVArrs) return ToDict(ad, copy);
   auto out = ToArrayImpl<DArrayInit>(ad, true);
   assertx(out->isDArray());
   return out;

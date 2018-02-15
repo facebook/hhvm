@@ -1039,8 +1039,9 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, colon_token) = assert_token parser Colon in
     let (parser, statement_list) =
       parse_terminated_list parser parse_statement terminator in
-    let (parser, terminate_token) = assert_token parser terminator in
-    let (parser, semicolon_token) = assert_token parser Semicolon in
+    let (parser, terminate_token) = require_token parser terminator
+      (SyntaxError.error1059 terminator) in
+    let (parser, semicolon_token) = require_semicolon parser in
     let syntax = make_alternate_loop_statement
       colon_token statement_list terminate_token semicolon_token in
     (parser, syntax)

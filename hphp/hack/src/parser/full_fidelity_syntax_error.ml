@@ -122,6 +122,9 @@ let error1056 = "This token is not valid as part of a function declaration."
 let error1057 text = "Encountered unexpected token '" ^ text ^ "'."
 let error1058 received required = Printf.sprintf ("Encountered unexpected " ^^
   "token '%s'. Did you mean '%s'?") received required
+let error1059 terminator = Printf.sprintf
+  "An '%s' is required when using alternate block syntax."
+  (Full_fidelity_token_kind.to_string terminator)
 
 let error2001 = "A type annotation is required in strict mode."
 let error2003 = "A case statement may only appear directly inside a switch."

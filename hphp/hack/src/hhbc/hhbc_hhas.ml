@@ -1076,7 +1076,7 @@ and string_of_param_default_value ~env expr =
       | Some env ->
         Hhbc_id.Class.to_raw_string @@ fst @@
           Hhbc_id.Class.elaborate_id
-            (Emit_env.get_namespace env) (p, SU.strip_global_ns id)
+            (Emit_env.get_namespace env) (p, id)
       | _ -> id
     in
     if should_format then fmt_class_name ~is_class_constant id else id

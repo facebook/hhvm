@@ -2349,6 +2349,9 @@ let mixed_namespace_errors node parents namespace_type errors =
                          | { syntax = NamespaceDeclaration _; _}
                          | { syntax = DeclareDirectiveStatement _; _}
                          | { syntax = DeclareBlockStatement _; _}
+                         | { syntax = ExpressionStatement {
+                            expression_statement_expression =
+                            { syntax = HaltCompilerExpression _; _}; _}; _}
                          | { syntax = EndOfFile _; _}
                          | { syntax = NamespaceUseDeclaration _; _} -> false
                          | _ -> true)

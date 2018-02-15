@@ -130,12 +130,12 @@ let precedence operator =
   | LeftShiftOperator | RightShiftOperator -> 17
   | AdditionOperator | SubtractionOperator | ConcatenationOperator -> 18
   | MultiplicationOperator | DivisionOperator | RemainderOperator | SuspendOperator -> 19
-  | CastOperator
-  | ReferenceOperator | ErrorControlOperator
-  | PrefixIncrementOperator | PrefixDecrementOperator
   | LogicalNotOperator| NotOperator
   | UnaryPlusOperator | UnaryMinusOperator -> 20
   | InstanceofOperator | IsOperator -> 21
+  | CastOperator
+  | ReferenceOperator | ErrorControlOperator
+  | PrefixIncrementOperator | PrefixDecrementOperator
   | ExponentOperator -> 22
   | PostfixIncrementOperator | PostfixDecrementOperator -> 23
   | CloneOperator -> 24

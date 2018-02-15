@@ -14,6 +14,7 @@ exception NotADirectory of string
 
 external realpath: string -> string option = "hh_realpath"
 external is_nfs: string -> bool = "hh_is_nfs"
+external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
 
 (** Option type intead of exception throwing. *)
 let get_env name =

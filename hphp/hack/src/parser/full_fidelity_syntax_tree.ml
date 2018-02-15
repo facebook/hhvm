@@ -23,6 +23,7 @@ module SyntaxError = Full_fidelity_syntax_error
 module TK = Full_fidelity_token_kind
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
+module Parser = Full_fidelity_parser.WithSyntax(Syntax)
 open Syntax
 
 type t = {
@@ -106,7 +107,6 @@ let remove_duplicates errors equals =
   List.rev result
 
 let make_impl ?(env = Env.default) text =
-  let module Parser = Full_fidelity_parser.WithSyntax(Syntax) in
   let parser = Parser.make env text in
   let (parser, root) = Parser.parse_script parser in
   (* We've got the lexical errors and the parser errors together, both

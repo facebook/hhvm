@@ -446,7 +446,11 @@ void finish_builtin(ISS& env,
   for (auto i = numArgs; i < func->params.size(); i++) {
     auto const& pi = func->params[i];
     if (pi.isVariadic) {
-      repl.emplace_back(bc::Array { staticEmptyVArray() });
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        repl.emplace_back(bc::Vec { staticEmptyVecArray() });
+      } else {
+        repl.emplace_back(bc::Array { staticEmptyVArray() });
+      }
       continue;
     }
     auto cell = pi.defaultValue.m_type == KindOfNull && !pi.builtinType ?
@@ -459,7 +463,11 @@ void finish_builtin(ISS& env,
       numArgs >= func->params.size()) {
 
     const uint32_t numToPack = numArgs - func->params.size() + 1;
-    repl.emplace_back(bc::NewVArray { numToPack });
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      repl.emplace_back(bc::NewVecArray { numToPack });
+    } else {
+      repl.emplace_back(bc::NewVArray { numToPack });
+    }
     numArgs = func->params.size();
   }
 

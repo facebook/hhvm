@@ -261,6 +261,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalHackArrCompatDVCmpNotices =
     gd.HackArrCompatDVCmpNotices;
   RuntimeOption::EvalUseMSRVForInOut = gd.UseMSRVForInOut;
+  RuntimeOption::EvalHackArrDVArrs = gd.HackArrDVArrs;
 
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
@@ -330,6 +331,7 @@ void write_global_data(
     RuntimeOption::EvalHackArrCompatTypeHintNotices;
   gd.HackArrCompatDVCmpNotices =
     RuntimeOption::EvalHackArrCompatDVCmpNotices;
+  gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;
   gd.InitialNamedEntityTableSize  =
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =

@@ -1910,6 +1910,7 @@ bool Type::checkInvariants() const {
     assert(!isVector || m_data.aval->isVecArray());
     assert(!isKeyset || m_data.aval->isKeyset());
     assert(!isDict || m_data.aval->isDict());
+    assertx(!RuntimeOption::EvalHackArrDVArrs || m_data.aval->isNotDVArray());
     break;
   case DataTag::ArrLikePacked: {
     assert(!m_data.packed->elems.empty());
@@ -2008,6 +2009,7 @@ Type dval(double val) {
 Type aval(SArray val) {
   assert(val->isStatic());
   assert(val->isPHPArray());
+  assertx(!RuntimeOption::EvalHackArrDVArrs || val->isNotDVArray());
   if (val->empty()) {
     if (val->isDArray()) return aempty_darray();
     if (val->isVArray()) return aempty_varray();
@@ -2024,11 +2026,20 @@ Type aval(SArray val) {
 }
 
 Type aempty()         { return Type { BSPArrE }; }
-Type aempty_varray()  { return Type { BSVArrE }; }
-Type aempty_darray()  { return Type { BSDArrE }; }
+Type aempty_varray()  {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  return Type { BSVArrE };
+}
+Type aempty_darray()  {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  return Type { BSDArrE };
+}
 Type sempty()         { return sval(s_empty.get()); }
 Type some_aempty()    { return Type { BPArrE }; }
-Type some_aempty_darray() { return Type { BDArrE }; }
+Type some_aempty_darray() {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  return Type { BDArrE };
+}
 
 Type vec_val(SArray val) {
   assert(val->isStatic());
@@ -2259,6 +2270,7 @@ Type arr_packed(std::vector<Type> elems) {
 }
 
 Type arr_packed_varray(std::vector<Type> elems) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   return packed_impl(BVArrN, std::move(elems));
 }
 
@@ -2304,6 +2316,7 @@ Type arr_map(MapElems m) {
 }
 
 Type arr_map_darray(MapElems m) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   return map_impl(BDArrN, std::move(m));
 }
 
@@ -2468,7 +2481,7 @@ Type::ArrayCat categorize_array(const Type& t) {
   auto isPacked = true;
   // Even if all the values are constants, we can't produce a constant array
   // unless the d/varray-ness is definitely known.
-  auto val = t.subtypeOfAny(TPArr, TVArr, TDArr);
+  auto val = t.subtypeOfAny(TPArr, TVArr, TDArr, TVec, TDict, TKeyset);
   size_t idx = 0;
   auto checkKey = [&] (const Cell& key) {
     if (isStringType(key.m_type)) {
@@ -2606,9 +2619,11 @@ R tvImpl(const Type& t) {
     return H::template make<KindOfPersistentArray>(staticEmptyArray());
   case BVArrE:
   case BSVArrE:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
     return H::template make<KindOfPersistentArray>(staticEmptyVArray());
   case BDArrE:
   case BSDArrE:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
     return H::template make<KindOfPersistentArray>(staticEmptyDArray());
   case BVecE:
   case BSVecE:
@@ -2686,6 +2701,7 @@ R tvImpl(const Type& t) {
       } else if ((t.m_bits & BPArrN) == t.m_bits) {
         return H::template fromMap<MixedArrayInit>(t.m_data.map->map);
       } else if ((t.m_bits & BDArrN) == t.m_bits) {
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
         return H::template fromMap<DArrayInit>(t.m_data.map->map);
       }
       break;
@@ -2699,8 +2715,10 @@ R tvImpl(const Type& t) {
       } else if ((t.m_bits & BPArrN) == t.m_bits) {
         return H::template fromVec<PackedArrayInit>(t.m_data.packed->elems);
       } else if ((t.m_bits & BVArrN) == t.m_bits) {
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
         return H::template fromVec<VArrayInit>(t.m_data.packed->elems);
       } else if ((t.m_bits & BDArrN) == t.m_bits) {
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
         return H::template fromVec<DArrayInit>(t.m_data.packed->elems);
       }
       break;
@@ -2767,8 +2785,12 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Dict:   return TDict;
   case IsTypeOp::Keyset: return TKeyset;
   case IsTypeOp::Obj:    return TObj;
-  case IsTypeOp::VArray: return TVArr;
-  case IsTypeOp::DArray: return TDArr;
+  case IsTypeOp::VArray:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    return TVArr;
+  case IsTypeOp::DArray:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    return TDArr;
   case IsTypeOp::ArrLike:
   case IsTypeOp::Scalar: always_assert(0);
   }
@@ -2879,9 +2901,18 @@ Type from_hni_constraint(SString s) {
   if (!strcasecmp(p, "HH\\dict"))     return union_of(ret, TDict);
   if (!strcasecmp(p, "HH\\vec"))      return union_of(ret, TVec);
   if (!strcasecmp(p, "HH\\keyset"))   return union_of(ret, TKeyset);
-  if (!strcasecmp(p, "HH\\varray"))   return union_of(ret, TArr);
-  if (!strcasecmp(p, "HH\\darray"))   return union_of(ret, TArr);
-  if (!strcasecmp(p, "HH\\varray_or_darray")) return union_of(ret, TArr);
+  if (!strcasecmp(p, "HH\\varray")) {
+    return union_of(ret, RuntimeOption::EvalHackArrDVArrs ? TVec : TArr);
+  }
+  if (!strcasecmp(p, "HH\\darray")) {
+    return union_of(ret, RuntimeOption::EvalHackArrDVArrs ? TDict : TArr);
+  }
+  if (!strcasecmp(p, "HH\\varray_or_darray")) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      return union_of(ret, union_of(TVec, TDict));
+    }
+    return union_of(ret, TArr);
+  }
   if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
   if (!strcasecmp(p, "HH\\arraykey")) return union_of(ret, TArrKey);
   if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;

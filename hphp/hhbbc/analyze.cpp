@@ -95,13 +95,16 @@ State entry_state(const Index& index, Context const ctx,
       if (locId < knownArgs->size()) {
         if (ctx.func->params[locId].isVariadic) {
           std::vector<Type> pack(knownArgs->begin() + locId, knownArgs->end());
-          ret.locals[locId] = arr_packed_varray(std::move(pack));
+          ret.locals[locId] = RuntimeOption::EvalHackArrDVArrs
+            ? vec(std::move(pack))
+            : arr_packed_varray(std::move(pack));
         } else {
           ret.locals[locId] = (*knownArgs)[locId];
         }
       } else {
-        ret.locals[locId] =
-          ctx.func->params[locId].isVariadic ? TVArr : TUninit;
+        ret.locals[locId] = ctx.func->params[locId].isVariadic
+          ? (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)
+          : TUninit;
       }
       continue;
     }
@@ -120,7 +123,7 @@ State entry_state(const Index& index, Context const ctx,
     ret.locals[locId] = param.byRef
       ? TGen
       : ctx.func->params[locId].isVariadic
-        ? TVArr
+        ? (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)
         : TCell;
   }
 
@@ -234,8 +237,9 @@ prepare_incompleteQ(const Index& index,
       ai.bdata[dv].stateIn = entryState;
       incompleteQ.push(rpoId(ai, dv));
       for (auto locId = paramId; locId < numParams; ++locId) {
-        ai.bdata[dv].stateIn.locals[locId] =
-          ctx.func->params[locId].isVariadic ? TVArr : TUninit;
+        ai.bdata[dv].stateIn.locals[locId] = ctx.func->params[locId].isVariadic
+          ? (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)
+          : TUninit;
       }
     }
   }

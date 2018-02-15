@@ -3949,10 +3949,13 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
       if (candidate.subtypeOf(TStr)) return TStr;
       return TArrKey;
     case AnnotMetaType::VArray:
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
       return TVArr;
     case AnnotMetaType::DArray:
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
       return TDArr;
     case AnnotMetaType::VArrOrDArr:
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
       return TArr;
     case AnnotMetaType::VecOrDict:
       if (candidate.subtypeOf(TVec)) return TVec;

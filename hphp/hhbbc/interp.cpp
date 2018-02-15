@@ -326,6 +326,7 @@ void in(ISS& env, const bc::String& op) {
 
 void in(ISS& env, const bc::Array& op) {
   assert(op.arr1->isPHPArray());
+  assertx(!RuntimeOption::EvalHackArrDVArrs || op.arr1->isNotDVArray());
   effect_free(env);
   push(env, aval(op.arr1));
 }
@@ -375,6 +376,7 @@ void in(ISS& env, const bc::NewPackedArray& op) {
 }
 
 void in(ISS& env, const bc::NewVArray& op) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto elems = std::vector<Type>{};
   elems.reserve(op.arg1);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {
@@ -386,6 +388,7 @@ void in(ISS& env, const bc::NewVArray& op) {
 }
 
 void in(ISS& env, const bc::NewDArray& op) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   push(env, op.arg1 == 0 ?
        effect_free(env), aempty_darray() : some_aempty_darray());
 }
@@ -400,6 +403,7 @@ void in(ISS& env, const bc::NewStructArray& op) {
 }
 
 void in(ISS& env, const bc::NewStructDArray& op) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto map = MapElems{};
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {
     map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
@@ -1047,10 +1051,12 @@ void in(ISS& env, const bc::CastKeyset&) {
 }
 
 void in(ISS& env, const bc::CastVArray&)  {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   castImpl(env, TVArr, tvCastToVArrayInPlace);
 }
 
 void in(ISS& env, const bc::CastDArray&)  {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   castImpl(env, TDArr, tvCastToDArrayInPlace);
 }
 
@@ -3345,7 +3351,12 @@ void in(ISS& env, const bc::CufSafeArray&) {
   auto val1 = popR(env);
   auto val2 = popC(env);
   popC(env);
-  push(env, arr_packed_varray({std::move(val2), std::move(val1)}));
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    if (!val1.subtypeOf(TInitCell)) val1 = TInitCell;
+    push(env, vec({std::move(val2), std::move(val1)}));
+  } else {
+    push(env, arr_packed_varray({std::move(val2), std::move(val1)}));
+  }
 }
 
 void in(ISS& env, const bc::CufSafeReturn&) {

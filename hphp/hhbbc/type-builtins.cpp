@@ -91,9 +91,15 @@ Type native_function_return_type(borrowed_ptr<const php::Func> f,
     return hni ? from_DataType(*hni) : TInitCell;
   }();
   if (t.subtypeOf(TArr)) {
-    if (f->retTypeConstraint.isVArray())      t = TVArr;
-    else if (f->retTypeConstraint.isDArray()) t = TDArr;
-    else if (f->retTypeConstraint.isArray())  t = TPArr;
+    if (f->retTypeConstraint.isVArray()) {
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
+      t = TVArr;
+    } else if (f->retTypeConstraint.isDArray()) {
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
+      t = TDArr;
+    } else if (f->retTypeConstraint.isArray()) {
+      t = TPArr;
+    }
   }
 
   // Non-simple types (ones that are represented by pointers) can always

@@ -886,6 +886,9 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
              tc.typeName(), tc.displayName());
     };
 
+    assertx(!RuntimeOption::EvalHackArrDVArrs ||
+            (!t.subtypeOf(TVArr) && !t.subtypeOf(TDArr)));
+
     if (t.subtypeOf(TInitNull)) return retype(AnnotType::Null);
     if (t.subtypeOf(TBool))     return retype(AnnotType::Bool);
     if (t.subtypeOf(TInt))      return retype(AnnotType::Int);

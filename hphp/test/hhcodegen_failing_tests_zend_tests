@@ -6,7 +6,6 @@ zend/good/Zend/tests/bug41351_2.php
 zend/good/Zend/tests/bug41351_3.php
 zend/good/Zend/tests/bug43332_1.php
 zend/good/Zend/tests/bug43343.php
-zend/good/Zend/tests/bug44830.php
 zend/good/Zend/tests/bug45147.php
 zend/good/Zend/tests/bug48930.php
 zend/good/Zend/tests/bug55086.php
@@ -37,8 +36,6 @@ zend/good/Zend/tests/generators/errors/yield_outside_function_error.php
 zend/good/Zend/tests/halt_compiler1.php
 zend/good/Zend/tests/heredoc_012.php
 zend/good/Zend/tests/heredoc_014.php
-zend/good/Zend/tests/heredoc_015.php
-zend/good/Zend/tests/heredoc_016.php
 zend/good/Zend/tests/jump12.php
 zend/good/Zend/tests/list_003.php
 zend/good/Zend/tests/nowdoc_016.php
@@ -58,7 +55,6 @@ zend/good/ext/standard/tests/file/fileinode_variation.php
 zend/good/ext/standard/tests/file/pathinfo_basic.php
 zend/good/ext/standard/tests/serialize/006.php
 zend/good/ext/standard/tests/strings/htmlspecialchars.php
-zend/good/ext/standard/tests/strings/stripslashes_variation2.php
 zend/good/tests/lang/008.php
 zend/good/tests/lang/033.php
 zend/good/tests/lang/bug24054.php

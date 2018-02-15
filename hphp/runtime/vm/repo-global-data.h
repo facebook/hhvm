@@ -189,6 +189,11 @@ struct Repo::GlobalData {
    */
   bool UseMSRVForInOut = false;
 
+  /*
+   * Are objects allowed to run destructors?
+   */
+  bool AllowObjectDestructors = false;
+
   std::vector<const StringData*> APCProfile;
 
   std::vector<std::pair<std::string,Cell>> ConstantFunctions;
@@ -223,6 +228,7 @@ struct Repo::GlobalData {
       (NoticeOnAllDynamicCalls)
       (NoticeOnBuiltinDynamicCalls)
       (UseMSRVForInOut)
+      (AllowObjectDestructors)
       ;
   }
 };

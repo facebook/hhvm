@@ -2964,7 +2964,8 @@ void Class::setNativeDataInfo() {
   // has one, and the destructor doesn't have the __OptionalDestruct attribute,
   // prevent instantiation of the class with an instanceCtor.
   if (!RuntimeOption::AllowObjectDestructors() && getDtor()) {
-    if (getDtor()->userAttributes().count(s___OptionalDestruct.get()) == 0) {
+    if (getDtor()->userAttributes().count(s___OptionalDestruct.get()) == 0 &&
+        !RuntimeOption::EvalAllDestructorsOptional) {
       allocExtraData();
       m_extra.raw()->m_instanceCtor = destructorFatalInstanceCtor;
     } else {

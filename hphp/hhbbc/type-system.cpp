@@ -4464,7 +4464,7 @@ IterTypes iter_types(const Type& iterable) {
   not_reached();
 }
 
-bool could_run_destructor(const Type& t) {
+bool could_contain_objects(const Type& t) {
   if (t.couldBe(TObj)) return true;
 
   auto const couldBeArrWithDestructors =
@@ -4472,7 +4472,7 @@ bool could_run_destructor(const Type& t) {
 
   if (t.couldBe(TRef)) {
     if (!couldBeArrWithDestructors && is_ref_with_inner(t)) {
-      return could_run_destructor(*t.m_data.inner);
+      return could_contain_objects(*t.m_data.inner);
     }
     return true;
   }
@@ -4491,21 +4491,26 @@ bool could_run_destructor(const Type& t) {
   case DataTag::ArrLikeVal: return false;
   case DataTag::ArrLikePacked:
     for (auto const& e : t.m_data.packed->elems) {
-      if (could_run_destructor(e)) return true;
+      if (could_contain_objects(e)) return true;
     }
     return false;
   case DataTag::ArrLikePackedN:
-    return could_run_destructor(t.m_data.packedn->type);
+    return could_contain_objects(t.m_data.packedn->type);
   case DataTag::ArrLikeMap:
     for (auto const& kv : t.m_data.map->map) {
-      if (could_run_destructor(kv.second)) return true;
+      if (could_contain_objects(kv.second)) return true;
     }
     return false;
   case DataTag::ArrLikeMapN:
-    return could_run_destructor(t.m_data.mapn->val);
+    return could_contain_objects(t.m_data.mapn->val);
   }
 
   not_reached();
+}
+
+bool could_run_destructor(const Type& t) {
+  if (!RuntimeOption::EvalAllowObjectDestructors) return false;
+  return could_contain_objects(t);
 }
 
 bool could_copy_on_write(const Type& t) {

@@ -629,7 +629,7 @@ private:
   friend Type vec_val(SArray);
   friend Type dict_val(SArray);
   friend Type keyset_val(SArray);
-  friend bool could_run_destructor(const Type&);
+  friend bool could_contain_objects(const Type&);
   friend bool could_copy_on_write(const Type&);
   friend Type loosen_staticness(Type);
   friend Type loosen_unstaticness(Type);
@@ -1439,6 +1439,12 @@ IterTypes iter_types(const Type&);
  *      !t.subtypeOf(TBottom)
  */
 RepoAuthType make_repo_type(ArrayTypeTable::Builder&, const Type& t);
+
+/*
+ * True iff t could be an object or a type which contains objects and
+ * Eval.AllowObjectDestructors is enbaled.
+ */
+bool could_run_destructor(const Type& t);
 
 //////////////////////////////////////////////////////////////////////
 

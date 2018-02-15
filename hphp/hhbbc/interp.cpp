@@ -4097,7 +4097,7 @@ void in(ISS& env, const bc::InitProp& op) {
       break;
   }
   auto const v = tv(t);
-  if (v || !could_run_destructor(t)) {
+  if (v || !could_contain_objects(t)) {
     for (auto& prop : env.ctx.func->cls->properties) {
       if (prop.name == op.str1) {
         ITRACE(1, "InitProp: {} = {}\n", op.str1, show(t));

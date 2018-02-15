@@ -798,7 +798,9 @@ void ExecutionContext::handleError(const std::string& msg,
   {
     ErrorStateHelper esh(this, newErrorState);
     if (callUserHandler) {
-      handled = callUserErrorHandler(ee, errnum, false);
+      handled =
+        RuntimeOption::EvalDisableErrorHandler ||
+        callUserErrorHandler(ee, errnum, false);
     }
 
     if (!handled) {
@@ -974,7 +976,9 @@ bool ExecutionContext::onFatalError(const Exception &e) {
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
-    handled = callUserErrorHandler(e, errnum, true);
+    handled =
+      RuntimeOption::EvalDisableErrorHandler ||
+      callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Log(Logger::LogError, prefix, e, fileAndLine.first.c_str(),

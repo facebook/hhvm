@@ -250,6 +250,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
   RuntimeOption::EvalHackArrCompatNotices    = gd.HackArrCompatNotices;
   RuntimeOption::EvalNoticeOnAllDynamicCalls = gd.NoticeOnAllDynamicCalls;
+  RuntimeOption::EvalAllowObjectDestructors  = gd.AllowObjectDestructors;
   RuntimeOption::EvalNoticeOnBuiltinDynamicCalls =
     gd.NoticeOnBuiltinDynamicCalls;
   RuntimeOption::EvalHackArrCompatIsArrayNotices =
@@ -321,6 +322,7 @@ void write_global_data(
   gd.APCProfile                  = std::move(apcProfile);
   gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
   gd.NoticeOnAllDynamicCalls     = RuntimeOption::EvalNoticeOnAllDynamicCalls;
+  gd.AllowObjectDestructors      = RuntimeOption::EvalAllowObjectDestructors;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.HackArrCompatIsArrayNotices =

@@ -551,6 +551,7 @@ struct RuntimeOption {
   F(bool, HardTypeHints,               RepoAuthoritative)               \
   F(bool, PromoteEmptyObject,          !EnableHipHopSyntax)             \
   F(bool, AllowObjectDestructors,      !one_bit_refcount)               \
+  F(bool, AllDestructorsOptional,      false)                           \
   F(bool, AllowScopeBinding,           true)                            \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
@@ -673,6 +674,7 @@ struct RuntimeOption {
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpHhas,                    false)                           \
   F(bool, DisableHphpcOpts,            false)                           \
+  F(bool, DisableErrorHandler,         false)                           \
   F(bool, DumpTC,                      false)                           \
   F(string, DumpTCPath,                "/tmp")                          \
   F(bool, DumpTCAnchors,               false)                           \

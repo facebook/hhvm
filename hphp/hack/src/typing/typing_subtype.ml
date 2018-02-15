@@ -22,7 +22,13 @@ module SN = Naming_special_names
 module Phase = Typing_phase
 
 (* Decomposition and subtyping for arrays *)
-let decompose_array env r ak_sub ak_super sub fail =
+let decompose_array
+  (env : Env.env)
+  (r : Reason.t)
+  (ak_sub : array_kind)
+  (ak_super : array_kind)
+  (sub : Env.env -> locl ty -> locl ty -> Env.env)
+  (fail : Env.env -> Env.env) : Env.env =
   match ak_sub, ak_super with
   (* An array of any kind is a subtype of an array of AKany *)
   | _, AKany ->
@@ -75,7 +81,11 @@ let decompose_array env r ak_sub ak_super sub fail =
  * are given string and int, or Cov<Derived> <: Cov<Base>) then evaluate the
  * failure continuation `fail`
  *)
-let rec decompose_subtype env ty_sub ty_super fail =
+let rec decompose_subtype
+  (env : Env.env)
+  (ty_sub : locl ty)
+  (ty_super : locl ty)
+  (fail : Env.env -> Env.env) : Env.env =
   let env, ty_super = Env.expand_type env ty_super in
   let env, ty_sub = Env.expand_type env ty_sub in
   let again env ty_sub =
@@ -208,7 +218,12 @@ let rec decompose_subtype env ty_sub ty_super fail =
   | _, _ ->
     env
 
-and decompose_tparams env tparams children_tyl super_tyl fail =
+and decompose_tparams
+  (env : Env.env)
+  (tparams : decl tparam list)
+  (children_tyl : locl ty list)
+  (super_tyl : locl ty list)
+  (fail : Env.env -> Env.env) : Env.env =
   match tparams, children_tyl, super_tyl with
   | [], _, _
   | _, [], _
@@ -223,7 +238,12 @@ and decompose_tparams env tparams children_tyl super_tyl fail =
     decompose_tparams env' tparams childrenl superl fail
 
 (* Decompose a general constraint *)
-and decompose_constraint env ck ty_sub ty_super fail =
+and decompose_constraint
+  (env : Env.env)
+  (ck : Ast.constraint_kind)
+  (ty_sub : locl ty)
+  (ty_super : locl ty)
+  (fail : Env.env -> Env.env) : Env.env =
   match ck with
   | Ast.Constraint_as ->
     decompose_subtype env ty_sub ty_super fail
@@ -257,7 +277,12 @@ and decompose_constraint env ck ty_sub ty_super fail =
  * the failure continuation fail.
 *)
 let constraint_iteration_limit = 20
-let add_constraint_with_fail env ck ty_sub ty_super fail =
+let add_constraint_with_fail
+  (env : Env.env)
+  (ck : Ast.constraint_kind)
+  (ty_sub : locl ty)
+  (ty_super : locl ty)
+  (fail : Env.env -> Env.env) : Env.env =
   let oldsize = Env.get_tpenv_size env in
   let env' = decompose_constraint env ck ty_sub ty_super fail in
   if Env.get_tpenv_size env' = oldsize
@@ -285,14 +310,23 @@ let add_constraint_with_fail env ck ty_sub ty_super fail =
  * want to produce an error. (For example, if after instantiation a
  * constraint becomes C<string> as C<int>)
  *)
-let add_constraint p env ck ty_sub ty_super =
+let add_constraint
+  (p : Pos.Map.key)
+  (env : Env.env)
+  (ck : Ast.constraint_kind)
+  (ty_sub : locl ty)
+  (ty_super : locl ty) : Env.env =
   Typing_log.log_types 2 p env
     [Typing_log.Log_sub ("Typing_subtype.add_constraint",
        [Typing_log.Log_type ("ty_sub", ty_sub);
         Typing_log.Log_type ("ty_super", ty_super)])];
   add_constraint_with_fail env ck ty_sub ty_super (fun env -> env)
 
-let rec subtype_params env subl superl variadic_ty =
+let rec subtype_params
+  (env : Env.env)
+  (subl : locl fun_param list)
+  (superl : locl fun_param list)
+  (variadic_ty : locl ty option) : Env.env =
   match subl, superl with
   | [], _ -> env
   | _, [] -> (match variadic_ty with
@@ -317,7 +351,10 @@ let rec subtype_params env subl superl variadic_ty =
     let env = subtype_params env subl superl variadic_ty in
     env
 
-and subtype_params_with_variadic env subl variadic_ty =
+and subtype_params_with_variadic
+  (env : Env.env)
+  (subl : locl fun_param list)
+  (variadic_ty : locl ty) : Env.env =
   match subl with
   | [] -> env
   | { fp_type = sub; _ } :: subl ->
@@ -325,7 +362,9 @@ and subtype_params_with_variadic env subl variadic_ty =
     let env = sub_type env sub variadic_ty in
     subtype_params_with_variadic env subl variadic_ty
 
-and subtype_reactivity r_sub r_super =
+and subtype_reactivity
+  (r_sub : reactivity)
+  (r_super : reactivity) : bool =
   match r_sub, r_super with
   (* Reactive functions are a subtype of non reactive ones, but not vice versa *)
   | _, Nonreactive
@@ -391,8 +430,14 @@ and subtype_reactivity r_sub r_super =
  *     and wsuper, and check that T1 satisfies csub1, ..., Tn satisfies csubn
  *     and that wsub holds under those assumptions.
  *)
-and subtype_funs_generic ~check_return ~contravariant_arguments env
-    r_sub ft_sub r_super ft_super =
+and subtype_funs_generic
+  ~(check_return : bool)
+  ~(contravariant_arguments : bool)
+  (env : Env.env)
+  (r_sub : Reason.t)
+  (ft_sub : locl fun_type)
+  (r_super : Reason.t)
+  (ft_super : locl fun_type) : Env.env =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
   if not (subtype_reactivity ft_sub.ft_reactive ft_super.ft_reactive) then
@@ -523,7 +568,13 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
  * methods are declarations we do not want to instantiate their function type
  * parameters as unresolved, instead it should stay as a Tgeneric.
  *)
-and subtype_method ~check_return env r_sub ft_sub r_super ft_super =
+and subtype_method
+  ~(check_return : bool)
+  (env : Env.env)
+  (r_sub : Reason.t)
+  (ft_sub : decl fun_type)
+  (r_super : Reason.t)
+  (ft_super : decl fun_type) : Env.env =
   if not ft_super.ft_abstract && ft_sub.ft_abstract then
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
@@ -541,7 +592,12 @@ and subtype_method ~check_return env r_sub ft_sub r_super ft_super =
     r_sub ft_sub_no_tvars
     r_super ft_super_no_tvars
 
-and subtype_tparams env c_name variancel children_tyl super_tyl =
+and subtype_tparams
+  (env : Env.env)
+  (c_name : string)
+  (variancel : Ast.variance list)
+  (children_tyl : locl ty list)
+  (super_tyl : locl ty list) : Env.env =
   match variancel, children_tyl, super_tyl with
   | [], [], [] -> env
   | [], _, _
@@ -551,7 +607,7 @@ and subtype_tparams env c_name variancel children_tyl super_tyl =
       let env = subtype_tparam env c_name variance child super in
       subtype_tparams env c_name variancel childrenl superl
 
-and invariance_suggestion c_name =
+and invariance_suggestion (c_name : string) : string =
   let open Naming_special_names.Collections in
   if c_name = cVector then
     "\nDid you mean ConstVector instead?"
@@ -561,7 +617,14 @@ and invariance_suggestion c_name =
     "\nDid you mean ConstSet instead?"
   else ""
 
-and subtype_tparam env c_name variance child (r_super, _ as super) =
+(* TODO: subtype_tparam ignores part of super argument *)
+and subtype_tparam
+  (env : Env.env)
+  (c_name : string)
+  (variance : Ast.variance)
+  (child : locl ty)
+  (super : locl ty) : Env.env =
+  let r_super, _ = super in
   match variance with
   | Ast.Covariant -> sub_type env child super
   | Ast.Contravariant ->
@@ -584,7 +647,10 @@ and subtype_tparam env c_name variance child (r_super, _ as super) =
 
 (* Distinction b/w sub_type and sub_type_with_uenv similar to unify and
  * unify_with_uenv, see comment there. *)
-and sub_type env ty_sub ty_super =
+and sub_type
+  (env : Env.env)
+  (ty_sub : locl ty)
+  (ty_super : locl ty) : Env.env =
   sub_type_with_uenv env (TUEnv.empty, ty_sub) (TUEnv.empty, ty_super)
 
 (**
@@ -595,7 +661,10 @@ and sub_type env ty_sub ty_super =
  *      sub_type env ?int alpha => env where alpha==?int
  *      sub_type env int string => error
 *)
-and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
+and sub_type_with_uenv
+  (env : Env.env)
+  ((uenv_sub, ty_sub) : TUEnv.uenv * locl ty)
+  ((uenv_super, ty_super) : TUEnv.uenv * locl ty) : Env.env =
   Typing_log.log_types 2 (Reason.to_pos (fst ty_sub)) env
     [Typing_log.Log_sub (Printf.sprintf
         "Typing_subtype.sub_type_with_uenv uenv_sub.unwrappedToption=%b uenv_super.unwrappedToption=%b"
@@ -1102,7 +1171,11 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
     | Tobject | Tshape _ | Tclass (_, _))
     ) -> fst (Unify.unify env ty_super ty_sub)
 
-and sub_generic_params seen env (uenv_sub, ty_sub) (uenv_super, ty_super) =
+and sub_generic_params
+  (seen : SSet.t)
+  (env : Env.env)
+  ((uenv_sub, ty_sub) : TUEnv.uenv * locl ty)
+  ((uenv_super, ty_super) : TUEnv.uenv * locl ty) : Env.env =
   Typing_log.log_types 2 (Reason.to_pos (fst ty_sub)) env
     [Typing_log.Log_sub ("Typing_subtype.sub_generic_params",
       [Typing_log.Log_type ("ty_sub", ty_sub);
@@ -1219,7 +1292,10 @@ and sub_generic_params seen env (uenv_sub, ty_sub) (uenv_super, ty_super) =
  * hiding the "error", and so we need to disable the fixme mechanism
  * before calling sub_type and then re-enable it afterwards.
  *)
-and is_sub_type env ty_sub ty_super =
+and is_sub_type
+  (env : Env.env)
+  (ty_sub : locl ty)
+  (ty_super : locl ty) : bool =
   let f = !Errors.is_hh_fixme in
   Errors.is_hh_fixme := (fun _ _ -> false);
   let result =
@@ -1229,7 +1305,10 @@ and is_sub_type env ty_sub ty_super =
   Errors.is_hh_fixme := f;
   result
 
-and sub_string p env ty2 =
+and sub_string
+  (p : Pos.Map.key)
+  (env : Env.env)
+  (ty2 : locl ty) : Env.env =
   let env, ety2 = Env.expand_type env ty2 in
   match ety2 with
   | (_, Toption ty2) -> sub_string p env ty2

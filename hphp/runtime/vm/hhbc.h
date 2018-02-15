@@ -1072,6 +1072,7 @@ inline bool isFPassStar(Op opcode) {
     case OpFPassN:
     case OpFPassG:
     case OpFPassS:
+    case OpFPassM:
       return true;
 
     default:

@@ -768,7 +768,10 @@ let scan_docstring_name lexer =
   (lexer, name, kind)
 
 let scan_docstring_header lexer =
-  let lexer = advance lexer 3 in
+  let ch = peek_char lexer 0 in
+  (* Skip 3 for <<< or 4 for b<<< *)
+  let skip_count = if ch = 'b' then 4 else 3 in
+  let lexer = advance lexer skip_count in
   let (lexer, name, kind) = scan_docstring_name lexer in
   let ch = peek_char lexer 0 in
   let lexer =
@@ -1109,7 +1112,10 @@ let rec scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
   | '`' -> scan_double_quote_like_string_literal_from_start lexer '`'
   | '"' -> scan_double_quote_like_string_literal_from_start lexer '"'
   | '\\' -> (advance lexer 1, TokenKind.Backslash)
-  | 'b' when let c = peek_char lexer 1 in c = '"' || c = '\'' ->
+  | 'b' when let c1 = peek_char lexer 1 in
+             let c2 = peek_char lexer 2 in
+             let c3 = peek_char lexer 3 in
+             c1 = '"' || c1 = '\'' || (c1 = '<' && c2 = '<' && c3 = '<') ->
     let lexer = advance lexer 1 in scan_token_impl in_type lexer
   (* Names *)
   | _ ->

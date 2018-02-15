@@ -376,40 +376,28 @@ let prepString2 : node list -> node list =
   | x -> x (* unchanged *)
 
 let mkStr : (string -> string) -> string -> string = fun unescaper content ->
+  let content = if String.length content > 0 && content.[0] = 'b'
+    then String.sub content 1 (String.length content - 1) else content in
   let len = String.length content in
-  let no_quotes = try
+  let no_quotes =
+    try (* Using String.sub; Invalid_argument when str too short *)
       if len >= 3 && String.sub content 0 3 = "<<<" (* The heredoc case *)
       then
-        (* These types of strings begin with an opening line containing <<<
-         * followed by a string to use as a terminator (which is optionally
-         * quoted) and end with a line containing only the terminator and a
-         * semicolon followed by a blank line. We need to drop the opening
-         * line as well as the blank line and preceding terminator line. *)
-        let start = (String.index content '\n') + 1 in
-        let end_ = (String.rindex_from content (len - 2) '\n') in
-        (* in case of empty heredoc expected start position will be
-           located after the end  *)
-        if start >= end_ then ""
-        else String.sub content start (end_ - start)
+         (* These types of strings begin with an opening line containing <<<
+          * followed by a string to use as a terminator (which is optionally
+          * quoted) and end with a line containing only the terminator and a
+          * semicolon followed by a blank line. We need to drop the opening line
+          * as well as the blank line and preceding terminator line.
+          *)
+         let start = String.index content '\n' + 1 in
+         let end_ = String.rindex_from content (len - 2) '\n' in
+         (* An empty heredoc, this way, will have start >= end *)
+         if start >= end_ then "" else String.sub content start (end_ - start)
       else
-        let transform_binary_string_to_string_if_needed str =
-          if String.get str 0 = 'b'
-            then String.sub str 1 (String.length str - 1)
-            else str in
-        let content = transform_binary_string_to_string_if_needed content in
-        let has_quotes str =
-          let len = String.length str in
-          if len >= 2 then
-            let first_char = String.get content 0 in
-            let last_char = String.get content (len - 1) in
-            let first_and_last_are ch = (first_char == ch && last_char == ch) in
-            List.exists ['"'; '\''; '`'] ~f:first_and_last_are
-          else false in
-        if has_quotes content
-        then String.sub content 1 (String.length content - 2)
-        else content
-    with
-    | Invalid_argument _ -> content
+      match String.get content 0, String.get content (len - 1) with
+        | '"', '"' | '\'', '\'' | '`', '`' -> String.sub content 1 (len - 2)
+        | _ -> content
+    with Invalid_argument _ -> content
   in
   try unescaper no_quotes with
   | Php_escaping.Invalid_string _ -> raise @@

@@ -61,15 +61,6 @@ zend/good/Zend/tests/zend_operators.php
 zend/good/ext/mbstring/tests/mb_ereg_variation3.php
 zend/good/ext/mbstring/tests/zend_multibyte-14.php
 zend/good/ext/reflection/tests/bug36337.php
-zend/good/ext/standard/tests/array/array_diff_assoc_variation5.php
-zend/good/ext/standard/tests/array/array_diff_assoc_variation8.php
-zend/good/ext/standard/tests/array/array_diff_variation6.php
-zend/good/ext/standard/tests/array/array_keys_variation_001.php
-zend/good/ext/standard/tests/array/array_merge.php
-zend/good/ext/standard/tests/array/array_unique_basic.php
-zend/good/ext/standard/tests/array/array_unique_variation5.php
-zend/good/ext/standard/tests/array/count_recursive.php
-zend/good/ext/standard/tests/array/usort_variation10.php
 zend/good/ext/standard/tests/file/fileinode_variation.php
 zend/good/ext/standard/tests/file/pathinfo_basic.php
 zend/good/ext/standard/tests/serialize/006.php

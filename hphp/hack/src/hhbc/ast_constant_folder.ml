@@ -191,6 +191,17 @@ and class_const_to_typed_value ns cid id =
   else raise UserDefinedConstant
 
 and array_to_typed_value ns fields =
+  let update_max_index newindex maxindex =
+    if Int64.compare newindex maxindex >= 0 then
+      Int64.add newindex Int64.one else maxindex in
+  let default key value pairs maxindex =
+    let k_tv = key_expr_to_typed_value ns key in
+    let maxindex = match k_tv with
+      | TV.Int newindex ->
+        update_max_index newindex maxindex
+      | _ -> maxindex in
+    (k_tv, expr_to_typed_value ns value) :: pairs, maxindex
+  in
   let pairs, _ =
     List.fold_left fields ~init:([], Int64.zero)
       ~f:(fun (pairs, maxindex) afield ->
@@ -208,21 +219,14 @@ and array_to_typed_value ns fields =
             | _ -> ()
             end;
             (TV.Int newindex, expr_to_typed_value ns value) :: pairs,
-              Int64.add (if Int64.compare newindex maxindex > 0
-              then newindex else maxindex) Int64.one
+              update_max_index newindex maxindex
           | _ ->
-          (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
-            :: pairs,
-          maxindex
+            default key value pairs maxindex
           | exception Failure _ ->
-          (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
-            :: pairs,
-          maxindex
+            default key value pairs maxindex
           end
         | A.AFkvalue (key, value) ->
-          (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
-            :: pairs,
-          maxindex
+          default key value pairs maxindex
         | A.AFvalue value ->
           (TV.Int maxindex, expr_to_typed_value ns value) :: pairs,
             Int64.add maxindex Int64.one)

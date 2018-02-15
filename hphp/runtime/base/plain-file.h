@@ -75,8 +75,8 @@ protected:
  * This is wrapper for fds that cannot be closed.
  */
 struct BuiltinFile : PlainFile {
-  explicit BuiltinFile(FILE *stream) : PlainFile(stream, true) {}
-  explicit BuiltinFile(int fd) : PlainFile(fd, true) {}
+  explicit BuiltinFile(FILE *stream);
+  explicit BuiltinFile(int fd);
   ~BuiltinFile() override;
   bool close() override;
   void sweep() override;

@@ -272,6 +272,11 @@ bool PlainFile::truncate(int64_t size) {
 ///////////////////////////////////////////////////////////////////////////////
 // BuiltinFiles
 
+const StaticString s_php("PHP");
+
+BuiltinFile::BuiltinFile(FILE *stream) : PlainFile(stream, true, s_php) {}
+BuiltinFile::BuiltinFile(int fd) : PlainFile(fd, true, s_php) {}
+
 BuiltinFile::~BuiltinFile() {
   setIsClosed(true);
   m_stream = nullptr;

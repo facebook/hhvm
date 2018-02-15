@@ -5398,12 +5398,14 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     }
 
     if (op == T_VARRAY) {
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
       emitArrayInit(e, el, ArrayType::VArray);
       return true;
     }
 
     if (op == T_DARRAY) {
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
       emitArrayInit(e, el, ArrayType::DArray);
       return true;
@@ -6137,9 +6139,21 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   TYPE_CONVERT_INSTR_HH(dict, Dict)
   TYPE_CONVERT_INSTR_HH(vec, Vec)
   TYPE_CONVERT_INSTR_HH(keyset, Keyset)
-  TYPE_CONVERT_INSTR_HH(varray, VArray)
-  TYPE_CONVERT_INSTR_HH(darray, DArray)
 #undef TYPE_CONVERT_INSTR_HH
+
+#define TYPE_CONVERT_INSTR_DVARR(what, What1, What2)                    \
+    else if (((call->isCallToFunction(#what) &&                         \
+               (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) || \
+              call->isCallToFunction("HH\\"#what)) &&                   \
+             params && params->getCount() == 1) {                       \
+      visit((*params)[0]);                                              \
+      emitConvertToCell(e);                                             \
+      !RuntimeOption::EvalHackArrDVArrs ? e.Cast##What1() : e.Cast##What2(); \
+      return true;                                                      \
+    }
+  TYPE_CONVERT_INSTR_DVARR(varray, VArray, Vec)
+  TYPE_CONVERT_INSTR_DVARR(darray, DArray, Dict)
+#undef TYPE_CONVERT_INSTR_DVARR
 
 #define TYPE_CHECK_INSTR_HH(what, What)                                 \
     else if (((call->isCallToFunction("is_"#what) &&                    \
@@ -6153,9 +6167,23 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   TYPE_CHECK_INSTR_HH(vec, Vec)
   TYPE_CHECK_INSTR_HH(dict, Dict)
   TYPE_CHECK_INSTR_HH(keyset, Keyset)
-  TYPE_CHECK_INSTR_HH(varray, VArray)
-  TYPE_CHECK_INSTR_HH(darray, DArray)
 #undef TYPE_CHECK_INSTR_HH
+
+#define TYPE_CHECK_INSTR_DVARR(what, What1, What2)                      \
+    else if (((call->isCallToFunction("is_"#what) &&                    \
+               (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) || \
+              call->isCallToFunction("HH\\is_"#what)) &&                \
+             params && params->getCount() == 1) {                       \
+      visit((*call->getParams())[0]);                                   \
+      emitIsType(                                                       \
+        e,                                                              \
+        !RuntimeOption::EvalHackArrDVArrs ? IsTypeOp::What1 : IsTypeOp::What2 \
+      );                                                                \
+      return true;                                                      \
+    }
+  TYPE_CHECK_INSTR_DVARR(varray, VArray, Vec)
+  TYPE_CHECK_INSTR_DVARR(darray, DArray, Dict)
+#undef TYPE_CHECK_INSTR_DVARR
 
 #define TYPE_CONVERT_INSTR(what, What)                             \
     else if (call->isCallToFunction(#what"val") &&                 \
@@ -6911,6 +6939,7 @@ const StaticString
   s_invariant_violation("invariant_violation"),
   s_gennull("HH\\Asio\\null"),
   s_fromDArray("fromDArray"),
+  s_fromDict("fromDict"),
   s_AwaitAllWaitHandle("HH\\AwaitAllWaitHandle"),
   s_WaitHandle("HH\\WaitHandle")
   ;
@@ -6935,7 +6964,11 @@ bool EmitterVisitor::emitInlineGenva(
   }
   if (!num_params) {
     if (deadResult) return true;
-    e.Array(staticEmptyVArray());
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      e.Vec(staticEmptyVecArray());
+    } else {
+      e.Array(staticEmptyVArray());
+    }
     return true;
   }
   if (params->containsUnpack()) {
@@ -6996,7 +7029,11 @@ bool EmitterVisitor::emitInlineGenva(
       emitPushL(e);
       e.WHResult();
     }
-    e.NewVArray(num_params);
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      e.NewVecArray(num_params);
+    } else {
+      e.NewVArray(num_params);
+    }
   } else {
     for (const auto wh : waithandles) {
       emitVirtualLocal(wh); // immediate for PopL
@@ -7055,11 +7092,15 @@ bool EmitterVisitor::emitInlineGena(
   if (params->getCount() != 1) return false;
 
   //
-  // Convert input into a darray.
+  // Convert input into a darray/dict.
   //
   visit((*params)[0]);
   emitConvertToCell(e);
-  e.CastDArray();
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    e.CastDict();
+  } else {
+    e.CastDArray();
+  }
   auto const array = emitSetUnnamedL(e);
   auto const arrayStart = m_ue.bcPos();
 
@@ -7067,7 +7108,11 @@ bool EmitterVisitor::emitInlineGena(
   // Construct an AAWH from the array.
   //
   auto const fromDArrayStart = m_ue.bcPos();
-  e.FPushClsMethodD(1, s_fromDArray.get(), s_AwaitAllWaitHandle.get());
+  e.FPushClsMethodD(
+    1,
+    RuntimeOption::EvalHackArrDVArrs ? s_fromDict.get() : s_fromDArray.get(),
+    s_AwaitAllWaitHandle.get()
+  );
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fromDArrayStart);
     emitVirtualLocal(array);
@@ -11558,11 +11603,13 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
         m_staticArrays.push_back(Array::attach(PackedArray::MakeReserve(0)));
         break;
       case ArrayType::VArray:
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
         m_staticArrays.push_back(
           Array::attach(PackedArray::MakeReserveVArray(0))
         );
         break;
       case ArrayType::DArray:
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
         m_staticArrays.push_back(
           Array::attach(MixedArray::MakeReserveDArray(0))
         );
@@ -11635,10 +11682,12 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
         break;
       }
       if (u->getOp() == T_VARRAY) {
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
         initArray(u->getExpression(), ArrayType::VArray);
         break;
       }
       if (u->getOp() == T_DARRAY) {
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
         initArray(u->getExpression(), ArrayType::DArray);
         break;
       }
@@ -11679,9 +11728,11 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
         e.Array(staticEmptyArray());
         break;
       case ArrayType::VArray:
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
         e.Array(staticEmptyVArray());
         break;
       case ArrayType::DArray:
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
         e.Array(staticEmptyDArray());
         break;
       case ArrayType::Vec:
@@ -11723,6 +11774,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
       case ArrayType::Array:
       case ArrayType::VArray:
       case ArrayType::DArray:
+        assertx(!RuntimeOption::EvalHackArrDVArrs || type == ArrayType::Array);
         assert(tv.m_data.parr->isPHPArray());
         assert(type != ArrayType::VArray || tv.m_data.parr->isVArray());
         assert(type != ArrayType::DArray || tv.m_data.parr->isDArray());
@@ -11785,6 +11837,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     } else if (type == ArrayType::Keyset) {
       e.NewKeysetArray(count);
     } else {
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
       e.NewVArray(count);
     }
     while (count < total) {
@@ -11827,6 +11880,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
       if (type == ArrayType::Dict) {
         e.NewStructDict(keys);
       } else {
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
         e.NewStructDArray(keys);
       }
       return;
@@ -11834,6 +11888,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     if (type == ArrayType::Dict) {
       e.NewDictArray(capacityHint);
     } else {
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
       e.NewDArray(capacityHint);
     }
     visit(el);

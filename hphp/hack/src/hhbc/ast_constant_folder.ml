@@ -21,6 +21,9 @@ exception UserDefinedConstant
 let hack_arr_compat_notices () =
   Hhbc_options.hack_arr_compat_notices !Hhbc_options.compiler_options
 
+let hack_arr_dv_arrs () =
+  Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
+
 let radix (s : string) : [`Oct | `Hex | `Dec | `Bin ] =
   if String.length s > 1 && s.[0] = '0' then
     match s.[1] with
@@ -228,7 +231,8 @@ and array_to_typed_value ns fields =
   TV.Array a
 
 and varray_to_typed_value ns fields =
-  TV.VArray (List.map fields ~f:(expr_to_typed_value ns))
+  let tv_fields = (List.map fields ~f:(expr_to_typed_value ns)) in
+  if hack_arr_dv_arrs () then (TV.Vec tv_fields) else (TV.VArray tv_fields)
 
 and darray_to_typed_value ns fields =
   let fields =
@@ -238,7 +242,7 @@ and darray_to_typed_value ns fields =
         match v1 with
         | (_, A.String (_, s)) ->
            begin match Int64.of_string s with
-           | index when SU.Integer.is_decimal_int s ->
+           | index when (SU.Integer.is_decimal_int s) && not (hack_arr_dv_arrs ()) ->
               (TV.Int index, expr_to_typed_value ns v2)
            | _ ->
               (expr_to_typed_value ns v1, expr_to_typed_value ns v2)
@@ -247,11 +251,11 @@ and darray_to_typed_value ns fields =
            end
         | _ -> (key_expr_to_typed_value ns v1, expr_to_typed_value ns v2))
   in
-  TV.DArray (update_duplicates_in_map fields)
+  let a = update_duplicates_in_map fields in
+  if hack_arr_dv_arrs () then (TV.Dict a) else (TV.DArray a)
 
 and shape_to_typed_value ns fields =
-  TV.DArray (
-  List.map fields (fun (sf, expr) ->
+  let a = List.map fields (fun (sf, expr) ->
     let key =
       match sf with
       | A.SFlit id ->
@@ -259,7 +263,8 @@ and shape_to_typed_value ns fields =
       | A.SFclass_const (class_id, id) ->
         class_const_to_typed_value ns (Pos.none, A.Id class_id) id in
     (key, expr_to_typed_value ns expr))
-  )
+  in
+  if hack_arr_dv_arrs () then (TV.Dict a) else (TV.DArray a)
 
 and key_expr_to_typed_value ?(restrict_keys=false) ns expr =
   let tv = expr_to_typed_value ns expr in

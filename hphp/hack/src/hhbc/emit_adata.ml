@@ -15,6 +15,9 @@ module TVMap = Typed_value.TVMap
 open Hhbc_ast
 open Hh_core
 
+let hack_arr_dv_arrs () =
+  Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
+
 let rec adata_to_string_seq argument =
   match argument with
   | TV.Uninit -> SS.str "uninit"
@@ -118,7 +121,11 @@ let rewrite_typed_value tv =
   | TV.Int i -> Int i
   | TV.Float f -> Double (SU.Float.to_string f)
   | TV.String s -> String s
-  | TV.Array _ | TV.VArray _ | TV.DArray _ -> Array (get_array_identifier tv)
+  | TV.Array _ -> Array (get_array_identifier tv)
+  | TV.VArray _ when hack_arr_dv_arrs () -> Vec (get_array_identifier tv)
+  | TV.VArray _ -> Array (get_array_identifier tv)
+  | TV.DArray _ when hack_arr_dv_arrs () -> Dict (get_array_identifier tv)
+  | TV.DArray _ -> Array (get_array_identifier tv)
   | TV.Vec _ -> Vec (get_array_identifier tv)
   | TV.Keyset _ -> Keyset (get_array_identifier tv)
   | TV.Dict _ -> Dict (get_array_identifier tv)

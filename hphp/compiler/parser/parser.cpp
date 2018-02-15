@@ -1051,11 +1051,21 @@ void Parser::onKeyset(Token& out, Token& exprs) {
 }
 
 void Parser::onVArray(Token& out, Token& exprs) {
-  onUnaryOpExp(out, exprs, T_VARRAY, true);
+  onUnaryOpExp(
+    out,
+    exprs,
+    RuntimeOption::EvalHackArrDVArrs ? T_VEC : T_VARRAY,
+    true
+  );
 }
 
 void Parser::onDArray(Token& out, Token& exprs) {
-  onUnaryOpExp(out, exprs, T_DARRAY, true);
+  onUnaryOpExp(
+    out,
+    exprs,
+    RuntimeOption::EvalHackArrDVArrs ? T_DICT : T_DARRAY,
+    true
+  );
 }
 
 void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,

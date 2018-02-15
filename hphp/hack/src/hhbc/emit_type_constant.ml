@@ -14,6 +14,9 @@ open Hhbc_string_utils
 module A = Ast
 module TV = Typed_value
 
+let hack_arr_dv_arrs () =
+  Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
+
 (* Taken from: hphp/runtime/base/type-structure.h *)
 let get_kind_num ~tparams p =
   let p = if List.mem tparams p then "typevar" else String.lowercase_ascii p in
@@ -83,13 +86,17 @@ let rec shape_field_to_pair ~tparams ~namespace sf =
     [(TV.String "value", hint_to_type_constant ~tparams ~namespace hint)]
   in
   let inner_value = class_const @ optional @ inner_value in
-  let value = TV.DArray inner_value in
-  (TV.String name, value)
+  let value =
+    if hack_arr_dv_arrs () then (TV.Dict inner_value) else (TV.DArray inner_value)
+  in
+    (TV.String name, value)
 
 and shape_info_to_typed_value ~tparams ~namespace si =
-  TV.DArray (
+  let info =
     List.map ~f:(shape_field_to_pair ~tparams ~namespace)
-    si.A.si_shape_field_list)
+             si.A.si_shape_field_list
+  in
+  if hack_arr_dv_arrs () then (TV.Dict info) else (TV.DArray info)
 
 and shape_allows_unknown_fields { A.si_allows_unknown_fields; _ } =
   if si_allows_unknown_fields then
@@ -98,7 +105,7 @@ and shape_allows_unknown_fields { A.si_allows_unknown_fields; _ } =
 
 and type_constant_access_list sl =
   let l = List.map ~f:(fun (_, s) -> TV.String s) sl
-  in TV.VArray l
+  in if hack_arr_dv_arrs () then (TV.Vec l) else (TV.VArray l)
 
 and resolve_classname ~tparams ~namespace (p, s) =
   let s = Types.fix_casing s in
@@ -168,9 +175,12 @@ and hint_to_type_constant_list ~tparams ~namespace h =
 
 and hint_to_type_constant ?(is_typedef = false) ~tparams ~namespace h =
   let l = hint_to_type_constant_list ~tparams ~namespace h in
-  TV.DArray (l @ if is_typedef then get_typevars tparams else [])
+  let tconsts = l @ if is_typedef then get_typevars tparams else [] in
+  if hack_arr_dv_arrs () then (TV.Dict tconsts) else (TV.DArray tconsts)
 
 and hints_to_type_constant ~tparams ~namespace l =
-  TV.VArray (
+  let tconsts =
     List.map l
-      ~f:(fun h -> hint_to_type_constant ~tparams ~namespace h))
+     ~f:(fun h -> hint_to_type_constant ~tparams ~namespace h)
+  in
+  if hack_arr_dv_arrs () then (TV.Vec tconsts) else (TV.VArray tconsts)

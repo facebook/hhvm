@@ -10834,7 +10834,7 @@ yyreduce:
 
   case 596:
 #line 2397 "hphp.y" /* yacc.c:1646  */
-    { _p->onArray((yyval), (yyvsp[-1]), T_DARRAY);}
+    { _p->onDArray((yyval), (yyvsp[-1]));}
 #line 10837 "hphp.5.tab.cpp" /* yacc.c:1646  */
     break;
 
@@ -12107,7 +12107,7 @@ yyreduce:
 
   case 801:
 #line 2847 "hphp.y" /* yacc.c:1646  */
-    { _p->onArray((yyval),(yyvsp[-1]),T_DARRAY);}
+    { _p->onDArray((yyval),(yyvsp[-1]));}
 #line 12110 "hphp.5.tab.cpp" /* yacc.c:1646  */
     break;
 
@@ -12613,7 +12613,7 @@ yyreduce:
 
   case 885:
 #line 3006 "hphp.y" /* yacc.c:1646  */
-    { _p->onArray((yyval),(yyvsp[-1]),T_DARRAY);}
+    { _p->onDArray((yyval),(yyvsp[-1]));}
 #line 12616 "hphp.5.tab.cpp" /* yacc.c:1646  */
     break;
 

@@ -30,6 +30,7 @@ type t = {
   option_create_inout_wrapper_functions   : bool;
   option_reffiness_invariance             : bool;
   option_hack_arr_compat_notices          : bool;
+  option_hack_arr_dv_arrs                 : bool;
   option_dynamic_invoke_functions         : SSet.t;
   option_repo_authoritative               : bool;
   option_jit_enable_rename_function       : bool;
@@ -58,6 +59,7 @@ let default = {
   option_create_inout_wrapper_functions = true;
   option_reffiness_invariance = false;
   option_hack_arr_compat_notices = false;
+  option_hack_arr_dv_arrs = false;
   option_dynamic_invoke_functions = SSet.empty;
   option_repo_authoritative = false;
   option_jit_enable_rename_function = false;
@@ -82,6 +84,7 @@ let php7_ltr_assign o = o.option_php7_ltr_assign
 let create_inout_wrapper_functions o = o.option_create_inout_wrapper_functions
 let reffiness_invariance o = o.option_reffiness_invariance
 let hack_arr_compat_notices o = o.option_hack_arr_compat_notices
+let hack_arr_dv_arrs o = o.option_hack_arr_dv_arrs
 let dynamic_invoke_functions o = o.option_dynamic_invoke_functions
 let repo_authoritative o = o.option_repo_authoritative
 let jit_enable_rename_function o = o.option_jit_enable_rename_function
@@ -110,6 +113,7 @@ let to_string o =
       @@ create_inout_wrapper_functions o
     ; Printf.sprintf "reffiness_invariance: %B" @@ reffiness_invariance o
     ; Printf.sprintf "hack_arr_compat_notices: %B" @@ hack_arr_compat_notices o
+    ; Printf.sprintf "hack_arr_dv_arrs: %B" @@ hack_arr_dv_arrs o
     ; Printf.sprintf "dynamic_invoke_functions: [%s]" dynamic_invokes
     ; Printf.sprintf "repo_authoritative: %B" @@ repo_authoritative o
     ; Printf.sprintf "jit_enable_rename_function: %B"
@@ -162,6 +166,8 @@ let set_option options name value =
     { options with option_reffiness_invariance = as_bool value }
   | "eval.hackarrcompatnotices" ->
     { options with option_hack_arr_compat_notices = as_bool value }
+  | "eval.hackarrdvarrs" ->
+    { options with option_hack_arr_dv_arrs = as_bool value }
   | "hhvm.repo_authoritative" ->
     { options with option_repo_authoritative = as_bool value }
   | "eval.jitenablerenamefunction" ->
@@ -249,6 +255,8 @@ let value_setters = [
     fun opts v -> { opts with option_reffiness_invariance = (v = 1) });
   (set_value "hhvm.hack_arr_compat_notices" get_value_from_config_int @@
     fun opts v -> { opts with option_hack_arr_compat_notices = (v = 1) });
+  (set_value "hhvm.hack_arr_dv_arrs" get_value_from_config_int @@
+    fun opts v -> { opts with option_hack_arr_dv_arrs = (v = 1) });
   (set_value "hhvm.dynamic_invoke_functions" get_value_from_config_string_array @@
     fun opts v -> {opts with option_dynamic_invoke_functions =
         SSet.of_list (List.map v String.lowercase_ascii)});

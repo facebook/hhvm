@@ -89,6 +89,8 @@ UnaryOpExpression::UnaryOpExpression
 (EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS, ExpressionPtr exp, int op, bool front)
   : Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETER_VALUES),
     m_exp(exp), m_op(op), m_front(front) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs ||
+          (m_op != T_VARRAY && m_op != T_DARRAY));
   ctorInit();
 }
 

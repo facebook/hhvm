@@ -280,6 +280,9 @@ let optimize_cuf () =
 let hack_arr_compat_notices () =
   Hhbc_options.hack_arr_compat_notices !Hhbc_options.compiler_options
 
+let hack_arr_dv_arrs () =
+  Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
+
 let php7_ltr_assign () =
   Hhbc_options.php7_ltr_assign !Hhbc_options.compiler_options
 
@@ -374,8 +377,8 @@ let istype_op lower_fq_id =
   | "hh\\is_keyset" -> Some OpKeyset
   | "hh\\is_dict" -> Some OpDict
   | "hh\\is_vec" -> Some OpVec
-  | "hh\\is_varray" -> Some OpVArray
-  | "hh\\is_darray" -> Some OpDArray
+  | "hh\\is_varray" -> Some (if hack_arr_dv_arrs () then OpVec else OpVArray)
+  | "hh\\is_darray" -> Some (if hack_arr_dv_arrs () then OpDict else OpDArray)
   | _ -> None
 
 (* Return the IsType op associated with a given primitive typehint. *)
@@ -1325,14 +1328,15 @@ and inline_gena_call env arg = Local.scope @@ fun () ->
   gather [
     (* convert input to array *)
     emit_expr ~need_ref:false env arg;
-    instr_cast_darray;
+    if hack_arr_dv_arrs () then instr_cast_dict else instr_cast_darray;
     instr_setl arr_local;
     instr_popc;
     begin
       unset_in_fault [arr_local] @@ fun () ->
         gather [
           instr_fpushclsmethodd 1
-            (Hhbc_id.Method.from_raw_string "fromDArray")
+            (Hhbc_id.Method.from_raw_string
+               (if hack_arr_dv_arrs () then "fromDict" else "fromDArray"))
             (Hhbc_id.Class.from_raw_string "HH\\AwaitAllWaitHandle");
           instr_fpassl 0 arr_local Cell;
           instr_fcall 1;
@@ -1462,7 +1466,9 @@ and try_inline_genva_call_ env pos args uargs inline_context =
         | GI_expression ->
           gather [
             reify ~pop_result:false;
-            instr_lit_const (NewVArray args_count);
+            instr_lit_const (if hack_arr_dv_arrs ()
+                             then (NewVecArray args_count)
+                             else (NewVArray args_count));
           ]
         | GI_list_assignment l ->
           emit_list_assignment l reserved_locals in
@@ -1811,12 +1817,15 @@ and emit_dynamic_collection env expr es =
        emit_keyvalue_collection name env es (NewDictArray count)
 
   | A.Varray _ ->
-    emit_value_only_collection env es (fun n -> NewVArray n)
+     emit_value_only_collection env es
+       (fun n -> if hack_arr_dv_arrs () then (NewVecArray n) else (NewVArray n))
   | A.Darray _ ->
      if is_struct_init env es false then
-       emit_struct_array env es instr_newstructdarray
+       emit_struct_array env es
+         (if hack_arr_dv_arrs () then instr_newstructdict else instr_newstructdarray)
      else
-       emit_keyvalue_collection "array" env es (NewDArray count)
+       emit_keyvalue_collection "array" env es
+         (if hack_arr_dv_arrs () then (NewDictArray count) else (NewDArray count))
   | _ ->
   (* From here on, we're only dealing with PHP arrays *)
   if is_packed_init es then
@@ -1863,8 +1872,8 @@ and emit_named_collection env expr pos name fields =
 
 and is_php_array = function
  | _, A.Array _ -> true
- | _, A.Varray _ -> true
- | _, A.Darray _ -> true
+ | _, A.Varray _ -> not (hack_arr_dv_arrs ())
+ | _, A.Darray _ -> not (hack_arr_dv_arrs ())
  | _ -> false
 
 and emit_collection ?(transform_to_collection) env expr es =
@@ -2994,8 +3003,8 @@ and get_call_builtin_func_info lower_fq_id =
   | "hh\\vec" -> Some (1, IOp CastVec)
   | "hh\\keyset" -> Some (1, IOp CastKeyset)
   | "hh\\dict" -> Some (1, IOp CastDict)
-  | "hh\\varray" -> Some (1, IOp CastVArray)
-  | "hh\\darray" -> Some (1, IOp CastDArray)
+  | "hh\\varray" -> Some (1, IOp (if hack_arr_dv_arrs () then CastVec else CastVArray))
+  | "hh\\darray" -> Some (1, IOp (if hack_arr_dv_arrs () then CastDict else CastDArray))
   | _ -> None
 
 and emit_call_user_func_arg env f i expr =

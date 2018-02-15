@@ -22,6 +22,18 @@ type type_hint_kind =
 | Param
 | TypeDef
 
+let hack_arr_dv_arrs () =
+  Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
+
+let transform_dv_arr_names name =
+  if not (hack_arr_dv_arrs ()) then name
+  else
+    match name with
+    | "HH\\varray" -> "HH\\vec"
+    | "HH\\darray" -> "HH\\dict"
+    | "HH\\varray_or_darray" -> "HH\\vec_or_dict"
+    | _ -> name
+
 let fmt_name_or_prim ~tparams ~namespace x =
   let name = snd x in
   if List.mem tparams name || is_self name
@@ -30,7 +42,7 @@ let fmt_name_or_prim ~tparams ~namespace x =
     let needs_unmangling = Xhp.is_xhp (strip_ns name) in
     let fq_id, _ = Hhbc_id.Class.elaborate_id namespace x in
     if needs_unmangling then Hhbc_id.Class.to_unmangled_string fq_id
-    else Hhbc_id.Class.to_raw_string fq_id
+    else transform_dv_arr_names (Hhbc_id.Class.to_raw_string fq_id)
 
 (* Produce the "userType" bit of the annotation *)
 let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
@@ -154,19 +166,20 @@ let rec hint_to_type_constraint
         (Printf.sprintf "Cannot access %s when no class scope is active" name)
       else
       let tc_name =
-        let fq_id, _ = Hhbc_id.Class.elaborate_id namespace id in
-        Hhbc_id.Class.to_raw_string fq_id in
+        transform_dv_arr_names
+          (let fq_id, _ = Hhbc_id.Class.elaborate_id namespace id in
+           Hhbc_id.Class.to_raw_string fq_id) in
       let tc_flags = [TC.HHType] in
       TC.make (Some tc_name) tc_flags
 
   (* Shapes and tuples are just arrays *)
   | A.Hshape _ ->
-    let tc_name = Some "HH\\darray" in
+    let tc_name = Some (if hack_arr_dv_arrs() then "HH\\dict" else "HH\\darray") in
     let tc_flags = [TC.HHType; TC.ExtendedHint] in
     TC.make tc_name tc_flags
 
   | A.Htuple _ ->
-    let tc_name = Some "HH\\varray" in
+    let tc_name = Some (if hack_arr_dv_arrs() then "HH\\vec" else "HH\\varray") in
     let tc_flags = [TC.HHType; TC.ExtendedHint] in
     TC.make tc_name tc_flags
 

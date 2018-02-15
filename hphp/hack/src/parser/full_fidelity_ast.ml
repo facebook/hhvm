@@ -57,6 +57,14 @@ type env =
   ; mutable saw_yield        : bool   (* Information flowing back up *)
   ; mutable unsafes          : ISet.t (* Offsets of UNSAFE_EXPR in trivia *)
   ; mutable saw_std_constant_redefinition: bool
+  (* Whether we've seen COMPILER_HALT_OFFSET. The value of COMPILER_HALT_OFFSET
+    defaults to 0 if HALT_COMPILER isn't called.
+    None -> COMPILER_HALT_OFFSET isn't in the source file
+    Some 0 -> COMPILER_HALT_OFFSET is in the source file, but HALT_COMPILER isn't
+    Some x -> COMPILER_HALT_OFFSET is in the source file,
+              HALT_COMPILER is at x bytes offset in the file.
+  *)
+  ; mutable saw_compiler_halt_offset : int option
   }
 
 let non_tls env = if not env.top_level_statements then env else
@@ -156,7 +164,7 @@ type expr_location =
 let in_string l =
   l = InDoubleQuotedString || l = InBacktickedString
 
-let pos_qualified_name node env =
+  let pos_qualified_name node env =
   let aux p =
     match syntax p with
     | ListItem li -> (text li.list_item) ^ (text li.list_separator)
@@ -180,6 +188,7 @@ let rec pos_name node env =
   let local_ignore_pos = env.ignore_pos in
   (* Special case for __LINE__; never ignore position for that special name *)
   if name = "__LINE__" then env.ignore_pos <- false;
+  if name = "__COMPILER_HALT_OFFSET__" then env.saw_compiler_halt_offset <- Some 0;
   let p = pPos node env in
   env.ignore_pos <- local_ignore_pos;
   p, name
@@ -2472,8 +2481,20 @@ let pProgram : program parser = fun node env ->
   (* HaltCompiler stops processing the list *)
   | [{ syntax = ExpressionStatement
       { expression_statement_expression =
-        { syntax = HaltCompilerExpression _ ; _ } ; _ } ; _ }]
-    -> List.concat (List.rev acc)
+        { syntax = HaltCompilerExpression _ ; _ } ; _ } ; _ } as cur_node]
+    ->
+    (* If we saw COMPILER_HALT_OFFSET, calculate the position of HALT_COMPILER *)
+    if env.saw_compiler_halt_offset <> None then
+      begin
+      let local_ignore_pos = env.ignore_pos in
+      let () = env.ignore_pos <- false in
+      let pos = pPos cur_node env in
+      (* __COMPILER_HALT_OFFSET__ takes value equal to halt_compiler's end position *)
+      let s = File_pos.offset @@ Pos.pos_end pos in
+      let () = env.saw_compiler_halt_offset <- Some s in
+      env.ignore_pos <- local_ignore_pos
+      end;
+    List.concat (List.rev acc)
   (* There's an incompatibility between the Full-Fidelity (FF) and the AST view
    * of the world; `define` is an *expression* in FF, but a *definition* in AST.
    * Luckily, `define` only happens at the level of definitions.
@@ -2657,6 +2678,7 @@ let make_env
     ; max_depth               = 42
     ; unsafes                 = ISet.empty
     ; saw_std_constant_redefinition = false
+    ; saw_compiler_halt_offset      = None
     }
 
 let elaborate_toplevel_and_std_constants ast env source_text =
@@ -2688,9 +2710,33 @@ let elaborate_toplevel_and_std_constants ast env source_text =
     NS.elaborate_toplevel_defs env.parser_options ast
   | _ -> ast
 
+let elaborate_halt_compiler ast env source_text  =
+  match env.saw_compiler_halt_offset with
+    | Some x ->
+    let elaborate_halt_compiler_const defs =
+      let visitor = object(self)
+        inherit [_] endo as super
+        method! on_expr env expr =
+          match expr with
+          | p, Id (_, "__COMPILER_HALT_OFFSET__") ->
+            let start_offset = File_pos.offset @@ Pos.pos_start p in
+            (* Construct a new position and id *)
+            let id = string_of_int x in
+            let end_offset = start_offset + (String.length id) in
+            let pos_file = Pos.filename p in
+            let pos = SourceText.relative_pos pos_file source_text start_offset end_offset in
+            pos, Ast.Int (pos, id)
+          | _ -> super#on_expr env expr
+      end in
+      visitor#on_program () defs in
+    elaborate_halt_compiler_const ast
+  | None -> ast
+
+
 let lower env ~source_text ~script : result =
   let ast = runP pScript script env in
   let ast = elaborate_toplevel_and_std_constants ast env source_text in
+  let ast = elaborate_halt_compiler ast env source_text in
   let comments, fixmes = scour_comments env.file source_text script env in
   let comments = if env.include_line_comments then comments else
     List.filter ~f:(fun (_,c) -> not (Prim_defs.is_line_comment c)) comments

@@ -1,5 +1,3 @@
-spec/tests/lexical_structure/tokens/heredoc_string_literals.php
-spec/tests/lexical_structure/tokens/string_literals.php
 spec/tests/statements/declare/declare.php
 spec/tests/statements/selection/if.php
 spec/tests/statements/selection/switch.php

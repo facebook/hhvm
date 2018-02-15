@@ -126,36 +126,22 @@ ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
   return ad;
 }
 
-ArrayData* SetArray::MakeUncounted(ArrayData* array,
-                                   bool withApcTypedValue,
-                                   PointerMap* seen) {
-  void** seenVal = nullptr;
-  if (seen && array->hasMultipleRefs()) {
-    auto it = seen->find(array);
-    assert(it != seen->end());
-    seenVal = &it->second;
-    if (auto const arr = static_cast<ArrayData*>(*seenVal)) {
-      if (arr->uncountedIncRef()) {
-        return arr;
-      }
-    }
-  }
+ArrayData* SetArray::MakeUncounted(ArrayData* array, size_t extra) {
   auto src = asSet(array);
   assertx(!src->empty());
   auto const scale = src->scale();
   auto const used = src->m_used;
-  auto const extra = withApcTypedValue ? sizeof(APCTypedValue) : 0;
-  auto const mem =
+  char* mem =
     static_cast<char*>(malloc_huge(extra + computeAllocBytes(scale)));
   auto const dest = reinterpret_cast<SetArray*>(mem + extra);
 
+  assert((extra % 16) == 0);
   assert(reinterpret_cast<uintptr_t>(dest) % 16 == 0);
   assert(reinterpret_cast<uintptr_t>(src) % 16 == 0);
   memcpy16_inline(dest, src, sizeof(SetArray) + sizeof(Elm) * used);
   assert(ClearElms(Data(dest) + used, Capacity(scale) - used));
   CopyHash(HashTab(dest, scale), src->hashTab(), scale);
-  dest->initHeader_16(HeaderKind::Keyset, UncountedValue,
-                      withApcTypedValue ? ArrayData::kHasApcTv : 0);
+  dest->m_count = UncountedValue;
 
   // Make sure all strings are uncounted.
   auto const elms = dest->data();
@@ -166,31 +152,20 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array,
     if (elm.hasStrKey()) {
       elm.tv.m_type = KindOfPersistentString;
       StringData*& skey = elm.tv.m_data.pstr;
-
       if (!skey->isStatic() &&
           (!skey->isUncounted() || !skey->uncountedIncRef())) {
-        skey = [&] {
-          if (auto const st = lookupStaticString(skey)) return st;
-          void** seenStr = nullptr;
-          if (seen && skey->hasMultipleRefs()) {
-            seenStr = &(*seen)[skey];
-            if (auto const st = static_cast<StringData*>(*seenStr)) {
-              if (st->uncountedIncRef()) return st;
-            }
-          }
-          auto const st = StringData::MakeUncounted(skey->slice());
-          if (seenStr) *seenStr = st;
-          return st;
-        }();
+        if (auto const st = lookupStaticString(skey)) {
+          skey = st;
+        } else {
+          skey = StringData::MakeUncounted(skey->slice());
+        }
       }
     }
   }
-
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().addAPCUncountedBlock();
   }
 
-  if (seenVal) *seenVal = dest;
   return dest;
 }
 
@@ -305,7 +280,7 @@ void SetArray::Release(ArrayData* in) {
   AARCH64_WALKABLE_FRAME();
 }
 
-void SetArray::ReleaseUncounted(ArrayData* in) {
+void SetArray::ReleaseUncounted(ArrayData* in, size_t extra) {
   assert(in->isUncounted());
   auto const ad = asSet(in);
 
@@ -331,8 +306,7 @@ void SetArray::ReleaseUncounted(ArrayData* in) {
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
-  free_huge(reinterpret_cast<char*>(ad) -
-            (ad->hasApcTv() ? sizeof(APCTypedValue) : 0));
+  free_huge(reinterpret_cast<char*>(ad) - extra);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -196,8 +196,6 @@ inline bool ArrayData::dvArraySanityCheck() const {
   return dv == kNotDVArray;
 }
 
-inline bool ArrayData::hasApcTv() const { return m_aux16 & kHasApcTv; }
-
 inline bool ArrayData::useWeakKeys() const { return isPHPArray(); }
 
 inline DataType ArrayData::toDataType() const {

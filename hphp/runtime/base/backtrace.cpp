@@ -621,7 +621,7 @@ Array CompactTrace::extract() const {
   auto ins = CachedArray(
     arr.get()->empty()
       ? staticEmptyArray()
-      : PackedArray::MakeUncounted(arr.get()),
+      : PackedArray::MakeUncounted(arr.get(), 0),
     CacheDeleter()
   );
   if (!s_cache.insert(m_key, ins)) {

@@ -63,7 +63,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   // Recursively register {allocation, rootAPCHandle} with APCGCManager
   static void RegisterUncountedAllocations(ArrayData* ad,
                                            APCHandle* rootAPCHandle);
-  static void ReleaseUncounted(ArrayData*);
+  static bool ReleaseUncounted(ArrayData*, size_t extra = 0);
   static member_rval::ptr_u NvGetInt(const ArrayData*, int64_t ki);
   static constexpr auto NvTryGetInt = &NvGetInt;
   static member_rval::ptr_u NvGetStr(const ArrayData*, const StringData*);
@@ -274,14 +274,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* MakeUninitializedVec(uint32_t size);
 
   static ArrayData* MakeUncounted(ArrayData* array,
-                                  bool withApcTypedValue = false,
+                                  size_t extra = 0,
                                   PointerMap* seen = nullptr);
-  static ArrayData* MakeUncounted(ArrayData* array,
-                                  int,
-                                  PointerMap* seen = nullptr) = delete;
-  static ArrayData* MakeUncounted(ArrayData* array,
-                                  size_t extra,
-                                  PointerMap* seen = nullptr) = delete;
   static ArrayData* MakeUncountedHelper(ArrayData* array, size_t extra);
 
   static ArrayData* MakeVecFromAPC(const APCArray* apc);

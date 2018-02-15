@@ -211,23 +211,6 @@ struct APCTypedValue {
   // Recursively register all {allocation, root} with APCGCManager
   void registerUncountedAllocations();
 
-  template <class StaticKey, class UncountedKey, class XData>
-  static APCHandle::Pair HandlePersistent(StaticKey skey,
-                                          UncountedKey ukey,
-                                          XData *data) {
-    if (!data->isRefCounted()) {
-      if (data->isStatic()) {
-        auto const value = new APCTypedValue(skey, data);
-        return {value->getHandle(), sizeof(APCTypedValue)};
-      }
-      if (data->uncountedIncRef()) {
-        auto const value = new APCTypedValue(ukey, data);
-        return {value->getHandle(), sizeof(APCTypedValue)};
-      }
-    }
-    return {nullptr, 0};
-  }
-
 private:
   APCTypedValue(const APCTypedValue&) = delete;
   APCTypedValue& operator=(const APCTypedValue&) = delete;

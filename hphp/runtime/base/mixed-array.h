@@ -246,18 +246,13 @@ struct MixedArray final : ArrayData,
    * uncounted or static arrays).  The Packed version does the same
    * when the array has a kPackedKind.
    *
-   * If withApcTypedValue is true, space for an APCTypedValue will be
-   * allocated in front of the returned pointer.
+   * 'extra' bytes may be allocated in front of the returned pointer,
+   * must be a multiple of 16, and later be passed to ReleaseUncounted.
+   * (This is used to co-allocate a TypedValue with its array data.)
    */
   static ArrayData* MakeUncounted(ArrayData* array,
-                                  bool withApcTypedValue,
+                                  size_t extra = 0,
                                   PointerMap* seen = nullptr);
-  static ArrayData* MakeUncounted(ArrayData* array,
-                                  int,
-                                  PointerMap* seen = nullptr) = delete;
-  static ArrayData* MakeUncounted(ArrayData* array,
-                                  size_t extra,
-                                  PointerMap* seen = nullptr) = delete;
 
   static ArrayData* MakeDictFromAPC(const APCArray* apc);
   static ArrayData* MakeDArrayFromAPC(const APCArray* apc);
@@ -383,7 +378,7 @@ public:
   // Recursively register {allocation, rootAPCHandle} with APCGCManager
   static void RegisterUncountedAllocations(ArrayData* ad,
                                            APCHandle* rootAPCHandle);
-  static void ReleaseUncounted(ArrayData*);
+  static bool ReleaseUncounted(ArrayData*, size_t extra = 0);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static ArrayData* Escalate(const ArrayData* ad) {

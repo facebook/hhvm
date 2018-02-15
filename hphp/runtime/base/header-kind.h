@@ -135,16 +135,14 @@ enum class GCBits : uint8_t {};
  * Refcounted types have a 32-bit RefCount normally, or 8-bit plus 24 bits of
  * padding with ONE_BIT_REFCOUNT.
  *
- * 0       32     40      48        50  56
- * [ cnt | kind | marks | DVArray | X  | sizeClass ] Packed, VecArray
- * [ cnt | kind | marks | DVArray | X  |           ] Mixed, Dict
- * [ cnt | kind | marks |                          ] Empty, Apc, Globals, Keyset
- * [ cnt | kind | marks | sizeClass:16             ] String
- * [ cnt | kind | marks | heapSize:16              ] Resource (ResourceHdr)
- * [ cnt | kind | marks |                          ] Ref (RefData)
- * [ cnt | kind | marks | Attribute    |           ] Object..ImmSet (ObjectData)
- *
- * Note: X in bit 50 is the kHasApcTv flag; see array-data.h
+ * 0         32     40      48          56
+ * [ count | kind | marks | DVArray   | sizeClass ] Packed, VecArray
+ * [ count | kind | marks | DVArray   |           ] Mixed, Dict
+ * [ count | kind | marks |                       ] Empty, Apc, Globals, Keyset
+ * [ count | kind | marks | sizeClass:16          ] String
+ * [ count | kind | marks | heapSize:16           ] Resource (ResourceHdr)
+ * [ count | kind | marks |                       ] Ref (RefData)
+ * [ count | kind | marks | Attribute |           ] Object..ImmSet (ObjectData)
  *
  * Note: when an ObjectData is preceded by a special header (AsyncFuncFrame,
  * NativeData, or ClosureHeader), only the special header is marked using

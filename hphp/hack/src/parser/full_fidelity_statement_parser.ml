@@ -599,7 +599,13 @@ module WithExpressionAndDeclAndTypeParser
     (* TODO: I'm not convinced that this always terminates in some cases.
     Check that. *)
     let (parser, section_list) =
-      parse_terminated_list parser parse_switch_section RightBrace in
+      let (parser1, token) = next_token parser in
+      match Token.kind token with
+      | Semicolon when peek_token_kind parser1 = RightBrace ->
+        parser1, make_list parser1 []
+      | _ ->
+        parse_terminated_list parser parse_switch_section RightBrace
+    in
     let (parser, right_brace_token) = require_right_brace parser in
     let syntax = make_switch_statement switch_keyword_token left_paren_token
       expr_node right_paren_token left_brace_token section_list

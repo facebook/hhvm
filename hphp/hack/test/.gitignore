@@ -12,3 +12,4 @@
 *.semdiff_messages
 *.hhcodegen_config.json
 *.debug_out
+*.type_check_raised_out

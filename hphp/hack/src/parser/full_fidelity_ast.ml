@@ -448,8 +448,7 @@ let mk_fun_kind suspension_kind yield =
   | SKAsync, true  -> FAsyncGenerator
   | SKSync,  false -> FSync
   | SKAsync, false -> FAsync
-  (* TODO(t17335630): Implement an FCoroutine fun_kind *)
-  | SKCoroutine, false -> assert false
+  | SKCoroutine, false -> FCoroutine
   | SKCoroutine, true -> raise (Failure "Couroutine functions may not yield")
 
 let fun_template yielding node suspension_kind env =

@@ -1050,13 +1050,17 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           (pExpr binary_right_operand env)
 
     | Token t ->
-      (match location with
-      | MemberSelect when Token.kind t = TK.Variable -> Lvar (pos_name node env)
-      | InDoubleQuotedString -> String (pos, unesc_dbl (text node))
-      | InBacktickedString -> String (pos, Php_escaping.unescape_backtick (text node))
-      | MemberSelect
-      | InGlobalVar
-      | TopLevel -> Id (pos_name node env)
+      (match location, Token.kind t with
+      | MemberSelect, TK.Variable -> Lvar (pos_name node env)
+      | InDoubleQuotedString, TK.HeredocStringLiteral
+      | InDoubleQuotedString, TK.HeredocStringLiteralHead
+      | InDoubleQuotedString, TK.HeredocStringLiteralTail ->
+          String (pos, Php_escaping.unescape_heredoc (text node))
+      | InDoubleQuotedString, _ -> String (pos, unesc_dbl (text node))
+      | InBacktickedString, _ -> String (pos, Php_escaping.unescape_backtick (text node))
+      | MemberSelect, _
+      | InGlobalVar, _
+      | TopLevel, _ -> Id (pos_name node env)
       )
 
     | YieldExpression { yield_operand; _ } when text yield_operand = "break" ->

@@ -60,7 +60,7 @@ let run_ast ?(quick=false) file =
   result
 
 let run_ffp (file : Relative_path.t) : Lowerer.result =
-  let env = Lowerer.make_env ~include_line_comments:true file in
+  let env = Lowerer.make_env ~codegen:true ~include_line_comments:true file in
   Lowerer.from_file env
 
 let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->

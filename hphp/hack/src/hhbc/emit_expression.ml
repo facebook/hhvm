@@ -667,6 +667,26 @@ and emit_instanceof env e1 e2 =
 
 and emit_is env pos lhs h =
   match snd h with
+    | A.Happly ((_, id), _)
+      when id = SN.Typehints.arraykey || id = SN.Typehints.num ->
+      begin match lhs with
+        | IsExprExpr e -> emit_is_create_local env pos e h
+        | IsExprUnnamedLocal local ->
+          let op2 = if id = SN.Typehints.arraykey then OpStr else OpDbl in
+          let its_true = Label.next_regular () in
+          let its_done = Label.next_regular () in
+          gather [
+            instr_istypel local OpInt;
+            instr_jmpnz its_true;
+            instr_istypel local op2;
+            instr_jmpnz its_true;
+            instr_false;
+            instr_jmp its_done;
+            instr_label its_true;
+            instr_true;
+            instr_label its_done;
+          ]
+      end
     | A.Happly ((_, id), _) ->
       begin match is_expr_primitive_op id with
         | Some op ->
@@ -678,14 +698,7 @@ and emit_is env pos lhs h =
       end
     | A.Hoption h2 ->
       begin match lhs with
-        | IsExprExpr e ->
-          Local.scope @@ fun () ->
-            let local = Local.get_unnamed_local () in
-            gather [
-              emit_expr ~need_ref:false env e;
-              instr_popl local;
-              emit_is env pos (IsExprUnnamedLocal local) h
-            ]
+        | IsExprExpr e -> emit_is_create_local env pos e h
         | IsExprUnnamedLocal local ->
           let its_true = Label.next_regular () in
           let its_done = Label.next_regular () in
@@ -702,6 +715,15 @@ and emit_is env pos lhs h =
           ]
       end
     | _ -> emit_nyi "is expression: unsupported hint (T22779957)"
+
+and emit_is_create_local env pos e h =
+  Local.scope @@ fun () ->
+    let local = Local.get_unnamed_local () in
+    gather [
+      emit_expr ~need_ref:false env e;
+      instr_popl local;
+      emit_is env pos (IsExprUnnamedLocal local) h
+    ]
 
 and emit_is_lhs env lhs =
   match lhs with

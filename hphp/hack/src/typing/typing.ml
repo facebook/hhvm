@@ -5233,13 +5233,31 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
     env, T.make_typed_expr p ty (T.Binop(bop, te1, te2)), ty in
   let check_dynamic f =
     if is_dynamic ty1 then
-      make_result env te1 te2 (fst ty1, Tdynamic)
+      let result_prim =
+        match is_sub_prim env ty2 Tfloat with
+        | Some r ->
+          (* dynamic op float = float *)
+          (r, Tprim Tfloat)
+        | _ ->
+          (* dynamic op _ = num *)
+          (fst ty2, Tprim Tnum)
+        in
+      make_result env te1 te2 result_prim
     else if is_dynamic ty2 then
-      make_result env te1 te2 (fst ty2, Tdynamic)
+      let result_prim =
+        match is_sub_prim env ty1 Tfloat with
+        | Some r ->
+          (* dynamic op float = float *)
+          (r, Tprim Tfloat)
+        | _ ->
+          (* dynamic op _ = num *)
+          (fst ty1, Tprim Tnum)
+        in
+      make_result env te1 te2 result_prim
     else f ()
   in
   match bop with
-  | Ast.Plus -> check_dynamic begin fun () ->
+  | Ast.Plus ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
       let env, ty2 = TUtils.fold_unresolved env ty2 in
       let env, ety1 = Env.expand_type env ty1 in
@@ -5278,6 +5296,8 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
       | (_, Tarraykind _), (_, Tany) ->
           let env, ty = Type.unify p Reason.URnone env ty1 ty2 in
           make_result env te1 te2 ty
+      | (_, Tdynamic), (_, Tdynamic) ->
+          make_result env te1 te2 (fst ty1, Tdynamic)
       | (_, (Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
         | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
@@ -5289,7 +5309,6 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
           | T.Binop (_, te1, te2) -> make_result env te1 te2 ty
           | _ -> assert false
       )
-      end
   | Ast.Minus | Ast.Star -> check_dynamic begin fun () ->
       let env, ty1 = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tnum) in
       let env, ty2 = enforce_sub_ty env ty2 (Reason.Rarith p2, Tprim Tnum) in

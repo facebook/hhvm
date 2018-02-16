@@ -479,9 +479,12 @@ let n_const_fold _tcopt _fn acc _const_name = acc
 let parse_name_and_decl popt files_contents tcopt =
   Errors.do_ begin fun () ->
     let parsed_files =
-      Relative_path.Map.mapi
-       ~f:(Parser_hack.program popt) files_contents in
-
+      Relative_path.Map.mapi files_contents ~f:begin fun fn contents ->
+        Errors.run_in_context fn Errors.Parsing begin fun () ->
+          Parser_hack.program popt fn contents
+        end
+      end
+    in
     let files_info =
       Relative_path.Map.mapi ~f:begin fun fn parsed_file ->
         let {Parser_hack.file_mode; comments; ast; _} = parsed_file in
@@ -499,12 +502,16 @@ let parse_name_and_decl popt files_contents tcopt =
       end parsed_files in
 
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
-      let {FileInfo.funs; classes; typedefs; consts; _} = fileinfo in
-      NamingGlobal.make_env popt ~funs ~classes ~typedefs ~consts
+      Errors.run_in_context fn Errors.Naming begin fun () ->
+        let {FileInfo.funs; classes; typedefs; consts; _} = fileinfo in
+        NamingGlobal.make_env popt ~funs ~classes ~typedefs ~consts
+      end
     end;
 
     Relative_path.Map.iter files_info begin fun fn _ ->
-      Decl.make_env tcopt fn
+      Errors.run_in_context fn Errors.Decl begin fun () ->
+        Decl.make_env tcopt fn
+      end
     end;
 
     files_info

@@ -393,7 +393,9 @@ and class_hint_decl class_env hint =
         let fn = FileInfo.get_pos_filename pos in
         (* We are supposed to redeclare the class *)
         let class_opt = Parser_heap.find_class_in_file class_env.tcopt fn cid in
-        Option.iter class_opt (class_decl_if_missing class_env)
+        Errors.run_in_context fn Errors.Decl begin fun () ->
+          Option.iter class_opt (class_decl_if_missing class_env)
+        end
       | _ -> ()
     end
   | _ ->

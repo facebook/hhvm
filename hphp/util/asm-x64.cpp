@@ -38,6 +38,11 @@ const char* show(RoundDirection rd) {
   not_reached();
 }
 
+#ifdef HAVE_LIBXED
+  static XedInit xi;
+  constexpr xed_state_t X64Assembler::s_xedState;
+#endif
+
 namespace x64 {
 
 void DecodedInstruction::decode(uint8_t* ip) {

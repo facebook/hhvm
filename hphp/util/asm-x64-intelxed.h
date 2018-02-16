@@ -65,14 +65,11 @@ struct DispReg;
 
 const uint8_t kOpsizePrefix = 0x66;
 
-struct XedInit
-{
-    XedInit() {
-        xed_tables_init();
-    }
+struct XedInit {
+  XedInit() {
+      xed_tables_init();
+  }
 };
-
-static XedInit xi;
 
 struct Reg64 {
   explicit constexpr Reg64(int rn) : rn(rn) {}
@@ -749,14 +746,15 @@ private:
   enum class RegNumber : int {};
   static const RegNumber noreg = RegNumber(-1);
 
+  constexpr static xed_state_t s_xedState = {
+        XED_MACHINE_MODE_LONG_64,
+        XED_ADDRESS_WIDTH_64b
+  };
+
   xed_uint8_t m_xedInstrBuff[XED_MAX_INSTRUCTION_BYTES];
-  xed_state_t m_xedState;
+
 public:
-  explicit X64Assembler(CodeBlock& cb) : codeBlock(cb)
-  {
-    m_xedState.stack_addr_width=XED_ADDRESS_WIDTH_64b;
-    m_xedState.mmode=XED_MACHINE_MODE_LONG_64;
-  }
+  explicit X64Assembler(CodeBlock& cb) : codeBlock(cb) {}
 
   X64Assembler(const X64Assembler&) = delete;
   X64Assembler& operator=(const X64Assembler&) = delete;
@@ -1303,7 +1301,7 @@ private:
     DECLARE_UNUSED(xed_bool_t, convert_ok);
 
   #define XED_EMIT_PREP_ENCODE                                                \
-    xed_encoder_request_zero_set_mode(&request, &m_xedState);                 \
+    xed_encoder_request_zero(&request);                                       \
     convert_ok = xed_convert_to_encoder_request(&request, &instruction);      \
     assert(convert_ok);                                                       \
     xedError = xed_encode(&request, m_xedInstrBuff, XED_MAX_INSTRUCTION_BYTES,\
@@ -1321,7 +1319,7 @@ private:
   uint32_t xedEmit0Prep(xed_iclass_enum_t instr,
                         xed_uint_t effOperandSizeBits = 0) {
     XED_EMIT_PREP_BEGIN
-    xed_inst0(&instruction, m_xedState, instr, effOperandSizeBits);
+    xed_inst0(&instruction, s_xedState, instr, effOperandSizeBits);
     XED_EMIT_PREP_ENCODE
     XED_ASSERT_ERR("")
     return encodedSize;
@@ -1337,7 +1335,7 @@ private:
                         const xed_encoder_operand_t& op,
                         xed_uint_t effOperandSizeBits = 0) {
     XED_EMIT_PREP_BEGIN
-    xed_inst1(&instruction, m_xedState, instr, effOperandSizeBits, op);
+    xed_inst1(&instruction, s_xedState, instr, effOperandSizeBits, op);
     XED_EMIT_PREP_ENCODE
     XED_ASSERT_ERR("arg")
     return encodedSize;
@@ -1355,7 +1353,7 @@ private:
                         const xed_encoder_operand_t& op_2,
                         xed_uint_t effOperandSizeBits = 0) {
     XED_EMIT_PREP_BEGIN
-    xed_inst2(&instruction, m_xedState, instr, effOperandSizeBits, op_1, op_2);
+    xed_inst2(&instruction, s_xedState, instr, effOperandSizeBits, op_1, op_2);
     XED_EMIT_PREP_ENCODE
     XED_ASSERT_ERR("arg, arg")
     return encodedSize;
@@ -1375,7 +1373,7 @@ private:
                         const xed_encoder_operand_t& op_3,
                         xed_uint_t effOperandSizeBits = 0) {
     XED_EMIT_PREP_BEGIN
-    xed_inst3(&instruction, m_xedState, instr, effOperandSizeBits,
+    xed_inst3(&instruction, s_xedState, instr, effOperandSizeBits,
               op_1, op_2, op_3);
     XED_EMIT_PREP_ENCODE
     XED_ASSERT_ERR("arg, arg, arg")

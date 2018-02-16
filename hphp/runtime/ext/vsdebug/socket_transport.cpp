@@ -359,9 +359,9 @@ void SocketTransport::waitForConnection(
   fds[0].fd = abortFd;
   fds[0].events = eventMask;
 
-  for (unsigned int i = 0; i < count; i++) {
-    fds[i + 1].fd = socketFds[i];
-    fds[i + 1].events = eventMask;
+  for (unsigned int i = 1; i < count; i++) {
+    fds[i].fd = socketFds[i - 1];
+    fds[i].events = eventMask;
   }
 
   // Poll socket fds until a connection is established or we're terminated.

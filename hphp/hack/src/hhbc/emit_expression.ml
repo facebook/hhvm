@@ -36,6 +36,10 @@ type genva_inline_context =
   | GI_ignore_result
   | GI_list_assignment of A.expr list
 
+type is_expr_lhs =
+  | IsExprExpr of A.expr
+  | IsExprUnnamedLocal of Local.t
+
 (* Locals, array elements, and properties all support the same range of l-value
  * operations. *)
 module LValOp = struct
@@ -661,17 +665,48 @@ and emit_instanceof env e1 e2 =
       emit_expr ~need_ref:false env e2;
       instr_instanceof ]
 
-and emit_is env e h =
+and emit_is env pos lhs h =
   match snd h with
     | A.Happly ((_, id), _) ->
       begin match is_expr_primitive_op id with
         | Some op ->
           gather [
-            emit_expr ~need_ref:false env e;
-            instr_istypec op ]
-        | None -> emit_nyi "is expression"
+            emit_is_lhs env lhs;
+            instr_istypec op
+          ]
+        | None -> emit_nyi "is expression: unsupported id (T22779957)"
       end
-    | _ -> emit_nyi "is expression"
+    | A.Hoption h2 ->
+      begin match lhs with
+        | IsExprExpr e ->
+          Local.scope @@ fun () ->
+            let local = Local.get_unnamed_local () in
+            gather [
+              emit_expr ~need_ref:false env e;
+              instr_popl local;
+              emit_is env pos (IsExprUnnamedLocal local) h
+            ]
+        | IsExprUnnamedLocal local ->
+          let its_true = Label.next_regular () in
+          let its_done = Label.next_regular () in
+          gather [
+            instr_istypel local OpNull;
+            instr_jmpnz its_true;
+            emit_is env pos lhs h2;
+            instr_jmpnz its_true;
+            instr_false;
+            instr_jmp its_done;
+            instr_label its_true;
+            instr_true;
+            instr_label its_done
+          ]
+      end
+    | _ -> emit_nyi "is expression: unsupported hint (T22779957)"
+
+and emit_is_lhs env lhs =
+  match lhs with
+    | IsExprExpr e -> emit_expr ~need_ref:false env e
+    | IsExprUnnamedLocal local -> instr_cgetl local
 
 and emit_null_coalesce env e1 e2 =
   let end_label = Label.next_regular () in
@@ -1543,7 +1578,7 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.InstanceOf (e1, e2) ->
     emit_box_if_necessary need_ref @@ emit_instanceof env e1 e2
   | A.Is (e, h) ->
-    emit_box_if_necessary need_ref @@ emit_is env e h
+    emit_box_if_necessary need_ref @@ emit_is env pos (IsExprExpr e) h
   | A.NullCoalesce (e1, e2) ->
     emit_box_if_necessary need_ref @@ emit_null_coalesce env e1 e2
   | A.Cast((_, hint), e) ->

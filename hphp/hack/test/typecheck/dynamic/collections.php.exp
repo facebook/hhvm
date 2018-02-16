@@ -1,0 +1,14 @@
+File "collections.php", line 6, characters 3-13:
+  vec<^(int)>
+File "collections.php", line 8, characters 3-13:
+  vec<^(int | dynamic)>
+File "collections.php", line 10, characters 3-13:
+  Vector<^(dynamic)>
+File "collections.php", line 12, characters 3-13:
+  Map<^(int), ^(dynamic)>
+File "collections.php", line 16, characters 3-11:
+Invalid assignment (Typing[4110])
+File "collections.php", line 15, characters 31-33:
+This is an int
+File "collections.php", line 15, characters 40-46:
+It is incompatible with a dynamic value

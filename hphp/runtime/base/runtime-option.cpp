@@ -1122,7 +1122,7 @@ void RuntimeOption::Load(
                  "Repo.LocalReadaheadConcurrent", false);
   }
 
-  {
+  if (use_jemalloc) {
     // HHProf
     Config::Bind(HHProfEnabled, ini, config, "HHProf.Enabled", false);
     Config::Bind(HHProfActive, ini, config, "HHProf.Active", false);

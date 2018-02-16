@@ -12,4 +12,3 @@ slow/parser/afl5934248.php
 slow/parser/empty-files/empty-invalid.php
 slow/parser/memory_exhaust.php
 slow/parser/unicode-literal-error.php
-slow/preg-file-mode.php

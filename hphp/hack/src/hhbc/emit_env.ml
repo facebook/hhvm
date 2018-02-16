@@ -34,12 +34,15 @@ let empty_global_state =
 }
 
 let is_hh_file_ = ref false
+let is_systemlib_ = ref false
 let global_state_ = ref empty_global_state
 
 let set_is_hh_file v = is_hh_file_ := v
+let set_is_systemlib v = is_systemlib_ := v
 
 let is_hh_syntax_enabled () =
   !is_hh_file_ || Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options
+let is_systemlib () = !is_systemlib_
 
 let get_explicit_use_set () = (!global_state_).global_explicit_use_set
 let get_closure_namespaces () = (!global_state_).global_closure_namespaces

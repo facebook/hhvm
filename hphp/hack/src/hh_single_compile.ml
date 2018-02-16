@@ -226,6 +226,8 @@ let rec dispatch_loop handlers =
     let header = json_of_string line in
     let file = get_field_opt (get_string "file") header in
     let bytes = get_field (get_number_int "bytes") (fun _af -> 0) header in
+    let is_systemlib = get_field_opt (get_bool "is_systemlib") header in
+    Emit_env.set_is_systemlib @@ Option.value ~default:false is_systemlib;
     let body = Bytes.create bytes in begin
     try
       really_input stdin body 0 bytes;

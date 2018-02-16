@@ -514,8 +514,10 @@ namespace reg {
 
 #define SZ_TO_BITS(sz)                    (sz << 3)
 #define BITS_TO_SZ(bits)                  (bits >> 3)
+
+typedef bool(*immFitFunc)(int64_t, int);
 #define IMMFITFUNC_SIGNED                 deltaFits
-#define IMMFITFUNC_UNSIGNED               (XedOperand::immFitFunc) magFits
+#define IMMFITFUNC_UNSIGNED               (immFitFunc) magFits
 
 struct XedOperand
 {
@@ -544,8 +546,6 @@ struct XedOperand
       }
     }
   };
-
-  typedef bool(*immFitFunc)(int64_t, int);
 
   inline xed_reg_enum_t xedFromReg (const Reg64& reg) {
     return xed_reg_enum_t(int(reg) + XED_REG_RAX);
@@ -577,7 +577,7 @@ struct XedOperand
     }
     if(deltaFits(value, sz::byte)) {
        return {(xed_uint64_t)safe_cast<int8_t>(value), SZ_TO_BITS(sz::byte)};
-     }
+    }
     return {(xed_uint64_t)safe_cast<int32_t>(value), SZ_TO_BITS(sz::dword)};
   }
 
@@ -639,7 +639,7 @@ struct XedOperand
 
 #define XED_REG(reg)                      XedOperand(reg).op
 #define XED_IMM(imm, size)                XedOperand(imm, size).op
-#define XED_IMM_RED(imm, sizes, redfunc)  XedOperand(imm, sizes, redfunct).op
+#define XED_IMM_RED(imm, sizes, redfunc)  XedOperand(imm, sizes, redfunc).op
 #define XED_MEMREF(m, size)               XedOperand(m, size).op
 #define XED_MEMREF_RIP(m, size, offset)   XedOperand(m, size, offset).op
 #define XED_BRREL(p, size)                XedOperand((CodeAddress)p, size).op
@@ -846,10 +846,16 @@ public:
                                                   sz::byte); }
 
 #define STORE_OP(name, instr)                                         \
-  void name##w(Immed i, MemoryRef m) { xedInstrIM(instr, i, m,        \
-                                                  sz::word); }        \
-  void name##l(Immed i, MemoryRef m) { xedInstrIM(instr, i, m,        \
-                                                  sz::dword); }       \
+  void name##w(Immed i, MemoryRef m) {                                \
+    xedInstrIM(instr, i, m, IMMPROP(sz::word,                         \
+                                    sz::word | sz::byte,              \
+                                    IMMFITFUNC_SIGNED), sz::word);    \
+  }                                                                   \
+  void name##l(Immed i, MemoryRef m) {                                \
+    xedInstrIM(instr, i, m, IMMPROP(sz::dword,                        \
+                                    sz::dword | sz::byte,             \
+                                    IMMFITFUNC_SIGNED), sz::dword);   \
+  }                                                                   \
   void name##w(Reg16 r, MemoryRef m) { xedInstrRM(instr, r, m); }     \
   void name##l(Reg32 r, MemoryRef m) { xedInstrRM(instr, r, m); }     \
   void name##q(Reg64 r, MemoryRef m) { xedInstrRM(instr, r, m); }     \
@@ -863,51 +869,59 @@ public:
   void name##q(Reg64 r1, Reg64 r2)   { xedInstrRR(instr, r1, r2); }   \
   void name##l(Reg32 r1, Reg32 r2)   { xedInstrRR(instr, r1, r2); }   \
   void name##w(Reg16 r1, Reg16 r2)   { xedInstrRR(instr, r1, r2); }   \
-  void name##l(Immed i, Reg32 r)     { xedInstrIR(instr, i, r); }     \
-  void name##w(Immed i, Reg16 r)     { xedInstrIR(instr, i, r); }     \
+  void name##l(Immed i, Reg32 r) {                                    \
+    xedInstrIR(instr, i, r, IMMPROP(sz::dword,                        \
+                                    sz::dword | sz::byte,             \
+                                    IMMFITFUNC_SIGNED));              \
+  }                                                                   \
+  void name##w(Immed i, Reg16 r) {                                    \
+    xedInstrIR(instr, i, r, IMMPROP(sz::word,                         \
+                                    sz::word | sz::byte,              \
+                                    IMMFITFUNC_SIGNED));              \
+  }                                                                   \
   BYTE_REG_OP(name, instr)
 
-  /*
-   * For when we a have a memory operand and the operand size is
-   * 64-bits, only a 32-bit (sign-extended) immediate is supported.
-   */
-#define IMM64_STORE_OP(name, instr)                         \
-  void name##q(Immed i, MemoryRef m) {                      \
-    xedInstrIM(instr, i, m, sz::dword, sz::qword);          \
+#define IMM64_STORE_OP(name, instr)                                   \
+  void name##q(Immed i, MemoryRef m) {                                \
+    xedInstrIM(instr, i, m, IMMPROP(sz::dword,                        \
+                                    sz::dword | sz::byte,             \
+                                    IMMFITFUNC_SIGNED), sz::qword);   \
   }
 
-  /*
-   * For instructions other than movq, even when the operand size is
-   * 64 bits only a 32-bit (sign-extended) immediate is supported.
-   */
-#define IMM64R_OP(name, instr)                              \
-  void name##q(Immed imm, Reg64 r) {                        \
-    always_assert(imm.fits(sz::dword));                     \
-    xedInstrIR(instr, imm, r, sz::dword);                   \
+#define IMM64R_OP(name, instr)                                        \
+  void name##q(Immed imm, Reg64 r) {                                  \
+    always_assert(imm.fits(sz::dword));                               \
+    xedInstrIR(instr, imm, r, IMMPROP(sz::dword,                      \
+                                      sz::dword | sz::byte,           \
+                                      IMMFITFUNC_SIGNED));            \
   }
 
-#define FULL_OP(name, instr)          \
-  LOAD_OP(name, instr)                \
-  STORE_OP(name, instr)               \
-  REG_OP(name, instr)                 \
-  IMM64_STORE_OP(name, instr)         \
+#define FULL_OP(name, instr)                                          \
+  LOAD_OP(name, instr)                                                \
+  STORE_OP(name, instr)                                               \
+  REG_OP(name, instr)                                                 \
+  IMM64_STORE_OP(name, instr)                                         \
   IMM64R_OP(name, instr)
 
   // We rename x64's mov to store and load for improved code
   // readability.
+#define IMMPROP(size, allsizes, func) size
   LOAD_OP        (load, XED_ICLASS_MOV)
   STORE_OP       (store,XED_ICLASS_MOV)
   IMM64_STORE_OP (store,XED_ICLASS_MOV)
   REG_OP         (mov,  XED_ICLASS_MOV)
+  FULL_OP        (test, XED_ICLASS_TEST)
+#undef IMMPROP
 
+#define IMMPROP(size, allsizes, func) allsizes, func
   FULL_OP(add, XED_ICLASS_ADD)
   FULL_OP(xor, XED_ICLASS_XOR)
   FULL_OP(sub, XED_ICLASS_SUB)
   FULL_OP(and, XED_ICLASS_AND)
   FULL_OP(or,  XED_ICLASS_OR)
-  FULL_OP(test,XED_ICLASS_TEST)
   FULL_OP(cmp, XED_ICLASS_CMP)
   FULL_OP(sbb, XED_ICLASS_SBB)
+#undef IMMPROP
 
 #undef IMM64_OP
 #undef IMM64R_OP
@@ -1405,12 +1419,12 @@ public:
     };
     // While n >= 9, emit 9 byte NOPs
     while (n >= 9) {
-      xedInstr(XED_ICLASS_NOP9, 9);
+      xedInstr(XED_ICLASS_NOP9, 0);
       n -= 9;
     }
     // Emit remaining NOPs (if any)
     if(n) {
-      xedInstr(nops[n], n);
+      xedInstr(nops[n], 0);
     }
   }
 
@@ -1494,8 +1508,15 @@ private:
   ALWAYS_INLINE                                                     \
   void xedInstrIR(xed_iclass_enum_t instr, const Immed& i,          \
                   const Reg##bitsize& r,                            \
-                  int immSz = BITS_TO_SZ(bitsize)) {                \
-    xedEmit2(instr, XED_REG(r), XED_IMM(i, immSz), bitsize);        \
+                  int immSize = BITS_TO_SZ(bitsize)) {              \
+    xedEmit2(instr, XED_REG(r), XED_IMM(i, immSize), bitsize);      \
+  }                                                                 \
+  ALWAYS_INLINE                                                     \
+  void xedInstrIR(xed_iclass_enum_t instr, const Immed& i,          \
+                  const Reg##bitsize& r,                            \
+                  int immSize, immFitFunc fitFunc) {                \
+    xedEmit2(instr, XED_REG(r),                                     \
+             XED_IMM_RED(i, immSize, fitFunc), bitsize);            \
   }
 
 #define XED_WRAP_X XED_INSTIR_WRAPPER_IMPL
@@ -1602,6 +1623,13 @@ private:
   void xedInstrIM(xed_iclass_enum_t instr, const Immed& i, const MemoryRef& m,
                   int immSize, int memSize) {
       xedEmit2(instr,  XED_MEMREF(m, memSize), XED_IMM(i, immSize),
+               SZ_TO_BITS(memSize));
+  }
+
+  ALWAYS_INLINE
+  void xedInstrIM(xed_iclass_enum_t instr, const Immed& i, const MemoryRef& m,
+                  int immSize, immFitFunc fitFunc, int memSize) {
+      xedEmit2(instr, XED_MEMREF(m, memSize), XED_IMM_RED(i, immSize, fitFunc),
                SZ_TO_BITS(memSize));
   }
 

@@ -602,10 +602,10 @@ let do_enhanced_hover (conn: server_conn) (params: Hover.params) : Hover.result 
       (* Hack server uses both None and "_" to indicate absence of a result. *)
       (* We're also catching the non-result "" just in case...               *)
       match hoverInfo with
-      | { HoverService.info = ""; _ }
-      | { HoverService.info = "_"; _ } -> []
-      | { HoverService.info; doc_block = None } -> [MarkedCode ("hack", info)]
-      | { HoverService.info; doc_block = Some s } -> [MarkedCode ("hack", info); MarkedString s]
+      | { HoverService.snippet = ""; _ }
+      | { HoverService.snippet = "_"; _ } -> []
+      | { HoverService.snippet; addendum } ->
+        (MarkedCode ("hack", snippet)) :: (List.map ~f:(fun s -> MarkedString s) addendum)
     end
     |> List.concat
     |> List.remove_consecutive_duplicates ~equal:(=)

@@ -36,23 +36,22 @@ let type_at (file, line, char) tcopt files_info =
       ~default:infer_type_results1)
   | results -> results
 
-let make_hover_info env_and_ty (occurrence, _definition) =
+let make_hover_info env_and_ty (occurrence, def_opt) =
   let open SymbolOccurrence in
   let open Typing_defs in
-  begin match occurrence, env_and_ty with
-    | { name; _ }, None
-    | { type_ = Class; name; _ }, _ -> Some (Utils.strip_ns name)
-
-    | { type_ = Function; name; _ }, Some (env, (_, Tfun ft))
-    | { type_ = Method (_, name); _ }, Some (env, (_, Tfun ft))
-    | { type_ = Property (_, name); _ }, Some (env, (_, Tfun ft))
-    | { type_ = ClassConst (_, name); _ }, Some (env, (_, Tfun ft))
-    | { type_ = GConst; name; _ }, Some (env, (_, Tfun ft)) ->
-      Some (Typing_print.full_func_strip_ns env ft name)
-
-    | _, Some (env, ty) -> Some (Typing_print.full_strip_ns env ty)
-  end
-  |> Option.map ~f:(fun info -> { info = info; doc_block = None })
+  let snippet = match occurrence, env_and_ty with
+    | { name; _ }, None -> Utils.strip_ns name
+    | occurrence, Some (env, ty) -> Typing_print.full_with_identity env ty occurrence def_opt
+  in
+  let addendum = [
+    (match occurrence, env_and_ty with
+    | { type_ = Method _; _ }, Some (_, (_, Tfun _))
+    | { type_ = Property _; _ }, Some (_, (_, Tfun _))
+    | { type_ = ClassConst _; _ }, Some (_, (_, Tfun _)) ->
+      [Printf.sprintf "Full name: `%s`" (Utils.strip_ns occurrence.name)]
+    | _ -> []);
+  ] |> List.concat in
+  { snippet; addendum }
 
 let go env (file, line, char) =
   let position = (file, line, char) in
@@ -64,9 +63,9 @@ let go env (file, line, char) =
   match identities with
   | [] ->
     begin match env_and_ty with
-    | Some (env, ty) -> [{ info = Typing_print.full_strip_ns env ty; doc_block = None }]
+    | Some (env, ty) -> [{ snippet = Typing_print.full_strip_ns env ty; addendum = [] }]
     | None -> []
     end
   | identities ->
     identities
-    |> List.filter_map ~f:(make_hover_info env_and_ty)
+    |> List.map ~f:(make_hover_info env_and_ty)

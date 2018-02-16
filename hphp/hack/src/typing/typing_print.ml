@@ -257,7 +257,7 @@ end
 module Full = struct
   module Env = Typing_env
 
-  let format_env = Format_env.{default with line_width = 30}
+  let format_env = Format_env.{default with line_width = 60}
 
   let text_strip_ns s = Doc.text (Utils.strip_ns s)
 
@@ -579,20 +579,65 @@ module Full = struct
   let to_string_strip_ns env x =
     to_string text_strip_ns env x
 
-  let func_to_string_strip_ns env ft name =
-    let open Doc in
-    Concat [
-      text_strip_ns name;
-      fun_type text_strip_ns ISet.empty env ft;
-    ]
-    |> Libhackfmt.format_doc format_env
-    |> String.trim
-
   let to_string_decl tcopt (x: decl ty) =
     let env =
       Typing_env.empty tcopt Relative_path.default
         ~droot:None in
     to_string Doc.text env x
+
+  let to_string_with_identity env x occurrence definition_opt =
+    let open Doc in
+    let prefix =
+      let open SymbolDefinition in
+      let print_mod m = text_strip_ns (string_of_modifier m) in
+      match definition_opt with
+      | None -> Nothing
+      | Some def ->
+        begin match def.modifiers with
+        | [] -> Nothing
+        | [m] ->
+          (* It looks weird if we line break after a single modifier. *)
+          Concat [print_mod m; Space]
+        | ms ->
+          Concat [
+            list_sep text_strip_ns " " print_mod ms;
+            Space;
+            Split;
+          ]
+        end
+    in
+    let body =
+      let open SymbolOccurrence in
+      match occurrence with
+      | { type_ = Class; name; _ } -> Concat [text "class "; text_strip_ns name]
+
+      | { type_ = Function; name; _ }
+      | { type_ = Method (_, name); _ }
+      | { type_ = Property (_, name); _ }
+      | { type_ = ClassConst (_, name); _ }
+      | { type_ = GConst; name; _ } ->
+        (* Use short names for function types since they display a lot more
+           information to the user. *)
+        begin match x with
+        | (_, Tfun ft) ->
+          Concat [
+            text "function ";
+            text_strip_ns name;
+            fun_type text_strip_ns ISet.empty env ft;
+          ]
+        | _ ->
+          Concat [
+            ty text_strip_ns ISet.empty env x;
+            Space;
+            text_strip_ns (occurrence.name);
+          ]
+        end
+
+      | _ -> ty text_strip_ns ISet.empty env x
+    in
+    Concat [prefix; body]
+    |> Libhackfmt.format_doc format_env
+    |> String.trim
 
 end
 
@@ -965,7 +1010,7 @@ let suggest: type a. a ty -> _ =  fun ty -> Suggest.type_ ty
 let full env ty = Full.to_string Doc.text env ty
 let full_rec env n ty = Full.to_string_rec env n ty
 let full_strip_ns env ty = Full.to_string_strip_ns env ty
-let full_func_strip_ns env ft name = Full.func_to_string_strip_ns env ft name
+let full_with_identity = Full.to_string_with_identity
 let debug env ty =
   Full.debug_mode := true;
   let f_str = full_strip_ns env ty in

@@ -13,6 +13,103 @@ open HoverService
 
 module Test = Integration_test_base
 
+let builtins = "<?hh // strict
+class Awaitable<T> {}"
+
+let class_members = "<?hh // strict
+abstract class ClassMembers {
+  public async function genDoStuff(): Awaitable<void> {}
+
+  public string $public = 'public';
+  protected string $protected = 'protected';
+  private string $private = 'private';
+
+  public static string $staticVar = 'staticVar';
+
+  public abstract function abstractMethod(): string;
+
+  public final function finalMethod(string $arg): void {}
+
+  protected final static async function genLotsOfModifiers(): Awaitable<void> {}
+
+  public async function exerciseClassMembers(): Awaitable<void> {
+    await $this->genDoStuff();
+//               ^18:18
+    $this->public;
+//         ^20:12
+    $this->protected;
+//         ^22:12
+    $this->private;
+//         ^24:12
+    ClassMembers::$staticVar;
+//                ^26:19
+    $this->abstractMethod();
+//         ^28:12
+    $this->finalMethod(\"arg\");
+//         ^30:12
+    await ClassMembers::genLotsOfModifiers();
+//        ^32:11        ^32:25
+  }
+}"
+
+let class_members_cases = [
+  ("class_members.php", 18, 18), [
+    {
+      snippet = "public async function genDoStuff(): Awaitable<void>";
+      addendum = ["Full name: `ClassMembers::genDoStuff`"]
+    }
+  ];
+  ("class_members.php", 20, 12), [
+    {
+      snippet = "public string ClassMembers::public";
+      addendum = []
+    };
+  ];
+  ("class_members.php", 22, 12), [
+    {
+      snippet = "protected string ClassMembers::protected";
+      addendum = []
+    };
+  ];
+  ("class_members.php", 24, 12), [
+    {
+      snippet = "private string ClassMembers::private";
+      addendum = []
+    };
+  ];
+  ("class_members.php", 26, 19), [
+    {
+      snippet = "public static string ClassMembers::staticVar";
+      addendum = []
+    };
+  ];
+  ("class_members.php", 28, 12), [
+    {
+      snippet = "public abstract function abstractMethod(): string";
+      addendum = ["Full name: `ClassMembers::abstractMethod`"]
+    }
+  ];
+  ("class_members.php", 30, 12), [
+    {
+      snippet = "public final function finalMethod(string $arg): void";
+      addendum = ["Full name: `ClassMembers::finalMethod`"]
+    };
+  ];
+  ("class_members.php", 32, 11), [
+    {
+      snippet = "abstract class ClassMembers";
+      addendum = []
+    };
+  ];
+  ("class_members.php", 32, 25), [
+    {
+      snippet = "protected final static async\n\
+                 function genLotsOfModifiers(): Awaitable<void>";
+      addendum = ["Full name: `ClassMembers::genLotsOfModifiers`"]
+    };
+  ];
+]
+
 let classname_call = "<?hh // strict
 class ClassnameCall {
   static function foo(): int {
@@ -26,8 +123,14 @@ function call_foo(): void {
 }"
 
 let classname_call_cases = [
-  ("classname_call.php", 9, 4), [{ info = "ClassnameCall"; doc_block = None }];
-  ("classname_call.php", 9, 18), [{ info = "foo(): int"; doc_block = None }];
+  ("classname_call.php", 9, 4), [{
+      snippet = "class ClassnameCall";
+      addendum = []
+    }];
+  ("classname_call.php", 9, 18), [{
+      snippet = "static function foo(): int";
+      addendum = ["Full name: `ClassnameCall::foo`"]
+    }];
 ]
 
 let chained_calls = "<?hh // strict
@@ -47,7 +150,12 @@ function test(): void {
 }"
 
 let chained_calls_cases = [
-  ("chained_calls.php", 13, 8), [{ info = "foo(): ChainedCalls"; doc_block = None }];
+  ("chained_calls.php", 13, 8), [
+    {
+      snippet = "public function foo(): ChainedCalls";
+      addendum = ["Full name: `ChainedCalls::foo`"]
+    };
+  ];
 ]
 
 let multiple_potential_types = "<?hh // strict
@@ -60,10 +168,19 @@ function test_multiple_type(C1 $c1, C2 $c2, bool $cond): arraykey {
 }"
 
 let multiple_potential_types_cases = [
-  ("multiple_potential_types.php", 6, 11), [{ info = "(C1 | C2)"; doc_block = None }];
+  ("multiple_potential_types.php", 6, 11), [{
+      snippet = "(C1 | C2)";
+      addendum = []
+    }];
   ("multiple_potential_types.php", 6, 16), [
-    { info = "((function(): string) | (function(): int))"; doc_block = None };
-    { info = "((function(): string) | (function(): int))"; doc_block = None };
+    {
+      snippet = "((function(): string) | (function(): int))";
+      addendum = []
+    };
+    {
+      snippet = "((function(): string) | (function(): int))";
+      addendum = []
+    };
   ];
 ]
 
@@ -79,20 +196,29 @@ function test_classname(): void {
 }"
 
 let classname_variable_cases = [
-  ("classname_variable.php", 8, 4), [{ info="classname<ClassnameVariable>"; doc_block=None }];
+  ("classname_variable.php", 8, 4), [{
+      snippet = "classname<ClassnameVariable>";
+      addendum = []
+    }];
 
   (* TODO(wipi): make this return something useful. *)
-  ("classname_variable.php", 8, 10), [{ info="_"; doc_block=None }];
+  ("classname_variable.php", 8, 10), [{
+      snippet = "_";
+      addendum = []
+    }];
 ]
 
 let files = [
+  "builtins.php", builtins;
+  "class_members.php", class_members;
   "classname_call.php", classname_call;
   "chained_calls.php", chained_calls;
   "classname_variable.php", classname_variable;
 ]
 
 let cases =
-  classname_call_cases
+  class_members_cases
+  @ classname_call_cases
   @ chained_calls_cases
   @ classname_variable_cases
 

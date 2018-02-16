@@ -64,7 +64,7 @@ let default = {
   option_repo_authoritative = false;
   option_jit_enable_rename_function = false;
   option_can_inline_gen_functions = true;
-  option_use_msrv_for_inout = false;
+  option_use_msrv_for_inout = true;
   option_php7_int_semantics = false;
 }
 

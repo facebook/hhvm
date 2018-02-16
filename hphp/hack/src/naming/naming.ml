@@ -1599,10 +1599,11 @@ module Make (GetLocals : GetLocals) = struct
         check_constant_expr env e2
 
   and constant_expr env e =
-    Errors.try_with_error begin fun () ->
+    let valid_constant_expression = Errors.try_with_error begin fun () ->
       check_constant_expr env e;
-      expr env e
-    end (fun () -> fst e, N.Any)
+      true
+    end (fun () -> false) in
+    if valid_constant_expression then expr env e else fst e, N.Any
 
   and const_defl h env l = List.map l (const_def h env)
   and const_def h env (x, e) =

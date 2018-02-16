@@ -188,7 +188,7 @@ let make_genv options config local_config handle =
 let default_genv =
   { options          = ServerArgs.default_options "";
     config           = ServerConfig.default_config;
-    local_config     = ServerLocalConfig.default;
+    local_config     = ServerLocalConfig.({ default with incremental_errors = true});
     debug_port       = None;
     workers          = None;
     indexer          = (fun _ -> fun () -> []);

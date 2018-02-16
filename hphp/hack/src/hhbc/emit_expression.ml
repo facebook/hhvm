@@ -667,6 +667,34 @@ and emit_instanceof env e1 e2 =
 
 and emit_is env pos lhs h =
   match snd h with
+    | A.Happly ((_, id), [ty]) when id = "classname" ->
+      begin match lhs with
+        | IsExprExpr e -> emit_is_create_local env pos e h
+        | IsExprUnnamedLocal local ->
+          begin match ty with
+            | _, A.Happly ((_, id), _) ->
+              let true_label = Label.next_regular () in
+              let done_label = Label.next_regular () in
+              let skip_label = Label.next_regular () in
+              gather [
+                instr_istypel local OpStr;
+                instr_jmpz skip_label;
+                instr_cgetl local;
+                instr_string id;
+                instr_true;
+                instr_fcallbuiltin 3 3 "is_a";
+                instr_unboxr_nop;
+                instr_jmpnz true_label;
+                instr_label skip_label;
+                instr_false;
+                instr_jmp done_label;
+                instr_label true_label;
+                instr_true;
+                instr_label done_label;
+              ]
+            | _ -> emit_nyi "is expression: unsupported classname (T22779957)"
+          end
+      end
     | A.Happly ((_, id), _)
       when id = SN.Typehints.arraykey || id = SN.Typehints.num ->
       begin match lhs with

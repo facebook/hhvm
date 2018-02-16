@@ -1736,7 +1736,8 @@ let inout_argument_bad_expr pos =
 
 let illegal_destructor pos =
   add NastCheck.illegal_destructor pos (
-    "Cannot have a destructor unless it is marked with <<__OptionalDestruct>>"
+    "Destructors are not supported in Hack; use other patterns like " ^
+    "IDisposable/using or try/catch instead."
   )
 
 (*****************************************************************************)

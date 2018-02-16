@@ -85,7 +85,6 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
     command.extend(['--compare-hh-codegen'])
   elif use_hackc == True:
     command.extend(['--hackc', '--exclude-pattern', '=/debugger|ext_vsdebug/='])
-
   custom_unittest(
     name=target_name,
     command=command,

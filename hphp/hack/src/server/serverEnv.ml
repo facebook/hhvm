@@ -114,11 +114,24 @@ type env = {
      * or find all references) must be preceded by Full_check. *)
     needs_phase2_redecl : Relative_path.Set.t;
     needs_recheck : Relative_path.Set.t;
+    init_env : init_env;
     needs_full_check : bool;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;
     recent_recheck_loop_stats : recheck_loop_stats;
   }
+
+and init_env = {
+  init_start_t : float;
+  (* Whether a full check was ever completed since init. *)
+  needs_full_init : bool;
+  (* Additional data associated with init that we want to log when a first full
+   * check completes. *)
+  state_distance : int option;
+  approach_name : string;
+  init_error : string option;
+  init_type : string;
+}
 
 let file_filter f =
   (* Filter the relative path *)

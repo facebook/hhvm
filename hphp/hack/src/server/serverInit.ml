@@ -317,8 +317,8 @@ module ServerInitCommon = struct
 
 
   let type_check genv env fast t =
-    if ServerArgs.ai_mode genv.options = None
-    then begin
+    if ServerArgs.ai_mode genv.options <> None then env, t
+    else if is_check_mode genv.options then begin
       let count = Relative_path.Map.cardinal fast in
       let logstring = Printf.sprintf "Type-check %d files" count in
       Hh_logger.log "Begin %s" logstring;
@@ -331,7 +331,20 @@ module ServerInitCommon = struct
         errorl = Errors.merge errorl env.errorl;
       } in
       env, (Hh_logger.log_duration logstring t)
-    end else env, t
+    end else begin
+      let needs_recheck = Relative_path.Map.fold fast
+        ~init:Relative_path.Set.empty
+        ~f:(fun fn _ acc -> Relative_path.Set.add acc fn)
+      in
+      let env = { env with
+        needs_recheck = Relative_path.Set.union env.needs_recheck needs_recheck;
+        needs_full_check = true;
+        init_env = { env.init_env with
+          needs_full_init = true;
+        };
+      } in
+      env, t
+    end
 
   let get_dirty_fast old_fast fast dirty =
     Relative_path.Set.fold dirty ~f:begin fun fn acc ->

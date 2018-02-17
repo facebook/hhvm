@@ -18,6 +18,11 @@ let init _ _ _ _ _ _ _ _ _ _ _ = ()
 let init_monitor _ _ _ = ()
 let init_end ~state_distance:_ ~approach_name:_ ~init_error:_ _ _ = ()
 let starting_first_server _ = ()
+let init_lazy_end
+  ~informant_use_xdb:_
+  ~state_distance:_
+  ~approach_name:_
+  ~init_error:_ _ = ()
 let init_really_end
   ~informant_use_xdb:_
   ~state_distance:_

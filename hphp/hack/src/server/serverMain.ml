@@ -34,9 +34,9 @@ end = struct
     ServerIdle.init genv root;
     Hh_logger.log "Init id: %s" init_id;
     let env = HackEventLogger.with_id ~stage:`Init init_id init_fun in
-    Hh_logger.log "Server is READY";
+    Hh_logger.log "Server is partially ready";
     let t' = Unix.gettimeofday () in
-    Hh_logger.log "Took %f seconds to initialize." (t' -. t);
+    Hh_logger.log "Took %f seconds." (t' -. t);
     env
 end
 
@@ -100,6 +100,18 @@ module Program =
       end;
       to_recheck
   end
+
+let finalize_init genv init_env =
+  ServerUtils.print_hash_stats ();
+  Hh_logger.log "Server is READY";
+  let t' = Unix.gettimeofday () in
+  Hh_logger.log "Took %f seconds to initialize." (t' -. init_env.init_start_t);
+  HackEventLogger.init_really_end
+    ~informant_use_xdb:genv.local_config.ServerLocalConfig.informant_use_xdb
+    ~state_distance:init_env.state_distance
+    ~approach_name:init_env.approach_name
+    ~init_error:init_env.init_error
+    init_env.init_type
 
 let shutdown_persistent_client env client =
   ClientProvider.shutdown_client client;
@@ -196,6 +208,9 @@ let handle_connection genv env client is_from_existing_persistent_client =
 let recheck genv old_env check_kind =
   let new_env, to_recheck, total_rechecked =
     ServerTypeCheck.check genv old_env check_kind in
+  if old_env.init_env.needs_full_init &&
+      not new_env.init_env.needs_full_init then
+        finalize_init genv new_env.init_env;
   ServerStamp.touch_stamp_errors (Errors.get_error_list old_env.errorl)
                                  (Errors.get_error_list new_env.errorl);
   new_env, to_recheck, total_rechecked
@@ -329,11 +344,12 @@ let serve_one_iteration ~iteration_flag genv env client_provider =
     end else env
   end else env in
   let start_t = Unix.gettimeofday () in
-  HackEventLogger.with_id ~stage:`Recheck recheck_id @@ fun () ->
+  let stage = if env.init_env.needs_full_init then `Init else `Recheck in
+  HackEventLogger.with_id ~stage recheck_id @@ fun () ->
   let env = recheck_loop ~iteration_flag genv env client
     has_persistent_connection_request in
   let stats = env.recent_recheck_loop_stats in
-  if stats.rechecked_count > 0 then begin
+  if stats.total_rechecked_count > 0 then begin
     HackEventLogger.recheck_end start_t has_parsing_hook
       stats.rechecked_batches
       stats.rechecked_count
@@ -397,8 +413,24 @@ let serve_one_iteration ~iteration_flag genv env client_provider =
       env, next_iteration_flag)
   else env, next_iteration_flag
 
+let initial_check genv env =
+  let start_t = Unix.gettimeofday () in
+  let recheck_id = new_serve_iteration_id () in
+  HackEventLogger.with_id ~stage:`Init recheck_id @@ fun () ->
+    let env, rechecked, total_rechecked =
+      recheck genv env ServerTypeCheck.Full_check in
+    if total_rechecked > 0 then begin
+      HackEventLogger.recheck_end start_t
+        false (* has parsing hook *)
+        1 (* number of batches *)
+        rechecked total_rechecked;
+      Hh_logger.log "Recheck id: %s" recheck_id
+    end;
+    env
+
 let serve genv env in_fd _ =
   let client_provider = ClientProvider.provider_from_file_descriptor in_fd in
+  let env = initial_check genv env in
   let env = ref env in
   let flag = ref None in
   while true do
@@ -447,6 +479,14 @@ let program_init genv =
         | ServerInit.Mini_load_failed err -> env, "mini_load_failed", Some err, None
       end
   in
+  let env = { env with
+    init_env = { env.init_env with
+      state_distance;
+      approach_name;
+      init_error;
+      init_type;
+    }
+  } in
   let timeout = genv.local_config.ServerLocalConfig.load_mini_script_timeout in
   EventLogger.set_init_type init_type;
   HackEventLogger.init_end ~state_distance ~approach_name ~init_error init_type timeout;
@@ -454,7 +494,7 @@ let program_init genv =
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();
   let informant_use_xdb = genv.local_config.ServerLocalConfig.informant_use_xdb in
-  HackEventLogger.init_really_end ~informant_use_xdb ~state_distance ~approach_name
+  HackEventLogger.init_lazy_end ~informant_use_xdb ~state_distance ~approach_name
     ~init_error init_type;
   env
 

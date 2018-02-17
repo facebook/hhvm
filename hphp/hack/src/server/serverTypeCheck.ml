@@ -484,6 +484,9 @@ module FullCheckKind : CheckKindType = struct
       needs_phase2_redecl = Relative_path.Set.empty;
       needs_recheck = Relative_path.Set.empty;
       needs_full_check = false;
+      init_env = { old_env.init_env with
+        needs_full_init = false;
+      };
       diag_subscribe;
       recent_recheck_loop_stats = old_env.recent_recheck_loop_stats;
     }

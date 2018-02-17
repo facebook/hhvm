@@ -13,8 +13,7 @@ open ServerCommandTypes
 
 module TLazyHeap = Typing_lazy_heap
 
-exception Nonfatal_rpc_exception of
-  exn * string * ServerEnv.env * ServerEnv.recheck_iteration_flag option
+exception Nonfatal_rpc_exception of exn * string * ServerEnv.env
 
 
 (* Some client commands require full check to be run in order to update global
@@ -136,8 +135,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
   match cmd with
   | LIST_FILES ->
       ServerEnv.list_files env oc;
-      ServerUtils.shutdown_client (ic, oc);
-      false
+      ServerUtils.shutdown_client (ic, oc)
   | LIST_MODES ->
       Relative_path.Map.iter env.ServerEnv.files_info begin fun fn fileinfo ->
         match Relative_path.prefix fn with
@@ -151,8 +149,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
         | _ -> ()
       end;
       flush oc;
-      ServerUtils.shutdown_client (ic, oc);
-      false
+      ServerUtils.shutdown_client (ic, oc)
   | SHOW name ->
       output_string oc "starting\n";
       SharedMem.invalidate_caches();
@@ -218,40 +215,16 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           output_string oc (td_str^"\n")
       );
       flush oc;
-      ServerUtils.shutdown_client (ic, oc);
-      false
+      ServerUtils.shutdown_client (ic, oc)
   | BUILD build_opts ->
-      let build_hook = BuildMain.go build_opts genv env oc in
-      (match build_hook with
-      | None -> ServerUtils.shutdown_client (ic, oc)
-      | Some build_hook -> begin
-        ServerTypeCheck.hook_after_parsing :=
-          Some (fun genv env ->
-            (* subtle: an exception there (such as writing on a closed pipe)
-             * will not be caught by handle_connection() because
-             * we have already returned from handle_connection(), hence
-             * this additional try.
-             *)
-            (try
-              with_context
-                ~enter:(fun () -> ())
-                ~exit:(fun () -> ServerUtils.shutdown_client (ic, oc))
-                ~do_:(fun () -> build_hook genv env);
-            with exn ->
-              let msg = Printexc.to_string exn in
-              Printf.printf "Exn in build_hook: %s" msg;
-              EventLogger.master_exception exn;
-            );
-            ServerTypeCheck.hook_after_parsing := None
-          )
-      end);
-    true
+      BuildMain.go build_opts genv env oc;
+      ServerUtils.shutdown_client (ic, oc)
 
 let handle
     (genv: ServerEnv.genv)
     (env: ServerEnv.env)
     (client: ClientProvider.client)
-  : (ServerEnv.env * ServerEnv.recheck_iteration_flag option) =
+  : ServerEnv.env =
   let msg = ClientProvider.read_client_msg client in
   let d_event = Debug_event.HandleServerCommand msg in
   let _ = Debug_port.write_opt d_event genv.ServerEnv.debug_port in
@@ -270,18 +243,18 @@ let handle
           not @@ (ClientProvider.is_persistent client)
         then ClientProvider.shutdown_client client;
       if ServerCommandTypes.is_kill_rpc cmd then ServerUtils.die_nicely ();
-      new_env, None
+      new_env
     with e ->
       let stack = Printexc.get_backtrace () in
       if ServerCommandTypes.is_critical_rpc cmd then raise e
-      else raise (Nonfatal_rpc_exception (e, stack, env, None))
+      else raise (Nonfatal_rpc_exception (e, stack, env))
     end
   | Stream cmd ->
       let ic, oc = ClientProvider.get_channels client in
-      let needs_flush = stream_response genv env (ic, oc) ~cmd in
-      env, if needs_flush then Some ServerEnv.Force_flush else None
+      stream_response genv env (ic, oc) ~cmd;
+      env
   | Debug ->
       let ic, oc = ClientProvider.get_channels client in
       genv.ServerEnv.debug_channels <- Some (ic, oc);
       ServerDebug.say_hello genv;
-      env, None
+      env

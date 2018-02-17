@@ -22,8 +22,7 @@ val save_state: ServerArgs.options -> SharedMem.handle -> 'a
 val initial_check: ServerEnv.genv -> ServerEnv.env -> ServerEnv.env
 
 val serve_one_iteration:
-  iteration_flag:ServerEnv.recheck_iteration_flag option ->
   ServerEnv.genv ->
   ServerEnv.env ->
   ClientProvider.t ->
-  ServerEnv.env * ServerEnv.recheck_iteration_flag option
+  ServerEnv.env

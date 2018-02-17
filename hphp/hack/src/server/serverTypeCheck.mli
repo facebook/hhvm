@@ -21,9 +21,6 @@ val type_check: ServerEnv.genv -> ServerEnv.env -> check_kind ->
 val check: ServerEnv.genv -> ServerEnv.env -> check_kind ->
   ServerEnv.env * int * int
 
-val hook_after_parsing: (ServerEnv.genv ->
-    (* new *) ServerEnv.env -> unit) option ref
-
 (****************************************************************************)
 (* Debugging: Declared here to stop ocamlc yelling at us for unused defs *)
 (****************************************************************************)

@@ -347,12 +347,6 @@ let union_set_and_map_keys set map =
     ~f:(fun k _ acc  -> Relative_path.Set.add acc k)
 
 (*****************************************************************************)
-(* Function called after parsing, does nothing by default. *)
-(*****************************************************************************)
-
-let hook_after_parsing = ref None
-
-(*****************************************************************************)
 (* Where the action is! *)
 (*****************************************************************************)
 
@@ -660,13 +654,6 @@ end = functor(CheckKind:CheckKindType) -> struct
     let files_info = update_file_info env fast_parsed in
     HackEventLogger.updating_deps_end t;
     let t = Hh_logger.log_duration logstring t in
-
-    (* BUILDING AUTOLOADMAP *)
-    Option.iter !hook_after_parsing begin fun f ->
-      f genv { env with files_info }
-    end;
-    HackEventLogger.parsing_hook_end t;
-    let t = Hh_logger.log_duration "Parsing Hook" t in
 
     (* NAMING *)
     let logstring = "Naming" in

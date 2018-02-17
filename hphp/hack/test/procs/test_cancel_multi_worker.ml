@@ -23,7 +23,7 @@ let do_work (acc : int) (jobs : int list) : int  =
    * job (with high probability) *)
   if (Random.int 100) = 0 then Unix.sleep 1;
   List.fold_left jobs ~init:acc ~f:begin fun acc job ->
-    TestHeap.add (string_of_int job) job;
+  TestHeap.add (string_of_int job) job;
     sum acc job
   end
 
@@ -55,6 +55,26 @@ let interrupt_handler fds =
   with Not_found -> () end;
   true
 
+let rec run_until_done fd_in workers (acc, iterations) = function
+| [] -> (acc, iterations)
+| work ->
+  Hh_logger.log "Left: %d" (List.length work);
+  let result, unfinished =
+    MultiWorker.call_with_interrupt (Some workers)
+      ~job:do_work
+      ~merge:sum
+      ~neutral:0
+      ~next:(Bucket.make ~num_workers:num_workers ~max_size:10 work)
+      ~interrupt_fds:[fd_in]
+      ~interrupt_handler
+  in
+  let unfinished = List.concat unfinished in
+  run_until_done fd_in workers (sum acc result, iterations + 1) unfinished
+
+let rec sum_memory acc = function
+| [] -> acc
+| x::xs -> sum_memory (acc + (TestHeap.find_unsafe (string_of_int x))) xs
+
 let multi_worker_cancel workers () =
   let work = make_work () in
   let fd_in, fd_out = Unix.pipe () in
@@ -64,27 +84,21 @@ let multi_worker_cancel workers () =
   in
   Unix.close fd_out;
   let t = Unix.gettimeofday () in
-  let result =
-    MultiWorker.call_with_interrupt (Some workers)
-      ~job:do_work
-      ~merge:sum
-      ~neutral:0
-      ~next:(Bucket.make ~num_workers:num_workers ~max_size:10 work)
-      ~interrupt_fds:[fd_in]
-      ~interrupt_handler
-  in
+  let result, iterations = run_until_done fd_in workers (0, 0) work in
   let duration = Unix.gettimeofday () -. t in
+  let memory_result = sum_memory 0 work in
 
   Unix.close fd_in;
   ignore @@ Unix.waitpid [] interrupter_pid;
 
   let expected = num_jobs*(num_jobs+1)/2 in (* behold... MATH! *)
 
-  Printf.printf "Result: %d in %f\n" result duration;
-  (* Check that at least some workers have finished *)
-  assert (result > 1);
-  (* ... but not all of them *)
-  assert (result < expected);
+  Printf.printf "Result: %d, memory result: %d in %f\n"
+    memory_result result duration;
+
+  (* Check that at least some cancellations have happened *)
+  assert (iterations > 1);
+  assert (result = expected && memory_result = expected);
   true
 
 let tests =[

@@ -15,27 +15,33 @@
 */
 #include "hphp/runtime/base/unit-cache.h"
 
-#include <cstdlib>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <memory>
 #include <string>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <cstdlib>
 #include <thread>
 
 #include <folly/ScopeGuard.h>
 #include <folly/portability/Fcntl.h>
 
-#include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/rank.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/process.h"
+#include "hphp/util/struct-log.h"
+#include "hphp/util/timer.h"
+#include "hphp/runtime/base/system-profiler.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
-#include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/system-profiler.h"
-#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -43,12 +49,6 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
-#include "hphp/util/assertions.h"
-#include "hphp/util/mutex.h"
-#include "hphp/util/process.h"
-#include "hphp/util/rank.h"
-#include "hphp/util/struct-log.h"
-#include "hphp/util/timer.h"
 
 #ifdef __APPLE__
 #define st_mtim st_mtimespec
@@ -67,8 +67,10 @@ using OptLog = folly::Optional<StructuredLogEntry>;
 
 struct LogTimer {
   LogTimer(const char* name, OptLog& ent)
-      : m_name(name), m_ent(ent),
-        m_start(m_ent ? Timer::GetThreadCPUTimeNanos() : -1) {}
+    : m_name(name)
+    , m_ent(ent)
+    , m_start(m_ent ? Timer::GetThreadCPUTimeNanos() : -1)
+  {}
   ~LogTimer() { stop(); }
 
   void stop() {
@@ -79,7 +81,7 @@ struct LogTimer {
     m_start = -1;
   }
 
-  private:
+private:
   const char* m_name;
   OptLog& m_ent;
   int64_t m_start;
@@ -88,10 +90,12 @@ struct LogTimer {
 struct CachedUnit {
   CachedUnit() = default;
   explicit CachedUnit(Unit* unit, size_t rdsBitId)
-      : unit(unit), rdsBitId(rdsBitId) {}
+    : unit(unit)
+    , rdsBitId(rdsBitId)
+  {}
 
-  Unit* unit{ nullptr };  // null if there is no Unit for this path
-  size_t rdsBitId{ -1u }; // id of the RDS bit for whether the Unit is included
+  Unit* unit{nullptr};  // null if there is no Unit for this path
+  size_t rdsBitId{-1u}; // id of the RDS bit for whether the Unit is included
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -105,16 +109,21 @@ struct CachedUnit {
  * they don't need to be littered with RepoAuthoritative checks.
  */
 
-using RepoUnitCache =
-  RankedCHM<const StringData*, // must be static
-            CachedUnit, StringDataHashCompare, RankUnitCache>;
+using RepoUnitCache = RankedCHM<
+  const StringData*,     // must be static
+  CachedUnit,
+  StringDataHashCompare,
+  RankUnitCache
+>;
 RepoUnitCache s_repoUnitCache;
 
 CachedUnit lookupUnitRepoAuth(const StringData* path) {
   path = makeStaticString(path);
 
   RepoUnitCache::accessor acc;
-  if (!s_repoUnitCache.insert(acc, path)) { return acc->second; }
+  if (!s_repoUnitCache.insert(acc, path)) {
+    return acc->second;
+  }
 
   try {
     /*
@@ -126,13 +135,16 @@ CachedUnit lookupUnitRepoAuth(const StringData* path) {
      * this.
      */
     MD5 md5;
-    if (Repo::get().findFile(path->data(), RuntimeOption::SourceRoot, md5) ==
-        RepoStatus::error) {
+    if (Repo::get().findFile(path->data(),
+                             RuntimeOption::SourceRoot,
+                             md5) == RepoStatus::error) {
       return acc->second;
     }
 
     acc->second.unit = Repo::get().loadUnit(path->data(), md5).release();
-    if (acc->second.unit) { acc->second.rdsBitId = rds::allocBit(); }
+    if (acc->second.unit) {
+      acc->second.rdsBitId = rds::allocBit();
+    }
   } catch (...) {
     s_repoUnitCache.erase(acc);
     throw;
@@ -169,9 +181,12 @@ struct CachedUnitNonRepo {
   dev_t devId;
 };
 
-using NonRepoUnitCache =
-  RankedCHM<const StringData*, // must be static
-            CachedUnitNonRepo, StringDataHashCompare, RankUnitCache>;
+using NonRepoUnitCache = RankedCHM<
+  const StringData*,     // must be static
+  CachedUnitNonRepo,
+  StringDataHashCompare,
+  RankUnitCache
+>;
 NonRepoUnitCache s_nonRepoUnitCache;
 
 // When running in remote unix server mode with UnixServerQuarantineUnits set,
@@ -183,7 +198,8 @@ using PerUserCache = folly::AtomicHashMap<uid_t, NonRepoUnitCache*>;
 PerUserCache s_perUserUnitCaches(10);
 
 #ifndef _MSC_VER
-int64_t timespecCompare(const struct timespec& l, const struct timespec& r) {
+int64_t timespecCompare(const struct timespec& l,
+                        const struct timespec& r) {
   if (l.tv_sec != r.tv_sec) return l.tv_sec - r.tv_sec;
   return l.tv_nsec - r.tv_nsec;
 }
@@ -202,18 +218,21 @@ bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
   // case someone created the file).  This case should only happen if something
   // successfully stat'd the file, but then it was gone by the time we tried to
   // open() it.
-  return !cu.cachedUnit || cu.cachedUnit->cu.unit == nullptr ||
+  return !cu.cachedUnit ||
+         cu.cachedUnit->cu.unit == nullptr ||
 #ifdef _MSC_VER
          cu.mtime - s.st_mtime < 0 ||
 #else
          timespecCompare(cu.mtime, s.st_mtim) < 0 ||
          timespecCompare(cu.ctime, s.st_ctim) < 0 ||
 #endif
-         cu.ino != s.st_ino || cu.devId != s.st_dev || stressUnitCache();
+         cu.ino != s.st_ino ||
+         cu.devId != s.st_dev ||
+         stressUnitCache();
 }
 
-folly::Optional<String>
-readFileAsString(Stream::Wrapper* w, const StringData* path) {
+folly::Optional<String> readFileAsString(Stream::Wrapper* w,
+                                         const StringData* path) {
   if (w) {
     if (const auto f = w->open(StrNR(path), "r", 0, nullptr)) {
       return f->read();
@@ -226,17 +245,19 @@ readFileAsString(Stream::Wrapper* w, const StringData* path) {
   return file->read();
 }
 
-CachedUnit createUnitFromString(const char* path, const String& contents,
-                                Unit** releaseUnit, OptLog& ent) {
-  auto const md5 = MD5{ mangleUnitMd5(string_md5(contents.slice())) };
+CachedUnit createUnitFromString(const char* path,
+                                const String& contents,
+                                Unit** releaseUnit,
+                                OptLog& ent) {
+  auto const md5 = MD5{mangleUnitMd5(string_md5(contents.slice()))};
   // Try the repo; if it's not already there, invoke the compiler.
   if (auto unit = Repo::get().loadUnit(path, md5)) {
-    return CachedUnit{ unit.release(), rds::allocBit() };
+    return CachedUnit { unit.release(), rds::allocBit() };
   }
   LogTimer compileTimer("compile_ms", ent);
-  auto const unit =
-    compile_file(contents.data(), contents.size(), md5, path, releaseUnit);
-  return CachedUnit{ unit, rds::allocBit() };
+  auto const unit = compile_file(contents.data(), contents.size(), md5, path,
+                                 releaseUnit);
+  return CachedUnit { unit, rds::allocBit() };
 }
 
 CachedUnit createUnitFromUrl(const StringData* const requestedPath) {
@@ -250,25 +271,26 @@ CachedUnit createUnitFromUrl(const StringData* const requestedPath) {
   return createUnitFromString(requestedPath->data(), sb.detach(), nullptr, ent);
 }
 
-CachedUnit createUnitFromFile(const StringData* const path, Unit** releaseUnit,
-                              Stream::Wrapper* w, OptLog& ent) {
+CachedUnit createUnitFromFile(const StringData* const path,
+                              Unit** releaseUnit, Stream::Wrapper* w,
+                              OptLog& ent) {
   auto const contents = readFileAsString(w, path);
   return contents
-           ? createUnitFromString(path->data(), *contents, releaseUnit, ent)
-           : CachedUnit{};
+    ? createUnitFromString(path->data(), *contents, releaseUnit, ent)
+    : CachedUnit{};
 }
 
 // When running via the CLI server special access checks may need to be
 // performed, and in the event that the server is unable to load the file an
 // alternative per client cache may be used.
-NonRepoUnitCache&
-getNonRepoCache(const StringData* rpath, Stream::Wrapper*& w) {
+NonRepoUnitCache& getNonRepoCache(const StringData* rpath,
+                                  Stream::Wrapper*& w) {
   if (auto uc = get_cli_ucred()) {
     if (!(w = Stream::getWrapperFromURI(StrNR(rpath)))) {
       return s_nonRepoUnitCache;
     }
 
-    auto unit_check_quarantine = [&]() -> NonRepoUnitCache& {
+    auto unit_check_quarantine = [&] () -> NonRepoUnitCache& {
       if (!RuntimeOption::EvalUnixServerQuarantineUnits) {
         return s_nonRepoUnitCache;
       }
@@ -284,7 +306,9 @@ getNonRepoCache(const StringData* rpath, Stream::Wrapper*& w) {
     // client. When UnixServerQuarantineUnits is set store units opened by
     // clients in per UID caches which are never accessible by server web
     // requests.
-    if (access(rpath->data(), R_OK) == -1) { return unit_check_quarantine(); }
+    if (access(rpath->data(), R_OK) == -1) {
+      return unit_check_quarantine();
+    }
 
     // When UnixServerVerifyExeAccess is set clients may not execute units if
     // they cannot read them, even when the server has access. To verify that
@@ -294,9 +318,11 @@ getNonRepoCache(const StringData* rpath, Stream::Wrapper*& w) {
     if (RuntimeOption::EvalUnixServerVerifyExeAccess) {
       struct stat local, remote;
       auto remoteFile = w->open(StrNR(rpath), "r", 0, nullptr);
-      if (!remoteFile || fcntl(remoteFile->fd(), F_GETFL) != O_RDONLY ||
+      if (!remoteFile ||
+          fcntl(remoteFile->fd(), F_GETFL) != O_RDONLY ||
           fstat(remoteFile->fd(), &remote) != 0 ||
-          stat(rpath->data(), &local) != 0 || remote.st_dev != local.st_dev ||
+          stat(rpath->data(), &local) != 0 ||
+          remote.st_dev != local.st_dev ||
           remote.st_ino != local.st_ino) {
         return unit_check_quarantine();
       }
@@ -310,7 +336,8 @@ getNonRepoCache(const StringData* rpath, Stream::Wrapper*& w) {
 }
 
 CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
-                               const struct stat& statInfo, OptLog& ent) {
+                               const struct stat& statInfo,
+                               OptLog& ent) {
   LogTimer loadTime("load_ms", ent);
   if (strstr(requestedPath->data(), "://") != nullptr) {
     // URL-based units are not currently cached in memory, but the Repo still
@@ -320,15 +347,17 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
 
   // The string we're using as a key must be static, because we're using it as
   // a key in the cache (across requests).
-  auto const path = makeStaticString(
-    // XXX: it seems weird we have to do this even though we already ran
-    // resolveVmInclude.
-    (FileUtil::isAbsolutePath(requestedPath->toCppString())
-       ? String{ requestedPath }
-       : String(SourceRootInfo::GetCurrentSourceRoot()) + StrNR(requestedPath))
-      .get());
+  auto const path =
+    makeStaticString(
+      // XXX: it seems weird we have to do this even though we already ran
+      // resolveVmInclude.
+      (FileUtil::isAbsolutePath(requestedPath->toCppString())
+       ?  String{requestedPath}
+        : String(SourceRootInfo::GetCurrentSourceRoot()) + StrNR(requestedPath)
+      ).get()
+    );
 
-  auto const rpath = [&]() -> const StringData* {
+  auto const rpath = [&] () -> const StringData* {
     if (RuntimeOption::CheckSymLink) {
       std::string rp = StatCache::realpath(path->data());
       if (rp.size() != 0) {
@@ -344,18 +373,18 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
   Stream::Wrapper* w = nullptr;
   auto& cache = getNonRepoCache(rpath, w);
 
-  assert(!w || &cache != &s_nonRepoUnitCache ||
-         !RuntimeOption::EvalUnixServerQuarantineUnits);
+  assert(
+    !w || &cache != &s_nonRepoUnitCache ||
+    !RuntimeOption::EvalUnixServerQuarantineUnits
+  );
 
   // Freeing a unit while holding the tbb lock would cause a rank violation when
   // recycle-tc is enabled as reclaiming dead functions requires that the code
   // and metadata locks be acquired.
   Unit* releaseUnit = nullptr;
-  SCOPE_EXIT {
-    if (releaseUnit) delete releaseUnit;
-  };
+  SCOPE_EXIT { if (releaseUnit) delete releaseUnit; };
 
-  auto const cuptr = [&]() -> std::shared_ptr<CachedUnitWithFree> {
+  auto const cuptr = [&] () -> std::shared_ptr<CachedUnitWithFree> {
     NonRepoUnitCache::accessor rpathAcc;
 
     if (!cache.insert(rpathAcc, rpath)) {
@@ -381,13 +410,13 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     auto const cu = createUnitFromFile(rpath, &releaseUnit, w, ent);
     rpathAcc->second.cachedUnit = std::make_shared<CachedUnitWithFree>(cu);
 #ifdef _MSC_VER
-    rpathAcc->second.mtime = statInfo.st_mtime;
+    rpathAcc->second.mtime      = statInfo.st_mtime;
 #else
-    rpathAcc->second.mtime = statInfo.st_mtim;
-    rpathAcc->second.ctime = statInfo.st_ctim;
+    rpathAcc->second.mtime      = statInfo.st_mtim;
+    rpathAcc->second.ctime      = statInfo.st_ctim;
 #endif
-    rpathAcc->second.ino = statInfo.st_ino;
-    rpathAcc->second.devId = statInfo.st_dev;
+    rpathAcc->second.ino        = statInfo.st_ino;
+    rpathAcc->second.devId      = statInfo.st_dev;
 
     return rpathAcc->second.cachedUnit;
   }();
@@ -397,20 +426,21 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     cache.insert(pathAcc, path);
     pathAcc->second.cachedUnit = cuptr;
 #ifdef _MSC_VER
-    pathAcc->second.mtime = statInfo.st_mtime;
+    pathAcc->second.mtime      = statInfo.st_mtime;
 #else
-    pathAcc->second.mtime = statInfo.st_mtim;
-    pathAcc->second.ctime = statInfo.st_ctim;
+    pathAcc->second.mtime      = statInfo.st_mtim;
+    pathAcc->second.ctime      = statInfo.st_ctim;
 #endif
-    pathAcc->second.ino = statInfo.st_ino;
-    pathAcc->second.devId = statInfo.st_dev;
+    pathAcc->second.ino        = statInfo.st_ino;
+    pathAcc->second.devId      = statInfo.st_dev;
   }
 
   return cuptr->cu;
 }
 
 CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
-                                 const struct stat& statInfo, OptLog& ent) {
+                                 const struct stat& statInfo,
+                                 OptLog& ent) {
   // Steady state, its probably already in the cache. Try that first
   {
     NonRepoUnitCache::const_accessor acc;
@@ -475,17 +505,19 @@ bool findFileWrapper(const String& file, void* ctx) {
 
   if (!w) return false;
 
-  auto passW = RuntimeOption::RepoAuthoritative ||
-                   dynamic_cast<FileStreamWrapper*>(w) ||
-                   !w->isNormalFileStream()
-                 ? nullptr
-                 : w;
+  auto passW =
+    RuntimeOption::RepoAuthoritative ||
+    dynamic_cast<FileStreamWrapper*>(w) ||
+    !w->isNormalFileStream()
+      ? nullptr
+      : w;
 
   // TranslatePath() will canonicalize the path and also check
   // whether the file is in an allowed directory.
   String translatedPath = File::TranslatePathKeepRelative(file);
   if (!FileUtil::isAbsolutePath(file.toCppString())) {
-    if (findFile(translatedPath.get(), context->s, context->allow_dir, passW)) {
+    if (findFile(translatedPath.get(), context->s, context->allow_dir,
+                 passW)) {
       context->path = translatedPath;
       return true;
     }
@@ -513,8 +545,13 @@ bool findFileWrapper(const String& file, void* ctx) {
   return false;
 }
 
-void logLoad(StructuredLogEntry& ent, StringData* path, const char* cwd,
-             String rpath, const CachedUnit& cu) {
+void logLoad(
+  StructuredLogEntry& ent,
+  StringData* path,
+  const char* cwd,
+  String rpath,
+  const CachedUnit& cu
+) {
   ent.setStr("include_path", path->data());
   ent.setStr("current_dir", cwd);
   ent.setStr("resolved_path", rpath.data());
@@ -545,10 +582,10 @@ void logLoad(StructuredLogEntry& ent, StringData* path, const char* cwd,
   }
 
   switch (requestKind) {
-    case RequestKind::Warmup: ent.setStr("request_kind", "warmup"); break;
-    case RequestKind::Profile: ent.setStr("request_kind", "profile"); break;
-    case RequestKind::Standard: ent.setStr("request_kind", "standard"); break;
-    case RequestKind::NonVM: ent.setStr("request_kind", "nonVM"); break;
+  case RequestKind::Warmup: ent.setStr("request_kind", "warmup"); break;
+  case RequestKind::Profile: ent.setStr("request_kind", "profile"); break;
+  case RequestKind::Standard: ent.setStr("request_kind", "standard"); break;
+  case RequestKind::NonVM: ent.setStr("request_kind", "nonVM"); break;
   }
   ent.setInt("request_count", requestCount());
 
@@ -557,23 +594,26 @@ void logLoad(StructuredLogEntry& ent, StringData* path, const char* cwd,
 
 //////////////////////////////////////////////////////////////////////
 
-CachedUnit
-checkoutFile(StringData* path, const struct stat& statInfo, OptLog& ent) {
+CachedUnit checkoutFile(
+  StringData* path,
+  const struct stat& statInfo,
+  OptLog& ent
+) {
   return RuntimeOption::RepoAuthoritative
-           ? lookupUnitRepoAuth(path)
-           : lookupUnitNonRepoAuth(path, statInfo, ent);
+    ? lookupUnitRepoAuth(path)
+    : lookupUnitNonRepoAuth(path, statInfo, ent);
 }
 
 const std::string mangleUnitPHP7Options() {
   // As the list of options increases, we may want to do something smarter here?
   std::string s;
   s += (RuntimeOption::PHP7_IntSemantics ? '1' : '0') +
-       (RuntimeOption::PHP7_LTR_assign ? '1' : '0') +
-       (RuntimeOption::PHP7_NoHexNumerics ? '1' : '0') +
-       (RuntimeOption::PHP7_Builtins ? '1' : '0') +
-       (RuntimeOption::PHP7_ScalarTypes ? '1' : '0') +
-       (RuntimeOption::PHP7_Substr ? '1' : '0') +
-       (RuntimeOption::PHP7_UVS ? '1' : '0');
+      (RuntimeOption::PHP7_LTR_assign ? '1' : '0') +
+      (RuntimeOption::PHP7_NoHexNumerics ? '1' : '0') +
+      (RuntimeOption::PHP7_Builtins ? '1' : '0') +
+      (RuntimeOption::PHP7_ScalarTypes ? '1' : '0') +
+      (RuntimeOption::PHP7_Substr ? '1' : '0') +
+      (RuntimeOption::PHP7_UVS ? '1' : '0');
   return s;
 }
 
@@ -589,61 +629,68 @@ const std::string mangleAliasedNamespaces() {
 
 const std::string mangleExternCompilerVersions() {
   std::string s;
-  if (HackcMode::kNever != hackc_mode()) { s += hackc_version(); }
+  if (HackcMode::kNever != hackc_mode()) {
+    s += hackc_version();
+  }
   return s;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-} // namespace
+} // end empty namespace
 
 //////////////////////////////////////////////////////////////////////
 
 std::string mangleUnitMd5(const std::string& fileMd5) {
-  std::string t =
-    fileMd5 + '\0' + (RuntimeOption::AssertEmitted ? '1' : '0') +
-    (RuntimeOption::AutoprimeGenerators ? '1' : '0') +
-    (RuntimeOption::EnableHipHopExperimentalSyntax ? '1' : '0') +
-    (RuntimeOption::EnableHipHopSyntax ? '1' : '0') +
-    (RuntimeOption::EnableXHP ? '1' : '0') +
-    (RuntimeOption::EvalAllowHhas ? '1' : '0') +
-    (RuntimeOption::EvalEmitSwitch ? '1' : '0') +
-    (RuntimeOption::EvalEnableCallBuiltin ? '1' : '0') +
-    (RuntimeOption::EvalHackArrCompatNotices ? '1' : '0') +
-    (RuntimeOption::EvalHackArrCompatIsArrayNotices ? '1' : '0') +
-    (RuntimeOption::EvalHackArrCompatPromoteNotices ? '1' : '0') +
-    (RuntimeOption::EvalHackArrCompatTypeHintNotices ? '1' : '0') +
-    (RuntimeOption::EvalHackArrCompatDVCmpNotices ? '1' : '0') +
-    (RuntimeOption::EvalHackCompilerFallback ? '1' : '0') +
-    (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0') +
-    (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0') +
-    (RuntimeOption::IntsOverflowToInts ? '1' : '0') +
-    (RuntimeOption::EvalReffinessInvariance ? '1' : '0') +
-    (RuntimeOption::EvalCreateInOutWrapperFunctions ? '1' : '0') +
-    (RuntimeOption::EvalNoticeOnAllDynamicCalls ? '1' : '0') +
-    (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls ? '1' : '0') +
-    (RuntimeOption::EvalHackArrDVArrs ? '1' : '0') +
-    (RuntimeOption::EvalDisableHphpcOpts ? '1' : '0') +
-    (RuntimeOption::EvalUseMSRVForInOut ? '1' : '0') +
-    (RuntimeOption::EvalAllowObjectDestructors ? '1' : '0') +
-    (RuntimeOption::EvalUseExternCompilerForSystemLib ? '1' : '0') +
-    RuntimeOption::EvalHackCompilerCommand + '\0' + mangleUnitPHP7Options() +
-    mangleAliasedNamespaces() + mangleExternCompilerVersions();
+  std::string t = fileMd5 + '\0'
+    + (RuntimeOption::AssertEmitted ? '1' : '0')
+    + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
+    + (RuntimeOption::EnableHipHopExperimentalSyntax ? '1' : '0')
+    + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
+    + (RuntimeOption::EnableXHP ? '1' : '0')
+    + (RuntimeOption::EvalAllowHhas ? '1' : '0')
+    + (RuntimeOption::EvalEmitSwitch ? '1' : '0')
+    + (RuntimeOption::EvalEnableCallBuiltin ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatIsArrayNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatPromoteNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatTypeHintNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatDVCmpNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackCompilerFallback ? '1' : '0')
+    + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
+    + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
+    + (RuntimeOption::IntsOverflowToInts ? '1' : '0')
+    + (RuntimeOption::EvalReffinessInvariance ? '1' : '0')
+    + (RuntimeOption::EvalCreateInOutWrapperFunctions ? '1' : '0')
+    + (RuntimeOption::EvalNoticeOnAllDynamicCalls ? '1' : '0')
+    + (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls ? '1' : '0')
+    + (RuntimeOption::EvalHackArrDVArrs ? '1' : '0')
+    + (RuntimeOption::EvalDisableHphpcOpts ? '1' : '0')
+    + (RuntimeOption::EvalUseMSRVForInOut ? '1' : '0')
+    + (RuntimeOption::EvalAllowObjectDestructors ? '1' : '0')
+    + RuntimeOption::EvalHackCompilerCommand + '\0'
+    + mangleUnitPHP7Options()
+    + mangleAliasedNamespaces()
+    + mangleExternCompilerVersions();
   return string_md5(t);
 }
 
 size_t numLoadedUnits() {
-  if (RuntimeOption::RepoAuthoritative) { return s_repoUnitCache.size(); }
+  if (RuntimeOption::RepoAuthoritative) {
+    return s_repoUnitCache.size();
+  }
   return s_nonRepoUnitCache.size();
 }
 
-String resolveVmInclude(StringData* path, const char* currentDir,
-                        struct stat* s, bool allow_dir /* = false */) {
+String resolveVmInclude(StringData* path,
+                        const char* currentDir,
+                        struct stat* s,
+                        bool allow_dir /* = false */) {
   ResolveIncludeContext ctx;
   ctx.s = s;
   ctx.allow_dir = allow_dir;
   void* vpCtx = &ctx;
-  resolve_include(String{ path }, currentDir, findFileWrapper, vpCtx);
+  resolve_include(String{path}, currentDir, findFileWrapper, vpCtx);
   // If resolve_include() could not find the file, return NULL
   return ctx.path;
 }
@@ -677,7 +724,8 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
   if (it != end(eContext->m_evaledFiles)) {
     // In RepoAuthoritative mode we assume that the files are unchanged.
     initial = false;
-    if (RuntimeOption::RepoAuthoritative || (it->second.ts_sec > s.st_mtime) ||
+    if (RuntimeOption::RepoAuthoritative ||
+        (it->second.ts_sec > s.st_mtime) ||
         ((it->second.ts_sec == s.st_mtime) &&
          (it->second.ts_nsec >= s.st_mtim.tv_nsec))) {
       return it->second.unit;
@@ -689,18 +737,18 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
   if (cunit.unit && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
     // per request fetch of the file.
-    if (rds::testAndSetBit(cunit.rdsBitId)) { initial = false; }
+    if (rds::testAndSetBit(cunit.rdsBitId)) {
+      initial = false;
+    }
     // if parsing was successful, update the mappings for spath and
     // rpath (if it exists).
     eContext->m_evaledFilesOrder.push_back(cunit.unit->filepath());
-    eContext->m_evaledFiles[spath.get()] = {
-      cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec)
-    };
+    eContext->m_evaledFiles[spath.get()] =
+      {cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec)};
     spath.get()->incRefCount();
     if (!cunit.unit->filepath()->same(spath.get())) {
-      eContext->m_evaledFiles[cunit.unit->filepath()] = {
-        cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec)
-      };
+      eContext->m_evaledFiles[cunit.unit->filepath()] =
+        {cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec)};
     }
     if (g_system_profiler) {
       g_system_profiler->fileLoadCallBack(path->toCppString());
@@ -729,8 +777,8 @@ void preloadRepo() {
   // batches.  Even if the batches are somewhat imbalanced in what they contain,
   // the straggler workers are very unlikey to take more than 10% longer than
   // the first worker to finish.
-  size_t batchSize{ std::max(units.size() / numWorkers / 16, size_t(1)) };
-  std::atomic<size_t> index{ 0 };
+  size_t batchSize{std::max(units.size() / numWorkers / 16, size_t(1))};
+  std::atomic<size_t> index{0};
   for (auto worker = 0; worker < numWorkers; ++worker) {
     workers.push_back(std::thread([&] {
       hphp_thread_init();
@@ -741,11 +789,11 @@ void preloadRepo() {
         auto end = std::min(begin + batchSize, units.size());
         if (begin >= end) break;
         auto unitCount = end - begin;
-        for (auto i = size_t{ 0 }; i < unitCount; ++i) {
+        for (auto i = size_t{0}; i < unitCount; ++i) {
           auto& kv = units[begin + i];
           try {
-            lookupUnit(String(RuntimeOption::SourceRoot + kv.first).get(), "",
-                       nullptr);
+            lookupUnit(String(RuntimeOption::SourceRoot + kv.first).get(),
+                       "", nullptr);
           } catch (...) {
             // swallow errors silently
           }
@@ -757,9 +805,11 @@ void preloadRepo() {
       hphp_thread_exit();
     }));
   }
-  for (auto& worker : workers) { worker.join(); }
+  for (auto& worker : workers) {
+    worker.join();
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
 
-} // namespace HPHP
+}

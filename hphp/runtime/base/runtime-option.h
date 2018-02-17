@@ -500,8 +500,6 @@ struct RuntimeOption {
   /* The number of times to reuse a single hh_single_compile daemons
      before forcing a restart */                                        \
   F(uint32_t, HackCompilerReset,       10)                              \
-  /* Whether to use an extern compiler to build systemlib */            \
-  F(bool, UseExternCompilerForSystemLib, false)                         \
   /* Whether or not to fallback to hphpc if hh_single_compile fails for
      any reason. */                                                     \
   F(bool, HackCompilerFallback,        false)                           \

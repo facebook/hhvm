@@ -44,31 +44,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// Default dirty page purging threshold.  This setting is especially relevant to
-// arena 0, which all the service requests use.  Arena 1, the low_malloc arena,
-// also uses this setting, but that arena is not tuning-sensitive.
-#define LG_DIRTY_MULT_DEFAULT 5
-// Dirty page purging thresholds for the per NUMA node arenas used by request
-// threads.  These arenas tend to have proportionally large memory usage
-// fluctuations because requests clean up nearly all allocated memory at request
-// end.  Depending on number of request threads, current load, etc., this can
-// easily result in excessive dirty page purging.  Therefore, apply loose
-// constraints on unused dirty page accumulation under normal operation, but
-// momentarily toggle the threshold when a thread idles so that the accumulated
-// dirty pages aren't excessive compared to the likely memory usage needs of the
-// remaining active threads.
-#define LG_DIRTY_MULT_REQUEST_ACTIVE -1
-#define LG_DIRTY_MULT_REQUEST_IDLE 3
-
-#ifdef USE_JEMALLOC
-static void numa_purge_arena();
-#endif
-
 void flush_thread_caches() {
 #ifdef USE_JEMALLOC
   if (mallctl) {
     mallctlCall("thread.tcache.flush", true);
-    numa_purge_arena();
   }
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
   thread_huge_tcache_flush();
@@ -85,50 +64,31 @@ bool purge_all(std::string* errStr) {
 #ifdef USE_JEMALLOC
   if (mallctl) {
     assert(mallctlnametomib && mallctlbymib);
-    // Purge all dirty unused pages.
-    int err = mallctlWrite<uint64_t>("epoch", 1, true);
-    if (err) {
+    unsigned allArenas = 0;
+#ifndef MALLCTL_ARENAS_ALL
+    if (mallctlRead("arenas.narenas", &allArenas, true)) {
       if (errStr) {
-        std::ostringstream estr;
-        estr << "Error " << err << " in mallctl(\"epoch\", ...)" << std::endl;
-        *errStr = estr.str();
+        *errStr = "arenas.narena";
       }
       return false;
     }
-
-    unsigned narenas;
-    err = mallctlRead("arenas.narenas", &narenas, true);
-    if (err) {
-      if (errStr) {
-        std::ostringstream estr;
-        estr << "Error " << err << " in mallctl(\"arenas.narenas\", ...)"
-             << std::endl;
-        *errStr = estr.str();
-      }
-      return false;
-    }
+#else
+    allArenas = MALLCTL_ARENAS_ALL;
+#endif
 
     size_t mib[3];
     size_t miblen = 3;
-    err = mallctlnametomib("arena.0.purge", mib, &miblen);
-    if (err) {
+    if (mallctlnametomib("arena.0.purge", mib, &miblen)) {
       if (errStr) {
-        std::ostringstream estr;
-        estr << "Error " << err
-             << " in mallctlnametomib(\"arenas.narenas\", ...)" << std::endl;
-        *errStr = estr.str();
+        *errStr = "mallctlnametomib(arena.0.purge)";
       }
       return false;
     }
-    mib[1] = narenas;
 
-    err = mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0);
-    if (err) {
+    mib[1] = allArenas;
+    if (mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0)) {
       if (errStr) {
-        std::ostringstream estr;
-        estr << "Error " << err << " in mallctlbymib([\"arena." << narenas
-             << ".purge\"], ...)" << std::endl;
-        *errStr = estr.str();
+        *errStr = "mallctlbymib(arena.all.purge)";
       }
       return false;
     }
@@ -292,64 +252,6 @@ static const unsigned kHugePageMask = (1 << kLgHugeGranularity) - 1;
 static uint32_t base_arena;
 static bool threads_bind_local = false;
 
-static bool purge_decay_hard() {
-  const char *purge;
-  if (mallctlRead("opt.purge", &purge, true) == 0) {
-    return (strcmp(purge, "decay") == 0);
-  }
-
-  // If "opt.purge" is absent, it's either because jemalloc is too old
-  // (pre-4.1.0), or because ratio-based purging is no longer present
-  // (likely post-4.x).
-  ssize_t decay_time;
-  // 4.x decay time API
-  int ret = mallctlRead("opt.decay_time", &decay_time, true);
-  if (ret != 0) {
-    // 5.x decay time API
-    ret = mallctlRead("opt.dirty_decay_ms", &decay_time, true);
-  }
-  return (ret == 0);
-}
-
-static bool purge_decay() {
-  static bool initialized = false;
-  static bool decay;
-
-  if (!initialized) {
-    decay = purge_decay_hard();
-    initialized = true;
-  }
-  return decay;
-}
-
-static void set_lg_dirty_mult(unsigned arena, ssize_t lg_dirty_mult) {
-  assert(!purge_decay());
-  constexpr size_t max_miblen = 3;
-  size_t miblen = max_miblen;
-  size_t mib[max_miblen];
-  if (mallctlnametomib("arena.0.lg_dirty_mult", mib, &miblen) == 0) {
-    mib[1] = arena;
-    mallctlbymib(mib, miblen, nullptr, nullptr, &lg_dirty_mult,
-                 sizeof(lg_dirty_mult));
-  }
-}
-
-static void numa_purge_arena() {
-  // Only purge if the thread's assigned arena is one of those created for use
-  // by request threads.
-  if (!threads_bind_local) return;
-  // Only purge if ratio-based purging is active.
-  if (purge_decay()) return;
-  unsigned arena;
-  mallctlRead("thread.arena", &arena);
-  if (arena >= base_arena && arena < base_arena + numa_num_nodes) {
-    // Threads may race through the following calls, but the last call made by
-    // any idling thread will correctly restore lg_dirty_mult.
-    set_lg_dirty_mult(arena, LG_DIRTY_MULT_REQUEST_IDLE);
-    set_lg_dirty_mult(arena, LG_DIRTY_MULT_REQUEST_ACTIVE);
-  }
-}
-
 void enable_numa(bool local) {
   if (!numa_node_mask) return;
 
@@ -387,10 +289,6 @@ void enable_numa(bool local) {
         return;
       }
       arenas++;
-      if (!purge_decay()) {
-        // Tune dirty page purging for new arena.
-        set_lg_dirty_mult(arena, LG_DIRTY_MULT_REQUEST_ACTIVE);
-      }
     }
   }
 
@@ -458,8 +356,6 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
   return mallocx(size, flags);
 }
 
-#else
-static void numa_purge_arena() {}
 #endif
 
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
@@ -883,9 +779,6 @@ void thread_huge_tcache_destroy() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#define STRINGIFY_HELPER(x) #x
-#define STRINGIFY(x) STRINGIFY_HELPER(x)
-
 extern "C" {
   const char* malloc_conf = "narenas:1,lg_tcache_max:16"
 #if (JEMALLOC_VERSION_MAJOR >= 5)
@@ -894,9 +787,6 @@ extern "C" {
 #ifdef FACEBOOK
     ",metadata_thp:disabled"
 #endif
-#endif
-#if (JEMALLOC_VERSION_MAJOR < 5)
-    ",lg_dirty_mult:" STRINGIFY(LG_DIRTY_MULT_DEFAULT)
 #endif
 #ifdef ENABLE_HHPROF
     ",prof:true,prof_active:false,prof_thread_active_init:false"

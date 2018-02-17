@@ -49,7 +49,7 @@ let () =
     c_file_name, "";
   ] in
 
-  Test.assert_errors env errors;
+  Test.assert_env_errors env errors;
 
   let env, _ = Test.(run_loop_once env { default_loop_input with
     disk_changes = [

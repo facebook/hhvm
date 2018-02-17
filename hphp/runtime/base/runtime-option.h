@@ -674,7 +674,8 @@ struct RuntimeOption {
   F(bool, RegionRelaxGuards,           true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
-  F(bool, DumpHhas,                    false)                           \
+  /* DumpHhas =1 dumps user php, =2 dumps systemlib & user php */       \
+  F(int32_t, DumpHhas,                 0)                               \
   F(bool, DisableHphpcOpts,            false)                           \
   F(bool, DisableErrorHandler,         false)                           \
   F(bool, DumpTC,                      false)                           \

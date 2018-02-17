@@ -740,10 +740,13 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
     _Exit(0);
   }
 
-  if (RuntimeOption::EvalDumpHhas && SystemLib::s_inited) {
+  if (RuntimeOption::EvalDumpHhas > 1 ||
+    (SystemLib::s_inited && RuntimeOption::EvalDumpHhas == 1)) {
     std::printf("%s", disassemble(u.get()).c_str());
     std::fflush(stdout);
-    _Exit(0);
+    if (SystemLib::s_inited) {
+      _Exit(0);
+    }
   }
 
   if (RuntimeOption::EvalDumpBytecode) {

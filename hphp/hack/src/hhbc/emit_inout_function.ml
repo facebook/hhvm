@@ -68,7 +68,6 @@ let emit_body_instrs_ref params call_instrs =
           instr_pushl local;
           instr_fpassc i H.Any
         ]) in
-  let params = if msrv then List.rev params else params in
   let param_get_instrs =
     List.filter_map params ~f:(fun p ->
         if Hhas_param.is_reference p
@@ -180,7 +179,8 @@ let emit_wrapper_method
   ~is_closure ~decl_vars ~original_id ~renamed_id ast_class ast_method =
   (* Wrapper methods may not have iterators *)
   Iterator.reset_iterator ();
-  let decl_vars = if is_closure then [] else decl_vars in
+  let decl_vars =
+    if is_closure then List.filter decl_vars ((<>) "$0Closure") else decl_vars in
   let scope =
     [Ast_scope.ScopeItem.Method ast_method;
      Ast_scope.ScopeItem.Class ast_class] in

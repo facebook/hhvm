@@ -106,8 +106,6 @@ void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static std::atomic<bool> s_loggedJitMature{false};
-
 std::map<std::string, ServiceData::ExportedTimeSeries*>
 buildCodeSizeCounters() {
   std::map<std::string, ServiceData::ExportedTimeSeries*> counters;
@@ -151,7 +149,8 @@ static ServiceData::CounterCallback s_warmedUpCounter(
 void reportJitMaturity() {
   auto static jitMaturityCounter = ServiceData::createCounter("jit.maturity");
   if (!jitMaturityCounter) return;
-  if (jitMaturityCounter->getValue() == 100) return;
+  auto const before = jitMaturityCounter->getValue();
+  if (before == 100) return;
   // Optimized translations are faster than profiling translations, which are
   // faster than the interpreter.  But when optimized translations are
   // generated, some profiling translations will become dead.  We assume the
@@ -163,10 +162,7 @@ void reportJitMaturity() {
   // When retranslateAll is used, we only add ahot after retranslateAll
   // finishes.
   if (!mcgen::retranslateAllPending()) codeSize += code().hot().used();
-  // EvalJitMatureSize is supposed to to be set to approximately 20% of the
-  // code that will give us full performance, so recover the "fully mature"
-  // size with some math.
-  auto const fullSize = RuntimeOption::EvalJitMatureSize * 5;
+  auto const fullSize = RuntimeOption::EvalJitMatureSize;
   // If EvalJitMatureAfterWarmup is set, we consider the JIT to be mature once
   // warmupStatusString() is empty, which indicates that the JIT is warmed up
   // based on the rate in which JITed code is being produced.
@@ -187,18 +183,8 @@ void reportJitMaturity() {
     after = 99;
   }
 
-  auto const before = jitMaturityCounter->getValue();
   if (after > before) {
     jitMaturityCounter->setValue(after);
-
-    if (!s_loggedJitMature.load(std::memory_order_relaxed) &&
-        StructuredLog::enabled() &&
-        codeSize >= RuntimeOption::EvalJitMatureSize &&
-        !s_loggedJitMature.exchange(true, std::memory_order_relaxed)) {
-      StructuredLogEntry cols;
-      cols.setInt("jit_mature_sec", time(nullptr) - HttpServer::StartTime);
-      StructuredLog::log("hhvm_warmup", cols);
-    }
   }
 
   code().forEachBlock([&] (const char* name, const CodeBlock& a) {

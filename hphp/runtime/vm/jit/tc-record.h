@@ -58,7 +58,7 @@ void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
 void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold);
 
 /*
- * Report jit warmup statistics to scribe via StructuredLog.
+ * Update JIT warmup stats and related counters.
  */
 void reportJitMaturity();
 

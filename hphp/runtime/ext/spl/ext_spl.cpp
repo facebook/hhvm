@@ -65,7 +65,7 @@ void throw_spl_exception(const char *fmt, ...) {
 }
 
 static bool s_inited = false;
-static int64_t s_hash_mask_handle = 0;
+static uint64_t s_hash_mask_handle = 0;
 static Mutex s_mutex;
 
 String HHVM_FUNCTION(spl_object_hash, const Object& obj) {

@@ -1784,7 +1784,7 @@ void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
   }
 }
 
-void kill_unsupported_refs(RCState& state) {
+void kill_unsupported_refs(RCState& state, PreAdder add_node = {}) {
   if (state.has_unsupported_refs) {
     FTRACE(3, "    killing all unsupported refs\n");
     auto id = 0;
@@ -1793,6 +1793,7 @@ void kill_unsupported_refs(RCState& state) {
         assertx(aset.unsupported_refs <= aset.lower_bound);
         aset.lower_bound -= aset.unsupported_refs;
         aset.unsupported_refs = 0;
+        if (aset.lower_bound < 2) add_node(id, NReq{1});
         FTRACE(5, "      {} lb: {}(0)\n", id, aset.lower_bound);
       }
       id++;
@@ -1891,7 +1892,7 @@ bool reduce_support(Env& env,
   FTRACE(3, "    reduce support {}{}\n",
          std::string{may_decref ? "(may_decref) " : ""}, show(aclass));
   if (may_decref && state.has_unsupported_refs) {
-    kill_unsupported_refs(state);
+    kill_unsupported_refs(state, add_node);
   }
   auto const alias = env.ainfo.may_alias(aclass);
   return reduce_support_bits(env, state, alias, may_decref, add_node);
@@ -2083,7 +2084,7 @@ void analyze_mem_effects(Env& env,
 
     [&] (GeneralEffects x)  {
       if (inst.is(CallBuiltin)) {
-        kill_unsupported_refs(state);
+        kill_unsupported_refs(state, add_node);
         observe_for_is_referenced(env, state, add_node);
       }
 

@@ -1,0 +1,3 @@
+<?hh
+
+echo "Included\n";

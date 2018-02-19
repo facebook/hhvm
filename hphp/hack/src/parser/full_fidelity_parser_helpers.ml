@@ -252,7 +252,42 @@ module WithParser(Parser : Parser_S) = struct
       end
     end
 
+  let require_token_one_of parser kinds error =
+    let (parser1, token) = next_token parser in
+    if List.mem (Token.kind token) kinds
+    then (parser1, make_token token)
+    else begin
+      (* ERROR RECOVERY: Look at the next token after this. Is it the one we
+       * require? If so, process the current token as extra and return the next
+       * one. Otherwise, create a missing token for what we required,
+       * and continue on from the current token (don't skip it). *)
+      let next_kind = peek_token_kind ~lookahead:1 parser in
+      if List.mem next_kind kinds then
+        let parser = skip_and_log_unexpected_token parser in
+        let (parser, token) = next_token parser in
+        (parser, make_token token)
+      else begin
+        (* ERROR RECOVERY: We know we didn't encounter an extra token.
+         * So, as a second line of defense, check if the current token
+         * is a misspelling, by our existing narrow definition of misspelling. *)
+        let is_misspelling k =
+          is_misspelled_kind k (current_token_text parser)
+        in
+        if List.exists is_misspelling kinds then
+          let kind = List.(hd @@ filter is_misspelling kinds) in
+          let parser = skip_and_log_misspelled_token parser kind in
+          let missing = make_missing parser in
+          (parser, missing)
+        else
+          let parser = with_error parser error in
+          let missing = make_missing parser in
+          (parser, missing)
+      end
+    end
+
+
   let require_token parser kind error =
+    (* Must behave as `require_token_one_of parser [kind] error` *)
     let (parser1, token) = next_token parser in
     if (Token.kind token) = kind then
       (parser1, make_token token)

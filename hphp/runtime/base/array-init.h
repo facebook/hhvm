@@ -555,8 +555,6 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
   DictInit& setValidKey(const Variant& name, const Variant& v) {
     return setValidKey(*name.asTypedValue(), *v.asTypedValue());
   }
-
-  friend struct DArrayInit;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -638,187 +636,323 @@ struct VecArrayInit : PackedArrayInitBase<detail::VecArray, KindOfVec> {
   VecArrayInit& append(const Variant& v) {
     return append(*v.asTypedValue());
   }
-
-  friend struct VArrayInit;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 struct VArrayInit {
   explicit VArrayInit(size_t n)
-    : init{
-       RuntimeOption::EvalHackArrDVArrs
-         ? Init{VecArrayInit{n}} : Init{VArrayInitImpl{n}}
-      }
-  {}
-
-  template <typename V>
-  VArrayInit& append(const V& val) {
-    match<void>(
-      init,
-      [&](VArrayInitImpl& v) { v.append(val); },
-      [&](VecArrayInit& v) { v.append(val); }
-    );
-    return *this;
+    : m_arr(RuntimeOption::EvalHackArrDVArrs
+              ? PackedArray::MakeReserveVec(n)
+              : PackedArray::MakeReserveVArray(n)
+           )
+#ifdef DEBUG
+    , m_addCount(0)
+    , m_expectedCount(n)
+#endif
+  {
+    assertx(m_arr->hasExactlyOneRef());
   }
 
-  VArrayInit& appendWithRef(TypedValue tv) {
-    match<void>(
-      init,
-      [&](VArrayInitImpl& v) { v.appendWithRef(tv); },
-      [&](VecArrayInit& v) {
-        if (tvIsReferenced(tv)) throwRefInvalidArrayValueException(v.m_arr);
-        v.append(tvToInitCell(tv));
-      }
-    );
+  VArrayInit(VArrayInit&& other) noexcept
+    : m_arr(other.m_arr)
+#ifdef DEBUG
+    , m_addCount(other.m_addCount)
+    , m_expectedCount(other.m_expectedCount)
+#endif
+  {
+    assertx(!m_arr || m_arr->isVecOrVArray());
+    other.m_arr = nullptr;
+#ifdef DEBUG
+    other.m_expectedCount = 0;
+#endif
+  }
+
+  VArrayInit(const VArrayInit&) = delete;
+  VArrayInit& operator=(const VArrayInit&) = delete;
+
+  ~VArrayInit() {
+    // In case an exception interrupts the initialization.
+    assertx(!m_arr || (m_arr->hasExactlyOneRef() &&
+                       m_arr->isVecOrVArray()));
+    if (m_arr) m_arr->release();
+  }
+
+  VArrayInit& append(TypedValue tv) {
+    performOp([&]{ return m_arr->append(tvToInitCell(tv), false); });
     return *this;
   }
-  VArrayInit& appendWithRef(const Variant& v) {
+  VArrayInit& append(const Variant& v) {
     return append(*v.asTypedValue());
   }
 
-  Array toArray() {
-    return match<Array>(
-      init,
-      [&](VArrayInitImpl& v) { return v.toArray(); },
-      [&](VecArrayInit& v) { return v.toArray(); }
-    );
+  VArrayInit& appendWithRef(TypedValue v) {
+    performOp([&]{ return m_arr->appendWithRef(v, false); });
+    return *this;
+  }
+  VArrayInit& appendWithRef(const Variant& v) {
+    return appendWithRef(*v.asTypedValue());
   }
 
   Variant toVariant() {
-    return match<Variant>(
-      init,
-      [&](VArrayInitImpl& v) { return v.toVariant(); },
-      [&](VecArrayInit& v) { return v.toVariant(); }
-    );
+    assertx(m_arr->hasExactlyOneRef());
+    assertx(m_arr->isVecOrVArray());
+    auto const ptr = m_arr;
+    m_arr = nullptr;
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return Variant(ptr, ptr->toDataType(), Variant::ArrayInitCtor{});
+  }
+
+  Array toArray() {
+    assertx(m_arr->hasExactlyOneRef());
+    assertx(m_arr->isVecOrVArray());
+    auto const ptr = m_arr;
+    m_arr = nullptr;
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return Array(ptr, Array::ArrayInitCtor::Tag);
   }
 
   ArrayData* create() {
-    return match<ArrayData*>(
-      init,
-      [&](VArrayInitImpl& v) { return v.create(); },
-      [&](VecArrayInit& v) { return v.create(); }
-    );
+    assertx(m_arr->hasExactlyOneRef());
+    assertx(m_arr->isVecOrVArray());
+    auto const ptr = m_arr;
+    m_arr = nullptr;
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return ptr;
   }
 
 private:
-  using VArrayInitImpl = PackedPHPArrayInitBase<detail::VArray>;
-  using Init = boost::variant<VArrayInitImpl, VecArrayInit>;
-  Init init;
+
+  template<class Operation>
+  ALWAYS_INLINE void performOp(Operation oper) {
+    DEBUG_ONLY auto newp = oper();
+    // Array escalation must not happen during these reserved initializations.
+    assertx(newp == m_arr);
+    // You cannot add/set more times than you reserved with ArrayInit.
+    assertx(++m_addCount <= m_expectedCount);
+  }
+
+  ArrayData* m_arr;
+#ifdef DEBUG
+  size_t m_addCount;
+  size_t m_expectedCount;
+#endif
 };
-
-namespace detail {
-
-struct DArrayInitImpl : MixedPHPArrayInitBase<detail::DArray> {
-  using Base = MixedPHPArrayInitBase<detail::DArray>;
-  explicit DArrayInitImpl(size_t n) : Base(n, Map{}) {}
-  DArrayInitImpl(size_t n, CheckAllocation c) : Base(n, Map{}, c) {}
-};
-
-}
 
 struct DArrayInit {
   explicit DArrayInit(size_t n)
-    : init{
-       RuntimeOption::EvalHackArrDVArrs
-         ? Init{DictInit{n}} : Init{DArrayInitImpl{n}}
-      }
-  {}
+    : m_arr(RuntimeOption::EvalHackArrDVArrs
+              ? MixedArray::MakeReserveDict(n)
+              : MixedArray::MakeReserveDArray(n)
+           )
+#ifdef DEBUG
+    , m_addCount(0)
+    , m_expectedCount(n)
+#endif
+  {
+    assertx(m_arr->hasExactlyOneRef());
+  }
 
-  DArrayInit(size_t n, CheckAllocation c)
-   : init{
-       RuntimeOption::EvalHackArrDVArrs
-         ? Init{DictInit{n, c}} : Init{DArrayInitImpl{n, c}}
-      }
-  {}
+  DArrayInit(size_t, CheckAllocation);
 
-  template <typename V>
-  DArrayInit& append(const V& val) {
-    match<void>(
-      init,
-      [&](DArrayInitImpl& v) { v.append(val); },
-      [&](DictInit& v) { v.append(val); }
-    );
+  DArrayInit(DArrayInit&& other) noexcept
+    : m_arr(other.m_arr)
+#ifdef DEBUG
+    , m_addCount(other.m_addCount)
+    , m_expectedCount(other.m_expectedCount)
+#endif
+  {
+    assert(!m_arr || m_arr->isDictOrDArray());
+    other.m_arr = nullptr;
+#ifdef DEBUG
+    other.m_expectedCount = 0;
+#endif
+  }
+
+  DArrayInit(const DArrayInit&) = delete;
+  DArrayInit& operator=(const DArrayInit&) = delete;
+
+  ~DArrayInit() {
+    // In case an exception interrupts the initialization.
+    assert(!m_arr || (m_arr->hasExactlyOneRef() &&
+                      m_arr->isDictOrDArray()));
+    if (m_arr) m_arr->release();
+  }
+
+  DArrayInit& append(TypedValue tv) {
+    performOp([&]{ return m_arr->append(tvToInitCell(tv), false); });
+    return *this;
+  }
+  DArrayInit& append(const Variant& v) {
+    return append(*v.asTypedValue());
+  }
+
+  /*
+   * Call add() on the underlying array.
+   */
+  DArrayInit& add(int64_t name, TypedValue tv,
+                  bool /*keyConverted*/ = false) {
+    performOp([&]{ return m_arr->add(name, tvToInitCell(tv), false); });
     return *this;
   }
 
-  template <typename K, typename V>
-  DArrayInit& add(const K& name, const V& val, bool keyConverted = false) {
-    match<void>(
-      init,
-      [&](DArrayInitImpl& v) { v.add(name, val, keyConverted); },
-      [&](DictInit& v) { v.set(name, val); }
-    );
-    return *this;
-  }
-
-  template <typename K, typename V>
-  DArrayInit& set(const K& name, const V& val) {
-    match<void>(
-      init,
-      [&](DArrayInitImpl& v) { v.set(name, val); },
-      [&](DictInit& v) { v.set(name, val); }
-    );
-    return *this;
-  }
-
-  template <typename K, typename V>
-  DArrayInit& setValidKey(const K& name, const V& val) {
-    match<void>(
-      init,
-      [&](DArrayInitImpl& v) { v.setValidKey(name, val); },
-      [&](DictInit& v) { v.setValidKey(name, val); }
-    );
-    return *this;
-  }
-
-  DArrayInit& setUnknownKey(const Variant& name, const Variant& val) {
-    match<void>(
-      init,
-      [&](DArrayInitImpl& v) { v.setUnknownKey(name, val); },
-      [&](DictInit& v) {
-        if (name.isInteger()) {
-          v.set(name.toInt64Val(), val);
-          return;
+  DArrayInit& add(const String& name, TypedValue tv,
+                  bool keyConverted = false) {
+    if (keyConverted) {
+      performOp([&]{ return m_arr->add(name, tvToInitCell(tv), false); });
+    } else if (!name.isNull()) {
+      performOp(
+        [&]{
+          return m_arr->add(VarNR::MakeKey(name).tv(), tvToInitCell(tv), false);
         }
-        if (name.isString()) {
-          v.set(name.toCStrRef(), val);
-          return;
-        }
-        throwInvalidArrayKeyException(val.asCell(), v.m_arr);
-      }
-    );
+      );
+    }
     return *this;
   }
 
-  Array toArray() {
-    return match<Array>(
-      init,
-      [&](DArrayInitImpl& v) { return v.toArray(); },
-      [&](DictInit& v) { return v.toArray(); }
+  DArrayInit& add(const Variant& name, TypedValue tv,
+                  bool keyConverted = false) {
+    if (keyConverted) {
+      performOp(
+        [&]{ return m_arr->add(name.asInitCellTmp(), tvToInitCell(tv), false); }
+      );
+    } else {
+      auto const k = name.toKey(m_arr).tv();
+      if (!isNullType(k.m_type)) {
+        performOp([&]{ return m_arr->add(k, tvToInitCell(tv), false); });
+      }
+    }
+    return *this;
+  }
+
+  template<typename T>
+  DArrayInit& add(const T& name, TypedValue tv,
+                  bool keyConverted = false) {
+    if (keyConverted) {
+      performOp([&]{ return m_arr->add(name, tvToInitCell(tv), false); });
+    } else {
+      auto const k = Variant(name).toKey(m_arr).tv();
+      if (!isNullType(k.m_type)) {
+        performOp([&]{ return m_arr->add(k, tvToInitCell(tv), false); });
+      }
+    }
+    return *this;
+  }
+
+#define IMPL_ADD(KeyType)                                           \
+  DArrayInit& add(KeyType name, const Variant& v,                   \
+                  bool keyConverted = false) {                      \
+    return add(name, *v.asTypedValue(), keyConverted);              \
+  }
+
+  IMPL_ADD(int64_t)
+  IMPL_ADD(const String&)
+  IMPL_ADD(const Variant&)
+  template<typename T> IMPL_ADD(const T&)
+#undef IMPL_ADD
+
+  /*
+   * Call set() on the underlying ArrayData.
+   */
+  DArrayInit& set(int64_t name, TypedValue tv) {
+    performOp([&]{ return m_arr->set(name, tvToInitCell(tv), false); });
+    return *this;
+  }
+  DArrayInit& set(const String& name, TypedValue tv) {
+    performOp([&]{ return m_arr->set(name, tvToInitCell(tv), false); });
+    return *this;
+  }
+  template<class T>
+  DArrayInit& set(const T& name, TypedValue tv) {
+    performOp([&]{ return m_arr->set(name, tvToInitCell(tv), false); });
+    return *this;
+  }
+
+#define IMPL_SET(KeyType)                            \
+  DArrayInit& set(KeyType name, const Variant& v) {  \
+    return set(name, *v.asTypedValue());             \
+  }
+
+  IMPL_SET(int64_t)
+  IMPL_SET(const String&)
+  template<typename T> IMPL_SET(const T&)
+
+  DArrayInit& set(const Variant& name, const Variant& v) = delete;
+#undef IMPL_SET
+
+  DArrayInit& setValidKey(TypedValue name, TypedValue v) {
+    performOp(
+      [&]{ return m_arr->set(tvToInitCell(name), tvToInitCell(v), false); }
     );
+    return *this;
+  }
+  DArrayInit& setValidKey(const Variant& name, const Variant& v) {
+    return setValidKey(*name.asTypedValue(), *v.asTypedValue());
+  }
+
+  DArrayInit& setUnknownKey(const Variant& name, const Variant& v) {
+    auto const k = name.toKey(m_arr).tv();
+    if (LIKELY(!isNullType(k.m_type))) {
+      performOp([&]{ return m_arr->set(k, v.asInitCellTmp(), false); });
+    }
+    return *this;
   }
 
   Variant toVariant() {
-    return match<Variant>(
-      init,
-      [&](DArrayInitImpl& v) { return v.toVariant(); },
-      [&](DictInit& v) { return v.toVariant(); }
-    );
+    assertx(m_arr->hasExactlyOneRef());
+    assertx(m_arr->isDictOrDArray());
+    auto const ptr = m_arr;
+    m_arr = nullptr;
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return Variant(ptr, ptr->toDataType(), Variant::ArrayInitCtor{});
+  }
+
+  Array toArray() {
+    assertx(m_arr->hasExactlyOneRef());
+    assertx(m_arr->isDictOrDArray());
+    auto const ptr = m_arr;
+    m_arr = nullptr;
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return Array(ptr, Array::ArrayInitCtor::Tag);
   }
 
   ArrayData* create() {
-    return match<ArrayData*>(
-      init,
-      [&](DArrayInitImpl& v) { return v.create(); },
-      [&](DictInit& v) { return v.create(); }
-    );
+    assertx(m_arr->hasExactlyOneRef());
+    assertx(m_arr->isDictOrDArray());
+    auto const ptr = m_arr;
+    m_arr = nullptr;
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return ptr;
   }
 
 private:
-  using DArrayInitImpl = detail::DArrayInitImpl;
-  using Init = boost::variant<DArrayInitImpl, DictInit>;
-  Init init;
+
+  template<class Operation>
+  ALWAYS_INLINE void performOp(Operation oper) {
+    DEBUG_ONLY auto newp = oper();
+    // Array escalation must not happen during these reserved initializations.
+    assertx(newp == m_arr);
+    // You cannot add/set more times than you reserved with ArrayInit.
+    assertx(++m_addCount <= m_expectedCount);
+  }
+
+  ArrayData* m_arr;
+#ifdef DEBUG
+  size_t m_addCount;
+  size_t m_expectedCount;
+#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////

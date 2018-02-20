@@ -1428,7 +1428,6 @@ module WithExpressionAndStatementAndTypeParser
         | _ -> parse_type_specifier parser in
     let (parser, name) = parse_decorated_variable_opt parser in
     let (parser, default) = parse_simple_initializer_opt parser in
-    let _txts = List.map Syntax.to_json [type_specifier; name] in
     let syntax =
       make_parameter_declaration
         attrs

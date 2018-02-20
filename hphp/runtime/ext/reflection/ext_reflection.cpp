@@ -138,25 +138,33 @@ const Func* get_method_func(const Class* cls, const String& meth_name) {
 }
 
 Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
-                                  const Func* func) {
+                                  const Func* func, unsigned argIdx) {
   assert(fpi.hasDefaultValue());
   if (fpi.hasScalarDefaultValue()) {
     // Most of the time the default value is scalar, so we can
     // avoid evaling in the common case
     return tvAsVariant((TypedValue*)&fpi.defaultValue);
-  } else {
-    // Eval PHP code to get default value. Note that access of
-    // undefined class constants can cause the eval() to
-    // fatal. Zend lets such fatals propagate, so don't bother catching
-    // exceptions here.
+  }
+  // Eval PHP code to get the default value. Note that eval here can throw a
+  // fatal, e.g. due to the use of undefined class constants or static:: .
+  // When this happens, instead of fataling the execution, set the default
+  // value to null and raise a warning.
+  try {
     return g_context->getEvaledArg(
       fpi.phpCode,
       // We use cls() instead of implCls() because we want the namespace and
-      // class context for which the closure is scoped, not that of the Closure
-      // subclass (which, among other things, is always globally namespaced).
+      // class context for which the closure is scoped, not that of the
+      // Closure subclass (which, among other things, is always globally
+      // namespaced).
       func->cls() ? func->cls()->nameStr() : func->nameStr(),
       func->unit()
     );
+  } catch (Exception& e) {
+    raise_warning("Failed to eval default value of %s()'s $%s argument for "
+                  "reflection, assigning NULL instead",
+                  func->fullNameStr().data(),
+                  func->localNames()[argIdx]->data());
+    return init_null_variant;
   }
 }
 
@@ -901,7 +909,7 @@ static Array get_function_param_info(const Func* func) {
     }
 
     if (fpi.phpCode) {
-      Variant v = default_arg_from_php_code(fpi, func);
+      Variant v = default_arg_from_php_code(fpi, func, i);
       param.set(s_default, v);
       param.set(s_defaultText, make_tv<KindOfPersistentString>(fpi.phpCode));
     }

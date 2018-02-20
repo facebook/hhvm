@@ -53,7 +53,6 @@ module FullFidelityParseArgs = struct
     schema: bool;
     show_file_name : bool;
     (* Configuring the parser *)
-    hhvm_compat_mode : bool;
     is_hh_file : bool;
     codegen : bool;
     php5_compat_mode : bool;
@@ -79,7 +78,6 @@ module FullFidelityParseArgs = struct
     program_text
     pretty_print
     schema
-    hhvm_compat_mode
     is_hh_file
     codegen
     php5_compat_mode
@@ -102,7 +100,6 @@ module FullFidelityParseArgs = struct
     program_text;
     pretty_print;
     schema;
-    hhvm_compat_mode;
     is_hh_file;
     codegen;
     php5_compat_mode;
@@ -140,7 +137,6 @@ module FullFidelityParseArgs = struct
     let set_pretty_print () = pretty_print := true in
     let schema = ref false in
     let set_schema () = schema := true in
-    let hhvm_compat_mode = ref false in
     let is_hh_file = ref false in
     let codegen = ref false in
     let php5_compat_mode = ref false in
@@ -191,12 +187,6 @@ No errors are filtered out.";
       "--schema",
         Arg.Unit set_schema,
         "Displays the parser version and schema of nodes.";
-      "--hhvm-compat-mode",
-        Arg.Set hhvm_compat_mode,
-        "Enforce HHVM compatibility (especially in what errors to ignore)";
-      "--no-hhvm-compat-mode",
-        Arg.Clear hhvm_compat_mode,
-        "Do not enforce HHVM compatibility (especially in what errors to ignore)";
       "--is-hh-file",
         Arg.Set is_hh_file,
         "Set the is_hh_file option for the parser.";
@@ -262,7 +252,6 @@ No errors are filtered out.";
       !program_text
       !pretty_print
       !schema
-      !hhvm_compat_mode
       !is_hh_file
       !codegen
       !php5_compat_mode
@@ -319,7 +308,7 @@ let handle_existing_file args filename =
     let pretty = Full_fidelity_pretty_printer.pretty_print editable in
     Printf.printf "%s\n" pretty
   end;
-  if args.hhvm_compat_mode then
+  if args.codegen then
     print_full_fidelity_errors ~syntax_tree ~source_text
       ~level:ParserErrors.HHVMCompatibility
   else begin
@@ -338,7 +327,6 @@ let handle_existing_file args filename =
     let module Lowerer = Full_fidelity_ast in
     let env =
       Lowerer.make_env
-        ~hhvm_compat_mode:args.hhvm_compat_mode
         ~codegen:args.codegen
         ~php5_compat_mode:args.php5_compat_mode
         ~elaborate_namespaces:args.elaborate_namespaces

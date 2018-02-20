@@ -268,7 +268,6 @@ let parse_text compiler_options popt fn text =
     let env = Full_fidelity_ast.make_env
       ~parser_options:popt
       ~ignore_pos
-      ~hhvm_compat_mode:true
       ~codegen:true
       ~php5_compat_mode
       ~enable_hh_syntax

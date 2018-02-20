@@ -1,4 +1,3 @@
-slow/async/genva-variadic.php
 slow/compilation/switch-default-multiple.php
 slow/ctor_param_promotion_bad_mod.php
 slow/goto/label_out_finally.php

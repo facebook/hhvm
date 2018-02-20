@@ -1217,7 +1217,7 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
     ]
   | _ ->
     gather [
-      emit_expr ~need_ref:false env expr;
+      emit_expr_and_unbox_if_necessary ~need_ref:false env expr;
       instr_istypec OpNull;
       instr_not
     ]
@@ -1249,7 +1249,7 @@ and emit_call_empty_expr env (pos, expr_ as expr) =
     ]
   | _ ->
     gather [
-      emit_expr ~need_ref:false env expr;
+      emit_expr_and_unbox_if_necessary ~need_ref:false env expr;
       instr_not
     ]
 
@@ -2025,7 +2025,7 @@ and emit_jmpz_aux env (pos, expr_ as expr) label =
       ]
     | _ ->
       gather [
-        emit_expr ~need_ref:false env expr;
+        emit_expr_and_unbox_if_necessary ~need_ref:false env expr;
         instr_jmpz label
       ]
     end
@@ -2075,7 +2075,7 @@ and emit_jmpnz env (pos, expr_ as expr) label =
       ]
     | _ ->
       gather [
-        emit_expr ~need_ref:false env expr;
+        emit_expr_and_unbox_if_necessary ~need_ref:false env expr;
         instr_jmpnz label
       ]
 
@@ -3506,12 +3506,17 @@ and binary_assignment_rhs_starts_with_ref = function
   | _ -> false
 
 and emit_expr_and_unbox_if_necessary ~need_ref env e =
-  let unboxing_instr =
-    if binary_assignment_rhs_starts_with_ref e
-    then instr_unbox
-    else empty
-  in
-  gather [emit_expr ~need_ref env e; unboxing_instr]
+  let need_unboxing =
+    match e with
+    | _, A.Expr_list es ->
+      Core_list.last es
+      |> Option.value_map ~default:false ~f:binary_assignment_rhs_starts_with_ref
+    | e ->
+      binary_assignment_rhs_starts_with_ref e in
+  gather [
+    emit_expr ~need_ref env e;
+    if need_unboxing then instr_unbox else empty;
+  ]
 
 (* Emit code for an l-value operation *)
 and emit_lval_op env pos op expr1 opt_expr2 =
@@ -3802,7 +3807,7 @@ and emit_unop ~need_ref env pos op e =
       ]
 
 and emit_exprs env exprs =
-  gather (List.map exprs (emit_expr ~need_ref:false env))
+  gather (List.map exprs (emit_expr_and_unbox_if_necessary ~need_ref:false env))
 
 (* allows to create a block of code that will
 - get a fresh temporary local
@@ -3856,7 +3861,8 @@ and stash_in_local_with_prefix ?(always_stash=false) ?(leave_on_stack=false)
     ]
   | _ ->
     let generate_value =
-      Local.scope @@ fun () -> emit_expr ~need_ref:false env e in
+      Local.scope @@ fun () ->
+        emit_expr_and_unbox_if_necessary ~need_ref:false env e in
     Local.scope @@ fun () ->
       let temp = Local.get_unnamed_local () in
       let prefix_instr, result_instr =

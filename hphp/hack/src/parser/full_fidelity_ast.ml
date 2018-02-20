@@ -2121,9 +2121,10 @@ and pClassElt : class_elt list parser = fun node env ->
         ; xhp_attribute_decl_required    = req
         } ->
           let (p, name) = pos_name name env in
+          let pos = if is_missing init then p else Pos.btw p (pPos init env) in
           XhpAttr
           ( mpOptional pHint ty env
-          , (Pos.none, (p, ":" ^ name), mpOptional pSimpleInitializer init env)
+          , (pos, (p, ":" ^ name), mpOptional pSimpleInitializer init env)
           , not (is_missing req)
           , match syntax ty with
             | XHPEnumType { xhp_enum_optional; xhp_enum_values; _ } ->
@@ -2568,10 +2569,13 @@ let scour_comments
       | TriviaKind.AfterHaltCompiler
         -> acc
       | TriviaKind.DelimitedComment ->
+        (* For legacy compliance, block comments should have the position of
+         * their end
+         *)
         let start = Trivia.start_offset t + 2 (* for the '/*' *) in
-        let end_  = Trivia.end_offset t - 2 (* for the '*/' *) in
-        let len   = end_ - start + 1 in
-        let p = pos_of_offset start end_ in
+        let end_  = Trivia.end_offset t in
+        let len   = end_ - start - 1 in
+        let p = pos_of_offset (end_ - 1) end_ in
         let t = String.sub (Trivia.text t) 2 len in
         (p, CmtBlock t) :: cmts, fm
       | TriviaKind.SingleLineComment ->

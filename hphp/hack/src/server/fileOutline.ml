@@ -11,6 +11,7 @@
 open Hh_core
 open Reordered_argument_collections
 open SymbolDefinition
+module Parser = Full_fidelity_ast
 
 type outline = string SymbolDefinition.t list
 
@@ -332,7 +333,7 @@ let add_def_docblock finder previous_def_line def =
 let add_docblocks defs comments =
   let finder = Docblock_finder.make_docblock_finder comments in
 
-  let rec map_def f acc def =
+  let rec map_def f (acc : int) (def : string SymbolDefinition.t) =
     let acc, def = f acc def in
     let acc, children = Option.value_map def.children
       ~f:(fun defs ->
@@ -342,7 +343,7 @@ let add_docblocks defs comments =
     in
     acc, { def with children }
 
-  and map_def_list f acc defs =
+  and map_def_list f (acc : int) (defs : string SymbolDefinition.t list) =
     let acc, defs = List.fold_left defs
       ~f:(fun (acc, defs) def ->
         let acc, def = map_def f acc def in
@@ -354,14 +355,13 @@ let add_docblocks defs comments =
   snd (map_def_list (add_def_docblock finder) 0 defs)
 
 let outline popt content =
-  let {Parser_hack.ast; comments; _} =
-    Parser_hack.program
-      popt
-      Relative_path.default
-      content
-      ~include_line_comments:true
-      ~keep_errors:false
+  let env = Parser.make_env
+    ~parser_options:popt
+    ~include_line_comments:true
+    ~keep_errors:false
+    Relative_path.default
   in
+  let {Parser_hack.ast; comments; _} = Parser.from_text_with_legacy env content in
   let result = outline_ast ast in
   add_docblocks result comments
 

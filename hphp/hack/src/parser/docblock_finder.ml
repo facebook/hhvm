@@ -74,7 +74,7 @@ let find_docblock (finder : finder)
       if is_line_comment then begin
         match merge_line_comments finder comment_index last_line line [] with
         | [] -> None
-        | lines -> Some (String.trim (String.concat "" lines))
+        | lines -> Some (String.trim (String.concat "\n" lines))
       end
       else if comment_line > last_line && comment_line >= line - 2 then
         Some ("/*" ^ str ^ "*/")

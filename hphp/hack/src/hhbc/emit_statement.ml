@@ -874,7 +874,7 @@ and emit_iterator_key_value_storage env iterator =
       let value_local = Local.get_unnamed_local () in
       let value_preamble, value_load =
         emit_iterator_lvalue_storage env expr_v value_local in
-      None, value_local, value_preamble, value_load
+      None, value_local, [], value_preamble @ value_load
     end
 
 (* Emit code for either the key or value l-value operation in foreach await.

@@ -44,6 +44,20 @@ let adata_checked = ref StringStringSet.empty
 let typedefs_to_check = ref IntIntSet.empty
 let typedefs_checked = ref IntIntSet.empty
 
+(* comparison of string representation of doubles
+   TODO: should be up to some precision?
+*)
+let compare_double_strings s s' =
+ (* convert both to lowercase to handle INF in different casing *)
+ let s = String.lowercase_ascii s in
+ let s' = String.lowercase_ascii s' in
+ if s=s' then true
+ else match Scanf.sscanf s "%f" (fun x -> Some x),
+            Scanf.sscanf s' "%f" (fun x -> Some x) with
+      | Some f, Some f' -> f = f'
+      | _, _ -> false
+      | exception _ -> false
+
 (* If `false`, then `UnsetL` instructions cannot be reordered. *)
 let lax_unset = ref false
 
@@ -647,17 +661,6 @@ let check_instruct_basic i i' =
   | Nop, _ | EntryNop, _ | PopC, _ | PopV, _ | PopR, _ | PopU, _ | Dup, _
   | Box, _ | Unbox, _ | BoxR, _ | UnboxR, _ | UnboxRNop, _ | RGetCNop, _ ->
     if i=i' then Some () else None
-
-(* comparison of string representation of doubles
-   TODO: should be up to some precision?
-*)
-let compare_double_strings s s' =
- if s=s' then true
- else match Scanf.sscanf s "%f" (fun x -> Some x),
-            Scanf.sscanf s' "%f" (fun x -> Some x) with
-      | Some f, Some f' -> f = f'
-      | _, _ -> false
-      | exception _ -> false
 
 let check_instruct_lit_const asn i i' =
   match i, i' with
@@ -1276,6 +1279,37 @@ let equiv prog prog' startlabelpairs =
         let newpc' = (hs_of_pc pc', n') in
           check newpc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
 
+    let negative_int_or_double = uIntOrDouble $? begin function
+      | Int v -> v < 0L
+      | Double s -> String.get s 0 = '-'
+      | _ -> assert false
+    end in
+
+    let positive_int_or_double = uIntOrDouble $? begin function
+      | Int v -> v >= 0L
+      | Double s -> String.get s 0 <> '-'
+      | _ -> assert false
+    end in
+
+    let zero_minus_number =
+      uInt0 $$ positive_int_or_double $$ uSub
+      $> (fun ((_, v), _) -> match v with
+          | Int v -> Int (Int64.sub 0L v)
+          | Double s -> Double ("-" ^ s)
+          | _ -> assert false) in
+
+    let negative_number_vs_zero_minus_action =
+      negative_int_or_double $*$| zero_minus_number
+      $? (fun (l1, l2) -> match l1, l2 with
+          | Int v1, Int v2 -> v1 = v2
+          | Double s1, Double s2 -> compare_double_strings s1 s2
+          | _ -> false)
+      $> (fun (s,_) -> s)
+      $>> (fun _s ((_,n), (_,n')) ->
+        let newpc = (hs_of_pc pc, n) in
+        let newpc' = (hs_of_pc pc', n') in
+          check newpc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
+
      (* genuinely flipped conditional branches *)
      let flipped_jump_pattern = (uJmpZ $*$ uJmpNZ) $| (uJmpNZ $*$ uJmpZ) in
      let flipped_jump_action =
@@ -1598,6 +1632,7 @@ let equiv prog prog' startlabelpairs =
       two_vget_binds_action;
       issetl_jmpz_action_left;
       issetl_jmpz_action_right;
+      negative_number_vs_zero_minus_action;
       failure_pattern_action;
       ] in
     bigmatch_action ((prog_array, ip_of_pc pc),(prog_array', ip_of_pc pc'))

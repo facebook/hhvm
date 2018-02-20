@@ -65,6 +65,13 @@ let uRetV = pa (function | IContFlow (RetV) -> Some () | _ -> None)
 let uPrint = pa (function | IOp Print -> Some () | _ -> None)
 let uBindS = pa (function | IMutator (BindS cid) -> Some cid | _ -> None)
 let uIssetL = pa (function | IIsset (IssetL loc) -> Some loc | _ -> None)
+let uInt0 = pa (function | ILitConst (Int 0L) -> Some () | _ -> None)
+let uSub = pa (function | IOp (Sub | SubO) -> Some () | _ -> None)
+let uIntOrDouble = pa (function
+  | ILitConst ((Int _ | Double _) as v) -> Some v
+  | ILitConst ((Cns s))
+    when String.lowercase_ascii (Hhbc_id.Const.to_raw_string s) = "inf" -> Some (Double "inf")
+  | _ -> None)
 (* trivial parser, always succeds, reads nothing *)
 let parse_any inp = Some ((),inp)
 

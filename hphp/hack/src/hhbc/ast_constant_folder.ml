@@ -353,14 +353,20 @@ let unop_on_value unop v =
 let binop_on_values binop v1 v2 =
   match binop with
   | A.Dot -> TV.concat v1 v2
-  (* temporarily disabled *)
-  (* | A.Plus -> TV.add v1 v2
+  | A.Plus -> TV.add v1 v2
   | A.Minus -> TV.sub v1 v2
   | A.Star -> TV.mul v1 v2
+  | A.Ltlt -> TV.shift_left v1 v2
   | A.Slash -> TV.div v1 v2
+  | A.Bar -> TV.bitwise_or v1 v2
+  (* temporarily disabled *)
+  (*
+  | A.Gtgt -> TV.shift_right v1 v2
+  | A.Star -> TV.mul v1 v2
+
   | A.Percent -> TV.rem v1 v2
   | A.Amp -> TV.bitwise_and v1 v2
-  | A.Bar -> TV.bitwise_or v1 v2
+
   | A.LogXor -> TV.logical_xor v1 v2
   | A.Xor -> TV.bitwise_xor v1 v2
   | A.AMpamp -> TV.logical_and v1 v2
@@ -369,8 +375,6 @@ let binop_on_values binop v1 v2 =
   | A.EQeqeq -> TV.eqeqeq v1 v2
   | A.Diff -> TV.diff v1 v2
   | A.Diff2 -> TV.diff2 v1 v2
-  | A.Gtgt -> TV.shift_right v1 v2
-  | A.Ltlt -> TV.shift_left v1 v2
   | A.Gt -> TV.greater_than v1 v2
   | A.Gte -> TV.greater_than_equals v1 v2
   | A.Lt -> TV.less_than v1 v2

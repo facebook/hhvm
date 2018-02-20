@@ -136,7 +136,6 @@ let to_int v =
     end
   | Int i -> Some i
   | Float f ->
-
     let fpClass = classify_float f in
     begin match fpClass with
       (* Here's a handy dandy chart of all possible values based on language
@@ -156,9 +155,15 @@ let to_int v =
         if f = infinity || php7_int_semantics () then
         Some Int64.zero else Some Int64.min_int
       | _ ->
-      (* TODO: get this right. It's unlikely that Caml and
-       * PHP semantics match up *)
-      (try Some (Int64.of_float f) with Failure _ -> None)
+      (* mimic double-to-int64.h *)
+      let cast v = try Some (Int64.of_float v) with Failure _ -> None in
+      if f >= 0.0 then
+      begin
+        if f < Int64.to_float Int64.max_int
+        then cast f
+        else Some 0L
+      end
+      else cast f
     end
   | _ ->
     Some (if to_bool v then Int64.one else Int64.zero)
@@ -218,10 +223,33 @@ let sub_int i1 i2 =
   then Some (Int (Int64.sub i1 i2))
   else None
 
+(* Arithmetic. For now, only on pure integer or float operands *)
+let sub v1 v2 =
+  match v1, v2 with
+  | Int i1, Int i2 -> sub_int i1 i2
+  | Float f1, Float f2 -> Some (Float (f1 -. f2))
+  | _ -> None
+
 let mul_int i1 i2 =
   if ints_overflow_to_ints ()
   then Some (Int (Int64.mul i1 i2))
   else None
+
+(* Arithmetic. For now, only on pure integer or float operands *)
+let mul v1 v2 =
+  match v1, v2 with
+  | Int i1, Int i2 -> mul_int i1 i2
+  | Float f1, Float f2 -> Some (Float (f1 *. f2))
+  | _ ->  None
+
+(* Arithmetic. For now, only on pure integer or float operands *)
+let div v1 v2 =
+  match v1, v2 with
+  | Int i1, Int i2 when i2 <> 0L ->
+    if Int64.rem i1 i2 = 0L then Some (Int (Int64.div i1 i2))
+    else Some (Float (Int64.to_float i1 /. Int64.to_float i2))
+  | Float f1, Float f2 when f2 <> 0.0 -> Some (Float (f1 /. f2))
+  | _ ->  None
 
 (* Arithmetic. For now, only on pure integer or float operands *)
 let add v1 v2 =
@@ -230,10 +258,20 @@ let add v1 v2 =
   | Int i1, Int i2 -> add_int i1 i2
   | _, _ -> None
 
-let shift f v1 v2 =
-  match Option.both (to_int v1) (to_int v2) with
-  | Some (l, r) when r > 0L ->
-    Some (Int (f l (Int64.to_int r)))
+let shift_left v1 v2 =
+  match v1, v2 with
+  | Int i1, Int i2 when i2 > 0L && (i2 < 64L || not @@ php7_int_semantics()) ->
+    begin try
+      let v = Int64.to_int i2 in
+      Some (Int (Int64.shift_left i1 v))
+    with _ -> None
+    end
+  | _ -> None
+
+(* Arithmetic. For now, only on pure integer operands *)
+let bitwise_or v1 v2 =
+  match v1, v2 with
+  | Int i1, Int i2 -> Some (Int (Int64.logor i1 i2))
   | _ -> None
 
 (* String concatenation *)

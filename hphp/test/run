@@ -40,6 +40,15 @@ function usage() {
   return "usage: $argv[0] [-m jit|interp] [-r] <test/directories>";
 }
 
+function suppress_opts_for_codegen_test($test) {
+  $opts_file = $test . ".opts";
+  if (!file_exists($opts_file)) {
+    return true;
+  }
+  $content = file_get_contents($opts_file);
+  return preg_match("/Eval\.DisableHphpcOpts=0/i", $content) !== 1;
+}
+
 function help() {
   global $argv;
   $ztestexample = 'test/zend/good/*/*z*.php'; // sep. for syntax highlighting.
@@ -262,13 +271,13 @@ function hhvm_path() {
   return rel_path($file);
 }
 
-function hh_codegen_cmd($options, $config_file = null) {
+function hh_codegen_cmd($options, $config_file = null, $disable_hphpc_opts = true) {
   $cmd = hh_codegen_path();
   if (isset($config_file)) {
     $cmd .= ' -c "'.$config_file.'"';
   }
   $cmd .= ' -v Hack.Compiler.SourceMapping=1 ';
-  if (isset($options['compare-hh-codegen'])) {
+  if (isset($options['compare-hh-codegen']) && $disable_hphpc_opts) {
     $cmd .= '-v Eval.DisableHphpcOpts=1';
   }
   if (isset($options['hackc'])) {
@@ -853,6 +862,7 @@ function extra_args($options) {
 function hhvm_cmd_impl() {
   $args = func_get_args();
   $options = array_shift($args);
+  $disable_hphpc_opts = array_shift($args);
   $config = array_shift($args);
   $extra_args = $args;
   $modes = (array)mode_cmd($options);
@@ -899,7 +909,9 @@ function hhvm_cmd_impl() {
     }
 
     if (isset($options['compare-hh-codegen'])) {
-      $args[] = '-vEval.DisableHphpcOpts=1';
+      if ($disable_hphpc_opts) {
+        $args[] = '-vEval.DisableHphpcOpts=1';
+      }
       $args[] = '-vEval.DisassemblerSourceMapping=1';
       $args[] = '-vEval.CreateInOutWrapperFunctions=0';
 
@@ -929,8 +941,10 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   $hdf = file_exists($test.$hdf_suffix)
        ? '-c ' . $test . $hdf_suffix
        : "";
+  $disable_hphpc_opts = suppress_opts_for_codegen_test($test);
   $cmds = hhvm_cmd_impl(
     $options,
+    $disable_hphpc_opts,
     find_test_ext($test, 'ini'),
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
@@ -1702,15 +1716,15 @@ function dump_hh_codegen($options, $test, $test_config) {
   if (isset($options['repo'])) {
     return dump_repo_to_hhas_files($test, "hackc", $temp_file);
   }
-
+  $disable_hphpc_opts = suppress_opts_for_codegen_test($test);
   $msgs_file = $test.'.hhcodegen_messages';
   if ($test_config) {
     $test_config_file = $test.'.hhcodegen_config.json';
     file_put_contents($test_config_file, $test_config);
-    $cmd = hh_codegen_cmd($options, $test_config_file);
+    $cmd = hh_codegen_cmd($options, $test_config_file, $disable_hphpc_opts);
   }
   else {
-    $cmd = hh_codegen_cmd($options);
+    $cmd = hh_codegen_cmd($options, null, $disable_hphpc_opts);
   }
   system("/usr/bin/timeout 300 $cmd $test > $temp_file 2> $msgs_file", $ret);
   return $ret === 0 ? $temp_file : false;
@@ -2742,6 +2756,7 @@ function start_server_proc($options, $config, $port) {
     : '-vServer.ThreadCount='.$threads;
   $command = hhvm_cmd_impl(
     $options,
+    true, /*$disable_hphpc_opts*/
     $config,
     '-m', 'server',
     "-vServer.Port=$port",

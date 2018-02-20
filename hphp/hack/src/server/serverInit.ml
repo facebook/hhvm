@@ -318,7 +318,8 @@ module ServerInitCommon = struct
 
   let type_check genv env fast t =
     if ServerArgs.ai_mode genv.options <> None then env, t
-    else if is_check_mode genv.options then begin
+    else if is_check_mode genv.options ||
+        (ServerArgs.save_filename genv.options <> None) then begin
       let count = Relative_path.Map.cardinal fast in
       let logstring = Printf.sprintf "Type-check %d files" count in
       Hh_logger.log "Begin %s" logstring;

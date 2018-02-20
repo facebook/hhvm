@@ -8,7 +8,4 @@
  *
  *)
 
-module Syntax = Full_fidelity_minimal_syntax
-module SyntaxParser = Full_fidelity_parser.WithSyntax(Syntax)
-module SC = Full_fidelity_syntax_smart_constructors.WithSyntax(Syntax)
-include SyntaxParser.WithSmartConstructors(SC)
+include Full_fidelity_parser.WithSyntax(Full_fidelity_minimal_syntax)

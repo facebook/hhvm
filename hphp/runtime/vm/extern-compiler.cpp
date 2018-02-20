@@ -531,10 +531,10 @@ void ExternCompiler::start() {
   }
 
   if (m_pid == kInvalidPid) {
-    throw BadCompilerException(
-      folly::to<std::string>(
-        "Unable to start external compiler with command: ",
-        m_options.command));
+    const auto msg = folly::to<std::string>(
+      "Unable to start external compiler with command: ", m_options.command);
+    Logger::Error(msg);
+    throw BadCompilerException(msg);
   }
 
   m_in = in.detach("w");

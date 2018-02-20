@@ -726,7 +726,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S)
   let make_missing s o stack = (Syntax.make_missing s o) :: stack, ()
   let make_list s o items stack =
     let (h, t) = Core_list.split_n stack (List.length items) in
-    (Syntax.make_list s o h) :: t, ()
+    (Syntax.make_list s o (List.rev h)) :: t, ()
 CONSTRUCTOR_METHODS
 end (* WithSyntax *)
 "

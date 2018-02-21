@@ -1594,7 +1594,9 @@ and emit_callconv _env kind _e =
 and emit_inline_hhas s =
   let lexer = Lexing.from_string (s ^ "\n") in
   try
-    let instrs = Hhas_parser.functionbody Hhas_lexer.read lexer in
+    let asm = Hhas_parser.functionbodywithdirectives Hhas_lexer.read lexer in
+    let instrs =
+      Label_rewriter.clone_with_fresh_regular_labels @@ Hhas_asm.instrs asm in
     (* TODO: handle case when code after inline hhas is unreachable
       i.e. fallthrough return should not be emitted *)
     match get_estimated_stack_depth instrs with

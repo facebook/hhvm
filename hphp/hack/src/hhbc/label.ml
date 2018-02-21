@@ -22,7 +22,7 @@ let id label =
   | Catch id
   | Fault id
   | DefaultArg id -> id
-  | Named _ -> failwith "Label should be rewritten before this point"
+  | Named _ -> failwith "Label should be rewritten before this point (id)"
 
 let option_map f label =
   match label with
@@ -34,7 +34,8 @@ let option_map f label =
     begin match f id with None -> None | Some id -> Some (Fault id) end
   | DefaultArg id ->
     begin match f id with None -> None | Some id -> Some (DefaultArg id) end
-  | Named _ -> failwith "Label should be rewritten before this point"
+  | Named _ ->
+    failwith "Label should be rewritten before this point (option_map)"
 
 let map f label =
   match label with
@@ -42,7 +43,7 @@ let map f label =
   | Catch id -> Catch (f id)
   | Fault id -> Fault (f id)
   | DefaultArg id -> DefaultArg (f id)
-  | Named _ -> failwith "Label should be rewritten before this point"
+  | Named _ -> failwith "Label should be rewritten before this point (map)"
 
 (* Numbers for string label *)
 let next_label = ref 0

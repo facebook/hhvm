@@ -52,8 +52,8 @@ open Hhas_parser_actions
 
 %start program
 %type <Hhas_program.t> program
-%start functionbody
-%type <Instruction_sequence.t> functionbody
+%start functionbodywithdirectives
+%type <Hhas_asm.t> functionbodywithdirectives
 %%
 program:
     nl decllist nl EOF { split_decl_list $2 false false [] [] None [] [] Hhas_symbol_refs.IncludePathSet.empty SSet.empty SSet.empty SSet.empty}
@@ -78,12 +78,11 @@ aliasdecl:
         (Some (attribute_from_string $6))}
 ;
 maindecl:
-    | MAINDIRECTIVE span LBRACE nl numiters ismemoizewrapper numclsrefslots declvars statics nl
-      functionbody RBRACE nl
-      {Hhas_body.make $11(*instrs*)
-        $8(*declvars*) $5(*numiters*)
-        $7(*numclsrefslots*) $6(*ismemoizewrapper*)
-        [](*params*) None(*return type*) $9 (*static_inits*)
+    | MAINDIRECTIVE span LBRACE nl functionbodywithdirectives RBRACE nl
+      {Hhas_body.make (Hhas_asm.instrs $5)
+        (Hhas_asm.decl_vars $5) (Hhas_asm.num_iters $5)
+        (Hhas_asm.num_cls_ref_slots $5) (Hhas_asm.is_memoize_wrapper $5)
+        [](*params*) None(*return type*) (Hhas_asm.static_inits $5)
         None (* doc *) None (* env *)}
 ;
 numiters:
@@ -99,22 +98,21 @@ nonclassattribute:
 ;
 fundecl:
     | FUNCTIONDIRECTIVE attributes span typeinfooption ID fparams
-      functionflags LBRACE nl numiters ismemoizewrapper numclsrefslots declvars statics
-      functionbody RBRACE
+      functionflags LBRACE nl functionbodywithdirectives RBRACE
         {
           let user_attrs, attrs = $2 in
           Hhas_function.make
             user_attrs (*attributes*)
             (Hhbc_id.Function.from_raw_string $5) (*name*)
             (Hhas_body.make
-              $15 (*instrs*)
-              $13 (*declvars*)
-              $10 (*numiters*)
-              $12 (*numclsrefslots *)
-              $11 (*ismemoizewrapper*)
+              (Hhas_asm.instrs $10)
+              (Hhas_asm.decl_vars $10)
+              (Hhas_asm.num_iters $10)
+              (Hhas_asm.num_cls_ref_slots $10)
+              (Hhas_asm.is_memoize_wrapper $10)
               $6 (*params*)
               $4 (*typeinfo*)
-              $14 (*static_inits*)
+              (Hhas_asm.static_inits $10)
               None (* doc *)
               None (* env *)
             )
@@ -249,8 +247,8 @@ methodname:
  | ID {$1}
 ;
 methoddecl:
- | METHODDIRECTIVE attributes span typeinfooption methodname fparams idlist LBRACE nl
-    numiters ismemoizewrapper numclsrefslots declvars statics functionbody RBRACE nl
+ | METHODDIRECTIVE attributes span typeinfooption methodname fparams idlist
+    LBRACE nl functionbodywithdirectives RBRACE nl
   {Hhas_method.make
     (fst $2) (* attributes *)
     (List.mem "protected" (snd $2))
@@ -263,14 +261,14 @@ methoddecl:
     (List.mem "inout_wrapper" (snd $2))
     (Hhbc_id.Method.from_raw_string $5) (* name *)
     (Hhas_body.make
-      $15 (* method instructions *)
-      $13 (* declvars *)
-      $10 (* numiters *)
-      $12 (* num cls ref slots *)
-      $11 (* ismemoizewrapper *)
+      (Hhas_asm.instrs $10)
+      (Hhas_asm.decl_vars $10)
+      (Hhas_asm.num_iters $10)
+      (Hhas_asm.num_cls_ref_slots $10)
+      (Hhas_asm.is_memoize_wrapper $10)
       $6 (* params *)
       $4 (* return type *)
-      $14 (* static_inits *)
+      (Hhas_asm.static_inits $10)
       None (* doc *)
       None (* env *)
       )
@@ -478,6 +476,10 @@ enumtypeinfo:
 optionalint:
     /* empty */ { None }
     | INT { Some $1 }
+;
+functionbodywithdirectives:
+    | numiters ismemoizewrapper numclsrefslots declvars statics nl functionbody
+      {Hhas_asm.make $7 $4 $1 $3 $2 $5}
 ;
 functionbody:
     | /* empty */ {Instruction_sequence.empty}

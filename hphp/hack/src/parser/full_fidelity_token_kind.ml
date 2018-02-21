@@ -60,6 +60,7 @@ type t =
   | Endforeach
   | Enddeclare
   | Endif
+  | Endswitch
   | Endwhile
   | Enum
   | Eval
@@ -271,6 +272,7 @@ let from_string keyword =
   | "endforeach"      -> Some Endforeach
   | "enddeclare"      -> Some Enddeclare
   | "endif"           -> Some Endif
+  | "endswitch"       -> Some Endswitch
   | "endwhile"        -> Some Endwhile
   | "enum"            -> Some Enum
   | "eval"            -> Some Eval
@@ -454,6 +456,7 @@ let to_string kind =
   | Endforeach                    -> "endforeach"
   | Enddeclare                    -> "enddeclare"
   | Endif                         -> "endif"
+  | Endswitch                     -> "endswitch"
   | Endwhile                      -> "endwhile"
   | Enum                          -> "enum"
   | Eval                          -> "eval"

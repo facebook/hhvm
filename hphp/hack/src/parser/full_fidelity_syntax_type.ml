@@ -544,6 +544,16 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; switch_sections                                    : t
     ; switch_right_brace                                 : t
     }
+  | AlternateSwitchStatement                of
+    { alternate_switch_keyword                           : t
+    ; alternate_switch_left_paren                        : t
+    ; alternate_switch_expression                        : t
+    ; alternate_switch_right_paren                       : t
+    ; alternate_switch_opening_colon                     : t
+    ; alternate_switch_sections                          : t
+    ; alternate_switch_closing_endswitch                 : t
+    ; alternate_switch_closing_semicolon                 : t
+    }
   | SwitchSection                           of
     { switch_section_labels                              : t
     ; switch_section_statements                          : t
@@ -1255,6 +1265,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtFor                          of for_statement
   | StmtForeach                      of foreach_statement
   | StmtSwitch                       of switch_statement
+  | StmtAlternateSwitch              of alternate_switch_statement
   | StmtSwitchFallthrough            of switch_fallthrough
   | StmtReturn                       of return_statement
   | StmtGotoLabel                    of goto_label
@@ -1781,6 +1792,16 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; switch_left_brace: Token.t value
     ; switch_sections: switch_section listesque value
     ; switch_right_brace: Token.t value
+    }
+  and alternate_switch_statement =
+    { alternate_switch_keyword: Token.t value
+    ; alternate_switch_left_paren: Token.t value
+    ; alternate_switch_expression: expression value
+    ; alternate_switch_right_paren: Token.t value
+    ; alternate_switch_opening_colon: Token.t value
+    ; alternate_switch_sections: switch_section listesque value
+    ; alternate_switch_closing_endswitch: Token.t value
+    ; alternate_switch_closing_semicolon: Token.t value
     }
   and switch_section =
     { switch_section_labels: switch_label listesque value

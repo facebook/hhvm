@@ -431,6 +431,16 @@ module type Syntax_S = sig
     ; switch_sections                                    : t
     ; switch_right_brace                                 : t
     }
+  | AlternateSwitchStatement                of
+    { alternate_switch_keyword                           : t
+    ; alternate_switch_left_paren                        : t
+    ; alternate_switch_expression                        : t
+    ; alternate_switch_right_paren                       : t
+    ; alternate_switch_opening_colon                     : t
+    ; alternate_switch_sections                          : t
+    ; alternate_switch_closing_endswitch                 : t
+    ; alternate_switch_closing_semicolon                 : t
+    }
   | SwitchSection                           of
     { switch_section_labels                              : t
     ; switch_section_statements                          : t
@@ -1073,6 +1083,7 @@ module type Syntax_S = sig
   val make_for_statement : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_foreach_statement : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_switch_statement : t -> t -> t -> t -> t -> t -> t -> t
+  val make_alternate_switch_statement : t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_switch_section : t -> t -> t -> t
   val make_switch_fallthrough : t -> t -> t
   val make_case_label : t -> t -> t -> t
@@ -1241,6 +1252,7 @@ module type Syntax_S = sig
   val is_for_statement : t -> bool
   val is_foreach_statement : t -> bool
   val is_switch_statement : t -> bool
+  val is_alternate_switch_statement : t -> bool
   val is_switch_section : t -> bool
   val is_switch_fallthrough : t -> bool
   val is_case_label : t -> bool

@@ -1291,6 +1291,7 @@ module WithStatementAndDeclAndTypeParser
     | Endforeach
     | Enddeclare
     | Endif
+    | Endswitch
     | Endwhile
     | Enum
     | Eval

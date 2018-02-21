@@ -113,6 +113,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val for_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val foreach_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val switch_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val alternate_switch_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val switch_section : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val switch_fallthrough : t -> SC.r -> SC.r -> t * SC.r
         val case_label : t -> SC.r -> SC.r -> SC.r -> t * SC.r

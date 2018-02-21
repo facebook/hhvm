@@ -876,6 +876,23 @@ let schema : schema_node list =
       ; "right_brace", Token
       ]
     }
+  ; { kind_name   = "AlternateSwitchStatement"
+    ; type_name   = "alternate_switch_statement"
+    ; func_name   = "alternate_switch_statement"
+    ; description = "alternate_switch_statement"
+    ; prefix      = "alternate_switch"
+    ; aggregates  = [ Statement ]
+    ; fields =
+      [ "keyword", Token
+      ; "left_paren", Token
+      ; "expression", Aggregate Expression
+      ; "right_paren", Token
+      ; "opening_colon", Token
+      ; "sections", ZeroOrMore (Just "SwitchSection")
+      ; "closing_endswitch", Token
+      ; "closing_semicolon", Token
+      ]
+    }
   ; { kind_name   = "SwitchSection"
     ; type_name   = "switch_section"
     ; func_name   = "switch_section"

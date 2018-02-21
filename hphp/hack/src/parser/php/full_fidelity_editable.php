@@ -276,6 +276,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return ForeachStatement::from_json($json, $position, $source);
     case 'switch_statement':
       return SwitchStatement::from_json($json, $position, $source);
+    case 'alternate_switch_statement':
+      return AlternateSwitchStatement::from_json($json, $position, $source);
     case 'switch_section':
       return SwitchSection::from_json($json, $position, $source);
     case 'switch_fallthrough':
@@ -881,6 +883,8 @@ abstract class EditableToken extends EditableSyntax {
        return new EnddeclareToken($leading, $trailing);
     case 'endif':
        return new EndifToken($leading, $trailing);
+    case 'endswitch':
+       return new EndswitchToken($leading, $trailing);
     case 'endwhile':
        return new EndwhileToken($leading, $trailing);
     case 'enum':
@@ -1860,6 +1864,21 @@ final class EndifToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): EndifToken {
     return new EndifToken($this->leading(), $trailing);
+  }
+}
+final class EndswitchToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('endswitch', $leading, $trailing, 'endswitch');
+  }
+
+  public function with_leading(EditableSyntax $leading): EndswitchToken {
+    return new EndswitchToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): EndswitchToken {
+    return new EndswitchToken($this->leading(), $trailing);
   }
 }
 final class EndwhileToken extends EditableToken {
@@ -12513,6 +12532,231 @@ final class SwitchStatement extends EditableSyntax {
     yield $this->_left_brace;
     yield $this->_sections;
     yield $this->_right_brace;
+    yield break;
+  }
+}
+final class AlternateSwitchStatement extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_paren;
+  private EditableSyntax $_expression;
+  private EditableSyntax $_right_paren;
+  private EditableSyntax $_opening_colon;
+  private EditableSyntax $_sections;
+  private EditableSyntax $_closing_endswitch;
+  private EditableSyntax $_closing_semicolon;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_paren,
+    EditableSyntax $expression,
+    EditableSyntax $right_paren,
+    EditableSyntax $opening_colon,
+    EditableSyntax $sections,
+    EditableSyntax $closing_endswitch,
+    EditableSyntax $closing_semicolon) {
+    parent::__construct('alternate_switch_statement');
+    $this->_keyword = $keyword;
+    $this->_left_paren = $left_paren;
+    $this->_expression = $expression;
+    $this->_right_paren = $right_paren;
+    $this->_opening_colon = $opening_colon;
+    $this->_sections = $sections;
+    $this->_closing_endswitch = $closing_endswitch;
+    $this->_closing_semicolon = $closing_semicolon;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_paren(): EditableSyntax {
+    return $this->_left_paren;
+  }
+  public function expression(): EditableSyntax {
+    return $this->_expression;
+  }
+  public function right_paren(): EditableSyntax {
+    return $this->_right_paren;
+  }
+  public function opening_colon(): EditableSyntax {
+    return $this->_opening_colon;
+  }
+  public function sections(): EditableSyntax {
+    return $this->_sections;
+  }
+  public function closing_endswitch(): EditableSyntax {
+    return $this->_closing_endswitch;
+  }
+  public function closing_semicolon(): EditableSyntax {
+    return $this->_closing_semicolon;
+  }
+  public function with_keyword(EditableSyntax $keyword): AlternateSwitchStatement {
+    return new AlternateSwitchStatement(
+      $keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $this->_opening_colon,
+      $this->_sections,
+      $this->_closing_endswitch,
+      $this->_closing_semicolon);
+  }
+  public function with_left_paren(EditableSyntax $left_paren): AlternateSwitchStatement {
+    return new AlternateSwitchStatement(
+      $this->_keyword,
+      $left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $this->_opening_colon,
+      $this->_sections,
+      $this->_closing_endswitch,
+      $this->_closing_semicolon);
+  }
+  public function with_expression(EditableSyntax $expression): AlternateSwitchStatement {
+    return new AlternateSwitchStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $expression,
+      $this->_right_paren,
+      $this->_opening_colon,
+      $this->_sections,
+      $this->_closing_endswitch,
+      $this->_closing_semicolon);
+  }
+  public function with_right_paren(EditableSyntax $right_paren): AlternateSwitchStatement {
+    return new AlternateSwitchStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $right_paren,
+      $this->_opening_colon,
+      $this->_sections,
+      $this->_closing_endswitch,
+      $this->_closing_semicolon);
+  }
+  public function with_opening_colon(EditableSyntax $opening_colon): AlternateSwitchStatement {
+    return new AlternateSwitchStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $opening_colon,
+      $this->_sections,
+      $this->_closing_endswitch,
+      $this->_closing_semicolon);
+  }
+  public function with_sections(EditableSyntax $sections): AlternateSwitchStatement {
+    return new AlternateSwitchStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $this->_opening_colon,
+      $sections,
+      $this->_closing_endswitch,
+      $this->_closing_semicolon);
+  }
+  public function with_closing_endswitch(EditableSyntax $closing_endswitch): AlternateSwitchStatement {
+    return new AlternateSwitchStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $this->_opening_colon,
+      $this->_sections,
+      $closing_endswitch,
+      $this->_closing_semicolon);
+  }
+  public function with_closing_semicolon(EditableSyntax $closing_semicolon): AlternateSwitchStatement {
+    return new AlternateSwitchStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $this->_opening_colon,
+      $this->_sections,
+      $this->_closing_endswitch,
+      $closing_semicolon);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
+    $expression = $this->expression()->rewrite($rewriter, $new_parents);
+    $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
+    $opening_colon = $this->opening_colon()->rewrite($rewriter, $new_parents);
+    $sections = $this->sections()->rewrite($rewriter, $new_parents);
+    $closing_endswitch = $this->closing_endswitch()->rewrite($rewriter, $new_parents);
+    $closing_semicolon = $this->closing_semicolon()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $expression === $this->expression() &&
+      $right_paren === $this->right_paren() &&
+      $opening_colon === $this->opening_colon() &&
+      $sections === $this->sections() &&
+      $closing_endswitch === $this->closing_endswitch() &&
+      $closing_semicolon === $this->closing_semicolon()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new AlternateSwitchStatement(
+        $keyword,
+        $left_paren,
+        $expression,
+        $right_paren,
+        $opening_colon,
+        $sections,
+        $closing_endswitch,
+        $closing_semicolon), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->alternate_switch_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_paren = EditableSyntax::from_json(
+      $json->alternate_switch_left_paren, $position, $source);
+    $position += $left_paren->width();
+    $expression = EditableSyntax::from_json(
+      $json->alternate_switch_expression, $position, $source);
+    $position += $expression->width();
+    $right_paren = EditableSyntax::from_json(
+      $json->alternate_switch_right_paren, $position, $source);
+    $position += $right_paren->width();
+    $opening_colon = EditableSyntax::from_json(
+      $json->alternate_switch_opening_colon, $position, $source);
+    $position += $opening_colon->width();
+    $sections = EditableSyntax::from_json(
+      $json->alternate_switch_sections, $position, $source);
+    $position += $sections->width();
+    $closing_endswitch = EditableSyntax::from_json(
+      $json->alternate_switch_closing_endswitch, $position, $source);
+    $position += $closing_endswitch->width();
+    $closing_semicolon = EditableSyntax::from_json(
+      $json->alternate_switch_closing_semicolon, $position, $source);
+    $position += $closing_semicolon->width();
+    return new AlternateSwitchStatement(
+        $keyword,
+        $left_paren,
+        $expression,
+        $right_paren,
+        $opening_colon,
+        $sections,
+        $closing_endswitch,
+        $closing_semicolon);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_paren;
+    yield $this->_expression;
+    yield $this->_right_paren;
+    yield $this->_opening_colon;
+    yield $this->_sections;
+    yield $this->_closing_endswitch;
+    yield $this->_closing_semicolon;
     yield break;
   }
 }

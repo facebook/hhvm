@@ -906,6 +906,26 @@ let rec get_doc node =
     let h = keyword ^| lparen ^| expr ^| rparen ^| space ^| lbrace in
     let h = add_break h in
     h ^| sections ^| rbrace
+  | AlternateSwitchStatement {
+    alternate_switch_keyword;
+    alternate_switch_left_paren;
+    alternate_switch_expression;
+    alternate_switch_right_paren;
+    alternate_switch_opening_colon;
+    alternate_switch_sections;
+    alternate_switch_closing_endswitch;
+    alternate_switch_closing_semicolon } ->
+    let keyword = get_doc alternate_switch_keyword in
+    let lparen= get_doc alternate_switch_left_paren in
+    let expr = get_doc alternate_switch_expression in
+    let rparen = get_doc alternate_switch_right_paren in
+    let colon = get_doc alternate_switch_opening_colon in
+    let sections = get_doc alternate_switch_sections in
+    let endswitch = get_doc alternate_switch_closing_endswitch in
+    let semicolon = get_doc alternate_switch_closing_semicolon in
+    let h = keyword ^| lparen ^| expr ^| rparen ^| colon in
+    let h = add_break h in
+    h ^| sections ^| endswitch ^| semicolon
   | SwitchSection {
     switch_section_labels;
     switch_section_statements;

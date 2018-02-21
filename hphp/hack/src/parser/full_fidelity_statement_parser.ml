@@ -603,22 +603,34 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, switch_keyword_token) = assert_token parser Switch in
     let (parser, left_paren_token, expr_node, right_paren_token) =
       parse_paren_expr parser in
-    let (parser, left_brace_token) = require_left_brace parser in
+    let (_, opening_token) = next_token parser in
+    let ((parser, opening_token_syntax), closing_token_kind) =
+    match Token.kind opening_token with
+    | Colon -> assert_token parser Colon, Endswitch
+    | _ -> require_left_brace parser, RightBrace in
     (* TODO: I'm not convinced that this always terminates in some cases.
     Check that. *)
     let (parser, section_list) =
       let (parser1, token) = next_token parser in
       match Token.kind token with
-      | Semicolon when peek_token_kind parser1 = RightBrace ->
+      | Semicolon when peek_token_kind parser1 = closing_token_kind ->
         parser1, make_list parser1 []
       | _ ->
-        parse_terminated_list parser parse_switch_section RightBrace
+        parse_terminated_list parser parse_switch_section closing_token_kind
     in
-    let (parser, right_brace_token) = require_right_brace parser in
-    let syntax = make_switch_statement switch_keyword_token left_paren_token
-      expr_node right_paren_token left_brace_token section_list
-      right_brace_token in
-    (parser, syntax)
+    match closing_token_kind with
+    | Endswitch ->
+      let (parser, endswitch_token_syntax) = require_token parser Endswitch
+        (SyntaxError.error1059 Endswitch) in
+      let (parser, semicolon) = require_semicolon parser in
+      parser, make_alternate_switch_statement switch_keyword_token
+        left_paren_token expr_node right_paren_token opening_token_syntax
+        section_list endswitch_token_syntax semicolon
+    | _ ->
+      let (parser, right_brace_token) = require_right_brace parser in
+      parser, make_switch_statement switch_keyword_token left_paren_token
+        expr_node right_paren_token opening_token_syntax section_list
+        right_brace_token
 
   and is_switch_fallthrough parser =
     peek_token_kind parser = Fallthrough &&
@@ -704,6 +716,7 @@ module WithExpressionAndDeclAndTypeParser
     | Default
     | Case
     | RightBrace
+    | Endswitch
     | TokenKind.EndOfFile -> (parser, None)
     | _ ->
       let (parser, statement) = parse_statement parser in

@@ -94,6 +94,7 @@ module type SmartConstructors_S = sig
   val make_for_statement : r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_foreach_statement : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_switch_statement : r -> r -> r -> r -> r -> r -> r -> t -> t * r
+  val make_alternate_switch_statement : r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_switch_section : r -> r -> r -> t -> t * r
   val make_switch_fallthrough : r -> r -> t -> t * r
   val make_case_label : r -> r -> r -> t -> t * r
@@ -272,6 +273,7 @@ end) = struct
     let for_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 = call parser (SCI.make_for_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8)
     let foreach_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 = call parser (SCI.make_foreach_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9)
     let switch_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 = call parser (SCI.make_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6)
+    let alternate_switch_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 = call parser (SCI.make_alternate_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7)
     let switch_section parser arg0 arg1 arg2 = call parser (SCI.make_switch_section arg0 arg1 arg2)
     let switch_fallthrough parser arg0 arg1 = call parser (SCI.make_switch_fallthrough arg0 arg1)
     let case_label parser arg0 arg1 arg2 = call parser (SCI.make_case_label arg0 arg1 arg2)

@@ -1011,6 +1011,24 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       braced_block_nest env left_b right_b (List.map sections (t env));
       Newline;
     ]
+  | Syntax.AlternateSwitchStatement {
+      alternate_switch_keyword = kw;
+      alternate_switch_left_paren = left_p;
+      alternate_switch_expression = expr;
+      alternate_switch_right_paren = right_p;
+      alternate_switch_opening_colon = colon;
+      alternate_switch_sections = sections;
+      alternate_switch_closing_endswitch = endswitch;
+      alternate_switch_closing_semicolon = semicolon; } ->
+    let sections = Syntax.syntax_node_to_list sections in
+    Concat [
+      t env kw;
+      Space;
+      delimited_nest env left_p right_p [t env expr];
+      Space;
+      coloned_block_nest env colon endswitch semicolon (List.map sections (t env));
+      Newline;
+    ]
   | Syntax.SwitchSection {
       switch_section_labels = labels;
       switch_section_statements = statements;

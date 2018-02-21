@@ -213,6 +213,8 @@ class EditableSyntax
       return ForeachStatement.from_json(json, position, source);
     case 'switch_statement':
       return SwitchStatement.from_json(json, position, source);
+    case 'alternate_switch_statement':
+      return AlternateSwitchStatement.from_json(json, position, source);
     case 'switch_section':
       return SwitchSection.from_json(json, position, source);
     case 'switch_fallthrough':
@@ -776,6 +778,8 @@ class EditableToken extends EditableSyntax
        return new EnddeclareToken(leading, trailing);
     case 'endif':
        return new EndifToken(leading, trailing);
+    case 'endswitch':
+       return new EndswitchToken(leading, trailing);
     case 'endwhile':
        return new EndwhileToken(leading, trailing);
     case 'enum':
@@ -1437,6 +1441,13 @@ class EndifToken extends EditableToken
   constructor(leading, trailing)
   {
     super('endif', leading, trailing, 'endif');
+  }
+}
+class EndswitchToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('endswitch', leading, trailing, 'endswitch');
   }
 }
 class EndwhileToken extends EditableToken
@@ -10358,6 +10369,214 @@ class SwitchStatement extends EditableSyntax
         'sections',
         'right_brace'];
     return SwitchStatement._children_keys;
+  }
+}
+class AlternateSwitchStatement extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_paren,
+    expression,
+    right_paren,
+    opening_colon,
+    sections,
+    closing_endswitch,
+    closing_semicolon)
+  {
+    super('alternate_switch_statement', {
+      keyword: keyword,
+      left_paren: left_paren,
+      expression: expression,
+      right_paren: right_paren,
+      opening_colon: opening_colon,
+      sections: sections,
+      closing_endswitch: closing_endswitch,
+      closing_semicolon: closing_semicolon });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get expression() { return this.children.expression; }
+  get right_paren() { return this.children.right_paren; }
+  get opening_colon() { return this.children.opening_colon; }
+  get sections() { return this.children.sections; }
+  get closing_endswitch() { return this.children.closing_endswitch; }
+  get closing_semicolon() { return this.children.closing_semicolon; }
+  with_keyword(keyword){
+    return new AlternateSwitchStatement(
+      keyword,
+      this.left_paren,
+      this.expression,
+      this.right_paren,
+      this.opening_colon,
+      this.sections,
+      this.closing_endswitch,
+      this.closing_semicolon);
+  }
+  with_left_paren(left_paren){
+    return new AlternateSwitchStatement(
+      this.keyword,
+      left_paren,
+      this.expression,
+      this.right_paren,
+      this.opening_colon,
+      this.sections,
+      this.closing_endswitch,
+      this.closing_semicolon);
+  }
+  with_expression(expression){
+    return new AlternateSwitchStatement(
+      this.keyword,
+      this.left_paren,
+      expression,
+      this.right_paren,
+      this.opening_colon,
+      this.sections,
+      this.closing_endswitch,
+      this.closing_semicolon);
+  }
+  with_right_paren(right_paren){
+    return new AlternateSwitchStatement(
+      this.keyword,
+      this.left_paren,
+      this.expression,
+      right_paren,
+      this.opening_colon,
+      this.sections,
+      this.closing_endswitch,
+      this.closing_semicolon);
+  }
+  with_opening_colon(opening_colon){
+    return new AlternateSwitchStatement(
+      this.keyword,
+      this.left_paren,
+      this.expression,
+      this.right_paren,
+      opening_colon,
+      this.sections,
+      this.closing_endswitch,
+      this.closing_semicolon);
+  }
+  with_sections(sections){
+    return new AlternateSwitchStatement(
+      this.keyword,
+      this.left_paren,
+      this.expression,
+      this.right_paren,
+      this.opening_colon,
+      sections,
+      this.closing_endswitch,
+      this.closing_semicolon);
+  }
+  with_closing_endswitch(closing_endswitch){
+    return new AlternateSwitchStatement(
+      this.keyword,
+      this.left_paren,
+      this.expression,
+      this.right_paren,
+      this.opening_colon,
+      this.sections,
+      closing_endswitch,
+      this.closing_semicolon);
+  }
+  with_closing_semicolon(closing_semicolon){
+    return new AlternateSwitchStatement(
+      this.keyword,
+      this.left_paren,
+      this.expression,
+      this.right_paren,
+      this.opening_colon,
+      this.sections,
+      this.closing_endswitch,
+      closing_semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var opening_colon = this.opening_colon.rewrite(rewriter, new_parents);
+    var sections = this.sections.rewrite(rewriter, new_parents);
+    var closing_endswitch = this.closing_endswitch.rewrite(rewriter, new_parents);
+    var closing_semicolon = this.closing_semicolon.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_paren === this.left_paren &&
+      expression === this.expression &&
+      right_paren === this.right_paren &&
+      opening_colon === this.opening_colon &&
+      sections === this.sections &&
+      closing_endswitch === this.closing_endswitch &&
+      closing_semicolon === this.closing_semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new AlternateSwitchStatement(
+        keyword,
+        left_paren,
+        expression,
+        right_paren,
+        opening_colon,
+        sections,
+        closing_endswitch,
+        closing_semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.alternate_switch_keyword, position, source);
+    position += keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.alternate_switch_left_paren, position, source);
+    position += left_paren.width;
+    let expression = EditableSyntax.from_json(
+      json.alternate_switch_expression, position, source);
+    position += expression.width;
+    let right_paren = EditableSyntax.from_json(
+      json.alternate_switch_right_paren, position, source);
+    position += right_paren.width;
+    let opening_colon = EditableSyntax.from_json(
+      json.alternate_switch_opening_colon, position, source);
+    position += opening_colon.width;
+    let sections = EditableSyntax.from_json(
+      json.alternate_switch_sections, position, source);
+    position += sections.width;
+    let closing_endswitch = EditableSyntax.from_json(
+      json.alternate_switch_closing_endswitch, position, source);
+    position += closing_endswitch.width;
+    let closing_semicolon = EditableSyntax.from_json(
+      json.alternate_switch_closing_semicolon, position, source);
+    position += closing_semicolon.width;
+    return new AlternateSwitchStatement(
+        keyword,
+        left_paren,
+        expression,
+        right_paren,
+        opening_colon,
+        sections,
+        closing_endswitch,
+        closing_semicolon);
+  }
+  get children_keys()
+  {
+    if (AlternateSwitchStatement._children_keys == null)
+      AlternateSwitchStatement._children_keys = [
+        'keyword',
+        'left_paren',
+        'expression',
+        'right_paren',
+        'opening_colon',
+        'sections',
+        'closing_endswitch',
+        'closing_semicolon'];
+    return AlternateSwitchStatement._children_keys;
   }
 }
 class SwitchSection extends EditableSyntax
@@ -20205,6 +20424,7 @@ exports.EndforToken = EndforToken;
 exports.EndforeachToken = EndforeachToken;
 exports.EnddeclareToken = EnddeclareToken;
 exports.EndifToken = EndifToken;
+exports.EndswitchToken = EndswitchToken;
 exports.EndwhileToken = EndwhileToken;
 exports.EnumToken = EnumToken;
 exports.EvalToken = EvalToken;
@@ -20450,6 +20670,7 @@ exports.DoStatement = DoStatement;
 exports.ForStatement = ForStatement;
 exports.ForeachStatement = ForeachStatement;
 exports.SwitchStatement = SwitchStatement;
+exports.AlternateSwitchStatement = AlternateSwitchStatement;
 exports.SwitchSection = SwitchSection;
 exports.SwitchFallthrough = SwitchFallthrough;
 exports.CaseLabel = CaseLabel;

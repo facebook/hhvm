@@ -86,6 +86,7 @@ type t =
   | ForStatement
   | ForeachStatement
   | SwitchStatement
+  | AlternateSwitchStatement
   | SwitchSection
   | SwitchFallthrough
   | CaseLabel
@@ -256,6 +257,7 @@ let to_string kind =
   | ForStatement                            -> "for_statement"
   | ForeachStatement                        -> "foreach_statement"
   | SwitchStatement                         -> "switch_statement"
+  | AlternateSwitchStatement                -> "alternate_switch_statement"
   | SwitchSection                           -> "switch_section"
   | SwitchFallthrough                       -> "switch_fallthrough"
   | CaseLabel                               -> "case_label"

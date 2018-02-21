@@ -163,6 +163,8 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S)
   
   let make_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 () = (), Syntax.make_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6
   
+  let make_alternate_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 () = (), Syntax.make_alternate_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7
+  
   let make_switch_section arg0 arg1 arg2 () = (), Syntax.make_switch_section arg0 arg1 arg2
   
   let make_switch_fallthrough arg0 arg1 () = (), Syntax.make_switch_fallthrough arg0 arg1

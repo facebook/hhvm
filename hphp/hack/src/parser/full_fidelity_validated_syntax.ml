@@ -385,6 +385,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ForStatement _ -> tag validate_for_statement (fun x -> StmtFor x) x
     | Syntax.ForeachStatement _ -> tag validate_foreach_statement (fun x -> StmtForeach x) x
     | Syntax.SwitchStatement _ -> tag validate_switch_statement (fun x -> StmtSwitch x) x
+    | Syntax.AlternateSwitchStatement _ -> tag validate_alternate_switch_statement (fun x -> StmtAlternateSwitch x) x
     | Syntax.SwitchFallthrough _ -> tag validate_switch_fallthrough (fun x -> StmtSwitchFallthrough x) x
     | Syntax.ReturnStatement _ -> tag validate_return_statement (fun x -> StmtReturn x) x
     | Syntax.GotoLabel _ -> tag validate_goto_label (fun x -> StmtGotoLabel x) x
@@ -418,6 +419,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtFor                          thing -> invalidate_for_statement                  (value, thing)
     | StmtForeach                      thing -> invalidate_foreach_statement              (value, thing)
     | StmtSwitch                       thing -> invalidate_switch_statement               (value, thing)
+    | StmtAlternateSwitch              thing -> invalidate_alternate_switch_statement     (value, thing)
     | StmtSwitchFallthrough            thing -> invalidate_switch_fallthrough             (value, thing)
     | StmtReturn                       thing -> invalidate_return_statement               (value, thing)
     | StmtGotoLabel                    thing -> invalidate_goto_label                     (value, thing)
@@ -1867,6 +1869,32 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; switch_left_brace = invalidate_token x.switch_left_brace
       ; switch_sections = invalidate_list_with (invalidate_switch_section) x.switch_sections
       ; switch_right_brace = invalidate_token x.switch_right_brace
+      }
+    ; Syntax.value = v
+    }
+  and validate_alternate_switch_statement : alternate_switch_statement validator = function
+  | { Syntax.syntax = Syntax.AlternateSwitchStatement x; value = v } -> v,
+    { alternate_switch_closing_semicolon = validate_token x.alternate_switch_closing_semicolon
+    ; alternate_switch_closing_endswitch = validate_token x.alternate_switch_closing_endswitch
+    ; alternate_switch_sections = validate_list_with (validate_switch_section) x.alternate_switch_sections
+    ; alternate_switch_opening_colon = validate_token x.alternate_switch_opening_colon
+    ; alternate_switch_right_paren = validate_token x.alternate_switch_right_paren
+    ; alternate_switch_expression = validate_expression x.alternate_switch_expression
+    ; alternate_switch_left_paren = validate_token x.alternate_switch_left_paren
+    ; alternate_switch_keyword = validate_token x.alternate_switch_keyword
+    }
+  | s -> validation_fail (Some SyntaxKind.AlternateSwitchStatement) s
+  and invalidate_alternate_switch_statement : alternate_switch_statement invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.AlternateSwitchStatement
+      { alternate_switch_keyword = invalidate_token x.alternate_switch_keyword
+      ; alternate_switch_left_paren = invalidate_token x.alternate_switch_left_paren
+      ; alternate_switch_expression = invalidate_expression x.alternate_switch_expression
+      ; alternate_switch_right_paren = invalidate_token x.alternate_switch_right_paren
+      ; alternate_switch_opening_colon = invalidate_token x.alternate_switch_opening_colon
+      ; alternate_switch_sections = invalidate_list_with (invalidate_switch_section) x.alternate_switch_sections
+      ; alternate_switch_closing_endswitch = invalidate_token x.alternate_switch_closing_endswitch
+      ; alternate_switch_closing_semicolon = invalidate_token x.alternate_switch_closing_semicolon
       }
     ; Syntax.value = v
     }

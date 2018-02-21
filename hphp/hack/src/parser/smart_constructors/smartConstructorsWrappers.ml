@@ -95,6 +95,7 @@ module type SyntaxKind_S = sig
   val is_for_statement : r -> bool
   val is_foreach_statement : r -> bool
   val is_switch_statement : r -> bool
+  val is_alternate_switch_statement : r -> bool
   val is_switch_section : r -> bool
   val is_switch_fallthrough : r -> bool
   val is_case_label : r -> bool
@@ -279,6 +280,7 @@ module SyntaxKind(SC : SC_S) :
   let make_for_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state = compose SK.ForStatement (SC.make_for_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) state)
   let make_foreach_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 state = compose SK.ForeachStatement (SC.make_foreach_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) (snd arg9) state)
   let make_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 state = compose SK.SwitchStatement (SC.make_switch_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) state)
+  let make_alternate_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 state = compose SK.AlternateSwitchStatement (SC.make_alternate_switch_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) state)
   let make_switch_section arg0 arg1 arg2 state = compose SK.SwitchSection (SC.make_switch_section (snd arg0) (snd arg1) (snd arg2) state)
   let make_switch_fallthrough arg0 arg1 state = compose SK.SwitchFallthrough (SC.make_switch_fallthrough (snd arg0) (snd arg1) state)
   let make_case_label arg0 arg1 arg2 state = compose SK.CaseLabel (SC.make_case_label (snd arg0) (snd arg1) (snd arg2) state)
@@ -448,6 +450,7 @@ module SyntaxKind(SC : SC_S) :
   let is_for_statement                                = has_kind SK.ForStatement
   let is_foreach_statement                            = has_kind SK.ForeachStatement
   let is_switch_statement                             = has_kind SK.SwitchStatement
+  let is_alternate_switch_statement                   = has_kind SK.AlternateSwitchStatement
   let is_switch_section                               = has_kind SK.SwitchSection
   let is_switch_fallthrough                           = has_kind SK.SwitchFallthrough
   let is_case_label                                   = has_kind SK.CaseLabel

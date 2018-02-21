@@ -122,6 +122,7 @@ module WithToken(Token: TokenType) = struct
       | ForStatement                            _ -> SyntaxKind.ForStatement
       | ForeachStatement                        _ -> SyntaxKind.ForeachStatement
       | SwitchStatement                         _ -> SyntaxKind.SwitchStatement
+      | AlternateSwitchStatement                _ -> SyntaxKind.AlternateSwitchStatement
       | SwitchSection                           _ -> SyntaxKind.SwitchSection
       | SwitchFallthrough                       _ -> SyntaxKind.SwitchFallthrough
       | CaseLabel                               _ -> SyntaxKind.CaseLabel
@@ -299,6 +300,7 @@ module WithToken(Token: TokenType) = struct
     let is_for_statement                                = has_kind SyntaxKind.ForStatement
     let is_foreach_statement                            = has_kind SyntaxKind.ForeachStatement
     let is_switch_statement                             = has_kind SyntaxKind.SwitchStatement
+    let is_alternate_switch_statement                   = has_kind SyntaxKind.AlternateSwitchStatement
     let is_switch_section                               = has_kind SyntaxKind.SwitchSection
     let is_switch_fallthrough                           = has_kind SyntaxKind.SwitchFallthrough
     let is_case_label                                   = has_kind SyntaxKind.CaseLabel
@@ -1198,6 +1200,25 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc switch_left_brace in
          let acc = f acc switch_sections in
          let acc = f acc switch_right_brace in
+         acc
+      | AlternateSwitchStatement {
+        alternate_switch_keyword;
+        alternate_switch_left_paren;
+        alternate_switch_expression;
+        alternate_switch_right_paren;
+        alternate_switch_opening_colon;
+        alternate_switch_sections;
+        alternate_switch_closing_endswitch;
+        alternate_switch_closing_semicolon;
+      } ->
+         let acc = f acc alternate_switch_keyword in
+         let acc = f acc alternate_switch_left_paren in
+         let acc = f acc alternate_switch_expression in
+         let acc = f acc alternate_switch_right_paren in
+         let acc = f acc alternate_switch_opening_colon in
+         let acc = f acc alternate_switch_sections in
+         let acc = f acc alternate_switch_closing_endswitch in
+         let acc = f acc alternate_switch_closing_semicolon in
          acc
       | SwitchSection {
         switch_section_labels;
@@ -2961,6 +2982,25 @@ module WithToken(Token: TokenType) = struct
         switch_sections;
         switch_right_brace;
       ]
+      | AlternateSwitchStatement {
+        alternate_switch_keyword;
+        alternate_switch_left_paren;
+        alternate_switch_expression;
+        alternate_switch_right_paren;
+        alternate_switch_opening_colon;
+        alternate_switch_sections;
+        alternate_switch_closing_endswitch;
+        alternate_switch_closing_semicolon;
+      } -> [
+        alternate_switch_keyword;
+        alternate_switch_left_paren;
+        alternate_switch_expression;
+        alternate_switch_right_paren;
+        alternate_switch_opening_colon;
+        alternate_switch_sections;
+        alternate_switch_closing_endswitch;
+        alternate_switch_closing_semicolon;
+      ]
       | SwitchSection {
         switch_section_labels;
         switch_section_statements;
@@ -4723,6 +4763,25 @@ module WithToken(Token: TokenType) = struct
         "switch_left_brace";
         "switch_sections";
         "switch_right_brace";
+      ]
+      | AlternateSwitchStatement {
+        alternate_switch_keyword;
+        alternate_switch_left_paren;
+        alternate_switch_expression;
+        alternate_switch_right_paren;
+        alternate_switch_opening_colon;
+        alternate_switch_sections;
+        alternate_switch_closing_endswitch;
+        alternate_switch_closing_semicolon;
+      } -> [
+        "alternate_switch_keyword";
+        "alternate_switch_left_paren";
+        "alternate_switch_expression";
+        "alternate_switch_right_paren";
+        "alternate_switch_opening_colon";
+        "alternate_switch_sections";
+        "alternate_switch_closing_endswitch";
+        "alternate_switch_closing_semicolon";
       ]
       | SwitchSection {
         switch_section_labels;
@@ -6605,6 +6664,26 @@ module WithToken(Token: TokenType) = struct
           switch_left_brace;
           switch_sections;
           switch_right_brace;
+        }
+      | (SyntaxKind.AlternateSwitchStatement, [
+          alternate_switch_keyword;
+          alternate_switch_left_paren;
+          alternate_switch_expression;
+          alternate_switch_right_paren;
+          alternate_switch_opening_colon;
+          alternate_switch_sections;
+          alternate_switch_closing_endswitch;
+          alternate_switch_closing_semicolon;
+        ]) ->
+        AlternateSwitchStatement {
+          alternate_switch_keyword;
+          alternate_switch_left_paren;
+          alternate_switch_expression;
+          alternate_switch_right_paren;
+          alternate_switch_opening_colon;
+          alternate_switch_sections;
+          alternate_switch_closing_endswitch;
+          alternate_switch_closing_semicolon;
         }
       | (SyntaxKind.SwitchSection, [
           switch_section_labels;
@@ -8759,6 +8838,29 @@ module WithToken(Token: TokenType) = struct
           switch_left_brace;
           switch_sections;
           switch_right_brace;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_alternate_switch_statement
+        alternate_switch_keyword
+        alternate_switch_left_paren
+        alternate_switch_expression
+        alternate_switch_right_paren
+        alternate_switch_opening_colon
+        alternate_switch_sections
+        alternate_switch_closing_endswitch
+        alternate_switch_closing_semicolon
+      =
+        let syntax = AlternateSwitchStatement {
+          alternate_switch_keyword;
+          alternate_switch_left_paren;
+          alternate_switch_expression;
+          alternate_switch_right_paren;
+          alternate_switch_opening_colon;
+          alternate_switch_sections;
+          alternate_switch_closing_endswitch;
+          alternate_switch_closing_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

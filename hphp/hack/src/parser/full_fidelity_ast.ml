@@ -1461,7 +1461,9 @@ and pStmt : stmt parser = fun node env ->
   extract_and_push_docblock node;
   let pos = pPos node env in
   let result = match syntax node with
-  | SwitchStatement { switch_expression; switch_sections; _ } ->
+  | SwitchStatement { switch_expression=expr; switch_sections=sections; _ }
+  | AlternateSwitchStatement { alternate_switch_expression=expr;
+    alternate_switch_sections=sections; _ } ->
     let pSwitchLabel : (block -> case) parser = fun node env cont ->
       match syntax node with
       | CaseLabel { case_expression; _ } ->
@@ -1493,8 +1495,8 @@ and pStmt : stmt parser = fun node env ->
     in
     pos,
     Switch
-    ( pExpr switch_expression env
-    , List.concat @@ couldMap ~f:pSwitchSection switch_sections env
+    ( pExpr expr env
+    , List.concat @@ couldMap ~f:pSwitchSection sections env
     )
   | IfStatement
     { if_condition; if_statement; if_elseif_clauses; if_else_clause; _ } ->

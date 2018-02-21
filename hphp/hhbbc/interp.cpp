@@ -56,7 +56,7 @@ namespace HPHP { namespace HHBBC {
 
 namespace {
 
-const StaticString s_Throwable("__SystemLib\\Throwable");
+const StaticString s_Throwable("Throwable");
 const StaticString s_empty("");
 const StaticString s_construct("__construct");
 const StaticString s_86ctor("86ctor");

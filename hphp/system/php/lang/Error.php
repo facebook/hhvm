@@ -1,7 +1,6 @@
 <?php
-namespace __SystemLib {
 class Error implements Throwable {
-  use BaseException;
+  use \__SystemLib\BaseException;
   /**
    * ( excerpt from http://php.net/manual/en/exception.construct.php )
    *
@@ -13,7 +12,7 @@ class Error implements Throwable {
    *                     chaining.
    */
   public function __construct($message = '', $code = 0,
-                              \__SystemLib\Throwable $previous = null) {
+                              Throwable $previous = null) {
 
     // Child classes may just override the protected property
     // without implementing a constructor or calling parent one.
@@ -37,4 +36,3 @@ class AssertionError extends Error {}
 class DivisionByZeroError extends Error {}
 class ParseError extends Error {}
 class TypeError extends Error {}
-}

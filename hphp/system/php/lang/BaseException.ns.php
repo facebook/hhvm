@@ -8,7 +8,7 @@ namespace __SystemLib {
  *
  */
 trait BaseException {
-  require implements Throwable;
+  require implements \Throwable;
 
   /**
    * throwable_init() and createAndConstructThrowable() depend on the order
@@ -54,16 +54,16 @@ trait BaseException {
     return $this->previous;
   }
 
-  final public function setPrevious(\__SystemLib\Throwable $previous) {
+  final public function setPrevious(\Throwable $previous) {
     $this->previous = $previous;
   }
 
-  final public function setPreviousChain(\__SystemLib\Throwable $previous) {
+  final public function setPreviousChain(\Throwable $previous) {
     $cur = $this;
     $cycle = array();
     $cycle[\spl_object_hash($cur)] = true;
     $next = $cur->getPrevious();
-    while ($next instanceof \__SystemLib\Throwable &&
+    while ($next instanceof \Throwable &&
       !\array_key_exists(\spl_object_hash($next), $cycle)) {
       $cycle[\spl_object_hash($next)] = true;
       $cur = $next;
@@ -187,7 +187,7 @@ trait BaseException {
       if (\substr($cls, 0, \strlen("__SystemLib\\")) === "__SystemLib\\") {
         $cls = \substr($cls, \strlen("__SystemLib\\"));
       }
-      $res .= $ex instanceof Error
+      $res .= $ex instanceof \Error
         ? $cls . ": " . $ex->getMessage()
         : "exception '" . $cls . "' with message '" . $ex->getMessage() .  "'";
       $res .=  " in " . $ex->getFile() . ":" .

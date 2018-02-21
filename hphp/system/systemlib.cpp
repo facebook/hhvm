@@ -312,32 +312,5 @@ void setupNullCtor(Class* cls) {
   s_nullCtor = clone;
 }
 
-namespace {
-
-#define PHP7_ROOT_ALIAS(x) \
-  auto x##Ne = NamedEntity::get(makeStaticString(#x)); \
-  x##Ne->m_cachedClass.bind(rds::Mode::Persistent); \
-  x##Ne->setCachedClass(SystemLib::s_##x##Class)
-
-InitFiniNode aliasPhp7Classes(
-  []() {
-    if (!RuntimeOption::PHP7_EngineExceptions) {
-      return;
-    }
-    PHP7_ROOT_ALIAS(Throwable);
-    PHP7_ROOT_ALIAS(Error);
-    PHP7_ROOT_ALIAS(ArithmeticError);
-    PHP7_ROOT_ALIAS(ArgumentCountError);
-    PHP7_ROOT_ALIAS(AssertionError);
-    PHP7_ROOT_ALIAS(DivisionByZeroError);
-    PHP7_ROOT_ALIAS(ParseError);
-    PHP7_ROOT_ALIAS(TypeError);
-  },
-  InitFiniNode::When::ProcessInit
-);
-
-#undef PHP7_ROOT_ALIAS
-} // namespace
-
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::SystemLib

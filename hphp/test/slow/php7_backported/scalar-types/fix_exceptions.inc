@@ -5,7 +5,6 @@ $errnames = [
     E_WARNING => 'E_WARNING',
     E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR'
 ];
-class TypeError extends Exception {};
 set_error_handler(function (int $errno, string $errmsg, string $file, int $line) use ($errnames) {
     if ($errno == E_NOTICE) {
       echo "$errnames[$errno]: $errmsg on line $line\n";

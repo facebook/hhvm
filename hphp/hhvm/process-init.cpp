@@ -58,15 +58,15 @@ SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
 #undef STRINGIZE_CLASS_NAME
 
 namespace {
-const StaticString s_Throwable("\\__SystemLib\\Throwable");
+const StaticString s_Throwable("Throwable");
 const StaticString s_BaseException("\\__SystemLib\\BaseException");
-const StaticString s_Error("\\__SystemLib\\Error");
-const StaticString s_ArithmeticError("\\__SystemLib\\ArithmeticError");
-const StaticString s_ArgumentCountError("\\__SystemLib\\ArgumentCountError");
-const StaticString s_AssertionError("\\__SystemLib\\AssertionError");
-const StaticString s_DivisionByZeroError("\\__SystemLib\\DivisionByZeroError");
-const StaticString s_ParseError("\\__SystemLib\\ParseError");
-const StaticString s_TypeError("\\__SystemLib\\TypeError");
+const StaticString s_Error("Error");
+const StaticString s_ArithmeticError("ArithmeticError");
+const StaticString s_ArgumentCountError("ArgumentCountError");
+const StaticString s_AssertionError("AssertionError");
+const StaticString s_DivisionByZeroError("DivisionByZeroError");
+const StaticString s_ParseError("ParseError");
+const StaticString s_TypeError("TypeError");
 }
 
 void tweak_variant_dtors();

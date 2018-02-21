@@ -1,6 +1,6 @@
 <?php
 
-class Exception implements \__SystemLib\Throwable {
+class Exception implements Throwable {
   use \__SystemLib\BaseException;
 
   private static $traceOpts = 0;
@@ -25,7 +25,7 @@ class Exception implements \__SystemLib\Throwable {
    *                     chaining.
    */
   public function __construct($message = '', $code = 0,
-                              \__SystemLib\Throwable $previous = null) {
+                              Throwable $previous = null) {
 
     // Child classes may just override the protected property
     // without implementing a constructor or calling parent one.

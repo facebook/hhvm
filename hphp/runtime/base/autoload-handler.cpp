@@ -45,7 +45,7 @@ const StaticString
   s_failure("failure"),
   s_autoload("__autoload"),
   s_exception("exception"),
-  s_error("SystemLib\\Error"),
+  s_error("Error"),
   s_previous("previous");
 
 using CufIterPtr = req::unique_ptr<CufIter>;

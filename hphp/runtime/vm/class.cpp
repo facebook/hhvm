@@ -2586,7 +2586,7 @@ void Class::addTraitPropInitializers(std::vector<const Func*>& thisInitVec,
 }
 
 namespace {
-  const StaticString s_Error("__SystemLib\\Error");
+  const StaticString s_Error("Error");
   const StaticString s_Exception("Exception");
 }
 

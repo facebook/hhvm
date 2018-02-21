@@ -15,7 +15,50 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-class Exception {
+interface Throwable {
+  public function getMessage(): string;
+  // Documented as 'int' in PHP docs, but not actually guaranteed;
+  // subclasses (e.g. PDO) can do what they want.
+  public function getCode(): mixed;
+  public function getFile(): string;
+  public function getLine(): int;
+  public function getTrace(): array<mixed>;
+  public function getTraceAsString(): string;
+  public function getPrevious(): ?Throwable;
+  public function __toString(): string;
+}
+
+class Error implements Throwable {
+  protected string $message;
+  protected mixed $code;
+  protected string $file;
+  protected int $line;
+
+  /* Methods */
+  public function __construct (
+    string $message = "",
+    int $code = 0,
+    ?Throwable $previous = null,
+  );
+  final public function getMessage(): string;
+  final public function getPrevious(): ?Throwable;
+  final public function getCode(): mixed;
+  final public function getFile(): string;
+  final public function getLine(): int;
+  final public function getTrace(): array<mixed>;
+  final public function getTraceAsString(): string;
+  public function __toString(): string;
+  final private function __clone(): void;
+}
+
+class ArithmeticError extends Error {}
+class ArgumentCountError extends Error {}
+class AssertionError extends Error {}
+class DivisionByZeroError extends Error {}
+class ParseError extends Error {}
+class TypeError extends Error {}
+
+class Exception implements Throwable {
   // $code should be untyped, or mixed because some subclasses set it
   // to a string, the main example being PDOException
   protected $code;
@@ -34,7 +77,7 @@ class Exception {
   public function getCode(): int;
   final public function getFile(): string;
   final public function getLine(): int;
-  final public function getTrace(): array;
+  final public function getTrace(): array<mixed>;
   final protected function __prependTrace(array $trace): void;
   final public function getTraceAsString(): string;
   public function __toString(): string;

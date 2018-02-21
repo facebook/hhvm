@@ -1877,7 +1877,7 @@ PHPUnit\Framework\TestFailureTest::testToString
 PHPUnit\Framework\TestFailureTest::testToStringForError
 .
 PHPUnit\Framework\TestFailureTest::testgetExceptionAsString
-F
+.
 PHPUnit\Framework\TestImplementorTest::testSuccessfulRun
 .
 PHPUnit\Framework\TestListenerTest::testError

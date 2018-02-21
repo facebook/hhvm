@@ -38,6 +38,7 @@ let drop_pstr : int -> pstring -> pstring = fun cnt (pos, str) ->
 type env =
   { is_hh_file               : bool
   ; codegen                  : bool
+  ; systemlib_compat_mode    : bool
   ; php5_compat_mode         : bool
   ; elaborate_namespaces     : bool
   ; include_line_comments    : bool
@@ -2638,6 +2639,7 @@ type result =
 
 let make_env
   ?(codegen                  = false                   )
+  ?(systemlib_compat_mode    = false                   )
   ?(php5_compat_mode         = false                   )
   ?(elaborate_namespaces     = true                    )
   ?(include_line_comments    = false                   )
@@ -2653,7 +2655,8 @@ let make_env
   (file : Relative_path.t)
   : env
   = { is_hh_file
-    ; codegen
+    ; codegen                 = codegen || systemlib_compat_mode
+    ; systemlib_compat_mode
     ; php5_compat_mode
     ; elaborate_namespaces
     ; include_line_comments
@@ -2759,11 +2762,13 @@ let from_text (env : env) (source_text : SourceText.t) : result =
         () in
     SyntaxTree.make ~env source_text in
   let () = if env.codegen then
+    let level = if env.systemlib_compat_mode then
+        ParserErrors.HHVMCompatibilitySystemLib
+      else ParserErrors.HHVMCompatibility
+    in
     let errors =
       ParserErrors.parse_errors
-        ~enable_hh_syntax:env.enable_hh_syntax
-        ~level:ParserErrors.HHVMCompatibility
-        tree
+        ~enable_hh_syntax:env.enable_hh_syntax ~level tree
     in
     (* Prioritize runtime errors *)
     let runtime_errors =

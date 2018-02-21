@@ -9,7 +9,8 @@
  *)
 
 module WithSyntax : functor (Syntax : Syntax_sig.Syntax_S) -> sig
-  type error_level = Minimum | Typical | Maximum | HHVMCompatibility
+  type error_level =
+    Minimum | Typical | Maximum | HHVMCompatibility | HHVMCompatibilitySystemLib
 
   val parse_errors :
     ?enable_hh_syntax:bool ->

@@ -67,6 +67,14 @@ type first_use_or_def = {
   f_name: string;
 }
 
+type error_level =
+  Minimum | Typical | Maximum | HHVMCompatibility | HHVMCompatibilitySystemLib
+
+let is_hhvm_compat level =
+  level = HHVMCompatibility || level = HHVMCompatibilitySystemLib
+
+let is_systemlib_compat level = level = HHVMCompatibilitySystemLib
+
 let global_namespace_name = "\\"
 
 let combine_names n1 n2 =
@@ -2300,7 +2308,7 @@ let abstract_final_class_nonstatic_method_error node parents hhvm_compat_mode er
     SyntaxError.error2062 cd.methodish_function_decl_header
   | _ -> errors
 
-let mixed_namespace_errors node parents namespace_type errors =
+let mixed_namespace_errors node parents systemlib_compat namespace_type errors =
   match syntax node with
   | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->
     let s = start_offset namespace_left_brace in
@@ -2329,6 +2337,13 @@ let mixed_namespace_errors node parents namespace_type errors =
       match parents with
       | [{ syntax = SyntaxList _; _} as decls; { syntax = Script _; _}] ->
         let decls = syntax_to_list_no_separators decls in
+        let decls = if not systemlib_compat then decls else
+          (* Drop everything before yourself *)
+          fst @@ Hh_core.List.fold_right decls
+            ~init:([], false)
+            ~f:(fun n (l, seen as acc) ->
+              if seen then acc else (n::l, n == node))
+        in
         let rec is_first l =
           match l with
           | { syntax = MarkupSection {markup_text; _}; _} :: rest
@@ -2488,7 +2503,9 @@ let get_namespace_name parents current_namespace_name =
     else combine_names current_namespace_name (text ns)
   | _ -> current_namespace_name
 
-let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
+let find_syntax_errors ~enable_hh_syntax error_level syntax_tree =
+  let hhvm_compatibility_mode = is_hhvm_compat error_level in
+  let systemlib_compat = is_systemlib_compat error_level in
   let is_strict = SyntaxTree.is_strict syntax_tree in
   let is_hack_file = SyntaxTree.is_hack syntax_tree in
   let is_hack = is_hack_file || enable_hh_syntax in
@@ -2534,7 +2551,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
     let errors =
       abstract_final_class_nonstatic_method_error node parents hhvm_compatibility_mode errors in
     let errors =
-      mixed_namespace_errors node parents namespace_type errors in
+      mixed_namespace_errors node parents systemlib_compat namespace_type errors in
     let names, errors =
       namespace_use_declaration_errors node is_hack
         (namespace_name = global_namespace_name) syntax_tree names errors in
@@ -2611,8 +2628,6 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
     } in
   acc.errors
 
-type error_level = Minimum | Typical | Maximum | HHVMCompatibility
-
 let parse_errors_impl ?(enable_hh_syntax=false) ?(level=Typical) syntax_tree =
   (*
   Minimum: suppress cascading errors; no second-pass errors if there are
@@ -2625,9 +2640,7 @@ let parse_errors_impl ?(enable_hh_syntax=false) ?(level=Typical) syntax_tree =
   | _ -> SyntaxTree.errors syntax_tree in
   let errors2 =
     if level = Minimum && errors1 <> [] then []
-    else find_syntax_errors
-      ~enable_hh_syntax
-      (level = HHVMCompatibility) syntax_tree in
+    else find_syntax_errors ~enable_hh_syntax level syntax_tree in
   List.sort SyntaxError.compare (Core_list.append errors1 errors2)
 
 let parse_errors ?(enable_hh_syntax=false) ?(level=Typical) syntax_tree =

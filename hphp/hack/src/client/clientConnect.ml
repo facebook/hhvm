@@ -117,13 +117,13 @@ let msg_of_tail tail_env =
   else if matches_re parsing_re line then
     "[parsing" ^ (count_suffix line) ^ final_suffix
   else if matches_re naming_re line then
-    "[naming" ^ final_suffix
+    "[resolving symbol references" ^ final_suffix
   else if matches_re determining_changes_re line then
     "[determining changes]"
   else if matches_re type_decl_re line then
-    "[type decl" ^ (count_suffix line) ^ final_suffix
+    "[evaluating type declarations of" ^ (count_suffix line) ^ final_suffix
   else if matches_re type_check_re line then
-    "[type check" ^ (count_suffix line) ^ final_suffix
+    "[typechecking" ^ (count_suffix line) ^ final_suffix
   else
     "[processing]"
 

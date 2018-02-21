@@ -25,7 +25,14 @@ type t = {
   trailing: Trivia.t list
 }
 
-let make kind text leading trailing =
+let create kind text leading trailing =
+  { kind; text; leading; trailing }
+
+let make kind source_text offset width leading trailing =
+  let leading_width =
+    List.fold_left (fun sum t -> sum + (Trivia.width t)) 0 leading
+  in
+  let text = SourceText.sub source_text (offset + leading_width) width in
   { kind; text; leading; trailing }
 
 let leading_width token =
@@ -45,11 +52,20 @@ let full_width token =
 let kind token =
   token.kind
 
+let with_kind token kind =
+  { token with kind }
+
 let leading token =
   token.leading
 
+let with_leading leading token =
+  { token with leading }
+
 let trailing token =
   token.trailing
+
+let with_trailing trailing token =
+  { token with trailing }
 
 let text token =
   token.text
@@ -63,16 +79,6 @@ let trailing_text token =
 let full_text token =
   (leading_text token) ^ (text token) ^ (trailing_text token)
 
-let from_positioned source_text positioned_token offset =
-  let lw = PositionedToken.leading_width positioned_token in
-  let w = PositionedToken.width positioned_token in
-  let leading = Trivia.from_positioned_list source_text
-    (PositionedToken.leading positioned_token) offset in
-  let text = SourceText.sub source_text (offset + lw) w in
-  let trailing = Trivia.from_positioned_list source_text
-    (PositionedToken.trailing positioned_token) (offset + lw + w) in
-  make (PositionedToken.kind positioned_token) text leading trailing
-
 let to_json token =
   let open Hh_json in
   JSON_Object [
@@ -80,3 +86,9 @@ let to_json token =
     ("text", JSON_String token.text);
     ("leading", JSON_Array (List.map Trivia.to_json token.leading));
     ("trailing", JSON_Array (List.map Trivia.to_json token.trailing)) ]
+
+let source_text _ =
+  raise (Invalid_argument "Editable token doesn't support source_text")
+
+let leading_start_offset _ =
+  raise (Invalid_argument "Editable token doesn't support leading_start_offset")

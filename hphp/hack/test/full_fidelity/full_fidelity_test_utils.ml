@@ -35,7 +35,7 @@ let rewrite_editable_tree_no_trivia node =
       let text = EditableToken.text t in
       let leading = EditableToken.leading t in
       let trailing = EditableToken.trailing t in
-      let token = EditableToken.make kind text [] [] in
+      let token = EditableToken.create kind text [] [] in
       trivia := !trivia @ leading @ trailing;
       EditableRewriter.Replace (EditableSyntax.make_token token)
     | _ -> EditableRewriter.Keep in

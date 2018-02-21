@@ -368,7 +368,18 @@ and emit_global_vars env p es =
     | _ ->
       emit_nyi "global expression"
   in
-  Emit_pos.emit_pos_then p @@ gather (List.map es emit_global_var)
+  (* Deduplicate global variable declarations *)
+  let _, instrs = List.fold es ~init:([], [])
+    ~f:begin fun (seen, instrs)  e ->
+      match snd e with
+      | A.Id (_, name) when List.mem seen name ->
+        seen, instrs
+      | A.Id (_, name) ->
+        name::seen, (emit_global_var e)::instrs
+      | _ ->
+        seen, (emit_global_var e)::instrs
+      end in
+  Emit_pos.emit_pos_then p @@ gather (List.rev instrs)
 
 and emit_static_var es =
   let emit_static_var_single e =

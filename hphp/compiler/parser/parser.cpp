@@ -2659,6 +2659,7 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
     HH_ALIAS(classname, string),
     HH_ALIAS(typename, string),
     HH_ALIAS(dynamic, mixed),
+    HH_ALIAS(nonnull, mixed),
 
     // Support a handful of synonyms for backwards compat with code written
     // against older versions of HipHop, and to be consistent with PHP5 casting

@@ -97,6 +97,7 @@ let alias_map = List.fold_left ~f:add_alias ~init:SMap.empty
   HH_ALIAS("double", "float");
   HH_ALIAS("real", "float");
   HH_ALIAS("dynamic", "mixed");
+  HH_ALIAS("nonnull", "mixed");
 
 (*
   PHP7_TYPE("Throwable"; PHP7_EngineExceptions);

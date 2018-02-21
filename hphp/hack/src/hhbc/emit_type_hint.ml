@@ -100,9 +100,11 @@ let can_be_nullable h =
   match snd h with
   | A.Hfun (_, _, _, _, _)
   | A.Hoption (_, A.Hfun (_, _, _, _, _))
-  | A.Happly ((_, "mixed"), _)
   | A.Happly ((_, "dynamic"), _)
+  | A.Happly ((_, "nonnull"), _)
+  | A.Happly ((_, "mixed"), _)
   | A.Hoption (_, A.Happly ((_, "dynamic"), _))
+  | A.Hoption (_, A.Happly ((_, "nonnull"), _))
   | A.Hoption (_, A.Happly ((_, "mixed"), _))
   (* HHVM does not emit nullable for type consts that are set to null by default
    * function(Class::Type $a = null) unless it is explicitly marked as nullable
@@ -113,8 +115,10 @@ let can_be_nullable h =
 let rec hint_to_type_constraint
   ~kind ~tparams ~skipawaitable ~namespace (_, h) =
   match h with
-  (* The dynamic type is treated by the runtime as mixed *)
+  (* The dynamic and nonnull types are treated by the runtime as mixed *)
   | A.Happly ((_, "dynamic"), [])
+  | A.Happly ((_, "nonnull"), [])
+  | A.Hoption (_, A.Happly ((_, "nonnull"), _))
   | A.Happly ((_, "mixed"), []) ->
     if Emit_env.is_hh_syntax_enabled ()
     then TC.make None []
@@ -221,6 +225,7 @@ let param_hint_to_type_info
     | A.Hfun _
     | A.Happly (_, _::_)
     | A.Happly ((_, "dynamic"), [])
+    | A.Happly ((_, "nonnull"), [])
     | A.Happly ((_, "mixed"), []) -> false
     | A.Happly ((_, id), _) when List.mem tparams id -> false
     | _ -> true

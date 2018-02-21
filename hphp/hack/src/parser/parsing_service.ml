@@ -40,7 +40,7 @@ let legacy_php_file_info = ref (fun fn ->
  *)
 let process_parse_result
   ?(ide = false) ~quick (acc, errorl, error_files) fn res popt =
-  let errorl', {Parser_hack.file_mode; comments; ast; content; is_hh_file = _} = res in
+  let errorl', {Parser_hack.file_mode; comments = _; ast; content; is_hh_file = _} = res in
   let ast =
   if (Relative_path.prefix fn = Relative_path.Hhi)
   && ParserOptions.deregister_php_stdlib popt
@@ -60,7 +60,7 @@ let process_parse_result
     File_heap.FileHeap.write_through fn content;
     let mode = if quick then Parser_heap.Decl else Parser_heap.Full in
     Parser_heap.ParserHeap.write_through fn (ast, mode);
-    let comments = Some comments in
+    let comments = None in
     let hash = Some (Ast_utils.generate_ast_decl_hash ast) in
     let defs =
       {FileInfo.hash; funs; classes; typedefs; consts; comments; file_mode}

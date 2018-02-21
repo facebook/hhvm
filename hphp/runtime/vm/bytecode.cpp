@@ -212,13 +212,17 @@ inline const char* prettytype(SilenceOp) { return "SilenceOp"; }
 inline const char* prettytype(SwitchKind) { return "SwitchKind"; }
 inline const char* prettytype(MOpMode) { return "MOpMode"; }
 inline const char* prettytype(QueryMOp) { return "QueryMOp"; }
+inline const char* prettytype(FPassHint) { return "FPassHint"; }
+inline const char* prettytype(CudOp) { return "CudOp"; }
+inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
+inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
+inline const char* prettytype(CollectionType) { return "CollectionType"; }
 
 // load a T value from *pc without incrementing
 template<class T> T peek(PC pc) {
   T v;
-  std::memcpy(&v, pc, sizeof v); // should compile to a load
-  ONTRACE(2, Trace::trace("decode:     Immediate %s %" PRIi64"\n",
-          prettytype(v), int64_t(v)));
+  std::memcpy(&v, pc, sizeof v);
+  TRACE(2, "decode:     Immediate %s %" PRIi64"\n", prettytype(v), int64_t(v));
   return v;
 }
 
@@ -230,7 +234,11 @@ template<class T> T decode(PC& pc) {
 
 inline const StringData* decode_litstr(PC& pc) {
   auto id = decode<Id>(pc);
-  return vmfp()->m_func->unit()->lookupLitstrId(id);
+  return liveUnit()->lookupLitstrId(id);
+}
+
+inline const ArrayData* decode_litarr(PC& pc) {
+  return liveUnit()->lookupArrayId(decode<Id>(pc));
 }
 
 ALWAYS_INLINE Offset decode_ba(PC& pc) {
@@ -269,13 +277,6 @@ struct local_var {
   TypedValue& operator*() const { return *ptr; }
 };
 
-// wrapper for variable-size IVA operand
-struct intva_t {
-  uint32_t n;
-  /* implicit */ operator uint32_t() const { return n; }
-  intva_t& operator=(uint32_t v) { n = v; return *this; }
-};
-
 // wrapper for class-ref slot CA(R|W) operand
 struct clsref_slot {
   LowPtr<Class>* ptr;
@@ -295,8 +296,14 @@ struct clsref_slot {
 
 // wrapper to handle unaligned access to variadic immediates
 template<class T> struct imm_array {
-  explicit imm_array(PC pc) : ptr(pc) {}
+  int32_t const size;
   PC const ptr;
+
+  explicit imm_array(int32_t size, PC pc)
+    : size{size}
+    , ptr{pc}
+  {}
+
   T operator[](int32_t i) const {
     T e;
     memcpy(&e, ptr + i * sizeof(T), sizeof(T));
@@ -315,14 +322,25 @@ ALWAYS_INLINE Iter* decode_iter(PC& pc) {
   return frame_iter(vmfp(), ia);
 }
 
-ALWAYS_INLINE intva_t decode_intva(PC& pc) {
-  return intva_t{decode_iva(pc)};
-}
-
 ALWAYS_INLINE clsref_slot decode_clsref_slot(PC& pc) {
   uint32_t ca = decode_iva(pc);
   assertx(ca < vmfp()->m_func->numClsRefSlots());
   return clsref_slot{frame_clsref_slot(vmfp(), ca), ca};
+}
+
+template<typename T>
+OPTBLD_INLINE imm_array<T> decode_imm_array(PC& pc) {
+  auto const size = decode<int32_t>(pc);
+  auto const arr_pc = pc;
+  pc += size * sizeof(T);
+  return imm_array<T>{size, arr_pc};
+}
+
+OPTBLD_INLINE RepoAuthType decode_rat(PC& pc) {
+  if (debug) return decodeRAT(liveUnit(), pc);
+
+  pc += encodedRATSize(pc);
+  return RepoAuthType{};
 }
 
 //=============================================================================
@@ -2042,7 +2060,7 @@ OPTBLD_INLINE void iopVec(const ArrayData* a) {
   vmStack().pushStaticVec(a);
 }
 
-OPTBLD_INLINE void iopNewArray(intva_t capacity) {
+OPTBLD_INLINE void iopNewArray(uint32_t capacity) {
   if (capacity == 0) {
     vmStack().pushArrayNoRc(staticEmptyArray());
   } else {
@@ -2050,7 +2068,7 @@ OPTBLD_INLINE void iopNewArray(intva_t capacity) {
   }
 }
 
-OPTBLD_INLINE void iopNewMixedArray(intva_t capacity) {
+OPTBLD_INLINE void iopNewMixedArray(uint32_t capacity) {
   if (capacity == 0) {
     vmStack().pushArrayNoRc(staticEmptyArray());
   } else {
@@ -2058,7 +2076,7 @@ OPTBLD_INLINE void iopNewMixedArray(intva_t capacity) {
   }
 }
 
-OPTBLD_INLINE void iopNewDictArray(intva_t capacity) {
+OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
   if (capacity == 0) {
     vmStack().pushDictNoRc(staticEmptyDictArray());
   } else {
@@ -2067,7 +2085,7 @@ OPTBLD_INLINE void iopNewDictArray(intva_t capacity) {
 }
 
 OPTBLD_INLINE
-void iopNewLikeArrayL(local_var fr, intva_t capacity) {
+void iopNewLikeArrayL(local_var fr, uint32_t capacity) {
   ArrayData* arr;
   if (LIKELY(isArrayType(fr->m_type))) {
     arr = MixedArray::MakeReserveLike(fr->m_data.parr, capacity);
@@ -2078,7 +2096,7 @@ void iopNewLikeArrayL(local_var fr, intva_t capacity) {
   vmStack().pushArrayNoRc(arr);
 }
 
-OPTBLD_INLINE void iopNewPackedArray(intva_t n) {
+OPTBLD_INLINE void iopNewPackedArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto* a = PackedArray::MakePacked(n, vmStack().topC());
   vmStack().ndiscard(n);
@@ -2088,7 +2106,8 @@ OPTBLD_INLINE void iopNewPackedArray(intva_t n) {
 namespace {
 
 template <typename F>
-ArrayData* newStructArrayImpl(int32_t n, imm_array<int32_t> ids, F f) {
+ArrayData* newStructArrayImpl(imm_array<int32_t> ids, F f) {
+  auto const n = ids.size;
   assert(n > 0 && n <= ArrayData::MaxElemsOnStack);
   req::vector<const StringData*> names;
   names.reserve(n);
@@ -2106,37 +2125,37 @@ ArrayData* newStructArrayImpl(int32_t n, imm_array<int32_t> ids, F f) {
 
 }
 
-OPTBLD_INLINE void iopNewStructArray(int32_t n, imm_array<int32_t> ids) {
-  auto const a = newStructArrayImpl(n, ids, MixedArray::MakeStruct);
+OPTBLD_INLINE void iopNewStructArray(imm_array<int32_t> ids) {
+  auto const a = newStructArrayImpl(ids, MixedArray::MakeStruct);
   vmStack().pushArrayNoRc(a);
 }
 
-OPTBLD_INLINE void iopNewStructDArray(int32_t n, imm_array<int32_t> ids) {
+OPTBLD_INLINE void iopNewStructDArray(imm_array<int32_t> ids) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  auto const a = newStructArrayImpl(n, ids, MixedArray::MakeStructDArray);
+  auto const a = newStructArrayImpl(ids, MixedArray::MakeStructDArray);
   vmStack().pushArrayNoRc(a);
 }
 
-OPTBLD_INLINE void iopNewStructDict(int32_t n, imm_array<int32_t> ids) {
-  auto const a = newStructArrayImpl(n, ids, MixedArray::MakeStructDict);
+OPTBLD_INLINE void iopNewStructDict(imm_array<int32_t> ids) {
+  auto const a = newStructArrayImpl(ids, MixedArray::MakeStructDict);
   vmStack().pushDictNoRc(a);
 }
 
-OPTBLD_INLINE void iopNewVecArray(intva_t n) {
+OPTBLD_INLINE void iopNewVecArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto* a = PackedArray::MakeVec(n, vmStack().topC());
   vmStack().ndiscard(n);
   vmStack().pushVecNoRc(a);
 }
 
-OPTBLD_INLINE void iopNewKeysetArray(intva_t n) {
+OPTBLD_INLINE void iopNewKeysetArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto* a = SetArray::MakeSet(n, vmStack().topC());
   vmStack().ndiscard(n);
   vmStack().pushKeysetNoRc(a);
 }
 
-OPTBLD_INLINE void iopNewVArray(intva_t n) {
+OPTBLD_INLINE void iopNewVArray(uint32_t n) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   // This constructor moves values, no inc/decref is necessary.
   auto a = PackedArray::MakeVArray(n, vmStack().topC());
@@ -2144,7 +2163,7 @@ OPTBLD_INLINE void iopNewVArray(intva_t n) {
   vmStack().pushArrayNoRc(a);
 }
 
-OPTBLD_INLINE void iopNewDArray(intva_t capacity) {
+OPTBLD_INLINE void iopNewDArray(uint32_t capacity) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   if (capacity == 0) {
     vmStack().pushArrayNoRc(staticEmptyDArray());
@@ -2219,8 +2238,7 @@ OPTBLD_INLINE void iopAddNewElemV() {
   vmStack().popV();
 }
 
-OPTBLD_INLINE void iopNewCol(intva_t type) {
-  auto cType = static_cast<CollectionType>(type.n);
+OPTBLD_INLINE void iopNewCol(CollectionType cType) {
   assertx(cType != CollectionType::Pair);
   // Incref the collection object during construction.
   auto obj = collections::alloc(cType);
@@ -2238,8 +2256,7 @@ OPTBLD_INLINE void iopNewPair() {
   vmStack().pushObjectNoRc(pair);
 }
 
-OPTBLD_INLINE void iopColFromArray(intva_t type) {
-  auto const cType = static_cast<CollectionType>(type.n);
+OPTBLD_INLINE void iopColFromArray(CollectionType cType) {
   assertx(cType != CollectionType::Pair);
   auto const c1 = vmStack().topC();
   if (cType == CollectionType::Vector || cType == CollectionType::ImmVector) {
@@ -2333,7 +2350,7 @@ OPTBLD_FLT_INLINE void iopConcat() {
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopConcatN(intva_t n) {
+OPTBLD_INLINE void iopConcatN(uint32_t n) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
 
@@ -2767,8 +2784,8 @@ struct IterBreakElem {
 };
 
 OPTBLD_INLINE
-void iopIterBreak(PC& pc, PC targetpc, int32_t n,
-                  imm_array<IterBreakElem> vec) {
+void iopIterBreak(PC& pc, PC targetpc, imm_array<IterBreakElem> vec) {
+  auto const n = vec.size;
   assert(n > 0);
   for (auto i = 0; i < n; ++i) {
     auto e = vec[i];
@@ -2797,8 +2814,9 @@ static SwitchMatch doubleCheck(double d, int64_t& out) {
 }
 
 OPTBLD_INLINE
-void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base, int veclen,
+void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
                imm_array<Offset> jmptab) {
+  auto const veclen = jmptab.size;
   assert(veclen > 0);
   TypedValue* val = vmStack().topTV();
   if (kind == SwitchKind::Unbounded) {
@@ -2932,8 +2950,8 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base, int veclen,
 }
 
 OPTBLD_INLINE
-void iopSSwitch(PC origpc, PC& pc, int32_t veclen,
-                imm_array<StrVecItem> jmptab) {
+void iopSSwitch(PC origpc, PC& pc, imm_array<StrVecItem> jmptab) {
+  auto const veclen = jmptab.size;
   assert(veclen > 1);
   unsigned cases = veclen - 1; // the last vector item is the default case
   Cell* val = tvToCell(vmStack().topTV());
@@ -3146,7 +3164,7 @@ OPTBLD_INLINE TCA iopRetV(PC& pc) {
   return ret(pc);
 }
 
-OPTBLD_INLINE TCA iopRetM(PC& pc, intva_t numRet) {
+OPTBLD_INLINE TCA iopRetM(PC& pc, uint32_t numRet) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   req::vector<TypedValue> retvals;
@@ -3407,7 +3425,7 @@ static inline void baseNImpl(TypedValue* key, MOpMode mode) {
   baseNGImpl(key, mode, lookupd_var, lookup_var);
 }
 
-OPTBLD_INLINE void iopBaseNC(intva_t idx, MOpMode mode) {
+OPTBLD_INLINE void iopBaseNC(uint32_t idx, MOpMode mode) {
   baseNImpl(vmStack().indTV(idx), mode);
 }
 
@@ -3415,12 +3433,12 @@ OPTBLD_INLINE void iopBaseNL(local_var loc, MOpMode mode) {
   baseNImpl(tvToCell(loc.ptr), mode);
 }
 
-OPTBLD_INLINE void iopFPassBaseNC(ActRec* ar, intva_t paramId, intva_t idx) {
+OPTBLD_INLINE void iopFPassBaseNC(ActRec* ar, uint32_t paramId, uint32_t idx) {
   auto const mode = fpass_mode(ar, paramId);
   baseNImpl(vmStack().indTV(idx), mode);
 }
 
-OPTBLD_INLINE void iopFPassBaseNL(ActRec* ar, intva_t paramId, local_var loc) {
+OPTBLD_INLINE void iopFPassBaseNL(ActRec* ar, uint32_t paramId, local_var loc) {
   auto const mode = fpass_mode(ar, paramId);
   baseNImpl(tvToCell(loc.ptr), mode);
 }
@@ -3429,7 +3447,7 @@ static inline void baseGImpl(TypedValue* key, MOpMode mode) {
   baseNGImpl(key, mode, lookupd_gbl, lookup_gbl);
 }
 
-OPTBLD_INLINE void iopBaseGC(intva_t idx, MOpMode mode) {
+OPTBLD_INLINE void iopBaseGC(uint32_t idx, MOpMode mode) {
   baseGImpl(vmStack().indTV(idx), mode);
 }
 
@@ -3437,12 +3455,12 @@ OPTBLD_INLINE void iopBaseGL(local_var loc, MOpMode mode) {
   baseGImpl(tvToCell(loc.ptr), mode);
 }
 
-OPTBLD_INLINE void iopFPassBaseGC(ActRec* ar, intva_t paramId, intva_t idx) {
+OPTBLD_INLINE void iopFPassBaseGC(ActRec* ar, uint32_t paramId, uint32_t idx) {
   auto const mode = fpass_mode(ar, paramId);
   baseGImpl(vmStack().indTV(idx), mode);
 }
 
-OPTBLD_INLINE void iopFPassBaseGL(ActRec* ar, intva_t paramId, local_var loc) {
+OPTBLD_INLINE void iopFPassBaseGL(ActRec* ar, uint32_t paramId, local_var loc) {
   auto const mode = fpass_mode(ar, paramId);
   baseGImpl(tvToCell(loc.ptr), mode);
 }
@@ -3463,7 +3481,7 @@ static inline TypedValue* baseSImpl(TypedValue* key,
   return lookup.prop;
 }
 
-OPTBLD_INLINE void iopBaseSC(intva_t keyIdx, clsref_slot slot) {
+OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, clsref_slot slot) {
   auto& mstate = initMState();
   mstate.base = baseSImpl(vmStack().indTV(keyIdx), slot);
 }
@@ -3487,17 +3505,17 @@ OPTBLD_INLINE void iopBaseL(local_var loc, MOpMode mode) {
   baseLImpl(loc, mode);
 }
 
-OPTBLD_INLINE void iopFPassBaseL(ActRec* ar, intva_t paramId, local_var loc) {
+OPTBLD_INLINE void iopFPassBaseL(ActRec* ar, uint32_t paramId, local_var loc) {
   auto mode = fpass_mode(ar, paramId);
   baseLImpl(loc, mode);
 }
 
-OPTBLD_INLINE void iopBaseC(intva_t idx) {
+OPTBLD_INLINE void iopBaseC(uint32_t idx) {
   auto& mstate = initMState();
   mstate.base = vmStack().indTV(idx);
 }
 
-OPTBLD_INLINE void iopBaseR(intva_t idx) {
+OPTBLD_INLINE void iopBaseR(uint32_t idx) {
   iopBaseC(idx);
 }
 
@@ -3668,7 +3686,7 @@ OPTBLD_INLINE void iopDim(MOpMode mode, MemberKey mk) {
   dimDispatch(mode, mk, false);
 }
 
-OPTBLD_INLINE void iopFPassDim(ActRec* ar, intva_t paramId, MemberKey mk) {
+OPTBLD_INLINE void iopFPassDim(ActRec* ar, uint32_t paramId, MemberKey mk) {
   auto const mode = fpass_mode(ar, paramId);
   dimDispatch(mode, mk, false);
 }
@@ -3726,7 +3744,7 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
   mFinal(mstate, nDiscard, result);
 }
 
-OPTBLD_INLINE void iopQueryM(intva_t nDiscard, QueryMOp subop, MemberKey mk) {
+OPTBLD_INLINE void iopQueryM(uint32_t nDiscard, QueryMOp subop, MemberKey mk) {
   queryMImpl(mk, nDiscard, subop);
 }
 
@@ -3739,11 +3757,11 @@ static OPTBLD_INLINE void vGetMImpl(MemberKey mk, int32_t nDiscard) {
   mFinal(mstate, nDiscard, result);
 }
 
-OPTBLD_INLINE void iopVGetM(intva_t nDiscard, MemberKey mk) {
+OPTBLD_INLINE void iopVGetM(uint32_t nDiscard, MemberKey mk) {
   vGetMImpl(mk, nDiscard);
 }
 
-static void checkFPassHint(ActRec* ar, intva_t paramId, FPassHint hint) {
+static void checkFPassHint(ActRec* ar, uint32_t paramId, FPassHint hint) {
   assert(paramId < ar->numArgs());
 
   if (!RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) return;
@@ -3757,13 +3775,12 @@ static void checkFPassHint(ActRec* ar, intva_t paramId, FPassHint hint) {
     if (ar->m_func->byRef(paramId)) return;
     break;
   }
-  raiseFPassHintWarning(ar->m_func->fullDisplayName(), paramId.n, hint);
+  raiseFPassHintWarning(ar->m_func->fullDisplayName(), paramId, hint);
 }
 
 OPTBLD_INLINE
-void iopFPassM(intva_t paramId, intva_t nDiscard, MemberKey mk,
+void iopFPassM(ActRec* ar, uint32_t paramId, uint32_t nDiscard, MemberKey mk,
                FPassHint hint) {
-  auto ar = arFromSp(paramId + nDiscard);
   checkFPassHint(ar, paramId, hint);
   auto const mode = fpass_mode(ar, paramId);
   if (mode == MOpMode::Warn) {
@@ -3772,7 +3789,7 @@ void iopFPassM(intva_t paramId, intva_t nDiscard, MemberKey mk,
   vGetMImpl(mk, nDiscard);
 }
 
-OPTBLD_FLT_INLINE void iopSetM(intva_t nDiscard, MemberKey mk) {
+OPTBLD_FLT_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   auto& mstate = vmMInstrState();
   auto const topC = vmStack().topC();
 
@@ -3800,7 +3817,7 @@ OPTBLD_FLT_INLINE void iopSetM(intva_t nDiscard, MemberKey mk) {
   mFinal(mstate, nDiscard, result);
 }
 
-OPTBLD_INLINE void iopIncDecM(intva_t nDiscard, IncDecOp subop, MemberKey mk) {
+OPTBLD_INLINE void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk) {
   auto const key = key_tv(mk);
 
   auto& mstate = vmMInstrState();
@@ -3818,7 +3835,7 @@ OPTBLD_INLINE void iopIncDecM(intva_t nDiscard, IncDecOp subop, MemberKey mk) {
   mFinal(mstate, nDiscard, result);
 }
 
-OPTBLD_INLINE void iopSetOpM(intva_t nDiscard, SetOpOp subop, MemberKey mk) {
+OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
   auto const key = key_tv(mk);
   auto const rhs = vmStack().topC();
 
@@ -3841,7 +3858,7 @@ OPTBLD_INLINE void iopSetOpM(intva_t nDiscard, SetOpOp subop, MemberKey mk) {
   mFinal(mstate, nDiscard, *result);
 }
 
-OPTBLD_INLINE void iopBindM(intva_t nDiscard, MemberKey mk) {
+OPTBLD_INLINE void iopBindM(uint32_t nDiscard, MemberKey mk) {
   auto& mstate = vmMInstrState();
   auto const rhs = *vmStack().topV();
 
@@ -3852,7 +3869,7 @@ OPTBLD_INLINE void iopBindM(intva_t nDiscard, MemberKey mk) {
   mFinal(mstate, nDiscard, rhs);
 }
 
-OPTBLD_INLINE void iopUnsetM(intva_t nDiscard, MemberKey mk) {
+OPTBLD_INLINE void iopUnsetM(uint32_t nDiscard, MemberKey mk) {
   auto const key = key_tv(mk);
 
   auto& mstate = vmMInstrState();
@@ -3911,7 +3928,7 @@ OPTBLD_INLINE void iopSetWithRefRML(local_var local) {
   vmStack().popTV();
 }
 
-OPTBLD_INLINE void iopMemoGet(intva_t nDiscard,
+OPTBLD_INLINE void iopMemoGet(uint32_t nDiscard,
                               LocalRange locals) {
   assertx(vmfp()->m_func->isMemoizeWrapper());
   assertx(locals.first + locals.restCount < vmfp()->m_func->numLocals());
@@ -3924,7 +3941,7 @@ OPTBLD_INLINE void iopMemoGet(intva_t nDiscard,
   mFinal(mstate, nDiscard, res);
 }
 
-OPTBLD_INLINE void iopMemoSet(intva_t nDiscard,
+OPTBLD_INLINE void iopMemoSet(uint32_t nDiscard,
                               LocalRange locals) {
   assertx(vmfp()->m_func->isMemoizeWrapper());
   assertx(locals.first + locals.restCount < vmfp()->m_func->numLocals());
@@ -4118,14 +4135,14 @@ OPTBLD_FLT_INLINE void iopAssertRATL(local_var loc, RepoAuthType rat) {
   }
 }
 
-OPTBLD_INLINE void iopAssertRATStk(intva_t stkSlot, RepoAuthType rat) {
+OPTBLD_INLINE void iopAssertRATStk(uint32_t stkSlot, RepoAuthType rat) {
   if (debug) {
     auto const tv = *vmStack().indTV(stkSlot);
     auto vm = &*g_context;
     always_assert_flog(
       tvMatchesRepoAuthType(tv, rat),
       "failed assert RATStk {} in {}:{}, expected {}, got {}",
-      stkSlot.n,
+      stkSlot,
       vm->getContainingFileName()->data(),
       vm->getLine(),
       show(rat),
@@ -4571,7 +4588,8 @@ OPTBLD_INLINE ActRec* fPushFuncImpl(const Func* func, int numArgs) {
   return ar;
 }
 
-ALWAYS_INLINE std::string concat_arg_list(int32_t n, imm_array<uint32_t> args) {
+ALWAYS_INLINE std::string concat_arg_list(imm_array<uint32_t> args) {
+  auto const n = args.size;
   assert(n != 0);
   std::string ret;
   folly::toAppend(args[0], &ret);
@@ -4579,11 +4597,11 @@ ALWAYS_INLINE std::string concat_arg_list(int32_t n, imm_array<uint32_t> args) {
   return ret;
 }
 
-OPTBLD_INLINE void iopFPushFunc(intva_t numArgs, int32_t n,
-                                imm_array<uint32_t> args) {
+OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
+  auto const n = args.size;
   std::string arglist;
   if (UNLIKELY(n)) {
-    arglist = concat_arg_list(n, args);
+    arglist = concat_arg_list(args);
   }
 
   Cell* c1 = vmStack().topC();
@@ -4697,7 +4715,7 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs, int32_t n,
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
-OPTBLD_FLT_INLINE void iopFPushFuncD(intva_t numArgs, Id id) {
+OPTBLD_FLT_INLINE void iopFPushFuncD(uint32_t numArgs, Id id) {
   const NamedEntityPair nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
   Func* func = Unit::loadFunc(nep.second, nep.first);
@@ -4708,7 +4726,7 @@ OPTBLD_FLT_INLINE void iopFPushFuncD(intva_t numArgs, Id id) {
   ar->trashThis();
 }
 
-OPTBLD_INLINE void iopFPushFuncU(intva_t numArgs, Id nsFunc, Id globalFunc) {
+OPTBLD_INLINE void iopFPushFuncU(uint32_t numArgs, Id nsFunc, Id globalFunc) {
   Unit* unit = vmfp()->m_func->unit();
   const NamedEntityPair nep = unit->lookupNamedEntityPairId(nsFunc);
   Func* func = Unit::loadFunc(nep.second, nep.first);
@@ -4784,17 +4802,16 @@ static void throw_call_non_object(const char* methodName,
 
 ALWAYS_INLINE StringData* mangleInOutName(
   const StringData* name,
-  int32_t n,
   imm_array<uint32_t> args
 ) {
   return
     StringData::Make(
-      name, folly::sformat("${}$inout", concat_arg_list(n, args))
+      name, folly::sformat("${}$inout", concat_arg_list(args))
     );
 }
 
-OPTBLD_INLINE void iopFPushObjMethod(intva_t numArgs, ObjMethodOp op,
-                                     int32_t n, imm_array<uint32_t> args) {
+OPTBLD_INLINE void iopFPushObjMethod(uint32_t numArgs, ObjMethodOp op,
+                                     imm_array<uint32_t> args) {
   Cell* c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
@@ -4814,9 +4831,9 @@ OPTBLD_INLINE void iopFPushObjMethod(intva_t numArgs, ObjMethodOp op,
   ObjectData* obj = c2->m_data.pobj;
   StringData* name = c1->m_data.pstr;
 
-  if (UNLIKELY(n)) {
+  if (UNLIKELY(args.size)) {
     String s = String::attach(name);
-    name = mangleInOutName(name, n, args);
+    name = mangleInOutName(name, args);
   }
 
   // We handle decReffing obj and name in fPushObjMethodImpl
@@ -4825,7 +4842,7 @@ OPTBLD_INLINE void iopFPushObjMethod(intva_t numArgs, ObjMethodOp op,
 }
 
 OPTBLD_INLINE void
-iopFPushObjMethodD(intva_t numArgs, const StringData* name, ObjMethodOp op) {
+iopFPushObjMethodD(uint32_t numArgs, const StringData* name, ObjMethodOp op) {
   Cell* c1 = vmStack().topC();
   if (c1->m_type != KindOfObject) {
     if (UNLIKELY(op == ObjMethodOp::NullThrows || !isNullType(c1->m_type))) {
@@ -4914,8 +4931,8 @@ Class* specialClsRefToCls(SpecialClsRef ref) {
 
 }
 
-OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs, clsref_slot slot,
-                                     int32_t n, imm_array<uint32_t> args) {
+OPTBLD_INLINE void iopFPushClsMethod(uint32_t numArgs, clsref_slot slot,
+                                     imm_array<uint32_t> args) {
   auto const c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
@@ -4923,9 +4940,9 @@ OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs, clsref_slot slot,
   auto const cls = slot.take();
   auto name = c1->m_data.pstr;
 
-  if (UNLIKELY(n)) {
+  if (UNLIKELY(args.size)) {
     String s = String::attach(name);
-    name = mangleInOutName(name, n, args);
+    name = mangleInOutName(name, args);
   }
 
   // pushClsMethodImpl will take care of decReffing name
@@ -4935,7 +4952,7 @@ OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs, clsref_slot slot,
 }
 
 OPTBLD_INLINE
-void iopFPushClsMethodD(intva_t numArgs, const StringData* name, Id classId) {
+void iopFPushClsMethodD(uint32_t numArgs, const StringData* name, Id classId) {
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
   Class* cls = Unit::loadClass(nep.second, nep.first);
@@ -4945,8 +4962,8 @@ void iopFPushClsMethodD(intva_t numArgs, const StringData* name, Id classId) {
   pushClsMethodImpl(cls, const_cast<StringData*>(name), numArgs, false, false);
 }
 
-OPTBLD_INLINE void iopFPushClsMethodS(intva_t numArgs, SpecialClsRef ref,
-                                      int32_t n, imm_array<uint32_t> args) {
+OPTBLD_INLINE void iopFPushClsMethodS(uint32_t numArgs, SpecialClsRef ref,
+                                      imm_array<uint32_t> args) {
   auto const c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
@@ -4954,9 +4971,9 @@ OPTBLD_INLINE void iopFPushClsMethodS(intva_t numArgs, SpecialClsRef ref,
   auto const cls = specialClsRefToCls(ref);
   auto name = c1->m_data.pstr;
 
-  if (UNLIKELY(n)) {
+  if (UNLIKELY(args.size)) {
     String s = String::attach(name);
-    name = mangleInOutName(name, n, args);
+    name = mangleInOutName(name, args);
   }
 
   // pushClsMethodImpl will take care of decReffing name
@@ -4970,7 +4987,7 @@ OPTBLD_INLINE void iopFPushClsMethodS(intva_t numArgs, SpecialClsRef ref,
   );
 }
 
-OPTBLD_INLINE void iopFPushClsMethodSD(intva_t numArgs,
+OPTBLD_INLINE void iopFPushClsMethodSD(uint32_t numArgs,
                                        SpecialClsRef ref,
                                        const StringData* name) {
   pushClsMethodImpl(
@@ -4984,7 +5001,7 @@ OPTBLD_INLINE void iopFPushClsMethodSD(intva_t numArgs,
 
 namespace {
 
-void fpushCtorImpl(intva_t numArgs, Class* cls, bool dynamic) {
+void fpushCtorImpl(uint32_t numArgs, Class* cls, bool dynamic) {
   const Func* f;
   auto const res UNUSED =
     lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
@@ -5006,11 +5023,11 @@ void fpushCtorImpl(intva_t numArgs, Class* cls, bool dynamic) {
 
 }
 
-OPTBLD_INLINE void iopFPushCtor(intva_t numArgs, clsref_slot slot) {
+OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs, clsref_slot slot) {
   fpushCtorImpl(numArgs, slot.take(), true);
 }
 
-OPTBLD_INLINE void iopFPushCtorD(intva_t numArgs, Id id) {
+OPTBLD_INLINE void iopFPushCtorD(uint32_t numArgs, Id id) {
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
   auto cls = Unit::loadClass(nep.second, nep.first);
@@ -5021,14 +5038,14 @@ OPTBLD_INLINE void iopFPushCtorD(intva_t numArgs, Id id) {
   fpushCtorImpl(numArgs, cls, false);
 }
 
-OPTBLD_INLINE void iopFPushCtorI(intva_t numArgs, intva_t clsIx) {
+OPTBLD_INLINE void iopFPushCtorI(uint32_t numArgs, uint32_t clsIx) {
   auto const func = vmfp()->m_func;
   auto const preCls = func->unit()->lookupPreClassId(clsIx);
   auto const cls = Unit::defClass(preCls, true);
   fpushCtorImpl(numArgs, cls, false);
 }
 
-OPTBLD_INLINE void iopFPushCtorS(intva_t numArgs, SpecialClsRef ref) {
+OPTBLD_INLINE void iopFPushCtorS(uint32_t numArgs, SpecialClsRef ref) {
   fpushCtorImpl(numArgs, specialClsRefToCls(ref), false);
 }
 
@@ -5068,7 +5085,7 @@ void iopDecodeCufIter(PC& pc, Iter* it, PC takenpc) {
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopFPushCufIter(intva_t numArgs, Iter* it) {
+OPTBLD_INLINE void iopFPushCufIter(uint32_t numArgs, Iter* it) {
   auto f = it->cuf().func();
   auto o = it->cuf().ctx();
   auto n = it->cuf().name();
@@ -5143,29 +5160,28 @@ OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
 }
 
 OPTBLD_INLINE void iopRaiseFPassWarning(
-  FPassHint hint, const StringData* fname, intva_t arg
+  FPassHint hint, const StringData* fname, uint32_t arg
 ) {
-  raiseFPassHintWarning(fname, arg.n, hint);
+  raiseFPassHintWarning(fname, arg, hint);
 }
 
-OPTBLD_INLINE void iopFPushCuf(intva_t numArgs) {
+OPTBLD_INLINE void iopFPushCuf(uint32_t numArgs) {
   doFPushCuf(numArgs, false, false);
 }
 
-OPTBLD_INLINE void iopFPushCufF(intva_t numArgs) {
+OPTBLD_INLINE void iopFPushCufF(uint32_t numArgs) {
   doFPushCuf(numArgs, true, false);
 }
 
-OPTBLD_INLINE void iopFPushCufSafe(intva_t numArgs) {
+OPTBLD_INLINE void iopFPushCufSafe(uint32_t numArgs) {
   doFPushCuf(numArgs, false, true);
 }
 
-OPTBLD_INLINE void iopFPassC(intva_t paramId, FPassHint hint) {
-  checkFPassHint(arFromSp(paramId + 1), paramId, hint);
+OPTBLD_INLINE void iopFPassC(ActRec* ar, uint32_t paramId, FPassHint hint) {
+  checkFPassHint(ar, paramId, hint);
 }
 
-OPTBLD_INLINE void iopFPassCW(intva_t paramId, FPassHint hint) {
-  auto ar = arFromSp(paramId + 1);
+OPTBLD_INLINE void iopFPassCW(ActRec* ar, uint32_t paramId, FPassHint hint) {
   checkFPassHint(ar, paramId, hint);
   auto const func = ar->m_func;
   if (func->mustBeRef(paramId)) {
@@ -5173,8 +5189,7 @@ OPTBLD_INLINE void iopFPassCW(intva_t paramId, FPassHint hint) {
   }
 }
 
-OPTBLD_INLINE void iopFPassCE(intva_t paramId, FPassHint hint) {
-  auto ar = arFromSp(paramId + 1);
+OPTBLD_INLINE void iopFPassCE(ActRec* ar, uint32_t paramId, FPassHint hint) {
   checkFPassHint(ar, paramId, hint);
   auto const func = ar->m_func;
   if (func->mustBeRef(paramId)) {
@@ -5182,8 +5197,7 @@ OPTBLD_INLINE void iopFPassCE(intva_t paramId, FPassHint hint) {
   }
 }
 
-OPTBLD_INLINE void iopFPassV(intva_t paramId, FPassHint hint) {
-  auto ar = arFromSp(paramId + 1);
+OPTBLD_INLINE void iopFPassV(ActRec* ar, uint32_t paramId, FPassHint hint) {
   checkFPassHint(ar, paramId, hint);
   const Func* func = ar->m_func;
   if (!func->byRef(paramId)) {
@@ -5191,14 +5205,12 @@ OPTBLD_INLINE void iopFPassV(intva_t paramId, FPassHint hint) {
   }
 }
 
-OPTBLD_INLINE void iopFPassVNop(intva_t paramId, FPassHint hint) {
-  auto ar = arFromSp(paramId + 1);
+OPTBLD_INLINE void iopFPassVNop(ActRec* ar, uint32_t paramId, FPassHint hint) {
   checkFPassHint(ar, paramId, hint);
   assert(ar->m_func->byRef(paramId));
 }
 
-OPTBLD_INLINE void iopFPassR(intva_t paramId, FPassHint hint) {
-  auto ar = arFromSp(paramId + 1);
+OPTBLD_INLINE void iopFPassR(ActRec* ar, uint32_t paramId, FPassHint hint) {
   checkFPassHint(ar, paramId, hint);
   const Func* func = ar->m_func;
   if (func->byRef(paramId)) {
@@ -5213,8 +5225,8 @@ OPTBLD_INLINE void iopFPassR(intva_t paramId, FPassHint hint) {
   }
 }
 
-OPTBLD_INLINE void iopFPassL(intva_t paramId, local_var loc, FPassHint hint) {
-  auto ar = arFromSp(paramId);
+OPTBLD_INLINE void iopFPassL(ActRec* ar, uint32_t paramId, local_var loc,
+                             FPassHint hint) {
   checkFPassHint(ar, paramId, hint);
   TypedValue* fr = loc.ptr;
   TypedValue* to = vmStack().allocTV();
@@ -5225,8 +5237,7 @@ OPTBLD_INLINE void iopFPassL(intva_t paramId, local_var loc, FPassHint hint) {
   }
 }
 
-OPTBLD_INLINE void iopFPassN(intva_t paramId, FPassHint hint) {
-  auto ar = arFromSp(paramId + 1);
+OPTBLD_INLINE void iopFPassN(ActRec* ar, uint32_t paramId, FPassHint hint) {
   checkFPassHint(ar, paramId, hint);
   if (!ar->m_func->byRef(paramId)) {
     iopCGetN();
@@ -5235,8 +5246,7 @@ OPTBLD_INLINE void iopFPassN(intva_t paramId, FPassHint hint) {
   }
 }
 
-OPTBLD_INLINE void iopFPassG(intva_t paramId, FPassHint hint) {
-  auto ar = arFromSp(paramId + 1);
+OPTBLD_INLINE void iopFPassG(ActRec* ar, uint32_t paramId, FPassHint hint) {
   checkFPassHint(ar, paramId, hint);
   if (!ar->m_func->byRef(paramId)) {
     iopCGetG();
@@ -5245,9 +5255,8 @@ OPTBLD_INLINE void iopFPassG(intva_t paramId, FPassHint hint) {
   }
 }
 
-OPTBLD_INLINE void iopFPassS(intva_t paramId, clsref_slot slot,
+OPTBLD_INLINE void iopFPassS(ActRec* ar, uint32_t paramId, clsref_slot slot,
                              FPassHint hint) {
-  auto ar = arFromSp(paramId + 1);
   checkFPassHint(ar, paramId, hint);
   if (!ar->m_func->byRef(paramId)) {
     iopCGetS(slot);
@@ -5271,8 +5280,7 @@ bool doFCall(ActRec* ar, PC& pc) {
   return true;
 }
 
-OPTBLD_INLINE void iopFCall(PC& pc, intva_t numArgs) {
-  auto ar = arFromSp(numArgs);
+OPTBLD_INLINE void iopFCall(PC& pc, ActRec* ar, uint32_t numArgs) {
   if (vmfp()->func()->isBuiltin()) {
     ar->setUseWeakTypes();
   } else if (ar->m_func->isBuiltin()) {
@@ -5289,9 +5297,8 @@ OPTBLD_INLINE void iopFCall(PC& pc, intva_t numArgs) {
 }
 
 OPTBLD_FLT_INLINE
-void iopFCallD(PC& pc, intva_t numArgs, const StringData* /*clsName*/,
-               const StringData* funcName) {
-  auto ar = arFromSp(numArgs);
+void iopFCallD(PC& pc, ActRec* ar, uint32_t numArgs,
+               const StringData* /*clsName*/, const StringData* funcName) {
   if (!RuntimeOption::EvalJitEnableRenameFunction &&
       !(ar->m_func->attrs() & AttrInterceptable)) {
     assertx(ar->m_func->name()->isame(funcName) ||
@@ -5305,9 +5312,8 @@ void iopFCallD(PC& pc, intva_t numArgs, const StringData* /*clsName*/,
 }
 
 OPTBLD_INLINE
-void iopFCallAwait(PC& pc, intva_t numArgs, const StringData* /*clsName*/,
-                   const StringData* funcName) {
-  auto ar = arFromSp(numArgs);
+void iopFCallAwait(PC& pc, ActRec* ar, uint32_t numArgs,
+                   const StringData* /*clsName*/, const StringData* funcName) {
   if (!RuntimeOption::EvalJitEnableRenameFunction &&
       !(ar->m_func->attrs() & AttrInterceptable)) {
     assert(ar->m_func->name()->isame(funcName));
@@ -5320,7 +5326,7 @@ void iopFCallAwait(PC& pc, intva_t numArgs, const StringData* /*clsName*/,
 }
 
 OPTBLD_FLT_INLINE
-void iopFCallBuiltin(intva_t numArgs, intva_t numNonDefault, Id id) {
+void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
   const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
   auto unit = vmfp()->func()->unit();
   auto strict = builtinCallUsesStrictTypes(unit);
@@ -5337,8 +5343,8 @@ void iopFCallBuiltin(intva_t numArgs, intva_t numNonDefault, Id id) {
       assertx(numArgs > 0);
       assertx(
         RuntimeOption::EvalHackArrDVArrs
-          ? isVecType(args[1 - safe_cast<int32_t>(numArgs.n)].m_type)
-          : isArrayType(args[1 - safe_cast<int32_t>(numArgs.n)].m_type)
+          ? isVecType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
+          : isArrayType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
       );
     }
     Native::callFunc<true>(func, nullptr, args, numNonDefault, ret);
@@ -5366,11 +5372,10 @@ enum class CallArrOnInvalidContainer {
   WarnAndContinue
 };
 
-static bool doFCallArray(PC& pc, int numStackValues,
+static bool doFCallArray(PC& pc, ActRec* ar, int numStackValues,
                          CallArrOnInvalidContainer onInvalid,
                          void* ret = nullptr) {
   assert(numStackValues >= 1);
-  ActRec* ar = (ActRec*)(vmStack().top() + numStackValues);
   assert(ar->numArgs() == numStackValues);
 
   Cell* c1 = vmStack().topC();
@@ -5443,39 +5448,39 @@ bool doFCallArrayTC(PC pc, int32_t numArgs, void* retAddr) {
     numArgs = 1;
     onInvalid = CallArrOnInvalidContainer::CastToArray;
   }
-  auto const ret = doFCallArray(pc, numArgs, onInvalid, retAddr);
+  auto const ret = doFCallArray(pc, arFromSp(numArgs), numArgs,
+                                onInvalid, retAddr);
   tl_regState = VMRegState::DIRTY;
   return ret;
 }
 
-OPTBLD_INLINE void iopFCallArray(PC& pc) {
-  doFCallArray(pc, 1, CallArrOnInvalidContainer::CastToArray);
+OPTBLD_INLINE void iopFCallArray(PC& pc, ActRec* ar) {
+  doFCallArray(pc, ar, 1, CallArrOnInvalidContainer::CastToArray);
 }
 
-OPTBLD_INLINE void iopFCallUnpack(PC& pc, intva_t numArgs) {
-  auto ar = arFromSp(numArgs);
+OPTBLD_INLINE void iopFCallUnpack(PC& pc, ActRec* ar, uint32_t numArgs) {
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
-  doFCallArray(pc, numArgs, CallArrOnInvalidContainer::WarnAndContinue);
+  doFCallArray(pc, ar, numArgs, CallArrOnInvalidContainer::WarnAndContinue);
 }
 
 OPTBLD_FLT_INLINE
-void iopFCallM(PC& pc, intva_t numArgs, intva_t /* numRet */) {
-  arFromSp(numArgs)->setFCallM();
-  iopFCall(pc, numArgs);
+void iopFCallM(PC& pc, ActRec* ar, uint32_t numArgs, uint32_t /* numRet */) {
+  ar->setFCallM();
+  iopFCall(pc, ar, numArgs);
 }
 
 OPTBLD_FLT_INLINE
-void iopFCallDM(PC& pc, intva_t numArgs, intva_t /* numRet */,
+void iopFCallDM(PC& pc, ActRec* ar, uint32_t numArgs, uint32_t /* numRet */,
                 const StringData* clsName, const StringData* funcName) {
-  arFromSp(numArgs)->setFCallM();
-  iopFCallD(pc, numArgs, clsName, funcName);
+  ar->setFCallM();
+  iopFCallD(pc, ar, numArgs, clsName, funcName);
 }
 
-OPTBLD_INLINE void iopFCallUnpackM(PC& pc, intva_t numArgs,
-                                   intva_t /* numRet */) {
-  arFromSp(numArgs)->setFCallM();
-  iopFCallUnpack(pc, numArgs);
+OPTBLD_INLINE void iopFCallUnpackM(PC& pc, ActRec* ar, uint32_t numArgs,
+                                   uint32_t /* numRet */) {
+  ar->setFCallM();
+  iopFCallUnpack(pc, ar, numArgs);
 }
 
 OPTBLD_INLINE void iopCufSafeArray() {
@@ -5753,12 +5758,12 @@ OPTBLD_INLINE void iopEval(PC& pc) {
   vm->evalUnit(unit, pc, EventHook::Eval);
 }
 
-OPTBLD_INLINE void iopDefFunc(intva_t fid) {
+OPTBLD_INLINE void iopDefFunc(uint32_t fid) {
   Func* f = vmfp()->m_func->unit()->lookupFuncId(fid);
   Unit::defFunc(f, isDebuggerAttached());
 }
 
-OPTBLD_INLINE void iopDefCls(intva_t cid) {
+OPTBLD_INLINE void iopDefCls(uint32_t cid) {
   PreClass* c = vmfp()->m_func->unit()->lookupPreClassId(cid);
   Unit::defClass(c);
 }
@@ -5774,9 +5779,9 @@ OPTBLD_INLINE void iopAliasCls(const StringData* original,
   vmStack().pushBool(Unit::aliasClass(original, alias, autoload));
 }
 
-OPTBLD_INLINE void iopDefClsNop(intva_t /*cid*/) {}
+OPTBLD_INLINE void iopDefClsNop(uint32_t /*cid*/) {}
 
-OPTBLD_INLINE void iopDefTypeAlias(intva_t tid) {
+OPTBLD_INLINE void iopDefTypeAlias(uint32_t tid) {
   vmfp()->func()->unit()->defTypeAlias(tid);
 }
 
@@ -5951,14 +5956,14 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
   }
 }
 
-OPTBLD_INLINE void iopVerifyOutType(intva_t paramId) {
+OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
   auto const func = vmfp()->m_func;
   assert(paramId < func->numParams());
   assert(func->numParams() == int(func->params().size()));
   auto const& tc = func->params()[paramId].typeConstraint;
   assert(tc.hasConstraint());
   if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyOutParam(vmStack().topTV(), func, paramId.n);
+    tc.verifyOutParam(vmStack().topTV(), func, paramId);
   }
 }
 
@@ -6039,7 +6044,7 @@ OPTBLD_INLINE void iopParent(clsref_slot slot) {
   slot.put(parent);
 }
 
-OPTBLD_INLINE void iopCreateCl(intva_t numArgs, intva_t clsIx) {
+OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, uint32_t clsIx) {
   auto const func = vmfp()->m_func;
   auto const preCls = func->unit()->lookupPreClassId(clsIx);
   auto const c = Unit::defClosure(preCls);
@@ -6673,8 +6678,8 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopIncStat(intva_t counter, intva_t value) {
-  Stats::inc(Stats::StatCounter(counter.n), value);
+OPTBLD_INLINE void iopIncStat(uint32_t counter, uint32_t value) {
+  Stats::inc(Stats::StatCounter(counter), value);
 }
 
 OPTBLD_INLINE void iopOODeclExists(OODeclExistsOp subop) {
@@ -6814,727 +6819,189 @@ condStackTraceSep(Op opcode) {
   ONTRACE(3, auto stack = prettyStack(pfx);\
           Trace::trace("%s\n", stack.c_str());)
 
+namespace {
+
 /*
- * iopWrapper is used to normalize the calling convention for the iop*
- * functions, since some return void and some return TCA. Any functions that
- * return void are treated as though they returned nullptr.
+ * iopWrapReturn() calls a function pointer and forwards its return value if it
+ * returns TCA, or nullptr if returns void.
  */
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(PC&), PC& pc) {
-  fn(pc);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, TCA(*fn)(PC& pc), PC& pc) {
-  return fn(pc);
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, TCA(*fn)(PC& pc, intva_t), PC& pc) {
-  auto n = decode_intva(pc);
-  return fn(pc, n);
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, TCA(*fn)(PC& pc, LocalRange locals), PC& pc) {
-  auto n = decodeLocalRange(pc);
-  return fn(pc, n);
-}
-
-OPTBLD_INLINE static TCA iopWrapper(Op, void (*fn)(), PC& /*pc*/) {
-  fn();
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(const StringData*), PC& pc) {
-  auto s = decode_litstr(pc);
-  fn(s);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(const StringData*,const StringData*), PC& pc) {
-  auto s1 = decode_litstr(pc);
-  auto s2 = decode_litstr(pc);
-  fn(s1, s2);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(const StringData*,clsref_slot), PC& pc) {
-  auto s1 = decode_litstr(pc);
-  auto s = decode_clsref_slot(pc);
-  fn(s1, s);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(local_var), PC& pc) {
-  auto var = decode_local(pc);
-  fn(var);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(local_var,local_var), PC& pc) {
-  auto var1 = decode_local(pc);
-  auto var2 = decode_local(pc);
-  fn(var1, var2);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(local_var,clsref_slot), PC& pc) {
-  auto var1 = decode_local(pc);
-  auto s = decode_clsref_slot(pc);
-  fn(var1, s);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t), PC& pc) {
-  auto n = decode_intva(pc);
-  fn(n);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t, FPassHint), PC& pc) {
-  auto n = decode_intva(pc);
-  auto imm = decode_oa<FPassHint>(pc);
-  fn(n, imm);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t,intva_t), PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto n2 = decode_intva(pc);
-  fn(n1, n2);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t,clsref_slot), PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto s = decode_clsref_slot(pc);
-  fn(n1, s);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t,SpecialClsRef), PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto imm = decode_oa<SpecialClsRef>(pc);
-  fn(n1, imm);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t,int32_t,imm_array<uint32_t>), PC& pc)  {
-  auto n1 = decode_intva(pc);
-  auto n2 = decode<int32_t>(pc);
-  auto v = imm_array<uint32_t>(pc);
-  pc += n2 * sizeof(uint32_t);
-  fn(n1, n2, v);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op,
-               void(*fn)(intva_t,SpecialClsRef,int32_t,imm_array<uint32_t>),
-               PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto imm = decode_oa<SpecialClsRef>(pc);
-  auto n2 = decode<int32_t>(pc);
-  auto v = imm_array<uint32_t>(pc);
-  pc += n2 * sizeof(uint32_t);
-  fn(n1, imm, n2, v);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t,clsref_slot,SpecialClsRef), PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto s = decode_clsref_slot(pc);
-  auto imm = decode_oa<SpecialClsRef>(pc);
-  fn(n1, s, imm);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op,
-               void(*fn)(intva_t,clsref_slot,int32_t,imm_array<uint32_t>),
-               PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto s = decode_clsref_slot(pc);
-  auto n2 = decode<int32_t>(pc);
-  auto v = imm_array<uint32_t>(pc);
-  pc += n2 * sizeof(uint32_t);
-  fn(n1, s, n2, v);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t,LocalRange), PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto n2 = decodeLocalRange(pc);
-  fn(n1, n2);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(clsref_slot), PC& pc) {
-  auto s = decode_clsref_slot(pc);
-  fn(s);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(int32_t), PC& pc) {
-  auto n = decode<int32_t>(pc);
-  fn(n);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(int32_t,imm_array<int32_t>), PC& pc) {
-  auto n = decode<int32_t>(pc);
-  auto v = imm_array<int32_t>(pc);
-  pc += n * sizeof(int32_t);
-  fn(n, v);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op op, void(*fn)(ActRec*,intva_t,intva_t), PC& pc) {
-  auto ar = arFromInstr(pc - encoded_op_size(op));
-  auto n1 = decode_intva(pc);
-  auto n2 = decode_intva(pc);
-  fn(ar, n1, n2);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op op, void(*fn)(ActRec*,intva_t,local_var), PC& pc) {
-  auto ar = arFromInstr(pc - encoded_op_size(op));
-  auto n = decode_intva(pc);
-  auto var = decode_local(pc);
-  fn(ar, n, var);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, local_var), PC& pc) {
-  auto n = decode_intva(pc);
-  auto var = decode_local(pc);
-  fn(n, var);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/,
-           void (*fn)(FPassHint,const StringData*,intva_t), PC& pc) {
-  auto imm = decode_oa<FPassHint>(pc);
-  auto s = decode_litstr(pc);
-  auto n = decode_intva(pc);
-  fn(imm, s, n);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, local_var, FPassHint), PC& pc) {
-  auto n = decode_intva(pc);
-  auto var = decode_local(pc);
-  auto imm = decode_oa<FPassHint>(pc);
-  fn(n, var, imm);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, clsref_slot, FPassHint), PC& pc) {
-  auto n = decode_intva(pc);
-  auto s = decode_clsref_slot(pc);
-  auto imm = decode_oa<FPassHint>(pc);
-  fn(n, s, imm);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, SpecialClsRef, const StringData*),
-           PC& pc) {
-  auto n = decode_intva(pc);
-  auto imm = decode_oa<SpecialClsRef>(pc);
-  auto s = decode_litstr(pc);
-  fn(n, imm, s);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(PC&, intva_t), PC& pc) {
-  auto n = decode_intva(pc);
-  fn(pc, n);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(PC&, intva_t, intva_t), PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto n2 = decode_intva(pc);
-  fn(pc, n1, n2);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, const StringData*, Id), PC& pc) {
-  auto n = decode_intva(pc);
-  auto s = decode_litstr(pc);
-  auto i = decode<Id>(pc);
-  fn(n, s, i);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(int64_t), PC& pc) {
-  auto imm = decode<int64_t>(pc);
-  fn(imm);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(double), PC& pc) {
-  auto imm = decode<double>(pc);
-  fn(imm);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(FatalOp), PC& pc) {
-  auto imm = decode_oa<FatalOp>(pc);
-  fn(imm);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(IsTypeOp), PC& pc) {
-  auto subop = decode_oa<IsTypeOp>(pc);
-  fn(subop);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(local_var,IsTypeOp), PC& pc) {
-  auto var = decode_local(pc);
-  auto subop = decode_oa<IsTypeOp>(pc);
-  fn(var, subop);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(SetOpOp), PC& pc) {
-  auto subop = decode_oa<SetOpOp>(pc);
-  fn(subop);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(SetOpOp,clsref_slot), PC& pc) {
-  auto subop = decode_oa<SetOpOp>(pc);
-  auto s = decode_clsref_slot(pc);
-  fn(subop, s);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(local_var,SetOpOp), PC& pc) {
-  auto var = decode_local(pc);
-  auto subop = decode_oa<SetOpOp>(pc);
-  fn(var, subop);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(IncDecOp), PC& pc) {
-  auto subop = decode_oa<IncDecOp>(pc);
-  fn(subop);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(IncDecOp,clsref_slot), PC& pc) {
-  auto subop = decode_oa<IncDecOp>(pc);
-  auto s = decode_clsref_slot(pc);
-  fn(subop, s);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(local_var,IncDecOp), PC& pc) {
-  auto var = decode_local(pc);
-  auto subop = decode_oa<IncDecOp>(pc);
-  fn(var, subop);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(BareThisOp), PC& pc) {
-  auto subop = decode_oa<BareThisOp>(pc);
-  fn(subop);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(OODeclExistsOp), PC& pc) {
-  auto subop = decode_oa<OODeclExistsOp>(pc);
-  fn(subop);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(local_var,SilenceOp), PC& pc) {
-  auto var = decode_local(pc);
-  auto subop = decode_oa<SilenceOp>(pc);
-  fn(var, subop);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(ContCheckOp), PC& pc) {
-  auto imm = decode_oa<ContCheckOp>(pc);
-  fn(imm);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(const ArrayData*), PC& pc) {
-  auto id = decode<Id>(pc);
-  auto a = vmfp()->m_func->unit()->lookupArrayId(id);
-  fn(a);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(local_var,intva_t), PC& pc) {
-  auto var1 = decode_local(pc);
-  auto imm2 = decode_intva(pc);
-  fn(var1, imm2);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(Iter*), PC& pc) {
-  auto iter = decode_iter(pc);
-  fn(iter);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t,Iter*), PC& pc) {
-  auto n = decode_intva(pc);
-  auto iter = decode_iter(pc);
-  fn(n, iter);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(CudOp,Iter*), PC& pc) {
-  auto subop = decode_oa<CudOp>(pc);
-  auto iter = decode_iter(pc);
-  fn(subop, iter);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op op, void(*fn)(PC&,Iter*,PC), PC& pc) {
-  auto origpc = pc - encoded_op_size(op);
-  auto iter = decode_iter(pc);
-  auto targetpc = origpc + decode_ba(pc);
-  fn(pc, iter, targetpc);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op op, void(*fn)(PC&,Iter*,PC,local_var), PC& pc) {
-  auto origpc = pc - encoded_op_size(op);
-  auto iter = decode_iter(pc);
-  auto targetpc = origpc + decode_ba(pc);
-  auto var = decode_local(pc);
-  fn(pc, iter, targetpc, var);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op op, void(*fn)(PC&,Iter*,PC,local_var,local_var), PC& pc) {
-  auto origpc = pc - encoded_op_size(op);
-  auto iter = decode_iter(pc);
-  auto targetpc = origpc + decode_ba(pc);
-  auto var1 = decode_local(pc);
-  auto var2 = decode_local(pc);
-  fn(pc, iter, targetpc, var1, var2);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op op, TCA(*fn)(PC&,Iter*,PC), PC& pc) {
-  auto origpc = pc - encoded_op_size(op);
-  auto iter = decode_iter(pc);
-  auto targetpc = origpc + decode_ba(pc);
-  return fn(pc, iter, targetpc);
-}
-
-OPTBLD_INLINE static TCA iopWrapper(Op op, void(*fn)(PC&,PC), PC& pc) {
-  auto origpc = pc - encoded_op_size(op);
-  auto targetpc = origpc + decode_ba(pc);
-  fn(pc, targetpc);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op op, void(*fn)(PC&,PC,int,imm_array<IterBreakElem>),
-               PC& pc) {
-  auto origpc = pc - encoded_op_size(op);
-  auto targetpc = origpc + decode_ba(pc);
-  auto n = decode<int32_t>(pc);
-  auto v = imm_array<IterBreakElem>(pc);
-  pc += n * sizeof(IterBreakElem);
-  fn(pc, targetpc, n, v);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, MOpMode), PC& pc) {
-  auto n = decode_intva(pc);
-  auto mode = decode<MOpMode>(pc);
-  fn(n, mode);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(local_var, MOpMode), PC& pc) {
-  auto local = decode_local(pc);
-  auto mode = decode<MOpMode>(pc);
-  fn(local, mode);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(const StringData*, int32_t), PC& pc) {
-  auto str = decode_litstr(pc);
-  auto n = decode<int32_t>(pc);
-  fn(str, n);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(MOpMode, MemberKey), PC& pc) {
-  auto mode = decode_oa<MOpMode>(pc);
-  auto mk = decode_member_key(pc, liveUnit());
-  fn(mode, mk);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, MemberKey), PC& pc) {
-  auto n = decode_intva(pc);
-  auto mk = decode_member_key(pc, liveUnit());
-  fn(n, mk);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op op, void(*fn)(ActRec*,intva_t,MemberKey), PC& pc) {
-  auto ar = arFromInstr(pc - encoded_op_size(op));
-  auto n = decode_intva(pc);
-  auto mk = decode_member_key(pc, liveUnit());
-  fn(ar, n, mk);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t,intva_t,MemberKey), PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto n2 = decode_intva(pc);
-  auto mk = decode_member_key(pc, liveUnit());
-  fn(n1, n2, mk);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t,intva_t,MemberKey,FPassHint), PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto n2 = decode_intva(pc);
-  auto mk = decode_member_key(pc, liveUnit());
-  auto imm = decode_oa<FPassHint>(pc);
-  fn(n1, n2, mk, imm);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, QueryMOp, MemberKey), PC& pc) {
-  auto n = decode_intva(pc);
-  auto subop = decode_oa<QueryMOp>(pc);
-  auto mk = decode_member_key(pc, liveUnit());
-  fn(n, subop, mk);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, IncDecOp, MemberKey), PC& pc) {
-  auto n = decode_intva(pc);
-  auto subop = decode_oa<IncDecOp>(pc);
-  auto mk = decode_member_key(pc, liveUnit());
-  fn(n, subop, mk);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, SetOpOp, MemberKey), PC& pc) {
-  auto n = decode_intva(pc);
-  auto subop = decode_oa<SetOpOp>(pc);
-  auto mk = decode_member_key(pc, liveUnit());
-  fn(n, subop, mk);
-  return nullptr;
-}
-
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(local_var, RepoAuthType), PC& pc) {
-  auto var = decode_local(pc);
-  if (debug) {
-    auto rat = decodeRAT(vmfp()->m_func->unit(), pc);
-    fn(var, rat);
-  } else {
-    RepoAuthType rat; pc += encodedRATSize(pc);
-    fn(var, rat);
+template<typename... Params, typename... Args>
+OPTBLD_INLINE TCA iopWrapReturn(void(fn)(Params...), PC, Args&&... args) {
+  fn(std::forward<Args>(args)...);
+  return nullptr;
+}
+
+template<typename... Params, typename... Args>
+OPTBLD_INLINE TCA iopWrapReturn(TCA(fn)(Params...), PC, Args&&... args) {
+  return fn(std::forward<Args>(args)...);
+}
+
+/*
+ * iopSwitch and iopSSwitch take vectors containing Offset and need origpc to
+ * translate those to PC. Special-case that here rather than creating a new
+ * flag in hhbc.h just for this one case.
+ */
+template<typename... Params, typename... Args>
+OPTBLD_INLINE TCA iopWrapReturn(void(fn)(PC, Params...), PC origpc,
+                                Args&&... args) {
+  fn(origpc, std::forward<Args>(args)...);
+  return nullptr;
+}
+
+/*
+ * arFromInstr() is always correct for FPI-using instructions, but many opcodes
+ * can use the much faster arFromSp().
+ */
+ALWAYS_INLINE ActRec* ar_for_inst(Op op, PC origpc,
+                                  int iva_count, uint32_t* ivas) {
+  switch (op) {
+    case Op::FPassC:
+    case Op::FPassCW:
+    case Op::FPassCE:
+    case Op::FPassV:
+    case Op::FPassVNop:
+    case Op::FPassR:
+    case Op::FPassN:
+    case Op::FPassG:
+    case Op::FPassS:
+      assertx(iva_count >= 1);
+      return arFromSp(ivas[0] + 1);
+    case Op::FPassL:
+    case Op::FCall:
+    case Op::FCallD:
+    case Op::FCallAwait:
+    case Op::FCallUnpack:
+    case Op::FCallM:
+    case Op::FCallDM:
+    case Op::FCallUnpackM:
+      assertx(iva_count >= 1);
+      return arFromSp(ivas[0]);
+    case Op::FPassM:
+      assertx(iva_count >= 2);
+      return arFromSp(ivas[0] + ivas[1]);
+    case Op::FCallArray:
+      return arFromSp(1);
+    default:
+      return arFromInstr(origpc);
   }
-  return nullptr;
 }
 
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, RepoAuthType), PC& pc) {
-  auto n = decode_intva(pc);
-  if (debug) {
-    auto rat = decodeRAT(vmfp()->m_func->unit(), pc);
-    fn(n, rat);
-  } else {
-    RepoAuthType rat; pc += encodedRATSize(pc);
-    fn(n, rat);
+/*
+ * Some bytecodes with SA immediates want the raw Id to look up a NamedEntity
+ * quickly, and some want the const StringData*. Support both by decoding to
+ * this struct and implicitly converting to what the callee wants.
+ */
+struct litstr_id {
+  /* implicit */ ALWAYS_INLINE operator const StringData*() const {
+    return liveUnit()->lookupLitstrId(id);
   }
-  return nullptr;
-}
+  /* implicit */ ALWAYS_INLINE operator Id() const {
+    return id;
+  }
 
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, int), PC& pc) {
-  auto n = decode_intva(pc);
-  auto sa = decode<int>(pc);
-  fn(n, sa);
-  return nullptr;
-}
+  Id id{kInvalidId};
+};
 
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, intva_t, int), PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto n2 = decode_intva(pc);
-  auto sa = decode<int>(pc);
-  fn(n1, n2, sa);
-  return nullptr;
-}
+/*
+ * These macros are used to generate wrapper functions for the iop*() functions
+ * defined earlier in this file. iopWrapFoo() decodes immediates from the
+ * bytecode stream according to the signature of Foo (in hhbc.h), then calls
+ * iopFoo() with those decoded arguments.
+ */
+#define FLAG_NF
+#define FLAG_TF
+#define FLAG_CF , pc
+#define FLAG_FF , ar_for_inst(op, origpc, iva_count, ivas)
+#define FLAG_PF
+#define FLAG_CF_TF FLAG_CF
+#define FLAG_CF_FF FLAG_CF FLAG_FF
 
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, int, int), PC& pc) {
-  auto n = decode_intva(pc);
-  auto sa1 = decode<int>(pc);
-  auto sa2 = decode<int>(pc);
-  fn(n, sa1, sa2);
-  return nullptr;
-}
+#define DECODE_IVA ivas[iva_count++] = decode_iva(pc)
+#define DECODE_I64A decode<int64_t>(pc)
+#define DECODE_LA decode_local(pc)
+#define DECODE_IA decode_iter(pc)
+#define DECODE_CAR decode_clsref_slot(pc)
+#define DECODE_CAW DECODE_CAR
+#define DECODE_DA decode<double>(pc)
+#define DECODE_SA decode<litstr_id>(pc)
+#define DECODE_AA decode_litarr(pc)
+#define DECODE_RATA decode_rat(pc)
+#define DECODE_BA origpc + decode_ba(pc)
+#define DECODE_OA(ty) decode<ty>(pc)
+#define DECODE_KA decode_member_key(pc, liveUnit())
+#define DECODE_LAR decodeLocalRange(pc)
+#define DECODE_BLA decode_imm_array<Offset>(pc)
+#define DECODE_SLA decode_imm_array<StrVecItem>(pc)
+#define DECODE_ILA decode_imm_array<IterBreakElem>(pc)
+#define DECODE_I32LA decode_imm_array<uint32_t>(pc)
+#define DECODE_VSA decode_imm_array<Id>(pc)
 
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/,
-           void (*fn)(intva_t,ObjMethodOp,int32_t,imm_array<uint32_t>),
-           PC& pc) {
-  auto n = decode_intva(pc);
-  auto subop = decode_oa<ObjMethodOp>(pc);
-  auto count = decode<int32_t>(pc);
-  auto args = imm_array<uint32_t>(pc);
-  pc += count * sizeof(uint32_t);
-  fn(n, subop, count, args);
-  return nullptr;
-}
+#define DECODE_NA
+#define DECODE_ONE(a) auto const imm1 = DECODE_##a;
+#define DECODE_TWO(a, b) DECODE_ONE(a) auto const imm2 = DECODE_##b;
+#define DECODE_THREE(a, b, c) DECODE_TWO(a, b) auto const imm3 = DECODE_##c;
+#define DECODE_FOUR(a, b, c, d) \
+  DECODE_THREE(a, b, c) auto const imm4 = DECODE_##d;
 
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, const StringData*, ObjMethodOp),
-           PC& pc) {
-  auto n = decode_intva(pc);
-  auto s = decode_litstr(pc);
-  auto subop = decode_oa<ObjMethodOp>(pc);
-  fn(n, s, subop);
-  return nullptr;
-}
+#define PASS_NA
+#define PASS_ONE(...) , imm1
+#define PASS_TWO(...) , imm1, imm2
+#define PASS_THREE(...) , imm1, imm2, imm3
+#define PASS_FOUR(...) , imm1, imm2, imm3, imm4
+constexpr size_t kMaxImms = 4;
 
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/,
-           void (*fn)(PC&, intva_t, const StringData*, const StringData*),
-           PC& pc) {
-  auto n = decode_intva(pc);
-  auto s1 = decode_litstr(pc);
-  auto s2 = decode_litstr(pc);
-  fn(pc, n, s1, s2);
-  return nullptr;
-}
+#define O(name, imm, in, out, flags)                                 \
+  OPTBLD_INLINE TCA iopWrap##name(PC& pc) {                          \
+    UNUSED int iva_count = 0;                                        \
+    UNUSED uint32_t ivas[kMaxImms];                                  \
+    UNUSED auto const op = Op::name;                                 \
+    UNUSED auto const origpc = pc - encoded_op_size(op);             \
+    DECODE_##imm                                                     \
+    return iopWrapReturn(iop##name, origpc FLAG_##flags PASS_##imm); \
+  }
+OPCODES
 
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/,
-           void (*fn)(PC&,intva_t,intva_t,const StringData*,const StringData*),
-           PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto n2 = decode_intva(pc);
-  auto s1 = decode_litstr(pc);
-  auto s2 = decode_litstr(pc);
-  fn(pc, n1, n2, s1, s2);
-  return nullptr;
-}
+#undef FLAG_NF
+#undef FLAG_TF
+#undef FLAG_CF
+#undef FLAG_FF
+#undef FLAG_PF
+#undef FLAG_CF_TF
+#undef FLAG_CF_FF
 
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(local_var, const StringData*), PC& pc) {
-  auto loc = decode_local(pc);
-  auto s = decode_litstr(pc);
-  fn(loc, s);
-  return nullptr;
-}
+#undef DECODE_IVA
+#undef DECODE_I64A
+#undef DECODE_LA
+#undef DECODE_IA
+#undef DECODE_CAR
+#undef DECODE_CAW
+#undef DECODE_DA
+#undef DECODE_SA
+#undef DECODE_AA
+#undef DECODE_RATA
+#undef DECODE_BA
+#undef DECODE_OA
+#undef DECODE_KA
+#undef DECODE_LAR
+#undef DECODE_BLA
+#undef DECODE_SLA
+#undef DECODE_ILA
+#undef DECODE_I32LA
+#undef DECODE_VSA
 
-OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(const StringData*, InitPropOp), PC& pc) {
-  auto s = decode_litstr(pc);
-  auto subop = decode_oa<InitPropOp>(pc);
-  fn(s, subop);
-  return nullptr;
-}
+#undef DECODE_NA
+#undef DECODE_ONE
+#undef DECODE_TWO
+#undef DECODE_THREE
+#undef DECODE_FOUR
 
-OPTBLD_INLINE static
-TCA iopWrapper(Op op,
-    void(*fn)(PC,PC&,SwitchKind,int64_t,int,imm_array<Offset>),
-    PC& pc) {
-  auto origpc = pc - encoded_op_size(op);
-  auto kind = decode_oa<SwitchKind>(pc);
-  auto base = decode<int64_t>(pc);
-  auto n = decode<int32_t>(pc);
-  auto v = imm_array<Offset>(pc);
-  pc += n * sizeof(Offset);
-  fn(origpc, pc, kind, base, n, v);
-  return nullptr;
-}
+#undef PASS_NA
+#undef PASS_ONE
+#undef PASS_TWO
+#undef PASS_THREE
+#undef PASS_FOUR
+#undef O
 
-OPTBLD_INLINE static
-TCA iopWrapper(Op op,
-    void(*fn)(PC,PC&,int,imm_array<StrVecItem>), PC& pc) {
-  auto origpc = pc - encoded_op_size(op);
-  auto n = decode<int32_t>(pc);
-  auto v = imm_array<StrVecItem>(pc);
-  pc += n * sizeof(StrVecItem);
-  fn(origpc, pc, n, v);
-  return nullptr;
 }
 
 /**
@@ -7570,7 +7037,7 @@ TCA iopWrapper(Op op,
           Trace::trace("op"#opcode" offset: %d\n", offset));            \
   assert(peek_op(pc) == Op::opcode);                                    \
   pc += encoded_op_size(Op::opcode);                                    \
-  auto const retAddr = iopWrapper(Op::opcode, iop##opcode, pc);         \
+  auto const retAddr = iopWrap##opcode(pc);                             \
   vmpc() = pc;                                                          \
   COND_STACKTRACE("op"#opcode" post: ");                                \
   condStackTraceSep(Op##opcode);                                        \
@@ -7668,7 +7135,7 @@ TCA dispatchImpl() {
     if (breakOnCtlFlow && Stats::enableInstrCount()) {        \
       Stats::inc(Stats::Instr_InterpBB##name);                \
     }                                                         \
-    retAddr = iopWrapper(Op::name, iop##name, pc);            \
+    retAddr = iopWrap##name(pc);                              \
     vmpc() = pc;                                              \
     if (breakOnCtlFlow) {                                     \
       isCtlFlow = instrIsControlFlow(Op::name);               \

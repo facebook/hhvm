@@ -66,8 +66,8 @@ std::string show(const LocalRange&);
   ARGTYPEVEC(BLA, Offset)        /* Bytecode offset vector immediate */        \
   ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */            \
   ARGTYPEVEC(ILA, Id)            /* IterKind/IterId pair vector */             \
-  ARGTYPEVEC(I32LA,uint32_t)     /* Vector of variable size: 8 or 32-bit uint*/\
-  ARGTYPE(IVA,    uint32_t)      /* Vector of 32-bit uint */                   \
+  ARGTYPEVEC(I32LA,uint32_t)     /* Vector of 32-bit uint */                   \
+  ARGTYPE(IVA,    uint32_t)      /* Variable size: 8 or 32-bit uint */         \
   ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                          \
   ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */      \
   ARGTYPE(IA,     int32_t)       /* Iterator ID: 8 or 32-bit int */            \

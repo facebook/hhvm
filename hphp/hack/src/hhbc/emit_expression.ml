@@ -742,6 +742,36 @@ and emit_is env pos lhs h =
             instr_label its_done
           ]
       end
+    | A.Htuple hl ->
+      begin match lhs with
+        | IsExprExpr e -> emit_is_create_local env pos e h
+        | IsExprUnnamedLocal local ->
+          let its_true = Label.next_regular () in
+          let its_done = Label.next_regular () in
+          let skip_label = Label.next_regular () in
+          gather [
+            instr_istypel local OpVArray;
+            instr_jmpz skip_label;
+
+            instr_int (List.length hl);
+            instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "count");
+            instr_fpassl 0 local H.Cell;
+            instr_fcall 1;
+            instr_unboxr_nop;
+            instr (IOp Same);
+            instr_jmpz skip_label;
+
+            gather (List.mapi ~f:(emit_is_tuple_elem env pos local skip_label) hl);
+            instr_jmp its_true;
+
+            instr_label skip_label;
+            instr_false;
+            instr_jmp its_done;
+            instr_label its_true;
+            instr_true;
+            instr_label its_done
+          ]
+      end
     | _ -> emit_nyi "is expression: unsupported hint (T22779957)"
 
 and emit_is_create_local env pos e h =
@@ -750,13 +780,25 @@ and emit_is_create_local env pos e h =
     gather [
       emit_expr ~need_ref:false env e;
       instr_popl local;
-      emit_is env pos (IsExprUnnamedLocal local) h
+      emit_is env pos (IsExprUnnamedLocal local) h;
+      instr_unsetl local;
     ]
 
 and emit_is_lhs env lhs =
   match lhs with
     | IsExprExpr e -> emit_expr ~need_ref:false env e
     | IsExprUnnamedLocal local -> instr_cgetl local
+
+and emit_is_tuple_elem env pos local skip_label i h =
+  let local_i = Local.get_unnamed_local () in
+  gather [
+    instr_basel local MemberOpMode.Warn;
+    instr_querym 0 H.QueryOp.CGet (MemberKey.EI (Int64.of_int i));
+    instr_popl local_i;
+    emit_is env pos (IsExprUnnamedLocal local_i) h;
+    instr_unsetl local_i;
+    instr_jmpz skip_label;
+  ]
 
 and emit_null_coalesce env e1 e2 =
   let end_label = Label.next_regular () in

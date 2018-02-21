@@ -116,10 +116,9 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
   }
 
   middle->prepend(unit.gen(Jmp, branch.bcctx(), to));
-  auto const unlikely = Block::Hint::Unlikely;
-  if (from->hint() == unlikely || to->hint() == unlikely) {
-    middle->setHint(unlikely);
-  }
+  // Use the colder of the predecessor and successor to set the new block's
+  // hint.
+  middle->setHint(std::min(from->hint(), to->hint()));
 
   // The branch may not be a Jmp, in which case there won't be a label
   if (branch.numSrcs() > 0 && to->front().is(DefLabel)) {

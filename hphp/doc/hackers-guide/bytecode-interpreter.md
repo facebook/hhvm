@@ -95,7 +95,7 @@ processor’s branch predictor to find associations between the bytecodes. These
 different mechanisms are hidden by the `DISPATCH_ACTUAL` macro.
 
 There are three separate parts to each bytecode handler. One part for dealing
-with PHP debugging, one part for tracking code coverage, and a third part which
+with Hack debugging, one part for tracking code coverage, and a third part which
 implements the actual handler. These are defined in the `OPCODE_DEBUG_BODY`,
 `OPCODE_COVER_BODY`, and `OPCODE_MAIN_BODY` macros, respectively. In the Windows
 version, [defined

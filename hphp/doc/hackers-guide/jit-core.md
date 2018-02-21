@@ -130,10 +130,11 @@ code. A few different classes and modules are involved in this process:
 
 All values in HHIR have a type, represented by the `Type` class in
 [type.h](../../runtime/vm/jit/type.h). A `Type` may represent a primitive type
-or any arbitrary union of primitive types. Primitive types exist for PHP-visible
-types such as `Int`, `Obj`, and `Bool`, and runtime-internal types such as
-`FramePtr`, `Func`, and `Cls`. Primitive types also exist for PHP references and
-pointers to PHP values: for each primitive PHP type `T`, `BoxedT`, `PtrToT`, and
+or any arbitrary union of primitive types. Primitive types exist for
+Hack-visible types such as `Int`, `Obj`, and `Bool`, and runtime-internal types
+such as `FramePtr`, `Func`, and `Cls`. Primitive types also exist for PHP
+references and pointers to PHP/Hack values: for each primitive PHP/Hack type
+`T`, `BoxedT`, `PtrToT`, and
 `PtrToBoxedT` also exist. A number of types commonly thought of as primitives
 are actually unions: `Str` is defined as `{PersistentStr+CountedStr}` and
 `Arr` is defined as `{PersistentArr+CountedArr}`. Predefined `constexpr Type`
@@ -155,11 +156,11 @@ the set of values represented by `S` is a subset of the set of values
 represented by `T`. `S` and `T` are not related if their intersection is the
 empty set (also called `Bottom`).
 
-As previously mentioned, types in HHIR represent a mix of PHP-visible types and
-internal types. The following table describes types representing PHP values.
+As previously mentioned, types in HHIR represent a mix of Hack-visible types and
+internal types. The following table describes types representing Hack values.
 Note that the types used here are more specific than what can be discriminated
 by user code (e.g., StaticStr and CountedStr both appear as type "string" at the
-PHP level).
+Hack level).
 
   Type           | HHVM representation
   ---------------|-------------------

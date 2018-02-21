@@ -1,17 +1,17 @@
 # Hacker's Guide to HHVM
 
 This directory contains documentation on the internal architecture of HHVM,
-targeted at C++ developers looking to hack on HHVM itself. If you're a PHP or
+targeted at C++ developers looking to hack on HHVM itself. If you're a
 Hack developer looking for documentation on using HHVM, that can be found
-[here](https://docs.hhvm.com/hhvm/).
+[here](https://docs.hhvm.com/).
 
 HHVM is a [virtual
 machine](https://en.wikipedia.org/wiki/Virtual_machine#Process_virtual_machines)
-that executes [PHP](http://php.net/) and [Hack](http://hacklang.org/) programs
-using a [bytecode
+that executes [Hack](http://hacklang.org/) programs using a [bytecode
 interpreter](https://en.wikipedia.org/wiki/Interpreter_(computing)#Bytecode_interpreters)
 and a [JIT compiler](https://en.wikipedia.org/wiki/Just-in-time_compilation)
 (the latter is vastly more complex, and will get much more airtime here).
+[PHP](https://php.net) is also currently supported for historical reasons.
 
 You should already be comfortable reading and writing C++ (specifically, HHVM is
 written in [C++14](https://en.wikipedia.org/wiki/C%2B%2B14)), as well as

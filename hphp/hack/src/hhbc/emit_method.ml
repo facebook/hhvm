@@ -81,6 +81,7 @@ let from_ast_wrapper : bool -> _ ->
     (not method_is_private && not method_is_protected)) in
   let is_memoize =
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
+  let is_native = Hhas_attribute.is_native method_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
   let (pos, original_name) = ast_method.Ast.m_name in
   let (_, class_name) = ast_class.Ast.c_name in
@@ -188,6 +189,7 @@ let from_ast_wrapper : bool -> _ ->
       ~scope:scope
       ~is_closure_body:method_is_closure_body
       ~is_memoize
+      ~is_native
       ~is_async:method_is_async
       ~deprecation_info
       ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)

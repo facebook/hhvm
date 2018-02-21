@@ -30,6 +30,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   let function_attributes =
     Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes in
   let is_memoize = Hhas_attribute.is_memoized function_attributes in
+  let is_native = Hhas_attribute.is_native function_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info function_attributes in
   let wrapper_type_opt, inout_param_locations =
     extract_inout_or_ref_param_locations ast_fun.Ast.f_params in
@@ -50,6 +51,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ~scope
       ~is_closure_body:false
       ~is_memoize
+      ~is_native
       ~is_async:function_is_async
       ~deprecation_info:(if is_memoize then None else deprecation_info)
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)

@@ -242,6 +242,7 @@ let emit_body
   ~scope
   ~is_closure_body
   ~is_memoize
+  ~is_native
   ~is_async
   ~deprecation_info
   ~skipawaitable
@@ -392,7 +393,7 @@ let emit_body
     with_namespace namespace |>
     with_needs_local_this needs_local_this |>
     with_scope scope) in
-  let stmt_instrs =
+  let stmt_instrs = if is_native then instr_nativeimpl else
     Emit_env.do_function env body emit_defs in
   let begin_label, default_value_setters =
     Emit_param.emit_param_default_value_setter env params in
@@ -418,7 +419,8 @@ let emit_body
      * if first instruction in the statement list is label
      * and header content is empty *)
     let header_content = gather [
-      emit_method_prolog ~pos ~params ~should_emit_init_this;
+      if is_native then empty else
+        emit_method_prolog ~pos ~params ~should_emit_init_this;
       emit_deprecation_warning scope deprecation_info;
       generator_instr;
     ] in

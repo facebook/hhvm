@@ -26,6 +26,7 @@ val emit_body:
   is_closure_body: bool ->
   (* True if this is the body of a <<__Memoize>> method *)
   is_memoize: bool ->
+  is_native: bool ->
   is_async: bool ->
   deprecation_info: (Typed_value.t list) option ->
   skipawaitable:bool ->

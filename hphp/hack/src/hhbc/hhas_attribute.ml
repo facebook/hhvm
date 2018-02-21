@@ -20,9 +20,13 @@ let make attribute_name attribute_arguments =
 
 let name a = a.attribute_name
 let arguments a = a.attribute_arguments
-let is_memoized attributes =
-  let f attr = (name attr) = "__Memoize" in
+
+let is_x s attributes =
+  let f attr = (name attr) = s in
   List.exists attributes f
+let is_memoized = is_x "__Memoize"
+let is_native = is_x "__Native"
+
 let deprecation_info attributes =
   let f attr =
     if (name attr) = "__Deprecated" then Some (arguments attr) else None

@@ -601,6 +601,7 @@ let string_of_misc instruction =
       sep ["AssertRATL"; string_of_local_id local; s]
     | AssertRATStk (n, s) ->
       sep ["AssertRATStk"; string_of_int n; s]
+    | NativeImpl -> "NativeImpl"
     | _ -> failwith "instruct_misc Not Implemented"
 
 let iterator_instruction_name_prefix instruction =
@@ -616,6 +617,7 @@ let iterator_instruction_name_prefix instruction =
     | MIterNextK _ -> "MIterNextK"
     | IterFree _ -> "IterFree"
     | MIterFree _ -> "MIterFree"
+    | CIterFree _ -> "CIterFree"
     | _ -> failwith "invalid iterator instruction"
   in
   iterator_instruction_name ^ " "
@@ -649,7 +651,8 @@ let string_of_iterator instruction =
     (string_of_local_id key) ^ " " ^
     (string_of_local_id value)
   | IterFree id
-  | MIterFree id ->
+  | MIterFree id
+  | CIterFree id ->
     (iterator_instruction_name_prefix instruction) ^
     (string_of_iterator_id id)
   | IterBreak (label, iterlist) ->
@@ -1379,6 +1382,8 @@ let add_body buf indent body =
 let function_attributes f =
   let user_attrs = Hhas_function.attributes f in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
+  let attrs = if Emit_env.is_systemlib ()
+    then "unique" :: "builtin" :: "persistent" :: attrs else attrs in
   let attrs =
     if not (Hhas_function.is_top f) then "nontop" :: attrs else attrs in
   let attrs =
@@ -1424,6 +1429,8 @@ let attributes_to_string attrs =
 let method_attributes m =
   let user_attrs = Hhas_method.attributes m in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
+  let attrs = if Emit_env.is_systemlib ()
+    then "unique" :: "builtin" :: "persistent" :: attrs else attrs in
   let attrs = if Hhas_method.inout_wrapper m then "inout_wrapper" :: attrs else attrs in
   let attrs = if Hhas_method.no_injection m then "no_injection" :: attrs else attrs in
   let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
@@ -1439,6 +1446,8 @@ let method_attributes m =
 let typedef_attributes t =
   let user_attrs = Hhas_typedef.attributes t in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
+  let attrs =
+    if Emit_env.is_systemlib () then "persistent" :: attrs else attrs in
   attributes_to_string attrs
 
 let add_method_def buf method_def =
@@ -1470,10 +1479,14 @@ let add_method_def buf method_def =
 let class_special_attributes c =
   let user_attrs = Hhas_class.attributes c in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
+  let attrs = if Emit_env.is_systemlib ()
+    then "unique" :: "builtin" :: "persistent" :: attrs else attrs in
   let attrs = if not (Hhas_class.is_top c) then "nontop" :: attrs else attrs in
-  let attrs = if Hhas_class.is_closure_class c
-              then "no_override" :: "unique" :: attrs
-              else attrs in
+  let attrs =
+    if Hhas_class.is_closure_class c && not @@ Emit_env.is_systemlib ()
+    then "unique" :: attrs else attrs in
+  let attrs =
+    if Hhas_class.is_closure_class c then "no_override" :: attrs else attrs in
   let attrs = if Hhas_class.is_trait c then "trait" :: attrs else attrs in
   let attrs =
     if Hhas_class.is_interface c then "interface" :: attrs else attrs

@@ -475,6 +475,10 @@ enumtypeinfo:
     | LANGLE quotestringoption flaglist RANGLE
       {Hhas_type_info.make $2 (Hhas_type_constraint.make None $3)}
 ;
+optionalint:
+    /* empty */ { None }
+    | INT { Some $1 }
+;
 functionbody:
     | /* empty */ {Instruction_sequence.empty}
     | NEWLINE functionbody { $2 }
@@ -506,20 +510,20 @@ functionbody:
              Hhbc_ast.ITry(Hhbc_ast.TryCatchLegacyEnd));
            $9
          ] }
-    | TRYDIRECTIVE LBRACE NEWLINE functionbody nl RBRACE
+    | TRYDIRECTIVE optionalint LBRACE NEWLINE functionbody nl RBRACE
        CATCHDIRECTIVE LBRACE NEWLINE functionbody nl RBRACE nl
        functionbody
        { Instruction_sequence.gather
          [
            Instruction_sequence.instr (
              Hhbc_ast.ITry(Hhbc_ast.TryCatchBegin));
-           $4;
+           $5;
            Instruction_sequence.instr (
              Hhbc_ast.ITry(Hhbc_ast.TryCatchMiddle));
-           $10;
+           $11;
            Instruction_sequence.instr (
              Hhbc_ast.ITry(Hhbc_ast.TryCatchEnd));
-           $14
+           $15
          ] }
 ;
 instruction:

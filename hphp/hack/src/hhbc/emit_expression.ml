@@ -1592,7 +1592,7 @@ and emit_callconv _env kind _e =
     failwith "emit_callconv: This should have been caught at emit_arg"
 
 and emit_inline_hhas s =
-  let lexer = Lexing.from_string s in
+  let lexer = Lexing.from_string (s ^ "\n") in
   try
     let instrs = Hhas_parser.functionbody Hhas_lexer.read lexer in
     (* TODO: handle case when code after inline hhas is unreachable
@@ -1605,7 +1605,8 @@ and emit_inline_hhas s =
         "Inline assembly expressions should leave the stack unchanged, \
         or push exactly one cell onto the stack."
   with Parsing.Parse_error ->
-    Emit_fatal.raise_fatal_parse Pos.none "error parsing inline hhas"
+    Emit_fatal.raise_fatal_parse Pos.none @@
+      "Error parsing inline hhas:\n" ^ s
 
 and emit_expr env (pos, expr_ as expr) ~need_ref =
   Emit_pos.emit_pos_then pos @@
@@ -2739,10 +2740,8 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
        1
 
 and get_pass_by_ref_hint expr =
-  let with_ref = expr_starts_with_ref expr in
-  if Emit_env.is_hh_syntax_enabled ()
-  then if with_ref then Ref else Cell
-  else Any
+  if Emit_env.is_systemlib () || not (Emit_env.is_hh_syntax_enabled ())
+  then Any else (if expr_starts_with_ref expr then Ref else Cell)
 
 and strip_ref e =
   match snd e with

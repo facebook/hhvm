@@ -310,6 +310,9 @@ let instr_contUnsetDelegate_ignore iter =
 let instr_trigger_sampled_error =
   instr_fcallbuiltin 3 3 "trigger_sampled_error"
 
+let instr_nativeimpl = instr (IMisc NativeImpl)
+
+
 (* Functions on instr_seq that correspond to existing Hh_core.List functions *)
 module InstrSeq = struct
 

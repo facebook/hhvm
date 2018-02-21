@@ -18,6 +18,7 @@ let emit_main is_evaled defs =
       ~namespace:Namespace_env.empty_with_default_popt
       ~is_closure_body:false
       ~is_memoize:false
+      ~is_native:false
       ~is_async:false
       ~deprecation_info:None
       ~skipawaitable:false

@@ -2933,7 +2933,8 @@ void parse_metadata(AsmState& as) {
 void parse(AsmState& as) {
   as.in.skipWhitespace();
   std::string directive;
-  if (!SystemLib::s_inited) {
+  if (!SystemLib::s_inited &&
+    !RuntimeOption::EvalUseExternCompilerForSystemLib) {
     /*
      * The SystemLib::s_hhas_unit is required to be merge-only,
      * and we create the source by concatenating separate .hhas files

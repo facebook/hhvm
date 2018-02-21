@@ -668,6 +668,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalDisableHphpcOpts ? '1' : '0')
     + (RuntimeOption::EvalUseMSRVForInOut ? '1' : '0')
     + (RuntimeOption::EvalAllowObjectDestructors ? '1' : '0')
+    + (RuntimeOption::EvalUseExternCompilerForSystemLib ? '1' : '0')
     + RuntimeOption::EvalHackCompilerCommand + '\0'
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces()

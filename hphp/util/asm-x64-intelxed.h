@@ -1,5 +1,19 @@
 /*
    +----------------------------------------------------------------------+
+   | INTEL CONFIDENTIAL                                                   |
+   | Copyright (c) 2018 Intel Corporation                                 |
+   +----------------------------------------------------------------------+
+   | This software and the related documents are Intel copyrighted        |
+   | materials, and your use of them is governed by the express license   |
+   | under which they were provided to you (License).                     |
+   | Unless the License provides otherwise, you may not use, modify, copy,|
+   | publish, distribute, disclose or transmit this software or the       |
+   | related documents without Intel's prior written permission.          |
+   | This software and the related documents are provided as is, with no  |
+   | express or implied warranties, other than those that are expressly   |
+   | stated in the License.                                               |
+   +----------------------------------------------------------------------+
+   +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
@@ -27,21 +41,8 @@ extern "C" {
     #include <xed-interface.h>
 }
 /*
- * An experimental macro assembler for x64, that strives for low coupling to
- * the runtime environment.
- *
- * There are more complete assemblers out there; if you use this one
- * yourself, expect not to find all the instructions you wanted to use. You
- * may have to go spelunking in the Intel manuals:
- *
- *   http://www.intel.com/products/processor/manuals/
- *
- * If you're looking for something more fully baked, here are some options
- * to consider:
- *
- *   1. Nanojit or llvm, both of which translate abstract virtual machine
- *      instructions to the native target architecture, or
- *   2. The embedded assemblers from v8, the Sun JVM, etc.
+ * A macro assembler for x64, based on the Intel XED library, that strives
+ * for low coupling to the runtime environment and ease of extendability.
  */
 
 /*

@@ -2646,7 +2646,7 @@ let make_env
   ?(keep_errors              = true                    )
   ?(ignore_pos               = false                   )
   ?(quick_mode               = false                   )
-  ?(lower_coroutines         = true                    )
+  ?(lower_coroutines         = false                   )
   ?(enable_hh_syntax         = false                   )
   ?(parser_options           = ParserOptions.default   )
   ?(fi_mode                  = FileInfo.Mpartial       )
@@ -2761,7 +2761,7 @@ let from_text (env : env) (source_text : SourceText.t) : result =
         ~php5_compat_mode:env.php5_compat_mode
         () in
     SyntaxTree.make ~env source_text in
-  let () = if env.codegen then
+  let () = if env.codegen && not env.lower_coroutines then
     let level = if env.systemlib_compat_mode then
         ParserErrors.HHVMCompatibilitySystemLib
       else ParserErrors.HHVMCompatibility

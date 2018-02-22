@@ -440,9 +440,8 @@ let check_instruct_call asn i i' =
     (* COMPLETENESS: If this is pass by reference, might get aliasing so just
       wimp out for now. *)
     None
-  | DecodeCufIter _, DecodeCufIter _ ->
-    (* COMPLETENESS: HackC does not currently generate this instruction, so
-      reject it for now. *)
+  | DecodeCufIter _ , DecodeCufIter _ ->
+    (* should be handled in check *)
     None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
@@ -963,6 +962,19 @@ let equiv prog prog' startlabelpairs =
     (* NativeImpl behaves like return - we don't want to look at the next instruction *)
     | IMisc NativeImpl, IMisc NativeImpl ->
           donext assumed todo
+
+    | ICall (DecodeCufIter (i1, l1)), ICall (DecodeCufIter (i2, l2))
+      when i1 = i2 ->
+      (* This instruction looks up $1 as a callable, and writes enough information to
+         iterator %1 for FPushCufIter to be able to push an actrec, as if it had been
+         given the callable. If the function is not successfully decoded, branches to
+         the given offset without raising a warning.
+         Since this instruction can either transfer control to label or fallthrough
+         treat it as conditional jump *)
+      check (succ pc) (succ pc') asn
+        (add_assumption (pc,pc') asn assumed)
+        (add_todo ((hs_of_pc pc, LabelMap.find l1 labelmap),
+          (hs_of_pc pc', LabelMap.find l2 labelmap')) asn todo)
 
     | IContFlow ins, IContFlow ins' ->
         begin match ins, ins' with

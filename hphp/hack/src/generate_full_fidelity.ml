@@ -725,8 +725,12 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S)
   let make_token token stack = (Syntax.make_token token) :: stack, ()
   let make_missing s o stack = (Syntax.make_missing s o) :: stack, ()
   let make_list s o items stack =
-    let (h, t) = Core_list.split_n stack (List.length items) in
-    (Syntax.make_list s o (List.rev h)) :: t, ()
+    if items = []
+    then
+      (Syntax.make_missing s o) :: stack, ()
+    else
+      let (h, t) = Core_list.split_n stack (List.length items) in
+      (Syntax.make_list s o (List.rev h)) :: t, ()
 CONSTRUCTOR_METHODS
 end (* WithSyntax *)
 "

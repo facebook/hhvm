@@ -33,8 +33,10 @@ ContinueCommand* ContinueCommand::createInstance(Debugger* debugger) {
   return new ContinueCommand(debugger, folly::dynamic::object);
 }
 
-bool ContinueCommand::executeImpl(DebuggerSession* /*session*/,
-                                  folly::dynamic* responseMsg) {
+bool ContinueCommand::executeImpl(
+  DebuggerSession* session,
+  folly::dynamic* responseMsg
+) {
   const folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   request_id_t threadId = tryGetInt(args, "threadId", -1);

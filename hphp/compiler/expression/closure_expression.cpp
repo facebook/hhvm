@@ -224,8 +224,7 @@ void ClosureExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
   }
 }
 
-void ClosureExpression::analyzeVarsForClosure(
-  AnalysisResultConstRawPtr /*ar*/) {
+void ClosureExpression::analyzeVarsForClosure(AnalysisResultConstRawPtr ar) {
   // closure function (not containing function)
   auto const func = m_func->getFunctionScope();
   for (auto const& var : *m_vars) {
@@ -235,7 +234,7 @@ void ClosureExpression::analyzeVarsForClosure(
 }
 
 void ClosureExpression::analyzeVarsForClosureExpression(
-  AnalysisResultConstRawPtr /*ar*/) {
+  AnalysisResultConstRawPtr ar) {
   auto const containing = getFunctionScope();
   for (auto const& var : *m_vars) {
     auto const param = dynamic_pointer_cast<ParameterExpression>(var);

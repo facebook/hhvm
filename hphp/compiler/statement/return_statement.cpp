@@ -47,7 +47,7 @@ StatementPtr ReturnStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ReturnStatement::analyzeProgram(AnalysisResultConstRawPtr /*ar*/) {
+void ReturnStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (m_exp) {
     FunctionScopePtr funcScope = getFunctionScope();
     if (funcScope) {

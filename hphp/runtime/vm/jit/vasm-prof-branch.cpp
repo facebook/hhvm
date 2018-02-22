@@ -359,8 +359,8 @@ BranchID branch_id_for(Env& env, const jcci& from, Vlabel b) {
  *
  * `b' should be either the from-block or the to-block for `branch'.
  */
-void sample_branch(Vout& v, Env& /*env*/, const BranchID& branch,
-                   const Func* func, Vlabel /*b*/) {
+void sample_branch(Vout& v, Env& env, const BranchID& branch,
+                   const Func* func, Vlabel b) {
   auto const push_val = [&] (Vout& v, uint64_t val) {
     // This wacky nonsense is to try to force XLS to use the same register for
     // each immediate we want to push.

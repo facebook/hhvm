@@ -29,8 +29,9 @@ StepCommand::StepCommand(
 StepCommand::~StepCommand() {
 }
 
-bool StepCommand::executeImpl(DebuggerSession* /*session*/,
-                              folly::dynamic* /*responseMsg*/
+bool StepCommand::executeImpl(
+  DebuggerSession* session,
+  folly::dynamic* responseMsg
 ) {
   const folly::dynamic& message = getMessage();
   const std::string& command = tryGetString(message, "command", "");

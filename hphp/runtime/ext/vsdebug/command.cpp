@@ -228,7 +228,7 @@ bool VSCommand::execute() {
     });
 }
 
-request_id_t VSCommand::targetThreadId(DebuggerSession* /*session*/) {
+request_id_t VSCommand::targetThreadId(DebuggerSession* session) {
   if (commandTarget() != CommandTarget::Request) {
     return -1;
   }

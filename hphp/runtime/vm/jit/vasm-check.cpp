@@ -268,16 +268,10 @@ struct VisitOp {
   template<class T> void across(T) {}
   template<class T, class H> void useHint(T,H) {}
   template<class T, class H> void defHint(T,H) {}
-  void def(Vptr8 /*m*/) { memWidth = Width::Byte; }
+  void def(Vptr8 m) { memWidth = Width::Byte; }
   void def(Vptr m) { memWidth = m.width; }
-  template <Width w>
-  void def(Vp<w> /*m*/) {
-    memWidth = w;
-  }
-  template <Width w>
-  void use(Vp<w> /*m*/) {
-    memWidth = w;
-  }
+  template<Width w> void def(Vp<w> m) { memWidth = w; }
+  template<Width w> void use(Vp<w> m) { memWidth = w; }
   template<class T> void use(T) {}
   template<class T> void def(T) {}
   void use(Vreg r) { useWidth = width(r); }

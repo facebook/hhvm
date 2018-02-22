@@ -230,7 +230,7 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstRawPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void SimpleFunctionCall::setupScopes(AnalysisResultConstRawPtr /*ar*/) {
+void SimpleFunctionCall::setupScopes(AnalysisResultConstRawPtr ar) {
   if (m_class || hasStaticClass()) {
     resolveClass();
   }

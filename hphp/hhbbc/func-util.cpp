@@ -107,8 +107,8 @@ void fixupSwitch(SSwitchTab& s, BlockId delta) {
 }
 
 // generic do-nothing function, thats an inexact match
-template <typename Opcode>
-void fixupBlockIds(const Opcode& /*op*/, bool) {}
+template<typename Opcode>
+void fixupBlockIds(const Opcode& op, bool) {}
 
 // exact match if there's a targets field with matching fixupSwitch
 template<typename Opcode>

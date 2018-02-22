@@ -1758,10 +1758,8 @@ void m_adj(uint32_t& ndiscard, Op& op, MaskType mask) {
   m_adj(op.mkey, mask);
 }
 
-template <typename Op>
-void adjustMinstr(Op& /*op*/, MaskType /*mask*/) {
-  always_assert(false);
-}
+template<typename Op>
+void adjustMinstr(Op& op, MaskType mask) { always_assert(false); }
 
 void adjustMinstr(bc::BaseC& op, MaskType m)       { m_adj(op.arg1, m); }
 void adjustMinstr(bc::BaseNC& op, MaskType m)      { m_adj(op.arg1, m); }

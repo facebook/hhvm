@@ -4050,10 +4050,11 @@ void EmitterVisitor::listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
   }
 }
 
-template <class F>
+template<class F>
 typename std::enable_if<
-  std::is_same<typename std::decay<F>::type, std::nullptr_t>::value, int>::type
-emit_list_assign_src(int /*i*/, bool, F&& /*null*/) {
+  std::is_same<typename std::decay<F>::type, std::nullptr_t>::value,
+  int
+>::type emit_list_assign_src(int i, bool, F&& null) {
   always_assert(false);
 }
 
@@ -4064,9 +4065,8 @@ auto emit_list_assign_src(int i, bool last, F&& func) ->
   return 1;
 }
 
-template <class F>
-auto emit_list_assign_src(int /*i*/, bool /*last*/, F&& func)
-  -> decltype(func(), 0) {
+template<class F>
+auto emit_list_assign_src(int i, bool last, F&& func) -> decltype(func(), 0) {
   func();
   return 0;
 }
@@ -8544,7 +8544,7 @@ bool EmitterVisitor::isInChain(const MInstrChain& chain, int off) {
   return true;
 }
 
-void EmitterVisitor::recordMInstr(Emitter& /*e*/, int off) {
+void EmitterVisitor::recordMInstr(Emitter& e, int off) {
   if (m_minstrChains.empty()) return;
   auto& chain = m_minstrChains.back();
 
@@ -8618,7 +8618,7 @@ void EmitterVisitor::recordMInstrBase(Emitter& e) {
   recordMInstr(e, m_evalStack.size() - 1);
 }
 
-void EmitterVisitor::emitMInstrChain(Emitter& /*e*/, MInstrChain& chain) {
+void EmitterVisitor::emitMInstrChain(Emitter& e, MInstrChain& chain) {
   assert(!chain.ops.empty());
 
   for (auto const& op : chain.ops) {
@@ -8657,7 +8657,7 @@ void EmitterVisitor::unsetMInstrChain(Emitter& e, MInstrChain chain) {
   }
 }
 
-void EmitterVisitor::markProp(Emitter& /*e*/, PropAccessType propAccessType) {
+void EmitterVisitor::markProp(Emitter& e, PropAccessType propAccessType) {
   if (m_evalStack.empty()) {
     InvariantViolation(
       "Emitter encountered an empty evaluation stack inside "
@@ -8692,7 +8692,7 @@ void EmitterVisitor::markProp(Emitter& /*e*/, PropAccessType propAccessType) {
   }
 }
 
-void EmitterVisitor::markSProp(Emitter& /*e*/) {
+void EmitterVisitor::markSProp(Emitter& e) {
   if (m_evalStack.empty()) {
     InvariantViolation(
       "Emitter encountered an empty evaluation stack inside "

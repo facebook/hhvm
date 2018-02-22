@@ -152,7 +152,7 @@ bool FunctionCall::checkUnpackParams() {
   return true;
 }
 
-void FunctionCall::analyzeProgram(AnalysisResultConstRawPtr /*ar*/) {
+void FunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (isParent()) {
     getFunctionScope()->setContainsThis();
   }

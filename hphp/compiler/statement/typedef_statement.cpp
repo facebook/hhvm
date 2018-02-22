@@ -58,7 +58,8 @@ void TypedefStatement::outputPHP(CodeGenerator& /*cg*/,
                                  AnalysisResultPtr /*ar*/) {}
 
 void TypedefStatement::onParse(AnalysisResultConstRawPtr /*ar*/,
-                               FileScopePtr /*scope*/) {}
+                               FileScopePtr scope) {
+}
 
 //////////////////////////////////////////////////////////////////////
 

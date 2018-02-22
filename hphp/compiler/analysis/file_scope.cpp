@@ -100,7 +100,7 @@ FunctionScopePtr FileScope::setTree(AnalysisResultConstRawPtr ar,
   return createPseudoMain(ar);
 }
 
-void FileScope::cleanupForError(AnalysisResultConstRawPtr /*ar*/) {
+void FileScope::cleanupForError(AnalysisResultConstRawPtr ar) {
   StringToFunctionScopePtrMap().swap(m_functions);
   delete m_redeclaredFunctions;
   m_redeclaredFunctions = 0;
@@ -149,7 +149,7 @@ void FileScope::makeParseFatal(AnalysisResultConstRawPtr ar,
   makeFatalMeth(*this, ar, msg, line, meth);
 }
 
-void FileScope::addFunction(AnalysisResultConstRawPtr /*ar*/,
+void FileScope::addFunction(AnalysisResultConstRawPtr ar,
                             FunctionScopePtr funcScope) {
   FunctionScopePtr &fs = m_functions[funcScope->getScopeName()];
   if (!fs) {
@@ -169,7 +169,7 @@ void FileScope::addFunction(AnalysisResultConstRawPtr /*ar*/,
   funcVec.push_back(funcScope);
 }
 
-void FileScope::addClass(AnalysisResultConstRawPtr /*ar*/,
+void FileScope::addClass(AnalysisResultConstRawPtr ar,
                          ClassScopePtr classScope) {
   m_classes[classScope->getScopeName()].push_back(classScope);
 }

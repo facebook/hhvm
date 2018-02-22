@@ -36,11 +36,12 @@ constexpr size_t kSlabAlign = kSlabSize;
 // don't consider also using other bits for now.
 struct TaggedSlabPtr {
   static constexpr uintptr_t TagMask = (1ul << 16) - 1;
+  static_assert(kSlabAlign > TagMask, "");
   TaggedSlabPtr() noexcept : rep(0) {}
   /* implicit */ TaggedSlabPtr(std::nullptr_t) noexcept : rep(0) {}
-  TaggedSlabPtr(void* p, uint32_t tag = 0) noexcept
+  TaggedSlabPtr(void* p, uint16_t tag = 0) noexcept
     : rep(reinterpret_cast<uintptr_t>(p) | tag) {
-    assert((reinterpret_cast<uintptr_t>(p) & TagMask) == 0);
+    assert(ptr() == p);
   }
   void* ptr() const {
     return reinterpret_cast<void*>(rep & ~TagMask);
@@ -72,7 +73,7 @@ struct TaggedSlabList {
    * Add a slab to the list.  If `local`, assume the list is only accessed in a
    * single thread.
    */
-  template<bool local = false> void push_front(void* p, uint32_t tag) {
+  template<bool local = false> void push_front(void* p, uint16_t tag) {
     ++tag;
     TaggedSlabPtr tagged{p, tag};
     auto ptr = reinterpret_cast<AtomicTaggedSlabPtr*>(p);

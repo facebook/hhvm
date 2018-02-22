@@ -135,4 +135,17 @@ TEST(Slab, set_starts) {
   }
 }
 
+TEST(SlabManagerTest, tag_overflow) {
+  SlabManager mgr;
+  auto const slab = static_cast<Slab*>(aligned_alloc(kSlabSize, kSlabSize));
+  SCOPE_EXIT { free(slab); };
+  mgr.addRange(slab, kSlabSize);
+  for (int i = 1; i <= 0x10001; ++i) {
+    auto tagged = mgr.tryAlloc();
+    ASSERT_EQ(tagged.ptr(), slab);
+    ASSERT_EQ(tagged.tag(), i & TaggedSlabPtr::TagMask);
+    mgr.push_front(tagged.ptr(), tagged.tag());
+  }
+}
+
 }

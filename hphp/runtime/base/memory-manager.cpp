@@ -748,7 +748,7 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
               Slab::fromPtr(m_front));
   }
   auto mem = m_heap.allocSlab(m_stats);
-  assert(reinterpret_cast<uintptr_t>(mem) % kSlabAlign == 0);
+  always_assert(reinterpret_cast<uintptr_t>(mem) % kSlabAlign == 0);
   auto slab = static_cast<Slab*>(mem);
   auto slab_start = slab->init();
   m_front = slab_start + nbytes; // allocate requested object

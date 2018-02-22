@@ -209,6 +209,16 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     # X64
     if(IS_X64)
       list(APPEND GENERAL_CXX_OPTIONS "mcrc32")
+        if(ENABLE_SSE4_2)
+          list(APPEND GENERAL_CXX_OPTIONS
+          # SSE4.2 has been available on processors for quite some time now. This
+          # allows enabling CRC hash function code
+          "msse4.2"
+          )
+          # Also pass the right option to ASM files to avoid inconsistencies
+          # in CRC hash function handling
+          set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -msse4.2")
+        endif()
     endif()
 
     # ARM64

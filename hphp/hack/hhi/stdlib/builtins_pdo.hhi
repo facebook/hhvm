@@ -92,6 +92,11 @@ class PDO {
   const MYSQL_ATTR_DIRECT_QUERY = 0;
   const MYSQL_ATTR_FOUND_ROWS = 0;
   const MYSQL_ATTR_IGNORE_SPACE = 0;
+  const MYSQL_ATTR_SSL_CA = 0;
+  const MYSQL_ATTR_SSL_CAPATH = 0;
+  const MYSQL_ATTR_SSL_CERT = 0;
+  const MYSQL_ATTR_SSL_KEY = 0;
+  const MYSQL_ATTR_SSL_CIPHER = 0;
   const HH_MYSQL_ATTR_READ_TIMEOUT = 0;
   const HH_MYSQL_ATTR_WRITE_TIMEOUT = 0;
   public function __construct($dsn, $username = null, $password = null, $options = null) { }

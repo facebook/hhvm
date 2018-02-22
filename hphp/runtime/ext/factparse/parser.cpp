@@ -378,7 +378,12 @@ void Parser::setTypeVars(Token &out, Token &name) {
 
 void Parser::onScopeLabel(const Token& /*stmt*/, const Token& /*label*/) {}
 
-void Parser::closeActiveUsings() {}
+void Parser::closeActiveUsings() {
+  auto& info = m_labelInfos.back();
+  while (info.scopes.back().kind == LabelScopeKind::Using) {
+    info.scopes.pop_back();
+  }
+}
 
 void Parser::onCompleteLabelScope(bool /*fresh*/) {}
 

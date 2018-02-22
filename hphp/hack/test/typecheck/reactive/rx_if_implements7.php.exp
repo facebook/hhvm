@@ -1,0 +1,2 @@
+File "rx_if_implements7.php", line 8, characters 28-35:
+Method cannot be marked as reactive and conditionally reactive at the same time. (NastCheck[3040])

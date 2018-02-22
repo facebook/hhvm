@@ -782,6 +782,10 @@ module NastCheck                            = struct
   let mutable_attribute_on_function         = 3054 (* DONT MODIFY!!!! *)
   let mutable_return_annotated_decls_must_be_reactive = 3055 (* DONT MODIFY!!!! *)
   let illegal_destructor                    = 3056 (* DONT MODIFY!!!! *)
+  let conditionally_reactive_function       = 3057 (* DONT MODIFY!!!! *)
+  let multiple_conditionally_reactive_annotations = 3058 (* DONT MODIFY!!!! *)
+  let conditionally_reactive_annotation_invalid_arguments = 3059 (* DONT MODIFY!!!! *)
+  let conflicting_reactive_annotations      = 3040 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1739,6 +1743,31 @@ let illegal_destructor pos =
   add NastCheck.illegal_destructor pos (
     "Destructors are not supported in Hack; use other patterns like " ^
     "IDisposable/using or try/catch instead."
+  )
+
+let conditionally_reactive_function pos =
+  add NastCheck.conditionally_reactive_function pos (
+    "Function cannot be marked with <<__RxIfImplements>>, " ^
+    "<<__RxShallowIfImplements>> or <<__RxLocalIfImplements>>."
+  )
+
+let multiple_conditionally_reactive_annotations pos name =
+  add NastCheck.multiple_conditionally_reactive_annotations pos (
+    "Method '" ^ name ^ "' has multiple <<__RxIfImplements>>, <<__RxShallowIfImplements>> "  ^
+    "or <<__RxLocalIfImplements>> annotations."
+  )
+
+let conditionally_reactive_annotation_invalid_arguments pos =
+  add NastCheck.conditionally_reactive_annotation_invalid_arguments pos (
+    "Method is marked with <<__RxIfImplements>>, <<__RxShallowIfImplements>> " ^
+    "or <<__RxLocalIfImplements>> attributes that have invalid arguments." ^
+    "These attributes must have one argument and it should be " ^
+    "'::class' class constant."
+  )
+
+let conflicting_reactive_annotations pos =
+  add NastCheck.conflicting_reactive_annotations pos (
+    "Method cannot be marked as reactive and conditionally reactive at the same time."
   )
 
 (*****************************************************************************)

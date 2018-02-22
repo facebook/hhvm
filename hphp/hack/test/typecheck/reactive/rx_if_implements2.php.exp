@@ -1,0 +1,2 @@
+File "rx_if_implements2.php", line 7, characters 10-16:
+Function cannot be marked with <<__RxIfImplements>>, <<__RxShallowIfImplements>> or <<__RxLocalIfImplements>>. (NastCheck[3057])

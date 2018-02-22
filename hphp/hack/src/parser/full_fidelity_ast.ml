@@ -1385,6 +1385,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
   in
   let outer_unsafes = env.unsafes in
   let is_safe =
+    (* when in codegen ignore UNSAFE_EXPRs *)
+    if env.codegen then true
+    else
     match leading_token node with
     | None -> true
     | Some t ->

@@ -315,6 +315,7 @@ let make_nullary_inst s =
  | "File"-> ILitConst (File)
  | "Dir"-> ILitConst (Dir)
  | "Method"-> ILitConst (Method)
+ | "NewPair" -> ILitConst NewPair
 
  (* instruct_operator *)
  | "Concat"-> IOp (Concat)
@@ -429,7 +430,19 @@ let make_nullary_inst s =
  | "Await" -> IAsync Await
  | "WHResult" -> IAsync WHResult
 
- | _ -> IComment (Hhbc_ast.nyi ^ " nullary: " ^ s)
+ (* generator functions *)
+ | "CreateCont" -> IGenerator CreateCont
+ | "ContEnter" -> IGenerator ContEnter
+ | "ContRaise" -> IGenerator ContRaise
+ | "Yield" -> IGenerator Yield
+ | "YieldK" -> IGenerator YieldK
+ | "ContValid" -> IGenerator ContValid
+ | "ContKey" -> IGenerator ContKey
+ | "ContGetReturn" -> IGenerator ContGetReturn
+ | "ContStarted" -> IGenerator ContStarted
+
+ | "ContEnterDelegate" -> IGenDelegation ContEnterDelegate
+ | _ -> failwith ("NYI nullary: " ^ s)
 
 type iarg =
   | IAInt64 of int64
@@ -604,6 +617,12 @@ let memberkeyofiarg arg =
   | IAId s' -> if s'="W" then MemberKey.W else report_error "bad memberkey"
   | _ -> report_error "bad memberkey"
 
+let memoargofiarg arg =
+  match arg with
+  | IAMemberkey ("L", IAArglist [IAInt64 n; IAInt64 m]) ->
+    (Local.Unnamed (Int64.to_int n), Int64.to_int m)
+  | _ -> report_error "bad memo arg"
+
 let incdecopofiarg arg =
   match arg with
   | IAId s -> (
@@ -703,6 +722,12 @@ let specialclsrefofiarg arg =
   | "Self" -> SpecialClsRef.Self
   | "Parent" -> SpecialClsRef.Parent
   | _ -> report_error ("bad special cls-ref" ^ stringofiarg arg)
+
+let freeiteratorofiarg arg =
+  match stringofiarg arg with
+  | "IgnoreIter" -> IgnoreIter
+  | "FreeIter" -> FreeIter
+  | _ -> report_error ("bad free_iterator type " ^ stringofiarg arg)
 
 let listofiteratorsofiarg arg =
    match arg with
@@ -842,7 +867,7 @@ let makeunaryinst s arg = match s with
    | "PushL" -> IGet (PushL (localidofiarg arg))
    | "CGetS" -> IGet (CGetS (intofiarg arg))
    | "VGetL" -> IGet (VGetL (localidofiarg arg))
-   | "VgetS" -> IGet (VGetS (intofiarg arg))
+   | "VGetS" -> IGet (VGetS (intofiarg arg))
    | "ClsRefGetC" -> IGet (ClsRefGetC (intofiarg arg))
 
    (*instruct_isset *)
@@ -901,17 +926,19 @@ let makeunaryinst s arg = match s with
    | "InitThisLoc" -> IMisc(InitThisLoc (localidofiarg arg))
    | "OODeclExists" -> IMisc(OODeclExists (classkindofiarg arg))
    | "VerifyParamType" -> IMisc(VerifyParamType (paramidofiarg arg))
+   | "VerifyOutType" -> IMisc(VerifyOutType (paramidofiarg arg))
    | "Self" -> IMisc(Self (intofiarg arg))
    | "Parent" -> IMisc(Parent (intofiarg arg))
    | "LateBoundCls" -> IMisc(LateBoundCls (intofiarg arg))
    | "ClsRefName" -> IMisc(ClsRefName (intofiarg arg))
    | "GetMemoKeyL" -> IMisc(GetMemoKeyL (localidofiarg arg))
 
+   | "ContAssignDelegate" -> IGenDelegation (ContAssignDelegate (iterofiarg arg))
    (* Note: The TryCatch/TryFault instructions don't show up here because the
       textual bytecode format represents them using directives and braces rather
       than instructions
    *)
-   | _ -> IComment (Hhbc_ast.nyi ^ " unary: " ^ s)
+   | _ -> failwith ("NYI unary: " ^ s)
 
 let makebinaryinst s arg1 arg2 =
 match s with
@@ -1000,7 +1027,24 @@ match s with
  | "Silence" -> IMisc (Silence (localidofiarg arg1, opsilenceofiarg arg2))
  | "FCallM" -> ICall (FCallM (intofiarg arg1, intofiarg arg2))
  | "FCallUnpackM" -> ICall (FCallUnpackM (intofiarg arg1, intofiarg arg2))
- | _ -> IComment (Hhbc_ast.nyi ^ " binary: " ^ s)
+
+ | "YieldFromDelegate" ->
+   IGenDelegation (YieldFromDelegate (iterofiarg arg1, labelofiarg arg2))
+ | "ContUnsetDelegate" ->
+   IGenDelegation (ContUnsetDelegate (freeiteratorofiarg arg1, iterofiarg arg2))
+
+ (* instruct_misc *)
+ | "MemoSet" ->
+   let l, n = memoargofiarg arg2 in
+   IMisc(MemoSet(intofiarg arg1, l, n+1))
+ | "MemoGet" ->
+   let l, n = memoargofiarg arg2 in
+   IMisc(MemoGet(intofiarg arg1, l, n+1))
+
+ | "AliasCls" ->
+   IIncludeEvalDefine (AliasCls(stringofiarg arg1, stringofiarg arg2))
+
+ | _ -> failwith ("NYI binary: " ^ s)
 
 let maketernaryinst s arg1 arg2 arg3 =
  match s with
@@ -1056,12 +1100,7 @@ let maketernaryinst s arg1 arg2 arg3 =
  | "MIterNext" -> IIterator(MIterNext (iterofiarg arg1,
                                          labelofiarg arg2, localidofiarg arg3))
 
-(* instruct_misc *)
- | "MemoSet" ->
-    IMisc(MemoSet(intofiarg arg1, localidofiarg arg2, intofiarg arg3 + 1))
- | "MemoGet" ->
-    IMisc(MemoGet(intofiarg arg1, localidofiarg arg2, intofiarg arg3 + 1))
- | _ -> IComment (Hhbc_ast.nyi ^ " ternary: " ^ s)
+ | _ -> failwith ("NYI ternary: " ^ s)
 
 let makequaternaryinst s arg1 arg2 arg3 arg4 =
 match s with
@@ -1082,4 +1121,4 @@ match s with
  | "FCallDM" ->
     ICall(FCallDM (intofiarg arg1, intofiarg arg2,
       class_id_of_iarg arg3, function_id_of_iarg arg4))
- | _ -> IComment (Hhbc_ast.nyi ^ " quaternary: " ^ s)
+ | _ -> failwith ("NYI quaternary: " ^ s)

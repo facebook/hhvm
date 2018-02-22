@@ -1135,7 +1135,7 @@ void CLIWorker::doJob(int client) {
 
 req::ptr<File>
 CLIWrapper::open(const String& filename, const String& mode, int options,
-                 const req::ptr<StreamContext>& context) {
+                 const req::ptr<StreamContext>& /*context*/) {
   mode_t md = static_cast<mode_t>(-1);
   int fl = 0;
   switch (mode[0]) {

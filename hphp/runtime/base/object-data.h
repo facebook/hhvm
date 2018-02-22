@@ -134,11 +134,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     }
   }
 
-  inline void setWeakRefed(bool flag) {
-    setAttribute(IsWeakRefed);
-  }
+  inline void setWeakRefed(bool /*flag*/) { setAttribute(IsWeakRefed); }
 
- public:
+  public:
 
   /*
    * Call newInstance() to instantiate a PHP object. The initial ref-count will

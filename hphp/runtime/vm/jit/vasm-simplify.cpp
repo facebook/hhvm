@@ -393,7 +393,7 @@ int value_width(Env& env, Vreg reg) {
  *    convert the load to a non-zero extending form
  *  - otherwise apply a movtq<sz> to the register, and return the dst.
  */
-Vreg narrow_reg(Env& env, int size, Vreg r, Vlabel b, size_t i, Vout& v) {
+Vreg narrow_reg(Env& env, int size, Vreg r, Vlabel b, size_t i, Vout& /*v*/) {
   auto const it = env.unit.regToConst.find(r);
   if (it != env.unit.regToConst.end()) {
     assert(!it->second.isUndef && it->second.kind != Vconst::Double);

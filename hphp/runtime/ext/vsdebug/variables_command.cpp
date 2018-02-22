@@ -718,15 +718,11 @@ int VariablesCommand::addArrayChildren(
   return added;
 }
 
-int VariablesCommand::addClassConstants(
-  DebuggerSession* session,
-  request_id_t requestId,
-  int start,
-  int count,
-  Class* cls,
-  const Variant& var,
-  folly::dynamic* vars
-) {
+int VariablesCommand::addClassConstants(DebuggerSession* session,
+                                        request_id_t requestId, int start,
+                                        int count, Class* cls,
+                                        const Variant& /*var*/,
+                                        folly::dynamic* vars) {
   Class* currentClass = cls;
 
   std::unordered_set<std::string> constantNames;
@@ -782,15 +778,11 @@ int VariablesCommand::addClassConstants(
   return constantNames.size();
 }
 
-int VariablesCommand::addClassStaticProps(
-  DebuggerSession* session,
-  request_id_t requestId,
-  int start,
-  int count,
-  Class* cls,
-  const Variant& var,
-  folly::dynamic* vars
-) {
+int VariablesCommand::addClassStaticProps(DebuggerSession* session,
+                                          request_id_t requestId, int start,
+                                          int count, Class* cls,
+                                          const Variant& /*var*/,
+                                          folly::dynamic* vars) {
   const std::string className = cls->name()->toCppString();
   const auto staticProperties = cls->staticProperties();
   int propCount = 0;

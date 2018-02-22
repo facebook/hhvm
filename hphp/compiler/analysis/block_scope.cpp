@@ -89,5 +89,4 @@ ClassScopeRawPtr BlockScope::getContainingClass() {
   return ClassScopeRawPtr((HPHP::ClassScope*)bs);
 }
 
-void BlockScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-}
+void BlockScope::outputPHP(CodeGenerator& /*cg*/, AnalysisResultPtr /*ar*/) {}

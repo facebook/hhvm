@@ -29,9 +29,8 @@ ConfigurationDoneCommand::ConfigurationDoneCommand(
 ConfigurationDoneCommand::~ConfigurationDoneCommand() {
 }
 
-bool ConfigurationDoneCommand::executeImpl(
-  DebuggerSession* session,
-  folly::dynamic* responseMsg
+bool ConfigurationDoneCommand::executeImpl(DebuggerSession* /*session*/,
+                                           folly::dynamic* /*responseMsg*/
 ) {
   m_debugger->setClientInitialized();
 

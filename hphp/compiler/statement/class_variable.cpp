@@ -50,9 +50,8 @@ StatementPtr ClassVariable::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassVariable::onParseRecur(AnalysisResultConstRawPtr ar,
-                                 FileScopeRawPtr fs,
-                                 ClassScopePtr scope) {
+void ClassVariable::onParseRecur(AnalysisResultConstRawPtr /*ar*/,
+                                 FileScopeRawPtr fs, ClassScopePtr scope) {
   ModifierExpressionPtr modifiers =
     scope->setModifiers(m_modifiers);
 

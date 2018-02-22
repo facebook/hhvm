@@ -60,7 +60,7 @@ ExpressionPtr StaticMemberExpression::clone() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-void StaticMemberExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
+void StaticMemberExpression::analyzeProgram(AnalysisResultConstRawPtr /*ar*/) {
   resolveClass();
 }
 

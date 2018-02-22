@@ -31,9 +31,8 @@ RunToLocationCommand::RunToLocationCommand(
 RunToLocationCommand::~RunToLocationCommand() {
 }
 
-bool RunToLocationCommand::executeImpl(
-  DebuggerSession* session,
-  folly::dynamic* responseMsg
+bool RunToLocationCommand::executeImpl(DebuggerSession* session,
+                                       folly::dynamic* /*responseMsg*/
 ) {
   folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);

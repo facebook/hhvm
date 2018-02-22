@@ -34,9 +34,8 @@ ResolveBreakpointsCommand::createInstance(Debugger* debugger) {
   return new ResolveBreakpointsCommand(debugger, folly::dynamic::object);
 }
 
-bool ResolveBreakpointsCommand::executeImpl(
-  DebuggerSession* session,
-  folly::dynamic* responseMsg
+bool ResolveBreakpointsCommand::executeImpl(DebuggerSession* /*session*/,
+                                            folly::dynamic* /*responseMsg*/
 ) {
   m_debugger->tryInstallBreakpoints(m_debugger->getRequestInfo());
 

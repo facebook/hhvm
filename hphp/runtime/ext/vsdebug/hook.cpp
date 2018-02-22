@@ -48,16 +48,16 @@ void VSDebugHook::onRequestInit() {
 void VSDebugHook::onRequestShutdown() {
 }
 
-void VSDebugHook::onOpcode(PC pc) {
+void VSDebugHook::onOpcode(PC /*pc*/) {
   RID().setDebuggerIntr(false);
   BreakContext breakContext(true);
 }
 
-void VSDebugHook::onFuncEntryBreak(const Func* func) {
+void VSDebugHook::onFuncEntryBreak(const Func* /*func*/) {
   // TODO: (Ericblue) NOT IMPLEMENTED
 }
 
-void VSDebugHook::onFuncExitBreak(const Func* func) {
+void VSDebugHook::onFuncExitBreak(const Func* /*func*/) {
   // TODO: (Ericblue) NOT IMPLEMENTED
 }
 
@@ -114,15 +114,15 @@ void VSDebugHook::onError(
   }
 }
 
-void VSDebugHook::onStepInBreak(const Unit* unit, int line) {
+void VSDebugHook::onStepInBreak(const Unit* /*unit*/, int /*line*/) {
   BreakContext breakContext(false);
 }
 
-void VSDebugHook::onStepOutBreak(const Unit* unit, int line) {
+void VSDebugHook::onStepOutBreak(const Unit* /*unit*/, int /*line*/) {
   BreakContext breakContext(false);
 }
 
-void VSDebugHook::onNextBreak(const Unit* unit, int line) {
+void VSDebugHook::onNextBreak(const Unit* /*unit*/, int /*line*/) {
   BreakContext breakContext(true);
 
   if (breakContext.m_debugger == nullptr ||
@@ -193,10 +193,9 @@ void VSDebugHook::onFileLoad(Unit* efile) {
   }
 }
 
-void VSDebugHook::onDefClass(const Class* cls) {
-}
+void VSDebugHook::onDefClass(const Class* /*cls*/) {}
 
-void VSDebugHook::onDefFunc(const Func* func) {
+void VSDebugHook::onDefFunc(const Func* /*func*/) {
   // TODO: (Ericblue) This routine is not needed unless we add support for
   // function entry breakpoints.
 }

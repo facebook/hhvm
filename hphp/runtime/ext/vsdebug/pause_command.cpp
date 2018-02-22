@@ -29,9 +29,8 @@ PauseCommand::PauseCommand(
 PauseCommand::~PauseCommand() {
 }
 
-bool PauseCommand::executeImpl(
-  DebuggerSession* session,
-  folly::dynamic* responseMsg
+bool PauseCommand::executeImpl(DebuggerSession* /*session*/,
+                               folly::dynamic* /*responseMsg*/
 ) {
   m_debugger->onAsyncBreak();
   return false;

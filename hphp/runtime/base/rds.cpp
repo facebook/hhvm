@@ -417,9 +417,8 @@ Handle attachImpl(Symbol key) {
 }
 
 NEVER_INLINE
-void bindOnLinkImpl(std::atomic<Handle>& handle,
-                    std::function<Handle()> fun,
-                    type_scan::Index tyIndex) {
+void bindOnLinkImpl(std::atomic<Handle>& handle, std::function<Handle()> fun,
+                    type_scan::Index /*tyIndex*/) {
   Handle c = kUninitHandle;
   if (handle.compare_exchange_strong(c, kBeingBound,
                                      std::memory_order_relaxed,

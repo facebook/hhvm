@@ -53,9 +53,8 @@ StatementPtr ClassConstant::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassConstant::onParseRecur(AnalysisResultConstRawPtr ar,
-                                 FileScopeRawPtr fs,
-                                 ClassScopePtr scope) {
+void ClassConstant::onParseRecur(AnalysisResultConstRawPtr /*ar*/,
+                                 FileScopeRawPtr fs, ClassScopePtr scope) {
   if (scope->isTrait()) {
     parseTimeFatal(fs,
                    "Traits cannot have constants");

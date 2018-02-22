@@ -1170,8 +1170,8 @@ struct TMIOps {
   }
 
   // Register a trait alias once the trait class is found.
-  static void addTraitAlias(const ClassInfo* cls, alias_type rule,
-                            class_type traitCls) {
+  static void addTraitAlias(const ClassInfo* /*cls*/, alias_type /*rule*/,
+                            class_type /*traitCls*/) {
     // purely a runtime thing... nothing to do
   }
 
@@ -1200,8 +1200,7 @@ struct TMIOps {
     return nullptr;
   }
 
-  static method_type findTraitMethod(class_type cls,
-                                     class_type traitCls,
+  static method_type findTraitMethod(class_type /*cls*/, class_type traitCls,
                                      string_type origMethName) {
     auto it = traitCls->methods.find(origMethName);
     if (it == traitCls->methods.end()) return nullptr;
@@ -1213,13 +1212,11 @@ struct TMIOps {
     throw TMIException(folly::sformat("Unknown method '{}'",
                                       rule.methodName()));
   }
-  static void errorUnknownMethod(alias_type rule,
-                                 string_type methName) {
+  static void errorUnknownMethod(alias_type /*rule*/, string_type methName) {
     throw TMIException(folly::sformat("Unknown method '{}'", methName));
   }
   template <class Rule>
-  static void errorUnknownTrait(const Rule& rule,
-                                string_type traitName) {
+  static void errorUnknownTrait(const Rule& /*rule*/, string_type traitName) {
     throw TMIException(folly::sformat("Unknown trait '{}'", traitName));
   }
   static void errorDuplicateMethod(class_type cls,
@@ -1239,8 +1236,7 @@ struct TMIOps {
     throw TMIException(folly::sformat("InconsistentInsteadOf: {} {}",
                                       methName, cls->cls->name));
   }
-  static void errorMultiplyExcluded(prec_type rule,
-                                    string_type traitName,
+  static void errorMultiplyExcluded(prec_type /*rule*/, string_type traitName,
                                     string_type methName) {
     throw TMIException(folly::sformat("MultiplyExcluded: {}::{}",
                                       traitName, methName));
@@ -3781,7 +3777,7 @@ res::Func Index::resolve_method(Context ctx,
 }
 
 folly::Optional<res::Func>
-Index::resolve_ctor(Context ctx, res::Class rcls, bool exact) const {
+Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
   auto const cinfo = rcls.val.right();
   if (!cinfo || !cinfo->ctor) return folly::none;
   if (exact || cinfo->ctor->second.attrs & AttrNoOverride) {

@@ -174,9 +174,8 @@ SetExceptionBreakpointsCommand::SetExceptionBreakpointsCommand(
 SetExceptionBreakpointsCommand::~SetExceptionBreakpointsCommand() {
 }
 
-bool SetExceptionBreakpointsCommand::executeImpl(
-  DebuggerSession* session,
-  folly::dynamic* responseMsg
+bool SetExceptionBreakpointsCommand::executeImpl(DebuggerSession* session,
+                                                 folly::dynamic* /*responseMsg*/
 ) {
   folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);

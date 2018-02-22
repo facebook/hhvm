@@ -524,7 +524,7 @@ bool XDebugServer::createServer(Mode mode) {
   return false;
 }
 
-bool XDebugServer::attach(Mode mode) {
+bool XDebugServer::attach(Mode /*mode*/) {
   if (XDEBUG_GLOBAL(Server) == nullptr) {
     return false;
   }

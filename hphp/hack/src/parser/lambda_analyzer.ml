@@ -195,6 +195,10 @@ let partition_used_locals parents node =
   let all_used = fold_no_lambdas add_local SSet.empty (get_body node)
   |> SSet.remove "$this" in
   let all_outer = compute_outer_variables parents node in
-  let used_outer = SSet.inter all_used all_outer in
+  let used_outer =
+    SSet.diff (SSet.inter all_used all_outer) param_set in
   let inner = SSet.diff all_used (SSet.union param_set used_outer) in
+  let inner_strings = SSet.to_string inner in
+  let used_outer_strings = SSet.to_string used_outer in
+  let _ = inner_strings, used_outer_strings in
   (inner, used_outer, params)

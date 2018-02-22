@@ -539,8 +539,6 @@ const std::string VariablesCommand::getVariableValue(const Variant& variable) {
     // For primitive / scalar values, just return a string representation of
     // the variable's value.
     case KindOfUninit:
-      return "undefined";
-
     case KindOfNull:
       return "null";
 

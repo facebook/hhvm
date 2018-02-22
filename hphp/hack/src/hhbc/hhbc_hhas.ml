@@ -1369,9 +1369,11 @@ let add_doc buf indent doc_comment =
 
 let add_body buf indent body =
   add_doc buf indent (Hhas_body.doc_comment body);
-  add_num_iters buf indent (Hhas_body.num_iters body);
   if Hhas_body.is_memoize_wrapper body
   then add_indented_line buf indent ".ismemoizewrapper;";
+  if Hhas_body.is_dynamically_callable body
+  then add_indented_line buf indent ".dynamicallycallable;";
+  add_num_iters buf indent (Hhas_body.num_iters body);
   add_num_cls_ref_slots buf indent (Hhas_body.num_cls_ref_slots body);
   add_decl_vars buf indent (Hhas_body.decl_vars body);
   add_static_values buf indent (Hhas_body.static_inits body);

@@ -249,8 +249,8 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   // When running hhvm, these option is not loaded from GD, but read from CLI.
   RuntimeOption::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
   RuntimeOption::EvalHackArrCompatNotices    = gd.HackArrCompatNotices;
-  RuntimeOption::EvalNoticeOnAllDynamicCalls = gd.NoticeOnAllDynamicCalls;
   RuntimeOption::EvalAllowObjectDestructors  = gd.AllowObjectDestructors;
+  RuntimeOption::EvalForbidDynamicCalls      = gd.ForbidDynamicCalls;
   RuntimeOption::EvalNoticeOnBuiltinDynamicCalls =
     gd.NoticeOnBuiltinDynamicCalls;
   RuntimeOption::EvalHackArrCompatIsArrayNotices =
@@ -321,8 +321,8 @@ void write_global_data(
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.APCProfile                  = std::move(apcProfile);
   gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
-  gd.NoticeOnAllDynamicCalls     = RuntimeOption::EvalNoticeOnAllDynamicCalls;
   gd.AllowObjectDestructors      = RuntimeOption::EvalAllowObjectDestructors;
+  gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.HackArrCompatIsArrayNotices =

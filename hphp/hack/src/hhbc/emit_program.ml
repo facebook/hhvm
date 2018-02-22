@@ -20,6 +20,7 @@ let emit_main is_evaled defs =
       ~is_memoize:false
       ~is_native:false
       ~is_async:false
+      ~is_dynamically_callable:false
       ~deprecation_info:None
       ~skipawaitable:false
       ~is_return_by_ref:false
@@ -45,6 +46,7 @@ let emit_fatal_program ~ignore_message op pos message =
     )
     [] (* decl_vars *)
     false (*is_memoize_wrapper*)
+    false (*is_dynamically_callable*)
     [] (* params *)
     None (* return_type_info *)
     [] (* static_inits static_inits  *)

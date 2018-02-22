@@ -746,6 +746,11 @@ struct Func final {
    */
   static const StringData* genMemoizeImplName(const StringData*);
 
+  /*
+   * Is this func allowed to be called dynamically?
+   */
+  bool isDynamicallyCallable() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Builtins.                                                          [const]
 
@@ -1200,6 +1205,7 @@ private:
     bool m_hasExtendedSharedData : 1;
     bool m_returnByValue : 1; // only for builtins
     bool m_isMemoizeWrapper : 1;
+    bool m_dynamicallyCallable : 1;
     // Needing more than 2 class ref slots basically doesn't happen, so just use
     // two bits normally. If we actually need more than that, we'll store the
     // count in ExtendedSharedData.

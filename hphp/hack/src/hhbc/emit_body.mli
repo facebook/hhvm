@@ -12,6 +12,7 @@ val make_body:
   Instruction_sequence.t ->
   string list -> (* Actually local_id list *)
   bool ->
+  bool ->
   Hhas_param.t list ->
   Hhas_type_info.t option ->
   string list ->
@@ -28,6 +29,7 @@ val emit_body:
   is_memoize: bool ->
   is_native: bool ->
   is_async: bool ->
+  is_dynamically_callable: bool ->
   deprecation_info: (Typed_value.t list) option ->
   skipawaitable:bool ->
   (* True if the return type is a ref *)

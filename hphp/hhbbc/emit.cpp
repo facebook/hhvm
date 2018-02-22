@@ -1249,6 +1249,7 @@ void emit_finish_func(EmitUnitState& state,
   fe.isPairGenerator = func.isPairGenerator;
   fe.isNative = func.nativeInfo != nullptr;
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
+  fe.dynamicallyCallable = func.dynamicallyCallable;
 
   auto const retTy = state.index.lookup_return_type_raw(&func);
   if (!retTy.subtypeOf(TBottom)) {

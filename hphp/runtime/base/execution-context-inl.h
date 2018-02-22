@@ -234,24 +234,28 @@ inline TypedValue ExecutionContext::invokeFuncFew(
 inline TypedValue ExecutionContext::invokeMethod(
   ObjectData* obj,
   const Func* meth,
-  InvokeArgs args
+  InvokeArgs args,
+  bool dynamic
 ) {
   return invokeFuncFew(
     meth,
     ActRec::encodeThis(obj),
     nullptr /* invName */,
     args.size(),
-    args.start()
+    args.start(),
+    false,
+    dynamic
   );
 }
 
 inline Variant ExecutionContext::invokeMethodV(
   ObjectData* obj,
   const Func* meth,
-  InvokeArgs args
+  InvokeArgs args,
+  bool dynamic
 ) {
   // Construct variant without triggering incref.
-  return Variant::attach(invokeMethod(obj, meth, args));
+  return Variant::attach(invokeMethod(obj, meth, args, dynamic));
 }
 
 inline ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {

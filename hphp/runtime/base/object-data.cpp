@@ -87,7 +87,7 @@ ALWAYS_INLINE
 static void invoke_destructor(ObjectData* obj, const Func* dtor) {
   try {
     // Call the destructor method
-    g_context->invokeMethodV(obj, dtor);
+    g_context->invokeMethodV(obj, dtor, InvokeArgs{}, false);
   } catch (...) {
     // Swallow any exceptions that escape the __destruct method
     handle_destructor_exception();
@@ -670,6 +670,7 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
     assert(!(ctx.func->attrs() & AttrStatic));
     ctx.invName = s.get();
     ctx.invName->incRefCount();
+    ctx.dynamic = false;
   }
   return true;
 }
@@ -789,7 +790,7 @@ ObjectData* ObjectData::clone() {
     assertx(!isCppBuiltin());
     auto const method = clone->m_cls->lookupMethod(s_clone.get());
     assertx(method);
-    g_context->invokeMethodV(clone.get(), method);
+    g_context->invokeMethodV(clone.get(), method, InvokeArgs{}, false);
   }
   return clone.detach();
 }
@@ -879,7 +880,8 @@ Variant ObjectData::offsetGet(Variant key) {
   auto const method = m_cls->lookupMethod(s_offsetGet.get());
   assert(method);
 
-  return g_context->invokeMethodV(this, method, InvokeArgs(key.asCell(), 1));
+  return
+    g_context->invokeMethodV(this, method, InvokeArgs(key.asCell(), 1), false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -891,7 +893,8 @@ const StaticString
   s___unset("__unset"),
   s___sleep("__sleep"),
   s___toDebugDisplay("__toDebugDisplay"),
-  s___wakeup("__wakeup");
+  s___wakeup("__wakeup"),
+  s___debugInfo("__debugInfo");
 
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps) {
@@ -1181,7 +1184,7 @@ struct MagicInvoker {
     TypedValue args[1] = {
       make_tv<KindOfString>(const_cast<StringData*>(info.key))
     };
-    return g_context->invokeMethod(info.obj, meth, folly::range(args));
+    return g_context->invokeMethod(info.obj, meth, folly::range(args), false);
   }
 };
 
@@ -1195,7 +1198,7 @@ bool ObjectData::invokeSet(const StringData* key, Cell val) {
       make_tv<KindOfString>(const_cast<StringData*>(key)),
       val
     };
-    return g_context->invokeMethod(this, meth, folly::range(args));
+    return g_context->invokeMethod(this, meth, folly::range(args), false);
   });
   if (r) tvDecRefGen(r.val);
   return r.ok();
@@ -1796,7 +1799,9 @@ void ObjectData::getTraitProps(const Class* klass, bool pubOnly,
 
 static Variant invokeSimple(ObjectData* obj, const StaticString& name) {
   auto const meth = obj->methodNamed(name.get());
-  return meth ? g_context->invokeMethodV(obj, meth) : uninit_null();
+  return meth
+    ? g_context->invokeMethodV(obj, meth, InvokeArgs{}, false)
+    : uninit_null();
 }
 
 Variant ObjectData::invokeSleep() {
@@ -1809,6 +1814,10 @@ Variant ObjectData::invokeToDebugDisplay() {
 
 Variant ObjectData::invokeWakeup() {
   return invokeSimple(this, s___wakeup);
+}
+
+Variant ObjectData::invokeDebugInfo() {
+  return invokeSimple(this, s___debugInfo);
 }
 
 String ObjectData::invokeToString() {
@@ -1824,7 +1833,7 @@ String ObjectData::invokeToString() {
     // we return the empty string.
     return empty_string();
   }
-  auto const tv = g_context->invokeMethod(this, method);
+  auto const tv = g_context->invokeMethod(this, method, InvokeArgs{}, false);
   if (!isStringType(tv.m_type)) {
     // Discard the value returned by the __toString() method and raise
     // a recoverable error

@@ -114,6 +114,7 @@ let make_wrapper_body env decl_vars return_type params instrs =
     instrs
     decl_vars
     false (* is_memoize_wrapper *)
+    false (* is_dynamically_callable *)
     params
     (Some return_type)
     [] (* static_inits: this is intentionally empty *)

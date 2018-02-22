@@ -32,3 +32,6 @@ let deprecation_info attributes =
     if (name attr) = "__Deprecated" then Some (arguments attr) else None
   in
   List.find_map attributes f
+let is_dynamically_callable attributes =
+  let f attr = (name attr) = "__DynamicallyCallable" in
+  List.exists attributes f

@@ -424,6 +424,10 @@ inline const StringData* Func::memoizeImplName() const {
   return genMemoizeImplName(name());
 }
 
+inline bool Func::isDynamicallyCallable() const {
+  return shared()->m_dynamicallyCallable;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Builtins.
 

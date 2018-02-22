@@ -348,27 +348,29 @@ let make_memoize_instance_method_code ~pos ~non_null_return env info index metho
   else make_memoize_instance_method_with_params_code ~pos env info method_id params index
 
 (* Construct the wrapper function *)
-let make_wrapper env return_type params instrs =
+let make_wrapper env return_type is_dynamically_callable params instrs =
   Emit_body.make_body
     instrs
     [] (* decl_vars *)
     true (* is_memoize_wrapper *)
+    is_dynamically_callable
     params
     (Some return_type)
     [] (* static_inits *)
     None (* doc *)
     (Some env)
 
-let emit ~pos ~non_null_return env info index return_type_info params is_static method_id =
+let emit ~pos ~non_null_return env info index return_type_info params
+         is_static method_id is_dynamically_callable =
   let instrs =
     if is_static
     then make_memoize_static_method_code ~pos ~non_null_return env info method_id params
     else make_memoize_instance_method_code ~pos ~non_null_return env info index method_id params
   in
-  make_wrapper env return_type_info params instrs
+  make_wrapper env return_type_info is_dynamically_callable params instrs
 
 let emit_memoize_wrapper_body env memoize_info index ast_method
-    ~scope ~namespace params ret =
+    ~scope ~namespace is_dynamically_callable params ret =
     let is_static =List.mem ast_method.Ast.m_kind Ast.Static in
     let tparams =
       Hh_core.List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
@@ -382,7 +384,8 @@ let emit_memoize_wrapper_body env memoize_info index ast_method
     let method_id =
       Hhbc_id.Method.from_ast_name original_name in
     (*let method_id = Hhbc_id.Method.add_suffix method_id Generate_memoized.memoize_suffix in*)
-    emit ~pos ~non_null_return env memoize_info index return_type_info params is_static method_id
+    emit ~pos ~non_null_return env memoize_info index return_type_info params
+         is_static method_id is_dynamically_callable
 
 let make_memoize_wrapper_method env info index ast_class ast_method =
   (* This is cut-and-paste from emit_method above, with special casing for
@@ -393,6 +396,8 @@ let make_memoize_wrapper_method env info index ast_class ast_method =
   let method_is_static = List.mem ast_method.Ast.m_kind Ast.Static in
   let method_attributes =
     Emit_attribute.from_asts (Emit_env.get_namespace env) ast_method.Ast.m_user_attributes in
+  let is_dynamically_callable =
+    Hhas_attribute.is_dynamically_callable method_attributes in
   let method_is_private =
     List.mem ast_method.Ast.m_kind Ast.Private in
   let method_is_protected =
@@ -416,7 +421,7 @@ let make_memoize_wrapper_method env info index ast_class ast_method =
     ~is_generated:true namespace ast_class method_id in
   let method_body =
     emit_memoize_wrapper_body env info index ast_method
-      ~scope ~namespace ast_method.Ast.m_params ret in
+      ~scope ~namespace is_dynamically_callable ast_method.Ast.m_params ret in
   Hhas_method.make
     method_attributes
     method_is_protected

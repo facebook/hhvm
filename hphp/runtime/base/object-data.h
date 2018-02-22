@@ -301,6 +301,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   Variant invokeSleep();
   Variant invokeToDebugDisplay();
   Variant invokeWakeup();
+  Variant invokeDebugInfo();
 
   /*
    * Returns whether this object has any dynamic properties.

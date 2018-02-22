@@ -17,12 +17,14 @@
 #ifndef incl_HPHP_VM_INTERP_HELPERS_H_
 #define incl_HPHP_VM_INTERP_HELPERS_H_
 
-#include "hphp/runtime/vm/act-rec.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/vm/act-rec.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
@@ -62,9 +64,24 @@ inline void checkForDynamicCall(const ActRec* ar) {
 
   if (func->accessesCallerFrame()) raise_disallowed_dynamic_call(func);
 
-  if (RuntimeOption::EvalNoticeOnAllDynamicCalls ||
-      (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls &&
-       func->isBuiltin())) {
+  if (!func->isDynamicallyCallable()) {
+    if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+      std::string msg;
+      string_printf(
+        msg,
+        Strings::FUNCTION_CALLED_DYNAMICALLY,
+        func->fullDisplayName()->data()
+      );
+      throw_invalid_operation_exception(makeStaticString(msg));
+    } else if (RuntimeOption::EvalForbidDynamicCalls == 1) {
+      raise_notice(
+        Strings::FUNCTION_CALLED_DYNAMICALLY,
+        func->fullDisplayName()->data()
+      );
+    }
+  }
+
+  if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
     raise_notice(
       Strings::FUNCTION_CALLED_DYNAMICALLY,
       func->fullDisplayName()->data()

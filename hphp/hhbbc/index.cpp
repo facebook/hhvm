@@ -831,9 +831,28 @@ bool Func::mightBeSkipFrame() const {
 
 bool Func::mightCareAboutDynCalls() const {
   if (mightAccessCallerFrame()) return true;
-  if (RuntimeOption::EvalNoticeOnAllDynamicCalls) return true;
   if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && mightBeBuiltin()) {
     return true;
+  }
+  if (RuntimeOption::EvalForbidDynamicCalls > 0) {
+    auto const res = match<bool>(
+      val,
+      [&](FuncName) { return true; },
+      [&](MethodName) { return true; },
+      [&](borrowed_ptr<FuncInfo> fi) {
+        return !fi->func->dynamicallyCallable;
+      },
+      [&](borrowed_ptr<const MethTabEntryPair> mte) {
+        return !mte->second.func->dynamicallyCallable;
+      },
+      [&](borrowed_ptr<FuncFamily> fa) {
+        for (auto const pf : fa->possibleFuncs) {
+          if (!pf->second.func->dynamicallyCallable) return true;
+        }
+        return false;
+      }
+    );
+    if (res) return true;
   }
   return false;
 }

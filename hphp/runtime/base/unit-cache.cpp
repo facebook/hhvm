@@ -662,7 +662,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::IntsOverflowToInts ? '1' : '0')
     + (RuntimeOption::EvalReffinessInvariance ? '1' : '0')
     + (RuntimeOption::EvalCreateInOutWrapperFunctions ? '1' : '0')
-    + (RuntimeOption::EvalNoticeOnAllDynamicCalls ? '1' : '0')
+    + std::to_string(RuntimeOption::EvalForbidDynamicCalls)
     + (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls ? '1' : '0')
     + (RuntimeOption::EvalHackArrDVArrs ? '1' : '0')
     + (RuntimeOption::EvalDisableHphpcOpts ? '1' : '0')

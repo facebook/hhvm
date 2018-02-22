@@ -641,6 +641,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     out << "Method";
     print_attrs(out, m_attrs);
     if (isMemoizeWrapper()) out << " (memoize_wrapper)";
+    if (isDynamicallyCallable()) out << " (dyn_callable)";
     if (cls() != nullptr) {
       out << ' ' << fullName()->data();
     } else {
@@ -650,6 +651,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     out << "Function";
     print_attrs(out, m_attrs);
     if (isMemoizeWrapper()) out << " (memoize_wrapper)";
+    if (isDynamicallyCallable()) out << " (dyn_callable)";
     out << ' ' << m_name->data();
   }
 
@@ -759,6 +761,7 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_hasExtendedSharedData(false)
   , m_returnByValue(false)
   , m_isMemoizeWrapper(false)
+  , m_dynamicallyCallable(false)
   , m_numClsRefSlots(0)
   , m_originalFilename(nullptr)
 {
@@ -1151,6 +1154,7 @@ void logFunc(const Func* func, StructuredLogEntry& ent) {
 
   if (func->isMemoizeWrapper()) attrSet.emplace("memoize_wrapper");
   if (func->isMemoizeImpl()) attrSet.emplace("memoize_impl");
+  if (func->isDynamicallyCallable()) attrSet.emplace("dyn_callable");
   if (func->isAsync()) attrSet.emplace("async");
   if (func->isGenerator()) attrSet.emplace("generator");
   if (func->isClosureBody()) attrSet.emplace("closure_body");

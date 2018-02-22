@@ -9399,7 +9399,7 @@ void EmitterVisitor::bindUserAttributes(MethodStatementPtr meth,
 
 const StaticString s_Void("HH\\void");
 const char* attr_Deprecated = "__Deprecated";
-const StaticString s_attr_Deprecated(attr_Deprecated);
+const char* attr_DynamicallyCallable = "__DynamicallyCallable";
 
 Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
                                     FuncEmitter *fe) {
@@ -9480,6 +9480,9 @@ Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   if (meth->getFunctionScope()->userAttributes().count(attr_Deprecated)) {
     emitDeprecationWarning(e, meth);
   }
+  // All functions in systemlib (thus all native functions) are automatically
+  // dynamically callable.
+  fe->dynamicallyCallable = true;
 
   if (!(attributes & (AttrReadsCallerFrame | AttrWritesCallerFrame))) {
     if (meth->getFunctionScope()->isDynamicInvoke() ||
@@ -9785,9 +9788,18 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   Label topOfBody(e, Label::NoEntryNopFlag{});
   emitMethodPrologue(e, meth);
 
-  if (!m_curFunc->isMemoizeImpl &&
-      meth->getFunctionScope()->userAttributes().count(attr_Deprecated)) {
-    emitDeprecationWarning(e, meth);
+  // Don't emit (redundant) depreciation warnings for a memoize
+  // implementation, nor do we want them to ever be dynamically callable.
+  if (!m_curFunc->isMemoizeImpl) {
+    auto const& attrs = meth->getFunctionScope()->userAttributes();
+    if (attrs.count(attr_Deprecated)) emitDeprecationWarning(e, meth);
+    if (!SystemLib::s_inited ||
+        meth->getFunctionScope()->isSystem() ||
+        attrs.count(attr_DynamicallyCallable)) {
+      m_curFunc->dynamicallyCallable = true;
+    }
+  } else {
+    assertx(!m_curFunc->dynamicallyCallable);
   }
 
   // emit code to create generator object
@@ -10053,8 +10065,12 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   emitMethodPrologue(e, meth);
   // We want to emit the deprecation warning on every call, even if its a cache
   // hit.
-  if (meth->getFunctionScope()->userAttributes().count(attr_Deprecated)) {
-    emitDeprecationWarning(e, meth);
+  auto const& attrs = meth->getFunctionScope()->userAttributes();
+  if (attrs.count(attr_Deprecated)) emitDeprecationWarning(e, meth);
+  if (!SystemLib::s_inited ||
+      meth->getFunctionScope()->isSystem() ||
+      attrs.count(attr_DynamicallyCallable)) {
+    m_curFunc->dynamicallyCallable = true;
   }
 
   // Function start
@@ -12477,8 +12493,8 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.HackArrCompatNotices        = RuntimeOption::EvalHackArrCompatNotices;
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
-  gd.NoticeOnAllDynamicCalls     = RuntimeOption::EvalNoticeOnAllDynamicCalls;
   gd.AllowObjectDestructors      = RuntimeOption::EvalAllowObjectDestructors;
+  gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.InitialNamedEntityTableSize =

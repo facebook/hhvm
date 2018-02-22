@@ -1641,7 +1641,7 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
                   cls->name()->data());
     return obj->toArray();
   }
-  Variant ret = const_cast<ObjectData*>(obj)->o_invoke_few_args(s_debugInfo, 0);
+  auto ret = const_cast<ObjectData*>(obj)->invokeDebugInfo();
   if (ret.isArray()) {
     return ret.toArray();
   }

@@ -411,6 +411,9 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
   if (func->isMemoizeWrapper()) {
     out.fmtln(".ismemoizewrapper;");
   }
+  if (func->isDynamicallyCallable()) {
+    out.fmtln(".dynamicallycallable;");
+  }
   if (auto const niters = func->numIterators()) {
     out.fmtln(".numiters {};", niters);
   }

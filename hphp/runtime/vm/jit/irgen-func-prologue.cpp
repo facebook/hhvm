@@ -491,7 +491,8 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
 void emitDynamicCallCheck(IRGS& env) {
   auto const func = curFunc(env);
 
-  if (!RuntimeOption::EvalNoticeOnAllDynamicCalls &&
+  if (!(RuntimeOption::EvalForbidDynamicCalls > 0 &&
+        !func->isDynamicallyCallable()) &&
       !(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) &&
       !func->accessesCallerFrame()) {
     return;
@@ -514,16 +515,27 @@ void emitDynamicCallCheck(IRGS& env) {
         gen(env, RaiseVarEnvDynCall, cns(env, func));
       }
 
-      if (RuntimeOption::EvalNoticeOnAllDynamicCalls ||
-          (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls &&
-           func->isBuiltin())) {
-        std::string msg;
-        string_printf(
-          msg,
-          Strings::FUNCTION_CALLED_DYNAMICALLY,
-          func->fullDisplayName()->data()
+      std::string str;
+      string_printf(
+        str,
+        Strings::FUNCTION_CALLED_DYNAMICALLY,
+        func->fullDisplayName()->data()
+      );
+      auto const msg = cns(env, makeStaticString(str));
+
+      if (RuntimeOption::EvalForbidDynamicCalls > 0 &&
+          !func->isDynamicallyCallable()) {
+        gen(
+          env,
+          RuntimeOption::EvalForbidDynamicCalls >= 2
+            ? ThrowInvalidOperation
+            : RaiseNotice,
+          msg
         );
-        gen(env, RaiseNotice, cns(env, makeStaticString(msg)));
+      }
+
+      if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
+        gen(env, RaiseNotice, msg);
       }
     }
   );

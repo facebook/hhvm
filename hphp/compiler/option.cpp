@@ -271,9 +271,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalHackArrDVArrs,
                ini, config, "HackArrDVArrs",
                RuntimeOption::EvalHackArrDVArrs);
-  Config::Bind(RuntimeOption::EvalNoticeOnAllDynamicCalls,
-               ini, config, "NoticeOnAllDynamicCalls",
-               RuntimeOption::EvalNoticeOnAllDynamicCalls);
+  Config::Bind(RuntimeOption::EvalForbidDynamicCalls,
+               ini, config, "ForbidDynamicCalls",
+               RuntimeOption::EvalForbidDynamicCalls);
   Config::Bind(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls,
                ini, config, "NoticeOnBuiltinDynamicCalls",
                RuntimeOption::EvalNoticeOnBuiltinDynamicCalls);

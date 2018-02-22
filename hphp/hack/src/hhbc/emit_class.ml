@@ -59,6 +59,7 @@ let make_86method
   let method_is_pair_generator = false in
   let method_is_closure_body = false in
   let method_is_memoize_wrapper = false in
+  let method_is_dynamically_callable = false in
   let method_no_injection = true in
   let method_inout_wrapper = false in
   let method_static_inits = [] in
@@ -70,6 +71,7 @@ let make_86method
     instrs
     method_decl_vars
     method_is_memoize_wrapper
+    method_is_dynamically_callable
     params
     method_return_type
     method_static_inits

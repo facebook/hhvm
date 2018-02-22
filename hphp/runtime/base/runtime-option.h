@@ -761,6 +761,16 @@ struct RuntimeOption {
   F(bool, CreateInOutWrapperFunctions, true)                            \
   F(bool, ReffinessInvariance, false)                                   \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
+  /*                                                                    \
+   * Control dynamic calls to functions which haven't opted into being called \
+   * that way.                                                          \
+   *                                                                    \
+   * 0 - Nothing                                                        \
+   * 1 - Warn                                                           \
+   * 2 - Throw exception                                                \
+   *                                                                    \
+   */                                                                   \
+  F(int32_t, ForbidDynamicCalls, 0)                                     \
   F(std::string, PreludePath, "")                                       \
   /* Use the CallM/RetM ABI to return multiple values via the stack for \
      inout functions */                                                 \
@@ -781,7 +791,6 @@ struct RuntimeOption {
                                             std::vector<std::string>()) \
   /* Options for testing */                                             \
   F(bool, TrashFillOnRequestExit, false)                                \
-  F(bool, NoticeOnAllDynamicCalls, false)                               \
   /******************                                                   \
    | ARM   Options. |                                                   \
    *****************/                                                   \

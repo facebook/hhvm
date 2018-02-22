@@ -475,13 +475,15 @@ public:
   TypedValue invokeMethod(
     ObjectData* obj,
     const Func* meth,
-    InvokeArgs args = InvokeArgs()
+    InvokeArgs args = InvokeArgs(),
+    bool dynamic = true
   );
 
   Variant invokeMethodV(
     ObjectData* obj,
     const Func* meth,
-    InvokeArgs args = InvokeArgs()
+    InvokeArgs args = InvokeArgs(),
+    bool dynamic = true
   );
 
   void resumeAsyncFunc(Resumable* resumable, ObjectData* freeObj,

@@ -39,6 +39,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
+#include <folly/CPortability.h>
 #include <folly/Random.h>
 #include <folly/ScopeGuard.h>
 #include <folly/portability/SysMman.h>
@@ -309,7 +310,9 @@ void MemoryManager::refreshStats() {
  * Calculate how many bytes of allocation should happen before the next
  * time the fast path is interrupted.
  */
-void MemoryManager::updateMMDebt() {
+void MemoryManager::updateMMDebt()
+  // TODO: T26068998 fix signed-integer-overflow undefined behavior
+  FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
   auto const new_debt = m_nextGC - m_stats.mmUsage();
   m_stats.mm_allocated = m_stats.mm_allocated - m_stats.mm_debt + new_debt;
   m_stats.mm_debt = new_debt;

@@ -19,6 +19,8 @@
 
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
 
+#include <folly/CPortability.h>
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -64,7 +66,11 @@ struct MemoryUsageStats {
   int64_t mmap_volume; // how many bytes have cumulatively been mmap'd
                        // by the HeapImpl, not counting munmaps or madvises.
 
-  int64_t mmAllocated() const { return mm_allocated - mm_debt; }
+  int64_t mmAllocated() const
+    // TODO: T26068998 fix signed-integer-overflow undefined behavior
+    FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
+    return mm_allocated - mm_debt;
+  }
   int64_t mmUsage() const { return mmAllocated() - mm_freed; }
   int64_t usage() const { return mmUsage() + auxUsage(); }
   int64_t capacity() const { return mmap_cap + malloc_cap; }

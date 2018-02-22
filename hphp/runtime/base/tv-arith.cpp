@@ -19,6 +19,7 @@
 #include <limits>
 #include <algorithm>
 
+#include <folly/CPortability.h>
 #include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/base/array-data-defs.h"
@@ -154,7 +155,11 @@ struct Add {
   Cell operator()(double  a, int64_t b) const { return make_dbl(a + b); }
   Cell operator()(double  a, double  b) const { return make_dbl(a + b); }
   Cell operator()(int64_t a, double  b) const { return make_dbl(a + b); }
-  Cell operator()(int64_t a, int64_t b) const { return make_int(a + b); }
+  Cell operator()(int64_t a, int64_t b) const
+    // TODO: T26068998 fix signed-integer-overflow undefined behavior
+    FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
+    return make_int(a + b);
+  }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
     if (UNLIKELY(a1->isHackArray())) throwInvalidAdditionException(a1);
@@ -170,7 +175,11 @@ struct Sub {
   Cell operator()(double  a, int64_t b) const { return make_dbl(a - b); }
   Cell operator()(double  a, double  b) const { return make_dbl(a - b); }
   Cell operator()(int64_t a, double  b) const { return make_dbl(a - b); }
-  Cell operator()(int64_t a, int64_t b) const { return make_int(a - b); }
+  Cell operator()(int64_t a, int64_t b) const
+    // TODO: T26068998 fix signed-integer-overflow undefined behavior
+    FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
+    return make_int(a - b);
+  }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* /*a2*/) const {
     throw_bad_array_operand(a1);
@@ -300,7 +309,11 @@ again:
 }
 
 struct AddEq {
-  int64_t operator()(int64_t a, int64_t b) const { return a + b; }
+  int64_t operator()(int64_t a, int64_t b) const
+    // TODO: T26068998 fix signed-integer-overflow undefined behavior
+    FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
+    return a + b;
+  }
   double  operator()(double  a, int64_t b) const { return a + b; }
   double  operator()(int64_t a, double  b) const { return a + b; }
   double  operator()(double  a, double  b) const { return a + b; }

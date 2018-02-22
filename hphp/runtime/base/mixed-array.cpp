@@ -41,6 +41,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
 
+#include <folly/CPortability.h>
 #include <folly/portability/Constexpr.h>
 
 #include <algorithm>
@@ -676,7 +677,9 @@ int32_t* warnUnbalanced(MixedArray* a, size_t n, int32_t* ei) {
   return ei;
 }
 
-MixedArray::InsertPos MixedArray::insert(int64_t k) {
+MixedArray::InsertPos MixedArray::insert(int64_t k)
+  // TODO: T26068998 fix signed-integer-overflow undefined behavior
+  FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
   assert(!isFull());
   auto h = hash_int64(k);
   auto ei = findForInsertUpdate(k, h);

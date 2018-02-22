@@ -476,7 +476,7 @@ and is_same_type ~opts env ty_sub ty_super =
 and generic_param_matches ~opts env x ty =
   let lower = Env.get_lower_bounds env x in
   let upper = Env.get_upper_bounds env x in
-  let mem_bounds = List.exists ~f:(fun ty' -> is_same_type ~opts env ty ty') in
+  let mem_bounds = Typing_set.exists (fun ty' -> is_same_type ~opts env ty ty') in
   opts.TUtils.follow_bounds && mem_bounds lower && mem_bounds upper
 
 and unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =

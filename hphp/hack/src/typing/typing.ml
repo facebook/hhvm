@@ -42,6 +42,7 @@ module Subst        = Decl_subst
 module ExprDepTy    = Typing_dependent_type.ExprDepTy
 module TCO          = TypecheckerOptions
 module EnvFromDef   = Typing_env_from_def.EnvFromDef(Nast.Annotations)
+module TySet        = Typing_set
 
 (*****************************************************************************)
 (* Debugging *)
@@ -205,7 +206,8 @@ let try_over_concrete_supertypes env ty f =
   let env, tyl = TUtils.get_concrete_supertypes env ty in
   (* If there is just a single result then don't swallow errors *)
   match tyl with
-  | [ty] -> [f env ty]
+  | [ty] ->
+    [f env ty]
   | _ ->
     let rec iter_over_types env resl tyl =
       match tyl with
@@ -5619,7 +5621,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
          * with unique suffix *)
         let env, tparams_with_new_names =
           List.map_env env class_info.tc_tparams
-            (fun env ((_,(_,name),_) as tp) ->
+            (fun env ((_, (_,name), _) as tp) ->
               let env, name = Env.add_fresh_generic_parameter env name in
               env, (tp, name)) in
         let s =
@@ -5628,7 +5630,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
             ^ ">" in
         let reason = Reason.Rinstanceof (ivar_pos, s) in
         let tyl_fresh = List.map
-            ~f:(fun (_,newname) -> (reason, Tabstract(AKgeneric newname, None)))
+            ~f:(fun (_, newname) -> (reason, Tabstract(AKgeneric newname, None)))
             tparams_with_new_names in
 
         (* Type of variable in block will be class name
@@ -5661,12 +5663,36 @@ and condition ?lhs_of_null_coalesce env tparamet =
          * Then SubType.add_constraint will deduce that T=int and add int as
          * both lower and upper bound on T in env.lenv.tpenv
          *)
-         let env = SubType.add_constraint p env Ast.Constraint_as obj_ty x_ty in
-        env, obj_ty in
+        let env = SubType.add_constraint p env Ast.Constraint_as obj_ty x_ty in
 
-        if SubType.is_sub_type env obj_ty (
-          Reason.none, Tclass ((Pos.none, SN.Classes.cAwaitable), [Reason.none, Tany])
-        ) then () else Async.enforce_nullable_or_not_awaitable env (fst ivar) x_ty;
+        (* It's often the case that the fresh name isn't necessary. For
+         * example, if C<T> extends B<T>, and we have $x:B<t> for some type t
+         * then $x instanceof B should refine to $x:C<t>.
+         * We take a simple approach:
+         *    For a fresh type parameter T#1, if
+         *    1) There is an eqality constraint T#1 = t then replace T#1 with t.
+         *    2) T#1 is covariant, and T#1 <: t and occurs nowhere else in the constraints
+         *    3) T#1 is contravariant, and t <: T#1 and occurs nowhere else in the constraints
+         *)
+        let tparams_in_constraints = Env.get_tpenv_tparams env in
+        let tyl_fresh_simplified =
+          List.map tparams_with_new_names
+          ~f:begin fun ((variance, _, _), newname) ->
+            match variance,
+              TySet.elements (Env.get_lower_bounds env newname),
+              TySet.elements (Env.get_equal_bounds env newname),
+              TySet.elements (Env.get_upper_bounds env newname) with
+            | _, _, [ty], _ -> ty
+            | Ast.Covariant, _, _, [ty]
+            | Ast.Contravariant, [ty], _, _
+              when not (SSet.mem newname tparams_in_constraints) -> ty
+            | _, _, _, _ -> (reason, Tabstract(AKgeneric newname, None)) end in
+        let obj_ty_simplified = (fst obj_ty, Tclass(_c, tyl_fresh_simplified)) in
+        env, obj_ty_simplified in
+
+      if SubType.is_sub_type env obj_ty (
+        Reason.none, Tclass ((Pos.none, SN.Classes.cAwaitable), [Reason.none, Tany])
+      ) then () else Async.enforce_nullable_or_not_awaitable env (fst ivar) x_ty;
 
       let safe_instanceof_enabled =
         TypecheckerOptions.experimental_feature_enabled
@@ -5680,7 +5706,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
           represent all of the possible types.
         *)
         | r, Tabstract (AKgeneric s, _) when AbstractKind.is_generic_dep_ty s ->
-          let upper_bounds = Env.get_upper_bounds env s in
+          let upper_bounds = TySet.elements (Env.get_upper_bounds env s) in
           let env, tyl = List.map_env env upper_bounds resolve_obj in
           env, (r, Tunresolved tyl)
         | _, Tabstract (AKgeneric name, _) ->

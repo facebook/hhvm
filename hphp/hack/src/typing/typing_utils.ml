@@ -116,7 +116,8 @@ let get_all_supertypes env ty =
       | Tabstract (AKgeneric n, _) ->
         if SSet.mem n seen
         then iter seen env acc tyl
-        else iter (SSet.add n seen) env acc (Env.get_upper_bounds env n @ tyl)
+        else iter (SSet.add n seen) env acc
+          (TySet.elements (Env.get_upper_bounds env n) @ tyl)
       | _ ->
         iter seen env (TySet.add ty acc) tyl
   in
@@ -148,7 +149,8 @@ let get_concrete_supertypes env ty =
       | Tabstract (AKgeneric n, _) ->
         if SSet.mem n seen
         then iter seen env acc tyl
-        else iter (SSet.add n seen) env acc (Env.get_upper_bounds env n @ tyl)
+        else iter (SSet.add n seen) env acc
+          (TySet.elements (Env.get_upper_bounds env n) @ tyl)
 
       | Tabstract (_, None) ->
         iter seen env acc tyl
@@ -168,11 +170,11 @@ let rec get_base_type env ty =
   (* If we have an expression dependent type and it only has one super
     type, we can treat it similarly to AKdependent _, Some ty  *)
   | Tabstract (AKgeneric n, _) when AbstractKind.is_generic_dep_ty n ->
-    begin match Env.get_upper_bounds env n with
+    begin match TySet.elements (Env.get_upper_bounds env n) with
     | ty2::_ when ty_equal ty ty2 -> ty
     (* If it's exactly equal, then the base ty is just this one *)
     | ty::_ ->
-      if List.mem ~equal:ty_equal (Env.get_lower_bounds env n) ty
+      if TySet.mem ty (Env.get_lower_bounds env n)
       then ty else get_base_type env ty
     | [] -> ty
     end

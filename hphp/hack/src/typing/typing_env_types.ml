@@ -28,7 +28,7 @@ type expression_id = Ident.t
 type local = locl ty * expression_id
 type local_history = locl ty list
 type old_local = locl ty list * locl ty * expression_id
-type tparam_bounds = locl ty list
+type tparam_bounds = TySet.t
 type tparam_info = {
   lower_bounds : TySet.t;
   upper_bounds : TySet.t;

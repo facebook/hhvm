@@ -95,14 +95,14 @@ let rec decompose_subtype
   | (_, Tabstract (AKgeneric name_sub, _)), _ when ty_sub != ty_super ->
     let tys = Env.get_upper_bounds env name_sub in
     (* Don't add the same type twice! *)
-    if List.mem tys ty_super then env
+    if Typing_set.mem ty_super tys then env
     else Env.add_upper_bound env name_sub ty_super
 
   (* ty_sub <: name_super so add a lower bound on name_super *)
   | _, (_, Tabstract (AKgeneric name_super, _)) when ty_sub != ty_super ->
     let tys = Env.get_lower_bounds env name_super in
     (* Don't add the same type twice! *)
-    if List.mem tys ty_sub then env
+    if Typing_set.mem ty_sub tys then env
     else Env.add_lower_bound env name_super ty_sub
 
   (* If ?ty_sub' <: ?ty_super' then must have ty_sub <: ty_super *)
@@ -295,9 +295,9 @@ let add_constraint_with_fail
       let env' =
         List.fold_left (Env.get_generic_parameters env) ~init:env
           ~f:(fun env x ->
-            List.fold_left (Env.get_lower_bounds env x) ~init:env
+            List.fold_left (Typing_set.elements (Env.get_lower_bounds env x)) ~init:env
               ~f:(fun env ty_sub' ->
-                List.fold_left (Env.get_upper_bounds env x) ~init:env
+                List.fold_left (Typing_set.elements (Env.get_upper_bounds env x)) ~init:env
                   ~f:(fun env ty_super' ->
                     decompose_subtype env ty_sub' ty_super' fail))) in
       if Env.get_tpenv_size env' = oldsize
@@ -1223,7 +1223,7 @@ and sub_generic_params
                      env.Env.pos r_sub name_sub l; env)
                  else try_bounds tyl)
           in try_bounds (Option.to_list opt_sub_cstr @
-              Env.get_upper_bounds env name_sub)) in
+              Typing_set.elements (Env.get_upper_bounds env name_sub))) in
 
     begin match ety_super with
       (* If supertype is the same generic parameter, we're done *)
@@ -1280,7 +1280,7 @@ and sub_generic_params
              then (Reason.explain_generic_constraint
                  env.Env.pos r_super name_super l; env)
              else try_bounds tyl)
-      in try_bounds (Env.get_lower_bounds env name_super)
+      in try_bounds (Typing_set.elements (Env.get_lower_bounds env name_super))
 
   | _, _ ->
     sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)

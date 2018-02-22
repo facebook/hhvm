@@ -20,6 +20,7 @@ open Utils
 module SN = Naming_special_names
 module Reason = Typing_reason
 module TySet = Typing_set
+
 (*****************************************************************************)
 (* Computes the string representing a type in an error message.
  * We generally don't want to show the whole type. If an error was due
@@ -523,25 +524,11 @@ module Full = struct
         ty to_doc st env cty
       ]
 
-  let visitor env =
-    object(this)
-      inherit [string list] Type_visitor.type_visitor
-      method! on_tabstract acc _ ak _ty_opt =
-        match ak with
-        | AKgeneric s -> s::acc
-        | _ -> acc
-      method! on_tvar acc r ix =
-        let _env, ty = Env.get_type env r ix in
-        this#on_type acc ty
-    end
-  let get_tparams env ty = (visitor env)#on_type [] ty
-
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam env tparam =
-    (* Dedup the lists *)
-    let lower = TySet.of_list (Env.get_lower_bounds env tparam) in
-    let upper = TySet.of_list (Env.get_upper_bounds env tparam) in
-    let equ = TySet.inter lower upper in
+    let lower = Env.get_lower_bounds env tparam in
+    let upper = Env.get_upper_bounds env tparam in
+    let equ = Env.get_equal_bounds env tparam in
     (* If we have an equality we can ignore the other bounds *)
     if not (TySet.is_empty equ)
     then List.map (TySet.elements equ) (fun ty -> (tparam, Ast.Constraint_eq, ty))
@@ -557,7 +544,7 @@ module Full = struct
 
   let constraints_for_type to_doc env ty =
     let open Doc in
-    let tparams = get_tparams env ty in
+    let tparams = SSet.elements (Env.get_tparams env ty) in
     let constraints = List.concat_map tparams (get_constraints_on_tparam env) in
     if List.is_empty constraints
     then None

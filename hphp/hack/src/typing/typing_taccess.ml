@@ -16,6 +16,7 @@ open Utils
 module Reason = Typing_reason
 module Env = Typing_env
 module Phase = Typing_phase
+module TySet = Typing_set
 
 type env = {
   tenv : Env.env;
@@ -36,7 +37,7 @@ type env = {
   ids : Nast.sid list;
 
   (* A list of generics we've seen while expanding. *)
-  gen_seen : locl ty list;
+  gen_seen : TySet.t;
 
   (* The identifiers for each class and typeconst pair seen while expanding,
    * along with the location where the typeconst was referenced. *)
@@ -49,7 +50,7 @@ let empty_env env ety_env ids = {
   trail = [];
   dep_tys = [];
   ids = ids;
-  gen_seen = [];
+  gen_seen = TySet.empty;
   typeconsts_seen = [];
 }
 
@@ -102,7 +103,7 @@ and expand env (root_reason, root_ty as root) =
         let env =
           { env with
             dep_tys = (root_reason, dep_ty)::env.dep_tys;
-            gen_seen = root::env.gen_seen;
+            gen_seen = TySet.add root env.gen_seen;
             } in
         let upper_bounds = Env.get_upper_bounds env.tenv s in
         (* Ignore upper bounds that are equal to ones we've seen, to avoid
@@ -110,10 +111,9 @@ and expand env (root_reason, root_ty as root) =
 
           let upper_bounds = upper_bounds - env.gen_seen
         *)
-        let upper_bounds = List.filter ~f:(fun ty ->
-            List.for_all env.gen_seen
-            ~f:(fun ty2 -> not (ty_equal ty ty2))) upper_bounds in
-        let env, tyl = List.map_env env upper_bounds begin fun prev_env ty ->
+        let upper_bounds = TySet.diff upper_bounds env.gen_seen in
+        let env, tyl = List.map_env env (TySet.elements upper_bounds)
+          begin fun prev_env ty ->
           let env, ty = expand env ty in
           (* If ty here involves a type access, we have to use
             the current environment's dependent types. Otherwise,

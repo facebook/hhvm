@@ -616,40 +616,169 @@ end
 (* Set to true when we are trying to infer the missing type hints. *)
 let is_suggest_mode = ref false
 
+(* Ordinal value for type constructor, for localized types *)
+let ty_con_ordinal ty =
+  match snd ty with
+  | Tany -> 0
+  | Tmixed -> 1
+  | Tnonnull -> 2
+  | Tdynamic -> 3
+  | Terr -> 4
+  | Toption _ -> 5
+  | Tprim _ -> 6
+  | Tfun _ -> 7
+  | Ttuple _ -> 8
+  | Tshape _ -> 9
+  | Tvar _ -> 10
+  | Tabstract _ -> 11
+  | Tanon _ -> 12
+  | Tunresolved _ -> 13
+  | Tobject -> 14
+  | Tclass _ -> 15
+  | Tarraykind _ -> 16
 
-let rec ty_equal ty1 ty2 =
+let array_kind_con_ordinal ak =
+  match ak with
+  | AKany -> 0
+  | AKvarray _ -> 1
+  | AKvec _ -> 2
+  | AKdarray _ -> 3
+  | AKvarray_or_darray _ -> 4
+  | AKmap _ -> 5
+  | AKempty -> 6
+  | AKshape _ -> 7
+  | AKtuple _ -> 8
+
+let abstract_kind_con_ordinal ak =
+  match ak with
+  | AKnewtype _ -> 0
+  | AKenum _ -> 1
+  | AKgeneric _ -> 2
+  | AKdependent _ -> 3
+
+(* Compare two types syntactically, ignoring reason information and other
+ * small differences that do not affect type inference behaviour. This
+ * comparison function can be used to construct tree-based sets of types,
+ * or to compare two types for "exact" equality.
+ * Note that this function does *not* expand type variables, or type
+ * aliases.
+ * But if ty_compare ty1 ty2 = 0, then the types must not be distinguishable
+ * by any typing rules.
+ *)
+let rec ty_compare ty1 ty2 =
   let ty_1, ty_2 = (snd ty1, snd ty2) in
   match  ty_1, ty_2 with
-    | Toption ty, Toption ty2 -> ty_equal ty ty2
-    | Tfun fty, Tfun fty2 -> fty.ft_pos = fty2.ft_pos
+    | Tprim ty1, Tprim ty2 ->
+      compare ty1 ty2
+    | Toption ty, Toption ty2 ->
+      ty_compare ty ty2
+    | Tfun fty, Tfun fty2 ->
+      tfun_compare fty fty2
     | Tunresolved tyl1, Tunresolved tyl2
     | Ttuple tyl1, Ttuple tyl2 ->
-      tyl_equal tyl1 tyl2
+      tyl_compare tyl1 tyl2
     | Tabstract (ak1, opt_cstr1), Tabstract (ak2, opt_cstr2) ->
-      abstract_kind_eq ak1 ak2 && Option.equal ty_equal opt_cstr1 opt_cstr2
+      begin match abstract_kind_compare ak1 ak2 with
+      | 0 -> opt_ty_compare opt_cstr1 opt_cstr2
+      | n -> n
+      end
     (* An instance of a class or interface, ty list are the arguments *)
     | Tclass (id, tyl), Tclass(id2, tyl2) ->
-      id = id2 && (tyl_equal tyl tyl2)
-    (* Localized version of Tarray *)
+      begin match String.compare (snd id) (snd id2) with
+      | 0 -> tyl_compare tyl tyl2
+      | n -> n
+      end
     | Tarraykind ak1, Tarraykind ak2 ->
-      array_kind_eq ak1 ak2
-    | _ -> ty_1 = ty_2
-  and tyl_equal tyl1 tyl2 =
-    match tyl1, tyl2 with
-    | [], [] -> true
-    | x::xs, y::ys -> ty_equal x y && (tyl_equal xs ys)
-    | _ -> false
-  and array_kind_eq ak1 ak2 =
+      array_kind_compare ak1 ak2
+    | Tshape (known1, fields1), Tshape (known2, fields2) ->
+      begin match shape_fields_known_compare known1 known2 with
+      | 0 ->
+        List.compare ~cmp:(fun (k1,v1) (k2,v2) ->
+          match compare k1 k2 with
+          | 0 -> shape_field_type_compare v1 v2
+          | n -> n)
+          (Nast.ShapeMap.elements fields1) (Nast.ShapeMap.elements fields2)
+      | n -> n
+      end
+    | Tvar v1, Tvar v2 ->
+      compare v1 v2
+    | _ ->
+      ty_con_ordinal ty1 - ty_con_ordinal ty2
+
+  and shape_fields_known_compare sfk1 sfk2 =
+    match sfk1, sfk2 with
+    | FieldsFullyKnown, FieldsFullyKnown -> 0
+    | FieldsFullyKnown, FieldsPartiallyKnown _ -> -1
+    | FieldsPartiallyKnown _, FieldsFullyKnown -> 1
+    | FieldsPartiallyKnown f1, FieldsPartiallyKnown f2 ->
+      compare (Nast.ShapeMap.keys f1) (Nast.ShapeMap.keys f2)
+
+  and shape_field_type_compare sft1 sft2 =
+    match ty_compare sft1.sft_ty sft2.sft_ty with
+    | 0 -> compare sft1.sft_optional sft2.sft_optional
+    | n -> n
+
+  and tfun_compare fty1 fty2 =
+    begin match ty_compare fty1.ft_ret fty2.ft_ret with
+    | 0 ->
+      begin match ft_params_compare fty1.ft_params fty2.ft_params with
+      | 0 ->
+        compare
+          (fty1.ft_is_coroutine, fty1.ft_arity, fty1.ft_ret_by_ref, fty1.ft_reactive,
+          fty1.ft_return_disposable, fty1.ft_mutable, fty1.ft_returns_mutable)
+          (fty2.ft_is_coroutine, fty2.ft_arity, fty2.ft_ret_by_ref, fty2.ft_reactive,
+          fty2.ft_return_disposable, fty2.ft_mutable, fty2.ft_returns_mutable)
+      | n -> n
+      end
+    | n -> n
+    end
+
+  and ft_params_compare params1 params2 =
+    List.compare ~cmp:ft_param_compare params1 params2
+
+  and ft_param_compare param1 param2 =
+    match ty_compare param1.fp_type param2.fp_type with
+    | 0 ->
+      compare
+        (param1.fp_kind, param1.fp_accept_disposable, param1.fp_mutable)
+        (param2.fp_kind, param2.fp_accept_disposable, param2.fp_mutable)
+    | n -> n
+
+  and tyl_compare tyl1 tyl2 =
+    List.compare ~cmp:ty_compare tyl1 tyl2
+
+  and opt_ty_compare opt_ty1 opt_ty2 =
+    match opt_ty1, opt_ty2 with
+    | None, None -> 0
+    | Some _, None -> 1
+    | None, Some _ -> -1
+    | Some ty1, Some ty2 -> ty_compare ty1 ty2
+
+  and array_kind_compare ak1 ak2 =
     match ak1, ak2 with
     | AKmap (ty1, ty2), AKmap (ty3, ty4)
     | AKdarray (ty1, ty2), AKdarray (ty3, ty4) ->
-      ty_equal ty1 ty3 && ty_equal ty2 ty4
+      tyl_compare [ty1; ty2] [ty3; ty4]
     | AKvarray ty1, AKvarray ty2
+    | AKvarray_or_darray ty1, AKvarray_or_darray ty2
     | AKvec ty1, AKvec ty2 ->
-      ty_equal ty1 ty2
-    | _ -> ak1 = ak2
-  and abstract_kind_eq t1 t2 =
+      ty_compare ty1 ty2
+    | _ ->
+      array_kind_con_ordinal ak1 - array_kind_con_ordinal ak2
+
+  and abstract_kind_compare t1 t2 =
     match t1, t2 with
     | AKnewtype (id, tyl), AKnewtype (id2, tyl2) ->
-      id = id2 && tyl_equal tyl tyl2
-    | _ -> t1 = t2
+      begin match String.compare id id2 with
+      | 0 -> tyl_compare tyl tyl2
+      | n -> n
+      end
+    | AKgeneric id1, AKgeneric id2
+    | AKenum id1, AKenum id2 ->
+      String.compare id1 id2
+    | AKdependent d1, AKdependent d2 ->
+      compare d1 d2
+    | _ ->
+      abstract_kind_con_ordinal t1 - abstract_kind_con_ordinal t2
+
+let ty_equal ty1 ty2 = ty_compare ty1 ty2 = 0

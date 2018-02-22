@@ -108,37 +108,42 @@ let get_shape_field_name = function
 let empty_bounds = TySet.empty
 let singleton_bound ty = TySet.singleton ty
 
+let get_tpenv_lower_bounds tpenv name =
+match SMap.get name tpenv with
+| None -> empty_bounds
+| Some {lower_bounds; _} -> lower_bounds
+
+let get_tpenv_upper_bounds tpenv name =
+match SMap.get name tpenv with
+| None -> empty_bounds
+| Some {upper_bounds; _} -> upper_bounds
+
 let get_lower_bounds env name =
-  let local =
-  match SMap.get name env.lenv.tpenv with
-  | None -> empty_bounds
-  | Some {lower_bounds; _} -> lower_bounds in
-  let global =
-  match SMap.get name env.global_tpenv with
-  | None -> empty_bounds
-  | Some {lower_bounds; _} -> lower_bounds in
-  TySet.elements (TySet.union local global)
+  let local = get_tpenv_lower_bounds env.lenv.tpenv name in
+  let global = get_tpenv_lower_bounds env.global_tpenv name in
+  TySet.union local global
 
 let get_upper_bounds env name =
-  let local =
-  match SMap.get name env.lenv.tpenv with
-  | None -> empty_bounds
-  | Some {upper_bounds; _} -> upper_bounds in
-  let global =
-  match SMap.get name env.global_tpenv with
-  | None -> empty_bounds
-  | Some {upper_bounds; _} -> upper_bounds in
-  TySet.elements (TySet.union local global)
+  let local = get_tpenv_upper_bounds env.lenv.tpenv name in
+  let global = get_tpenv_upper_bounds env.global_tpenv name in
+  TySet.union local global
 
 (* Get bounds that are both an upper and lower of a given generic *)
 let get_equal_bounds env name =
-  let lower = TySet.of_list (get_lower_bounds env name) in
-  let upper = TySet.of_list (get_upper_bounds env name) in
-  TySet.elements (TySet.inter lower upper)
+  let lower = get_lower_bounds env name in
+  let upper = get_upper_bounds env name in
+  TySet.inter lower upper
+
+let is_generic_param ty name =
+  match ty with
+  | (_, Tabstract (AKgeneric name', None)) -> name = name'
+  | _ -> false
 
 (* Add a single new upper bound [ty] to generic parameter [name] in [tpenv] *)
 let add_upper_bound_ tpenv name ty =
-  match SMap.get name tpenv with
+  if is_generic_param ty name
+  then tpenv
+  else match SMap.get name tpenv with
   | None ->
     SMap.add name
       {lower_bounds = empty_bounds; upper_bounds = singleton_bound ty} tpenv
@@ -148,6 +153,9 @@ let add_upper_bound_ tpenv name ty =
 
 (* Add a single new lower bound [ty] to generic parameter [name] in [tpenv] *)
 let add_lower_bound_ tpenv name ty =
+  if is_generic_param ty name
+  then tpenv
+  else
   match SMap.get name tpenv with
   | None ->
     SMap.add name
@@ -228,6 +236,30 @@ let add_fresh_generic_parameter env prefix =
                       upper_bounds = empty_bounds} env.lenv.tpenv) in
   env, name
 
+let tparams_visitor env =
+  object(this)
+    inherit [SSet.t] Type_visitor.type_visitor
+    method! on_tabstract acc _ ak _ty_opt =
+      match ak with
+      | AKgeneric s -> SSet.add s acc
+      | _ -> acc
+    method! on_tvar acc r ix =
+      let _env, ty = get_type env r ix in
+      this#on_type acc ty
+  end
+let get_tparams_aux env acc ty = (tparams_visitor env)#on_type acc ty
+let get_tparams env ty = get_tparams_aux env SSet.empty ty
+
+let get_tpenv_tparams env =
+  SMap.fold begin fun _x { lower_bounds; upper_bounds } acc ->
+    let folder ty acc =
+      match ty with
+      | _, Tabstract (AKgeneric _, _) -> acc
+      | _ -> get_tparams_aux env acc ty in
+    TySet.fold folder lower_bounds @@
+    TySet.fold folder upper_bounds acc
+    end
+  env.lenv.tpenv SSet.empty
 
 (* Replace types for locals with empty environment *)
 let env_with_locals env locals history =

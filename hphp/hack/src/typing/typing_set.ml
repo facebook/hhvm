@@ -8,18 +8,14 @@
  *
  *)
 
- (* An implementation of a set of types, checking for equality by ty_equal.
+ (* An implementation of a set of types, using ty_compare for a total order.
+  * Typing-rule-equivalent types may get duplicated, as the equality induced
+  * by ty_compare does not expand Tvars and type aliases.
  *)
 open Typing_defs
 module Ty_ = struct
   type t = locl ty
-  let compare r1 r2 =
-    if ty_equal r1 r2 then 0
-    else begin
-    let x1 = Hashtbl.hash r1 in
-    let x2 = Hashtbl.hash r2 in
-    x1 - x2
-    end
+  let compare r1 r2 = ty_compare r1 r2
 end
 
 include Set.Make(Ty_)

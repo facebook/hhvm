@@ -99,11 +99,14 @@ val get_locals : env -> local Local_id.Map.t
 val get_local : env -> Local_id.t -> locl ty
 val set_local_expr_id : env -> Local_id.t -> expression_id -> env
 val get_local_expr_id : env -> Local_id.t -> expression_id option
+val get_tpenv_lower_bounds : tpenv -> string -> tparam_bounds
+val get_tpenv_upper_bounds : tpenv -> string -> tparam_bounds
 val get_lower_bounds : env -> string -> tparam_bounds
 val get_upper_bounds : env -> string -> tparam_bounds
 val add_upper_bound : env -> string -> locl ty -> env
 val add_lower_bound : env -> string -> locl ty -> env
 val get_equal_bounds : env -> string -> tparam_bounds
+val get_tparams : env -> 'a ty -> SSet.t
 val add_upper_bound_global : env -> string -> locl ty -> env
 val env_with_tpenv : env -> tpenv -> env
 val env_with_mut : env -> Typing_mutability_env.mutability_env -> env
@@ -117,6 +120,7 @@ val is_checking_lambda : unit -> bool
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val add_fresh_generic_parameter : env -> string -> env * string
 val get_tpenv_size : env -> int
+val get_tpenv_tparams : env -> SSet.t
 val set_env_reactive : env -> reactivity -> env
 val set_env_function_pos: env -> Pos.t -> env
 val env_reactivity: env -> reactivity

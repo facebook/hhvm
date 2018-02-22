@@ -93,7 +93,7 @@ module ExprDepTy = struct
             to be expression dependent. Thus, $x->get() typechecks.
           *)
             | (_, Tabstract (AKgeneric s, _)) when
-            Env.get_equal_bounds env s <> [] ->
+            not (Typing_set.is_empty (Env.get_equal_bounds env s)) ->
             (env, ty)
             | _ ->
              let ty_name = to_string dep_ty in

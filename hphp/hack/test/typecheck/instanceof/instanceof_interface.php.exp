@@ -14,6 +14,6 @@ File "instanceof_interface.php", line 24, characters 5-18:
   ^(Base<Tt>)
   where Tt = string
 File "instanceof_interface.php", line 27, characters 5-15:
-  H<Th#1>
-  where Th#1 super Tt, Th#1 as \K
+  H<Tt>
+  where Tt as Th#1, Tt as \K
 No errors

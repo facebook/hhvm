@@ -177,16 +177,16 @@ let log_return_type env =
 
 let log_tpenv env =
   let tparams = Env.get_generic_parameters env in
-  if tparams != [] then
+  if not (List.is_empty tparams) then
   indentEnv "tpenv" (fun () ->
     List.iter tparams ~f:begin fun tparam ->
-      let lower = Env.get_lower_bounds env tparam in
-      let upper = Env.get_upper_bounds env tparam in
+      let lower = Typing_set.elements (Env.get_lower_bounds env tparam) in
+      let upper = Typing_set.elements (Env.get_upper_bounds env tparam) in
       lnewline ();
-      (if lower != []
+      (if not (List.is_empty lower)
       then (log_type_list env lower; lprintf (Normal Green) " <: "));
       lprintf (Bold Green) "%s" tparam;
-      (if upper != []
+      (if not (List.is_empty upper)
       then (lprintf (Normal Green) " <: "; log_type_list env upper))
         end)
 

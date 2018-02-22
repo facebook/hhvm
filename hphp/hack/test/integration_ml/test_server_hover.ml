@@ -208,16 +208,136 @@ let classname_variable_cases = [
     }];
 ]
 
+let docblock = "<?hh // strict
+
+// Multiline
+// function
+// doc block.
+function queryDocBlocks(): void {
+  DocBlock::doStuff();
+//^7:3     ^7:13
+  queryDocBlocks();
+//^9:3
+  DocBlock::preserveIndentation();
+//          ^11:13
+  DocBlock::leadingStarsAndMDList();
+//          ^13:13
+  DocBlock::manyLineBreaks();
+//          ^15:13
+}
+
+/* Class doc block.
+   This
+   doc
+   block
+   has
+   multiple
+   lines. */
+class DocBlock {
+  /** Method doc block with double star. */
+  public static function doStuff(): void {}
+
+  /** Multiline doc block with
+      a certain amount of
+          indentation
+      we want to preserve. */
+  public static function preserveIndentation(): void {}
+
+  /** Multiline doc block with
+    * leading stars, as well as
+    *   * a Markdown list!
+    * and we'd really like to preserve the Markdown list while getting rid of
+    * the other stars. */
+  public static function leadingStarsAndMDList(): void {}
+
+  /**
+   * This method has many line breaks, which
+   *
+   * someone might use if they wanted
+   *
+   * to have separate paragraphs
+   *
+   * in Markdown.
+   */
+  public static function manyLineBreaks(): void {}
+}
+"
+
+let docblockCases = [
+  ("docblock.php", 7, 3), [
+    {
+      snippet = "class DocBlock";
+      addendum = ["Class doc block.\n\
+                   This\n\
+                   doc\n\
+                   block\n\
+                   has\n\
+                   multiple\n\
+                   lines."]
+    }
+  ];
+  ("docblock.php", 7, 13), [
+    {
+      snippet = "public static function doStuff(): void";
+      addendum = ["Method doc block with double star."; "Full name: `DocBlock::doStuff`"]
+    }
+  ];
+  ("docblock.php", 9, 3), [
+    {
+      snippet = "function queryDocBlocks(): void";
+      addendum = ["Multiline\n\
+                   function\n\
+                   doc block."]
+    }
+  ];
+  ("docblock.php", 11, 13), [
+    {
+      snippet = "public static function preserveIndentation(): void";
+      addendum = ["Multiline doc block with
+a certain amount of
+    indentation
+we want to preserve."; "Full name: `DocBlock::preserveIndentation`"]
+    }
+  ];
+  ("docblock.php", 13, 13), [
+    {
+      snippet = "public static function leadingStarsAndMDList(): void";
+      addendum = ["Multiline doc block with
+leading stars, as well as
+  * a Markdown list!
+and we'd really like to preserve the Markdown list while getting rid of
+the other stars."; "Full name: `DocBlock::leadingStarsAndMDList`"]
+    }
+  ];
+  ("docblock.php", 15, 13), [
+    {
+      snippet = "public static function manyLineBreaks(): void";
+      addendum = [
+        "\n\
+         This method has many line breaks, which\n\
+         \n\
+         someone might use if they wanted\n\
+         \n\
+         to have separate paragraphs\n\
+         \n\
+         in Markdown.\n";
+      "Full name: `DocBlock::manyLineBreaks`"]
+    }
+  ]
+]
+
 let files = [
   "builtins.php", builtins;
   "class_members.php", class_members;
   "classname_call.php", classname_call;
   "chained_calls.php", chained_calls;
   "classname_variable.php", classname_variable;
+  "docblock.php", docblock;
 ]
 
 let cases =
-  class_members_cases
+  docblockCases
+  @ class_members_cases
   @ classname_call_cases
   @ chained_calls_cases
   @ classname_variable_cases

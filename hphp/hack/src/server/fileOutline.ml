@@ -325,7 +325,7 @@ let should_add_docblock = function
 let add_def_docblock finder previous_def_line def =
   let line = Pos.line def.pos in
   let docblock = if should_add_docblock def.kind
-    then Docblock_finder.find_docblock finder previous_def_line line
+    then Docblock_finder.find_docblock finder ~last_line:previous_def_line line
     else None
   in
   line, { def with docblock }

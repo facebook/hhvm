@@ -2591,7 +2591,7 @@ let scour_comments
         let len   = end_ - start + 1 in
         let p = pos_of_offset start end_ in
         let t = String.sub text start len in
-        (p, CmtLine t) :: cmts, fm
+        (p, CmtLine (t ^ "\n")) :: cmts, fm
       | TriviaKind.FixMe
       | TriviaKind.IgnoreError
         -> let open Str in

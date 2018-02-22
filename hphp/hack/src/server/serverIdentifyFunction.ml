@@ -24,6 +24,9 @@ let get_occurrence_and_map tcopt content line char ~f =
     f path file_info !result
   end tcopt
 
+(** NOTE: the paths of any positions within any returned `SymbolOccurrence` or
+    `SymbolDefinition` objects will be the empty string (`""`) if the symbol is
+    located in the passed in content buffer. *)
 let go content line char (tcopt : TypecheckerOptions.t) =
   (* Order symbols from innermost to outermost *)
   let by_nesting x y =
@@ -60,6 +63,9 @@ let go content line char (tcopt : TypecheckerOptions.t) =
       x, symbol_definition)
       )
 
+(** NOTE: the paths of any positions within any returned `SymbolOccurrence` or
+    `SymbolDefinition` objects will be the empty string (`""`) if the symbol is
+    located in the passed in content buffer. *)
 let go_absolute content line char tcopt =
   List.map (go content line char tcopt) begin fun (x, y) ->
     SymbolOccurrence.to_absolute x, Option.map y SymbolDefinition.to_absolute

@@ -166,21 +166,6 @@ let connect_persistent_client env =
     env.ServerEnv.persistent_client;
   env
 
-let get_errors env = Errors.get_error_list env.ServerEnv.errorl
-
-let assert_no_errors env =
-  match get_errors env with
-  | [] -> ()
-  | errors ->
-    let errors_str =
-      errors
-      |> List.map ~f:Errors.to_list
-      |> List.concat
-      |> List.map ~f:(fun (_, e) -> e)
-      |> List.fold_left ~init:"" ~f:(fun l1 l2 -> l1 ^ "\n" ^ l2)
-    in
-    fail (Printf.sprintf "Expected no errors, instead had:%s" errors_str)
-
 let assertSingleError expected err_list =
   let error_strings =
     List.map ~f:(fun x -> Errors.(to_string (to_absolute x))) err_list
@@ -316,6 +301,9 @@ let assert_errors errors expected =
 
 let assert_env_errors env expected =
   assert_errors env.ServerEnv.errorl expected
+
+let assert_no_errors env =
+  assert_env_errors env ""
 
 let diagnostics_to_string x =
   let buf = Buffer.create 1024 in

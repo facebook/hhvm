@@ -131,6 +131,19 @@ ucred* get_cli_ucred();
 bool cli_mkstemp(char* buf);
 
 /*
+ * Explicitly open a file via the CLI-server client.
+ *
+ * WARNING: use of this function should be considered a last resort, it's
+ * much better to get a CLIWrapper instance and use that. The problem with
+ * getting a raw fd is reads/writes will be unchecked, and if the client dies
+ * (e.g. the user presses ^C to "kill the script") nothing will immediately stop
+ * IO happening on this fd. So, the user may experience surprising behavior
+ * where files change even after the script is "dead".
+ */
+int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
+                      bool use_include_path, bool quiet);
+
+/*
  * Fetch the environment for the CLI process.
  */
 Array cli_env();

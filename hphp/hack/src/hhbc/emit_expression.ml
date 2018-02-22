@@ -715,12 +715,20 @@ and emit_is env pos lhs h =
             instr_label its_done;
           ]
       end
+    | A.Happly ((_, id), _) when id = SN.Typehints.nonnull ->
+        gather [
+          emit_is_lhs env lhs;
+          instr_istypec OpNull;
+          instr_not;
+        ]
+    | A.Happly ((_, id), _) when id = SN.Typehints.mixed ->
+        instr_true
     | A.Happly ((_, id), _) ->
       begin match is_expr_primitive_op id with
         | Some op ->
           gather [
             emit_is_lhs env lhs;
-            instr_istypec op
+            instr_istypec op;
           ]
         | None -> emit_nyi "is expression: unsupported id (T22779957)"
       end

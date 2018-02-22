@@ -58,6 +58,8 @@ let experimental_disallow_untyped_lambda_as_non_function_type =
 let experimental_nonnull = GlobalOptions.tco_experimental_nonnull
 let experimental_unpacking_check_arity =
   GlobalOptions.tco_unpacking_check_arity
+let experimental_disallow_refs_in_array =
+  GlobalOptions.tco_experimental_disallow_refs_in_array
 
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

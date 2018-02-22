@@ -1109,14 +1109,20 @@ and bind_as_expr env ty aexpr =
     | _ -> (* TODO Probably impossible, should check that *)
       assert false
 
-and expr ?expected ?(accept_using_var = false) ?(is_using_clause = false) ?allow_uref env e =
+and expr
+    ?expected
+    ?(accept_using_var = false)
+    ?(is_using_clause = false)
+    ?is_func_arg
+    ?forbid_uref
+    env e =
   begin match expected with
   | None -> ()
   | Some (_, r, ty) ->
     Typing_log.log_types 1 (fst e) env
     [Typing_log.Log_sub ("Typing.expr " ^ Typing_reason.string_of_ureason r,
        [Typing_log.Log_type ("expected_ty", ty)])] end;
-  raw_expr ~accept_using_var ~is_using_clause ?allow_uref ?expected ~in_cond:false env e
+  raw_expr ~accept_using_var ~is_using_clause ?is_func_arg ?forbid_uref ?expected ~in_cond:false env e
 
 and raw_expr
   ~in_cond
@@ -1124,12 +1130,14 @@ and raw_expr
   ?(is_using_clause = false)
   ?expected
   ?lhs_of_null_coalesce
-  ?allow_uref
+  ?is_func_arg
+  ?forbid_uref
   ?valkind:(valkind=`other)
   env e =
   debug_last_pos := fst e;
   let env, te, ty =
-    expr_ ~in_cond ~accept_using_var ~is_using_clause ?expected ?lhs_of_null_coalesce ?allow_uref
+    expr_ ~in_cond ~accept_using_var ~is_using_clause ?expected
+      ?lhs_of_null_coalesce ?is_func_arg ?forbid_uref
       ~valkind env e in
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
@@ -1195,14 +1203,14 @@ and check_escaping_var env (pos, x) =
     else Errors.escaping_disposable pos
   else ()
 
-and exprs ?(accept_using_var = false) ?allow_uref ?expected env el =
+and exprs ?(accept_using_var = false) ?is_func_arg ?expected env el =
   match el with
   | [] ->
     env, [], []
 
   | e::el ->
-    let env, te, ty = expr ~accept_using_var ?allow_uref ?expected env e in
-    let env, tel, tyl = exprs ~accept_using_var ?allow_uref ?expected env el in
+    let env, te, ty = expr ~accept_using_var ?is_func_arg ?expected env e in
+    let env, tel, tyl = exprs ~accept_using_var ?is_func_arg ?expected env el in
     env, te::tel, ty::tyl
 
 and exprs_expected (pos, ur, expected_tyl) env el =
@@ -1222,7 +1230,8 @@ and expr_
   ?(accept_using_var = false)
   ?(is_using_clause = false)
   ?lhs_of_null_coalesce
-  ?allow_uref
+  ?(is_func_arg=false)
+  ?(forbid_uref=false)
   ~(valkind: [> `lvalue | `lvalue_subexpr | `other ])
   env (p, e) =
   let make_result env te ty =
@@ -1815,7 +1824,11 @@ and expr_
         | _ -> assert false
       end
   | Binop (Ast.Eq None, e1, e2) ->
-      let env, te2, ty2 = raw_expr in_cond env e2 in
+      let forbid_uref = match e1, e2 with
+        | (_, Array_get _), (_, Unop (Ast.Uref, _))
+        | _, (_, Unop (Ast.Uref, (_, Array_get _))) -> true
+        | _ -> false in
+      let env, te2, ty2 = raw_expr ~in_cond ~forbid_uref env e2 in
       let env, te1, ty = assign p env e1 ty2 in
       let env =
         if Env.env_local_reactive env then
@@ -1885,7 +1898,7 @@ and expr_
       make_result env (T.Pipe(e0, te1, te2)) ty2
   | Unop (uop, e) ->
       let env, te, ty = raw_expr in_cond env e in
-      unop ?allow_uref p env uop te ty
+      unop ~is_func_arg ~forbid_uref p env uop te ty
   | Eif (c, e1, e2) -> eif env ~expected ~coalesce:false ~in_cond p c e1 e2
   | NullCoalesce (e1, e2) -> eif env ~expected ~coalesce:true ~in_cond p e1 None e2
   | Typename sid ->
@@ -3075,8 +3088,12 @@ and assign_ p ur env e1 ty2 =
      make_result env T.Any (Reason.Rwitness p, Terr)
   | pref, Unop (Ast.Uref, e1') ->
     (* references can be "lvalues" in foreach bindings *)
-    if Env.is_strict env then
-      Errors.reference_expr pref;
+    if TypecheckerOptions.experimental_feature_enabled
+      (Env.get_options env)
+      TypecheckerOptions.experimental_disallow_refs_in_array
+    then Errors.binding_ref_in_array pref
+    else if Env.is_strict env
+    then Errors.reference_expr pref;
     let env, texpr, ty = assign p env e1' ty2 in
     make_result env (T.Unop (Ast.Uref, texpr)) ty
   | _ ->
@@ -3101,7 +3118,7 @@ and array_field env = function
       env, (T.AFkvalue (tke, tve), Some tk, tv)
 
 and array_value ~expected env x =
-  let env, te, ty = expr ?expected env x in
+  let env, te, ty = expr ?expected ~forbid_uref:true env x in
   let env, ty = Typing_env.unbind env ty in
   env, (te, ty)
 
@@ -3683,7 +3700,7 @@ and is_abstract_ft fty = match fty with
         | [shape; field] -> begin match shape with
             | (_, Lvar (_, lvar))
             | (_, Unop (Ast.Uref, (_, Lvar (_, lvar)))) ->
-              let env, _te, shape_ty = expr ~allow_uref:true env shape in
+              let env, _te, shape_ty = expr ~is_func_arg:true env shape in
               let env, shape_ty =
                 Typing_shapes.remove_key p env shape_ty field in
               let env, _ = set_valid_rvalue p env lvar shape_ty in
@@ -4894,7 +4911,7 @@ and call_ ~expected pos env fty el uel =
     let el = el @ uel in
     let env, tel = List.map_env env el begin fun env elt ->
       let env, te, arg_ty =
-        expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Tany)) ~allow_uref:true env elt
+        expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Tany)) ~is_func_arg:true env elt
       in
       let env, _arg_ty = check_valid_rvalue pos env arg_ty in
       env, te
@@ -4967,13 +4984,13 @@ and call_ ~expected pos env fty el uel =
             begin match opt_param with
             | Some param ->
               let env, te, ty =
-                expr ~allow_uref:true ~accept_using_var:param.fp_accept_disposable
+                expr ~is_func_arg:true ~accept_using_var:param.fp_accept_disposable
                   ~expected:(pos, Reason.URparam, param.fp_type) env e in
               let env = call_param env param (e, ty) in
               env, Some (te, ty)
             | None ->
               let env, te, ty = expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Tany))
-                ~allow_uref:true env e in
+                ~is_func_arg:true env e in
               env, Some (te, ty)
             end in
         let env, rl, paraml = check_args check_lambdas env el paraml in
@@ -5044,7 +5061,7 @@ and call_ ~expected pos env fty el uel =
       ft.ft_params (List.map (el @ uel) fst) env;
     env, tel, tuel, ft.ft_ret
   | r2, Tanon (arity, id) ->
-    let env, tel, tyl = exprs ~allow_uref:true env el in
+    let env, tel, tyl = exprs ~is_func_arg:true env el in
     let expr_for_unpacked_expr_list env = function
       | [] -> env, [], None, Pos.none
       | (pos, _) as e :: _ ->
@@ -5152,7 +5169,7 @@ and call_untyped_unpack env uel = match uel with
 and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)
 
-and unop ?(allow_uref=false) p env uop te ty =
+and unop ~is_func_arg ~forbid_uref p env uop te ty =
 let rec is_dynamic ty =
   match Env.expand_type env ty with
   | (_, (_, Tdynamic)) -> true
@@ -5193,8 +5210,12 @@ let rec is_dynamic ty =
       make_result env te ty
   | Ast.Uref ->
       (* We basically just ignore references in non-strict files *)
-      if Env.is_strict env && not allow_uref then
-        Errors.reference_expr p;
+      if forbid_uref && TypecheckerOptions.experimental_feature_enabled
+        (Env.get_options env)
+        TypecheckerOptions.experimental_disallow_refs_in_array
+      then Errors.binding_ref_in_array p
+      else if Env.is_strict env && not is_func_arg
+      then Errors.reference_expr p;
       make_result env te ty
   | Ast.Usilence ->
       (* Silencing does not change the type *)
@@ -6424,7 +6445,7 @@ and gconst_def tcopt cst =
  * return value type *)
 and overload_function p env ((), class_id) method_id el uel f =
   let env, _ce, ty = static_class_id p env class_id in
-  let env, _tel, _ = exprs ~allow_uref:true env el in
+  let env, _tel, _ = exprs ~is_func_arg:true env el in
   let env, fty, _ =
     class_get ~is_method:true ~is_const:false env ty method_id class_id in
   (* call the function as declared to validate arity and input types,

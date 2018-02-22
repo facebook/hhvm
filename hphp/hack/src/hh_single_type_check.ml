@@ -136,6 +136,7 @@ let parse_options () =
   let disallow_destruct = ref false in
   let disallow_ambiguous_lambda = ref false in
   let no_fallback_in_namespaces = ref false in
+  let disallow_refs_in_array = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -249,6 +250,9 @@ let parse_options () =
     "--no-fallback-in-namespaces",
       Arg.Set no_fallback_in_namespaces,
       " Treat foo() as namespace\\foo() and MY_CONST as namespace\\MY_CONST.";
+    "--disallow-refs-in-array",
+      Arg.Set disallow_refs_in_array,
+      " Forbid creation of references inside arrays.";
     "--infer-return-types",
       Arg.Unit (set_mode Infer_return_types),
       " Infers return types of functions and methods.";
@@ -279,6 +283,8 @@ let parse_options () =
         then !disable_optional_and_unknown_shape_fields
         else if x = GlobalOptions.tco_experimental_no_fallback_in_namespaces
         then !no_fallback_in_namespaces
+        else if x = GlobalOptions.tco_experimental_disallow_refs_in_array
+        then !disallow_refs_in_array
         else true
       end tcopt.GlobalOptions.tco_experimental_features;
   } in

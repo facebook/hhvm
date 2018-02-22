@@ -1008,6 +1008,7 @@ module Typing                               = struct
   let ambiguous_lambda                      = 4222 (* DONT MODIFY!!!! *)
   let ellipsis_strict_mode                  = 4223 (* DONT MODIFY!!!! *)
   let untyped_lambda_strict_mode            = 4224 (* DONT MODIFY!!!! *)
+  let binding_ref_in_array                  = 4225 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -3136,6 +3137,9 @@ let ambiguous_lambda pos n =
       n in
   add Typing.ambiguous_lambda pos msg
 
+let binding_ref_in_array pos =
+  let msg = "Binding a reference in an array is no longer supported in Hack." in
+  add Typing.binding_ref_in_array pos msg
 
 
 (*****************************************************************************)

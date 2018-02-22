@@ -483,4 +483,5 @@ module type S = sig
   val ambiguous_lambda : Pos.t -> int -> unit
   val ellipsis_strict_mode : require_param_name:bool -> Pos.t -> unit
   val untyped_lambda_strict_mode : Pos.t -> unit
+  val binding_ref_in_array : Pos.t -> unit
 end

@@ -162,6 +162,14 @@ let tco_unpacking_check_arity =
   *)
 let tco_experimental_dynamic_types = "dynamic_types"
 
+(**
+ * Adds specific errors for binding PHP references inside arrays.
+ *
+ * Primarily affects partial mode since references are already forbidden in
+ * strict mode. When enabled, some errors will be reported differently.
+ *)
+let tco_experimental_disallow_refs_in_array = "disallow_refs_in_array"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -187,6 +195,7 @@ let tco_experimental_all =
      tco_experimental_nonnull;
      tco_unpacking_check_arity;
      tco_experimental_disallow_untyped_lambda_as_non_function_type;
+     tco_experimental_disallow_refs_in_array;
    ]
 
 let tco_migration_flags_all =
@@ -223,6 +232,9 @@ let make_permissive tcopt =
   { tcopt with
     tco_assume_php = true;
     tco_user_attrs = None;
+    tco_experimental_features = SSet.remove
+      tco_experimental_disallow_refs_in_array
+      tcopt.tco_experimental_features;
   }
 
 let make ~tco_assume_php

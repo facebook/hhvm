@@ -453,7 +453,7 @@ and fun_def tcopt f =
   let nb = TNBody.func_body tcopt f in
   let env = EnvFromDef.fun_env tcopt f in
   let env = Env.set_env_function_pos env pos in
-  let reactive = fun_reactivity f.f_user_attributes in
+  let reactive = Decl.fun_reactivity env.Env.decl_env f.f_user_attributes in
   let mut = TUtils.fun_mutable f.f_user_attributes in
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let return_mutable = has_mutable_return_attribute f.f_user_attributes in
@@ -3836,7 +3836,7 @@ and is_abstract_ft fty = match fty with
       let tel = ref [] and tuel = ref [] and tftyl = ref [] in
       let fn = (fun (env, fty, _) ->
         check_coroutine_call env fty;
-        let env, tel_, tuel_, method_ = call ~expected p env fty el uel in
+        let env, tel_, tuel_, method_ = call ~expected ~receiver_type:ty1 p env fty el uel in
         tel := tel_; tuel := tuel_;
         tftyl := fty :: !tftyl;
         env, method_, None) in
@@ -4892,8 +4892,8 @@ and inout_write_back env { fp_type; _ } (_, e) =
     env
   | _ -> env
 
-and call ~expected pos env fty el uel =
-  let env, tel, tuel, ty = call_ ~expected pos env fty el uel in
+and call ~expected ?receiver_type pos env fty el uel =
+  let env, tel, tuel, ty = call_ ~expected ~receiver_type pos env fty el uel in
   (* We need to solve the constraints after every single function call.
    * The type-checker is control-flow sensitive, the same value could
    * have different type depending on the branch that we are in.
@@ -4902,7 +4902,7 @@ and call ~expected pos env fty el uel =
   let env = Env.check_todo env in
   env, tel, tuel, ty
 
-and call_ ~expected pos env fty el uel =
+and call_ ~expected ~receiver_type pos env fty el uel =
   let make_unpacked_traversable_ty pos ty =
     let unpack_r = Reason.Runpack_param pos in
     unpack_r, Tclass ((pos, SN.Collections.cTraversable), [ty])
@@ -4941,23 +4941,7 @@ and call_ ~expected pos env fty el uel =
     let pos_def = Reason.to_pos r2 in
     let env, var_param = variadic_param env ft in
 
-    (* if lambda is trying to call function that is not
-       strictly reactive - mark lambda as non-reactive *)
-    if ft.ft_reactive <> Reactive
-    then Env.not_lambda_reactive ();
-
-    (* Strictly reactive functions can only call stricly reactive functions *)
-    (* Shallow reactive functions can call strictly/shallow/local reactive functions *)
-    (* Local reactive functions can call anything *)
-    begin match Env.env_reactivity env, ft.ft_reactive with
-    (* error if reactive function is calling into something non-strictly-reactive *)
-    | Reactive, (Shallow | Local | Nonreactive) ->
-      Errors.nonreactive_function_call pos (Reason.to_pos r2)
-    (* error if shallow reactive function is calling into non-reactive *)
-    | Shallow, Nonreactive ->
-      Errors.nonreactive_call_from_shallow pos (Reason.to_pos r2)
-    | _ -> ()
-    end;
+    Typing_reactivity.check_call env receiver_type pos r2 ft;
 
     (* Force subtype with expected result *)
     let env = check_expected_ty "Call result" env ft.ft_ret expected in
@@ -6282,7 +6266,7 @@ and method_def env m =
     Env.env_with_locals env Typing_continuations.Map.empty Local_id.Map.empty
   in
   let env = Env.set_env_function_pos env pos in
-  let reactive = fun_reactivity m.m_user_attributes in
+  let reactive = Decl.fun_reactivity env.Env.decl_env m.m_user_attributes in
   let mut = TUtils.fun_mutable m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
   let return_mutable = has_mutable_return_attribute m.m_user_attributes in

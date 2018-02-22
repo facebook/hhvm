@@ -1,1 +1,4 @@
-No errors
+File "rx_if_implements3.php", line 8, characters 5-21:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "rx_if_implements3.php", line 12, characters 28-35:
+This function is not reactive.

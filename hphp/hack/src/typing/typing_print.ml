@@ -383,9 +383,9 @@ module Full = struct
     | Ttuple tyl -> Concat [to_doc "("; list k tyl; to_doc ")"]
     | Tanon (_, id) ->
       begin match Env.get_anonymous env id with
-      | Some (Reactive, true, _, _, _) -> to_doc "[coroutine rx fun]"
+      | Some (Reactive _, true, _, _, _) -> to_doc "[coroutine rx fun]"
       | Some (Nonreactive, true, _, _, _) -> to_doc "[coroutine fun]"
-      | Some (Reactive, false, _, _, _) -> to_doc "[rx fun]"
+      | Some (Reactive _, false, _, _, _) -> to_doc "[rx fun]"
       | _ -> to_doc "[fun]"
       end
     | Tunresolved [] -> to_doc "[unresolved]"

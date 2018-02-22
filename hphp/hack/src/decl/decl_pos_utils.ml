@@ -129,7 +129,14 @@ let rec ty (p, x) =
       ft_ret     = ty ft.ft_ret                        ;
       ft_pos     = pos ft.ft_pos                       ;
       ft_arity   = fun_arity ft.ft_arity               ;
+      ft_reactive = fun_reactive ft.ft_reactive        ;
     }
+
+  and fun_reactive = function
+    | Local (Some ty1) -> Local (Some (ty ty1))
+    | Shallow (Some ty1) -> Shallow (Some (ty ty1))
+    | Reactive (Some ty1) -> Reactive (Some (ty ty1))
+    | r -> r
 
   and where_constraint (ty1, c, ty2) = (ty ty1, c, ty ty2)
 

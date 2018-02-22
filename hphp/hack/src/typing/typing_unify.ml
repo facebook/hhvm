@@ -327,8 +327,8 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
         let p2 = Reason.to_pos r2 in
         if reactivity <> ft.ft_reactive
         then Errors.fun_reactivity_mismatch
-          p1 (reactivity_to_string reactivity)
-          p2 (reactivity_to_string ft.ft_reactive);
+          p1 (TUtils.reactivity_to_string env reactivity)
+          p2 (TUtils.reactivity_to_string env ft.ft_reactive);
         if is_coroutine <> ft.ft_is_coroutine
         then Errors.coroutinness_mismatch is_coroutine p1 p2;
         if not (unify_arities ~ellipsis_is_variadic:true anon_arity ft.ft_arity)

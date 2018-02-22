@@ -27,6 +27,39 @@ module Attrs = Attributes
 module SN = Naming_special_names
 
 exception Decl_not_found of string
+
+let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =
+  match l with
+  (* convert class const expression to non-generic type hint *)
+  | [p, Class_const ((_, CI (cls, _)), (_, name))]
+    when name = SN.Members.mClass ->
+      Decl_hint.hint env (p, Happly (cls, []))
+  | _ ->
+    (* error for invalid argument list was already reported during the
+       naming step, do nothing *)
+    Reason.none, Tany
+
+let fun_reactivity env user_attributes =
+  let has attr = Attributes.mem attr user_attributes in
+  let find attr = Attributes.find attr user_attributes in
+  let module UA = SN.UserAttributes in
+
+  if has UA.uaReactive then Reactive None
+  else if has UA.uaShallowReactive then Shallow None
+  else if has UA.uaLocalReactive then Local None
+  else match find UA.uaRxIfImplements with
+  | Some attr ->
+    Reactive (Some (conditionally_reactive_attribute_to_hint env attr))
+  | None ->
+  match find UA.uaRxShallowIfImplements with
+  | Some attr ->
+    Shallow (Some (conditionally_reactive_attribute_to_hint env attr))
+  | None ->
+  match find UA.uaRxLocalIfImplements with
+  | Some attr ->
+    Local (Some (conditionally_reactive_attribute_to_hint env attr))
+  | None -> Nonreactive
+
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
  * For example, a class cannot extend an interface, an interface cannot
@@ -249,7 +282,7 @@ and ret_from_fun_kind pos kind =
 
 and fun_decl_in_env env f =
   check_params env f.f_params;
-  let reactivity = fun_reactivity f.f_user_attributes in
+  let reactivity = fun_reactivity env f.f_user_attributes in
   let returns_mutable = fun_returns_mutable f.f_user_attributes in
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let arity_min = minimum_arity f.f_params in
@@ -787,7 +820,7 @@ and typeconst_decl env c (acc, acc2) {
 
 and method_decl env m =
   check_params env m.m_params;
-  let reactivity = fun_reactivity m.m_user_attributes in
+  let reactivity = fun_reactivity env m.m_user_attributes in
   let mut = has_mutable_attribute m.m_user_attributes in
   let returns_mutable = fun_returns_mutable m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in

@@ -363,14 +363,32 @@ and subtype_params_with_variadic
     subtype_params_with_variadic env subl variadic_ty
 
 and subtype_reactivity
+  (env : Env.env)
   (r_sub : reactivity)
   (r_super : reactivity) : bool =
   match r_sub, r_super with
-  (* Reactive functions are a subtype of non reactive ones, but not vice versa *)
-  | _, Nonreactive
-  | (Reactive | Shallow), Local
-  | Reactive, Shallow -> true
-  | sub, super -> sub = super
+  (* anything is a subtype of nonreactive functions *)
+  | _, Nonreactive -> true
+  (* unconditional local/shallow/reactive functions are subtypes of Local *.
+      reason: if condition does not hold Local becomes non-reactive which is
+      still ok *)
+  | (Local None | Shallow None | Reactive None), Local _ -> true
+  (* unconditional shallow / reactive functions are subtypes of Shallow *.
+     Reason: same as above *)
+  | (Shallow None | Reactive None), Shallow _ -> true
+  (* unconditional reactive functions are subtype of reactive *.
+     Reason: same as above *)
+  | Reactive None, Reactive _ -> true
+  (* conditionally reactive function are subtypes of conditionally reactive
+     functions only if condition type matches *)
+  | Reactive (Some t), Reactive (Some t1)
+  | (Shallow (Some t) | Reactive (Some t)), Shallow (Some t1)
+  | (Local (Some t) | Shallow (Some t) | Reactive (Some t)), Local (Some t1) ->
+    let ety_env = Phase.env_with_self env in
+    let _, t = Phase.localize ~ety_env env t in
+    let _, t1 = Phase.localize ~ety_env env t1 in
+    ty_equal t t1
+  | _ -> false
 
 
 (* This function checks that the method ft_sub can be used to replace
@@ -440,10 +458,10 @@ and subtype_funs_generic
   (ft_super : locl fun_type) : Env.env =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
-  if not (subtype_reactivity ft_sub.ft_reactive ft_super.ft_reactive) then
+  if not (subtype_reactivity env ft_sub.ft_reactive ft_super.ft_reactive) then
     Errors.fun_reactivity_mismatch
-      p_super (reactivity_to_string ft_super.ft_reactive)
-      p_sub (reactivity_to_string ft_sub.ft_reactive);
+      p_super (TUtils.reactivity_to_string env ft_super.ft_reactive)
+      p_sub (TUtils.reactivity_to_string env ft_sub.ft_reactive);
   if ft_sub.ft_is_coroutine <> ft_super.ft_is_coroutine
   then Errors.coroutinness_mismatch ft_super.ft_is_coroutine p_super p_sub;
   if ft_sub.ft_return_disposable <> ft_super.ft_return_disposable
@@ -1039,10 +1057,10 @@ and sub_type_with_uenv
       | Some (reactivity, is_coroutine, counter, _, anon) ->
           let p_super = Reason.to_pos r_super in
           let p_sub = Reason.to_pos r_sub in
-          if not (subtype_reactivity reactivity ft.ft_reactive)
+          if not (subtype_reactivity env reactivity ft.ft_reactive)
           then Errors.fun_reactivity_mismatch
-            p_super (reactivity_to_string reactivity)
-            p_sub (reactivity_to_string ft.ft_reactive);
+            p_super (TUtils.reactivity_to_string env reactivity)
+            p_sub (TUtils.reactivity_to_string env ft.ft_reactive);
           if is_coroutine <> ft.ft_is_coroutine
           then Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub;
           if not (Unify.unify_arities

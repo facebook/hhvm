@@ -348,7 +348,11 @@ and shape_fields_known =
   | FieldsFullyKnown
   | FieldsPartiallyKnown of Pos.t Nast.ShapeMap.t
 
-and reactivity = Nonreactive | Local | Shallow | Reactive
+and reactivity =
+  | Nonreactive
+  | Local of decl ty option
+  | Shallow of decl ty option
+  | Reactive of decl ty option
 
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
@@ -498,25 +502,6 @@ and 'phase where_constraint =
 type phase_ty =
   | DeclTy of decl ty
   | LoclTy of locl ty
-
-(*****************************************************************************)
-(* Reactivity *)
-(*****************************************************************************)
-
-let fun_reactivity user_attributes =
-  let has attr = Attributes.mem attr user_attributes in
-  let module UA = SN.UserAttributes in
-
-  if has UA.uaReactive then Reactive
-  else if has UA.uaShallowReactive then Shallow
-  else if has UA.uaLocalReactive then Local
-  else Nonreactive
-
-let reactivity_to_string = function
-| Reactive -> "reactive"
-| Shallow -> "shallow reactive"
-| Local -> "local reactive"
-| Nonreactive -> "non-reactive"
 
 (* Tracks information about how a type was expanded *)
 type expand_env = {

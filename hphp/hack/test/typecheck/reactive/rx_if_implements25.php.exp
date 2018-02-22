@@ -1,0 +1,4 @@
+File "rx_if_implements25.php", line 14, characters 12-26:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "rx_if_implements25.php", line 7, characters 19-27:
+This function is not reactive.

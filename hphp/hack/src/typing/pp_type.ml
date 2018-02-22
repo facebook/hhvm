@@ -348,10 +348,26 @@ and show_shape_fields_known : shape_fields_known -> string = fun x ->
 
 and pp_reactivity : Format.formatter -> reactivity -> unit = fun fmt r ->
   match r with
-  | Nonreactive -> Format.pp_print_string fmt "Nonreactive"
-  | Local -> Format.pp_print_string fmt "Local"
-  | Shallow -> Format.pp_print_string fmt "Shallow"
-  | Reactive -> Format.pp_print_string fmt "Reactive"
+  | Nonreactive ->
+    Format.pp_print_string fmt "Nonreactive"
+  | Local None ->
+    Format.pp_print_string fmt "Local {}";
+  | Local (Some ty) ->
+    Format.pp_print_string fmt "Local {";
+    pp_ty fmt ty;
+    Format.pp_print_string fmt "}"
+  | Shallow None ->
+    Format.pp_print_string fmt "Shallow {}";
+  | Shallow (Some ty) ->
+    Format.pp_print_string fmt "Shallow {";
+    pp_ty fmt ty;
+    Format.pp_print_string fmt "}"
+  | Reactive None ->
+    Format.pp_print_string fmt "Reactive {}";
+  | Reactive (Some ty) ->
+    Format.pp_print_string fmt "Reactive {";
+    pp_ty fmt ty;
+    Format.pp_print_string fmt "}"
 
 and show_reactivity : reactivity -> string = fun x ->
   Format.asprintf "%a" pp_reactivity x

@@ -346,7 +346,7 @@ let set_fun_mutable env mut =
   block and checks if it breaks reactivity rules *)
 let check_lambda_reactive f =
   let old_lambda_reactive = !lambda_reactive in
-  lambda_reactive := Some Reactive;
+  lambda_reactive := Some (Reactive None);
   let results = f () in
   let result = !lambda_reactive in
   lambda_reactive := old_lambda_reactive;

@@ -1013,6 +1013,7 @@ module Typing                               = struct
   let ellipsis_strict_mode                  = 4223 (* DONT MODIFY!!!! *)
   let untyped_lambda_strict_mode            = 4224 (* DONT MODIFY!!!! *)
   let binding_ref_in_array                  = 4225 (* DONT MODIFY!!!! *)
+  let invalid_conditionally_reactive_call   = 4225 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2498,6 +2499,14 @@ let untyped_lambda_strict_mode pos =
      Please add type hints on parameters."
   in
     add Typing.untyped_lambda_strict_mode pos msg
+
+let invalid_conditionally_reactive_call pos condition_type receiver_type =
+  add Typing.invalid_conditionally_reactive_call pos (
+    "Conditionally reactive method with condition type '" ^ condition_type ^
+    "' cannot be called. Calling such methods is allowed only from conditionally " ^
+    "reactive methods with the same condition type or if static type of method " ^
+    "receiver is a subtype of condition type, now '" ^ receiver_type ^ "'."
+  )
 
 let expected_tparam pos n =
   add Typing.expected_tparam pos (

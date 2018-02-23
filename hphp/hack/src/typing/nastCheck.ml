@@ -450,13 +450,9 @@ and hint_ env p = function
   | Htuple hl -> List.iter hl (hint env)
   | Hoption h ->
       hint env h; ()
-  | Hfun (_, is_coroutine, hl, kl, _, h) ->
+  | Hfun (_, is_coroutine, hl, _, _, h) ->
       check_coroutines_enabled is_coroutine env p;
       List.iter hl (hint env);
-      List.iter kl (function
-        | None -> ()
-        | Some Ast.Pinout -> require_inout_params_enabled env p; ()
-      );
       hint env h;
       ()
   | Happly ((_, x), hl) as h when Env.is_typedef x ->
@@ -934,15 +930,6 @@ and method_ (env, is_static) m =
   | None -> assert false)
 
 
-and inout_params_enabled env =
-  TypecheckerOptions.experimental_feature_enabled
-    (Env.get_options env.tenv)
-    TypecheckerOptions.experimental_inout_params
-
-and require_inout_params_enabled env p =
-  if not (inout_params_enabled env)
-  then Errors.experimental_feature p "inout parameters"
-
 and param_is_mutable p =
   Attributes.mem SN.UserAttributes.uaMutable p.param_user_attributes
 
@@ -958,7 +945,6 @@ and fun_param env (pos, name) f_type byref param =
   | None -> ()
   | Some Ast.Pinout ->
     let pos = param.param_pos in
-    require_inout_params_enabled env pos;
     if f_type <> Ast.FSync then Errors.inout_params_outside_of_sync pos;
     if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
     Option.iter byref ~f:(fun param ->
@@ -1203,7 +1189,6 @@ and expr_ env p = function
       List.iter el (expr env);
       ()
   | Callconv (_, e) ->
-      require_inout_params_enabled env p;
       expr env e;
       let rec aux = function
         | _, Lvar _ -> true

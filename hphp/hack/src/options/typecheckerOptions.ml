@@ -44,7 +44,6 @@ let experimental_forbid_nullable_cast =
   GlobalOptions.tco_experimental_forbid_nullable_cast
 let experimental_coroutines =
   GlobalOptions.tco_experimental_coroutines
-let experimental_inout_params = GlobalOptions.tco_experimental_inout_params
 let experimental_disallow_static_memoized =
   GlobalOptions.tco_experimental_disallow_static_memoized
 let experimental_disable_optional_and_unknown_shape_fields =

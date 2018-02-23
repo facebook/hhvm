@@ -82,12 +82,6 @@ let tco_experimental_coroutines =
   "coroutines"
 
 (**
- * Support for in-out function parameters. This feature is incomplete and
- * under development, see T21979562 for details and progress.
- *)
-let tco_experimental_inout_params = "inout_params"
-
-(**
  * Disables optional and unknown shape fields syntax and typechecking.
  *
  * Please see the public documentation at
@@ -186,7 +180,6 @@ let tco_experimental_all =
      tco_experimental_forbid_nullable_cast;
      tco_experimental_coroutines;
      tco_experimental_disallow_static_memoized;
-     tco_experimental_inout_params;
      tco_experimental_disable_optional_and_unknown_shape_fields;
      tco_experimental_no_trait_reuse;
      tco_experimental_is_expression;

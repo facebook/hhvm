@@ -148,7 +148,8 @@ let set_option options name value =
     { options with option_optimize_null_check = as_bool value }
   | "hack.compiler.optimizecuf" ->
     { options with option_optimize_cuf = as_bool value }
-  | "hack.compiler.sourcemapping" ->
+  (* Keep both for backwards compatibility until next release *)
+  | "hack.compiler.sourcemapping" | "eval.disassemblersourcemapping" ->
     { options with option_source_mapping = as_bool value }
   | "hhvm.php7.scalar_types" ->
     { options with option_php7_scalar_types = as_bool value }
@@ -245,6 +246,8 @@ let value_setters = [
                               option_can_inline_gen_functions = (v = 0) });
   (set_value "hack.compiler.optimize_cuf" get_value_from_config_int @@
     fun opts v -> { opts with option_optimize_cuf = (v = 1) });
+  (set_value "eval.disassembler_source_mapping" get_value_from_config_int @@
+    fun opts v -> { opts with option_source_mapping = (v = 1) });
   (set_value "hhvm.php7.uvs" get_value_from_config_int @@
     fun opts v -> { opts with option_php7_uvs = (v = 1) });
   (set_value "hhvm.php7.ltr_assign" get_value_from_config_int @@

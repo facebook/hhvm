@@ -1518,11 +1518,11 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
 
     Variant matches;
     preg_match("/^(?:\\(|\\s)*(?:"
-               "(insert).*?\\s+(?:into\\s+)?([^\\s\\(,]+)|"
-               "(update|set|show)\\s+([^\\s\\(,]+)|"
-               "(replace).*?\\s+into\\s+([^\\s\\(,]+)|"
-               "(delete).*?\\s+from\\s+([^\\s\\(,]+)|"
-               "(select).*?[\\s`]+from\\s+([^\\s\\(,]+)|"
+               "(?:explain\\s|describe\\s)?(insert).*?\\s+(?:into\\s+)?([^\\s\\(,]+)|"
+               "(?:explain\\s|describe\\s)?(update|set|show)\\s+([^\\s\\(,]+)|"
+               "(?:explain\\s|describe\\s)?(replace).*?\\s+into\\s+([^\\s\\(,]+)|"
+               "(?:explain\\s|describe\\s)?(delete).*?\\s+from\\s+([^\\s\\(,]+)|"
+               "(?:explain\\s|describe\\s)?(select).*?[\\s`]+from\\s+([^\\s\\(,]+)|"
                "(create|alter|drop).*?\\s+table\\s+([^\\s\\(,]+))/is",
                q, &matches);
     auto marray = matches.toArray();

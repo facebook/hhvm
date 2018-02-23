@@ -670,33 +670,49 @@ and emit_instanceof env e1 e2 =
 
 and emit_is env pos lhs h =
   match snd h with
-    | A.Happly ((_, id), [ty]) when id = "classname" ->
+    | A.Happly ((_, id), tyl) when (SU.strip_global_ns id) = "classname" ->
       begin match lhs with
         | IsExprExpr e -> emit_is_create_local env pos e h
         | IsExprUnnamedLocal local ->
-          begin match ty with
-            | _, A.Happly ((_, id), _) ->
-              let true_label = Label.next_regular () in
-              let done_label = Label.next_regular () in
-              let skip_label = Label.next_regular () in
-              gather [
-                instr_istypel local OpStr;
-                instr_jmpz skip_label;
-                instr_cgetl local;
-                instr_string id;
-                instr_true;
-                instr_fcallbuiltin 3 3 "is_a";
-                instr_unboxr_nop;
-                instr_jmpnz true_label;
-                instr_label skip_label;
-                instr_false;
-                instr_jmp done_label;
-                instr_label true_label;
-                instr_true;
-                instr_label done_label;
-              ]
-            | _ -> emit_nyi "is expression: unsupported classname (T22779957)"
-          end
+          let true_label = Label.next_regular () in
+          let done_label = Label.next_regular () in
+          let skip_label = Label.next_regular () in
+          gather [
+            instr_istypel local OpStr;
+            instr_jmpz skip_label;
+            begin match tyl with
+              | (_, A.Happly ((_, id), _))::_ ->
+                gather [
+                  instr_cgetl local;
+                  instr_string id;
+                  instr_true;
+                  instr_fcallbuiltin 3 3 "is_a";
+                  instr_unboxr_nop;
+                  instr_jmpnz true_label;
+                ]
+              | [] ->
+                gather [
+                  instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "class_exists");
+                  instr_fpassl 0 local H.Cell;
+                  instr_fcall 1;
+                  instr_unboxr_nop;
+                  instr_jmpnz true_label;
+                  instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "interface_exists");
+                  instr_fpassl 0 local H.Cell;
+                  instr_fcall 1;
+                  instr_unboxr_nop;
+                  instr_jmpnz true_label;
+                ]
+              | _ ->
+                emit_nyi "is expression: unsupported classname (T22779957)"
+            end;
+            instr_label skip_label;
+            instr_false;
+            instr_jmp done_label;
+            instr_label true_label;
+            instr_true;
+            instr_label done_label;
+          ]
       end
     | A.Happly ((_, id), _)
       when id = SN.Typehints.arraykey || id = SN.Typehints.num ->

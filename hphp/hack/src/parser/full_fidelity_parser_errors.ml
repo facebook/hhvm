@@ -342,20 +342,22 @@ let modifiers_of_function_decl_header_exn node =
   | FunctionDeclarationHeader { function_modifiers = m; _ } -> m
   | _ -> failwith "expected to get FunctionDeclarationHeader"
 
-let get_modifiers_of_methodish_declaration node =
+let get_modifiers_of_declaration node =
   match syntax node with
   | MethodishDeclaration { methodish_function_decl_header = header; _ } ->
     Some (modifiers_of_function_decl_header_exn header)
+  | PropertyDeclaration { property_modifiers; _} ->
+    Some (property_modifiers)
   | _ -> None
 
 (* tests whether the methodish contains a modifier that satisfies [p] *)
 let methodish_modifier_contains_helper p node =
-  get_modifiers_of_methodish_declaration node
+  get_modifiers_of_declaration node
     |> Option.exists ~f:(list_contains_predicate p)
 
 (* tests whether the methodish contains > 1 modifier that satisfies [p] *)
 let methodish_modifier_multiple_helper p node =
-  get_modifiers_of_methodish_declaration node
+  get_modifiers_of_declaration node
     |> Option.value_map ~default:false ~f:(list_contains_multiple_predicate p)
 
 (* test the methodish node contains the Final keyword *)
@@ -387,10 +389,8 @@ let methodish_contains_non_visibility hhvm_compat_mode node =
   let is_non_visibility x = not (is_visibility x) in
   methodish_modifier_contains_helper is_non_visibility node
 
-(* checks if a methodish decl has multiple visibility modifiers *)
-let methodish_multiple_visibility hhvm_compat_mode node =
-  if hhvm_compat_mode then false
-  else
+(* checks if a methodish decl or property has multiple visibility modifiers *)
+let declaration_multiple_visibility node =
   methodish_modifier_multiple_helper is_visibility node
 
 (* Given a function declaration header, confirm that it is a constructor
@@ -470,7 +470,7 @@ let class_constructor_destructor_has_non_void_type hhvm_compat_node node parents
 
 (* whether a methodish has duplicate modifiers *)
 let methodish_duplicate_modifier node =
-  get_modifiers_of_methodish_declaration node
+  get_modifiers_of_declaration node
     |> Option.value_map ~default:false ~f:list_contains_duplicate
 
 (* whether a methodish decl has body *)
@@ -505,9 +505,7 @@ let methodish_abstract_with_body hhvm_compat_mode node =
 (* Test whether node is a non-abstract method without a body.
  * Here node is the methodish node
  * And methods inside interfaces are inherently considered abstract *)
-let methodish_non_abstract_without_body hhvm_compat_mode node parents =
-  if hhvm_compat_mode then false
-  else
+let methodish_non_abstract_without_body node parents =
   let non_abstract = not (methodish_contains_abstract node
       || methodish_inside_interface parents) in
   let not_has_body = not (methodish_has_body node) in
@@ -519,18 +517,14 @@ let methodish_in_interface_has_body hhvm_compat_mode node parents =
 
 (* Test whether node is a method that is both abstract and private
  *)
-let methodish_abstract_conflict_with_private hhvm_compat_mode node =
-  if hhvm_compat_mode then false
-  else
+let methodish_abstract_conflict_with_private node =
   let is_abstract = methodish_contains_abstract node in
   let has_private = methodish_contains_private node in
   is_abstract && has_private
 
 (* Test whether node is a method that is both abstract and final
  *)
-let methodish_abstract_conflict_with_final hhvm_compat_mode node =
-  if hhvm_compat_mode then false
-  else
+let methodish_abstract_conflict_with_final node =
   let is_abstract = methodish_contains_abstract node in
   let has_final = methodish_contains_final node in
   is_abstract && has_final
@@ -720,6 +714,16 @@ let first_parent_class_name parents =
     | _ -> None (* This arm is never reached  *)
   end
 
+(* Return, as a string opt, the name of the closest enclosing classish entity in
+  the list of parents(not just Classes ) *)
+let enclosing_classish_name parents =
+  Hh_core.List.find_map parents ~f:begin fun node ->
+  match syntax node with
+  | ClassishDeclaration cd -> Syntax.extract_text cd.classish_name
+  | _ -> None
+  end
+
+
 (* Given a classish_ or methodish_ declaration node, returns the modifier node
    from its list of modifiers, or None if there isn't one. *)
 let extract_keyword modifier declaration_node =
@@ -731,7 +735,7 @@ let extract_keyword modifier declaration_node =
   | ClassishDeclaration { classish_modifiers = modifiers_list ; _ } ->
     aux modifiers_list
   | _ ->
-    Option.bind (get_modifiers_of_methodish_declaration declaration_node) aux
+    Option.bind (get_modifiers_of_declaration declaration_node) aux
 
 (* Wrapper function that uses above extract_keyword function to test if node
    contains is_abstract keyword *)
@@ -782,7 +786,7 @@ let is_generalized_abstract_method md_node parents =
  * None if something other than a methodish_declaration node was provided as
  * input. *)
 let extract_async_node md_node =
-  get_modifiers_of_methodish_declaration md_node
+  get_modifiers_of_declaration md_node
   |> Option.value_map ~default:[] ~f:syntax_to_list_no_separators
   |> Hh_core.List.find ~f:is_async
 
@@ -903,7 +907,7 @@ let extract_callconv_node node =
  * methods inside an interface. *)
 let has_valid_interface_visibility node =
   (* If not a methodish declaration, is vacuously valid *)
-  get_modifiers_of_methodish_declaration node
+  get_modifiers_of_declaration node
   |> Option.value_map ~default:true ~f:(fun methodish_modifiers ->
     let visibility_kind = extract_visibility_node methodish_modifiers in
     let is_valid_methodish_visibility kind =
@@ -1083,6 +1087,10 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
   | MethodishDeclaration md ->
     let header_node = md.methodish_function_decl_header in
     let modifiers = modifiers_of_function_decl_header_exn header_node in
+    let class_name = Option.value (enclosing_classish_name parents)
+      ~default:"" in
+    let method_name = Option.value (extract_function_name
+      md.methodish_function_decl_header) ~default:"" in
     let errors =
       produce_error_for_header errors
       (class_constructor_has_static hhvm_compat_mode) header_node
@@ -1101,7 +1109,7 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
       produce_error_for_header errors async_magic_method header_node [node]
       SyntaxError.async_magic_method modifiers in
     let errors =
-      produce_error errors (methodish_multiple_visibility hhvm_compat_mode) node
+      produce_error errors declaration_multiple_visibility node
       SyntaxError.error2017 modifiers in
     let errors =
       produce_error errors methodish_duplicate_modifier node
@@ -1113,25 +1121,21 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
     let fun_semicolon = md.methodish_semicolon in
     let errors =
       produce_error errors
-      (methodish_non_abstract_without_body hhvm_compat_mode node) parents
-      SyntaxError.error2015 fun_semicolon in
+      (methodish_non_abstract_without_body node) parents
+      (SyntaxError.error2015 class_name method_name) fun_semicolon in
     let errors =
       produce_error errors
-      (methodish_abstract_conflict_with_private hhvm_compat_mode)
-      node SyntaxError.error2016 modifiers in
+      methodish_abstract_conflict_with_private
+      node (SyntaxError.error2016 class_name method_name) modifiers in
     let errors =
       produce_error errors
-      (methodish_abstract_conflict_with_final hhvm_compat_mode)
-      node SyntaxError.error2019 modifiers in
+      methodish_abstract_conflict_with_final
+      node (SyntaxError.error2019 class_name method_name) modifiers in
     let errors =
       produce_error errors
       (methodish_in_interface_has_body hhvm_compat_mode node) parents
       SyntaxError.error2041 md.methodish_function_body in
     let errors =
-      let class_name = Option.value (first_parent_class_name parents)
-        ~default:"" in
-      let method_name = Option.value (extract_function_name
-        md.methodish_function_decl_header) ~default:"" in
       (* default will never be used, since existence of abstract_keyword is a
        * necessary condition for the production of an error. *)
       let abstract_keyword = Option.value (extract_keyword is_abstract node)
@@ -2300,6 +2304,16 @@ let abstract_final_class_nonstatic_var_error node parents hhvm_compat_mode error
     SyntaxError.error2061 cd.property_modifiers
   | _ -> errors
 
+let class_property_multiple_visibility_error node parents errors =
+  match syntax node with
+  | PropertyDeclaration cd ->
+    let first_parent_name = Option.value (first_parent_class_name parents) ~default:"" in
+    produce_error errors
+    declaration_multiple_visibility node
+    (SyntaxError.property_has_multiple_visibilities first_parent_name) cd.property_modifiers
+  | _ -> errors
+
+
 let abstract_final_class_nonstatic_method_error node parents hhvm_compat_mode errors =
   match syntax node with
   | MethodishDeclaration cd ->
@@ -2548,6 +2562,8 @@ let find_syntax_errors ~enable_hh_syntax error_level syntax_tree =
       const_decl_errors node parents hhvm_compatibility_mode namespace_name names errors in
     let errors =
       abstract_final_class_nonstatic_var_error node parents hhvm_compatibility_mode errors in
+    let errors =
+      class_property_multiple_visibility_error node parents errors in
     let errors =
       abstract_final_class_nonstatic_method_error node parents hhvm_compatibility_mode errors in
     let errors =

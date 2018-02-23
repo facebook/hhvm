@@ -141,13 +141,19 @@ let error2011 = "A destructor must have an empty parameter list."
 let error2012 = "A destructor can only have visibility modifiers."
 let error2013 = "A method declaration cannot have duplicate modifiers."
 let error2014 = "An abstract method cannot have a method body."
-let error2015 = "A non-abstract method must have a body."
-let error2016 = "A method cannot be both abstract and private."
+let error2015 class_name method_name =
+  Printf.sprintf "Non-abstract method %s::%s must contain body"
+    class_name method_name
+let error2016 class_name method_name =
+  Printf.sprintf "Cannot declare abstract method %s::%s private"
+    class_name method_name
 let error2017 =
   "A method declaration cannot have multiple visibility modifiers."
 let error2018 =
   "A constructor or destructor cannot have a non-void type annotation."
-let error2019 = "A method cannot be both abstract and final."
+let error2019 class_name method_name =
+  Printf.sprintf "Cannot declare abstract method %s::%s final"
+    class_name method_name
 let error2020 = "Use of the '{}' subscript operator is deprecated; " ^
   " use '[]' instead."
 let error2021 = "A variadic parameter ('...') may only appear at the end of " ^
@@ -386,3 +392,6 @@ let variadic_param_with_type_in_php name type_ =
   ^ type_ ^ "); variadic params with type constraints are not "
   ^ "supported in non-Hack files"
 let final_property = "Properties cannot be declared final"
+
+let property_has_multiple_visibilities name =
+  "Multiple access type modifiers are not allowed: properties of " ^ name

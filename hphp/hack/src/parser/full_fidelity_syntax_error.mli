@@ -110,11 +110,11 @@ val error2011 : string
 val error2012 : string
 val error2013 : string
 val error2014 : string
-val error2015 : string
-val error2016 : string
+val error2015 : string -> string -> string
+val error2016 : string -> string -> string
 val error2017 : string
 val error2018 : string
-val error2019 : string
+val error2019 : string -> string -> string
 val error2020 : string
 val error2021 : string
 val error2022 : string
@@ -236,3 +236,4 @@ val redeclaration_of_method : name:string -> string
 val self_or_parent_colon_colon_class_outside_of_class : string -> string
 val variadic_param_with_type_in_php : string -> string -> string
 val final_property : string
+val property_has_multiple_visibilities : string -> string 

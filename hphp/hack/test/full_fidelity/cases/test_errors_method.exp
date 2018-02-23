@@ -2,10 +2,10 @@
 (4,3)-(4,16) A method declaration cannot have multiple visibility modifiers.
 (5,3)-(5,13) A method declaration cannot have duplicate modifiers.
 (5,3)-(5,34) Redeclared method E::f
-(6,3)-(6,23) A method cannot be both abstract and final.
+(6,3)-(6,23) Cannot declare abstract method E::f final
 (6,3)-(6,44) Redeclared method E::f
 (6,10)-(6,17) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class E', or make 'function f' non-abstract.
-(7,3)-(7,18) A method cannot be both abstract and private.
+(7,3)-(7,18) Cannot declare abstract method E::f private
 (7,3)-(7,39) Redeclared method E::f
 (7,11)-(7,18) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class E', or make 'function f' non-abstract.
 (8,3)-(8,45) Redeclared method E::f
@@ -14,7 +14,7 @@
 (9,3)-(9,45) Redeclared method E::f
 (9,10)-(9,17) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class E', or make 'function f' non-abstract.
 (10,3)-(10,29) Redeclared method E::f
-(10,31)-(10,31) A non-abstract method must have a body.
+(10,31)-(10,31) Non-abstract method E::f must contain body
 (11,3)-(11,15) A constructor cannot be static.
 (12,3)-(12,45) Redeclared method E::__construct
 (13,3)-(13,41) Redeclared method E::__construct

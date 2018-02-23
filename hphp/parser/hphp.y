@@ -2031,6 +2031,11 @@ class_constant_declaration:
     hh_constname_with_type '=' static_expr   { _p->onClassConstant($$,&$1,$3,$5);}
   | T_CONST hh_constname_with_type '='
     static_expr                         { _p->onClassConstant($$,0,$2,$4);}
+  /* !PHP7_ONLY */
+  | parameter_modifier T_CONST hh_constname_with_type '='
+    static_expr                         { _p->onClassConstant($$,0,$3,$5);}
+  /* !END */
+;
 ;
 class_abstract_constant_declaration:
     class_abstract_constant_declaration ','

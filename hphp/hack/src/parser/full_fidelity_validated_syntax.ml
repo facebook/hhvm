@@ -1217,12 +1217,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; const_type_specifier = validate_option_with (validate_specifier) x.const_type_specifier
     ; const_keyword = validate_token x.const_keyword
     ; const_abstract = validate_option_with (validate_token) x.const_abstract
+    ; const_visibility = validate_option_with (validate_token) x.const_visibility
     }
   | s -> validation_fail (Some SyntaxKind.ConstDeclaration) s
   and invalidate_const_declaration : const_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.ConstDeclaration
-      { const_abstract = invalidate_option_with (invalidate_token) x.const_abstract
+      { const_visibility = invalidate_option_with (invalidate_token) x.const_visibility
+      ; const_abstract = invalidate_option_with (invalidate_token) x.const_abstract
       ; const_keyword = invalidate_token x.const_keyword
       ; const_type_specifier = invalidate_option_with (invalidate_specifier) x.const_type_specifier
       ; const_declarators = invalidate_list_with (invalidate_constant_declarator) x.const_declarators

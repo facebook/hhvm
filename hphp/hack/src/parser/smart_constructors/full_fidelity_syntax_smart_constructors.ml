@@ -95,7 +95,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S)
   
   let make_require_clause arg0 arg1 arg2 arg3 () = (), Syntax.make_require_clause arg0 arg1 arg2 arg3
   
-  let make_const_declaration arg0 arg1 arg2 arg3 arg4 () = (), Syntax.make_const_declaration arg0 arg1 arg2 arg3 arg4
+  let make_const_declaration arg0 arg1 arg2 arg3 arg4 arg5 () = (), Syntax.make_const_declaration arg0 arg1 arg2 arg3 arg4 arg5
   
   let make_constant_declarator arg0 arg1 () = (), Syntax.make_constant_declarator arg0 arg1
   

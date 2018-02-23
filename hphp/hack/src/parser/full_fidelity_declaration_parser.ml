@@ -575,6 +575,7 @@ module WithExpressionAndStatementAndTypeParser
      // constant-declaration:
      const T $x = v ;
      abstract const T $x ;
+     public const T $x = v ; // PHP7 only
 
      // type-constant-declaration
      const type T = X;
@@ -633,11 +634,21 @@ module WithExpressionAndStatementAndTypeParser
       let missing = make_missing parser in
       parse_const_or_type_const_declaration parser missing
     | Abstract -> parse_methodish_or_const_or_type_const parser
-    | Async
-    | Static
     | Public
     | Protected
-    | Private
+    | Private ->
+      let (parser1, visibility) = next_token parser in
+      let next_kind = peek_token_kind parser1 in
+      if next_kind = Const then
+        let (parser, const) = assert_token parser1 Const in
+        let visibility = make_token visibility in
+        let missing = make_missing parser in
+        parse_const_declaration parser visibility missing const
+      else
+        let missing = make_missing parser in
+        parse_methodish_or_property parser missing
+    | Async
+    | Static
     | Final ->
       (* Parse methods, constructors, destructors or properties. *)
       let missing = make_missing parser in
@@ -1143,11 +1154,13 @@ module WithExpressionAndStatementAndTypeParser
     let kind2 = peek_token_kind ~lookahead:1 parser in
     match kind1, kind2 with
     | Type, (Equal | Semicolon) ->
-      parse_const_declaration parser abstr const
+      let missing = make_missing parser in
+      parse_const_declaration parser missing abstr const
     | Type, _ when kind2 <> Equal ->
       parse_type_const_declaration parser abstr const
     | _, _ ->
-      parse_const_declaration parser abstr const
+      let missing = make_missing parser in
+      parse_const_declaration parser missing abstr const
 
   and parse_property_declaration ?(contains_abstract=false) parser modifiers =
     (* SPEC:
@@ -1192,6 +1205,7 @@ module WithExpressionAndStatementAndTypeParser
   (* SPEC:
     const-declaration:
       abstract_opt  const  type-specifier_opt  constant-declarator-list  ;
+      visibility  const  type-specifier_opt  constant-declarator-list  ;
     constant-declarator-list:
       constant-declarator
       constant-declarator-list  ,  constant-declarator
@@ -1200,7 +1214,7 @@ module WithExpressionAndStatementAndTypeParser
     constant-initializer:
       =  const-expression
   *)
-  and parse_const_declaration parser abstr const =
+  and parse_const_declaration parser visibility abstr const =
     let (parser, type_spec) = if is_type_in_const parser then
       parse_type_specifier parser
     else
@@ -1210,7 +1224,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, const_list) = parse_comma_list
       parser Semicolon SyntaxError.error1004 parse_constant_declarator in
     let (parser, semi) = require_semicolon parser in
-    (parser, make_const_declaration abstr const type_spec const_list semi)
+    (parser, make_const_declaration visibility abstr const type_spec const_list semi)
 
   and is_type_in_const parser =
     let before = List.length (errors parser) in
@@ -1810,8 +1824,7 @@ module WithExpressionAndStatementAndTypeParser
         (* TODO figure out what global const differs from class const *)
       | Const ->
         let missing = make_missing parser in
-        parse_const_declaration parser1 missing
-              (make_token token)
+        parse_const_declaration parser1 missing missing (make_token token)
       | _ ->
         with_statement_parser parser StatementParser.parse_statement
         (* TODO: What if it's not a legal statement? Do we still make progress

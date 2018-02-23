@@ -555,6 +555,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Newline;
     ]
   | Syntax.ConstDeclaration {
+      const_visibility = _; (* not supported in Hack *)
       const_abstract = abstr;
       const_keyword = kw;
       const_type_specifier = const_type;

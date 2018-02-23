@@ -381,17 +381,19 @@ let rec get_doc node =
     let s = get_doc x.require_semicolon in
     r ^| k ^| n ^^^ s
   | ConstDeclaration {
+    const_visibility;
     const_abstract;
     const_keyword;
     const_type_specifier;
     const_declarators;
     const_semicolon } ->
+    let visibility = get_doc const_visibility in
     let abstr = get_doc const_abstract in
     let token = get_doc const_keyword in
     let ty = get_doc const_type_specifier in
     let lst = get_doc const_declarators in
     let semi = get_doc const_semicolon in
-    group_doc (abstr ^| token ^| ty ) ^| lst ^^^ semi
+    group_doc (visibility ^| abstr ^| token ^| ty ) ^| lst ^^^ semi
   | ConstantDeclarator x ->
     let name = get_doc x.constant_declarator_name in
     let init = get_doc x.constant_declarator_initializer in

@@ -7998,23 +7998,29 @@ final class RequireClause extends EditableSyntax {
   }
 }
 final class ConstDeclaration extends EditableSyntax {
+  private EditableSyntax $_visibility;
   private EditableSyntax $_abstract;
   private EditableSyntax $_keyword;
   private EditableSyntax $_type_specifier;
   private EditableSyntax $_declarators;
   private EditableSyntax $_semicolon;
   public function __construct(
+    EditableSyntax $visibility,
     EditableSyntax $abstract,
     EditableSyntax $keyword,
     EditableSyntax $type_specifier,
     EditableSyntax $declarators,
     EditableSyntax $semicolon) {
     parent::__construct('const_declaration');
+    $this->_visibility = $visibility;
     $this->_abstract = $abstract;
     $this->_keyword = $keyword;
     $this->_type_specifier = $type_specifier;
     $this->_declarators = $declarators;
     $this->_semicolon = $semicolon;
+  }
+  public function visibility(): EditableSyntax {
+    return $this->_visibility;
   }
   public function abstract(): EditableSyntax {
     return $this->_abstract;
@@ -8031,8 +8037,18 @@ final class ConstDeclaration extends EditableSyntax {
   public function semicolon(): EditableSyntax {
     return $this->_semicolon;
   }
+  public function with_visibility(EditableSyntax $visibility): ConstDeclaration {
+    return new ConstDeclaration(
+      $visibility,
+      $this->_abstract,
+      $this->_keyword,
+      $this->_type_specifier,
+      $this->_declarators,
+      $this->_semicolon);
+  }
   public function with_abstract(EditableSyntax $abstract): ConstDeclaration {
     return new ConstDeclaration(
+      $this->_visibility,
       $abstract,
       $this->_keyword,
       $this->_type_specifier,
@@ -8041,6 +8057,7 @@ final class ConstDeclaration extends EditableSyntax {
   }
   public function with_keyword(EditableSyntax $keyword): ConstDeclaration {
     return new ConstDeclaration(
+      $this->_visibility,
       $this->_abstract,
       $keyword,
       $this->_type_specifier,
@@ -8049,6 +8066,7 @@ final class ConstDeclaration extends EditableSyntax {
   }
   public function with_type_specifier(EditableSyntax $type_specifier): ConstDeclaration {
     return new ConstDeclaration(
+      $this->_visibility,
       $this->_abstract,
       $this->_keyword,
       $type_specifier,
@@ -8057,6 +8075,7 @@ final class ConstDeclaration extends EditableSyntax {
   }
   public function with_declarators(EditableSyntax $declarators): ConstDeclaration {
     return new ConstDeclaration(
+      $this->_visibility,
       $this->_abstract,
       $this->_keyword,
       $this->_type_specifier,
@@ -8065,6 +8084,7 @@ final class ConstDeclaration extends EditableSyntax {
   }
   public function with_semicolon(EditableSyntax $semicolon): ConstDeclaration {
     return new ConstDeclaration(
+      $this->_visibility,
       $this->_abstract,
       $this->_keyword,
       $this->_type_specifier,
@@ -8078,12 +8098,14 @@ final class ConstDeclaration extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
+    $visibility = $this->visibility()->rewrite($rewriter, $new_parents);
     $abstract = $this->abstract()->rewrite($rewriter, $new_parents);
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $type_specifier = $this->type_specifier()->rewrite($rewriter, $new_parents);
     $declarators = $this->declarators()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
+      $visibility === $this->visibility() &&
       $abstract === $this->abstract() &&
       $keyword === $this->keyword() &&
       $type_specifier === $this->type_specifier() &&
@@ -8092,6 +8114,7 @@ final class ConstDeclaration extends EditableSyntax {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ConstDeclaration(
+        $visibility,
         $abstract,
         $keyword,
         $type_specifier,
@@ -8101,6 +8124,9 @@ final class ConstDeclaration extends EditableSyntax {
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
+    $visibility = EditableSyntax::from_json(
+      $json->const_visibility, $position, $source);
+    $position += $visibility->width();
     $abstract = EditableSyntax::from_json(
       $json->const_abstract, $position, $source);
     $position += $abstract->width();
@@ -8117,6 +8143,7 @@ final class ConstDeclaration extends EditableSyntax {
       $json->const_semicolon, $position, $source);
     $position += $semicolon->width();
     return new ConstDeclaration(
+        $visibility,
         $abstract,
         $keyword,
         $type_specifier,
@@ -8124,6 +8151,7 @@ final class ConstDeclaration extends EditableSyntax {
         $semicolon);
   }
   public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_visibility;
     yield $this->_abstract;
     yield $this->_keyword;
     yield $this->_type_specifier;

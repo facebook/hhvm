@@ -28,8 +28,12 @@ let auto_namespace_map () =
     ~default:default_auto_aliased_namespaces
 
 let elaborate_id ns kind id =
+  let autoimport =
+    if List.mem
+      Hh_autoimport.autoimport_only_for_typechecker (SU.strip_ns @@ snd id)
+    then false else Emit_env.is_hh_syntax_enabled () in
   let was_renamed, (_, fully_qualified_id) =
-    Namespaces.elaborate_id_impl ~autoimport:(Emit_env.is_hh_syntax_enabled ()) ns kind id in
+    Namespaces.elaborate_id_impl ~autoimport ns kind id in
   let fully_qualified_id =
     Namespaces.renamespace_if_aliased
       ~reverse:true (auto_namespace_map ()) fully_qualified_id

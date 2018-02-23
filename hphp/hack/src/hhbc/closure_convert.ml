@@ -46,21 +46,25 @@ type env = {
   in_using: bool;
 }
 
-type function_goto_state = {
+type per_function_state = {
+  inline_hhas_blocks: string list;
+  has_finally: bool;
   has_goto: bool;
   labels: bool SMap.t
 }
 
-let empty_goto_state = {
+let empty_per_function_state = {
+  inline_hhas_blocks = [];
+  has_finally = false;
   has_goto = false;
-  labels = SMap.empty
+  labels = SMap.empty;
 }
 
-let to_empty_state_if_no_goto s =
+(* let to_empty_state_if_no_goto s =
   (* if function does not have any goto statements inside - it is ok
      to ignore any labels that might appear in it *)
   if s.has_goto then s
-  else empty_goto_state
+  else empty_goto_state *)
 
 type state = {
   (* Number of closures created in the current function *)
@@ -92,17 +96,40 @@ type state = {
   closure_namespaces : Namespace_env.env SMap.t;
   (* original enclosing class for closure *)
   closure_enclosing_classes: Ast.class_ SMap.t;
-  (* does current function has finally block *)
-  has_finally: bool;
+  (* information about current function *)
+  current_function_state: per_function_state;
+
+  (*** accumulated information about program ***)
+
   (* set of functions that has try-finally block *)
   functions_with_finally: SSet.t;
-  (* accumulated information about goto statements in current function *)
-  goto_state: function_goto_state;
   (* maps name of function that has at least one goto statement
      to labels in function (bool value denotes whether label appear in using) *)
   function_to_labels_map: (bool SMap.t) SMap.t;
   seen_strict_types: bool option;
+  (* map  functions -> list of inline hhas blocks *)
+  functions_with_hhas_blocks: (string list) SMap.t;
 }
+
+let set_has_finally st =
+  if st.current_function_state.has_finally then st
+  else { st with current_function_state =
+       { st.current_function_state with has_finally = true } }
+
+let set_inline_hhas st hhas =
+  { st with current_function_state =
+  { st.current_function_state with inline_hhas_blocks =
+    hhas :: st.current_function_state.inline_hhas_blocks }}
+
+let set_label st l v =
+  { st with current_function_state =
+  { st.current_function_state with labels =
+    SMap.add l v st.current_function_state.labels } }
+
+let set_has_goto st =
+  if st.current_function_state.has_goto then st
+  else { st with current_function_state =
+       { st.current_function_state with has_goto = true } }
 
 let initial_state =
 {
@@ -119,11 +146,11 @@ let initial_state =
   explicit_use_set = SSet.empty;
   closure_namespaces = SMap.empty;
   closure_enclosing_classes = SMap.empty;
+  current_function_state = empty_per_function_state;
   functions_with_finally = SSet.empty;
-  has_finally = false;
-  goto_state = empty_goto_state;
   function_to_labels_map = SMap.empty;
   seen_strict_types = None;
+  functions_with_hhas_blocks = SMap.empty;
 }
 
 let total_class_count env st =
@@ -283,15 +310,27 @@ let reset_function_counts st =
     closure_cnt_per_fun = 0;
     anon_cls_cnt_per_fun = 0 }
 
-let record_function_state key (has_finally, goto_state) st =
-  let goto_state = to_empty_state_if_no_goto goto_state in
-  if not has_finally && goto_state == empty_goto_state then st
+let record_function_state key { inline_hhas_blocks; has_finally; has_goto; labels } st =
+  if List.is_empty inline_hhas_blocks &&
+     not has_finally &&
+     not has_goto &&
+     SMap.is_empty labels
+  then st
   else
   let functions_with_finally =
-    SSet.add key st.functions_with_finally in
+    if has_finally
+    then SSet.add key st.functions_with_finally
+    else st.functions_with_finally in
   let function_to_labels_map =
-    SMap.add key goto_state.labels st.function_to_labels_map in
-  { st with functions_with_finally; function_to_labels_map }
+    if not @@ SMap.is_empty labels
+    then SMap.add key labels st.function_to_labels_map
+    else st.function_to_labels_map in
+  let functions_with_hhas_blocks =
+    if not @@ List.is_empty inline_hhas_blocks
+    then SMap.add key (List.rev inline_hhas_blocks) st.functions_with_hhas_blocks
+    else st.functions_with_hhas_blocks in
+  { st with
+    functions_with_finally; function_to_labels_map; functions_with_hhas_blocks }
 
 let add_function ~has_inout_params env st fd =
   let n = env.defined_function_count
@@ -533,6 +572,13 @@ let rec convert_expr env st (p, expr_ as expr) =
       Emit_env.is_hh_syntax_enabled () ->
     convert_expr env st (p, Varray es)
   | Call (e, el1, el2, el3) ->
+    let st =
+      begin match snd e, el2 with
+      | Id (_, s), [_, String (_, arg)] when
+        String.lowercase_ascii @@ SU.strip_global_ns s = "hh\\asm"->
+        set_inline_hhas st arg
+      | _ -> st
+      end in
     let st, e = convert_expr env st e in
     let st, el2 = convert_exprs env st el2 in
     let st, el3 = convert_exprs env st el3 in
@@ -655,7 +701,7 @@ and convert_lambda env st p fd use_vars_opt =
   let captured_this = st.captured_this in
   let total_count = st.total_count in
   let static_vars = st.static_vars in
-  let old_has_finally = st.has_finally in
+  let old_function_state = st.current_function_state in
   let st = { st with total_count = total_count + 1; } in
   let st = enter_lambda st in
   let old_env = env in
@@ -713,7 +759,7 @@ and convert_lambda env st p fd use_vars_opt =
                      closure_enclosing_classes;
                      closure_namespaces = SMap.add
                        closure_class_name st.namespace st.closure_namespaces;
-                     has_finally = old_has_finally;
+                     current_function_state = old_function_state;
            } in
   let st =
     record_function_state
@@ -791,13 +837,13 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
     let st, b1 = convert_block env st b1 in
     let st, cl = List.map_env st cl (convert_catch env) in
     let st, b2 = convert_block (reset_in_using env) st b2 in
-    let st = if List.is_empty b2 then st else { st with has_finally = true } in
+    let st = if List.is_empty b2 then st else set_has_finally st in
     st, (p, Try (b1, cl, b2))
   | Using s ->
     if s.us_has_await then check_if_in_async_context env;
     let st, us_expr = convert_expr env st s.us_expr in
     let st, us_block = convert_block (set_in_using env) st s.us_block in
-    let st = if st.has_finally then st else { st with has_finally = true } in
+    let st = set_has_finally st in
     st, (p, Using { s with us_expr; us_block })
   | Def_inline d ->
     (* propagate namespace information to nested classes or functions *)
@@ -826,14 +872,11 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
     process_inline_defs st defs
   | GotoLabel (_, l) ->
     (* record known label in function *)
-    let labels = SMap.add l env.in_using st.goto_state.labels in
-    let st = { st with goto_state = { st.goto_state with labels } } in
+    let st = set_label st l env.in_using in
     st, stmt
   | Goto _ ->
     (* record the fact that function has goto *)
-    let st =
-      if st.goto_state.has_goto then st
-      else { st with goto_state = { st.goto_state with has_goto = true } } in
+    let st = set_has_goto st in
     st, stmt
   | Declare (_, (_, Binop (Eq None, (_, Id (_, "strict_types")), (_, Int (_, v)))), _) ->
     let st = { st with seen_strict_types = Some (v = "1") } in
@@ -847,22 +890,15 @@ and convert_block env st stmts =
 and convert_function_like_body env old_st block =
   (* reset has_finally/goto_state values on the state *)
   let st =
-    (* can use old state if old values and values to be set are the same *)
-    if not old_st.has_finally && old_st.goto_state == empty_goto_state
+    if old_st.current_function_state = empty_per_function_state
     then old_st
-    else { old_st with has_finally = false; goto_state = empty_goto_state }
+    else { old_st with current_function_state = empty_per_function_state }
   in
   let st, r = convert_block env st block in
-  (* capture current value of has_finally/goto_state *)
-  let has_finally = st.has_finally in
-  let goto_state = st.goto_state in
+  let function_state = st.current_function_state in
   (* restore old has_finally/goto_state values *)
-  let st =
-    (* can keep the state if values were not changed *)
-    if st.has_finally = old_st.has_finally && st.goto_state == old_st.goto_state
-    then st
-    else { st with has_finally = old_st.has_finally; goto_state = old_st.goto_state } in
-  st, r, (has_finally, goto_state)
+  let st = { st with current_function_state = old_st.current_function_state } in
+  st, r, function_state
 
 and convert_catch env st (id1, id2, b) =
   let st, b = convert_block env st b in
@@ -1068,7 +1104,7 @@ let convert_toplevel_prog defs =
    * function and we place hoisted functions just after that *)
   let env = env_toplevel (count_classes defs) 1 defs in
   let st, original_defs = convert_defs env 0 0 initial_state defs in
-  let main_state = st.has_finally, to_empty_state_if_no_goto st.goto_state in
+  let main_state = st.current_function_state in
   let st =
     record_function_state (Emit_env.get_unique_id_for_main ()) main_state st in
   (* Reorder the functions so that they appear first. This matches the
@@ -1083,7 +1119,8 @@ let convert_toplevel_prog defs =
       ; global_closure_namespaces = st.closure_namespaces
       ; global_closure_enclosing_classes = st.closure_enclosing_classes
       ; global_functions_with_finally = st.functions_with_finally
-      ; global_function_to_labels_map = st.function_to_labels_map }) in
+      ; global_function_to_labels_map = st.function_to_labels_map
+      ; global_functions_with_hhas_blocks = st.functions_with_hhas_blocks }) in
   {
     ast_defs;
     global_state;

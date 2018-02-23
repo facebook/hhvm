@@ -21,6 +21,9 @@ module SU = Hhbc_string_utils
 module ULS = Unique_list_string
 module Opts = Hhbc_options
 
+let inline_hhas_blocks_: (Hhas_asm.t SMap.t) ref = ref SMap.empty
+let set_inline_hhas_blocks s = inline_hhas_blocks_ := s
+
 let can_inline_gen_functions () =
   let opts = !Opts.compiler_options in
   Emit_env.is_hh_syntax_enabled () &&
@@ -1642,23 +1645,22 @@ and emit_callconv _env kind _e =
     failwith "emit_callconv: This should have been caught at emit_arg"
 
 and emit_inline_hhas s =
-  let lexer = Lexing.from_string (s ^ "\n") in
-  try
-    let asm = Hhas_parser.functionbodywithdirectives Hhas_lexer.read lexer in
+  match SMap.get s !inline_hhas_blocks_ with
+  | Some asm ->
     let instrs =
       Label_rewriter.clone_with_fresh_regular_labels @@ Hhas_asm.instrs asm in
     (* TODO: handle case when code after inline hhas is unreachable
       i.e. fallthrough return should not be emitted *)
-    match get_estimated_stack_depth instrs with
+    begin match get_estimated_stack_depth instrs with
     | 0 -> gather [ instrs; instr_null ]
     | 1 -> instrs
     | _ ->
       Emit_fatal.raise_fatal_runtime Pos.none
         "Inline assembly expressions should leave the stack unchanged, \
         or push exactly one cell onto the stack."
-  with Parsing.Parse_error ->
-    Emit_fatal.raise_fatal_parse Pos.none @@
-      "Error parsing inline hhas:\n" ^ s
+    end
+  | None ->
+    failwith @@ "impossible: cannot find parsed inline hhas for '" ^ s ^ "'"
 
 and emit_expr env (pos, expr_ as expr) ~need_ref =
   Emit_pos.emit_pos_then pos @@

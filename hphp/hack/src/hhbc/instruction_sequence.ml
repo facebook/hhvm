@@ -980,3 +980,49 @@ let get_estimated_stack_depth instrs =
     end in
 
   (instr_seq_aux initial_state instrs).depth
+
+let collect_locals f instrs =
+  let add acc l =
+    match l with
+    | Local.Named s when f s -> Unique_list_string.add acc s
+    | _ -> acc in
+  let add_member_key acc mk =
+    match mk with
+    | MemberKey.EL l | MemberKey.PL l -> add acc l
+    | _ -> acc in
+  let aux acc i =
+    match i with
+    | ILitConst (NewLikeArrayL (l, _))
+    | IGet (
+      CGetL l | CGetQuietL l |CGetL2 l | CUGetL l | PushL l |
+      VGetL l | ClsRefGetL (l, _))
+    | IIsset (IssetL l | EmptyL l | IsTypeL (l, _))
+    | IMutator (SetL l | PopL l | SetOpL (l, _) | IncDecL (l, _) | BindL l |
+                UnsetL l)
+    | ICall (FPassL (_, l, _))
+    | IBase (BaseNL (l, _) | FPassBaseNL (_, l) | BaseGL (l, _) |
+             FPassBaseGL (_, l) | FPassBaseL (_, l)
+      )
+    | IFinal (SetWithRefRML l)
+    | IIterator (
+      IterInit (_, _, l) | WIterInit (_, _, l) | MIterInit (_, _, l) |
+      IterNext (_, _, l) | WIterNext (_, _, l) | MIterNext (_, _, l)
+      )
+    | IMisc (InitThisLoc l | StaticLocCheck (l, _) | StaticLocDef (l, _) |
+             StaticLocInit (l, _) | AssertRATL (l, _) | Silence (l, _) |
+             GetMemoKeyL l | MemoGet (_, l, _) | MemoSet (_, l, _))
+    | IAsync (AwaitAll (l, _))
+      -> add acc l
+    | IFinal (SetWithRefLML (l1, l2))
+    | IIterator (
+      IterInitK (_, _, l1, l2) | WIterInitK (_, _, l1, l2) | MIterInitK (_, _, l1, l2) |
+      IterNextK (_, _, l1, l2) | WIterNextK (_, _, l1, l2) | MIterNextK (_, _, l1, l2)
+      )
+      -> add (add acc l1) l2
+    | IBase (Dim (_, mk))
+    | IFinal (QueryM (_, _, mk) | VGetM (_, mk) | FPassM (_, _, mk, _) |
+              SetM (_, mk) | IncDecM (_, _, mk) | BindM (_, mk) | UnsetM (_, mk))
+      -> add_member_key acc mk
+    | _ -> acc
+  in
+  InstrSeq.fold_left instrs ~f:aux ~init:Unique_list_string.empty

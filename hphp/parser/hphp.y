@@ -3268,10 +3268,10 @@ callable_variable:
   | common_scalar                      { $$ = $1;}
   | '(' variable ')'                   { $$ = $2;}
   | '(' expr_no_variable ')'           { $$ = $2;}
-  /* !PHP7_ONLY */
+  /* PHP7 only, but harmless to enable in older versions (and FB) */
   | parenthesis_expr_with_parens       { $$ = $1;}
   | object_method_call                 { $$ = $1;}
-  /* !END */
+  /* end of not-really-php7-only */
   | lambda_or_closure_with_parens '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
   | callable_variable '('

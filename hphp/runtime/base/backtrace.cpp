@@ -488,7 +488,7 @@ req::ptr<CompactTrace> createCompactBacktrace() {
 namespace {
 
 struct CTKHasher final {
-  int64_t hash(const CompactTrace::Key& k) const { return k.m_hash; }
+  uint64_t hash(const CompactTrace::Key& k) const { return k.m_hash; }
   bool equal(const CompactTrace::Key& k1, const CompactTrace::Key& k2) const;
 };
 

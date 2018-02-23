@@ -65,7 +65,7 @@ struct CompactTrace : SweepableResourceData {
 
     TYPE_SCAN_IGNORE_ALL;
 
-    int64_t m_hash{0x9e3779b9};
+    uint64_t m_hash{0x9e3779b9};
     folly::small_vector<Frame, 16> m_frames;
   };
 

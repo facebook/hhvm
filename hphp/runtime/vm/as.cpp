@@ -1921,7 +1921,8 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
   as.in.skipWhitespace();
   int ret = AttrNone;
   if (ctx == AttrContext::Class || ctx == AttrContext::Func) {
-    if (!SystemLib::s_inited) {
+    if (!SystemLib::s_inited &&
+      !RuntimeOption::EvalUseExternCompilerForSystemLib) {
       ret |= AttrUnique | AttrPersistent | AttrBuiltin;
     }
   }

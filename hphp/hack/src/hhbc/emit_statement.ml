@@ -59,8 +59,10 @@ let emit_def_inline = function
       (if not has_inout_params then empty else instr_deffunc (n + 1))
     ]
   | A.Class cd ->
+    let defcls_fn =
+      if Emit_env.is_systemlib () then instr_defclsnop else instr_defcls in
     Emit_pos.emit_pos_then (fst cd.Ast.c_name) @@
-    instr_defcls (int_of_string (snd cd.Ast.c_name))
+    defcls_fn (int_of_string (snd cd.Ast.c_name))
   | A.Typedef td ->
     Emit_pos.emit_pos_then (fst td.Ast.t_id) @@
     instr_deftypealias (int_of_string (snd td.Ast.t_id))

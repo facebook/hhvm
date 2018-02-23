@@ -26,6 +26,7 @@ let is_x s attributes =
   List.exists attributes f
 let is_memoized = is_x "__Memoize"
 let is_native = is_x "__Native"
+let is_foldable = is_x "__IsFoldable"
 
 let deprecation_info attributes =
   let f attr =

@@ -281,6 +281,8 @@ let instr_fcallbuiltin n un s = instr (ICall (FCallBuiltin (n, un, s)))
 
 let instr_defcls n =
   instr (IIncludeEvalDefine (DefCls n))
+let instr_defclsnop n =
+  instr (IIncludeEvalDefine (DefClsNop n))
 let instr_deftypealias n =
   instr (IIncludeEvalDefine (DefTypeAlias n))
 let instr_deffunc n =

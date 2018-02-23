@@ -76,9 +76,9 @@ type t =
   | IfStatement
   | ElseifClause
   | ElseClause
-  | IfEndIfStatement
-  | ElseifColonClause
-  | ElseColonClause
+  | AlternateIfStatement
+  | AlternateElseifClause
+  | AlternateElseClause
   | TryStatement
   | CatchClause
   | FinallyClause
@@ -247,9 +247,9 @@ let to_string kind =
   | IfStatement                             -> "if_statement"
   | ElseifClause                            -> "elseif_clause"
   | ElseClause                              -> "else_clause"
-  | IfEndIfStatement                        -> "if_endif_statement"
-  | ElseifColonClause                       -> "elseif_colon_clause"
-  | ElseColonClause                         -> "else_colon_clause"
+  | AlternateIfStatement                    -> "alternate_if_statement"
+  | AlternateElseifClause                   -> "alternate_elseif_clause"
+  | AlternateElseClause                     -> "alternate_else_clause"
   | TryStatement                            -> "try_statement"
   | CatchClause                             -> "catch_clause"
   | FinallyClause                           -> "finally_clause"

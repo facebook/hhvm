@@ -722,11 +722,11 @@ let schema : schema_node list =
       ; "statement", Aggregate Statement
       ]
     }
-  ; { kind_name   = "IfEndIfStatement"
-    ; type_name   = "if_endif_statement"
-    ; func_name   = "if_endif_statement"
-    ; description = "if_endif_statement"
-    ; prefix      = "if_endif"
+  ; { kind_name   = "AlternateIfStatement"
+    ; type_name   = "alternate_if_statement"
+    ; func_name   = "alternate_if_statement"
+    ; description = "alternate_if_statement"
+    ; prefix      = "alternate_if"
     ; aggregates  = [ TopLevelDeclaration; Statement ]
     ; fields =
       [ "keyword", Token
@@ -735,17 +735,17 @@ let schema : schema_node list =
       ; "right_paren", Token
       ; "colon", Token
       ; "statement", ZeroOrMore (Aggregate Statement)
-      ; "elseif_colon_clauses", ZeroOrMore (Just "ElseifColonClause")
-      ; "else_colon_clause", ZeroOrOne (Just "ElseColonClause")
+      ; "elseif_clauses", ZeroOrMore (Just "AlternateElseifClause")
+      ; "else_clause", ZeroOrOne (Just "AlternateElseClause")
       ; "endif_keyword", Token
       ; "semicolon", Token
       ]
     }
-  ; { kind_name   = "ElseifColonClause"
-    ; type_name   = "elseif_colon_clause"
-    ; func_name   = "elseif_colon_clause"
-    ; description = "elseif_colon_clause"
-    ; prefix      = "elseif_colon"
+  ; { kind_name   = "AlternateElseifClause"
+    ; type_name   = "alternate_elseif_clause"
+    ; func_name   = "alternate_elseif_clause"
+    ; description = "alternate_elseif_clause"
+    ; prefix      = "alternate_elseif"
     ; aggregates  = []
     ; fields =
       [ "keyword", Token
@@ -756,11 +756,11 @@ let schema : schema_node list =
       ; "statement", ZeroOrMore (Aggregate Statement)
       ]
     }
-  ; { kind_name   = "ElseColonClause"
-    ; type_name   = "else_colon_clause"
-    ; func_name   = "else_colon_clause"
-    ; description = "else_colon_clause"
-    ; prefix      = "else_colon"
+  ; { kind_name   = "AlternateElseClause"
+    ; type_name   = "alternate_else_clause"
+    ; func_name   = "alternate_else_clause"
+    ; description = "alternate_else_clause"
+    ; prefix      = "alternate_else"
     ; aggregates  = []
     ; fields =
       [ "keyword", Token

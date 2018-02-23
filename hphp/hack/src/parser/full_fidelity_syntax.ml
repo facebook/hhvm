@@ -112,9 +112,9 @@ module WithToken(Token: TokenType) = struct
       | IfStatement                             _ -> SyntaxKind.IfStatement
       | ElseifClause                            _ -> SyntaxKind.ElseifClause
       | ElseClause                              _ -> SyntaxKind.ElseClause
-      | IfEndIfStatement                        _ -> SyntaxKind.IfEndIfStatement
-      | ElseifColonClause                       _ -> SyntaxKind.ElseifColonClause
-      | ElseColonClause                         _ -> SyntaxKind.ElseColonClause
+      | AlternateIfStatement                    _ -> SyntaxKind.AlternateIfStatement
+      | AlternateElseifClause                   _ -> SyntaxKind.AlternateElseifClause
+      | AlternateElseClause                     _ -> SyntaxKind.AlternateElseClause
       | TryStatement                            _ -> SyntaxKind.TryStatement
       | CatchClause                             _ -> SyntaxKind.CatchClause
       | FinallyClause                           _ -> SyntaxKind.FinallyClause
@@ -290,9 +290,9 @@ module WithToken(Token: TokenType) = struct
     let is_if_statement                                 = has_kind SyntaxKind.IfStatement
     let is_elseif_clause                                = has_kind SyntaxKind.ElseifClause
     let is_else_clause                                  = has_kind SyntaxKind.ElseClause
-    let is_if_endif_statement                           = has_kind SyntaxKind.IfEndIfStatement
-    let is_elseif_colon_clause                          = has_kind SyntaxKind.ElseifColonClause
-    let is_else_colon_clause                            = has_kind SyntaxKind.ElseColonClause
+    let is_alternate_if_statement                       = has_kind SyntaxKind.AlternateIfStatement
+    let is_alternate_elseif_clause                      = has_kind SyntaxKind.AlternateElseifClause
+    let is_alternate_else_clause                        = has_kind SyntaxKind.AlternateElseClause
     let is_try_statement                                = has_kind SyntaxKind.TryStatement
     let is_catch_clause                                 = has_kind SyntaxKind.CatchClause
     let is_finally_clause                               = has_kind SyntaxKind.FinallyClause
@@ -1043,52 +1043,52 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc else_keyword in
          let acc = f acc else_statement in
          acc
-      | IfEndIfStatement {
-        if_endif_keyword;
-        if_endif_left_paren;
-        if_endif_condition;
-        if_endif_right_paren;
-        if_endif_colon;
-        if_endif_statement;
-        if_endif_elseif_colon_clauses;
-        if_endif_else_colon_clause;
-        if_endif_endif_keyword;
-        if_endif_semicolon;
+      | AlternateIfStatement {
+        alternate_if_keyword;
+        alternate_if_left_paren;
+        alternate_if_condition;
+        alternate_if_right_paren;
+        alternate_if_colon;
+        alternate_if_statement;
+        alternate_if_elseif_clauses;
+        alternate_if_else_clause;
+        alternate_if_endif_keyword;
+        alternate_if_semicolon;
       } ->
-         let acc = f acc if_endif_keyword in
-         let acc = f acc if_endif_left_paren in
-         let acc = f acc if_endif_condition in
-         let acc = f acc if_endif_right_paren in
-         let acc = f acc if_endif_colon in
-         let acc = f acc if_endif_statement in
-         let acc = f acc if_endif_elseif_colon_clauses in
-         let acc = f acc if_endif_else_colon_clause in
-         let acc = f acc if_endif_endif_keyword in
-         let acc = f acc if_endif_semicolon in
+         let acc = f acc alternate_if_keyword in
+         let acc = f acc alternate_if_left_paren in
+         let acc = f acc alternate_if_condition in
+         let acc = f acc alternate_if_right_paren in
+         let acc = f acc alternate_if_colon in
+         let acc = f acc alternate_if_statement in
+         let acc = f acc alternate_if_elseif_clauses in
+         let acc = f acc alternate_if_else_clause in
+         let acc = f acc alternate_if_endif_keyword in
+         let acc = f acc alternate_if_semicolon in
          acc
-      | ElseifColonClause {
-        elseif_colon_keyword;
-        elseif_colon_left_paren;
-        elseif_colon_condition;
-        elseif_colon_right_paren;
-        elseif_colon_colon;
-        elseif_colon_statement;
+      | AlternateElseifClause {
+        alternate_elseif_keyword;
+        alternate_elseif_left_paren;
+        alternate_elseif_condition;
+        alternate_elseif_right_paren;
+        alternate_elseif_colon;
+        alternate_elseif_statement;
       } ->
-         let acc = f acc elseif_colon_keyword in
-         let acc = f acc elseif_colon_left_paren in
-         let acc = f acc elseif_colon_condition in
-         let acc = f acc elseif_colon_right_paren in
-         let acc = f acc elseif_colon_colon in
-         let acc = f acc elseif_colon_statement in
+         let acc = f acc alternate_elseif_keyword in
+         let acc = f acc alternate_elseif_left_paren in
+         let acc = f acc alternate_elseif_condition in
+         let acc = f acc alternate_elseif_right_paren in
+         let acc = f acc alternate_elseif_colon in
+         let acc = f acc alternate_elseif_statement in
          acc
-      | ElseColonClause {
-        else_colon_keyword;
-        else_colon_colon;
-        else_colon_statement;
+      | AlternateElseClause {
+        alternate_else_keyword;
+        alternate_else_colon;
+        alternate_else_statement;
       } ->
-         let acc = f acc else_colon_keyword in
-         let acc = f acc else_colon_colon in
-         let acc = f acc else_colon_statement in
+         let acc = f acc alternate_else_keyword in
+         let acc = f acc alternate_else_colon in
+         let acc = f acc alternate_else_statement in
          acc
       | TryStatement {
         try_keyword;
@@ -2824,52 +2824,52 @@ module WithToken(Token: TokenType) = struct
         else_keyword;
         else_statement;
       ]
-      | IfEndIfStatement {
-        if_endif_keyword;
-        if_endif_left_paren;
-        if_endif_condition;
-        if_endif_right_paren;
-        if_endif_colon;
-        if_endif_statement;
-        if_endif_elseif_colon_clauses;
-        if_endif_else_colon_clause;
-        if_endif_endif_keyword;
-        if_endif_semicolon;
+      | AlternateIfStatement {
+        alternate_if_keyword;
+        alternate_if_left_paren;
+        alternate_if_condition;
+        alternate_if_right_paren;
+        alternate_if_colon;
+        alternate_if_statement;
+        alternate_if_elseif_clauses;
+        alternate_if_else_clause;
+        alternate_if_endif_keyword;
+        alternate_if_semicolon;
       } -> [
-        if_endif_keyword;
-        if_endif_left_paren;
-        if_endif_condition;
-        if_endif_right_paren;
-        if_endif_colon;
-        if_endif_statement;
-        if_endif_elseif_colon_clauses;
-        if_endif_else_colon_clause;
-        if_endif_endif_keyword;
-        if_endif_semicolon;
+        alternate_if_keyword;
+        alternate_if_left_paren;
+        alternate_if_condition;
+        alternate_if_right_paren;
+        alternate_if_colon;
+        alternate_if_statement;
+        alternate_if_elseif_clauses;
+        alternate_if_else_clause;
+        alternate_if_endif_keyword;
+        alternate_if_semicolon;
       ]
-      | ElseifColonClause {
-        elseif_colon_keyword;
-        elseif_colon_left_paren;
-        elseif_colon_condition;
-        elseif_colon_right_paren;
-        elseif_colon_colon;
-        elseif_colon_statement;
+      | AlternateElseifClause {
+        alternate_elseif_keyword;
+        alternate_elseif_left_paren;
+        alternate_elseif_condition;
+        alternate_elseif_right_paren;
+        alternate_elseif_colon;
+        alternate_elseif_statement;
       } -> [
-        elseif_colon_keyword;
-        elseif_colon_left_paren;
-        elseif_colon_condition;
-        elseif_colon_right_paren;
-        elseif_colon_colon;
-        elseif_colon_statement;
+        alternate_elseif_keyword;
+        alternate_elseif_left_paren;
+        alternate_elseif_condition;
+        alternate_elseif_right_paren;
+        alternate_elseif_colon;
+        alternate_elseif_statement;
       ]
-      | ElseColonClause {
-        else_colon_keyword;
-        else_colon_colon;
-        else_colon_statement;
+      | AlternateElseClause {
+        alternate_else_keyword;
+        alternate_else_colon;
+        alternate_else_statement;
       } -> [
-        else_colon_keyword;
-        else_colon_colon;
-        else_colon_statement;
+        alternate_else_keyword;
+        alternate_else_colon;
+        alternate_else_statement;
       ]
       | TryStatement {
         try_keyword;
@@ -4606,52 +4606,52 @@ module WithToken(Token: TokenType) = struct
         "else_keyword";
         "else_statement";
       ]
-      | IfEndIfStatement {
-        if_endif_keyword;
-        if_endif_left_paren;
-        if_endif_condition;
-        if_endif_right_paren;
-        if_endif_colon;
-        if_endif_statement;
-        if_endif_elseif_colon_clauses;
-        if_endif_else_colon_clause;
-        if_endif_endif_keyword;
-        if_endif_semicolon;
+      | AlternateIfStatement {
+        alternate_if_keyword;
+        alternate_if_left_paren;
+        alternate_if_condition;
+        alternate_if_right_paren;
+        alternate_if_colon;
+        alternate_if_statement;
+        alternate_if_elseif_clauses;
+        alternate_if_else_clause;
+        alternate_if_endif_keyword;
+        alternate_if_semicolon;
       } -> [
-        "if_endif_keyword";
-        "if_endif_left_paren";
-        "if_endif_condition";
-        "if_endif_right_paren";
-        "if_endif_colon";
-        "if_endif_statement";
-        "if_endif_elseif_colon_clauses";
-        "if_endif_else_colon_clause";
-        "if_endif_endif_keyword";
-        "if_endif_semicolon";
+        "alternate_if_keyword";
+        "alternate_if_left_paren";
+        "alternate_if_condition";
+        "alternate_if_right_paren";
+        "alternate_if_colon";
+        "alternate_if_statement";
+        "alternate_if_elseif_clauses";
+        "alternate_if_else_clause";
+        "alternate_if_endif_keyword";
+        "alternate_if_semicolon";
       ]
-      | ElseifColonClause {
-        elseif_colon_keyword;
-        elseif_colon_left_paren;
-        elseif_colon_condition;
-        elseif_colon_right_paren;
-        elseif_colon_colon;
-        elseif_colon_statement;
+      | AlternateElseifClause {
+        alternate_elseif_keyword;
+        alternate_elseif_left_paren;
+        alternate_elseif_condition;
+        alternate_elseif_right_paren;
+        alternate_elseif_colon;
+        alternate_elseif_statement;
       } -> [
-        "elseif_colon_keyword";
-        "elseif_colon_left_paren";
-        "elseif_colon_condition";
-        "elseif_colon_right_paren";
-        "elseif_colon_colon";
-        "elseif_colon_statement";
+        "alternate_elseif_keyword";
+        "alternate_elseif_left_paren";
+        "alternate_elseif_condition";
+        "alternate_elseif_right_paren";
+        "alternate_elseif_colon";
+        "alternate_elseif_statement";
       ]
-      | ElseColonClause {
-        else_colon_keyword;
-        else_colon_colon;
-        else_colon_statement;
+      | AlternateElseClause {
+        alternate_else_keyword;
+        alternate_else_colon;
+        alternate_else_statement;
       } -> [
-        "else_colon_keyword";
-        "else_colon_colon";
-        "else_colon_statement";
+        "alternate_else_keyword";
+        "alternate_else_colon";
+        "alternate_else_statement";
       ]
       | TryStatement {
         try_keyword;
@@ -6497,55 +6497,55 @@ module WithToken(Token: TokenType) = struct
           else_keyword;
           else_statement;
         }
-      | (SyntaxKind.IfEndIfStatement, [
-          if_endif_keyword;
-          if_endif_left_paren;
-          if_endif_condition;
-          if_endif_right_paren;
-          if_endif_colon;
-          if_endif_statement;
-          if_endif_elseif_colon_clauses;
-          if_endif_else_colon_clause;
-          if_endif_endif_keyword;
-          if_endif_semicolon;
+      | (SyntaxKind.AlternateIfStatement, [
+          alternate_if_keyword;
+          alternate_if_left_paren;
+          alternate_if_condition;
+          alternate_if_right_paren;
+          alternate_if_colon;
+          alternate_if_statement;
+          alternate_if_elseif_clauses;
+          alternate_if_else_clause;
+          alternate_if_endif_keyword;
+          alternate_if_semicolon;
         ]) ->
-        IfEndIfStatement {
-          if_endif_keyword;
-          if_endif_left_paren;
-          if_endif_condition;
-          if_endif_right_paren;
-          if_endif_colon;
-          if_endif_statement;
-          if_endif_elseif_colon_clauses;
-          if_endif_else_colon_clause;
-          if_endif_endif_keyword;
-          if_endif_semicolon;
+        AlternateIfStatement {
+          alternate_if_keyword;
+          alternate_if_left_paren;
+          alternate_if_condition;
+          alternate_if_right_paren;
+          alternate_if_colon;
+          alternate_if_statement;
+          alternate_if_elseif_clauses;
+          alternate_if_else_clause;
+          alternate_if_endif_keyword;
+          alternate_if_semicolon;
         }
-      | (SyntaxKind.ElseifColonClause, [
-          elseif_colon_keyword;
-          elseif_colon_left_paren;
-          elseif_colon_condition;
-          elseif_colon_right_paren;
-          elseif_colon_colon;
-          elseif_colon_statement;
+      | (SyntaxKind.AlternateElseifClause, [
+          alternate_elseif_keyword;
+          alternate_elseif_left_paren;
+          alternate_elseif_condition;
+          alternate_elseif_right_paren;
+          alternate_elseif_colon;
+          alternate_elseif_statement;
         ]) ->
-        ElseifColonClause {
-          elseif_colon_keyword;
-          elseif_colon_left_paren;
-          elseif_colon_condition;
-          elseif_colon_right_paren;
-          elseif_colon_colon;
-          elseif_colon_statement;
+        AlternateElseifClause {
+          alternate_elseif_keyword;
+          alternate_elseif_left_paren;
+          alternate_elseif_condition;
+          alternate_elseif_right_paren;
+          alternate_elseif_colon;
+          alternate_elseif_statement;
         }
-      | (SyntaxKind.ElseColonClause, [
-          else_colon_keyword;
-          else_colon_colon;
-          else_colon_statement;
+      | (SyntaxKind.AlternateElseClause, [
+          alternate_else_keyword;
+          alternate_else_colon;
+          alternate_else_statement;
         ]) ->
-        ElseColonClause {
-          else_colon_keyword;
-          else_colon_colon;
-          else_colon_statement;
+        AlternateElseClause {
+          alternate_else_keyword;
+          alternate_else_colon;
+          alternate_else_statement;
         }
       | (SyntaxKind.TryStatement, [
           try_keyword;
@@ -8644,61 +8644,61 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_if_endif_statement
-        if_endif_keyword
-        if_endif_left_paren
-        if_endif_condition
-        if_endif_right_paren
-        if_endif_colon
-        if_endif_statement
-        if_endif_elseif_colon_clauses
-        if_endif_else_colon_clause
-        if_endif_endif_keyword
-        if_endif_semicolon
+      let make_alternate_if_statement
+        alternate_if_keyword
+        alternate_if_left_paren
+        alternate_if_condition
+        alternate_if_right_paren
+        alternate_if_colon
+        alternate_if_statement
+        alternate_if_elseif_clauses
+        alternate_if_else_clause
+        alternate_if_endif_keyword
+        alternate_if_semicolon
       =
-        let syntax = IfEndIfStatement {
-          if_endif_keyword;
-          if_endif_left_paren;
-          if_endif_condition;
-          if_endif_right_paren;
-          if_endif_colon;
-          if_endif_statement;
-          if_endif_elseif_colon_clauses;
-          if_endif_else_colon_clause;
-          if_endif_endif_keyword;
-          if_endif_semicolon;
+        let syntax = AlternateIfStatement {
+          alternate_if_keyword;
+          alternate_if_left_paren;
+          alternate_if_condition;
+          alternate_if_right_paren;
+          alternate_if_colon;
+          alternate_if_statement;
+          alternate_if_elseif_clauses;
+          alternate_if_else_clause;
+          alternate_if_endif_keyword;
+          alternate_if_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_elseif_colon_clause
-        elseif_colon_keyword
-        elseif_colon_left_paren
-        elseif_colon_condition
-        elseif_colon_right_paren
-        elseif_colon_colon
-        elseif_colon_statement
+      let make_alternate_elseif_clause
+        alternate_elseif_keyword
+        alternate_elseif_left_paren
+        alternate_elseif_condition
+        alternate_elseif_right_paren
+        alternate_elseif_colon
+        alternate_elseif_statement
       =
-        let syntax = ElseifColonClause {
-          elseif_colon_keyword;
-          elseif_colon_left_paren;
-          elseif_colon_condition;
-          elseif_colon_right_paren;
-          elseif_colon_colon;
-          elseif_colon_statement;
+        let syntax = AlternateElseifClause {
+          alternate_elseif_keyword;
+          alternate_elseif_left_paren;
+          alternate_elseif_condition;
+          alternate_elseif_right_paren;
+          alternate_elseif_colon;
+          alternate_elseif_statement;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_else_colon_clause
-        else_colon_keyword
-        else_colon_colon
-        else_colon_statement
+      let make_alternate_else_clause
+        alternate_else_keyword
+        alternate_else_colon
+        alternate_else_statement
       =
-        let syntax = ElseColonClause {
-          else_colon_keyword;
-          else_colon_colon;
-          else_colon_statement;
+        let syntax = AlternateElseClause {
+          alternate_else_keyword;
+          alternate_else_colon;
+          alternate_else_statement;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

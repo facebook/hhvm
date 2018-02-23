@@ -143,11 +143,11 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S)
   
   let make_else_clause arg0 arg1 () = (), Syntax.make_else_clause arg0 arg1
   
-  let make_if_endif_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 () = (), Syntax.make_if_endif_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9
+  let make_alternate_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 () = (), Syntax.make_alternate_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9
   
-  let make_elseif_colon_clause arg0 arg1 arg2 arg3 arg4 arg5 () = (), Syntax.make_elseif_colon_clause arg0 arg1 arg2 arg3 arg4 arg5
+  let make_alternate_elseif_clause arg0 arg1 arg2 arg3 arg4 arg5 () = (), Syntax.make_alternate_elseif_clause arg0 arg1 arg2 arg3 arg4 arg5
   
-  let make_else_colon_clause arg0 arg1 arg2 () = (), Syntax.make_else_colon_clause arg0 arg1 arg2
+  let make_alternate_else_clause arg0 arg1 arg2 () = (), Syntax.make_alternate_else_clause arg0 arg1 arg2
   
   let make_try_statement arg0 arg1 arg2 arg3 () = (), Syntax.make_try_statement arg0 arg1 arg2 arg3
   

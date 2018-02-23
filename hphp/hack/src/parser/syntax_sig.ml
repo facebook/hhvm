@@ -347,30 +347,30 @@ module type Syntax_S = sig
     { else_keyword                                       : t
     ; else_statement                                     : t
     }
-  | IfEndIfStatement                        of
-    { if_endif_keyword                                   : t
-    ; if_endif_left_paren                                : t
-    ; if_endif_condition                                 : t
-    ; if_endif_right_paren                               : t
-    ; if_endif_colon                                     : t
-    ; if_endif_statement                                 : t
-    ; if_endif_elseif_colon_clauses                      : t
-    ; if_endif_else_colon_clause                         : t
-    ; if_endif_endif_keyword                             : t
-    ; if_endif_semicolon                                 : t
+  | AlternateIfStatement                    of
+    { alternate_if_keyword                               : t
+    ; alternate_if_left_paren                            : t
+    ; alternate_if_condition                             : t
+    ; alternate_if_right_paren                           : t
+    ; alternate_if_colon                                 : t
+    ; alternate_if_statement                             : t
+    ; alternate_if_elseif_clauses                        : t
+    ; alternate_if_else_clause                           : t
+    ; alternate_if_endif_keyword                         : t
+    ; alternate_if_semicolon                             : t
     }
-  | ElseifColonClause                       of
-    { elseif_colon_keyword                               : t
-    ; elseif_colon_left_paren                            : t
-    ; elseif_colon_condition                             : t
-    ; elseif_colon_right_paren                           : t
-    ; elseif_colon_colon                                 : t
-    ; elseif_colon_statement                             : t
+  | AlternateElseifClause                   of
+    { alternate_elseif_keyword                           : t
+    ; alternate_elseif_left_paren                        : t
+    ; alternate_elseif_condition                         : t
+    ; alternate_elseif_right_paren                       : t
+    ; alternate_elseif_colon                             : t
+    ; alternate_elseif_statement                         : t
     }
-  | ElseColonClause                         of
-    { else_colon_keyword                                 : t
-    ; else_colon_colon                                   : t
-    ; else_colon_statement                               : t
+  | AlternateElseClause                     of
+    { alternate_else_keyword                             : t
+    ; alternate_else_colon                               : t
+    ; alternate_else_statement                           : t
     }
   | TryStatement                            of
     { try_keyword                                        : t
@@ -1073,9 +1073,9 @@ module type Syntax_S = sig
   val make_if_statement : t -> t -> t -> t -> t -> t -> t -> t
   val make_elseif_clause : t -> t -> t -> t -> t -> t
   val make_else_clause : t -> t -> t
-  val make_if_endif_statement : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_elseif_colon_clause : t -> t -> t -> t -> t -> t -> t
-  val make_else_colon_clause : t -> t -> t -> t
+  val make_alternate_if_statement : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_alternate_elseif_clause : t -> t -> t -> t -> t -> t -> t
+  val make_alternate_else_clause : t -> t -> t -> t
   val make_try_statement : t -> t -> t -> t -> t
   val make_catch_clause : t -> t -> t -> t -> t -> t -> t
   val make_finally_clause : t -> t -> t
@@ -1242,9 +1242,9 @@ module type Syntax_S = sig
   val is_if_statement : t -> bool
   val is_elseif_clause : t -> bool
   val is_else_clause : t -> bool
-  val is_if_endif_statement : t -> bool
-  val is_elseif_colon_clause : t -> bool
-  val is_else_colon_clause : t -> bool
+  val is_alternate_if_statement : t -> bool
+  val is_alternate_elseif_clause : t -> bool
+  val is_alternate_else_clause : t -> bool
   val is_try_statement : t -> bool
   val is_catch_clause : t -> bool
   val is_finally_clause : t -> bool

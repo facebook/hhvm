@@ -469,17 +469,28 @@ module WithExpressionAndDeclAndTypeParser
   and parse_if_statement parser =
     (* SPEC:
   if-statement:
-    if   (   expression   )   statement   elseif-clauses-opt   else-clause-opt
+    if   (   expression   )   statement   elseif-clauses-opt    else-clause-opt
+    if   (   expression   ):  statement   alt-elif-clauses-opt  alt-else-clause-opt endif;
 
   elseif-clauses:
     elseif-clause
     elseif-clauses   elseif-clause
 
+  alt-elif-clauses:
+    alt-elif-clause
+    alt-elif-clauses   alt-elif-clause
+
   elseif-clause:
     elseif   (   expression   )   statement
 
+  alt-elif-clause:
+    elseif   (   expression   ):  statement
+
   else-clause:
     else   statement
+
+  alt-else-clause:
+    else:  statement
 
     *)
 
@@ -489,18 +500,48 @@ module WithExpressionAndDeclAndTypeParser
     let parse_if_body_helper parser_body =
       let (parser_body, left_paren_token, expr_node, right_paren_token) =
         parse_paren_expr parser_body in
-      let (parser_body, statement_node) = parse_statement parser_body in
-        (parser_body, left_paren_token, expr_node, right_paren_token,
-        statement_node)
+      let parser1, opening_token = next_token parser_body in
+      let opening_token_syntax = make_token opening_token in
+      let (parser_body, statement_node) = match Token.kind opening_token with
+      | Colon -> parse_alternate_if_block parser1 parse_statement
+      | _ -> parse_statement parser_body in
+      ( parser_body
+      , left_paren_token
+      , expr_node
+      , right_paren_token
+      , opening_token
+      , opening_token_syntax
+      , statement_node
+      )
     in
     let parse_elseif_opt parser_elseif =
       if peek_token_kind parser_elseif = Elseif then
         let (parser_elseif, elseif_token) = assert_token parser_elseif Elseif in
-        let (parser_elseif, elseif_left_paren, elseif_condition_expr,
-          elseif_right_paren, elseif_statement) =
+        let ( parser_elseif
+            , elseif_left_paren
+            , elseif_condition_expr
+            , elseif_right_paren
+            , elseif_opening_token
+            , elseif_opening_token_syntax
+            , elseif_statement
+            ) =
           parse_if_body_helper parser_elseif in
-        let elseif_syntax = make_elseif_clause elseif_token elseif_left_paren
-          elseif_condition_expr elseif_right_paren elseif_statement in
+        let elseif_syntax = match Token.kind elseif_opening_token with
+        | Colon ->
+          make_alternate_elseif_clause
+            elseif_token
+            elseif_left_paren
+            elseif_condition_expr
+            elseif_right_paren
+            elseif_opening_token_syntax
+            elseif_statement
+        | _ ->
+          make_elseif_clause
+            elseif_token
+            elseif_left_paren
+            elseif_condition_expr
+            elseif_right_paren
+            elseif_statement in
         (parser_elseif, Some elseif_syntax)
       else
         (parser_elseif, None)
@@ -511,19 +552,59 @@ module WithExpressionAndDeclAndTypeParser
       if is_missing else_token then
         (parser_else, else_token)
       else
-        let (parser_else, else_consequence) = parse_statement parser_else in
-        let else_syntax = make_else_clause else_token else_consequence in
-        (parser_else, else_syntax)
+        let parser1, opening_token = next_token parser_else in
+        match Token.kind opening_token with
+        | Colon ->
+          let opening_token_syntax = make_token opening_token in
+          let (parser_else, else_consequence) =
+            parse_alternate_if_block parser1 parse_statement in
+          (parser_else, make_alternate_else_clause else_token opening_token_syntax else_consequence)
+        | _ ->
+          let (parser_else, else_consequence) = parse_statement parser_else in
+          (parser_else, make_else_clause else_token else_consequence)
     in
     let (parser, if_keyword_token) = assert_token parser If in
-    let (parser, if_left_paren, if_expr, if_right_paren, if_consequence) =
+    let ( parser
+        , if_left_paren
+        , if_expr
+        , if_right_paren
+        , if_opening_token
+        , if_opening_token_syntax
+        , if_consequence
+        ) =
       parse_if_body_helper parser in
     let (parser, elseif_syntax) =
       parse_list_until_none parser parse_elseif_opt in
     let (parser, else_syntax) = parse_else_opt parser in
-    let syntax = make_if_statement if_keyword_token if_left_paren if_expr
-      if_right_paren if_consequence elseif_syntax else_syntax in
-    (parser, syntax)
+    match Token.kind if_opening_token with
+    | Colon ->
+      let (parser, closing_token) = require_token parser Endif
+        (SyntaxError.error1059 Endif) in
+      let (parser, semicolon_token) = require_semicolon parser in
+      ( parser
+      , make_alternate_if_statement
+          if_keyword_token
+          if_left_paren
+          if_expr
+          if_right_paren
+          if_opening_token_syntax
+          if_consequence
+          elseif_syntax
+          else_syntax
+          closing_token
+          semicolon_token
+      )
+    | _ ->
+      ( parser
+      , make_if_statement
+          if_keyword_token
+          if_left_paren
+          if_expr
+          if_right_paren
+          if_consequence
+          elseif_syntax
+          else_syntax
+      )
 
   and parse_switch_statement parser =
     (* SPEC:

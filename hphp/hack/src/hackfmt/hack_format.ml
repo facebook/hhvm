@@ -816,17 +816,17 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         ]
       | _ -> handle_possible_compound_statement env x.else_statement
     ]
-  | Syntax.IfEndIfStatement {
-      if_endif_keyword = kw;
-      if_endif_left_paren = left_p;
-      if_endif_condition = condition;
-      if_endif_right_paren = right_p;
-      if_endif_colon = colon;
-      if_endif_statement = if_body;
-      if_endif_elseif_colon_clauses = elseif_clauses;
-      if_endif_else_colon_clause = else_clause;
-      if_endif_endif_keyword = endif_kw;
-      if_endif_semicolon = semicolon; } ->
+  | Syntax.AlternateIfStatement {
+      alternate_if_keyword = kw;
+      alternate_if_left_paren = left_p;
+      alternate_if_condition = condition;
+      alternate_if_right_paren = right_p;
+      alternate_if_colon = colon;
+      alternate_if_statement = if_body;
+      alternate_if_elseif_clauses = elseif_clauses;
+      alternate_if_else_clause = else_clause;
+      alternate_if_endif_keyword = endif_kw;
+      alternate_if_semicolon = semicolon; } ->
     Concat [
       t env kw;
       Space;
@@ -839,13 +839,13 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semicolon;
       Newline;
     ]
-  | Syntax.ElseifColonClause {
-      elseif_colon_keyword = kw;
-      elseif_colon_left_paren = left_p;
-      elseif_colon_condition = condition;
-      elseif_colon_right_paren = right_p;
-      elseif_colon_colon = colon;
-      elseif_colon_statement = body; } ->
+  | Syntax.AlternateElseifClause {
+      alternate_elseif_keyword = kw;
+      alternate_elseif_left_paren = left_p;
+      alternate_elseif_condition = condition;
+      alternate_elseif_right_paren = right_p;
+      alternate_elseif_colon = colon;
+      alternate_elseif_statement = body; } ->
     Concat [
       t env kw;
       Space;
@@ -853,16 +853,16 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env colon;
       handle_possible_compound_statement env body;
     ]
-  | Syntax.ElseColonClause x ->
+  | Syntax.AlternateElseClause x ->
     Concat [
-      t env x.else_colon_keyword;
-      match Syntax.syntax x.else_colon_statement with
+      t env x.alternate_else_keyword;
+      match Syntax.syntax x.alternate_else_statement with
       | Syntax.IfStatement _ -> Concat [
           Space;
-          t env x.else_colon_statement;
+          t env x.alternate_else_statement;
           Space;
         ]
-      | _ -> handle_possible_compound_statement env x.else_colon_statement
+      | _ -> handle_possible_compound_statement env x.alternate_else_statement
     ]
   | Syntax.TryStatement {
       try_keyword = kw;

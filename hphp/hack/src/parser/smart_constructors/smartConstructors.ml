@@ -84,9 +84,9 @@ module type SmartConstructors_S = sig
   val make_if_statement : r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_elseif_clause : r -> r -> r -> r -> r -> t -> t * r
   val make_else_clause : r -> r -> t -> t * r
-  val make_if_endif_statement : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
-  val make_elseif_colon_clause : r -> r -> r -> r -> r -> r -> t -> t * r
-  val make_else_colon_clause : r -> r -> r -> t -> t * r
+  val make_alternate_if_statement : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
+  val make_alternate_elseif_clause : r -> r -> r -> r -> r -> r -> t -> t * r
+  val make_alternate_else_clause : r -> r -> r -> t -> t * r
   val make_try_statement : r -> r -> r -> r -> t -> t * r
   val make_catch_clause : r -> r -> r -> r -> r -> r -> t -> t * r
   val make_finally_clause : r -> r -> t -> t * r
@@ -263,9 +263,9 @@ end) = struct
     let if_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 = call parser (SCI.make_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6)
     let elseif_clause parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_elseif_clause arg0 arg1 arg2 arg3 arg4)
     let else_clause parser arg0 arg1 = call parser (SCI.make_else_clause arg0 arg1)
-    let if_endif_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 = call parser (SCI.make_if_endif_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9)
-    let elseif_colon_clause parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_elseif_colon_clause arg0 arg1 arg2 arg3 arg4 arg5)
-    let else_colon_clause parser arg0 arg1 arg2 = call parser (SCI.make_else_colon_clause arg0 arg1 arg2)
+    let alternate_if_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 = call parser (SCI.make_alternate_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9)
+    let alternate_elseif_clause parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_alternate_elseif_clause arg0 arg1 arg2 arg3 arg4 arg5)
+    let alternate_else_clause parser arg0 arg1 arg2 = call parser (SCI.make_alternate_else_clause arg0 arg1 arg2)
     let try_statement parser arg0 arg1 arg2 arg3 = call parser (SCI.make_try_statement arg0 arg1 arg2 arg3)
     let catch_clause parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_catch_clause arg0 arg1 arg2 arg3 arg4 arg5)
     let finally_clause parser arg0 arg1 = call parser (SCI.make_finally_clause arg0 arg1)

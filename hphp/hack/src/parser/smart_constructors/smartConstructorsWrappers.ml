@@ -85,9 +85,9 @@ module type SyntaxKind_S = sig
   val is_if_statement : r -> bool
   val is_elseif_clause : r -> bool
   val is_else_clause : r -> bool
-  val is_if_endif_statement : r -> bool
-  val is_elseif_colon_clause : r -> bool
-  val is_else_colon_clause : r -> bool
+  val is_alternate_if_statement : r -> bool
+  val is_alternate_elseif_clause : r -> bool
+  val is_alternate_else_clause : r -> bool
   val is_try_statement : r -> bool
   val is_catch_clause : r -> bool
   val is_finally_clause : r -> bool
@@ -270,9 +270,9 @@ module SyntaxKind(SC : SC_S) :
   let make_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 state = compose SK.IfStatement (SC.make_if_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) state)
   let make_elseif_clause arg0 arg1 arg2 arg3 arg4 state = compose SK.ElseifClause (SC.make_elseif_clause (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_else_clause arg0 arg1 state = compose SK.ElseClause (SC.make_else_clause (snd arg0) (snd arg1) state)
-  let make_if_endif_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 state = compose SK.IfEndIfStatement (SC.make_if_endif_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) (snd arg9) state)
-  let make_elseif_colon_clause arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.ElseifColonClause (SC.make_elseif_colon_clause (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
-  let make_else_colon_clause arg0 arg1 arg2 state = compose SK.ElseColonClause (SC.make_else_colon_clause (snd arg0) (snd arg1) (snd arg2) state)
+  let make_alternate_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 state = compose SK.AlternateIfStatement (SC.make_alternate_if_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) (snd arg9) state)
+  let make_alternate_elseif_clause arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.AlternateElseifClause (SC.make_alternate_elseif_clause (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
+  let make_alternate_else_clause arg0 arg1 arg2 state = compose SK.AlternateElseClause (SC.make_alternate_else_clause (snd arg0) (snd arg1) (snd arg2) state)
   let make_try_statement arg0 arg1 arg2 arg3 state = compose SK.TryStatement (SC.make_try_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_catch_clause arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.CatchClause (SC.make_catch_clause (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
   let make_finally_clause arg0 arg1 state = compose SK.FinallyClause (SC.make_finally_clause (snd arg0) (snd arg1) state)
@@ -440,9 +440,9 @@ module SyntaxKind(SC : SC_S) :
   let is_if_statement                                 = has_kind SK.IfStatement
   let is_elseif_clause                                = has_kind SK.ElseifClause
   let is_else_clause                                  = has_kind SK.ElseClause
-  let is_if_endif_statement                           = has_kind SK.IfEndIfStatement
-  let is_elseif_colon_clause                          = has_kind SK.ElseifColonClause
-  let is_else_colon_clause                            = has_kind SK.ElseColonClause
+  let is_alternate_if_statement                       = has_kind SK.AlternateIfStatement
+  let is_alternate_elseif_clause                      = has_kind SK.AlternateElseifClause
+  let is_alternate_else_clause                        = has_kind SK.AlternateElseClause
   let is_try_statement                                = has_kind SK.TryStatement
   let is_catch_clause                                 = has_kind SK.CatchClause
   let is_finally_clause                               = has_kind SK.FinallyClause

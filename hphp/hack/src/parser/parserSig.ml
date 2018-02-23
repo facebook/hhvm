@@ -103,9 +103,9 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val if_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val elseif_clause : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val else_clause : t -> SC.r -> SC.r -> t * SC.r
-        val if_endif_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val elseif_colon_clause : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val else_colon_clause : t -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val alternate_if_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val alternate_elseif_clause : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val alternate_else_clause : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val try_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val catch_clause : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val finally_clause : t -> SC.r -> SC.r -> t * SC.r

@@ -1502,7 +1502,15 @@ and pStmt : stmt parser = fun node env ->
     , List.concat @@ couldMap ~f:pSwitchSection sections env
     )
   | IfStatement
-    { if_condition; if_statement; if_elseif_clauses; if_else_clause; _ } ->
+    { if_condition=cond;
+      if_statement=stmt;
+      if_elseif_clauses=elseif_clause;
+      if_else_clause=else_clause; _ }
+  | AlternateIfStatement
+    { alternate_if_condition=cond;
+      alternate_if_statement=stmt;
+      alternate_if_elseif_clauses=elseif_clause;
+      alternate_if_else_clause=else_clause; _ } ->
     (* Because consistency is for the weak-willed, Parser_hack does *not*
      * produce `Noop`s for compound statements **in if statements**
      *)
@@ -1510,25 +1518,28 @@ and pStmt : stmt parser = fun node env ->
     | [p, Block [_, Noop]] -> [p, Block []]
     | stmts -> stmts
     in
-    let if_condition = pExpr if_condition env in
-    let if_statement = de_noop (pStmtUnsafe if_statement env) in
+    let if_condition = pExpr cond env in
+    let if_statement = de_noop (pStmtUnsafe stmt env) in
     let if_elseif_statement =
       let pElseIf : (block -> block) parser = fun node env ->
         match syntax node with
-        | ElseifClause { elseif_condition; elseif_statement; _ } ->
+        | ElseifClause { elseif_condition=ei_cond; elseif_statement=ei_stmt; _ }
+        | AlternateElseifClause { alternate_elseif_condition=ei_cond;
+          alternate_elseif_statement=ei_stmt; _ } ->
           fun next_clause ->
-            let elseif_condition = pExpr elseif_condition env in
-            let elseif_statement = de_noop (pStmtUnsafe elseif_statement env) in
+            let elseif_condition = pExpr ei_cond env in
+            let elseif_statement = de_noop (pStmtUnsafe ei_stmt env) in
             [ pos, If (elseif_condition, elseif_statement, next_clause) ]
         | _ -> missing_syntax "elseif clause" node env
       in
       List.fold_right ~f:(@@)
-          (couldMap ~f:pElseIf if_elseif_clauses env)
-          ~init:( match syntax if_else_clause with
-            | ElseClause { else_statement; _ } ->
-              de_noop (pStmtUnsafe else_statement env)
+          (couldMap ~f:pElseIf elseif_clause env)
+          ~init:( match syntax else_clause with
+            | ElseClause { else_statement=e_stmt; _ }
+            | AlternateElseClause { alternate_else_statement=e_stmt; _ } ->
+              de_noop (pStmtUnsafe e_stmt env)
             | Missing -> [Pos.none, Noop]
-            | _ -> missing_syntax "else clause" if_else_clause env
+            | _ -> missing_syntax "else clause" else_clause env
           )
     in
     pos, If (if_condition, if_statement, if_elseif_statement)
@@ -1545,6 +1556,8 @@ and pStmt : stmt parser = fun node env ->
     handle_loop_body pos compound_statements tail env
   | AlternateLoopStatement { alternate_loop_statements; _ } ->
     handle_loop_body pos alternate_loop_statements [] env
+  | SyntaxList _ ->
+    handle_loop_body pos node [] env
   | ThrowStatement { throw_expression; _ } ->
     pos, Throw (pExpr throw_expression env)
   | DoStatement { do_body; do_condition; _ } ->

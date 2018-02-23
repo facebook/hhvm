@@ -256,12 +256,12 @@ abstract class EditableSyntax implements ArrayAccess {
       return ElseifClause::from_json($json, $position, $source);
     case 'else_clause':
       return ElseClause::from_json($json, $position, $source);
-    case 'if_endif_statement':
-      return IfEndIfStatement::from_json($json, $position, $source);
-    case 'elseif_colon_clause':
-      return ElseifColonClause::from_json($json, $position, $source);
-    case 'else_colon_clause':
-      return ElseColonClause::from_json($json, $position, $source);
+    case 'alternate_if_statement':
+      return AlternateIfStatement::from_json($json, $position, $source);
+    case 'alternate_elseif_clause':
+      return AlternateElseifClause::from_json($json, $position, $source);
+    case 'alternate_else_clause':
+      return AlternateElseClause::from_json($json, $position, $source);
     case 'try_statement':
       return TryStatement::from_json($json, $position, $source);
     case 'catch_clause':
@@ -10717,15 +10717,15 @@ final class ElseClause extends EditableSyntax {
     yield break;
   }
 }
-final class IfEndIfStatement extends EditableSyntax {
+final class AlternateIfStatement extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_paren;
   private EditableSyntax $_condition;
   private EditableSyntax $_right_paren;
   private EditableSyntax $_colon;
   private EditableSyntax $_statement;
-  private EditableSyntax $_elseif_colon_clauses;
-  private EditableSyntax $_else_colon_clause;
+  private EditableSyntax $_elseif_clauses;
+  private EditableSyntax $_else_clause;
   private EditableSyntax $_endif_keyword;
   private EditableSyntax $_semicolon;
   public function __construct(
@@ -10735,19 +10735,19 @@ final class IfEndIfStatement extends EditableSyntax {
     EditableSyntax $right_paren,
     EditableSyntax $colon,
     EditableSyntax $statement,
-    EditableSyntax $elseif_colon_clauses,
-    EditableSyntax $else_colon_clause,
+    EditableSyntax $elseif_clauses,
+    EditableSyntax $else_clause,
     EditableSyntax $endif_keyword,
     EditableSyntax $semicolon) {
-    parent::__construct('if_endif_statement');
+    parent::__construct('alternate_if_statement');
     $this->_keyword = $keyword;
     $this->_left_paren = $left_paren;
     $this->_condition = $condition;
     $this->_right_paren = $right_paren;
     $this->_colon = $colon;
     $this->_statement = $statement;
-    $this->_elseif_colon_clauses = $elseif_colon_clauses;
-    $this->_else_colon_clause = $else_colon_clause;
+    $this->_elseif_clauses = $elseif_clauses;
+    $this->_else_clause = $else_clause;
     $this->_endif_keyword = $endif_keyword;
     $this->_semicolon = $semicolon;
   }
@@ -10769,11 +10769,11 @@ final class IfEndIfStatement extends EditableSyntax {
   public function statement(): EditableSyntax {
     return $this->_statement;
   }
-  public function elseif_colon_clauses(): EditableSyntax {
-    return $this->_elseif_colon_clauses;
+  public function elseif_clauses(): EditableSyntax {
+    return $this->_elseif_clauses;
   }
-  public function else_colon_clause(): EditableSyntax {
-    return $this->_else_colon_clause;
+  public function else_clause(): EditableSyntax {
+    return $this->_else_clause;
   }
   public function endif_keyword(): EditableSyntax {
     return $this->_endif_keyword;
@@ -10781,133 +10781,133 @@ final class IfEndIfStatement extends EditableSyntax {
   public function semicolon(): EditableSyntax {
     return $this->_semicolon;
   }
-  public function with_keyword(EditableSyntax $keyword): IfEndIfStatement {
-    return new IfEndIfStatement(
+  public function with_keyword(EditableSyntax $keyword): AlternateIfStatement {
+    return new AlternateIfStatement(
       $keyword,
       $this->_left_paren,
       $this->_condition,
       $this->_right_paren,
       $this->_colon,
       $this->_statement,
-      $this->_elseif_colon_clauses,
-      $this->_else_colon_clause,
+      $this->_elseif_clauses,
+      $this->_else_clause,
       $this->_endif_keyword,
       $this->_semicolon);
   }
-  public function with_left_paren(EditableSyntax $left_paren): IfEndIfStatement {
-    return new IfEndIfStatement(
+  public function with_left_paren(EditableSyntax $left_paren): AlternateIfStatement {
+    return new AlternateIfStatement(
       $this->_keyword,
       $left_paren,
       $this->_condition,
       $this->_right_paren,
       $this->_colon,
       $this->_statement,
-      $this->_elseif_colon_clauses,
-      $this->_else_colon_clause,
+      $this->_elseif_clauses,
+      $this->_else_clause,
       $this->_endif_keyword,
       $this->_semicolon);
   }
-  public function with_condition(EditableSyntax $condition): IfEndIfStatement {
-    return new IfEndIfStatement(
+  public function with_condition(EditableSyntax $condition): AlternateIfStatement {
+    return new AlternateIfStatement(
       $this->_keyword,
       $this->_left_paren,
       $condition,
       $this->_right_paren,
       $this->_colon,
       $this->_statement,
-      $this->_elseif_colon_clauses,
-      $this->_else_colon_clause,
+      $this->_elseif_clauses,
+      $this->_else_clause,
       $this->_endif_keyword,
       $this->_semicolon);
   }
-  public function with_right_paren(EditableSyntax $right_paren): IfEndIfStatement {
-    return new IfEndIfStatement(
+  public function with_right_paren(EditableSyntax $right_paren): AlternateIfStatement {
+    return new AlternateIfStatement(
       $this->_keyword,
       $this->_left_paren,
       $this->_condition,
       $right_paren,
       $this->_colon,
       $this->_statement,
-      $this->_elseif_colon_clauses,
-      $this->_else_colon_clause,
+      $this->_elseif_clauses,
+      $this->_else_clause,
       $this->_endif_keyword,
       $this->_semicolon);
   }
-  public function with_colon(EditableSyntax $colon): IfEndIfStatement {
-    return new IfEndIfStatement(
+  public function with_colon(EditableSyntax $colon): AlternateIfStatement {
+    return new AlternateIfStatement(
       $this->_keyword,
       $this->_left_paren,
       $this->_condition,
       $this->_right_paren,
       $colon,
       $this->_statement,
-      $this->_elseif_colon_clauses,
-      $this->_else_colon_clause,
+      $this->_elseif_clauses,
+      $this->_else_clause,
       $this->_endif_keyword,
       $this->_semicolon);
   }
-  public function with_statement(EditableSyntax $statement): IfEndIfStatement {
-    return new IfEndIfStatement(
+  public function with_statement(EditableSyntax $statement): AlternateIfStatement {
+    return new AlternateIfStatement(
       $this->_keyword,
       $this->_left_paren,
       $this->_condition,
       $this->_right_paren,
       $this->_colon,
       $statement,
-      $this->_elseif_colon_clauses,
-      $this->_else_colon_clause,
+      $this->_elseif_clauses,
+      $this->_else_clause,
       $this->_endif_keyword,
       $this->_semicolon);
   }
-  public function with_elseif_colon_clauses(EditableSyntax $elseif_colon_clauses): IfEndIfStatement {
-    return new IfEndIfStatement(
+  public function with_elseif_clauses(EditableSyntax $elseif_clauses): AlternateIfStatement {
+    return new AlternateIfStatement(
       $this->_keyword,
       $this->_left_paren,
       $this->_condition,
       $this->_right_paren,
       $this->_colon,
       $this->_statement,
-      $elseif_colon_clauses,
-      $this->_else_colon_clause,
+      $elseif_clauses,
+      $this->_else_clause,
       $this->_endif_keyword,
       $this->_semicolon);
   }
-  public function with_else_colon_clause(EditableSyntax $else_colon_clause): IfEndIfStatement {
-    return new IfEndIfStatement(
+  public function with_else_clause(EditableSyntax $else_clause): AlternateIfStatement {
+    return new AlternateIfStatement(
       $this->_keyword,
       $this->_left_paren,
       $this->_condition,
       $this->_right_paren,
       $this->_colon,
       $this->_statement,
-      $this->_elseif_colon_clauses,
-      $else_colon_clause,
+      $this->_elseif_clauses,
+      $else_clause,
       $this->_endif_keyword,
       $this->_semicolon);
   }
-  public function with_endif_keyword(EditableSyntax $endif_keyword): IfEndIfStatement {
-    return new IfEndIfStatement(
+  public function with_endif_keyword(EditableSyntax $endif_keyword): AlternateIfStatement {
+    return new AlternateIfStatement(
       $this->_keyword,
       $this->_left_paren,
       $this->_condition,
       $this->_right_paren,
       $this->_colon,
       $this->_statement,
-      $this->_elseif_colon_clauses,
-      $this->_else_colon_clause,
+      $this->_elseif_clauses,
+      $this->_else_clause,
       $endif_keyword,
       $this->_semicolon);
   }
-  public function with_semicolon(EditableSyntax $semicolon): IfEndIfStatement {
-    return new IfEndIfStatement(
+  public function with_semicolon(EditableSyntax $semicolon): AlternateIfStatement {
+    return new AlternateIfStatement(
       $this->_keyword,
       $this->_left_paren,
       $this->_condition,
       $this->_right_paren,
       $this->_colon,
       $this->_statement,
-      $this->_elseif_colon_clauses,
-      $this->_else_colon_clause,
+      $this->_elseif_clauses,
+      $this->_else_clause,
       $this->_endif_keyword,
       $semicolon);
   }
@@ -10924,8 +10924,8 @@ final class IfEndIfStatement extends EditableSyntax {
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     $colon = $this->colon()->rewrite($rewriter, $new_parents);
     $statement = $this->statement()->rewrite($rewriter, $new_parents);
-    $elseif_colon_clauses = $this->elseif_colon_clauses()->rewrite($rewriter, $new_parents);
-    $else_colon_clause = $this->else_colon_clause()->rewrite($rewriter, $new_parents);
+    $elseif_clauses = $this->elseif_clauses()->rewrite($rewriter, $new_parents);
+    $else_clause = $this->else_clause()->rewrite($rewriter, $new_parents);
     $endif_keyword = $this->endif_keyword()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
@@ -10935,21 +10935,21 @@ final class IfEndIfStatement extends EditableSyntax {
       $right_paren === $this->right_paren() &&
       $colon === $this->colon() &&
       $statement === $this->statement() &&
-      $elseif_colon_clauses === $this->elseif_colon_clauses() &&
-      $else_colon_clause === $this->else_colon_clause() &&
+      $elseif_clauses === $this->elseif_clauses() &&
+      $else_clause === $this->else_clause() &&
       $endif_keyword === $this->endif_keyword() &&
       $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
-      return $rewriter(new IfEndIfStatement(
+      return $rewriter(new AlternateIfStatement(
         $keyword,
         $left_paren,
         $condition,
         $right_paren,
         $colon,
         $statement,
-        $elseif_colon_clauses,
-        $else_colon_clause,
+        $elseif_clauses,
+        $else_clause,
         $endif_keyword,
         $semicolon), $parents ?? []);
     }
@@ -10957,44 +10957,44 @@ final class IfEndIfStatement extends EditableSyntax {
 
   public static function from_json(mixed $json, int $position, string $source) {
     $keyword = EditableSyntax::from_json(
-      $json->if_endif_keyword, $position, $source);
+      $json->alternate_if_keyword, $position, $source);
     $position += $keyword->width();
     $left_paren = EditableSyntax::from_json(
-      $json->if_endif_left_paren, $position, $source);
+      $json->alternate_if_left_paren, $position, $source);
     $position += $left_paren->width();
     $condition = EditableSyntax::from_json(
-      $json->if_endif_condition, $position, $source);
+      $json->alternate_if_condition, $position, $source);
     $position += $condition->width();
     $right_paren = EditableSyntax::from_json(
-      $json->if_endif_right_paren, $position, $source);
+      $json->alternate_if_right_paren, $position, $source);
     $position += $right_paren->width();
     $colon = EditableSyntax::from_json(
-      $json->if_endif_colon, $position, $source);
+      $json->alternate_if_colon, $position, $source);
     $position += $colon->width();
     $statement = EditableSyntax::from_json(
-      $json->if_endif_statement, $position, $source);
+      $json->alternate_if_statement, $position, $source);
     $position += $statement->width();
-    $elseif_colon_clauses = EditableSyntax::from_json(
-      $json->if_endif_elseif_colon_clauses, $position, $source);
-    $position += $elseif_colon_clauses->width();
-    $else_colon_clause = EditableSyntax::from_json(
-      $json->if_endif_else_colon_clause, $position, $source);
-    $position += $else_colon_clause->width();
+    $elseif_clauses = EditableSyntax::from_json(
+      $json->alternate_if_elseif_clauses, $position, $source);
+    $position += $elseif_clauses->width();
+    $else_clause = EditableSyntax::from_json(
+      $json->alternate_if_else_clause, $position, $source);
+    $position += $else_clause->width();
     $endif_keyword = EditableSyntax::from_json(
-      $json->if_endif_endif_keyword, $position, $source);
+      $json->alternate_if_endif_keyword, $position, $source);
     $position += $endif_keyword->width();
     $semicolon = EditableSyntax::from_json(
-      $json->if_endif_semicolon, $position, $source);
+      $json->alternate_if_semicolon, $position, $source);
     $position += $semicolon->width();
-    return new IfEndIfStatement(
+    return new AlternateIfStatement(
         $keyword,
         $left_paren,
         $condition,
         $right_paren,
         $colon,
         $statement,
-        $elseif_colon_clauses,
-        $else_colon_clause,
+        $elseif_clauses,
+        $else_clause,
         $endif_keyword,
         $semicolon);
   }
@@ -11005,14 +11005,14 @@ final class IfEndIfStatement extends EditableSyntax {
     yield $this->_right_paren;
     yield $this->_colon;
     yield $this->_statement;
-    yield $this->_elseif_colon_clauses;
-    yield $this->_else_colon_clause;
+    yield $this->_elseif_clauses;
+    yield $this->_else_clause;
     yield $this->_endif_keyword;
     yield $this->_semicolon;
     yield break;
   }
 }
-final class ElseifColonClause extends EditableSyntax {
+final class AlternateElseifClause extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_paren;
   private EditableSyntax $_condition;
@@ -11026,7 +11026,7 @@ final class ElseifColonClause extends EditableSyntax {
     EditableSyntax $right_paren,
     EditableSyntax $colon,
     EditableSyntax $statement) {
-    parent::__construct('elseif_colon_clause');
+    parent::__construct('alternate_elseif_clause');
     $this->_keyword = $keyword;
     $this->_left_paren = $left_paren;
     $this->_condition = $condition;
@@ -11052,8 +11052,8 @@ final class ElseifColonClause extends EditableSyntax {
   public function statement(): EditableSyntax {
     return $this->_statement;
   }
-  public function with_keyword(EditableSyntax $keyword): ElseifColonClause {
-    return new ElseifColonClause(
+  public function with_keyword(EditableSyntax $keyword): AlternateElseifClause {
+    return new AlternateElseifClause(
       $keyword,
       $this->_left_paren,
       $this->_condition,
@@ -11061,8 +11061,8 @@ final class ElseifColonClause extends EditableSyntax {
       $this->_colon,
       $this->_statement);
   }
-  public function with_left_paren(EditableSyntax $left_paren): ElseifColonClause {
-    return new ElseifColonClause(
+  public function with_left_paren(EditableSyntax $left_paren): AlternateElseifClause {
+    return new AlternateElseifClause(
       $this->_keyword,
       $left_paren,
       $this->_condition,
@@ -11070,8 +11070,8 @@ final class ElseifColonClause extends EditableSyntax {
       $this->_colon,
       $this->_statement);
   }
-  public function with_condition(EditableSyntax $condition): ElseifColonClause {
-    return new ElseifColonClause(
+  public function with_condition(EditableSyntax $condition): AlternateElseifClause {
+    return new AlternateElseifClause(
       $this->_keyword,
       $this->_left_paren,
       $condition,
@@ -11079,8 +11079,8 @@ final class ElseifColonClause extends EditableSyntax {
       $this->_colon,
       $this->_statement);
   }
-  public function with_right_paren(EditableSyntax $right_paren): ElseifColonClause {
-    return new ElseifColonClause(
+  public function with_right_paren(EditableSyntax $right_paren): AlternateElseifClause {
+    return new AlternateElseifClause(
       $this->_keyword,
       $this->_left_paren,
       $this->_condition,
@@ -11088,8 +11088,8 @@ final class ElseifColonClause extends EditableSyntax {
       $this->_colon,
       $this->_statement);
   }
-  public function with_colon(EditableSyntax $colon): ElseifColonClause {
-    return new ElseifColonClause(
+  public function with_colon(EditableSyntax $colon): AlternateElseifClause {
+    return new AlternateElseifClause(
       $this->_keyword,
       $this->_left_paren,
       $this->_condition,
@@ -11097,8 +11097,8 @@ final class ElseifColonClause extends EditableSyntax {
       $colon,
       $this->_statement);
   }
-  public function with_statement(EditableSyntax $statement): ElseifColonClause {
-    return new ElseifColonClause(
+  public function with_statement(EditableSyntax $statement): AlternateElseifClause {
+    return new AlternateElseifClause(
       $this->_keyword,
       $this->_left_paren,
       $this->_condition,
@@ -11128,7 +11128,7 @@ final class ElseifColonClause extends EditableSyntax {
       $statement === $this->statement()) {
       return $rewriter($this, $parents ?? []);
     } else {
-      return $rewriter(new ElseifColonClause(
+      return $rewriter(new AlternateElseifClause(
         $keyword,
         $left_paren,
         $condition,
@@ -11140,24 +11140,24 @@ final class ElseifColonClause extends EditableSyntax {
 
   public static function from_json(mixed $json, int $position, string $source) {
     $keyword = EditableSyntax::from_json(
-      $json->elseif_colon_keyword, $position, $source);
+      $json->alternate_elseif_keyword, $position, $source);
     $position += $keyword->width();
     $left_paren = EditableSyntax::from_json(
-      $json->elseif_colon_left_paren, $position, $source);
+      $json->alternate_elseif_left_paren, $position, $source);
     $position += $left_paren->width();
     $condition = EditableSyntax::from_json(
-      $json->elseif_colon_condition, $position, $source);
+      $json->alternate_elseif_condition, $position, $source);
     $position += $condition->width();
     $right_paren = EditableSyntax::from_json(
-      $json->elseif_colon_right_paren, $position, $source);
+      $json->alternate_elseif_right_paren, $position, $source);
     $position += $right_paren->width();
     $colon = EditableSyntax::from_json(
-      $json->elseif_colon_colon, $position, $source);
+      $json->alternate_elseif_colon, $position, $source);
     $position += $colon->width();
     $statement = EditableSyntax::from_json(
-      $json->elseif_colon_statement, $position, $source);
+      $json->alternate_elseif_statement, $position, $source);
     $position += $statement->width();
-    return new ElseifColonClause(
+    return new AlternateElseifClause(
         $keyword,
         $left_paren,
         $condition,
@@ -11175,7 +11175,7 @@ final class ElseifColonClause extends EditableSyntax {
     yield break;
   }
 }
-final class ElseColonClause extends EditableSyntax {
+final class AlternateElseClause extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_colon;
   private EditableSyntax $_statement;
@@ -11183,7 +11183,7 @@ final class ElseColonClause extends EditableSyntax {
     EditableSyntax $keyword,
     EditableSyntax $colon,
     EditableSyntax $statement) {
-    parent::__construct('else_colon_clause');
+    parent::__construct('alternate_else_clause');
     $this->_keyword = $keyword;
     $this->_colon = $colon;
     $this->_statement = $statement;
@@ -11197,20 +11197,20 @@ final class ElseColonClause extends EditableSyntax {
   public function statement(): EditableSyntax {
     return $this->_statement;
   }
-  public function with_keyword(EditableSyntax $keyword): ElseColonClause {
-    return new ElseColonClause(
+  public function with_keyword(EditableSyntax $keyword): AlternateElseClause {
+    return new AlternateElseClause(
       $keyword,
       $this->_colon,
       $this->_statement);
   }
-  public function with_colon(EditableSyntax $colon): ElseColonClause {
-    return new ElseColonClause(
+  public function with_colon(EditableSyntax $colon): AlternateElseClause {
+    return new AlternateElseClause(
       $this->_keyword,
       $colon,
       $this->_statement);
   }
-  public function with_statement(EditableSyntax $statement): ElseColonClause {
-    return new ElseColonClause(
+  public function with_statement(EditableSyntax $statement): AlternateElseClause {
+    return new AlternateElseClause(
       $this->_keyword,
       $this->_colon,
       $statement);
@@ -11231,7 +11231,7 @@ final class ElseColonClause extends EditableSyntax {
       $statement === $this->statement()) {
       return $rewriter($this, $parents ?? []);
     } else {
-      return $rewriter(new ElseColonClause(
+      return $rewriter(new AlternateElseClause(
         $keyword,
         $colon,
         $statement), $parents ?? []);
@@ -11240,15 +11240,15 @@ final class ElseColonClause extends EditableSyntax {
 
   public static function from_json(mixed $json, int $position, string $source) {
     $keyword = EditableSyntax::from_json(
-      $json->else_colon_keyword, $position, $source);
+      $json->alternate_else_keyword, $position, $source);
     $position += $keyword->width();
     $colon = EditableSyntax::from_json(
-      $json->else_colon_colon, $position, $source);
+      $json->alternate_else_colon, $position, $source);
     $position += $colon->width();
     $statement = EditableSyntax::from_json(
-      $json->else_colon_statement, $position, $source);
+      $json->alternate_else_statement, $position, $source);
     $position += $statement->width();
-    return new ElseColonClause(
+    return new AlternateElseClause(
         $keyword,
         $colon,
         $statement);

@@ -856,6 +856,12 @@ module WithParser(Parser : Parser_S) = struct
     let predicate parser = peek_token_kind parser != terminator in
     parse_list_while parser parse_item predicate
 
+  let parse_alternate_if_block parser parse_item =
+    parse_list_while parser parse_item (fun parser ->
+      match peek_token_kind parser with
+      | TokenKind.Elseif | TokenKind.Else | TokenKind.Endif -> false
+      | _ -> true)
+
   let parse_list_until_none parser parse_item =
     let rec aux parser acc =
       let (parser, maybe_item) = parse_item parser in

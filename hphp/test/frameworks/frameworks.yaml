@@ -9,7 +9,6 @@
 #
 # Optionally, you can specify:
 #
-# pull_requests: a list of maps of pull requests (see pear)
 # blacklist: a list of tests that will cause the runner to behave badly
 # clowns: a list of tests that are clowny (e.g. fail both HHVM and Zend)
 # flakey: a list of tests that intermittently fail

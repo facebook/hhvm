@@ -76,6 +76,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/alloc.h"
 #include "hphp/util/arch.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
@@ -2263,6 +2264,13 @@ void hphp_process_init() {
     hphp_process_exit();
     exit(0);
   }
+
+#if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 5)
+  // jemalloc 5 has background threads, which handle purging asynchronously.
+  if (mallctlWrite("background_thread", true, /* errorOK */ true)) {
+    Logger::Warning("Failed to enable jemalloc background threads");
+  }
+#endif
 }
 
 static void handle_exception(bool& ret, ExecutionContext* context,

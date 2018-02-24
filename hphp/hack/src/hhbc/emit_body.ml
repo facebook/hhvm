@@ -517,7 +517,7 @@ let emit_body
     body_instrs
     decl_vars
     false (*is_memoize_wrapper*)
-    is_dynamically_callable
+    (is_dynamically_callable || is_native)
     params
     (Some return_type_info)
     svar_instrs

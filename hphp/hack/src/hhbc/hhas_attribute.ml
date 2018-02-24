@@ -27,12 +27,18 @@ let is_x s attributes =
 let is_memoized = is_x "__Memoize"
 let is_native = is_x "__Native"
 let is_foldable = is_x "__IsFoldable"
+let is_dynamically_callable = is_x "__DynamicallyCallable"
+
+let is_native_opcode_impl attributes =
+  let f attr =
+    (name attr) = "__Native" &&
+    match arguments attr with
+      | [_; Typed_value.String "OpCodeImpl"] -> true | _ -> false
+  in
+  List.exists attributes f
 
 let deprecation_info attributes =
   let f attr =
     if (name attr) = "__Deprecated" then Some (arguments attr) else None
   in
   List.find_map attributes f
-let is_dynamically_callable attributes =
-  let f attr = (name attr) = "__DynamicallyCallable" in
-  List.exists attributes f

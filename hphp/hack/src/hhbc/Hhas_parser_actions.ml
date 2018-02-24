@@ -438,6 +438,7 @@ let make_nullary_inst s =
  | "YieldK" -> IGenerator YieldK
  | "ContValid" -> IGenerator ContValid
  | "ContKey" -> IGenerator ContKey
+ | "ContCurrent" -> IGenerator ContCurrent
  | "ContGetReturn" -> IGenerator ContGetReturn
  | "ContStarted" -> IGenerator ContStarted
 

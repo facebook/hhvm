@@ -94,6 +94,7 @@ let instr_null = instr (ILitConst Null)
 let instr_nulluninit = instr (ILitConst NullUninit)
 let instr_catch = instr (IMisc Catch)
 let instr_dup = instr (IBasic Dup)
+let instr_nop = instr (IBasic Nop)
 let instr_instanceofd s = instr (IOp (InstanceOfD s))
 let instr_instanceof = instr (IOp InstanceOf)
 let instr_int i = instr (ILitConst (Int (Int64.of_int i)))
@@ -308,6 +309,16 @@ let instr_contUnsetDelegate_free iter =
   instr (IGenDelegation (ContUnsetDelegate (FreeIter, iter)))
 let instr_contUnsetDelegate_ignore iter =
   instr (IGenDelegation (ContUnsetDelegate (IgnoreIter, iter)))
+
+let instr_contcheck_check = instr (IGenerator (ContCheck CheckStarted))
+let instr_contcheck_ignore = instr (IGenerator (ContCheck IgnoreStarted))
+let instr_contenter = instr (IGenerator ContEnter)
+let instr_contraise = instr (IGenerator ContRaise)
+let instr_contvalid = instr (IGenerator ContValid)
+let instr_contstarted = instr (IGenerator ContStarted)
+let instr_contcurrent = instr (IGenerator ContCurrent)
+let instr_contkey = instr (IGenerator ContKey)
+let instr_contgetreturn = instr (IGenerator ContGetReturn)
 
 let instr_trigger_sampled_error =
   instr_fcallbuiltin 3 3 "trigger_sampled_error"
@@ -746,7 +757,7 @@ let get_input_output_count i =
     end
   | IGenerator i ->
     begin match i with
-    | CreateCont | ContValid | ContStarted | ContKey
+    | CreateCont | ContValid | ContStarted | ContKey | ContCurrent
     | ContGetReturn  -> (0, 1)
     | ContEnter | ContRaise | Yield -> (1, 1)
     | YieldK -> (2, 1)

@@ -82,6 +82,8 @@ let from_ast_wrapper : bool -> _ ->
   let is_memoize =
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
   let is_native = Hhas_attribute.is_native method_attributes in
+  let is_native_opcode_impl =
+    Hhas_attribute.is_native_opcode_impl method_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
   let is_dynamically_callable = Hhas_attribute.is_dynamically_callable method_attributes in
   let (pos, original_name) = ast_method.Ast.m_name in
@@ -185,24 +187,35 @@ let from_ast_wrapper : bool -> _ ->
   let has_ref_params =
     List.exists ast_method.Ast.m_params ~f:(fun p -> p.Ast.param_is_reference) in
   let method_body, method_is_generator, method_is_pair_generator =
-    Emit_body.emit_body
-      ~pos:ast_method.Ast.m_span
-      ~scope:scope
-      ~is_closure_body:method_is_closure_body
-      ~is_memoize
-      ~is_native
-      ~is_async:method_is_async
-      ~is_dynamically_callable
-      ~deprecation_info
-      ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
-      ~is_return_by_ref
-      ~default_dropthrough
-      ~return_value:instr_null
-      ~namespace
-      ~doc_comment:ast_method.Ast.m_doc_comment
-      ast_method.Ast.m_params
-      ret
-      [Ast.Stmt (Pos.none, Ast.Block ast_method.Ast.m_body)]
+    if is_native_opcode_impl then
+      Emit_native_opcode.emit_body
+        scope
+        namespace
+        ast_class.A.c_user_attributes
+        ast_method.Ast.m_name
+        ast_method.Ast.m_params
+        ret,
+      false,
+      false
+    else
+      Emit_body.emit_body
+        ~pos:ast_method.Ast.m_span
+        ~scope:scope
+        ~is_closure_body:method_is_closure_body
+        ~is_memoize
+        ~is_native
+        ~is_async:method_is_async
+        ~is_dynamically_callable
+        ~deprecation_info
+        ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
+        ~is_return_by_ref
+        ~default_dropthrough
+        ~return_value:instr_null
+        ~namespace
+        ~doc_comment:ast_method.Ast.m_doc_comment
+        ast_method.Ast.m_params
+        ret
+        [Ast.Stmt (Pos.none, Ast.Block ast_method.Ast.m_body)]
   in
   let method_id =
     if has_inout_args && (method_is_closure_body || has_ref_params) then

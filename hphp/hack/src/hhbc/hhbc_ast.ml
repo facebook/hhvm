@@ -566,6 +566,7 @@ type gen_creation_execution =
   | ContStarted
   | ContKey
   | ContGetReturn
+  | ContCurrent
 
 type gen_delegation =
   | ContAssignDelegate of Iterator.t

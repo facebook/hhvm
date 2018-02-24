@@ -686,9 +686,17 @@ let string_of_async = function
 
 let string_of_generator = function
   | CreateCont -> "CreateCont"
+  | ContEnter -> "ContEnter"
+  | ContRaise -> "ContRaise"
   | Yield -> "Yield"
   | YieldK -> "YieldK"
-  | _ -> "### string_of_generator - " ^ nyi
+  | ContCheck IgnoreStarted -> "ContCheck IgnoreStarted"
+  | ContCheck CheckStarted -> "ContCheck CheckStarted"
+  | ContValid -> "ContValid"
+  | ContStarted -> "ContStarted"
+  | ContKey -> "ContKey"
+  | ContGetReturn -> "ContGetReturn"
+  | ContCurrent -> "ContCurrent"
 
 let string_of_include_eval_define = function
   | Incl -> "Incl"
@@ -1435,7 +1443,8 @@ let attributes_to_string attrs =
 let method_attributes m =
   let user_attrs = Hhas_method.attributes m in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
-  let is_native = Hhas_attribute.is_native user_attrs in
+  let is_native_opcode_impl = Hhas_attribute.is_native_opcode_impl user_attrs in
+  let is_native = not is_native_opcode_impl && Hhas_attribute.is_native user_attrs in
   let is_systemlib = Emit_env.is_systemlib () in
   let attrs = if is_systemlib && is_native then "skip_frame" :: attrs else attrs in
   let attrs =

@@ -37,6 +37,7 @@ type t = {
   option_can_inline_gen_functions         : bool;
   option_use_msrv_for_inout               : bool;
   option_php7_int_semantics               : bool;
+  option_autoprime_generators             : bool;
 }
 
 let default = {
@@ -66,6 +67,7 @@ let default = {
   option_can_inline_gen_functions = true;
   option_use_msrv_for_inout = true;
   option_php7_int_semantics = false;
+  option_autoprime_generators = true;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -91,6 +93,7 @@ let jit_enable_rename_function o = o.option_jit_enable_rename_function
 let can_inline_gen_functions o = o.option_can_inline_gen_functions
 let use_msrv_for_inout o = o.option_use_msrv_for_inout
 let php7_int_semantics o = o.option_php7_int_semantics
+let autoprime_generators o = o.option_autoprime_generators
 
 let to_string o =
   let dynamic_invokes =
@@ -121,6 +124,7 @@ let to_string o =
     ; Printf.sprintf "can_inline_gen_functions: %B" @@ can_inline_gen_functions o
     ; Printf.sprintf "use_msrv_for_inout: %B" @@ use_msrv_for_inout o
     ; Printf.sprintf "php7_int_semantics: %B" @@ php7_int_semantics o
+    ; Printf.sprintf "autoprime_generators: %B" @@ autoprime_generators o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -182,6 +186,8 @@ let set_option options name value =
     { options with option_use_msrv_for_inout = as_bool value }
   | "hhvm.php7.int_semantics" ->
     { options with option_php7_int_semantics = as_bool value }
+  | "hack.lang.autoprimegenerators" ->
+    { options with option_autoprime_generators = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -271,6 +277,8 @@ let value_setters = [
     fun opts v -> { opts with option_use_msrv_for_inout = (v = 1) });
   (set_value "hhvm.php7.int_semantics" get_value_from_config_int @@
     fun opts v -> { opts with option_php7_int_semantics = (v = 1) });
+  (set_value "hack.lang.autoprime_generators" get_value_from_config_int @@
+    fun opts v -> { opts with option_autoprime_generators = (v = 1) });
 ]
 
 let extract_config_options_from_json ~init config_json =

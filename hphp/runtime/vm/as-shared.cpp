@@ -66,6 +66,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrNoInjection,          F,       "no_injection");     \
   X(AttrIsInOutWrapper,       F,       "inout_wrapper");    \
   X(AttrReference,            F,       "reference");        \
+  X(AttrClone,                F,       "clone");            \
   X(AttrInterceptable,        F,       "interceptable");
 
   /* */

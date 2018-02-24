@@ -1461,6 +1461,12 @@ let method_attributes m =
   let attrs = if Hhas_method.is_protected m then "protected" :: attrs else attrs in
   let attrs = if Hhas_method.is_private m then "private" :: attrs else attrs in
   let attrs = if Hhas_method.is_return_by_ref m then "reference" :: attrs else attrs in
+  let attrs = if is_native_opcode_impl then
+    let n = Hhbc_id.Method.to_raw_string @@ Hhas_method.name m in
+      begin match n with
+      | "send" | "raise" | "throw" | "next" -> "clone" :: attrs
+      | _ -> attrs end
+    else attrs in
   let attrs = if Hhas_method.is_interceptable m then "interceptable" :: attrs else attrs in
   attributes_to_string attrs
 

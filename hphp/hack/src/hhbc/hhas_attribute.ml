@@ -29,13 +29,16 @@ let is_native = is_x "__Native"
 let is_foldable = is_x "__IsFoldable"
 let is_dynamically_callable = is_x "__DynamicallyCallable"
 
-let is_native_opcode_impl attributes =
+let is_native_arg s attributes =
   let f attr =
     (name attr) = "__Native" &&
-    match arguments attr with
-      | [_; Typed_value.String "OpCodeImpl"] -> true | _ -> false
+    List.exists (arguments attr)
+      ~f:(function Typed_value.String s0 -> s = s0 | _ -> false)
   in
   List.exists attributes f
+let is_native_opcode_impl = is_native_arg "OpCodeImpl"
+let is_reads_caller_frame = is_native_arg "ReadsCallerFrame"
+let is_writes_caller_frame = is_native_arg "WritesCallerFrame"
 
 let deprecation_info attributes =
   let f attr =

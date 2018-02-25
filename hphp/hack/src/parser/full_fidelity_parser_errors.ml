@@ -1746,6 +1746,18 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
       && leading_width lambda_signature = 0
       -> failwith "syntax error, unexpected T_LAMBDA_ARROW";
     (* End of bug-port *)
+  | IsExpression
+    { is_right_operand = hint
+    ; _ } ->
+    begin match syntax hint with
+      | ClosureTypeSpecifier _ ->
+        make_error_from_node hint
+          (SyntaxError.invalid_is_expression_hint "Callable") :: errors
+      | SoftTypeSpecifier _ ->
+        make_error_from_node hint
+          (SyntaxError.invalid_is_expression_hint "Soft") :: errors
+      | _ -> errors
+    end
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors node parents hhvm_compat_mode trait_use_clauses errors =

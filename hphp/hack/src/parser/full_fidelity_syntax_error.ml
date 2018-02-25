@@ -392,6 +392,6 @@ let variadic_param_with_type_in_php name type_ =
   ^ type_ ^ "); variadic params with type constraints are not "
   ^ "supported in non-Hack files"
 let final_property = "Properties cannot be declared final"
-
 let property_has_multiple_visibilities name =
   "Multiple access type modifiers are not allowed: properties of " ^ name
+let invalid_is_expression_hint hint = hint ^ " typehints cannot be used with `is` expressions"

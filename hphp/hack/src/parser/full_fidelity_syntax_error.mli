@@ -237,3 +237,4 @@ val self_or_parent_colon_colon_class_outside_of_class : string -> string
 val variadic_param_with_type_in_php : string -> string -> string
 val final_property : string
 val property_has_multiple_visibilities : string -> string 
+val invalid_is_expression_hint : string -> string

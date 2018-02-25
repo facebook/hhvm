@@ -191,6 +191,8 @@ let error_tests =
     make_test_case_from_files testname test_errors in
   List.map
   [
+    "is_expression/test_callable_hint";
+    "is_expression/test_soft_hint";
     "test_default_param_errors";
     "test_alias_errors";
     "test_method_modifier_errors";

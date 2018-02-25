@@ -1,0 +1,1 @@
+(13,16)-(13,19) Soft typehints cannot be used with `is` expressions

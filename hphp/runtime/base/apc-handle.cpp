@@ -65,16 +65,9 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
         // for unserialization.
         return APCString::MakeSerializedObject(apc_reserialize(String{s}));
       }
-      if (!s->isRefCounted()) {
-        if (s->isStatic()) {
-          auto const value = new APCTypedValue(APCTypedValue::StaticStr{}, s);
-          return APCHandle::Pair{value->getHandle(), sizeof(APCTypedValue)};
-        }
-        if (s->uncountedIncRef()) {
-          auto const value = new APCTypedValue(APCTypedValue::UncountedStr{},
-                                               s);
-          return {value->getHandle(), sizeof(APCTypedValue)};
-        }
+      if (auto const value = APCTypedValue::HandlePersistent(
+            APCTypedValue::StaticStr{}, APCTypedValue::UncountedStr{}, s)) {
+        return value;
       }
       auto const st = lookupStaticString(s);
       if (st) {
@@ -93,11 +86,6 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
     case KindOfVec: {
       auto ad = source.getArrayData();
       assert(ad->isVecArray());
-      if (ad->isStatic()) {
-        auto value = new APCTypedValue(APCTypedValue::StaticVec{}, ad);
-        return {value->getHandle(), sizeof(APCTypedValue)};
-      }
-
       return APCArray::MakeSharedVec(ad, level, unserializeObj);
     }
 
@@ -105,11 +93,6 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
     case KindOfDict: {
       auto ad = source.getArrayData();
       assert(ad->isDict());
-      if (ad->isStatic()) {
-        auto value = new APCTypedValue(APCTypedValue::StaticDict{}, ad);
-        return {value->getHandle(), sizeof(APCTypedValue)};
-      }
-
       return APCArray::MakeSharedDict(ad, level, unserializeObj);
     }
 
@@ -117,11 +100,6 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
     case KindOfKeyset: {
       auto ad = source.getArrayData();
       assert(ad->isKeyset());
-      if (ad->isStatic()) {
-        auto value = new APCTypedValue(APCTypedValue::StaticKeyset{}, ad);
-        return {value->getHandle(), sizeof(APCTypedValue)};
-      }
-
       return APCArray::MakeSharedKeyset(ad, level, unserializeObj);
     }
 
@@ -129,11 +107,6 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
     case KindOfArray: {
       auto ad = source.getArrayData();
       assert(ad->isPHPArray());
-      if (ad->isStatic()) {
-        auto value = new APCTypedValue(APCTypedValue::StaticArr{}, ad);
-        return {value->getHandle(), sizeof(APCTypedValue)};
-      }
-
       return APCArray::MakeSharedArray(ad, level, unserializeObj);
     }
 

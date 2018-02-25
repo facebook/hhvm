@@ -158,45 +158,29 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
   not_reached();
 }
 
-Variant APCHandle::toLocal() const {
+Variant APCHandle::toLocalHelper() const {
+  assertx(!isTypedValue());
   switch (m_kind) {
     case APCKind::Uninit:
     case APCKind::Null:
-      return init_null(); // shortcut.. no point to forward
     case APCKind::Bool:
-      return APCTypedValue::fromHandle(this)->getBoolean();
     case APCKind::Int:
-      return APCTypedValue::fromHandle(this)->getInt64();
     case APCKind::Double:
-      return APCTypedValue::fromHandle(this)->getDouble();
     case APCKind::StaticString:
     case APCKind::UncountedString:
-      return Variant{APCTypedValue::fromHandle(this)->getStringData(),
-                     Variant::PersistentStrInit{}};
+    case APCKind::StaticArray:
+    case APCKind::UncountedArray:
+    case APCKind::StaticVec:
+    case APCKind::UncountedVec:
+    case APCKind::StaticDict:
+    case APCKind::UncountedDict:
+    case APCKind::StaticKeyset:
+    case APCKind::UncountedKeyset:
+      not_reached();
     case APCKind::SharedString:
       return Variant::attach(
         StringData::MakeProxy(APCString::fromHandle(this))
       );
-    case APCKind::StaticArray:
-    case APCKind::UncountedArray:
-      return Variant{APCTypedValue::fromHandle(this)->getArrayData(),
-                     KindOfPersistentArray,
-                     Variant::PersistentArrInit{}};
-    case APCKind::StaticVec:
-    case APCKind::UncountedVec:
-      return Variant{APCTypedValue::fromHandle(this)->getVecData(),
-                     KindOfPersistentVec,
-                     Variant::PersistentArrInit{}};
-    case APCKind::StaticDict:
-    case APCKind::UncountedDict:
-      return Variant{APCTypedValue::fromHandle(this)->getDictData(),
-                     KindOfPersistentDict,
-                     Variant::PersistentArrInit{}};
-    case APCKind::StaticKeyset:
-    case APCKind::UncountedKeyset:
-      return Variant{APCTypedValue::fromHandle(this)->getKeysetData(),
-                     KindOfPersistentKeyset,
-                     Variant::PersistentArrInit{}};
     case APCKind::SerializedArray: {
       auto const serArr = APCString::fromHandle(this)->getStringData();
       auto const v = apc_unserialize(serArr->data(), serArr->size());

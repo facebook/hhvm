@@ -83,7 +83,7 @@ struct StoreValue {
     return kind;
   }
   Variant toLocal() const {
-    return data().left()->toLocal(getKind());
+    return data().left()->toLocal();
   }
   void set(APCHandle* v, int64_t ttl);
   bool expired() const;

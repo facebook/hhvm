@@ -194,36 +194,18 @@ struct APCHandle {
    * instance returned will be local to the request/thread that performed
    * the call.
    */
+  Variant toLocalHelper() const;
   Variant toLocal() const;
-  Variant toLocal(APCKind savedKind) const {
-    assert(savedKind == m_kind);
-    return savedKind == APCKind::UncountedArray ?
-      Variant{getUncountedArray(),
-              KindOfPersistentArray,
-              Variant::PersistentArrInit{}} :
-      toLocal();
-  }
-  ArrayData* getUncountedArray() const {
-    assert(m_kind == APCKind::UncountedArray);
-    return reinterpret_cast<ArrayData*>(const_cast<APCHandle*>(this) + 1);
-  }
-  ArrayData* getUncountedVec() const {
-    assert(m_kind == APCKind::UncountedVec);
-    return reinterpret_cast<ArrayData*>(const_cast<APCHandle*>(this) + 1);
-  }
-  ArrayData* getUncountedDict() const {
-    assert(m_kind == APCKind::UncountedDict);
-    return reinterpret_cast<ArrayData*>(const_cast<APCHandle*>(this) + 1);
-  }
-  ArrayData* getUncountedKeyset() const {
-    assert(m_kind == APCKind::UncountedKeyset);
-    return reinterpret_cast<ArrayData*>(const_cast<APCHandle*>(this) + 1);
-  }
 
   /*
    * Return the APCKind represented by this APCHandle.
    */
   APCKind kind() const { return m_kind; }
+
+  /*
+   * Return the DataType (if any) of this APCHandle.
+   */
+  DataType type() const { return m_type; }
 
   /*
    * When we load serialized objects (in an APCString), we may attempt to
@@ -267,6 +249,10 @@ struct APCHandle {
            m_kind == APCKind::UncountedVec ||
            m_kind == APCKind::UncountedDict ||
            m_kind == APCKind::UncountedKeyset;
+  }
+
+  bool isTypedValue() const {
+    return m_type != kInvalidDataType;
   }
 
   /*

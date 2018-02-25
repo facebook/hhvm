@@ -202,6 +202,14 @@ struct APCTypedValue {
     return m_data.keyset;
   }
 
+  TypedValue toTypedValue() const {
+    assertx(m_handle.isTypedValue());
+    TypedValue tv;
+    tv.m_data.num = m_data.num;
+    tv.m_type = m_handle.type();
+    return tv;
+  }
+
   static APCTypedValue* tvUninit();
   static APCTypedValue* tvNull();
   static APCTypedValue* tvTrue();
@@ -228,6 +236,18 @@ private:
   } m_data;
   APCHandle m_handle;
 };
+
+//////////////////////////////////////////////////////////////////////
+// Here because of circular dependencies
+
+inline Variant APCHandle::toLocal() const {
+  if (isTypedValue()) {
+    Variant ret;
+    *ret.asTypedValue() = APCTypedValue::fromHandle(this)->toTypedValue();
+    return ret;
+  }
+  return toLocalHelper();
+}
 
 //////////////////////////////////////////////////////////////////////
 

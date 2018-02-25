@@ -2173,6 +2173,15 @@ void hphp_process_init() {
   timezone_init();
   BootStats::mark("timezone_init");
 
+#if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 5)
+  // jemalloc 5 has background threads, which handle purging asynchronously.
+  // This needs to be done before external compilers are intitialized as doing
+  // so will spawn a light process pool.
+  if (mallctlWrite("background_thread", true, /* errorOK */ true)) {
+    Logger::Warning("Failed to enable jemalloc background threads");
+  }
+#endif
+
   // start any external compilers
   compilers_start();
   BootStats::mark("compilers_start");
@@ -2264,13 +2273,6 @@ void hphp_process_init() {
     hphp_process_exit();
     exit(0);
   }
-
-#if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 5)
-  // jemalloc 5 has background threads, which handle purging asynchronously.
-  if (mallctlWrite("background_thread", true, /* errorOK */ true)) {
-    Logger::Warning("Failed to enable jemalloc background threads");
-  }
-#endif
 }
 
 static void handle_exception(bool& ret, ExecutionContext* context,

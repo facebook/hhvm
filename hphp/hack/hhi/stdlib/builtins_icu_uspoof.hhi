@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 class SpoofChecker {
   const SINGLE_SCRIPT_CONFUSABLE = 0;
   const MIXED_SCRIPT_CONFUSABLE = 0;

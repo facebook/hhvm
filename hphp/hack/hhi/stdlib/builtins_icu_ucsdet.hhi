@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 class EncodingDetector {
   public function __construct() { }
   public function setText($text) { }

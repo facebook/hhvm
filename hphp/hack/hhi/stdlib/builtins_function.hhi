@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 <<__PHPStdLib>>
 function get_defined_functions(): array<string, array<string>>;
 <<__PHPStdLib>>

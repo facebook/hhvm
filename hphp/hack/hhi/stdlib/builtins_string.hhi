@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 const int HTML_SPECIALCHARS = 0;
 const int HTML_ENTITIES = 1;
 

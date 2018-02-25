@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 <<__PHPStdLib>>
 function memcache_connect($host, $port = 0, $timeout = 0, $timeoutms = 0) { }
 <<__PHPStdLib>>

@@ -8,6 +8,7 @@
 * of patent rights can be found in the PATENTS file in the same directory.
 *
 */
+
 const int INPUT_POST = 0;
 const int INPUT_GET = 0;
 const int INPUT_COOKIE = 0;
@@ -77,4 +78,3 @@ function filter_list(): array<string> {}
 function filter_var_array(array $data, mixed $definition = null, bool $add_empty = true) {}
 <<__PHPStdLib>>
 function filter_var(mixed $value, int $filter = FILTER_DEFAULT, mixed $options = null) {}
-

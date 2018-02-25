@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 const resource STDIN = /* UNSAFE_EXPR */ 0;
 const resource STDOUT = /* UNSAFE_EXPR */ 0;
 const resource STDERR = /* UNSAFE_EXPR */ 0;

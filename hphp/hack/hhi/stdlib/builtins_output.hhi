@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 <<__PHPStdLib>>
 function ob_start($output_callback = null, $chunk_size = 0, $erase = true) { }
 <<__PHPStdLib>>

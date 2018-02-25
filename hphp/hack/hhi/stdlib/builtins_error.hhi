@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT, int $limit = 0) { }
 <<__PHPStdLib>>
 function debug_print_backtrace(int $options = 0, int $limit = 0): void { }

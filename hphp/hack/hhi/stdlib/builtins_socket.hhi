@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 define('AF_UNIX', 0);
 define('AF_INET', 0);
 define('AF_INET6', 0);

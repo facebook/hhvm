@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 <<__PHPStdLib>>
 function thrift_protocol_write_binary($transportobj, $method_name, $msgtype, $request_struct, $seqid, $strict_write, $oneway = false);
 <<__PHPStdLib>>

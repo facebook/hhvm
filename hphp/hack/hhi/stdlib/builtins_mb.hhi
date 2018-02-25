@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 const MB_OVERLOAD_MAIL = 1;
 const MB_OVERLOAD_STRING = 2;
 const MB_OVERLOAD_REGEX = 4;

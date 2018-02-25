@@ -8,7 +8,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
- <<__Rx>>
+
+<<__Rx>>
 function is_bool($var): bool;
 <<__Rx>>
 function is_int($var): bool;

@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 <<__PHPStdLib>>
 function hphp_recursiveiteratoriterator___construct($obj, $iterator, $mode, $flags) { }
 <<__PHPStdLib>>

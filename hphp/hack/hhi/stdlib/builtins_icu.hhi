@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 define('UREGEX_CASE_INSENSITIVE', 0);
 define('UREGEX_COMMENTS', 0);
 define('UREGEX_DOTALL', 0);

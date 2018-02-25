@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 <<__PHPStdLib>>
 function apc_add($key, $var, $ttl = 0, $cache_id = 0) { }
 <<__PHPStdLib>>

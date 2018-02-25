@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 <<__PHPStdLib>>
 function hphp_create_continuation($clsname, $funcname, $origFuncName, $args = null) { }
 class DummyContinuation {

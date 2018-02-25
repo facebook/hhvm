@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 <<__PHPStdLib>>
 function xmlwriter_open_memory() { }
 <<__PHPStdLib>>

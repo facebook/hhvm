@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 class Memcached {
   const OPT_COMPRESSION = 0;
   const OPT_SERIALIZER = 0;

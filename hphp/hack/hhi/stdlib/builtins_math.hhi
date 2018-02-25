@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 const PHP_ROUND_HALF_UP = 0;
 const PHP_ROUND_HALF_DOWN = 0;
 const PHP_ROUND_HALF_EVEN = 0;

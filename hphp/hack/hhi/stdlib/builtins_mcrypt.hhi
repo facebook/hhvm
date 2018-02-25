@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 define('MCRYPT_ENCRYPT', 0);
 define('MCRYPT_DECRYPT', 1);
 define('MCRYPT_DEV_RANDOM', 0);

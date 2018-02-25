@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 const FILEINFO_NONE = 0;
 const FILEINFO_SYMLINK = 2;
 const FILEINFO_MIME = 1040;

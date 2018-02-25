@@ -14,6 +14,7 @@
  *
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
+
 <<__PHPStdLib>>
 function array_key_exists<Tk, Tv>(mixed $key, ?KeyedContainer<Tk, Tv> $search): bool;
 

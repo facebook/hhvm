@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 const int MW_AbsoluteIntent = 3;
 const int MW_AddCompositeOp = 2;
 const int MW_AddEvaluateOperator = 1;

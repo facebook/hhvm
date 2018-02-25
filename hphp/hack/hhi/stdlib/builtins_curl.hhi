@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 const int CURLAUTH_ANY = 0;
 const int CURLAUTH_ANYSAFE = 0;
 const int CURLAUTH_BASIC = 0;

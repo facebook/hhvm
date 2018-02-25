@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 const int PHP_SESSION_DISABLED = 0;
 const int PHP_SESSION_NONE = 1;
 const int PHP_SESSION_ACTIVE = 2;

@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 class UConverter {
   const REASON_UNASSIGNED = 0;
   const REASON_ILLEGAL = 0;

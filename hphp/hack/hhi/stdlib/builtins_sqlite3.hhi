@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 define('SQLITE3_ASSOC', 0);
 define('SQLITE3_NUM', 0);
 define('SQLITE3_BOTH', 0);

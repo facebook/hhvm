@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
 const int MYSQL_ASSOC = 0;
 const int MYSQL_BOTH = 0;
 const int MYSQL_NUM = 0;

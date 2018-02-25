@@ -207,7 +207,7 @@ struct StringData final : MaybeCountable,
    * uncountedDecRef, and if necessary destroy the StringData and
    * return true.
    */
-  static bool ReleaseUncounted(const StringData*);
+  static void ReleaseUncounted(const StringData*);
 
   /*
    * root is the address of the top-level APCHandle which contains this string

@@ -154,7 +154,7 @@ APCHandle::Pair APCCollection::WrapArray(APCHandle::Pair inner,
 }
 
 Object APCCollection::createObject() const {
-  if (m_arrayHandle->isUncounted()) {
+  if (m_arrayHandle->isTypedValue()) {
     Variant local(m_arrayHandle->toLocal());
     assert(local.isArray());
     return Object::attach(

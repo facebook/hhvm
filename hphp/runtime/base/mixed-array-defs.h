@@ -354,7 +354,7 @@ void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
       assert(ad->isVecArray());
       if (ad->isStatic()) break;
       else if (ad->empty()) ad = staticEmptyVecArray();
-      else ad = PackedArray::MakeUncounted(ad, 0, seen);
+      else ad = PackedArray::MakeUncounted(ad, false, seen);
       break;
     }
 
@@ -366,7 +366,7 @@ void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
       assert(ad->isDict());
       if (ad->isStatic()) break;
       else if (ad->empty()) ad = staticEmptyDictArray();
-      else ad = MixedArray::MakeUncounted(ad, 0, seen);
+      else ad = MixedArray::MakeUncounted(ad, false, seen);
       break;
     }
 
@@ -378,7 +378,7 @@ void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
       assert(ad->isKeyset());
       if (ad->isStatic()) break;
       else if (ad->empty()) ad = staticEmptyKeysetArray();
-      else ad = SetArray::MakeUncounted(ad);
+      else ad = SetArray::MakeUncounted(ad, false, seen);
       break;
     }
 
@@ -395,9 +395,9 @@ void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
         else if (ad->isDArray()) ad = staticEmptyDArray();
         else ad = staticEmptyArray();
       } else if (ad->hasPackedLayout()) {
-        ad = PackedArray::MakeUncounted(ad, 0, seen);
+        ad = PackedArray::MakeUncounted(ad, false, seen);
       } else {
-        ad = MixedArray::MakeUncounted(ad, 0, seen);
+        ad = MixedArray::MakeUncounted(ad, false, seen);
       }
       break;
     }

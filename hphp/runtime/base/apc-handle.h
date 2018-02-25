@@ -137,6 +137,7 @@ struct APCHandle {
   struct Pair {
     APCHandle* handle;
     size_t size;
+    explicit operator bool() const { return handle != nullptr; }
   };
 
   explicit APCHandle(APCKind kind, DataType type = kInvalidDataType)

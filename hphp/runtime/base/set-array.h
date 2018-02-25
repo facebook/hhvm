@@ -187,19 +187,22 @@ public:
    * Allocate an uncounted SetArray and copy the values from the
    * input 'array' into the uncounted one.
    *
-   * 'extra' bytes may be allocated in front of the returned pointer,
-   * must be a multiple of 16, and later be passed to ReleaseUncounted.
-   * (This is used to co-allocate a TypedValue with its array data.)
+   * If withApcTypedValue is true, space for an APCTypedValue will be
+   * allocated in front of the returned pointer.
    */
-  static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
+  static ArrayData* MakeUncounted(ArrayData* array,
+                                  bool withApcTypedValue = false,
+                                  PointerMap* m = nullptr);
+  static ArrayData* MakeUncounted(ArrayData* array, int) = delete;
+  static ArrayData* MakeUncounted(ArrayData* array, size_t) = delete;
 
   static void Release(ArrayData*);
-  static void ReleaseUncounted(ArrayData*, size_t extra = 0);
+  static void ReleaseUncounted(ArrayData*);
   /*
    * Recursively register {allocation, rootAPCHandle} with APCGCManager
    */
   static void RegisterUncountedAllocations(ArrayData* ad,
-                                              APCHandle* rootAPCHandle);
+                                           APCHandle* rootAPCHandle);
 
   /*
    * Safe downcast helpers.

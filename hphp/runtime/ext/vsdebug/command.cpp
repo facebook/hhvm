@@ -261,6 +261,18 @@ const folly::dynamic VSCommand::getDebuggerCapabilities() {
   capabilities["supportsDelayedStackTraceLoading"] = true;
   capabilities["supportsLoadedSourcesRequest"] = false;
 
+  folly::dynamic exceptionBreakpointFilters = folly::dynamic::array;
+
+  // Filter for all breakpoints.
+  folly::dynamic allBreakpointsFilter = folly::dynamic::object;
+  allBreakpointsFilter["filter"] = "all";
+  allBreakpointsFilter["label"] = "All Exceptions";
+  allBreakpointsFilter["default"] = false;
+  exceptionBreakpointFilters.push_back(allBreakpointsFilter);
+
+  capabilities["exceptionBreakpointFilters"] =
+    std::move(exceptionBreakpointFilters);
+
   return capabilities;
 }
 

@@ -18,13 +18,9 @@ zend/good/Zend/tests/errmsg_008.php
 zend/good/Zend/tests/errmsg_012.php
 zend/good/Zend/tests/errmsg_015.php
 zend/good/Zend/tests/errmsg_019.php
-zend/good/Zend/tests/errmsg_030.php
-zend/good/Zend/tests/errmsg_031.php
 zend/good/Zend/tests/errmsg_032.php
 zend/good/Zend/tests/errmsg_033.php
 zend/good/Zend/tests/errmsg_034.php
-zend/good/Zend/tests/errmsg_035.php
-zend/good/Zend/tests/errmsg_036.php
 zend/good/Zend/tests/errmsg_039.php
 zend/good/Zend/tests/foreach_list_004.php
 zend/good/Zend/tests/generators/errors/yield_outside_function_error.php

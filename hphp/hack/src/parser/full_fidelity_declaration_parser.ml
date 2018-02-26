@@ -518,6 +518,13 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, comma) = optional_token parser Comma in
       let list_item = make_list_item item comma in
       (parser, list_item, comma)
+    | Parent
+    | Self when Env.hhvm_compat_mode (env parser) ->
+      (* HHVM allows these keywords here for some reason *)
+      let (parser, item) = parse_type_specifier parser in
+      let (parser, comma) = optional_token parser Comma in
+      let list_item = make_list_item item comma in
+      (parser, list_item, comma)
     | _ ->
       (* ERROR RECOVERY: We are expecting a type; give an error as above.
       Don't eat the offending token.

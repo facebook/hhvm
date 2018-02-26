@@ -703,6 +703,12 @@ let labelofiarg arg =
 
 let iterofiarg arg = Iterator.Id (intofiarg arg)
 
+let checkstarted_of_arg arg =
+  match arg with
+  | IAId "IgnoreStarted" -> IgnoreStarted
+  | IAId "CheckStarted" -> CheckStarted
+  | _ -> report_error "bad check_started"
+
 let iterwithkindofiarg arg =
   match arg with
   | IAIteratorid (kind, id) -> kind = "MIter", Iterator.Id (Int64.to_int id)
@@ -939,6 +945,10 @@ let makeunaryinst s arg = match s with
       textual bytecode format represents them using directives and braces rather
       than instructions
    *)
+   | "AwaitAll" ->
+    let l, i = memoargofiarg arg in
+    IAsync (AwaitAll (l, i + 1))
+   | "ContCheck" -> IGenerator (ContCheck (checkstarted_of_arg arg))
    | _ -> failwith ("NYI unary: " ^ s)
 
 let makebinaryinst s arg1 arg2 =

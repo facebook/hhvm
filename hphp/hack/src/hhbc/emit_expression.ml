@@ -1434,7 +1434,7 @@ and try_inline_gen_call env e =
   if not (can_inline_gen_functions ()) then None
   else match snd e with
   | A.Call ((_, A.Id (_, s)), _, [arg], [])
-    when String.lowercase_ascii s = "gena"->
+    when String.lowercase_ascii (SU.strip_global_ns s) = "gena"->
     Some (inline_gena_call env arg)
   | _ ->
     try_inline_genva_call env e GI_expression
@@ -1443,7 +1443,7 @@ and try_inline_genva_call env e inline_context =
   if not (can_inline_gen_functions ()) then None
   else match e with
   | pos, A.Call ((_, A.Id (_, s)), _, args, uargs)
-    when String.lowercase_ascii s = "genva"->
+    when String.lowercase_ascii (SU.strip_global_ns s) = "genva"->
     try_inline_genva_call_ env pos args uargs inline_context
   | _ -> None
 
@@ -1552,18 +1552,14 @@ and try_inline_genva_call_ env pos args uargs inline_context =
       | [], r :: rhs -> ((Pos.none, A.Omitted), r) :: combine [] rhs
       | _, [] -> [] in
     let generate values ~is_ltr =
-      let rec aux acc = function
-      | [] -> List.rev acc
-      | ((_, A.Omitted), _) :: tail -> aux acc tail
+      let rec aux lhs_acc set_acc = function
+      | [] -> (if is_ltr then List.rev lhs_acc else lhs_acc), List.rev set_acc
+      | ((_, A.Omitted), _) :: tail -> aux lhs_acc set_acc tail
       | (lhs, rhs) :: tail ->
         let lhs_instrs, set_instrs =
           emit_lval_op_list ~last_usage:true env (Some rhs) [] lhs in
-        let set = gather [
-          lhs_instrs;
-          set_instrs;
-        ] in
-        aux (set :: acc) tail in
-      aux [] (if is_ltr then values else List.rev values) in
+        aux (lhs_instrs::lhs_acc) (set_instrs::set_acc) tail in
+      aux [] [] (if is_ltr then values else List.rev values) in
     let reify = gather @@ Core_list.map rhs ~f:begin fun l ->
       gather [
         instr_pushl l;
@@ -1572,13 +1568,11 @@ and try_inline_genva_call_ env pos args uargs inline_context =
       ]
     end in
     let pairs = combine lhs rhs in
-    let assign =
-      pairs
-      |> generate ~is_ltr:(php7_ltr_assign ())
-      |> gather in
+    let lhs, set = generate pairs ~is_ltr:(php7_ltr_assign ()) in
     gather [
       reify;
-      assign;
+      gather lhs;
+      gather set;
       gather @@ Core_list.map pairs
         ~f:(function (_, A.Omitted), l -> instr_unsetl l | _ -> empty);
     ] in

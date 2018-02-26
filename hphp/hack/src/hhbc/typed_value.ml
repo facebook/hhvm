@@ -240,6 +240,8 @@ let mul v1 v2 =
   match v1, v2 with
   | Int i1, Int i2 -> mul_int i1 i2
   | Float f1, Float f2 -> Some (Float (f1 *. f2))
+  | Int i1, Float f2 -> Some (Float ((Int64.to_float i1) *. f2))
+  | Float f1, Int i2 -> Some (Float (f1 *. (Int64.to_float i2)))
   | _ ->  None
 
 (* Arithmetic. For now, only on pure integer or float operands *)
@@ -249,6 +251,8 @@ let div v1 v2 =
     if Int64.rem i1 i2 = 0L then Some (Int (Int64.div i1 i2))
     else Some (Float (Int64.to_float i1 /. Int64.to_float i2))
   | Float f1, Float f2 when f2 <> 0.0 -> Some (Float (f1 /. f2))
+  | Int i1, Float f2 when f2 <> 0.0 -> Some (Float ((Int64.to_float i1) /. f2))
+  | Float f1, Int i2 when i2 <> 0L -> Some (Float (f1 /. (Int64.to_float i2)))
   | _ ->  None
 
 (* Arithmetic. For now, only on pure integer or float operands *)
@@ -256,11 +260,13 @@ let add v1 v2 =
   match v1, v2 with
   | Float f1, Float f2 -> Some (Float (f1 +. f2))
   | Int i1, Int i2 -> add_int i1 i2
+  | Int i1, Float f2 -> Some (Float ((Int64.to_float i1) +. f2))
+  | Float f1, Int i2 -> Some (Float (f1 +. (Int64.to_float i2)))
   | _, _ -> None
 
 let shift_left v1 v2 =
   match v1, v2 with
-  | Int i1, Int i2 when i2 > 0L && (i2 < 64L || not @@ php7_int_semantics()) ->
+  | Int i1, Int i2 when i2 >= 0L && (i2 < 64L || not @@ php7_int_semantics()) ->
     begin try
       let v = Int64.to_int i2 in
       Some (Int (Int64.shift_left i1 v))

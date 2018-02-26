@@ -716,7 +716,10 @@ module GenerateFFVerifySmartConstructors = struct
 module type SC_S = SmartConstructors.SmartConstructors_S
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S)
-: (SC_S with module Token = Syntax.Token) = struct
+: (SC_S
+  with module Token = Syntax.Token
+  and type t = Syntax.t list
+  ) = struct
   module Token = Syntax.Token
   type t = Syntax.t list
   type r = unit
@@ -838,9 +841,12 @@ module type SyntaxKind_S = sig
 TYPE_TESTS_SIG
 end
 
-module SyntaxKind(SC : SC_S) :
-  (SyntaxKind_S with module Token = SC.Token and type original_sc_r = SC.r)
-= struct
+module SyntaxKind(SC : SC_S)
+  : (SyntaxKind_S
+    with module Token = SC.Token
+    and type original_sc_r = SC.r
+    and type t = SC.t
+  ) = struct
   module Token = SC.Token
   type original_sc_r = SC.r
   type t = SC.t

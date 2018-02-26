@@ -20,6 +20,7 @@ sig
   val make : Env.t -> Full_fidelity_source_text.t -> t
   val errors : t -> Full_fidelity_syntax_error.t list
   val env : t -> Env.t
+  val sc_state : t -> SCI.t
   val parse_script : t -> t * Syntax.t
 end = struct
 module SCWithToken = SmartConstructorsWrappers.SyntaxKind(SCI)
@@ -101,6 +102,8 @@ let errors parser =
   parser.errors @ (Lexer.errors parser.lexer)
 
 let env parser = parser.env
+
+let sc_state parser = parser.sc_state
 
 let parse_script parser =
   let decl_parser = DeclParser.make parser.env

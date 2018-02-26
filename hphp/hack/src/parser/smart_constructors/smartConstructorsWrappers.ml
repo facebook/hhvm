@@ -198,9 +198,12 @@ module type SyntaxKind_S = sig
 
 end
 
-module SyntaxKind(SC : SC_S) :
-  (SyntaxKind_S with module Token = SC.Token and type original_sc_r = SC.r)
-= struct
+module SyntaxKind(SC : SC_S)
+  : (SyntaxKind_S
+    with module Token = SC.Token
+    and type original_sc_r = SC.r
+    and type t = SC.t
+  ) = struct
   module Token = SC.Token
   type original_sc_r = SC.r
   type t = SC.t

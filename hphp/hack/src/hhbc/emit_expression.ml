@@ -1016,7 +1016,8 @@ and emit_load_class_ref env cexpr =
   | Class_unnamed_local l -> instr (IGet (ClsRefGetL (l, 0)))
   | Class_expr expr ->
     begin match snd expr with
-    | A.Lvar ((_, id) as pos_id) when id <> SN.SpecialIdents.this ->
+    | A.Lvar ((_, id) as pos_id)
+      when id <> SN.SpecialIdents.this || (Emit_env.get_needs_local_this env) ->
       let local = get_local env pos_id in
       instr (IGet (ClsRefGetL (local, 0)))
     | _ ->

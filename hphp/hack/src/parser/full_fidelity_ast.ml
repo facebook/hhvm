@@ -328,6 +328,8 @@ let syntax_of_token : Token.t -> node = fun t ->
 (* TODO: Clean up string escaping *)
 let prepString2 : node list -> node list =
   let is_double_quote_or_backtick ch = ch = '"' || ch = '`' in
+  let is_binary_string_header s =
+    (String.length s > 1) && (s.[0] = 'b') && (s.[1] = '"') in
   let trimLeft ~n t =
     Token.(
       with_updated_original_source_data
@@ -354,7 +356,9 @@ let prepString2 : node list -> node list =
   in
   function
   | ({ syntax = Token t; _ }::ss)
-  when (Token.width t) > 0 && is_double_quote_or_backtick (Token.text t).[0] ->
+  when (Token.width t) > 0 &&
+    ((is_double_quote_or_backtick (Token.text t).[0])
+      || is_binary_string_header (Token.text t)) ->
     let rec unwind = function
       | [{ syntax = Token t; _ }]
       when (Token.width t) > 0 &&
@@ -364,7 +368,9 @@ let prepString2 : node list -> node list =
       | x :: xs -> x :: unwind xs
       | _ -> raise (Invalid_argument "Malformed String2 SyntaxList")
     in
-    let s = syntax_of_token (trimLeft ~n:1 t) in
+    (* Trim the starting b and double quote *)
+    let left_trim = if (Token.text t).[0] = 'b' then 2 else 1 in
+    let s = syntax_of_token (trimLeft ~n:left_trim t) in
     if width s > 0 then s :: unwind ss else unwind ss
   | ({ syntax = Token t; _ }::ss)
   when (Token.width t) > 3 && String.sub (Token.text t) 0 3 = "<<<" ->

@@ -42,12 +42,8 @@ zend/good/Zend/tests/traits/bug55554b.php
 zend/good/Zend/tests/try_catch_finally_007.php
 zend/good/Zend/tests/use_function/case_insensivity.php
 zend/good/Zend/tests/use_function/no_global_fallback2.php
-zend/good/ext/mbstring/tests/mb_ereg_variation3.php
 zend/good/ext/reflection/tests/bug36337.php
-zend/good/ext/standard/tests/file/fileinode_variation.php
-zend/good/ext/standard/tests/file/pathinfo_basic.php
 zend/good/ext/standard/tests/serialize/006.php
-zend/good/ext/standard/tests/strings/htmlspecialchars.php
 zend/good/tests/lang/008.php
 zend/good/tests/lang/033.php
 zend/good/tests/lang/bug24054.php

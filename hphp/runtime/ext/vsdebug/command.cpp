@@ -256,7 +256,7 @@ const folly::dynamic VSCommand::getDebuggerCapabilities() {
   capabilities["supportsRestartRequest"] = false;
   capabilities["supportsExceptionOptions"] = true;
   capabilities["supportsValueFormattingOptions"] = true;
-  capabilities["supportsExceptionInfoRequest"] = true;
+  capabilities["supportsExceptionInfoRequest"] = false;
   capabilities["supportTerminateDebuggee"] = false;
   capabilities["supportsDelayedStackTraceLoading"] = true;
   capabilities["supportsLoadedSourcesRequest"] = false;

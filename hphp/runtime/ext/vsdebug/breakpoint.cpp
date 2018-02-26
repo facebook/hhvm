@@ -261,21 +261,34 @@ void BreakpointManager::sendBreakpointEvent(
                    breakpoint->m_resolvedLocation.m_startLine,
                    false
                  );
-    bp["endLine"] = adjustLineNumber(
+
+    int endLine = adjustLineNumber(
                       preferences,
                       breakpoint->m_resolvedLocation.m_endLine,
                       false
                     );
-    bp["column"] = adjustLineNumber(
+    if (endLine > 0) {
+      bp["endLine"] = endLine;
+    }
+
+    int col = adjustLineNumber(
                       preferences,
                       breakpoint->m_resolvedLocation.m_startCol,
                       true
                     );
-    bp["endColumn"] = adjustLineNumber(
+    if (col > 0) {
+      bp["column"] = col;
+    }
+
+    int endCol = adjustLineNumber(
                         preferences,
                         breakpoint->m_resolvedLocation.m_endCol,
                         true
                       );
+
+    if (endCol > 0) {
+      bp["endColumn"] = endCol;
+    }
 
     bp["originalLine"] = adjustLineNumber(
                            preferences,
@@ -288,11 +301,15 @@ void BreakpointManager::sendBreakpointEvent(
                    breakpoint->m_line,
                    false
                  );
-    bp["column"] = adjustLineNumber(
+
+    int col = adjustLineNumber(
                      preferences,
                      breakpoint->m_column,
                      false
                    );
+    if (col > 0) {
+      bp["column"] = col;
+    }
   }
 
   folly::dynamic source = folly::dynamic::object;

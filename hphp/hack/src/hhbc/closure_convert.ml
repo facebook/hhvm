@@ -466,7 +466,7 @@ let convert_id (env:env) p (pid, str as id) =
     let prefix =
       match Scope.get_class env.scope with
       | None -> ""
-      | Some cd -> strip_id cd.c_name ^ "::" in
+      | Some cd -> (SU.Xhp.mangle @@ strip_id cd.c_name) ^ "::" in
     begin match env.scope with
       | ScopeItem.Function fd :: _ -> return (prefix ^ strip_id fd.f_name)
       | ScopeItem.Method md :: _ -> return (prefix ^ strip_id md.m_name)

@@ -36,7 +36,8 @@ bool ThreadsCommand::executeImpl(
 
   folly::dynamic threads = folly::dynamic::array;
   m_debugger->getAllThreadInfo(threads);
-  (*responseMsg)["body"] = std::move(threads);
+  (*responseMsg)["body"] = folly::dynamic::object;
+  (*responseMsg)["body"]["threads"] = std::move(threads);
 
   // Completion of this command does not resume the target.
   return false;

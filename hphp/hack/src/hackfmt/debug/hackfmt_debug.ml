@@ -8,8 +8,10 @@
  *
  *)
 
-module SyntaxTree = Full_fidelity_syntax_tree
 module SourceText = Full_fidelity_source_text
+module Syntax = Full_fidelity_positioned_syntax
+module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
+module DebugPos = Debug.WithSyntax(Syntax)
 
 open Hh_core
 
@@ -109,7 +111,8 @@ let debug_full_text source_text =
   Printf.printf "%s\n" (SourceText.get_text source_text)
 
 let debug_ast syntax_tree =
-  Printf.printf "%s\n" @@ Debug.dump_full_fidelity syntax_tree
+  let root = SyntaxTree.root syntax_tree in
+  Printf.printf "%s\n" @@ DebugPos.dump_syntax root
 
 let debug_text_range source_text start_char end_char =
   Printf.printf "Subrange passed:\n%s\n" @@

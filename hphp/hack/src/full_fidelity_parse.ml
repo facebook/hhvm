@@ -34,6 +34,7 @@ module SyntaxTree = Full_fidelity_syntax_tree
 module SourceText = Full_fidelity_source_text
 module ParserErrors = Full_fidelity_parser_errors
   .WithSyntax(Full_fidelity_positioned_syntax)
+module DebugPos = Debug.WithSyntax(Full_fidelity_positioned_syntax)
 
 module FullFidelityParseArgs = struct
 
@@ -320,7 +321,8 @@ let handle_existing_file args filename =
         ~level:ParserErrors.Maximum
   end;
   if args.full_fidelity_s_expr then begin
-    let str = Debug.dump_full_fidelity syntax_tree in
+    let root = SyntaxTree.root syntax_tree in
+    let str = DebugPos.dump_syntax root in
     Printf.printf "%s" str
   end;
   if args.full_fidelity_ast_s_expr then begin

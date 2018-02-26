@@ -10,4 +10,6 @@
 
 let dump_ast _ = ""
 
-let dump_full_fidelity _ = ""
+module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
+  let dump_syntax _ = ""
+end

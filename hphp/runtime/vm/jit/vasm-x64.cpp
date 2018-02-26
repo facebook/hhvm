@@ -495,9 +495,13 @@ void Vgen::patch(Venv& env) {
 
 void Vgen::pad(CodeBlock& cb) {
   X64Assembler a { cb };
+#if HAVE_LIBXED
+  a.pad();
+#else
   while (a.available() >= 2) a.ud2();
   if (a.available() > 0) a.int3();
   assertx(a.available() == 0);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

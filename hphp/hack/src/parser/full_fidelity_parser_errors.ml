@@ -481,6 +481,19 @@ let methodish_has_body node =
     not (is_missing body)
   | _ -> false
 
+(* whether a methodish decl is native *)
+let methodish_is_native node =
+  match syntax node with
+  | MethodishDeclaration { methodish_attribute = {
+      syntax = AttributeSpecification {
+        attribute_specification_attributes = attrs; _}; _}; _} ->
+    let attrs = syntax_to_list_no_separators attrs in
+    Hh_core.List.exists attrs
+      ~f:(function { syntax = Attribute {attribute_name; _}; _} ->
+            String.lowercase_ascii @@ text attribute_name = "__native"
+          | _ -> false)
+  | _ -> false
+
 (* By checking the third parent of a methodish node, tests whether the methodish
  * node is inside an interface. *)
 let methodish_inside_interface parents =
@@ -502,14 +515,15 @@ let methodish_abstract_with_body hhvm_compat_mode node =
   let has_body = methodish_has_body node in
   is_abstract && has_body
 
-(* Test whether node is a non-abstract method without a body.
+(* Test whether node is a non-abstract method without a body and not native.
  * Here node is the methodish node
  * And methods inside interfaces are inherently considered abstract *)
-let methodish_non_abstract_without_body node parents =
+let methodish_non_abstract_without_body_not_native node parents =
   let non_abstract = not (methodish_contains_abstract node
       || methodish_inside_interface parents) in
   let not_has_body = not (methodish_has_body node) in
-  non_abstract && not_has_body
+  let not_native = not (methodish_is_native node) in
+  non_abstract && not_has_body && not_native
 
 let methodish_in_interface_has_body hhvm_compat_mode node parents =
   not hhvm_compat_mode &&
@@ -1121,7 +1135,7 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
     let fun_semicolon = md.methodish_semicolon in
     let errors =
       produce_error errors
-      (methodish_non_abstract_without_body node) parents
+      (methodish_non_abstract_without_body_not_native node) parents
       (SyntaxError.error2015 class_name method_name) fun_semicolon in
     let errors =
       produce_error errors

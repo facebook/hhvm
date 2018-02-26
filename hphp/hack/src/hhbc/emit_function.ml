@@ -12,10 +12,6 @@ open Instruction_sequence
 module A = Ast
 open Hh_core
 
-let extract_inout_or_ref_param_locations params =
-  let module EIOH = Emit_inout_helpers in
-  EIOH.extract_inout_or_ref_param_locations ~is_closure_or_func:true params
-
 (* Given a function definition, emit code, and in the case of <<__Memoize>>,
  * a wrapper function
  *)
@@ -34,7 +30,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   let deprecation_info = Hhas_attribute.deprecation_info function_attributes in
   let is_dynamically_callable = Hhas_attribute.is_dynamically_callable function_attributes in
   let wrapper_type_opt, inout_param_locations =
-    extract_inout_or_ref_param_locations ast_fun.Ast.f_params in
+    Emit_inout_helpers.extract_function_inout_or_ref_param_locations ast_fun in
   let has_inout_args = Option.is_some wrapper_type_opt in
   let renamed_id =
     if is_memoize
@@ -68,8 +64,8 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   let normal_function_name =
     if wrapper_type_opt = Some Emit_inout_helpers.RefWrapper
     then original_id else renamed_id in
-  let is_interceptable = Interceptable.is_function_interceptable
-    ~is_generated:false namespace ast_fun in
+  let is_interceptable =
+    Interceptable.is_function_interceptable namespace ast_fun in
   let normal_function =
     Hhas_function.make
       function_attributes

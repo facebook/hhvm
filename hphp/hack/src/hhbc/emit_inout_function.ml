@@ -14,6 +14,10 @@ open Hhbc_ast
 
 module H = Hhbc_ast
 
+let is_last_param_variadic param_count params =
+  let last_p = List.nth_exn params (param_count - 1) in
+  Hhas_param.is_variadic last_p
+
 let emit_body_instrs_inout params call_instrs =
   let param_count = List.length params in
   let param_instrs = gather @@
@@ -33,8 +37,7 @@ let emit_body_instrs_inout params call_instrs =
         Some (instr_setl @@ Local.Named (Hhas_param.name p))) in
   let msrv = Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
   let local = Local.get_unnamed_local () in
-  let last_p = List.nth_exn params (param_count - 1) in
-  let has_variadic = Hhas_param.is_variadic last_p in
+  let has_variadic = is_last_param_variadic param_count params in
   let num_inout = List.length inout_params in
   let num_uninit = if msrv then num_inout else 0 in
   gather [
@@ -71,12 +74,16 @@ let emit_body_instrs_ref params call_instrs =
   let param_get_instrs =
     List.filter_map params ~f:(fun p ->
         if Hhas_param.is_reference p
-        then Some (instr_cgetl (Local.Named (Hhas_param.name p))) else None)
+        then Some (instr_cgetl (Local.Named (Hhas_param.name p))) else None) in
+  let fcall_instr =
+    if is_last_param_variadic param_count params
+    then instr_fcallunpack param_count
+    else instr_fcall param_count
   in
   gather [
     call_instrs;
     param_instrs;
-    instr_fcall param_count;
+    fcall_instr;
     instr_unboxr_nop;
     gather param_get_instrs;
     if msrv then
@@ -161,8 +168,8 @@ let emit_wrapper_function
     make_wrapper_body
       env doc decl_vars return_type_info modified_params body_instrs in
   let return_by_ref = ast_fun.Ast.f_ret_by_ref in
-  let is_interceptable = Interceptable.is_function_interceptable
-    ~is_generated:true namespace ast_fun in
+  let is_interceptable =
+    Interceptable.is_function_interceptable namespace ast_fun in
   Hhas_function.make
     function_attributes
     name
@@ -255,8 +262,8 @@ let emit_wrapper_method
   let doc = ast_method.A.m_doc_comment in
   let body =
     make_wrapper_body env doc decl_vars return_type_info params body_instrs in
-  let method_is_interceptable = Interceptable.is_method_interceptable
-    ~is_generated:true namespace ast_class original_id in
+  let method_is_interceptable =
+    Interceptable.is_method_interceptable namespace ast_class original_id in
   Hhas_method.make
     method_attributes
     method_is_protected

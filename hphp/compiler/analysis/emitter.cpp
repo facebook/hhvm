@@ -8811,8 +8811,9 @@ FuncEmitter* EmitterVisitor::createInOutWrapper(MethodStatementPtr m,
   auto const nonClosureMethod = fe->pce() && !fe->isClosureBody;
 
   // For now we cannot support inout parameters on generators, async functions,
-  // functions which return by ref, and non-closure methods when reffiness is
-  // not invariant on method overrides. Additionally, we don't emit wrappers
+  // functions which return by ref, variadic byref parameters and non-closure
+  // methods when reffiness is not invariant on method overrides.
+  // Additionally, we don't emit wrappers
   // for non <?hh files unless EnableHipHopSyntax is set.
   auto const needIOWrapper =
     RuntimeOption::EvalCreateInOutWrapperFunctions &&
@@ -8822,6 +8823,7 @@ FuncEmitter* EmitterVisitor::createInOutWrapper(MethodStatementPtr m,
     !scope->isAsync() &&
     !scope->isGenerator() &&
     !scope->isAbstract() &&
+    !scope->hasRefVariadicParam() &&
     !m->isRef();
 
   // InOut functions must always have a wrapper created for them, however, ref

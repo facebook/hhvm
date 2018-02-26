@@ -860,9 +860,8 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
       | Fun fd :: _defs ->
         let st, fd = convert_fun env st fd in
         let has_inout_params =
-          let wrapper, _ = Emit_inout_helpers.extract_inout_or_ref_param_locations
-            ~is_closure_or_func:true
-            fd.Ast.f_params in
+          let wrapper, _ =
+            Emit_inout_helpers.extract_function_inout_or_ref_param_locations fd in
           Option.is_some wrapper in
         let st, stub_fd =
           add_function ~has_inout_params:has_inout_params env st fd in

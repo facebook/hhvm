@@ -48,9 +48,7 @@ let emit_def_inline = function
   | A.Fun fd ->
     let has_inout_params =
       let r, _ =
-        Emit_inout_helpers.extract_inout_or_ref_param_locations
-          ~is_closure_or_func:true
-          fd.Ast.f_params in
+        Emit_inout_helpers.extract_function_inout_or_ref_param_locations fd in
       Option.is_some r in
     Emit_pos.emit_pos_then (fst fd.Ast.f_name) @@
     let n = int_of_string (snd fd.Ast.f_name) in

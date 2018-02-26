@@ -49,10 +49,10 @@ let rec hint_uses_tparams tparam_names (_, hint)  =
 (* Extracts inout params
  * Or ref params only if the function is a closure
  *)
-let extract_inout_or_ref_param_locations is_closure params =
-  let module EIOH = Emit_inout_helpers in
+let extract_inout_or_ref_param_locations is_closure_or_func md  =
   let _, l =
-    EIOH.extract_inout_or_ref_param_locations ~is_closure_or_func:is_closure params in
+    Emit_inout_helpers.extract_method_inout_or_ref_param_locations
+      ~is_closure_or_func md in
   l
 
 let has_kind m k = List.mem m.Ast.m_kind k
@@ -101,7 +101,7 @@ let from_ast_wrapper : bool -> _ ->
        if id = SN.SpecialIdents.this then
        Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this");
   let inout_param_locations =
-    extract_inout_or_ref_param_locations method_is_closure_body ast_method.Ast.m_params in
+    extract_inout_or_ref_param_locations method_is_closure_body ast_method in
   let has_inout_args = List.length inout_param_locations <> 0 in
   let renamed_method_id = if has_inout_args then
     Hhbc_id.Method.from_ast_name @@
@@ -220,8 +220,8 @@ let from_ast_wrapper : bool -> _ ->
   let method_id =
     if has_inout_args && (method_is_closure_body || has_ref_params) then
     original_method_id else renamed_method_id in
-  let method_is_interceptable = Interceptable.is_method_interceptable
-    ~is_generated:(method_id <> renamed_method_id) namespace ast_class original_method_id in
+  let method_is_interceptable =
+    Interceptable.is_method_interceptable namespace ast_class original_method_id in
   let normal_function =
     Hhas_method.make
       method_attributes

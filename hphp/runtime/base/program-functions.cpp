@@ -814,11 +814,23 @@ static void pagein_self(void) {
   unsigned long begin, end, inode, pgoff;
   char mapname[PATH_MAX];
   char perm[5];
-  char dev[6];
+  char dev[11];
   char *buf;
   int bufsz;
   int r;
   FILE *fp;
+
+  auto mapped_huge = false;
+  auto const try_map_huge =
+    RuntimeOption::EvalMaxHotTextHugePages > 0 &&
+    (char*)__hot_start != nullptr && (char*)__hot_end != nullptr &&
+    hugePagesSupported();
+
+  SCOPE_EXIT {
+    if (try_map_huge && !mapped_huge) {
+      Logger::Warning("Failed to hugify the .text section");
+    }
+  };
 
   // pad due to the spaces between the inode number and the mapname
   bufsz = sizeof(unsigned long) * 4 + sizeof(mapname) + sizeof(char) * 11 + 100;
@@ -832,7 +844,7 @@ static void pagein_self(void) {
     while (!feof(fp)) {
       if (fgets(buf, bufsz, fp) == 0)
         break;
-      r = sscanf(buf, "%lx-%lx %4s %lx %5s %ld %s",
+      r = sscanf(buf, "%lx-%lx %4s %lx %10s %ld %s",
                  &begin, &end, perm, &pgoff, dev, &inode, mapname);
 
       // page in read-only segments that correspond to a file on disk
@@ -850,13 +862,7 @@ static void pagein_self(void) {
       const size_t hugePageBytes = 2L * 1024 * 1024;
 
       if (mlock(beginPtr, end - begin) == 0) {
-        if (RuntimeOption::EvalMaxHotTextHugePages > 0 &&
-            __hot_start &&
-            __hot_end &&
-            hugePagesSupported() &&
-            beginPtr <= hotStart &&
-            hotEnd <= endPtr) {
-
+        if (try_map_huge && beginPtr <= hotStart && hotEnd <= endPtr) {
           char* from = hotStart - ((intptr_t)hotStart & (hugePageBytes - 1));
           char* to = hotEnd + (hugePageBytes - 1);
           to -= (intptr_t)to & (hugePageBytes - 1);
@@ -866,6 +872,7 @@ static void pagein_self(void) {
             to = from + maxHugeHotTextBytes;
           }
           if (to <= (void*)hugifyText) {
+            mapped_huge = true;
             hugifyText(from, to);
           }
         }

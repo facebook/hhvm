@@ -111,7 +111,7 @@ void ArrayOffsetProfile::update(const ArrayData* ad,
 
       int64_t i;
       if (checkForInt && ad->convertKey(sd, i, false)) {
-        return !RuntimeOption::EvalHackArrCompatNotices ?
+        return !checkHACIntishCast() ?
           a->find(i, hash_int64(i)) : -1;
       }
       return a->find(sd, sd->hash());

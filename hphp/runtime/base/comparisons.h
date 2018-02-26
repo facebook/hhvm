@@ -26,7 +26,7 @@ namespace HPHP {
 namespace detail {
 
 ALWAYS_INLINE void hackArrCompatCheck(const Array& arr) {
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices && !arr.isNull())) {
+  if (UNLIKELY(checkHACCompare() && !arr.isNull())) {
     raiseHackArrCompatArrMixedCmp();
   }
 }

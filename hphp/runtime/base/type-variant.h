@@ -1336,9 +1336,7 @@ struct VarNR : private TypedValueAux {
     if (s.empty()) return VarNR(staticEmptyString());
     int64_t n;
     if (UNLIKELY(s.get()->isStrictlyInteger(n))) {
-      if (RuntimeOption::EvalHackArrCompatNotices) {
-        raise_intish_index_cast();
-      }
+      if (checkHACIntishCast()) raise_intish_index_cast();
       return VarNR(n);
     }
     return VarNR(s);

@@ -164,7 +164,7 @@ struct Add {
   ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
     if (UNLIKELY(a1->isHackArray())) throwInvalidAdditionException(a1);
     if (UNLIKELY(a2->isHackArray())) throwInvalidAdditionException(a2);
-    if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatAdd();
+    if (checkHACMisc()) raiseHackArrCompatAdd();
     a1->incRefCount(); // force COW
     SCOPE_EXIT { a1->decRefCount(); };
     return a1->plusEq(a2);
@@ -321,7 +321,7 @@ struct AddEq {
   ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
     if (UNLIKELY(ad1->isHackArray())) throwInvalidAdditionException(ad1);
     if (UNLIKELY(ad2->isHackArray())) throwInvalidAdditionException(ad2);
-    if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatAdd();
+    if (checkHACMisc()) raiseHackArrCompatAdd();
     if (ad2->empty() || ad1 == ad2) return ad1;
     if (ad1->empty()) {
       ad2->incRefCount();

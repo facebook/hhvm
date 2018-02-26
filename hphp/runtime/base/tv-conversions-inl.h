@@ -107,7 +107,7 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
   if (!ad->useWeakKeys()) {
     throwInvalidArrayKeyException(&cell, ad);
   }
-  if (RuntimeOption::EvalHackArrCompatNotices) {
+  if (checkHACMisc()) {
     raiseHackArrCompatImplicitArrayKey(&cell);
   }
 

@@ -2062,7 +2062,7 @@ void emitAKExists(IRGS& env) {
       return;
     }
 
-    if (RuntimeOption::EvalHackArrCompatNotices) {
+    if (checkHACMisc()) {
       gen(
         env,
         RaiseHackArrCompatNotice,

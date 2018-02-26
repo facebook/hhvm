@@ -996,7 +996,7 @@ int ArrayData::compare(const ArrayData* v2) const {
 
   if (isPHPArray()) {
     if (UNLIKELY(!v2->isPHPArray())) {
-      if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
+      if (UNLIKELY(checkHACCompare())) {
         raiseHackArrCompatArrMixedCmp();
       }
       if (v2->isVecArray()) throw_vec_compare_exception();
@@ -1009,8 +1009,7 @@ int ArrayData::compare(const ArrayData* v2) const {
 
   if (isVecArray()) {
     if (UNLIKELY(!v2->isVecArray())) {
-      if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices &&
-                   v2->isPHPArray())) {
+      if (UNLIKELY(checkHACCompare() && v2->isPHPArray())) {
         raiseHackArrCompatArrMixedCmp();
       }
       throw_vec_compare_exception();
@@ -1018,8 +1017,7 @@ int ArrayData::compare(const ArrayData* v2) const {
     return PackedArray::VecCmp(this, v2);
   }
 
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices &&
-               v2->isPHPArray())) {
+  if (UNLIKELY(checkHACCompare() && v2->isPHPArray())) {
     raiseHackArrCompatArrMixedCmp();
   }
 
@@ -1033,8 +1031,7 @@ bool ArrayData::equal(const ArrayData* v2, bool strict) const {
   assert(v2);
 
   auto const mixed = [&]{
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices &&
-                 v2->isHackArray())) {
+    if (UNLIKELY(checkHACCompare() && v2->isHackArray())) {
       raiseHackArrCompatArrMixedCmp();
     }
     return false;

@@ -229,7 +229,7 @@ EmptyArray::SetStr(ArrayData*, StringData* k, Cell v, bool /*copy*/) {
 
 ArrayData* EmptyArray::SetWithRefInt(ArrayData* ad, int64_t k,
                                      TypedValue v, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+  if (checkHACRefBind() && tvIsReferenced(v)) {
     raiseHackArrCompatRefBind(k);
   }
   auto const lval = LvalInt(ad, k, copy);
@@ -239,7 +239,7 @@ ArrayData* EmptyArray::SetWithRefInt(ArrayData* ad, int64_t k,
 
 ArrayData* EmptyArray::SetWithRefStr(ArrayData* ad, StringData* k,
                                      TypedValue v, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+  if (checkHACRefBind() && tvIsReferenced(v)) {
     raiseHackArrCompatRefBind(k);
   }
   auto const lval = LvalStr(ad, k, copy);
@@ -253,7 +253,7 @@ member_lval EmptyArray::LvalInt(ArrayData*, int64_t k, bool) {
 }
 
 member_lval EmptyArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   return LvalInt(ad, k, copy);
 }
 
@@ -262,7 +262,7 @@ member_lval EmptyArray::LvalStr(ArrayData*, StringData* k, bool) {
 }
 
 member_lval EmptyArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   return LvalStr(ad, k, copy);
 }
 
@@ -271,13 +271,13 @@ member_lval EmptyArray::LvalNew(ArrayData*, bool) {
 }
 
 member_lval EmptyArray::LvalNewRef(ArrayData* ad, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
+  if (checkHACRefBind()) raiseHackArrCompatRefNew();
   return LvalNew(ad, copy);
 }
 
 ArrayData* EmptyArray::SetRefInt(ArrayData*, int64_t k,
                                  member_lval v, bool) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   tvBoxIfNeeded(v);
   tvIncRefCountable(v.tv());
   auto const lval = k == 0 ? EmptyArray::MakePacked(v.tv())
@@ -287,7 +287,7 @@ ArrayData* EmptyArray::SetRefInt(ArrayData*, int64_t k,
 
 ArrayData* EmptyArray::SetRefStr(ArrayData*, StringData* k,
                                  member_lval v, bool) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   tvBoxIfNeeded(v);
   tvIncRefCountable(v.tv());
   return EmptyArray::MakeMixed(k, v.tv()).arr_base();
@@ -299,14 +299,14 @@ ArrayData* EmptyArray::Append(ArrayData*, Cell v, bool /*copy*/) {
 }
 
 ArrayData* EmptyArray::AppendRef(ArrayData*, member_lval v, bool) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
+  if (checkHACRefBind()) raiseHackArrCompatRefNew();
   tvBoxIfNeeded(v);
   tvIncRefCountable(v.tv());
   return EmptyArray::MakePacked(v.tv()).arr_base();
 }
 
 ArrayData* EmptyArray::AppendWithRef(ArrayData*, TypedValue v, bool /*copy*/) {
-  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+  if (checkHACRefBind() && tvIsReferenced(v)) {
     raiseHackArrCompatRefNew();
   }
   auto tv = make_tv<KindOfNull>();

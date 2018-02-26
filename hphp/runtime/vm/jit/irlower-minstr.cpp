@@ -311,8 +311,7 @@ ArgGroup elemArgs(IRLS& env, const IRInstruction* inst) {
 void implElem(IRLS& env, const IRInstruction* inst) {
   auto const mode  = inst->extra<MOpModeData>()->mode;
   auto const key   = inst->src(1);
-  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mode,
-              RuntimeOption::EvalHackArrCompatNotices);
+  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mode, checkHACIntishCast());
 
   auto const args = elemArgs(env, inst).ssa(2);
 
@@ -325,7 +324,7 @@ void implIssetEmptyElem(IRLS& env, const IRInstruction* inst) {
   auto const isEmpty = inst->op() == EmptyElem;
   auto const key     = inst->src(1);
   BUILD_OPTAB(ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key),
-              isEmpty, RuntimeOption::EvalHackArrCompatNotices);
+              isEmpty, checkHACIntishCast());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -344,7 +343,7 @@ void cgCGetElem(IRLS& env, const IRInstruction* inst) {
   auto const mode  = inst->extra<MOpModeData>()->mode;
   auto const key   = inst->src(1);
   BUILD_OPTAB(CGETELEM_HELPER_TABLE, getKeyType(key), mode,
-              RuntimeOption::EvalHackArrCompatNotices);
+              checkHACIntishCast());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
@@ -354,7 +353,7 @@ void cgCGetElem(IRLS& env, const IRInstruction* inst) {
 void cgVGetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   BUILD_OPTAB(VGETELEM_HELPER_TABLE, getKeyType(key),
-              RuntimeOption::EvalHackArrCompatNotices);
+              checkHACIntishCast());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -364,7 +363,7 @@ void cgVGetElem(IRLS& env, const IRInstruction* inst) {
 void cgSetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   BUILD_OPTAB(SETELEM_HELPER_TABLE, getKeyType(key),
-              RuntimeOption::EvalHackArrCompatNotices);
+              checkHACIntishCast());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -377,7 +376,7 @@ IMPL_OPCODE_CALL(BindNewElem);
 void cgSetWithRefElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const target = RuntimeOption::EvalHackArrCompatNotices
+  auto const target = checkHACIntishCast()
     ? CallSpec::direct(MInstrHelpers::setWithRefElem<true>)
     : CallSpec::direct(MInstrHelpers::setWithRefElem<false>);
 
@@ -392,7 +391,7 @@ void cgSetWithRefElem(IRLS& env, const IRInstruction* inst) {
 void cgBindElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const target = RuntimeOption::EvalHackArrCompatNotices
+  auto const target = checkHACIntishCast()
     ? CallSpec::direct(MInstrHelpers::bindElemC<true>)
     : CallSpec::direct(MInstrHelpers::bindElemC<false>);
 
@@ -407,7 +406,7 @@ void cgBindElem(IRLS& env, const IRInstruction* inst) {
 void cgSetOpElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const target = RuntimeOption::EvalHackArrCompatNotices
+  auto const target = checkHACIntishCast()
     ? CallSpec::direct(MInstrHelpers::setOpElem<true>)
     : CallSpec::direct(MInstrHelpers::setOpElem<false>);
 
@@ -424,7 +423,7 @@ void cgSetOpElem(IRLS& env, const IRInstruction* inst) {
 void cgIncDecElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const target = RuntimeOption::EvalHackArrCompatNotices
+  auto const target = checkHACIntishCast()
     ? CallSpec::direct(MInstrHelpers::incDecElem<true>)
     : CallSpec::direct(MInstrHelpers::incDecElem<false>);
 
@@ -440,7 +439,7 @@ void cgIncDecElem(IRLS& env, const IRInstruction* inst) {
 void cgUnsetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   BUILD_OPTAB(UNSET_ELEM_HELPER_TABLE, getKeyType(key),
-              RuntimeOption::EvalHackArrCompatNotices);
+              checkHACIntishCast());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), kVoidDest,
@@ -632,7 +631,7 @@ void implArraySet(IRLS& env, const IRInstruction* inst) {
               keyInfo.type,
               keyInfo.checkForInt,
               setRef,
-              RuntimeOption::EvalHackArrCompatNotices);
+              checkHACIntishCast());
 
 
   auto args = arrArgs(env, inst, keyInfo);
@@ -653,7 +652,7 @@ void cgElemArrayX(IRLS& env, const IRInstruction* inst) {
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
               keyInfo.type, keyInfo.checkForInt, mode,
-              RuntimeOption::EvalHackArrCompatNotices);
+              checkHACIntishCast());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -663,8 +662,7 @@ void cgElemArrayX(IRLS& env, const IRInstruction* inst) {
 void cgElemArrayD(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   auto const keyInfo = checkStrictlyInteger(inst->typeParam(), key->type());
-  BUILD_OPTAB(ELEM_ARRAY_D_HELPER_TABLE, keyInfo.type,
-              RuntimeOption::EvalHackArrCompatNotices);
+  BUILD_OPTAB(ELEM_ARRAY_D_HELPER_TABLE, keyInfo.type, checkHACIntishCast());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -674,8 +672,7 @@ void cgElemArrayD(IRLS& env, const IRInstruction* inst) {
 void cgElemArrayU(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   auto const keyInfo = checkStrictlyInteger(inst->typeParam(), key->type());
-  BUILD_OPTAB(ELEM_ARRAY_U_HELPER_TABLE, keyInfo.type,
-              RuntimeOption::EvalHackArrCompatNotices);
+  BUILD_OPTAB(ELEM_ARRAY_U_HELPER_TABLE, keyInfo.type, checkHACIntishCast());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -700,7 +697,7 @@ void cgArrayGet(IRLS& env, const IRInstruction* inst) {
   auto const mode = inst->extra<ArrayGet>()->mode;
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ARRAYGET_HELPER_TABLE, keyInfo.type, keyInfo.checkForInt, mode,
-                      RuntimeOption::EvalHackArrCompatNotices);
+                      checkHACIntishCast());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
@@ -763,7 +760,7 @@ void cgAddNewElemVec(IRLS& env, const IRInstruction* inst) {
 void cgAddElemStrKey(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const target = RuntimeOption::EvalHackArrCompatNotices
+  auto const target = checkHACIntishCast()
     ? CallSpec::direct(addElemStringKeyHelper<true>)
     : CallSpec::direct(addElemStringKeyHelper<false>);
 
@@ -777,7 +774,7 @@ void cgArrayIsset(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ARRAY_ISSET_HELPER_TABLE, keyInfo.type, keyInfo.checkForInt,
-              RuntimeOption::EvalHackArrCompatNotices);
+              checkHACIntishCast());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -791,7 +788,7 @@ void cgArrayIdx(IRLS& env, const IRInstruction* inst) {
 
   auto const target = [&] () -> CallSpec {
     if (keyInfo.checkForInt) {
-      return RuntimeOption::EvalHackArrCompatNotices
+      return checkHACIntishCast()
         ? CallSpec::direct(arrayIdxSi<true>)
         : CallSpec::direct(arrayIdxSi<false>);
     }

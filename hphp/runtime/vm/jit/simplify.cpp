@@ -2805,7 +2805,7 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst, bool& skip) {
   auto const rval = [&] {
     int64_t val;
     if (arr->arrVal()->convertKey(idx->strVal(), val, false)) {
-      if (RuntimeOption::EvalHackArrCompatNotices) {
+      if (checkHACIntishCast()) {
         skip = true;
         return member_rval{};
       }

@@ -760,7 +760,7 @@ member_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
 }
 
 member_lval PackedArray::LvalIntRef(ArrayData* adIn, int64_t k, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   return LvalInt(adIn, k, copy);
 }
 
@@ -786,7 +786,7 @@ member_lval PackedArray::LvalStr(ArrayData* adIn, StringData* k, bool copy) {
 
 member_lval
 PackedArray::LvalStrRef(ArrayData* adIn, StringData* key, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(key);
+  if (checkHACRefBind()) raiseHackArrCompatRefBind(key);
   return LvalStr(adIn, key, copy);
 }
 
@@ -819,7 +819,7 @@ member_lval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
 }
 
 member_lval PackedArray::LvalNewRef(ArrayData* adIn, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
+  if (checkHACRefBind()) raiseHackArrCompatRefNew();
   return LvalNew(adIn, copy);
 }
 
@@ -860,7 +860,7 @@ ArrayData* PackedArray::SetStrVec(ArrayData* adIn, StringData* k, Cell, bool) {
 ArrayData* PackedArray::SetWithRefInt(ArrayData* adIn, int64_t k,
                                       TypedValue v, bool copy) {
   auto const checkHackArrRef = [&] {
-    if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+    if (checkHACRefBind() && tvIsReferenced(v)) {
       raiseHackArrCompatRefBind(k);
     }
   };
@@ -894,7 +894,7 @@ ArrayData* PackedArray::SetWithRefStr(ArrayData* adIn, StringData* k,
                                       TypedValue v, bool copy) {
   return MutableOpStr(adIn, k, copy,
     [&] (MixedArray* mixed) {
-      if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+      if (checkHACRefBind() && tvIsReferenced(v)) {
         raiseHackArrCompatRefBind(k);
       }
       auto const lval = mixed->addLvalImpl<false>(k);
@@ -913,7 +913,7 @@ ArrayData* PackedArray::SetWithRefStrVec(ArrayData* adIn, StringData* k,
 
 ArrayData* PackedArray::SetRefInt(ArrayData* adIn, int64_t k,
                                   member_lval v, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
 
   return MutableOpInt(adIn, k, copy,
     [&] (ArrayData* ad) {
@@ -936,7 +936,7 @@ ArrayData* PackedArray::SetRefIntVec(ArrayData* adIn, int64_t,
 
 ArrayData* PackedArray::SetRefStr(ArrayData* adIn, StringData* k,
                                   member_lval v, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
 
   return MutableOpStr(adIn, k, copy,
     // TODO(#2606310): Make use of our knowledge that the key is missing.
@@ -1077,7 +1077,7 @@ ArrayData* PackedArray::Append(ArrayData* adIn, Cell v, bool copy) {
 ArrayData* PackedArray::AppendRef(ArrayData* adIn, member_lval v, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
+  if (checkHACRefBind()) raiseHackArrCompatRefNew();
   auto const ad = PrepareForInsert(adIn, copy);
   auto& dst = packedData(ad)[ad->m_size++];
   tvBoxIfNeeded(v);
@@ -1098,7 +1098,7 @@ PackedArray::AppendWithRef(ArrayData* adIn, TypedValue v, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
 
-  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+  if (checkHACRefBind() && tvIsReferenced(v)) {
     raiseHackArrCompatRefNew();
   }
 

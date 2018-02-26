@@ -1050,7 +1050,7 @@ member_lval MixedArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
 }
 
 member_lval MixedArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   return LvalInt(ad, k, copy);
 }
 
@@ -1059,7 +1059,7 @@ member_lval MixedArray::LvalStr(ArrayData* ad, StringData* key, bool copy) {
 }
 
 member_lval MixedArray::LvalStrRef(ArrayData* ad, StringData* key, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(key);
+  if (checkHACRefBind()) raiseHackArrCompatRefBind(key);
   return LvalStr(ad, key, copy);
 }
 
@@ -1098,7 +1098,7 @@ member_lval MixedArray::LvalNew(ArrayData* ad, bool copy) {
 }
 
 member_lval MixedArray::LvalNewRef(ArrayData* ad, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
+  if (checkHACRefBind()) raiseHackArrCompatRefNew();
   return LvalNew(ad, copy);
 }
 
@@ -1113,7 +1113,7 @@ MixedArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
 
 ArrayData* MixedArray::SetWithRefInt(ArrayData* ad, int64_t k,
                                      TypedValue v, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+  if (checkHACRefBind() && tvIsReferenced(v)) {
     raiseHackArrCompatRefBind(k);
   }
   return asMixed(ad)->prepareForInsert(copy)->updateWithRef(k, v);
@@ -1121,7 +1121,7 @@ ArrayData* MixedArray::SetWithRefInt(ArrayData* ad, int64_t k,
 
 ArrayData* MixedArray::SetWithRefStr(ArrayData* ad, StringData* k,
                                      TypedValue v, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+  if (checkHACRefBind() && tvIsReferenced(v)) {
     raiseHackArrCompatRefBind(k);
   }
   return asMixed(ad)->prepareForInsert(copy)->updateWithRef(k, v);
@@ -1131,7 +1131,7 @@ ArrayData*
 MixedArray::SetRefInt(ArrayData* ad, int64_t k, member_lval v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   return a->prepareForInsert(copy)->updateRef(k, v);
 }
 
@@ -1139,7 +1139,7 @@ ArrayData*
 MixedArray::SetRefStr(ArrayData* ad, StringData* k, member_lval v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   return a->prepareForInsert(copy)->updateRef(k, v);
 }
 
@@ -1244,7 +1244,7 @@ ArrayData* MixedArray::AppendRef(ArrayData* ad, member_lval v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
 
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
+  if (checkHACRefBind()) raiseHackArrCompatRefNew();
 
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
@@ -1260,7 +1260,7 @@ ArrayData* MixedArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
 
-  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+  if (checkHACRefBind() && tvIsReferenced(v)) {
     raiseHackArrCompatRefNew();
   }
 

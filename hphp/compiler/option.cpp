@@ -253,24 +253,32 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(EnableHipHopExperimentalSyntax, ini,
                config, "EnableHipHopExperimentalSyntax");
   Config::Bind(EnableShortTags, ini, config, "EnableShortTags", true);
-  Config::Bind(RuntimeOption::EvalHackArrCompatNotices,
-               ini, config, "HackArrCompatNotices",
-               RuntimeOption::EvalHackArrCompatNotices);
-  Config::Bind(RuntimeOption::EvalHackArrCompatIsArrayNotices,
-               ini, config, "HackArrCompatIsArrayNotices",
-               RuntimeOption::EvalHackArrCompatIsArrayNotices);
-  Config::Bind(RuntimeOption::EvalHackArrCompatPromoteNotices,
-               ini, config, "HackArrCompatPromoteNotices",
-               RuntimeOption::EvalHackArrCompatPromoteNotices);
-  Config::Bind(RuntimeOption::EvalHackArrCompatTypeHintNotices,
-               ini, config, "HackArrCompatTypeHintNotices",
-               RuntimeOption::EvalHackArrCompatTypeHintNotices);
-  Config::Bind(RuntimeOption::EvalHackArrCompatDVCmpNotices,
-               ini, config, "HackArrCompatDVCmpNotices",
-               RuntimeOption::EvalHackArrCompatDVCmpNotices);
+
+#define BIND_HAC_OPTION(Name, Def)                      \
+  Config::Bind(RuntimeOption::EvalHackArrCompat##Name,  \
+               ini, config, "HackArrCompat" #Name,      \
+               RuntimeOption::EvalHackArrCompat##Def);
+
+#define BIND_HAC_OPTION_SELF(Name)  BIND_HAC_OPTION(Name, Name)
+
+  BIND_HAC_OPTION_SELF(Notices)
+  BIND_HAC_OPTION(CheckIntishCast, Notices)
+  BIND_HAC_OPTION(CheckRefBind, Notices)
+  BIND_HAC_OPTION(CheckFalseyPromote, Notices)
+  BIND_HAC_OPTION(CheckCompare, Notices)
+  BIND_HAC_OPTION(CheckMisc, Notices)
+  BIND_HAC_OPTION_SELF(IsArrayNotices)
+  BIND_HAC_OPTION_SELF(PromoteNotices)
+  BIND_HAC_OPTION_SELF(TypeHintNotices)
+  BIND_HAC_OPTION_SELF(DVCmpNotices)
+
+#undef BIND_HAC_OPTION_SELF
+#undef BIND_HAC_OPTION
+
   Config::Bind(RuntimeOption::EvalHackArrDVArrs,
                ini, config, "HackArrDVArrs",
                RuntimeOption::EvalHackArrDVArrs);
+
   Config::Bind(RuntimeOption::EvalForbidDynamicCalls,
                ini, config, "ForbidDynamicCalls",
                RuntimeOption::EvalForbidDynamicCalls);

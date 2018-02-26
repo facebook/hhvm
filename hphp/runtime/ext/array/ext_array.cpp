@@ -321,7 +321,7 @@ bool HHVM_FUNCTION(array_key_exists,
   switch (cell->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      if (RuntimeOption::EvalHackArrCompatNotices && ad->useWeakKeys()) {
+      if (checkHACMisc() && ad->useWeakKeys()) {
         raiseHackArrCompatImplicitArrayKey(cell);
       }
       return ad->useWeakKeys() && ad->exists(staticEmptyString());
@@ -339,7 +339,7 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfObject:
     case KindOfResource:
       if (!ad->useWeakKeys()) throwInvalidArrayKeyException(cell, ad);
-      if (RuntimeOption::EvalHackArrCompatNotices) {
+      if (checkHACMisc()) {
         raiseHackArrCompatImplicitArrayKey(cell);
       }
       raise_warning("Array key should be either a string or an integer");
@@ -1719,7 +1719,7 @@ static inline void addToSetHelper(const req::ptr<c_Set>& st,
     }
     int64_t n;
     if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
-      if (RuntimeOption::EvalHackArrCompatNotices) raise_intish_index_cast();
+      if (checkHACIntishCast()) raise_intish_index_cast();
       st->add(n);
     } else {
       st->add(s);
@@ -1744,7 +1744,7 @@ static inline bool checkSetHelper(const req::ptr<c_Set>& st,
   }
   int64_t n;
   if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
-    if (RuntimeOption::EvalHackArrCompatNotices) raise_intish_index_cast();
+    if (checkHACIntishCast()) raise_intish_index_cast();
     return st->contains(n);
   }
   return st->contains(s);
@@ -2032,7 +2032,7 @@ static inline void addToIntersectMapHelper(const req::ptr<c_Map>& mp,
     }
     int64_t n;
     if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
-      if (RuntimeOption::EvalHackArrCompatNotices) raise_intish_index_cast();
+      if (checkHACIntishCast()) raise_intish_index_cast();
       mp->set(n, *intOneTv);
     } else {
       mp->set(s, *intOneTv);
@@ -2062,7 +2062,7 @@ static inline void updateIntersectMapHelper(const req::ptr<c_Map>& mp,
     }
     int64_t n;
     if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
-      if (RuntimeOption::EvalHackArrCompatNotices) raise_intish_index_cast();
+      if (checkHACIntishCast()) raise_intish_index_cast();
       auto val = mp->get(n);
       if (val && val->m_data.num == pos) {
         assert(val->m_type == KindOfInt64);

@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/runtime-option.h"
+
 #include "hphp/util/portability.h"
 
 namespace HPHP {
@@ -252,6 +254,29 @@ inline bool ArrayData::IsValidKey(const StringData* k) {
 
 ALWAYS_INLINE void decRefArr(ArrayData* arr) {
   arr->decRefAndRelease();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE bool checkHACIntishCast() {
+  return RuntimeOption::EvalHackArrCompatNotices &&
+         RuntimeOption::EvalHackArrCompatCheckIntishCast;
+}
+ALWAYS_INLINE bool checkHACRefBind() {
+  return RuntimeOption::EvalHackArrCompatNotices &&
+         RuntimeOption::EvalHackArrCompatCheckRefBind;
+}
+ALWAYS_INLINE bool checkHACFalseyPromote() {
+  return RuntimeOption::EvalHackArrCompatNotices &&
+         RuntimeOption::EvalHackArrCompatCheckFalseyPromote;
+}
+ALWAYS_INLINE bool checkHACCompare() {
+  return RuntimeOption::EvalHackArrCompatNotices &&
+         RuntimeOption::EvalHackArrCompatCheckCompare;
+}
+ALWAYS_INLINE bool checkHACMisc() {
+  return RuntimeOption::EvalHackArrCompatNotices &&
+         RuntimeOption::EvalHackArrCompatCheckMisc;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

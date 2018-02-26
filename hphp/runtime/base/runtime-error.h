@@ -33,6 +33,7 @@
 #endif
 
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Class;
@@ -135,7 +136,14 @@ void raise_return_typehint_error(const std::string& msg);
 
 void raise_disallowed_dynamic_call(const Func* f);
 
+void raise_call_to_undefined(const StringData* name, const Class* c = nullptr);
+
 void raise_intish_index_cast();
+
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Hack arrays.
+ */
 
 void raise_hackarr_type_hint_param_notice(const Func* func,
                                           const ArrayData* ad,
@@ -149,10 +157,10 @@ void raise_hackarr_type_hint_outparam_notice(const Func* func,
                                              AnnotType at,
                                              int param);
 
-void raise_call_to_undefined(const StringData* name, const Class* c = nullptr);
-
-// RAII mechanism to temporarily suppress Hack array compat notices within a
-// scope.
+/*
+ * RAII mechanism to temporarily suppress Hack array compat notices within a
+ * scope.
+ */
 struct SuppressHackArrCompatNotices {
   SuppressHackArrCompatNotices();
   ~SuppressHackArrCompatNotices();
@@ -169,6 +177,7 @@ private:
 void raise_hackarr_compat_notice(const std::string& msg);
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // incl_HPHP_RUNTIME_ERROR_H_

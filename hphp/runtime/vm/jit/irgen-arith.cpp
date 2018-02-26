@@ -1004,7 +1004,7 @@ void implCmp(IRGS& env, Op op) {
     PUNT(cmpUnknownDataType);
   }
 
-  if (RuntimeOption::EvalHackArrCompatNotices) {
+  if (checkHACCompare()) {
     // With EvalHackArrCompatNotices enabled, we'll raise a notice on ===, !==,
     // ==, or != between a PHP array and a Hack array. On relational compares,
     // we'll raise a notice between a PHP array and any other type.

@@ -199,7 +199,7 @@ void cgAKExistsArr(IRLS& env, const IRInstruction* inst) {
   auto const keyInfo = checkStrictlyInteger(arrTy, keyTy);
   auto const target =
     keyInfo.checkForInt
-      ? (RuntimeOption::EvalHackArrCompatNotices
+      ? (checkHACIntishCast()
          ? CallSpec::direct(ak_exist_string<true>)
          : CallSpec::direct(ak_exist_string<false>))
       : (keyInfo.type == KeyType::Int

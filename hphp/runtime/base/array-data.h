@@ -698,7 +698,9 @@ public:
    * If `notice' is set, raise a notice if we return true.
    */
   bool convertKey(const StringData* key, int64_t& i,
-                  bool notice = RuntimeOption::EvalHackArrCompatNotices) const;
+                  bool notice =
+                    RuntimeOption::EvalHackArrCompatNotices &&
+                    RuntimeOption::EvalHackArrCompatCheckIntishCast) const;
 
   /*
    * Re-index all numeric keys to start from 0.
@@ -973,6 +975,12 @@ void raiseHackArrCompatMissingSetOp();
 
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
 void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);
+
+bool checkHACIntishCast();
+bool checkHACRefBind();
+bool checkHACFalseyPromote();
+bool checkHACCompare();
+bool checkHACMisc();
 
 ///////////////////////////////////////////////////////////////////////////////
 

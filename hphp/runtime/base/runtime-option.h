@@ -751,13 +751,24 @@ struct RuntimeOption {
   F(int64_t, FunctionCallSampleRate, 0)                                 \
   F(double, InitialLoadFactor, 1.0)                                     \
   /* Raise notices on various array operations which may present        \
-   * compatibility issues with Hack arrays. */                          \
+   * compatibility issues with Hack arrays.                             \
+   *                                                                    \
+   * The various *Notices options independently control separate        \
+   * subsets of notices.  The Check* options are subordinate to the     \
+   * HackArrCompatNotices option, and control whether various runtime
+   * checks are made; they do not affect any optimizations. */          \
   F(bool, HackArrCompatNotices, false)                                  \
+  F(bool, HackArrCompatCheckIntishCast, false)                          \
+  F(bool, HackArrCompatCheckRefBind, false)                             \
+  F(bool, HackArrCompatCheckFalseyPromote, false)                       \
+  F(bool, HackArrCompatCheckCompare, false)                             \
+  F(bool, HackArrCompatCheckMisc, false)                                \
   F(bool, HackArrCompatIsArrayNotices, false)                           \
   F(bool, HackArrCompatPromoteNotices, false)                           \
   F(bool, HackArrCompatTypeHintNotices, false)                          \
   F(bool, HackArrCompatDVCmpNotices, false)                             \
   F(bool, HackArrDVArrs, false)                                         \
+  /* Switches on miscellaneous junk. */                                 \
   F(bool, CreateInOutWrapperFunctions, true)                            \
   F(bool, ReffinessInvariance, false)                                   \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \

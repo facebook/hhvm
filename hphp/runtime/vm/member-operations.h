@@ -19,6 +19,7 @@
 
 #include <type_traits>
 
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
@@ -174,7 +175,7 @@ void raise_inout_undefined_index(const StringData* sd);
 namespace detail {
 
 ALWAYS_INLINE void checkPromotion(const TypedValue* base) {
-  if (LIKELY(!RuntimeOption::EvalHackArrCompatNotices)) return;
+  if (LIKELY(!checkHACFalseyPromote())) return;
 
   if (base->m_type == KindOfNull) {
     raise_hackarr_compat_notice("Promoting null to array");
@@ -461,12 +462,12 @@ NEVER_INLINE member_rval ElemSlow(TypedValue& tvRef,
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      if (mode != MOpMode::None && RuntimeOption::EvalHackArrCompatNotices) {
+      if (mode != MOpMode::None && checkHACFalseyPromote()) {
         raise_hackarr_compat_notice("Cannot index into null");
       }
       return ElemEmptyish();
     case KindOfBoolean:
-      if (mode != MOpMode::None && RuntimeOption::EvalHackArrCompatNotices) {
+      if (mode != MOpMode::None && checkHACFalseyPromote()) {
         raise_hackarr_compat_notice("Cannot index into a boolean");
       }
       return ElemBoolean(base);
@@ -834,7 +835,7 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
                                     s_storage.get());
     // ArrayObject should always have the 'storage' property...
     assert(storage.has_ref());
-    return UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)
+    return UNLIKELY(checkHACIntishCast())
       ? ElemDArray<mode, reffy, true, keyType>(storage.tv_ptr(), key)
       : ElemDArray<mode, reffy, false, keyType>(storage.tv_ptr(), key);
   }
@@ -932,7 +933,7 @@ void SetWithRefMLElem(TypedValue& tvRef, TypedValue* base,
         // Rather than fork the Lval API to have warn and no-warn flavors, we
         // instead lift the binding assignment warning here, and then disable
         // Hack array notices.
-        if (reffy && RuntimeOption::EvalHackArrCompatNotices &&
+        if (reffy && checkHACRefBind() &&
             !base->m_data.parr->isGlobalsArray()) {
           raiseHackArrCompatRefBind(key);
         }
@@ -1561,7 +1562,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
       a, key.m_data.num, value, copy
     );
   }
-  if (RuntimeOption::EvalHackArrCompatNotices) {
+  if (checkHACMisc()) {
     raiseHackArrCompatImplicitArrayKey(&key);
   }
   if (isNullType(key.m_type)) {
@@ -2032,7 +2033,7 @@ inline TypedValue* SetOpElem(TypedValue& tvRef,
     case KindOfPersistentArray:
     case KindOfArray: {
       if (UNLIKELY(
-            RuntimeOption::EvalHackArrCompatNotices &&
+            checkHACFalseyPromote() &&
             !ArrNR{base->m_data.parr}.asArray().exists(tvAsCVarRef(&key))
           )) {
         raiseHackArrCompatMissingSetOp();
@@ -2279,7 +2280,7 @@ inline Cell IncDecElem(
     case KindOfPersistentArray:
     case KindOfArray: {
       if (UNLIKELY(
-            RuntimeOption::EvalHackArrCompatNotices &&
+            checkHACFalseyPromote() &&
             !ArrNR{base->m_data.parr}.asArray().exists(tvAsCVarRef(&key))
           )) {
         raiseHackArrCompatMissingIncDec();

@@ -248,7 +248,13 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   // When running hhbbc, these option is loaded from GD, and will override CLI.
   // When running hhvm, these option is not loaded from GD, but read from CLI.
   RuntimeOption::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
-  RuntimeOption::EvalHackArrCompatNotices    = gd.HackArrCompatNotices;
+  RuntimeOption::EvalHackArrCompatNotices =
+    RuntimeOption::EvalHackArrCompatCheckIntishCast =
+    RuntimeOption::EvalHackArrCompatCheckRefBind =
+    RuntimeOption::EvalHackArrCompatCheckFalseyPromote =
+    RuntimeOption::EvalHackArrCompatCheckCompare =
+    RuntimeOption::EvalHackArrCompatCheckMisc =
+      gd.HackArrCompatNotices;
   RuntimeOption::EvalAllowObjectDestructors  = gd.AllowObjectDestructors;
   RuntimeOption::EvalForbidDynamicCalls      = gd.ForbidDynamicCalls;
   RuntimeOption::EvalNoticeOnBuiltinDynamicCalls =

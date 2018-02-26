@@ -611,7 +611,7 @@ struct Eq {
 
   bool noticeOnArrNonArr() const { return false; }
   bool noticeOnArrHackArr() const {
-    return RuntimeOption::EvalHackArrCompatNotices;
+    return checkHACCompare();
   }
 };
 
@@ -678,10 +678,10 @@ struct Lt {
   }
 
   bool noticeOnArrNonArr() const {
-    return RuntimeOption::EvalHackArrCompatNotices;
+    return checkHACCompare();
   }
   bool noticeOnArrHackArr() const {
-    return RuntimeOption::EvalHackArrCompatNotices;
+    return checkHACCompare();
   }
 };
 
@@ -748,10 +748,10 @@ struct Gt {
   }
 
   bool noticeOnArrNonArr() const {
-    return RuntimeOption::EvalHackArrCompatNotices;
+    return checkHACCompare();
   }
   bool noticeOnArrHackArr() const {
-    return RuntimeOption::EvalHackArrCompatNotices;
+    return checkHACCompare();
   }
 };
 
@@ -820,10 +820,10 @@ struct Cmp {
   }
 
   bool noticeOnArrNonArr() const {
-    return RuntimeOption::EvalHackArrCompatNotices;
+    return checkHACCompare();
   }
   bool noticeOnArrHackArr() const {
-    return RuntimeOption::EvalHackArrCompatNotices;
+    return checkHACCompare();
   }
 };
 
@@ -841,8 +841,7 @@ bool cellSame(Cell c1, Cell c2) {
   if (null1 || null2) return false;
 
   auto const phpArrayCheck = [&]{
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices &&
-                 isArrayType(c2.m_type))) {
+    if (UNLIKELY(checkHACCompare() && isArrayType(c2.m_type))) {
       raiseHackArrCompatArrMixedCmp();
     }
   };
@@ -889,8 +888,7 @@ bool cellSame(Cell c1, Cell c2) {
     case KindOfPersistentArray:
     case KindOfArray:
       if (!isArrayType(c2.m_type)) {
-        if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices &&
-                     isHackArrayType(c2.m_type))) {
+        if (UNLIKELY(checkHACCompare() && isHackArrayType(c2.m_type))) {
           raiseHackArrCompatArrMixedCmp();
         }
         return false;

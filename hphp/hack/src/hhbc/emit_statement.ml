@@ -307,13 +307,15 @@ and emit_break env pos level =
 and emit_continue env pos level =
   TFR.emit_break_or_continue ~is_break:false ~in_finally_epilogue:false env pos level
 
+and get_instrs r = r.Emit_expression.instrs
+
 and emit_if env pos condition consequence alternative =
   match alternative with
   | []
   | [_, A.Noop] ->
     let done_label = Label.next_regular () in
     gather [
-      emit_jmpz env condition done_label;
+      get_instrs @@ emit_jmpz env condition done_label;
       emit_stmts env consequence;
       instr_label done_label;
     ]
@@ -323,7 +325,7 @@ and emit_if env pos condition consequence alternative =
     let consequence_instr = emit_stmts env consequence in
     let alternative_instr = emit_stmts env alternative in
     gather [
-      emit_jmpz env condition alternative_label;
+      get_instrs @@ emit_jmpz env condition alternative_label;
       consequence_instr;
       Emit_pos.emit_pos pos;
       instr_jmp done_label;
@@ -407,11 +409,11 @@ and emit_while env e b =
   instr_label break_label;
   *)
   gather [
-    emit_jmpz env e break_label;
+    get_instrs @@ emit_jmpz env e break_label;
     instr_label start_label;
     (Emit_env.do_in_loop_body break_label cont_label env b emit_stmt);
     instr_label cont_label;
-    emit_jmpnz env e start_label;
+    get_instrs @@ emit_jmpnz env e start_label;
     instr_label break_label;
   ]
 
@@ -517,7 +519,7 @@ and emit_do env b e =
     instr_label start_label;
     (Emit_env.do_in_loop_body break_label cont_label env b emit_stmt);
     instr_label cont_label;
-    emit_jmpnz env e start_label;
+    get_instrs @@ emit_jmpnz env e start_label;
     instr_label break_label;
   ]
 
@@ -539,7 +541,7 @@ and emit_for env p e1 e2 e3 b =
   *)
   let emit_cond ~jmpz label =
     let final cond =
-      if jmpz then emit_jmpz env cond label else emit_jmpnz env cond label
+      get_instrs (if jmpz then emit_jmpz env cond label else emit_jmpnz env cond label)
     in
     let rec expr_list h tl =
       match tl with

@@ -43,6 +43,15 @@ type is_expr_lhs =
   | IsExprExpr of A.expr
   | IsExprUnnamedLocal of Local.t
 
+type emit_jmp_result = {
+  (* generated instruction sequence *)
+  instrs: Instruction_sequence.t;
+  (* does instruction sequence fall through *)
+  is_fallthrough: bool;
+  (* was label associated with emit operation used *)
+  is_label_used: bool;
+}
+
 (* Locals, array elements, and properties all support the same range of l-value
  * operations. *)
 module LValOp = struct
@@ -873,17 +882,31 @@ and emit_conditional_expression env etest etrue efalse =
   | Some etrue ->
     let false_label = Label.next_regular () in
     let end_label = Label.next_regular () in
-    let opt_b, jmp_instrs = emit_jmpz_aux env etest false_label in
+    let r = emit_jmpz env etest false_label in
     gather [
-      jmp_instrs;
-      (* Don't emit code for true branch if statically we know condition is false *)
-      optional (opt_b <> Some false)
-        [emit_expr ~need_ref:false env etrue; instr_jmp end_label];
-      instr_label false_label;
-      (* Don't emit code for false branch if statically we know condition is true *)
-      optional (opt_b <> Some true)
-        [emit_expr ~need_ref:false env efalse];
-      instr_label end_label;
+      r.instrs;
+      (* only emit true branch if there is fallthrough from condition *)
+      begin if r.is_fallthrough
+      then gather [
+        emit_expr ~need_ref:false env etrue;
+        instr_jmp end_label
+      ]
+      else empty
+      end;
+      (* only emit false branch if false_label is used *)
+      begin if r.is_label_used
+      then gather [
+        instr_label false_label;
+        emit_expr ~need_ref:false env efalse;
+      ]
+      else empty
+      end;
+      (* end_label is used to jump out of true branch so they should be emitted
+         together *)
+      begin if r.is_fallthrough
+      then instr_label end_label
+      else empty
+      end;
     ]
   | None ->
     let end_label = Label.next_regular () in
@@ -2057,52 +2080,81 @@ and emit_pipe env e1 e2 =
  * Generate specialized code in case expr is statically known, and for
  * !, && and || expressions
  *)
-and emit_jmpz_aux env (pos, expr_ as expr) label =
+and emit_jmpz env (pos, expr_ as expr) label: emit_jmp_result =
+  let with_pos i = Emit_pos.emit_pos_then pos i in
   let opt = optimize_null_check () in
   match Ast_constant_folder.expr_to_opt_typed_value (Emit_env.get_namespace env) expr with
   | Some v ->
     let b = Typed_value.to_bool v in
-    Some b, Emit_pos.emit_pos_then pos @@
-      (if b then empty else instr_jmp label)
+    if b then
+      { instrs = with_pos empty;
+        is_fallthrough = true;
+        is_label_used = false; }
+    else
+      { instrs = with_pos @@ instr_jmp label;
+        is_fallthrough = false;
+        is_label_used = true; }
   | None ->
-    None,
-    Emit_pos.emit_pos_then pos @@
     begin match expr_ with
     | A.Unop(A.Unot, e) ->
       emit_jmpnz env e label
     | A.Binop(A.BArbar, e1, e2) ->
       let skip_label = Label.next_regular () in
-      gather [
-        emit_jmpnz env e1 skip_label;
-        emit_jmpz env e2 label;
-        instr_label skip_label;
-      ]
+      let r1 = emit_jmpnz env e1 skip_label in
+      if not r1.is_fallthrough
+      then
+        let instrs =
+          if r1.is_label_used then gather [ r1.instrs; instr_label skip_label; ]
+          else r1.instrs in
+        { instrs = with_pos instrs;
+          is_fallthrough = r1.is_label_used;
+          is_label_used = false }
+      else
+        let r2 = emit_jmpz env e2 label in
+        let instrs = gather [
+          r1.instrs;
+          r2.instrs;
+          optional r1.is_label_used [instr_label skip_label];
+        ] in
+        { instrs = with_pos instrs;
+          is_fallthrough = r2.is_fallthrough || r1.is_label_used;
+          is_label_used = r2.is_label_used }
     | A.Binop(A.AMpamp, e1, e2) ->
-      gather [
-        emit_jmpz env e1 label;
-        emit_jmpz env e2 label;
-      ]
+      let r1 = emit_jmpz env e1 label in
+      if not r1.is_fallthrough
+      then
+        { instrs = with_pos r1.instrs;
+          is_fallthrough = false;
+          is_label_used = r1.is_label_used }
+      else
+        let r2 = emit_jmpz env e2 label in
+        { instrs = with_pos @@ gather [ r1.instrs; r2.instrs; ];
+          is_fallthrough = r2.is_fallthrough;
+           is_label_used = r1.is_label_used || r2.is_label_used }
     | A.Binop(A.EQeqeq, e, (_, A.Null))
     | A.Binop(A.EQeqeq, (_, A.Null), e) when opt ->
-      gather [
-        emit_is_null env e;
-        instr_jmpz label
-      ]
+      { instrs = with_pos @@ gather [
+          emit_is_null env e;
+          instr_jmpz label;
+        ];
+        is_fallthrough = true;
+        is_label_used = true; }
     | A.Binop(A.Diff2, e, (_, A.Null))
     | A.Binop(A.Diff2, (_, A.Null), e) when opt ->
-      gather [
-        emit_is_null env e;
-        instr_jmpnz label
-      ]
+      { instrs = with_pos @@ gather [
+          emit_is_null env e;
+          instr_jmpnz label;
+        ];
+        is_fallthrough = true;
+        is_label_used = true; }
     | _ ->
-      gather [
-        emit_expr_and_unbox_if_necessary ~need_ref:false env expr;
-        instr_jmpz label
-      ]
+      { instrs = with_pos @@ gather [
+          emit_expr_and_unbox_if_necessary ~need_ref:false env expr;
+          instr_jmpz label;
+        ];
+        is_fallthrough = true;
+        is_label_used = true; }
     end
-
-and emit_jmpz env expr label =
-  snd (emit_jmpz_aux env expr label)
 
 (* Emit code that is equivalent to
  *   <code for expr>
@@ -2110,56 +2162,98 @@ and emit_jmpz env expr label =
  * Generate specialized code in case expr is statically known, and for
  * !, && and || expressions
  *)
-and emit_jmpnz env (pos, expr_ as expr) label =
+and emit_jmpnz env (pos, expr_ as expr) label: emit_jmp_result =
+  let with_pos i = Emit_pos.emit_pos_then pos i in
   let opt = optimize_null_check () in
-  Emit_pos.emit_pos_then pos @@
   match Ast_constant_folder.expr_to_opt_typed_value (Emit_env.get_namespace env) expr with
   | Some v ->
-    if Typed_value.to_bool v then instr_jmp label else empty
+    if Typed_value.to_bool v
+    then
+      { instrs = with_pos @@ instr_jmp label;
+        is_fallthrough = false;
+        is_label_used = true }
+    else
+      { instrs = with_pos empty;
+        is_fallthrough = true;
+        is_label_used = false }
   | None ->
-    match expr_ with
+    begin match expr_ with
     | A.Unop(A.Unot, e) ->
       emit_jmpz env e label
     | A.Binop(A.BArbar, e1, e2) ->
-      gather [
-        emit_jmpnz env e1 label;
-        emit_jmpnz env e2 label;
-      ]
+      let r1 = emit_jmpnz env e1 label in
+      if not r1.is_fallthrough then r1
+      else
+        let r2 = emit_jmpnz env e2 label in
+        { instrs = with_pos @@ gather [ r1.instrs; r2.instrs ];
+          is_fallthrough = r2.is_fallthrough;
+          is_label_used = r1.is_label_used || r2.is_label_used }
     | A.Binop(A.AMpamp, e1, e2) ->
       let skip_label = Label.next_regular () in
-      gather [
-        emit_jmpz env e1 skip_label;
-        emit_jmpnz env e2 label;
-        instr_label skip_label;
-      ]
+      let r1 = emit_jmpz env e1 skip_label in
+      if not r1.is_fallthrough
+      then
+        { instrs = with_pos @@ gather [
+            r1.instrs;
+            optional r1.is_label_used [instr_label skip_label]
+          ];
+          is_fallthrough = r1.is_label_used;
+          is_label_used = false }
+      else begin
+        let r2 = emit_jmpnz env e2 label in
+        { instrs = with_pos @@ gather [
+            r1.instrs;
+            r2.instrs;
+            optional r1.is_label_used [instr_label skip_label]
+          ];
+          is_fallthrough = r2.is_fallthrough || r1.is_label_used;
+          is_label_used = r2.is_label_used }
+      end
     | A.Binop(A.EQeqeq, e, (_, A.Null))
     | A.Binop(A.EQeqeq, (_, A.Null), e) when opt ->
-      gather [
-        emit_is_null env e;
-        instr_jmpnz label
-      ]
+      { instrs = with_pos @@ gather [
+          emit_is_null env e;
+          instr_jmpnz label;
+        ];
+        is_fallthrough = true;
+        is_label_used = true; }
     | A.Binop(A.Diff2, e, (_, A.Null))
     | A.Binop(A.Diff2, (_, A.Null), e) when opt ->
-      gather [
-        emit_is_null env e;
-        instr_jmpz label
-      ]
+      { instrs = with_pos @@ gather [
+          emit_is_null env e;
+          instr_jmpz label;
+        ];
+        is_fallthrough = true;
+        is_label_used = true; }
     | _ ->
-      gather [
-        emit_expr_and_unbox_if_necessary ~need_ref:false env expr;
-        instr_jmpnz label
-      ]
+      { instrs = with_pos @@ gather [
+          emit_expr_and_unbox_if_necessary ~need_ref:false env expr;
+          instr_jmpnz label;
+        ];
+        is_fallthrough = true;
+        is_label_used = true; }
+    end
 
 and emit_short_circuit_op env expr =
   let its_true = Label.next_regular () in
   let its_done = Label.next_regular () in
-  gather [
-    emit_jmpnz env expr its_true;
+  let r1 = emit_jmpnz env expr its_true in
+  let if_true =
+    if r1.is_label_used then gather [
+      instr_label its_true;
+      instr_true;
+    ]
+    else empty in
+  if r1.is_fallthrough
+  then gather [
+    r1.instrs;
     instr_false;
     instr_jmp its_done;
-    instr_label its_true;
-    instr_true;
+    if_true;
     instr_label its_done ]
+  else gather [
+    r1.instrs;
+    if_true; ]
 
 and emit_quiet_expr env (pos, expr_ as expr) =
   match expr_ with

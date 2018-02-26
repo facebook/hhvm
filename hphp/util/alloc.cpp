@@ -782,7 +782,6 @@ void thread_huge_tcache_destroy() {
 extern "C" {
   const char* malloc_conf = "narenas:1,lg_tcache_max:16"
 #if (JEMALLOC_VERSION_MAJOR >= 5)
-    ",background_thread:false"
 #ifdef FACEBOOK
     // FB-only as this feature does not exist in any jemalloc release as of
     // 2017-11-02 (latest: 5.0.1)

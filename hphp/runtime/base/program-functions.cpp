@@ -76,7 +76,6 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/abi-cxx.h"
-#include "hphp/util/alloc.h"
 #include "hphp/util/arch.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
@@ -779,6 +778,24 @@ hugifyText(char* from, char* to) {
     // zero size or negative sizes.
     return;
   }
+#if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 5)
+  // jemalloc 5 has background threads, which handle purging asynchronously.
+  bool background_threads = false;
+  if (mallctlRead("background_thread", &background_threads)) {
+    background_threads = false;
+    Logger::Warning("Failed to determine jemalloc background thread state");
+  }
+  if (background_threads &&
+      mallctlWrite("background_thread", false, /* errorOK */ true)) {
+    Logger::Warning("Failed to disable jemalloc background threads");
+  }
+  SCOPE_EXIT {
+    if (background_threads &&
+        mallctlWrite("background_thread", true, /* errorOK */ true)) {
+      Logger::Warning("Failed to enable jemalloc background threads");
+    }
+  };
+#endif
   size_t sz = to - from;
   void* mem = malloc(sz);
   memcpy(mem, from, sz);
@@ -2179,15 +2196,6 @@ void hphp_process_init() {
   // initialize the tzinfo cache.
   timezone_init();
   BootStats::mark("timezone_init");
-
-#if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 5)
-  // jemalloc 5 has background threads, which handle purging asynchronously.
-  // This needs to be done before external compilers are intitialized as doing
-  // so will spawn a light process pool.
-  if (mallctlWrite("background_thread", true, /* errorOK */ true)) {
-    Logger::Warning("Failed to enable jemalloc background threads");
-  }
-#endif
 
   // start any external compilers
   compilers_start();

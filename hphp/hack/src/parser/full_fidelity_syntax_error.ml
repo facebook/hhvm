@@ -235,6 +235,7 @@ let error2074 call_modifier = "An '" ^ call_modifier ^ "' parameter must not " ^
 let error2075 call_modifier = "An '" ^ call_modifier ^ "' parameter cannot " ^
   "be passed by reference ('&')."
 let error2076 = "Cannot use both 'inout' and '&' on the same argument."
+let error2077 = "Cannot use empty list"
 
 (* Start giving names rather than numbers *)
 let list_as_subscript = "A subscript index cannot be a list"

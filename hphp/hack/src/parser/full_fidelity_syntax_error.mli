@@ -167,6 +167,7 @@ val error2073 : string
 val error2074 : string -> string
 val error2075 : string -> string
 val error2076 : string
+val error2077 : string
 
 (* Start giving names rather than numbers *)
 val list_as_subscript : string

@@ -5,7 +5,6 @@ zend/good/Zend/tests/bug41351_2.php
 zend/good/Zend/tests/bug41351_3.php
 zend/good/Zend/tests/bug43332_1.php
 zend/good/Zend/tests/bug43343.php
-zend/good/Zend/tests/bug45147.php
 zend/good/Zend/tests/bug55086.php
 zend/good/Zend/tests/bug55156.php
 zend/good/Zend/tests/class_name_as_scalar_error_001.php
@@ -22,7 +21,6 @@ zend/good/Zend/tests/errmsg_032.php
 zend/good/Zend/tests/errmsg_033.php
 zend/good/Zend/tests/errmsg_034.php
 zend/good/Zend/tests/errmsg_039.php
-zend/good/Zend/tests/foreach_list_004.php
 zend/good/Zend/tests/generators/errors/yield_outside_function_error.php
 zend/good/Zend/tests/heredoc_012.php
 zend/good/Zend/tests/heredoc_014.php
@@ -40,6 +38,4 @@ zend/good/Zend/tests/use_function/case_insensivity.php
 zend/good/Zend/tests/use_function/no_global_fallback2.php
 zend/good/ext/reflection/tests/bug36337.php
 zend/good/ext/standard/tests/serialize/006.php
-zend/good/tests/lang/008.php
-zend/good/tests/lang/033.php
 zend/good/tests/lang/bug24054.php

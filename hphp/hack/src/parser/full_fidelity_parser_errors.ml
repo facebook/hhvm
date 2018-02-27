@@ -1668,6 +1668,17 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
   | ListExpression le
     when not hhvm_compat_mode && (is_invalid_list_expression node parents) ->
     make_error_from_node node SyntaxError.error2040 :: errors
+  | ListExpression { list_members; _ } when hhvm_compat_mode ->
+    begin match parents with
+    | p1 :: _ when is_value_of_foreach node p1 ->
+      begin match list_members.syntax with
+      | Missing ->
+        make_error_from_node ~error_type:SyntaxError.RuntimeError node
+          SyntaxError.error2077 :: errors
+      | _ -> errors
+      end
+    | _ -> errors
+    end
   | ShapeExpression { shape_expression_fields; _} ->
     List.fold_right invalid_shape_field_check
       (syntax_to_list_no_separators shape_expression_fields) errors

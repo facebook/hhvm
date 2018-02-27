@@ -2190,6 +2190,9 @@ void parse_function(AsmState& as) {
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs, &isTop);
 
+  // Be conservative by default. HHBBC can clear it where appropriate.
+  attrs |= AttrMayUseVV;
+
   if(!isTop && as.emittedTopLevelFunc) {
     as.error("All top level functions must be defined after any "
              "non-top functions");

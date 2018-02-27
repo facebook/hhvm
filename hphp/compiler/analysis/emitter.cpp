@@ -12751,12 +12751,16 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       }
     }
 
-    if (auto uc = UnitCompiler::create(code, codeLen, filename, md5)) {
-      try {
-        ue = uc->compile();
-      } catch (const BadCompilerException& exc) {
-        Logger::Error("Bad external compiler: %s", exc.what());
-        return nullptr;
+    // If ue != nullptr then we were assembled it above, so don't feed it into
+    // the extern compiler
+    if (!ue) {
+      if (auto uc = UnitCompiler::create(code, codeLen, filename, md5)) {
+        try {
+          ue = uc->compile();
+        } catch (const BadCompilerException& exc) {
+          Logger::Error("Bad external compiler: %s", exc.what());
+          return nullptr;
+        }
       }
     }
 

@@ -58,7 +58,7 @@ struct TestBase {
     auto fail = [&] { printf("%s failed\n", name.c_str()); ret = false; };
 
     if (which.empty() || which == name) {
-      SCOPE_EXIT { fflush(nullptr); };
+      SCOPE_EXIT { fflush(stdout); fflush(stderr); };
       test_name = name;
       try {
         if (test()) {

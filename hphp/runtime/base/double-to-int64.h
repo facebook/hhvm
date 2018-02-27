@@ -19,11 +19,14 @@
 
 #include <limits>
 
+#include <folly/CPortability.h>
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline int64_t double_to_int64(double v) {
+inline int64_t double_to_int64(double v)
+  FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("float-cast-overflow") {
   if (v >= 0) {
     return v < std::numeric_limits<uint64_t>::max() ? (uint64_t)v : 0u;
   } else if (v < 0) {

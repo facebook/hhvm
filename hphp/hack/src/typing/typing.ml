@@ -780,10 +780,7 @@ and stmt env = function
       let env =
         if Nast.Visitor.HasContinue.block b
         then LEnv.fully_integrate env parent_lenv
-        else
-          let env = LEnv.integrate env parent_lenv env.Env.lenv in
-          let env = { env with Env.lenv = after_block } in
-          env in
+        else { env with Env.lenv = after_block } in
       let env = condition env false e in
       env, T.Do(tb, te)
   | While (e, b) as st ->

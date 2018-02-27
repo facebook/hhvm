@@ -492,7 +492,11 @@ static inline bool eagerGcDefault() {
 }
 
 static inline bool hackCompilerEnableDefault() {
+#ifndef HHVM_NO_DEFAULT_HACKC
   return facebook;
+#else
+  return false;
+#endif
 }
 
 static inline std::string hackCompilerExtractPathDefault() {

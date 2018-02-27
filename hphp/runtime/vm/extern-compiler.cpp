@@ -24,12 +24,15 @@
 #include <sys/wait.h>
 
 #include <folly/json.h>
+#include <folly/FileUtil.h>
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/compression.h"
+#include "hphp/util/embedded-data.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
@@ -543,11 +546,19 @@ void ExternCompiler::start() {
   m_err = err.detach("r");
 
   m_logStderrThread = std::thread([&]() {
+      int ret = 0;
       auto pid = m_pid;
       try {
-        while (true) {
-          const auto line = readline(m_err);
-          Logger::FError("[external compiler {}]: {}", pid, line);
+        pollfd pfd[] = {{fileno(m_err), POLLIN, 0}};
+        while ((ret = poll(pfd, 1, -1)) != -1) {
+          if (ret == 0) continue;
+          if (pfd[0].revents & (POLLHUP | POLLNVAL | POLLERR)) {
+            throw std::runtime_error("hangup");
+          }
+          if (pfd[0].revents) {
+            const auto line = readline(m_err);
+            Logger::FError("[external compiler {}]: {}", pid, line);
+          }
         }
       } catch (const std::exception& exc) {
         // The stderr output messes with expected test output, which presumably
@@ -580,6 +591,65 @@ void ExternCompiler::start() {
   writeConfig();
 }
 
+bool createHackc(const std::string& path, const std::string& binary) {
+  if (access(path.c_str(), R_OK|X_OK) == 0) {
+    auto const fd = open(path.c_str(), O_RDONLY);
+    if (fd != -1) {
+      SCOPE_EXIT { close(fd); };
+      std::string contents;
+      if (folly::readFile(fd, contents) && contents == binary) return true;
+    }
+  }
+  try {
+    folly::writeFileAtomic(path, binary, 0755);
+  } catch (std::system_error& ex) {
+    return false;
+  }
+  return true;
+}
+
+std::string hackcCommand() {
+  static const std::string hackc_command = [&] () -> std::string {
+    if (!RuntimeOption::EvalHackCompilerUseEmbedded) {
+      return RuntimeOption::EvalHackCompilerCommand;
+    }
+
+    auto const loc = [&] (const std::string& s) {
+      return s + " " + RuntimeOption::EvalHackCompilerArgs;
+    };
+
+    auto const trust = RuntimeOption::EvalHackCompilerTrustExtract;
+    auto const location = RuntimeOption::HackCompilerExtractPath;
+    auto const fallback = RuntimeOption::HackCompilerExtractFallback;
+    // As an optimization we can just choose to trust the extracted version
+    // without reading it.
+    if (trust && access(location.c_str(), X_OK) == 0) return loc(location);
+    if (trust && access(fallback.c_str(), X_OK) == 0) return loc(fallback);
+
+    embedded_data desc;
+    if (!get_embedded_data("hackc_binary", &desc)) {
+      Logger::Error("Embedded hackc binary is missing");
+      return RuntimeOption::EvalHackCompilerCommand;
+    }
+    auto const gz_binary = read_embedded_data(desc);
+    int len = safe_cast<int>(gz_binary.size());
+    auto const bin_str = gzdecode(gz_binary.data(), len);
+    SCOPE_EXIT { free(bin_str); };
+    if (!bin_str || !len) {
+      Logger::Error("Embedded hackc binary could not be decompressed");
+      return RuntimeOption::EvalHackCompilerCommand;
+    }
+
+    auto const binary = std::string(bin_str, len);
+    if (createHackc(location, binary)) return loc(location);
+    if (createHackc(fallback, binary)) return loc(fallback);
+
+    Logger::Error("Failed to write extern hackc binary");
+    return RuntimeOption::EvalHackCompilerCommand;
+  }();
+  return hackc_command;
+}
+
 folly::Optional<CompilerOptions> hackcConfiguration() {
   if (hackc_mode() == HackcMode::kNever) {
     return folly::none;
@@ -589,7 +659,7 @@ folly::Optional<CompilerOptions> hackcConfiguration() {
     RuntimeOption::EvalHackCompilerVerboseErrors,
     RuntimeOption::EvalHackCompilerMaxRetries,
     RuntimeOption::EvalHackCompilerWorkers,
-    RuntimeOption::EvalHackCompilerCommand,
+    hackcCommand(),
     RuntimeOption::EvalHackCompilerInheritConfig,
   };
 }
@@ -602,8 +672,7 @@ HackcMode hackc_mode() {
     return HackcMode::kNever;
   }
 
-  if (RuntimeOption::EvalHackCompilerCommand == "" ||
-      !RuntimeOption::EvalHackCompilerWorkers) {
+  if (hackcCommand() == "" || !RuntimeOption::EvalHackCompilerWorkers) {
     return HackcMode::kNever;
   }
 
@@ -670,6 +739,13 @@ CompilerPool& CompilerManager::get_hackc_pool() {
 
 void compilers_start() {
   s_manager.ensure_started();
+#if FOLLY_HAVE_PTHREAD_ATFORK
+  pthread_atfork(
+    nullptr /* prepare */,
+    nullptr /* parent */,
+    compilers_detach_after_fork /* child */
+  );
+#endif
 }
 
 void compilers_set_user(const std::string& username) {

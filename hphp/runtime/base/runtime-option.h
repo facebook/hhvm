@@ -453,6 +453,11 @@ struct RuntimeOption {
   static std::string DynamicExtensionPath;
   static std::vector<std::string> DynamicExtensions;
 
+  // When using an embedded hackc, extract it to the ExtractPath or the
+  // ExtractFallback.
+  static std::string HackCompilerExtractPath;
+  static std::string HackCompilerExtractFallback;
+
   // Namespace aliases for the compiler
   static std::map<std::string, std::string> AliasedNamespaces;
 
@@ -489,8 +494,14 @@ struct RuntimeOption {
   F(bool, DisassemblerPropDocComments, true)                            \
   F(bool, LoadFilepathFromUnitCache,   false)                           \
   F(bool, WarnOnCallByRefAnnotationMismatch, false)                     \
+  /* Whether to use the embedded hackc binary */                        \
+  F(bool, HackCompilerUseEmbedded,     facebook)                        \
+  /* Whether to trust existing versions of the extracted compiler */    \
+  F(bool, HackCompilerTrustExtract,    true)                            \
+  /* Arguments to run embedded hackc binary with */                     \
+  F(string, HackCompilerArgs,          hackCompilerArgsDefault())       \
   /* Whether to use hh_single_compile by default if available. */       \
-  F(bool, HackCompilerDefault,         false)                           \
+  F(bool, HackCompilerDefault,         hackCompilerEnableDefault())     \
   /* The command to invoke to spawn hh_single_compile in server mode. */\
   F(string, HackCompilerCommand,       "")                              \
   /* The number of hh_single_compile daemons to keep alive. */          \
@@ -500,7 +511,7 @@ struct RuntimeOption {
   F(uint64_t, HackCompilerMaxRetries,  0)                               \
   /* The number of times to reuse a single hh_single_compile daemons
      before forcing a restart */                                        \
-  F(uint32_t, HackCompilerReset,       10)                              \
+  F(uint32_t, HackCompilerReset,       0)                               \
   /* Whether to use an extern compiler to build systemlib */            \
   F(bool, UseExternCompilerForSystemLib, false)                         \
   /* Whether or not to fallback to hphpc if hh_single_compile fails for

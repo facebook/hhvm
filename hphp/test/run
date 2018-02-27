@@ -887,6 +887,7 @@ function hhvm_cmd_impl() {
     if (isset($options['hackc'])) {
       $args[] = '-vEval.HackCompilerCommand="'.hh_codegen_cmd($options).'"';
       $args[] = '-vEval.HackCompilerDefault=true';
+      $args[] = '-vEval.HackCompilerUseEmbedded=false';
     }
 
     if (isset($options['relocate'])) {
@@ -906,6 +907,10 @@ function hhvm_cmd_impl() {
         isset($options['hhas-round-trip'])) {
       $args[] = '-vEval.AllowHhas=1';
       $args[] = '-vEval.LoadFilepathFromUnitCache=1';
+      if (isset($options['run-hh-codegen'])) {
+        $args[] = '-vEval.HackCompilerDefault=false';
+        $args[] = '-vEval.HackCompilerUseEmbedded=false';
+      }
     }
 
     if (isset($options['compare-hh-codegen'])) {
@@ -915,6 +920,8 @@ function hhvm_cmd_impl() {
       $args[] = '-vEval.DisassemblerSourceMapping=1';
       $args[] = '-vEval.CreateInOutWrapperFunctions=1';
       $args[] = '-vEval.ReffinessInvariance=1';
+      $args[] = '-vEval.HackCompilerDefault=false';
+      $args[] = '-vEval.HackCompilerUseEmbedded=false';
 
       // TODO(paulbiss): support these
       $args[] = '-vEval.DisassemblerPropDocComments=0';
@@ -1066,6 +1073,7 @@ function hphp_cmd($options, $test, $timeout_prefix, $hackc) {
     $hackc_args = implode(" ", array(
       "-vRuntime.Eval.HackCompilerReset=1",
       "-vRuntime.Eval.HackCompilerDefault=true",
+      '-vRuntime.Eval.HackCompilerUseEmbedded=false',
       "-vRuntime.Eval.HackCompilerInheritConfig=true",
       "-vRuntime.Eval.HackCompilerCommand=\"${hh_single_compile} -v Hack.Compiler.SourceMapping=1 --daemon --stop-logging-stats --dump-symbol-refs\""
     ));

@@ -129,6 +129,7 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
   $chooseAdmin = $adminPort === null;
   $chooseDebug = $debugPort === null;
   $pid = posix_getpid();
+  $safe_children = array_flip(explode(',', exec("pgrep -f -d , -P $pid")));
 
   for ($i = 0; $i < 5; $i++) {
     if ($chooseServer) $serverPort = get_random_port($adminPort, $debugPort);
@@ -145,7 +146,7 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
     } else if (waitForServerToGetGoing($serverPort, $serverProc, $serverId)) {
       return $serverProc;
     }
-    killChildren($pid);
+    killChildren($pid, $safe_children);
     if ($serverProc) proc_close($serverProc);
   }
   dumpLogFilesToStdoutAndDie();
@@ -277,12 +278,13 @@ if (!function_exists("request")) {
   }
 }
 
-function killChildren($pid) {
+function killChildren($pid, $safe_children) {
   $childIds = exec("pgrep -f -d , -P $pid");
   foreach (explode(",", $childIds) as $cid) {
     if (!$cid) continue;
+    if (isset($safe_children[$cid])) continue;
     tlog("killing ".exec("ps -f -p ".$cid));
-    killChildren($cid);
+    killChildren($cid, $safe_children);
     posix_kill($cid, SIGKILL);
   }
 }

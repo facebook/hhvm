@@ -658,6 +658,9 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalHackArrCompatTypeHintNotices ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatDVCmpNotices ? '1' : '0')
     + (RuntimeOption::EvalHackCompilerFallback ? '1' : '0')
+    + (RuntimeOption::EvalHackCompilerDefault ? '1' : '0')
+    + (RuntimeOption::EvalUseExternCompilerForSystemLib ? '1' : '0')
+    + (RuntimeOption::EvalHackCompilerUseEmbedded ? '1' : '0')
     + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
     + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
     + (RuntimeOption::IntsOverflowToInts ? '1' : '0')
@@ -671,6 +674,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalAllowObjectDestructors ? '1' : '0')
     + (RuntimeOption::EvalUseExternCompilerForSystemLib ? '1' : '0')
     + RuntimeOption::EvalHackCompilerCommand + '\0'
+    + RuntimeOption::EvalHackCompilerArgs + '\0'
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces()
     + mangleExternCompilerVersions();

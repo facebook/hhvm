@@ -449,6 +449,9 @@ bool RuntimeOption::PHP7_DisallowUnsafeCurlUploads = false;
 
 std::map<std::string, std::string> RuntimeOption::AliasedNamespaces;
 
+std::string RuntimeOption::HackCompilerExtractPath;
+std::string RuntimeOption::HackCompilerExtractFallback;
+
 int RuntimeOption::GetScannerType() {
   int type = 0;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
@@ -486,6 +489,24 @@ static inline bool eagerGcDefault() {
 #else
   return false;
 #endif
+}
+
+static inline bool hackCompilerEnableDefault() {
+  return facebook;
+}
+
+static inline std::string hackCompilerExtractPathDefault() {
+  return folly::sformat("/var/run/hackc_{}", repoSchemaId());
+}
+
+static inline std::string hackCompilerExtractFallbackDefault() {
+  return folly::sformat("/tmp/hackc_{}", repoSchemaId());
+}
+
+static inline std::string hackCompilerArgsDefault() {
+  return RuntimeOption::RepoAuthoritative
+    ? "-v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs"
+    : "-v Hack.Compiler.SourceMapping=1 --daemon";
 }
 
 static inline bool enableGcDefault() {
@@ -1913,6 +1934,24 @@ void RuntimeOption::Load(
 
     ++it;
   }
+
+  // These are here rather than in EVALFLAGS because reading from repoSchemaId
+  // before main() triggers SIOF that can leave the repo-schema and compiler-id
+  // uninitialized.
+  Config::Bind(
+    HackCompilerExtractPath,
+    ini,
+    config,
+    "HackCompilerExtractPath",
+    hackCompilerExtractPathDefault()
+  );
+  Config::Bind(
+    HackCompilerExtractFallback,
+    ini,
+    config,
+    "HackCompilerExtractFallback",
+    hackCompilerExtractFallbackDefault()
+  );
 
   Config::Bind(TzdataSearchPaths, ini, config, "TzdataSearchPaths");
 

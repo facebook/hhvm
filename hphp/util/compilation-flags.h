@@ -63,6 +63,14 @@ constexpr bool one_bit_refcount =
 #endif
   ;
 
+constexpr bool facebook =
+#ifdef FACEBOOK
+  true
+#else
+  false
+#endif
+  ;
+
 //////////////////////////////////////////////////////////////////////
 
 }

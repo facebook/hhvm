@@ -126,6 +126,13 @@ void CurlResource::sweep() {
 }
 
 void CurlResource::close() {
+  // If we try to close while we're in a callback, warn.
+  if (m_in_callback) {
+    raise_warning(
+      "curl_close(): Attempt to close cURL in callback, ignored."
+    );
+    return;
+  }
   closeForSweep();
   m_opts.clear();
   m_to_free.reset();
@@ -1094,6 +1101,10 @@ size_t CurlResource::curl_read(char *data,
         break;
       case PHP_CURL_USER: {
         int data_size = size * nmemb;
+        ch->m_in_callback = true;
+        SCOPE_EXIT {
+          ch->m_in_callback = false;
+        };
         Variant ret = vm_call_user_func(
           t->callback,
           make_packed_array(Resource(ch), Resource(t->fp), data_size));
@@ -1131,6 +1142,10 @@ size_t CurlResource::curl_write(char *data,
         }
         break;
       case PHP_CURL_USER: {
+        ch->m_in_callback = true;
+        SCOPE_EXIT {
+          ch->m_in_callback = false;
+        };
         Variant ret = vm_call_user_func(
           t->callback,
           make_packed_array(Resource(ch), String(data, length, CopyString)));
@@ -1164,6 +1179,10 @@ size_t CurlResource::curl_write_header(char *data,
       case PHP_CURL_FILE:
         return t->fp->write(String(data, length, CopyString), length);
       case PHP_CURL_USER: {
+        ch->m_in_callback = true;
+        SCOPE_EXIT {
+          ch->m_in_callback = false;
+        };
         Variant ret = vm_call_user_func(
           t->callback,
           make_packed_array(Resource(ch), String(data, length, CopyString)));

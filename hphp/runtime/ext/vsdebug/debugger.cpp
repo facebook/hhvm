@@ -315,6 +315,7 @@ void Debugger::trySendTerminatedEvent() {
 
 void Debugger::sendStoppedEvent(
   const char* reason,
+  const char* displayReason,
   request_id_t threadId
 ) {
   Lock lock(m_lock);
@@ -324,7 +325,12 @@ void Debugger::sendStoppedEvent(
 
   if (reason != nullptr) {
     event["reason"] = reason;
-    event["description"] = reason;
+  }
+
+  if (displayReason == nullptr) {
+    event["description"] = "execution paused";
+  } else {
+    event["description"] = displayReason;
   }
 
   if (threadId >= 0) {
@@ -445,7 +451,7 @@ void Debugger::requestInit() {
   // If the debugger was already paused when this request started, block the
   // request in its command queue until the debugger resumes.
   if (pauseRequest && requestInfo != nullptr) {
-    processCommandQueue(getCurrentThreadId(), requestInfo);
+    processCommandQueue(getCurrentThreadId(), requestInfo, "entry", nullptr);
   }
 }
 
@@ -476,10 +482,11 @@ void Debugger::enterDebuggerIfPaused(RequestInfo* requestInfo) {
       processCommandQueue(
         getCurrentThreadId(),
         requestInfo,
+        "step",
         requestInfo->m_stepReason
       );
     } else {
-      processCommandQueue(getCurrentThreadId(), requestInfo);
+      processCommandQueue(getCurrentThreadId(), requestInfo, "pause", nullptr);
     }
   }
 }
@@ -487,7 +494,8 @@ void Debugger::enterDebuggerIfPaused(RequestInfo* requestInfo) {
 void Debugger::processCommandQueue(
   request_id_t threadId,
   RequestInfo* requestInfo,
-  const char* reason /* = "pause" */
+  const char* reason,
+  const char* displayReason
 ) {
   m_lock.assertOwnedBySelf();
 
@@ -498,7 +506,7 @@ void Debugger::processCommandQueue(
   requestInfo->m_pauseRecurseCount++;
   requestInfo->m_totalPauseCount++;
 
-  sendStoppedEvent(reason, threadId);
+  sendStoppedEvent(reason, displayReason, threadId);
 
   VSDebugLogger::Log(
     VSDebugLogger::LogLevelInfo,
@@ -863,7 +871,12 @@ Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
       // command queue to service the current break.
       // NOTE: processCommandQueue drops and re-acquires m_lock.
       if (requestInfo != nullptr) {
-        processCommandQueue(getCurrentThreadId(), requestInfo);
+        processCommandQueue(
+          getCurrentThreadId(),
+          requestInfo,
+          "pause",
+          nullptr
+        );
       } else {
         // This is true only in the case of async-break, which is not
         // specific to any request. Ok to proceed here, async-break just
@@ -906,7 +919,7 @@ void Debugger::pauseTarget(RequestInfo* ri, const char* stopReason) {
 
   m_state = ProgramState::Paused;
 
-  sendStoppedEvent(stopReason, getCurrentThreadId());
+  sendStoppedEvent("pause", stopReason, getCurrentThreadId());
 
   if (ri != nullptr) {
     clearStepOperation(ri);
@@ -1386,7 +1399,12 @@ void Debugger::onLineBreakpointHit(
 
   if (matchingBpId >= 0) {
     // If an active breakpoint was found at this location, enter the debugger.
-    processCommandQueue(getCurrentThreadId(), ri, stopReason.c_str());
+    processCommandQueue(
+      getCurrentThreadId(),
+      ri,
+      "breakpoint",
+      stopReason.c_str()
+    );
   } else if (ri->m_runToLocationInfo.path == filePath &&
              line == ri->m_runToLocationInfo.line) {
 
@@ -1413,7 +1431,12 @@ void Debugger::onLineBreakpointHit(
     }
 
     pauseTarget(ri, stopReason.c_str());
-    processCommandQueue(getCurrentThreadId(), ri, stopReason.c_str());
+    processCommandQueue(
+      getCurrentThreadId(),
+      ri,
+      "step",
+      stopReason.c_str()
+    );
   } else {
     // This breakpoint no longer exists. Remove it from the VM.
     VSDebugLogger::Log(
@@ -1472,7 +1495,12 @@ void Debugger::onExceptionBreakpointHit(
   }
 
   pauseTarget(ri, stopReason.c_str());
-  processCommandQueue(getCurrentThreadId(), ri, stopReason.c_str());
+  processCommandQueue(
+    getCurrentThreadId(),
+    ri,
+    "exception",
+    stopReason.c_str()
+  );
 }
 
 bool Debugger::onHardBreak() {
@@ -1501,7 +1529,12 @@ bool Debugger::onHardBreak() {
   }
 
   pauseTarget(ri, stopReason);
-  processCommandQueue(getCurrentThreadId(), ri, stopReason);
+  processCommandQueue(
+    getCurrentThreadId(),
+    ri,
+    "breakpoint",
+    stopReason
+  );
 
   // We actually need to step out here, because as far as the PC filter is
   // concerned, hphp_debug_break() was a function call that increased the

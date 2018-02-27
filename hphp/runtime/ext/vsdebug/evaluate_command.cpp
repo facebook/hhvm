@@ -180,6 +180,7 @@ bool EvaluateCommand::executeImpl(
       ri->m_pauseRecurseCount > 0) {
 
     m_debugger->sendStoppedEvent(
+      "breakpoint",
       "Evaluation returned",
       threadId
     );

@@ -205,7 +205,8 @@ struct Debugger final {
   void processCommandQueue(
     request_id_t threadId,
     RequestInfo* requestInfo,
-    const char* reason = "execution paused"
+    const char* reason,
+    const char* displayReason
   );
 
   // Called by the debugger transport when a new message is received from
@@ -243,6 +244,7 @@ struct Debugger final {
   // Sends a stopped event to the client.
   void sendStoppedEvent(
     const char* reason,
+    const char* displayReason,
     request_id_t threadId
   );
 

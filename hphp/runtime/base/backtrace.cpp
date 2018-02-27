@@ -75,12 +75,12 @@ static ActRec* getActRecFromWaitHandle(
     folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
   while (currentWaitHandle != nullptr) {
     assertx(!currentWaitHandle->isFinished());
-    if (currentWaitHandle->getKind() == c_WaitHandle::Kind::AsyncFunction) {
+    if (currentWaitHandle->getKind() == c_Awaitable::Kind::AsyncFunction) {
       auto resumable = currentWaitHandle->asAsyncFunction()->resumable();
       *prevPc = resumable->resumeOffset();
       return resumable->actRec();
     }
-    if (currentWaitHandle->getKind() == c_WaitHandle::Kind::AsyncGenerator) {
+    if (currentWaitHandle->getKind() == c_Awaitable::Kind::AsyncGenerator) {
       auto resumable = currentWaitHandle->asAsyncGenerator()->resumable();
       *prevPc = resumable->resumeOffset();
       return resumable->actRec();

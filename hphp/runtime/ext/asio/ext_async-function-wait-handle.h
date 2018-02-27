@@ -134,7 +134,7 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   }
 };
 
-inline c_AsyncFunctionWaitHandle* c_WaitHandle::asAsyncFunction() {
+inline c_AsyncFunctionWaitHandle* c_Awaitable::asAsyncFunction() {
   assert(getKind() == Kind::AsyncFunction);
   return static_cast<c_AsyncFunctionWaitHandle*>(this);
 }

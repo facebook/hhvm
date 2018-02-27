@@ -67,7 +67,7 @@ const StaticString s_invoke("__invoke");
 const StaticString s_isFinished("isFinished");
 const StaticString s_isSucceeded("isSucceeded");
 const StaticString s_isFailed("isFailed");
-const StaticString s_WaitHandle("HH\\WaitHandle");
+const StaticString s_Awaitable("HH\\Awaitable");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -3364,22 +3364,22 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
         return nullptr;
       }
 
-      if (cls->classof(c_WaitHandle::classof())) {
+      if (cls->classof(c_Awaitable::classof())) {
         auto const genState = [&] (Opcode op, int64_t whstate) -> SSATmp* {
           // these methods all spring from the base class
-          assert(callee->cls()->name()->isame(s_WaitHandle.get()));
+          assert(callee->cls()->name()->isame(s_Awaitable.get()));
           auto const state = gen(env, LdWHState, thiz);
           return gen(env, op, state, cns(env, whstate));
         };
         auto const methName = callee->name();
         if (methName->isame(s_isFinished.get())) {
-          return genState(LteInt, int64_t{c_WaitHandle::STATE_FAILED});
+          return genState(LteInt, int64_t{c_Awaitable::STATE_FAILED});
         }
         if (methName->isame(s_isSucceeded.get())) {
-          return genState(EqInt, int64_t{c_WaitHandle::STATE_SUCCEEDED});
+          return genState(EqInt, int64_t{c_Awaitable::STATE_SUCCEEDED});
         }
         if (methName->isame(s_isFailed.get())) {
-          return genState(EqInt, int64_t{c_WaitHandle::STATE_FAILED});
+          return genState(EqInt, int64_t{c_Awaitable::STATE_FAILED});
         }
       }
 
@@ -3391,9 +3391,9 @@ SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
   return simplifyByClass(
     env, inst->src(0),
     [&](const Class* cls, bool) -> SSATmp* {
-      if (cls->classof(c_WaitHandle::classof())) return cns(env, true);
+      if (cls->classof(c_Awaitable::classof())) return cns(env, true);
       if (!isInterface(cls) &&
-          !c_WaitHandle::classof()->classof(cls)) {
+          !c_Awaitable::classof()->classof(cls)) {
         return cns(env, false);
       }
       return nullptr;

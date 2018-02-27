@@ -95,7 +95,7 @@ void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnSuccessCallback,
 void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnFailCallback,
                         const Variant& callback);
 
-inline c_ExternalThreadEventWaitHandle* c_WaitHandle::asExternalThreadEvent() {
+inline c_ExternalThreadEventWaitHandle* c_Awaitable::asExternalThreadEvent() {
   assert(getKind() == Kind::ExternalThreadEvent);
   return static_cast<c_ExternalThreadEventWaitHandle*>(this);
 }

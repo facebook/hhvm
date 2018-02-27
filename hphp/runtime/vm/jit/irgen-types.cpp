@@ -33,7 +33,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_WaitHandle("HH\\WaitHandle");
+const StaticString s_Awaitable("HH\\Awaitable");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -76,7 +76,7 @@ SSATmp* ldClassSafe(IRGS& env, const StringData* className,
 SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
                           SSATmp* checkCls) {
   assert(src->isA(TObj));
-  if (s_WaitHandle.get()->isame(className)) {
+  if (s_Awaitable.get()->isame(className)) {
     return gen(env, IsWaitHandle, src);
   }
 

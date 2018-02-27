@@ -49,7 +49,7 @@ bool AsyncFlowStepper::isActRecOnAsyncStack(const ActRec* target) {
       return false;
     }
     auto wh = objToWaitableWaitHandle(tvCastToObject(rval.tv()));
-    if (wh->getKind() == c_WaitHandle::Kind::AsyncFunction &&
+    if (wh->getKind() == c_Awaitable::Kind::AsyncFunction &&
       target == wh->asAsyncFunction()->actRec()) {
       return true;
     }
@@ -113,7 +113,7 @@ AsyncStepHandleOpcodeResult AsyncFlowStepper::handleOpcode(PC pc) {
     {
       // Check if we are executing "await" instruction.
       if (m_awaitOpcodeBreakpointFilter.checkPC(pc)) {
-        auto wh = c_WaitHandle::fromCell(*vmsp());
+        auto wh = c_Awaitable::fromCell(*vmsp());
         // Is "await" blocked?
         if (wh && !wh->isFinished()) {
           handleBlockedAwaitOpcode(pc);

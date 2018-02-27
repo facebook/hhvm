@@ -215,7 +215,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   CollectionType collectionType() const; // asserts(isCollection())
   HeaderKind headerKind() const;
 
-  // True if this is a c_WaitHandle or derived
+  // True if this is a c_Awaitable or derived
   bool isWaitHandle() const;
 
   bool getAttribute(Attribute) const;

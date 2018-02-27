@@ -72,7 +72,7 @@ $optional_functions = array(
   'include',
   AwaitAllWaitHandle::class.'::fromArray',
   RescheduleWaitHandle::class.'::create',
-  WaitableWaitHandle::class.'::result',
+  Awaitable::class.'::result',
 );
 verifyTestRun($stacks, $required_functions, $optional_functions);
 if ($success) {

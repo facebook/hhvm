@@ -279,7 +279,7 @@ void cgContArUpdateIdx(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using WH = c_WaitHandle;
+using WH = c_Awaitable;
 using AFWH = c_AsyncFunctionWaitHandle;
 
 namespace {
@@ -333,8 +333,8 @@ void cgCountWHNotDone(IRLS& env, const IRInstruction* inst) {
       auto const obj = v.makeReg();
 
       // We depend on this in the test with 0x0E below.
-      static_assert(c_WaitHandle::STATE_SUCCEEDED == 0, "");
-      static_assert(c_WaitHandle::STATE_FAILED == 1, "");
+      static_assert(c_Awaitable::STATE_SUCCEEDED == 0, "");
+      static_assert(c_Awaitable::STATE_FAILED == 1, "");
 
       v << load{base[loc_in * 8], obj};
       v << testbim{0x0E, obj[WH::stateOff()], sf1};
@@ -427,8 +427,8 @@ void cgLdWHNotDone(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   // We depend on this in the test with 0x0E below.
-  static_assert(c_WaitHandle::STATE_SUCCEEDED == 0, "");
-  static_assert(c_WaitHandle::STATE_FAILED == 1, "");
+  static_assert(c_Awaitable::STATE_SUCCEEDED == 0, "");
+  static_assert(c_Awaitable::STATE_FAILED == 1, "");
 
   auto const sf = v.makeReg();
   auto const result = v.makeReg();

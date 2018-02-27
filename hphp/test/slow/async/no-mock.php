@@ -1,7 +1,7 @@
 <?hh
 
 <<__MockClass>>
-class MyWaitHandle extends WaitableWaitHandle {
+class MyWaitHandle extends Awaitable {
   public function __construct() {
     echo "Ha ha!\n";
   }

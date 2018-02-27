@@ -23,25 +23,25 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// class WaitHandle
+// class Awaitable
 
-void HHVM_STATIC_METHOD(WaitHandle, setOnIoWaitEnterCallback,
+void HHVM_STATIC_METHOD(Awaitable, setOnIoWaitEnterCallback,
                         const Variant& callback);
-void HHVM_STATIC_METHOD(WaitHandle, setOnIoWaitExitCallback,
+void HHVM_STATIC_METHOD(Awaitable, setOnIoWaitExitCallback,
                         const Variant& callback);
-void HHVM_STATIC_METHOD(WaitHandle, setOnJoinCallback,
+void HHVM_STATIC_METHOD(Awaitable, setOnJoinCallback,
                         const Variant& callback);
-bool HHVM_METHOD(WaitHandle, isFinished);
-bool HHVM_METHOD(WaitHandle, isSucceeded);
-bool HHVM_METHOD(WaitHandle, isFailed);
-String HHVM_METHOD(WaitHandle, getName);
+bool HHVM_METHOD(Awaitable, isFinished);
+bool HHVM_METHOD(Awaitable, isSucceeded);
+bool HHVM_METHOD(Awaitable, isFailed);
+String HHVM_METHOD(Awaitable, getName);
 
 /**
  * A wait handle is an object that describes operation that is potentially
  * asynchronous. A WaitHandle class is a base class of all such objects. There
  * are multiple types of wait handles, this is their hierarchy:
  *
- * WaitHandle                      - abstract wait handle
+ * Awaitable                       - abstract wait handle
  *  StaticWaitHandle               - statically finished wait handle
  *  WaitableWaitHandle             - wait handle that can be waited for
  *   ResumableWaitHandle           - wait handle that can resume PHP execution
@@ -88,9 +88,9 @@ T* wait_handle(const ObjectData* obj) {
   return static_cast<T*>(const_cast<ObjectData*>(obj));
 }
 
-struct c_WaitHandle : ObjectData {
-  WAITHANDLE_CLASSOF(WaitHandle);
-  WAITHANDLE_DTOR(WaitHandle);
+struct c_Awaitable : ObjectData {
+  WAITHANDLE_CLASSOF(Awaitable);
+  WAITHANDLE_DTOR(Awaitable);
 
   enum class Kind : uint8_t {
     Static,
@@ -103,7 +103,7 @@ struct c_WaitHandle : ObjectData {
     ExternalThreadEvent,
   };
 
-  explicit c_WaitHandle(Class* cls, HeaderKind kind,
+  explicit c_Awaitable(Class* cls, HeaderKind kind,
                         type_scan::Index tyindex) noexcept
     : ObjectData(cls, NoInit{}, ObjectData::NoDestructor, kind),
       m_tyindex(tyindex)
@@ -111,26 +111,26 @@ struct c_WaitHandle : ObjectData {
     assert(type_scan::isKnownType(tyindex));
   }
 
-  ~c_WaitHandle()
+  ~c_Awaitable()
   {}
 
  public:
   static constexpr ptrdiff_t stateOff() {
-    return offsetof(c_WaitHandle, m_kind_state);
+    return offsetof(c_Awaitable, m_kind_state);
   }
   static constexpr ptrdiff_t resultOff() {
-    return offsetof(c_WaitHandle, m_resultOrException);
+    return offsetof(c_Awaitable, m_resultOrException);
   }
 
-  static c_WaitHandle* fromCell(Cell cell) {
+  static c_Awaitable* fromCell(Cell cell) {
     return (
         cell.m_type == KindOfObject && cell.m_data.pobj->isWaitHandle()
-      ) ? static_cast<c_WaitHandle*>(cell.m_data.pobj) : nullptr;
+      ) ? static_cast<c_Awaitable*>(cell.m_data.pobj) : nullptr;
   }
-  static c_WaitHandle* fromCellAssert(Cell cell) {
+  static c_Awaitable* fromCellAssert(Cell cell) {
     assert(cell.m_type == KindOfObject);
     assert(cell.m_data.pobj->isWaitHandle());
-    return static_cast<c_WaitHandle*>(cell.m_data.pobj);
+    return static_cast<c_Awaitable*>(cell.m_data.pobj);
   }
   bool isFinished() const { return getState() <= STATE_FAILED; }
   bool isSucceeded() const { return getState() == STATE_SUCCEEDED; }
@@ -178,13 +178,13 @@ struct c_WaitHandle : ObjectData {
   // [parentChain             ][contextIdx][kind_state][tyindex][ctxVecIndex]
   // [resultOrException.m_data][m_type]                         [aux]
   static void checkLayout() {
-    constexpr auto data = offsetof(c_WaitHandle, m_resultOrException);
+    constexpr auto data = offsetof(c_Awaitable, m_resultOrException);
     constexpr auto type = data + offsetof(TypedValue, m_type);
     constexpr auto aux  = data + offsetof(TypedValue, m_aux);
-    static_assert(offsetof(c_WaitHandle, m_parentChain) == data, "");
-    static_assert(offsetof(c_WaitHandle, m_contextIdx) == type, "");
-    static_assert(offsetof(c_WaitHandle, m_kind_state) < aux, "");
-    static_assert(offsetof(c_WaitHandle, m_ctxVecIndex) == aux, "");
+    static_assert(offsetof(c_Awaitable, m_parentChain) == data, "");
+    static_assert(offsetof(c_Awaitable, m_contextIdx) == type, "");
+    static_assert(offsetof(c_Awaitable, m_kind_state) < aux, "");
+    static_assert(offsetof(c_Awaitable, m_ctxVecIndex) == aux, "");
   }
 
  protected:
@@ -225,7 +225,7 @@ struct c_WaitHandle : ObjectData {
 
 template<class T>
 T* wait_handle(Cell cell) {
-  return wait_handle<T>(c_WaitHandle::fromCellAssert(cell));
+  return wait_handle<T>(c_Awaitable::fromCellAssert(cell));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

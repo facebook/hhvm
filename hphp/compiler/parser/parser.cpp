@@ -2627,7 +2627,6 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
 
     HH_ONLY_TYPE(Awaitable),
     HH_ONLY_TYPE(AsyncGenerator),
-    HH_ONLY_TYPE(WaitHandle),
     // Keep in sync with order in hphp/runtime/ext/asio/wait-handle.h
     HH_ONLY_TYPE(StaticWaitHandle),
     HH_ONLY_TYPE(WaitableWaitHandle),

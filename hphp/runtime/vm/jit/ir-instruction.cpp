@@ -418,7 +418,7 @@ Type callReturn(const IRInstruction* inst) {
 Type genIterReturn(const IRInstruction* inst) {
   assertx(inst->is(ContEnter));
   return inst->extra<ContEnter>()->isAsync
-    ? Type::SubObj(c_WaitHandle::classof())
+    ? Type::SubObj(c_Awaitable::classof())
     : TInitNull;
 }
 

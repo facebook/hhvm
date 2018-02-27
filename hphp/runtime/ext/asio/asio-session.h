@@ -27,7 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ActRec;
-struct c_WaitHandle;
+struct c_Awaitable;
 struct c_AwaitAllWaitHandle;
 struct c_ConditionWaitHandle;
 struct c_ResumableWaitHandle;
@@ -97,7 +97,7 @@ struct AsioSession final {
   bool hasAbruptInterruptException() { return !!m_abruptInterruptException; }
   void initAbruptInterruptException();
 
-  // WaitHandle callbacks:
+  // Awaitable callbacks:
   void setOnIOWaitEnter(const Variant& callback);
   void setOnIOWaitExit(const Variant& callback);
   void setOnJoin(const Variant& callback);
@@ -106,7 +106,7 @@ struct AsioSession final {
   bool hasOnJoin() { return !!m_onJoin; }
   void onIOWaitEnter();
   void onIOWaitExit();
-  void onJoin(c_WaitHandle* waitHandle);
+  void onJoin(c_Awaitable* waitHandle);
 
   // ResumableWaitHandle callbacks:
   void setOnResumableCreate(const Variant& callback);

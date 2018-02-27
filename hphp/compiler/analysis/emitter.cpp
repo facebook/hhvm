@@ -6940,8 +6940,7 @@ const StaticString
   s_gennull("HH\\Asio\\null"),
   s_fromDArray("fromDArray"),
   s_fromDict("fromDict"),
-  s_AwaitAllWaitHandle("HH\\AwaitAllWaitHandle"),
-  s_WaitHandle("HH\\WaitHandle")
+  s_AwaitAllWaitHandle("HH\\AwaitAllWaitHandle")
   ;
 
 bool EmitterVisitor::emitInlineGenva(
@@ -9287,7 +9286,7 @@ void EmitterVisitor::emitPostponedMeths() {
     if (fe->isAsync && !fe->isGenerator && meth->retTypeAnnotation()) {
       auto rta = meth->retTypeAnnotation();
       auto nTypeArgs = rta->numTypeArgs();
-      if (!rta->isAwaitable() && !rta->isWaitHandle()) {
+      if (!rta->isAwaitable()) {
         if (fe->isClosureBody) {
           throw IncludeTimeFatalException(
             meth,
@@ -9551,9 +9550,9 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
   // "Awaitable<T>", we set m_retTypeConstraint to T. For all other async
   // functions, we leave m_retTypeConstraint empty.
   if (annot && fe->isAsync && !fe->isGenerator) {
-    // Semantic checks ensure that the return annotation is "Awaitable" or
-    // "WaitHandle" and that it has at most one type parameter
-    assert(annot->isAwaitable() || annot->isWaitHandle());
+    // Semantic checks ensure that the return annotation is "Awaitable" and that
+    // it has at most one type parameter
+    assert(annot->isAwaitable());
     assert(annot->numTypeArgs() <= 1);
     // If annot was "Awaitable" with no type args, getTypeArg() will return an
     // empty annotation

@@ -32,7 +32,7 @@ namespace HPHP { namespace asio {
 
 namespace {
   struct EnterContext final {
-    typedef c_WaitHandle::Kind Kind;
+    typedef c_Awaitable::Kind Kind;
 
     EnterContext(c_WaitableWaitHandle* root, context_idx_t ctx_idx)
       : m_importSet({root}), m_pending({root}), m_contextIdx(ctx_idx) {

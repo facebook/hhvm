@@ -30,7 +30,7 @@ namespace HPHP {
 struct c_AsyncGeneratorWaitHandle;
 struct c_StaticWaitHandle;
 struct c_WaitableWaitHandle;
-struct c_WaitHandle;
+struct c_Awaitable;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncGenerator

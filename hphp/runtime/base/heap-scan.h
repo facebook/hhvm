@@ -77,7 +77,7 @@ inline void scanNative(const NativeNode* node, type_scan::Scanner& scanner) {
   }
 }
 
-inline void scanAFWH(const c_WaitHandle* wh, type_scan::Scanner& scanner) {
+inline void scanAFWH(const c_Awaitable* wh, type_scan::Scanner& scanner) {
   assert(!wh->hasNativeData());
   // scan ResumableHeader before object
   auto r = Resumable::FromObj(wh);
@@ -113,13 +113,13 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     case HeaderKind::WaitHandle:
       // scan C++ properties after [ObjectData] header. should pick up
       // unioned and bit-packed fields
-      return static_cast<const c_WaitHandle*>(h)->scan(scanner);
+      return static_cast<const c_Awaitable*>(h)->scan(scanner);
     case HeaderKind::AwaitAllWH:
       // scan C++ properties after [ObjectData] header. should pick up
       // unioned and bit-packed fields
       return static_cast<const c_AwaitAllWaitHandle*>(h)->scan(scanner);
     case HeaderKind::AsyncFuncWH:
-      return scanAFWH(static_cast<const c_WaitHandle*>(h), scanner);
+      return scanAFWH(static_cast<const c_Awaitable*>(h), scanner);
     case HeaderKind::NativeData: {
       auto native = static_cast<const NativeNode*>(h);
       scanNative(native, scanner);
@@ -177,7 +177,7 @@ inline void c_AwaitAllWaitHandle::scan(type_scan::Scanner& scanner) const {
   ObjectData::scan(scanner); // in case of dynprops
 }
 
-inline void c_WaitHandle::scan(type_scan::Scanner& scanner) const {
+inline void c_Awaitable::scan(type_scan::Scanner& scanner) const {
   assert(kind() != HeaderKind::AwaitAllWH);
   auto const size =
     kind() == HeaderKind::AsyncFuncWH ? sizeof(c_AsyncFunctionWaitHandle) :

@@ -55,7 +55,7 @@ struct ClassInfo;
 struct EnumValues;
 struct Func;
 struct StringData;
-struct c_WaitHandle;
+struct c_Awaitable;
 
 namespace collections {
 struct CollectionsExtension;
@@ -1320,7 +1320,7 @@ private:
 
   default_ptr<ExtraData> m_extra;
   template<class T> friend typename
-    std::enable_if<std::is_base_of<c_WaitHandle, T>::value, void>::type
+    std::enable_if<std::is_base_of<c_Awaitable, T>::value, void>::type
   finish_class();
 
   friend struct collections::CollectionsExtension;

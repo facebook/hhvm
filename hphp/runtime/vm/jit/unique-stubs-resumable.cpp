@@ -115,11 +115,11 @@ void storeAFWHResult(Vout& v, PhysReg data, PhysReg type) {
 
   // Set state to succeeded.
   v << storebi{
-    c_WaitHandle::toKindState(
-      c_WaitHandle::Kind::AsyncFunction,
-      c_WaitHandle::STATE_SUCCEEDED
+    c_Awaitable::toKindState(
+      c_Awaitable::Kind::AsyncFunction,
+      c_Awaitable::STATE_SUCCEEDED
     ),
-    rvmfp()[afwhToAr(c_WaitHandle::stateOff())]
+    rvmfp()[afwhToAr(c_Awaitable::stateOff())]
   };
 }
 
@@ -168,7 +168,7 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
     // Set the AFHW's state to RUNNING.
     v << storebi{
       AFWH::toKindState(
-        c_WaitHandle::Kind::AsyncFunction,
+        c_Awaitable::Kind::AsyncFunction,
         AFWH::STATE_RUNNING
       ),
       afwh[AFWH::stateOff()]
@@ -292,8 +292,8 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
   v << store{rvmfp(), rvmtl()[rds::kVmFirstAROff]};
 
   // setState(STATE_RUNNING)
-  auto const runningState = c_WaitHandle::toKindState(
-    c_WaitHandle::Kind::AsyncFunction,
+  auto const runningState = c_Awaitable::toKindState(
+    c_Awaitable::Kind::AsyncFunction,
     c_ResumableWaitHandle::STATE_RUNNING
   );
   v << storebi{runningState, parentBl[afwhToBl(AFWH::stateOff())]};

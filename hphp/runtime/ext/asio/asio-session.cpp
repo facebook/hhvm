@@ -109,27 +109,27 @@ void AsioSession::initAbruptInterruptException() {
 }
 
 void AsioSession::setOnIOWaitEnter(const Variant& callback) {
-  m_onIOWaitEnter = checkCallback(callback, "WaitHandle::onIOWaitEnter");
+  m_onIOWaitEnter = checkCallback(callback, "Awaitable::onIOWaitEnter");
 }
 
 void AsioSession::setOnIOWaitExit(const Variant& callback) {
-  m_onIOWaitExit = checkCallback(callback, "WaitHandle::onIOWaitExit");
+  m_onIOWaitExit = checkCallback(callback, "Awaitable::onIOWaitExit");
 }
 
 void AsioSession::setOnJoin(const Variant& callback) {
-  m_onJoin = checkCallback(callback, "WaitHandle::onJoin");
+  m_onJoin = checkCallback(callback, "Awaitable::onJoin");
 }
 
 void AsioSession::onIOWaitEnter() {
-  runCallback(m_onIOWaitEnter, empty_array(), "WaitHandle::onIOWaitEnter");
+  runCallback(m_onIOWaitEnter, empty_array(), "Awaitable::onIOWaitEnter");
 }
 
 void AsioSession::onIOWaitExit() {
-  runCallback(m_onIOWaitExit, empty_array(), "WaitHandle::onIOWaitExit");
+  runCallback(m_onIOWaitExit, empty_array(), "Awaitable::onIOWaitExit");
 }
 
-void AsioSession::onJoin(c_WaitHandle* waitHandle) {
-  runCallback(m_onJoin, make_packed_array(waitHandle), "WaitHandle::onJoin");
+void AsioSession::onJoin(c_Awaitable* waitHandle) {
+  runCallback(m_onJoin, make_packed_array(waitHandle), "Awaitable::onJoin");
 }
 
 void AsioSession::setOnResumableCreate(const Variant& callback) {

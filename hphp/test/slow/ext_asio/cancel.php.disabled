@@ -44,7 +44,7 @@ function reschedule($priority = 0) {
 function testCancelInvalidAwaitables() {
   echo "=== testCancelInvalidAwaitables ===\n";
   try {
-    // try canceling something, that is not WaitHandle
+    // try canceling something, that is not Awaitable
     HH\Asio\cancel(HH\Asio\null(), new OperationCanceledException);
     echo "Fail\n";
   } catch(Exception $e) {
@@ -145,11 +145,11 @@ async function testCancelExternalThreadEventFromBeginIOWait(): Awaitable<void> {
   $cat = new CatWrapper();
   $wh = $cat->runAsync();
 
-  WaitHandle::setOnIOWaitEnterCallback(function() use ($wh) {
+  Awaitable::setOnIOWaitEnterCallback(function() use ($wh) {
       echo "io wait enter\n";
       var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == true);
     });
-  WaitHandle::setOnIOWaitExitCallback(function() {
+  Awaitable::setOnIOWaitExitCallback(function() {
       echo "io wait exit\n";
     });
 
@@ -162,8 +162,8 @@ async function testCancelExternalThreadEventFromBeginIOWait(): Awaitable<void> {
   }
   echo "after await\n";
 
-  WaitHandle::setOnIOWaitEnterCallback(null);
-  WaitHandle::setOnIOWaitExitCallback(null);
+  Awaitable::setOnIOWaitEnterCallback(null);
+  Awaitable::setOnIOWaitExitCallback(null);
   // clean up to avoid leaking libevent watch
   // this is still wrong, since libevent 1.4 (used by hphp) does not support
   // multiple events for same FD. But it gets us to predictable state.
@@ -224,11 +224,11 @@ async function testCancelSleepFromBeginIOWait(): Awaitable<void> {
   echo "=== testCancelSleepFromBeginIOWait ===\n";
   $wh = SleepWaitHandle::create(30000000);
 
-  WaitHandle::setOnIOWaitEnterCallback(function() use ($wh) {
+  Awaitable::setOnIOWaitEnterCallback(function() use ($wh) {
       echo "io wait enter\n";
       var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == true);
     });
-  WaitHandle::setOnIOWaitExitCallback(function() {
+  Awaitable::setOnIOWaitExitCallback(function() {
       echo "io wait exit\n";
     });
 
@@ -241,8 +241,8 @@ async function testCancelSleepFromBeginIOWait(): Awaitable<void> {
   }
   echo "after await\n";
 
-  WaitHandle::setOnIOWaitEnterCallback(null);
-  WaitHandle::setOnIOWaitExitCallback(null);
+  Awaitable::setOnIOWaitEnterCallback(null);
+  Awaitable::setOnIOWaitExitCallback(null);
 }
 
 function main() {

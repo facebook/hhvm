@@ -258,7 +258,7 @@ void emitWHResult(IRGS& env) {
   // We already need to setup a side-exit for the !succeeded case.
   gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, child));
   static_assert(
-    c_WaitHandle::STATE_SUCCEEDED == 0,
+    c_Awaitable::STATE_SUCCEEDED == 0,
     "we test state for non-zero, success must be zero"
   );
   gen(env, JmpNZero, exitSlow, gen(env, LdWHState, child));
@@ -283,8 +283,8 @@ void emitAwait(IRGS& env) {
   gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, child));
 
   // cns() would ODR-use these
-  auto const kSucceeded = c_WaitHandle::STATE_SUCCEEDED;
-  auto const kFailed    = c_WaitHandle::STATE_FAILED;
+  auto const kSucceeded = c_Awaitable::STATE_SUCCEEDED;
+  auto const kFailed    = c_Awaitable::STATE_FAILED;
 
   auto const state = gen(env, LdWHState, child);
 
@@ -351,7 +351,7 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
     auto cnt = cns(env, 0);
     for (int i = 0; i < locals.restCount + 1; ++i) {
       assertTypeLocal(
-        env, locals.first + i, Type::SubObj(c_WaitHandle::classof())
+        env, locals.first + i, Type::SubObj(c_Awaitable::classof())
       );
       auto const loc = ldLoc(env, locals.first + i, nullptr, DataTypeSpecific);
       auto const not_done = gen(env, LdWHNotDone, loc);

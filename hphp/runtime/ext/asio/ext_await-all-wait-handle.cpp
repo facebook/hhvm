@@ -74,7 +74,7 @@ namespace {
   }
 
   void prepareChild(Cell src, context_idx_t& ctx_idx, uint32_t& cnt) {
-    auto const waitHandle = c_WaitHandle::fromCell(src);
+    auto const waitHandle = c_Awaitable::fromCell(src);
     if (UNLIKELY(!waitHandle)) failWaitHandle();
     if (waitHandle->isFinished()) return;
     assert(isa<c_WaitableWaitHandle>(waitHandle));
@@ -84,7 +84,7 @@ namespace {
   }
 
   bool addChild(Cell src, c_AwaitAllWaitHandle::Node*& dst, uint32_t& idx) {
-    auto const waitHandle = c_WaitHandle::fromCellAssert(src);
+    auto const waitHandle = c_Awaitable::fromCellAssert(src);
     if (waitHandle->isFinished()) return false;
 
     waitHandle->incRefCount();
@@ -138,7 +138,7 @@ ObjectData* c_AwaitAllWaitHandle::fromFrameNoCheck(
   uint32_t idx = cnt;
 
   for (int64_t i = 0; i < total; i++) {
-    auto const waitHandle = c_WaitHandle::fromCellAssert(stk[-i]);
+    auto const waitHandle = c_Awaitable::fromCellAssert(stk[-i]);
     if (waitHandle->isFinished()) continue;
 
     auto const child = static_cast<c_WaitableWaitHandle*>(waitHandle);

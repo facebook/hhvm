@@ -60,7 +60,7 @@ const StaticString s_IAA("IAA");
 const StaticString s_IB("IB");
 const StaticString s_NonUnique("NonUnique");
 const StaticString s_NonUniqueA("NonUniqueA");
-const StaticString s_WaitHandle("HH\\WaitHandle");
+const StaticString s_Awaitable("HH\\Awaitable");
 
 // A test program so we can actually test things involving object or
 // class types.
@@ -76,7 +76,7 @@ std::unique_ptr<php::Unit> make_test_unit(php::Program& program) {
     # only one we have to make sure the type system can see for unit
     # test purposes, so we can just define it here.  We don't need to
     # give it any of its functions currently.
-    .class [abstract unique builtin] HH\WaitHandle {
+    .class [abstract unique builtin] HH\Awaitable {
     }
 
     .class [interface unique] IBase {
@@ -751,7 +751,7 @@ TEST(Type, OptUnionOf) {
 
   auto const program = make_program();
   Index index { borrow(program) };
-  auto const rcls = index.builtin_class(s_WaitHandle.get());
+  auto const rcls = index.builtin_class(s_Awaitable.get());
 
   EXPECT_TRUE(union_of(TObj, opt(objExact(rcls))) == TOptObj);
 }
@@ -1477,7 +1477,7 @@ TEST(Type, WaitH) {
     }
   }
 
-  auto const rcls   = index.builtin_class(s_WaitHandle.get());
+  auto const rcls   = index.builtin_class(s_Awaitable.get());
   auto const twhobj = subObj(rcls);
   EXPECT_TRUE(wait_handle(index, TTop).subtypeOf(twhobj));
 
@@ -1491,7 +1491,7 @@ TEST(Type, WaitH) {
   EXPECT_FALSE(optWH.subtypeOf(wait_handle(index, ival(2))));
   EXPECT_TRUE(optWH.couldBe(wait_handle(index, ival(2))));
 
-  // union_of(WaitH<T>, Obj<=WaitHandle) == Obj<=WaitHandle
+  // union_of(WaitH<T>, Obj<=Awaitable) == Obj<=Awaitable
   for (auto& t : all()) {
     auto const u = union_of(wait_handle(index, t), twhobj);
     EXPECT_EQ(u, twhobj);

@@ -49,7 +49,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_WaitHandle("HH\\WaitHandle");
+const StaticString s_Awaitable("HH\\Awaitable");
 const StaticString s_empty("");
 
 //////////////////////////////////////////////////////////////////////
@@ -1967,7 +1967,7 @@ bool Type::checkInvariants() const {
 //////////////////////////////////////////////////////////////////////
 
 Type wait_handle(const Index& index, Type inner) {
-  auto const rwh = index.builtin_class(s_WaitHandle.get());
+  auto const rwh = index.builtin_class(s_Awaitable.get());
   auto t = subObj(rwh);
   t.m_data.dobj.whType.emplace(std::move(inner));
   return t;

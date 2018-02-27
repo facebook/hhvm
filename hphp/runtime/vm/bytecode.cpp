@@ -6549,9 +6549,9 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
 
 OPTBLD_INLINE TCA iopAwait(PC& pc) {
   auto const awaitable = vmStack().topC();
-  auto wh = c_WaitHandle::fromCell(*awaitable);
+  auto wh = c_Awaitable::fromCell(*awaitable);
   if (UNLIKELY(wh == nullptr)) {
-    SystemLib::throwBadMethodCallExceptionObject("Await on a non-WaitHandle");
+    SystemLib::throwBadMethodCallExceptionObject("Await on a non-Awaitable");
   }
   if (LIKELY(wh->isFailed())) {
     throw req::root<Object>{wh->getException()};
@@ -6566,7 +6566,7 @@ OPTBLD_INLINE TCA iopAwait(PC& pc) {
 OPTBLD_INLINE TCA iopAwaitAll(PC& pc, LocalRange locals) {
   uint32_t cnt = 0;
   for (auto i = locals.first; i < locals.first + locals.restCount + 1; ++i) {
-    if (!c_WaitHandle::fromCellAssert(*frame_local(vmfp(), i))->isFinished()) {
+    if (!c_Awaitable::fromCellAssert(*frame_local(vmfp(), i))->isFinished()) {
       ++cnt;
     }
   }
@@ -6580,7 +6580,7 @@ OPTBLD_INLINE TCA iopAwaitAll(PC& pc, LocalRange locals) {
     locals.restCount + 1, cnt, frame_local(vmfp(), locals.first)
   ));
   assert(obj->isWaitHandle());
-  assert(!static_cast<c_WaitHandle*>(obj.get())->isFinished());
+  assert(!static_cast<c_Awaitable*>(obj.get())->isFinished());
 
   vmStack().pushObjectNoRc(obj.detach());
   return suspendStack(pc);
@@ -6625,9 +6625,9 @@ TCA suspendStack(PC &pc) {
 
 OPTBLD_INLINE void iopWHResult() {
   // we should never emit this bytecode for non-waithandle
-  auto const wh = c_WaitHandle::fromCell(*vmStack().topC());
+  auto const wh = c_Awaitable::fromCell(*vmStack().topC());
   if (UNLIKELY(!wh)) {
-    raise_error("WHResult input was not a subclass of WaitHandle");
+    raise_error("WHResult input was not a subclass of Awaitable");
   }
 
   // the failure condition is likely since we punt to this opcode

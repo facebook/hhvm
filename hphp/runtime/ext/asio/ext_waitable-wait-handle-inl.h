@@ -27,7 +27,7 @@ namespace HPHP {
 inline
 c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb, HeaderKind kind,
                                            type_scan::Index tyindex) noexcept
-    : c_WaitHandle(cb, kind, tyindex) {
+    : c_Awaitable(cb, kind, tyindex) {
   m_parentChain.init();
 }
 

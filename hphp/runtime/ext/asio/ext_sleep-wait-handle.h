@@ -64,7 +64,7 @@ void HHVM_STATIC_METHOD(SleepWaitHandle, setOnSuccessCallback,
                         const Variant& callback);
 Object HHVM_STATIC_METHOD(SleepWaitHandle, create, int64_t usecs);
 
-inline c_SleepWaitHandle* c_WaitHandle::asSleep() {
+inline c_SleepWaitHandle* c_Awaitable::asSleep() {
   assert(getKind() == Kind::Sleep);
   return static_cast<c_SleepWaitHandle*>(this);
 }

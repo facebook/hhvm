@@ -170,20 +170,20 @@ inline Resumable* resumable(HeapObject* h) {
   );
 }
 
-inline const c_WaitHandle* asyncFuncWH(const HeapObject* h) {
+inline const c_Awaitable* asyncFuncWH(const HeapObject* h) {
   assert(resumable(h)->actRec()->func()->isAsyncFunction());
   auto native = static_cast<const NativeNode*>(h);
-  auto obj = reinterpret_cast<const c_WaitHandle*>(
+  auto obj = reinterpret_cast<const c_Awaitable*>(
     (const char*)native + native->obj_offset
   );
   assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
   return obj;
 }
 
-inline c_WaitHandle* asyncFuncWH(HeapObject* h) {
+inline c_Awaitable* asyncFuncWH(HeapObject* h) {
   assert(resumable(h)->actRec()->func()->isAsyncFunction());
   auto native = static_cast<NativeNode*>(h);
-  auto obj = reinterpret_cast<c_WaitHandle*>(
+  auto obj = reinterpret_cast<c_Awaitable*>(
     (char*)native + native->obj_offset
   );
   assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
@@ -366,7 +366,7 @@ inline size_t allocSize(const HeapObject* h) {
       // size = table[h->whkind & mask]
       // [ObjectData][subclass]
       auto obj = static_cast<const ObjectData*>(h);
-      auto whKind = wait_handle<c_WaitHandle>(obj)->getKind();
+      auto whKind = wait_handle<c_Awaitable>(obj)->getKind();
       size = waithandle_sizes[(int)whKind];
       assert(size != 0); // AsyncFuncFrame or AwaitAllWH
       assert(size == MemoryManager::sizeClass(size));

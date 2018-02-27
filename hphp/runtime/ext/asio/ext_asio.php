@@ -4,7 +4,7 @@ namespace HH {
 
 /* A wait handle representing asynchronous operation
  */
-abstract class WaitHandle implements Awaitable {
+abstract class Awaitable {
 
   final private function __construct() {
     throw new \InvalidOperationException(
@@ -29,13 +29,6 @@ abstract class WaitHandle implements Awaitable {
    */
   <<__HipHopSpecific, __Native>>
   final public static function setOnJoinCallback(mixed $callback): void;
-
-  /* Return this wait handle (for Awaitable interface)
-   * @return object
-   */
-  final public function getWaitHandle(): this {
-    return $this;
-  }
 
   /* Check if this wait handle finished (succeeded or failed)
    * @return bool - A boolean indicating whether this wait handle finished
@@ -72,11 +65,11 @@ abstract class WaitHandle implements Awaitable {
 
 /* A wait handle that is always finished
  */
-final class StaticWaitHandle extends WaitHandle {}
+final class StaticWaitHandle extends Awaitable {}
 
 /* A wait handle that can be waited upon
  */
-abstract class WaitableWaitHandle extends WaitHandle {
+abstract class WaitableWaitHandle extends Awaitable {
 }
 
 /* A wait handle that can resume execution of PHP code
@@ -130,7 +123,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromArray(array $dependencies): WaitHandle;
+  public static function fromArray(array $dependencies): Awaitable;
 
   /* Create a wait handle that waits for a given array of dependencies
    * @param array $dependencies - An DArray of dependencies to wait for
@@ -138,7 +131,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromDArray(darray $dependencies): WaitHandle;
+  public static function fromDArray(darray $dependencies): Awaitable;
 
   /* Create a wait handle that waits for a given vec of dependencies
    * @param array $dependencies - A vec of dependencies to wait for
@@ -146,7 +139,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromVec(vec $dependencies): WaitHandle;
+  public static function fromVec(vec $dependencies): Awaitable;
 
   /* Create a wait handle that waits for a given dict of dependencies
    * @param array $dependencies - A dict of dependencies to wait for
@@ -154,7 +147,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromDict(dict $dependencies): WaitHandle;
+  public static function fromDict(dict $dependencies): Awaitable;
 
   /* Create a wait handle that waits for a given Map of dependencies
    * @param mixed $dependencies - A Map of dependencies to wait for
@@ -162,7 +155,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromMap(mixed $dependencies): WaitHandle;
+  public static function fromMap(mixed $dependencies): Awaitable;
 
   /* Create a wait handle that waits for a given Vector of dependencies
    * @param mixed $dependencies - A Vector of dependencies to wait for
@@ -170,7 +163,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromVector(mixed $dependencies): WaitHandle;
+  public static function fromVector(mixed $dependencies): Awaitable;
 
   /* Set callback for when a AwaitAllWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
@@ -325,10 +318,6 @@ function join<T>(Awaitable<T> $awaitable): mixed;
  * Throws an InvalidOperationException if the Awaitable is not finished.
  */
 function result<T>(Awaitable<T> $awaitable): T {
-  invariant(
-    $awaitable instanceof WaitHandle,
-    'unsupported user-land Awaitable',
-  );
   return \hh\asm('
     CGetL $awaitable
     WHResult
@@ -339,10 +328,6 @@ function result<T>(Awaitable<T> $awaitable): T {
  * Check whether the given Awaitable has finished.
  */
 function has_finished<T>(Awaitable<T> $awaitable): bool {
-  invariant(
-    $awaitable instanceof WaitHandle,
-    'unsupported user-land Awaitable',
-  );
   return $awaitable->isFinished();
 }
 
@@ -350,10 +335,6 @@ function has_finished<T>(Awaitable<T> $awaitable): bool {
  * Get the name of the Awaitable
  */
 function name<T>(Awaitable<T> $awaitable): string {
-  invariant(
-    $awaitable instanceof WaitHandle,
-    'unsupported user-land Awaitable',
-  );
   return $awaitable->getName();
 }
 

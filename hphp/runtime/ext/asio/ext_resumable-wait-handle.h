@@ -55,7 +55,7 @@ struct c_ResumableWaitHandle : c_WaitableWaitHandle {
   static const int8_t STATE_RUNNING   = 4; // currently running
 };
 
-inline c_ResumableWaitHandle* c_WaitHandle::asResumable() {
+inline c_ResumableWaitHandle* c_Awaitable::asResumable() {
   assert(getKind() == Kind::AsyncFunction || getKind() == Kind::AsyncGenerator);
   return static_cast<c_ResumableWaitHandle*>(this);
 }

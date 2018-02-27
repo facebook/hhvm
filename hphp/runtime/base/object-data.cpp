@@ -736,7 +736,7 @@ ObjectData* ObjectData::clone() {
     if (instanceof(c_Closure::classof())) {
       return c_Closure::fromObject(this)->clone();
     }
-    assertx(instanceof(c_WaitHandle::classof()));
+    assertx(instanceof(c_Awaitable::classof()));
     // cloning WaitHandles is not allowed
     // invoke the instanceCtor to get the right sort of exception
     auto const ctor = m_cls->instanceCtor();

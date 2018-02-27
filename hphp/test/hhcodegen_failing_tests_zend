@@ -24,7 +24,6 @@ zend/good/Zend/tests/errmsg_039.php
 zend/good/Zend/tests/generators/errors/yield_outside_function_error.php
 zend/good/Zend/tests/heredoc_012.php
 zend/good/Zend/tests/heredoc_014.php
-zend/good/Zend/tests/jump12.php
 zend/good/Zend/tests/list_003.php
 zend/good/Zend/tests/nowdoc_016.php
 zend/good/Zend/tests/ns_057.php

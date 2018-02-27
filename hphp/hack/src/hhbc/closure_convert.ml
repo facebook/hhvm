@@ -880,6 +880,9 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
   | Declare (_, (_, Binop (Eq None, (_, Id (_, "strict_types")), (_, Int (_, v)))), _) ->
     let st = { st with seen_strict_types = Some (v = "1") } in
     st, stmt
+  | Declare (true, _, b) ->
+    let st, _ = convert_block env st b in
+    st, stmt
   | _ ->
     st, stmt
 

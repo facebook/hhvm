@@ -103,6 +103,7 @@ module Program =
 
 let finalize_init genv init_env =
   ServerUtils.print_hash_stats ();
+  Hh_logger.log "Heap size: %d" (SharedMem.heap_size ());
   Hh_logger.log "Server is READY";
   let t' = Unix.gettimeofday () in
   Hh_logger.log "Took %f seconds to initialize." (t' -. init_env.init_start_t);
@@ -407,6 +408,7 @@ let serve_one_iteration genv env client_provider =
   else env
 
 let initial_check genv env =
+  if not env.init_env.needs_full_init then env else
   let start_t = Unix.gettimeofday () in
   let recheck_id = new_serve_iteration_id () in
   HackEventLogger.with_id ~stage:`Init recheck_id @@ fun () ->

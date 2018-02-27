@@ -46,6 +46,7 @@ type t = {
   informant_use_xdb: bool;
   load_script_config: LoadScriptConfig.t;
   incremental_errors : bool;
+  typecheck_after_init: bool;
 }
 
 let default = {
@@ -79,6 +80,7 @@ let default = {
   informant_use_xdb = false;
   load_script_config = LoadScriptConfig.default;
   incremental_errors = false;
+  typecheck_after_init = false;
 }
 
 let path =
@@ -179,6 +181,8 @@ let load_ fn ~silent =
     ~default:default.max_bucket_size config in
   let incremental_errors = bool_ "incremental_errors"
     ~default:default.incremental_errors config in
+  let typecheck_after_init = bool_ "typecheck_after_init"
+    ~default:default.typecheck_after_init config in
   let load_script_config = LoadScriptConfig.default in
   {
     use_watchman;
@@ -210,6 +214,7 @@ let load_ fn ~silent =
     informant_use_xdb;
     load_script_config;
     incremental_errors;
+    typecheck_after_init;
   }
 
 let load ~silent =

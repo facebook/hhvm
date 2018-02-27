@@ -1,27 +1,17 @@
+comparing .main
 Semdiff succeeded
+comparing .class C
 comparing key 86ctor
 Semdiff succeeded
 comparing key 86pinit
 Semdiff failed
 pc=;7, pc'=;7, i=CheckProp "z" i'=CheckProp "v" asn={}{}
-Assumed=
-[;0,;0-><{}{}>]
-[;1,;1-><{}{}>]
-[;2,;2-><{}{}>]
-[;3,;3-><{}{}>]
-[;4,;4-><{}{}>]
-[;5,;5-><{}{}>]
-[;6,;6-><{}{}>]
-
-Todo=[;6,;6->{}{}]
 
 comparing key 86sinit
 Semdiff succeeded
-Distance = 16
-Size = 180
-Similarity = 91.16
 Edits = 
 
+in .class C
 - HH\int
 + HH\float
 - array<HH\int>

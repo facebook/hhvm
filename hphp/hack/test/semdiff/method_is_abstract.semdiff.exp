@@ -1,19 +1,18 @@
+comparing .main
 Semdiff succeeded
+comparing .class Foo
 comparing key openFoo
 Semdiff failed
 pc=;0, pc'=;0, i=Null i'=String "Cannot call abstract method Foo::openFoo()" asn={}{}
-Assumed=
 
-Todo=
 comparing key 86ctor
 Semdiff succeeded
+comparing .class Bar
 comparing key 86ctor
 Semdiff succeeded
-Distance = 4
-Size = 81
-Similarity = 95.12
 Edits = 
 
+in .class Foo
 + abstract
 for openFoo:
 + isAbstract

@@ -18,6 +18,7 @@ BASEDIR="$HOME/fbsource/fbcode"
 BUCK="$BASEDIR/tools/build/buck/bin/buck"
 DIFF_TMP=/tmp/semdiff_tmp.exp
 DIFF_RESULT=/tmp/diff_tmp.result
+SEMDIFF_ARGS=(--laxunset --hidedist --hidesim --hidesize --hideassm)
 
 # prepare semdiff
 echo "compiling semdiff"
@@ -72,10 +73,10 @@ for FILE in ${FDS[*]}; do
   then
     new_file="$basename.semdiff.exp.out"
     echo -e "\t\tcreating $YELLOW $test_name.semdiff.exp.out $NC"
-    "$SEMDIFF_PATH" --laxunset "$FILE" "$basename.2.hhas" > "$new_file"
+    "$SEMDIFF_PATH" "${SEMDIFF_ARGS[@]}" "$FILE" "$basename.2.hhas" > "$new_file"
   else
     printf "\t\trunning: %s %s %s %s" "$(basename "$SEMDIFF_PATH")" "$(basename "$basename")".{{1,2}.hhas,semdiff.exp}
-    diff <("$SEMDIFF_PATH" --laxunset "$basename".{1,2}.hhas) "$basename.semdiff.exp" > "$DIFF_RESULT"
+    diff <("$SEMDIFF_PATH" "${SEMDIFF_ARGS[@]}" "$basename".{1,2}.hhas) "$basename.semdiff.exp" > "$DIFF_RESULT"
     if [ -z "$(cat $DIFF_RESULT)" ]
     then
       echo -e "$GREEN OK $NC"

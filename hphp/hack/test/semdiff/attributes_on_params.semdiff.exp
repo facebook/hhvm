@@ -1,3 +1,4 @@
+comparing .main
 Semdiff succeeded
 comparing key f
 Semdiff succeeded
@@ -5,16 +6,15 @@ comparing key test
 Semdiff succeeded
 comparing key run
 Semdiff succeeded
+comparing .class A
 comparing key __construct
 Semdiff succeeded
-Distance = 2
-Size = 246
-Similarity = 99.19
 Edits = 
 
 for f:
 - A1
 + A11
+in .class A
 for __construct:
 - Annotation
 + Annotation42

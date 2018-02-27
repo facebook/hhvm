@@ -1,15 +1,10 @@
+comparing .main
 Semdiff failed
 pc=;2, pc'=;2, i=IssetL _0 i'=Int 1 asn=(_0,_0){_0}{_0}
-Assumed=
-[;0,;0-><{}{}>]
-[;1,;1-><{}{}>]
 
-Todo=
-Distance = 5
-Size = 12
-Similarity = 61.54
 Edits = 
 
+for .main:
 - IssetL _0
 - JmpZ L1
 - Int 0

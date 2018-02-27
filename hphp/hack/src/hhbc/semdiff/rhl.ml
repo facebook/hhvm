@@ -1127,7 +1127,7 @@ let equiv prog prog' startlabelpairs =
 
     (* eagerly constructing the strings here turns out to be expensive ! *)
     let logstate () =
-    if !Semdiff_logging.verbosity_level > 2
+    if !Log.verbosity_level > 2
     then begin
     Log.trace (Tty.Normal Tty.White) @@ Printf.sprintf
       "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nAssumed=\n%s\nTodo=%s"

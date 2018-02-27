@@ -1,12 +1,9 @@
+comparing .main
 Semdiff succeeded
 comparing key silly
 Semdiff succeeded
 comparing key test
 Semdiff succeeded
+comparing .class Closure$test;0
 comparing key __invoke
 Semdiff succeeded
-Distance = 0
-Size = 195
-Similarity = 100.00
-Edits = 
-

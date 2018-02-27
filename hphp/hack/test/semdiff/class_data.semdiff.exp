@@ -1,9 +1,9 @@
+comparing .main
 Semdiff succeeded
-Distance = 3
-Size = 18
-Similarity = 84.21
+comparing .class Bar
 Edits = 
 
+in .class Bar
 - Bar
 + Foo
 - B

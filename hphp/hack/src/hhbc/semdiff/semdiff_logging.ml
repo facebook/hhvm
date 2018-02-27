@@ -11,6 +11,18 @@
 (* Default logging level is 2 *)
 let verbosity_level = ref 2
 
+(* Default: similarity is shown *)
+let hide_sim = ref false
+
+(* Default: size is shown *)
+let hide_size = ref false
+
+(* Default: distance is shown *)
+let hide_dist = ref false
+
+(* Default: assumed and todo info is shown *)
+let hide_assm = ref false
+
 let print ~level ?(newline = true) ?(channel = stdout) c s =
   if !verbosity_level >= level
   then Tty.cprintf ~out_channel:channel c "%s%s" s (if newline then "\n" else "")

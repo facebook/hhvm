@@ -199,6 +199,20 @@ let wrap f wrapstring c = {
   string_of = (fun a -> wrapstring a (c.string_of (f a)))
 }
 
+(* add debugging information to a non-empty given edit sequence *)
+let debug_edit_log_with s e =
+  if e=[] then e else (Log.Def s) :: e
+
+
+(* add debugging information to a given comparer *)
+let debug_log_with s c = {
+  c with comparer = (fun a a' ->
+    Log.debug (Tty.Normal Tty.Blue) ("comparing " ^ s);
+    let (sz, (d, e)) = c.comparer a a' in
+    (sz, (d, debug_edit_log_with ("for " ^ s ^ ":") e)))
+}
+
+
 (* join combines two, assumed independent, comparers on the same type *)
 let join combinestrings c1 c2 = {
   comparer = (fun a b ->
@@ -740,13 +754,20 @@ let body_instrs_comparer = {
     | Some (pc,pc',asn,assumed,todo) ->
       (Log.debug (Tty.Normal Tty.White) "Semdiff failed";
        Log.debug (Tty.Normal Tty.White) @@ Printf.sprintf
-         "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nAssumed=\n%s\nTodo=%s"
-         (Rhl.string_of_pc pc) (Rhl.string_of_pc pc')
-         (Rhl.string_of_nth_instruction inss pc)
-         (Rhl.string_of_nth_instruction inss' pc')
-         (Rhl.asntostring asn) (Rhl.labasnsmaptostring assumed)
-         (Rhl.labasnlisttostring todo);
-       instruct_list_comparer.comparer inss inss'));
+        "pc=%s, pc'=%s, i=%s i'=%s asn=%s\n"
+        (Rhl.string_of_pc pc) (Rhl.string_of_pc pc')
+        (Rhl.string_of_nth_instruction inss pc)
+        (Rhl.string_of_nth_instruction inss' pc')
+        (Rhl.asntostring asn);
+       let assumed_str = Rhl.labasnsmaptostring assumed in
+       let todo_str = Rhl.labasnlisttostring todo in
+       if assumed_str <> "" && not !Log.hide_assm
+       then Log.debug (Tty.Normal Tty.White) @@
+            Printf.sprintf "Assumed=\n%s\n" assumed_str;
+       if todo_str <> "" && not !Log.hide_assm
+       then Log.debug (Tty.Normal Tty.White) @@
+            Printf.sprintf"Todo=%s" todo_str);
+       instruct_list_comparer.comparer inss inss');
   size_of = (fun b -> instruct_list_comparer.size_of
       (Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b)));
   string_of = (fun b -> instruct_list_comparer.string_of
@@ -786,6 +807,8 @@ let method_header_body_comparer perm =
 
 let program_main_comparer =
   wrap Hhas_program.main (fun _p s -> s) (body_comparer [])
+  |> debug_log_with ".main"
+
 
 let functions_alist_comparer =
   alist_comparer function_header_body_comparer (fun fname -> fname)
@@ -915,6 +938,10 @@ let compare_classes_functions_of_programs p p' =
           Rhl.adata_checked := Rhl.StringStringSet.add (id, id') !Rhl.adata_checked;
           let (df, (sf, ef)) = typed_value_comparer.comparer
               (Hhas_adata.value adata) (Hhas_adata.value adata') in
+          let ef =
+            match ef with
+            | [] -> []
+            | _  ->  Log.Def ("for .adata " ^ id ^ " with " ^ id') :: ef in
           loop (d+df) (s+sf) (e @ ef)
       )
       | Some ((fid,fid'),newftodo) ->
@@ -946,13 +973,17 @@ let compare_classes_functions_of_programs p p' =
        then loop d s e (* already done this pair *)
        else
        let actual_class = List.nth (Hhas_program.classes p) ac in
+       let class_name = Hhas_class.name actual_class |> Hhbc_id.Class.to_raw_string in
        let actual_class' = List.nth (Hhas_program.classes p') ac' in
        Rhl.classes_checked := Rhl.IntIntSet.add (ac,ac') (!Rhl.classes_checked);
+       Log.debug (Tty.Normal Tty.Blue) @@
+       Printf.sprintf "comparing .class %s" class_name;
        let (dc, (sc,ec)) = (class_comparer perm).comparer actual_class actual_class' in
        (if perm = [] then ()
         else Log.debug (Tty.Normal Tty.Blue) @@
           Printf.sprintf "did perm comparison on classes %d and %d, distance was %d" ac ac' dc);
-       loop (d+dc) (s+sc) (e @ ec))
+       loop (d+dc) (s+sc)
+        (e @ debug_edit_log_with ("in .class " ^ class_name) ec))
   in loop dist size edits
 
 (* TODO: sizes and printing are not quite right here,

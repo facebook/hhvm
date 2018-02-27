@@ -1,17 +1,11 @@
+comparing .main
 Left loop detected
 Semdiff failed
 pc=;0, pc'=;3, i=L0: i'=Int 2 asn={}{}
-Assumed=
-[;0,;0-><{}{}>]
-[;0,;2-><{}{}>]
-[;1,;1-><{}{}>]
 
-Todo=
-Distance = 6
-Size = 5
-Similarity = 0.00
 Edits = 
 
+for .main:
 + Jmp L1
 + L1:
 + Int 2

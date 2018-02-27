@@ -1,17 +1,15 @@
+comparing .main
 Semdiff succeeded
+comparing .class MemoizeWrappers
 comparing key 86ctor
 Semdiff succeeded
 comparing key get
 Semdiff failed
 pc=;0, pc'=;0, i=Null i'=FPushCtorD 0 "MemoizeWrappers" asn={}{}
-Assumed=
 
-Todo=
-Distance = 106
-Size = 159
-Similarity = 33.75
 Edits = 
 
+in .class MemoizeWrappers
 - privatestaticget$guarded_single$memoize_cache$guardb:0;no_serialize<  {}>
 - privatestaticget$guarded_single$memoize_cacheN;no_serialize<  {}>
 - get$memoize_impl->[__Memoize([]) ]<HH\this HH\this {hh_type extended_hint }>get$memoize_impl([]) isPrivateisStatic{

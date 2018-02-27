@@ -1,3 +1,4 @@
+comparing .main
 Semdiff succeeded
 comparing key f
 Semdiff succeeded
@@ -13,8 +14,3 @@ dynamic function comparison 3=g2 and 5=g2
 Semdiff succeeded
 dynamic function comparison 5=i and 1=i
 Semdiff succeeded
-Distance = 0
-Size = 119
-Similarity = 100.00
-Edits = 
-

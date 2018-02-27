@@ -1,13 +1,13 @@
+comparing .main
 Semdiff succeeded
+comparing .class ClassConstants
 comparing key SOME_CONSTANT
 comparing key ANOTHER_CONSTANT
 comparing key 86ctor
 Semdiff succeeded
-Distance = 2
-Size = 35
-Similarity = 94.44
 Edits = 
 
+in .class ClassConstants
 for SOME_CONSTANT:
 - s:15:\"Constant String\";
 + i:3;

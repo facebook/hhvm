@@ -1,13 +1,9 @@
+comparing .main
 Semdiff succeeded
 comparing key main_foo
 Semdiff failed
 pc=;0, pc'=;0, i=Double NAN i'=Double INF asn={}{}
-Assumed=
 
-Todo=
-Distance = 1
-Size = 31
-Similarity = 96.88
 Edits = 
 
 for main_foo:

@@ -34,15 +34,31 @@ let parse_options () =
                   then raise (Arg.Bad "Verbosity level has to be 0, 1, 2, or 3")
                   else Log.verbosity_level := i)
         (* Change the default logging level in Semdiff_logging.ml *)
-      , " Set verbosity level 0, 1 or 2 [default: 2]
-                  0: Only displays the similarity percentage on STDOUT
-                  1: Also displays differences on STDOUT
-                  2: Also displays debugging information on STDOUT
+      , " Set verbosity level 0, 1, 2 or 3 [default: 2]
+                  0: Displays nothing
+                  1: Only displays differences on STDOUT
+                  2: Also displays differences and debugging information on STDOUT
                   3: Also displays full trace on STDOUT"
       );
       ("--laxunset",
        Arg.Unit (fun () -> Rhl.lax_unset := true),
        " Ignore finalizer ordering effects of Unset instructions"
+      );
+      ("--hidesim",
+       Arg.Unit (fun () -> Log.hide_sim := true),
+       " hide similarity information"
+      );
+      ("--hidesize",
+       Arg.Unit (fun () -> Log.hide_size := true),
+       " hide size information"
+      );
+      ("--hidedist",
+       Arg.Unit (fun () -> Log.hide_dist := true),
+       " hide size information"
+      );
+      ("--hideassm",
+       Arg.Unit (fun () -> Log.hide_assm := true),
+       " hide assumed & todo information"
       );
     ] in
   let options = Arg.align ~limit:25 options in
@@ -75,11 +91,18 @@ let run options =
 
   let d, (s, e) = program_comparer.comparer prog1 prog2 in
   let similarity = (100.0 *. (1.0 -. float_of_int d /. float_of_int (s+1))) in
-  Log.print ~level:1 (Tty.Normal Tty.White) @@ Printf.sprintf "Distance = %d" d;
-  Log.print ~level:1 (Tty.Normal Tty.White) @@ Printf.sprintf "Size = %d" s;
-  Log.print ~level:1 ~newline:false (Tty.Normal Tty.White) @@ "Similarity = ";
-  Log.print ~level:0 (Tty.Normal Tty.White) @@ Printf.sprintf "%.2f" similarity;
-  Log.print ~level:1 (Tty.Normal Tty.White) @@ Printf.sprintf "Edits = \n";
+  if not !Log.hide_dist
+  then
+    Log.print ~level:0 (Tty.Normal Tty.White) @@ Printf.sprintf "Distance = %.d" d;
+  if not !Log.hide_sim
+  then
+    Log.print ~level:0 (Tty.Normal Tty.White) @@
+    Printf.sprintf "Similarity = %.2f" similarity;
+  if not !Log.hide_size
+  then
+      Log.print ~level:0 (Tty.Normal Tty.White) @@ Printf.sprintf "Size = %d" s;
+  if d <> 0
+  then Log.print ~level:1 (Tty.Normal Tty.White) @@ Printf.sprintf "Edits = \n";
   Log.print_edit_sequence ~level:1 e
 
 (* command line driver *)

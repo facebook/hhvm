@@ -1634,10 +1634,11 @@ and emit_iter ~collection f = Local.scope @@ fun () ->
   ]
 
 and inline_gena_call env arg = Local.scope @@ fun () ->
+  (* convert input to array *)
+  let load_array = emit_expr ~need_ref:false env arg in
   let arr_local = Local.get_unnamed_local () in
   gather [
-    (* convert input to array *)
-    emit_expr ~need_ref:false env arg;
+    load_array;
     if hack_arr_dv_arrs () then instr_cast_dict else instr_cast_darray;
     instr_setl arr_local;
     instr_popc;

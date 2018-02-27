@@ -166,9 +166,10 @@ let rec emit_stmt env (pos, st_) =
     in
     if has_elements then
       Local.scope @@ fun () ->
+        let awaited = emit_await env e_await in
         let temp = Local.get_unnamed_local () in
         gather [
-          emit_await env e_await;
+          awaited;
           instr_setl temp;
           instr_popc;
           with_temp_local temp

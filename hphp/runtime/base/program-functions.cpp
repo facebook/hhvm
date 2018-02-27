@@ -2568,19 +2568,6 @@ void hphp_session_exit(const Transport* transport) {
 
   TI().onSessionExit();
 
-  if (transport) {
-    std::unique_ptr<StructuredLogEntry> entry;
-    if (RuntimeOption::EvalProfileHWStructLog) {
-      entry = std::make_unique<StructuredLogEntry>();
-      entry->setInt("response_code", transport->getResponseCode());
-    }
-    HardwareCounter::UpdateServiceData(transport->getCpuTime(),
-                                       transport->getWallTime(),
-                                       entry.get(),
-                                       true /*psp*/);
-    if (entry) StructuredLog::log("hhvm_request_perf", *entry);
-  }
-
   // We might have events from after the final surprise flag check of the
   // request, so consume them here.
   perf_event_consume(record_perf_mem_event);
@@ -2596,6 +2583,19 @@ void hphp_session_exit(const Transport* transport) {
 
   s_sessionInitialized = false;
   s_extra_request_nanoseconds = 0;
+
+  if (transport) {
+    std::unique_ptr<StructuredLogEntry> entry;
+    if (RuntimeOption::EvalProfileHWStructLog) {
+      entry = std::make_unique<StructuredLogEntry>();
+      entry->setInt("response_code", transport->getResponseCode());
+    }
+    HardwareCounter::UpdateServiceData(transport->getCpuTime(),
+                                       transport->getWallTime(),
+                                       entry.get(),
+                                       true /*psp*/);
+    if (entry) StructuredLog::log("hhvm_request_perf", *entry);
+  }
 }
 
 void hphp_process_exit() noexcept {

@@ -283,7 +283,7 @@ let rec emit_stmt env (pos, st_) =
       emit_try_finally env pos (pos, A.Block try_block) (pos, A.Block finally_block)
 
   | A.Switch (e, cl) ->
-    emit_switch env e cl
+    emit_switch env pos e cl
   | A.Foreach (collection, await_pos, iterator, block) ->
     emit_foreach env pos collection await_pos iterator (pos, A.Block block)
   | A.Def_inline def ->
@@ -562,7 +562,7 @@ and emit_for env p e1 e2 e3 b =
     instr_label break_label;
   ]
 
-and emit_switch env scrutinee_expr cl =
+and emit_switch env pos scrutinee_expr cl =
   if List.is_empty cl
   then emit_ignored_expr env scrutinee_expr
   else
@@ -575,7 +575,7 @@ and emit_switch env scrutinee_expr cl =
     | 0 -> cl @ [A.Default []], false
     | 1 -> cl, true
     | _ -> Emit_fatal.raise_fatal_runtime
-      Pos.none "Switch statements may only contain one 'default' clause." in
+      pos "Switch statements may only contain one 'default' clause." in
   (* "continue" in a switch in PHP has the same semantics as break! *)
   let cl =
     Emit_env.do_in_switch_body break_label env cl @@

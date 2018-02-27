@@ -14,7 +14,7 @@ PASS
 Test corrupt subscription callback
 Got expected exception: Problem(s) on subscription named 'X'. Connection IS alive.
 First error:
-syntax error, unexpected '}'
+%s
 PASS
 Test delete subscription callback
 Got expected exception: Problem(s) on subscription named 'X'. Connection IS alive.

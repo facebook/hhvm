@@ -867,7 +867,12 @@ and emit_is env pos lhs h =
             instr_label its_done
           ]
       end
-    | _ -> emit_nyi "is expression: unsupported hint (T22779957)"
+    | A.Haccess _ ->
+      emit_nyi "is expression: unsupported type const access"
+    | A.Hsoft _ ->
+      failwith "Soft typehints cannot be used with `is` expressions"
+    | A.Hfun _ ->
+      failwith "Function typehints cannot be used with `is` expressions"
 
 and emit_is_create_local env pos e h =
   Local.scope @@ fun () ->

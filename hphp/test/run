@@ -519,6 +519,7 @@ function get_options($argv) {
     'hackc' => '',
     'hack-only' => '',
     'ignore-oids' => '',
+    'hphpc' => ''
   );
   $options = array();
   $files = array();
@@ -888,6 +889,10 @@ function hhvm_cmd_impl() {
       $args[] = '-vEval.HackCompilerCommand="'.hh_codegen_cmd($options).'"';
       $args[] = '-vEval.HackCompilerDefault=true';
       $args[] = '-vEval.HackCompilerUseEmbedded=false';
+    }
+
+    if (isset($options['hphpc'])) {
+      $args[] = '-vEval.HackCompilerDefault=false';
     }
 
     if (isset($options['relocate'])) {

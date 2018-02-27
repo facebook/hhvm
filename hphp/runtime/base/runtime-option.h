@@ -419,6 +419,7 @@ struct RuntimeOption {
   static bool LookForTypechecker;
   static bool AutoTypecheck;
   static bool AutoprimeGenerators;
+  static bool EnableHackcOnlyFeature;
   static uint32_t EvalInitialStaticStringTableSize;
   static uint32_t EvalInitialNamedEntityTableSize;
 

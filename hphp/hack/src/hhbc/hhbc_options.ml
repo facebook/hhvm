@@ -38,6 +38,7 @@ type t = {
   option_use_msrv_for_inout               : bool;
   option_php7_int_semantics               : bool;
   option_autoprime_generators             : bool;
+  option_enable_hackc_only_feature        : bool;
 }
 
 let default = {
@@ -68,6 +69,7 @@ let default = {
   option_use_msrv_for_inout = true;
   option_php7_int_semantics = false;
   option_autoprime_generators = true;
+  option_enable_hackc_only_feature = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -94,6 +96,7 @@ let can_inline_gen_functions o = o.option_can_inline_gen_functions
 let use_msrv_for_inout o = o.option_use_msrv_for_inout
 let php7_int_semantics o = o.option_php7_int_semantics
 let autoprime_generators o = o.option_autoprime_generators
+let enable_hackc_only_feature o = o.option_enable_hackc_only_feature
 
 let to_string o =
   let dynamic_invokes =
@@ -125,6 +128,7 @@ let to_string o =
     ; Printf.sprintf "use_msrv_for_inout: %B" @@ use_msrv_for_inout o
     ; Printf.sprintf "php7_int_semantics: %B" @@ php7_int_semantics o
     ; Printf.sprintf "autoprime_generators: %B" @@ autoprime_generators o
+    ; Printf.sprintf "enable_hackc_only_feature: %B" @@ enable_hackc_only_feature o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -188,6 +192,8 @@ let set_option options name value =
     { options with option_php7_int_semantics = as_bool value }
   | "hack.lang.autoprimegenerators" ->
     { options with option_autoprime_generators = as_bool value }
+  | "hack.lang.enablehackconlyfeature" ->
+    { options with option_enable_hackc_only_feature = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -277,8 +283,10 @@ let value_setters = [
     fun opts v -> { opts with option_use_msrv_for_inout = (v = 1) });
   (set_value "hhvm.php7.int_semantics" get_value_from_config_int @@
     fun opts v -> { opts with option_php7_int_semantics = (v = 1) });
-  (set_value "hack.lang.autoprime_generators" get_value_from_config_int @@
+  (set_value "hhvm.hack.lang.autoprime_generators" get_value_from_config_int @@
     fun opts v -> { opts with option_autoprime_generators = (v = 1) });
+  (set_value "hhvm.hack.lang.enable_hackc_only_feature" get_value_from_config_int @@
+    fun opts v -> { opts with option_enable_hackc_only_feature = (v = 1) });
 ]
 
 let extract_config_options_from_json ~init config_json =

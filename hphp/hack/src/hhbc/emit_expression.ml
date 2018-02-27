@@ -678,6 +678,9 @@ and emit_instanceof env e1 e2 =
       instr_instanceof ]
 
 and emit_is env pos lhs h =
+  if not @@ Hhbc_options.enable_hackc_only_feature !Hhbc_options.compiler_options
+  then Emit_fatal.raise_fatal_runtime pos "Is expression is not allowed"
+  else
   match snd h with
     | A.Happly ((_, id), tyl) when (SU.strip_global_ns id) = "classname" ->
       begin match lhs with

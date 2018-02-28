@@ -1030,12 +1030,12 @@ module WithExpressionAndDeclAndTypeParser
           here; add an error in a later pass.
     *)
     let (parser, default_token) = assert_token parser Default in
-    let (parser, semi_token) = optional_token parser Semicolon in
     let (parser, colon_token) =
-      if SC.is_missing semi_token then
-        require_colon parser
+      let (parser1, token) = next_token parser in
+      if (Token.kind token) = Semicolon then
+        Make.token parser1 token
       else
-        (parser, semi_token)
+        require_colon parser
     in
     Make.default_label parser default_token colon_token
 
@@ -1052,12 +1052,12 @@ module WithExpressionAndDeclAndTypeParser
 
     let (parser, case_token) = assert_token parser Case in
     let (parser, expr) = parse_expression parser in
-    let (parser, semi_token) = optional_token parser Semicolon in
     let (parser, colon_token) =
-      if SC.is_missing semi_token then
-        require_colon parser
+      let (parser1, token) = next_token parser in
+      if (Token.kind token) = Semicolon then
+        Make.token parser1 token
       else
-        (parser, semi_token)
+        require_colon parser
     in
     Make.case_label parser case_token expr colon_token
 

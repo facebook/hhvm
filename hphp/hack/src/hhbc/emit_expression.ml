@@ -978,7 +978,7 @@ and emit_null_coalesce env e1 e2 =
     instr_label end_label;
   ]
 
-and emit_cast env hint expr =
+and emit_cast env pos hint expr =
   let op =
     begin match hint with
     | A.Happly((_, id), []) ->
@@ -1003,6 +1003,7 @@ and emit_cast env hint expr =
     end in
   gather [
     emit_expr ~need_ref:false env expr;
+    Emit_pos.emit_pos pos;
     op;
   ]
 
@@ -1856,7 +1857,7 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.NullCoalesce (e1, e2) ->
     emit_box_if_necessary need_ref @@ emit_null_coalesce env e1 e2
   | A.Cast((_, hint), e) ->
-    emit_box_if_necessary need_ref @@ emit_cast env hint e
+    emit_box_if_necessary need_ref @@ emit_cast env pos hint e
   | A.Eif (etest, etrue, efalse) ->
     emit_box_if_necessary need_ref @@
       emit_conditional_expression env etest etrue efalse

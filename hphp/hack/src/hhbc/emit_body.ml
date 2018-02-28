@@ -70,7 +70,7 @@ let rec emit_def env def =
         Emit_expression.emit_expr ~need_ref:false env c.Ast.cst_value;
         Emit_pos.emit_pos_then c.Ast.cst_span
           @@ instr (IIncludeEvalDefine (DefCns cns_id));
-        Emit_pos.emit_pos_then c.Ast.cst_span instr_popc;
+        instr_popc;
       ]
     (* We assume that SetNamespaceEnv does namespace setting *)
   | Ast.Namespace(_, defs) ->

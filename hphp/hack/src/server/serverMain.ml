@@ -408,19 +408,22 @@ let serve_one_iteration genv env client_provider =
   else env
 
 let initial_check genv env =
-  if not env.init_env.needs_full_init then env else
-  let start_t = Unix.gettimeofday () in
-  let recheck_id = new_serve_iteration_id () in
-  HackEventLogger.with_id ~stage:`Init recheck_id @@ fun () ->
-    let env, rechecked, total_rechecked =
-      recheck genv env ServerTypeCheck.Full_check in
-    if total_rechecked > 0 then begin
-      HackEventLogger.recheck_end start_t
-        1 (* number of batches *)
-        rechecked total_rechecked;
-      Hh_logger.log "Recheck id: %s" recheck_id
-    end;
+  if not env.init_env.needs_full_init then begin
+    finalize_init genv env.init_env;
     env
+  end else
+    let start_t = Unix.gettimeofday () in
+    let recheck_id = new_serve_iteration_id () in
+    HackEventLogger.with_id ~stage:`Init recheck_id @@ fun () ->
+      let env, rechecked, total_rechecked =
+        recheck genv env ServerTypeCheck.Full_check in
+      if total_rechecked > 0 then begin
+        HackEventLogger.recheck_end start_t
+          1 (* number of batches *)
+          rechecked total_rechecked;
+        Hh_logger.log "Recheck id: %s" recheck_id
+      end;
+      env
 
 let serve genv env in_fd _ =
   let client_provider = ClientProvider.provider_from_file_descriptor in_fd in

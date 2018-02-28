@@ -226,6 +226,8 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     attrs = Attr(attrs & ~AttrPersistent);
   }
 
+  assert(attrs & AttrPersistent || SystemLib::s_inited);
+
   auto pc = std::make_unique<PreClass>(
     &unit, m_line1, m_line2, m_offset, m_name,
     attrs, m_parent, m_docComment, m_id,

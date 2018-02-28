@@ -1920,12 +1920,6 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
                           bool* isTop = nullptr) {
   as.in.skipWhitespace();
   int ret = AttrNone;
-  if (ctx == AttrContext::Class || ctx == AttrContext::Func) {
-    if (!SystemLib::s_inited &&
-      !RuntimeOption::EvalUseExternCompilerForSystemLib) {
-      ret |= AttrUnique | AttrPersistent | AttrBuiltin;
-    }
-  }
   if (as.in.peek() != '[') return Attr(ret);
   as.in.getc();
 
@@ -2174,12 +2168,37 @@ bool parse_line_range(AsmState& as, int& line0, int& line1) {
 }
 
 /*
+ * If we haven't seen a pseudomain and we are compiling systemlib,
+ * add a pseudomain and return true
+ * If we haven't seen a pseudomain and we are not compiling systemlib,
+ * return false so that the caller can give an assembler error
+ * Otherwise, return true
+ */
+bool ensure_pseudomain(AsmState& as) {
+  if (!as.emittedPseudoMain) {
+    if (!SystemLib::s_inited) {
+      /*
+       * The SystemLib::s_hhas_unit is required to be merge-only,
+       * and we create the source by concatenating separate .hhas files
+       * Rather than choosing one to have the .main directive, we just
+       * generate a trivial pseudoMain automatically.
+       */
+      as.ue->addTrivialPseudoMain();
+      as.emittedPseudoMain = true;
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
+/*
  * directive-function : attribute-list ?line-range type-info identifier
  *                      parameter-list function-flags '{' function-body
  *                    ;
  */
 void parse_function(AsmState& as) {
-  if (!as.emittedPseudoMain) {
+  if (!ensure_pseudomain(as)) {
     as.error(".function blocks must all follow the .main block");
   }
 
@@ -2189,6 +2208,10 @@ void parse_function(AsmState& as) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs, &isTop);
+
+  if (!SystemLib::s_inited) {
+    attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
+  }
 
   // Be conservative by default. HHBBC can clear it where appropriate.
   attrs |= AttrMayUseVV;
@@ -2234,6 +2257,10 @@ void parse_method(AsmState& as) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
+
+  if (!SystemLib::s_inited) {
+    attrs |= AttrBuiltin;
+  }
 
   int line0;
   int line1;
@@ -2551,7 +2578,7 @@ void parse_cls_doccomment(AsmState& as) {
  *                 ;
  */
 void parse_class_body(AsmState& as) {
-  if (!as.emittedPseudoMain) {
+  if (!ensure_pseudomain(as)) {
     as.error(".class blocks must all follow the .main block");
   }
 
@@ -2618,6 +2645,10 @@ void parse_class(AsmState& as) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs, &isTop);
+  if (!SystemLib::s_inited) {
+    attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
+  }
+
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".class must have a name");
@@ -2694,11 +2725,7 @@ void parse_filepath(AsmState& as) {
  */
 void parse_main(AsmState& as) {
   if (as.emittedPseudoMain) {
-    if (!SystemLib::s_inited) {
-      as.error(".main found in systemlib");
-    } else {
-      as.error("Multiple .main directives found");
-    }
+    as.error("Multiple .main directives found");
   }
 
   int line0;
@@ -2762,6 +2789,9 @@ void parse_alias(AsmState& as) {
 
   TypeAlias record;
   Attr attrs = parse_attribute_list(as, AttrContext::Alias, &record.userAttrs);
+  if (!SystemLib::s_inited) {
+    attrs |= AttrPersistent;
+  }
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".alias must have a name");
@@ -2943,17 +2973,6 @@ void parse_metadata(AsmState& as) {
 void parse(AsmState& as) {
   as.in.skipWhitespace();
   std::string directive;
-  if (!SystemLib::s_inited &&
-    !RuntimeOption::EvalUseExternCompilerForSystemLib) {
-    /*
-     * The SystemLib::s_hhas_unit is required to be merge-only,
-     * and we create the source by concatenating separate .hhas files
-     * Rather than choosing one to have the .main directive, we just
-     * generate a trivial pseudoMain automatically.
-     */
-    as.ue->addTrivialPseudoMain();
-    as.emittedPseudoMain = true;
-  }
 
   while (as.in.readword(directive)) {
     if (directive == ".filepath")      { parse_filepath(as)      ; continue; }
@@ -2973,7 +2992,7 @@ void parse(AsmState& as) {
     as.error("unrecognized top-level directive `" + directive + "'");
   }
 
-  if (!as.emittedPseudoMain) {
+  if (!ensure_pseudomain(as)) {
     as.error("no .main found in hhas unit");
   }
 }
@@ -2991,6 +3010,9 @@ std::unique_ptr<UnitEmitter> assemble_string(
   AsmCallbacks* callbacks
 ) {
   auto ue = std::make_unique<UnitEmitter>(md5);
+  if (!SystemLib::s_inited) {
+    ue->m_mergeOnly = true;
+  }
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
   ue->m_useStrictTypes = RuntimeOption::EnableHipHopSyntax ||

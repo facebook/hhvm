@@ -168,14 +168,17 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       attrs = Attr(attrs & ~AttrInterceptable);
     }
   }
-  if (attrs & AttrPersistent && !preClass &&
-      (RuntimeOption::EvalJitEnableRenameFunction ||
-       attrs & AttrInterceptable ||
-       (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {
-    if (attrs & AttrBuiltin) {
-      SystemLib::s_anyNonPersistentBuiltins = true;
+  if (attrs & AttrPersistent && !preClass) {
+    if ((RuntimeOption::EvalJitEnableRenameFunction ||
+         attrs & AttrInterceptable ||
+         (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {
+      if (attrs & AttrBuiltin) {
+        SystemLib::s_anyNonPersistentBuiltins = true;
+      }
+      attrs = Attr(attrs & ~AttrPersistent);
     }
-    attrs = Attr(attrs & ~AttrPersistent);
+  } else {
+    assert(preClass || !(attrs & AttrBuiltin));
   }
   if (!RuntimeOption::RepoAuthoritative) {
     // In non-RepoAuthoritative mode, any function could get a VarEnv because

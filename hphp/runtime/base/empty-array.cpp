@@ -98,7 +98,7 @@ ArrayData* EmptyArray::Copy(const ArrayData*) { return staticEmptyArray(); }
 
 /*
  * Note: if you try to tail-call these helper routines, gcc will
- * unfortunately still generate functions with frames and and makes a
+ * unfortunately still generate functions with frames and makes a
  * call instead of a jump.  It's because of std::pair (and is still
  * the case if you return a custom struct).
  *

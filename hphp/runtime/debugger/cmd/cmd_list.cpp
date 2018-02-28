@@ -98,7 +98,7 @@ void CmdList::help(DebuggerClient &client) {
 // the debugger client and can thereafter be modified by list
 // commands and by switching the the stack frame.
 //
-// The lineFocus and and charFocus parameters
+// The lineFocus and charFocus parameters
 // are non zero only when the source location comes from a breakpoint.
 // They can be used to highlight the location of the current breakpoint
 // in the edit window of an attached IDE, for example.

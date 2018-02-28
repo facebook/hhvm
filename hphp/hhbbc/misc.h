@@ -50,7 +50,7 @@ borrowed_ptr<T> borrow(const std::unique_ptr<T>& p) {
 }
 
 /*
- * String that must be a static string, and and Array that must be a
+ * String that must be a static string, and Array that must be a
  * static array.
  */
 using SString  = const StringData*;

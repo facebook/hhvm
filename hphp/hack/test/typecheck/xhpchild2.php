@@ -16,4 +16,3 @@ function f1(XHPChild $x): void {}
 function f2(): void {
   f1(new Foo());
 }
-

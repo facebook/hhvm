@@ -10,4 +10,3 @@
  */
 
 newtype myshape = shape('x' => myshape);
-

@@ -11,4 +11,3 @@
 
 class foo {}
 class :foo {}
-

@@ -12,4 +12,5 @@
      (require_clause ((whitespace) (require) (whitespace))
       ((implements) (whitespace)) (simple_type_specifier ((name)))
       ((";") (end_of_line))))
-    ((}))))))
+    ((}))))
+  (end_of_file ((end_of_file)))))

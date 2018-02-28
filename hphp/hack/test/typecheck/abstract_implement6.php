@@ -23,4 +23,3 @@ abstract class CClass extends BClass {}
 class DClass extends CClass {
   /* should fail, foo is missing */
 }
-

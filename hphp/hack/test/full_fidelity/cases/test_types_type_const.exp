@@ -13,4 +13,5 @@
        ((variable)) (missing))
       (missing)))
     ((rparen)) (missing) (missing) (missing))
-   (compound_statement (({)) (missing) ((}))))))
+   (compound_statement (({)) (missing) ((}))))
+  (end_of_file ((end_of_file)))))

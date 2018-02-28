@@ -62,4 +62,5 @@
        (list_item (variable ((variable))) (missing)))
       ((";")) (missing) ((rparen) (whitespace))
       (compound_statement (({)) (missing) ((}) (end_of_line)))))
-    ((}))))))
+    ((}))))
+  (end_of_file ((end_of_file)))))

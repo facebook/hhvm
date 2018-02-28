@@ -30,4 +30,3 @@ class B<T> {
 function test2(): int {
   return B::f(0);
 }
-

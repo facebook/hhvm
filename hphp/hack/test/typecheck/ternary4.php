@@ -12,4 +12,3 @@
 function foo<T>(T $x): T {
   return $x ?: $x ?: $x ?: $x;
 }
-

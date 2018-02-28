@@ -15,4 +15,5 @@
          ((name) (whitespace))
          (namespace_body (({) (whitespace)) (missing) ((}) (whitespace)))))
        ((}) (whitespace)))))
-    ((}))))))
+    ((}))))
+  (end_of_file ((end_of_file)))))

@@ -1840,18 +1840,10 @@ module WithExpressionAndStatementAndTypeParser
     let rec aux parser acc =
       let (parser1, token) = next_token parser in
       match Token.kind token with
-      | TokenKind.EndOfFile when Token.leading token <> [] ->
-        (* The only time an end-of-file node is useful is when there is
-           leading trivia in the end-of-file token. *)
+      | TokenKind.EndOfFile ->
         let (parser, token) = Make.token parser1 token in
         let (parser, end_of_file) = Make.end_of_file parser token in
         (parser, end_of_file :: acc)
-      | TokenKind.EndOfFile ->
-        (* With smart constructors we still want to signal user that end-of-file
-        is reached. *)
-        let (parser, token) = Make.token parser1 token in
-        let (parser, _) = Make.end_of_file parser token in
-        (parser, acc)
       | _ ->
         let (parser, declaration) = parse_declaration parser in
         aux parser (declaration :: acc)

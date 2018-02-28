@@ -30,4 +30,3 @@ function f3(): bool {
   }
   return $x < 42;
 }
-

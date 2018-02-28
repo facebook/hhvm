@@ -31,4 +31,3 @@ class B extends A {
     }
   }
 }
-

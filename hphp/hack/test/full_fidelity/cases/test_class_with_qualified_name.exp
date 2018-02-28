@@ -41,4 +41,5 @@
     (list (list_item ((name)) (("\\"))) (list_item ((name)) (("\\")))
      (list_item ((name) (whitespace)) (missing))))
    (missing) (missing) (missing) (missing) (missing)
-   (classish_body (({)) (missing) ((}))))))
+   (classish_body (({)) (missing) ((}))))
+  (end_of_file ((end_of_file)))))

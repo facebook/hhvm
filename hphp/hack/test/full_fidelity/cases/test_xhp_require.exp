@@ -11,4 +11,5 @@
      (require_clause ((whitespace) (require) (whitespace))
       ((extends) (whitespace)) (simple_type_specifier ((XHP_class_name)))
       ((";") (end_of_line))))
-    ((}))))))
+    ((}))))
+  (end_of_file ((end_of_file)))))

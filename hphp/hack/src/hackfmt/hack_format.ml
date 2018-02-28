@@ -48,6 +48,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       end;
       begin
         match token_kind with
+        | TokenKind.EndOfFile -> Nothing
         | TokenKind.SingleQuotedStringLiteral
         | TokenKind.DoubleQuotedStringLiteral
         | TokenKind.DoubleQuotedStringLiteralHead

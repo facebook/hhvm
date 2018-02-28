@@ -16,4 +16,3 @@ function foo(?string $x): string {
   }
   return $x;
 }
-

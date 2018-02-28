@@ -47,4 +47,5 @@
          ((while) (whitespace)) ((lparen)) (variable ((variable))) ((rparen))
          ((";") (end_of_line)))))
       (missing)))
-    ((}))))))
+    ((}))))
+  (end_of_file ((end_of_file)))))

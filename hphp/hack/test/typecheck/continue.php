@@ -18,4 +18,3 @@ function without_arg() {
     }
   }
 }
-

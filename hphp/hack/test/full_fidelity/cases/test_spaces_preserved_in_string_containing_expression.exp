@@ -23,4 +23,5 @@
          (embedded_braced_expression (({)) (variable ((variable))) ((})))
          ((double_quoted_string_literal_tail)))))
       ((";") (end_of_line))))
-    ((}))))))
+    ((}))))
+  (end_of_file ((end_of_file)))))

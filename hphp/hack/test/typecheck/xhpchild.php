@@ -18,4 +18,3 @@ function f2(): void {
   f1(array("hello", "world"));
   f1(<x>hi</x>);
 }
-

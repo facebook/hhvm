@@ -43,4 +43,5 @@
         ((rparen) (whitespace)))
        ((=) (whitespace)) (variable ((variable))))
       ((";") (whitespace) (single_line_comment) (end_of_line))))
-    ((}))))))
+    ((}))))
+  (end_of_file ((end_of_file)))))

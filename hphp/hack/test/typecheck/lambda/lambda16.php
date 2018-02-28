@@ -14,4 +14,3 @@ class Foo<T> {
     return () ==> $this;
   }
 }
-

@@ -53,4 +53,3 @@ class BirthdayStoryPreparable extends Preparable {
     return false;
   }
 }
-

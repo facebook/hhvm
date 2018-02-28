@@ -36,4 +36,5 @@
       ((=>) (whitespace)) (variable ((variable))) ((rparen))
       (compound_statement (({) (end_of_line)) (missing)
        ((whitespace) (}) (end_of_line)))))
-    ((}))))))
+    ((}))))
+  (end_of_file ((end_of_file)))))

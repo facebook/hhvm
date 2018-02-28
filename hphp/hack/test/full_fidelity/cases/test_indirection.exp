@@ -8,4 +8,5 @@
    (binary_expression (variable ((end_of_line) (variable) (whitespace)))
     ((=) (whitespace))
     (prefix_unary_expression (($)) (variable ((variable)))))
-   ((";")))))
+   ((";")))
+  (end_of_file ((end_of_file)))))

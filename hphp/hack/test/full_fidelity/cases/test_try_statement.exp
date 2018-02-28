@@ -30,4 +30,5 @@
          (expression_statement (variable ((whitespace) (variable)))
           ((";") (end_of_line))))
         ((whitespace) (}) (end_of_line))))))
-    ((}))))))
+    ((}))))
+  (end_of_file ((end_of_file)))))

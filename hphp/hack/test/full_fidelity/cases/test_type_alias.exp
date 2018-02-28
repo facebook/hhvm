@@ -37,4 +37,5 @@
       ((,) (whitespace)))
      (list_item (type_parameter (missing) ((name)) (missing)) (missing)))
     ((>) (whitespace)))
-   (missing) ((=) (whitespace)) (simple_type_specifier ((name))) ((";")))))
+   (missing) ((=) (whitespace)) (simple_type_specifier ((name))) ((";")))
+  (end_of_file ((end_of_file)))))

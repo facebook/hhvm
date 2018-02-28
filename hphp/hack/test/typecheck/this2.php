@@ -14,4 +14,3 @@ class X {
     return new X();
   }
 }
-

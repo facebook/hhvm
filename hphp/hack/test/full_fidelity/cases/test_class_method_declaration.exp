@@ -43,4 +43,5 @@
        ((lparen)) (missing) ((rparen) (whitespace)) ((:) (whitespace))
        (simple_type_specifier ((void) (whitespace))) (missing))
       (compound_statement (({)) (missing) ((}) (end_of_line))) (missing)))
-    ((}))))))
+    ((}))))
+  (end_of_file ((end_of_file)))))

@@ -25,4 +25,3 @@ class A {
 }
 
 function nasty(A $x): void {}
-

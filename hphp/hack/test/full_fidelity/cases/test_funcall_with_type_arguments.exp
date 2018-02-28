@@ -55,4 +55,5 @@
        ((lparen)) (missing) ((rparen)))
       (missing)))
     ((rparen)))
-   ((";") (whitespace) (single_line_comment)))))
+   ((";") (whitespace) (single_line_comment)))
+  (end_of_file ((end_of_file)))))

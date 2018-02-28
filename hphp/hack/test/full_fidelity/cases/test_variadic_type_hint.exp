@@ -22,7 +22,8 @@
      (expression_statement ((:) (whitespace)) (missing))
      (expression_statement
       (collection_literal_expression
-       (simple_type_specifier ((name) (whitespace))) (({)) (missing)
+       (simple_type_specifier ((name) (whitespace))) (({)) (missing) 
        ((})))
       (missing)))
-    (missing)))))
+    (missing)))
+  (end_of_file ((end_of_file)))))

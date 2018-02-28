@@ -22,4 +22,3 @@ class Foo {
     return 123; // This works without this line
   }
 }
-

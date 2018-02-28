@@ -32,4 +32,3 @@ class Y<T1, T2> extends X<int, T2> {
     return $this->foo()->bar();
   }
 }
-

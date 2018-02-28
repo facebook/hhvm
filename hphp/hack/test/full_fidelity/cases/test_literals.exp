@@ -16,4 +16,5 @@
       (binary_expression (variable ((whitespace) (variable) (whitespace)))
        ((=) (end_of_line)) (literal ((nowdoc_string_literal) (end_of_line))))
       ((";") (end_of_line))))
-    ((end_of_line) (}))))))
+    ((end_of_line) (}))))
+  (end_of_file ((end_of_file)))))

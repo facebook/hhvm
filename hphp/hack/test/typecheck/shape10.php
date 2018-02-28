@@ -10,4 +10,3 @@
  */
 
 type myshape = shape();
-

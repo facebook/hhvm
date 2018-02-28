@@ -33,4 +33,3 @@ function f2(): void {
   $y = $y + 10;
   echo $y;
 }
-

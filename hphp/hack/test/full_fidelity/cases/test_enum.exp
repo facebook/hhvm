@@ -14,4 +14,5 @@
      (literal ((decimal_literal))) ((";") (whitespace)))
     (enumerator ((name) (whitespace)) ((=) (whitespace))
      (literal ((decimal_literal))) ((";") (whitespace))))
-   ((})))))
+   ((})))
+  (end_of_file ((end_of_file)))))

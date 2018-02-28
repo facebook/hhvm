@@ -21,4 +21,3 @@ class Bar extends Foo {
   }
 
 }
-

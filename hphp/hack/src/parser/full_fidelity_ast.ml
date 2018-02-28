@@ -2503,9 +2503,9 @@ let pProgram : program parser = fun node env ->
   | [{ syntax = EndOfFile _; _ }]
     -> List.concat (List.rev acc)
   (* HaltCompiler stops processing the list *)
-  | [{ syntax = ExpressionStatement
+  | { syntax = ExpressionStatement
       { expression_statement_expression =
-        { syntax = HaltCompilerExpression _ ; _ } ; _ } ; _ } as cur_node]
+        { syntax = HaltCompilerExpression _ ; _ } ; _ } ; _ } as cur_node :: nodel
     ->
     (* If we saw COMPILER_HALT_OFFSET, calculate the position of HALT_COMPILER *)
     if env.saw_compiler_halt_offset <> None then
@@ -2518,7 +2518,7 @@ let pProgram : program parser = fun node env ->
       let () = env.saw_compiler_halt_offset <- Some s in
       env.ignore_pos <- local_ignore_pos
       end;
-    List.concat (List.rev acc)
+    aux env acc nodel
   (* There's an incompatibility between the Full-Fidelity (FF) and the AST view
    * of the world; `define` is an *expression* in FF, but a *definition* in AST.
    * Luckily, `define` only happens at the level of definitions.

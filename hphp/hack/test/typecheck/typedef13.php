@@ -14,4 +14,3 @@ type myint = int;
 function foo(): myint {
   return 0;
 }
-

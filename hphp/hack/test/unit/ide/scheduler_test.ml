@@ -67,11 +67,11 @@ let test_channel_wait env =
 
   schedule_wait_for_channel "channel" fd_in ~priority:0;
   let env = run_and_expect_trace env [] in
-  Marshal_tools.to_fd_with_preamble fd_out "msg1";
+  Marshal_tools.to_fd_with_preamble fd_out "msg1" |> ignore;
   let env = run_and_expect_trace env ["channel:msg1"] in
-  Marshal_tools.to_fd_with_preamble fd_out "msg2";
+  Marshal_tools.to_fd_with_preamble fd_out "msg2" |> ignore;
   let env = run_and_expect_trace env ["channel:msg2"; "channel:msg1"] in
-  Marshal_tools.to_fd_with_preamble fd_out "msg3";
+  Marshal_tools.to_fd_with_preamble fd_out "msg3" |> ignore;
   TestScheduler.stop_waiting_for_channel fd_in;
   ignore (run_and_expect_trace env ["channel:msg2"; "channel:msg1"]);
   true

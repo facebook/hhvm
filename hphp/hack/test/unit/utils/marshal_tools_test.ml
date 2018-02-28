@@ -74,8 +74,8 @@ let child_1_process socket_fd =
 
 (** Tail call; exits *)
 let child_2_process socket_fd =
-  Marshal_tools.to_fd_with_preamble socket_fd payload_message_1;
-  Marshal_tools.to_fd_with_preamble socket_fd payload_message_2;
+  Marshal_tools.to_fd_with_preamble socket_fd payload_message_1 |> ignore;
+  Marshal_tools.to_fd_with_preamble socket_fd payload_message_2 |> ignore;
   exit 0
 
 (** After forking once, continue as the parent to fork the second child.

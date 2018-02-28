@@ -64,6 +64,7 @@ let sleep_and_check in_fd persistent_client_opt ~ide_idle =
 let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in
   Marshal_tools.to_fd_with_preamble fd ServerCommandTypes.Hello
+  |> ignore
 
 let read_connection_type ic =
   Timeout.with_timeout
@@ -91,9 +92,9 @@ let send_response_to_client client response =
   match client with
   | Non_persistent_client (_, oc) ->
     let fd = Unix.descr_of_out_channel oc in
-    Marshal_tools.to_fd_with_preamble fd response
+    Marshal_tools.to_fd_with_preamble fd response |> ignore
   | Persistent_client fd ->
-    Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Response response)
+    Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Response response) |> ignore
 
 let send_push_message_to_client client response =
   match client with
@@ -101,7 +102,7 @@ let send_push_message_to_client client response =
     failwith "non-persistent clients don't expect push messages "
   | Persistent_client fd ->
     try
-      Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Push response)
+      Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Push response) |> ignore
     with Unix.Unix_error(Unix.EPIPE, "write", "") ->
       raise Client_went_away
 

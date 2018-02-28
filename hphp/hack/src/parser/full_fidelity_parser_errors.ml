@@ -1552,6 +1552,15 @@ let is_in_finally_block parents =
     | FinallyClause _ -> true
     | _ -> false)
 
+let is_in_function parents =
+  Hh_core.List.exists parents ~f:begin fun node ->
+    match syntax node with
+    | FunctionDeclaration _
+    | MethodishDeclaration _
+    | AnonymousFunction _ -> true
+    | _ -> false
+    end
+
 let function_call_argument_errors node errors =
   match syntax node with
   | DecoratedExpression
@@ -1717,6 +1726,10 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
       if is_in_finally_block parents then
       make_error_from_node ~error_type:SyntaxError.RuntimeError
         node SyntaxError.yield_in_finally_block :: errors
+      else errors in
+    let errors =
+      if not (is_in_function parents) then
+      make_error_from_node node SyntaxError.yield_outside_function :: errors
       else errors in
     let errors =
       if has_inout_params parents then

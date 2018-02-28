@@ -201,6 +201,7 @@ val reference_not_allowed_on_key : string
 val reference_not_allowed_on_value : string
 val reference_not_allowed_on_element : string
 val yield_in_finally_block : string
+val yield_outside_function : string
 val coloncolonclass_on_dynamic : string
 val enum_elem_name_is_class : string
 val safe_member_selection_in_write : string

@@ -315,6 +315,8 @@ let reference_not_allowed_on_element = "Collection element cannot " ^
   "be marked as reference"
 let yield_in_finally_block =
   "Yield expression inside a finally block is not supported"
+let yield_outside_function =
+  "Yield can only be used inside a function"
 
 let coloncolonclass_on_dynamic =
   "Dynamic class names are not allowed in compile-time ::class fetch"

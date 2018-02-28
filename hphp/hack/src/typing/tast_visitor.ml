@@ -39,15 +39,15 @@ class virtual ['self] iter = object (self : 'self)
 
   method go_def def =
     match def with
-    | Fun x -> self#go_fun_ x
-    | Class x -> self#go_class_ x
-    | Typedef x -> self#go_typedef x
-    | Constant x -> self#go_gconst x
+    | Fun x -> self#go_Fun x
+    | Class x -> self#go_Class x
+    | Typedef x -> self#go_Typedef x
+    | Constant x -> self#go_Constant x
 
-  method go_fun_    x = self#on_fun_ (fun_env x) x
-  method go_class_  x = self#on_class_ (class_env x) x
-  method go_typedef x = self#on_typedef (typedef_env x) x
-  method go_gconst  x = self#on_gconst (gconst_env x) x
+  method go_Fun x = self#on_Fun (fun_env x) x
+  method go_Class x = self#on_Class (class_env x) x
+  method go_Typedef x = self#on_Typedef (typedef_env x) x
+  method go_Constant x = self#on_Constant (gconst_env x) x
 
   method! on_method_ env x = super#on_method_ (method_env env x) x
 
@@ -65,15 +65,15 @@ class virtual ['self] reduce = object (self : 'self)
 
   method go_def def =
     match def with
-    | Fun x -> self#go_fun_ x
-    | Class x -> self#go_class_ x
-    | Typedef x -> self#go_typedef x
-    | Constant x -> self#go_gconst x
+    | Fun x -> self#go_Fun x
+    | Class x -> self#go_Class x
+    | Typedef x -> self#go_Typedef x
+    | Constant x -> self#go_Constant x
 
-  method go_fun_    x = self#on_fun_ (fun_env x) x
-  method go_class_  x = self#on_class_ (class_env x) x
-  method go_typedef x = self#on_typedef (typedef_env x) x
-  method go_gconst  x = self#on_gconst (gconst_env x) x
+  method go_Fun x = self#on_Fun (fun_env x) x
+  method go_Class x = self#on_Class (class_env x) x
+  method go_Typedef x = self#on_Typedef (typedef_env x) x
+  method go_Constant x = self#on_Constant (gconst_env x) x
 
   method! on_method_ env x = super#on_method_ (method_env env x) x
 
@@ -91,15 +91,15 @@ class virtual ['self] map = object (self : 'self)
 
   method go_def def =
     match def with
-    | Fun x -> Fun (self#go_fun_ x)
-    | Class x -> Class (self#go_class_ x)
-    | Typedef x -> Typedef (self#go_typedef x)
-    | Constant x -> Constant (self#go_gconst x)
+    | Fun x -> self#go_Fun x
+    | Class x -> self#go_Class x
+    | Typedef x -> self#go_Typedef x
+    | Constant x -> self#go_Constant x
 
-  method go_fun_    x = self#on_fun_ (fun_env x) x
-  method go_class_  x = self#on_class_ (class_env x) x
-  method go_typedef x = self#on_typedef (typedef_env x) x
-  method go_gconst  x = self#on_gconst (gconst_env x) x
+  method go_Fun x = self#on_Fun (fun_env x) x
+  method go_Class x = self#on_Class (class_env x) x
+  method go_Typedef x = self#on_Typedef (typedef_env x) x
+  method go_Constant x = self#on_Constant (gconst_env x) x
 
   method! on_method_ env x = super#on_method_ (method_env env x) x
 
@@ -117,23 +117,15 @@ class virtual ['self] endo = object (self : 'self)
 
   method go_def def =
     match def with
-    | Fun x ->
-      let y = self#go_fun_ x in
-      if x == y then def else Fun y
-    | Class x ->
-      let y = self#go_class_ x in
-      if x == y then def else Class y
-    | Typedef x ->
-      let y = self#go_typedef x in
-      if x == y then def else Typedef y
-    | Constant x ->
-      let y = self#go_gconst x in
-      if x == y then def else Constant y
+    | Fun x -> self#go_Fun def x
+    | Class x -> self#go_Class def x
+    | Typedef x -> self#go_Typedef def x
+    | Constant x -> self#go_Constant def x
 
-  method go_fun_    x = self#on_fun_ (fun_env x) x
-  method go_class_  x = self#on_class_ (class_env x) x
-  method go_typedef x = self#on_typedef (typedef_env x) x
-  method go_gconst  x = self#on_gconst (gconst_env x) x
+  method go_Fun def x = self#on_Fun (fun_env x) def x
+  method go_Class def x = self#on_Class (class_env x) def x
+  method go_Typedef def x = self#on_Typedef (typedef_env x) def x
+  method go_Constant def x = self#on_Constant (gconst_env x) def x
 
   method! on_method_ env x = super#on_method_ (method_env env x) x
 

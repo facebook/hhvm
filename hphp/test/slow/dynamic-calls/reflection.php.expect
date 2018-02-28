@@ -1,0 +1,5 @@
+=========================== positive tests ===================
+Exception: 'func1' called dynamically
+Exception: 'A::func2' called dynamically
+Exception: 'A::func3' called dynamically
+=========================== negative tests ===================

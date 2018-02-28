@@ -28,7 +28,9 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   let is_memoize = Hhas_attribute.is_memoized function_attributes in
   let is_native = Hhas_attribute.is_native function_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info function_attributes in
-  let is_dynamically_callable = Hhas_attribute.is_dynamically_callable function_attributes in
+  let is_dynamically_callable =
+    ((Hhas_attribute.is_dynamically_callable function_attributes) || Emit_env.is_systemlib ())
+  in
   let wrapper_type_opt, inout_param_locations =
     Emit_inout_helpers.extract_function_inout_or_ref_param_locations ast_fun in
   let has_inout_args = Option.is_some wrapper_type_opt in
@@ -50,7 +52,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ~is_memoize
       ~is_native
       ~is_async:function_is_async
-      ~is_dynamically_callable
+      ~is_dynamically_callable:(is_dynamically_callable && (not is_memoize))
       ~deprecation_info:(if is_memoize then None else deprecation_info)
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
       ~is_return_by_ref

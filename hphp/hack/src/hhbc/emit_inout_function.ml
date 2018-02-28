@@ -112,7 +112,7 @@ let emit_body_instrs ~wrapper_type env params call_instrs =
   ]
 
 (* Construct the wrapper function body *)
-let make_wrapper_body env doc decl_vars return_type params instrs =
+let make_wrapper_body env doc decl_vars return_type is_dynamically_callable params instrs =
   let params = List.map params ~f:Hhas_param.without_type in
   let return_user_type = Hhas_type_info.user_type return_type in
   let return_tc = Hhas_type_constraint.make None [] in
@@ -121,7 +121,7 @@ let make_wrapper_body env doc decl_vars return_type params instrs =
     instrs
     decl_vars
     false (* is_memoize_wrapper *)
-    false (* is_dynamically_callable *)
+    is_dynamically_callable
     params
     (Some return_type)
     [] (* static_inits: this is intentionally empty *)
@@ -143,6 +143,9 @@ let emit_wrapper_function
     ~scope ast_fun.Ast.f_params in
   let function_attributes =
     Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes in
+  let is_dynamically_callable =
+    ((Hhas_attribute.is_dynamically_callable function_attributes) || Emit_env.is_systemlib ())
+  in
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let return_type_info =
     Emit_body.emit_return_type_info
@@ -166,7 +169,9 @@ let emit_wrapper_function
   let doc = ast_fun.A.f_doc_comment in
   let body =
     make_wrapper_body
-      env doc decl_vars return_type_info modified_params body_instrs in
+      env doc decl_vars return_type_info
+      is_dynamically_callable modified_params body_instrs
+  in
   let return_by_ref = ast_fun.Ast.f_ret_by_ref in
   let is_interceptable =
     Interceptable.is_function_interceptable namespace ast_fun in
@@ -210,6 +215,9 @@ let emit_wrapper_method
     List.mem ast_method.Ast.m_kind Ast.Static in
   let method_attributes = Emit_attribute.from_asts
       (Emit_env.get_namespace env) ast_method.Ast.m_user_attributes in
+  let is_dynamically_callable =
+    ((Hhas_attribute.is_dynamically_callable method_attributes) || Emit_env.is_systemlib ())
+  in
   let method_is_private =
     List.mem ast_method.Ast.m_kind Ast.Private in
   let method_is_protected =
@@ -261,7 +269,9 @@ let emit_wrapper_method
   in
   let doc = ast_method.A.m_doc_comment in
   let body =
-    make_wrapper_body env doc decl_vars return_type_info params body_instrs in
+    make_wrapper_body env doc decl_vars return_type_info
+                      is_dynamically_callable params body_instrs
+  in
   let method_is_interceptable =
     Interceptable.is_method_interceptable namespace ast_class original_id in
   Hhas_method.make

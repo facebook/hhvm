@@ -9060,6 +9060,8 @@ determine_type_constraint(const ParameterExpressionPtr& par) {
   return determine_type_constraint_from_annot(par->annotation(), false, false);
 }
 
+const char* attr_DynamicallyCallable = "__DynamicallyCallable";
+
 template<class F1, class F2>
 void EmitterVisitor::emitFuncWrapper(PostponedMeth& p, FuncEmitter* fe,
                                      F1 getParam, F2 getReturn, bool isInOut) {
@@ -9071,6 +9073,13 @@ void EmitterVisitor::emitFuncWrapper(PostponedMeth& p, FuncEmitter* fe,
   emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
   if (isInOut) fe->attrs |= AttrTakesInOutParams;
   else fe->attrs = Attr(fe->attrs & ~AttrTakesInOutParams);
+
+  auto const& attrs = meth->getFunctionScope()->userAttributes();
+  if (!SystemLib::s_inited ||
+      meth->getFunctionScope()->isSystem() ||
+      attrs.count(attr_DynamicallyCallable)) {
+    fe->dynamicallyCallable = true;
+  }
 
   auto region = createRegion(meth, Region::Kind::FuncBody);
   enterRegion(region);
@@ -9400,7 +9409,6 @@ void EmitterVisitor::bindUserAttributes(MethodStatementPtr meth,
 
 const StaticString s_Void("HH\\void");
 const char* attr_Deprecated = "__Deprecated";
-const char* attr_DynamicallyCallable = "__DynamicallyCallable";
 
 Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
                                     FuncEmitter *fe) {

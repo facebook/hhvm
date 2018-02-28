@@ -1,4 +1,5 @@
 .function [skip_frame] array_filter($arr = no_args, $func = start("""null"""), $flag = start("""null"""), $res = start) {
+          .dynamicallycallable;
           .numiters 2;
 
 # if we get here, a value was supplied for $res

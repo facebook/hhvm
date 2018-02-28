@@ -85,7 +85,9 @@ let from_ast_wrapper : bool -> _ ->
   let is_native_opcode_impl =
     Hhas_attribute.is_native_opcode_impl method_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
-  let is_dynamically_callable = Hhas_attribute.is_dynamically_callable method_attributes in
+  let is_dynamically_callable =
+    ((Hhas_attribute.is_dynamically_callable method_attributes) || Emit_env.is_systemlib ())
+  in
   let (pos, original_name) = ast_method.Ast.m_name in
   let (_, class_name) = ast_class.Ast.c_name in
   let class_name = SU.Xhp.mangle @@ Utils.strip_ns class_name in
@@ -205,7 +207,7 @@ let from_ast_wrapper : bool -> _ ->
         ~is_memoize
         ~is_native
         ~is_async:method_is_async
-        ~is_dynamically_callable
+        ~is_dynamically_callable:(is_dynamically_callable && (not is_memoize))
         ~deprecation_info
         ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
         ~is_return_by_ref

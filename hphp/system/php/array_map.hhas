@@ -1,4 +1,5 @@
 .function [skip_frame] array_map($func = no_args, $arr = one_arg, $res = one_array, ...$extra) {
+          .dynamicallycallable;
           .numiters 2;
 
 # If we get here, a value was supplied for $res (or we did not get an

@@ -2214,7 +2214,6 @@ void parse_function(AsmState& as) {
   as.fe->init(line0, line1, as.ue->bcPos(), attrs, isTop, 0);
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
   as.fe->userAttributes = userAttrs;
-  as.fe->dynamicallyCallable = !SystemLib::s_inited;
 
   parse_parameter_list(as);
   parse_function_flags(as);
@@ -2252,7 +2251,6 @@ void parse_method(AsmState& as) {
               as.ue->bcPos(), attrs, false, 0);
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
   as.fe->userAttributes = userAttrs;
-  as.fe->dynamicallyCallable = !SystemLib::s_inited;
 
   parse_parameter_list(as);
   parse_function_flags(as);

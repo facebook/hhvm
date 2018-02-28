@@ -350,7 +350,7 @@ int VariablesCommand::addLocals(
   auto const locals = getDefinedVariables(fp);
   for (ArrayIter iter(locals); iter; ++iter) {
     const std::string name = iter.first().toString().toCppString();
-    if (isSuperGlobal(name)) {
+    if (isSuperGlobal(name) || name == "this") {
       continue;
     }
 
@@ -366,6 +366,26 @@ int VariablesCommand::addLocals(
   return count;
 }
 
+int VariablesCommand::getCachedValue(
+  DebuggerSession* session,
+  const int cacheKey,
+  folly::dynamic* vars
+) {
+  int count;
+
+  folly::dynamic* cachedResult = session->getCachedVariableObject(cacheKey);
+  if (cachedResult != nullptr) {
+    // Found a cached copy of this response as a folly::dynamic. Use that.
+    count = cachedResult->size();
+    if (vars != nullptr) {
+      *vars = *cachedResult;
+    }
+    return count;
+  }
+
+  return -1;
+}
+
 int VariablesCommand::addConstants(
   DebuggerSession* session,
   request_id_t requestId,
@@ -373,6 +393,20 @@ int VariablesCommand::addConstants(
   folly::dynamic* vars
 ) {
   int count = 0;
+
+  int cacheKey = -1;
+  if (category == s_core) {
+    cacheKey = DebuggerSession::kCachedVariableKeyServerConsts;
+  } else if (category == s_user) {
+    cacheKey = DebuggerSession::kCachedVariableKeyUserConsts;
+  }
+
+  if (cacheKey != -1) {
+    int cacheCount = getCachedValue(session, cacheKey, vars);
+    if (cacheCount >= 0) {
+      return cacheCount;
+    }
+  }
 
   const auto& constants = lookupDefinedConstants(true)[category].toArray();
   for (ArrayIter iter(constants); iter; ++iter) {
@@ -384,6 +418,13 @@ int VariablesCommand::addConstants(
     }
 
     count++;
+  }
+
+  if (vars != nullptr && cacheKey != -1) {
+    // Cache the result since the same JSON array is to be requested by the
+    // client for every stack frame for every request for this pause of the
+    // target.
+    session->setCachedVariableObject(cacheKey, *vars);
   }
 
   return count;
@@ -401,8 +442,17 @@ int VariablesCommand::addSuperglobalVariables(
 ) {
   assert(scope->m_scopeType == ScopeType::Superglobals);
 
-  int count = 0;
+  int cacheCount = getCachedValue(
+    session,
+    DebuggerSession::kCachedVariableKeyServerGlobals,
+    vars
+  );
 
+  if (cacheCount >= 0) {
+    return cacheCount;
+  }
+
+  int count = 0;
   const Array globals = php_globals_as_array();
   for (ArrayIter iter(globals); iter; ++iter) {
     const std::string name = iter.first().toString().toCppString();
@@ -417,6 +467,16 @@ int VariablesCommand::addSuperglobalVariables(
     }
 
     count++;
+  }
+
+  if (vars != nullptr) {
+    // Cache the result since the same JSON array is to be requested by the
+    // client for every stack frame for every request for this pause of the
+    // target.
+    session->setCachedVariableObject(
+      DebuggerSession::kCachedVariableKeyServerGlobals,
+      *vars
+    );
   }
 
   return count;

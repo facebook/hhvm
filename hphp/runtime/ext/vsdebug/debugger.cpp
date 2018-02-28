@@ -531,6 +531,12 @@ void Debugger::processCommandQueue(
   // as soon as the thread is allowed to step.
   cleanupServerObjectsForRequest(requestInfo);
 
+  // Once any request steps, we must invalidate cached globals and constants,
+  // since the user code could have modified them.
+  if (m_session != nullptr) {
+    m_session->clearCachedVariable(DebuggerSession::kCachedVariableKeyAll);
+  }
+
   VSDebugLogger::Log(
     VSDebugLogger::LogLevelInfo,
     "Thread %d resumed",

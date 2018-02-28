@@ -427,6 +427,16 @@ private:
     folly::dynamic* vars
   );
 
+  // Tries to get a cached JSON response for a variables request
+  // from the debugger session. This is used for responses that are
+  // the same for all frames and requests, and are valid for the duration
+  // of the current pause of the target.
+  static int getCachedValue(
+    DebuggerSession* session,
+    const int cacheKey,
+    folly::dynamic* vars
+  );
+
   static const std::string getVariableValue(const Variant& variable);
 
   static constexpr char* VisibilityPrivate = "private";

@@ -135,6 +135,11 @@ bool EvaluateCommand::executeImpl(
 
       g_context->exitDebuggerDummyEnv();
     }
+
+    // It is difficult to prove if this evaluation expression wrote to any
+    // server constant or server global, so we must err on the side of caution
+    // and invalidate cached copies.
+    session->clearCachedVariable(DebuggerSession::kCachedVariableKeyAll);
   };
 
   Unit* unit = compile_string(evalExpression.c_str(), evalExpression.size());

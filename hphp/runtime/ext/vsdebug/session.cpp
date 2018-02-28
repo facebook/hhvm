@@ -314,6 +314,34 @@ void DebuggerSession::onServerObjectDestroyed(unsigned int objectId) {
   }
 }
 
+folly::dynamic* DebuggerSession::getCachedVariableObject(const int key) {
+  auto it = m_globalVariableCache.find(key);
+  if (it != m_globalVariableCache.end()) {
+    return &it->second;
+  }
+
+  return nullptr;
+}
+
+void DebuggerSession::setCachedVariableObject(
+  const int key,
+  const folly::dynamic& value
+) {
+  m_globalVariableCache.emplace(key, value);
+}
+
+void DebuggerSession::clearCachedVariable(const int key) {
+  if (key == kCachedVariableKeyAll) {
+    // Clear all keys.
+    m_globalVariableCache.clear();
+  } else {
+    auto it = m_globalVariableCache.find(key);
+    if (it != m_globalVariableCache.end()) {
+      m_globalVariableCache.erase(it);
+    }
+  }
+}
+
 unsigned int DebuggerSession::s_nextObjectId {0};
 }
 }

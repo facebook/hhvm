@@ -76,6 +76,15 @@ struct DebuggerSession final {
   // RequestInfo for the dummy request thread.
   RequestInfo* const m_dummyRequestInfo;
 
+  folly::dynamic* getCachedVariableObject(const int key);
+  void setCachedVariableObject(const int key, const folly::dynamic& value);
+  void clearCachedVariable(const int key);
+
+  static constexpr int kCachedVariableKeyAll = -1;
+  static constexpr int kCachedVariableKeyServerConsts = 1;
+  static constexpr int kCachedVariableKeyUserConsts = 2;
+  static constexpr int kCachedVariableKeyServerGlobals = 3;
+
 private:
 
   void registerRequestObject(
@@ -107,6 +116,11 @@ private:
   // only until that request resumes.
   static unsigned int s_nextObjectId;
   std::unordered_map<unsigned int, ServerObject*> m_serverObjects;
+
+  // A cache for things like server constants that are expensive to compute,
+  // are requested for each thread and frame, and unlikely to change while
+  // the target is paused. Items in this cache are global, not per-request.
+  std::unordered_map<int, folly::dynamic> m_globalVariableCache;
 };
 
 }

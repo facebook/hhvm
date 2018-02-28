@@ -1821,15 +1821,15 @@ module WithStatementAndDeclAndTypeParser
       let operator = Operator.trailing_from_token (Token.kind token) in
       let default () =
         let precedence = Operator.precedence operator in
+        let (parser, token) = Make.token parser1 token in
         let (parser, right_term) =
           if is_rhs_of_assignment then
             (* reset the current precedence to make sure that expression on
               the right hand side of the assignment is fully consumed *)
-            with_reset_precedence parser1 parse_term
+            with_reset_precedence parser parse_term
           else
-            parse_term parser1
+            parse_term parser
         in
-        let (parser, token) = Make.token parser token in
         let (parser, right_term) =
           parse_remaining_binary_expression_helper parser right_term precedence
         in

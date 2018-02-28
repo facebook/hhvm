@@ -1513,13 +1513,12 @@ module WithExpressionAndStatementAndTypeParser
          function declaration or expression statement containing
          anonymous function - use statement parser to determine in which case
          we are currently in *)
-      with_statement_parser parser StatementParser.parse_possible_php_function
+      with_statement_parser
+        parser
+        (fun p ->
+          StatementParser.parse_possible_php_function p attribute_specification)
     else
       parse_function_declaration parser attribute_specification
-
-  and parse_function parser =
-    let (parser, missing) = make_missing parser in
-    parse_function_declaration parser missing
 
   and parse_function_declaration parser attribute_specification =
     let (parser, modifiers, _) = parse_modifiers parser in

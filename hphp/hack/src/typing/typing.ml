@@ -861,7 +861,7 @@ and stmt env = function
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
       let env, (te2, tb) = Env.in_loop env begin
         iter_n_acc alias_depth begin fun env ->
-          let env, te2 = bind_as_expr env ty2 e2 in
+          let env, te2 = bind_as_expr env ty1 ty2 e2 in
           let env, tb = block env b in
           env, (te2, tb)
         end
@@ -1082,7 +1082,12 @@ function
       let tmap = Tclass ((pe, SN.Classes.cAsyncKeyedIterator), [ty1; ty2]) in
       make_result (Reason.Rasyncforeach pe, tmap)
 
-and bind_as_expr env ty aexpr =
+and bind_as_expr env loop_ty ty aexpr =
+  let rec is_dynamic ty =
+    match Env.expand_type env ty with
+    | (_, (_, Tdynamic)) -> true
+    | (_, (_, Tunresolved tyl)) -> List.exists tyl is_dynamic
+    | _ -> false in
   let env, ety = Env.expand_type env ty in
   let p, ty1, ty2 =
     match ety with
@@ -1090,6 +1095,10 @@ and bind_as_expr env ty aexpr =
       (p, (Reason.Rnone, TUtils.desugar_mixed env Reason.Rnone), ty2)
     | _, Tclass ((p, _), [ty1; ty2]) -> (p, ty1, ty2)
     | _ -> assert false in
+  (* Set id as dynamic if the foreach loop was dynamic *)
+  let env, eloop_ty = Env.expand_type env loop_ty in
+  let ty1, ty2 = if is_dynamic eloop_ty then
+    (fst ty1, Tdynamic), (fst ty2, Tdynamic) else ty1, ty2 in
   match aexpr with
     | As_v ev ->
       let env, te, _ = assign p env ev ty2 in
@@ -5153,11 +5162,11 @@ and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)
 
 and unop ~is_func_arg ~forbid_uref p env uop te ty =
-let rec is_dynamic ty =
-  match Env.expand_type env ty with
-  | (_, (_, Tdynamic)) -> true
-  | (_, (_, Tunresolved tyl)) -> List.exists tyl is_dynamic
-  | _ -> false in
+  let rec is_dynamic ty =
+    match Env.expand_type env ty with
+    | (_, (_, Tdynamic)) -> true
+    | (_, (_, Tunresolved tyl)) -> List.exists tyl is_dynamic
+    | _ -> false in
   let check_dynamic env ty ~f =
     if is_dynamic ty then
       env, (fst ty, Tdynamic)

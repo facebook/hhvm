@@ -1804,7 +1804,6 @@ and expr_
           tel,
           [])) (Env.fresh_type())
   | Call (call_type, e, hl, el, uel) ->
-
       let env, te, ty = check_call ~is_using_clause ~expected env p call_type e hl el uel ~in_suspend:false in
       Typing_mutability.enforce_mutable_call env te;
       env, te, ty
@@ -4874,19 +4873,19 @@ and param_modes { fp_pos; fp_kind; _ } (pos, e) =
     Errors.inout_annotation_missing pos fp_pos
 
 and inout_write_back env { fp_type; _ } (_, e) =
-  match e with
-  | Callconv (Ast.Pinout, e1) ->
-    (* Translate the write-back semantics of inout parameters.
-     *
-     * This matters because we want to:
-     * (1) make sure we can write to the original argument
-     *     (modifiable lvalue check)
-     * (2) allow for growing of locals / Tunresolveds (type side effect)
-     *     but otherwise unify the argument type with the parameter hint
-     *)
-    let env, _te, _ty = assign_ (fst e1) Reason.URparam_inout env e1 fp_type in
-    env
-  | _ -> env
+    match e with
+    | Callconv (Ast.Pinout, e1) ->
+      (* Translate the write-back semantics of inout parameters.
+       *
+       * This matters because we want to:
+       * (1) make sure we can write to the original argument
+       *     (modifiable lvalue check)
+       * (2) allow for growing of locals / Tunresolveds (type side effect)
+       *     but otherwise unify the argument type with the parameter hint
+       *)
+      let env, _te, _ty = assign_ (fst e1) Reason.URparam_inout env e1 fp_type in
+      env
+    | _ -> env
 
 and call ~expected ?receiver_type pos env fty el uel =
   let env, tel, tuel, ty = call_ ~expected ~receiver_type pos env fty el uel in
@@ -4911,6 +4910,15 @@ and call_ ~expected ~receiver_type pos env fty el uel =
       let env, te, arg_ty =
         expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Tany)) ~is_func_arg:true env elt
       in
+      let env =
+        match elt with
+        | _, Callconv (Ast.Pinout, e1) ->
+          let env, _te, _ty = assign_ (fst e1) Reason.URparam_inout env e1 efty in
+          env
+        | _, Unop (Ast.Uref, e1) ->
+          let env, _te, _ty = assign_ (fst e1) Reason.URparam env e1 efty in
+          env
+        | _ -> env in
       let env, _arg_ty = check_valid_rvalue pos env arg_ty in
       env, te
     end in

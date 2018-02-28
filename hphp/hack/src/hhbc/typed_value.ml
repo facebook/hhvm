@@ -92,7 +92,7 @@ let to_bool v =
 
 (* try to convert numeric
  * or if allow_following passed then leading numeric string to a number *)
-let string_to_int_opt ~allow_following s =
+let string_to_int_opt ~allow_following ~allow_inf s =
   (* Interger conversion in scanf is slightly strange,
    * both 3 and 3ab are converted to 3, so we take a separate approach
    * when we do not want the following characters
@@ -106,7 +106,12 @@ let string_to_int_opt ~allow_following s =
     begin if allow_following then
       try Scanf.sscanf s "%f%s"
         (fun x _ -> Some (Int64.of_float x)) with _ -> None
-      else try Some (Int64.of_float @@ float_of_string s) with _ -> None
+      else
+        try
+          let s = float_of_string s in
+          if not allow_inf && (s = infinity || s = neg_infinity) then None else
+          Some (Int64.of_float s)
+        with _ -> None
     end
   | x -> x
 
@@ -130,7 +135,7 @@ let to_int v =
       characters in leading-numeric strings are ignored. For any other string,
       the result value is 0.
     *)
-    match string_to_int_opt ~allow_following:true s with
+    match string_to_int_opt ~allow_following:true ~allow_inf:true s with
     | None -> Some Int64.zero
     | x -> x
     end

@@ -29,7 +29,7 @@ end
 module StringNAST = Nast.AnnotatedAST(StringNASTAnnotations)
 
 module TASTStringMapper =
-  Aast_mapper.MapAnnotatedAST(Tast.Annotations)(StringNASTAnnotations)
+  Aast_mapper.MapAnnotatedAST(Tast_expand.ExpandedTypeAnnotations)(StringNASTAnnotations)
 
 module TASTTypeStripper =
   Aast_mapper.MapAnnotatedAST(Tast.Annotations)(Nast.Annotations)
@@ -772,21 +772,21 @@ let handle_mode mode filename tcopt popt files_contents files_info errors =
       Printf.printf "Errors:\n";
       List.iter errors (fun err ->
         List.iter (Errors.to_list err) (fun (pos, msg) ->
-          Format.printf "  %a %s\n" Pos.pp pos msg))
+          Format.printf "  %a %s" Pos.pp pos msg;
+          Format.print_newline ()))
     );
     let env = Typing_env.empty tcopt filename ~droot:None in
-    let stringify_types =
-      TASTStringMapper.map_program
-        ~map_env_annotation:(fun _ -> ())
-        ~map_expr_annotation:begin fun saved_env (pos, ty) ->
-          let env = Tast_expand.restore_saved_env env saved_env in
+    let stringify_types tast =
+      let tast = Tast_expand.expand_program tast in
+      TASTStringMapper.map_program tast
+        ~map_env_annotation:(fun () -> ())
+        ~map_expr_annotation:begin fun () (pos, ty) ->
           match ty with
           | None -> Format.asprintf "(%a, None)" Pos.pp pos
           | Some ty ->
             Format.asprintf "(%a, Some %s)" Pos.pp pos (Typing_print.full env ty)
         end
-        ~map_class_id_annotation:begin fun saved_env ty ->
-          let env = Tast_expand.restore_saved_env env saved_env in
+        ~map_class_id_annotation:begin fun () ty ->
           match ty with
           | None -> "(None)"
           | Some ty -> Printf.sprintf "(Some %s)" (Typing_print.full env ty)

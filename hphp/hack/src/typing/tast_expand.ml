@@ -104,13 +104,19 @@ let expand_ty env ty =
 let expand_annotation env (pos, tyopt) =
   (pos, Option.map tyopt (expand_ty env))
 
-let restore_saved_env env saved_env =
-  let module Env = Typing_env in
-  {env with
-    Env.genv = {env.Env.genv with Env.tcopt = saved_env.Tast.tcopt};
-    Env.tenv = saved_env.Tast.tenv;
-    Env.subst = saved_env.Tast.subst;
-  }
+class ['self] expander = object (_ : 'self)
+  inherit [_] Tast_visitor.endo
+  method! on_expr_annotation = expand_annotation
+  method! on_class_id_annotation env tyopt = Option.map tyopt (expand_ty env)
+end
 
 module ExpandAST =
   Aast_mapper.MapAnnotatedAST(Tast.Annotations)(ExpandedTypeAnnotations)
+
+(* Replace all types in a program AST by their expansions *)
+let expand_program tast =
+  let tast = new expander#go tast in
+  ExpandAST.map_program tast
+    ~map_env_annotation:(fun _ -> ())
+    ~map_class_id_annotation:(fun _ x -> x)
+    ~map_expr_annotation:(fun _ x -> x)

@@ -87,8 +87,10 @@ let rec did_loading_saved_state_fail l =
   match l with
   | [] -> false
   | s::ss ->
-     if matches_re success_loaded_mini_re s then
+     if matches_re success_loaded_mini_re s then begin
+       saved_state_failed := false;
        false
+       end
      else if matches_re could_not_load_mini_state_re s then
        true
      else if matches_re server_ready_re s then begin

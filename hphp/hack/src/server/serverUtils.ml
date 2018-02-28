@@ -82,17 +82,17 @@ let with_exit_on_exception f =
     Hh_logger.exc e;
     Hh_logger.log "Exiting. Failed due to watchman error: %s" s;
     Exit_status.(exit Watchman_failed)
-  | Worker.Worker_oomed as e->
+  | WorkerController.Worker_oomed as e->
     Hh_logger.exc e;
     Exit_status.(exit Worker_oomed)
-  | Worker.Worker_busy as e ->
+  | WorkerController.Worker_busy as e ->
     Hh_logger.exc e;
     Exit_status.(exit Worker_busy)
-  | (Worker.Worker_exited_abnormally i) as e ->
+  | (WorkerController.Worker_exited_abnormally i) as e ->
     Hh_logger.exc e;
     (** Exit with the same exit code that that worker used. *)
     exit i
-  | Worker.Worker_failed_to_send_job _ as e->
+  | WorkerController.Worker_failed_to_send_job _ as e->
     Hh_logger.exc e;
     Exit_status.(exit Worker_failed_to_send_job)
   | File_heap.File_heap_stale ->

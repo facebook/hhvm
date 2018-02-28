@@ -62,11 +62,11 @@ module Program =
         (List.map (Errors.get_error_list env.errorl) Errors.to_absolute) stdout;
       match ServerArgs.convert genv.options with
       | None ->
-         Worker.killall ();
+         WorkerController.killall ();
          exit (if Errors.is_empty env.errorl then 0 else 1)
       | Some dirname ->
          ServerConvert.go genv env dirname;
-         Worker.killall ();
+         WorkerController.killall ();
          exit 0
 
     (* filter and relativize updated file paths *)

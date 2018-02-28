@@ -11,7 +11,7 @@
 (* As for [Daemon.register_entry_point], this should stay
    at toplevel, in order to be executed before
    [Daemon.check_entry_point]. *)
-let entry = Worker.register_entry_point ~restore:(ServerGlobalState.restore)
+let entry = WorkerController.register_entry_point ~restore:(ServerGlobalState.restore)
 
 (** We use the call_wrapper to classify some exceptions in all calls in the
  * same way. *)
@@ -28,8 +28,8 @@ let make ?nbr_procs gc_control heap_handle =
   let nbr_procs = match nbr_procs with
     | None -> GlobalConfig.nbr_procs
     | Some x -> x in
-  Worker.make
-    ~call_wrapper:{ Worker.wrap = catch_and_classify_exceptions; }
+  WorkerController.make
+    ~call_wrapper:{ WorkerController.wrap = catch_and_classify_exceptions; }
     ~saved_state:(ServerGlobalState.save ())
     ~entry
     ~nbr_procs

@@ -8,5 +8,5 @@
  *
  *)
 
-val go : Worker.t list option ->
+val go : WorkerController.worker list option ->
   get_next: Relative_path.t list Bucket.next -> ParserOptions.t -> unit

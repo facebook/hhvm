@@ -11,7 +11,7 @@ val empty_file_info: FileInfo.t
 
 val go:
   ?quick: bool ->
-  Worker.t list option ->
+  WorkerController.worker list option ->
   Relative_path.Set.t ->
   get_next: Relative_path.t list Bucket.next ->
   ParserOptions.t ->

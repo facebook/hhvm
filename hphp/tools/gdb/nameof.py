@@ -13,7 +13,10 @@ from gdbutils import *
 
 def nameof(val):
     val = deref(val)
-    t = val.type.name
+    try:
+        t = val.type.name
+    except:
+        return None
 
     sd = None
 

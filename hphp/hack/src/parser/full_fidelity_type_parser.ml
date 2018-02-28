@@ -73,7 +73,9 @@ let rec parse_type_specifier ?(allow_var=false) parser =
      a simple type specifier here. *)
   let (parser1, token) = next_xhp_class_name_or_other_token parser in
   match Token.kind token with
-  | Var when allow_var -> parser1, make_simple_type_specifier (make_token token)
+  | Var when allow_var ->
+    let (parser, token) = Make.token parser1 token in
+    Make.simple_type_specifier parser token
   | This -> parse_simple_type_or_type_constant parser
   (* Any keyword-type could be a non-keyword type, because PHP, so check whether
    * these have generics.
@@ -92,7 +94,8 @@ let rec parse_type_specifier ?(allow_var=false) parser =
   | Mixed
   | Name -> parse_simple_type_or_type_constant_or_generic parser
   | Backslash ->
-    let (parser, name) = scan_qualified_name parser1 (make_token token) in
+    let (parser, token) = Make.token parser1 token in
+    let (parser, name) = scan_qualified_name parser token in
     parse_remaining_simple_type_or_type_constant_or_generic parser name
   | Self
   | Parent -> parse_simple_type_or_type_constant parser
@@ -112,7 +115,8 @@ let rec parse_type_specifier ?(allow_var=false) parser =
   | Classname -> parse_classname_type_specifier parser
   | _ ->
     let parser = with_error parser1 SyntaxError.error1007 in
-    (parser, make_error (make_token token))
+    let (parser, token) = Make.token parser token in
+    Make.error parser token
 
 (* SPEC
   type-constant-type-name:
@@ -124,27 +128,25 @@ let rec parse_type_specifier ?(allow_var=false) parser =
 *)
 
 and parse_remaining_type_constant parser left =
-  let (parser, separator) = next_token parser in
+  let (parser, separator) = fetch_token parser in
   let (parser1, right) = next_token_as_name parser in
   if (Token.kind right) = Name then
     begin
-      let syntax =
-        make_type_constant left (make_token separator) (make_token right) in
-      let token = peek_token parser1 in
+      let (parser, right) = Make.token parser1 right in
+      let (parser, syntax) = Make.type_constant parser left separator right in
+      let token = peek_token parser in
       if (Token.kind token) = ColonColon then
-        parse_remaining_type_constant parser1 syntax
+        parse_remaining_type_constant parser syntax
       else
-        (parser1, syntax)
+        (parser, syntax)
     end
   else
     (* ERROR RECOVERY: Assume that the thing following the ::
        that is not a name belongs to the next thing to be
        parsed; treat the name as missing. *)
     let parser = with_error parser1 SyntaxError.error1004 in
-    let missing = make_missing parser in
-    let separator = make_token separator in
-    let syntax = make_type_constant left separator missing in
-    (parser, syntax)
+    let (parser, missing) = make_missing parser in
+    Make.type_constant parser left separator missing
 
 and parse_simple_type_or_type_constant parser =
   let (parser, name) = next_xhp_class_name_or_other parser in
@@ -154,7 +156,7 @@ and parse_remaining_simple_type_or_type_constant parser name =
   let token = peek_token parser in
   match Token.kind token with
   | ColonColon -> parse_remaining_type_constant parser name
-  | _ -> (parser, make_simple_type_specifier name)
+  | _ -> Make.simple_type_specifier parser name
 
 and parse_simple_type_or_type_constant_or_generic parser =
   let (parser, name) = next_xhp_class_name_or_other parser in
@@ -174,13 +176,13 @@ and parse_possible_generic_specifier_or_type_const parser =
 
 and parse_remaining_possible_generic_specifier_or_type_const parser name =
   let (parser, arguments, _) = parse_generic_type_argument_list_opt parser in
-  if (kind arguments) = SyntaxKind.Missing then
+  if SC.is_missing arguments then
     let token = peek_token parser in
     match Token.kind token with
     | ColonColon -> parse_remaining_type_constant parser name
-    | _ -> (parser, make_simple_type_specifier name)
+    | _ -> Make.simple_type_specifier parser name
   else
-    (parser, make_generic_type_specifier name arguments)
+    Make.generic_type_specifier parser name arguments
 
 (* SPEC
   class-interface-trait-specifier:
@@ -189,10 +191,10 @@ and parse_remaining_possible_generic_specifier_or_type_const parser name =
 and parse_possible_generic_specifier parser =
   let (parser, name) = next_xhp_class_name_or_other parser in
   let (parser, arguments, _) = parse_generic_type_argument_list_opt parser in
-  if (kind arguments) = SyntaxKind.Missing then
-    (parser, make_simple_type_specifier name)
+  if SC.is_missing arguments then
+    Make.simple_type_specifier parser name
   else
-    (parser, make_generic_type_specifier name arguments)
+    Make.generic_type_specifier parser name arguments
 
 (* SPEC
     generic-type-constraint-list:
@@ -214,21 +216,18 @@ and parse_generic_type_constraint_opt parser =
   match (Token.kind token) with
   | As
   | Super ->
-    let constraint_token = make_token token in
-    let (parser, matched_type) = parse_type_specifier parser1 in
-    let type_constraint = make_type_constraint constraint_token matched_type in
+    let (parser, constraint_token) = Make.token parser1 token in
+    let (parser, matched_type) = parse_type_specifier parser in
+    let (parser, type_constraint) =
+      Make.type_constraint parser constraint_token matched_type
+    in
     (parser, Some type_constraint)
   | _ -> (parser, None)
 
 and parse_variance_opt parser =
   match peek_token_kind parser with
-  | Plus | Minus ->
-    let (parser, token) = next_token parser in
-    let variance = (make_token token) in
-    (parser, variance)
-  | _ ->
-    let missing = make_missing parser in
-    (parser, missing)
+  | Plus | Minus -> fetch_token parser
+  | _ -> make_missing parser
 
 (* SPEC
   generic-type-parameter:
@@ -246,8 +245,9 @@ and parse_type_parameter parser =
   let parser, variance = parse_variance_opt parser in
   let (parser, type_name) = require_name_allow_keywords parser in
   let (parser, constraints) =
-    parse_list_until_none parser parse_generic_type_constraint_opt in
-  (parser, make_type_parameter variance type_name constraints)
+    parse_list_until_none parser parse_generic_type_constraint_opt
+  in
+  Make.type_parameter parser variance type_name constraints
 
 (* SPEC
   type-parameter-list:
@@ -267,22 +267,19 @@ and parse_generic_type_parameter_list parser =
       parse_type_parameter
   in
   let (parser, right) = require_right_angle parser in
-  let result = make_type_parameters left params right in
-  (parser, result)
+  Make.type_parameters parser left params right
 
 and parse_generic_parameter_list_opt parser =
   match peek_token_kind parser with
   | LessThan -> parse_generic_type_parameter_list parser
-  | _ ->
-    let missing = make_missing parser in
-    (parser, missing)
+  | _ -> make_missing parser
 
 and parse_generic_type_argument_list_opt parser =
   let token = peek_token parser in
   if (Token.kind token) = LessThan then
     parse_generic_type_argument_list parser
   else
-    let missing = make_missing parser in
+    let (parser, missing) = make_missing parser in
     (parser, missing, false)
 
 and parse_type_list parser close_kind =
@@ -314,10 +311,8 @@ and parse_type_list parser close_kind =
 and parse_call_convention_opt parser =
   let (parser1, token) = next_token parser in
   match Token.kind token with
-  | Inout -> (parser1, make_token token)
-  | _ ->
-    let missing = make_missing parser in
-    (parser, missing)
+  | Inout -> Make.token parser1 token
+  | _ -> make_missing parser
 
 (* SPEC
 
@@ -358,20 +353,19 @@ and parse_closure_param_type_or_ellipsis parser =
   let (parser1, token) = next_token parser in
   match Token.kind token with
   | DotDotDot ->
-    let missing1 = make_missing parser in
-    let missing2 = make_missing parser in
-    let token = make_token token in
-    let var_param = make_variadic_parameter missing1 missing2 token in
-    parser1, var_param
+    let (parser, missing1) = make_missing parser in
+    let (parser, missing2) = make_missing parser in
+    let (parser, token) = Make.token parser1 token in
+    Make.variadic_parameter parser missing1 missing2 token
   | _ ->
     let (parser, callconv) = parse_call_convention_opt parser in
     let (parser, ts) = parse_type_specifier parser in
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | DotDotDot ->
-      parser1, make_variadic_parameter callconv ts (make_token token)
-    | _ ->
-      parser, make_closure_parameter_type_specifier callconv ts
+      let (parser, token) = Make.token parser1 token in
+      Make.variadic_parameter parser callconv ts token
+    | _ -> Make.closure_parameter_type_specifier parser callconv ts
 
 and parse_generic_type_argument_list parser =
   (* SPEC:
@@ -393,8 +387,7 @@ and parse_generic_type_argument_list parser =
     For now, we extend the specification to allow return types, not just
     ordinary types.
   *)
-  let (parser, open_angle) = next_token parser in
-  let open_angle = make_token open_angle in
+  let (parser, open_angle) = fetch_token parser in
   let (parser, args, no_arg_is_missing) =
     parse_comma_list_allow_trailing
       parser
@@ -404,16 +397,21 @@ and parse_generic_type_argument_list parser =
   in
   let (parser1, close_angle) = next_token parser in
   if (Token.kind close_angle) = GreaterThan then
-    let result = make_type_arguments open_angle args (make_token close_angle) in
-    (parser1, result, no_arg_is_missing)
+    let (parser, close_angle) = Make.token parser1 close_angle in
+    let (parser, result) =
+      Make.type_arguments parser open_angle args close_angle
+    in
+    (parser, result, no_arg_is_missing)
   else
     (* ERROR RECOVERY: Don't eat the token that is in the place of the
        missing > or ,.  Assume that it is the > that is missing and
        try to parse whatever is coming after the type.  *)
     let parser = with_error parser SyntaxError.error1014 in
-    let missing = make_missing parser in
-    let type_args = make_type_arguments open_angle args missing in
-    (parser, type_args, no_arg_is_missing)
+    let (parser, missing) = make_missing parser in
+    let (parser, result) = 
+      Make.type_arguments parser open_angle args missing
+    in
+    (parser, result, no_arg_is_missing)
 
 and parse_array_type_specifier parser =
   (* We allow
@@ -427,7 +425,7 @@ and parse_array_type_specifier parser =
   *)
   let (parser, array_token) = assert_token parser Array in
   if peek_token_kind parser <> LessThan then
-    (parser, make_simple_type_specifier array_token)
+    Make.simple_type_specifier parser array_token
   else begin
     let (parser, left_angle) = assert_token parser LessThan in
     (* ERROR RECOVERY: We could improve error recovery by detecting
@@ -435,30 +433,39 @@ and parse_array_type_specifier parser =
     let (parser, key_type) = parse_type_specifier parser in
     let kind = Token.kind (peek_token parser) in
     if kind = GreaterThan then
-      let (parser, right_angle) = next_token parser in
-      let right_angle = make_token right_angle in
-      let result = make_vector_array_type_specifier array_token
-        left_angle key_type right_angle in
-      (parser, result)
+      let (parser, right_angle) = fetch_token parser in
+      Make.vector_array_type_specifier
+        parser
+        array_token
+        left_angle
+        key_type
+        right_angle
     else if kind = Comma then
-      let (parser, comma) = next_token parser in
-      let comma = make_token comma in
+      let (parser, comma) = fetch_token parser in
       let next_token_kind = Token.kind (peek_token parser) in
       let (parser, value_type) =
         if next_token_kind = GreaterThan then
-          let missing = make_missing parser in
-          (parser, missing)
-        else parse_type_specifier parser in
+          make_missing parser
+        else parse_type_specifier parser
+      in
       let (parser, right_angle) = require_right_angle parser in
-      let result = make_map_array_type_specifier array_token left_angle key_type
-        comma value_type right_angle in
-      (parser, result)
+      Make.map_array_type_specifier
+        parser
+        array_token
+        left_angle
+        key_type
+        comma
+        value_type
+        right_angle
     else
       (* ERROR RECOVERY: Assume that the > is missing and keep going. *)
-      let right_angle = make_missing parser in
-      let result = make_vector_array_type_specifier array_token
-        left_angle key_type right_angle in
-      (parser, result)
+      let (parser, right_angle) = make_missing parser in
+      Make.vector_array_type_specifier
+        parser
+        array_token
+        left_angle
+        key_type
+        right_angle
     end
 
 
@@ -466,47 +473,41 @@ and parse_array_type_specifier parser =
     (* darray<type, type> *)
     let parser, array_token = assert_token parser Darray in
     if peek_token_kind parser != LessThan then
-      let result = make_simple_type_specifier array_token in
-      (parser, result)
+      Make.simple_type_specifier parser array_token
     else
       let parser, left_angle = assert_token parser LessThan in
       let parser, key_type = parse_type_specifier parser in
-      let parser, comma = next_token parser in
-      let comma = make_token comma in
+      let parser, comma = fetch_token parser in
       let parser, value_type = parse_type_specifier parser in
       let parser, optional_comma = optional_token parser Comma in
       let parser, right_angle = require_right_angle parser in
-      let result =
-        make_darray_type_specifier
-          array_token
-          left_angle
-          key_type
-          comma
-          value_type
-          optional_comma
-          right_angle in
-      parser, result
+      Make.darray_type_specifier
+        parser
+        array_token
+        left_angle
+        key_type
+        comma
+        value_type
+        optional_comma
+        right_angle
 
   and parse_varray_type_specifier parser =
     (* varray<type> *)
-    let parser, array_token = assert_token parser Varray in
+    let (parser, array_token) = assert_token parser Varray in
     if peek_token_kind parser != LessThan then
-      let result = make_simple_type_specifier array_token in
-      (parser, result)
+      Make.simple_type_specifier parser array_token
     else
-      let parser, left_angle = assert_token parser LessThan in
-      let parser, value_type = parse_type_specifier parser in
-      let parser, optional_comma = optional_token parser Comma in
-      let parser, right_angle = next_token parser in
-      let right_angle = make_token right_angle in
-      let result =
-        make_varray_type_specifier
-          array_token
-          left_angle
-          value_type
-          optional_comma
-          right_angle in
-      parser, result
+      let (parser, left_angle) = assert_token parser LessThan in
+      let (parser, value_type) = parse_type_specifier parser in
+      let (parser, optional_comma) = optional_token parser Comma in
+      let (parser, right_angle) = fetch_token parser in
+      Make.varray_type_specifier
+        parser
+        array_token
+        left_angle
+        value_type
+        optional_comma
+        right_angle
 
   and parse_vec_type_specifier parser =
     (*
@@ -519,16 +520,13 @@ and parse_array_type_specifier parser =
     *)
     let (parser, keyword) = assert_token parser Vec in
     if peek_token_kind parser != LessThan then
-      let result = make_simple_type_specifier keyword in
-      (parser, result)
+      Make.simple_type_specifier parser keyword
     else
       let (parser, left) = require_left_angle parser in
       let (parser, t) = parse_type_specifier parser in
       let (parser, optional_comma) = optional_token parser Comma in
       let (parser, right) = require_right_angle parser in
-      let result =
-        make_vector_type_specifier keyword left t optional_comma right in
-      (parser, result)
+      Make.vector_type_specifier parser keyword left t optional_comma right
 
   and parse_keyset_type_specifier parser =
     (*
@@ -541,15 +539,13 @@ and parse_array_type_specifier parser =
     *)
     let (parser, keyword) = assert_token parser Keyset in
     if peek_token_kind parser != LessThan then
-      let result = make_simple_type_specifier keyword in
-      (parser, result)
+      Make.simple_type_specifier parser keyword
     else
       let (parser, left) = require_left_angle parser in
       let (parser, t) = parse_type_specifier parser in
       let (parser, comma) = optional_token parser Comma in
       let (parser, right) = require_right_angle parser in
-      let result = make_keyset_type_specifier keyword left t comma right in
-      (parser, result)
+      Make.keyset_type_specifier parser keyword left t comma right
 
   and parse_tuple_type_explicit_specifier parser =
     (*
@@ -561,19 +557,20 @@ and parse_array_type_specifier parser =
     let (parser, args) = parse_type_list parser GreaterThan in
     let (parser1, right_angle) = next_token parser in
     if (Token.kind right_angle) = GreaterThan then
-      let result = make_tuple_type_explicit_specifier keyword left_angle args
-        (make_token right_angle) in
-      (parser1, result)
+      let (parser, token) = Make.token parser1 right_angle in
+      Make.tuple_type_explicit_specifier parser keyword left_angle args token
     else
       (* ERROR RECOVERY: Don't eat the token that is in the place of the
          missing > or ,.  Assume that it is the > that is missing and
          try to parse whatever is coming after the type.  *)
       let parser = with_error parser SyntaxError.error1022 in
-      let right_angle = make_missing parser in
-      let result =
-        make_tuple_type_explicit_specifier keyword left_angle args right_angle
-      in
-      (parser, result)
+      let (parser, right_angle) = make_missing parser in
+      Make.tuple_type_explicit_specifier
+        parser
+        keyword
+        left_angle
+        args
+        right_angle
 
   and parse_dictionary_type_specifier parser =
     (*
@@ -592,8 +589,7 @@ and parse_array_type_specifier parser =
     *)
     let (parser, keyword) = assert_token parser Dict in
     if peek_token_kind parser != LessThan then
-      let result = make_simple_type_specifier keyword in
-      (parser, result)
+      Make.simple_type_specifier parser keyword
     else
       (* TODO: This allows "noreturn" as a type argument. Should we
       disallow that at parse time? *)
@@ -606,9 +602,7 @@ and parse_array_type_specifier parser =
           parse_return_type
       in
       let (parser, right) = require_right_angle parser in
-      let result = make_dictionary_type_specifier
-        keyword left arguments right in
-      (parser, result)
+      Make.dictionary_type_specifier parser keyword left arguments right
 
 and parse_tuple_or_closure_type_specifier parser =
   let (parser1, _) = assert_token parser LeftParen in
@@ -635,29 +629,26 @@ and parse_closure_type_specifier parser =
       ) : type-specifier )
   *)
   (* TODO: Error recovery is pretty weak here. We could be smarter. *)
-  let (parser, olp) = next_token parser in
-  let olp = make_token olp in
+  let (parser, olp) = fetch_token parser in
   let (parser, coroutine) = optional_token parser Coroutine in
-  let (parser, fnc) = next_token parser in
-  let fnc = make_token fnc in
+  let (parser, fnc) = fetch_token parser in
   let (parser, ilp) = require_left_paren parser in
   let (parser1, token) = next_token parser in
   let (parser, pts, irp) =
     if (Token.kind token) = RightParen then
-      let missing = make_missing parser in
-      let token = make_token token in
+      let (parser, missing) = make_missing parser in
+      let (parser1, token) = Make.token parser1 token in
       (parser1, missing, token)
     else
       (* TODO add second pass checking to ensure ellipsis is the last arg *)
       let (parser, pts) = parse_closure_param_list parser RightParen in
       let (parser, irp) = require_right_paren parser in
-      (parser, pts, irp) in
+      (parser, pts, irp)
+  in
   let (parser, col) = require_colon parser in
   let (parser, ret) = parse_type_specifier parser in
   let (parser, orp) = require_right_paren parser in
-  let result =
-    make_closure_type_specifier olp coroutine fnc ilp pts irp col ret orp in
-  (parser, result)
+  Make.closure_type_specifier parser olp coroutine fnc ilp pts irp col ret orp
 
 and parse_tuple_type_specifier parser =
   (* SPEC
@@ -678,17 +669,15 @@ and parse_tuple_type_specifier parser =
   let (parser, args) = parse_type_list parser RightParen in
   let (parser1, right_paren) = next_token parser in
   if (Token.kind right_paren) = RightParen then
-    let result = make_tuple_type_specifier left_paren args
-      (make_token right_paren) in
-    (parser1, result)
+    let (parser, token) = Make.token parser1 right_paren in
+    Make.tuple_type_specifier parser left_paren args token
   else
     (* ERROR RECOVERY: Don't eat the token that is in the place of the
        missing ) or ,.  Assume that it is the ) that is missing and
        try to parse whatever is coming after the type.  *)
     let parser = with_error parser SyntaxError.error1022 in
-    let missing = make_missing parser in
-    let result = make_tuple_type_specifier left_paren args missing in
-    (parser, result)
+    let (parser, missing) = make_missing parser in
+    Make.tuple_type_specifier parser left_paren args missing
 
 and parse_nullable_type_specifier parser =
   (* SPEC:
@@ -702,8 +691,7 @@ and parse_nullable_type_specifier parser =
     underlying type. *)
   let (parser, question) = assert_token parser Question in
   let (parser, nullable_type) = parse_type_specifier parser in
-  let result = make_nullable_type_specifier question nullable_type in
-  (parser, result)
+  Make.nullable_type_specifier parser question nullable_type
 
 and parse_soft_type_specifier parser =
   (* SPEC (Draft)
@@ -718,8 +706,7 @@ and parse_soft_type_specifier parser =
   *)
   let (parser, soft_at) = assert_token parser At in
   let (parser, soft_type) = parse_type_specifier parser in
-  let result = make_soft_type_specifier soft_at soft_type in
-  (parser, result)
+  Make.soft_type_specifier parser soft_at soft_type
 
 and parse_classname_type_specifier parser =
   (* SPEC
@@ -736,27 +723,32 @@ and parse_classname_type_specifier parser =
   *)
 
   (* TODO ERROR RECOVERY is unsophisticated here. *)
-  let (parser, classname) = next_token parser in
-  let classname = make_token classname in
+  let (parser, classname) = fetch_token parser in
   match peek_token_kind parser with
   | LessThan ->
     let (parser, left_angle) = require_left_angle parser in
     let (parser, classname_type) = parse_type_specifier parser in
     let (parser, optional_comma) = optional_token parser Comma in
     let (parser, right_angle) = require_right_angle parser in
-    let result = make_classname_type_specifier
-      classname left_angle classname_type optional_comma right_angle in
-    (parser, result)
+    Make.classname_type_specifier
+      parser
+      classname
+      left_angle
+      classname_type
+      optional_comma
+      right_angle
   | _ ->
-    let missing1 = make_missing parser in
-    let missing2 = make_missing parser in
-    let missing3 = make_missing parser in
-    let missing4 = make_missing parser in
-    let result =
-      make_classname_type_specifier
-      classname missing1 missing2 missing3 missing4
-    in
-    (parser, result)
+    let (parser, missing1) = make_missing parser in
+    let (parser, missing2) = make_missing parser in
+    let (parser, missing3) = make_missing parser in
+    let (parser, missing4) = make_missing parser in
+    Make.classname_type_specifier
+      parser
+      classname
+      missing1
+      missing2
+      missing3
+      missing4
 
 and parse_field_specifier parser =
   (* SPEC
@@ -777,15 +769,12 @@ and parse_field_specifier parser =
   let (parser, question) =
     if peek_token_kind parser = Question
     then assert_token parser Question
-    else
-      let missing = make_missing parser in
-      (parser, missing)
+    else make_missing parser
   in
   let (parser, name) = parse_expression parser in
   let (parser, arrow) = require_arrow parser in
   let (parser, field_type) = parse_type_specifier parser in
-  let result = make_field_specifier question name arrow field_type in
-  (parser, result)
+  Make.field_specifier parser question name arrow field_type
 
 and parse_shape_specifier parser =
   (* SPEC
@@ -799,8 +788,7 @@ and parse_shape_specifier parser =
       field-specifiers  ,  field-specifier
   *)
   (* TODO: ERROR RECOVERY is not very sophisticated here. *)
-  let (parser, shape) = next_token parser in
-  let shape = make_token shape in
+  let (parser, shape) = fetch_token parser in
   let (parser, lparen) = require_left_paren parser in
   let is_closing_token = function
     | RightParen | DotDotDot -> true
@@ -810,13 +798,10 @@ and parse_shape_specifier parser =
   let (parser, ellipsis) =
     if peek_token_kind parser = DotDotDot
     then assert_token parser DotDotDot
-    else
-      let missing = make_missing parser in
-      (parser, missing)
+    else make_missing parser
   in
   let (parser, rparen) = require_right_paren parser in
-  let result = make_shape_type_specifier shape lparen fields ellipsis rparen in
-  (parser, result)
+  Make.shape_type_specifier parser shape lparen fields ellipsis rparen
 
 and parse_type_constraint_opt parser =
   (* SPEC
@@ -828,18 +813,16 @@ and parse_type_constraint_opt parser =
   let (parser1, constraint_as) = next_token parser in
   let kind = Token.kind constraint_as in
   if kind = As then
-    let constraint_as = make_token constraint_as in
-    let (parser, constraint_type) = parse_type_specifier parser1 in
-    let result = make_type_constraint constraint_as constraint_type in
-    (parser, result)
+    let (parser, constraint_as) = Make.token parser1 constraint_as in
+    let (parser, constraint_type) = parse_type_specifier parser in
+    Make.type_constraint parser constraint_as constraint_type
   else
-    let missing = make_missing parser in
-    (parser, missing)
+    make_missing parser
 
 and parse_return_type parser =
   let (parser1, token) = next_token parser in
   if (Token.kind token) = Noreturn then
-    (parser1, make_token token)
+    Make.token parser1 token
   else
     parse_type_specifier parser
 

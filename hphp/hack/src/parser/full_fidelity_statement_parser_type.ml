@@ -27,14 +27,15 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val context : t -> Context.t
       val env : t -> Full_fidelity_parser_env.t
       val sc_state : t -> SC.t
-      val parse_alternate_loop_statement : t -> terminator:Full_fidelity_token_kind.t ->
-        t * Syntax.t
-      val parse_compound_statement : t -> t * Syntax.t
-      val parse_statement : t -> t * Syntax.t
-      val parse_markup_section: t ->
-        is_leading_section:bool ->
-        t * Syntax.t * bool
-      val parse_possible_php_function: t -> t * Syntax.t
+      val parse_alternate_loop_statement : t
+        -> terminator:Full_fidelity_token_kind.t
+        -> t * SC.r
+      val parse_compound_statement : t -> t * SC.r
+      val parse_statement : t -> t * SC.r
+      val parse_markup_section: t
+        -> is_leading_section:bool
+        -> t * SC.r * bool
+      val parse_possible_php_function: t -> t * SC.r
     end (* StatementParser_S *)
   end (* WithLexer *)
 end (* WithSyntax *)

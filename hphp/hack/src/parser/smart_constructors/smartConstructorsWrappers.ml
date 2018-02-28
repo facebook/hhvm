@@ -29,6 +29,7 @@ module type SyntaxKind_S = sig
   type original_sc_r
   val extract : r -> original_sc_r
   val is_name : r -> bool
+  val is_abstract : r -> bool
   val is_missing : r -> bool
   val is_list : r -> bool
   val is_end_of_file : r -> bool
@@ -218,7 +219,8 @@ module SyntaxKind(SC : SC_S)
   let make_token token state = compose (SK.Token (SC.Token.kind token)) (SC.make_token token state)
   let make_missing s o state = compose SK.Missing (SC.make_missing s o state)
   let make_list s o items state =
-    compose SK.SyntaxList (SC.make_list s o (List.map snd items) state)
+    let kind = if items <> [] then SK.SyntaxList else SK.Missing in
+    compose kind (SC.make_list s o (Core_list.map ~f:snd items) state)
   let make_end_of_file arg0 state = compose SK.EndOfFile (SC.make_end_of_file (snd arg0) state)
   let make_script arg0 state = compose SK.Script (SC.make_script (snd arg0) state)
   let make_qualified_name arg0 state = compose SK.QualifiedName (SC.make_qualified_name (snd arg0) state)
@@ -387,6 +389,7 @@ module SyntaxKind(SC : SC_S)
 
   let has_kind kind node = kind_of node = kind
   let is_name = has_kind (SK.Token Full_fidelity_token_kind.Name)
+  let is_abstract = has_kind (SK.Token Full_fidelity_token_kind.Abstract)
   let is_missing = has_kind SK.Missing
   let is_list = has_kind SK.Missing
   let is_end_of_file                                  = has_kind SK.EndOfFile

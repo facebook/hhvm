@@ -26,15 +26,14 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val context : t -> Context.t
       val env : t -> Full_fidelity_parser_env.t
       val sc_state : t -> SC.t
-      val parse_type_specifier : ?allow_var:bool -> t ->
-        t * Syntax.t
-      val parse_return_type : t -> t * Syntax.t
-      val parse_possible_generic_specifier : t -> t * Syntax.t
-      val parse_type_constraint_opt : t -> t * Syntax.t
-      val parse_generic_type_parameter_list: t -> t * Syntax.t
-      val parse_generic_parameter_list_opt: t -> t * Syntax.t
-      val parse_generic_type_argument_list_opt: t -> t * Syntax.t * bool
-      val parse_remaining_type_specifier: Syntax.t -> t -> t * Syntax.t
+      val parse_type_specifier : ?allow_var:bool -> t -> t * SC.r
+      val parse_return_type : t -> t * SC.r
+      val parse_possible_generic_specifier : t -> t * SC.r
+      val parse_type_constraint_opt : t -> t * SC.r
+      val parse_generic_type_parameter_list: t -> t * SC.r
+      val parse_generic_parameter_list_opt: t -> t * SC.r
+      val parse_generic_type_argument_list_opt: t -> t * SC.r * bool
+      val parse_remaining_type_specifier: SC.r -> t -> t * SC.r
     end (* TypeParser_S *)
   end (* WithLexer *)
 end (* WithSyntax *)

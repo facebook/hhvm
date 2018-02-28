@@ -759,9 +759,8 @@ module GenerateFFSyntaxSmartConstructors = struct
     let fields = Core_list.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i)
     in
     let stack = String.concat " " fields in
-    sprintf "
-  let make_%s %s () = (), Syntax.make_%s %s
-  " x.type_name stack x.type_name stack
+    sprintf "  let make_%s %s () = (), Syntax.make_%s %s\n"
+  x.type_name stack x.type_name stack
 
   let full_fidelity_syntax_smart_constructors_template: string =
     (make_header MLStyle "
@@ -773,7 +772,7 @@ module type SC_S = SmartConstructors.SmartConstructors_S
 module SourceText = Full_fidelity_source_text
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S)
-: (SC_S with module Token = Syntax.Token) = struct
+: (SC_S with module Token = Syntax.Token and type r = Syntax.t) = struct
   module Token = Syntax.Token
   type t = unit
   type r = Syntax.t
@@ -781,7 +780,10 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S)
   let initial_state () = ()
   let make_token token () = (), Syntax.make_token token
   let make_missing s o () = (), Syntax.make_missing s o
-  let make_list s o items () = (), Syntax.make_list s o items
+  let make_list s o items () =
+    if items <> []
+    then (), Syntax.make_list s o items
+    else (), Syntax.make_missing s o
 CONSTRUCTOR_METHODS
 end (* WithSyntax *)
 "
@@ -836,6 +838,7 @@ module type SyntaxKind_S = sig
   type original_sc_r
   val extract : r -> original_sc_r
   val is_name : r -> bool
+  val is_abstract : r -> bool
   val is_missing : r -> bool
   val is_list : r -> bool
 TYPE_TESTS_SIG
@@ -861,11 +864,13 @@ module SyntaxKind(SC : SC_S)
   let make_token token state = compose (SK.Token (SC.Token.kind token)) (SC.make_token token state)
   let make_missing s o state = compose SK.Missing (SC.make_missing s o state)
   let make_list s o items state =
-    compose SK.SyntaxList (SC.make_list s o (List.map snd items) state)
+    let kind = if items <> [] then SK.SyntaxList else SK.Missing in
+    compose kind (SC.make_list s o (Core_list.map ~f:snd items) state)
 CONSTRUCTOR_METHODS
 
   let has_kind kind node = kind_of node = kind
   let is_name = has_kind (SK.Token Full_fidelity_token_kind.Name)
+  let is_abstract = has_kind (SK.Token Full_fidelity_token_kind.Abstract)
   let is_missing = has_kind SK.Missing
   let is_list = has_kind SK.Missing
 TYPE_TESTS

@@ -26,16 +26,13 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val context : t -> Context.t
       val env : t -> Full_fidelity_parser_env.t
       val sc_state : t -> SC.t
-      val parse_script : t -> t * Syntax.t
-      val parse_function : t -> t * Syntax.t
-      val parse_parameter_list_opt : t -> t * Syntax.t *
-        Syntax.t * Syntax.t
-      val parse_classish_declaration : t ->
-        Syntax.t ->
-        t * Syntax.t
-      val parse_classish_extends_opt : t -> t * Syntax.t * Syntax.t
-      val parse_classish_implements_opt : t -> t * Syntax.t * Syntax.t
-      val parse_classish_body : t -> t * Syntax.t
+      val parse_script : t -> t * SC.r
+      val parse_function : t -> t * SC.r
+      val parse_parameter_list_opt : t -> t * SC.r * SC.r * SC.r
+      val parse_classish_declaration : t -> SC.r -> t * SC.r
+      val parse_classish_extends_opt : t -> t * SC.r * SC.r
+      val parse_classish_implements_opt : t -> t * SC.r * SC.r
+      val parse_classish_body : t -> t * SC.r
     end (* DeclarationParser_S *)
   end (* WithLexer *)
 end (* WithSyntax *)

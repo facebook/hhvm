@@ -27,9 +27,9 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val context : t -> Context.t
       val env : t -> Full_fidelity_parser_env.t
       val sc_state : t -> SC.t
-      val parse_expression : t -> t * Syntax.t
-      val parse_simple_variable: t -> t * Syntax.t
-      val parse_cast_or_parenthesized_or_lambda_expression: t -> t * Syntax.t
+      val parse_expression : t -> t * SC.r
+      val parse_simple_variable: t -> t * SC.r
+      val parse_cast_or_parenthesized_or_lambda_expression: t -> t * SC.r
     end (* ExpressionParser_S *)
   end (* WithLexer *)
 end (* WithSyntax *)

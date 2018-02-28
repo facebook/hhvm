@@ -24,9 +24,9 @@ module WithLexer(Lexer : Lexer_S) = struct
     (* [Trick] Hack to keep track of prefix unary expressions created and change
     parser behavior based on this knowledge *)
     type prefix_unary_expression_type = {
-      node : Syntax.t;
+      node : SC.r;
       operator_kind : TokenKind.t;
-      operand : Syntax.t;
+      operand : SC.r;
     }
 
 type t = {

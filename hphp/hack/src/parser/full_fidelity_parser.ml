@@ -21,7 +21,7 @@ sig
   val errors : t -> Full_fidelity_syntax_error.t list
   val env : t -> Env.t
   val sc_state : t -> SCI.t
-  val parse_script : t -> t * Syntax.t
+  val parse_script : t -> t * SCI.r
 end = struct
 module SCWithToken = SmartConstructorsWrappers.SyntaxKind(SCI)
 
@@ -106,13 +106,21 @@ let env parser = parser.env
 let sc_state parser = parser.sc_state
 
 let parse_script parser =
-  let decl_parser = DeclParser.make parser.env
-    parser.lexer parser.errors parser.context parser.sc_state in
+  let decl_parser =
+    DeclParser.make
+      parser.env
+      parser.lexer
+      parser.errors
+      parser.context
+      parser.sc_state
+  in
   let (decl_parser, node) = DeclParser.parse_script decl_parser in
   let lexer = DeclParser.lexer decl_parser in
   let errors = DeclParser.errors decl_parser in
-  let parser = { parser with lexer; errors } in
-  (parser, node)
+  let context = DeclParser.context decl_parser in
+  let env = DeclParser.env decl_parser in
+  let sc_state = DeclParser.sc_state decl_parser in
+  { lexer; errors; context; env; sc_state }, SCWithToken.extract node
 
 end (* WithSmartConstructors *)
 

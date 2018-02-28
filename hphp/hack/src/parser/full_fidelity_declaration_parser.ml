@@ -160,8 +160,7 @@ module WithExpressionAndStatementAndTypeParser
     *)
     let (parser, expr) = parse_expression parser in
     let (parser, semi) = require_semicolon parser in
-    let result = make_inclusion_directive expr semi in
-    (parser, result)
+    Make.inclusion_directive parser expr semi
 
   and parse_alias_declaration parser attr =
     (* SPEC
@@ -173,8 +172,7 @@ module WithExpressionAndStatementAndTypeParser
             =  type-specifier  ;
     *)
 
-    let (parser, token) = next_token parser in
-    let token = make_token token in
+    let (parser, token) = fetch_token parser in
     (* Not `require_name` but `require_name_allow_keywords`, because the parser
      * must allow keywords in the place of identifiers; at least to parse .hhi
      * files.
@@ -187,9 +185,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, equal) = require_equal parser in
     let (parser, ty) = parse_type_specifier parser in
     let (parser, semi) = require_semicolon parser in
-    let result = make_alias_declaration
-      attr token name generic constr equal ty semi in
-    (parser, result)
+    Make.alias_declaration parser attr token name generic constr equal ty semi
 
   and parse_enumerator parser =
     (* SPEC
@@ -207,8 +203,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, equal) = require_equal parser in
     let (parser, value) = parse_expression parser in
     let (parser, semicolon) = require_semicolon parser in
-    let result = make_enumerator name equal value semicolon in
-    (parser, result)
+    Make.enumerator parser name equal value semicolon
 
   and parse_enumerator_list_opt parser =
     (* SPEC
@@ -237,11 +232,11 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, colon) = require_colon parser in
     let (parser, base) = parse_type_specifier parser in
     let (parser, enum_type) = parse_type_constraint_opt parser in
-    let (parser, left_brace, enumerators, right_brace) = parse_braced_list
-      parser parse_enumerator_list_opt in
-    let result = make_enum_declaration
-      attrs enum name colon base enum_type left_brace enumerators right_brace in
-    (parser, result)
+    let (parser, left_brace, enumerators, right_brace) =
+      parse_braced_list parser parse_enumerator_list_opt
+    in
+    Make.enum_declaration parser attrs enum name colon base enum_type left_brace
+      enumerators right_brace
 
   and parse_namespace_declaration parser =
     (* SPEC
@@ -257,44 +252,40 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, namespace_token) = assert_token parser Namespace in
     let (parser1, token) = next_token parser in
     let (parser, name) = match Token.kind token with
-    | Name -> scan_remaining_qualified_name parser1 (make_token token)
-    | LeftBrace ->
-      let missing = make_missing parser in
-      (parser, missing)
+    | Name ->
+      let (parser, token) = Make.token parser1 token in
+      scan_remaining_qualified_name parser token
+    | LeftBrace -> make_missing parser
     | Semicolon ->
       (* ERROR RECOVERY Plainly the name is missing. *)
-      let missing = make_missing parser in
-      (with_error parser SyntaxError.error1004, missing)
+      let parser = with_error parser SyntaxError.error1004 in
+      make_missing parser
     | _ ->
       (* TODO: Death to PHPisms; keywords as namespace names *)
       require_name_allow_keywords parser in
     let (parser, body) = parse_namespace_body parser in
-    let result = make_namespace_declaration namespace_token name body in
-    (parser, result)
+    Make.namespace_declaration parser namespace_token name body
 
   and parse_namespace_body parser =
     match peek_token_kind parser with
     | Semicolon ->
-      let (parser, token) = next_token parser in
-      (parser, make_namespace_empty_body (make_token token))
+      let (parser, token) = fetch_token parser in
+      Make.namespace_empty_body parser token
     | LeftBrace ->
-      let (parser, token) = next_token parser in
-      let left = make_token token in
+      let (parser, left) = fetch_token parser in
       let (parser, body) =
         parse_terminated_list parser parse_declaration RightBrace in
       let (parser, right) = require_right_brace parser in
-      let result = make_namespace_body left body right in
-      (parser, result)
+      Make.namespace_body parser left body right
     | _ ->
       (* ERROR RECOVERY: return an inert namespace (one with all of its
        * components 'missing'), and recover--without advancing the parser--
        * back to the level that the namespace was declared in. *)
       let parser = with_error parser SyntaxError.error1038 in
-      let missing1 = make_missing parser in
-      let missing2 = make_missing parser in
-      let missing3 = make_missing parser in
-      let result = make_namespace_body missing1 missing2 missing3 in
-      (parser, result)
+      let (parser, missing1) = make_missing parser in
+      let (parser, missing2) = make_missing parser in
+      let (parser, missing3) = make_missing parser in
+      Make.namespace_body parser missing1 missing2 missing3
 
   and parse_namespace_use_kind_opt parser =
     (* SPEC
@@ -307,10 +298,8 @@ module WithExpressionAndStatementAndTypeParser
     | Type
     | Namespace
     | Function
-    | Const -> (parser1, (make_token token))
-    | _ ->
-      let missing = make_missing parser in
-      (parser, missing)
+    | Const -> Make.token parser1 token
+    | _ -> make_missing parser
 
   and parse_namespace_use_clause parser =
     (* SPEC
@@ -326,15 +315,15 @@ module WithExpressionAndStatementAndTypeParser
     let (parser1, as_token) = next_token parser in
     let (parser, as_token, alias) =
       if Token.kind as_token = As then
-        let as_token = make_token as_token in
-        let (parser, alias) = require_name_allow_std_constants parser1 in
+        let (parser, as_token) = Make.token parser1 as_token in
+        let (parser, alias) = require_name_allow_std_constants parser in
         (parser, as_token, alias)
       else
-        let missing1 = make_missing parser in
-        let missing2 = make_missing parser in
-        (parser, missing1, missing2) in
-    let result = make_namespace_use_clause use_kind name as_token alias in
-    (parser, result)
+        let (parser, missing1) = make_missing parser in
+        let (parser, missing2) = make_missing parser in
+        (parser, missing1, missing2)
+    in
+    Make.namespace_use_clause parser use_kind name as_token alias
 
   and is_group_use parser =
     (* We want a heuristic to determine whether to parse the use clause as
@@ -347,13 +336,13 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, token) = next_token parser in
     match Token.kind token with
     | Backslash ->
-      let token = make_token token in
+      let (parser, token) = Make.token parser token in
       let (parser, name, is_backslash) =
         scan_qualified_name_extended parser token
       in
       is_backslash || peek_token_kind parser = LeftBrace
     | Name ->
-      let token = make_token token in
+      let (parser, token) = Make.token parser token in
       let (parser, name, is_backslash) =
         scan_remaining_qualified_name_extended parser token
       in
@@ -374,9 +363,8 @@ module WithExpressionAndStatementAndTypeParser
       parse_braced_comma_list_opt_allow_trailing
       parser parse_namespace_use_clause in
     let (parser, semi) = require_semicolon parser in
-    let result = make_namespace_group_use_declaration
-      use_token use_kind prefix left clauses right semi in
-    (parser, result)
+    Make.namespace_group_use_declaration parser use_token use_kind prefix left
+      clauses right semi
 
   and parse_namespace_use_declaration parser =
     (* SPEC
@@ -421,9 +409,7 @@ module WithExpressionAndStatementAndTypeParser
           parse_namespace_use_clause
       in
       let (parser, semi) = require_semicolon parser in
-      let result = make_namespace_use_declaration
-        use_token use_kind clauses semi in
-      (parser, result)
+      Make.namespace_use_declaration parser use_token use_kind clauses semi
 
   and parse_classish_declaration parser attribute_spec =
     let (parser, modifiers) =
@@ -438,13 +424,17 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, classish_implements, classish_implements_list) =
       parse_classish_implements_opt parser in
     let (parser, body) = parse_classish_body parser in
-    let syntax = make_classish_declaration
-      attribute_spec modifiers token name generic_type_parameter_list
-      classish_extends classish_extends_list classish_implements
+    Make.classish_declaration
+      parser
+      attribute_spec modifiers
+      token
+      name
+      generic_type_parameter_list
+      classish_extends
+      classish_extends_list
+      classish_implements
       classish_implements_list
       body
-    in
-    (parser, syntax)
 
   and parse_classish_modifiers parser =
     let rec parse_classish_modifier_opt parser acc =
@@ -452,9 +442,11 @@ module WithExpressionAndStatementAndTypeParser
       match Token.kind token with
         | Abstract
         | Final ->
-          let acc = (make_token token)::acc in
-          parse_classish_modifier_opt parser1 acc
-        | _ -> (parser, make_list parser (List.rev acc))
+          (* TODO(T25649779) *)
+          let (parser, token) = Make.token parser1 token in
+          let acc = token :: acc in
+          parse_classish_modifier_opt parser acc
+        | _ -> make_list parser (List.rev acc)
     in
     parse_classish_modifier_opt parser []
 
@@ -465,7 +457,7 @@ module WithExpressionAndStatementAndTypeParser
     match Token.kind token with
       | Class
       | Trait
-      | Interface -> (parser1, make_token token)
+      | Interface -> Make.token parser1 token
        (* Spellcheck case *)
       | Name when is_misspelled_from spellcheck_tokens token_str ->
         (* Default won't be used, since we already checked is_misspelled_from *)
@@ -473,31 +465,32 @@ module WithExpressionAndStatementAndTypeParser
           Option.value (suggested_kind_from spellcheck_tokens token_str)
             ~default:Name in
         let parser = skip_and_log_misspelled_token parser suggested_kind in
-        let missing = make_missing parser in
-        (parser, missing)
+        make_missing parser
       | _ ->
-        let missing = make_missing parser in
-        (with_error parser SyntaxError.error1035, missing)
+        let parser = with_error parser SyntaxError.error1035 in
+        make_missing parser
 
   and parse_classish_extends_opt parser =
     let (parser1, extends_token) = next_token parser in
     if (Token.kind extends_token) <> Extends then
-      let missing1 = make_missing parser in
-      let missing2 = make_missing parser in
+      let (parser, missing1) = make_missing parser in
+      let (parser, missing2) = make_missing parser in
       (parser, missing1, missing2)
     else
-    let (parser, extends_list) = parse_special_type_list parser1 in
-    (parser, make_token extends_token, extends_list)
+      let (parser, extends_list) = parse_special_type_list parser1 in
+      let (parser, extends_token) = Make.token parser extends_token in
+      (parser, extends_token, extends_list)
 
   and parse_classish_implements_opt parser =
     let (parser1, implements_token) = next_token parser in
     if (Token.kind implements_token) <> Implements then
-      let missing1 = make_missing parser in
-      let missing2 = make_missing parser in
+      let (parser, missing1) = make_missing parser in
+      let (parser, missing2) = make_missing parser in
       (parser, missing1, missing2)
     else
     let (parser, implements_list) = parse_special_type_list parser1 in
-    (parser, make_token implements_token, implements_list)
+    let (parser, implements_token) = Make.token parser implements_token in
+    (parser, implements_token, implements_list)
 
   and parse_special_type parser =
     let (parser1, token) = next_xhp_class_name_or_other_token parser in
@@ -507,32 +500,32 @@ module WithExpressionAndStatementAndTypeParser
       Give the error that we expected a type, not a name, even though
       not every type is legal here. *)
       let parser = with_error parser1 SyntaxError.error1007 in
-      let comma = make_token token in
-      let missing = make_missing parser in
-      let list_item = make_list_item missing comma in
+      let (parser, comma) = Make.token parser token in
+      let (parser, missing) = make_missing parser in
+      let (parser, list_item) = Make.list_item parser missing comma in
       (parser, list_item, comma)
     | Backslash
     | Name
     | XHPClassName ->
       let (parser, item) = parse_type_specifier parser in
       let (parser, comma) = optional_token parser Comma in
-      let list_item = make_list_item item comma in
+      let (parser, list_item) = Make.list_item parser item comma in
       (parser, list_item, comma)
     | Parent
     | Self when Env.hhvm_compat_mode (env parser) ->
       (* HHVM allows these keywords here for some reason *)
       let (parser, item) = parse_type_specifier parser in
       let (parser, comma) = optional_token parser Comma in
-      let list_item = make_list_item item comma in
+      let (parser, list_item) = Make.list_item parser item comma in
       (parser, list_item, comma)
     | _ ->
       (* ERROR RECOVERY: We are expecting a type; give an error as above.
       Don't eat the offending token.
       *)
       let parser = with_error parser SyntaxError.error1007 in
-      let missing1 = make_missing parser in
-      let missing2 = make_missing parser in
-      let list_item = make_list_item missing1 missing2 in
+      let (parser, missing1) = make_missing parser in
+      let (parser, missing2) = make_missing parser in
+      let (parser, list_item) = Make.list_item parser missing1 missing2 in
       (parser, list_item, missing2)
 
   and parse_special_type_list parser =
@@ -557,23 +550,23 @@ module WithExpressionAndStatementAndTypeParser
     *)
     let rec aux parser acc =
       let (parser, item, separator) = parse_special_type parser in
-      if is_missing separator then
+      if SC.is_missing separator then
         (parser, item :: acc)
       else
         aux parser (item :: acc)
     in
     let (parser, items) = aux parser [] in
-    (parser, make_list parser (List.rev items))
+    make_list parser (List.rev items)
 
 
   and parse_classish_body parser =
     let (parser, left_brace_token) = require_left_brace parser in
     let (parser, classish_element_list) =
-      parse_classish_element_list_opt parser in
+      parse_classish_element_list_opt parser
+    in
     let (parser, right_brace_token) = require_right_brace parser in
-    let syntax = make_classish_body
-      left_brace_token classish_element_list right_brace_token in
-    (parser, syntax)
+    Make.classish_body parser left_brace_token classish_element_list
+      right_brace_token
 
   and parse_classish_element parser =
     (*We need to identify an element of a class, trait, etc. Possibilities
@@ -638,7 +631,7 @@ module WithExpressionAndStatementAndTypeParser
     | Category -> parse_xhp_category_declaration parser
     | Use -> parse_trait_use parser
     | Const ->
-      let missing = make_missing parser in
+      let (parser, missing) = make_missing parser in
       parse_const_or_type_const_declaration parser missing
     | Abstract -> parse_methodish_or_const_or_type_const parser
     | Public
@@ -648,17 +641,17 @@ module WithExpressionAndStatementAndTypeParser
       let next_kind = peek_token_kind parser1 in
       if next_kind = Const then
         let (parser, const) = assert_token parser1 Const in
-        let visibility = make_token visibility in
-        let missing = make_missing parser in
+        let (parser, visibility) = Make.token parser visibility in
+        let (parser, missing) = make_missing parser in
         parse_const_declaration parser visibility missing const
       else
-        let missing = make_missing parser in
+        let (parser, missing) = make_missing parser in
         parse_methodish_or_property parser missing
     | Async
     | Static
     | Final ->
       (* Parse methods, constructors, destructors or properties. *)
-      let missing = make_missing parser in
+      let (parser, missing) = make_missing parser in
       parse_methodish_or_property parser missing
     | LessThanLessThan ->
       (* Parse "methodish" declarations: methods, ctors and dtors *)
@@ -677,8 +670,8 @@ module WithExpressionAndStatementAndTypeParser
       with a visibility modifier, but PHP does not have this requirement.
       We accept the lack of a modifier here, and produce an error in
       a later pass. *)
-      let missing1 = make_missing parser in
-      let missing2 = make_missing parser in
+      let (parser, missing1) = make_missing parser in
+      let (parser, missing2) = make_missing parser in
       parse_methodish parser missing1 missing2
     | Var ->
       (* We allow "var" as a synonym for "public" in a property; this
@@ -687,14 +680,12 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, var) = assert_token parser Var in
       parse_property_declaration parser var
     | kind when Parser.expects parser kind ->
-      let missing = make_missing parser in
-      (parser, missing)
+      make_missing parser
     | _ ->
         (* TODO ERROR RECOVERY could be improved here. *)
-      let (parser, token) = next_token parser in
+      let (parser, token) = fetch_token parser in
       let parser = with_error parser SyntaxError.error1033 in
-      let result = make_error (make_token token) in
-      (parser, result)
+      Make.error parser token
     (* Parser does not detect the error where non-static instance variables
       or methods are within abstract final classes in its first pass, but
       instead detects it in its second pass. *)
@@ -725,9 +716,9 @@ module WithExpressionAndStatementAndTypeParser
     in allowing a comma before the close paren. Consider allowing it.
     *)
     let (parser, left, exprs, right) =
-      parse_parenthesized_comma_list parser parse_xhp_children_expression in
-    let result = make_xhp_children_parenthesized_list left exprs right in
-    (parser, result)
+      parse_parenthesized_comma_list parser parse_xhp_children_expression
+    in
+    Make.xhp_children_parenthesized_list parser left exprs right
 
   and parse_xhp_children_term parser =
     (* SPEC (Draft)
@@ -742,7 +733,7 @@ module WithExpressionAndStatementAndTypeParser
     "foo*?" is not a legal xhp child expression.
     *)
     let (parser1, token) = next_xhp_children_name_or_other parser in
-    let name = make_token token in
+    let (parser1, name) = Make.token parser1 token in
     match Token.kind token with
     | Name
     | XHPClassName
@@ -760,8 +751,8 @@ module WithExpressionAndStatementAndTypeParser
     | Star
     | Plus
     | Question ->
-      let result = make_postfix_unary_expression term (make_token token) in
-      (parser1, result)
+      let (parser, token) = Make.token parser1 token in
+      Make.postfix_unary_expression parser term token
     | _ -> (parser, term)
 
   and parse_xhp_children_bar parser left =
@@ -769,7 +760,8 @@ module WithExpressionAndStatementAndTypeParser
     match Token.kind token with
     | Bar ->
       let (parser, right) = parse_xhp_children_term parser1 in
-      let result = make_binary_expression left (make_token token) right in
+      let (parser, token) = Make.token parser token in
+      let (parser, result) = Make.binary_expression parser left token right in
       parse_xhp_children_bar parser result
     | _ -> (parser, left)
 
@@ -791,17 +783,18 @@ module WithExpressionAndStatementAndTypeParser
       children xhp-children-expression ;
     *)
     let (parser, children) = assert_token parser Children in
-    let (parser, expr) = if peek_token_kind parser = Empty then
-      assert_token parser Empty
-    else
-      parse_xhp_children_expression parser in
+    let (parser1, token) = next_token parser in
+    let (parser, expr) =
+      match Token.kind token with
+      | Empty -> Make.token parser1 token
+      | _ -> parse_xhp_children_expression parser
+    in
     let (parser, semi) = require_semicolon parser in
-    let result = make_xhp_children_declaration children expr semi in
-    (parser, result)
+    Make.xhp_children_declaration parser children expr semi
 
   and parse_xhp_category parser =
     let (parser, token) = next_xhp_category_name parser in
-    let category = make_token token in
+    let (parser, category) = Make.token parser token in
     match Token.kind token with
     | XHPCategoryName -> (parser, category)
     | _ -> (with_error parser SyntaxError.error1052, category)
@@ -824,8 +817,7 @@ module WithExpressionAndStatementAndTypeParser
         parse_xhp_category
     in
     let (parser, semi) = require_semicolon parser in
-    let result = make_xhp_category_declaration category items semi in
-    (parser, result)
+    Make.xhp_category_declaration parser category items semi
 
   and parse_xhp_type_specifier parser =
     (* SPEC (Draft)
@@ -858,21 +850,26 @@ module WithExpressionAndStatementAndTypeParser
     let (parser', token, optional) =
       match Token.kind token with
       | Question ->
-        let parser, enum_token = next_token parser' in
-        parser, enum_token, make_token token
+        let (parser, enum_token) = next_token parser' in
+        let (parser, token) = Make.token parser token in
+        (parser, enum_token, token)
       | _ ->
-        let missing = make_missing parser in
+        let (parser, missing) = make_missing parser in
         (parser', token, missing)
     in
     match Token.kind token with
     | Enum ->
-      let enum_token = make_token token in
+      let (parser, enum_token) = Make.token parser' token in
       let (parser, left_brace, values, right_brace) =
-        parse_braced_comma_list_opt_allow_trailing
-        parser' parse_expression in
-      let result =
-        make_xhp_enum_type optional enum_token left_brace values right_brace in
-      (parser, result)
+        parse_braced_comma_list_opt_allow_trailing parser parse_expression
+      in
+      Make.xhp_enum_type
+        parser
+        optional
+        enum_token
+        left_brace
+        values
+        right_brace
     | kind -> parse_type_specifier ~allow_var:true parser
 
   and parse_xhp_required_opt parser =
@@ -884,11 +881,9 @@ module WithExpressionAndStatementAndTypeParser
     if peek_token_kind parser = At then
       let (parser, at) = assert_token parser At in
       let (parser, req) = require_required parser in
-      let result = make_xhp_required at req in
-      (parser, result)
+      Make.xhp_required parser at req
     else
-      let missing = make_missing parser in
-      (parser, missing)
+      make_missing parser
 
   and parse_xhp_class_attribute_typed parser =
     (* xhp-type-specifier xhp-name initializer-opt xhp-required-opt *)
@@ -896,8 +891,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, name) = require_xhp_name parser in
     let (parser, init) = parse_simple_initializer_opt parser in
     let (parser, req) = parse_xhp_required_opt parser in
-    let result = make_xhp_class_attribute ty name init req in
-    (parser, result)
+    Make.xhp_class_attribute parser ty name init req
 
   and parse_xhp_class_attribute parser =
     (* SPEC (Draft)
@@ -915,9 +909,10 @@ module WithExpressionAndStatementAndTypeParser
       match peek_token_kind parser1 with
       | Comma
       | Semicolon ->
-        let type_specifier = make_simple_type_specifier class_name in
-        let result = make_xhp_simple_class_attribute type_specifier in
-        (parser1, result)
+        let (parser, type_specifier) =
+          Make.simple_type_specifier parser1 class_name
+        in
+        Make.xhp_simple_class_attribute parser type_specifier
       | _ -> parse_xhp_class_attribute_typed parser
     else
       parse_xhp_class_attribute_typed parser
@@ -939,10 +934,10 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, attr_token) = assert_token parser TokenKind.Attribute in
     (* TODO: Better error message. *)
     let (parser, attrs) = parse_comma_list parser Semicolon
-      SyntaxError.error1004 parse_xhp_class_attribute in
+      SyntaxError.error1004 parse_xhp_class_attribute
+    in
     let (parser, semi) = require_semicolon parser in
-    let result = make_xhp_class_attribute_declaration attr_token attrs semi in
-    (parser, result)
+    Make.xhp_class_attribute_declaration parser attr_token attrs semi
 
   and parse_qualified_name_type parser =
     (* Here we're parsing a name followed by an optional generic type
@@ -958,11 +953,8 @@ module WithExpressionAndStatementAndTypeParser
        argument list; if we don't have a name, give an error. *)
     match peek_token_kind parser with
     | Backslash
-    | Name ->
-      parse_possible_generic_specifier parser
-    | _ ->
-      let missing = make_missing parser in
-      (parser, missing)
+    | Name -> parse_possible_generic_specifier parser
+    | _ -> make_missing parser
 
   and parse_require_clause parser =
     (* SPEC
@@ -987,18 +979,18 @@ module WithExpressionAndStatementAndTypeParser
     let (parser1, req_kind_token) = next_token parser in
     let (parser, req_kind) = match Token.kind req_kind_token with
     | Implements
-    | Extends -> (parser1, make_token req_kind_token)
+    | Extends -> Make.token parser1 req_kind_token
     | _ ->
-      let missing = make_missing parser in
-      (with_error parser SyntaxError.error1045, missing) in
+      let parser = with_error parser SyntaxError.error1045 in
+      make_missing parser
+    in
     let (parser, name) =
       if is_next_xhp_class_name parser
       then parse_possible_generic_specifier parser
       else parse_qualified_name_type parser
     in
     let (parser, semi) = require_semicolon parser in
-    let result = make_require_clause req req_kind name semi in
-    (parser, result)
+    Make.require_clause parser req req_kind name semi
 
   and parse_methodish_or_property parser attribute_spec =
     (* If there is an attribute then it cannot be a property. *)
@@ -1007,7 +999,7 @@ module WithExpressionAndStatementAndTypeParser
        TODO: simply make it legal? A property seems like something that could
        TODO: reasonably have an attribute. *)
     let (parser, modifiers, contains_abstract) = parse_modifiers parser in
-    if is_missing attribute_spec then
+    if SC.is_missing attribute_spec then
       (* ERROR RECOVERY: match against two tokens, because if one token is
        * in error but the next isn't, then it's likely that the user is
        * simply still typing. Throw an error on what's being typed, then eat
@@ -1044,26 +1036,14 @@ module WithExpressionAndStatementAndTypeParser
         parser
         (function Semicolon -> true | _ -> false)
     in
-    let trait_use_precendence_item =
-      make_trait_use_precedence_item
-        name
-        keyword
-        removed_names
-    in
-    (parser, trait_use_precendence_item)
+    Make.trait_use_precedence_item parser name keyword removed_names
 
   and parse_trait_use_alias_item parser aliasing_name =
     let (parser, keyword) = assert_token parser As in
     let (parser, visibility, _) = parse_modifiers parser in
     let (parser, aliased_name) = parse_qualified_name_type_opt parser in
-    let trait_use_alias_item =
-      make_trait_use_alias_item
-        aliasing_name
-        keyword
-        visibility
-        aliased_name
-    in
-    (parser, trait_use_alias_item)
+    Make.trait_use_alias_item parser aliasing_name keyword visibility
+      aliased_name
 
   and parse_trait_use_conflict_resolution_item parser =
     let (parser, qualifier) = parse_qualified_name_type parser in
@@ -1072,7 +1052,7 @@ module WithExpressionAndStatementAndTypeParser
         (* scope resolution expression case *)
         let (parser, cc_token) = require_coloncolon parser in
         let (parser, name) = require_name parser in
-        (parser, make_scope_resolution_expression qualifier cc_token name)
+        Make.scope_resolution_expression parser qualifier cc_token name
       else
         (* plain qualified name case *)
         (parser, qualifier)
@@ -1112,15 +1092,13 @@ module WithExpressionAndStatementAndTypeParser
         parse_trait_use_conflict_resolution_item
     in
     let (parser, right_brace) = assert_token parser RightBrace in
-    let trait_use_conflict_resolution =
-      make_trait_use_conflict_resolution
-        use_token
-        trait_name_list
-        left_brace
-        clauses
-        right_brace
-    in
-    (parser, trait_use_conflict_resolution)
+    Make.trait_use_conflict_resolution
+      parser
+      use_token
+      trait_name_list
+      left_brace
+      clauses
+      right_brace
 
   (* SPEC:
     trait-use-clause:
@@ -1153,7 +1131,7 @@ module WithExpressionAndStatementAndTypeParser
       parse_trait_use_conflict_resolution parser use_token trait_name_list
     else
       let (parser, semi) = require_semicolon parser in
-      (parser, make_trait_use use_token trait_name_list semi)
+      Make.trait_use parser use_token trait_name_list semi
 
   and parse_const_or_type_const_declaration parser abstr =
     let (parser, const) = assert_token parser Const in
@@ -1161,12 +1139,12 @@ module WithExpressionAndStatementAndTypeParser
     let kind2 = peek_token_kind ~lookahead:1 parser in
     match kind1, kind2 with
     | Type, (Equal | Semicolon) ->
-      let missing = make_missing parser in
+      let (parser, missing) = make_missing parser in
       parse_const_declaration parser missing abstr const
     | Type, _ when kind2 <> Equal ->
       parse_type_const_declaration parser abstr const
     | _, _ ->
-      let missing = make_missing parser in
+      let (parser, missing) = make_missing parser in
       parse_const_declaration parser missing abstr const
 
   and parse_property_declaration ?(contains_abstract=false) parser modifiers =
@@ -1177,25 +1155,27 @@ module WithExpressionAndStatementAndTypeParser
        property-declarator-list:
          property-declarator
          property-declarator-list  ,  property-declarator
-     *)
-     (* The type specifier is optional in non-strict mode and required in
-        strict mode. We give an error in a later pass. *)
-     let (parser, prop_type) = match peek_token_kind parser with
-     | Variable ->
-       let missing = make_missing parser in
-       (parser, missing)
-     | _ -> parse_type_specifier parser in
-     let (parser, decls) = parse_comma_list
-       parser Semicolon SyntaxError.error1008 parse_property_declarator in
-     let (parser, semi) = require_semicolon parser in
-     let result = make_property_declaration modifiers prop_type decls semi in
-     (* TODO: Move this to Full_fidelity_parser_errors. *)
-     let parser =
-       if contains_abstract then
-         with_error parser SyntaxError.error2058
-       else
-         parser in
-     (parser, result)
+    *)
+    (* The type specifier is optional in non-strict mode and required in
+      strict mode. We give an error in a later pass. *)
+    let (parser, prop_type) = match peek_token_kind parser with
+      | Variable -> make_missing parser
+      | _ -> parse_type_specifier parser
+    in
+    let (parser, decls) =
+      parse_comma_list parser Semicolon SyntaxError.error1008
+        parse_property_declarator
+    in
+    let (parser, semi) = require_semicolon parser in
+    let (parser, result) =
+      Make.property_declaration parser modifiers prop_type decls semi
+    in
+    (* TODO: Move this to Full_fidelity_parser_errors. *)
+    let parser =
+      if contains_abstract then with_error parser SyntaxError.error2058
+      else parser
+    in
+    (parser, result)
 
   and parse_property_declarator parser =
     (* SPEC:
@@ -1206,8 +1186,7 @@ module WithExpressionAndStatementAndTypeParser
     *)
     let (parser, name) = require_variable parser in
     let (parser, simple_init) = parse_simple_initializer_opt parser in
-    let result = make_property_declarator name simple_init in
-    (parser, result)
+    Make.property_declarator parser name simple_init
 
   (* SPEC:
     const-declaration:
@@ -1222,16 +1201,24 @@ module WithExpressionAndStatementAndTypeParser
       =  const-expression
   *)
   and parse_const_declaration parser visibility abstr const =
-    let (parser, type_spec) = if is_type_in_const parser then
-      parse_type_specifier parser
-    else
-      let missing = make_missing parser in
-      (parser, missing)
+    let (parser, type_spec) =
+      if is_type_in_const parser then
+        parse_type_specifier parser
+      else
+        make_missing parser
     in
     let (parser, const_list) = parse_comma_list
-      parser Semicolon SyntaxError.error1004 parse_constant_declarator in
+      parser Semicolon SyntaxError.error1004 parse_constant_declarator
+    in
     let (parser, semi) = require_semicolon parser in
-    (parser, make_const_declaration visibility abstr const type_spec const_list semi)
+    Make.const_declaration
+      parser
+      visibility
+      abstr
+      const
+      type_spec
+      const_list
+      semi
 
   and is_type_in_const parser =
     let before = List.length (errors parser) in
@@ -1252,7 +1239,7 @@ module WithExpressionAndStatementAndTypeParser
        tree is created. *)
     let (parser, const_name) = require_name_allow_keywords parser in
     let (parser, initializer_) = parse_simple_initializer_opt parser in
-    (parser, make_constant_declarator const_name initializer_)
+    Make.constant_declarator parser const_name initializer_
 
   (* SPEC:
     type-constant-declaration:
@@ -1284,29 +1271,27 @@ module WithExpressionAndStatementAndTypeParser
       parse_generic_type_parameter_list_opt parser
     in
     let (parser, type_constraint) = parse_type_constraint_opt parser in
-    let (parser, equal_token, type_specifier) = if is_missing abstr then
+    let (parser, equal_token, type_specifier) = if SC.is_missing abstr then
       let (parser, equal_token) = require_equal parser in
       let (parser, type_spec) = parse_type_specifier parser in
       (parser, equal_token, type_spec)
     else
-      let missing1 = make_missing parser in
-      let missing2 = make_missing parser in
+      let (parser, missing1) = make_missing parser in
+      let (parser, missing2) = make_missing parser in
       (parser, missing1, missing2)
     in
     let (parser, semicolon) = require_semicolon parser in
-    let syntax =
-      make_type_const_declaration
-        abstr
-        const
-        type_token
-        name
-        generic_type_parameter_list
-        type_constraint
-        equal_token
-        type_specifier
-        semicolon
-    in
-    (parser, syntax)
+    Make.type_const_declaration
+      parser
+      abstr
+      const
+      type_token
+      name
+      generic_type_parameter_list
+      type_constraint
+      equal_token
+      type_specifier
+      semicolon
 
   (* SPEC:
     attribute_specification := << attribute_list >>
@@ -1329,11 +1314,11 @@ module WithExpressionAndStatementAndTypeParser
   and parse_attribute_specification_opt parser =
     if peek_token_kind parser = LessThanLessThan then
       let (parser, left, items, right) =
-        parse_double_angled_comma_list_allow_trailing parser parse_attribute in
-      (parser, make_attribute_specification left items right)
+        parse_double_angled_comma_list_allow_trailing parser parse_attribute
+      in
+      Make.attribute_specification parser left items right
     else
-      let missing = make_missing parser in
-      (parser, missing)
+      make_missing parser
 
   and parse_attribute parser =
     let (parser, name) = require_name parser in
@@ -1342,11 +1327,12 @@ module WithExpressionAndStatementAndTypeParser
         parse_parenthesized_comma_list_opt_allow_trailing
           parser parse_expression
       else
-        let missing1 = make_missing parser in
-        let missing2 = make_missing parser in
-        let missing3 = make_missing parser in
-        (parser, missing1, missing2, missing3) in
-    (parser, make_attribute name left items right)
+        let (parser, missing1) = make_missing parser in
+        let (parser, missing2) = make_missing parser in
+        let (parser, missing3) = make_missing parser in
+        (parser, missing1, missing2, missing3)
+    in
+    Make.attribute parser name left items right
 
   and parse_generic_type_parameter_list_opt parser =
     let (parser1, open_angle) = next_token parser in
@@ -1354,19 +1340,19 @@ module WithExpressionAndStatementAndTypeParser
     if kind = LessThan then
       with_type_parser parser TypeParser.parse_generic_type_parameter_list
     else
-      let missing = make_missing parser in
-      (parser, missing)
+      make_missing parser
 
   and parse_return_type_hint_opt parser =
     let (parser1, colon_token) = next_token parser in
     if (Token.kind colon_token) = Colon then
-      let (parser2, return_type) =
-        with_type_parser parser1 TypeParser.parse_return_type
+      let (parser, colon_token) = Make.token parser1 colon_token in
+      let (parser, return_type) =
+        with_type_parser parser TypeParser.parse_return_type
       in
-      (parser2, make_token colon_token, return_type)
+      (parser, colon_token, return_type)
     else
-      let missing1 = make_missing parser in
-      let missing2 = make_missing parser in
+      let (parser, missing1) = make_missing parser in
+      let (parser, missing2) = make_missing parser in
       (parser, missing1, missing2)
 
   and parse_parameter_list_opt parser =
@@ -1406,10 +1392,10 @@ module WithExpressionAndStatementAndTypeParser
       let next_kind = peek_token_kind parser1 in
       if next_kind = Variable then parse_parameter_declaration parser
       else
-        let missing1 = make_missing parser in
-        let missing2 = make_missing parser in
-        let token = make_token token in
-        (parser1, make_variadic_parameter missing1 missing2 token)
+        let (parser, missing1) = make_missing parser in
+        let (parser, missing2) = make_missing parser in
+        let (parser, token) = Make.token parser1 token in
+        Make.variadic_parameter parser missing1 missing2 token
     | _ -> parse_parameter_declaration parser
 
   and parse_parameter_declaration parser =
@@ -1443,21 +1429,19 @@ module WithExpressionAndStatementAndTypeParser
     let token = peek_token parser in
     let (parser, type_specifier) =
       match Token.kind token with
-        | Variable | DotDotDot | Ampersand ->
-          let missing = make_missing parser in
-          (parser, missing)
-        | _ -> parse_type_specifier parser in
+        | Variable | DotDotDot | Ampersand -> make_missing parser
+        | _ -> parse_type_specifier parser
+    in
     let (parser, name) = parse_decorated_variable_opt parser in
     let (parser, default) = parse_simple_initializer_opt parser in
-    let syntax =
-      make_parameter_declaration
-        attrs
-        visibility
-        callconv
-        type_specifier
-        name
-        default in
-    (parser, syntax)
+    Make.parameter_declaration
+      parser
+      attrs
+      visibility
+      callconv
+      type_specifier
+      name
+      default
 
   and parse_decorated_variable_opt parser =
     match peek_token_kind parser with
@@ -1476,23 +1460,21 @@ module WithExpressionAndStatementAndTypeParser
        we deliberately allow multiple decorators in the initial parse and produce
        an error in a later pass.
      *)
-    let (parser, decorator) = next_token parser in
-    let decorator = make_token decorator in
+
+    let (parser, decorator) = fetch_token parser in
     let (parser, variable) =
       match peek_token_kind parser with
       | DotDotDot
       | Ampersand -> parse_decorated_variable parser
       | _ -> require_variable parser
     in
-    parser, make_decorated_expression decorator variable
+    Make.decorated_expression parser decorator variable
 
   and parse_visibility_modifier_opt parser =
     let (parser1, token) = next_token parser in
     match Token.kind token with
-    | Public | Protected | Private -> (parser1, make_token token)
-    | _ ->
-      let missing = make_missing parser in
-      (parser, missing)
+    | Public | Protected | Private -> Make.token parser1 token
+    | _ -> make_missing parser
 
   (* SPEC
 
@@ -1505,10 +1487,8 @@ module WithExpressionAndStatementAndTypeParser
   and parse_call_convention_opt parser =
     let (parser1, token) = next_token parser in
     match Token.kind token with
-    | Inout -> (parser1, make_token token)
-    | _ ->
-      let missing = make_missing parser in
-      (parser, missing)
+    | Inout -> Make.token parser1 token
+    | _ -> make_missing parser
 
   (* SPEC
     default-argument-specifier:
@@ -1522,14 +1502,13 @@ module WithExpressionAndStatementAndTypeParser
     match (Token.kind token) with
     | Equal ->
       (* TODO: Detect if expression is not const *)
-      let (parser, default_value) = parse_expression parser1 in
-      (parser, make_simple_initializer (make_token token) default_value)
-    | _ ->
-      let missing = make_missing parser in
-      (parser, missing)
+      let (parser, token) = Make.token parser1 token in
+      let (parser, default_value) = parse_expression parser in
+      Make.simple_initializer parser token default_value
+    | _ -> make_missing parser
 
   and parse_function_declaration_or_expression_statement parser attribute_specification =
-    if is_missing attribute_specification then
+    if SC.is_missing attribute_specification then
       (* if attribute section is missing - it might be either
          function declaration or expression statement containing
          anonymous function - use statement parser to determine in which case
@@ -1539,7 +1518,7 @@ module WithExpressionAndStatementAndTypeParser
       parse_function_declaration parser attribute_specification
 
   and parse_function parser =
-    let missing = make_missing parser in
+    let (parser, missing) = make_missing parser in
     parse_function_declaration parser missing
 
   and parse_function_declaration parser attribute_specification =
@@ -1547,9 +1526,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, header) =
       parse_function_declaration_header parser ~is_methodish:false modifiers in
     let (parser, body) = parse_compound_statement parser in
-    let syntax = make_function_declaration
-      attribute_specification header body in
-    (parser, syntax)
+    Make.function_declaration parser attribute_specification header body
 
   and parse_constraint_operator parser =
     (* TODO: Put this in the specification
@@ -1563,11 +1540,10 @@ module WithExpressionAndStatementAndTypeParser
     match Token.kind token with
     | Equal
     | As
-    | Super -> (parser1, (make_token token))
+    | Super -> Make.token parser1 token
     | _ -> (* ERROR RECOVERY: don't eat the offending token. *)
       (* TODO: Give parse error *)
-      let missing = make_missing parser in
-      (parser, missing)
+      make_missing parser
 
   and parse_where_constraint parser =
     (* TODO: Put this in the specification
@@ -1579,8 +1555,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, left) = parse_type_specifier parser in
     let (parser, op) = parse_constraint_operator parser in
     let (parser, right) = parse_type_specifier parser in
-    let result = make_where_constraint left op right in
-    (parser, result)
+    Make.where_constraint parser left op right
 
   and parse_where_constraint_list_item parser =
     match peek_token_kind parser with
@@ -1589,7 +1564,7 @@ module WithExpressionAndStatementAndTypeParser
     | _ ->
       let (parser, where_constraint) = parse_where_constraint parser in
       let (parser, comma) = optional_token parser Comma in
-      let result = make_list_item where_constraint comma in
+      let (parser, result) = Make.list_item parser where_constraint comma in
       (parser, Some result)
 
   and parse_where_clause parser =
@@ -1605,13 +1580,11 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, keyword) = assert_token parser Where in
     let (parser, constraints) = parse_list_until_none
       parser parse_where_constraint_list_item in
-    let result = make_where_clause keyword constraints in
-    (parser, result)
+    Make.where_clause parser keyword constraints
 
   and parse_where_clause_opt parser =
     if peek_token_kind parser != Where then
-      let missing = make_missing parser in
-      (parser, missing)
+      make_missing parser
     else
       parse_where_clause parser
 
@@ -1639,37 +1612,36 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, colon_token, return_type) =
       parse_return_type_hint_opt parser in
     let (parser, where_clause) = parse_where_clause_opt parser in
-    let syntax =
-      make_function_declaration_header
-        modifiers
-        function_token
-        ampersand_token
-        label
-        generic_type_parameter_list
-        left_paren_token
-        parameter_list
-        right_paren_token
-        colon_token
-        return_type
-        where_clause in
-    (parser, syntax)
+    Make.function_declaration_header
+      parser
+      modifiers
+      function_token
+      ampersand_token
+      label
+      generic_type_parameter_list
+      left_paren_token
+      parameter_list
+      right_paren_token
+      colon_token
+      return_type
+      where_clause
 
   (* A function label is either a function name, a __construct label, or a
   __destruct label. *)
   and parse_function_label_opt parser ~is_methodish =
     let report_error parser token =
       let parser = with_error parser SyntaxError.error1044 in
-      let error = make_error (make_token token) in
-      (parser, error) in
+      let (parser, token) = Make.token parser token in
+      Make.error parser token
+    in
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | Name
     | Construct
-    | Destruct -> (parser1, make_token token)
+    | Destruct -> Make.token parser1 token
     | LeftParen ->
       (* It turns out, it was just a verbose lambda; YOLO PHP *)
-      let missing = make_missing parser in
-      (parser, missing)
+      make_missing parser
     | Trait | Interface | Class | Static | Using | Inout
     | Instanceof | Array | Throw | Print | As | And
     | Or | Xor | New | Const | Eval
@@ -1684,7 +1656,7 @@ module WithExpressionAndStatementAndTypeParser
       reserved and which are not, and reject the reserved keywords. *)
       let (parser, token) = next_token_as_name parser in
       if Token.kind token = Name then
-        (parser, make_token token)
+        Make.token parser token
       else
         (* ERROR RECOVERY: Eat the offending token. *)
         report_error parser token
@@ -1708,7 +1680,7 @@ module WithExpressionAndStatementAndTypeParser
       parse_const_or_type_const_declaration parser1 abstract
     else
       let (parser, modifiers, _) = parse_modifiers parser in
-      let missing = make_missing parser in
+      let (parser, missing) = make_missing parser in
       parse_methodish parser missing modifiers
 
   and parse_methodish parser attribute_spec modifiers =
@@ -1718,29 +1690,21 @@ module WithExpressionAndStatementAndTypeParser
     match Token.kind token with
     | LeftBrace ->
       let (parser, body) = parse_compound_statement parser in
-      let syntax =
-        let missing = make_missing parser in
-        make_methodish_declaration
-          attribute_spec header body missing in
-      (parser, syntax)
+      let (parser, missing) = make_missing parser in
+      Make.methodish_declaration parser attribute_spec header body missing
     | Semicolon ->
-      let semicolon = make_token token in
-      let syntax =
-        let missing = make_missing parser in
-        make_methodish_declaration
-          attribute_spec header missing semicolon
-      in
-      (parser1, syntax)
+      let (parser1, semicolon) = Make.token parser1 token in
+      let (parser, missing) = make_missing parser in
+      Make.methodish_declaration parser1 attribute_spec header missing semicolon
     | _ ->
       (* ERROR RECOVERY: We expected either a block or a semicolon; we got
       neither. Use the offending token as the body of the method.
       TODO: Is this the right error recovery? *)
-      let error = make_error (make_token token) in
-      let missing = make_missing parser in
-      let syntax = make_methodish_declaration
-        attribute_spec header error missing in
-      let parser = with_error parser1 SyntaxError.error1041 in
-      (parser, syntax)
+      let parser1 = with_error parser1 SyntaxError.error1041 in
+      let (parser1, token) = Make.token parser1 token in
+      let (parser1, error) = Make.error parser1 token in
+      let (parser, missing) = make_missing parser in
+      Make.methodish_declaration parser1 attribute_spec header error missing
 
   and parse_modifiers parser =
     let rec aux parser acc =
@@ -1754,13 +1718,14 @@ module WithExpressionAndStatementAndTypeParser
       | Async
       | Coroutine
       | Final ->
-        let item = make_token token in
-        aux parser1 (item :: acc)
+        let (parser, item) = Make.token parser1 token in
+        aux parser (item :: acc)
       | _ -> (parser, List.rev acc)
     in
     let (parser, items) = aux parser [] in
-    let contains_abstract = List.exists is_abstract items in
-    (parser, make_list parser items, contains_abstract)
+    let contains_abstract = List.exists SC.is_abstract items in
+    let (parser, items_list) = make_list parser items in
+    (parser, items_list, contains_abstract)
 
   and parse_enum_or_classish_or_function_declaration parser =
     (* An enum, type alias, function, interface, trait or class may all
@@ -1783,7 +1748,8 @@ module WithExpressionAndStatementAndTypeParser
       (* ERROR RECOVERY TODO: Produce an error here. *)
       (* TODO: This is wrong; we have lost the attribute specification
       from the tree. *)
-      (parser1, make_error (make_token token))
+      let (parser, token) = Make.token parser1 token in
+      Make.error parser token
 
   and parse_declaration parser =
     let recovery_tokens = [ Class; Trait; Interface ] in
@@ -1799,11 +1765,12 @@ module WithExpressionAndStatementAndTypeParser
       | Newtype when
          match peek_token_kind parser1 with
          | Name | Classname -> true
-         | _ -> false ->
-        let missing = make_missing parser in
+         | _ -> false
+      ->
+        let (parser, missing) = make_missing parser in
         parse_alias_declaration parser missing
       | Enum ->
-        let missing = make_missing parser in
+        let (parser, missing) = make_missing parser in
         parse_enum_declaration parser missing
       (* The keyword namespace before a name should be parsed as
         "the current namespace we are in", essentially a no op.
@@ -1819,19 +1786,21 @@ module WithExpressionAndStatementAndTypeParser
       | Abstract
       | Final
       | Class ->
-        let missing = make_missing parser in
+        let (parser, missing) = make_missing parser in
         parse_classish_declaration parser missing
       | Async
       | Coroutine
       | Function ->
-        let missing = make_missing parser in
+        let (parser, missing) = make_missing parser in
         parse_function_declaration_or_expression_statement parser missing
       | LessThanLessThan ->
         parse_enum_or_classish_or_function_declaration parser
         (* TODO figure out what global const differs from class const *)
       | Const ->
-        let missing = make_missing parser in
-        parse_const_declaration parser1 missing missing (make_token token)
+        let (parser, missing1) = make_missing parser in
+        let (parser, missing2) = make_missing parser in
+        let (parser, token) = Make.token parser1 token in
+        parse_const_declaration parser missing1 missing2 token
       | _ ->
         with_statement_parser parser StatementParser.parse_statement
         (* TODO: What if it's not a legal statement? Do we still make progress
@@ -1858,17 +1827,14 @@ module WithExpressionAndStatementAndTypeParser
     if has_suffix || Env.hhvm_compat_mode (env parser) then
       parser1, markup_section
     else
-      let parser = with_error parser SyntaxError.error1001 in
-      let markup_section =
-        let missing1 = make_missing parser in
-        let missing2 = make_missing parser in
-        let missing3 = make_missing parser in
-        let missing4 = make_missing parser in
-        make_markup_section missing1 missing2 missing3 missing4
-      in
       (* ERROR RECOVERY *)
       (* Make no progress; try parsing the file without a header *)
-      parser, markup_section
+      let parser = with_error parser SyntaxError.error1001 in
+      let (parser, missing1) = make_missing parser in
+      let (parser, missing2) = make_missing parser in
+      let (parser, missing3) = make_missing parser in
+      let (parser, missing4) = make_missing parser in
+      Make.markup_section parser missing1 missing2 missing3 missing4
 
   let parse_script parser =
     let rec aux parser acc =
@@ -1877,13 +1843,15 @@ module WithExpressionAndStatementAndTypeParser
       | TokenKind.EndOfFile when Token.leading token <> [] ->
         (* The only time an end-of-file node is useful is when there is
            leading trivia in the end-of-file token. *)
-        let end_of_file = make_end_of_file (make_token token) in
-        (parser1, end_of_file :: acc)
+        let (parser, token) = Make.token parser1 token in
+        let (parser, end_of_file) = Make.end_of_file parser token in
+        (parser, end_of_file :: acc)
       | TokenKind.EndOfFile ->
         (* With smart constructors we still want to signal user that end-of-file
         is reached. *)
-        let _ = make_end_of_file (make_token token) in
-        (parser1, acc)
+        let (parser, token) = Make.token parser1 token in
+        let (parser, _) = Make.end_of_file parser token in
+        (parser, acc)
       | _ ->
         let (parser, declaration) = parse_declaration parser in
         aux parser (declaration :: acc)
@@ -1892,8 +1860,10 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, header) = parse_leading_markup_section parser in
     let (parser, declarations) = aux parser [] in
     (* include leading markup section as a head of declaration list *)
-    let declarations = make_list parser (header :: List.rev declarations) in
-    let result = make_script declarations in
+    let (parser, declarations) =
+      make_list parser (header :: List.rev declarations)
+    in
+    let (parser, result) = Make.script parser declarations in
     (* If we are not at the end of the file, something is wrong. *)
     assert ((peek_token_kind parser) = TokenKind.EndOfFile);
     (parser, result)

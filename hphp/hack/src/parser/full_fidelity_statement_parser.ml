@@ -136,7 +136,7 @@ module WithExpressionAndDeclAndTypeParser
     | While -> parse_while_statement parser
     | Declare -> parse_declare_statement parser
     | Using ->
-      let missing = make_missing parser in
+      let (parser, missing) = make_missing parser in
       parse_using_statement parser missing
     | Await when peek_token_kind ~lookahead:1 parser = Using ->
       let parser, await_kw = assert_token parser Await in
@@ -178,8 +178,7 @@ module WithExpressionAndDeclAndTypeParser
      * and continue on, starting at the unexpected token. *)
     (* TODO T20390825: Make sure this this won't cause premature recovery. *)
     | kind when Parser.expects parser kind ->
-      let missing = make_missing parser in
-      (parser, missing)
+      make_missing parser
     | _ -> parse_expression_statement parser
 
   and parse_markup_section parser ~is_leading_section =
@@ -190,18 +189,18 @@ module WithExpressionAndDeclAndTypeParser
          error in a later pass *)
       if not is_leading_section
         && peek_token_kind parser = TokenKind.QuestionGreaterThan then
-        let (parser, prefix) = next_token parser in
-        parser, make_token prefix
+        fetch_token parser
       else
-        let missing = make_missing parser in
-        (parser, missing)
+        make_missing parser
     in
     let parser, markup, suffix_opt = scan_markup parser ~is_leading_section in
-    let markup = make_token markup in
-    let (suffix, is_echo_tag, has_suffix) =
+    let (parser, markup) = Make.token parser markup in
+    let (parser, suffix, is_echo_tag, has_suffix) =
       match suffix_opt with
       | Some (less_than_question, language_opt) ->
-        let less_than_question_token = make_token less_than_question in
+        let (parser, less_than_question_token) =
+          Make.token parser less_than_question
+        in
         (* if markup section ends with <?= tag
            then script section embedded between tags should be treated as if it
            will be an argument to 'echo'. Technically it should be restricted to
@@ -211,24 +210,35 @@ module WithExpressionAndDeclAndTypeParser
            for better error recovery in cases when user
            accidentally type '<?=' instead of '<?php' so declaration in script
            section won't throw parser off the rails. *)
-        let language, is_echo_tag =
+        let (parser, language, is_echo_tag) =
           match language_opt with
           | Some language ->
-            make_token language, (Token.kind language = TokenKind.Equal)
-          | None -> make_missing parser, false
+            let (parser, token) = Make.token parser language in
+            (parser, token, (Token.kind language = TokenKind.Equal))
+          | None ->
+            let (parser, missing) = make_missing parser in
+            (parser, missing, false)
         in
-        make_markup_suffix less_than_question_token language,
-        is_echo_tag, true
-      | None -> make_missing parser, false, false
+        let (parser, suffix) =
+          Make.markup_suffix parser less_than_question_token language
+        in
+        ( parser
+        , suffix
+        , is_echo_tag
+        , true
+        )
+      | None ->
+        let (parser, missing) = make_missing parser in
+        (parser, missing, false, false)
     in
     let parser, expression =
       if is_echo_tag then parse_statement parser
-      else
-        let missing = make_missing parser in
-        (parser, missing)
+      else make_missing parser
     in
-    let s = make_markup_section prefix markup suffix expression in
-    parser, s, has_suffix
+    let (parser, s) =
+      Make.markup_section parser prefix markup suffix expression
+    in
+    (parser, s, has_suffix)
 
   and parse_possible_php_function parser =
     (* ERROR RECOVERY: PHP supports nested named functions, but Hack does not.
@@ -261,7 +271,7 @@ module WithExpressionAndDeclAndTypeParser
   and parse_php_class parser =
     (* PHP allows classes nested inside of functions, but hack does not *)
     (* TODO check for hack error: no classish declarations inside functions *)
-    let missing = make_missing parser in
+    let (parser, missing) = make_missing parser in
     with_decl_parser parser
       (fun parser -> DeclParser.parse_classish_declaration parser missing)
 
@@ -302,12 +312,19 @@ module WithExpressionAndDeclAndTypeParser
       let _, open_token = next_token parser in
       match Token.kind open_token with
       | Colon -> parse_alternate_loop_statement parser ~terminator:Endfor
-      | _ -> parse_statement parser in
-    let syntax = make_for_statement for_keyword_token for_left_paren
-      for_initializer_expr for_first_semicolon for_control_expr
-      for_second_semicolon for_end_of_loop_expr for_right_paren for_statement
+      | _ -> parse_statement parser
     in
-    (parser, syntax)
+    Make.for_statement
+      parser
+      for_keyword_token
+      for_left_paren
+      for_initializer_expr
+      for_first_semicolon
+      for_control_expr
+      for_second_semicolon
+      for_end_of_loop_expr
+      for_right_paren
+      for_statement
 
   and parse_foreach_statement parser =
     let parser, foreach_keyword_token = assert_token parser Foreach in
@@ -321,8 +338,8 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, foreach_key, foreach_arrow, foreach_value) =
     match Token.kind (peek_token parser) with
       | RightParen ->
-        let missing1 = make_missing parser in
-        let missing2 = make_missing parser in
+        let (parser, missing1) = make_missing parser in
+        let (parser, missing2) = make_missing parser in
         (parser, missing1, missing2, after_as)
       | EqualGreaterThan ->
         let parser, arrow = assert_token parser EqualGreaterThan in
@@ -331,22 +348,30 @@ module WithExpressionAndDeclAndTypeParser
       | _ ->
         (* TODO ERROR RECOVERY. Now assumed that the arrow is missing
          * and goes on to parse the next expression *)
-        let parser, token = next_token parser in
-        let parser, foreach_value = parse_expression parser in
-        (parser, after_as, make_error (make_token token), foreach_value)
+        let (parser, token) = fetch_token parser in
+        let (parser, error) = Make.error parser token in
+        let (parser, foreach_value) = parse_expression parser in
+        (parser, after_as, error, foreach_value)
     in
     let parser, right_paren_token = require_right_paren parser in
     let parser = Parser.pop_scope parser [ RightParen ] in
     let parser, foreach_statement =
-      let _, open_token = next_token parser in
-      match Token.kind open_token with
+      match peek_token_kind parser with
       | Colon -> parse_alternate_loop_statement parser ~terminator:Endforeach
-      | _ -> parse_statement parser in
-    let syntax =
-      make_foreach_statement foreach_keyword_token foreach_left_paren
-      foreach_collection_name await_token as_token foreach_key foreach_arrow
-      foreach_value right_paren_token foreach_statement in
-    (parser, syntax)
+      | _ -> parse_statement parser
+    in
+    Make.foreach_statement
+      parser
+      foreach_keyword_token
+      foreach_left_paren
+      foreach_collection_name
+      await_token
+      as_token
+      foreach_key
+      foreach_arrow
+      foreach_value
+      right_paren_token
+      foreach_statement
 
   and parse_do_statement parser =
     let (parser, do_keyword_token) =
@@ -357,24 +382,33 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, left_paren_token, expr_node, right_paren_token) =
       parse_paren_expr parser in
     let (parser, do_semicolon_token) = require_semicolon parser in
-    let syntax = make_do_statement do_keyword_token statement_node
-      do_while_keyword_token left_paren_token expr_node right_paren_token
-      do_semicolon_token in
-    (parser, syntax)
+    Make.do_statement
+      parser
+      do_keyword_token
+      statement_node
+      do_while_keyword_token
+      left_paren_token
+      expr_node
+      right_paren_token
+      do_semicolon_token
 
   and parse_while_statement parser =
-    let (parser, while_keyword_token) =
-      assert_token parser While in
+    let (parser, while_keyword_token) = assert_token parser While in
     let (parser, left_paren_token, expr_node, right_paren_token) =
-      parse_paren_expr parser in
+      parse_paren_expr parser
+    in
     let (parser, statement_node) =
-      let _, open_token = next_token parser in
-      match Token.kind open_token with
+      match peek_token_kind parser with
       | Colon -> parse_alternate_loop_statement parser ~terminator:Endwhile
-      | _ -> parse_statement parser in
-    let syntax = make_while_statement while_keyword_token left_paren_token
-      expr_node right_paren_token statement_node in
-    (parser, syntax)
+      | _ -> parse_statement parser
+    in
+    Make.while_statement
+      parser
+      while_keyword_token
+      left_paren_token
+      expr_node
+      right_paren_token
+      statement_node
 
   (* SPEC:
     declare-statement:
@@ -393,16 +427,28 @@ module WithExpressionAndDeclAndTypeParser
     match peek_token_kind parser with
     | Semicolon ->
       let (parser, semi) = assert_token parser Semicolon in
-      parser, make_declare_directive_statement
-        declare_keyword_token left_paren_token expr_node right_paren_token semi
+      Make.declare_directive_statement
+        parser
+        declare_keyword_token
+        left_paren_token
+        expr_node
+        right_paren_token
+        semi
     | Colon ->
-      let (parser, statement_node) = parse_alternate_loop_statement parser ~terminator:Enddeclare in
-      parser, make_declare_block_statement
-        declare_keyword_token left_paren_token expr_node right_paren_token
+      let (parser, statement_node) =
+        parse_alternate_loop_statement parser ~terminator:Enddeclare
+      in
+      Make.declare_block_statement
+        parser
+        declare_keyword_token
+        left_paren_token
+        expr_node
+        right_paren_token
         statement_node
     | _ ->
       let (parser, statement_node) = parse_statement parser in
-      parser, make_declare_block_statement
+      Make.declare_block_statement
+        parser
         declare_keyword_token
         left_paren_token
         expr_node
@@ -435,16 +481,17 @@ module WithExpressionAndDeclAndTypeParser
     let (parser1, token) = next_token parser1 in
     match Token.kind token with
     | Semicolon ->
-      let semi = make_token token in
-      parser1, make_using_statement_function_scoped await_kw using_kw expr semi
+      let (parser, semi) = Make.token parser1 token in
+      Make.using_statement_function_scoped parser await_kw using_kw expr semi
     | _ ->
       let (parser, left_paren) = require_left_paren parser in
       let (parser, expressions) = parse_comma_list
-        parser RightParen SyntaxError.error1015 parse_expression in
+        parser RightParen SyntaxError.error1015 parse_expression
+      in
       let (parser, right_paren) = require_right_paren parser in
       let (parser, statements) = parse_statement parser in
-      parser, make_using_statement_block_scoped
-        await_kw using_kw left_paren expressions right_paren statements
+      Make.using_statement_block_scoped parser await_kw using_kw left_paren
+        expressions right_paren statements
 
   and parse_unset_statement parser =
     (*
@@ -459,12 +506,10 @@ module WithExpressionAndDeclAndTypeParser
     *)
     let (parser, keyword) = assert_token parser Unset in
     let (parser, left_paren, variables, right_paren) =
-      parse_parenthesized_comma_list_opt_allow_trailing
-        parser parse_expression in
+      parse_parenthesized_comma_list_opt_allow_trailing parser parse_expression
+    in
     let (parser, semi) = require_semicolon parser in
-    let result = make_unset_statement
-      keyword left_paren variables right_paren semi in
-    (parser, result)
+    Make.unset_statement parser keyword left_paren variables right_paren semi
 
   and parse_if_statement parser =
     (* SPEC:
@@ -501,7 +546,7 @@ module WithExpressionAndDeclAndTypeParser
       let (parser_body, left_paren_token, expr_node, right_paren_token) =
         parse_paren_expr parser_body in
       let parser1, opening_token = next_token parser_body in
-      let opening_token_syntax = make_token opening_token in
+      let (parser1, opening_token_syntax) = Make.token parser1 opening_token in
       let (parser_body, statement_node) = match Token.kind opening_token with
       | Colon -> parse_alternate_if_block parser1 parse_statement
       | _ -> parse_statement parser_body in
@@ -526,9 +571,10 @@ module WithExpressionAndDeclAndTypeParser
             , elseif_statement
             ) =
           parse_if_body_helper parser_elseif in
-        let elseif_syntax = match Token.kind elseif_opening_token with
+        let (parser_elseif, elseif_syntax) = match Token.kind elseif_opening_token with
         | Colon ->
-          make_alternate_elseif_clause
+          Make.alternate_elseif_clause
+            parser_elseif
             elseif_token
             elseif_left_paren
             elseif_condition_expr
@@ -536,12 +582,14 @@ module WithExpressionAndDeclAndTypeParser
             elseif_opening_token_syntax
             elseif_statement
         | _ ->
-          make_elseif_clause
+          Make.elseif_clause
+            parser_elseif
             elseif_token
             elseif_left_paren
             elseif_condition_expr
             elseif_right_paren
-            elseif_statement in
+            elseif_statement
+        in
         (parser_elseif, Some elseif_syntax)
       else
         (parser_elseif, None)
@@ -549,19 +597,26 @@ module WithExpressionAndDeclAndTypeParser
     (* do not eat token and return Missing if first token is not Else *)
     let parse_else_opt parser_else =
       let (parser_else, else_token) = optional_token parser_else Else in
-      if is_missing else_token then
+      if SC.is_missing else_token then
         (parser_else, else_token)
       else
         let parser1, opening_token = next_token parser_else in
         match Token.kind opening_token with
         | Colon ->
-          let opening_token_syntax = make_token opening_token in
+          let (parser, opening_token_syntax) =
+            Make.token parser opening_token
+          in
           let (parser_else, else_consequence) =
-            parse_alternate_if_block parser1 parse_statement in
-          (parser_else, make_alternate_else_clause else_token opening_token_syntax else_consequence)
+            parse_alternate_if_block parser1 parse_statement
+          in
+          Make.alternate_else_clause
+            parser_else
+            else_token
+            opening_token_syntax
+            else_consequence
         | _ ->
           let (parser_else, else_consequence) = parse_statement parser_else in
-          (parser_else, make_else_clause else_token else_consequence)
+          Make.else_clause parser_else else_token else_consequence
     in
     let (parser, if_keyword_token) = assert_token parser If in
     let ( parser
@@ -578,33 +633,32 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, else_syntax) = parse_else_opt parser in
     match Token.kind if_opening_token with
     | Colon ->
-      let (parser, closing_token) = require_token parser Endif
-        (SyntaxError.error1059 Endif) in
+      let (parser, closing_token) =
+        require_token parser Endif (SyntaxError.error1059 Endif)
+      in
       let (parser, semicolon_token) = require_semicolon parser in
-      ( parser
-      , make_alternate_if_statement
-          if_keyword_token
-          if_left_paren
-          if_expr
-          if_right_paren
-          if_opening_token_syntax
-          if_consequence
-          elseif_syntax
-          else_syntax
-          closing_token
-          semicolon_token
-      )
+      Make.alternate_if_statement
+        parser
+        if_keyword_token
+        if_left_paren
+        if_expr
+        if_right_paren
+        if_opening_token_syntax
+        if_consequence
+        elseif_syntax
+        else_syntax
+        closing_token
+        semicolon_token
     | _ ->
-      ( parser
-      , make_if_statement
-          if_keyword_token
-          if_left_paren
-          if_expr
-          if_right_paren
-          if_consequence
-          elseif_syntax
-          else_syntax
-      )
+      Make.if_statement
+        parser
+        if_keyword_token
+        if_left_paren
+        if_expr
+        if_right_paren
+        if_consequence
+        elseif_syntax
+        else_syntax
 
   and parse_switch_statement parser =
     (* SPEC:
@@ -695,22 +749,36 @@ module WithExpressionAndDeclAndTypeParser
       let (parser1, token) = next_token parser in
       match Token.kind token with
       | Semicolon when peek_token_kind parser1 = closing_token_kind ->
-        parser1, make_list parser1 []
+        make_list parser1 []
       | _ ->
         parse_terminated_list parser parse_switch_section closing_token_kind
     in
     match closing_token_kind with
     | Endswitch ->
-      let (parser, endswitch_token_syntax) = require_token parser Endswitch
-        (SyntaxError.error1059 Endswitch) in
+      let (parser, endswitch_token_syntax) =
+        require_token parser Endswitch (SyntaxError.error1059 Endswitch)
+      in
       let (parser, semicolon) = require_semicolon parser in
-      parser, make_alternate_switch_statement switch_keyword_token
-        left_paren_token expr_node right_paren_token opening_token_syntax
-        section_list endswitch_token_syntax semicolon
+      Make.alternate_switch_statement
+        parser
+        switch_keyword_token
+        left_paren_token
+        expr_node
+        right_paren_token
+        opening_token_syntax
+        section_list
+        endswitch_token_syntax
+        semicolon
     | _ ->
       let (parser, right_brace_token) = require_right_brace parser in
-      parser, make_switch_statement switch_keyword_token left_paren_token
-        expr_node right_paren_token opening_token_syntax section_list
+      Make.switch_statement
+        parser
+        switch_keyword_token
+        left_paren_token
+        expr_node
+        right_paren_token
+        opening_token_syntax
+        section_list
         right_brace_token
 
   and is_switch_fallthrough parser =
@@ -730,8 +798,7 @@ module WithExpressionAndDeclAndTypeParser
     (* We don't get here unless we have fallthrough ; *)
     let (parser, keyword) = assert_token parser Fallthrough in
     let (parser, semi) = assert_token parser Semicolon in
-    let result = make_switch_fallthrough keyword semi in
-    (parser, result)
+    Make.switch_fallthrough parser keyword semi
 
   and parse_switch_fallthrough_opt parser =
     if is_switch_fallthrough parser then
@@ -768,28 +835,28 @@ module WithExpressionAndDeclAndTypeParser
           (fun t -> Trivia.kind t = TriviaKind.FallThrough)
           (Token.leading next)
       in
-       let missing = make_missing parser in
-      let result =
-        if commented_fallthrough
-        then let missing1 = make_missing parser in
-             make_switch_fallthrough missing missing1
-        else missing
-      in
-      parser, result
+      let (parser, missing) = make_missing parser in
+      if commented_fallthrough
+      then
+        let (parser, missing1) = make_missing parser in
+        Make.switch_fallthrough parser missing missing1
+      else
+        (parser, missing)
 
   and parse_switch_section parser =
     (* See parse_switch_statement for grammar *)
     let (parser, labels) =
-      parse_list_until_none parser parse_switch_section_label in
-    let parser = if is_missing labels then
-        with_error parser SyntaxError.error2008
-      else
-        parser in
+      parse_list_until_none parser parse_switch_section_label
+    in
+    let parser =
+      if SC.is_missing labels then with_error parser SyntaxError.error2008
+      else parser
+    in
     let (parser, statements) =
-      parse_list_until_none parser parse_switch_section_statement in
+      parse_list_until_none parser parse_switch_section_statement
+    in
     let (parser, fallthrough) = parse_switch_fallthrough_opt parser in
-    let result = make_switch_section labels statements fallthrough in
-    (parser, result)
+    Make.switch_section parser labels statements fallthrough
 
   and parse_switch_section_statement parser =
     if is_switch_fallthrough parser then (parser, None)
@@ -825,15 +892,21 @@ module WithExpressionAndDeclAndTypeParser
         match peek_token_kind parser with
         | TokenKind.Variable ->
           let parser = with_error parser SyntaxError.error1007 in
-          let missing = make_missing parser in
-          (parser, missing)
+          make_missing parser
         | _ -> parse_type_specifier parser
       in
       let (parser, catch_var) = require_variable parser in
       let (parser, right_paren) = require_right_paren parser in
       let (parser, compound_stmt) = parse_compound_statement parser in
-      let catch_clause = make_catch_clause catch_token left_paren
-        catch_type catch_var right_paren compound_stmt in
+      let (parser, catch_clause) =
+        Make.catch_clause
+          parser
+          catch_token
+          left_paren
+          catch_type
+          catch_var
+          right_paren
+          compound_stmt in
       (parser, Some catch_clause)
     else
       (parser, None)
@@ -846,11 +919,9 @@ module WithExpressionAndDeclAndTypeParser
     if peek_token_kind parser = Finally then
       let (parser, finally_token) = assert_token parser Finally in
       let (parser, compound_stmt) = parse_compound_statement parser in
-      let finally_clause = make_finally_clause finally_token compound_stmt in
-      (parser, finally_clause)
+      Make.finally_clause parser finally_token compound_stmt
     else
-      let missing = make_missing parser in
-      (parser, missing)
+      make_missing parser
 
   and parse_try_statement parser =
     (* SPEC:
@@ -862,13 +933,17 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, try_keyword_token) = assert_token parser Try in
     let (parser, try_compound_stmt) = parse_compound_statement parser in
     let (parser, catch_clauses) =
-      parse_list_until_none parser parse_catch_clause_opt in
+      parse_list_until_none parser parse_catch_clause_opt
+    in
     let (parser, finally_clause) = parse_finally_clause_opt parser in
     (* If the catch and finally are both missing then we give an error in
        a later pass. *)
-    let syntax = make_try_statement try_keyword_token try_compound_stmt
-      catch_clauses finally_clause in
-    (parser, syntax)
+    Make.try_statement
+      parser
+      try_keyword_token
+      try_compound_stmt
+      catch_clauses
+      finally_clause
 
   and parse_break_statement parser =
     (* SPEC
@@ -883,12 +958,10 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, break_token) = assert_token parser Break in
     let (parser, level) =
       if peek_token_kind parser = Semicolon then
-        let missing = make_missing parser in
-        (parser, missing)
+        make_missing parser
       else parse_expression parser in
     let (parser, semi_token) = require_semicolon parser in
-    let result = make_break_statement break_token level semi_token in
-    (parser, result)
+    Make.break_statement parser break_token level semi_token
 
   and parse_continue_statement parser =
     (* SPEC
@@ -903,46 +976,41 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, continue_token) = assert_token parser Continue in
     let (parser, level) =
       if peek_token_kind parser = Semicolon then
-        let missing = make_missing parser in
-        (parser, missing)
+        make_missing parser
       else parse_expression parser in
     let (parser, semi_token) = require_semicolon parser in
-    let result = make_continue_statement continue_token level semi_token in
-    (parser, result)
+    Make.continue_statement parser continue_token level semi_token
 
   and parse_return_statement parser =
     let (parser, return_token) = assert_token parser Return in
     let (parser1, semi_token) = next_token parser in
     if Token.kind semi_token = Semicolon then
-      let missing = make_missing parser in
-      let semi_token = make_token semi_token in
-      let return_statement = make_return_statement
-        return_token missing semi_token
-      in
-      (parser1, return_statement)
+      let (parser, missing) = make_missing parser in
+      let (parser, semi_token) = Make.token parser1 semi_token in
+      Make.return_statement parser return_token missing semi_token
     else
       let (parser, expr) = parse_expression parser in
       let (parser, semi_token) = require_semicolon parser in
-      (parser, make_return_statement return_token expr semi_token)
+      Make.return_statement parser return_token expr semi_token
 
   and parse_goto_label parser =
     let parser, goto_label_name = next_token_as_name parser in
-    let goto_label_name = make_token goto_label_name in
+    let (parser, goto_label_name) = Make.token parser goto_label_name in
     let parser, colon = assert_token parser Colon in
-    parser, make_goto_label goto_label_name colon
+    Make.goto_label parser goto_label_name colon
 
   and parse_goto_statement parser =
     let parser, goto = assert_token parser Goto in
     let parser, goto_label_name = next_token_as_name parser in
-    let goto_label_name = make_token goto_label_name in
+    let (parser, goto_label_name) = Make.token parser goto_label_name in
     let parser, semicolon = assert_token parser Semicolon in
-    parser, make_goto_statement goto goto_label_name semicolon
+    Make.goto_statement parser goto goto_label_name semicolon
 
   and parse_throw_statement parser =
     let (parser, throw_token) = assert_token parser Throw in
     let (parser, expr) = parse_expression parser in
     let (parser, semi_token) = require_semicolon parser in
-    (parser, make_throw_statement throw_token expr semi_token)
+    Make.throw_statement parser throw_token expr semi_token
 
   and parse_default_label parser =
     (*
@@ -958,12 +1026,12 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, default_token) = assert_token parser Default in
     let (parser, semi_token) = optional_token parser Semicolon in
     let (parser, colon_token) =
-      if is_missing semi_token then
+      if SC.is_missing semi_token then
         require_colon parser
       else
-        (parser, semi_token) in
-    let result = make_default_label default_token colon_token in
-    (parser, result)
+        (parser, semi_token)
+    in
+    Make.default_label parser default_token colon_token
 
   and parse_case_label parser =
     (* SPEC:
@@ -980,12 +1048,12 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, expr) = parse_expression parser in
     let (parser, semi_token) = optional_token parser Semicolon in
     let (parser, colon_token) =
-      if is_missing semi_token then
+      if SC.is_missing semi_token then
         require_colon parser
       else
-        (parser, semi_token) in
-    let result = make_case_label case_token expr colon_token in
-    (parser, result)
+        (parser, semi_token)
+    in
+    Make.case_label parser case_token expr colon_token
 
   and parse_global_statement_or_expression_statement parser =
     (* PHP has a statement of the form
@@ -1011,8 +1079,7 @@ module WithExpressionAndDeclAndTypeParser
         parser1 Semicolon SyntaxError.error1008 parse_simple_variable
       in
       let (parser, semicolon) = require_semicolon parser in
-      let result = make_global_statement keyword variables semicolon in
-      (parser, result)
+      Make.global_statement parser keyword variables semicolon
     else
       parse_expression_statement parser
 
@@ -1040,8 +1107,7 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, decls) = parse_comma_list
       parser Semicolon SyntaxError.error1008 parse_static_declarator in
     let (parser, semicolon) = require_semicolon parser in
-    let result = make_function_static_statement static decls semicolon in
-    (parser, result)
+    Make.function_static_statement parser static decls semicolon
 
   and parse_static_declarator parser =
     (* SPEC
@@ -1051,8 +1117,7 @@ module WithExpressionAndDeclAndTypeParser
     (* TODO: ERROR RECOVERY not very sophisticated here *)
     let (parser, variable_name) = require_variable parser in
     let (parser, init) = parse_static_initializer_opt parser in
-    let result = make_static_declarator variable_name init in
-    (parser, result)
+    Make.static_declarator parser variable_name init
 
   and parse_static_initializer_opt parser =
     (* SPEC
@@ -1063,12 +1128,10 @@ module WithExpressionAndDeclAndTypeParser
     match (Token.kind token) with
     | Equal ->
       (* TODO: Detect if expression is not const *)
-      let equal = make_token token in
-      let (parser, value) = parse_expression parser1 in
-      (parser, make_simple_initializer equal value)
-    | _ ->
-      let missing = make_missing parser in
-      (parser, missing)
+      let (parser, equal) = Make.token parser1 token in
+      let (parser, value) = parse_expression parser in
+      Make.simple_initializer parser equal value
+    | _ -> make_missing parser
 
   (* SPEC:
     TODO: update the spec to reflect that echo and print must be a statement
@@ -1087,17 +1150,15 @@ module WithExpressionAndDeclAndTypeParser
       parser Semicolon SyntaxError.error1015 parse_expression
     in
     let parser, semicolon = require_semicolon parser in
-    let syntax = make_echo_statement token expression_list semicolon in
-    (parser, syntax)
+    Make.echo_statement parser token expression_list semicolon
 
   and parse_expression_statement parser =
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | Semicolon ->
-      let missing = make_missing parser in
-      let token = make_token token in
-      let expr_stmt = make_expression_statement missing token in
-      (parser1, expr_stmt)
+      let (parser, missing) = make_missing parser in
+      let (parser, token) = Make.token parser1 token in
+      Make.expression_statement parser missing token
     | _ ->
       let parser = Parser.expect_in_new_scope parser [ Semicolon ] in
       let (parser, expression) = parse_expression parser in
@@ -1105,29 +1166,29 @@ module WithExpressionAndDeclAndTypeParser
         let (parser, token) = require_semicolon_token parser in
         match token with
         | Some t ->
-          if is_halt_compiler_expression expression then
+          if SC.is_halt_compiler_expression expression then
             let (parser, token) = rescan_halt_compiler parser t in
-            (parser, make_token token)
+            Make.token parser token
           else
-            (parser, make_token t)
+            Make.token parser t
         | None ->
-          parser, make_missing parser
+          make_missing parser
       in
       let parser = Parser.pop_scope parser [ Semicolon ] in
-      (parser, make_expression_statement expression token)
+      Make.expression_statement parser expression token
 
   and parse_compound_statement parser =
     let (parser1, token) = next_token parser in
     match Token.kind token with
-    | Semicolon -> (parser1, make_token token)
+    | Semicolon -> Make.token parser1 token
     | _ ->
       let (parser, left_brace_token) = require_left_brace parser in
       let (parser, statement_list) =
-        parse_terminated_list parser parse_statement RightBrace in
+        parse_terminated_list parser parse_statement RightBrace
+      in
       let (parser, right_brace_token) = require_right_brace parser in
-      let syntax = make_compound_statement
-        left_brace_token statement_list right_brace_token in
-      (parser, syntax)
+      Make.compound_statement parser left_brace_token statement_list
+        right_brace_token
 
   and parse_alternate_loop_statement parser ~terminator =
     let (parser, colon_token) = assert_token parser Colon in
@@ -1136,9 +1197,12 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, terminate_token) = require_token parser terminator
       (SyntaxError.error1059 terminator) in
     let (parser, semicolon_token) = require_semicolon parser in
-    let syntax = make_alternate_loop_statement
-      colon_token statement_list terminate_token semicolon_token in
-    (parser, syntax)
+    Make.alternate_loop_statement
+      parser
+      colon_token
+      statement_list
+      terminate_token
+      semicolon_token
 
 end
 end (* WithSmartConstructors *)

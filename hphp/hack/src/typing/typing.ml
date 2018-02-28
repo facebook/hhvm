@@ -839,13 +839,8 @@ and stmt env = function
       let env = LEnv.intersect_list env parent_lenv cl in
       env, T.Switch(te, tcl)
   | Foreach (e1, e2, b) as st ->
-      let rec is_dynamic ty =
-        match Env.expand_type env ty with
-        | (_, (_, Tdynamic)) -> true
-        | (_, (_, Tunresolved tyl)) -> tyl <> [] && List.for_all tyl is_dynamic
-        | _ -> false in
       let check_dynamic env ty ~f =
-        if is_dynamic ty then
+        if TUtils.is_dynamic env ty then
           env
         else f() in
       (* It's safe to do foreach over a disposable, as no leaking is possible *)
@@ -1083,11 +1078,6 @@ function
       make_result (Reason.Rasyncforeach pe, tmap)
 
 and bind_as_expr env loop_ty ty aexpr =
-  let rec is_dynamic ty =
-    match Env.expand_type env ty with
-    | (_, (_, Tdynamic)) -> true
-    | (_, (_, Tunresolved tyl)) -> List.exists tyl is_dynamic
-    | _ -> false in
   let env, ety = Env.expand_type env ty in
   let p, ty1, ty2 =
     match ety with
@@ -1097,7 +1087,7 @@ and bind_as_expr env loop_ty ty aexpr =
     | _ -> assert false in
   (* Set id as dynamic if the foreach loop was dynamic *)
   let env, eloop_ty = Env.expand_type env loop_ty in
-  let ty1, ty2 = if is_dynamic eloop_ty then
+  let ty1, ty2 = if TUtils.is_dynamic env eloop_ty then
     (fst ty1, Tdynamic), (fst ty2, Tdynamic) else ty1, ty2 in
   match aexpr with
     | As_v ev ->
@@ -5162,13 +5152,8 @@ and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)
 
 and unop ~is_func_arg ~forbid_uref p env uop te ty =
-  let rec is_dynamic ty =
-    match Env.expand_type env ty with
-    | (_, (_, Tdynamic)) -> true
-    | (_, (_, Tunresolved tyl)) -> List.exists tyl is_dynamic
-    | _ -> false in
   let check_dynamic env ty ~f =
-    if is_dynamic ty then
+    if TUtils.is_dynamic env ty then
       env, (fst ty, Tdynamic)
     else f()
   in
@@ -5214,11 +5199,6 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
       make_result env te ty
 
 and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
-  let rec is_dynamic ty =
-    match Env.expand_type env ty with
-    | (_, (_, Tdynamic)) -> true
-    | (_, (_, Tunresolved tyl)) -> List.exists tyl is_dynamic
-    | _ -> false in
   let rec is_any ty =
     match Env.expand_type env ty with
     | (_, (_, (Tany | Terr))) -> true
@@ -5245,7 +5225,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
   let make_result env te1 te2 ty =
     env, T.make_typed_expr p ty (T.Binop(bop, te1, te2)), ty in
   let check_dynamic f =
-    if is_dynamic ty1 then
+    if TUtils.is_dynamic env ty1 then
       let result_prim =
         match is_sub_prim env ty2 Tfloat with
         | Some r ->
@@ -5256,7 +5236,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
           (fst ty2, Tprim Tnum)
         in
       make_result env te1 te2 result_prim
-    else if is_dynamic ty2 then
+    else if TUtils.is_dynamic env ty2 then
       let result_prim =
         match is_sub_prim env ty1 Tfloat with
         | Some r ->
@@ -5385,7 +5365,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
       make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
     end
   | Ast.Xor ->
-      if is_dynamic ty1 && is_dynamic ty2 then
+      if TUtils.is_dynamic env ty1 && TUtils.is_dynamic env ty2 then
         make_result env te1 te2 (Reason.Rbitwise p, Tdynamic) else
         begin match is_sub_prim env ty1 Tbool, is_sub_prim env ty2 Tbool with
         | (Some _, _)
@@ -5393,18 +5373,18 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
           (* Logical xor:
            *   function(bool, bool) : bool
            *)
-          let env, _ = if is_dynamic ty1 then env, ty1 else
+          let env, _ = if TUtils.is_dynamic env ty1 then env, ty1 else
             enforce_sub_ty env ty1 (Reason.Rlogic_ret p1, Tprim Tbool) in
-          let env, _ = if is_dynamic ty2 then env, ty2 else
+          let env, _ = if TUtils.is_dynamic env ty2 then env, ty2 else
             enforce_sub_ty env ty2 (Reason.Rlogic_ret p1, Tprim Tbool) in
           make_result env te1 te2 (Reason.Rlogic_ret p, Tprim Tbool)
         | _, _ ->
           (* Arithmetic xor:
            *   function(int, int) : int
            *)
-          let env, _ = if is_dynamic ty1 then env, ty1 else
+          let env, _ = if TUtils.is_dynamic env ty1 then env, ty1 else
             enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tint) in
-          let env, _ = if is_dynamic ty2 then env, ty2 else
+          let env, _ = if TUtils.is_dynamic env ty2 then env, ty2 else
             enforce_sub_ty env ty2 (Reason.Rarith p1, Tprim Tint) in
           make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
         end
@@ -5439,7 +5419,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
          *   function<T>(T, T): bool
          *)
         let env, _ =
-        if is_dynamic ty1 || is_dynamic ty2
+        if TUtils.is_dynamic env ty1 || TUtils.is_dynamic env ty2
         then env, ty1 else Type.unify p Reason.URnone env ty1 ty2 in
         make_result env te1 te2 (Reason.Rcomp p, ty_result)
   | Ast.Dot ->
@@ -5455,13 +5435,13 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
       make_result env te1 te2 (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.Amp | Ast.Bar | Ast.Ltlt | Ast.Gtgt ->
       (* If both are dynamic, we can only return dynamic *)
-      if is_dynamic ty1 && is_dynamic ty2 then
+      if TUtils.is_dynamic env ty1 && TUtils.is_dynamic env ty2 then
         make_result env te1 te2 (Reason.Rbitwise_ret p, Tdynamic) else
       (* Otherwise at least one of these is an int, so the result is an int *)
-      let env, _ = if is_dynamic ty1
+      let env, _ = if TUtils.is_dynamic env ty1
                    then env, ty1
                    else enforce_sub_ty env ty1 (Reason.Rbitwise p1, Tprim Tint) in
-      let env, _ = if is_dynamic ty2
+      let env, _ = if TUtils.is_dynamic env ty2
                    then env, ty2 else
                    enforce_sub_ty env ty2 (Reason.Rbitwise p2, Tprim Tint) in
       make_result env te1 te2 (Reason.Rbitwise_ret p, Tprim Tint)

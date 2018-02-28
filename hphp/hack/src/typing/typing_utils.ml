@@ -716,3 +716,12 @@ let desugar_mixed env r =
       (Typing_env.get_tcopt env)
       TypecheckerOptions.experimental_nonnull in
   if nonnull_allowed then Toption (r, Tnonnull) else Tmixed
+
+  (*****************************************************************************)
+(* Dynamicism  *)
+(*****************************************************************************)
+let rec is_dynamic env ty =
+  match Env.expand_type env ty with
+  | (_, (_, Tdynamic)) -> true
+  | (_, (_, Tunresolved tyl)) -> List.exists tyl (is_dynamic env)
+  | _ -> false

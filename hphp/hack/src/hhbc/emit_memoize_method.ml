@@ -184,7 +184,7 @@ let make_memoize_instance_method_with_params_code ~pos
   let begin_label, default_value_setters =
     (* Default value setters belong in the
      * wrapper method not in the original method *)
-    Emit_param.emit_param_default_value_setter env params
+    Emit_param.emit_param_default_value_setter env pos params
   in
   (* The index of the first local that represents a formal is the number of
   parameters, plus one for the optional index. This is equal to the count
@@ -304,7 +304,7 @@ let make_memoize_static_method_with_params_code ~pos
   let begin_label, default_value_setters =
     (* Default value setters belong in the
      * wrapper method not in the original method *)
-    Emit_param.emit_param_default_value_setter env params
+    Emit_param.emit_param_default_value_setter env pos params
   in
   gather [
     begin_label;

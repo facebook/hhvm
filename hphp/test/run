@@ -290,6 +290,7 @@ function hh_codegen_cmd($options, $config_file = null, $disable_hphpc_opts = tru
 function hh_semdiff_cmd($options) {
   $cmd = hh_semdiff_path();
   if (isset($options['hackc'])) $cmd .= ' --daemon';
+  if (isset($options['srcloc'])) $cmd .= ' --srcloc';
   $cmd .= ' --verbose 1';
   return $cmd;
 }
@@ -517,6 +518,7 @@ function get_options($argv) {
     'run-hh-codegen' => '',
     'record-failures:' => '',
     'hackc' => '',
+    'srcloc' => '',
     'hack-only' => '',
     'ignore-oids' => '',
     'hphpc' => ''

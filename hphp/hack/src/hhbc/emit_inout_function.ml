@@ -95,7 +95,7 @@ let emit_body_instrs_ref params call_instrs =
       ]
   ]
 
-let emit_body_instrs ~wrapper_type env params call_instrs =
+let emit_body_instrs ~wrapper_type env pos params call_instrs =
   let body =
     match wrapper_type with
     | Emit_inout_helpers.InoutWrapper ->
@@ -104,7 +104,7 @@ let emit_body_instrs ~wrapper_type env params call_instrs =
       emit_body_instrs_ref params call_instrs
   in
   let begin_label, default_value_setters =
-    Emit_param.emit_param_default_value_setter env params in
+    Emit_param.emit_param_default_value_setter env pos params in
   gather [
     begin_label;
     body;
@@ -163,7 +163,7 @@ let emit_wrapper_function
   in
   Local.reset_local @@ List.length decl_vars + List.length params;
   let body_instrs =
-    emit_body_instrs ~wrapper_type env params call_instrs in
+    emit_body_instrs ~wrapper_type env ast_fun.Ast.f_span params call_instrs in
   let fault_instrs = extract_fault_instructions body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
   let doc = ast_fun.A.f_doc_comment in
@@ -258,7 +258,7 @@ let emit_wrapper_method
   in
   Local.reset_local @@ List.length decl_vars + List.length params;
   let body_instrs =
-    emit_body_instrs ~wrapper_type env params call_instrs in
+    emit_body_instrs ~wrapper_type env ast_method.Ast.m_span params call_instrs in
   let fault_instrs = extract_fault_instructions body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
   let params =

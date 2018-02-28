@@ -237,6 +237,7 @@ and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
     in
     gather [
       preamble;
+      Emit_pos.emit_pos pos;
       emit_jump_to_label target_label iterators_to_release;
     ]
   | JT.ResolvedTryFinally {
@@ -252,6 +253,7 @@ and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
     gather [
       preamble;
       emit_jump_to_label finally_label iterators_to_release;
+      Emit_pos.emit_pos pos;
       (* emit break/continue instr as an indicator for try/finally rewriter
          to generate finally epilogue - try/finally rewriter will remove it. *)
       if is_break then instr_break adjusted_level else instr_continue adjusted_level

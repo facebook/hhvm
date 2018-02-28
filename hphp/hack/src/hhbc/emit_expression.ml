@@ -1430,6 +1430,7 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
     when is_local_this env name && not (Emit_env.get_needs_local_this env) ->
     gather [
       emit_local ~notice:NoNotice ~need_ref:false env id;
+      Emit_pos.emit_pos outer_pos;
       instr_istypec OpNull;
       instr_not
     ]
@@ -1443,6 +1444,7 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
   | _ ->
     gather [
       emit_expr_and_unbox_if_necessary ~need_ref:false env expr;
+      Emit_pos.emit_pos outer_pos;
       instr_istypec OpNull;
       instr_not
     ]
@@ -1967,7 +1969,7 @@ and emit_static_collection ~transform_to_collection tv =
     transform_instr;
   ]
 
-and emit_value_only_collection env es constructor =
+and emit_value_only_collection env pos es constructor =
   let limit = max_array_elem_on_stack () in
   let inline exprs =
     gather
@@ -1976,6 +1978,7 @@ and emit_value_only_collection env es constructor =
         (* Drop the keys *)
         | A.AFkvalue (_, e)
         | A.AFvalue e -> emit_expr ~need_ref:false env e);
+      Emit_pos.emit_pos pos;
       instr @@ ILitConst (constructor @@ List.length exprs)]
   in
   let outofline exprs =
@@ -2098,13 +2101,13 @@ and is_struct_init env es allow_numerics =
 
 (* transform_to_collection argument keeps track of
  * what collection to transform to *)
-and emit_dynamic_collection env expr es =
+and emit_dynamic_collection env (pos, expr_) es =
   let count = List.length es in
-  match snd expr with
+  match expr_ with
   | A.Collection ((_, "vec"), _) ->
-    emit_value_only_collection env es (fun n -> NewVecArray n)
+    emit_value_only_collection env pos es (fun n -> NewVecArray n)
   | A.Collection ((_, "keyset"), _) ->
-    emit_value_only_collection env es (fun n -> NewKeysetArray n)
+    emit_value_only_collection env pos es (fun n -> NewKeysetArray n)
   | A.Collection ((_, "dict"), _) ->
      if is_struct_init env es true then
        emit_struct_array env es instr_newstructdict
@@ -2124,7 +2127,7 @@ and emit_dynamic_collection env expr es =
        emit_keyvalue_collection name env es (NewDictArray count)
 
   | A.Varray _ ->
-     emit_value_only_collection env es
+     emit_value_only_collection env pos es
        (fun n -> if hack_arr_dv_arrs () then (NewVecArray n) else (NewVArray n))
   | A.Darray _ ->
      if is_struct_init env es false then
@@ -2136,7 +2139,7 @@ and emit_dynamic_collection env expr es =
   | _ ->
   (* From here on, we're only dealing with PHP arrays *)
   if is_packed_init es then
-    emit_value_only_collection env es (fun n -> NewPackedArray n)
+    emit_value_only_collection env pos es (fun n -> NewPackedArray n)
   else if is_struct_init env es false then
     emit_struct_array env es instr_newstructarray
   else if is_packed_init ~hack_arr_compat:false es then
@@ -3554,6 +3557,7 @@ and emit_special_function env pos id args uargs default =
     | [arg_expr], Some i ->
       Some (gather [
         emit_expr ~need_ref:false env arg_expr;
+        Emit_pos.emit_pos pos;
         instr (IIsset (IsTypeC i))
       ], Flavor.Cell)
     | _ ->

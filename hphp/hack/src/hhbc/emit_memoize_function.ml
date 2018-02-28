@@ -88,7 +88,7 @@ let make_memoize_function_with_params_code
   let first_local = Local.Unnamed (param_count + 1) in
   let begin_label, default_value_setters =
     (* Default value setters belong in the wrapper function not in the original function *)
-    Emit_param.emit_param_default_value_setter env params
+    Emit_param.emit_param_default_value_setter env pos params
   in
   let scope = Emit_env.get_scope env in
   let deprecation_body =

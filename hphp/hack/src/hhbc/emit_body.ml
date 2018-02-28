@@ -466,7 +466,7 @@ let emit_body
   let stmt_instrs = if is_native then instr_nativeimpl else
     Emit_env.do_function env body emit_defs in
   let begin_label, default_value_setters =
-    Emit_param.emit_param_default_value_setter env params in
+    Emit_param.emit_param_default_value_setter env pos params in
   let generator_instr =
     if is_generator then gather [instr_createcont; instr_popc] else empty
   in

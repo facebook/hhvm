@@ -192,7 +192,7 @@ let from_asts ~namespace ~tparams ~generate_defaults ~scope ast_params =
     (from_ast ~tparams ~namespace ~generate_defaults ~scope) in
   rename_params hhas_params
 
-let emit_param_default_value_setter env params =
+let emit_param_default_value_setter env pos params =
   let setters = List.filter_map params (fun p ->
     let param_name = Hhas_param.name p in
     let dvo = Hhas_param.default_value p in
@@ -200,6 +200,7 @@ let emit_param_default_value_setter env params =
       gather [
         instr_label l;
         Emit_expression.emit_expr ~need_ref:false env e;
+        Emit_pos.emit_pos pos;
         instr_setl (Local.Named param_name);
         instr_popc;
       ]) )

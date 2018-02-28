@@ -12,6 +12,8 @@ open Hhbc_ast
 open Parsing
 module TV = Typed_value
 
+let check_srcloc = ref false
+
 (*
   TODO: proper error handling...
 *)

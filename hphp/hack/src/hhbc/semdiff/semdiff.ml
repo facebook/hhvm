@@ -60,6 +60,10 @@ let parse_options () =
        Arg.Unit (fun () -> Log.hide_assm := true),
        " hide assumed & todo information"
       );
+      ("--srcloc",
+       Arg.Unit (fun () -> Hhas_parser_actions.check_srcloc := true),
+       " Check line numbers in srcloc directives"
+      );
     ] in
   let options = Arg.align ~limit:25 options in
   let files = ref [] in

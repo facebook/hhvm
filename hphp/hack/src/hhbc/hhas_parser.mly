@@ -294,7 +294,11 @@ numclsrefslots:
 ;
 srcloc:
  | SRCLOCDIRECTIVE INT COLON INT COMMA INT COLON INT SEMI
-   { (($2, $4), ($6, $8)) }
+   { Hhbc_ast.{
+     line_begin = Int64.to_int $2;
+     col_begin = Int64.to_int $4;
+     line_end = Int64.to_int $6;
+     col_end = Int64.to_int $8 } }
 ;
 
 metadata:
@@ -491,10 +495,13 @@ functionbodywithdirectives:
 functionbody:
     | /* empty */ {Instruction_sequence.empty}
     | NEWLINE functionbody { $2 }
-    | srcloc functionbody { $2 }
     | /* Label: Instruction */ ID COLON functionbody {
       Instruction_sequence.gather
         [Instruction_sequence.instr (makelabelinst $1); $3]}
+    | srcloc NEWLINE functionbody {
+        if !check_srcloc
+        then Instruction_sequence.gather [Instruction_sequence.instr (Hhbc_ast.ISrcLoc $1); $3]
+        else $3 }
     | instruction NEWLINE functionbody {
         Instruction_sequence.gather [Instruction_sequence.instr $1; $3]}
     | TRYFAULTDIRECTIVE ID LBRACE NEWLINE functionbody nl RBRACE nl

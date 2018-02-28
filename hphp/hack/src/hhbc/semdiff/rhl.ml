@@ -1097,6 +1097,10 @@ let equiv prog prog' startlabelpairs =
       | None -> try_specials ()
       | Some newasn -> nextinsnewasn newasn
       end
+    | ISrcLoc loc, ISrcLoc loc'  ->
+      if loc.line_begin = loc'.line_begin && loc.line_end = loc'.line_end
+      then nextins ()
+      else try_specials ()
     (* Iterator instructions have multiple exit points, so have to add to
       todos as well as looking at next instruction.
       TODO: exceptional exits from here.

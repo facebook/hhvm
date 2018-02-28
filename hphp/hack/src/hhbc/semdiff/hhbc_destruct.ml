@@ -14,11 +14,14 @@
 open Hhbc_ast
 
 (*  turn destructors into parsers on arrays *)
-let pa p (a, n) =
- match p (Array.get a n) with
-  | Some v -> Some (v, (a,n+1))
-  | None -> None
-  | exception (Invalid_argument _) -> None (* Out of bounds *)
+let rec pa p (a, n) =
+  match Array.get a n with
+  | ISrcLoc _ -> pa p (a, n+1)
+  | exception (Invalid_argument _) -> None
+  | x ->
+    match p x with
+    | Some v -> Some (v, (a,n+1))
+    | None -> None
 
 (* primitive parsers for instructions of interest *)
 let uSetL = pa (function | IMutator (SetL lab) -> Some lab | _ -> None)

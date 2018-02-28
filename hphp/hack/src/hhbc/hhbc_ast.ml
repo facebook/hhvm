@@ -588,6 +588,7 @@ type instruct_try =
   | TryFaultBegin of Label.t
   | TryFaultEnd
 
+type srcloc = { line_begin:int; col_begin:int; line_end:int; col_end:int }
 type instruct =
   | IBasic of instruct_basic
   | IIterator of instruct_iterator
@@ -605,7 +606,7 @@ type instruct =
   | ILabel of Label.t
   | ITry of instruct_try
   | IComment of string
-  | ISrcLoc of Pos.t
+  | ISrcLoc of srcloc
   | IAsync of async_functions
   | IGenerator of gen_creation_execution
   | IGenDelegation of gen_delegation

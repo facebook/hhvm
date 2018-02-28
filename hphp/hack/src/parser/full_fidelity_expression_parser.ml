@@ -2053,12 +2053,13 @@ module WithStatementAndDeclAndTypeParser
        we allow both, and give an error in the type checker.
     *)
     let parser, expr1 = parse_expression_with_reset_precedence parser in
-    let parser, arrow = optional_token parser TokenKind.EqualGreaterThan in
-    if SC.is_missing arrow then
-      (parser, expr1)
-    else
+    let (parser1, token) = next_token parser in
+    if Token.kind token = TokenKind.EqualGreaterThan then
+      let (parser, arrow) = Make.token parser1 token in
       let (parser, expr2) = parse_expression_with_reset_precedence parser in
       Make.element_initializer parser expr1 arrow expr2
+    else
+      (parser, expr1)
 
   and parse_keyed_element_initializer parser =
     let parser, expr1 = parse_expression_with_reset_precedence parser in
@@ -2197,8 +2198,8 @@ module WithStatementAndDeclAndTypeParser
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | EqualGreaterThan ->
-      let (parser, expr2) = with_reset_precedence parser1 parse_expression in
-      let (parser, arrow) = Make.token parser token in
+      let (parser, arrow) = Make.token parser1 token in
+      let (parser, expr2) = with_reset_precedence parser parse_expression in
       Make.element_initializer parser expr1 arrow expr2
     | _ -> (parser, expr1)
 

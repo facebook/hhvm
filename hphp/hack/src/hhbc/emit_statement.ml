@@ -133,9 +133,9 @@ let rec emit_stmt env (pos, st_) =
     ]
   | A.Expr (_, A.Call ((_, A.Id (_, "unset")), _, exprl, [])) ->
     gather (List.map exprl (emit_unset_expr env))
-  | A.Return (Some (_, A.Await e)) ->
+  | A.Return (Some (inner_pos, A.Await e)) ->
     gather [
-      emit_await env e;
+      emit_await env inner_pos e;
       Emit_pos.emit_pos pos;
       emit_return ~need_ref:false env;
     ]
@@ -145,17 +145,17 @@ let rec emit_stmt env (pos, st_) =
       Emit_pos.emit_pos pos;
       emit_return ~need_ref:false env;
     ]
-  | A.Expr (_, A.Await e) ->
+  | A.Expr (pos, A.Await e) ->
     begin match try_inline_genva_call env e GI_ignore_result with
     | Some r -> r
     | None ->
     gather [
-      emit_await env e;
+      emit_await env pos e;
       instr_popc;
     ]
     end
   | A.Expr
-    (_, A.Binop ((A.Eq None), ((_, A.List l) as e1), (_, A.Await e_await))) ->
+    (_, A.Binop ((A.Eq None), ((_, A.List l) as e1), (await_pos, A.Await e_await))) ->
     begin match try_inline_genva_call env e_await (GI_list_assignment l) with
     | Some r -> r
     | None ->
@@ -166,7 +166,7 @@ let rec emit_stmt env (pos, st_) =
     in
     if has_elements then
       Local.scope @@ fun () ->
-        let awaited = emit_await env e_await in
+        let awaited = emit_await env await_pos e_await in
         let temp = Local.get_unnamed_local () in
         gather [
           awaited;
@@ -188,15 +188,15 @@ let rec emit_stmt env (pos, st_) =
       Local.scope @@ fun () ->
         let temp = Local.get_unnamed_local () in
         gather [
-          emit_await env e_await;
+          emit_await env await_pos e_await;
           instr_setl temp;
           instr_popc;
           instr_pushl temp;
           instr_popc;
         ]
     end
-  | A.Expr (_, A.Binop (A.Eq None, e_lhs, (_, A.Await e_await))) ->
-    let result = Local.scope @@ fun () -> emit_await env e_await in
+  | A.Expr (_, A.Binop (A.Eq None, e_lhs, (await_pos, A.Await e_await))) ->
+    let result = Local.scope @@ fun () -> emit_await env await_pos e_await in
     Local.scope @@ fun () ->
       let temp = Local.get_unnamed_local () in
       let rhs_instrs = instr_pushl temp in
@@ -290,7 +290,7 @@ let rec emit_stmt env (pos, st_) =
   | A.Def_inline def ->
     emit_def_inline def
   | A.Static_var es ->
-    emit_static_var es
+    emit_static_var pos es
   | A.Global_var es ->
     emit_global_vars env pos es
   | A.Markup ((_, s), echo_expr_opt) ->
@@ -384,12 +384,15 @@ and emit_global_vars env p es =
       end in
   Emit_pos.emit_pos_then p @@ gather (List.rev instrs)
 
-and emit_static_var es =
+and emit_static_var pos es =
   let emit_static_var_single e =
     match snd e with
     | A.Lvar (_, name)
     | A.Binop (A.Eq _, (_, A.Lvar (_, name)), _) ->
-      instr_static_loc_init name
+      gather [
+        Emit_pos.emit_pos pos;
+        instr_static_loc_init name
+      ]
     | _ -> failwith "Static var - impossible"
   in
   gather @@ List.map es ~f:emit_static_var_single

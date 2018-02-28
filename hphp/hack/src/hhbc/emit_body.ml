@@ -471,9 +471,13 @@ let emit_body
     if is_generator then gather [instr_createcont; instr_popc] else empty
   in
   let svar_map = Static_var.make_static_map body in
+  let emit_expr env e =
+    gather [
+      Emit_expression.emit_expr env ~need_ref:false e;
+      Emit_pos.emit_pos (fst e)
+    ] in
   let stmt_instrs =
-    rewrite_static_instrseq svar_map
-                    (Emit_expression.emit_expr ~need_ref:false) env stmt_instrs
+    rewrite_static_instrseq svar_map emit_expr env stmt_instrs
   in
   let first_instruction_is_label =
     match Instruction_sequence.first stmt_instrs with

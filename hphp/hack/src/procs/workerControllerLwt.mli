@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -8,4 +8,5 @@
  *
  *)
 
-val make : ?nbr_procs:int -> Gc.control -> SharedMem.handle -> MultiWorker.worker list
+(* Call in a sub-process *)
+val call: WorkerController.worker -> ('a -> 'b) -> 'a -> 'b Lwt.t

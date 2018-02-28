@@ -22,6 +22,6 @@ type lazy_decl_result = Errors.t
 (*****************************************************************************)
 (* Starts the process *)
 (*****************************************************************************)
-val go: WorkerController.worker list option -> bucket_size:int -> TypecheckerOptions.t ->
+val go: MultiWorker.worker list option -> bucket_size:int -> TypecheckerOptions.t ->
   FileInfo.fast -> result
 val merge_lazy_decl: lazy_decl_result -> lazy_decl_result -> lazy_decl_result

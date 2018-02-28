@@ -40,7 +40,7 @@ type genv = {
     config           : ServerConfig.t;
     local_config     : ServerLocalConfig.t;
     debug_port       : Debug_port.out_port option;
-    workers          : WorkerController.worker list option;
+    workers          : MultiWorker.worker list option;
     (* Returns the list of files under .hhconfig, subject to a filter *)
     indexer          : (string -> bool) -> (unit -> string list);
     (* Each time this is called, it should return the files that have changed

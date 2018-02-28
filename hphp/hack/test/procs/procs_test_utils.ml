@@ -7,7 +7,7 @@ let try_finalize f x finally y =
 
 let make_workers n =
   let handle = SharedMem.init GlobalConfig.default_sharedmem_config in
-  let workers = WorkerController.make handle entry n GlobalConfig.gc_control handle in
+  let workers = MultiWorker.make handle entry n GlobalConfig.gc_control handle in
   SharedMem.connect handle ~is_master:true;
   workers
 

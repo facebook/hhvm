@@ -28,7 +28,7 @@ let make ?nbr_procs gc_control heap_handle =
   let nbr_procs = match nbr_procs with
     | None -> GlobalConfig.nbr_procs
     | Some x -> x in
-  WorkerController.make
+  MultiWorker.make
     ~call_wrapper:{ WorkerController.wrap = catch_and_classify_exceptions; }
     ~saved_state:(ServerGlobalState.save ())
     ~entry

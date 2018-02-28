@@ -65,7 +65,7 @@ let merge_lazy_decl errors1 errors2 =
 (* Let's go! That's where the action is *)
 (*****************************************************************************)
 
-let go (workers:WorkerController.worker list option) ~bucket_size tcopt fast =
+let go (workers:MultiWorker.worker list option) ~bucket_size tcopt fast =
   TypeDeclarationStore.store tcopt;
   let fast_l =
     Relative_path.Map.fold fast ~init:[] ~f:(fun x _ y -> x :: y) in

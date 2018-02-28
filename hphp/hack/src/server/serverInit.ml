@@ -75,7 +75,7 @@ module ServerInitCommon = struct
 
 
   (* Return all the files that we need to typecheck *)
-  let make_next_files genv : Relative_path.t MultiWorker.nextlist =
+  let make_next_files genv : Relative_path.t list Bucket.next =
     let next_files_root = compose
       (List.map ~f:(Relative_path.(create Root)))
       (genv.indexer ServerEnv.file_filter) in

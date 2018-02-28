@@ -72,7 +72,7 @@ let parallel_helper workers tcopt pos_infos =
 
 (* Entry Point *)
 let go:
-  WorkerController.worker list option ->
+  MultiWorker.worker list option ->
   (string * int * int) list ->
   ServerEnv.env ->
   string list =

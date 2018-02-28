@@ -12,7 +12,7 @@ open Reordered_argument_collections
 open Typing_deps
 
 val redo_type_decl :
-  WorkerController.worker list option ->
+  MultiWorker.worker list option ->
   bucket_size:int ->
   TypecheckerOptions.t ->
   FileInfo.names ->
@@ -28,7 +28,7 @@ val redo_type_decl :
  * in a very particular use case of invalidate_type_decl.
  *)
 val get_dependent_classes :
-  WorkerController.worker list option ->
+  MultiWorker.worker list option ->
   bucket_size:int ->
   FileInfo.t Relative_path.Map.t ->
   SSet.t ->
@@ -36,7 +36,7 @@ val get_dependent_classes :
 
 val oldify_type_decl :
   ?collect_garbage:bool ->
-  WorkerController.worker list option ->
+  MultiWorker.worker list option ->
   FileInfo.t Relative_path.Map.t ->
   bucket_size:int ->
   FileInfo.names ->

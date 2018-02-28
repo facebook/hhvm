@@ -477,8 +477,8 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, missing2) = make_missing parser in
       (parser, missing1, missing2)
     else
-      let (parser, extends_list) = parse_special_type_list parser1 in
-      let (parser, extends_token) = Make.token parser extends_token in
+      let (parser, extends_token) = Make.token parser1 extends_token in
+      let (parser, extends_list) = parse_special_type_list parser in
       (parser, extends_token, extends_list)
 
   and parse_classish_implements_opt parser =
@@ -488,8 +488,8 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, missing2) = make_missing parser in
       (parser, missing1, missing2)
     else
-    let (parser, implements_list) = parse_special_type_list parser1 in
-    let (parser, implements_token) = Make.token parser implements_token in
+    let (parser, implements_token) = Make.token parser1 implements_token in
+    let (parser, implements_list) = parse_special_type_list parser in
     (parser, implements_token, implements_list)
 
   and parse_special_type parser =

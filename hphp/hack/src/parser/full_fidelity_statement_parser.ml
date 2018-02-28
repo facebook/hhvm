@@ -335,26 +335,26 @@ module WithExpressionAndDeclAndTypeParser
   and parse_foreach_statement parser =
     let parser, foreach_keyword_token = assert_token parser Foreach in
     let parser, foreach_left_paren = require_left_paren parser in
+    let parser = Parser.expect_in_new_scope parser [ RightParen ] in
     let parser, foreach_collection_name = parse_expression parser in
     let parser, await_token = optional_token parser Await in
     let parser, as_token = require_as parser in
-    (* let (parser1, token) = next_token parser in *)
-    let (parser, after_as) = parse_expression parser in
-    let parser = Parser.expect_in_new_scope parser [ RightParen ] in
+    let (parser1, after_as) = parse_expression parser in
     let (parser, foreach_key, foreach_arrow, foreach_value) =
-    match Token.kind (peek_token parser) with
+      match Token.kind (peek_token parser1) with
       | RightParen ->
         let (parser, missing1) = make_missing parser in
         let (parser, missing2) = make_missing parser in
-        (parser, missing1, missing2, after_as)
+        let (parser, value) = parse_expression parser in
+        (parser, missing1, missing2, value)
       | EqualGreaterThan ->
-        let parser, arrow = assert_token parser EqualGreaterThan in
+        let parser, arrow = assert_token parser1 EqualGreaterThan in
         let parser, value = parse_expression parser in
         (parser, after_as, arrow, value)
       | _ ->
         (* TODO ERROR RECOVERY. Now assumed that the arrow is missing
          * and goes on to parse the next expression *)
-        let (parser, token) = fetch_token parser in
+        let (parser, token) = fetch_token parser1 in
         let (parser, error) = Make.error parser token in
         let (parser, foreach_value) = parse_expression parser in
         (parser, after_as, error, foreach_value)

@@ -49,6 +49,7 @@ MODULES=\
   diff\
   debug\
   find\
+	facts\
   format\
   hackfmt/debug\
   hackfmt\

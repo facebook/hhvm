@@ -41,6 +41,7 @@ type options = {
   dump_symbol_refs : bool;
   dump_stats       : bool;
   dump_config      : bool;
+  extract_facts    : bool;
   log_stats        : bool;
 }
 
@@ -49,6 +50,7 @@ type message_handler = Hh_json.json -> string -> unit
 type message_handlers = {
   set_config : message_handler;
   compile    : message_handler;
+  facts      : message_handler;
   error      : message_handler;
 }
 
@@ -107,6 +109,7 @@ let parse_options () =
   let quiet_mode = ref false in
   let input_file_list = ref None in
   let dump_symbol_refs = ref false in
+  let extract_facts = ref false in
   let dump_stats = ref false in
   let dump_config = ref false in
   let log_stats = ref true in
@@ -128,6 +131,10 @@ let parse_options () =
           , Arg.Set quiet_mode
             , " Runs very quietly, and ignore any result if invoked without -o "
               ^ "(lower priority than the debug-time option)"
+      );
+      ("--facts"
+          , Arg.Set extract_facts
+          , "Extract facts from the source code."
       );
       ("-v"
           , Arg.String (fun str -> config_list := str :: !config_list)
@@ -205,6 +212,7 @@ let parse_options () =
   ; dump_stats         = !dump_stats
   ; dump_config        = !dump_config
   ; log_stats          = !log_stats
+  ; extract_facts      = !extract_facts
   }
 
 let fail_daemon file error =
@@ -244,6 +252,7 @@ let rec dispatch_loop handlers =
     | "code"   -> handlers.compile header body
     | "error"  -> handlers.error header body
     | "config" -> handlers.set_config header body
+    | "facts"  -> handlers.facts header body
     | _        -> fail_daemon None ("Unhandled message type '" ^ msg_type ^ "'"));
   dispatch_loop handlers
 
@@ -367,18 +376,27 @@ let do_compile filename compiler_options text fail_or_ast debug_time =
   then log_success compiler_options filename debug_time;
   hhas_text
 
+let extract_facts ?pretty text =
+  Facts_parser.extract_as_json ~php5_compat_mode:true text
+  |> Hh_json.json_to_string ?pretty
 
 (*****************************************************************************)
 (* Main entry point *)
 (*****************************************************************************)
 
-let process_single_source_unit compiler_options popt handle_output handle_exception filename source_text =
+let process_single_source_unit compiler_options popt handle_output
+  handle_exception filename source_text =
   try
     let t = Unix.gettimeofday () in
-    let fail_or_ast = parse_file compiler_options popt filename source_text in
-    let debug_time = new_debug_time () in
-    ignore @@ add_to_time_ref debug_time.parsing_t t;
-    let output = do_compile filename compiler_options source_text fail_or_ast debug_time in
+    let output =
+      if compiler_options.extract_facts
+      then extract_facts ~pretty:true source_text
+      else begin
+        let fail_or_ast = parse_file compiler_options popt filename source_text in
+        let debug_time = new_debug_time () in
+        ignore @@ add_to_time_ref debug_time.parsing_t t;
+        do_compile filename compiler_options source_text fail_or_ast debug_time
+      end in
     handle_output filename output
   with exc ->
     if compiler_options.log_stats
@@ -446,7 +464,9 @@ let decl_and_run_mode compiler_options popt =
             handle_exception
             (Relative_path.create Relative_path.Dummy filename)
             body)
-        } in
+        ; facts = (fun _header body -> (
+          handle_output Relative_path.default @@ extract_facts body)
+        )} in
       dispatch_loop handlers
 
     | CLI ->

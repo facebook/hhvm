@@ -303,7 +303,7 @@ let priorities = [
   (Left, [Tcomma]);
   (Right, [Tprint]);
   (Left, [Tpipe]);
-  (Left, [Tqm; Tcolon]);
+  (Left, [Telvis; Tqm; Tcolon]);
   (Right, [Tqmqm]);
   (Left, [Tbarbar]);
   (Left, [Txor]);
@@ -1140,9 +1140,15 @@ and hint_function_with_no_parens_error env start ~is_coroutine =
   h
 
 and hint env =
-  match L.token env.file env.lb with
+  let tok = L.token env.file env.lb in
+  match tok with
   (* ?_ *)
-  | Tqm ->
+  | Tqm | Telvis ->
+      if tok = Telvis then begin
+        (* We're likely dealing with ?:XHPNAME *)
+        L.back env.lb;
+        L.look_for_qm env.lb;
+      end;
       let start = Pos.make env.file env.lb in
       let e = hint env in
       Pos.btw start (fst e), Hoption e
@@ -3018,6 +3024,8 @@ and expr_remain env e1 =
       expr_array_get env e1
   | Tqm ->
       expr_if env e1
+  | Telvis ->
+      expr_elvis env e1
   | Tqmqm ->
       expr_null_coalesce env e1
   | Tword when Lexing.lexeme env.lb = "instanceof" ->
@@ -3837,7 +3845,12 @@ and is_colon_if env =
 and expr_if env e1 =
   reduce env e1 Tqm begin fun e1 env ->
     if is_colon_if env
-    then colon_if env e1
+    then begin
+      expect env Tcolon;
+      if ParserOptions.disallow_elvis_space env.popt then
+        error env "Remove all whitespace between ? and :";
+      expr_elvis env e1
+    end
     else ternary_if env e1
   end
 
@@ -3851,8 +3864,7 @@ and ternary_if env e1 =
   | _ -> ());
   Pos.btw (fst e1) (fst e3), Eif (e1, Some e2, e3)
 
-and colon_if env e1 =
-  expect env Tcolon;
+and expr_elvis env e1 =
   let e2 = expr env in
   Pos.btw (fst e1) (fst e2), Eif (e1, None, e2)
 

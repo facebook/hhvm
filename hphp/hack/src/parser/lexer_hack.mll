@@ -118,6 +118,7 @@ type token =
   | Tlambda
   | Tem
   | Tqm
+  | Telvis
   | Tqmqm
   | Tamp
   | Ttild
@@ -239,6 +240,7 @@ let token_to_string = function
   | Tlambda       -> "==>"
   | Tem           -> "!"
   | Tqm           -> "?"
+  | Telvis        -> "?:"
   | Tqmqm         -> "??"
   | Tamp          -> "&"
   | Ttild         -> "~"
@@ -415,6 +417,7 @@ rule token file = parse
   | "==>"              { Tlambda      }
   | '!'                { Tem          }
   | '?'                { Tqm          }
+  | "?:"               { Telvis       }
   | "??"               { Tqmqm        }
   | '&'                { Tamp         }
   | '~'                { Ttild        }
@@ -596,7 +599,6 @@ and gt_or_comma file = parse
                        }
   | "//"               { line_comment (create_line_comment_buf ()) file lexbuf;
                          gt_or_comma file lexbuf }
-  | '\n'               { Lexing.new_line lexbuf; gt_or_comma file lexbuf }
   | '>'                { Tgt  }
   | ','                { Tcomma  }
   | _                  { Terror }
@@ -667,6 +669,12 @@ and look_for_open_cb = parse
   | '\n'               { Lexing.new_line lexbuf; look_for_open_cb lexbuf }
   | '{'                { () }
   | _                  { look_for_open_cb lexbuf }
+
+and look_for_qm = parse
+  | eof                { () }
+  | '\n'               { Lexing.new_line lexbuf; look_for_qm lexbuf }
+  | '?'                { () }
+  | _                  { look_for_qm lexbuf }
 
 (* Normally you can just use "token" and get back Tlvar, but specifically for
  * member variable accesses, the part to the right of the "->" isn't a word
@@ -758,6 +766,7 @@ and format_token = parse
   | "==>"              { Tlambda       }
   | '!'                { Tem           }
   | '?'                { Tqm           }
+  | "?:"               { Telvis        }
   | "??"               { Tqmqm         }
   | '&'                { Tamp          }
   | '~'                { Ttild         }

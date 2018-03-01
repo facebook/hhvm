@@ -81,6 +81,12 @@ type t = {
   *)
  tco_disallow_ambiguous_lambda : bool;
 
+ (*
+  * Flag to stop parsing the degenerate ternary ?<whitespace>: as if it
+  * were the Elvis operator ?:
+  *)
+ po_disallow_elvis_space : bool;
+
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
 }
@@ -95,6 +101,7 @@ val make :
   po_auto_namespace_map: (string * string) list ->
   tco_disallow_destruct: bool ->
   tco_disallow_ambiguous_lambda: bool ->
+  po_disallow_elvis_space: bool ->
   ignored_fixme_codes: ISet.t -> t
 val tco_assume_php : t -> bool
 val tco_safe_array : t -> bool
@@ -108,6 +115,7 @@ val po_deregister_php_stdlib : t -> bool
 val po_enable_hh_syntax_for_hhvm : t -> bool
 val tco_disallow_destruct : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool
+val po_disallow_elvis_space : t -> bool
 val default : t
 val make_permissive : t -> t
 val tco_experimental_instanceof : string

@@ -216,6 +216,7 @@ let load config_filename options =
     (prepare_auto_namespace_map config)
     (bool_ "disallow_destruct" ~default:false config)
     (bool_ "disallow_ambiguous_lambda" ~default:false config)
+    (bool_ "disallow_elvis_space" ~default:false config)
     (prepare_ignored_fixme_codes config)
   in
   Errors.ignored_fixme_codes :=

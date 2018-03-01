@@ -76,6 +76,7 @@ type env =
   ; level                : error_level
   ; hhvm_compat_mode     : hhvm_compat_mode
   ; enable_hh_syntax     : bool
+  ; disallow_elvis_space : bool
   ; is_hh_file           : bool
   ; is_strict            : bool
   }
@@ -84,12 +85,14 @@ let make_env
   ?(level                = Typical         )
   ?(hhvm_compat_mode     = NoCompat        )
   ?(enable_hh_syntax     = false           )
+  ?(disallow_elvis_space = false           )
   (syntax_tree : SyntaxTree.t)
   : env
   = { syntax_tree
     ; level
     ; hhvm_compat_mode
     ; enable_hh_syntax
+    ; disallow_elvis_space
     ; is_hh_file = SyntaxTree.is_hack syntax_tree
     ; is_strict = SyntaxTree.is_strict syntax_tree
     }
@@ -1843,6 +1846,13 @@ let expression_errors env node parents errors =
           (SyntaxError.invalid_is_expression_hint "Soft") :: errors
       | _ -> errors
     end
+  | ConditionalExpression
+    { conditional_consequence = cons
+    ; _ }
+    when is_missing cons
+      && env.disallow_elvis_space
+      && is_hack env ->
+    make_error_from_node node SyntaxError.elvis_operator_space :: errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors env node parents trait_use_clauses errors =

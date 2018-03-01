@@ -1949,18 +1949,27 @@ module WithStatementAndDeclAndTypeParser
        but legal in C#.
     *)
     let kind = peek_token_kind parser in
-    (* e1 ?: e2 -- where there is no consequence -- is legal.
-       However this introduces an ambiguity:
-       x ? :y::m : z
-       is that
-       x   ?:   y::m   :   z
+    (* ERROR RECOVERY
+       e1 ?: e2 is legal and we parse it as a binary expression. However,
+       it is possible to treat it degenerately as a conditional with no
+       consequence. This introduces an ambiguity
+          x ? :y::m : z
+       Is that
+          x   ?:   y::m   :   z    [1]
        or
-       x   ?   :y::m   :   z
+          x   ?   :y::m   :   z    [2]
 
-       We assume the latter.
-       TODO: Review this decision.
+       First consider a similar expression
+          x ? : y::m
+       If we assume XHP class names cannot have a space after the : , then
+       this only has one interpretation
+          x   ?:   y::m
+
+       The first example also resolves cleanly to [2]. To reduce confusion,
+       we report an error for the e1 ? : e2 construction in a later pass.
+
        TODO: Add this to the XHP draft specification.
-       *)
+    *)
     let missing_consequence =
       kind = Colon && not (is_next_xhp_class_name parser) in
     let (parser, consequence) =

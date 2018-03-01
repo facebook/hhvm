@@ -50,6 +50,7 @@ let () =
     ~po_deregister_php_stdlib: true
     ~tco_disallow_destruct:false
     ~tco_disallow_ambiguous_lambda:false
+    ~po_disallow_elvis_space:false
     ~ignored_fixme_codes: ISet.empty
   in
   let custom_config = ServerConfig.default_config in

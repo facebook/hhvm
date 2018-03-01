@@ -137,6 +137,7 @@ let parse_options () =
   let disallow_ambiguous_lambda = ref false in
   let no_fallback_in_namespaces = ref false in
   let disallow_refs_in_array = ref false in
+  let disallow_elvis_space = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -253,6 +254,10 @@ let parse_options () =
     "--disallow-refs-in-array",
       Arg.Set disallow_refs_in_array,
       " Forbid creation of references inside arrays.";
+    "--disallow-elvis-space",
+      Arg.Set disallow_elvis_space,
+      " Stop parsing the degenerate ternary ? : (when the halves are" ^
+      " separated by whitespace) as an Elvis operator ?:";
     "--infer-return-types",
       Arg.Unit (set_mode Infer_return_types),
       " Infers return types of functions and methods.";
@@ -273,6 +278,7 @@ let parse_options () =
       GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;
       GlobalOptions.tco_disallow_destruct = !disallow_destruct;
       GlobalOptions.tco_disallow_ambiguous_lambda = !disallow_ambiguous_lambda;
+      GlobalOptions.po_disallow_elvis_space = !disallow_elvis_space;
   } in
   let tcopt = {
     tcopt with

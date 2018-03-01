@@ -46,6 +46,7 @@ type env =
   ; quick_mode               : bool
   ; lower_coroutines         : bool
   ; enable_hh_syntax         : bool
+  ; disallow_elvis_space     : bool
   ; parser_options           : ParserOptions.t
   ; fi_mode                  : FileInfo.mode
   ; file                     : Relative_path.t
@@ -2672,6 +2673,7 @@ let make_env
   ?(quick_mode               = false                   )
   ?(lower_coroutines         = false                   )
   ?(enable_hh_syntax         = false                   )
+  ?(disallow_elvis_space     = false                   )
   ?(parser_options           = ParserOptions.default   )
   ?(fi_mode                  = FileInfo.Mpartial       )
   ?(is_hh_file               = false                   )
@@ -2680,6 +2682,8 @@ let make_env
   : env
   = let parser_options = ParserOptions.with_hh_syntax_for_hhvm parser_options
       (codegen && (enable_hh_syntax || is_hh_file)) in
+    let parser_options = ParserOptions.with_disallow_elvis_space parser_options
+      disallow_elvis_space in
     { is_hh_file
     ; codegen = codegen || systemlib_compat_mode
     ; systemlib_compat_mode
@@ -2696,6 +2700,7 @@ let make_env
          )
     ; lower_coroutines
     ; enable_hh_syntax
+    ; disallow_elvis_space
     ; parser_options
     ; fi_mode
     ; file
@@ -2792,7 +2797,9 @@ let from_text (env : env) (source_text : SourceText.t) : result =
       else ParserErrors.HHVMCompat in
     let error_env = ParserErrors.make_env tree
       ~hhvm_compat_mode
-      ~enable_hh_syntax:env.enable_hh_syntax in
+      ~enable_hh_syntax:env.enable_hh_syntax
+      ~disallow_elvis_space:env.disallow_elvis_space
+    in
     let errors = ParserErrors.parse_errors error_env in
     (* Prioritize runtime errors *)
     let runtime_errors =
@@ -2836,6 +2843,8 @@ let from_text (env : env) (source_text : SourceText.t) : result =
    *)
   let popt = ParserOptions.with_hh_syntax_for_hhvm popt
     (env.codegen && (ParserOptions.enable_hh_syntax_for_hhvm popt || env.is_hh_file)) in
+  let popt = ParserOptions.with_disallow_elvis_space popt
+    env.disallow_elvis_space in
   let env = { env with parser_options = popt } in
   lower
     env

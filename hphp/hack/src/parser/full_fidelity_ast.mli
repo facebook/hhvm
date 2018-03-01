@@ -32,6 +32,7 @@ val make_env
   -> ?quick_mode:bool
   -> ?lower_coroutines:bool
   -> ?enable_hh_syntax:bool
+  -> ?disallow_elvis_space:bool
   -> ?parser_options:ParserOptions.t
   -> ?fi_mode:FileInfo.mode
   -> ?is_hh_file:bool

@@ -19,6 +19,7 @@ module WithSyntax : functor (Syntax : Syntax_sig.Syntax_S) -> sig
        ?level:error_level
     -> ?hhvm_compat_mode:hhvm_compat_mode
     -> ?enable_hh_syntax:bool
+    -> ?disallow_elvis_space:bool
     (* Required parts *)
     -> Full_fidelity_syntax_tree.WithSyntax(Syntax).t
     -> env

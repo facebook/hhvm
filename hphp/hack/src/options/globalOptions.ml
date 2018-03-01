@@ -20,6 +20,7 @@ type t = {
   po_deregister_php_stdlib : bool;
   tco_disallow_destruct : bool;
   tco_disallow_ambiguous_lambda : bool;
+  po_disallow_elvis_space : bool;
   ignored_fixme_codes : ISet.t;
 }
 
@@ -211,6 +212,7 @@ let default = {
  po_deregister_php_stdlib = false;
  tco_disallow_destruct = false;
  tco_disallow_ambiguous_lambda = false;
+ po_disallow_elvis_space = false;
  ignored_fixme_codes = ISet.empty;
 }
 
@@ -240,6 +242,7 @@ let make ~tco_assume_php
          ~po_auto_namespace_map
          ~tco_disallow_destruct
          ~tco_disallow_ambiguous_lambda
+         ~po_disallow_elvis_space
          ~ignored_fixme_codes = {
                    tco_assume_php;
                    tco_safe_array;
@@ -253,6 +256,7 @@ let make ~tco_assume_php
                    po_deregister_php_stdlib;
                    tco_disallow_destruct;
                    tco_disallow_ambiguous_lambda;
+                   po_disallow_elvis_space;
         }
 let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
@@ -270,5 +274,6 @@ let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
 let po_enable_hh_syntax_for_hhvm t = t.po_enable_hh_syntax_for_hhvm
 let tco_disallow_destruct t = t.tco_disallow_destruct
 let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda
+let po_disallow_elvis_space t = t.po_disallow_elvis_space
 
 let ignored_fixme_codes t = t.ignored_fixme_codes

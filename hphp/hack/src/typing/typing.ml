@@ -4090,7 +4090,9 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       | Some field -> (match ShapeMap.get field fdm with
         | None ->
           Errors.undefined_field
-            p (TUtils.get_printable_shape_field_name field);
+            ~use_pos:p
+            ~name:(TUtils.get_printable_shape_field_name field)
+            ~shape_type_pos:(Reason.to_pos (fst ety1));
           env, (Reason.Rwitness p, Terr)
         | Some { sft_optional = true; _ }
           when not is_lvalue && not lhs_of_null_coalesce ->

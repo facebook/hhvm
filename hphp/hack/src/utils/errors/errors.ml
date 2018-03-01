@@ -2304,8 +2304,11 @@ let typing_error pos msg =
 let typing_error_l err =
   add_error err
 
-let undefined_field p name =
-  add Typing.undefined_field p ("The field "^name^" is undefined")
+let undefined_field ~use_pos ~name ~shape_type_pos =
+  add_list Typing.undefined_field [
+    use_pos, "The field "^name^" is undefined";
+    shape_type_pos, "You might want to check this out"
+  ]
 
 let array_access pos1 pos2 ty =
   add_list Typing.array_access

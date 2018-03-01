@@ -161,7 +161,8 @@ module type S = sig
   val array_get_arity : Pos.t -> string -> Pos.t -> unit
   val typing_error : Pos.t -> string -> unit
   val typing_error_l : error -> unit
-  val undefined_field : Pos.t -> string -> unit
+  val undefined_field :
+    use_pos: Pos.t -> name: string -> shape_type_pos: Pos.t -> unit
   val array_access : Pos.t -> Pos.t -> string -> unit
   val keyset_set : Pos.t -> Pos.t -> unit
   val array_append : Pos.t -> Pos.t -> string -> unit

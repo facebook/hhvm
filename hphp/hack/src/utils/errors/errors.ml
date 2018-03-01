@@ -58,13 +58,9 @@ let files_t_map v ~f =
 
 let files_t_merge ~f x y =
   Relative_path.Map.merge x y ~f:begin fun k x y ->
-    Option.merge x y ~f:begin fun x y ->
-      PhaseMap.merge x y ~f:begin fun _k x y ->
-        Option.merge x y ~f:begin fun x y ->
-          f k x y
-        end
-      end
-    end
+    let x = Option.value x ~default:PhaseMap.empty in
+    let y = Option.value y ~default:PhaseMap.empty in
+    Some (PhaseMap.merge x y ~f:(fun _k x y -> f k x y))
   end
 
 let files_t_to_list x =
@@ -488,7 +484,11 @@ and add_list code pos_msg_l =
   add_ignored_fixme_code_error pos code
 
 and merge (err',fixmes') (err,fixmes) =
-  let append = fun _ x y -> List.rev_append x y in
+  let append = fun _ x y ->
+    let x = Option.value x ~default: [] in
+    let y = Option.value y ~default: [] in
+    Some (List.rev_append x y)
+  in
   files_t_merge ~f:append err' err,
   files_t_merge ~f:append fixmes' fixmes
 
@@ -517,14 +517,16 @@ and incremental_update :
     | Some x -> Relative_path.Map.add acc path x
   in
   (* Replace old errors with new *)
-  let res = files_t_merge old new_ ~f:begin fun path _old new_ ->
+  let res = files_t_merge old new_ ~f:begin fun path old new_ ->
     if path = Relative_path.default then
       Utils.assert_false_log_backtrace (Some(
         "Default (untracked) error sources should not get into incremental " ^
         "mode. There might be a missing call to Errors.do_with_context/" ^
         "run_in_context somwhere or incorrectly used Errors.from_error_list"
       ));
-    new_
+    match new_ with
+    | Some new_ -> Some (List.rev new_)
+    | None -> old
   end in
   (* For files that were rechecked, but had no errors - remove them from maps *)
   fold res begin fun path acc ->

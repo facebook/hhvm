@@ -98,6 +98,18 @@ let test_merge () =
   Asserter.String_asserter.assert_equals expected
     (Errors.get_error_list errors |> error_list_to_string )
     "Errors.merge behaves like List.rev_append";
+
+  let errors = Errors.merge errors1 Errors.empty in
+  let expected = (expect_error_in "B") ^ (expect_error_in "A") in
+  Asserter.String_asserter.assert_equals expected
+    (Errors.get_error_list errors |> error_list_to_string )
+    "Errors.merge behaves like List.rev_append";
+
+  let errors = Errors.merge Errors.empty errors2 in
+  let expected = (expect_error_in "C") ^ (expect_error_in "D") in
+  Asserter.String_asserter.assert_equals expected
+    (Errors.get_error_list errors |> error_list_to_string )
+    "Errors.merge behaves like List.rev_append";
   true
 
 let test_from_error_list () =

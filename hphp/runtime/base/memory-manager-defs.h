@@ -122,7 +122,7 @@ struct alignas(kSmallSizeAlign) Slab : HeapObject {
 
   // access whole start-bits word, for testing
   uint64_t start_bits(const void* p) const {
-    return starts_[start_index(p)];
+    return starts_[start_index(p) / kBitsPerStart];
   }
 
 private:

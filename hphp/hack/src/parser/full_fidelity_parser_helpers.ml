@@ -29,17 +29,8 @@ module type Parser_S = ParserSig.WithSyntax(Syntax).WithLexer(Lexer).Parser_S
 module WithParser(Parser : Parser_S) = struct
   open Parser
 
-  let make_missing parser =
-    let l = lexer parser in
-    let s = Lexer.source l in
-    let o = Lexer.end_offset l in
-    Make.missing parser s o
-
   let make_list parser items =
-    let l = lexer parser in
-    let s = Lexer.source l in
-    let o = Lexer.end_offset l in
-    Make.list parser s o items
+    Make.list parser (pos parser) items
 
   module NextToken : sig
     val next_token : t -> t * Syntax.Token.t
@@ -280,10 +271,10 @@ module WithParser(Parser : Parser_S) = struct
         if List.exists is_misspelling kinds then
           let kind = List.(hd @@ filter is_misspelling kinds) in
           let parser = skip_and_log_misspelled_token parser kind in
-          make_missing parser
+          Make.missing parser (pos parser)
         else
           let parser = with_error parser error in
-          make_missing parser
+          Make.missing parser (pos parser)
       end
     end
 
@@ -309,10 +300,10 @@ module WithParser(Parser : Parser_S) = struct
          * is a misspelling, by our existing narrow definition of misspelling. *)
         if is_misspelled_kind kind (current_token_text parser) then
           let parser = skip_and_log_misspelled_token parser kind in
-          make_missing parser
+          Make.missing parser (pos parser)
         else
           let parser = with_error parser error in
-          make_missing parser
+          Make.missing parser (pos parser)
       end
     end
 
@@ -330,7 +321,7 @@ module WithParser(Parser : Parser_S) = struct
       (* ERROR RECOVERY: Create a missing token for the expected token,
          and continue on from the current token. Don't skip it. *)
       let parser = with_error parser SyntaxError.error1004 in
-      make_missing parser
+      Make.missing parser (pos parser)
 
   let require_name_allow_std_constants parser =
     let start_offset = Lexer.end_offset @@ lexer parser in
@@ -381,7 +372,7 @@ module WithParser(Parser : Parser_S) = struct
          and continue on from the current token. Don't skip it. *)
       (* TODO: Different error? *)
       let parser = with_error parser SyntaxError.error1004 in
-      make_missing parser
+      Make.missing parser (pos parser)
 
   let is_next_xhp_category_name parser =
     Lexer.is_next_xhp_category_name (lexer parser)
@@ -407,7 +398,7 @@ module WithParser(Parser : Parser_S) = struct
       (* next token is not part of qualified name but we've consume some
          part of the input - create part for name with missing backslash
          and return accumulated result *)
-      let (parser, missing) = make_missing parser in
+      let (parser, missing) = Make.missing parser (pos parser) in
       let (parser, part) = Make.list_item parser name missing in
       (* TODO(T25649779) *)
       parser, List.rev (part :: acc), false
@@ -434,7 +425,7 @@ module WithParser(Parser : Parser_S) = struct
     (parser, name)
 
   let scan_qualified_name_extended parser backslash =
-    let (parser, missing) = make_missing parser in
+    let (parser, missing) = Make.missing parser (pos parser) in
     let (parser, head) = Make.list_item parser missing backslash in
     let (parser, parts, is_backslash) =
       scan_qualified_name_worker parser None [head] false
@@ -456,7 +447,7 @@ module WithParser(Parser : Parser_S) = struct
     | TokenKind.Backslash ->
       let (parser, token) = Make.token parser1 token in
       scan_qualified_name parser token
-    | _ -> make_missing parser
+    | _ -> Make.missing parser (pos parser)
     end
 
   let next_xhp_class_name_or_other_token parser =
@@ -491,7 +482,7 @@ module WithParser(Parser : Parser_S) = struct
       scan_remaining_qualified_name parser token
     | _ ->
       let parser = with_error parser SyntaxError.error1004 in
-      make_missing parser
+      Make.missing parser (pos parser)
 
   (**
    * TODO: If using qualified names for class names is legal in some cases, then
@@ -523,7 +514,7 @@ module WithParser(Parser : Parser_S) = struct
   let require_semicolon parser =
     (* TODO: Kill PHPism; no semicolon required right before ?> *)
     match peek_token_kind parser with
-    | TokenKind.QuestionGreaterThan -> make_missing parser
+    | TokenKind.QuestionGreaterThan -> Make.missing parser (pos parser)
     | _ -> require_token parser TokenKind.Semicolon SyntaxError.error1010
 
   let require_colon parser =
@@ -581,7 +572,7 @@ module WithParser(Parser : Parser_S) = struct
       (* ERROR RECOVERY: Create a missing token for the expected token,
          and continue on from the current token. Don't skip it. *)
       let parser = with_error parser error in
-      make_missing parser
+      Make.missing parser (pos parser)
 
   let require_name_or_variable parser =
     require_name_or_variable_or_error parser SyntaxError.error1050
@@ -598,7 +589,7 @@ module WithParser(Parser : Parser_S) = struct
     if (Token.kind token) = kind then
       Make.token parser1 token
     else
-      make_missing parser
+      Make.missing parser (pos parser)
 
   let assert_token parser kind =
     let (parser, token) = next_token parser in
@@ -650,8 +641,8 @@ module WithParser(Parser : Parser_S) = struct
           then with_error parser error
           else parser
         in
-        let (parser, missing1) = make_missing parser in
-        let (parser, missing2) = make_missing parser in
+        let (parser, missing1) = Make.missing parser (pos parser) in
+        let (parser, missing2) = Make.missing parser (pos parser) in
         let (parser, list_item) = Make.list_item parser missing1 missing2 in
         (* TODO(T25649779) *)
         (parser, (list_item :: acc))
@@ -674,7 +665,7 @@ module WithParser(Parser : Parser_S) = struct
         let parser = if list_kind <> ItemsOptional
           then with_error parser1 error
           else parser1 in
-        let (parser, item) = make_missing parser in
+        let (parser, item) = Make.missing parser (pos parser) in
         let (parser, separator) = Make.token parser token in
         let (parser, list_item) = Make.list_item parser item separator in
         (* TODO(T25649779) *)
@@ -687,7 +678,7 @@ module WithParser(Parser : Parser_S) = struct
         let (parser1, token) = next_token parser in
         let kind = Token.kind token in
         if close_predicate kind then
-          let (parser, missing) = make_missing parser in
+          let (parser, missing) = Make.missing parser (pos parser) in
           let (parser, list_item) = Make.list_item parser item missing in
           (* TODO(T25649779) *)
           (parser, (list_item :: acc))
@@ -706,7 +697,7 @@ module WithParser(Parser : Parser_S) = struct
         else
           (* ERROR RECOVERY: We were expecting a close or separator, but
              got neither. Bail out. Caller will give an error. *)
-          let (parser, missing) = make_missing parser in
+          let (parser, missing) = Make.missing parser (pos parser) in
           let (parser, list_item) = Make.list_item parser item missing in
           (* TODO(T25649779) *)
           (parser, (list_item :: acc)) in
@@ -730,7 +721,7 @@ module WithParser(Parser : Parser_S) = struct
     let token = peek_token parser in
     let kind = Token.kind token in
     if close_predicate kind then
-      make_missing parser
+      Make.missing parser (pos parser)
     else
       let (parser, items, _) =
       parse_separated_list_predicate

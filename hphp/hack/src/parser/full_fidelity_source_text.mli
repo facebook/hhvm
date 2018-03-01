@@ -15,6 +15,8 @@ type t = {
   offset_map : Line_break_map.t
 }
 
+type pos = t * int
+
 (** create a new source_text.t with a path and contents *)
 val make : Relative_path.t -> string -> t
 

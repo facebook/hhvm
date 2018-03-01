@@ -593,8 +593,8 @@ module type SmartConstructors_S = sig
 
   val initial_state : unit -> t
   val make_token : Token.t -> t -> t * r
-  val make_missing : Full_fidelity_source_text.t -> int -> t -> t * r
-  val make_list : Full_fidelity_source_text.t -> int -> r list -> t -> t * r
+  val make_missing : Full_fidelity_source_text.pos -> t -> t * r
+  val make_list : Full_fidelity_source_text.pos -> r list -> t -> t * r
 CONSTRUCTOR_METHODS
 end (* SmartConstructors_S *)
 
@@ -608,8 +608,8 @@ end) = struct
     open Parser
 
     let token parser token = call parser (SCI.make_token token)
-    let missing parser s o = call parser (SCI.make_missing s o)
-    let list parser s o items = call parser (SCI.make_list s o items)
+    let missing parser p = call parser (SCI.make_missing p)
+    let list parser p items = call parser (SCI.make_list p items)
 MAKE_METHODS
   end (* Make *)
 end (* ParserWrapper *)
@@ -656,6 +656,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     module type Parser_S = sig
       module SC : SCWithKind_S with module Token = Token
       type t
+      val pos : t -> Full_fidelity_source_text.pos
       val sc_call : t -> (SC.t -> SC.t * SC.r) -> t * SC.r
       val lexer : t -> Lexer.t
       val errors : t -> Full_fidelity_syntax_error.t list
@@ -670,8 +671,8 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
       module Make : sig
         val token : t -> Token.t -> t * SC.r
-        val missing : t -> Full_fidelity_source_text.t -> int -> t * SC.r
-        val list : t -> Full_fidelity_source_text.t -> int -> SC.r list -> t * SC.r
+        val missing : t -> Full_fidelity_source_text.pos -> t * SC.r
+        val list : t -> Full_fidelity_source_text.pos -> SC.r list -> t * SC.r
 MAKE_METHODS
       end (* Make *)
     end (* Parser_S *)
@@ -725,15 +726,16 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S)
   type r = unit
 
   let initial_state () = []
-  let make_token token stack = (Syntax.make_token token) :: stack, ()
-  let make_missing s o stack = (Syntax.make_missing s o) :: stack, ()
-  let make_list s o items stack =
-    if items = []
-    then
-      (Syntax.make_missing s o) :: stack, ()
-    else
+
+  let make_token token stack = Syntax.make_token token :: stack, ()
+
+  let make_missing (s, o) stack = Syntax.make_missing s o :: stack, ()
+
+  let make_list (s, o) items stack =
+    if items <> [] then
       let (h, t) = Core_list.split_n stack (List.length items) in
-      (Syntax.make_list s o (List.rev h)) :: t, ()
+      Syntax.make_list s o (List.rev h) :: t, ()
+    else make_missing (s, o) stack
 CONSTRUCTOR_METHODS
 end (* WithSyntax *)
 "
@@ -769,7 +771,6 @@ module GenerateFFSyntaxSmartConstructors = struct
  ") ^ "
 
 module type SC_S = SmartConstructors.SmartConstructors_S
-module SourceText = Full_fidelity_source_text
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S)
 : (SC_S with module Token = Syntax.Token and type r = Syntax.t) = struct
@@ -779,11 +780,11 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S)
 
   let initial_state () = ()
   let make_token token () = (), Syntax.make_token token
-  let make_missing s o () = (), Syntax.make_missing s o
-  let make_list s o items () =
+  let make_missing (s, o) () = (), Syntax.make_missing s o
+  let make_list (s, o) items () =
     if items <> []
     then (), Syntax.make_list s o items
-    else (), Syntax.make_missing s o
+    else make_missing (s, o) ()
 CONSTRUCTOR_METHODS
 end (* WithSyntax *)
 "
@@ -862,10 +863,10 @@ module SyntaxKind(SC : SC_S)
   let initial_state = SC.initial_state
 
   let make_token token state = compose (SK.Token (SC.Token.kind token)) (SC.make_token token state)
-  let make_missing s o state = compose SK.Missing (SC.make_missing s o state)
-  let make_list s o items state =
+  let make_missing p state = compose SK.Missing (SC.make_missing p state)
+  let make_list p items state =
     let kind = if items <> [] then SK.SyntaxList else SK.Missing in
-    compose kind (SC.make_list s o (Core_list.map ~f:snd items) state)
+    compose kind (SC.make_list p (Core_list.map ~f:snd items) state)
 CONSTRUCTOR_METHODS
 
   let has_kind kind node = kind_of node = kind

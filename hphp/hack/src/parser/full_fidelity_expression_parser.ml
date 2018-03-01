@@ -190,7 +190,7 @@ module WithStatementAndDeclAndTypeParser
        * the previous scope of the expected stack, don't eat it--just mark the
        * name missing and continue parsing, starting from the offending token. *)
       let parser = with_error parser SyntaxError.error1015 in
-      make_missing parser
+      Make.missing parser (pos parser)
     | _ ->
       (* ERROR RECOVERY: If we're encountering anything other than a Name
        * or the next expected kind, eat the offending token.
@@ -296,7 +296,7 @@ module WithStatementAndDeclAndTypeParser
        * later, mark the expression missing, throw an error, and do not advance
        * the parser. *)
       let parser = with_error parser SyntaxError.error1015 in
-      make_missing parser
+      Make.missing parser (pos parser)
     | TokenKind.EndOfFile
     | _ -> parse_as_name_or_error parser
 
@@ -437,7 +437,7 @@ module WithStatementAndDeclAndTypeParser
             Make.token parser1 token
           else
             let parser = with_error parser SyntaxError.error1006 in
-            make_missing parser
+            Make.missing parser (pos parser)
         in
         parser, expr, right_brace
     in
@@ -1003,7 +1003,7 @@ module WithStatementAndDeclAndTypeParser
     | (LeftBracket, RightBracket)
     | (LeftBrace, RightBrace) ->
       let (parser, left) = Make.token parser1 left in
-      let (parser, missing) = make_missing parser in
+      let (parser, missing) = Make.missing parser (pos parser) in
       let (parser, right) = Make.token parser right in
       let (parser, result) =
         Make.subscript_expression parser term left missing right
@@ -1157,9 +1157,9 @@ module WithStatementAndDeclAndTypeParser
       if peek_token_kind parser = LeftParen
       then parse_expression_list_opt parser
       else
-        let (parser, missing1) = make_missing parser in
-        let (parser, missing2) = make_missing parser in
-        let (parser, missing3) = make_missing parser in
+        let (parser, missing1) = Make.missing parser (pos parser) in
+        let (parser, missing2) = Make.missing parser (pos parser) in
+        let (parser, missing3) = Make.missing parser (pos parser) in
         (parser, missing1, missing2, missing3)
     in
     let parser
@@ -1208,9 +1208,9 @@ module WithStatementAndDeclAndTypeParser
       if peek_token_kind parser = LeftParen then
         parse_expression_list_opt parser
       else
-        let (parser, missing1) = make_missing parser in
-        let (parser, missing2) = make_missing parser in
-        let (parser, missing3) = make_missing parser in
+        let (parser, missing1) = Make.missing parser (pos parser) in
+        let (parser, missing2) = Make.missing parser (pos parser) in
+        let (parser, missing3) = Make.missing parser (pos parser) in
         (parser, missing1, missing2, missing3)
     in
     Make.constructor_call parser designator left args right
@@ -1251,7 +1251,7 @@ module WithStatementAndDeclAndTypeParser
       let (parser, break_kw) = assert_token parser Break in
       Make.yield_expression parser yield_kw break_kw
     | Semicolon ->
-      let (parser, missing) = make_missing parser in
+      let (parser, missing) = Make.missing parser (pos parser) in
       Make.yield_expression parser yield_kw missing
     | _ ->
       let (parser, operand) = parse_array_element_init parser in
@@ -1584,8 +1584,8 @@ module WithStatementAndDeclAndTypeParser
   and parse_lambda_expression_after_signature parser signature =
     (* We had a signature with no async or coroutine, and we disambiguated it
     from a cast. *)
-    let (parser, async) = make_missing parser in
-    let (parser, coroutine) = make_missing parser in
+    let (parser, async) = Make.missing parser (pos parser) in
+    let (parser, coroutine) = Make.missing parser (pos parser) in
     let (parser, arrow) = require_lambda_arrow parser in
     let (parser, body) = parse_lambda_body parser in
     Make.lambda_expression parser async coroutine signature arrow body
@@ -1974,7 +1974,7 @@ module WithStatementAndDeclAndTypeParser
       kind = Colon && not (is_next_xhp_class_name parser) in
     let (parser, consequence) =
       if missing_consequence then
-        make_missing parser
+        Make.missing parser (pos parser)
       else
         with_reset_precedence parser parse_expression
     in
@@ -2325,7 +2325,7 @@ module WithStatementAndDeclAndTypeParser
     *)
     let (parser, use_token) = optional_token parser Use in
     if SC.is_missing use_token then
-      make_missing parser
+      Make.missing parser (pos parser)
     else
       let (parser, left, vars, right) =
         parse_parenthesized_comma_list_opt_allow_trailing
@@ -2338,7 +2338,7 @@ module WithStatementAndDeclAndTypeParser
     let (parser, colon) = optional_token parser Colon in
     let (parser, return_type) =
       if SC.is_missing colon then
-        make_missing parser
+        Make.missing parser (pos parser)
       else
         with_type_parser parser TypeParser.parse_return_type
     in
@@ -2420,7 +2420,7 @@ module WithStatementAndDeclAndTypeParser
       (* ERROR RECOVERY: Create a missing token for the expected token,
          and continue on from the current token. Don't skip it. *)
       let parser = with_error parser SyntaxError.error1006 in
-      make_missing parser
+      Make.missing parser (pos parser)
 
   and parse_xhp_body_braced_expression parser =
     (* The difference between a regular braced expression and an
@@ -2463,10 +2463,10 @@ module WithStatementAndDeclAndTypeParser
     let (parser', token, _) = next_xhp_element_token parser in
     if (Token.kind token) != Equal then
       let parser = with_error parser SyntaxError.error1016 in
-      let (parser, missing1) = make_missing parser in
-      let (parser', missing2) = make_missing parser' in
+      let (parser, missing1) = Make.missing parser (pos parser') in
+      let (parser, missing2) = Make.missing parser (pos parser) in
       let (parser, node) =
-        Make.xhp_simple_attribute parser name missing2 missing1
+        Make.xhp_simple_attribute parser name missing1 missing2
       in
       (* ERROR RECOVERY: The = is missing; assume that the name belongs
          to the attribute, but that the remainder is missing, and start
@@ -2489,7 +2489,7 @@ module WithStatementAndDeclAndTypeParser
       (* ERROR RECOVERY: The expression is missing; assume that the "name ="
          belongs to the attribute and start looking for the next attribute. *)
         let parser = with_error parser' SyntaxError.error1017 in
-        let (parser'', missing) = make_missing parser'' in
+        let (parser, missing) = Make.missing parser (pos parser'') in
         let (parser, node) = Make.xhp_simple_attribute parser name equal missing
         in
         (parser, Some node)
@@ -2537,7 +2537,7 @@ module WithStatementAndDeclAndTypeParser
         else
           (* ERROR RECOVERY: *)
           let parser = with_error parser1 SyntaxError.error1039 in
-          let (parser, missing) = make_missing parser in
+          let (parser, missing) = Make.missing parser (pos parser) in
           Make.xhp_close
             parser
             less_than_slash_token
@@ -2546,8 +2546,8 @@ module WithStatementAndDeclAndTypeParser
       else
         (* ERROR RECOVERY: *)
         let parser = with_error parser SyntaxError.error1039 in
-        let (parser, missing1) = make_missing parser in
-        let (parser, missing2) = make_missing parser in
+        let (parser, missing1) = Make.missing parser (pos parser) in
+        let (parser, missing2) = Make.missing parser (pos parser) in
         Make.xhp_close
           parser
           less_than_slash_token
@@ -2558,8 +2558,8 @@ module WithStatementAndDeclAndTypeParser
          TODO: For now we'll just bail out. We could use a more
          sophisticated strategy here. *)
       let parser = with_error parser SyntaxError.error1026 in
-      let (parser, missing1) = make_missing parser in
-      let (parser, missing2) = make_missing parser in
+      let (parser, missing1) = Make.missing parser (pos parser) in
+      let (parser, missing2) = Make.missing parser (pos parser) in
       Make.xhp_close
         parser
         less_than_slash_token
@@ -2575,9 +2575,10 @@ module WithStatementAndDeclAndTypeParser
       let (parser1, xhp_open) =
         Make.xhp_open parser1 left_angle name attrs token
       in
-      let (parser, missing1) = make_missing parser in
-      let (parser, missing2) = make_missing parser in
-      Make.xhp_expression parser1 xhp_open missing1 missing2
+      let pos = pos parser in
+      let (parser, missing1) = Make.missing parser1 pos in
+      let (parser, missing2) = Make.missing parser pos in
+      Make.xhp_expression parser xhp_open missing1 missing2
     | GreaterThan ->
       let (parser, token) = Make.token parser1 token in
       let (parser, xhp_open) =
@@ -2595,12 +2596,13 @@ module WithStatementAndDeclAndTypeParser
          comes next. *)
       let parser = with_error parser SyntaxError.error1013 in
       let (parser, xhp_open) =
-        let (parser, missing) = make_missing parser in
+        let (parser, missing) = Make.missing parser (pos parser) in
         Make.xhp_open parser left_angle name attrs missing
       in
-      let (parser, missing1) = make_missing parser in
-      let (parser, missing2) = make_missing parser in
-      Make.xhp_expression parser1 xhp_open missing1 missing2
+      let pos = pos parser in
+      let (parser, missing1) = Make.missing parser1 pos in
+      let (parser, missing2) = Make.missing parser pos in
+      Make.xhp_expression parser xhp_open missing1 missing2
 
   and parse_possible_xhp_expression ~consume_trailing_trivia parser =
     (* We got a < token where an expression was expected. *)

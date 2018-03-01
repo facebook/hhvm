@@ -39,6 +39,8 @@ type t = {
   prefix_unary_expression_stack : prefix_unary_expression_type list;
 }
 
+    let pos parser = (Lexer.source parser.lexer, Lexer.end_offset parser.lexer)
+
     let sc_call parser f =
       let (sc_state, result) = f parser.sc_state in
       {parser with sc_state}, result

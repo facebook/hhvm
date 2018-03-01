@@ -31,6 +31,8 @@ type t = {
   offset_map : OffsetMap.t
 }
 
+type pos = t * int
+
 let make file_path content =
   { file_path; text = content; offset_map = OffsetMap.make content;
     length = String.length content; }

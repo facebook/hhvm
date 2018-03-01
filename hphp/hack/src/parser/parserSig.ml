@@ -33,6 +33,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     module type Parser_S = sig
       module SC : SCWithKind_S with module Token = Token
       type t
+      val pos : t -> Full_fidelity_source_text.pos
       val sc_call : t -> (SC.t -> SC.t * SC.r) -> t * SC.r
       val lexer : t -> Lexer.t
       val errors : t -> Full_fidelity_syntax_error.t list
@@ -47,8 +48,8 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
       module Make : sig
         val token : t -> Token.t -> t * SC.r
-        val missing : t -> Full_fidelity_source_text.t -> int -> t * SC.r
-        val list : t -> Full_fidelity_source_text.t -> int -> SC.r list -> t * SC.r
+        val missing : t -> Full_fidelity_source_text.pos -> t * SC.r
+        val list : t -> Full_fidelity_source_text.pos -> SC.r list -> t * SC.r
         val end_of_file : t -> SC.r -> t * SC.r
         val script : t -> SC.r -> t * SC.r
         val qualified_name : t -> SC.r -> t * SC.r

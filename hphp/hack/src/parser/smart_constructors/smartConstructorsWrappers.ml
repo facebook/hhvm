@@ -217,10 +217,10 @@ module SyntaxKind(SC : SC_S)
   let initial_state = SC.initial_state
 
   let make_token token state = compose (SK.Token (SC.Token.kind token)) (SC.make_token token state)
-  let make_missing s o state = compose SK.Missing (SC.make_missing s o state)
-  let make_list s o items state =
+  let make_missing p state = compose SK.Missing (SC.make_missing p state)
+  let make_list p items state =
     let kind = if items <> [] then SK.SyntaxList else SK.Missing in
-    compose kind (SC.make_list s o (Core_list.map ~f:snd items) state)
+    compose kind (SC.make_list p (Core_list.map ~f:snd items) state)
   let make_end_of_file arg0 state = compose SK.EndOfFile (SC.make_end_of_file (snd arg0) state)
   let make_script arg0 state = compose SK.Script (SC.make_script (snd arg0) state)
   let make_qualified_name arg0 state = compose SK.QualifiedName (SC.make_qualified_name (snd arg0) state)

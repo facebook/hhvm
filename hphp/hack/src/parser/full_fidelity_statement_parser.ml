@@ -124,7 +124,7 @@ module WithExpressionAndDeclAndTypeParser
     | Async
     | Coroutine
     | Function ->
-      let (parser, missing) = make_missing parser in
+      let (parser, missing) = Make.missing parser (pos parser) in
       parse_possible_php_function parser missing
     | Abstract
     | Final
@@ -138,7 +138,7 @@ module WithExpressionAndDeclAndTypeParser
     | While -> parse_while_statement parser
     | Declare -> parse_declare_statement parser
     | Using ->
-      let (parser, missing) = make_missing parser in
+      let (parser, missing) = Make.missing parser (pos parser) in
       parse_using_statement parser missing
     | Await when peek_token_kind ~lookahead:1 parser = Using ->
       let parser, await_kw = assert_token parser Await in
@@ -180,7 +180,7 @@ module WithExpressionAndDeclAndTypeParser
      * and continue on, starting at the unexpected token. *)
     (* TODO T20390825: Make sure this this won't cause premature recovery. *)
     | kind when Parser.expects parser kind ->
-      make_missing parser
+      Make.missing parser (pos parser)
     | _ -> parse_expression_statement parser
 
   and parse_markup_section parser ~is_leading_section =
@@ -193,7 +193,7 @@ module WithExpressionAndDeclAndTypeParser
         && peek_token_kind parser = TokenKind.QuestionGreaterThan then
         fetch_token parser
       else
-        make_missing parser
+        Make.missing parser (pos parser)
     in
     let parser, markup, suffix_opt = scan_markup parser ~is_leading_section in
     let (parser, markup) = Make.token parser markup in
@@ -218,7 +218,7 @@ module WithExpressionAndDeclAndTypeParser
             let (parser, token) = Make.token parser language in
             (parser, token, (Token.kind language = TokenKind.Equal))
           | None ->
-            let (parser, missing) = make_missing parser in
+            let (parser, missing) = Make.missing parser (pos parser) in
             (parser, missing, false)
         in
         let (parser, suffix) =
@@ -230,12 +230,12 @@ module WithExpressionAndDeclAndTypeParser
         , true
         )
       | None ->
-        let (parser, missing) = make_missing parser in
+        let (parser, missing) = Make.missing parser (pos parser) in
         (parser, missing, false, false)
     in
     let parser, expression =
       if is_echo_tag then parse_statement parser
-      else make_missing parser
+      else Make.missing parser (pos parser)
     in
     let (parser, s) =
       Make.markup_section parser prefix markup suffix expression
@@ -277,7 +277,7 @@ module WithExpressionAndDeclAndTypeParser
   and parse_php_class parser =
     (* PHP allows classes nested inside of functions, but hack does not *)
     (* TODO check for hack error: no classish declarations inside functions *)
-    let (parser, missing) = make_missing parser in
+    let (parser, missing) = Make.missing parser (pos parser) in
     with_decl_parser parser
       (fun parser -> DeclParser.parse_classish_declaration parser missing)
 
@@ -343,8 +343,8 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, foreach_key, foreach_arrow, foreach_value) =
       match Token.kind (peek_token parser1) with
       | RightParen ->
-        let (parser, missing1) = make_missing parser in
-        let (parser, missing2) = make_missing parser in
+        let (parser, missing1) = Make.missing parser (pos parser) in
+        let (parser, missing2) = Make.missing parser (pos parser) in
         let (parser, value) = parse_expression parser in
         (parser, missing1, missing2, value)
       | EqualGreaterThan ->
@@ -841,10 +841,10 @@ module WithExpressionAndDeclAndTypeParser
           (fun t -> Trivia.kind t = TriviaKind.FallThrough)
           (Token.leading next)
       in
-      let (parser, missing) = make_missing parser in
+      let (parser, missing) = Make.missing parser (pos parser) in
       if commented_fallthrough
       then
-        let (parser, missing1) = make_missing parser in
+        let (parser, missing1) = Make.missing parser (pos parser) in
         Make.switch_fallthrough parser missing missing1
       else
         (parser, missing)
@@ -898,7 +898,7 @@ module WithExpressionAndDeclAndTypeParser
         match peek_token_kind parser with
         | TokenKind.Variable ->
           let parser = with_error parser SyntaxError.error1007 in
-          make_missing parser
+          Make.missing parser (pos parser)
         | _ -> parse_type_specifier parser
       in
       let (parser, catch_var) = require_variable parser in
@@ -927,7 +927,7 @@ module WithExpressionAndDeclAndTypeParser
       let (parser, compound_stmt) = parse_compound_statement parser in
       Make.finally_clause parser finally_token compound_stmt
     else
-      make_missing parser
+      Make.missing parser (pos parser)
 
   and parse_try_statement parser =
     (* SPEC:
@@ -964,7 +964,7 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, break_token) = assert_token parser Break in
     let (parser, level) =
       if peek_token_kind parser = Semicolon then
-        make_missing parser
+        Make.missing parser (pos parser)
       else parse_expression parser in
     let (parser, semi_token) = require_semicolon parser in
     Make.break_statement parser break_token level semi_token
@@ -982,7 +982,7 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, continue_token) = assert_token parser Continue in
     let (parser, level) =
       if peek_token_kind parser = Semicolon then
-        make_missing parser
+        Make.missing parser (pos parser)
       else parse_expression parser in
     let (parser, semi_token) = require_semicolon parser in
     Make.continue_statement parser continue_token level semi_token
@@ -991,8 +991,8 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, return_token) = assert_token parser Return in
     let (parser1, semi_token) = next_token parser in
     if Token.kind semi_token = Semicolon then
-      let (parser, missing) = make_missing parser in
-      let (parser, semi_token) = Make.token parser1 semi_token in
+      let (parser, missing) = Make.missing parser1 (pos parser) in
+      let (parser, semi_token) = Make.token parser semi_token in
       Make.return_statement parser return_token missing semi_token
     else
       let (parser, expr) = parse_expression parser in
@@ -1137,7 +1137,7 @@ module WithExpressionAndDeclAndTypeParser
       let (parser, equal) = Make.token parser1 token in
       let (parser, value) = parse_expression parser in
       Make.simple_initializer parser equal value
-    | _ -> make_missing parser
+    | _ -> Make.missing parser (pos parser)
 
   (* SPEC:
     TODO: update the spec to reflect that echo and print must be a statement
@@ -1162,8 +1162,8 @@ module WithExpressionAndDeclAndTypeParser
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | Semicolon ->
-      let (parser, missing) = make_missing parser in
-      let (parser, token) = Make.token parser1 token in
+      let (parser, missing) = Make.missing parser1 (pos parser) in
+      let (parser, token) = Make.token parser token in
       Make.expression_statement parser missing token
     | _ ->
       let parser = Parser.expect_in_new_scope parser [ Semicolon ] in
@@ -1178,7 +1178,7 @@ module WithExpressionAndDeclAndTypeParser
           else
             Make.token parser t
         | None ->
-          make_missing parser
+          Make.missing parser (pos parser)
       in
       let parser = Parser.pop_scope parser [ Semicolon ] in
       Make.expression_statement parser expression token

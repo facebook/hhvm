@@ -22,7 +22,6 @@
  *)
 
 module type SC_S = SmartConstructors.SmartConstructors_S
-module SourceText = Full_fidelity_source_text
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S)
 : (SC_S with module Token = Syntax.Token and type r = Syntax.t) = struct
@@ -32,11 +31,11 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S)
 
   let initial_state () = ()
   let make_token token () = (), Syntax.make_token token
-  let make_missing s o () = (), Syntax.make_missing s o
-  let make_list s o items () =
+  let make_missing (s, o) () = (), Syntax.make_missing s o
+  let make_list (s, o) items () =
     if items <> []
     then (), Syntax.make_list s o items
-    else (), Syntax.make_missing s o
+    else make_missing (s, o) ()
   let make_end_of_file arg0 () = (), Syntax.make_end_of_file arg0
   let make_script arg0 () = (), Syntax.make_script arg0
   let make_qualified_name arg0 () = (), Syntax.make_qualified_name arg0

@@ -28,6 +28,8 @@ module WithLexer(Lexer : Lexer_S) = struct
     sc_state : SC.t;
   }
 
+  let pos parser = (Lexer.source parser.lexer, Lexer.end_offset parser.lexer)
+
   let sc_call parser f =
     let (sc_state, result) = f parser.sc_state in
     {parser with sc_state}, result

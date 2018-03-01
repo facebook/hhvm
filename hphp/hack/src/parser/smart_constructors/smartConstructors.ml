@@ -28,8 +28,8 @@ module type SmartConstructors_S = sig
 
   val initial_state : unit -> t
   val make_token : Token.t -> t -> t * r
-  val make_missing : Full_fidelity_source_text.t -> int -> t -> t * r
-  val make_list : Full_fidelity_source_text.t -> int -> r list -> t -> t * r
+  val make_missing : Full_fidelity_source_text.pos -> t -> t * r
+  val make_list : Full_fidelity_source_text.pos -> r list -> t -> t * r
   val make_end_of_file : r -> t -> t * r
   val make_script : r -> t -> t * r
   val make_qualified_name : r -> t -> t * r
@@ -207,8 +207,8 @@ end) = struct
     open Parser
 
     let token parser token = call parser (SCI.make_token token)
-    let missing parser s o = call parser (SCI.make_missing s o)
-    let list parser s o items = call parser (SCI.make_list s o items)
+    let missing parser p = call parser (SCI.make_missing p)
+    let list parser p items = call parser (SCI.make_list p items)
     let end_of_file parser arg0 = call parser (SCI.make_end_of_file arg0)
     let script parser arg0 = call parser (SCI.make_script arg0)
     let qualified_name parser arg0 = call parser (SCI.make_qualified_name arg0)

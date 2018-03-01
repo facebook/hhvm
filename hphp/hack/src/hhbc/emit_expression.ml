@@ -3728,6 +3728,8 @@ and emit_array_get_fixed last_usage local indices =
 
 and can_use_as_rhs_in_list_assignment expr =
   match expr with
+  | A.Call ((_, A.Id (_, s)), _, _, _) when String.lowercase_ascii s = "echo" ->
+    false
   | A.Lvar _
   | A.Dollar _
   | A.Array_get _

@@ -25,6 +25,7 @@
 #include "hphp/runtime/ext/vsdebug/breakpoint.h"
 #include "hphp/runtime/ext/vsdebug/client_preferences.h"
 #include "hphp/runtime/ext/vsdebug/server_object.h"
+#include "hphp/runtime/server/source-root-info.h"
 #include "hphp/util/async-func.h"
 
 namespace HPHP {
@@ -40,7 +41,11 @@ struct DebuggerSession final {
   DebuggerSession(Debugger* debugger);
   virtual ~DebuggerSession();
 
-  void startDummyRequest(const std::string& startupDoc);
+  void startDummyRequest(
+    const std::string& startupDoc,
+    const std::string& sandboxUser,
+    const std::string& sandboxName
+  );
 
   void enqueueDummyCommand(VSCommand* command);
   void setClientPreferences(ClientPreferences& preferences);
@@ -121,6 +126,8 @@ private:
   // are requested for each thread and frame, and unlikely to change while
   // the target is paused. Items in this cache are global, not per-request.
   std::unordered_map<int, folly::dynamic> m_globalVariableCache;
+
+  SourceRootInfo* m_sourceRootInfo;
 };
 
 }

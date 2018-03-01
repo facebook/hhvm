@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/breakpoint.h"
@@ -52,7 +53,10 @@ bool SetBreakpointsCommand::executeImpl(
     );
   }
 
-  const std::string& path = File::TranslatePath(String(filePath)).toCppString();
+  const std::string& path =
+    StatCache::realpath(
+      File::TranslatePath(String(filePath)).toCppString().c_str());
+
   BreakpointManager* bpMgr = session->getBreakpointManager();
 
   // Make a map of line -> breakpoint for all breakpoints in this file before

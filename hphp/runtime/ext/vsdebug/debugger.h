@@ -233,7 +233,11 @@ struct Debugger final {
   ClientPreferences getClientPreferences();
 
   // Starts the session's dummy request.
-  void startDummyRequest(const std::string& startupDoc);
+  void startDummyRequest(
+    const std::string& startupDoc,
+    const std::string& sandboxUser,
+    const std::string& sandboxName
+  );
 
   // Sets the client initialized flag.
   void setClientInitialized();

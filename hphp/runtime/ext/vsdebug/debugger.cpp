@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
@@ -1080,14 +1081,18 @@ ClientPreferences Debugger::getClientPreferences() {
   return m_session->getClientPreferences();
 }
 
-void Debugger::startDummyRequest(const std::string& startupDoc) {
+void Debugger::startDummyRequest(
+  const std::string& startupDoc,
+  const std::string& sandboxUser,
+  const std::string& sandboxName
+) {
   Lock lock(m_lock);
   if (!clientConnected()) {
     return;
   }
 
   assert(m_session != nullptr);
-  m_session->startDummyRequest(startupDoc);
+  m_session->startDummyRequest(startupDoc, sandboxUser, sandboxName);
 }
 
 void Debugger::setDummyThreadId(int64_t threadId) {
@@ -1239,6 +1244,7 @@ bool Debugger::tryResolveBreakpointInUnit(
   const std::string& unitFilePath,
   const HPHP::Unit* compilationUnit
 ) {
+
   if (bp->m_path != unitFilePath) {
     return false;
   }
@@ -1618,7 +1624,8 @@ void Debugger::onError(
 std::string Debugger::getFilePathForUnit(const HPHP::Unit* compilationUnit) {
   const auto path =
     HPHP::String(const_cast<StringData*>(compilationUnit->filepath()));
-  return File::TranslatePath(path).toCppString();
+  const auto translatedPath = File::TranslatePath(path).toCppString();
+  return StatCache::realpath(translatedPath.c_str());
 }
 
 std::string Debugger::getStopReasonForBp(

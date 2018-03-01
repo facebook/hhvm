@@ -35,19 +35,25 @@ bool LaunchAttachCommand::executeImpl(
 ) {
   folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
-  const std::string noDocument = std::string("");
+  const std::string emptyString = std::string("");
+
+  const auto& sandboxUser =
+    tryGetString(args, "sandboxUser", emptyString);
+
+  const auto& sandboxName =
+    tryGetString(args, "sandboxName", "default");
 
   const auto& startupDoc =
-    tryGetString(args, "startupDocumentPath", noDocument);
+    tryGetString(args, "startupDocumentPath", emptyString);
 
   if (!startupDoc.empty()) {
-    m_debugger->startDummyRequest(startupDoc);
+    m_debugger->startDummyRequest(startupDoc, sandboxUser, sandboxName);
   } else {
-    m_debugger->startDummyRequest(noDocument);
+    m_debugger->startDummyRequest(emptyString, sandboxUser, sandboxName);
   }
 
   const auto& logFilePath =
-    tryGetString(args, "logFilePath", noDocument);
+    tryGetString(args, "logFilePath", emptyString);
 
   if (!logFilePath.empty()) {
     // Re-open logging using the file path specified by the client.

@@ -17,6 +17,7 @@
 #include "hphp/runtime/ext/vsdebug/session.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/util/process.h"
 
@@ -28,7 +29,8 @@ DebuggerSession::DebuggerSession(Debugger* debugger) :
   m_debugger(debugger),
   m_breakpointMgr(new BreakpointManager(debugger)),
   m_dummyThread(this, &DebuggerSession::runDummy),
-  m_dummyStartupDoc("") {
+  m_dummyStartupDoc(""),
+  m_sourceRootInfo(nullptr) {
 
   assert(m_debugger != nullptr);
 }
@@ -41,13 +43,31 @@ DebuggerSession::~DebuggerSession() {
     delete m_breakpointMgr;
   }
 
+  if (m_sourceRootInfo != nullptr) {
+    delete m_sourceRootInfo;
+    m_sourceRootInfo = nullptr;
+  }
+
   if (m_dummyRequestInfo != nullptr) {
     Debugger::cleanupRequestInfo(nullptr, m_dummyRequestInfo);
   }
 }
 
-void DebuggerSession::startDummyRequest(const std::string& startupDoc) {
+void DebuggerSession::startDummyRequest(
+  const std::string& startupDoc,
+  const std::string& sandboxUser,
+  const std::string& sandboxName
+) {
+
+  assert(m_sourceRootInfo == nullptr);
+  if (!sandboxUser.empty()) {
+    m_sourceRootInfo = new SourceRootInfo(sandboxUser, sandboxName);
+  }
   m_dummyStartupDoc = File::TranslatePath(startupDoc).data();
+
+  // Flush dirty writes to m_sourceRootInfo and m_dummyStartupDoc.
+  std::atomic_thread_fence(std::memory_order_release);
+
   m_dummyThread.start();
 }
 
@@ -105,6 +125,7 @@ void DebuggerSession::invokeDummyStartupDocument() {
 }
 
 const StaticString s_memory_limit("memory_limit");
+const StaticString s__SERVER("_SERVER");
 
 void DebuggerSession::runDummy() {
   // The debugger needs to know which background thread is processing the dummy
@@ -174,6 +195,22 @@ void DebuggerSession::runDummy() {
   // debugger attached to it.
   IniSetting::SetUser(s_memory_limit, std::numeric_limits<int64_t>::max());
   m_dummyRequestInfo->m_flags.memoryLimitRemoved = true;
+
+  std::atomic_thread_fence(std::memory_order_acquire);
+
+  // Setup sandbox variables for dummy request context.
+  if (m_sourceRootInfo != nullptr) {
+    auto server = php_global_exchange(s__SERVER, init_null());
+    forceToArray(server);
+    Array arr = server.toArrRef();
+    server.unset();
+    php_global_set(
+      s__SERVER,
+      m_sourceRootInfo->setServerVariables(std::move(arr))
+    );
+
+    g_context->setSandboxId(m_sourceRootInfo->getSandboxInfo().id());
+  }
 
   if (!m_dummyStartupDoc.empty()) {
     invokeDummyStartupDocument();

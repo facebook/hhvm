@@ -494,6 +494,13 @@ void emitInstanceOfD(IRGS& env, const StringData* className) {
   decRef(env, src);
 }
 
+void emitIsNameD(IRGS& env, const StringData* className) {
+  auto const src = popC(env);
+  push(env, implInstanceOfD(env, src, className));
+  // TODO(kunalm): implement for type aliases, enums, etc.
+  decRef(env, src);
+}
+
 void emitInstanceOf(IRGS& env) {
   auto const t1 = popC(env);
   auto const t2 = popC(env); // t2 instanceof t1

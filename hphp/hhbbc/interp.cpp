@@ -2064,6 +2064,11 @@ void in(ISS& env, const bc::InstanceOfD& op) {
   push(env, TBool);
 }
 
+void in(ISS& env, const bc::IsNameD& op) {
+  // TODO(kunalm): implement for type aliases, enums, etc.
+  return reduce(env, bc::InstanceOfD { op.str1 });
+}
+
 void in(ISS& env, const bc::InstanceOf& /*op*/) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);

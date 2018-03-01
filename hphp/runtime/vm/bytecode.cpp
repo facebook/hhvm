@@ -2679,6 +2679,14 @@ OPTBLD_INLINE void iopInstanceOfD(Id id) {
   vmStack().replaceC<KindOfBoolean>(r);
 }
 
+OPTBLD_INLINE void iopIsNameD(Id id) {
+  const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
+  Cell* c1 = vmStack().topC();
+  bool r = cellInstanceOf(c1, ne);
+  // TODO(kunalm): implement for type aliases, enums, etc.
+  vmStack().replaceC<KindOfBoolean>(r);
+}
+
 OPTBLD_INLINE void iopPrint() {
   Cell* c1 = vmStack().topC();
   g_context->write(cellAsVariant(*c1).toString());

@@ -1482,8 +1482,16 @@ and emit_call_empty_expr env outer_pos (pos, expr_ as expr) =
       Emit_pos.emit_pos outer_pos;
       instr_emptyg
     ]
-  | A.Lvar id when not (is_local_this env (snd id)) ->
-    instr_emptyl (get_local env id)
+  | A.Lvar id ->
+    if not (is_local_this env (snd id)) ||
+      Emit_env.get_needs_local_this env then
+      instr_emptyl (get_local env id)
+    else
+      gather [
+        instr (IMisc (BareThis NoNotice));
+        Emit_pos.emit_pos outer_pos;
+        instr_not
+      ]
   | A.Dollar e ->
     gather [
       emit_expr ~need_ref:false env e;

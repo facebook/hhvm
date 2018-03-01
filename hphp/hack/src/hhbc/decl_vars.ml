@@ -154,7 +154,7 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
       | _ -> acc in
     let call_w_bareparam =
       match e with
-      | (_, Ast.Id(_, ("isset" | "echo"))) -> false
+      | (_, Ast.Id(_, ("isset" | "echo" | "empty"))) -> false
       | _ -> true in
     let on_arg acc e =
       match e with

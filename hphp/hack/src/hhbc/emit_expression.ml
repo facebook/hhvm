@@ -2500,6 +2500,8 @@ and emit_array_get_worker ?(no_final=false) ?mode
   match base_expr, opt_elem_expr with
   | (pos, A.Array _), None ->
     Emit_fatal.raise_fatal_parse pos "Can't use array() as base in write context"
+  | (pos, _), None when not (Emit_env.does_env_allow_array_append env)->
+    Emit_fatal.raise_fatal_runtime pos "Can't use [] for reading"
   | _ ->
   let local_temp_kind =
     get_local_temp_kind inout_param_info env opt_elem_expr in
@@ -2877,10 +2879,13 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
        | Some i -> FPassBaseGC (i, base_offset)
        )))
        1
-
+   (* $a[] can not be used as the base of an array get unless as an lval *)
+   | A.Array_get(_, None) when not (Emit_env.does_env_allow_array_append env) ->
+      Emit_fatal.raise_fatal_runtime pos "Can't use [] for reading"
    (* base is in turn array_get - do a specific handling for inout params
       if necessary *)
    | A.Array_get(base_expr, opt_elem_expr) ->
+
      let local_temp_kind =
        get_local_temp_kind inout_param_info env opt_elem_expr in
      let elem_expr_instrs, elem_stack_size =
@@ -3211,7 +3216,11 @@ and emit_args_and_call env call_pos args uargs =
               ]
             end
         end
-        else next @@ emit_array_get ~need_ref:false env (Some (i, hint))
+        else
+          next @@ emit_array_get
+            ~need_ref:false
+            { env with Emit_env.env_allows_array_append = true }
+            (Some (i, hint))
           QueryOp.CGet base_expr opt_elem_expr
 
       | A.Obj_get (e1, e2, nullflavor) ->
@@ -3904,6 +3913,14 @@ and emit_lval_op_nonlist env pos op e rhs_instrs rhs_stack_size =
   ]
 
 and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
+  let env =
+  match op with
+  (* Unbelieveably, $test[] += 5; is legal in PHP, but $test[] = $test[] + 5 is not *)
+  | LValOp.SetRef
+  | LValOp.Set
+  | LValOp.SetOp _
+  | LValOp.IncDec _ -> { env with Emit_env.env_allows_array_append = true }
+  | _ -> env in
   let handle_dollar e final_op =
     match e with
       _, A.Lvar id ->
@@ -3920,6 +3937,7 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
         final_op op
       ]
     | _ ->
+
       let instrs = emit_expr ~need_ref:false env e in
       instrs,
       rhs_instrs,
@@ -3965,7 +3983,8 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
         index_instrs,
         rhs_instrs,
         final_global_op_instrs
-
+  | A.Array_get (_, None) when not (Emit_env.does_env_allow_array_append env) ->
+      Emit_fatal.raise_fatal_runtime pos "Can't use [] for reading"
   | A.Array_get (base_expr, opt_elem_expr) ->
     let mode =
       match op with
@@ -3978,9 +3997,8 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
         base_expr_instrs_end,
         base_setup_instrs,
         base_stack_size =
-      emit_base
-        ~notice:Notice ~is_object:false
-        env mode base_offset None base_expr
+      emit_base ~notice:Notice ~is_object:false env
+        mode base_offset None base_expr
     in
     let mk = get_elem_member_key env rhs_stack_size opt_elem_expr in
     let total_stack_size = elem_stack_size + base_stack_size in
@@ -4079,7 +4097,8 @@ and from_unop op =
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usilence ->
     emit_nyi "unop - probably does not need translation"
 
-and emit_expr_as_ref env e = emit_expr ~need_ref:true env e
+and emit_expr_as_ref env e =
+  emit_expr ~need_ref:true { env with Emit_env.env_allows_array_append = true} e
 
 and emit_unop ~need_ref env pos op e =
   let unop_instr = Emit_pos.emit_pos_then pos @@ from_unop op in

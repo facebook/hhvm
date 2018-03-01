@@ -206,6 +206,58 @@ let test_incremental_update () =
     "Incremental update should clear errors if a rechecked file has no errors";
   true
 
+let test_merge_into_current () =
+  let errors1, () = Errors.do_ begin fun () ->
+    error_in "A";
+    error_in "B";
+    error_in "C";
+    error_in "D";
+    error_in "E";
+    error_in "F";
+    ()
+  end in
+
+  let expected =
+    (expect_error_in "A") ^ (expect_error_in "B") ^ (expect_error_in "C") ^
+    (expect_error_in "D") ^ (expect_error_in "E") ^ (expect_error_in "F")
+  in
+
+  let error_message = "merge_into_current should behave as if the code that " ^
+    "generated errors was inlined at the callsite." in
+
+  Asserter.String_asserter.assert_equals expected
+    (Errors.get_error_list errors1 |> error_list_to_string) error_message;
+
+  let sub_errors, () = Errors.do_ begin fun () ->
+    error_in "C";
+    error_in "D";
+    ()
+  end in
+
+  let errors2, () =  Errors.do_ begin fun () ->
+    Errors.merge_into_current sub_errors;
+    ()
+  end in
+
+  let expected2 = (expect_error_in "C") ^ (expect_error_in "D") in
+
+  Asserter.String_asserter.assert_equals expected2
+    (Errors.get_error_list errors2 |> error_list_to_string) error_message;
+
+  let errors, () = Errors.do_ begin fun () ->
+    error_in "A";
+    error_in "B";
+    Errors.merge_into_current sub_errors;
+    error_in "E";
+    error_in "F";
+    ()
+  end in
+
+  Asserter.String_asserter.assert_equals expected
+    (Errors.get_error_list errors |> error_list_to_string) error_message;
+  true
+
+
 let tests = [
   "test", test_do;
   "test_get_sorted_error_list", test_get_sorted_error_list;
@@ -214,6 +266,7 @@ let tests = [
   "test_from_error_list", test_from_error_list;
   "test_phases", test_phases;
   "test_incremental_update", test_incremental_update;
+  "test_merge_into_current", test_merge_into_current;
 ]
 
 let () =

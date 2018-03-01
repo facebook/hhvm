@@ -207,6 +207,7 @@ module type Errors_modes = sig
   type applied_fixme = Pos.t * int
 
   val applied_fixmes: applied_fixme files_t ref
+  val error_map: error files_t ref
 
   val try_with_result: (unit -> 'a) -> ('a -> error -> 'a) -> 'a
   val do_: (unit -> 'a) -> (error files_t * applied_fixme files_t) * 'a
@@ -432,6 +433,7 @@ type phase = error_phase = Parsing | Naming | Decl | Typing
 (*****************************************************************************)
 
 let applied_fixmes = M.applied_fixmes
+let error_map = M.error_map
 
 let ignored_fixme_files = ref None
 let set_ignored_fixmes files = ignored_fixme_files := files
@@ -491,6 +493,11 @@ and merge (err',fixmes') (err,fixmes) =
   in
   files_t_merge ~f:append err' err,
   files_t_merge ~f:append fixmes' fixmes
+
+and merge_into_current errors =
+  let merged = merge errors (!error_map, !applied_fixmes) in
+  error_map := fst merged;
+  applied_fixmes := snd merged
 
 and incremental_update :
   (* Need to write out the entire ugly type to convince OCaml it's polymorphic

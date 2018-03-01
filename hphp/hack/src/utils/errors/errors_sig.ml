@@ -385,6 +385,7 @@ module type S = sig
   val to_absolute : error -> Pos.absolute error_
 
   val merge : t -> t -> t
+  val merge_into_current : t -> unit
 
   val incremental_update_set:
     old:t -> new_:t -> rechecked:Relative_path.Set.t -> phase -> t

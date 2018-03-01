@@ -67,7 +67,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                             PhysReg tv, PhysReg type, RegSet live) {
   return vwrap(cb, data, fixups, [&] (Vout& v) {
     // Set up frame linkage to avoid an indirect fixup.
-    v << pushp{rlr(), rfp()};
+    v << stublogue{true};
     v << copy{rsp(), rfp()};
 
     // We use the first argument register for the TV data because we might pass
@@ -82,12 +82,9 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
 
       // The refcount is exactly 1; release the value.
       // Avoid 'this' pointer overwriting by reserving it as an argument.
+      // There's no need for a fixup, because we setup a frame on the c++
+      // stack.
       v << callm{lookupDestructor(v, type), arg_regs(1)};
-
-      // Between where %rsp is now and the saved RIP of the call into the
-      // freeLocalsHelpers stub, we have all the live regs we pushed, plus the
-      // saved RIP of the call from the stub to this helper.
-      v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
       // fallthru
     };
 
@@ -102,9 +99,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
         ifThen(v, CC_NE, sf, [&] (Vout& v) {
           // The refcount is greater than 1; decref it.
           emitDecRefCount(v, data);
-          // Pop FP/LR and return
-          v << popp{rfp(), rlr()};
-          v << ret{live};
+          v << stubret{live, true};
         });
 
         destroy(v);
@@ -112,9 +107,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     }
 
     // Either we did a decref, or the value was static.
-    // Pop FP/LR and return
-    v << popp{rfp(), rlr()};
-    v << ret{live};
+    v << stubret{live, true};
   });
 }
 

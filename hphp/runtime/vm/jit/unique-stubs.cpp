@@ -769,7 +769,20 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
 
   auto const start = vwrap(cb, data, meta, [] (Vout& v) {
     v << vregrestrict{};
-    v << stublogue{};
+    auto const fullFrame = [&] {
+      switch (arch()) {
+        case Arch::ARM:
+        case Arch::PPC64:
+          return true;
+        case Arch::X64:
+          return false;
+      }
+      not_reached();
+    }();
+    v << stublogue{fullFrame};
+    if (fullFrame) {
+      v << copy{rsp(), rvmfp()};
+    }
 
     auto const rdata = rarg(0);
     auto const rtype = rarg(1);
@@ -790,14 +803,16 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
       auto const dtor = lookupDestructor(v, rtype);
       v << callm{dtor, arg_regs(1)};
 
-      // The stub frame's saved RIP is at %rsp[8] before we saved the
-      // caller-saved registers.
-      v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
+      if (!fullFrame) {
+        // The stub frame's saved RIP is at %rsp[8] before we saved the
+        // caller-saved registers.
+        v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
+      }
     };
 
     emitDecRefWork(v, v, rdata, destroy, false, TRAP_REASON);
 
-    v << stubret{};
+    v << stubret{{}, fullFrame};
   });
 
   meta.process(nullptr);

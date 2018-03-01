@@ -105,11 +105,13 @@ let err_none = Reason.Rnone, Terr
 type _expected_ty =
   Pos.t * Reason.ureason * locl ty
 
-let expr_error env r =
-  env, T.make_implicitly_typed_expr Pos.none T.Any, (r, Terr)
+let expr_error env p r =
+  let ty = (r, Terr) in
+  env, T.make_typed_expr p ty T.Any, ty
 
-let expr_any env r =
-  env, T.make_implicitly_typed_expr Pos.none T.Any, (r, Tany)
+let expr_any env p r =
+  let ty = (r, Tany) in
+  env, T.make_typed_expr p ty T.Any, ty
 
 let compare_field_kinds x y =
   match x, y with
@@ -127,10 +129,10 @@ let unbound_name env (pos, name) =
   match Env.get_mode env with
   | FileInfo.Mstrict ->
     (Errors.unbound_name_typing pos name;
-    expr_error env Reason.Rnone)
+    expr_error env pos Reason.Rnone)
 
   | FileInfo.Mdecl | FileInfo.Mpartial | FileInfo.Mphp ->
-    expr_any env Reason.Rnone
+    expr_any env pos Reason.Rnone
 
 (* Is this type Traversable<vty> or Container<vty> for some vty? *)
 let get_value_collection_inst ty =
@@ -1280,7 +1282,7 @@ and expr_
     env, te, result in
 
   match e with
-  | Any -> expr_error env (Reason.Rwitness p)
+  | Any -> expr_error env p (Reason.Rwitness p)
   | Array [] ->
     (* TODO: use expected type to determine expected element type *)
     make_result env (T.Array []) (Reason.Rwitness p, Tarraykind AKempty)
@@ -1490,10 +1492,10 @@ and expr_
     make_result env (T.Clone te) ty
   | This when Env.is_static env ->
       Errors.this_in_static p;
-      expr_error env (Reason.Rwitness p)
+      expr_error env p (Reason.Rwitness p)
   | This when valkind = `lvalue ->
      Errors.this_lvalue p;
-     expr_error env (Reason.Rwitness p)
+     expr_error env p (Reason.Rwitness p)
   | This ->
       let r, _ = Env.get_self env in
       if r = Reason.Rnone
@@ -1685,7 +1687,7 @@ and expr_
       (match smethod with
       | None -> (* The static method wasn't found. *)
         smember_not_found p ~is_const:false ~is_method:true class_ (snd meth);
-        expr_error env Reason.Rnone
+        expr_error env p Reason.Rnone
       | Some { ce_type = lazy ty; ce_visibility; _ } ->
         let cid = CI (c, []) in
         let env, _te, cid_ty = static_class_id (fst c) env cid in
@@ -1706,14 +1708,14 @@ and expr_
               make_result env (T.Smethod_id(c, meth)) ty
             | Vprivate _ ->
               Errors.private_class_meth (Reason.to_pos r) p;
-              expr_error env r
+              expr_error env p r
             | Vprotected _ ->
               Errors.protected_class_meth (Reason.to_pos r) p;
-              expr_error env r
+              expr_error env p r
           end
         | (r, _) ->
           Errors.internal_error p "We have a method which isn't callable";
-          expr_error env r
+          expr_error env p r
       )
     )
   | Lplaceholder p ->
@@ -1722,7 +1724,7 @@ and expr_
       make_result env (T.Lplaceholder p) ty
   | Dollardollar _ when valkind = `lvalue ->
       Errors.dollardollar_lvalue p;
-      expr_error env (Reason.Rwitness p)
+      expr_error env p (Reason.Rwitness p)
   | Dollardollar ((_, x) as id) ->
       let ty = Env.get_local env x in
       make_result env (T.Dollardollar id) ty
@@ -1920,7 +1922,7 @@ and expr_
             (* Should never hit this case since we only construct this AST node
              * if in the expression Foo::class, Foo is a type def.
              *)
-            expr_error env (Reason.Rwitness p)
+            expr_error env p (Reason.Rwitness p)
       end
   | Class_const (cid, mid) -> class_const env p (cid, mid)
   | Class_get (((), x), (py, y))
@@ -2019,7 +2021,7 @@ and expr_
       let rty = match Env.get_fn_kind env with
         | Ast.FCoroutine ->
             (* yield in coroutine is already reported as error in NastCheck *)
-            let _, _, ty = expr_error env (Reason.Rwitness p) in
+            let _, _, ty = expr_error env p (Reason.Rwitness p) in
             ty
         | Ast.FGenerator ->
             Reason.Ryield_gen p,
@@ -2066,7 +2068,7 @@ and expr_
     when Env.is_strict env
     || TCO.migration_flag_enabled (Env.get_tcopt env) "array_cast" ->
       Errors.array_cast p;
-      expr_error env (Reason.Rwitness p)
+      expr_error env p (Reason.Rwitness p)
   | Cast (hint, e) ->
       let env, te, ty2 = expr env e in
       Async.enforce_not_awaitable env (fst e) ty2;
@@ -2091,7 +2093,7 @@ and expr_
         TypecheckerOptions.experimental_is_expression)
       then begin
         Errors.experimental_feature p "is expression";
-        expr_error env (Reason.Rnone)
+        expr_error env p (Reason.Rnone)
       end else begin
         let env, te, _ = expr env e in
         let env, hint_ty = Phase.hint_locl env hint in
@@ -2105,7 +2107,7 @@ and expr_
           | TUtils.IsExprHint.Invalid (r, ty_) ->
             Errors.invalid_is_expression_hint (Reason.to_pos r)
               (TUtils.IsExprHint.print ty_);
-            expr_error env (Reason.Rnone)
+            expr_error env p (Reason.Rnone)
       end
   | Efun (f, idl) ->
       (* This is the function type as declared on the lambda itself.
@@ -2527,7 +2529,7 @@ and anon_make tenv p f ft idl =
     if !is_typing_self
     then begin
       Errors.anonymous_recursive p;
-      expr_error env (Reason.Rwitness p)
+      expr_error env p (Reason.Rwitness p)
     end
     else begin
       is_typing_self := true;
@@ -3464,7 +3466,7 @@ and is_abstract_ft fty = match fty with
           class_const ~incl_tc:true env p (cid, cst)
         | _ ->
           Errors.illegal_type_structure p "second argument is not a string";
-          expr_error env Reason.Rnone)
+          expr_error env p Reason.Rnone)
      | _ -> assert false)
   (* Special function `array_map` *)
   | Id ((_, array_map) as x)

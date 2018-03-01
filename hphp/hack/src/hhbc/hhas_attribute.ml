@@ -39,6 +39,7 @@ let is_native_arg s attributes =
 let is_native_opcode_impl = is_native_arg "OpCodeImpl"
 let is_reads_caller_frame = is_native_arg "ReadsCallerFrame"
 let is_writes_caller_frame = is_native_arg "WritesCallerFrame"
+let is_no_injection = is_native_arg "NoInjection"
 
 let deprecation_info attributes =
   let f attr =

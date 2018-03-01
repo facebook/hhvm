@@ -86,8 +86,10 @@ let from_ast_wrapper : bool -> _ ->
     Hhas_attribute.is_native_opcode_impl method_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
   let is_dynamically_callable =
-    ((Hhas_attribute.is_dynamically_callable method_attributes) || Emit_env.is_systemlib ())
+    ((Hhas_attribute.is_dynamically_callable method_attributes) ||
+    Emit_env.is_systemlib ())
   in
+  let is_no_injection = Hhas_attribute.is_no_injection method_attributes in
   let (pos, original_name) = ast_method.Ast.m_name in
   let (_, class_name) = ast_class.Ast.c_name in
   let class_name = SU.Xhp.mangle @@ Utils.strip_ns class_name in
@@ -233,7 +235,7 @@ let from_ast_wrapper : bool -> _ ->
       method_is_static
       method_is_final
       method_is_abstract
-      false (*method_no_injection*)
+      is_no_injection
       false (*method_inout_wrapper*)
       method_id
       method_body

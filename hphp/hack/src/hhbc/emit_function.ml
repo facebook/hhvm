@@ -29,8 +29,10 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   let is_native = Hhas_attribute.is_native function_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info function_attributes in
   let is_dynamically_callable =
-    ((Hhas_attribute.is_dynamically_callable function_attributes) || Emit_env.is_systemlib ())
+    ((Hhas_attribute.is_dynamically_callable function_attributes) ||
+    Emit_env.is_systemlib ())
   in
+  let is_no_injection = Hhas_attribute.is_no_injection function_attributes in
   let wrapper_type_opt, inout_param_locations =
     Emit_inout_helpers.extract_function_inout_or_ref_param_locations ast_fun in
   let has_inout_args = Option.is_some wrapper_type_opt in
@@ -78,7 +80,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       function_is_generator
       function_is_pair_generator
       is_top
-      false (*no_injection*)
+      is_no_injection
       false (*inout_wrapper*)
       is_return_by_ref
       is_interceptable

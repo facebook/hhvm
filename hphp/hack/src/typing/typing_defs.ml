@@ -371,6 +371,7 @@ and 'phase fun_type = {
   ft_return_disposable : bool         ;
   ft_mutable : bool                   ;
   ft_returns_mutable : bool           ;
+  ft_decl_errors : Errors.t option    ;
 }
 
 (* Arity information for a fun_type; indicating the minimum number of
@@ -471,6 +472,7 @@ and class_type = {
   tc_req_ancestors_extends : SSet.t; (* the extends of req_ancestors *)
   tc_extends             : SSet.t;
   tc_enum_type           : enum_type option;
+  tc_decl_errors         : Errors.t option;
 }
 
 and typeconst_type = {
@@ -491,6 +493,7 @@ and typedef_type = {
   td_tparams: decl tparam list;
   td_constraint: decl ty option;
   td_type: decl ty;
+  td_decl_errors: Errors.t option;
 }
 
 and 'phase tparam =

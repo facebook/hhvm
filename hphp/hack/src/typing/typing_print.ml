@@ -973,7 +973,8 @@ end
 module PrintTypedef = struct
 
   let typedef tcopt = function
-    | {td_pos; td_vis = _; td_tparams; td_constraint; td_type} ->
+    | {td_pos; td_vis = _; td_tparams; td_constraint; td_type;
+        td_decl_errors = _;} ->
       let tparaml_s = PrintClass.tparam_list tcopt td_tparams in
       let constr_s = match td_constraint with
         | None -> "[None]"
@@ -1011,7 +1012,7 @@ let debug_with_tvars env ty =
   f_str
 
 let class_ tcopt c = PrintClass.class_type tcopt c
-let gconst tcopt gc = Full.to_string_decl tcopt gc
+let gconst tcopt gc = Full.to_string_decl tcopt (fst gc)
 let fun_ tcopt f = PrintFun.fun_type tcopt f
 let typedef tcopt td = PrintTypedef.typedef tcopt td
 let constraints_for_type env ty = Full.constraints_for_type Doc.text env ty

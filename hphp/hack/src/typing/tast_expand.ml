@@ -57,13 +57,14 @@ let expand_ty env ty =
                      ft_where_constraints; ft_ret; ft_params;
                      ft_reactive; ft_return_disposable;
                      ft_mutable; ft_returns_mutable;
-                     ft_is_coroutine; ft_ret_by_ref } =
+                     ft_is_coroutine; ft_ret_by_ref; ft_decl_errors } =
   { ft_pos; ft_deprecated; ft_arity; ft_abstract; ft_reactive; ft_is_coroutine;
     ft_return_disposable; ft_ret_by_ref; ft_mutable; ft_returns_mutable;
     ft_tparams = List.map exp_tparam ft_tparams;
     ft_where_constraints = List.map exp_where_constraint ft_where_constraints;
     ft_ret = exp_ty ft_ret;
     ft_params = List.map exp_fun_param ft_params;
+    ft_decl_errors;
   }
 
   and exp_fun_param { fp_pos; fp_name; fp_kind; fp_type; fp_mutable;

@@ -445,6 +445,10 @@ and check_inout_return env =
     | _ -> env
   end
 
+and add_decl_errors = function
+  | None -> ()
+  | Some errors -> Errors.merge_into_current errors
+
 (*****************************************************************************)
 (* Now we are actually checking stuff! *)
 (*****************************************************************************)
@@ -455,6 +459,10 @@ and fun_def tcopt f =
   let pos = fst f.f_name in
   let nb = TNBody.func_body tcopt f in
   let env = EnvFromDef.fun_env tcopt f in
+  add_decl_errors (Option.map
+    (Env.get_fun env (snd f.f_name))
+    ~f:(fun x -> Option.value_exn x.ft_decl_errors)
+  );
   let env = Env.set_env_function_pos env pos in
   let reactive = Decl.fun_reactivity env.Env.decl_env f.f_user_attributes in
   let mut = TUtils.fun_mutable f.f_user_attributes in
@@ -1555,7 +1563,7 @@ and expr_
           env, te, ty
       | None ->
           make_result env (T.Id id) (Reason.Rnone, Tany)
-      | Some ty ->
+      | Some (ty, _) ->
         if cst_name = SN.HH.rx_is_enabled
         then begin
           if Env.is_checking_lambda ()
@@ -1661,6 +1669,7 @@ and expr_
               ft_mutable = fty.ft_mutable;
               ft_returns_mutable = fty.ft_returns_mutable;
               ft_return_disposable = fty.ft_return_disposable;
+              ft_decl_errors = None;
             } in
             make_result env (T.Method_caller(pos_cname, meth_name))
               (reason, Tfun caller)
@@ -3527,6 +3536,7 @@ and is_abstract_ft fty = match fty with
                 ft_mutable = fty.ft_mutable;
                 ft_returns_mutable = fty.ft_returns_mutable;
                 ft_return_disposable = fty.ft_return_disposable;
+                ft_decl_errors = None;
               }
             ) in
             let containers = List.map vars (fun var ->
@@ -5971,12 +5981,13 @@ and check_parent_abstract position parent_type class_type =
 
 and class_def tcopt c =
   let env = EnvFromDef.class_env tcopt c in
+  let tc = Env.get_class env (snd c.c_name) in
+  add_decl_errors (Option.(map tc (fun tc -> value_exn tc.tc_decl_errors)));
   let c = TNBody.class_meth_bodies tcopt c in
   if not !auto_complete then begin
     NastCheck.class_ env c;
     NastInitCheck.class_ env c;
   end;
-  let tc = Env.get_class env (snd c.c_name) in
   match tc with
   | None ->
       (* This can happen if there was an error during the declaration
@@ -6389,6 +6400,8 @@ and method_def env m =
 
 and typedef_def tcopt typedef  =
   let env = EnvFromDef.typedef_env tcopt typedef in
+  let tdecl = Env.get_typedef env (snd typedef.t_name) in
+  add_decl_errors (Option.(map tdecl (fun tdecl -> value_exn tdecl.td_decl_errors)));
   (* Mode for typedefs themselves doesn't really matter right now, but
    * they can expand hints, so make it loose so that the typedef doesn't
    * fail. (The hint will get re-checked with the proper mode anyways.)
@@ -6439,6 +6452,8 @@ and gconst_def tcopt cst =
   Typing_hooks.dispatch_global_const_hook cst.cst_name;
   let env = EnvFromDef.gconst_env tcopt cst in
   let env = Typing_env.set_mode env cst.cst_mode in
+  add_decl_errors (Option.map (Env.get_gconst env (snd cst.cst_name)) ~f:snd);
+
   let typed_cst_value, env =
     match cst.cst_value with
     | None -> None, env

@@ -374,7 +374,8 @@ let rec class_ tcopt class_name class_type impl =
 
 and typedef tcopt type_name =
   match TLazyHeap.get_typedef tcopt type_name with
-  | Some {td_tparams; td_type; td_pos = _; td_constraint = _; td_vis = _}  ->
+  | Some {td_tparams; td_type; td_pos = _; td_constraint = _; td_vis = _;
+      td_decl_errors = _;}  ->
      let root = (Typing_deps.Dep.Class type_name, None) in
       let env = SMap.empty in
       let pos = Reason.to_pos (fst td_type) in

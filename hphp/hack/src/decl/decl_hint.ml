@@ -90,6 +90,7 @@ and hint_ p env = function
       ft_return_disposable = false;
       ft_mutable = false;
       ft_returns_mutable = false;
+      ft_decl_errors = None;
     }
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->

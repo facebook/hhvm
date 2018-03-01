@@ -255,13 +255,16 @@ and make_param_ty env param =
   }
 
 and fun_decl f decl_tcopt =
-  let dep = Dep.Fun (snd f.f_name) in
-  let env = {
-    Decl_env.mode = f.f_mode;
-    droot = Some dep;
-    decl_tcopt;
-  } in
-  let ft = fun_decl_in_env env f in
+  let errors, ft = Errors.do_ begin fun () ->
+    let dep = Dep.Fun (snd f.f_name) in
+    let env = {
+      Decl_env.mode = f.f_mode;
+      droot = Some dep;
+      decl_tcopt;
+    } in
+    fun_decl_in_env env f
+  end in
+  let ft = { ft with ft_decl_errors = Some errors } in
   Decl_heap.Funs.add (snd f.f_name) ft;
   ()
 
@@ -317,6 +320,7 @@ and fun_decl_in_env env f =
     ft_mutable     = false; (* Functions can't be mutable because they don't have "this" *)
     ft_returns_mutable = returns_mutable;
     ft_return_disposable = return_disposable;
+    ft_decl_errors = None;
   } in
   ft
 
@@ -395,8 +399,11 @@ let rec class_decl_if_missing class_env c =
 and class_naming_and_decl (class_env:class_env) cid c =
   let class_env = { class_env with stack = SSet.add cid class_env.stack } in
   let c = Errors.ignore_ (fun () -> Naming.class_ class_env.tcopt c) in
-  class_parents_decl class_env c;
-  class_decl class_env.tcopt c;
+  let errors, tc = Errors.do_ begin fun() ->
+    class_parents_decl class_env c;
+    class_decl class_env.tcopt c
+  end in
+  Decl_heap.Classes.add (snd c.c_name) { tc with dc_decl_errors = Some errors };
   ()
 
 and class_parents_decl class_env c =
@@ -561,6 +568,7 @@ and class_decl tcopt c =
     dc_req_ancestors = req_ancestors;
     dc_req_ancestors_extends = req_ancestors_extends;
     dc_enum_type = enum;
+    dc_decl_errors = None;
   } in
   if Ast.Cnormal = c.c_kind then
     begin
@@ -575,7 +583,7 @@ and class_decl tcopt c =
   SMap.iter begin fun x _ ->
     Typing_deps.add_idep class_dep (Dep.Class x)
   end impl;
-  Decl_heap.Classes.add (snd c.c_name) tc
+  tc
 
 and get_implements env ht =
   let _r, (_p, c), paraml = Decl_utils.unwrap_class_type ht in
@@ -856,6 +864,7 @@ and method_decl env m =
     ft_mutable = mut;
     ft_returns_mutable = returns_mutable;
     ft_return_disposable = return_disposable;
+    ft_decl_errors = None;
   }
 
 and method_check_override c m acc  =
@@ -971,14 +980,16 @@ and typedef_decl tdef decl_tcopt =
   let td_tparams = List.map params (type_param env) in
   let td_type = Decl_hint.hint env concrete_type in
   let td_constraint = Option.map tcstr (Decl_hint.hint env) in
-  let tdecl = {
-    td_vis; td_tparams; td_constraint; td_type; td_pos;
-  } in
-  Decl_heap.Typedefs.add tid tdecl;
+  let td_decl_errors = None in
+  {
+    td_vis; td_tparams; td_constraint; td_type; td_pos; td_decl_errors;
+  }
 
 and type_typedef_naming_and_decl tcopt tdef =
   let tdef = Errors.ignore_ (fun () -> Naming.typedef tcopt tdef) in
-  typedef_decl tdef tcopt;
+  let errors, tdecl = Errors.do_ (fun () -> typedef_decl tdef tcopt) in
+  Decl_heap.Typedefs.add (snd tdef.t_name)
+    { tdecl with td_decl_errors = Some errors};
   ()
 
 (*****************************************************************************)
@@ -987,27 +998,24 @@ and type_typedef_naming_and_decl tcopt tdef =
 
 let const_decl cst decl_tcopt =
   let open Option.Monad_infix in
-  let cst_pos, cst_name = cst.cst_name in
+  let cst_pos, _cst_name = cst.cst_name in
   let dep = Dep.GConst (snd cst.cst_name) in
   let env = {Decl_env.mode = cst.cst_mode; droot = Some dep; decl_tcopt} in
-  let hint_ty =
-    match cst.cst_type with
-    | Some h -> Decl_hint.hint env h
+  match cst.cst_type with
+  | Some h -> Decl_hint.hint env h
+  | None ->
+    match cst.cst_value >>= infer_const with
+    | Some ty -> ty
+    | None when cst.cst_mode = FileInfo.Mstrict && (not cst.cst_is_define) ->
+      Errors.missing_typehint cst_pos;
+      Reason.Rwitness cst_pos, Tany
     | None ->
-      match cst.cst_value >>= infer_const with
-      | Some ty -> ty
-      | None when cst.cst_mode = FileInfo.Mstrict && (not cst.cst_is_define) ->
-        Errors.missing_typehint cst_pos;
-        Reason.Rwitness cst_pos, Tany
-      | None ->
-        Reason.Rwitness cst_pos, Tany
-  in
-  Decl_heap.GConsts.add cst_name hint_ty;
-  ()
+      Reason.Rwitness cst_pos, Tany
 
 let iconst_decl tcopt cst =
   let cst = Errors.ignore_ (fun () -> Naming.global_const tcopt cst) in
-  const_decl cst tcopt;
+  let errors, hint_ty = Errors.do_ (fun() -> const_decl cst tcopt) in
+  Decl_heap.GConsts.add (snd cst.cst_name) (hint_ty, errors);
   ()
 
 (*****************************************************************************)

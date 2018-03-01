@@ -70,6 +70,7 @@ type decl_class_type = {
   dc_extends             : SSet.t;
   dc_xhp_attr_deps       : SSet.t;
   dc_enum_type           : enum_type option;
+  dc_decl_errors         : Errors.t option;
 }
 
 and element = {

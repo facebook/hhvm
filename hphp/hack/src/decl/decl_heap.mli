@@ -28,7 +28,7 @@ module Typedef :
     val description : string
   end
 module GConst : sig
-  type t = decl ty
+  type t = decl ty * Errors.t
   val prefix : Prefix.t
   val description : string
 end

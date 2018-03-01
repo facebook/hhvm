@@ -78,6 +78,7 @@ let to_class_type {
   dc_extends;
   dc_xhp_attr_deps;
   dc_enum_type;
+  dc_decl_errors;
 } =
   let map_elements find elts = SMap.mapi begin fun name elt ->
     let ty = lazy begin
@@ -129,4 +130,5 @@ let to_class_type {
     tc_req_ancestors_extends = dc_req_ancestors_extends;
     tc_extends = SSet.union dc_xhp_attr_deps dc_extends;
     tc_enum_type = dc_enum_type;
+    tc_decl_errors = dc_decl_errors;
   }

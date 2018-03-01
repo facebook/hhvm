@@ -99,6 +99,7 @@ let make_ft p reactivity is_coroutine params ret_ty =
     ft_return_disposable = false;
     ft_returns_mutable = false;
     ft_mutable = false;
+    ft_decl_errors = None;
   }
 
 let get_shape_field_name = function

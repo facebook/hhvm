@@ -33,4 +33,4 @@ module Typedefs : ReadOnly
 
 module GConsts : ReadOnly
   with type key = StringKey.t
-   and type t = decl ty
+   and type t = decl ty * Errors.t

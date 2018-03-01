@@ -61,16 +61,14 @@ let () =
    * memory (to avoid getting cached old versions of declarations) *)
 
   let errors = Typing_check_service.go None tcopt bar_fast in
-  Test.assert_errors errors expected_errors;
-  (* To consider typing idempotent, both of the calls below should return
-   * expected_errors instead of no errors. At the moment, cached declarations
-   * don't contain errors (while at the same time shortcutting computation that
-   * would generate them. *)
+  Test.assert_errors errors "";
   let errors = Typing_check_service.go None tcopt bar_fast in
   Test.assert_errors errors "";
 
   let errors = Typing_check_service.go None tcopt foo_fast in
-  Test.assert_errors errors "";
-  (* TODO: check/show the same thing for non-lazy decl (when decl calls decl)*)
+  Test.assert_errors errors expected_errors;
+  let errors = Typing_check_service.go None tcopt foo_fast in
+  Test.assert_errors errors expected_errors;
+
   ignore env;
   ()

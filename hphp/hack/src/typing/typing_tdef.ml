@@ -31,7 +31,8 @@ let expand_typedef_ ?force_expand:(force_expand=false) ety_env env r x argl =
     Errors.cyclic_typedef pos;
     env, (ety_env, (r, Tany))
   end else begin
-    let {td_pos; td_vis; td_tparams; td_type; td_constraint} =
+    let {td_pos; td_vis; td_tparams; td_type; td_constraint;
+        td_decl_errors = _;} =
       unsafe_opt @@ Typing_env.get_typedef env x in
     let should_expand =
       force_expand ||

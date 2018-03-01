@@ -16,8 +16,11 @@ module ShapeMap = Nast.ShapeMap
 
 (*****************************************************************************)
 (* Functor traversing a type, but applies a user defined function for
-* positions.
-*)
+ * positions. Positions in errors (_decl_errors) are not mapped - entire
+ * field is erased instead. This is safe because there exists a completely
+ * different system for tracking and updating positions in errors
+ * (see ServerTypeCheck.get_files_with_stale_errors)
+ *)
 (*****************************************************************************)
 module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
 open Typing_reason
@@ -130,6 +133,7 @@ let rec ty (p, x) =
       ft_pos     = pos ft.ft_pos                       ;
       ft_arity   = fun_arity ft.ft_arity               ;
       ft_reactive = fun_reactive ft.ft_reactive        ;
+      ft_decl_errors = None                            ;
     }
 
   and fun_reactive = function
@@ -200,6 +204,7 @@ let rec ty (p, x) =
       dc_construct             = dc.dc_construct                      ;
       dc_ancestors             = SMap.map ty dc.dc_ancestors          ;
       dc_enum_type             = Option.map dc.dc_enum_type enum_type ;
+      dc_decl_errors           = None                                 ;
     }
 
   and requirement (p, t) = (pos p, ty t)
@@ -215,6 +220,7 @@ let rec ty (p, x) =
       td_tparams    = List.map tdef.td_tparams type_param ;
       td_constraint = ty_opt tdef.td_constraint           ;
       td_type       = ty tdef.td_type                     ;
+      td_decl_errors = None;
     }
 end
 

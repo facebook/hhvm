@@ -3633,6 +3633,11 @@ and is_abstract_ft fty = match fty with
         let { fp_type = (r3, _); _ } = param3 in
         let params, ret = match List.length el with
           | 2 ->
+            let ty1 = match param1.fp_type with
+              | (r11, Toption (r12, Tapply (coll, [tk; (r13, _) as tv]))) ->
+                (r11, Toption (r12, Tapply (coll, [tk; (r13, Toption tv)])))
+              | _ -> assert false in
+            let param1 = { param1 with fp_type = ty1 } in
             let ty2 = (r2, Toption (r2, Tgeneric "Tk")) in
             let param2 = { param2 with fp_type = ty2 } in
             let rret = fst fty.ft_ret in

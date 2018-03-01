@@ -13,7 +13,7 @@
  * Calls to idx are rewritten by the typechecker depending on their arity. It
  * can have two signatures:
  *
- * idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $collection, ?Tk $index): ?Tv
+ * idx<Tk, Tv>(?KeyedContainer<Tk, ?Tv> $collection, ?Tk $index): ?Tv
  * idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $collection, Tk $index, Tv $default): Tv
  */
 // NB: the typechecker relies on the exact format of this signature and rewrites

@@ -89,12 +89,19 @@ module TypeAndPosAnnotatedAST = Nast.AnnotatedAST(Annotations)
 
 include TypeAndPosAnnotatedAST
 
+(* Helper function to create an annotation for a typed and positioned expression.
+ * Do not construct this tuple directly - at some point we will build
+ * some abstraction in so that we can change the representation (e.g. put
+ * further annotations on the expression) as we see fit.
+ *)
+let make_expr_annotation p ty : Annotations.ExprAnnotation.t = (p, Some ty)
+
 (* Helper function to create a typed and positioned expression.
  * Do not construct this triple directly - at some point we will build
  * some abstraction in so that we can change the representation (e.g. put
  * further annotations on the expression) as we see fit.
  *)
-let make_typed_expr p ty te : expr = ((p, Some ty), te)
+let make_typed_expr p ty te : expr = (make_expr_annotation p ty, te)
 
 (* Given types for locals, the type of the expression should be cheaply
  * and uniquely derivable.

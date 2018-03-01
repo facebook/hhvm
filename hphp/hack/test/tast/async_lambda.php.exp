@@ -7,7 +7,8 @@
       f_name = ([3:16-3:25], "\\genString"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_hint = (Some ([3:26-3:32], (Hprim Tstring)));
+      [{ AnnotatedAST.param_annotation = ([3:33-3:35], Some string);
+         param_hint = (Some ([3:26-3:32], (Hprim Tstring)));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:33-3:35]; param_name = "$s"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
@@ -84,7 +85,8 @@
                            f_tparams = []; f_where_constraints = [];
                            f_variadic = AnnotatedAST.FVnonVariadic;
                            f_params =
-                           [{ AnnotatedAST.param_hint = None;
+                           [{ AnnotatedAST.param_annotation =
+                              ([9:15-9:17], Some _); param_hint = None;
                               param_is_reference = false;
                               param_is_variadic = false;
                               param_pos = [9:15-9:17]; param_name = "$x";

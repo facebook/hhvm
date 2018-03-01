@@ -1,6 +1,6 @@
 (* @generated from aast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<11246975af85dd6783212caab19851017c760b9b>> *)
+(* SourceShasum<<215018ed44790a56ca3f79cf857a60faa917a504>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -162,6 +162,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     and is_variadic = bool
     and fun_param =
       {
+      param_annotation: expr_annotation ;
       param_hint: hint option ;
       param_is_reference: is_reference ;
       param_is_variadic: is_variadic ;
@@ -1445,43 +1446,50 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     
     and pp_fun_param :
       Format.formatter -> fun_param -> Ppx_deriving_runtime.unit =
-      let __6 () = pp_user_attribute
+      let __7 () = pp_user_attribute
       
-      and __5 () = Ast.pp_param_kind
+      and __6 () = Ast.pp_param_kind
       
-      and __4 () = pp_expr
+      and __5 () = pp_expr
       
-      and __3 () = pp_pos
+      and __4 () = pp_pos
       
-      and __2 () = pp_is_variadic
+      and __3 () = pp_is_variadic
       
-      and __1 () = pp_is_reference
+      and __2 () = pp_is_reference
       
-      and __0 () = pp_hint
+      and __1 () = pp_hint
+      
+      and __0 () = pp_expr_annotation
        in
       ((let open! Ppx_deriving_runtime in
           fun fmt  ->
             fun x  ->
               Format.fprintf fmt "@[<2>{ ";
-              ((((((((Format.fprintf fmt "@[%s =@ " "AnnotatedAST.param_hint";
+              (((((((((Format.fprintf fmt "@[%s =@ "
+                         "AnnotatedAST.param_annotation";
+                       ((__0 ()) fmt) x.param_annotation;
+                       Format.fprintf fmt "@]");
+                      Format.fprintf fmt ";@ ";
+                      Format.fprintf fmt "@[%s =@ " "param_hint";
                       ((function
                         | None  -> Format.pp_print_string fmt "None"
                         | Some x ->
                             (Format.pp_print_string fmt "(Some ";
-                             ((__0 ()) fmt) x;
+                             ((__1 ()) fmt) x;
                              Format.pp_print_string fmt ")"))) x.param_hint;
                       Format.fprintf fmt "@]");
                      Format.fprintf fmt ";@ ";
                      Format.fprintf fmt "@[%s =@ " "param_is_reference";
-                     ((__1 ()) fmt) x.param_is_reference;
+                     ((__2 ()) fmt) x.param_is_reference;
                      Format.fprintf fmt "@]");
                     Format.fprintf fmt ";@ ";
                     Format.fprintf fmt "@[%s =@ " "param_is_variadic";
-                    ((__2 ()) fmt) x.param_is_variadic;
+                    ((__3 ()) fmt) x.param_is_variadic;
                     Format.fprintf fmt "@]");
                    Format.fprintf fmt ";@ ";
                    Format.fprintf fmt "@[%s =@ " "param_pos";
-                   ((__3 ()) fmt) x.param_pos;
+                   ((__4 ()) fmt) x.param_pos;
                    Format.fprintf fmt "@]");
                   Format.fprintf fmt ";@ ";
                   Format.fprintf fmt "@[%s =@ " "param_name";
@@ -1493,7 +1501,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                    | None  -> Format.pp_print_string fmt "None"
                    | Some x ->
                        (Format.pp_print_string fmt "(Some ";
-                        ((__4 ()) fmt) x;
+                        ((__5 ()) fmt) x;
                         Format.pp_print_string fmt ")"))) x.param_expr;
                  Format.fprintf fmt "@]");
                 Format.fprintf fmt ";@ ";
@@ -1502,7 +1510,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   | None  -> Format.pp_print_string fmt "None"
                   | Some x ->
                       (Format.pp_print_string fmt "(Some ";
-                       ((__5 ()) fmt) x;
+                       ((__6 ()) fmt) x;
                        Format.pp_print_string fmt ")"))) x.param_callconv;
                 Format.fprintf fmt "@]");
                Format.fprintf fmt ";@ ";
@@ -1514,7 +1522,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                         (fun sep  ->
                            fun x  ->
                              if sep then Format.fprintf fmt ";@ ";
-                             ((__6 ()) fmt) x;
+                             ((__7 ()) fmt) x;
                              true) false x);
                    Format.fprintf fmt "@,]@]")) x.param_user_attributes;
                Format.fprintf fmt "@]");
@@ -2978,22 +2986,25 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
             method on_is_variadic env = self#on_bool env
             method on_fun_param env _visitors_this =
               let _visitors_r0 =
-                self#on_option self#on_hint env _visitors_this.param_hint  in
+                self#on_expr_annotation env _visitors_this.param_annotation
+                 in
               let _visitors_r1 =
+                self#on_option self#on_hint env _visitors_this.param_hint  in
+              let _visitors_r2 =
                 self#on_is_reference env _visitors_this.param_is_reference
                  in
-              let _visitors_r2 =
+              let _visitors_r3 =
                 self#on_is_variadic env _visitors_this.param_is_variadic  in
-              let _visitors_r3 = self#on_pos env _visitors_this.param_pos  in
-              let _visitors_r4 = self#on_string env _visitors_this.param_name
+              let _visitors_r4 = self#on_pos env _visitors_this.param_pos  in
+              let _visitors_r5 = self#on_string env _visitors_this.param_name
                  in
-              let _visitors_r5 =
-                self#on_option self#on_expr env _visitors_this.param_expr  in
               let _visitors_r6 =
+                self#on_option self#on_expr env _visitors_this.param_expr  in
+              let _visitors_r7 =
                 self#on_option self#on_param_kind env
                   _visitors_this.param_callconv
                  in
-              let _visitors_r7 =
+              let _visitors_r8 =
                 self#on_list self#on_user_attribute env
                   _visitors_this.param_user_attributes
                  in
@@ -3785,22 +3796,25 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
             method on_is_variadic env = self#on_bool env
             method on_fun_param env _visitors_this =
               let _visitors_s0 =
-                self#on_option self#on_hint env _visitors_this.param_hint  in
+                self#on_expr_annotation env _visitors_this.param_annotation
+                 in
               let _visitors_s1 =
+                self#on_option self#on_hint env _visitors_this.param_hint  in
+              let _visitors_s2 =
                 self#on_is_reference env _visitors_this.param_is_reference
                  in
-              let _visitors_s2 =
+              let _visitors_s3 =
                 self#on_is_variadic env _visitors_this.param_is_variadic  in
-              let _visitors_s3 = self#on_pos env _visitors_this.param_pos  in
-              let _visitors_s4 = self#on_string env _visitors_this.param_name
+              let _visitors_s4 = self#on_pos env _visitors_this.param_pos  in
+              let _visitors_s5 = self#on_string env _visitors_this.param_name
                  in
-              let _visitors_s5 =
-                self#on_option self#on_expr env _visitors_this.param_expr  in
               let _visitors_s6 =
+                self#on_option self#on_expr env _visitors_this.param_expr  in
+              let _visitors_s7 =
                 self#on_option self#on_param_kind env
                   _visitors_this.param_callconv
                  in
-              let _visitors_s7 =
+              let _visitors_s8 =
                 self#on_list self#on_user_attribute env
                   _visitors_this.param_user_attributes
                  in
@@ -3809,9 +3823,12 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                    (self#plus
                       (self#plus
                          (self#plus
-                            (self#plus (self#plus _visitors_s0 _visitors_s1)
-                               _visitors_s2) _visitors_s3) _visitors_s4)
-                      _visitors_s5) _visitors_s6) _visitors_s7
+                            (self#plus
+                               (self#plus
+                                  (self#plus _visitors_s0 _visitors_s1)
+                                  _visitors_s2) _visitors_s3) _visitors_s4)
+                         _visitors_s5) _visitors_s6) _visitors_s7)
+                _visitors_s8
             method on_FVvariadicArg env _visitors_c0 =
               let _visitors_s0 = self#on_fun_param env _visitors_c0  in
               _visitors_s0
@@ -4694,34 +4711,38 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
             method on_is_variadic env = self#on_bool env
             method on_fun_param env _visitors_this =
               let _visitors_r0 =
-                self#on_option self#on_hint env _visitors_this.param_hint  in
+                self#on_expr_annotation env _visitors_this.param_annotation
+                 in
               let _visitors_r1 =
+                self#on_option self#on_hint env _visitors_this.param_hint  in
+              let _visitors_r2 =
                 self#on_is_reference env _visitors_this.param_is_reference
                  in
-              let _visitors_r2 =
+              let _visitors_r3 =
                 self#on_is_variadic env _visitors_this.param_is_variadic  in
-              let _visitors_r3 = self#on_pos env _visitors_this.param_pos  in
-              let _visitors_r4 = self#on_string env _visitors_this.param_name
+              let _visitors_r4 = self#on_pos env _visitors_this.param_pos  in
+              let _visitors_r5 = self#on_string env _visitors_this.param_name
                  in
-              let _visitors_r5 =
-                self#on_option self#on_expr env _visitors_this.param_expr  in
               let _visitors_r6 =
+                self#on_option self#on_expr env _visitors_this.param_expr  in
+              let _visitors_r7 =
                 self#on_option self#on_param_kind env
                   _visitors_this.param_callconv
                  in
-              let _visitors_r7 =
+              let _visitors_r8 =
                 self#on_list self#on_user_attribute env
                   _visitors_this.param_user_attributes
                  in
               {
-                param_hint = _visitors_r0;
-                param_is_reference = _visitors_r1;
-                param_is_variadic = _visitors_r2;
-                param_pos = _visitors_r3;
-                param_name = _visitors_r4;
-                param_expr = _visitors_r5;
-                param_callconv = _visitors_r6;
-                param_user_attributes = _visitors_r7
+                param_annotation = _visitors_r0;
+                param_hint = _visitors_r1;
+                param_is_reference = _visitors_r2;
+                param_is_variadic = _visitors_r3;
+                param_pos = _visitors_r4;
+                param_name = _visitors_r5;
+                param_expr = _visitors_r6;
+                param_callconv = _visitors_r7;
+                param_user_attributes = _visitors_r8
               }
             method on_FVvariadicArg env _visitors_c0 =
               let _visitors_r0 = self#on_fun_param env _visitors_c0  in
@@ -6016,61 +6037,68 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
             method on_is_variadic env = self#on_bool env
             method on_fun_param env _visitors_this =
               let _visitors_r0 =
-                self#on_option self#on_hint env _visitors_this.param_hint  in
+                self#on_expr_annotation env _visitors_this.param_annotation
+                 in
               let _visitors_r1 =
+                self#on_option self#on_hint env _visitors_this.param_hint  in
+              let _visitors_r2 =
                 self#on_is_reference env _visitors_this.param_is_reference
                  in
-              let _visitors_r2 =
+              let _visitors_r3 =
                 self#on_is_variadic env _visitors_this.param_is_variadic  in
-              let _visitors_r3 = self#on_pos env _visitors_this.param_pos  in
-              let _visitors_r4 = self#on_string env _visitors_this.param_name
+              let _visitors_r4 = self#on_pos env _visitors_this.param_pos  in
+              let _visitors_r5 = self#on_string env _visitors_this.param_name
                  in
-              let _visitors_r5 =
-                self#on_option self#on_expr env _visitors_this.param_expr  in
               let _visitors_r6 =
+                self#on_option self#on_expr env _visitors_this.param_expr  in
+              let _visitors_r7 =
                 self#on_option self#on_param_kind env
                   _visitors_this.param_callconv
                  in
-              let _visitors_r7 =
+              let _visitors_r8 =
                 self#on_list self#on_user_attribute env
                   _visitors_this.param_user_attributes
                  in
               if
                 Pervasives.(&&)
-                  (Pervasives.(==) _visitors_this.param_hint _visitors_r0)
+                  (Pervasives.(==) _visitors_this.param_annotation
+                     _visitors_r0)
                   (Pervasives.(&&)
-                     (Pervasives.(==) _visitors_this.param_is_reference
-                        _visitors_r1)
+                     (Pervasives.(==) _visitors_this.param_hint _visitors_r1)
                      (Pervasives.(&&)
-                        (Pervasives.(==) _visitors_this.param_is_variadic
+                        (Pervasives.(==) _visitors_this.param_is_reference
                            _visitors_r2)
                         (Pervasives.(&&)
-                           (Pervasives.(==) _visitors_this.param_pos
+                           (Pervasives.(==) _visitors_this.param_is_variadic
                               _visitors_r3)
                            (Pervasives.(&&)
-                              (Pervasives.(==) _visitors_this.param_name
+                              (Pervasives.(==) _visitors_this.param_pos
                                  _visitors_r4)
                               (Pervasives.(&&)
-                                 (Pervasives.(==) _visitors_this.param_expr
+                                 (Pervasives.(==) _visitors_this.param_name
                                     _visitors_r5)
                                  (Pervasives.(&&)
                                     (Pervasives.(==)
-                                       _visitors_this.param_callconv
-                                       _visitors_r6)
-                                    (Pervasives.(==)
-                                       _visitors_this.param_user_attributes
-                                       _visitors_r7)))))))
+                                       _visitors_this.param_expr _visitors_r6)
+                                    (Pervasives.(&&)
+                                       (Pervasives.(==)
+                                          _visitors_this.param_callconv
+                                          _visitors_r7)
+                                       (Pervasives.(==)
+                                          _visitors_this.param_user_attributes
+                                          _visitors_r8))))))))
               then _visitors_this
               else
                 {
-                  param_hint = _visitors_r0;
-                  param_is_reference = _visitors_r1;
-                  param_is_variadic = _visitors_r2;
-                  param_pos = _visitors_r3;
-                  param_name = _visitors_r4;
-                  param_expr = _visitors_r5;
-                  param_callconv = _visitors_r6;
-                  param_user_attributes = _visitors_r7
+                  param_annotation = _visitors_r0;
+                  param_hint = _visitors_r1;
+                  param_is_reference = _visitors_r2;
+                  param_is_variadic = _visitors_r3;
+                  param_pos = _visitors_r4;
+                  param_name = _visitors_r5;
+                  param_expr = _visitors_r6;
+                  param_callconv = _visitors_r7;
+                  param_user_attributes = _visitors_r8
                 }
             method on_FVvariadicArg env _visitors_this _visitors_c0 =
               let _visitors_r0 = self#on_fun_param env _visitors_c0  in

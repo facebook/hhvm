@@ -4,7 +4,8 @@
       f_name = ([3:10-3:22], "\\takes_string"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_hint = (Some ([3:23-3:29], (Hprim Tstring)));
+      [{ AnnotatedAST.param_annotation = ([3:30-3:32], Some string);
+         param_hint = (Some ([3:23-3:29], (Hprim Tstring)));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:30-3:32]; param_name = "$s"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
@@ -20,7 +21,9 @@
        f_where_constraints = [];
        f_variadic =
        (AnnotatedAST.FVvariadicArg
-          { AnnotatedAST.param_hint = (Some ([5:12-5:18], (Hprim Tstring)));
+          { AnnotatedAST.param_annotation =
+            ([5:22-5:27], Some varray<string>);
+            param_hint = (Some ([5:12-5:18], (Hprim Tstring)));
             param_is_reference = false; param_is_variadic = true;
             param_pos = [5:22-5:27]; param_name = "$args"; param_expr = None;
             param_callconv = None; param_user_attributes = [] });
@@ -63,10 +66,12 @@
           m_where_constraints = [];
           m_variadic =
           (AnnotatedAST.FVvariadicArg
-             { AnnotatedAST.param_hint = None; param_is_reference = false;
-               param_is_variadic = true; param_pos = [12:27-12:32];
-               param_name = "$args"; param_expr = None;
-               param_callconv = None; param_user_attributes = [] });
+             { AnnotatedAST.param_annotation =
+               ([12:27-12:32], Some varray<_>); param_hint = None;
+               param_is_reference = false; param_is_variadic = true;
+               param_pos = [12:27-12:32]; param_name = "$args";
+               param_expr = None; param_callconv = None;
+               param_user_attributes = [] });
           m_params = [];
           m_body =
           (AnnotatedAST.NamedBody

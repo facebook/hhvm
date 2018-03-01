@@ -27,7 +27,8 @@
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = AnnotatedAST.FVnonVariadic;
                           f_params =
-                          [{ AnnotatedAST.param_hint = None;
+                          [{ AnnotatedAST.param_annotation =
+                             ([15:8-15:10], Some _); param_hint = None;
                              param_is_reference = false;
                              param_is_variadic = false;
                              param_pos = [15:8-15:10]; param_name = "$z";
@@ -80,7 +81,8 @@
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = AnnotatedAST.FVnonVariadic;
                           f_params =
-                          [{ AnnotatedAST.param_hint = None;
+                          [{ AnnotatedAST.param_annotation =
+                             ([18:17-18:19], Some _); param_hint = None;
                              param_is_reference = false;
                              param_is_variadic = false;
                              param_pos = [18:17-18:19]; param_name = "$z";
@@ -119,13 +121,15 @@
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = AnnotatedAST.FVnonVariadic;
                           f_params =
-                          [{ AnnotatedAST.param_hint = None;
+                          [{ AnnotatedAST.param_annotation =
+                             ([23:9-23:11], Some _); param_hint = None;
                              param_is_reference = false;
                              param_is_variadic = false;
                              param_pos = [23:9-23:11]; param_name = "$a";
                              param_expr = None; param_callconv = None;
                              param_user_attributes = [] };
-                            { AnnotatedAST.param_hint = None;
+                            { AnnotatedAST.param_annotation =
+                              ([23:13-23:15], Some _); param_hint = None;
                               param_is_reference = false;
                               param_is_variadic = false;
                               param_pos = [23:13-23:15]; param_name = "$b";

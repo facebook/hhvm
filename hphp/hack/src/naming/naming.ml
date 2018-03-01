@@ -1753,7 +1753,8 @@ module Make (GetLocals : GetLocals) = struct
     Env.add_lvar env param.param_id (p, ident);
     let ty = Option.map param.param_hint (hint env) in
     let eopt = Option.map param.param_expr (expr env) in
-    { N.param_hint = ty;
+    { N.param_annotation = p;
+      param_hint = ty;
       param_is_reference = param.param_is_reference;
       param_is_variadic = param.param_is_variadic;
       param_pos = p;

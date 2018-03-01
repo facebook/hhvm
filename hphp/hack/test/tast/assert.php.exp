@@ -4,7 +4,8 @@
       f_name = ([14:10-14:13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_hint =
+      [{ AnnotatedAST.param_annotation = ([14:17-14:19], Some ?\A);
+         param_hint =
          (Some ([14:14-14:16],
                 (Hoption
                    ([14:15-14:16], (Happly (([14:15-14:16], "\\A"), []))))));

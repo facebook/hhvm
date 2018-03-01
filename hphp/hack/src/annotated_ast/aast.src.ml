@@ -199,6 +199,7 @@ and special_func =
 and is_reference = bool
 and is_variadic = bool
 and fun_param = {
+  param_annotation : expr_annotation;
   param_hint : hint option;
   param_is_reference : is_reference;
   param_is_variadic : is_variadic;

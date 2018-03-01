@@ -196,6 +196,7 @@ struct
 
   and map_fun_param menv fp =
   {
+    T.param_annotation = menv.map_expr_annotation menv.env fp.S.param_annotation;
     T.param_hint = fp.S.param_hint;
     T.param_is_reference = fp.S.param_is_reference;
     T.param_is_variadic = fp.S.param_is_variadic;

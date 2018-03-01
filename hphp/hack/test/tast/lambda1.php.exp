@@ -27,7 +27,8 @@
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = AnnotatedAST.FVnonVariadic;
                           f_params =
-                          [{ AnnotatedAST.param_hint = None;
+                          [{ AnnotatedAST.param_annotation =
+                             ([4:8-4:10], Some _); param_hint = None;
                              param_is_reference = false;
                              param_is_variadic = false;
                              param_pos = [4:8-4:10]; param_name = "$n";

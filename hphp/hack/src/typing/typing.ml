@@ -397,6 +397,7 @@ let rec bind_param env (ty1, param) =
   Typing_suggest.save_param (param.param_name) env ty1 ty2;
   let env = Type.sub_type param.param_pos Reason.URhint env ty2 ty1 in
   let tparam = {
+    T.param_annotation = T.make_expr_annotation param.param_pos ty1;
     T.param_hint = param.param_hint;
     T.param_is_reference = param.param_is_reference;
     T.param_is_variadic = param.param_is_variadic;

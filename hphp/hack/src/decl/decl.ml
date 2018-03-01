@@ -223,7 +223,7 @@ let has_mutable_attribute user_attributes =
   Attributes.mem SN.UserAttributes.uaMutable user_attributes
 
 let rec ifun_decl tcopt (f: Ast.fun_) =
-  let f = Naming.fun_ tcopt f in
+  let f = Errors.ignore_ (fun () -> Naming.fun_ tcopt f) in
   fun_decl f tcopt;
   ()
 
@@ -394,7 +394,7 @@ let rec class_decl_if_missing class_env c =
 
 and class_naming_and_decl (class_env:class_env) cid c =
   let class_env = { class_env with stack = SSet.add cid class_env.stack } in
-  let c = Naming.class_ class_env.tcopt c in
+  let c = Errors.ignore_ (fun () -> Naming.class_ class_env.tcopt c) in
   class_parents_decl class_env c;
   class_decl class_env.tcopt c;
   ()
@@ -977,7 +977,7 @@ and typedef_decl tdef decl_tcopt =
   Decl_heap.Typedefs.add tid tdecl;
 
 and type_typedef_naming_and_decl tcopt tdef =
-  let tdef = Naming.typedef tcopt tdef in
+  let tdef = Errors.ignore_ (fun () -> Naming.typedef tcopt tdef) in
   typedef_decl tdef tcopt;
   ()
 
@@ -1006,7 +1006,7 @@ let const_decl cst decl_tcopt =
   ()
 
 let iconst_decl tcopt cst =
-  let cst = Naming.global_const tcopt cst in
+  let cst = Errors.ignore_ (fun () -> Naming.global_const tcopt cst) in
   const_decl cst tcopt;
   ()
 

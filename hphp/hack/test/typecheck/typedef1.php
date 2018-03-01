@@ -13,5 +13,6 @@ class A {}
 
 type MyTypedef = A;
 
+/* HH_FIXME[4123]: cascading errors */
 class X extends MyTypedef {
 }

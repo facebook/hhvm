@@ -39,10 +39,6 @@ let () =
   "File \"/foo2.php\", line 2, characters 9-11:\n" ^
   "Could not find FOO (Naming[2006])\n" ^
   "File \"/foo1.php\", line 2, characters 9-11:\n" ^
-  "Did you mean foo?\n\n" ^
-  "File \"/foo2.php\", line 2, characters 9-11:\n" ^
-  "Could not find FOO (Naming[2006])\n" ^
-  "File \"/foo1.php\", line 2, characters 9-11:\n" ^
   "Did you mean foo?\n\n"
   in
   Test.assert_env_errors env expected_error;

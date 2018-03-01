@@ -36,9 +36,6 @@ class C {}
 let errors = {|
 File "/A.php", line 4, characters 31-31:
 Unbound name: C (an object type) (Naming[2049])
-
-File "/A.php", line 4, characters 31-31:
-Unbound name: C (an object type) (Naming[2049])
 |}
 
 let () =

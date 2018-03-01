@@ -10,6 +10,7 @@
  */
 
 class A {}
+/* HH_FIXME[4123]: cascading errors */
 class B {
   use Z; // Hack should not allow this
 }

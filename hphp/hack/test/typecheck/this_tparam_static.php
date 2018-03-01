@@ -12,7 +12,7 @@
 class BadClass {
   private static ?this $instance;
 
-  public function getInstance(): this {
+  public static function getInstance(): this {
     $instance = self::$instance;
     if ($instance === null) {
       $instance = new static();

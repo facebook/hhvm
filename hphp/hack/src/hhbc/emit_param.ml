@@ -192,17 +192,34 @@ let from_asts ~namespace ~tparams ~generate_defaults ~scope ast_params =
     (from_ast ~tparams ~namespace ~generate_defaults ~scope) in
   rename_params hhas_params
 
-let emit_param_default_value_setter env pos params =
+let emit_param_default_value_setter ?(is_native = false) env pos params =
   let setters = List.filter_map params (fun p ->
     let param_name = Hhas_param.name p in
     let dvo = Hhas_param.default_value p in
+    let nop_requirements e = is_native && snd e = A.Null && begin
+      let is_optional, is_mixed, is_callable =
+        match Hhas_param.type_info p with
+        | Some {Hhas_type_info.type_info_user_type = Some s; _} ->
+          let is_optional = String_utils.string_starts_with s "?" in
+          let s = String_utils.lstrip s "?" in
+          is_optional, s = "HH\\mixed", s = "callable"
+        | _ -> false, false, false in
+      is_mixed ||
+      Hhas_param.is_reference p ||
+      (is_optional && is_callable)
+      end
+    in
     Option.map dvo (fun (l, e) ->
       gather [
         instr_label l;
-        Emit_expression.emit_expr ~need_ref:false env e;
+        if nop_requirements e then
+          instr_nop
+        else gather [
+          Emit_expression.emit_expr ~need_ref:false env e;
         Emit_pos.emit_pos pos;
-        instr_setl (Local.Named param_name);
-        instr_popc;
+          instr_setl (Local.Named param_name);
+          instr_popc;
+        ];
       ]) )
   in
   if List.is_empty setters

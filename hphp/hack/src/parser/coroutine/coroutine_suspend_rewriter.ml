@@ -362,24 +362,13 @@ let rewrite_suspend
   ; extra_info = { is_tail_call = false; prefix = statements } }
 
 (* checks if specified node might need to be saved in local *)
-let rec might_be_spilled node parent
-  ~spill_subscript_expressions =
+let rec might_be_spilled node parent ~spill_subscript_expressions =
   match syntax node, syntax parent with
-  (* do not spill subscript expressions if receiver and index should not
-     be spilled when node is an immediate argument for unset.
-
-     NOTE: Normally we should not do this, consider this case:
-
-     f($a[0], suspend y($a[0]++))
-     if initial value of $a[0] is not saved then
-     value that will be passed as the first argument to f will be
-     incremented. *)
-  | SubscriptExpression {
-      subscript_receiver = r;
-      subscript_index = i;
-      _ }, _ when spill_subscript_expressions ->
-       might_be_spilled r node ~spill_subscript_expressions:false
-    || might_be_spilled i node ~spill_subscript_expressions:false
+  (* do not spill tokens, literals or qualified names *)
+  | Token _, _
+  | LiteralExpression _, _
+  | QualifiedName _, _ ->
+    false
 
   (* do not spill variables that are receivers in array indexed access
      or objects in member selection expressions :
@@ -387,26 +376,29 @@ let rec might_be_spilled node parent
   | VariableExpression {
       variable_expression = {
         syntax = Token { Token.kind = TokenKind.Variable; _ }; _ };
-      _
+      _;
     },
     (
       SubscriptExpression { subscript_receiver = r; _  } |
       MemberSelectionExpression { member_object = r; _ }
-    ) when node == r
-    -> false
+    ) when node == r -> false
+
   (* spill variables except $this *)
   | VariableExpression {
       variable_expression = {
         syntax = Token ({ Token.kind = TokenKind.Variable; _; } as token); _ };
       _
-    }, _ ->
-    let text = Token.text token in
-    text <> "$this"
-  (* do not spill tokens, literals or qualified names *)
-  | Token _, _
-  | LiteralExpression _, _
-  | QualifiedName _, _ ->
-    false
+    },
+    _ when Token.text token = "$this" -> false
+
+  (* Do not spill member selection if is function call *)
+  (* $obj->some_function(...) or self::some_function *)
+  | (MemberSelectionExpression _ | ScopeResolutionExpression _),
+    FunctionCallExpression {
+      function_call_receiver;
+      _;
+    } when function_call_receiver = node -> false
+
   (* do not spill member accesses on $closure variable *)
   | MemberSelectionExpression {
       member_object = {
@@ -423,9 +415,8 @@ let rec might_be_spilled node parent
       };
       _;
     },
-    _ ->
-      let text = Token.text token in
-      text <> closure_variable
+    _ when Token.text token = closure_variable -> false
+
   (* do not spill binary expressions where operands don't need spilling *)
   | BinaryExpression {
       binary_left_operand = left;
@@ -434,6 +425,25 @@ let rec might_be_spilled node parent
     }, _ ->
        might_be_spilled left node ~spill_subscript_expressions:false
     || might_be_spilled right node ~spill_subscript_expressions:false
+
+  (* do not spill subscript expressions if receiver and index should not
+     be spilled when node is an immediate argument for unset.
+
+     NOTE: Normally we should not do this, consider this case:
+
+     f($a[0], suspend y($a[0]++))
+     if initial value of $a[0] is not saved then
+     value that will be passed as the first argument to f will be
+     incremented. *)
+  | SubscriptExpression {
+      subscript_receiver = r;
+      subscript_index = i;
+      _;
+    },
+    _ when spill_subscript_expressions ->
+       might_be_spilled r node ~spill_subscript_expressions:false
+    || might_be_spilled i node ~spill_subscript_expressions:false
+
   (* do not spill parenthesised expression if
      inner expression does not need spilling *)
   | ParenthesizedExpression {
@@ -441,6 +451,7 @@ let rec might_be_spilled node parent
       _
     }, _ ->
     might_be_spilled e node ~spill_subscript_expressions
+
   (* do not spill list items if inner expression does not need spilling *)
   | ListItem { list_item; _ }, _ ->
     might_be_spilled list_item node ~spill_subscript_expressions
@@ -626,7 +637,6 @@ let rewrite_suspends_in_statement
       (no_info :: node_extra_info_rest, next_label, next_temp),
       Rewriter.Result.Keep
     in
-
     match syntax node with
     (* ignore tokens and missing nodes *)
     | Token _ | Missing -> keep_node ()
@@ -983,7 +993,6 @@ let rewrite_suspends_in_statement
         Rewriter.Result.Replace new_node
 
       | _ ->
-
         let spill_subscript_expressions =
              is_argument_to_unset
           && Core_list.is_empty parents in

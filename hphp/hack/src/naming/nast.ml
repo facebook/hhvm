@@ -1,6 +1,6 @@
 (* @generated from nast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<59267a2e38de5dd8c4eff8ab604b81871d432aa1>> *)
+(* SourceShasum<<350adaeede12dda12a77af73f8c9cb34dc0f4577>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text

@@ -2076,12 +2076,6 @@ module Make (GetLocals : GetLocals) = struct
   and expr_obj_get_name env = function
     | p, Id x -> p, N.Id x
     | p, e ->
-        (match (fst env).in_mode with
-          | FileInfo.Mstrict ->
-              Errors.dynamic_method_call p
-          | FileInfo.Mpartial | FileInfo.Mdecl | FileInfo.Mphp ->
-              ()
-        );
         expr env (p, e)
 
   and exprl env l = List.map l (expr env)

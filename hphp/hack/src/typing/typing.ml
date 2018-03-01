@@ -1978,9 +1978,19 @@ and expr_
         T.make_implicitly_typed_expr pm (T.Id m), nullflavor)) result
     (* Dynamic instance property access e.g. $x->$f *)
   | Obj_get (e1, e2, nullflavor) ->
-    let env, te1, _ = expr ~accept_using_var:true env e1 in
+    let env, te1, ty1 = expr ~accept_using_var:true env e1 in
     let env, te2, _ = expr env e2 in
-    let ty = (Reason.Rwitness p, Tany) in
+    let ty = if TUtils.is_dynamic env ty1 then
+      (Reason.Rwitness p, Tdynamic) else
+      begin
+      if Env.is_strict env then
+        begin
+        Errors.dynamic_method_call (fst e2);
+        (Reason.Rwitness p, Terr)
+        end
+      else
+      (Reason.Rwitness p, Tany)
+      end in
     make_result env (T.Obj_get(te1, te2, nullflavor)) ty
   | Yield_break ->
       make_result env T.Yield_break (Reason.Rwitness p, Tany)

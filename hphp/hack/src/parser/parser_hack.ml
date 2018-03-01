@@ -3849,7 +3849,8 @@ and expr_if env e1 =
       expect env Tcolon;
       if ParserOptions.disallow_elvis_space env.popt then
         error env "Remove all whitespace between ? and :";
-      expr_elvis env e1
+      let e2 = expr env in
+      Pos.btw (fst e1) (fst e2), Eif (e1, None, e2)
     end
     else ternary_if env e1
   end
@@ -3865,8 +3866,10 @@ and ternary_if env e1 =
   Pos.btw (fst e1) (fst e3), Eif (e1, Some e2, e3)
 
 and expr_elvis env e1 =
-  let e2 = expr env in
-  Pos.btw (fst e1) (fst e2), Eif (e1, None, e2)
+  reduce env e1 Telvis begin fun e1 env ->
+    let e2 = expr env in
+    Pos.btw (fst e1) (fst e2), Eif (e1, None, e2)
+  end
 
 (*****************************************************************************)
 (* Null coalesce expression: _??_ *)

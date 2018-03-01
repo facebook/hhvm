@@ -838,6 +838,16 @@ static void pagein_self(void) {
   FILE *fp;
 
   auto mapped_huge = false;
+#ifdef __APPLE__
+  // The normal implementation is theoretically safe on non-Linux platforms,
+  // boiling down to several if(false), including safely checking the
+  // result of failing to open /proc/self/maps.
+  //
+  // On MacOS Sierra and High Sierra, this is still true, but it makes
+  // XCode's toolchain *very* unhappy: it makes the HHVM binary ~ 3x the
+  // size, and the parser ~ 300x slower - so, let's just skip it.
+  auto const try_map_huge = false;
+#else
   auto const try_map_huge =
     RuntimeOption::EvalMaxHotTextHugePages > 0 &&
     (char*)__hot_start != nullptr && (char*)__hot_end != nullptr &&
@@ -848,6 +858,7 @@ static void pagein_self(void) {
       Logger::Warning("Failed to hugify the .text section");
     }
   };
+#endif // __APPLE__
 
   // pad due to the spaces between the inode number and the mapname
   bufsz = sizeof(unsigned long) * 4 + sizeof(mapname) + sizeof(char) * 11 + 100;

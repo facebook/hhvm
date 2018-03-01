@@ -32,7 +32,7 @@ val make_env
   -> ?quick_mode:bool
   -> ?lower_coroutines:bool
   -> ?enable_hh_syntax:bool
-  -> ?parser_options:GlobalOptions.t
+  -> ?parser_options:ParserOptions.t
   -> ?fi_mode:FileInfo.mode
   -> ?is_hh_file:bool
   -> ?stats:Stats_container.t

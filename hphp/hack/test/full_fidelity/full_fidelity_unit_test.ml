@@ -121,7 +121,8 @@ let test_errors source =
   let source_text = SourceText.make file_path source in
   let offset_to_position = SourceText.offset_to_position source_text in
   let syntax_tree = PositionedTree.make source_text in
-  let errors = ParserErrors.parse_errors syntax_tree in
+  let error_env = ParserErrors.make_env syntax_tree in
+  let errors = ParserErrors.parse_errors error_env in
   let mapper err = SyntaxError.to_positioned_string err offset_to_position in
   let errors = List.map errors ~f:mapper in
   Printf.sprintf "%s" (String.concat "\n" errors)

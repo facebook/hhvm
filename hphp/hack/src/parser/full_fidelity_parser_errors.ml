@@ -67,13 +67,38 @@ type first_use_or_def = {
   f_name: string;
 }
 
-type error_level =
-  Minimum | Typical | Maximum | HHVMCompatibility | HHVMCompatibilitySystemLib
+type error_level = Minimum | Typical | Maximum
 
-let is_hhvm_compat level =
-  level = HHVMCompatibility || level = HHVMCompatibilitySystemLib
+type hhvm_compat_mode = NoCompat | HHVMCompat | SystemLibCompat
 
-let is_systemlib_compat level = level = HHVMCompatibilitySystemLib
+type env =
+  { syntax_tree          : SyntaxTree.t
+  ; level                : error_level
+  ; hhvm_compat_mode     : hhvm_compat_mode
+  ; enable_hh_syntax     : bool
+  ; is_hh_file           : bool
+  ; is_strict            : bool
+  }
+
+let make_env
+  ?(level                = Typical         )
+  ?(hhvm_compat_mode     = NoCompat        )
+  ?(enable_hh_syntax     = false           )
+  (syntax_tree : SyntaxTree.t)
+  : env
+  = { syntax_tree
+    ; level
+    ; hhvm_compat_mode
+    ; enable_hh_syntax
+    ; is_hh_file = SyntaxTree.is_hack syntax_tree
+    ; is_strict = SyntaxTree.is_strict syntax_tree
+    }
+
+and is_hhvm_compat env = env.hhvm_compat_mode <> NoCompat
+
+and is_systemlib_compat env = env.hhvm_compat_mode = SystemLibCompat
+
+and is_hack env = env.is_hh_file || env.enable_hh_syntax
 
 let global_namespace_name = "\\"
 
@@ -383,8 +408,8 @@ let is_not_public_visibility x =
   is_private x || is_protected x
 
 (* test the methodish node contains any non-visibility modifiers *)
-let methodish_contains_non_visibility hhvm_compat_mode node =
-  if hhvm_compat_mode then false
+let methodish_contains_non_visibility env node =
+  if is_hhvm_compat env then false
   else
   let is_non_visibility x = not (is_visibility x) in
   methodish_modifier_contains_helper is_non_visibility node
@@ -395,8 +420,8 @@ let declaration_multiple_visibility node =
 
 (* Given a function declaration header, confirm that it is a constructor
  * and that the methodish containing it has a static keyword *)
-let class_constructor_has_static hhvm_compat_mode node parents =
-  if hhvm_compat_mode then false
+let class_constructor_has_static env node parents =
+  if is_hhvm_compat env then false
   else
   match node with
   | FunctionDeclarationHeader node ->
@@ -423,23 +448,25 @@ let class_non_constructor_has_visibility_param node parents =
 
 (* Given a function declaration header, confirm that it is a destructor
  * and that the methodish containing it has non-empty parameters *)
-let class_destructor_has_param hhvm_compat_mode node parents =
+let class_destructor_has_param env node parents =
   match node with
   | FunctionDeclarationHeader node ->
     let label = node.function_name in
     let param = node.function_parameter_list in
-    not hhvm_compat_mode && (is_destruct label) && not (is_missing param)
+    not (is_hhvm_compat env)
+    && (is_destruct label)
+    && not (is_missing param)
   | _ -> false
 
 (* Given a function declaration header, confirm that it is a destructor
  * and that the methodish containing it has non-visibility modifiers *)
-let class_destructor_has_non_visibility_modifier hhvm_compat_mode node parents =
+let class_destructor_has_non_visibility_modifier env node parents =
   match node with
   | FunctionDeclarationHeader node ->
     let label = node.function_name in
-    not hhvm_compat_mode &&
+    not (is_hhvm_compat env) &&
     (is_destruct label) &&
-    (matches_first (methodish_contains_non_visibility hhvm_compat_mode) parents)
+    (matches_first (methodish_contains_non_visibility env) parents)
   | _ -> false
 
 let async_magic_method node parents =
@@ -450,8 +477,8 @@ let async_magic_method node parents =
   | _ -> false
 
 (* check that a constructor or a destructor is type annotated *)
-let class_constructor_destructor_has_non_void_type hhvm_compat_node node parents =
-  if hhvm_compat_node then false
+let class_constructor_destructor_has_non_void_type env node parents =
+  if is_hhvm_compat env then false
   else
   match node with
   | FunctionDeclarationHeader node ->
@@ -508,8 +535,8 @@ let methodish_inside_interface parents =
 
 (* Test whether node is an abstract method with a body.
  * Here node is the methodish node *)
-let methodish_abstract_with_body hhvm_compat_mode node =
-  if hhvm_compat_mode then false
+let methodish_abstract_with_body env node =
+  if is_hhvm_compat env then false
   else
   let is_abstract = methodish_contains_abstract node in
   let has_body = methodish_has_body node in
@@ -525,8 +552,8 @@ let methodish_non_abstract_without_body_not_native node parents =
   let not_native = not (methodish_is_native node) in
   non_abstract && not_has_body && not_native
 
-let methodish_in_interface_has_body hhvm_compat_mode node parents =
-  not hhvm_compat_mode &&
+let methodish_in_interface_has_body env node parents =
+  not (is_hhvm_compat env) &&
   methodish_inside_interface parents && methodish_has_body node
 
 (* Test whether node is a method that is both abstract and private
@@ -601,14 +628,14 @@ let is_invalid_xhp_attr_enum_item node =
       is_invalid_xhp_attr_enum_item_literal literal_expression
   | _ -> true
 
-let xhp_errors node _parents hhvm_compat_mode errors =
+let xhp_errors env node errors =
   match syntax node with
   |  XHPEnumType enumType when
-    not hhvm_compat_mode &&
+    not (is_hhvm_compat env) &&
     (is_missing enumType.xhp_enum_values) ->
       make_error_from_node enumType.xhp_enum_values SyntaxError.error2055 :: errors
   |  XHPEnumType enumType when
-    not hhvm_compat_mode ->
+    not (is_hhvm_compat env) ->
     let invalid_enum_items = List.filter is_invalid_xhp_attr_enum_item
       (syntax_to_list_no_separators enumType.xhp_enum_values) in
     let mapper errors item =
@@ -628,8 +655,8 @@ let xhp_errors node _parents hhvm_compat_mode errors =
 let classish_duplicate_modifiers node =
   list_contains_duplicate node
 
-let type_contains_array_in_strict is_strict hhvm_compat_mode node =
-  not hhvm_compat_mode && is_array node && is_strict
+let type_contains_array_in_strict env node =
+  not (is_hhvm_compat env) && is_array node && env.is_strict
 
 (* helper since there are so many kinds of errors *)
 let produce_error acc check node error error_node =
@@ -658,8 +685,8 @@ let produce_error_for_header acc check node error error_node =
 
 (* Given a particular TokenKind.(Trait/Interface/Class), tests if a given
  * classish_declaration node is both of that kind and declared abstract. *)
-let is_classish_kind_declared_abstract hhvm_compat_mode classish_kind cd_node =
-  if hhvm_compat_mode then false
+let is_classish_kind_declared_abstract env classish_kind cd_node =
+  if is_hhvm_compat env then false
   else
   match syntax cd_node with
   | ClassishDeclaration { classish_keyword; classish_modifiers; _ }
@@ -667,7 +694,7 @@ let is_classish_kind_declared_abstract hhvm_compat_mode classish_kind cd_node =
       list_contains_predicate is_abstract classish_modifiers
   | _ -> false
 
-let is_reserved_keyword is_hack classish_name =
+let is_reserved_keyword env classish_name =
   let name = text classish_name in
   (* TODO: What else goes here? *)
   match String.lowercase_ascii name with
@@ -675,7 +702,7 @@ let is_reserved_keyword is_hack classish_name =
   | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
   | "array" | "instanceof" | "trait" | "class" | "interface"
   | "static" -> true
-  | "using" | "inout" when is_hack -> true
+  | "using" | "inout" when is_hack env -> true
   | _ -> false
 
 (* Given a function_declaration_header node, returns its function_name
@@ -763,8 +790,8 @@ let is_final_declaration declaration_node =
 
 (* Given a methodish_declaration node and a list of parents, tests if that
  * node declares an abstract method inside of a no-nabstract class. *)
-let abstract_method_in_nonabstract_class hhvm_compat_mode  md_node parents =
-  if hhvm_compat_mode then false
+let abstract_method_in_nonabstract_class env md_node parents =
+  if is_hhvm_compat env then false
   else
   let is_abstract_method = is_abstract_declaration md_node in
   let parent_class_node = first_parent_classish_node TokenKind.Class parents in
@@ -786,8 +813,8 @@ let is_inside_trait parents =
 
 (* Given a methodish_declaration node and a list of parents, tests if that
  * node declares an abstract method inside of an interface. *)
-let abstract_method_in_interface hhvm_compat_mode  md_node parents =
-  not hhvm_compat_mode &&
+let abstract_method_in_interface env md_node parents =
+  not (is_hhvm_compat env) &&
   is_abstract_declaration md_node && is_inside_interface parents
 
 (* Tests if md_node is either explicitly declared abstract or is
@@ -870,22 +897,22 @@ let make_name_already_used_error node name short_name original_location
   SyntaxError.make
     ~child:(Some original_location_error) s e (report_error ~name ~short_name)
 
-let check_type_name_reference name_text location is_hack names errors =
-  if not (is_hack && Hh_autoimport.is_hh_autoimport name_text) || SMap.mem name_text names.t_classes
+let check_type_name_reference env name_text location names errors =
+  if not (is_hack env && Hh_autoimport.is_hh_autoimport name_text) || SMap.mem name_text names.t_classes
   then names, errors
   else
     let def = make_first_use_or_def ~kind:Name_implicit_use location "HH" name_text in
     let names = { names with t_classes = SMap.add name_text def names.t_classes} in
     names, errors
 
-let check_type_hint node is_hack names errors =
+let check_type_hint env node names errors =
   let rec check (names, errors) node =
     let names, errors =
       Core_list.fold_left (Syntax.children node) ~f:check ~init:(names, errors) in
     match syntax node with
     | SimpleTypeSpecifier { simple_type_specifier = s; _ }
     | GenericTypeSpecifier { generic_class_type = s; _ } ->
-      check_type_name_reference (text s) (make_location_of_node node) is_hack names errors
+      check_type_name_reference env (text s) (make_location_of_node node) names errors
     | _ ->
       names, errors
   in
@@ -932,8 +959,8 @@ let has_valid_interface_visibility node =
 
 (* Tests if a given node is a method definition (inside an interface) with
  * either private or protected visibility. *)
-let invalid_methodish_visibility_inside_interface hhvm_compat_mode node parents =
-  not hhvm_compat_mode &&
+let invalid_methodish_visibility_inside_interface env node parents =
+  not (is_hhvm_compat env) &&
   is_inside_interface parents && not (has_valid_interface_visibility node)
 
 (* Test if (a list_expression is the left child of a binary_expression,
@@ -973,8 +1000,8 @@ let is_abstract_const declaration =
 
 (* Given a ConstDeclarator node, test whether it is concrete, but has no
    initializer. *)
-let concrete_no_initializer hhvm_compat_mode init parents =
-  if hhvm_compat_mode then false
+let concrete_no_initializer env init parents =
+  if is_hhvm_compat env then false
   else
   let is_concrete =
     match parents with
@@ -1014,15 +1041,15 @@ let abstract_final_parent_class parents =
 
 (* Given a PropertyDeclaration node, tests whether parent class is abstract
   final but child variable is non-static *)
-let abstract_final_with_inst_var hhvm_compat_mode cd parents =
-  not hhvm_compat_mode &&
+let abstract_final_with_inst_var env cd parents =
+  not (is_hhvm_compat env) &&
   (abstract_final_parent_class parents) &&
     not (property_modifier_contains_helper is_static cd)
 
 (* Given a MethodishDeclaration, tests whether parent class is abstract final
     but child method is non-static *)
-let abstract_final_with_method hhvm_compat_mode cd parents =
-  not hhvm_compat_mode &&
+let abstract_final_with_method env cd parents =
+  not (is_hhvm_compat env) &&
   (abstract_final_parent_class parents) && not (methodish_contains_static cd)
 
 let is_byref_expression node =
@@ -1082,17 +1109,17 @@ let special_method_param_errors node parents errors =
     errors
   | _ -> errors
 
-let methodish_errors node parents is_hack hhvm_compat_mode errors =
+let methodish_errors env node parents errors =
   match syntax node with
   (* TODO how to narrow the range of error *)
   | FunctionDeclarationHeader { function_parameter_list; function_type; _} ->
     let errors =
       produce_error_for_header errors
-      (class_destructor_has_param hhvm_compat_mode) node parents
+      (class_destructor_has_param env) node parents
       SyntaxError.error2011 function_parameter_list in
     let errors =
       produce_error_for_header errors
-      (class_constructor_destructor_has_non_void_type hhvm_compat_mode)
+      (class_constructor_destructor_has_non_void_type env)
       node parents SyntaxError.error2018 function_type in
     let errors =
       produce_error_for_header errors class_non_constructor_has_visibility_param
@@ -1107,16 +1134,18 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
       md.methodish_function_decl_header) ~default:"" in
     let errors =
       produce_error_for_header errors
-      (class_constructor_has_static hhvm_compat_mode) header_node
+      (class_constructor_has_static env) header_node
       [node] SyntaxError.error2009 modifiers in
     let errors =
-      let missing_modifier is_hack hhvm_compat_mode modifiers =
-        not hhvm_compat_mode && is_hack && is_missing modifiers in
-      produce_error errors (missing_modifier is_hack hhvm_compat_mode) modifiers
+      let missing_modifier env modifiers =
+        not (is_hhvm_compat env)
+        && is_hack env
+        && is_missing modifiers in
+      produce_error errors (missing_modifier env) modifiers
       SyntaxError.error2054 header_node in
     let errors =
       produce_error_for_header errors
-      (class_destructor_has_non_visibility_modifier hhvm_compat_mode)
+      (class_destructor_has_non_visibility_modifier env)
       header_node [node]
       SyntaxError.error2012 modifiers in
     let errors =
@@ -1130,7 +1159,7 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
       SyntaxError.error2013 modifiers in
     let fun_body = md.methodish_function_body in
     let errors =
-      produce_error errors (methodish_abstract_with_body hhvm_compat_mode) node
+      produce_error errors (methodish_abstract_with_body env) node
       SyntaxError.error2014 fun_body in
     let fun_semicolon = md.methodish_semicolon in
     let errors =
@@ -1147,7 +1176,7 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
       node (SyntaxError.error2019 class_name method_name) modifiers in
     let errors =
       produce_error errors
-      (methodish_in_interface_has_body hhvm_compat_mode node) parents
+      (methodish_in_interface_has_body env node) parents
       SyntaxError.error2041 md.methodish_function_body in
     let errors =
       (* default will never be used, since existence of abstract_keyword is a
@@ -1155,13 +1184,13 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
       let abstract_keyword = Option.value (extract_keyword is_abstract node)
         ~default:node in
       produce_error errors
-      (abstract_method_in_nonabstract_class hhvm_compat_mode node) parents
+      (abstract_method_in_nonabstract_class env node) parents
       (SyntaxError.error2044 class_name method_name) abstract_keyword in
     let errors =
       let abstract_keyword = Option.value (extract_keyword is_abstract node)
         ~default:node in
       produce_error errors
-      (abstract_method_in_interface hhvm_compat_mode node) parents
+      (abstract_method_in_interface env node) parents
       SyntaxError.error2045 abstract_keyword in
     let errors =
       let async_annotation = Option.value (extract_async_node node)
@@ -1174,7 +1203,7 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
         ~default:node in
       let visibility_text = text visibility_node in (* is this option? *)
       produce_error errors
-      (invalid_methodish_visibility_inside_interface hhvm_compat_mode node)
+      (invalid_methodish_visibility_inside_interface env node)
       parents (SyntaxError.error2047 visibility_text) visibility_node in
     let errors =
       special_method_param_errors
@@ -1190,27 +1219,28 @@ let is_hashbang text =
     let count = List.length @@ String_utils.split_on_newlines text in
     count = 1 && Str.string_match r text 0 && Str.matched_string text = text
 
-let markup_errors node is_hack_file hhvm_compat_mode errors =
+let markup_errors env node errors =
   match syntax node with
   | MarkupSection { markup_prefix; markup_text; _ }
     (* only report the error on the first markup section of a hack file *)
-    when is_hack_file && (is_missing markup_prefix) &&
+    when env.is_hh_file && (is_missing markup_prefix) &&
     (* hashbang is allowed before <?hh *)
     (width markup_text) > 0 && not (is_hashbang markup_text) ->
     make_error_from_node node SyntaxError.error1001 :: errors
   | MarkupSection { markup_prefix; markup_text; _ }
-    when is_hack_file && (token_kind markup_prefix) = Some TokenKind.QuestionGreaterThan ->
+    when env.is_hh_file && (token_kind markup_prefix) = Some TokenKind.QuestionGreaterThan ->
     make_error_from_node node SyntaxError.error2067 :: errors
   | MarkupSuffix { markup_suffix_less_than_question; markup_suffix_name; }
-    when not hhvm_compat_mode && not is_hack_file
+    when not (is_hhvm_compat env)
+    && not env.is_hh_file
     && ((token_kind markup_suffix_less_than_question) = Some TokenKind.LessThanQuestion)
     && (Syntax.extract_text markup_suffix_name <> Some "php") ->
     make_error_from_node node SyntaxError.error2068 :: errors
   | _ -> errors
 
-let default_value_params is_hack hhvm_compat_mode params =
+let default_value_params env params =
   match param_missing_default_value params with
-  | Some param when not hhvm_compat_mode && is_hack -> Some param
+  | Some param when not (is_hhvm_compat env) && is_hack env -> Some param
   | _ -> None
 
 let is_in_namespace parents =
@@ -1249,9 +1279,12 @@ let is_in_construct_method parents =
   | _ -> false
 
 (* Test if the parameter is missing a type annotation but one is required *)
-let missing_param_type_check is_strict hhvm_compat_mode parameter_type parents =
+let missing_param_type_check env parameter_type parents =
   let is_required = parameter_type_is_required parents in
-  not hhvm_compat_mode && is_strict && is_missing parameter_type && is_required
+  not (is_hhvm_compat env)
+  && env.is_strict
+  && is_missing parameter_type
+  && is_required
 
 (* If a variadic parameter has a default value, return it *)
 let variadic_param_with_default_value params =
@@ -1277,9 +1310,9 @@ let param_with_callconv_is_byref node =
     is_byref_parameter_variable parameter_name -> Some node
   | _ -> None
 
-let params_errors params is_hack hhvm_compat_mode namespace_name names errors =
+let params_errors env params namespace_name names errors =
   let errors =
-    produce_error_from_check errors (default_value_params is_hack hhvm_compat_mode)
+    produce_error_from_check errors (default_value_params env)
     params SyntaxError.error2066 in
   let errors =
     produce_error_from_check errors ends_with_variadic_comma
@@ -1316,11 +1349,11 @@ let decoration_errors node errors =
   let errors = produce_error errors is_double_reference node SyntaxError.double_reference node in
   errors
 
-let parameter_errors node parents is_strict is_hack hhvm_compat_mode namespace_name names errors =
+let parameter_errors env node parents namespace_name names errors =
   match syntax node with
   | ParameterDeclaration p ->
     let errors =
-      produce_error_parents errors (missing_param_type_check is_strict hhvm_compat_mode)
+      produce_error_parents errors (missing_param_type_check env)
       p.parameter_type parents SyntaxError.error2001 node in
     let callconv_text = Option.value (extract_callconv_node node) ~default:node
       |> text in
@@ -1331,7 +1364,7 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode namespace_n
       produce_error_from_check errors param_with_callconv_is_byref
       node (SyntaxError.error2075 callconv_text) in
     let names, errors =
-      check_type_hint p.parameter_type is_hack names errors in
+      check_type_hint env p.parameter_type names errors in
     let errors = if is_parameter_with_callconv node then
       begin
         let errors = if is_inside_async_method parents then
@@ -1352,7 +1385,7 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode namespace_n
       end else errors
     in
     let errors =
-      if not is_hack &&
+      if not (is_hack env) &&
          is_variadic_expression p.parameter_name &&
          not (is_missing p.parameter_type) then
         (* Strip & and ..., reference will always come before variadic *)
@@ -1370,35 +1403,40 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode namespace_n
   | FunctionDeclarationHeader { function_parameter_list = params; _ }
   | AnonymousFunction { anonymous_parameters = params; _ }
   | ClosureTypeSpecifier { closure_parameter_list = params; _ } ->
-    params_errors params is_hack hhvm_compat_mode namespace_name names errors
+    params_errors env params namespace_name names errors
   | LambdaExpression
     { lambda_signature = {syntax = LambdaSignature { lambda_parameters; _ }; _}
     ; _
-    } -> params_errors lambda_parameters is_hack hhvm_compat_mode namespace_name names errors
+    } -> params_errors env lambda_parameters namespace_name names errors
   | DecoratedExpression _ -> names, decoration_errors node errors
   | _ -> names, errors
 
-let function_errors node parents is_strict hhvm_compat_mode errors =
+let function_errors env node parents errors =
   match syntax node with
   | FunctionDeclarationHeader f ->
-    let missing_type_annot_check is_strict hhvm_compat_mode _ =
+    let missing_type_annot_check env _ =
       let label = f.function_name in
       let is_function = not (is_construct label) && not (is_destruct label) in
-      not hhvm_compat_mode && is_strict && is_missing f.function_type && is_function in
+      not (is_hhvm_compat env)
+      && env.is_strict
+      && is_missing f.function_type
+      && is_function in
 
-    let function_reference_check is_strict hhvm_compat_mode _ =
-      not hhvm_compat_mode && is_strict && not (is_missing f.function_ampersand) in
+    let function_reference_check env _ =
+      not (is_hhvm_compat env)
+      && env.is_strict
+      && not (is_missing f.function_ampersand) in
 
     let errors =
-      produce_error errors (missing_type_annot_check is_strict hhvm_compat_mode) ()
+      produce_error errors (missing_type_annot_check env) ()
       SyntaxError.error2001 f.function_right_paren in
     let errors =
-      produce_error errors (function_reference_check is_strict hhvm_compat_mode) ()
+      produce_error errors (function_reference_check env) ()
       SyntaxError.error2064 f.function_ampersand in
     errors
   | _ -> errors
 
-let redeclaration_errors node parents syntax_tree namespace_name names errors =
+let redeclaration_errors env node parents namespace_name names errors =
   match syntax node with
   | FunctionDeclarationHeader f when not (is_missing f.function_name)->
     begin match parents with
@@ -1413,7 +1451,7 @@ let redeclaration_errors node parents syntax_tree namespace_name names errors =
         let errors =
           match SMap.get function_name names.t_functions with
           | Some { f_location = { start_offset; _}; f_kind = Name_def; _} ->
-            let text = SyntaxTree.text syntax_tree in
+            let text = SyntaxTree.text env.syntax_tree in
             let line, _ =
               Full_fidelity_source_text.offset_to_position text start_offset in
             let path =
@@ -1439,13 +1477,13 @@ let redeclaration_errors node parents syntax_tree namespace_name names errors =
     end
   | _ -> names, errors
 
-let statement_errors node parents hhvm_compat_mode errors =
+let statement_errors env node parents errors =
   let result = match syntax node with
   | BreakStatement _
-    when not (hhvm_compat_mode || break_is_legal parents) ->
+    when not (is_hhvm_compat env || break_is_legal parents) ->
     Some (node, SyntaxError.error2005)
   | ContinueStatement _
-    when not (hhvm_compat_mode || continue_is_legal parents) ->
+    when not (is_hhvm_compat env || continue_is_legal parents) ->
     Some (node, SyntaxError.error2006)
   | TryStatement { try_catch_clauses; try_finally_clause; _ }
     when (is_missing try_catch_clauses) && (is_missing try_finally_clause) ->
@@ -1459,19 +1497,23 @@ let statement_errors node parents hhvm_compat_mode errors =
   | Some (error_node, error_message) ->
     make_error_from_node error_node error_message :: errors
 
-let property_errors node is_strict is_hack hhvm_compat_mode errors =
+let property_errors env node errors =
   match syntax node with
   | PropertyDeclaration p ->
-      let missing_property_check is_strict hhvm_compat_mode _ =
-        not hhvm_compat_mode && is_strict && is_missing (p.property_type) in
-      let invalid_var_check is_hack hhvm_compat_mode _ =
-        not hhvm_compat_mode && is_hack && (is_var p.property_modifiers) in
+      let missing_property_check env _ =
+        not (is_hhvm_compat env)
+        && env.is_strict
+        && is_missing (p.property_type) in
+      let invalid_var_check env _ =
+        not (is_hhvm_compat env)
+        && is_hack env
+        && (is_var p.property_modifiers) in
 
       let errors =
-        produce_error errors (missing_property_check is_strict hhvm_compat_mode) ()
+        produce_error errors (missing_property_check env) ()
         SyntaxError.error2001 node in
       let errors =
-        produce_error errors (invalid_var_check is_hack hhvm_compat_mode) ()
+        produce_error errors (invalid_var_check env) ()
         SyntaxError.error2053 p.property_modifiers in
 
       let modifiers = syntax_to_list_no_separators p.property_modifiers in
@@ -1613,7 +1655,7 @@ let function_call_on_xhp_name_errors node errors =
     end
   | _ -> errors
 
-let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors =
+let expression_errors env node parents errors =
   let is_decimal_or_hexadecimal_literal token =
     match Token.kind token with
     | TokenKind.DecimalLiteral | TokenKind.HexadecimalLiteral -> true
@@ -1621,7 +1663,7 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
   in
   match syntax node with
   | LiteralExpression { literal_expression = {syntax = Token token; _} as e ; _}
-    when is_hack_file && is_decimal_or_hexadecimal_literal token ->
+    when env.is_hh_file && is_decimal_or_hexadecimal_literal token ->
     let text = text e in
     begin try ignore (Int64.of_string text); errors
     with _ ->
@@ -1631,10 +1673,11 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
         else SyntaxError.error2072 text in
       make_error_from_node node error_text :: errors
     end
-  | SafeMemberSelectionExpression _ when not is_hack ->
+  | SafeMemberSelectionExpression _ when not (is_hack env) ->
     make_error_from_node node SyntaxError.error2069 :: errors
   | SubscriptExpression { subscript_left_bracket; _}
-    when not hhvm_compat_mode && is_left_brace subscript_left_bracket ->
+    when not (is_hhvm_compat env)
+      && is_left_brace subscript_left_bracket ->
     make_error_from_node node SyntaxError.error2020 :: errors
   | HaltCompilerExpression { halt_compiler_argument_list = args; _ } ->
     let errors =
@@ -1663,7 +1706,9 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
     let errors =
       function_call_on_xhp_name_errors function_call_receiver errors in
     errors
-  | ConstructorCall ctr_call when not hhvm_compat_mode && is_hack ->
+  | ConstructorCall ctr_call
+    when not (is_hhvm_compat env)
+      && is_hack env ->
     if is_missing ctr_call.constructor_call_left_paren &&
         is_missing ctr_call.constructor_call_right_paren
     then
@@ -1675,9 +1720,11 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
     else
       errors
   | ListExpression le
-    when not hhvm_compat_mode && (is_invalid_list_expression node parents) ->
+    when not (is_hhvm_compat env)
+      && (is_invalid_list_expression node parents) ->
     make_error_from_node node SyntaxError.error2040 :: errors
-  | ListExpression { list_members; _ } when hhvm_compat_mode ->
+  | ListExpression { list_members; _ }
+    when is_hhvm_compat env ->
     begin match parents with
     | p1 :: _ when is_value_of_foreach node p1 ->
       begin match list_members.syntax with
@@ -1702,7 +1749,7 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
   | VectorIntrinsicExpression { vector_intrinsic_members = m; _ }
   | DictionaryIntrinsicExpression { dictionary_intrinsic_members = m; _ }
   | KeysetIntrinsicExpression { keyset_intrinsic_members = m; _ } ->
-    if not is_hack then
+    if not (is_hack env) then
       (* In php, vec[0] would be a subscript, where vec would be a constant *)
       match syntax_to_list_no_separators m with
       | _ :: _ :: _ -> (* 2 elements or more *)
@@ -1712,7 +1759,7 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
   | VarrayIntrinsicExpression { varray_intrinsic_members = m; _ }
   | DarrayIntrinsicExpression { darray_intrinsic_members = m; _ } ->
     let errors =
-      if not is_hack
+      if not (is_hack env)
       then make_error_from_node node SyntaxError.vdarray_in_php :: errors
       else errors in
     check_collection_members m errors
@@ -1777,7 +1824,7 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
     end
   (* TODO(T21285960): Remove this bug-port, stemming from T22184312 *)
   | LambdaExpression { lambda_async; lambda_coroutine; lambda_signature; _ }
-    when hhvm_compat_mode
+    when is_hhvm_compat env
       && not (is_missing lambda_async)
       && trailing_width lambda_async = 0
       && full_width lambda_coroutine = 0
@@ -1798,7 +1845,7 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
     end
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
-let require_errors node parents hhvm_compat_mode trait_use_clauses errors =
+let require_errors env node parents trait_use_clauses errors =
   match syntax node with
   | RequireClause p ->
     let name = text p.require_name in
@@ -1816,7 +1863,7 @@ let require_errors node parents hhvm_compat_mode trait_use_clauses errors =
     let errors =
       match (containing_classish_kind parents, req_kind) with
       | (Some TokenKind.Class, Some TokenKind.Extends)
-        when not hhvm_compat_mode ->
+        when not (is_hhvm_compat env) ->
         make_error_from_node node SyntaxError.error2029 :: errors
       | (Some TokenKind.Interface, Some TokenKind.Implements)
       | (Some TokenKind.Class, Some TokenKind.Implements) ->
@@ -1851,30 +1898,30 @@ let check_type_name syntax_tree name namespace_name name_text location names err
     names, errors
   end
 
-let classish_errors node parents syntax_tree is_hack hhvm_compat_mode namespace_name names errors =
+let classish_errors env node parents namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
     (* Given a ClassishDeclaration node, test whether or not it contains
      * an invalid use of 'implements'. *)
-    let classish_invalid_implements_keyword hhvm_compat_mode _ =
+    let classish_invalid_implements_keyword env _ =
       (* Invalid if uses 'implements' and isn't a class. *)
-      not hhvm_compat_mode &&
+      not (is_hhvm_compat env) &&
       token_kind cd.classish_implements_keyword = Some TokenKind.Implements &&
         token_kind cd.classish_keyword <> Some TokenKind.Class in
 
     (* Given a ClassishDeclaration node, test whether or not it's a trait
      * invoking the 'extends' keyword. *)
-    let classish_invalid_extends_keyword hhvm_compat_mode _ =
+    let classish_invalid_extends_keyword env _ =
       (* Invalid if uses 'extends' and is a trait. *)
-      not hhvm_compat_mode &&
+      not (is_hhvm_compat env) &&
       token_kind cd.classish_extends_keyword = Some TokenKind.Extends &&
         token_kind cd.classish_keyword = Some TokenKind.Trait in
 
     (* Given a ClassishDeclaration node, test whether or not length of
      * extends_list is appropriate for the classish_keyword. *)
-    let classish_invalid_extends_list  hhvm_compat_mode _ =
+    let classish_invalid_extends_list env _ =
       (* Invalid if is a class and has list of length greater than one. *)
-      not hhvm_compat_mode &&
+      not (is_hhvm_compat env) &&
       token_kind cd.classish_keyword = Some TokenKind.Class &&
         token_kind cd.classish_extends_keyword = Some TokenKind.Extends &&
         match syntax_to_list_no_separators cd.classish_extends_list with
@@ -1887,14 +1934,14 @@ let classish_errors node parents syntax_tree is_hack hhvm_compat_mode namespace_
       SyntaxError.error2031 cd.classish_modifiers in
     let errors =
       produce_error errors
-      (classish_invalid_implements_keyword hhvm_compat_mode) ()
+      (classish_invalid_implements_keyword env) ()
       SyntaxError.error2035 cd.classish_implements_keyword in
     let errors =
       produce_error errors
-      (classish_invalid_extends_keyword hhvm_compat_mode) ()
+      (classish_invalid_extends_keyword env) ()
       SyntaxError.error2036 cd.classish_extends_keyword in
     let errors =
-      produce_error errors (classish_invalid_extends_list hhvm_compat_mode) ()
+      produce_error errors (classish_invalid_extends_list env) ()
       SyntaxError.error2037 cd.classish_extends_list in
     let errors =
       (* Extra setup for the the customized error message. *)
@@ -1908,7 +1955,8 @@ let classish_errors node parents syntax_tree is_hack hhvm_compat_mode namespace_
       (* To avoid iterating through the whole parents list again, do a simple
        * check on function_str rather than a harder one on cd or parents. *)
       produce_error errors
-      (fun str -> not hhvm_compat_mode && String.length str != 0) function_str
+      (fun str -> not (is_hhvm_compat env)
+        && String.length str != 0) function_str
       (SyntaxError.error2039 keyword_str declared_name_str function_str)
       cd.classish_keyword in
     let errors =
@@ -1917,7 +1965,7 @@ let classish_errors node parents syntax_tree is_hack hhvm_compat_mode namespace_
       let abstract_keyword = Option.value (extract_keyword is_abstract node)
         ~default:node in
       produce_error errors
-      (is_classish_kind_declared_abstract hhvm_compat_mode TokenKind.Interface)
+      (is_classish_kind_declared_abstract env TokenKind.Interface)
       node SyntaxError.error2042 abstract_keyword in
     let errors =
       (* default will never be used, since existence of abstract_keyword is a
@@ -1925,11 +1973,11 @@ let classish_errors node parents syntax_tree is_hack hhvm_compat_mode namespace_
       let abstract_keyword = Option.value (extract_keyword is_abstract node)
         ~default:node in
       produce_error errors
-      (is_classish_kind_declared_abstract hhvm_compat_mode TokenKind.Trait)
+      (is_classish_kind_declared_abstract env TokenKind.Trait)
       node SyntaxError.error2043 abstract_keyword in
     let errors =
       produce_error errors
-      (is_reserved_keyword is_hack) cd.classish_name
+      (is_reserved_keyword env) cd.classish_name
       SyntaxError.reserved_keyword_as_class_name cd.classish_name in
     let name = text cd.classish_name in
     let errors =
@@ -1961,26 +2009,26 @@ let classish_errors node parents syntax_tree is_hack hhvm_compat_mode namespace_
       | Some TokenKind.Class | Some TokenKind.Trait
         when not (is_missing cd.classish_name)->
         let location = make_location_of_node cd.classish_name in
-        check_type_name syntax_tree cd.classish_name namespace_name name location names errors
+        check_type_name env.syntax_tree cd.classish_name namespace_name name location names errors
       | _ ->
         names, errors in
     names, errors
   | _ -> names, errors
 
-let class_element_errors node parents errors =
+let class_element_errors _env node parents errors =
   match syntax node with
   | ConstDeclaration _ when is_inside_trait parents ->
     make_error_from_node node SyntaxError.const_in_trait :: errors
   | _ -> errors
 
-let type_errors node parents is_strict hhvm_compat_mode errors =
+let type_errors env node parents errors =
   match syntax node with
   | SimpleTypeSpecifier t ->
-    produce_error errors (type_contains_array_in_strict is_strict hhvm_compat_mode)
+    produce_error errors (type_contains_array_in_strict env)
     t.simple_type_specifier SyntaxError.error2032 t.simple_type_specifier
   | _ -> errors
 
-let alias_errors syntax_tree node namespace_name names errors =
+let alias_errors env node namespace_name names errors =
   match syntax node with
   | AliasDeclaration ad ->
     let errors =
@@ -1992,7 +2040,7 @@ let alias_errors syntax_tree node namespace_name names errors =
     else
     let name = text ad.alias_name in
     let location = make_location_of_node ad.alias_name in
-    check_type_name syntax_tree ad.alias_name namespace_name name location names errors
+    check_type_name env.syntax_tree ad.alias_name namespace_name name location names errors
   | _ -> names, errors
 
 let is_invalid_group_use_clause kind clause =
@@ -2012,7 +2060,7 @@ let is_invalid_group_use_clause kind clause =
 let is_invalid_group_use_prefix prefix =
   not (is_namespace_prefix prefix)
 
-let group_use_errors node errors =
+let group_use_errors _env node errors =
   match syntax node with
   | NamespaceGroupUseDeclaration
     { namespace_group_use_prefix = prefix
@@ -2030,8 +2078,8 @@ let group_use_errors node errors =
   | _ -> errors
 
 let use_class_or_namespace_clause_errors
-  is_hack is_global_namespace namespace_prefix
-  kind syntax_tree (names, errors) cl =
+  env is_global_namespace namespace_prefix
+  kind (names, errors) cl =
 
   match syntax cl with
   | NamespaceUseClause {
@@ -2103,7 +2151,7 @@ let use_class_or_namespace_clause_errors
         if name_text = "strict"
         then
           let message =
-            if is_hack then SyntaxError.strict_namespace_hh
+            if is_hack env then SyntaxError.strict_namespace_hh
             else SyntaxError.strict_namespace_not_hh in
           make_error_from_node name message :: errors
         else errors in
@@ -2115,8 +2163,8 @@ let use_class_or_namespace_clause_errors
           if qualified_name = f_name && f_kind = Name_def then names, errors
           else
             let err_msg =
-              if is_hack && f_kind <> Name_def then
-                let text = SyntaxTree.text syntax_tree in
+              if is_hack env && f_kind <> Name_def then
+                let text = SyntaxTree.text env.syntax_tree in
                 let line_num, _ =
                   Full_fidelity_source_text.offset_to_position
                     text loc.start_offset in
@@ -2156,14 +2204,14 @@ let is_global_in_const_decl init =
   | _ -> false
 
 let namespace_use_declaration_errors
-  node is_hack is_global_namespace syntax_tree names errors =
+  env node is_global_namespace names errors =
   match syntax node with
   | NamespaceUseDeclaration {
       namespace_use_kind = kind;
       namespace_use_clauses = clauses; _ } ->
     let f =
       use_class_or_namespace_clause_errors
-        is_hack is_global_namespace None kind syntax_tree in
+        env is_global_namespace None kind in
     List.fold_left f (names, errors) (syntax_to_list_no_separators clauses)
   | NamespaceGroupUseDeclaration {
       namespace_group_use_kind = kind;
@@ -2171,7 +2219,7 @@ let namespace_use_declaration_errors
       namespace_group_use_prefix = prefix; _ } ->
     let f =
       use_class_or_namespace_clause_errors
-        is_hack is_global_namespace (Some (text prefix)) kind syntax_tree in
+        env is_global_namespace (Some (text prefix)) kind in
     List.fold_left f (names, errors) (syntax_to_list_no_separators clauses)
   | _ -> names, errors
 
@@ -2297,12 +2345,12 @@ let rec check_constant_expression errors node =
   | _ ->
     (make_error_from_node node SyntaxError.invalid_constant_initializer) :: errors
 
-let const_decl_errors node parents hhvm_compat_mode namespace_name names errors =
+let const_decl_errors env node parents namespace_name names errors =
   match syntax node with
   | ConstantDeclarator cd ->
     let errors =
       produce_error_parents errors
-      (concrete_no_initializer hhvm_compat_mode) cd.constant_declarator_initializer parents
+      (concrete_no_initializer env) cd.constant_declarator_initializer parents
       SyntaxError.error2050 cd.constant_declarator_initializer in
     let errors =
       produce_error_parents errors abstract_with_initializer cd.constant_declarator_initializer parents
@@ -2346,15 +2394,15 @@ let const_decl_errors node parents hhvm_compat_mode namespace_name names errors 
     names, errors
   | _ -> names, errors
 
-let abstract_final_class_nonstatic_var_error node parents hhvm_compat_mode errors =
+let abstract_final_class_nonstatic_var_error env node parents errors =
   match syntax node with
   | PropertyDeclaration cd ->
     produce_error_parents errors
-    (abstract_final_with_inst_var hhvm_compat_mode) node parents
+    (abstract_final_with_inst_var env) node parents
     SyntaxError.error2061 cd.property_modifiers
   | _ -> errors
 
-let class_property_multiple_visibility_error node parents errors =
+let class_property_multiple_visibility_error _env node parents errors =
   match syntax node with
   | PropertyDeclaration cd ->
     let first_parent_name = Option.value (first_parent_class_name parents) ~default:"" in
@@ -2364,15 +2412,15 @@ let class_property_multiple_visibility_error node parents errors =
   | _ -> errors
 
 
-let abstract_final_class_nonstatic_method_error node parents hhvm_compat_mode errors =
+let abstract_final_class_nonstatic_method_error env node parents errors =
   match syntax node with
   | MethodishDeclaration cd ->
     produce_error_parents errors
-    (abstract_final_with_method hhvm_compat_mode) node parents
+    (abstract_final_with_method env) node parents
     SyntaxError.error2062 cd.methodish_function_decl_header
   | _ -> errors
 
-let mixed_namespace_errors node parents systemlib_compat namespace_type errors =
+let mixed_namespace_errors env node parents namespace_type errors =
   match syntax node with
   | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->
     let s = start_offset namespace_left_brace in
@@ -2401,7 +2449,7 @@ let mixed_namespace_errors node parents systemlib_compat namespace_type errors =
       match parents with
       | [{ syntax = SyntaxList _; _} as decls; { syntax = Script _; _}] ->
         let decls = syntax_to_list_no_separators decls in
-        let decls = if not systemlib_compat then decls else
+        let decls = if not (is_systemlib_compat env) then decls else
           (* Drop everything before yourself *)
           fst @@ Hh_core.List.fold_right decls
             ~init:([], false)
@@ -2449,7 +2497,7 @@ let mixed_namespace_errors node parents systemlib_compat namespace_type errors =
     errors
   | _ -> errors
 
-let enum_errors node errors =
+let enum_errors _env node errors =
   match syntax node with
   | Enumerator { enumerator_name = name; _}
       when String.lowercase_ascii @@ text name = "class" ->
@@ -2472,7 +2520,7 @@ let does_op_create_write_on_left = function
         | TokenKind.GreaterThanGreaterThanEqual) -> true
   | _ -> false
 
-let assignment_errors node errors =
+let assignment_errors _env node errors =
   match syntax node with
   | BinaryExpression
     { binary_left_operand = loperand
@@ -2498,7 +2546,7 @@ let assignment_errors node errors =
     end
   | _ -> errors
 
-let trait_use_alias_item_errors node errors =
+let trait_use_alias_item_errors _env node errors =
   let is_public_private_protected_or_final token =
     let open TokenKind in
     match Token.kind token with
@@ -2518,7 +2566,7 @@ let trait_use_alias_item_errors node errors =
         e :: errors)
   | _ -> errors
 
-let declare_errors node parents hhvm_compat_mode errors =
+let declare_errors env node parents errors =
   match syntax node with
   | DeclareDirectiveStatement { declare_directive_expression = expr; _}
   | DeclareBlockStatement { declare_block_expression = expr; _} ->
@@ -2549,7 +2597,8 @@ let declare_errors node parents hhvm_compat_mode errors =
         in
         let errors =
           match syntax node with
-          | DeclareBlockStatement _ when not hhvm_compat_mode ->
+          | DeclareBlockStatement _
+            when not (is_hhvm_compat env) ->
             make_error_from_node ~error_type:SyntaxError.RuntimeError
               node SyntaxError.strict_types_in_declare_block_mode :: errors
           | _ -> errors
@@ -2567,12 +2616,7 @@ let get_namespace_name parents current_namespace_name =
     else combine_names current_namespace_name (text ns)
   | _ -> current_namespace_name
 
-let find_syntax_errors ~enable_hh_syntax error_level syntax_tree =
-  let hhvm_compatibility_mode = is_hhvm_compat error_level in
-  let systemlib_compat = is_systemlib_compat error_level in
-  let is_strict = SyntaxTree.is_strict syntax_tree in
-  let is_hack_file = SyntaxTree.is_hack syntax_tree in
-  let is_hack = is_hack_file || enable_hh_syntax in
+let find_syntax_errors env =
   let rec folder acc node parents =
     let { errors
         ; namespace_type
@@ -2581,50 +2625,50 @@ let find_syntax_errors ~enable_hh_syntax error_level syntax_tree =
         ; trait_require_clauses
         } = acc in
     let errors =
-      markup_errors node is_hack_file hhvm_compatibility_mode errors in
+      markup_errors env node errors in
     let names, errors =
-      parameter_errors node parents is_strict is_hack hhvm_compatibility_mode namespace_name names errors in
+      parameter_errors env node parents namespace_name names errors in
     let errors =
-      function_errors node parents is_strict hhvm_compatibility_mode errors in
+      function_errors env node parents errors in
     let names, errors =
-      redeclaration_errors node parents syntax_tree namespace_name names errors in
+      redeclaration_errors env node parents namespace_name names errors in
     let errors =
-      xhp_errors node parents hhvm_compatibility_mode errors in
+      xhp_errors env node errors in
     let errors =
-      statement_errors node parents hhvm_compatibility_mode errors in
+      statement_errors env node parents errors in
     let errors =
-      methodish_errors node parents is_hack hhvm_compatibility_mode errors in
+      methodish_errors env node parents errors in
     let errors =
-      property_errors node is_strict is_hack hhvm_compatibility_mode errors in
+      property_errors env node errors in
     let errors =
-      expression_errors node parents is_hack is_hack_file hhvm_compatibility_mode errors in
+      expression_errors env node parents errors in
     let trait_require_clauses, errors =
-      require_errors node parents hhvm_compatibility_mode trait_require_clauses errors in
+      require_errors env node parents trait_require_clauses errors in
     let names, errors =
-      classish_errors node parents syntax_tree is_hack hhvm_compatibility_mode namespace_name names errors in
+      classish_errors env node parents namespace_name names errors in
     let errors =
-      class_element_errors node parents errors in
+      class_element_errors env node parents errors in
     let errors =
-      type_errors node parents is_strict hhvm_compatibility_mode errors in
-    let names, errors = alias_errors syntax_tree node namespace_name names errors in
-    let errors = group_use_errors node errors in
+      type_errors env node parents errors in
+    let names, errors = alias_errors env node namespace_name names errors in
+    let errors = group_use_errors env node errors in
     let names, errors =
-      const_decl_errors node parents hhvm_compatibility_mode namespace_name names errors in
+      const_decl_errors env node parents namespace_name names errors in
     let errors =
-      abstract_final_class_nonstatic_var_error node parents hhvm_compatibility_mode errors in
+      abstract_final_class_nonstatic_var_error env node parents errors in
     let errors =
-      class_property_multiple_visibility_error node parents errors in
+      class_property_multiple_visibility_error env node parents errors in
     let errors =
-      abstract_final_class_nonstatic_method_error node parents hhvm_compatibility_mode errors in
+      abstract_final_class_nonstatic_method_error env node parents errors in
     let errors =
-      mixed_namespace_errors node parents systemlib_compat namespace_type errors in
+      mixed_namespace_errors env node parents namespace_type errors in
     let names, errors =
-      namespace_use_declaration_errors node is_hack
-        (namespace_name = global_namespace_name) syntax_tree names errors in
-    let errors = enum_errors node errors in
-    let errors = assignment_errors node errors in
-    let errors = declare_errors node parents hhvm_compatibility_mode errors in
-    let errors = trait_use_alias_item_errors node errors in
+      namespace_use_declaration_errors env node
+        (namespace_name = global_namespace_name) names errors in
+    let errors = enum_errors env node errors in
+    let errors = assignment_errors env node errors in
+    let errors = declare_errors env node parents errors in
+    let errors = trait_use_alias_item_errors env node errors in
 
     match syntax node with
     | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->
@@ -2685,7 +2729,7 @@ let find_syntax_errors ~enable_hh_syntax error_level syntax_tree =
           namespace_name trait_require_clauses
       in
       fold_child_nodes folder node parents acc in
-  let acc = fold_child_nodes folder (SyntaxTree.root syntax_tree) []
+  let acc = fold_child_nodes folder (SyntaxTree.root env.syntax_tree) []
     { errors = []
     ; namespace_type = Unspecified
     ; names = empty_names
@@ -2694,24 +2738,24 @@ let find_syntax_errors ~enable_hh_syntax error_level syntax_tree =
     } in
   acc.errors
 
-let parse_errors_impl ?(enable_hh_syntax=false) ?(level=Typical) syntax_tree =
+let parse_errors_impl env =
   (*
   Minimum: suppress cascading errors; no second-pass errors if there are
   any first-pass errors.
   Typical: suppress cascading errors; give second pass errors always.
   Maximum: all errors
   *)
-  let errors1 = match level with
-  | Maximum -> SyntaxTree.all_errors syntax_tree
-  | _ -> SyntaxTree.errors syntax_tree in
+  let errors1 = match env.level with
+  | Maximum -> SyntaxTree.all_errors env.syntax_tree
+  | _ -> SyntaxTree.errors env.syntax_tree in
   let errors2 =
-    if level = Minimum && errors1 <> [] then []
-    else find_syntax_errors ~enable_hh_syntax level syntax_tree in
+    if env.level = Minimum && errors1 <> [] then []
+    else find_syntax_errors env in
   List.sort SyntaxError.compare (Core_list.append errors1 errors2)
 
-let parse_errors ?(enable_hh_syntax=false) ?(level=Typical) syntax_tree =
+let parse_errors env =
   Stats_container.wrap_nullary_fn_timing
     ?stats:(Stats_container.get_instance ())
     ~key:"full_fidelity_parse_errors:parse_errors"
-    ~f:(fun () -> parse_errors_impl ~enable_hh_syntax ~level syntax_tree)
+    ~f:(fun () -> parse_errors_impl env)
 end (* WithSyntax *)

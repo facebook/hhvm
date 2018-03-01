@@ -281,11 +281,15 @@ let print_full_fidelity_error source_text error =
 
 (* Computes and prints list of all FFP errors from syntax pass and parser pass.
  * Specifying all_errors=false will attempt to filter out duplicate errors. *)
-let print_full_fidelity_errors ~syntax_tree ~source_text ~level =
-  let errors = ParserErrors.parse_errors ~level syntax_tree in
+let print_full_fidelity_errors ~source_text ~error_env =
+  let errors = ParserErrors.parse_errors error_env in
   List.iter (print_full_fidelity_error source_text) errors
 
 let handle_existing_file args filename =
+  let popt = ParserOptions.default in
+  let popt = ParserOptions.with_hh_syntax_for_hhvm popt
+    (args.codegen && args.enable_hh_syntax) in
+
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
@@ -295,7 +299,7 @@ let handle_existing_file args filename =
   (* Parse with the original parser *)
   let (original_errors, original_parse) = Errors.do_
     begin
-      fun () -> Parser_hack.from_file ParserOptions.default file
+      fun () -> Parser_hack.from_file popt file
     end in
 
   if args.show_file_name then begin
@@ -309,17 +313,24 @@ let handle_existing_file args filename =
     let pretty = Full_fidelity_pretty_printer.pretty_print editable in
     Printf.printf "%s\n" pretty
   end;
-  if args.codegen then
-    print_full_fidelity_errors ~syntax_tree ~source_text
-      ~level:ParserErrors.HHVMCompatibility
-  else begin
-    if args.full_fidelity_errors then
-      print_full_fidelity_errors ~syntax_tree ~source_text
-        ~level:ParserErrors.Typical;
-    if args.full_fidelity_errors_all then
-      print_full_fidelity_errors ~syntax_tree ~source_text
-        ~level:ParserErrors.Maximum
+
+  let print_errors =
+       args.codegen
+    || args.full_fidelity_errors
+    || args.full_fidelity_errors_all
+  in
+  if print_errors then begin
+    let level = if args.full_fidelity_errors_all
+      then ParserErrors.Maximum
+      else ParserErrors.Typical in
+    let hhvm_compat_mode = if args.codegen
+      then ParserErrors.HHVMCompat
+      else ParserErrors.NoCompat in
+    let error_env = ParserErrors.make_env syntax_tree
+      ~level ~hhvm_compat_mode in
+    print_full_fidelity_errors ~source_text ~error_env
   end;
+
   if args.full_fidelity_s_expr then begin
     let root = SyntaxTree.root syntax_tree in
     let str = DebugPos.dump_syntax root in
@@ -337,6 +348,7 @@ let handle_existing_file args filename =
         ~quick_mode:args.quick_mode
         ~lower_coroutines:args.lower_coroutines
         ~enable_hh_syntax:args.enable_hh_syntax
+        ~parser_options:popt
         ~is_hh_file:args.is_hh_file
         file
     in

@@ -46,11 +46,11 @@ type env =
   ; quick_mode               : bool
   ; lower_coroutines         : bool
   ; enable_hh_syntax         : bool
-  ; top_level_statements     : bool (* Whether we are (still) considering TLSs*)
   ; parser_options           : ParserOptions.t
   ; fi_mode                  : FileInfo.mode
   ; file                     : Relative_path.t
   ; stats                    : Stats_container.t option
+  ; top_level_statements     : bool (* Whether we are (still) considering TLSs*)
   (* Changing parts; should disappear in future. `mutable` saves allocations. *)
   ; mutable ignore_pos       : bool
   ; mutable max_depth        : int    (* Filthy hack around OCaml bug *)
@@ -2678,34 +2678,35 @@ let make_env
   ?stats
   (file : Relative_path.t)
   : env
-  = { is_hh_file
-    ; codegen                 = codegen || systemlib_compat_mode
+  = let parser_options = ParserOptions.with_hh_syntax_for_hhvm parser_options
+      (codegen && (enable_hh_syntax || is_hh_file)) in
+    { is_hh_file
+    ; codegen = codegen || systemlib_compat_mode
     ; systemlib_compat_mode
     ; php5_compat_mode
     ; elaborate_namespaces
     ; include_line_comments
     ; keep_errors
-    ; quick_mode              = not codegen && (match fi_mode with
-                                                        | FileInfo.Mdecl
-                                                        | FileInfo.Mphp
-                                                          -> true
-                                                        | _ -> quick_mode
-                                                        )
+    ; quick_mode =
+         not codegen
+      && (match fi_mode with
+         | FileInfo.Mdecl
+         | FileInfo.Mphp -> true
+         | _ -> quick_mode
+         )
     ; lower_coroutines
     ; enable_hh_syntax
-    ; parser_options =
-      ParserOptions.with_hh_syntax_for_hhvm parser_options
-        (codegen && (enable_hh_syntax || is_hh_file))
-    ; file
+    ; parser_options
     ; fi_mode
+    ; file
     ; stats
+    ; top_level_statements = true
     ; ignore_pos
-    ; top_level_statements    = true
-    ; saw_yield               = false
-    ; max_depth               = 42
-    ; unsafes                 = ISet.empty
+    ; max_depth = 42
+    ; saw_yield = false
+    ; unsafes = ISet.empty
     ; saw_std_constant_redefinition = false
-    ; saw_compiler_halt_offset      = None
+    ; saw_compiler_halt_offset = None
     }
 
 let elaborate_toplevel_and_std_constants ast env source_text =
@@ -2786,14 +2787,13 @@ let from_text (env : env) (source_text : SourceText.t) : result =
         () in
     SyntaxTree.make ~env source_text in
   let () = if env.codegen && not env.lower_coroutines then
-    let level = if env.systemlib_compat_mode then
-        ParserErrors.HHVMCompatibilitySystemLib
-      else ParserErrors.HHVMCompatibility
-    in
-    let errors =
-      ParserErrors.parse_errors
-        ~enable_hh_syntax:env.enable_hh_syntax ~level tree
-    in
+    let hhvm_compat_mode = if env.systemlib_compat_mode
+      then ParserErrors.SystemLibCompat
+      else ParserErrors.HHVMCompat in
+    let error_env = ParserErrors.make_env tree
+      ~hhvm_compat_mode
+      ~enable_hh_syntax:env.enable_hh_syntax in
+    let errors = ParserErrors.parse_errors error_env in
     (* Prioritize runtime errors *)
     let runtime_errors =
       List.filter errors
@@ -2829,13 +2829,14 @@ let from_text (env : env) (source_text : SourceText.t) : result =
   in
   let env = if env.fi_mode = fi_mode then env else { env with fi_mode } in
   let env = { env with is_hh_file = SyntaxTree.is_hack tree } in
+  let popt = env.parser_options in
   (* If we are generating code and this is an hh file or hh syntax is enabled,
    * then we want to inject auto import types into HH namespace during namespace
    * resolution.
    *)
-  let env = { env with parser_options =
-    ParserOptions.with_hh_syntax_for_hhvm env.parser_options
-      (env.codegen && (ParserOptions.enable_hh_syntax_for_hhvm env.parser_options || env.is_hh_file)) } in
+  let popt = ParserOptions.with_hh_syntax_for_hhvm popt
+    (env.codegen && (ParserOptions.enable_hh_syntax_for_hhvm popt || env.is_hh_file)) in
+  let env = { env with parser_options = popt } in
   lower
     env
     ~source_text

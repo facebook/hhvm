@@ -75,18 +75,6 @@ struct Option {
    */
   static bool CachePHPFile;
 
-  /**
-   * Legal root directory expressions in an include expression. For example,
-   *
-   *   include_once $PHP_ROOT . '/lib.php';
-   *
-   * Here, "$PHP_ROOT" is a legal include root. Stores what it resolves to.
-   *
-   *   Option::IncludeRoots["$PHP_ROOT"] = "";
-   *   Option::IncludeRoots["$LIB_ROOT"] = "lib";
-   */
-  static std::map<std::string, std::string> IncludeRoots;
-  static std::map<std::string, std::string> AutoloadRoots;
   static std::vector<std::string> IncludeSearchPaths;
 
   /**
@@ -141,12 +129,6 @@ struct Option {
    * Turn it off for cleaner unit tests.
    */
   static bool KeepStatementsWithNoEffect;
-
-  /**
-   * Whether or not name matches AUTOLOAD files. If not, returns empty. If
-   * yes, returns root directory for the file.
-   */
-  static std::string GetAutoloadRoot(const std::string &name);
 
   /**
    * Turning a file name into an identifier. When id is false, preserve

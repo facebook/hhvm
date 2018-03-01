@@ -456,12 +456,15 @@ let extract_shape_field_name_pstring = function
   | A.SFclass_const ((pn, _) as id, p) -> A.Class_const ((pn, A.Id id), p)
 
 let rec text_of_expr e_ = match e_ with
-  | A.Id id | A.Lvar id | A.String id -> id
+  (* Note we force string literals to become single-quoted, regardless of
+     whether they were single- or double-quoted in the source. Gross. *)
+  | A.String (p, s) -> (p, "'" ^ s ^ "'")
+  | A.Id id | A.Lvar id -> id
   | A.Array_get ((p, A.Lvar (_, id)), Some (_, e_)) ->
     (p, id ^ "[" ^ snd (text_of_expr e_) ^ "]")
   | _ -> Pos.none, "unknown" (* TODO: get text of expression *)
 
-let add_include ?(doc_root=false) e =
+let parse_include e =
   let strip_backslash p =
     let len = String.length p in
     if len > 0 && p.[0] = '/' then String.sub p 1 (len-1) else p in
@@ -477,17 +480,13 @@ let add_include ?(doc_root=false) e =
   let var, lit = split_var_lit e in
   let var, lit =
     if var = "__DIR__" then ("", strip_backslash lit) else (var, lit) in
-  let inc =
-    if var = ""
-    then
-      if not (Filename.is_relative lit)
-      then Hhas_symbol_refs.Absolute lit
-      else
-        if doc_root
-        then Hhas_symbol_refs.DocRootRelative lit
-        else Hhas_symbol_refs.SearchPathRelative lit
-    else Hhas_symbol_refs.IncludeRootRelative (var, strip_backslash lit) in
-  Emit_symbol_refs.add_include inc
+  if var = ""
+  then
+    if Filename.is_relative lit
+    then Hhas_symbol_refs.SearchPathRelative lit
+    else Hhas_symbol_refs.Absolute lit
+  else
+    Hhas_symbol_refs.IncludeRootRelative (var, strip_backslash lit)
 
 let rec expr_and_new env instr_to_add_new instr_to_add = function
   | A.AFvalue e ->
@@ -1407,17 +1406,23 @@ and emit_xhp env p id attributes children =
       []))
 
 and emit_import env pos flavor e =
-  let import_instr = match flavor with
-    | A.Include -> instr @@ IIncludeEvalDefine Incl
-    | A.Require -> instr @@ IIncludeEvalDefine Req
-    | A.IncludeOnce -> instr @@ IIncludeEvalDefine InclOnce
-    | A.RequireOnce -> instr @@ IIncludeEvalDefine ReqOnce
+  let inc = parse_include e in
+  Emit_symbol_refs.add_include inc;
+  let e, import_op = match flavor with
+    | A.Include -> e, IIncludeEvalDefine Incl
+    | A.Require -> e, IIncludeEvalDefine Req
+    | A.IncludeOnce -> e, IIncludeEvalDefine InclOnce
+    | A.RequireOnce ->
+      let include_roots = Hhbc_options.include_roots !Hhbc_options.compiler_options in
+      match Hhas_symbol_refs.resolve_to_doc_root_relative inc ~include_roots with
+        | Hhas_symbol_refs.DocRootRelative path ->
+          (pos, A.String (fst e, path)), IIncludeEvalDefine ReqDoc
+        | _ -> e, IIncludeEvalDefine ReqOnce
   in
-  add_include e;
   gather [
     emit_expr ~need_ref:false env e;
     Emit_pos.emit_pos pos;
-    import_instr;
+    instr import_op;
   ]
 
 and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =

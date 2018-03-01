@@ -27,6 +27,7 @@
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 using namespace HPHP;
 
@@ -83,7 +84,7 @@ static std::string get_include_file_path(const std::string &source,
     }
 
     // if file cannot be found, resolve it using search paths
-    for (unsigned int i = 0; i < Option::IncludeSearchPaths.size(); i++) {
+    for (std::size_t i = 0; i < Option::IncludeSearchPaths.size(); i++) {
       auto const filename = Option::IncludeSearchPaths[i] + "/" + lit;
       if (stat(filename.c_str(), &sb) == 0) {
         return filename;
@@ -99,9 +100,9 @@ static std::string get_include_file_path(const std::string &source,
   }
 
   // [IncludeRoot] . 'string'
-  auto const iter = Option::IncludeRoots.find(var);
+  auto const iter = RuntimeOption::IncludeRoots.find(var);
 
-  if (iter != Option::IncludeRoots.end()) {
+  if (iter != RuntimeOption::IncludeRoots.end()) {
     auto includeRoot = iter->second;
     if (!includeRoot.empty()) {
       if (includeRoot[0] == '/') includeRoot = includeRoot.substr(1);

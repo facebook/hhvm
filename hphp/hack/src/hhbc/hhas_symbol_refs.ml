@@ -10,10 +10,10 @@
 
 
 type include_path =
-  | Absolute of string
-  | SearchPathRelative of string
+  | Absolute of string                     (* /foo/bar/baz.php *)
+  | SearchPathRelative of string           (* foo/bar/baz.php *)
+  | IncludeRootRelative of string * string (* $_SERVER['PHP_ROOT'] . "foo/bar/baz.php" *)
   | DocRootRelative of string
-  | IncludeRootRelative of string * string
 [@@deriving compare, show]
 
 module IncludePathSet = Set.Make(struct
@@ -32,3 +32,15 @@ type t =
 ; functions: SSet.t
 ; classes: SSet.t
 }
+
+let resolve_to_doc_root_relative ?(include_roots=SMap.empty) = function
+  | IncludeRootRelative (var, lit) as ip -> begin
+    match SMap.find_opt var include_roots with
+      | Some prefix ->
+        let path = Filename.concat prefix lit in
+        if Filename.is_relative path
+        then DocRootRelative path
+        else Absolute path (* This should probably never happen. *)
+      | _ -> ip
+  end
+  | ip -> ip

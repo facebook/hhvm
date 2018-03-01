@@ -288,6 +288,8 @@ std::set<std::string> RuntimeOption::XboxPasswords;
 
 std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
+std::map<std::string, std::string> RuntimeOption::IncludeRoots;
+std::map<std::string, std::string> RuntimeOption::AutoloadRoots;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
 std::string RuntimeOption::ErrorDocument404;

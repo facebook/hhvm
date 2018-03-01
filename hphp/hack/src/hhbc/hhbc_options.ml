@@ -39,6 +39,9 @@ type t = {
   option_php7_int_semantics               : bool;
   option_autoprime_generators             : bool;
   option_enable_hackc_only_feature        : bool;
+  option_doc_root                         : string;
+  option_include_search_paths             : string list;
+  option_include_roots                    : string SMap.t;
 }
 
 let default = {
@@ -70,6 +73,9 @@ let default = {
   option_php7_int_semantics = false;
   option_autoprime_generators = true;
   option_enable_hackc_only_feature = false;
+  option_doc_root = "";
+  option_include_search_paths = [];
+  option_include_roots = SMap.empty;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -97,10 +103,17 @@ let use_msrv_for_inout o = o.option_use_msrv_for_inout
 let php7_int_semantics o = o.option_php7_int_semantics
 let autoprime_generators o = o.option_autoprime_generators
 let enable_hackc_only_feature o = o.option_enable_hackc_only_feature
+let doc_root o = o.option_doc_root
+let include_search_paths o = o.option_include_search_paths
+let include_roots o = o.option_include_roots
 
 let to_string o =
   let dynamic_invokes =
     String.concat ", " (SSet.elements (dynamic_invoke_functions o)) in
+  let search_paths = String.concat ", " (include_search_paths o) in
+  let inc_roots = SMap.bindings (include_roots o)
+    |> List.map ~f:(fun (root, path) -> root ^ ": " ^ path)
+    |> String.concat ", " in
   String.concat "\n"
     [ Printf.sprintf "enable_hiphop_syntax: %B" @@ enable_hiphop_syntax o
     ; Printf.sprintf "php7_scalar_types: %B" @@ php7_scalar_types o
@@ -129,6 +142,9 @@ let to_string o =
     ; Printf.sprintf "php7_int_semantics: %B" @@ php7_int_semantics o
     ; Printf.sprintf "autoprime_generators: %B" @@ autoprime_generators o
     ; Printf.sprintf "enable_hackc_only_feature: %B" @@ enable_hackc_only_feature o
+    ; Printf.sprintf "doc_root: %s" @@ doc_root o
+    ; Printf.sprintf "include_search_paths: [%s]" search_paths
+    ; Printf.sprintf "include_roots: {%s}" inc_roots
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -213,6 +229,9 @@ let get_value_from_config_int config key =
   | "" -> 0
   | x -> int_of_string x)
 
+let get_value_from_config_string config key =
+  get_value_from_config_ config key |> Option.map ~f:J.get_string_exn
+
 let get_value_from_config_kv_list config key =
   let json_opt = get_value_from_config_ config key in
   Option.map json_opt ~f:(fun json ->
@@ -225,9 +244,20 @@ let get_value_from_config_kv_list config key =
 let get_value_from_config_string_array config key =
   let json_opt = get_value_from_config_ config key in
   match json_opt with
-    | None                   -> Some []
+    | None                   -> None
     | Some (J.JSON_Array fs) -> Some (List.map fs J.get_string_exn)
     | _                      -> raise (Arg.Bad ("Expected list of strings at " ^ key))
+
+let get_value_from_config_string_to_string_map config key =
+  let json_opt = get_value_from_config_ config key in
+  match json_opt with
+    | None -> None
+    | Some (J.JSON_Object fs) -> Some (
+      List.fold_left fs ~init:SMap.empty ~f:(fun acc json ->
+        match json with
+          | (root, J.JSON_String path) -> SMap.add root path acc
+          | _ -> raise (Arg.Bad ("Expected {root:path} pair"))))
+    | _ -> raise (Arg.Bad ("Expected string-to-string map strings at " ^ key))
 
 let set_value name get set config opts =
   try
@@ -287,6 +317,12 @@ let value_setters = [
     fun opts v -> { opts with option_autoprime_generators = (v = 1) });
   (set_value "hhvm.hack.lang.enable_hackc_only_feature" get_value_from_config_int @@
     fun opts v -> { opts with option_enable_hackc_only_feature = (v = 1) });
+  (set_value "doc_root" get_value_from_config_string @@
+    fun opts v -> { opts with option_doc_root = v });
+  (set_value "hhvm.server.include_search_paths" get_value_from_config_string_array @@
+     fun opts v -> { opts with option_include_search_paths = v });
+  (set_value "hhvm.include_roots" get_value_from_config_string_to_string_map @@
+     fun opts v -> { opts with option_include_roots = v });
 ]
 
 let extract_config_options_from_json ~init config_json =
@@ -297,8 +333,8 @@ let extract_config_options_from_json ~init config_json =
 (* Construct an instance of Hhbc_options.t from the options passed in as well as
  * as specified in `-v str` on the command line.
  *)
-let get_options_from_config config_json config_list =
-  let init = extract_config_options_from_json ~init:default config_json in
+let get_options_from_config ?(init=default) ?(config_list=[]) config_json =
+  let init = extract_config_options_from_json ~init config_json in
   List.fold_left config_list ~init ~f:begin
     fun options str ->
     match Str.split_delim (Str.regexp "=") str with

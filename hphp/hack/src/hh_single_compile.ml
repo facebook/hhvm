@@ -409,7 +409,11 @@ let decl_and_run_mode compiler_options popt =
 
   let set_compiler_options config_json =
     let options =
-      Hhbc_options.get_options_from_config config_json compiler_options.config_list in
+      Hhbc_options.get_options_from_config
+        config_json
+        ~init:!Hhbc_options.compiler_options
+        ~config_list:compiler_options.config_list
+    in
     Hhbc_options.set_compiler_options options in
   let ini_config_json =
     Option.map ~f:json_of_file compiler_options.config_file in

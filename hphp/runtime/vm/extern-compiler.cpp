@@ -23,6 +23,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <folly/DynamicConverter.h>
 #include <folly/json.h>
 #include <folly/FileUtil.h>
 
@@ -146,7 +147,7 @@ private:
   void stopLogStderrThread();
 
   void writeMessage(folly::dynamic& header, folly::StringPiece body);
-  void writeConfig();
+  void writeConfigs();
   void writeProgram(const char* filename, MD5 md5, folly::StringPiece code);
 
   std::string readVersion() const;
@@ -371,19 +372,52 @@ void ExternCompiler::writeMessage(
   fflush(m_in);
 }
 
-void ExternCompiler::writeConfig() {
-  static const std::string config = [this] () -> std::string {
+struct ConfigBuilder {
+  template<typename T>
+  ConfigBuilder& addField(folly::StringPiece key, const T& data) {
+    if (!m_config.isObject()) {
+      m_config = folly::dynamic::object();
+    }
+
+    m_config[key] = folly::dynamic::object(
+      "global_value", folly::toDynamic(data));
+
+    return *this;
+  }
+
+  std::string toString() const {
+    return m_config.isNull() ? "" : folly::toJson(m_config);
+  }
+
+ private:
+  folly::dynamic m_config{nullptr};
+};
+
+void ExternCompiler::writeConfigs() {
+  static const std::string boundConfig = [this] () -> std::string {
     if (m_options.inheritConfig) {
-      // necessary to initialize zend-strtod, which is used to serialize config
-      // to JSON (!)
+      // necessary to initialize zend-strtod, which is used to serialize
+      // boundConfig to JSON (!)
       zend_get_bigint_data();
       return IniSetting::GetAllAsJSON();
     }
     return "";
   }();
 
+  // Some configs, like IncludeRoots, can't easily be Config::Bind(ed), so here
+  // we create a place to dump miscellaneous config values HackC might want.
+  static const std::string miscConfig = [this] () -> std::string {
+    if (m_options.inheritConfig) {
+      return ConfigBuilder()
+        .addField("hhvm.include_roots", RuntimeOption::IncludeRoots)
+        .toString();
+    }
+    return "";
+  }();
+
   folly::dynamic header = folly::dynamic::object("type", "config");
-  writeMessage(header, config);
+  writeMessage(header, boundConfig);
+  writeMessage(header, miscConfig);
 }
 
 void ExternCompiler::writeProgram(
@@ -588,7 +622,7 @@ void ExternCompiler::start() {
   }
   fflush(m_in);
 
-  writeConfig();
+  writeConfigs();
 }
 
 bool createHackc(const std::string& path, const std::string& binary) {

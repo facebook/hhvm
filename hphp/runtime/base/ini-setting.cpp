@@ -1190,7 +1190,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     }
 
     auto value = iter.second.getCallback();
-    // Cast all non-arrays to strings since that is what everything used ot be
+    // Cast all non-arrays to strings since that is what everything used to be
     if (!value.isArray()) {
       value = value.toString();
     }

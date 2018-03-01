@@ -277,6 +277,20 @@ struct RuntimeOption {
 
   static std::string SourceRoot;
   static std::vector<std::string> IncludeSearchPaths;
+
+  /**
+   * Legal root directory expressions in an include expression. For example,
+   *
+   *   include_once $PHP_ROOT . '/lib.php';
+   *
+   * Here, "$PHP_ROOT" is a legal include root. Stores what it resolves to.
+   *
+   *   RuntimeOption::IncludeRoots["$PHP_ROOT"] = "";
+   *   RuntimeOption::IncludeRoots["$LIB_ROOT"] = "lib";
+   */
+  static std::map<std::string, std::string> IncludeRoots;
+  static std::map<std::string, std::string> AutoloadRoots;
+
   static std::string FileCache;
   static std::string DefaultDocument;
   static std::string ErrorDocument404;

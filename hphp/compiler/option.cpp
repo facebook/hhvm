@@ -55,8 +55,6 @@ bool Option::CachePHPFile = false;
 
 std::vector<std::string> Option::ParseOnDemandDirs;
 
-std::map<std::string, std::string> Option::IncludeRoots;
-std::map<std::string, std::string> Option::AutoloadRoots;
 std::vector<std::string> Option::IncludeSearchPaths;
 
 bool Option::GeneratePickledPHP = false;
@@ -130,8 +128,8 @@ void Option::LoadRootHdf(const IniSetting::Map& ini,
 }
 
 void Option::Load(const IniSetting::Map& ini, Hdf &config) {
-  LoadRootHdf(ini, config, "IncludeRoots", IncludeRoots);
-  LoadRootHdf(ini, config, "AutoloadRoots", AutoloadRoots);
+  LoadRootHdf(ini, config, "IncludeRoots", RuntimeOption::IncludeRoots);
+  LoadRootHdf(ini, config, "AutoloadRoots", RuntimeOption::AutoloadRoots);
 
   Config::Bind(PackageFiles, ini, config, "PackageFiles", PackageFiles);
   Config::Bind(IncludeSearchPaths, ini, config, "IncludeSearchPaths");
@@ -341,15 +339,6 @@ void Option::Load() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-std::string Option::GetAutoloadRoot(const std::string &name) {
-  for (auto const& pair : AutoloadRoots) {
-    if (name.substr(0, pair.first.length()) == pair.first) {
-      return pair.second;
-    }
-  }
-  return "";
-}
 
 std::string Option::MangleFilename(const std::string &name, bool id) {
   std::string ret = UserFilePrefix;

@@ -1751,29 +1751,33 @@ let add_include_region
     if not check_paths_exist || Sys.file_exists p
     then (B.add_string buf ("\n  " ^ p); true)
     else false in
-  let write_include = function
-    | Hhas_symbol_refs.Absolute p -> ignore @@ write_if_exists p
-    | Hhas_symbol_refs.SearchPathRelative p ->
-      if not check_paths_exist
-      then B.add_string buf ("\n  " ^ p)
-      else
-        let rec try_paths = function
-          | [] -> ()
-          | prefix :: rest ->
-            if write_if_exists (Filename.concat prefix p)
-            then ()
-            else try_paths rest in
-        let dirname =
-          Option.value_map path ~default:[] ~f:(fun p -> [Filename.dirname p]) in
-        try_paths (dirname @ Option.value search_paths ~default:[])
-    | Hhas_symbol_refs.DocRootRelative p -> ignore @@
-      let resolved = Filename.concat (Option.value doc_root ~default:"") p in
-      write_if_exists resolved
-    | Hhas_symbol_refs.IncludeRootRelative (v, p) -> if p <> "" then
-      Option.iter include_roots (fun irs ->
-        Option.iter (SMap.find_opt v irs) (fun ir ->
-          let resolved = Filename.concat ir p in
-          ignore @@ write_if_exists resolved)) in
+  let write_include inc =
+    let include_roots = Option.value include_roots ~default:SMap.empty in
+    match Hhas_symbol_refs.resolve_to_doc_root_relative inc ~include_roots with
+      | Hhas_symbol_refs.Absolute p -> ignore @@ write_if_exists p
+      | Hhas_symbol_refs.SearchPathRelative p ->
+        if not check_paths_exist
+        then B.add_string buf ("\n  " ^ p)
+        else
+          let rec try_paths = function
+            | [] -> ()
+            | prefix :: rest ->
+              if write_if_exists (Filename.concat prefix p)
+              then ()
+              else try_paths rest in
+          let dirname =
+            Option.value_map path ~default:[] ~f:(fun p -> [Filename.dirname p]) in
+          try_paths (dirname @ Option.value search_paths ~default:[])
+      | Hhas_symbol_refs.IncludeRootRelative (v, p) -> if p <> "" then
+          Option.iter (SMap.find_opt v include_roots) (fun ir ->
+            let doc_root = Option.value doc_root ~default:"" in
+            let resolved = Filename.concat doc_root (Filename.concat ir p) in
+            ignore @@ write_if_exists resolved)
+      | Hhas_symbol_refs.DocRootRelative p -> ignore @@
+        let doc_root = Option.value doc_root ~default:"" in
+        let resolved = Filename.concat doc_root p in
+        write_if_exists resolved
+  in
   if not (Hhas_symbol_refs.IncludePathSet.is_empty includes) then begin
     B.add_string buf "\n.includes {";
     Hhas_symbol_refs.IncludePathSet.iter write_include includes;
@@ -1806,7 +1810,11 @@ let add_program_content ?path dump_symbol_refs buf hhas_prog =
   List.iter (add_class_def buf) classes;
   List.iter (add_typedef buf) (Hhas_program.typedefs hhas_prog);
   if dump_symbol_refs then begin
-    add_include_region ?path buf symbol_refs.Hhas_symbol_refs.includes;
+    let opts = !Hhbc_options.compiler_options in
+    add_include_region ?path buf symbol_refs.Hhas_symbol_refs.includes
+      ~doc_root:(Hhbc_options.doc_root opts)
+      ~search_paths:(Hhbc_options.include_search_paths opts)
+      ~include_roots:(Hhbc_options.include_roots opts);
     add_symbol_ref_regions buf symbol_refs
   end
 

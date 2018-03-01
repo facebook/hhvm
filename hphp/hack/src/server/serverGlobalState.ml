@@ -38,4 +38,28 @@ let restore state =
   HackSearchService.fuzzy := state.fuzzy;
   Utils.profile := state.profile_log;
   Errors.ignored_fixme_codes := state.fixme_codes;
-  FilesToIgnore.set_paths_to_ignore state.paths_to_ignore
+  FilesToIgnore.set_paths_to_ignore state.paths_to_ignore;;
+
+let to_string state =
+  let saved_root = Path.to_string state.saved_root in
+  let saved_hhi = Path.to_string state.saved_hhi in
+  let saved_tmp = Path.to_string state.saved_tmp in
+  let trace = if state.trace then "true" else "false" in
+  let fuzzy = if state.fuzzy then "true" else "false" in
+  let profile_log = if state.profile_log then "true" else "false" in
+  let fixme_codes = ISet.to_string state.fixme_codes in
+  (* OCaml regexps cannot be re-serialized to strings *)
+  let paths_to_ignore = "(...)" in
+  [
+    ("saved_root", saved_root);
+    ("saved_hhi", saved_hhi);
+    ("saved_tmp", saved_tmp);
+    ("trace", trace);
+    ("fuzzy", fuzzy);
+    ("profile_log", profile_log);
+    ("fixme_codes", fixme_codes);
+    ("paths_to_ignore", paths_to_ignore);
+  ]
+    |> List.map (fun (x, y) -> Printf.sprintf "%s : %s" x y)
+    |> String.concat ", "
+    |> Printf.sprintf "{%s}"

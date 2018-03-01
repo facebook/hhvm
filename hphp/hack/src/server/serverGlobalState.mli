@@ -11,3 +11,5 @@
 type t
 val save : unit -> t
 val restore : t -> unit
+
+val to_string : t -> string

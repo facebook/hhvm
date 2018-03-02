@@ -172,6 +172,7 @@ module SpecialFunctions = struct
 
   let call_user_func = "call_user_func"
   let autoload       = "__autoload"
+  let clone          = "__clone"
 end
 
 module SpecialIdents = struct

@@ -401,3 +401,6 @@ let invalid_is_expression_hint hint = hint ^ " typehints cannot be used with `is
 let elvis_operator_space = "An Elvis operator ('?:') is expected here."
 let autoload_takes_one_argument =
   "__autoload() must take exactly 1 argument"
+let clone_takes_no_arguments class_name method_name =
+  Printf.sprintf "Method %s::%s cannot accept any arguments"
+    class_name method_name

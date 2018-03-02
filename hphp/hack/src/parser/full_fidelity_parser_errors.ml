@@ -479,6 +479,14 @@ let async_magic_method node parents =
     list_contains_predicate is_async node.function_modifiers
   | _ -> false
 
+
+let clone_takes_no_arguments method_name node parents =
+  match node with
+  | FunctionDeclarationHeader { function_parameter_list = l; _} ->
+    let num_params = List.length (syntax_to_list_no_separators l) in
+    (String.lowercase_ascii method_name) = SN.SpecialFunctions.clone && num_params <> 0
+  | _ -> false
+
 (* check that a constructor or a destructor is type annotated *)
 let class_constructor_destructor_has_non_void_type env node parents =
   if is_hhvm_compat env then false
@@ -1154,6 +1162,10 @@ let methodish_errors env node parents errors =
     let errors =
       produce_error_for_header errors async_magic_method header_node [node]
       SyntaxError.async_magic_method modifiers in
+    let errors =
+      produce_error_for_header errors (clone_takes_no_arguments method_name) header_node [node]
+      (SyntaxError.clone_takes_no_arguments class_name method_name) modifiers in
+
     let errors =
       produce_error errors declaration_multiple_visibility node
       SyntaxError.error2017 modifiers in

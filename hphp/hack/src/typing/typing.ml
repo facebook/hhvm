@@ -6407,12 +6407,7 @@ and typedef_def tcopt typedef  =
   let env = EnvFromDef.typedef_env tcopt typedef in
   let tdecl = Env.get_typedef env (snd typedef.t_name) in
   add_decl_errors (Option.(map tdecl (fun tdecl -> value_exn tdecl.td_decl_errors)));
-  (* Mode for typedefs themselves doesn't really matter right now, but
-   * they can expand hints, so make it loose so that the typedef doesn't
-   * fail. (The hint will get re-checked with the proper mode anyways.)
-   * Ideally the typedef would carry the right mode with it, but it's a
-   * slightly larger change than I want to deal with right now. *)
-  let env = Typing_env.set_mode env FileInfo.Mdecl in
+  let env = Typing_env.set_mode env typedef.t_mode in
   let env, constraints =
     Phase.localize_generic_parameters_with_bounds env typedef.t_tparams
               ~ety_env:(Phase.env_with_self env) in

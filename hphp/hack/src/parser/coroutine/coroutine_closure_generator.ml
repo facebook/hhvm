@@ -130,7 +130,9 @@ let generate_clone_body { CoroutineStateMachineData.parameters; properties; } =
       make_assignment_syntax_variable
         closure_member_syntax
         this_member_syntax in
-    Core_list.map ~f:make_copy_property_syntax (next_label :: properties) in
+      Core_list.map
+        ~f:make_copy_property_syntax
+        (completion_continuation_continuation :: next_label :: properties) in
   (* return $closure; *)
   let return_statement_syntax =
     make_return_statement_syntax closure_variable_syntax in

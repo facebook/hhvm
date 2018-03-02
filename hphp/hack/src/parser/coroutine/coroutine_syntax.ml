@@ -997,6 +997,10 @@ let set_next_label_syntax number =
   let number = make_int_literal_syntax number in
   make_assignment_syntax_variable label_syntax number
 
+(* For $__closure->completionContinuationContinuation *)
+let completion_continuation_continuation =
+  "completionContinuationContinuation"
+
 (**
  * For rewriting foreach
  *)

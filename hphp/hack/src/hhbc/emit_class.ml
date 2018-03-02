@@ -266,7 +266,6 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     then from_enum_type ast_class.A.c_namespace ast_class.A.c_enum
     else None
   in
-  let class_is_xhp = ast_class.A.c_is_xhp in
   let class_xhp_attributes =
     List.filter_map
       ast_class.A.c_body
@@ -325,20 +324,19 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   (* TODO: communicate this without looking at the name *)
   let additional_methods = [] in
   let additional_methods =
-    if not class_is_xhp || class_xhp_categories = []
+    if class_xhp_categories = []
     then additional_methods
     else additional_methods
       @ Emit_xhp.from_category_declaration ast_class class_xhp_categories
   in
   let additional_methods =
-    if not class_is_xhp || class_xhp_children = []
+    if class_xhp_children = []
     then additional_methods
     else additional_methods
       @ Emit_xhp.from_children_declaration ast_class class_xhp_children
   in
   let additional_methods =
-    if not class_is_xhp ||
-      (class_xhp_attributes = [] && class_xhp_use_attributes = [])
+    if class_xhp_attributes = [] && class_xhp_use_attributes = []
     then additional_methods
     else additional_methods
       @ Emit_xhp.from_attribute_declaration
@@ -464,7 +462,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     class_is_abstract
     class_is_interface
     class_is_trait
-    class_is_xhp
+    ast_class.A.c_is_xhp
     is_top
     class_uses
     class_use_aliases

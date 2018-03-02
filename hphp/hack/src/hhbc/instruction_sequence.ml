@@ -640,6 +640,8 @@ let rec can_initialize_static_var e =
       && can_initialize_static_var v)
   | A.Varray es ->
     List.for_all es ~f:can_initialize_static_var
+  | A.Class_const(_, (_, name)) ->
+    String.lowercase_ascii name = Naming_special_names.Members.mClass
   | A.Collection ((_, name), fields) ->
     let name =
       Hhbc_string_utils.Types.fix_casing @@ Hhbc_string_utils.strip_ns name in

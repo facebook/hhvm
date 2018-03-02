@@ -176,51 +176,56 @@ let xhp_child_op_to_int = function
   | Some A.ChildQuestion -> 2
   | Some A.ChildPlus -> 3
 
-let rec emit_xhp_children_decl_expr ~unary = function
-  | [] -> failwith "Empty xhp child declaration"
-  | [A.ChildList l] ->
+let rec emit_xhp_child_decl ~unary = function
+  | A.ChildList l ->
     get_array3
       (A.Int (p, unary))
       (A.Int (p, "5"))
       (emit_xhp_children_decl_expr ~unary:"0" l)
-  | [A.ChildName (_, name)] when String.lowercase_ascii name = "any" ->
+  | A.ChildName (_, name) when String.lowercase_ascii name = "any" ->
     get_array3
       (A.Int (p, unary))
       (A.Int (p, "1"))
       (A.Null)
-  | [A.ChildName (_, name)] when String.lowercase_ascii name = "pcdata"->
+  | A.ChildName (_, name) when String.lowercase_ascii name = "pcdata"->
     get_array3
       (A.Int (p, unary))
       (A.Int (p, "2"))
       (A.Null)
-  | [A.ChildName (_, s)] when s.[0] = '%' ->
+  | A.ChildName (_, s) when s.[0] = '%' ->
     get_array3
       (A.Int (p, unary))
       (A.Int (p, "4"))
       (A.String (p, SU.Xhp.mangle (String.sub s 1 ((String.length s) - 1))))
-  | [A.ChildName (_, s)] ->
+  | A.ChildName (_, s) ->
     get_array3
       (A.Int (p, unary))
       (A.Int (p, "3"))
       (A.String (p, SU.Xhp.mangle s))
-  | [A.ChildUnary (c, op)] ->
+  | A.ChildUnary (c, op) ->
     emit_xhp_children_decl_expr [c]
       ~unary:(string_of_int @@ xhp_child_op_to_int @@ Some op)
-  | [A.ChildBinary (c1, c2)] ->
+  | A.ChildBinary (c1, c2) ->
     get_array3
       (A.Int (p, "5"))
       (emit_xhp_children_decl_expr ~unary [c1])
       (emit_xhp_children_decl_expr ~unary [c2])
-  | [c1; c2] ->
-    get_array3
-      (A.Int (p, "4"))
-      (emit_xhp_children_decl_expr ~unary [c1])
-      (emit_xhp_children_decl_expr ~unary [c2])
+
+and emit_xhp_children_decl_expr ~unary l =
+  match l with
+  | [] -> failwith "xhp children: unexpected empty list"
+  | [c] -> emit_xhp_child_decl ~unary c
   | c1 :: c2 :: cs ->
-    get_array3
-      (A.Int (p, "4"))
-      (emit_xhp_children_decl_expr ~unary [c1; c2])
-      (emit_xhp_children_decl_expr ~unary cs)
+    let first_two =
+      get_array3
+        (A.Int (p, "4"))
+        (emit_xhp_child_decl ~unary c1)
+        (emit_xhp_child_decl ~unary c2) in
+    Core_list.fold_left cs ~init:first_two ~f:(fun acc n ->
+      get_array3
+        (A.Int (p, "4"))
+        acc
+        (emit_xhp_child_decl ~unary n))
 
 let emit_xhp_children_paren_expr c =
   let l, op_num = match c with

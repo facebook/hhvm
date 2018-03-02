@@ -212,6 +212,21 @@ let multiple_type_cases = [
   ("multiple_type.php", 6, 14), ("((function(): string) | (function(): int))", "(int | string)");
 ]
 
+let lambda_param = "<?hh // strict
+function takes_func((function (int): int) $f): void {}
+function lambda_param(): void {
+  $f1 = $s ==> 3;
+//      ^4:9
+  takes_func($x ==> $x);
+//           ^6:14
+}
+"
+
+let lambda_param_cases = [
+  ("lambda_param.php", 4, 9), ("_", "_");
+  ("lambda_param.php", 6, 14), ("int", "int");
+]
+
 let files = [
   "id.php", id;
   "A.php", class_A;
@@ -224,6 +239,7 @@ let files = [
   "nullthrows.php", nullthrows;
   "curried.php", curried;
   "multiple_type.php", multiple_type;
+  "lambda_param.php", lambda_param;
 ]
 
 let cases =
@@ -236,6 +252,7 @@ let cases =
   @ nullthrows_cases
   @ curried_cases
   @ multiple_type_cases
+  @ lambda_param_cases
 
 let () =
   let env = Test.setup_server () in

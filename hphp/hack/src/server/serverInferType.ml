@@ -74,6 +74,15 @@ class ['self] base_visitor line char = object (self : 'self)
       else None
     in
     self#plus acc (super#on_expr env e)
+
+  method! on_fun_param env param =
+    let (pos, ty) = param.Tast.param_annotation in
+    let acc =
+      if Pos.inside pos line char
+      then ty >>| fun ty -> pos, env, ty
+      else None
+    in
+    self#plus acc (super#on_fun_param env param)
 end
 
 (** Same as `base_visitor`, except:

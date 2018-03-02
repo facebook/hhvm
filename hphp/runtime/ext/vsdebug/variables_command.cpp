@@ -32,9 +32,9 @@ const StaticString s_user("user");
 const StaticString s_core("Core");
 
 static bool isArrayObjectType(const std::string className) {
-  // HH\Vector is special in that its an object but its children should
-  // look like array indicies.
-  return className == "HH\\Vector";
+  // HH\Vector and HH\Map are special in that they are objects but their
+  // children look like array indicies.
+  return className == "HH\\Vector" || className == "HH\\Map";
 };
 
 VariablesCommand::VariablesCommand(

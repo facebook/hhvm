@@ -89,7 +89,13 @@ union FixupEntry {
   IndirectFixup indirect;
 };
 
-TreadHashMap<uint32_t,FixupEntry,std::hash<uint32_t>> s_fixups{kInitCapac};
+struct FixupHash {
+  size_t operator()(uint32_t k) const {
+    return hash_int64(k);
+  }
+};
+
+TreadHashMap<uint32_t,FixupEntry,FixupHash> s_fixups{kInitCapac};
 
 PC pc(const ActRec* /*ar*/, const Func* f, const Fixup& fixup) {
   assertx(f);

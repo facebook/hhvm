@@ -399,3 +399,5 @@ let property_has_multiple_visibilities name =
   "Multiple access type modifiers are not allowed: properties of " ^ name
 let invalid_is_expression_hint hint = hint ^ " typehints cannot be used with `is` expressions"
 let elvis_operator_space = "An Elvis operator ('?:') is expected here."
+let autoload_takes_one_argument =
+  "__autoload() must take exactly 1 argument"

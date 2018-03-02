@@ -171,6 +171,7 @@ module SpecialFunctions = struct
   let meth_caller    = "meth_caller"
 
   let call_user_func = "call_user_func"
+  let autoload       = "__autoload"
 end
 
 module SpecialIdents = struct

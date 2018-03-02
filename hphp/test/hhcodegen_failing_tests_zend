@@ -8,7 +8,6 @@ zend/good/Zend/tests/class_name_as_scalar_error_001.php
 zend/good/Zend/tests/class_name_as_scalar_error_002.php
 zend/good/Zend/tests/closure_005.php
 zend/good/Zend/tests/closure_014.php
-zend/good/Zend/tests/errmsg_012.php
 zend/good/Zend/tests/errmsg_015.php
 zend/good/Zend/tests/errmsg_019.php
 zend/good/Zend/tests/errmsg_032.php

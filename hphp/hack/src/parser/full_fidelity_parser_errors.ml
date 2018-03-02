@@ -1430,12 +1430,22 @@ let function_errors env node parents errors =
       && env.is_strict
       && not (is_missing f.function_ampersand) in
 
+    let special_autoload_function hhvm_compat_mode _ =
+      let is_autoload =
+        String.lowercase_ascii @@ (text f.function_name) = SN.SpecialFunctions.autoload in
+      let num_params = List.length (syntax_to_list_no_separators f.function_parameter_list) in
+      hhvm_compat_mode && is_autoload && num_params > 1 in
+
     let errors =
       produce_error errors (missing_type_annot_check env) ()
       SyntaxError.error2001 f.function_right_paren in
     let errors =
       produce_error errors (function_reference_check env) ()
       SyntaxError.error2064 f.function_ampersand in
+    let errors =
+      produce_error errors (special_autoload_function (is_hhvm_compat env)) ()
+      SyntaxError.autoload_takes_one_argument node in
+
     errors
   | _ -> errors
 

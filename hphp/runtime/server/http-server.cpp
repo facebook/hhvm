@@ -58,6 +58,7 @@ namespace HPHP {
 std::shared_ptr<HttpServer> HttpServer::Server;
 time_t HttpServer::StartTime;
 std::atomic<double> HttpServer::LoadFactor{1.0};
+std::atomic_int HttpServer::QueueDiscount{0};
 std::atomic_int_fast64_t HttpServer::PrepareToStopTime{0};
 time_t HttpServer::OldServerStopTime;
 std::vector<ShutdownStat> HttpServer::ShutdownStats;

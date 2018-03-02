@@ -365,6 +365,9 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/load-factor:     get or set load factor\n"
         "    set           optional, set new load factor (default 1.0,\n"
         "                  valid range [-1.0, 10.0])\n"
+        "/queue-discount:  get/set how much we discount the queue-length \n"
+        "    set           optional, set discount value (default 0,\n"
+        "                  valid range [0, 10000])\n"
         "/warmup-status:   Describes state of JIT warmup.\n"
         "                  Returns empty string if warmed up.\n"
         ;
@@ -738,6 +741,27 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       transport->sendString(folly::sformat("Load factor updated to {}\n",
                                            factor));
       Logger::Info("Load factor updated to %lf", factor);
+      break;
+    }
+    if (cmd == "queue-discount") {
+      auto const discountStr = transport->getParam("set");
+      if (discountStr.empty()) {
+        transport->sendString(folly::to<string>(
+          HttpServer::QueueDiscount.load(std::memory_order_relaxed)));
+        break;
+      }
+      int queue_discount = 0;
+      if (sscanf(discountStr.c_str(), "%d", &queue_discount) < 1 ||
+          queue_discount > 10000 || queue_discount < 0) {
+        transport->sendString("Invalid queue discount spec: " +
+          discountStr, 400);
+        break;
+      }
+      HttpServer::QueueDiscount.store(queue_discount,
+        std::memory_order_relaxed);
+      transport->sendString(folly::sformat("Queue Discount updated to {}\n",
+        queue_discount));
+      Logger::Info("Queue Discount updated to %d", queue_discount);
       break;
     }
     if (cmd == "ini-get-all") {

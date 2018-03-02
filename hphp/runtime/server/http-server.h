@@ -34,6 +34,7 @@ struct HttpServer : Synchronizable, TakeoverListener,
   static std::shared_ptr<HttpServer> Server;
   static time_t StartTime;
   static std::atomic<double> LoadFactor;
+  static std::atomic_int QueueDiscount;
 
 private:
   static std::atomic_int_fast64_t PrepareToStopTime;

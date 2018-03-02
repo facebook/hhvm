@@ -97,6 +97,7 @@
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -2192,6 +2193,25 @@ bool ensure_pseudomain(AsmState& as) {
   return true;
 }
 
+static StaticString s_native("__Native");
+
+/*
+ * Checks whether the current function is native by looking at the user
+ * attribute map and sets the isNative flag accoringly
+ * If the give function is op code implementation, then isNative is not set
+ */
+void check_native(AsmState& as) {
+  if (as.fe->userAttributes.count(s_native.get())) {
+    if (SystemLib::s_inited) {
+      as.error("Native function may only appear in systemlib");
+    }
+
+    as.fe->isNative =
+      !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
+    as.fe->attrs |= AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
+  }
+}
+
 /*
  * directive-function : attribute-list ?line-range type-info identifier
  *                      parameter-list function-flags '{' function-body
@@ -2238,6 +2258,8 @@ void parse_function(AsmState& as) {
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
   as.fe->userAttributes = userAttrs;
 
+  check_native(as);
+
   parse_parameter_list(as);
   parse_function_flags(as);
 
@@ -2278,6 +2300,8 @@ void parse_method(AsmState& as) {
               as.ue->bcPos(), attrs, false, 0);
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
   as.fe->userAttributes = userAttrs;
+
+  check_native(as);
 
   parse_parameter_list(as);
   parse_function_flags(as);

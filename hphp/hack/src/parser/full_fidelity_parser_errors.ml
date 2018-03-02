@@ -410,6 +410,14 @@ let is_visibility x =
 let is_not_public_visibility x =
   is_private x || is_protected x
 
+let has_static node parents f =
+  match node with
+  | FunctionDeclarationHeader node ->
+    let label = node.function_name in
+    (f label) &&
+    (matches_first (methodish_contains_static) parents)
+  | _ -> false
+
 (* test the methodish node contains any non-visibility modifiers *)
 let methodish_contains_non_visibility env node =
   if is_hhvm_compat env then false
@@ -423,14 +431,18 @@ let declaration_multiple_visibility node =
 
 (* Given a function declaration header, confirm that it is a constructor
  * and that the methodish containing it has a static keyword *)
-let class_constructor_has_static env node parents =
-  if is_hhvm_compat env then false
-  else
-  match node with
-  | FunctionDeclarationHeader node ->
-    let label = node.function_name in
-    (is_construct label) && (matches_first methodish_contains_static parents)
-  | _ -> false
+
+let is_clone label =
+  String.lowercase_ascii (text label) = SN.SpecialFunctions.clone
+
+let class_constructor_has_static node parents =
+  has_static node parents is_construct
+
+let class_destructor_cannot_be_static node parents =
+  has_static node parents (is_destruct)
+
+let clone_cannot_be_static node parents =
+  has_static node parents is_clone
 
 (* Given a function declaration header, confirm that it is NOT a constructor
  * and that the header containing it has visibility modifiers in parameters
@@ -482,9 +494,9 @@ let async_magic_method node parents =
 
 let clone_takes_no_arguments method_name node parents =
   match node with
-  | FunctionDeclarationHeader { function_parameter_list = l; _} ->
+  | FunctionDeclarationHeader { function_parameter_list = l; function_name = name; _} ->
     let num_params = List.length (syntax_to_list_no_separators l) in
-    (String.lowercase_ascii method_name) = SN.SpecialFunctions.clone && num_params <> 0
+    (is_clone name) && num_params <> 0
   | _ -> false
 
 (* check that a constructor or a destructor is type annotated *)
@@ -1145,8 +1157,8 @@ let methodish_errors env node parents errors =
       md.methodish_function_decl_header) ~default:"" in
     let errors =
       produce_error_for_header errors
-      (class_constructor_has_static env) header_node
-      [node] SyntaxError.error2009 modifiers in
+      (class_constructor_has_static) header_node
+      [node] (SyntaxError.error2009 class_name method_name) modifiers in
     let errors =
       let missing_modifier env modifiers =
         not (is_hhvm_compat env)
@@ -1160,12 +1172,19 @@ let methodish_errors env node parents errors =
       header_node [node]
       SyntaxError.error2012 modifiers in
     let errors =
+      produce_error_for_header errors
+      (class_destructor_cannot_be_static)
+      header_node [node]
+      (SyntaxError.class_destructor_cannot_be_static class_name method_name) modifiers in
+    let errors =
       produce_error_for_header errors async_magic_method header_node [node]
       SyntaxError.async_magic_method modifiers in
     let errors =
       produce_error_for_header errors (clone_takes_no_arguments method_name) header_node [node]
       (SyntaxError.clone_takes_no_arguments class_name method_name) modifiers in
-
+    let errors =
+      produce_error_for_header errors (clone_cannot_be_static) header_node [node]
+      (SyntaxError.clone_cannot_be_static class_name method_name) modifiers in
     let errors =
       produce_error errors declaration_multiple_visibility node
       SyntaxError.error2017 modifiers in

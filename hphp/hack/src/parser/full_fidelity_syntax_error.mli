@@ -104,7 +104,7 @@ val error2005 : string
 val error2006 : string
 val error2007 : string
 val error2008 : string
-val error2009 : string
+val error2009 : string -> string -> string
 val error2010 : string
 val error2011 : string
 val error2012 : string
@@ -243,3 +243,5 @@ val elvis_operator_space : string
 val property_has_multiple_visibilities : string -> string
 val autoload_takes_one_argument : string
 val clone_takes_no_arguments : string -> string -> string
+val class_destructor_cannot_be_static : string -> string -> string
+val clone_cannot_be_static : string -> string -> string

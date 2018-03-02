@@ -134,7 +134,10 @@ let error2006 = "A continue statement may only appear inside a loop."
 let error2007 = "A try statement requires a catch or a finally clause."
 let error2008 = "The first statement inside a switch statement must " ^
   "be a case or default label statement."
-let error2009 = "A constructor cannot be static."
+let error2009 class_name method_name =
+  Printf.sprintf "Constructor %s::%s() cannot be static"
+    class_name method_name
+
 let error2010 = "Parameters cannot have visibility modifiers (except in " ^
   "parameter lists of constructors)."
 let error2011 = "A destructor must have an empty parameter list."
@@ -404,3 +407,10 @@ let autoload_takes_one_argument =
 let clone_takes_no_arguments class_name method_name =
   Printf.sprintf "Method %s::%s cannot accept any arguments"
     class_name method_name
+let class_destructor_cannot_be_static class_name method_name =
+  Printf.sprintf "Destructor %s::%s() cannot be static"
+  class_name method_name
+  
+let clone_cannot_be_static class_name method_name =
+  Printf.sprintf "Clone method %s::%s() cannot be static"
+  class_name method_name

@@ -15,7 +15,7 @@
 (9,10)-(9,17) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class E', or make 'function f' non-abstract.
 (10,3)-(10,29) Redeclared method E::f
 (10,31)-(10,31) Non-abstract method E::f must contain body
-(11,3)-(11,15) A constructor cannot be static.
+(11,3)-(11,15) Constructor E::__construct() cannot be static
 (12,3)-(12,45) Redeclared method E::__construct
 (13,3)-(13,41) Redeclared method E::__construct
 (13,10)-(13,17) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class E', or make 'function __construct' non-abstract.
@@ -25,6 +25,7 @@
 (15,3)-(15,42) Redeclared method E::f
 (15,22)-(15,34) Parameters cannot have visibility modifiers (except in parameter lists of constructors).
 (16,31)-(16,36) A destructor must have an empty parameter list.
+(17,3)-(17,8) Destructor E::__destruct() cannot be static
 (17,3)-(17,8) A destructor can only have visibility modifiers.
 (17,3)-(17,31) Redeclared method E::__destruct
 (18,3)-(18,38) Redeclared method E::__construct

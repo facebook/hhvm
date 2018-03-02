@@ -586,10 +586,9 @@ let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
   let command = ServerCommandTypes.INFER_TYPE (ServerUtils.FileName file, line, column) in
   let inferred_type = rpc conn command in
   match inferred_type with
-  (* Hack server uses both None and "_" to indicate absence of a result. *)
+  (* Hack server uses None to indicate absence of a result. *)
   (* We're also catching the non-result "" just in case...               *)
   | None
-  | Some ("_", _)
   | Some ("", _) -> { Hover.contents = []; range = None; }
   | Some (s, _) -> { Hover.contents = [MarkedString s]; range = None; }
 
@@ -599,11 +598,10 @@ let do_enhanced_hover (conn: server_conn) (params: Hover.params) : Hover.result 
   let command = ServerCommandTypes.IDE_HOVER (ServerUtils.FileName file, line, column) in
   let contents = rpc conn command
     |> List.map ~f:begin fun hoverInfo ->
-      (* Hack server uses both None and "_" to indicate absence of a result. *)
+      (* Hack server uses None to indicate absence of a result. *)
       (* We're also catching the non-result "" just in case...               *)
       match hoverInfo with
-      | { HoverService.snippet = ""; _ }
-      | { HoverService.snippet = "_"; _ } -> []
+      | { HoverService.snippet = ""; _ } -> []
       | { HoverService.snippet; addendum } ->
         (MarkedCode ("hack", snippet)) :: (List.map ~f:(fun s -> MarkedString s) addendum)
     end

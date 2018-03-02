@@ -367,6 +367,12 @@ let error_if_reactive_context env f =
   not_lambda_reactive ();
   if env_local_reactive env then f ()
 
+let error_if_shallow_reactive_context env f =
+  not_lambda_reactive ();
+  match env_reactivity env with
+  | Reactive _ | Shallow _ -> f()
+  | _ -> ()
+
 let add_wclass env x =
   let dep = Dep.Class x in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);

@@ -491,4 +491,5 @@ module type S = sig
   val multiple_conditionally_reactive_annotations : Pos.t -> string -> unit
   val conditionally_reactive_annotation_invalid_arguments : Pos.t -> unit
   val conflicting_reactive_annotations : Pos.t -> unit
+  val echo_in_reactive_context : Pos.t -> unit
 end

@@ -1023,6 +1023,7 @@ module Typing                               = struct
   let untyped_lambda_strict_mode            = 4224 (* DONT MODIFY!!!! *)
   let binding_ref_in_array                  = 4225 (* DONT MODIFY!!!! *)
   let invalid_conditionally_reactive_call   = 4225 (* DONT MODIFY!!!! *)
+  let echo_in_reactive_context              = 4226 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2518,6 +2519,11 @@ let invalid_conditionally_reactive_call pos condition_type receiver_type =
     "' cannot be called. Calling such methods is allowed only from conditionally " ^
     "reactive methods with the same condition type or if static type of method " ^
     "receiver is a subtype of condition type, now '" ^ receiver_type ^ "'."
+  )
+
+let echo_in_reactive_context pos =
+  add Typing.echo_in_reactive_context pos (
+    "'echo' or 'print' are not allowed in reactive or shallow-reactive functions."
   )
 
 let expected_tparam pos n =

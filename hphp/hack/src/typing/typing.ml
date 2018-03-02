@@ -3314,8 +3314,11 @@ and is_abstract_ft fty = match fty with
 
   match fun_expr with
   (* Special function `echo` *)
-  | Id ((_, pseudo_func) as id) when pseudo_func = SN.SpecialFunctions.echo ->
+  | Id ((p, pseudo_func) as id) when pseudo_func = SN.SpecialFunctions.echo ->
       check_function_in_suspend SN.SpecialFunctions.echo;
+      Env.error_if_shallow_reactive_context env @@ begin fun () ->
+        Errors.echo_in_reactive_context p;
+      end;
       let env, tel, _ = exprs ~accept_using_var:true env el in
       make_call_special env id tel (Reason.Rwitness p, Tprim Tvoid)
   (* Special function `empty` *)

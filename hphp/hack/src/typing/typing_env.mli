@@ -118,6 +118,7 @@ val check_lambda_reactive : (unit -> 'a) -> reactivity * 'a
 val not_lambda_reactive : unit -> unit
 val is_checking_lambda : unit -> bool
 val error_if_reactive_context : env -> (unit -> unit) -> unit
+val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
 val add_fresh_generic_parameter : env -> string -> env * string
 val get_tpenv_size : env -> int
 val get_tpenv_tparams : env -> SSet.t

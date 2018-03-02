@@ -1352,7 +1352,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | { syntax = Token b; _ } as t :: xs -> track t b None xs
         | x :: xs -> x :: search xs
         and track t b oe = function (* keep going through consecutive tokens *)
-        | { syntax = Token e; _ } :: xs -> track t b (Some e) xs
+        | { syntax = Token e; _ } :: xs
+          when Token.kind e <> TK.XHPComment -> track t b (Some e) xs
         | xs -> Option.value_map oe ~default:t ~f:(combine b) :: search xs
         in
         search (as_list node)

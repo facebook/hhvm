@@ -258,16 +258,16 @@ let emit_deprecation_warning scope = function
       | _ :: Typed_value.Int i :: _ -> i
       | _ -> failwith "deprecated attribute second argument is not an integer"
     in
-    (* TODO: if the function is system function or a native function,
-     * emit PHP_DEPRECATED error code *)
-    let user_deprecated_error_code = 16384 (* USER_DEPRECATED *) in
+    let error_code = if Emit_env.is_systemlib () then
+      8192 (* E_DEPRECATED *) else 16384 (* E_USER_DEPRECATED *)
+    in
     if Int64.to_int sampling_rate <= 0 then empty else
     gather [
       trait_instrs;
       instr_string deprecation_string;
       concat_instruction;
       instr_int64 sampling_rate;
-      instr_int user_deprecated_error_code;
+      instr_int error_code;
       instr_trigger_sampled_error;
       instr_popr;
     ]

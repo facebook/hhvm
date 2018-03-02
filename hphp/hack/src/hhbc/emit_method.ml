@@ -63,27 +63,31 @@ let from_ast_wrapper : bool -> _ ->
   if not (has_valid_access_modifiers ast_method.Ast.m_kind) then
     Emit_fatal.raise_fatal_parse Pos.none
       "Multiple access type modifiers are not allowed";
+  let namespace = ast_class.Ast.c_namespace in
+  let method_attributes =
+    Emit_attribute.from_asts namespace ast_method.Ast.m_user_attributes in
+  let is_native = Hhas_attribute.is_native method_attributes in
+  let is_native_opcode_impl =
+    Hhas_attribute.is_native_opcode_impl method_attributes in
   let method_is_abstract =
     ast_class.Ast.c_kind = Ast.Cinterface ||
     has_kind ast_method Ast.Abstract in
   let method_is_final = has_kind ast_method Ast.Final in
   let method_is_static = has_kind ast_method Ast.Static in
-  let namespace = ast_class.Ast.c_namespace in
-  let method_attributes =
-    Emit_attribute.from_asts namespace ast_method.Ast.m_user_attributes in
   let method_is_private =
-    privatize || has_kind ast_method Ast.Private in
+    not is_native_opcode_impl &&
+    (privatize || has_kind ast_method Ast.Private) in
   let method_is_protected =
-    not privatize && has_kind ast_method Ast.Protected in
+    not is_native_opcode_impl &&
+    not privatize &&
+    has_kind ast_method Ast.Protected in
   let method_is_public =
-    not privatize && (
+    is_native_opcode_impl ||
+    (not privatize && (
     has_kind ast_method Ast.Public ||
-    (not method_is_private && not method_is_protected)) in
+    (not method_is_private && not method_is_protected))) in
   let is_memoize =
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
-  let is_native = Hhas_attribute.is_native method_attributes in
-  let is_native_opcode_impl =
-    Hhas_attribute.is_native_opcode_impl method_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
   let is_dynamically_callable =
     ((Hhas_attribute.is_dynamically_callable method_attributes) ||

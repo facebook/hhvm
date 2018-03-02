@@ -760,7 +760,11 @@ and emit_is env pos lhs h =
             emit_is_lhs env lhs;
             instr_istypec op;
           ]
-        | None -> emit_nyi "is expression: unsupported id (T22779957)"
+        | None ->
+          gather [
+            emit_is_lhs env lhs;
+            instr_isnamed (Hhbc_id.Class.from_raw_string id);
+          ]
       end
     | A.Hoption h2 ->
       begin match lhs with

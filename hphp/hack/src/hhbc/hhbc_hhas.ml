@@ -186,6 +186,7 @@ let string_of_operator instruction =
     | CastDArray -> "CastDArray"
     | InstanceOf -> "InstanceOf"
     | InstanceOfD id -> sep ["InstanceOfD"; string_of_class_id id]
+    | IsNameD id -> sep ["IsNameD"; string_of_class_id id]
     | Print -> "Print"
     | Clone -> "Clone"
     | H.Exit -> "Exit"

@@ -266,6 +266,7 @@ type instruct_operator =
   | CastDArray
   | InstanceOf
   | InstanceOfD of class_id
+  | IsNameD of class_id
   | Print
   | Clone
   | Exit

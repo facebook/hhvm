@@ -45,6 +45,107 @@ namespace HPHP {
 
 namespace {
 
+bool createHackc(const std::string& path, const std::string& binary) {
+  if (access(path.c_str(), R_OK|X_OK) == 0) {
+    auto const fd = open(path.c_str(), O_RDONLY);
+    if (fd != -1) {
+      SCOPE_EXIT { close(fd); };
+      std::string contents;
+      if (folly::readFile(fd, contents) && contents == binary) return true;
+    }
+  }
+  try {
+    folly::writeFileAtomic(path, binary, 0755);
+  } catch (std::system_error& ex) {
+    return false;
+  }
+  return true;
+}
+
+THREAD_LOCAL(std::string, tl_extractPath);
+
+std::mutex s_extractLock;
+std::string s_extractPath;
+
+folly::Optional<std::string> hackcExtractPath() {
+  if (!RuntimeOption::EvalHackCompilerUseEmbedded) return folly::none;
+
+  auto check = [] (const std::string& s) {
+    return !s.empty() && access(s.data(), X_OK) == 0;
+  };
+  if (!tl_extractPath.isNull() && check(*tl_extractPath)) {
+    return *tl_extractPath;
+  }
+
+  std::unique_lock<std::mutex> lock{s_extractLock};
+  if (check(s_extractPath)) {
+    *tl_extractPath.getCheck() = s_extractPath;
+    return *tl_extractPath;
+  }
+
+  auto set = [&] (const std::string& s) {
+    s_extractPath = s;
+    *tl_extractPath.getCheck() = s;
+    return s;
+  };
+
+  auto const trust = RuntimeOption::EvalHackCompilerTrustExtract;
+  auto const location = RuntimeOption::EvalHackCompilerExtractPath;
+  // As an optimization we can just choose to trust the extracted version
+  // without reading it.
+  if (trust && check(location)) return set(location);
+
+  embedded_data desc;
+  if (!get_embedded_data("hackc_binary", &desc)) {
+    Logger::Error("Embedded hackc binary is missing");
+    return folly::none;
+  }
+  auto const gz_binary = read_embedded_data(desc);
+  int len = safe_cast<int>(gz_binary.size());
+
+  auto const bin_str = gzdecode(gz_binary.data(), len);
+  SCOPE_EXIT { free(bin_str); };
+  if (!bin_str || !len) {
+    Logger::Error("Embedded hackc binary could not be decompressed");
+    return folly::none;
+  }
+
+  auto const binary = std::string(bin_str, len);
+  if (createHackc(location, binary)) return set(location);
+
+  int fd = -1;
+  SCOPE_EXIT { if (fd != -1) close(fd); };
+
+  auto fallback = RuntimeOption::EvalHackCompilerFallbackPath;
+  if ((fd = mkstemp(&fallback[0])) == -1) {
+    Logger::FError(
+      "Unable to create temp file for hackc binary: {}", folly::errnoStr(errno)
+    );
+    return folly::none;
+  }
+
+  if (folly::writeFull(fd, binary.data(), binary.size()) == -1) {
+    Logger::FError(
+      "Failed to write extern hackc binary: {}", folly::errnoStr(errno)
+    );
+    return folly::none;
+  }
+
+  if (chmod(fallback.data(), 0755) != 0) {
+    Logger::Error("Unable to mark hackc binary as writable");
+    return folly::none;
+  }
+
+  return set(fallback);
+}
+
+std::string hackcCommand() {
+  if (auto path = hackcExtractPath()) {
+    return *path + " " + RuntimeOption::EvalHackCompilerArgs;
+  }
+  return RuntimeOption::EvalHackCompilerCommand;
+}
+
 struct CompileException : Exception {
   explicit CompileException(const std::string& what) : Exception(what) {}
   template<class... A>
@@ -61,7 +162,6 @@ struct CompilerOptions {
   bool verboseErrors;
   uint64_t maxRetries;
   uint64_t workers;
-  std::string command;
   bool inheritConfig;
 };
 
@@ -556,21 +656,26 @@ void ExternCompiler::start() {
   std::vector<int> wanted = {STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO};
   std::vector<std::string> env;
 
-  {
+  auto const command = hackcCommand();
+
+  if (!command.empty()) {
     UseLightDelegate useDelegate;
 
     m_pid = LightProcess::proc_open(
-      m_options.command.c_str(),
+      command.c_str(),
       created,
       wanted,
       nullptr /* cwd */,
       env
     );
+  } else {
+    Logger::Error("Unable to get external command");
+    throw BadCompilerException("Unable to get external command");
   }
 
   if (m_pid == kInvalidPid) {
     const auto msg = folly::to<std::string>(
-      "Unable to start external compiler with command: ", m_options.command);
+      "Unable to start external compiler with command: ", command.c_str());
     Logger::Error(msg);
     throw BadCompilerException(msg);
   }
@@ -625,65 +730,6 @@ void ExternCompiler::start() {
   writeConfigs();
 }
 
-bool createHackc(const std::string& path, const std::string& binary) {
-  if (access(path.c_str(), R_OK|X_OK) == 0) {
-    auto const fd = open(path.c_str(), O_RDONLY);
-    if (fd != -1) {
-      SCOPE_EXIT { close(fd); };
-      std::string contents;
-      if (folly::readFile(fd, contents) && contents == binary) return true;
-    }
-  }
-  try {
-    folly::writeFileAtomic(path, binary, 0755);
-  } catch (std::system_error& ex) {
-    return false;
-  }
-  return true;
-}
-
-std::string hackcCommand() {
-  static const std::string hackc_command = [&] () -> std::string {
-    if (!RuntimeOption::EvalHackCompilerUseEmbedded) {
-      return RuntimeOption::EvalHackCompilerCommand;
-    }
-
-    auto const loc = [&] (const std::string& s) {
-      return s + " " + RuntimeOption::EvalHackCompilerArgs;
-    };
-
-    auto const trust = RuntimeOption::EvalHackCompilerTrustExtract;
-    auto const location = RuntimeOption::HackCompilerExtractPath;
-    auto const fallback = RuntimeOption::HackCompilerExtractFallback;
-    // As an optimization we can just choose to trust the extracted version
-    // without reading it.
-    if (trust && access(location.c_str(), X_OK) == 0) return loc(location);
-    if (trust && access(fallback.c_str(), X_OK) == 0) return loc(fallback);
-
-    embedded_data desc;
-    if (!get_embedded_data("hackc_binary", &desc)) {
-      Logger::Error("Embedded hackc binary is missing");
-      return RuntimeOption::EvalHackCompilerCommand;
-    }
-    auto const gz_binary = read_embedded_data(desc);
-    int len = safe_cast<int>(gz_binary.size());
-    auto const bin_str = gzdecode(gz_binary.data(), len);
-    SCOPE_EXIT { free(bin_str); };
-    if (!bin_str || !len) {
-      Logger::Error("Embedded hackc binary could not be decompressed");
-      return RuntimeOption::EvalHackCompilerCommand;
-    }
-
-    auto const binary = std::string(bin_str, len);
-    if (createHackc(location, binary)) return loc(location);
-    if (createHackc(fallback, binary)) return loc(fallback);
-
-    Logger::Error("Failed to write extern hackc binary");
-    return RuntimeOption::EvalHackCompilerCommand;
-  }();
-  return hackc_command;
-}
-
 folly::Optional<CompilerOptions> hackcConfiguration() {
   if (hackc_mode() == HackcMode::kNever) {
     return folly::none;
@@ -693,7 +739,6 @@ folly::Optional<CompilerOptions> hackcConfiguration() {
     RuntimeOption::EvalHackCompilerVerboseErrors,
     RuntimeOption::EvalHackCompilerMaxRetries,
     RuntimeOption::EvalHackCompilerWorkers,
-    hackcCommand(),
     RuntimeOption::EvalHackCompilerInheritConfig,
   };
 }
@@ -788,10 +833,20 @@ void compilers_set_user(const std::string& username) {
 
 void compilers_shutdown() {
   s_manager.shutdown();
+  std::unique_lock<std::mutex> lock{s_extractLock};
+  if (!s_extractPath.empty() &&
+      s_extractPath != RuntimeOption::EvalHackCompilerExtractPath) {
+    unlink(s_extractPath.data());
+  }
 }
 
 void compilers_detach_after_fork() {
   s_manager.detach_after_fork();
+  std::unique_lock<std::mutex> lock{s_extractLock};
+  if (!s_extractPath.empty() &&
+      s_extractPath != RuntimeOption::EvalHackCompilerExtractPath) {
+    s_extractPath.clear();
+  }
 }
 
 CompilerResult hackc_compile(

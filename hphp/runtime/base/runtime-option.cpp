@@ -451,9 +451,6 @@ bool RuntimeOption::PHP7_DisallowUnsafeCurlUploads = false;
 
 std::map<std::string, std::string> RuntimeOption::AliasedNamespaces;
 
-std::string RuntimeOption::HackCompilerExtractPath;
-std::string RuntimeOption::HackCompilerExtractFallback;
-
 int RuntimeOption::GetScannerType() {
   int type = 0;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
@@ -499,14 +496,6 @@ static inline bool hackCompilerEnableDefault() {
 #else
   return false;
 #endif
-}
-
-static inline std::string hackCompilerExtractPathDefault() {
-  return folly::sformat("/var/run/hackc_{}", repoSchemaId());
-}
-
-static inline std::string hackCompilerExtractFallbackDefault() {
-  return folly::sformat("/tmp/hackc_{}", repoSchemaId());
 }
 
 static inline std::string hackCompilerArgsDefault() {
@@ -1196,6 +1185,14 @@ void RuntimeOption::Load(
     Config::Bind(Eval ## name, ini, config, "Eval."#name, defaultVal);
     EVALFLAGS()
 #undef F
+
+    EvalHackCompilerExtractPath = insertSchema(
+      EvalHackCompilerExtractPath.data()
+    );
+
+    EvalHackCompilerFallbackPath = insertSchema(
+      EvalHackCompilerFallbackPath.data()
+    );
 
     if (EvalPerfRelocate > 0) {
       setRelocateRequests(EvalPerfRelocate);
@@ -1940,24 +1937,6 @@ void RuntimeOption::Load(
 
     ++it;
   }
-
-  // These are here rather than in EVALFLAGS because reading from repoSchemaId
-  // before main() triggers SIOF that can leave the repo-schema and compiler-id
-  // uninitialized.
-  Config::Bind(
-    HackCompilerExtractPath,
-    ini,
-    config,
-    "HackCompilerExtractPath",
-    hackCompilerExtractPathDefault()
-  );
-  Config::Bind(
-    HackCompilerExtractFallback,
-    ini,
-    config,
-    "HackCompilerExtractFallback",
-    hackCompilerExtractFallbackDefault()
-  );
 
   Config::Bind(TzdataSearchPaths, ini, config, "TzdataSearchPaths");
 

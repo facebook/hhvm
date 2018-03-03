@@ -186,14 +186,11 @@ struct Repo : RepoProxy {
  private:
   // Magic product constant used to distinguish a .hhbc database.
   static const char* kMagicProduct;
-  static const char* kSchemaPlaceholder;
-
   static const char* kDbs[RepoIdCount];
 
   void connect();
   void disconnect();
   void initCentral();
-  std::string insertSchema(const char* path);
   RepoStatus openCentral(const char* repoPath, std::string& errorMsg);
   void initLocal();
   void attachLocal(const char* repoPath, bool isWritable);

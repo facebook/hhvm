@@ -85,5 +85,17 @@ folly::StringPiece compilerId() {
   return compiler;
 }
 
+const char* kSchemaPlaceholder = "%{schema}";
+
+std::string insertSchema(const char* path) {
+  assert(strstr(repoSchemaId().begin(), kSchemaPlaceholder) == nullptr);
+  std::string result = path;
+  size_t idx;
+  if ((idx = result.find(kSchemaPlaceholder)) != std::string::npos) {
+    result.replace(idx, strlen(kSchemaPlaceholder), repoSchemaId().begin());
+  }
+  return result;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 }

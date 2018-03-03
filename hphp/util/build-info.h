@@ -35,6 +35,11 @@ folly::StringPiece repoSchemaId();
  */
 folly::StringPiece compilerId();
 
+/*
+ * Replace %{schema} with the repo schema in path.
+ */
+std::string insertSchema(const char* path);
+
 }
 
 #endif

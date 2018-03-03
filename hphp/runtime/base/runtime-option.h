@@ -467,11 +467,6 @@ struct RuntimeOption {
   static std::string DynamicExtensionPath;
   static std::vector<std::string> DynamicExtensions;
 
-  // When using an embedded hackc, extract it to the ExtractPath or the
-  // ExtractFallback.
-  static std::string HackCompilerExtractPath;
-  static std::string HackCompilerExtractFallback;
-
   // Namespace aliases for the compiler
   static std::map<std::string, std::string> AliasedNamespaces;
 
@@ -512,6 +507,10 @@ struct RuntimeOption {
   F(bool, HackCompilerUseEmbedded,     facebook)                        \
   /* Whether to trust existing versions of the extracted compiler */    \
   F(bool, HackCompilerTrustExtract,    true)                            \
+  /* When using an embedded hackc, extract it to the ExtractPath or the
+     ExtractFallback. */                                                \
+  F(string, HackCompilerExtractPath,   "/var/run/hackc_%{schema}")      \
+  F(string, HackCompilerFallbackPath,  "/tmp/hackc_%{schema}_XXXXXX")   \
   /* Arguments to run embedded hackc binary with */                     \
   F(string, HackCompilerArgs,          hackCompilerArgsDefault())       \
   /* Whether to use hh_single_compile by default if available. */       \

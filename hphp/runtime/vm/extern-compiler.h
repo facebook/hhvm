@@ -41,7 +41,6 @@ struct BadCompilerException : Exception {
   {}
 };
 
-void compilers_init();
 void compilers_start();
 void compilers_shutdown();
 void compilers_set_user(const std::string& username);

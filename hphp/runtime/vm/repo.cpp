@@ -41,7 +41,6 @@ TRACE_SET_MOD(hhbc);
 
 const char* Repo::kMagicProduct =
   "facebook.com HipHop Virtual Machine bytecode repository";
-const char* Repo::kSchemaPlaceholder = "%{schema}";
 const char* Repo::kDbs[RepoIdCount] = { "main",   // Central.
                                         "local"}; // Local.
 Repo::GlobalData Repo::s_globalData;
@@ -661,18 +660,6 @@ static int busyHandler(void* opaque, int nCalls) {
   // spin-wait can starve other threads.
   usleep(1000 * nCalls);
   return 1; // Tell SQLite to retry.
-}
-
-std::string Repo::insertSchema(const char* path) {
-  assert(strstr(repoSchemaId().begin(), kSchemaPlaceholder) == nullptr);
-  std::string result = path;
-  size_t idx;
-  if ((idx = result.find(kSchemaPlaceholder)) != std::string::npos) {
-    result.replace(idx, strlen(kSchemaPlaceholder), repoSchemaId().begin());
-  }
-  TRACE(2, "Repo::%s() transformed %s into %s\n",
-        __func__, path, result.c_str());
-  return result;
 }
 
 namespace {

@@ -803,9 +803,12 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
                                 "cpu = '{}', tiers = '{}'",
                                 hostname, tier, cpu, tiers));
       }
-      if (matchHdfPattern(hostname, ini, hdf, "machine") &&
-          matchHdfPattern(tier, ini, hdf, "tier") &&
-          matchHdfPattern(tiers, ini, hdf, "tiers", "m") &&
+      // Check the patterns using "&" rather than "&&" so they all get
+      // evaluated; otherwise with multiple patterns, if an earlier
+      // one fails to match, the later one is reported as unused.
+      if (matchHdfPattern(hostname, ini, hdf, "machine") &
+          matchHdfPattern(tier, ini, hdf, "tier") &
+          matchHdfPattern(tiers, ini, hdf, "tiers", "m") &
           matchHdfPattern(cpu, ini, hdf, "cpu")) {
         messages.emplace_back(folly::sformat(
                                 "Matched tier: {}", hdf.getName()));

@@ -1181,24 +1181,6 @@ and emit_load_class_const env pos cexpr id =
       load_const
     ]
 
-and emit_class_expr_parts env cexpr prop =
-  let load_prop, load_prop_first =
-    match prop with
-    | _, A.Id (_, id) ->
-      instr_string id, true
-    | _, A.Lvar (_, id) ->
-      instr_string (SU.Locals.strip_dollar id), true
-    | _, A.Dollar (_, A.Lvar _ as e) ->
-      emit_expr ~need_ref:false env e, false
-      (* The outer dollar just says "class property" *)
-    | _, A.Dollar e | e ->
-      emit_expr ~need_ref:false env e, true
-
-  in
-  let load_cls_ref = emit_load_class_ref env (fst prop) cexpr in
-  if load_prop_first then load_prop, load_cls_ref
-  else load_cls_ref, load_prop
-
 and emit_class_expr env cexpr prop =
   match cexpr with
   | Class_expr ((pos, (A.BracedExpr _ |
@@ -1213,6 +1195,7 @@ and emit_class_expr env cexpr prop =
        for class case is different (PopC / UnsetL is the part of try block) *)
     let cexpr_local =
       Local.scope @@ fun () -> emit_expr ~need_ref:false env e in
+    empty,
     Local.scope @@ fun () ->
       let temp = Local.get_unnamed_local () in
       let instrs = emit_class_expr env (Class_unnamed_local temp) prop in
@@ -1223,7 +1206,7 @@ and emit_class_expr env cexpr prop =
           (* try block *)
           (gather [
             instr_popc;
-            instrs;
+            of_pair @@ instrs;
             instr_unsetl temp
           ])
           (* fault block *)
@@ -1237,15 +1220,28 @@ and emit_class_expr env cexpr prop =
         block
       ]
   | _ ->
-  let cexpr_begin, cexpr_end = emit_class_expr_parts env cexpr prop in
-  gather [cexpr_begin ; cexpr_end]
+  let load_prop, load_prop_first =
+    match prop with
+    | _, A.Id (_, id) ->
+      instr_string id, true
+    | _, A.Lvar (_, id) ->
+      instr_string (SU.Locals.strip_dollar id), true
+    | _, A.Dollar (_, A.Lvar _ as e) ->
+      emit_expr ~need_ref:false env e, false
+      (* The outer dollar just says "class property" *)
+    | _, A.Dollar e | e ->
+      emit_expr ~need_ref:false env e, true
+  in
+  let load_cls_ref = emit_load_class_ref env (fst prop) cexpr in
+  if load_prop_first then load_prop, load_cls_ref
+  else load_cls_ref, load_prop
 
 and emit_class_get env param_num_opt qop need_ref cid prop =
   let cexpr = expr_to_class_expr ~resolve_self:false
     (Emit_env.get_scope env) cid
   in
   gather [
-    emit_class_expr env cexpr prop;
+    of_pair @@ emit_class_expr env cexpr prop;
     match (param_num_opt, qop) with
     | (None, QueryOp.CGet) -> if need_ref then instr_vgets else instr_cgets
     | (None, QueryOp.CGetQuiet) -> failwith "emit_class_get: CGetQuiet"
@@ -3037,7 +3033,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
    | A.Class_get(cid, prop) ->
      let cexpr = expr_to_class_expr ~resolve_self:false
        (Emit_env.get_scope env) cid in
-     let cexpr_begin, cexpr_end = emit_class_expr_parts env cexpr prop in
+     let cexpr_begin, cexpr_end = emit_class_expr env cexpr prop in
      emit_default
        cexpr_begin
        cexpr_end
@@ -3346,7 +3342,7 @@ and emit_call_lhs env (pos, expr_ as expr) nargs has_splat inout_arg_positions =
     | _ ->
        let method_name = Hhbc_id.Method.to_raw_string method_id in
        gather [
-         emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_name));
+         of_pair @@ emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_name));
          instr_fpushclsmethod nargs []
        ]
     end
@@ -4088,7 +4084,7 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
       let final_instr =
         Emit_pos.emit_pos_then pos @@
         emit_final_static_op (snd cid) prop op in
-      emit_class_expr env cexpr prop,
+      of_pair @@ emit_class_expr env cexpr prop,
       rhs_instrs,
       final_instr
     end

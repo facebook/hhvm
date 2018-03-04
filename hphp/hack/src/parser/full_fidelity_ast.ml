@@ -422,15 +422,16 @@ let unempty_str = function
   | "''" | "\"\"" -> ""
   | s -> s
 let unesc_dbl s = unempty_str @@ Php_escaping.unescape_double s
+let get_quoted_content s =
+  let open Str in
+  if string_match (regexp "[ \t\n\r\012]*\"\\(\\(.\\|\n\\)*\\)\"") s 0
+  then matched_group 1 s
+  else s
 let unesc_xhp s =
   let whitespace = Str.regexp "[ \t\n\r\012]+" in
   Str.global_replace whitespace " " s
 let unesc_xhp_attr s =
-  let open Str in
-  unesc_dbl @@
-    if string_match (regexp "[ \t\n\r\012]*\"\\(\\(.\\|\n\\)*\\)\"") s 0
-    then matched_group 1 s
-    else s
+  unesc_dbl @@ get_quoted_content s
 
 type suspension_kind =
   | SKSync
@@ -1360,6 +1361,20 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       in
       let pEmbedded escaper node env =
         match syntax node with
+        | Token { Token.kind = TK.XHPStringLiteral; _ }
+          when env.codegen ->
+          let p = pPos node env in
+          (* for XHP string literals (attribute values) just extract
+              value from quotes and decode HTML entities  *)
+          let text =
+            Html_entities.decode @@ get_quoted_content (full_text node) in
+          p, String (p, text)
+        | Token { Token.kind = TK.XHPBody; _ }
+          when env.codegen ->
+          let p = pPos node env in
+          (* for XHP body - only decode HTML entities *)
+          let text = Html_entities.decode @@ unesc_xhp (full_text node) in
+          p, String (p, text)
         | Token _ ->
           let p = pPos node env in
           p, String (p, escaper (full_text node))

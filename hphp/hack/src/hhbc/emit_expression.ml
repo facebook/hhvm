@@ -1385,16 +1385,15 @@ and emit_xhp env p id attributes children =
   let create_spread p id = (p, "...$" ^ string_of_int(id)) in
   let convert_attr (spread_id, attrs) = function
     | A.Xhp_simple (name, v) ->
-        let attr = (A.SFlit name, Html_entities.decode_expr v) in
+        let attr = (A.SFlit name, v) in
         (spread_id, attr::attrs)
     | A.Xhp_spread e ->
         let (p, _) = e in
-        let attr = (A.SFlit (create_spread p spread_id), Html_entities.decode_expr e) in
+        let attr = (A.SFlit (create_spread p spread_id), e) in
         (spread_id + 1, attr::attrs) in
   let (_, attributes) = List.fold_left ~f:convert_attr ~init:(0, []) attributes in
   let attribute_map = p, A.Shape (List.rev attributes) in
-  let dec_children = List.map ~f:Html_entities.decode_expr children in
-  let children_vec = p, A.Varray dec_children in
+  let children_vec = p, A.Varray children in
   let filename = p, A.Id (p, "__FILE__") in
   let line = p, A.Id (p, "__LINE__") in
   let renamed_id = rename_xhp id in

@@ -331,13 +331,3 @@ let decode_entity s =
 let decode s = Str.global_substitute entity_regex (fun m ->
   decode_entity (Str.matched_string m)
 ) s
-
-let rec decode_expr (p, e) = (p, decode_expr_ e)
-
-and decode_expr_ e = match e with
-  | Ast.String (p, s) -> Ast.String (p, decode s)
-  | Ast.Xml (id, attrs, children) ->
-      let dec_attrs = List.map (Ast_utils.map_xhp_attr (fun x -> x) decode_expr) attrs in
-      let dec_children = List.map decode_expr children in
-      Ast.Xml (id, dec_attrs, dec_children)
-  | _ -> e

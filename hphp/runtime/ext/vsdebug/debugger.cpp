@@ -317,7 +317,8 @@ void Debugger::trySendTerminatedEvent() {
 void Debugger::sendStoppedEvent(
   const char* reason,
   const char* displayReason,
-  request_id_t threadId
+  request_id_t threadId,
+  bool focusedThread
 ) {
   Lock lock(m_lock);
 
@@ -338,6 +339,7 @@ void Debugger::sendStoppedEvent(
     event["threadId"] = threadId;
   }
 
+  event["threadCausedFocus"] = focusedThread;
   sendEventMessage(event, "stopped");
 }
 
@@ -452,7 +454,13 @@ void Debugger::requestInit() {
   // If the debugger was already paused when this request started, block the
   // request in its command queue until the debugger resumes.
   if (pauseRequest && requestInfo != nullptr) {
-    processCommandQueue(getCurrentThreadId(), requestInfo, "entry", nullptr);
+    processCommandQueue(
+      getCurrentThreadId(),
+      requestInfo,
+      "entry",
+      nullptr,
+      false
+    );
   }
 }
 
@@ -484,10 +492,17 @@ void Debugger::enterDebuggerIfPaused(RequestInfo* requestInfo) {
         getCurrentThreadId(),
         requestInfo,
         "step",
-        requestInfo->m_stepReason
+        requestInfo->m_stepReason,
+        true
       );
     } else {
-      processCommandQueue(getCurrentThreadId(), requestInfo, "pause", nullptr);
+      processCommandQueue(
+        getCurrentThreadId(),
+        requestInfo,
+        "pause",
+        nullptr,
+        false
+      );
     }
   }
 }
@@ -496,7 +511,8 @@ void Debugger::processCommandQueue(
   request_id_t threadId,
   RequestInfo* requestInfo,
   const char* reason,
-  const char* displayReason
+  const char* displayReason,
+  bool focusedThread
 ) {
   m_lock.assertOwnedBySelf();
 
@@ -507,7 +523,7 @@ void Debugger::processCommandQueue(
   requestInfo->m_pauseRecurseCount++;
   requestInfo->m_totalPauseCount++;
 
-  sendStoppedEvent(reason, displayReason, threadId);
+  sendStoppedEvent(reason, displayReason, threadId, focusedThread);
 
   VSDebugLogger::Log(
     VSDebugLogger::LogLevelInfo,
@@ -882,7 +898,8 @@ Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
           getCurrentThreadId(),
           requestInfo,
           "pause",
-          nullptr
+          nullptr,
+          false
         );
       } else {
         // This is true only in the case of async-break, which is not
@@ -926,7 +943,7 @@ void Debugger::pauseTarget(RequestInfo* ri, const char* stopReason) {
 
   m_state = ProgramState::Paused;
 
-  sendStoppedEvent("pause", stopReason, getCurrentThreadId());
+  sendStoppedEvent("pause", stopReason, getCurrentThreadId(), false);
 
   if (ri != nullptr) {
     clearStepOperation(ri);
@@ -1415,7 +1432,8 @@ void Debugger::onLineBreakpointHit(
       getCurrentThreadId(),
       ri,
       "breakpoint",
-      stopReason.c_str()
+      stopReason.c_str(),
+      true
     );
   } else if (ri->m_runToLocationInfo.path == filePath &&
              line == ri->m_runToLocationInfo.line) {
@@ -1447,7 +1465,8 @@ void Debugger::onLineBreakpointHit(
       getCurrentThreadId(),
       ri,
       "step",
-      stopReason.c_str()
+      stopReason.c_str(),
+      true
     );
   } else {
     // This breakpoint no longer exists. Remove it from the VM.
@@ -1511,7 +1530,8 @@ void Debugger::onExceptionBreakpointHit(
     getCurrentThreadId(),
     ri,
     "exception",
-    stopReason.c_str()
+    stopReason.c_str(),
+    true
   );
 }
 
@@ -1545,7 +1565,8 @@ bool Debugger::onHardBreak() {
     getCurrentThreadId(),
     ri,
     "breakpoint",
-    stopReason
+    stopReason,
+    true
   );
 
   // We actually need to step out here, because as far as the PC filter is

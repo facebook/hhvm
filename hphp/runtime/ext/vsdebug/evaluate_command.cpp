@@ -187,7 +187,8 @@ bool EvaluateCommand::executeImpl(
     m_debugger->sendStoppedEvent(
       "breakpoint",
       "Evaluation returned",
-      threadId
+      threadId,
+      true
     );
   }
 

@@ -206,7 +206,8 @@ struct Debugger final {
     request_id_t threadId,
     RequestInfo* requestInfo,
     const char* reason,
-    const char* displayReason
+    const char* displayReason,
+    bool focusedThread
   );
 
   // Called by the debugger transport when a new message is received from
@@ -249,7 +250,8 @@ struct Debugger final {
   void sendStoppedEvent(
     const char* reason,
     const char* displayReason,
-    request_id_t threadId
+    request_id_t threadId,
+    bool focusedThread
   );
 
   // Sends a thread continued event to the client.

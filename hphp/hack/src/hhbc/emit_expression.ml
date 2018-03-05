@@ -488,12 +488,12 @@ let parse_include e =
   else
     Hhas_symbol_refs.IncludeRootRelative (var, strip_backslash lit)
 
-let rec expr_and_new env instr_to_add_new instr_to_add = function
+let rec expr_and_new env pos instr_to_add_new instr_to_add = function
   | A.AFvalue e ->
     let add_instr =
       if expr_starts_with_ref e then instr_add_new_elemv else instr_to_add_new
     in
-    gather [emit_expr ~need_ref:false env e; add_instr]
+    gather [emit_expr ~need_ref:false env e; Emit_pos.emit_pos pos; add_instr]
   | A.AFkvalue (k, v) ->
     let add_instr =
       if expr_starts_with_ref v then instr_add_elemv else instr_to_add
@@ -1433,7 +1433,7 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
       instr (IIsset IssetG)
     ]
   | A.Array_get (base_expr, opt_elem_expr) ->
-    emit_array_get ~need_ref:false env None QueryOp.Isset base_expr opt_elem_expr
+    emit_array_get ~need_ref:false env pos None QueryOp.Isset base_expr opt_elem_expr
   | A.Class_get (cid, id)  ->
     emit_class_get env None QueryOp.Isset false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
@@ -1470,7 +1470,7 @@ and emit_call_empty_expr env outer_pos (pos, expr_ as expr) =
       instr_emptyg
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
-    emit_array_get ~need_ref:false env None QueryOp.Empty base_expr opt_elem_expr
+    emit_array_get ~need_ref:false env pos None QueryOp.Empty base_expr opt_elem_expr
   | A.Class_get (cid, id) ->
     emit_class_get env None QueryOp.Empty false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
@@ -1719,7 +1719,7 @@ and try_inline_genva_call_ env pos args uargs inline_context =
       | ((_, A.Omitted), _) :: tail -> aux lhs_acc set_acc tail
       | (lhs, rhs) :: tail ->
         let lhs_instrs, set_instrs =
-          emit_lval_op_list ~last_usage:true env (Some rhs) [] lhs in
+          emit_lval_op_list ~last_usage:true env pos (Some rhs) [] lhs in
         aux (lhs_instrs::lhs_acc) (set_instrs::set_acc) tail in
       aux [] [] (if is_ltr then values else List.rev values) in
     let reify = gather @@ Core_list.map rhs ~f:begin fun l ->
@@ -1875,7 +1875,7 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Binop (op, e1, e2) ->
     emit_box_if_necessary need_ref @@ emit_binop env expr op e1 e2
   | A.Pipe (e1, e2) ->
-    emit_box_if_necessary need_ref @@ emit_pipe env e1 e2
+    emit_box_if_necessary need_ref @@ emit_pipe env pos e1 e2
   | A.InstanceOf (e1, e2) ->
     emit_box_if_necessary need_ref @@ emit_instanceof env e1 e2
   | A.Is (e, h) ->
@@ -1891,11 +1891,12 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;
+      Emit_pos.emit_pos pos;
       instr (IGet (if need_ref then VGetG else CGetG))
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
-    emit_array_get ~need_ref env None query_op base_expr opt_elem_expr
+    emit_array_get ~need_ref env pos None query_op base_expr opt_elem_expr
   | A.Obj_get (expr, prop, nullflavor) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
     emit_obj_get ~need_ref env pos None query_op expr prop nullflavor
@@ -1988,7 +1989,8 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
 and emit_static_collection ~transform_to_collection tv =
   let transform_instr =
     match transform_to_collection with
-    | Some collection_type -> instr_colfromarray collection_type
+    | Some collection_type ->
+      instr_colfromarray collection_type
     | _ -> empty
   in
   gather [
@@ -2021,7 +2023,7 @@ and emit_value_only_collection env pos es constructor =
     | x1 :: [] -> inline x1
     | x1 :: x2 :: _ -> gather [inline x1; outofline x2]
 
-and emit_keyvalue_collection name env es constructor =
+and emit_keyvalue_collection name env pos es constructor =
   let name = SU.strip_ns name in
   let transform_instr =
     if name = "dict" || name = "array" then empty else
@@ -2034,7 +2036,8 @@ and emit_keyvalue_collection name env es constructor =
   in
   gather [
     instr (ILitConst constructor);
-    gather (List.map es ~f:(expr_and_new env add_elem_instr instr_add_elemc));
+    gather (List.map es ~f:(expr_and_new env pos add_elem_instr instr_add_elemc));
+    Emit_pos.emit_pos pos;
     transform_instr;
   ]
 
@@ -2141,7 +2144,7 @@ and emit_dynamic_collection env (pos, expr_) es =
      if is_struct_init env es true then
        emit_struct_array env pos es instr_newstructdict
      else
-       emit_keyvalue_collection "dict" env es (NewDictArray count)
+       emit_keyvalue_collection "dict" env pos es (NewDictArray count)
   | A.Collection ((_, name), _)
      when SU.strip_ns name = "Set"
       || SU.strip_ns name = "ImmSet"
@@ -2154,7 +2157,7 @@ and emit_dynamic_collection env (pos, expr_) es =
            instr_colfromarray (collection_type (SU.strip_ns name));
          ]
      else
-       emit_keyvalue_collection name env es (NewDictArray count)
+       emit_keyvalue_collection name env pos es (NewDictArray count)
 
   | A.Varray _ ->
      emit_value_only_collection env pos es
@@ -2164,7 +2167,7 @@ and emit_dynamic_collection env (pos, expr_) es =
        emit_struct_array env pos es
          (if hack_arr_dv_arrs () then instr_newstructdict else instr_newstructdarray)
      else
-       emit_keyvalue_collection "array" env es
+       emit_keyvalue_collection "array" env pos es
          (if hack_arr_dv_arrs () then (NewDictArray count) else (NewDArray count))
   | _ ->
   (* From here on, we're only dealing with PHP arrays *)
@@ -2173,9 +2176,9 @@ and emit_dynamic_collection env (pos, expr_) es =
   else if is_struct_init env es false then
     emit_struct_array env pos es instr_newstructarray
   else if is_packed_init ~hack_arr_compat:false es then
-    emit_keyvalue_collection "array" env es (NewArray count)
+    emit_keyvalue_collection "array" env pos es (NewArray count)
   else
-    emit_keyvalue_collection "array" env es (NewMixedArray count)
+    emit_keyvalue_collection "array" env pos es (NewMixedArray count)
 
 and emit_named_collection env expr pos name fields =
   let name = SU.Types.fix_casing @@ SU.strip_ns name in
@@ -2228,8 +2231,8 @@ and emit_collection ?(transform_to_collection) env expr es =
   | None ->
     emit_dynamic_collection env expr es
 
-and emit_pipe env e1 e2 =
-  stash_in_local ~always_stash:true env e1
+and emit_pipe env pos e1 e2 =
+  stash_in_local ~always_stash:true env pos e1
   begin fun temp _break_label ->
   let env = Emit_env.with_pipe_var temp env in
   emit_expr ~need_ref:false env e2
@@ -2422,6 +2425,7 @@ and emit_quiet_expr env pos (_, expr_ as expr) =
   | A.Lvar (_, name) when name = SN.Superglobals.globals ->
     gather [
       instr_string (SU.Locals.strip_dollar name);
+      Emit_pos.emit_pos pos;
       instr (IGet CGetQuietG)
     ]
   | A.Lvar ((_, name) as id) when not (is_local_this env name) ->
@@ -2435,10 +2439,11 @@ and emit_quiet_expr env pos (_, expr_ as expr) =
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;
+      Emit_pos.emit_pos pos;
       instr (IGet CGetQuietG)
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
-    emit_array_get ~need_ref:false env None QueryOp.CGetQuiet base_expr opt_elem_expr
+    emit_array_get ~need_ref:false env pos None QueryOp.CGetQuiet base_expr opt_elem_expr
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get ~need_ref:false env pos None QueryOp.CGetQuiet expr prop nullflavor
   | _ ->
@@ -2447,7 +2452,7 @@ and emit_quiet_expr env pos (_, expr_ as expr) =
 (* returns instruction that will represent setter for $base[local] where
    is_base is true when result cell is base for another subscript operator and
    false when it is final left hand side of the assignment *)
-and emit_store_for_simple_base ~is_base env elem_stack_size param_num_opt base_expr local =
+and emit_store_for_simple_base ~is_base env pos elem_stack_size param_num_opt base_expr local =
   let base_expr_instrs_begin,
       base_expr_instrs_end,
       base_setup_instrs,
@@ -2460,6 +2465,7 @@ and emit_store_for_simple_base ~is_base env elem_stack_size param_num_opt base_e
   gather [
     base_expr_instrs_begin;
     base_expr_instrs_end;
+    Emit_pos.emit_pos pos;
     base_setup_instrs;
     expr;
   ]
@@ -2497,17 +2503,17 @@ and is_trivial env (_, e) =
  *)
 
 and emit_array_get ?(no_final=false) ?mode ~need_ref
-  env param_num_hint_opt qop base_expr opt_elem_expr =
+  env outer_pos param_num_hint_opt qop base_expr opt_elem_expr =
   let result =
     emit_array_get_worker ~no_final ?mode ~need_ref ~inout_param_info:None
-    env param_num_hint_opt qop base_expr opt_elem_expr in
+    env outer_pos param_num_hint_opt qop base_expr opt_elem_expr in
   match result with
   | Array_get_regular i -> i
   | Array_get_inout _ -> failwith "unexpected inout"
 
 and emit_array_get_worker ?(no_final=false) ?mode
   ~need_ref ~inout_param_info
-  env param_num_hint_opt qop base_expr opt_elem_expr =
+  env outer_pos param_num_hint_opt qop base_expr opt_elem_expr =
   (* Disallow use of array(..)[] *)
   match base_expr, opt_elem_expr with
   | (pos, A.Array _), None ->
@@ -2546,6 +2552,7 @@ and emit_array_get_worker ?(no_final=false) ?mode
       base.instrs_begin;
       elem_expr_instrs;
       base.instrs_end;
+      Emit_pos.emit_pos outer_pos;
       base.setup_instrs;
       make_final param_num_hint_opt (base.stack_size + elem_stack_size);
     ])
@@ -2562,12 +2569,13 @@ and emit_array_get_worker ?(no_final=false) ?mode
         (* finish loading the value *)
         gather [
           base.instrs_end;
+          Emit_pos.emit_pos outer_pos;
           base.setup_instrs;
           make_final None (base.stack_size + elem_stack_size);
         ], None
       ] in
     let store =
-      emit_store_for_simple_base ~is_base:false env elem_stack_size
+      emit_store_for_simple_base ~is_base:false env outer_pos elem_stack_size
       param_num_opt base_expr local in
     Array_get_inout { load; store }
 
@@ -2578,6 +2586,7 @@ and emit_array_get_worker ?(no_final=false) ?mode
       gather [
         elem_expr_instrs;
         base.load.instrs_end;
+        Emit_pos.emit_pos outer_pos;
         base.load.setup_instrs;
         make_final None (base.load.stack_size + elem_stack_size);
       ], None
@@ -2599,6 +2608,7 @@ and emit_array_get_worker ?(no_final=false) ?mode
       elem_expr_instrs, Some (local, local_kind);
       gather [
         base.load.instrs_end;
+        Emit_pos.emit_pos outer_pos;
         base.load.setup_instrs;
         make_final None (base.load.stack_size + elem_stack_size);
       ], None
@@ -2911,7 +2921,6 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
      let make_setup_instrs base_setup_instrs =
        gather [
          base_setup_instrs;
-         Emit_pos.emit_pos pos;
          instr (IBase (
            match param_num_opt with
            | None -> Dim (mode, mk)
@@ -2943,7 +2952,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
            instrs_end = base.instrs_end;
            setup_instrs = make_setup_instrs base.setup_instrs;
            stack_size = base.stack_size + elem_stack_size };
-         store = emit_store_for_simple_base ~is_base:true env elem_stack_size
+         store = emit_store_for_simple_base ~is_base:true env pos elem_stack_size
                  param_num_opt base_expr local
        }
      | Array_get_base_inout base, None ->
@@ -3013,7 +3022,6 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
          base_expr_instrs_end
          (gather [
            base_setup_instrs;
-           Emit_pos.emit_pos pos;
            final_instr
          ])
          total_stack_size
@@ -3150,13 +3158,13 @@ and emit_args_and_call env call_pos args uargs =
 
     | expr :: rest ->
       let next c = gather [ c; aux (i + 1) rest inout_setters ] in
-      let is_inout, (pos, _ as expr) =
+      let is_inout, expr =
         match snd expr with
         | A.Callconv (A.Pinout, e) -> true, e
         | _ -> false, expr
       in
       let hint = get_pass_by_ref_hint expr in
-      let _, expr_ = strip_ref expr in
+      let pos, expr_ = strip_ref expr in
       if i >= args_count then
         next @@ default_emit i expr hint
       else
@@ -3203,7 +3211,7 @@ and emit_args_and_call env call_pos args uargs =
         then begin
           let array_get_result =
             emit_array_get_worker ~need_ref:false
-              ~inout_param_info:(Some (i, aliases)) env (Some (i, hint))
+              ~inout_param_info:(Some (i, aliases)) env pos (Some (i, hint))
               QueryOp.InOut base_expr opt_elem_expr in
           match array_get_result with
           | Array_get_regular instrs ->
@@ -3211,7 +3219,7 @@ and emit_args_and_call env call_pos args uargs =
               let base =
                 emit_array_get ~no_final:true ~need_ref:false
                   ~mode:MemberOpMode.Define
-                  env None QueryOp.InOut base_expr opt_elem_expr in
+                  env pos None QueryOp.InOut base_expr opt_elem_expr in
               gather [
                 base;
                 instr_setm 0 (get_elem_member_key env 0 opt_elem_expr);
@@ -3232,7 +3240,7 @@ and emit_args_and_call env call_pos args uargs =
           next @@ emit_array_get
             ~need_ref:false
             { env with Emit_env.env_allows_array_append = true }
-            (Some (i, hint))
+            pos (Some (i, hint))
           QueryOp.CGet base_expr opt_elem_expr
 
       | A.Obj_get (e1, e2, nullflavor) ->
@@ -3244,7 +3252,7 @@ and emit_args_and_call env call_pos args uargs =
       | A.Binop (A.Eq None, (_, A.List _ as e), (_, A.Lvar id)) ->
         let local = get_local env id in
         let lhs_instrs, set_instrs =
-          emit_lval_op_list env (Some local) [] e in
+          emit_lval_op_list env pos (Some local) [] e in
         next @@ gather [
           lhs_instrs;
           set_instrs;
@@ -3675,29 +3683,29 @@ and emit_final_member_op stack_index op mk =
   | LValOp.IncDec op -> instr (IFinal (IncDecM (stack_index, op, mk)))
   | LValOp.Unset -> instr (IFinal (UnsetM (stack_index, mk)))
 
-and emit_final_local_op op lid =
+and emit_final_local_op pos op lid =
   match op with
-  | LValOp.Set -> instr (IMutator (SetL lid))
+  | LValOp.Set -> Emit_pos.emit_pos_then pos @@ instr (IMutator (SetL lid))
   | LValOp.SetRef -> instr (IMutator (BindL lid))
   | LValOp.SetOp op -> instr (IMutator (SetOpL (lid, op)))
   | LValOp.IncDec op -> instr (IMutator (IncDecL (lid, op)))
-  | LValOp.Unset -> instr (IMutator (UnsetL lid))
+  | LValOp.Unset -> Emit_pos.emit_pos_then pos @@ instr (IMutator (UnsetL lid))
 
-and emit_final_named_local_op op =
+and emit_final_named_local_op pos op =
   match op with
-  | LValOp.Set -> instr (IMutator SetN)
+  | LValOp.Set -> Emit_pos.emit_pos_then pos @@ instr (IMutator SetN)
   | LValOp.SetRef -> instr (IMutator BindN)
   | LValOp.SetOp op -> instr (IMutator (SetOpN op))
   | LValOp.IncDec op -> instr (IMutator (IncDecN op))
   | LValOp.Unset -> instr (IMutator UnsetN)
 
-and emit_final_global_op op =
+and emit_final_global_op pos op =
   match op with
-  | LValOp.Set -> instr (IMutator SetG)
+  | LValOp.Set -> Emit_pos.emit_pos_then pos @@ instr (IMutator SetG)
   | LValOp.SetRef -> instr (IMutator BindG)
   | LValOp.SetOp op -> instr (IMutator (SetOpG op))
   | LValOp.IncDec op -> instr (IMutator (IncDecG op))
-  | LValOp.Unset -> instr (IMutator UnsetG)
+  | LValOp.Unset -> Emit_pos.emit_pos_then pos @@ instr (IMutator UnsetG)
 
 and emit_final_static_op cid prop op =
   match op with
@@ -3781,7 +3789,7 @@ and can_use_as_rhs_in_list_assignment expr =
  * list($a[$f()]) = b();
  * here f() should be invoked before b()
  *)
-and emit_lval_op_list ?(last_usage=false) env local indices expr =
+and emit_lval_op_list ?(last_usage=false) env outer_pos local indices expr =
   let is_ltr = php7_ltr_assign () in
   match snd expr with
   | A.List exprs ->
@@ -3806,7 +3814,7 @@ and emit_lval_op_list ?(last_usage=false) env local indices expr =
     let lhs_instrs, set_instrs =
       List.mapi exprs (fun i expr ->
         emit_lval_op_list ~last_usage:(Some i = last_non_omitted)
-          env local (i::indices) expr)
+          env outer_pos local (i::indices) expr)
       |> List.unzip in
     gather lhs_instrs,
     gather (if not is_ltr then List.rev set_instrs else set_instrs)
@@ -3824,7 +3832,7 @@ and emit_lval_op_list ?(last_usage=false) env local indices expr =
     (* Generate code to assign to the lvalue *)
     (* Return pair: side effects to initialize lhs + assignment *)
     let lhs_instrs, rhs_instrs, set_op =
-      emit_lval_op_nonlist_steps env LValOp.Set expr access_instrs 1 in
+      emit_lval_op_nonlist_steps env outer_pos LValOp.Set expr access_instrs 1 in
     let lhs = if is_ltr then empty else lhs_instrs in
     let rest =
       gather [
@@ -3874,7 +3882,7 @@ and emit_lval_op env pos op expr1 opt_expr2 =
       in
       if has_elements then
         stash_in_local_with_prefix
-          ~always_stash:(php7_ltr_assign ()) ~leave_on_stack:true env expr2
+          ~always_stash:(php7_ltr_assign ()) ~leave_on_stack:true env pos expr2
         begin fun local _break_label ->
           let local =
             if can_use_as_rhs_in_list_assignment (snd expr2) then
@@ -3882,7 +3890,7 @@ and emit_lval_op env pos op expr1 opt_expr2 =
             else
               None
           in
-          emit_lval_op_list env local [] expr1
+          emit_lval_op_list env pos local [] expr1
         end
       else
         Local.scope @@ fun () ->
@@ -3917,16 +3925,15 @@ and emit_lval_op env pos op expr1 opt_expr2 =
 
 and emit_lval_op_nonlist env pos op e rhs_instrs rhs_stack_size =
   let (lhs, rhs, setop) =
-    emit_lval_op_nonlist_steps env op e rhs_instrs rhs_stack_size
+    emit_lval_op_nonlist_steps env pos op e rhs_instrs rhs_stack_size
   in
   gather [
     lhs;
     rhs;
-    Emit_pos.emit_pos pos;
     setop;
   ]
 
-and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
+and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stack_size =
   let env =
   match op with
   (* Unbelieveably, $test[] += 5; is legal in PHP, but $test[] = $test[] + 5 is not *)
@@ -3961,7 +3968,7 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
   | A.Lvar (_, id) when SN.Superglobals.is_superglobal id ->
     instr_string @@ SU.Locals.strip_dollar id,
     rhs_instrs,
-    emit_final_global_op op
+    emit_final_global_op outer_pos op
 
   | A.Lvar ((_, str) as id) when is_local_this env str && is_incdec op ->
     emit_local ~notice:Notice ~need_ref:false env id,
@@ -3971,13 +3978,13 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
   | A.Lvar id when not (is_local_this env (snd id)) || op = LValOp.Unset ->
     empty,
     rhs_instrs,
-    emit_final_local_op op (get_local env id)
+    emit_final_local_op outer_pos op (get_local env id)
 
   | A.Dollar e ->
-    handle_dollar e emit_final_named_local_op
+    handle_dollar e (emit_final_named_local_op pos)
 
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
-    let final_global_op_instrs = emit_final_global_op op in
+    let final_global_op_instrs = emit_final_global_op pos op in
     if rhs_stack_size = 0
     then
       emit_expr ~need_ref:false env e,
@@ -4026,6 +4033,7 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
     ],
     rhs_instrs,
     gather [
+      Emit_pos.emit_pos pos;
       base_setup_instrs;
       final_instr
     ]
@@ -4194,7 +4202,7 @@ and with_temp_local_with_prefix temp f =
    creates a block of code can yield a prefix instrution
   that will be executed as the first instruction in the result instruction set *)
 and stash_in_local_with_prefix ?(always_stash=false) ?(leave_on_stack=false)
-                   ?(always_stash_this=false) env e f =
+                   ?(always_stash_this=false) env pos e f =
   match e with
   | (_, A.Lvar id) when not always_stash
     && not (is_local_this env (snd id) &&
@@ -4222,6 +4230,7 @@ and stash_in_local_with_prefix ?(always_stash=false) ?(leave_on_stack=false)
         instr_setl temp;
         instr_popc;
         result_instr;
+        Emit_pos.emit_pos pos;
         if leave_on_stack then instr_pushl temp else instr_unsetl temp
       ]
 (* Generate code to evaluate `e`, and, if necessary, store its value in a
@@ -4234,6 +4243,6 @@ and stash_in_local_with_prefix ?(always_stash=false) ?(leave_on_stack=false)
  *    push `temp` on stack if `leave_on_stack` is true.
  *)
 and stash_in_local ?(always_stash=false) ?(leave_on_stack=false)
-                   ?(always_stash_this=false) env e f =
+                   ?(always_stash_this=false) env pos e f =
   stash_in_local_with_prefix ~always_stash ~leave_on_stack ~always_stash_this
-    env e (fun temp label -> empty, f temp label)
+    env pos e (fun temp label -> empty, f temp label)

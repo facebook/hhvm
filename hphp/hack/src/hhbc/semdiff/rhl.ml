@@ -930,6 +930,11 @@ let equiv prog prog' startlabelpairs =
         check (succ pc) (succ pc') asn
           (add_assumption (pc,pc') asn assumed) newtodo in
 
+    let nextleftins () =
+      let newtodo = exceptional_todo () in
+        check (succ pc) pc' asn
+          (add_assumption (pc,pc') asn assumed) newtodo in
+
     (* Check the next instruction; the assertion has changed.
        We assume it's not had its stepcount incremented yet
        so do that here. *)
@@ -1102,6 +1107,9 @@ let equiv prog prog' startlabelpairs =
       if loc.line_begin = loc'.line_begin && loc.line_end = loc'.line_end
       then nextins ()
       else try_specials ()
+    | ISrcLoc _, IBasic PopC ->
+      nextleftins ()
+
     (* Iterator instructions have multiple exit points, so have to add to
       todos as well as looking at next instruction.
       TODO: exceptional exits from here.

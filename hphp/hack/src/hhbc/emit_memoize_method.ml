@@ -361,6 +361,7 @@ let make_wrapper env return_type params instrs =
 
 let emit ~pos ~non_null_return env info index return_type_info params is_static method_id =
   let instrs =
+    Emit_pos.emit_pos_then pos @@
     if is_static
     then make_memoize_static_method_code ~pos ~non_null_return env info method_id params
     else make_memoize_instance_method_code ~pos ~non_null_return env info index method_id params

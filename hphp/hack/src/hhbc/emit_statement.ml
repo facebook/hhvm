@@ -175,7 +175,7 @@ let rec emit_stmt env (pos, st_) =
           with_temp_local temp
           begin fun temp _ ->
             let prefix, block =
-              emit_lval_op_list env (Some temp) [] e1 in
+              emit_lval_op_list env pos (Some temp) [] e1 in
               gather [
                 prefix;
                 block
@@ -201,7 +201,7 @@ let rec emit_stmt env (pos, st_) =
       let temp = Local.get_unnamed_local () in
       let rhs_instrs = instr_pushl temp in
       let (lhs, rhs, setop) =
-        emit_lval_op_nonlist_steps env LValOp.Set e_lhs rhs_instrs 1 in
+        emit_lval_op_nonlist_steps env pos LValOp.Set e_lhs rhs_instrs 1 in
       gather [
         result;
         instr_setl temp;
@@ -258,7 +258,7 @@ let rec emit_stmt env (pos, st_) =
       Ast.us_expr = e; Ast.us_block = b;
       Ast.us_is_block_scoped = is_block_scoped
     } ->
-    emit_using env pos is_block_scoped has_await e (pos, A.Block b)
+    emit_using env pos is_block_scoped has_await e (block_pos b, A.Block b)
   | A.Break level_opt ->
     emit_break env pos (get_level pos "break" level_opt)
   | A.Continue level_opt ->
@@ -449,6 +449,7 @@ and emit_using env pos is_block_scoped has_await e b =
       | A.Lvar (_, id) ->
         Local.Named id, gather [
           emit_expr_and_unbox_if_necessary ~need_ref:false env e;
+          Emit_pos.emit_pos (fst b);
           instr_popc;
         ]
       | _ ->
@@ -494,6 +495,7 @@ and emit_using env pos is_block_scoped has_await e b =
         instr_unsetl (Local.get_label_id_local ());
         instr_unsetl (Local.get_retval_local ()) ] in
     let fault = gather [
+      Emit_pos.emit_pos (fst b);
       cleanup_local;
       finally;
       Emit_pos.emit_pos pos;
@@ -570,7 +572,7 @@ and emit_switch env pos scrutinee_expr cl =
   if List.is_empty cl
   then emit_ignored_expr env scrutinee_expr
   else
-  stash_in_local env scrutinee_expr
+  stash_in_local env pos scrutinee_expr
   begin fun local break_label ->
   (* If there is no default clause, add an empty one at the end *)
   let is_default c = match c with A.Default _ -> true | _ -> false in
@@ -606,7 +608,7 @@ and emit_switch env pos scrutinee_expr cl =
             (* Special case for simple scrutinee *)
             match scrutinee_expr with
             | _, A.Lvar _ ->
-              let eq_expr = Pos.none, A.Binop (A.Eqeq, scrutinee_expr, e) in
+              let eq_expr = pos, A.Binop (A.Eqeq, scrutinee_expr, e) in
               gather [
                 emit_expr ~need_ref:false env eq_expr;
                 instr_jmpnz l
@@ -625,6 +627,8 @@ and emit_switch env pos scrutinee_expr cl =
     bodies;
   ]
   end
+
+and block_pos b = Pos.btw (fst (List.hd_exn b)) (fst (List.last_exn b))
 
 and emit_catch env pos end_label (catch_type, (_, catch_local), b) =
     (* Note that this is a "regular" label; we're not going to branch to
@@ -777,6 +781,7 @@ and emit_try_finally_ env pos try_block finally_block =
   gather [
     instr_try_fault fault_label try_body fault_body;
     instr_label finally_start;
+    Emit_pos.emit_pos (fst finally_block);
     finally_body;
     finally_epilogue;
     instr_label finally_end;
@@ -898,7 +903,7 @@ and emit_iterator_key_value_storage env iterator =
  * value) that is prepended onto the indices needed for list destructuring
  *)
 and emit_foreach_await_lvalue_storage env expr1 indices local =
-  let instrs1, instrs2 = emit_lval_op_list env (Some local) indices expr1 in
+  let instrs1, instrs2 = emit_lval_op_list env (fst expr1) (Some local) indices expr1 in
     gather [
       instrs1;
       instrs2;
@@ -948,11 +953,11 @@ and emit_iterator_lvalue_storage env v local =
     ]
     in
     preamble, load_values
-  | x ->
+  | pos, x ->
     match x with
-    | _, A.Unop (A.Uref, e) ->
+    | A.Unop (A.Uref, e) ->
       let (lhs, rhs, set_op) =
-        emit_lval_op_nonlist_steps env LValOp.SetRef e (instr_vgetl local) 1
+        emit_lval_op_nonlist_steps env pos LValOp.SetRef e (instr_vgetl local) 1
       in
       [lhs], [
         rhs;
@@ -960,9 +965,9 @@ and emit_iterator_lvalue_storage env v local =
         instr_popv;
         instr_unsetl local
       ]
-    | x ->
+    | _ ->
       let (lhs, rhs, set_op) =
-        emit_lval_op_nonlist_steps env LValOp.Set x (instr_cgetl local) 1
+        emit_lval_op_nonlist_steps env pos LValOp.Set v (instr_cgetl local) 1
       in
       [lhs], [
         rhs;

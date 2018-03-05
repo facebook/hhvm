@@ -121,6 +121,7 @@ let make_memoize_function_with_params_code
 
 let make_memoize_function_code
   ~pos ~non_null_return ~deprecation_info env params renamed_method_id =
+  Emit_pos.emit_pos_then pos @@
   if List.is_empty params
   then make_memoize_function_no_params_code
         ~non_null_return ~deprecation_info env renamed_method_id

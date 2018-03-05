@@ -34,3 +34,9 @@ val hint_to_class :
   namespace: Namespace_env.env ->
   Ast.hint ->
   Hhbc_id.Class.t
+
+val emit_type_constraint_for_native_function :
+  string list ->
+  Ast.hint option ->
+  Hhas_type_info.t ->
+  Hhas_type_info.t

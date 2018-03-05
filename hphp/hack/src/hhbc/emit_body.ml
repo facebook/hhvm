@@ -341,6 +341,10 @@ let emit_body
   Iterator.reset_iterator ();
   let return_type_info =
     emit_return_type_info ~scope ~skipawaitable ~namespace ret in
+  let return_type_info = if not is_native then return_type_info else
+    Emit_type_hint.emit_type_constraint_for_native_function
+      tparams ret return_type_info
+  in
   let is_generator, is_pair_generator = Generator.is_function_generator body in
   let verify_return =
     return_type_info.Hhas_type_info.type_info_user_type <> Some "" &&

@@ -26,6 +26,8 @@ let strip_ns s =
   Str.replace_first (Str.regexp {|.*\\|}) "" s
 let has_ns s =
   Str.string_match (Str.regexp {|.+\\.+|}) s 0
+let strip_type_list s =
+  Str.global_replace (Str.regexp {|<.*>|}) "" s
 
 let cmp ?(case_sensitive=true) ?(ignore_ns=false) s1 s2 =
   let s1, s2 =

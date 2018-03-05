@@ -300,3 +300,31 @@ let hint_to_class ~namespace h =
     let fq_id, _ = Hhbc_id.Class.elaborate_id namespace id in
     fq_id
   | _ -> Hhbc_id.Class.from_raw_string "__type_is_not_class__"
+
+let emit_type_constraint_for_native_function tparams ret ti =
+  let user_type = Hhas_type_info.user_type ti in
+  let name, flags = match user_type, ret with
+    | _ , None
+    | None, _ -> Some "HH\\void", [TC.HHType; TC.ExtendedHint]
+    | Some t, _ when t = "HH\\mixed" || t = "callable" -> None, []
+    | Some t, Some ret ->
+      let strip_nullable n = String_utils.lstrip n "?" in
+      let strip_soft n = String_utils.lstrip n "@" in
+      let vanilla_name n = Hhbc_string_utils.strip_type_list n in
+      let name =
+        (* Strip twice since we don't know which one is coming first *)
+        Some (vanilla_name @@ strip_nullable @@ strip_soft @@ strip_nullable t)
+      in
+      let flags = [TC.HHType; TC.ExtendedHint] in
+      let flags = match snd ret with
+        | A.Hoption _ -> TC.Nullable :: flags
+        | A.Hsoft _ -> TC.Soft :: flags
+        | A.Haccess _ -> TC.TypeConstant :: flags
+        | A.Happly ((_, name), _) when List.mem tparams name ->
+          TC.TypeVar :: flags
+        | _ -> flags
+      in
+      name, flags
+  in
+  let tc = Hhas_type_constraint.make name flags in
+  Hhas_type_info.make user_type tc

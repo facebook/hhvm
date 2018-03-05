@@ -99,11 +99,11 @@ module WithStatementAndDeclAndTypeParser
     let parser = { parser with env; lexer; errors; context; sc_state } in
     (parser, node)
 
-  let parse_generic_type_arguments_opt parser =
+  let parse_generic_type_arguments parser =
     with_type_parser parser
       (fun p ->
         let (p, items, no_arg_is_missing) =
-          TypeParser.parse_generic_type_argument_list_opt p
+          TypeParser.parse_generic_type_argument_list p
         in
         (p, (items, no_arg_is_missing))
       )
@@ -750,11 +750,9 @@ module WithStatementAndDeclAndTypeParser
   and parse_remaining_expression_or_specified_function_call parser term
       prefix_kind =
     let (parser1, (type_arguments, no_arg_is_missing)) =
-      parse_generic_type_arguments_opt parser
+      parse_generic_type_arguments parser
     in
-    if no_arg_is_missing
-    && SC.is_type_arguments type_arguments
-    && parser.errors = parser1.errors
+    if no_arg_is_missing && parser.errors = parser1.errors
     then
       let parser, result =
         begin match peek_token_kind parser1 with
@@ -1102,11 +1100,9 @@ module WithStatementAndDeclAndTypeParser
       | LeftParen -> Make.token parser1 token
       | LessThan ->
         let (parser1, (type_arguments, no_arg_is_missing)) =
-          parse_generic_type_arguments_opt parser1
+          parse_generic_type_arguments parser1
         in
-        if no_arg_is_missing
-        && SC.is_type_arguments type_arguments
-        && parser.errors = parser1.errors
+        if no_arg_is_missing && parser.errors = parser1.errors
         then
           let (parser, token) = Make.token parser1 token in
           let (parser, type_specifier) =
@@ -1999,10 +1995,9 @@ module WithStatementAndDeclAndTypeParser
       parse_collection_literal_expression parser name
     | LessThan ->
       let (parser1, (type_arguments, no_arg_is_missing)) =
-        parse_generic_type_arguments_opt parser
+        parse_generic_type_arguments parser
       in
       if no_arg_is_missing
-      && SC.is_type_arguments type_arguments
       && parser.errors = parser1.errors
       && peek_token_kind parser1 = LeftBrace
       then

@@ -175,14 +175,12 @@ and parse_possible_generic_specifier_or_type_const parser =
   parse_remaining_possible_generic_specifier_or_type_const parser name
 
 and parse_remaining_possible_generic_specifier_or_type_const parser name =
-  let (parser, arguments, _) = parse_generic_type_argument_list_opt parser in
-  if SC.is_missing arguments then
-    let token = peek_token parser in
-    match Token.kind token with
-    | ColonColon -> parse_remaining_type_constant parser name
-    | _ -> Make.simple_type_specifier parser name
-  else
+  match Token.kind (peek_token parser) with
+  | LessThan ->
+    let (parser, arguments, _) = parse_generic_type_argument_list parser in
     Make.generic_type_specifier parser name arguments
+  | ColonColon -> parse_remaining_type_constant parser name
+  | _ -> Make.simple_type_specifier parser name
 
 (* SPEC
   class-interface-trait-specifier:
@@ -190,11 +188,11 @@ and parse_remaining_possible_generic_specifier_or_type_const parser name =
 *)
 and parse_possible_generic_specifier parser =
   let (parser, name) = next_xhp_class_name_or_other parser in
-  let (parser, arguments, _) = parse_generic_type_argument_list_opt parser in
-  if SC.is_missing arguments then
-    Make.simple_type_specifier parser name
-  else
+  match Token.kind (peek_token parser) with
+  | LessThan ->
+    let (parser, arguments, _) = parse_generic_type_argument_list parser in
     Make.generic_type_specifier parser name arguments
+  | _ -> Make.simple_type_specifier parser name
 
 (* SPEC
     generic-type-constraint-list:
@@ -273,14 +271,6 @@ and parse_generic_parameter_list_opt parser =
   match peek_token_kind parser with
   | LessThan -> parse_generic_type_parameter_list parser
   | _ -> Make.missing parser (pos parser)
-
-and parse_generic_type_argument_list_opt parser =
-  let token = peek_token parser in
-  if (Token.kind token) = LessThan then
-    parse_generic_type_argument_list parser
-  else
-    let (parser, missing) = Make.missing parser (pos parser) in
-    (parser, missing, false)
 
 and parse_type_list parser close_kind =
   (* SPEC:

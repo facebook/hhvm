@@ -2413,7 +2413,9 @@ module WithStatementAndDeclAndTypeParser
     Make.braced_expression parser left_brace expression right_brace
 
   and require_right_brace_xhp parser =
-    let (parser1, token) = next_xhp_body_token parser in
+    (* do not consume trailing trivia for the right brace
+       it should be accounted as XHP text *)
+    let (parser1, token) = next_token_no_trailing parser in
     if (Token.kind token) = TokenKind.RightBrace then
       Make.token parser1 token
     else

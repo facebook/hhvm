@@ -444,10 +444,14 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
   // Steady state, its probably already in the cache. Try that first
   {
     NonRepoUnitCache::const_accessor acc;
-    if (s_nonRepoUnitCache.find(acc, requestedPath)) {
-      if (!isChanged(acc->second, statInfo)) {
+    if (s_nonRepoUnitCache.find(acc, requestedPath) &&
+        !isChanged(acc->second, statInfo)) {
+      auto const cu = acc->second.cachedUnit->cu;
+      if (!cu.unit || !RuntimeOption::CheckSymLink ||
+          !strcmp(StatCache::realpath(requestedPath->data()).c_str(),
+                  cu.unit->filepath()->data())) {
         if (ent) ent->setStr("type", "cache_hit_readlock");
-        return acc->second.cachedUnit->cu;
+        return cu;
       }
     }
   }

@@ -424,10 +424,6 @@ inline const StringData* Func::memoizeImplName() const {
   return genMemoizeImplName(name());
 }
 
-inline bool Func::isDynamicallyCallable() const {
-  return shared()->m_dynamicallyCallable;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Builtins.
 
@@ -576,6 +572,18 @@ inline bool Func::isFoldable() const {
 
 inline bool Func::isParamCoerceMode() const {
   return attrs() & (AttrParamCoerceModeFalse | AttrParamCoerceModeNull);
+}
+
+inline bool Func::isDynamicallyCallable() const {
+  return m_attrs & AttrDynamicallyCallable;
+}
+
+inline bool Func::isHot() const {
+  return m_hot;
+}
+
+inline void Func::setHot() {
+  m_hot = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

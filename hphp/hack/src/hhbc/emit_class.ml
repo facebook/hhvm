@@ -59,19 +59,18 @@ let make_86method
   let method_is_pair_generator = false in
   let method_is_closure_body = false in
   let method_is_memoize_wrapper = false in
-  let method_is_dynamically_callable = false in
   let method_no_injection = true in
   let method_inout_wrapper = false in
   let method_static_inits = [] in
   let method_doc_comment = None in
   let method_is_return_by_ref = false in
   let method_is_interceptable = false in
+  let method_is_memoize_impl = false in
   let method_env = None in
   let method_body = Emit_body.make_body
     instrs
     method_decl_vars
     method_is_memoize_wrapper
-    method_is_dynamically_callable
     params
     method_return_type
     method_static_inits
@@ -96,6 +95,7 @@ let make_86method
     method_is_closure_body
     method_is_return_by_ref
     method_is_interceptable
+    method_is_memoize_impl
 
 let from_extends ~namespace ~is_enum _tparams extends =
   if is_enum

@@ -1847,11 +1847,6 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
         as.in.expectWs(';');
         continue;
       }
-      if (word == ".dynamicallycallable") {
-        as.fe->dynamicallyCallable = true;
-        as.in.expectWs(';');
-        continue;
-      }
       if (word == ".numiters")  { parse_numiters(as); continue; }
       if (word == ".declvars")  { parse_declvars(as); continue; }
       if (word == ".numclsrefslots") { parse_numclsrefslots(as); continue; }

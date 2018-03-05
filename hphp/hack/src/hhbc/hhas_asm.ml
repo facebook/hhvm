@@ -15,7 +15,6 @@ type t = {
   asm_num_iters         : int;
   asm_num_cls_ref_slots : int;
   asm_is_memoize_wrapper: bool;
-  asm_is_dynamically_callable : bool;
   asm_static_inits      : string list;
 }
 
@@ -25,7 +24,6 @@ let make
   num_iters
   num_cls_ref_slots
   is_memoize_wrapper
-  is_dynamically_callable
   static_inits =
   {
     asm_instrs = instrs;
@@ -33,7 +31,6 @@ let make
     asm_num_iters = num_iters;
     asm_num_cls_ref_slots = num_cls_ref_slots;
     asm_is_memoize_wrapper = is_memoize_wrapper;
-    asm_is_dynamically_callable = is_dynamically_callable;
     asm_static_inits = static_inits;
   }
 
@@ -42,5 +39,4 @@ let decl_vars a = a.asm_decl_vars
 let num_iters a = a.asm_num_iters
 let num_cls_ref_slots a = a.asm_num_cls_ref_slots
 let is_memoize_wrapper a = a.asm_is_memoize_wrapper
-let is_dynamically_callable a = a.asm_is_dynamically_callable
 let static_inits a = a.asm_static_inits

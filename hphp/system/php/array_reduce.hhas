@@ -1,5 +1,4 @@
-.function [skip_frame] array_reduce($input = no_args, $func = one_arg, $res = two_args, $extra = got_args) {
-          .dynamicallycallable;
+.function [skip_frame dyn_callable] array_reduce($input = no_args, $func = one_arg, $res = two_args, $extra = got_args) {
           .numiters 2;
 
 # If we get here, a value was supplied for $extra

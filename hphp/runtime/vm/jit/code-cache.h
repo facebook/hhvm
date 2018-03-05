@@ -27,8 +27,8 @@ namespace HPHP { namespace jit {
 /*
  * CodeCache contains our Translation Cache, which is partitioned into 5
  * sections:
- *   - hot: Hot code from AttrHot Funcs.
- *   - main: Hot code from non-AttrHot Funcs.
+ *   - hot: Hot code from optimized translations.
+ *   - main: Cold code from optimized translations, hot cold from other.
  *   - cold: Cold code from all Funcs.
  *   - frozen: Code that is almost never used, and cold code from profiling
        translations.

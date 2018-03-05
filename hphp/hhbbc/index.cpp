@@ -840,14 +840,14 @@ bool Func::mightCareAboutDynCalls() const {
       [&](FuncName) { return true; },
       [&](MethodName) { return true; },
       [&](borrowed_ptr<FuncInfo> fi) {
-        return !fi->func->dynamicallyCallable;
+        return !(fi->func->attrs & AttrDynamicallyCallable);
       },
       [&](borrowed_ptr<const MethTabEntryPair> mte) {
-        return !mte->second.func->dynamicallyCallable;
+        return !(mte->second.func->attrs & AttrDynamicallyCallable);
       },
       [&](borrowed_ptr<FuncFamily> fa) {
         for (auto const pf : fa->possibleFuncs) {
-          if (!pf->second.func->dynamicallyCallable) return true;
+          if (!(pf->second.func->attrs & AttrDynamicallyCallable)) return true;
         }
         return false;
       }

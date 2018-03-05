@@ -128,12 +128,11 @@ let make_memoize_function_code
         ~pos ~deprecation_info env params renamed_method_id
 
 (* Construct the wrapper function body *)
-let make_wrapper_body env return_type is_dynamically_callable params instrs =
+let make_wrapper_body env return_type params instrs =
   Emit_body.make_body
     instrs
     [] (* decl_vars *)
     true (* is_memoize_wrapper *)
-    is_dynamically_callable
     params
     (Some return_type)
     [] (* static_inits: this is intentionally empty *)
@@ -159,8 +158,6 @@ let emit_wrapper_function
     ~scope ast_fun.Ast.f_params in
   let function_attributes =
     Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes in
-  let is_dynamically_callable =
-    Hhas_attribute.is_dynamically_callable function_attributes in
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let return_type_info =
     Emit_body.emit_return_type_info
@@ -172,7 +169,7 @@ let emit_wrapper_function
       ~pos ~non_null_return ~deprecation_info env params renamed_id
   in
   let memoized_body =
-    make_wrapper_body env return_type_info is_dynamically_callable params body_instrs in
+    make_wrapper_body env return_type_info params body_instrs in
   let is_interceptable = Interceptable.is_function_interceptable namespace ast_fun in
   Hhas_function.make
     function_attributes
@@ -187,3 +184,4 @@ let emit_wrapper_function
     false (* inout_wrapper *)
     ret_by_ref
     is_interceptable
+    false (* is_memoize_impl *)

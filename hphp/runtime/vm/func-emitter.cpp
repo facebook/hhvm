@@ -230,7 +230,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_past = past;
     ex->m_returnByValue = false;
     ex->m_isMemoizeWrapper = false;
-    ex->m_dynamicallyCallable = false;
     ex->m_actualNumClsRefSlots = m_numClsRefSlots;
   }
 
@@ -271,7 +270,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_repoReturnType = repoReturnType;
   f->shared()->m_repoAwaitedReturnType = repoAwaitedReturnType;
   f->shared()->m_isMemoizeWrapper = isMemoizeWrapper;
-  f->shared()->m_dynamicallyCallable = dynamicallyCallable;
   f->shared()->m_numClsRefSlots = m_numClsRefSlots;
 
   if (isNative) {

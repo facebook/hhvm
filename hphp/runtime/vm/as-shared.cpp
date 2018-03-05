@@ -67,7 +67,8 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrIsInOutWrapper,       F,       "inout_wrapper");    \
   X(AttrReference,            F,       "reference");        \
   X(AttrClone,                F,       "clone");            \
-  X(AttrInterceptable,        F,       "interceptable");
+  X(AttrInterceptable,        F,       "interceptable");    \
+  X(AttrDynamicallyCallable,  F,       "dyn_callable");
 
   /* */
 

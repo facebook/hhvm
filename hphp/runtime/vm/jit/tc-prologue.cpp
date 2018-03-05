@@ -74,7 +74,7 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
   auto const funcBody =
     SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}};
 
-  profileSetHotFuncAttr();
+  profileSetHotFunc();
   auto codeView = code().view(kind);
   TCA mainOrig = codeView.main().frontier();
   CGMeta fixups;

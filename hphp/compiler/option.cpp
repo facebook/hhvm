@@ -70,8 +70,6 @@ std::string Option::AutoloadRoot;
 
 std::vector<std::string> Option::APCProfile;
 
-std::map<std::string, std::string> Option::FunctionSections;
-
 bool Option::GenerateTextHHBC = false;
 bool Option::GenerateHhasHHBC = false;
 bool Option::GenerateBinaryHHBC = false;
@@ -178,19 +176,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     }
     Logger::FError("Invalid ConstantFunction: '{}'\n", str);
   }
-
-  // build map from function names to sections
-  auto function_sections_callback = [&](const IniSetting::Map& ini_fs,
-                                        const Hdf& hdf_fs,
-                                        const std::string& ini_fs_key) {
-    auto function_callback = [&](const IniSetting::Map& ini_f, const Hdf& hdf_f,
-                                 const std::string& /*ini_f_key*/) {
-      FunctionSections[Config::GetString(ini_f, hdf_f, "", "", false)] =
-        hdf_fs.exists() && !hdf_fs.isEmpty() ? hdf_fs.getName() : ini_fs_key;
-    };
-    Config::Iterate(function_callback, ini_fs, hdf_fs, "", false);
-  };
-  Config::Iterate(function_sections_callback, ini, config, "FunctionSections");
 
   {
     // Repo

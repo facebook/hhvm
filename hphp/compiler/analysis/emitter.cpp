@@ -8913,12 +8913,14 @@ static Attr buildAttrs(ModifierExpressionPtr mod, bool isRef = false) {
  * for reflection.
  * <<__IsFoldable>> Function has no side-effects and may be called at
  * compile time with constant input to get deterministic output.
+ * <<__DynamicallyCallable>> Function is allowed to be called dynamically
  */
 const StaticString
   s_IsFoldable("__IsFoldable"),
   s_AllowStatic("__AllowStatic"),
   s_ParamCoerceModeNull("__ParamCoerceModeNull"),
-  s_ParamCoerceModeFalse("__ParamCoerceModeFalse");
+  s_ParamCoerceModeFalse("__ParamCoerceModeFalse"),
+  s_DynamicallyCallable("__DynamicallyCallable");
 
 static void parseUserAttributes(FuncEmitter* fe, Attr& attrs) {
   if (fe->userAttributes.count(s_IsFoldable.get())) {
@@ -8934,6 +8936,11 @@ static void parseUserAttributes(FuncEmitter* fe, Attr& attrs) {
     attrs = attrs | AttrParamCoerceModeNull;
   } else if (fe->userAttributes.count(s_ParamCoerceModeFalse.get())) {
     attrs = attrs | AttrParamCoerceModeFalse;
+  }
+
+  if (!fe->isMemoizeImpl &&
+      fe->userAttributes.count(s_DynamicallyCallable.get())) {
+    attrs = attrs | AttrDynamicallyCallable;
   }
 }
 
@@ -8954,18 +8961,12 @@ buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe, bool /*top*/) {
     attrs |= AttrInterceptable;
   }
 
-  auto fullName = meth->getOriginalFullName();
-  auto it = Option::FunctionSections.find(fullName);
-  if ((it != Option::FunctionSections.end() && it->second == "hot") ||
-      (RuntimeOption::EvalRandomHotFuncs &&
-       (hash_string_i_unsafe(fullName.c_str(), fullName.size()) & 8))) {
-    attrs = attrs | AttrHot;
-  }
-
   if (!SystemLib::s_inited || funcScope->isSystem()) {
     // we're building systemlib. everything is unique
     if (!meth->getClassScope()) attrs |= AttrUnique | AttrPersistent;
     attrs |= AttrBuiltin;
+    // Everything in systemlib is implicitly dynamically callable for now.
+    attrs |= AttrDynamicallyCallable;
   }
 
   // For closures, the MethodStatement didn't have real attributes; enforce
@@ -9060,8 +9061,6 @@ determine_type_constraint(const ParameterExpressionPtr& par) {
   return determine_type_constraint_from_annot(par->annotation(), false, false);
 }
 
-const char* attr_DynamicallyCallable = "__DynamicallyCallable";
-
 template<class F1, class F2>
 void EmitterVisitor::emitFuncWrapper(PostponedMeth& p, FuncEmitter* fe,
                                      F1 getParam, F2 getReturn, bool isInOut) {
@@ -9073,13 +9072,6 @@ void EmitterVisitor::emitFuncWrapper(PostponedMeth& p, FuncEmitter* fe,
   emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
   if (isInOut) fe->attrs |= AttrTakesInOutParams;
   else fe->attrs = Attr(fe->attrs & ~AttrTakesInOutParams);
-
-  auto const& attrs = meth->getFunctionScope()->userAttributes();
-  if (!SystemLib::s_inited ||
-      meth->getFunctionScope()->isSystem() ||
-      attrs.count(attr_DynamicallyCallable)) {
-    fe->dynamicallyCallable = true;
-  }
 
   auto region = createRegion(meth, Region::Kind::FuncBody);
   enterRegion(region);
@@ -9421,7 +9413,10 @@ Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   auto modifiers = meth->getModifiers();
   bindUserAttributes(meth, fe);
 
-  Attr attributes = AttrBuiltin | AttrUnique | AttrPersistent;
+  // Everything in systemlib is implicitly dynamically callable for now.
+  Attr attributes =
+    AttrBuiltin | AttrUnique |
+    AttrPersistent | AttrDynamicallyCallable;
   if (meth->isRef()) {
     attributes = attributes | AttrReference;
   }
@@ -9489,9 +9484,6 @@ Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   if (meth->getFunctionScope()->userAttributes().count(attr_Deprecated)) {
     emitDeprecationWarning(e, meth);
   }
-  // All functions in systemlib (thus all native functions) are automatically
-  // dynamically callable.
-  fe->dynamicallyCallable = true;
 
   if (!(attributes & (AttrReadsCallerFrame | AttrWritesCallerFrame))) {
     if (meth->getFunctionScope()->isDynamicInvoke() ||
@@ -9802,13 +9794,6 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   if (!m_curFunc->isMemoizeImpl) {
     auto const& attrs = meth->getFunctionScope()->userAttributes();
     if (attrs.count(attr_Deprecated)) emitDeprecationWarning(e, meth);
-    if (!SystemLib::s_inited ||
-        meth->getFunctionScope()->isSystem() ||
-        attrs.count(attr_DynamicallyCallable)) {
-      m_curFunc->dynamicallyCallable = true;
-    }
-  } else {
-    assertx(!m_curFunc->dynamicallyCallable);
   }
 
   // emit code to create generator object
@@ -10076,11 +10061,6 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   // hit.
   auto const& attrs = meth->getFunctionScope()->userAttributes();
   if (attrs.count(attr_Deprecated)) emitDeprecationWarning(e, meth);
-  if (!SystemLib::s_inited ||
-      meth->getFunctionScope()->isSystem() ||
-      attrs.count(attr_DynamicallyCallable)) {
-    m_curFunc->dynamicallyCallable = true;
-  }
 
   // Function start
   int staticLocalID = 0;

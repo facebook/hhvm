@@ -124,11 +124,11 @@ static bool comp(const FuncHotness& a, const FuncHotness& b) {
 }
 
 /*
- * Set AttrHot on hot functions. Sort all functions by their profile count, and
- * set AttrHot to the top Eval.HotFuncCount functions.
+ * Set hot functions. Sort all functions by their profile count, and make the
+ * top Eval.HotFuncCount functions hot.
  */
 static Mutex syncLock;
-void profileSetHotFuncAttr() {
+void profileSetHotFunc() {
   static bool synced = false;
   if (LIKELY(synced)) return;
 
@@ -171,7 +171,7 @@ void profileSetHotFuncAttr() {
     while (queue.size()) {
       auto f = queue.top().first;
       queue.pop();
-      const_cast<Func*>(f)->setAttrs(f->attrs() | AttrHot);
+      const_cast<Func*>(f)->setHot();
     }
   }
 

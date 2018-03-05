@@ -76,7 +76,7 @@ int64_t jitInitTime() { return s_startTime; }
 
 bool dumpTCAnnotation(const Func& func, TransKind transKind) {
   return RuntimeOption::EvalDumpTCAnnotationsForAllTrans ||
-    (transKind == TransKind::Optimize && (func.attrs() & AttrHot));
+    (transKind == TransKind::Optimize && func.isHot());
 }
 
 }}}

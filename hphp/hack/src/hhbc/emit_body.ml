@@ -148,7 +148,7 @@ let deduplicate l =
   |> Unique_list_string.items
 
 let make_body_ function_directives_opt body_instrs decl_vars is_memoize_wrapper
-              is_dynamically_callable params return_type_info static_inits doc_comment
+              params return_type_info static_inits doc_comment
               env =
   let body_instrs = rewrite_user_labels body_instrs in
   let body_instrs = rewrite_class_refs body_instrs in
@@ -173,17 +173,16 @@ let make_body_ function_directives_opt body_instrs decl_vars is_memoize_wrapper
     num_iters
     num_cls_ref_slots
     is_memoize_wrapper
-    is_dynamically_callable
     params
     return_type_info
     static_inits
     doc_comment
     env
 
-let make_body body_instrs decl_vars is_memoize_wrapper is_dynamically_callable
-              params return_type_info static_inits doc_comment env =
-  make_body_ None body_instrs decl_vars is_memoize_wrapper is_dynamically_callable
-    params return_type_info static_inits doc_comment env
+let make_body body_instrs decl_vars is_memoize_wrapper params
+              return_type_info static_inits doc_comment env =
+  make_body_ None body_instrs decl_vars is_memoize_wrapper params
+             return_type_info static_inits doc_comment env
 
 let prepare_inline_hhas_blocks decl_vars params hhas_blocks =
   assert (not @@ List.is_empty hhas_blocks);
@@ -305,7 +304,6 @@ let emit_body
   ~is_memoize
   ~is_native
   ~is_async
-  ~is_dynamically_callable
   ~deprecation_info
   ~skipawaitable
   ~is_return_by_ref
@@ -526,7 +524,6 @@ let emit_body
     body_instrs
     decl_vars
     false (*is_memoize_wrapper*)
-    is_dynamically_callable
     params
     (Some return_type_info)
     svar_instrs

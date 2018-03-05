@@ -89,10 +89,6 @@ let from_ast_wrapper : bool -> _ ->
   let is_memoize =
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
-  let is_dynamically_callable =
-    ((Hhas_attribute.is_dynamically_callable method_attributes) ||
-    Emit_env.is_systemlib ())
-  in
   let is_no_injection = Hhas_attribute.is_no_injection method_attributes in
   let (pos, original_name) = ast_method.Ast.m_name in
   let (_, class_name) = ast_class.Ast.c_name in
@@ -213,7 +209,6 @@ let from_ast_wrapper : bool -> _ ->
         ~is_memoize
         ~is_native
         ~is_async:method_is_async
-        ~is_dynamically_callable:(is_dynamically_callable && (not is_memoize))
         ~deprecation_info
         ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
         ~is_return_by_ref
@@ -250,6 +245,7 @@ let from_ast_wrapper : bool -> _ ->
       method_is_closure_body
       is_return_by_ref
       method_is_interceptable
+      is_memoize (*method_is_memoize_impl*)
   in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_method.body normal_function in
   if has_inout_args

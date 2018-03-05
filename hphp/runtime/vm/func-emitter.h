@@ -298,7 +298,6 @@ public:
       bool isNative         : 1;
       bool isGenerator      : 1;
       bool isPairGenerator  : 1;
-      bool dynamicallyCallable : 1;
     };
   };
 

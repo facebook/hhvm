@@ -405,8 +405,6 @@ struct Func : FuncBase {
 
   bool isMemoizeImpl : 1;
 
-  bool dynamicallyCallable : 1;
-
   /*
    * Return type specified in the source code (ex. "function foo(): Bar").
    * HHVM checks if the a function's return value matches it's return type

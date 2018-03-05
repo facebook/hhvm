@@ -71,7 +71,7 @@ bool shouldPGOFunc(const Func* func) {
   if (func->isPseudoMain()) return false;
 
   if (!RuntimeOption::EvalJitPGOHotOnly) return true;
-  return func->attrs() & AttrHot;
+  return func->isHot();
 }
 
 }

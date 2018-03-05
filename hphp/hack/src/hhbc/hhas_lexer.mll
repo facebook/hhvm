@@ -73,7 +73,6 @@ rule read =
   | ".class_refs"       {CLASSREFSDIRECTIVE}
   | ".declvars"         {DECLVARSDIRECTIVE}
   | ".ismemoizewrapper" {ISMEMOIZEWRAPPERDIRECTIVE}
-  | ".dynamicallycallable" {DYNAMICALLYCALLABLEDIRECTIVE}
   | ".adata"            {DATADECLDIRECTIVE}
   | ".numiters"         {NUMITERSDIRECTIVE}
   | ".method"           {METHODDIRECTIVE}

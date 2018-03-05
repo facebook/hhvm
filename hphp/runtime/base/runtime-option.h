@@ -719,7 +719,6 @@ struct RuntimeOption {
   F(bool, LowStaticArrays,             true)                            \
   F(bool, UncountedMixedArrayHuge,     true)                            \
   F(bool, UncountedStringHuge,         true)                            \
-  F(bool, RandomHotFuncs,              false)                           \
   F(int64_t, HeapPurgeWindowSize,      5 * 1000000)                     \
   F(uint64_t, HeapPurgeThreshold,      128 * 1024 * 1024)               \
   /* GC Options: See heap-collect.cpp for more details */               \

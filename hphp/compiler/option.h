@@ -109,11 +109,6 @@ struct Option {
   static std::vector<std::string> APCProfile;
 
   /**
-   * Names of hot and cold functions to be marked in sources.
-   */
-  static std::map<std::string, std::string> FunctionSections;
-
-  /**
    * A somewhat unique prefix for system identifiers.
    */
   static std::string IdPrefix;

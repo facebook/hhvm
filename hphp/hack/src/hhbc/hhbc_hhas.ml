@@ -1380,8 +1380,6 @@ let add_body buf indent body =
   add_doc buf indent (Hhas_body.doc_comment body);
   if Hhas_body.is_memoize_wrapper body
   then add_indented_line buf indent ".ismemoizewrapper;";
-  if Hhas_body.is_dynamically_callable body
-  then add_indented_line buf indent ".dynamicallycallable;";
   add_num_iters buf indent (Hhas_body.num_iters body);
   add_num_cls_ref_slots buf indent (Hhas_body.num_cls_ref_slots body);
   add_decl_vars buf indent (Hhas_body.decl_vars body);
@@ -1395,6 +1393,12 @@ let function_attributes f =
   let attrs = Emit_adata.attributes_to_strings user_attrs in
   let attrs = if Emit_env.is_systemlib ()
     then "unique" :: "builtin" :: "persistent" :: attrs else attrs in
+  let attrs =
+    if Emit_env.is_systemlib () ||
+         ((Hhas_attribute.is_dynamically_callable user_attrs) &&
+            not (Hhas_function.is_memoize_impl f))
+    then "dyn_callable" :: attrs else attrs
+  in
   let attrs =
     if Hhas_attribute.is_reads_caller_frame user_attrs && not (Hhas_function.inout_wrapper f) then "reads_frame" :: attrs else attrs in
   let attrs =
@@ -1451,6 +1455,12 @@ let method_attributes m =
   let is_native_opcode_impl = Hhas_attribute.is_native_opcode_impl user_attrs in
   let is_native = not is_native_opcode_impl && Hhas_attribute.is_native user_attrs in
   let is_systemlib = Emit_env.is_systemlib () in
+  let attrs =
+    if Emit_env.is_systemlib () ||
+         ((Hhas_attribute.is_dynamically_callable user_attrs) &&
+            not (Hhas_method.is_memoize_impl m))
+    then "dyn_callable" :: attrs else attrs
+  in
   let attrs = if is_systemlib && is_native then "persistent" :: attrs else attrs in
   let attrs = if is_systemlib then "builtin" :: attrs else attrs in
   let attrs = if is_systemlib && is_native then "unique" :: attrs else attrs in

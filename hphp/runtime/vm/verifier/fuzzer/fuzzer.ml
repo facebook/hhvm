@@ -715,7 +715,6 @@ let mutate_metadata (input : HP.t)  =
       (body |> Hhas_body.num_iters)
       (body |> Hhas_body.num_cls_ref_slots  |> fun n -> mutate_int n !mag)
       (body |> Hhas_body.is_memoize_wrapper |> mutate_bool)
-      (body |> Hhas_body.is_dynamically_callable |> mutate_bool)
       (body |> Hhas_body.params             |> delete_map mutate_param)
       (body |> Hhas_body.return_type        |> option_lift mutate_type_info)
       (body |> Hhas_body.static_inits       |> delete_map mutate_static_init)
@@ -744,7 +743,8 @@ let mutate_metadata (input : HP.t)  =
         (m |> Hhas_method.is_pair_generator |> mutate_bool)
         (m |> Hhas_method.is_closure_body   |> mutate_bool)
         (m |> Hhas_method.is_return_by_ref  |> mutate_bool)
-        (m |> Hhas_method.is_interceptable  |> mutate_bool) in
+        (m |> Hhas_method.is_interceptable  |> mutate_bool)
+        (m |> Hhas_method.is_memoize_impl   |> mutate_bool) in
     let mutate_property (prop : Hhas_property.t) : Hhas_property.t =
       Hhas_property.make
         (prop |> Hhas_property.is_private         |> mutate_bool)
@@ -809,7 +809,8 @@ let mutate_metadata (input : HP.t)  =
       (f |> Hhas_function.no_injection      |> mutate_bool)
       (f |> Hhas_function.inout_wrapper     |> mutate_bool)
       (f |> Hhas_function.is_return_by_ref  |> mutate_bool)
-      (f |> Hhas_function.is_interceptable  |> mutate_bool) in
+      (f |> Hhas_function.is_interceptable  |> mutate_bool)
+      (f |> Hhas_function.is_memoize_impl   |> mutate_bool) in
   let mutate_typedef (typedef : Hhas_typedef.t) : Hhas_typedef.t =
     Hhas_typedef.make
       (typedef |> Hhas_typedef.name)

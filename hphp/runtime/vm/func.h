@@ -746,11 +746,6 @@ struct Func final {
    */
   static const StringData* genMemoizeImplName(const StringData*);
 
-  /*
-   * Is this func allowed to be called dynamically?
-   */
-  bool isDynamicallyCallable() const;
-
   /////////////////////////////////////////////////////////////////////////////
   // Builtins.                                                          [const]
 
@@ -981,6 +976,17 @@ struct Func final {
    */
   bool isParamCoerceMode() const;
 
+  /*
+   * Is this func allowed to be called dynamically?
+   */
+  bool isDynamicallyCallable() const;
+
+  /*
+   * Has this function been determined to be hot by profiling?
+   */
+  bool isHot() const;
+  void setHot();
+
   /////////////////////////////////////////////////////////////////////////////
   // Unit table entries.                                                [const]
 
@@ -1205,7 +1211,6 @@ private:
     bool m_hasExtendedSharedData : 1;
     bool m_returnByValue : 1; // only for builtins
     bool m_isMemoizeWrapper : 1;
-    bool m_dynamicallyCallable : 1;
     // Needing more than 2 class ref slots basically doesn't happen, so just use
     // two bits normally. If we actually need more than that, we'll store the
     // count in ExtendedSharedData.
@@ -1375,6 +1380,7 @@ private:
   bool m_isPreFunc : 1;
   bool m_hasPrivateAncestor : 1;
   bool m_shouldSampleJit : 1;
+  bool m_hot : 1;
   int m_maxStackCells{0};
   uint64_t m_refBitVal{0};
   Unit* const m_unit;

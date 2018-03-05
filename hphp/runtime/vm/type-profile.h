@@ -49,7 +49,7 @@ void profileWarmupStart();
 void profileWarmupEnd();
 void profileRequestStart();
 void profileRequestEnd();
-void profileSetHotFuncAttr();
+void profileSetHotFunc();
 
 int64_t requestCount();
 int singleJitRequestCount();

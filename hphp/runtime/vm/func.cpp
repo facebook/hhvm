@@ -95,17 +95,15 @@ inline int numProloguesForNumParams(int numParams) {
 
 Func::Func(Unit& unit, const StringData* name, Attr attrs)
   : m_name(name)
+  , m_isPreFunc(false)
+  , m_hasPrivateAncestor(false)
+  , m_shouldSampleJit(StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate))
+  , m_hot(false)
   , m_unit(&unit)
+  , m_shared(nullptr)
   , m_attrs(attrs)
 {
-  m_isPreFunc = false;
-  m_hasPrivateAncestor = false;
-  m_shared = nullptr;
-  m_shouldSampleJit = StructuredLog::coinflip(
-      RuntimeOption::EvalJitSampleRate
-  );
-
- assertx(IMPLIES(accessesCallerFrame(), isBuiltin() && !isMethod()));
+  assertx(IMPLIES(accessesCallerFrame(), isBuiltin() && !isMethod()));
 }
 
 Func::~Func() {
@@ -619,7 +617,6 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrAbstract)  { out << " abstract"; }
   if (attrs & AttrFinal)     { out << " final"; }
   if (attrs & AttrPhpLeafFn) { out << " (leaf)"; }
-  if (attrs & AttrHot)       { out << " (hot)"; }
   if (attrs & AttrNoOverride){ out << " (nooverride)"; }
   if (attrs & AttrInterceptable) { out << " (interceptable)"; }
   if (attrs & AttrPersistent) { out << " (persistent)"; }
@@ -632,6 +629,7 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrIsFoldable) { out << " (foldable)"; }
   if (attrs & AttrNoInjection) { out << " (no_injection)"; }
   if (attrs & AttrReference) { out << " (reference)"; }
+  if (attrs & AttrDynamicallyCallable) { out << " (dyn_callable)"; }
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
@@ -641,7 +639,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     out << "Method";
     print_attrs(out, m_attrs);
     if (isMemoizeWrapper()) out << " (memoize_wrapper)";
-    if (isDynamicallyCallable()) out << " (dyn_callable)";
+    if (isHot()) out << " (hot)";
     if (cls() != nullptr) {
       out << ' ' << fullName()->data();
     } else {
@@ -651,7 +649,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     out << "Function";
     print_attrs(out, m_attrs);
     if (isMemoizeWrapper()) out << " (memoize_wrapper)";
-    if (isDynamicallyCallable()) out << " (dyn_callable)";
+    if (isHot()) out << " (hot)";
     out << ' ' << m_name->data();
   }
 
@@ -761,7 +759,6 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_hasExtendedSharedData(false)
   , m_returnByValue(false)
   , m_isMemoizeWrapper(false)
-  , m_dynamicallyCallable(false)
   , m_numClsRefSlots(0)
   , m_originalFilename(nullptr)
 {
@@ -1154,13 +1151,13 @@ void logFunc(const Func* func, StructuredLogEntry& ent) {
 
   if (func->isMemoizeWrapper()) attrSet.emplace("memoize_wrapper");
   if (func->isMemoizeImpl()) attrSet.emplace("memoize_impl");
-  if (func->isDynamicallyCallable()) attrSet.emplace("dyn_callable");
   if (func->isAsync()) attrSet.emplace("async");
   if (func->isGenerator()) attrSet.emplace("generator");
   if (func->isClosureBody()) attrSet.emplace("closure_body");
   if (func->isPairGenerator()) attrSet.emplace("pair_generator");
   if (func->hasVariadicCaptureParam()) attrSet.emplace("variadic_param");
   if (func->hasStaticLocals()) attrSet.emplace("has_statics");
+  if (func->isHot()) attrSet.emplace("hot");
   if (func->attrs() & AttrMayUseVV) attrSet.emplace("may_use_vv");
   if (func->attrs() & AttrRequiresThis) attrSet.emplace("must_have_this");
   if (func->attrs() & AttrPhpLeafFn) attrSet.emplace("leaf_function");

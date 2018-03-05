@@ -129,8 +129,8 @@ enum Attr {
   // beginning of its signature (after Class*/ObjectData* for methods)
   AttrNumArgs              = (1 << 18), //       |          |    X    //
                                         //       |          |         //
-  // Set on functions to mark them as hot during PGO profiling.       //
-  AttrHot                  = (1 << 19), //       |          |    X    //
+  // Set on functions to mark them as being able to be dynamically called
+  AttrDynamicallyCallable  = (1 << 19), //       |          |    X    //
                                         //       |          |         //
   // Set on all builtin functions, whether PHP or C++.
   AttrBuiltin              = (1 << 20), //    X  |          |    X    //

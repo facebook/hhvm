@@ -159,6 +159,25 @@ let get_concrete_supertypes env ty =
   in
     let env, resl = iter SSet.empty env TySet.empty [ty] in
     env, TySet.elements resl
+
+
+(*****************************************************************************)
+(* Dynamicism  *)
+(*****************************************************************************)
+let rec find_dynamic env tyl =
+  match tyl with
+   | [] -> None
+   | ty::tys ->
+    begin match Env.expand_type env ty with
+    | (_, (_, Tdynamic)) ->
+      Some ty
+    | (_, (_, Tunresolved tyl)) -> find_dynamic env (tys@tyl)
+    | _ -> find_dynamic env tys end
+
+
+let is_dynamic env ty =
+  find_dynamic env [ty] <> None
+
 (*****************************************************************************)
 (* Gets the base type of an abstract type *)
 (*****************************************************************************)
@@ -485,8 +504,16 @@ let normalize_inter env tyl1 tyl2 =
      * a significant perf win here *)
     env, (List.rev_append tyl1 tyl2)
   else
-    (* TODO this should probably pass through the uenv *)
-    normalize_inter env tyl1 tyl2
+  begin match find_dynamic env tyl1 with
+    | Some ty -> env, [ty]
+    | None ->
+      begin match find_dynamic env tyl2 with
+      | Some ty -> env, [ty]
+      | None ->
+        (* TODO this should probably pass through the uenv *)
+        normalize_inter env tyl1 tyl2
+      end
+  end
 
 (*****************************************************************************)
 (* *)
@@ -716,12 +743,3 @@ let desugar_mixed env r =
       (Typing_env.get_tcopt env)
       TypecheckerOptions.experimental_nonnull in
   if nonnull_allowed then Toption (r, Tnonnull) else Tmixed
-
-  (*****************************************************************************)
-(* Dynamicism  *)
-(*****************************************************************************)
-let rec is_dynamic env ty =
-  match Env.expand_type env ty with
-  | (_, (_, Tdynamic)) -> true
-  | (_, (_, Tunresolved tyl)) -> List.exists tyl (is_dynamic env)
-  | _ -> false

@@ -4,7 +4,7 @@ function testCollections(dynamic $x): void {
   $y = vec[];
   $y[] = 5; // $y : vec<int>
   hh_show($y);
-  $y[] = $x; // $y : vec<(int | dynamic)>
+  $y[] = $x; // $y : vec<(dynamic)>
   hh_show($y);
   $y = Vector { $x }; // $y : Vector<dynamic>
   hh_show($y);

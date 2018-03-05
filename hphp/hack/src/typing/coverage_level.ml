@@ -143,6 +143,8 @@ let incr_reason_stats r p reason_stats =
     | Rfinal_property _ -> "Rfinal_property"
     | Rvarray_or_darray_key _ -> "Rvarray_or_darray_key"
     | Rusing _ -> "Rusing"
+    | Rdynamic_prop _ -> "Rdynamic_prop"
+    | Rdynamic_call _ -> "Rdynamic_call"
     in
   let pos_stats_map = match SMap.get string_key reason_stats with
     | Some x -> x

@@ -4521,7 +4521,9 @@ and obj_get_concrete_ty ~is_method ~valkind ~pos_params ?(explicit_tparams=[])
 
       env, member_ty, Some (mem_pos, vis)
     end
-  | _, Tdynamic -> env, concrete_ty, None
+  | _, Tdynamic ->
+    let ty = Reason.Rdynamic_prop id_pos, Tdynamic in
+    env, ty, None
   | _, Tobject
   | _, Tany
   | _, Terr ->
@@ -4959,7 +4961,7 @@ and call_ ~expected ~receiver_type pos env fty el uel =
     Typing_hooks.dispatch_fun_call_hooks [] (List.map (el @ uel) fst) env;
     let ty =
       if snd efty = Tdynamic then
-        efty
+        (Reason.Rdynamic_call pos, Tdynamic)
       else (Reason.Rnone, Tany)
     in
     env, tel, [], ty
@@ -5331,7 +5333,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
           let env, ty = Type.unify p Reason.URnone env ty1 ty2 in
           make_result env te1 te2 ty
       | (_, Tdynamic), (_, Tdynamic) ->
-          make_result env te1 te2 (fst ty1, Tdynamic)
+          make_result env te1 te2 (Reason.Rarith p, Tdynamic)
       | (_, (Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
         | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _

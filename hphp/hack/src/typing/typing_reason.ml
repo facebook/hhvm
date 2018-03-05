@@ -74,6 +74,8 @@ type t =
   | Rfinal_property  of Pos.t
   | Rvarray_or_darray_key of Pos.t
   | Rusing           of Pos.t
+  | Rdynamic_prop    of Pos.t
+  | Rdynamic_call    of Pos.t
 
 and expr_dep_type_reason =
   | ERexpr of int
@@ -205,6 +207,11 @@ let rec to_string prefix r =
       )]
   | Rusing p ->
     [(p, prefix ^ " because it was assigned in a 'using' clause")]
+  | Rdynamic_prop p ->
+    [(p, prefix ^ ", the result of accessing a property of a dynamic type")]
+  | Rdynamic_call p ->
+    [(p, prefix ^ ", the result of calling a dynamic type as a function")]
+
 
 
 and to_pos = function
@@ -267,6 +274,8 @@ and to_pos = function
   | Rvarray_or_darray_key p
   | Rfinal_property p -> p
   | Rusing p -> p
+  | Rdynamic_prop p -> p
+  | Rdynamic_call p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -358,6 +367,8 @@ let pp fmt r =
     | Rfinal_property _ -> "Rfinal_property"
     | Rvarray_or_darray_key _ -> "Rvarray_or_darray_key"
     | Rusing _ -> "Rusing"
+    | Rdynamic_prop _ -> "Rdynamic_prop"
+    | Rdynamic_call _ -> "Rdynamic_call"
 
 type ureason =
   | URnone

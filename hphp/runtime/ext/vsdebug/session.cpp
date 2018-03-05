@@ -219,6 +219,11 @@ void DebuggerSession::runDummy() {
       VSDebugLogger::LogLevelWarning,
       "Dummy request started without a startup document."
     );
+    m_debugger->sendUserMessage(
+      "No startup document was specified, not loading any Hack/PHP "
+        "types for the console.",
+      DebugTransport::OutputLevelWarning
+    );
   }
 
   m_dummyRequestInfo->m_commandQueue.processCommands();

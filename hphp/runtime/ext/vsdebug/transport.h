@@ -85,8 +85,8 @@ struct DebugTransport {
   //    they do not understand.
   static constexpr char* OutputLevelSuccess = "success";
   static constexpr char* OutputLevelInfo = "info";
-  static constexpr char* OutputLevelWarning = "warning";
-  static constexpr char* OutputLevelError = "error";
+  static constexpr char* OutputLevelWarning = "console";
+  static constexpr char* OutputLevelError = "stderr";
   static constexpr char* OutputLevelLog = "console";
   static constexpr char* OutputLevelStdout = "stdout";
   static constexpr char* OutputLevelStderr = "stderr";

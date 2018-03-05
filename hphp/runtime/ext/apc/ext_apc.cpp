@@ -197,6 +197,8 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill",
                RuntimeOption::ServerExecutionMode());
 #endif
+  Config::Bind(ShareUncounted, ini, config, "Server.APC.ShareUncounted", true);
+  if (!UseUncounted && ShareUncounted) ShareUncounted = false;
 
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.stat",
@@ -302,6 +304,7 @@ bool apcExtension::UseUncounted = true;
 #else
 bool apcExtension::UseUncounted = false;
 #endif
+bool apcExtension::ShareUncounted = true;
 bool apcExtension::Stat = true;
 // Different from zend default but matches what we've been returning for years
 bool apcExtension::EnableCLI = true;

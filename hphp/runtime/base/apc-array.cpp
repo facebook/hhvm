@@ -52,7 +52,8 @@ APCArray::MakeSharedImpl(ArrayData* arr,
                          APCHandleLevel level,
                          A shared, B uncounted, C serialized) {
   if (level == APCHandleLevel::Outer) {
-    auto const seenArrs = std::make_unique<PointerMap>();
+    auto const seenArrs = apcExtension::ShareUncounted ?
+      std::make_unique<PointerMap>() : nullptr;
     // only need to call traverseData() on the toplevel array
     DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
     DataWalker::DataFeature features = walker.traverseData(arr, seenArrs.get());
@@ -65,7 +66,8 @@ APCArray::MakeSharedImpl(ArrayData* arr,
         !arr->empty()) {
       auto const base_size = use_jemalloc ?
         tl_heap->getAllocated() - tl_heap->getDeallocated() :
-        getMemSize(seenArrs.get());
+        seenArrs.get() ? getMemSize(seenArrs.get()) :
+        ::HPHP::getMemSize(arr, true);
       auto const uncounted_arr = uncounted(seenArrs.get());
       auto const size = use_jemalloc ?
         tl_heap->getAllocated() - tl_heap->getDeallocated() - base_size :

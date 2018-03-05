@@ -63,6 +63,7 @@ struct apcExtension final : Extension {
   static bool FileStorageKeepFileLinked;
   static std::vector<std::string> NoTTLPrefix;
   static bool UseUncounted;
+  static bool ShareUncounted;
   static bool Stat;
   static bool EnableCLI;
 

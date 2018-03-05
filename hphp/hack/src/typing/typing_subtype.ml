@@ -168,6 +168,10 @@ let rec decompose_subtype
         Typing_arrays.fold_aktuple_as_akvec again env r fields
       )
 
+  (* If C<ts> <: ?D<ts'> then must have C<ts> <: D<ts'> *)
+  | (_, Tclass _), (_, Toption ((_, Tclass _) as ty_super')) ->
+    decompose_subtype env ty_sub ty_super' fail
+
   | (_, (Tclass (x_sub, tyl_sub))), (_, (Tclass (x_super, tyl_super)))->
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
     begin match Env.get_class env cid_sub with

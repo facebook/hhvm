@@ -22,4 +22,9 @@ class G<T1, T2, T3, T4 as I<T4>> {
       hh_show($c);
     }
   }
+  public function testit3(?C<T1, T2, T3, T4> $c): void {
+    if ($c instanceof D) {
+      hh_show($c);
+    }
+  }
 }

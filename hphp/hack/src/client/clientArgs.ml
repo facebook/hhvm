@@ -425,7 +425,11 @@ let parse_check_args cmd =
     timeout = !timeout;
     autostart = !autostart;
     force_dormant_start = !force_dormant_start;
-    no_load = !no_load;
+    no_load = !no_load || (
+      match !mode with
+      | Some (MODE_REMOVE_DEAD_FIXMES _) -> true
+      | _ -> false
+    );
     profile_log = !profile_log;
     ai_mode = !ai_mode;
     ignore_hh_version = !ignore_hh_version;

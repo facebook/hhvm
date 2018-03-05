@@ -32,6 +32,7 @@ let make_tmp_dir () =
  * listening to socket requests from hh_client, checking Build ID, and relaying
  * requests to the typechecker process. *)
 let monitor_daemon_main (options: ServerArgs.options) =
+  let () = ServerLoadFlag.set_no_load (ServerArgs.no_load options) in
   let init_id = Random_id.short_string () in
   if Sys_utils.is_test_mode ()
   then EventLogger.init EventLogger.Event_logger_fake 0.0

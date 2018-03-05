@@ -17,6 +17,7 @@ type t = {
     profile_log : bool;
     fixme_codes : ISet.t;
     paths_to_ignore : Str.regexp list;
+    no_load : bool;
   }
 
 let save () = {
@@ -28,6 +29,7 @@ let save () = {
     profile_log = !Utils.profile;
     fixme_codes = !Errors.ignored_fixme_codes;
     paths_to_ignore = FilesToIgnore.get_paths_to_ignore ();
+    no_load = ServerLoadFlag.get_no_load ();
   }
 
 let restore state =
@@ -38,7 +40,8 @@ let restore state =
   HackSearchService.fuzzy := state.fuzzy;
   Utils.profile := state.profile_log;
   Errors.ignored_fixme_codes := state.fixme_codes;
-  FilesToIgnore.set_paths_to_ignore state.paths_to_ignore;;
+  FilesToIgnore.set_paths_to_ignore state.paths_to_ignore;
+  ServerLoadFlag.set_no_load state.no_load;;
 
 let to_string state =
   let saved_root = Path.to_string state.saved_root in

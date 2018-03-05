@@ -377,15 +377,23 @@ let main args =
       print_string @@ Hh_json.json_to_multiline (Stats.to_json stats);
       Exit_status.No_error
     | MODE_REMOVE_DEAD_FIXMES codes ->
+      (* we need to confirm that the server is not already started
+       * in a non-no-load (yes-load) state
+       *)
       let conn = connect args in
-      let patches = ServerCommand.rpc conn @@
-        Rpc.REMOVE_DEAD_FIXMES codes in
-      let file_map = List.fold_left patches
-        ~f:map_patches_to_filename ~init:SMap.empty in
-      if args.output_json
-      then print_patches_json file_map
-      else apply_patches file_map;
-      Exit_status.No_error
+      let response = ServerCommand.rpc conn @@
+          Rpc.REMOVE_DEAD_FIXMES codes in
+      begin match response with
+      | `Error msg ->
+        (Printf.eprintf "%s\n" msg; Exit_status.Type_error)
+      | `Ok patches -> begin
+        let file_map = List.fold_left patches
+          ~f:map_patches_to_filename ~init:SMap.empty in
+        if args.output_json
+        then print_patches_json file_map
+        else apply_patches file_map;
+        Exit_status.No_error
+      end end
     | MODE_IGNORE_FIXMES files ->
       let conn = connect args in
       let {

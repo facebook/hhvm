@@ -13,6 +13,11 @@ open ServerEnv
 open ServerCommandTypes
 open Utils
 
+let remove_dead_fixme_warning = (
+  "hh_server was started without '--no-load', which is required when removing dead fixmes.\n" ^
+  "Please run 'hh_client restart --no-load' to restart it."
+)
+
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   fun genv env ~is_stale -> function
     | STATUS _ ->
@@ -73,8 +78,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let definitions = ServerIdentifyFunction.go_absolute content line char env.tcopt in
         env, ServerRefactor.go_ide definitions new_name genv env
     | REMOVE_DEAD_FIXMES codes ->
-      HackEventLogger.check_response (Errors.get_error_list env.errorl);
-      env, ServerRefactor.get_fixme_patches codes env
+      if genv.ServerEnv.options |> ServerArgs.no_load then begin
+        HackEventLogger.check_response (Errors.get_error_list env.errorl);
+        env, `Ok (ServerRefactor.get_fixme_patches codes env)
+      end else
+        env, (`Error remove_dead_fixme_warning)
     | IGNORE_FIXMES files ->
       let paths = List.map files Relative_path.from_root in
       let disk_needs_parsing =

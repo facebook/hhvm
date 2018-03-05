@@ -54,7 +54,7 @@ type _ t =
       ServerRefactorTypes.patch list t
   | DUMP_SYMBOL_INFO : string list -> SymbolInfoServiceTypes.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
-  | REMOVE_DEAD_FIXMES : int list -> ServerRefactorTypes.patch list t
+  | REMOVE_DEAD_FIXMES : int list -> [`Ok of ServerRefactorTypes.patch list | `Error of string] t
   | IGNORE_FIXMES : string list -> Ignore_fixmes_result.t t
   | SEARCH : string * string -> HackSearchService.result t
   | COVERAGE_COUNTS : string -> ServerCoverageMetricTypes.result t

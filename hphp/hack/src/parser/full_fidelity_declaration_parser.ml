@@ -625,14 +625,28 @@ module WithExpressionAndStatementAndTypeParser
     children ... ;
 
   *)
-    let token = peek_token parser in
-    match (Token.kind token) with
+    match peek_token_kind parser with
     | Children -> parse_xhp_children_declaration parser
     | Category -> parse_xhp_category_declaration parser
     | Use -> parse_trait_use parser
     | Const ->
-      let (parser, missing) = Make.missing parser (pos parser) in
-      parse_const_or_type_const_declaration parser missing
+      begin
+        let (parser, missing) = Make.missing parser (pos parser) in
+        let kind1 = peek_token_kind ~lookahead:1 parser in
+        let kind2 = peek_token_kind ~lookahead:2 parser in
+        match kind1, kind2 with
+        | Type, Semicolon ->
+          let (parser, missing') = Make.missing parser (pos parser) in
+          let (parser, const) = assert_token parser Const in
+          parse_const_declaration parser missing missing' const
+        | Type, _ when kind2 <> Equal ->
+          let (parser, const) = assert_token parser Const in
+          parse_type_const_declaration parser missing const
+        | _, _ ->
+          let (parser, missing') = Make.missing parser (pos parser) in
+          let (parser, const) = assert_token parser Const in
+          parse_const_declaration parser missing missing' const
+      end
     | Abstract -> parse_methodish_or_const_or_type_const parser
     | Public
     | Protected
@@ -640,9 +654,9 @@ module WithExpressionAndStatementAndTypeParser
       let (parser1, visibility) = next_token parser in
       let next_kind = peek_token_kind parser1 in
       if next_kind = Const then
-        let (parser, const) = assert_token parser1 Const in
-        let (parser, visibility) = Make.token parser visibility in
+        let (parser, visibility) = Make.token parser1 visibility in
         let (parser, missing) = Make.missing parser (pos parser) in
+        let (parser, const) = assert_token parser Const in
         parse_const_declaration parser visibility missing const
       else
         let (parser, missing) = Make.missing parser (pos parser) in
@@ -1132,20 +1146,6 @@ module WithExpressionAndStatementAndTypeParser
     else
       let (parser, semi) = require_semicolon parser in
       Make.trait_use parser use_token trait_name_list semi
-
-  and parse_const_or_type_const_declaration parser abstr =
-    let (parser, const) = assert_token parser Const in
-    let kind1 = peek_token_kind parser in
-    let kind2 = peek_token_kind ~lookahead:1 parser in
-    match kind1, kind2 with
-    | Type, (Equal | Semicolon) ->
-      let (parser, missing) = Make.missing parser (pos parser) in
-      parse_const_declaration parser missing abstr const
-    | Type, _ when kind2 <> Equal ->
-      parse_type_const_declaration parser abstr const
-    | _, _ ->
-      let (parser, missing) = Make.missing parser (pos parser) in
-      parse_const_declaration parser missing abstr const
 
   and parse_property_declaration ?(contains_abstract=false) parser modifiers =
     (* SPEC:
@@ -1675,9 +1675,24 @@ module WithExpressionAndStatementAndTypeParser
         final
    *)
   and parse_methodish_or_const_or_type_const parser =
-    let (parser1, abstract) = assert_token parser Abstract in
-    if peek_token_kind parser1 = Const then
-      parse_const_or_type_const_declaration parser1 abstract
+    if peek_token_kind ~lookahead:1 parser = Const then
+      let kind1 = peek_token_kind ~lookahead:2 parser in
+      let kind2 = peek_token_kind ~lookahead:3 parser in
+      match kind1, kind2 with
+      | Type, Semicolon ->
+        let (parser, missing) = Make.missing parser (pos parser) in
+        let (parser, abstr) = assert_token parser Abstract in
+        let (parser, const) = assert_token parser Const in
+        parse_const_declaration parser missing abstr const
+      | Type, _ when kind2 <> Equal ->
+        let (parser, abstr) = assert_token parser Abstract in
+        let (parser, const) = assert_token parser Const in
+        parse_type_const_declaration parser abstr const
+      | _, _ ->
+        let (parser, missing) = Make.missing parser (pos parser) in
+        let (parser, abstr) = assert_token parser Abstract in
+        let (parser, const) = assert_token parser Const in
+        parse_const_declaration parser missing abstr const
     else
       let (parser, modifiers, _) = parse_modifiers parser in
       let (parser, missing) = Make.missing parser (pos parser) in

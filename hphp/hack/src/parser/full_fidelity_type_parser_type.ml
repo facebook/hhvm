@@ -27,6 +27,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val env : t -> Full_fidelity_parser_env.t
       val sc_state : t -> SC.t
       val parse_type_specifier : ?allow_var:bool -> t -> t * SC.r
+      val parse_simple_type_or_type_constant : t -> t * SC.r
       val parse_return_type : t -> t * SC.r
       val parse_possible_generic_specifier : t -> t * SC.r
       val parse_type_constraint_opt : t -> t * SC.r

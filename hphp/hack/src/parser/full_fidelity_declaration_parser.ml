@@ -88,6 +88,9 @@ module WithExpressionAndStatementAndTypeParser
   let parse_type_specifier ?(allow_var=false) parser =
     with_type_parser parser (TypeParser.parse_type_specifier ~allow_var)
 
+  let parse_simple_type_or_type_constant parser =
+    with_type_parser parser (TypeParser.parse_simple_type_or_type_constant)
+
   let parse_type_constraint_opt parser =
     with_type_parser parser TypeParser.parse_type_constraint_opt
 
@@ -512,9 +515,10 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, list_item) = Make.list_item parser item comma in
       (parser, list_item, comma)
     | Parent
+    | Shape
     | Self when Env.hhvm_compat_mode (env parser) ->
       (* HHVM allows these keywords here for some reason *)
-      let (parser, item) = parse_type_specifier parser in
+      let (parser, item) = parse_simple_type_or_type_constant parser in
       let (parser, comma) = optional_token parser Comma in
       let (parser, list_item) = Make.list_item parser item comma in
       (parser, list_item, comma)

@@ -34,20 +34,18 @@ type 'a promise =
     (** A future formed from two underlying futures. Calling "get" blocks until
      * both underlying are ready. *)
   | Merged : ('a t * 'b t * ('a -> 'b -> 'c)) -> 'c promise
-    (** float is the time the Future was constructed. *)
-  | Incomplete of float * Process_types.t * (string -> 'a)
-and 'a t = 'a promise ref
+  | Incomplete of Process_types.t * (string -> 'a)
+
+(** float is the time the Future was constructed. *)
+and 'a t = ('a promise ref) * float
 
 let make process transformer =
-  ref (Incomplete (Unix.time (), process, transformer))
+  (ref (Incomplete (process, transformer)), Unix.gettimeofday ())
 
-let merge a b handler =
-  ref (Merged (a, b, handler))
-
-let of_value v = ref @@ Complete v
+let of_value v = (ref @@ Complete v, Unix.gettimeofday ())
 
 let delayed_value ~delays v =
-  ref (Delayed {tapped = 0; remaining = delays; value = v;})
+  (ref (Delayed {tapped = 0; remaining = delays; value = v;}), Unix.gettimeofday ())
 
 let error_to_string (info, e) =
   let info = Printf.sprintf "(%s [%s])"
@@ -71,7 +69,7 @@ let error_to_string (info, e) =
 let error_to_exn e = raise (Failure e)
 
 let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
-  fun ?(timeout=30) promise -> match !promise with
+  fun ?(timeout=30) (promise, _) -> match !promise with
   | Complete v -> Ok v
   | Complete_but_transformer_raised (info, e) ->
     Error (info, Transformer_raised e)
@@ -89,7 +87,7 @@ let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
     let result = handler a b in
     let () = promise := Complete result in
     Ok result
-  | Incomplete (_, process, transformer) ->
+  | Incomplete (process, transformer) ->
     let info = process.Process_types.info in
     match Process.read_and_wait_pid ~timeout process with
     | Ok (stdout, _stderr) -> begin
@@ -115,7 +113,7 @@ let get_exn ?timeout x = get ?timeout x
   |> Core_result.ok_exn
 
 (** Must explicitly make recursive functions polymorphic. *)
-let rec is_ready : 'a. 'a t -> bool = fun promise ->
+let rec is_ready : 'a. 'a t -> bool = fun (promise, _) ->
   match !promise with
   | Complete _ | Complete_but_transformer_raised _ -> true
   | Delayed {remaining; _} when remaining <= 0 ->
@@ -125,7 +123,7 @@ let rec is_ready : 'a. 'a t -> bool = fun promise ->
     false
   | Merged (a, b, _) ->
     is_ready a && is_ready b
-  | Incomplete (_, process, _) ->
+  | Incomplete (process, _) ->
     Process.is_ready process
 
 let merge_status stat_a stat_b handler =
@@ -141,8 +139,13 @@ let merge_status stat_a stat_b handler =
   | _, In_progress age ->
     In_progress age
 
+let start_t : 'a. 'a t -> float = fun (_, time) -> time
+
+let merge a b handler =
+  (ref (Merged (a, b, handler)), (min (start_t a) (start_t b)))
+
 (** Must explicitly make recursive function polymorphic. *)
-let rec check_status : 'a. 'a t -> 'a status = fun promise ->
+let rec check_status : 'a. 'a t -> 'a status = fun (promise, start_t) ->
   match !promise with
   | Complete v ->
     Complete_with_result (Ok v)
@@ -155,9 +158,9 @@ let rec check_status : 'a. 'a t -> 'a status = fun promise ->
     In_progress (float_of_int tapped)
   | Merged (a, b, handler) ->
     merge_status (check_status a) (check_status b) handler
-  | Incomplete (start_t, process, _) ->
+  | Incomplete (process, _) ->
     if Process.is_ready process then
-      Complete_with_result (get promise)
+      Complete_with_result (get (promise, start_t))
     else
       let age = Unix.time () -. start_t in
       In_progress age

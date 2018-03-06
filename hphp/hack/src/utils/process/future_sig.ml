@@ -62,6 +62,10 @@ module type S = sig
 
   val check_status : 'a t -> 'a status
 
+  (** Return the timestamp the future was constructed. For Merged futures,
+   * returns the older of the merged futures. *)
+  val start_t : 'a t -> float
+
   val error_to_string : error -> string
   val error_to_exn : error -> exn
 end

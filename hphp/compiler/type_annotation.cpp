@@ -94,45 +94,8 @@ std::string TypeAnnotation::fullName() const {
 }
 
 MaybeDataType TypeAnnotation::dataType() const {
-  if (m_function || m_xhp || m_tuple) {
-    return KindOfObject;
-  }
-  if (m_typeArgs) {
-    if (!strcasecmp(m_name.c_str(), "array"))      return KindOfArray;
-    if (!strcasecmp(m_name.c_str(), "HH\\vec"))    return KindOfVec;
-    if (!strcasecmp(m_name.c_str(), "HH\\dict"))   return KindOfDict;
-    if (!strcasecmp(m_name.c_str(), "HH\\keyset")) return KindOfKeyset;
-    if (!strcasecmp(m_name.c_str(), "HH\\varray")) return KindOfArray;
-    if (!strcasecmp(m_name.c_str(), "HH\\darray")) return KindOfArray;
-    if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) return folly::none;
-    if (!strcasecmp(m_name.c_str(), "HH\\vec_or_dict")) return folly::none;
-    return KindOfObject;
-  }
-  if (m_nullable || m_soft) {
-    return folly::none;
-  }
-  if (!strcasecmp(m_name.c_str(), "null") ||
-      !strcasecmp(m_name.c_str(), "HH\\void")) {
-    return KindOfNull;
-  }
-  if (!strcasecmp(m_name.c_str(), "HH\\bool"))     return KindOfBoolean;
-  if (!strcasecmp(m_name.c_str(), "HH\\int"))      return KindOfInt64;
-  if (!strcasecmp(m_name.c_str(), "HH\\float"))    return KindOfDouble;
-  if (!strcasecmp(m_name.c_str(), "HH\\num"))      return folly::none;
-  if (!strcasecmp(m_name.c_str(), "HH\\arraykey")) return folly::none;
-  if (!strcasecmp(m_name.c_str(), "HH\\string"))   return KindOfString;
-  if (!strcasecmp(m_name.c_str(), "array"))        return KindOfArray;
-  if (!strcasecmp(m_name.c_str(), "HH\\dict"))     return KindOfDict;
-  if (!strcasecmp(m_name.c_str(), "HH\\vec"))      return KindOfVec;
-  if (!strcasecmp(m_name.c_str(), "HH\\keyset"))   return KindOfKeyset;
-  if (!strcasecmp(m_name.c_str(), "HH\\varray"))   return KindOfArray;
-  if (!strcasecmp(m_name.c_str(), "HH\\darray"))   return KindOfArray;
-  if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) return folly::none;
-  if (!strcasecmp(m_name.c_str(), "HH\\vec_or_dict")) return folly::none;
-  if (!strcasecmp(m_name.c_str(), "HH\\resource")) return KindOfResource;
-  if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return folly::none;
-
-  return KindOfObject;
+  return get_datatype(m_name, (bool)m_typeArgs, m_function,
+    m_xhp, m_tuple, m_nullable, m_soft);
 }
 
 void TypeAnnotation::getAllSimpleNames(std::vector<std::string>& names) const {

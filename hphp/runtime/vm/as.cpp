@@ -60,8 +60,6 @@
  *
  * Missing features (partial list):
  *
- *   - builtinType (for native funcs) field on ParamInfo
- *
  *   - while class/function names can contains ':', '$', and ';',
  *     .use declarations can't handle those names because of syntax
  *     conflicts
@@ -2201,9 +2199,25 @@ void check_native(AsmState& as) {
       as.error("Native function may only appear in systemlib");
     }
 
+    as.fe->hniReturnType = as.fe->retTypeConstraint.underlyingDataType();
     as.fe->isNative =
       !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
     as.fe->attrs |= AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
+
+    for (auto& pi : as.fe->params) {
+      auto& tc = pi.typeConstraint;
+      if (auto type = tc.typeName()) {
+        pi.builtinType = get_datatype(
+          type->toCppString(),
+          tc.isArray() || tc.isKeyset() || tc.isDict(),
+          tc.isCallable(),
+          false, //?
+          false, //?
+          tc.isNullable(),
+          tc.isSoft());
+      }
+    }
+
   }
 }
 
@@ -2253,10 +2267,10 @@ void parse_function(AsmState& as) {
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
   as.fe->userAttributes = userAttrs;
 
-  check_native(as);
-
   parse_parameter_list(as);
   parse_function_flags(as);
+
+  check_native(as);
 
   as.in.expectWs('{');
 
@@ -2296,10 +2310,10 @@ void parse_method(AsmState& as) {
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
   as.fe->userAttributes = userAttrs;
 
-  check_native(as);
-
   parse_parameter_list(as);
   parse_function_flags(as);
+
+  check_native(as);
 
   as.in.expectWs('{');
 

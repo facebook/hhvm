@@ -2204,6 +2204,11 @@ void check_native(AsmState& as) {
       !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
     as.fe->attrs |= AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
 
+    if (!(as.fe->attrs &
+        (AttrParamCoerceModeFalse | AttrParamCoerceModeNull))) {
+      as.fe->attrs |= AttrParamCoerceModeNull;
+    }
+
     for (auto& pi : as.fe->params) {
       auto& tc = pi.typeConstraint;
       if (auto type = tc.typeName()) {

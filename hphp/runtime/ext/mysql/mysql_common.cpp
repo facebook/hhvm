@@ -78,6 +78,14 @@ int MySQLUtil::set_mysql_timeout(MYSQL *mysql,
 #endif
 
   mysql_option opt = MYSQL_OPT_CONNECT_TIMEOUT;
+#ifdef MYSQL_MILLISECOND_TIMEOUT
+  switch (type) {
+   case MySQLUtil::ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT_MS; break;
+   case MySQLUtil::ReadTimeout: opt =  MYSQL_OPT_READ_TIMEOUT_MS; break;
+   case MySQLUtil::WriteTimeout: opt =  MYSQL_OPT_WRITE_TIMEOUT_MS; break;
+   default: assert(false); break;
+  }
+#else
   switch (type) {
     case MySQLUtil::ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT; break;
     case MySQLUtil::ReadTimeout: opt =  MYSQL_OPT_READ_TIMEOUT; break;
@@ -85,6 +93,7 @@ int MySQLUtil::set_mysql_timeout(MYSQL *mysql,
     default: assert(false); break;
   }
   ms = (ms + 999) / 1000;
+#endif
 
   return mysql_options(mysql, opt, (const char*)&ms);
 }

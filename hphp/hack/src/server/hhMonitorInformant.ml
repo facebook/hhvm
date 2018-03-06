@@ -119,9 +119,15 @@ module Revision_map = struct
       | Future.In_progress _ ->
         None
       | Future.Complete_with_result result ->
-        Some (result
+        let result = result
           |> Core_result.map_error ~f:Future.error_to_string
-          |> Core_result.map_error ~f:HackEventLogger.find_svn_rev_failed
+          |> Core_result.map_error ~f:(HackEventLogger.find_svn_rev_failed (Future.start_t future))
+        in
+        let () = Core_result.iter result ~f:(fun _ ->
+          HackEventLogger.find_svn_rev_success (Future.start_t future)
+        )
+        in
+        Some (result
           |> Core_result.ok
           |> Option.value ~default:0)
 
@@ -170,7 +176,7 @@ module Revision_map = struct
       let query_to_result_list future =
         Future.get future
         |> Core_result.map_error ~f:Future.error_to_string
-        |> Core_result.map_error ~f:HackEventLogger.find_xdb_match_failed
+        |> Core_result.map_error ~f:(HackEventLogger.find_xdb_match_failed (Future.start_t future))
         |> Core_result.ok
         |> Option.value ~default:[] in
       let prefetch_package ~is_tiny xdb_result =
@@ -205,6 +211,7 @@ module Revision_map = struct
           | Future.In_progress age when age > 30.0 ->
             (** If prefetcher has taken longer than 30 seconds, we consider
              * this as having no saved states. *)
+            let () = HackEventLogger.informant_prefetcher_timed_out (Future.start_t prefetcher) in
             no_good_xdb_result ~is_tiny
           | Future.In_progress _ ->
             (** Prefetcher is still running. "Not yet ready, check later." *)
@@ -214,8 +221,11 @@ module Revision_map = struct
              * (where the prefetcher succeeded). Prefetchr is only run after
              * XDB lookup finishes and produces a non-empty result list,
              * so we know the XDB list is non-empty here. *)
+            let () = HackEventLogger.informant_prefetcher_success (Future.start_t prefetcher) in
             good_xdb_result ~is_tiny (List.hd (query_to_result_list query))
-          | _ ->
+          | Future.Complete_with_result (Error e) ->
+            let () = HackEventLogger.informant_prefetcher_failed
+              (Future.start_t prefetcher) (Future.error_to_string e) in
             no_good_xdb_result ~is_tiny
           end
         | query, None ->
@@ -223,6 +233,7 @@ module Revision_map = struct
           | Future.In_progress age when age > 15.0 ->
             (** If lookup in XDB table has taken more than 15 seconds, we
              * we consider this as having no saved state. *)
+            let () = HackEventLogger.find_xdb_match_timed_out (Future.start_t query) in
             no_good_xdb_result ~is_tiny
           | Future.In_progress _ ->
             (** XDB lookup still in progress. "Not yet ready, check later." *)
@@ -232,20 +243,29 @@ module Revision_map = struct
             if result = [] then
               no_good_xdb_result ~is_tiny
             else
+              let () = HackEventLogger.find_xdb_match_success (Future.start_t query) in
               (** XDB looup is done, so we need to fire up the prefetcher.
                * The prefetcher's status will be checked on the next loop. *)
               let () = prefetcher := Some (prefetch_package ~is_tiny (List.hd result)) in
               not_yet_ready
           end
 
-    let find hg_rev t =
+    let find ~start_t hg_rev t =
       let svn_rev = find_svn_rev hg_rev t in
       let open Option in
       svn_rev >>= fun svn_rev ->
         if t.use_xdb then
           find_xdb_match svn_rev t
-          >>= fun (xdb_results, is_tiny) ->
+          >>= fun (xdb_results, is_tiny) -> begin
+            let () = match xdb_results with
+              | [] ->
+                HackEventLogger.informant_find_saved_state_failed start_t
+              | result :: _ ->
+                let distance = abs (svn_rev - result.Xdb.svn_rev) in
+                HackEventLogger.informant_find_saved_state_success ~distance start_t
+            in
             Some(svn_rev, xdb_results, is_tiny)
+          end
         else
           Some(svn_rev, [], false)
 
@@ -396,8 +416,8 @@ module Revision_tracker = struct
     distance > (float_of_int min_distance_restart)
       && (elapsed_t <= 0.0 || ((distance /. elapsed_t) > 2.0))
 
-  let cached_svn_rev revision_map hg_rev =
-    Revision_map.find hg_rev revision_map
+  let cached_svn_rev ~start_t revision_map hg_rev =
+    Revision_map.find ~start_t hg_rev revision_map
 
   (** Form a decision about whether or not we'd like to start a new server.
    * transition: The state transition for which we are forming a decision
@@ -459,7 +479,7 @@ module Revision_tracker = struct
       | State_leave hg_rev
       | Changed_merge_base hg_rev -> hg_rev
     in
-    match cached_svn_rev env.rev_map hg_rev with
+    match cached_svn_rev ~start_t:timestamp env.rev_map hg_rev with
     | None ->
       None
     | Some (svn_rev, xdb_results, is_tiny) ->

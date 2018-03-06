@@ -15,6 +15,28 @@ open Typing_defs
 type single_result = (string SymbolOccurrence.t) * (string SymbolDefinition.t option)
 type result = single_result list
 
+(** Filters out redundant elements.
+
+  An example of a redundant element would be a Class occurrence when we also
+  have a Method occurrence, since that means that the user is hovering over an
+  invocation of the constructor, and would therefore only want to see
+  information about the constructor, rather than getting both the class and
+  constructor back in the hover. *)
+let filter_redundant results =
+  let result_is_method result =
+    match result with
+    | { SymbolOccurrence.type_ = SymbolOccurrence.Method _; _ }, _ -> true
+    | _ -> false in
+  let result_is_class result =
+    match result with
+    | { SymbolOccurrence.type_ = SymbolOccurrence.Class; _ }, _ -> true
+    | _ -> false in
+  let has_class = List.exists results ~f:result_is_class in
+  let has_method = List.exists results ~f:result_is_method in
+  if has_class && has_method
+  then List.filter results ~f:result_is_method
+  else results
+
 let result_to_ide_message x =
   let open Ide_message in
   Identify_symbol_response (

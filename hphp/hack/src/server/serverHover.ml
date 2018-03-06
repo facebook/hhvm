@@ -104,11 +104,25 @@ let type_at (file, line, char) tcopt files_info =
       ~default:infer_type_results1)
   | results -> results
 
-let make_hover_info (file, _line, _char) env_and_ty (occurrence, def_opt) =
+let make_hover_info tcopt (file, _line, _char) env_and_ty (occurrence, def_opt) =
   let open SymbolOccurrence in
   let open Typing_defs in
   let snippet = match occurrence, env_and_ty with
     | { name; _ }, None -> Utils.strip_ns name
+    | { type_ = Method (classname, name); _ }, Some (env, ty)
+      when name = Naming_special_names.Members.__construct ->
+        let snippet_opt =
+          let open Option.Monad_infix in
+          Typing_lazy_heap.get_class tcopt classname
+          >>= fun c -> fst c.tc_construct
+          >>| fun elt ->
+            let ty = Lazy.force_val elt.ce_type in
+            Typing_print.full_with_identity env ty occurrence def_opt
+        in
+        begin match snippet_opt with
+        | Some s -> s
+        | None -> Typing_print.full_with_identity env ty occurrence def_opt
+        end
     | occurrence, Some (env, ty) -> Typing_print.full_with_identity env ty occurrence def_opt
   in
   let addendum = [
@@ -141,10 +155,14 @@ let make_hover_info (file, _line, _char) env_and_ty (occurrence, def_opt) =
         end
       | None -> []);
     (match occurrence, env_and_ty with
-      | { type_ = Method _; _ }, Some (_, (_, Tfun _))
+      | { type_ = Method _; _ }, _
       | { type_ = Property _; _ }, Some (_, (_, Tfun _))
       | { type_ = ClassConst _; _ }, Some (_, (_, Tfun _)) ->
-        [Printf.sprintf "Full name: `%s`" (Utils.strip_ns occurrence.name)]
+        let name = match def_opt with
+          | Some def -> def.SymbolDefinition.full_name
+          | None -> occurrence.name
+        in
+        [Printf.sprintf "Full name: `%s`" (Utils.strip_ns name)]
       | _ -> []);
   ] |> List.concat in
   { snippet; addendum }
@@ -164,4 +182,5 @@ let go env (file, line, char) =
     end
   | identities ->
     identities
-    |> List.map ~f:(make_hover_info (file, line, char) env_and_ty)
+    |> IdentifySymbolService.filter_redundant
+    |> List.map ~f:(make_hover_info tcopt (file, line, char) env_and_ty)

@@ -224,6 +224,16 @@ function queryDocBlocks(): void {
 //          ^13:13
   DocBlock::manyLineBreaks();
 //          ^15:13
+  $x = new DocBlockOnClassButNotConstructor();
+//         ^17:12
+}
+
+function docblockReturn(): DocBlockBase {
+//                         ^21:28
+  $x = new DocBlockBase();
+//         ^23:12
+  return new DocBlockDerived();
+//           ^25:14
 }
 
 /* Class doc block.
@@ -261,6 +271,23 @@ class DocBlock {
    */
   public static function manyLineBreaks(): void {}
 }
+
+/**
+ * Class doc block for a class whose constructor doesn't have a doc block.
+ */
+final class DocBlockOnClassButNotConstructor {
+  public function __construct() {}
+}
+
+/* DocBlockBase: class doc block. */
+class DocBlockBase {
+  /* DocBlockBase: constructor doc block. */
+  public function __construct() {}
+}
+
+/* DocBlockDerived: extends a class with a constructor, but doesn't have one of
+   its own. */
+class DocBlockDerived extends DocBlockBase {}
 "
 
 let docblockCases = [
@@ -322,6 +349,43 @@ the other stars."; "Full name: `DocBlock::leadingStarsAndMDList`"]
          \n\
          in Markdown.\n";
       "Full name: `DocBlock::manyLineBreaks`"]
+    }
+  ];
+  ("docblock.php", 17, 12), [
+    {
+      snippet =
+        "public function __construct(): _";
+      (* This is because we set `last_line` to 0 in Docblock_finder, but we
+         can't get a proper `last_line` value without generating a TAST of the
+         file that contains this class. I'll be fixing this in a later diff.
+            -wipi *)
+      addendum = [
+        "\nClass doc block for a class whose constructor doesn't have a doc block.\n";
+        "Full name: `DocBlockOnClassButNotConstructor::__construct`";
+      ]
+    }
+  ];
+  ("docblock.php", 21, 28), [
+    {
+      snippet = "DocBlockBase";
+      addendum = ["DocBlockBase: class doc block."]
+    }
+  ];
+  ("docblock.php", 23, 12), [
+    {
+      snippet = "public function __construct(): _";
+      addendum = [
+        "DocBlockBase: constructor doc block.";
+        "Full name: `DocBlockBase::__construct`";
+      ]
+    }
+  ];
+  ("docblock.php", 25, 14), [
+    {
+      snippet = "public function __construct(): _";
+      addendum = [
+        "DocBlockBase: constructor doc block.";
+        "Full name: `DocBlockBase::__construct`"]
     }
   ]
 ]

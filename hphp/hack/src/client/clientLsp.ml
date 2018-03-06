@@ -1075,7 +1075,7 @@ let report_connect_progress
   (* TODO: better to report time that hh_server has spent initializing *)
   let load_state_not_found, tail_msg =
     ClientConnect.open_and_get_tail_msg ienv.first_start_time tail_env in
-  let msg = if load_state_not_found then
+  let msg = if load_state_not_found <> ClientConnect.No_failure then
     Printf.sprintf
       "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
       tail_msg delay_in_secs

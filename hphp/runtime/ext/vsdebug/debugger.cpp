@@ -83,9 +83,9 @@ void Debugger::setClientConnected(bool connected) {
       }
 
       // When the client connects, break the entire program to get it into a
-      // known state that matches the thread list being presented in the
-      // debugger. Once all threads are wrangled and the front-end is updated,
-      // the program can resume execution.
+      // known state, set initial breakpoints and then wait for
+      // the client to send a configurationDone command, which will resume
+      // the target.
       m_state = ProgramState::LoaderBreakpoint;
 
       // Attach the debugger to any request threads that were already
@@ -523,7 +523,13 @@ void Debugger::processCommandQueue(
   requestInfo->m_pauseRecurseCount++;
   requestInfo->m_totalPauseCount++;
 
-  sendStoppedEvent(reason, displayReason, threadId, focusedThread);
+  // Don't actually tell the client about the stop if it's due to the
+  // loader breakpoint, this is an internal implementation detail that
+  // should not be visible to the client.
+  bool sendEvent = m_state != ProgramState::LoaderBreakpoint;
+  if (sendEvent) {
+    sendStoppedEvent(reason, displayReason, threadId, focusedThread);
+  }
 
   VSDebugLogger::Log(
     VSDebugLogger::LogLevelInfo,
@@ -542,7 +548,9 @@ void Debugger::processCommandQueue(
     m_pausedRequestCount--;
   }
 
-  sendContinuedEvent(threadId);
+  if (sendEvent) {
+    sendContinuedEvent(threadId);
+  }
 
   // Any server objects stored for the client for this request are invalid
   // as soon as the thread is allowed to step.
@@ -598,7 +606,8 @@ request_id_t Debugger::nextThreadId() {
 }
 
 RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
-  // Note: the caller of this routine must hold m_lock.
+  m_lock.assertOwnedBySelf();
+
   RequestInfo* requestInfo = nullptr;
 
   request_id_t threadId;

@@ -109,7 +109,7 @@ bool addDbgGuards(const Unit* unit) {
       if (!Func::isFuncIdValid(sk.funcID())) continue;
       SrcRec* sr = pair.second;
       auto srLock = sr->writelock();
-      if (sr->unitMd5() == unit->md5() &&
+      if (sk.func()->unit() == unit &&
           !sr->hasDebuggerGuard() &&
           isSrcKeyInDbgBL(sk)) {
         addDbgGuardImpl(sk, sr, main, data, fixups);

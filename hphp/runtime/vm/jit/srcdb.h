@@ -154,9 +154,7 @@ static_assert(sizeof(TransLoc) == 16, "Don't add fields to TransLoc");
  * SrcRec: record of translator output for a given source location.
  */
 struct SrcRec final {
-  SrcRec(TCA anchor, const Func* func)
-    : m_anchorTranslation(anchor)
-    , m_unitMd5(func->unit()->md5())
+  SrcRec(TCA anchor) : m_anchorTranslation(anchor)
   {}
 
   /*
@@ -195,7 +193,6 @@ struct SrcRec final {
   void chainFrom(IncomingBranch br);
   void addDebuggerGuard(TCA dbgGuard, TCA m_dbgBranchGuardSrc);
   bool hasDebuggerGuard() const { return m_dbgBranchGuardSrc != nullptr; }
-  const MD5& unitMd5() const { return m_unitMd5; }
 
   const GrowableVector<IncomingBranch>& incomingBranches() const {
     return m_incomingBranches;
@@ -260,7 +257,6 @@ private:
 
   GrowableVector<TransLoc> m_translations;
   GrowableVector<IncomingBranch> m_incomingBranches;
-  MD5 m_unitMd5;
   // The branch src for the debug guard, if this has one.
   LowTCA m_dbgBranchGuardSrc{nullptr};
 
@@ -301,7 +297,7 @@ struct SrcDB {
 
   SrcRec* insert(SrcKey sk, TCA anchor) {
     return *m_map.insert(
-      sk.toAtomicInt(), new SrcRec(anchor, sk.func())
+      sk.toAtomicInt(), new SrcRec(anchor)
     );
   }
 

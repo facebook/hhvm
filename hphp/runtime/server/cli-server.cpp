@@ -886,9 +886,16 @@ struct RemoteFile final {
     FTRACE(2, "CLIWorker::doJob({}): {} = {}\n", client, name, fd);
   }
   ~RemoteFile() { if (file) fclose(file); }
+  FILE* release() {
+    auto r = file;
+    file = nullptr;
+    return r;
+  }
 
-  FILE* file{nullptr};
   int fd{-1};
+
+private:
+  FILE* file{nullptr};
 };
 
 struct MonitorThread final {
@@ -1067,7 +1074,7 @@ void CLIWorker::doJob(int client) {
       CliLoggerHook logging_hook(cli_err.fd);
       g_context->setStdout(&stdout_hook);
       g_context->setCwd(String(cwd.c_str(), CopyString));
-      setThreadLocalIO(cli_in.file, cli_out.file, cli_err.file);
+      setThreadLocalIO(cli_in.release(), cli_out.release(), cli_err.release());
       LightProcess::setThreadLocalAfdtOverride(cli_afdt.fd);
       Logger::SetThreadHook(&logging_hook);
 

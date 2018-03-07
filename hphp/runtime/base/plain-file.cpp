@@ -38,13 +38,20 @@ __thread FILE* tl_stderr{nullptr};
 }
 
 void setThreadLocalIO(FILE* in, FILE* out, FILE* err) {
+  // Before setting new thread local IO structures the previous ones must be
+  // cleared to ensure that they are closed appropriately.
+  always_assert(!tl_stdin && !tl_stdout && !tl_stderr);
+
   tl_stdin = in;
   tl_stdout = out;
   tl_stderr = err;
 }
 
 void clearThreadLocalIO() {
-  setThreadLocalIO(nullptr, nullptr, nullptr);
+  if (tl_stdin)  fclose(tl_stdin);
+  if (tl_stdout) fclose(tl_stdout);
+  if (tl_stderr) fclose(tl_stderr);
+  tl_stdin = tl_stdout = tl_stderr = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -285,6 +292,9 @@ BuiltinFile::~BuiltinFile() {
 
 bool BuiltinFile::close() {
   invokeFiltersOnClose();
+  if (m_stream == tl_stdin)  tl_stdin = nullptr;
+  if (m_stream == tl_stdout) tl_stdout = nullptr;
+  if (m_stream == tl_stderr) tl_stderr = nullptr;
   auto status = ::fclose(m_stream);
   setIsClosed(true);
   m_stream = nullptr;

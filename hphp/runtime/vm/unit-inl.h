@@ -247,8 +247,8 @@ inline const RepoAuthType::Array* Unit::lookupArrayTypeId(Id id) const {
 // Funcs and PreClasses.
 
 inline Func* Unit::lookupFuncId(Id id) const {
-  assert(id < Id(m_mergeInfo->m_firstHoistablePreClass));
-  return m_mergeInfo->funcBegin()[id];
+  assert(id < Id(mergeInfo()->m_firstHoistablePreClass));
+  return mergeInfo()->funcBegin()[id];
 }
 
 inline PreClass* Unit::lookupPreClassId(Id id) const {
@@ -257,7 +257,7 @@ inline PreClass* Unit::lookupPreClassId(Id id) const {
 }
 
 inline Unit::FuncRange Unit::funcs() const {
-  return m_mergeInfo->funcs();
+  return mergeInfo()->funcs();
 }
 
 inline folly::Range<PreClassPtr*> Unit::preclasses() {
@@ -269,7 +269,7 @@ inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
 }
 
 inline Func* Unit::firstHoistable() const {
-  return *m_mergeInfo->funcHoistableBegin();
+  return *mergeInfo()->funcHoistableBegin();
 }
 
 template<class Fn> void Unit::forEachFunc(Fn fn) const {
@@ -346,7 +346,7 @@ inline bool Unit::isMergeOnly() const {
 }
 
 inline bool Unit::isEmpty() const {
-  return m_mergeState & MergeState::Empty;
+  return m_mergeState.load(std::memory_order_relaxed) & MergeState::Empty;
 }
 
 inline const TypedValue* Unit::getMainReturn() const {

@@ -193,7 +193,7 @@ Unit::Unit()
 
 Unit::~Unit() {
   if (RuntimeOption::EvalEnableReverseDataMap &&
-      m_mergeState != MergeState::Unmerged) {
+      m_mergeState.load(std::memory_order_relaxed) != MergeState::Unmerged) {
     // Units are registered to data_map in Unit::initialMerge().
     data_map::deregister(this);
   }
@@ -220,8 +220,9 @@ Unit::~Unit() {
     g_hhbc_size->addValue(-int64_t(m_bclen));
   }
 
-  if (m_mergeInfo) {
-    for (auto* func : m_mergeInfo->mutableFuncs()) Func::destroy(func);
+  auto const mi = mergeInfo();
+  if (mi) {
+    for (auto const func : mi->mutableFuncs()) Func::destroy(func);
   }
 
   // ExecutionContext and the TC may retain references to Class'es, so
@@ -237,7 +238,7 @@ Unit::~Unit() {
     }
   }
 
-  free(m_mergeInfo);
+  free(mi);
 
   if (m_pseudoMainCache) {
     for (auto& kv : *m_pseudoMainCache) {
@@ -608,7 +609,8 @@ void stashExtendedLineTable(const Unit* unit, SourceLocTable table) {
 // Funcs and PreClasses.
 
 Func* Unit::getMain(Class* cls /* = nullptr */) const {
-  if (!cls) return *m_mergeInfo->funcBegin();
+  auto const mi = mergeInfo();
+  if (!cls) return *mi->funcBegin();
   Lock lock(g_classesMutex);
   if (!m_pseudoMainCache) {
     m_pseudoMainCache = new PseudoMainCacheMap;
@@ -617,7 +619,7 @@ Func* Unit::getMain(Class* cls /* = nullptr */) const {
   if (it != m_pseudoMainCache->end()) {
     return it->second;
   }
-  Func* f = (*m_mergeInfo->funcBegin())->clone(cls);
+  Func* f = (*mi->funcBegin())->clone(cls);
   f->setNewFuncId();
   f->setBaseCls(cls);
   (*m_pseudoMainCache)[cls] = f;
@@ -632,7 +634,7 @@ void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
   assert(oldName && oldName->isStatic());
   assert(newName && newName->isStatic());
 
-  for (auto& func : m_mergeInfo->hoistableFuncs()) {
+  for (auto& func : mergeInfo()->hoistableFuncs()) {
     auto const name = func->name();
     assert(name);
     if (name->same(oldName)) {
@@ -1339,7 +1341,9 @@ void setGlobal(StringData* name, TypedValue *value) {
 
 void Unit::initialMerge() {
   unitInitLock.assertOwnedBySelf();
-  if (m_mergeState != MergeState::Unmerged) return;
+  if (m_mergeState.load(std::memory_order_relaxed) != MergeState::Unmerged) {
+    return;
+  }
 
   if (RuntimeOption::EvalEnableReverseDataMap) {
     data_map::register_start(this);
@@ -1347,10 +1351,11 @@ void Unit::initialMerge() {
 
   int state = 0;
   bool needsCompact = false;
-  m_mergeState = MergeState::Merging;
+  m_mergeState.store(MergeState::Merging, std::memory_order_relaxed);
 
+  auto const mi = m_mergeInfo.load(std::memory_order_relaxed);
   bool allFuncsUnique = RuntimeOption::RepoAuthoritative;
-  for (auto& func : m_mergeInfo->nonMainFuncs()) {
+  for (auto& func : mi->nonMainFuncs()) {
     if (allFuncsUnique) {
       allFuncsUnique = (func->attrs() & AttrUnique);
     }
@@ -1380,20 +1385,20 @@ void Unit::initialMerge() {
      * the pointer will be followed by a TypedValue representing
      * the value being defined/assigned.
      */
-    int ix = m_mergeInfo->m_firstHoistablePreClass;
-    int end = m_mergeInfo->m_firstMergeablePreClass;
+    int ix = mi->m_firstHoistablePreClass;
+    int end = mi->m_firstMergeablePreClass;
     while (ix < end) {
-      PreClass* pre = (PreClass*)m_mergeInfo->mergeableObj(ix++);
+      PreClass* pre = (PreClass*)mi->mergeableObj(ix++);
       if (pre->attrs() & AttrUnique) {
         needsCompact = true;
       }
     }
 
     if (isMergeOnly()) {
-      ix = m_mergeInfo->m_firstMergeablePreClass;
-      end = m_mergeInfo->m_mergeablesSize;
+      ix = mi->m_firstMergeablePreClass;
+      end = mi->m_mergeablesSize;
       while (ix < end) {
-        void *obj = m_mergeInfo->mergeableObj(ix);
+        void *obj = mi->mergeableObj(ix);
         auto k = MergeKind(uintptr_t(obj) & 7);
         switch (k) {
           case MergeKind::UniqueDefinedClass:
@@ -1419,14 +1424,14 @@ void Unit::initialMerge() {
               nullptr /* initial_opt */
             );
             unit->initialMerge();
-            m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
+            mi->mergeableObj(ix) = (void*)((char*)unit + (int)k);
             break;
           }
           case MergeKind::PersistentDefine:
             needsCompact = true;
           case MergeKind::Define: {
             auto const s = (StringData*)((char*)obj - (int)k);
-            auto const v = (TypedValueAux*)m_mergeInfo->mergeableData(ix + 1);
+            auto const v = (TypedValueAux*)mi->mergeableData(ix + 1);
             if (k == MergeKind::PersistentDefine && bindPersistentCns(s, *v)) {
               Stats::inc(Stats::UnitMerge_mergeable);
               Stats::inc(Stats::UnitMerge_mergeable_persistent_define);
@@ -1446,34 +1451,36 @@ void Unit::initialMerge() {
     if (needsCompact) state |= MergeState::NeedsCompact;
   }
 
-  m_mergeState = MergeState::Merged | state;
+  m_mergeState.store(MergeState::Merged | state, std::memory_order_relaxed);
 }
 
 void Unit::merge() {
-  if (UNLIKELY(!(m_mergeState & MergeState::Merged))) {
+  if (UNLIKELY(!(m_mergeState.load(std::memory_order_relaxed) &
+                 MergeState::Merged))) {
     SimpleLock lock(unitInitLock);
     initialMerge();
   }
 
   if (UNLIKELY(isDebuggerAttached())) {
-    mergeImpl<true>(rds::tl_base, m_mergeInfo);
+    mergeImpl<true>(rds::tl_base, mergeInfo());
   } else {
-    mergeImpl<false>(rds::tl_base, m_mergeInfo);
+    mergeImpl<false>(rds::tl_base, mergeInfo());
   }
 }
 
 void* Unit::replaceUnit() const {
-  if (m_mergeState & MergeState::Empty) return nullptr;
-  if (isMergeOnly() &&
-      m_mergeInfo->m_mergeablesSize == m_mergeInfo->m_firstHoistableFunc + 1) {
+  if (isEmpty()) return nullptr;
+  if (!isMergeOnly()) return const_cast<Unit*>(this);
+  auto const mi = mergeInfo();
+  if (mi->m_mergeablesSize == mi->m_firstHoistableFunc + 1) {
     void* obj =
-      m_mergeInfo->mergeableObj(m_mergeInfo->m_firstHoistableFunc);
-    if (m_mergeInfo->m_firstMergeablePreClass ==
-        m_mergeInfo->m_firstHoistableFunc) {
+      mi->mergeableObj(mi->m_firstHoistableFunc);
+    if (mi->m_firstMergeablePreClass ==
+        mi->m_firstHoistableFunc) {
       auto k = MergeKind(uintptr_t(obj) & 7);
       if (k != MergeKind::Class) return obj;
-    } else if (m_mergeInfo->m_firstHoistablePreClass ==
-               m_mergeInfo->m_firstHoistableFunc) {
+    } else if (mi->m_firstHoistablePreClass ==
+               mi->m_firstHoistableFunc) {
       if (uintptr_t(obj) & 1) {
         return (char*)obj - 1 + (int)MergeKind::UniqueDefinedClass;
       }
@@ -1618,14 +1625,15 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
 
 template <bool debugger>
 void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
-  assert(m_mergeState & MergeState::Merged);
+  assert(m_mergeState.load(std::memory_order_relaxed) & MergeState::Merged);
 
   autoTypecheck(this);
 
   Func** it = mi->funcHoistableBegin();
   Func** fend = mi->funcEnd();
   if (it != fend) {
-    if (LIKELY((m_mergeState & MergeState::UniqueFuncs) != 0)) {
+    if (LIKELY((m_mergeState.load(std::memory_order_relaxed) &
+                MergeState::UniqueFuncs) != 0)) {
       do {
         Func* func = *it;
         assertx(func->top());
@@ -1831,7 +1839,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable_require);
           Unit *unit = (Unit*)((char*)obj - (int)k);
 
-          unit->mergeImpl<debugger>(tcbase, unit->m_mergeInfo);
+          unit->mergeImpl<debugger>(tcbase, unit->mergeInfo());
           if (UNLIKELY(!unit->isMergeOnly())) {
             Stats::inc(Stats::PseudoMain_Reentered);
             VarEnv* ve = nullptr;
@@ -1877,9 +1885,13 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
         continue;
       case MergeKind::Done:
         assert((unsigned)ix == mi->m_mergeablesSize);
-        if (UNLIKELY(m_mergeState & MergeState::NeedsCompact)) {
+        if (UNLIKELY(m_mergeState.load(std::memory_order_relaxed) &
+                     MergeState::NeedsCompact)) {
           SimpleLock lock(unitInitLock);
-          if (!(m_mergeState & MergeState::NeedsCompact)) return;
+          if (!(m_mergeState.load(std::memory_order_relaxed) &
+                MergeState::NeedsCompact)) {
+            return;
+          }
           if (!redoHoistable) {
             /*
              * All the classes are known to be unique, and we just got
@@ -1905,17 +1917,19 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
              */
             compactMergeInfo(mi, newMi, m_typeAliases);
             if (newMi != mi) {
-              this->m_mergeInfo = newMi;
+              this->m_mergeInfo.store(newMi, std::memory_order_release);
               Treadmill::deferredFree(mi);
               if (isMergeOnly() &&
                   newMi->m_firstHoistableFunc == newMi->m_mergeablesSize) {
-                m_mergeState |= MergeState::Empty;
+                m_mergeState.fetch_or(MergeState::Empty,
+                                      std::memory_order_relaxed);
               }
             }
             assert(newMi->m_firstMergeablePreClass == newMi->m_mergeablesSize ||
                    isMergeOnly());
           }
-          m_mergeState &= ~MergeState::NeedsCompact;
+          m_mergeState.fetch_and(~MergeState::NeedsCompact,
+                                 std::memory_order_relaxed);
         }
         return;
     }

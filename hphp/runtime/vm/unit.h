@@ -41,6 +41,7 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include <atomic>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -852,6 +853,9 @@ private:
   void mergeImpl(void* tcbase, MergeInfo* mi);
   UnitExtended* getExtended();
   const UnitExtended* getExtended() const;
+  MergeInfo* mergeInfo() const {
+    return m_mergeInfo.load(std::memory_order_acquire);
+  }
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -862,14 +866,14 @@ private:
   unsigned char const* m_bc{nullptr};
   Offset m_bclen{0};
   LowStringPtr m_filepath{nullptr};
-  MergeInfo* m_mergeInfo{nullptr};
+  std::atomic<MergeInfo*> m_mergeInfo{nullptr};
 
   int8_t m_repoId{-1};
   /*
    * m_mergeState is read without a lock, but only written to under
    * unitInitLock (see unit.cpp).
    */
-  uint8_t m_mergeState{MergeState::Unmerged};
+  std::atomic<uint8_t> m_mergeState{MergeState::Unmerged};
   bool m_mergeOnly: 1;
   bool m_interpretOnly : 1;
   bool m_isHHFile : 1;

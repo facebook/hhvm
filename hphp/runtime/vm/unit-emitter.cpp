@@ -592,7 +592,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
     ix += extra;
   }
   Unit::MergeInfo *mi = Unit::MergeInfo::alloc(ix);
-  u->m_mergeInfo = mi;
+  u->m_mergeInfo.store(mi, std::memory_order_relaxed);
   ix = 0;
   for (auto& fe : m_fes) {
     Func* func = fe->create(*u);

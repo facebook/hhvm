@@ -124,31 +124,35 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
   InstrSet literals;
   for (auto instr = start; instr < end; instr = instr->NextInstruction()) {
     if (literals.count(instr)) continue;
+
+    // Skip over smashable calls (sequence: B ; TARGET(64b) ; LDR ; BLR), and
+    // mark their targets as literals.
+    if ((TCA)instr + smashableCallLen() <= (TCA)end &&
+        isSmashableCall((TCA)instr)) {
+      auto target1 = instr->NextInstruction();
+      auto target2 = target1->NextInstruction();
+      literals.insert(target1);
+      literals.insert(target2);
+      instr = target2->NextInstruction()->NextInstruction();
+      continue;
+    }
     if (instr->IsLoadLiteral()) {
-      /*
-       * Get the address of the literal instruction words. Add both words.
-       * Also check if these instruction words are themselves LDR literals
-       * whose literals may have been accidentally added.
-       */
+      // Get the address of the literal instruction words. Add both words.
       auto addLiteral = [&] (Instruction* lit) {
         if (lit >= start && lit < end) {
-          if (!literals.count(lit)) {
-            literals.insert(lit);
-          }
-          if (lit->IsLoadLiteral()) {
-            auto oops = Instruction::Cast(lit->LiteralAddress());
-            literals.erase(oops);
-            if (lit->Mask(LoadLiteralMask) == LDR_x_lit) {
-              literals.erase(oops->NextInstruction());
-            }
-          }
+          literals.insert(lit);
         }
       };
 
       auto la = Instruction::Cast(instr->LiteralAddress());
+      // The only LDRs of an earlier address in the range should be due to the
+      // smashable call pattern, which we skip over.
+      always_assert(la < start || la > instr);
+
       addLiteral(la);
-      if (instr->Mask(LoadLiteralMask) == LDR_x_lit)
+      if (instr->Mask(LoadLiteralMask) == LDR_x_lit) {
         addLiteral(la->NextInstruction());
+      }
     }
   }
   return literals;

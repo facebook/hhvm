@@ -60,6 +60,7 @@ void smashJmp(TCA inst, TCA target);
 void smashJcc(TCA inst, TCA target);
 
 bool isSmashableMovq(TCA inst);
+bool isSmashableCall(TCA inst);
 uint64_t smashableMovqImm(TCA inst);
 uint32_t smashableCmpqImm(TCA inst);
 TCA smashableCallTarget(TCA inst);

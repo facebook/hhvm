@@ -691,31 +691,38 @@ and emit_is env pos lhs h =
           gather [
             instr_istypel local OpStr;
             instr_jmpz skip_label;
-            begin match tyl with
-              | (_, A.Happly ((_, id), _))::_ ->
-                gather [
-                  instr_cgetl local;
-                  instr_string id;
-                  instr_true;
-                  instr_fcallbuiltin 3 3 "is_a";
-                  instr_unboxr_nop;
-                  instr_jmpnz true_label;
-                ]
-              | [] ->
-                gather [
-                  instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "class_exists");
-                  instr_fpassl 0 local H.Cell;
-                  instr_fcall 1;
-                  instr_unboxr_nop;
-                  instr_jmpnz true_label;
-                  instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "interface_exists");
-                  instr_fpassl 0 local H.Cell;
-                  instr_fcall 1;
-                  instr_unboxr_nop;
-                  instr_jmpnz true_label;
-                ]
-              | _ ->
-                emit_nyi "is expression: unsupported classname (T22779957)"
+            begin match List.hd tyl with
+              | None ->
+                emit_is_classname_exists local true_label
+              | Some (_, h2) ->
+                begin match h2 with
+                  | A.Happly ((_, id), _)
+                    when id = SN.Typehints.mixed
+                      || id = SN.Typehints.nonnull
+                      || id = SN.Typehints.dynamic ->
+                    emit_is_classname_exists local true_label
+                  | A.Happly ((_, id), _) ->
+                    gather [
+                      instr_cgetl local;
+                      instr_string id;
+                      instr_true;
+                      instr_fcallbuiltin 3 3 "is_a";
+                      instr_unboxr_nop;
+                      instr_jmpnz true_label;
+                    ]
+                  | A.Haccess _ ->
+                    emit_nyi "Type constants"
+                  | A.Hoption _ ->
+                    failwith "Invalid classname: nullable typehint"
+                  | A.Hfun _ ->
+                    failwith "Invalid classname: callable typehint"
+                  | A.Htuple _ ->
+                    failwith "Invalid classname: tuple typehint"
+                  | A.Hshape _ ->
+                    failwith "Invalid classname: shape typehint"
+                  | A.Hsoft _ ->
+                    failwith "Invalid classname: soft typehint"
+                end
             end;
             instr_label skip_label;
             instr_false;
@@ -891,6 +898,20 @@ and emit_is_lhs env lhs =
   match lhs with
     | IsExprExpr e -> emit_expr ~need_ref:false env e
     | IsExprUnnamedLocal local -> instr_cgetl local
+
+and emit_is_classname_exists local true_label =
+  gather [
+    instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "class_exists");
+    instr_fpassl 0 local H.Cell;
+    instr_fcall 1;
+    instr_unboxr_nop;
+    instr_jmpnz true_label;
+    instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "interface_exists");
+    instr_fpassl 0 local H.Cell;
+    instr_fcall 1;
+    instr_unboxr_nop;
+    instr_jmpnz true_label;
+  ]
 
 and emit_is_shape_verify_count count_local fail_label shape_is_open field_list =
   let num_fields = List.length field_list in

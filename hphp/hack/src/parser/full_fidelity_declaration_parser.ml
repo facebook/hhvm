@@ -972,6 +972,7 @@ module WithExpressionAndStatementAndTypeParser
        argument list; if we don't have a name, give an error. *)
     match peek_token_kind parser with
     | Backslash
+    | Construct
     | Name -> parse_possible_generic_specifier parser
     | _ -> Make.missing parser (pos parser)
 

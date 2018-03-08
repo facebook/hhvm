@@ -220,6 +220,8 @@ unsigned high_huge1g_arena_real = 0;
 // arena when it is disabled, so that we know when to reenable it.
 std::atomic_uint g_high1GRecentlyFreed;
 
+alloc::Bump2MMapper* low_2m_mapper = nullptr;
+
 // Customized hooks to use 1g pages for jemalloc metadata.
 static extent_hooks_t huge_page_metadata_hooks;
 static extent_alloc_t* orig_alloc = nullptr;
@@ -372,13 +374,7 @@ static void set_arena_retain_grow_limit(unsigned id) {
   }
 }
 
-/*
- * Get `pages` (at most 2) 1G huge pages and map to the low memory that grows
- * down from 4G.  We can do either one (3G-4G) or two pages (2G-4G).
- */
-void setup_low_1g_arena(int pages) {
-  if (pages <= 0) return;
-  if (pages > 2) pages = 2;             // At most 2 1G pages in low memory
+void setup_low_1g_arena(unsigned n1GPages) {
 #ifdef HAVE_NUMA
   const int max_node = numa_max_node();
 #else
@@ -389,48 +385,59 @@ void setup_low_1g_arena(int pages) {
   if (max_node < 1) {
     // We either don't have libnuma, or run on a single-socket CPU.  In either
     // case, no need to worry about NUMA.
-    mapper = new Bump1GMapper(pages);
-    // mapper->append(new Bump4KMapper);
+    if (n1GPages) {
+      mapper = new Bump1GMapper(n1GPages);
+    } else {
+      low_2m_mapper = new Bump2MMapper;
+      mapper = low_2m_mapper;
+    }
+    mapper->append(new Bump4KMapper);
   } else {
-    mapper = new Bump1GMapper(pages, numa_node_set,
-                              0 /* starting from Node 0 */);
-    // mapper->append(new Bump4KMapper(numa_node_set));
+    if (n1GPages) {
+      mapper = new Bump1GMapper(n1GPages, numa_node_set,
+                                0 /* starting from Node 0 */);
+    } else {
+      low_2m_mapper = new Bump2MMapper(numa_node_set);
+      mapper = low_2m_mapper;
+    }
+    mapper->append(new Bump4KMapper(numa_node_set));
   }
   auto ma =
     LowHugeArena::CreateAt(&g_lowHugeArena,
-                           size1g * 4, size1g * pages, false, mapper);
+                           kLowArenaMaxAddr, kLowArenaMaxCap, false, mapper);
   set_arena_retain_grow_limit(ma->id());
   low_huge1g_arena = low_huge1g_arena_real = ma->id();
 }
 
-/*
- * Get `pages` 1G huge pages with explicit NUMA balancing.
- */
-void setup_high_1g_arena(int pages) {
-  if (pages <= 0) return;
-  // We don't need/want a crazy number of pages here.
-  if (pages > 12) pages = 12;
+void setup_high_1g_arena(unsigned n1GPages) {
 #ifdef HAVE_NUMA
   const int max_node = numa_max_node();
 #else
   constexpr int max_node = 0;
 #endif
   using namespace alloc;
-  BumpMapper* mapper;
+  BumpMapper* mapper = nullptr;
   if (max_node < 1) {
     // We either don't have libnuma, or run on a single-node system.  In
     // either case, no need to worry about NUMA.
-    mapper = new Bump1GMapper(pages);
-    // mapper->append(new Bump4KMapper);
+    if (n1GPages) {
+      mapper = new Bump1GMapper(n1GPages);
+      mapper->append(new Bump4KMapper);
+    } else {
+      mapper = new Bump4KMapper;
+    }
   } else {
-    // start grabbing 1G huge pages from a node different from the one for low
-    // arena.
-    mapper = new Bump1GMapper(pages, numa_node_set,
-                              max_node / 2 + 1);
-    // mapper->append(new Bump4KMapper(numa_node_set));
+    if (n1GPages) {
+      // start grabbing 1G huge pages from a node different from the one for low
+      // arena.
+      mapper = new Bump1GMapper(n1GPages, numa_node_set, max_node / 2 + 1);
+      mapper->append(new Bump4KMapper(numa_node_set));
+    } else {
+      mapper = new Bump4KMapper(numa_node_set);
+    }
   }
-  auto ma = HighArena::CreateAt(&g_highArena,
-                                kHigh1GArenaMaxAddr, size1g * pages,
+  auto ma = HighArena::CreateAt(&alloc::g_highArena,
+                                kHighArenaMaxAddr, kHighArenaMaxCap,
                                 false, mapper);
   set_arena_retain_grow_limit(ma->id());
   high_huge1g_arena = high_huge1g_arena_real = ma->id();
@@ -567,19 +574,31 @@ struct JEMallocInitializer {
     assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
     highest_lowmall_addr = (char*)sbrk(0) - 1;
 
-#if defined USE_JEMALLOC_EXTENT_HOOKS
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
     // Number of 1G huge pages for data in low memeory
-    int low_1g_pages = 0;
+    unsigned low_1g_pages = 0;
     if (char* buffer = getenv("HHVM_LOW_1G_PAGE")) {
-      sscanf(buffer, "%d", &low_1g_pages);
+      if (!sscanf(buffer, "%u", &low_1g_pages)) {
+        fprintf(stderr,
+                "Bad environment variable HHVM_LOW_1G_PAGE: %s\n", buffer);
+        abort();
+      }
     }
     // Number of 1G pages for shared data not in low memory (e.g., APC)
-    int high_1g_pages = 0;
+    unsigned high_1g_pages = 0;
     if (char* buffer = getenv("HHVM_HIGH_1G_PAGE")) {
-      sscanf(buffer, "%d", &high_1g_pages);
+      if (!sscanf(buffer, "%u", &high_1g_pages)) {
+        fprintf(stderr,
+                "Bad environment variable HHVM_HIGH_1G_PAGE: %s\n", buffer);
+        abort();
+      }
     }
 
-    if (low_1g_pages > 0 || high_1g_pages > 0) {
+    HugePageInfo info = get_huge1g_info();
+    unsigned remaining = static_cast<unsigned>(info.nr_hugepages);
+    if (remaining == 0) {
+      low_1g_pages = high_1g_pages = 0;
+    } else if (low_1g_pages > 0 || high_1g_pages > 0) {
       KernelVersion version;
       if (version.m_major < 3 ||
           (version.m_major == 3 && version.m_minor < 9)) {
@@ -588,11 +607,10 @@ struct JEMallocInitializer {
       }
     }
 
-    HugePageInfo info = get_huge1g_info();
-    int remaining = info.nr_hugepages;
-    if (remaining == 0) return;         // no pages reverved
-
-    // Do some allocation between low and high 1G arenas
+    // Do some allocation between low and high 1G arenas.  We use at most 2 1G
+    // pages for the low 1G arena; usually 1 is good enough.
+    auto const origLow1G = low_1g_pages;
+    auto const origHigh1G = high_1g_pages;
     if (low_1g_pages > 0) {
       if (low_1g_pages > 2) {
         low_1g_pages = 2;
@@ -600,16 +618,25 @@ struct JEMallocInitializer {
       if (low_1g_pages + high_1g_pages > remaining) {
         low_1g_pages = 1;
       }
+      assert(remaining >= low_1g_pages);
       remaining -= low_1g_pages;
-      setup_low_1g_arena(low_1g_pages);
     }
+    if (origLow1G) {
+      fprintf(stderr,
+              "using %u (specified %u) 1G huge pages for low arena\n",
+              low_1g_pages, origLow1G);
+    }
+    setup_low_1g_arena(low_1g_pages);
 
     if (high_1g_pages > remaining) {
       high_1g_pages = remaining;
     }
-    if (high_1g_pages > 0) {
-      setup_high_1g_arena(high_1g_pages);
+    if (origHigh1G) {
+      fprintf(stderr,
+              "using %u (specified %u) 1G huge pages for high arena\n",
+              high_1g_pages, origHigh1G);
     }
+    setup_high_1g_arena(high_1g_pages);
 #endif
   }
 };
@@ -713,6 +740,18 @@ void* malloc_huge1g_impl(size_t size) {
 void low_malloc_skip_huge(void* start, void* end) {}
 
 #endif // USE_JEMALLOC
+
+void low_malloc_huge_pages(int pages) {
+#ifdef USE_JEMALLOC
+  if (pages <= 0) return;
+  low_huge_pages = pages;
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
+  if (low_2m_mapper) {
+    low_2m_mapper->setMaxPages(pages);
+  }
+#endif
+#endif
+}
 
 int mallctlCall(const char* cmd, bool errOk) {
   // Use <unsigned> rather than <void> to avoid sizeof(void).

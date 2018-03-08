@@ -91,7 +91,7 @@ struct BumpMapper {
   // If the mapper doesn't use huge pages, it can choose not to look at it in
   // `addMappingImpl()`, and that's why we don't check m_currNumPages <
   // m_maxNumPages in `addMapping()`.
-  const uint32_t m_maxNumPages{0};
+  uint32_t m_maxNumPages{0};
   uint32_t m_currNumPages{0};
   // NUMA interleave masks for the newly added memory.  0 indicates no-NUMA.
   uint32_t m_interleaveMask{0};
@@ -114,20 +114,26 @@ struct Bump1GMapper : public BumpMapper {
   bool addMappingImpl(BumpAllocState& state, size_t newSize) override;
 };
 
-// Add 2M huge pages
-struct Bump2MMapper : public BumpMapper {
-  template<typename... Args>
-  explicit Bump2MMapper(Args&&... args)
-    : BumpMapper(std::forward<Args>(args)...) {}
- protected:
-  bool addMappingImpl(BumpAllocState& state, size_t newSize) override;
-};
-
 struct Bump4KMapper : public BumpMapper {
   // Only the NUMA mask is relevant.  `m_maxNumPages` is ignored for this
   // mapper.
   explicit Bump4KMapper(uint32_t numaMask = 0)
     : BumpMapper(0, numaMask) {}
+ protected:
+  bool addMappingImpl(BumpAllocState& state, size_t newSize) override;
+  static constexpr size_t kChunkSize = 8u << 20;
+};
+
+// Bump4KMapper with transparent huge pages.
+struct Bump2MMapper : public Bump4KMapper {
+  template<typename... Args>
+  explicit Bump2MMapper(uint32_t numaMask = 0)
+    : Bump4KMapper(numaMask) {}
+
+  inline void setMaxPages(uint32_t max2MPages) {
+    m_maxNumPages = max2MPages;
+  }
+
  protected:
   bool addMappingImpl(BumpAllocState& state, size_t newSize) override;
 };

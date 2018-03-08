@@ -164,7 +164,7 @@ function compact($varname, ...);
 <<__PHPStdLib>>
 function shuffle(&$array);
 <<__Deprecated('Use count(), it does the same thing as sizeof() in PHP and '.
-  'doesn\'t suggest that it\'s counting bytes.')>>
+  'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib>>
 function sizeof($var, $recursive = false);
 <<__PHPStdLib>>
 function each(&$array);

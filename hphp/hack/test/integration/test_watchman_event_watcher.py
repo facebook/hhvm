@@ -14,7 +14,7 @@ import sys
 import time
 import unittest
 
-from libfb.testutil import flaky
+from libfb.py.testutil import flaky
 
 import common_tests
 

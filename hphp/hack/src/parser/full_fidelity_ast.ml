@@ -47,6 +47,7 @@ type env =
   ; lower_coroutines         : bool
   ; enable_hh_syntax         : bool
   ; disallow_elvis_space     : bool
+  ; fail_open                : bool
   ; parser_options           : ParserOptions.t
   ; fi_mode                  : FileInfo.mode
   ; file                     : Relative_path.t
@@ -113,29 +114,60 @@ let invariant_failure node msg env =
   let pos = Pos.string (Pos.to_absolute (pPos node env)) in
   raise (Lowerer_invariant_failure (pos, msg))
 
-exception API_Missing_syntax of string * env * node
-let missing_syntax : string -> node -> env -> 'a = fun s n env ->
-  raise (API_Missing_syntax (s, env, n))
-let handle_missing_syntax : string -> node -> env -> 'a = fun s n e ->
-  let pos = Pos.string (Pos.to_absolute (pPos n e)) in
-  let msg = Printf.sprintf
-    "Missing case in %s.
- - Pos: %s
- - Unexpected: '%s'
- - Kind: %s
- "
-  s
-  pos
-  (text n)
-  (SyntaxKind.to_string (kind n))
+let scuba_table = Scuba.Table.of_name "hh_missing_lowerer_cases"
+
+let log_missing ?(caught = false) ~env ~expecting node : unit =
+  let source = source_text node in
+  let start = start_offset node in
+  let end_ = end_offset node in
+  let pos = SourceText.relative_pos env.file source start end_ in
+  let file = Relative_path.to_absolute env.file in
+  let contents =
+    let context_size = 5000 in
+    let start = max 0 (start - context_size) in
+    let length = min (2 * context_size) (SourceText.length source - start) in
+    SourceText.sub source start length
   in
-  raise (Failure msg)
+  let kind = SyntaxKind.to_string (Syntax.kind node) in
+  let line = Pos.line pos in
+  let column = Pos.start_cnum pos in
+  let synthetic = value node = Value.Synthetic in
+  Scuba.new_sample (Some scuba_table)
+  |> Scuba.add_normal "filename" file
+  |> Scuba.add_normal "expecting" expecting
+  |> Scuba.add_normal "contents" contents
+  |> Scuba.add_normal "found_kind" kind
+  |> Scuba.add_int "line" line
+  |> Scuba.add_int "column" column
+  |> Scuba.add_int "is_synthetic" (if synthetic then 1 else 0)
+  |> Scuba.add_int "caught" (if caught then 1 else 0)
+  |> EventLogger.log
+
+exception API_Missing_syntax of string * env * node
+let missing_syntax : ?fallback:'a -> string -> node -> env -> 'a =
+  fun ?fallback expecting node env ->
+    match fallback with
+    | Some x when env.fail_open ->
+      let () = log_missing ~env ~expecting node in
+      x
+    | _ -> raise (API_Missing_syntax (expecting, env, node))
 
 let runP : 'a parser -> node -> env -> 'a = fun pThing thing env ->
   try pThing thing env with
-  | API_Missing_syntax (ex, env, n) -> handle_missing_syntax ex n env
-  | e -> raise e
-
+  | API_Missing_syntax (s, env, n) ->
+    let pos = Pos.string (Pos.to_absolute (pPos n env)) in
+    let msg = Printf.sprintf
+      "missing case in %s.
+   - pos: %s
+   - unexpected: '%s'
+   - kind: %s
+   "
+    s
+    pos
+    (text n)
+    (SyntaxKind.to_string (kind n))
+    in
+    raise (Failure msg)
 
 (* TODO: Cleanup this hopeless Noop mess *)
 let mk_noop pos : stmt list -> stmt list = function
@@ -957,7 +989,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         begin match (syntax type_args) with
           | TypeArguments { type_arguments_types; _ } ->
             couldMap ~f:pHint type_arguments_types env
-          | _ -> missing_syntax "no type arguments for annotated function call" type_args env
+          | _ -> missing_syntax "type arguments" type_args env
         end in
       Call (pExpr recv env, hints, couldMap ~f:pExpr args env, [])
     | QualifiedName _ ->
@@ -1404,7 +1436,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       in
       Xml (name, attrs, exprs)
     (* FIXME; should this include Missing? ; "| Missing -> Null" *)
-    | _ -> missing_syntax "expression" node env
+    | _ -> missing_syntax ?fallback:(Some Null) "expression" node env
   in
   let outer_unsafes = env.unsafes in
   let is_safe =
@@ -1733,7 +1765,7 @@ and pStmt : stmt parser = fun node env ->
     in
     let () = env.max_depth <- outer_max_depth in
     result
-  | _ -> missing_syntax "statement" node env in
+  | _ -> missing_syntax ?fallback:(Some (Pos.none,Noop)) "statement" node env in
   pop_docblock ();
   result
 
@@ -1954,7 +1986,7 @@ and top_docblock () =
 
 and pClassElt : class_elt list parser = fun node env ->
   let doc_comment_opt = extract_docblock node in
-  match syntax node with
+  let pClassElt_ = function
   | ConstDeclaration
     { const_abstract; const_type_specifier; const_declarators; _ } ->
       let ty = mpOptional pHint const_type_specifier env in
@@ -2187,8 +2219,12 @@ and pClassElt : class_elt list parser = fun node env ->
   | XHPCategoryDeclaration { xhp_category_categories = cats; _ } ->
     let pNameSansPercent node _env = drop_pstr 1 (pos_name node env) in
     [ XhpCategory (couldMap ~f:pNameSansPercent cats env) ]
-  | _ -> missing_syntax "expression" node env
-
+  | _ -> missing_syntax "class element" node env
+  in
+  try pClassElt_ (syntax node) with
+  | API_Missing_syntax (expecting, env, node) when env.fail_open ->
+    let () = log_missing ~caught:true ~env ~expecting node in
+    []
 and pXhpChild : xhp_child parser = fun node env ->
   match syntax node with
   | Token t -> ChildName (pos_name node env)
@@ -2565,8 +2601,15 @@ let pProgram : program parser = fun node env ->
       in
       aux env ([def] :: acc) nodel
   | node :: nodel ->
-    let def = pDef node env in
-    aux env (def :: acc) nodel
+    let acc =
+      match pDef node env with
+      | exception API_Missing_syntax (expecting, env, node)
+        when env.fail_open ->
+          let () = log_missing ~caught:true ~env ~expecting node in
+          acc
+      | def -> def :: acc
+    in
+    aux env acc nodel
   in
   let nodes = as_list node in
   let nodes = aux env [] nodes in
@@ -2690,6 +2733,7 @@ let make_env
   ?(lower_coroutines         = false                   )
   ?(enable_hh_syntax         = false                   )
   ?(disallow_elvis_space     = false                   )
+  ?(fail_open                = true                    )
   ?(parser_options           = ParserOptions.default   )
   ?(fi_mode                  = FileInfo.Mpartial       )
   ?(is_hh_file               = false                   )
@@ -2719,6 +2763,7 @@ let make_env
     ; disallow_elvis_space
     ; parser_options
     ; fi_mode
+    ; fail_open
     ; file
     ; stats
     ; top_level_statements = true

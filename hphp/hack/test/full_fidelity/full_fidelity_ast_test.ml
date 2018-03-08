@@ -42,8 +42,8 @@ let sanity_test_classic_parser source =
 let full_fidelity_to_classic source =
   let stats = Stats_container.new_container () in
   let path = Relative_path.create Relative_path.Dummy "<inline>" in
-  let classic_ast =
-    Lowerer.(from_text_with_legacy (make_env ~stats path) source) in
+  let env = Lowerer.make_env ~fail_open:false ~stats path in
+  let classic_ast = Lowerer.from_text_with_legacy env source in
   let str = Debug.dump_ast (Ast.AProgram classic_ast.Parser_hack.ast) in
   str
 

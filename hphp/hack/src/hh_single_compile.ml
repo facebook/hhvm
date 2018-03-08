@@ -281,6 +281,7 @@ let parse_text compiler_options popt fn text =
       ~parser_options:popt
       ~ignore_pos
       ~codegen:true
+      ~fail_open:false
       ~systemlib_compat_mode
       ~php5_compat_mode
       ~enable_hh_syntax

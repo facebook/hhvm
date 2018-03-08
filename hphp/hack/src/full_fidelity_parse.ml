@@ -64,6 +64,7 @@ module FullFidelityParseArgs = struct
     lower_coroutines : bool;
     enable_hh_syntax : bool;
     disallow_elvis_space : bool;
+    fail_open : bool;
     (* Defining the input *)
     files : string list
   }
@@ -90,6 +91,7 @@ module FullFidelityParseArgs = struct
     lower_coroutines
     enable_hh_syntax
     disallow_elvis_space
+    fail_open
     show_file_name
     files = {
     full_fidelity_json;
@@ -113,6 +115,7 @@ module FullFidelityParseArgs = struct
     lower_coroutines;
     enable_hh_syntax;
     disallow_elvis_space;
+    fail_open;
     show_file_name;
     files }
 
@@ -151,6 +154,7 @@ module FullFidelityParseArgs = struct
     let lower_coroutines = ref true in
     let enable_hh_syntax = ref false in
     let disallow_elvis_space = ref false in
+    let fail_open = ref true in
     let show_file_name = ref false in
     let set_show_file_name () = show_file_name := true in
     let files = ref [] in
@@ -246,6 +250,12 @@ No errors are filtered out.";
       "--no-disallow-elvis-space",
         Arg.Clear disallow_elvis_space,
         "Unset the disallow_elvis_space option for the parser.";
+      "--fail-open",
+        Arg.Set fail_open,
+        "Set the fail_open option for the parser.";
+      "--no-fail-open",
+        Arg.Clear fail_open,
+        "Unset the fail_open option for the parser.";
       "--show-file-name",
         Arg.Unit set_show_file_name,
         "Displays the file name.";
@@ -273,6 +283,7 @@ No errors are filtered out.";
       !lower_coroutines
       !enable_hh_syntax
       !disallow_elvis_space
+      !fail_open
       !show_file_name
       (List.rev !files)
 end
@@ -366,6 +377,7 @@ let handle_existing_file args filename =
         ~enable_hh_syntax:args.enable_hh_syntax
         ~disallow_elvis_space:args.disallow_elvis_space
         ~parser_options:popt
+        ~fail_open:args.fail_open
         ~is_hh_file:args.is_hh_file
         file
     in

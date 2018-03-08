@@ -12744,6 +12744,12 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       if (auto uc = UnitCompiler::create(code, codeLen, filename, md5)) {
         try {
           ue = uc->compile();
+          if (BuiltinSymbols::s_systemAr) {
+            ue->m_filepath = makeStaticString(
+              "/:" + ue->m_filepath->toCppString());
+            BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
+            ue = uc->compile();
+          }
         } catch (const BadCompilerException& exc) {
           Logger::Error("Bad external compiler: %s", exc.what());
           return nullptr;

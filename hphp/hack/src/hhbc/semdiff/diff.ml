@@ -184,8 +184,8 @@ let string_no_whitespace_no_casing_comparer =
 let bool_comparer = primitive_comparer string_of_bool
 
 
-(* wrap takes a function a->b,a function a->string->string, a b-comparer and
-   returns an a-comparer
+(* wrap takes a (function a->b), a (function a->string->string), a b-comparer 
+   and returns an a-comparer
    TODO: this is still not quite right, as we want to be able to customize the
    wrapped edits, and that should be compatible with what we do in string_of.
    The underlying comparer *should* return a more structured
@@ -628,10 +628,14 @@ let property_type_info_comparer =
 let property_comparer =
   List.fold_left (fun c1 c2 -> join (fun s1 s2 -> s1 ^ s2) c1 c2)
     property_is_private_comparer
-    [property_is_protected_comparer; property_is_public_comparer;
-     property_is_static_comparer; property_is_deep_init_comparer;
-     property_name_comparer; property_initial_value_comparer;
-     property_no_serialize_comparer; property_type_info_comparer]
+    [property_is_protected_comparer;
+     property_is_public_comparer;
+     property_is_static_comparer;
+     property_is_deep_init_comparer;
+     property_name_comparer;
+     property_initial_value_comparer;
+     property_no_serialize_comparer;
+     property_type_info_comparer]
 
 (* apply a permutation to the trailing elements of a list
    used to reorder the properties of one closure class to

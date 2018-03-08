@@ -1962,9 +1962,8 @@ let classish_errors env node parents namespace_name names errors =
 
     (* Given a ClassishDeclaration node, test whether or not it's a trait
      * invoking the 'extends' keyword. *)
-    let classish_invalid_extends_keyword env _ =
+    let classish_invalid_extends_keyword _ =
       (* Invalid if uses 'extends' and is a trait. *)
-      not (is_hhvm_compat env) &&
       token_kind cd.classish_extends_keyword = Some TokenKind.Extends &&
         token_kind cd.classish_keyword = Some TokenKind.Trait in
 
@@ -1989,7 +1988,7 @@ let classish_errors env node parents namespace_name names errors =
       SyntaxError.error2035 cd.classish_implements_keyword in
     let errors =
       produce_error errors
-      (classish_invalid_extends_keyword env) ()
+      classish_invalid_extends_keyword ()
       SyntaxError.error2036 cd.classish_extends_keyword in
     let errors =
       produce_error errors (classish_invalid_extends_list env) ()

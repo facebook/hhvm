@@ -154,7 +154,7 @@ static_assert(sizeof(TransLoc) == 16, "Don't add fields to TransLoc");
  * SrcRec: record of translator output for a given source location.
  */
 struct SrcRec final {
-  SrcRec(TCA anchor) : m_anchorTranslation(anchor)
+  explicit SrcRec(TCA anchor) : m_anchorTranslation(anchor)
   {}
 
   /*

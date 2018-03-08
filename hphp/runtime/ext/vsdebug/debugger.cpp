@@ -1336,33 +1336,42 @@ std::pair<int, int> Debugger::calibrateBreakpointLineInUnit(
   // statement, or could be on a line that contains multiple statements. It
   // could also be in whitespace, or past the end of the file.
   std::pair<int, int> bestLocation = {-1, -1};
-  int bestDistance = INT_MAX;
+  struct sourceLocCompare {
+    bool operator()(const SourceLoc& a, const SourceLoc& b) const {
+      if (a.line0 == b.line0) {
+        return a.line1 < b.line1;
+      }
 
-  for (auto const& tableEntry : getSourceLocTable(unit)) {
+      return a.line0 < b.line0;
+    }
+  };
+
+  std::set<SourceLoc, sourceLocCompare> candidateLocations;
+  const auto& table = getSourceLocTable(unit);
+  for (auto const& tableEntry : table) {
     const SourceLoc& sourceLocation = tableEntry.val();
 
-    // If this source location ends before the bp's line. No match.
-    if (!sourceLocation.valid() || sourceLocation.line1 < bpLine) {
+    // If this source location is invalid, ends before the line we are
+    // looking for, or starts before the line we are looking for there
+    // is no match. Exception: if it is a multi-line statement that begins
+    // before the target line and ends ON the target line, that is a match
+    // to allow, for example, setting a breakpoint on the line containing
+    // a closing paren for a multi-line function call.
+    if (!sourceLocation.valid() ||
+        sourceLocation.line1 < bpLine ||
+        (sourceLocation.line0 < bpLine && sourceLocation.line1 != bpLine)) {
+
       continue;
     }
 
-    // If we found a single line source location that begins at the bp's line,
-    // this is the ideal case, and is where the breakpoint should be placed.
-    if (sourceLocation.line0 == sourceLocation.line1 &&
-        sourceLocation.line0 == bpLine) {
-        bestLocation.first = sourceLocation.line0;
-        bestLocation.second = sourceLocation.line1;
-        break;
-    }
+    candidateLocations.insert(sourceLocation);
+  }
 
-    // Otherwise, choose the source line whose ending line is closest to the
-    // breakpoint's desired line.
-    int distance = sourceLocation.line1 - bpLine;
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      bestLocation.first = sourceLocation.line0;
-      bestLocation.second = sourceLocation.line1;
-    }
+  if (candidateLocations.size() > 0) {
+    const auto it = candidateLocations.begin();
+    const SourceLoc& location = *it;
+    bestLocation.first = location.line0;
+    bestLocation.second = location.line1;
   }
 
   return bestLocation;

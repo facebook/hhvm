@@ -17,13 +17,31 @@
 #include "hphp/util/maphuge.h"
 
 #include "hphp/util/hugetlb.h"
+#include "hphp/util/kernel-version.h"
 
+#include <folly/portability/SysMman.h>
 #include <folly/portability/Unistd.h>
 
-#include <errno.h>
-#include <stdint.h>
-
 namespace HPHP {
+
+void hintHuge(void* mem, size_t length) {
+#ifdef MADV_HUGEPAGE
+  if (hugePagesSupported()) {
+    madvise(mem, length, MADV_HUGEPAGE);
+  }
+#endif
+}
+
+bool hugePagesSupported() {
+#ifdef MADV_HUGEPAGE
+  static KernelVersion kv;
+  // This kernel fixed a panic when using MADV_HUGEPAGE.
+  static KernelVersion minKv("3.2.28-72_fbk12");
+  return KernelVersion::cmp(kv, minKv);
+#else
+  return false;
+#endif
+}
 
 void hintHugeDeleteData(char* mem, size_t length, int prot, bool shared) {
 #ifdef __linux__

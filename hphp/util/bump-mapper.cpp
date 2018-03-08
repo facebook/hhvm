@@ -18,7 +18,6 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/hugetlb.h"
-#include "hphp/util/maphuge.h"
 #include "hphp/util/numa.h"
 
 #include <folly/portability/SysMman.h>
@@ -96,9 +95,56 @@ bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
   return false;
 }
 
-constexpr size_t Bump4KMapper::kChunkSize;
+bool Bump2MMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
+  // Check quota and alignment before trying to map.
+  if (m_currNumPages >= m_maxNumPages) {
+    m_failed = true;
+    return false;
+  }
+  uintptr_t currFrontier = state.frontier();
+  if (currFrontier % size2m != 0) return false;
+
+#ifdef HAVE_NUMA
+  assert((m_interleaveMask & ~numa_node_set) == 0);
+  const unsigned allowedRetries = __builtin_popcount(m_interleaveMask);
+#else
+  constexpr unsigned allowedRetries = 0; // No retry when there is no NUMA limit
+#endif
+  // Try to map 2M pages until we have enough capacity for the requested size,
+  // or until we run out of allowed quota, or until we have failed to obtain 2M
+  // huge pages on all the allowed NUMA nodes.
+  unsigned failCount = 0;
+  while (state.m_currCapacity < newSize) {
+    currFrontier = state.m_base - state.m_currCapacity;
+    assert(currFrontier % size2m == 0);
+    void* newPageStart = reinterpret_cast<void*>(currFrontier - size2m);
+    int currNode = -1;
+#ifdef HAVE_NUMA
+    if (m_interleaveMask) {
+      // Advance to the next allowed node.
+      do {
+        currNode = m_nextNode;
+        m_nextNode = (currNode + 1) & numa_node_mask;
+      } while (!((1u << currNode) & m_interleaveMask));
+    }
+#endif
+    if (mmap_2m(newPageStart, PROT_READ | PROT_WRITE, currNode)) {
+      state.m_currCapacity += size2m;
+      if (++m_currNumPages >= m_maxNumPages) {
+        m_failed = true;
+        return state.m_currCapacity >= newSize;
+      }
+      failCount = 0;
+    } else if (++failCount >= allowedRetries) {
+      // Failed on all allowed nodes.
+      return false;
+    }
+  }
+  return true;
+}
 
 bool Bump4KMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
+  constexpr size_t kChunkSize = size2m * 4;
   auto const currFrontier = state.m_base - state.m_currCapacity;
   if (currFrontier % size4k != 0) return false;
   void* newPageStart = reinterpret_cast<void*>(currFrontier - kChunkSize);
@@ -121,28 +167,6 @@ bool Bump4KMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
           &mask, 32 /* max node */, 0 /* flag */);
   }
 #endif
-  return true;
-}
-
-bool Bump2MMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
-  // Check quota and alignment before trying to map.  Note that m_maxNumPages
-  // may be initialized later for this mapper, so don't fail permanently before
-  // it is initialized.
-  if (m_currNumPages >= m_maxNumPages) {
-    if (m_maxNumPages) {
-      m_failed = true;
-    }
-    return false;
-  }
-  auto newPages = state.m_base - state.m_currCapacity;
-  // Add some 4K pages before madvise()
-  if (!Bump4KMapper::addMappingImpl(state, newSize)) {
-    return false;
-  }
-  auto const hugeSize = std::min(Bump4KMapper::kChunkSize,
-                                 size2m * (m_maxNumPages - m_currNumPages));
-  assert(newPages % size2m == 0);
-  hintHuge(reinterpret_cast<void*>(newPages), hugeSize);
   return true;
 }
 

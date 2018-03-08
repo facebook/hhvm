@@ -165,14 +165,8 @@ extern unsigned low_huge1g_arena;
 extern unsigned low_huge1g_arena_real;
 extern unsigned high_huge1g_arena;
 extern unsigned high_huge1g_arena_real;
-
-// Address ranges for the managed arenas.  Low arena is in [3G, 4G), and high
-// arena in [4G, 32G) at most.  Both grows down and can be smaller.  But things
-// won't work well if either overflows.
-constexpr uintptr_t kLowArenaMaxAddr = 4ull << 30;
-constexpr uintptr_t kHighArenaMaxAddr = 32ull << 30;
-constexpr size_t kLowArenaMaxCap = 2ull << 30;
-constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
+// Address range in the high1g arena is less than 16G.
+constexpr uintptr_t kHigh1GArenaMaxAddr = 16ull << 30;
 
 // Explicit per-thread tcache for the huge arenas.
 extern __thread int high_huge1g_tcache;
@@ -224,7 +218,12 @@ inline void low_free(void* ptr) {
 #endif
 }
 
-void low_malloc_huge_pages(int pages);
+inline void low_malloc_huge_pages(int pages) {
+#ifdef USE_JEMALLOC
+  low_huge_pages = pages;
+#endif
+}
+
 void low_malloc_skip_huge(void* start, void* end);
 
 inline void* low_malloc_data(size_t size) {
@@ -257,7 +256,7 @@ inline void free_huge(void* ptr) {
 #ifndef USE_JEMALLOC_EXTENT_HOOKS
   free(ptr);
 #else
-  if (LIKELY(reinterpret_cast<uintptr_t>(ptr) < kHighArenaMaxAddr)) {
+  if (LIKELY(reinterpret_cast<uintptr_t>(ptr) < kHigh1GArenaMaxAddr)) {
     if (ptr) dallocx(ptr, dallocx_huge1g_flags());
   } else {
     // Not from the high 1G arena

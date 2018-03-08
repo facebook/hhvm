@@ -31,6 +31,7 @@ type options = {
   waiting_client   : Unix.file_descr option;
   debug_client     : Handle.handle option;
   ignore_hh_version : bool;
+  file_info_on_disk : bool;
 }
 
 (*****************************************************************************)
@@ -80,6 +81,7 @@ module Messages = struct
                       \ starting and again when it's done starting"
   let debug_client  = " send significant server events to this file descriptor"
   let ignore_hh_version = " ignore hh_version check when loading saved states"
+  let file_info_on_disk = " [experimental] store file-info in sqlite db."
 end
 
 let print_json_version () =
@@ -177,6 +179,7 @@ let parse_options () =
   let waiting_client= ref None in
   let debug_client  = ref None in
   let ignore_hh     = ref false in
+  let file_info_on_disk = ref false in
   let cdir          = fun s -> convert_dir := Some s in
   let set_ai        = fun s ->
     ai_mode := Some (Ai_options.prepare ~server:true s) in
@@ -211,6 +214,7 @@ let parse_options () =
      "--waiting-client", Arg.Int set_wait      , Messages.waiting_client;
      "--debug-client"  , Arg.Int set_debug     , Messages.debug_client;
      "--ignore-hh-version", Arg.Set ignore_hh  , Messages.ignore_hh_version;
+     "--file-info-on-disk", Arg.Set file_info_on_disk , Messages.file_info_on_disk;
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -260,6 +264,7 @@ let parse_options () =
     waiting_client= !waiting_client;
     debug_client  = !debug_client;
     ignore_hh_version = !ignore_hh;
+    file_info_on_disk = !file_info_on_disk;
   }
 
 (* useful in testing code *)
@@ -280,6 +285,7 @@ let default_options ~root = {
   waiting_client = None;
   debug_client = None;
   ignore_hh_version = false;
+  file_info_on_disk = false;
 }
 
 (*****************************************************************************)
@@ -302,6 +308,7 @@ let use_gen_deps options = options.use_gen_deps
 let waiting_client options = options.waiting_client
 let debug_client options = options.debug_client
 let ignore_hh_version options = options.ignore_hh_version
+let file_info_on_disk options = options.file_info_on_disk
 
 (*****************************************************************************)
 (* Setters *)
@@ -336,6 +343,7 @@ let to_string
     waiting_client;
     debug_client;
     ignore_hh_version;
+    file_info_on_disk;
   } =
     let ai_mode_str = match ai_mode with
       | None -> "<>"
@@ -373,5 +381,6 @@ let to_string
       "waiting_client: "; waiting_client_str; ", ";
       "debug_client: "; debug_client_str; ", ";
       "ignore_hh_version: "; string_of_bool ignore_hh_version;
+      "file_info_on_disk: "; string_of_bool file_info_on_disk;
       "})"
     ] |> String.concat "")

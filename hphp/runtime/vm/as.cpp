@@ -2199,7 +2199,10 @@ void check_native(AsmState& as) {
       as.error("Native function may only appear in systemlib");
     }
 
-    as.fe->hniReturnType = as.fe->retTypeConstraint.underlyingDataType();
+    if (!as.fe->retTypeConstraint.isNullable()) {
+      as.fe->hniReturnType = as.fe->retTypeConstraint.underlyingDataType();
+    }
+
     as.fe->isNative =
       !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
     as.fe->attrs |= AttrBuiltin | AttrSkipFrame | AttrMayUseVV;

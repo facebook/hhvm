@@ -316,14 +316,15 @@ let emit_type_constraint_for_native_function tparams ret ti =
         Some (vanilla_name @@ strip_nullable @@ strip_soft @@ strip_nullable t)
       in
       let flags = [TC.HHType; TC.ExtendedHint] in
-      let flags = match snd ret with
-        | A.Hoption _ -> TC.Nullable :: flags
-        | A.Hsoft _ -> TC.Soft :: flags
+      let rec get_flags t flags = match snd t with
+        | A.Hoption x -> TC.Nullable :: (get_flags x flags)
+        | A.Hsoft x -> TC.Soft :: (get_flags x flags)
         | A.Haccess _ -> TC.TypeConstant :: flags
         | A.Happly ((_, name), _) when List.mem tparams name ->
           TC.TypeVar :: flags
         | _ -> flags
       in
+      let flags = get_flags ret flags in
       name, flags
   in
   let tc = Hhas_type_constraint.make name flags in

@@ -213,7 +213,7 @@ let multiple_type_cases = [
 ]
 
 let lambda_param = "<?hh // strict
-function takes_func((function (int): int) $f): void {}
+function takes_func((function (int): num) $f): void {}
 function lambda_param(): void {
   $f1 = $s ==> 3;
 //      ^4:9
@@ -223,8 +223,12 @@ function lambda_param(): void {
 "
 
 let lambda_param_cases = [
-  ("lambda_param.php", 4, 9), ("_", "_");
-  ("lambda_param.php", 6, 14), ("int", "int");
+  (* FIXME: We're incorrectly showing the function types here because the
+     positional information produced by Parser_hack for lambda expressions is
+     wrong. When we cut over to the FFP, we'll correctly show the parameter
+     types here instead. *)
+  ("lambda_param.php", 4, 9), ("(function($s): _)", "(function($s): _)");
+  ("lambda_param.php", 6, 14), ("(function(int $x): num)", "(function(int $x): num)");
 ]
 
 let files = [

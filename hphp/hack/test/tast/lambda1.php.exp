@@ -20,7 +20,7 @@
                  (AnnotatedAST.Binop ((Eq None),
                     (([4:3-4:5], Some [fun]),
                      (AnnotatedAST.Lvar ([4:3-4:5], $f))),
-                    (([4:8-4:10], Some _),
+                    (([4:8-4:10], Some (function($n): _)),
                      (AnnotatedAST.Efun (
                         { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                           f_ret = None; f_name = ([Pos.none], ";anonymous");

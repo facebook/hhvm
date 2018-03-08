@@ -20,7 +20,7 @@
                  (AnnotatedAST.Binop ((Eq None),
                     (([15:3-15:5], Some [fun]),
                      (AnnotatedAST.Lvar ([15:3-15:5], $x))),
-                    (([15:8-15:10], Some _),
+                    (([15:8-15:10], Some (function($z): _)),
                      (AnnotatedAST.Efun (
                         { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                           f_ret = None; f_name = ([Pos.none], ";anonymous");
@@ -74,7 +74,7 @@
                  (AnnotatedAST.Binop ((Eq None),
                     (([18:3-18:5], Some [fun]),
                      (AnnotatedAST.Lvar ([18:3-18:5], $x))),
-                    (([18:8-18:16], Some _),
+                    (([18:8-18:16], Some (function($z): _)),
                      (AnnotatedAST.Efun (
                         { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                           f_ret = None; f_name = ([Pos.none], ";anonymous");
@@ -114,7 +114,7 @@
                  (AnnotatedAST.Binop ((Eq None),
                     (([23:3-23:5], Some [fun]),
                      (AnnotatedAST.Lvar ([23:3-23:5], $x))),
-                    (([23:8-23:9], Some _),
+                    (([23:8-23:9], Some (function($a, $b): _)),
                      (AnnotatedAST.Efun (
                         { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                           f_ret = None; f_name = ([Pos.none], ";anonymous");

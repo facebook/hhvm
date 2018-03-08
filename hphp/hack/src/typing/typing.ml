@@ -2638,7 +2638,8 @@ and anon_make tenv p f ft idl =
           T.f_variadic = t_variadic; (* TODO TAST: Variadic efuns *)
           T.f_ret_by_ref = f.f_ret_by_ref;
         } in
-        let te = T.make_typed_expr p hret (T.Efun (tfun_, idl)) in
+        let ty = (Reason.Rnone, Tfun ft) in
+        let te = T.make_typed_expr p ty (T.Efun (tfun_, idl)) in
         env, te, hret
       end
     end

@@ -587,19 +587,28 @@ let class_use_alias_string (a, b, c, d) =
   let c' = match c with
     | None -> ""
     | Some c -> " as " ^ c in
-  let d' = match d with
-    | [] -> ""
-    | d ->
+  let d' =
       String.concat " " @@
         List.map Ast_defs.string_of_kind (List.sort compare d) in
   a' ^ b ^ c' ^ d'
 
+let class_use_precedence_string (a, b, c) =
+  let c' = String.concat " " (List.sort compare c) in
+  a ^ "::" ^ b ^  " insteadof " ^ c'
+
 let class_use_alias_comparer =
   wrap class_use_alias_string (fun _ s -> s) string_comparer
+
+let class_use_precedence_comparer =
+  wrap class_use_precedence_string (fun _ s -> s) string_comparer
 
 let class_use_aliases_comparer =
   wrap Hhas_class.class_use_aliases (fun _f s -> s)
     (list_comparer class_use_alias_comparer " ")
+
+let class_use_precedences_comparer =
+  wrap Hhas_class.class_use_precedences (fun _f s -> s)
+    (list_comparer class_use_precedence_comparer " ")
 
 let property_is_private_comparer =
   wrap Hhas_property.is_private (fun _f s -> s) (flag_comparer "private")
@@ -834,6 +843,11 @@ let class_properties_methods_use_aliases_comparer perm =
     (class_properties_methods_comparer perm)
     class_use_aliases_comparer
 
+let class_properties_methods_use_aliases_precedences_comparer perm =
+  join (fun s1 s2 -> s1 ^ s2)
+    (class_properties_methods_use_aliases_comparer perm)
+    class_use_precedences_comparer
+
 let class_constants_type_constants_comparer =
   join (fun s1 s2 -> s1 ^ s2)
     class_constants_comparer
@@ -842,7 +856,7 @@ let class_constants_type_constants_comparer =
 let class_header_properties_methods_comparer perm =
   join (fun s1 s2 -> s1 ^ "{\n" ^ s2 ^ "}")
     class_header_comparer
-    (class_properties_methods_use_aliases_comparer perm)
+    (class_properties_methods_use_aliases_precedences_comparer perm)
 
 (* TODO: add all the other bits to classes *)
 let class_comparer perm =

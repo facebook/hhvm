@@ -439,7 +439,7 @@ module WithParser(Parser : Parser_S) = struct
     (parser, name)
 
   let scan_name_or_qualified_name parser =
-    let parser1, token = next_token parser in
+    let parser1, token = next_token_as_name parser in
     begin match Token.kind token with
     | TokenKind.Name ->
       let (parser, token) = Make.token parser1 token in

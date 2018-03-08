@@ -508,6 +508,7 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, list_item) = Make.list_item parser missing comma in
       (parser, list_item, comma)
     | Backslash
+    | Namespace
     | Name
     | XHPClassName ->
       let (parser, item) = parse_type_specifier parser in
@@ -1798,7 +1799,7 @@ module WithExpressionAndStatementAndTypeParser
         namespace\f1(); should be parsed as a call to the function f1 in
         the current namespace.      *)
       | Namespace when peek_token_kind parser1 = Backslash ->
-        with_statement_parser parser1 StatementParser.parse_statement
+        with_statement_parser parser StatementParser.parse_statement
       | Namespace -> parse_namespace_declaration parser
       | Use -> parse_namespace_use_declaration parser
       | Trait

@@ -93,6 +93,8 @@ let rec parse_type_specifier ?(allow_var=false) parser =
   | Object
   | Mixed
   | Name -> parse_simple_type_or_type_constant_or_generic parser
+  | Namespace ->
+    scan_name_or_qualified_name parser
   | Backslash ->
     let (parser, token) = Make.token parser1 token in
     let (parser, name) = scan_qualified_name parser token in

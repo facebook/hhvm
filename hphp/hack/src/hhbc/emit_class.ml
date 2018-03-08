@@ -242,12 +242,15 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
           else Some name
         | _ -> None)
   in
+  let elaborate_namespace_id namespace id =
+    let id, _ = Hhbc_id.Class.elaborate_id namespace id in
+    Hhbc_id.Class.to_raw_string id in
   let class_use_aliases =
     List.filter_map
       ast_class.A.c_body
       (function
         | A.ClassUseAlias (ido1, id, ido2, kindo) ->
-          let id1 = Option.map ido1 ~f:snd in
+          let id1 = Option.map ido1 ~f:(elaborate_namespace_id namespace) in
           let id2 = Option.map ido2 ~f:snd in
           Some (id1, snd id, id2, kindo)
         | _ -> None)
@@ -257,8 +260,9 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
       ast_class.A.c_body
       (function
         | A.ClassUsePrecedence (id1, id2, ids) ->
-          let ids = List.map ids ~f:snd in
-          Some (snd id1, snd id2, ids)
+          let id1 = elaborate_namespace_id namespace id1 in
+          let ids = List.map ids ~f:(elaborate_namespace_id namespace) in
+          Some (id1, snd id2, ids)
         | _ -> None)
   in
   let class_enum_type =

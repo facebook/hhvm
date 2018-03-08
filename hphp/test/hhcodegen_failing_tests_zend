@@ -1,8 +1,6 @@
 zend/good/Zend/tests/argument_restriction_004.php
 zend/good/Zend/tests/bug43332_1.php
 zend/good/Zend/tests/bug43343.php
-zend/good/Zend/tests/bug55086.php
-zend/good/Zend/tests/bug55156.php
 zend/good/Zend/tests/class_name_as_scalar_error_001.php
 zend/good/Zend/tests/class_name_as_scalar_error_002.php
 zend/good/Zend/tests/closure_005.php
@@ -12,8 +10,6 @@ zend/good/Zend/tests/errmsg_039.php
 zend/good/Zend/tests/heredoc_012.php
 zend/good/Zend/tests/heredoc_014.php
 zend/good/Zend/tests/nowdoc_016.php
-zend/good/Zend/tests/ns_057.php
-zend/good/Zend/tests/ns_058.php
 zend/good/Zend/tests/objects_026.php
 zend/good/Zend/tests/traits/bug55524.php
 zend/good/Zend/tests/traits/bug55554a.php

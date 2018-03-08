@@ -314,3 +314,64 @@ let set_mini_state_target options target = match target with
     { options with
       with_mini_state = Some (Informant_induced_mini_state_target target)
     }
+
+(****************************************************************************)
+(* Misc *)
+(****************************************************************************)
+let to_string
+  {
+    json_mode;
+    ai_mode;
+    check_mode;
+    use_gen_deps;
+    root;
+    should_detach;
+    convert;
+    max_procs;
+    no_load;
+    profile_log;
+    load_state_canary;
+    with_mini_state;
+    save_filename;
+    waiting_client;
+    debug_client;
+    ignore_hh_version;
+  } =
+    let ai_mode_str = match ai_mode with
+      | None -> "<>"
+      | Some _ -> "Some(...)" in
+    let mini_state_str = match with_mini_state with
+      | None -> "<>"
+      | Some _ -> "MiniStateTarget(...)" in
+    let waiting_client_str = match waiting_client with
+      | None -> "<>"
+      | Some _ -> "WaitingClient(...)" in
+    let debug_client_str = match debug_client with
+      | None -> "<>"
+      | Some _ -> "DebugClient(...)" in
+    let convert_str = match convert with
+      | None -> "<>"
+      | Some path -> Path.to_string path in
+    let save_filename_str = match save_filename with
+      | None -> "<>"
+      | Some path -> path in
+    ([
+      "ServerArgs.options({";
+      "json_mode: "; string_of_bool json_mode; ", ";
+      "ai_mode: "; ai_mode_str; ", ";
+      "check_mode: "; string_of_bool check_mode; ", ";
+      "use_gen_desp: "; string_of_bool use_gen_deps; ", ";
+      "root: "; Path.to_string root; ", ";
+      "should_detach: "; string_of_bool should_detach; ", ";
+      "convert: "; convert_str; ", ";
+      "maxprocs: "; string_of_int max_procs; ", ";
+      "no_load: "; string_of_bool no_load; ", ";
+      "profile_log: "; string_of_bool profile_log; ", ";
+      "load_state_canary: "; string_of_bool load_state_canary; ", ";
+      "with_mini_state: "; mini_state_str; ", ";
+      "save_filename: "; save_filename_str; ", ";
+      "waiting_client: "; waiting_client_str; ", ";
+      "debug_client: "; debug_client_str; ", ";
+      "ignore_hh_version: "; string_of_bool ignore_hh_version;
+      "})"
+    ] |> String.concat "")

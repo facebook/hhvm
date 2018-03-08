@@ -58,4 +58,8 @@ module type S = sig
   val set_no_load         : options -> bool -> options
   val set_mini_state_target : options -> ServerMonitorUtils.target_mini_state option -> options
 
+  (****************************************************************************)
+  (* Misc *)
+  (****************************************************************************)
+  val to_string : options -> string
 end

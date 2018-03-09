@@ -47,7 +47,7 @@ namespace HPHP { namespace jit { namespace x64 {
           Alignment::Smash##Inst,       \
           AlignContext::Live);          \
     auto const theStart = cb.frontier();\
-    X64Assembler a { cb };              \
+    NEW_X64_ASM(a, cb);                 \
     a.inst(__VA_ARGS__);                \
     return theStart;                    \
   }())
@@ -101,7 +101,7 @@ void smashCmpq(TCA inst, uint32_t imm) {
 
 void smashCall(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashCall));
-  X64Assembler::patchCall(inst, inst, target);
+  X64AssemblerBase::patchCall(inst, inst, target);
 }
 
 void smashJmp(TCA inst, TCA target) {
@@ -151,7 +151,7 @@ void smashJmp(TCA inst, TCA target) {
 
 void smashJcc(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashJcc));
-  X64Assembler::patchJcc(inst, inst, target);
+  X64AssemblerBase::patchJcc(inst, inst, target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

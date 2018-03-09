@@ -45,29 +45,11 @@ struct XedInit {
   }
 };
 
-// *(reg + x)
-struct MemoryRef {
-  /*
-   * The default value of MemoryRef::segment should be XED_REG_DS, but Xed fails
-   * to encode lea(r, m) if the value of m.segment is not XED_REG_INVALID.
-   * XED_RED_INVALID is a safe default value for m.segment, it will produce
-   * the same output as assigning it XED_REG_DS when emitting all other
-   * instructions and it will also work for lea(r ,m).
-   */
-  explicit MemoryRef(DispReg dr) : r(dr), segment(XED_REG_INVALID) {}
-  explicit MemoryRef(IndexedDispReg idr) : r(idr),
-                                           segment(XED_REG_INVALID) {}
-  IndexedDispReg r;
-  xed_reg_enum_t segment;
-  void fs() { segment = XED_REG_FS; }
-  void gs() { segment = XED_REG_GS; }
-};
-
 //////////////////////////////////////////////////////////////////////
 
 #define SZ_TO_BITS(sz)                    (sz << 3)
 #define BITS_TO_SZ(bits)                  (bits >> 3)
-
+#define RIP_ZERO_DISP                     RIPRelativeRef(DispRIP(0))
 typedef bool(*immFitFunc)(int64_t, int);
 #define IMMFITFUNC_SIGNED                 deltaFits
 #define IMMFITFUNC_UNSIGNED               (immFitFunc) magFits
@@ -114,7 +96,7 @@ struct XedOperand
 
   inline xed_reg_enum_t xedFromReg (const Reg8& reg) {
     int regid = int(reg);
-    if((regid & 0x80) == 0) {
+    if ((regid & 0x80) == 0) {
       return xed_reg_enum_t(regid + XED_REG_AL);
     }
     return xed_reg_enum_t((regid - 0x84) + XED_REG_AH);
@@ -124,18 +106,25 @@ struct XedOperand
     return xed_reg_enum_t(int(reg) + XED_REG_XMM0);
   }
 
-  xed_enc_displacement_t xedDispFromValue(intptr_t value) {
+  static int getDisplSize(intptr_t value) {
     if (value == 0) {
-      return {0, 0};
+      return sz::nosize;
     }
-    if(deltaFits(value, sz::byte)) {
-       return {(xed_uint64_t)safe_cast<int8_t>(value), SZ_TO_BITS(sz::byte)};
-    }
-    return {(xed_uint64_t)safe_cast<int32_t>(value), SZ_TO_BITS(sz::dword)};
+    return deltaFits(value, sz::byte) ? sz::byte : sz::dword;
   }
 
-  xed_enc_displacement_t xedDispFromValue(intptr_t value, int64_t offset) {
-    return xedDispFromValue(value - offset);
+  xed_enc_displacement_t xedDispFromValue(intptr_t value, int size) {
+    switch(size) {
+      case sz::nosize:  return {0, 0};
+      case sz::byte:    return {(xed_uint64_t)(safe_cast<int8_t>(value)),
+                                SZ_TO_BITS((xed_uint32_t) size)};
+      default:          return {(xed_uint64_t)(safe_cast<int32_t>(value)),
+                                SZ_TO_BITS((xed_uint32_t) size)};
+    }
+  }
+
+  xed_enc_displacement_t xedDispFromValue(intptr_t value) {
+    return xedDispFromValue(value, getDisplSize(value));
   }
 
   template<typename regtype>
@@ -152,12 +141,12 @@ struct XedOperand
                             xedFromReg(m.r.base) : XED_REG_INVALID);
     xed_reg_enum_t index = (int(m.r.index) != -1 ?
                             xedFromReg(m.r.index) : XED_REG_INVALID);
-    op = xed_mem_gbisd(m.segment, base, index, m.r.scale,
+    op = xed_mem_gbisd(xed_reg_enum_t(m.segment), base, index, m.r.scale,
                        xedDispFromValue(m.r.disp), SZ_TO_BITS(memSize));
   }
 
-  explicit XedOperand(const RIPRelativeRef& r, int memSize, int64_t offset) {
-    op = xed_mem_bd(XED_REG_RIP, xedDispFromValue(r.r.disp, offset),
+  explicit XedOperand(const RIPRelativeRef& r, int memSize) {
+    op = xed_mem_bd(XED_REG_RIP, xedDispFromValue(r.r.disp, sz::dword),
                     SZ_TO_BITS(memSize));
   }
 
@@ -181,7 +170,7 @@ struct XedOperand
 
   inline int reduceImmSize(int64_t value, int allowedSizes, immFitFunc func) {
     for (int crtSize = sz::byte; crtSize < sz::qword; crtSize <<= 1) {
-      if((allowedSizes & crtSize) && (*func)(value, crtSize))
+      if ((allowedSizes & crtSize) && (*func)(value, crtSize))
         return crtSize;
       }
     assert((allowedSizes & sz::qword) &&
@@ -193,13 +182,11 @@ struct XedOperand
 #define XED_REG(reg)                      XedOperand(reg).op
 #define XED_IMM(imm, size)                XedOperand(imm, size).op
 #define XED_IMM_RED(imm, sizes, redfunc)  XedOperand(imm, sizes, redfunc).op
-#define XED_MEMREF(m, size)               XedOperand(m, size).op
-#define XED_MEMREF_RIP(m, size, offset)   XedOperand(m, size, offset).op
+#define XED_MEMREF(m, memSize)            XedOperand(m, memSize).op
+#define XED_MEMREF_RIP(m, memSize)        XedOperand(m, memSize).op
 #define XED_BRREL(p, size)                XedOperand((CodeAddress)p, size).op
 
 ///////////////////////////////////////////////////////////////////////////////
-
-struct Label;
 
 /**
  * Copyright (c) 2009, Andrew J. Paroski
@@ -228,77 +215,23 @@ struct Label;
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-struct X64Assembler {
+struct XedAssembler : public X64AssemblerBase {
 private:
-  friend struct Label;
-
-  /*
-   * Type for register numbers, independent of the size we're going to
-   * be using it as. Also, the same register number may mean different
-   * physical registers for different instructions (e.g. xmm0 and rax
-   * are both 0). Only for internal use in X64Assembler.
-   */
-  enum class RegNumber : int {};
-  static const RegNumber noreg = RegNumber(-1);
-
   constexpr static xed_state_t s_xedState = {
         XED_MACHINE_MODE_LONG_64,
         XED_ADDRESS_WIDTH_64b
   };
 
+  CodeAddress dest() const {
+    codeBlock.assertCanEmit(XED_MAX_INSTRUCTION_BYTES);
+    return codeBlock.toDestAddress(codeBlock.frontier());
+  }
+
 public:
-  explicit X64Assembler(CodeBlock& cb) : codeBlock(cb) {}
+  explicit XedAssembler(CodeBlock& cb) : X64AssemblerBase(cb) {}
 
-  X64Assembler(const X64Assembler&) = delete;
-  X64Assembler& operator=(const X64Assembler&) = delete;
-
-  CodeBlock& code() const { return codeBlock; }
-
-  CodeAddress base() const {
-    return codeBlock.base();
-  }
-
-  CodeAddress frontier() const {
-    return codeBlock.frontier();
-  }
-
-  CodeAddress toDestAddress(CodeAddress addr) const {
-    return codeBlock.toDestAddress(addr);
-  }
-
-  void setFrontier(CodeAddress newFrontier) {
-    codeBlock.setFrontier(newFrontier);
-  }
-
-  size_t capacity() const {
-    return codeBlock.capacity();
-  }
-
-  size_t used() const {
-    return codeBlock.used();
-  }
-
-  size_t available() const {
-    return codeBlock.available();
-  }
-
-  bool contains(CodeAddress addr) const {
-    return codeBlock.contains(addr);
-  }
-
-  bool empty() const {
-    return codeBlock.empty();
-  }
-
-  void clear() {
-    codeBlock.clear();
-  }
-
-  bool canEmit(size_t nBytes) const {
-    assert(capacity() >= used());
-    return nBytes < (capacity() - used());
-  }
-
+  XedAssembler(const XedAssembler&) = delete;
+  XedAssembler& operator=(const XedAssembler&) = delete;
   /*
    * The following section defines the main interface for emitting
    * x64.
@@ -423,6 +356,8 @@ public:
 #undef BYTE_LOAD_OP
 #undef BYTE_STORE_OP
 #undef BYTE_REG_OP
+#undef IMM64_STORE_OP
+#undef IMM64R_OP
 
   // 64-bit immediates work with mov to a register.
   void movq(Immed64 imm, Reg64 r) { xedInstrIR(XED_ICLASS_MOV, imm, r); }
@@ -549,11 +484,6 @@ public:
    * Label class.
    */
 
-  bool jmpDeltaFits(CodeAddress dest) {
-    int64_t delta = dest - (codeBlock.frontier() + 5);
-    return deltaFits(delta, sz::dword);
-  }
-
   void jmp(Reg64 r)            { xedInstrR(XED_ICLASS_JMP,        r); }
   void jmp(MemoryRef m)        { xedInstrM(XED_ICLASS_JMP,        m); }
   void jmp(RIPRelativeRef m)   { xedInstrM(XED_ICLASS_JMP,        m); }
@@ -577,76 +507,18 @@ public:
   }
 
   void jcc8(ConditionCode cond, CodeAddress dest) {
-    xedInstrRelBr(ccToXedJump(cond), dest, sz::dword);
+    xedInstrRelBr(ccToXedJump(cond), dest, sz::byte);
   }
 
-  void jmpAuto(CodeAddress dest) {
-    auto delta = dest - (codeBlock.frontier() + 2);
-    if (deltaFits(delta, sz::byte)) {
-      jmp8(dest);
-    } else {
-      jmp(dest);
-    }
-  }
+  using X64AssemblerBase::call;
+  using X64AssemblerBase::jmp;
+  using X64AssemblerBase::jmp8;
+  using X64AssemblerBase::jcc;
+  using X64AssemblerBase::jcc8;
 
-  void jccAuto(ConditionCode cc, CodeAddress dest) {
-    auto delta = dest - (codeBlock.frontier() + 2);
-    if (deltaFits(delta, sz::byte)) {
-      jcc8(cc, dest);
-    } else {
-      jcc(cc, dest);
-    }
-  }
-
-  void call(Label&);
-  void jmp(Label&);
-  void jmp8(Label&);
-  void jcc(ConditionCode, Label&);
-  void jcc8(ConditionCode, Label&);
-
-#define CCS \
-  CC(o,   CC_O)         \
-  CC(no,  CC_NO)        \
-  CC(nae, CC_NAE)       \
-  CC(ae,  CC_AE)        \
-  CC(nb,  CC_NB)        \
-  CC(e,   CC_E)         \
-  CC(z,   CC_Z)         \
-  CC(ne,  CC_NE)        \
-  CC(nz,  CC_NZ)        \
-  CC(b,   CC_B)         \
-  CC(be,  CC_BE)        \
-  CC(nbe, CC_NBE)       \
-  CC(s,   CC_S)         \
-  CC(ns,  CC_NS)        \
-  CC(p,   CC_P)         \
-  CC(np,  CC_NP)        \
-  CC(nge, CC_NGE)       \
-  CC(g,   CC_G)         \
-  CC(l,   CC_L)         \
-  CC(ge,  CC_GE)        \
-  CC(nl,  CC_NL)        \
-  CC(ng,  CC_NG)        \
-  CC(le,  CC_LE)        \
-  CC(nle, CC_NLE)
-
-#define CC(_nm, _code)                                        \
-  void j ## _nm(CodeAddress dest)      { jcc(_code, dest); }  \
-  void j ## _nm ## 8(CodeAddress dest) { jcc8(_code, dest); } \
-  void j ## _nm(Label&);                                      \
-  void j ## _nm ## 8(Label&);
-  CCS
-#undef CC
   void setcc(int cc, Reg8 byteReg) {
     xedInstrR(ccToXedSetCC(cc), byteReg);
   }
-
-#define CC(_nm, _cond)                          \
-  void set ## _nm(Reg8 byteReg) {               \
-    setcc(_cond, byteReg);                      \
-  }
-  CCS
-#undef CC
 
   void psllq(Immed i, RegXMM r) { xedInstrIR(XED_ICLASS_PSLLQ, i, r,
                                              sz::byte); }
@@ -690,55 +562,6 @@ public:
   }
   void cvttsd2siq(RegXMM src, Reg64 dest) {
     xedInstrRR(XED_ICLASS_CVTTSD2SI, XED_INVERSE(dest, src));
-  }
-
-  /*
-   * The following utility functions do more than emit specific code.
-   * (E.g. combine common idioms or patterns, smash code, etc.)
-   */
-
-  void emitImmReg(Immed64 imm, Reg64 dest) {
-    if (imm.q() == 0) {
-      // Zeros the top bits also.
-      xorl  (r32(dest), r32(dest));
-      return;
-    }
-    if (LIKELY(imm.q() > 0 && imm.fits(sz::dword))) {
-      // This will zero out the high-order bits.
-      movl (imm.l(), r32(dest));
-      return;
-    }
-    movq (imm.q(), dest);
-  }
-
-  static void patchJcc(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
-    assert(jmp[0] == 0x0F && (jmp[1] & 0xF0) == 0x80);
-    ssize_t diff = dest - (from + 6);
-    *(int32_t*)(jmp + 2) = safe_cast<int32_t>(diff);
-  }
-
-  static void patchJcc8(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
-    assert((jmp[0] & 0xF0) == 0x70);
-    ssize_t diff = dest - (from + 2);  // one for opcode, one for offset
-    *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
-  }
-
-  static void patchJmp(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
-    assert(jmp[0] == 0xE9);
-    ssize_t diff = dest - (from + 5);
-    *(int32_t*)(jmp + 1) = safe_cast<int32_t>(diff);
-  }
-
-  static void patchJmp8(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
-    assert(jmp[0] == 0xEB);
-    ssize_t diff = dest - (from + 2);  // one for opcode, one for offset
-    *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
-  }
-
-  static void patchCall(CodeAddress call, CodeAddress from, CodeAddress dest) {
-    assert(call[0] == 0xE8);
-    ssize_t diff = dest - (from + 5);
-    *(int32_t*)(call + 1) = safe_cast<int32_t>(diff);
   }
 
 private:
@@ -809,10 +632,6 @@ private:
               effOperandSizeBits,                                           \
               xed_error_enum_t2str(xedError))
 
-#define XED_UPDATE_CODEBLOCK(call)                                          \
-  codeBlock.assertCanEmit(XED_MAX_INSTRUCTION_BYTES);                       \
-  codeBlock.moveFrontier(call)
-
   ALWAYS_INLINE
   uint32_t xedEmit0(xed_iclass_enum_t instr,
                     xed_uint_t effOperandSizeBits,
@@ -826,7 +645,7 @@ private:
 
   ALWAYS_INLINE
   void xedEmit0(xed_iclass_enum_t instr, xed_uint_t effOperandSizeBits = 0) {
-    XED_UPDATE_CODEBLOCK(xedEmit0(instr, effOperandSizeBits, frontier()));
+    codeBlock.moveFrontier(xedEmit0(instr, effOperandSizeBits, dest()));
   }
 
   ALWAYS_INLINE
@@ -844,7 +663,7 @@ private:
   ALWAYS_INLINE
   void xedEmit1(xed_iclass_enum_t instr, const xed_encoder_operand_t& op,
                     xed_uint_t effOperandSizeBits = 0) {
-    XED_UPDATE_CODEBLOCK(xedEmit1(instr, op, effOperandSizeBits, frontier()));
+    codeBlock.moveFrontier(xedEmit1(instr, op, effOperandSizeBits, dest()));
   }
 
   ALWAYS_INLINE
@@ -864,8 +683,8 @@ private:
   void xedEmit2(xed_iclass_enum_t instr, const xed_encoder_operand_t& op_1,
                 const xed_encoder_operand_t& op_2,
                 xed_uint_t effOperandSizeBits = 0) {
-    XED_UPDATE_CODEBLOCK(xedEmit2(instr, op_1, op_2, effOperandSizeBits,
-                         frontier()));
+    codeBlock.moveFrontier(xedEmit2(instr, op_1, op_2, effOperandSizeBits,
+                           dest()));
   }
 
   ALWAYS_INLINE
@@ -889,8 +708,8 @@ private:
                 const xed_encoder_operand_t& op_2,
                 const xed_encoder_operand_t& op_3,
                 xed_uint_t effOperandSizeBits = 0) {
-    XED_UPDATE_CODEBLOCK(xedEmit3(instr, op_1, op_2, op_3, effOperandSizeBits,
-                         frontier()));
+    codeBlock.moveFrontier(xedEmit3(instr, op_1, op_2, op_3, effOperandSizeBits,
+                           dest()));
   }
 
 public:
@@ -925,7 +744,7 @@ public:
       n -= 9;
     }
     // Emit remaining NOPs (if any)
-    if(n) {
+    if (n) {
       xedInstr(nops[n], 0);
     }
   }
@@ -993,13 +812,11 @@ public:
     xedInstrRR(ccToXedCMov(cc), rsrc, rdest);
   }
 
+  XedAssembler& fs(MemoryRef* mr)  { mr->setSegment(int(XED_REG_FS));
+                                     return *this; }
+  XedAssembler& gs(MemoryRef* mr)  { mr->setSegment(int(XED_REG_GS));
+                                     return *this; }
 private:
-  RegNumber rn(Reg8 r)   { return RegNumber(int(r)); }
-  RegNumber rn(Reg16 r)  { return RegNumber(int(r)); }
-  RegNumber rn(Reg32 r)  { return RegNumber(int(r)); }
-  RegNumber rn(Reg64 r)  { return RegNumber(int(r)); }
-  RegNumber rn(RegXMM r) { return RegNumber(int(r)); }
-
   // Caches sizes for instruction types in a certain xedInstr* context.
   // This helps with instructions where you need to know in advance
   // the length of the instruction being emitted (such as when one of
@@ -1007,17 +824,16 @@ private:
   // and removing the need to call xedEmit twice each time (once to get
   // the size, and once to actually emit the instruction).
 
-#define XED_MEMOIZE_LEN(call)                                       \
+#define XED_CACHE_LEN(call, size)                                   \
   uint32_t instrLen;                                                \
   static std::unordered_map<int32_t,                                \
                             uint32_t> instrLengths;                 \
-  auto res = instrLengths.find(int32_t(instr));                     \
-  if(res != instrLengths.end()) {                                   \
+  auto res = instrLengths.find(int32_t(instr) | (size << 24));      \
+  if (res != instrLengths.end()) {                                  \
     instrLen = res->second;                                         \
   } else {                                                          \
-    codeBlock.assertCanEmit(XED_MAX_INSTRUCTION_BYTES);             \
     instrLen = call;                                                \
-    instrLengths.insert({int32_t(instr), instrLen});                \
+    instrLengths.insert({int32_t(instr) | (size << 24), instrLen}); \
   }
 
 #define XED_WRAP_IMPL() \
@@ -1047,6 +863,7 @@ private:
                   int immSize = BITS_TO_SZ(bitsize)) {              \
     xedEmit2(instr, XED_REG(r), XED_IMM(i, immSize), bitsize);      \
   }                                                                 \
+                                                                    \
   ALWAYS_INLINE                                                     \
   void xedInstrIR(xed_iclass_enum_t instr, const Immed& i,          \
                   const Reg##bitsize& r,                            \
@@ -1113,9 +930,9 @@ private:
     xedEmit2(instr, XED_REG(r2), XED_REG(r1));
   }
 
-
   // most instr(xmm_1, xmm_2) instructions take operands in reverse order
   // compared to instr(reg_1, reg_2): source and destination are swapped
+
   ALWAYS_INLINE
   void xedInstrRR(xed_iclass_enum_t instr, const RegXMM& r1, const RegXMM& r2) {
     xedEmit2(instr, XED_REG(r1), XED_REG(r2));
@@ -1137,12 +954,12 @@ private:
   }
 
   ALWAYS_INLINE
-  void xedInstrM(xed_iclass_enum_t instr, const RIPRelativeRef& m,
+  void xedInstrM(xed_iclass_enum_t instr, RIPRelativeRef m,
                  int size = sz::qword) {
-    XED_MEMOIZE_LEN(xedEmit1(instr, XED_MEMREF_RIP(m, size, 0),
-                             SZ_TO_BITS(size), frontier()));
-    xedEmit1(instr, XED_MEMREF_RIP(m, size,
-             (int64_t)frontier() + (int64_t)instrLen), SZ_TO_BITS(size));
+    XED_CACHE_LEN(xedEmit1(instr, XED_MEMREF_RIP(RIP_ZERO_DISP, size), 0,
+                           dest()), 0);
+    m.r.disp -= ((int64_t)frontier() + (int64_t)instrLen);
+    xedEmit1(instr, XED_MEMREF_RIP(m, size), 0);
   }
 
   // instr(imm, mem)
@@ -1170,23 +987,24 @@ private:
 
   // instr(mem, reg)
 
-#define XED_INSTMR_WRAPPER_IMPL(bitsize)                              \
-  ALWAYS_INLINE                                                       \
-  void xedInstrMR(xed_iclass_enum_t instr, const MemoryRef& m,        \
-                  const Reg##bitsize& r,                              \
-                  int memSize = BITS_TO_SZ(bitsize)) {                \
-    xedEmit2(instr, XED_REG(r), XED_MEMREF(m, memSize), bitsize);     \
-  }                                                                   \
-  ALWAYS_INLINE                                                       \
-  void xedInstrMR(xed_iclass_enum_t instr, const RIPRelativeRef& m,   \
-                  const Reg##bitsize& r) {                            \
-    XED_MEMOIZE_LEN(xedEmit2(instr, XED_REG(r),                       \
-                             XED_MEMREF_RIP(m,                        \
-                             BITS_TO_SZ(bitsize), 0), bitsize,        \
-                             frontier()));                            \
-    xedEmit2(instr, XED_REG(r),                                       \
-             XED_MEMREF_RIP(m, BITS_TO_SZ(bitsize),                   \
-             (int64_t)frontier() + (int64_t)instrLen), bitsize);      \
+#define XED_INSTMR_WRAPPER_IMPL(bitsize)                                \
+  ALWAYS_INLINE                                                         \
+  void xedInstrMR(xed_iclass_enum_t instr, const MemoryRef& m,          \
+                  const Reg##bitsize& r,                                \
+                  int memSize = BITS_TO_SZ(bitsize)) {                  \
+    xedEmit2(instr, XED_REG(r), XED_MEMREF(m, memSize), bitsize);       \
+  }                                                                     \
+                                                                        \
+  ALWAYS_INLINE                                                         \
+  void xedInstrMR(xed_iclass_enum_t instr, RIPRelativeRef m,            \
+                  const Reg##bitsize& r) {                              \
+    XED_CACHE_LEN(xedEmit2(instr, XED_REG(r),                           \
+                           XED_MEMREF_RIP(RIP_ZERO_DISP,                \
+                           BITS_TO_SZ(bitsize)),  bitsize, dest()),     \
+                  0);                                                   \
+    m.r.disp -= ((int64_t)frontier() + (int64_t)instrLen);              \
+    xedEmit2(instr, XED_REG(r), XED_MEMREF_RIP(m, BITS_TO_SZ(bitsize)), \
+             bitsize);                                                  \
   }
 
 #define XED_WRAP_X XED_INSTMR_WRAPPER_IMPL
@@ -1199,15 +1017,14 @@ private:
     xedEmit2(instr, XED_REG(r), XED_MEMREF(m, memSize));
   }
 
-  ALWAYS_INLINE                                                       \
-  void xedInstrMR(xed_iclass_enum_t instr, const RIPRelativeRef& m,   \
-                  const RegXMM& r, int memSize = sz::qword) {         \
-    XED_MEMOIZE_LEN(xedEmit2(instr, XED_REG(r),                       \
-                             XED_MEMREF_RIP(m, memSize, 0), 0,        \
-                             frontier()));                            \
-    xedEmit2(instr, XED_REG(r),                                       \
-             XED_MEMREF_RIP(m, memSize, (int64_t)frontier() +         \
-             (int64_t)instrLen));                                     \
+  ALWAYS_INLINE
+  void xedInstrMR(xed_iclass_enum_t instr, RIPRelativeRef m,
+                  const RegXMM& r, int memSize = sz::qword) {
+    XED_CACHE_LEN(xedEmit2(instr, XED_REG(r),
+                           XED_MEMREF_RIP(RIP_ZERO_DISP, memSize),
+                           0, dest()), 0);
+    m.r.disp -= ((int64_t)frontier() + (int64_t)instrLen);
+    xedEmit2(instr, XED_REG(r), XED_MEMREF_RIP(m, memSize));
   }
 
   // instr(reg, mem)
@@ -1240,11 +1057,11 @@ private:
 
   // instr(relbr)
 
-  void xedInstrRelBr(xed_iclass_enum_t instr, CodeAddress dest, int size)
+  void xedInstrRelBr(xed_iclass_enum_t instr, CodeAddress destination, int size)
   {
-    XED_MEMOIZE_LEN(xedEmit1(instr, XED_BRREL((CodeAddress)0, size), 0,
-                    frontier()));
-    auto target = dest - (codeBlock.frontier() + instrLen);
+    XED_CACHE_LEN(xedEmit1(instr, XED_BRREL((CodeAddress)0, size), 0,
+                  dest()), size);
+    auto target = destination - (codeBlock.frontier() + instrLen);
     xedEmit1(instr, XED_BRREL(target, size));
   }
 
@@ -1254,8 +1071,6 @@ private:
   void xedInstr(xed_iclass_enum_t instr, int size = sz::qword) {
     xedEmit0(instr, SZ_TO_BITS(size));
   }
-
-  CodeBlock& codeBlock;
 };
 
 }}

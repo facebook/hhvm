@@ -18,13 +18,6 @@
 
 namespace HPHP { namespace jit {
 
-// *(reg + x)
-struct MemoryRef {
-  explicit MemoryRef(DispReg dr) : r(dr) {}
-  explicit MemoryRef(IndexedDispReg idr) : r(idr) {}
-  IndexedDispReg r;
-};
-
 //////////////////////////////////////////////////////////////////////
 
 enum X64InstrFlags {
@@ -167,8 +160,6 @@ const X64Instr instr_cmpsd =   { { 0xF1,0xF1,0xC2,0xF1,0xF1,0xF1 }, 0x10112 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Label;
-
 /**
  * Copyright (c) 2009, Andrew J. Paroski
  * All rights reserved.
@@ -196,71 +187,12 @@ struct Label;
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-struct X64Assembler {
-private:
-  friend struct Label;
-
-  /*
-   * Type for register numbers, independent of the size we're going to
-   * be using it as. Also, the same register number may mean different
-   * physical registers for different instructions (e.g. xmm0 and rax
-   * are both 0). Only for internal use in X64Assembler.
-   */
-  enum class RegNumber : int {};
-  static const RegNumber noreg = RegNumber(-1);
-
+struct X64Assembler : public X64AssemblerBase {
 public:
-  explicit X64Assembler(CodeBlock& cb) : codeBlock(cb) {}
+  explicit X64Assembler(CodeBlock& cb) : X64AssemblerBase(cb) {}
 
   X64Assembler(const X64Assembler&) = delete;
   X64Assembler& operator=(const X64Assembler&) = delete;
-
-  CodeBlock& code() const { return codeBlock; }
-
-  CodeAddress base() const {
-    return codeBlock.base();
-  }
-
-  CodeAddress frontier() const {
-    return codeBlock.frontier();
-  }
-
-  CodeAddress toDestAddress(CodeAddress addr) const {
-    return codeBlock.toDestAddress(addr);
-  }
-
-  void setFrontier(CodeAddress newFrontier) {
-    codeBlock.setFrontier(newFrontier);
-  }
-
-  size_t capacity() const {
-    return codeBlock.capacity();
-  }
-
-  size_t used() const {
-    return codeBlock.used();
-  }
-
-  size_t available() const {
-    return codeBlock.available();
-  }
-
-  bool contains(CodeAddress addr) const {
-    return codeBlock.contains(addr);
-  }
-
-  bool empty() const {
-    return codeBlock.empty();
-  }
-
-  void clear() {
-    codeBlock.clear();
-  }
-
-  bool canEmit(size_t nBytes) const {
-    assert(capacity() >= used());
-    return nBytes < (capacity() - used());
-  }
 
   /*
    * The following section defines the main interface for emitting
@@ -368,6 +300,8 @@ public:
 #undef BYTE_LOAD_OP
 #undef BYTE_STORE_OP
 #undef BYTE_REG_OP
+#undef IMM64_STORE_OP
+#undef IMM64R_OP
 
   // 64-bit immediates work with mov to a register.
   void movq(Immed64 imm, Reg64 r) { instrIR(instr_mov, imm, r); }
@@ -426,6 +360,7 @@ public:
   void incq(MemoryRef m) { instrM(instr_inc,  m); }
   void incl(MemoryRef m) { instrM32(instr_inc, m); }
   void incw(MemoryRef m) { instrM16(instr_inc, m); }
+  void decqlock(MemoryRef m) { lock(); decq(m); }
   void decq(MemoryRef m) { instrM(instr_dec,  m); }
   void decl(MemoryRef m) { instrM32(instr_dec, m); }
   void decw(MemoryRef m) { instrM16(instr_dec, m); }
@@ -473,11 +408,6 @@ public:
    * Label class.
    */
 
-  bool jmpDeltaFits(CodeAddress dest) {
-    int64_t delta = dest - (codeBlock.frontier() + 5);
-    return deltaFits(delta, sz::dword);
-  }
-
   void jmp(Reg64 r)            { instrR(instr_jmp, r); }
   void jmp(MemoryRef m)        { instrM(instr_jmp, m); }
   void jmp(RIPRelativeRef m)   { instrM(instr_jmp, m); }
@@ -505,74 +435,15 @@ public:
     emitCJ8(instr_jcc, cond, (ssize_t)dest);
   }
 
-  void jmpAuto(CodeAddress dest) {
-    auto delta = dest - (codeBlock.frontier() + 2);
-    if (deltaFits(delta, sz::byte)) {
-      jmp8(dest);
-    } else {
-      jmp(dest);
-    }
-  }
-
-  void jccAuto(ConditionCode cc, CodeAddress dest) {
-    auto delta = dest - (codeBlock.frontier() + 2);
-    if (deltaFits(delta, sz::byte)) {
-      jcc8(cc, dest);
-    } else {
-      jcc(cc, dest);
-    }
-  }
-
-  void call(Label&);
-  void jmp(Label&);
-  void jmp8(Label&);
-  void jcc(ConditionCode, Label&);
-  void jcc8(ConditionCode, Label&);
-
-#define CCS \
-  CC(o,   CC_O)         \
-  CC(no,  CC_NO)        \
-  CC(nae, CC_NAE)       \
-  CC(ae,  CC_AE)        \
-  CC(nb,  CC_NB)        \
-  CC(e,   CC_E)         \
-  CC(z,   CC_Z)         \
-  CC(ne,  CC_NE)        \
-  CC(nz,  CC_NZ)        \
-  CC(b,   CC_B)         \
-  CC(be,  CC_BE)        \
-  CC(nbe, CC_NBE)       \
-  CC(s,   CC_S)         \
-  CC(ns,  CC_NS)        \
-  CC(p,   CC_P)         \
-  CC(np,  CC_NP)        \
-  CC(nge, CC_NGE)       \
-  CC(g,   CC_G)         \
-  CC(l,   CC_L)         \
-  CC(ge,  CC_GE)        \
-  CC(nl,  CC_NL)        \
-  CC(ng,  CC_NG)        \
-  CC(le,  CC_LE)        \
-  CC(nle, CC_NLE)
-
-#define CC(_nm, _code)                                        \
-  void j ## _nm(CodeAddress dest)      { jcc(_code, dest); }  \
-  void j ## _nm ## 8(CodeAddress dest) { jcc8(_code, dest); } \
-  void j ## _nm(Label&);                                      \
-  void j ## _nm ## 8(Label&);
-  CCS
-#undef CC
+  using X64AssemblerBase::call;
+  using X64AssemblerBase::jmp;
+  using X64AssemblerBase::jmp8;
+  using X64AssemblerBase::jcc;
+  using X64AssemblerBase::jcc8;
 
   void setcc(int cc, Reg8 byteReg) {
     emitCR(instr_setcc, cc, rn(byteReg), sz::byte);
   }
-
-#define CC(_nm, _cond)                          \
-  void set ## _nm(Reg8 byteReg) {               \
-    setcc(_cond, byteReg);                      \
-  }
-  CCS
-#undef CC
 
   void psllq(Immed i, RegXMM r) { emitIR(instr_psllq, rn(r), i.b()); }
   void psrlq(Immed i, RegXMM r) { emitIR(instr_psrlq, rn(r), i.b()); }
@@ -616,55 +487,6 @@ public:
     emitRR(instr_cvttsd2si, rn(dest), rn(src));
   }
 
-  /*
-   * The following utility functions do more than emit specific code.
-   * (E.g. combine common idioms or patterns, smash code, etc.)
-   */
-
-  void emitImmReg(Immed64 imm, Reg64 dest) {
-    if (imm.q() == 0) {
-      // Zeros the top bits also.
-      xorl  (r32(dest), r32(dest));
-      return;
-    }
-    if (LIKELY(imm.q() > 0 && imm.fits(sz::dword))) {
-      // This will zero out the high-order bits.
-      movl (imm.l(), r32(dest));
-      return;
-    }
-    movq (imm.q(), dest);
-  }
-
-  static void patchJcc(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
-    assert(jmp[0] == 0x0F && (jmp[1] & 0xF0) == 0x80);
-    ssize_t diff = dest - (from + 6);
-    *(int32_t*)(jmp + 2) = safe_cast<int32_t>(diff);
-  }
-
-  static void patchJcc8(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
-    assert((jmp[0] & 0xF0) == 0x70);
-    ssize_t diff = dest - (from + 2);  // one for opcode, one for offset
-    *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
-  }
-
-  static void patchJmp(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
-    assert(jmp[0] == 0xE9);
-    ssize_t diff = dest - (from + 5);
-    *(int32_t*)(jmp + 1) = safe_cast<int32_t>(diff);
-  }
-
-  static void patchJmp8(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
-    assert(jmp[0] == 0xEB);
-    ssize_t diff = dest - (from + 2);  // one for opcode, one for offset
-    *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
-  }
-
-  static void patchCall(CodeAddress call, CodeAddress from, CodeAddress dest) {
-    assert(call[0] == 0xE8);
-    ssize_t diff = dest - (from + 5);
-    *(int32_t*)(call + 1) = safe_cast<int32_t>(diff);
-  }
-
   void emitInt3s(int n) {
     for (auto i = 0; i < n; ++i) {
       byte(0xcc);
@@ -693,28 +515,17 @@ public:
     bytes(n, nops[n]);
   }
 
+  void pad() {
+    while (available() >= 2) ud2();
+    if (available() > 0) int3();
+    assertx(available() == 0);
+  }
   /*
    * Low-level emitter functions.
    *
    * These functions are the core of the assembler, and can also be
    * used directly.
    */
-
-  void byte(uint8_t b) {
-    codeBlock.byte(b);
-  }
-  void word(uint16_t w) {
-    codeBlock.word(w);
-  }
-  void dword(uint32_t dw) {
-    codeBlock.dword(dw);
-  }
-  void qword(uint64_t qw) {
-    codeBlock.qword(qw);
-  }
-  void bytes(size_t n, const uint8_t* bs) {
-    codeBlock.bytes(n, bs);
-  }
 
   // op %r
   // ------
@@ -1360,8 +1171,9 @@ public:
   }
 
   // Segment register prefixes.
-  X64Assembler& fs()  { byte(0x64); return *this; }
-  X64Assembler& gs()  { byte(0x65); return *this; }
+  // MemoryRef* parameter added for compatibility with XedAssembler
+  X64Assembler& fs(MemoryRef* mr)  { byte(0x64); return *this; }
+  X64Assembler& gs(MemoryRef* mr)  { byte(0x65); return *this; }
 
 public:
   /*
@@ -1478,12 +1290,6 @@ private:
   }
 
 private:
-  RegNumber rn(Reg8 r)   { return RegNumber(int(r)); }
-  RegNumber rn(Reg16 r)  { return RegNumber(int(r)); }
-  RegNumber rn(Reg32 r)  { return RegNumber(int(r)); }
-  RegNumber rn(Reg64 r)  { return RegNumber(int(r)); }
-  RegNumber rn(RegXMM r) { return RegNumber(int(r)); }
-
   // Wraps a bunch of the emit* functions to make using them with the
   // typed wrappers more terse. We should have these replace
   // the emit functions eventually.
@@ -1577,8 +1383,6 @@ private:
 
 #undef UMR
 #undef URIP
-
-  CodeBlock& codeBlock;
 };
 
 }}

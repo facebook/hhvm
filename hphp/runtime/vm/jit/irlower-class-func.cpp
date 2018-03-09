@@ -176,6 +176,16 @@ void cgLdFuncNumParams(IRLS& env, const IRInstruction* inst) {
   v << shrqi{1, tmp, dst, v.makeReg()};
 }
 
+void cgIsFuncDynCallable(IRLS& env, const IRInstruction* inst) {
+  auto const func = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const sf = v.makeReg();
+  v << testlim{AttrDynamicallyCallable, func[Func::attrsOff()], sf};
+  v << setcc{CC_NZ, sf, dst};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

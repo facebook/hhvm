@@ -243,7 +243,8 @@ bool beginInlining(IRGS& env,
                    SrcKey startSk,
                    Offset returnBcOffset,
                    ReturnTarget returnTarget,
-                   int cost);
+                   int cost,
+                   bool conjure);
 
 /*
  * End the current inlined frame, after all its blocks have been emitted.

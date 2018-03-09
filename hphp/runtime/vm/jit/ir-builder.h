@@ -309,6 +309,7 @@ private:
   SSATmp* preOptimizeAssertLoc(IRInstruction*);
   SSATmp* preOptimizeAssertStk(IRInstruction*);
   SSATmp* preOptimizeLdARFuncPtr(IRInstruction*);
+  SSATmp* preOptimizeLdARIsDynamic(IRInstruction*);
   SSATmp* preOptimizeCheckCtxThis(IRInstruction*);
   SSATmp* preOptimizeLdCtxHelper(IRInstruction*);
   SSATmp* preOptimizeLdCtx(IRInstruction* i) {

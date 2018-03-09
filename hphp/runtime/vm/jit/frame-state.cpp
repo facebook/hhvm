@@ -198,6 +198,12 @@ bool merge_into(FrameState& dst, const FrameState& src) {
       dstInfo.func = nullptr;
       changed = true;
     }
+
+    if (dstInfo.dynamicCall != nullptr &&
+        dstInfo.dynamicCall != srcInfo.dynamicCall) {
+      dstInfo.dynamicCall = nullptr;
+      changed = true;
+    }
   }
 
   // The frame may span a call if it could have done so in either state.
@@ -706,6 +712,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
                                          TCtx,
                                          nullptr,
                                          extra.opcode,
+                                         nullptr,
                                          nullptr,
                                          false /* inlineEligible */,
                                          false /* spansCall */});
@@ -1769,10 +1776,13 @@ static const Func* getSpillFrameKnownCallee(const IRInstruction* inst) {
 void FrameStateMgr::spillFrameStack(IRSPRelOffset offset,
                                     FPInvOffset retOffset,
                                     const IRInstruction* inst) {
+  assertx(inst->is(SpillFrame));
+
   for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
     setValue(stk(offset + i), nullptr);
   }
-  auto const ctx = inst->op() == SpillFrame ? inst->src(2) : nullptr;
+  auto const ctx = inst->src(2);
+  auto const dynamicCall = inst->src(4);
 
   const Func* func = getSpillFrameKnownCallee(inst);
   auto const opc = m_fpushOverride ?
@@ -1787,6 +1797,7 @@ void FrameStateMgr::spillFrameStack(IRSPRelOffset offset,
     ctx,
     opc,
     func,
+    dynamicCall,
     true /* inlineEligible */,
     false /* spans */
   });

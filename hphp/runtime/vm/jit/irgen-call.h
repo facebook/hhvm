@@ -46,6 +46,10 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
 
 SSATmp* implFCall(IRGS& env, uint32_t numParams, uint32_t numOut);
 
+void emitCallerDynamicCallChecks(IRGS& env,
+                                 const Func* callee,
+                                 uint32_t numParams);
+
 Type callReturnType(const Func* callee);
 
 //////////////////////////////////////////////////////////////////////

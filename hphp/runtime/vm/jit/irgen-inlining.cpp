@@ -37,7 +37,8 @@ bool beginInlining(IRGS& env,
                    SrcKey startSk,
                    Offset returnBcOffset,
                    ReturnTarget returnTarget,
-                   int cost) {
+                   int cost,
+                   bool conjure) {
   auto const& fpiStack = env.irb->fs().fpiStack();
 
   assertx(!fpiStack.empty() &&
@@ -73,6 +74,8 @@ bool beginInlining(IRGS& env,
     prevSP == calleeSP,
     "FPI stack pointer and callee stack pointer didn't match in beginInlining"
   );
+
+  if (!conjure) emitCallerDynamicCallChecks(env, target, numParams);
 
   // The VM stack-pointer is conceptually pointing to the last
   // parameter, so we need to add numParams to get to the ActRec
@@ -184,7 +187,7 @@ bool beginInlining(IRGS& env,
 
   updateMarker(env);
   env.irb->exceptionStackBoundary();
-  emitDynamicCallCheck(env);
+  emitCalleeDynamicCallCheck(env);
 
   if (data.ctx && data.ctx->isA(TObj)) {
     assertx(startSk.hasThis());
@@ -273,7 +276,8 @@ bool conjureBeginInlining(IRGS& env,
     startSk,
     0 /* returnBcOffset */,
     returnTarget,
-    9 /* cost */
+    9, /* cost */
+    true
   );
 }
 

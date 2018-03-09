@@ -1556,6 +1556,50 @@ void emitFPassCW(IRGS& env, uint32_t argNum, FPassHint hint) {
 
 //////////////////////////////////////////////////////////////////////
 
+void emitCallerDynamicCallChecks(IRGS& env,
+                                 const Func* callee,
+                                 uint32_t numParams) {
+  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
+  if (callee && callee->isDynamicallyCallable()) return;
+
+  SSATmp* func = nullptr;
+  ifElse(
+    env,
+    [&] (Block* skip) {
+      auto const calleeAROff = spOffBCFromIRSP(env) + numParams;
+      auto const dynamic = gen(
+        env,
+        LdARIsDynamic,
+        IRSPRelOffsetData { calleeAROff },
+        sp(env)
+      );
+      gen(env, JmpZero, skip, dynamic);
+
+      // If we do have a callee, we already know its not dynamically callable
+      // (checked above).
+      if (!callee) {
+        func = gen(
+          env,
+          LdARFuncPtr,
+          TFunc,
+          IRSPRelOffsetData { calleeAROff },
+          sp(env)
+        );
+        auto const dyncallable = gen(env, IsFuncDynCallable, func);
+        gen(env, JmpNZero, skip, dyncallable);
+      } else {
+        func = cns(env, callee);
+      }
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, RaiseForbiddenDynCall, func);
+    }
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void emitFCallArray(IRGS& env) {
   auto const callee = env.currentNormalizedInstruction->funcd;
 
@@ -1565,6 +1609,8 @@ void emitFCallArray(IRGS& env) {
   auto const readLocals = callee
     ? funcReadsLocals(callee)
     : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
+
+  emitCallerDynamicCallChecks(env, callee, 1);
 
   auto const data = CallArrayData {
     spOffBCFromIRSP(env),
@@ -1589,6 +1635,8 @@ void implFCallUnpack(IRGS& env, uint32_t numParams, uint32_t numOut) {
   auto const readLocals = callee
     ? funcReadsLocals(callee)
     : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
+
+  emitCallerDynamicCallChecks(env, callee, numParams);
 
   auto const data = CallArrayData {
     spOffBCFromIRSP(env),
@@ -1632,6 +1680,8 @@ SSATmp* implFCall(IRGS& env, uint32_t numParams, uint32_t numOut) {
       *env.currentNormalizedInstruction,
       curFunc(env)
     );
+
+  emitCallerDynamicCallChecks(env, callee, numParams);
 
   auto op = curFunc(env)->unit()->getOp(bcOff(env));
   auto const retVal = gen(

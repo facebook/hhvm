@@ -753,7 +753,8 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                  calleeRegion->start(),
                                  returnFuncOff,
                                  irgen::ReturnTarget { returnBlock },
-                                 calleeCost)) {
+                                 calleeCost,
+                                 false)) {
           SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
             { return show(*calleeRegion); };
 

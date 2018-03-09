@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit { namespace irlower {
@@ -89,6 +90,31 @@ static void raiseHackArrCompatNotice(const StringData* msg) {
 
 void cgRaiseHackArrCompatNotice(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(vmain(env), env, CallSpec::direct(raiseHackArrCompatNotice),
+               kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
+}
+
+static void raiseForbiddenDynCall(const Func* func) {
+  assertx(RuntimeOption::EvalForbidDynamicCalls > 0);
+  assertx(!func->isDynamicallyCallable());
+
+  if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+    std::string msg;
+    string_printf(
+      msg,
+      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      func->fullDisplayName()->data()
+    );
+    throw_invalid_operation_exception(makeStaticString(msg));
+  } else {
+    raise_notice(
+      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      func->fullDisplayName()->data()
+    );
+  }
+}
+
+void cgRaiseForbiddenDynCall(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(vmain(env), env, CallSpec::direct(raiseForbiddenDynCall),
                kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
 }
 

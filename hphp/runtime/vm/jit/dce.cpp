@@ -192,6 +192,7 @@ bool canDCE(IRInstruction* inst) {
   case LdObjClass:
   case LdClsName:
   case LdARFuncPtr:
+  case LdARIsDynamic:
   case LdARNumParams:
   case LdFuncNumParams:
   case LdStrLen:
@@ -269,6 +270,7 @@ bool canDCE(IRInstruction* inst) {
   case LdCufIterDynamic:
   case LdStaticLoc:
   case LdARNumArgsAndFlags:
+  case IsFuncDynCallable:
   case StrictlyIntegerConv:
     assertx(!inst->isControlFlow());
     return true;
@@ -502,6 +504,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseVarEnvDynCall:
   case RaiseHackArrCompatNotice:
   case RaiseParamRefMismatch:
+  case RaiseForbiddenDynCall:
   case InitStaticLoc:
   case PrintStr:
   case PrintInt:

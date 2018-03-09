@@ -1656,7 +1656,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
 
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->m_func, 0);
-  checkForDynamicCall(enterFnAr);
+  calleeDynamicCallChecks(enterFnAr);
   checkForRequiredCallM(enterFnAr);
   assert(vmfp()->func()->contains(vmpc()));
 
@@ -5286,7 +5286,7 @@ bool doFCall(ActRec* ar, PC& pc) {
     pc = vmpc();
     return false;
   }
-  checkForDynamicCall(ar);
+  calleeDynamicCallChecks(ar);
   checkForRequiredCallM(ar);
   return true;
 }
@@ -5302,6 +5302,7 @@ OPTBLD_INLINE void iopFCall(PC& pc, ActRec* ar, uint32_t numArgs) {
     ar->setUseWeakTypes();
   }
   assert(numArgs == ar->numArgs());
+  if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
   doFCall(ar, pc);
@@ -5317,6 +5318,7 @@ void iopFCallD(PC& pc, ActRec* ar, uint32_t numArgs,
              ar->m_func == ar->m_func->cls()->getCtor()));
   }
   assert(numArgs == ar->numArgs());
+  if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
   doFCall(ar, pc);
@@ -5330,6 +5332,7 @@ void iopFCallAwait(PC& pc, ActRec* ar, uint32_t numArgs,
     assert(ar->m_func->name()->isame(funcName));
   }
   assert(numArgs == ar->numArgs());
+  if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
   ar->setFCallAwait();
@@ -5445,7 +5448,7 @@ static bool doFCallArray(PC& pc, ActRec* ar, int numStackValues,
     pc = vmpc();
     return false;
   }
-  checkForDynamicCall(ar);
+  calleeDynamicCallChecks(ar);
   checkForRequiredCallM(ar);
   return true;
 }
@@ -5466,11 +5469,13 @@ bool doFCallArrayTC(PC pc, int32_t numArgs, void* retAddr) {
 }
 
 OPTBLD_INLINE void iopFCallArray(PC& pc, ActRec* ar) {
+  if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
   doFCallArray(pc, ar, 1, CallArrOnInvalidContainer::CastToArray);
 }
 
 OPTBLD_INLINE void iopFCallUnpack(PC& pc, ActRec* ar, uint32_t numArgs) {
   assert(numArgs == ar->numArgs());
+  if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
   checkStack(vmStack(), ar->m_func, 0);
   doFCallArray(pc, ar, numArgs, CallArrOnInvalidContainer::WarnAndContinue);
 }

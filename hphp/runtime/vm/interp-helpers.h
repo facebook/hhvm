@@ -58,27 +58,32 @@ inline void setTypesFlag(ActRec* fp, ActRec* ar) {
   if (!callUsesStrictTypes(fp)) ar->setUseWeakTypes();
 }
 
-inline void checkForDynamicCall(const ActRec* ar) {
+inline void callerDynamicCallChecks(const Func* func) {
+  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
+  if (func->isDynamicallyCallable()) return;
+
+  if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+    std::string msg;
+    string_printf(
+      msg,
+      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      func->fullDisplayName()->data()
+    );
+    throw_invalid_operation_exception(makeStaticString(msg));
+  } else {
+    raise_notice(
+      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      func->fullDisplayName()->data()
+    );
+  }
+}
+
+inline void calleeDynamicCallChecks(const ActRec* ar) {
   if (!ar->isDynamicCall()) return;
   auto const func = ar->func();
 
-  if (func->accessesCallerFrame()) raise_disallowed_dynamic_call(func);
-
-  if (!func->isDynamicallyCallable()) {
-    if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
-      std::string msg;
-      string_printf(
-        msg,
-        Strings::FUNCTION_CALLED_DYNAMICALLY,
-        func->fullDisplayName()->data()
-      );
-      throw_invalid_operation_exception(makeStaticString(msg));
-    } else if (RuntimeOption::EvalForbidDynamicCalls == 1) {
-      raise_notice(
-        Strings::FUNCTION_CALLED_DYNAMICALLY,
-        func->fullDisplayName()->data()
-      );
-    }
+  if (func->accessesCallerFrame()) {
+    raise_disallowed_dynamic_call(func);
   }
 
   if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) {

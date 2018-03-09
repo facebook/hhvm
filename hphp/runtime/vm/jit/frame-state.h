@@ -71,6 +71,11 @@ struct FPIInfo {
    */
   const Func* func;
 
+  /*
+   * Whether this func was pushed as part of a dynamic call
+   */
+  SSATmp* dynamicCall;
+
   bool inlineEligible;
   bool spansCall;
 };

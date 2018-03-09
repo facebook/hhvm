@@ -320,6 +320,13 @@ SSATmp* simplifyCheckFuncStatic(State& env, const IRInstruction* inst) {
   return mergeBranchDests(env, inst);
 }
 
+SSATmp* simplifyIsFuncDynCallable(State& env, const IRInstruction* inst) {
+  auto const funcTmp = inst->src(0);
+  return funcTmp->hasConstVal(TFunc)
+    ? cns(env, funcTmp->funcVal()->isDynamicallyCallable())
+    : nullptr;
+}
+
 SSATmp* simplifyRaiseMissingThis(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   if (funcTmp->hasConstVal()) {
@@ -3663,6 +3670,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(MethodExists)
   X(CheckCtxThis)
   X(CheckFuncStatic)
+  X(IsFuncDynCallable)
   X(RaiseMissingThis)
   X(LdObjClass)
   X(LdObjInvoke)

@@ -1535,6 +1535,8 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   VMRegAnchor _;
   auto const reentrySP = vmStack().top();
 
+  if (dynamic) callerDynamicCallChecks(f);
+
   if (thiz != nullptr) thiz->incRefCount();
 
   TypedValue retval;

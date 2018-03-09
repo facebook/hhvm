@@ -331,7 +331,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
     gen(env, CheckSurpriseFlagsEnter, FuncEntryData { func, argc }, fp(env));
   }
 
-  emitDynamicCallCheck(env);
+  emitCalleeDynamicCallCheck(env);
   emitCallMCheck(env);
 
   prologDispatch(
@@ -488,12 +488,10 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
   );
 }
 
-void emitDynamicCallCheck(IRGS& env) {
+void emitCalleeDynamicCallCheck(IRGS& env) {
   auto const func = curFunc(env);
 
-  if (!(RuntimeOption::EvalForbidDynamicCalls > 0 &&
-        !func->isDynamicallyCallable()) &&
-      !(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) &&
+  if (!(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) &&
       !func->accessesCallerFrame()) {
     return;
   }
@@ -522,17 +520,6 @@ void emitDynamicCallCheck(IRGS& env) {
         func->fullDisplayName()->data()
       );
       auto const msg = cns(env, makeStaticString(str));
-
-      if (RuntimeOption::EvalForbidDynamicCalls > 0 &&
-          !func->isDynamicallyCallable()) {
-        gen(
-          env,
-          RuntimeOption::EvalForbidDynamicCalls >= 2
-            ? ThrowInvalidOperation
-            : RaiseNotice,
-          msg
-        );
-      }
 
       if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
         gen(env, RaiseNotice, msg);

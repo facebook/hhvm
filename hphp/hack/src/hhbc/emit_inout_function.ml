@@ -142,7 +142,8 @@ let emit_wrapper_function
   let params = Emit_param.from_asts ~namespace ~tparams ~generate_defaults:true
     ~scope ast_fun.Ast.f_params in
   let function_attributes =
-    Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes in
+    Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes
+    |> Core_list.filter ~f:(fun attr -> not (Hhas_attribute.is_native attr)) in
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let return_type_info =
     Emit_body.emit_return_type_info

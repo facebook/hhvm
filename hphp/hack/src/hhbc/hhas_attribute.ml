@@ -21,17 +21,22 @@ let make attribute_name attribute_arguments =
 let name a = a.attribute_name
 let arguments a = a.attribute_arguments
 
-let is_x s attributes =
-  let f attr = (name attr) = s in
-  List.exists attributes f
-let is_memoized = is_x "__Memoize"
-let is_native = is_x "__Native"
-let is_foldable = is_x "__IsFoldable"
-let is_dynamically_callable = is_x "__DynamicallyCallable"
+let is_ s attr = (name attr) = s
+let has_ f attrs = List.exists attrs f
+
+let is_memoized = is_ "__Memoize"
+let is_native   = is_ "__Native"
+let is_foldable = is_ "__IsFoldable"
+let is_dynamically_callable = is_ "__DynamicallyCallable"
+
+let has_memoized = has_ is_memoized
+let has_native   = has_ is_native
+let has_foldable = has_ is_foldable
+let has_dynamically_callable = has_ is_dynamically_callable
 
 let is_native_arg s attributes =
   let f attr =
-    (name attr) = "__Native" &&
+    is_native attr &&
     List.exists (arguments attr)
       ~f:(function Typed_value.String s0 -> s = s0 | _ -> false)
   in

@@ -1395,7 +1395,7 @@ let function_attributes f =
     then "unique" :: "builtin" :: "persistent" :: attrs else attrs in
   let attrs =
     if Emit_env.is_systemlib () ||
-         ((Hhas_attribute.is_dynamically_callable user_attrs) &&
+         ((Hhas_attribute.has_dynamically_callable user_attrs) &&
             not (Hhas_function.is_memoize_impl f))
     then "dyn_callable" :: attrs else attrs
   in
@@ -1410,9 +1410,9 @@ let function_attributes f =
   let attrs =
     if Hhas_function.no_injection f then "no_injection" :: attrs else attrs in
   let attrs =
-    if Hhas_attribute.is_native user_attrs then "skip_frame" :: attrs else attrs in
+    if Hhas_attribute.has_native user_attrs then "skip_frame" :: attrs else attrs in
   let attrs =
-    if Hhas_attribute.is_foldable user_attrs then "foldable" :: attrs else attrs in
+    if Hhas_attribute.has_foldable user_attrs then "foldable" :: attrs else attrs in
   let attrs =
     if Hhas_function.is_return_by_ref f then "reference" :: attrs else attrs in
   let attrs =
@@ -1453,11 +1453,11 @@ let method_attributes m =
   let user_attrs = Hhas_method.attributes m in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
   let is_native_opcode_impl = Hhas_attribute.is_native_opcode_impl user_attrs in
-  let is_native = not is_native_opcode_impl && Hhas_attribute.is_native user_attrs in
+  let is_native = not is_native_opcode_impl && Hhas_attribute.has_native user_attrs in
   let is_systemlib = Emit_env.is_systemlib () in
   let attrs =
     if Emit_env.is_systemlib () ||
-         ((Hhas_attribute.is_dynamically_callable user_attrs) &&
+         ((Hhas_attribute.has_dynamically_callable user_attrs) &&
             not (Hhas_method.is_memoize_impl m))
     then "dyn_callable" :: attrs else attrs
   in
@@ -1472,7 +1472,7 @@ let method_attributes m =
   let attrs = if Hhas_method.no_injection m then "no_injection" :: attrs else attrs in
   let attrs = if is_systemlib && is_native then "skip_frame" :: attrs else attrs in
   let attrs =
-    if Hhas_attribute.is_foldable user_attrs then "foldable" :: attrs else attrs in
+    if Hhas_attribute.has_foldable user_attrs then "foldable" :: attrs else attrs in
   let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
   let attrs = if Hhas_method.is_final m then "final" :: attrs else attrs in
   let attrs = if Hhas_method.is_static m then "static" :: attrs else attrs in
@@ -1526,7 +1526,7 @@ let class_special_attributes c =
   let user_attrs = Hhas_class.attributes c in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
   let attrs =
-    if Hhas_attribute.is_foldable user_attrs then "foldable" :: attrs else attrs in
+    if Hhas_attribute.has_foldable user_attrs then "foldable" :: attrs else attrs in
   let attrs = if Emit_env.is_systemlib ()
     then "unique" :: "builtin" :: "persistent" :: attrs else attrs in
   let attrs = if not (Hhas_class.is_top c) then "nontop" :: attrs else attrs in

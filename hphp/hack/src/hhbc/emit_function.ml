@@ -25,8 +25,8 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
     || ast_fun.Ast.f_fun_kind = Ast_defs.FAsyncGenerator in
   let function_attributes =
     Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes in
-  let is_memoize = Hhas_attribute.is_memoized function_attributes in
-  let is_native = Hhas_attribute.is_native function_attributes in
+  let is_memoize = Hhas_attribute.has_memoized function_attributes in
+  let is_native = Hhas_attribute.has_native function_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info function_attributes in
   let is_no_injection = Hhas_attribute.is_no_injection function_attributes in
   let wrapper_type_opt, inout_param_locations =

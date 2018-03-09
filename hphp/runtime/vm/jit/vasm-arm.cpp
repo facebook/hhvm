@@ -488,11 +488,11 @@ void Vgen::emit(const copy2& i) {
   }
 }
 
-void emitSimdImmInt(vixl::MacroAssembler* a, int64_t val, Vreg d) {
+void emitSimdImmInt(vixl::MacroAssembler* a, uint64_t val, Vreg d) {
   // Assembler::fmov emits a ldr from a literal pool if IsImmFP64 is false.
   // In that case, emit the raw bits into a GPR first and then move them
   // unmodified into destination SIMD
-  union { double dval; int64_t ival; };
+  union { double dval; uint64_t ival; };
   ival = val;
   if (vixl::Assembler::IsImmFP64(dval)) {
     a->Fmov(D(d), dval);
@@ -507,7 +507,7 @@ void emitSimdImmInt(vixl::MacroAssembler* a, int64_t val, Vreg d) {
 #define Y(vasm_opc, simd_w, vr_w, gpr_w, imm) \
 void Vgen::emit(const vasm_opc& i) {          \
   if (i.d.isSIMD()) {                         \
-    emitSimdImmInt(a, i.s.simd_w(), i.d);     \
+    emitSimdImmInt(a, static_cast<uint##vr_w##_t>(i.s.simd_w()), i.d);     \
   } else {                                    \
     Vreg##vr_w d = i.d;                       \
     a->Mov(gpr_w(d), imm);                    \

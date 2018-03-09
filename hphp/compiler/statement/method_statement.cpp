@@ -380,7 +380,7 @@ void MethodStatement::setSpecialMethod(FileScopeRawPtr fileScope,
     classScope->setAttribute(ClassScope::HasDestructor);
     if (m_params && m_params->getCount()) {
       parseTimeFatal(fileScope,
-                     "Method %s cannot take any arguments",
+                     "Method %s cannot accept any arguments",
                      getOriginalFullName().c_str());
     }
   } else if (name == "__get") {

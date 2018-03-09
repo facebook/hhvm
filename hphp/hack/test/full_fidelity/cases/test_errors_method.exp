@@ -24,6 +24,7 @@
 (14,43)-(14,44) An abstract method cannot have a method body.
 (15,3)-(15,42) Redeclared method E::f
 (15,22)-(15,34) Parameters cannot have visibility modifiers (except in parameter lists of constructors).
+(16,3)-(16,8) Method E::__destruct cannot accept any arguments
 (16,31)-(16,36) A destructor must have an empty parameter list.
 (17,3)-(17,8) Destructor E::__destruct() cannot be static
 (17,3)-(17,8) A destructor can only have visibility modifiers.

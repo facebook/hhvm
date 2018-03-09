@@ -242,6 +242,6 @@ val invalid_is_expression_hint : string -> string
 val elvis_operator_space : string
 val property_has_multiple_visibilities : string -> string
 val autoload_takes_one_argument : string
-val clone_takes_no_arguments : string -> string -> string
+val clone_destruct_takes_no_arguments : string -> string -> string
 val class_destructor_cannot_be_static : string -> string -> string
 val clone_cannot_be_static : string -> string -> string

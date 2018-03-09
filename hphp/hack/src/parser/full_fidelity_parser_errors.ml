@@ -492,11 +492,11 @@ let async_magic_method node parents =
   | _ -> false
 
 
-let clone_takes_no_arguments method_name node parents =
+let clone_destruct_takes_no_arguments method_name node parents =
   match node with
   | FunctionDeclarationHeader { function_parameter_list = l; function_name = name; _} ->
     let num_params = List.length (syntax_to_list_no_separators l) in
-    (is_clone name) && num_params <> 0
+    ((is_clone name) || (is_destruct name)) && num_params <> 0
   | _ -> false
 
 (* check that a constructor or a destructor is type annotated *)
@@ -1180,8 +1180,9 @@ let methodish_errors env node parents errors =
       produce_error_for_header errors async_magic_method header_node [node]
       SyntaxError.async_magic_method modifiers in
     let errors =
-      produce_error_for_header errors (clone_takes_no_arguments method_name) header_node [node]
-      (SyntaxError.clone_takes_no_arguments class_name method_name) modifiers in
+      produce_error_for_header errors
+      (clone_destruct_takes_no_arguments method_name) header_node [node]
+      (SyntaxError.clone_destruct_takes_no_arguments class_name method_name) modifiers in
     let errors =
       produce_error_for_header errors (clone_cannot_be_static) header_node [node]
       (SyntaxError.clone_cannot_be_static class_name method_name) modifiers in

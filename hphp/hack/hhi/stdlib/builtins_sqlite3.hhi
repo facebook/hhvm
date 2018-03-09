@@ -26,13 +26,13 @@ class SQLite3 {
   public function busytimeout($msecs) { }
   public function close() { }
   public function exec($sql) { }
-  public function version() { }
+  public static function version() { }
   public function lastinsertrowid() { }
   public function lasterrorcode() { }
   public function lasterrormsg() { }
   public function loadextension($extension) { }
   public function changes() { }
-  public function escapestring($sql) { }
+  public static function escapestring($sql) { }
   public function prepare($sql) { }
   public function query($sql) { }
   public function querysingle($sql, $entire_row = false) { }

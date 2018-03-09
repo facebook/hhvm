@@ -2202,6 +2202,12 @@ MaybeDataType type_constraint_to_data_type(const TypeConstraint& tc) {
     return folly::none;
 }
 
+static const StaticString
+  s_AllowStatic("__AllowStatic"),
+  s_ParamCoerceModeNull("__ParamCoerceModeNull"),
+  s_ParamCoerceModeFalse("__ParamCoerceModeFalse");
+
+
 /*
  * Checks whether the current function is native by looking at the user
  * attribute map and sets the isNative flag accoringly
@@ -2218,8 +2224,21 @@ void check_native(AsmState& as, bool is_construct_or_destruct) {
       : type_constraint_to_data_type(as.fe->retTypeConstraint);
     as.fe->isNative =
       !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
+
+    // set extra attributes
     as.fe->attrs |= AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
 
+    if (as.fe->pce() &&
+        !(as.fe->attrs & AttrStatic) &&
+        !as.fe->userAttributes.count(s_AllowStatic.get())) {
+      as.fe->attrs |= AttrRequiresThis;
+    }
+    if (as.fe->userAttributes.count(s_ParamCoerceModeFalse.get())) {
+      as.fe->attrs |= AttrParamCoerceModeFalse;
+    }
+    if (as.fe->userAttributes.count(s_ParamCoerceModeNull.get())) {
+      as.fe->attrs |= AttrParamCoerceModeNull;
+    }
     if (!(as.fe->attrs &
         (AttrParamCoerceModeFalse | AttrParamCoerceModeNull))) {
       as.fe->attrs |= AttrParamCoerceModeNull;

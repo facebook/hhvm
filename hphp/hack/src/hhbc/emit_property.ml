@@ -103,15 +103,19 @@ let from_ast ast_class cv_kind_list type_hint tparams namespace doc_comment_opt
         let label = Label.next_regular () in
         let prolog, epilog =
           if is_static
-          then empty, instr (IMutator (InitProp (pid, Static)))
+          then empty, Emit_pos.emit_pos_then ast_class.Ast.c_span @@
+            instr (IMutator (InitProp (pid, Static)))
           else if is_private
-          then empty, instr (IMutator (InitProp (pid, NonStatic)))
+          then empty, Emit_pos.emit_pos_then ast_class.Ast.c_span @@
+            instr (IMutator (InitProp (pid, NonStatic)))
           else
             gather [
+              Emit_pos.emit_pos ast_class.Ast.c_span;
               instr (IMutator (CheckProp pid));
               instr_jmpnz label;
             ],
             gather [
+              Emit_pos.emit_pos ast_class.Ast.c_span;
               instr (IMutator (InitProp (pid, NonStatic)));
               instr_label label;
             ] in

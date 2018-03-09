@@ -1107,7 +1107,7 @@ let equiv prog prog' startlabelpairs =
       if loc.line_begin = loc'.line_begin && loc.line_end = loc'.line_end
       then nextins ()
       else try_specials ()
-    | ISrcLoc _, IBasic PopC ->
+    | ISrcLoc _, _ ->
       nextleftins ()
 
     (* Iterator instructions have multiple exit points, so have to add to

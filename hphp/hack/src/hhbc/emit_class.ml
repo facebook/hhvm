@@ -408,7 +408,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
       let rec make_cinit_instrs cs =
         match cs with
         | [] ->
-          instr_retc
+          Emit_pos.emit_pos_then ast_class.Ast.c_span @@ instr_retc
         | (name, instrs) :: cs ->
           if List.is_empty cs
           then
@@ -425,11 +425,14 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
               instr_eq;
               instr_jmpz label;
               instrs;
+              Emit_pos.emit_pos ast_class.Ast.c_span;
               instr_jmp return_label;
               instr_label label;
               make_cinit_instrs cs;
             ] in
-      let instrs = make_cinit_instrs initialized_class_constants in
+      let instrs =
+        Emit_pos.emit_pos_then ast_class.Ast.c_span @@
+        make_cinit_instrs initialized_class_constants in
       let params =
         [Hhas_param.make "$constName" false false false [] None None] in
       [make_86method

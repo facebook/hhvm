@@ -107,6 +107,7 @@ let emit_body_instrs ~wrapper_type env pos params call_instrs =
     Emit_param.emit_param_default_value_setter env pos params in
   gather [
     begin_label;
+    Emit_pos.emit_pos pos;
     body;
     default_value_setters;
   ]

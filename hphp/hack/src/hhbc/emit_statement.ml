@@ -50,7 +50,7 @@ let emit_def_inline = function
       let r, _ =
         Emit_inout_helpers.extract_function_inout_or_ref_param_locations fd in
       Option.is_some r in
-    Emit_pos.emit_pos_then (fst fd.Ast.f_name) @@
+    Emit_pos.emit_pos_then (fd.Ast.f_span) @@
     let n = int_of_string (snd fd.Ast.f_name) in
     gather [
       instr_deffunc n;
@@ -239,7 +239,7 @@ let rec emit_stmt env (pos, st_) =
     let need_ref = !return_by_ref in
     gather [
       emit_expr ~need_ref env expr;
-      Emit_pos.emit_pos pos;
+      if not need_ref then Emit_pos.emit_pos pos else empty;
       emit_return ~need_ref env;
     ]
   | A.GotoLabel (_, label) ->
@@ -349,20 +349,23 @@ and emit_global_vars env p es =
     | A.Dollar e ->
       let rec emit_inner e =
         match snd e with
-        | A.Lvar (_, id) ->
+        | A.Lvar (name_pos, id) ->
           if SN.Superglobals.is_superglobal id then
             gather [
+              Emit_pos.emit_pos name_pos;
               instr_string (SU.Locals.strip_dollar id);
+              Emit_pos.emit_pos (fst e);
               instr_cgetg;
             ]
           else
             instr_cgetl (Local.Named id)
         | A.Dollar e ->
-          gather [emit_inner e; instr_cgetn]
+          gather [emit_inner e; Emit_pos.emit_pos p; instr_cgetn]
         | _ ->
           emit_expr ~need_ref:false env e in
       gather [
         emit_inner e;
+        Emit_pos.emit_pos p;
         instr_dup;
         instr_vgetg;
         instr_bindn;
@@ -448,7 +451,7 @@ and emit_using env pos is_block_scoped has_await e b =
       | A.Binop (A.Eq None, (_, A.Lvar (_, id)), _)
       | A.Lvar (_, id) ->
         Local.Named id, gather [
-          emit_expr_and_unbox_if_necessary ~need_ref:false env e;
+          emit_expr_and_unbox_if_necessary ~need_ref:false env pos e;
           Emit_pos.emit_pos (fst b);
           instr_popc;
         ]
@@ -1084,7 +1087,7 @@ and emit_foreach_ env pos collection iterator block =
     Emit_env.do_in_loop_body loop_break_label loop_continue_label env
       ~iter:(mutable_iter, iterator_number) block emit_stmt in
   let result = gather [
-    emit_expr_and_unbox_if_necessary ~need_ref:mutable_iter env collection;
+    emit_expr_and_unbox_if_necessary ~need_ref:mutable_iter env pos collection;
     Emit_pos.emit_pos pos;
     init;
     instr_try_fault
@@ -1099,9 +1102,9 @@ and emit_foreach_ env pos collection iterator block =
       ])
       (* fault body *)
       (gather [
+        Emit_pos.emit_pos pos;
         if mutable_iter then instr_miterfree iterator_number
         else instr_iterfree iterator_number;
-        Emit_pos.emit_pos pos;
         instr_unwind ]);
     instr_label loop_break_label
   ] in

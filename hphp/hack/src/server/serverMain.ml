@@ -122,25 +122,8 @@ let shutdown_persistent_client env client =
 (* The main loop *)
 (*****************************************************************************)
 
-let handle_connection_ genv env client =
-  let open ServerCommandTypes in
-  try
-    match ClientProvider.read_connection_type client with
-    | Persistent ->
-      let env = match env.persistent_client with
-        | Some old_client ->
-          ClientProvider.send_push_message_to_client old_client
-            NEW_CLIENT_CONNECTED;
-          shutdown_persistent_client env old_client
-        | None -> env
-      in
-      ClientProvider.send_response_to_client client Connected;
-      { env with persistent_client =
-          Some (ClientProvider.make_persistent client)}
-    | Non_persistent ->
-      ServerCommand.handle genv env client
-  with
-  | ClientProvider.Client_went_away | Read_command_timeout ->
+let handle_connection_exception env client e = match e with
+  | ClientProvider.Client_went_away | ServerCommandTypes.Read_command_timeout ->
     ClientProvider.shutdown_client client;
     env
   (** Connection dropped off. Its unforunate that we don't actually know
@@ -164,6 +147,28 @@ let handle_connection_ genv env client =
     ClientProvider.shutdown_client client;
     env
 
+let handle_connection_ genv env client =
+  let open ServerCommandTypes in
+  try
+    match ClientProvider.read_connection_type client with
+    | Persistent ->
+      let env = match env.persistent_client with
+        | Some old_client ->
+          ClientProvider.send_push_message_to_client old_client
+            NEW_CLIENT_CONNECTED;
+          shutdown_persistent_client env old_client
+        | None -> env
+      in
+      ClientProvider.send_response_to_client client Connected;
+      { env with persistent_client =
+          Some (ClientProvider.make_persistent client)}
+    | Non_persistent ->
+      ServerCommand.handle genv env client
+  with
+  | ServerCommand.Nonfatal_rpc_exception (e, _, env) ->
+    handle_connection_exception env client e
+  | e ->
+    handle_connection_exception env client e
 
 let report_persistent_exception
     ~(e: exn)

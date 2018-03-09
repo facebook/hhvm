@@ -92,8 +92,6 @@ let async_suggest_return fkind hint pos =
     match snd hint with
     | Happly (s, _) ->
         if snd s <> Naming_special_names.Classes.cAwaitable then e_func pos
-    | Hoption (_, (Happly (s, _))) ->
-        if snd s <> Naming_special_names.Classes.cAwaitable then e_func pos
     | _ -> e_func pos
 
 let err_witness p = Reason.Rwitness p, Terr

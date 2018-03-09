@@ -556,7 +556,7 @@ let save_state options handle =
   let genv, _ = setup_server ~informant_managed:false ~monitor_pid:None options handle in
   let env = ServerInit.init_to_save_state genv in
   Option.iter (ServerArgs.save_filename genv.options)
-    (ServerInit.save_state env);
+    (ServerInit.save_state genv env);
   Hh_logger.log "Running to save saved state";
   Program.run_once_and_exit genv env
 
@@ -568,7 +568,7 @@ let run_once options handle =
     Exit_status.(exit Input_error));
   let env = program_init genv in
   Option.iter (ServerArgs.save_filename genv.options)
-    (ServerInit.save_state env);
+    (ServerInit.save_state genv env);
   Hh_logger.log "Running in check mode";
   Program.run_once_and_exit genv env
 
@@ -584,7 +584,8 @@ let daemon_main_exn ~informant_managed options monitor_pid (ic, oc) =
   let handle = SharedMem.init (ServerConfig.sharedmem_config config) in
   SharedMem.connect handle ~is_master:true;
 
-  let genv, init_id = setup_server ~informant_managed ~monitor_pid:(Some monitor_pid) options handle in
+  let genv, init_id = setup_server
+      ~informant_managed ~monitor_pid:(Some monitor_pid) options handle in
   if ServerArgs.check_mode genv.options then
     (Hh_logger.log "Invalid program args - can't run daemon in check mode.";
     Exit_status.(exit Input_error));

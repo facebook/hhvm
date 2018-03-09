@@ -926,7 +926,8 @@ let run_search genv t =
   end
   else ()
 
-let save_state env fn =
+let save_state genv env fn =
+  let db_name = fn ^ ".sql" in
   let t = Unix.gettimeofday () in
   if not (Errors.is_empty env.errorl)
   then failwith "--save-mini only works if there are no type errors!";
@@ -934,7 +935,10 @@ let save_state env fn =
   let saved = FileInfo.info_to_saved env.files_info in
   Marshal.to_channel chan saved [];
   Sys_utils.close_out_no_fail fn chan;
-  let sqlite_save_t = SharedMem.save_dep_table_sqlite (fn^".sql") Build_id.build_revision in
+  let () = if ServerArgs.file_info_on_disk genv.ServerEnv.options then
+    SharedMem.save_file_info_sqlite db_name |> ignore
+  else () in
+  let sqlite_save_t = SharedMem.save_dep_table_sqlite db_name Build_id.build_revision in
   Hh_logger.log "Saving deptable using sqlite took(seconds): %d" sqlite_save_t;
   ignore @@ Hh_logger.log_duration "Saving" t
 

@@ -18,7 +18,7 @@ type load_mini_approach =
   | Load_state_natively_with_target of ServerMonitorUtils.target_mini_state
 
 (* Saves the state that is used by init below. *)
-val save_state: ServerEnv.env -> string -> unit
+val save_state: ServerEnv.genv -> ServerEnv.env -> string -> unit
 
 type init_result =
   (** Loaded a mini saved state of this distance. Note: for older load scripts
@@ -33,4 +33,4 @@ type init_result =
 val init: ?load_mini_approach:load_mini_approach -> ServerEnv.genv
   -> ServerEnv.env * init_result (* If the script failed, the error message *)
 
-val init_to_save_state : ServerEnv.genv -> ServerEnv.env 
+val init_to_save_state : ServerEnv.genv -> ServerEnv.env

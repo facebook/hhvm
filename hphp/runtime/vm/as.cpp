@@ -2188,21 +2188,34 @@ bool ensure_pseudomain(AsmState& as) {
 
 static StaticString s_native("__Native");
 
+MaybeDataType type_constraint_to_data_type(const TypeConstraint& tc) {
+    if (auto type = tc.typeName()) {
+      return get_datatype(
+        type->toCppString(),
+        tc.isArray() || tc.isKeyset() || tc.isDict(),
+        false, // no syntactic functions in type annotations
+        false, // no xhp type annotation
+        false, // no tuples in type annotation
+        tc.isNullable(),
+        tc.isSoft());
+    }
+    return folly::none;
+}
+
 /*
  * Checks whether the current function is native by looking at the user
  * attribute map and sets the isNative flag accoringly
  * If the give function is op code implementation, then isNative is not set
  */
-void check_native(AsmState& as) {
+void check_native(AsmState& as, bool is_construct_or_destruct) {
   if (as.fe->userAttributes.count(s_native.get())) {
     if (SystemLib::s_inited) {
       as.error("Native function may only appear in systemlib");
     }
 
-    if (!as.fe->retTypeConstraint.isNullable()) {
-      as.fe->hniReturnType = as.fe->retTypeConstraint.underlyingDataType();
-    }
-
+    as.fe->hniReturnType = is_construct_or_destruct
+      ? KindOfNull
+      : type_constraint_to_data_type(as.fe->retTypeConstraint);
     as.fe->isNative =
       !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
     as.fe->attrs |= AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
@@ -2213,19 +2226,9 @@ void check_native(AsmState& as) {
     }
 
     for (auto& pi : as.fe->params) {
-      auto& tc = pi.typeConstraint;
-      if (auto type = tc.typeName()) {
-        pi.builtinType = get_datatype(
-          type->toCppString(),
-          tc.isArray() || tc.isKeyset() || tc.isDict(),
-          tc.isCallable(),
-          false, //?
-          false, //?
-          tc.isNullable(),
-          tc.isSoft());
-      }
+      pi.builtinType =
+        type_constraint_to_data_type(pi.typeConstraint);
     }
-
   }
 }
 
@@ -2278,7 +2281,7 @@ void parse_function(AsmState& as) {
   parse_parameter_list(as);
   parse_function_flags(as);
 
-  check_native(as);
+  check_native(as, false);
 
   as.in.expectWs('{');
 
@@ -2321,7 +2324,7 @@ void parse_method(AsmState& as) {
   parse_parameter_list(as);
   parse_function_flags(as);
 
-  check_native(as);
+  check_native(as, name == "__construct" || name == "__destruct");
 
   as.in.expectWs('{');
 

@@ -414,3 +414,6 @@ let class_destructor_cannot_be_static class_name method_name =
 let clone_cannot_be_static class_name method_name =
   Printf.sprintf "Clone method %s::%s() cannot be static"
   class_name method_name
+
+let namespace_not_a_classname =
+  "Namespace cannot be used as a classname"

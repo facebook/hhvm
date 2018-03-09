@@ -1851,6 +1851,12 @@ let expression_errors env node parents errors =
         make_error_from_node
           node SyntaxError.coloncolonclass_on_dynamic :: errors
         else errors in
+      let text_name = text qualifier in
+      let is_name_namespace = String.lowercase_ascii @@ text_name = "namespace" in
+      let errors = if is_name_namespace
+        then make_error_from_node ~error_type:SyntaxError.ParseError
+          node (SyntaxError.namespace_not_a_classname)::errors
+        else errors in
       let errors = if is_self_or_parent && is_name_class &&
           not @@ is_in_active_class_scope parents
         then make_error_from_node ~error_type:SyntaxError.RuntimeError

@@ -245,3 +245,4 @@ val autoload_takes_one_argument : string
 val clone_destruct_takes_no_arguments : string -> string -> string
 val class_destructor_cannot_be_static : string -> string -> string
 val clone_cannot_be_static : string -> string -> string
+val namespace_not_a_classname : string

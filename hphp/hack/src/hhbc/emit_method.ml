@@ -225,6 +225,9 @@ let from_ast_wrapper : bool -> _ ->
     original_method_id else renamed_method_id in
   let method_is_interceptable =
     Interceptable.is_method_interceptable namespace ast_class original_method_id in
+  let method_span =
+    if is_native_opcode_impl then (0, 0)
+    else Hhas_pos.pos_to_span ast_method.Ast.m_span in
   let normal_function =
     Hhas_method.make
       method_attributes
@@ -238,7 +241,7 @@ let from_ast_wrapper : bool -> _ ->
       false (*method_inout_wrapper*)
       method_id
       method_body
-      (Hhas_pos.pos_to_span ast_method.Ast.m_span)
+      method_span
       method_is_async
       method_is_generator
       method_is_pair_generator

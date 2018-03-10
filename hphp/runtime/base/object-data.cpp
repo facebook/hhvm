@@ -911,32 +911,35 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
 }
 
 // called from jit code
-template<bool Big>
-ObjectData* ObjectData::newInstanceRaw(Class* cls, size_t size) {
+ObjectData* ObjectData::newInstanceRawSmall(Class* cls, size_t size,
+                                          size_t index) {
   assert(cls->getODAttrs() == DefaultAttrs);
-  assert(Big || size <= kMaxSmallSize);
-  auto mem = Big ? tl_heap->mallocBigSize<MemoryManager::Unzeroed>(size) :
-             tl_heap->mallocSmallSize(size);
+  assert(size <= kMaxSmallSize);
+  auto mem = tl_heap->mallocSmallIndexSize(index, size);
+  return new (mem) ObjectData(cls, InitRaw{}, DefaultAttrs);
+}
+
+ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
+  assert(cls->getODAttrs() == DefaultAttrs);
+  auto mem = tl_heap->mallocBigSize<MemoryManager::Unzeroed>(size);
   return new (mem) ObjectData(cls, InitRaw{}, DefaultAttrs);
 }
 
 // called from jit code
-template<bool Big>
-ObjectData* ObjectData::newInstanceRawAttrs(Class* cls, size_t size,
-                                            uint8_t attrs) {
-  assert(Big || size <= kMaxSmallSize);
-  auto mem = Big ? tl_heap->mallocBigSize<MemoryManager::Unzeroed>(size) :
-             tl_heap->mallocSmallSize(size);
+ObjectData* ObjectData::newInstanceRawAttrsSmall(Class* cls, size_t size,
+                                              size_t index,
+                                              uint8_t attrs) {
+  assert(size <= kMaxSmallSize);
+  auto mem = tl_heap->mallocSmallIndexSize(index, size);
   return new (mem) ObjectData(cls, InitRaw{}, attrs);
 }
 
-// Explicitly instantiate newInstanceRaw[Attrs]() template funcs.
-template ObjectData* ObjectData::newInstanceRaw<false>(Class*, size_t);
-template ObjectData* ObjectData::newInstanceRaw<true>(Class*, size_t);
-template ObjectData*
-ObjectData::newInstanceRawAttrs<false>(Class*, size_t, uint8_t);
-template ObjectData*
-ObjectData::newInstanceRawAttrs<true>(Class*, size_t, uint8_t);
+ObjectData* ObjectData::newInstanceRawAttrsBig(Class* cls, size_t size,
+                                              uint8_t attrs) {
+  auto mem = tl_heap->mallocBigSize<MemoryManager::Unzeroed>(size);
+  return new (mem) ObjectData(cls, InitRaw{}, attrs);
+}
+
 
 // Note: the normal object destruction path does not actually call this
 // destructor.  See ObjectData::release.

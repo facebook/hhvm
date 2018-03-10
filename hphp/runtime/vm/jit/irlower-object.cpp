@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/vm/class.h"
 
@@ -55,25 +56,45 @@ void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const cls = inst->extra<NewInstanceRaw>()->cls;
   auto const size = ObjectData::sizeForNProps(cls->numDeclProperties());
+  auto const index = MemoryManager::size2Index(size);
+  auto const size_class = MemoryManager::sizeIndex2Size(index);
 
   auto attrs = cls->getODAttrs();
+
   if (attrs != ObjectData::DefaultAttrs) {
-    auto func = size <= kMaxSmallSize
-      ? &ObjectData::newInstanceRawAttrs<false>
-      : &ObjectData::newInstanceRawAttrs<true>;
-    cgCallHelper(vmain(env), env, CallSpec::direct(func),
-                 callDest(dst), SyncOptions::Sync, argGroup(env, inst)
-                   .imm(reinterpret_cast<uintptr_t>(cls))
-                   .imm(size)
-                   .imm(attrs));
+
+    if (size <= kMaxSmallSize) {
+      cgCallHelper(vmain(env), env,
+          CallSpec::direct(&ObjectData::newInstanceRawAttrsSmall),
+          callDest(dst), SyncOptions::Sync, argGroup(env, inst)
+            .imm(reinterpret_cast<uintptr_t>(cls))
+            .imm(size_class)
+            .imm(index)
+            .imm(attrs));
+    } else {
+      cgCallHelper(vmain(env), env,
+          CallSpec::direct(&ObjectData::newInstanceRawAttrsBig),
+          callDest(dst), SyncOptions::Sync, argGroup(env, inst)
+            .imm(reinterpret_cast<uintptr_t>(cls))
+            .imm(size)
+            .imm(attrs));
+    }
   } else {
-    auto func = size <= kMaxSmallSize
-      ? &ObjectData::newInstanceRaw<false>
-      : &ObjectData::newInstanceRaw<true>;
-    cgCallHelper(vmain(env), env, CallSpec::direct(func),
-                 callDest(dst), SyncOptions::Sync, argGroup(env, inst)
-                   .imm(reinterpret_cast<uintptr_t>(cls))
-                   .imm(size));
+
+    if (size <= kMaxSmallSize) {
+      cgCallHelper(vmain(env), env,
+          CallSpec::direct(&ObjectData::newInstanceRawSmall),
+          callDest(dst), SyncOptions::Sync, argGroup(env, inst)
+            .imm(reinterpret_cast<uintptr_t>(cls))
+            .imm(size_class)
+            .imm(index));
+    } else {
+      cgCallHelper(vmain(env), env,
+          CallSpec::direct(&ObjectData::newInstanceRawBig),
+          callDest(dst), SyncOptions::Sync, argGroup(env, inst)
+            .imm(reinterpret_cast<uintptr_t>(cls))
+            .imm(size));
+    }
   }
 }
 

@@ -168,10 +168,13 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    * The initial ref-count will be set to one.
    */
   static const uint8_t DefaultAttrs = NoDestructor;
-  template<bool Big>
-  static ObjectData* newInstanceRaw(Class*, size_t);
-  template<bool Big>
-  static ObjectData* newInstanceRawAttrs(Class*, size_t, uint8_t attrs);
+
+  static ObjectData* newInstanceRawSmall(Class*, size_t size, size_t index);
+  static ObjectData* newInstanceRawBig(Class*, size_t size);
+  static ObjectData* newInstanceRawAttrsSmall(Class*, size_t size, size_t index,
+      uint8_t attrs);
+  static ObjectData* newInstanceRawAttrsBig(Class*, size_t size,
+      uint8_t attrs);
 
   void release() noexcept;
   void releaseNoObjDestructCheck() noexcept;

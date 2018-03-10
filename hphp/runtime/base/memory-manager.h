@@ -612,6 +612,7 @@ struct MemoryManager {
    * Pre: size > 0 && size <= kMaxSmallSize
    */
   void* mallocSmallSize(size_t size);
+  void* mallocSmallIndexSize(size_t index, size_t bytes);
   void freeSmallSize(void* p, size_t size);
 
   /*

@@ -211,10 +211,13 @@ inline size_t MemoryManager::sizeClass(size_t size) {
 }
 
 inline void* MemoryManager::mallocSmallIndex(size_t index) {
+  return mallocSmallIndexSize(index, sizeIndex2Size(index));
+}
+
+inline void* MemoryManager::mallocSmallIndexSize(size_t index, size_t bytes) {
   assert(index < kNumSmallSizes);
   if (debug) requestEagerGC();
 
-  auto bytes = sizeIndex2Size(index);
   m_stats.mm_debt -= bytes;
   if (UNLIKELY(m_stats.mm_debt < 0)) return mallocSmallIndexSlow(bytes, index);
 

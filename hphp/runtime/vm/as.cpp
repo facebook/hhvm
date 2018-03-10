@@ -3098,6 +3098,9 @@ std::unique_ptr<UnitEmitter> assemble_string(
     AsmState as(instr, callbacks);
     as.ue = ue.get();
     parse(as);
+    if (ue->m_isHHFile) {
+      ue->m_useStrictTypes = true;
+    }
   } catch (const std::exception& e) {
     if (!swallowErrors) throw;
     ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));

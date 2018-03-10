@@ -2884,7 +2884,8 @@ void parse_alias(AsmState& as) {
   if (ts.isInitialized()) {
     record.typeStructure = ArrNR(ArrayData::GetScalarArray(std::move(ts)));
   }
-  as.ue->addTypeAlias(record);
+  auto aliasId = as.ue->addTypeAlias(record);
+  as.ue->pushMergeableTypeAlias(Unit::MergeKind::TypeAlias, aliasId);
 
   as.in.expectWs(';');
 }

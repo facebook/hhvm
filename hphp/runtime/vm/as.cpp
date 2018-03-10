@@ -2188,11 +2188,20 @@ bool ensure_pseudomain(AsmState& as) {
 
 static StaticString s_native("__Native");
 
-MaybeDataType type_constraint_to_data_type(const TypeConstraint& tc) {
+MaybeDataType type_constraint_to_data_type(LowStringPtr user_type,
+  const TypeConstraint& tc) {
     if (auto type = tc.typeName()) {
+      // in type_annotation.cpp this code uses m_typeArgs
+      // as indicator that type can represent one of collection types
+      // when we extract data from the constraint we know if type is one of
+      // collection types but we don't have direct way to figure out if
+      // type used to have type arguments - do it indirectly by checking
+      // if name of user type contains '<'
+      auto has_type_args =
+        user_type && user_type->slice().str().find('<') != std::string::npos;
       return get_datatype(
         type->toCppString(),
-        tc.isArray() || tc.isKeyset() || tc.isDict(),
+        has_type_args,
         false, // no syntactic functions in type annotations
         false, // no xhp type annotation
         false, // no tuples in type annotation
@@ -2221,7 +2230,8 @@ void check_native(AsmState& as, bool is_construct_or_destruct) {
 
     as.fe->hniReturnType = is_construct_or_destruct
       ? KindOfNull
-      : type_constraint_to_data_type(as.fe->retTypeConstraint);
+      : type_constraint_to_data_type(as.fe->retUserType,
+        as.fe->retTypeConstraint);
     as.fe->isNative =
       !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
 
@@ -2246,7 +2256,7 @@ void check_native(AsmState& as, bool is_construct_or_destruct) {
 
     for (auto& pi : as.fe->params) {
       pi.builtinType =
-        type_constraint_to_data_type(pi.typeConstraint);
+        type_constraint_to_data_type(pi.userType, pi.typeConstraint);
     }
   }
 }

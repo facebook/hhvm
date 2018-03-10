@@ -82,9 +82,9 @@ let qualified_name namespace name_node =
   then String.sub name_text 1 (String.length name_text - 1)
   else namespace ^ "\\" ^ name_text
 
-let add_or_update_classish_declaration facts name kind flags base_types
+let add_or_update_classish_declaration types name kind flags base_types
   require_extends require_implements =
-  match SMap.get name facts.types with
+  match SMap.get name types with
   | Some old_tf ->
     let tf =
       if old_tf.kind <> kind then { old_tf with kind = TKMixed }
@@ -115,8 +115,8 @@ let add_or_update_classish_declaration facts name kind flags base_types
         tf with require_implements =
           SSet.union require_implements tf.require_implements } in
 
-    if tf == old_tf then facts
-    else { facts with types = SMap.add name tf facts.types }
+    if tf == old_tf then types
+    else SMap.add name tf types
 
   | None ->
     let base_types =
@@ -125,7 +125,7 @@ let add_or_update_classish_declaration facts name kind flags base_types
       else base_types in
     let tf =
       { base_types; flags; kind; require_extends; require_implements } in
-    { facts with types = SMap.add name tf facts.types }
+    SMap.add name tf types
 
 let facts_from_define_argument facts node =
   let node = strip_list_item node in
@@ -210,8 +210,11 @@ let facts_from_classish_declaration ns facts
     | TKTrait | TKInterface -> require_sections_from_classish_body ns body
     | _ -> SSet.empty, SSet.empty
     end in
-  add_or_update_classish_declaration facts name kind flags
-    base_types require_extends require_implements
+  let types =
+    add_or_update_classish_declaration facts.types name kind flags
+      base_types require_extends require_implements in
+  if types == facts.types then facts
+  else { facts with types }
 
 let rec collect_facts (ns, facts as acc) node =
   match syntax node with
@@ -259,10 +262,10 @@ let rec collect_facts (ns, facts as acc) node =
   (* enums *)
   | EnumDeclaration { enum_name; _ } ->
     let enum_name = qualified_name ns enum_name in
-    let facts =
-      add_or_update_classish_declaration facts
+    let types =
+      add_or_update_classish_declaration facts.types
         enum_name TKEnum flags_final SSet.empty SSet.empty SSet.empty in
-    ns, facts
+    ns, if types == facts.types then facts else { facts with types }
 
   (* top level define call *)
   | ExpressionStatement {
@@ -276,16 +279,16 @@ let rec collect_facts (ns, facts as acc) node =
 
   (*  constants *)
   | ConstDeclaration { const_declarators = { syntax = SyntaxList l; _}; _ } ->
-    let aux facts n =
+    let aux constants n =
       begin match syntax @@ strip_list_item n with
       | ConstantDeclarator { constant_declarator_name = n; _ }
         when not @@ is_missing n ->
         let constant_name = qualified_name ns n in
-        { facts with constants = constant_name :: facts.constants }
-      | _ -> facts
+        constant_name :: constants
+      | _ -> constants
       end in
-    let facts = Core_list.fold_left ~init:facts ~f:aux l in
-    ns, facts
+    let constants = Core_list.fold_left ~init:facts.constants ~f:aux l in
+    ns, { facts with constants }
 
   (* function declarations *)
   | FunctionDeclaration {

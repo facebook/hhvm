@@ -2396,11 +2396,28 @@ let rec check_constant_expression errors node =
   | ScopeResolutionExpression
     { scope_resolution_qualifier
     ; scope_resolution_name
+
     ; _ } when is_good_scope_resolution_qualifier scope_resolution_qualifier &&
                is_good_scope_resolution_name scope_resolution_name
       -> errors
   | _ ->
     (make_error_from_node node SyntaxError.invalid_constant_initializer) :: errors
+
+let check_static_in_constant_decl constant_declarator_initializer  =
+  match syntax constant_declarator_initializer with
+  | SimpleInitializer {
+    simple_initializer_value = {
+      syntax = ScopeResolutionExpression {
+        scope_resolution_qualifier = { syntax = Token t; _ };
+        scope_resolution_name = name;
+        _}; _}; _
+  } ->
+    begin match Token.kind t with
+      | TokenKind.Static -> true
+      | TokenKind.Parent when (String.lowercase_ascii @@ text name = "class") -> true
+      | _ -> false
+    end
+  | _ -> false
 
 let const_decl_errors env node parents namespace_name names errors =
   match syntax node with
@@ -2417,6 +2434,9 @@ let const_decl_errors env node parents namespace_name names errors =
       SyntaxError.global_in_const_decl cd.constant_declarator_initializer in
     let errors =
       check_constant_expression errors cd.constant_declarator_initializer in
+    let errors =
+      produce_error errors check_static_in_constant_decl cd.constant_declarator_initializer
+      SyntaxError.parent_static_const_decl cd.constant_declarator_initializer in
     let errors =
       match syntax cd.constant_declarator_initializer with
       | SimpleInitializer { simple_initializer_value = { syntax =

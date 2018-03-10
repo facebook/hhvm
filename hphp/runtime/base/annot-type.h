@@ -124,6 +124,10 @@ enum class AnnotAction {
   Fail,
   ObjectCheck,
   CallableCheck,
+  VArrayCheck,
+  DArrayCheck,
+  VArrayOrDArrayCheck,
+  NonVArrayOrDArrayCheck
 };
 
 /*
@@ -158,6 +162,17 @@ enum class AnnotAction {
  * types and we've already checked if the annotation was "self" / "parent",
  * but the caller still needs to check if the annotation is a type alias or
  * an enum.
+ *
+ * VArrayCheck: `dt' is an array on which the caller needs to do a varray check.
+ *
+ * DArrayCheck: `dt' is an array on which the caller needs to do a darray check.
+ *
+ * VArrayOrDArrayCheck: `dt' is an array on which the caller needs to do a
+ * varray or darray check.
+ *
+ * NonVArrayOrDArrayCheck: `dt' is an array on which the caller needs to check
+ * for non-dvarray-ness.
+ *
  */
 inline AnnotAction
 annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
@@ -192,14 +207,19 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
               dt == KindOfObject)
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
     case AnnotMetaType::VArray:
+      if (!isArrayType(dt)) return AnnotAction::Fail;
+      return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
+        ? AnnotAction::VArrayCheck
+        : AnnotAction::Pass;
     case AnnotMetaType::DArray:
+      if (!isArrayType(dt)) return AnnotAction::Fail;
+      return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
+        ? AnnotAction::DArrayCheck
+        : AnnotAction::Pass;
     case AnnotMetaType::VArrOrDArr:
       if (!isArrayType(dt)) return AnnotAction::Fail;
-      // If we're raising notices for d/varray type-hint mismatches, we have to
-      // treat everything as a fail. In the failure handling we'll do the actual
-      // check and raise the notice.
       return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
-        ? AnnotAction::Fail
+        ? AnnotAction::VArrayOrDArrayCheck
         : AnnotAction::Pass;
     case AnnotMetaType::VecOrDict:
       return (isVecType(dt) || isDictType(dt))
@@ -207,7 +227,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::Precise:
       if (UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices) &&
           at == AnnotType::Array && isArrayType(dt)) {
-        return AnnotAction::Fail;
+        return AnnotAction::NonVArrayOrDArrayCheck;
       }
       break;
   }

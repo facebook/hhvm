@@ -201,13 +201,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id, bool isReturnType,
     auto const failHard = strictTypes
       && RuntimeOption::RepoAuthoritative
       && !tc.isSoft()
-      && (!tc.isThis() || thisFailsHard())
-      // If we're warning on d/varray mismatches, any array type-hint will
-      // always fail, so regardless of other settings, we can't assume its a
-      // hard failure.
-      && !(RuntimeOption::EvalHackArrCompatTypeHintNotices
-           && tc.isArray()
-           && valType <= TArr);
+      && (!tc.isThis() || thisFailsHard());
 
     if (isReturnType) {
       updateMarker(env);
@@ -231,6 +225,17 @@ void verifyTypeImpl(IRGS& env, int32_t const id, bool isReturnType,
     }
   };
 
+  auto const genDVArrFail = [&]{
+    hint(env, Block::Hint::Unlikely);
+    gen(
+      env,
+      RaiseHackArrParamNotice,
+      RaiseHackArrParamNoticeData { tc.type(), id, isReturnType },
+      val,
+      cns(env, func)
+    );
+  };
+
   auto result = annotCompat(valType.toDataType(), tc.type(), tc.typeName());
   switch (result) {
     case AnnotAction::Pass: return;
@@ -244,6 +249,42 @@ void verifyTypeImpl(IRGS& env, int32_t const id, bool isReturnType,
       return;
     case AnnotAction::ObjectCheck:
       break;
+    case AnnotAction::VArrayCheck:
+      assertx(valType <= TArr);
+      ifThen(
+        env,
+        [&] (Block* taken) { gen(env, CheckVArray, taken, val); },
+        genDVArrFail
+      );
+      return;
+    case AnnotAction::DArrayCheck:
+      assertx(valType <= TArr);
+      ifThen(
+        env,
+        [&] (Block* taken) { gen(env, CheckDArray, taken, val); },
+        genDVArrFail
+      );
+      return;
+    case AnnotAction::VArrayOrDArrayCheck:
+      assertx(valType <= TArr);
+      ifThen(
+        env,
+        [&] (Block* taken) {
+          gen(env, JmpZero, taken, gen(env, IsDVArray, val));
+        },
+        genDVArrFail
+      );
+      return;
+    case AnnotAction::NonVArrayOrDArrayCheck:
+      assertx(valType <= TArr);
+      ifThen(
+        env,
+        [&] (Block* taken) {
+          gen(env, JmpNZero, taken, gen(env, IsDVArray, val));
+        },
+        genDVArrFail
+      );
+      return;
   }
   assertx(result == AnnotAction::ObjectCheck);
   if (onlyCheckNullability) return;

@@ -1226,10 +1226,9 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         gen(
           env,
           RaiseHackArrParamNotice,
-          RaiseHackArrParamNoticeData { tc.type() },
+          RaiseHackArrParamNoticeData { tc.type(), int32_t(param), false },
           val,
-          cns(env, callee),
-          cns(env, param)
+          cns(env, callee)
         );
       }
     );

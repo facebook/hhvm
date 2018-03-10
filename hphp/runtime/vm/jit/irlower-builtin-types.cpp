@@ -250,15 +250,40 @@ static void hackArrParamNoticeImpl(const Func* f, const ArrayData* a,
   raise_hackarr_type_hint_param_notice(f, a, AnnotType(type), param);
 }
 
+static void hackArrOutParamNoticeImpl(const Func* f, const ArrayData* a,
+                                      int64_t type, int64_t param) {
+  raise_hackarr_type_hint_outparam_notice(f, a, AnnotType(type), param);
+}
+
+static void hackArrRetNoticeImpl(const Func* f, const ArrayData* a,
+                                 int64_t type) {
+  raise_hackarr_type_hint_ret_notice(f, a, AnnotType(type));
+}
+
 void cgRaiseHackArrParamNotice(IRLS& env, const IRInstruction* inst) {
-  auto const at = inst->extra<RaiseHackArrParamNotice>()->type;
+  auto const extra = inst->extra<RaiseHackArrParamNotice>();
+
+  auto args = argGroup(env, inst).ssa(1).ssa(0).imm(int64_t(extra->type));
+  auto const target = [&] {
+    if (extra->isReturn) {
+      if (extra->id == HPHP::TypeConstraint::ReturnId) {
+        return CallSpec::direct(hackArrRetNoticeImpl);
+      }
+      args.imm(extra->id);
+      return CallSpec::direct(hackArrOutParamNoticeImpl);
+    } else {
+      args.imm(extra->id);
+      return CallSpec::direct(hackArrParamNoticeImpl);
+    }
+  }();
+
   cgCallHelper(
     vmain(env),
     env,
-    CallSpec::direct(hackArrParamNoticeImpl),
+    target,
     kVoidDest,
     SyncOptions::Sync,
-    argGroup(env, inst).ssa(1).ssa(0).imm(int64_t(at)).ssa(2)
+    args
   );
 }
 

@@ -1991,11 +1991,11 @@ To string conversions:
   Terminal version of VerifyRetFail, to be used when the compiler can prove
   that this failure will result in a fatal error.
 
-| RaiseHackArrParamNotice<type>, ND, S(Arr) S(Func) C(Int), Er
+| RaiseHackArrParamNotice<type,id,isReturn>, ND, S(Arr) S(Func), Er
 
-  Raise a HackArrCompatNotice corresponding to a parameter type-hint d/varray
-  mismatch. S0 is the array being passed in. S1 is the function being
-  called. S2 is the index of the parameter.
+  Raise a HackArrCompatNotice corresponding to a parameter or return type-hint
+  d/varray mismatch. S0 is the array being passed in. S1 is the function being
+  called.
 
 | RaiseUninitLoc<localId>, ND, S(Str), Er
 

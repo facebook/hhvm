@@ -339,6 +339,18 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
       case AnnotAction::CallableCheck:
         return is_callable(tvAsCVarRef(tv));
       case AnnotAction::ObjectCheck: break;
+      case AnnotAction::VArrayCheck:
+        assert(tvIsArray(tv));
+        return tv->m_data.parr->isVArray();
+      case AnnotAction::DArrayCheck:
+        assert(tvIsArray(tv));
+        return tv->m_data.parr->isDArray();
+      case AnnotAction::VArrayOrDArrayCheck:
+        assert(tvIsArray(tv));
+        return !tv->m_data.parr->isNotDVArray();
+      case AnnotAction::NonVArrayOrDArrayCheck:
+        assert(tvIsArray(tv));
+        return tv->m_data.parr->isNotDVArray();
     }
     assert(result == AnnotAction::ObjectCheck);
     assert(td->type == AnnotType::Object);
@@ -497,6 +509,18 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
     case AnnotAction::ObjectCheck:
       assert(isObject());
       return checkTypeAliasNonObj(tv);
+    case AnnotAction::VArrayCheck:
+      assert(tvIsArray(tv));
+      return tv->m_data.parr->isVArray();
+    case AnnotAction::DArrayCheck:
+      assert(tvIsArray(tv));
+      return tv->m_data.parr->isDArray();
+    case AnnotAction::VArrayOrDArrayCheck:
+      assert(tvIsArray(tv));
+      return !tv->m_data.parr->isNotDVArray();
+    case AnnotAction::NonVArrayOrDArrayCheck:
+      assert(tvIsArray(tv));
+      return tv->m_data.parr->isNotDVArray();
   }
   not_reached();
 }
@@ -549,34 +573,31 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
     auto const check = [&](AnnotType at) {
       switch (at) {
       case AnnotType::Array:
-        if (c->m_data.parr->isNotDVArray()) return;
+        if (c->m_data.parr->isNotDVArray()) return true;
         break;
       case AnnotType::VArray:
-        if (c->m_data.parr->isVArray()) return;
+        if (c->m_data.parr->isVArray()) return true;
         break;
       case AnnotType::DArray:
-        if (c->m_data.parr->isDArray()) return;
+        if (c->m_data.parr->isDArray()) return true;
         break;
       case AnnotType::VArrOrDArr:
-        if (!c->m_data.parr->isNotDVArray()) return;
+        if (!c->m_data.parr->isNotDVArray()) return true;
         break;
       default:
-        return;
+        return false;
       }
       raise_hackarr_type_hint_outparam_notice(
         func, c->m_data.parr, at, paramNum
       );
+      return true;
     };
     if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices)) return false;
     if (!isArrayType(c->m_type)) return false;
-    if (isArray()) {
-      check(m_type);
-      return true;
-    }
+    if (isArray()) return check(m_type);
     if (!isObject()) return false;
     if (auto alias = getTypeAliasWithAutoload(m_namedEntity, m_typeName)) {
-      check(alias->type);
-      return true;
+      return check(alias->type);
     }
     return false;
   }();
@@ -606,19 +627,19 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     auto const check = [&](AnnotType at) {
       switch (at) {
       case AnnotType::Array:
-        if (c->m_data.parr->isNotDVArray()) return;
+        if (c->m_data.parr->isNotDVArray()) return true;
         break;
       case AnnotType::VArray:
-        if (c->m_data.parr->isVArray()) return;
+        if (c->m_data.parr->isVArray()) return true;
         break;
       case AnnotType::DArray:
-        if (c->m_data.parr->isDArray()) return;
+        if (c->m_data.parr->isDArray()) return true;
         break;
       case AnnotType::VArrOrDArr:
-        if (!c->m_data.parr->isNotDVArray()) return;
+        if (!c->m_data.parr->isNotDVArray()) return true;
         break;
       default:
-        return;
+        return false;
       }
       if (id == ReturnId) {
         raise_hackarr_type_hint_ret_notice(
@@ -634,17 +655,14 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
           id
         );
       }
+      return true;
     };
     if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices)) return false;
     if (!isArrayType(c->m_type)) return false;
-    if (isArray()) {
-      check(m_type);
-      return true;
-    }
+    if (isArray()) return check(m_type);
     if (!isObject()) return false;
     if (auto alias = getTypeAliasWithAutoload(m_namedEntity, m_typeName)) {
-      check(alias->type);
-      return true;
+      return check(alias->type);
     }
     return false;
   }();

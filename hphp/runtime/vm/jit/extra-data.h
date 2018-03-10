@@ -1303,17 +1303,28 @@ struct ParamData : IRExtraData {
 };
 
 struct RaiseHackArrParamNoticeData : IRExtraData {
-  explicit RaiseHackArrParamNoticeData(AnnotType type)
-    : type{type} {}
+  RaiseHackArrParamNoticeData(AnnotType type, int32_t id, bool isReturn)
+    : type{type}
+    , id{id}
+    , isReturn{isReturn} {}
 
   std::string show() const {
-    if (type == AnnotType::VArray) return "varray";
-    if (type == AnnotType::DArray) return "darray";
-    if (type == AnnotType::VArrOrDArr) return "varray_or_darray";
-    return "array";
+    auto const typeStr = [&]{
+      if (type == AnnotType::VArray) return "varray";
+      if (type == AnnotType::DArray) return "darray";
+      if (type == AnnotType::VArrOrDArr) return "varray_or_darray";
+      return "array";
+    }();
+    return folly::to<std::string>(
+      typeStr, ",",
+      id, ",",
+      isReturn ? "true" : "false"
+    );
   }
 
   AnnotType type;
+  int32_t id;
+  bool isReturn;
 };
 
 struct RaiseArrayIndexNoticeData : IRExtraData {

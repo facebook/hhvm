@@ -35,6 +35,14 @@ struct
     | ScopeItem.Class cd :: _ -> Some cd
     | _ :: scope -> get_class scope
 
+  let rec get_span scope =
+    match scope with
+    | [] -> Pos.none
+    | ScopeItem.Class cd :: _ -> cd.Ast.c_span
+    | ScopeItem.Function fd :: _ -> fd.Ast.f_span
+    | ScopeItem.Method md :: _ -> md.Ast.m_span
+    | _ :: scope' -> get_span scope'
+
   let rec get_tparams scope =
     match scope with
     | [] -> []

@@ -12,6 +12,7 @@ open Hh_core
 open Hhbc_ast
 open Instruction_sequence
 open Ast_class_expr
+open Emit_pos
 
 module A = Ast
 module H = Hhbc_ast
@@ -493,7 +494,7 @@ let rec expr_and_new env pos instr_to_add_new instr_to_add = function
     let add_instr =
       if expr_starts_with_ref e then instr_add_new_elemv else instr_to_add_new
     in
-    gather [emit_expr ~need_ref:false env e; Emit_pos.emit_pos pos; add_instr]
+    gather [emit_expr ~need_ref:false env e; emit_pos pos; add_instr]
   | A.AFkvalue (k, v) ->
     let add_instr =
       if expr_starts_with_ref v then instr_add_elemv else instr_to_add
@@ -531,7 +532,7 @@ and emit_local ~notice ~need_ref env ((pos, str) as id) =
   if SN.Superglobals.is_superglobal str
   then gather [
     instr_string (SU.Locals.strip_dollar str);
-    Emit_pos.emit_pos pos;
+    emit_pos pos;
     instr (IGet (if need_ref then VGetG else CGetG))
   ]
   else
@@ -540,7 +541,7 @@ and emit_local ~notice ~need_ref env ((pos, str) as id) =
     if need_ref then
       instr_vgetl local
     else
-      instr (IMisc (BareThis notice))
+      emit_pos_then pos @@ instr (IMisc (BareThis notice))
   else if need_ref then
     instr_vgetl local
   else
@@ -569,12 +570,12 @@ and emit_two_exprs env outer_pos e1 e2 =
     if is_under_top
     then
       if instrs2_is_var
-      then [Emit_pos.emit_pos outer_pos; instrs2; instrs1]
-      else [instrs2; Emit_pos.emit_pos outer_pos; instrs1]
+      then [emit_pos outer_pos; instrs2; instrs1]
+      else [instrs2; emit_pos outer_pos; instrs1]
     else
       if instrs2_is_var
-      then [instrs1; Emit_pos.emit_pos outer_pos; instrs2]
-      else [instrs1; instrs2; Emit_pos.emit_pos outer_pos]
+      then [instrs1; emit_pos outer_pos; instrs2]
+      else [instrs1; instrs2; emit_pos outer_pos]
 
 and emit_is_null env e =
   match e with
@@ -627,7 +628,7 @@ and emit_box_if_necessary pos need_ref instr =
   if need_ref then
     gather [
       instr;
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr_box
     ]
   else
@@ -640,7 +641,7 @@ and emit_instanceof env pos e1 e2 =
     let from_class_ref instrs =
       gather [
         lhs;
-        Emit_pos.emit_pos pos;
+        emit_pos pos;
         instrs;
         instr_instanceof;
       ] in
@@ -1028,8 +1029,8 @@ and emit_cast env pos hint expr =
       emit_nyi "cast type"
     end in
   gather [
-    emit_expr ~need_ref:false env expr;
-    Emit_pos.emit_pos pos;
+    emit_expr ~last_pos:pos ~need_ref:false env expr;
+    emit_pos pos;
     op;
   ]
 
@@ -1045,7 +1046,7 @@ and emit_conditional_expression env pos etest etrue efalse =
       begin if r.is_fallthrough
       then gather [
         emit_expr ~need_ref:false env etrue;
-        Emit_pos.emit_pos pos;
+        emit_pos pos;
         instr_jmp end_label
       ]
       else empty
@@ -1068,7 +1069,7 @@ and emit_conditional_expression env pos etest etrue efalse =
   | None ->
     let end_label = Label.next_regular () in
     gather [
-      emit_expr ~need_ref:false env etest;
+      emit_expr ~last_pos:pos ~need_ref:false env etest;
       instr_dup;
       instr_jmpnz end_label;
       instr_popc;
@@ -1087,28 +1088,28 @@ and emit_new env pos expr args uargs =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
     Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
     gather [
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr_fpushctord nargs fq_id;
       emit_args_and_call env pos args uargs;
       instr_popr
       ]
   | Class_static ->
     gather [
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Static;
       emit_args_and_call env pos args uargs;
       instr_popr
       ]
   | Class_self ->
     gather [
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Self;
       emit_args_and_call env pos args uargs;
       instr_popr
       ]
   | Class_parent ->
     gather [
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Parent;
       emit_args_and_call env pos args uargs;
       instr_popr
@@ -1145,13 +1146,13 @@ and emit_shape env expr fl =
   in
   emit_expr ~need_ref:false env (p, A.Darray fl)
 
-and emit_call_expr ~need_ref env expr =
+and emit_call_expr ?last_pos ~need_ref env expr =
   let instrs, flavor = emit_flavored_expr env expr in
   gather [
     instrs;
     (* If the instruction has produced a ref then unbox it *)
     if flavor = Flavor.ReturnVal then
-      Emit_pos.emit_pos_then (fst expr) @@
+      emit_pos_then (Option.value ~default:(fst expr) last_pos) @@
       if need_ref then
         instr_boxr
       else
@@ -1169,7 +1170,7 @@ and emit_known_class_id env id =
   ]
 
 and emit_load_class_ref env pos cexpr =
-  Emit_pos.emit_pos_then pos @@
+  emit_pos_then pos @@
   match cexpr with
   | Class_static -> instr (IMisc (LateBoundCls 0))
   | Class_parent -> instr (IMisc (Parent 0))
@@ -1184,7 +1185,7 @@ and emit_load_class_ref env pos cexpr =
       instr (IGet (ClsRefGetL (local, 0)))
     | _ ->
       gather [
-        Emit_pos.emit_pos pos;
+        emit_pos pos;
         emit_expr ~need_ref:false env expr;
         instr_clsrefgetc
       ]
@@ -1197,7 +1198,7 @@ and emit_load_class_const env pos cexpr id =
   | Some cd when cd.A.c_kind = A.Ctrait
               && cexpr = Class_self
               && SU.is_class id ->
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     instr_string @@ SU.strip_global_ns @@ snd cd.A.c_name
   | _ ->
     let load_const =
@@ -1241,7 +1242,7 @@ and emit_class_expr env cexpr prop =
           (* fault block *)
           (gather [
             instr_unsetl temp;
-            Emit_pos.emit_pos pos;
+            emit_pos pos;
             instr_unwind ]) in
       gather [
         cexpr_local;
@@ -1252,10 +1253,10 @@ and emit_class_expr env cexpr prop =
   let load_prop, load_prop_first =
     match prop with
     | pos, A.Id (_, id) ->
-      Emit_pos.emit_pos_then pos @@
+      emit_pos_then pos @@
       instr_string id, true
     | pos, A.Lvar (_, id) ->
-      Emit_pos.emit_pos_then pos @@
+      emit_pos_then pos @@
       instr_string (SU.Locals.strip_dollar id), true
     | _, A.Dollar (_, A.Lvar _ as e) ->
       emit_expr ~need_ref:false env e, false
@@ -1300,7 +1301,7 @@ and emit_class_const_impl env cid id =
     Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
   let fq_id_str = Hhbc_id.Class.to_raw_string fq_id in
   Emit_symbol_refs.add_class fq_id_str;
-  Emit_pos.emit_pos_then (fst cid) @@
+  emit_pos_then (fst cid) @@
   if SU.is_class id
   then instr_string fq_id_str
   else instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id, fq_id)))
@@ -1308,15 +1309,15 @@ and emit_class_const_impl env cid id =
 and emit_yield env pos = function
   | A.AFvalue e ->
     gather [
-      emit_expr ~need_ref:false env e;
-      Emit_pos.emit_pos pos;
+      emit_expr ~last_pos:pos ~need_ref:false env e;
+      emit_pos pos;
       instr_yield;
     ]
   | A.AFkvalue (e1, e2) ->
     gather [
-      emit_expr ~need_ref:false env e1;
+      emit_expr ~last_pos:pos ~need_ref:false env e1;
       emit_expr ~need_ref:false env e2;
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr_yieldk;
     ]
 
@@ -1337,18 +1338,18 @@ and emit_string2 env pos exprs =
   match exprs with
   | [e] ->
     gather [
-      emit_expr ~need_ref:false env e;
-      Emit_pos.emit_pos pos;
+      emit_expr ~last_pos:pos ~need_ref:false env e;
+      emit_pos pos;
       instr (IOp CastString)
     ]
   | e1::e2::es ->
     gather @@ [
       emit_two_exprs env (fst e1) e1 e2;
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr (IOp Concat);
       gather (List.map es (fun e ->
         gather [emit_expr ~need_ref:false env e;
-          Emit_pos.emit_pos pos; instr (IOp Concat)]))
+          emit_pos pos; instr (IOp Concat)]))
     ]
 
   | [] -> failwith "String2 with zero arguments is impossible"
@@ -1395,11 +1396,11 @@ and emit_id env (p, s as id) =
     | Some id ->
       Emit_symbol_refs.add_constant (Hhbc_id.Const.to_raw_string fq_id);
       Emit_symbol_refs.add_constant id;
-      Emit_pos.emit_pos_then p @@
+      emit_pos_then p @@
       instr (ILitConst (CnsU (fq_id, id)))
     | None ->
       Emit_symbol_refs.add_constant (snd id);
-      Emit_pos.emit_pos_then p @@
+      emit_pos_then p @@
       instr (ILitConst
         (if contains_backslash then CnsE fq_id else Cns fq_id))
     end
@@ -1455,7 +1456,7 @@ and emit_import env pos flavor e =
   in
   gather [
     emit_expr ~need_ref:false env e;
-    Emit_pos.emit_pos pos;
+    emit_pos pos;
     instr import_op;
   ]
 
@@ -1464,7 +1465,7 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;
-      Emit_pos.emit_pos outer_pos;
+      emit_pos outer_pos;
       instr (IIsset IssetG)
     ]
   | A.Array_get (base_expr, opt_elem_expr) ->
@@ -1476,14 +1477,14 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
   | A.Lvar ((_, name) as id)
     when is_local_this env name && not (Emit_env.get_needs_local_this env) ->
     gather [
-      Emit_pos.emit_pos outer_pos;
+      emit_pos outer_pos;
       emit_local ~notice:NoNotice ~need_ref:false env id;
-      Emit_pos.emit_pos outer_pos;
+      emit_pos outer_pos;
       instr_istypec OpNull;
       instr_not
     ]
   | A.Lvar id ->
-    Emit_pos.emit_pos_then outer_pos @@
+    emit_pos_then outer_pos @@
     instr (IIsset (IssetL (get_local env id)))
   | A.Dollar e ->
     gather [
@@ -1502,7 +1503,7 @@ and emit_call_empty_expr env outer_pos (pos, expr_ as expr) =
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;
-      Emit_pos.emit_pos outer_pos;
+      emit_pos outer_pos;
       instr_emptyg
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
@@ -1514,26 +1515,26 @@ and emit_call_empty_expr env outer_pos (pos, expr_ as expr) =
   | A.Lvar(_, id) when SN.Superglobals.is_superglobal id ->
     gather [
       instr_string @@ SU.Locals.strip_dollar id;
-      Emit_pos.emit_pos outer_pos;
+      emit_pos outer_pos;
       instr_emptyg
     ]
   | A.Lvar id ->
     if not (is_local_this env (snd id)) ||
       Emit_env.get_needs_local_this env
     then
-      Emit_pos.emit_pos_then outer_pos @@
+      emit_pos_then outer_pos @@
       instr_emptyl (get_local env id)
     else
       gather [
-        Emit_pos.emit_pos pos;
+        emit_pos pos;
         instr (IMisc (BareThis NoNotice));
-        Emit_pos.emit_pos outer_pos;
+        emit_pos outer_pos;
         instr_not
       ]
   | A.Dollar e ->
     gather [
-      emit_expr ~need_ref:false env e;
-      Emit_pos.emit_pos outer_pos;
+      emit_expr ~last_pos:outer_pos ~need_ref:false env e;
+      emit_pos outer_pos;
       instr_emptyn
     ]
   | _ ->
@@ -1581,7 +1582,7 @@ and emit_idx env pos es =
   let default = if List.length es = 2 then instr_null else empty in
   gather [
     emit_exprs env pos es;
-    Emit_pos.emit_pos pos;
+    emit_pos pos;
     default;
     instr_idx;
   ]
@@ -1589,29 +1590,28 @@ and emit_idx env pos es =
 and emit_define env pos s e =
   gather [
     emit_expr ~need_ref:false env e;
-    Emit_pos.emit_pos pos;
+    emit_pos pos;
     instr_defcns s;
   ]
 
 and emit_eval env pos e =
   gather [
     emit_expr ~need_ref:false env e;
-    Emit_pos.emit_pos pos;
+    emit_pos pos;
     instr_eval;
   ]
 
-and emit_xhp_obj_get_raw env e s nullflavor =
-  let p = Pos.none in
-  let fn_name = p, A.Obj_get (e, (p, A.Id (p, "getAttribute")), nullflavor) in
-  let args = [p, A.String (p, SU.Xhp.clean s)] in
-  fst (emit_call env p fn_name args [])
+and emit_xhp_obj_get_raw env pos e s nullflavor =
+  let fn_name = pos, A.Obj_get (e, (pos, A.Id (pos, "getAttribute")), nullflavor) in
+  let args = [pos, A.String (pos, SU.Xhp.clean s)] in
+  fst (emit_call env pos fn_name args [])
 
 and emit_xhp_obj_get ~need_ref env pos param_num_opt e s nullflavor =
-  let call = emit_xhp_obj_get_raw env e s nullflavor in
+  let call = emit_xhp_obj_get_raw env pos e s nullflavor in
   match param_num_opt with
   | Some (i, h) -> gather [ call; instr_fpassr i h ]
   | None -> gather [ call;
-    Emit_pos.emit_pos pos; if need_ref then instr_boxr else instr_unboxr ]
+    emit_pos pos; if need_ref then instr_boxr else instr_unboxr ]
 
 and emit_get_class_no_args () =
   gather [
@@ -1866,7 +1866,7 @@ and emit_await env pos e =
     let after_await = Label.next_regular () in
     gather [
       emit_expr ~need_ref:false env e;
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr_dup;
       instr_istypec OpNull;
       instr_jmpnz after_await;
@@ -1898,18 +1898,20 @@ and emit_inline_hhas s =
   | None ->
     failwith @@ "impossible: cannot find parsed inline hhas for '" ^ s ^ "'"
 
-and emit_expr env (pos, expr_ as expr) ~need_ref =
+and emit_expr env ?last_pos ?(need_ref=false) (pos, expr_ as expr) =
   match expr_ with
   | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True ->
     let v = Ast_constant_folder.expr_to_typed_value (Emit_env.get_namespace env) expr in
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@
     instr (ILitConst (TypedValue v))
   | A.ParenthesizedExpr e ->
     emit_expr ~need_ref env e
   | A.Lvar id ->
-    Emit_pos.emit_pos_then pos @@
-    emit_local ~notice:Notice ~need_ref env id
+    gather [
+      emit_pos (Option.value ~default:pos last_pos);
+      emit_local ~notice:Notice ~need_ref env id
+    ]
   | A.Class_const (cid, id) ->
     emit_class_const env pos cid id
   | A.Unop (op, e) ->
@@ -1933,7 +1935,7 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr (IGet (if need_ref then VGetG else CGetG))
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
@@ -1956,33 +1958,33 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     emit_box_if_necessary pos need_ref @@ emit_eval env pos expr
   | A.Call ((_, A.Id (_, "class_alias")), _, es, _)
     when is_global_namespace env ->
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@ emit_class_alias es
   | A.Call ((_, A.Id (_, "get_class")), _, [], _) ->
     emit_box_if_necessary pos need_ref @@ emit_get_class_no_args ()
   | A.Call ((_, A.Id (_, ("exit" | "die"))), _, es, _) ->
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     emit_exit env (List.hd es)
   | A.Call _
   (* execution operator is compiled as call to `shell_exec` and should
      be handled in the same way *)
   | A.Execution_operator _ ->
-    emit_call_expr ~need_ref env expr
+    emit_call_expr ?last_pos ~need_ref env expr
   | A.New (typeexpr, args, uargs) ->
     emit_box_if_necessary pos need_ref @@ emit_new env pos typeexpr args uargs
   | A.NewAnonClass (args, uargs, { A.c_name = (_, cls_name); _ }) ->
     let cls_idx = int_of_string cls_name in
     emit_box_if_necessary pos need_ref @@ emit_new_anon env pos cls_idx args uargs
   | A.Array es ->
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@ emit_collection env expr es
   | A.Darray es ->
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     let es2 = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
     let darray_e = fst expr, A.Darray es in
     emit_box_if_necessary pos need_ref @@ emit_collection env darray_e es2
   | A.Varray es ->
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     let es2 = List.map ~f:(fun e -> A.AFvalue e) es in
     let varray_e = fst expr, A.Varray es in
     emit_box_if_necessary pos need_ref @@ emit_collection env varray_e es2
@@ -1990,10 +1992,10 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     emit_box_if_necessary pos need_ref
       @@ emit_named_collection env expr pos name fields
   | A.Clone e ->
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@ emit_clone env e
   | A.Shape fl ->
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@ emit_shape env expr fl
   | A.Await e -> emit_await env pos e
   | A.Yield e -> emit_yield env pos e
@@ -2003,7 +2005,7 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Lfun _ ->
     failwith "expected Lfun to be converted to Efun during closure conversion"
   | A.Efun (fundef, ids) ->
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     emit_lambda env fundef ids
   | A.Class_get (cid, id)  ->
     emit_class_get env None QueryOp.CGet need_ref cid id
@@ -2011,20 +2013,14 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.BracedExpr e -> emit_expr ~need_ref:false env e
   | A.Dollar e ->
     check_non_pipe_local e;
-    let instr = emit_expr ~need_ref:false env e in
-    if need_ref then
-      gather [
-        instr;
-        Emit_pos.emit_pos pos;
-        instr_vgetn
-      ]
-    else
-      gather [
-        instr;
-        instr_cgetn
-      ]
+    let instr = emit_expr ?last_pos ~need_ref:false env e in
+    gather [
+      instr;
+      emit_pos (Option.value ~default:pos last_pos);
+      if need_ref then instr_vgetn else instr_cgetn
+    ]
   | A.Id id ->
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     emit_id env id
   | A.Xml (id, attributes, children) ->
     emit_xhp env (fst expr) id attributes children
@@ -2032,7 +2028,7 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     emit_box_if_necessary pos need_ref @@ emit_callconv env kind e
   | A.Import (flavor, e) -> emit_import env pos flavor e
   | A.Id_type_arguments (id, _) ->
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     emit_id env id
   | A.Omitted -> empty
   | A.Unsafeexpr _ ->
@@ -2050,7 +2046,7 @@ and emit_static_collection ~transform_to_collection pos tv =
     | _ -> empty
   in
   gather [
-    Emit_pos.emit_pos pos;
+    emit_pos pos;
     instr (ILitConst (TypedValue tv));
     transform_instr;
   ]
@@ -2064,7 +2060,7 @@ and emit_value_only_collection env pos es constructor =
         (* Drop the keys *)
         | A.AFkvalue (_, e)
         | A.AFvalue e -> emit_expr ~need_ref:false env e);
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr @@ ILitConst (constructor @@ List.length exprs)]
   in
   let outofline exprs =
@@ -2092,10 +2088,10 @@ and emit_keyvalue_collection name env pos es constructor =
     else gather [instr_dup; instr_add_elemc]
   in
   gather [
-    Emit_pos.emit_pos pos;
+    emit_pos pos;
     instr (ILitConst constructor);
     gather (List.map es ~f:(expr_and_new env pos add_elem_instr instr_add_elemc));
-    Emit_pos.emit_pos pos;
+    emit_pos pos;
     transform_instr;
   ]
 
@@ -2113,7 +2109,7 @@ and emit_struct_array env pos es ctor =
   in
   gather [
     gather @@ List.map es ~f:snd;
-    Emit_pos.emit_pos pos;
+    emit_pos pos;
     ctor @@ List.map es ~f:fst;
   ]
 
@@ -2211,7 +2207,7 @@ and emit_dynamic_collection env (pos, expr_) es =
      if is_struct_init env es true then
        gather [
            emit_struct_array env pos es instr_newstructdict;
-           Emit_pos.emit_pos pos;
+           emit_pos pos;
            instr_colfromarray (collection_type (SU.strip_ns name));
          ]
      else
@@ -2223,7 +2219,7 @@ and emit_dynamic_collection env (pos, expr_) es =
   | A.Darray _ ->
      if is_struct_init env es false then
        emit_struct_array env pos es
-         (fun arg -> Emit_pos.emit_pos_then pos @@
+         (fun arg -> emit_pos_then pos @@
            if hack_arr_dv_arrs () then instr_newstructdict arg else instr_newstructdarray arg)
      else
        emit_keyvalue_collection "array" env pos es
@@ -2243,13 +2239,13 @@ and emit_named_collection env expr pos name fields =
   let name = SU.Types.fix_casing @@ SU.strip_ns name in
   match name with
   | "dict" | "vec" | "keyset" ->
-    Emit_pos.emit_pos_then pos @@
+    emit_pos_then pos @@
     emit_collection env expr fields
   | "Vector" | "ImmVector" ->
     let collection_type = collection_type name in
     if fields = []
     then
-      Emit_pos.emit_pos_then pos @@
+      emit_pos_then pos @@
       instr_newcol collection_type
     else
     gather [
@@ -2260,7 +2256,7 @@ and emit_named_collection env expr pos name fields =
     let collection_type = collection_type name in
     if fields = []
     then
-      Emit_pos.emit_pos_then pos @@
+      emit_pos_then pos @@
       instr_newcol collection_type
     else
       emit_collection
@@ -2309,7 +2305,7 @@ and emit_pipe env pos e1 e2 =
  * !, && and || expressions
  *)
 and emit_jmpz env (pos, expr_ as expr) label: emit_jmp_result =
-  let with_pos i = Emit_pos.emit_pos_then pos i in
+  let with_pos i = emit_pos_then pos i in
   let opt = optimize_null_check () in
   match Ast_constant_folder.expr_to_opt_typed_value (Emit_env.get_namespace env) expr with
   | Some v ->
@@ -2391,7 +2387,7 @@ and emit_jmpz env (pos, expr_ as expr) label: emit_jmp_result =
  * !, && and || expressions
  *)
 and emit_jmpnz env (pos, expr_ as expr) label: emit_jmp_result =
-  let with_pos i = Emit_pos.emit_pos_then pos i in
+  let with_pos i = emit_pos_then pos i in
   let opt = optimize_null_check () in
   match Ast_constant_folder.expr_to_opt_typed_value (Emit_env.get_namespace env) expr with
   | Some v ->
@@ -2469,13 +2465,14 @@ and emit_short_circuit_op env expr =
   let if_true =
     if r1.is_label_used then gather [
       instr_label its_true;
+      emit_pos (fst expr);
       instr_true;
     ]
     else empty in
   if r1.is_fallthrough
   then gather [
     r1.instrs;
-    Emit_pos.emit_pos (fst expr);
+    emit_pos (fst expr);
     instr_false;
     instr_jmp its_done;
     if_true;
@@ -2488,9 +2485,9 @@ and emit_quiet_expr env pos (_, expr_ as expr) =
   match expr_ with
   | A.Lvar (name_pos, name) when name = SN.Superglobals.globals ->
     gather [
-      Emit_pos.emit_pos name_pos;
+      emit_pos name_pos;
       instr_string (SU.Locals.strip_dollar name);
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr (IGet CGetQuietG)
     ]
   | A.Lvar ((_, name) as id) when not (is_local_this env name) ->
@@ -2498,13 +2495,13 @@ and emit_quiet_expr env pos (_, expr_ as expr) =
   | A.Dollar e ->
     gather [
       emit_expr ~need_ref:false env e;
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr_cgetquietn
     ]
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr (IGet CGetQuietG)
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
@@ -2530,7 +2527,7 @@ and emit_store_for_simple_base ~is_base env pos elem_stack_size param_num_opt ba
   gather [
     base_expr_instrs_begin;
     base_expr_instrs_end;
-    Emit_pos.emit_pos pos;
+    emit_pos pos;
     base_setup_instrs;
     expr;
   ]
@@ -2617,7 +2614,7 @@ and emit_array_get_worker ?(no_final=false) ?mode
       base.instrs_begin;
       elem_expr_instrs;
       base.instrs_end;
-      Emit_pos.emit_pos outer_pos;
+      emit_pos outer_pos;
       base.setup_instrs;
       make_final param_num_hint_opt (base.stack_size + elem_stack_size);
     ])
@@ -2634,7 +2631,7 @@ and emit_array_get_worker ?(no_final=false) ?mode
         (* finish loading the value *)
         gather [
           base.instrs_end;
-          Emit_pos.emit_pos outer_pos;
+          emit_pos outer_pos;
           base.setup_instrs;
           make_final None (base.stack_size + elem_stack_size);
         ], None
@@ -2651,7 +2648,7 @@ and emit_array_get_worker ?(no_final=false) ?mode
       gather [
         elem_expr_instrs;
         base.load.instrs_end;
-        Emit_pos.emit_pos outer_pos;
+        emit_pos outer_pos;
         base.load.setup_instrs;
         make_final None (base.load.stack_size + elem_stack_size);
       ], None
@@ -2673,7 +2670,7 @@ and emit_array_get_worker ?(no_final=false) ?mode
       elem_expr_instrs, Some (local, local_kind);
       gather [
         base.load.instrs_end;
-        Emit_pos.emit_pos outer_pos;
+        emit_pos outer_pos;
         base.load.setup_instrs;
         make_final None (base.load.stack_size + elem_stack_size);
       ], None
@@ -2726,7 +2723,7 @@ and emit_obj_get ~need_ref env pos param_num_hint_opt qop expr prop null_flavor 
         base_expr_instrs_begin;
         prop_expr_instrs;
         base_expr_instrs_end;
-        Emit_pos.emit_pos pos;
+        emit_pos pos;
         base_setup_instrs;
         final_instr
       ]
@@ -2896,7 +2893,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
    match expr_ with
    | A.Lvar (name_pos, x) when SN.Superglobals.is_superglobal x ->
      emit_default
-       (Emit_pos.emit_pos_then name_pos @@ instr_string (SU.Locals.strip_dollar x))
+       (emit_pos_then name_pos @@ instr_string (SU.Locals.strip_dollar x))
        empty
        (instr (IBase (
        match param_num_opt with
@@ -2907,7 +2904,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
 
    | A.Lvar (thispos, x) when is_object && x = SN.SpecialIdents.this ->
      emit_default
-       (Emit_pos.emit_pos_then thispos @@ instr (IMisc CheckThis))
+       (emit_pos_then thispos @@ instr (IMisc CheckThis))
        empty
        (instr (IBase BaseH))
        0
@@ -3058,7 +3055,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
      begin match snd prop_expr with
      | A.Id (_, s) when SU.Xhp.is_xhp s ->
        emit_default
-         (emit_xhp_obj_get_raw env base_expr s null_flavor)
+         (emit_xhp_obj_get_raw env pos base_expr s null_flavor)
          empty
          (gather [ instr_baser base_offset ])
          1
@@ -3099,7 +3096,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
      emit_default
        (emit_load_class_ref env pos cexpr)
        empty
-       (Emit_pos.emit_pos_then pos @@
+       (emit_pos_then pos @@
        instr_basesl (get_local env id))
        0
    | A.Class_get(cid, prop) ->
@@ -3117,7 +3114,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
      emit_default
        empty
        empty
-       (Emit_pos.emit_pos_then pos @@
+       (emit_pos_then pos @@
          match param_num_opt with
            | None -> instr_basenl local base_mode
            | Some i -> instr (IBase (FPassBaseNL (i, local))
@@ -3128,7 +3125,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
      emit_default
        base_expr_instrs
        empty
-       (Emit_pos.emit_pos_then pos @@
+       (emit_pos_then pos @@
        instr_basenc base_offset base_mode)
        1
    | _ ->
@@ -3138,7 +3135,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
        then gather [base_expr_instrs; instr_unbox]
        else base_expr_instrs)
        empty
-       (Emit_pos.emit_pos_then pos @@
+       (emit_pos_then pos @@
        instr (IBase (if flavor = Flavor.ReturnVal
                      then BaseR base_offset else BaseC base_offset)))
        1
@@ -3156,10 +3153,10 @@ and emit_ignored_expr env ?(pop_pos = Pos.none) e =
   match snd e with
   | A.Expr_list es -> gather @@ List.map ~f:(emit_ignored_expr env ~pop_pos) es
   | _ ->
-    let instrs, flavor = emit_flavored_expr env e in
+    let instrs, flavor = emit_flavored_expr ~last_pos:pop_pos env e in
     gather [
       instrs;
-      Emit_pos.emit_pos_then pop_pos @@ instr_pop flavor;
+      emit_pos_then pop_pos @@ instr_pop flavor;
     ]
 
 (* Emit code to construct the argument frame and then make the call *)
@@ -3173,7 +3170,7 @@ and emit_args_and_call env call_pos args uargs =
 
   (* generic emit function *)
   let default_emit i expr hint =
-    let instrs, flavor = emit_flavored_expr env expr in
+    let instrs, flavor = emit_flavored_expr env ~last_pos:call_pos expr in
     let is_splatted = i >= args_count in
     let instrs =
       if is_splatted && flavor = Flavor.ReturnVal
@@ -3188,7 +3185,7 @@ and emit_args_and_call env call_pos args uargs =
     in
     gather [
       instrs;
-      Emit_pos.emit_pos call_pos;
+      emit_pos call_pos;
       fpass_kind; ]
   in
   let rec aux i args inout_setters =
@@ -3235,7 +3232,7 @@ and emit_args_and_call env call_pos args uargs =
       match expr_ with
       | A.Lvar (name_pos, x) when SN.Superglobals.is_superglobal x ->
         next @@ gather [
-          Emit_pos.emit_pos name_pos;
+          emit_pos name_pos;
           instr_string (SU.Locals.strip_dollar x);
           instr_fpassg i hint;
         ]
@@ -3250,7 +3247,7 @@ and emit_args_and_call env call_pos args uargs =
         gather [
           emit_expr ~need_ref:false env expr;
           move_instrs;
-          Emit_pos.emit_pos call_pos;
+          emit_pos call_pos;
           instr_fpassc i hint;
           aux (i + 1) rest inout_setters
         ]
@@ -3333,11 +3330,11 @@ and emit_args_and_call env call_pos args uargs =
   Local.scope @@ fun () -> aux 0 all_args []
 
 (* Expression that appears in an object context, such as expr->meth(...) *)
-and emit_object_expr env (_, expr_ as expr) =
+and emit_object_expr env ?last_pos (_, expr_ as expr) =
   match expr_ with
   | A.Lvar(_, x) when is_local_this env x ->
     instr_this
-  | _ -> emit_expr ~need_ref:false env expr
+  | _ -> emit_expr ?last_pos ~need_ref:false env expr
 
 and emit_call_lhs_with_this env instrs = Local.scope @@ fun () ->
   let id = Pos.none, SN.SpecialIdents.this in
@@ -3364,7 +3361,7 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
   | A.Obj_get (obj, (_, A.Id ((_, str) as id)), null_flavor)
     when str.[0] = '$' ->
     gather [
-      emit_object_expr env obj;
+      emit_object_expr ~last_pos:outer_pos env obj;
       instr_cgetl (get_local env id);
       instr_fpushobjmethod nargs null_flavor inout_arg_positions;
     ]
@@ -3377,14 +3374,14 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
         (Emit_inout_helpers.inout_suffix inout_arg_positions)
       else name in
     gather [
-      emit_object_expr env obj;
-      Emit_pos.emit_pos outer_pos;
+      emit_object_expr env ~last_pos:outer_pos obj;
+      emit_pos outer_pos;
       instr_fpushobjmethodd nargs name null_flavor;
     ]
   | A.Obj_get(obj, method_expr, null_flavor) ->
     gather [
-      Emit_pos.emit_pos outer_pos;
-      emit_object_expr env obj;
+      emit_pos outer_pos;
+      emit_object_expr env ~last_pos:outer_pos obj;
       emit_expr ~need_ref:false env method_expr;
       instr_fpushobjmethod nargs null_flavor inout_arg_positions;
     ]
@@ -3430,24 +3427,24 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
     begin match cexpr with
     | Class_static ->
        gather [expr_instrs;
-         Emit_pos.emit_pos outer_pos; instr_fpushclsmethods nargs SpecialClsRef.Static]
+         emit_pos outer_pos; instr_fpushclsmethods nargs SpecialClsRef.Static]
     | Class_self ->
        gather [expr_instrs;
-         Emit_pos.emit_pos outer_pos; instr_fpushclsmethods nargs SpecialClsRef.Self]
+         emit_pos outer_pos; instr_fpushclsmethods nargs SpecialClsRef.Self]
     | Class_parent ->
        gather [expr_instrs;
-         Emit_pos.emit_pos outer_pos; instr_fpushclsmethods nargs SpecialClsRef.Parent]
+         emit_pos outer_pos; instr_fpushclsmethods nargs SpecialClsRef.Parent]
     | Class_expr (_, A.Lvar (_, x)) when x = SN.SpecialIdents.this ->
        gather [
         emit_call_lhs_with_this env expr_instrs;
-        Emit_pos.emit_pos outer_pos;
+        emit_pos outer_pos;
         instr_fpushclsmethod nargs inout_arg_positions
        ]
     | _ ->
        gather [
         expr_instrs;
         emit_load_class_ref env pos cexpr;
-        Emit_pos.emit_pos outer_pos;
+        emit_pos outer_pos;
         instr_fpushclsmethod nargs inout_arg_positions
        ]
     end
@@ -3466,18 +3463,18 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
       then Hhbc_id.Function.add_suffix
         fq_id (Emit_inout_helpers.inout_suffix inout_arg_positions)
       else fq_id in
-    Emit_pos.emit_pos_then outer_pos @@
+    emit_pos_then outer_pos @@
     begin match id_opt with
     | Some id -> instr (ICall (FPushFuncU (nargs, fq_id, id)))
     | None -> instr (ICall (FPushFuncD (nargs, fq_id)))
     end
   | A.String (_, s) ->
-    Emit_pos.emit_pos_then outer_pos @@
+    emit_pos_then outer_pos @@
     instr_fpushfuncd nargs (Hhbc_id.Function.from_raw_string s)
   | _ ->
     gather [
       emit_expr ~need_ref:false env expr;
-      Emit_pos.emit_pos outer_pos;
+      emit_pos outer_pos;
       instr_fpushfunc nargs inout_arg_positions
     ]
 
@@ -3594,7 +3591,7 @@ and emit_special_function env pos id args uargs default =
     let instrs = gather @@ List.mapi args begin fun i arg ->
          gather [
            emit_expr ~need_ref:false env arg;
-           Emit_pos.emit_pos pos;
+           emit_pos pos;
            instr (IOp Print);
            if i = nargs-1 then empty else instr_popc
          ] end in
@@ -3683,7 +3680,7 @@ and emit_special_function env pos id args uargs default =
     | [arg_expr], Some i ->
       Some (gather [
         emit_expr ~need_ref:false env arg_expr;
-        Emit_pos.emit_pos pos;
+        emit_pos pos;
         instr (IIsset (IsTypeC i))
       ], Flavor.Cell)
     | _ ->
@@ -3692,7 +3689,7 @@ and emit_special_function env pos id args uargs default =
         Some (
           gather [
           emit_exprs env pos args;
-          Emit_pos.emit_pos pos;
+          emit_pos pos;
           instr i
         ], Flavor.Cell)
       | _ -> None
@@ -3736,12 +3733,12 @@ and emit_call env pos (_, expr_ as expr) args uargs =
 (* Emit code for an expression that might leave a cell or reference on the
  * stack. Return which flavor it left.
  *)
-and emit_flavored_expr env (pos, expr_ as expr) =
+and emit_flavored_expr env ?last_pos (pos, expr_ as expr) =
   match expr_ with
   | A.Call (e, _, args, uargs)
     when not (is_special_function env e args) ->
     let instrs, flavor = emit_call env pos e args uargs in
-    Emit_pos.emit_pos_then pos instrs, flavor
+    emit_pos_then pos instrs, flavor
   | A.Execution_operator es ->
     emit_execution_operator env pos es, Flavor.ReturnVal
   | _ ->
@@ -3750,7 +3747,7 @@ and emit_flavored_expr env (pos, expr_ as expr) =
       then Flavor.Ref
       else Flavor.Cell
     in
-    emit_expr ~need_ref:false env expr, flavor
+    emit_expr ?last_pos env expr, flavor
 
 and emit_final_member_op stack_index op mk =
   match op with
@@ -3761,7 +3758,7 @@ and emit_final_member_op stack_index op mk =
   | LValOp.Unset -> instr (IFinal (UnsetM (stack_index, mk)))
 
 and emit_final_local_op pos op lid =
-  Emit_pos.emit_pos_then pos @@
+  emit_pos_then pos @@
   match op with
   | LValOp.Set -> instr (IMutator (SetL lid))
   | LValOp.SetRef -> instr (IMutator (BindL lid))
@@ -3771,7 +3768,7 @@ and emit_final_local_op pos op lid =
 
 and emit_final_named_local_op pos op =
   match op with
-  | LValOp.Set -> Emit_pos.emit_pos_then pos @@ instr (IMutator SetN)
+  | LValOp.Set -> emit_pos_then pos @@ instr (IMutator SetN)
   | LValOp.SetRef -> instr (IMutator BindN)
   | LValOp.SetOp op -> instr (IMutator (SetOpN op))
   | LValOp.IncDec op -> instr (IMutator (IncDecN op))
@@ -3779,11 +3776,11 @@ and emit_final_named_local_op pos op =
 
 and emit_final_global_op pos op =
   match op with
-  | LValOp.Set -> Emit_pos.emit_pos_then pos @@ instr (IMutator SetG)
+  | LValOp.Set -> emit_pos_then pos @@ instr (IMutator SetG)
   | LValOp.SetRef -> instr (IMutator BindG)
   | LValOp.SetOp op -> instr (IMutator (SetOpG op))
   | LValOp.IncDec op -> instr (IMutator (IncDecG op))
-  | LValOp.Unset -> Emit_pos.emit_pos_then pos @@ instr (IMutator UnsetG)
+  | LValOp.Unset -> emit_pos_then pos @@ instr (IMutator UnsetG)
 
 and emit_final_static_op cid prop op =
   match op with
@@ -3930,7 +3927,7 @@ and binary_assignment_rhs_starts_with_ref = function
   | _, A.Binop (A.Eq None, _, e) when expr_starts_with_ref e -> true
   | _ -> false
 
-and emit_expr_and_unbox_if_necessary ~need_ref env pos e =
+and emit_expr_and_unbox_if_necessary ?last_pos ~need_ref env pos e =
   let need_unboxing =
     match e with
     | _, A.Expr_list es ->
@@ -3939,8 +3936,8 @@ and emit_expr_and_unbox_if_necessary ~need_ref env pos e =
     | e ->
       binary_assignment_rhs_starts_with_ref e in
   gather [
-    emit_expr ~need_ref env e;
-    if need_unboxing then Emit_pos.emit_pos_then pos @@ instr_unbox else empty;
+    emit_expr ?last_pos ~need_ref env e;
+    if need_unboxing then emit_pos_then pos @@ instr_unbox else empty;
   ]
 
 (* Emit code for an l-value operation *)
@@ -4032,7 +4029,7 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
       empty,
       rhs_instrs,
       gather [
-        Emit_pos.emit_pos outer_pos;
+        emit_pos outer_pos;
         instruction;
         final_op op
       ]
@@ -4045,7 +4042,7 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
   in
   match expr_ with
   | A.Lvar (name_pos, id) when SN.Superglobals.is_superglobal id ->
-    Emit_pos.emit_pos_then name_pos @@ instr_string @@ SU.Locals.strip_dollar id,
+    emit_pos_then name_pos @@ instr_string @@ SU.Locals.strip_dollar id,
     rhs_instrs,
     emit_final_global_op outer_pos op
 
@@ -4103,7 +4100,7 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
     let mk = get_elem_member_key env rhs_stack_size opt_elem_expr in
     let total_stack_size = elem_stack_size + base_stack_size in
     let final_instr =
-      Emit_pos.emit_pos_then pos @@
+      emit_pos_then pos @@
       emit_final_member_op total_stack_size op mk in
     gather [
       base_expr_instrs_begin;
@@ -4112,7 +4109,7 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
     ],
     rhs_instrs,
     gather [
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       base_setup_instrs;
       final_instr
     ]
@@ -4137,7 +4134,7 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
     in
     let total_stack_size = prop_stack_size + base_stack_size in
     let final_instr =
-      Emit_pos.emit_pos_then pos @@
+      emit_pos_then pos @@
       emit_final_member_op total_stack_size op mk in
     gather [
       base_expr_instrs_begin;
@@ -4168,7 +4165,7 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
         final_instr
     | _ ->
       let final_instr =
-        Emit_pos.emit_pos_then pos @@
+        emit_pos_then pos @@
         emit_final_static_op (snd cid) prop op in
       of_pair @@ emit_class_expr env cexpr prop,
       rhs_instrs,
@@ -4202,27 +4199,27 @@ and emit_expr_as_ref env e =
   emit_expr ~need_ref:true { env with Emit_env.env_allows_array_append = true} e
 
 and emit_unop ~need_ref env pos op e =
-  let unop_instr = Emit_pos.emit_pos_then pos @@ from_unop op in
+  let unop_instr = emit_pos_then pos @@ from_unop op in
   match op with
   | A.Utild ->
     emit_box_if_necessary pos need_ref @@ gather [
-      emit_expr ~need_ref:false env e; unop_instr
+      emit_expr ~last_pos:pos ~need_ref:false env e; unop_instr
     ]
   | A.Unot ->
     emit_box_if_necessary pos need_ref @@ gather [
-      emit_expr ~need_ref:false env e; unop_instr
+      emit_expr ~last_pos:pos ~need_ref:false env e; unop_instr
     ]
   | A.Uplus ->
     emit_box_if_necessary pos need_ref @@ gather
-    [Emit_pos.emit_pos pos;
+    [emit_pos pos;
     instr (ILitConst (Int (Int64.zero)));
-    emit_expr ~need_ref:false env e;
+    emit_expr ~last_pos:pos ~need_ref:false env e;
     unop_instr]
   | A.Uminus ->
     emit_box_if_necessary pos need_ref @@ gather
-    [Emit_pos.emit_pos pos;
+    [emit_pos pos;
     instr (ILitConst (Int (Int64.zero)));
-    emit_expr ~need_ref:false env e;
+    emit_expr ~last_pos:pos ~need_ref:false env e;
     unop_instr]
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
     begin match unop_to_incdec_op op with
@@ -4234,18 +4231,25 @@ and emit_unop ~need_ref env pos op e =
   | A.Uref -> emit_expr_as_ref env e
   | A.Usilence ->
     Local.scope @@ fun () ->
+      let enclosing_span = Ast_scope.Scope.get_span env.Emit_env.env_scope in
       let fault_label = Label.next_fault () in
       let temp_local = Local.get_unnamed_local () in
       let cleanup = instr_silence_end temp_local in
-      let body = gather [emit_expr ~need_ref:false env e; cleanup] in
-      let fault = gather [cleanup; Emit_pos.emit_pos pos; instr_unwind] in
+      let body =
+        gather [emit_expr ~need_ref:false env e; emit_pos pos; cleanup] in
+      let fault = gather [emit_pos enclosing_span; cleanup; instr_unwind] in
       gather [
+        emit_pos pos;
         instr_silence_start temp_local;
         instr_try_fault fault_label body fault
       ]
 
 and emit_exprs env pos exprs =
-  gather (List.map exprs (emit_expr_and_unbox_if_necessary ~need_ref:false env pos))
+  match exprs with
+  | [] -> empty
+  | expr::exprs ->
+    gather (emit_expr_and_unbox_if_necessary ~last_pos:pos ~need_ref:false env pos expr ::
+      List.map exprs (emit_expr_and_unbox_if_necessary ~last_pos:pos ~need_ref:false env pos))
 
 (* allows to create a block of code that will
 - get a fresh temporary local
@@ -4311,7 +4315,7 @@ and stash_in_local_with_prefix ?(always_stash=false) ?(leave_on_stack=false)
         instr_setl temp;
         instr_popc;
         result_instr;
-        Emit_pos.emit_pos pos;
+        emit_pos pos;
         if leave_on_stack then instr_pushl temp else instr_unsetl temp
       ]
 (* Generate code to evaluate `e`, and, if necessary, store its value in a

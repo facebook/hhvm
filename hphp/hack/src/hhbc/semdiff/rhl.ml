@@ -837,6 +837,9 @@ let equiv prog prog' startlabelpairs =
   | IBasic EntryNop ->
      Some (succ pc, pc', asn)
 
+  | ISrcLoc p when p.line_begin < 0 ->
+      Some (succ pc, pc', asn)
+
   | ITry TryCatchLegacyBegin _
   | ITry TryCatchLegacyEnd -> failwith "Legacy try instructions not implemented"
 
@@ -874,6 +877,9 @@ let equiv prog prog' startlabelpairs =
   | IComment _
   | IBasic Nop
   | IBasic EntryNop ->
+     Some (pc, succ pc', asn)
+
+  | ISrcLoc p when p.line_begin < 0 ->
      Some (pc, succ pc', asn)
 
   | ITry TryCatchLegacyBegin _

@@ -37,6 +37,7 @@ let gather x =
   | x -> Instr_concat x
 let empty = Instr_empty
 let optional b instrs = if b then gather instrs else empty
+let optionally f v = match v with None -> empty | Some v -> f v
 let of_pair (i1, i2) = gather [i1; i2]
 
 let class_ref_rewrite_sentinel = -100

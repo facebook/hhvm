@@ -12,6 +12,7 @@ open Hh_core
 open Hhbc_ast
 open Instruction_sequence
 open Emit_expression
+open Emit_pos
 
 module A = Ast
 module H = Hhbc_ast
@@ -141,7 +142,7 @@ let rec emit_stmt env (pos, st_) =
     ]
   | A.Return (Some (_, A.Yield_from e)) ->
     gather [
-      emit_yield_from_delegates env e;
+      emit_yield_from_delegates env pos e;
       Emit_pos.emit_pos pos;
       emit_return ~need_ref:false env;
     ]
@@ -213,7 +214,8 @@ let rec emit_stmt env (pos, st_) =
       ]
   | A.Expr (_, A.Yield_from e) ->
     gather [
-      emit_yield_from_delegates env e;
+      emit_yield_from_delegates env pos e;
+      emit_pos pos;
       instr_popc;
     ]
   | A.Expr (pos, A.Binop (A.Eq None, e_lhs, (_, A.Yield_from e))) ->
@@ -221,7 +223,7 @@ let rec emit_stmt env (pos, st_) =
       let temp = Local.get_unnamed_local () in
       let rhs_instrs = instr_pushl temp in
       gather [
-        emit_yield_from_delegates env e;
+        emit_yield_from_delegates env pos e;
         instr_setl temp;
         instr_popc;
         emit_lval_op_nonlist env pos LValOp.Set e_lhs rhs_instrs 1;
@@ -238,7 +240,7 @@ let rec emit_stmt env (pos, st_) =
   | A.Return (Some expr) ->
     let need_ref = !return_by_ref in
     gather [
-      emit_expr ~need_ref env expr;
+      emit_expr ~last_pos:pos ~need_ref env expr;
       if not need_ref then Emit_pos.emit_pos pos else empty;
       emit_return ~need_ref env;
     ]
@@ -326,7 +328,7 @@ and emit_if env pos condition consequence alternative =
     gather [
       get_instrs @@ emit_jmpz env condition alternative_label;
       consequence_instr;
-      Emit_pos.emit_pos pos;
+      emit_pos pos;
       instr_jmp done_label;
       instr_label alternative_label;
       alternative_instr;
@@ -714,6 +716,8 @@ and emit_try_finally_ env pos try_block finally_block =
   let finally_start = Label.next_regular () in
   let finally_end = Label.next_regular () in
 
+  let enclosing_span = Ast_scope.Scope.get_span env.Emit_env.env_scope in
+
   let try_env = Emit_env.with_try env in
   let try_body =
     Emit_env.do_in_try_body finally_start try_env try_block emit_stmt in
@@ -769,6 +773,7 @@ and emit_try_finally_ env pos try_block finally_block =
 
   let cleanup_local =
     gather [
+      emit_pos enclosing_span;
       instr_unsetl (Local.get_label_id_local ());
       instr_unsetl (Local.get_retval_local ())
     ]
@@ -776,7 +781,7 @@ and emit_try_finally_ env pos try_block finally_block =
   let fault_body = gather [
       cleanup_local;
       finally_body_for_fault;
-      Emit_pos.emit_pos pos;
+      Emit_pos.emit_pos enclosing_span;
       instr_unwind;
     ] in
   let fault_label = Label.next_fault () in
@@ -1024,6 +1029,7 @@ and emit_foreach_await env pos collection iterator block =
       with_temp_local result_temp_local begin fun _ _ -> set_key_and_value end;
       instr_unsetl result_temp_local;
       (Emit_env.do_in_loop_body exit_label next_label env block emit_stmt);
+      emit_pos pos;
       instr_jmp next_label;
       instr_label exit_label;
       instr_unsetl result_temp_local;
@@ -1032,6 +1038,7 @@ and emit_foreach_await env pos collection iterator block =
   ]
 
 and emit_foreach_ env pos collection iterator block =
+  let enclosing_span = Ast_scope.Scope.get_span env.Emit_env.env_scope in
   let iterator_number = Iterator.get_iterator () in
   let fault_label = Label.next_fault () in
   let loop_break_label = Label.next_regular () in
@@ -1042,6 +1049,7 @@ and emit_foreach_ env pos collection iterator block =
     emit_iterator_key_value_storage env iterator
   in
   let fault_block_local local = gather [
+    emit_pos enclosing_span;
     instr_unsetl local;
     instr_unwind
   ]
@@ -1087,8 +1095,7 @@ and emit_foreach_ env pos collection iterator block =
     Emit_env.do_in_loop_body loop_break_label loop_continue_label env
       ~iter:(mutable_iter, iterator_number) block emit_stmt in
   let result = gather [
-    emit_expr_and_unbox_if_necessary ~need_ref:mutable_iter env pos collection;
-    Emit_pos.emit_pos pos;
+    emit_expr_and_unbox_if_necessary ~last_pos:pos ~need_ref:mutable_iter env pos collection;
     init;
     instr_try_fault
       fault_label
@@ -1102,7 +1109,7 @@ and emit_foreach_ env pos collection iterator block =
       ])
       (* fault body *)
       (gather [
-        Emit_pos.emit_pos pos;
+        Emit_pos.emit_pos enclosing_span;
         if mutable_iter then instr_miterfree iterator_number
         else instr_iterfree iterator_number;
         instr_unwind ]);
@@ -1111,7 +1118,7 @@ and emit_foreach_ env pos collection iterator block =
   Iterator.free_iterator ();
   result
 
-and emit_yield_from_delegates env e =
+and emit_yield_from_delegates env pos e =
   let iterator_number = Iterator.get_iterator () in
   let loop_label = Label.next_regular () in
   let fault_label = Label.next_fault () in
@@ -1125,12 +1132,14 @@ and emit_yield_from_delegates env e =
   in
   let fault_body =
     gather [
+      emit_pos (Ast_scope.Scope.get_span env.Emit_env.env_scope);
       instr_contUnsetDelegate_free iterator_number;
       instr_unwind;
     ]
   in
   gather [
     emit_expr ~need_ref:false env e;
+    emit_pos pos;
     instr_contAssignDelegate iterator_number;
     instr_try_fault fault_label body fault_body;
     instr_contUnsetDelegate_ignore iterator_number;

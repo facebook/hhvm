@@ -224,10 +224,12 @@ let from_ast_wrapper : bool -> _ ->
     if has_inout_args && (method_is_closure_body || has_ref_params) then
     original_method_id else renamed_method_id in
   let method_is_interceptable =
-    Interceptable.is_method_interceptable namespace ast_class original_method_id in
+    Interceptable.is_method_interceptable
+      namespace ast_class original_method_id method_attributes in
   let method_span =
     if is_native_opcode_impl then (0, 0)
     else Hhas_pos.pos_to_span ast_method.Ast.m_span in
+
   let normal_function =
     Hhas_method.make
       method_attributes

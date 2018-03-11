@@ -160,7 +160,9 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
       match e with
       (* Only add $this to locals if it's bare *)
       | (_, Ast.Lvar(_, "$this" as id)) ->
-       add_local ~bareparam:(call_w_bareparam) acc id
+        add_local ~bareparam:(call_w_bareparam) acc id
+      | (_, Ast.(Unop (Uref, (_, Lvar id)))) ->
+        add_local ~bareparam:false acc id
       | _ ->
         this#on_expr acc e
     in

@@ -3320,7 +3320,7 @@ and emit_args_and_call env call_pos args uargs =
           set_instrs;
           instr_fpassl i local hint;
         ]
-      | A.Call _ when expr_starts_with_ref expr ->
+      | _ when expr_starts_with_ref expr ->
         (* pass expression with a stripped reference but
            use hint from the original expression *)
         next @@ default_emit i (pos, expr_) hint

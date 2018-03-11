@@ -419,7 +419,7 @@ let get_passByRefKind is_splatted expr  =
   let rec from_non_list_assignment permissive_kind expr =
     match snd expr with
     | A.New _ | A.Lvar _ | A.Clone _
-    | A.Import ((A.Include | A.IncludeOnce), _) -> AllowCell
+    | A.Import ((A.Include | A.IncludeOnce | A.Require), _) -> AllowCell
     | A.Binop(A.Eq None, (_, A.List _), e) ->
       from_non_list_assignment WarnOnCell e
     | A.Array_get(_, Some _) -> permissive_kind

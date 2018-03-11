@@ -366,18 +366,7 @@ let make_anonymous_class_name env st =
     (make_scope_name st.namespace env.scope) per_fun_idx per_scope_idx
 
 let make_closure ~class_num
-  p total_count env st lambda_vars tparams fd body =
-  let rec is_scope_static scope =
-    match scope with
-    | ScopeItem.LongLambda is_static :: scope ->
-      is_static || is_scope_static scope
-    | ScopeItem.Function _ :: _ -> false
-    | ScopeItem.Method md :: _ ->
-      List.mem md.m_kind Static
-    | ScopeItem.Lambda :: scope ->
-      not st.captured_this || is_scope_static scope
-    | _ -> false in
-  let is_static = fd.f_static || is_scope_static env.scope in
+  p total_count env st lambda_vars tparams is_static fd body =
   let md = {
     m_kind = [Public] @ (if is_static then [Static] else []);
     m_tparams = fd.f_tparams;
@@ -735,10 +724,34 @@ and convert_lambda env st p fd use_vars_opt =
         List.map use_vars (fun ((_, var), _ref) -> var), use_vars in
   let tparams = Scope.get_tparams env.scope in
   let class_num = total_class_count env st in
+
+  let rec is_scope_static scope =
+    match scope with
+    | ScopeItem.LongLambda is_static :: scope ->
+      is_static || is_scope_static scope
+    | ScopeItem.Function _ :: _ -> false
+    | ScopeItem.Method md :: _ ->
+      List.mem md.m_kind Static
+    | ScopeItem.Lambda :: scope ->
+      is_scope_static scope
+    | _ -> false in
+
+  let is_static =
+    let is_static =
+      (* long lambdas are static if they are annotated as such *)
+      if Option.is_some use_vars_opt
+      then fd.f_static
+      (* short lambdas can be made static if they don't capture this in
+         any form (including any nested non-static lambdas )*)
+      else not st.captured_this in
+    (* check if something can be promoted to static based on enclosing scope *)
+    if is_static then is_static
+    else is_scope_static env.scope in
+
   let inline_fundef, cd, md =
       make_closure
       ~class_num
-      p total_count env st lambda_vars tparams fd block in
+      p total_count env st lambda_vars tparams is_static fd block in
   let explicit_use_set =
     if Option.is_some use_vars_opt
     then SSet.add (snd inline_fundef.f_name) st.explicit_use_set
@@ -751,9 +764,15 @@ and convert_lambda env st p fd use_vars_opt =
     | Some cd -> SMap.add closure_class_name cd st.closure_enclosing_classes
     | None -> st.closure_enclosing_classes in
 
+  (* adjust captured $this information *)
+  let captured_this =
+    (* we already know that $this is captured *)
+    captured_this ||
+    (* lambda that was just processed was converted into non-static one *)
+    (not is_static) in
   (* Restore capture and defined set *)
   let st = { st with captured_vars = captured_vars;
-                     captured_this = captured_this || st.captured_this;
+                     captured_this;
                      static_vars = static_vars;
                      explicit_use_set;
                      closure_enclosing_classes;

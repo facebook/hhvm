@@ -111,8 +111,8 @@ module type SmartConstructors_S = sig
   val make_global_statement : r -> r -> r -> t -> t * r
   val make_simple_initializer : r -> r -> t -> t * r
   val make_anonymous_class : r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
-  val make_anonymous_function : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
-  val make_php7_anonymous_function : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
+  val make_anonymous_function : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
+  val make_php7_anonymous_function : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_anonymous_function_use_clause : r -> r -> r -> r -> t -> t * r
   val make_lambda_expression : r -> r -> r -> r -> r -> t -> t * r
   val make_lambda_signature : r -> r -> r -> r -> r -> t -> t * r
@@ -290,8 +290,8 @@ end) = struct
     let global_statement parser arg0 arg1 arg2 = call parser (SCI.make_global_statement arg0 arg1 arg2)
     let simple_initializer parser arg0 arg1 = call parser (SCI.make_simple_initializer arg0 arg1)
     let anonymous_class parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 = call parser (SCI.make_anonymous_class arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8)
-    let anonymous_function parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 = call parser (SCI.make_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10)
-    let php7_anonymous_function parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 = call parser (SCI.make_php7_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10)
+    let anonymous_function parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 = call parser (SCI.make_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11)
+    let php7_anonymous_function parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 = call parser (SCI.make_php7_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11)
     let anonymous_function_use_clause parser arg0 arg1 arg2 arg3 = call parser (SCI.make_anonymous_function_use_clause arg0 arg1 arg2 arg3)
     let lambda_expression parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_lambda_expression arg0 arg1 arg2 arg3 arg4)
     let lambda_signature parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_lambda_signature arg0 arg1 arg2 arg3 arg4)

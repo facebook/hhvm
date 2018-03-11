@@ -1304,6 +1304,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       { anonymous_static_keyword
       ; anonymous_async_keyword
       ; anonymous_coroutine_keyword
+      ; anonymous_ampersand
       ; anonymous_parameters
       ; anonymous_type
       ; anonymous_use
@@ -1313,6 +1314,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       { php7_anonymous_static_keyword = anonymous_static_keyword
       ; php7_anonymous_async_keyword = anonymous_async_keyword
       ; php7_anonymous_coroutine_keyword = anonymous_coroutine_keyword
+      ; php7_anonymous_ampersand = anonymous_ampersand
       ; php7_anonymous_parameters = anonymous_parameters
       ; php7_anonymous_type = anonymous_type
       ; php7_anonymous_use = anonymous_use
@@ -1342,12 +1344,14 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         let doc_comment = match extract_docblock node with
           | Some _ as doc_comment -> doc_comment
           | None -> top_docblock() in
+        let f_ret_by_ref = is_ret_by_ref anonymous_ampersand in
         Efun
         ( { (fun_template yield node suspension_kind env) with
             f_ret         = mpOptional pHint anonymous_type env
           ; f_params      = couldMap ~f:pFunParam anonymous_parameters env
           ; f_body
           ; f_static      = not (is_missing anonymous_static_keyword)
+          ; f_ret_by_ref
           ; f_doc_comment = doc_comment
           }
         , try pUse anonymous_use env with _ -> []

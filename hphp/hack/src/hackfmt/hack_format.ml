@@ -1176,6 +1176,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       anonymous_async_keyword = async_kw;
       anonymous_coroutine_keyword = coroutine_kw;
       anonymous_function_keyword = fun_kw;
+      anonymous_ampersand = amp;
       anonymous_left_paren = lp;
       anonymous_parameters = params;
       anonymous_right_paren = rp;
@@ -1191,6 +1192,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env coroutine_kw;
       when_present coroutine_kw space;
       t env fun_kw;
+      when_present amp space;
       transform_argish_with_return_type env lp params rp colon ret_type;
       t env use;
       handle_possible_compound_statement env
@@ -1203,6 +1205,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       php7_anonymous_async_keyword = async_kw;
       php7_anonymous_coroutine_keyword = coroutine_kw;
       php7_anonymous_function_keyword = fun_kw;
+      php7_anonymous_ampersand = amp;
       php7_anonymous_left_paren = lp;
       php7_anonymous_parameters = params;
       php7_anonymous_right_paren = rp;
@@ -1218,6 +1221,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env coroutine_kw;
       when_present coroutine_kw space;
       t env fun_kw;
+      when_present amp space;
       transform_argish env lp params rp;
       t env use;
       t env colon;

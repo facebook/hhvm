@@ -528,6 +528,7 @@ module type Syntax_S = sig
     ; anonymous_async_keyword                            : t
     ; anonymous_coroutine_keyword                        : t
     ; anonymous_function_keyword                         : t
+    ; anonymous_ampersand                                : t
     ; anonymous_left_paren                               : t
     ; anonymous_parameters                               : t
     ; anonymous_right_paren                              : t
@@ -541,6 +542,7 @@ module type Syntax_S = sig
     ; php7_anonymous_async_keyword                       : t
     ; php7_anonymous_coroutine_keyword                   : t
     ; php7_anonymous_function_keyword                    : t
+    ; php7_anonymous_ampersand                           : t
     ; php7_anonymous_left_paren                          : t
     ; php7_anonymous_parameters                          : t
     ; php7_anonymous_right_paren                         : t
@@ -1101,8 +1103,8 @@ module type Syntax_S = sig
   val make_global_statement : t -> t -> t -> t
   val make_simple_initializer : t -> t -> t
   val make_anonymous_class : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_php7_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_php7_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_anonymous_function_use_clause : t -> t -> t -> t -> t
   val make_lambda_expression : t -> t -> t -> t -> t -> t
   val make_lambda_signature : t -> t -> t -> t -> t -> t

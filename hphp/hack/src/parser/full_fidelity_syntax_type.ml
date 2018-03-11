@@ -107,6 +107,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_async_keyword                            : t
     ; anonymous_coroutine_keyword                        : t
     ; anonymous_function_keyword                         : t
+    ; anonymous_ampersand                                : t
     ; anonymous_left_paren                               : t
     ; anonymous_parameters                               : t
     ; anonymous_right_paren                              : t
@@ -641,6 +642,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_async_keyword                            : t
     ; anonymous_coroutine_keyword                        : t
     ; anonymous_function_keyword                         : t
+    ; anonymous_ampersand                                : t
     ; anonymous_left_paren                               : t
     ; anonymous_parameters                               : t
     ; anonymous_right_paren                              : t
@@ -654,6 +656,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; php7_anonymous_async_keyword                       : t
     ; php7_anonymous_coroutine_keyword                   : t
     ; php7_anonymous_function_keyword                    : t
+    ; php7_anonymous_ampersand                           : t
     ; php7_anonymous_left_paren                          : t
     ; php7_anonymous_parameters                          : t
     ; php7_anonymous_right_paren                         : t
@@ -1891,6 +1894,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_async_keyword: Token.t option value
     ; anonymous_coroutine_keyword: Token.t option value
     ; anonymous_function_keyword: Token.t value
+    ; anonymous_ampersand: Token.t option value
     ; anonymous_left_paren: Token.t value
     ; anonymous_parameters: parameter listesque value
     ; anonymous_right_paren: Token.t value
@@ -1904,6 +1908,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; php7_anonymous_async_keyword: Token.t option value
     ; php7_anonymous_coroutine_keyword: Token.t option value
     ; php7_anonymous_function_keyword: Token.t value
+    ; php7_anonymous_ampersand: Token.t option value
     ; php7_anonymous_left_paren: Token.t value
     ; php7_anonymous_parameters: parameter listesque value
     ; php7_anonymous_right_paren: Token.t value

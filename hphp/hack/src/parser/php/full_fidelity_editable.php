@@ -14217,6 +14217,7 @@ final class AnonymousFunction extends EditableSyntax {
   private EditableSyntax $_async_keyword;
   private EditableSyntax $_coroutine_keyword;
   private EditableSyntax $_function_keyword;
+  private EditableSyntax $_ampersand;
   private EditableSyntax $_left_paren;
   private EditableSyntax $_parameters;
   private EditableSyntax $_right_paren;
@@ -14229,6 +14230,7 @@ final class AnonymousFunction extends EditableSyntax {
     EditableSyntax $async_keyword,
     EditableSyntax $coroutine_keyword,
     EditableSyntax $function_keyword,
+    EditableSyntax $ampersand,
     EditableSyntax $left_paren,
     EditableSyntax $parameters,
     EditableSyntax $right_paren,
@@ -14241,6 +14243,7 @@ final class AnonymousFunction extends EditableSyntax {
     $this->_async_keyword = $async_keyword;
     $this->_coroutine_keyword = $coroutine_keyword;
     $this->_function_keyword = $function_keyword;
+    $this->_ampersand = $ampersand;
     $this->_left_paren = $left_paren;
     $this->_parameters = $parameters;
     $this->_right_paren = $right_paren;
@@ -14260,6 +14263,9 @@ final class AnonymousFunction extends EditableSyntax {
   }
   public function function_keyword(): EditableSyntax {
     return $this->_function_keyword;
+  }
+  public function ampersand(): EditableSyntax {
+    return $this->_ampersand;
   }
   public function left_paren(): EditableSyntax {
     return $this->_left_paren;
@@ -14288,6 +14294,7 @@ final class AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14302,6 +14309,7 @@ final class AnonymousFunction extends EditableSyntax {
       $async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14316,6 +14324,7 @@ final class AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14330,6 +14339,22 @@ final class AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $function_keyword,
+      $this->_ampersand,
+      $this->_left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $this->_colon,
+      $this->_type,
+      $this->_use,
+      $this->_body);
+  }
+  public function with_ampersand(EditableSyntax $ampersand): AnonymousFunction {
+    return new AnonymousFunction(
+      $this->_static_keyword,
+      $this->_async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14344,6 +14369,7 @@ final class AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14358,6 +14384,7 @@ final class AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $parameters,
       $this->_right_paren,
@@ -14372,6 +14399,7 @@ final class AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $right_paren,
@@ -14386,6 +14414,7 @@ final class AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14400,6 +14429,7 @@ final class AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14414,6 +14444,7 @@ final class AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14428,6 +14459,7 @@ final class AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14447,6 +14479,7 @@ final class AnonymousFunction extends EditableSyntax {
     $async_keyword = $this->async_keyword()->rewrite($rewriter, $new_parents);
     $coroutine_keyword = $this->coroutine_keyword()->rewrite($rewriter, $new_parents);
     $function_keyword = $this->function_keyword()->rewrite($rewriter, $new_parents);
+    $ampersand = $this->ampersand()->rewrite($rewriter, $new_parents);
     $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
     $parameters = $this->parameters()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
@@ -14459,6 +14492,7 @@ final class AnonymousFunction extends EditableSyntax {
       $async_keyword === $this->async_keyword() &&
       $coroutine_keyword === $this->coroutine_keyword() &&
       $function_keyword === $this->function_keyword() &&
+      $ampersand === $this->ampersand() &&
       $left_paren === $this->left_paren() &&
       $parameters === $this->parameters() &&
       $right_paren === $this->right_paren() &&
@@ -14473,6 +14507,7 @@ final class AnonymousFunction extends EditableSyntax {
         $async_keyword,
         $coroutine_keyword,
         $function_keyword,
+        $ampersand,
         $left_paren,
         $parameters,
         $right_paren,
@@ -14496,6 +14531,9 @@ final class AnonymousFunction extends EditableSyntax {
     $function_keyword = EditableSyntax::from_json(
       $json->anonymous_function_keyword, $position, $source);
     $position += $function_keyword->width();
+    $ampersand = EditableSyntax::from_json(
+      $json->anonymous_ampersand, $position, $source);
+    $position += $ampersand->width();
     $left_paren = EditableSyntax::from_json(
       $json->anonymous_left_paren, $position, $source);
     $position += $left_paren->width();
@@ -14522,6 +14560,7 @@ final class AnonymousFunction extends EditableSyntax {
         $async_keyword,
         $coroutine_keyword,
         $function_keyword,
+        $ampersand,
         $left_paren,
         $parameters,
         $right_paren,
@@ -14535,6 +14574,7 @@ final class AnonymousFunction extends EditableSyntax {
     yield $this->_async_keyword;
     yield $this->_coroutine_keyword;
     yield $this->_function_keyword;
+    yield $this->_ampersand;
     yield $this->_left_paren;
     yield $this->_parameters;
     yield $this->_right_paren;
@@ -14550,6 +14590,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
   private EditableSyntax $_async_keyword;
   private EditableSyntax $_coroutine_keyword;
   private EditableSyntax $_function_keyword;
+  private EditableSyntax $_ampersand;
   private EditableSyntax $_left_paren;
   private EditableSyntax $_parameters;
   private EditableSyntax $_right_paren;
@@ -14562,6 +14603,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
     EditableSyntax $async_keyword,
     EditableSyntax $coroutine_keyword,
     EditableSyntax $function_keyword,
+    EditableSyntax $ampersand,
     EditableSyntax $left_paren,
     EditableSyntax $parameters,
     EditableSyntax $right_paren,
@@ -14574,6 +14616,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
     $this->_async_keyword = $async_keyword;
     $this->_coroutine_keyword = $coroutine_keyword;
     $this->_function_keyword = $function_keyword;
+    $this->_ampersand = $ampersand;
     $this->_left_paren = $left_paren;
     $this->_parameters = $parameters;
     $this->_right_paren = $right_paren;
@@ -14593,6 +14636,9 @@ final class Php7AnonymousFunction extends EditableSyntax {
   }
   public function function_keyword(): EditableSyntax {
     return $this->_function_keyword;
+  }
+  public function ampersand(): EditableSyntax {
+    return $this->_ampersand;
   }
   public function left_paren(): EditableSyntax {
     return $this->_left_paren;
@@ -14621,6 +14667,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14635,6 +14682,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
       $async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14649,6 +14697,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14663,6 +14712,22 @@ final class Php7AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $function_keyword,
+      $this->_ampersand,
+      $this->_left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $this->_use,
+      $this->_colon,
+      $this->_type,
+      $this->_body);
+  }
+  public function with_ampersand(EditableSyntax $ampersand): Php7AnonymousFunction {
+    return new Php7AnonymousFunction(
+      $this->_static_keyword,
+      $this->_async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14677,6 +14742,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14691,6 +14757,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $parameters,
       $this->_right_paren,
@@ -14705,6 +14772,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $right_paren,
@@ -14719,6 +14787,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14733,6 +14802,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14747,6 +14817,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14761,6 +14832,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
+      $this->_ampersand,
       $this->_left_paren,
       $this->_parameters,
       $this->_right_paren,
@@ -14780,6 +14852,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
     $async_keyword = $this->async_keyword()->rewrite($rewriter, $new_parents);
     $coroutine_keyword = $this->coroutine_keyword()->rewrite($rewriter, $new_parents);
     $function_keyword = $this->function_keyword()->rewrite($rewriter, $new_parents);
+    $ampersand = $this->ampersand()->rewrite($rewriter, $new_parents);
     $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
     $parameters = $this->parameters()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
@@ -14792,6 +14865,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
       $async_keyword === $this->async_keyword() &&
       $coroutine_keyword === $this->coroutine_keyword() &&
       $function_keyword === $this->function_keyword() &&
+      $ampersand === $this->ampersand() &&
       $left_paren === $this->left_paren() &&
       $parameters === $this->parameters() &&
       $right_paren === $this->right_paren() &&
@@ -14806,6 +14880,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
         $async_keyword,
         $coroutine_keyword,
         $function_keyword,
+        $ampersand,
         $left_paren,
         $parameters,
         $right_paren,
@@ -14829,6 +14904,9 @@ final class Php7AnonymousFunction extends EditableSyntax {
     $function_keyword = EditableSyntax::from_json(
       $json->php7_anonymous_function_keyword, $position, $source);
     $position += $function_keyword->width();
+    $ampersand = EditableSyntax::from_json(
+      $json->php7_anonymous_ampersand, $position, $source);
+    $position += $ampersand->width();
     $left_paren = EditableSyntax::from_json(
       $json->php7_anonymous_left_paren, $position, $source);
     $position += $left_paren->width();
@@ -14855,6 +14933,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
         $async_keyword,
         $coroutine_keyword,
         $function_keyword,
+        $ampersand,
         $left_paren,
         $parameters,
         $right_paren,
@@ -14868,6 +14947,7 @@ final class Php7AnonymousFunction extends EditableSyntax {
     yield $this->_async_keyword;
     yield $this->_coroutine_keyword;
     yield $this->_function_keyword;
+    yield $this->_ampersand;
     yield $this->_left_paren;
     yield $this->_parameters;
     yield $this->_right_paren;

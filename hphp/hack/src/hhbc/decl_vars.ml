@@ -12,46 +12,77 @@ open Hh_core
 module ULS = Unique_list_string
 module SN = Naming_special_names
 
+type bare_this_usage =
+  (* $this appear as expression *)
+  | Bare_this
+  (* bare $this appear as possible targetfor assignment
+  - $this as function argument
+  - $this as target of & operator
+  - $this as reference in catch clause *)
+  | Bare_this_as_ref
+
 type decl_vars_state = {
+  (* set of locals used inside the functions *)
   dvs_locals: ULS.t;
-  dvs_has_dynamic_var: bool;
-  dvs_has_bare_this: bool;
+  (* does function use anything that might access local dynamically:
+  - special function
+  - '$' operator *)
+  dvs_use_dynamic_var_access: bool;
+  (* does function uses bare form of $this *)
+  dvs_bare_this: bare_this_usage option
 }
 
-let with_dynamic_var s =
-  if s.dvs_has_dynamic_var then s
-  else { s with dvs_has_dynamic_var = true }
+(* List of functions from SimpleFunctionCall::InitFunctionTypeMap()
+   with kinds: Extract, Assert, Compact, GetDefinedVars.
+   When function contains calls to functions from the list its is considered
+   to be having dynamic vars *)
+let dynamic_functions = SSet.of_list @@ [
+  "extract";
+  "parse_str";
+  "compact";
+  "assert";
+  "get_defined_vars"
+]
+
+let with_dynamic_var_access s =
+  if s.dvs_use_dynamic_var_access then s
+  else { s with dvs_use_dynamic_var_access = true }
 
 let with_local name s =
   { s with dvs_locals = ULS.add s.dvs_locals name }
 
-let with_this is_bare s =
-  if is_bare && s.dvs_has_bare_this then s
+let with_this barethis s =
+  let new_bare_this =
+    match s.dvs_bare_this, barethis with
+    | _, Bare_this_as_ref -> Some Bare_this_as_ref
+    | None, Bare_this     -> Some Bare_this
+    | u, _ -> u in
+  if s.dvs_bare_this = new_bare_this then s
   else
   { s with
-      dvs_has_bare_this = s.dvs_has_bare_this || is_bare;
+      dvs_bare_this = new_bare_this;
       dvs_locals = ULS.add s.dvs_locals SN.SpecialIdents.this }
 
 let dvs_empty = {
   dvs_locals = ULS.empty;
-  dvs_has_dynamic_var = false;
-  dvs_has_bare_this = false; }
+  dvs_use_dynamic_var_access = false;
+  dvs_bare_this = None; }
 
 (* Add a local to the accumulated list. Don't add if it's $GLOBALS or
  * the pipe variable $$. If it's $this, add it, and if this variable appears
  * "bare" (because bareparam=true), remember for needs_local_this *)
-let add_local ~bareparam s (_, name) =
+let add_local ~barethis s (_, name) =
   if name = SN.Superglobals.globals || name = SN.SpecialIdents.dollardollar
   then s
   else if name = SN.SpecialIdents.this
-  then with_this bareparam s
+  then with_this barethis s
   else with_local name s
 
-(* Add locals for an expression for which $this counts as "bare" *)
+(* Add locals for an expression for which $this counts as "bare_ref" *)
 let add_bare_expr this acc expr =
   match expr with
-  | (_, Ast.Lvar(_, "$this" as id)) ->
-   add_local ~bareparam:true acc id
+  | (_, Ast.Lvar(_, "$this")) ->
+    with_this Bare_this_as_ref acc
   | _ ->
     this#on_expr acc expr
 
@@ -65,35 +96,38 @@ let on_class_get this acc recv prop ~is_call_target =
   - A::$b = 1 - $b is a static field name *)
   match snd prop with
   | Ast.Lvar pid ->
-    if is_call_target then add_local ~bareparam:false acc pid
+    if is_call_target then add_local ~barethis:Bare_this acc pid
     else acc
   | _ -> this#on_expr acc prop
 
-class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
+class declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body
+  = object(this)
   inherit [decl_vars_state] Ast_visitor.ast_visitor as super
 
   method! on_global_var acc exprs =
     let rec add_local_from_expr acc e =
       match snd e with
-      | (Ast.Id id | Ast.Lvar id) -> add_local ~bareparam:false acc id
+      | (Ast.Id id | Ast.Lvar id) -> add_local ~barethis:Bare_this acc id
       | Ast.Dollar e -> add_local_from_expr acc e
       | _ -> this#on_expr acc e in
     List.fold_left exprs ~init:acc ~f:add_local_from_expr
 
   method! on_obj_get acc e prop =
     let acc = match snd e with
-    | Ast.Lvar (_, "$this") when is_in_static_method -> acc
+    | Ast.Lvar (_, ("$this" as id)) ->
+      if is_in_static_method && not is_closure_body then acc
+      else with_local id acc
     | _ -> this#on_expr acc e in
     match snd prop with
     (* Only add if it is a variable *)
-    | Ast.Lvar id -> add_local ~bareparam:false acc id
+    | Ast.Lvar id -> add_local ~barethis:Bare_this acc id
     | _ -> this#on_expr acc prop
 
   method! on_foreach acc e pos iterator block =
     let acc =
       match snd e with
-      | Ast.Lvar(_, "$this" as id) when Iterator.is_mutable_iterator iterator ->
-        add_local ~bareparam:true acc id
+      | Ast.Lvar(_, "$this") when Iterator.is_mutable_iterator iterator ->
+        with_this Bare_this_as_ref acc
       | _ ->
         acc
     in
@@ -113,14 +147,16 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
     | _ -> super#on_binop acc binop e1 e2
 
   method! on_lvar acc id =
-    add_local ~bareparam:false acc id
+    add_local ~barethis:Bare_this acc id
+
   method! on_dollar acc e =
     match e with
-    | _, Ast.Lvar id -> with_dynamic_var (add_local ~bareparam:false acc id)
+    | _, Ast.Lvar id -> with_dynamic_var_access (add_local ~barethis:Bare_this acc id)
     | _ -> this#on_expr acc e
 
   method! on_class_get acc id prop =
     on_class_get this acc id prop ~is_call_target:false
+
   method! on_efun acc fn use_list =
   (* at this point AST is already rewritten so use lists on EFun nodes
     contain list of captured variables. However if use list was initially absent
@@ -142,7 +178,7 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
         ~default:false ~f:(fun s -> SSet.mem fn_name s) in
     if has_use_list
     then List.fold_left use_list ~init:acc
-      ~f:(fun acc (x, _isref) -> add_local ~bareparam:false acc x)
+      ~f:(fun acc (x, _isref) -> add_local ~barethis:Bare_this acc x)
     else acc
   method! on_class_const acc e _ = this#on_expr acc e
   method! on_call acc e _ el1 el2 =
@@ -150,19 +186,25 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
       match e with
       | (_, Ast.Id(p, "HH\\set_frame_metadata"))
       | (_, Ast.Id(p, "\\HH\\set_frame_metadata")) ->
-        add_local ~bareparam:false acc (p,"$86metadata")
+        add_local ~barethis:Bare_this acc (p,"$86metadata")
       | _ -> acc in
-    let call_w_bareparam =
+    let acc =
       match e with
-      | (_, Ast.Id(_, ("isset" | "echo" | "empty"))) -> false
-      | _ -> true in
+      | (_, Ast.Id (_, s))
+        when SSet.mem (String.lowercase_ascii s) dynamic_functions ->
+        with_dynamic_var_access acc
+      | _ -> acc in
+    let barethis =
+      match e with
+      | (_, Ast.Id(_, ("isset" | "echo" | "empty"))) -> Bare_this
+      | _ -> Bare_this_as_ref in
     let on_arg acc e =
       match e with
       (* Only add $this to locals if it's bare *)
-      | (_, Ast.Lvar(_, "$this" as id)) ->
-        add_local ~bareparam:(call_w_bareparam) acc id
+      | (_, Ast.Lvar(_, "$this")) ->
+        with_this barethis acc
       | (_, Ast.(Unop (Uref, (_, Lvar id)))) ->
-        add_local ~bareparam:false acc id
+        add_local ~barethis:Bare_this acc id
       | _ ->
         this#on_expr acc e
     in
@@ -183,7 +225,7 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
     acc
 
   method! on_catch acc (_, x, b) =
-    this#on_block (add_local ~bareparam:true acc x) b
+    this#on_block (add_local ~barethis:Bare_this_as_ref acc x) b
   method! on_class_ acc _ = acc
   method! on_fun_ acc _ = acc
 end
@@ -192,7 +234,8 @@ let uls_from_ast ~is_closure_body ~has_this
   ~params ~is_toplevel ~is_in_static_method
   ~get_param_name ~get_param_default_value
   ~explicit_use_set_opt b =
-  let visitor = new declvar_visitor explicit_use_set_opt is_in_static_method in
+  let visitor =
+    new declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body in
   let state =
     (* pull variables used in default values *)
     let acc = List.fold_left params ~init:dvs_empty ~f:(
@@ -200,12 +243,10 @@ let uls_from_ast ~is_closure_body ~has_this
     in
     visitor#on_program acc b in
   let needs_local_this =
-    state.dvs_has_bare_this ||
-    is_in_static_method ||
-    (* local this is necessary if we have 'this' in list of locals and function
-    also uses dynamic variables *)
-    (state.dvs_has_dynamic_var
-     && SSet.mem SN.SpecialIdents.this (ULS.items_set state.dvs_locals)) in
+    state.dvs_bare_this = Some Bare_this_as_ref ||
+    (state.dvs_bare_this = Some Bare_this && state.dvs_use_dynamic_var_access) ||
+    is_in_static_method
+  in
   let param_names =
     List.fold_left
       params

@@ -617,13 +617,15 @@ let rec continue_is_legal parents =
 
 let using_statement_function_scoped_is_legal parents =
   match parents with
+  (* using is allowed in the toplevel, and also in toplevel async blocks *)
   | _ ::
     { syntax = CompoundStatement _; _ } ::
     { syntax = (
         FunctionDeclaration  _ |
         MethodishDeclaration _ |
         AnonymousFunction    _ |
-        LambdaExpression     _); _ } :: _ -> true
+        LambdaExpression     _ |
+        AwaitableCreationExpression _); _ } :: _ -> true
   | _ -> false
 
 let make_error_from_nodes

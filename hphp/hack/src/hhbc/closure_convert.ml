@@ -452,11 +452,20 @@ let convert_id (env:env) p (pid, str as id) =
       (* HHVM does not inline method name in anonymous classes *)
       p, Id (pid, (snd id))
     | _ ->
-    let prefix =
+    let prefix, is_trait =
       match Scope.get_class env.scope with
-      | None -> ""
-      | Some cd -> (SU.Xhp.mangle @@ strip_id cd.c_name) ^ "::" in
-    begin match env.scope with
+      | None -> "", false
+      | Some cd ->
+        (SU.Xhp.mangle @@ strip_id cd.c_name) ^ "::",
+        cd.Ast.c_kind = Ast.Ctrait in
+    let scope =
+      if not is_trait then env.scope
+      (* for lambdas nested in trait methods HHVM replaces __METHOD__
+         with enclosing method name - do the same and bubble up from lambdas *)
+      else Core_list.drop_while env.scope ~f:(function
+        | ScopeItem.Lambda | ScopeItem.LongLambda _ -> true
+        | _ -> false) in
+    begin match scope with
       | ScopeItem.Function fd :: _ -> return (prefix ^ strip_id fd.f_name)
       | ScopeItem.Method md :: _ -> return (prefix ^ strip_id md.m_name)
       | (ScopeItem.Lambda | ScopeItem.LongLambda _) :: _ ->

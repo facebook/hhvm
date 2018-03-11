@@ -46,7 +46,7 @@ let get_kind_num ~tparams p =
   | "hh\\keyset" -> 21
   | "hh\\vec_or_dict" -> 22
   | "typeaccess" -> 102
-  | "xhp_xhp" -> 103
+  | _ when String.length p > 4 && String.sub p 0 4 = "xhp_" -> 103
   | "unresolved"
   | _ -> 101
 

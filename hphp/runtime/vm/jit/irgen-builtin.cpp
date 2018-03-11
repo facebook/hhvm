@@ -2006,6 +2006,17 @@ void emitAKExists(IRGS& env) {
   auto const arr = popC(env);
   auto key = popC(env);
 
+  auto throwBadKey = [&] {
+    // TODO(T11019533): Fix the underlying issue with unreachable code rather
+    // than papering over it by pushing an unused value here.
+    push(env, cns(env, false));
+    decRef(env, arr);
+    decRef(env, key);
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
+    gen(env, ThrowInvalidArrayKey, arr, key);
+  };
+
   if (arr->isA(TVec)) {
     if (key->isA(TNull | TStr)) {
       push(env, cns(env, false));
@@ -2014,8 +2025,7 @@ void emitAKExists(IRGS& env) {
       return;
     }
     if (!key->isA(TInt)) {
-      gen(env, ThrowInvalidArrayKey, arr, key);
-      return;
+      return throwBadKey();
     }
     auto const result = cond(
       env,
@@ -2038,8 +2048,7 @@ void emitAKExists(IRGS& env) {
       return;
     }
     if (!key->isA(TInt) && !key->isA(TStr)) {
-      gen(env, ThrowInvalidArrayKey, arr, key);
-      return;
+      return throwBadKey();
     }
     auto const val = gen(
       env,

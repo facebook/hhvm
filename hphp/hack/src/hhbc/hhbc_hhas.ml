@@ -1064,6 +1064,8 @@ and string_of_param_default_value ~env expr =
     e1 ^ s ^ e2
   in
   let fmt_class_name ~is_class_constant cn =
+    let cn = if SU.Xhp.is_xhp (Utils.strip_ns cn)
+    then SU.Xhp.mangle cn else cn in
     let cn = (Php_escaping.escape (SU.strip_global_ns cn)) in
     if is_class_constant then "\\\\" ^ cn else cn in
   let get_special_class_name ~env ~is_class_constant id =

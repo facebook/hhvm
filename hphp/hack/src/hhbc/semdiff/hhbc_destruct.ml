@@ -23,6 +23,13 @@ let rec pa p (a, n) =
     | Some v -> Some (v, (a,n+1))
     | None -> None
 
+(* apply parser starting from previous instruction *)
+let rec back p (a, n) =
+  match Array.get a (n - 1) with
+  | ISrcLoc _ -> back p (a, n - 1)
+  | exception (Invalid_argument _) -> None
+  | _ -> p (a, n - 1)
+
 (* primitive parsers for instructions of interest *)
 let uSetL = pa (function | IMutator (SetL lab) -> Some lab | _ -> None)
 let uPopC = pa (function | IBasic PopC -> Some () | _ -> None)

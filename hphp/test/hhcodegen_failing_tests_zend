@@ -3,7 +3,6 @@ zend/good/Zend/tests/bug43332_1.php
 zend/good/Zend/tests/closure_005.php
 zend/good/Zend/tests/closure_014.php
 zend/good/Zend/tests/errmsg_039.php
-zend/good/Zend/tests/heredoc_012.php
 zend/good/Zend/tests/heredoc_014.php
 zend/good/Zend/tests/nowdoc_016.php
 zend/good/Zend/tests/objects_026.php
@@ -12,4 +11,3 @@ zend/good/Zend/tests/use_function/case_insensivity.php
 zend/good/Zend/tests/use_function/no_global_fallback2.php
 zend/good/ext/reflection/tests/bug36337.php
 zend/good/ext/standard/tests/serialize/006.php
-zend/good/tests/lang/bug24054.php

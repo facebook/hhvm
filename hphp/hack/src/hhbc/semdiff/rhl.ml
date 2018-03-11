@@ -1293,6 +1293,32 @@ let equiv prog prog' startlabelpairs =
         let newpc' = (hs_of_pc pc', n') in
           check newpc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
 
+    let concat_or_caststring_or_string_pattern =
+      (uConcat $> ignore) $|
+      (uCastString $> ignore) $|
+      (uString $> ignore) in
+
+    let previous_instruction_pushes_string_pattern =
+      back concat_or_caststring_or_string_pattern in
+
+    (* string + "" is no op *)
+    let previous_instruction_pushes_string_concat_empty_string_pattern =
+      previous_instruction_pushes_string_pattern $$
+      (uString $? (fun s -> s = "")) $$
+      uConcat
+      $> ignore in
+
+    let string_concat_empty_string_is_noop_pattern =
+      previous_instruction_pushes_string_concat_empty_string_pattern $*$|
+      previous_instruction_pushes_string_pattern in
+
+    let string_concat_empty_string_is_noop_action =
+      string_concat_empty_string_is_noop_pattern
+      $>> (fun _ ((_,n), (_,n')) ->
+      let newpc = (hs_of_pc pc, n) in
+      let newpc' = (hs_of_pc pc', n') in
+      check newpc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
+
     let empty_string_cgetl2_concat_pattern =
       (uString $? (fun s -> s = "") $$ uCGetL2 $$ uConcat)
       $> (fun ((_empty_string, loc), _) -> loc) in
@@ -1664,6 +1690,8 @@ let equiv prog prog' startlabelpairs =
       issetl_jmpz_action_left;
       issetl_jmpz_action_right;
       negative_number_vs_zero_minus_action;
+      string_concat_empty_string_is_noop_action;
+
       failure_pattern_action;
       ] in
     bigmatch_action ((prog_array, ip_of_pc pc),(prog_array', ip_of_pc pc'))

@@ -1,0 +1,6 @@
+.main {
+  String "42"
+  PopC
+  Int 1
+  RetC
+}

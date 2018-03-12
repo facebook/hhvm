@@ -27,6 +27,7 @@ module Class : sig
    * namespace qualification but no initial backslash, and XHP
    * mangling. Also return the unqualified form as a string *)
   val elaborate_id : Namespace_env.env -> Ast.id -> t * string option
+  val elaborate_id_at_definition_site : Namespace_env.env -> Ast.id -> t * string option
 end
 
 module Function : sig
@@ -39,6 +40,8 @@ module Function : sig
   val add_suffix : t -> string -> t
   val elaborate_id : Namespace_env.env -> Ast.id -> t * string option
   val elaborate_id_with_builtins : Namespace_env.env -> Ast.id -> t * string option
+  val elaborate_id_at_definition_site : Namespace_env.env -> Ast.id -> t * string option
+
 end
 
 module Prop : sig

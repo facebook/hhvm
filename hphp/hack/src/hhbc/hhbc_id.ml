@@ -27,17 +27,38 @@ let auto_namespace_map () =
   Option.value Hhbc_options.(aliased_namespaces !compiler_options)
     ~default:default_auto_aliased_namespaces
 
-let elaborate_id ns kind id =
+let should_alias_name ns id aliased_id =
+  (* Take any "use namespace" clauses (but not just use clauses) *)
+  (* A use clause also fills the use_class list, where as a
+    use namespace clause only fills the first list. Thus we
+    are looking for namespaces in the first list but not the second
+  *)
+  let use_ns = SMap.keys ns.Namespace_env.ns_ns_uses in
+  let use_class = SMap.keys ns.Namespace_env.ns_class_uses in
+  let in_ns l =
+    List.exists l (String_utils.string_starts_with id)  in
+  aliased_id <> id
+  (* If we expicitly used the namespace, this overrides the namespace aliasing *)
+  && not (in_ns use_ns && not (in_ns use_class))
+
+let elaborate_id ~should_alias ns kind id =
   let autoimport =
     if List.mem
       Hh_autoimport.autoimport_only_for_typechecker (SU.strip_ns @@ snd id)
     then false else Emit_env.is_hh_syntax_enabled () in
-  let was_renamed, (_, fully_qualified_id) =
-    Namespaces.elaborate_id_impl ~autoimport ns kind id in
-  let fully_qualified_id =
+
+  let aliased_id =
     Namespaces.renamespace_if_aliased
-      ~reverse:true (auto_namespace_map ()) fully_qualified_id
-  in
+      ~reverse:true (auto_namespace_map ()) (snd id) in
+  let was_renamed, fully_qualified_id =
+    if should_alias && should_alias_name ns (snd id) aliased_id
+    then false, aliased_id
+    else
+      let was_renamed, (_, fully_qualified_id) =
+        Namespaces.elaborate_id_impl ~autoimport ns kind id in
+      was_renamed, fully_qualified_id
+    in
+
   let stripped_fully_qualified_id = SU.strip_global_ns fully_qualified_id in
   let clean_id = SU.strip_ns fully_qualified_id in
   let need_fallback =
@@ -60,7 +81,7 @@ module Class = struct
       (SU.strip_global_ns s)
   let from_raw_string s = s
   let to_raw_string s = s
-  let elaborate_id ns ((_, n) as id) =
+  let elaborate_id_ ~should_alias ns ((_, n) as id) =
     let ns =
       if SU.Xhp.is_xhp n
       then Namespace_env.empty ns.Namespace_env.ns_popt
@@ -68,7 +89,7 @@ module Class = struct
     let mangled_name = SU.Xhp.mangle n in
     let stripped_mangled_name = SU.strip_global_ns mangled_name in
     let was_renamed, id, fallback_id =
-      elaborate_id ns Namespaces.ElaborateClass (fst id, mangled_name) in
+      elaborate_id ~should_alias ns Namespaces.ElaborateClass (fst id, mangled_name) in
     if was_renamed || mangled_name.[0] = '\\'
     then id, fallback_id
     else
@@ -79,6 +100,8 @@ module Class = struct
     | None -> id, fallback_id
     | Some s -> s, None
 
+  let elaborate_id_at_definition_site = elaborate_id_ ~should_alias:false
+  let elaborate_id = elaborate_id_ ~should_alias:true
   let to_unmangled_string s =
     SU.Xhp.unmangle s
 end
@@ -169,9 +192,13 @@ module Function = struct
   let from_raw_string s = s
   let to_raw_string s = s
   let add_suffix s suffix = s ^ suffix
-  let elaborate_id ns id =
-    let _, x, y = elaborate_id ns Namespaces.ElaborateFun id in
+
+  let elaborate_id_ ~should_alias ns id =
+    let _, x, y = elaborate_id ~should_alias ns Namespaces.ElaborateFun id in
     x, y
+
+  let elaborate_id_at_definition_site = elaborate_id_ ~should_alias:false
+  let elaborate_id = elaborate_id_ ~should_alias:true
   let elaborate_id_with_builtins ns id =
     let fq_id, backoff_id = elaborate_id ns id in
     match backoff_id with
@@ -201,6 +228,7 @@ module Const = struct
   let from_raw_string s = s
   let to_raw_string s = s
   let elaborate_id ns id =
-    let _was_renamed, fq_id, backoff_id = elaborate_id ns Namespaces.ElaborateConst id in
+    let _was_renamed, fq_id, backoff_id = elaborate_id ~should_alias:true ns Namespaces.ElaborateConst id in
     fq_id, backoff_id, String.contains (snd id) '\\'
+
 end

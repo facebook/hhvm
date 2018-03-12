@@ -229,7 +229,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   let class_attributes =
     Emit_attribute.from_asts namespace ast_class.Ast.c_user_attributes in
   let class_id, _ =
-    Hhbc_id.Class.elaborate_id namespace ast_class.Ast.c_name in
+    Hhbc_id.Class.elaborate_id_at_definition_site namespace ast_class.Ast.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
   let class_is_interface = ast_is_interface ast_class in
   let class_uses =

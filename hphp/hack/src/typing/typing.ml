@@ -4964,6 +4964,8 @@ and call_ ~expected ~receiver_type pos env fty el uel =
       else (Reason.Rnone, Tany)
     in
     env, tel, [], ty
+  | _, Tunresolved [ty] ->
+    call ~expected pos env ty el uel
   | r, Tunresolved tyl ->
     let env, retl = List.map_env env tyl begin fun env ty ->
       let env, _, _, ty = call ~expected pos env ty el uel in env, ty

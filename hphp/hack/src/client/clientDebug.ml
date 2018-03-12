@@ -13,7 +13,8 @@ type env = {
 }
 
 let main env =
-  let ic, oc = ClientConnect.connect { ClientConnect.
+  let {ClientConnect.channels = ic, oc; _} =
+      ClientConnect.connect { ClientConnect.
     root = env.root;
     autostart = true;
     force_dormant_start = false;

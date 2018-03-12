@@ -58,7 +58,8 @@ let main_exn env =
   let build_type = ServerBuild.build_type_of env.build_opts in
   let request_id = env.build_opts.ServerBuild.id in
   HackEventLogger.client_build build_type request_id;
-  let ic, oc = ClientConnect.connect { ClientConnect.
+  let ClientConnect.{channels = ic, oc; _} =
+      ClientConnect.connect { ClientConnect.
     root = env.root;
     autostart = true;
     (** When running Hack Build, we want to force the monitor to start

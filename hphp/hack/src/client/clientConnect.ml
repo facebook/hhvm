@@ -26,6 +26,10 @@ type env = {
   ignore_hh_version : bool;
 }
 
+type conn = {
+  channels : Timeout.in_channel * out_channel;
+}
+
 let tty_progress_reporter (status: string option) : unit =
   if Tty.spinner_used () then Tty.print_clear_line stderr;
   match status with
@@ -267,7 +271,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
           " is being initialized with a better saved state after a large rebase/update.");
           raise Exit_status.(Exit_with No_server_running))
       end;
-      (ic, oc)
+      {channels = (ic, oc)}
   | Error e ->
     if first_attempt then
       Printf.eprintf
@@ -358,21 +362,21 @@ let connect env =
   let start_time = Unix.time () in
   let tail_env = Tail.create_env link_file in
   try
-    let (ic, oc) =
+    let {channels = (_, oc); _} as conn =
       connect ~first_attempt:true env env.retries start_time tail_env in
     Tail.close_env tail_env;
     HackEventLogger.client_established_connection start_time;
     if env.do_post_handoff_handshake then begin
       ServerCommand.send_connection_type oc ServerCommandTypes.Non_persistent;
     end;
-    (ic, oc)
+    conn
   with
   | e ->
     HackEventLogger.client_establish_connection_exception e;
     raise e
 
-let rpc : type a. Timeout.in_channel * out_channel -> a ServerCommandTypes.t -> a
-= fun (_, oc) cmd ->
+let rpc : type a. conn -> a ServerCommandTypes.t -> a
+= fun {channels = (_, oc)} cmd ->
   Marshal.to_channel oc (ServerCommandTypes.Rpc cmd) [];
   flush oc;
   let fd = Unix.descr_of_out_channel oc in

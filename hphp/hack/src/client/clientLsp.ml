@@ -1181,7 +1181,8 @@ let rec connect_client
       ignore_hh_version = false;
     } in
   try
-    let (ic, oc) = ClientConnect.connect env_connect in
+    let ClientConnect.{channels = ic, oc; _} =
+      ClientConnect.connect env_connect in
     can_autostart_after_mismatch := false;
     let pending_messages = Queue.create () in
     { ic; oc; pending_messages; }

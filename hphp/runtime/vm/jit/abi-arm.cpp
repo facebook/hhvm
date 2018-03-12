@@ -56,18 +56,21 @@ const RegSet kGPReserved =
 const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 
 const RegSet kSIMDCallerSaved =
+  // not callee saved at all
   vixl::d0 | vixl::d1 | vixl::d2 | vixl::d3 |
   vixl::d4 | vixl::d5 | vixl::d6 | vixl::d7 |
-  // d8-15 are callee-saved
+  // the low 64 bits of d8-15 are callee-saved, but we can't tell the
+  // register allocator that.
+  vixl::d8 | vixl::d9 | vixl::d10 | vixl::d11 |
+  vixl::d12 | vixl::d13 | vixl::d14 | vixl::d15 |
+  // not callee saved at all
   vixl::d16 | vixl::d17 | vixl::d18 | vixl::d19 |
   vixl::d20 | vixl::d21 | vixl::d22 | vixl::d23 |
   vixl::d24 | vixl::d25 | vixl::d26 | vixl::d27 |
   vixl::d28 | vixl::d29;
   // we don't use d30 and d31 because BitSet can't represent them
 
-const RegSet kSIMDCalleeSaved =
-  vixl::d8 | vixl::d9 | vixl::d10 | vixl::d11 |
-  vixl::d12 | vixl::d13 | vixl::d14 | vixl::d15;
+const RegSet kSIMDCalleeSaved{};
 
 const RegSet kSIMDUnreserved = kSIMDCallerSaved | kSIMDCalleeSaved;
 const RegSet kSIMDReserved;

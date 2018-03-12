@@ -526,7 +526,7 @@ struct RuntimeOption {
      before forcing a restart */                                        \
   F(uint32_t, HackCompilerReset,       0)                               \
   /* Whether to use an extern compiler to build systemlib */            \
-  F(bool, UseExternCompilerForSystemLib, false)                         \
+  F(bool, UseExternCompilerForSystemLib, true)                          \
   /* Whether or not to fallback to hphpc if hh_single_compile fails for
      any reason. */                                                     \
   F(bool, HackCompilerFallback,        false)                           \

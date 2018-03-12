@@ -2105,6 +2105,23 @@ void parse_parameter_list(AsmState& as) {
         } else if (str.size() == 5 && !strcasecmp("false", str.data())) {
           tv = make_tv<KindOfBoolean>(false);
         }
+        auto utype = param.typeConstraint.underlyingDataType();
+        if (tv.m_type == KindOfUninit &&
+            (!utype || *utype == KindOfInt64 || *utype == KindOfDouble)) {
+          int64_t ival;
+          double dval;
+          int overflow = 0;
+          auto dt = str.get()->isNumericWithVal(ival, dval, false, &overflow);
+          if (overflow == 0) {
+            if (dt == KindOfInt64) {
+              if (utype == KindOfDouble) tv = make_tv<KindOfDouble>(ival);
+              else tv = make_tv<KindOfInt64>(ival);
+            } else if (dt == KindOfDouble &&
+                       (!utype || utype == KindOfDouble)) {
+              tv = make_tv<KindOfDouble>(dval);
+            }
+          }
+        }
         if (tv.m_type != KindOfUninit) {
           param.defaultValue = tv;
         }

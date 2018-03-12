@@ -17,19 +17,17 @@
 #define incl_HPHP_VM_TREAD_HASH_MAP_H_
 
 #include <atomic>
-#include <boost/iterator/iterator_facade.hpp>
 #include <type_traits>
-#include <utility>
+
+#include <boost/iterator/iterator_facade.hpp>
+
 #include <folly/Bits.h>
-#include "hphp/util/atomic.h"
+
+#include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
-
-namespace Treadmill { void deferredFree(void*); }
-
-//////////////////////////////////////////////////////////////////////
+extern uint64_t g_emptyTable;
 
 /*
  * A hashtable safe for multiple concurrent readers, even while writes are
@@ -48,9 +46,12 @@ namespace Treadmill { void deferredFree(void*); }
  *
  * Uses the treadmill to collect garbage.
  */
-template<class Key, class Val, class HashFunc>
+
+template<class Key, class Val,
+         class HashFunc = std::hash<Key>,
+         class Allocator = std::allocator<char>>
 struct TreadHashMap {
-  typedef std::pair<std::atomic<Key>,Val> value_type;
+  using value_type = std::pair<std::atomic<Key>,Val>;
 
   static_assert(
     std::is_trivially_destructible<Key>::value &&
@@ -60,18 +61,27 @@ struct TreadHashMap {
 
 private:
   struct Table {
-    size_t capac;
-    size_t size;
+    uint32_t capac;
+    uint32_t size;
     value_type entries[0];
   };
 
+  Table* staticEmptyTable() {
+    static_assert(sizeof(Table) == sizeof(g_emptyTable), "");
+    return reinterpret_cast<Table*>(&g_emptyTable);
+  }
+
 public:
-  explicit TreadHashMap(size_t initialCapacity)
-    : m_table(allocTable(initialCapacity))
+  explicit TreadHashMap(uint32_t initialCapacity)
+    : m_table(staticEmptyTable())
+    , m_initialSize(folly::nextPowTwo(initialCapacity))
   {}
 
   ~TreadHashMap() {
-    free(m_table);
+    auto t = m_table.load(std::memory_order_relaxed);
+    if (t != staticEmptyTable()) {
+      freeTable(t);
+    }
   }
 
   TreadHashMap(const TreadHashMap&) = delete;
@@ -82,7 +92,7 @@ public:
     : boost::iterator_facade<thm_iterator<IterVal>,IterVal,
                              boost::forward_traversal_tag>
   {
-    explicit thm_iterator() : m_table(0) {}
+    explicit thm_iterator() : m_table(nullptr) {}
 
     // Conversion constructor for interoperability between iterator
     // and const_iterator.  The enable_if<> magic prevents the
@@ -164,8 +174,8 @@ public:
 
   Val* find(Key key) const {
     assert(key != 0);
-
     auto tab = m_table.load(std::memory_order_consume);
+    if (tab->size == 0) return nullptr; // empty
     assert(tab->capac > tab->size);
     auto idx = project(tab, key);
     for (;;) {
@@ -216,18 +226,21 @@ private:
       return old;
     }
 
-    // Rehash from old to new.
-    auto newTable = allocTable(old->capac * 2);
-    for (auto i = 0; i < old->capac; ++i) {
-      value_type* ent = old->entries + i;
-      if (ent->first.load()) {
-        insertImpl(newTable, ent->first, ent->second);
+    Table* newTable;
+    if (UNLIKELY(old == staticEmptyTable())) {
+      newTable = allocTable(m_initialSize);
+    } else {
+      newTable = allocTable(old->capac * 2);
+      for (uint32_t i = 0; i < old->capac; ++i) {
+        value_type* ent = old->entries + i;
+        if (ent->first.load()) {
+          insertImpl(newTable, ent->first, ent->second);
+        }
       }
+      Treadmill::enqueue([this, old] { freeTable(old); });
     }
-    assert(newTable->capac == old->capac * 2);
     assert(newTable->size == old->size); // only one writer thread
     m_table.store(newTable, std::memory_order_release);
-    Treadmill::deferredFree(old);
     return newTable;
   }
 
@@ -236,17 +249,28 @@ private:
     return m_hash(key) & (tab->capac - 1);
   }
 
-  static Table* allocTable(size_t capacity) {
-    auto ret = static_cast<Table*>(
-      calloc(1, capacity * sizeof(value_type) + sizeof(Table)));
+  constexpr size_t allocSize(uint32_t cap) {
+    return cap * sizeof(value_type) + sizeof(Table);
+  }
+
+  Table* allocTable(uint32_t capacity) {
+    auto size = allocSize(capacity);
+    auto ret = reinterpret_cast<Table*>(m_alloc.allocate(size));
+    memset(ret, 0, size);
     ret->capac = capacity;
     ret->size = 0;
     return ret;
   }
 
+  void freeTable(Table* t) {
+    m_alloc.deallocate(reinterpret_cast<char*>(t), allocSize(t->capac));
+  }
+
 private:
-  HashFunc m_hash;
   std::atomic<Table*> m_table;
+  uint32_t m_initialSize;
+  HashFunc m_hash;
+  Allocator m_alloc;
 };
 
 //////////////////////////////////////////////////////////////////////

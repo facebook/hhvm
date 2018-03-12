@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <atomic>
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/growable-vector.h"
 #include "hphp/util/trace.h"
@@ -270,7 +271,8 @@ struct SrcDB {
    * Maybe could be possible with a better hash function or lower max load
    * factor.  (See D450383.)
    */
-  using THM            = TreadHashMap<SrcKey::AtomicInt, SrcRec*, int64_hash>;
+  using THM            = TreadHashMap<SrcKey::AtomicInt, SrcRec*,
+                                      int64_hash, HugeAllocator<char>>;
   using iterator       = THM::iterator;
   using const_iterator = THM::const_iterator;
 

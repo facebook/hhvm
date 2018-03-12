@@ -73,11 +73,12 @@ namespace HPHP { namespace req {
  */
 
 template <typename T>
-struct unique_ptr final : folly::AllocatorUniquePtr<T, Allocator<T>>::type {
-  using Base = typename folly::AllocatorUniquePtr<T,Allocator<T>>::type;
+struct unique_ptr final
+    : std::unique_ptr<T, folly::allocator_delete<Allocator<T>>> {
+  using Base = std::unique_ptr<T, folly::allocator_delete<Allocator<T>>>;
   template <class... Args>
-  /* implicit */ unique_ptr(Args&&... args) :
-    Base(std::forward<Args>(args)...) {}
+  /* implicit */ unique_ptr(Args&&... args)
+      : Base(std::forward<Args>(args)...) {}
   // Unlike the rest, we don't want to ignore the base. Its easy to type-scan
   // unique_ptr and more efficient to let it do it itself.
   TYPE_SCAN_SILENCE_FORBIDDEN_BASES(Base);

@@ -112,7 +112,7 @@ let parse_options () =
   let extract_facts = ref false in
   let dump_stats = ref false in
   let dump_config = ref false in
-  let log_stats = ref true in
+  let log_stats = ref false in
   let usage = P.sprintf "Usage: hh_single_compile (%s) filename\n" Sys.argv.(0) in
   let options =
     [ ("--version"
@@ -179,6 +179,10 @@ let parse_options () =
       ("--dump-config"
       , Arg.Set dump_config
       , " Dump configuration settings"
+      );
+      ("--enable-logging-stats"
+      , Arg.Unit (fun () -> log_stats := true)
+      , " Starts logging stats"
       );
       ("--stop-logging-stats"
       , Arg.Unit (fun () -> log_stats := false)

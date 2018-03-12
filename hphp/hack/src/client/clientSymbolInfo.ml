@@ -60,6 +60,6 @@ let go conn (files:string) expand_path =
     end in
   let command =
     ServerCommandTypes.DUMP_SYMBOL_INFO (expand_path_list file_list) in
-  let result = ServerCommand.rpc conn command in
+  let result = ClientConnect.rpc conn command in
   let result_json = to_json result in
   print_endline (Hh_json.json_to_string result_json)

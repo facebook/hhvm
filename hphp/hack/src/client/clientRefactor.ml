@@ -111,7 +111,7 @@ let print_patches_json file_map =
   print_endline (Hh_json.json_to_string (Hh_json.JSON_Array entries))
 
 let go_ide conn args filename line char new_name =
-  let patches = ServerCommand.rpc conn @@
+  let patches = ClientConnect.rpc conn @@
     ServerCommandTypes.IDE_REFACTOR (filename, line, char, new_name) in
   let file_map = List.fold_left patches
     ~f:map_patches_to_filename ~init:SMap.empty in
@@ -148,7 +148,7 @@ let go conn args mode before after =
         failwith "Unexpected Mode" in
 
     let patches =
-      ServerCommand.rpc conn @@ ServerCommandTypes.REFACTOR command in
+      ClientConnect.rpc conn @@ ServerCommandTypes.REFACTOR command in
     let file_map = List.fold_left patches
       ~f:map_patches_to_filename ~init:SMap.empty in
     if args.output_json

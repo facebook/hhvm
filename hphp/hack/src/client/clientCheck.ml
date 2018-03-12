@@ -90,7 +90,7 @@ let connect args =
 
 let rpc args command =
   let conn = connect args in
-  Cmd.rpc conn @@ command
+  ClientConnect.rpc conn @@ command
 
 let is_stale_msg liveness =
    match liveness with
@@ -381,7 +381,7 @@ let main args =
        * in a non-no-load (yes-load) state
        *)
       let conn = connect args in
-      let response = ServerCommand.rpc conn @@
+      let response = ClientConnect.rpc conn @@
           Rpc.REMOVE_DEAD_FIXMES codes in
       begin match response with
       | `Error msg ->
@@ -399,7 +399,7 @@ let main args =
       let {
         Rpc.Ignore_fixmes_result.has_unsaved_changes;
         error_list;
-      } = ServerCommand.rpc conn @@ Rpc.IGNORE_FIXMES files in
+      } = ClientConnect.rpc conn @@ Rpc.IGNORE_FIXMES files in
       if args.output_json || args.from <> "" || error_list = []
       then begin
         let oc = if args.output_json then stderr else stdout in

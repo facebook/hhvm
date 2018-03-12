@@ -370,3 +370,10 @@ let connect env =
   | e ->
     HackEventLogger.client_establish_connection_exception e;
     raise e
+
+let rpc : type a. Timeout.in_channel * out_channel -> a ServerCommandTypes.t -> a
+= fun (_, oc) cmd ->
+  Marshal.to_channel oc (ServerCommandTypes.Rpc cmd) [];
+  flush oc;
+  let fd = Unix.descr_of_out_channel oc in
+  Marshal_tools.from_fd_with_preamble fd

@@ -88,13 +88,6 @@ let full_recheck_if_needed genv env msg =
 exception Remote_fatal_exception of Marshal_tools.remote_exception_data
 exception Remote_nonfatal_exception of Marshal_tools.remote_exception_data
 
-let rpc : type a. Timeout.in_channel * out_channel -> a t -> a
-= fun (_, oc) cmd ->
-  Marshal.to_channel oc (Rpc cmd) [];
-  flush oc;
-  let fd = Unix.descr_of_out_channel oc in
-  Marshal_tools.from_fd_with_preamble fd
-
 let rec wait_for_rpc_response fd push_messages =
   match Marshal_tools.from_fd_with_preamble fd with
   | Response r -> r, List.rev push_messages

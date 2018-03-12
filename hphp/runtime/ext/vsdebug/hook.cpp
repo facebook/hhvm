@@ -217,6 +217,11 @@ void VSDebugHook::tryEnterDebugger(
     requestInfo->m_flags.memoryLimitRemoved = true;
   }
 
+  if (!requestInfo->m_flags.requestUrlInitialized) {
+    requestInfo->m_requestUrl = g_context->getRequestUrl();
+    requestInfo->m_flags.requestUrlInitialized = true;
+  }
+
   // Check if we need to update the hook stdout and stderr for the request
   // thread.
   if (!requestInfo->m_flags.outputHooked) {

@@ -78,6 +78,7 @@ struct RequestInfo {
     bool compilationUnitsMapped;
     bool doNotBreak;
     bool outputHooked;
+    bool requestUrlInitialized;
   } m_flags;
   const char* m_stepReason;
   CommandQueue m_commandQueue;
@@ -102,6 +103,12 @@ struct RequestInfo {
 
   // Number of times this request has entered the command queue since starting.
   unsigned int m_totalPauseCount;
+
+  // Non-TLS copy of the request's URL to display in the client. Each request
+  // has this string in its ExecutionContext, but since that is thread-local,
+  // we cannot get at that copy when responding to a ThreadsRequest from the
+  // debugger client, so the debugger needs a copy.
+  std::string m_requestUrl;
 };
 
 // An exception to be thrown when a message from the client cannot be processed.

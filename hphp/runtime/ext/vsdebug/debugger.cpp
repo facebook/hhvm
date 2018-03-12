@@ -284,6 +284,10 @@ void Debugger::getAllThreadInfo(folly::dynamic& threads) {
         threadInfo["id"] = requestId;
         threadInfo["name"] = std::string("Request ") +
                              std::to_string(requestId);
+
+        if (!ri->m_requestUrl.empty()) {
+          threadInfo["name"] += ": " + ri->m_requestUrl;
+        }
       }
     },
     false /* includeDummyRequest */

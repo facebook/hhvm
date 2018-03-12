@@ -28,6 +28,10 @@ type env = {
 
 type conn = {
   channels : Timeout.in_channel * out_channel;
+  conn_retries : int option;
+  conn_progress_callback: string option -> unit;
+  conn_start_time: float;
+  tail_env: Tail.env option
 }
 
 let tty_progress_reporter (status: string option) : unit =
@@ -179,7 +183,8 @@ let print_wait_msg progress_callback start_time tail_env =
 
 (** Sleeps until the server says hello. While waiting, prints out spinner and
  * useful messages by tailing the server logs. *)
-let rec wait_for_server_hello
+let rec wait_for_server_message
+  ~expected_message
   ~ic
   ~retries
   ~progress_callback
@@ -198,7 +203,8 @@ let rec wait_for_server_hello
   if readable = [] then (
     Option.iter tail_env
       (fun t -> print_wait_msg progress_callback start_time t);
-    wait_for_server_hello
+    wait_for_server_message
+      ~expected_message
       ~ic
       ~retries
       ~progress_callback
@@ -208,19 +214,37 @@ let rec wait_for_server_hello
     try
       let fd = Timeout.descr_of_in_channel ic in
       let msg = Marshal_tools.from_fd_with_preamble fd in
-      (match msg with
-      | ServerCommandTypes.Hello ->
-        ()
-      | _ ->
+      if Option.is_none expected_message || Some msg = expected_message then
+        msg
+      else begin
         Option.iter tail_env
           (fun t -> print_wait_msg progress_callback start_time t);
-        wait_for_server_hello ic retries
-          progress_callback start_time tail_env
-      )
+        wait_for_server_message ~expected_message ~ic ~retries
+          ~progress_callback ~start_time ~tail_env
+      end
     with
     | End_of_file
     | Sys_error _ ->
       raise Server_hung_up
+
+let wait_for_server_hello ic retries progress_callback start_time tail_env =
+  let _ : 'a ServerCommandTypes.persistent_connection_message_type =
+    wait_for_server_message
+      ~expected_message:(Some ServerCommandTypes.Hello)
+      ~ic
+      ~retries
+      ~progress_callback
+      ~start_time
+      ~tail_env
+  in
+  ()
+
+let with_server_hung_up f =
+  try f () with
+  | Server_hung_up ->
+    (Printf.eprintf ("Hack server disconnected suddenly. Most likely a new one" ^^
+    " is being initialized with a better saved state after a large rebase/update.");
+    raise Exit_status.(Exit_with No_server_running))
 
 let rec connect ?(first_attempt=false) env retries start_time tail_env =
   let elapsed_t = int_of_float (Unix.time () -. start_time) in
@@ -261,17 +285,18 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
   match conn with
   | Ok (ic, oc) ->
       if env.do_post_handoff_handshake then begin
-        try
+        with_server_hung_up @@ fun () ->
           wait_for_server_hello ic retries env.progress_callback start_time
             (Some tail_env);
           env.progress_callback None
-        with
-        | Server_hung_up ->
-          (Printf.eprintf ("Hack server disconnected suddenly. Most likely a new one" ^^
-          " is being initialized with a better saved state after a large rebase/update.");
-          raise Exit_status.(Exit_with No_server_running))
       end;
-      {channels = (ic, oc)}
+      {
+        channels = (ic, oc);
+        conn_retries = retries;
+        conn_progress_callback = env.progress_callback;
+        conn_start_time = start_time;
+        tail_env = Some tail_env;
+      }
   | Error e ->
     if first_attempt then
       Printf.eprintf
@@ -376,8 +401,23 @@ let connect env =
     raise e
 
 let rpc : type a. conn -> a ServerCommandTypes.t -> a
-= fun {channels = (_, oc)} cmd ->
+= fun {
+    channels = (ic, oc);
+    conn_retries = retries;
+    conn_progress_callback = progress_callback;
+    conn_start_time = start_time;
+    tail_env
+  } cmd ->
   Marshal.to_channel oc (ServerCommandTypes.Rpc cmd) [];
   flush oc;
-  let fd = Unix.descr_of_out_channel oc in
-  Marshal_tools.from_fd_with_preamble fd
+  with_server_hung_up @@ fun () ->
+    let res = wait_for_server_message
+      ~expected_message:None
+      ~ic
+      ~retries
+      ~progress_callback
+      ~start_time
+      ~tail_env
+    in
+    Option.iter tail_env ~f:Tail.close_env;
+    res

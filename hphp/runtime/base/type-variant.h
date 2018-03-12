@@ -1055,23 +1055,22 @@ struct Variant : private TypedValue {
 
   ResourceData* detachResourceData() {
     assert(is(KindOfResource));
-    if (LIKELY(m_type == KindOfResource)) {
-      m_type = KindOfNull;
-      return m_data.pres->data();
+    if (UNLIKELY(m_type == KindOfRef)) {
+      tvUnbox(*asTypedValue());
     }
+    assert(m_type == KindOfResource);
     m_type = KindOfNull;
-    return m_data.pref->tv()->m_data.pres->data();
+    return m_data.pres->data();
   }
 
   ObjectData* detachObjectData() {
     assert(is(KindOfObject));
-    if (LIKELY(m_type == KindOfObject)) {
-      m_type = KindOfNull;
-      return m_data.pobj;
-    } else {
-      m_type = KindOfNull;
-      return m_data.pref->tv()->m_data.pobj;
+    if (UNLIKELY(m_type == KindOfRef)) {
+      tvUnbox(*asTypedValue());
     }
+    assert(m_type == KindOfObject);
+    m_type = KindOfNull;
+    return m_data.pobj;
   }
 
   template <typename T>

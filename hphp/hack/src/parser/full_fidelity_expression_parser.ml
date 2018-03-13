@@ -2318,7 +2318,7 @@ module WithStatementAndDeclAndTypeParser
     *)
     let (parser, use_token) = optional_token parser Use in
     if SC.is_missing use_token then
-      Make.missing parser (pos parser)
+      parser, use_token
     else
       let (parser, left, vars, right) =
         parse_parenthesized_comma_list_opt_allow_trailing
@@ -2357,21 +2357,12 @@ module WithStatementAndDeclAndTypeParser
     let (parser, fn) = assert_token parser Function in
     let (parser, ampersand_token) = optional_token parser Ampersand in
     let (parser, left_paren, params, right_paren) =
-      parse_parameter_list_opt parser in
-    let (parser, colon, return_type, use_clause, is_php7) =
-      let (parser, use_clause) = parse_anon_use_opt parser in
-      if SC.is_missing use_clause then begin
-        let (parser, colon, return_type) = parse_optional_return parser in
-        let (parser, use_clause) = parse_anon_use_opt parser in
-        (parser, colon, return_type, use_clause, false)
-        end
-      else begin
-        (* might be PHP7 style lambda where return type follows use clause *)
-        let (parser, colon, return_type) = parse_optional_return parser in
-        (parser, colon, return_type, use_clause, not (SC.is_missing colon))
-        end in
-    let (parser, body) = parse_compound_statement parser in
-    if is_php7 then
+      parse_parameter_list_opt parser
+    in
+    let (parser1, use_clause) = parse_anon_use_opt parser in
+    if not (SC.is_missing use_clause) && peek_token_kind parser1 = Colon then
+      let (parser, colon, return_type) = parse_optional_return parser1 in
+      let (parser, body) = parse_compound_statement parser in
       Make.php7_anonymous_function
         parser
         static
@@ -2387,6 +2378,9 @@ module WithStatementAndDeclAndTypeParser
         return_type
         body
     else
+      let (parser, colon, return_type) = parse_optional_return parser in
+      let (parser, use_clause) = parse_anon_use_opt parser in
+      let (parser, body) = parse_compound_statement parser in
       Make.anonymous_function
         parser
         static

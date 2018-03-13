@@ -644,6 +644,11 @@ let prim = function
   | Nast.Tarraykey -> "arraykey"
   | Nast.Tnoreturn -> "noreturn"
 
+let param_mode = function
+  | FPnormal -> "normal"
+  | FPref -> "ref"
+  | FPinout -> "inout"
+
 let rec from_type: type a. Typing_env.env -> a ty -> json =
   function env -> function ty ->
   (* Helpers to construct fields that appear in JSON rendering of type *)
@@ -732,11 +737,13 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   | Taccess (ty, ids) ->
     obj @@ kind "path" @ typ ty @ path (List.map ids snd)
   | Tfun ft ->
-    let arg_tys = List.map ft.ft_params (fun x -> x.fp_type) in
     let fun_kind =
       if ft.ft_is_coroutine then kind "coroutine" @ kind "function"
       else kind "function" in
-    obj @@ fun_kind @ args arg_tys @ result ft.ft_ret
+    let callconv cc = ["callConvention", JSON_String (param_mode cc)] in
+    let param fp = obj @@ callconv fp.fp_kind @ typ fp.fp_type in
+    let params fps = ["params", JSON_Array (List.map fps param)] in
+    obj @@ fun_kind @ params ft.ft_params @ result ft.ft_ret
   | Tanon _ ->
     obj @@ kind "anon"
   | Tdarray (ty1, ty2) ->

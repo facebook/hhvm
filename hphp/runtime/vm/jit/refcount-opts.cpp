@@ -2817,7 +2817,15 @@ void pre_insert(PreEnv& penv, bool incDec) {
       blk->prepend(inst);
     } else if (blk->taken()) {
       auto const back = blk->backIter();
-      assertx(irrelevant_inst(*back));
+      // We're trying to insert at the end of the block, but there's a
+      // taken edge, so we have to insert before the last
+      // instruction. This could either be an unconditional jmp (which
+      // will be irrelevant), or we could be in the blk->numPreds()==1
+      // case in pre_find_insertions_helper, where the insertion needs
+      // to happen at the start of the block, but can be delayed to
+      // the end because it wasn't altered. In either case its safe
+      // (and correct) to insert before the last instruction.
+      assertx(irrelevant_inst(*back) || !penv.state[blk].altLoc[id]);
       blk->insert(back, inst);
     } else {
       blk->push_back(inst);

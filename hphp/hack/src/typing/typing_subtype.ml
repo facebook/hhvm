@@ -367,31 +367,66 @@ and subtype_params_with_variadic
     subtype_params_with_variadic env subl variadic_ty
 
 and subtype_reactivity
+  ?(method_info: (string * bool) option)
   (env : Env.env)
   (r_sub : reactivity)
   (r_super : reactivity) : bool =
-  match r_sub, r_super with
+  match r_sub, r_super, method_info with
   (* anything is a subtype of nonreactive functions *)
-  | _, Nonreactive -> true
+  | _, Nonreactive, _ -> true
   (* unconditional local/shallow/reactive functions are subtypes of Local *.
       reason: if condition does not hold Local becomes non-reactive which is
       still ok *)
-  | (Local None | Shallow None | Reactive None), Local _ -> true
+  | (Local None | Shallow None | Reactive None), Local _, _ -> true
   (* unconditional shallow / reactive functions are subtypes of Shallow *.
      Reason: same as above *)
-  | (Shallow None | Reactive None), Shallow _ -> true
+  | (Shallow None | Reactive None), Shallow _, _ -> true
   (* unconditional reactive functions are subtype of reactive *.
      Reason: same as above *)
-  | Reactive None, Reactive _ -> true
+  | Reactive None, Reactive _, _ -> true
   (* conditionally reactive function are subtypes of conditionally reactive
      functions only if condition type matches *)
-  | Reactive (Some t), Reactive (Some t1)
-  | (Shallow (Some t) | Reactive (Some t)), Shallow (Some t1)
-  | (Local (Some t) | Shallow (Some t) | Reactive (Some t)), Local (Some t1) ->
+  | Reactive (Some t), Reactive (Some t1), _
+  | (Shallow (Some t) | Reactive (Some t)), Shallow (Some t1), _
+  | (Local (Some t) | Shallow (Some t) | Reactive (Some t)), Local (Some t1), _ ->
     let ety_env = Phase.env_with_self env in
     let _, t = Phase.localize ~ety_env env t in
     let _, t1 = Phase.localize ~ety_env env t1 in
     ty_equal t t1
+  (* non reactive function type TSub of method M in derive class can be subtype of
+     conditionally reactive function type TSuper of method M defined in base class
+     when condition type has reactive method M.
+     interface Rx {
+       <<__Rx>>
+       public function f(): int;
+     }
+     class A {
+       <<__RxIfImplements(Rx::class)>>
+       public function f(): int { ... }
+     }
+     class B extends A {
+       public function f(): int { ... }
+     }
+     This should be OK because:
+     - B does not implement Rx (B::f is not compatible with Rx::f) which means
+     that calling ($b : B)->f() will not be treated as reactive
+     - if one of subclasses of B will decide to implement B - they will be forced
+     to redeclare f which now will shadow B::f. Note that B::f will still be
+     accessible as parent::f() but will be treated as non-reactive call.
+     *)
+  | Nonreactive, (Reactive (Some t) | Shallow (Some t) | Local (Some t)),
+    Some (method_name, is_static) ->
+    let _, cond_type_name, _ = TUtils.unwrap_class_type t in
+    begin match Env.get_class env (snd cond_type_name) with
+    | None -> false
+    | Some cls ->
+      let m = if is_static then cls.tc_smethods else cls.tc_methods in
+      begin match SMap.get method_name m with
+      | Some { ce_type = lazy (_, Typing_defs.Tfun f); _  }
+        -> f.ft_reactive = Reactive None
+      | _ -> false
+      end
+    end
   | _ -> false
 
 
@@ -455,6 +490,7 @@ and subtype_reactivity
 and subtype_funs_generic
   ~(check_return : bool)
   ~(contravariant_arguments : bool)
+  ?(method_info: (string * bool) option)
   (env : Env.env)
   (r_sub : Reason.t)
   (ft_sub : locl fun_type)
@@ -462,7 +498,7 @@ and subtype_funs_generic
   (ft_super : locl fun_type) : Env.env =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
-  if not (subtype_reactivity env ft_sub.ft_reactive ft_super.ft_reactive) then
+  if not (subtype_reactivity ?method_info env ft_sub.ft_reactive ft_super.ft_reactive) then
     Errors.fun_reactivity_mismatch
       p_super (TUtils.reactivity_to_string env ft_super.ft_reactive)
       p_sub (TUtils.reactivity_to_string env ft_sub.ft_reactive);
@@ -592,6 +628,7 @@ and subtype_funs_generic
  *)
 and subtype_method
   ~(check_return : bool)
+  ~(method_info: string * bool)
   (env : Env.env)
   (r_sub : Reason.t)
   (ft_sub : decl fun_type)
@@ -610,6 +647,7 @@ and subtype_method
     Phase.localize_ft ~use_pos:ft_sub.ft_pos ~ety_env ~instantiate_tparams:false env ft_sub in
   subtype_funs_generic
     ~check_return env
+    ~method_info
     ~contravariant_arguments:false
     r_sub ft_sub_no_tvars
     r_super ft_super_no_tvars

@@ -173,8 +173,11 @@ let check_override env member_name mem_source ?(ignore_fun_return = false)
     Errors.try_ (fun () ->
     match parent_class_elt.ce_type, fty_child with
     | lazy (r_parent, Tfun ft_parent), (r_child, Tfun ft_child) ->
+      let is_static = SMap.mem member_name parent_class.tc_smethods in
       (* Add deps here when we override *)
-      let subtype_funs = SubType.subtype_method ~check_return:(
+      let subtype_funs = SubType.subtype_method
+          ~method_info:(member_name, is_static)
+          ~check_return:(
           (not ignore_fun_return) &&
           (class_known || check_partially_known_method_returns)
         ) in

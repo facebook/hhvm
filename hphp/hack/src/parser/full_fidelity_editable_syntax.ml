@@ -16,6 +16,8 @@
 
 module Token = Full_fidelity_editable_token
 module Trivia = Full_fidelity_editable_trivia
+module SyntaxKind = Full_fidelity_syntax_kind
+module TokenKind = Full_fidelity_token_kind
 module SyntaxWithToken = Full_fidelity_syntax.WithToken(Token)
 
 (**
@@ -108,3 +110,47 @@ let is_in_body node position =
   aux (parentage node position)
 
   let position _ _ = None
+
+(* This function takes a parse tree and renders it in the GraphViz DOT
+language; this is a small domain-specific language for visualizing graphs.
+You can use www.webgraphviz.com to render it in a browser, or the "dot"
+command line tool to turn DOT text into image files.
+
+Edge labels can make the graph hard to read, so they can be enabled or
+disabled as you like.
+
+Use hh_parse --full-fidelity-dot or --full-fidelity-dot-edges to parse
+a Hack file and display it in DOT form.
+
+TODO: There's nothing here that's unique to editable trees; this could
+be auto-generated as part of full_fidelity_syntax.ml.
+*)
+let to_dot node with_labels =
+  (* returns new current_id, accumulator *)
+  let rec aux node current_id parent_id edge_label acc =
+    let kind = (SyntaxKind.to_string (kind node)) in
+    let new_id = current_id + 1 in
+    let label =
+      if with_labels then Printf.sprintf " [label=\"%s\"]" edge_label else "" in
+    let new_edge = Printf.sprintf "  %d -> %d%s" parent_id current_id label in
+    match node.syntax with
+    | Token t -> (* TODO: Trivia *)
+      let kind = (TokenKind.to_string (Token.kind t)) in
+      let new_node = Printf.sprintf "  %d [label=\"%s\"];" current_id kind in
+      let new_acc = new_edge :: new_node :: acc in
+      (new_id, new_acc)
+    | SyntaxList x ->
+      let new_node = Printf.sprintf "  %d [label=\"%s\"];" current_id kind in
+      let new_acc = new_edge :: new_node :: acc in
+      let folder (c, a) n = aux n c current_id "" a in
+      List.fold_left folder (new_id, new_acc) x
+    | _ ->
+      let folder (c, a) n l = aux n c current_id l a in
+      let new_node = Printf.sprintf "  %d [label=\"%s\"];" current_id kind in
+      let new_acc = new_edge :: new_node :: acc in
+      List.fold_left2
+        folder (new_id, new_acc) (children node) (children_names node) in
+  let (_, acc) =
+    aux node 1001 1000 "" ["  1000 [label=\"root\"]"; "digraph {"] in
+  let acc = "}" :: acc in
+  String.concat "\n" (List.rev acc)

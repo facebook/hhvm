@@ -43,6 +43,8 @@ module FullFidelityParseArgs = struct
     (* Output options *)
     full_fidelity_json : bool;
     full_fidelity_text_json : bool;
+    full_fidelity_dot : bool;
+    full_fidelity_dot_edges : bool;
     full_fidelity_errors : bool;
     full_fidelity_errors_all : bool;
     full_fidelity_s_expr : bool;
@@ -72,6 +74,8 @@ module FullFidelityParseArgs = struct
   let make
     full_fidelity_json
     full_fidelity_text_json
+    full_fidelity_dot
+    full_fidelity_dot_edges
     full_fidelity_errors
     full_fidelity_errors_all
     full_fidelity_s_expr
@@ -95,6 +99,8 @@ module FullFidelityParseArgs = struct
     show_file_name
     files = {
     full_fidelity_json;
+    full_fidelity_dot;
+    full_fidelity_dot_edges;
     full_fidelity_text_json;
     full_fidelity_errors;
     full_fidelity_errors_all;
@@ -125,6 +131,10 @@ module FullFidelityParseArgs = struct
     let set_full_fidelity_json () = full_fidelity_json := true in
     let full_fidelity_text_json = ref false in
     let set_full_fidelity_text_json () = full_fidelity_text_json := true in
+    let full_fidelity_dot = ref false in
+    let set_full_fidelity_dot () = full_fidelity_dot := true in
+    let full_fidelity_dot_edges = ref false in
+    let set_full_fidelity_dot_edges () = full_fidelity_dot_edges := true in
     let full_fidelity_errors = ref false in
     let set_full_fidelity_errors () = full_fidelity_errors := true in
     let full_fidelity_errors_all = ref false in
@@ -167,6 +177,12 @@ module FullFidelityParseArgs = struct
       "--full-fidelity-text-json",
         Arg.Unit set_full_fidelity_text_json,
         "Displays the full-fidelity parse tree in JSON format with token text.";
+      "--full-fidelity-dot",
+        Arg.Unit set_full_fidelity_dot,
+        "Displays the full-fidelity parse tree in GraphViz DOT format.";
+      "--full-fidelity-dot-edges",
+        Arg.Unit set_full_fidelity_dot_edges,
+        "Displays the full-fidelity parse tree in GraphViz DOT format with edge labels.";
       "--full-fidelity-errors",
         Arg.Unit set_full_fidelity_errors,
         "Displays the full-fidelity parser errors, if any.
@@ -264,6 +280,8 @@ No errors are filtered out.";
     make
       !full_fidelity_json
       !full_fidelity_text_json
+      !full_fidelity_dot
+      !full_fidelity_dot_edges
       !full_fidelity_errors
       !full_fidelity_errors_all
       !full_fidelity_s_expr
@@ -402,6 +420,14 @@ let handle_existing_file args filename =
     let json = Full_fidelity_editable_syntax.to_json editable in
     let str = Hh_json.json_to_string json in
     Printf.printf "%s\n" str
+  end;
+  if args.full_fidelity_dot then begin
+    let dot = Full_fidelity_editable_syntax.to_dot editable false in
+    Printf.printf "%s\n" dot
+  end;
+  if args.full_fidelity_dot_edges then begin
+    let dot = Full_fidelity_editable_syntax.to_dot editable true in
+    Printf.printf "%s\n" dot
   end
 
 let handle_file args filename =

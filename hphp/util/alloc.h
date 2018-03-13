@@ -17,9 +17,10 @@
 #ifndef incl_HPHP_UTIL_ALLOC_H_
 #define incl_HPHP_UTIL_ALLOC_H_
 
-#include <stdint.h>
-#include <cassert>
+#include <array>
 #include <atomic>
+
+#include <stdint.h>
 
 #include <folly/CPortability.h>
 #include <folly/Portability.h>
@@ -157,9 +158,24 @@ inline int low_dallocx_flags() {
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
 
 #ifndef MAX_MANAGED_ARENA_COUNT
-#define MAX_MANAGED_ARENA_COUNT 8
+#define MAX_MANAGED_ARENA_COUNT 4
 #endif
 static_assert(MAX_MANAGED_ARENA_COUNT >= 1, "");
+// All ManagedArena's represented as an array of pair<id, pointer>.  Each
+// pointer can be casted to the underlying ExtentAllocator/Arena. We use this
+// to access the state of ExtentAllocators in extent hooks.  An id of zero
+// indicates an empty entry.
+using ArenaArray = std::array<std::pair<unsigned, void*>,
+                              MAX_MANAGED_ARENA_COUNT>;
+extern ArenaArray g_arenas;
+template<typename T> inline T* GetByArenaId(unsigned id) {
+  for (auto i : g_arenas) {
+    if (i.first == id) {
+      return static_cast<T*>(i.second);
+    }
+  }
+  return nullptr;
+}
 
 extern unsigned low_huge1g_arena;
 extern unsigned low_huge1g_arena_real;

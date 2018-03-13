@@ -39,16 +39,6 @@
 
 namespace HPHP { namespace alloc {
 
-extern void* g_arenas[MAX_MANAGED_ARENA_COUNT];
-
-template<typename ExtentAllocator>
-inline static ExtentAllocator* GetByArenaId(unsigned id) {
-  assert(id < MAX_MANAGED_ARENA_COUNT);
-  void* r = g_arenas[id];
-  assert(r);
-  return reinterpret_cast<ExtentAllocator*>(r);
-}
-
 /**
  * Extent hooks that do bump mapping for ManagedArena.
  */
@@ -64,10 +54,6 @@ struct BumpExtentAllocator : private BumpAllocState {
   static void* extent_alloc(extent_hooks_t* extent_hooks, void* addr,
                             size_t size, size_t alignment, bool* zero,
                             bool* commit, unsigned arena_ind);
-
-  static BumpExtentAllocator* GetForArena(unsigned arena_ind) {
-    return GetByArenaId<BumpExtentAllocator>(arena_ind);
-  }
 
   static constexpr bool IsPurgingSupported() { return false; }
 

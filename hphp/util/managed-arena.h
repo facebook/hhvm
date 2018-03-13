@@ -37,21 +37,7 @@ namespace HPHP { namespace alloc {
  * For various purposes, we want to control the properties of the underlying
  * memory in a particular arena, such as address range, physical placement on
  * NUMA nodes, or huge pages.  The extent alloc hook comes in handy for the
- * purpose.
- */
-
-template <typename ExtentAllocator> struct ManagedArena;
-
-// List of all ManagedArenas (of different types).  Each can be casted to the
-// underlying ExtentAllocator. We need this to access the state of
-// ExtentAllocators in extent hooks.
-extern void* g_arenas[MAX_MANAGED_ARENA_COUNT];
-
-////////////////////////////////////////////////////////////////////////////////
-
-/*
- * jemalloc arena with customized extent hooks.  The extent_hook_t is
- * described in the ExtentAllocator policy class.
+ * purpose, and is wrapped in the ExtentAllocator policy class.
  */
 template <typename ExtentAllocator>
 struct ManagedArena : public ExtentAllocator {
@@ -73,20 +59,12 @@ struct ManagedArena : public ExtentAllocator {
 
  public:
   inline unsigned id() const {
-    assert(m_arenaId < MAX_MANAGED_ARENA_COUNT);
     return m_arenaId;
   }
 
   // For stats reporting
   size_t unusedSize();
   std::string reportStats();
-
-  static ManagedArena* GetArenaById(unsigned id) {
-    assert(id < MAX_MANAGED_ARENA_COUNT);
-    void* r = g_arenas[id];
-    assert(r);
-    return reinterpret_cast<ManagedArena*>(r);
-  }
 
   template<typename... Args>
   static ManagedArena* CreateAt(void* addr, Args&&... args) {

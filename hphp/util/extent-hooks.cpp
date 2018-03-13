@@ -18,8 +18,6 @@
 
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
 
-#include <folly/portability/SysMman.h>
-
 namespace HPHP { namespace alloc {
 
 // trivial jemalloc extent hooks
@@ -99,7 +97,7 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
   assert(folly::isPowTwo(alignment));
   const uintptr_t mask = ~(alignment - 1);
 
-  BumpExtentAllocator* extAlloc = GetForArena(arena_ind);
+  BumpExtentAllocator* extAlloc = GetByArenaId<BumpExtentAllocator>(arena_ind);
   do {
     size_t oldSize = extAlloc->m_size.load(std::memory_order_relaxed);
     uintptr_t newFrontier = (extAlloc->m_base - oldSize - size) & mask;

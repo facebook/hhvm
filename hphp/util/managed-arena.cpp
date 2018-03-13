@@ -18,12 +18,12 @@
 
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
 
-#include <cinttypes>
-#include <stdexcept>
+namespace HPHP {
 
-namespace HPHP { namespace alloc {
+ArenaArray g_arenas;
 
-void* g_arenas[MAX_MANAGED_ARENA_COUNT];
+namespace alloc {
+
 static_assert(alignof(HighArena) <= 64, "");
 static_assert(alignof(LowHugeArena) <= 64, "");
 alignas(64) uint8_t g_highArena[sizeof(HighArena)];
@@ -88,12 +88,17 @@ size_t ManagedArena<ExtentAllocator>::unusedSize() {
 
 template<typename ExtentAllocator>
 void ManagedArena<ExtentAllocator>::init() {
+  if (!g_mib_initialized) {
+    initializeMibs();
+  }
+  if (m_arenaId != 0) {
+    // Should call init() multiple times for the same instance.
+    not_reached();
+    return;
+  }
   size_t idSize = sizeof(m_arenaId);
   if (mallctl("arenas.create", &m_arenaId, &idSize, nullptr, 0)) {
     throw std::runtime_error{"arenas.create"};
-  }
-  if (m_arenaId >= MAX_MANAGED_ARENA_COUNT) {
-    throw std::out_of_range{"too many arenas, check MAX_HUGE_ARENA_COUNT"};
   }
   char command[32];
   std::snprintf(command, sizeof(command), "arena.%d.extent_hooks", m_arenaId);
@@ -115,11 +120,17 @@ void ManagedArena<ExtentAllocator>::init() {
       throw std::runtime_error{command};
     }
   }
-  assert(m_arenaId < MAX_MANAGED_ARENA_COUNT);
-  g_arenas[m_arenaId] = this;
-  if (!g_mib_initialized) {
-    initializeMibs();
+  assert(GetByArenaId<ManagedArena>(m_arenaId) == nullptr);
+  for (auto& i : g_arenas) {
+    if (!i.first) {
+      i.first = m_arenaId;
+      i.second = this;
+      return;
+    }
   }
+  // Should never reached here, as there should be spare entries in g_arenas.
+  throw std::out_of_range{
+    "too many ManagedArena's, check MAX_HUGE_ARENA_COUNT"};
 }
 
 template void ManagedArena<BumpExtentAllocator>::init();

@@ -232,8 +232,9 @@ module WithStatementAndDeclAndTypeParser
       parse_name_or_collection_literal_expression parser qualified_name
     | Backslash ->
       let (parser, qualified_name) =
-        let (parser, token) = Make.token parser1 token in
-        scan_qualified_name parser token in
+        let (parser, missing) = Make.missing parser1 (pos parser1) in
+        let (parser, backslash) = Make.token parser token in
+        scan_qualified_name parser missing backslash in
       parse_name_or_collection_literal_expression parser qualified_name
     | Self
     | Parent -> parse_scope_resolution_or_name parser
@@ -1056,10 +1057,14 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_start_of_type_specifier parser start_token =
     let (parser, name) =
-      let (parser, start_token_node) = Make.token parser start_token in
       if Token.kind start_token = Backslash
-      then scan_qualified_name parser start_token_node
-      else scan_remaining_qualified_name parser start_token_node
+      then
+        let (parser, missing) = Make.missing parser (pos parser) in
+        let (parser, backslash) = Make.token parser start_token in
+        scan_qualified_name parser missing backslash
+      else
+        let (parser, start_token) = Make.token parser start_token in
+        scan_remaining_qualified_name parser start_token
     in
     match peek_token_kind parser with
     | LeftParen | LessThan -> Some (parser, name)

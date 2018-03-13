@@ -339,9 +339,10 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, token) = next_token parser in
     match Token.kind token with
     | Backslash ->
-      let (parser, token) = Make.token parser token in
+      let (parser, missing) = Make.missing parser (pos parser) in
+      let (parser, backslash) = Make.token parser token in
       let (parser, name, is_backslash) =
-        scan_qualified_name_extended parser token
+        scan_qualified_name_extended parser missing backslash
       in
       is_backslash || peek_token_kind parser = LeftBrace
     | Name ->

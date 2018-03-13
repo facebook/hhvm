@@ -424,8 +424,7 @@ module WithParser(Parser : Parser_S) = struct
     in
     (parser, name)
 
-  let scan_qualified_name_extended parser backslash =
-    let (parser, missing) = Make.missing parser (pos parser) in
+  let scan_qualified_name_extended parser missing backslash =
     let (parser, head) = Make.list_item parser missing backslash in
     let (parser, parts, is_backslash) =
       scan_qualified_name_worker parser None [head] false
@@ -434,21 +433,23 @@ module WithParser(Parser : Parser_S) = struct
     let (parser, name) = Make.qualified_name parser list_node in
     (parser, name, is_backslash)
 
-  let scan_qualified_name parser backslash =
-    let (parser, name, _) = scan_qualified_name_extended parser backslash in
+  let scan_qualified_name parser missing backslash =
+    let (parser, name, _) =
+      scan_qualified_name_extended parser missing backslash
+    in
     (parser, name)
 
   let scan_name_or_qualified_name parser =
     let parser1, token = next_token_as_name parser in
-    begin match Token.kind token with
+    match Token.kind token with
     | TokenKind.Name ->
       let (parser, token) = Make.token parser1 token in
       scan_remaining_qualified_name parser token
     | TokenKind.Backslash ->
-      let (parser, token) = Make.token parser1 token in
-      scan_qualified_name parser token
+      let (parser, missing) = Make.missing parser1 (pos parser1) in
+      let (parser, token) = Make.token parser token in
+      scan_qualified_name parser missing token
     | _ -> Make.missing parser (pos parser)
-    end
 
   let next_xhp_class_name_or_other_token parser =
     if is_next_xhp_class_name parser then next_xhp_class_name parser
@@ -456,11 +457,15 @@ module WithParser(Parser : Parser_S) = struct
 
   let next_xhp_class_name_or_other parser =
     let parser, token = next_xhp_class_name_or_other_token parser in
-    let (parser, token_node) = Make.token parser token in
     match Token.kind token with
-    | TokenKind.Name -> scan_remaining_qualified_name parser token_node
-    | TokenKind.Backslash -> scan_qualified_name parser token_node
-    | _ -> (parser, token_node)
+    | TokenKind.Name ->
+      let (parser, name_token) = Make.token parser token in
+      scan_remaining_qualified_name parser name_token
+    | TokenKind.Backslash ->
+      let (parser, missing) = Make.missing parser (pos parser) in
+      let (parser, backslash) = Make.token parser token in
+      scan_qualified_name parser missing backslash
+    | _ -> Make.token parser token
 
   let next_xhp_children_name_or_other parser =
     if is_next_xhp_category_name parser then
@@ -474,12 +479,13 @@ module WithParser(Parser : Parser_S) = struct
   let require_qualified_name parser =
     let (parser1, name) = next_token_as_name parser in
     match Token.kind name with
-    | TokenKind.Backslash ->
-      let (parser, token) = Make.token parser1 name in
-      scan_qualified_name parser token
     | TokenKind.Name ->
       let (parser, token) = Make.token parser1 name in
       scan_remaining_qualified_name parser token
+    | TokenKind.Backslash ->
+      let (parser, missing) = Make.missing parser1 (pos parser1) in
+      let (parser, backslash) = Make.token parser name in
+      scan_qualified_name parser missing backslash
     | _ ->
       let parser = with_error parser SyntaxError.error1004 in
       Make.missing parser (pos parser)

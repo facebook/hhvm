@@ -1,0 +1,9 @@
+File "try_nested.php", line 21, characters 7-17:
+  ^(E | D | F)
+File "try_nested.php", line 23, characters 5-15:
+  ^(E | D | F)
+File "try_nested.php", line 25, characters 5-15:
+  ^(D | F | B | E | C)
+File "try_nested.php", line 27, characters 3-13:
+  ^(D | F | B | E | C)
+No errors

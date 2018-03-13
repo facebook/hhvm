@@ -610,8 +610,8 @@ module WithStatementAndDeclAndTypeParser
                  see above. Do we want to (1) catch this at parse time,
                  (2) catch it in a later pass, or (3) just allow any
                  expression here? *)
-        let (parser, expr) = parse_braced_expression_in_string parser in
         let (parser, acc) = put_opt parser head acc in
+        let (parser, expr) = parse_braced_expression_in_string parser in
         aux parser None (expr :: acc)
       | _ ->
         (* We do not support {$ inside a string unless the $ begins a
@@ -663,8 +663,8 @@ module WithStatementAndDeclAndTypeParser
       | LeftBrace ->
         handle_left_brace parser head acc
       | Variable ->
-        let (parser, expr) = parse_embedded_expression parser1 token in
-        let (parser, acc) = put_opt parser head acc in
+        let (parser, acc) = put_opt parser1 head acc in
+        let (parser, expr) = parse_embedded_expression parser token in
         aux parser None (expr :: acc)
       | Dollar ->
         handle_dollar parser1 token head acc

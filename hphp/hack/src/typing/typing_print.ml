@@ -187,7 +187,7 @@ module Suggest = struct
                              -> "darray"
     | Tarraykind AKvarray _  -> "varray"
     | Tarraykind _           -> "array"
-    | Tdynamic               -> "dyanmic"
+    | Tdynamic               -> "dynamic"
     | Tthis                  -> SN.Typehints.this
     | Tunresolved _          -> "..."
     | Ttuple (l)             -> "("^list l^")"

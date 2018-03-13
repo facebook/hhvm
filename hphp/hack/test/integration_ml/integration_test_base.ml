@@ -25,6 +25,7 @@ let global_opts = GlobalOptions.make
   ~tco_user_attrs: None
   ~tco_experimental_features: GlobalOptions.tco_experimental_all
   ~tco_migration_flags: SSet.empty
+  ~tco_dynamic_view: false
   ~po_auto_namespace_map: []
   ~po_deregister_php_stdlib:true
   ~tco_disallow_destruct:false

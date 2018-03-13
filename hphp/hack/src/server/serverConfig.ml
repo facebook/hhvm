@@ -213,6 +213,7 @@ let load config_filename options =
     (config_user_attributes config)
     (config_experimental_tc_features config)
     (config_tc_migration_flags config)
+    false (* typechecker option to set Tany as Tdynamic, off by default *)
     (prepare_auto_namespace_map config)
     (bool_ "disallow_destruct" ~default:false config)
     (bool_ "disallow_ambiguous_lambda" ~default:false config)

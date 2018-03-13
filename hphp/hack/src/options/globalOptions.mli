@@ -60,6 +60,9 @@ type t = {
  (* Set of opt-in migration behavior flags, in lowercase. *)
  tco_migration_flags : SSet.t;
 
+ (* Whether to treat Tany as  Tdynamic *)
+ tco_dynamic_view : bool;
+
  (* Namespace aliasing map *)
  po_auto_namespace_map : (string * string) list;
 
@@ -98,6 +101,7 @@ val make :
   tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
   tco_migration_flags: SSet.t ->
+  tco_dynamic_view: bool ->
   po_auto_namespace_map: (string * string) list ->
   tco_disallow_destruct: bool ->
   tco_disallow_ambiguous_lambda: bool ->
@@ -109,6 +113,7 @@ val tco_safe_vector_array : t -> bool
 val tco_user_attrs : t -> SSet.t option
 val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_migration_flag_enabled : t -> SSet.elt -> bool
+val tco_dynamic_view : t -> bool 
 val tco_allowed_attribute : t -> SSet.elt -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool

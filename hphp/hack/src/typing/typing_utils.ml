@@ -743,3 +743,13 @@ let desugar_mixed env r =
       (Typing_env.get_tcopt env)
       TypecheckerOptions.experimental_nonnull in
   if nonnull_allowed then Toption (r, Tnonnull) else Tmixed
+
+let tany env =
+  let dynamic_view_enabled =
+    TypecheckerOptions.dynamic_view (Typing_env.get_tcopt env) in
+  if dynamic_view_enabled then Tdynamic else Tany
+
+let terr env =
+  let dynamic_view_enabled =
+    TypecheckerOptions.dynamic_view (Typing_env.get_tcopt env) in
+  if dynamic_view_enabled then Tdynamic else Terr

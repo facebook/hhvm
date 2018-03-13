@@ -1,0 +1,8 @@
+File "test_basic.php", line 11, characters 3-13:
+  dynamic
+File "test_basic.php", line 12, characters 10-11:
+Invalid return type (Typing[4110])
+  File "test_basic.php", line 8, characters 19-21:
+  This is an int
+  File "test_basic.php", line 2, characters 10-12:
+  It is incompatible with a dynamic value

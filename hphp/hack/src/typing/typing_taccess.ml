@@ -175,7 +175,7 @@ and expand env (root_reason, root_ty as root) =
  *)
 and create_root_from_type_constant env class_pos class_name root_ty (pos, tconst) =
   match get_typeconst env class_pos class_name pos tconst with
-  | None -> env, (fst root_ty, Tany)
+  | None -> env, (fst root_ty, Typing_utils.tany env.tenv)
   | Some (env, typeconst) ->
       let env =
         { env with

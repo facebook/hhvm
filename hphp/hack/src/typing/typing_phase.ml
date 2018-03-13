@@ -100,7 +100,12 @@ let env_with_self env =
 
 let rec localize_with_env ~ety_env env (dty: decl ty) =
   match dty with
-  | _, (Terr | Tany | Tnonnull | Tprim _ | Tdynamic) as x -> env, (ety_env, x)
+  | r, Terr ->
+      env, (ety_env, (r, TUtils.terr env))
+  | r, Tany ->
+      env, (ety_env, (r, TUtils.tany env))
+  | _, (Tnonnull | Tprim _ | Tdynamic) as x ->
+      env, (ety_env, x)
   | r, Tmixed ->
       env, (ety_env, (r, TUtils.desugar_mixed env r))
   | r, Tthis ->
@@ -167,7 +172,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       (* if argl <> [], nastInitCheck would have raised an error *)
       if Typing_defs.has_expanded ety_env x then begin
         Errors.cyclic_enum_constraint p;
-        env, (ety_env, (r, Tany))
+        env, (ety_env, (r, Typing_utils.tany env))
       end else begin
         let type_expansions = (p, x) :: ety_env.type_expansions in
         let ety_env = {ety_env with type_expansions} in

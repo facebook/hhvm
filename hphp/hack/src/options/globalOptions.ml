@@ -15,6 +15,7 @@ type t = {
   tco_user_attrs : SSet.t option;
   tco_experimental_features : SSet.t;
   tco_migration_flags : SSet.t;
+  tco_dynamic_view : bool;
   po_auto_namespace_map : (string * string) list;
   po_enable_hh_syntax_for_hhvm : bool;
   po_deregister_php_stdlib : bool;
@@ -207,6 +208,7 @@ let default = {
   * from hhconfig, which defaults to empty. *)
  tco_experimental_features = tco_experimental_all;
  tco_migration_flags = SSet.empty;
+ tco_dynamic_view = false;
  po_auto_namespace_map = [];
  po_enable_hh_syntax_for_hhvm = false;
  po_deregister_php_stdlib = false;
@@ -239,6 +241,7 @@ let make ~tco_assume_php
          ~tco_user_attrs
          ~tco_experimental_features
          ~tco_migration_flags
+         ~tco_dynamic_view
          ~po_auto_namespace_map
          ~tco_disallow_destruct
          ~tco_disallow_ambiguous_lambda
@@ -250,6 +253,7 @@ let make ~tco_assume_php
                    tco_user_attrs;
                    tco_experimental_features;
                    tco_migration_flags;
+                   tco_dynamic_view;
                    po_auto_namespace_map;
                    po_enable_hh_syntax_for_hhvm = false;
                    ignored_fixme_codes;
@@ -269,6 +273,8 @@ let tco_experimental_feature_enabled t s =
   SSet.mem s t.tco_experimental_features
 let tco_migration_flag_enabled t s =
   SSet.mem s t.tco_migration_flags
+let tco_dynamic_view t =
+  t.tco_dynamic_view
 let po_auto_namespace_map t = t.po_auto_namespace_map
 let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
 let po_enable_hh_syntax_for_hhvm t = t.po_enable_hh_syntax_for_hhvm

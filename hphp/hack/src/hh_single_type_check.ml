@@ -138,6 +138,7 @@ let parse_options () =
   let no_fallback_in_namespaces = ref false in
   let disallow_refs_in_array = ref false in
   let disallow_elvis_space = ref false in
+  let dynamic_view = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -264,6 +265,9 @@ let parse_options () =
     "--least-upper-bound",
         Arg.Unit (set_mode Least_upper_bound),
         " Gets the least upper bound of a list of types.";
+    "--dynamic-view",
+        Arg.Set (dynamic_view),
+        " Turns on dynamic view, replacing Tany with dynamic";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -279,6 +283,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_destruct = !disallow_destruct;
       GlobalOptions.tco_disallow_ambiguous_lambda = !disallow_ambiguous_lambda;
       GlobalOptions.po_disallow_elvis_space = !disallow_elvis_space;
+      GlobalOptions.tco_dynamic_view = !dynamic_view;
   } in
   let tcopt = {
     tcopt with

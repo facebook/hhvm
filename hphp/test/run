@@ -1198,6 +1198,18 @@ class Status {
     mkdir(self::$tempdir);
   }
 
+  public static function setMode($mode) {
+    self::$mode = $mode;
+  }
+  
+  public static function getMode() {
+    return self::$mode;
+  }
+
+  public static function setUseColor($use) {
+    self::$use_color = $use;
+  }
+
   // Since we run the tests in forked processes, state is not shared
   // So we cannot keep a static variable adding individual test times.
   // But we can put the times files and add the values later.
@@ -1216,18 +1228,6 @@ class Status {
       }
     }
     return $time;
-  }
-
-  public static function setMode($mode) {
-    self::$mode = $mode;
-  }
-
-  public static function setUseColor($use) {
-    self::$use_color = $use;
-  }
-
-  public static function getMode() {
-    return self::$mode;
   }
 
   public static function getOverallStartTime() {
@@ -1255,6 +1255,10 @@ class Status {
       self::$queue = null;
       self::$killed = true;
     }
+  }
+
+  public static function serverRestarted() {
+    self::send(self::MSG_SERVER_RESTARTED, null);
   }
 
   public static function pass($test, $detail, $time, $stime, $etime) {
@@ -1300,10 +1304,6 @@ class Status {
       'time' => $time
     ));
     self::send(self::MSG_TEST_FAIL, array($test, $time, $stime, $etime));
-  }
-
-  public static function serverRestarted() {
-    self::send(self::MSG_SERVER_RESTARTED, null);
   }
 
   private static function send($type, $msg) {
@@ -1757,7 +1757,7 @@ function semdiff_output($options, $test) {
   $cmd = hh_semdiff_cmd($options);
   $ret = false;
   system("/usr/bin/timeout 300 $cmd $hhcodegen_output $hhvm_output > $temp_file 2> $msgs_file", $ret);
-  return $ret === 0 ? $temp_file : false;
+  return array($ret, $temp_file);
 }
 
 function strip_hhas_file($file) {
@@ -2275,26 +2275,15 @@ function run_test($options, $test) {
         return 'skip-nosemdiff';
       }
       // Run semantic diff on outputs first
-      $semdiff = semdiff_output($options, $test);
-      // If it fails completely (e.g. timeout or exception) then
-      // use vanilla diff
-      if ($semdiff) {
-        // Now we look for "distance = 0" in the file
-        // If we find it we "succeed" and don't drop through to vanilla diff
-        $h = fopen($semdiff, "r");
-        if (($s = fgets($h)) !== false) {
-          if (strtolower(substr($s, 0, 12)) === "distance = 0") {
-              fclose($h);
-              unlink($semdiff);
-              unlink($test . '.semdiff_messages');
-              return true;
-          }
-          fclose($h);
-          return false; // semdiff ran OK, returned non-zero distance, report as test failing
-        }
-        fclose($h); // couldn't read a string, so something went wrong with semdiff
-        rename($semdiff, $test.".semdiff"); // preserve the output as it may be useful?
+      list($rc, $out_file) = semdiff_output($options, $test);
+      if ($rc === 0) {
+        unlink($out_file);
+        unlink($test . '.semdiff_messages');
+        return true;
+      } else if ($rc === 1) {
+        return false;
       }
+      rename($out_file, $test.".semdiff"); // preserve the output as it may be useful?
     }
     // so either semdiff went wrong, or we have no-semdiff set. So we try ordinary diffing
     strip_hhas_file($hhas);
@@ -2681,6 +2670,47 @@ SHIP
   }
 }
 
+function aggregate_srcloc_info($tests) {
+  $all_missing_on_lhs = [];
+  $all_missing_on_rhs = [];
+  $all_mismatched_srcloc = [];
+  
+  foreach ($tests as $test) {
+    $file = "$test.diff";
+    $json_content = file_get_contents($file);
+    $srcloc_info = json_decode($json_content, true);
+    
+    $mismatched_srcloc = $srcloc_info['mismatched_srcloc'];
+    foreach ($mismatched_srcloc as $instr) {
+      $all_mismatched_srcloc[] = $instr;
+    }
+    $all_mismatched_srcloc = array_unique($all_mismatched_srcloc);
+    sort($all_mismatched_srcloc);
+    
+    $missing_on_lhs_srcloc = $srcloc_info['missing_on_lhs_srcloc'];
+    foreach ($missing_on_lhs_srcloc as $instr) {
+      $all_missing_on_lhs[] = $instr;
+    }
+    $all_missing_on_lhs = array_unique($all_missing_on_lhs);
+    sort($all_missing_on_lhs);
+    
+    $missing_on_rhs_srcloc = $srcloc_info['missing_on_rhs_srcloc'];
+    foreach ($missing_on_rhs_srcloc as $instr) {
+      $all_missing_on_rhs[] = $instr;
+    }
+    $all_missing_on_rhs = array_unique($all_missing_on_rhs);
+    sort($all_missing_on_rhs);
+  }
+  
+  print "\nInstructions with mismatched srcloc:\n";
+  print "  - " . implode(",\n  - ", $all_mismatched_srcloc) . "\n\n";
+  print "Instructions with missing srcloc in HackC:\n";
+  print "  - " . implode(",\n  - ", $all_missing_on_lhs) . "\n\n";
+  print "Instructions with missing srcloc in HHVM:\n";
+  print "  - " . implode(",\n  - ", $all_missing_on_rhs) . "\n\n";
+  print "\n";
+}
+
 function print_failure($argv, $results, $options) {
   $failed = array();
   $passed = array();
@@ -2701,51 +2731,55 @@ function print_failure($argv, $results, $options) {
     // trying to decipher it?
   }
 
-  print make_header("See the diffs:").
-    implode("\n", array_map(
-      function($test) { return 'cat '.$test.'.diff'; },
-    $failed))."\n";
+  if (isset($options['srcloc'])) {
+    aggregate_srcloc_info ($failed);
+  } else {  
+    print make_header("See the diffs:").
+      implode("\n", array_map(
+        function($test) { return 'cat '.$test.'.diff'; },
+      $failed))."\n";
 
-  $failing_tests_file = !empty($options['failure-file'])
-    ? $options['failure-file']
-    : tempnam('/tmp', 'test-failures');
-  file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
-  print make_header('For xargs, list of failures is available using:').
-    'cat '.$failing_tests_file."\n";
+    $failing_tests_file = !empty($options['failure-file'])
+      ? $options['failure-file']
+      : tempnam('/tmp', 'test-failures');
+    file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
+    print make_header('For xargs, list of failures is available using:').
+      'cat '.$failing_tests_file."\n";
 
-  if (!empty($passed)) {
-    $passing_tests_file = !empty($options['success-file'])
-      ? $options['success-file']
-      : tempnam('/tmp', 'tests-passed');
-    file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
-    print make_header('For xargs, list of passed tests is available using:').
-      'cat '.$passing_tests_file."\n";
-  }
-
-  print_commands($failed, $options);
-
-  $rerun = make_header("Re-run just the failing tests:") . $argv[0];
-  foreach ($options as $option => $value) {
-    if ($option === "servers") continue;
-    if ($option === "threads") {
-      // e.g., For a small number of failed tests, we don't need max threads.
-      $rerun .= " --" . $option . ' ' . get_num_threads($options, $failed);
-    } else if ($option === "typechecker" ||
-               $option === "verbose" ||
-               $option === "repo" ||
-               $option === "server" ||
-               $option === "cli-server" ||
-               $option === "compare-hh-codegen" ||
-               $option === "no-semdiff") {
-      // The escapeshellarg($value) of these is 1, but there is no real value
-      // associated with these options.
-      $rerun .= " --" . $option;
-    } else {
-      $rerun .= " --" . $option . ' ' . escapeshellarg($value);
+    if (!empty($passed)) {
+      $passing_tests_file = !empty($options['success-file'])
+        ? $options['success-file']
+        : tempnam('/tmp', 'tests-passed');
+      file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
+      print make_header('For xargs, list of passed tests is available using:').
+        'cat '.$passing_tests_file."\n";
     }
+
+    print_commands($failed, $options);
+
+    $rerun = make_header("Re-run just the failing tests:") . $argv[0];
+    foreach ($options as $option => $value) {
+      if ($option === "servers") continue;
+      if ($option === "threads") {
+        // e.g., For a small number of failed tests, we don't need max threads.
+        $rerun .= " --" . $option . ' ' . get_num_threads($options, $failed);
+      } else if ($option === "typechecker" ||
+                 $option === "verbose" ||
+                 $option === "repo" ||
+                 $option === "server" ||
+                 $option === "cli-server" ||
+                 $option === "compare-hh-codegen" ||
+                 $option === "no-semdiff") {
+        // The escapeshellarg($value) of these is 1, but there is no real value
+        // associated with these options.
+        $rerun .= " --" . $option;
+      } else {
+        $rerun .= " --" . $option . ' ' . escapeshellarg($value);
+      }
+    }
+    $rerun .= ' ' . implode(' ', array_map('escapeshellarg', $failed)) . "\n";
+    print $rerun;
   }
-  $rerun .= ' ' . implode(' ', array_map('escapeshellarg', $failed)) . "\n";
-  print $rerun;
 }
 
 function port_is_listening($port) {
@@ -3168,6 +3202,7 @@ function main($argv) {
     }
   }
 
+  // aggregate results
   $results = array();
   foreach ($bad_test_files as $bad_test_file) {
     $json = json_decode(file_get_contents($bad_test_file), true);
@@ -3181,6 +3216,7 @@ function main($argv) {
     unlink($bad_test_file);
   }
 
+  // print results
   if (isset($options['record-failures'])) {
     $fail_file = $options['record-failures'];
     $failed_tests = array();

@@ -16,7 +16,9 @@ open Hh_core
 open Hhbc_ast
 open Local
 open Hhbc_destruct
+module Loc = Srcloc_stats
 module Log = Semdiff_logging
+module Utils = Semdiff_utils
 
 (* Ref keeping to-do set for pairs of classes that
    need to be compared. Originally just for closure classes, now
@@ -127,33 +129,33 @@ module  LabelMap = MyMap.Make(struct type t = Label.t let compare = compare end)
 *)
 type tcstackentry = Stack_label of Label.t | Stack_tc of int
 let make_label_try_maps prog =
-  let rec loop p n trycatchstack labelmap trymap =
-  match p with
-  | [] -> (labelmap, trymap)
-  | i :: is -> begin match i with
-    | ILabel l ->
-      loop is (n+1) trycatchstack (LabelMap.add l n labelmap) trymap
-    | ITry (TryCatchLegacyBegin l)
-    | ITry (TryFaultBegin l) ->
-      loop is (n+1) (Stack_label l :: trycatchstack) labelmap trymap
-    | ITry TryCatchBegin ->
-      loop is (n+1) (Stack_tc n :: trycatchstack) labelmap trymap
-    | ITry TryCatchMiddle ->
-      begin match trycatchstack with
-      | Stack_tc m :: rest ->
-        loop is (n+1) rest labelmap (IMap.add m n trymap)
-      | _ -> raise Labelexn
-      end
-    | ITry TryCatchLegacyEnd
-    | ITry TryFaultEnd ->
-      begin match trycatchstack with
-      | Stack_label _l :: rest ->
-        loop is (n+1) rest labelmap trymap
-      | _ -> raise Labelexn
-      end
-    | ITry TryCatchEnd
-    | _ -> loop is (n+1) trycatchstack labelmap trymap
-    end in
+  let rec loop prog n trycatchstack labelmap trymap =
+    match prog with
+    | [] -> (labelmap, trymap)
+    | i :: is -> begin match i with
+      | ILabel l ->
+        loop is (n+1) trycatchstack (LabelMap.add l n labelmap) trymap
+      | ITry (TryCatchLegacyBegin l)
+      | ITry (TryFaultBegin l) ->
+        loop is (n+1) (Stack_label l :: trycatchstack) labelmap trymap
+      | ITry TryCatchBegin ->
+        loop is (n+1) (Stack_tc n :: trycatchstack) labelmap trymap
+      | ITry TryCatchMiddle ->
+        begin match trycatchstack with
+        | Stack_tc m :: rest ->
+          loop is (n+1) rest labelmap (IMap.add m n trymap)
+        | _ -> raise Labelexn
+        end
+      | ITry TryCatchLegacyEnd
+      | ITry TryFaultEnd ->
+        begin match trycatchstack with
+        | Stack_label _l :: rest ->
+          loop is (n+1) rest labelmap trymap
+        | _ -> raise Labelexn
+        end
+      | ITry TryCatchEnd
+      | _ -> loop is (n+1) trycatchstack labelmap trymap
+      end in
   loop prog 0 [] LabelMap.empty IMap.empty
 
 (* Second pass constructs an exception table. Revised version maps instruction
@@ -165,7 +167,7 @@ let make_label_try_maps prog =
   handler. For now, I'm trying with remembering everything.
 *)
 let make_exntable prog labelmap trymap =
-  let rec loop p n trycatchstack exnmap = match p with
+  let rec loop prog n trycatchstack exnmap = match prog with
   | [] -> exnmap
   | i::is ->
     let newexnmap = IMap.add n trycatchstack (* <- filter this? *) exnmap in
@@ -222,10 +224,10 @@ let rec to_first_catch hs = match hs with
    The result is an option to enable shortcircuiting throwing out of frame
 *)
 let throw_pc static dynamic =
- match (to_first_catch static) @ dynamic with
-  | [] -> None (* really should be ([],-1) *)
-  | Fault_handler x :: rest
-  | Catch_handler x :: rest -> Some (rest, x)
+  match (to_first_catch static) @ dynamic with
+    | [] -> None (* really should be ([],-1) *)
+    | Fault_handler x :: rest
+    | Catch_handler x :: rest -> Some (rest, x)
 
 (* Moving string functions into rhl so that I can use them in debugging *)
 let propstostring props =
@@ -269,14 +271,10 @@ let labasnlisttostring l = String.concat "" (List.map ~f:labasntostring l)
 let labasnsmaptostring asnmap =
   String.concat "" (List.map ~f:labasnstostring (PcpMap.bindings asnmap))
 
-  (* string_of_instruction already appends a newline, so remove it *)
-let droplast s = String.sub s 0 (String.length s - 1)
-let my_string_of_instruction i = droplast (Hhbc_hhas.string_of_instruction i)
-
 let string_of_nth_instruction l pc =
   let i = ip_of_pc pc in
   if i= -1 then "THROWN"
-  else my_string_of_instruction @@ List.nth_exn l i
+  else Utils.string_of_instruction @@ List.nth_exn l i
 
 (* Add equality between v1 and v2 to an assertion, removing any existing
   relation involving them. Mark v1 and v2 as being possibly set. *)
@@ -936,11 +934,6 @@ let equiv prog prog' startlabelpairs =
         check (succ pc) (succ pc') asn
           (add_assumption (pc,pc') asn assumed) newtodo in
 
-    let nextleftins () =
-      let newtodo = exceptional_todo () in
-        check (succ pc) pc' asn
-          (add_assumption (pc,pc') asn assumed) newtodo in
-
     (* Check the next instruction; the assertion has changed.
        We assume it's not had its stepcount incremented yet
        so do that here. *)
@@ -1109,13 +1102,6 @@ let equiv prog prog' startlabelpairs =
       | None -> try_specials ()
       | Some newasn -> nextinsnewasn newasn
       end
-    | ISrcLoc loc, ISrcLoc loc'  ->
-      if loc.line_begin = loc'.line_begin && loc.line_end = loc'.line_end
-      then nextins ()
-      else try_specials ()
-    | ISrcLoc _, _ ->
-      nextleftins ()
-
     (* Iterator instructions have multiple exit points, so have to add to
       todos as well as looking at next instruction.
       TODO: exceptional exits from here.
@@ -1146,18 +1132,18 @@ let equiv prog prog' startlabelpairs =
 
     (* eagerly constructing the strings here turns out to be expensive ! *)
     let logstate () =
-    if !Log.verbosity_level > 2
-    then begin
-    Log.trace (Tty.Normal Tty.White) @@ Printf.sprintf
-      "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nAssumed=\n%s\nTodo=%s"
-      (string_of_pc pc) (string_of_pc pc')
-      (string_of_nth_instruction prog pc)
-      (string_of_nth_instruction prog' pc')
-      (asntostring asn) (labasnsmaptostring assumed)
-      (labasnlisttostring todo);
-    Log.trace (Tty.Normal Tty.Blue) "*******"
-    end
-    else () in
+      if !Log.verbosity_level > 2
+      then begin
+      Log.trace (Tty.Normal Tty.White) @@ Printf.sprintf
+        "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nAssumed=\n%s\nTodo=%s"
+        (string_of_pc pc) (string_of_pc pc')
+        (string_of_nth_instruction prog pc)
+        (string_of_nth_instruction prog' pc')
+        (asntostring asn) (labasnsmaptostring assumed)
+        (labasnlisttostring todo);
+      Log.trace (Tty.Normal Tty.Blue) "*******"
+      end
+      else () in
 
     (* main body of checking function here *)
     if List.length (hs_of_pc pc) > 10 (* arbitrary limit *)
@@ -1171,16 +1157,15 @@ let equiv prog prog' startlabelpairs =
       let () = logstate () in
       let previous_assumptions = lookup_assumption (pc,pc') assumed in
       if AsnSet.exists (fun assasn -> entails_asns asn assasn)
-        previous_assumptions
-      (* that's a clumsy attempt at entailment asn => \bigcup prev_asses *)
-      then donext assumed todo
-      else
-       if AsnSet.cardinal previous_assumptions > 7 (* arbitrary bound *)
-       then begin
-         Log.error ~level:0 (Tty.Normal Tty.Blue) ("disjunction limit exceeded");
-         specials pc pc' asn assumed todo
-       end
-       else begin
+          previous_assumptions then
+        (* that's a clumsy attempt at entailment asn => \bigcup prev_asses *)
+        donext assumed todo
+      else if AsnSet.cardinal previous_assumptions > 7 (* arbitrary bound *)
+          then (
+        Log.error ~level:0 (Tty.Normal Tty.Blue) ("disjunction limit exceeded");
+        specials pc pc' asn assumed todo
+      ) else (
+        let (pc, pc') = Loc.check_srcloc prog_array prog_array' pc pc' in
         match one_side_left (pc,pc',asn) with
          | None ->
            let rec possible_right_loop sofar (pc,pc',asn) =
@@ -1193,7 +1178,7 @@ let equiv prog prog' startlabelpairs =
                   Log.debug (Tty.Normal Tty.Blue) "Right loop detected";
                   Some (pc,pc',asn,assumed,todo)
                 end else possible_right_loop ((pc,pc',asn)::sofar) (newpc,newpc',newasn)
-            in possible_right_loop [] (pc,pc',asn)
+            in possible_right_loop [] (pc, pc',asn)
          | Some (newpc,newpc',newasn) -> begin
             match one_side_right (newpc,newpc',newasn) with
              | Some (bothnewpc,bothnewpc',bothnewasn) -> (* both stepped, so progress *)
@@ -1213,7 +1198,7 @@ let equiv prog prog' startlabelpairs =
                       possible_left_loop ((pc,pc',asn)::sofar) (newpc,newpc',newasn)
                 in possible_left_loop [(pc,pc',asn)] (newpc,newpc',newasn)
           end
-       end
+        )
 
   and donext assumed todo =
     match todo with
@@ -1664,13 +1649,13 @@ let equiv prog prog' startlabelpairs =
     let issetl_jmpz_action_right =
       (parse_any $*$ (issetl_jmpz_pattern vs'))
      $>> (fun (_, (_local',lab')) (_,_) ->
-           let newpc' = (hs_of_pc pc', LabelMap.find lab' labelmap') in
-           check pc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
+       let newpc' = (hs_of_pc pc', LabelMap.find lab' labelmap') in
+       check pc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
 
-    (* last, failure, case for use in bigmatch *)
-    let failure_pattern_action =
-      parse_any
-      $>> (fun _ _ -> Some (pc, pc', asn, assumed, todo)) in
+   (* last, failure, case for use in bigmatch *)
+   let failure_pattern_action =
+     parse_any
+     $>> (fun _ _ -> Some (pc, pc', asn, assumed, todo)) in
 
     let bigmatch_action = bigmatch [
       set_pop_get_action_left;
@@ -1692,7 +1677,7 @@ let equiv prog prog' startlabelpairs =
       negative_number_vs_zero_minus_action;
       string_concat_empty_string_is_noop_action;
 
-      failure_pattern_action;
+      failure_pattern_action; (* This one should stay last *)
       ] in
     bigmatch_action ((prog_array, ip_of_pc pc),(prog_array', ip_of_pc pc'))
   in

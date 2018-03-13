@@ -10,6 +10,7 @@
 open Hhas_parser
 open Diff
 
+module Loc = Srcloc_stats
 module Log = Semdiff_logging
 
 type options = {
@@ -88,26 +89,49 @@ let parse_file program_parser filename =
   close_in channel;
   prog
 
+let print_srcloc_stats () =
+  Log.print_default "{";
+  Log.print_set_json ~name:"mismatched_srcloc"
+    !Loc.mismatch_loc_instrs;
+  Log.print_set_json ~name:"missing_on_lhs_srcloc"
+    !Loc.missing_loc_on_left_instrs;
+  Log.print_set_json ~name:"missing_on_rhs_srcloc" ~trailing_coma:false
+    !Loc.missing_loc_on_right_instrs;
+  Log.print_default "}"
+
+let srcloc_are_the_same () =
+  SSet.is_empty !Loc.mismatch_loc_instrs
+    && SSet.is_empty !Loc.missing_loc_on_left_instrs
+    (* we don't care about missing on right as rhs corresponds to HHVM *)
+
 let run options =
   let program_parser = program Hhas_lexer.read in
   let prog1 = parse_file program_parser (fst options.files) in
   let prog2 = parse_file program_parser (snd options.files) in
 
   let d, (s, e) = program_comparer.comparer prog1 prog2 in
-  let similarity = (100.0 *. (1.0 -. float_of_int d /. float_of_int (s+1))) in
-  if not !Log.hide_dist
-  then
-    Log.print ~level:0 (Tty.Normal Tty.White) @@ Printf.sprintf "Distance = %.d" d;
-  if not !Log.hide_sim
-  then
-    Log.print ~level:0 (Tty.Normal Tty.White) @@
-    Printf.sprintf "Similarity = %.2f" similarity;
-  if not !Log.hide_size
-  then
-      Log.print ~level:0 (Tty.Normal Tty.White) @@ Printf.sprintf "Size = %d" s;
-  if d <> 0
-  then Log.print ~level:1 (Tty.Normal Tty.White) @@ Printf.sprintf "Edits = \n";
-  Log.print_edit_sequence ~level:1 e
+  let all_the_same =
+    if !Hhas_parser_actions.check_srcloc then begin
+      print_srcloc_stats ();
+      srcloc_are_the_same ()
+    end else begin
+      let similarity = (100.0 *. (1.0 -. float_of_int d /. float_of_int (s+1))) in
+      if not !Log.hide_dist
+      then
+        Log.print_default @@ Printf.sprintf "Distance = %.d" d;
+      if not !Log.hide_sim
+      then
+        Log.print_default @@
+        Printf.sprintf "Similarity = %.2f" similarity;
+      if not !Log.hide_size
+      then
+        Log.print_default @@ Printf.sprintf "Size = %d" s;
+      if d <> 0
+      then Log.print_default ~level:1 @@ Printf.sprintf "Edits = \n";
+      Log.print_edit_sequence ~level:1 e;
+      d = 0
+    end in
+  all_the_same
 
 (* command line driver *)
 let _ =
@@ -120,4 +144,5 @@ let _ =
        expected one (i.e. in given file without CRLF). *)
     set_binary_mode_out stdout true;
     let options = parse_options () in
-    Unix.handle_unix_error run options
+    let all_the_same = Unix.handle_unix_error run options in
+    exit (if all_the_same then 0 else 1)

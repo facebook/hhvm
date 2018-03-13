@@ -28,6 +28,12 @@ let print ~level ?(newline = true) ?(channel = stdout) c s =
   then Tty.cprintf ~out_channel:channel c "%s%s" s (if newline then "\n" else "")
   else ()
 
+let print_default ?(level = 0) ?(color = Tty.White) ?(newline = true) =
+  print ~level ~newline (Tty.Normal color)
+
+let print_newline ~level =
+  print_default ~level ""
+
 let error ~level ?(newline = true) c s =
   print ~level ~newline ~channel:stderr c s
 
@@ -52,3 +58,11 @@ let print_edit_sequence ~level ?(out_channel = stdout) edit_seq =
  if !verbosity_level >= level
  then List.iter (print_tagged_string ~out_channel) edit_seq
  else ()
+
+let print_set_json ?(level = 0) ?(trailing_coma = true) ~name s =
+  print_default ~level @@ Printf.sprintf "  \"%s\":[" name;
+  let list_string = String.concat ",\n"
+    @@ List.map (fun s -> "    \"" ^ s ^ "\"") @@ SSet.elements s in
+  print_default ~level list_string;
+  print_default ~level @@
+    Printf.sprintf "  ]%s" (if trailing_coma then "," else "")

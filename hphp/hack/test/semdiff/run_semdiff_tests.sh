@@ -84,6 +84,7 @@ for FILE in ${FDS[*]}; do
     else
       echo -e "$RED KO $NC"
       NUM_FAIL=$((NUM_FAIL + 1))
+      cat "$DIFF_RESULT"
     fi
   fi
 done

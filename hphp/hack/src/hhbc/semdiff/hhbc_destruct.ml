@@ -14,9 +14,11 @@
 open Hhbc_ast
 
 (*  turn destructors into parsers on arrays *)
-let rec pa p (a, n) =
+let rec pa p ?(ignore_srcloc=true) (a, n)=
   match Array.get a n with
-  | ISrcLoc _ -> pa p (a, n+1)
+  (* ignore srcloc *)
+  | ISrcLoc _ when ignore_srcloc -> pa p ~ignore_srcloc (a, n+1)
+  (* index out of bounds *)
   | exception (Invalid_argument _) -> None
   | x ->
     match p x with
@@ -82,6 +84,9 @@ let uIntOrDouble = pa (function
   | ILitConst ((Cns s))
     when String.lowercase_ascii (Hhbc_id.Const.to_raw_string s) = "inf" -> Some (Double "inf")
   | _ -> None)
+let uSrcLoc =
+  pa (function ISrcLoc loc -> Some loc | _ -> None) ~ignore_srcloc:false
+let uAnyInst = pa (function x -> Some x)
 (* trivial parser, always succeds, reads nothing *)
 let parse_any inp = Some ((),inp)
 
@@ -116,9 +121,10 @@ let ($>>) p f inp =
 let rec bigmatch ps inp =
  match ps with
   | [] -> failwith "top level match failure"
-  | p :: rest -> (match p inp with
-                   | None -> bigmatch rest inp
-                   | Some f -> f())
+  | p :: rest ->
+    (match p inp with
+      | None -> bigmatch rest inp
+      | Some f -> f())
 
 (* alternation *)
 let ($|) p1 p2 inp =
@@ -140,7 +146,8 @@ let ($*$) p p' (inp,inp') =
 let ($*$|) p p' =
   (p $*$ p') $| (p' $*$ p)
 
-(* this isn't tail recursive, but that should be OK *)
+(* Parse a sequence of the same instruction.
+   This isn't tail recursive, but that should be OK *)
 let rec greedy_kleene p inp =
  match p inp with
   | Some (v,newinp) ->

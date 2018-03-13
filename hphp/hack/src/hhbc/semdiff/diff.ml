@@ -13,6 +13,7 @@
 module EA = Emit_adata
 module Log = Semdiff_logging
 module SS = String_sequence
+module Utils = Semdiff_utils
 
 let concatstrs = String.concat ""
 
@@ -784,7 +785,7 @@ let body_iters_cls_ref_slots_decl_vars_comparer perm =
     body_iters_cls_ref_slots_comparer
     (body_decl_vars_comparer perm)
 
-let instruct_comparer = primitive_comparer Rhl.my_string_of_instruction
+let instruct_comparer = primitive_comparer Utils.string_of_instruction
 
 let instruct_list_comparer = list_comparer instruct_comparer "\n"
 
@@ -827,6 +828,10 @@ let body_instrs_comparer = {
        if todo_str <> "" && not !Log.hide_assm
        then Log.debug (Tty.Normal Tty.White) @@
             Printf.sprintf"Todo=%s" todo_str);
+       let is_isrcloc = function Hhbc_ast.ISrcLoc _ -> true | _ -> false in
+       let remove_isrclocs = List.filter (fun i -> not @@ is_isrcloc i) in
+       let inss = remove_isrclocs inss in
+       let inss' = remove_isrclocs inss' in
        instruct_list_comparer.comparer inss inss');
   size_of = (fun b -> instruct_list_comparer.size_of
       (Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b)));

@@ -973,7 +973,7 @@ let scan_dollar_token lexer =
   match ch1 with
   | '$' ->
     let ch2 = peek_char lexer 2 in
-    if ch2 = '$' || is_name_nondigit ch2 then
+    if ch2 = '$' || ch2 = '{' || is_name_nondigit ch2 then
       (advance lexer 1, TokenKind.Dollar) (* $$x or $$$*)
     else
       (advance lexer 2, TokenKind.DollarDollar) (* $$ *)

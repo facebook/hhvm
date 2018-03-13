@@ -833,7 +833,7 @@ let string_of_type_info_option tio =
 
 type default_value_printing_env = {
   codegen_env      : Emit_env.t option;
-  use_single_quote : bool;
+  in_xhp: bool;
 }
 
 let rec string_of_afield ~env = function
@@ -1030,17 +1030,18 @@ and string_of_statement ~env ~indent ((_, stmt_) : A.stmt) =
   text
 
 and string_of_expression ~env e =
-  string_of_param_default_value ~env:{ env with use_single_quote = true } e
+  string_of_param_default_value ~env e
 
 and string_of_xml ~env (_, id) attributes children =
+  let env = { env with in_xhp = true } in
   let p = Pos.none in
   let name = SU.Xhp.mangle id in
   let _, attributes =
     List.fold_right (string_of_xhp_attr p) attributes (0, [])
   in
-  let attributes = string_of_param_default_value ~env (p, A.Array attributes) in
+  let attributes = string_of_param_default_value ~env (p, A.Darray attributes) in
   let children = string_of_param_default_value ~env
-   (p, A.Array (List.map (fun e -> A.AFvalue e) children))
+   (p, A.Varray children)
   in
   "new "
   ^ name
@@ -1051,10 +1052,10 @@ and string_of_xml ~env (_, id) attributes children =
   ^ ", __FILE__, __LINE__)"
 
 and string_of_xhp_attr p attr (spread_id, attrs) = match attr with
-  | A.Xhp_simple (id, e) -> (spread_id, (A.AFkvalue ((p, A.String id), e))::attrs)
+  | A.Xhp_simple (id, e) -> (spread_id, ((p, A.String id), e)::attrs)
   | A.Xhp_spread e ->
     let id = (p, "...$" ^ (string_of_int spread_id)) in
-    (spread_id + 1, (A.AFkvalue ((p, A.String id), e))::attrs)
+    (spread_id + 1, ((p, A.String id), e)::attrs)
 
 and string_of_param_default_value ~env expr =
   let p = Pos.none in
@@ -1104,7 +1105,6 @@ and string_of_param_default_value ~env expr =
         ~env:env.codegen_env ~should_format:false ~is_class_constant:false s1 in
       let e =
         (fst expr, if is_array_get then A.Id (p, s1) else A.String (p, s1)) in
-      let env = { env with use_single_quote = false } in
       Some (string_of_param_default_value ~env e)
     | _ -> None
   in
@@ -1132,9 +1132,7 @@ and string_of_param_default_value ~env expr =
   | A.Float (_, litstr) -> SU.Float.with_scientific_notation litstr
   | A.Int (_, litstr) -> SU.Integer.to_decimal litstr
   | A.String (_, litstr) ->
-    if env.use_single_quote
-    then SU.single_quote_string_with_escape ~f:escape_fn litstr
-    else SU.quote_string_with_escape ~f:escape_fn litstr
+    SU.quote_string_with_escape ~f:escape_fn litstr
   | A.Null -> "NULL"
   | A.True -> "true"
   | A.False -> "false"
@@ -1145,7 +1143,6 @@ and string_of_param_default_value ~env expr =
     "array(" ^ string_of_afield_list ~env afl ^ ")"
   | A.Collection ((_, name), afl) when
     name = "vec" || name = "dict" || name = "keyset" ->
-    let env = { env with use_single_quote = false } in
     name ^ "[" ^ string_of_afield_list ~env afl ^ "]"
   | A.Collection ((_, name), afl) ->
     let name = SU.Types.fix_casing @@ SU.strip_ns name in
@@ -1267,12 +1264,21 @@ and string_of_param_default_value ~env expr =
     let h = string_of_hint ~ns:true h in
       e ^ " is " ^ h
   | A.Varray es ->
-    let index i = p, A.Int (p, string_of_int i) in
-    string_of_param_default_value ~env @@
-     (p, A.Array (List.mapi (fun i e -> A.AFkvalue (index i, e)) es))
+    if env.in_xhp
+    then begin
+      let es = List.map (string_of_param_default_value ~env) es in
+      "varray[" ^ (String.concat ", " es) ^ "]"
+    end
+    else begin
+      let index i = p, A.Int (p, string_of_int i) in
+      string_of_param_default_value ~env @@
+       (p, A.Array (List.mapi (fun i e -> A.AFkvalue (index i, e)) es))
+    end
   | A.Darray es ->
-    string_of_param_default_value ~env @@
-     (p, A.Array (List.map (fun (e1, e2) -> A.AFkvalue (e1, e2)) es))
+    let es = List.map (fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
+    if env.in_xhp
+    then "darray[" ^ (string_of_afield_list ~env es) ^ "]"
+    else string_of_param_default_value ~env @@ (p, A.Array es)
   | A.Import (fl, e) ->
     let fl = string_of_import_flavor fl in
     let e = string_of_param_default_value ~env e in
@@ -1295,9 +1301,7 @@ and string_of_param_default_value ~env expr =
 let string_of_param_default_value_option env = function
   | None -> ""
   | Some (label, expr) ->
-    let use_single_quote =
-      match snd expr with A.String _ -> false | _ -> true in
-    let env = { codegen_env = env; use_single_quote } in
+    let env = { codegen_env = env; in_xhp = false } in
     " = "
     ^ (string_of_label label)
     ^ "(\"\"\""

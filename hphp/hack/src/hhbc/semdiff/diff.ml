@@ -172,19 +172,66 @@ let int_comparer = primitive_comparer string_of_int
 
 let string_comparer = primitive_comparer (fun s -> s)
 
-let string_no_whitespace_no_casing_comparer =
-  (* TODO(T25624348): Remove this shortcut for arrays *)
-  let contains_array_like_element s =
-    String_utils.is_substring "array" s ||
-    String_utils.is_substring "vec" s ||
-    String_utils.is_substring "dict" s in
-  primitive_comparer (fun s -> if contains_array_like_element s then "" else
-      Str.global_replace (Str.regexp {|[\n\t\r\v ]|}) "" @@
-      String.lowercase_ascii s)
+let default_value_text_comparer =
+  let env = Full_fidelity_ast.make_env
+    ~codegen:true
+    ~keep_errors:false Relative_path.default
+    ~fail_open:false
+    ~php5_compat_mode:true in
+  (* remove explicit array keys when its value matches with implicit order *)
+  let remove_explicit_array_keys e =
+    let v = object(self)
+    inherit [_] Ast.endo as super
+      method! on_expr nenv expr =
+        let expr = super#on_expr nenv expr in
+        Ast_constant_folder.fold_expr nenv expr
+      method! on_Array nenv _ values =
+        let values = self#on_list self#on_afield nenv values in
+        let _, values = Hh_core.List.map_env (Some 0L) values (fun exp_i el ->
+          match el, exp_i with
+          | Ast.AFvalue _, Some exp_i -> Some (Int64.add exp_i 1L), el
+          | Ast.AFkvalue ((_, Ast.Int (_, k)), v), _ ->
+            let i_opt =
+              Typed_value.string_to_int_opt
+                ~allow_following:false ~allow_inf:false k in
+            begin match i_opt, exp_i with
+            | Some i, Some exp when i = exp ->
+              Some (Int64.add i 1L), Ast.AFvalue v
+            | Some i, _ ->
+              Some (Int64.add i 1L), el
+            | None, _ ->
+              None, el
+            end
+          | _ -> None, el
+        ) in
+        Ast.Array values
+    end in
+    v#on_expr Namespace_env.empty_with_default_popt e in
+  let expr_to_sexp s =
+    let s = Php_escaping.unescape_long_string s in
+    let text = "<?hh\n" ^ "(" ^ s ^ ");" in
+    let text = Full_fidelity_source_text.make Relative_path.default text in
+    let ast = Full_fidelity_ast.from_text env text in
+    match ast.Full_fidelity_ast.ast with
+    | Ast.([Stmt (_, Markup _); Stmt (_, Expr e)]) ->
+      Debug.dump_ast (Ast.AExpr (remove_explicit_array_keys e))
+    | a -> failwith @@
+      "Unexpected shape of default value:" ^ (Debug.dump_ast (Ast.AProgram a)) in
+  {
+    comparer = (fun n1 n2 ->
+      if n1 = n2 then (0,(1,[]))
+      else
+      let n1str = expr_to_sexp n1 in
+      let n2str = expr_to_sexp n2 in
+      if n1str = n2str then (0,(1,[]))
+      else (1,(1,substedit n1str n2str)));
+    size_of = (fun _n -> 1);
+    string_of = expr_to_sexp;
+  }
 let bool_comparer = primitive_comparer string_of_bool
 
 
-(* wrap takes a (function a->b), a (function a->string->string), a b-comparer 
+(* wrap takes a (function a->b), a (function a->string->string), a b-comparer
    and returns an a-comparer
    TODO: this is still not quite right, as we want to be able to customize the
    wrapped edits, and that should be compatible with what we do in string_of.
@@ -446,7 +493,7 @@ let param_ti_name_reference_comparer =
     param_name_reference_comparer
 let param_default_value_expression_comparer =
   wrap (function (_, (_, Ast.String (_, s))) -> s | _ -> "")
-    (fun _e s -> s) string_no_whitespace_no_casing_comparer
+    (fun _e s -> s) default_value_text_comparer
 let param_default_value_comparer = wrap Hhas_param.default_value
     (fun _p s -> s)
     (option_comparer param_default_value_expression_comparer)

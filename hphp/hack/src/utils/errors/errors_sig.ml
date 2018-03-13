@@ -467,7 +467,8 @@ module type S = sig
   val inout_params_mix_byref : Pos.t -> Pos.t -> unit
   val inout_params_memoize : Pos.t -> Pos.t -> unit
   val obj_set_reactive : Pos.t -> unit
-  val global_in_reactive_context : Pos.t -> unit
+  val global_in_reactive_context : Pos.t -> string -> unit
+  val static_property_in_reactive_context : Pos.t -> unit
   val inout_annotation_missing : Pos.t -> Pos.t -> unit
   val inout_annotation_unexpected : Pos.t -> Pos.t -> unit
   val inoutness_mismatch : Pos.t -> Pos.t -> unit
@@ -492,4 +493,6 @@ module type S = sig
   val conditionally_reactive_annotation_invalid_arguments : Pos.t -> unit
   val conflicting_reactive_annotations : Pos.t -> unit
   val echo_in_reactive_context : Pos.t -> unit
+  val superglobal_in_reactive_context : Pos.t -> string -> unit
+  val static_in_reactive_context : Pos.t -> string -> unit
 end

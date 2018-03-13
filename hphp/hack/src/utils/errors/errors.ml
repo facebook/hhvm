@@ -797,7 +797,10 @@ module NastCheck                            = struct
   let conditionally_reactive_function       = 3057 (* DONT MODIFY!!!! *)
   let multiple_conditionally_reactive_annotations = 3058 (* DONT MODIFY!!!! *)
   let conditionally_reactive_annotation_invalid_arguments = 3059 (* DONT MODIFY!!!! *)
-  let conflicting_reactive_annotations      = 3040 (* DONT MODIFY!!!! *)
+  let conflicting_reactive_annotations      = 3060 (* DONT MODIFY!!!! *)
+  let superglobal_in_reactive_context       = 3061 (* DONT MODIFY!!!! *)
+  let static_property_in_reactive_context   = 3062 (* DONT MODIFY!!!! *)
+  let static_in_reactive_context            = 3063 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1743,9 +1746,21 @@ let const_attribute_prohibited pos kind =
   add NastCheck.const_attribute_prohibited pos
     ("Cannot apply __Const attribute to " ^ kind)
 
-let global_in_reactive_context pos =
-  add NastCheck.global_in_reactive_context pos
-    "This is global; you cannot access or write to globals in a reactive context"
+let global_in_reactive_context pos name =
+  add NastCheck.global_in_reactive_context pos (
+    "Global " ^ name ^ " cannot be used in a reactive context."
+  )
+
+let static_property_in_reactive_context pos =
+  add NastCheck.static_property_in_reactive_context pos (
+    "Static property cannot be used in a reactive context."
+  )
+
+let static_in_reactive_context pos name =
+  add NastCheck.static_in_reactive_context pos (
+    "Static " ^ name ^ " cannot be used in a reactive context."
+  )
+
 
 let inout_argument_bad_expr pos =
   add NastCheck.inout_argument_bad_expr pos (
@@ -1782,6 +1797,11 @@ let conditionally_reactive_annotation_invalid_arguments pos =
 let conflicting_reactive_annotations pos =
   add NastCheck.conflicting_reactive_annotations pos (
     "Method cannot be marked as reactive and conditionally reactive at the same time."
+  )
+
+let superglobal_in_reactive_context pos name =
+  add NastCheck.superglobal_in_reactive_context pos (
+    "Superglobal "^  name ^ " cannot be used in a reactive context."
   )
 
 (*****************************************************************************)

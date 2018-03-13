@@ -67,6 +67,13 @@ let check_coroutines_enabled condition env p =
   if condition && not (coroutines_enabled env)
   then report_coroutines_not_enabled p
 
+let rec get_name = function
+(* name *)
+| _, Lvar (_, id) -> Local_id.to_string id
+(* name = initializer *)
+| _, Binop (_, lhs, _) -> get_name lhs
+| _ -> "_"
+
 module CheckFunctionBody = struct
   let rec stmt f_type env st = match f_type, st with
     | Ast.FSync, Return (_, None)
@@ -188,11 +195,14 @@ module CheckFunctionBody = struct
     | _, Class_get _
     | _, Class_const _
     | _, Typename _
-    | _, Lvar _
     | _, Lplaceholder _
     | _, Dollardollar _ -> ()
     | _, Dollar e ->
         expr f_type env e
+    | _, Lvar (_, id) ->
+        let id = Local_id.to_string id in
+        if env.is_reactive && SN.Superglobals.is_superglobal id
+        then Errors.superglobal_in_reactive_context p id;
     | _, Pipe (_, l, r) ->
         expr f_type env l;
         expr f_type env r;
@@ -951,6 +961,14 @@ and fun_param env (pos, name) f_type byref param =
       Errors.inout_params_mix_byref pos param.param_pos);
     ()
 
+and error_on_static_or_global_in_reactive_context ~is_static env el =
+  if env.is_reactive
+  then (Core_list.hd el) |> Option.iter ~f:(fun n ->
+    let p = fst n in
+    let name = get_name n in
+    if is_static then Errors.static_in_reactive_context p name
+    else Errors.global_in_reactive_context p name)
+
 and stmt env = function
   | Return (p, _) when env.t_is_finally ->
     Errors.return_in_finally p; ()
@@ -973,16 +991,12 @@ and stmt env = function
   | Return (_, Some e)
   | Expr e | Throw (_, e) ->
     expr env e
-  | Static_var el
+  | Static_var el ->
+    error_on_static_or_global_in_reactive_context ~is_static:true env el;
+    List.iter el (expr env)
   | Global_var el ->
-    begin match el with
-    | x::_ ->
-      if env.is_reactive then
-      let p = fst x in
-      Errors.global_in_reactive_context p;
-      List.iter el (expr env)
-    | [] -> () (* This should never happen*)
-    end
+    error_on_static_or_global_in_reactive_context ~is_static:false env el;
+    List.iter el (expr env)
   | If (e, b1, b2) ->
     expr env e;
     block env b1;
@@ -1058,7 +1072,7 @@ and expr_ env p = function
       expr env e2
   | Class_get _  ->
     if env.is_reactive then
-    Errors.global_in_reactive_context p;
+    Errors.static_property_in_reactive_context p;
     ()
   (* Check that __CLASS__ and __TRAIT__ are used appropriately *)
   | Id (pos, const) ->

@@ -664,14 +664,12 @@ module WithExpressionAndStatementAndTypeParser
         let (parser, const) = assert_token parser Const in
         parse_const_declaration parser visibility missing const
       else
-        let (parser, missing) = Make.missing parser (pos parser) in
-        parse_methodish_or_property parser missing
+        parse_methodish_or_property parser
     | Async
     | Static
     | Final ->
       (* Parse methods, constructors, destructors or properties. *)
-      let (parser, missing) = Make.missing parser (pos parser) in
-      parse_methodish_or_property parser missing
+      parse_methodish_or_property parser
     | LessThanLessThan ->
       (* Parse "methodish" declarations: methods, ctors and dtors *)
       (* TODO: Consider whether properties ought to allow attributes. *)
@@ -1012,42 +1010,47 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, semi) = require_semicolon parser in
     Make.require_clause parser req req_kind name semi
 
-  and parse_methodish_or_property parser attribute_spec =
+  and parse_methodish_or_property parser =
     (* If there is an attribute then it cannot be a property. *)
     (* TODO: ERROR RECOVERY: Consider whether a property with an attribute
        TODO: ought to be (1) parsed, with an error, or (2) perhaps
        TODO: simply make it legal? A property seems like something that could
        TODO: reasonably have an attribute. *)
-    let (parser, modifiers, contains_abstract) = parse_modifiers parser in
-    if SC.is_missing attribute_spec then
-      (* ERROR RECOVERY: match against two tokens, because if one token is
-       * in error but the next isn't, then it's likely that the user is
-       * simply still typing. Throw an error on what's being typed, then eat
-       * it and keep going. *)
-      let current_token_kind = peek_token_kind parser in
-      let next_token = peek_token ~lookahead:1 parser in
-      let next_token_kind = Token.kind next_token in
-      match current_token_kind, next_token_kind with
-      (* Detected the usual start to a method, so continue parsing as method. *)
-      | (Async | Coroutine | Function) , _ ->
-        parse_methodish parser attribute_spec modifiers
-      | LeftParen, _ ->
-        parse_property_declaration parser modifiers ~contains_abstract
-      (* We encountered one unexpected token, but the next still indicates that
-       * we should be parsing a methodish. Throw an error, process the token
-       * as an extra, and keep going. *)
-      | _, (Async | Coroutine | Function)
-        when not (Syntax.has_leading_trivia TriviaKind.EndOfLine next_token) ->
-        let parser = with_error parser SyntaxError.error1056
-          ~on_whole_token:true in
-        let parser = skip_and_log_unexpected_token parser
-          ~generate_error:false in
-        parse_methodish parser attribute_spec modifiers
-      (* Otherwise, continue parsing as a property (which might be a lambda). *)
-      | ( _ , _ ) ->
-        parse_property_declaration parser modifiers ~contains_abstract
-    else
-      parse_methodish parser attribute_spec modifiers
+    let (parser1, modifiers, contains_abstract) = parse_modifiers parser in
+    (* We will do backtracking and reparse modifiers to call smart constructors
+     * in the correct order. Depending on what goes after modifiers we may want
+     * to pre-create missing node.*)
+
+    (* ERROR RECOVERY: match against two tokens, because if one token is
+     * in error but the next isn't, then it's likely that the user is
+     * simply still typing. Throw an error on what's being typed, then eat
+     * it and keep going. *)
+    let current_token_kind = peek_token_kind parser1 in
+    let next_token = peek_token ~lookahead:1 parser1 in
+    let next_token_kind = Token.kind next_token in
+    match current_token_kind, next_token_kind with
+    (* Detected the usual start to a method, so continue parsing as method. *)
+    | (Async | Coroutine | Function) , _ ->
+      let (parser, missing) = Make.missing parser (pos parser) in
+      let (parser, modifiers, _) = parse_modifiers parser in
+      parse_methodish parser missing modifiers
+    | LeftParen, _ ->
+      parse_property_declaration parser1 modifiers ~contains_abstract
+    (* We encountered one unexpected token, but the next still indicates that
+     * we should be parsing a methodish. Throw an error, process the token
+     * as an extra, and keep going. *)
+    | _, (Async | Coroutine | Function)
+      when not (Syntax.has_leading_trivia TriviaKind.EndOfLine next_token) ->
+      let (parser, missing) = Make.missing parser (pos parser) in
+      let (parser, modifiers, _) = parse_modifiers parser in
+      let parser = with_error parser SyntaxError.error1056
+        ~on_whole_token:true in
+      let parser = skip_and_log_unexpected_token parser
+        ~generate_error:false in
+      parse_methodish parser missing modifiers
+    (* Otherwise, continue parsing as a property (which might be a lambda). *)
+    | ( _ , _ ) ->
+      parse_property_declaration parser1 modifiers ~contains_abstract
 
   and parse_trait_use_precendence_item parser name =
     let (parser, keyword) = assert_token parser Insteadof in

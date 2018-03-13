@@ -24,7 +24,11 @@ val integrate :
   Typing_env.env ->
   Typing_env.local_env ->
   Typing_env.local_env -> Typing_env.env
-val intersect_list :
+val integrate_list :
+  Typing_env.env ->
+  Typing_env.local_env ->
+  Typing_env.local_env list -> Typing_env.env
+val intersect_nonterminal_branches :
   Typing_env.env ->
   Typing_env.local_env ->
   (bool * Typing_env.local_env) list -> Typing_env.env

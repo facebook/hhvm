@@ -3,7 +3,7 @@ File "try_nested.php", line 21, characters 7-17:
 File "try_nested.php", line 23, characters 5-15:
   ^(E | D | F)
 File "try_nested.php", line 25, characters 5-15:
-  ^(D | F | B | E | C)
+  ^(C | E | D | F | B)
 File "try_nested.php", line 27, characters 3-13:
-  ^(D | F | B | E | C)
+  ^(C | E | D | F | B)
 No errors

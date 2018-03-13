@@ -165,23 +165,31 @@ let integrate env parent_lenv child_lenv =
     }
   }
 
+let integrate_list env parent_lenv lenv_l =
+  List.fold lenv_l ~init:env ~f:(fun env lenv -> integrate env parent_lenv lenv)
+
 (* Same as intersect, but with a list of local environments *)
-let intersect_list env parent_lenv term_lenv_l =
+let intersect_list env parent_lenv lenv_l =
+  match lenv_l with
+  | [] -> env
+  | [x] -> { env with Env.lenv = x }
+  | lenv1 :: rl ->
+    List.fold rl
+      ~init:{ env with Env.lenv = lenv1 }
+      ~f:(fun env lenv2 -> intersect env parent_lenv env.Env.lenv lenv2)
+
+(* Similar to intersect_list, but lenvs from terminal branches are integrated
+ * instead of intersected (so that the locals history from terminal branches is
+ * remembered, but terminal branches do not contribute to the intersected types
+ * of locals).
+ *)
+let intersect_nonterminal_branches env parent_lenv term_lenv_l =
   let to_integrate, to_intersect =
     List.partition_map term_lenv_l begin fun (term, lenv) ->
       if term then `Fst lenv else `Snd lenv
     end in
-  let env = List.fold_left to_integrate ~f:begin fun env lenv ->
-    integrate env parent_lenv lenv
-  end ~init:env in
-  (match to_intersect with
-  | [] -> env
-  | [x] -> { env with Env.lenv = x }
-  | lenv1 :: rl ->
-      List.fold_left ~f:begin fun env lenv2 ->
-        intersect env parent_lenv env.Env.lenv lenv2
-      end ~init:{ env with Env.lenv = lenv1 } rl
-  )
+  let env = integrate_list env parent_lenv to_integrate in
+  intersect_list env parent_lenv to_intersect
 
 (* Function that changes the types of locals to a more conservative value.
  * When exiting from a construction that could have disrupted the

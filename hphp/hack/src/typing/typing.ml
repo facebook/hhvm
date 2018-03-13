@@ -845,7 +845,7 @@ and stmt env = function
       let env = check_exhaustiveness env (fst e) ty cl in
       let parent_lenv = env.Env.lenv in
       let env, cl, tcl = case_list parent_lenv ty env cl in
-      let env = LEnv.intersect_list env parent_lenv cl in
+      let env = LEnv.intersect_nonterminal_branches env parent_lenv cl in
       env, T.Switch(te, tcl)
   | Foreach (e1, e2, b) as st ->
       let check_dynamic env ty ~f =
@@ -873,8 +873,7 @@ and stmt env = function
       let env = LEnv.fully_integrate env parent_lenv in
       env, T.Foreach (te1, te2, tb)
   | Try (tb, cl, fb) ->
-    let env, ttb, tcl = try_catch env tb cl in
-    let env, tfb = block env fb in
+    let env, ttb, tcl, tfb = try_catch env tb cl fb in
     env, T.Try (ttb, tcl, tfb)
   | Static_var el ->
     Env.not_lambda_reactive ();
@@ -943,9 +942,10 @@ and case_list parent_lenv ty env cl =
   let env = { env with Env.lenv = parent_lenv } in
   case_list_ parent_lenv ty env cl
 
-and try_catch env tb cl =
-  let parent_lenv = env.Env.lenv in
+and try_catch env tb cl fb =
+  let unfrozen_parent_lenv = env.Env.lenv in
   let env = Env.freeze_local_env env in
+  let parent_lenv = env.Env.lenv in
   let env, ttb = block env tb in
   let after_try = env.Env.lenv in
   let env, term_lenv_tcb_l = List.map_env env cl
@@ -958,8 +958,20 @@ and try_catch env tb cl =
   let tcb_l = List.map term_lenv_tcb_l (fun (_, _, a) -> a) in
   let term_lenv_l =
     (Nast_terminality.Terminal.block env tb, after_try) :: term_lenv_l in
-  let env = LEnv.intersect_list env parent_lenv term_lenv_l in
-  env, ttb, tcb_l
+  let env, tfb = if List.is_empty fb then env, [] else begin
+    let after_catchl = env.Env.lenv in
+    let lenv_l = List.map term_lenv_l (fun (_, a) -> a) in
+    let env = LEnv.integrate_list env parent_lenv lenv_l in
+    let env = LEnv.fully_integrate env parent_lenv in
+    let env, tfb = block env fb in
+    { env with Env.lenv = after_catchl }, tfb
+  end in
+  let env = LEnv.intersect_nonterminal_branches env parent_lenv term_lenv_l in
+  let env, _ = block env fb in
+  let after_finally = env.Env.lenv in
+  let env = LEnv.integrate env after_finally unfrozen_parent_lenv in
+  let env = LEnv.integrate env unfrozen_parent_lenv after_finally in
+  env, ttb, tcb_l, tfb
 
 and drop_dead_code_after_break_block = function
   | [] -> [], false

@@ -167,14 +167,6 @@ module WithStatementAndDeclAndTypeParser
   and parse_expression_with_operator_precedence parser operator =
     with_operator_precedence parser operator parse_expression
 
-  and parse_if_no_error parser f =
-    let old_errors = List.length (errors parser) in
-    try
-      let (parser, result) = f parser in
-      let new_errors = List.length(errors parser) in
-      Option.some_if (old_errors = new_errors) (parser, result)
-    with Failure _ -> None
-
   and parse_as_name_or_error parser =
     (* TODO: Are there "reserved" keywords that absolutely cannot start
        an expression? If so, list them above and make them produce an
@@ -1264,8 +1256,8 @@ module WithStatementAndDeclAndTypeParser
       Make.cast_expression parser left cast_type right operand
     | _ -> begin
       match possible_lambda_expression parser with
-      | Some (parser, signature) ->
-        parse_lambda_expression_after_signature parser signature
+      | Some (parser, async, coroutine, signature) ->
+        parse_lambda_expression_after_signature parser async coroutine signature
       | None ->
         parse_parenthesized_expression parser
       end
@@ -1559,32 +1551,38 @@ module WithStatementAndDeclAndTypeParser
        (x)==> then odds are pretty good that a lambda was intended and the
        error should say that ($x)==> was expected.
     *)
-    let signature_result = parse_if_no_error parser parse_lambda_signature in
-    match signature_result with
-    | Some (parser, _) when (peek_token_kind parser) = EqualEqualGreaterThan ->
-      signature_result
-    | _ -> None
+
+    let old_errors = errors parser in
+    try
+      let (parser, async, coroutine, signature) = parse_lambda_header parser in
+      if old_errors = errors parser
+      && peek_token_kind parser = EqualEqualGreaterThan
+      then Some (parser, async, coroutine, signature)
+      else None
+    with Failure _ -> None
 
   and parse_lambda_expression parser =
     (* SPEC
       lambda-expression:
         async-opt  lambda-function-signature  ==>  lambda-body
     *)
-    let (parser, async) = optional_token parser Async in
-    let (parser, coroutine) = optional_token parser Coroutine in
-    let (parser, signature) = parse_lambda_signature parser in
+    let (parser, async, coroutine, signature) = parse_lambda_header parser in
     let (parser, arrow) = require_lambda_arrow parser in
     let (parser, body) = parse_lambda_body parser in
     Make.lambda_expression parser async coroutine signature arrow body
 
-  and parse_lambda_expression_after_signature parser signature =
+  and parse_lambda_expression_after_signature parser async coroutine signature =
     (* We had a signature with no async or coroutine, and we disambiguated it
     from a cast. *)
-    let (parser, async) = Make.missing parser (pos parser) in
-    let (parser, coroutine) = Make.missing parser (pos parser) in
     let (parser, arrow) = require_lambda_arrow parser in
     let (parser, body) = parse_lambda_body parser in
     Make.lambda_expression parser async coroutine signature arrow body
+
+  and parse_lambda_header parser =
+    let (parser, async) = optional_token parser Async in
+    let (parser, coroutine) = optional_token parser Coroutine in
+    let (parser, signature) = parse_lambda_signature parser in
+    (parser, async, coroutine, signature)
 
   and parse_lambda_signature parser =
     (* SPEC:

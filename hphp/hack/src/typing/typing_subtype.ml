@@ -1044,47 +1044,70 @@ and sub_type_with_uenv
   | (r, Tarraykind ak_sub), (_, Tarraykind ak_super) ->
     decompose_array env r ak_sub ak_super sub_type (fun env -> fst (Unify.unify env ty_super ty_sub))
 
-  | _, (_, Toption ty_super) when uenv_super.TUEnv.unwrappedToption ->
-      sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
-
-  (* Subtype is generic parameter
-   * We delegate this case to a separate function in order to catch cycles
-   * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
-   * Need to match on this *before* Toption, in order to deal with T<:?t
+  (* If ?t1 <: ?t2, then from t1 <: ?t1 (widening) and transitivity
+   * of <: it follows that t1 <: ?t2.  Conversely, if t1 <: ?t2, then
+   * by covariance and idempotence of ?, we have ?t1 <: ??t2 <: ?t2.
+   * Therefore, this step preserves the set of solutions.
    *)
-  | (_, Tabstract (AKgeneric _, _)), _ ->
-    sub_generic_params SSet.empty env (uenv_sub, ty_sub) (uenv_super, ty_super)
+  | (_, Toption ty_sub), (_, Toption _) ->
+    let uenv_sub = {uenv_sub with TUEnv.unwrappedToption = true} in
+    sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
-  | (_, Toption arg_ty_sub), _ when uenv_sub.TUEnv.unwrappedToption ->
-    sub_type_with_uenv env (uenv_sub, arg_ty_sub) (uenv_super, ty_super)
+  (* If the nonnull type is not enabled, mixed <: ?t is equivalent
+   * to mixed <: t.  Otherwise, we should not encounter mixed
+   * because by this time it should have been desugared into ?nonnull.
+   *)
+  | (_, (Tmixed | Tdynamic)), (_, Toption ty_super) ->
+    let uenv_super = {uenv_super with TUEnv.unwrappedToption = true} in
+    sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
-  | (_, Toption arg_ty_sub), (_, Toption arg_ty_super) ->
-    let uenv_sub = {
-      TUEnv.unwrappedToption = true;
-      TUEnv.this_ty = uenv_sub.TUEnv.this_ty;
-    } in
-    let env, earg_ty_sub = Env.expand_type env arg_ty_sub in
-    begin match arg_ty_sub, earg_ty_sub with
-      (* special case for ? (v:=Tunresolved ...) <: ? t
-       * because it's possible to substitute v with another nullable.
-       *)
-    | (_, Tvar _), (_, Tunresolved _) ->
-      sub_type_with_uenv env (uenv_sub, arg_ty_sub) (uenv_super, ty_super)
+  (* If t1 <: ?t2, where t1 is guaranteed not to contain null, then
+   * t1 <: t2, and the converse is obviously true as well.
+   *)
+  | (_, (Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ |
+         Tobject | Tclass _ | Tarraykind _ |
+         Tabstract ((AKdependent _ | AKnewtype _| AKenum _), None))),
+    (_, Toption ty_super) ->
+    let uenv_super = {uenv_super with TUEnv.unwrappedToption = true} in
+    sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
-    | _, _ ->
-      let uenv_super = {
-        TUEnv.unwrappedToption = true;
-        TUEnv.this_ty = uenv_super.TUEnv.this_ty;
-      } in
-      sub_type_with_uenv env (uenv_sub, arg_ty_sub) (uenv_super, arg_ty_super)
-    end
+  (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
+   * then t1 <: t2 or t1' <: ?t2.  The converse is obviously
+   * true as well.  We can fold the case where t1 is unconstrained
+   * into the case analysis below.
+   *)
+  | (_, Tabstract ((AKnewtype _ | AKenum _), Some ty)),
+    (_, Toption arg_ty_super) ->
+    Errors.try_
+      (fun () ->
+        let uenv_super = {uenv_super with TUEnv.unwrappedToption = true} in
+        sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, arg_ty_super))
+      (fun _ ->
+        sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
 
-  | _, (_, Toption ty_opt) ->
-      let uenv_super = {
-        TUEnv.unwrappedToption = true;
-        TUEnv.this_ty = uenv_super.TUEnv.this_ty;
-      } in
-      sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_opt)
+  | (_, Tabstract (AKdependent _, Some ty)), (_, Toption arg_ty_super) ->
+    Errors.try_
+      (fun () ->
+        let uenv_super = {uenv_super with TUEnv.unwrappedToption = true} in
+        sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, arg_ty_super))
+      (fun _ ->
+        let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub in
+        sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
+
+  | (_, Tabstract (AKgeneric _, _)), (_, Toption arg_ty_super) ->
+    Errors.try_
+      (fun () ->
+        let uenv_super = {uenv_super with TUEnv.unwrappedToption = true} in
+        sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, arg_ty_super))
+      (fun _ ->
+        sub_generic_params SSet.empty env
+          (uenv_sub, ty_sub) (uenv_super, ty_super))
+
+  (* The following case is already handled because we are looking
+   * at expanded types.
+   *)
+  | (_, Tvar _), (_, Toption _) -> assert false
+
   | (_, Ttuple tyl_sub), (_, Ttuple tyl_super)
     when List.length tyl_super = List.length tyl_sub ->
     wfold_left2 sub_type env tyl_sub tyl_super
@@ -1219,6 +1242,13 @@ and sub_type_with_uenv
           let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub in
           sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
 
+  (* Subtype is generic parameter
+   * We delegate this case to a separate function in order to catch cycles
+   * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
+   *)
+  | (_, Tabstract (AKgeneric _, _)), _ ->
+    sub_generic_params SSet.empty env (uenv_sub, ty_sub) (uenv_super, ty_super)
+
   (* Supertype is generic parameter
    * We delegate this case to a separate function in order to catch cycles
    * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
@@ -1243,6 +1273,11 @@ and sub_generic_params
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
   match ety_sub, ety_super with
+  (* If subtype and supertype are the same generic parameter, we're done *)
+  | (_, Tabstract (AKgeneric name_sub, _)),
+    (_, Tabstract (AKgeneric name_super, _))
+       when name_sub = name_super
+    -> env
 
   (* Subtype is generic parameter *)
   | (r_sub, Tabstract (AKgeneric name_sub, opt_sub_cstr)), _ ->
@@ -1250,60 +1285,39 @@ and sub_generic_params
       we need to update the Unification environment's this_ty
     *)
     let uenv_sub = if AbstractKind.is_generic_dep_ty name_sub then
-      TUEnv.update_this_if_unset uenv_sub ety_sub else uenv_sub in
-    let default () =
-         (* If we've seen this type parameter before then we must have gone
-         * round a cycle so we fail
-         *)
-        (if SSet.mem name_sub seen
-        then fst (Unify.unify env ty_super ty_sub)
-        else
-          let seen = SSet.add name_sub seen in
-          (* Otherwise, we collect all the upper bounds ("as" constraints) on
-             the generic parameter, and check each of these in turn against
-             ty_super until one of them succeeds
-           *)
-          let rec try_bounds tyl =
-            match tyl with
-            | [] ->
-              (* There are no bounds so force an error *)
-              fst (Unify.unify env ty_super ty_sub)
+    TUEnv.update_this_if_unset uenv_sub ety_sub else uenv_sub in
+    (* If we've seen this type parameter before then we must have gone
+     * round a cycle so we fail
+     *)
+    if SSet.mem name_sub seen
+    then fst (Unify.unify env ty_super ty_sub)
+    else
+      let seen = SSet.add name_sub seen in
+      (* Otherwise, we collect all the upper bounds ("as" constraints) on
+         the generic parameter, and check each of these in turn against
+         ty_super until one of them succeeds
+       *)
+      let rec try_bounds tyl =
+        match tyl with
+        | [] ->
+          (* There are no bounds so force an error *)
+           fst (Unify.unify env ty_super ty_sub)
 
-            | ty::tyl ->
-              Errors.try_
-              (fun () ->
-                sub_generic_params seen env (uenv_sub, ty)
-                                            (uenv_super, ty_super))
-              (fun l ->
-               (* Right now we report constraint failure based on the last
-                * error. This should change when we start supporting
-                * multiple constraints *)
-                 if List.is_empty tyl
-                 then (Reason.explain_generic_constraint
-                     env.Env.pos r_sub name_sub l; env)
-                 else try_bounds tyl)
-          in try_bounds (Option.to_list opt_sub_cstr @
-              Typing_set.elements (Env.get_upper_bounds env name_sub))) in
-
-    begin match ety_super with
-      (* If supertype is the same generic parameter, we're done *)
-      | (_, Tabstract (AKgeneric name_super, _)) when name_sub = name_super
-        -> env
-
-      (* Try this first *)
-      | (_, Toption ty_super) ->
-        Errors.try_
-          (fun () ->
-          let uenv_super = {
-            TUEnv.unwrappedToption = true;
-            TUEnv.this_ty = uenv_super.TUEnv.this_ty;
-          } in
-          sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super))
-          (fun _ ->
-              default ())
-
-      | _ -> default ()
-    end
+        | ty::tyl ->
+          Errors.try_
+            (fun () ->
+              sub_generic_params seen env (uenv_sub, ty)
+                                          (uenv_super, ty_super))
+            (fun l ->
+              (* Right now we report constraint failure based on the last
+               * error. This should change when we start supporting
+               * multiple constraints *)
+              if List.is_empty tyl
+              then (Reason.explain_generic_constraint
+                env.Env.pos r_sub name_sub l; env)
+              else try_bounds tyl)
+      in try_bounds (Option.to_list opt_sub_cstr @
+           Typing_set.elements (Env.get_upper_bounds env name_sub))
 
   (* Supertype is generic parameter *)
   | _, (r_super, Tabstract (AKgeneric name_super, _)) ->

@@ -8,6 +8,11 @@
  *
  *)
 
+let process_env = [
+  (** Disable user aliases or configs. *)
+  "HGPLAIN=1"
+]
+
 (** Tools for shelling out to Mercurial. *)
 
 module Hg_actual = struct
@@ -17,6 +22,8 @@ module Hg_actual = struct
   let rev_string rev = match rev with
     | Hg_rev hash -> hash
     | Svn_rev rev -> Printf.sprintf "r%d" rev
+
+let exec_hg = Process.exec "hg" ~env:process_env
 
 (** Given a list of files and their revisions, saves the files to the output
  * directory. For example,
@@ -30,7 +37,7 @@ module Hg_actual = struct
  * /tmp/hh_server/file1.php
  *)
 let get_old_version_of_files ~rev ~files ~out ~repo =
-  let process = Process.exec "hg" ([
+  let process = exec_hg ([
     "cat";
     "-r";
     (rev_string rev);
@@ -48,7 +55,7 @@ let get_old_version_of_files ~rev ~files ~out ~repo =
  * hg log -r 'ancestor(master,rev)' -T '{svnrev}\n'
  *)
 let get_closest_svn_ancestor rev repo =
-  let process = Process.exec "hg" [
+  let process = exec_hg [
     "log";
     "-r";
     Printf.sprintf "ancestor(master,%s)" rev;
@@ -64,7 +71,7 @@ let get_closest_svn_ancestor rev repo =
    *
    * hg id -i --cwd <repo> *)
   let current_working_copy_hg_rev repo =
-    let process = Process.exec "hg" ["id"; "--debug"; "-i"; "--cwd"; repo; ] in
+    let process = exec_hg ["id"; "--debug"; "-i"; "--cwd"; repo; ] in
     Future.make process @@ fun result ->
       let result = String.trim result in
       if String.length result < 1 then
@@ -77,7 +84,7 @@ let get_closest_svn_ancestor rev repo =
 
   (** hg log -r 'p2()' -T '{node}' *)
   let get_p2_node repo =
-    let process = Process.exec "hg" [
+    let process = exec_hg [
       "log";
       "-r";
       "p2()";
@@ -116,7 +123,7 @@ let get_closest_svn_ancestor rev repo =
    *
    * hg status -n --rev r<svn_rev> --cwd <repo> *)
   let files_changed_since_rev rev repo =
-    let process = Process.exec "hg" [
+    let process = exec_hg [
       "status";
       "-n";
       "--rev";
@@ -128,7 +135,7 @@ let get_closest_svn_ancestor rev repo =
 
   (** hg update --rev r<svn_rev> --cwd <repo> *)
   let update_to_rev rev repo =
-    let process = Process.exec "hg" [
+    let process = exec_hg [
       "update";
       "--rev";
       rev_string rev;

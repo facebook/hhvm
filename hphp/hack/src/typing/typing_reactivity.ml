@@ -83,7 +83,7 @@ let check_call env receiver_type pos reason ft =
       Option.value_map ~default:"" callee_t ~f:type_to_str in
     let receiver_type_str =
       Option.value_map receiver_type ~default:"" ~f:type_to_str in
-    Errors.invalid_conditionally_reactive_call (Reason.to_pos reason)
+    Errors.invalid_conditionally_reactive_call pos (Reason.to_pos reason)
       condition_type_str
       receiver_type_str;
   | _ -> ()

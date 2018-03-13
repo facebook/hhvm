@@ -486,7 +486,7 @@ module type S = sig
   val ellipsis_strict_mode : require_param_name:bool -> Pos.t -> unit
   val untyped_lambda_strict_mode : Pos.t -> unit
   val binding_ref_in_array : Pos.t -> unit
-  val invalid_conditionally_reactive_call : Pos.t -> string -> string -> unit
+  val invalid_conditionally_reactive_call : Pos.t -> Pos.t -> string -> string -> unit
   val conditionally_reactive_function : Pos.t -> unit
   val multiple_conditionally_reactive_annotations : Pos.t -> string -> unit
   val conditionally_reactive_annotation_invalid_arguments : Pos.t -> unit

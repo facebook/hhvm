@@ -2516,13 +2516,14 @@ let untyped_lambda_strict_mode pos =
   in
     add Typing.untyped_lambda_strict_mode pos msg
 
-let invalid_conditionally_reactive_call pos condition_type receiver_type =
-  add Typing.invalid_conditionally_reactive_call pos (
-    "Conditionally reactive method with condition type '" ^ condition_type ^
-    "' cannot be called. Calling such methods is allowed only from conditionally " ^
+let invalid_conditionally_reactive_call pos def_pos condition_type receiver_type =
+  add_list Typing.invalid_conditionally_reactive_call [
+    pos, "Conditionally reactive method with condition type '" ^ condition_type ^
+    "' cannot be called";
+    def_pos, "Calling such methods is allowed only from conditionally " ^
     "reactive methods with the same condition type or if static type of method " ^
     "receiver is a subtype of condition type, now '" ^ receiver_type ^ "'."
-  )
+  ]
 
 let echo_in_reactive_context pos =
   add Typing.echo_in_reactive_context pos (

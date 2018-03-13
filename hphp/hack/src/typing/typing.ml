@@ -3770,7 +3770,7 @@ and is_abstract_ft fty = match fty with
           class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
         let fty = check_abstract_parent_meth (snd m) p fty in
         check_coroutine_call env fty;
-        let env, tel, tuel, ty = call ~expected p env fty el uel in
+        let env, tel, tuel, ty = call ~expected ~receiver_type:ty1 p env fty el uel in
         make_call env (T.make_typed_expr fpos fty
           (T.Class_const ((Some ty1, T.CIparent), m))) hl tel tuel ty
       end
@@ -3792,7 +3792,8 @@ and is_abstract_ft fty = match fty with
               begin fun (env, fty, _) ->
                 let fty = check_abstract_parent_meth (snd m) p fty in
                 check_coroutine_call env fty;
-                let env, _tel, _tuel, method_ = call ~expected p env fty el uel in
+                let env, _tel, _tuel, method_ = call ~expected
+                  ~receiver_type:ty1 p env fty el uel in
                 env, method_, None
               end
               k_lhs
@@ -3804,7 +3805,7 @@ and is_abstract_ft fty = match fty with
               class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
             let fty = check_abstract_parent_meth (snd m) p fty in
             check_coroutine_call env fty;
-            let env, tel, tuel, ty = call ~expected p env fty el uel in
+            let env, tel, tuel, ty = call ~expected ~receiver_type:ty1 p env fty el uel in
             make_call env (T.make_typed_expr fpos fty
               (T.Class_const ((Some ty1, T.CIparent), m))) hl tel tuel ty
       end
@@ -3845,7 +3846,7 @@ and is_abstract_ft fty = match fty with
             ())
         | _ -> () in
       check_coroutine_call env fty;
-      let env, tel, tuel, ty = call ~expected p env fty el uel in
+      let env, tel, tuel, ty = call ~expected ~receiver_type:ty1 p env fty el uel in
       make_call env (T.make_typed_expr fpos fty
         (T.Class_const(te1, m))) hl tel tuel ty
 

@@ -206,6 +206,24 @@ void VSDebugHook::tryEnterDebugger(
   RequestInfo* requestInfo,
   bool breakNoStepOnly
 ) {
+  if (requestInfo->m_flags.terminateRequest) {
+    std::string message = "Request " +
+      std::to_string(debugger->getCurrentThreadId()) +
+      " terminating at debugger client's request.";
+    debugger->sendUserMessage(
+      message.c_str(),
+      DebugTransport::OutputLevelLog
+    );
+
+    raise_fatal_error(
+      "Request terminated by debugger client.",
+      null_array,
+      false,
+      true,
+      true
+    );
+  }
+
   if (requestInfo->m_flags.doNotBreak) {
     return;
   }

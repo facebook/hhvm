@@ -159,12 +159,17 @@ bool VSCommand::parseCommand(
 
     *command = new EvaluateCommand(debugger, clientMessage);
 
-  } else if (cmdString == "fb_continueToLocation") {
+  } else if (cmdString == "fb_continueToLocation" ||
+             cmdString == "continueToLocation") {
 
     // NOTE: fb_continueToLocation is a Facebook addition to the VS Code
     // debug protocol. Other clients are not expected to send this message
     // since it's not standard, but Nuclide can send it.
     *command = new RunToLocationCommand(debugger, clientMessage);
+
+  } else if (cmdString == "terminateThread") {
+
+    *command = new TerminateThreadCommand(debugger, clientMessage);
 
   } else if (cmdString == "initialize") {
 
@@ -260,6 +265,9 @@ const folly::dynamic VSCommand::getDebuggerCapabilities() {
   capabilities["supportTerminateDebuggee"] = false;
   capabilities["supportsDelayedStackTraceLoading"] = true;
   capabilities["supportsLoadedSourcesRequest"] = false;
+
+  // Experimental support for terminate thread
+  capabilities["supportsTerminateThread"] = true;
 
   folly::dynamic exceptionBreakpointFilters = folly::dynamic::array;
 

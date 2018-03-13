@@ -79,6 +79,7 @@ struct RequestInfo {
     bool doNotBreak;
     bool outputHooked;
     bool requestUrlInitialized;
+    bool terminateRequest;
   } m_flags;
   const char* m_stepReason;
   CommandQueue m_commandQueue;

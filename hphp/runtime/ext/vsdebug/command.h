@@ -533,6 +533,11 @@ struct ThreadsCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(ThreadsCommand, CommandTarget::None, false);
 };
 
+//////  Handles terminate thread requests from the client           //////
+struct TerminateThreadCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(TerminateThreadCommand, CommandTarget::Request, false);
+};
+
 //////  Handles completions requests from the client                //////
 struct CompletionsCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(CompletionsCommand, CommandTarget::Request, true);

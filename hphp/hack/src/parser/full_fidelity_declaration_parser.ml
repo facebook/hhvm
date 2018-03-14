@@ -1691,8 +1691,8 @@ module WithExpressionAndStatementAndTypeParser
         let (parser, const) = assert_token parser Const in
         parse_const_declaration parser missing abstr const
     else
-      let (parser, modifiers, _) = parse_modifiers parser in
       let (parser, missing) = Make.missing parser (pos parser) in
+      let (parser, modifiers, _) = parse_modifiers parser in
       parse_methodish parser missing modifiers
 
   and parse_methodish parser attribute_spec modifiers =

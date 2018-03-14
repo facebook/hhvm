@@ -15,7 +15,7 @@ open Typing_env_return_info
 open Hh_core
 
 module Env = Typing_env
-
+module TUtils = Typing_utils
 (* For async functions, strip Awaitable<_> from the return type *)
 let strip_awaitable fun_kind env ty =
   if fun_kind <> Ast.FAsync then ty
@@ -27,7 +27,7 @@ let strip_awaitable fun_kind env ty =
     (* In non-strict code we might find Awaitable without type arguments. Assume Tany *)
   | _env, (_, Tclass ((_, class_name), []))
     when class_name = Naming_special_names.Classes.cAwaitable ->
-    (Reason.Rnone, Tany)
+    (Reason.Rnone, TUtils.tany env)
   | _ ->
     ty
 
@@ -69,7 +69,7 @@ let wrap_awaitable env p rty =
     | Ast.FGenerator
       (* Is an error, but caught in NastCheck. *)
     | Ast.FAsyncGenerator ->
-      (Reason.Rnone, Typing_utils.terr env)
+      (Reason.Rnone, TUtils.terr env)
     | Ast.FAsync ->
       (Reason.Rwitness p), Tclass ((p, SN.Classes.cAwaitable), [rty])
 

@@ -121,7 +121,7 @@ let idx env p fty shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
   let env, res = Env.fresh_unresolved_type env in
   match TUtils.shape_field_name env (fst field) (snd field) with
-  | None -> env, (Reason.Rwitness (fst field), Tany)
+  | None -> env, (Reason.Rwitness (fst field), TUtils.tany env)
   | Some field_name ->
     let fake_shape = (
       (* Rnone because we don't want the fake shape to show up in messages about
@@ -162,7 +162,7 @@ let idx env p fty shape_ty field default =
 
 let remove_key p env shape_ty field  =
   match TUtils.shape_field_name env (fst field) (snd field) with
-   | None -> env, (Reason.Rwitness (fst field), Tany)
+   | None -> env, (Reason.Rwitness (fst field), TUtils.tany env)
    | Some field_name -> shrink_shape p field_name env shape_ty
 
 let to_array env shape_ty res =
@@ -181,14 +181,14 @@ let to_array env shape_ty res =
         let env, keys = List.map_env env keys begin fun env key ->
           let env, ty = match key with
           | Ast.SFlit (p, _) -> env, (Reason.Rwitness p, Tprim Tstring)
-          | Ast.SFclass_const ((_, cid), (_, mid)) ->
+          | Ast.SFclass_const ((p, cid), (_, mid)) ->
             begin match Env.get_class env cid with
               | Some class_ -> begin match Env.get_const env class_ mid with
                   | Some const ->
                     Typing_phase.localize_with_self env const.cc_type
-                  | None -> env, (Reason.Rnone, Tany)
+                  | None -> env, (Reason.Rwitness p, TUtils.tany env)
                 end
-              | None -> env, (Reason.Rnone, Tany)
+              | None -> env, (Reason.Rwitness p, TUtils.tany env)
             end in
           Typing_utils.unresolved env ty
         end in

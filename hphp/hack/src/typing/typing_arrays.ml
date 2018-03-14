@@ -73,7 +73,7 @@ let array_type_list_to_single_type env values =
   let unknown = List.find values (fun ty ->
     snd (snd (TUtils.fold_unresolved env ty)) = Tany)
   in match unknown with
-    | Some (r, _) -> env, (r, Tany)
+    | Some (r, _) -> env, (r, TUtils.tany env)
     | None ->
       let env, value = Env.fresh_unresolved_type env in
       List.fold_left_env env values ~init:value ~f:TUtils.unify

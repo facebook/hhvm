@@ -685,7 +685,8 @@ size_t relocateImpl(Env& env) {
     for (auto srcAddr = env.start;
          srcAddr < env.end;
          srcAddr += srcCount << kInstructionSizeLog2) {
-      auto const src = Instruction::Cast(env.srcBlock.toDestAddress(srcAddr));
+      auto const srcPtr = env.srcBlock.toDestAddress(srcAddr);
+      auto const src = Instruction::Cast(srcPtr);
       auto destAddr = env.destBlock.frontier();
       srcCount = 1;
       destCount = 1;
@@ -695,20 +696,33 @@ size_t relocateImpl(Env& env) {
                           env.srcBlock.toDestAddress(srcAddr));
 
       // If it's not a literal, then attempt any special relocations
-      if (!literals.count(src) &&
-          !relocateSmashable(env, srcAddr, destAddr, srcCount, destCount) &&
-          !relocatePCRelative(env, srcAddr, destAddr, srcCount, destCount) &&
-          !relocateImmediate(env, srcAddr, destAddr, srcCount, destCount) &&
-          !relocatePadding(env, srcAddr, destAddr, srcCount, destCount,
-                           destStart)) {
-        // Do nothing, as the instruction word was initially copied above
-      }
-
-      // If we just copied the first instruction of a smashableMovq, then it may
-      // have an internal reference that'll need to be adjusted below.
-      if (!literals.count(src) &&
-          isSmashableMovq(env.srcBlock.toDestAddress(srcAddr))) {
-        env.updateInternalRefs = true;
+      if (!literals.count(src)) {
+        auto align = [&] (Alignment a) {
+          while (!is_aligned(destAddr, a)) {
+            env.destBlock.setFrontier(destAddr);
+            vixl::MacroAssembler as { env.destBlock };
+            as.Nop();
+            destAddr = env.destBlock.frontier();
+            env.destBlock.bytes(kInstructionSize,
+                                env.srcBlock.toDestAddress(srcAddr));
+          }
+        };
+        // If we just copied the first instruction of a smashableMovq,
+        // then it may have an internal reference that'll need to be
+        // adjusted below.
+        if (isSmashableMovq(srcPtr)) {
+          env.updateInternalRefs = true;
+          align(Alignment::SmashMovq);
+        } else if (isSmashableCall(srcPtr)) {
+          env.updateInternalRefs = true;
+          align(Alignment::SmashCall);
+        } else {
+          relocateSmashable(env, srcAddr, destAddr, srcCount, destCount) ||
+          relocatePCRelative(env, srcAddr, destAddr, srcCount, destCount) ||
+          relocateImmediate(env, srcAddr, destAddr, srcCount, destCount) ||
+          relocatePadding(env, srcAddr, destAddr, srcCount,
+                          destCount, destStart);
+        }
       }
 
       if (srcAddr == env.start) {
@@ -825,26 +839,34 @@ size_t relocateImpl(Env& env) {
               }
             } else {
               auto const target = *reinterpret_cast<uintptr_t*>(addr);
-              if (env.meta.addressImmediates.count(
-                    reinterpret_cast<TCA>(
-                      ~reinterpret_cast<uintptr_t>(srcAddr)))) {
-                auto munge = [] (TCA addr) {
-                  return (reinterpret_cast<uintptr_t>(addr) << 1) | 1;
-                };
-                // An mcprep smashableMovq.  During live relocation,
-                // the target will probably have been smashed before
-                // we get here. In that case, its no longer encoding a
-                // tc address, and we don't need to do anything.
-                if (target & 1) {
-                  always_assert(target == munge(srcAddr));
-                  patchTarget64(addr, reinterpret_cast<TCA>(munge(destAddr)));
+              auto const adjusted = [&] () -> uintptr_t {
+                if (env.meta.addressImmediates.count(
+                      reinterpret_cast<TCA>(
+                        ~reinterpret_cast<uintptr_t>(srcAddr)))) {
+                  auto munge = [] (TCA addr) {
+                    return (reinterpret_cast<uintptr_t>(addr) << 1) | 1;
+                  };
+                  // An mcprep smashableMovq.  During live relocation,
+                  // the target will probably have been smashed before
+                  // we get here. In that case, its no longer encoding a
+                  // tc address, and we don't need to do anything.
+                  if (target & 1) {
+                    always_assert(target == munge(srcAddr));
+                    return munge(destAddr);
+                  }
+                } else {
+                  return reinterpret_cast<uintptr_t>(
+                    env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target))
+                  );
                 }
-              } else {
-                auto adjusted =
-                  env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
-                if (adjusted) {
-                  patchTarget64(addr, adjusted);
-                }
+                return 0;
+              }();
+              if (adjusted) {
+                auto const DEBUG_ONLY clsize = cache_line_size();
+                auto const DEBUG_ONLY lowbits =
+                  reinterpret_cast<uintptr_t>(dest->LiteralAddress()) % clsize;
+                assertx(lowbits + sizeof(adjusted) <= clsize);
+                *reinterpret_cast<uintptr_t*>(addr) = adjusted;
               }
             }
           } else if (src->IsMovz()) {

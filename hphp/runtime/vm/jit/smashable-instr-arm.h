@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_SMASHABLE_INSTR_ARM_H_
 #define incl_HPHP_JIT_SMASHABLE_INSTR_ARM_H_
 
+#include "hphp/runtime/vm/jit/align-arm.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
@@ -92,6 +93,7 @@ inline void patchTarget32(TCA inst, TCA target) {
 }
 
 inline void patchTarget64(TCA inst, TCA target) {
+  assertx(is_aligned(inst - kSmashMovqImmOff, Alignment::SmashMovq));
   *reinterpret_cast<uint64_t*>(inst) = reinterpret_cast<uint64_t>(target);
   auto const begin = inst;
   auto const end = begin + 8;

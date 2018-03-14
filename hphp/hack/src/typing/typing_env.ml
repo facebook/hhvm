@@ -13,6 +13,7 @@ open Hh_core
 open Decl_env
 open Typing_defs
 open Nast
+open Typing_env_return_info
 
 module Dep = Typing_deps.Dep
 module TLazyHeap = Typing_lazy_heap
@@ -305,9 +306,9 @@ let empty tcopt file ~droot = {
     tcopt   = tcopt;
     return  = {
       return_type = fresh_type ();
-      return_explicit = false;
       return_disposable = false;
-      return_mutable = false };
+      return_mutable = false;
+      return_explicit = false; };
     params  = Local_id.Map.empty;
     self_id = "";
     self    = Reason.none, Tany;

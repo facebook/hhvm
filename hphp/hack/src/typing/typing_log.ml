@@ -166,13 +166,14 @@ let log_using_vars env =
 
 let log_return_type env =
   indentEnv "return_type" (fun () ->
-    let Env.{return_type; return_explicit; return_disposable; return_mutable} =
+    let Typing_env_return_info.
+      {return_type; return_disposable; return_mutable; return_explicit} =
       Env.get_return env in
     lprintf (Normal Green) "%s%s%s%s"
       (Typing_print.debug_with_tvars env return_type)
-      (if return_explicit then " (explicit)" else "")
       (if return_disposable then " (disposable)" else "")
       (if return_mutable then " (mutable_return)" else "")
+      (if return_explicit then " (explicit)" else "")
   )
 
 let log_tpenv env =

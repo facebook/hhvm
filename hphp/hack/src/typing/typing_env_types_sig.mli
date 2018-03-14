@@ -72,15 +72,9 @@
    (* A set of constraints that are global to a given method *)
    global_tpenv : tpenv ;
  }
-and return_info = {
-  return_type : locl ty;
-  return_disposable : bool;
-  return_mutable: bool;
-  return_explicit : bool;
-}
 and genv = {
   tcopt   : TypecheckerOptions.t;
-  return  : return_info;
+  return  : Typing_env_return_info.t;
   (* For each function parameter, its type and calling convention. *)
   params  : (locl ty * param_mode) Local_id.Map.t;
   parent_id : string;

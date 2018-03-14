@@ -78,22 +78,6 @@ let suggest env p ty =
   | ty -> Errors.expecting_type_hint_suggest p ty
   )
 
-let suggest_return env p ty =
-  let ty = Typing_expand.fully_expand env ty in
-  (match Typing_print.suggest ty with
-  | "..." -> Errors.expecting_return_type_hint p
-  | ty -> Errors.expecting_return_type_hint_suggest p ty
-)
-
-let async_suggest_return fkind hint pos =
-  let is_async = Ast_defs.FAsync = fkind in
-  if is_async then
-    let e_func = Errors.expecting_awaitable_return_type_hint in
-    match snd hint with
-    | Happly (s, _) ->
-        if snd s <> Naming_special_names.Classes.cAwaitable then e_func pos
-    | _ -> e_func pos
-
 let err_witness env p = Reason.Rwitness p, Typing_utils.terr env
 let err_none env = Reason.Rnone, Typing_utils.terr env
 
@@ -226,47 +210,10 @@ let save_env env =
 (* Handling function/method arguments *)
 (*****************************************************************************)
 
+
 let has_accept_disposable_attribute param =
   List.exists param.param_user_attributes
     (fun { ua_name; _ } -> SN.UserAttributes.uaAcceptDisposable = snd ua_name)
-
-let has_attribute attr l =
-  List.exists l (fun { ua_name; _ } -> attr = snd ua_name)
-
-let has_return_disposable_attribute attrs =
-  has_attribute SN.UserAttributes.uaReturnDisposable attrs
-
-let has_mutable_return_attribute attrs =
-  has_attribute SN.UserAttributes.uaMutableReturn attrs
-
-
-let is_disposable_visitor env =
-  object(this)
-  inherit [string option] Type_visitor.type_visitor
-  (* Only bother looking at classish types. Other types can spuriously
-   * claim to implement these interfaces. Ideally we should check
-   * constrained generics, abstract types, etc.
-   *)
-  method! on_tclass acc _ (_, class_name) tyl =
-    let default () =
-      List.fold_left tyl ~f:this#on_type ~init:acc in
-    begin match Env.get_class env class_name with
-    | None -> default ()
-    | Some c ->
-      if c.tc_is_disposable
-      then Some (strip_ns class_name)
-      else default ()
-    end
-  end
-
-(* Does ty (or a type embedded in ty) implement IDisposable
- * or IAsyncDisposable, directly or indirectly?
- * Return Some class_name if it does, None if it doesn't.
- *)
-let is_disposable_type env ty =
-  match Env.expand_type env ty with
-  | _env, ety ->
-    (is_disposable_visitor env)#on_type None ety
 
 let has_mutable_attribute param =
   List.exists param.param_user_attributes
@@ -278,31 +225,16 @@ let has_mutable_attribute param =
 let is_return_disposable_fun_type env ty =
   match Env.expand_type env ty with
   | _env, (_, Tfun ft) ->
-    ft.ft_return_disposable || Option.is_some (is_disposable_type env ft.ft_ret)
+    ft.ft_return_disposable || Option.is_some (Typing_disposable.is_disposable_type env ft.ft_ret)
   | _ -> false
 
 let enforce_param_not_disposable env param ty =
   if has_accept_disposable_attribute param then ()
   else
   let p = param.param_pos in
-  match is_disposable_type env ty with
+  match Typing_disposable.is_disposable_type env ty with
   | Some class_name ->
     Errors.invalid_disposable_hint p (strip_ns class_name)
-  | None ->
-    ()
-
-let strip_awaitable fun_kind env ty =
-  match Env.expand_type env ty with
-  | _env, (_, Tclass ((_, class_name), [ty]))
-    when fun_kind = Ast.FAsync && class_name = SN.Classes.cAwaitable ->
-    ty
-  | _, _ ->
-    ty
-
-let enforce_return_not_disposable fun_kind env ty =
-  match is_disposable_type env (strip_awaitable fun_kind env ty) with
-  | Some class_name ->
-    Errors.invalid_disposable_return_hint (Reason.to_pos (fst ty)) (strip_ns class_name)
   | None ->
     ()
 
@@ -464,8 +396,6 @@ and fun_def tcopt f =
   let env = Env.set_env_function_pos env pos in
   let reactive = Decl.fun_reactivity env.Env.decl_env f.f_user_attributes in
   let mut = TUtils.fun_mutable f.f_user_attributes in
-  let return_disposable = has_return_disposable_attribute f.f_user_attributes in
-  let return_mutable = has_mutable_return_attribute f.f_user_attributes in
   let env = Env.set_env_reactive env reactive in
   let env = Env.set_fun_mutable env mut in
   NastCheck.fun_ env f nb;
@@ -481,25 +411,15 @@ and fun_def tcopt f =
       let env =
         localize_where_constraints
           ~ety_env:(Phase.env_with_self env) env f.f_where_constraints in
-      let env, return =
+      let env, ty =
         match f.f_ret with
         | None ->
-          env,
-          Env.{ return_type = (Reason.Rwitness pos, Typing_utils.tany env);
-                return_explicit = false;
-                return_disposable = return_disposable;
-                return_mutable; }
+          env, (Reason.Rwitness pos, Typing_utils.tany env)
         | Some ret ->
           let ty = TI.instantiable_hint env ret in
-          let env, ty = Phase.localize_with_self env ty in
-          if not return_disposable
-          then enforce_return_not_disposable f.f_fun_kind env ty;
-          env,
-          Env.{ return_type = ty;
-                return_explicit = true;
-                return_disposable = return_disposable;
-                return_mutable; }
-      in
+          Phase.localize_with_self env ty in
+      let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
+        ~is_explicit:(Option.is_some f.f_ret) ty in
       TI.check_params_instantiable env f.f_params;
       TI.check_tparams_instantiable env f.f_tparams;
       let env, param_tys = List.map_env env f.f_params make_param_local_ty in
@@ -525,9 +445,11 @@ and fun_def tcopt f =
       let env = Env.check_todo env in
       if Env.is_strict env then Env.log_anonymous env;
       begin match f.f_ret with
-        | None when Env.is_strict env -> suggest_return env pos return.Env.return_type
+        | None when Env.is_strict env ->
+          Typing_return.suggest_return env pos return.Typing_env_return_info.return_type
         | None -> Typing_suggest.save_fun_or_method f.f_name
-        | Some hint -> async_suggest_return (f.f_fun_kind) hint pos
+        | Some hint ->
+          Typing_return.async_suggest_return (f.f_fun_kind) hint pos
       end;
       {
         T.f_annotation = save_env env;
@@ -561,19 +483,19 @@ and fun_ ?(abstract=false) env return pos named_body f_kind =
     let env = Env.set_fn_kind env f_kind in
     let env, tb = block env named_body.fnb_nast in
     Typing_sequencing.sequence_check_block named_body.fnb_nast;
-    let { Env.return_type = ret; _} = Env.get_return env in
+    let { Typing_env_return_info.return_type = ret; _} = Env.get_return env in
     let env =
       if Nast_terminality.Terminal.block env named_body.fnb_nast ||
         abstract ||
         named_body.fnb_unsafe ||
         !auto_complete
       then env
-      else fun_implicit_return env pos ret named_body.fnb_nast f_kind in
+      else fun_implicit_return env pos ret f_kind in
     debug_last_pos := Pos.none;
     env, tb
   end
 
-and fun_implicit_return env pos ret _b = function
+and fun_implicit_return env pos ret = function
   | Ast.FGenerator | Ast.FAsyncGenerator -> env
   | Ast.FCoroutine
   | Ast.FSync ->
@@ -618,7 +540,7 @@ and check_using_expr has_await env ((pos, content) as using_clause) =
     (* Simple assignment to local of form `$lvar = e` *)
   | Binop (Ast.Eq None, (lvar_pos, Lvar lvar), e) ->
     let env, te, ty = expr ~is_using_clause:true env e in
-    let env = enforce_is_disposable_type env has_await (fst e) ty in
+    let env = Typing_disposable.enforce_is_disposable_type env has_await (fst e) ty in
     let env = set_local ~is_using_clause:true env lvar ty in
     (* We are assigning a new value to the local variable, so we need to
      * generate a new expression id
@@ -630,7 +552,7 @@ and check_using_expr has_await env ((pos, content) as using_clause) =
     (* Arbitrary expression. This will be assigned to a temporary *)
   | _ ->
     let env, typed_using_clause, ty = expr ~is_using_clause:true env using_clause in
-    let env = enforce_is_disposable_type env has_await pos ty in
+    let env = Typing_disposable.enforce_is_disposable_type env has_await pos ty in
     env, (typed_using_clause, [])
 
 (* Check the using clause e in
@@ -651,17 +573,6 @@ and check_using_clause env has_await ((pos, content) as using_clause) =
   | _ ->
     let env, (typed_using_clause, vars) = check_using_expr has_await env using_clause in
     env, typed_using_clause, vars
-
-(* Ensure that `ty` is a subtype of IDisposable (for `using`) or
- * IAsyncDisposable (for `await using`)
- *)
-and enforce_is_disposable_type env has_await pos ty =
-  let class_name =
-    if has_await
-    then SN.Classes.cIAsyncDisposable
-    else SN.Classes.cIDisposable in
-  let disposable_ty = (Reason.Rusing pos, Tclass ((pos, class_name), [])) in
-  Type.sub_type pos Reason.URusing env ty disposable_ty
 
 (* Require a new construct with disposable *)
 and enforce_return_disposable _env e =
@@ -729,24 +640,26 @@ and stmt env = function
       env, T.If(te, tb1, tb2)
   | Return (p, None) ->
       let env = check_inout_return env in
-      let rty = make_return_type env p (Reason.Rwitness p, Tprim Tvoid) in
-      let { Env.return_type = expected_return; _ } = Env.get_return env in
+      let rty = Typing_return.wrap_awaitable env p (Reason.Rwitness p, Tprim Tvoid) in
+      let { Typing_env_return_info.return_type = expected_return; _ } = Env.get_return env in
       Typing_suggest.save_return env expected_return rty;
       let env = Type.sub_type p Reason.URreturn env rty expected_return in
       env, T.Return (p, None)
   | Return (p, Some e) ->
       let env = check_inout_return env in
       let pos = fst e in
-      let Env.{ return_type; return_explicit; return_disposable; return_mutable; } =
+      let Typing_env_return_info.{
+        return_type; return_disposable; return_mutable; return_explicit } =
         Env.get_return env in
       let expected =
         if return_explicit
-        then Some (pos, Reason.URreturn, return_type)
+        then Some (pos, Reason.URreturn,
+          Typing_return.strip_awaitable (Env.get_fn_kind env) env return_type)
         else Some (pos, Reason.URreturn, (Reason.Rwitness p, Typing_utils.tany env)) in
       if return_disposable then enforce_return_disposable env e;
       let env, te, rty = expr ~is_using_clause:return_disposable ?expected:expected env e in
       if return_mutable then enforce_mutable_return env te;
-      let rty = make_return_type env p rty in
+      let rty = Typing_return.wrap_awaitable env p rty in
       (match snd (Env.expand_type env return_type) with
       | r, Tprim Tvoid ->
           (* Yell about returning a value from a void function. This catches
@@ -2051,7 +1964,7 @@ and expr_
             Tclass ((p, SN.Classes.cAsyncGenerator), [key; value; send])
         | Ast.FSync | Ast.FAsync ->
             failwith "Parsing should never allow this" in
-      let Env.{ return_type = expected_return; _ } = Env.get_return env in
+      let Typing_env_return_info.{ return_type = expected_return; _ } = Env.get_return env in
       let env =
         Type.sub_type p (Reason.URyield) env rty expected_return in
       let env = Env.forget_members env p in
@@ -2545,6 +2458,7 @@ and anon_make tenv p f ft idl =
   is_coroutine,
   ref 0,
   p,
+  (* Here ret_ty should include Awaitable wrapper *)
   fun ?el ?ret_ty env supplied_params supplied_arity ->
     if !is_typing_self
     then begin
@@ -2600,13 +2514,18 @@ and anon_make tenv p f ft idl =
           | Some x ->
             iter2_shortest param_modes ft.ft_params x;
             wfold_left2 inout_write_back env ft.ft_params x in
+        let env = Env.set_fn_kind env f.f_fun_kind in
         let env, hret =
           match f.f_ret with
           | None ->
             (* Do we have a contextual return type? *)
             begin match ret_ty with
-            | None -> Env.fresh_unresolved_type env
-            | Some ret_ty -> env, ret_ty
+            | None ->
+              let env, ret_ty = Env.fresh_unresolved_type env in
+              env, Typing_return.wrap_awaitable env p ret_ty
+            | Some ret_ty ->
+              (* We might need to force it to be Awaitable if it is a type variable *)
+              Typing_return.force_awaitable env p ret_ty
             end
           | Some x ->
             let ret = TI.instantiable_hint env x in
@@ -2618,18 +2537,17 @@ and anon_make tenv p f ft idl =
                 from_class = Some CIstatic } in
             Phase.localize ~ety_env env ret in
         let env = Env.set_return env
-          Env.{ return_type = hret;
-                return_disposable = false;
-                return_mutable = false;
-                return_explicit = Option.is_some ret_ty; } in
-        let env = Env.set_fn_kind env f.f_fun_kind in
+          (Typing_return.make_info f.f_fun_kind [] env
+            ~is_explicit:(Option.is_some ret_ty) hret) in
         let env, tb = block env nb.fnb_nast in
         let env =
           if Nast_terminality.Terminal.block tenv nb.fnb_nast
             || nb.fnb_unsafe || !auto_complete
           then env
-          else fun_implicit_return env p hret nb.fnb_nast f.f_fun_kind
+          else fun_implicit_return env p hret f.f_fun_kind
         in
+        (* We don't want the *uses* of the function to affect its return type *)
+        let env, hret = Env.unbind env hret in
         is_typing_self := false;
         let tfun_ = {
           T.f_annotation = save_env env;
@@ -2677,16 +2595,6 @@ and special_func env p func =
     (Reason.Rwitness p, Tclass ((p, SN.Classes.cAwaitable), [ty])) in
   env, T.make_typed_expr p result_ty (T.Special_func tfunc), result_ty
 
-and make_return_type env p rty =
-  match Env.get_fn_kind env with
-    | Ast.FCoroutine
-    | Ast.FSync -> rty
-    | Ast.FGenerator
-    (* Is an error, but caught in NastCheck. *)
-    | Ast.FAsyncGenerator -> (Reason.Rnone, Typing_utils.terr env)
-    | Ast.FAsync ->
-      (Reason.Rwitness p), Tclass ((p, SN.Classes.cAwaitable), [rty])
-
 and requires_consistent_construct = function
   | CIstatic -> true
   | CIexpr _ -> true
@@ -2718,11 +2626,6 @@ and check_expected_ty message env inferred_ty expected =
   | None ->
     env
   | Some (p, ur, expected_ty) ->
-    (* Special case for returning from an async function *)
-    let inferred_ty =
-      if ur = Reason.URreturn
-      then make_return_type env p inferred_ty
-      else inferred_ty in
     Typing_log.log_types 1 p env
     [Typing_log.Log_sub
       (Printf.sprintf "Typing.check_expected_ty %s" message,
@@ -6019,17 +5922,6 @@ and class_def tcopt c =
     Typing_requirements.check_class env tc;
     Some (class_def_ env c tc)
 
-and enforce_is_disposable env hint =
-  match hint with
-    | (_, Happly ((p, c), _)) ->
-      begin match Decl_env.get_class_dep env.Env.decl_env c with
-      | None -> ()
-      | Some c ->
-        if not c.dc_is_disposable
-        then Errors.must_extend_disposable p
-      end
-    | _ -> ()
-
 and class_def_ env c tc =
   Typing_hooks.dispatch_enter_class_def_hook c tc;
   let env = Env.set_mode env c.c_mode in
@@ -6070,7 +5962,7 @@ and class_def_ env c tc =
   SMap.iter (check_static_method tc.tc_methods) tc.tc_smethods;
   List.iter impl (class_implements_type env c);
   if tc.tc_is_disposable
-    then List.iter (c.c_extends @ c.c_uses) (enforce_is_disposable env);
+    then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
   let typed_vars = List.map c.c_vars (class_var_def env ~is_static:false c) in
   let typed_methods = List.map c.c_methods (method_def env) in
   let typed_typeconsts = List.map c.c_typeconsts (typeconst_def env) in
@@ -6296,12 +6188,6 @@ and user_attribute env ua =
     T.ua_params = typed_ua_params;
   }
 
-and make_default_return env name
-  = if snd name = SN.Members.__destruct
-    || snd name = SN.Members.__construct
-    then (Reason.Rwitness (fst name), Tprim Tvoid)
-    else (Reason.Rwitness (fst name), Typing_utils.tany env)
-
 and method_def env m =
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
@@ -6313,8 +6199,6 @@ and method_def env m =
   let env = Env.set_env_function_pos env pos in
   let reactive = Decl.fun_reactivity env.Env.decl_env m.m_user_attributes in
   let mut = TUtils.fun_mutable m.m_user_attributes in
-  let return_disposable = has_return_disposable_attribute m.m_user_attributes in
-  let return_mutable = has_mutable_return_attribute m.m_user_attributes in
   let env = Env.set_env_reactive env reactive in
   let env = Env.set_fun_mutable env mut in
   let ety_env =
@@ -6338,13 +6222,9 @@ and method_def env m =
       then Env.set_using_var env this
       else env in
   let env = Env.clear_params env in
-  let env, return = match m.m_ret with
+  let env, ty = match m.m_ret with
     | None ->
-      env,
-      Env.{ return_type = make_default_return env m.m_name;
-            return_explicit = false;
-            return_disposable = return_disposable;
-            return_mutable; }
+      env, Typing_return.make_default_return env m.m_name
     | Some ret ->
       let ret = TI.instantiable_hint env ret in
       (* If a 'this' type appears it needs to be compatible with the
@@ -6353,14 +6233,9 @@ and method_def env m =
       let ety_env =
         { (Phase.env_with_self env) with
           from_class = Some CIstatic } in
-      let env, ty = Phase.localize ~ety_env env ret in
-      if not return_disposable
-      then enforce_return_not_disposable m.m_fun_kind env ty;
-      env,
-      Env.{ return_type = ty;
-            return_explicit = true;
-            return_disposable = return_disposable;
-            return_mutable; } in
+      Phase.localize ~ety_env env ret in
+  let return = Typing_return.make_info m.m_fun_kind m.m_user_attributes env
+    ~is_explicit:(Option.is_some m.m_ret) ty in
   TI.check_params_instantiable env m.m_params;
   let env, param_tys = List.map_env env m.m_params make_param_local_ty in
   if Env.is_strict env then begin
@@ -6391,12 +6266,13 @@ and method_def env m =
       || snd m.m_name = SN.Members.__construct ->
       Some (pos, Happly((pos, "void"), []))
     | None when Env.is_strict env ->
-      suggest_return env pos return.Env.return_type; None
+      Typing_return.suggest_return env pos return.Typing_env_return_info.return_type; None
     | None -> let (pos, id) = m.m_name in
               let id = (Env.get_self_id env) ^ "::" ^ id in
               Typing_suggest.save_fun_or_method (pos, id);
               m.m_ret
-    | Some hint -> async_suggest_return (m.m_fun_kind) hint (fst m.m_name); m.m_ret in
+    | Some hint ->
+      Typing_return.async_suggest_return (m.m_fun_kind) hint (fst m.m_name); m.m_ret in
   Env.log_anonymous env;
   let m = { m with m_ret = m_ret; } in
   Typing_hooks.dispatch_exit_method_def_hook m;

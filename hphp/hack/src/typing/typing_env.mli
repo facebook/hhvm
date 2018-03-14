@@ -46,8 +46,8 @@ val get_member : bool -> env -> class_type -> string -> class_elt option
 val suggest_member : bool -> class_type -> string -> (Pos.t * string) option
 val get_construct : env -> class_type -> class_elt option * bool
 val check_todo : env -> env
-val get_return : env -> return_info
-val set_return : env -> return_info -> env
+val get_return : env -> Typing_env_return_info.t
+val set_return : env -> Typing_env_return_info.t -> env
 val get_params : env -> (locl ty * param_mode) Local_id.Map.t
 val set_param : env -> Local_id.t -> locl ty * param_mode -> env
 val clear_params : env -> env

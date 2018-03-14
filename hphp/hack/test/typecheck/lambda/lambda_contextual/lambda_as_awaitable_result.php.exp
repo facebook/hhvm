@@ -1,0 +1,12 @@
+File "lambda_as_awaitable_result.php", line 63, characters 10-45:
+Some elements in this Vector are incompatible (Typing[4110])
+  File "lambda_as_awaitable_result.php", line 62, characters 40-47:
+  This is an array key (int/string)
+  File "lambda_as_awaitable_result.php", line 65, characters 5-7:
+  It is incompatible with a float
+File "lambda_as_awaitable_result.php", line 63, characters 10-45:
+Some elements in this Vector are incompatible (Typing[4110])
+  File "lambda_as_awaitable_result.php", line 62, characters 40-47:
+  This is an array key (int/string)
+  File "lambda_as_awaitable_result.php", line 66, characters 5-8:
+  It is incompatible with a bool

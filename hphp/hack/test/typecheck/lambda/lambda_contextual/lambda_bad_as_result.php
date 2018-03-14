@@ -34,7 +34,7 @@ function getThing1(): MyClosureRunner<MyClass> {
 
 function breakIt(): void {
   $x = new MyClass();
-  $c = getThing1(false)->get();
+  $c = getThing1()->get();
   $c($x);
 }
 

@@ -1,0 +1,7 @@
+array(0) {
+}
+
+Fatal error: Uncaught TypeError: Argument 1 passed to not_a_builtin() must be an instance of int, string given in %s.php:3
+Stack trace:
+#0 %s.php(15): not_a_builtin()
+#1 {main}

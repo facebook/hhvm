@@ -1110,9 +1110,10 @@ uintptr_t tlsBaseNoInline() {
  * determine if the call used strict types.
  */
 bool useStrictTypesHelper(const Func* callee) {
-  return liveFunc() == callee
-    ? !liveFrame()->useWeakTypes()
-    : liveUnit()->useStrictTypes() && !liveUnit()->isHHFile();
+  if (liveFunc() == callee) {
+    return !liveFrame()->useWeakTypes();
+  }
+  return liveUnit()->useStrictTypes() && !liveUnit()->isHHFile();
 }
 
 void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {

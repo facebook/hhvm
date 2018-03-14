@@ -167,7 +167,13 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
 
   // Set flags
   auto const caller = inst->marker().func();
-  auto flags = caller->isBuiltin() || !caller->unit()->useStrictTypes()
+  auto const callee = funcTmp->type().hasConstVal()
+    ? funcTmp->funcVal() : nullptr;
+  auto flags = caller->isBuiltin()
+    || !caller->unit()->useStrictTypes()
+    || (callee
+        && callee->isBuiltin()
+        && !caller->unit()->useStrictTypesForBuiltins())
     ? ActRec::Flags::UseWeakTypes
     : ActRec::Flags::None;
 

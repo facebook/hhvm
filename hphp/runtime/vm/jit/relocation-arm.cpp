@@ -814,29 +814,36 @@ size_t relocateImpl(Env& env) {
            *   MOV/MOVK
            */
           if (src->IsLoadLiteral()) {
+            auto const addr =
+              env.destBlock.toDestAddress(dest->LiteralAddress());
             if (src->Mask(LoadLiteralMask) == LDR_w_lit) {
-              auto addr = reinterpret_cast<uint32_t*>(dest->LiteralAddress());
-              auto target = *addr;
+              auto target = *reinterpret_cast<uint32_t*>(addr);
               auto adjusted =
                 env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
               if (adjusted) {
-                patchTarget32(reinterpret_cast<TCA>(addr), adjusted);
+                patchTarget32(addr, adjusted);
               }
             } else {
-              auto addr = reinterpret_cast<TCA*>(dest->LiteralAddress());
-              auto target = *addr;
-              auto adjusted = env.rel.adjustedAddressAfter(target);
-              if (!adjusted) {
-                // Consider the case of a non-initialized mcprep smashableMovq
-                target = reinterpret_cast<TCA>((uint64_t(target) >> 1));
-                adjusted = env.rel.adjustedAddressAfter(target);
-                if (adjusted) {
-                  adjusted = reinterpret_cast<TCA>(
-                    (uint64_t(adjusted) << 1) | 1
-                  );
+              auto const target = *reinterpret_cast<uintptr_t*>(addr);
+              if (env.meta.addressImmediates.count(
+                    reinterpret_cast<TCA>(
+                      ~reinterpret_cast<uintptr_t>(srcAddr)))) {
+                auto munge = [] (TCA addr) {
+                  return (reinterpret_cast<uintptr_t>(addr) << 1) | 1;
+                };
+                // An mcprep smashableMovq.  During live relocation,
+                // the target will probably have been smashed before
+                // we get here. In that case, its no longer encoding a
+                // tc address, and we don't need to do anything.
+                if (target & 1) {
+                  always_assert(target == munge(srcAddr));
+                  patchTarget64(addr, reinterpret_cast<TCA>(munge(destAddr)));
                 }
+              } else {
+                auto adjusted =
+                  env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
                 if (adjusted) {
-                  patchTarget64(reinterpret_cast<TCA>(addr), adjusted);
+                  patchTarget64(addr, adjusted);
                 }
               }
             }

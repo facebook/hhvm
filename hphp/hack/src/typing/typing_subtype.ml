@@ -1103,10 +1103,9 @@ and sub_type_with_uenv
         sub_generic_params SSet.empty env
           (uenv_sub, ty_sub) (uenv_super, ty_super))
 
-  (* The following case is already handled because we are looking
-   * at expanded types.
-   *)
-  | (_, Tvar _), (_, Toption _) -> assert false
+  | (r_sub, Tvar v), (_, Toption _) ->
+    let env, ty_sub = Env.get_type env r_sub v in
+    sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
   | (_, Ttuple tyl_sub), (_, Ttuple tyl_super)
     when List.length tyl_super = List.length tyl_sub ->

@@ -1816,11 +1816,12 @@ module WithStatementAndDeclAndTypeParser
       let is_rhs_of_assignment = assignment_prefix_kind <> Prefix_none in
       assert (not (next_is_lower_precedence parser) || is_rhs_of_assignment);
 
-      let (parser1, token) = next_token parser in
-      let operator = Operator.trailing_from_token (Token.kind token) in
+      let pre_assignment_precedence = parser.precedence in
+      let (parser, token) = next_token parser in
       let default () =
+        let operator = Operator.trailing_from_token (Token.kind token) in
         let precedence = Operator.precedence operator in
-        let (parser, token) = Make.token parser1 token in
+        let (parser, token) = Make.token parser token in
         let (parser, right_term) =
           if is_rhs_of_assignment then
             (* reset the current precedence to make sure that expression on
@@ -1843,22 +1844,28 @@ module WithStatementAndDeclAndTypeParser
       ... (left_term = & right_term) ...
       *)
       if assignment_prefix_kind = Prefix_byref_assignment &&
-         Token.kind (peek_token parser1) = Ampersand then
-        let (parser2, right_term) =
+         Token.kind (peek_token parser) = Ampersand then
+        let (parser1, right_term) =
           parse_term @@ with_precedence
-            parser1
+            parser
             Operator.precedence_for_assignment_in_expressions
         in
-        if is_byref_assignment_source parser2 right_term then
-          let (parser2, token) = Make.token parser2 token in
-          let (parser2, left_term) =
-            Make.binary_expression parser2 left_term token right_term
+        if is_byref_assignment_source parser1 right_term then
+          (* We backtrack here to call smart constructors in the correct order. *)
+          let (parser, token) = Make.token parser token in
+          let (parser, right_term) =
+            parse_term @@ with_precedence
+              parser
+              Operator.precedence_for_assignment_in_expressions
           in
-          let (parser2, left_term) =
-            parse_remaining_binary_expression_helper parser2 left_term
-              parser.precedence
+          let (parser, left_term) =
+            Make.binary_expression parser left_term token right_term
           in
-          parse_remaining_expression parser2 left_term
+          let (parser, left_term) =
+            parse_remaining_binary_expression_helper parser left_term
+              pre_assignment_precedence
+          in
+          parse_remaining_expression parser left_term
         else
           default ()
       else

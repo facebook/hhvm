@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -473,8 +474,18 @@ static Array HHVM_FUNCTION(xdebug_get_code_coverage) {
     return Array::Create();
   }
 
-  auto ret = Array::Create();
+  auto executables = Array::Create();
+  if (ti->m_reqInjectionData.getCoverageWithUnused()) {
+    executables = ti->m_coverage->ReportExecutable();
+  }
+
+  auto deads = Array::Create();
+  if (ti->m_reqInjectionData.getCoverageWithDeadCode()) {
+    deads = ti->m_coverage->ReportDeadCode();
+  }
+
   auto const reports = ti->m_coverage->Report(false);
+  auto coverage = Array::Create();
   for (ArrayIter report(reports); report; ++report) {
     auto tmp = Array::Create();
     auto const lines = report.second().toArray();
@@ -484,8 +495,19 @@ static Array HHVM_FUNCTION(xdebug_get_code_coverage) {
         tmp.set(line.first(), Variant(CodeCoverage::kLineExecuted));
       }
     }
-    ret.set(report.first(), tmp);
+    coverage.set(report.first(), tmp);
   }
+
+  auto arg = Array::Create();
+  arg.set(0, coverage);
+  auto const merged = HHVM_FN(array_replace_recursive)(executables, deads, arg);
+  Array ret = Array::Create();
+  for (ArrayIter iter(merged); iter; ++iter) {
+    Array tmp = iter.second().toArray();
+    tmp->ksort(SORT_REGULAR, true);
+    ret.set(iter.first(), tmp);
+  }
+
   return ret;
 }
 
@@ -601,18 +623,11 @@ static void HHVM_FUNCTION(xdebug_print_function_stack,
 
   static void HHVM_FUNCTION(xdebug_start_code_coverage,
                             int64_t options /* = 0 */) {
-  // XDEBUG_CC_UNUSED and XDEBUG_CC_DEAD_CODE not supported right now primarily
-  // because the internal CodeCoverage class does support either unexecuted line
-  // tracking or dead code analysis
-  if (options != 0) {
-    raise_error("XDEBUG_CC_UNUSED and XDEBUG_CC_DEAD_CODE constants are not "
-                "currently supported.");
-    return;
-  }
-
   // If we get here, turn on coverage
-  auto ti = ThreadInfo::s_threadInfo.getNoCheck();
-  ti->m_reqInjectionData.setCoverage(true);
+  auto& rid = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  rid.setCoverage(true);
+  rid.setCoverageWithUnused(options & k_XDEBUG_CC_UNUSED);
+  rid.setCoverageWithDeadCode(options & k_XDEBUG_CC_DEAD_CODE);
   if (g_context->isNested()) {
     raise_notice("Calling xdebug_start_code_coverage from a nested VM instance "
                  "may cause unpredicable results");
@@ -660,6 +675,8 @@ static void HHVM_FUNCTION(xdebug_stop_code_coverage,
                           bool cleanup /* = true */) {
   auto ti = ThreadInfo::s_threadInfo.getNoCheck();
   ti->m_reqInjectionData.setCoverage(false);
+  ti->m_reqInjectionData.setCoverageWithUnused(false);
+  ti->m_reqInjectionData.setCoverageWithDeadCode(false);
   if (cleanup) {
     ti->m_coverage->Reset();
   }

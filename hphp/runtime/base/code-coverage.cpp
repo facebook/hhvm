@@ -15,7 +15,11 @@
 */
 #include "hphp/runtime/base/code-coverage.h"
 
+#include <algorithm>
 #include <fstream>
+#include <iterator>
+#include <set>
+#include <utility>
 #include <vector>
 
 #include "hphp/runtime/base/execution-context.h"
@@ -109,6 +113,33 @@ void CodeCoverage::Record(const char *filename, int line0, int line1) {
   }
 }
 
+void CodeCoverage::RecordExecutable(const char* filename,
+                                    std::set<int>&& lines) {
+  if (!filename || !*filename) {
+    return;
+  }
+
+  m_executables[filename] = std::move(lines);
+}
+
+void CodeCoverage::RecordAsNotDeadCode(const char *filename,
+                                       std::set<int>&& lines) {
+  if (!filename || !*filename) {
+    return;
+  }
+
+  const std::set<int>& execs = m_executables[filename];
+
+  std::set<int> deads;
+  std::set_difference(execs.begin(),
+                      execs.end(),
+                      lines.begin(),
+                      lines.end(),
+                      std::inserter(deads, deads.end()));
+
+  m_deads[filename] = deads;
+}
+
 Array CodeCoverage::Report(bool sys /* = true */) {
   Array ret = Array::Create();
   for (CodeCoverageMap::const_iterator iter = m_hits.begin();
@@ -122,6 +153,42 @@ Array CodeCoverage::Report(bool sys /* = true */) {
       if (lines[i]) {
         tmp.set(i, Variant((int64_t)lines[i]));
       }
+    }
+    ret.set(String(iter->first), Variant(tmp));
+  }
+
+  return ret;
+}
+
+Array CodeCoverage::ReportExecutable() {
+  Array ret = Array::Create();
+  for (CodeCoverageSet::const_iterator iter = m_executables.begin();
+       iter != m_executables.end(); ++iter) {
+    if (Extension::IsSystemlibPath(iter->first)) {
+      continue;
+    }
+    auto const& lines = iter->second;
+    Array tmp = Array::Create();
+    for (int i : lines) {
+      tmp.set(i, Variant(CodeCoverage::kLineUnused));
+    }
+    ret.set(String(iter->first), Variant(tmp));
+  }
+
+  return ret;
+}
+
+Array CodeCoverage::ReportDeadCode() {
+  Array ret = Array::Create();
+  for (CodeCoverageSet::const_iterator iter = m_deads.begin();
+       iter != m_deads.end(); ++iter) {
+    if (Extension::IsSystemlibPath(iter->first)) {
+      continue;
+    }
+    auto const& lines = iter->second;
+    Array tmp = Array::Create();
+    for (int i : lines) {
+      tmp.set(i, Variant(CodeCoverage::kLineDeadCode));
     }
     ret.set(String(iter->first), Variant(tmp));
   }
@@ -161,7 +228,19 @@ void CodeCoverage::Report(const std::string &filename) {
 
 void CodeCoverage::Reset() {
   m_hits.clear();
+  m_executables.clear();
+  m_deads.clear();
   resetCoverageCounters();
+}
+
+bool CodeCoverage::IsRecordedExecutable(const char* filename) {
+  CodeCoverageSet::const_iterator iter = m_executables.find(filename);
+  return (iter != m_executables.end());
+}
+
+bool CodeCoverage::IsRecordedDeadCode(const char* filename) {
+  CodeCoverageSet::const_iterator iter = m_deads.find(filename);
+  return (iter != m_deads.end());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

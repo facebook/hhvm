@@ -1,1 +1,15 @@
-Fatal error: XDEBUG_CC_UNUSED and XDEBUG_CC_DEAD_CODE constants are not currently supported. in %s/test/slow/ext_xdebug/code_coverage_unused.php on line 2
+array(1) {
+  ["%s/hphp/test/slow/ext_xdebug/code_coverage_unused.php"]=>
+  array(5) {
+    [3]=>
+    int(1)
+    [7]=>
+    int(-1)
+    [10]=>
+    int(1)
+    [11]=>
+    int(1)
+    [12]=>
+    int(1)
+  }
+}

@@ -41,24 +41,16 @@ let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =
 
 let fun_reactivity env user_attributes =
   let has attr = Attributes.mem attr user_attributes in
-  let find attr = Attributes.find attr user_attributes in
   let module UA = SN.UserAttributes in
 
-  if has UA.uaReactive then Reactive None
-  else if has UA.uaShallowReactive then Shallow None
-  else if has UA.uaLocalReactive then Local None
-  else match find UA.uaRxIfImplements with
-  | Some attr ->
-    Reactive (Some (conditionally_reactive_attribute_to_hint env attr))
-  | None ->
-  match find UA.uaRxShallowIfImplements with
-  | Some attr ->
-    Shallow (Some (conditionally_reactive_attribute_to_hint env attr))
-  | None ->
-  match find UA.uaRxLocalIfImplements with
-  | Some attr ->
-    Local (Some (conditionally_reactive_attribute_to_hint env attr))
-  | None -> Nonreactive
+  let rx_condition =
+    Attributes.find UA.uaOnlyRxIfImpl user_attributes
+    |> Option.map ~f:(conditionally_reactive_attribute_to_hint env) in
+
+  if has UA.uaReactive then Reactive rx_condition
+  else if has UA.uaShallowReactive then Shallow rx_condition
+  else if has UA.uaLocalReactive then Local rx_condition
+  else Nonreactive
 
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent

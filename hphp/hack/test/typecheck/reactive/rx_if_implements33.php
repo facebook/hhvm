@@ -9,7 +9,7 @@ interface Rx1 extends Rx {
 }
 
 class A {
-  <<__RxIfImplements(Rx1::class)>>
+  <<__Rx, __OnlyRxIfImpl(Rx1::class)>>
   public function f(): int {
     return 1;
   }

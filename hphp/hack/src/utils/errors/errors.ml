@@ -797,11 +797,11 @@ module NastCheck                            = struct
   let conditionally_reactive_function       = 3057 (* DONT MODIFY!!!! *)
   let multiple_conditionally_reactive_annotations = 3058 (* DONT MODIFY!!!! *)
   let conditionally_reactive_annotation_invalid_arguments = 3059 (* DONT MODIFY!!!! *)
-  let conflicting_reactive_annotations      = 3060 (* DONT MODIFY!!!! *)
-  let superglobal_in_reactive_context       = 3061 (* DONT MODIFY!!!! *)
-  let static_property_in_reactive_context   = 3062 (* DONT MODIFY!!!! *)
-  let static_in_reactive_context            = 3063 (* DONT MODIFY!!!! *)
-
+  let superglobal_in_reactive_context       = 3060 (* DONT MODIFY!!!! *)
+  let static_property_in_reactive_context   = 3061 (* DONT MODIFY!!!! *)
+  let static_in_reactive_context            = 3062 (* DONT MODIFY!!!! *)
+  let missing_reactivity_for_condition      = 3063 (* DONT MODIFY!!!! *)
+  let multiple_reactivity_annotations       = 3064 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1761,6 +1761,17 @@ let static_in_reactive_context pos name =
     "Static " ^ name ^ " cannot be used in a reactive context."
   )
 
+let missing_reactivity_for_condition pos =
+  add NastCheck.missing_reactivity_for_condition pos (
+    "__OnlyRxIfImpl annotation cannot be used without __Rx, __RxShallow " ^
+    "or __RxLocal."
+  )
+
+let multiple_reactivity_annotations pos =
+  add NastCheck.multiple_reactivity_annotations pos (
+    "Multiple <<__Rx>>, <<__RxLocal>> or <<__RxShallow>> annotations are not " ^
+    "allowed."
+  )
 
 let inout_argument_bad_expr pos =
   add NastCheck.inout_argument_bad_expr pos (
@@ -1776,27 +1787,19 @@ let illegal_destructor pos =
 
 let conditionally_reactive_function pos =
   add NastCheck.conditionally_reactive_function pos (
-    "Function cannot be marked with <<__RxIfImplements>>, " ^
-    "<<__RxShallowIfImplements>> or <<__RxLocalIfImplements>>."
+    "Function cannot be marked with <<__OnlyRxIfImpl>> annotation."
   )
 
 let multiple_conditionally_reactive_annotations pos name =
   add NastCheck.multiple_conditionally_reactive_annotations pos (
-    "Method '" ^ name ^ "' has multiple <<__RxIfImplements>>, <<__RxShallowIfImplements>> "  ^
-    "or <<__RxLocalIfImplements>> annotations."
+    "Method '" ^ name ^ "' has multiple <<__OnlyRxIfImpl>> annotations."
   )
 
 let conditionally_reactive_annotation_invalid_arguments pos =
   add NastCheck.conditionally_reactive_annotation_invalid_arguments pos (
-    "Method is marked with <<__RxIfImplements>>, <<__RxShallowIfImplements>> " ^
-    "or <<__RxLocalIfImplements>> attributes that have invalid arguments." ^
-    "These attributes must have one argument and it should be " ^
+    "Method is marked with <<__OnlyRxIfImpl>> attribute that have " ^
+    "invalid arguments. This attribute must have one argument and it should be " ^
     "'::class' class constant."
-  )
-
-let conflicting_reactive_annotations pos =
-  add NastCheck.conflicting_reactive_annotations pos (
-    "Method cannot be marked as reactive and conditionally reactive at the same time."
   )
 
 let superglobal_in_reactive_context pos name =

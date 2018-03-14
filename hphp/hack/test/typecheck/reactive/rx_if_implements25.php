@@ -3,7 +3,7 @@
 interface Rx1 {}
 
 interface I {
-  <<__RxLocalIfImplements(Rx1::class)>>
+  <<__RxLocal, __OnlyRxIfImpl(Rx1::class)>>
   public function condlocal(): int;
 }
 

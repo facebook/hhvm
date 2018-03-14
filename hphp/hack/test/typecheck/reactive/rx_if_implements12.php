@@ -6,7 +6,7 @@ interface Rx1 {
 }
 
 abstract class A {
-  <<__RxIfImplements(Rx1::class)>>
+  <<__Rx, __OnlyRxIfImpl(Rx1::class)>>
   public function mayberx(): int {
     return 1;
   }

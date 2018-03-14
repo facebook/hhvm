@@ -4,6 +4,6 @@ interface Rx1 {}
 
 abstract class A {
   // ERROR: conflicting annotations
-  <<__RxIfImplements(Rx1::class), __RxLocalIfImplements(Rx1::class)>>
+  <<__Rx, __RxLocal, __OnlyRxIfImpl(Rx1::class)>>
   public abstract function mayberx2(): void;
 }

@@ -6,7 +6,7 @@ interface Rx {
 }
 
 class A {
-  <<__RxIfImplements(Rx::class)>>
+  <<__Rx, __OnlyRxIfImpl(Rx::class)>>
   public static function f(): int {
     return 1;
   }

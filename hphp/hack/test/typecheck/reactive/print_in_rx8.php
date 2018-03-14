@@ -9,7 +9,7 @@ function rxlocal(): void {
 interface Rx {}
 
 class A {
-  <<__RxLocalIfImplements(Rx::class)>>
+  <<__RxLocal, __OnlyRxIfImpl(Rx::class)>>
   public function f(): void {
     // OK
     print 1;

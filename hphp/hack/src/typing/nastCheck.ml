@@ -342,42 +342,53 @@ let is_magic =
   fun (_, s) ->
     Hashtbl.mem h s
 
-let fun_is_conditionally_reactive user_attributes =
-  Attributes.mem SN.UserAttributes.uaRxIfImplements user_attributes ||
-  Attributes.mem SN.UserAttributes.uaRxShallowIfImplements user_attributes ||
-  Attributes.mem SN.UserAttributes.uaRxLocalIfImplements user_attributes
-
 let check_conditionally_reactive_annotation_params p params =
   match params with
   | [_, Class_const (_, (_, prop))] when prop = "class" -> ()
   | _ -> Errors.conditionally_reactive_annotation_invalid_arguments p
 
-let check_conditionally_reactive_annotations p method_name user_attributes =
+let check_conditionally_reactive_annotations is_reactive p method_name user_attributes =
   ignore @@ Core_list.fold user_attributes
     ~init:false
     ~f:(fun seen { ua_name = (_, name); ua_params } ->
-    if name = SN.UserAttributes.uaRxIfImplements ||
-       name = SN.UserAttributes.uaRxShallowIfImplements ||
-       name = SN.UserAttributes.uaRxLocalIfImplements
+    if name = SN.UserAttributes.uaOnlyRxIfImpl
     then begin
       if seen then begin
         Errors.multiple_conditionally_reactive_annotations p method_name;
         seen
       end
       else begin
-        check_conditionally_reactive_annotation_params p ua_params;
+        if is_reactive
+        then check_conditionally_reactive_annotation_params p ua_params
+        else Errors.missing_reactivity_for_condition p;
         true
       end
     end
     else seen
   )
 
+let is_some_reactivity_attribute { ua_name = (_, name); _ } =
+  name = SN.UserAttributes.uaReactive ||
+  name = SN.UserAttributes.uaLocalReactive ||
+  name = SN.UserAttributes.uaShallowReactive
+
 (* During NastCheck, all reactivity kinds are the same *)
-let fun_is_reactive ~is_method user_attributes =
-  Attributes.mem SN.UserAttributes.uaReactive user_attributes ||
-  Attributes.mem SN.UserAttributes.uaLocalReactive user_attributes ||
-  Attributes.mem SN.UserAttributes.uaShallowReactive user_attributes ||
-  (is_method && fun_is_conditionally_reactive user_attributes)
+let fun_is_reactive user_attributes =
+  Core_list.exists user_attributes ~f:is_some_reactivity_attribute
+
+let ensure_single_reactivity_attribute user_attributes =
+  let rec check l seen =
+    match l with
+    | [] -> ()
+    | x :: xs when is_some_reactivity_attribute x ->
+      if seen
+      then Errors.multiple_reactivity_annotations (fst x.ua_name)
+      else check xs true
+    | _ :: xs -> check xs seen in
+  check user_attributes false
+
+let fun_is_conditionally_reactive user_attributes =
+  Attributes.mem SN.UserAttributes.uaOnlyRxIfImpl user_attributes
 
 let rec fun_ tenv f named_body =
   if !auto_complete then ()
@@ -388,8 +399,7 @@ let rec fun_ tenv f named_body =
                 imm_ctrl_ctx = Toplevel;
                 typedef_tparams = [];
                 tenv = tenv;
-                is_reactive =
-                  fun_is_reactive ~is_method:false f.f_user_attributes
+                is_reactive = fun_is_reactive f.f_user_attributes
                 } in
     func env f named_body
   end
@@ -408,7 +418,7 @@ and func env f named_body =
   let env = { env with
     tenv = Env.set_mode tenv f.f_mode;
     t_is_finally = false;
-    is_reactive = fun_is_reactive ~is_method:false f.f_user_attributes;
+    is_reactive = fun_is_reactive f.f_user_attributes;
   } in
   maybe hint env f.f_ret;
   (* Functions can't be mutable, only methods can *)
@@ -419,6 +429,9 @@ and func env f named_body =
     Errors.mutable_return_annotated_decls_must_be_reactive "function" p fname;
   if fun_is_conditionally_reactive f.f_user_attributes
   then Errors.conditionally_reactive_function p;
+
+  if env.is_reactive
+  then ensure_single_reactivity_attribute f.f_user_attributes;
 
   List.iter f.f_tparams (tparam env);
   let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
@@ -866,7 +879,7 @@ and check_static_memoized_function m =
 
 and method_ (env, is_static) m =
   let env =
-    { env with is_reactive = fun_is_reactive ~is_method:true m.m_user_attributes } in
+    { env with is_reactive = fun_is_reactive m.m_user_attributes } in
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
 
@@ -900,12 +913,10 @@ and method_ (env, is_static) m =
     && not env.is_reactive then
     Errors.mutable_return_annotated_decls_must_be_reactive "method" p name;
 
-  let _ =
-    let is_reactive = fun_is_reactive ~is_method:false m.m_user_attributes in
-    let is_conditionally_reactive = fun_is_conditionally_reactive m.m_user_attributes in
-    if is_reactive && is_conditionally_reactive
-    then Errors.conflicting_reactive_annotations p in
-  check_conditionally_reactive_annotations p name m.m_user_attributes;
+  if env.is_reactive
+  then ensure_single_reactivity_attribute m.m_user_attributes;
+
+  check_conditionally_reactive_annotations env.is_reactive p name m.m_user_attributes;
 
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
   List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);

@@ -1,2 +1,2 @@
-File "rx_if_implements11.php", line 8, characters 28-35:
-Method 'mayberx2' has multiple <<__RxIfImplements>>, <<__RxShallowIfImplements>> or <<__RxLocalIfImplements>> annotations. (NastCheck[3058])
+File "rx_if_implements11.php", line 7, characters 5-8:
+Multiple <<__Rx>>, <<__RxLocal>> or <<__RxShallow>> annotations are not allowed. (NastCheck[3064])

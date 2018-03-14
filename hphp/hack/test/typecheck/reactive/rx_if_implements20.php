@@ -6,15 +6,15 @@ abstract class A {
   public abstract function nonrx(): int;
   <<__RxLocal>>
   public abstract function localrx(): int;
-  <<__RxLocalIfImplements(Rx1::class)>>
+  <<__RxLocal, __OnlyRxIfImpl(Rx1::class)>>
   public abstract function condlocalrx(): int;
   <<__RxShallow>>
   public abstract function shallowrx(): int;
-  <<__RxShallowIfImplements(Rx1::class)>>
+  <<__RxShallow, __OnlyRxIfImpl(Rx1::class)>>
   public abstract function condshallowrx(): int;
   <<__Rx>>
   public abstract function rx(): int;
-  <<__RxIfImplements(Rx1::class)>>
+  <<__Rx, __OnlyRxIfImpl(Rx1::class)>>
   public abstract function condrx(): int;
 }
 

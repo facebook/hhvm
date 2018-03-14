@@ -3,13 +3,13 @@
 interface Rx1 {}
 
 abstract class A {
-  <<__RxShallowIfImplements(Rx1::class)>>
+  <<__RxShallow, __OnlyRxIfImpl(Rx1::class)>>
   public abstract function condshallowrx(): int;
 }
 
 abstract class A0 extends A {
   // OK
-  <<__Override, __RxShallowIfImplements(Rx1::class)>>
+  <<__Override, __RxShallow, __OnlyRxIfImpl(Rx1::class)>>
   public function condshallowrx(): int {
     return 1;
   }
@@ -17,7 +17,7 @@ abstract class A0 extends A {
 
 abstract class A1 extends A {
   // OK
-  <<__Override, __RxIfImplements(Rx1::class)>>
+  <<__Override, __Rx, __OnlyRxIfImpl(Rx1::class)>>
   public function condshallowrx(): int {
     return 1;
   }

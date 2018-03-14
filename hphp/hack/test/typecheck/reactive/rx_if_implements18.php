@@ -11,11 +11,11 @@ class C {
 }
 
 abstract class A {
-  <<__RxShallowIfImplements(Rx1::class)>>
+  <<__RxShallow, __OnlyRxIfImpl(Rx1::class)>>
   public abstract function mayberx(C $c): int;
 }
 
 abstract class B extends A {
-  <<__Override, __RxShallowIfImplements(Rx2::class)>>
+  <<__Override, __RxShallow, __OnlyRxIfImpl(Rx2::class)>>
   public abstract function mayberx(C $c): int;
 }

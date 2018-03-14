@@ -3,7 +3,7 @@
 interface Rx {}
 
 class A {
-  <<__RxIfImplements(Rx::class)>>
+  <<__Rx, __OnlyRxIfImpl(Rx::class)>>
   static function f(): int {
     return 1;
   }

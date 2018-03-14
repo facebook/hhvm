@@ -777,8 +777,8 @@ module WithExpressionAndStatementAndTypeParser
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | Bar ->
-      let (parser, right) = parse_xhp_children_term parser1 in
-      let (parser, token) = Make.token parser token in
+      let (parser, token) = Make.token parser1 token in
+      let (parser, right) = parse_xhp_children_term parser in
       let (parser, result) = Make.binary_expression parser left token right in
       parse_xhp_children_bar parser result
     | _ -> (parser, left)

@@ -2448,10 +2448,10 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_xhp_spread_attribute parser =
     let (parser, left_brace, _) = next_xhp_element_token parser in
+    let (parser, left_brace) = Make.token parser left_brace in
     let (parser, ellipsis) = assert_token parser DotDotDot in
     let (parser, expression) = parse_expression_with_reset_precedence parser in
     let (parser, right_brace) = require_right_brace parser in
-    let (parser, left_brace) = Make.token parser left_brace in
     let (parser, node) =
       Make.xhp_spread_attribute
         parser

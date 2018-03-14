@@ -24,6 +24,7 @@
 #include <folly/Bits.h>
 
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 

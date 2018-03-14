@@ -8,14 +8,11 @@
  *
 *)
 
+module Syntax = Full_fidelity_positioned_syntax
 module EditableTrivia = Full_fidelity_editable_trivia
 module SourceText = Full_fidelity_source_text
-module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_positioned_syntax)
-module PositionedTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_positioned_syntax)
-module ParserErrors = Full_fidelity_parser_errors
-  .WithSyntax(Full_fidelity_positioned_syntax)
+module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
+module ParserErrors = Full_fidelity_parser_errors.WithSyntax(Syntax)
 module SyntaxError = Full_fidelity_syntax_error
 module TestUtils = Full_fidelity_test_utils
 module TriviaKind = Full_fidelity_trivia_kind
@@ -82,17 +79,16 @@ let remove_whitespace text =
       | _ -> begin Buffer.add_char buffer ch; aux (i + 1) end in
   aux 0
 
-
 let test_minimal source =
   let file_path = Relative_path.(create Dummy "<test_minimal>") in
   let source_text = SourceText.make file_path source in
-  let syntax_tree = SyntaxTree.make source_text in
+  let syntax_tree = CallOrder.verify source_text in
   TestUtils.to_formatted_sexp_string (SyntaxTree.root syntax_tree)
 
 let test_trivia source =
   let file_path = Relative_path.(create Dummy "<test_trivia>") in
   let source_text = SourceText.make file_path source in
-  let syntax_tree = SyntaxTree.make source_text in
+  let syntax_tree = CallOrder.verify source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in
   let (no_trivia_tree, trivia) = TestUtils.rewrite_editable_tree_no_trivia editable in
   let pretty_no_trivia = Full_fidelity_pretty_printer.pretty_print no_trivia_tree in
@@ -107,7 +103,7 @@ let test_trivia source =
 let test_mode source =
   let file_path = Relative_path.(create Dummy "<test_mode>") in
   let source_text = SourceText.make file_path source in
-  let syntax_tree = SyntaxTree.make source_text in
+  let syntax_tree = CallOrder.verify source_text in
   let lang = SyntaxTree.language syntax_tree in
   let mode = SyntaxTree.mode syntax_tree in
   let is_strict = SyntaxTree.is_strict syntax_tree in
@@ -120,7 +116,7 @@ let test_errors source =
   let file_path = Relative_path.(create Dummy "<test_errors>") in
   let source_text = SourceText.make file_path source in
   let offset_to_position = SourceText.offset_to_position source_text in
-  let syntax_tree = PositionedTree.make source_text in
+  let syntax_tree = CallOrder.verify source_text in
   let error_env = ParserErrors.make_env syntax_tree
     ~disallow_elvis_space:true
   in
@@ -322,6 +318,7 @@ let test_suite =
   "Full_fidelity_suite" >::: (run_tests test_data)
 
 let main () =
+  Printexc.record_backtrace true;
   run_test_tt_main test_suite
 
 let _ = main ()

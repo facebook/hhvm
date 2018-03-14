@@ -126,3 +126,64 @@ let tree_to_sexp_string_ignore_trivia tree =
   |> rewrite_tree_no_trivia
   |> to_sexp
   |> Sexp.to_string_mach
+
+let tree_dump_node node =
+  let print level text =
+    let buf = Buffer.create (level * 2 + String.length text) in
+    let () =
+      for i = 1 to level do Buffer.add_string buf "> " done;
+      Buffer.add_string buf text
+    in
+    Buffer.contents buf
+  in
+  let rec aux level node =
+    match Syntax.syntax node with
+    | Syntax.Token token ->
+      [print level (TokenKind.to_string (Token.kind token))]
+    | _ ->
+      let children =
+        List.concat_map ~f:(aux @@ level + 1) (Syntax.children node)
+      in
+      let name = print level (SyntaxKind.to_string (Syntax.kind node)) in
+      children @ [name]
+  in
+  aux 0 node
+
+let tree_dump_list lst =
+  List.concat_map ~f:tree_dump_node lst
+  |> String.concat "\n"
+
+let printer w1 w2 s1 s2 =
+  let fmt w s =
+    let len = (w - (String.length s)) in
+    s ^ String.make len ' '
+  in
+  "| " ^ fmt w1 s1 ^ " | " ^ fmt w2 s2 ^ " |\n"
+
+let width l =
+  let max_length m s = max m (String.length s) in
+  List.fold_left ~f:max_length ~init:0 l
+  |> max 8
+
+let adjust l1 l2 =
+  let aux lst len =
+    if List.length lst < len
+    then lst @ List.init ~f:(fun _ -> "") (len - (List.length lst))
+    else lst
+  in
+  let len = max (List.length l1) (List.length l2) in
+  aux l1 len, aux l2 len
+
+let dump_diff expected actual =
+  let l1 = List.concat_map ~f:tree_dump_node expected in
+  let l2 = List.concat_map ~f:tree_dump_node actual in
+  let l1, l2 = adjust l1 l2 in
+  let w1, w2 = width l1, width l2 in
+  let separator = String.make (w1 + w2 + 7) '-'  ^ "\n" in
+  let printer = printer w1 w2 in
+  let header = printer "EXPECTED" "ACTUAL" in
+  let body =
+    List.map2_exn ~f:printer l1 l2
+    |> String.concat ""
+  in
+  separator ^ header ^ body ^ separator

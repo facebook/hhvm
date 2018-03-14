@@ -697,16 +697,25 @@ end (* GenerateFFParserSig *)
 
 module GenerateFFVerifySmartConstructors = struct
   let to_constructor_methods x =
-    let fields = Core_list.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i)
-    in
-    let units = map_and_concat_separated " " (fun _ -> "()") fields in
-    let stack_rev = String.concat " :: " (List.rev fields) in
-    let stack = String.concat " " fields in
+    let params = Core_list.mapi x.fields ~f:(fun i _ -> sprintf "p%d" i) in
+    let args = Core_list.mapi x.fields ~f:(fun i _ -> sprintf "a%d" i) in
     sprintf "
-  let make_%s %s = function
-    | %s :: rem -> Syntax.make_%s %s :: rem, ()
+  let make_%s %s stack =
+    match stack with
+    | %s :: rem ->
+      let () = verify ~stack [%s] [%s] \"%s\" in
+      let node = Syntax.make_%s %s in
+      node :: rem, node
     | _ -> failwith \"Unexpected stack state\"
-  " x.type_name units stack_rev x.type_name stack
+    "
+    x.type_name
+    (String.concat " " params)
+    (String.concat " :: " (List.rev args))
+    (String.concat "; " params)
+    (String.concat "; " args)
+    x.type_name
+    x.type_name
+    (String.concat " " params)
 
   let full_fidelity_verify_smart_constructors_template: string =
     (make_header MLStyle "
@@ -714,27 +723,53 @@ module GenerateFFVerifySmartConstructors = struct
  * build AST.
  ") ^ "
 
-module type SC_S = SmartConstructors.SmartConstructors_S
-
-module WithSyntax(Syntax : Syntax_sig.Syntax_S)
-: (SC_S
-  with module Token = Syntax.Token
-  and type t = Syntax.t list
-  ) = struct
+module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module Token = Syntax.Token
   type t = Syntax.t list
-  type r = unit
+  type r = Syntax.t
+
+  exception NotEquals of
+    string * Syntax.t list * Syntax.t list * Syntax.t list
+  exception NotPhysicallyEquals of
+    string * Syntax.t list * Syntax.t list * Syntax.t list
+
+  let verify ~stack params args cons_name =
+    let equals e1 e2 =
+      if e1 != e2 then
+        if e1 = e2
+        then
+          raise @@ NotPhysicallyEquals
+            (cons_name
+            , List.rev stack
+            , params
+            , args
+            )
+        else
+          raise @@ NotEquals
+            (cons_name
+            , List.rev stack
+            , params
+            , args
+            )
+    in
+    Core_list.iter2_exn ~f:equals params args
 
   let initial_state () = []
 
-  let make_token token stack = Syntax.make_token token :: stack, ()
+  let make_token token stack =
+    let token = Syntax.make_token token in
+    token :: stack, token
 
-  let make_missing (s, o) stack = Syntax.make_missing s o :: stack, ()
+  let make_missing (s, o) stack =
+    let missing = Syntax.make_missing s o in
+    missing :: stack, missing
 
   let make_list (s, o) items stack =
     if items <> [] then
       let (h, t) = Core_list.split_n stack (List.length items) in
-      Syntax.make_list s o (List.rev h) :: t, ()
+      let () = verify ~stack items (List.rev h) \"list\" in
+      let lst = Syntax.make_list s o items in
+      lst :: t, lst
     else make_missing (s, o) stack
 CONSTRUCTOR_METHODS
 end (* WithSyntax *)
@@ -758,11 +793,11 @@ end (* GenerateFFVerifySmartConstructors *)
 
 module GenerateFFSyntaxSmartConstructors = struct
   let to_constructor_methods x =
-    let fields = Core_list.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i)
+    let fields = Core_list.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i)
     in
     let stack = String.concat " " fields in
     sprintf "  let make_%s %s () = (), Syntax.make_%s %s\n"
-  x.type_name stack x.type_name stack
+      x.type_name stack x.type_name stack
 
   let full_fidelity_syntax_smart_constructors_template: string =
     (make_header MLStyle "
@@ -770,10 +805,7 @@ module GenerateFFSyntaxSmartConstructors = struct
  * build AST.
  ") ^ "
 
-module type SC_S = SmartConstructors.SmartConstructors_S
-
-module WithSyntax(Syntax : Syntax_sig.Syntax_S)
-: (SC_S with module Token = Syntax.Token and type r = Syntax.t) = struct
+module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module Token = Syntax.Token
   type t = unit
   type r = Syntax.t

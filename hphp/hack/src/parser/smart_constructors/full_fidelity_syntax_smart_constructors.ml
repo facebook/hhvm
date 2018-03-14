@@ -21,10 +21,7 @@
  
  *)
 
-module type SC_S = SmartConstructors.SmartConstructors_S
-
-module WithSyntax(Syntax : Syntax_sig.Syntax_S)
-: (SC_S with module Token = Syntax.Token and type r = Syntax.t) = struct
+module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module Token = Syntax.Token
   type t = unit
   type r = Syntax.t

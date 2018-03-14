@@ -123,9 +123,7 @@ module WithExpressionAndDeclAndTypeParser
     match peek_token_kind parser with
     | Async
     | Coroutine
-    | Function ->
-      let (parser, missing) = Make.missing parser (pos parser) in
-      parse_possible_php_function parser missing
+    | Function -> parse_possible_php_function parser
     | Abstract
     | Final
     | Interface
@@ -242,7 +240,7 @@ module WithExpressionAndDeclAndTypeParser
     in
     (parser, s, has_suffix)
 
-  and parse_possible_php_function parser attribute_specification =
+  and parse_possible_php_function parser =
     (* ERROR RECOVERY: PHP supports nested named functions, but Hack does not.
     (Hack only supports anonymous nested functions as expressions.)
 
@@ -258,10 +256,7 @@ module WithExpressionAndDeclAndTypeParser
     let kind0 = peek_token_kind ~lookahead:0 parser in
     let kind1 = peek_token_kind ~lookahead:1 parser in
     match kind0, kind1 with
-    | Async, Function
-      when peek_token_kind ~lookahead:2 parser = LeftParen ->
-      parse_expression_statement parser
-    | Coroutine, Function
+    | (Async | Coroutine), Function
       when peek_token_kind ~lookahead:2 parser = LeftParen ->
       parse_expression_statement parser
     | Function, LeftParen (* Verbose-style lambda *)
@@ -269,10 +264,11 @@ module WithExpressionAndDeclAndTypeParser
     | Async, LeftBrace (* Async block *)
       -> parse_expression_statement parser
     | _ ->
+      let (parser, missing) = Make.missing parser (pos parser) in
       with_decl_parser
         parser
         (fun p ->
-          DeclParser.parse_function_declaration p attribute_specification)
+          DeclParser.parse_function_declaration p missing)
 
   and parse_php_class parser =
     (* PHP allows classes nested inside of functions, but hack does not *)

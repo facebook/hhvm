@@ -1518,19 +1518,6 @@ module WithExpressionAndStatementAndTypeParser
       Make.simple_initializer parser token default_value
     | _ -> Make.missing parser (pos parser)
 
-  and parse_function_declaration_or_expression_statement parser attribute_specification =
-    if SC.is_missing attribute_specification then
-      (* if attribute section is missing - it might be either
-         function declaration or expression statement containing
-         anonymous function - use statement parser to determine in which case
-         we are currently in *)
-      with_statement_parser
-        parser
-        (fun p ->
-          StatementParser.parse_possible_php_function p attribute_specification)
-    else
-      parse_function_declaration parser attribute_specification
-
   and parse_function_declaration parser attribute_specification =
     let (parser, modifiers, _) = parse_modifiers parser in
     let (parser, header) =
@@ -1756,25 +1743,33 @@ module WithExpressionAndStatementAndTypeParser
   and parse_enum_or_classish_or_function_declaration parser =
     (* An enum, type alias, function, interface, trait or class may all
       begin with an attribute. *)
-    let parser, attribute_specification =
+    let parser1, attribute_specification =
       parse_attribute_specification_opt parser in
-    let parser1, token = next_token parser in
+    let parser2, token = next_token parser1 in
     match Token.kind token with
-    | Enum -> parse_enum_declaration parser attribute_specification
-    | Type | Newtype ->
-      parse_alias_declaration parser attribute_specification
+    | Enum -> parse_enum_declaration parser1 attribute_specification
+    | Type | Newtype -> parse_alias_declaration parser1 attribute_specification
     | Async | Coroutine | Function ->
-      parse_function_declaration_or_expression_statement parser attribute_specification
+      if SC.is_missing attribute_specification then
+        (* if attribute section is missing - it might be either
+           function declaration or expression statement containing
+           anonymous function - use statement parser to determine in which case
+           we are currently in *)
+        with_statement_parser
+          parser
+          StatementParser.parse_possible_php_function
+      else
+        parse_function_declaration parser1 attribute_specification
     | Abstract
     | Final
     | Interface
     | Trait
-    | Class -> parse_classish_declaration parser attribute_specification
+    | Class -> parse_classish_declaration parser1 attribute_specification
     | _ ->
       (* ERROR RECOVERY TODO: Produce an error here. *)
       (* TODO: This is wrong; we have lost the attribute specification
       from the tree. *)
-      let (parser, token) = Make.token parser1 token in
+      let (parser, token) = Make.token parser2 token in
       Make.error parser token
 
   and parse_declaration parser =
@@ -1817,8 +1812,9 @@ module WithExpressionAndStatementAndTypeParser
       | Async
       | Coroutine
       | Function ->
-        let (parser, missing) = Make.missing parser (pos parser) in
-        parse_function_declaration_or_expression_statement parser missing
+        with_statement_parser
+          parser
+          StatementParser.parse_possible_php_function
       | LessThanLessThan ->
         parse_enum_or_classish_or_function_declaration parser
         (* TODO figure out what global const differs from class const *)

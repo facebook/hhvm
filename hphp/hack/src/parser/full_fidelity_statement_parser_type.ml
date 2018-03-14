@@ -35,7 +35,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val parse_markup_section: t
         -> is_leading_section:bool
         -> t * SC.r * bool
-      val parse_possible_php_function: t -> SC.r -> t * SC.r
+      val parse_possible_php_function: t -> t * SC.r
     end (* StatementParser_S *)
   end (* WithLexer *)
 end (* WithSyntax *)

@@ -48,7 +48,7 @@ void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnFailCallback,
 }
 
 void c_ExternalThreadEventWaitHandle::sweep() {
-  assert(getState() == STATE_WAITING);
+  assertx(getState() == STATE_WAITING);
 
   if (m_event->cancel()) {
     // canceled; the processing thread will take care of cleanup
@@ -109,8 +109,8 @@ void c_ExternalThreadEventWaitHandle::destroyEvent(bool sweeping /*= false */) {
 }
 
 void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
-  assert(getState() == STATE_WAITING);
-  assert(hasExactlyOneRef() || sweeping);
+  assertx(getState() == STATE_WAITING);
+  assertx(hasExactlyOneRef() || sweeping);
 
   if (isInContext()) {
     unregisterFromContext();
@@ -158,7 +158,7 @@ bool c_ExternalThreadEventWaitHandle::cancel(const Object& exception) {
 }
 
 void c_ExternalThreadEventWaitHandle::process() {
-  assert(getState() == STATE_WAITING);
+  assertx(getState() == STATE_WAITING);
 
   if (isInContext()) {
     unregisterFromContext();
@@ -174,7 +174,7 @@ void c_ExternalThreadEventWaitHandle::process() {
   try {
     m_event->unserialize(result);
   } catch (const Object& exception) {
-    assert(exception->instanceof(SystemLib::s_ThrowableClass));
+    assertx(exception->instanceof(SystemLib::s_ThrowableClass));
     auto parentChain = getParentChain();
     setState(STATE_FAILED);
     tvWriteObject(exception.get(), &m_resultOrException);
@@ -200,7 +200,7 @@ void c_ExternalThreadEventWaitHandle::process() {
     throw;
   }
 
-  assert(cellIsPlausible(result));
+  assertx(cellIsPlausible(result));
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
@@ -223,9 +223,9 @@ String c_ExternalThreadEventWaitHandle::getName() {
 }
 
 void c_ExternalThreadEventWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-  assert(getState() == STATE_WAITING);
-  assert(getContextIdx() == ctx_idx);
+  assertx(AsioSession::Get()->getContext(ctx_idx));
+  assertx(getState() == STATE_WAITING);
+  assertx(getContextIdx() == ctx_idx);
 
   // Move us to the parent context.
   setContextIdx(getContextIdx() - 1);

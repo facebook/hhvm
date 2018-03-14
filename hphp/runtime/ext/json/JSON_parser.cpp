@@ -303,7 +303,7 @@ namespace {
 
 NEVER_INLINE
 static void tvDecRefRange(TypedValue* begin, TypedValue* end) {
-  assert(begin <= end);
+  assertx(begin <= end);
   for (auto tv = begin; tv != end; ++tv) {
     tvDecRefGen(tv);
   }
@@ -349,7 +349,7 @@ struct SimpleParser {
       : p(input),
         top(buffer),
         array_depth(-kMaxArrayDepth) /* Start negative to simplify check. */ {
-    assert(input[length] == 0);  // Parser relies on sentinel to avoid checks.
+    assertx(input[length] == 0);  // Parser relies on sentinel to avoid checks.
   }
 
   /*
@@ -576,17 +576,17 @@ struct UncheckedBuffer {
 #endif
   }
   void append(char c) {
-    assert(p < end);
+    assertx(p < end);
     *p++ = c;
   }
   void shrinkBy(int decrease) {
     p -= decrease;
-    assert(p >= begin);
+    assertx(p >= begin);
   }
   int size() { return p - begin; }
   // NUL-terminates the output before returning it, for backward-compatibility.
   char* data() {
-    assert(p < end);
+    assertx(p < end);
     *p = 0;
     return begin;
   }
@@ -773,7 +773,7 @@ static void json_create_zval(Variant &z, UncheckedBuffer &buf, int type,
     case KindOfInt64: {
       bool bigint = false;
       const char *p = buf.data();
-      assert(p);
+      assertx(p);
       if (p == NULL) {
         z = int64_t(0);
         return;
@@ -1049,7 +1049,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
       s_json_parser->error_code = JSON_ERROR_UTF8;
       return false;
     }
-    assert(b >= 0);
+    assertx(b >= 0);
 
     if ((b & 127) == b) {
       /*<fb>*/

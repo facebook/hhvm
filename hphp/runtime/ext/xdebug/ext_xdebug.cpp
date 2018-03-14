@@ -62,12 +62,12 @@ static ActRec* get_call_fp(Offset* off = nullptr) {
   // We want the frame of our callee's callee
   VMRegAnchor _; // Ensure consistent state for vmfp
   auto fp0 = g_context->getPrevVMState(vmfp());
-  assert(fp0);
+  assertx(fp0);
   auto fp1 = g_context->getPrevVMState(fp0, off);
 
   // fp1 should only be NULL if fp0 is the top-level pseudo-main
   if (!fp1) {
-    assert(fp0->m_func->isPseudoMain());
+    assertx(fp0->m_func->isPseudoMain());
     fp1 = nullptr;
   }
   return fp1;
@@ -85,7 +85,7 @@ const StaticString
 // "special" characters. They are replaced with _. The string is modified in
 // place, so there shouldn't be more than one reference to it.
 static void replace_special_chars(StringData* str) {
-  assert(!str->hasMultipleRefs());
+  assertx(!str->hasMultipleRefs());
   auto const len = str->size();
   auto data = str->mutableData();
   for (int i = 0; i < len; i++) {
@@ -240,7 +240,7 @@ DECLARE_EXTERN_REQUEST_LOCAL(ProfilerFactory, s_profiler_factory);
 
 // Returns the attached xdebug profiler. Requires one is attached.
 static inline XDebugProfiler* xdebug_profiler() {
-  assert(XDEBUG_GLOBAL(ProfilerAttached));
+  assertx(XDEBUG_GLOBAL(ProfilerAttached));
   return (XDebugProfiler*) s_profiler_factory->getProfiler();
 }
 
@@ -298,7 +298,7 @@ static void start_profiling(XDebugProfiler* profiler) {
 // Attempts to attach the xdebug profiler to the current thread. Assumes it
 // is not already attached. Raises an error on failure.
 static void attach_xdebug_profiler() {
-  assert(!XDEBUG_GLOBAL(ProfilerAttached));
+  assertx(!XDEBUG_GLOBAL(ProfilerAttached));
   if (s_profiler_factory->start(ProfilerKind::XDebug, 0, false)) {
     XDEBUG_GLOBAL(ProfilerAttached) = true;
     // Enable profiling and tracing if we need to
@@ -320,14 +320,14 @@ static void attach_xdebug_profiler() {
 
 // Detaches the xdebug profiler from the current thread
 static void detach_xdebug_profiler() {
-  assert(XDEBUG_GLOBAL(ProfilerAttached));
+  assertx(XDEBUG_GLOBAL(ProfilerAttached));
   s_profiler_factory->stop();
   XDEBUG_GLOBAL(ProfilerAttached) = false;
 }
 
 // Detaches the xdebug profiler if it's no longer needed
 static void detach_xdebug_profiler_if_needed() {
-  assert(XDEBUG_GLOBAL(ProfilerAttached));
+  assertx(XDEBUG_GLOBAL(ProfilerAttached));
   auto profiler = xdebug_profiler();
   if (!profiler->isNeeded()) {
     detach_xdebug_profiler();
@@ -397,7 +397,7 @@ static String HHVM_FUNCTION(xdebug_call_file) {
   if (fp == nullptr) {
     VMRegAnchor _;
     func = g_context->getPrevFunc(vmfp());
-    assert(func);
+    assertx(func);
   } else {
     func = fp->func();
   }
@@ -413,7 +413,7 @@ static int64_t HHVM_FUNCTION(xdebug_call_line) {
   }
 
   auto const unit = fp->m_func->unit();
-  assert(unit);
+  assertx(unit);
   return unit->getLineNumber(pc);
 }
 
@@ -514,7 +514,7 @@ static Array HHVM_FUNCTION(xdebug_get_declared_vars) {
   auto const numNames = func->numNamedLocals();
   PackedArrayInit vars(numNames);
   for (Id i = 0; i < numNames; ++i) {
-    assert(func->lookupVarId(func->localVarName(i)) == i);
+    assertx(func->lookupVarId(func->localVarName(i)) == i);
     String varname(const_cast<StringData*>(func->localVarName(i)));
     // Skip the internal closure "0Closure" variable
     if (!s_closure_varname.equal(varname)) {
@@ -586,7 +586,7 @@ static bool HHVM_FUNCTION(xdebug_is_enabled) {
 static int64_t HHVM_FUNCTION(xdebug_memory_usage) {
   // With jemalloc, the usage can go negative (see memory_get_usage)
   auto const usage = tl_heap->getStats().usage();
-  assert(use_jemalloc || usage >= 0);
+  assertx(use_jemalloc || usage >= 0);
   return std::max<int64_t>(usage, 0);
 }
 
@@ -842,7 +842,7 @@ static void loadEnvConfig(std::map<std::string, std::string>& envCfg) {
 static std::map<const char*, int> config_values;
 
 void XDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) {
-  assert(config_values.empty());
+  assertx(config_values.empty());
 
   auto debugger = xdebug_hdf["Eval"]["Debugger"];
 
@@ -1016,7 +1016,7 @@ void XDebugExtension::requestInit() {
   #undef XDEBUG_OPT
 
   // Initialize our breakpoint maps.
-  assert(s_xdebug_breakpoints.isNull());
+  assertx(s_xdebug_breakpoints.isNull());
   s_xdebug_breakpoints.getCheck();
 
   // Let the server do initialization

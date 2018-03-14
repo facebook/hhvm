@@ -107,7 +107,7 @@ Transport::Method PageletTransport::getMethod() {
 }
 
 std::string PageletTransport::getHeader(const char *name) {
-  assert(name && *name);
+  assertx(name && *name);
   HeaderMap::const_iterator iter = m_requestHeaders.find(name);
   if (iter != m_requestHeaders.end()) {
     return iter->second[0];
@@ -120,13 +120,13 @@ void PageletTransport::getHeaders(HeaderMap &headers) {
 }
 
 void PageletTransport::addHeaderImpl(const char *name, const char *value) {
-  assert(name && *name);
-  assert(value);
+  assertx(name && *name);
+  assertx(value);
   m_responseHeaders[name].push_back(value);
 }
 
 void PageletTransport::removeHeaderImpl(const char *name) {
-  assert(name && *name);
+  assertx(name && *name);
   m_responseHeaders.erase(name);
 }
 
@@ -191,7 +191,7 @@ Array PageletTransport::getAsyncResults(bool allow_empty) {
 
   {
     Lock lock(this);
-    assert(m_done || !m_pipeline.empty() || allow_empty);
+    assertx(m_done || !m_pipeline.empty() || allow_empty);
     while (!m_pipeline.empty()) {
       std::string &str = m_pipeline.front();
       String response(str.c_str(), str.size(), CopyString);
@@ -270,7 +270,7 @@ void PageletTransport::incRefCount() {
 }
 
 void PageletTransport::decRefCount() {
-  assert(m_refCount.load() > 0);
+  assertx(m_refCount.load() > 0);
   if (--m_refCount == 0) {
     delete this;
   }
@@ -464,10 +464,10 @@ Array PageletServer::AsyncTaskResult(const Resource& task) {
 }
 
 void PageletServer::AddToPipeline(const std::string &s) {
-  assert(!s.empty());
+  assertx(!s.empty());
   PageletTransport *job =
     dynamic_cast<PageletTransport *>(g_context->getTransport());
-  assert(job);
+  assertx(job);
   job->addToPipeline(s);
 }
 

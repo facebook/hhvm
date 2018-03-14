@@ -62,9 +62,9 @@ void TypeConstraint::init() {
   auto const mptr = nameToAnnotType(m_typeName);
   if (mptr) {
     m_type = *mptr;
-    assert(getAnnotDataType(m_type) != KindOfPersistentString);
+    assertx(getAnnotDataType(m_type) != KindOfPersistentString);
     if (RuntimeOption::EvalHackArrDVArrs) {
-      assert(m_type != AnnotType::VArray &&
+      assertx(m_type != AnnotType::VArray &&
              m_type != AnnotType::DArray &&
              m_type != AnnotType::VArrOrDArr);
       if (m_typeName->isame(s_varray.get())) {
@@ -267,15 +267,15 @@ std::pair<const TypeAliasReq*, Class*> getTypeAliasOrClassWithAutoload(
     }
   }
 
-  assert(!def || !klass);
+  assertx(!def || !klass);
   return std::make_pair(def, klass);
 }
 
 }
 
 MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
-  assert(!isSelf() && !isParent() && !isCallable());
-  assert(IMPLIES(
+  assertx(!isSelf() && !isParent() && !isCallable());
+  assertx(IMPLIES(
     !hasConstraint() || isTypeVar() || isTypeConstant(),
     isMixed()));
 
@@ -285,12 +285,12 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
   }
 
   auto t = underlyingDataType();
-  assert(t);
+  assertx(t);
 
   // If we aren't a class or type alias, nothing special to do.
   if (!isObject()) return t;
 
-  assert(t == KindOfObject);
+  assertx(t == KindOfObject);
   auto p = getTypeAliasOrClassWithAutoload(m_namedEntity, m_typeName);
   auto td = p.first;
   auto c = p.second;
@@ -321,8 +321,8 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
 }
 
 bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
-  assert(tv->m_type != KindOfObject);
-  assert(isObject());
+  assertx(tv->m_type != KindOfObject);
+  assertx(isObject());
 
   auto p = getTypeAliasOrClassWithAutoload(m_namedEntity, m_typeName);
   auto td = p.first;
@@ -340,20 +340,20 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
         return is_callable(tvAsCVarRef(tv));
       case AnnotAction::ObjectCheck: break;
       case AnnotAction::VArrayCheck:
-        assert(tvIsArray(tv));
+        assertx(tvIsArray(tv));
         return tv->m_data.parr->isVArray();
       case AnnotAction::DArrayCheck:
-        assert(tvIsArray(tv));
+        assertx(tvIsArray(tv));
         return tv->m_data.parr->isDArray();
       case AnnotAction::VArrayOrDArrayCheck:
-        assert(tvIsArray(tv));
+        assertx(tvIsArray(tv));
         return !tv->m_data.parr->isNotDVArray();
       case AnnotAction::NonVArrayOrDArrayCheck:
-        assert(tvIsArray(tv));
+        assertx(tvIsArray(tv));
         return tv->m_data.parr->isNotDVArray();
     }
-    assert(result == AnnotAction::ObjectCheck);
-    assert(td->type == AnnotType::Object);
+    assertx(result == AnnotAction::ObjectCheck);
+    assertx(td->type == AnnotType::Object);
     // Fall through to the check below, since this could be a type
     // alias to an enum type
     c = td->klass;
@@ -377,7 +377,7 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
 }
 
 bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
-  assert(isObject() && m_namedEntity && m_typeName);
+  assertx(isObject() && m_namedEntity && m_typeName);
   // Look up the type alias (autoloading if necessary)
   // and fail if we can't find it
   auto const td = getTypeAliasWithAutoload(m_namedEntity, m_typeName);
@@ -429,7 +429,7 @@ void TypeConstraint::verifyReturnNonNull(TypedValue* tv, const Func* func,
 }
 
 bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
-  assert(hasConstraint() && !isTypeVar() && !isMixed() && !isTypeConstant());
+  assertx(hasConstraint() && !isTypeVar() && !isMixed() && !isTypeConstant());
 
   // This is part of the interpreter runtime; perf matters.
   if (tv->m_type == KindOfRef) {
@@ -450,7 +450,7 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
       }
       // We can't save the Class* since it moves around from request
       // to request.
-      assert(m_namedEntity);
+      assertx(m_namedEntity);
       c = Unit::lookupClass(m_namedEntity);
     } else {
       switch (metaType()) {
@@ -507,19 +507,19 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
     case AnnotAction::CallableCheck:
       return is_callable(tvAsCVarRef(tv));
     case AnnotAction::ObjectCheck:
-      assert(isObject());
+      assertx(isObject());
       return checkTypeAliasNonObj(tv);
     case AnnotAction::VArrayCheck:
-      assert(tvIsArray(tv));
+      assertx(tvIsArray(tv));
       return tv->m_data.parr->isVArray();
     case AnnotAction::DArrayCheck:
-      assert(tvIsArray(tv));
+      assertx(tvIsArray(tv));
       return tv->m_data.parr->isDArray();
     case AnnotAction::VArrayOrDArrayCheck:
-      assert(tvIsArray(tv));
+      assertx(tvIsArray(tv));
       return !tv->m_data.parr->isNotDVArray();
     case AnnotAction::NonVArrayOrDArrayCheck:
-      assert(tvIsArray(tv));
+      assertx(tvIsArray(tv));
       return tv->m_data.parr->isNotDVArray();
   }
   not_reached();
@@ -862,7 +862,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
   switch (tc.metaType()) {
     case AnnotMetaType::Precise: {
       auto const dt = tc.underlyingDataType();
-      assert(dt.hasValue());
+      assertx(dt.hasValue());
       switch (*dt) {
         case KindOfNull:         return MK::Null;
         case KindOfBoolean:

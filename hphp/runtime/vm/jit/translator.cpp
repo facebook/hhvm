@@ -659,7 +659,7 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define FOUR(a, b, c, d) a(0) b(1) c(2) d(3)
 // Iterator bytecodes have multiple local immediates but not the Local flag, so
 // they should never flow through this function.
-#define LA(n) assert(idx == 0xff); idx = n;
+#define LA(n) assertx(idx == 0xff); idx = n;
 #define MA(n)
 #define BLA(n)
 #define SLA(n)
@@ -686,7 +686,7 @@ size_t localImmIdx(Op op) {
   switch (op) {
     OPCODES
   }
-  assert(idx != 0xff);
+  assertx(idx != 0xff);
   return idx;
 }
 
@@ -696,10 +696,10 @@ size_t memberKeyImmIdx(Op op) {
 #undef LA
 #undef KA
 #define LA(n)
-#define KA(n) assert(idx == 0xff); idx = n;
+#define KA(n) assertx(idx == 0xff); idx = n;
     OPCODES
   }
-  assert(idx != 0xff);
+  assertx(idx != 0xff);
   return idx;
 }
 

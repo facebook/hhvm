@@ -176,7 +176,7 @@ Variant *get_intercept_handler(const String& name, int8_t* flag) {
   if (handler == nullptr) {
     return nullptr;
   }
-  assert(*flag);
+  assertx(*flag);
   return handler;
 }
 

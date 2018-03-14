@@ -339,7 +339,7 @@ Flags load(Local& env,
 
   auto const meta = env.global.ainfo.find(acls);
   if (!meta) return FNone{};
-  assert(meta->index < kMaxTrackedALocs);
+  assertx(meta->index < kMaxTrackedALocs);
 
   auto& tracked = env.state.tracked[meta->index];
 

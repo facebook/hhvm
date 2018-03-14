@@ -74,7 +74,7 @@ StringData* concat_ss(StringData* v1, StringData* v2) {
 
   auto const ret = v1->append(v2->slice());
   if (UNLIKELY(ret != v1)) {
-    assert(v1->hasExactlyOneRef());
+    assertx(v1->hasExactlyOneRef());
     v1->release();
   }
   return ret;
@@ -108,7 +108,7 @@ StringData* concat_si(StringData* v1, int64_t v2) {
 
   auto const ret = v1->append(s2);
   if (UNLIKELY(ret != v1)) {
-    assert(v1->hasExactlyOneRef());
+    assertx(v1->hasExactlyOneRef());
     v1->release();
   }
   return ret;
@@ -126,7 +126,7 @@ StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
   auto const ret = v1->append(v2->slice(), v3->slice());
 
   if (UNLIKELY(ret != v1)) {
-    assert(v1->hasExactlyOneRef());
+    assertx(v1->hasExactlyOneRef());
     v1->release();
   }
   return ret;
@@ -145,7 +145,7 @@ StringData* concat_s4(StringData* v1, StringData* v2,
   auto const ret = v1->append(v2->slice(), v3->slice(), v4->slice());
 
   if (UNLIKELY(ret != v1)) {
-    assert(v1->hasExactlyOneRef());
+    assertx(v1->hasExactlyOneRef());
     v1->release();
   }
   return ret;

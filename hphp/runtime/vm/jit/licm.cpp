@@ -599,7 +599,7 @@ void hoist_invariant(LoopEnv& env) {
     auto const preh = pre_header(env);
     FTRACE(1, "moving {} to B{}\n", inst->toString(), preh->id());
     inst->block()->erase(inst);
-    assert(!inst->taken() && !inst->next());
+    assertx(!inst->taken() && !inst->next());
     preh->insert(std::prev(preh->end()), inst);
   }
 }
@@ -647,7 +647,7 @@ void hoist_check_instruction(LoopEnv& env,
   // Note that the current pre_header jump may have arguments.  We need to
   // preserve them in the new pre_header, so we have to keep the same
   // instruction.
-  assert(preh->back().is(Jmp));
+  assertx(preh->back().is(Jmp));
   auto const jmp       = &preh->back();
   auto const new_preh  = env.global.unit.defBlock(linfo(env).numInvocations);
   preh->erase(jmp);

@@ -738,7 +738,7 @@ struct OptVisit {
       if (arch() == Arch::ARM) {
         // After lowering, only [base, index lsl #scale] and [base, #imm]
         // are allowed where the range of #imm is [-256 .. 255]
-        assert(ptr.base.isValid());
+        assertx(ptr.base.isValid());
         auto disp = ptr.disp + def.disp;
         if (ptr.index.isValid()) {
           if (disp != 0) return;

@@ -334,7 +334,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
           auto delegate = gen->m_delegate.m_data.pobj;
           // We only checked that our delegate is an object, but we can't get
           // into this situation if the object itself isn't a Generator
-          assert(delegate->getVMClass() == Generator::getClass());
+          assertx(delegate->getVMClass() == Generator::getClass());
           // Ok so we're in a `yield from` situation, we know our ar is garbage.
           // The ar that we're looking for is the ar of the delegate generator,
           // so grab that here.
@@ -347,7 +347,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       if (ar->isFCallAwait()) {
         // If there was an interped FCallAwait, and we return via the
         // jit, we need to deal with the suspend case here.
-        assert(ar->retSlot()->m_aux.u_fcallAwaitFlag < 2);
+        assertx(ar->retSlot()->m_aux.u_fcallAwaitFlag < 2);
         if (ar->retSlot()->m_aux.u_fcallAwaitFlag) {
           start = tc::ustubs().fcallAwaitSuspendHelper;
           break;
@@ -365,7 +365,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
     case REQ_POST_DEBUGGER_RET: {
       auto fp = vmfp();
       auto caller = fp->func();
-      assert(g_unwind_rds.isInit());
+      assertx(g_unwind_rds.isInit());
       vmpc() = caller->unit()->at(caller->base() +
                                   g_unwind_rds->debuggerReturnOff);
       FTRACE(3, "REQ_DEBUGGER_RET: pc {} in {}\n",

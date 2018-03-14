@@ -681,7 +681,7 @@ void xdebug_var_export_text_ansi(
       if (v.isVecArray()) return "vec";
       if (v.isDict()) return "dict";
       if (v.isKeyset()) return "keyset";
-      assert(v.isArray());
+      assertx(v.isArray());
       return "array";
     }();
 
@@ -923,7 +923,7 @@ void xdebug_var_export_fancy(
       if (v.isVecArray()) return "vec";
       if (v.isDict()) return "dict";
       if (v.isKeyset()) return "keyset";
-      assert(v.isArray());
+      assertx(v.isArray());
       return "array";
     }();
 

@@ -123,7 +123,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     int n = 1000;
     if (m_mallocSize) imDump(ptrs, n);
 #endif
-    assert(m_mallocSize == 0);
+    assertx(m_mallocSize == 0);
     m_mallocSize = 0;
   }
   void requestShutdown() override {
@@ -131,7 +131,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     void *ptrs[1000];
     int n = 1000;
     if (m_mallocSize) imDump(ptrs, n);
-    assert(m_mallocSize == 0);
+    assertx(m_mallocSize == 0);
 #endif
     m_mallocSize = 0;
   }
@@ -140,7 +140,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     if (m_mallocSize + size < (size_t)RuntimeOption::ImageMemoryMaxBytes) {
 #ifdef IM_MEMORY_CHECK
       void *ptr = malloc(sizeof(ln) + sizeof(size) + size);
@@ -165,7 +165,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     size_t bytes = nmemb * size;
     if (m_mallocSize + bytes < (size_t)RuntimeOption::ImageMemoryMaxBytes) {
 #ifdef IM_MEMORY_CHECK
@@ -200,11 +200,11 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 #ifdef IM_MEMORY_CHECK
     void *lnPtr = (char *)sizePtr - sizeof(ln);
     int count = m_alloced.erase((char*)sizePtr - sizeof(ln));
-    assert(count == 1); // double free on failure
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(count == 1); // double free on failure
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     free(lnPtr);
 #else
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     free(sizePtr);
 #endif
   }
@@ -215,7 +215,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
 
 #ifdef IM_MEMORY_CHECK
     if (!ptr) return imMalloc(size, ln);
@@ -241,7 +241,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     if (m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
         !(tmp = realloc(lnPtr, sizeof(ln) + sizeof(size) + size))) {
       int count = m_alloced.erase(ptr);
-      assert(count == 1); // double free on failure
+      assertx(count == 1); // double free on failure
       free(lnPtr);
       return nullptr;
     }
@@ -250,7 +250,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     m_mallocSize += diff;
     if (tmp != lnPtr) {
       int count = m_alloced.erase(lnPtr);
-      assert(count == 1);
+      assertx(count == 1);
       m_alloced.insert(tmp);
     }
     return ((char *)tmp + sizeof(ln) + sizeof(size));
@@ -272,7 +272,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     for (std::set<void*>::iterator iter = m_alloced.begin();
          iter != m_alloced.end(); ++i, ++iter) {
       void *p = *iter;
-      assert(p);
+      assertx(p);
       if (i < n) ptrs[i] = p;
       int ln;
       size_t size;
@@ -2336,7 +2336,7 @@ static gdImagePtr _php_image_create_from(const String& filename,
   }
   else {
     /* TODO: try and force the stream to be FILE* */
-    assert(false);
+    assertx(false);
   }
 
   if (!im && fp) {

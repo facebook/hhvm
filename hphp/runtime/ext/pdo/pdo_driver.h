@@ -444,7 +444,7 @@ protected:
  */
 struct PDOResource : SweepableResourceData {
   explicit PDOResource(sp_PDOConnection conn) : m_conn(conn) {
-    assert(m_conn);
+    assertx(m_conn);
   }
   virtual ~PDOResource() {}
 

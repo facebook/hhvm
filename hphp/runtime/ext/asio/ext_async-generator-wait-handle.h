@@ -98,7 +98,7 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
 };
 
 inline c_AsyncGeneratorWaitHandle* c_Awaitable::asAsyncGenerator() {
-  assert(getKind() == Kind::AsyncGenerator);
+  assertx(getKind() == Kind::AsyncGenerator);
   return static_cast<c_AsyncGeneratorWaitHandle*>(this);
 }
 

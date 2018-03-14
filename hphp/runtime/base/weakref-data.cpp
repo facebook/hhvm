@@ -54,7 +54,7 @@ req::shared_ptr<WeakRefData> WeakRefData::forObject(Object obj) {
     if (!(weakmap->insert(
             {(uintptr_t)obj.get(), weak_data}).second)) {
       // Failure. Key should be unique.  We just checked.
-      assert(false);
+      assertx(false);
     }
   }
   return wr_data;

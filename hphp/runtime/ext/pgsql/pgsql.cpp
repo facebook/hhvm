@@ -363,7 +363,7 @@ bool PGSQLResult::convertFieldRow(const Variant& row, const Variant& field,
   Variant actual_field;
   int actual_row;
 
-  assert(out_row && out_field && "Output parameters cannot be null");
+  assertx(out_row && out_field && "Output parameters cannot be null");
 
   if (!fn_name) {
     fn_name = "__internal_pgsql_func";

@@ -93,8 +93,8 @@ void PlainFile::sweep() {
 bool PlainFile::open(const String& filename, const String& mode) {
   int fd;
   FILE *f;
-  assert(m_stream == nullptr);
-  assert(getFd() == -1);
+  assertx(m_stream == nullptr);
+  assertx(getFd() == -1);
 
   // For these definded in php fopen but C stream have different modes
   switch (mode[0]) {
@@ -166,8 +166,8 @@ bool PlainFile::closeImpl() {
 // virtual functions
 
 int64_t PlainFile::readImpl(char *buffer, int64_t length) {
-  assert(valid());
-  assert(length > 0);
+  assertx(valid());
+  assertx(length > 0);
   // use read instead of fread to handle EOL in stdin
   size_t ret = ::read(getFd(), buffer, length);
   if (ret == 0
@@ -179,7 +179,7 @@ int64_t PlainFile::readImpl(char *buffer, int64_t length) {
 }
 
 int PlainFile::getc() {
-  assert(valid());
+  assertx(valid());
   return File::getc();
 }
 
@@ -196,8 +196,8 @@ String PlainFile::read(int64_t length) {
 }
 
 int64_t PlainFile::writeImpl(const char *buffer, int64_t length) {
-  assert(valid());
-  assert(length > 0);
+  assertx(valid());
+  assertx(length > 0);
 
   // use write instead of fwrite to be consistent with read
   // o.w., read-and-write files would not work
@@ -206,7 +206,7 @@ int64_t PlainFile::writeImpl(const char *buffer, int64_t length) {
 }
 
 bool PlainFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
-  assert(valid());
+  assertx(valid());
 
   if (whence == SEEK_CUR) {
     off_t result = lseek(getFd(), 0, SEEK_CUR);
@@ -235,12 +235,12 @@ bool PlainFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
 }
 
 int64_t PlainFile::tell() {
-  assert(valid());
+  assertx(valid());
   return getPosition();
 }
 
 bool PlainFile::eof() {
-  assert(valid());
+  assertx(valid());
   int64_t avail = bufferedLen();
   if (avail > 0) {
     return false;
@@ -249,7 +249,7 @@ bool PlainFile::eof() {
 }
 
 bool PlainFile::rewind() {
-  assert(valid());
+  assertx(valid());
   seek(0);
   setWritePosition(0);
   setReadPosition(0);
@@ -258,7 +258,7 @@ bool PlainFile::rewind() {
 }
 
 bool PlainFile::stat(struct stat *sb) {
-  assert(valid());
+  assertx(valid());
   return ::fstat(getFd(), sb) == 0;
 }
 
@@ -266,13 +266,13 @@ bool PlainFile::flush() {
   if (m_stream) {
     return fflush(m_stream) == 0;
   }
-  assert(valid());
+  assertx(valid());
   // No need to flush a file descriptor.
   return true;
 }
 
 bool PlainFile::truncate(int64_t size) {
-  assert(valid());
+  assertx(valid());
   return ftruncate(getFd(), size) == 0;
 }
 
@@ -333,7 +333,7 @@ const Variant& BuiltinFiles::GetSTDIN() {
     auto f = req::make<BuiltinFile>(tl_stdin ? tl_stdin : stdin);
     g_builtin_files->m_stdin = f;
     f->setId(1);
-    assert(f->getId() == 1);
+    assertx(f->getId() == 1);
   }
   return g_builtin_files->m_stdin;
 }
@@ -343,7 +343,7 @@ const Variant& BuiltinFiles::GetSTDOUT() {
     auto f = req::make<BuiltinFile>(tl_stdout ? tl_stdout : stdout);
     g_builtin_files->m_stdout = f;
     f->setId(2);
-    assert(f->getId() == 2);
+    assertx(f->getId() == 2);
   }
   return g_builtin_files->m_stdout;
 }
@@ -353,7 +353,7 @@ const Variant& BuiltinFiles::GetSTDERR() {
     auto f = req::make<BuiltinFile>(tl_stderr ? tl_stderr : stderr);
     g_builtin_files->m_stderr = f;
     f->setId(3);
-    assert(f->getId() == 3);
+    assertx(f->getId() == 3);
   }
   return g_builtin_files->m_stderr;
 }

@@ -141,7 +141,7 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
   }
 
   if (mw->slen + slen+1 >= mw->smax) {
-    assert(mw->slen + slen > 0);
+    assertx(mw->slen + slen > 0);
     char* ts = (char*)realloc(mw->s, (mw->slen + slen) << 1);
     if (ts == nullptr) {
       mw->oom = true;
@@ -830,7 +830,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
 #ifdef USE_JEMALLOC
     if (mallctl) {
-      assert(mallctlnametomib && mallctlbymib);
+      assertx(mallctlnametomib && mallctlbymib);
       if (cmd == "jemalloc-stats") {
         // Force jemalloc to update stats cached for use by mallctl().
         uint32_t error = 0;

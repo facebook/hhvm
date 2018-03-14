@@ -220,7 +220,7 @@ inline bool less(bool v1, const Array& v2) {
   }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
-  assert(v2.isKeyset());
+  assertx(v2.isKeyset());
   throw_keyset_compare_exception();
  }
 inline bool less(bool v1, const Object& v2) { return less(v1,v2.toBoolean()); }
@@ -245,7 +245,7 @@ inline bool more(bool v1, const Array& v2) {
   }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
-  assert(v2.isKeyset());
+  assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
 inline bool more(bool v1, const Object& v2) { return more(v1,v2.toBoolean()); }
@@ -313,7 +313,7 @@ inline bool less(int /*v1*/, const Array& v2) {
   }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
-  assert(v2.isKeyset());
+  assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
 inline bool less(int v1, const Object& v2) {
@@ -336,7 +336,7 @@ inline bool more(int /*v1*/, const Array& v2) {
   }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
-  assert(v2.isKeyset());
+  assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
 inline bool more(int v1, const Object& v2) {
@@ -412,7 +412,7 @@ inline bool less(int64_t /*v1*/, const Array& v2) {
   }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
-  assert(v2.isKeyset());
+  assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
 inline bool less(int64_t v1, const Object& v2) {
@@ -441,7 +441,7 @@ inline bool more(int64_t /*v1*/, const Array& v2) {
   }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
-  assert(v2.isKeyset());
+  assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
 inline bool more(int64_t v1, const Object& v2) {
@@ -522,7 +522,7 @@ inline bool less(double /*v1*/, const Array& v2) {
   }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
-  assert(v2.isKeyset());
+  assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
 inline bool less(double v1, const Object& v2) {
@@ -551,7 +551,7 @@ inline bool more(double /*v1*/, const Array& v2) {
   }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
-  assert(v2.isKeyset());
+  assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
 inline bool more(double v1, const Object& v2) {
@@ -672,7 +672,7 @@ inline bool less(const StringData *v1, const Array& v2) {
   }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
-  assert(v2.isKeyset());
+  assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
 inline bool less(const StringData *v1, const Object& v2) {
@@ -725,7 +725,7 @@ inline bool more(const StringData *v1, const Array& v2) {
   }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
-  assert(v2.isKeyset());
+  assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
 inline bool more(const StringData *v1, const Object& v2) {
@@ -755,8 +755,8 @@ inline bool moreEqual(const StringData* v1, int64_t v2) {
 
 int64_t compare(const StringData* v1, int64_t v2);
 inline int64_t compare(const StringData* v1, const StringData* v2) {
-  assert(v1);
-  assert(v2);
+  assertx(v1);
+  assertx(v2);
   // Clamp return values to just -1, 0, 1.
   auto cmp = v1->compare(v2);
   return (cmp < 0) ? -1 : ((cmp > 0) ? 1 : 0);
@@ -1036,8 +1036,8 @@ inline bool more(const Object& v1, const Variant& v2) {
 // ObjectData*
 
 inline bool equal(const ObjectData* v1, const ObjectData* v2) {
-  assert(v1);
-  assert(v2);
+  assertx(v1);
+  assertx(v2);
   return v1->equal(*v2);
 }
 
@@ -1046,8 +1046,8 @@ inline bool nequal(const ObjectData* v1, const ObjectData* v2) {
 }
 
 inline bool less(const ObjectData* v1, const ObjectData* v2) {
-  assert(v1);
-  assert(v2);
+  assertx(v1);
+  assertx(v2);
   return v1->less(*v2);
 }
 
@@ -1056,8 +1056,8 @@ inline bool lessEqual(const ObjectData* v1, const ObjectData* v2) {
 }
 
 inline bool more(const ObjectData* v1, const ObjectData* v2) {
-  assert(v1);
-  assert(v2);
+  assertx(v1);
+  assertx(v2);
   return v1->more(*v2);
 }
 
@@ -1066,8 +1066,8 @@ inline bool moreEqual(const ObjectData* v1, const ObjectData* v2) {
 }
 
 inline int64_t compare(const ObjectData* v1, const ObjectData* v2) {
-  assert(v1);
-  assert(v2);
+  assertx(v1);
+  assertx(v2);
   return v1->compare(*v2);
 }
 
@@ -1132,7 +1132,7 @@ inline bool less(const Resource& /*v1*/, const Array& v2) {
   }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
-  assert(v2.isKeyset());
+  assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
 inline bool less(const Resource& /*v1*/, const Object& /*v2*/) {
@@ -1157,7 +1157,7 @@ inline bool more(const Resource& /*v1*/, const Array& v2) {
   }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
-  assert(v2.isKeyset());
+  assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
 inline bool more(const Resource& /*v1*/, const Object& /*v2*/) {
@@ -1178,8 +1178,8 @@ inline bool nequal(const ResourceHdr* v1, const ResourceHdr* v2) {
 }
 
 inline bool less(const ResourceHdr* v1, const ResourceHdr* v2) {
-  assert(v1);
-  assert(v2);
+  assertx(v1);
+  assertx(v2);
   return v1->data()->o_toInt64() < v2->data()->o_toInt64();
 }
 
@@ -1188,8 +1188,8 @@ inline bool lessEqual(const ResourceHdr* v1, const ResourceHdr* v2) {
 }
 
 inline bool more(const ResourceHdr* v1, const ResourceHdr* v2) {
-  assert(v1);
-  assert(v2);
+  assertx(v1);
+  assertx(v2);
   return v1->data()->o_toInt64() > v2->data()->o_toInt64();
 }
 
@@ -1198,8 +1198,8 @@ inline bool moreEqual(const ResourceHdr* v1, const ResourceHdr* v2) {
 }
 
 inline int64_t compare(const ResourceHdr* v1, const ResourceHdr* v2) {
-  assert(v1);
-  assert(v1);
+  assertx(v1);
+  assertx(v1);
   auto id1 = v1->data()->o_toInt64();
   auto id2 = v2->data()->o_toInt64();
   return (id1 < id2) ? -1 : ((id1 > id2) ? 1 : 0);

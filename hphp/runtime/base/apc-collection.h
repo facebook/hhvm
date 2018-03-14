@@ -32,8 +32,8 @@ struct APCCollection {
   static void Delete(APCHandle*);
 
   static const APCCollection* fromHandle(const APCHandle* handle) {
-    assert(handle->checkInvariants());
-    assert(handle->kind() == APCKind::SharedCollection);
+    assertx(handle->checkInvariants());
+    assertx(handle->kind() == APCKind::SharedCollection);
     static_assert(offsetof(APCCollection, m_handle) == 0, "");
     return reinterpret_cast<const APCCollection*>(handle);
   }

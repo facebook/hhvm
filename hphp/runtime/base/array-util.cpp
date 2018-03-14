@@ -502,12 +502,12 @@ void ArrayUtil::Walk(Variant& input, PFUNC_WALK walk_function,
                      const void *data, bool recursive /* = false */,
                      PointerSet *seen /* = NULL */,
                      const Variant& userdata /* = uninit_variant */) {
-  assert(walk_function);
+  assertx(walk_function);
 
   // The Optional is just to avoid copy constructing MArrayIter.
   folly::Optional<MArrayIter> miter;
   create_miter_for_walk(miter, input);
-  assert(miter.hasValue());
+  assertx(miter.hasValue());
 
   Variant k;
   Variant v;
@@ -515,7 +515,7 @@ void ArrayUtil::Walk(Variant& input, PFUNC_WALK walk_function,
     k = miter->key();
     v.assignRef(miter->val());
     if (recursive && v.isArray()) {
-      assert(seen);
+      assertx(seen);
       ArrayData *arr = v.getArrayData();
 
       if (v.isReferenced()) {

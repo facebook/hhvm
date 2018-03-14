@@ -123,8 +123,8 @@ Repo::~Repo() {
 
 std::string Repo::s_cliFile;
 void Repo::setCliFile(const std::string& cliFile) {
-  assert(s_cliFile.empty());
-  assert(t_dh.isNull());
+  assertx(s_cliFile.empty());
+  assertx(t_dh.isNull());
   s_cliFile = cliFile;
 }
 
@@ -238,7 +238,7 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
     }
   }
 
-  assert(Process::IsInMainThread());
+  assertx(Process::IsInMainThread());
   exit(1);
 }
 
@@ -473,7 +473,7 @@ void Repo::txPop() {
   // rollback an inner transaction we eventually end up rolling back the outer
   // transaction instead (Sqlite doesn't support rolling back partial
   // transactions).
-  assert(m_txDepth > 0);
+  assertx(m_txDepth > 0);
   if (m_txDepth > 1) {
     m_txDepth--;
     return;
@@ -534,7 +534,7 @@ void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {
   } catch (const std::exception& e) {
     TRACE(0, "unexpected exception in commitUnit: %s\n",
           e.what());
-    assert(false);
+    assertx(false);
   }
 }
 
@@ -546,7 +546,7 @@ void Repo::connect() {
   } else if (!RuntimeOption::RepoEvalMode.compare("central")) {
     m_evalRepoId = RepoIdCentral;
   } else {
-    assert(!RuntimeOption::RepoEvalMode.compare("readonly"));
+    assertx(!RuntimeOption::RepoEvalMode.compare("readonly"));
     m_evalRepoId = RepoIdInvalid;
   }
   TRACE(1, "Repo.Eval.Mode=%s\n",
@@ -570,7 +570,7 @@ void Repo::disconnect() {
 void Repo::initCentral() {
   std::string error;
 
-  assert(m_dbc == nullptr);
+  assertx(m_dbc == nullptr);
   auto tryPath = [this, &error](const char* path) {
     std::string subErr;
     if (openCentral(path, subErr) == RepoStatus::error) {
@@ -854,7 +854,7 @@ void Repo::initLocal() {
     if (!RuntimeOption::RepoLocalMode.compare("rw")) {
       isWritable = true;
     } else {
-      assert(!RuntimeOption::RepoLocalMode.compare("r-"));
+      assertx(!RuntimeOption::RepoLocalMode.compare("r-"));
       isWritable = false;
     }
 

@@ -461,7 +461,7 @@ void raise_param_type_warning(
   } else if (strncmp(func_name, "tg1_", 4) == 0) {
     func_name += 4;
   }
-  assert(param_num > 0);
+  assertx(param_num > 0);
   auto msg = folly::sformat(
     "{}() expects parameter {} to be {}, {} given",
     func_name,

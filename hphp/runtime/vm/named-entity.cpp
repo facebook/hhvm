@@ -82,7 +82,7 @@ const TypeAliasReq* NamedEntity::getCachedTypeAlias() const {
 }
 
 void NamedEntity::pushClass(Class* cls) {
-  assert(!cls->m_nextClass);
+  assertx(!cls->m_nextClass);
   cls->m_nextClass = m_clsList;
   m_clsList = cls;
 }
@@ -102,7 +102,7 @@ void NamedEntity::removeClass(Class* goner) {
   }
   LowPtr<Class>* cls = &head->m_nextClass;
   while (cls->get() != goner) {
-    assert(*cls);
+    assertx(*cls);
     cls = &(*cls)->m_nextClass;
   }
   *cls = goner->m_nextClass;

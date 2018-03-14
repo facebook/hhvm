@@ -106,7 +106,7 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
 }
 
 const AnnotType* nameToAnnotType(const StringData* typeName) {
-  assert(typeName);
+  assertx(typeName);
   auto const& mapPair = getAnnotTypeMaps();
   return folly::get_ptr(mapPair.first, typeName);
 }
@@ -114,7 +114,7 @@ const AnnotType* nameToAnnotType(const StringData* typeName) {
 const AnnotType* nameToAnnotType(const std::string& typeName) {
   auto const& mapPair = getAnnotTypeMaps();
   auto const* at = folly::get_ptr(mapPair.second, typeName);
-  assert(!at || *at != AnnotType::Object);
+  assertx(!at || *at != AnnotType::Object);
   return at;
 }
 

@@ -53,21 +53,21 @@ struct SetArrayElm {
   static auto constexpr kEmpty = KindOfUninit;
 
   void setStrKey(StringData* k, strhash_t h) {
-    assert(isEmpty());
+    assertx(isEmpty());
     k->incRefCount();
     tv.m_type = KindOfString;
     tv.m_data.pstr = k;
     tv.hash() = h;
-    assert(!isInvalid());
+    assertx(!isInvalid());
   }
 
   void setIntKey(int64_t k, inthash_t h) {
-    assert(isEmpty());
+    assertx(isEmpty());
     tv.m_type = KindOfInt64;
     tv.m_data.num = k;
     tv.hash() = h | STRHASH_MSB;
-    assert(!isInvalid());
-    assert(hasIntKey());
+    assertx(!isInvalid());
+    assertx(hasIntKey());
   }
 
   void setTombstone() {
@@ -90,17 +90,17 @@ struct SetArrayElm {
      * that we don't have to care about the MSB when working
      * with strhash_t.
      */
-    assert(!isInvalid());
+    assertx(!isInvalid());
     return tv.hash() >= 0;
   }
 
   ALWAYS_INLINE StringData* strKey() const {
-    assert(hasStrKey());
+    assertx(hasStrKey());
     return tv.m_data.pstr;
   }
 
   ALWAYS_INLINE bool hasIntKey() const {
-    assert(!isInvalid());
+    assertx(!isInvalid());
     return tv.hash() < 0;
   }
 
@@ -110,7 +110,7 @@ struct SetArrayElm {
 
   ALWAYS_INLINE
   Cell getKey() const {
-    assert(!isInvalid());
+    assertx(!isInvalid());
     Cell out;
     cellDup(tv, out);
     return out;

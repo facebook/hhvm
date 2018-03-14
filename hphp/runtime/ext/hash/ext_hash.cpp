@@ -145,8 +145,8 @@ struct HashContext : SweepableResourceData {
   }
 
   explicit HashContext(req::ptr<HashContext>&& ctx) {
-    assert(ctx->ops);
-    assert(ctx->ops->context_size >= 0);
+    assertx(ctx->ops);
+    assertx(ctx->ops->context_size >= 0);
     ops = ctx->ops;
     context = malloc(ops->context_size);
     ops->hash_copy(context, ctx->context);
@@ -162,7 +162,7 @@ struct HashContext : SweepableResourceData {
   ~HashContext() {
     /* Just in case the algo has internally allocated resources */
     if (context) {
-      assert(ops->digest_size >= 0);
+      assertx(ops->digest_size >= 0);
       unsigned char* dummy = (unsigned char*)alloca(
         sizeof(unsigned char) * ops->digest_size);
       ops->hash_final(dummy, context);

@@ -323,7 +323,7 @@ struct ServerOptions {
       m_useFileSocket(false),
       m_queueToWorkerRatio(1),
       m_hugeThreads(0) {
-    assert(m_maxThreads >= 0);
+    assertx(m_maxThreads >= 0);
     if (m_initThreads < 0 || m_initThreads > m_maxThreads) {
       m_initThreads = m_maxThreads;
     }

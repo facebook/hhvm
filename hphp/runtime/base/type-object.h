@@ -51,59 +51,59 @@ public:
   explicit Object(ObjectData *data) : m_obj(data) {
     // The object must have at least two refs here. One pre-existing ref, and
     // one caused by placing it under m_obj's control.
-    assert(!data || data->hasMultipleRefs());
+    assertx(!data || data->hasMultipleRefs());
   }
   /* implicit */ Object(const Object& src) : m_obj(src.m_obj) {
-    assert(!m_obj || m_obj->hasMultipleRefs());
+    assertx(!m_obj || m_obj->hasMultipleRefs());
   }
 
   template <typename T>
   explicit Object(const req::ptr<T> &ptr) : m_obj(ptr) {
-    assert(!m_obj || m_obj->hasMultipleRefs());
+    assertx(!m_obj || m_obj->hasMultipleRefs());
   }
 
   template <typename T>
   explicit Object(req::ptr<T>&& ptr) : m_obj(std::move(ptr)) {
-    assert(!m_obj || m_obj->checkCount());
+    assertx(!m_obj || m_obj->checkCount());
   }
 
   explicit Object(Class* cls)
     : m_obj(ObjectData::newInstance(cls), NoIncRef{}) {
     // References to the object can escape inside newInstance, so we only know
     // that the ref-count is at least 1 here.
-    assert(!m_obj || m_obj->checkCount());
+    assertx(!m_obj || m_obj->checkCount());
   }
 
   // Move ctor
   Object(Object&& src) noexcept : m_obj(std::move(src.m_obj)) {
-    assert(!m_obj || m_obj->checkCount());
+    assertx(!m_obj || m_obj->checkCount());
   }
 
   // Regular assign
   Object& operator=(const Object& src) {
     m_obj = src.m_obj;
-    assert(!m_obj || m_obj->hasMultipleRefs());
+    assertx(!m_obj || m_obj->hasMultipleRefs());
     return *this;
   }
 
   template <typename T>
   Object& operator=(const req::ptr<T>& src) {
     m_obj = src;
-    assert(!m_obj || m_obj->hasMultipleRefs());
+    assertx(!m_obj || m_obj->hasMultipleRefs());
     return *this;
   }
 
   // Move assign
   Object& operator=(Object&& src) {
     m_obj = std::move(src.m_obj);
-    assert(!m_obj || m_obj->checkCount());
+    assertx(!m_obj || m_obj->checkCount());
     return *this;
   }
 
   template <typename T>
   Object& operator=(req::ptr<T>&& src) {
     m_obj = std::move(src);
-    assert(!m_obj || m_obj->checkCount());
+    assertx(!m_obj || m_obj->checkCount());
     return *this;
   }
 
@@ -197,7 +197,7 @@ public:
 
   // Take ownership of a reference without touching the ref count
   static Object attach(ObjectData *object) {
-    assert(!object || object->checkCount());
+    assertx(!object || object->checkCount());
     return Object{req::ptr<ObjectData>::attach(object)};
   }
 

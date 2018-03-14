@@ -99,7 +99,7 @@ CodeCache::CodeCache()
 
   auto enhugen = [&](void* base, int numMB) {
     if (CodeCache::MapTCHuge) {
-      assert((uintptr_t(base) & (kRoundUp - 1)) == 0);
+      assertx((uintptr_t(base) & (kRoundUp - 1)) == 0);
       hintHugeDeleteData((char*)base, numMB << 20,
                          PROT_READ | PROT_WRITE | PROT_EXEC,
                          false /* MAP_SHARED */);
@@ -131,7 +131,7 @@ CodeCache::CodeCache()
   };
 
   if (base != (uint8_t*)-1) {
-    assert(!(allocationSize & (kRoundUp - 1)));
+    assertx(!(allocationSize & (kRoundUp - 1)));
     // Make sure that we have space to round up to the start of a huge page
     allocationSize += -(uint64_t)base & (kRoundUp - 1);
     allocationSize += shiftTC();
@@ -157,7 +157,7 @@ CodeCache::CodeCache()
   } else {
     low_malloc_skip_huge(base, base + allocationSize - 1);
   }
-  assert(base);
+  assertx(base);
   base += baseAdjustment;
 
   m_base = base;
@@ -210,9 +210,9 @@ CodeCache::CodeCache()
   }
   m_threadLocalSize = thread_local_size;
 
-  assert(base - m_base <= allocationSize);
-  assert(base - m_base + 2 * kRoundUp > allocationSize);
-  assert(base - m_base <= (2ul << 30));
+  assertx(base - m_base <= allocationSize);
+  assertx(base - m_base + 2 * kRoundUp > allocationSize);
+  assertx(base - m_base <= (2ul << 30));
 }
 
 CodeBlock& CodeCache::blockFor(CodeAddress addr) {

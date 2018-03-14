@@ -57,7 +57,7 @@ void LitstrTable::setReading() {
 
 void LitstrTable::forEachLitstr(
   std::function<void (int, const StringData*)> onItem) {
-  assert(m_safeToRead);
+  assertx(m_safeToRead);
   auto i = 0;
   for (auto s : m_namedInfo) {
     onItem(i++, s);

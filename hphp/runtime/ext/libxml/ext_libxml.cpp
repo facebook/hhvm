@@ -142,7 +142,7 @@ const StaticString
 
 void XMLNodeData::sweep() {
   if (m_node) {
-    assert(this == m_node->_private);
+    assertx(this == m_node->_private);
     php_libxml_node_free_resource(m_node);
   }
 
@@ -150,7 +150,7 @@ void XMLNodeData::sweep() {
 }
 
 void XMLDocumentData::cleanup() {
-  assert(!m_liveNodes);
+  assertx(!m_liveNodes);
   auto docp = (xmlDocPtr)m_node;
   if (docp->URL) {
     xmlFree((void*)docp->URL);
@@ -211,7 +211,7 @@ int libxml_streams_IO_read(void* context, char* buffer, int len) {
   Trace::Indent _i;
 
   auto stream = getStream(context);
-  assert(len >= 0);
+  assertx(len >= 0);
   if (len > 0) {
     String str = stream->read(len);
     if (str.size() <= len) {

@@ -22,12 +22,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void LitstrTable::init() {
-  assert(!LitstrTable::s_litstrTable);
+  assertx(!LitstrTable::s_litstrTable);
   LitstrTable::s_litstrTable = new LitstrTable();
 }
 
 inline void LitstrTable::fini() {
-  assert(LitstrTable::s_litstrTable);
+  assertx(LitstrTable::s_litstrTable);
   delete LitstrTable::s_litstrTable;
   LitstrTable::s_litstrTable = nullptr;
 }
@@ -40,27 +40,27 @@ inline LitstrTable& LitstrTable::get() {
 // Main API.
 
 inline size_t LitstrTable::numLitstrs() const {
-  assert(m_safeToRead);
+  assertx(m_safeToRead);
   return m_namedInfo.size();
 }
 
 inline bool LitstrTable::contains(Id id) const {
-  assert(m_safeToRead);
+  assertx(m_safeToRead);
   return m_namedInfo.contains(id);
 }
 
 inline StringData* LitstrTable::lookupLitstrId(Id id) const {
-  assert(m_safeToRead);
+  assertx(m_safeToRead);
   return m_namedInfo.lookupLitstr(id);
 }
 
 inline const NamedEntity* LitstrTable::lookupNamedEntityId(Id id) const {
-  assert(m_safeToRead);
+  assertx(m_safeToRead);
   return m_namedInfo.lookupNamedEntity(id);
 }
 
 inline NamedEntityPair LitstrTable::lookupNamedEntityPairId(Id id) const {
-  assert(m_safeToRead);
+  assertx(m_safeToRead);
   return m_namedInfo.lookupNamedEntityPair(id);
 }
 

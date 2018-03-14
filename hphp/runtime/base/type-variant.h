@@ -119,11 +119,11 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(const std::string &v) {
     m_type = KindOfString;
     StringData *s = StringData::Make(v.c_str(), v.size(), CopyString);
-    assert(s);
+    assertx(s);
     m_data.pstr = s;
   }
   /* implicit */ Variant(const StaticString &v) noexcept {
-    assert(v.get() && !v.get()->isRefCounted());
+    assertx(v.get() && !v.get()->isRefCounted());
     m_type = KindOfPersistentString;
     m_data.pstr = v.get();
   }
@@ -187,22 +187,22 @@ struct Variant : private TypedValue {
    * inc-ref.
    */
   explicit Variant(ArrayData* ad, DataType dt, ArrayInitCtor) noexcept {
-    assert(ad->toDataType() == dt);
+    assertx(ad->toDataType() == dt);
     m_type = dt;
     m_data.parr = ad;
   }
 
   enum class PersistentArrInit {};
   Variant(const ArrayData* ad, DataType dt, PersistentArrInit) noexcept {
-    assert(ad->toPersistentDataType() == dt);
-    assert(!ad->isRefCounted());
+    assertx(ad->toPersistentDataType() == dt);
+    assertx(!ad->isRefCounted());
     m_data.parr = const_cast<ArrayData*>(ad);
     m_type = dt;
   }
 
   enum class PersistentStrInit {};
   explicit Variant(const StringData *s, PersistentStrInit) noexcept {
-    assert(!s->isRefCounted());
+    assertx(!s->isRefCounted());
     m_data.pstr = const_cast<StringData*>(s);
     m_type = KindOfPersistentString;
   }
@@ -239,7 +239,7 @@ struct Variant : private TypedValue {
   }
 
   Variant(StrongBind, Variant& v) {
-    assert(tvIsPlausible(v));
+    assertx(tvIsPlausible(v));
     tvBoxIfNeeded(*v.asTypedValue());
     refDup(*v.asTypedValue(), *asTypedValue());
   }
@@ -263,7 +263,7 @@ struct Variant : private TypedValue {
       return;
     }
 
-    assert(this != &v);
+    assertx(this != &v);
     if (v.m_type != KindOfUninit) {
       m_type = v.m_type;
       m_data = v.m_data;
@@ -328,7 +328,7 @@ struct Variant : private TypedValue {
    * refs and turn uninits to null.
    */
   Variant& operator=(Variant &&rhs) noexcept {
-    assert(this != &rhs); // we end up as null on a self move-assign.
+    assertx(this != &rhs); // we end up as null on a self move-assign.
     if (rhs.m_type == KindOfRef) return *this = *rhs.m_data.pref->var();
 
     Variant& lhs = m_type == KindOfRef ? *m_data.pref->var() : *this;
@@ -428,12 +428,12 @@ struct Variant : private TypedValue {
 // int64
 
   ALWAYS_INLINE int64_t asInt64Val() const {
-    assert(m_type == KindOfInt64);
+    assertx(m_type == KindOfInt64);
     return m_data.num;
   }
 
   ALWAYS_INLINE int64_t toInt64Val() const {
-    assert(is(KindOfInt64));
+    assertx(is(KindOfInt64));
     return
         LIKELY(m_type == KindOfInt64) ?
         m_data.num : m_data.pref->var()->m_data.num;
@@ -443,12 +443,12 @@ struct Variant : private TypedValue {
 // double
 
   ALWAYS_INLINE double asDoubleVal() const {
-    assert(m_type == KindOfDouble);
+    assertx(m_type == KindOfDouble);
     return m_data.dbl;
   }
 
   ALWAYS_INLINE double toDoubleVal() const {
-    assert(is(KindOfDouble));
+    assertx(is(KindOfDouble));
     return
         LIKELY(m_type == KindOfDouble) ?
         m_data.dbl : m_data.pref->var()->m_data.dbl;
@@ -458,12 +458,12 @@ struct Variant : private TypedValue {
 // boolean
 
   ALWAYS_INLINE bool asBooleanVal() const {
-    assert(m_type == KindOfBoolean);
+    assertx(m_type == KindOfBoolean);
     return m_data.num;
   }
 
   ALWAYS_INLINE bool toBooleanVal() const {
-    assert(is(KindOfBoolean));
+    assertx(is(KindOfBoolean));
     return
         LIKELY(m_type == KindOfBoolean) ?
         m_data.num : m_data.pref->var()->m_data.num;
@@ -473,19 +473,21 @@ struct Variant : private TypedValue {
 // string
 
   ALWAYS_INLINE const String& asCStrRef() const {
-    assert(isStringType(m_type) && m_data.pstr);
+    assertx(isStringType(m_type) && m_data.pstr);
     return *reinterpret_cast<const String*>(&m_data.pstr);
   }
 
   ALWAYS_INLINE const String& toCStrRef() const {
-    assert(isString());
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
+    assertx(isString());
+    assertx(m_type == KindOfRef
+            ? m_data.pref->var()->m_data.pstr
+            : m_data.pstr);
     return *reinterpret_cast<const String*>(LIKELY(isStringType(m_type)) ?
         &m_data.pstr : &m_data.pref->tv()->m_data.pstr);
   }
 
   ALWAYS_INLINE String& asStrRef() {
-    assert(isStringType(m_type) && m_data.pstr);
+    assertx(isStringType(m_type) && m_data.pstr);
     // The caller is likely going to modify the string, so we have to eagerly
     // promote KindOfPersistentString -> KindOfString.
     m_type = KindOfString;
@@ -493,8 +495,10 @@ struct Variant : private TypedValue {
   }
 
   ALWAYS_INLINE String& toStrRef() {
-    assert(isString());
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
+    assertx(isString());
+    assertx(m_type == KindOfRef
+            ? m_data.pref->var()->m_data.pstr
+            : m_data.pstr);
     // The caller is likely going to modify the string, so we have to eagerly
     // promote KindOfPersistentString -> KindOfString.
     auto tv = LIKELY(isStringType(m_type)) ? this : m_data.pref->tv();
@@ -506,26 +510,30 @@ struct Variant : private TypedValue {
 // array
 
   ALWAYS_INLINE const Array& asCArrRef() const {
-    assert(isArrayLikeType(m_type) && m_data.parr);
+    assertx(isArrayLikeType(m_type) && m_data.parr);
     return *reinterpret_cast<const Array*>(&m_data.parr);
   }
 
   ALWAYS_INLINE const Array& toCArrRef() const {
-    assert(isArray());
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
+    assertx(isArray());
+    assertx(m_type == KindOfRef
+            ? m_data.pref->var()->m_data.parr
+            : m_data.parr);
     return *reinterpret_cast<const Array*>(LIKELY(isArrayLikeType(m_type)) ?
         &m_data.parr : &m_data.pref->tv()->m_data.parr);
   }
 
   ALWAYS_INLINE Array& asArrRef() {
-    assert(isArrayLikeType(m_type) && m_data.parr);
+    assertx(isArrayLikeType(m_type) && m_data.parr);
     m_type = m_data.parr->toDataType();
     return *reinterpret_cast<Array*>(&m_data.parr);
   }
 
   ALWAYS_INLINE Array& toArrRef() {
-    assert(isArray());
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
+    assertx(isArray());
+    assertx(m_type == KindOfRef
+            ? m_data.pref->var()->m_data.parr
+            : m_data.parr);
     auto tv = LIKELY(isArrayLikeType(m_type)) ? this : m_data.pref->tv();
     tv->m_type = tv->m_data.parr->toDataType();
     return *reinterpret_cast<Array*>(&tv->m_data.parr);
@@ -535,42 +543,48 @@ struct Variant : private TypedValue {
 // object
 
   ALWAYS_INLINE const Object& asCObjRef() const {
-    assert(m_type == KindOfObject && m_data.pobj);
+    assertx(m_type == KindOfObject && m_data.pobj);
     return *reinterpret_cast<const Object*>(&m_data.pobj);
   }
 
   ALWAYS_INLINE const Object& toCObjRef() const {
-    assert(is(KindOfObject));
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
+    assertx(is(KindOfObject));
+    assertx(m_type == KindOfRef
+            ? m_data.pref->var()->m_data.pobj
+            : m_data.pobj);
     return *reinterpret_cast<const Object*>(LIKELY(m_type == KindOfObject) ?
         &m_data.pobj : &m_data.pref->tv()->m_data.pobj);
   }
 
   ALWAYS_INLINE Object & asObjRef() {
-    assert(m_type == KindOfObject && m_data.pobj);
+    assertx(m_type == KindOfObject && m_data.pobj);
     return *reinterpret_cast<Object*>(&m_data.pobj);
   }
 
   ALWAYS_INLINE const Resource& asCResRef() const {
-    assert(m_type == KindOfResource && m_data.pres);
+    assertx(m_type == KindOfResource && m_data.pres);
     return *reinterpret_cast<const Resource*>(&m_data.pres);
   }
 
   ALWAYS_INLINE const Resource& toCResRef() const {
-    assert(is(KindOfResource));
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pres : m_data.pres);
+    assertx(is(KindOfResource));
+    assertx(m_type == KindOfRef
+            ? m_data.pref->var()->m_data.pres
+            : m_data.pres);
     return *reinterpret_cast<const Resource*>(LIKELY(m_type == KindOfResource) ?
         &m_data.pres : &m_data.pref->tv()->m_data.pres);
   }
 
   ALWAYS_INLINE Resource & asResRef() {
-    assert(m_type == KindOfResource && m_data.pres);
+    assertx(m_type == KindOfResource && m_data.pres);
     return *reinterpret_cast<Resource*>(&m_data.pres);
   }
 
   ALWAYS_INLINE Object& toObjRef() {
-    assert(is(KindOfObject));
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
+    assertx(is(KindOfObject));
+    assertx(m_type == KindOfRef
+            ? m_data.pref->var()->m_data.pobj
+            : m_data.pobj);
     return *reinterpret_cast<Object*>(LIKELY(m_type == KindOfObject) ?
         &m_data.pobj : &m_data.pref->tv()->m_data.pobj);
   }
@@ -677,15 +691,15 @@ struct Variant : private TypedValue {
   int getRefCount() const noexcept;
 
   bool getBoolean() const {
-    assert(getType() == KindOfBoolean);
+    assertx(getType() == KindOfBoolean);
     return m_type == KindOfRef ? m_data.pref->var()->m_data.num : m_data.num;
   }
   int64_t getInt64() const {
-    assert(getType() == KindOfInt64);
+    assertx(getType() == KindOfInt64);
     return m_type == KindOfRef ? m_data.pref->var()->m_data.num : m_data.num;
   }
   double getDouble() const {
-    assert(getType() == KindOfDouble);
+    assertx(getType() == KindOfDouble);
     return m_type == KindOfRef ? m_data.pref->var()->m_data.dbl : m_data.dbl;
   }
 
@@ -697,7 +711,7 @@ struct Variant : private TypedValue {
     return *this;
   }
   Variant& assignRef(Variant& v) noexcept {
-    assert(&v != &uninit_variant);
+    assertx(&v != &uninit_variant);
     tvBoxIfNeeded(*v.asTypedValue());
     tvBind(*v.asTypedValue(), *asTypedValue());
     return *this;
@@ -945,56 +959,56 @@ struct Variant : private TypedValue {
    * Low level access that should be restricted to internal use.
    */
   int64_t *getInt64Data() const {
-    assert(getType() == KindOfInt64);
+    assertx(getType() == KindOfInt64);
     return m_type == KindOfRef ? &m_data.pref->var()->m_data.num :
                      const_cast<int64_t*>(&m_data.num);
   }
   double *getDoubleData() const {
-    assert(getType() == KindOfDouble);
+    assertx(getType() == KindOfDouble);
     return m_type == KindOfRef ? &m_data.pref->var()->m_data.dbl :
                      const_cast<double*>(&m_data.dbl);
   }
   StringData *getStringData() const {
-    assert(isStringType(getType()));
+    assertx(isStringType(getType()));
     return m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr;
   }
   StringData *getStringDataOrNull() const {
     // This is a necessary evil because getStringData() returns
     // an undefined result if this is a null variant
-    assert(isNull() || isString());
+    assertx(isNull() || isString());
     return m_type == KindOfRef ?
       (m_data.pref->var()->m_type <= KindOfNull ? nullptr :
         m_data.pref->var()->m_data.pstr) :
       (m_type <= KindOfNull ? nullptr : m_data.pstr);
   }
   ArrayData *getArrayData() const {
-    assert(isArray());
+    assertx(isArray());
     return m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr;
   }
   ArrayData *getArrayDataOrNull() const {
     // This is a necessary evil because getArrayData() returns
     // an undefined result if this is a null variant
-    assert(isNull() || isArray());
+    assertx(isNull() || isArray());
     return m_type == KindOfRef ?
       (m_data.pref->var()->m_type <= KindOfNull ? nullptr :
         m_data.pref->var()->m_data.parr) :
       (m_type <= KindOfNull ? nullptr : m_data.parr);
   }
   ObjectData* getObjectData() const {
-    assert(is(KindOfObject));
+    assertx(is(KindOfObject));
     return m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj;
   }
   ObjectData *getObjectDataOrNull() const {
     // This is a necessary evil because getObjectData() returns
     // an undefined result if this is a null variant
-    assert(isNull() || is(KindOfObject));
+    assertx(isNull() || is(KindOfObject));
     return m_type == KindOfRef ?
       (m_data.pref->var()->m_type <= KindOfNull ? nullptr :
         m_data.pref->var()->m_data.pobj) :
       (m_type <= KindOfNull ? nullptr : m_data.pobj);
   }
   Variant *getRefData() const {
-    assert(m_type == KindOfRef);
+    assertx(m_type == KindOfRef);
     return m_data.pref->var();
   }
 
@@ -1048,27 +1062,27 @@ struct Variant : private TypedValue {
 
  private:
   ResourceData* getResourceData() const {
-    assert(is(KindOfResource));
+    assertx(is(KindOfResource));
     return m_type == KindOfRef ? m_data.pref->var()->m_data.pres->data() :
                                  m_data.pres->data();
   }
 
   ResourceData* detachResourceData() {
-    assert(is(KindOfResource));
+    assertx(is(KindOfResource));
     if (UNLIKELY(m_type == KindOfRef)) {
       tvUnbox(*asTypedValue());
     }
-    assert(m_type == KindOfResource);
+    assertx(m_type == KindOfResource);
     m_type = KindOfNull;
     return m_data.pres->data();
   }
 
   ObjectData* detachObjectData() {
-    assert(is(KindOfObject));
+    assertx(is(KindOfObject));
     if (UNLIKELY(m_type == KindOfRef)) {
       tvUnbox(*asTypedValue());
     }
-    assert(m_type == KindOfObject);
+    assertx(m_type == KindOfObject);
     m_type = KindOfNull;
     return m_data.pobj;
   }
@@ -1177,7 +1191,7 @@ struct Variant : private TypedValue {
 
   bool isPrimitive() const { return !isRefcountedType(m_type); }
   bool isObjectConvertable() {
-    assert(m_type != KindOfRef);
+    assertx(m_type != KindOfRef);
     return m_type <= KindOfNull ||
       (m_type == KindOfBoolean && !m_data.num) ||
       (isStringType(m_type) && m_data.pstr->empty());
@@ -1231,9 +1245,9 @@ struct Variant : private TypedValue {
 
 private:
   void moveRefHelper(Variant&& v) {
-    assert(tvIsPlausible(v));
+    assertx(tvIsPlausible(v));
 
-    assert(v.m_type == KindOfRef);
+    assertx(v.m_type == KindOfRef);
     m_type = v.m_data.pref->tv()->m_type; // Can't be KindOfUninit.
     m_data = v.m_data.pref->tv()->m_data;
     tvIncRefGen(*asTypedValue());
@@ -1308,7 +1322,7 @@ struct VRefParamValue {
   ArrNR toArrNR() const { return m_var.toArrNR(); }
 
   RefData* getRefData() const {
-    assert(isRefData());
+    assertx(isRefData());
     return m_var.asTypedValue()->m_data.pref;
   }
   RefData* getRefDataOrNull() const {
@@ -1352,7 +1366,7 @@ struct VarNR : private TypedValueAux {
   explicit VarNR(double  v) { init(KindOfDouble ); m_data.dbl = v;}
 
   explicit VarNR(const StaticString &v) {
-    assert(v.get() && !v.get()->isRefCounted());
+    assertx(v.get() && !v.get()->isRefCounted());
     init(KindOfPersistentString);
     m_data.pstr = v.get();
   }
@@ -1362,7 +1376,7 @@ struct VarNR : private TypedValueAux {
   explicit VarNR(const Object& v);
   explicit VarNR(StringData *v);
   explicit VarNR(const StringData *v) {
-    assert(v && !v->isRefCounted());
+    assertx(v && !v->isRefCounted());
     init(KindOfPersistentString);
     m_data.pstr = const_cast<StringData*>(v);
   }
@@ -1406,28 +1420,28 @@ private:
     return &tvAsVariant(static_cast<TypedValue*>(this));
   }
   void checkRefCount() {
-    assert(isRefcountedType(m_type) ? varNrFlag() == NR_FLAG : true);
+    assertx(isRefcountedType(m_type) ? varNrFlag() == NR_FLAG : true);
 
     switch (m_type) {
       DT_UNCOUNTED_CASE:
         return;
       case KindOfString:
-        assert(m_data.pstr->checkCount());
+        assertx(m_data.pstr->checkCount());
         return;
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
       case KindOfArray:
-        assert(m_data.parr->checkCount());
+        assertx(m_data.parr->checkCount());
         return;
       case KindOfObject:
-        assert(m_data.pobj->checkCount());
+        assertx(m_data.pobj->checkCount());
         return;
       case KindOfResource:
-        assert(m_data.pres->checkCount());
+        assertx(m_data.pres->checkCount());
         return;
       case KindOfRef:
-        assert(m_data.pref->checkCount());
+        assertx(m_data.pref->checkCount());
         return;
     }
     not_reached();
@@ -1507,7 +1521,7 @@ inline Variant &concat_assign(Variant &v1, const String& s2) {
 
 // Defined here for include order reasons.
 inline RefData::~RefData() {
-  assert(m_kind == HeaderKind::Ref);
+  assertx(m_kind == HeaderKind::Ref);
   tvAsVariant(&m_tv).~Variant();
 }
 

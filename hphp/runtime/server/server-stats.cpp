@@ -126,7 +126,7 @@ void ServerStats::Filter(list<TimeSlot*>& slots, const std::string& keys,
     std::map<std::string, int> rules;
     for (unsigned int i = 0; i < rules0.size(); i++) {
       auto const& rule = rules0[i];
-      assert(!rule.empty());
+      assertx(!rule.empty());
       int len = rule.length();
       std::string suffix;
       if (len > 4) {
@@ -439,7 +439,7 @@ void ServerStats::ReportStatus(std::string& output, Writer::Format format) {
   } else if (format == Writer::Format::HTML) {
     w = new HTMLWriter(out);
   } else {
-    assert(format == Writer::Format::JSON);
+    assertx(format == Writer::Format::JSON);
     w = new JSONWriter(out);
   }
 
@@ -494,7 +494,7 @@ void ServerStats::ReportStatus(std::string& output, Writer::Format format) {
     case ThreadMode::Processing:     mode = "process"; break;
     case ThreadMode::Writing:        mode = "writing"; break;
     case ThreadMode::PostProcessing: mode = "psp";     break;
-    default: assert(false);
+    default: assertx(false);
     }
 
     w->beginObject("thread");
@@ -880,7 +880,7 @@ IOStatusHelper::IOStatusHelper(const char *name,
                                const char *address /* = NULL */,
                                int port /* = 0 */)
     : m_exeProfiler(ThreadInfo::NetworkIO) {
-  assert(name && *name);
+  assertx(name && *name);
 
   if (ServerStats::s_profile_network ||
       (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats)) {

@@ -99,7 +99,7 @@ public:
   }
 
   void registerExtensionFunction(const String& name) {
-    assert(name.get()->isStatic());
+    assertx(name.get()->isStatic());
     m_functions.push_back(name.get());
   }
 

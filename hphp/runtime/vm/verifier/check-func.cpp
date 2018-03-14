@@ -257,7 +257,7 @@ using SectionMap = std::map<Offset,Offset>;
  * ensure that off is at least within the entire func's bytecode region.
  */
 Offset findSection(SectionMap& sections, Offset off) {
-  assert(!sections.empty());
+  assertx(!sections.empty());
   SectionMap::iterator i = sections.upper_bound(off);
   --i;
   return i->first;
@@ -270,7 +270,7 @@ Offset findSection(SectionMap& sections, Offset off) {
  */
 bool FuncChecker::checkOffsets() {
   bool ok = true;
-  assert(unit()->bclen() >= 0);
+  assertx(unit()->bclen() >= 0);
   PC bc = unit()->entry();
   Offset base = m_func->base();
   Offset past = m_func->past();
@@ -575,7 +575,7 @@ bool FuncChecker::checkImmRATA(PC& pc, PC const /*instr*/) {
 
 bool FuncChecker::checkImmBA(PC& pc, PC const instr) {
   // we check branch offsets in checkSection(). ignore here.
-  assert(instrJumpTarget(unit()->entry(), offset(instr)) !=
+  assertx(instrJumpTarget(unit()->entry(), offset(instr)) !=
          InvalidAbsoluteOffset);
   pc += sizeof(Offset);
   return true;
@@ -1050,7 +1050,7 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* /*b*/) {
 // it must not already be initialized; for *IterNext and *IterFree, it must
 // be initialized.
 bool FuncChecker::checkIter(State* cur, PC const pc) {
-  assert(isIter(pc));
+  assertx(isIter(pc));
   int id = getImmIva(pc);
   bool ok = true;
   auto op = peek_op(pc);
@@ -1656,7 +1656,7 @@ void FuncChecker::initState(State* s) {
 }
 
 void FuncChecker::copyState(State* to, const State* from) {
-  assert(from->stk);
+  assertx(from->stk);
   if (!to->stk) initState(to);
   memcpy(to->stk, from->stk, from->stklen * sizeof(*to->stk));
   memcpy(to->fpi, from->fpi, from->fpilen * sizeof(*to->fpi));
@@ -1959,7 +1959,7 @@ void FuncChecker::reportEscapeEdge(Block* b, Block* s) {
 bool FuncChecker::checkOffset(const char* name, Offset off,
                               const char* regionName, Offset base,
                               Offset past, bool check_instrs) {
-  assert(past >= base);
+  assertx(past >= base);
   if (off < base || off >= past) {
     error("Offset %s %d is outside region %s %d:%d\n",
            name, off, regionName, base, past);
@@ -1980,7 +1980,7 @@ bool FuncChecker::checkOffset(const char* name, Offset off,
 bool FuncChecker::checkRegion(const char* name, Offset b, Offset p,
                                const char* regionName, Offset base,
                                Offset past, bool check_instrs) {
-  assert(past >= base);
+  assertx(past >= base);
   if (p < b) {
     error("region %s %d:%d has negative length\n",
            name, b, p);

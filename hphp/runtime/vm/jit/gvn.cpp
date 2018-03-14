@@ -136,8 +136,8 @@ struct CongruenceComparator {
     auto idxA = keyA.second;
     auto idxB = keyB.second;
 
-    assert(instA->op() == instB->op());
-    assert(instA->is(DefLabel));
+    assertx(instA->op() == instB->op());
+    assertx(instA->is(DefLabel));
 
     jit::hash_set<SSATmp*> valuesA;
     jit::hash_set<SSATmp*> valuesB;

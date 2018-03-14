@@ -30,10 +30,10 @@ inline ArrayData::ArrayData(ArrayKind kind, RefCount initial_count)
   : m_sizeAndPos(uint32_t(-1))
 {
   initHeader(static_cast<HeaderKind>(kind), initial_count);
-  assert(m_size == -1);
-  assert(m_pos == 0);
-  assert(m_kind == static_cast<HeaderKind>(kind));
-  assert(dvArraySanityCheck());
+  assertx(m_size == -1);
+  assertx(m_pos == 0);
+  assertx(m_kind == static_cast<HeaderKind>(kind));
+  assertx(dvArraySanityCheck());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,7 @@ ALWAYS_INLINE ArrayData* ArrayData::CreateKeyset() {
 }
 
 ALWAYS_INLINE void ArrayData::decRefAndRelease() {
-  assert(kindIsValid());
+  assertx(kindIsValid());
   if (decReleaseCheck()) release();
 }
 
@@ -130,7 +130,7 @@ inline bool ArrayData::kindIsValid() const {
 }
 
 inline ArrayData::ArrayKind ArrayData::kind() const {
-  assert(kindIsValid());
+  assertx(kindIsValid());
   return static_cast<ArrayKind>(m_kind);
 }
 
@@ -207,7 +207,7 @@ inline DataType ArrayData::toDataType() const {
   if (k < kDictKind) return KindOfArray;
   if (k == kVecKind) return KindOfVec;
   if (k == kDictKind) return KindOfDict;
-  assert(k == kKeysetKind);
+  assertx(k == kKeysetKind);
   return KindOfKeyset;
 }
 
@@ -216,7 +216,7 @@ inline DataType ArrayData::toPersistentDataType() const {
   if (k < kDictKind) return KindOfPersistentArray;
   if (k == kVecKind) return KindOfPersistentVec;
   if (k == kDictKind) return KindOfPersistentDict;
-  assert(k == kKeysetKind);
+  assertx(k == kKeysetKind);
   return KindOfPersistentKeyset;
 }
 
@@ -228,7 +228,7 @@ inline int32_t ArrayData::getPosition() const {
 }
 
 inline void ArrayData::setPosition(int32_t p) {
-  assert(m_pos == p || !isStatic());
+  assertx(m_pos == p || !isStatic());
   m_pos = p;
 }
 

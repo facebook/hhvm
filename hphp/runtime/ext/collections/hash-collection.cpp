@@ -20,7 +20,7 @@ HashCollection::HashCollection(Class* cls, HeaderKind kind, uint32_t cap)
 
 NEVER_INLINE
 void HashCollection::throwTooLarge() {
-  assert(getClassName().size() == 6);
+  assertx(getClassName().size() == 6);
   auto clsName = getClassName().get()->slice();
   String msg(130, ReserveString);
   auto buf = msg.bufferSlice();
@@ -36,7 +36,7 @@ void HashCollection::throwTooLarge() {
 
 NEVER_INLINE
 void HashCollection::throwReserveTooLarge() {
-  assert(getClassName().size() == 6);
+  assertx(getClassName().size() == 6);
   auto clsName = getClassName().get()->slice();
   String msg(80, ReserveString);
   auto buf = msg.bufferSlice();
@@ -70,7 +70,7 @@ void HashCollection::warnOnStrIntDup() const {
     if (e->hasIntKey()) {
       newVal = e->ikey;
     } else {
-      assert(e->hasStrKey());
+      assertx(e->hasStrKey());
       // isStriclyInteger() puts the int value in newVal as a side effect.
       if (!e->skey->isStrictlyInteger(newVal)) continue;
     }
@@ -104,8 +104,8 @@ Array HashCollection::toArray() {
   }
   auto ad = arrayData()->toPHPArray(true);
   if (UNLIKELY(ad->size() < m_size)) warnOnStrIntDup();
-  assert(m_size);
-  assert(ad->m_pos == 0);
+  assertx(m_size);
+  assertx(ad->m_pos == 0);
   return Array::attach(ad);
 }
 
@@ -116,7 +116,7 @@ Array HashCollection::toKeysArray() {
     if (e->hasIntKey()) {
       ai.append(int64_t{e->ikey});
     } else {
-      assert(e->hasStrKey());
+      assertx(e->hasStrKey());
       ai.append(VarNR(e->skey).tv());
     }
   }
@@ -149,17 +149,17 @@ void HashCollection::remove(StringData* key) {
 }
 
 void HashCollection::eraseNoCompact(ssize_t pos) {
-  assert(canMutateBuffer());
-  assert(validPos(pos) && !isTombstone(pos));
-  assert(m_size > 0);
+  assertx(canMutateBuffer());
+  assertx(validPos(pos) && !isTombstone(pos));
+  assertx(m_size > 0);
   arrayData()->eraseNoCompact(pos);
   --m_size;
 }
 
 NEVER_INLINE
 void HashCollection::makeRoom() {
-  assert(isFull());
-  assert(posLimit() == cap());
+  assertx(isFull());
+  assertx(posLimit() == cap());
   if (LIKELY(!isDensityTooLow())) {
     if (UNLIKELY(cap() == MaxSize)) {
       throwTooLarge();
@@ -169,14 +169,14 @@ void HashCollection::makeRoom() {
   } else {
     compact();
   }
-  assert(canMutateBuffer());
-  assert(m_immCopy.isNull());
-  assert(!isFull());
+  assertx(canMutateBuffer());
+  assertx(m_immCopy.isNull());
+  assertx(!isFull());
 }
 
 NEVER_INLINE
 void HashCollection::reserve(int64_t sz) {
-  assert(m_size <= posLimit() && posLimit() <= cap());
+  assertx(m_size <= posLimit() && posLimit() <= cap());
   auto cap = static_cast<int64_t>(this->cap());
   if (LIKELY(sz > cap)) {
     if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
@@ -185,7 +185,7 @@ void HashCollection::reserve(int64_t sz) {
     // Fast path: The requested capacity is greater than the current capacity.
     // Grow to the smallest allowed capacity that is sufficient.
     grow(MixedArray::computeScaleFromSize(sz));
-    assert(canMutateBuffer());
+    assertx(canMutateBuffer());
     return;
   }
   if (LIKELY(!hasTombstones())) {
@@ -201,7 +201,7 @@ void HashCollection::reserve(int64_t sz) {
     // sz < m_size or there's enough room to add sz-m_size elements, in
     // which case we do nothing and return.
     compactOrShrinkIfDensityTooLow();
-    assert(sz + int64_t(posLimit() - m_size) <= cap);
+    assertx(sz + int64_t(posLimit() - m_size) <= cap);
     mutate();
     return;
   }
@@ -209,19 +209,19 @@ void HashCollection::reserve(int64_t sz) {
   // there is not enough room to add sz-m_size elements. While would could
   // compact to make room, it's better for Hysteresis if we grow capacity
   // by 2x instead.
-  assert(!isDensityTooLow());
-  assert(sz + int64_t(posLimit() - m_size) > cap);
-  assert(cap < MaxSize && tableMask() != 0);
+  assertx(!isDensityTooLow());
+  assertx(sz + int64_t(posLimit() - m_size) > cap);
+  assertx(cap < MaxSize && tableMask() != 0);
   auto newScale = scale() * 2;
-  assert(sz > 0 && MixedArray::Capacity(newScale) >= sz);
+  assertx(sz > 0 && MixedArray::Capacity(newScale) >= sz);
   grow(newScale);
-  assert(canMutateBuffer());
+  assertx(canMutateBuffer());
 }
 
 ALWAYS_INLINE
 void HashCollection::resizeHelper(uint32_t newCap) {
-  assert(newCap >= m_size);
-  assert(m_immCopy.isNull());
+  assertx(newCap >= m_size);
+  assertx(m_immCopy.isNull());
   // Allocate a new ArrayData with the specified capacity and dup
   // all the elements (without copying over tombstones).
   auto ad = arrayData() == staticEmptyDictArrayAsMixed() ?
@@ -229,14 +229,14 @@ void HashCollection::resizeHelper(uint32_t newCap) {
     MixedArray::CopyReserve(m_arr, newCap);
   decRefArr(m_arr);
   m_arr = ad;
-  assert(canMutateBuffer());
+  assertx(canMutateBuffer());
 }
 
 void HashCollection::grow(uint32_t newScale) {
   auto newCap = MixedArray::Capacity(newScale);
-  assert(m_size <= posLimit() && posLimit() <= cap() && cap() <= newCap);
-  assert(SmallSize <= newCap && newCap <= MaxSize);
-  assert(m_size <= newCap);
+  assertx(m_size <= posLimit() && posLimit() <= cap() && cap() <= newCap);
+  assertx(SmallSize <= newCap && newCap <= MaxSize);
+  assertx(m_size <= newCap);
   auto oldAd = arrayData();
   dropImmCopy();
   if (m_size > 0 && !oldAd->cowCheck()) {
@@ -247,12 +247,12 @@ void HashCollection::grow(uint32_t newScale) {
     // greater than 1, call resizeHelper().
     resizeHelper(newCap);
   }
-  assert(canMutateBuffer());
-  assert(m_immCopy.isNull());
+  assertx(canMutateBuffer());
+  assertx(m_immCopy.isNull());
 }
 
 void HashCollection::compact() {
-  assert(isDensityTooLow());
+  assertx(isDensityTooLow());
   dropImmCopy();
   if (!arrayData()->cowCheck()) {
     // MixedArray::compact can only handle cases where the buffer's
@@ -263,14 +263,14 @@ void HashCollection::compact() {
     // resizeHelper().
     resizeHelper(cap());
   }
-  assert(canMutateBuffer());
-  assert(m_immCopy.isNull());
-  assert(!isDensityTooLow());
+  assertx(canMutateBuffer());
+  assertx(m_immCopy.isNull());
+  assertx(!isDensityTooLow());
 }
 
 void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
-  assert(isCapacityTooHigh() && (oldCap == 0 || oldCap < cap()));
-  assert(m_size <= posLimit() && posLimit() <= cap());
+  assertx(isCapacityTooHigh() && (oldCap == 0 || oldCap < cap()));
+  assertx(m_size <= posLimit() && posLimit() <= cap());
   dropImmCopy();
   uint32_t newCap;
   if (oldCap != 0) {
@@ -280,7 +280,7 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     // smallest capacity that is large enough to hold the current number
     // of elements.
     for (; newCap < m_size; newCap <<= 1) {}
-    assert(newCap == computeMaxElms(folly::nextPowTwo<uint64_t>(newCap) - 1));
+    assertx(newCap == computeMaxElms(folly::nextPowTwo<uint64_t>(newCap) - 1));
   } else {
     if (m_size == 0 && nextKI() == 0) {
       decRefArr(m_arr);
@@ -293,8 +293,8 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     uint32_t capThreshold = (doubleSz < size_t(MaxSize)) ? doubleSz : MaxSize;
     for (newCap = SmallSize * 2; newCap < capThreshold; newCap <<= 1) {}
   }
-  assert(SmallSize <= newCap && newCap <= MaxSize);
-  assert(m_size <= newCap);
+  assertx(SmallSize <= newCap && newCap <= MaxSize);
+  assertx(m_size <= newCap);
   auto* oldAd = arrayData();
   if (!oldAd->cowCheck()) {
     // If the buffer's refcount is 1, we can teleport the elements
@@ -321,14 +321,14 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     // resizeHelper()
     resizeHelper(newCap);
   }
-  assert(canMutateBuffer());
-  assert(m_immCopy.isNull());
-  assert(!isCapacityTooHigh() || newCap == oldCap);
+  assertx(canMutateBuffer());
+  assertx(m_immCopy.isNull());
+  assertx(!isCapacityTooHigh() || newCap == oldCap);
 }
 
 HashCollection::Elm& HashCollection::allocElmFront(MixedArray::Inserter ei) {
-  assert(MixedArray::isValidIns(ei) && !MixedArray::isValidPos(*ei));
-  assert(m_size <= posLimit() && posLimit() < cap());
+  assertx(MixedArray::isValidIns(ei) && !MixedArray::isValidPos(*ei));
+  assertx(m_size <= posLimit() && posLimit() < cap());
   // Move the existing elements to make element slot 0 available.
   memmove(data() + 1, data(), posLimit() * sizeof(Elm));
   incPosLimit();
@@ -360,7 +360,7 @@ HashCollection::Elm& HashCollection::allocElmFront(MixedArray::Inserter ei) {
  */
 template <typename AccessorT>
 SortFlavor HashCollection::preSort(const AccessorT& acc, bool checkTypes) {
-  assert(m_size > 0);
+  assertx(m_size > 0);
   if (!checkTypes && !hasTombstones()) {
     // No need to loop over the elements, we're done
     return GenericSort;
@@ -406,7 +406,7 @@ SortFlavor HashCollection::preSort(const AccessorT& acc, bool checkTypes) {
   // garbage by resetting it. The logic above ensures that the first
   // slot is not a tombstone, so it's safe to set m_pos to 0.
   arrayData()->m_pos = 0;
-  assert(!hasTombstones());
+  assertx(!hasTombstones());
   if (checkTypes) {
     return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
   } else {
@@ -515,14 +515,14 @@ bool HashCollection::uksort(const Variant& cmp_function) {
 #undef USER_SORT_BODY
 
 void HashCollection::mutateImpl() {
-  assert(arrayData()->hasMultipleRefs());
+  assertx(arrayData()->hasMultipleRefs());
   dropImmCopy();
   if (canMutateBuffer()) {
     return;
   }
   auto* oldAd = arrayData();
   m_arr = MixedArray::asMixed(MixedArray::Copy(oldAd));
-  assert(oldAd->hasMultipleRefs());
+  assertx(oldAd->hasMultipleRefs());
   oldAd->decRefCount();
 }
 

@@ -56,7 +56,7 @@ int SSLSocket::GetSSLExDataIndex() {
   if (s_ex_data_index < 0) {
     s_ex_data_index = SSL_get_ex_new_index(0, (void*)"PHP stream index",
                                            nullptr, nullptr, nullptr);
-    assert(s_ex_data_index >= 0);
+    assertx(s_ex_data_index >= 0);
   }
   return s_ex_data_index;
 }
@@ -294,7 +294,7 @@ bool SSLSocket::onAccept() {
       m_data->m_method = CryptoMethod::ServerTLS;
       break;
     default:
-      assert(false);
+      assertx(false);
     }
 
     if (setupCrypto() && enableCrypto()) {

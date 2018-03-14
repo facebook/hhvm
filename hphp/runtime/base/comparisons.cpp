@@ -157,7 +157,7 @@ bool moreEqual(int64_t v1, const StringData *v2) {
 }
 
 int64_t compare(const StringData* v1, int64_t v2) {
-  assert(v1);
+  assertx(v1);
   int64_t lval;
   double dval;
   auto ret = v1->isNumericWithVal(lval, dval, 1);

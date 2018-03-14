@@ -261,9 +261,9 @@ protected:
 
 private:
   // disabling copy constructor and assignment
-ThriftBuffer(const ThriftBuffer& /*sb*/) { assert(false); }
+ThriftBuffer(const ThriftBuffer& /*sb*/) { assertx(false); }
 ThriftBuffer& operator=(const ThriftBuffer& /*sb*/) {
-  assert(false);
+  assertx(false);
   return *this;
   }
 

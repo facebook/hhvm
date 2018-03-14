@@ -118,7 +118,7 @@ struct HashTableCommon {
 
   static ALWAYS_INLINE
   bool isValidPos(Inserter e) {
-    assert(isValidIns(e));
+    assertx(isValidIns(e));
     return (int32_t)(*e) >= 0;
   }
 protected:
@@ -283,8 +283,8 @@ struct HashTable : HashTableCommon {
   /////////////////////////////////////////////////////////////////////////////
 protected:
   ALWAYS_INLINE Elm* allocElm(Inserter ei) {
-    assert(!isValidPos(ei) && !isFull());
-    assert(array()->m_size <= m_used);
+    assertx(!isValidPos(ei) && !isFull());
+    assertx(array()->m_size <= m_used);
     ++(array()->m_size);
     size_t i = m_used;
     (*ei) = i;
@@ -302,14 +302,14 @@ protected:
   static void InitSmallHash(ArrayType* a);
 
   static ALWAYS_INLINE bool hitIntKey(const Elm& e, int64_t ki) {
-    assert(!e.isInvalid());
+    assertx(!e.isInvalid());
     return e.intKey() == ki && e.hasIntKey();
   }
 
   static ALWAYS_INLINE bool hitStrKey(const Elm& e,
                                       const StringData* ks,
                                       hash_t h) {
-    assert(!e.isInvalid());
+    assertx(!e.isInvalid());
     /*
      * We do not have to check e.hasStrKey() because it is
      * implicitely done by the check on the hash.
@@ -496,16 +496,16 @@ protected:
 private:
   static ALWAYS_INLINE
   ArrayType* asArrayType(ArrayData* ad) {
-    assert(ad->hasMixedLayout() || ad->isKeyset());
+    assertx(ad->hasMixedLayout() || ad->isKeyset());
     auto a = static_cast<ArrayType*>(ad);
-    assert(a->checkInvariants());
+    assertx(a->checkInvariants());
     return a;
   }
   static ALWAYS_INLINE
   const ArrayType* asArrayType(const ArrayData* ad) {
-    assert(ad->hasMixedLayout() || ad->isKeyset());
+    assertx(ad->hasMixedLayout() || ad->isKeyset());
     auto a = static_cast<const ArrayType*>(ad);
-    assert(a->checkInvariants());
+    assertx(a->checkInvariants());
     return a;
   }
 

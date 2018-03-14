@@ -150,12 +150,12 @@ inline MD5 Unit::md5() const {
 }
 
 inline const StringData* Unit::filepath() const {
-  assert(m_filepath);
+  assertx(m_filepath);
   return m_filepath;
 }
 
 inline const StringData* Unit::dirpath() const {
-  assert(m_dirpath);
+  assertx(m_dirpath);
   return m_dirpath;
 }
 
@@ -171,12 +171,12 @@ inline Offset Unit::bclen() const {
 }
 
 inline PC Unit::at(Offset off) const {
-  assert(off >= 0 && off <= Offset(m_bclen));
+  assertx(off >= 0 && off <= Offset(m_bclen));
   return m_bc + off;
 }
 
 inline Offset Unit::offsetOf(PC pc) const {
-  assert(contains(pc));
+  assertx(contains(pc));
   return pc - m_bc;
 }
 
@@ -185,7 +185,7 @@ inline bool Unit::contains(PC pc) const {
 }
 
 inline Op Unit::getOp(Offset instrOffset) const {
-  assert(instrOffset < m_bclen);
+  assertx(instrOffset < m_bclen);
   return peek_op(m_bc + instrOffset);
 }
 
@@ -233,7 +233,7 @@ inline size_t Unit::numArrays() const {
 }
 
 inline const ArrayData* Unit::lookupArrayId(Id id) const {
-  assert(id < m_arrays.size());
+  assertx(id < m_arrays.size());
   return m_arrays[id];
 }
 
@@ -247,12 +247,12 @@ inline const RepoAuthType::Array* Unit::lookupArrayTypeId(Id id) const {
 // Funcs and PreClasses.
 
 inline Func* Unit::lookupFuncId(Id id) const {
-  assert(id < Id(mergeInfo()->m_firstHoistablePreClass));
+  assertx(id < Id(mergeInfo()->m_firstHoistablePreClass));
   return mergeInfo()->funcBegin()[id];
 }
 
 inline PreClass* Unit::lookupPreClassId(Id id) const {
-  assert(id < Id(m_preClasses.size()));
+  assertx(id < Id(m_preClasses.size()));
   return m_preClasses[id].get();
 }
 
@@ -350,7 +350,7 @@ inline bool Unit::isEmpty() const {
 }
 
 inline const TypedValue* Unit::getMainReturn() const {
-  assert(isMergeOnly());
+  assertx(isMergeOnly());
   return &m_mainReturn;
 }
 

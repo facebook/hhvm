@@ -32,7 +32,7 @@ DebuggerSession::DebuggerSession(Debugger* debugger) :
   m_dummyStartupDoc(""),
   m_sourceRootInfo(nullptr) {
 
-  assert(m_debugger != nullptr);
+  assertx(m_debugger != nullptr);
 }
 
 DebuggerSession::~DebuggerSession() {
@@ -59,7 +59,7 @@ void DebuggerSession::startDummyRequest(
   const std::string& sandboxName
 ) {
 
-  assert(m_sourceRootInfo == nullptr);
+  assertx(m_sourceRootInfo == nullptr);
   if (!sandboxUser.empty()) {
     m_sourceRootInfo = new SourceRootInfo(sandboxUser, sandboxName);
   }
@@ -248,7 +248,7 @@ unsigned int DebuggerSession::generateFrameId(
   const unsigned int objectId = ++s_nextObjectId;
   FrameObject* frame = new FrameObject(objectId, requestId, frameDepth);
 
-  assert(requestId == m_debugger->getCurrentThreadId());
+  assertx(requestId == m_debugger->getCurrentThreadId());
   registerRequestObject(objectId, frame);
   return objectId;
 }
@@ -274,7 +274,7 @@ unsigned int DebuggerSession::generateScopeId(
   const unsigned int objectId = ++s_nextObjectId;
   ScopeObject* scope = new ScopeObject(objectId, requestId, depth, scopeType);
 
-  assert(requestId == m_debugger->getCurrentThreadId());
+  assertx(requestId == m_debugger->getCurrentThreadId());
   registerRequestObject(objectId, scope);
   return objectId;
 }
@@ -286,7 +286,7 @@ unsigned int DebuggerSession::generateVariableId(
   const unsigned int objectId = ++s_nextObjectId;
   VariableObject* varObj = new VariableObject(objectId, requestId, variable);
 
-  assert(requestId == m_debugger->getCurrentThreadId());
+  assertx(requestId == m_debugger->getCurrentThreadId());
   registerRequestObject(objectId, varObj);
   return objectId;
 }

@@ -39,7 +39,7 @@ void c_WaitableWaitHandle::join() {
   EagerVMRegAnchor _;
   auto const savedFP = vmfp();
 
-  assert(!isFinished());
+  assertx(!isFinished());
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnJoin())) {
@@ -56,7 +56,7 @@ void c_WaitableWaitHandle::join() {
 
   // run queues until we are finished
   session->getCurrentContext()->runUntil(this);
-  assert(isFinished());
+  assertx(isFinished());
 }
 
 String c_WaitableWaitHandle::getName() {
@@ -74,7 +74,7 @@ String c_WaitableWaitHandle::getName() {
 }
 
 c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
-  assert(!isFinished());
+  assertx(!isFinished());
 
   switch (getKind()) {
     case Kind::Static:              not_reached();
@@ -91,7 +91,7 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
 
 bool
 c_WaitableWaitHandle::isDescendantOf(c_WaitableWaitHandle* wait_handle) const {
-  assert(wait_handle);
+  assertx(wait_handle);
 
   while (wait_handle != this && wait_handle && !wait_handle->isFinished()) {
     wait_handle = wait_handle->getChild();
@@ -102,7 +102,7 @@ c_WaitableWaitHandle::isDescendantOf(c_WaitableWaitHandle* wait_handle) const {
 
 void
 c_WaitableWaitHandle::throwCycleException(c_WaitableWaitHandle* child) const {
-  assert(isDescendantOf(child));
+  assertx(isDescendantOf(child));
 
   req::vector<std::string> exception_msg_items;
   exception_msg_items.push_back("Encountered dependency cycle.\n");

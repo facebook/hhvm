@@ -508,7 +508,7 @@ ELEM_HELPER_TABLE(X)
 template<bool warn, bool intishWarn>
 inline member_rval checkedGet(ArrayData* a, StringData* key) {
   int64_t i;
-  assert(a->isPHPArray());
+  assertx(a->isPHPArray());
   if (UNLIKELY(key->isStrictlyInteger(i))) {
     if (intishWarn) raise_intish_index_cast();
     return warn ? a->rvalStrict(i) : a->rval(i);
@@ -635,7 +635,7 @@ TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
     raise_inout_undefined_index(key);
     return make_tv<KindOfNull>();
   }
-  assert(mode == MOpMode::Warn);
+  assertx(mode == MOpMode::Warn);
   return arrayGetNotFound(key);
 }
 
@@ -848,7 +848,7 @@ inline ArrayData* checkedSet(ArrayData* a,
                              Cell value,
                              bool copy) {
   int64_t i;
-  assert(a->isPHPArray());
+  assertx(a->isPHPArray());
   if (UNLIKELY(key->isStrictlyInteger(i))) {
     if (intishWarn) raise_intish_index_cast();
     return a->set(i, value, copy);

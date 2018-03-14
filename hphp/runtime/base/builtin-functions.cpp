@@ -219,7 +219,7 @@ vm_decode_function(const Variant& function,
       // assign the value at index 1 to name and we use the value at index
       // 0 to populate cls (if the value is a string) or this_ and cls (if
       // the value is an object).
-      assert(function.isArray());
+      assertx(function.isArray());
       Array arr = function.toArray();
       if (!array_is_valid_callback(arr)) {
         if (flags == DecodeFlags::Warn) {
@@ -275,7 +275,7 @@ vm_decode_function(const Variant& function,
           return nullptr;
         }
       } else {
-        assert(elem0.isObject());
+        assertx(elem0.isObject());
         this_ = elem0.getObjectData();
         cls = this_->getVMClass();
       }
@@ -346,10 +346,10 @@ vm_decode_function(const Variant& function,
         }
         return nullptr;
       }
-      assert(f && f->preClass() == nullptr);
+      assertx(f && f->preClass() == nullptr);
       return f;
     }
-    assert(cls);
+    assertx(cls);
     CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
     auto f = lookupMethodCtx(cc, name.get(), ctx, lookupType);
     if (f && (f->attrs() & AttrStatic)) {
@@ -370,11 +370,11 @@ vm_decode_function(const Variant& function,
           // If this_ is non-null AND we could not find a method, try
           // looking up __call in cls's method table
           f = cls->lookupMethod(s___call.get());
-          assert(!f || !(f->attrs() & AttrStatic));
+          assertx(!f || !(f->attrs() & AttrStatic));
         }
         if (!f && lookupType == CallType::ClsMethod) {
           f = cls->lookupMethod(s___callStatic.get());
-          assert(!f || (f->attrs() & AttrStatic));
+          assertx(!f || (f->attrs() & AttrStatic));
           this_ = nullptr;
         }
         if (f && (cc == cls || cc->lookupMethod(f->name()))) {
@@ -400,10 +400,10 @@ vm_decode_function(const Variant& function,
       }
     }
 
-    assert(f && f->preClass());
+    assertx(f && f->preClass());
     // If this_ is non-NULL, then this_ is the current instance and cls is
     // the class of the current instance.
-    assert(!this_ || this_->getVMClass() == cls);
+    assertx(!this_ || this_->getVMClass() == cls);
     // If we are doing a forwarding call and this_ is null, set cls
     // appropriately to propagate the current late bound class.
     if (!this_ && forwarding && ar && ar->func()->cls()) {
@@ -824,7 +824,7 @@ void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
     rv->m_data.num = 0LL;
     rv->m_type = KindOfNull;
   }
-  assert(false);
+  assertx(false);
 }
 
 void throw_bad_type_exception(const char *fmt, ...) {

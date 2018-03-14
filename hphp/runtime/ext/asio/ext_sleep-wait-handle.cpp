@@ -107,7 +107,7 @@ bool c_SleepWaitHandle::process() {
     return false;
   }
 
-  assert(getState() == STATE_WAITING);
+  assertx(getState() == STATE_WAITING);
 
   if (isInContext()) {
     unregisterFromContext();
@@ -136,9 +136,9 @@ String c_SleepWaitHandle::getName() {
 }
 
 void c_SleepWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-  assert(getState() == STATE_WAITING);
-  assert(getContextIdx() == ctx_idx);
+  assertx(AsioSession::Get()->getContext(ctx_idx));
+  assertx(getState() == STATE_WAITING);
+  assertx(getContextIdx() == ctx_idx);
 
   // Move us to the parent context.
   setContextIdx(getContextIdx() - 1);

@@ -1688,7 +1688,7 @@ static bool HHVM_FUNCTION(session_start) {
       /* fallthrough */
     }
   default:
-    assert(s_session->session_status == Session::None);
+    assertx(s_session->session_status == Session::None);
     s_session->define_sid = true;
     s_session->send_cookie = true;
   }
@@ -1882,10 +1882,10 @@ static struct SessionExtension final : Extension {
   }
 
   void threadInit() override {
-    assert(s_session.isNull());
+    assertx(s_session.isNull());
     s_session.getCheck();
     Extension* ext = ExtensionRegistry::get(s_session_ext_name);
-    assert(ext);
+    assertx(ext);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.save_path",               "",
                      IniSetting::SetAndGet<std::string>(

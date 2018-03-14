@@ -74,7 +74,7 @@ String HHVM_METHOD(Awaitable, getName) {
     return s_exception;
   }
 
-  assert(obj->instanceof(c_WaitableWaitHandle::classof()));
+  assertx(obj->instanceof(c_WaitableWaitHandle::classof()));
   return static_cast<c_WaitableWaitHandle*>(obj)->getName();
 }
 
@@ -138,19 +138,19 @@ template<class T> typename
 finish_class() {
   DEBUG_ONLY auto const wh = c_Awaitable::classof();
   auto cls = const_cast<Class*>(T::classof());
-  assert(wh && cls);
-  assert((cls == wh) || (cls->classof(wh)));
-  assert(cls->numDeclProperties() == 0);
-  assert(cls->numStaticProperties() == 0);
+  assertx(wh && cls);
+  assertx((cls == wh) || (cls->classof(wh)));
+  assertx(cls->numDeclProperties() == 0);
+  assertx(cls->numStaticProperties() == 0);
   DEBUG_ONLY auto const ctor = cls->getCtor();
-  assert(ctor == wh->getCtor());
-  assert(ctor->attrs() & AttrPrivate);
-  assert(ctor->attrs() & AttrFinal);
+  assertx(ctor == wh->getCtor());
+  assertx(ctor->attrs() & AttrPrivate);
+  assertx(ctor->attrs() & AttrFinal);
 
   cls->allocExtraData();
-  assert(!cls->m_extra->m_nativeDataInfo);
-  assert(!cls->m_extra->m_instanceCtor);
-  assert(!cls->m_extra->m_instanceDtor);
+  assertx(!cls->m_extra->m_nativeDataInfo);
+  assertx(!cls->m_extra->m_instanceCtor);
+  assertx(!cls->m_extra->m_instanceDtor);
   cls->m_extra.raw()->m_instanceCtor = asioInstanceCtor;
   cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
 }

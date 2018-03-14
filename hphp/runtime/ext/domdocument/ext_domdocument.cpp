@@ -68,7 +68,7 @@ extern xmlNodePtr SimpleXMLElement_exportNode(const Object& sxe);
 #define IMPLEMENT_GET_CLASS_FUNCTION(CLASS)                                    \
 Class* get ## CLASS ## Class() {                                               \
   static Class* cls = Unit::lookupClass(s_ ## CLASS.get());                    \
-  assert(cls);                                                                 \
+  assertx(cls);                                                                \
   return cls;                                                                  \
 }                                                                              \
 /**/
@@ -147,7 +147,7 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
                      parser->input->filename, parser->input->line);
         break;
       default:
-        assert(false);
+        assertx(false);
         break;
       }
     } else {
@@ -161,7 +161,7 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
                      parser->input->line);
         break;
       default:
-        assert(false);
+        assertx(false);
         break;
       }
     }
@@ -174,7 +174,7 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
       raise_notice("%s", msg.c_str());
       break;
     default:
-      assert(false);
+      assertx(false);
       break;
     }
   }
@@ -1173,7 +1173,7 @@ Variant php_dom_create_object(xmlNodePtr obj,
   if (doc) {
     if (doc->m_classmap.exists(clsname)) {
       // or const char * is not safe
-      assert(doc->m_classmap[clsname].isString());
+      assertx(doc->m_classmap[clsname].isString());
       clsname = doc->m_classmap[clsname].toString();
     }
   }
@@ -1189,7 +1189,7 @@ Variant php_dom_create_object(xmlNodePtr obj,
   if (!nodeobj->node()) {
     nodeobj->setNode(node);
   }
-  assert(nodeobj->node() == node);
+  assertx(nodeobj->node() == node);
 
   if (doc) {
     nodeobj->setDoc(std::move(doc));
@@ -2157,7 +2157,7 @@ DOMNode& DOMNode::operator=(const DOMNode& copy) {
   }
 
   if (m_node) {
-    assert(m_node->getCache() &&
+    assertx(m_node->getCache() &&
            Native::data<DOMNode>(m_node->getCache()) == this);
     m_node->clearCache();
     m_node = nullptr;
@@ -5699,7 +5699,7 @@ Variant HHVM_METHOD(DOMXPath, registerPHPFunctions,
 ///////////////////////////////////////////////////////////////////////////////
 
 void DOMNodeIterator::reset_iterator() {
-  assert(m_objmap);
+  assertx(m_objmap);
   xmlNodePtr curnode = nullptr;
   if (m_objmap->m_nodetype != XML_ENTITY_NODE &&
       m_objmap->m_nodetype != XML_NOTATION_NODE) {

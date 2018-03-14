@@ -134,7 +134,7 @@ const uint64_t kCodePrefix          = 0xf0;
 
 ALWAYS_INLINE void serialize_memoize_code(StringBuffer& sb,
                                           SerializeMemoizeCode code) {
-  assert(code == (code & kCodeMask));
+  assertx(code == (code & kCodeMask));
   uint8_t v = (kCodePrefix | code);
   sb.append(reinterpret_cast<char*>(&v), 1);
 }

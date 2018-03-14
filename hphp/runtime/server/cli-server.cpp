@@ -1622,7 +1622,7 @@ void init_cli_server(const char* socket_path) {
     }
   }
 
-  assert(!s_cliServer);
+  assertx(!s_cliServer);
   FTRACE(1, "init_cli_server({}): init...\n", socket_path);
   s_cliServer = new CLIServer(socket_path);
 }
@@ -1647,7 +1647,7 @@ void teardown_cli_server() {
 ucred* get_cli_ucred() { return tl_ucred; }
 
 bool cli_mkstemp(char* buf) {
-  assert(tl_cliSock >= 0);
+  assertx(tl_cliSock >= 0);
   FTRACE(2, "cli_mkstemp({}): fd = {}\n", buf, tl_cliSock);
   std::string out = buf;
   cli_write(tl_cliSock, "mkstemp", out);

@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_SLAB_MANAGER_H_
 #define incl_HPHP_SLAB_MANAGER_H_
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/portability.h"
 
 #include <atomic>
-#include <cassert>
 #include <vector>
 #include <utility>
 
@@ -41,7 +41,7 @@ struct TaggedSlabPtr {
   /* implicit */ TaggedSlabPtr(std::nullptr_t) noexcept : rep(0) {}
   TaggedSlabPtr(void* p, uint16_t tag = 0) noexcept
     : rep(reinterpret_cast<uintptr_t>(p) | tag) {
-    assert(ptr() == p);
+    assertx(ptr() == p);
   }
   void* ptr() const {
     return reinterpret_cast<void*>(rep & ~TagMask);
@@ -130,7 +130,7 @@ struct SlabManager : TaggedSlabList {
   // multiple local slabs to the global list in one batch at the end of each
   // request.
   void merge(TaggedSlabPtr newHead, void* localTail) {
-    assert(newHead);
+    assertx(newHead);
     // No need to bump the tag here, as it is already bumped when forming the
     // local list.
     auto last = reinterpret_cast<AtomicTaggedSlabPtr*>(localTail);

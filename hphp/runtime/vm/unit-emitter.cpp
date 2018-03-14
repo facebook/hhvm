@@ -125,12 +125,12 @@ const StringData* UnitEmitter::lookupLitstr(Id id) const {
   if (isGlobalLitstrId(id)) {
     return LitstrTable::get().lookupLitstrId(decodeGlobalLitstrId(id));
   }
-  assert(id < m_litstrs.size());
+  assertx(id < m_litstrs.size());
   return m_litstrs[id];
 }
 
 const ArrayData* UnitEmitter::lookupArray(Id id) const {
-  assert(id < m_arrays.size());
+  assertx(id < m_arrays.size());
   return m_arrays[id];
 }
 
@@ -179,7 +179,7 @@ Id UnitEmitter::mergeArray(const ArrayData* a) {
 // FuncEmitters.
 
 void UnitEmitter::initMain(int line1, int line2) {
-  assert(m_fes.size() == 0);
+  assertx(m_fes.size() == 0);
   StringData* name = staticEmptyString();
   FuncEmitter* pseudomain = newFuncEmitter(name);
   Attr attrs = AttrMayUseVV;
@@ -205,7 +205,7 @@ void UnitEmitter::addTrivialPseudoMain() {
 
 FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* name) {
   // The pseudomain comes first.
-  assert(m_fes.size() > 0 || !strcmp(name->data(), ""));
+  assertx(m_fes.size() > 0 || !strcmp(name->data(), ""));
 
   FuncEmitter* fe = new FuncEmitter(*this, m_nextFuncSn++, m_fes.size(), name);
   m_fes.push_back(fe);
@@ -348,16 +348,16 @@ void UnitEmitter::recordSourceLocation(const Location::Range& sLoc,
   if (!m_sourceLocTab.empty()) {
     if (m_sourceLocTab.back().second == newLoc) {
       // Combine into the interval already at the back of the vector.
-      assert(start >= m_sourceLocTab.back().first);
+      assertx(start >= m_sourceLocTab.back().first);
       return;
     }
-    assert(m_sourceLocTab.back().first < start &&
+    assertx(m_sourceLocTab.back().first < start &&
            "source location offsets must be added to UnitEmitter in "
            "increasing order");
   } else {
     // First record added should be for bytecode offset zero or very rarely one
     // when the source starts with a label and a Nop is inserted.
-    assert(start == 0 || start == 1);
+    assertx(start == 0 || start == 1);
   }
   m_sourceLocTab.push_back(std::make_pair(start, newLoc));
 }
@@ -378,7 +378,7 @@ void UnitEmitter::pushMergeableInclude(Unit::MergeKind kind,
 }
 
 void UnitEmitter::insertMergeableInclude(int ix, Unit::MergeKind kind, Id id) {
-  assert(size_t(ix) <= m_mergeableStmts.size());
+  assertx(size_t(ix) <= m_mergeableStmts.size());
   m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
                           std::make_pair(kind, id));
   m_allClassesHoistable = false;
@@ -394,7 +394,7 @@ void UnitEmitter::pushMergeableDef(Unit::MergeKind kind,
 
 void UnitEmitter::insertMergeableDef(int ix, Unit::MergeKind kind,
                                      Id id, const TypedValue& tv) {
-  assert(size_t(ix) <= m_mergeableStmts.size());
+  assertx(size_t(ix) <= m_mergeableStmts.size());
   m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
                           std::make_pair(kind, m_mergeableValues.size()));
   m_mergeableValues.push_back(std::make_pair(id, tv));
@@ -408,7 +408,7 @@ void UnitEmitter::pushMergeableTypeAlias(Unit::MergeKind kind, const Id id) {
 
 void UnitEmitter::insertMergeableTypeAlias(int ix, Unit::MergeKind kind,
                                            const Id id) {
-  assert(size_t(ix) <= m_mergeableStmts.size());
+  assertx(size_t(ix) <= m_mergeableStmts.size());
   m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
                           std::make_pair(kind, id));
   m_allClassesHoistable = false;
@@ -601,17 +601,17 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
         mi->m_firstHoistableFunc = ix;
       }
     } else {
-      assert(!mi->m_firstHoistableFunc);
+      assertx(!mi->m_firstHoistableFunc);
     }
-    assert(ix == fe->id());
+    assertx(ix == fe->id());
     mi->mergeableObj(ix++) = func;
   }
-  assert(u->getMain(nullptr)->isPseudoMain());
+  assertx(u->getMain(nullptr)->isPseudoMain());
   if (!mi->m_firstHoistableFunc) {
     mi->m_firstHoistableFunc =  ix;
   }
   mi->m_firstHoistablePreClass = ix;
-  assert(m_fes.size());
+  assertx(m_fes.size());
   for (auto& id : m_hoistablePceIdList) {
     mi->mergeableObj(ix++) = u->m_preClasses[id].get();
   }
@@ -627,14 +627,14 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
             (void*)((intptr_t(mergeable.second) << 3) + (int)mergeable.first);
           break;
         case MergeKind::ReqDoc: {
-          assert(RuntimeOption::RepoAuthoritative);
+          assertx(RuntimeOption::RepoAuthoritative);
           void* name = u->lookupLitstrId(mergeable.second);
           mi->mergeableObj(ix++) = (char*)name + (int)mergeable.first;
           break;
         }
         case MergeKind::Define:
         case MergeKind::Global:
-          assert(RuntimeOption::RepoAuthoritative);
+          assertx(RuntimeOption::RepoAuthoritative);
         case MergeKind::PersistentDefine: {
           void* name = u->lookupLitstrId
             (m_mergeableValues[mergeable.second].first);
@@ -645,7 +645,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
           tva->m_type = tv.m_type;
           // leave tva->m_aux uninitialized
           ix += sizeof(*tva) / sizeof(void*);
-          assert(sizeof(*tva) % sizeof(void*) == 0);
+          assertx(sizeof(*tva) % sizeof(void*) == 0);
           break;
         }
         case MergeKind::Done:
@@ -654,7 +654,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
       }
     }
   }
-  assert(ix == mi->m_mergeablesSize);
+  assertx(ix == mi->m_mergeablesSize);
   mi->mergeableObj(ix) = (void*)MergeKind::Done;
 
   /*
@@ -690,7 +690,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
     ux->m_arrayTypeTable = m_arrayTypeTable;
 
     for (auto const fe : m_feTab) {
-      assert(m_fMap.find(fe) != m_fMap.end());
+      assertx(m_fMap.find(fe) != m_fMap.end());
       auto const func = m_fMap.find(fe)->second;
       ux->m_funcTable.push_back(func);
     }
@@ -1021,7 +1021,7 @@ void UnitRepoProxy::GetUnitLitstrsStmt
       Id litstrId;        /**/ query.getId(0, litstrId);
       StringData* litstr; /**/ query.getStaticString(1, litstr);
       Id id UNUSED = ue.mergeUnitLitstr(litstr);
-      assert(id == litstrId);
+      assertx(id == litstrId);
     }
   } while (!query.done());
   txn.commit();
@@ -1059,12 +1059,12 @@ void UnitRepoProxy::GetUnitArrayTypeTableStmt
   query.bindInt64("@unitSn", ue.m_sn);
 
   query.step();
-  assert(query.row());
+  assertx(query.row());
   BlobDecoder dataBlob = query.getBlob(1);
   dataBlob(ue.m_arrayTypeTable);
   dataBlob.assertDone();
   query.step();
-  assert(query.done());
+  assertx(query.done());
 
   txn.commit();
 }
@@ -1108,7 +1108,7 @@ void UnitRepoProxy::GetUnitArraysStmt
         VariableUnserializer::Type::Internal
       );
       Id id DEBUG_ONLY = ue.mergeArray(ArrayData::GetScalarArray(std::move(v)));
-      assert(id == arrayId);
+      assertx(id == arrayId);
     }
   } while (!query.done());
   txn.commit();
@@ -1132,12 +1132,12 @@ void UnitRepoProxy::InsertUnitMergeableStmt
   query.bindInt("@mergeableKind", (int)kind);
   query.bindId("@mergeableId", id);
   if (value) {
-    assert(kind == MergeKind::Define ||
+    assertx(kind == MergeKind::Define ||
            kind == MergeKind::PersistentDefine ||
            kind == MergeKind::Global);
     query.bindTypedValue("@mergeableValue", *value);
   } else {
-    assert(kind == MergeKind::ReqDoc || kind == MergeKind::TypeAlias);
+    assertx(kind == MergeKind::ReqDoc || kind == MergeKind::TypeAlias);
     query.bindNull("@mergeableValue");
   }
   query.exec();

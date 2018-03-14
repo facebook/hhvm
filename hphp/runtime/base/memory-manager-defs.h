@@ -97,7 +97,7 @@ struct alignas(kSmallSizeAlign) Slab : HeapObject {
   HeapObject* find(const void* ptr) const;
 
   static Slab* fromHeader(HeapObject* h) {
-    assert(h->kind() == HeaderKind::Slab);
+    assertx(h->kind() == HeaderKind::Slab);
     return reinterpret_cast<Slab*>(h);
   }
 
@@ -109,7 +109,7 @@ struct alignas(kSmallSizeAlign) Slab : HeapObject {
   static Slab* fromPtr(const void* p) {
     static_assert(kSlabAlign == kSlabSize, "");
     auto slab = reinterpret_cast<Slab*>(uintptr_t(p) & ~(kSlabAlign - 1));
-    assert(slab->kind() == HeaderKind::Slab);
+    assertx(slab->kind() == HeaderKind::Slab);
     return slab;
   }
 
@@ -155,7 +155,7 @@ static_assert(kMaxSmallSize < kSlabSize - sizeof(Slab),
               "kMaxSmallSize must fit in Slab");
 
 inline const Resumable* resumable(const HeapObject* h) {
-  assert(h->kind() == HeaderKind::AsyncFuncFrame);
+  assertx(h->kind() == HeaderKind::AsyncFuncFrame);
   auto native = static_cast<const NativeNode*>(h);
   return reinterpret_cast<const Resumable*>(
     (const char*)native + native->obj_offset - sizeof(Resumable)
@@ -163,7 +163,7 @@ inline const Resumable* resumable(const HeapObject* h) {
 }
 
 inline Resumable* resumable(HeapObject* h) {
-  assert(h->kind() == HeaderKind::AsyncFuncFrame);
+  assertx(h->kind() == HeaderKind::AsyncFuncFrame);
   auto native = static_cast<NativeNode*>(h);
   return reinterpret_cast<Resumable*>(
     (char*)native + native->obj_offset - sizeof(Resumable)
@@ -171,38 +171,38 @@ inline Resumable* resumable(HeapObject* h) {
 }
 
 inline const c_Awaitable* asyncFuncWH(const HeapObject* h) {
-  assert(resumable(h)->actRec()->func()->isAsyncFunction());
+  assertx(resumable(h)->actRec()->func()->isAsyncFunction());
   auto native = static_cast<const NativeNode*>(h);
   auto obj = reinterpret_cast<const c_Awaitable*>(
     (const char*)native + native->obj_offset
   );
-  assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
+  assertx(obj->headerKind() == HeaderKind::AsyncFuncWH);
   return obj;
 }
 
 inline c_Awaitable* asyncFuncWH(HeapObject* h) {
-  assert(resumable(h)->actRec()->func()->isAsyncFunction());
+  assertx(resumable(h)->actRec()->func()->isAsyncFunction());
   auto native = static_cast<NativeNode*>(h);
   auto obj = reinterpret_cast<c_Awaitable*>(
     (char*)native + native->obj_offset
   );
-  assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
+  assertx(obj->headerKind() == HeaderKind::AsyncFuncWH);
   return obj;
 }
 
 inline const ObjectData* closureObj(const HeapObject* h) {
-  assert(h->kind() == HeaderKind::ClosureHdr);
+  assertx(h->kind() == HeaderKind::ClosureHdr);
   auto closure_hdr = static_cast<const ClosureHdr*>(h);
   auto obj = reinterpret_cast<const ObjectData*>(closure_hdr + 1);
-  assert(obj->headerKind() == HeaderKind::Closure);
+  assertx(obj->headerKind() == HeaderKind::Closure);
   return obj;
 }
 
 inline ObjectData* closureObj(HeapObject* h) {
-  assert(h->kind() == HeaderKind::ClosureHdr);
+  assertx(h->kind() == HeaderKind::ClosureHdr);
   auto closure_hdr = static_cast<ClosureHdr*>(h);
   auto obj = reinterpret_cast<ObjectData*>(closure_hdr + 1);
-  assert(obj->headerKind() == HeaderKind::Closure);
+  assertx(obj->headerKind() == HeaderKind::Closure);
   return obj;
 }
 
@@ -368,8 +368,8 @@ inline size_t allocSize(const HeapObject* h) {
       auto obj = static_cast<const ObjectData*>(h);
       auto whKind = wait_handle<c_Awaitable>(obj)->getKind();
       size = waithandle_sizes[(int)whKind];
-      assert(size != 0); // AsyncFuncFrame or AwaitAllWH
-      assert(size == MemoryManager::sizeClass(size));
+      assertx(size != 0); // AsyncFuncFrame or AwaitAllWH
+      assertx(size == MemoryManager::sizeClass(size));
       return size;
     }
     case HeaderKind::AwaitAllWH:
@@ -405,14 +405,14 @@ inline size_t allocSize(const HeapObject* h) {
     case HeaderKind::BigObj:    // [MallocNode][HeapObject...]
     case HeaderKind::BigMalloc: // [MallocNode][raw bytes...]
       size = static_cast<const MallocNode*>(h)->nbytes;
-      assert(size != 0);
+      assertx(size != 0);
       // not rounded up to size class, because we never need to iterate over
       // more than one allocated block. avoid calling nallocx().
       return size;
     case HeaderKind::Free:
     case HeaderKind::Hole:
       size = static_cast<const FreeNode*>(h)->size();
-      assert(size != 0);
+      assertx(size != 0);
       // Free objects are guaranteed to be already size-class aligned.
       // Holes are not size-class aligned, so neither need to be rounded up.
       return size;
@@ -490,7 +490,7 @@ inline void Slab::setStarts(const void* start, const void* end,
   auto const nbits = nbytes / kSmallSizeAlign;
   if (nbits <= kBitsPerStart &&
       start_bit / kBitsPerStart < end_bit / kBitsPerStart) {
-    assert(index < kNumMasks);
+    assertx(index < kNumMasks);
     auto const mask = masks_[index];
     size_t const k = shifts_[index];
     // initially n = how much mask should be shifted to line up with start_bit
@@ -527,12 +527,12 @@ void SparseHeap::iterate(OnBig onBig, OnSlab onSlab) {
   while (slab != slabend || big != bigend) {
     HeapObject* slab_hdr = slab != slabend ? (HeapObject*)slab->ptr : SENTINEL;
     HeapObject* big_hdr = big != bigend ? *big : SENTINEL;
-    assert(slab_hdr < SENTINEL || big_hdr < SENTINEL);
+    assertx(slab_hdr < SENTINEL || big_hdr < SENTINEL);
     if (slab_hdr < big_hdr) {
       onSlab(slab_hdr, slab->size);
       ++slab;
     } else {
-      assert(big_hdr < slab_hdr);
+      assertx(big_hdr < slab_hdr);
       onBig(big_hdr, allocSize(big_hdr));
       ++big;
     }
@@ -549,13 +549,13 @@ template<class Fn> void SparseHeap::iterate(Fn fn) {
   while (slab != slabend || big != bigend) {
     HeapObject* slab_hdr = slab != slabend ? (HeapObject*)slab->ptr : SENTINEL;
     HeapObject* big_hdr = big != bigend ? *big : SENTINEL;
-    assert(slab_hdr < SENTINEL || big_hdr < SENTINEL);
+    assertx(slab_hdr < SENTINEL || big_hdr < SENTINEL);
     HeapObject *h, *end;
     if (slab_hdr < big_hdr) {
       h = slab_hdr;
       end = (HeapObject*)((char*)h + slab->size);
       ++slab;
-      assert(end <= big_hdr); // otherwise slab overlaps next big
+      assertx(end <= big_hdr); // otherwise slab overlaps next big
     } else {
       h = big_hdr;
       end = nullptr; // ensure we don't loop below
@@ -566,7 +566,7 @@ template<class Fn> void SparseHeap::iterate(Fn fn) {
       fn(h, size);
       h = (HeapObject*)((char*)h + size);
     } while (h < end);
-    assert(!end || h == end); // otherwise, last object was truncated
+    assertx(!end || h == end); // otherwise, last object was truncated
   }
 }
 
@@ -577,7 +577,7 @@ template<class Fn> void MemoryManager::iterate(Fn fn) {
       h = static_cast<MallocNode*>(h) + 1;
       allocSize -= sizeof(MallocNode);
     } else if (h->kind() >= HeaderKind::Hole) {
-      assert(unsigned(h->kind()) < NumHeaderKinds);
+      assertx(unsigned(h->kind()) < NumHeaderKinds);
       // no valid pointer can point here.
       return; // continue iterating
     }
@@ -619,8 +619,8 @@ template<class Fn> void MemoryManager::sweepApcStrings(Fn fn) {
   auto& head = getStringList();
   for (StringDataNode *next, *n = head.next; n != &head; n = next) {
     next = n->next;
-    assert(next && uintptr_t(next) != kSmallFreeWord);
-    assert(next && uintptr_t(next) != kMallocFreeWord);
+    assertx(next && uintptr_t(next) != kSmallFreeWord);
+    assertx(next && uintptr_t(next) != kMallocFreeWord);
     auto const s = StringData::node2str(n);
     if (fn(s)) {
       s->unProxy();

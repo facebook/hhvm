@@ -125,7 +125,7 @@ public:
     }
 
     Accessor& operator=(const pcre_cache_entry* ptr) {
-      assert(m_kind == Kind::Empty || m_kind == Kind::Ptr);
+      assertx(m_kind == Kind::Empty || m_kind == Kind::Ptr);
       m_kind = Kind::Ptr;
       m_u.ptr = ptr;
       return *this;
@@ -175,7 +175,7 @@ public:
     }
 
     const EntryPtr& entryPtr() const {
-      assert(m_kind == Kind::SmartPtr);
+      assertx(m_kind == Kind::SmartPtr);
       return m_u.smart_ptr;
     }
 
@@ -422,7 +422,7 @@ bool PCRECache::find(Accessor& accessor,
   switch (m_kind) {
     case CacheKind::Static:
       {
-        assert(m_staticCache.load());
+        assertx(m_staticCache.load());
         StaticCache::iterator it;
         auto cache = m_staticCache.load(std::memory_order_acquire);
         if ((it = cache->find(regex)) != cache->end()) {
@@ -473,7 +473,7 @@ void PCRECache::insert(
   switch (m_kind) {
     case CacheKind::Static:
       {
-        assert(m_staticCache.load());
+        assertx(m_staticCache.load());
         // Clear the cache if we haven't refreshed it in a while
         if (time(nullptr) > m_expire) {
           clearStatic();
@@ -888,10 +888,10 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       std::make_unique<pcre_literal_data>(std::move(literal_data));
   }
 
-  assert((poptions & ~0x1) == 0);
+  assertx((poptions & ~0x1) == 0);
   new_entry->preg_options = poptions;
 
-  assert((coptions & 0x80000000) == 0);
+  assertx((coptions & 0x80000000) == 0);
   new_entry->compile_options = coptions;
 
   /* Get pcre full info */
@@ -1665,7 +1665,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
                                    callable, limit, replace_count);
 
     if (ret.isBoolean()) {
-      assert(!ret.toBoolean());
+      assertx(!ret.toBoolean());
       return init_null();
     }
 
@@ -1679,7 +1679,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
       Variant ret = php_pcre_replace(regex_entry, subject, replace,
                                      callable, limit, replace_count);
       if (ret.isBoolean()) {
-        assert(!ret.toBoolean());
+        assertx(!ret.toBoolean());
         return init_null();
       }
       if (!ret.isString()) {
@@ -1708,7 +1708,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
                                    callable, limit, replace_count);
 
     if (ret.isBoolean()) {
-      assert(!ret.toBoolean());
+      assertx(!ret.toBoolean());
       return init_null();
     }
     if (!ret.isString()) {
@@ -1725,7 +1725,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
 Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
                           const Variant& subject, int limit, Variant* count,
                           bool is_callable, bool is_filter) {
-  assert(!(is_callable && is_filter));
+  assertx(!(is_callable && is_filter));
   if (!is_callable &&
       replacement.isArray() && !pattern.isArray()) {
     raise_warning("Parameter mismatch, pattern is a string while "

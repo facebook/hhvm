@@ -27,7 +27,7 @@ struct BaseSet : HashCollection {
   void addAll(const Variant& t);
 
   void init(const Variant& t) {
-    assert(m_size == 0);
+    assertx(m_size == 0);
     addAll(t);
   }
 
@@ -38,7 +38,7 @@ protected:
   void addRaw(int64_t k);
   void addRaw(StringData* k);
   void addRaw(Cell tv) {
-    assert(tv.m_type != KindOfRef);
+    assertx(tv.m_type != KindOfRef);
     if (tv.m_type == KindOfInt64) {
       addRaw(tv.m_data.num);
     } else if (isStringType(tv.m_type)) {
@@ -56,7 +56,7 @@ public:
   void add(int64_t k);
   void add(StringData* k);
   void add(Cell tv) {
-    assert(tv.m_type != KindOfRef);
+    assertx(tv.m_type != KindOfRef);
     if (tv.m_type == KindOfInt64) {
       add(tv.m_data.num);
     } else if (isStringType(tv.m_type)) {
@@ -116,7 +116,7 @@ public:
     if (key->m_type == KindOfInt64) {
       collections::throwUndef(key->m_data.num);
     } else {
-      assert(isStringType(key->m_type));
+      assertx(isStringType(key->m_type));
       collections::throwUndef(key->m_data.pstr);
     }
   }

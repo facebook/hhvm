@@ -79,17 +79,17 @@ inline const void* Func::mallocEnd() const {
 
 inline void Func::validate() const {
 #ifdef DEBUG
-  assert(m_magic == kMagic);
+  assertx(m_magic == kMagic);
 #endif
-  assert(m_name != nullptr);
+  assertx(m_name != nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // FuncId manipulation.
 
 inline FuncId Func::getFuncId() const {
-  assert(m_funcId != InvalidFuncId);
-  assert(fromFuncId(m_funcId) == this);
+  assertx(m_funcId != InvalidFuncId);
+  assertx(fromFuncId(m_funcId) == this);
   return m_funcId;
 }
 
@@ -121,12 +121,12 @@ inline Class* Func::implCls() const {
 }
 
 inline const StringData* Func::name() const {
-  assert(m_name != nullptr);
+  assertx(m_name != nullptr);
   return m_name;
 }
 
 inline StrNR Func::nameStr() const {
-  assert(m_name != nullptr);
+  assertx(m_name != nullptr);
   return StrNR(m_name);
 }
 
@@ -136,7 +136,7 @@ inline const StringData* Func::fullName() const {
 }
 
 inline StrNR Func::fullNameStr() const {
-  assert(m_fullName != nullptr);
+  assertx(m_fullName != nullptr);
   return StrNR(m_fullName);
 }
 
@@ -150,12 +150,12 @@ inline const StringData* Func::fullDisplayName() const {
 }
 
 inline NamedEntity* Func::getNamedEntity() {
-  assert(!shared()->m_preClass);
+  assertx(!shared()->m_preClass);
   return *reinterpret_cast<LowPtr<NamedEntity>*>(&m_namedEntity);
 }
 
 inline const NamedEntity* Func::getNamedEntity() const {
-  assert(!shared()->m_preClass);
+  assertx(!shared()->m_preClass);
   return *reinterpret_cast<const LowPtr<const NamedEntity>*>(&m_namedEntity);
 }
 
@@ -180,9 +180,9 @@ inline const StringData* Func::filename() const {
   // the unit
   const StringData* name = originalFilename();
   if (!name) {
-    assert(m_unit);
+    assertx(m_unit);
     name = m_unit->filepath();
-    assert(name);
+    assertx(name);
   }
   return name;
 }
@@ -195,7 +195,7 @@ inline int Func::line2() const {
   auto const sd = shared();
   auto const delta = sd->m_line2Delta;
   if (UNLIKELY(delta == kSmallDeltaLimit)) {
-    assert(extShared());
+    assertx(extShared());
     return static_cast<const ExtendedSharedData*>(sd)->m_line2;
   }
   return line1() + delta;
@@ -220,7 +220,7 @@ inline Offset Func::past() const {
   auto const sd = shared();
   auto const delta = sd->m_pastDelta;
   if (UNLIKELY(delta == kSmallDeltaLimit)) {
-    assert(extShared());
+    assertx(extShared());
     return static_cast<const ExtendedSharedData*>(sd)->m_past;
   }
   return base() + delta;
@@ -274,20 +274,20 @@ inline const Func::ParamInfoVec& Func::params() const {
 }
 
 inline uint32_t Func::numParams() const {
-  assert(bool(m_attrs & AttrVariadicParam) != bool(m_paramCounts & 1));
-  assert((m_paramCounts >> 1) == params().size());
+  assertx(bool(m_attrs & AttrVariadicParam) != bool(m_paramCounts & 1));
+  assertx((m_paramCounts >> 1) == params().size());
   return (m_paramCounts) >> 1;
 }
 
 inline uint32_t Func::numNonVariadicParams() const {
-  assert(bool(m_attrs & AttrVariadicParam) != bool(m_paramCounts & 1));
-  assert((m_paramCounts >> 1) == params().size());
+  assertx(bool(m_attrs & AttrVariadicParam) != bool(m_paramCounts & 1));
+  assertx((m_paramCounts >> 1) == params().size());
   return (m_paramCounts - 1) >> 1;
 }
 
 inline bool Func::hasVariadicCaptureParam() const {
 #ifdef DEBUG
-  assert(bool(m_attrs & AttrVariadicParam) ==
+  assertx(bool(m_attrs & AttrVariadicParam) ==
          (numParams() && params()[numParams() - 1].variadic));
 #endif
   return m_attrs & AttrVariadicParam;
@@ -327,7 +327,7 @@ inline Id Func::numNamedLocals() const {
 }
 
 inline const StringData* Func::localVarName(Id id) const {
-  assert(id >= 0);
+  assertx(id >= 0);
   return id < numNamedLocals() ? shared()->m_localNames[id] : nullptr;
 }
 
@@ -500,7 +500,7 @@ inline bool Func::isResumable() const {
 // Methods.
 
 inline Slot Func::methodSlot() const {
-  assert(isMethod());
+  assertx(isMethod());
   return m_methodSlot;
 }
 
@@ -598,12 +598,12 @@ inline const Func::FPIEntVec& Func::fpitab() const {
 }
 
 inline const EHEnt* Func::findEH(Offset o) const {
-  assert(o >= base() && o < past());
+  assertx(o >= base() && o < past());
   return findEH(shared()->m_ehtab, o);
 }
 
 inline const EHEnt* Func::findEHbyHandler(Offset o) const {
-  assert(o >= base() && o < past());
+  assertx(o >= base() && o < past());
   return findEHbyHandler(shared()->m_ehtab, o);
 }
 
@@ -701,7 +701,7 @@ inline void Func::setHasPrivateAncestor(bool b) {
 }
 
 inline void Func::setMethodSlot(Slot s) {
-  assert(isMethod());
+  assertx(isMethod());
   m_methodSlot = s;
 }
 

@@ -225,7 +225,7 @@ bool XboxServer::SendMessage(const String& message,
       job = new XboxTransport(message.toCppString());
       job->incRefCount(); // paired with worker's decRefCount()
       job->incRefCount(); // paired with decRefCount() at below
-      assert(s_dispatcher);
+      assertx(s_dispatcher);
       s_dispatcher->enqueue(job);
     }
 
@@ -309,7 +309,7 @@ bool XboxServer::PostMessage(const String& message,
 
     XboxTransport *job = new XboxTransport(message.toCppString());
     job->incRefCount(); // paired with worker's decRefCount()
-    assert(s_dispatcher);
+    assertx(s_dispatcher);
     s_dispatcher->enqueue(job);
     return true;
 
@@ -398,7 +398,7 @@ Resource XboxServer::TaskStart(const String& msg,
         event->setJob(job);
       }
 
-      assert(s_dispatcher);
+      assertx(s_dispatcher);
       s_dispatcher->enqueue(job);
 
       return Resource(std::move(task));
@@ -428,7 +428,7 @@ void XboxServer::TaskStartFromNonRequest(
         XboxTransport *job = new XboxTransport(msg, reqInitDoc);
         job->incRefCount(); // paired with worker's decRefCount()
 
-        assert(s_dispatcher);
+        assertx(s_dispatcher);
         s_dispatcher->enqueue(job);
         return;
       }

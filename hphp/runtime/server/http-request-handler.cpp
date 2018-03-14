@@ -132,9 +132,9 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
                                            bool compressed,
                                            const std::string &cmd,
                                            const char *ext) {
-  assert(ext);
-  assert(cmd.rfind('.') != std::string::npos);
-  assert(strcmp(ext, cmd.c_str() + cmd.rfind('.') + 1) == 0);
+  assertx(ext);
+  assertx(cmd.rfind('.') != std::string::npos);
+  assertx(strcmp(ext, cmd.c_str() + cmd.rfind('.') + 1) == 0);
 
   auto iter = RuntimeOption::StaticFileExtensions.find(ext);
   if (iter != RuntimeOption::StaticFileExtensions.end()) {
@@ -245,7 +245,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   // resolve virtual host
   const VirtualHost *vhost = VirtualHost::GetCurrent();
-  assert(vhost);
+  assertx(vhost);
   if (vhost->disabled() ||
       vhost->isBlocking(transport->getCommand(), transport->getRemoteHost())) {
     transport->sendString("Not Found", 404);

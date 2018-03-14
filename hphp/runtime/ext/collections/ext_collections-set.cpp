@@ -29,7 +29,7 @@ bool invokeAndCastToBool(const CallCtx& ctx, int argc,
 // BaseSet
 
 void BaseSet::addAllKeysOf(const Cell container) {
-  assert(isContainer(container));
+  assertx(isContainer(container));
 
   decltype(cap()) oldCap = 0;
   bool ok =
@@ -113,7 +113,7 @@ void BaseSet::addImpl(int64_t k) {
   }
   auto h = hash_int64(k);
   auto p = findForInsert(k, h);
-  assert(MixedArray::isValidIns(p));
+  assertx(MixedArray::isValidIns(p));
   if (MixedArray::isValidPos(*p)) {
     // When there is a conflict, the add() API is supposed to replace the
     // existing element with the new element in place. However since Sets
@@ -141,7 +141,7 @@ void BaseSet::addImpl(StringData *key) {
   }
   strhash_t h = key->hash();
   auto p = findForInsert(key, h);
-  assert(MixedArray::isValidIns(p));
+  assertx(MixedArray::isValidIns(p));
   if (MixedArray::isValidPos(*p)) {
     return;
   }
@@ -176,7 +176,7 @@ void BaseSet::addFront(int64_t k) {
   mutate();
   auto h = hash_int64(k);
   auto p = findForInsert(k, h);
-  assert(MixedArray::isValidIns(p));
+  assertx(MixedArray::isValidIns(p));
   if (MixedArray::isValidPos(*p)) {
     // When there is a conflict, the addFront() API is supposed to replace
     // the existing element with the new element in place. However since
@@ -200,7 +200,7 @@ void BaseSet::addFront(StringData *key) {
   mutate();
   strhash_t h = key->hash();
   auto p = findForInsert(key, h);
-  assert(MixedArray::isValidIns(p));
+  assertx(MixedArray::isValidIns(p));
   if (MixedArray::isValidPos(*p)) {
     return;
   }
@@ -222,7 +222,7 @@ Variant BaseSet::pop() {
   mutate();
   auto e = elmLimit() - 1;
   for (;; --e) {
-    assert(e >= data());
+    assertx(e >= data());
     if (!isTombstone(e)) break;
   }
   Variant ret = tvAsCVarRef(&e->data);
@@ -240,7 +240,7 @@ Variant BaseSet::popFront() {
   mutate();
   auto e = data();
   for (;; ++e) {
-    assert(e != elmLimit());
+    assertx(e != elmLimit());
     if (!isTombstone(e)) break;
   }
   Variant ret = tvAsCVarRef(&e->data);
@@ -254,7 +254,7 @@ Variant BaseSet::popFront() {
 Variant BaseSet::firstValue() {
   if (!m_size) return init_null();
   auto e = firstElm();
-  assert(e != elmLimit());
+  assertx(e != elmLimit());
   return tvAsCVarRef(&e->data);
 }
 
@@ -266,7 +266,7 @@ Variant BaseSet::lastValue() {
   // manual while loop.
   uint32_t pos = posLimit() - 1;
   while (isTombstone(pos)) {
-    assert(pos > 0);
+    assertx(pos > 0);
     --pos;
   }
   return tvAsCVarRef(&data()[pos].data);
@@ -296,9 +296,9 @@ Object c_Set::getImmutableCopy() {
     m_immCopy = std::move(set);
     arrayData()->incRefCount();
   }
-  assert(!m_immCopy.isNull());
-  assert(data() == static_cast<c_ImmSet*>(m_immCopy.get())->data());
-  assert(arrayData()->hasMultipleRefs());
+  assertx(!m_immCopy.isNull());
+  assertx(data() == static_cast<c_ImmSet*>(m_immCopy.get())->data());
+  assertx(arrayData()->hasMultipleRefs());
   return m_immCopy;
 }
 
@@ -335,7 +335,7 @@ BaseSet::Clone(ObjectData* obj) {
 }
 
 bool BaseSet::OffsetIsset(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(key->m_type != KindOfRef);
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     return set->contains(key->m_data.num);
@@ -348,7 +348,7 @@ bool BaseSet::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseSet::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(key->m_type != KindOfRef);
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     return set->contains(key->m_data.num) ? !cellToBool(*key) : true;
@@ -361,7 +361,7 @@ bool BaseSet::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseSet::OffsetContains(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(key->m_type != KindOfRef);
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     return set->contains(key->m_data.num);
@@ -374,7 +374,7 @@ bool BaseSet::OffsetContains(ObjectData* obj, const TypedValue* key) {
 }
 
 void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(key->m_type != KindOfRef);
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     set->remove(key->m_data.num);
@@ -400,11 +400,11 @@ BaseSet::php_map(const Variant& callback) {
   }
   auto set = req::make<TSet>();
   if (!m_size) return Object{std::move(set)};
-  assert(posLimit() != 0);
-  assert(set->arrayData() == staticEmptyDictArrayAsMixed());
+  assertx(posLimit() != 0);
+  assertx(set->arrayData() == staticEmptyDictArrayAsMixed());
   auto oldCap = set->cap();
   set->reserve(posLimit()); // presume minimum collisions ...
-  assert(set->canMutateBuffer());
+  assertx(set->canMutateBuffer());
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
@@ -452,7 +452,7 @@ BaseSet::php_filter(const Variant& callback) {
     if (e->hasIntKey()) {
       set->addRaw(e->data.m_data.num);
     } else {
-      assert(e->hasStrKey());
+      assertx(e->hasStrKey());
       set->addRaw(e->data.m_data.pstr);
     }
   }
@@ -501,7 +501,7 @@ Object BaseSet::php_retain(const Variant& callback) {
               findForRemove(e->skey, h);
     eraseNoCompact(pp);
   }
-  assert(m_size <= size);
+  assertx(m_size <= size);
   compactOrShrinkIfDensityTooLow();
   return Object{this};
 }
@@ -540,7 +540,7 @@ BaseSet::php_take(const Variant& n) {
     if (toE.hasIntKey()) {
       set->updateNextKI(toE.ikey);
     } else {
-      assert(toE.hasStrKey());
+      assertx(toE.hasStrKey());
     }
   }
   return Object{std::move(set)};
@@ -569,7 +569,7 @@ BaseSet::php_takeWhile(const Variant& fn) {
     if (e->hasIntKey()) {
       set->addRaw(e->data.m_data.num);
     } else {
-      assert(e->hasStrKey());
+      assertx(e->hasStrKey());
       set->addRaw(e->data.m_data.pstr);
     }
   }
@@ -597,7 +597,7 @@ BaseSet::php_skip(const Variant& n) {
     return Object{std::move(set)};
   }
   size_t sz = size_t(m_size) - size_t(len);
-  assert(sz);
+  assertx(sz);
   set->reserve(sz);
   set->setSize(sz);
   set->setPosLimit(sz);
@@ -606,7 +606,7 @@ BaseSet::php_skip(const Variant& n) {
   auto mask = set->tableMask();
   for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
     while (isTombstone(frPos)) {
-      assert(frPos + 1 < posLimit());
+      assertx(frPos + 1 < posLimit());
       ++frPos;
     }
     auto& toE = set->data()[toPos];
@@ -615,7 +615,7 @@ BaseSet::php_skip(const Variant& n) {
     if (toE.hasIntKey()) {
       set->updateNextKI(toE.ikey);
     } else {
-      assert(toE.hasStrKey());
+      assertx(toE.hasStrKey());
     }
   }
   return Object{std::move(set)};
@@ -649,7 +649,7 @@ BaseSet::php_skipWhile(const Variant& fn) {
     if (e.hasIntKey()) {
       set->addRaw(e.data.m_data.num);
     } else {
-      assert(e.hasStrKey());
+      assertx(e.hasStrKey());
       set->addRaw(e.data.m_data.pstr);
     }
   }
@@ -687,7 +687,7 @@ BaseSet::php_slice(const Variant& start, const Variant& len) {
     if (toE.hasIntKey()) {
       set->updateNextKI(toE.ikey);
     } else {
-      assert(toE.hasStrKey());
+      assertx(toE.hasStrKey());
     }
   }
   return Object{std::move(set)};
@@ -702,7 +702,7 @@ BaseSet::php_concat(const Variant& iterable) {
   auto vec = req::make<TVector>();
   uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
-  assert(vec->canMutateBuffer());
+  assertx(vec->canMutateBuffer());
   vec->setSize(sz);
 
   uint32_t used = posLimit();

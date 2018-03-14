@@ -194,7 +194,7 @@ bool newTranslation();
  */
 ALWAYS_INLINE CodeCache& code() {
   extern CodeCache* g_code;
-  assert(g_code);
+  assertx(g_code);
   return *g_code;
 }
 

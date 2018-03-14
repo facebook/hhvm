@@ -125,7 +125,7 @@ bool VSCommand::parseCommand(
   folly::dynamic& clientMessage,
   VSCommand** command
 ) {
-  assert(command != nullptr && *command == nullptr);
+  assertx(command != nullptr && *command == nullptr);
 
   // Only VS Code debug protocol messages of type "request" are expected from
   // the client.
@@ -225,7 +225,7 @@ bool VSCommand::parseCommand(
 }
 
 bool VSCommand::execute() {
-  assert(m_debugger != nullptr);
+  assertx(m_debugger != nullptr);
   return m_debugger->executeClientCommand(
     this,
     [&](DebuggerSession* session, folly::dynamic& responseMsg) {

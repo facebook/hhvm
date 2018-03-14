@@ -157,7 +157,7 @@ struct XboxTransport final : Transport, Synchronizable {
     ++m_refCount;
   }
   void decRefCount() {
-    assert(m_refCount.load());
+    assertx(m_refCount.load());
     if (--m_refCount == 0) {
       delete this;
     }

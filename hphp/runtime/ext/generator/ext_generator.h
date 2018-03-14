@@ -61,7 +61,7 @@ struct BaseGenerator {
    * Skips CreateCont and PopC opcodes.
    */
   static Offset userBase(const Func* func) {
-    assert(func->isGenerator());
+    assertx(func->isGenerator());
     auto base = func->base();
 
     // Skip past VerifyParamType and EntryNoop bytecodes
@@ -74,8 +74,8 @@ struct BaseGenerator {
 
     auto DEBUG_ONLY op1 = decode_op(pc);
     auto DEBUG_ONLY op2 = decode_op(pc);
-    assert(op1 == OpCreateCont);
-    assert(op2 == OpPopC);
+    assertx(op1 == OpCreateCont);
+    assertx(op2 == OpPopC);
 
     return func->unit()->offsetOf(pc);
   }
@@ -98,9 +98,9 @@ struct BaseGenerator {
     node->obj_offset = obj_offset;
     node->initHeader_32_16(HeaderKind::NativeData, ar_off, tyindex);
     auto const obj = new (objmem) ObjectData(cls, 0, HeaderKind::NativeObject);
-    assert((void*)obj == (void*)objmem);
-    assert(obj->hasExactlyOneRef());
-    assert(obj->noDestruct());
+    assertx((void*)obj == (void*)objmem);
+    assertx(obj->hasExactlyOneRef());
+    assertx(obj->noDestruct());
     return obj;
   }
 
@@ -176,7 +176,7 @@ struct Generator final : BaseGenerator {
   static ObjectData* Create(const ActRec* fp, size_t numSlots,
                             jit::TCA resumeAddr, Offset resumeOffset);
   static Class* getClass() {
-    assert(s_class);
+    assertx(s_class);
     return s_class;
   }
   static constexpr ptrdiff_t objectOff() {

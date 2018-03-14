@@ -245,7 +245,7 @@ void Debugger::InterruptPSPEnded(const char *url) {
 void Debugger::Interrupt(int type, const char *program,
                          InterruptSite *site /* = NULL */,
                          const char *error /* = NULL */) {
-  assert(RuntimeOption::EnableHphpdDebugger);
+  assertx(RuntimeOption::EnableHphpdDebugger);
   TRACE_RB(2, "Debugger::Interrupt type %d\n", type);
 
   DebuggerProxyPtr proxy = GetProxy();
@@ -425,7 +425,7 @@ void Debugger::unregisterSandbox(const StringData* sandboxId) {
   if (m_sandboxThreadInfoMap.find(acc, sid)) {                         \
     auto const& set = acc->second;                                     \
     for (auto ti : set) {                                              \
-      assert(ThreadInfo::valid(ti));                                   \
+      assertx(ThreadInfo::valid(ti));                                   \
 
 #define FOREACH_SANDBOX_THREAD_END()    } } }                          \
 
@@ -481,7 +481,7 @@ DebuggerProxyPtr Debugger::createProxy(req::ptr<Socket> socket, bool local) {
     // dummy sandbox thread needs to interrupt.
     const StringData* sid =
       makeStaticString(proxy->getDummyInfo().id());
-    assert(sid);
+    assertx(sid);
     ProxyMap::accessor acc;
     m_proxyMap.insert(acc, sid);
     acc->second = proxy;

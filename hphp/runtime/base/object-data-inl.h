@@ -32,9 +32,9 @@ inline ObjectData::ObjectData(Class* cls, uint8_t flags, HeaderKind kind)
   : m_cls(cls)
 {
   initHeader_16(kind, OneReference, flags | cls->getODAttrs());
-  assert(isObjectKind(m_kind));
-  assert(!cls->needInitialization() || cls->initialized());
-  assert(!isCollection()); // collections use NoInit{}
+  assertx(isObjectKind(m_kind));
+  assertx(!cls->needInitialization() || cls->initialized());
+  assertx(!isCollection()); // collections use NoInit{}
   o_id = ++os_max_id;
   instanceInit(cls);
 }
@@ -44,9 +44,9 @@ inline ObjectData::ObjectData(Class* cls, InitRaw, uint8_t flags,
   : m_cls(cls)
 {
   initHeader_16(kind, OneReference, flags);
-  assert(isObjectKind(m_kind));
-  assert(!cls->needInitialization() || cls->initialized());
-  assert(!(cls->getODAttrs() & ~static_cast<uint8_t>(flags)));
+  assertx(isObjectKind(m_kind));
+  assertx(!cls->needInitialization() || cls->initialized());
+  assertx(!(cls->getODAttrs() & ~static_cast<uint8_t>(flags)));
   o_id = ++os_max_id;
 }
 
@@ -54,7 +54,7 @@ inline ObjectData::ObjectData(Class* cls, NoInit, uint8_t flags,
                               HeaderKind kind) noexcept
   : ObjectData(cls, InitRaw{}, flags, kind)
 {
-  assert(cls->numDeclProperties() == 0);
+  assertx(cls->numDeclProperties() == 0);
 }
 
 inline size_t ObjectData::heapSize() const {
@@ -74,21 +74,21 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   ObjectData* obj;
   if (auto const ctor = cls->instanceCtor()) {
     obj = ctor(cls);
-    assert(obj->checkCount());
+    assertx(obj->checkCount());
     assertx(obj->hasInstanceDtor());
   } else {
     size_t nProps = cls->numDeclProperties();
     size_t size = sizeForNProps(nProps);
     auto& mm = *tl_heap;
     obj = new (mm.objMalloc(size)) ObjectData(cls);
-    assert(obj->hasExactlyOneRef());
+    assertx(obj->hasExactlyOneRef());
     assertx(!obj->hasInstanceDtor());
   }
 
   if (UNLIKELY(cls->needsInitThrowable())) {
     // may incref obj
     throwable_init(obj);
-    assert(obj->checkCount());
+    assertx(obj->checkCount());
   }
 
   return obj;
@@ -97,7 +97,7 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
 inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
   if (cls->needInitialization()) cls->initialize();
 
-  assert(!cls->instanceCtor() &&
+  assertx(!cls->instanceCtor() &&
          !(cls->attrs() &
            (AttrAbstract | AttrInterface | AttrTrait | AttrEnum)));
 
@@ -105,7 +105,7 @@ inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
   size_t size = sizeForNProps(nProps);
   auto const obj = new (tl_heap->objMalloc(size))
                    ObjectData(cls, InitRaw{}, cls->getODAttrs());
-  assert(obj->hasExactlyOneRef());
+  assertx(obj->hasExactlyOneRef());
   return obj;
 }
 
@@ -114,8 +114,8 @@ inline void ObjectData::instanceInit(Class* cls) {
   if (nProps > 0) {
     if (cls->pinitVec().size() > 0) {
       const Class::PropInitVec* propInitVec = m_cls->getPropData();
-      assert(propInitVec != nullptr);
-      assert(nProps == propInitVec->size());
+      assertx(propInitVec != nullptr);
+      assertx(nProps == propInitVec->size());
       if (!cls->hasDeepInitProps()) {
         memcpy16_inline(propVecForConstruct(),
                         &(*propInitVec)[0], nProps * sizeof(TypedValue));
@@ -123,7 +123,7 @@ inline void ObjectData::instanceInit(Class* cls) {
         deepInitHelper(propVecForConstruct(), &(*propInitVec)[0], nProps);
       }
     } else {
-      assert(nProps == cls->declPropInit().size());
+      assertx(nProps == cls->declPropInit().size());
       memcpy16_inline(propVecForConstruct(),
                       &cls->declPropInit()[0], nProps * sizeof(TypedValue));
     }
@@ -131,7 +131,7 @@ inline void ObjectData::instanceInit(Class* cls) {
 }
 
 inline Class* ObjectData::getVMClass() const {
-  assert(kindIsValid());
+  assertx(kindIsValid());
   return m_cls;
 }
 
@@ -168,7 +168,7 @@ inline bool ObjectData::isImmutableCollection() const {
 }
 
 inline CollectionType ObjectData::collectionType() const {
-  assert(isValidCollection(static_cast<CollectionType>(m_kind)));
+  assertx(isValidCollection(static_cast<CollectionType>(m_kind)));
   return static_cast<CollectionType>(m_kind);
 }
 

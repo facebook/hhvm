@@ -123,7 +123,7 @@ public:
    */
   struct LiveLists {
     LiveList& get(size_t i) {
-      assert(i < DebuggerClient::AutoCompleteCount);
+      assertx(i < DebuggerClient::AutoCompleteCount);
       return lists[i];
     }
 

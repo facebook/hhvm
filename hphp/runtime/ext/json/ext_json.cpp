@@ -232,7 +232,7 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
     return tvReturn(json.substr(1, json.size() - 2));
   }
 
-  assert(json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE);
+  assertx(json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE);
   return make_tv<KindOfNull>();
 }
 

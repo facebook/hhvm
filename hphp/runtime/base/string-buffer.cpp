@@ -43,8 +43,8 @@ StringBuffer::StringBuffer(uint32_t initialSize /* = SmallStringReserve */)
 
 StringBuffer::~StringBuffer() {
   if (m_str) {
-    assert(m_str->hasExactlyOneRef());
-    assert((m_str->setSize(0), true)); // appease StringData::checkSane()
+    assertx(m_str->hasExactlyOneRef());
+    assertx((m_str->setSize(0), true)); // appease StringData::checkSane()
     m_str->release();
   }
 }
@@ -60,7 +60,7 @@ const char* StringBuffer::data() const {
 
 String StringBuffer::detach() {
   if (m_str && m_len) {
-    assert(m_str->hasExactlyOneRef());
+    assertx(m_str->hasExactlyOneRef());
     auto str = String::attach(m_str);
     str.setSize(m_len);
     m_str = nullptr;
@@ -104,7 +104,7 @@ void StringBuffer::clear() {
 
 void StringBuffer::release() {
   if (m_str) {
-    assert(m_str->hasExactlyOneRef());
+    assertx(m_str->hasExactlyOneRef());
     if (debug) {
       m_str->mutableData()[m_len] = 0; // appease StringData::checkSane()
     }
@@ -115,7 +115,7 @@ void StringBuffer::release() {
 }
 
 void StringBuffer::resize(uint32_t size) {
-  assert(size <= m_cap);
+  assertx(size <= m_cap);
   if (size <= m_cap) {
     m_len = size;
   }
@@ -128,7 +128,7 @@ char* StringBuffer::appendCursor(int size) {
     m_str->setSize(m_len);
     auto const tmp = m_str->reserve(m_len + size);
     if (UNLIKELY(tmp != m_str)) {
-      assert(m_str->hasExactlyOneRef());
+      assertx(m_str->hasExactlyOneRef());
       m_str->release();
       m_str = tmp;
     }
@@ -207,8 +207,8 @@ void StringBuffer::appendHelper(char ch) {
 }
 
 void StringBuffer::makeValid(uint32_t minCap) {
-  assert(!valid());
-  assert(!m_len);
+  assertx(!valid());
+  assertx(!m_len);
   m_str = StringData::Make(std::max(m_initialCap, minCap));
   m_cap = m_str->capacity();
 }
@@ -216,8 +216,8 @@ void StringBuffer::makeValid(uint32_t minCap) {
 void StringBuffer::appendHelper(const char *s, int len) {
   if (!valid()) makeValid(len);
 
-  assert(s);
-  assert(len >= 0);
+  assertx(s);
+  assertx(len >= 0);
   if (len <= 0) return;
 
   if (len > m_cap - m_len) {
@@ -250,8 +250,8 @@ void StringBuffer::printf(const char *format, ...) {
 }
 
 void StringBuffer::read(FILE* in, int page_size /* = 1024 */) {
-  assert(in);
-  assert(page_size > 0);
+  assertx(in);
+  assertx(page_size > 0);
 
   if (!valid()) makeValid(page_size);
   while (true) {
@@ -267,8 +267,8 @@ void StringBuffer::read(FILE* in, int page_size /* = 1024 */) {
 }
 
 void StringBuffer::read(File* in, int page_size /* = 1024 */) {
-  assert(in);
-  assert(page_size > 0);
+  assertx(in);
+  assertx(page_size > 0);
 
   if (!valid()) makeValid(page_size);
   while (true) {
@@ -278,7 +278,7 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
       buffer_size = m_cap - m_len;
     }
     int64_t len = in->readImpl(m_str->mutableData() + m_len, buffer_size);
-    assert(len >= 0);
+    assertx(len >= 0);
     if (len == 0) break;
     m_len += len;
   }
@@ -310,7 +310,7 @@ void StringBuffer::growBy(int spaceRequired) {
   m_str->setSize(m_len);
   auto const tmp = m_str->reserve(new_size);
   if (UNLIKELY(tmp != m_str)) {
-    assert(m_str->hasExactlyOneRef());
+    assertx(m_str->hasExactlyOneRef());
     m_str->release();
     m_str = tmp;
   }
@@ -321,7 +321,7 @@ void StringBuffer::growBy(int spaceRequired) {
 
 CstrBuffer::CstrBuffer(int cap)
   : m_buffer((char*)safe_malloc(cap + 1)), m_len(0), m_cap(cap) {
-  assert(unsigned(cap) <= kMaxCap);
+  assertx(unsigned(cap) <= kMaxCap);
 }
 
 CstrBuffer::CstrBuffer(const char *filename)
@@ -353,7 +353,7 @@ CstrBuffer::CstrBuffer(const char *filename)
 
 CstrBuffer::CstrBuffer(char* data, int len)
   : m_buffer(data), m_len(len), m_cap(len) {
-  assert(unsigned(len) < kMaxCap);
+  assertx(unsigned(len) < kMaxCap);
 }
 
 CstrBuffer::~CstrBuffer() {
@@ -366,7 +366,7 @@ void CstrBuffer::append(folly::StringPiece slice) {
 
   static_assert(std::is_unsigned<decltype(len)>::value,
                 "len is supposed to be unsigned");
-  assert(m_buffer);
+  assertx(m_buffer);
 
   unsigned newlen = m_len + len;
   if (newlen + 1 > m_cap) {
@@ -376,14 +376,14 @@ void CstrBuffer::append(folly::StringPiece slice) {
     unsigned newcap = folly::nextPowTwo(newlen + 1);
     m_buffer = (char*)safe_realloc(m_buffer, newcap);
     m_cap = newcap - 1;
-    assert(newlen + 1 <= m_cap);
+    assertx(newlen + 1 <= m_cap);
   }
   memcpy(m_buffer + m_len, data, len);
   m_buffer[m_len = newlen] = 0;
 }
 
 String CstrBuffer::detach() {
-  assert(m_len <= m_cap);
+  assertx(m_len <= m_cap);
   m_buffer[m_len] = 0;
   String s(m_buffer, m_len, AttachString);
   m_buffer = 0;

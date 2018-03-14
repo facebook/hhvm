@@ -1962,7 +1962,7 @@ bool HHVM_FUNCTION(chroot,
 
 struct DirectoryData final : RequestEventHandler {
   void requestInit() override {
-    assert(!defaultDirectory);
+    assertx(!defaultDirectory);
   }
   void requestShutdown() override {
     defaultDirectory = nullptr;

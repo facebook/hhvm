@@ -40,7 +40,7 @@ AsyncGenerator::~AsyncGenerator() {
     return;
   }
 
-  assert(!isRunning());
+  assertx(!isRunning());
 
   // Free locals, but don't trigger the EventHook for FunctionReturn since
   // the generator has already been exited. We don't want redundant calls.
@@ -51,9 +51,9 @@ AsyncGenerator::~AsyncGenerator() {
 ObjectData*
 AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
                        jit::TCA resumeAddr, Offset resumeOffset) {
-  assert(fp);
-  assert(!fp->resumed());
-  assert(fp->func()->isAsyncGenerator());
+  assertx(fp);
+  assertx(!fp->resumed());
+  assertx(fp->func()->isAsyncGenerator());
   const size_t frameSz = Resumable::getFrameSize(numSlots);
   const size_t genSz = genSize(sizeof(AsyncGenerator), frameSz);
   auto const obj = BaseGenerator::Alloc<AsyncGenerator>(s_class, genSz);
@@ -70,7 +70,7 @@ AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
 c_StaticWaitHandle*
 AsyncGenerator::yield(Offset resumeOffset,
                       const Cell* key, const Cell value) {
-  assert(isRunning());
+  assertx(isRunning());
   resumable()->setResumeAddr(nullptr, resumeOffset);
   setState(State::Started);
 
@@ -91,7 +91,7 @@ AsyncGenerator::yield(Offset resumeOffset,
 
 c_StaticWaitHandle*
 AsyncGenerator::ret() {
-  assert(isRunning());
+  assertx(isRunning());
   setState(State::Done);
 
   auto nullTV = make_tv<KindOfNull>();
@@ -107,7 +107,7 @@ AsyncGenerator::ret() {
 
 c_StaticWaitHandle*
 AsyncGenerator::fail(ObjectData* exception) {
-  assert(isRunning());
+  assertx(isRunning());
   setState(State::Done);
 
   if (m_waitHandle) {
@@ -120,7 +120,7 @@ AsyncGenerator::fail(ObjectData* exception) {
 }
 
 void AsyncGenerator::failCpp() {
-  assert(isRunning());
+  assertx(isRunning());
   setState(State::Done);
 
   if (m_waitHandle) {
@@ -138,7 +138,7 @@ void AsioExtension::initAsyncGenerator() {
   loadSystemlib("async-generator");
   AsyncGenerator::s_class =
     Unit::lookupClass(AsyncGenerator::s_className.get());
-  assert(AsyncGenerator::s_class);
+  assertx(AsyncGenerator::s_class);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

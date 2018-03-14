@@ -131,7 +131,7 @@ void InterruptSite::Initialize(ActRec *fp) {
   TRACE(2, "InterruptSite::Initialize\n");
 
 #define bail_on(c) if (c) { return; }
-  assert(fp);
+  assertx(fp);
   m_activationRecord = fp;
   bail_on(!fp->m_func);
   m_unit = fp->m_func->unit();
@@ -181,7 +181,7 @@ const char *BreakPointInfo::GetInterruptName(InterruptType interrupt) {
     case RequestEnded:   return "end of request or start of psp";
     case PSPEnded:       return "end of psp";
     default:
-      assert(false);
+      assertx(false);
       break;
   }
   return nullptr;
@@ -215,7 +215,7 @@ BreakPointInfo::BreakPointInfo(bool regex, State state,
       m_line1(0), m_line2(0),
       m_regex(regex), m_check(false) {
   TRACE(2, "BreakPointInfo::BreakPointInfo..const std::string &file)\n");
-  assert(m_interruptType != ExceptionHandler); // Server-side only.
+  assertx(m_interruptType != ExceptionHandler); // Server-side only.
   if (m_interruptType == ExceptionThrown) {
     parseExceptionThrown(exp);
   } else {
@@ -337,7 +337,7 @@ void BreakPointInfo::toggle() {
     case Once:     setState(Disabled); break;
     case Disabled: setState(Always);   break;
     default:
-      assert(false);
+      assertx(false);
       break;
   }
 }
@@ -434,7 +434,7 @@ std::string BreakPointInfo::state(bool padding) const {
     case Once:     return padding ? "ONCE    " : "ONCE"    ;
     case Disabled: return padding ? "DISABLED" : "DISABLED";
     default:
-      assert(false);
+      assertx(false);
       break;
   }
   return "";
@@ -634,7 +634,7 @@ void mangleXhpName(const std::string &source, std::string &target) {
 
 int32_t scanName(const std::string &str, int32_t offset) {
   auto len = str.length();
-  assert(0 <= offset && offset <= len);
+  assertx(0 <= offset && offset <= len);
   while (offset < len) {
     char ch = str[offset];
     if (ch == ':' || ch == '\\' || ch == ',' || ch == '(' || ch == '=' ||
@@ -660,7 +660,7 @@ int32_t scanName(const std::string &str, int32_t offset) {
 int32_t scanNumber(const std::string &str, int32_t offset, int32_t& value) {
   value = 0;
   auto len = str.length();
-  assert(0 <= offset && offset < len);
+  assertx(0 <= offset && offset < len);
   while (offset < len) {
     char ch = str[offset];
     if (ch < '0' || ch > '9') return offset;
@@ -673,7 +673,7 @@ int32_t scanNumber(const std::string &str, int32_t offset, int32_t& value) {
 int32_t BreakPointInfo::parseFileLocation(const std::string &str,
                                           int32_t offset) {
   auto len = str.length();
-  assert(0 <= offset && offset < len);
+  assertx(0 <= offset && offset < len);
   auto offset1 = scanNumber(str, offset, m_line1);
   if (offset1 == offset) return offset; //Did not find a number
   m_line2 = m_line1; //so that we always have a range
@@ -1003,7 +1003,7 @@ bool BreakPointInfo::Match(const char *haystack, int haystack_len,
 
 bool BreakPointInfo::checkExceptionOrError(const Variant& e) {
   TRACE(2, "BreakPointInfo::checkException\n");
-  assert(!e.isNull());
+  assertx(!e.isNull());
   if (e.isObject()) {
     if (m_regex) {
       return Match(m_class.c_str(), m_class.size(),
@@ -1033,7 +1033,7 @@ bool BreakPointInfo::checkUrl(std::string &url) {
 bool BreakPointInfo::checkLines(int line) {
   TRACE(2, "BreakPointInfo::checkLines\n");
   if (m_line1) {
-    assert(m_line2 == -1 || m_line2 >= m_line1);
+    assertx(m_line2 == -1 || m_line2 >= m_line1);
     return line >= m_line1 && (m_line2 == -1 || line <= m_line2);
   }
   return true;

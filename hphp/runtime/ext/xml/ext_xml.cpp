@@ -297,7 +297,7 @@ String xml_utf8_decode(const XML_Char *s, int len,
     ++newlen;
   }
 
-  assert(newlen <= len);
+  assertx(newlen <= len);
   str.shrink(newlen);
   return str;
 }
@@ -1028,7 +1028,7 @@ String HHVM_FUNCTION(utf8_encode,
     }
   }
 
-  assert(newlen <= maxSize);
+  assertx(newlen <= maxSize);
   str.shrink(newlen);
   return str;
 }

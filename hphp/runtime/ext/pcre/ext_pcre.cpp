@@ -95,12 +95,12 @@ static Variant preg_replace_callback_array_impl(
   auto key = 0;
   auto total_replacement_count = 0;
   for (ArrayIter s_iter(subjects); s_iter; ++s_iter) {
-    assert(s_iter.second().isString());
+    assertx(s_iter.second().isString());
     auto subj = s_iter.second();
     for (ArrayIter pc_iter(patterns_and_callbacks.toArray());
                            pc_iter; ++pc_iter) {
       Variant pattern(pc_iter.first());
-      assert(pattern.isString());
+      assertx(pattern.isString());
       Variant callback(pc_iter.second());
       subj = HHVM_FN(preg_replace_callback)(pattern, callback, subj, limit,
                                             count);

@@ -35,9 +35,9 @@ ArrayTypeTable::serde(SerDe& sd) {
   decltype(m_arrTypes)(size).swap(m_arrTypes);
   for (auto i = uint32_t{0}; i < size; ++i) {
     m_arrTypes[i] = RepoAuthType::Array::deserialize(sd, *this);
-    assert(m_arrTypes[i] != nullptr);
-    assert(m_arrTypes[i]->id() == i);
-    assert(check(m_arrTypes[i]));
+    assertx(m_arrTypes[i] != nullptr);
+    assertx(m_arrTypes[i]->id() == i);
+    assertx(check(m_arrTypes[i]));
     FTRACE(2, "  {} {}\n", i, show(*m_arrTypes[i]));
   }
 }

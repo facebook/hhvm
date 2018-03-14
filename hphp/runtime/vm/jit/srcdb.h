@@ -105,7 +105,7 @@ struct TransLoc {
   void setFrozenStart(TCA newFrozen);
 
   void setMainSize(size_t size) {
-    assert(size < std::numeric_limits<uint32_t>::max());
+    assertx(size < std::numeric_limits<uint32_t>::max());
     m_mainLen = (uint32_t)size;
   }
 

@@ -54,7 +54,7 @@ struct MixedArrayElm {
   TypedValueAux data;
 
   void setStaticKey(StringData* k, strhash_t h) {
-    assert(k->isStatic());
+    assertx(k->isStatic());
     setStrKeyNoIncRef(k, h);
   }
 
@@ -72,7 +72,7 @@ struct MixedArrayElm {
   void setIntKey(int64_t k, inthash_t h) {
     ikey = k;
     data.hash() = static_cast<int32_t>(h) | STRHASH_MSB;
-    assert(hasIntKey());
+    assertx(hasIntKey());
     static_assert(static_cast<int32_t>(STRHASH_MSB) < 0,
                   "high bit indicates int key");
   }
@@ -101,7 +101,7 @@ struct MixedArrayElm {
   }
 
   ALWAYS_INLINE StringData* strKey() const {
-    assert(hasStrKey());
+    assertx(hasStrKey());
     return skey;
   }
 
@@ -135,7 +135,7 @@ struct MixedArrayElm {
 
   // Elm's data.m_type == kInvalidDataType for deleted slots.
   ALWAYS_INLINE bool isTombstone() const {
-    assert(isRealType(data.m_type) || data.m_type == kInvalidDataType);
+    assertx(isRealType(data.m_type) || data.m_type == kInvalidDataType);
     return data.m_type < KindOfUninit;
     static_assert(KindOfUninit == 0 && kInvalidDataType < 0, "");
   }
@@ -522,7 +522,7 @@ public:
   bool isTombstone(ssize_t pos) const;
   // Elm's data.m_type == kInvalidDataType for deleted slots.
   static bool isTombstone(DataType t) {
-    assert(isRealType(t) || t == kInvalidDataType);
+    assertx(isRealType(t) || t == kInvalidDataType);
     return t < KindOfUninit;
     static_assert(KindOfUninit == 0 && kInvalidDataType < 0, "");
   }
@@ -550,22 +550,22 @@ private:
 public:
   // Safe downcast helpers
   static MixedArray* asMixed(ArrayData* ad) {
-    assert(ad->hasMixedLayout());
+    assertx(ad->hasMixedLayout());
     auto a = static_cast<MixedArray*>(ad);
-    assert(a->checkInvariants());
+    assertx(a->checkInvariants());
     return a;
   }
   static const MixedArray* asMixed(const ArrayData* ad) {
-    assert(ad->hasMixedLayout());
+    assertx(ad->hasMixedLayout());
     auto a = static_cast<const MixedArray*>(ad);
-    assert(a->checkInvariants());
+    assertx(a->checkInvariants());
     return a;
   }
 
   // Fast iteration
   template <class F, bool inc = true>
   static void IterateV(const MixedArray* arr, F fn) {
-    assert(arr->hasMixedLayout());
+    assertx(arr->hasMixedLayout());
     auto elm = arr->data();
     if (inc) arr->incRefCount();
     SCOPE_EXIT { if (inc) decRefArr(const_cast<MixedArray*>(arr)); };
@@ -577,7 +577,7 @@ public:
   }
   template <class F, bool inc = true>
   static void IterateKV(const MixedArray* arr, F fn) {
-    assert(arr->hasMixedLayout());
+    assertx(arr->hasMixedLayout());
     auto elm = arr->data();
     if (inc) arr->incRefCount();
     SCOPE_EXIT { if (inc) decRefArr(const_cast<MixedArray*>(arr)); };
@@ -624,7 +624,7 @@ private:
   static ArrayData* ArrayMergeGeneric(MixedArray*, const ArrayData*);
 
   // Assert a bunch of invariants about this array then return true.
-  // usage:  assert(checkInvariants());
+  // usage:  assertx(checkInvariants());
   bool checkInvariants() const;
 
 private:

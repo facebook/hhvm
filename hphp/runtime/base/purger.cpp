@@ -68,8 +68,8 @@ Purger::Purger()
 {}
 
 void Purger::purge(char* base, char* front) {
-  assert(uintptr_t(base) % kPageSize == 0);
-  assert(uintptr_t(front) % kPageSize == 0);
+  assertx(uintptr_t(base) % kPageSize == 0);
+  assertx(uintptr_t(front) % kPageSize == 0);
   size_t size = front - base;
   dirty_ = std::max(size, dirty_);
   // If dirty_ exceeds threshold_, purge all the exceeded memory.
@@ -114,7 +114,7 @@ void Purger::purge(char* base, char* front) {
 }
 
 void Purger::flush(char* base) {
-  assert(uintptr_t(base) % kPageSize == 0);
+  assertx(uintptr_t(base) % kPageSize == 0);
   if (debug) {
     auto age = Timer::GetCurrentTimeMicros() - kTime0;
     VLOG(1) << "flush " << id_ << ": t " << age/bucket_slice_

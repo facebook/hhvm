@@ -35,15 +35,15 @@ VMRegAnchor::VMRegAnchor()
 VMRegAnchor::VMRegAnchor(ActRec* ar)
   : m_old(tl_regState)
 {
-  assert(tl_regState == VMRegState::DIRTY);
+  assertx(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
 
   auto prevAr = g_context->getOuterVMFrame(ar);
   const Func* prevF = prevAr->m_func;
-  assert(!ar->resumed());
+  assertx(!ar->resumed());
   auto& regs = vmRegs();
   regs.stack.top() = (TypedValue*)ar - ar->numArgs();
-  assert(vmStack().isValidAddress((uintptr_t)vmsp()));
+  assertx(vmStack().isValidAddress((uintptr_t)vmsp()));
   regs.pc = prevF->unit()->at(prevF->base() + ar->m_soff);
   regs.fp = prevAr;
 }

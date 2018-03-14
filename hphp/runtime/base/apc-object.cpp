@@ -61,7 +61,7 @@ APCObject::APCObject(ClassOrName cls, uint32_t propCount)
 APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
   // This function assumes the object and object/array down the tree have no
   // internal references and do not implement the serializable interface.
-  assert(!objectData->instanceof(SystemLib::s_SerializableClass));
+  assertx(!objectData->instanceof(SystemLib::s_SerializableClass));
 
   auto cls = objectData->getVMClass();
   auto clsOrName = make_class(cls);
@@ -91,7 +91,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
 
   for (unsigned i = 0; i < numRealProps; ++i) {
     auto const attrs = propInfo[i].attrs;
-    assert((attrs & AttrStatic) == 0);
+    assertx((attrs & AttrStatic) == 0);
 
     const TypedValue* objProp;
     if (attrs & AttrBuiltin) {
@@ -137,7 +137,7 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
   auto prop = apcObj->props();
   for (ArrayIter it(odProps); !it.end(); it.next(), ++prop) {
     Variant key(it.first());
-    assert(key.isString());
+    assertx(key.isString());
     auto const rval = it.secondRval();
     if (!isNullType(rval.unboxed().type())) {
       auto val = APCHandle::Create(VarNR(rval.tv()), false,
@@ -171,7 +171,7 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
       prop->name = makeStaticString(keySD.get());
     }
   }
-  assert(prop == apcObj->props() + propCount);
+  assertx(prop == apcObj->props() + propCount);
 
   return {apcObj->getHandle(), size};
 }
@@ -190,7 +190,7 @@ APCObject::~APCObject() {
 
   for (auto i = uint32_t{0}; i < numProps; ++i) {
     if (props()[i].val) props()[i].val->unreferenceRoot();
-    assert(props()[i].name->isStatic());
+    assertx(props()[i].name->isStatic());
   }
 }
 
@@ -227,7 +227,7 @@ Variant APCObject::MakeLocalObject(const APCHandle* handle) {
 
 Object APCObject::createObject() const {
   auto cls = m_cls.left();
-  assert(cls != nullptr);
+  assertx(cls != nullptr);
 
   auto obj = Object::attach(
     m_fast_init ? ObjectData::newInstanceNoPropInit(const_cast<Class*>(cls))
@@ -261,7 +261,7 @@ Object APCObject::createObject() const {
 
   if (UNLIKELY(numProps < m_propCount)) {
     auto dynProps = apcProp[numProps];
-    assert(dynProps->kind() == APCKind::StaticArray ||
+    assertx(dynProps->kind() == APCKind::StaticArray ||
            dynProps->kind() == APCKind::UncountedArray ||
            dynProps->kind() == APCKind::SharedArray);
     obj->setDynPropArray(dynProps->toLocal().asCArrRef());

@@ -131,8 +131,8 @@ void cgCmpBool(IRLS& env, const IRInstruction* inst) {
   auto const extended0 = v.makeReg();
   auto const extended1 = v.makeReg();
 
-  assert(inst->src(0)->type() <= TBool);
-  assert(inst->src(1)->type() <= TBool);
+  assertx(inst->src(0)->type() <= TBool);
+  assertx(inst->src(1)->type() <= TBool);
 
   v << movzbq{s0, extended0};
   v << movzbq{s1, extended1};
@@ -149,8 +149,8 @@ void cgCmpInt(IRLS& env, const IRInstruction* inst) {
   auto const tmp1 = v.makeReg();
   auto const tmp2 = v.makeReg();
 
-  assert(inst->src(0)->type() <= TInt);
-  assert(inst->src(1)->type() <= TInt);
+  assertx(inst->src(0)->type() <= TInt);
+  assertx(inst->src(1)->type() <= TInt);
 
   v << cmpq{s1, s0, sf};
   v << setcc{CC_G, sf, tmp1};
@@ -233,8 +233,8 @@ void cgCmpDbl(IRLS& env, const IRInstruction* inst) {
   auto const tmp1 = v.makeReg();
   auto const tmp2 = v.makeReg();
 
-  assert(inst->src(0)->type() <= TDbl);
-  assert(inst->src(1)->type() <= TDbl);
+  assertx(inst->src(0)->type() <= TDbl);
+  assertx(inst->src(1)->type() <= TDbl);
 
   v << ucomisd{s0, s1, sf};
   v << cmovq{CC_A, sf, v.cns(-1), v.cns(1), tmp1};

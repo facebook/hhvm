@@ -70,7 +70,7 @@ ALWAYS_INLINE bool tvDecRefWillRelease(TypedValue tv) {
  * @requires: isRefcountedType(tv->m_type)
  */
 ALWAYS_INLINE RefCount tvGetCount(TypedValue tv) {
-  assert(isRefcountedType(tv.m_type));
+  assertx(isRefcountedType(tv.m_type));
   return tv.m_data.pcnt->count();
 }
 
@@ -132,7 +132,7 @@ ALWAYS_INLINE void tvDecRefGenUnlikely(TypedValue tv) {
  * Decref `tv' without releasing it, if it's refcounted.
  */
 ALWAYS_INLINE void tvDecRefGenNZ(TypedValue tv) {
-  assert(!tvDecRefWillCallHelper(tv));
+  assertx(!tvDecRefWillCallHelper(tv));
   if (noop_decref) return;
   if (isRefcountedType(tv.m_type)) {
     tv.m_data.pcnt->decRefCount();
@@ -146,12 +146,12 @@ ALWAYS_INLINE void tvDecRefGenNZ(const TypedValue* tv) {
  * DecRefs for TypedValues of known type.
  */
 ALWAYS_INLINE void tvDecRefStr(const TypedValue* tv) {
-  assert(tv->m_type == KindOfString);
+  assertx(tv->m_type == KindOfString);
   decRefStr(tv->m_data.pstr);
 }
 
 ALWAYS_INLINE void tvDecRefArr(const TypedValue* tv) {
-  assert(tv->m_type == KindOfArray ||
+  assertx(tv->m_type == KindOfArray ||
          tv->m_type == KindOfVec ||
          tv->m_type == KindOfDict ||
          tv->m_type == KindOfKeyset);
@@ -159,17 +159,17 @@ ALWAYS_INLINE void tvDecRefArr(const TypedValue* tv) {
 }
 
 ALWAYS_INLINE void tvDecRefObj(const TypedValue* tv) {
-  assert(tv->m_type == KindOfObject);
+  assertx(tv->m_type == KindOfObject);
   decRefObj(tv->m_data.pobj);
 }
 
 ALWAYS_INLINE void tvDecRefRes(const TypedValue* tv) {
-  assert(tv->m_type == KindOfResource);
+  assertx(tv->m_type == KindOfResource);
   decRefRes(tv->m_data.pres);
 }
 
 ALWAYS_INLINE void tvDecRefRef(const TypedValue* tv) {
-  assert(tv->m_type == KindOfRef);
+  assertx(tv->m_type == KindOfRef);
   decRefRef(tv->m_data.pref);
 }
 
@@ -181,8 +181,8 @@ ALWAYS_INLINE void tvDecRefRef(const TypedValue* tv) {
  * @requires: isRefcountedType(tv->m_type)
  */
 ALWAYS_INLINE void tvIncRefCountable(TypedValue tv) {
-  assert(tvIsPlausible(tv));
-  assert(isRefcountedType(tv.m_type));
+  assertx(tvIsPlausible(tv));
+  assertx(isRefcountedType(tv.m_type));
   tv.m_data.pcnt->incRefCount();
 }
 
@@ -190,7 +190,7 @@ ALWAYS_INLINE void tvIncRefCountable(TypedValue tv) {
  * Incref `tv', or do nothing if it's not refcounted.
  */
 ALWAYS_INLINE void tvIncRefGen(TypedValue tv) {
-  assert(tvIsPlausible(tv));
+  assertx(tvIsPlausible(tv));
   if (isRefcountedType(tv.m_type)) {
     tvIncRefCountable(tv);
   }

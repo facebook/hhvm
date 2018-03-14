@@ -36,40 +36,40 @@ struct Variant;
  */
 
 ALWAYS_INLINE Variant& tvAsVariant(TypedValue* tv) {
-  assert(tv != nullptr);
-  assert(tvIsPlausible(*tv));
+  assertx(tv != nullptr);
+  assertx(tvIsPlausible(*tv));
   return reinterpret_cast<Variant&>(*tv);
 }
 
 ALWAYS_INLINE Variant& tvAsUninitializedVariant(TypedValue* tv) {
   // A special case, for use when constructing a variant and we don't assume
   // initialization.
-  assert(tv != nullptr);
+  assertx(tv != nullptr);
   return reinterpret_cast<Variant&>(*tv);
 }
 
 ALWAYS_INLINE const Variant& tvAsCVarRef(const TypedValue* tv) {
-  assert(tv != nullptr);
+  assertx(tv != nullptr);
   return reinterpret_cast<const Variant&>(*tv);
 }
 
 ALWAYS_INLINE Variant& cellAsVariant(Cell& cell) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
   return reinterpret_cast<Variant&>(cell);
 }
 
 ALWAYS_INLINE const Variant& cellAsCVarRef(const Cell& cell) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
   return reinterpret_cast<const Variant&>(cell);
 }
 
 ALWAYS_INLINE Variant& refAsVariant(Ref& ref) {
-  assert(refIsPlausible(ref));
+  assertx(refIsPlausible(ref));
   return reinterpret_cast<Variant&>(ref);
 }
 
 ALWAYS_INLINE const Variant& refAsCVarRef(const Ref& ref) {
-  assert(refIsPlausible(ref));
+  assertx(refIsPlausible(ref));
   return reinterpret_cast<const Variant&>(ref);
 }
 

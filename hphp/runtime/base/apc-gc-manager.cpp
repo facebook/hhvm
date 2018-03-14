@@ -193,7 +193,7 @@ APCGCManager& APCGCManager::getInstance() {
 ALWAYS_INLINE
 void RegisterUncountedTvAllocations(TypedValue& tv, APCHandle* rootAPCHandle) {
   if (isStringType(tv.m_type)) {
-    assert(!tv.m_data.pstr->isRefCounted());
+    assertx(!tv.m_data.pstr->isRefCounted());
     if (tv.m_data.pstr->isUncounted()) {
       tv.m_data.pstr->registerUncountedAllocation(rootAPCHandle);
     }
@@ -201,7 +201,7 @@ void RegisterUncountedTvAllocations(TypedValue& tv, APCHandle* rootAPCHandle) {
   }
   if (isArrayLikeType(tv.m_type)) {
     auto arr = tv.m_data.parr;
-    assert(!arr->isRefCounted());
+    assertx(!arr->isRefCounted());
     if (!arr->isStatic()) {
       if (arr->hasPackedLayout()) {
         PackedArray::RegisterUncountedAllocations(arr, rootAPCHandle);
@@ -222,11 +222,11 @@ void RegisterUncountedTvAllocations(TypedValue& tv, APCHandle* rootAPCHandle) {
  * with APCGCManager
 */
 void APCTypedValue::registerUncountedAllocations() {
-  assert(m_handle.isUncounted());
-  assert(RuntimeOption::EvalGCForAPC);
+  assertx(m_handle.isUncounted());
+  assertx(RuntimeOption::EvalGCForAPC);
   auto kind = m_handle.kind();
 
-  assert(kind == APCKind::UncountedString ||
+  assertx(kind == APCKind::UncountedString ||
          kind == APCKind::UncountedArray ||
          kind == APCKind::UncountedVec ||
          kind == APCKind::UncountedDict ||
@@ -234,7 +234,7 @@ void APCTypedValue::registerUncountedAllocations() {
    if (kind == APCKind::UncountedString) {
      m_data.str->registerUncountedAllocation(&m_handle);
    } else if (kind == APCKind::UncountedArray) {
-     assert(m_data.arr->isPHPArray());
+     assertx(m_data.arr->isPHPArray());
      if (m_data.arr->hasPackedLayout()) {
        auto arr = m_data.arr;
        PackedArray::RegisterUncountedAllocations(arr, &m_handle);
@@ -246,17 +246,17 @@ void APCTypedValue::registerUncountedAllocations() {
      }
    } else if (kind == APCKind::UncountedVec) {
      auto vec = m_data.vec;
-     assert(vec->isVecArray());
+     assertx(vec->isVecArray());
      PackedArray::RegisterUncountedAllocations(vec, &m_handle);
      return;
    } else if (kind == APCKind::UncountedDict) {
      auto dict = m_data.dict;
-     assert(dict->isDict());
+     assertx(dict->isDict());
      MixedArray::RegisterUncountedAllocations(dict, &m_handle);
      return;
    } else if (kind == APCKind::UncountedKeyset) {
      auto keyset = m_data.keyset;
-     assert(keyset->isKeyset());
+     assertx(keyset->isKeyset());
      SetArray::RegisterUncountedAllocations(keyset, &m_handle);
      return;
    }
@@ -265,9 +265,9 @@ void APCTypedValue::registerUncountedAllocations() {
 
 // Register {allocation, rootAPCHandle} with APCGCManager
 void StringData::registerUncountedAllocation(APCHandle* rootAPCHandle) {
-  assert(checkSane() && isUncounted());
-  assert(isFlat());
-  assert(RuntimeOption::EvalGCForAPC);
+  assertx(checkSane() && isUncounted());
+  assertx(isFlat());
+  assertx(RuntimeOption::EvalGCForAPC);
   // [this, this + 1) doesn't give us address of the string
   // But we assume reference point only at the header of a StringData
   APCGCManager::getInstance().registerAllocation(this,
@@ -281,16 +281,16 @@ void StringData::registerUncountedAllocation(APCHandle* rootAPCHandle) {
  */
 void PackedArray::RegisterUncountedAllocations(ArrayData* ad,
                                           APCHandle* rootAPCHandle) {
-  assert(checkInvariants(ad));
-  assert(ad->isUncounted());
+  assertx(checkInvariants(ad));
+  assertx(ad->isUncounted());
 
   auto const data = packedData(ad);
   auto const stop = data + ad->m_size;
   for (auto ptr = data; ptr != stop; ++ptr) {
     RegisterUncountedTvAllocations(*ptr, rootAPCHandle);
   }
-  assert(!has_strong_iterator(ad));
-  assert(RuntimeOption::EvalGCForAPC);
+  assertx(!has_strong_iterator(ad));
+  assertx(RuntimeOption::EvalGCForAPC);
   APCGCManager::getInstance().registerAllocation(ad,
                                         (char*)ad + PackedArray::heapSize(ad),
                                         rootAPCHandle);
@@ -303,7 +303,7 @@ void PackedArray::RegisterUncountedAllocations(ArrayData* ad,
 void MixedArray::RegisterUncountedAllocations(ArrayData* in,
                                           APCHandle* rootAPCHandle) {
   auto const ad = asMixed(in);
-  assert(ad->isUncounted());
+  assertx(ad->isUncounted());
   if (!ad->isZombie()) {
     auto const data = ad->data();
     auto const stop = data + ad->m_used;
@@ -311,16 +311,16 @@ void MixedArray::RegisterUncountedAllocations(ArrayData* in,
     for (auto ptr = data; ptr != stop; ++ptr) {
       if (isTombstone(ptr->data.m_type)) continue;
       if (ptr->hasStrKey()) {
-        assert(!ptr->skey->isRefCounted());
+        assertx(!ptr->skey->isRefCounted());
         if (ptr->skey->isUncounted()) {
           ptr->skey->registerUncountedAllocation(rootAPCHandle);
         }
       }
       RegisterUncountedTvAllocations(ptr->data, rootAPCHandle);
     }
-    assert(!has_strong_iterator(ad));
+    assertx(!has_strong_iterator(ad));
   }
-  assert(RuntimeOption::EvalGCForAPC);
+  assertx(RuntimeOption::EvalGCForAPC);
   APCGCManager::getInstance().registerAllocation(ad,
                                         (char*)ad + ad->heapSize(),
                                         rootAPCHandle);
@@ -332,7 +332,7 @@ void MixedArray::RegisterUncountedAllocations(ArrayData* in,
  */
 void SetArray::RegisterUncountedAllocations(ArrayData* in,
                                         APCHandle* rootAPCHandle) {
-  assert(in->isUncounted());
+  assertx(in->isUncounted());
   auto const ad = asSet(in);
 
   if (!ad->isZombie()) {
@@ -341,18 +341,18 @@ void SetArray::RegisterUncountedAllocations(ArrayData* in,
     for (uint32_t i = 0; i < used; ++i) {
       auto& elm = elms[i];
       if (UNLIKELY(elm.isTombstone())) continue;
-      assert(!elm.isEmpty());
+      assertx(!elm.isEmpty());
       if (elm.hasStrKey()) {
         auto const skey = elm.strKey();
-        assert(!skey->isRefCounted());
+        assertx(!skey->isRefCounted());
         if (skey->isUncounted()) {
           skey->registerUncountedAllocation(rootAPCHandle);
         }
       }
     }
-    assert(!has_strong_iterator(ad));
+    assertx(!has_strong_iterator(ad));
   }
-  assert(RuntimeOption::EvalGCForAPC);
+  assertx(RuntimeOption::EvalGCForAPC);
   APCGCManager::getInstance().registerAllocation(ad,
                                         (char*)ad + ad->heapSize(),
                                         rootAPCHandle);

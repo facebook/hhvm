@@ -445,7 +445,7 @@ String DebuggerClient::FormatVariable(
   } catch (const StringBufferLimitException& e) {
     value = "Serialization limit reached";
   } catch (...) {
-    assert(false);
+    assertx(false);
     throw;
   }
   return value;
@@ -456,7 +456,7 @@ String DebuggerClient::FormatVariable(
  * truncated result, and the number of bytes truncated.
  */
 String DebuggerClient::FormatVariableWithLimit(const Variant& v, int maxlen) {
-  assert(maxlen >= 0);
+  assertx(maxlen >= 0);
 
   VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
   auto const value = vs.serializeWithLimit(v, maxlen + 1);
@@ -553,7 +553,7 @@ bool DebuggerClient::isLocal() {
 
 bool DebuggerClient::connect(const std::string &host, int port) {
   TRACE(2, "DebuggerClient::connect\n");
-  assert((!m_machines.empty() && m_machines[0]->m_name == LocalPrompt));
+  assertx((!m_machines.empty() && m_machines[0]->m_name == LocalPrompt));
   // First check for an existing connect, and reuse that.
   for (unsigned int i = 1; i < m_machines.size(); i++) {
     if (HHVM_FN(gethostbyname)(m_machines[i]->m_name) ==
@@ -567,9 +567,9 @@ bool DebuggerClient::connect(const std::string &host, int port) {
 
 bool DebuggerClient::connectRPC(const std::string &host, int port) {
   TRACE(2, "DebuggerClient::connectRPC\n");
-  assert(!m_machines.empty());
+  assertx(!m_machines.empty());
   auto local = m_machines[0];
-  assert(local->m_name == LocalPrompt);
+  assertx(local->m_name == LocalPrompt);
   local->m_rpcHost = host;
   local->m_rpcPort = port;
   switchMachine(local);
@@ -580,9 +580,9 @@ bool DebuggerClient::connectRPC(const std::string &host, int port) {
 
 bool DebuggerClient::disconnect() {
   TRACE(2, "DebuggerClient::disconnect\n");
-  assert(!m_machines.empty());
+  assertx(!m_machines.empty());
   auto local = m_machines[0];
-  assert(local->m_name == LocalPrompt);
+  assertx(local->m_name == LocalPrompt);
   local->m_rpcHost.clear();
   local->m_rpcPort = 0;
   switchMachine(local);
@@ -624,7 +624,7 @@ req::ptr<Socket> DebuggerClient::connectLocal() {
   machine->m_sandboxAttached = true;
   machine->m_name = LocalPrompt;
   machine->m_thrift.create(socket1);
-  assert(m_machines.empty());
+  assertx(m_machines.empty());
   m_machines.push_back(machine);
   switchMachine(machine);
   return socket2;
@@ -646,7 +646,7 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
 
 bool DebuggerClient::reconnect() {
   TRACE(2, "DebuggerClient::reconnect\n");
-  assert(m_machine);
+  assertx(m_machine);
   auto& host = m_machine->m_name;
   int port = m_machine->m_port;
   if (port <= 0) {
@@ -1044,7 +1044,7 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
         }
       }
     } else {
-      assert(m_inputState == TakingCode);
+      assertx(m_inputState == TakingCode);
       if (!*rl_line_buffer) {
         addCompletion("?>"); // so we tab, we're done
       } else {
@@ -1061,7 +1061,7 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
     } else if ((int64_t)list >= 0 && (int64_t)list < AutoCompleteCount) {
       if (m_acLiveListsDirty) {
         updateLiveLists();
-        assert(!m_acLiveListsDirty);
+        assertx(!m_acLiveListsDirty);
       }
       char *p = getCompletion(m_acLiveLists->get(int64_t(list)), text);
       if (p) return p;
@@ -1873,7 +1873,7 @@ bool DebuggerClient::parse(const char *line) {
 
 bool DebuggerClient::match(const char *cmd) {
   TRACE(2, "DebuggerClient::match\n");
-  assert(cmd && *cmd);
+  assertx(cmd && *cmd);
   return !strncasecmp(m_command.c_str(), cmd, m_command.size());
 }
 
@@ -1884,8 +1884,8 @@ bool DebuggerClient::Match(const char *input, const char *cmd) {
 
 bool DebuggerClient::arg(int index, const char *s) const {
   TRACE(2, "DebuggerClient::arg\n");
-  assert(s && *s);
-  assert(index > 0);
+  assertx(s && *s);
+  assertx(index > 0);
   --index;
   return (int)m_args.size() > index &&
     !strncasecmp(m_args[index].c_str(), s, m_args[index].size());
@@ -1893,7 +1893,7 @@ bool DebuggerClient::arg(int index, const char *s) const {
 
 std::string DebuggerClient::argValue(int index) {
   TRACE(2, "DebuggerClient::argValue\n");
-  assert(index > 0);
+  assertx(index > 0);
   --index;
   if (index >= 0 && index < (int)m_args.size()) {
     return m_args[index];
@@ -1903,7 +1903,7 @@ std::string DebuggerClient::argValue(int index) {
 
 std::string DebuggerClient::lineRest(int index) {
   TRACE(2, "DebuggerClient::lineRest\n");
-  assert(index > 0);
+  assertx(index > 0);
   return m_line.substr(m_argIdx[index - 1] + 1);
 }
 
@@ -1950,7 +1950,7 @@ const StaticString s_UNDERSCORE("_");
 // and carries out the command.
 void DebuggerClient::processTakeCode() {
   TRACE(2, "DebuggerClient::processTakeCode\n");
-  assert(m_inputState == TakingCommand);
+  assertx(m_inputState == TakingCommand);
 
   char first = m_line[0];
   if (first == '@') {
@@ -1999,7 +1999,7 @@ bool DebuggerClient::processEval() {
 
 void DebuggerClient::swapHelp() {
   TRACE(2, "DebuggerClient::swapHelp\n");
-  assert(m_args.size() > 0);
+  assertx(m_args.size() > 0);
   m_command = m_args[0];
   m_args[0] = "help";
 }
@@ -2024,7 +2024,7 @@ DSandboxInfoPtr DebuggerClient::getSandbox(int index) const {
 // Update the current sandbox in the current machine. This should always be
 // called once we're attached to a machine.
 void DebuggerClient::setSandbox(DSandboxInfoPtr sandbox) {
-  assert(m_machine != nullptr);
+  assertx(m_machine != nullptr);
   m_machine->m_sandbox = sandbox;
 }
 
@@ -2307,7 +2307,7 @@ bool DebuggerClient::deleteMacro(int index) {
 
 void DebuggerClient::record(const char *line) {
   TRACE(2, "DebuggerClient::record\n");
-  assert(line);
+  assertx(line);
   if (m_macroRecording && line[0] != '&') {
     m_macroRecording->m_cmds.push_back(line);
   }

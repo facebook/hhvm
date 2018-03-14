@@ -102,7 +102,7 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
       !array->empty()) {
     DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
     auto const features = walker.traverseData(const_cast<ArrayData*>(array));
-    assert(!features.isCircular);
+    assertx(!features.isCircular);
     if (!features.hasObjectOrResource) {
       auto const makeUncounted = [&] () {
         if (isVectorCollection(obj->collectionType())) {
@@ -131,7 +131,7 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
 }
 
 void APCCollection::Delete(APCHandle* h) {
-  assert(offsetof(APCCollection, m_handle) == 0);
+  assertx(offsetof(APCCollection, m_handle) == 0);
   delete reinterpret_cast<APCCollection*>(h);
 }
 
@@ -156,7 +156,7 @@ APCHandle::Pair APCCollection::WrapArray(APCHandle::Pair inner,
 Object APCCollection::createObject() const {
   if (m_arrayHandle->isTypedValue()) {
     Variant local(m_arrayHandle->toLocal());
-    assert(local.isArray());
+    assertx(local.isArray());
     return Object::attach(
       collections::alloc(m_colType, local.getArrayData())
     );

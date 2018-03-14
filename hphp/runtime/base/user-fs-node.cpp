@@ -107,7 +107,7 @@ Variant UserFSNode::invoke(const Func* func, const String& name,
 
     case LookupResult::MethodFoundNoThis:
       // Should never happen (Attr::Static check in ctor)
-      assert(false);
+      assertx(false);
       raise_error("%s::%s() must not be declared static",
                   m_cls->name()->data(), name.data());
       return uninit_null();

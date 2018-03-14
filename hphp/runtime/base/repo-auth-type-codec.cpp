@@ -61,7 +61,7 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::Ref:
   case T::InitGen:
   case T::Gen:
-    assert(!highBitSet);
+    assertx(!highBitSet);
     return RepoAuthType{tag};
 
   case T::SArr:
@@ -101,7 +101,7 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::SubObj:
   case T::OptExactObj:
   case T::OptSubObj:
-    assert(!highBitSet);
+    assertx(!highBitSet);
     {
       uint32_t id;
       std::memcpy(&id, pc, sizeof id);

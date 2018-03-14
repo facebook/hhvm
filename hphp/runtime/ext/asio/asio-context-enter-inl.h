@@ -23,7 +23,7 @@ namespace HPHP { namespace asio {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void enter_context(c_WaitableWaitHandle* root, context_idx_t ctx_idx) {
-  assert(ctx_idx <= AsioSession::Get()->getCurrentContextIdx());
+  assertx(ctx_idx <= AsioSession::Get()->getCurrentContextIdx());
 
   // If this wait handle is being finished and there is a parent A that is being
   // unblocked and a parent B that was not unblocked yet, it is possible that

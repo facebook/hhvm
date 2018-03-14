@@ -42,7 +42,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
   int soap_version = SOAP_1_1;
   sdlSoapBindingFunctionHeaderMap *hdrs = nullptr;
 
-  assert(return_value.asTypedValue()->m_type == KindOfUninit);
+  assertx(return_value.asTypedValue()->m_type == KindOfUninit);
   return_value.asTypedValue()->m_type = KindOfNull;
 
   /* Response for one-way opearation */

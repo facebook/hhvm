@@ -543,7 +543,7 @@ static bool hphp_chdir_file(const std::string& filename) {
   String s = File::TranslatePath(filename);
   char *buf = strndup(s.data(), s.size());
   char *dir = dirname(buf);
-  assert(dir);
+  assertx(dir);
   if (dir) {
     if (File::IsVirtualDirectory(dir)) {
       g_context->setCwd(String(dir, CopyString));
@@ -1962,7 +1962,7 @@ static int execute_program_impl(int argc, char** argv) {
       ret = 0;
       while (true) {
         try {
-          assert(po.debugger_options.fileName == file);
+          assertx(po.debugger_options.fileName == file);
           execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
           // Set the proxy for this thread to be the localProxy we just
           // created. If we're script debugging, this will be the proxy that
@@ -2113,7 +2113,7 @@ static void on_timeout(int sig, siginfo_t* info, void* /*context*/) {
  * Update constants to their real values and sync some runtime options
  */
 static void update_constants_and_options() {
-  assert(ExtensionRegistry::modulesInitialised());
+  assertx(ExtensionRegistry::modulesInitialised());
   // If extension constants were used in the ini files (e.g., E_ALL) they
   // would have come out as 0 in the previous pass until we load and
   // initialize our extensions, which we do in RuntimeOption::Load() via
@@ -2155,7 +2155,7 @@ void hphp_thread_init() {
   get_server_note();
   tl_heap.getCheck()->init();
 
-  assert(ThreadInfo::s_threadInfo.isNull());
+  assertx(ThreadInfo::s_threadInfo.isNull());
   ThreadInfo::s_threadInfo.getCheck()->init();
 
   HardwareCounter::s_counter.getCheck();
@@ -2304,7 +2304,7 @@ void hphp_process_init() {
 static void handle_exception(bool& ret, ExecutionContext* context,
                              std::string& errorMsg, ContextOfException where,
                              bool& error, bool richErrorMsg) {
-  assert(where == ContextOfException::Invoke ||
+  assertx(where == ContextOfException::Invoke ||
          where == ContextOfException::ReqInit);
   try {
     handle_exception_helper(ret, context, errorMsg, where, error, richErrorMsg);
@@ -2355,7 +2355,7 @@ static bool hphp_warmup(ExecutionContext *context,
 }
 
 void hphp_session_init() {
-  assert(!s_sessionInitialized);
+  assertx(!s_sessionInitialized);
   g_context.getCheck();
   AsioSession::Init();
   Socket::clearLastError();
@@ -2563,7 +2563,7 @@ void hphp_memory_cleanup() {
 }
 
 void hphp_session_exit(const Transport* transport) {
-  assert(s_sessionInitialized);
+  assertx(s_sessionInitialized);
   // Server note and INI have to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
@@ -2590,7 +2590,7 @@ void hphp_session_exit(const Transport* transport) {
     hphp_memory_cleanup();
   }
 
-  assert(tl_heap->empty());
+  assertx(tl_heap->empty());
 
   s_sessionInitialized = false;
   s_extra_request_nanoseconds = 0;

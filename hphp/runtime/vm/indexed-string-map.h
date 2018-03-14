@@ -63,7 +63,7 @@ struct IndexedStringMap {
    * builder below.
    */
   void create(const Builder& b) {
-    assert(!size() && "IndexedStringMap::create called more than once");
+    assertx(!size() && "IndexedStringMap::create called more than once");
     setSize(b.size());
     m_map.init(b.size(), size() * sizeof(T));
     if (!b.size()) {
@@ -109,7 +109,7 @@ struct IndexedStringMap {
   // Lookup entries by index.  Index must be in range or you get
   // undefined behavior.
   T& operator[](Index index) {
-    assert(index < size());
+    assertx(index < size());
     return mutableAccessList()[index];
   }
   const T& operator[](Index index) const {
@@ -179,8 +179,8 @@ public:
   bool contains(const StringData* key) const { return m_map.count(key); }
 
   T& operator[](Index idx) {
-    assert(idx >= 0);
-    assert(size_t(idx) < m_list.size());
+    assertx(idx >= 0);
+    assertx(size_t(idx) < m_list.size());
     return m_list[idx];
   }
 
@@ -194,7 +194,7 @@ public:
    */
   void add(const StringData* name, const T& t) {
     if (m_list.size() >= size_t(std::numeric_limits<Index>::max())) {
-      assert(false && "IndexedStringMap::Builder overflowed");
+      assertx(false && "IndexedStringMap::Builder overflowed");
       abort();
     }
 

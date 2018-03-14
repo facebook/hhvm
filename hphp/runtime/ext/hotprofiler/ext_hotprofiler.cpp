@@ -618,7 +618,7 @@ struct TraceWalker {
     // off. This ensures main() represents the entire run, even if we
     // run out of log space.
     if (!m_stack.empty()) {
-      assert(strcmp(m_stack.back().trace->symbol, "main()") == 0);
+      assertx(strcmp(m_stack.back().trace->symbol, "main()") == 0);
       incStats(m_stack.back().trace->symbol, final, m_stack.back(), stats);
     }
     if (m_badArcCount > 0) {
@@ -749,7 +749,7 @@ struct TraceProfiler final : Profiler {
     } else {
       m_maxTraceBuffer = RuntimeOption::ProfilerMaxTraceBuffer;
       Extension* ext = ExtensionRegistry::get(s_hotprofiler);
-      assert(ext);
+      assertx(ext);
       IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                        "profiler.max_trace_buffer",
                        &m_maxTraceBuffer);

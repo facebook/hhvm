@@ -134,7 +134,7 @@ private:
 
 struct Certificate : SweepableResourceData {
   X509 *m_cert;
-  explicit Certificate(X509 *cert) : m_cert(cert) { assert(m_cert);}
+  explicit Certificate(X509 *cert) : m_cert(cert) { assertx(m_cert);}
   ~Certificate() {
     if (m_cert) X509_free(m_cert);
   }

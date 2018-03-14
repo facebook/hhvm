@@ -93,7 +93,7 @@ void* start_routine_wrapper(void *arg) {
   auto& info = *reinterpret_cast<PthreadInfo*>(arg);
 
   info.mm = tl_heap.getCheck();
-  assert(info.mm);
+  assertx(info.mm);
   info.mm->resetExternalStats();
 #ifdef __linux__
   info.tid = syscall(SYS_gettid);

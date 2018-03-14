@@ -101,7 +101,7 @@ struct c_ExternalThreadEventWaitHandle;
  *     event->setException(exception);
  *   } catch (...) {
  *     // unknown exception; should be never reached
- *     assert(false);
+ *     assertx(false);
  *     event->abandon();
  *     SystemLib::throwInvalidOperationExceptionObject(
  *       "Encountered unexpected exception"
@@ -219,7 +219,7 @@ struct AsioExternalThreadEvent {
      * is eventually called.
      */
     virtual ~AsioExternalThreadEvent() {
-      assert(
+      assertx(
         m_state.load() == Finished ||
         m_state.load() == Canceled ||
         m_state.load() == Abandoned
@@ -247,7 +247,7 @@ struct AsioExternalThreadEvent {
      * called only from the unserialize() implementation.
      */
     ObjectData* getPrivData() const {
-      assert(m_state.load() == Finished);
+      assertx(m_state.load() == Finished);
       return m_waitHandle->getPrivData();
     }
 

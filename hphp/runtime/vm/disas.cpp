@@ -121,7 +121,7 @@ std::string escaped_long(const ArrayData* ad) {
 }
 
 std::string escaped_long(Cell cell) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
   auto const str = internal_serialize(tvAsCVarRef(&cell));
   return escaped_long(str.get());
 }
@@ -370,7 +370,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   switch (peek_op(pc)) { OPCODES }
 #undef O
 
-  assert(pc == startPc + instrLen(startPc));
+  assertx(pc == startPc + instrLen(startPc));
 
 #undef IMM_NA
 #undef IMM_ONE
@@ -634,7 +634,7 @@ void print_func(Output& out, const Func* func) {
 }
 
 std::string member_tv_initializer(Cell cell) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
   if (cell.m_type == KindOfUninit) return "uninit";
   return escaped_long(cell);
 }

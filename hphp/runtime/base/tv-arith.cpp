@@ -43,7 +43,7 @@ void throw_bad_array_operand(const ArrayData* ad) {
     if (ad->isVecArray()) return "vecs";
     if (ad->isDict()) return "dicts";
     if (ad->isKeyset()) return "keysets";
-    assert(ad->isPHPArray());
+    assertx(ad->isPHPArray());
     return "arrays";
   }();
   throw ExtendedException(
@@ -60,7 +60,7 @@ Cell make_dbl(double d)  { return make_tv<KindOfDouble>(d); }
 // Helper for converting String, Array, Bool, Null or Obj to Dbl|Int.
 // Other types (i.e. Int and Double) must be handled outside of this.
 TypedNum numericConvHelper(Cell cell) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -106,7 +106,7 @@ again:
       if (c2.m_type == KindOfInt64)  return o(c1.m_data.num, c2.m_data.num);
       if (c2.m_type == KindOfDouble) return o(c1.m_data.num, c2.m_data.dbl);
       cellCopy(numericConvHelper(c2), c2);
-      assert(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
+      assertx(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
   }
 
@@ -115,7 +115,7 @@ again:
       if (c2.m_type == KindOfDouble) return o(c1.m_data.dbl, c2.m_data.dbl);
       if (c2.m_type == KindOfInt64)  return o(c1.m_data.dbl, c2.m_data.num);
       cellCopy(numericConvHelper(c2), c2);
-      assert(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
+      assertx(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
   }
 
@@ -124,7 +124,7 @@ again:
   }
 
   cellCopy(numericConvHelper(c1), c1);
-  assert(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
+  assertx(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
   goto again;
 }
 
@@ -217,7 +217,7 @@ struct Div {
         FOLLY_MSVC_DISABLE_WARNING(4723)
         return make_dbl([](int64_t tVal) {
           auto v = tVal / 0.0;
-          assert(std::isnan(v) || std::isinf(v));
+          assertx(std::isnan(v) || std::isinf(v));
           return v;
         }(t));
         FOLLY_POP_WARNING
@@ -273,7 +273,7 @@ again:
         return;
       }
       cellCopy(numericConvHelper(c2), c2);
-      assert(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
+      assertx(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
   }
 
@@ -288,7 +288,7 @@ again:
         return;
       }
       cellCopy(numericConvHelper(c2), c2);
-      assert(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
+      assertx(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
   }
 
@@ -304,7 +304,7 @@ again:
   }
 
   cellSet(numericConvHelper(c1), c1);
-  assert(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
+  assertx(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
   goto again;
 }
 
@@ -374,8 +374,8 @@ StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
 
 template<template<class> class BitOp, class StrLenOp>
 Cell cellBitOp(StrLenOp strLenOp, Cell c1, Cell c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+  assertx(cellIsPlausible(c1));
+  assertx(cellIsPlausible(c2));
 
   if (isStringType(c1.m_type) && isStringType(c2.m_type)) {
     return make_tv<KindOfString>(
@@ -402,7 +402,7 @@ void cellBitOpEq(Op op, Cell& c1, Cell c2) {
 // Op must implement the interface described for cellIncDecOp.
 template<class Op>
 void stringIncDecOp(Op op, Cell& cell) {
-  assert(isStringType(cell.m_type));
+  assertx(isStringType(cell.m_type));
 
   auto const sd = cell.m_data.pstr;
   if (sd->empty()) {
@@ -424,7 +424,7 @@ void stringIncDecOp(Op op, Cell& cell) {
     cellCopy(make_dbl(dval), cell);
     op.dblCase(cell);
   } else {
-    assert(dt == KindOfNull);
+    assertx(dt == KindOfNull);
     op.nonNumericString(cell);
   }
 }
@@ -442,7 +442,7 @@ void stringIncDecOp(Op op, Cell& cell) {
  */
 template<class Op>
 void cellIncDecOp(Op op, Cell& cell) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -499,7 +499,7 @@ struct IncBase {
       auto const tmp = StringData::Make(sd, CopyString);
       auto const tmp2 = tmp->increment();
       if (tmp2 != tmp) {
-        assert(tmp->hasExactlyOneRef());
+        assertx(tmp->hasExactlyOneRef());
         tmp->release();
         return tmp2;
       }
@@ -682,8 +682,8 @@ void cellSubEqO(Cell& c1, Cell c2) { cellSet(cellSubO(c1, c2), c1); }
 void cellMulEqO(Cell& c1, Cell c2) { cellSet(cellMulO(c1, c2), c1); }
 
 void cellDivEq(Cell& c1, Cell c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+  assertx(cellIsPlausible(c1));
+  assertx(cellIsPlausible(c2));
   if (!isIntType(c1.m_type) && !isDoubleType(c1.m_type)) {
     cellSet(numericConvHelper(c1), c1);
   }
@@ -719,7 +719,7 @@ void cellDec(Cell& cell) { cellIncDecOp(Dec(), cell); }
 void cellDecO(Cell& cell) { cellIncDecOp(DecO(), cell); }
 
 void cellBitNot(Cell& cell) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfInt64:
@@ -752,7 +752,7 @@ void cellBitNot(Cell& cell) {
         auto const sd   = cell.m_data.pstr;
         auto const len  = sd->size();
         auto const data = sd->mutableData();
-        assert(sd->hasExactlyOneRef());
+        assertx(sd->hasExactlyOneRef());
         for (uint32_t i = 0; i < len; ++i) {
           data[i] = ~data[i];
         }

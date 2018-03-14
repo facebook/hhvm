@@ -42,14 +42,14 @@ struct EnumCache {
   // TBB hash and compare struct
   struct clsCompare {
     bool equal(intptr_t key1, intptr_t key2) const {
-      assert(key1 && key2);
+      assertx(key1 && key2);
       bool equal = (key1 == key2);
-      assert(!equal || getClass(key1)->name()->equal(getClass(key2)->name()));
+      assertx(!equal || getClass(key1)->name()->equal(getClass(key2)->name()));
       return equal;
     }
 
     size_t hash(intptr_t key) const {
-      assert(key);
+      assertx(key);
       return static_cast<size_t>(hash_int64(key));
     }
   };

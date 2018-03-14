@@ -132,7 +132,7 @@ void smashJmp(TCA inst, TCA target) {
     // we always leave the instruction in a consistent state.
     auto const imm = safe_cast<int32_t>(target - (inst + 5));
     if (inst[0] != 0xe9) {
-      assert(inst[0] == 0x0f && inst[1] == 0x1f && inst[2] == 0x44);
+      assertx(inst[0] == 0x0f && inst[1] == 0x1f && inst[2] == 0x44);
 
       auto const last = 0xff & (imm >> 24);
       auto const first = 0xe9 | ((size_t(imm) & 0xffffffULL) << 8);

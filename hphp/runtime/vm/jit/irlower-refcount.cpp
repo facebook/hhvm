@@ -92,7 +92,7 @@ void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
     v << testqi{ActRec::kHasClassBit, loc.reg(0), sf};
     cond = CC_E;
   } else {
-    assert(ty <= TGen);
+    assertx(ty <= TGen);
     emitCmpTVType(v, sf, KindOfRefCountThreshold, loc.reg(1));
   }
   unlikelyIfThen(v, vtaken, cond, sf, then);

@@ -65,14 +65,14 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
    * Deallocate a RefData.
    */
   void release() noexcept {
-    assert(kindIsValid());
+    assertx(kindIsValid());
     this->~RefData();
     tl_heap->objFree(this, sizeof(RefData));
     AARCH64_WALKABLE_FRAME();
   }
 
   ALWAYS_INLINE void decRefAndRelease() {
-    assert(kindIsValid());
+    assertx(kindIsValid());
     if (decReleaseCheck()) release();
   }
   bool kindIsValid() const { return m_kind == HeaderKind::Ref; }
@@ -81,11 +81,11 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
    * Note, despite the name, this can never return a non-Cell.
    */
   const Cell* tv() const {
-    assert(kindIsValid());
+    assertx(kindIsValid());
     return &m_tv;
   }
   Cell* tv() {
-    assert(kindIsValid());
+    assertx(kindIsValid());
     return &m_tv;
   }
 
@@ -98,10 +98,10 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
 
   static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
 
-  void assertValid() const { assert(kindIsValid()); }
+  void assertValid() const { assertx(kindIsValid()); }
 
   bool isReferenced() const {
-    assert(kindIsValid());
+    assertx(kindIsValid());
     return m_count >= 2;
   }
 

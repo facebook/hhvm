@@ -295,7 +295,7 @@ SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
   // TC, but for non-system settings, we can optimize them as a load from the
   // known static address or thread-local address of where the setting lives.
   // This might be worth doing specifically for the zend.assertions setting,
-  // for which the emitter emits an ini_get around every call to assert().
+  // for which the emitter emits an ini_get around every call to assertx().
   auto const settingName = params[0].value->strVal()->toCppString();
   IniSetting::Mode mode = IniSetting::PHP_INI_NONE;
   if (!IniSetting::GetMode(settingName, mode)) {
@@ -1143,7 +1143,7 @@ SSATmp* realize_param(IRGS& env,
                       R realize) {
   if (param.needsConversion) {
     auto const baseTy = targetTy - TNull;
-    assert(baseTy.isKnownDataType());
+    assertx(baseTy.isKnownDataType());
     auto const convertTy =
       (!callee->isParamCoerceMode() &&
        targetTy == TNullableObj) ? targetTy : baseTy;
@@ -1898,7 +1898,7 @@ void implGenericIdx(IRGS& env) {
   SSATmp* const args[] = { base, key, def };
 
   static auto func = Unit::lookupBuiltin(s_idx.get());
-  assert(func && func->numParams() == 3);
+  assertx(func && func->numParams() == 3);
 
   emitDirectCall(env, func, 3, args);
 }

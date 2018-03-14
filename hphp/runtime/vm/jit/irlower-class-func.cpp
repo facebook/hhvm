@@ -155,8 +155,8 @@ void cgCheckInitSProps(IRLS& env, const IRInstruction* inst) {
     v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
   } else {
     // Always initialized; just fall through to inst->next().
-    assert(rds::isPersistentHandle(handle));
-    assert(rds::handleToRef<bool>(handle));
+    assertx(rds::isPersistentHandle(handle));
+    assertx(rds::handleToRef<bool>(handle));
   }
 }
 

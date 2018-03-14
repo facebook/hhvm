@@ -31,7 +31,7 @@ Debugger::Debugger() {
 }
 
 void Debugger::setTransport(DebugTransport* transport) {
-  assert(m_transport == nullptr);
+  assertx(m_transport == nullptr);
   m_transport = transport;
   setClientConnected(m_transport->clientConnected());
 }
@@ -72,7 +72,7 @@ void Debugger::setClientConnected(bool connected) {
 
     if (connected) {
       // Create a new debugger session.
-      assert(m_session == nullptr);
+      assertx(m_session == nullptr);
       m_session = new DebuggerSession(this);
       if (m_session == nullptr) {
         VSDebugLogger::Log(
@@ -152,8 +152,8 @@ void Debugger::setClientConnected(bool connected) {
 
           ri->m_breakpointInfo = new RequestBreakpointInfo();
           if (ri->m_breakpointInfo != nullptr) {
-            assert(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
-            assert(ri->m_breakpointInfo->m_unresolvedBreakpoints.empty());
+            assertx(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
+            assertx(ri->m_breakpointInfo->m_unresolvedBreakpoints.empty());
           }
         },
         true /* includeDummyRequest */
@@ -225,7 +225,7 @@ void Debugger::cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri) {
     delete ri->m_breakpointInfo;
   }
 
-  assert(ri->m_serverObjects.size() == 0);
+  assertx(ri->m_serverObjects.size() == 0);
   delete ri;
 }
 
@@ -249,7 +249,7 @@ void Debugger::cleanupServerObjectsForRequest(RequestInfo* ri) {
     it = objs.erase(it);
   }
 
-  assert(objs.size() == 0);
+  assertx(objs.size() == 0);
 }
 
 void Debugger::executeForEachAttachedRequest(
@@ -259,7 +259,7 @@ void Debugger::executeForEachAttachedRequest(
   m_lock.assertOwnedBySelf();
 
   for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
-    assert(it->second != nullptr);
+    assertx(it->second != nullptr);
     callback(it->first, it->second);
   }
 
@@ -272,7 +272,7 @@ void Debugger::executeForEachAttachedRequest(
 }
 
 void Debugger::getAllThreadInfo(folly::dynamic& threads) {
-  assert(threads.isArray());
+  assertx(threads.isArray());
   executeForEachAttachedRequest(
     [&](ThreadInfo* ti, RequestInfo* ri) {
       threads.push_back(folly::dynamic::object);
@@ -305,7 +305,7 @@ void Debugger::shutdown() {
   setClientConnected(false);
 
   // m_session is deleted and set to nullptr by setClientConnected(false).
-  assert(m_session == nullptr);
+  assertx(m_session == nullptr);
 
   delete m_transport;
   m_transport = nullptr;
@@ -619,7 +619,7 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   if (it == m_requests.end()) {
     // New request. Insert a request info object into our map.
     threadId = nextThreadId();
-    assert(threadId > 0);
+    assertx(threadId > 0);
 
     requestInfo = createRequestInfo();
     if (requestInfo == nullptr) {
@@ -633,11 +633,11 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   } else {
     requestInfo = it->second;
     auto idIt = m_requestInfoMap.find(ti);
-    assert(idIt != m_requestInfoMap.end());
+    assertx(idIt != m_requestInfoMap.end());
     threadId = idIt->second;
   }
 
-  assert(requestInfo != nullptr && requestInfo->m_breakpointInfo != nullptr);
+  assertx(requestInfo != nullptr && requestInfo->m_breakpointInfo != nullptr);
 
   // Have the debugger hook update the output hook on next interrupt.
   requestInfo->m_flags.outputHooked = false;
@@ -701,11 +701,11 @@ void Debugger::requestShutdown() {
     m_requests.erase(it);
 
     auto infoItr = m_requestInfoMap.find(threadInfo);
-    assert(infoItr != m_requestInfoMap.end());
+    assertx(infoItr != m_requestInfoMap.end());
 
     threadId = infoItr->second;
     auto idItr = m_requestIdMap.find(threadId);
-    assert(idItr != m_requestIdMap.end());
+    assertx(idItr != m_requestIdMap.end());
 
     m_requestIdMap.erase(idItr);
     m_requestInfoMap.erase(infoItr);
@@ -921,7 +921,7 @@ Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
         break;
       }
     } else {
-      assert(m_state == ProgramState::Running && m_pausedRequestCount > 0);
+      assertx(m_state == ProgramState::Running && m_pausedRequestCount > 0);
 
       // The target is running, but at least one thread is still paused.
       // This means a resume is in progress, drop the lock and wait for
@@ -946,7 +946,7 @@ Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
   }
 
   m_lock.assertOwnedBySelf();
-  assert(requestInfo == nullptr || m_state == ProgramState::Running);
+  assertx(requestInfo == nullptr || m_state == ProgramState::Running);
 
   return clientConnected() ? ReadyToPause : ErrorNoClient;
 }
@@ -1002,7 +1002,7 @@ void Debugger::onClientMessage(folly::dynamic& message) {
     }
 
     if (!VSCommand::parseCommand(this, message, &command)) {
-      assert(command == nullptr);
+      assertx(command == nullptr);
 
       try {
         auto cmdName = message["command"];
@@ -1021,7 +1021,7 @@ void Debugger::onClientMessage(folly::dynamic& message) {
       );
     }
 
-    assert(command != nullptr);
+    assertx(command != nullptr);
     enforceRequiresBreak(command);
 
     // Otherwise this is a normal command. Dispatch it to its target.
@@ -1045,7 +1045,7 @@ void Debugger::onClientMessage(folly::dynamic& message) {
             auto it = m_requestIdMap.find(threadId);
             if (it != m_requestIdMap.end()) {
               const auto request = m_requests.find(it->second);
-              assert(request != m_requests.end());
+              assertx(request != m_requests.end());
               ri = request->second;
             }
           }
@@ -1070,7 +1070,7 @@ void Debugger::onClientMessage(folly::dynamic& message) {
         command = nullptr;
         break;
       default:
-        assert(false);
+        assertx(false);
     }
   } catch (DebuggerCommandException e) {
     reportClientMessageError(message, e.what());
@@ -1096,7 +1096,7 @@ void Debugger::setClientPreferences(ClientPreferences& preferences) {
     return;
   }
 
-  assert(m_session != nullptr);
+  assertx(m_session != nullptr);
   m_session->setClientPreferences(preferences);
 }
 
@@ -1107,7 +1107,7 @@ ClientPreferences Debugger::getClientPreferences() {
     return empty;
   }
 
-  assert(m_session != nullptr);
+  assertx(m_session != nullptr);
   return m_session->getClientPreferences();
 }
 
@@ -1121,7 +1121,7 @@ void Debugger::startDummyRequest(
     return;
   }
 
-  assert(m_session != nullptr);
+  assertx(m_session != nullptr);
   m_session->startDummyRequest(startupDoc, sandboxUser, sandboxName);
 }
 
@@ -1133,7 +1133,7 @@ void Debugger::setDummyThreadId(int64_t threadId) {
 void Debugger::onBreakpointAdded(int bpId) {
   Lock lock(m_lock);
 
-  assert(m_session != nullptr);
+  assertx(m_session != nullptr);
 
   // Now to actually install the breakpoints, each request thread needs to
   // process the bp and set it in some TLS data structures. If the program
@@ -1246,7 +1246,7 @@ void Debugger::tryInstallBreakpoints(RequestInfo* ri) {
     it = pendingBps.erase(it);
   }
 
-  assert(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
+  assertx(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
 }
 
 bool Debugger::tryResolveBreakpoint(
@@ -1540,7 +1540,7 @@ void Debugger::onExceptionBreakpointHit(
     case BreakAll:
       break;
     default:
-      assert(false);
+      assertx(false);
   }
 
   if (prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
@@ -1692,7 +1692,7 @@ std::string Debugger::getStopReasonForBp(
 void Debugger::interruptAllThreads() {
   executeForEachAttachedRequest(
     [&](ThreadInfo* ti, RequestInfo* ri) {
-      assert(ti != nullptr);
+      assertx(ti != nullptr);
       ti->m_reqInjectionData.setDebuggerIntr(true);
     },
     false /* includeDummyRequest */

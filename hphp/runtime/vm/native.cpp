@@ -62,7 +62,7 @@ static void nativeArgHelper(const Func* func, int i,
       }
     } else {
       GP_args[GP_count++] = val;
-      assert((GP_count + 1) < kMaxBuiltinArgs);
+      assertx((GP_count + 1) < kMaxBuiltinArgs);
       val = arg.m_type;
     }
   }
@@ -111,7 +111,7 @@ static void populateArgs(const Func* func,
         GP_args[GP_count++] = args[-i].m_data.num;
       }
     } else {
-      assert((GP_count + 1) < kMaxBuiltinArgs);
+      assertx((GP_count + 1) < kMaxBuiltinArgs);
       if (pi.nativeArg) {
         nativeArgHelper(func, i, type, args[-i], GP_args, GP_count);
       } else if (!type) {
@@ -123,7 +123,7 @@ static void populateArgs(const Func* func,
       }
       if ((GP_count == numGP) && ntmp) {
         // GP regs are now full, bring tmp back to fill the initial stack
-        assert((GP_count + ntmp) <= kMaxBuiltinArgs);
+        assertx((GP_count + ntmp) <= kMaxBuiltinArgs);
         memcpy(GP_args + GP_count, tmp, ntmp * sizeof(int64_t));
         GP_count += ntmp;
         ntmp = 0;
@@ -131,7 +131,7 @@ static void populateArgs(const Func* func,
     }
   }
   if (ntmp) {
-    assert((GP_count + ntmp) <= kMaxBuiltinArgs);
+    assertx((GP_count + ntmp) <= kMaxBuiltinArgs);
     // We had more than kNumSIMDRegs doubles,
     // but less than numGPRegArgs INTs.
     // Push out the count and leave garbage behind.
@@ -147,11 +147,11 @@ static void populateArgs(const Func* func,
 static void populateArgsNoDoubles(const Func* func,
                                   TypedValue* args, int numArgs,
                                   int64_t* GP_args, int& GP_count) {
-  assert(numArgs >= 0);
+  assertx(numArgs >= 0);
   for (int i = 0; i < numArgs; ++i) {
     auto const& pi = func->params()[i];
     auto dt = pi.builtinType;
-    assert(dt != KindOfDouble);
+    assertx(dt != KindOfDouble);
     if (pi.nativeArg) {
       nativeArgHelper(func, i, dt, args[-i], GP_args, GP_count);
     } else if (!dt) {
@@ -238,7 +238,7 @@ void callFunc(const Func* func, void *ctx,
     case KindOfObject:
     case KindOfResource:
     case KindOfRef: {
-      assert(isBuiltinByRef(ret.m_type));
+      assertx(isBuiltinByRef(ret.m_type));
       if (func->isReturnByValue()) {
         auto val = callFuncInt64Impl(f, GP_args, GP_count, SIMD_args,
                                      SIMD_count);
@@ -287,7 +287,7 @@ void callFunc(const Func* func, void *ctx,
 bool coerceFCallArgs(TypedValue* args,
                      int32_t numArgs, int32_t numNonDefault,
                      const Func* func, bool useStrictTypes) {
-  assert(numArgs == func->numParams());
+  assertx(numArgs == func->numParams());
 
   bool paramCoerceMode = func->isParamCoerceMode();
 
@@ -422,7 +422,7 @@ bool nativeWrapperCheckArgs(ActRec* ar) {
 
 template<bool usesDoubles>
 TypedValue* functionWrapper(ActRec* ar) {
-  assert(ar);
+  assertx(ar);
   auto func = ar->m_func;
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
@@ -440,7 +440,7 @@ TypedValue* functionWrapper(ActRec* ar) {
     rv.m_data.num = 0;
   }
 
-  assert(rv.m_type != KindOfUninit);
+  assertx(rv.m_type != KindOfUninit);
   frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
   tvCopy(rv, *ar->retSlot());
   return ar->retSlot();
@@ -448,7 +448,7 @@ TypedValue* functionWrapper(ActRec* ar) {
 
 template<bool usesDoubles>
 TypedValue* methodWrapper(ActRec* ar) {
-  assert(ar);
+  assertx(ar);
   auto func = ar->m_func;
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
@@ -483,7 +483,7 @@ TypedValue* methodWrapper(ActRec* ar) {
     rv.m_data.num = 0;
   }
 
-  assert(rv.m_type != KindOfUninit);
+  assertx(rv.m_type != KindOfUninit);
   if (isStatic) {
     frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
   } else {

@@ -281,7 +281,7 @@ bool traceThroughJmp(Env& env) {
   // We want to keep profiling translations to basic blocks, inlining shouldn't
   // happen in profiling translations
   if (env.profiling) {
-    assert(!env.inlining);
+    assertx(!env.inlining);
     return false;
   }
 

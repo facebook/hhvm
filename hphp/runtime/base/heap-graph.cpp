@@ -172,7 +172,7 @@ HeapGraph makeHeapGraph(bool include_free) {
     auto h = g.nodes[i].h;
     scanHeapObject(h, scanner);
     auto from = blocks.index(h);
-    assert(from == i);
+    assertx(from == i);
     scanner.finish(
       [&](const void* p, std::size_t size) {
         conservativeScan(p, size, [&](const void** addr, const void* ptr) {

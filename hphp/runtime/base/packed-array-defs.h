@@ -94,7 +94,7 @@ size_t PackedArray::capacityToSizeIndex(size_t cap) {
   auto const sizeIndex = MemoryManager::size2Index(
     sizeof(ArrayData) + cap * sizeof(TypedValue)
   );
-  assert(sizeIndex <= PackedArray::MaxSizeIndex);
+  assertx(sizeIndex <= PackedArray::MaxSizeIndex);
   return sizeIndex;
 }
 
@@ -123,14 +123,14 @@ uint8_t PackedArray::sizeClass(const ArrayData* ad) {
 }
 
 inline void PackedArray::scan(const ArrayData* a, type_scan::Scanner& scanner) {
-  assert(checkInvariants(a));
+  assertx(checkInvariants(a));
   auto data = packedData(a);
   scanner.scan(*data, a->getSize() * sizeof(*data));
 }
 
 template <class F, bool inc>
 void PackedArray::IterateV(const ArrayData* arr, F fn) {
-  assert(checkInvariants(arr));
+  assertx(checkInvariants(arr));
   auto elm = packedData(arr);
   if (inc) arr->incRefCount();
   SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };
@@ -141,7 +141,7 @@ void PackedArray::IterateV(const ArrayData* arr, F fn) {
 
 template <class F, bool inc>
 void PackedArray::IterateKV(const ArrayData* arr, F fn) {
-  assert(checkInvariants(arr));
+  assertx(checkInvariants(arr));
   auto elm = packedData(arr);
   if (inc) arr->incRefCount();
   SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };

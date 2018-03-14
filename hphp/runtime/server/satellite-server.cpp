@@ -191,7 +191,7 @@ SatelliteServer::Create(std::shared_ptr<SatelliteServerInfo> info) {
       satellite.reset(new RPCServer(info));
       break;
     default:
-      assert(false);
+      assertx(false);
     }
     if (satellite) {
       satellite->setName(info->getName());

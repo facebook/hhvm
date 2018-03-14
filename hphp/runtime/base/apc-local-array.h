@@ -135,7 +135,7 @@ public:
   using ArrayData::incRefCount;
 
   ssize_t iterAdvanceImpl(ssize_t prev) const {
-    assert(prev >= 0 && prev < m_size);
+    assertx(prev >= 0 && prev < m_size);
     ssize_t next = prev + 1;
     return next < m_size ? next : m_size;
   }

@@ -37,7 +37,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void ActRec::setReturnVMExit() {
-  assert(isReturnHelper(jit::tc::ustubs().callToExit));
+  assertx(isReturnHelper(jit::tc::ustubs().callToExit));
   m_sfp = nullptr;
   m_savedRip = reinterpret_cast<uintptr_t>(jit::tc::ustubs().callToExit);
   m_soff = 0;

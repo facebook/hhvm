@@ -957,7 +957,7 @@ bool PDOMySqlStatement::support(SupportedMethod method) {
 }
 
 int PDOMySqlStatement::handleError(const char *file, int line) {
-  assert(m_conn);
+  assertx(m_conn);
   return m_conn->handleError(file, line, this);
 }
 

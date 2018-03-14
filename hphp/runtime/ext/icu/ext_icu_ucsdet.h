@@ -86,7 +86,7 @@ struct EncodingMatch : IntlError {
   static Object newInstance(const UCharsetMatch* match) {
     if (UNLIKELY(!c_EncodingMatch)) {
       c_EncodingMatch = Unit::lookupClass(s_EncodingMatch.get());
-      assert(c_EncodingMatch);
+      assertx(c_EncodingMatch);
     }
     Object ret{c_EncodingMatch};
     Native::data<EncodingMatch>(ret)->m_match =

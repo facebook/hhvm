@@ -1127,7 +1127,7 @@ TypedValue HHVM_FUNCTION(strstr,
                          bool before_needle /* = false */) {
   auto const tv = HHVM_FN(strpos)(haystack, needle);
   auto const& ret = tvAsCVarRef(&tv);
-  assert(!isRefcountedType(tv.m_type));
+  assertx(!isRefcountedType(tv.m_type));
 
   if (same(ret, false)) {
     return make_tv<KindOfBoolean>(false);
@@ -1145,7 +1145,7 @@ TypedValue HHVM_FUNCTION(stristr,
                          bool before_needle /* = false */) {
   auto const tv = HHVM_FN(stripos)(haystack, needle);
   auto const& ret = tvAsCVarRef(&tv);
-  assert(!isRefcountedType(tv.m_type));
+  assertx(!isRefcountedType(tv.m_type));
 
   if (same(ret, false)) {
     return make_tv<KindOfBoolean>(false);
@@ -1163,7 +1163,7 @@ Variant strpbrk_char_list_has_nulls_slow(const String& haystack,
 
   auto const charListSz = char_list.size();
   auto const charListData = char_list.c_str();
-  assert(memchr(charListData, '\0', charListSz) != nullptr);
+  assertx(memchr(charListData, '\0', charListSz) != nullptr);
 
   // in order to use strcspn, remove all null byte(s) from char_list
   auto charListWithoutNull = (char*) req::malloc_noptrs(charListSz);
@@ -1174,7 +1174,7 @@ Variant strpbrk_char_list_has_nulls_slow(const String& haystack,
   for (auto ptr = charListData; ptr != charListStop; ++ptr) {
     if (*ptr != '\0') { *copy_ptr++ = *ptr; }
   }
-  assert((copy_ptr - charListWithoutNull) < charListSz);
+  assertx((copy_ptr - charListWithoutNull) < charListSz);
   // at least one of charListData chars was null, so there must be room:
   *copy_ptr = '\0';
 
@@ -1937,7 +1937,7 @@ private:
 };
 
 uint16_t inline PatAndRepl::hash(int start, int len) const {
-  assert(pat.size() >= start + len);
+  assertx(pat.size() >= start + len);
   return strtr_hash(pat.data() + start, len);
 };
 
@@ -1982,7 +1982,7 @@ void WuManberReplacement::initTables() {
       // init shift tab
       for (int j = 0; j < max_shift; j++) {
         uint16_t h2 = patterns[i].hash( j, B ) & SHIFT_TAB_MASK;
-        assert((long long) m - (long long) j - B >= 0);
+        assertx((long long) m - (long long) j - B >= 0);
         shift[h2] = MIN(shift[h2], m - j - B);
       }
       // init prefix

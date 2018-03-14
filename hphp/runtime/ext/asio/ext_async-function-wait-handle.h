@@ -112,7 +112,7 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   }
 
   bool isFastResumable() const {
-    assert(getState() == STATE_READY);
+    assertx(getState() == STATE_READY);
     return (resumable()->resumeAddr() &&
             m_children[0].getChild()->isSucceeded());
   }
@@ -135,7 +135,7 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
 };
 
 inline c_AsyncFunctionWaitHandle* c_Awaitable::asAsyncFunction() {
-  assert(getKind() == Kind::AsyncFunction);
+  assertx(getKind() == Kind::AsyncFunction);
   return static_cast<c_AsyncFunctionWaitHandle*>(this);
 }
 

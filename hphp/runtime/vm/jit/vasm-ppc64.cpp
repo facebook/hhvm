@@ -1380,7 +1380,7 @@ void lowerForPPC64(const VLS& /*e*/, Vout& v, cmpsd& inst) {
     std::swap(equal, nequal);
     break;
   default:
-    assert(false && "Invalid ComparisonPred for cmpsd");
+    assertx(false && "Invalid ComparisonPred for cmpsd");
   }
   v << cmovq{CC_E, sf, nequal, equal, r64_d};
   v << copy{r64_d, inst.d}; // GP -> FP
@@ -1514,7 +1514,7 @@ void fixVptr(Vout& v, Vptr& p) {
     }
 
     case AddressModes::Invalid:
-      assert(false && "Invalid address mode");
+      assertx(false && "Invalid address mode");
       break;
   }
 }

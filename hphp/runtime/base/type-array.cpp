@@ -188,9 +188,9 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
                       const void *key_data,
                       PFUNC_CMP value_cmp_function,
                       const void *value_data) const {
-  assert(by_key || by_value);
-  assert(by_key || key_cmp_function == nullptr);
-  assert(by_value || value_cmp_function == nullptr);
+  assertx(by_key || by_value);
+  assertx(by_key || key_cmp_function == nullptr);
+  assertx(by_value || value_cmp_function == nullptr);
   PFUNC_CMP value_cmp_as_string_function = value_cmp_function;
   if (!value_cmp_function) {
     value_cmp_function = SortStringAscending;
@@ -360,7 +360,7 @@ String Array::toString() const {
     raise_notice("Array to string conversion");
     return array_string;
   }
-  assert(m_arr->isHackArray());
+  assertx(m_arr->isHackArray());
   if (m_arr->isVecArray()) {
     raise_notice("Vec to string conversion");
     return vec_string;
@@ -369,7 +369,7 @@ String Array::toString() const {
     raise_notice("Dict to string conversion");
     return dict_string;
   }
-  assert(m_arr->isKeyset());
+  assertx(m_arr->isKeyset());
   raise_notice("Keyset to string conversion");
   return keyset_string;
 }
@@ -658,7 +658,7 @@ member_lval Array::lvalAtImpl(const T& key, AccessFlags) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lval(key, m_arr->cowCheck());
   if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
-  assert(lval.has_ref());
+  assertx(lval.has_ref());
   return lval;
 }
 
@@ -667,7 +667,7 @@ member_lval Array::lvalAtRefImpl(const T& key, AccessFlags) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalRef(key, m_arr->cowCheck());
   if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
-  assert(lval.has_ref());
+  assertx(lval.has_ref());
   return lval;
 }
 
@@ -900,7 +900,7 @@ member_lval Array::lvalAt() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalNew(m_arr->cowCheck());
   if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
-  assert(lval);
+  assertx(lval);
   return lval;
 }
 
@@ -908,7 +908,7 @@ member_lval Array::lvalAtRef() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalNewRef(m_arr->cowCheck());
   if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
-  assert(lval);
+  assertx(lval);
   return lval;
 }
 
@@ -1011,7 +1011,7 @@ static int multi_compare_func(const void *n1, const void *n2, const void *op) {
 void Array::SortImpl(std::vector<int> &indices, const Array& source,
                      Array::SortData &opaque, Array::PFUNC_CMP cmp_func,
                      bool by_key, const void *data /* = NULL */) {
-  assert(cmp_func);
+  assertx(cmp_func);
 
   int count = source.size();
   if (count == 0) {
@@ -1054,14 +1054,14 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
 }
 
 bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
-  assert(!data.empty());
+  assertx(!data.empty());
 
   int count = -1;
   for (unsigned int k = 0; k < data.size(); k++) {
     SortData &opaque = data[k];
 
-    assert(opaque.array);
-    assert(opaque.cmp_func);
+    assertx(opaque.array);
+    assertx(opaque.cmp_func);
     int size = opaque.array->size();
     if (count == -1) {
       count = size;

@@ -105,7 +105,7 @@ bool EvaluateCommand::executeImpl(
   rid.setErrorReportingLevel(0);
 
   RequestInfo* ri = m_debugger->getRequestInfo();
-  assert(ri->m_evaluateCommandDepth >= 0);
+  assertx(ri->m_evaluateCommandDepth >= 0);
   ri->m_evaluateCommandDepth++;
 
   // Track if the evaluation command caused any opcode stepping to occur
@@ -119,7 +119,7 @@ bool EvaluateCommand::executeImpl(
     rid.setErrorReportingLevel(previousErrorLevel);
 
     ri->m_evaluateCommandDepth--;
-    assert(ri->m_evaluateCommandDepth >= 0);
+    assertx(ri->m_evaluateCommandDepth >= 0);
 
     if (ri->m_evaluateCommandDepth == 0 && isDummy) {
       // The dummy request only appears in the client UX while it is
@@ -304,7 +304,7 @@ void EvaluateCommand::preparseEvalExpression(
   StatementPtr statement = (*statements)[0];
 
   // Statement list says we have a single statement, expect one.
-  assert(statement != nullptr);
+  assertx(statement != nullptr);
 
   if (statement->getKindOf() == Construct::KindOfExpStatement) {
     interpretExpr = "<?hh ";

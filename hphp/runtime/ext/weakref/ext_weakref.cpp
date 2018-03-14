@@ -74,7 +74,7 @@ bool HHVM_METHOD(WeakRef, acquire) {
     if (wr_data_handle->acquire_count == 1) {
       tvIncRefCountable(wr_data_handle->wr_data->pointee);
     }
-    assert(wr_data_handle->acquire_count > 0);
+    assertx(wr_data_handle->acquire_count > 0);
     return true;
   }
   return false;

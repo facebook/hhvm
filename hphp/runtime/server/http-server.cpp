@@ -126,12 +126,12 @@ HttpServer::HttpServer()
   }
 
   if (RuntimeOption::EnableSSL) {
-    assert(SSLInit::IsInited());
+    assertx(SSLInit::IsInited());
     m_pageServer->enableSSL(RuntimeOption::SSLPort);
   }
 
   if (RuntimeOption::EnableSSLWithPlainText) {
-    assert(SSLInit::IsInited());
+    assertx(SSLInit::IsInited());
     m_pageServer->enableSSLWithPlainText();
   }
 
@@ -217,7 +217,7 @@ void HttpServer::takeoverShutdown() {
 
 void HttpServer::serverStopped(HPHP::Server* server) {
   Logger::Info("Page server stopped");
-  assert(server == m_pageServer.get());
+  assertx(server == m_pageServer.get());
   removePid();
 
   auto sockFile = RuntimeOption::ServerFileSocket;
@@ -665,7 +665,7 @@ bool HttpServer::CanContinue(const MemInfo& mem, int64_t rssMb,
   if (mem.freeMb < RuntimeOption::ServerCriticalFreeMb) return false;
   auto const availableMb = availableMemory(mem, rssMb, cacheFreeFactor);
   auto const result = (rssMb + availableMb >= rssNeeded);
-  if (result) assert(CanStep(mem, rssMb, rssNeeded, cacheFreeFactor));
+  if (result) assertx(CanStep(mem, rssMb, rssNeeded, cacheFreeFactor));
   return result;
 }
 
@@ -734,7 +734,7 @@ void HttpServer::MarkShutdownStat(ShutdownEvent event) {
   }
 #ifndef NDEBUG
   if (!ShutdownStats.empty()) {
-    assert(ShutdownStats.back().event <= event);
+    assertx(ShutdownStats.back().event <= event);
   }
 #endif
   ShutdownStats.push_back({event, time(nullptr), mem, rss, requests});

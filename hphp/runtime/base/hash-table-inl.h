@@ -92,7 +92,7 @@ void HashTableCommon::CopyHash(int32_t* to,
 }
 
 ALWAYS_INLINE bool HashTableCommon::isFull() const {
-  assert(m_used <= capacity());
+  assertx(m_used <= capacity());
   return m_used == capacity();
 }
 
@@ -100,7 +100,7 @@ template<typename ArrayType, typename ElmType>
 ALWAYS_INLINE
 ssize_t HashTable<ArrayType, ElmType>::getIterBeginNotEmpty() const {
   // Expedite no tombstone case.
-  assert(!array()->empty());
+  assertx(!array()->empty());
   if (LIKELY(!data()[0].isTombstone())) {
       return 0;
   }
@@ -132,11 +132,11 @@ ALWAYS_INLINE ssize_t HashTable<ArrayType, ElmType>::getIterEnd() const {
 template<typename ArrayType, typename ElmType>
 ALWAYS_INLINE ssize_t HashTable<ArrayType, ElmType>::nextElm(Elm* elms,
                                                              ssize_t ei) const {
-  assert(-1 <= ei && ei < m_used);
+  assertx(-1 <= ei && ei < m_used);
   while (++ei < m_used) {
     if (LIKELY(!elms[ei].isTombstone())) return ei;
   }
-  assert(ei == m_used);
+  assertx(ei == m_used);
   return m_used;
 }
 
@@ -148,7 +148,7 @@ ALWAYS_INLINE ssize_t HashTable<ArrayType, ElmType>::nextElm(ssize_t ei) const {
 template<typename ArrayType, typename ElmType>
 ALWAYS_INLINE ssize_t HashTable<ArrayType, ElmType>::prevElm(Elm* elms,
                                                              ssize_t ei) const {
-  assert(ei < ssize_t(m_used));
+  assertx(ei < ssize_t(m_used));
   while (--ei >= 0) {
     if (!elms[ei].isTombstone()) {
       return ei;
@@ -185,7 +185,7 @@ HashTable<ArrayType, ElmType>::iter_advance_helper(ssize_t next_pos) const {
       return next_pos;
     }
   }
-  assert(next_pos == m_used);
+  assertx(next_pos == m_used);
   return next_pos;
 }
 
@@ -279,8 +279,8 @@ HashTable<ArrayType, ElmType>::NvGetStr(const ArrayData* ad,
 template<typename ArrayType, typename ElmType>
 Cell HashTable<ArrayType, ElmType>::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asArrayType(ad);
-  assert(pos != a->m_used);
-  assert(!a->data()[pos].isTombstone());
+  assertx(pos != a->m_used);
+  assertx(!a->data()[pos].isTombstone());
   return a->data()[pos].getKey();
 }
 
@@ -370,8 +370,8 @@ typename std::conditional<
     int32_t pos = *ei;
 
     if (validPos(pos)) {
-      assert(0 <= pos);
-      assert(pos < capacity());
+      assertx(0 <= pos);
+      assertx(pos < capacity());
       if (hit(elms[pos])) {
         if (type == FindType::Remove) {
           remove(elms[pos]);
@@ -383,7 +383,7 @@ typename std::conditional<
         );
       }
     } else if (pos & 1) {
-      assert(pos == Empty);
+      assertx(pos == Empty);
       return std::get<static_cast<int>(type)>(
         std::make_tuple(int32_t(pos), false, Inserter(ei),
                         Inserter(ei), int32_t(pos))

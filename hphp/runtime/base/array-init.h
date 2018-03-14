@@ -58,7 +58,7 @@ struct ArrayInitBase {
     , m_expectedCount(n)
 #endif
   {
-    assert(m_arr->hasExactlyOneRef());
+    assertx(m_arr->hasExactlyOneRef());
   }
 
   ArrayInitBase(ArrayInitBase&& other) noexcept
@@ -68,7 +68,7 @@ struct ArrayInitBase {
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
-    assert(!m_arr || m_arr->toDataType() == DT);
+    assertx(!m_arr || m_arr->toDataType() == DT);
     other.m_arr = nullptr;
 #ifdef DEBUG
     other.m_expectedCount = 0;
@@ -80,7 +80,7 @@ struct ArrayInitBase {
 
   ~ArrayInitBase() {
     // In case an exception interrupts the initialization.
-    assert(!m_arr || (m_arr->hasExactlyOneRef() &&
+    assertx(!m_arr || (m_arr->hasExactlyOneRef() &&
                       m_arr->toDataType() == DT));
     if (m_arr) TArray::Release(m_arr);
   }
@@ -93,8 +93,8 @@ struct ArrayInitBase {
    */
 
   Variant toVariant() {
-    assert(m_arr->hasExactlyOneRef());
-    assert(m_arr->toDataType() == DT);
+    assertx(m_arr->hasExactlyOneRef());
+    assertx(m_arr->toDataType() == DT);
     auto const ptr = m_arr;
     m_arr = nullptr;
 #ifdef DEBUG
@@ -104,8 +104,8 @@ struct ArrayInitBase {
   }
 
   Array toArray() {
-    assert(m_arr->hasExactlyOneRef());
-    assert(m_arr->toDataType() == DT);
+    assertx(m_arr->hasExactlyOneRef());
+    assertx(m_arr->toDataType() == DT);
     auto const ptr = m_arr;
     m_arr = nullptr;
 #ifdef DEBUG
@@ -115,8 +115,8 @@ struct ArrayInitBase {
   }
 
   ArrayData* create() {
-    assert(m_arr->hasExactlyOneRef());
-    assert(m_arr->toDataType() == DT);
+    assertx(m_arr->hasExactlyOneRef());
+    assertx(m_arr->toDataType() == DT);
     auto const ptr = m_arr;
     m_arr = nullptr;
 #ifdef DEBUG
@@ -144,9 +144,9 @@ protected:
   ALWAYS_INLINE void performOp(Operation oper) {
     DEBUG_ONLY auto newp = oper();
     // Array escalation must not happen during these reserved initializations.
-    assert(newp == m_arr);
+    assertx(newp == m_arr);
     // You cannot add/set more times than you reserved with ArrayInit.
-    assert(++m_addCount <= m_expectedCount);
+    assertx(++m_addCount <= m_expectedCount);
   }
 
 protected:
@@ -544,7 +544,7 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
   DictInit& setValidKey(TypedValue name, TypedValue v) {
     performOp([&]{
       auto const k = tvToCell(name);
-      assert(isIntType(k.m_type) || isStringType(k.m_type));
+      assertx(isIntType(k.m_type) || isStringType(k.m_type));
 
       return isIntType(k.m_type)
         ? MixedArray::SetIntDict(m_arr, k.m_data.num, tvToInitCell(v), false)
@@ -579,7 +579,7 @@ struct PackedArrayInitBase : ArrayInitBase<TArray, DT> {
       check_non_safepoint_surprise();
     }
     this->m_arr = TArray::MakeReserve(n);
-    assert(this->m_arr->hasExactlyOneRef());
+    assertx(this->m_arr->hasExactlyOneRef());
     check_non_safepoint_surprise();
   }
 };
@@ -768,7 +768,7 @@ struct DArrayInit {
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
-    assert(!m_arr || m_arr->isDictOrDArray());
+    assertx(!m_arr || m_arr->isDictOrDArray());
     other.m_arr = nullptr;
 #ifdef DEBUG
     other.m_expectedCount = 0;
@@ -780,7 +780,7 @@ struct DArrayInit {
 
   ~DArrayInit() {
     // In case an exception interrupts the initialization.
-    assert(!m_arr || (m_arr->hasExactlyOneRef() &&
+    assertx(!m_arr || (m_arr->hasExactlyOneRef() &&
                       m_arr->isDictOrDArray()));
     if (m_arr) m_arr->release();
   }
@@ -1222,7 +1222,7 @@ MixedPHPArrayInitBase<TArray>::MixedPHPArrayInitBase(size_t n,
     check_non_safepoint_surprise();
   }
   this->m_arr = TArray::MakeReserve(n);
-  assert(this->m_arr->hasExactlyOneRef());
+  assertx(this->m_arr->hasExactlyOneRef());
   check_non_safepoint_surprise();
 }
 

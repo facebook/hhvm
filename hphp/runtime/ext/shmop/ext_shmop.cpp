@@ -186,7 +186,7 @@ struct ShmopRequestLocal final : RequestEventHandler {
     // still valid when we use it but this way it's unique per process (although
     // it may get reused).
     int64_t shmid = reinterpret_cast<ssize_t>(p.get());
-    assert(LIKELY(m_records.find(shmid) == m_records.end()));
+    assertx(LIKELY(m_records.find(shmid) == m_records.end()));
     m_records.emplace(shmid, std::move(p));
     return shmid;
   }

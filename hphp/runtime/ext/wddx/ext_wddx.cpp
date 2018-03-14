@@ -91,7 +91,7 @@ bool WddxPacket::recursiveAddVarImpl(const String& varName,
       varAsArray = varAsObject.toArray();
       ptr = varAsObject.get();
     }
-    assert(!ptr.isNull());
+    assertx(!ptr.isNull());
     if (!seen.emplace(ptr).second) {
       raise_warning("recursion detected");
       return false;

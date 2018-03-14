@@ -141,7 +141,7 @@ std::pair<int, double> getObjSize(
 );
 
 String pathString(ObjprofStack* stack, const char* sep) {
-  assert(stack->size() < 100000000);
+  assertx(stack->size() < 100000000);
   StringBuffer sb;
   for (size_t i = 0; i < stack->size(); ++i) {
     if (i != 0) sb.append(sep);
@@ -399,7 +399,7 @@ void stringsOfArray(
           // a gcc-4.9 bug (t16350411); even after t16350411 is fixed, we
           // can't always_assert(false) here until we stop supporting gcc-4.9
           // for open source users, since they may be using an older version
-          assert(false);
+          assertx(false);
       }
 
       tvGetStrings(v, metrics, path, pointers, val_stack);
@@ -1120,7 +1120,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
        objsizePair.first,
        objsizePair.second
       );
-      assert(stack.size() == 0);
+      assertx(stack.size() == 0);
   });
 
   NamedEntity::foreach_class([&](Class* cls) {
@@ -1180,7 +1180,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
           aggReferral.sources.insert(cls);
         }
       }
-      assert(stack.size() == 0);
+      assertx(stack.size() == 0);
     }
   });
 

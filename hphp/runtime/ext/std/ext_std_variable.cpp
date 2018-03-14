@@ -297,7 +297,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
     case KindOfPersistentVec:
     case KindOfVec: {
       ArrayData* arr = value.getArrayData();
-      assert(arr->isVecArray());
+      assertx(arr->isVecArray());
       if (arr->empty()) return s_EmptyVecArray;
       break;
     }
@@ -305,7 +305,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
     case KindOfPersistentDict:
     case KindOfDict: {
       ArrayData* arr = value.getArrayData();
-      assert(arr->isDict());
+      assertx(arr->isDict());
       if (arr->empty()) return s_EmptyDictArray;
       break;
     }
@@ -313,7 +313,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
       ArrayData* arr = value.getArrayData();
-      assert(arr->isKeyset());
+      assertx(arr->isKeyset());
       if (arr->empty()) return s_EmptyKeysetArray;
       break;
     }
@@ -321,8 +321,8 @@ ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
     case KindOfPersistentArray:
     case KindOfArray: {
       ArrayData *arr = value.getArrayData();
-      assert(arr->isPHPArray());
-      assert(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
+      assertx(arr->isPHPArray());
+      assertx(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
       if (arr->empty()) {
         if (keepDVArrays) {
           if (arr->isVArray()) return s_EmptyVArray;

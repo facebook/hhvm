@@ -59,7 +59,7 @@ bool IpBlockMap::BinaryPrefixTrie::isAllowedImpl(
     return m_allow;
   }
 
-  assert(bit_offset < num_bits);
+  assertx(bit_offset < num_bits);
 
   child = m_children[(*search_bytes >> (7 - bit_offset)) & 1];
   if (child) {
@@ -213,7 +213,7 @@ bool IpBlockMap::isBlocking(const std::string &command,
 
       if (!translated) {
         ReadIPv6Address(ip.c_str(), &address, bits);
-        assert(bits == 128);
+        assertx(bits == 128);
         translated = true;
       }
 

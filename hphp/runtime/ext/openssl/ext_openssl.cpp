@@ -93,7 +93,7 @@ static OpenSSLInitializer s_openssl_initializer;
 
 struct Key : SweepableResourceData {
   EVP_PKEY *m_key;
-  explicit Key(EVP_PKEY *key) : m_key(key) { assert(m_key);}
+  explicit Key(EVP_PKEY *key) : m_key(key) { assertx(m_key);}
   ~Key() {
     if (m_key) EVP_PKEY_free(m_key);
   }
@@ -105,14 +105,14 @@ struct Key : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(Key)
 
   bool isPrivate() {
-    assert(m_key);
+    assertx(m_key);
     switch (EVP_PKEY_id(m_key)) {
 #ifndef NO_RSA
     case EVP_PKEY_RSA:
     case EVP_PKEY_RSA2:
       {
         const auto rsa = EVP_PKEY_get0_RSA(m_key);
-        assert(rsa);
+        assertx(rsa);
         const BIGNUM *p, *q;
         RSA_get0_factors(rsa, &p, &q);
         if (!p || !q) {
@@ -129,7 +129,7 @@ struct Key : SweepableResourceData {
     case EVP_PKEY_DSA4:
       {
         const auto dsa = EVP_PKEY_get0_DSA(m_key);
-        assert(dsa);
+        assertx(dsa);
         const BIGNUM *p, *q, *g, *pub_key, *priv_key;
         DSA_get0_pqg(dsa, &p, &q, &g);
         if (!p || !q || !g) {
@@ -146,7 +146,7 @@ struct Key : SweepableResourceData {
     case EVP_PKEY_DH:
       {
         const auto dh = EVP_PKEY_get0_DH(m_key);
-        assert(dh);
+        assertx(dh);
         const BIGNUM *p, *q, *g, *pub_key, *priv_key;
         DH_get0_pqg(dh, &p, &q, &g);
         if (!p) {
@@ -163,7 +163,7 @@ struct Key : SweepableResourceData {
     case EVP_PKEY_EC:
       {
         const auto ec_key = EVP_PKEY_get0_EC_KEY(m_key);
-        assert(ec_key);
+        assertx(ec_key);
         if (EC_KEY_get0_private_key(ec_key) == nullptr) {
           return false;
         }
@@ -278,7 +278,7 @@ private:
 
 public:
   explicit CSRequest(X509_REQ *csr) : m_csr(csr) {
-    assert(m_csr);
+    assertx(m_csr);
   }
 
   X509_REQ *csr() { return m_csr; }
@@ -393,7 +393,7 @@ struct php_x509_request {
   }
 
   bool generatePrivateKey() {
-    assert(priv_key == nullptr);
+    assertx(priv_key == nullptr);
 
     if (priv_key_bits < MIN_KEY_LENGTH) {
       raise_warning("private key length is too short; it needs to be "
@@ -1327,7 +1327,7 @@ openssl_pkcs12_export_impl(const Variant& x509, BIO *bio_out,
      (char*)(friendly_name.empty() ? nullptr : friendly_name.data()),
      key, cert, ca, 0, 0, 0, 0, 0);
 
-  assert(bio_out);
+  assertx(bio_out);
   bool ret = i2d_PKCS12_bio(bio_out, p12);
   PKCS12_free(p12);
   sk_X509_free(ca);
@@ -1475,8 +1475,8 @@ bool HHVM_FUNCTION(openssl_pkcs7_decrypt, const String& infilename,
   if (p7 == nullptr) {
     goto clean_exit;
   }
-  assert(okey->m_key);
-  assert(ocert->m_cert);
+  assertx(okey->m_key);
+  assertx(ocert->m_cert);
   if (PKCS7_decrypt(p7, okey->m_key, ocert->m_cert, out, PKCS7_DETACHED)) {
     ret = true;
   }
@@ -1693,9 +1693,9 @@ Variant openssl_pkcs7_verify_core(
 #if (OPENSSL_VERSION_NUMBER >= 0x10000000)
     // make sure no other callback is specified
   #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-    assert(!X509_STORE_get_verify_cb(store));
+    assertx(!X509_STORE_get_verify_cb(store));
   #else
-    assert(!store->verify_cb);
+    assertx(!store->verify_cb);
   #endif
     // ignore expired certs
     X509_STORE_set_verify_cb(store, pkcs7_ignore_expiration);
@@ -1787,7 +1787,7 @@ openssl_pkey_export_impl(const Variant& key, BIO *bio_out,
     } else {
       cipher = nullptr;
     }
-    assert(bio_out);
+    assertx(bio_out);
 
     switch (EVP_PKEY_id(pkey)) {
 #ifdef HAVE_EVP_PKEY_EC
@@ -1905,7 +1905,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
     {
       ktype = OPENSSL_KEYTYPE_RSA;
       RSA *rsa = EVP_PKEY_get0_RSA(pkey);
-      assert(rsa);
+      assertx(rsa);
       const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
       RSA_get0_key(rsa, &n, &e, &d);
       RSA_get0_factors(rsa, &p, &q);
@@ -1928,7 +1928,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
     {
       ktype = OPENSSL_KEYTYPE_DSA;
       DSA *dsa = EVP_PKEY_get0_DSA(pkey);
-      assert(dsa);
+      assertx(dsa);
       const BIGNUM *p, *q, *g, *pub_key, *priv_key;
       DSA_get0_pqg(dsa, &p, &q, &g);
       DSA_get0_key(dsa, &pub_key, &priv_key);
@@ -1944,7 +1944,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
     {
       ktype = OPENSSL_KEYTYPE_DH;
       DH *dh = EVP_PKEY_get0_DH(pkey);
-      assert(dh);
+      assertx(dh);
       const BIGNUM *p, *q, *g, *pub_key, *priv_key;
       DH_get0_pqg(dh, &p, &q, &g);
       DH_get0_key(dh, &pub_key, &priv_key);
@@ -1960,7 +1960,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
     {
       ktype = OPENSSL_KEYTYPE_EC;
       auto const ec = EVP_PKEY_get0_EC_KEY(pkey);
-      assert(ec);
+      assertx(ec);
 
       auto const ec_group = EC_KEY_get0_group(ec);
       auto const nid = EC_GROUP_get_curve_name(ec_group);
@@ -2470,7 +2470,7 @@ Variant HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
   }
   X509 *cert;
   cert = ocert->m_cert;
-  assert(cert);
+  assertx(cert);
 
   ret = check_cert(pcainfo, cert, untrustedchain, purpose);
 
@@ -2492,9 +2492,9 @@ static bool openssl_x509_export_impl(const Variant& x509, BIO *bio_out,
     return false;
   }
   X509 *cert = ocert->m_cert;
-  assert(cert);
+  assertx(cert);
 
-  assert(bio_out);
+  assertx(bio_out);
   if (!notext) {
     X509_print(bio_out, cert);
   }
@@ -2673,7 +2673,7 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
     return false;
   }
   X509 *cert = ocert->m_cert;
-  assert(cert);
+  assertx(cert);
 
   Array ret;
   const auto sn = X509_get_subject_name(cert);

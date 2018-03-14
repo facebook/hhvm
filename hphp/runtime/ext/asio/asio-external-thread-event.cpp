@@ -31,8 +31,8 @@ AsioExternalThreadEvent::AsioExternalThreadEvent(ObjectData* priv_data)
 }
 
 void AsioExternalThreadEvent::abandon() {
-  assert(m_state.load() == Waiting);
-  assert(m_waitHandle->hasExactlyOneRef());
+  assertx(m_state.load() == Waiting);
+  assertx(m_waitHandle->hasExactlyOneRef());
   m_state.store(Abandoned);
   m_waitHandle->abandon(false);
 }
@@ -43,7 +43,7 @@ bool AsioExternalThreadEvent::cancel() {
     return true;
   }
 
-  assert(expected == Finished);
+  assertx(expected == Finished);
   return false;
 }
 
@@ -55,7 +55,7 @@ void AsioExternalThreadEvent::markAsFinished() {
     m_queue->send(m_waitHandle);
   } else {
     // web request died, destroy object
-    assert(expected == Canceled);
+    assertx(expected == Canceled);
     release();
   }
 }

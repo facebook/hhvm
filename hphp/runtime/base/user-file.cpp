@@ -276,7 +276,7 @@ int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
-  assert(seekable());
+  assertx(seekable());
 
   // Seek within m_buffer if we can, otherwise kill it and call user stream_seek / stream_tell
   if (whence == SEEK_CUR &&

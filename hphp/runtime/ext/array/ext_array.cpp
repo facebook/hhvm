@@ -242,7 +242,7 @@ TypedValue HHVM_FUNCTION(array_fill_keys,
                   "an array or collection");
     return make_tv<KindOfNull>();
   }
-  assert(ai.hasValue());
+  assertx(ai.hasValue());
   return tvReturn(ai->toVariant());
 }
 
@@ -577,13 +577,13 @@ TypedValue HHVM_FUNCTION(array_merge_recursive,
   Array ret = Array::Create();
   PointerSet seen;
   php_array_merge_recursive(seen, false, ret, arr_array1);
-  assert(seen.empty());
+  assertx(seen.empty());
 
   if (UNLIKELY(numArgs < 2)) return tvReturn(std::move(ret));
 
   getCheckedArray(array2);
   php_array_merge_recursive(seen, false, ret, arr_array2);
-  assert(seen.empty());
+  assertx(seen.empty());
 
   for (ArrayIter iter(args); iter; ++iter) {
     Variant v = iter.second();
@@ -593,7 +593,7 @@ TypedValue HHVM_FUNCTION(array_merge_recursive,
     }
     const Array& arr_v = v.asCArrRef();
     php_array_merge_recursive(seen, false, ret, arr_v);
-    assert(seen.empty());
+    assertx(seen.empty());
   }
   return tvReturn(std::move(ret));
 }
@@ -679,7 +679,7 @@ TypedValue HHVM_FUNCTION(array_replace_recursive,
   Array ret = Array::Create();
   PointerSet seen;
   php_array_replace_recursive(seen, false, ret, arr_array1);
-  assert(seen.empty());
+  assertx(seen.empty());
 
   if (UNLIKELY(array2.isNull() && args.empty())) {
     return tvReturn(std::move(ret));
@@ -687,13 +687,13 @@ TypedValue HHVM_FUNCTION(array_replace_recursive,
 
   getCheckedArray(array2);
   php_array_replace_recursive(seen, false, ret, arr_array2);
-  assert(seen.empty());
+  assertx(seen.empty());
 
   for (ArrayIter iter(args); iter; ++iter) {
     auto const v = VarNR(iter.secondVal());
     getCheckedArray(v);
     php_array_replace_recursive(seen, false, ret, arr_v);
-    assert(seen.empty());
+    assertx(seen.empty());
   }
   return tvReturn(std::move(ret));
 }
@@ -734,7 +734,7 @@ TypedValue HHVM_FUNCTION(array_pop,
     }
     return make_tv<KindOfNull>();
   }
-  assert(container->m_type == KindOfObject);
+  assertx(container->m_type == KindOfObject);
   return tvReturn(collections::pop(container->m_data.pobj));
 }
 
@@ -1151,9 +1151,9 @@ TypedValue HHVM_FUNCTION(array_unshift,
     return make_tv<KindOfInt64>(ref_array->asArrRef().size());
   }
   // Handle collections
-  assert(cell_array->m_type == KindOfObject);
+  assertx(cell_array->m_type == KindOfObject);
   auto* obj = cell_array->m_data.pobj;
-  assert(obj->isCollection());
+  assertx(obj->isCollection());
   switch (obj->collectionType()) {
     case CollectionType::Vector: {
       auto* vec = static_cast<c_Vector*>(obj);
@@ -1227,7 +1227,7 @@ Variant array_values(const Variant& input) {
     return init_null();
   }
 
-  assert(ai.hasValue());
+  assertx(ai.hasValue());
   return ai->toVariant();
 }
 
@@ -1864,7 +1864,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
       if (c.m_type == KindOfInt64) {
         if (ad2->exists(c.m_data.num)) continue;
       } else {
-        assert(isStringType(c.m_type));
+        assertx(isStringType(c.m_type));
         if (ad2->exists(c.m_data.pstr)) continue;
       }
       ret.setWithRef(key, iter.secondValPlus(), true);
@@ -1992,9 +1992,9 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
                                                   const Array& argv,
                                                   int count,
                                                   int smallestPos) {
-  assert(count == argv.size() + 1);
-  assert(0 <= smallestPos);
-  assert(smallestPos < count);
+  assertx(count == argv.size() + 1);
+  assertx(0 <= smallestPos);
+  assertx(smallestPos < count);
   // Allocate a TypedValue array and copy 'a' and the contents of 'argv'
   TypedValue* containers = req::make_raw_array<TypedValue>(count);
   tvCopy(*a.asCell(), containers[0]);
@@ -2048,7 +2048,7 @@ static inline void updateIntersectMapHelper(const req::ptr<c_Map>& mp,
   if (c.m_type == KindOfInt64) {
     auto val = mp->get(c.m_data.num);
     if (val && val->m_data.num == pos) {
-      assert(val->m_type == KindOfInt64);
+      assertx(val->m_type == KindOfInt64);
       ++val->m_data.num;
     }
   } else {
@@ -2065,13 +2065,13 @@ static inline void updateIntersectMapHelper(const req::ptr<c_Map>& mp,
       if (checkHACIntishCast()) raise_intish_index_cast();
       auto val = mp->get(n);
       if (val && val->m_data.num == pos) {
-        assert(val->m_type == KindOfInt64);
+        assertx(val->m_type == KindOfInt64);
         ++val->m_data.num;
       }
     } else {
       auto val = mp->get(s);
       if (val && val->m_data.num == pos) {
-        assert(val->m_type == KindOfInt64);
+        assertx(val->m_type == KindOfInt64);
         ++val->m_data.num;
       }
     }
@@ -2081,7 +2081,7 @@ static inline void updateIntersectMapHelper(const req::ptr<c_Map>& mp,
 static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
                                            TypedValue* containers,
                                            int count) {
-  assert(count >= 2);
+  assertx(count >= 2);
   auto mp = req::make<c_Map>();
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
@@ -2110,7 +2110,7 @@ static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
     // corresponding value is equal to pos exactly (which means it
     // was present in all of the containers).
     auto const rval = iter.secondRvalPlus().unboxed();
-    assert(rval.type() == KindOfInt64);
+    assertx(rval.type() == KindOfInt64);
     if (rval.val().num == count) {
       st->add(*iter.first().asCell());
     }
@@ -2120,7 +2120,7 @@ static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
 static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
                                          TypedValue* containers,
                                          int count) {
-  assert(count >= 2);
+  assertx(count >= 2);
   auto mp = req::make<c_Map>();
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
@@ -2148,7 +2148,7 @@ static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
     // corresponding value is equal to pos exactly (which means it
     // was present in all of the containers).
     auto const rval = iter.secondRvalPlus().unboxed();
-    assert(rval.type() == KindOfInt64);
+    assertx(rval.type() == KindOfInt64);
     if (rval.val().num == count) {
       st->add(*iter.first().asCell());
     }
@@ -2250,7 +2250,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
       if (c.m_type == KindOfInt64) {
         if (!ad2->exists(c.m_data.num)) continue;
       } else {
-        assert(isStringType(c.m_type));
+        assertx(isStringType(c.m_type));
         if (!ad2->exists(c.m_data.pstr)) continue;
       }
       ret.setWithRef(key, iter.secondValPlus(), true);
@@ -2459,7 +2459,7 @@ struct Collator final : RequestEventHandler {
     if (U_FAILURE(error)) {
       m_errcode.setError(error);
     }
-    assert(m_ucoll);
+    assertx(m_ucoll);
   }
 
   void requestShutdown() override {
@@ -2482,7 +2482,7 @@ namespace {
 struct ArraySortTmp {
   explicit ArraySortTmp(TypedValue* arr, SortFunction sf) : m_arr(arr) {
     m_ad = arr->m_data.parr->escalateForSort(sf);
-    assert(m_ad == arr->m_data.parr || m_ad->hasExactlyOneRef());
+    assertx(m_ad == arr->m_data.parr || m_ad->hasExactlyOneRef());
   }
   ~ArraySortTmp() {
     if (m_ad != m_arr->m_data.parr) {

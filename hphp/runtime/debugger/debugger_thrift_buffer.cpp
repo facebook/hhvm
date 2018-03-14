@@ -24,7 +24,7 @@ TRACE_SET_MOD(debugger);
 
 String DebuggerThriftBuffer::readImpl() {
   TRACE(7, "DebuggerThriftBuffer::readImpl\n");
-  assert(m_size <= BUFFER_SIZE);
+  assertx(m_size <= BUFFER_SIZE);
   int nread = getSocket()->readImpl(m_buffer, m_size);
   m_buffer[nread] = '\0';
   return String(m_buffer, nread, CopyString);
@@ -82,7 +82,7 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
   } catch (const Object& o) {
     // Get the message property from the Exception if we can. Otherwise, use
     // the class name.
-    assert(o->instanceof(SystemLib::s_ExceptionClass));
+    assertx(o->instanceof(SystemLib::s_ExceptionClass));
 
     auto const info = o->getProp(SystemLib::s_ExceptionClass, s_message.get());
     if (info) {

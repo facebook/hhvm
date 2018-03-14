@@ -125,7 +125,7 @@ void CmdList::getListLocation(DebuggerClient &client, int &lineFocus0,
 // or give an error message if the debugger is not currently performing
 // an eval command.
 void CmdList::listEvalCode(DebuggerClient &client) {
-  assert(m_file.empty());
+  assertx(m_file.empty());
 
   std::string evalCode = client.getCode();
   if (evalCode.empty()) {
@@ -176,7 +176,7 @@ const StaticString
 // Returns false if the server was unable to return the information
 // needed for this command.
 bool CmdList::listFunctionOrClass(DebuggerClient &client) {
-  assert(client.argCount() == 1);
+  assertx(client.argCount() == 1);
   auto cmdInfo = std::make_shared<CmdInfo>();
   std::string subsymbol;
   cmdInfo->parseOneArg(client, subsymbol);

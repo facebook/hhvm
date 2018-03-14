@@ -85,8 +85,8 @@ struct TypeAlias {
 
     TypedValue tv;
     sd(tv);
-    assert(tvIsPlausible(tv));
-    assert(
+    assertx(tvIsPlausible(tv));
+    assertx(
       RuntimeOption::EvalHackArrDVArrs
         ? isDictType(tv.m_type)
         : isArrayType(tv.m_type)

@@ -212,7 +212,7 @@ Variant HHVM_FUNCTION(gzencode, const String& data, int level,
  */
 static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
                                        int &status) {
-  assert(maxlen >= 0);
+  assertx(maxlen >= 0);
   size_t retsize = (maxlen && maxlen < Z->avail_in) ? maxlen : Z->avail_in;
   String ret;
   size_t retused = 0;
@@ -222,7 +222,7 @@ static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
     if (UNLIKELY(retsize >= kMaxSmallSize) &&
         UNLIKELY(tl_heap->preAllocOOM(retsize + 1))) {
       VMRegAnchor _;
-      assert(checkSurpriseFlags());
+      assertx(checkSurpriseFlags());
       handle_request_surprise();
     }
 
@@ -504,7 +504,7 @@ struct ChunkedInflator {
 
 bool HHVM_METHOD(ChunkedInflator, eof) {
   FETCH_CHUNKED_INFLATOR(data, this_);
-  assert(data);
+  assertx(data);
   return data->eof();
 }
 
@@ -512,7 +512,7 @@ String HHVM_METHOD(ChunkedInflator,
                    inflateChunk,
                    const String& chunk) {
   FETCH_CHUNKED_INFLATOR(data, this_);
-  assert(data);
+  assertx(data);
   return data->inflateChunk(chunk);
 }
 

@@ -53,17 +53,17 @@ GlobalsArray::GlobalsArray(NameValueTable* tab)
 #undef X
 
   g_variables.set(this);
-  assert(hasExactlyOneRef());
+  assertx(hasExactlyOneRef());
 }
 
 inline GlobalsArray* GlobalsArray::asGlobals(ArrayData* ad) {
-  assert(ad->kind() == kGlobalsKind);
+  assertx(ad->kind() == kGlobalsKind);
   return static_cast<GlobalsArray*>(ad);
 }
 
 inline const GlobalsArray*
 GlobalsArray::asGlobals(const ArrayData* ad) {
-  assert(ad->kind() == kGlobalsKind);
+  assertx(ad->kind() == kGlobalsKind);
   return static_cast<const GlobalsArray*>(ad);
 }
 
@@ -254,7 +254,7 @@ ssize_t GlobalsArray::IterRewind(const ArrayData* ad, ssize_t prev) {
 bool
 GlobalsArray::ValidMArrayIter(const ArrayData* ad,
                                        const MArrayIter & fp) {
-  assert(fp.getContainer() == ad);
+  assertx(fp.getContainer() == ad);
   auto a = asGlobals(ad);
   if (fp.getResetFlag()) return false;
   if (fp.m_pos == IterEnd(a)) return false;

@@ -133,13 +133,13 @@ const Func* get_method_func(const Class* cls, const String& meth_name) {
       }
     }
   }
-  assert(func == nullptr || func->isMethod());
+  assertx(func == nullptr || func->isMethod());
   return func;
 }
 
 Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
                                   const Func* func, unsigned argIdx) {
-  assert(fpi.hasDefaultValue());
+  assertx(fpi.hasDefaultValue());
   if (fpi.hasScalarDefaultValue()) {
     // Most of the time the default value is scalar, so we can
     // avoid evaling in the common case
@@ -226,7 +226,7 @@ static void set_attrs(Array& ret, int modifiers) {
     ret.set(s_access, VarNR(s_private).tv());
     ret.set(s_accessible, false_varNR.tv());
   } else {
-    assert(false);
+    assertx(false);
   }
   ret.set(s_modifiers, make_tv<KindOfInt64>(modifiers));
   if (modifiers & 0x1) {
@@ -1034,7 +1034,7 @@ static bool HHVM_METHOD(ReflectionMethod, __init,
     // caller raises exception
     return false;
   }
-  assert(func->isMethod());
+  assertx(func->isMethod());
   ReflectionFuncHandle::Get(this_)->setFunc(func);
   return true;
 }
@@ -1121,15 +1121,15 @@ static bool HHVM_METHOD(ReflectionFunction, __initName, const String& name) {
 static bool HHVM_METHOD(ReflectionFunction, __initClosure,
                         const Object& closure) {
   auto const cls = get_cls(closure);
-  assert(cls);
+  assertx(cls);
   if (!cls) { return false; }
   const Func* func = cls->lookupMethod(s___invoke.get());
   if (!func) {
     // caller raises exception
     return false;
   }
-  assert(func->isClosureBody());
-  assert(func->implCls()->isScopedClosure());
+  assertx(func->isClosureBody());
+  assertx(func->implCls()->isScopedClosure());
   ReflectionFuncHandle::Get(this_)->setFunc(func);
   return true;
 }
@@ -1172,7 +1172,7 @@ static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
     // with a mangled name.
     if (prop.name->data()[0] == '8') {
       static const char prefix[] = "86static_";
-      assert(0 == strncmp(prop.name->data(), prefix, sizeof prefix - 1));
+      assertx(0 == strncmp(prop.name->data(), prefix, sizeof prefix - 1));
       String strippedName(prop.name->data() + sizeof prefix - 1,
                           prop.name->size() - sizeof prefix + 1,
                           CopyString);
@@ -1494,7 +1494,7 @@ static
 void addClassConstantNames(const Class* cls,
                            const req::ptr<c_Set>& st,
                            size_t limit) {
-  assert(cls && st && (st->size() < limit));
+  assertx(cls && st && (st->size() < limit));
 
   auto numConsts = cls->numConstants();
 
@@ -1529,13 +1529,13 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
   st->reserve(numConsts);
 
   addClassConstantNames(cls, st, numConsts);
-  assert(st->size() <= numConsts);
+  assertx(st->size() <= numConsts);
 
   ArrayInit ai(numConsts, ArrayInit::Mixed{});
   for (ArrayIter iter(st.get()); iter; ++iter) {
     auto constName = iter.first().getStringData();
     Cell value = cls->clsCnsGet(constName);
-    assert(value.m_type != KindOfUninit);
+    assertx(value.m_type != KindOfUninit);
     ai.add(constName, cellAsCVarRef(value));
   }
   return ai.toArray();
@@ -1560,7 +1560,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
     }
   }
 
-  assert(st->size() <= numConsts);
+  assertx(st->size() <= numConsts);
   return st->toArray();
 }
 
@@ -1585,7 +1585,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedTypeConstants) {
     }
   }
 
-  assert(st->size() <= numConsts);
+  assertx(st->size() <= numConsts);
   return st->toArray();
 }
 
@@ -1692,7 +1692,7 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
                          const Object& obj) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   auto obj_data = obj.get();
-  assert(obj_data->getVMClass() == cls);
+  assertx(obj_data->getVMClass() == cls);
   if (!obj_data->hasDynProps()) {
     return empty_array();
   }
@@ -1813,9 +1813,9 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
     // the original assigned type text
     auto const preCls = cls->preClass();
     auto typeCns = preCls->lookupConstant(cns->name);
-    assert(typeCns->isType());
-    assert(!typeCns->isAbstract());
-    assert(isArrayLikeType(typeCns->val().m_type));
+    assertx(typeCns->isType());
+    assertx(!typeCns->isAbstract());
+    assertx(isArrayLikeType(typeCns->val().m_type));
     return TypeStructure::toString(Array::attach(typeCns->val().m_data.parr));
   }
 
@@ -1889,7 +1889,7 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
   // is there a dynamic property?
   if (cls_or_obj.is(KindOfObject)) {
     auto obj = cls_or_obj.toCObjRef().get();
-    assert(cls == obj->getVMClass());
+    assertx(cls == obj->getVMClass());
     if (obj->hasDynProps() && obj->dynPropArray().exists(prop_name)) {
       data->setDynamicProp();
       this_->setProp(nullptr, s_class.get(),
@@ -2053,7 +2053,7 @@ static TypedValue HHVM_METHOD(ReflectionProperty, getDefaultValue) {
       // look it up by name.
       auto lookup = prop->cls->getDeclPropIndex(prop->cls, prop->name);
       auto propIdx = lookup.prop;
-      assert(propIdx != kInvalidSlot);
+      assertx(propIdx != kInvalidSlot);
       prop->cls->initialize();
       auto const& propInitVec = prop->cls->getPropData()
         ? *prop->cls->getPropData()
@@ -2092,7 +2092,7 @@ static String HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
 
 static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
-  assert(req);
+  assertx(req);
   auto const typeStructure = req->typeStructure;
   assertx(!typeStructure.empty());
   assertx(typeStructure.isDictOrDArray());
@@ -2101,7 +2101,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
 
 static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
-  assert(req);
+  assertx(req);
   auto const typeStructure = req->typeStructure;
   assertx(!typeStructure.empty());
   assertx(typeStructure.isDictOrDArray());
@@ -2110,7 +2110,7 @@ static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
 
 static Array HHVM_METHOD(ReflectionTypeAlias, getAttributes) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
-  assert(req);
+  assertx(req);
   auto const userAttrs = req->userAttrs;
 
   ArrayInit ai(userAttrs.size(), ArrayInit::Mixed{});
@@ -2122,7 +2122,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getAttributes) {
 
 static String HHVM_METHOD(ReflectionTypeAlias, getFileName) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
-  assert(req);
+  assertx(req);
   auto file = req->unit->filepath()->data();
   if (!file) { file = ""; }
   if (file[0] != '/') {
@@ -2549,7 +2549,7 @@ Array get_class_info(const String& name) {
       // get_class_constants(), so mimic that behavior
       if (consts[i].cls == cls) {
         Cell value = cls->clsCnsGet(consts[i].name);
-        assert(value.m_type != KindOfUninit);
+        assertx(value.m_type != KindOfUninit);
         arr.set(StrNR(consts[i].name), cellAsCVarRef(value));
       }
     }

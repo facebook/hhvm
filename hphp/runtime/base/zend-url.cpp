@@ -353,7 +353,7 @@ String url_decode(const char *s, size_t len) {
 }
 
 size_t url_decode_ex(char *value, size_t len) {
-  assert(value && *value); // check before calling this function
+  assertx(value && *value); // check before calling this function
   if (len == 0) return 0;
 
   size_t i = 0, o = 0;

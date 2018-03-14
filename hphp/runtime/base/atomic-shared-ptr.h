@@ -127,7 +127,7 @@ struct AtomicSharedPtrImpl {
 
 protected:
   void overwrite_unsafe(T* ptr) {
-    assert(!m_px);
+    assertx(!m_px);
     m_px = ptr;
   }
 

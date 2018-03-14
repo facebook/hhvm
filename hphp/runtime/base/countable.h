@@ -166,32 +166,32 @@ ALWAYS_INLINE bool Countable::isRefCounted() const {
 }
 
 ALWAYS_INLINE bool MaybeCountable::hasMultipleRefs() const {
-  assert(checkCount());
+  assertx(checkCount());
   if (one_bit_refcount) return m_count != OneReference;
 
   return uint32_t(m_count) > 1; // treat Static/Uncounted as large counts
 }
 
 ALWAYS_INLINE bool Countable::hasMultipleRefs() const {
-  assert(checkCount());
+  assertx(checkCount());
   if (one_bit_refcount) return m_count != OneReference;
 
   return m_count > 1;
 }
 
 ALWAYS_INLINE bool MaybeCountable::hasExactlyOneRef() const {
-  assert(checkCount());
+  assertx(checkCount());
   return m_count == OneReference;
 }
 
 ALWAYS_INLINE bool Countable::hasExactlyOneRef() const {
-  assert(checkCount());
+  assertx(checkCount());
   return m_count == OneReference;
 }
 
 ALWAYS_INLINE void MaybeCountable::incRefCount() const {
-  assert(!tl_sweeping);
-  assert(checkCount() || m_count == 0 /* due to static init order */);
+  assertx(!tl_sweeping);
+  assertx(checkCount() || m_count == 0 /* due to static init order */);
   if (one_bit_refcount) {
     if (m_count == OneReference) m_count = MultiReference;
     return;
@@ -201,8 +201,8 @@ ALWAYS_INLINE void MaybeCountable::incRefCount() const {
 }
 
 ALWAYS_INLINE void Countable::incRefCount() const {
-  assert(!tl_sweeping);
-  assert(checkCount() || m_count == 0 /* due to static init order */);
+  assertx(!tl_sweeping);
+  assertx(checkCount() || m_count == 0 /* due to static init order */);
   if (one_bit_refcount) {
     if (unconditional_one_bit_incref || m_count == OneReference) {
       m_count = MultiReference;
@@ -214,8 +214,8 @@ ALWAYS_INLINE void Countable::incRefCount() const {
 }
 
 ALWAYS_INLINE void MaybeCountable::rawIncRefCount() const {
-  assert(!tl_sweeping);
-  assert(isRefCounted());
+  assertx(!tl_sweeping);
+  assertx(isRefCounted());
   if (one_bit_refcount) {
     if (unconditional_one_bit_incref || m_count == OneReference) {
       m_count = MultiReference;
@@ -227,8 +227,8 @@ ALWAYS_INLINE void MaybeCountable::rawIncRefCount() const {
 }
 
 ALWAYS_INLINE void Countable::rawIncRefCount() const {
-  assert(!tl_sweeping);
-  assert(isRefCounted());
+  assertx(!tl_sweeping);
+  assertx(isRefCounted());
   if (one_bit_refcount) {
     if (unconditional_one_bit_incref || m_count == OneReference) {
       m_count = MultiReference;
@@ -240,16 +240,16 @@ ALWAYS_INLINE void Countable::rawIncRefCount() const {
 }
 
 ALWAYS_INLINE void MaybeCountable::decRefCount() const {
-  assert(!tl_sweeping);
-  assert(checkCount());
+  assertx(!tl_sweeping);
+  assertx(checkCount());
   if (one_bit_refcount) return;
 
   if (isRefCounted()) --m_count;
 }
 
 ALWAYS_INLINE void Countable::decRefCount() const {
-  assert(!tl_sweeping);
-  assert(checkCount());
+  assertx(!tl_sweeping);
+  assertx(checkCount());
   if (one_bit_refcount) return;
 
   --m_count;
@@ -264,8 +264,8 @@ ALWAYS_INLINE bool Countable::decWillRelease() const {
 }
 
 ALWAYS_INLINE bool MaybeCountable::decReleaseCheck() {
-  assert(!tl_sweeping);
-  assert(checkCount());
+  assertx(!tl_sweeping);
+  assertx(checkCount());
   if (noop_decref) return false;
   if (one_bit_refcount) return m_count == OneReference;
 
@@ -275,8 +275,8 @@ ALWAYS_INLINE bool MaybeCountable::decReleaseCheck() {
 }
 
 ALWAYS_INLINE bool Countable::decReleaseCheck() {
-  assert(!tl_sweeping);
-  assert(checkCount());
+  assertx(!tl_sweeping);
+  assertx(checkCount());
   if (noop_decref) return false;
   if (one_bit_refcount) return m_count == OneReference;
 
@@ -286,23 +286,23 @@ ALWAYS_INLINE bool Countable::decReleaseCheck() {
 }
 
 ALWAYS_INLINE bool MaybeCountable::isStatic() const {
-  assert(checkCount());
+  assertx(checkCount());
   return m_count == StaticValue;
 }
 
 ALWAYS_INLINE bool Countable::isStatic() const {
-  assert(checkCount());
+  assertx(checkCount());
   return false;
 }
 
 ALWAYS_INLINE bool MaybeCountable::isUncounted() const {
-  assert(checkCount());
+  assertx(checkCount());
   return one_bit_refcount ?
     m_count < 0 && m_count != StaticValue : m_count <= UncountedValue;
 }
 
 ALWAYS_INLINE bool Countable::isUncounted() const {
-  assert(checkCount());
+  assertx(checkCount());
   return false;
 }
 

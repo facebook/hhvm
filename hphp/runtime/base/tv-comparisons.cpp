@@ -66,7 +66,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, bool val) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -125,7 +125,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -254,9 +254,9 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
 
-  assert(ad->isPHPArray());
+  assertx(ad->isPHPArray());
 
   auto const nonArr = [&]{
     if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -331,7 +331,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -393,7 +393,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -452,8 +452,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceHdr* r) {
 
 template<class Op>
 typename Op::RetType cellRelOpVec(Op op, Cell cell, const ArrayData* a) {
-  assert(cellIsPlausible(cell));
-  assert(a->isVecArray());
+  assertx(cellIsPlausible(cell));
+  assertx(a->isVecArray());
 
   if (UNLIKELY(!isVecType(cell.m_type))) {
     if (isDictType(cell.m_type)) return op.dictVsNonDict();
@@ -468,8 +468,8 @@ typename Op::RetType cellRelOpVec(Op op, Cell cell, const ArrayData* a) {
 
 template<class Op>
 typename Op::RetType cellRelOpDict(Op op, Cell cell, const ArrayData* a) {
-  assert(cellIsPlausible(cell));
-  assert(a->isDict());
+  assertx(cellIsPlausible(cell));
+  assertx(a->isDict());
 
   if (UNLIKELY(!isDictType(cell.m_type))) {
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
@@ -485,8 +485,8 @@ typename Op::RetType cellRelOpDict(Op op, Cell cell, const ArrayData* a) {
 
 template<class Op>
 typename Op::RetType cellRelOpKeyset(Op op, Cell cell, const ArrayData* a) {
-  assert(cellIsPlausible(cell));
-  assert(a->isKeyset());
+  assertx(cellIsPlausible(cell));
+  assertx(a->isKeyset());
 
   if (UNLIKELY(!isKeysetType(cell.m_type))) {
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
@@ -502,8 +502,8 @@ typename Op::RetType cellRelOpKeyset(Op op, Cell cell, const ArrayData* a) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+  assertx(cellIsPlausible(c1));
+  assertx(cellIsPlausible(c2));
 
   switch (c2.m_type) {
   case KindOfUninit:
@@ -536,8 +536,8 @@ typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
 
 template<class Op>
 typename Op::RetType tvRelOp(Op op, TypedValue tv1, TypedValue tv2) {
-  assert(tvIsPlausible(tv1));
-  assert(tvIsPlausible(tv2));
+  assertx(tvIsPlausible(tv1));
+  assertx(tvIsPlausible(tv2));
   return cellRelOp(op, *tvToCell(&tv1), *tvToCell(&tv2));
 }
 
@@ -570,14 +570,14 @@ struct Eq {
   }
 
   bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isPHPArray());
-    assert(ad2->isPHPArray());
+    assertx(ad1->isPHPArray());
+    assertx(ad2->isPHPArray());
     return ArrayData::Equal(ad1, ad2);
   }
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
-    assert(od1);
-    assert(od2);
+    assertx(od1);
+    assertx(od2);
     return od1->equal(*od2);
   }
 
@@ -589,18 +589,18 @@ struct Eq {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isVecArray());
-    assert(ad2->isVecArray());
+    assertx(ad1->isVecArray());
+    assertx(ad2->isVecArray());
     return PackedArray::VecEqual(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isDict());
-    assert(ad2->isDict());
+    assertx(ad1->isDict());
+    assertx(ad2->isDict());
     return MixedArray::DictEqual(ad1, ad2);
   }
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isKeyset());
-    assert(ad2->isKeyset());
+    assertx(ad1->isKeyset());
+    assertx(ad2->isKeyset());
     return SetArray::Equal(ad1, ad2);
   }
 
@@ -630,14 +630,14 @@ struct Lt {
   }
 
   bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isPHPArray());
-    assert(ad2->isPHPArray());
+    assertx(ad1->isPHPArray());
+    assertx(ad2->isPHPArray());
     return ArrayData::Lt(ad1, ad2);
   }
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
-    assert(od1);
-    assert(od2);
+    assertx(od1);
+    assertx(od2);
     return od1->less(*od2);
   }
 
@@ -649,18 +649,18 @@ struct Lt {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isVecArray());
-    assert(ad2->isVecArray());
+    assertx(ad1->isVecArray());
+    assertx(ad2->isVecArray());
     return PackedArray::VecLt(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isDict());
-    assert(ad2->isDict());
+    assertx(ad1->isDict());
+    assertx(ad2->isDict());
     throw_dict_compare_exception();
   }
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isKeyset());
-    assert(ad2->isKeyset());
+    assertx(ad1->isKeyset());
+    assertx(ad2->isKeyset());
     throw_keyset_compare_exception();
   }
 
@@ -700,14 +700,14 @@ struct Gt {
   }
 
   bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isPHPArray());
-    assert(ad2->isPHPArray());
+    assertx(ad1->isPHPArray());
+    assertx(ad2->isPHPArray());
     return ArrayData::Gt(ad1, ad2);
   }
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
-    assert(od1);
-    assert(od2);
+    assertx(od1);
+    assertx(od2);
     return od1->more(*od2);
   }
 
@@ -719,18 +719,18 @@ struct Gt {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isVecArray());
-    assert(ad2->isVecArray());
+    assertx(ad1->isVecArray());
+    assertx(ad2->isVecArray());
     return PackedArray::VecGt(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isDict());
-    assert(ad2->isDict());
+    assertx(ad1->isDict());
+    assertx(ad2->isDict());
     throw_dict_compare_exception();
   }
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isKeyset());
-    assert(ad2->isKeyset());
+    assertx(ad1->isKeyset());
+    assertx(ad2->isKeyset());
     throw_keyset_compare_exception();
   }
 
@@ -774,8 +774,8 @@ struct Cmp {
   }
 
   int64_t operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isPHPArray());
-    assert(ad2->isPHPArray());
+    assertx(ad1->isPHPArray());
+    assertx(ad2->isPHPArray());
     return ArrayData::Compare(ad1, ad2);
   }
 
@@ -791,18 +791,18 @@ struct Cmp {
   }
 
   int64_t vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isVecArray());
-    assert(ad2->isVecArray());
+    assertx(ad1->isVecArray());
+    assertx(ad2->isVecArray());
     return PackedArray::VecCmp(ad1, ad2);
   }
   int64_t dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isDict());
-    assert(ad2->isDict());
+    assertx(ad1->isDict());
+    assertx(ad2->isDict());
     throw_dict_compare_exception();
   }
   int64_t keyset(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isKeyset());
-    assert(ad2->isKeyset());
+    assertx(ad1->isKeyset());
+    assertx(ad2->isKeyset());
     throw_keyset_compare_exception();
   }
 
@@ -832,8 +832,8 @@ struct Cmp {
 }
 
 bool cellSame(Cell c1, Cell c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+  assertx(cellIsPlausible(c1));
+  assertx(cellIsPlausible(c2));
 
   bool const null1 = isNullType(c1.m_type);
   bool const null2 = isNullType(c2.m_type);
@@ -912,8 +912,8 @@ bool cellSame(Cell c1, Cell c2) {
 }
 
 bool tvSame(TypedValue tv1, TypedValue tv2) {
-  assert(tvIsPlausible(tv1));
-  assert(tvIsPlausible(tv2));
+  assertx(tvIsPlausible(tv1));
+  assertx(tvIsPlausible(tv2));
   return cellSame(*tvToCell(&tv1), *tvToCell(&tv2));
 }
 
@@ -1096,8 +1096,8 @@ int64_t tvCompare(TypedValue tv1, TypedValue tv2) {
 //////////////////////////////////////////////////////////////////////
 
 bool cellLessOrEqual(Cell c1, Cell c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+  assertx(cellIsPlausible(c1));
+  assertx(cellIsPlausible(c2));
 
   if ((isArrayLikeType(c1.m_type) && isArrayLikeType(c2.m_type)) ||
       (c1.m_type == KindOfObject && c2.m_type == KindOfObject) ||
@@ -1115,8 +1115,8 @@ bool cellLessOrEqual(Cell c1, Cell c2) {
 }
 
 bool cellGreaterOrEqual(Cell c1, Cell c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+  assertx(cellIsPlausible(c1));
+  assertx(cellIsPlausible(c2));
 
   if ((isArrayLikeType(c1.m_type) && isArrayLikeType(c2.m_type)) ||
       (c1.m_type == KindOfObject && c2.m_type == KindOfObject) ||

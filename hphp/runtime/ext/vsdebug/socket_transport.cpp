@@ -29,7 +29,7 @@ SocketTransport::SocketTransport(Debugger* debugger, int listenPort) :
 
   Lock lock(m_lock);
 
-  assert(m_abortPipeFd[0] == -1 && m_abortPipeFd[1] == -1);
+  assertx(m_abortPipeFd[0] == -1 && m_abortPipeFd[1] == -1);
 
   // Create a set of pipe file descriptors to use to inform the thread
   // polling for socket connections that it's time to exit.
@@ -73,7 +73,7 @@ void SocketTransport::createAbortPipe() {
 
     // This is unexpected and treated as fatal because we won't be able
     // to stop the polling thread in an orderly fashion at this point.
-    assert(false);
+    assertx(false);
   }
 }
 
@@ -120,7 +120,7 @@ void SocketTransport::listenForClientConnection() {
   {
     Lock lock(m_lock);
     abortFd = m_abortPipeFd[0];
-    assert(abortFd >= 0);
+    assertx(abortFd >= 0);
   }
 
   struct addrinfo hint;

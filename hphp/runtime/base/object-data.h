@@ -118,7 +118,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
  public:
   ALWAYS_INLINE void decRefAndRelease() {
-    assert(kindIsValid());
+    assertx(kindIsValid());
     if (decReleaseCheck()) release();
   }
   bool kindIsValid() const { return isObjectKind(headerKind()); }
@@ -493,8 +493,8 @@ ALWAYS_INLINE void tvWriteObject(ObjectData* pobj, TypedValue* to) {
 }
 
 inline ObjectData* instanceFromTv(TypedValue* tv) {
-  assert(tv->m_type == KindOfObject);
-  assert(dynamic_cast<ObjectData*>(tv->m_data.pobj));
+  assertx(tv->m_type == KindOfObject);
+  assertx(dynamic_cast<ObjectData*>(tv->m_data.pobj));
   return tv->m_data.pobj;
 }
 
@@ -524,7 +524,7 @@ typename std::enable_if<
   (void)type_scan::getIndexForMalloc<T>(); // ensure T* ptrs are interesting
   try {
     auto t = new (mem) T(std::forward<Args>(args)...);
-    assert(t->hasExactlyOneRef());
+    assertx(t->hasExactlyOneRef());
     return req::ptr<T>::attach(t);
   } catch (...) {
     tl_heap->objFree(mem, sizeof(T));

@@ -225,7 +225,7 @@ bool checkPointers(const HeapGraph& g, const char* phase) {
     auto& node = g.nodes[n];
     if (!haveCount(node.h->kind())) continue;
     auto count = static_cast<const MaybeCountable*>(node.h)->count();
-    assert(count >= 0); // static things shouldn't be in the heap.
+    assertx(count >= 0); // static things shouldn't be in the heap.
     unsigned num_counted{0}, num_ambig{0};
     g.eachPred(n, [&](const HeapGraph::Ptr& ptr) {
       switch (ptr.ptr_kind) {
@@ -251,7 +251,7 @@ bool checkPointers(const HeapGraph& g, const char* phase) {
       traceToRoot(g, n, "");
     }
   }
-  assert(!found_dangling && "found dangling pointers");
+  assertx(!found_dangling && "found dangling pointers");
   return true;
 }
 

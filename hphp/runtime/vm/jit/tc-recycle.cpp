@@ -288,7 +288,7 @@ void clearRange(TCA start, size_t len, const char* info) {
   cb.init(start, len, info);
 
   CGMeta fixups;
-  SCOPE_EXIT { assert(fixups.empty()); };
+  SCOPE_EXIT { assertx(fixups.empty()); };
 
   DataBlock db;
   Vauto vasm { cb, cb, db, fixups };

@@ -85,28 +85,28 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
     case KindOfPersistentVec:
     case KindOfVec: {
       auto ad = source.getArrayData();
-      assert(ad->isVecArray());
+      assertx(ad->isVecArray());
       return APCArray::MakeSharedVec(ad, level, unserializeObj);
     }
 
     case KindOfPersistentDict:
     case KindOfDict: {
       auto ad = source.getArrayData();
-      assert(ad->isDict());
+      assertx(ad->isDict());
       return APCArray::MakeSharedDict(ad, level, unserializeObj);
     }
 
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
       auto ad = source.getArrayData();
-      assert(ad->isKeyset());
+      assertx(ad->isKeyset());
       return APCArray::MakeSharedKeyset(ad, level, unserializeObj);
     }
 
     case KindOfPersistentArray:
     case KindOfArray: {
       auto ad = source.getArrayData();
-      assert(ad->isPHPArray());
+      assertx(ad->isPHPArray());
       return APCArray::MakeSharedArray(ad, level, unserializeObj);
     }
 
@@ -157,25 +157,25 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::SerializedArray: {
       auto const serArr = APCString::fromHandle(this)->getStringData();
       auto const v = apc_unserialize(serArr->data(), serArr->size());
-      assert(v.isPHPArray());
+      assertx(v.isPHPArray());
       return v;
     }
     case APCKind::SerializedVec: {
       auto const serVec = APCString::fromHandle(this)->getStringData();
       auto const v = apc_unserialize(serVec->data(), serVec->size());
-      assert(v.isVecArray());
+      assertx(v.isVecArray());
       return v;
     }
     case APCKind::SerializedDict: {
       auto const serDict = APCString::fromHandle(this)->getStringData();
       auto const v = apc_unserialize(serDict->data(), serDict->size());
-      assert(v.isDict());
+      assertx(v.isDict());
       return v;
     }
     case APCKind::SerializedKeyset: {
       auto const serKeyset = APCString::fromHandle(this)->getStringData();
       auto const v = apc_unserialize(serKeyset->data(), serKeyset->size());
-      assert(v.isKeyset());
+      assertx(v.isKeyset());
       return v;
     }
     case APCKind::SharedArray:
@@ -218,7 +218,7 @@ Variant APCHandle::toLocalHelper() const {
 }
 
 void APCHandle::deleteShared() {
-  assert(checkInvariants());
+  assertx(checkInvariants());
   switch (m_kind) {
     case APCKind::Uninit:
     case APCKind::Null:
@@ -267,7 +267,7 @@ void APCHandle::deleteShared() {
     case APCKind::UncountedDict:
     case APCKind::UncountedKeyset:
     case APCKind::UncountedString:
-      assert(false);
+      assertx(false);
       return;
   }
   not_reached();
@@ -276,39 +276,39 @@ void APCHandle::deleteShared() {
 bool APCHandle::checkInvariants() const {
   switch (m_kind) {
     case APCKind::Uninit:
-      assert(m_type == KindOfUninit);
+      assertx(m_type == KindOfUninit);
       return true;
     case APCKind::Null:
-      assert(m_type == KindOfNull);
+      assertx(m_type == KindOfNull);
       return true;
     case APCKind::Bool:
-      assert(m_type == KindOfBoolean);
+      assertx(m_type == KindOfBoolean);
       return true;
     case APCKind::Int:
-      assert(m_type == KindOfInt64);
+      assertx(m_type == KindOfInt64);
       return true;
     case APCKind::Double:
-      assert(m_type == KindOfDouble);
+      assertx(m_type == KindOfDouble);
       return true;
     case APCKind::StaticString:
     case APCKind::UncountedString:
-      assert(m_type == KindOfPersistentString);
+      assertx(m_type == KindOfPersistentString);
       return true;
     case APCKind::StaticArray:
     case APCKind::UncountedArray:
-      assert(m_type == KindOfPersistentArray);
+      assertx(m_type == KindOfPersistentArray);
       return true;
     case APCKind::StaticVec:
     case APCKind::UncountedVec:
-      assert(m_type == KindOfPersistentVec);
+      assertx(m_type == KindOfPersistentVec);
       return true;
     case APCKind::StaticDict:
     case APCKind::UncountedDict:
-      assert(m_type == KindOfPersistentDict);
+      assertx(m_type == KindOfPersistentDict);
       return true;
     case APCKind::StaticKeyset:
     case APCKind::UncountedKeyset:
-      assert(m_type == KindOfPersistentKeyset);
+      assertx(m_type == KindOfPersistentKeyset);
       return true;
     case APCKind::SharedVArray:
     case APCKind::SharedDArray:
@@ -326,7 +326,7 @@ bool APCHandle::checkInvariants() const {
     case APCKind::SerializedDict:
     case APCKind::SerializedKeyset:
     case APCKind::SerializedObject:
-      assert(m_type == kInvalidDataType);
+      assertx(m_type == kInvalidDataType);
       return true;
   }
   not_reached();

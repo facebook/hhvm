@@ -467,7 +467,7 @@ int getLineNumber(const LineTable& table, Offset pc) {
   auto const key = LineEntry(pc, -1);
   auto it = std::upper_bound(begin(table), end(table), key);
   if (it != end(table)) {
-    assert(pc < it->pastOffset());
+    assertx(pc < it->pastOffset());
     return it->val();
   }
   return -1;
@@ -536,7 +536,7 @@ bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc) {
   SourceLocEntry key(pc, sLoc);
   auto it = std::upper_bound(table.begin(), table.end(), key);
   if (it != table.end()) {
-    assert(pc < it->pastOffset());
+    assertx(pc < it->pastOffset());
     sLoc = it->val();
     return true;
   }
@@ -563,7 +563,7 @@ bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
 }
 
 bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
-  assert(offsets.size() == 0);
+  assertx(offsets.size() == 0);
   auto map = getLineToOffsetRangeVecMap(this);
   auto it = map.find(line);
   if (it == map.end()) return false;
@@ -585,7 +585,7 @@ const Func* Unit::getFunc(Offset pc) const {
                                return pc < b->past();
                              });
   if (it != table.end()) {
-    assert(pc < (*it)->past());
+    assertx(pc < (*it)->past());
     return *it;
   }
   return nullptr;
@@ -631,12 +631,12 @@ void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
   // func with a given name; in practice this is okay because the units created
   // by create_function() will always have the function being renamed at the
   // beginning
-  assert(oldName && oldName->isStatic());
-  assert(newName && newName->isStatic());
+  assertx(oldName && oldName->isStatic());
+  assertx(newName && newName->isStatic());
 
   for (auto& func : mergeInfo()->hoistableFuncs()) {
     auto const name = func->name();
-    assert(name);
+    assertx(name);
     if (name->same(oldName)) {
       func->rename(newName);
       break;
@@ -649,7 +649,7 @@ void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
 // Func lookup.
 
 void Unit::defFunc(Func* func, bool debugger) {
-  assert(!func->isMethod());
+  assertx(!func->isMethod());
   auto const handle = func->funcHandle();
   auto& funcAddr = rds::handleToRef<LowPtr<Func>>(handle);
 
@@ -715,7 +715,7 @@ Func* Unit::loadFunc(const StringData* name) {
 }
 
 void Unit::bindFunc(Func *func) {
-  assert(!func->isMethod());
+  assertx(!func->isMethod());
   auto const ne = func->getNamedEntity();
   ne->m_cachedFunc.bind(
     [&] {
@@ -893,7 +893,7 @@ Class* Unit::defClass(const PreClass* preClass,
         }
         return nullptr;
       }
-      assert(avail == Class::Avail::False);
+      assertx(avail == Class::Avail::False);
     }
 
     // Create a new class.
@@ -1052,7 +1052,7 @@ const Cell* Unit::lookupCns(const StringData* cnsName) {
     auto const callback =
       reinterpret_cast<Native::ConstantCallback>(tv.m_data.pref);
     const Cell* tvRet = callback().asTypedValue();
-    assert(cellIsPlausible(*tvRet));
+    assertx(cellIsPlausible(*tvRet));
     if (LIKELY(tvRet->m_type != KindOfUninit)) {
       return tvRet;
     }
@@ -1070,7 +1070,7 @@ const Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
     return nullptr;
   }
   auto const ret = &rds::handleToRef<TypedValue>(handle);
-  assert(cellIsPlausible(*ret));
+  assertx(cellIsPlausible(*ret));
   return ret;
 }
 
@@ -1261,7 +1261,7 @@ const TypeAliasReq* Unit::loadTypeAlias(const StringData* name,
 }
 
 bool Unit::defTypeAlias(Id id) {
-  assert(id < m_typeAliases.size());
+  assertx(id < m_typeAliases.size());
   auto thisType = &m_typeAliases[id];
   auto nameList = NamedEntity::get(thisType->name);
   const StringData* typeName = thisType->value;
@@ -1521,12 +1521,12 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
   end = in->m_firstMergeablePreClass;
   for (; ix < end; ++ix) {
     void* obj = in->mergeableObj(ix);
-    assert((uintptr_t(obj) & 1) == 0);
+    assertx((uintptr_t(obj) & 1) == 0);
     PreClass* pre = (PreClass*)obj;
     if (pre->attrs() & AttrUnique) {
       Class* cls = pre->namedEntity()->clsList();
-      assert(cls && !cls->m_nextClass);
-      assert(cls->preClass() == pre);
+      assertx(cls && !cls->m_nextClass);
+      assertx(cls->preClass() == pre);
       if (rds::isPersistentHandle(cls->classHandle())) {
         delta++;
       } else if (out) {
@@ -1550,8 +1550,8 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
         PreClass* pre = (PreClass*)obj;
         if (pre->attrs() & AttrUnique) {
           Class* cls = pre->namedEntity()->clsList();
-          assert(cls && !cls->m_nextClass);
-          assert(cls->preClass() == pre);
+          assertx(cls && !cls->m_nextClass);
+          assertx(cls->preClass() == pre);
           if (rds::isPersistentHandle(cls->classHandle())) {
             delta++;
           } else if (out) {
@@ -1625,7 +1625,7 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
 
 template <bool debugger>
 void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
-  assert(m_mergeState.load(std::memory_order_relaxed) & MergeState::Merged);
+  assertx(m_mergeState.load(std::memory_order_relaxed) & MergeState::Merged);
 
   autoTypecheck(this);
 
@@ -1770,7 +1770,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           if (UNLIKELY(avail == Class::Avail::Fail)) {
             raise_error("unknown class %s", other->name()->data());
           }
-          assert(avail == Class::Avail::True);
+          assertx(avail == Class::Avail::True);
           auto const handle = cls->classHandle();
           getDataRef<LowPtr<Class>>(tcbase, handle) = cls;
           if (rds::isNormalHandle(handle)) rds::initHandle(handle);
@@ -1804,7 +1804,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
 
           auto const name = (StringData*)((char*)obj - (int)k);
           auto const v = (TypedValueAux*)mi->mergeableData(ix + 1);
-          assert(v->m_type != KindOfUninit);
+          assertx(v->m_type != KindOfUninit);
 
           auto const handle = v->rdsHandle();
           assertx(rds::isNormalHandle(handle));
@@ -1884,7 +1884,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
         } while (k == MergeKind::TypeAlias);
         continue;
       case MergeKind::Done:
-        assert((unsigned)ix == mi->m_mergeablesSize);
+        assertx((unsigned)ix == mi->m_mergeablesSize);
         if (UNLIKELY(m_mergeState.load(std::memory_order_relaxed) &
                      MergeState::NeedsCompact)) {
           SimpleLock lock(unitInitLock);
@@ -1925,7 +1925,8 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
                                       std::memory_order_relaxed);
               }
             }
-            assert(newMi->m_firstMergeablePreClass == newMi->m_mergeablesSize ||
+            assertx(newMi->m_firstMergeablePreClass
+                      == newMi->m_mergeablesSize ||
                    isMergeOnly());
           }
           m_mergeState.fetch_and(~MergeState::NeedsCompact,
@@ -2022,7 +2023,7 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
   int prevLineNum = -1;
   while (it < &m_bc[stopOffset]) {
     if (opts.showFuncs) {
-      assert(funcIt == funcMap.end() || funcIt->first >= offsetOf(it));
+      assertx(funcIt == funcMap.end() || funcIt->first >= offsetOf(it));
       if (funcIt != funcMap.end() &&
           funcIt->first == offsetOf(it)) {
         out.put('\n');

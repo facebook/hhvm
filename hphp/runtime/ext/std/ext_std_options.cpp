@@ -155,7 +155,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
 
   auto const unit = g_context->compileEvalString(prefixedCode.get());
   if (unit == nullptr) {
-    raise_recoverable_error("Syntax error in assert()");
+    raise_recoverable_error("Syntax error in assertx()");
     // Failure to compile the eval string doesn't count as an
     // assertion failure.
     return Variant(true);
@@ -550,7 +550,7 @@ static int php_getopt(int argc, req::vector<char*>& argv,
     }
     return opts[php_optidx].opt_char;
   }
-  assert(false);
+  assertx(false);
   return(0);  /* never reached */
 }
 
@@ -590,7 +590,7 @@ static req::vector<opt_struct> parse_opts(const char *opts, int opts_len) {
     }
     ++i;
   }
-  assert(i == count);
+  assertx(i == count);
   return paras;
 }
 
@@ -624,7 +624,7 @@ static Array HHVM_FUNCTION(getopt, const String& options,
       opt.opt_char = 0;
       ++i;
     }
-    assert(i == opt_vec.size() - 1);
+    assertx(i == opt_vec.size() - 1);
   } else {
     opt_vec.resize(opt_vec.size() + 1);
   }
@@ -875,7 +875,7 @@ Variant HHVM_FUNCTION(ini_set,
 
 static int64_t HHVM_FUNCTION(memory_get_allocation) {
   auto total = tl_heap->getStatsCopy().totalAlloc;
-  assert(total >= 0);
+  assertx(total >= 0);
   return total;
 }
 
@@ -884,7 +884,7 @@ static int64_t HHVM_FUNCTION(hphp_memory_get_interval_peak_usage,
   auto const stats = tl_heap->getStatsCopy();
   int64_t ret = real_usage ? stats.peakIntervalUsage :
                 stats.peakIntervalCap;
-  assert(ret >= 0);
+  assertx(ret >= 0);
   return ret;
 }
 
@@ -892,7 +892,7 @@ static int64_t HHVM_FUNCTION(memory_get_peak_usage,
                              bool real_usage /*=false */) {
   auto const stats = tl_heap->getStatsCopy();
   int64_t ret = real_usage ? stats.peakUsage : stats.peakCap;
-  assert(ret >= 0);
+  assertx(ret >= 0);
   return ret;
 }
 
@@ -902,7 +902,7 @@ static int64_t HHVM_FUNCTION(memory_get_usage, bool real_usage /*=false */) {
   // Since we don't always alloc and dealloc a shared structure from the same
   // thread it is possible that this can go negative when we are tracking
   // jemalloc stats.
-  assert((use_jemalloc && real_usage) || ret >= 0);
+  assertx((use_jemalloc && real_usage) || ret >= 0);
   return std::max<int64_t>(ret, 0);
 }
 

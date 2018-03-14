@@ -36,7 +36,7 @@ req::ptr<c_AwaitAllWaitHandle> c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
   auto size = c_AwaitAllWaitHandle::heapSize(cnt);
   auto mem = tl_heap->objMalloc(size);
   auto handle = new (mem) c_AwaitAllWaitHandle(cnt);
-  assert(handle->hasExactlyOneRef());
+  assertx(handle->hasExactlyOneRef());
   return req::ptr<c_AwaitAllWaitHandle>::attach(handle);
 }
 
@@ -77,7 +77,7 @@ namespace {
     auto const waitHandle = c_Awaitable::fromCell(src);
     if (UNLIKELY(!waitHandle)) failWaitHandle();
     if (waitHandle->isFinished()) return;
-    assert(isa<c_WaitableWaitHandle>(waitHandle));
+    assertx(isa<c_WaitableWaitHandle>(waitHandle));
     auto const child = static_cast<c_WaitableWaitHandle*>(waitHandle);
     ctx_idx = std::min(ctx_idx, child->getContextIdx());
     ++cnt;
@@ -122,7 +122,7 @@ Object c_AwaitAllWaitHandle::Create(Iter iter) {
 
   iter([&](TypedValue v) { addChild(toCell(v), next, idx); });
 
-  assert(next == &result->m_children[0]);
+  assertx(next == &result->m_children[0]);
   result->initialize(ctx_idx);
   return Object{std::move(result)};
 }
@@ -130,7 +130,7 @@ Object c_AwaitAllWaitHandle::Create(Iter iter) {
 ObjectData* c_AwaitAllWaitHandle::fromFrameNoCheck(
   uint32_t total, uint32_t cnt, TypedValue* stk
 ) {
-  assert(cnt);
+  assertx(cnt);
 
   auto result = Alloc(cnt);
   auto ctx_idx = std::numeric_limits<context_idx_t>::max();
@@ -155,7 +155,7 @@ ObjectData* c_AwaitAllWaitHandle::fromFrameNoCheck(
     if (!idx) break;
   }
 
-  assert(next == &result->m_children[0]);
+  assertx(next == &result->m_children[0]);
   result->initialize(ctx_idx);
   return result.detach();
 }
@@ -271,8 +271,8 @@ void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
 }
 
 void c_AwaitAllWaitHandle::onUnblocked(uint32_t idx) {
-  assert(idx <= m_unfinished);
-  assert(getState() == STATE_BLOCKED);
+  assertx(idx <= m_unfinished);
+  assertx(getState() == STATE_BLOCKED);
 
   if (idx == m_unfinished) {
     for (uint32_t next = idx - 1; next < idx; --next) {
@@ -324,8 +324,8 @@ String c_AwaitAllWaitHandle::getName() {
 }
 
 c_WaitableWaitHandle* c_AwaitAllWaitHandle::getChild() {
-  assert(getState() == STATE_BLOCKED);
-  assert(m_unfinished < m_cap);
+  assertx(getState() == STATE_BLOCKED);
+  assertx(m_unfinished < m_cap);
   return m_children[m_unfinished].m_child;
 }
 

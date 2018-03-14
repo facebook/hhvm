@@ -67,7 +67,7 @@ Object HHVM_STATIC_METHOD(ConditionWaitHandle, create,
     throwNotNotifiedException();
   }
 
-  assert(child_wh->instanceof(c_WaitableWaitHandle::classof()));
+  assertx(child_wh->instanceof(c_WaitableWaitHandle::classof()));
   auto const child_wwh = static_cast<c_WaitableWaitHandle*>(child_wh);
 
   auto wh = req::make<c_ConditionWaitHandle>();
@@ -81,7 +81,7 @@ void HHVM_METHOD(ConditionWaitHandle, succeed, const Variant& result) {
     failAlreadyFinished();
   }
 
-  assert(obj->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
+  assertx(obj->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
   auto parentChain = obj->getParentChain();
   obj->setState(c_ConditionWaitHandle::STATE_SUCCEEDED);
   cellDup(*result.asCell(), obj->m_resultOrException);
@@ -99,7 +99,7 @@ void HHVM_METHOD(ConditionWaitHandle, fail, const Object& exception) {
     failAlreadyFinished();
   }
 
-  assert(obj->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
+  assertx(obj->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
   auto parentChain = obj->getParentChain();
   obj->setState(c_ConditionWaitHandle::STATE_FAILED);
   cellDup(make_tv<KindOfObject>(exception.get()), obj->m_resultOrException);
@@ -107,7 +107,7 @@ void HHVM_METHOD(ConditionWaitHandle, fail, const Object& exception) {
 }
 
 void c_ConditionWaitHandle::initialize(c_WaitableWaitHandle* child) {
-  assert(!child->isFinished());
+  assertx(!child->isFinished());
 
   setState(STATE_BLOCKED);
   setContextIdx(child->getContextIdx());
@@ -148,7 +148,7 @@ String c_ConditionWaitHandle::getName() {
 }
 
 c_WaitableWaitHandle* c_ConditionWaitHandle::getChild() {
-  assert(getState() == STATE_BLOCKED);
+  assertx(getState() == STATE_BLOCKED);
   return m_child;
 }
 

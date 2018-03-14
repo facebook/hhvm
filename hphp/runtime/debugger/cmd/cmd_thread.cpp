@@ -222,7 +222,7 @@ bool CmdThread::onServer(DebuggerProxy &proxy) {
     return true;
   }
 
-  assert(false);
+  assertx(false);
   return false;
 }
 

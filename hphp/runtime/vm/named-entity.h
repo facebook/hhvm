@@ -44,7 +44,7 @@ struct String;
  */
 struct ahm_string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    assert(int64_t(s2) > 0);  // RHS is never a magic value.
+    assertx(int64_t(s2) > 0);  // RHS is never a magic value.
     return s1 == s2 || (int64_t(s1) > 0 && s1->isame(s2));
   }
 };

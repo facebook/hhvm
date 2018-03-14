@@ -281,7 +281,7 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
 
 static void sock_array_to_fd_set(const Array& sockets, pollfd *fds, int &nfds,
                                  short flag) {
-  assert(fds);
+  assertx(fds);
   for (ArrayIter iter(sockets); iter; ++iter) {
     auto sock = cast<File>(iter.second());
     int intfd = sock->fd();
@@ -300,12 +300,12 @@ static void sock_array_to_fd_set(const Array& sockets, pollfd *fds, int &nfds,
 
 static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
                                    int &count, short flag) {
-  assert(sockets.isArray());
+  assertx(sockets.isArray());
   Array sock_array = sockets.toArray();
   Array ret = Array::Create();
   for (ArrayIter iter(sock_array); iter; ++iter) {
     const pollfd &fd = fds[nfds++];
-    assert(fd.fd == cast<File>(iter.second())->fd());
+    assertx(fd.fd == cast<File>(iter.second())->fd());
     if (fd.revents & flag) {
       ret.set(iter.first(), iter.second());
       count++;
@@ -1504,9 +1504,9 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   }
 
   if (persistent) {
-    assert(!key.empty());
+    assertx(!key.empty());
     s_sockets[key] = cast<Socket>(socket)->getData();
-    assert(s_sockets[key]);
+    assertx(s_sockets[key]);
   }
 
   return socket;

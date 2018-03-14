@@ -56,7 +56,8 @@ struct c_ResumableWaitHandle : c_WaitableWaitHandle {
 };
 
 inline c_ResumableWaitHandle* c_Awaitable::asResumable() {
-  assert(getKind() == Kind::AsyncFunction || getKind() == Kind::AsyncGenerator);
+  assertx(getKind() == Kind::AsyncFunction ||
+          getKind() == Kind::AsyncGenerator);
   return static_cast<c_ResumableWaitHandle*>(this);
 }
 

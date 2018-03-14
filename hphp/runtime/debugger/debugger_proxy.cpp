@@ -76,7 +76,7 @@ bool DebuggerProxy::cleanup(int timeout) {
   TRACE_RB(2, "DebuggerProxy::cleanup starting\n");
   // If we're not already marked as stopping then there may be other
   // threads still attempting to use this object!
-  assert(m_stopped);
+  assertx(m_stopped);
   // No more client operation is possible, so drop the connection.
   m_thrift.close();
   TRACE(2, "Stopping signal thread...\n");
@@ -152,10 +152,10 @@ void DebuggerProxy::getThreads(std::vector<DThreadInfoPtr> &threads) {
   TRACE(2, "DebuggerProxy::getThreads\n");
   Lock lock(this);
   auto& interrupts = RID().interrupts;
-  assert(!interrupts.empty());
+  assertx(!interrupts.empty());
   if (!interrupts.empty()) {
     CmdInterrupt *tint = (CmdInterrupt*)interrupts.top();
-    assert(tint);
+    assertx(tint);
     if (tint) {
       threads.push_back(createThreadInfo(tint->desc()));
     }
@@ -344,7 +344,7 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
         throw;
       } catch (...) {
         TRACE(2, "Unknown exception from processInterrupt!\n");
-        assert(false); // no other exceptions should be seen here
+        assertx(false); // no other exceptions should be seen here
         switchThreadMode(Normal);
         throw;
       }
@@ -810,7 +810,7 @@ DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   // other threads which may hit interrupts while we're running,
   // since nested processInterrupt() calls would normally release
   // other threads on the way out.
-  assert(m_thread == (int64_t)Process::GetThreadId());
+  assertx(m_thread == (int64_t)Process::GetThreadId());
   ThreadMode origThreadMode = m_threadMode;
   switchThreadMode(Sticky, m_thread);
   if (flags & ExecutePHPFlagsAtInterrupt) enableSignalPolling();

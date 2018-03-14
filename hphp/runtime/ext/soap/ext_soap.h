@@ -110,7 +110,7 @@ struct SoapVar {
     if (!enc_type.isInitialized()) {
       raise_error("Encoding: SoapVar has no 'enc_type' property");
       not_reached();
-      assert(false);
+      assertx(false);
     }
     return enc_type.toInt64();
   }

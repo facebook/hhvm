@@ -162,7 +162,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
   if (name) {
     f->name = *name;
   } else {
-    assert(func != nullptr);
+    assertx(func != nullptr);
     f->name = lookupFunction(func, exit, inPrologue, true);
     auto names = func->localNames();
     for (int i = 0; i < func->numNamedLocals(); i++) {
@@ -188,7 +188,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
     m_functions.erase(it);
     delete f;
     f = m_functions[end];
-    assert(f->m_chunk != nullptr);
+    assertx(f->m_chunk != nullptr);
     f->m_chunk->clearSynced();
     f->clearPerfSynced();
   } else {

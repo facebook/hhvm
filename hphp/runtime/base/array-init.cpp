@@ -35,7 +35,7 @@ DictInit::DictInit(size_t n, CheckAllocation)
     check_non_safepoint_surprise();
   }
   m_arr = MixedArray::MakeReserveDict(n);
-  assert(m_arr->hasExactlyOneRef());
+  assertx(m_arr->hasExactlyOneRef());
   check_non_safepoint_surprise();
 }
 
@@ -53,7 +53,7 @@ KeysetInit::KeysetInit(size_t n, CheckAllocation)
     check_non_safepoint_surprise();
   }
   m_arr = SetArray::MakeReserveSet(n);
-  assert(m_arr->hasExactlyOneRef());
+  assertx(m_arr->hasExactlyOneRef());
   check_non_safepoint_surprise();
 }
 
@@ -77,7 +77,7 @@ DArrayInit::DArrayInit(size_t n, CheckAllocation)
   m_arr = RuntimeOption::EvalHackArrDVArrs
     ? MixedArray::MakeReserveDict(n)
     : MixedArray::MakeReserveDArray(n);
-  assert(m_arr->hasExactlyOneRef());
+  assertx(m_arr->hasExactlyOneRef());
   check_non_safepoint_surprise();
 }
 

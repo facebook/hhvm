@@ -126,7 +126,7 @@ struct TypeConstraint {
     , m_typeName(typeName)
     , m_namedEntity(nullptr)
   {
-    assert(!(flags & Flags::Resolved));
+    assertx(!(flags & Flags::Resolved));
     init();
   }
 
@@ -147,8 +147,8 @@ struct TypeConstraint {
   TypeConstraint& operator=(const TypeConstraint&) = default;
 
   void resolveType(AnnotType t, bool nullable) {
-    assert(m_type == AnnotType::Object);
-    assert(t != AnnotType::Object);
+    assertx(m_type == AnnotType::Object);
+    assertx(t != AnnotType::Object);
     auto flags = m_flags | Flags::Resolved;
     if (nullable) flags |= Flags::Nullable;
     m_flags = static_cast<Flags>(flags);

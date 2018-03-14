@@ -292,7 +292,7 @@ const uint64_t kCodePrefix          = 0xf0;
 
 static void fb_compact_serialize_code(StringBuffer& sb,
                                       FbCompactSerializeCode code) {
-  assert(code == (code & kCodeMask));
+  assertx(code == (code & kCodeMask));
   uint8_t v = (kCodePrefix | code);
   sb.append(reinterpret_cast<char*>(&v), 1);
 }
@@ -478,7 +478,7 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentVec:
     case KindOfVec: {
       Array arr = var.toArray();
-      assert(arr->isVecArray());
+      assertx(arr->isVecArray());
       fb_compact_serialize_vec(sb, std::move(arr), depth);
       return 0;
     }
@@ -486,7 +486,7 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentDict:
     case KindOfDict: {
       Array arr = var.toArray();
-      assert(arr->isDict());
+      assertx(arr->isDict());
       fb_compact_serialize_array_as_map(sb, std::move(arr), depth);
       return 0;
     }
@@ -494,7 +494,7 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
       Array arr = var.toArray();
-      assert(arr->isKeyset());
+      assertx(arr->isKeyset());
       fb_compact_serialize_keyset(sb, std::move(arr));
       return 0;
     }
@@ -502,7 +502,7 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentArray:
     case KindOfArray: {
       Array arr = var.toArray();
-      assert(arr->isPHPArray());
+      assertx(arr->isPHPArray());
       int64_t index_limit;
       if (fb_compact_serialize_is_list(arr, index_limit)) {
         fb_compact_serialize_array_as_list_map(
@@ -863,7 +863,7 @@ bool HHVM_FUNCTION(fb_utf8ize, VRefParam input) {
     // We know that resultBuffer > total possible length.
     U8_APPEND_UNSAFE(dstBuf, dstPosBytes, curCodePoint);
   }
-  assert(dstPosBytes <= dstMaxLenBytes);
+  assertx(dstPosBytes <= dstMaxLenBytes);
   input.assignIfRef(dstStr.shrink(dstPosBytes));
   return true;
 }
@@ -912,8 +912,8 @@ static String fb_utf8_substr_simple(const String& str,
   const char* const srcBuf = str.data();
   int32_t srcLenBytes = str.size(); // May truncate; checked before use below.
 
-  assert(firstCodePoint >= 0);  // Wrapper fixes up negative starting positions.
-  assert(numDesiredCodePoints > 0); // Wrapper fixes up negative/zero length.
+  assertx(firstCodePoint >= 0); // Wrapper fixes up negative starting positions.
+  assertx(numDesiredCodePoints > 0); // Wrapper fixes up negative/zero length.
   if (str.size() <= 0 ||
       str.size() > INT_MAX ||
       firstCodePoint >= srcLenBytes) {
@@ -965,7 +965,7 @@ static String fb_utf8_substr_simple(const String& str,
     }
   }
 
-  assert(dstPosBytes <= dstMaxLenBytes);
+  assertx(dstPosBytes <= dstMaxLenBytes);
   if (dstPosBytes > 0) {
     dstStr.shrink(dstPosBytes);
     return dstStr;

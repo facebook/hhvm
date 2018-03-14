@@ -173,7 +173,7 @@ IMPLEMENT_SET(int64_t, m_type = KindOfInt64; m_data.num = v)
 IMPLEMENT_SET(double, m_type = KindOfDouble; m_data.dbl = v)
 IMPLEMENT_SET(const StaticString&,
               StringData* s = v.get();
-              assert(s);
+              assertx(s);
               m_type = KindOfPersistentString;
               m_data.pstr = s)
 
@@ -353,7 +353,7 @@ bool Variant::isAllowedAsConstantValue() const {
 
 inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
   StringData *s = getStringData();
-  assert(s);
+  assertx(s);
   return s->isNumericWithVal(*lval, *dval, 1);
 }
 
@@ -361,7 +361,7 @@ inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
 // type conversions
 
 bool Variant::toBooleanHelper() const {
-  assert(m_type > KindOfInt64);
+  assertx(m_type > KindOfInt64);
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -386,7 +386,7 @@ bool Variant::toBooleanHelper() const {
 }
 
 int64_t Variant::toInt64Helper(int base /* = 10 */) const {
-  assert(m_type > KindOfInt64);
+  assertx(m_type > KindOfInt64);
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -452,7 +452,7 @@ String Variant::toStringHelper() const {
 
     case KindOfPersistentString:
     case KindOfString:
-      assert(false); // Should be done in caller
+      assertx(false); // Should be done in caller
       return String{m_data.pstr};
 
     case KindOfPersistentVec:
@@ -634,7 +634,7 @@ void Variant::setEvalScalar() {
   auto const do_array = [this]{
     if (!m_data.parr->isStatic()) {
       ArrayData::GetScalarArray(&m_data.parr);
-      assert(m_data.parr->isStatic());
+      assertx(m_data.parr->isStatic());
     }
   };
 
@@ -654,7 +654,7 @@ void Variant::setEvalScalar() {
         StringData *sd = makeStaticString(pstr);
         decRefStr(pstr);
         m_data.pstr = sd;
-        assert(m_data.pstr->isStatic());
+        assertx(m_data.pstr->isStatic());
       }
       return;
     }

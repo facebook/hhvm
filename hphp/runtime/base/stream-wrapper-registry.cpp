@@ -64,7 +64,7 @@ static __thread Wrapper* tl_fileHandler;
 IMPLEMENT_STATIC_REQUEST_LOCAL(RequestWrappers, s_request_wrappers);
 
 bool registerWrapper(const std::string &scheme, Wrapper *wrapper) {
-  assert(s_wrappers.find(scheme) == s_wrappers.end());
+  assertx(s_wrappers.find(scheme) == s_wrappers.end());
   s_wrappers[scheme] = wrapper;
   return true;
 }

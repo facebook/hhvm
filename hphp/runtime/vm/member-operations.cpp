@@ -44,7 +44,7 @@ void unknownBaseType(const TypedValue* tv) {
 }
 
 void objArrayAccess(ObjectData* base) {
-  assert(!base->isCollection());
+  assertx(!base->isCollection());
   if (!base->instanceof(SystemLib::s_ArrayAccessClass)) {
     raise_error("Object does not implement ArrayAccess");
   }
@@ -63,7 +63,7 @@ TypedValue objOffsetGet(
   assertx(offset.m_type != KindOfRef);
 
   auto const method = base->methodNamed(s_offsetGet.get());
-  assert(method != nullptr);
+  assertx(method != nullptr);
 
   return g_context->invokeMethod(base, method, InvokeArgs(&offset, 1));
 }
@@ -81,7 +81,7 @@ static OffsetExistsResult objOffsetExists(ObjectData* base, TypedValue offset) {
   assertx(offset.m_type != KindOfRef);
 
   auto const method = base->methodNamed(s_offsetExists.get());
-  assert(method != nullptr);
+  assertx(method != nullptr);
 
   auto result = g_context->invokeMethod(base, method, InvokeArgs(&offset, 1));
   // In-place cast decrefs the function call result.
@@ -112,7 +112,7 @@ bool objOffsetIsset(ObjectData* base, TypedValue offset,
   // `isset(...)` expressions, so call the method on the base ArrayObject class.
   auto const cls = SystemLib::s_ArrayObjectClass;
   auto const method = cls->lookupMethod(s_offsetGet.get());
-  assert(method != nullptr);
+  assertx(method != nullptr);
 
   auto result = g_context->invokeMethodV(base, method, InvokeArgs(&offset, 1));
   return !result.isNull();
@@ -157,7 +157,7 @@ void objOffsetSet(
   assertx(offset.m_type != KindOfRef);
 
   auto const method = base->methodNamed(s_offsetSet.get());
-  assert(method != nullptr);
+  assertx(method != nullptr);
 
   TypedValue args[2] = { offset, *tvToCell(val) };
   g_context->invokeMethodV(base, method, folly::range(args));
@@ -170,7 +170,7 @@ void objOffsetUnset(ObjectData* base, TypedValue offset) {
   assertx(offset.m_type != KindOfRef);
 
   auto const method = base->methodNamed(s_offsetUnset.get());
-  assert(method != nullptr);
+  assertx(method != nullptr);
 
   g_context->invokeMethodV(base, method, InvokeArgs(&offset, 1));
 }
@@ -207,7 +207,7 @@ void raise_inout_undefined_index(TypedValue tv) {
     raise_inout_undefined_index(tv.m_data.num);
     return;
   }
-  assert(isStringType(tv.m_type));
+  assertx(isStringType(tv.m_type));
   raise_inout_undefined_index(tv.m_data.pstr);
 }
 
@@ -220,8 +220,8 @@ void raise_inout_undefined_index(const StringData* sd) {
 }
 
 Cell incDecBodySlow(IncDecOp op, Cell* fr) {
-  assert(cellIsPlausible(*fr));
-  assert(fr->m_type != KindOfUninit);
+  assertx(cellIsPlausible(*fr));
+  assertx(fr->m_type != KindOfUninit);
 
   auto dup = [&]() { tvIncRefGen(*fr); return *fr; };
 

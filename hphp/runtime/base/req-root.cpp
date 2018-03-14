@@ -34,7 +34,7 @@ uint32_t req::root_handle::addRootHandle() {
 }
 
 uint32_t req::root_handle::stealRootHandle(root_handle* s) {
-  assert(s->m_id != INVALID);
+  assertx(s->m_id != INVALID);
   auto& handles = tl_heap->m_root_handles;
   auto id = s->m_id;
   handles[id] = this;

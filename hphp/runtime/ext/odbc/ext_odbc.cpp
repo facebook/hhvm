@@ -371,7 +371,7 @@ bool ODBCCursor::prepare_query(const String& query)
   for (int i=1; i <= params_size_; i++) {
     params_.append(Variant(req::make<ODBCParam>(hdl_stmt_, i)));
   }
-  assert(params_.size() == params_size_);
+  assertx(params_.size() == params_size_);
   return true;
 }
 
@@ -473,7 +473,7 @@ bool ODBCCursor::bind_buffer()
 
     cursor = (SQLPOINTER)((char*)cursor + column->total_column_size());
   }
-  assert(columns_count_ == columns_.size());
+  assertx(columns_count_ == columns_.size());
   is_buffer_bound = true;
   return true;
 }

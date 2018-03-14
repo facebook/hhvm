@@ -60,14 +60,14 @@ __thread char* t_stackbase = nullptr;
 THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
 ThreadInfo::ThreadInfo() {
-  assert(!t_stackbase);
+  assertx(!t_stackbase);
   t_stackbase = static_cast<char*>(stack_top_ptr());
 
   m_coverage = new CodeCoverage();
 }
 
 ThreadInfo::~ThreadInfo() {
-  assert(t_stackbase);
+  assertx(t_stackbase);
   t_stackbase = nullptr;
 
   Lock lock(s_thread_info_mutex);

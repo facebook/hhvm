@@ -174,7 +174,7 @@ bool install_catch_trace(_Unwind_Context* ctx, TCA rip, _Unwind_Exception* exn,
   // things to the handler using the RDS. This also simplifies the handler code
   // because it doesn't have to worry about saving its arguments somewhere
   // while executing the exit trace.
-  assert(g_unwind_rds.isInit());
+  assertx(g_unwind_rds.isInit());
   if (do_side_exit) {
     g_unwind_rds->exn = nullptr;
 #ifndef _MSC_VER
@@ -383,7 +383,7 @@ tc_unwind_personality(int version,
     }
     always_assert(!(actions & _UA_HANDLER_FRAME));
 
-    assert(g_unwind_rds.isInit());
+    assertx(g_unwind_rds.isInit());
 
     if (ip == stubs.endCatchHelperPast) {
       FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
@@ -449,7 +449,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
     // actually an ActRec, so it's actually required that we skip it above).
     unwindPreventReturnToTC(fp);
 
-    assert(g_unwind_rds.isInit());
+    assertx(g_unwind_rds.isInit());
     auto catchTrace = lookup_catch_trace(savedRip, g_unwind_rds->exn);
 
     if (isDebuggerReturnHelper(savedRip)) {

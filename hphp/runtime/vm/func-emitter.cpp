@@ -111,7 +111,7 @@ void FuncEmitter::init(int l1, int l2, Offset base_, Attr attrs_, bool top_,
 
   if (!isPseudoMain()) {
     if (!SystemLib::s_inited) {
-      assert(attrs & AttrBuiltin);
+      assertx(attrs & AttrBuiltin);
     }
     if ((attrs & AttrBuiltin) && !pce()) {
       attrs |= AttrSkipFrame;
@@ -178,7 +178,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       attrs = Attr(attrs & ~AttrPersistent);
     }
   } else {
-    assert(preClass || !(attrs & AttrBuiltin));
+    assertx(preClass || !(attrs & AttrBuiltin));
   }
   if (!RuntimeOption::RepoAuthoritative) {
     // In non-RepoAuthoritative mode, any function could get a VarEnv because
@@ -201,7 +201,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   if (!containsCalls) { attrs |= AttrPhpLeafFn; }
 
-  assert(!m_pce == !preClass);
+  assertx(!m_pce == !preClass);
   auto f = m_ue.newFunc(this, unit, name, attrs, params.size());
 
   f->m_isPreFunc = !!preClass;
@@ -299,7 +299,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       int extra =
         (attrs & AttrNumArgs ? 1 : 0) +
         (isMethod() ? 1 : 0);
-      assert(info.sig.args.size() == params.size() + extra);
+      assertx(info.sig.args.size() == params.size() + extra);
       for (auto i = params.size(); i--; ) {
         switch (info.sig.args[extra + i]) {
           case Native::NativeSig::Type::ObjectArg:
@@ -325,19 +325,19 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 // Locals, iterators, and parameters.
 
 void FuncEmitter::allocVarId(const StringData* name) {
-  assert(name != nullptr);
+  assertx(name != nullptr);
   // Unnamed locals are segregated (they all come after the named locals).
-  assert(m_numUnnamedLocals == 0);
+  assertx(m_numUnnamedLocals == 0);
   UNUSED Id id;
   if (m_localNames.find(name) == m_localNames.end()) {
     id = (m_numLocals++);
-    assert(id == (int)m_localNames.size());
+    assertx(id == (int)m_localNames.size());
     m_localNames.add(name, name);
   }
 }
 
 Id FuncEmitter::allocIterator() {
-  assert(m_numIterators >= m_nextFreeIterator);
+  assertx(m_numIterators >= m_nextFreeIterator);
   Id id = m_nextFreeIterator++;
   if (m_numIterators < m_nextFreeIterator) {
     m_numIterators = m_nextFreeIterator;
@@ -359,7 +359,7 @@ Id FuncEmitter::allocUnnamedLocal() {
 // Unit tables.
 
 EHEntEmitter& FuncEmitter::addEHEnt() {
-  assert(!m_ehTabSorted
+  assertx(!m_ehTabSorted
     || "should only mark the ehtab as sorted after adding all of them");
   ehtab.push_back(EHEntEmitter());
   ehtab.back().m_parentIndex = 7777;
@@ -407,7 +407,7 @@ void FuncEmitter::sortEHTab() {
     for (int j = i - 1; j >= 0; j--) {
       if (ehtab[j].m_past >= ehtab[i].m_past) {
         // parent EHEnt better enclose this one.
-        assert(ehtab[j].m_base <= ehtab[i].m_base);
+        assertx(ehtab[j].m_base <= ehtab[i].m_base);
         ehtab[i].m_parentIndex = j;
         break;
       }
@@ -502,9 +502,9 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   int ret = Native::AttrNone;
 
   auto it = userAttributes.find(s_native.get());
-  assert(it != userAttributes.end());
+  assertx(it != userAttributes.end());
   const TypedValue userAttr = it->second;
-  assert(isArrayType(userAttr.m_type));
+  assertx(isArrayType(userAttr.m_type));
   for (ArrayIter it(userAttr.m_data.parr); it; ++it) {
     Variant userAttrVal = it.second();
     if (userAttrVal.isString()) {
@@ -618,17 +618,17 @@ void FuncRepoProxy::GetFuncsStmt
         PreClassEmitter* pce = ue.pce(preClassId);
         fe = ue.newMethodEmitter(name, pce);
         bool added UNUSED = pce->addMethod(fe);
-        assert(added);
+        assertx(added);
       }
-      assert(fe->sn() == funcSn);
+      assertx(fe->sn() == funcSn);
       fe->top = top;
       fe->serdeMetaData(extraBlob);
       if (!SystemLib::s_inited && !fe->isPseudoMain()) {
-        assert(fe->attrs & AttrBuiltin);
+        assertx(fe->attrs & AttrBuiltin);
         if (preClassId < 0) {
-          assert(fe->attrs & AttrPersistent);
-          assert(fe->attrs & AttrUnique);
-          assert(fe->attrs & AttrSkipFrame);
+          assertx(fe->attrs & AttrPersistent);
+          assertx(fe->attrs & AttrUnique);
+          assertx(fe->attrs & AttrSkipFrame);
         }
       }
       fe->setEHTabIsSorted();

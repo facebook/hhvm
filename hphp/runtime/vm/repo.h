@@ -64,7 +64,7 @@ struct Repo : RepoProxy {
   ~Repo();
 
   const char* dbName(int repoId) const {
-    assert(repoId < RepoIdCount);
+    assertx(repoId < RepoIdCount);
     return kDbs[repoId];
   }
   sqlite3* dbc() const { return m_dbc; }
@@ -75,7 +75,7 @@ struct Repo : RepoProxy {
     case UnitOrigin::Eval:
       return m_evalRepoId;
     default:
-      assert(false);
+      assertx(false);
       return RepoIdInvalid;
     }
   }
@@ -125,7 +125,7 @@ struct Repo : RepoProxy {
    * RuntimeOption::RepoAuthoritative.
    */
   static const GlobalData& global() {
-    assert(RuntimeOption::RepoAuthoritative);
+    assertx(RuntimeOption::RepoAuthoritative);
     return s_globalData;
   }
 

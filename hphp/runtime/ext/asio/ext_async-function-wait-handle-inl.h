@@ -24,8 +24,8 @@ namespace HPHP {
 
 inline void
 c_AsyncFunctionWaitHandle::Node::setChild(c_WaitableWaitHandle* child) {
-  assert(child);
-  assert(!child->isFinished());
+  assertx(child);
+  assertx(!child->isFinished());
 
   m_child = child;
   m_child->getParentChain()

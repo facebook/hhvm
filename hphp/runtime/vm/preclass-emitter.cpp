@@ -121,7 +121,7 @@ bool PreClassEmitter::addMethod(FuncEmitter* method) {
 void PreClassEmitter::renameMethod(const StringData* oldName,
                                    const StringData* newName) {
   MethodMap::const_iterator it = m_methodMap.find(oldName);
-  assert(it != m_methodMap.end());
+  assertx(it != m_methodMap.end());
   it->second->name = newName;
   m_methodMap[newName] = it->second;
   m_methodMap.erase(oldName);
@@ -145,7 +145,7 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
 const PreClassEmitter::Prop&
 PreClassEmitter::lookupProp(const StringData* propName) const {
   PropMap::Builder::const_iterator it = m_propMap.find(propName);
-  assert(it != m_propMap.end());
+  assertx(it != m_propMap.end());
   Slot idx = it->second;
   return m_propMap[idx];
 }
@@ -176,7 +176,7 @@ bool PreClassEmitter::addConstant(const StringData* n,
   if (typeconst && !typeStructure.empty())  {
     assertx(typeStructure.isDictOrDArray());
     tvVal = make_persistent_array_like_tv(typeStructure.get());
-    assert(tvIsPlausible(tvVal));
+    assertx(tvIsPlausible(tvVal));
   } else {
     tvVal = *val;
   }
@@ -226,7 +226,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     attrs = Attr(attrs & ~AttrPersistent);
   }
 
-  assert(attrs & AttrPersistent || SystemLib::s_inited);
+  assertx(attrs & AttrPersistent || SystemLib::s_inited);
 
   auto pc = std::make_unique<PreClass>(
     &unit, m_line1, m_line2, m_offset, m_name,
@@ -431,10 +431,10 @@ void PreClassRepoProxy::GetPreClassesStmt
         name, (PreClass::Hoistable)hoistable);
       pce->serdeMetaData(extraBlob);
       if (!SystemLib::s_inited) {
-        assert(pce->attrs() & AttrPersistent);
-        assert(pce->attrs() & AttrUnique);
+        assertx(pce->attrs() & AttrPersistent);
+        assertx(pce->attrs() & AttrUnique);
       }
-      assert(pce->id() == preClassId);
+      assertx(pce->id() == preClassId);
     }
   } while (!query.done());
   txn.commit();

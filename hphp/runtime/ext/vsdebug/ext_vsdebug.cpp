@@ -114,7 +114,7 @@ void VSDebugExtension::moduleInit() {
         transport = new FdTransport(s_debugger);
         s_launchMode = true;
       } catch (...) {
-        assert(transport == nullptr);
+        assertx(transport == nullptr);
       }
     }
   }
@@ -125,7 +125,7 @@ void VSDebugExtension::moduleInit() {
     return;
   }
 
-  assert(s_debugger != nullptr);
+  assertx(s_debugger != nullptr);
   s_debugger->setTransport(transport);
 }
 
@@ -146,7 +146,7 @@ void VSDebugExtension::requestInit() {
     return;
   }
 
-  assert(s_debugger != nullptr);
+  assertx(s_debugger != nullptr);
 
   // If we're in SCRIPT mode and a TCP listen port was specified on the command
   // line, we need to block starting the script until the debugger client
@@ -175,7 +175,7 @@ void VSDebugExtension::requestShutdown() {
     return;
   }
 
-  assert(s_debugger != nullptr);
+  assertx(s_debugger != nullptr);
   s_debugger->requestShutdown();
 }
 

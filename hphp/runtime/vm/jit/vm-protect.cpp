@@ -61,7 +61,7 @@ void protect() {
 }
 
 void unprotect(void* base, VMRegState state) {
-  assert(rds::tl_base == s_fakeRdsBase.load(std::memory_order_relaxed));
+  assertx(rds::tl_base == s_fakeRdsBase.load(std::memory_order_relaxed));
   rds::tl_base = base;
   tl_regState = state;
   VMProtect::is_protected = false;

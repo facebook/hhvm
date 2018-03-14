@@ -281,7 +281,7 @@ static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
     s = s.substr(2);
   }
   auto conn = get_connection(Object{this_});
-  assert(conn);
+  assertx(conn);
   Variant ret = php_mysql_do_connect_on_link(
                   conn, s, username.toString(), password.toString(),
                   dbname.toString(), client_flags.toInt64(), persistent, false,
@@ -303,10 +303,10 @@ static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {
 
 static void HHVM_METHOD(mysqli, hh_update_last_error, const Object& stmt_obj) {
   auto conn = get_connection(Object{this_});
-  assert(conn);
+  assertx(conn);
 
   auto stmt = getStmt(stmt_obj);
-  assert(stmt);
+  assertx(stmt);
 
   auto s = stmt->get();
   auto mysql = conn->get();

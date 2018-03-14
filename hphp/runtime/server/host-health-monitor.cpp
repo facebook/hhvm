@@ -47,7 +47,7 @@ folly::Singleton<HostHealthMonitor> s_health_monitor;
 }
 
 void HostHealthMonitor::addMetric(IHealthMonitorMetric* metric) {
-  assert(metric != nullptr);
+  assertx(metric != nullptr);
   std::lock_guard<std::mutex> g(m_lock);
   m_metrics.push_back(metric);
 }

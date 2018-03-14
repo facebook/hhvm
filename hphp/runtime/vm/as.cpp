@@ -217,7 +217,7 @@ struct Input {
              (i >= 'A' && i <= 'F');
     };
     auto hex_val = [&] (int i) -> uint32_t {
-      assert(is_hex(i));
+      assertx(is_hex(i));
       return i >= '0' && i <= '9' ? i - '0' :
              i >= 'a' && i <= 'f' ? i - 'a' + 10 : i - 'A' + 10;
     };
@@ -472,7 +472,7 @@ struct StackDepth {
   void addListener(AsmState& as, StackDepth* target);
   void setBase(AsmState& as, int stackDepth);
   int absoluteDepth() {
-    assert(baseValue.hasValue());
+    assertx(baseValue.hasValue());
     return baseValue.value() + currentOffset;
   }
 
@@ -657,7 +657,7 @@ struct AsmState {
       // Base value still unknown, this will need to be updated later.
 
       // Store the FPIEnt's index in the FuncEmitter's entry table.
-      assert(&fe->fpitab[fe->fpitab.size()-1] == &ent);
+      assertx(&fe->fpitab[fe->fpitab.size()-1] == &ent);
       fpiToUpdate.emplace_back(fe->fpitab.size() - 1, reg.stackDepth);
     }
 
@@ -667,7 +667,7 @@ struct AsmState {
   }
 
   void finishClass() {
-    assert(!fe);
+    assertx(!fe);
     ue->addPreClassEmitter(pce);
     pce = 0;
     enumTySet = false;
@@ -2494,7 +2494,7 @@ void parse_constant(AsmState& as) {
  * No-op, for backward compat
  */
 void parse_default_ctor(AsmState& as) {
-  assert(!as.fe && as.pce);
+  assertx(!as.fe && as.pce);
   as.in.expectWs(';');
 }
 

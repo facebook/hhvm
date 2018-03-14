@@ -117,7 +117,7 @@ struct ClassData : IRExtraData {
   explicit ClassData(const Class* cls)
     : cls(cls)
   {
-    assert(cls != nullptr);
+    assertx(cls != nullptr);
   }
 
   std::string show() const {
@@ -142,7 +142,7 @@ struct ExtendsClassData : IRExtraData {
   explicit ExtendsClassData(const Class* cls, bool strictLikely = false)
       : cls(cls), strictLikely(strictLikely)
   {
-    assert(cls != nullptr);
+    assertx(cls != nullptr);
   }
 
   std::string show() const {

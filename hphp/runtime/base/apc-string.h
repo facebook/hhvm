@@ -61,8 +61,8 @@ struct APCString {
   }
 
   static APCString* fromHandle(APCHandle* handle) {
-    assert(handle->checkInvariants());
-    assert(handle->kind() == APCKind::SharedString ||
+    assertx(handle->checkInvariants());
+    assertx(handle->kind() == APCKind::SharedString ||
            handle->kind() == APCKind::SerializedArray ||
            handle->kind() == APCKind::SerializedVec ||
            handle->kind() == APCKind::SerializedDict ||
@@ -76,8 +76,8 @@ struct APCString {
   }
 
   static const APCString* fromHandle(const APCHandle* handle) {
-    assert(handle->checkInvariants());
-    assert(handle->kind() == APCKind::SharedString ||
+    assertx(handle->checkInvariants());
+    assertx(handle->kind() == APCKind::SharedString ||
            handle->kind() == APCKind::SerializedArray ||
            handle->kind() == APCKind::SerializedVec ||
            handle->kind() == APCKind::SerializedDict ||

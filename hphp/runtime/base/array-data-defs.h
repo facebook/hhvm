@@ -64,7 +64,7 @@ inline ArrayData* ArrayData::copy() const {
 
 inline ArrayData* ArrayData::copyStatic() const {
   auto ret = g_array_funcs.copyStatic[kind()](this);
-  assert(ret != this && ret->isStatic());
+  assertx(ret != this && ret->isStatic());
   return ret;
 }
 
@@ -101,7 +101,7 @@ inline bool ArrayData::isVectorData() const {
 }
 
 inline void ArrayData::release() noexcept {
-  assert(hasExactlyOneRef());
+  assertx(hasExactlyOneRef());
   g_array_funcs.release[kind()](this);
   AARCH64_WALKABLE_FRAME();
 }
@@ -335,17 +335,17 @@ inline void ArrayData::renumber() {
 namespace detail {
 
 inline bool isIntKey(Cell cell) {
-  assert(isIntType(cell.m_type) || isStringType(cell.m_type));
+  assertx(isIntType(cell.m_type) || isStringType(cell.m_type));
   return isIntType(cell.m_type);
 }
 
 inline int64_t getIntKey(Cell cell) {
-  assert(isIntType(cell.m_type));
+  assertx(isIntType(cell.m_type));
   return cell.m_data.num;
 }
 
 inline StringData* getStringKey(Cell cell) {
-  assert(isStringType(cell.m_type));
+  assertx(isStringType(cell.m_type));
   return cell.m_data.pstr;
 }
 
@@ -355,19 +355,19 @@ inline StringData* getStringKey(Cell cell) {
 // Element manipulation.
 
 inline bool ArrayData::exists(Cell k) const {
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return detail::isIntKey(k) ? exists(detail::getIntKey(k))
                              : exists(detail::getStringKey(k));
 }
 
 inline member_lval ArrayData::lval(Cell k, bool copy) {
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return detail::isIntKey(k) ? lval(detail::getIntKey(k), copy)
                              : lval(detail::getStringKey(k), copy);
 }
 
 inline member_lval ArrayData::lvalRef(Cell k, bool copy) {
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return detail::isIntKey(k) ? lvalRef(detail::getIntKey(k), copy)
                              : lvalRef(detail::getStringKey(k), copy);
 }
@@ -383,7 +383,7 @@ inline member_rval ArrayData::get(const StringData* k, bool error) const {
 }
 
 inline member_rval ArrayData::get(Cell k, bool error) const {
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return detail::isIntKey(k) ? get(detail::getIntKey(k), error)
                              : get(detail::getStringKey(k), error);
 }
@@ -419,7 +419,7 @@ inline ArrayData* ArrayData::setWithRef(Cell k, TypedValue v, bool copy) {
 }
 
 inline ArrayData* ArrayData::setRef(Cell k, member_lval v, bool copy) {
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return detail::isIntKey(k) ? setRef(detail::getIntKey(k), v, copy)
                              : setRef(detail::getStringKey(k), v, copy);
 }
@@ -446,7 +446,7 @@ inline ArrayData* ArrayData::add(Cell k, Cell v, bool copy) {
 }
 
 inline ArrayData* ArrayData::remove(Cell k, bool copy) {
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return detail::isIntKey(k) ? remove(detail::getIntKey(k), copy)
                              : remove(detail::getStringKey(k), copy);
 }
@@ -454,7 +454,7 @@ inline ArrayData* ArrayData::remove(Cell k, bool copy) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool ArrayData::exists(const String& k) const {
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return exists(k.get());
 }
 
@@ -463,7 +463,7 @@ inline bool ArrayData::exists(const Variant& k) const {
 }
 
 inline member_lval ArrayData::lval(const String& k, bool copy) {
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return lval(k.get(), copy);
 }
 
@@ -472,7 +472,7 @@ inline member_lval ArrayData::lval(const Variant& k, bool copy) {
 }
 
 inline member_lval ArrayData::lvalRef(const String& k, bool copy) {
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return lvalRef(k.get(), copy);
 }
 
@@ -481,7 +481,7 @@ inline member_lval ArrayData::lvalRef(const Variant& k, bool copy) {
 }
 
 inline member_rval ArrayData::get(const String& k, bool error) const {
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return get(k.get(), error);
 }
 
@@ -514,7 +514,7 @@ inline ArrayData* ArrayData::setWithRef(const String& k,
 
 inline ArrayData*
 ArrayData::setRef(const String& k, member_lval v, bool copy) {
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return setRef(k.get(), v, copy);
 }
 
@@ -533,7 +533,7 @@ inline ArrayData* ArrayData::setRef(const Variant& k, Variant& v, bool copy) {
 
 inline ArrayData* ArrayData::add(const String& k, Cell v, bool copy) {
   assertx(cellIsPlausible(v));
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return add(k.get(), v, copy);
 }
 
@@ -548,7 +548,7 @@ inline ArrayData* ArrayData::add(const Variant& k, const Variant& v,
 }
 
 inline ArrayData* ArrayData::remove(const String& k, bool copy) {
-  assert(IsValidKey(k));
+  assertx(IsValidKey(k));
   return remove(k.get(), copy);
 }
 

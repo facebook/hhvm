@@ -115,19 +115,19 @@ struct SymbolEq : boost::static_visitor<bool> {
   >::type operator()(const T&, const U&) const { return false; }
 
   bool operator()(StaticLocal k1, StaticLocal k2) const {
-    assert(k1.name->isStatic() && k2.name->isStatic());
+    assertx(k1.name->isStatic() && k2.name->isStatic());
     return k1.funcId == k2.funcId && k1.name == k2.name;
   }
 
   bool operator()(ClsConstant k1, ClsConstant k2) const {
-    assert(k1.clsName->isStatic() && k1.cnsName->isStatic());
-    assert(k2.clsName->isStatic() && k2.cnsName->isStatic());
+    assertx(k1.clsName->isStatic() && k1.cnsName->isStatic());
+    assertx(k2.clsName->isStatic() && k2.cnsName->isStatic());
     return k1.clsName->isame(k2.clsName) &&
            k1.cnsName == k2.cnsName;
   }
 
   bool operator()(Profile k1, Profile k2) const {
-    assert(k1.name->isStatic() && k2.name->isStatic());
+    assertx(k1.name->isStatic() && k2.name->isStatic());
     return k1.transId == k2.transId &&
            k1.bcOff == k2.bcOff &&
            k1.name == k2.name;
@@ -139,7 +139,7 @@ struct SymbolEq : boost::static_visitor<bool> {
       std::is_same<T,StaticMethodF>::value,
     bool
   >::type operator()(const T& t1, const T& t2) const {
-    assert(t1.name->isStatic() && t2.name->isStatic());
+    assertx(t1.name->isStatic() && t2.name->isStatic());
     return t1.name->isame(t2.name);
   }
 
@@ -238,7 +238,7 @@ AllocDescriptorList s_local_alloc_descs;
  * Round base up to align, which must be a power of two.
  */
 size_t roundUp(size_t base, size_t align) {
-  assert(folly::isPowTwo(align));
+  assertx(folly::isPowTwo(align));
   --align;
   return (base + align) & ~align;
 }
@@ -496,9 +496,9 @@ typedef tbb::concurrent_hash_map<const StringData*, Handle,
 //////////////////////////////////////////////////////////////////////
 
 void requestInit() {
-  assert(tl_base);
+  assertx(tl_base);
   s_constantsStorage.set(nullptr);
-  assert(!s_constants().get());
+  assertx(!s_constants().get());
 
   auto gen = header()->currentGen;
   memset(tl_base, 0, sizeof(Header));
@@ -688,7 +688,7 @@ static void initPersistentCache() {
 }
 
 void threadInit(bool shouldRegister) {
-  assert(tl_base == nullptr);
+  assertx(tl_base == nullptr);
 
   if (!s_tc_fd) {
     initPersistentCache();
@@ -724,7 +724,7 @@ void threadInit(bool shouldRegister) {
 
   if (shouldRegister) {
     Guard g(s_tlBaseListLock);
-    assert(std::find(begin(s_tlBaseList), end(s_tlBaseList), tl_base) ==
+    assertx(std::find(begin(s_tlBaseList), end(s_tlBaseList), tl_base) ==
              end(s_tlBaseList));
     s_tlBaseList.push_back(tl_base);
   }

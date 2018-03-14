@@ -76,7 +76,7 @@ static int fd_transfer_request_handler(const uint8_t* request,
   String req((const char*)request, request_length, CopyString);
   String resp;
   int fd = agent->afdtRequest(req, &resp);
-  assert(resp.size() <= (int)*response_length);
+  assertx(resp.size() <= (int)*response_length);
   memcpy(response, resp.data(), resp.size());
   *response_length = resp.size();
   return fd;

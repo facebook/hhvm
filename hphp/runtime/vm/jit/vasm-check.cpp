@@ -167,7 +167,7 @@ struct FlagUseChecker {
   }
   void use(VregSF r) {
     assertx(!cur_sf.isValid() || cur_sf == r);
-    assert(!r.isValid() || r.isSF() || r.isVirt());
+    assertx(!r.isValid() || r.isSF() || r.isVirt());
     cur_sf = r;
   }
   VregSF& cur_sf;
@@ -225,7 +225,7 @@ checkSF(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
     for (auto s : succs(block)) {
       if (!livein[s].isValid()) continue;
       assertx(!cur_sf.isValid() || cur_sf == livein[s]);
-      assert(livein[s].isSF() || livein[s].isVirt());
+      assertx(livein[s].isSF() || livein[s].isVirt());
       cur_sf = livein[s];
     }
     for (auto i = block.code.end(); i != block.code.begin();) {

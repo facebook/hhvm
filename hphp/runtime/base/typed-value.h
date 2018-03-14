@@ -176,7 +176,7 @@ using TypedNum = TypedValue;
 
 /*
  * Assertions on Cells and TypedValues.  Should usually only happen inside an
- * assert().
+ * assertx().
  */
 bool tvIsPlausible(TypedValue);
 bool cellIsPlausible(Cell);
@@ -244,7 +244,7 @@ typename std::enable_if<
   TypedValue ret;
   ret.m_data = make_value(val);
   ret.m_type = DType;
-  assert(tvIsPlausible(ret));
+  assertx(tvIsPlausible(ret));
   return ret;
 }
 
@@ -255,7 +255,7 @@ typename std::enable_if<
 >::type make_tv() {
   TypedValue ret;
   ret.m_type = DType;
-  assert(tvIsPlausible(ret));
+  assertx(tvIsPlausible(ret));
   return ret;
 }
 
@@ -269,8 +269,8 @@ typename std::enable_if<
   std::is_same<typename DataTypeCPPType<DType>::type,double>::value,
   double
 >::type unpack_tv(TypedValue *tv) {
-  assert(DType == tv->m_type);
-  assert(tvIsPlausible(*tv));
+  assertx(DType == tv->m_type);
+  assertx(tvIsPlausible(*tv));
   return tv->m_data.dbl;
 }
 
@@ -279,8 +279,8 @@ typename std::enable_if<
   std::is_integral<typename DataTypeCPPType<DType>::type>::value,
   typename DataTypeCPPType<DType>::type
 >::type unpack_tv(TypedValue *tv) {
-  assert(DType == tv->m_type);
-  assert(tvIsPlausible(*tv));
+  assertx(DType == tv->m_type);
+  assertx(tvIsPlausible(*tv));
   return tv->m_data.num;
 }
 
@@ -289,13 +289,13 @@ typename std::enable_if<
   std::is_pointer<typename DataTypeCPPType<DType>::type>::value,
   typename DataTypeCPPType<DType>::type
 >::type unpack_tv(TypedValue *tv) {
-  assert((DType == tv->m_type) ||
+  assertx((DType == tv->m_type) ||
          (isStringType(DType) && isStringType(tv->m_type)) ||
          (isArrayType(DType) && isArrayType(tv->m_type)) ||
          (isVecType(DType) && isVecType(tv->m_type)) ||
          (isDictType(DType) && isDictType(tv->m_type)) ||
          (isKeysetType(DType) && isKeysetType(tv->m_type)));
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   return reinterpret_cast<typename DataTypeCPPType<DType>::type>
            (tv->m_data.pstr);
 }

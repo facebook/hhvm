@@ -40,7 +40,7 @@ static_assert(sizeof(RepoAuthType) == sizeof(CompactTaggedPtr<void>), "");
 namespace {
 
 bool tvMatchesArrayType(TypedValue tv, const RepoAuthType::Array* arrTy) {
-  assert(isArrayLikeType(tv.m_type));
+  assertx(isArrayLikeType(tv.m_type));
   auto const ad = tv.m_data.parr;
   using A = RepoAuthType::Array;
 
@@ -91,7 +91,7 @@ void RepoAuthType::resolveArray(const UnitEmitter& ue) {
 }
 
 const uint32_t RepoAuthType::arrayId() const {
-  assert(mayHaveArrData());
+  assertx(mayHaveArrData());
   if (resolved()) return m_data.ptr() ? array()->id() : kInvalidArrayId;
 
   return reinterpret_cast<uintptr_t>(m_data.ptr());
@@ -184,7 +184,7 @@ size_t RepoAuthType::hash() const {
 //////////////////////////////////////////////////////////////////////
 
 bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
-  assert(tvIsPlausible(tv));
+  assertx(tvIsPlausible(tv));
 
   bool const initNull = tv.m_type == KindOfNull;
 

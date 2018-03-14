@@ -38,8 +38,8 @@ namespace HPHP { namespace jit { namespace irlower {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline Vout& vmain(IRLS& env) { assert(env.vmain); return *env.vmain; }
-inline Vout& vcold(IRLS& env) { assert(env.vcold); return *env.vcold; }
+inline Vout& vmain(IRLS& env) { assertx(env.vmain); return *env.vmain; }
+inline Vout& vcold(IRLS& env) { assertx(env.vcold); return *env.vcold; }
 
 inline Vlabel label(IRLS& env, Block* b) { return env.labels[b]; }
 

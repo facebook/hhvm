@@ -221,7 +221,7 @@ void requestInit() {
   Stats::init();
   requestInitProfData();
   s_initialTCSize = g_code->totalUsed();
-  assert(!g_unwind_rds.isInit());
+  assertx(!g_unwind_rds.isInit());
   memset(g_unwind_rds.get(), 0, sizeof(UnwindRDS));
   g_unwind_rds.markInit();
 }

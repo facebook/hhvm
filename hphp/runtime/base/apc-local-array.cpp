@@ -59,14 +59,14 @@ struct EscalateHelper {
 //////////////////////////////////////////////////////////////////////
 
 bool APCLocalArray::checkInvariants(const ArrayData* ad) {
-  assert(ad->isApcArray());
-  assert(ad->isNotDVArray());
-  assert(ad->checkCount());
+  assertx(ad->isApcArray());
+  assertx(ad->isNotDVArray());
+  assertx(ad->checkCount());
   DEBUG_ONLY auto const local = static_cast<const APCLocalArray*>(ad);
   DEBUG_ONLY auto p = local->localCache();
   for (auto end = p + local->getSize(); p < end; ++p) {
     // Elements in the local cache must not be KindOfRef.
-    assert(cellIsPlausible(*p));
+    assertx(cellIsPlausible(*p));
   }
   return true;
 }
@@ -84,18 +84,18 @@ void APCLocalArray::sweep() {
 member_rval::ptr_u APCLocalArray::GetValueRef(const ArrayData* adIn,
                                               ssize_t pos) {
   auto const ad = asApcArray(adIn);
-  assert(unsigned(pos) < ad->getSize());
+  assertx(unsigned(pos) < ad->getSize());
   auto const elms = ad->localCache();
   auto const tv = &elms[pos];
   if (tv->m_type != KindOfUninit) return tv;
   auto const sv = ad->m_arr->getValue(pos);
   tvAsVariant(tv) = sv->toLocal();
-  assert(tv->m_type != KindOfUninit);
+  assertx(tv->m_type != KindOfUninit);
   return tv;
 }
 
 void APCLocalArray::Release(ArrayData* ad) {
-  assert(ad->hasExactlyOneRef());
+  assertx(ad->hasExactlyOneRef());
   auto const a = asApcArray(ad);
   auto size = a->heapSize();
 
@@ -154,7 +154,7 @@ ArrayData* APCLocalArray::loadElems() const {
   if (elems->isStatic()) {
     elems = elems->copy();
   }
-  assert(elems->hasExactlyOneRef());
+  assertx(elems->hasExactlyOneRef());
   return elems;
 }
 
@@ -282,8 +282,8 @@ ArrayData* APCLocalArray::Prepend(ArrayData* ad, Cell v, bool /*copy*/) {
 ArrayData *APCLocalArray::Escalate(const ArrayData* ad) {
   auto smap = asApcArray(ad);
   auto ret = smap->loadElems();
-  assert(!ret->isStatic());
-  assert(ret->hasExactlyOneRef());
+  assertx(!ret->isStatic());
+  assertx(ret->hasExactlyOneRef());
   return ret;
 }
 
@@ -317,8 +317,8 @@ ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   if (ret != elems) {
     elems->release();
   }
-  assert(ret->hasExactlyOneRef());
-  assert(!ret->isStatic());
+  assertx(ret->hasExactlyOneRef());
+  assertx(!ret->isStatic());
   return ret;
 }
 
@@ -369,14 +369,14 @@ ssize_t APCLocalArray::IterAdvance(const ArrayData* ad, ssize_t prev) {
 
 ssize_t APCLocalArray::IterRewind(const ArrayData* ad, ssize_t prev) {
   auto a = asApcArray(ad);
-  assert(prev >= 0 && prev < a->m_size);
+  assertx(prev >= 0 && prev < a->m_size);
   ssize_t next = prev - 1;
   return next >= 0 ? next : a->m_size;
 }
 
 bool APCLocalArray::ValidMArrayIter(const ArrayData* ad,
                                     const MArrayIter& fp) {
-  assert(fp.getContainer() == ad);
+  assertx(fp.getContainer() == ad);
   not_reached();  // we should've escalated
 }
 

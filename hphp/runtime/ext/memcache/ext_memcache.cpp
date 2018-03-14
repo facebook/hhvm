@@ -751,7 +751,7 @@ HHVM_METHOD(Memcache, addserver, const String& host, int port /* = 11211 */,
 struct MemcacheExtension final : Extension {
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
     void threadInit() override {
-      assert(!s_memcache_globals);
+      assertx(!s_memcache_globals);
       s_memcache_globals = new MEMCACHEGlobals;
       IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                        "memcache.hash_strategy", "standard",

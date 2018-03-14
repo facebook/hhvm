@@ -278,7 +278,7 @@ bool CompletionsCommand::executeImpl(
         break;
 
       default:
-        assert(false);
+        assertx(false);
     }
 
     // Sort results, prefer shorter strings, then alphabatize.

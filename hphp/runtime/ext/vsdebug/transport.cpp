@@ -30,8 +30,8 @@ void DebugTransport::setTransportFd(int fd) {
   Lock lock(m_mutex);
 
   // We shouldn't have a valid transport already.
-  assert(m_transportFd < 0);
-  assert(m_abortPipeFd[0] == -1 && m_abortPipeFd[1] == -1);
+  assertx(m_transportFd < 0);
+  assertx(m_abortPipeFd[0] == -1 && m_abortPipeFd[1] == -1);
 
   // Create a set of pipe file descriptors to use to inform the thread
   // polling for reads that it's time to exit.
@@ -43,7 +43,7 @@ void DebugTransport::setTransportFd(int fd) {
 
     // This is unexpected and treated as fatal because we won't be able
     // to stop the polling threads in an orderly fashion at this point.
-    assert(false);
+    assertx(false);
   }
 
   m_transportFd = fd;
@@ -370,7 +370,7 @@ bool DebugTransport::tryProcessMessage(
   bool success = false;
 
   const char* bufferPos = buffer + *bufferPosition;
-  assert(bufferPos <= buffer + bufferSize);
+  assertx(bufferPos <= buffer + bufferSize);
 
   // Advance through the buffer until we locate the NULL separator between
   // client messages.

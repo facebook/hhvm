@@ -83,14 +83,14 @@ int MySQLUtil::set_mysql_timeout(MYSQL *mysql,
    case MySQLUtil::ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT_MS; break;
    case MySQLUtil::ReadTimeout: opt =  MYSQL_OPT_READ_TIMEOUT_MS; break;
    case MySQLUtil::WriteTimeout: opt =  MYSQL_OPT_WRITE_TIMEOUT_MS; break;
-   default: assert(false); break;
+   default: assertx(false); break;
   }
 #else
   switch (type) {
     case MySQLUtil::ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT; break;
     case MySQLUtil::ReadTimeout: opt =  MYSQL_OPT_READ_TIMEOUT; break;
     case MySQLUtil::WriteTimeout: opt =  MYSQL_OPT_WRITE_TIMEOUT; break;
-    default: assert(false); break;
+    default: assertx(false); break;
   }
   ms = (ms + 999) / 1000;
 #endif
@@ -290,7 +290,7 @@ MySQL::MySQL(const char *host, int port, const char *username,
 }
 
 void MySQL::setLastError(const char *func) {
-  assert(m_conn);
+  assertx(m_conn);
   m_last_error_set = true;
   m_last_errno = mysql_errno(m_conn);
   const char *error = mysql_error(m_conn);
@@ -658,7 +658,7 @@ static void mysql_set_conn_attr(MYSQL* mysql, const String& key,
 static void mysql_set_conn_attrs(
     std::shared_ptr<MySQL> mySQL,
     const Array* conn_attrs) {
-  assert(mySQL != nullptr && mySQL->get() != nullptr);
+  assertx(mySQL != nullptr && mySQL->get() != nullptr);
 
   for (auto itr = conn_attrs->begin(); !itr.end(); itr.next()) {
     const auto& key = itr.first();
@@ -857,7 +857,7 @@ void MySQLResult::addField(Variant&& value) {
 }
 
 void MySQLResult::setFieldCount(int64_t fields) {
-  assert(m_fields.empty());
+  assertx(m_fields.empty());
   m_fields.resize(fields);
 }
 
@@ -936,7 +936,7 @@ bool MySQLResult::seekRow(int64_t row) {
 
 bool MySQLResult::fetchRow() {
   // If not localized, use standard mysql functions on m_res
-  assert(isLocalized());
+  assertx(isLocalized());
   if (m_current_row != m_rows->end()) m_current_row++;
   if (m_current_row != m_rows->end()) {
     m_row_ready = true;
@@ -1011,7 +1011,7 @@ MySQLStmtVariables::~MySQLStmtVariables() {
 }
 
 bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
-  assert(m_arr.size() == mysql_stmt_field_count(stmt));
+  assertx(m_arr.size() == mysql_stmt_field_count(stmt));
 
   MYSQL_RES *res = mysql_stmt_result_metadata(stmt);
   MYSQL_FIELD *fields = mysql_fetch_fields(res);
@@ -1065,7 +1065,7 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
         // There exists some more types in this enum like MYSQL_TYPE_TIMESTAMP2,
         // MYSQL_TYPE_DATETIME2, MYSQL_TYPE_TIME2 but they are just used on the
         // server
-        assert(false);
+        assertx(false);
     }
 
     if (b->buffer_length > 0) {
@@ -1096,7 +1096,7 @@ void MySQLStmtVariables::update_result() {
         default:
           // We never ask for anything else than DOUBLE, LONGLONG and STRING
           // so in the case we get something else back something is really wrong
-          assert(false);
+          assertx(false);
       }
     }
 
@@ -1105,7 +1105,7 @@ void MySQLStmtVariables::update_result() {
 }
 
 bool MySQLStmtVariables::init_params(MYSQL_STMT *stmt, const String& types) {
-  assert(m_arr.size() == types.size());
+  assertx(m_arr.size() == types.size());
 
   for (int i = 0; i < types.size(); i++) {
     MYSQL_BIND *b = &m_vars[i];
@@ -1123,7 +1123,7 @@ bool MySQLStmtVariables::init_params(MYSQL_STMT *stmt, const String& types) {
         b->buffer_type = MYSQL_TYPE_LONG_BLOB;
         break;
       default:
-        assert(false);
+        assertx(false);
     }
   }
 
@@ -1167,7 +1167,7 @@ bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
           // anything here
           break;
         default:
-          assert(false);
+          assertx(false);
       }
     }
   }

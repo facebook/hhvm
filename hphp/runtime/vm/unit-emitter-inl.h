@@ -112,7 +112,7 @@ void UnitEmitter::emitIVA(T n) {
   if (LIKELY((n & 0x7f) == n)) {
     emitByte((unsigned char)n);
   } else {
-    assert((n & 0x7fffffff) == n);
+    assertx((n & 0x7fffffff) == n);
     emitInt32((n & 0x7fffff80) << 1 | 0x80 | (n & 0x7f));
   }
 }
@@ -129,7 +129,7 @@ void UnitEmitter::emitImpl(T n, int64_t pos) {
     memcpy(&m_bc[m_bclen], c, sizeof(T));
     m_bclen += sizeof(T);
   } else {
-    assert(pos + sizeof(T) <= m_bclen);
+    assertx(pos + sizeof(T) <= m_bclen);
     for (uint32_t i = 0; i < sizeof(T); ++i) {
       m_bc[pos + i] = c[i];
     }

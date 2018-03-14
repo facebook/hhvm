@@ -89,7 +89,7 @@ DataStreamWrapper::open(const String& filename, const String& /*mode*/,
         }
     }
 
-    assert(data == comma || data == semi);
+    assertx(data == comma || data == semi);
     // eat parameters, and figure out if we have ';base64'
     while (semi && (data == semi)) {
       data++;

@@ -43,7 +43,7 @@ Generator::~Generator() {
     return;
   }
 
-  assert(getState() != State::Running);
+  assertx(getState() != State::Running);
   tvDecRefGen(m_key);
   tvDecRefGen(m_value);
   tvDecRefGen(m_delegate);
@@ -80,9 +80,9 @@ Generator& Generator::operator=(const Generator& other) {
 
 ObjectData* Generator::Create(const ActRec* fp, size_t numSlots,
                               jit::TCA resumeAddr, Offset resumeOffset) {
-  assert(fp);
-  assert(!fp->resumed());
-  assert(fp->func()->isNonAsyncGenerator());
+  assertx(fp);
+  assertx(!fp->resumed());
+  assertx(fp->func()->isNonAsyncGenerator());
   const size_t frameSz = Resumable::getFrameSize(numSlots);
   const size_t genSz = genSize(sizeof(Generator), frameSz);
   auto const obj = BaseGenerator::Alloc<Generator>(s_class, genSz);
@@ -115,14 +115,14 @@ void Generator::copyVars(const ActRec* srcFp) {
   if (srcFp->hasExtraArgs()) {
     dstFp->setExtraArgs(srcFp->getExtraArgs()->clone(dstFp));
   } else {
-    assert(srcFp->hasVarEnv());
+    assertx(srcFp->hasVarEnv());
     dstFp->setVarEnv(srcFp->getVarEnv()->clone(dstFp));
   }
 }
 
 void Generator::yield(Offset resumeOffset,
                       const Cell* key, const Cell value) {
-  assert(isRunning());
+  assertx(isRunning());
   resumable()->setResumeAddr(nullptr, resumeOffset);
 
   if (key) {
@@ -142,7 +142,7 @@ void Generator::yield(Offset resumeOffset,
 }
 
 void Generator::done(TypedValue tv) {
-  assert(isRunning());
+  assertx(isRunning());
   cellSetNull(m_key);
   cellSet(*tvToCell(&tv), m_value);
   setState(State::Done);
@@ -168,7 +168,7 @@ String HHVM_METHOD(Generator, getOrigFuncName) {
   const Func* origFunc = gen->actRec()->func();
   auto const origName = origFunc->isClosureBody() ? s__closure_.get()
                                                   : origFunc->name();
-  assert(origName->isStatic());
+  assertx(origName->isStatic());
   return String(const_cast<StringData*>(origName));
 }
 
@@ -199,7 +199,7 @@ struct GeneratorExtension final : Extension {
       Native::NDIFlags::NO_SWEEP);
     loadSystemlib("generator");
     Generator::s_class = Unit::lookupClass(Generator::s_className.get());
-    assert(Generator::s_class);
+    assertx(Generator::s_class);
   }
 };
 

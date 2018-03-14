@@ -34,14 +34,14 @@ template<class T> struct RootMap {
   using Map = req::hash_map<RootId,req::ptr<T>>;
 
   RootId addRoot(req::ptr<T>&& ptr) {
-    assert(ptr);
+    assertx(ptr);
     const RootId tok = ptr->getId();
     getMap().emplace(tok, std::move(ptr));
     return tok;
   }
 
   RootId addRoot(const req::ptr<T>& ptr) {
-    assert(ptr);
+    assertx(ptr);
     auto tok = ptr->getId();
     getMap()[tok] = ptr;
     return tok;

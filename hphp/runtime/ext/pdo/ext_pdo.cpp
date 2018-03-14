@@ -974,7 +974,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
     }
   } else if (data->m_dbh) {
     if (is_persistent) {
-      assert(!shashkey.empty());
+      assertx(!shashkey.empty());
       s_connections[shashkey] = data->m_dbh->conn();
     }
 
@@ -990,7 +990,7 @@ static Variant HHVM_METHOD(PDO, prepare, const String& statement,
                            const Array& options = null_array) {
   auto data = Native::data<PDOData>(this_);
 
-  assert(data->m_dbh->conn()->driver);
+  assertx(data->m_dbh->conn()->driver);
   setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
@@ -1018,7 +1018,7 @@ static Variant HHVM_METHOD(PDO, prepare, const String& statement,
 
   if (data->m_dbh->conn()->preparer(statement, &pdostmt->m_stmt, options)) {
     auto stmt = pdostmt->m_stmt;
-    assert(stmt);
+    assertx(stmt);
 
     /* unconditionally keep this for later reference */
     stmt->query_string = statement;
@@ -1053,7 +1053,7 @@ static Variant HHVM_METHOD(PDO, prepare, const String& statement,
 static bool HHVM_METHOD(PDO, commit) {
   auto data = Native::data<PDOData>(this_);
 
-  assert(data->m_dbh->conn()->driver);
+  assertx(data->m_dbh->conn()->driver);
   if (!data->m_dbh->conn()->in_txn) {
     throw_pdo_exception(uninit_null(), uninit_null(),
                         "There is no active transaction");
@@ -1069,14 +1069,14 @@ static bool HHVM_METHOD(PDO, commit) {
 static bool HHVM_METHOD(PDO, intransaction) {
   auto data = Native::data<PDOData>(this_);
 
-  assert(data->m_dbh->conn()->driver);
+  assertx(data->m_dbh->conn()->driver);
   return data->m_dbh->conn()->in_txn;
 }
 
 static bool HHVM_METHOD(PDO, rollback) {
   auto data = Native::data<PDOData>(this_);
 
-  assert(data->m_dbh->conn()->driver);
+  assertx(data->m_dbh->conn()->driver);
   if (!data->m_dbh->conn()->in_txn) {
     throw_pdo_exception(uninit_null(), uninit_null(),
                         "There is no active transaction");
@@ -1093,7 +1093,7 @@ static bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
                         const Variant& value) {
   auto data = Native::data<PDOData>(this_);
 
-  assert(data->m_dbh->conn()->driver);
+  assertx(data->m_dbh->conn()->driver);
 
 #define PDO_LONG_PARAM_CHECK                                           \
   if (!value.isInteger() && !value.isString() && !value.isBoolean()) { \
@@ -1211,7 +1211,7 @@ static bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
 static Variant HHVM_METHOD(PDO, getattribute, int64_t attribute) {
   auto data = Native::data<PDOData>(this_);
 
-  assert(data->m_dbh->conn()->driver);
+  assertx(data->m_dbh->conn()->driver);
   setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
@@ -1273,7 +1273,7 @@ static Variant HHVM_METHOD(PDO, exec, const String& query) {
     return false;
   }
 
-  assert(data->m_dbh->conn()->driver);
+  assertx(data->m_dbh->conn()->driver);
   setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
@@ -1289,7 +1289,7 @@ static Variant HHVM_METHOD(PDO, lastinsertid,
                            const String& seqname /* = null_string */) {
   auto data = Native::data<PDOData>(this_);
 
-  assert(data->m_dbh->conn()->driver);
+  assertx(data->m_dbh->conn()->driver);
   setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
@@ -1310,7 +1310,7 @@ static Variant HHVM_METHOD(PDO, lastinsertid,
 static Variant HHVM_METHOD(PDO, errorcode) {
   auto data = Native::data<PDOData>(this_);
 
-  assert(data->m_dbh->conn()->driver);
+  assertx(data->m_dbh->conn()->driver);
   if (data->m_dbh->query_stmt) {
     return String(data->m_dbh->query_stmt->error_code, CopyString);
   }
@@ -1329,7 +1329,7 @@ static Variant HHVM_METHOD(PDO, errorcode) {
 static Array HHVM_METHOD(PDO, errorinfo) {
   auto data = Native::data<PDOData>(this_);
 
-  assert(data->m_dbh->conn()->driver);
+  assertx(data->m_dbh->conn()->driver);
 
   Array ret;
   if (data->m_dbh->query_stmt) {
@@ -1363,7 +1363,7 @@ static Variant HHVM_METHOD(PDO, query, const String& sql,
 
   auto data = Native::data<PDOData>(this_);
   SYNC_VM_REGS_SCOPED();
-  assert(data->m_dbh->conn()->driver);
+  assertx(data->m_dbh->conn()->driver);
   setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
@@ -1380,7 +1380,7 @@ static Variant HHVM_METHOD(PDO, query, const String& sql,
 
   if (data->m_dbh->conn()->preparer(sql, &pdostmt->m_stmt, Array())) {
     auto stmt = pdostmt->m_stmt;
-    assert(stmt);
+    assertx(stmt);
 
     /* unconditionally keep this for later reference */
     stmt->query_string = sql;
@@ -1432,7 +1432,7 @@ static Variant HHVM_METHOD(PDO, quote, const String& str,
                            int64_t paramtype /* = PDO_PARAM_STR */) {
   auto data = Native::data<PDOData>(this_);
 
-  assert(data->m_dbh->conn()->driver);
+  assertx(data->m_dbh->conn()->driver);
   setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
@@ -1873,7 +1873,7 @@ static bool do_fetch(sp_PDOStatement stmt,
     break;
 
   default:
-    assert(false);
+    assertx(false);
     return false;
   }
 

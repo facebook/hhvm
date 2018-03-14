@@ -33,7 +33,7 @@ void ResourceHdr::resetMaxId() {
 }
 
 void ResourceHdr::setId(int id) {
-  assert(id >= 1 && id <= 3); // only for STDIN, STDOUT, STDERR
+  assertx(id >= 1 && id <= 3); // only for STDIN, STDOUT, STDERR
   if (m_id != id) {
     if (m_id == s_max_resource_id) --s_max_resource_id;
     m_id = id;

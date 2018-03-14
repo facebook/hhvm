@@ -481,7 +481,7 @@ IniSettingMap::IniSettingMap(IniSettingMap&& i) noexcept {
 }
 
 const IniSettingMap IniSettingMap::operator[](const String& key) const {
-  assert(this->isArray());
+  assertx(this->isArray());
   return IniSettingMap(m_map.toCArrRef()[key]);
 }
 
@@ -507,7 +507,7 @@ void mergeSettings(member_lval curval, TypedValue v) {
 }
 
 void IniSettingMap::set(const String& key, const Variant& v) {
-  assert(this->isArray());
+  assertx(this->isArray());
   auto const curval = m_map.toArrRef().lvalAt(key);
   mergeSettings(curval, *v.asTypedValue());
 }
@@ -564,9 +564,9 @@ void IniSetting::ParserCallback::onPopEntry(
 void IniSetting::ParserCallback::makeArray(Variant& hash,
                                            const std::string& offset,
                                            const std::string& value) {
-  assert(!offset.empty());
+  assertx(!offset.empty());
   Variant *val = &hash;
-  assert(val->isArray());
+  assertx(val->isArray());
   auto start = offset.c_str();
   auto p = start;
   bool last = false;
@@ -591,12 +591,12 @@ void IniSetting::ParserCallback::makeSettingSub(const String& key,
                                                 const std::string& offset,
                                                 const std::string& value,
                                                 Variant& cur_settings) {
-  assert(offset.size() == 1 ||
+  assertx(offset.size() == 1 ||
          (offset.size() >=2 && offset[offset.size()-2] == 0));
   auto type = offset.substr(offset.size() - 1);
-  assert(type == ":" || type == "@");
+  assertx(type == ":" || type == "@");
   std::vector<std::string> copy_name_parts = split_brackets(value);
-  assert(!copy_name_parts.empty());
+  assertx(!copy_name_parts.empty());
   Variant* base = &cur_settings;
   bool skip = false;
   for (auto& part : copy_name_parts) {
@@ -632,9 +632,9 @@ void IniSetting::ParserCallback::traverseToSet(const String &key,
                                                Variant& value,
                                                Variant& cur_settings,
                                                const std::string& stopChar) {
-  assert(stopChar == "@" || stopChar == ":");
-  assert(offset != stopChar);
-  assert(cur_settings.isArray());
+  assertx(stopChar == "@" || stopChar == ":");
+  assertx(offset != stopChar);
+  assertx(cur_settings.isArray());
   auto isSymlink = stopChar == ":";
   auto start = offset.c_str();
   auto p = start;
@@ -736,7 +736,7 @@ void IniSetting::SectionParserCallback::onPopEntry(
 
 void IniSetting::SystemParserCallback::onEntry(
     const std::string &key, const std::string &value, void *arg) {
-  assert(!key.empty());
+  assertx(!key.empty());
   // onConstant will always be called before onEntry, so we can check
   // here
   if (IniSetting::s_config_is_a_constant) {
@@ -751,7 +751,7 @@ void IniSetting::SystemParserCallback::onPopEntry(const std::string& key,
                                                   const std::string& value,
                                                   const std::string& offset,
                                                   void* arg) {
-  assert(!key.empty());
+  assertx(!key.empty());
   if (IniSetting::s_config_is_a_constant) {
     IniSetting::config_names_that_use_constants.insert(key);
     IniSetting::s_config_is_a_constant = false;
@@ -825,7 +825,7 @@ IniSettingMap IniSetting::FromStringAsMap(const std::string& ini,
 
 Variant IniSetting::Unbox(const Variant& boxed, std::set<ArrayData*>& seen,
                           bool& use_defaults, const String& array_key) {
-  assert(boxed.isArray());
+  assertx(boxed.isArray());
   Variant unboxed(Array::Create());
   auto ad = boxed.getArrayData();
   if (seen.insert(ad).second) {
@@ -833,7 +833,7 @@ Variant IniSetting::Unbox(const Variant& boxed, std::set<ArrayData*>& seen,
       auto key = it.first();
       // asserting here to ensure that key is  a scalar type that can be
       // converted to a string.
-      assert(key.isScalar());
+      assertx(key.isScalar());
       auto& elem = tvAsCVarRef(it.secondRval().tv_ptr());
       unboxed.asArrRef().set(
         key,
@@ -924,7 +924,7 @@ struct IniSettingExtension final : Extension {
 
   // s_saved_defaults should be clear at the beginning of any request
   void requestInit() override {
-    assert(!s_saved_defaults->settings.hasValue());
+    assertx(!s_saved_defaults->settings.hasValue());
   }
 } s_ini_extension;
 
@@ -936,7 +936,7 @@ void IniSetting::Bind(
   std::function<Variant()> getCallback,
   std::function<struct UserIniData *(void)> userDataCallback
 ) {
-  assert(!name.empty());
+  assertx(!name.empty());
 
   /*
    * WATCH OUT: unlike php5, a Mode is not necessarily a bit mask.
@@ -958,7 +958,7 @@ void IniSetting::Bind(
     );
   } else {
     is_thread_local = (mode == PHP_INI_USER || mode == PHP_INI_ALL);
-    assert(is_thread_local || !ExtensionRegistry::modulesInitialised() ||
+    assertx(is_thread_local || !ExtensionRegistry::modulesInitialised() ||
            !s_system_settings_are_set);
   }
   //
@@ -1012,7 +1012,7 @@ void IniSetting::Bind(
 }
 
 void IniSetting::Unbind(const std::string& name) {
-  assert(!name.empty());
+  assertx(!name.empty());
   s_user_callbacks->erase(name);
 }
 
@@ -1095,7 +1095,7 @@ bool IniSetting::FillInConstant(const std::string& name,
 
 bool IniSetting::SetSystem(const String& name, const Variant& value) {
   // Shouldn't be calling this function after the runtime options are loaded.
-  assert(!s_system_settings_are_set);
+  assertx(!s_system_settings_are_set);
   // Since we're going to keep these settings for the lifetime of the program,
   // we need to make them static.
   Variant eval_scalar_variant = value;

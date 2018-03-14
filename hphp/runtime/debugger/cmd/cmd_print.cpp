@@ -91,7 +91,7 @@ std::string CmdPrint::FormatResult(const char* format, const Variant& ret) {
       return sb.data();
     }
 
-    assert(false);
+    assertx(false);
   }
 
   String sret = DebuggerClient::FormatVariable(ret);
@@ -124,7 +124,7 @@ std::string CmdPrint::FormatResult(const char* format, const Variant& ret) {
     return String(ts).data();
   }
 
-  assert(false);
+  assertx(false);
   return "";
 }
 
@@ -157,7 +157,7 @@ void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
     thrift.read(sdata);
     auto const error = DebuggerWireHelpers::WireUnserialize(sdata, m_ret);
     if (error == DebuggerWireHelpers::ErrorMsg) {
-      assert(m_ret.isString());
+      assertx(m_ret.isString());
       m_wireError = m_ret.toCStrRef().data();
     }
     if (error != DebuggerWireHelpers::NoError) {
@@ -329,7 +329,7 @@ void CmdPrint::onClient(DebuggerClient &client) {
   }
   m_bypassAccessCheck = client.getDebuggerClientBypassCheck();
   m_printLevel = client.getDebuggerClientPrintLevel();
-  assert(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
+  assertx(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
   m_frame = client.getFrame();
   auto res = client.xendWithNestedExecution<CmdPrint>(this);
   m_output = res->m_output;

@@ -74,7 +74,7 @@ void SimpleCounter::Count(const std::string &name) {
   if (Enabled) {
     int count = ++s_counter->m_counters[name];
     if (SampleStackCount > 0) {
-      assert(StackTrace::Enabled);
+      assertx(StackTrace::Enabled);
       std::vector<std::string> &stackVec = s_counter->m_stacks[name];
       if ((int)stackVec.size() < SampleStackCount ||
           HHVM_FN(rand)(0, count - 1) < SampleStackCount) {

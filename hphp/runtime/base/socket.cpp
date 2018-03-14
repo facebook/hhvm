@@ -64,7 +64,7 @@ Socket::Socket(std::shared_ptr<SocketData> data)
 : File(data),
   m_data(static_cast<SocketData*>(getFileData()))
 {
-  assert(data);
+  assertx(data);
   inferStreamType();
 }
 
@@ -177,8 +177,8 @@ bool Socket::waitForData() {
 }
 
 int64_t Socket::readImpl(char *buffer, int64_t length) {
-  assert(getFd());
-  assert(length > 0);
+  assertx(getFd());
+  assertx(length > 0);
 
   IOStatusHelper io("socket::recv", m_data->m_address.c_str(), m_data->m_port);
 
@@ -202,8 +202,8 @@ int64_t Socket::readImpl(char *buffer, int64_t length) {
 }
 
 int64_t Socket::writeImpl(const char *buffer, int64_t length) {
-  assert(getFd());
-  assert(length > 0);
+  assertx(getFd());
+  assertx(length > 0);
   setEof(false);
   IOStatusHelper io("socket::send", m_data->m_address.c_str(), m_data->m_port);
   int64_t ret = send(getFd(), buffer, length, 0);

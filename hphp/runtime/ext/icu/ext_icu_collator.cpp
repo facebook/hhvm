@@ -257,7 +257,7 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
                         strval.getBuffer(), strval.length(),
                         (uint8_t*)(sortKeys + sortKeysOffset),
                         sortKeysLength - sortKeysOffset);
-      assert(sortkey_len <= (sortKeysLength - sortKeysOffset));
+      assertx(sortkey_len <= (sortKeysLength - sortKeysOffset));
     }
 
     // Check for index buffer overflow

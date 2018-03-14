@@ -256,7 +256,7 @@ void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
       return nullFunc(ar, name);
     }
     ar->setMagicDispatch(name);
-    assert(!(func->attrs() & AttrStatic));
+    assertx(!(func->attrs() & AttrStatic));
     ar->m_func   = func;
     mce->m_key   = reinterpret_cast<uintptr_t>(cls) | 0x1u;
     mce->m_value = func;

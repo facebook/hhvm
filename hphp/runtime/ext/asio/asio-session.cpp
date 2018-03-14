@@ -58,7 +58,7 @@ namespace {
   }
 
   void runCallback(const Object& function, const Array& params, char* name) {
-    assert(function.get());
+    assertx(function.get());
     try {
       vm_call_user_func(function, params);
     } catch (const Object&) {
@@ -88,12 +88,12 @@ void AsioSession::enterContext(ActRec* savedFP) {
 
   m_contexts.push_back(req::make_raw<AsioContext>(savedFP));
 
-  assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
-  assert(isInContext());
+  assertx(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
+  assertx(isInContext());
 }
 
 void AsioSession::exitContext() {
-  assert(isInContext());
+  assertx(isInContext());
 
   m_contexts.back()->exit(m_contexts.size());
   req::destroy_raw(m_contexts.back());
@@ -101,7 +101,7 @@ void AsioSession::exitContext() {
 }
 
 void AsioSession::initAbruptInterruptException() {
-  assert(!hasAbruptInterruptException());
+  assertx(!hasAbruptInterruptException());
   m_abruptInterruptException =
     SystemLib::AllocInvalidOperationExceptionObject(
       "The request was abruptly interrupted."

@@ -70,8 +70,8 @@ struct ReflectionFuncHandle {
 
   const Func* getFunc() { return m_func; }
   void setFunc(const Func* func) {
-    assert(func != nullptr);
-    assert(m_func == nullptr);
+    assertx(func != nullptr);
+    assertx(m_func == nullptr);
     m_func = func;
   }
 
@@ -107,8 +107,8 @@ struct ReflectionClassHandle {
 
   const Class* getClass() const { return m_cls; }
   void setClass(const Class* cls) {
-    assert(cls != nullptr);
-    assert(m_cls == nullptr);
+    assertx(cls != nullptr);
+    assertx(m_cls == nullptr);
     m_cls = cls;
   }
 
@@ -146,14 +146,14 @@ struct ReflectionConstHandle {
   const Class* getClass() const { return m_cls; }
 
   void setConst(const Class::Const* cns) {
-    assert(cns != nullptr);
-    assert(m_const == nullptr);
+    assertx(cns != nullptr);
+    assertx(m_const == nullptr);
     m_const = cns;
   }
 
   void setClass(const Class* cls) {
-    assert(cls != nullptr);
-    assert(m_cls == nullptr);
+    assertx(cls != nullptr);
+    assertx(m_cls == nullptr);
     m_cls = cls;
   }
 
@@ -178,21 +178,21 @@ struct ReflectionPropHandle {
 
   Type getType() const { return m_type; }
   const Class::Prop* getProp() const {
-    assert(m_type == Instance);
+    assertx(m_type == Instance);
     return m_prop;
   }
   const Class::SProp* getSProp() const {
-    assert(m_type == Static);
+    assertx(m_type == Static);
     return m_sprop;
   }
 
   void setInstanceProp(const Class::Prop* prop) {
-    assert(prop != nullptr);
+    assertx(prop != nullptr);
     m_type = Instance;
     m_prop = prop;
   }
   void setStaticProp(const Class::SProp* sprop) {
-    assert(sprop != nullptr);
+    assertx(sprop != nullptr);
     m_type = Static;
     m_sprop = sprop;
   }
@@ -225,8 +225,8 @@ struct ReflectionTypeAliasHandle {
   const TypeAliasReq* getTypeAliasReq() const { return m_req; }
 
   void setTypeAliasReq(const TypeAliasReq* req) {
-    assert(req != nullptr);
-    assert(m_req == nullptr);
+    assertx(req != nullptr);
+    assertx(m_req == nullptr);
     m_req = req;
   }
 

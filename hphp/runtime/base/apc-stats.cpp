@@ -52,7 +52,7 @@ size_t getMemSize(const TypedValue* tv, bool recurse = true) {
   if (!isRefcountedType(type)) {
     return sizeof(Variant);
   }
-  assert(!"Unsupported Variant type for getMemSize()");
+  assertx(!"Unsupported Variant type for getMemSize()");
   return 0;
 }
 
@@ -113,7 +113,7 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::SharedCollection:
       return getMemSize(APCObject::fromHandle(handle));
   }
-  assert(!"Unsupported APCHandle Type in getMemSize");
+  assertx(!"Unsupported APCHandle Type in getMemSize");
   return 0;
 }
 
@@ -210,7 +210,7 @@ size_t getMemSize(const ArrayData* arr, bool recurse) {
   case ArrayData::ArrayKind::kEmptyKind:
     return sizeof(ArrayData);
   default:
-    assert(!"Unsupported Array type in getMemSize");
+    assertx(!"Unsupported Array type in getMemSize");
   }
   return 0;
 }

@@ -186,13 +186,13 @@ void Config::SetParsedIni(IniSettingMap &ini, const std::string confStr,
                           bool is_system) {
   // if we are setting constants, we must be setting system settings
   if (constants_only) {
-    assert(is_system);
+    assertx(is_system);
   }
   auto parsed_ini = IniSetting::FromStringAsMap(confStr, filename);
   for (ArrayIter iter(parsed_ini.toArray()); iter; ++iter) {
     // most likely a string, but just make sure that we are dealing
     // with something that can be converted to a string
-    assert(iter.first().isScalar());
+    assertx(iter.first().isScalar());
     ini.set(iter.first().toString(), iter.second());
     if (constants_only) {
       IniSetting::FillInConstant(iter.first().toString().toCppString(),

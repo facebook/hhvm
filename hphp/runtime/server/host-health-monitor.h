@@ -32,7 +32,7 @@ namespace HPHP {
 // This class must be used as a singleton.
 struct HostHealthMonitor {
   void subscribe(IHostHealthObserver* observer) {
-    assert(observer != nullptr);
+    assertx(observer != nullptr);
     std::lock_guard<std::mutex> g(m_lock);
     m_observers.insert(observer);
   }

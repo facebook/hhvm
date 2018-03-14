@@ -47,7 +47,7 @@ static void mcr_throwException(const std::string& message,
                                const std::string& key = "") {
   if (!c_MCRouterException) {
     c_MCRouterException = Unit::lookupClass(s_MCRouterException.get());
-    assert(c_MCRouterException);
+    assertx(c_MCRouterException);
   }
 
   Object obj{c_MCRouterException};
@@ -67,7 +67,7 @@ static void mcr_throwOptionException(
   if (!c_MCRouterOptionException) {
     c_MCRouterOptionException =
       Unit::lookupClass(s_MCRouterOptionException.get());
-    assert(c_MCRouterOptionException);
+    assertx(c_MCRouterOptionException);
   }
 
   Array errorArray = Array::Create();
@@ -354,7 +354,7 @@ Object MCRouter::issue(std::unique_ptr<const Request> request) {
   try {
     return Object{ev->getWaitHandle()};
   } catch (...) {
-    assert(false);
+    assertx(false);
     ev->abandon();
     throw;
   }

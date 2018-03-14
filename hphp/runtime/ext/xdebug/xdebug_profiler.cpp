@@ -121,7 +121,7 @@ void XDebugProfiler::recordFrame(const TypedValue* retVal) {
 }
 
 void XDebugProfiler::beginFrame(const char* /*symbol*/) {
-  assert(isNeeded());
+  assertx(isNeeded());
 
   // Check the stack depth, abort if we've reached the limit
   m_depth++;
@@ -139,7 +139,7 @@ void XDebugProfiler::beginFrame(const char* /*symbol*/) {
 
 void XDebugProfiler::endFrame(const TypedValue* retVal, const char* /*symbol*/,
                               bool /*endMain*/ /* = false */) {
-  assert(isNeeded());
+  assertx(isNeeded());
   m_depth--;
 
   if (isCollecting()) {
@@ -157,7 +157,7 @@ void XDebugProfiler::endFrame(const TypedValue* retVal, const char* /*symbol*/,
 // Tracing
 
 void XDebugProfiler::enableTracing(const String& filename, int64_t opts) {
-  assert(!m_tracingEnabled);
+  assertx(!m_tracingEnabled);
 
   // Attempt to open the passed filename. php5 xdebug doesn't enable tracing
   // if we cannot open the file, so we need to open it now as opposed to when we
@@ -223,7 +223,7 @@ void XDebugProfiler::writeTracingResults() {
   // iterating until we run out of frames
   writeTracingResultsHeader<outputType>();
   while (buf_idx < m_nextFrameIdx) {
-    assert(level >= 0);
+    assertx(level >= 0);
     if (!m_frameBuffer[buf_idx].is_func_begin) {
       buf_idx++;
       level--;
@@ -292,7 +292,7 @@ int64_t XDebugProfiler::writeTracingFrame(int64_t level,
                                           const FrameData* parentBegin) {
   uint64_t id = m_tracingNextFrameId++;
   FrameData& begin = m_frameBuffer[startIdx];
-  assert(begin.is_func_begin);
+  assertx(begin.is_func_begin);
 
   writeTracingLinePrefix<outputType>();
   writeTracingLevel<outputType>(level);
@@ -529,7 +529,7 @@ static const StaticString
   s_SCRIPT_NAME("SCRIPT_NAME");
 
 void XDebugProfiler::enableProfiling(const String& filename, int64_t opts) {
-  assert(!m_profilingEnabled);
+  assertx(!m_profilingEnabled);
 
   // Attempt to open the passed filename. php5 xdebug doesn't enable profiling
   // if we cannot open the file, so we need to open it now as opposed to when we
@@ -585,7 +585,7 @@ void XDebugProfiler::writeProfilingResults() {
 }
 
 int64_t XDebugProfiler::writeProfilingFrame(int64_t startIdx) {
-  assert(m_frameBuffer[startIdx].is_func_begin);
+  assertx(m_frameBuffer[startIdx].is_func_begin);
 
   // We need to store the child calls so we don't have to find
   // them again in writeCacheGrindFrame. Theoretically, this could be stored

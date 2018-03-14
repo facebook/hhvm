@@ -100,7 +100,7 @@ VariableSerializer::getKind(const ArrayData* arr) const {
   if (arr->isDict()) return VariableSerializer::ArrayKind::Dict;
   if (arr->isVecArray()) return VariableSerializer::ArrayKind::Vec;
   if (arr->isKeyset()) return VariableSerializer::ArrayKind::Keyset;
-  assert(arr->isPHPArray());
+  assertx(arr->isPHPArray());
   if (m_keepDVArrays) {
     if (arr->isVArray()) return VariableSerializer::ArrayKind::VArray;
     if (arr->isDArray()) return VariableSerializer::ArrayKind::DArray;
@@ -110,7 +110,7 @@ VariableSerializer::getKind(const ArrayData* arr) const {
 
 void VariableSerializer::pushObjectInfo(const String& objClass, int objId,
                                         char objCode) {
-  assert(objCode == 'O' || objCode == 'V' || objCode == 'K');
+  assertx(objCode == 'O' || objCode == 'V' || objCode == 'K');
   m_objectInfos.emplace_back(
     ObjectInfo { m_objClass, m_objId, m_objCode, m_rsrcName, m_rsrcId }
   );
@@ -184,7 +184,7 @@ String VariableSerializer::serializeWithLimit(const Variant& v, int limit) {
   if (m_type == Type::Serialize || m_type == Type::Internal ||
       m_type == Type::JSON || m_type == Type::APCSerialize ||
       m_type == Type::DebuggerSerialize) {
-    assert(false);
+    assertx(false);
     return String();
   }
   StringBuffer buf;
@@ -230,7 +230,7 @@ void VariableSerializer::write(bool v) {
     m_buf->append(v ? "b:1;" : "b:0;");
     break;
   default:
-    assert(false);
+    assertx(false);
     break;
   }
 }
@@ -267,7 +267,7 @@ void VariableSerializer::write(int64_t v) {
     m_buf->append(';');
     break;
   default:
-    assert(false);
+    assertx(false);
     break;
   }
 }
@@ -341,7 +341,7 @@ void VariableSerializer::write(double v) {
     m_buf->append(';');
     break;
   default:
-    assert(false);
+    assertx(false);
     break;
   }
 }
@@ -415,7 +415,7 @@ utf8_decode:
       sb.append("null", 4);
       break;
     }
-    assert(c >= 0);
+    assertx(c >= 0);
     unsigned short us = (unsigned short)c;
     switch (us) {
     case '"':
@@ -593,7 +593,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     break;
   }
   default:
-    assert(false);
+    assertx(false);
     break;
   }
 }
@@ -617,7 +617,7 @@ void VariableSerializer::write(const Object& v) {
   if (!v.isNull() && m_type == Type::JSON) {
 
     if (v.instanceof(s_JsonSerializable)) {
-      assert(!v->isCollection());
+      assertx(!v->isCollection());
       Variant ret = v->o_invoke_few_args(s_jsonSerialize, 0);
       // for non objects or when $this is not returned
       if (!ret.isObject() || (ret.isObject() && !same(ret, v))) {
@@ -708,7 +708,7 @@ void VariableSerializer::writeNull() {
     m_buf->append("null");
     break;
   default:
-    assert(false);
+    assertx(false);
     break;
   }
 }
@@ -747,7 +747,7 @@ void VariableSerializer::writeOverflow(const TypedValue& tv) {
   case Type::APCSerialize:
     {
       int optId = m_refs[tv].m_id;
-      assert(optId != NO_ID);
+      assertx(optId != NO_ID);
       bool isObject = tv.m_type == KindOfResource || tv.m_type == KindOfObject;
       if (wasRef) {
         m_buf->append("R:");
@@ -767,7 +767,7 @@ void VariableSerializer::writeOverflow(const TypedValue& tv) {
     m_buf->append("null");
     break;
   default:
-    assert(false);
+    assertx(false);
     break;
   }
 }
@@ -839,7 +839,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       if (m_objCode == 'O') {
         m_buf->append("::__set_state(array(\n");
       } else {
-        assert(m_objCode == 'V' || m_objCode == 'K');
+        assertx(m_objCode == 'V' || m_objCode == 'K');
         m_buf->append(" {\n");
       }
     } else if (!m_rsrcName.empty()) {
@@ -983,7 +983,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
 
     break;
   default:
-    assert(false);
+    assertx(false);
     break;
   }
 
@@ -1002,7 +1002,7 @@ void VariableSerializer::writePropertyKey(const String& prop) {
   if (!*key && kl) {
     const char *cls = key + 1;
     if (*cls == '*') {
-      assert(key[2] == 0);
+      assertx(key[2] == 0);
       m_buf->append(key + 3, kl - 3);
       const char prot[] = "\":protected";
       int o = m_type == Type::PrintR ? 1 : 0;
@@ -1125,7 +1125,7 @@ void VariableSerializer::writeArrayKey(
     break;
 
   default:
-    assert(false);
+    assertx(false);
     break;
   }
 }
@@ -1224,7 +1224,7 @@ void VariableSerializer::writeArrayFooter(
       if (m_objCode == 'O') {
         m_buf->append("))");
       } else {
-        assert(m_objCode == 'V' || m_objCode == 'K');
+        assertx(m_objCode == 'V' || m_objCode == 'K');
         m_buf->append("}");
       }
     } else if (m_rsrcName.empty()) { // for rsrc, only write NULL in arrayHeader
@@ -1268,7 +1268,7 @@ void VariableSerializer::writeArrayFooter(
     }
     break;
   default:
-    assert(false);
+    assertx(false);
     break;
   }
 
@@ -1339,7 +1339,7 @@ bool VariableSerializer::incNestedLevel(const TypedValue& tv) {
     }
     break;
   default:
-    assert(false);
+    assertx(false);
     break;
   }
   return false;
@@ -1354,7 +1354,7 @@ void VariableSerializer::decNestedLevel(const TypedValue& tv) {
 }
 
 void VariableSerializer::serializeRef(const TypedValue* tv, bool isArrayKey) {
-  assert(tv->m_type == KindOfRef);
+  assertx(tv->m_type == KindOfRef);
   // Ugly, but behavior is different for serialize
   if (getType() == VariableSerializer::Type::Serialize ||
       getType() == VariableSerializer::Type::Internal ||
@@ -1382,12 +1382,12 @@ void VariableSerializer::serializeVariant(const Variant& self,
   switch (tv->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      assert(!isArrayKey);
+      assertx(!isArrayKey);
       writeNull();
       return;
 
     case KindOfBoolean:
-      assert(!isArrayKey);
+      assertx(!isArrayKey);
       write(tv->m_data.num != 0);
       return;
 
@@ -1407,39 +1407,39 @@ void VariableSerializer::serializeVariant(const Variant& self,
 
     case KindOfPersistentVec:
     case KindOfVec:
-      assert(!isArrayKey);
-      assert(tv->m_data.parr->isVecArray());
+      assertx(!isArrayKey);
+      assertx(tv->m_data.parr->isVecArray());
       serializeArray(tv->m_data.parr, skipNestCheck);
       return;
 
     case KindOfPersistentDict:
     case KindOfDict:
-      assert(!isArrayKey);
-      assert(tv->m_data.parr->isDict());
+      assertx(!isArrayKey);
+      assertx(tv->m_data.parr->isDict());
       serializeArray(tv->m_data.parr, skipNestCheck);
       return;
 
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      assert(!isArrayKey);
-      assert(tv->m_data.parr->isKeyset());
+      assertx(!isArrayKey);
+      assertx(tv->m_data.parr->isKeyset());
       serializeArray(tv->m_data.parr, skipNestCheck);
       return;
 
     case KindOfPersistentArray:
     case KindOfArray:
-      assert(!isArrayKey);
-      assert(tv->m_data.parr->isPHPArray());
+      assertx(!isArrayKey);
+      assertx(tv->m_data.parr->isPHPArray());
       serializeArray(tv->m_data.parr, skipNestCheck);
       return;
 
     case KindOfObject:
-      assert(!isArrayKey);
+      assertx(!isArrayKey);
       serializeObject(tv->m_data.pobj);
       return;
 
     case KindOfResource:
-      assert(!isArrayKey);
+      assertx(!isArrayKey);
       serializeResource(tv->m_data.pres->data());
       return;
 
@@ -1667,7 +1667,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
              type == VariableSerializer::Type::Internal ||
              type == VariableSerializer::Type::APCSerialize)) {
     if (obj->instanceof(SystemLib::s_SerializableClass)) {
-      assert(!obj->isCollection());
+      assertx(!obj->isCollection());
       ret =
         const_cast<ObjectData*>(obj)->o_invoke_few_args(s_serialize, 0);
       if (ret.isString()) {
@@ -1714,10 +1714,10 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
   }
 
   if (UNLIKELY(handleSleep)) {
-    assert(!obj->isCollection());
+    assertx(!obj->isCollection());
     if (ret.isArray()) {
       Array wanted = Array::Create();
-      assert(isArrayType(ret.getRawType())); // can't be KindOfRef
+      assertx(isArrayType(ret.getRawType())); // can't be KindOfRef
       const Array &props = ret.asCArrRef();
       for (ArrayIter iter(props); iter; ++iter) {
         String memberName = iter.second().toString();

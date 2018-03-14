@@ -74,7 +74,7 @@ doVregMoves(Vunit& unit, MovePlan& moves) {
         // next already visited; check if next is on current path.
         if (index[next] >= index[reg]) {
           // found a cycle.
-          assert(num_cycles < N);
+          assertx(num_cycles < N);
           cycles[num_cycles++] = { next, nextIndex - index[next] };
         }
       }
@@ -171,7 +171,7 @@ jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
         // next already visited; check if next is on current path.
         if (index[next] >= index[reg]) {
           // found a cycle.
-          assert(num_cycles < N);
+          assertx(num_cycles < N);
           cycles[num_cycles++] = { next, nextIndex - index[next] };
         }
       }

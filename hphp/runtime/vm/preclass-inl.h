@@ -44,20 +44,20 @@ inline bool PreClass::hasProp(const StringData* propName) const {
 inline const PreClass::Const*
 PreClass::lookupConstant(const StringData* cnsName) const {
   Slot s = m_constants.findIndex(cnsName);
-  assert(s != kInvalidSlot);
+  assertx(s != kInvalidSlot);
   return &m_constants[s];
 }
 
 inline Func* PreClass::lookupMethod(const StringData* methName) const {
   Func* f = m_methods.lookupDefault(methName, nullptr);
-  assert(f != nullptr);
+  assertx(f != nullptr);
   return f;
 }
 
 inline const PreClass::Prop*
 PreClass::lookupProp(const StringData* propName) const {
   Slot s = m_properties.findIndex(propName);
-  assert(s != kInvalidSlot);
+  assertx(s != kInvalidSlot);
   return &m_properties[s];
 }
 

@@ -47,7 +47,7 @@ TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
 
   add(tm, aliasedName);
 
-  assert(m_dataForName.count(origName));
+  assertx(m_dataForName.count(origName));
   m_dataForName[origName].aliases.push_back(aliasedName);
 }
 

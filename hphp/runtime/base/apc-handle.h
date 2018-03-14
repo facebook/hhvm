@@ -142,7 +142,7 @@ struct APCHandle {
 
   explicit APCHandle(APCKind kind, DataType type = kInvalidDataType)
     : m_type(type), m_kind(kind) {
-    assert(checkInvariants());
+    assertx(checkInvariants());
   }
 
   APCHandle(const APCHandle&) = delete;
@@ -219,13 +219,13 @@ struct APCHandle {
    * the thread-safety rule documented above the class.
    */
   bool objAttempted() const {
-    assert(m_kind == APCKind::SerializedObject ||
+    assertx(m_kind == APCKind::SerializedObject ||
            m_kind == APCKind::SharedObject ||
            m_kind == APCKind::SharedCollection);
     return m_obj_attempted.load(std::memory_order_relaxed);
   }
   void setObjAttempted() {
-    assert(m_kind == APCKind::SerializedObject ||
+    assertx(m_kind == APCKind::SerializedObject ||
            m_kind == APCKind::SharedObject ||
            m_kind == APCKind::SharedCollection);
     m_obj_attempted.store(true, std::memory_order_relaxed);

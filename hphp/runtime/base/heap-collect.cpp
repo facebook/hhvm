@@ -126,7 +126,7 @@ struct Collector {
   HeapObject* find(const void*);
 
   size_t slab_index(const void* h) {
-    assert((char*)h >= (char*)slabs_range_.ptr &&
+    assertx((char*)h >= (char*)slabs_range_.ptr &&
            (char*)h < (char*)slabs_range_.ptr + slabs_range_.size);
     return (uintptr_t(h) - uintptr_t(slabs_range_.ptr)) >> kLgSlabSize;
   }
@@ -231,7 +231,7 @@ void Collector::checkedEnqueue(const void* p) {
       auto& work = willScanConservative(h) ? cwork_ : xwork_;
       work.push_back(h);
       max_worklist_ = std::max(max_worklist_, cwork_.size() + xwork_.size());
-      assert(checkEnqueuedKind(h));
+      assertx(checkEnqueuedKind(h));
     }
   } else if (apcgc) {
     // If p doesn't belong to any APC data, APCGCManager won't do anything
@@ -258,7 +258,7 @@ void Collector::exactEnqueue(const void* p) {
       ++marked_;
       xwork_.push_back(h);
       max_worklist_ = std::max(max_worklist_, xwork_.size());
-      assert(checkEnqueuedKind(h));
+      assertx(checkEnqueuedKind(h));
     }
   } else if (apcgc) {
     // If p doesn't belong to any APC data, APCGCManager won't do anything
@@ -325,7 +325,7 @@ NEVER_INLINE void Collector::init() {
         }
       } else {
         // put the inner big object in ptrs_ without the BigObj header
-        assert(h->kind() == HeaderKind::BigObj);
+        assertx(h->kind() == HeaderKind::BigObj);
         ptrs_.insert(static_cast<MallocNode*>(h)+1, size - sizeof(MallocNode));
       }
     },
@@ -410,7 +410,7 @@ NEVER_INLINE void Collector::traceConservative() {
 template <bool apcgc>
 NEVER_INLINE void Collector::traceExact() {
   auto finish = [&] {
-    assert(cwork_.empty() && type_scanner_.m_conservative.empty());
+    assertx(cwork_.empty() && type_scanner_.m_conservative.empty());
     for (auto addr : type_scanner_.m_addrs) {
       xscanned_ += sizeof(*addr);
       exactEnqueue<apcgc>(*addr);
@@ -484,14 +484,14 @@ NEVER_INLINE void Collector::sweep() {
     if (RuntimeOption::EvalQuarantine) mm.endQuarantine(std::move(quarantine));
     freed_bytes_ = usage0 - mm.currentUsage();
     sweep_ns_ = cpu_ns() - t0;
-    assert(freed_bytes_ >= 0);
+    assertx(freed_bytes_ >= 0);
   };
 
   // Clear weak references as needed.
   for (auto w : type_scanner_.m_weak) {
     auto wref = static_cast<const WeakRefDataHandle*>(w);
-    assert(wref->acquire_count == 0);
-    assert(wref->wr_data);
+    assertx(wref->acquire_count == 0);
+    assertx(wref->wr_data);
     auto type = wref->wr_data->pointee.m_type;
     if (type == KindOfObject) {
       auto h = find(wref->wr_data->pointee.m_data.pobj);
@@ -501,7 +501,7 @@ NEVER_INLINE void Collector::sweep() {
       }
       continue;
     }
-    assert(type == KindOfNull || type == KindOfUninit);
+    assertx(type == KindOfNull || type == KindOfUninit);
   }
   type_scanner_.m_weak.clear();
 
@@ -761,7 +761,7 @@ void MemoryManager::collect(const char* phase) {
 }
 
 void MemoryManager::setMemoryLimit(size_t limit) {
-  assert(limit <= (size_t)std::numeric_limits<int64_t>::max());
+  assertx(limit <= (size_t)std::numeric_limits<int64_t>::max());
   m_usageLimit = limit;
   updateNextGc();
 }

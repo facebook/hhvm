@@ -132,8 +132,8 @@ struct ArrayIter {
   void next() {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
-      assert(ad);
-      assert(m_pos != ad->iter_end());
+      assertx(ad);
+      assertx(m_pos != ad->iter_end());
       m_pos = ad->iter_advance(m_pos);
       return;
     }
@@ -144,8 +144,8 @@ struct ArrayIter {
   Variant first() {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
-      assert(ad);
-      assert(m_pos != ad->iter_end());
+      assertx(ad);
+      assertx(m_pos != ad->iter_end());
       return ad->getKey(m_pos);
     }
     return firstHelper();
@@ -154,7 +154,7 @@ struct ArrayIter {
 
   TypedValue nvFirst() {
     auto const ad = getArrayData();
-    assert(ad && m_pos != ad->iter_end());
+    assertx(ad && m_pos != ad->iter_end());
     return ad->nvGetKey(m_pos);
   }
 
@@ -184,7 +184,7 @@ struct ArrayIter {
   // Inline version of secondRef.  Only for use in iterator helpers.
   member_rval nvSecond() const {
     auto const ad = getArrayData();
-    assert(ad && m_pos != ad->iter_end());
+    assertx(ad && m_pos != ad->iter_end());
     return ad->rvalPos(m_pos);
   }
 
@@ -193,7 +193,7 @@ struct ArrayIter {
   }
 
   const ArrayData* getArrayData() const {
-    assert(hasArrayData());
+    assertx(hasArrayData());
     return m_data;
   }
   ssize_t getPos() {
@@ -220,7 +220,7 @@ struct ArrayIter {
   }
 
   ObjectData* getObject() const {
-    assert(!hasArrayData());
+    assertx(!hasArrayData());
     return (ObjectData*)((intptr_t)m_obj & ~1);
   }
 
@@ -240,7 +240,7 @@ private:
   void destruct();
 
   void setArrayData(const ArrayData* ad) {
-    assert((intptr_t(ad) & 1) == 0);
+    assertx((intptr_t(ad) & 1) == 0);
     m_data = ad;
     m_nextHelperIdx = IterNextIndex::ArrayMixed;
     if (ad != nullptr) {
@@ -253,7 +253,7 @@ private:
   }
 
   void setObject(ObjectData* obj) {
-    assert((intptr_t(obj) & 1) == 0);
+    assertx((intptr_t(obj) & 1) == 0);
     m_obj = (ObjectData*)((intptr_t)obj | 1);
     m_nextHelperIdx = IterNextIndex::Object;
   }
@@ -344,17 +344,17 @@ struct MArrayIter {
    */
   Variant key() {
     ArrayData* data = getArray();
-    assert(data && data == getContainer());
-    assert(!getResetFlag() && data->validMArrayIter(*this));
+    assertx(data && data == getContainer());
+    assertx(!getResetFlag() && data->validMArrayIter(*this));
     return data->getKey(m_pos);
   }
 
   Variant& val() {
     ArrayData* data = getArray();
-    assert(data && data == getContainer());
-    assert(!data->cowCheck() || data->noCopyOnWrite());
-    assert(!getResetFlag());
-    assert(data->validMArrayIter(*this));
+    assertx(data && data == getContainer());
+    assertx(!data->cowCheck() || data->noCopyOnWrite());
+    assertx(!getResetFlag());
+    assertx(data->validMArrayIter(*this));
     // Normally it's not ok to modify the return value of rvalPos,
     // but the whole point of mutable array iteration is that this is
     // allowed, so this const_cast is not actually evil.
@@ -387,11 +387,11 @@ struct MArrayIter {
     return bool(intptr_t(m_data) & 1LL);
   }
   RefData* getRef() const {
-    assert(hasRef());
+    assertx(hasRef());
     return m_ref;
   }
   ArrayData* getAd() const {
-    assert(hasAd());
+    assertx(hasAd());
     return (ArrayData*)(intptr_t(m_data) & ~1LL);
   }
   void setRef(RefData* ref) {
@@ -412,7 +412,7 @@ struct MArrayIter {
 
 private:
   ArrayData* getData() const {
-    assert(hasRef());
+    assertx(hasRef());
     return isArrayType(m_ref->tv()->m_type)
       ? m_ref->tv()->m_data.parr
       : nullptr;
@@ -639,7 +639,7 @@ bool IterateV(const TypedValue& it,
               ArrFn arrFn,
               PreCollFn preCollFn,
               ObjFn objFn) {
-  assert(it.m_type != KindOfRef);
+  assertx(it.m_type != KindOfRef);
   ArrayData* adata;
   if (LIKELY(isArrayLikeType(it.m_type))) {
     adata = it.m_data.parr;
@@ -658,7 +658,7 @@ bool IterateV(const TypedValue& it,
     if (ArrayData::call_helper(preCollFn, odata)) return true;
     adata = collections::asArray(odata);
     if (adata) goto do_array;
-    assert(odata->collectionType() == CollectionType::Pair);
+    assertx(odata->collectionType() == CollectionType::Pair);
     auto tv = make_tv<KindOfInt64>(0);
     if (!ArrayData::call_helper(arrFn, *collections::at(odata, &tv))) {
       tv.m_data.num = 1;
@@ -727,7 +727,7 @@ bool IterateKV(const TypedValue& it,
                ArrFn arrFn,
                PreCollFn preCollFn,
                ObjFn objFn) {
-  assert(it.m_type != KindOfRef);
+  assertx(it.m_type != KindOfRef);
   ArrayData* adata;
   if (LIKELY(isArrayLikeType(it.m_type))) {
     adata = it.m_data.parr;
@@ -746,7 +746,7 @@ bool IterateKV(const TypedValue& it,
     if (ArrayData::call_helper(preCollFn, odata)) return true;
     adata = collections::asArray(odata);
     if (adata) goto do_array;
-    assert(odata->collectionType() == CollectionType::Pair);
+    assertx(odata->collectionType() == CollectionType::Pair);
     auto tv = make_tv<KindOfInt64>(0);
     if (!ArrayData::call_helper(arrFn, tv, *collections::at(odata, &tv))) {
       tv.m_data.num = 1;

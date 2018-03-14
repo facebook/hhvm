@@ -133,7 +133,7 @@ ArrayData* asArray(ObjectData* obj) {
 // Deep Copy
 
 ArrayData* deepCopyArray(ArrayData* arr) {
-  assert(arr->isPHPArray());
+  assertx(arr->isPHPArray());
   Array ar(arr);
   IterateKV(
     arr,
@@ -151,7 +151,7 @@ ArrayData* deepCopyArray(ArrayData* arr) {
 }
 
 ArrayData* deepCopyVecArray(ArrayData* arr) {
-  assert(arr->isVecArray());
+  assertx(arr->isVecArray());
   Array ar(arr);
   PackedArray::IterateKV(
     arr,
@@ -160,7 +160,7 @@ ArrayData* deepCopyVecArray(ArrayData* arr) {
       Variant value{tvAsCVarRef(&v)};
       deepCopy(value.asTypedValue());
       if (value.asTypedValue()->m_data.num != v.m_data.num) {
-        assert(k.m_type == KindOfInt64);
+        assertx(k.m_type == KindOfInt64);
         ar.set(k.m_data.num, value);
       }
       return false;
@@ -170,7 +170,7 @@ ArrayData* deepCopyVecArray(ArrayData* arr) {
 }
 
 ArrayData* deepCopyDict(ArrayData* arr) {
-  assert(arr->isDict());
+  assertx(arr->isDict());
   Array ar(arr);
   MixedArray::IterateKV(
     MixedArray::asMixed(arr),
@@ -281,7 +281,7 @@ void deepCopy(TypedValue* tv) {
         default:
           assertx(false);
       }
-      assert(obj != tv->m_data.pobj || tv->m_data.pobj->hasMultipleRefs());
+      assertx(obj != tv->m_data.pobj || tv->m_data.pobj->hasMultipleRefs());
       decRefObj(tv->m_data.pobj);
       tv->m_data.pobj = obj;
       return;
@@ -295,7 +295,7 @@ void deepCopy(TypedValue* tv) {
 
 template <bool throwOnMiss>
 static inline TypedValue* atImpl(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(key->m_type != KindOfRef);
   switch (obj->collectionType()) {
 #define X(type) case CollectionType::type: \
                   return c_##type::OffsetAt<throwOnMiss>(obj, key);

@@ -126,7 +126,7 @@ bool SetVariableCommand::executeImpl(
           break;
 
         default:
-          assert(false);
+          assertx(false);
       }
     } else if (obj->objectType() == ServerObjectType::Variable) {
       VariableObject* variable = static_cast<VariableObject*>(obj);
@@ -230,7 +230,7 @@ bool SetVariableCommand::setArrayVariable(
   VMRegAnchor regAnchor;
 
   Variant& var = array->m_variable;
-  assert(var.isArray());
+  assertx(var.isArray());
 
   Array arr = var.toArray();
   for (ArrayIter iter(arr); iter; ++iter) {
@@ -271,7 +271,7 @@ bool SetVariableCommand::setObjectVariable(
   folly::dynamic* result
 ) {
   Variant& var = object->m_variable;
-  assert(var.isObject());
+  assertx(var.isObject());
 
   HPHP::String key(name);
   ObjectData* obj = var.getObjectData();

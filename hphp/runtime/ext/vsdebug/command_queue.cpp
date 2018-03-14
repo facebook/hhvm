@@ -39,7 +39,7 @@ void CommandQueue::shutdown() {
     while (m_threadProcessingCount.load() > 0) {
       m_waiterLeftCondition.wait(lock);
     }
-    assert(m_threadProcessingCount.load() == 0);
+    assertx(m_threadProcessingCount.load() == 0);
   }
 
   // Free any commands remaining in the queue.
@@ -48,7 +48,7 @@ void CommandQueue::shutdown() {
     it = m_commands.erase(it);
   }
 
-  assert(m_commands.empty());
+  assertx(m_commands.empty());
 }
 
 void CommandQueue::processCommands() {
@@ -61,7 +61,7 @@ void CommandQueue::processCommands() {
   m_threadProcessingCount++;
 
   SCOPE_EXIT {
-    assert(lock.owns_lock());
+    assertx(lock.owns_lock());
     m_threadProcessingCount--;
 
     if (m_terminating) {

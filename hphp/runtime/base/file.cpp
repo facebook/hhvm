@@ -98,7 +98,7 @@ String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
 
     // unresolvable paths are all considered as unsafe
     if (canonicalized.find("..") >= 0) {
-      assert(canonicalized.find("..") == 0);
+      assertx(canonicalized.find("..") == 0);
       return empty_string();
     }
   }
@@ -201,7 +201,7 @@ void File::sweep() {
   // `this` has been request-heap allocated. Note that the derived class'
   // sweep() is responsible for closing m_fd and any other non-request
   // resources it might have allocated.
-  assert(!valid());
+  assertx(!valid());
   File::closeImpl();
   m_data.reset();
   m_wrapperType = nullptr;
@@ -334,7 +334,7 @@ String File::read(int64_t length) {
 
   m_data->m_position += copied;
 
-  assert(copied <= allocSize);
+  assertx(copied <= allocSize);
   s.shrink(copied);
   return s;
 }
@@ -424,7 +424,7 @@ bool File::seek(int64_t offset, int whence /* = SEEK_SET */) {
   }
   if (offset > 0) {
     int64_t avail = bufferedLen();
-    assert(avail >= 0);
+    assertx(avail >= 0);
     if (avail >= offset) {
       m_data->m_readpos += offset;
       return true;
@@ -487,7 +487,7 @@ bool File::lock(int operation) {
 }
 
 bool File::lock(int operation, bool &wouldblock /* = false */) {
-  assert(m_data->m_fd >= 0);
+  assertx(m_data->m_fd >= 0);
 
   wouldblock = false;
   if (flock(m_data->m_fd, operation)) {
@@ -657,7 +657,7 @@ String File::readLine(int64_t maxlen /* = 0 */) {
   }
 
   if (total_copied == 0) {
-    assert(ret == nullptr);
+    assertx(ret == nullptr);
     return String();
   }
 
@@ -687,7 +687,7 @@ Variant File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
   }
 
   if (avail < maxlen && !eof()) {
-    assert(m_data->m_writepos + maxlen - avail <= m_data->m_chunkSize * 3);
+    assertx(m_data->m_writepos + maxlen - avail <= m_data->m_chunkSize * 3);
     m_data->m_writepos +=
       readImpl(m_data->m_buffer + m_data->m_writepos, maxlen - avail);
     maxlen = bufferedLen();
@@ -1121,7 +1121,7 @@ String File::applyFilters(const String& buffer,
     }
   }
 
-  assert(out);
+  assertx(out);
   return out->createString();
 }
 

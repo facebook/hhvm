@@ -40,7 +40,7 @@ const char* memberCodeString(MemberCode mcode) {
   static_assert(
       std::is_unsigned<typename std::underlying_type<MemberCode>::type>::value,
       "MemberCode is expected to be unsigned.");
-  assert(mcode < NumMemberCodes);
+  assertx(mcode < NumMemberCodes);
   return memberNames[mcode];
 }
 

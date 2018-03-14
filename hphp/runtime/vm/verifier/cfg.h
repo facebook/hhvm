@@ -179,7 +179,7 @@ struct LinearBlocks {
   LinearBlocks(Block* first, Block* end) : b(first), end(end) {
   }
   bool empty() const { return b == end; }
-  Block* front() const { assert(!empty()); return b; }
+  Block* front() const { assertx(!empty()); return b; }
   Block* popFront() { Block* f = front(); b = b->next_linear; return f; }
  private:
   Block *b;   // The current block.
@@ -195,8 +195,8 @@ struct BlockPtrRange {
     trimBack();
   }
   bool empty() const { return i >= end; }
-  Block* front() const { assert(!empty()); return i[0]; }
-  Block* back()  const { assert(!empty()); return end[-1]; }
+  Block* front() const { assertx(!empty()); return i[0]; }
+  Block* back()  const { assertx(!empty()); return end[-1]; }
   Block* popFront() {
     Block* b = front();
     ++i; trimFront();
@@ -225,7 +225,7 @@ struct InstrRange {
     return pc >= end;
   }
   PC front() const {
-    assert(!empty());
+    assertx(!empty());
     return pc;
   }
   PC popFront() {

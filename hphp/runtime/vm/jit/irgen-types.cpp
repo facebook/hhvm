@@ -75,14 +75,14 @@ SSATmp* ldClassSafe(IRGS& env, const StringData* className,
  */
 SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
                           SSATmp* checkCls) {
-  assert(src->isA(TObj));
+  assertx(src->isA(TObj));
   if (s_Awaitable.get()->isame(className)) {
     return gen(env, IsWaitHandle, src);
   }
 
   auto knownCls = checkCls->hasConstVal(TCls) ? checkCls->clsVal() : nullptr;
-  assert(IMPLIES(knownCls, classIsUniqueOrCtxParent(env, knownCls)));
-  assert(IMPLIES(knownCls, knownCls->name()->isame(className)));
+  assertx(IMPLIES(knownCls, classIsUniqueOrCtxParent(env, knownCls)));
+  assertx(IMPLIES(knownCls, knownCls->name()->isame(className)));
 
   auto const srcType = src->type();
 
@@ -336,7 +336,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id, bool isReturnType,
     );
     return;
   }
-  assert(IMPLIES(tc.isThis(), RuntimeOption::EvalThisTypeHintLevel == 1));
+  assertx(IMPLIES(tc.isThis(), RuntimeOption::EvalThisTypeHintLevel == 1));
 
   // If we reach here then valType is Obj and tc is Object, Self, or Parent
   const StringData* clsName;

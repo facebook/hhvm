@@ -69,7 +69,7 @@ static Array convert_to_array(const ObjectData* obj, Class* cls) {
   // We currently do not special case ArrayObjects / ArrayIterators in
   // reflectionClass. Until, either ArrayObject moves to HNI or a special
   // case is added to reflection unset should be turned off.
-  assert(prop.has_val() /* && prop.type() != KindOfUninit */);
+  assertx(prop.has_val() /* && prop.type() != KindOfUninit */);
   return tvCastToArrayLike(prop.tv());
 }
 
@@ -108,7 +108,7 @@ NEVER_INLINE bool ObjectData::destructImpl() {
   // Some decref paths call release() when --count == 0 and some call it when
   // count == 1. This difference only matters for objects that resurrect
   // themselves in their destructors, so make sure count is consistent here.
-  assert(m_count == 0 || m_count == 1);
+  assertx(m_count == 0 || m_count == 1);
   m_count = static_cast<RefCount>(0);
 
   // We raise the refcount around the call to __destruct(). This is to prevent
@@ -119,7 +119,7 @@ NEVER_INLINE bool ObjectData::destructImpl() {
 }
 
 void ObjectData::destructForExit() {
-  assert(RuntimeOption::EnableObjDestructCall);
+  assertx(RuntimeOption::EnableObjDestructCall);
   auto const dtor = m_cls->getDtor();
   if (dtor) {
     g_context->m_liveBCObjs.erase(this);
@@ -129,8 +129,8 @@ void ObjectData::destructForExit() {
   setNoDestruct();
 
   // We're exiting, so there should not be any live faults.
-  assert(g_context->m_faults.empty());
-  assert(!g_context->m_unwindingCppException);
+  assertx(g_context->m_faults.empty());
+  assertx(!g_context->m_unwindingCppException);
 
   CountableHelper h(this);
   invoke_destructor(this, dtor);
@@ -140,15 +140,15 @@ NEVER_INLINE
 static void freeDynPropArray(ObjectData* inst) {
   auto& table = g_context->dynPropTable;
   auto it = table.find(inst);
-  assert(it != end(table));
-  assert(it->second.arr().isPHPArray());
+  assertx(it != end(table));
+  assertx(it->second.arr().isPHPArray());
   it->second.destroy();
   table.erase(it);
 }
 
 NEVER_INLINE
 void ObjectData::releaseNoObjDestructCheck() noexcept {
-  assert(kindIsValid());
+  assertx(kindIsValid());
 
   // Destructors are unsupported in one-bit reference counting mode.
   if (!one_bit_refcount && UNLIKELY(!getAttribute(NoDestructor))) {
@@ -181,7 +181,7 @@ void ObjectData::releaseNoObjDestructCheck() noexcept {
   invalidateWeakRef();
   auto const size =
     reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(this);
-  assert(size == sizeForNProps(nProps));
+  assertx(size == sizeForNProps(nProps));
   tl_heap->objFree(this, size);
   AARCH64_WALKABLE_FRAME();
 }
@@ -193,7 +193,7 @@ static void tail_call_remove_live_bc_obj(ObjectData* obj) {
 }
 
 void ObjectData::release() noexcept {
-  assert(kindIsValid());
+  assertx(kindIsValid());
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall && m_cls->getDtor())) {
     tail_call_remove_live_bc_obj(this);
     AARCH64_WALKABLE_FRAME();
@@ -211,7 +211,7 @@ StrNR ObjectData::getClassName() const {
 }
 
 bool ObjectData::instanceof(const String& s) const {
-  assert(kindIsValid());
+  assertx(kindIsValid());
   auto const cls = Unit::lookupClass(s.get());
   return cls && instanceof(cls);
 }
@@ -235,13 +235,13 @@ bool ObjectData::toBooleanImpl() const noexcept {
 
 int64_t ObjectData::toInt64Impl() const noexcept {
   // SimpleXMLElement is the only class that has proper custom int casting.
-  assert(instanceof(SimpleXMLElement_classof()));
+  assertx(instanceof(SimpleXMLElement_classof()));
   return SimpleXMLElement_objectCast(this, KindOfInt64).toInt64();
 }
 
 double ObjectData::toDoubleImpl() const noexcept {
   // SimpleXMLElement is the only class that has custom double casting.
-  assert(instanceof(SimpleXMLElement_classof()));
+  assertx(instanceof(SimpleXMLElement_classof()));
   return SimpleXMLElement_objectCast(this, KindOfDouble).toDouble();
 }
 
@@ -252,7 +252,7 @@ const StaticString s_getIterator("getIterator");
 
 Object ObjectData::iterableObject(bool& isIterable,
                                   bool mayImplementIterator /* = true */) {
-  assert(mayImplementIterator || !isIterator());
+  assertx(mayImplementIterator || !isIterator());
   if (mayImplementIterator && isIterator()) {
     isIterable = true;
     return Object(this);
@@ -280,9 +280,9 @@ Object ObjectData::iterableObject(bool& isIterable,
 }
 
 Array& ObjectData::dynPropArray() const {
-  assert(getAttribute(HasDynPropArr));
-  assert(g_context->dynPropTable.count(this));
-  assert(g_context->dynPropTable[this].arr().isPHPArray());
+  assertx(getAttribute(HasDynPropArr));
+  assertx(g_context->dynPropTable.count(this));
+  assertx(g_context->dynPropTable[this].arr().isPHPArray());
   return g_context->dynPropTable[this].arr();
 }
 
@@ -296,16 +296,16 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
 }
 
 Array& ObjectData::setDynPropArray(const Array& newArr) {
-  assert(!g_context->dynPropTable.count(this));
-  assert(!getAttribute(HasDynPropArr));
-  assert(newArr.isPHPArray());
+  assertx(!g_context->dynPropTable.count(this));
+  assertx(!getAttribute(HasDynPropArr));
+  assertx(newArr.isPHPArray());
 
   if (m_cls->forbidsDynamicProps()) {
     throw_object_forbids_dynamic_props(getClassName().data());
   }
 
   auto& arr = g_context->dynPropTable[this].arr();
-  assert(arr.isPHPArray());
+  assertx(arr.isPHPArray());
   arr = newArr;
   setAttribute(HasDynPropArr);
   return arr;
@@ -319,7 +319,7 @@ TypedValue* ObjectData::makeDynProp(K key, AccessFlags flags) {
 
 Variant ObjectData::o_get(const String& propName, bool error /* = true */,
                           const String& context /*= null_string*/) {
-  assert(kindIsValid());
+  assertx(kindIsValid());
 
   // This is not (just) a check for empty string; property names that start
   // with null are intentionally being rejected here.
@@ -357,7 +357,7 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
 
 void ObjectData::o_set(const String& propName, const Variant& v,
                        const String& context /* = null_string */) {
-  assert(kindIsValid());
+  assertx(kindIsValid());
 
   // This is not (just) a check for empty string; property names that start
   // with null are intentionally being rejected here.
@@ -425,7 +425,7 @@ void ObjectData::o_setArray(const Array& properties) {
 }
 
 void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
-  assert(kindIsValid());
+  assertx(kindIsValid());
 
   // Fast path for classes with no declared properties
   if (!m_cls->numDeclProperties() && getAttribute(HasDynPropArr)) {
@@ -470,7 +470,7 @@ const int64_t ARRAYOBJ_STD_PROP_LIST = 1;
 const StaticString s_flags("flags");
 
 Array ObjectData::toArray(bool pubOnly /* = false */) const {
-  assert(kindIsValid());
+  assertx(kindIsValid());
 
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
@@ -479,11 +479,11 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
   } else if (UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     // If we end up with other classes that need special behavior, turn the
     // assert into an if and add cases.
-    assert(instanceof(SimpleXMLElement_classof()));
+    assertx(instanceof(SimpleXMLElement_classof()));
     return SimpleXMLElement_objectCast(this, KindOfArray).toArray();
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
     auto const flags = getProp(SystemLib::s_ArrayObjectClass, s_flags.get());
-    assert(flags.has_val());
+    assertx(flags.has_val());
 
     if (UNLIKELY(flags.type() == KindOfInt64 &&
                  flags.val().num == ARRAYOBJ_STD_PROP_LIST)) {
@@ -594,7 +594,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
       // properties must be dynamic because you can't declare a
       // property with a non-string name.
       if (UNLIKELY(!isStringType(key.m_type))) {
-        assert(key.m_type == KindOfInt64);
+        assertx(key.m_type == KindOfInt64);
         switch (mode) {
         case CreateRefs: {
           auto& lval = tvAsVariant(dynProps->lvalAt(key.m_data.num).tv_ptr());
@@ -667,7 +667,7 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
       return false;
     }
     // We found __call! Stash the original name into invName.
-    assert(!(ctx.func->attrs() & AttrStatic));
+    assertx(!(ctx.func->attrs() & AttrStatic));
     ctx.invName = s.get();
     ctx.invName->incRefCount();
     ctx.dynamic = false;
@@ -875,10 +875,10 @@ int64_t ObjectData::compare(const ObjectData& other) const {
 }
 
 Variant ObjectData::offsetGet(Variant key) {
-  assert(instanceof(SystemLib::s_ArrayAccessClass));
+  assertx(instanceof(SystemLib::s_ArrayAccessClass));
 
   auto const method = m_cls->lookupMethod(s_offsetGet.get());
-  assert(method);
+  assertx(method);
 
   return
     g_context->invokeMethodV(this, method, InvokeArgs(key.asCell(), 1), false);
@@ -913,14 +913,14 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
 // called from jit code
 ObjectData* ObjectData::newInstanceRawSmall(Class* cls, size_t size,
                                           size_t index) {
-  assert(cls->getODAttrs() == DefaultAttrs);
-  assert(size <= kMaxSmallSize);
+  assertx(cls->getODAttrs() == DefaultAttrs);
+  assertx(size <= kMaxSmallSize);
   auto mem = tl_heap->mallocSmallIndexSize(index, size);
   return new (mem) ObjectData(cls, InitRaw{}, DefaultAttrs);
 }
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  assert(cls->getODAttrs() == DefaultAttrs);
+  assertx(cls->getODAttrs() == DefaultAttrs);
   auto mem = tl_heap->mallocBigSize<MemoryManager::Unzeroed>(size);
   return new (mem) ObjectData(cls, InitRaw{}, DefaultAttrs);
 }
@@ -929,7 +929,7 @@ ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
 ObjectData* ObjectData::newInstanceRawAttrsSmall(Class* cls, size_t size,
                                               size_t index,
                                               uint8_t attrs) {
-  assert(size <= kMaxSmallSize);
+  assertx(size <= kMaxSmallSize);
   auto mem = tl_heap->mallocSmallIndexSize(index, size);
   return new (mem) ObjectData(cls, InitRaw{}, attrs);
 }
@@ -952,7 +952,7 @@ ObjectData::~ObjectData() {
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {
-  assert(properties->isPHPArray());
+  assertx(properties->isPHPArray());
   Object retval{SystemLib::s_stdclassClass};
   retval->setAttribute(HasDynPropArr);
   g_context->dynPropTable.emplace(retval.get(), properties);
@@ -1454,7 +1454,7 @@ bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
   if (UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     // We only get here for SimpleXMLElement or collections
     if (LIKELY(!isCollection())) {
-      assert(instanceof(SimpleXMLElement_classof()));
+      assertx(instanceof(SimpleXMLElement_classof()));
       return SimpleXMLElement_propEmpty(this, key);
     }
   }
@@ -1596,7 +1596,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   // create a new dynamic property.  (We know this is a new property,
   // or it would've hit the visible && accessible case above.)
   prop = makeDynProp(StrNR(key), AccessFlags::Key);
-  assert(prop->m_type == KindOfNull); // cannot exist yet
+  assertx(prop->m_type == KindOfNull); // cannot exist yet
   setopBody(prop, op, val);
   return prop;
 }
@@ -1684,7 +1684,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   // create a new dynamic property.  (We know this is a new property,
   // or it would've hit the visible && accessible case above.)
   prop = makeDynProp(StrNR(key), AccessFlags::Key);
-  assert(prop->m_type == KindOfNull); // cannot exist yet
+  assertx(prop->m_type == KindOfNull); // cannot exist yet
   return IncDecBody(op, prop);
 }
 
@@ -1763,7 +1763,7 @@ void ObjectData::getProp(const Class* klass,
   }
 
   Slot propInd = klass->lookupDeclProp(prop->name());
-  assert(propInd != kInvalidSlot);
+  assertx(propInd != kInvalidSlot);
   const TypedValue* propVal = &propVec()[propInd];
 
   if ((!pubOnly || (prop->attrs() & AttrPublic)) &&
@@ -1790,8 +1790,8 @@ void ObjectData::getProps(const Class* klass, bool pubOnly,
 void ObjectData::getTraitProps(const Class* klass, bool pubOnly,
                                const Class* trait, Array& props,
                                std::vector<bool>& inserted) const {
-  assert(isNormalClass(klass));
-  assert(isTrait(trait));
+  assertx(isNormalClass(klass));
+  assertx(isTrait(trait));
 
   getProps(klass, pubOnly, trait->preClass(), props, inserted);
   for (auto const& traitCls : trait->usedTraitClasses()) {

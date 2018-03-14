@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE bool cellIsNull(Cell tv) {
-  assert(cellIsPlausible(tv));
+  assertx(cellIsPlausible(tv));
   return isNullType(tv.m_type);
 }
 ALWAYS_INLINE bool cellIsNull(const Cell* tv) {

@@ -202,7 +202,7 @@ template<MOpMode mode, bool intishWarn>
 inline member_rval ElemArrayPre(ArrayData* base, StringData* key) {
   auto constexpr warn = mode == MOpMode::Warn;
   int64_t n;
-  assert(base->isPHPArray());
+  assertx(base->isPHPArray());
   if (key->isStrictlyInteger(n)) {
     if (intishWarn) raise_intish_index_cast();
     return warn ? base->rvalStrict(n) : base->rval(n);
@@ -232,7 +232,7 @@ inline member_rval ElemArrayPre(ArrayData* base, TypedValue key) {
  */
 template<MOpMode mode, KeyType keyType, bool intishWarn>
 inline member_rval ElemArray(ArrayData* base, key_type<keyType> key) {
-  assert(base->isPHPArray());
+  assertx(base->isPHPArray());
 
   auto result = ElemArrayPre<mode, intishWarn>(base, key);
 
@@ -416,7 +416,7 @@ inline member_rval ElemString(TypedValue& tvRef,
     tvRef = make_tv<KindOfPersistentString>(staticEmptyString());
   } else {
     tvRef = make_tv<KindOfPersistentString>(base->m_data.pstr->getChar(offset));
-    assert(tvRef.m_data.pstr->isStatic());
+    assertx(tvRef.m_data.pstr->isStatic());
   }
   return member_rval { base->m_data.pstr, &tvRef };
 }
@@ -834,7 +834,7 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
     auto storage = obj->getPropLval(SystemLib::s_ArrayObjectClass,
                                     s_storage.get());
     // ArrayObject should always have the 'storage' property...
-    assert(storage.has_ref());
+    assertx(storage.has_ref());
     return UNLIKELY(checkHACIntishCast())
       ? ElemDArray<mode, reffy, true, keyType>(storage.tv_ptr(), key)
       : ElemDArray<mode, reffy, false, keyType>(storage.tv_ptr(), key);
@@ -1538,7 +1538,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   Cell* value,
                                   bool copy) {
   int64_t n;
-  assert(a->isPHPArray());
+  assertx(a->isPHPArray());
   if (key->isStrictlyInteger(n)) {
     if (intishWarn) raise_intish_index_cast();
     return a->set(n, *value, copy);
@@ -1950,7 +1950,7 @@ inline void SetNewElem(TypedValue* base, Cell* value) {
  */
 inline TypedValue* SetOpElemEmptyish(SetOpOp op, Cell* base,
                                      TypedValue key, Cell* rhs) {
-  assert(cellIsPlausible(*base));
+  assertx(cellIsPlausible(*base));
 
   detail::checkPromotion(base);
 
@@ -2150,14 +2150,14 @@ inline TypedValue* SetOpNewElem(TypedValue& tvRef,
 Cell incDecBodySlow(IncDecOp op, Cell* fr);
 
 inline Cell IncDecBody(IncDecOp op, Cell* fr) {
-  assert(cellIsPlausible(*fr));
+  assertx(cellIsPlausible(*fr));
 
   if (UNLIKELY(fr->m_type != KindOfInt64)) {
     return incDecBodySlow(op, fr);
   }
 
   auto copy = [&]() {
-    assert(cellIsPlausible(*fr));
+    assertx(cellIsPlausible(*fr));
     return *fr;
   };
 
@@ -2219,7 +2219,7 @@ inline Cell IncDecElemEmptyish(
     raise_notice(Strings::UNDEFINED_INDEX,
                  tvAsCVarRef(&key).toString().data());
   }
-  assert(lval.type() == KindOfNull);
+  assertx(lval.type() == KindOfNull);
   return IncDecBody(op, lval.tv_ptr());
 }
 
@@ -2297,7 +2297,7 @@ inline Cell IncDecElem(
 
       if (LIKELY(base->m_data.pobj->isCollection())) {
         result = collections::atRw(base->m_data.pobj, &key);
-        assert(cellIsPlausible(*result));
+        assertx(cellIsPlausible(*result));
       } else {
         localTvRef = objOffsetGet(instanceFromTv(base), key);
         result = tvToCell(&localTvRef);
@@ -2322,7 +2322,7 @@ inline Cell IncDecNewElemEmptyish(
   auto a = Array::Create();
   auto result = a.lvalAt().tv_ptr();
   tvAsVariant(base) = a;
-  assert(result->m_type == KindOfNull);
+  assertx(result->m_type == KindOfNull);
   return IncDecBody(op, result);
 }
 
@@ -2375,7 +2375,7 @@ inline Cell IncDecNewElem(
     case KindOfPersistentArray:
     case KindOfArray: {
       TypedValue* result = tvAsVariant(base).asArrRef().lvalAt().tv_ptr();
-      assert(result->m_type == KindOfNull);
+      assertx(result->m_type == KindOfNull);
       return IncDecBody(op, tvToCell(result));
     }
 
@@ -2411,7 +2411,7 @@ template <bool intishWarn>
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key,
                                     bool copy) {
   int64_t n;
-  assert(a->isPHPArray());
+  assertx(a->isPHPArray());
   if (key->isStrictlyInteger(n)) {
     if (intishWarn) raise_intish_index_cast();
     return a->remove(n, copy);
@@ -2708,7 +2708,7 @@ bool IssetEmptyElemString(TypedValue* base, key_type<keyType> key) {
   }
 
   auto str = base->m_data.pstr->getChar(x);
-  assert(str->isStatic());
+  assertx(str->isStatic());
   return !str->toBoolean();
 }
 
@@ -2864,7 +2864,7 @@ inline void promoteToStdClass(TypedValue* base, bool warn, F fun) {
   if (base->m_type == KindOfString) {
     decRefStr(base->m_data.pstr);
   } else {
-    assert(!isRefcountedType(base->m_type));
+    assertx(!isRefcountedType(base->m_type));
   }
   base->m_type = KindOfObject;
   base->m_data.pobj = obj.get();
@@ -3015,14 +3015,14 @@ inline TypedValue* PropObj(TypedValue& tvRef, const Class* ctx,
       return instance->propD(&tvRef, ctx, keySD);
     }
   }
-  assert(!reffy);
+  assertx(!reffy);
   if (mode == MOpMode::None) {
     return instance->prop(&tvRef, ctx, keySD);
   }
   if (mode == MOpMode::Warn) {
     return instance->propW(&tvRef, ctx, keySD);
   }
-  assert(mode == MOpMode::Unset);
+  assertx(mode == MOpMode::Unset);
   return instance->propD(&tvRef, ctx, keySD);
 }
 
@@ -3233,7 +3233,7 @@ inline Cell IncDecPropStdclass(IncDecOp op, TypedValue* base,
       tvWriteNull(tv);
       dest = IncDecBody(op, &tv);
       obj->setProp(nullptr, keySD, dest);
-      assert(!isRefcountedType(tv.m_type));
+      assertx(!isRefcountedType(tv.m_type));
     });
 
   return dest;

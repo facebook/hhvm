@@ -51,7 +51,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void tvCastToBooleanInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   bool b;
 
@@ -118,7 +118,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
 }
 
 bool tvCastToBoolean(TypedValue tv) {
-  assert(tvIsPlausible(tv));
+  assertx(tvIsPlausible(tv));
   if (tv.m_type == KindOfRef) {
     tv = *tv.m_data.pref->tv();
   }
@@ -126,7 +126,7 @@ bool tvCastToBoolean(TypedValue tv) {
 }
 
 void tvCastToDoubleInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   double d;
 
@@ -138,7 +138,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
         continue;
 
       case KindOfBoolean:
-        assert(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
+        assertx(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
         // fallthru
       case KindOfInt64:
         d = (double)(tv->m_data.num);
@@ -192,10 +192,10 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
 }
 
 void tvCastToInt64InPlace(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
 
-  assert(cellIsPlausible(*tv));
+  assertx(cellIsPlausible(*tv));
   int64_t i;
 
   do {
@@ -205,7 +205,7 @@ void tvCastToInt64InPlace(TypedValue* tv) {
         tv->m_data.num = 0LL;
         // fallthru
       case KindOfBoolean:
-        assert(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
+        assertx(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
         tv->m_type = KindOfInt64;
         // fallthru
       case KindOfInt64:
@@ -260,7 +260,7 @@ void tvCastToInt64InPlace(TypedValue* tv) {
 }
 
 int64_t tvCastToInt64(TypedValue tv) {
-  assert(tvIsPlausible(tv));
+  assertx(tvIsPlausible(tv));
   if (tv.m_type == KindOfRef) {
     tv = *tv.m_data.pref->tv();
   }
@@ -268,7 +268,7 @@ int64_t tvCastToInt64(TypedValue tv) {
 }
 
 double tvCastToDouble(TypedValue tv) {
-  assert(tvIsPlausible(tv));
+  assertx(tvIsPlausible(tv));
   if (tv.m_type == KindOfRef) {
     tv = *tv.m_data.pref->tv();
   }
@@ -279,7 +279,7 @@ double tvCastToDouble(TypedValue tv) {
       return 0;
 
     case KindOfBoolean:
-      assert(tv.m_data.num == 0LL || tv.m_data.num == 1LL);
+      assertx(tv.m_data.num == 0LL || tv.m_data.num == 1LL);
       // fallthru
     case KindOfInt64:
       return (double)(tv.m_data.num);
@@ -318,7 +318,7 @@ const StaticString
   s_scalar("scalar");
 
 void tvCastToStringInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
 
   auto string = [&](StringData* s) {
@@ -326,7 +326,7 @@ void tvCastToStringInPlace(TypedValue* tv) {
     tv->m_data.pstr = s;
   };
   auto persistentString = [&](StringData* s) {
-    assert(!s->isRefCounted());
+    assertx(!s->isRefCounted());
     tv->m_type = KindOfPersistentString;
     tv->m_data.pstr = s;
   };
@@ -390,7 +390,7 @@ void tvCastToStringInPlace(TypedValue* tv) {
 }
 
 StringData* tvCastToStringData(TypedValue tv) {
-  assert(tvIsPlausible(tv));
+  assertx(tvIsPlausible(tv));
   if (tv.m_type == KindOfRef) {
     tv = *tv.m_data.pref->tv();
   }
@@ -455,7 +455,7 @@ String tvCastToString(TypedValue tv) {
 }
 
 ArrayData* tvCastToArrayLikeData(TypedValue tv) {
-  assert(tvIsPlausible(tv));
+  assertx(tvIsPlausible(tv));
   if (tv.m_type == KindOfRef) {
     tv = *tv.m_data.pref->tv();
   }
@@ -503,7 +503,7 @@ Array tvCastToArrayLike(TypedValue tv) {
 }
 
 void tvCastToArrayInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   ArrayData* a;
 
@@ -528,15 +528,15 @@ void tvCastToArrayInPlace(TypedValue* tv) {
 
       case KindOfPersistentVec: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isVecArray());
+        assertx(adIn->isVecArray());
         a = PackedArray::ToPHPArrayVec(adIn, true);
-        assert(a != adIn);
+        assertx(a != adIn);
         continue;
       }
 
       case KindOfVec: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isVecArray());
+        assertx(adIn->isVecArray());
         a = PackedArray::ToPHPArrayVec(adIn, adIn->cowCheck());
         if (a != adIn) tvDecRefArr(tv);
         continue;
@@ -544,15 +544,15 @@ void tvCastToArrayInPlace(TypedValue* tv) {
 
       case KindOfPersistentDict: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isDict());
+        assertx(adIn->isDict());
         a = MixedArray::ToPHPArrayDict(adIn, true);
-        assert(a != adIn);
+        assertx(a != adIn);
         continue;
       }
 
       case KindOfDict: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isDict());
+        assertx(adIn->isDict());
         a = MixedArray::ToPHPArrayDict(adIn, adIn->cowCheck());
         if (a != adIn) tvDecRefArr(tv);
         continue;
@@ -560,15 +560,15 @@ void tvCastToArrayInPlace(TypedValue* tv) {
 
       case KindOfPersistentKeyset: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isKeyset());
+        assertx(adIn->isKeyset());
         a = SetArray::ToPHPArray(adIn, true);
-        assert(a != adIn);
+        assertx(a != adIn);
         continue;
       }
 
       case KindOfKeyset: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isKeyset());
+        assertx(adIn->isKeyset());
         a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
         if (a != adIn) tvDecRefArr(tv);
         continue;
@@ -576,16 +576,16 @@ void tvCastToArrayInPlace(TypedValue* tv) {
 
       case KindOfPersistentArray: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isPHPArray());
+        assertx(adIn->isPHPArray());
         if (adIn->isNotDVArray()) return;
         a = adIn->toPHPArray(true);
-        assert(a != adIn);
+        assertx(a != adIn);
         continue;
       }
 
       case KindOfArray: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isPHPArray());
+        assertx(adIn->isPHPArray());
         if (adIn->isNotDVArray()) return;
         a = adIn->toPHPArray(adIn->cowCheck());
         if (a != adIn) tvDecRefArr(tv);
@@ -608,16 +608,16 @@ void tvCastToArrayInPlace(TypedValue* tv) {
     not_reached();
   } while (0);
 
-  assert(a->isPHPArray());
-  assert(a->isNotDVArray());
+  assertx(a->isPHPArray());
+  assertx(a->isNotDVArray());
 
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;
-  assert(cellIsPlausible(*tv));
+  assertx(cellIsPlausible(*tv));
 }
 
 void tvCastToVecInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   ArrayData* a;
 
@@ -658,9 +658,9 @@ void tvCastToVecInPlace(TypedValue* tv) {
       case KindOfPersistentDict:
       case KindOfDict: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isDict());
+        assertx(adIn->isDict());
         a = MixedArray::ToVecDict(adIn, adIn->cowCheck());
-        assert(a != adIn);
+        assertx(a != adIn);
         decRefArr(adIn);
         continue;
       }
@@ -668,9 +668,9 @@ void tvCastToVecInPlace(TypedValue* tv) {
       case KindOfPersistentKeyset:
       case KindOfKeyset: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isKeyset());
+        assertx(adIn->isKeyset());
         a = SetArray::ToVec(adIn, adIn->cowCheck());
-        assert(a != adIn);
+        assertx(a != adIn);
         decRefArr(adIn);
         continue;
       }
@@ -678,7 +678,7 @@ void tvCastToVecInPlace(TypedValue* tv) {
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isPHPArray());
+        assertx(adIn->isPHPArray());
         a = adIn->toVec(adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -686,7 +686,7 @@ void tvCastToVecInPlace(TypedValue* tv) {
 
       case KindOfPersistentVec:
       case KindOfVec:
-        assert(tv->m_data.parr->isVecArray());
+        assertx(tv->m_data.parr->isVecArray());
         return;
 
       case KindOfObject:
@@ -703,11 +703,11 @@ void tvCastToVecInPlace(TypedValue* tv) {
 
   tv->m_data.parr = a;
   tv->m_type = KindOfVec;
-  assert(cellIsPlausible(*tv));
+  assertx(cellIsPlausible(*tv));
 }
 
 void tvCastToDictInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   ArrayData* a;
 
@@ -748,9 +748,9 @@ void tvCastToDictInPlace(TypedValue* tv) {
       case KindOfPersistentVec:
       case KindOfVec: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isVecArray());
+        assertx(adIn->isVecArray());
         a = PackedArray::ToDictVec(adIn, adIn->cowCheck());
-        assert(a != adIn);
+        assertx(a != adIn);
         decRefArr(adIn);
         continue;
       }
@@ -758,7 +758,7 @@ void tvCastToDictInPlace(TypedValue* tv) {
       case KindOfPersistentKeyset:
       case KindOfKeyset: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isKeyset());
+        assertx(adIn->isKeyset());
         a = SetArray::ToDict(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -767,7 +767,7 @@ void tvCastToDictInPlace(TypedValue* tv) {
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isPHPArray());
+        assertx(adIn->isPHPArray());
         a = adIn->toDict(adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -775,7 +775,7 @@ void tvCastToDictInPlace(TypedValue* tv) {
 
       case KindOfPersistentDict:
       case KindOfDict:
-        assert(tv->m_data.parr->isDict());
+        assertx(tv->m_data.parr->isDict());
         return;
 
       case KindOfObject:
@@ -792,11 +792,11 @@ void tvCastToDictInPlace(TypedValue* tv) {
 
   tv->m_data.parr = a;
   tv->m_type = KindOfDict;
-  assert(cellIsPlausible(*tv));
+  assertx(cellIsPlausible(*tv));
 }
 
 void tvCastToKeysetInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   ArrayData* a;
 
@@ -837,9 +837,9 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
       case KindOfPersistentVec:
       case KindOfVec: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isVecArray());
+        assertx(adIn->isVecArray());
         a = PackedArray::ToKeysetVec(adIn, adIn->cowCheck());
-        assert(a != adIn);
+        assertx(a != adIn);
         decRefArr(adIn);
         continue;
       }
@@ -847,7 +847,7 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
       case KindOfPersistentDict:
       case KindOfDict: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isDict());
+        assertx(adIn->isDict());
         a = MixedArray::ToKeysetDict(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -856,7 +856,7 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isPHPArray());
+        assertx(adIn->isPHPArray());
         a = adIn->toKeyset(adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -864,7 +864,7 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
 
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-        assert(tv->m_data.parr->isKeyset());
+        assertx(tv->m_data.parr->isKeyset());
         return;
 
       case KindOfObject:
@@ -881,12 +881,12 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
 
   tv->m_data.parr = a;
   tv->m_type = KindOfKeyset;
-  assert(cellIsPlausible(*tv));
+  assertx(cellIsPlausible(*tv));
 }
 
 void tvCastToVArrayInPlace(TypedValue* tv) {
-  assert(!RuntimeOption::EvalHackArrDVArrs);
-  assert(tvIsPlausible(*tv));
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   ArrayData* a;
 
@@ -927,7 +927,7 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
       case KindOfPersistentVec:
       case KindOfVec: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isVecArray());
+        assertx(adIn->isVecArray());
         a = PackedArray::ToVArrayVec(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -936,9 +936,9 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
       case KindOfPersistentDict:
       case KindOfDict: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isDict());
+        assertx(adIn->isDict());
         a = MixedArray::ToVArrayDict(adIn, adIn->cowCheck());
-        assert(a != adIn);
+        assertx(a != adIn);
         decRefArr(adIn);
         continue;
       }
@@ -946,9 +946,9 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
       case KindOfPersistentKeyset:
       case KindOfKeyset: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isKeyset());
+        assertx(adIn->isKeyset());
         a = SetArray::ToVArray(adIn, adIn->cowCheck());
-        assert(a != adIn);
+        assertx(a != adIn);
         decRefArr(adIn);
         continue;
       }
@@ -956,11 +956,11 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isPHPArray());
+        assertx(adIn->isPHPArray());
         if (adIn->isVArray()) return;
         a = adIn->toVArray(adIn->cowCheck());
-        assert(a->isPacked());
-        assert(a->isVArray());
+        assertx(a->isPacked());
+        assertx(a->isVArray());
         if (a == adIn) return;
         decRefArr(adIn);
         continue;
@@ -978,17 +978,17 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
     not_reached();
   } while (0);
 
-  assert(a->isPacked());
-  assert(a->isVArray());
+  assertx(a->isPacked());
+  assertx(a->isVArray());
 
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;
-  assert(cellIsPlausible(*tv));
+  assertx(cellIsPlausible(*tv));
 }
 
 void tvCastToDArrayInPlace(TypedValue* tv) {
-  assert(!RuntimeOption::EvalHackArrDVArrs);
-  assert(tvIsPlausible(*tv));
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   ArrayData* a;
 
@@ -1029,9 +1029,9 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
       case KindOfPersistentVec:
       case KindOfVec: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isVecArray());
+        assertx(adIn->isVecArray());
         a = PackedArray::ToDArrayVec(adIn, adIn->cowCheck());
-        assert(a != adIn);
+        assertx(a != adIn);
         decRefArr(adIn);
         continue;
       }
@@ -1039,7 +1039,7 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
       case KindOfPersistentDict:
       case KindOfDict: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isDict());
+        assertx(adIn->isDict());
         a = MixedArray::ToDArrayDict(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
@@ -1048,9 +1048,9 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
       case KindOfPersistentKeyset:
       case KindOfKeyset: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isKeyset());
+        assertx(adIn->isKeyset());
         a = SetArray::ToDArray(adIn, adIn->cowCheck());
-        assert(a != adIn);
+        assertx(a != adIn);
         decRefArr(adIn);
         continue;
       }
@@ -1058,11 +1058,11 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = tv->m_data.parr;
-        assert(adIn->isPHPArray());
+        assertx(adIn->isPHPArray());
         if (adIn->isDArray()) return;
         a = adIn->toDArray(adIn->cowCheck());
-        assert(a->isMixed());
-        assert(a->isDArray());
+        assertx(a->isMixed());
+        assertx(a->isDArray());
         if (a == adIn) return;
         decRefArr(adIn);
         continue;
@@ -1080,16 +1080,16 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
     not_reached();
   } while (0);
 
-  assert(a->isMixed());
-  assert(a->isDArray());
+  assertx(a->isMixed());
+  assertx(a->isDArray());
 
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;
-  assert(cellIsPlausible(*tv));
+  assertx(cellIsPlausible(*tv));
 }
 
 ObjectData* tvCastToObjectData(TypedValue tv) {
-  assert(tvIsPlausible(tv));
+  assertx(tvIsPlausible(tv));
   if (tv.m_type == KindOfRef) {
     tv = *tv.m_data.pref->tv();
   }
@@ -1139,7 +1139,7 @@ Object tvCastToObject(TypedValue tv) {
 }
 
 void tvCastToObjectInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   ObjectData* o;
 
@@ -1194,7 +1194,7 @@ void tvCastToObjectInPlace(TypedValue* tv) {
 
   tv->m_data.pobj = o;
   tv->m_type = KindOfObject;
-  assert(cellIsPlausible(*tv));
+  assertx(cellIsPlausible(*tv));
 }
 
 void tvCastToNullableObjectInPlace(TypedValue* tv) {
@@ -1212,7 +1212,7 @@ void tvCastToNullableObjectInPlace(TypedValue* tv) {
 }
 
 void tvCastToResourceInPlace(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
 
   do {
@@ -1238,12 +1238,12 @@ void tvCastToResourceInPlace(TypedValue* tv) {
 
   tv->m_type = KindOfResource;
   tv->m_data.pres = req::make<DummyResource>().detach()->hdr();
-  assert(cellIsPlausible(*tv));
+  assertx(cellIsPlausible(*tv));
 }
 
 bool tvCoerceParamToBooleanInPlace(TypedValue* tv,
                                    bool builtin) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
 
   switch (tv->m_type) {
@@ -1331,7 +1331,7 @@ static bool tvCanBeCoercedToNumber(const TypedValue* tv,
 
 bool tvCoerceParamToInt64InPlace(TypedValue* tv,
                                  bool builtin) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   if (!tvCanBeCoercedToNumber(tv, builtin)) {
     return false;
@@ -1349,7 +1349,7 @@ bool tvCoerceParamToInt64InPlace(TypedValue* tv,
 
 bool tvCoerceParamToDoubleInPlace(TypedValue* tv,
                                   bool builtin) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   if (!tvCanBeCoercedToNumber(tv, builtin)) {
     return false;
@@ -1360,7 +1360,7 @@ bool tvCoerceParamToDoubleInPlace(TypedValue* tv,
 
 bool tvCoerceParamToStringInPlace(TypedValue* tv,
                                   bool builtin) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
 
   switch (tv->m_type) {
@@ -1407,7 +1407,7 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv,
 }
 
 bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
 
   switch (tv->m_type) {
@@ -1446,7 +1446,7 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
 }
 
 bool tvCoerceParamToVecInPlace(TypedValue* tv, bool /*builtin*/) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
 
   switch (tv->m_type) {
@@ -1478,7 +1478,7 @@ bool tvCoerceParamToVecInPlace(TypedValue* tv, bool /*builtin*/) {
 }
 
 bool tvCoerceParamToDictInPlace(TypedValue* tv, bool /*builtin*/) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
 
   switch (tv->m_type) {
@@ -1510,7 +1510,7 @@ bool tvCoerceParamToDictInPlace(TypedValue* tv, bool /*builtin*/) {
 }
 
 bool tvCoerceParamToKeysetInPlace(TypedValue* tv, bool /*builtin*/) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
 
   switch (tv->m_type) {
@@ -1542,13 +1542,13 @@ bool tvCoerceParamToKeysetInPlace(TypedValue* tv, bool /*builtin*/) {
 }
 
 bool tvCoerceParamToObjectInPlace(TypedValue* tv, bool /*builtin*/) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   return tv->m_type == KindOfObject;
 }
 
 bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv, bool /*builtin*/) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   if (isNullType(tv->m_type)) {
     // See comment in tvCastToNullableObjectInPlace
@@ -1559,7 +1559,7 @@ bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv, bool /*builtin*/) {
 }
 
 bool tvCoerceParamToResourceInPlace(TypedValue* tv, bool /*builtin*/) {
-  assert(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
   return tv->m_type == KindOfResource;
 }

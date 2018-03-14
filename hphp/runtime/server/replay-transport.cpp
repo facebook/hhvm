@@ -28,7 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ReplayTransport::recordInput(Transport* transport, const char *filename) {
-  assert(transport);
+  assertx(transport);
 
   Hdf hdf;
 
@@ -115,9 +115,9 @@ Transport::Method ReplayTransport::getMethod() {
 }
 
 std::string ReplayTransport::getHeader(const char *name) {
-  assert(name);
+  assertx(name);
   if (m_requestHeaders.find(name) != m_requestHeaders.end()) {
-    assert(!m_requestHeaders[name].empty());
+    assertx(!m_requestHeaders[name].empty());
     return m_requestHeaders[name][0];
   }
   return "";
@@ -128,12 +128,12 @@ void ReplayTransport::getHeaders(HeaderMap &headers) {
 }
 
 void ReplayTransport::addHeaderImpl(const char *name, const char *value) {
-  assert(name && value);
+  assertx(name && value);
   m_responseHeaders[name].push_back(value);
 }
 
 void ReplayTransport::removeHeaderImpl(const char *name) {
-  assert(name);
+  assertx(name);
   m_responseHeaders.erase(name);
 }
 

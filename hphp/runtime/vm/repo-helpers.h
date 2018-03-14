@@ -89,7 +89,7 @@ struct RepoStmt {
 struct RepoQuery {
   explicit RepoQuery(RepoStmt& stmt)
     : m_stmt(stmt), m_row(false), m_done(false) {
-    assert(m_stmt.prepared());
+    assertx(m_stmt.prepared());
   }
   ~RepoQuery() { m_stmt.reset(); }
 

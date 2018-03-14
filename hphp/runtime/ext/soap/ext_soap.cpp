@@ -50,7 +50,7 @@ const StaticString s___dorequest("__dorequest");
 Class* cls::getClass() {                                                       \
   if (s_class == nullptr) {                                                    \
     s_class = Unit::lookupClass(s_className.get());                            \
-    assert(s_class);                                                           \
+    assertx(s_class);                                                          \
   }                                                                            \
   return s_class;                                                              \
 }                                                                              \
@@ -391,7 +391,7 @@ static xmlDocPtr serialize_function_call(SoapClient *client,
   if (head) {
     for (ArrayIter iter(soap_headers); iter; ++iter) {
       Object obj_header = iter.second().toObject();
-      assert(obj_header.instanceof(SoapHeader::getClass()));
+      assertx(obj_header.instanceof(SoapHeader::getClass()));
       SoapHeader *header = Native::data<SoapHeader>(obj_header);
 
       xmlNodePtr h;

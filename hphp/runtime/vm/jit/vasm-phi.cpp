@@ -137,10 +137,10 @@ void optimizePhis(Vunit& unit) {
             auto i2 = unit.blocks[pred].code.end();
             --i2;
             if (i2->op == Vinstr::phijmp) {
-              assert(i2->phijmp_.target == label);
+              assertx(i2->phijmp_.target == label);
               i2->phijmp_.target = phijmp.target;
             } else {
-              assert(i2->op == Vinstr::phijcc);
+              assertx(i2->op == Vinstr::phijcc);
               int changes = 0;
               if (i2->phijcc_.targets[0] == label) {
                 i2->phijcc_.targets[0] = phijmp.target;

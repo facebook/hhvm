@@ -533,7 +533,7 @@ void emitContValid(IRGS& env) {
 }
 
 void emitContStarted(IRGS& env) {
-  assert(curClass(env));
+  assertx(curClass(env));
   auto const cont = ldThis(env);
   push(env, gen(env, ContStarted, cont));
 }

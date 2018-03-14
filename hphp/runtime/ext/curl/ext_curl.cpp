@@ -1477,7 +1477,7 @@ struct CurlExtension final : Extension {
     HHVM_FE(curl_share_close);
 
     Extension* ext = ExtensionRegistry::get("curl");
-    assert(ext);
+    assertx(ext);
 
     IniSetting::Bind(ext, IniSetting::PHP_INI_SYSTEM, "curl.namedPools",
       "", &s_namedPools);

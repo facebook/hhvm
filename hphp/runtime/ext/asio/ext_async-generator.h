@@ -42,7 +42,7 @@ struct AsyncGenerator final : BaseGenerator {
   static ObjectData* Create(const ActRec* fp, size_t numSlots,
                             jit::TCA resumeAddr, Offset resumeOffset);
   static Class* getClass() {
-    assert(s_class);
+    assertx(s_class);
     return s_class;
   }
   static constexpr ptrdiff_t objectOff() {

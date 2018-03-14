@@ -41,7 +41,7 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   } else if (format == Writer::Format::HTML) {
     w.reset(new HTMLWriter(out));
   } else {
-    assert(format == Writer::Format::JSON);
+    assertx(format == Writer::Format::JSON);
     w.reset(new JSONWriter(out));
   }
 

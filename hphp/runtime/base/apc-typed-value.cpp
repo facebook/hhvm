@@ -43,46 +43,46 @@ APCTypedValue* APCTypedValue::tvFalse() {
 }
 
 bool APCTypedValue::checkInvariants() const {
-  assert(m_handle.checkInvariants());
+  assertx(m_handle.checkInvariants());
   switch (m_handle.kind()) {
     case APCKind::Uninit:
-    case APCKind::Null: assert(m_data.num == 0); break;
+    case APCKind::Null: assertx(m_data.num == 0); break;
     case APCKind::Bool:
     case APCKind::Int:
     case APCKind::Double: break;
-    case APCKind::StaticString: assert(m_data.str->isStatic()); break;
-    case APCKind::UncountedString: assert(m_data.str->isUncounted()); break;
+    case APCKind::StaticString: assertx(m_data.str->isStatic()); break;
+    case APCKind::UncountedString: assertx(m_data.str->isUncounted()); break;
     case APCKind::StaticArray:
-      assert(m_data.arr->isPHPArray());
-      assert(m_data.arr->isStatic());
+      assertx(m_data.arr->isPHPArray());
+      assertx(m_data.arr->isStatic());
       break;
     case APCKind::StaticVec:
-      assert(m_data.vec->isVecArray());
-      assert(m_data.vec->isStatic());
+      assertx(m_data.vec->isVecArray());
+      assertx(m_data.vec->isStatic());
       break;
     case APCKind::StaticDict:
-      assert(m_data.dict->isDict());
-      assert(m_data.dict->isStatic());
+      assertx(m_data.dict->isDict());
+      assertx(m_data.dict->isStatic());
       break;
     case APCKind::StaticKeyset:
-      assert(m_data.keyset->isKeyset());
-      assert(m_data.keyset->isStatic());
+      assertx(m_data.keyset->isKeyset());
+      assertx(m_data.keyset->isStatic());
       break;
     case APCKind::UncountedArray:
-      assert(m_data.arr->isPHPArray());
-      assert(m_data.arr->isUncounted());
+      assertx(m_data.arr->isPHPArray());
+      assertx(m_data.arr->isUncounted());
       break;
     case APCKind::UncountedVec:
-      assert(m_data.vec->isVecArray());
-      assert(m_data.vec->isUncounted());
+      assertx(m_data.vec->isVecArray());
+      assertx(m_data.vec->isUncounted());
       break;
     case APCKind::UncountedDict:
-      assert(m_data.dict->isDict());
-      assert(m_data.dict->isUncounted());
+      assertx(m_data.dict->isDict());
+      assertx(m_data.dict->isUncounted());
       break;
     case APCKind::UncountedKeyset:
-      assert(m_data.keyset->isKeyset());
-      assert(m_data.keyset->isUncounted());
+      assertx(m_data.keyset->isKeyset());
+      assertx(m_data.keyset->isUncounted());
       break;
     case APCKind::SharedString:
     case APCKind::SharedArray:
@@ -99,7 +99,7 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
     case APCKind::SerializedKeyset:
-      assert(false);
+      assertx(false);
       break;
   }
   return true;
@@ -108,9 +108,9 @@ bool APCTypedValue::checkInvariants() const {
 //////////////////////////////////////////////////////////////////////
 
 void APCTypedValue::deleteUncounted() {
-  assert(m_handle.isUncounted());
+  assertx(m_handle.isUncounted());
   auto kind = m_handle.kind();
-  assert(kind == APCKind::UncountedString ||
+  assertx(kind == APCKind::UncountedString ||
          kind == APCKind::UncountedArray ||
          kind == APCKind::UncountedVec ||
          kind == APCKind::UncountedDict ||
@@ -127,7 +127,7 @@ void APCTypedValue::deleteUncounted() {
     auto const arr = [&] {
       if (kind == APCKind::UncountedArray) {
         auto const parr = m_data.arr;
-        assert(parr->isPHPArray());
+        assertx(parr->isPHPArray());
         if (parr->hasPackedLayout()) {
           PackedArray::ReleaseUncounted(parr);
         } else {
@@ -137,19 +137,19 @@ void APCTypedValue::deleteUncounted() {
       }
       if (kind == APCKind::UncountedVec) {
         auto const vec = m_data.vec;
-        assert(vec->isVecArray());
+        assertx(vec->isVecArray());
         PackedArray::ReleaseUncounted(vec);
         return vec;
       }
       if (kind == APCKind::UncountedDict) {
         auto const dict = m_data.dict;
-        assert(dict->isDict());
+        assertx(dict->isDict());
         MixedArray::ReleaseUncounted(dict);
         return dict;
       }
       assertx(kind == APCKind::UncountedKeyset);
       auto const keyset = m_data.keyset;
-      assert(keyset->isKeyset());
+      assertx(keyset->isKeyset());
       SetArray::ReleaseUncounted(keyset);
       return keyset;
     }();

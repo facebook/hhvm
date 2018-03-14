@@ -93,7 +93,7 @@ int emulate_zend(int argc, char** argv) {
         newargv.push_back(argv[cnt++]);
         continue;
       }
-      assert(cnt + 1 < argc);
+      assertx(cnt + 1 < argc);
       program = argv[cnt + 1];
       need_file = true;
       cnt += 2;

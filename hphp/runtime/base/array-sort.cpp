@@ -42,7 +42,7 @@ template <typename AccessorT, class ArrayT>
 SortFlavor genericPreSort(ArrayT& arr,
                           const AccessorT& acc,
                           bool checkTypes) {
-  assert(arr.m_size > 0);
+  assertx(arr.m_size > 0);
   if (!checkTypes && arr.m_size == arr.m_used) {
     // No need to loop over the elements, we're done
     return GenericSort;
@@ -83,7 +83,7 @@ SortFlavor genericPreSort(ArrayT& arr,
   }
 done:
   arr.m_used = start - arr.data();
-  assert(arr.m_size == arr.m_used);
+  assertx(arr.m_size == arr.m_used);
   if (checkTypes) {
     return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
   }
@@ -99,7 +99,7 @@ template <typename AccessorT>
 SortFlavor SetArray::preSort(const AccessorT& acc, bool checkTypes) {
   auto const oldUsed UNUSED = m_used;
   auto flav = genericPreSort(*this, acc, checkTypes);
-  assert(ClearElms(data() + m_used, oldUsed - m_used));
+  assertx(ClearElms(data() + m_used, oldUsed - m_used));
   return flav;
 }
 
@@ -109,7 +109,7 @@ SortFlavor SetArray::preSort(const AccessorT& acc, bool checkTypes) {
  * renumber the keys 0 thru n-1.
  */
 void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
-  assert(m_size > 0);
+  assertx(m_size > 0);
   auto const ht = initHash(m_scale);
   auto const mask = this->mask();
   if (resetKeys) {
@@ -135,14 +135,14 @@ void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
  * handles rebuilding the hash.
  */
 void SetArray::postSort() {   // nothrow guarantee
-  assert(m_size > 0);
+  assertx(m_size > 0);
   auto const ht = initHash(m_scale);
   auto const mask = this->mask();
   auto elms = data();
-  assert(m_used == m_size);
+  assertx(m_used == m_size);
   for (uint32_t i = 0; i < m_used; ++i) {
     auto& elm = elms[i];
-    assert(!elm.isInvalid());
+    assertx(!elm.isInvalid());
     *findForNewInsert(ht, mask, elm.hash()) = i;
   }
 }
@@ -155,7 +155,7 @@ ArrayData* MixedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   // }
   if (UNLIKELY(hasUserDefinedCmp(sf) || a->cowCheck())) {
     auto ret = a->copyMixed();
-    assert(ret->hasExactlyOneRef());
+    assertx(ret->hasExactlyOneRef());
     return ret;
   }
   return a;
@@ -165,7 +165,7 @@ ArrayData* SetArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   auto a = asSet(ad);
   if (UNLIKELY(hasUserDefinedCmp(sf) || a->cowCheck())) {
     auto ret = a->copySet();
-    assert(ret->hasExactlyOneRef());
+    assertx(ret->hasExactlyOneRef());
     return ret;
   }
   return a;
@@ -178,7 +178,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   if (isSortFamily(sf)) {               // sort/rsort/usort
     if (UNLIKELY(ad->cowCheck())) {
       auto ret = PackedArray::Copy(ad);
-      assert(ret->hasExactlyOneRef());
+      assertx(ret->hasExactlyOneRef());
       return ret;
     }
     return ad;
@@ -186,16 +186,16 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   if (ad->m_size <= 1) {
     if (ad->isVecArray()) {
       auto ret = PackedArray::ToDictVec(ad, ad->cowCheck());
-      assert(ret->hasExactlyOneRef());
+      assertx(ret->hasExactlyOneRef());
       return ret;
     }
     return ad;
   }
-  assert(checkInvariants(ad));
+  assertx(checkInvariants(ad));
   auto ret = ad->isVecArray()
     ? PackedArray::ToDictVec(ad, ad->cowCheck())
     : ToMixedCopy(ad);
-  assert(ret->hasExactlyOneRef());
+  assertx(ret->hasExactlyOneRef());
   return ret;
 }
 
@@ -291,11 +291,11 @@ void SetArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
 }
 
 void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
-  assert(checkInvariants(ad));
+  assertx(checkInvariants(ad));
   if (ad->m_size <= 1) {
     return;
   }
-  assert(!ad->hasMultipleRefs());
+  assertx(!ad->hasMultipleRefs());
   auto a = ad;
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(a);
@@ -378,7 +378,7 @@ bool SetArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
 }
 
 SortFlavor PackedArray::preSort(ArrayData* ad) {
-  assert(checkInvariants(ad));
+  assertx(checkInvariants(ad));
   auto const data = packedData(ad);
   TVAccessor acc;
   uint32_t sz = ad->m_size;
@@ -392,11 +392,11 @@ SortFlavor PackedArray::preSort(ArrayData* ad) {
 }
 
 bool PackedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
-  assert(checkInvariants(ad));
+  assertx(checkInvariants(ad));
   if (ad->m_size <= 1) {
     return true;
   }
-  assert(!ad->hasMultipleRefs());
+  assertx(!ad->hasMultipleRefs());
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(ad);
   }

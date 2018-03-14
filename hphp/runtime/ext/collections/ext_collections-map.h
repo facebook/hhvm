@@ -32,7 +32,7 @@ public:
   // init(), used by Map::__construct()
   // expects an iterable of key=>value
   void init(const Variant& t) {
-    assert(m_size == 0);
+    assertx(m_size == 0);
     addAllImpl(t);
   }
   // addAllPairs(), used by Map::addAll()
@@ -68,7 +68,7 @@ public:
   void set(int64_t k, const Variant& v) { set(k, *v.asCell()); }
   void set(StringData* k, const Variant& v) { set(k, *v.asCell()); }
   void set(TypedValue k, TypedValue v) {
-    assert(k.m_type != KindOfRef);
+    assertx(k.m_type != KindOfRef);
     if (k.m_type == KindOfInt64) {
       set(k.m_data.num, v);
     } else if (isStringType(k.m_type)) {
@@ -191,7 +191,7 @@ protected:
   void setRaw(StringData* k, const Variant& v) { setRaw(k, *v.asCell()); }
 
   void setRaw(TypedValue k, TypedValue v) {
-    assert(k.m_type != KindOfRef);
+    assertx(k.m_type != KindOfRef);
     if (k.m_type == KindOfInt64) {
       setRaw(k.m_data.num, v);
     } else if (isStringType(k.m_type)) {
@@ -257,7 +257,7 @@ protected:
     auto target = req::make<TVector>();
     int64_t sz = m_size;
     target->reserve(sz);
-    assert(target->canMutateBuffer());
+    assertx(target->canMutateBuffer());
     target->setSize(sz);
     auto* out = target->data();
     auto* eLimit = elmLimit();
@@ -271,7 +271,7 @@ protected:
   Object php_keys() {
     auto vec = req::make<TVector>();
     vec->reserve(m_size);
-    assert(vec->canMutateBuffer());
+    assertx(vec->canMutateBuffer());
     auto* e = firstElm();
     auto* eLimit = elmLimit();
     ssize_t j = 0;
@@ -280,7 +280,7 @@ protected:
         vec->data()[j].m_data.num = e->ikey;
         vec->data()[j].m_type = KindOfInt64;
       } else {
-        assert(e->hasStrKey());
+        assertx(e->hasStrKey());
         cellDup(make_tv<KindOfString>(e->skey), vec->data()[j]);
       }
     }

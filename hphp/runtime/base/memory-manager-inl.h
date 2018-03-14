@@ -145,8 +145,8 @@ inline void MemoryManager::FreeList::push(void* val) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline size_t MemoryManager::computeSize2Index(size_t size) {
-  assert(size > 1);
-  assert(size <= kMaxSizeClass);
+  assertx(size > 1);
+  assertx(size <= kMaxSizeClass);
   // We want to round size up to the nearest size class, and return the index
   // of that size class. The first 1 << kLgSizeClassesPerDoubling size classes
   // are denormal; their sizes are (class + 1) << kLgSmallSizeQuantum.
@@ -172,20 +172,20 @@ inline size_t MemoryManager::computeSize2Index(size_t size) {
   size_t exp = nBits - (kLgSizeClassesPerDoubling + kLgSmallSizeQuantum);
   size_t rawMantissa = size >> (nBits - kLgSizeClassesPerDoubling);
   size_t index = (exp << kLgSizeClassesPerDoubling) + rawMantissa;
-  assert(index < kNumSizeClasses);
+  assertx(index < kNumSizeClasses);
   return index;
 }
 
 inline size_t MemoryManager::lookupSmallSize2Index(size_t size) {
-  assert(size > 0);
-  assert(size <= kMaxSmallSizeLookup);
+  assertx(size > 0);
+  assertx(size <= kMaxSmallSizeLookup);
   auto const index = kSmallSize2Index[(size-1) >> kLgSmallSizeQuantum];
   return index;
 }
 
 inline size_t MemoryManager::size2Index(size_t size) {
-  assert(size > 0);
-  assert(size <= kMaxSizeClass);
+  assertx(size > 0);
+  assertx(size <= kMaxSizeClass);
   if (LIKELY(size <= kMaxSmallSizeLookup)) {
     return lookupSmallSize2Index(size);
   }
@@ -197,16 +197,16 @@ inline size_t MemoryManager::sizeIndex2Size(size_t index) {
 }
 
 inline size_t MemoryManager::sizeClass(size_t size) {
-  assert(size > 1);
-  assert(size <= kMaxSizeClass);
+  assertx(size > 1);
+  assertx(size <= kMaxSizeClass);
   // Round up to the nearest kLgSizeClassesPerDoubling + 1 significant bits,
   // or to the nearest kLgSmallSizeQuantum, whichever is greater.
   ssize_t nInsignificantBits = fls64(--size) - kLgSizeClassesPerDoubling;
   size_t roundTo = (nInsignificantBits < ssize_t(kLgSmallSizeQuantum))
     ? kLgSmallSizeQuantum : nInsignificantBits;
   size_t ret = ((size >> roundTo) + 1) << roundTo;
-  assert(ret >= kSmallSizeAlign);
-  assert(ret <= kMaxSizeClass);
+  assertx(ret >= kSmallSizeAlign);
+  assertx(ret <= kMaxSizeClass);
   return ret;
 }
 
@@ -215,7 +215,7 @@ inline void* MemoryManager::mallocSmallIndex(size_t index) {
 }
 
 inline void* MemoryManager::mallocSmallIndexSize(size_t index, size_t bytes) {
-  assert(index < kNumSmallSizes);
+  assertx(index < kNumSmallSizes);
   if (debug) requestEagerGC();
 
   m_stats.mm_debt -= bytes;
@@ -230,22 +230,22 @@ void* MemoryManager::mallocSmallIndexTail(size_t bytes, size_t index) {
   if (!p) {
     p = mallocSmallSizeSlow(bytes, index);
   }
-  assert((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);
+  assertx((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);
   FTRACE(3, "mallocSmallIndex: {} -> {}\n", bytes, p);
   return p;
 }
 
 inline void* MemoryManager::mallocSmallSize(size_t bytes) {
-  assert(bytes > 0);
-  assert(bytes <= kMaxSmallSize);
+  assertx(bytes > 0);
+  assertx(bytes <= kMaxSmallSize);
   // mallocSmallIndex() converts the size index back to a size to track the
   // size class's actual size, rather than the requested size.
   return mallocSmallIndex(size2Index(bytes));
 }
 
 inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
-  assert(index < kNumSmallSizes);
-  assert((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
+  assertx(index < kNumSmallSizes);
+  assertx((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
     --currentSmallAllocs[index];
@@ -293,7 +293,7 @@ void MemoryManager::objFreeIndex(void* ptr, size_t index) {
 
 inline int64_t MemoryManager::getAllocated() const {
   if (use_jemalloc) {
-    assert(m_allocated);
+    assertx(m_allocated);
     return *m_allocated;
   }
   return 0;
@@ -301,7 +301,7 @@ inline int64_t MemoryManager::getAllocated() const {
 
 inline int64_t MemoryManager::getDeallocated() const {
   if (use_jemalloc) {
-    assert(m_deallocated);
+    assertx(m_deallocated);
     return *m_deallocated;
   } else {
     return 0;
@@ -335,7 +335,7 @@ inline bool MemoryManager::startStatsInterval() {
   // negative. Make sure that doesn't occur here.
   m_stats.peakIntervalUsage = std::max<int64_t>(0, stats.usage());
   m_stats.peakIntervalCap = m_stats.capacity();
-  assert(m_stats.peakIntervalCap >= 0);
+  assertx(m_stats.peakIntervalCap >= 0);
   m_statsIntervalActive = true;
   return ret;
 }

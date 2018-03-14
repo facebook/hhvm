@@ -404,7 +404,7 @@ void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
 
 void findFixups(TCA start, TCA end, CGMeta& meta) {
   while (start != end) {
-    assert(start < end);
+    assertx(start < end);
     DecodedInstruction di(start);
     start += di.size();
 

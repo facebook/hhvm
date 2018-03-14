@@ -139,7 +139,7 @@ void Func::destroy(Func* func) {
     }
 
     DEBUG_ONLY auto oldVal = s_funcVec.exchange(func->m_funcId, nullptr);
-    assert(oldVal == func);
+    assertx(oldVal == func);
     func->m_funcId = InvalidFuncId;
 
     if (RuntimeOption::EvalEnableReverseDataMap) {
@@ -158,8 +158,8 @@ void Func::destroy(Func* func) {
 }
 
 void Func::freeClone() {
-  assert(isPreFunc());
-  assert(m_cloned.flag.test_and_set());
+  assertx(isPreFunc());
+  assertx(m_cloned.flag.test_and_set());
 
   if (jit::mcgen::initialized() && RuntimeOption::EvalEnableReusableTC) {
     // Free TC-space associated with func
@@ -170,7 +170,7 @@ void Func::freeClone() {
 
   if (m_funcId != InvalidFuncId) {
     DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, nullptr);
-    assert(oldVal == this);
+    assertx(oldVal == this);
     m_funcId = InvalidFuncId;
   }
 
@@ -254,7 +254,7 @@ void Func::init(int numParams) {
      */
     m_attrs = m_attrs | AttrNoInjection;
   }
-  assert(m_name);
+  assertx(m_name);
   initPrologues(numParams);
 }
 
@@ -280,7 +280,7 @@ void Func::initPrologues(int numParams) {
 }
 
 void Func::setFullName(int /*numParams*/) {
-  assert(m_name->isStatic());
+  assertx(m_name->isStatic());
   if (m_cls) {
     m_fullName = makeStaticString(
       std::string(m_cls->name()->data()) + "::" + m_name->data());
@@ -310,7 +310,7 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
   // used
   int qword = numParams / kBitsPerQword;
   int bit   = numParams % kBitsPerQword;
-  assert(!info.isVariadic() || (m_attrs & AttrVariadicParam));
+  assertx(!info.isVariadic() || (m_attrs & AttrVariadicParam));
   uint64_t* refBits = &m_refBitVal;
   // Grow args, if necessary.
   if (qword) {
@@ -328,7 +328,7 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
     *refBits = (m_attrs & AttrVariadicByRef) ? -1ull : 0;
   }
 
-  assert(!(*refBits & (uint64_t(1) << bit)) == !(m_attrs & AttrVariadicByRef));
+  assertx(!(*refBits & (uint64_t(1) << bit)) == !(m_attrs & AttrVariadicByRef));
   *refBits &= ~(1ull << bit);
   *refBits |= uint64_t(ref) << bit;
   pBuilder.push_back(info);
@@ -340,9 +340,9 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
  * is (non)variadic; and the rest of the bits are the number of params.
  */
 void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
-  assert(m_paramCounts == 0);
+  assertx(m_paramCounts == 0);
   if (!fParams.size()) {
-    assert(!m_refBitVal && !shared()->m_refBitPtr);
+    assertx(!m_refBitVal && !shared()->m_refBitPtr);
     m_refBitVal = attrs() & AttrVariadicByRef ? -1uLL : 0uLL;
   }
 
@@ -351,7 +351,7 @@ void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
   if (!(m_attrs & AttrVariadicParam)) {
     m_paramCounts |= 1;
   }
-  assert(numParams() == fParams.size());
+  assertx(numParams() == fParams.size());
 }
 
 bool Func::isMemoizeImplName(const StringData* name) {
@@ -367,12 +367,12 @@ const StringData* Func::genMemoizeImplName(const StringData* origName) {
 // FuncId manipulation.
 
 void Func::setNewFuncId() {
-  assert(m_funcId == InvalidFuncId);
+  assertx(m_funcId == InvalidFuncId);
   m_funcId = s_nextFuncId.fetch_add(1, std::memory_order_relaxed);
 
   s_funcVec.ensureSize(m_funcId + 1);
   DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, this);
-  assert(oldVal == nullptr);
+  assertx(oldVal == nullptr);
 }
 
 FuncId Func::nextFuncId() {
@@ -380,7 +380,7 @@ FuncId Func::nextFuncId() {
 }
 
 const Func* Func::fromFuncId(FuncId id) {
-  assert(id < s_nextFuncId);
+  assertx(id < s_nextFuncId);
   auto func = s_funcVec.get(id);
   func->validate();
   return func;
@@ -435,7 +435,7 @@ int Func::getDVEntryNumParams(Offset offset) const {
 }
 
 Offset Func::getEntryForNumArgs(int numArgsPassed) const {
-  assert(numArgsPassed >= 0);
+  assertx(numArgsPassed >= 0);
   auto const nparams = numNonVariadicParams();
   for (unsigned i = numArgsPassed; i < nparams; i++) {
     const Func::ParamInfo& pi = params()[i];
@@ -468,7 +468,7 @@ bool Func::anyByRef() const {
 
 bool Func::byRef(int32_t arg) const {
   const uint64_t* ref = &m_refBitVal;
-  assert(arg >= 0);
+  assertx(arg >= 0);
   if (UNLIKELY(arg >= kBitsPerQword)) {
     // Super special case. A handful of builtins are varargs functions where the
     // (not formally declared) varargs are pass-by-reference. psychedelic-kitten
@@ -518,7 +518,7 @@ bool Func::mustBeRef(int32_t arg) const {
 // Locals, iterators, and stack.
 
 Id Func::lookupVarId(const StringData* name) const {
-  assert(name != nullptr);
+  assertx(name != nullptr);
   return shared()->m_localNames.findIndex(name);
 }
 
@@ -527,7 +527,7 @@ Id Func::lookupVarId(const StringData* name) const {
 
 bool Func::isImmutableFrom(const Class* cls) const {
   if (!RuntimeOption::RepoAuthoritative) return false;
-  assert(cls && cls->lookupMethod(name()) == this);
+  assertx(cls && cls->lookupMethod(name()) == this);
   if (attrs() & AttrNoOverride) {
     // Even if the func isn't overridden, we clone it into
     // any derived classes if it has static locals
@@ -577,9 +577,9 @@ const FPIEnt* Func::findFPI(const FPIEnt* b, const FPIEnt* e, Offset o) {
 }
 
 const FPIEnt* Func::findPrecedingFPI(Offset o) const {
-  assert(o >= base() && o < past());
+  assertx(o >= base() && o < past());
   const FPIEntVec& fpitab = shared()->m_fpitab;
-  assert(fpitab.size());
+  assertx(fpitab.size());
   const FPIEnt* fe = 0;
   for (unsigned i = 0; i < fpitab.size(); i++) {
     const FPIEnt* cur = &fpitab[i];
@@ -588,7 +588,7 @@ const FPIEnt* Func::findPrecedingFPI(Offset o) const {
       fe = cur;
     }
   }
-  assert(fe);
+  assertx(fe);
   return fe;
 }
 

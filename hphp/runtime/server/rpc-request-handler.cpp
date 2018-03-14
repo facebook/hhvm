@@ -188,7 +188,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
 
   // resolve virtual host
   const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
-  assert(vhost);
+  assertx(vhost);
   if (vhost->disabled()) {
     transport->sendString("Virtual host disabled.", 404);
     transport->onSendEnd();
@@ -235,7 +235,7 @@ void RPCRequestHandler::abortRequest(Transport *transport) {
   g_context.getCheck();
   GetAccessLog().onNewRequest();
   const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
-  assert(vhost);
+  assertx(vhost);
   transport->sendString("Service Unavailable", 503);
   GetAccessLog().log(transport, vhost);
   if (!vmStack().isAllocated()) {
@@ -379,7 +379,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       String response;
       switch (output) {
         case 0: {
-          assert(returnEncodeType == ReturnEncodeType::Json ||
+          assertx(returnEncodeType == ReturnEncodeType::Json ||
                  returnEncodeType == ReturnEncodeType::Serialize);
           try {
             response = (returnEncodeType == ReturnEncodeType::Json)

@@ -101,7 +101,7 @@ bool CmdExtension::processList(DebuggerProxy &proxy) {
   }
   for (auto const& name : names) {
     auto ext = ExtensionRegistry::get(name);
-    assert(ext);
+    assertx(ext);
     if (ext) {
       int support = ext->debuggerSupport();
       std::string line;

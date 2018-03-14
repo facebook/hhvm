@@ -34,7 +34,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 int numImmediates(Op opcode) {
-  assert(isValidOpcode(opcode));
+  assertx(isValidOpcode(opcode));
   static const int8_t values[] = {
 #define NA         0
 #define ONE(...)   1
@@ -54,8 +54,8 @@ int numImmediates(Op opcode) {
 }
 
 ArgType immType(const Op opcode, int idx) {
-  assert(isValidOpcode(opcode));
-  assert(idx >= 0 && idx < numImmediates(opcode));
+  assertx(isValidOpcode(opcode));
+  assertx(idx >= 0 && idx < numImmediates(opcode));
   always_assert(idx < 4); // No opcodes have more than four immediates
   static const int8_t argTypes[][4] = {
 #define NA               {-1, -1, -1, -1},
@@ -86,7 +86,7 @@ static size_t encoded_iva_size(uint8_t lowByte) {
 int immSize(PC origPC, int idx) {
   auto pc = origPC;
   auto const op = decode_op(pc);
-  assert(idx >= 0 && idx < numImmediates(op));
+  assertx(idx >= 0 && idx < numImmediates(op));
   always_assert(idx < 4); // No origPCs have more than four immediates
   static const int8_t argTypeToSizes[] = {
 #define ARGTYPE(nm, type) sizeof(type),
@@ -157,7 +157,7 @@ int immSize(PC origPC, int idx) {
     } else if (itype == I32LA) {
       vecElemSz = sizeof(uint32_t);
     } else {
-      assert(itype == SLA);
+      assertx(itype == SLA);
       vecElemSz = sizeof(StrVecItem);
     }
     return sizeof(int32_t) + vecElemSz * decode_raw<int32_t>(pc);
@@ -184,7 +184,7 @@ bool hasImmVector(Op opcode) {
 ArgUnion getImm(PC const origPC, int idx, const Unit* unit) {
   auto pc = origPC;
   auto const UNUSED op = decode_op(pc);
-  assert(idx >= 0 && idx < numImmediates(op));
+  assertx(idx >= 0 && idx < numImmediates(op));
   ArgUnion retval;
   retval.u_NA = 0;
   int cursor = 0;
@@ -198,7 +198,7 @@ ArgUnion getImm(PC const origPC, int idx, const Unit* unit) {
       type == CAR || type == CAW) {
     retval.u_IVA = decode_iva(pc);
   } else if (type == KA) {
-    assert(unit != nullptr);
+    assertx(unit != nullptr);
     retval.u_KA = decode_member_key(pc, unit);
   } else if (type == LAR) {
     retval.u_LAR = decodeLocalRange(pc);
@@ -213,12 +213,12 @@ ArgUnion getImm(PC const origPC, int idx, const Unit* unit) {
 ArgUnion* getImmPtr(PC const origPC, int idx) {
   auto pc = origPC;
   auto const UNUSED op = decode_op(pc);
-  assert(immType(op, idx) != IVA);
-  assert(immType(op, idx) != LA);
-  assert(immType(op, idx) != IA);
-  assert(immType(op, idx) != CAR);
-  assert(immType(op, idx) != CAW);
-  assert(immType(op, idx) != RATA);
+  assertx(immType(op, idx) != IVA);
+  assertx(immType(op, idx) != LA);
+  assertx(immType(op, idx) != IA);
+  assertx(immType(op, idx) != CAR);
+  assertx(immType(op, idx) != CAW);
+  assertx(immType(op, idx) != RATA);
   for (int i = 0; i < idx; i++) {
     pc += immSize(origPC, i);
   }
@@ -299,7 +299,7 @@ Offset* instrJumpOffset(PC const origPC) {
 
   auto pc = origPC;
   auto const op = decode_op(pc);
-  assert(!isSwitch(op));  // BLA doesn't work here
+  assertx(!isSwitch(op));  // BLA doesn't work here
 
   if (op == OpIterBreak) {
     // offset is imm number 0
@@ -317,7 +317,7 @@ Offset* instrJumpOffset(PC const origPC) {
   case 2: immNum = 1; break;
   case 4: immNum = 2; break;
   case 8: immNum = 3; break;
-  default: assert(false); return nullptr;
+  default: assertx(false); return nullptr;
   }
 
   return &getImmPtr(origPC, immNum)->u_BA;
@@ -437,7 +437,7 @@ int instrNumPops(PC pc) {
 
   // For instructions with vector immediates, we have to scan the contents of
   // the vector immediate to determine how many values are popped
-  assert(n == -1);
+  assertx(n == -1);
   ImmVector iv = getImmVector(pc);
   int k = iv.numStackValues();
   return k;
@@ -625,7 +625,7 @@ void staticArrayStreamer(const ArrayData* ad, std::string& out) {
   else if (ad->isDict()) out += "dict(";
   else if (ad->isKeyset()) out += "keyset(";
   else {
-    assert(ad->isPHPArray());
+    assertx(ad->isPHPArray());
     if (ad->isVArray()) out += "varray(";
     else if (ad->isDArray()) out += "darray(";
     else out += "array(";
@@ -769,7 +769,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define READLITSTR(sep) do {                                    \
   Id id = decode_raw<Id>(it);                                   \
   if (id < 0) {                                                 \
-    assert(op == OpSSwitch);                                    \
+    assertx(op == OpSSwitch);                                    \
     folly::format(&out, "{}-", sep);                            \
   } else {                                                      \
     auto const sd = lookupLitstrId(id);                         \
@@ -893,7 +893,7 @@ OPCODES
 #undef H_AA
 #undef H_VSA
 #undef H_KA
-    default: assert(false);
+    default: assertx(false);
   };
   return out;
 }
@@ -1147,9 +1147,9 @@ ImmVector getImmVector(PC opcode) {
 int instrFpToArDelta(const Func* func, PC opcode) {
   // This function should only be called for instructions that read the current
   // FPI
-  assert(instrReadsCurrentFpi(peek_op(opcode)));
+  assertx(instrReadsCurrentFpi(peek_op(opcode)));
   auto const fpi = func->findFPI(func->unit()->offsetOf(opcode));
-  assert(fpi != nullptr);
+  assertx(fpi != nullptr);
   return fpi->m_fpOff;
 }
 

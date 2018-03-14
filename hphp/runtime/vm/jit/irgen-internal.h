@@ -342,7 +342,7 @@ void ifNonNull(IRGS& env, SSATmp* tmp, Then then) {
 // Eval stack manipulation
 
 inline SSATmp* assertType(SSATmp* tmp, Type type) {
-  assert(!tmp || tmp->isA(type));
+  assertx(!tmp || tmp->isA(type));
   return tmp;
 }
 
@@ -811,7 +811,7 @@ inline void stLocMove(IRGS& env,
     // of the ref, since it may side-exit.
     auto const predTy = env.irb->predictedLocalInnerType(id);
 
-    assert(ldrefExit);
+    assertx(ldrefExit);
     gen(env, CheckRefInner, predTy, ldrefExit, box);
 
     auto const innerCell = gen(env, LdRef, predTy, box);

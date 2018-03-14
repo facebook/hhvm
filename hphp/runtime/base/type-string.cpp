@@ -90,7 +90,7 @@ StringData* buildStringData(int n) {
 req::ptr<StringData> String::buildString(int n) {
   const StringData* sd = GetIntegerStringData(n);
   if (sd) {
-    assert(sd->isStatic());
+    assertx(sd->isStatic());
     return req::ptr<StringData>::attach(const_cast<StringData*>(sd));
   }
   return req::ptr<StringData>::attach(buildStringData(n));
@@ -109,7 +109,7 @@ StringData* buildStringData(int64_t n) {
 req::ptr<StringData> String::buildString(int64_t n) {
   const StringData* sd = GetIntegerStringData(n);
   if (sd) {
-    assert(sd->isStatic());
+    assertx(sd->isStatic());
     return req::ptr<StringData>::attach(const_cast<StringData*>(sd));
   }
   return req::ptr<StringData>::attach(buildStringData(n));
@@ -152,7 +152,7 @@ int String::find(char ch, int pos /* = 0 */,
 
 int String::find(const char *s, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
-  assert(s);
+  assertx(s);
   if (empty()) return -1;
   if (*s && *(s+1) == 0) {
     return find(*s, pos, caseSensitive);
@@ -180,7 +180,7 @@ int String::rfind(char ch, int pos /* = 0 */,
 
 int String::rfind(const char *s, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
-  assert(s);
+  assertx(s);
   if (empty()) return -1;
   if (*s && *(s+1) == 0) {
     return rfind(*s, pos, caseSensitive);
@@ -203,7 +203,7 @@ int String::rfind(const String& s, int pos /* = 0 */,
 // offset functions: cannot inline these due to dependencies
 
 char String::charAt(int pos) const {
-  assert(pos >= 0 && pos <= size());
+  assertx(pos >= 0 && pos <= size());
   const char *s = data();
   return s[pos];
 }

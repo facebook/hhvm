@@ -189,7 +189,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     } else {
       fp = vmfp();
       auto const unit = fp->func()->unit();
-      assert(unit);
+      assertx(unit);
       pc = unit->offsetOf(vmpc());
     }
 
@@ -211,7 +211,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     }
     if (curFp) {
       auto const unit = curFp->func()->unit();
-      assert(unit);
+      assertx(unit);
       auto const filename = curFp->func()->filename();
 
       ArrayInit frame(btArgs.m_parserFrame ? 4 : 2, ArrayInit::Map{});
@@ -251,7 +251,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       if (prevFp->func()->originalFilename()) {
         prevFile = prevFp->func()->originalFilename();
       }
-      assert(prevFile);
+      assertx(prevFile);
       frame.set(s_file, Variant{const_cast<StringData*>(prevFile)});
 
       // In the normal method case, the "saved pc" for line number printing is

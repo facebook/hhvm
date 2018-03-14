@@ -940,7 +940,7 @@ void StreamContext::mergeOptions(const Array& options) {
     if (!m_options.exists(wrapper)) {
       m_options.set(wrapper, Array::Create());
     }
-    assert(m_options[wrapper].isArray());
+    assertx(m_options[wrapper].isArray());
     Array& opts = asArrRef(m_options.lvalAt(wrapper));
     Array new_opts = it.second().toArray();
     for (ArrayIter it2(new_opts); it2; ++it2) {
@@ -958,7 +958,7 @@ void StreamContext::setOption(const String& wrapper,
   if (!m_options.exists(wrapper)) {
     m_options.set(wrapper, Array::Create());
   }
-  assert(m_options[wrapper].isArray());
+  assertx(m_options[wrapper].isArray());
   Array& opts = asArrRef(m_options.lvalAt(wrapper));
   opts.set(option, value);
 }
@@ -999,7 +999,7 @@ void StreamContext::mergeParams(const Array& params) {
   }
   const String& options_key = String::FromCStr("options");
   if (params.exists(options_key)) {
-    assert(params[options_key].isArray());
+    assertx(params[options_key].isArray());
     mergeOptions(params[options_key].toArray());
   }
 }

@@ -107,7 +107,7 @@ void RequestLocal<T>::create() {
     m_node.m_on_thread_exit_fn = RequestLocal<T>::OnThreadExit;
     ThreadLocalManager::PushTop(m_node);
   }
-  assert(m_node.m_p == nullptr);
+  assertx(m_node.m_p == nullptr);
   m_node.m_p = new T();
 }
 

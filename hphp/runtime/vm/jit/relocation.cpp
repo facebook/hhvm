@@ -247,11 +247,11 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
   ARCH_SWITCH_CALL(adjustMetaDataForRelocation, rel, asmInfo, meta);
 
   if (asmInfo) {
-    assert(asmInfo->validate());
+    assertx(asmInfo->validate());
     rel.fixupRanges(asmInfo, AreaIndex::Main);
     rel.fixupRanges(asmInfo, AreaIndex::Cold);
     rel.fixupRanges(asmInfo, AreaIndex::Frozen);
-    assert(asmInfo->validate());
+    assertx(asmInfo->validate());
   }
 }
 

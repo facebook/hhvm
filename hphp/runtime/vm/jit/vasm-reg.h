@@ -329,7 +329,7 @@ struct Vptr {
   bool operator!=(const Vptr&) const;
 
   void validate() {
-    assert((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
+    assertx((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
            "Invalid index register scaling (must be 1,2,4 or 8).");
   }
 

@@ -397,7 +397,7 @@ void StatCache::Node::insertChild(const std::string& childName,
                                   StatCache::NodePtr child, bool follow) {
   auto& map = follow ? m_children : m_lChildren;
   if (!map.insert(std::make_pair(childName, child)).second) {
-    assert(0); // should not already exist in the map here.
+    assertx(0); // should not already exist in the map here.
   }
 }
 
@@ -460,8 +460,8 @@ void StatCache::clear() {
     m_root->expirePaths();
   }
   m_root = nullptr;
-  assert(m_path2Node.size() == 0);
-  assert(m_lpath2Node.size() == 0);
+  assertx(m_path2Node.size() == 0);
+  assertx(m_lpath2Node.size() == 0);
 }
 
 void StatCache::reset() {
@@ -492,7 +492,7 @@ StatCache::NodePtr StatCache::getNode(const std::string& path, bool follow) {
     if (!node.get()) {
       node = new Node(*this, wd);
       if (!m_watch2Node.insert(std::make_pair(wd, node)).second) {
-        assert(0); // should not already exist in the map
+        assertx(0); // should not already exist in the map
       }
       TRACE(2, "StatCache: getNode('%s', follow=%s) --> %p (wd=%d)\n",
                path.c_str(), follow ? "true" : "false", node.get(), wd);
@@ -516,7 +516,7 @@ bool StatCache::mergePath(const std::string& path, bool follow) {
   String canonicalPath = FileUtil::canonicalize(path);
   std::vector<std::string> pvec;
   folly::split('/', canonicalPath.slice(), pvec);
-  assert((pvec[0].size() == 0)); // path should be absolute.
+  assertx((pvec[0].size() == 0)); // path should be absolute.
   // Lazily initialize so that if StatCache never gets used, no kernel
   // resources are consumed.
   if (m_ifd == -1 && init()) {
@@ -558,7 +558,7 @@ bool StatCache::handleEvent(const struct inotify_event* event) {
     reset();
     return true;
   }
-  assert(event->wd != -1);
+  assertx(event->wd != -1);
   NodePtr node = folly::get_default(m_watch2Node, event->wd);
   if (!node.get()) {
     TRACE(1, "StatCache: inotify event (obsolete) %s\n",
@@ -656,7 +656,7 @@ void StatCache::refresh() {
     int nread = read(m_ifd, m_readBuf, kReadBufSize);
     if (nread == -1) {
       // No pending events.
-      assert(errno == EAGAIN);
+      assertx(errno == EAGAIN);
       // Record the last refresh time *after* processing the event queue, in
       // order to assure that once the event queue has been merged into the
       // cache state, all cached values have timestamps older than
@@ -813,7 +813,7 @@ __FBSDID("$FreeBSD: src/lib/libc/stdlib/realpath.c,v 1.24 2011/11/04 19:56:34 ed
 // components.  Returns the resolved path on success, or "" on failure,
 std::string StatCache::realpathImpl(const char* path) {
   std::string resolved;
-  assert(path != nullptr);
+  assertx(path != nullptr);
   if (path[0] != '/') {
     return realpathLibc(path);
   }

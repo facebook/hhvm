@@ -219,7 +219,7 @@ struct StringData final : MaybeCountable,
    * Reference-counting related.
    */
   ALWAYS_INLINE void decRefAndRelease() {
-    assert(kindIsValid());
+    assertx(kindIsValid());
     if (decReleaseCheck()) release();
   }
 

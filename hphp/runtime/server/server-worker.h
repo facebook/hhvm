@@ -64,7 +64,7 @@ struct ServerWorker
    * Called when thread enters and exits.
    */
   void onThreadEnter() override {
-    assert(this->m_context);
+    assertx(this->m_context);
     m_handler = this->m_context->createRequestHandler();
     m_requestsTimedOutOnQueue =
       ServiceData::createTimeSeries("requests_timed_out_on_queue",
@@ -72,7 +72,7 @@ struct ServerWorker
   }
 
   void onThreadExit() override {
-    assert(this->m_context);
+    assertx(this->m_context);
     m_handler.reset();
   }
 

@@ -202,7 +202,7 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
   } else {
     ad = arr->copyStatic();
   }
-  assert(ad->isStatic());
+  assertx(ad->isStatic());
   s_cachedHash.first = ad;
   assertx(ScalarHash{}.raw_hash(ad) == s_cachedHash.second);
   auto const DEBUG_ONLY inserted = s_arrayDataMap.insert(ad).second;
@@ -877,8 +877,8 @@ ArrayData* ArrayData::CreateRef(TypedValue name, Variant& value) {
 ALWAYS_INLINE
 bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
                             bool strict) {
-  assert(ad1->isPHPArray());
-  assert(ad2->isPHPArray());
+  assertx(ad1->isPHPArray());
+  assertx(ad2->isPHPArray());
 
   if (ad1 == ad2) return true;
 
@@ -894,7 +894,7 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
 
   if (strict) {
     for (ArrayIter iter1{ad1}, iter2{ad2}; iter1; ++iter1, ++iter2) {
-      assert(iter2);
+      assertx(iter2);
       if (!same(iter1.first(), iter2.first()) ||
           !tvSame(iter1.secondVal(), iter2.secondVal())) {
         return false;
@@ -919,8 +919,8 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
 
 ALWAYS_INLINE
 int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
-  assert(ad1->isPHPArray());
-  assert(ad2->isPHPArray());
+  assertx(ad1->isPHPArray());
+  assertx(ad2->isPHPArray());
 
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatDVCmpNotices &&
                !ArrayData::dvArrayEqual(ad1, ad2))) {
@@ -992,7 +992,7 @@ int64_t ArrayData::Compare(const ArrayData* ad1, const ArrayData* ad2) {
 }
 
 int ArrayData::compare(const ArrayData* v2) const {
-  assert(v2);
+  assertx(v2);
 
   if (isPHPArray()) {
     if (UNLIKELY(!v2->isPHPArray())) {
@@ -1028,7 +1028,7 @@ int ArrayData::compare(const ArrayData* v2) const {
 }
 
 bool ArrayData::equal(const ArrayData* v2, bool strict) const {
-  assert(v2);
+  assertx(v2);
 
   auto const mixed = [&]{
     if (UNLIKELY(checkHACCompare() && v2->isHackArray())) {

@@ -94,17 +94,17 @@ TCA TransLoc::coldStart()   const { return tc::offsetToAddr(m_coldOff); }
 TCA TransLoc::frozenStart() const { return tc::offsetToAddr(m_frozenOff); }
 
 void TransLoc::setMainStart(TCA newStart) {
-  assert(tc::isValidCodeAddress(newStart));
+  assertx(tc::isValidCodeAddress(newStart));
   m_mainOff = tc::addrToOffset(newStart);
 }
 
 void TransLoc::setColdStart(TCA newStart) {
-  assert(tc::isValidCodeAddress(newStart));
+  assertx(tc::isValidCodeAddress(newStart));
   m_coldOff = tc::addrToOffset(newStart);
 }
 
 void TransLoc::setFrozenStart(TCA newStart) {
-  assert(tc::isValidCodeAddress(newStart));
+  assertx(tc::isValidCodeAddress(newStart));
   m_frozenOff = tc::addrToOffset(newStart);
 }
 

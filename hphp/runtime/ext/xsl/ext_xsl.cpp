@@ -195,8 +195,8 @@ xmlDocPtr XSLTProcessorData::apply_stylesheet() {
   );
 
   for (ArrayIter iter(m_params); iter; ++iter) {
-    assert(iter.first().isString());
-    assert(iter.second().isString());
+    assertx(iter.first().isString());
+    assertx(iter.second().isString());
 
     xmlChar *value = xslt_string_to_xpathexpr(iter.second().toString().c_str());
     if (value) {
@@ -214,7 +214,7 @@ xmlDocPtr XSLTProcessorData::apply_stylesheet() {
     profile = fopen(m_profile.data(), "w");
   }
 
-  assert(m_usedElements.empty());
+  assertx(m_usedElements.empty());
   xmlDocPtr res = xsltApplyStylesheetUser(m_stylesheet,
                                           doc(),
                                           nullptr,
@@ -449,7 +449,7 @@ HHVM_METHOD(XSLTProcessor, getParameter, const Variant& /*namespaceURI*/,
 
   // namespaceURI argument is unused in PHP5 XSL extension.
   if (data->m_params.exists(localName)) {
-    assert(data->m_params[localName].isString());
+    assertx(data->m_params[localName].isString());
     return data->m_params[localName].toString();
   }
 
@@ -505,7 +505,7 @@ HHVM_METHOD(XSLTProcessor, removeParameter, const Variant& /*namespaceURI*/,
 
   // namespaceURI argument is unused in PHP5 XSL extension.
   if (data->m_params.exists(localName)) {
-    assert(data->m_params[localName].isString());
+    assertx(data->m_params[localName].isString());
     data->m_params.remove(localName);
 
     return true;

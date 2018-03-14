@@ -34,7 +34,7 @@ MimePart::MimeHeader::MimeHeader()
 
 MimePart::MimeHeader::MimeHeader(const char *value)
   : m_empty(false) {
-  assert(value);
+  assertx(value);
   m_attributes = Array::Create();
   m_value = String(value, CopyString);
 }

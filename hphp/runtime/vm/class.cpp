@@ -75,7 +75,7 @@ static FuncIdToClassMap* s_funcIdToClassMap;
 
 const Class* getOwningClassForFunc(const Func* f) {
   // We only populate s_funcIdToClassMap when EvalPerfDataMap is true.
-  assert(RuntimeOption::EvalPerfDataMap);
+  assertx(RuntimeOption::EvalPerfDataMap);
 
   if (s_funcIdToClassMap) {
     FuncIdToClassMap::const_accessor acc;
@@ -109,7 +109,7 @@ Class::PropInitVec::allocWithReqAllocator(const PropInitVec& src) {
 
 const Class::PropInitVec&
 Class::PropInitVec::operator=(const PropInitVec& piv) {
-  assert(!reqAllocated());
+  assertx(!reqAllocated());
   if (this != &piv) {
     if (UNLIKELY(m_capacity)) {
       free_huge(m_data);
@@ -118,14 +118,14 @@ Class::PropInitVec::operator=(const PropInitVec& piv) {
     unsigned sz = m_size = m_capacity = piv.size();
     if (sz == 0) return *this;
     m_data = (TypedValueAux*)malloc_huge(sz * sizeof(*m_data));
-    assert(m_data);
+    assertx(m_data);
     memcpy(m_data, piv.m_data, sz * sizeof(*m_data));
   }
   return *this;
 }
 
 void Class::PropInitVec::push_back(const TypedValue& v) {
-  assert(!reqAllocated());
+  assertx(!reqAllocated());
   if (m_size == m_capacity) {
     unsigned newCap = folly::nextPowTwo(m_size + 1);
     m_capacity = static_cast<int32_t>(newCap);
@@ -135,7 +135,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
       free_huge(m_data);
     }
     m_data = reinterpret_cast<TypedValueAux*>(newData);
-    assert(m_data);
+    assertx(m_data);
   }
   cellDup(v, m_data[m_size]);
   m_data[m_size++].deepInit() = false;
@@ -269,8 +269,8 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
 }
 
 Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
-  assert(parent() == c_Closure::classof());
-  assert(m_invoke);
+  assertx(parent() == c_Closure::classof());
+  assertx(m_invoke);
 
   bool const is_dynamic = (attrs != AttrNone);
 
@@ -280,8 +280,8 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
   auto template_cls = is_dynamic ? preClass()->namedEntity()->clsList() : this;
   auto const invoke = template_cls->m_invoke;
 
-  assert(IMPLIES(is_dynamic, m_scoped));
-  assert(IMPLIES(is_dynamic, template_cls->m_scoped));
+  assertx(IMPLIES(is_dynamic, m_scoped));
+  assertx(IMPLIES(is_dynamic, template_cls->m_scoped));
 
   auto const try_template = [&]() -> Class* {
     bool const ctx_match = invoke->cls() == ctx;
@@ -448,8 +448,8 @@ void Class::destroy() {
 }
 
 void Class::atomicRelease() {
-  assert(!m_cachedClass.bound());
-  assert(!getCount());
+  assertx(!m_cachedClass.bound());
+  assertx(!getCount());
   this->~Class();
   low_free_data(mallocPtr());
 }
@@ -599,7 +599,7 @@ Class::Avail Class::avail(Class*& parent,
   for (size_t i = 0; i < m_numDeclInterfaces; i++) {
     auto di = m_declInterfaces.get()[i].get();
     const StringData* pdi = m_preClass.get()->interfaces()[i];
-    assert(pdi->isame(di->name()));
+    assertx(pdi->isame(di->name()));
 
     PreClass *pint = di->m_preClass.get();
     Class* interface = Unit::getClass(pint->namedEntity(), pdi,
@@ -665,12 +665,12 @@ Class::Avail Class::avail(Class*& parent,
 // Ancestry.
 
 const Class* Class::commonAncestor(const Class* cls) const {
-  assert(isNormalClass(this) && isNormalClass(cls));
+  assertx(isNormalClass(this) && isNormalClass(cls));
 
   // Walk up m_classVec for both classes to look for a common ancestor.
   auto vecIdx = std::min(m_classVecLen, cls->m_classVecLen) - 1;
   do {
-    assert(vecIdx < m_classVecLen && vecIdx < cls->m_classVecLen);
+    assertx(vecIdx < m_classVecLen && vecIdx < cls->m_classVecLen);
     if (m_classVec[vecIdx] == cls->m_classVec[vecIdx]) {
       return m_classVec[vecIdx];
     }
@@ -697,7 +697,7 @@ const Func* Class::getDeclaredCtor() const {
 }
 
 const Func* Class::getCachedInvoke() const {
-  assert(IMPLIES(m_invoke, !m_invoke->isStaticInPrologue()));
+  assertx(IMPLIES(m_invoke, !m_invoke->isStaticInPrologue()));
   return m_invoke;
 }
 
@@ -711,7 +711,7 @@ bool Class::hasCall() const {
 // Builtin classes.
 
 bool Class::isCppSerializable() const {
-  assert(instanceCtor()); // Only call this on CPP classes
+  assertx(instanceCtor()); // Only call this on CPP classes
   auto* ndi = m_extra ? m_extra.raw()->m_nativeDataInfo : nullptr;
   return ndi != nullptr && ndi->isSerializable();
 }
@@ -745,8 +745,8 @@ bool Class::initialized() const {
 }
 
 void Class::initProps() const {
-  assert(m_pinitVec.size() > 0);
-  assert(getPropData() == nullptr);
+  assertx(m_pinitVec.size() > 0);
+  assertx(getPropData() == nullptr);
   // Copy initial values for properties to a new vector that can be used to
   // complete initialization for non-scalar properties via the iterative
   // 86pinit() calls below. 86pinit() takes a reference to an array to populate
@@ -767,7 +767,7 @@ void Class::initProps() const {
         *it, init_null_variant, nullptr, const_cast<Class*>(this),
         nullptr, nullptr, ExecutionContext::InvokeNormal, false, false
       );
-      assert(retval.m_type == KindOfNull);
+      assertx(retval.m_type == KindOfNull);
     }
   } catch (...) {
     // Undo the allocation of propVec
@@ -802,7 +802,7 @@ bool Class::needsInitSProps() const {
 }
 
 void Class::initSProps() const {
-  assert(needsInitSProps() || m_sPropCacheInit.isPersistent());
+  assertx(needsInitSProps() || m_sPropCacheInit.isPersistent());
 
   const bool hasNonscalarInit = !m_sinitVec.empty();
   folly::Optional<VMRegAnchor> _;
@@ -837,7 +837,7 @@ void Class::initSProps() const {
         m_sinitVec[i], init_null_variant, nullptr, const_cast<Class*>(this),
         nullptr, nullptr, ExecutionContext::InvokeNormal, false, false
       );
-      assert(retval.m_type == KindOfNull);
+      assertx(retval.m_type == KindOfNull);
     }
   }
 
@@ -925,7 +925,7 @@ Class::PropInitVec* Class::getPropData() const {
 }
 
 TypedValue* Class::getSPropData(Slot index) const {
-  assert(numStaticProperties() > index);
+  assertx(numStaticProperties() > index);
   return m_sPropCache[index].bound() ? &m_sPropCache[index].get()->val :
          nullptr;
 }
@@ -949,7 +949,7 @@ Class::PropLookup<Slot> Class::getDeclPropIndex(
       // Fetch the class in the inheritance tree which first declared the
       // property
       auto const baseClass = m_declProperties[propInd].cls;
-      assert(baseClass);
+      assertx(baseClass);
 
       // If ctx == baseClass, we have the right property and we can stop here.
       if (ctx == baseClass) return PropLookup<Slot> { propInd, true };
@@ -958,7 +958,7 @@ Class::PropLookup<Slot> Class::getDeclPropIndex(
       // we can fail fast here.
       if (ctx == nullptr) return PropLookup<Slot> { propInd, false };
 
-      assert(ctx);
+      assertx(ctx);
       if (attrs & AttrPrivate) {
         // ctx != baseClass and the property is private, so it is not
         // accessible. We need to keep going because ctx may define a private
@@ -985,7 +985,7 @@ Class::PropLookup<Slot> Class::getDeclPropIndex(
         // keep going because ctx may define a private property with the same
         // name.
         accessible = true;
-        assert(baseClass->classof(ctx));
+        assertx(baseClass->classof(ctx));
       }
     } else {
       // The property is public (or we're in the debugger and we are bypassing
@@ -1080,7 +1080,7 @@ Class::PropLookup<TypedValue*> Class::getSProp(
   }
 
   auto const sProp = getSPropData(lookup.prop);
-  assert(sProp && sProp->m_type != KindOfUninit &&
+  assertx(sProp && sProp->m_type != KindOfUninit &&
          "Static property initialization failed to initialize a property.");
   return PropLookup<TypedValue*> { sProp, lookup.accessible };
 }
@@ -1109,7 +1109,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
     if (cns.isType()) {
       // Type constants with the low bit set are already resolved and can be
       // returned after masking out that bit.
-      assert(cnsVal->m_type ==
+      assertx(cnsVal->m_type ==
              (RuntimeOption::EvalHackArrDVArrs
               ? KindOfPersistentDict
               : KindOfPersistentArray)
@@ -1118,7 +1118,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
       auto const rawData = reinterpret_cast<intptr_t>(typeCns);
       if (rawData & 0x1) {
         auto const resolved = reinterpret_cast<ArrayData*>(rawData ^ 0x1);
-        assert(resolved->isDictOrDArray());
+        assertx(resolved->isDictOrDArray());
         return make_persistent_array_like_tv(resolved);
       }
     } else {
@@ -1193,7 +1193,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
     auto const ad = ArrayData::GetScalarArray(std::move(resolvedTS));
     if (persistent) {
       auto const rawData = reinterpret_cast<intptr_t>(ad);
-      assert((rawData & 0x7) == 0 && "ArrayData not 8-byte aligned");
+      assertx((rawData & 0x7) == 0 && "ArrayData not 8-byte aligned");
       auto taggedData = reinterpret_cast<ArrayData*>(rawData | 0x1);
 
       // Multiple threads might create and store the resolved type structure
@@ -1255,7 +1255,7 @@ const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
     return nullptr;
   }
   auto const ret = &m_constants[clsCnsInd].val;
-  assert(m_constants[clsCnsInd].isType() || tvIsPlausible(*ret));
+  assertx(m_constants[clsCnsInd].isType() || tvIsPlausible(*ret));
   return ret;
 }
 
@@ -1551,7 +1551,7 @@ inline void checkRefCompat(const char* kind, const Func* self,
 
   // Because of name mangling inout functions should only have the same names as
   // other inout functions.
-  assert(self->takesInOutParams() == inherit->takesInOutParams());
+  assertx(self->takesInOutParams() == inherit->takesInOutParams());
 
   // Inout functions have the parameter offsets of their inout parameters
   // mangled into their names, so doing this check on them would be meaningless,
@@ -1560,7 +1560,7 @@ inline void checkRefCompat(const char* kind, const Func* self,
     // When reffiness invariance is disabled we cannot create wrappers for ref
     // functions, as those wrappers would violate our invariance rules for inout
     // functions.
-    assert(RuntimeOption::EvalReffinessInvariance || !self->isInOutWrapper());
+    assertx(RuntimeOption::EvalReffinessInvariance || !self->isInOutWrapper());
     return;
   }
 
@@ -1659,8 +1659,8 @@ void checkDeclarationCompat(const PreClass* preClass,
       }
     }
     if (ivariadic) {
-      assert(iparams[iparams.size() - 1].isVariadic());
-      assert(params[params.size() - 1].isVariadic());
+      assertx(iparams[iparams.size() - 1].isVariadic());
+      assertx(params[params.size() - 1].isVariadic());
       // reffiness of the variadics must match
       if (imeth->byRef(iparams.size() - 1) !=
           func->byRef(params.size() - 1)) {
@@ -1795,7 +1795,7 @@ void Class::setMethods() {
     // Copy down the parent's method entries. These may be overridden below.
     for (Slot i = 0; i < m_parent->m_methods.size(); ++i) {
       Func* f = m_parent->getMethod(i);
-      assert(f);
+      assertx(f);
       ITRACE(5, "  - adding parent method {}\n", f->name()->data());
       if ((f->attrs() & AttrClone) ||
           (!(f->attrs() & AttrPrivate) && f->hasStaticLocals())) {
@@ -1806,7 +1806,7 @@ void Class::setMethods() {
         // overridden below.
         parentMethodsWithStaticLocals.push_back(i);
       }
-      assert(builder.size() == i);
+      assertx(builder.size() == i);
       builder.add(f->name(), f);
     }
   }
@@ -1832,7 +1832,7 @@ void Class::setMethods() {
     if (it2 != builder.end()) {
       Func* parentMethod = builder[it2->second];
       // We should never have null func pointers to deal with
-      assert(parentMethod);
+      assertx(parentMethod);
       // An abstract method that came from a trait doesn't override another
       // method.
       if (method->isFromTrait() && (method->attrs() & AttrAbstract)) continue;
@@ -1841,7 +1841,7 @@ void Class::setMethods() {
       Func* f = method->clone(this);
       f->setNewFuncId();
       Class* baseClass;
-      assert(!(f->attrs() & AttrPrivate) ||
+      assertx(!(f->attrs() & AttrPrivate) ||
              (parentMethod->attrs() & AttrPrivate));
       if ((parentMethod->attrs() & AttrPrivate) || (f->attrs() & AttrPrivate)) {
         baseClass = this;
@@ -1896,7 +1896,7 @@ void Class::setMethods() {
               acc, FuncIdToClassMap::value_type(f->getFuncId(), this))) {
           // we only just allocated this id, which is supposedly
           // process unique
-          assert(false);
+          assertx(false);
         }
       }
     }
@@ -2130,7 +2130,7 @@ void Class::setConstants() {
     if (cns.isType()) {
       auto& preConsts = cns.cls->preClass()->constantsMap();
       auto const idx = preConsts.findIndex(cns.name.get());
-      assert(idx != -1);
+      assertx(idx != -1);
       cns.val = preConsts[idx].val();
     }
   }
@@ -2286,7 +2286,7 @@ void Class::setProperties() {
         PropMap::Builder::iterator it2 = curPropMap.find(preProp->name());
         if (it2 != curPropMap.end()) {
           auto& prop = curPropMap[it2->second];
-          assert((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) ==
+          assertx((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) ==
                  AttrProtected);
           prop.cls = this;
           prop.docComment = preProp->docComment();
@@ -2336,7 +2336,7 @@ void Class::setProperties() {
         addNewProp();
         break;
       }
-      default: assert(false);
+      default: assertx(false);
       }
     } else { // Static property.
       // Prohibit non-static-->static redeclaration.
@@ -2524,7 +2524,7 @@ void Class::importTraitStaticProp(Class* /*trait*/, SProp& traitProp,
       auto const& prevSProps = prevProp.cls->m_staticProperties;
 
       auto prevPropInd = prevSProps.findIndex(prevProp.name);
-      assert(prevPropInd != kInvalidSlot);
+      assertx(prevPropInd != kInvalidSlot);
 
       prevPropVal = prevSProps[prevPropInd].val;
     }
@@ -2703,7 +2703,7 @@ void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
 
   for (auto const& traitName : m_preClass->usedTraits()) {
     auto const trait = Unit::lookupClass(traitName);
-    assert(trait->attrs() & AttrTrait);
+    assertx(trait->attrs() & AttrTrait);
     int numIfcs = trait->m_interfaces.size();
 
     for (int i = 0; i < numIfcs; i++) {
@@ -2767,16 +2767,16 @@ void Class::setInterfaces() {
          !m_preClass->name()->isame(s_Stringish.get()))) {
       // Add Stringish
       Class* stringish = Unit::lookupClass(s_Stringish.get());
-      assert(stringish != nullptr);
-      assert((stringish->attrs() & AttrInterface));
+      assertx(stringish != nullptr);
+      assertx((stringish->attrs() & AttrInterface));
       interfacesBuilder.add(stringish->name(), LowPtr<Class>(stringish));
 
       if (!m_preClass->name()->isame(s_XHPChild.get()) &&
           !interfacesBuilder.contains(s_XHPChild.get())) {
         // All Stringish are also XHPChild
         Class* xhpChild = Unit::lookupClass(s_XHPChild.get());
-        assert(xhpChild != nullptr);
-        assert((xhpChild->attrs() & AttrInterface));
+        assertx(xhpChild != nullptr);
+        assertx((xhpChild->attrs() & AttrInterface));
         interfacesBuilder.add(xhpChild->name(), LowPtr<Class>(xhpChild));
       }
     }
@@ -2888,7 +2888,7 @@ void Class::setRequirements() {
     // pointless circular dependencies, but if it does, we check
     // that it's the right kind.
     for (auto const& req : m_preClass->requirements()) {
-      assert(req.is_extends());
+      assertx(req.is_extends());
       auto const reqName = req.name();
       auto const reqCls = Unit::lookupClass(reqName);
       if (reqCls) {
@@ -2917,7 +2917,7 @@ void Class::setRequirements() {
                         reqName->data());
           }
         } else {
-          assert(req.is_implements());
+          assertx(req.is_implements());
           if (!(reqCls->attrs() & AttrInterface)) {
             raise_error(Strings::TRAIT_BAD_REQ_IMPLEMENTS,
                         m_preClass->name()->data(),
@@ -2979,7 +2979,7 @@ bool Class::hasNativePropHandler() const {
 }
 
 const Native::NativePropHandler* Class::getNativePropHandler() const {
-  assert(hasNativePropHandler());
+  assertx(hasNativePropHandler());
 
   for (auto cls = this; cls; cls = cls->parent()) {
     auto propHandler = Native::getNativePropHandler(cls->name());
@@ -2992,13 +2992,13 @@ const Native::NativePropHandler* Class::getNativePropHandler() const {
 }
 
 void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  const {
-  assert(!(attrs() & (AttrInterface | AttrTrait)));
+  assertx(!(attrs() & (AttrInterface | AttrTrait)));
 
   auto const reqName = req->name();
   if (req->is_implements()) {
     // "require implements" is only allowed on traits.
 
-    assert(attrs() & AttrNoExpandTrait ||
+    assertx(attrs() & AttrNoExpandTrait ||
            (m_extra && m_extra->m_usedTraits.size() > 0));
     for (auto const& traitCls : m_extra->m_usedTraits) {
       if (traitCls->allRequirements().contains(reqName)) {
@@ -3014,8 +3014,8 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
       // contains a requirement. To save space, we don't include the source
       // trait in the requirement. For details, see
       // ClassScope::importUsedTraits in the compiler.
-      assert(!m_extra || m_extra->m_usedTraits.size() == 0);
-      assert(m_preClass->requirements().size() > 0);
+      assertx(!m_extra || m_extra->m_usedTraits.size() == 0);
+      assertx(m_preClass->requirements().size() > 0);
       raise_error(Strings::TRAIT_REQ_IMPLEMENTS,
                   m_preClass->name()->data(),
                   reqName->data(),
@@ -3026,7 +3026,7 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
     return;
   }
 
-  assert(req->is_extends());
+  assertx(req->is_extends());
   for (auto const& iface : m_interfaces.range()) {
     if (iface->allRequirements().contains(reqName)) {
       raise_error("Class '%s' required to extend class '%s'"
@@ -3048,8 +3048,8 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
 
   if (attrs() & AttrNoExpandTrait) {
     // A result of trait flattening, as with the is_implements case above
-    assert(!m_extra || m_extra->m_usedTraits.size() == 0);
-    assert(m_preClass->requirements().size() > 0);
+    assertx(!m_extra || m_extra->m_usedTraits.size() == 0);
+    assertx(m_preClass->requirements().size() > 0);
     raise_error(Strings::TRAIT_REQ_EXTENDS,
                 m_preClass->name()->data(),
                 reqName->data(),
@@ -3087,7 +3087,7 @@ void Class::checkRequirementConstraints() const {
 
 void Class::setClassVec() {
   if (m_classVecLen > 1) {
-    assert(m_parent.get() != nullptr);
+    assertx(m_parent.get() != nullptr);
     memcpy(m_classVec, m_parent->m_classVec,
            (m_classVecLen-1) * sizeof(m_classVec[0]));
   }
@@ -3100,10 +3100,10 @@ void Class::setFuncVec(MethodMapBuilder& builder) {
   memset(funcVec, 0, m_funcVecLen * sizeof(LowPtr<Func>));
 
   funcVec = (LowPtr<Func>*)this;
-  assert(builder.size() <= m_funcVecLen);
+  assertx(builder.size() <= m_funcVecLen);
 
   for (Slot i = 0; i < builder.size(); i++) {
-    assert(builder[i]->methodSlot() < builder.size());
+    assertx(builder[i]->methodSlot() < builder.size());
     funcVec[-((int32_t)builder[i]->methodSlot() + 1)] = builder[i];
   }
 }
@@ -3275,7 +3275,7 @@ void Class::importTraitMethod(const TMIData::MethodData& mdata,
 
     methodOverrideCheck(parentMethod, f);
 
-    assert(!(f->attrs() & AttrPrivate) ||
+    assertx(!(f->attrs() & AttrPrivate) ||
            (parentMethod->attrs() & AttrPrivate));
     if ((parentMethod->attrs() & AttrPrivate) || (f->attrs() & AttrPrivate)) {
       baseClass = this;
@@ -3313,7 +3313,7 @@ void Class::importTraitMethods(MethodMapBuilder& builder) {
 
       if (method->takesInOutParams()) {
         auto const wrapper = trait->lookupMethod(stripInOutSuffix(methName));
-        assert(wrapper);
+        assertx(wrapper);
 
         inoutFunctions.emplace(wrapper, method);
         continue; // Don't apply any trait rules to the inout function
@@ -3330,7 +3330,7 @@ void Class::importTraitMethods(MethodMapBuilder& builder) {
 
   auto getSuffix = [] (const StringData* name) {
     auto start = name->data() + name->size() - sizeof(kInOutSuffix);
-    for (; *start != '$'; --start) assert(start != name->data());
+    for (; *start != '$'; --start) assertx(start != name->data());
     return folly::StringPiece(start, name->size() - (start - name->data()));
   };
 

@@ -42,7 +42,7 @@ struct c_StaticWaitHandle final : c_Awaitable {
                   type_scan::getIndexForMalloc<c_StaticWaitHandle>())
   {}
   ~c_StaticWaitHandle() {
-    assert(isFinished());
+    assertx(isFinished());
     tvDecRefGen(&m_resultOrException);
   }
 

@@ -57,12 +57,12 @@ inline size_t Class::PropInitVec::size() const {
 }
 
 inline TypedValueAux& Class::PropInitVec::operator[](size_t i) {
-  assert(i < m_size);
+  assertx(i < m_size);
   return m_data[i];
 }
 
 inline const TypedValueAux& Class::PropInitVec::operator[](size_t i) const {
-  assert(i < m_size);
+  assertx(i < m_size);
   return m_data[i];
 }
 
@@ -104,7 +104,7 @@ inline Class::veclen_t Class::classVecLen() const {
 // Ancestry.
 
 inline bool Class::classofNonIFace(const Class* cls) const {
-  assert(!(cls->attrs() & AttrInterface));
+  assertx(!(cls->attrs() & AttrInterface));
   if (m_classVecLen >= cls->m_classVecLen) {
     return (m_classVec[cls->m_classVecLen-1] == cls);
   }
@@ -155,7 +155,7 @@ inline StrNR Class::parentStr() const {
 }
 
 inline Attr Class::attrs() const {
-  assert(Attr(m_attrCopy) == m_preClass->attrs());
+  assertx(Attr(m_attrCopy) == m_preClass->attrs());
   return Attr(m_attrCopy);
 }
 
@@ -314,8 +314,8 @@ inline rds::Handle Class::sPropHandle(Slot index) const {
 }
 
 inline rds::Link<StaticPropData> Class::sPropLink(Slot index) const {
-  assert(m_sPropCacheInit.bound());
-  assert(numStaticProperties() > index);
+  assertx(m_sPropCacheInit.bound());
+  assertx(numStaticProperties() > index);
   return m_sPropCache[index];
 }
 
@@ -407,7 +407,7 @@ inline rds::Handle Class::classHandle() const {
 }
 
 inline void Class::setClassHandle(rds::Link<LowPtr<Class>> link) const {
-  assert(!m_cachedClass.bound());
+  assertx(!m_cachedClass.bound());
   m_cachedClass = link;
 }
 

@@ -135,12 +135,12 @@ member_lval EmptyArray::MakePackedInl(TypedValue tv) {
   auto const elem = packedData(ad);
   *elem = tv;
 
-  assert(ad->kind() == ArrayData::kPackedKind);
-  assert(ad->dvArray() == ArrayData::kNotDVArray);
-  assert(ad->m_size == 1);
-  assert(ad->m_pos == 0);
-  assert(ad->hasExactlyOneRef());
-  assert(PackedArray::checkInvariants(ad));
+  assertx(ad->kind() == ArrayData::kPackedKind);
+  assertx(ad->dvArray() == ArrayData::kNotDVArray);
+  assertx(ad->m_size == 1);
+  assertx(ad->m_pos == 0);
+  assertx(ad->hasExactlyOneRef());
+  assertx(PackedArray::checkInvariants(ad));
   return member_lval { ad, elem };
 }
 
@@ -169,13 +169,13 @@ member_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   elem.m_data = val.m_data;
   elem.m_type = val.m_type;
 
-  assert(ad->m_size == 1);
-  assert(ad->m_pos == 0);
-  assert(ad->m_scale == MixedArray::SmallScale);
-  assert(ad->kind() == ArrayData::kMixedKind);
-  assert(ad->hasExactlyOneRef());
-  assert(ad->m_used == 1);
-  assert(ad->checkInvariants());
+  assertx(ad->m_size == 1);
+  assertx(ad->m_pos == 0);
+  assertx(ad->m_scale == MixedArray::SmallScale);
+  assertx(ad->kind() == ArrayData::kMixedKind);
+  assertx(ad->hasExactlyOneRef());
+  assertx(ad->m_used == 1);
+  assertx(ad->checkInvariants());
   return member_lval { ad, &elem };
 }
 
@@ -198,13 +198,13 @@ member_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   elem.m_data = val.m_data;
   elem.m_type = val.m_type;
 
-  assert(ad->kind() == ArrayData::kMixedKind);
-  assert(ad->m_size == 1);
-  assert(ad->m_pos == 0);
-  assert(ad->hasExactlyOneRef());
-  assert(ad->m_scale == MixedArray::SmallScale);
-  assert(ad->m_used == 1);
-  assert(ad->checkInvariants());
+  assertx(ad->kind() == ArrayData::kMixedKind);
+  assertx(ad->m_size == 1);
+  assertx(ad->m_pos == 0);
+  assertx(ad->hasExactlyOneRef());
+  assertx(ad->m_scale == MixedArray::SmallScale);
+  assertx(ad->m_used == 1);
+  assertx(ad->checkInvariants());
   return member_lval { ad, &elem };
 }
 
@@ -332,14 +332,14 @@ ArrayData* EmptyArray::Merge(ArrayData*, const ArrayData* elems) {
     // Fast path the common case that elems is mixed.
     if (elems->isMixed()) {
       auto const copy = MixedArray::Copy(elems);
-      assert(copy != elems);
+      assertx(copy != elems);
       MixedArray::Renumber(copy);
       return copy;
     }
   }
   auto copy = const_cast<ArrayData*>(elems)->toPHPArray(true);
   copy = copy == elems ? elems->copy() : copy;
-  assert(copy != elems);
+  assertx(copy != elems);
   copy->renumber();
   return copy;
 }

@@ -292,7 +292,7 @@ inline int64_t countHelper(TypedValue tv) {
   }                                                                      \
   Variant var_##input(input);                                            \
   tvCastToArrayInPlace(var_##input.asTypedValue());                      \
-  assert(var_##input.isArray());                                         \
+  assertx(var_##input.isArray());                                         \
   auto arr_##input = var_##input.toArray();
 
 #define getCheckedArray(input)        \

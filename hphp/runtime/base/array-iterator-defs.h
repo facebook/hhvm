@@ -47,7 +47,7 @@ void for_each_strong_iterator_slow(MIterTable& table, Fn fn) {
 template<class Fn>
 void for_each_strong_iterator(Fn fn) {
   static_assert(MIterTable::ents_size == 7, "");
-  assert(strong_iterators_exist());
+  assertx(strong_iterators_exist());
   auto& table = *tl_miter_table;
   fn(table.ents[0]);
   fn(table.ents[1]);

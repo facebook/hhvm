@@ -78,7 +78,7 @@ inline void scanNative(const NativeNode* node, type_scan::Scanner& scanner) {
 }
 
 inline void scanAFWH(const c_Awaitable* wh, type_scan::Scanner& scanner) {
-  assert(!wh->hasNativeData());
+  assertx(!wh->hasNativeData());
   // scan ResumableHeader before object
   auto r = Resumable::FromObj(wh);
   if (!wh->isFinished()) {
@@ -178,7 +178,7 @@ inline void c_AwaitAllWaitHandle::scan(type_scan::Scanner& scanner) const {
 }
 
 inline void c_Awaitable::scan(type_scan::Scanner& scanner) const {
-  assert(kind() != HeaderKind::AwaitAllWH);
+  assertx(kind() != HeaderKind::AwaitAllWH);
   auto const size =
     kind() == HeaderKind::AsyncFuncWH ? sizeof(c_AsyncFunctionWaitHandle) :
               asio_object_size(this);

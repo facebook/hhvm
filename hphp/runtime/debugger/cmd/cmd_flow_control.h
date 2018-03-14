@@ -85,12 +85,12 @@ protected:
   void recvImpl(DebuggerThriftBuffer&) override;
 
   int decCount() {
-    assert(m_count > 0);
+    assertx(m_count > 0);
     return --m_count;
   }
 
   int getCount() const {
-    assert(m_count > 0);
+    assertx(m_count > 0);
     return m_count;
   }
 

@@ -89,10 +89,10 @@ std::string fullName(const Array& arr);
 void functionTypeName(const Array& arr, std::string& name) {
   name += "(function (";
 
-  assert(arr.exists(s_return_type));
+  assertx(arr.exists(s_return_type));
   auto const retType = arr[s_return_type].toCArrRef();
 
-  assert(arr.exists(s_param_types));
+  assertx(arr.exists(s_param_types));
   auto const params = arr[s_param_types].toCArrRef();
 
   auto sep = "";
@@ -108,11 +108,11 @@ void functionTypeName(const Array& arr, std::string& name) {
 }
 
 void accessTypeName(const Array& arr, std::string& name) {
-  assert(arr.exists(s_root_name));
+  assertx(arr.exists(s_root_name));
   auto const rootName = arr[s_root_name].toCStrRef();
   name += rootName.toCppString();
 
-  assert(arr.exists(s_access_list));
+  assertx(arr.exists(s_access_list));
   auto const accessList = arr[s_access_list].toCArrRef();
   auto const sz = accessList.size();
   for (auto i = 0; i < sz; i++) {
@@ -125,7 +125,7 @@ void accessTypeName(const Array& arr, std::string& name) {
 // xhp names are mangled so we get them back to their original definition
 // see the mangling in ScannerToken::xhpLabel
 void xhpTypeName(const Array& arr, std::string& name) {
-  assert(arr.exists(s_classname));
+  assertx(arr.exists(s_classname));
   std::string clsName = arr[s_classname].toCStrRef().toCppString();
   // remove prefix if any
   if (clsName.compare(0, sizeof("xhp_") - 1, "xhp_") == 0) {
@@ -140,7 +140,7 @@ void xhpTypeName(const Array& arr, std::string& name) {
 
 void tupleTypeName(const Array& arr, std::string& name) {
   name += "(";
-  assert(arr.exists(s_elem_types));
+  assertx(arr.exists(s_elem_types));
   auto const elems = arr[s_elem_types].toCArrRef();
   auto const sz = elems.size();
   auto sep = "";
@@ -155,7 +155,7 @@ void tupleTypeName(const Array& arr, std::string& name) {
 
 void genericTypeName(const Array& arr, std::string& name) {
   name += "<";
-  assert(arr.exists(s_generic_types));
+  assertx(arr.exists(s_generic_types));
   auto const args = arr[s_generic_types].toCArrRef();
   auto const sz = args.size();
   auto sep = "";
@@ -170,7 +170,7 @@ void genericTypeName(const Array& arr, std::string& name) {
 void shapeTypeName(const Array& arr, std::string& name) {
   // works for both resolved and unresolved TypeStructures
   name += "(";
-  assert(arr.exists(s_fields));
+  assertx(arr.exists(s_fields));
   auto const fields = arr[s_fields].toCArrRef();
   auto const sz = fields.size();
   auto sep = "";
@@ -208,11 +208,11 @@ void shapeTypeName(const Array& arr, std::string& name) {
 std::string fullName(const Array& arr) {
   std::string name;
   if (arr.exists(s_nullable)) {
-    assert(arr[s_nullable].toBoolean());
+    assertx(arr[s_nullable].toBoolean());
     name += '?';
   }
 
-  assert(arr.exists(s_kind));
+  assertx(arr.exists(s_kind));
 
   TypeStructure::Kind kind =
     TypeStructure::Kind(arr[s_kind].toInt64Val());
@@ -288,7 +288,7 @@ std::string fullName(const Array& arr) {
       }
       break;
     case TypeStructure::Kind::T_typevar:
-      assert(arr.exists(s_name));
+      assertx(arr.exists(s_name));
       name += arr[s_name].toCStrRef().toCppString();
       break;
     case TypeStructure::Kind::T_typeaccess:
@@ -302,7 +302,7 @@ std::string fullName(const Array& arr) {
     case TypeStructure::Kind::T_trait:
     case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_unresolved:
-      assert(arr.exists(s_classname));
+      assertx(arr.exists(s_classname));
       name += arr[s_classname].toCStrRef().toCppString();
       if (arr.exists(s_generic_types)) genericTypeName(arr, name);
       break;
@@ -402,7 +402,7 @@ const Class* getClass(const String& clsName,
   auto name = clsName;
   auto ts = getAlias(name, persistent);
   while (!ts.empty()) {
-    assert(ts.exists(s_kind));
+    assertx(ts.exists(s_kind));
     if (!ts.exists(s_classname)) {
       // not a class, interface, trait, enum, or alias
       throw Exception(
@@ -433,10 +433,10 @@ Array resolveShape(const Array& arr,
                    const Class* typeCnsCls,
                    const Array& generics,
                    bool& persistent) {
-  assert(arr.exists(s_kind));
-  assert(static_cast<TypeStructure::Kind>(arr[s_kind].toInt64Val())
+  assertx(arr.exists(s_kind));
+  assertx(static_cast<TypeStructure::Kind>(arr[s_kind].toInt64Val())
          == TypeStructure::Kind::T_shape);
-  assert(arr.exists(s_fields));
+  assertx(arr.exists(s_fields));
 
   auto newfields = Array::CreateDArray();
   auto const fields = arr[s_fields].toCArrRef();
@@ -464,7 +464,7 @@ Array resolveShape(const Array& arr,
           clsName.c_str(), cnsName.c_str());
       }
     }
-    assert(wrapper.exists(s_value));
+    assertx(wrapper.exists(s_value));
     auto valueArr = wrapper[s_value].toArray();
     auto value =
       resolveTS(valueArr, typeCns, typeCnsCls, generics, persistent);
@@ -517,7 +517,7 @@ Array resolveTS(const Array& arr,
                 const Class* typeCnsCls,
                 const Array& generics,
                 bool& persistent) {
-  assert(arr.exists(s_kind));
+  assertx(arr.exists(s_kind));
   auto const kind = static_cast<TypeStructure::Kind>(
     arr[s_kind].toInt64Val());
 
@@ -531,7 +531,7 @@ Array resolveTS(const Array& arr,
 
   switch (kind) {
     case TypeStructure::Kind::T_tuple: {
-      assert(arr.exists(s_elem_types));
+      assertx(arr.exists(s_elem_types));
       auto const elemsArr = arr[s_elem_types].toCArrRef();
       auto const elemTypes =
         resolveList(elemsArr, typeCns, typeCnsCls, generics, persistent);
@@ -539,13 +539,13 @@ Array resolveTS(const Array& arr,
       break;
     }
     case TypeStructure::Kind::T_fun: {
-      assert(arr.exists(s_return_type));
+      assertx(arr.exists(s_return_type));
       auto const returnArr = arr[s_return_type].toCArrRef();
       auto const returnType =
         resolveTS(returnArr, typeCns, typeCnsCls, generics, persistent);
       newarr.add(s_return_type, Variant(returnType));
 
-      assert(arr.exists(s_param_types));
+      assertx(arr.exists(s_param_types));
       auto const paramsArr = arr[s_param_types].toCArrRef();
       auto const paramTypes =
         resolveList(paramsArr, typeCns, typeCnsCls, generics, persistent);
@@ -571,7 +571,7 @@ Array resolveTS(const Array& arr,
       break;
     }
     case TypeStructure::Kind::T_unresolved: {
-      assert(arr.exists(s_classname));
+      assertx(arr.exists(s_classname));
       auto const clsName = arr[s_classname].toCStrRef();
       auto ts = getAlias(clsName, persistent);
       if (!ts.empty()) {
@@ -625,9 +625,9 @@ Array resolveTS(const Array& arr,
        * type constants, i.e., cls::TC1::TC2::TC3. Each type constant other
        * than the last one in the chain must refer to a class or an
        * interface. */
-      assert(arr.exists(s_root_name));
+      assertx(arr.exists(s_root_name));
       auto clsName = arr[s_root_name].toCStrRef();
-      assert(arr.exists(s_access_list));
+      assertx(arr.exists(s_access_list));
       auto const accList = arr[s_access_list].toCArrRef();
       auto const sz = accList.size();
       Array typeCnsVal;
@@ -649,7 +649,7 @@ Array resolveTS(const Array& arr,
         if (i == sz - 1) break;
 
         // if there are more accesses, keep resolving
-        assert(typeCnsVal.exists(s_kind));
+        assertx(typeCnsVal.exists(s_kind));
         auto kind = static_cast<TypeStructure::Kind>
           (typeCnsVal[s_kind].toInt64Val());
         if (kind != TypeStructure::Kind::T_class
@@ -662,7 +662,7 @@ Array resolveTS(const Array& arr,
             cnsName.data(),
             accList[i+1].toCStrRef().data());
         }
-        assert(typeCnsVal.exists(s_classname));
+        assertx(typeCnsVal.exists(s_classname));
         clsName = typeCnsVal[s_classname].toCStrRef();
       }
 
@@ -673,7 +673,7 @@ Array resolveTS(const Array& arr,
       return typeCnsVal;
     }
     case TypeStructure::Kind::T_typevar: {
-      assert(arr.exists(s_name));
+      assertx(arr.exists(s_name));
       auto const name = arr[s_name].toCStrRef();
       return generics.exists(name) ? generics[name].toDArray() : arr.toDArray();
     }
@@ -702,10 +702,10 @@ String TypeStructure::toString(const Array& arr) {
 Array TypeStructure::resolve(const Class::Const& typeCns,
                              const Class* typeCnsCls,
                              bool& persistent) {
-  assert(typeCns.isType());
-  assert(isArrayLikeType(typeCns.val.m_type));
-  assert(typeCns.name);
-  assert(typeCnsCls);
+  assertx(typeCns.isType());
+  assertx(isArrayLikeType(typeCns.val.m_type));
+  assertx(typeCns.name);
+  assertx(typeCnsCls);
 
   Array arr(typeCns.val.m_data.parr);
   return resolveTS(arr, typeCns, typeCnsCls, Array(), persistent);

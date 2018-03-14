@@ -54,8 +54,8 @@ void registerNativeDataInfo(const StringData* name,
                             NativeDataInfo::WakeupFunc wakeup,
                             type_scan::Index tyindex,
                             uint8_t rt_attrs) {
-  assert(s_nativedatainfo.find(name) == s_nativedatainfo.end());
-  assert((sleep == nullptr && wakeup == nullptr) ||
+  assertx(s_nativedatainfo.find(name) == s_nativedatainfo.end());
+  assertx((sleep == nullptr && wakeup == nullptr) ||
          (sleep != nullptr && wakeup != nullptr));
   NativeDataInfo info;
   info.sz = sz;
@@ -101,11 +101,11 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
     tl_heap->objMalloc(size)
   );
   node->obj_offset = nativeDataSize;
-  assert(type_scan::isKnownType(ndi->tyindex));
+  assertx(type_scan::isKnownType(ndi->tyindex));
   node->initHeader_32_16(HeaderKind::NativeData, 0, ndi->tyindex);
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
              ObjectData(cls, 0, HeaderKind::NativeObject);
-  assert(obj->hasExactlyOneRef());
+  assertx(obj->hasExactlyOneRef());
   if (ndi->init) {
     ndi->init(obj);
   }
@@ -128,12 +128,12 @@ ObjectData* nativeDataInstanceCopyCtor(ObjectData* src, Class* cls,
     tl_heap->objMalloc(ObjectData::sizeForNProps(nProps) + nativeDataSize)
   );
   node->obj_offset = nativeDataSize;
-  assert(type_scan::isKnownType(ndi->tyindex));
+  assertx(type_scan::isKnownType(ndi->tyindex));
   node->initHeader_32_16(HeaderKind::NativeData, 0, ndi->tyindex);
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
     ObjectData(cls, ObjectData::InitRaw{}, cls->getODAttrs(),
                HeaderKind::NativeObject);
-  assert(obj->hasExactlyOneRef());
+  assertx(obj->hasExactlyOneRef());
   if (ndi->init) {
     ndi->init(obj);
   }
@@ -168,15 +168,15 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
 
 Variant nativeDataSleep(const ObjectData* obj) {
   auto ndi = obj->getVMClass()->getNativeDataInfo();
-  assert(ndi);
-  assert(ndi->sleep);
+  assertx(ndi);
+  assertx(ndi->sleep);
   return ndi->sleep(obj);
 }
 
 void nativeDataWakeup(ObjectData* obj, const Variant& data) {
   auto ndi = obj->getVMClass()->getNativeDataInfo();
-  assert(ndi);
-  assert(ndi->wakeup);
+  assertx(ndi);
+  assertx(ndi->wakeup);
   ndi->wakeup(obj, data);
 }
 

@@ -223,7 +223,7 @@ struct HotCache {
       if (sd->isStatic()) return sd->data();
       auto const nbytes = sd->size() + 1;
       auto const dst = malloc_huge(nbytes);
-      assert((reinterpret_cast<uintptr_t>(dst) & 7) == 0);
+      assertx((reinterpret_cast<uintptr_t>(dst) & 7) == 0);
       memcpy(dst, sd->data(), nbytes);
       return reinterpret_cast<const char*>(dst);
     }
@@ -239,7 +239,7 @@ struct HotCache {
   }
 
   static HotValueRaw makeRawValue(APCHandle* h) {
-    assert(h != nullptr && supportedKind(h));
+    assertx(h != nullptr && supportedKind(h));
     HotValue v = [&] {
       switch (h->kind()) {
         case APCKind::UncountedArray:
@@ -372,7 +372,7 @@ bool HotCache::store(Idx idx, const StringData* key,
     }
     idx = p.first.getIndex();
   }
-  assert(idx >= 0);
+  assertx(idx >= 0);
   sval->hotIndex.store(idx, std::memory_order_relaxed);
   m_hotMap->findAt(idx)->second.store(raw, std::memory_order_relaxed);
   return true;
@@ -380,7 +380,7 @@ bool HotCache::store(Idx idx, const StringData* key,
 
 bool HotCache::clearValueIdx(Idx idx) {
   if (idx == StoreValue::kHotCacheUnknown) return false;
-  assert(idx >= 0);
+  assertx(idx >= 0);
   auto it = m_hotMap->findAt(idx);
   it->second.store(HotValue(nullptr).toOpaque(), std::memory_order_relaxed);
   return true;
@@ -407,7 +407,7 @@ bool ConcurrentTableSharedStore::clear() {
 }
 
 bool ConcurrentTableSharedStore::eraseKey(const String& key) {
-  assert(!key.isNull());
+  assertx(!key.isNull());
   return eraseImpl(tagStringData(key.get()), false, 0, nullptr);
 }
 
@@ -423,7 +423,7 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
                                            bool expired,
                                            int64_t oldestLive,
                                            ExpMap::accessor* expAcc) {
-  assert(key);
+  assertx(key);
 
   SharedMutex::ReadHolder l(m_lock);
   Map::accessor acc;
@@ -452,7 +452,7 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
       var->unreferenceRoot(storeVal.dataSize);
     }
   } else {
-    assert(!expired);  // primed keys never say true to expired()
+    assertx(!expired);  // primed keys never say true to expired()
   }
 
   FTRACE(2, "Remove {} {}\n", acc->first, show(acc->second));
@@ -559,7 +559,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
 APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
                                                    StoreValue* sval) {
   auto const sAddr = sval->data().right();
-  assert(sAddr != nullptr);
+  assertx(sAddr != nullptr);
   /*
     This method is special, since another thread T may concurrently
     attempt to 'get' this entry while we're unserializing it. If T
@@ -634,7 +634,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
           if (!svar) return false;
         }
       }
-      assert(sval->data().left() == svar);
+      assertx(sval->data().left() == svar);
       APCKind kind = sval->getKind();
       if (apcExtension::AllowObj &&
           (kind == APCKind::SerializedObject ||
@@ -696,7 +696,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
   }
 
   // Currently a no-op, since HotCache doesn't store int/double.
-  assert(sval.hotIndex == StoreValue::kHotCacheUnknown);
+  assertx(sval.hotIndex == StoreValue::kHotCacheUnknown);
   s_hotCache.clearValue(sval);
 
   auto const ret = oldHandle->toLocal().toInt64() + step;
@@ -1163,7 +1163,7 @@ template<typename Key, typename T, typename HashCompare>
 bool ConcurrentTableSharedStore
       ::APCMap<Key,T,HashCompare>
       ::getRandomAPCEntry(std::vector<EntryInfo>& entries) {
-  assert(!this->empty());
+  assertx(!this->empty());
 #if TBB_VERSION_MAJOR >= 4
   auto current = this->range();
   for (auto rnd = rand(); rnd > 0 && current.is_divisible(); rnd >>= 1) {

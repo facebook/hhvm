@@ -178,7 +178,7 @@ XDebugServer::XDebugServer(Mode mode)
     fail();
   }
 
-  assert(status == 0);
+  assertx(status == 0);
 
   // Get the requested handler.
   log("I: Connected to client. :-)\n");
@@ -512,7 +512,7 @@ bool XDebugServer::isNeeded() {
 }
 
 bool XDebugServer::createServer(Mode mode) {
-  assert(XDEBUG_GLOBAL(Server) == nullptr);
+  assertx(XDEBUG_GLOBAL(Server) == nullptr);
   try {
     XDEBUG_GLOBAL(Server) = new XDebugServer(mode);
     if (XDEBUG_GLOBAL(Server) != nullptr) {
@@ -551,7 +551,7 @@ bool XDebugServer::attach(Mode mode) {
 }
 
 void XDebugServer::detach() {
-  assert(XDEBUG_GLOBAL(Server) != nullptr);
+  assertx(XDEBUG_GLOBAL(Server) != nullptr);
   XDEBUG_GLOBAL(Server)->deinitDbgp();
   delete XDEBUG_GLOBAL(Server);
   XDEBUG_GLOBAL(Server) = nullptr;
@@ -897,7 +897,7 @@ bool XDebugServer::readInput() {
   auto constexpr INPUT_BUFFER_INIT_SIZE = 1024;
   auto constexpr INPUT_BUFFER_EXPANSION = 2.0;
 
-  assert(m_bufferAvail == 0);
+  assertx(m_bufferAvail == 0);
   size_t bytes_read = 0;
   do {
     size_t bytes_left = m_bufferSize - bytes_read;
@@ -922,7 +922,7 @@ bool XDebugServer::readInput() {
 }
 
 std::shared_ptr<XDebugCommand> XDebugServer::parseCommand() {
-  assert(m_bufferAvail > 0);
+  assertx(m_bufferAvail > 0);
 
   log("<- %s\n", m_bufferCur);
   logFlush();
@@ -936,7 +936,7 @@ std::shared_ptr<XDebugCommand> XDebugServer::parseCommand() {
   // Bump the current buffer pointer forward *before* calling parseInput, so we
   // don't get stuck in an infinite loop if parseInput throws.
   auto consumed = strlen(m_bufferCur) + 1;
-  assert(consumed <= m_bufferAvail);
+  assertx(consumed <= m_bufferAvail);
   m_bufferCur += consumed;
   m_bufferAvail -= consumed;
 

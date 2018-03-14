@@ -144,7 +144,7 @@ bool CmdFlowControl::atStepOutOffset(Unit* unit, Offset o) {
 // destination(s) of such instructions.
 void CmdFlowControl::setupStepOuts() {
   // Existing step outs should be cleaned up before making new ones.
-  assert(!hasStepOuts());
+  assertx(!hasStepOuts());
   auto fp = vmfp();
   if (!fp) return; // No place to step out to!
   Offset returnOffset;
@@ -168,7 +168,7 @@ void CmdFlowControl::setupStepOuts() {
       // We only execute this for opcodes which invoke more PHP, and that does
       // not include switches. Thus, we'll have at most two destinations.
       auto const retOp = peek_op(returnPC);
-      assert(!isSwitch(retOp) && numSuccs(returnPC) <= 2);
+      assertx(!isSwitch(retOp) && numSuccs(returnPC) <= 2);
       // Set an internal breakpoint after the instruction if it can fall thru.
       if (instrAllowsFallThru(retOp)) {
         Offset nextOffset = returnOffset + instrLen(returnPC);

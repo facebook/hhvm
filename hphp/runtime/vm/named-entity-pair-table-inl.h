@@ -27,7 +27,7 @@ inline bool NamedEntityPairTable::contains(Id id) const {
 }
 
 inline StringData* NamedEntityPairTable::lookupLitstr(Id id) const {
-  assert(contains(id));
+  assertx(contains(id));
   return const_cast<StringData*>((*this)[id].get());
 }
 
@@ -38,11 +38,11 @@ NamedEntityPairTable::lookupNamedEntity(Id id) const {
 
 inline NamedEntityPair
 NamedEntityPairTable::lookupNamedEntityPair(Id id) const {
-  assert(contains(id));
+  assertx(contains(id));
   auto const name = (*this)[id];
 
-  assert(name);
-  assert(name->data()[0] != '\\');
+  assertx(name);
+  assertx(name->data()[0] != '\\');
 
   return { name, NamedEntity::get(name) };
 }

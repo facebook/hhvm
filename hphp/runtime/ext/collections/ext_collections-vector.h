@@ -99,33 +99,33 @@ public:
   php_concat(const Variant& iterable);
 
   ArrayData* arrayData() {
-    assert(m_arr->isVecArray());
+    assertx(m_arr->isVecArray());
     return m_arr;
   }
   const ArrayData* arrayData() const {
-    assert(m_arr->isVecArray());
+    assertx(m_arr->isVecArray());
     return m_arr;
   }
   void setSize(uint32_t sz) {
-    assert(canMutateBuffer());
-    assert(sz <= PackedArray::capacity(arrayData()));
+    assertx(canMutateBuffer());
+    assertx(sz <= PackedArray::capacity(arrayData()));
     m_size = sz;
     arrayData()->m_size = sz;
   }
   void incSize() {
-    assert(canMutateBuffer());
-    assert(m_size < PackedArray::capacity(arrayData()));
+    assertx(canMutateBuffer());
+    assertx(m_size < PackedArray::capacity(arrayData()));
     ++m_size;
     arrayData()->m_size = m_size;
   }
   void decSize() {
-    assert(canMutateBuffer());
-    assert(m_size > 0);
+    assertx(canMutateBuffer());
+    assertx(m_size > 0);
     --m_size;
     arrayData()->m_size = m_size;
   }
   TypedValue* appendForUnserialize(int64_t k) {
-    assert(k == m_size);
+    assertx(k == m_size);
     incSize();
     return &data()[k];
   }
@@ -183,7 +183,7 @@ public:
     return &data()[key];
   }
   TypedValue* get(const TypedValue* key) {
-    assert(key->m_type != KindOfRef);
+    assertx(key->m_type != KindOfRef);
     if (LIKELY(key->m_type == KindOfInt64)) {
       return get(key->m_data.num);
     }
@@ -195,7 +195,7 @@ public:
   }
 
   void init(const Variant& it) {
-    assert(m_size == 0);
+    assertx(m_size == 0);
     addAllImpl(it);
   }
 
@@ -239,7 +239,7 @@ public:
     set(key, val.asCell());
   }
   void set(const TypedValue* key, const TypedValue* val) {
-    assert(key->m_type != KindOfRef);
+    assertx(key->m_type != KindOfRef);
     if (key->m_type != KindOfInt64) {
       throwBadKeyType();
     }
@@ -259,8 +259,8 @@ public:
    * modify this Vector's buffer.
    */
   bool canMutateBuffer() const {
-    assert(IMPLIES(!arrayData()->hasMultipleRefs(), m_immCopy.isNull()));
-    assert(m_size == arrayData()->m_size);
+    assertx(IMPLIES(!arrayData()->hasMultipleRefs(), m_immCopy.isNull()));
+    assertx(m_size == arrayData()->m_size);
     return !arrayData()->cowCheck();
   }
 
@@ -277,12 +277,12 @@ public:
         mutateImpl();
       }
     }
-    assert(canMutateBuffer());
+    assertx(canMutateBuffer());
   }
 
   Object getImmutableCopy();
   void dropImmCopy() {
-    assert(m_immCopy.isNull() ||
+    assertx(m_immCopy.isNull() ||
            (arrayData() == ((BaseVector*)m_immCopy.get())->arrayData() &&
             !canMutateBuffer()));
     m_immCopy.reset();
@@ -312,10 +312,10 @@ protected:
 
   template<bool raw> ALWAYS_INLINE
   void addImpl(TypedValue tv) {
-    assert(tv.m_type != KindOfRef);
+    assertx(tv.m_type != KindOfRef);
     auto oldAd = arrayData();
     if (raw) {
-      assert(canMutateBuffer());
+      assertx(canMutateBuffer());
       m_arr = PackedArray::AppendVec(oldAd, tv, false);
     } else {
       dropImmCopy();
@@ -337,8 +337,8 @@ protected:
   // check for an immutable buffer, so it's only safe to use in some cases.
   // If you're not sure, use set() instead.
   void setRaw(int64_t key, const TypedValue* val) {
-    assert(val->m_type != KindOfRef);
-    assert(canMutateBuffer());
+    assertx(val->m_type != KindOfRef);
+    assertx(canMutateBuffer());
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       collections::throwOOB(key);
       return;
@@ -352,7 +352,7 @@ protected:
     setRaw(key, val.asCell());
   }
   void setRaw(const TypedValue* key, const TypedValue* val) {
-    assert(key->m_type != KindOfRef);
+    assertx(key->m_type != KindOfRef);
     if (key->m_type != KindOfInt64) {
       throwBadKeyType();
     }

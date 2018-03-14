@@ -78,7 +78,7 @@ Variant vm_call_user_func_cufiter(const CufIter& cufIter,
       obj = (ObjectData*)cufIter.ctx();
     }
   }
-  assert(!obj || !cls);
+  assertx(!obj || !cls);
   if (invName) {
     invName->incRefCount();
   }
@@ -128,9 +128,9 @@ bool vm_decode_function_cufiter(const Variant& function,
 IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
 void AutoloadHandler::requestInit() {
-  assert(m_map.get() == nullptr);
-  assert(m_map_root.get() == nullptr);
-  assert(m_loading.get() == nullptr);
+  assertx(m_map.get() == nullptr);
+  assertx(m_map_root.get() == nullptr);
+  assertx(m_loading.get() == nullptr);
   m_spl_stack_inited = false;
   new (&m_handlers) req::deque<HandlerBundle>();
   m_handlers_valid = true;
@@ -236,7 +236,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
                                  bool toLower,
                                  const T &checkExists,
                                  Variant& err) {
-  assert(!m_map.isNull());
+  assertx(!m_map.isNull());
   // Always normalize name before autoloading
   const String& name = normalizeNS(clsName);
   auto const type_map = m_map.get()->get(kind).unboxed();
@@ -404,7 +404,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
   // code below can throw
   SCOPE_EXIT {
     DEBUG_ONLY auto const l_className = m_loading.pop().toString();
-    assert(l_className == className);
+    assertx(l_className == className);
   };
 
   Array params = PackedArrayInit(1).append(className).toArray();
@@ -423,7 +423,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
     try {
       vm_call_user_func_cufiter(*hb.m_cufIter, params);
     } catch (Object& ex) {
-      assert(ex.instanceof(SystemLib::s_ThrowableClass));
+      assertx(ex.instanceof(SystemLib::s_ThrowableClass));
       if (autoloadException.isNull()) {
         autoloadException = ex;
       } else {
@@ -461,13 +461,13 @@ AutoloadHandler::loadFromMapPartial(const String& className,
   if (res == Success) {
     return Success;
   }
-  assert(res == Failure);
+  assertx(res == Failure);
   if (!err.isNull()) {
     auto const func = m_map.get()->get(s_failure);
     if (!isNullType(func.unboxed().type())) {
       res = invokeFailureCallback(tvAsCVarRef(func.tv_ptr()),
                                   kind, className, err);
-      assert(res != Failure);
+      assertx(res != Failure);
       if (checkExists()) {
         return Success;
       }
@@ -508,7 +508,7 @@ bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
         // First, call the failure callback for 'class' if we didn't do so
         // above
         if (classRes == Failure) {
-          assert(tryClass);
+          assertx(tryClass);
           classRes = invokeFailureCallback(func, s_class, className, classErr);
           // The failure callback may have defined a class or type alias for
           // us, in which case we're done.
@@ -516,13 +516,13 @@ bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
         }
         // Next, call the failure callback for 'type' if we didn't do so above
         if (typeRes == Failure) {
-          assert(tryType);
+          assertx(tryType);
           typeRes = invokeFailureCallback(func, s_type, className, typeErr);
           // The failure callback may have defined a class or type alias for
           // us, in which case we're done.
           if (cte()) return true;
         }
-        assert(classRes != Failure && typeRes != Failure);
+        assertx(classRes != Failure && typeRes != Failure);
         tryClass = (classRes == RetryAutoloading);
         tryType = (typeRes == RetryAutoloading);
         // If the failure callback requested a retry for 'class' or 'type'

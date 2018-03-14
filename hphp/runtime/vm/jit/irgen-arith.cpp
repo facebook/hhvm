@@ -491,7 +491,7 @@ SSATmp* emitMixedKeysetCmp(IRGS& env, Op op) {
 }
 
 void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  assert(left->type() <= TNull);
+  assertx(left->type() <= TNull);
   auto const rightTy = right->type();
 
   // Left operand is null.
@@ -526,7 +526,7 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 }
 
 void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  assert(left->type() <= TBool);
+  assertx(left->type() <= TBool);
   auto const rightTy = right->type();
 
   if (rightTy <= TVec) {
@@ -547,7 +547,7 @@ void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 }
 
 void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  assert(left->type() <= TInt);
+  assertx(left->type() <= TInt);
   auto const rightTy = right->type();
 
   // Left operand is int.
@@ -617,7 +617,7 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 }
 
 void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  assert(left->type() <= TDbl);
+  assertx(left->type() <= TDbl);
   auto const rightTy = right->type();
 
   // Left operand is a double.
@@ -669,7 +669,7 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 }
 
 void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  assert(left->type() <= TArr);
+  assertx(left->type() <= TArr);
   auto const rightTy = right->type();
 
   // Left operand is an array.
@@ -708,7 +708,7 @@ void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 }
 
 void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  assert(left->type() <= TVec);
+  assertx(left->type() <= TVec);
   auto const rightTy = right->type();
 
   // Left operand is a vec.
@@ -720,7 +720,7 @@ void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 }
 
 void implDictCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  assert(left->type() <= TDict);
+  assertx(left->type() <= TDict);
   auto const rightTy = right->type();
 
   // Left operand is a dict.
@@ -743,7 +743,7 @@ void implDictCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 }
 
 void implKeysetCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  assert(left->type() <= TKeyset);
+  assertx(left->type() <= TKeyset);
   auto const rightTy = right->type();
 
   // Left operand is a keyset.
@@ -766,7 +766,7 @@ void implKeysetCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 }
 
 void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  assert(left->type() <= TStr);
+  assertx(left->type() <= TStr);
   auto const rightTy = right->type();
 
   // Left operand is a string.
@@ -844,7 +844,7 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 }
 
 void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  assert(left->type() <= TObj);
+  assertx(left->type() <= TObj);
   auto const rightTy = right->type();
 
   // Left operand is an object.
@@ -934,7 +934,7 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 }
 
 void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  assert(left->type() <= TRes);
+  assertx(left->type() <= TRes);
   auto const rightTy = right->type();
 
   // Left operand is a resource.

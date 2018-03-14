@@ -54,7 +54,7 @@ void CmdEval::onClient(DebuggerClient &client) {
   m_frame = client.getFrame();
   m_bypassAccessCheck = client.getDebuggerClientBypassCheck();
   auto res = client.xendWithNestedExecution<CmdEval>(this);
-  assert(res->is(DebuggerCommand::KindOfEval));
+  assertx(res->is(DebuggerCommand::KindOfEval));
   auto eval = std::static_pointer_cast<CmdEval>(res);
   eval->handleReply(client);
   m_failed = eval->m_failed;

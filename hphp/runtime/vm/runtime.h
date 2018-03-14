@@ -82,30 +82,30 @@ frame_local(const ActRec* fp, int n) {
 
 inline Resumable*
 frame_resumable(const ActRec* fp) {
-  assert(fp->resumed());
+  assertx(fp->resumed());
   return (Resumable*)((char*)fp - Resumable::arOff());
 }
 
 inline c_AsyncFunctionWaitHandle*
 frame_afwh(const ActRec* fp) {
-  assert(fp->func()->isAsyncFunction());
+  assertx(fp->func()->isAsyncFunction());
   auto resumable = frame_resumable(fp);
   auto arOffset = c_AsyncFunctionWaitHandle::arOff();
   auto waitHandle = (c_AsyncFunctionWaitHandle*)((char*)resumable - arOffset);
-  assert(waitHandle->getVMClass() == c_AsyncFunctionWaitHandle::classof());
+  assertx(waitHandle->getVMClass() == c_AsyncFunctionWaitHandle::classof());
   return waitHandle;
 }
 
 inline Generator*
 frame_generator(const ActRec* fp) {
-  assert(fp->func()->isNonAsyncGenerator());
+  assertx(fp->func()->isNonAsyncGenerator());
   auto resumable = frame_resumable(fp);
   return (Generator*)((char*)resumable - Generator::resumableOff());
 }
 
 inline AsyncGenerator*
 frame_async_generator(const ActRec* fp) {
-  assert(fp->func()->isAsyncGenerator());
+  assertx(fp->func()->isAsyncGenerator());
   auto resumable = frame_resumable(fp);
   return (AsyncGenerator*)((char*)resumable -
     AsyncGenerator::resumableOff());
@@ -113,7 +113,7 @@ frame_async_generator(const ActRec* fp) {
 
 void ALWAYS_INLINE
 frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
-  assert(numLocals == fp->m_func->numLocals());
+  assertx(numLocals == fp->m_func->numLocals());
   // Check if the frame has a VarEnv or if it has extraArgs
   if (UNLIKELY(fp->func()->attrs() & AttrMayUseVV) &&
       UNLIKELY(fp->m_varEnv != nullptr)) {
@@ -124,7 +124,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
       return;
     }
     // Free extra args
-    assert(fp->hasExtraArgs());
+    assertx(fp->hasExtraArgs());
     ExtraArgs* ea = fp->getExtraArgs();
     int numExtra = fp->numArgs() - fp->m_func->numNonVariadicParams();
     ExtraArgs::deallocate(ea, numExtra);
@@ -154,9 +154,9 @@ frame_free_locals_inl(ActRec* fp, int numLocals, TypedValue* rv) {
 
 void ALWAYS_INLINE
 frame_free_inl(ActRec* fp, TypedValue* rv) { // For frames with no locals
-  assert(0 == fp->m_func->numLocals());
-  assert(fp->m_varEnv == nullptr);
-  assert(fp->hasThis());
+  assertx(0 == fp->m_func->numLocals());
+  assertx(fp->m_varEnv == nullptr);
+  assertx(fp->hasThis());
   decRefObj(fp->getThis());
   EventHook::FunctionReturn(fp, *rv);
 }
@@ -198,9 +198,9 @@ Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
 // necessary. The initial ref-count of the instance will be greater than zero.
 inline ObjectData*
 newInstance(Class* cls) {
-  assert(cls);
+  assertx(cls);
   auto* inst = ObjectData::newInstance(cls);
-  assert(inst->checkCount());
+  assertx(inst->checkCount());
   Stats::inc(cls->getDtor() ? Stats::ObjectData_new_dtor_yes
                             : Stats::ObjectData_new_dtor_no);
 

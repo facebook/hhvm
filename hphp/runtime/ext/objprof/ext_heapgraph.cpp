@@ -177,7 +177,7 @@ const StringData* edgeKindName(HeapGraph::PtrKind kind) {
 // return metadata about this pointer, in the form of a CapturedPtr
 CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
   // Try to drill down and resolve the edge name
-  assert(g.ptrs[ptr].from != -1 && g.ptrs[ptr].to != -1);
+  assertx(g.ptrs[ptr].from != -1 && g.ptrs[ptr].to != -1);
   auto& edge = g.ptrs[ptr];
   auto& from = g.nodes[edge.from];
   int prop_offset = edge.offset;

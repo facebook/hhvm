@@ -49,7 +49,7 @@ template<typename T> struct ptr final {
 
   enum class NonNull {};
   explicit ptr(T* px, NonNull) : m_px(px) {
-    assert(px);
+    assertx(px);
     m_px->incRefCount();
   }
 
@@ -93,7 +93,7 @@ template<typename T> struct ptr final {
   // Move assignment for derived types
   template<class Y>
   ptr& operator=(ptr<Y>&& src) {
-    assert((void*)this != (void*)&src);
+    assertx((void*)this != (void*)&src);
     // Update m_px before releasing the goner
     auto goner = m_px;
     m_px = src.m_px;
@@ -277,7 +277,7 @@ inline bool is_null(const T& p) {
 
 template <typename T, typename P>
 inline bool isa_non_null(const P& p) {
-  assert(!is_null(p));
+  assertx(!is_null(p));
   return p->template instanceof<T>();
 }
 

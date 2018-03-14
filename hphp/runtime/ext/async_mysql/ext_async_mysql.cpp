@@ -39,7 +39,7 @@ namespace HPHP {
   Class* cls::getClass() {                                                     \
     if (s_class == nullptr) {                                                  \
       s_class = Unit::lookupClass(s_className.get());                          \
-      assert(s_class);                                                         \
+      assertx(s_class);                                                        \
     }                                                                          \
   return s_class;                                                              \
   }                                                                            \
@@ -273,7 +273,7 @@ static Object newAsyncMysqlConnectEvent(
 
     return Object{event->getWaitHandle()};
   } catch (...) {
-    assert(false);
+    assertx(false);
     event->abandon();
     return Object{};
   }
@@ -659,7 +659,7 @@ Object AsyncMysqlConnection::query(
   }
   catch (...) {
     LOG(ERROR) << "Unexpected exception while beginning ConnectOperation";
-    assert(false);
+    assertx(false);
     event->abandon();
     return Object{};
   }
@@ -783,7 +783,7 @@ static Object HHVM_METHOD(
     return Object{event->getWaitHandle()};
   }
   catch (...) {
-    assert(false);
+    assertx(false);
     event->abandon();
     return Object{};
   }
@@ -1244,7 +1244,7 @@ void throwAsyncMysqlException(const char* exception_type,
   auto error =
       AsyncMysqlErrorResult::newInstance(op, std::move(clientStats));
 
-  assert(op->result() == am::OperationResult::Failed ||
+  assertx(op->result() == am::OperationResult::Failed ||
          op->result() == am::OperationResult::TimedOut ||
          op->result() == am::OperationResult::Cancelled);
 
@@ -1260,7 +1260,7 @@ void throwAsyncMysqlQueryException(const char* exception_type,
   auto error = AsyncMysqlQueryErrorResult::newInstance(
       op, std::move(clientStats), res);
 
-  assert(op->result() == am::OperationResult::Failed ||
+  assertx(op->result() == am::OperationResult::Failed ||
          op->result() == am::OperationResult::TimedOut ||
          op->result() == am::OperationResult::Cancelled);
 
@@ -1285,7 +1285,7 @@ void AsyncMysqlConnectEvent::unserialize(Cell& result) {
 void AsyncMysqlQueryEvent::unserialize(Cell& result) {
   // Retrieve the original conn and return the underlying connection
   // to it.
-  assert(getPrivData()->instanceof(AsyncMysqlConnection::getClass()));
+  assertx(getPrivData()->instanceof(AsyncMysqlConnection::getClass()));
   auto* conn = Native::data<AsyncMysqlConnection>(getPrivData());
   conn->setConnection(m_query_op->releaseConnection());
 
@@ -1307,7 +1307,7 @@ void AsyncMysqlMultiQueryEvent::unserialize(Cell& result) {
   // Same as unserialize from AsyncMysqlQueryEvent but the result is a
   // vector of query results
   if (getPrivData() != nullptr) {
-    assert(getPrivData()->instanceof(AsyncMysqlConnection::getClass()));
+    assertx(getPrivData()->instanceof(AsyncMysqlConnection::getClass()));
     auto* conn = Native::data<AsyncMysqlConnection>(getPrivData());
     conn->setConnection(m_multi_op->releaseConnection());
   }

@@ -93,12 +93,12 @@ private:
     Trace::Indent indent;
 
     auto sk = profRegion.blocks().back()->last();
-    assert(sk.op() == OpSwitch);
+    assertx(sk.op() == OpSwitch);
     TargetProfile<SwitchProfile> profile(tid,
                                          TransKind::Optimize,
                                          sk.offset(),
                                          s_switchProfile.get());
-    assert(!profile.profiling());
+    assertx(!profile.profiling());
     if (!profile.optimizing()) {
       // We don't have profile data for this Switch, most likely because it saw
       // some weird input type during profiling.

@@ -42,7 +42,7 @@ static std::shared_ptr<HHProf> hhprof() {
   // Centralize try_get() calls to document that despite the scary name, it
   // won't fail under any conditions we subject it to.
   std::shared_ptr<HHProf> h = s_hhprof.try_get();
-  assert(h.get() != nullptr);
+  assertx(h.get() != nullptr);
   return h;
 }
 

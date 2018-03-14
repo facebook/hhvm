@@ -396,7 +396,7 @@ int value_width(Env& env, Vreg reg) {
 Vreg narrow_reg(Env& env, int size, Vreg r, Vlabel b, size_t i, Vout& v) {
   auto const it = env.unit.regToConst.find(r);
   if (it != env.unit.regToConst.end()) {
-    assert(!it->second.isUndef && it->second.kind != Vconst::Double);
+    assertx(!it->second.isUndef && it->second.kind != Vconst::Double);
     return r;
   }
 

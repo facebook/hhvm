@@ -85,7 +85,7 @@ inline DataType getAnnotDataType(AnnotType at) {
 }
 
 inline AnnotType dataTypeToAnnotType(DataType dt) {
-  assert(dt == KindOfUninit || dt == KindOfBoolean || dt == KindOfInt64 ||
+  assertx(dt == KindOfUninit || dt == KindOfBoolean || dt == KindOfInt64 ||
          dt == KindOfDouble || dt == KindOfString || dt == KindOfArray ||
          dt == KindOfVec || dt == KindOfDict || dt == KindOfKeyset ||
          dt == KindOfObject || dt == KindOfResource);
@@ -176,8 +176,8 @@ enum class AnnotAction {
  */
 inline AnnotAction
 annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
-  assert(dt != KindOfRef);
-  assert(IMPLIES(at == AnnotType::Object, annotClsName != nullptr));
+  assertx(dt != KindOfRef);
+  assertx(IMPLIES(at == AnnotType::Object, annotClsName != nullptr));
 
   auto const metatype = getAnnotMetaType(at);
   switch (metatype) {
@@ -232,7 +232,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       break;
   }
 
-  assert(metatype == AnnotMetaType::Precise);
+  assertx(metatype == AnnotMetaType::Precise);
   if (at != AnnotType::Object) {
     // If `at' is "bool", "int", "float", "string", "array", or "resource",
     // then equivDataTypes() can definitively tell us whether or not `dt'

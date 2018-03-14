@@ -213,7 +213,7 @@ struct ShellExecContext final {
   }
 
   FILE *exec(const String& cmd_string) {
-    assert(m_proc == nullptr);
+    assertx(m_proc == nullptr);
     const auto cmd = cmd_string.c_str();
     if (RuntimeOption::WhitelistExec && !check_cmd(cmd)) {
       return nullptr;
@@ -934,7 +934,7 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
 
     child = LightProcess::proc_open(cmd.c_str(), created, intended,
                                     scwd.c_str(), envs);
-    assert(child);
+    assertx(child);
     return post_proc_open(cmd, pipes, enva, items, child);
   }
 
@@ -954,7 +954,7 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
     }
   }
 
-  assert(child == 0);
+  assertx(child == 0);
   /* this is the child process */
 
   /* close those descriptors that we just opened for the parent stuff,

@@ -168,15 +168,16 @@ public:
   }
 
   Val* insert(Key key, Val val) {
-    assert(key != 0);
+    assertx(key != 0);
     return insertImpl(acquireAndGrowIfNeeded(), key, val);
   }
 
   Val* find(Key key) const {
-    assert(key != 0);
+    assertx(key != 0);
+
     auto tab = m_table.load(std::memory_order_consume);
     if (tab->size == 0) return nullptr; // empty
-    assert(tab->capac > tab->size);
+    assertx(tab->capac > tab->size);
     auto idx = project(tab, key);
     for (;;) {
       auto& entry = tab->entries[idx];
@@ -190,14 +191,14 @@ public:
 private:
   Val* insertImpl(Table* const tab, Key newKey, Val newValue) {
     auto probe = &tab->entries[project(tab, newKey)];
-    assert(size_t(probe - tab->entries) < tab->capac);
+    assertx(size_t(probe - tab->entries) < tab->capac);
 
     // Since we're the only thread allowed to write, we're allowed to
     // do a relaxed load here.  (No need for an acquire/release
     // handshake with ourselves.)
     while (Key currentProbe = probe->first) {
-      assert(currentProbe != newKey); // insertions must be unique
-      assert(probe <= (tab->entries + tab->capac));
+      assertx(currentProbe != newKey); // insertions must be unique
+      assertx(probe <= (tab->entries + tab->capac));
       // can't loop forever; acquireAndGrowIfNeeded ensures there's
       // some slack.
       (void)currentProbe;
@@ -239,13 +240,13 @@ private:
       }
       Treadmill::enqueue([this, old] { freeTable(old); });
     }
-    assert(newTable->size == old->size); // only one writer thread
+    assertx(newTable->size == old->size); // only one writer thread
     m_table.store(newTable, std::memory_order_release);
     return newTable;
   }
 
   size_t project(Table* tab, Key key) const {
-    assert(folly::isPowTwo(tab->capac));
+    assertx(folly::isPowTwo(tab->capac));
     return m_hash(key) & (tab->capac - 1);
   }
 

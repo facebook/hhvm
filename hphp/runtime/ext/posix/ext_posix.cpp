@@ -189,7 +189,7 @@ const StaticString
 static Variant php_posix_group_to_array(int gid,
                    const String& gname = uninit_variant.toString()) {
   // Don't pass a gid *and* a gname to this.
-  assert((gid <  0) || gname.size() == 0);
+  assertx((gid <  0) || gname.size() == 0);
 
   if ((gid < 0) && (gname.size() == 0)) {
     return false;
@@ -207,7 +207,7 @@ static Variant php_posix_group_to_array(int gid,
   // If we somehow reach this point and both gname and gid were
   // passed, then the gid values will override the gname values,
   // but it will otherwise function just fine.
-  // The assert() clause above should prevent that, however.
+  // The assertx() clause above should prevent that, however.
   if ((gname.size() > 0) &&
       (getgrnam_r(gname.data(), &gr, grbuf.get(), grbuflen, &retgrptr) != 0 ||
       retgrptr == nullptr)) {
@@ -289,7 +289,7 @@ int64_t HHVM_FUNCTION(posix_getppid) {
 static Variant php_posix_passwd_to_array(int uid,
                    const String& name = uninit_variant.toString()) {
   // Don't pass a uid *and* a name to this.
-  assert((uid <  0) || name.size() == 0);
+  assertx((uid <  0) || name.size() == 0);
 
   if ((uid < 0) && name.size() == 0) {
     return false;
@@ -307,7 +307,7 @@ static Variant php_posix_passwd_to_array(int uid,
   // If we somehow reach this point and both name and uid were
   // passed, then the uid values will override the name values,
   // but it will otherwise function just fine.
-  // The assert() clauses above should prevent that, however.
+  // The assertx() clauses above should prevent that, however.
   if ((name.size() > 0) &&
       getpwnam_r(name.data(), &pw, pwbuf.get(), pwbuflen, &retpwptr)) {
     return false;

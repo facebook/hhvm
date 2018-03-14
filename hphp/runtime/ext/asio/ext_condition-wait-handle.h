@@ -77,7 +77,7 @@ void HHVM_METHOD(ConditionWaitHandle, succeed, const Variant& result);
 void HHVM_METHOD(ConditionWaitHandle, fail, const Object& exception);
 
 inline c_ConditionWaitHandle* c_Awaitable::asCondition() {
-  assert(getKind() == Kind::Condition);
+  assertx(getKind() == Kind::Condition);
   return static_cast<c_ConditionWaitHandle*>(this);
 }
 

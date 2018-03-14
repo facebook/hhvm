@@ -127,7 +127,7 @@ void CmdInfo::help(DebuggerClient &client) {
 }
 
 bool CmdInfo::parseZeroArg(DebuggerClient &client) {
-  assert(client.argCount() == 0);
+  assertx(client.argCount() == 0);
   BreakPointInfoPtr bpi = client.getCurrentLocation();
   if (bpi) {
     m_symbol = bpi->getClass();
@@ -141,7 +141,7 @@ bool CmdInfo::parseZeroArg(DebuggerClient &client) {
 }
 
 void CmdInfo::parseOneArg(DebuggerClient &client, std::string &subsymbol) {
-  assert(client.argCount() == 1);
+  assertx(client.argCount() == 1);
   string symbol = client.argValue(1);
   size_t pos = symbol.find("::");
   if (pos != string::npos) {

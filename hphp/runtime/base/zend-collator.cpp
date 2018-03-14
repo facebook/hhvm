@@ -426,7 +426,7 @@ static int collator_regular_compare_function(const Variant& v1, const Variant& v
       num2 = collator_convert_string_to_number_if_possible(str2);
     }
     if (same(num1, false) || same(num2, false)) {
-      assert(data);
+      assertx(data);
       int ret = ucol_strcoll((const UCollator *)data,
                              (UChar*)(str1.toString().data()),
                              UCHARS(str1.toString().length()),
@@ -517,7 +517,7 @@ static int collator_numeric_compare_descending(const Variant& v1, const Variant&
 static int collator_string_compare_function(const Variant& v1, const Variant& v2,
                                             const void *data,
                                             bool ascending) {
-  assert(data);
+  assertx(data);
   String str1;
   if (v1.isString()) {
     str1 = v1.toString();
@@ -562,7 +562,7 @@ static int collator_string_compare_descending(const Variant& v1, const Variant& 
 static bool collator_sort_internal(bool renumber, Variant &array,
                                    int sort_flags, bool ascending, bool byKey,
                                    UCollator *coll, Intl::IntlError *errcode) {
-  assert(coll);
+  assertx(coll);
   errcode->clearError();
   Array temp = array.toArray();
   Array::PFUNC_CMP cmp_func;
@@ -608,7 +608,7 @@ static bool collator_sort_internal(bool renumber, Variant &array,
 
 bool collator_sort(Variant &array, int sort_flags, bool ascending,
                    UCollator *coll, Intl::IntlError *errcode) {
-  assert(coll);
+  assertx(coll);
   bool byKey = false;
   bool ret = collator_sort_internal(true, array, sort_flags, ascending, byKey,
                                     coll, errcode);
@@ -617,7 +617,7 @@ bool collator_sort(Variant &array, int sort_flags, bool ascending,
 
 bool collator_asort(Variant &array, int sort_flags, bool ascending,
                     UCollator *coll, Intl::IntlError *errcode) {
-  assert(coll);
+  assertx(coll);
   bool byKey = false;
   bool ret = collator_sort_internal(false, array, sort_flags, ascending, byKey,
                                     coll, errcode);

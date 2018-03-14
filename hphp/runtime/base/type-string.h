@@ -201,16 +201,16 @@ public:
 
 public:
   const String& setSize(int len) {
-    assert(m_str);
+    assertx(m_str);
     m_str->setSize(len);
     return *this;
   }
   const String& shrink(size_t len) {
-    assert(m_str && !m_str->isImmutable());
+    assertx(m_str && !m_str->isImmutable());
     if (m_str->capacity() - len > kMinShrinkThreshold) {
       m_str = req::ptr<StringData>::attach(m_str->shrinkImpl(len));
     } else {
-      assert(len < StringData::MaxSize);
+      assertx(len < StringData::MaxSize);
       m_str->setSize(len);
     }
     return *this;
@@ -470,22 +470,22 @@ struct hphp_string_isame {
 
 struct StringDataHashCompare {
   bool equal(const StringData *s1, const StringData *s2) const {
-    assert(s1 && s2);
+    assertx(s1 && s2);
     return s1->same(s2);
   }
   size_t hash(const StringData *s) const {
-    assert(s);
+    assertx(s);
     return s->hash();
   }
 };
 
 struct StringDataHashICompare {
   bool equal(const StringData *s1, const StringData *s2) const {
-    assert(s1 && s2);
+    assertx(s1 && s2);
     return s1->isame(s2);
   }
   size_t hash(const StringData *s) const {
-    assert(s);
+    assertx(s);
     return s->hash();
   }
 };
@@ -577,7 +577,7 @@ StaticString getDataTypeString(DataType t);
 
 inline String::String(const StaticString& str) :
   m_str(str.m_str.get(), NoIncRef{}) {
-  assert(str.m_str->isStatic());
+  assertx(str.m_str->isStatic());
 }
 
 inline String& String::operator=(const StaticString& v) {

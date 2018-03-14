@@ -69,7 +69,7 @@ void SparseHeap::reset() {
 }
 
 void SparseHeap::flush() {
-  assert(empty());
+  assertx(empty());
   m_slabs = std::vector<SlabInfo>{};
   m_bigs = std::vector<MallocNode*>{};
   m_pooledBytes = 0;

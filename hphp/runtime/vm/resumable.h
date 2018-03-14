@@ -133,14 +133,14 @@ struct alignas(16) Resumable {
            bool mayUseVV = true>
   void initialize(const ActRec* fp, jit::TCA resumeAddr,
                   Offset resumeOffset, size_t frameSize, size_t totalSize) {
-    assert(fp);
-    assert(fp->resumed() == clone);
+    assertx(fp);
+    assertx(fp->resumed() == clone);
     auto const func = fp->func();
-    assert(func);
-    assert(func->isResumable());
-    assert(func->contains(resumeOffset));
+    assertx(func);
+    assertx(func->isResumable());
+    assertx(func->contains(resumeOffset));
     // Check memory alignment
-    assert((((uintptr_t) actRec()) & (sizeof(Cell) - 1)) == 0);
+    assertx((((uintptr_t) actRec()) & (sizeof(Cell) - 1)) == 0);
 
     if (!clone) {
       // Copy ActRec, locals and iterators
@@ -152,7 +152,7 @@ struct alignas(16) Resumable {
       actRec()->setResumed();
 
       // Suspend VarEnv if needed
-      assert(mayUseVV || !(func->attrs() & AttrMayUseVV));
+      assertx(mayUseVV || !(func->attrs() & AttrMayUseVV));
       if (mayUseVV &&
           UNLIKELY(func->attrs() & AttrMayUseVV) &&
           UNLIKELY(fp->hasVarEnv())) {
@@ -184,13 +184,13 @@ struct alignas(16) Resumable {
   const ActRec* actRec() const { return &m_actRec; }
   jit::TCA resumeAddr() const { return m_resumeAddr; }
   Offset resumeOffset() const {
-    assert(m_actRec.func()->contains(m_resumeOffset));
+    assertx(m_actRec.func()->contains(m_resumeOffset));
     return m_resumeOffset;
   }
   size_t size() const { return m_size; }
 
   void setResumeAddr(jit::TCA resumeAddr, Offset resumeOffset) {
-    assert(m_actRec.func()->contains(resumeOffset));
+    assertx(m_actRec.func()->contains(resumeOffset));
     m_resumeAddr = resumeAddr;
     m_resumeOffset = resumeOffset;
   }

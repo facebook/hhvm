@@ -62,11 +62,11 @@ const Func* lookupMethodCtx(const Class* cls,
                             bool raise) {
   const Func* method;
   if (callType == CallType::CtorMethod) {
-    assert(methodName == nullptr);
+    assertx(methodName == nullptr);
     method = cls->getCtor();
   } else {
-    assert(callType == CallType::ObjMethod || callType == CallType::ClsMethod);
-    assert(methodName != nullptr);
+    assertx(callType == CallType::ObjMethod || callType == CallType::ClsMethod);
+    assertx(methodName != nullptr);
     method = cls->lookupMethod(methodName);
     while (!method) {
       if (UNLIKELY(methodName->isame(s___construct.get()))) {
@@ -83,14 +83,14 @@ const Func* lookupMethodCtx(const Class* cls,
       return nullptr;
     }
   }
-  assert(method);
+  assertx(method);
   bool accessible = true;
   // If we found a protected or private method, we need to do some
   // accessibility checks.
   if ((method->attrs() & (AttrProtected|AttrPrivate)) &&
       (g_context.isNull() || !g_context->debuggerSettings.bypassCheck)) {
     Class* baseClass = method->baseCls();
-    assert(baseClass);
+    assertx(baseClass);
     // If ctx is the class that first declared this method, then we know we
     // have the right method and we can stop here.
     if (ctx == baseClass) {
@@ -107,7 +107,7 @@ const Func* lookupMethodCtx(const Class* cls,
       }
       return nullptr;
     }
-    assert(ctx);
+    assertx(ctx);
     if (method->attrs() & AttrPrivate) {
       // ctx is not the class that declared this private method, so this
       // private method is not accessible. We need to keep going because
@@ -138,7 +138,7 @@ const Func* lookupMethodCtx(const Class* cls,
       }
       // We now know this protected method is accessible, but we need to
       // keep going because ctx may define a private method with this name.
-      assert(accessible && baseClass->classof(ctx));
+      assertx(accessible && baseClass->classof(ctx));
     }
   }
   // If this is an ObjMethod call ("$obj->foo()") AND there is an ancestor
@@ -215,15 +215,15 @@ LookupResult lookupClsMethod(const Func*& f,
         return LookupResult::MethodNotFound;
       }
       f->validate();
-      assert(f);
-      assert(f->attrs() & AttrStatic);
+      assertx(f);
+      assertx(f->attrs() & AttrStatic);
       return LookupResult::MagicCallStaticFound;
     }
-    assert(f);
-    assert(obj);
+    assertx(f);
+    assertx(obj);
     // __call cannot be static, this should be enforced by semantic
     // checks defClass time or earlier
-    assert(!(f->attrs() & AttrStatic));
+    assertx(!(f->attrs() & AttrStatic));
     return LookupResult::MagicCallFound;
   }
   if (obj && !(f->attrs() & AttrStatic) && obj->instanceof(cls)) {
@@ -242,7 +242,7 @@ LookupResult lookupCtorMethod(const Func*& f,
     if (!f) {
       // If raise was true than lookupMethodCtx should have thrown,
       // so we should only be able to get here if raise was false
-      assert(!raise);
+      assertx(!raise);
       return LookupResult::MethodNotFound;
     }
   }

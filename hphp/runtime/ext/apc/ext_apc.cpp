@@ -734,7 +734,7 @@ void apc_load_impl_compressed
         k += int_lens[i + 2] + 1; // skip \0
       }
       s.prime(std::move(vars));
-      assert((k - keys) == len);
+      assertx((k - keys) == len);
     }
   }
   {
@@ -770,7 +770,7 @@ void apc_load_impl_compressed
         k += char_lens[i + 2] + 1; // skip \0
       }
       s.prime(std::move(vars));
-      assert((k - keys) == len);
+      assertx((k - keys) == len);
     }
   }
   {
@@ -795,7 +795,7 @@ void apc_load_impl_compressed
         p += string_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(std::move(vars));
-      assert((p - decoded) == len);
+      assertx((p - decoded) == len);
     }
   }
   {
@@ -818,7 +818,7 @@ void apc_load_impl_compressed
         p += object_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(std::move(vars));
-      assert((p - decoded) == len);
+      assertx((p - decoded) == len);
     }
   }
   {
@@ -846,7 +846,7 @@ void apc_load_impl_compressed
         p += thrift_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(std::move(vars));
-      assert((p - decoded) == len);
+      assertx((p - decoded) == len);
     }
   }
   {
@@ -876,7 +876,7 @@ void apc_load_impl_compressed
         p += other_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(std::move(vars));
-      assert((p - decoded) == len);
+      assertx((p - decoded) == len);
     }
   }
 }
@@ -922,7 +922,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
     rfc1867ApcData->update_freq = RuntimeOption::Rfc1867Freq;
 
     if (rfc1867ApcData->update_freq < 0) {
-      assert(false); // TODO: support percentage
+      assertx(false); // TODO: support percentage
       // frequency is a percentage, not bytes
       rfc1867ApcData->update_freq =
         rfc1867ApcData->content_length * RuntimeOption::Rfc1867Freq / 100;

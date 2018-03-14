@@ -179,7 +179,7 @@ void startRequest() {
     if (threadIdx >= s_inflightRequests.size()) {
       s_inflightRequests.resize(threadIdx + 1, {kIdleGenCount, 0});
     } else {
-      assert(s_inflightRequests[threadIdx].startTime == kIdleGenCount);
+      assertx(s_inflightRequests[threadIdx].startTime == kIdleGenCount);
     }
     s_inflightRequests[threadIdx].startTime = correctTime(startTime);
     s_inflightRequests[threadIdx].pthreadId = Process::GetThreadId();
@@ -198,12 +198,12 @@ void startRequest() {
 
 void finishRequest() {
   auto const threadIdx = Treadmill::threadIdx();
-  assert(threadIdx != -1);
+  assertx(threadIdx != -1);
   FTRACE(1, "tid {} finish\n", threadIdx);
   std::vector<std::unique_ptr<WorkItem>> toFire;
   {
     GenCountGuard g;
-    assert(s_inflightRequests[threadIdx].startTime != kIdleGenCount);
+    assertx(s_inflightRequests[threadIdx].startTime != kIdleGenCount);
     GenCount finishedRequest = s_inflightRequests[threadIdx].startTime;
     s_inflightRequests[threadIdx].startTime = kIdleGenCount;
 
@@ -257,7 +257,7 @@ void finishRequest() {
           break;
         }
       }
-      assert(i < limit);
+      assertx(i < limit);
       if (i == limit) {
         Logger::Warning("Treadmill fails to set global GC status into Idle");
       }

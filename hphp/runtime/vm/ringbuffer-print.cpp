@@ -110,7 +110,7 @@ void dumpRingBufferMasked(int numEntries, uint32_t types, uint32_t threadId) {
   while (startIdx < 0) {
     startIdx += kMaxRBEntries;
   }
-  assert(startIdx >= 0 && startIdx < kMaxRBEntries);
+  assertx(startIdx >= 0 && startIdx < kMaxRBEntries);
   int numDumped = 0;
   for (int i = 0; i < kMaxRBEntries && numDumped < numEntries; i++) {
     RingBufferEntry* rb = &g_ring_ptr[(startIdx + i) % kMaxRBEntries];

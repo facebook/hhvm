@@ -2190,7 +2190,7 @@ void emitUnsetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   if (mcodeIsProp(mk.mcode)) {
     gen(env, UnsetProp, extractBaseIfObj(env), key);
   } else {
-    assert(mcodeIsElem(mk.mcode));
+    assertx(mcodeIsElem(mk.mcode));
     gen(env, UnsetElem, ldMBase(env), key);
   }
 

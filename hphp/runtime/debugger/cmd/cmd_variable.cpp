@@ -118,9 +118,9 @@ void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
   }
 
   auto const get_var = [varName] (const CmdVariable& cmd) {
-    assert(cmd.m_variables.size() == 1);
-    assert(cmd.m_variables.exists(varName, true /* isKey */));
-    assert(cmd.m_variables[varName].isString());
+    assertx(cmd.m_variables.size() == 1);
+    assertx(cmd.m_variables.exists(varName, true /* isKey */));
+    assertx(cmd.m_variables[varName].isString());
     return cmd.m_variables[varName].toString();
   };
 
@@ -175,7 +175,7 @@ void CmdVariable::PrintVariables(DebuggerClient &client, const Array& variables,
     cmd.m_version = 2;
     auto rcmd = client.xend<CmdVariable>(&cmd);
     if (!rcmd->m_variables.empty()) {
-      assert(rcmd->m_variables[name].isString());
+      assertx(rcmd->m_variables[name].isString());
       value = rcmd->m_variables[name].toString();
       found = true;
     } else if (text.empty()) {
@@ -284,7 +284,7 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
     ArrayInit ret(m_variables->size(), ArrayInit::Map{});
     Variant v;
     for (ArrayIter iter(m_variables); iter; ++iter) {
-      assert(iter.first().isString());
+      assertx(iter.first().isString());
       ret.add(iter.first().toString(), v);
     }
     m_variables = ret.toArray();

@@ -81,11 +81,11 @@ void discardStackTemps(const ActRec* const fp,
   visitStackElems(
     fp, stack.top(), bcOffset,
     [&] (ActRec* ar, Offset pushOff) {
-      assert(ar == reinterpret_cast<ActRec*>(stack.top()));
+      assertx(ar == reinterpret_cast<ActRec*>(stack.top()));
       // ar is a pre-live ActRec in fp's scope, and pushOff
       // is the offset of the corresponding FPush* opcode.
       if (isFPushCtor(fp->func()->unit()->getOp(pushOff))) {
-        assert(ar->hasThis());
+        assertx(ar->hasThis());
         ar->getThis()->setNoDestruct();
       }
       ITRACE(2, "  unwind pop AR : {}\n",
@@ -93,7 +93,7 @@ void discardStackTemps(const ActRec* const fp,
       stack.popAR();
     },
     [&] (TypedValue* tv) {
-      assert(tv == stack.top());
+      assertx(tv == stack.top());
       ITRACE(2, "  unwind pop TV : {}\n",
              implicit_cast<void*>(stack.top()));
       stack.popTV();
@@ -257,7 +257,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       phpException = nullptr;
       stack.ndiscard(func->numSlotsInFrame());
       stack.ret();
-      assert(stack.topTV() == fp->retSlot());
+      assertx(stack.topTV() == fp->retSlot());
       cellCopy(make_tv<KindOfObject>(waitHandle), *fp->retSlot());
     } else {
       // Free ActRec.
@@ -313,7 +313,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     return phpException;
   }
 
-  assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
+  assertx(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
          prevFp->resumed());
   auto const prevOff = soff + prevFp->func()->base();
   pc = prevFp->func()->unit()->at(prevOff);
@@ -362,7 +362,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
       }
 
       foundLval = head->propLvalAtOffset(s_previousIdx);
-      assert(foundLval.type() != KindOfUninit);
+      assertx(foundLval.type() != KindOfUninit);
       head = foundLval.val().pobj;
     } while (foundLval.type() == KindOfObject &&
              foundLval.val().pobj->instanceof(SystemLib::s_ThrowableClass));
@@ -433,7 +433,7 @@ const StaticString s_xdebug_start_code_coverage("xdebug_start_code_coverage");
  * reallocate due to nested exception handling.
  */
 void unwindPhp() {
-  assert(!g_context->m_faults.empty());
+  assertx(!g_context->m_faults.empty());
   auto& fp = vmfp();
   auto& stack = vmStack();
   auto& pc = vmpc();
@@ -474,9 +474,9 @@ void unwindPhp() {
            fault.m_raiseOffset,
            implicit_cast<void*>(fp));
 
-    assert(fault.m_raiseNesting != kInvalidNesting);
-    assert(fault.m_raiseFrame != nullptr);
-    assert(fault.m_raiseOffset != kInvalidOffset);
+    assertx(fault.m_raiseNesting != kInvalidNesting);
+    assertx(fault.m_raiseFrame != nullptr);
+    assertx(fault.m_raiseOffset != kInvalidOffset);
 
     /*
      * If the handledCount is non-zero, we've already seen this fault once
@@ -578,12 +578,12 @@ void unwindCpp(Exception* exception) {
   auto& stack = vmStack();
   auto& pc = vmpc();
 
-  assert(!g_context->m_unwindingCppException);
+  assertx(!g_context->m_unwindingCppException);
   g_context->m_unwindingCppException = true;
   ITRACE(1, "entering unwinder for C++ exception: {}\n",
          implicit_cast<void*>(exception));
   SCOPE_EXIT {
-    assert(g_context->m_unwindingCppException);
+    assertx(g_context->m_unwindingCppException);
     g_context->m_unwindingCppException = false;
     ITRACE(1, "leaving unwinder for C++ exception: {}\n",
            implicit_cast<void*>(exception));
@@ -613,7 +613,7 @@ void unwindCpp(Exception* exception) {
 
     // Discard the frame
     DEBUG_ONLY auto const phpException = tearDownFrame(fp, stack, pc, nullptr);
-    assert(phpException == nullptr);
+    assertx(phpException == nullptr);
   } while (fp);
 
   // Propagate the C++ exception to the outer VM nesting
@@ -624,7 +624,7 @@ void unwindBuiltinFrame() {
   auto& stack = vmStack();
   auto& fp = vmfp();
 
-  assert(fp->m_func->name()->isame(s_hphpd_break.get()) ||
+  assertx(fp->m_func->name()->isame(s_hphpd_break.get()) ||
          fp->m_func->name()->isame(s_fb_enable_code_coverage.get()) ||
          fp->m_func->name()->isame(s_xdebug_start_code_coverage.get()));
 
@@ -644,7 +644,7 @@ void unwindBuiltinFrame() {
   // Tear down the frame
   Offset pc = -1;
   ActRec* sfp = g_context->getPrevVMState(fp, &pc);
-  assert(pc != -1);
+  assertx(pc != -1);
   fp = sfp;
   vmpc() = fp->m_func->unit()->at(pc);
   stack.ndiscard(numSlots);

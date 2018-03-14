@@ -39,7 +39,7 @@ namespace HPHP {
   Class *cls::getClass() {                                                     \
     if (s_class == nullptr) {                                                  \
       s_class = Unit::lookupClass(s_className.get());                          \
-      assert(s_class);                                                         \
+      assertx(s_class);                                                        \
     }                                                                          \
     return s_class;                                                            \
   }                                                                            \
@@ -53,7 +53,7 @@ struct php_sqlite3_agg_context {
 };
 
 static Variant get_column_value(sqlite3_stmt *stmt, int column) {
-  assert(stmt);
+  assertx(stmt);
   Variant data;
   switch (sqlite3_column_type(stmt, column)) {
   case SQLITE_INTEGER:
@@ -374,7 +374,7 @@ Variant HHVM_METHOD(SQLite3, query,
     Variant stmt = HHVM_MN(SQLite3, prepare)(this_, sql);
     if (!same(stmt, false)) {
       Object obj_stmt = stmt.toObject();
-      assert(obj_stmt.instanceof(SQLite3Stmt::getClass()));
+      assertx(obj_stmt.instanceof(SQLite3Stmt::getClass()));
       return HHVM_MN(SQLite3Stmt, execute)(obj_stmt.get());
     }
   }
@@ -391,7 +391,7 @@ Variant HHVM_METHOD(SQLite3, querysingle,
     Variant stmt = HHVM_MN(SQLite3, prepare)(this_, sql);
     if (!same(stmt, false)) {
       Object obj_stmt = stmt.toObject();
-      assert(obj_stmt.instanceof(SQLite3Stmt::getClass()));
+      assertx(obj_stmt.instanceof(SQLite3Stmt::getClass()));
       sqlite3_stmt *pstmt =
         Native::data<SQLite3Stmt>(obj_stmt)->m_raw_stmt;
       switch (sqlite3_step(pstmt)) {
@@ -509,7 +509,7 @@ void HHVM_METHOD(SQLite3Stmt, __construct,
                  const String& statement) {
   auto *data = Native::data<SQLite3Stmt>(this_);
   if (!statement.empty()) {
-    assert(dbobject.instanceof(SQLite3::getClass()));
+    assertx(dbobject.instanceof(SQLite3::getClass()));
     const SQLite3 *db = Native::data<SQLite3>(dbobject);
     db->validate();
     data->m_db = dbobject;

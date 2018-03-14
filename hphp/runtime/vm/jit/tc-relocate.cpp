@@ -94,7 +94,7 @@ struct CodeSmasher {
       cb.init(e.first, e.second - e.first, "relocated");
 
       CGMeta fixups;
-      SCOPE_EXIT { assert(fixups.empty()); };
+      SCOPE_EXIT { assertx(fixups.empty()); };
 
       DataBlock db;
       Vauto vasm { cb, cb, db, fixups };
@@ -282,7 +282,7 @@ void readRelocations(
         }
         continue;
       }
-      assert(pos != std::string::npos && pos > n);
+      assertx(pos != std::string::npos && pos > n);
       auto b64 = line.substr(pos + 1);
       auto decoded = base64_decode(b64.c_str(), b64.size(), true);
 
@@ -323,7 +323,7 @@ void adjustProfiledCallers(RelocationInfo& rel) {
 void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
               CGMeta& fixups) {
   assertOwnsCodeLock();
-  assert(!Func::s_treadmill);
+  assertx(!Func::s_treadmill);
 
   auto newRelocMapName = Debug::DebugInfo::Get()->getRelocMapName() + ".tmp";
   auto newRelocMap = fopen(newRelocMapName.c_str(), "w+");
@@ -349,7 +349,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
 
   RelocationInfo rel;
   size_t num = 0;
-  assert(fixups.alignments.empty());
+  assertx(fixups.alignments.empty());
   for (size_t sz = relocs.size(); num < sz; num++) {
     auto& reloc = relocs[num];
     if (ignoreEntry(reloc.sk)) continue;
@@ -370,7 +370,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
     }
   }
   swap_trick(fixups.alignments);
-  assert(fixups.empty());
+  assertx(fixups.empty());
 
   adjustForRelocation(rel);
 
@@ -561,7 +561,7 @@ bool relocateNewTranslation(TransLoc& loc,
       cb.init(start, end - start, "Dead code");
 
       CGMeta fixups;
-      SCOPE_EXIT { assert(fixups.empty()); };
+      SCOPE_EXIT { assertx(fixups.empty()); };
 
       DataBlock db;
       Vauto vasm { cb, cb, db, fixups };
@@ -643,7 +643,7 @@ void liveRelocate(int time) {
 
     unsigned new_size = g() % ((relocs.size() + 1) >> 1);
     new_size += (relocs.size() + 3) >> 2;
-    assert(new_size > 0 && new_size <= relocs.size());
+    assertx(new_size > 0 && new_size <= relocs.size());
 
     relocs.resize(new_size);
   } else {

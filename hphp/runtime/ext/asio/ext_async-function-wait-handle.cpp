@@ -36,7 +36,7 @@ c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
     return;
   }
 
-  assert(!isRunning());
+  assertx(!isRunning());
   frame_free_locals_inl_no_hook(actRec(), actRec()->func()->numLocals());
   decRefObj(m_children[0].getChild());
 }
@@ -52,12 +52,12 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   jit::TCA resumeAddr,
                                   Offset resumeOffset,
                                   c_WaitableWaitHandle* child) {
-  assert(fp);
-  assert(!fp->resumed());
-  assert(fp->func()->isAsyncFunction());
-  assert(child);
-  assert(child->instanceof(c_WaitableWaitHandle::classof()));
-  assert(!child->isFinished());
+  assertx(fp);
+  assertx(!fp->resumed());
+  assertx(fp->func()->isAsyncFunction());
+  assertx(child);
+  assertx(child->instanceof(c_WaitableWaitHandle::classof()));
+  assertx(!child->isFinished());
 
   const size_t frameSize = Resumable::getFrameSize(numSlots);
   const size_t totalSize = sizeof(NativeNode) + frameSize + sizeof(Resumable) +
@@ -69,9 +69,9 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                          frameSize,
                                          totalSize);
   auto const waitHandle = new (resumable + 1) c_AsyncFunctionWaitHandle();
-  assert(waitHandle->hasExactlyOneRef());
+  assertx(waitHandle->hasExactlyOneRef());
   waitHandle->actRec()->setReturnVMExit();
-  assert(waitHandle->noDestruct());
+  assertx(waitHandle->noDestruct());
   waitHandle->initialize(child);
   return waitHandle;
 }
@@ -104,8 +104,8 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
 
 void c_AsyncFunctionWaitHandle::resume() {
   auto const child = m_children[0].getChild();
-  assert(getState() == STATE_READY);
-  assert(child->isFinished());
+  assertx(getState() == STATE_READY);
+  assertx(child->isFinished());
   setState(STATE_RUNNING);
 
   if (LIKELY(child->isSucceeded())) {
@@ -119,7 +119,7 @@ void c_AsyncFunctionWaitHandle::resume() {
 }
 
 void c_AsyncFunctionWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
-  assert(!child->isFinished());
+  assertx(!child->isFinished());
 
   // import child into the current context, throw on cross-context cycles
   asio::enter_context(child, getContextIdx());
@@ -155,7 +155,7 @@ void c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
 }
 
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {
-  assert(isRunning());
+  assertx(isRunning());
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
@@ -168,9 +168,9 @@ void c_AsyncFunctionWaitHandle::ret(Cell& result) {
  * - consumes reference of the given Exception object
  */
 void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
-  assert(isRunning());
-  assert(exception);
-  assert(exception->instanceof(SystemLib::s_ThrowableClass));
+  assertx(isRunning());
+  assertx(exception);
+  assertx(exception->instanceof(SystemLib::s_ThrowableClass));
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnResumableFail())) {
@@ -192,7 +192,7 @@ void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
  * Mark the wait handle as failed due to unexpected abrupt interrupt.
  */
 void c_AsyncFunctionWaitHandle::failCpp() {
-  assert(isRunning());
+  assertx(isRunning());
   auto const exception = AsioSession::Get()->getAbruptInterruptException();
   auto parentChain = getParentChain();
   setState(STATE_FAILED);
@@ -246,13 +246,13 @@ c_WaitableWaitHandle* c_AsyncFunctionWaitHandle::getChild() {
   if (getState() == STATE_BLOCKED) {
     return m_children[0].getChild();
   } else {
-    assert(getState() == STATE_READY || getState() == STATE_RUNNING);
+    assertx(getState() == STATE_READY || getState() == STATE_RUNNING);
     return nullptr;
   }
 }
 
 void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
+  assertx(AsioSession::Get()->getContext(ctx_idx));
 
   // stop before corrupting unioned data
   if (isFinished()) {
@@ -261,7 +261,7 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // not in a context being exited
-  assert(getContextIdx() <= ctx_idx);
+  assertx(getContextIdx() <= ctx_idx);
   if (getContextIdx() != ctx_idx) {
     decRefObj(this);
     return;
@@ -295,7 +295,7 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
       break;
 
     default:
-      assert(false);
+      assertx(false);
   }
 }
 

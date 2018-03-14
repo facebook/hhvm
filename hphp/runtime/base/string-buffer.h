@@ -152,7 +152,7 @@ struct StringBuffer {
    * Mutate a character in existing buffer.
    */
   void set(uint32_t offset, char c) {
-    assert(offset < m_len);
+    assertx(offset < m_len);
     m_str->mutableData()[offset] = c;
   }
 
@@ -167,13 +167,13 @@ struct StringBuffer {
     appendHelper(c);
   }
   void append(unsigned char c) { append((char)c);}
-  void append(const char* s) { assert(s); append(s, strlen(s)); }
+  void append(const char* s) { assertx(s); append(s, strlen(s)); }
   void append(const String& s) { append(s.data(), s.size()); }
   void append(const std::string& s) { append(s.data(), s.size()); }
   void append(const StringData* s) { append(s->data(), s->size()); }
   void append(folly::StringPiece s) { append(s.data(), s.size()); }
   void append(const char* s, int len) {
-    assert(len >= 0);
+    assertx(len >= 0);
     if (m_str && len <= m_cap - m_len) {
       memcpy(m_str->mutableData() + m_len, s, len);
       m_len += len;
@@ -296,7 +296,7 @@ private:
 };
 
 inline const char* CstrBuffer::data() const {
-  assert(m_len <= m_cap);
+  assertx(m_len <= m_cap);
   m_buffer[m_len] = 0;
   return m_buffer;
 }

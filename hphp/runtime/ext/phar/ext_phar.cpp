@@ -62,7 +62,7 @@ static struct PharStreamWrapper final : Stream::Wrapper {
   int access(const String& path, int /*mode*/) override {
     Variant ret = callStat(path);
     if (ret.isBoolean()) {
-      assert(!ret.toBoolean());
+      assertx(!ret.toBoolean());
       return -1;
     }
     return 0;
@@ -71,7 +71,7 @@ static struct PharStreamWrapper final : Stream::Wrapper {
   int stat(const String& path, struct stat* buf) override {
     Variant ret = callStat(path);
     if (ret.isBoolean()) {
-      assert(!ret.toBoolean());
+      assertx(!ret.toBoolean());
       return -1;
     }
     const Array& stat = ret.toArray();

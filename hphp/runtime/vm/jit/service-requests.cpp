@@ -75,7 +75,7 @@ void emit_svcreq(CodeBlock& cb,
 
   {
     CGMeta fixups;
-    SCOPE_EXIT { assert(fixups.empty()); };
+    SCOPE_EXIT { assertx(fixups.empty()); };
 
     Vauto vasm{stub, stub, data, fixups};
     auto& v = vasm.main();
@@ -90,7 +90,7 @@ void emit_svcreq(CodeBlock& cb,
 
     auto live_out = leave_trace_regs();
 
-    assert(argv.size() <= kMaxArgs);
+    assertx(argv.size() <= kMaxArgs);
 
     // Pick up CondCode arguments first---vasm may optimize immediate loads
     // into operations which clobber status flags.

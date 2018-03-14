@@ -130,7 +130,7 @@ static InitFiniNode initCodeSizeCounters([] {
 }, InitFiniNode::When::PostRuntimeOptions);
 
 ServiceData::ExportedTimeSeries* getCodeSizeCounter(const std::string& name) {
-  assert(!s_counters.empty());
+  assertx(!s_counters.empty());
   return s_counters.at(name);
 }
 

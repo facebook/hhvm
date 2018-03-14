@@ -291,7 +291,7 @@ void refineTmps(IRUnit& unit,
 
 SSATmp* insertPhi(IRUnit& unit, Block* blk,
                   const jit::vector<SSATmp*>& inputs) {
-  assert(blk->numPreds() > 1);
+  assertx(blk->numPreds() > 1);
   auto label = &blk->front();
   if (!label->is(DefLabel)) {
     label = unit.defLabel(1, label->bcctx());

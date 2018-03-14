@@ -128,7 +128,7 @@ Array HHVM_FUNCTION(get_class_constants, const String& className) {
       if (value.m_type == KindOfUninit) {
         value = cls->clsCnsGet(consts[i].name);
       }
-      assert(value.m_type != KindOfUninit);
+      assertx(value.m_type != KindOfUninit);
       arrayInit.set(name, cellAsCVarRef(value));
     }
   }
@@ -157,8 +157,8 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
     ? cls->getPropData()
     : &declPropInitVec;
 
-  assert(propVals != nullptr);
-  assert(propVals->size() == numDeclProps);
+  assertx(propVals != nullptr);
+  assertx(propVals->size() == numDeclProps);
 
   // For visibility checks
   auto ctx = arGetContextClass(GetCallerFrame());
@@ -168,7 +168,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   for (size_t i = 0; i < numDeclProps; ++i) {
     auto const name = const_cast<StringData*>(propInfo[i].name.get());
     // Empty names are used for invisible/private parent properties; skip them.
-    assert(name->size() != 0);
+    assertx(name->size() != 0);
     if (Class::IsPropAccessible(propInfo[i], ctx)) {
       auto const value = &((*propVals)[i]);
       arr.set(name, tvAsCVarRef(value));
@@ -294,7 +294,7 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
   if (class_or_object.isObject()) {
     obj = class_or_object.getObjectData();
     cls = obj->getVMClass();
-    assert(cls);
+    assertx(cls);
   } else if (class_or_object.isString()) {
     cls = Unit::loadClass(class_or_object.toString().get());
     if (!cls) return false;

@@ -63,7 +63,7 @@ const Class* SimpleXMLIterator_classof() {
 
 struct SimpleXMLElement {
   SimpleXMLElement() {
-    assert(Native::object<SimpleXMLElement>(this)->getVMClass()->
+    assertx(Native::object<SimpleXMLElement>(this)->getVMClass()->
            rtAttribute(Class::CallToImpl));
   }
   SimpleXMLElement& operator=(const SimpleXMLElement &src) {
@@ -118,12 +118,12 @@ struct SimpleXMLElement {
 
 struct SimpleXMLElementIterator {
   SimpleXMLElement* sxe() {
-    assert(m_sxe->instanceof(SimpleXMLElement_classof()));
+    assertx(m_sxe->instanceof(SimpleXMLElement_classof()));
     return Native::data<SimpleXMLElement>(m_sxe.get());
   }
 
   void setSxe(const Object& sxe) {
-    assert(sxe->instanceof(SimpleXMLElement_classof()));
+    assertx(sxe->instanceof(SimpleXMLElement_classof()));
     m_sxe = Object(sxe.get());
   }
 
@@ -306,7 +306,7 @@ static void php_sxe_move_forward_iterator(SimpleXMLElement* sxe) {
   xmlNodePtr node = nullptr;
   auto data = sxe->iter.data;
   if (!data.isNull()) {
-    assert(data->instanceof(SimpleXMLElement_classof()));
+    assertx(data->instanceof(SimpleXMLElement_classof()));
     auto intern = Native::data<SimpleXMLElement>(data.get());
     node = intern->nodep();
     sxe->iter.data.reset();
@@ -360,7 +360,7 @@ static xmlNodePtr php_sxe_get_first_node(SimpleXMLElement* sxe,
     php_sxe_reset_iterator(sxe, true);
     xmlNodePtr retnode = nullptr;
     if (!sxe->iter.data.isNull()) {
-      assert(sxe->iter.data->instanceof(SimpleXMLElement_classof()));
+      assertx(sxe->iter.data->instanceof(SimpleXMLElement_classof()));
       retnode = Native::data<SimpleXMLElement>(sxe->iter.data.get())->nodep();
     }
     return retnode;
@@ -888,7 +888,7 @@ next_iter:
 }
 
 Variant SimpleXMLElement_objectCast(const ObjectData* obj, int8_t type) {
-  assert(obj->instanceof(SimpleXMLElement_classof()));
+  assertx(obj->instanceof(SimpleXMLElement_classof()));
   auto sxe = Native::data<SimpleXMLElement>(const_cast<ObjectData*>(obj));
   if (type == KindOfBoolean) {
     xmlNodePtr node = php_sxe_get_first_node(sxe, nullptr);
@@ -1781,7 +1781,7 @@ static Variant HHVM_METHOD(SimpleXMLIterator, key) {
     return init_null();
   }
 
-  assert(curobj->instanceof(SimpleXMLElement_classof()));
+  assertx(curobj->instanceof(SimpleXMLElement_classof()));
   auto curnode = Native::data<SimpleXMLElement>(curobj.get())->nodep();
   return String((char*)curnode->name);
 }
@@ -1809,7 +1809,7 @@ static Variant HHVM_METHOD(SimpleXMLIterator, getChildren) {
   if (current.isNull()) {
     return init_null();
   }
-  assert(current->instanceof(SimpleXMLElement_classof()));
+  assertx(current->instanceof(SimpleXMLElement_classof()));
   return HHVM_MN(SimpleXMLElement, children)(current.get());
 }
 
@@ -1819,7 +1819,7 @@ static bool HHVM_METHOD(SimpleXMLIterator, hasChildren) {
     return false;
   }
   auto od = children.toObject().get();
-  assert(od->instanceof(SimpleXMLElement_classof()));
+  assertx(od->instanceof(SimpleXMLElement_classof()));
   return HHVM_MN(SimpleXMLElement, count)(od) > 0;
 }
 

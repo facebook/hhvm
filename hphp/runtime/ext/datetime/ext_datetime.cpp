@@ -70,7 +70,7 @@ THREAD_LOCAL(DateGlobals, s_date_globals);
   Class* cls::getClass() {                                                     \
     if (s_class == nullptr) {                                                  \
       s_class = Unit::lookupClass(s_className.get());                          \
-      assert(s_class);                                                         \
+      assertx(s_class);                                                        \
     }                                                                          \
     return s_class;                                                            \
   }                                                                            \
@@ -336,7 +336,7 @@ int64_t DateTimeData::getTimestamp(const Object& obj) {
   if (LIKELY(obj.instanceof(getClass()))) {
     return Native::data<DateTimeData>(obj)->getTimestamp();
   }
-  assert(obj->instanceof(SystemLib::s_DateTimeInterfaceClass));
+  assertx(obj->instanceof(SystemLib::s_DateTimeInterfaceClass));
   Variant result = obj->o_invoke(s_getTimestamp, Array::Create());
   return result.toInt64();
 }
@@ -385,7 +385,7 @@ req::ptr<DateTime> DateTimeData::unwrap(const Object& datetime) {
       SystemLib::s_DateTimeImmutableClass,
       s_data.get()
     );
-    assert(rval.has_val() && rval.type() == KindOfObject);
+    assertx(rval.has_val() && rval.type() == KindOfObject);
     Object impl(rval.val().pobj);
     return unwrap(impl);
   }

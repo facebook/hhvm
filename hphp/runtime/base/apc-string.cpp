@@ -32,18 +32,18 @@ APCString::MakeSharedString(APCKind kind, StringData* data) {
   apcStr->m_str.initHeader(HeaderKind::String, UncountedValue);
   apcStr->m_str.m_len         = len; // don't store hash
 
-  assert(apcStr == reinterpret_cast<APCString*>(chars) - 1);
+  assertx(apcStr == reinterpret_cast<APCString*>(chars) - 1);
   auto const mcret = memcpy(chars, data->data(), len + 1);
   apcStr = reinterpret_cast<APCString*>(mcret) - 1;
   // Recalculating apcStr from mcret avoids a spill.
 
   apcStr->m_str.preCompute();
 
-  assert(apcStr->m_str.m_hash != 0);
-  assert(apcStr->m_str.data()[len] == 0);
-  assert(apcStr->m_str.isUncounted());
-  assert(apcStr->m_str.isFlat());
-  assert(apcStr->m_str.checkSane());
+  assertx(apcStr->m_str.m_hash != 0);
+  assertx(apcStr->m_str.data()[len] == 0);
+  assertx(apcStr->m_str.isUncounted());
+  assertx(apcStr->m_str.isFlat());
+  assertx(apcStr->m_str.checkSane());
   return {&apcStr->m_handle, size};
 }
 

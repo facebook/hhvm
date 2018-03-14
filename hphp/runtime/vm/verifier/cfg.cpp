@@ -25,7 +25,7 @@ namespace Verifier {
  * Create all blocks and edges for one Func.
  */
 Graph* GraphBuilder::build() {
-  assert(!funcInstrs(m_func).empty());
+  assertx(!funcInstrs(m_func).empty());
   m_graph = new (m_arena) Graph();
   createBlocks();
   createExBlocks();
@@ -50,7 +50,7 @@ void GraphBuilder::createBlocks() {
                                    createBlock(param.funcletOff);
   }
   // main entry point
-  assert(dv_index == m_graph->param_count);
+  assertx(dv_index == m_graph->param_count);
   m_graph->entries[dv_index] = createBlock(m_func->base());
   // ordinary basic block boundaries
   for (InstrRange i = funcInstrs(m_func); !i.empty(); ) {
@@ -85,7 +85,7 @@ void GraphBuilder::linkBlocks() {
       } else {
         Offset target = instrJumpTarget(bc, pc - bc);
         if (target != InvalidAbsoluteOffset) {
-          assert(numSuccBlocks(block) > 0);
+          assertx(numSuccBlocks(block) > 0);
           succs(block)[numSuccBlocks(block) - 1] = at(target);
         }
       }
@@ -103,7 +103,7 @@ void GraphBuilder::linkBlocks() {
       block->next_linear = next;
       block->end = next_pc;
       if (!isTF(pc)) {
-        assert(numSuccBlocks(block) > 0);
+        assertx(numSuccBlocks(block) > 0);
         succs(block)[0] = next;
       }
       block = next;
@@ -153,11 +153,12 @@ void GraphBuilder::linkExBlocks() {
   // For every block, add edges to reachable fault and catch handlers.
   for (LinearBlocks i = linearBlocks(m_graph); !i.empty(); ) {
     Block* b = i.popFront();
-    assert(m_func->findEH(offset(b->start)) == m_func->findEH(offset(b->last)));
+    assertx(m_func->findEH(offset(b->start)) ==
+            m_func->findEH(offset(b->last)));
     Offset off = offset(b->start);
     const EHEnt* eh = m_func->findEH(off);
     if (eh != nullptr) {
-      assert(eh->m_base <= off && off < eh->m_past);
+      assertx(eh->m_base <= off && off < eh->m_past);
       // the innermost exception handler is reachable from b
       b->exn = at(eh->m_handler);
     }

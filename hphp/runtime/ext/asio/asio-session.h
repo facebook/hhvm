@@ -45,17 +45,17 @@ struct AsioSession final {
   }
 
   AsioContext* getContext(context_idx_t ctx_idx) {
-    assert(ctx_idx <= m_contexts.size());
+    assertx(ctx_idx <= m_contexts.size());
     return ctx_idx ? m_contexts[ctx_idx - 1] : nullptr;
   }
 
   AsioContext* getCurrentContext() {
-    assert(isInContext());
+    assertx(isInContext());
     return m_contexts.back();
   }
 
   context_idx_t getCurrentContextIdx() {
-    assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
+    assertx(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
     return static_cast<context_idx_t>(m_contexts.size());
   }
 

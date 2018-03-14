@@ -53,7 +53,7 @@ ALWAYS_INLINE StringData* allocFlat(size_t len) {
   auto sd = static_cast<StringData*>(tl_heap->objMallocIndex(sizeIndex));
   // Refcount initialized to 1.
   sd->initHeader_16(HeaderKind::String, OneReference, sizeIndex);
-  assert(sd->capacity() >= len);
+  assertx(sd->capacity() >= len);
 #ifndef NO_M_DATA
   sd->m_data = reinterpret_cast<char*>(sd + 1);
 #endif
@@ -107,10 +107,10 @@ StringData* StringData::MakeShared(folly::StringPiece sl) {
   // Recalculating ret from mcret avoids a spill.
   ret->preCompute();                    // get m_hash right
 
-  assert(ret == sd);
-  assert(ret->isFlat());
-  assert(trueStatic ? ret->isStatic() : ret->isUncounted());
-  assert(ret->checkSane());
+  assertx(ret == sd);
+  assertx(ret->isFlat());
+  assertx(trueStatic ? ret->isStatic() : ret->isUncounted());
+  assertx(ret->checkSane());
   return ret;
 }
 
@@ -139,24 +139,24 @@ StringData* StringData::MakeEmpty() {
   data[0] = 0;
   sd->preCompute();
 
-  assert(sd->m_len == 0);
-  assert(sd->capacity() == 0);
-  assert(sd->m_kind == HeaderKind::String);
-  assert(sd->isFlat());
-  assert(sd->isStatic());
-  assert(sd->checkSane());
+  assertx(sd->m_len == 0);
+  assertx(sd->capacity() == 0);
+  assertx(sd->m_kind == HeaderKind::String);
+  assertx(sd->isFlat());
+  assertx(sd->isStatic());
+  assertx(sd->checkSane());
   return sd;
 }
 
 void StringData::destructStatic() {
-  assert(checkSane() && isStatic());
-  assert(isFlat());
+  assertx(checkSane() && isStatic());
+  assertx(isFlat());
   low_free_data(this);
 }
 
 void StringData::ReleaseUncounted(const StringData* str) {
-  assert(str->checkSane());
-  assert(str->isFlat());
+  assertx(str->checkSane());
+  assertx(str->isFlat());
   if (!str->uncountedDecRef()) return;
 
   if (APCStats::IsCreated()) {
@@ -172,12 +172,12 @@ void StringData::ReleaseUncounted(const StringData* str) {
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE void StringData::delist() {
-  assert(isProxy());
+  assertx(isProxy());
   auto& payload = *proxy();
   auto const next = payload.node.next;
   auto const prev = payload.node.prev;
-  assert(uintptr_t(next) != kMallocFreeWord);
-  assert(uintptr_t(prev) != kMallocFreeWord);
+  assertx(uintptr_t(next) != kMallocFreeWord);
+  assertx(uintptr_t(prev) != kMallocFreeWord);
   next->prev = prev;
   prev->next = next;
 }
@@ -188,10 +188,10 @@ unsigned StringData::sweepAll() {
   for (StringDataNode *next, *n = head.next; n != &head; n = next) {
     count++;
     next = n->next;
-    assert(next && uintptr_t(next) != kSmallFreeWord);
-    assert(next && uintptr_t(next) != kMallocFreeWord);
+    assertx(next && uintptr_t(next) != kSmallFreeWord);
+    assertx(next && uintptr_t(next) != kMallocFreeWord);
     auto const s = node2str(n);
-    assert(s->isProxy());
+    assertx(s->isProxy());
     s->proxy()->apcstr->unreference();
   }
   head.next = head.prev = &head;
@@ -206,7 +206,7 @@ StringData* StringData::Make(const StringData* s, CopyStringMode) {
   auto const data = static_cast<void*>(sd + 1);
   *memcpy8(data, s->data(), s->m_len) = 0;
 
-  assert(sd->same(s));
+  assertx(sd->same(s));
   return sd;
 }
 
@@ -220,12 +220,12 @@ StringData* StringData::Make(folly::StringPiece sl, CopyStringMode) {
   auto const ret = reinterpret_cast<StringData*>(mcret) - 1;
   // Recalculating ret from mcret avoids a spill.
 
-  assert(ret == sd);
-  assert(ret->m_len == sl.size());
-  assert(ret->hasExactlyOneRef());
-  assert(ret->m_hash == 0);
-  assert(ret->isFlat());
-  assert(ret->checkSane());
+  assertx(ret == sd);
+  assertx(ret->m_len == sl.size());
+  assertx(ret->hasExactlyOneRef());
+  assertx(ret->m_hash == 0);
+  assertx(ret->isFlat());
+  assertx(ret->checkSane());
   return ret;
 }
 
@@ -241,9 +241,9 @@ StringData* StringData::Make(size_t reserveLen) {
   auto const sd = allocFlat(reserveLen);
   sd->setSize(0);
 
-  assert(sd->hasExactlyOneRef());
-  assert(sd->isFlat());
-  assert(sd->checkSane());
+  assertx(sd->hasExactlyOneRef());
+  assertx(sd->isFlat());
+  assertx(sd->checkSane());
   return sd;
 }
 
@@ -259,7 +259,7 @@ StringData* StringData::Make(char* data, size_t len, AttachStringMode) {
   }
   auto const sd = Make(folly::StringPiece(data, len), CopyString);
   free(data);
-  assert(sd->checkSane());
+  assertx(sd->checkSane());
   return sd;
 }
 
@@ -273,9 +273,9 @@ StringData* StringData::Make(folly::StringPiece r1, folly::StringPiece r2) {
   memcpy(data + r1.size(), r2.data(), r2.size());
   data[len] = 0;
 
-  assert(sd->hasExactlyOneRef());
-  assert(sd->isFlat());
-  assert(sd->checkSane());
+  assertx(sd->hasExactlyOneRef());
+  assertx(sd->isFlat());
+  assertx(sd->checkSane());
   return sd;
 }
 
@@ -290,9 +290,9 @@ StringData* StringData::Make(const StringData* s1, const StringData* s2) {
   auto const next = memcpy8(data, s1->data(), s1->m_len);
   *memcpy8(next, s2->data(), s2->m_len) = 0;
 
-  assert(sd->hasExactlyOneRef());
-  assert(sd->isFlat());
-  assert(sd->checkSane());
+  assertx(sd->hasExactlyOneRef());
+  assertx(sd->isFlat());
+  assertx(sd->checkSane());
   return sd;
 }
 
@@ -312,9 +312,9 @@ StringData* StringData::Make(folly::StringPiece r1, folly::StringPiece r2,
   p = static_cast<char*>(memcpy(p + r2.size(), r3.data(), r3.size()));
   p[r3.size()] = 0;
 
-  assert(sd->hasExactlyOneRef());
-  assert(sd->isFlat());
-  assert(sd->checkSane());
+  assertx(sd->hasExactlyOneRef());
+  assertx(sd->isFlat());
+  assertx(sd->checkSane());
   return sd;
 }
 
@@ -331,21 +331,21 @@ StringData* StringData::Make(folly::StringPiece r1, folly::StringPiece r2,
   p = static_cast<char*>(memcpy(p + r3.size(), r4.data(), r4.size()));
   p[r4.size()] = 0;
 
-  assert(sd->hasExactlyOneRef());
-  assert(sd->isFlat());
-  assert(sd->checkSane());
+  assertx(sd->hasExactlyOneRef());
+  assertx(sd->isFlat());
+  assertx(sd->checkSane());
   return sd;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE void StringData::enlist() {
-  assert(isProxy());
+  assertx(isProxy());
   auto& head = tl_heap->getStringList();
   // insert after head
   auto const next = head.next;
   auto& payload = *proxy();
-  assert(uintptr_t(next) != kMallocFreeWord);
+  assertx(uintptr_t(next) != kMallocFreeWord);
   payload.node.next = next;
   payload.node.prev = &head;
   next->prev = head.next = &payload.node;
@@ -356,10 +356,10 @@ StringData* StringData::MakeProxy(const APCString* apcstr) {
   always_assert(false);
   not_reached();
 #else
-  assert(!apcExtension::UseUncounted);
+  assertx(!apcExtension::UseUncounted);
   // No need to check if len > MaxSize, because if it were we'd never
   // have made the StringData in the APCVariant without throwing.
-  assert(size_t(apcstr->getStringData()->size()) <= size_t(MaxSize));
+  assertx(size_t(apcstr->getStringData()->size()) <= size_t(MaxSize));
 
   auto const sd = static_cast<StringData*>(
     tl_heap->mallocSmallSize(sizeof(StringData) + sizeof(Proxy))
@@ -372,19 +372,19 @@ StringData* StringData::MakeProxy(const APCString* apcstr) {
   sd->enlist();
   apcstr->reference();
 
-  assert(sd->m_len == data->size());
-  assert(sd->m_aux16 == data->m_aux16);
-  assert(sd->m_kind == HeaderKind::String);
-  assert(sd->hasExactlyOneRef());
-  assert(sd->m_hash == data->m_hash);
-  assert(sd->isProxy());
-  assert(sd->checkSane());
+  assertx(sd->m_len == data->size());
+  assertx(sd->m_aux16 == data->m_aux16);
+  assertx(sd->m_kind == HeaderKind::String);
+  assertx(sd->hasExactlyOneRef());
+  assertx(sd->m_hash == data->m_hash);
+  assertx(sd->isProxy());
+  assertx(sd->checkSane());
   return sd;
 #endif
 }
 
 void StringData::unProxy() {
-  assert(isProxy());
+  assertx(isProxy());
   proxy()->apcstr->unreference();
   delist();
 }
@@ -396,8 +396,8 @@ void StringData::releaseProxy() {
 }
 
 void StringData::release() noexcept {
-  assert(isRefCounted());
-  assert(checkSane());
+  assertx(isRefCounted());
+  assertx(checkSane());
   if (UNLIKELY(!isFlat())) {
     releaseProxy();
     AARCH64_WALKABLE_FRAME();
@@ -410,12 +410,12 @@ void StringData::release() noexcept {
 //////////////////////////////////////////////////////////////////////
 
 #define ALIASING_APPEND_ASSERT(ptr, len)                        \
-  assert(uintptr_t(ptr) <= uintptr_t(data()) ||                 \
+  assertx(uintptr_t(ptr) <= uintptr_t(data()) ||                 \
          uintptr_t(ptr) >= uintptr_t(data() + capacity() + 1)); \
-  assert(ptr != data() || len <= m_len);
+  assertx(ptr != data() || len <= m_len);
 
 StringData* StringData::append(folly::StringPiece range) {
-  assert(!isImmutable() && !hasMultipleRefs());
+  assertx(!isImmutable() && !hasMultipleRefs());
 
   auto s = range.data();
   auto const len = range.size();
@@ -438,13 +438,13 @@ StringData* StringData::append(folly::StringPiece range) {
                                            : reserve(requestLen);
   memcpy(target->mutableData() + m_len, s, len);
   target->setSize(newLen);
-  assert(target->checkSane());
+  assertx(target->checkSane());
 
   return target;
 }
 
 StringData* StringData::append(folly::StringPiece r1, folly::StringPiece r2) {
-  assert(!isImmutable() && !hasMultipleRefs());
+  assertx(!isImmutable() && !hasMultipleRefs());
 
   auto const len = r1.size() + r2.size();
 
@@ -476,7 +476,7 @@ StringData* StringData::append(folly::StringPiece r1, folly::StringPiece r2) {
       memcpy((char*)p + r1.size(), r2.data(), r2.size());
 
   target->setSize(newLen);
-  assert(target->checkSane());
+  assertx(target->checkSane());
 
   return target;
 }
@@ -484,7 +484,7 @@ StringData* StringData::append(folly::StringPiece r1, folly::StringPiece r2) {
 StringData* StringData::append(folly::StringPiece r1,
                                folly::StringPiece r2,
                                folly::StringPiece r3) {
-  assert(!isImmutable() && !hasMultipleRefs());
+  assertx(!isImmutable() && !hasMultipleRefs());
 
   auto const len = r1.size() + r2.size() + r3.size();
 
@@ -518,7 +518,7 @@ StringData* StringData::append(folly::StringPiece r1,
       memcpy((char*)p + r2.size(), r3.data(), r3.size());
 
   target->setSize(newLen);
-  assert(target->checkSane());
+  assertx(target->checkSane());
 
   return target;
 }
@@ -528,8 +528,8 @@ StringData* StringData::append(folly::StringPiece r1,
 //////////////////////////////////////////////////////////////////////
 
 StringData* StringData::reserve(size_t cap) {
-  assert(!isImmutable() && !hasMultipleRefs());
-  assert(isFlat());
+  assertx(!isImmutable() && !hasMultipleRefs());
+  assertx(isFlat());
 
   if (cap <= capacity()) return this;
 
@@ -555,16 +555,16 @@ StringData* StringData::reserve(size_t cap) {
   assertx(reinterpret_cast<uintptr_t>(&m_lenAndHash) % 16 == 0);
 #endif
 
-  assert(sd->hasExactlyOneRef());
-  assert(sd->isFlat());
-  assert(sd->checkSane());
+  assertx(sd->hasExactlyOneRef());
+  assertx(sd->isFlat());
+  assertx(sd->checkSane());
   return sd;
 }
 
 StringData* StringData::shrinkImpl(size_t len) {
-  assert(!isImmutable() && !hasMultipleRefs());
-  assert(isFlat());
-  assert(len <= capacity());
+  assertx(!isImmutable() && !hasMultipleRefs());
+  assertx(isFlat());
+  assertx(len <= capacity());
 
   auto const sd = allocFlat(len);
   sd->m_lenAndHash = len;
@@ -572,32 +572,32 @@ StringData* StringData::shrinkImpl(size_t len) {
   auto const dst = static_cast<void*>(sd + 1);
   *memcpy8(dst, src, len) = 0;
 
-  assert(sd->checkSane());
+  assertx(sd->checkSane());
   return sd;
 }
 
 StringData* StringData::shrink(size_t len) {
-  assert(!isImmutable() && !hasMultipleRefs());
+  assertx(!isImmutable() && !hasMultipleRefs());
   if (capacity() - len > kMinShrinkThreshold) {
     return shrinkImpl(len);
   }
-  assert(len < MaxSize);
+  assertx(len < MaxSize);
   setSize(len);
   return this;
 }
 
 // State transition from Mode::Shared to Mode::Flat.
 StringData* StringData::escalate(size_t cap) {
-  assert(isProxy() && !isStatic() && cap >= m_len);
+  assertx(isProxy() && !isStatic() && cap >= m_len);
 
   auto const sd = allocFlat(cap);
   sd->m_lenAndHash = m_lenAndHash;
   auto const sd_data = reinterpret_cast<char*>(sd + 1);
   *memcpy8(sd_data, data(), m_len) = 0;
 
-  assert(sd->hasExactlyOneRef());
-  assert(sd->isFlat());
-  assert(sd->checkSane());
+  assertx(sd->hasExactlyOneRef());
+  assertx(sd->isFlat());
+  assertx(sd->checkSane());
   return sd;
 }
 
@@ -629,8 +629,8 @@ StringData* StringData::getChar(int offset) const {
 }
 
 StringData* StringData::increment() {
-  assert(!isImmutable() && !hasMultipleRefs());
-  assert(!empty());
+  assertx(!isImmutable() && !hasMultipleRefs());
+  assertx(!empty());
 
   auto const sd = UNLIKELY(isProxy())
     ? escalate(m_len + 1)
@@ -703,7 +703,7 @@ void StringData::incrementHelper() {
       raiseStringLengthExceededError(len + 1);
     }
 
-    assert(len + 1 <= capacity());
+    assertx(len + 1 <= capacity());
     memmove(s + 1, s, len);
     s[len + 1] = '\0';
     m_len = len + 1;
@@ -727,7 +727,7 @@ void StringData::incrementHelper() {
 void StringData::preCompute() {
   auto s = slice();
   m_hash = hash_string_i_unsafe(s.data(), s.size());
-  assert(m_hash >= 0);
+  assertx(m_hash >= 0);
   if (s.size() > 0 &&
       (is_numeric_string(s.data(), s.size(), nullptr, nullptr,
                          1, nullptr) == KindOfNull)) {
@@ -739,9 +739,9 @@ void StringData::preCompute() {
      defined(NO_HWCRC) || !defined(NO_M_DATA) || defined(_MSC_VER)
 // This function is implemented directly in ASM in string-data-*.S otherwise.
 NEVER_INLINE strhash_t StringData::hashHelper() const {
-  assert(!isProxy());
+  assertx(!isProxy());
   strhash_t h = hash_string_i_unsafe(data(), m_len);
-  assert(h >= 0);
+  assertx(h >= 0);
   m_hash |= h;
   return h;
 }
@@ -767,7 +767,7 @@ DataType StringData::isNumericWithVal(int64_t &lval, double &dval,
     if (ret == KindOfNull && allow_errors) {
       // a proxy string has its hash precomputed - so it can't
       // suddenly go from being numeric to not-numeric
-      assert(!isProxy());
+      assertx(!isProxy());
       m_hash |= STRHASH_MSB;
     }
   }
@@ -859,7 +859,7 @@ DataType StringData::toNumeric(int64_t &lval, double &dval) const {
 // comparisons
 
 bool StringData::equal(const StringData *s) const {
-  assert(s);
+  assertx(s);
   if (s == this) return true;
   int ret;
 
@@ -873,7 +873,7 @@ bool StringData::equal(const StringData *s) const {
 }
 
 int StringData::numericCompare(const StringData *v2) const {
-  assert(v2);
+  assertx(v2);
 
   int oflow1, oflow2;
   int64_t lval1, lval2;
@@ -899,14 +899,14 @@ int StringData::numericCompare(const StringData *v2) const {
     return -1;
   }
   if (ret1 == KindOfDouble) {
-    assert(ret2 == KindOfInt64);
+    assertx(ret2 == KindOfInt64);
     if (oflow1) {
       return oflow1;
     }
     dval2 = (double)lval2;
   } else {
-    assert(ret1 == KindOfInt64);
-    assert(ret2 == KindOfDouble);
+    assertx(ret1 == KindOfInt64);
+    assertx(ret2 == KindOfDouble);
     if (oflow2) {
       return -oflow2;
     }
@@ -919,7 +919,7 @@ int StringData::numericCompare(const StringData *v2) const {
 }
 
 int StringData::compare(const StringData *v2) const {
-  assert(v2);
+  assertx(v2);
 
   if (v2 == this) return 0;
 
@@ -947,7 +947,7 @@ StringData::substr(int start, int length /* = StringData::MaxSize */) {
     length = max_len;
   }
 
-  assert(length > 0);
+  assertx(length > 0);
   if (UNLIKELY(length == size())) {
     incRefCount();
     return this;
@@ -975,14 +975,14 @@ bool StringData::checkSane() const {
   static_assert(offsetof(StringData, m_len) == SD_LEN, "");
   static_assert(offsetof(StringData, m_hash) == SD_HASH, "");
 #endif
-  assert(kindIsValid());
-  assert(uint32_t(size()) <= MaxSize);
-  assert(size() >= 0);
+  assertx(kindIsValid());
+  assertx(uint32_t(size()) <= MaxSize);
+  assertx(size() >= 0);
   if (isImmutable()) {
-    assert(capacity() == 0);
+    assertx(capacity() == 0);
   } else {
-    assert(size() <= capacity());
-    assert(capacity() <= MaxSize);
+    assertx(size() <= capacity());
+    assertx(capacity() <= MaxSize);
   }
   // isFlat() and isProxy() both check whether m_data == payload(),
   // which guarantees by definition that isFlat() != isProxy()

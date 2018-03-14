@@ -251,7 +251,7 @@ inline ObjectData* obj(NativeNode* node) {
   auto obj = reinterpret_cast<ObjectData*>(
     reinterpret_cast<char*>(node) + node->obj_offset
   );
-  assert(obj->hasNativeData());
+  assertx(obj->hasNativeData());
   return obj;
 }
 
@@ -260,7 +260,7 @@ inline const ObjectData* obj(const NativeNode* node) {
   auto obj = reinterpret_cast<const ObjectData*>(
     reinterpret_cast<const char*>(node) + node->obj_offset
   );
-  assert(obj->hasNativeData());
+  assertx(obj->hasNativeData());
   return obj;
 }
 

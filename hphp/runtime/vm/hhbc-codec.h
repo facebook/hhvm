@@ -70,7 +70,7 @@ void encode_op(Op op, F write_byte) {
     write_byte(static_cast<uint8_t>(0xff));
     rawVal -= 0xff;
   }
-  assert(rawVal < 0xff);
+  assertx(rawVal < 0xff);
 
   write_byte(rawVal);
 }
@@ -141,7 +141,7 @@ void encode_member_key(MemberKey mk, UnitEmitter& ue);
 template<typename L>
 void foreachSwitchTarget(PC pc, L func) {
   auto const op = decode_op(pc);
-  assert(isSwitch(op));
+  assertx(isSwitch(op));
   if (op == Op::Switch) {
     (void)decode_oa<SwitchKind>(pc); // skip bounded kind
     (void)decode_raw<int64_t>(pc); // skip base
@@ -156,7 +156,7 @@ void foreachSwitchTarget(PC pc, L func) {
 template<typename L>
 void foreachSSwitchString(PC pc, L func) {
   auto const UNUSED op = decode_op(pc);
-  assert(op == Op::SSwitch);
+  assertx(op == Op::SSwitch);
   int32_t size = decode_raw<int32_t>(pc) - 1; // the last item is the default
   for (int i = 0; i < size; ++i) {
     func(decode_raw<Id>(pc));

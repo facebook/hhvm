@@ -78,8 +78,8 @@ struct StoreValue {
     tagged_data.store(v, std::memory_order_release);
   }
   APCKind getKind() const {
-    assert(data().left());
-    assert(data().left()->kind() == kind);
+    assertx(data().left());
+    assertx(data().left()->kind() == kind);
     return kind;
   }
   Variant toLocal() const {
@@ -89,12 +89,12 @@ struct StoreValue {
   bool expired() const;
 
   int32_t getSerializedSize() const {
-    assert(data().right() != nullptr);
+    assertx(data().right() != nullptr);
     return abs(dataSize);
   }
 
   bool isSerializedObj() const {
-    assert(data().right() != nullptr);
+    assertx(data().right() != nullptr);
     return dataSize < 0;
   }
 
@@ -336,7 +336,7 @@ private:
   }
 
   static StringData* getStringData(const char* s) {
-    assert(reinterpret_cast<intptr_t>(s) < 0);
+    assertx(reinterpret_cast<intptr_t>(s) < 0);
     return reinterpret_cast<StringData*>(-reinterpret_cast<intptr_t>(s));
   }
 
@@ -347,18 +347,18 @@ private:
 private:
   struct CharHashCompare {
     bool equal(const char* s1, const char* s2) const {
-      assert(s1 && s2);
+      assertx(s1 && s2);
       // tbb implementation call equal with the second pointer being the
       // value in the table and thus not a StringData*. We are asserting
       // to make sure that is the case
-      assert(!isTaggedStringData(s2));
+      assertx(!isTaggedStringData(s2));
       if (isTaggedStringData(s1)) {
         s1 = getStringData(s1)->data();
       }
       return strcmp(s1, s2) == 0;
     }
     size_t hash(const char* s) const {
-      assert(s);
+      assertx(s);
       return isTaggedStringData(s) ? getStringData(s)->hash() :
              StringData::hash(s, strlen(s));
     }

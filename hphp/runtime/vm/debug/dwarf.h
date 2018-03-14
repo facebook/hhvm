@@ -65,7 +65,7 @@ extern int g_dwarfCallback(
 
 struct TCRange {
   TCRange() : m_start(nullptr), m_end(nullptr), m_isAcold(false) {
-    assert(!isValid());
+    assertx(!isValid());
   }
   TCRange(const TCA start, const TCA end, bool isAcold) :
     m_start(start), m_end(end), m_isAcold(isAcold) { V(); }
@@ -79,9 +79,9 @@ struct TCRange {
   }
 
   bool isValid() const {
-    assert(bool(m_start) == bool(m_end));
-    assert(!m_start || m_start < m_end);
-    assert(!m_start || (m_end - m_start) < (1ll << 32));
+    assertx(bool(m_start) == bool(m_end));
+    assertx(!m_start || m_start < m_end);
+    assertx(!m_start || (m_end - m_start) < (1ll << 32));
     return bool(m_start);
   }
   bool isAcold() const { return m_isAcold; }
@@ -90,13 +90,13 @@ struct TCRange {
   uint32_t size() const   { V(); return m_end - m_start; }
 
   void extend(const TCA newEnd) {
-    assert(newEnd >= m_end);
+    assertx(newEnd >= m_end);
     m_end = newEnd;
     V();
   }
 
 private:
-  void V() const { assert(isValid()); }
+  void V() const { assertx(isValid()); }
 
 private:
   TCA m_start, m_end;

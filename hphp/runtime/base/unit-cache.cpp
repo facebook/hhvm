@@ -373,7 +373,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
   Stream::Wrapper* w = nullptr;
   auto& cache = getNonRepoCache(rpath, w);
 
-  assert(
+  assertx(
     !w || &cache != &s_nonRepoUnitCache ||
     !RuntimeOption::EvalUnixServerQuarantineUnits
   );
@@ -492,7 +492,7 @@ bool findFile(const StringData* path, struct stat* s, bool allow_dir,
 
 bool findFileWrapper(const String& file, void* ctx) {
   auto const context = static_cast<ResolveIncludeContext*>(ctx);
-  assert(context->path.isNull());
+  assertx(context->path.isNull());
 
   Stream::Wrapper* w = Stream::getWrapperFromURI(file);
   if (w && !w->isNormalFileStream()) {

@@ -144,7 +144,7 @@ void AccessLog::init(const std::string &format,
 }
 
 void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
-  assert(transport);
+  assertx(transport);
   if (!m_initialized) return;
   m_defaultWriter->write(transport, vhost);
   for (auto& file : m_files) file->write(transport, vhost);

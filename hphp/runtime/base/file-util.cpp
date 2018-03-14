@@ -441,8 +441,8 @@ String FileUtil::relativePath(const std::string& fromDir,
   }
 
   // Ensure the result is null-terminated after the strcpy
-  assert(to_start - to_file <= toFile.size());
-  assert(path_end - path + strlen(to_start) <= ret.capacity());
+  assertx(to_start - to_file <= toFile.size());
+  assertx(path_end - path + strlen(to_start) <= ret.capacity());
 
   strcpy(path_end, to_start);
   return ret.setSize(strlen(path));
@@ -474,7 +474,7 @@ String FileUtil::canonicalize(const std::string &path) {
 
 String FileUtil::canonicalize(const char *addpath, size_t addlen,
                               bool collapse_slashes /* = true */) {
-  assert(strlen(addpath) <= addlen);
+  assertx(strlen(addpath) <= addlen);
   // 4 for slashes at start, after root, and at end, plus trailing
   // null
   size_t maxlen = addlen + 4;

@@ -43,7 +43,7 @@ struct BZ2StreamWrapper final : Stream::Wrapper {
     static const char cz[] = "compress.bzip2://";
 
     if (strncmp(filename.c_str(), cz, sizeof(cz) - 1)) {
-      assert(false);
+      assertx(false);
       return nullptr;
     }
 

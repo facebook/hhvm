@@ -212,7 +212,7 @@ APCHandle* APCArray::MakeUncountedArray(ArrayData* array, PointerMap* m) {
       auto const mem = reinterpret_cast<APCTypedValue*>(data) - 1;
       return new(mem) APCTypedValue(APCTypedValue::UncountedArr{}, data);
     }
-    assert(array->isMixed());
+    assertx(array->isMixed());
     auto const data = MixedArray::MakeUncounted(array, true, m);
     auto const mem = reinterpret_cast<APCTypedValue*>(data) - 1;
     return new(mem) APCTypedValue(APCTypedValue::UncountedArr{}, data);

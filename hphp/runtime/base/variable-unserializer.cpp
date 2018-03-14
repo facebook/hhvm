@@ -311,7 +311,7 @@ void VariableUnserializer::add(Variant* v, UnserializeMode mode) {
   } else if (mode == UnserializeMode::ColValue) {
     m_refs.emplace_back(RefInfo::makeColValue(v));
   } else {
-    assert(mode == UnserializeMode::ColKey);
+    assertx(mode == UnserializeMode::ColKey);
     // We don't currently support using the 'R' encoding to refer to collection
     // keys. For now we encode collections keys in m_refs using a null pointer.
     m_refs.emplace_back(RefInfo(nullptr));
@@ -338,7 +338,7 @@ Variant* VariableUnserializer::getByRef(int id) {
     } else if (info.isVecValue()) {
       throwVecRefValue();
     } else {
-      assert(info.isDictValue());
+      assertx(info.isDictValue());
       throwDictRefValue();
     }
   } else if (checkHACRefBind()) {
@@ -532,7 +532,7 @@ bool VariableUnserializer::matchString(folly::StringPiece str) {
   p += ss;
   if (*p++ != '\"') return false;
   if (*p++ != ';') return false;
-  assert(m_buf + total == p);
+  assertx(m_buf + total == p);
   m_buf = p;
   return true;
 }
@@ -542,7 +542,7 @@ bool VariableUnserializer::matchString(folly::StringPiece str) {
 // remainingProps should include the current property being unserialized.
 void VariableUnserializer::unserializePropertyValue(Variant& v,
                                                     int remainingProps) {
-  assert(remainingProps > 0);
+  assertx(remainingProps > 0);
   unserializeVariant(v);
   if (--remainingProps > 0) {
     auto lastChar = peekBack();
@@ -864,9 +864,9 @@ void VariableUnserializer::unserializeVariant(
   case 'S':
     if (this->type() == VariableUnserializer::Type::APCSerialize) {
       auto str = readStr(8);
-      assert(str.size() == 8);
+      assertx(str.size() == 8);
       auto sdp = reinterpret_cast<StringData*const*>(&str[0]);
-      assert((*sdp)->isStatic());
+      assertx((*sdp)->isStatic());
       tvMove(make_tv<KindOfPersistentString>(*sdp), *self.asTypedValue());
     } else {
       throwUnknownType(type);
@@ -987,7 +987,7 @@ void VariableUnserializer::unserializeVariant(
         // without having it initialized completely.
         if (cls->instanceCtor() && !cls->isCppSerializable() &&
             !cls->isCollectionClass()) {
-          assert(obj.isNull());
+          assertx(obj.isNull());
           throw_null_pointer_exception();
         } else {
           if (UNLIKELY(collections::isType(cls, CollectionType::Pair))) {
@@ -1007,7 +1007,7 @@ void VariableUnserializer::unserializeVariant(
         obj->setProp(nullptr, s_PHP_Incomplete_Class_Name.get(),
                      clsName.asCell());
       }
-      assert(!obj.isNull());
+      assertx(!obj.isNull());
       tvSet(make_tv<KindOfObject>(obj.get()), *self.asTypedValue());
 
       if (size > 0) {
@@ -1104,7 +1104,7 @@ void VariableUnserializer::unserializeVariant(
                           clsName.data());
           }
         } else {
-          assert(type == 'V' || type == 'K');
+          assertx(type == 'V' || type == 'K');
           if (!obj->isCollection()) {
             throwNotCollection(clsName);
           }
@@ -1211,7 +1211,7 @@ Array VariableUnserializer::unserializeArray() {
     }
 
     // for apc, we know the key can't exist, but ignore that optimization
-    assert(type() != VariableUnserializer::Type::APCSerialize ||
+    assertx(type() != VariableUnserializer::Type::APCSerialize ||
            !arr.exists(key, true));
 
     auto& value = [&]() -> decltype(auto) {
@@ -1265,7 +1265,7 @@ Array VariableUnserializer::unserializeDict() {
     }
 
     // for apc, we know the key can't exist, but ignore that optimization
-    assert(type() != VariableUnserializer::Type::APCSerialize ||
+    assertx(type() != VariableUnserializer::Type::APCSerialize ||
            !arr.exists(key, true));
 
     auto const lval = [&] {
@@ -1447,7 +1447,7 @@ Array VariableUnserializer::unserializeDArray() {
     }
 
     // for apc, we know the key can't exist, but ignore that optimization
-    assert(type() != VariableUnserializer::Type::APCSerialize ||
+    assertx(type() != VariableUnserializer::Type::APCSerialize ||
            !arr.exists(key, true));
 
     auto& value = [&]() -> decltype(auto) {
@@ -1703,7 +1703,7 @@ void VariableUnserializer::unserializeSet(ObjectData* obj, int64_t sz,
 
 void VariableUnserializer::unserializePair(ObjectData* obj, int64_t sz,
                                            char type) {
-  assert(sz == 2);
+  assertx(sz == 2);
   if (type != 'V') throwBadFormat(obj, type);
   auto pair = static_cast<c_Pair*>(obj);
   unserializeVariant(tvAsVariant(pair->at(0)), UnserializeMode::ColValue);
@@ -1752,7 +1752,7 @@ void VariableUnserializer::reserialize(StringBuffer& buf) {
   case 's':
     {
       String v = unserializeString();
-      assert(!v.isNull());
+      assertx(!v.isNull());
       if (v.get()->isStatic()) {
         union {
           char pointer[8];

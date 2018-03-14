@@ -180,7 +180,7 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
     case LOC_VARIANT:      ulocfunc = uloc_getVariant;   break;
     case LOC_CANONICALIZE: ulocfunc = uloc_canonicalize; break;
     default:
-      assert(false);
+      assertx(false);
       return false;
   }
 
@@ -241,7 +241,7 @@ static Variant get_icu_display_value(const String& locale,
     case LOC_VARIANT:  ulocfunc = uloc_getDisplayVariant;  break;
     case LOC_DISPLAY:  ulocfunc = uloc_getDisplayName;     break;
     default:
-      assert(false);
+      assertx(false);
       return false;
   }
 

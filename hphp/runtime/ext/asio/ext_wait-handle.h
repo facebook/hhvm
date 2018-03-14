@@ -83,8 +83,8 @@ struct c_ExternalThreadEventWaitHandle;
 
 template<class T>
 T* wait_handle(const ObjectData* obj) {
-  assert(obj->instanceof(T::classof()));
-  assert(obj->isWaitHandle());
+  assertx(obj->instanceof(T::classof()));
+  assertx(obj->isWaitHandle());
   return static_cast<T*>(const_cast<ObjectData*>(obj));
 }
 
@@ -108,7 +108,7 @@ struct c_Awaitable : ObjectData {
     : ObjectData(cls, NoInit{}, ObjectData::NoDestructor, kind),
       m_tyindex(tyindex)
   {
-    assert(type_scan::isKnownType(tyindex));
+    assertx(type_scan::isKnownType(tyindex));
   }
 
   ~c_Awaitable()
@@ -128,26 +128,26 @@ struct c_Awaitable : ObjectData {
       ) ? static_cast<c_Awaitable*>(cell.m_data.pobj) : nullptr;
   }
   static c_Awaitable* fromCellAssert(Cell cell) {
-    assert(cell.m_type == KindOfObject);
-    assert(cell.m_data.pobj->isWaitHandle());
+    assertx(cell.m_type == KindOfObject);
+    assertx(cell.m_data.pobj->isWaitHandle());
     return static_cast<c_Awaitable*>(cell.m_data.pobj);
   }
   bool isFinished() const { return getState() <= STATE_FAILED; }
   bool isSucceeded() const { return getState() == STATE_SUCCEEDED; }
   bool isFailed() const { return getState() == STATE_FAILED; }
   Cell getResult() const {
-    assert(isSucceeded());
+    assertx(isSucceeded());
     return m_resultOrException;
   }
   ObjectData* getException() const {
-    assert(isFailed());
+    assertx(isFailed());
     return m_resultOrException.m_data.pobj;
   }
 
   Kind getKind() const { return static_cast<Kind>(m_kind_state >> 4); }
   uint8_t getState() const { return m_kind_state & 0x0F; }
   static uint8_t toKindState(Kind kind, uint8_t state) {
-    assert((uint8_t)kind < 0x10 && state < 0x10);
+    assertx((uint8_t)kind < 0x10 && state < 0x10);
     return ((uint8_t)kind << 4) | state;
   }
   void setKindState(Kind kind, uint8_t state) {

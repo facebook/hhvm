@@ -151,7 +151,7 @@ struct PhpFileDoesNotExistException : ExtendedException {
   explicit PhpFileDoesNotExistException(const char* msg,
                                         DEBUG_ONLY bool empty_file)
       : ExtendedException("%s", msg) {
-    assert(empty_file);
+    assertx(empty_file);
   }
   EXCEPTION_COMMON_IMPL(PhpFileDoesNotExistException);
 };

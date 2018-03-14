@@ -655,12 +655,12 @@ void RequestInjectionData::updateJit() {
 }
 
 void RequestInjectionData::clearFlag(SurpriseFlag flag) {
-  assert(flag >= 1ull << 48);
+  assertx(flag >= 1ull << 48);
   m_sflagsAndStkPtr->fetch_and(~flag);
 }
 
 void RequestInjectionData::setFlag(SurpriseFlag flag) {
-  assert(flag >= 1ull << 48);
+  assertx(flag >= 1ull << 48);
   m_sflagsAndStkPtr->fetch_or(flag);
 }
 

@@ -384,7 +384,7 @@ BaseVector::php_keys() {
 }
 
 bool BaseVector::OffsetIsset(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(key->m_type != KindOfRef);
   auto vec = static_cast<BaseVector*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -397,7 +397,7 @@ bool BaseVector::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseVector::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(key->m_type != KindOfRef);
   auto vec = static_cast<BaseVector*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -410,7 +410,7 @@ bool BaseVector::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseVector::OffsetContains(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(key->m_type != KindOfRef);
   auto vec = static_cast<BaseVector*>(obj);
   if (key->m_type == KindOfInt64) {
     return vec->contains(key->m_data.num);
@@ -427,7 +427,7 @@ bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
 }
 
 void BaseVector::addFront(TypedValue tv) {
-  assert(tv.m_type != KindOfRef);
+  assertx(tv.m_type != KindOfRef);
   dropImmCopy();
   auto oldAd = arrayData();
   m_arr = PackedArray::PrependVec(oldAd, tv, oldAd->cowCheck());
@@ -456,7 +456,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
   m_arr = PackedArray::MakeReserveVec(newCap);
   arrayData()->m_size = m_size;
   if (LIKELY(!oldAd->cowCheck())) {
-    assert(oldAd->isVecArray());
+    assertx(oldAd->isVecArray());
     if (m_size > 0) {
       std::memcpy(data(), oldBuf, m_size * sizeof(TypedValue));
       // Mark oldAd as having 0 elements so that the array release logic doesn't
@@ -473,7 +473,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
         cellDup(*from++, *to++);
       } while (from < end);
     }
-    assert(!oldAd->decWillRelease());
+    assertx(!oldAd->decWillRelease());
     oldAd->decRefCount();
   }
 }
@@ -485,7 +485,7 @@ void BaseVector::reserve(uint32_t sz) {
   } else if (!canMutateBuffer()) {
     mutateImpl();
   }
-  assert(canMutateBuffer());
+  assertx(canMutateBuffer());
 }
 
 /**
@@ -501,7 +501,7 @@ BaseVector::~BaseVector() {
 void BaseVector::mutateImpl() {
   auto oldAd = arrayData();
   m_arr = PackedArray::CopyVec(oldAd);
-  assert(!oldAd->decWillRelease());
+  assertx(!oldAd->decWillRelease());
   oldAd->decRefCount();
 }
 
@@ -524,7 +524,7 @@ BaseVector::fromKeysOf(const TypedValue& container) {
   auto vec = req::make<TVector>(sz);
   vec->setSize(sz);
   ArrayIter iter(container);
-  assert(iter);
+  assertx(iter);
   auto elm = vec->data();
   do {
     cellDup(*iter.first().asCell(), *elm++);
@@ -541,10 +541,10 @@ Object BaseVector::getImmutableCopy() {
     arrayData()->incRefCount();
     m_immCopy = std::move(vec);
   }
-  assert(!m_immCopy.isNull());
-  assert(arrayData() ==
+  assertx(!m_immCopy.isNull());
+  assertx(arrayData() ==
          static_cast<c_ImmVector*>(m_immCopy.get())->arrayData());
-  assert(!canMutateBuffer());
+  assertx(!canMutateBuffer());
   return m_immCopy;
 }
 
@@ -655,7 +655,7 @@ void c_Vector::splice(int64_t startPos, int64_t endPos) {
   // desctuctors may mutate this Vector (and need to see it in the fully
   // spliced state). The easiest way to do this is to copy the part we're
   // keeping into a new vec, swap them, and decref the old one.
-  assert(0 <= startPos && startPos < endPos && endPos <= m_size);
+  assertx(0 <= startPos && startPos < endPos && endPos <= m_size);
   uint32_t sz = m_size - (endPos - startPos);
   dropImmCopy();
   auto oldBuf = data();
@@ -745,7 +745,7 @@ Object c_Vector::fromArray(const Class*, const Variant& arr) {
   auto end = elm + sz;
   ssize_t pos = ad->iter_begin();
   do {
-    assert(pos != ad->iter_end());
+    assertx(pos != ad->iter_end());
     cellDup(tvToCell(ad->atPos(pos)), *elm);
     pos = ad->iter_advance(pos);
   } while (++elm < end);
@@ -773,7 +773,7 @@ using VectorValAccessor = TVAccessor;
  */
 template <typename AccessorT>
 SortFlavor c_Vector::preSort(const AccessorT& acc) {
-  assert(m_size > 0);
+  assertx(m_size > 0);
   bool allInts = true;
   bool allStrs = true;
   auto elm = data();

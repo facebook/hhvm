@@ -245,7 +245,7 @@ size_t relocateImpl(RelocationInfo& rel,
               keep_nops = rel.isSmashableRelocation(dest);
             }
             if (!d2.setFarBranchTarget(new_far_target, keep_nops)) {
-              assert(false && "Far branch target setting failed");
+              assertx(false && "Far branch target setting failed");
             }
             if (d2.couldBeNearBranch()) {
               // target is close enough, convert it to Near branch
@@ -400,7 +400,7 @@ void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
 
 void findFixups(TCA start, TCA end, CGMeta& meta) {
   while (start != end) {
-    assert(start < end);
+    assertx(start < end);
     DecodedInstruction di(start);
     start += di.size();
 

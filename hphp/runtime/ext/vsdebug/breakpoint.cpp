@@ -110,7 +110,7 @@ int BreakpointManager::addBreakpoint(
   }
 
   // Add this ID to the set of breakpoints in this file.
-  assert(it != m_sourceBreakpoints.end());
+  assertx(it != m_sourceBreakpoints.end());
   std::unordered_set<int>& fileBreakpoints = it->second;
   fileBreakpoints.emplace(id);
 

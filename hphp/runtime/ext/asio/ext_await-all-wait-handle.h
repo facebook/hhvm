@@ -147,7 +147,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
                           const Variant& dependencies);
 
 inline c_AwaitAllWaitHandle* c_Awaitable::asAwaitAll() {
-  assert(getKind() == Kind::AwaitAll);
+  assertx(getKind() == Kind::AwaitAll);
   return static_cast<c_AwaitAllWaitHandle*>(this);
 }
 

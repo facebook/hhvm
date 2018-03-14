@@ -40,7 +40,7 @@ inline TypeAliasReq TypeAliasReq::Invalid(Unit* unit) {
 }
 
 inline TypeAliasReq TypeAliasReq::From(Unit* unit, const TypeAlias& alias) {
-  assert(alias.type != AnnotType::Object);
+  assertx(alias.type != AnnotType::Object);
   assertx(unit);
 
   TypeAliasReq req;
@@ -56,7 +56,7 @@ inline TypeAliasReq TypeAliasReq::From(Unit* unit, const TypeAlias& alias) {
 
 inline TypeAliasReq TypeAliasReq::From(Unit* unit, TypeAliasReq req,
                                        const TypeAlias& alias) {
-  assert(alias.type == AnnotType::Object);
+  assertx(alias.type == AnnotType::Object);
   assertx(unit);
 
   req.unit = unit;

@@ -49,7 +49,7 @@ inline int FuncEmitter::sn() const {
 }
 
 inline Id FuncEmitter::id() const {
-  assert(m_pce == nullptr);
+  assertx(m_pce == nullptr);
   return m_id;
 }
 
@@ -82,7 +82,7 @@ inline Id FuncEmitter::numLiveIterators() const {
 }
 
 inline void FuncEmitter::setNumIterators(Id numIterators) {
-  assert(m_numIterators == 0);
+  assertx(m_numIterators == 0);
   m_numIterators = numIterators;
 }
 
@@ -91,17 +91,17 @@ inline void FuncEmitter::setNumLiveIterators(Id id) {
 }
 
 inline void FuncEmitter::setNumClsRefSlots(Id num) {
-  assert(m_numClsRefSlots == 0);
+  assertx(m_numClsRefSlots == 0);
   m_numClsRefSlots = num;
 }
 
 inline bool FuncEmitter::hasVar(const StringData* name) const {
-  assert(name != nullptr);
+  assertx(name != nullptr);
   return m_localNames.find(name) != m_localNames.end();
 }
 
 inline Id FuncEmitter::lookupVarId(const StringData* name) const {
-  assert(hasVar(name));
+  assertx(hasVar(name));
   return m_localNames.find(name)->second;
 }
 
@@ -113,7 +113,7 @@ inline void FuncEmitter::freeUnnamedLocal(Id id) {
 
 inline void FuncEmitter::freeIterator(Id id) {
   --m_nextFreeIterator;
-  assert(id == m_nextFreeIterator);
+  assertx(id == m_nextFreeIterator);
 }
 
 inline void FuncEmitter::appendParam(const StringData* name,

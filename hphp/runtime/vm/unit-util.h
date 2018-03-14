@@ -62,7 +62,7 @@ inline bool needsStripInOut(const StringData* name) {
  */
 inline const StringData* normalizeNS(const StringData* name) {
   if (needsNSNormalization(name)) {
-    assert(name->size() != 0);
+    assertx(name->size() != 0);
     auto const size  = static_cast<size_t>(name->size() - 1);
     auto const piece = folly::StringPiece{name->data() + 1, size};
     return makeStaticString(piece);
@@ -79,10 +79,10 @@ inline String normalizeNS(const String& name) {
 
 inline const StringData* stripInOutSuffix(const StringData* name) {
   if (UNLIKELY(needsStripInOut(name))) {
-    assert(name->size() > sizeof(kInOutSuffix));
+    assertx(name->size() > sizeof(kInOutSuffix));
     auto const s = name->data();
     size_t len = name->size() - sizeof(kInOutSuffix);
-    for (; s[len] != '$'; --len) assert(len != 0);
+    for (; s[len] != '$'; --len) assertx(len != 0);
     return makeStaticString(folly::StringPiece(name->data(), len));
   }
   return name;

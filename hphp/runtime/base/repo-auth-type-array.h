@@ -57,7 +57,7 @@ struct ArrayTypeTable {
    * Find an array type description by id.
    */
   const RepoAuthType::Array* lookup(uint32_t id) const {
-    assert(id < m_arrTypes.size());
+    assertx(id < m_arrTypes.size());
     return m_arrTypes[id];
   }
 
@@ -154,7 +154,7 @@ struct RepoAuthType::Array {
    * Pre: tag() == Tag::Packed
    */
   uint32_t size() const {
-    assert(tag() == Tag::Packed);
+    assertx(tag() == Tag::Packed);
     return m_size;
   }
 
@@ -165,8 +165,8 @@ struct RepoAuthType::Array {
    *      idx < size()
    */
   RepoAuthType packedElem(uint32_t idx) const {
-    assert(tag() == Tag::Packed);
-    assert(idx < size());
+    assertx(tag() == Tag::Packed);
+    assertx(idx < size());
     return types()[idx];
   }
 
@@ -176,7 +176,7 @@ struct RepoAuthType::Array {
    * Pre: tag() == Tag::PackedN
    */
   RepoAuthType elemType() const {
-    assert(tag() == Tag::PackedN);
+    assertx(tag() == Tag::PackedN);
     return types()[0];
   }
 

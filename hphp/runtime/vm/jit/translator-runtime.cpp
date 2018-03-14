@@ -274,24 +274,24 @@ ArrayData* convKeysetToArrHelper(ArrayData* adIn) {
 }
 
 ArrayData* convArrToVecHelper(ArrayData* adIn) {
-  assert(adIn->isPHPArray());
+  assertx(adIn->isPHPArray());
   auto a = adIn->toVec(adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
 
 ArrayData* convDictToVecHelper(ArrayData* adIn) {
-  assert(adIn->isDict());
+  assertx(adIn->isDict());
   auto a = MixedArray::ToVecDict(adIn, adIn->cowCheck());
-  assert(a != adIn);
+  assertx(a != adIn);
   decRefArr(adIn);
   return a;
 }
 
 ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
-  assert(adIn->isKeyset());
+  assertx(adIn->isKeyset());
   auto a = SetArray::ToVec(adIn, adIn->cowCheck());
-  assert(a != adIn);
+  assertx(a != adIn);
   decRefArr(adIn);
   return a;
 }
@@ -304,7 +304,7 @@ ArrayData* convObjToVecHelper(ObjectData* obj) {
 }
 
 ArrayData* convArrToDictHelper(ArrayData* adIn) {
-  assert(adIn->isPHPArray());
+  assertx(adIn->isPHPArray());
   auto a = adIn->toDict(adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
@@ -313,7 +313,7 @@ ArrayData* convArrToDictHelper(ArrayData* adIn) {
 ArrayData* convVecToDictHelper(ArrayData* adIn) {
   assertx(adIn->isVecArray());
   auto a = PackedArray::ToDictVec(adIn, adIn->cowCheck());
-  assert(a != adIn);
+  assertx(a != adIn);
   decRefArr(adIn);
   return a;
 }
@@ -333,7 +333,7 @@ ArrayData* convObjToDictHelper(ObjectData* obj) {
 }
 
 ArrayData* convArrToKeysetHelper(ArrayData* adIn) {
-  assert(adIn->isPHPArray());
+  assertx(adIn->isPHPArray());
   auto a = adIn->toKeyset(adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
@@ -342,13 +342,13 @@ ArrayData* convArrToKeysetHelper(ArrayData* adIn) {
 ArrayData* convVecToKeysetHelper(ArrayData* adIn) {
   assertx(adIn->isVecArray());
   auto a = PackedArray::ToKeysetVec(adIn, adIn->cowCheck());
-  assert(a != adIn);
+  assertx(a != adIn);
   decRefArr(adIn);
   return a;
 }
 
 ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
-  assert(adIn->isDict());
+  assertx(adIn->isDict());
   auto a = MixedArray::ToKeysetDict(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;

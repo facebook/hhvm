@@ -266,7 +266,7 @@ inline uint32_t IRUnit::numIds(const IRInstruction*) const {
 }
 
 inline SSATmp* IRUnit::findSSATmp(uint32_t id) const {
-  assert(id < m_ssaTmps.size());
+  assertx(id < m_ssaTmps.size());
   return m_ssaTmps[id];
 }
 

@@ -57,14 +57,14 @@ struct APCObject {
   static void Delete(APCHandle* handle);
 
   static APCObject* fromHandle(APCHandle* handle) {
-    assert(handle->checkInvariants() &&
+    assertx(handle->checkInvariants() &&
            handle->kind() == APCKind::SharedObject);
     static_assert(offsetof(APCObject, m_handle) == 0, "");
     return reinterpret_cast<APCObject*>(handle);
   }
 
   static const APCObject* fromHandle(const APCHandle* handle) {
-    assert(handle->checkInvariants() &&
+    assertx(handle->checkInvariants() &&
            handle->kind() == APCKind::SharedObject);
     static_assert(offsetof(APCObject, m_handle) == 0, "");
     return reinterpret_cast<const APCObject*>(handle);

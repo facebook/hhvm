@@ -36,7 +36,7 @@ inline void APCHandle::unreferenceNonRoot() const {
 }
 
 inline void APCHandle::unreferenceRoot(size_t size) {
-  assert(isSingletonKind() || m_unref_root_count++ == 0);
+  assertx(isSingletonKind() || m_unref_root_count++ == 0);
   if (!isUncounted()) {
     atomicDecRef();
   } else {
@@ -50,17 +50,17 @@ inline bool APCHandle::isAtomicCounted() const {
 }
 
 inline void APCHandle::atomicIncRef() const {
-  assert(isAtomicCounted());
+  assertx(isAtomicCounted());
   ++m_count;
 }
 
 inline void APCHandle::atomicDecRef() const {
-  assert(m_count.load() > 0);
+  assertx(m_count.load() > 0);
   if (m_count > 1) {
-    assert(isAtomicCounted());
+    assertx(isAtomicCounted());
     if (--m_count) return;
   }
-  assert(isSingletonKind() || m_unref_root_count == 1);
+  assertx(isSingletonKind() || m_unref_root_count == 1);
   const_cast<APCHandle*>(this)->deleteShared();
 }
 

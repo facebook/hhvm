@@ -59,8 +59,8 @@ struct APCArray {
   static void Delete(APCHandle* handle);
 
   static APCArray* fromHandle(APCHandle* handle) {
-    assert(handle->checkInvariants());
-    assert(handle->kind() == APCKind::SharedArray ||
+    assertx(handle->checkInvariants());
+    assertx(handle->kind() == APCKind::SharedArray ||
            handle->kind() == APCKind::SharedPackedArray ||
            handle->kind() == APCKind::SharedVArray ||
            handle->kind() == APCKind::SharedDArray ||
@@ -72,8 +72,8 @@ struct APCArray {
   }
 
   static const APCArray* fromHandle(const APCHandle* handle) {
-    assert(handle->checkInvariants());
-    assert(handle->kind() == APCKind::SharedArray ||
+    assertx(handle->checkInvariants());
+    assertx(handle->kind() == APCKind::SharedArray ||
            handle->kind() == APCKind::SharedPackedArray ||
            handle->kind() == APCKind::SharedVArray ||
            handle->kind() == APCKind::SharedDArray ||
@@ -110,19 +110,19 @@ struct APCArray {
 
   Variant getKey(ssize_t pos) const {
     if (isPacked()) {
-      assert(static_cast<size_t>(pos) < m_size);
+      assertx(static_cast<size_t>(pos) < m_size);
       return pos;
     }
-    assert(static_cast<size_t>(pos) < m.m_num);
+    assertx(static_cast<size_t>(pos) < m.m_num);
     return buckets()[pos].key->toLocal();
   }
 
   APCHandle* getValue(ssize_t pos) const {
     if (isPacked()) {
-      assert(static_cast<size_t>(pos) < m_size);
+      assertx(static_cast<size_t>(pos) < m_size);
       return vals()[pos];
     }
-    assert(static_cast<size_t>(pos) < m.m_num);
+    assertx(static_cast<size_t>(pos) < m.m_num);
     return buckets()[pos].val;
   }
 
@@ -196,12 +196,12 @@ private:
   enum class PackedCtor {};
   APCArray(PackedCtor, APCKind kind, size_t size)
     : m_handle(kind, kInvalidDataType), m_size(size) {
-    assert(isPacked());
+    assertx(isPacked());
   }
 
   enum class HashedCtor {};
   APCArray(HashedCtor, APCKind kind, unsigned int cap) : m_handle(kind) {
-    assert(isHashed());
+    assertx(isHashed());
     m.m_capacity_mask = cap - 1;
     m.m_num = 0;
   }

@@ -369,7 +369,7 @@ public:
 
     auto const go = [&] (uint64_t& bits, off_t off) {
       while (ffs64(bits, out)) {
-        assert(0 <= out && out < 64);
+        assertx(0 <= out && out < 64);
         bits &= ~(uint64_t{1} << out);
         f(PhysReg(out + off));
       }
@@ -389,7 +389,7 @@ public:
 
     auto const go = [&] (uint64_t& bits, off_t off) {
       while (ffs64(bits, out)) {
-        assert(0 <= out && out < 64);
+        assertx(0 <= out && out < 64);
         bits &= ~(uint64_t{1} << out);
         r[i++] = out + off;
         if (i > 1) {
@@ -412,7 +412,7 @@ public:
 
     auto const go = [&] (uint64_t& bits, off_t off) {
       while (fls64(bits, out)) {
-        assert(0 <= out && out < 64);
+        assertx(0 <= out && out < 64);
         bits &= ~(uint64_t{1} << out);
         f(PhysReg(out + off));
       }
@@ -433,7 +433,7 @@ public:
 
     auto const go = [&] (uint64_t& bits, off_t off) {
       while (fls64(bits, out)) {
-        assert(0 <= out && out < 64);
+        assertx(0 <= out && out < 64);
         bits &= ~(uint64_t{1} << out);
         r[i++] = out + off;
         if (i > 1) {

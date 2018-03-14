@@ -56,14 +56,14 @@ struct AsioBlockable final {
   c_WaitableWaitHandle* getWaitHandle() const;
 
   void setNextParent(AsioBlockable* parent, Kind kind) {
-    assert(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
-    assert(!(static_cast<intptr_t>(kind) & kParentMask));
+    assertx(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
+    assertx(!(static_cast<intptr_t>(kind) & kParentMask));
     m_bits = reinterpret_cast<intptr_t>(parent) | static_cast<intptr_t>(kind);
   }
 
   // Only update the next parent w/o changing kind.
   void updateNextParent(AsioBlockable* parent) {
-    assert(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
+    assertx(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
     m_bits = (m_bits & ~kParentMask) | reinterpret_cast<intptr_t>(parent);
   }
 

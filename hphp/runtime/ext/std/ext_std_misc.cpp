@@ -804,7 +804,7 @@ const int MaxUserTokenId = 451; // Marker, not a real user token ID
 
 // Converts an internal token ID to a user token ID
 static int get_user_token_id(int internal_id) {
-  assert(internal_id >= 0);
+  assertx(internal_id >= 0);
   if (internal_id < 256) {
     return internal_id;
   }
@@ -840,10 +840,10 @@ static String token_get_all_fix_elseif(Array& res,
     return true;
   };
 
-  assert(tokText.size() > strlen("elseif"));
-  assert(!strncasecmp(tokCStr, "else", strlen("else")));
-  assert(checkWhitespace(tokCStr + strlen("else"), tokCEnd - strlen("if")));
-  assert(!strcasecmp(tokCEnd - strlen("if"), "if"));
+  assertx(tokText.size() > strlen("elseif"));
+  assertx(!strncasecmp(tokCStr, "else", strlen("else")));
+  assertx(checkWhitespace(tokCStr + strlen("else"), tokCEnd - strlen("if")));
+  assertx(!strcasecmp(tokCEnd - strlen("if"), "if"));
 
   // Shove in the T_ELSE and T_WHITESPACE, then return the remaining T_IF
   res.append(make_packed_array(

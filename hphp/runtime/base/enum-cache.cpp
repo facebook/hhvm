@@ -46,7 +46,7 @@ const EnumValues* EnumCache::getValues(const Class* klass,
 }
 
 const EnumValues* EnumCache::getValuesBuiltin(const Class* klass) {
-  assert(isEnum(klass));
+  assertx(isEnum(klass));
   if (auto values = klass->getEnumValues()) {
     return values;
   }
@@ -141,7 +141,7 @@ const EnumValues* EnumCache::loadEnumValues(const Class* klass,
       persist = false;
       value = klass->clsCnsGet(consts[i].name);
     }
-    assert(value.m_type != KindOfUninit);
+    assertx(value.m_type != KindOfUninit);
     if (UNLIKELY(!(isIntType(value.m_type) || tvIsString(&value)))) {
       // only int and string values allowed for enums.
       std::string msg;

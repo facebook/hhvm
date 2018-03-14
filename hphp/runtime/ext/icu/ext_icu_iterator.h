@@ -51,7 +51,7 @@ struct IntlIterator : IntlError {
   static Object newInstance(icu::StringEnumeration *se = nullptr) {
     if (!c_IntlIterator) {
       c_IntlIterator = Unit::lookupClass(s_IntlIterator.get());
-      assert(c_IntlIterator);
+      assertx(c_IntlIterator);
     }
     Object obj{c_IntlIterator};
     if (se) {

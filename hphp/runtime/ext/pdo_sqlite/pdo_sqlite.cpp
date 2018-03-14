@@ -359,9 +359,9 @@ bool PDOSqliteStatement::support(SupportedMethod method) {
 
 int PDOSqliteStatement::handleError(const char *file, int line) {
   auto rsrc = unsafe_cast<PDOSqliteResource>(dbh);
-  assert(rsrc);
+  assertx(rsrc);
   auto conn = rsrc->conn();
-  assert(conn);
+  assertx(conn);
   return conn->handleError(file, line, this);
 }
 

@@ -45,8 +45,8 @@ c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceeded(const Cell result) {
  * - produces reference for the returned StaticWaitHandle object
  */
 c_StaticWaitHandle* c_StaticWaitHandle::CreateFailed(ObjectData* exception) {
-  assert(exception);
-  assert(exception->instanceof(SystemLib::s_ThrowableClass));
+  assertx(exception);
+  assertx(exception->instanceof(SystemLib::s_ThrowableClass));
 
   auto waitHandle = req::make<c_StaticWaitHandle>();
   waitHandle->setState(STATE_FAILED);

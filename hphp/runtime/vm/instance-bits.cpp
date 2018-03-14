@@ -76,7 +76,7 @@ void profile(const StringData* name) {
     return;
   }
 
-  assert(name->isStatic());
+  assertx(name->isStatic());
   unsigned inc = 1;
   Class* c = Unit::lookupClass(name);
   if (c && (c->attrs() & AttrInterface)) {
@@ -197,19 +197,19 @@ bool initted() {
 }
 
 unsigned lookup(const StringData* name) {
-  assert(g_initFlag.load(std::memory_order_acquire) ||
+  assertx(g_initFlag.load(std::memory_order_acquire) ||
          pthread_equal(s_initThread.load(std::memory_order_acquire),
                        pthread_self()));
 
   if (auto const ptr = folly::get_ptr(s_instanceBitsMap, name)) {
-    assert(*ptr >= 1 && *ptr < kNumInstanceBits);
+    assertx(*ptr >= 1 && *ptr < kNumInstanceBits);
     return *ptr;
   }
   return 0;
 }
 
 bool getMask(const StringData* name, int& offset, uint8_t& mask) {
-  assert(g_initFlag.load(std::memory_order_acquire));
+  assertx(g_initFlag.load(std::memory_order_acquire));
 
   unsigned bit = lookup(name);
   if (!bit) return false;

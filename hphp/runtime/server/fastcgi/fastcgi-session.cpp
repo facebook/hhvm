@@ -46,7 +46,7 @@ std::tuple<
   std::unique_ptr<folly::IOBuf>,
   std::unique_ptr<folly::IOBuf>
 > KVParser::readNext() {
-  assert(ready());
+  assertx(ready());
 
   m_phase = Phase::READ_KEY_LENGTH;
   auto key = m_keyBuf.move();
@@ -157,9 +157,9 @@ bool KVParser::parseKeyValueContent(Cursor& cursor,
   std::unique_ptr<IOBuf> buf;
   size_t len = cursor.cloneAtMost(buf, length);
   queue.append(std::move(buf));
-  assert(length >= len);
+  assertx(length >= len);
   length -= len;
-  assert(available >= len);
+  assertx(available >= len);
   available -= len;
   return (length == 0);
 }
@@ -676,7 +676,7 @@ void FastCGISession::writeUnknownType(fcgi::Type record_type) {
 
 void FastCGISession::writeStream(fcgi::Type type,
                                  std::unique_ptr<IOBuf> stream_chain) {
-  assert(type == fcgi::STDOUT || type == fcgi::STDERR);
+  assertx(type == fcgi::STDOUT || type == fcgi::STDERR);
   if (stream_chain == nullptr) {
     return; // Nothing to do.
   }

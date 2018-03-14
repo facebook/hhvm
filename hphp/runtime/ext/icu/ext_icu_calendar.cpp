@@ -393,7 +393,7 @@ static bool HHVM_METHOD(IntlCalendar, roll, int64_t field, const Variant& value)
 
 // TODO: Switch to AcrRec API once it lands
 static bool HHVM_METHOD(IntlCalendar, __set_array, const Array& args) {
-  assert(args.size() == 6);
+  assertx(args.size() == 6);
   CAL_FETCH(data, this_, false);
 
   // Assume at least two args because of PHP signature
@@ -419,7 +419,7 @@ static bool HHVM_METHOD(IntlCalendar, __set_array, const Array& args) {
   }
 
   int32_t intargs[6];
-  assert(numargs <= 6);
+  assertx(numargs <= 6);
   for (int i = 0; i < numargs; ++i) {
     int64_t arg = args[i].toInt64();
     if ((arg < INT32_MIN) || (arg > INT32_MAX)) {
@@ -619,7 +619,7 @@ static bool HHVM_METHOD(IntlCalendar, setSkippedWallTimeOption,
 
 static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
                         const Array& args) {
-  assert(args.size() == 6);
+  assertx(args.size() == 6);
 
   int32_t numargs;
   for (numargs = 0; numargs < 6; ++numargs) {
@@ -656,7 +656,7 @@ static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
   }
 
   int32_t intarg[6];
-  assert(numargs <= 6);
+  assertx(numargs <= 6);
   for (int i = 0; i < numargs; ++i) {
     int64_t arg = args[i].toInt64();
     if ((arg < INT32_MIN) || (arg > INT32_MAX)) {

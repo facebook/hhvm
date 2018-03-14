@@ -408,7 +408,7 @@ folly::Optional<tc::TransMetaInfo>
 translate(TransArgs args, FPInvOffset spOff,
           folly::Optional<CodeCache::View> optView) {
   INC_TPC(translate);
-  assert(args.kind != TransKind::Invalid);
+  assertx(args.kind != TransKind::Invalid);
 
   if (!tc::shouldTranslate(args.sk.func(), args.kind)) return folly::none;
 

@@ -229,7 +229,7 @@ public:
 
 struct MySQLResource : SweepableResourceData {
   explicit MySQLResource(std::shared_ptr<MySQL> mysql) : m_mysql(mysql) {
-    assert(mysql);
+    assertx(mysql);
   }
 
   CLASSNAME_IS("mysql link")

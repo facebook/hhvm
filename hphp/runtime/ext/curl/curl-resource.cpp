@@ -143,7 +143,7 @@ void CurlResource::closeForSweep() {
   if (m_cp) {
     if (m_connPool) {
       // reuse this curl handle if we're pooling
-      assert(m_pooledHandle);
+      assertx(m_pooledHandle);
       m_connPool->store(m_pooledHandle);
       m_pooledHandle = nullptr;
     } else {

@@ -1153,7 +1153,7 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
   auto compat = [](TrackedStore store1, TrackedStore store2) {
     auto i1 = store1.instruction();
     auto i2 = store2.instruction();
-    assert(i1 && i2);
+    assertx(i1 && i2);
     if (i1->op() != i2->op()) return Compat::Bad;
     if (i1->numSrcs() != i2->numSrcs()) return Compat::Bad;
     for (auto i = i1->numSrcs(); i--; ) {
@@ -1317,7 +1317,7 @@ void compute_available_stores(
           auto tsNew = succ->numPreds() == 1 ? ts : recompute_ts(genv, i, succ);
           if (!tsNew.same(tsSucc)) {
             changed = true;
-            assert(tsNew >= tsSucc);
+            assertx(tsNew >= tsSucc);
             tsSucc = tsNew;
             if (tsSucc.isBad()) {
               if (sf) {

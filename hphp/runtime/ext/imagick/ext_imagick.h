@@ -243,7 +243,7 @@ req::ptr<WandResource<DrawingWand>> getDrawingWandResource(const Object& obj) {
 ALWAYS_INLINE
 req::ptr<WandResource<PixelWand>> getPixelWandResource(const Object& obj) {
   auto ret = getWandResource<PixelWand>(s_ImagickPixel, obj);
-  assert(ret != nullptr && ret->getWand() != nullptr);
+  assertx(ret != nullptr && ret->getWand() != nullptr);
   return ret;
 }
 

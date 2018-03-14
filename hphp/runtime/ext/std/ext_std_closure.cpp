@@ -235,7 +235,7 @@ static Variant HHVM_METHOD(Closure, bindto,
   // If we are changing either the scope or the attributes of the closure, we
   // need to re-scope its Closure subclass.
   if (newscope != curscope || newattrs != curattrs) {
-    assert(newattrs != AttrNone);
+    assertx(newattrs != AttrNone);
 
     auto newcls = cls->rescope(newscope, newattrs);
     cloneObj->setVMClass(newcls);

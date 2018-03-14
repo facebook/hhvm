@@ -63,7 +63,7 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::Ref:
   case T::InitGen:
   case T::Gen:
-    assert(!highBitSet);
+    assertx(!highBitSet);
     return 1;
   case T::SArr:
   case T::OptSArr:
@@ -94,7 +94,7 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::SubObj:
   case T::OptExactObj:
   case T::OptSubObj:
-    assert(!highBitSet);
+    assertx(!highBitSet);
     return 5;
   }
   not_reached();

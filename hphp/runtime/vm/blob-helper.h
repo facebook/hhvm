@@ -134,7 +134,7 @@ struct BlobEncoder {
 
   void encode(DataType t) {
     // always encode DataType as int8 even if it's a bigger size.
-    assert(DataType(int8_t(t)) == t);
+    assertx(DataType(int8_t(t)) == t);
     encode(int8_t(t));
   }
 
@@ -255,7 +255,7 @@ struct BlobDecoder {
   {}
 
   void assertDone() {
-    assert(m_p >= m_last);
+    assertx(m_p >= m_last);
   }
 
   // See encode() in BlobEncoder for why this only allows integral
@@ -305,7 +305,7 @@ struct BlobDecoder {
     tvWriteUninit(tv);
 
     String s = decodeString();
-    assert(!!s);
+    assertx(!!s);
     if (s.empty()) return;
 
     tvAsVariant(&tv) =
@@ -405,7 +405,7 @@ private:
 
     String s = String(sz, ReserveString);
     char* pch = s.mutableData();
-    assert(m_last - m_p >= sz);
+    assertx(m_last - m_p >= sz);
     std::copy(m_p, m_p + sz, pch);
     m_p += sz;
     s.setSize(sz);

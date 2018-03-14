@@ -124,7 +124,7 @@ struct RepoAuthType {
     switch (tag) {
     case Tag::OptSubObj: case Tag::OptExactObj:
     case Tag::SubObj: case Tag::ExactObj:
-      assert(sd != nullptr);
+      assertx(sd != nullptr);
       break;
     default:
       break;
@@ -133,7 +133,7 @@ struct RepoAuthType {
 
   explicit RepoAuthType(Tag tag, const Array* ar) {
     m_data.set(static_cast<uint8_t>(tag), ar);
-    assert(mayHaveArrData());
+    assertx(mayHaveArrData());
   }
 
   Tag tag() const { return toResolvedTag(m_data.tag()); }
@@ -147,7 +147,7 @@ struct RepoAuthType {
    */
 
   const StringData* clsName() const {
-    assert(hasClassName());
+    assertx(hasClassName());
     return static_cast<const StringData*>(m_data.ptr());
   }
 
@@ -167,7 +167,7 @@ struct RepoAuthType {
    */
 
   const Array* array() const {
-    assert(resolved());
+    assertx(resolved());
     return static_cast<const Array*>(m_data.ptr());
   }
 
@@ -218,7 +218,7 @@ struct RepoAuthType {
 
     // the 0x40 bit for resolved/unresolved Array* should not be visible
     // to the outside world.
-    assert(resolved());
+    assertx(resolved());
 
     if (mayHaveArrData()) {
       // serialization
@@ -263,7 +263,7 @@ private:
      if (!mayHaveArrData() || resolved()) return;
 
      auto const id = arrayId();
-     assert(id != kInvalidArrayId); // this case is handled in deser time.
+     assertx(id != kInvalidArrayId); // this case is handled in deser time.
      auto const array = fn(id);
      m_data.set(static_cast<uint8_t>(tag()), array);
    }

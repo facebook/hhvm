@@ -100,7 +100,7 @@ const std::string& VariablesCommand::getUcVariableName(
 
 void VariablesCommand::sortVariablesInPlace(folly::dynamic& vars) {
   constexpr char* ucKey = "uc_name";
-  assert(vars.isArray());
+  assertx(vars.isArray());
 
   std::sort(
     vars.begin(),
@@ -196,7 +196,7 @@ int VariablesCommand::addScopeVariables(
   const ScopeObject* scope,
   folly::dynamic* vars
 ) {
-  assert(vars == nullptr || vars->isArray());
+  assertx(vars == nullptr || vars->isArray());
 
   switch (scope->m_scopeType) {
     case ScopeType::Locals:
@@ -238,7 +238,7 @@ int VariablesCommand::addScopeVariables(
       return addSuperglobalVariables(session, requestId, scope, vars);
 
     default:
-      assert(false);
+      assertx(false);
   }
 
   return 0;
@@ -325,7 +325,7 @@ int VariablesCommand::addLocals(
   const ScopeObject* scope,
   folly::dynamic* vars
 ) {
-  assert(scope->m_scopeType == ScopeType::Locals);
+  assertx(scope->m_scopeType == ScopeType::Locals);
 
   VMRegAnchor regAnchor;
   int count = 0;
@@ -440,7 +440,7 @@ int VariablesCommand::addSuperglobalVariables(
   const ScopeObject* scope,
   folly::dynamic* vars
 ) {
-  assert(scope->m_scopeType == ScopeType::Superglobals);
+  assertx(scope->m_scopeType == ScopeType::Superglobals);
 
   int cacheCount = getCachedValue(
     session,
@@ -746,7 +746,7 @@ int VariablesCommand::addArrayChildren(
 ) {
   Variant& var = variable->m_variable;
 
-  assert(var.isArray());
+  assertx(var.isArray());
 
   int idx = -1;
   int added = 0;
@@ -1042,7 +1042,7 @@ int VariablesCommand::addClassSubScopes(
       }
       break;
     default:
-      assert(false);
+      assertx(false);
   }
 
   return subScopeCount;
@@ -1191,7 +1191,7 @@ int VariablesCommand::addObjectChildren(
   const Variant& var,
   folly::dynamic* vars
 ) {
-  assert(var.isObject());
+  assertx(var.isObject());
 
   int propCount = 0;
 

@@ -137,7 +137,7 @@ struct XMLDocumentData : XMLNodeData {
     , m_recover(false)
     , m_destruct(false)
   {
-    assert(p->type == XML_HTML_DOCUMENT_NODE || p->type == XML_DOCUMENT_NODE);
+    assertx(p->type == XML_HTML_DOCUMENT_NODE || p->type == XML_DOCUMENT_NODE);
   }
 
   void copyProperties(req::ptr<XMLDocumentData> data) {
@@ -154,7 +154,7 @@ struct XMLDocumentData : XMLNodeData {
   xmlDocPtr docp() const { return (xmlDocPtr)m_node; }
   void attachNode() { m_liveNodes++; }
   void detachNode() {
-    assert(m_liveNodes);
+    assertx(m_liveNodes);
     if (!--m_liveNodes && m_destruct) cleanup();
   }
 
@@ -184,7 +184,7 @@ inline XMLNode libxml_register_node(xmlNodePtr p) {
 
   if (p->type == XML_HTML_DOCUMENT_NODE ||
       p->type == XML_DOCUMENT_NODE) {
-    assert(p->doc == (xmlDocPtr)p);
+    assertx(p->doc == (xmlDocPtr)p);
 
     return req::make<XMLDocumentData>((xmlDocPtr)p);
   }
@@ -197,7 +197,7 @@ inline XMLNode libxml_register_node(xmlDocPtr p) {
 
 
 inline XMLNodeData::XMLNodeData(xmlNodePtr p) : m_node(p) {
-  assert(p && !p->_private);
+  assertx(p && !p->_private);
   m_node->_private = this;
 
   if (p->doc && p != (xmlNodePtr)p->doc) {
@@ -208,7 +208,7 @@ inline XMLNodeData::XMLNodeData(xmlNodePtr p) : m_node(p) {
 
 inline XMLNodeData::~XMLNodeData() {
   if (m_node) {
-    assert(!m_cache && m_node->_private == this);
+    assertx(!m_cache && m_node->_private == this);
 
     m_node->_private = nullptr;
     php_libxml_node_free_resource(m_node);
@@ -231,11 +231,11 @@ inline req::ptr<XMLDocumentData> XMLNodeData::doc() {
   }
 
   if (!m_doc) {
-    assert(!m_node->doc);
+    assertx(!m_node->doc);
     return nullptr;
   }
 
-  assert(m_doc.get() == libxml_register_node((xmlNodePtr)m_node->doc).get());
+  assertx(m_doc.get() == libxml_register_node((xmlNodePtr)m_node->doc).get());
   return m_doc;
 }
 

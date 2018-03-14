@@ -254,7 +254,7 @@ SourceRootInfo::parseSandboxServerVariable(const std::string &format) const {
           // skip trailing /
           const char *data = m_path.data();
           int n = m_path.size() - 1;
-          assert(data[n] == '/');
+          assertx(data[n] == '/');
           res.write(data, n);
           break;
         }

@@ -2278,12 +2278,13 @@ module WithStatementAndDeclAndTypeParser
   and parse_use_variable parser =
     (* TODO: Is it better that this returns the variable as a *token*, or
     as an *expression* that consists of the token? We do the former. *)
-    let (parser, ampersand) = optional_token parser Ampersand in
-    let (parser, variable) = require_variable parser in
-    if SC.is_missing ampersand then
-      (parser, variable)
-    else
+    let (parser1, token) = next_token parser in
+    if Token.kind token = Ampersand then
+      let (parser, ampersand) = Make.token parser1 token in
+      let (parser, variable) = require_variable parser in
       make_and_track_prefix_unary_expression parser ampersand Ampersand variable
+    else
+      require_variable parser
 
   and parse_anon_or_lambda_or_awaitable parser =
     (* TODO: The original Hack parser accepts "async" as an identifier, and

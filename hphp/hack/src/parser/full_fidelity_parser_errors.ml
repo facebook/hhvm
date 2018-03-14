@@ -2048,6 +2048,14 @@ let classish_errors env node parents namespace_name names errors =
         let has_non_public_method =
           Hh_core.List.exists methods
             ~f:(methodish_modifier_contains_helper is_not_public_visibility) in
+        let has_multiple_xhp_category_decls =
+          let cats = Hh_core.List.filter methods ~f:(fun m ->
+            match syntax m with
+            | XHPCategoryDeclaration _ -> true
+            | _ -> false) in
+          match cats with
+          | [] | [_] -> false
+          | _ -> true in
         let errors =
           if has_abstract_fn &&
              is_token_kind cd.classish_keyword TokenKind.Class &&
@@ -2060,6 +2068,11 @@ let classish_errors env node parents namespace_name names errors =
              is_token_kind cd.classish_keyword TokenKind.Interface
           then make_error_from_node node
             SyntaxError.interface_has_non_public_method :: errors
+          else errors in
+        let errors =
+          if has_multiple_xhp_category_decls
+          then make_error_from_node node
+            SyntaxError.xhp_class_multiple_category_decls :: errors
           else errors in
         errors
       | _ -> errors in

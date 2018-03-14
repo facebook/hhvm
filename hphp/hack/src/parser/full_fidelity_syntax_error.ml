@@ -337,7 +337,8 @@ let async_magic_method =
 
 let reserved_keyword_as_class_name =
   "You may not use a reserved keyword for a class name"
-
+let xhp_class_multiple_category_decls =
+  "An XHP class cannot have multiple category declarations"
 let inout_param_in_generator =
   "Parameters may not be marked inout on generators"
 let inout_param_in_async_generator =

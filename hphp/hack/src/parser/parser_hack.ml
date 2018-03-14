@@ -1421,7 +1421,8 @@ and class_toplevel_word env word =
       xhp_format env;
       class_defs env
   | "category" ->
-      let cat = XhpCategory (xhp_category_list env) in
+      let start = Pos.make env.file env.lb in
+      let cat = XhpCategory (start, xhp_category_list env) in
       cat :: class_defs env
   | "const" ->
       let error_state = !(env.errors) in

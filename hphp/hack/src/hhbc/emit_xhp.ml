@@ -21,7 +21,10 @@ let get_array3 i0 i1 i2 =
   let index2 = p, i2 in
   A.Varray [index0; index1; index2]
 
-let xhp_attribute_declaration_method name kind body =
+let xhp_attribute_declaration_method ?p name kind body =
+  let p = match p with
+  | Some p -> p
+  | None -> Pos.none in
   {
     A.m_kind = kind;
     A.m_tparams = [];
@@ -33,7 +36,7 @@ let xhp_attribute_declaration_method name kind body =
     A.m_ret = None;
     A.m_ret_by_ref = false;
     A.m_fun_kind = A.FSync;
-    A.m_span = Pos.none;
+    A.m_span = p;
     A.m_doc_comment = None;
   }
 
@@ -250,10 +253,10 @@ let emit_xhp_children_array = function
   | _ -> failwith "HHVM does not support multiple children declarations"
 
 (* AST transformations taken from hphp/parser/hphp.y *)
-let from_children_declaration ast_class children =
+let from_children_declaration ast_class (child_pos, children) =
   let var_dollar_ = p, A.Lvar (p, "$_") in
   (* static $_ = children; *)
-  let children_arr = p, emit_xhp_children_array children in
+  let children_arr = child_pos, emit_xhp_children_array children in
   let token1 =
     p, A.Static_var [p, A.Binop (A.Eq None, var_dollar_, children_arr)]
   in
@@ -262,6 +265,7 @@ let from_children_declaration ast_class children =
   let body = [token1; token2] in
   let m =
     xhp_attribute_declaration_method
+      ~p:child_pos
       "__xhpChildrenDeclaration"
       [A.Protected]
       body
@@ -274,7 +278,7 @@ let get_category_array categories =
     ~f:(fun s -> ((p, A.String s), (p, A.Int (p, "1"))))
 
 (* AST transformations taken from hphp/parser/hphp.y *)
-let from_category_declaration ast_class categories =
+let from_category_declaration ast_class (cat_pos, categories) =
   let var_dollar_ = p, A.Lvar (p, "$_") in
   (* static $_ = categories; *)
   let category_arr = p, A.Darray (get_category_array categories) in
@@ -286,6 +290,7 @@ let from_category_declaration ast_class categories =
   let body = [token1; token2] in
   let m =
     xhp_attribute_declaration_method
+      ~p:cat_pos
       "__xhpCategoryDeclaration"
       [A.Protected]
       body

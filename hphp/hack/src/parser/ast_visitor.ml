@@ -711,8 +711,8 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | ClassUsePrecedence (id, ps, ids) ->
       this#on_classUsePrecedence acc id ps ids
     | XhpAttrUse h -> this#on_xhpAttrUse acc h
-    | XhpCategory cs -> this#on_xhpCategory acc cs
-    | XhpChild c -> this#on_xhp_child acc c
+    | XhpCategory (_, cs) -> this#on_xhpCategory acc cs
+    | XhpChild (_, c) -> this#on_xhp_child acc c
     | ClassTraitRequire (t, h) -> this#on_classTraitRequire acc t h
     | ClassVars cv -> this#on_classVars acc cv
     | XhpAttr (t,h,i,n) -> this#on_xhpAttr acc t h i n

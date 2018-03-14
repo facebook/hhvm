@@ -2219,10 +2219,12 @@ and pClassElt : class_elt list parser = fun node env ->
     in
     couldMap ~f:pXHPAttr xhp_attribute_attributes env
   | XHPChildrenDeclaration { xhp_children_expression; _; } ->
-    [ XhpChild (pXhpChild xhp_children_expression env) ]
+    let p = pPos node env in
+    [ XhpChild (p, pXhpChild xhp_children_expression env) ]
   | XHPCategoryDeclaration { xhp_category_categories = cats; _ } ->
+    let p = pPos node env in
     let pNameSansPercent node _env = drop_pstr 1 (pos_name node env) in
-    [ XhpCategory (couldMap ~f:pNameSansPercent cats env) ]
+    [ XhpCategory (p, couldMap ~f:pNameSansPercent cats env) ]
   | _ -> missing_syntax "class element" node env
   in
   try pClassElt_ (syntax node) with

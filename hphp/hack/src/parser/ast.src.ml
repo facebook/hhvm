@@ -125,8 +125,8 @@ and class_elt =
   | XhpAttr of hint option * class_var * bool *
                ((pos * bool * expr list) option)
   | Method of method_
-  | XhpCategory of pstring list
-  | XhpChild of xhp_child
+  | XhpCategory of pos * (pstring list)
+  | XhpChild of pos * xhp_child
 
 and xhp_child =
   | ChildName of id

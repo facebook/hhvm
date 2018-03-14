@@ -285,19 +285,14 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
         | _ -> None)
   in
   let class_xhp_children =
-    List.filter_map
-      ast_class.A.c_body
-      (function
-        | A.XhpChild sl -> Some sl
-        | _ -> None)
+    List.find_map ast_class.A.c_body (function
+      | A.XhpChild (p, sl) -> Some (p, [sl])
+      | _ -> None)
   in
   let class_xhp_categories =
-    List.concat @@
-    List.filter_map
-      ast_class.A.c_body
-      (function
-        | A.XhpCategory sl -> Some sl
-        | _ -> None)
+    List.find_map ast_class.A.c_body (function
+      | A.XhpCategory (p, c) -> Some (p, c)
+      | _ -> None)
   in
   let class_is_abstract = ast_class.A.c_kind = Ast.Cabstract in
   let class_is_final =
@@ -328,16 +323,16 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   (* TODO: communicate this without looking at the name *)
   let additional_methods = [] in
   let additional_methods =
-    if class_xhp_categories = []
-    then additional_methods
-    else additional_methods
-      @ Emit_xhp.from_category_declaration ast_class class_xhp_categories
+    match class_xhp_categories with
+    | None -> additional_methods
+    | Some cats -> additional_methods
+      @ Emit_xhp.from_category_declaration ast_class cats
   in
   let additional_methods =
-    if class_xhp_children = []
-    then additional_methods
-    else additional_methods
-      @ Emit_xhp.from_children_declaration ast_class class_xhp_children
+  match class_xhp_children with
+  | None -> additional_methods
+  | Some children -> additional_methods
+      @ Emit_xhp.from_children_declaration ast_class children
   in
   let additional_methods =
     if class_xhp_attributes = [] && class_xhp_use_attributes = []

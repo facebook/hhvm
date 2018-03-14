@@ -1,6 +1,6 @@
 (* @generated from ast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<36ea0f8d69ba93a3cfa3229d612370640d610fa8>> *)
+(* SourceShasum<<50ad225618216ee265ef16526dbbcad454340d50>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -106,8 +106,8 @@ and class_elt =
   | XhpAttr of hint option * class_var * bool * (pos * bool * expr list)
   option 
   | Method of method_ 
-  | XhpCategory of pstring list 
-  | XhpChild of xhp_child 
+  | XhpCategory of pos * pstring list 
+  | XhpChild of pos * xhp_child 
 and xhp_child =
   | ChildName of id 
   | ChildList of xhp_child list 
@@ -836,9 +836,13 @@ and show_user_attribute : user_attribute -> Ppx_deriving_runtime.string =
 
 and pp_class_elt : Format.formatter -> class_elt -> Ppx_deriving_runtime.unit
   =
-  let __25 () = pp_xhp_child
+  let __27 () = pp_xhp_child
   
-  and __24 () = pp_pstring
+  and __26 () = pp_pos
+  
+  and __25 () = pp_pstring
+  
+  and __24 () = pp_pos
   
   and __23 () = pp_method_
   
@@ -1048,23 +1052,27 @@ and pp_class_elt : Format.formatter -> class_elt -> Ppx_deriving_runtime.unit
             (Format.fprintf fmt "(@[<2>Method@ ";
              ((__23 ()) fmt) a0;
              Format.fprintf fmt "@])")
-        | XhpCategory a0 ->
-            (Format.fprintf fmt "(@[<2>XhpCategory@ ";
-             ((fun x  ->
-                 Format.fprintf fmt "@[<2>[";
-                 ignore
-                   (List.fold_left
-                      (fun sep  ->
-                         fun x  ->
-                           if sep then Format.fprintf fmt ";@ ";
-                           ((__24 ()) fmt) x;
-                           true) false x);
-                 Format.fprintf fmt "@,]@]")) a0;
-             Format.fprintf fmt "@])")
-        | XhpChild a0 ->
-            (Format.fprintf fmt "(@[<2>XhpChild@ ";
-             ((__25 ()) fmt) a0;
-             Format.fprintf fmt "@])"))
+        | XhpCategory (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>XhpCategory (@,";
+             (((__24 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((__25 ()) fmt) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a1);
+             Format.fprintf fmt "@,))@]")
+        | XhpChild (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>XhpChild (@,";
+             (((__26 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__27 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]"))
     [@ocaml.warning "-A"])
 
 and show_class_elt : class_elt -> Ppx_deriving_runtime.string =
@@ -3566,17 +3574,23 @@ include
           if Pervasives.(==) _visitors_c0 _visitors_r0
           then _visitors_this
           else Method _visitors_r0
-        method on_XhpCategory env _visitors_this _visitors_c0 =
-          let _visitors_r0 = self#on_list self#on_pstring env _visitors_c0
+        method on_XhpCategory env _visitors_this _visitors_c0 _visitors_c1 =
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
+          let _visitors_r1 = self#on_list self#on_pstring env _visitors_c1
              in
-          if Pervasives.(==) _visitors_c0 _visitors_r0
+          if
+            Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+              (Pervasives.(==) _visitors_c1 _visitors_r1)
           then _visitors_this
-          else XhpCategory _visitors_r0
-        method on_XhpChild env _visitors_this _visitors_c0 =
-          let _visitors_r0 = self#on_xhp_child env _visitors_c0  in
-          if Pervasives.(==) _visitors_c0 _visitors_r0
+          else XhpCategory (_visitors_r0, _visitors_r1)
+        method on_XhpChild env _visitors_this _visitors_c0 _visitors_c1 =
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
+          let _visitors_r1 = self#on_xhp_child env _visitors_c1  in
+          if
+            Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+              (Pervasives.(==) _visitors_c1 _visitors_r1)
           then _visitors_this
-          else XhpChild _visitors_r0
+          else XhpChild (_visitors_r0, _visitors_r1)
         method on_class_elt env _visitors_this =
           match _visitors_this with
           | Const (_visitors_c0,_visitors_c1) as _visitors_this ->
@@ -3612,10 +3626,11 @@ include
                 _visitors_c2 _visitors_c3
           | Method _visitors_c0 as _visitors_this ->
               self#on_Method env _visitors_this _visitors_c0
-          | XhpCategory _visitors_c0 as _visitors_this ->
+          | XhpCategory (_visitors_c0,_visitors_c1) as _visitors_this ->
               self#on_XhpCategory env _visitors_this _visitors_c0
-          | XhpChild _visitors_c0 as _visitors_this ->
-              self#on_XhpChild env _visitors_this _visitors_c0
+                _visitors_c1
+          | XhpChild (_visitors_c0,_visitors_c1) as _visitors_this ->
+              self#on_XhpChild env _visitors_this _visitors_c0 _visitors_c1
         method on_ChildName env _visitors_this _visitors_c0 =
           let _visitors_r0 = self#on_id env _visitors_c0  in
           if Pervasives.(==) _visitors_c0 _visitors_r0
@@ -5290,13 +5305,15 @@ include
         method on_Method env _visitors_c0 =
           let _visitors_s0 = self#on_method_ env _visitors_c0  in
           _visitors_s0
-        method on_XhpCategory env _visitors_c0 =
-          let _visitors_s0 = self#on_list self#on_pstring env _visitors_c0
+        method on_XhpCategory env _visitors_c0 _visitors_c1 =
+          let _visitors_s0 = self#on_pos env _visitors_c0  in
+          let _visitors_s1 = self#on_list self#on_pstring env _visitors_c1
              in
-          _visitors_s0
-        method on_XhpChild env _visitors_c0 =
-          let _visitors_s0 = self#on_xhp_child env _visitors_c0  in
-          _visitors_s0
+          self#plus _visitors_s0 _visitors_s1
+        method on_XhpChild env _visitors_c0 _visitors_c1 =
+          let _visitors_s0 = self#on_pos env _visitors_c0  in
+          let _visitors_s1 = self#on_xhp_child env _visitors_c1  in
+          self#plus _visitors_s0 _visitors_s1
         method on_class_elt env _visitors_this =
           match _visitors_this with
           | Const (_visitors_c0,_visitors_c1) ->
@@ -5321,8 +5338,10 @@ include
               self#on_XhpAttr env _visitors_c0 _visitors_c1 _visitors_c2
                 _visitors_c3
           | Method _visitors_c0 -> self#on_Method env _visitors_c0
-          | XhpCategory _visitors_c0 -> self#on_XhpCategory env _visitors_c0
-          | XhpChild _visitors_c0 -> self#on_XhpChild env _visitors_c0
+          | XhpCategory (_visitors_c0,_visitors_c1) ->
+              self#on_XhpCategory env _visitors_c0 _visitors_c1
+          | XhpChild (_visitors_c0,_visitors_c1) ->
+              self#on_XhpChild env _visitors_c0 _visitors_c1
         method on_ChildName env _visitors_c0 =
           let _visitors_s0 = self#on_id env _visitors_c0  in _visitors_s0
         method on_ChildList env _visitors_c0 =
@@ -6337,13 +6356,15 @@ include
         method on_Method env _visitors_c0 =
           let _visitors_r0 = self#on_method_ env _visitors_c0  in
           Method _visitors_r0
-        method on_XhpCategory env _visitors_c0 =
-          let _visitors_r0 = self#on_list self#on_pstring env _visitors_c0
+        method on_XhpCategory env _visitors_c0 _visitors_c1 =
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
+          let _visitors_r1 = self#on_list self#on_pstring env _visitors_c1
              in
-          XhpCategory _visitors_r0
-        method on_XhpChild env _visitors_c0 =
-          let _visitors_r0 = self#on_xhp_child env _visitors_c0  in
-          XhpChild _visitors_r0
+          XhpCategory (_visitors_r0, _visitors_r1)
+        method on_XhpChild env _visitors_c0 _visitors_c1 =
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
+          let _visitors_r1 = self#on_xhp_child env _visitors_c1  in
+          XhpChild (_visitors_r0, _visitors_r1)
         method on_class_elt env _visitors_this =
           match _visitors_this with
           | Const (_visitors_c0,_visitors_c1) ->
@@ -6368,8 +6389,10 @@ include
               self#on_XhpAttr env _visitors_c0 _visitors_c1 _visitors_c2
                 _visitors_c3
           | Method _visitors_c0 -> self#on_Method env _visitors_c0
-          | XhpCategory _visitors_c0 -> self#on_XhpCategory env _visitors_c0
-          | XhpChild _visitors_c0 -> self#on_XhpChild env _visitors_c0
+          | XhpCategory (_visitors_c0,_visitors_c1) ->
+              self#on_XhpCategory env _visitors_c0 _visitors_c1
+          | XhpChild (_visitors_c0,_visitors_c1) ->
+              self#on_XhpChild env _visitors_c0 _visitors_c1
         method on_ChildName env _visitors_c0 =
           let _visitors_r0 = self#on_id env _visitors_c0  in
           ChildName _visitors_r0
@@ -7366,12 +7389,14 @@ include
           ()
         method on_Method env _visitors_c0 =
           let _visitors_r0 = self#on_method_ env _visitors_c0  in ()
-        method on_XhpCategory env _visitors_c0 =
-          let _visitors_r0 = self#on_list self#on_pstring env _visitors_c0
+        method on_XhpCategory env _visitors_c0 _visitors_c1 =
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
+          let _visitors_r1 = self#on_list self#on_pstring env _visitors_c1
              in
           ()
-        method on_XhpChild env _visitors_c0 =
-          let _visitors_r0 = self#on_xhp_child env _visitors_c0  in ()
+        method on_XhpChild env _visitors_c0 _visitors_c1 =
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
+          let _visitors_r1 = self#on_xhp_child env _visitors_c1  in ()
         method on_class_elt env _visitors_this =
           match _visitors_this with
           | Const (_visitors_c0,_visitors_c1) ->
@@ -7396,8 +7421,10 @@ include
               self#on_XhpAttr env _visitors_c0 _visitors_c1 _visitors_c2
                 _visitors_c3
           | Method _visitors_c0 -> self#on_Method env _visitors_c0
-          | XhpCategory _visitors_c0 -> self#on_XhpCategory env _visitors_c0
-          | XhpChild _visitors_c0 -> self#on_XhpChild env _visitors_c0
+          | XhpCategory (_visitors_c0,_visitors_c1) ->
+              self#on_XhpCategory env _visitors_c0 _visitors_c1
+          | XhpChild (_visitors_c0,_visitors_c1) ->
+              self#on_XhpChild env _visitors_c0 _visitors_c1
         method on_ChildName env _visitors_c0 =
           let _visitors_r0 = self#on_id env _visitors_c0  in ()
         method on_ChildList env _visitors_c0 =

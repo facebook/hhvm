@@ -1356,7 +1356,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassTraitRequire _ -> acc
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
-    | XhpCategory cs ->
+    | XhpCategory (_, cs) ->
       (match acc with
       | Some _ -> Errors.multiple_xhp_category (fst (List.hd_exn cs)); acc
       | None -> Some cs)

@@ -282,6 +282,9 @@ let make_param_local_ty env param =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
   let env, ty =
     match param.param_hint with
+    | None when param.param_expr = None ->
+      let r = Reason.Rwitness param.param_pos in
+      env, (r, TUtils.tany env)
     | None ->
       (* if the type is missing, use an unbound type variable *)
       let _r, ty = Env.fresh_type () in

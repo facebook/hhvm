@@ -1189,6 +1189,7 @@ module type Syntax_S = sig
 
 
   val position : Relative_path.t -> t -> Pos.t option
+  val offset : t -> int option
   val is_missing : t -> bool
   val is_list : t -> bool
   val is_end_of_file : t -> bool

@@ -107,5 +107,6 @@ let is_in_body node position =
   let parents = parentage node position in
   aux parents
 
+let offset _ = None
 let position _file _node = None
 let extract_text _node = None

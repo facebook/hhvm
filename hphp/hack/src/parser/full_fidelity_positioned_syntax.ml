@@ -268,3 +268,5 @@ let position file node =
   let start_offset = start_offset node in
   let end_offset = end_offset node in
   Some (SourceText.relative_pos file source_text start_offset end_offset)
+
+let offset node = Some (start_offset node)

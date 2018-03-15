@@ -109,8 +109,6 @@ let is_in_body node position =
   in
   aux (parentage node position)
 
-  let position _ _ = None
-
 (* This function takes a parse tree and renders it in the GraphViz DOT
 language; this is a small domain-specific language for visualizing graphs.
 You can use www.webgraphviz.com to render it in a browser, or the "dot"
@@ -154,3 +152,6 @@ let to_dot node with_labels =
     aux node 1001 1000 "" ["  1000 [label=\"root\"]"; "digraph {"] in
   let acc = "}" :: acc in
   String.concat "\n" (List.rev acc)
+
+let offset _ = None
+let position _ _ = None

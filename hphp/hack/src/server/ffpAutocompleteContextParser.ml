@@ -408,7 +408,7 @@ type autocomplete_location_classification =
   | InTrailingTrivia
 
 let classify_autocomplete_location
-  (parents:PositionedSyntax.t list) (offset:int)
+  (parents:PositionedSyntax.t list) (off:int)
   : autocomplete_location_classification =
   let open PositionedSyntax in
   let check_for_specific_token parent =
@@ -420,12 +420,12 @@ let classify_autocomplete_location
   in
   match parents with
   | [] -> failwith "Empty parentage (this should never happen)"
-  | parent :: _ when offset < start_offset parent -> InLeadingTrivia
-  | parent :: _ when offset = start_offset parent -> check_for_specific_token parent
-  | parent :: _ when offset <= trailing_start_offset parent -> InToken
+  | parent :: _ when off < start_offset parent -> InLeadingTrivia
+  | parent :: _ when off = start_offset parent -> check_for_specific_token parent
+  | parent :: _ when off <= trailing_start_offset parent -> InToken
   | _ -> InTrailingTrivia
 
-let get_context_and_stub (positioned_tree:PositionedSyntax.t) (offset:int)
+let get_context_and_stub (positioned_tree:PositionedSyntax.t) (off:int)
   : context * string =
   let open PositionedSyntax in
   (* If the offset is the same as the width of the whole tree, then the cursor is at the end of
@@ -433,11 +433,11 @@ let get_context_and_stub (positioned_tree:PositionedSyntax.t) (offset:int)
   considered to be in the leading trivia of the end of file character. This guarantees our parentage
   is not empty. *)
   let new_offset =
-    if offset >= full_width positioned_tree then full_width positioned_tree - 1
-    else offset
+    if off >= full_width positioned_tree then full_width positioned_tree - 1
+    else off
   in
   let ancestry = parentage positioned_tree new_offset in
-  let location = classify_autocomplete_location ancestry offset in
+  let location = classify_autocomplete_location ancestry off in
   let autocomplete_leaf_node = List.hd_exn ancestry in
   let previous_offset = leading_start_offset autocomplete_leaf_node - 1 in
   let predecessor_parentage = parentage positioned_tree previous_offset in

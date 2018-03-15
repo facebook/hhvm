@@ -147,6 +147,11 @@ let end_offset node =
 let trailing_start_offset node =
   leading_start_offset node + leading_width node + width node
 
+let offset node =
+  match value node with
+  | Value.Positioned source_data -> Some (SourceData.start_offset source_data)
+  | Value.Synthetic -> None
+
 let position file node =
   match value node with
   | Value.Positioned source_data ->

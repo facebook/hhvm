@@ -520,6 +520,7 @@ SYNTAX
 CONSTRUCTOR_METHODS
 
   val position : Relative_path.t -> t -> Pos.t option
+  val offset : t -> int option
   val is_missing : t -> bool
   val is_list : t -> bool
 TYPE_TESTS

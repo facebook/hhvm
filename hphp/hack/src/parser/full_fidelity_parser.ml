@@ -96,7 +96,7 @@ let make env text =
   ; errors = []
   ; context = Context.empty
   ; env
-  ; sc_state = SCWithToken.initial_state ()
+  ; sc_state = SCWithToken.initial_state env
   }
 
 let errors parser =

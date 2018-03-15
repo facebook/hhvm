@@ -22,10 +22,12 @@
  *)
 
 module type SC_S = SmartConstructors.SmartConstructors_S
+module ParserEnv = Full_fidelity_parser_env
+
 module type State_S = sig
   type r
   type t
-  val initial : unit -> t
+  val initial : ParserEnv.t -> t
   val next : t -> r list -> t
 end
 
@@ -213,7 +215,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     struct
       type r = Syntax.t
       type t = unit
-      let initial () = ()
+      let initial _ = ()
       let next () _ = ()
     end
   )

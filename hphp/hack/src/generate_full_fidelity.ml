@@ -587,12 +587,14 @@ module GenerateFFSmartConstructors = struct
  * constructors.
   ") ^ "
 
+module ParserEnv = Full_fidelity_parser_env
+
 module type SmartConstructors_S = sig
   module Token : Lexable_token_sig.LexableToken_S
   type t (* state *)
   type r (* smart constructor return type *)
 
-  val initial_state : unit -> t
+  val initial_state : ParserEnv.t -> t
   val make_token : Token.t -> t -> t * r
   val make_missing : Full_fidelity_source_text.pos -> t -> t * r
   val make_list : Full_fidelity_source_text.pos -> r list -> t -> t * r
@@ -755,7 +757,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     in
     Core_list.iter2_exn ~f:equals params args
 
-  let initial_state () = []
+  let initial_state _ = []
 
   let make_token token stack =
     let token = Syntax.make_token token in
@@ -808,10 +810,12 @@ module GenerateFFSyntaxSmartConstructors = struct
  ") ^ "
 
 module type SC_S = SmartConstructors.SmartConstructors_S
+module ParserEnv = Full_fidelity_parser_env
+
 module type State_S = sig
   type r
   type t
-  val initial : unit -> t
+  val initial : ParserEnv.t -> t
   val next : t -> r list -> t
 end
 
@@ -835,7 +839,7 @@ CONSTRUCTOR_METHODS
     struct
       type r = Syntax.t
       type t = unit
-      let initial () = ()
+      let initial _ = ()
       let next () _ = ()
     end
   )

@@ -761,7 +761,14 @@ let scan_docstring_name lexer =
       let lexer = if ch = '"' then advance lexer 1 else lexer in
       let lexer, name = scan_docstring_name_actual lexer in
       let lexer =
-        if ch = '"' && peek_char lexer 0 = '\"' then advance lexer 1 else lexer
+        if ch = '"' then
+          (* same logic as above, just for double quote *)
+          if peek_char lexer 0 = '\"' then
+            advance lexer 1
+          else
+            with_error lexer SyntaxError.missing_double_quote
+        else
+          lexer
       in
       lexer, name
   in

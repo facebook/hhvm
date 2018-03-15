@@ -419,3 +419,6 @@ let clone_cannot_be_static class_name method_name =
 
 let namespace_not_a_classname =
   "Namespace cannot be used as a classname"
+
+let missing_double_quote = (* error0010 analogue *)
+  "A double quote is expected here."

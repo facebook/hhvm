@@ -248,3 +248,4 @@ val clone_cannot_be_static : string -> string -> string
 val namespace_not_a_classname : string
 val parent_static_const_decl : string
 val xhp_class_multiple_category_decls: string
+val missing_double_quote: string

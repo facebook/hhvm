@@ -191,6 +191,22 @@ class LowPtrPrinter(PtrPrinter):
 
 
 #------------------------------------------------------------------------------
+# folly::Optional
+
+class OptionalPrinter(object):
+    RECOGNIZE = '^(HPHP::req|folly)::Optional<.*>$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        if not self.val['storage_']['hasValue_']:
+            return 'folly::none'
+        inner = self.val.type.template_argument(0)
+        ptr = self.val['storage_']['value_'].address.cast(inner.pointer())
+        return ptr.dereference()
+
+#------------------------------------------------------------------------------
 # ArrayData.
 
 class ArrayDataPrinter(object):
@@ -465,6 +481,7 @@ printer_classes = [
     HhbbcBytecodePrinter,
     CompactVectorPrinter,
     SrcKeyPrinter,
+    OptionalPrinter,
 ]
 type_printers = {(re.compile(cls.RECOGNIZE), cls)
                   for cls in printer_classes}

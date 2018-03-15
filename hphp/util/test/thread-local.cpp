@@ -46,7 +46,6 @@ TEST(ThreadLocalFlat, OnThreadExit) {
       EXPECT_EQ(s_destructs, 0);
       foo->m_bar = 87;
     });
-  EXPECT_EQ(s_destructs, 0);
   thread.join();
   EXPECT_EQ(s_destructs, 1);
 }
@@ -67,7 +66,6 @@ TEST(ThreadLocalFlat, Recreate) {
       EXPECT_EQ(s_destructs, 1);
       foo->m_bar = 87;
     });
-  EXPECT_LE(s_destructs, 1);
   thread.join();
   EXPECT_EQ(s_destructs, 2);
 }

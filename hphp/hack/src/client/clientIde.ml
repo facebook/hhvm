@@ -234,7 +234,7 @@ let handle_request conn id protocol = function
   | Infer_type args ->
     let filename, line, column = file_position_to_tuple args in
     let filename = ServerUtils.FileName filename in
-    rpc conn (Rpc.INFER_TYPE (filename, line, column)) |>
+    rpc conn (Rpc.INFER_TYPE (filename, line, column, false)) |>
     InferAtPosService.infer_result_to_ide_response |>
     print_response id protocol
   | Identify_symbol args ->

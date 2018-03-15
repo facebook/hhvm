@@ -32,7 +32,7 @@ type lint_stdin_input = { filename: string; contents: string }
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
   | STATUS : bool -> Server_status.t t
-  | INFER_TYPE : ServerUtils.file_input * int * int ->
+  | INFER_TYPE : ServerUtils.file_input * int * int * bool ->
       InferAtPosService.result t
   | INFER_TYPE_BATCH : (string * int * int) list -> string list t
   | IDE_HOVER : ServerUtils.file_input * int * int ->

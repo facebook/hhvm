@@ -151,10 +151,11 @@ let returned_type_at_pos
 
 let go:
   ServerEnv.env ->
-  (ServerUtils.file_input * int * int) ->
+  (ServerUtils.file_input * int * int * bool) ->
   (string * string) option =
-fun env (file, line, char) ->
+fun env (file, line, char, dynamic_view) ->
   let ServerEnv.{tcopt; files_info; _} = env in
+  let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view; } in
   let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
   returned_type_at_pos tast line char
   >>| fun (env, ty) ->

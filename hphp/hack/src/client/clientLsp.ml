@@ -584,7 +584,7 @@ let do_didChange
 
 let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
   let (file, line, column) = lsp_file_position_to_hack params in
-  let command = ServerCommandTypes.INFER_TYPE (ServerUtils.FileName file, line, column) in
+  let command = ServerCommandTypes.INFER_TYPE (ServerUtils.FileName file, line, column, false) in
   let inferred_type = rpc conn command in
   match inferred_type with
   (* Hack server uses None to indicate absence of a result. *)

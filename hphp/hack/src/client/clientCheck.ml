@@ -242,7 +242,7 @@ let main args =
           Printf.eprintf "Invalid position\n";
           raise Exit_status.(Exit_with Input_error)
       in
-      let ty = rpc args @@ Rpc.INFER_TYPE (fn, line, char) in
+      let ty = rpc args @@ Rpc.INFER_TYPE (fn, line, char, args.dynamic_view) in
       ClientTypeAtPos.go ty args.output_json;
       Exit_status.No_error
     | MODE_TYPE_AT_POS_BATCH positions ->

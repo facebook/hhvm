@@ -80,6 +80,7 @@ let parse_check_args cmd =
   let format_from = ref 0 in
   let ai_mode = ref None in
   let ignore_hh_version = ref false in
+  let dynamic_view = ref false in
 
   (* custom behaviors *)
   let set_from x () = from := x in
@@ -169,6 +170,9 @@ let parse_check_args cmd =
     "--find-class-refs",
       Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x) ()),
       " (mode) finds references of the provided class name";
+    "--dynamic-view",
+      Arg.Set dynamic_view,
+      " Replace occurrences of untyped code with dynamic";
     "--dump-symbol-info",
       Arg.String (fun files -> set_mode (MODE_DUMP_SYMBOL_INFO files) ()),
       (*  Input format:
@@ -433,6 +437,7 @@ let parse_check_args cmd =
     profile_log = !profile_log;
     ai_mode = !ai_mode;
     ignore_hh_version = !ignore_hh_version;
+    dynamic_view = !dynamic_view;
   }
 
 let parse_start_env command =

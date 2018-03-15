@@ -231,6 +231,39 @@ let lambda_param_cases = [
   ("lambda_param.php", 6, 14), ("(function(int $x): num)", "(function(int $x): num)");
 ]
 
+
+let dynamic_view = "<?hh
+function any() {
+  return 'any';
+}
+function foo($x) : void {
+//           ^5:14
+  $y = $x + 5;
+//^7:3
+  $z = $x + $x;
+//^9:3
+  $w = any();
+//^11:3
+  $z = $x ^ $x;
+//^13:3
+  $z = $w . '';
+//^15:3
+  $z = $x | 5;
+//^17:3
+
+}
+"
+
+let dynamic_view_cases = [
+  ("dynamic_view.php", 5, 14), ("dynamic", "dynamic");
+  ("dynamic_view.php", 7, 3),  ("num", "num");
+  ("dynamic_view.php", 9, 3),  ("dynamic", "dynamic");
+  ("dynamic_view.php", 11, 3), ("dynamic", "dynamic");
+  ("dynamic_view.php", 13, 3), ("dynamic", "dynamic");
+  ("dynamic_view.php", 15, 3), ("string", "string");
+  ("dynamic_view.php", 17, 3), ("int", "int");
+]
+
 let files = [
   "id.php", id;
   "A.php", class_A;
@@ -244,6 +277,7 @@ let files = [
   "curried.php", curried;
   "multiple_type.php", multiple_type;
   "lambda_param.php", lambda_param;
+  "dynamic_view.php", dynamic_view;
 ]
 
 let cases =
@@ -262,12 +296,7 @@ let () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env files in
 
-  Test.assert_no_errors env;
-
-  List.iter cases ~f:begin fun
-    ((file, line, col), (expected_type, expected_returned_type))
-  ->
-
+  let test_case ~dynamic ((file, line, col), (expected_type, expected_returned_type)) =
     let compare_type expected type_at =
       let ty_str =
         match type_at with
@@ -283,6 +312,7 @@ let () =
     let fn = ServerUtils.FileName ("/" ^ file) in
 
     let ServerEnv.{tcopt; files_info; _} = env in
+    let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic } in
     let _, tast = ServerIdeUtils.check_file_input tcopt files_info fn in
 
     let ty = ServerInferType.type_at_pos tast line col in
@@ -290,4 +320,7 @@ let () =
 
     let ty = ServerInferType.returned_type_at_pos tast line col in
     compare_type expected_returned_type ty
-  end
+  in
+
+  List.iter cases ~f:(test_case ~dynamic:false);
+  List.iter dynamic_view_cases ~f:(test_case ~dynamic:true)

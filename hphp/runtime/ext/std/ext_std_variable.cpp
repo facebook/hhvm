@@ -128,13 +128,19 @@ bool HHVM_FUNCTION(is_scalar, const Variant& v) {
 bool HHVM_FUNCTION(is_array, const Variant& v) {
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
     if (v.isPHPArray()) {
-      auto& arr = v.asCArrRef();
+      auto const& arr = v.toCArrRef();
       if (arr.isVArray()) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_ARR);
       } else if (arr.isDArray()) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_ARR);
       }
       return true;
+    } else if (v.isVecArray()) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);
+    } else if (v.isDict()) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_ARR);
+    } else if (v.isKeyset()) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
     }
     return false;
   }
@@ -142,10 +148,28 @@ bool HHVM_FUNCTION(is_array, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+    if (v.isPHPArray()) {
+      auto const& arr = v.toCArrRef();
+      if (arr.isVArray()) {
+        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_VEC);
+      }
+      return false;
+    }
+  }
   return is_vec(v);
 }
 
 bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+    if (v.isPHPArray()) {
+      auto const& arr = v.toCArrRef();
+      if (arr.isDArray()) {
+        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
+      }
+      return false;
+    }
+  }
   return is_dict(v);
 }
 
@@ -155,12 +179,24 @@ bool HHVM_FUNCTION(HH_is_keyset, const Variant& v) {
 
 bool HHVM_FUNCTION(HH_is_varray, const Variant& val) {
   if (RuntimeOption::EvalHackArrDVArrs) return is_vec(val);
-  return val.isPHPArray() && val.asCArrRef().isVArray();
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+    if (val.isVecArray()) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_VARR);
+      return false;
+    }
+  }
+  return val.isPHPArray() && val.toCArrRef().isVArray();
 }
 
 bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
   if (RuntimeOption::EvalHackArrDVArrs) return is_dict(val);
-  return val.isPHPArray() && val.asCArrRef().isDArray();
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+    if (val.isDict()) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_DARR);
+      return false;
+    }
+  }
+  return val.isPHPArray() && val.toCArrRef().isDArray();
 }
 
 bool HHVM_FUNCTION(is_object, const Variant& v) {

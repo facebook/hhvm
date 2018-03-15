@@ -407,13 +407,13 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::Dbl:     return TDbl;
   case IsTypeOp::Bool:    return TBool;
   case IsTypeOp::Str:     return TStr;
-  case IsTypeOp::Vec:     return TVec;
-  case IsTypeOp::Dict:    return TDict;
-  case IsTypeOp::Keyset:  return TKeyset;
   case IsTypeOp::Arr:     return TArr;
+  case IsTypeOp::Keyset:  return TKeyset;
   case IsTypeOp::Obj:     return TObj;
   case IsTypeOp::ArrLike: return TArrLike;
   case IsTypeOp::Res:     return TRes;
+  case IsTypeOp::Vec:
+  case IsTypeOp::Dict:
   case IsTypeOp::VArray:
   case IsTypeOp::DArray:
   case IsTypeOp::Scalar: not_reached();
@@ -447,7 +447,107 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* val, IsTypeOp op) {
       );
     },
     [&](SSATmp*) { return cns(env, true); },
-    [&]{ return cns(env, false); }
+    [&]{
+      if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
+        ifElse(
+          env,
+          [&] (Block* taken) {
+            gen(
+              env,
+              CheckType,
+              op == IsTypeOp::VArray ? TVec : TDict,
+              taken,
+              val
+            );
+          },
+          [&] {
+            gen(
+              env,
+              RaiseHackArrCompatNotice,
+              cns(
+                env,
+                makeStaticString(
+                  op == IsTypeOp::VArray
+                  ? Strings::HACKARR_COMPAT_VEC_IS_VARR
+                  : Strings::HACKARR_COMPAT_DICT_IS_DARR
+                )
+              )
+            );
+          }
+        );
+      }
+      return cns(env, false);
+    }
+  );
+}
+
+SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
+  if (!RuntimeOption::EvalHackArrCompatIsArrayNotices) {
+    return gen(env, IsType, TVec, src);
+  }
+
+  auto const varrCheck = [&]{
+    cond(
+      env,
+      [&](Block* taken) { return gen(env, CheckType, TArr, taken, src); },
+      [&](SSATmp* arr) {
+        ifElse(
+          env,
+          [&](Block* taken) { gen(env, CheckVArray, taken, arr); },
+          [&]{
+            gen(
+              env,
+              RaiseHackArrCompatNotice,
+              cns(env, makeStaticString(Strings::HACKARR_COMPAT_VARR_IS_VEC))
+            );
+          }
+        );
+        return nullptr;
+      },
+      [&]{ return nullptr; }
+    );
+  };
+
+  return cond(
+    env,
+    [&](Block* taken) { gen(env, CheckType, TVec, taken, src); },
+    [&]{ return cns(env, true); },
+    [&]{ varrCheck(); return cns(env, false); }
+  );
+}
+
+SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
+  if (!RuntimeOption::EvalHackArrCompatIsArrayNotices) {
+    return gen(env, IsType, TDict, src);
+  }
+
+  auto const darrCheck = [&]{
+    cond(
+      env,
+      [&](Block* taken) { return gen(env, CheckType, TArr, taken, src); },
+      [&](SSATmp* arr) {
+        ifElse(
+          env,
+          [&](Block* taken) { gen(env, CheckDArray, taken, arr); },
+          [&]{
+            gen(
+              env,
+              RaiseHackArrCompatNotice,
+              cns(env, makeStaticString(Strings::HACKARR_COMPAT_DARR_IS_DICT))
+            );
+          }
+        );
+        return nullptr;
+      },
+      [&]{ return nullptr; }
+    );
+  };
+
+  return cond(
+    env,
+    [&](Block* taken) { gen(env, CheckType, TDict, taken, src); },
+    [&]{ return cns(env, true); },
+    [&]{ darrCheck(); return cns(env, false); }
   );
 }
 
@@ -485,11 +585,33 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
     );
   };
 
+#define X(name, type, msg, next)                                        \
+  auto const name = [&]{                                                \
+    ifThenElse(                                                         \
+      env,                                                              \
+      [&](Block* taken) { gen(env, CheckType, type, taken, src); },     \
+      [&]{                                                              \
+        gen(                                                            \
+          env,                                                          \
+          RaiseHackArrCompatNotice,                                     \
+          cns(env, makeStaticString(Strings::HACKARR_COMPAT_##msg##_IS_ARR)) \
+        );                                                              \
+      },                                                                \
+      [&]{ next; }                                                      \
+    );                                                                  \
+  }
+
+  X(keysetCheck, TKeyset, KEYSET,);
+  X(dictCheck, TDict, DICT, keysetCheck());
+  X(vecCheck, TVec, VEC, dictCheck());
+
+#undef X
+
   return cond(
     env,
     [&](Block* taken) { firstCheck(gen(env, CheckType, TArr, taken, src)); },
     [&]{ return cns(env, true); },
-    [&]{ return cns(env, false); }
+    [&]{ vecCheck(); return cns(env, false); }
   );
 }
 
@@ -662,6 +784,10 @@ void emitIsTypeC(IRGS& env, IsTypeOp subop) {
     push(env, isDVArrayImpl(env, src, subop));
   } else if (subop == IsTypeOp::Arr) {
     push(env, isArrayImpl(env, src));
+  } else if (subop == IsTypeOp::Vec) {
+    push(env, isVecImpl(env, src));
+  } else if (subop == IsTypeOp::Dict) {
+    push(env, isDictImpl(env, src));
   } else {
     auto const t = typeOpToType(subop);
     if (t <= TObj) {
@@ -685,6 +811,10 @@ void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
     push(env, isDVArrayImpl(env, val, subop));
   } else if (subop == IsTypeOp::Arr) {
     push(env, isArrayImpl(env, val));
+  } else if (subop == IsTypeOp::Vec) {
+    push(env, isVecImpl(env, val));
+  } else if (subop == IsTypeOp::Dict) {
+    push(env, isDictImpl(env, val));
   } else {
     auto const t = typeOpToType(subop);
     if (t <= TObj) {

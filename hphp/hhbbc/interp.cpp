@@ -1122,6 +1122,18 @@ void in(ISS& env, const bc::JmpZ& op)  { jmpImpl<false>(env, op); }
 
 namespace {
 
+bool isTypeMightRaise(const Type& testTy, const Type& valTy) {
+  if (!RuntimeOption::EvalHackArrCompatIsArrayNotices) return false;
+  if (testTy.subtypeOf(TVArr)) return valTy.couldBe(TVec);
+  if (testTy.subtypeOf(TDArr)) return valTy.couldBe(TDict);
+  if (testTy.subtypeOf(TArr))  return valTy.couldBeAny(TVArr, TDArr,
+                                                       TVec, TDict,
+                                                       TKeyset);
+  if (testTy.subtypeOf(TVec))  return valTy.couldBe(TVArr);
+  if (testTy.subtypeOf(TDict)) return valTy.couldBe(TDArr);
+  return false;
+}
+
 template<class IsType, class JmpOp>
 void isTypeHelper(ISS& env,
                   IsTypeOp typeOp, LocalId location,
@@ -1139,18 +1151,11 @@ void isTypeHelper(ISS& env,
   }
 
   if (istype.op == Op::IsTypeC) {
-    if (!RuntimeOption::EvalHackArrCompatIsArrayNotices ||
-        typeOp != IsTypeOp::Arr ||
-        !val.couldBeAny(TVArr, TDArr)) {
-      nothrow(env);
-    }
+    if (!isTypeMightRaise(testTy, val)) nothrow(env);
     popT(env);
-  } else if (!locCouldBeUninit(env, location)) {
-    if (!RuntimeOption::EvalHackArrCompatIsArrayNotices ||
-        typeOp != IsTypeOp::Arr ||
-        !val.couldBeAny(TVArr, TDArr)) {
-      nothrow(env);
-    }
+  } else if (!locCouldBeUninit(env, location) &&
+             !isTypeMightRaise(testTy, val)) {
+    nothrow(env);
   }
 
   auto const negate = jmp.op == Op::JmpNZ;
@@ -1957,12 +1962,7 @@ void in(ISS& env, const bc::EmptyG&) { popC(env); push(env, TBool); }
 void in(ISS& env, const bc::IssetG&) { popC(env); push(env, TBool); }
 
 void isTypeImpl(ISS& env, const Type& locOrCell, const Type& test) {
-  if (!RuntimeOption::EvalHackArrCompatIsArrayNotices ||
-      !test.subtypeOf(TArr) ||
-      test.subtypeOfAny(TVArr, TDArr) ||
-      !locOrCell.couldBeAny(TVArr, TDArr)) {
-    constprop(env);
-  }
+  if (!isTypeMightRaise(test, locOrCell)) constprop(env);
   if (locOrCell.subtypeOf(test))  return push(env, TTrue);
   if (!locOrCell.couldBe(test))   return push(env, TFalse);
   push(env, TBool);

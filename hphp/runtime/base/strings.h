@@ -105,6 +105,13 @@ const char* const HACKARR_COMPAT_ARR_MIXEDCMP =
   "Comparing array with non-array";
 const char* const HACKARR_COMPAT_VARR_IS_ARR = "is_array() called on varray";
 const char* const HACKARR_COMPAT_DARR_IS_ARR = "is_array() called on darray";
+const char* const HACKARR_COMPAT_VEC_IS_ARR = "is_array() called on vec";
+const char* const HACKARR_COMPAT_DICT_IS_ARR = "is_array() called on dict";
+const char* const HACKARR_COMPAT_KEYSET_IS_ARR = "is_array() called on keyset";
+const char* const HACKARR_COMPAT_VARR_IS_VEC = "is_vec() called on varray";
+const char* const HACKARR_COMPAT_VEC_IS_VARR = "is_varray() called on vec";
+const char* const HACKARR_COMPAT_DARR_IS_DICT = "is_dict() called on darray";
+const char* const HACKARR_COMPAT_DICT_IS_DARR = "is_darray() called on dict";
 const char* const FUNCTION_CALLED_DYNAMICALLY = "'%s' called dynamically";
 
 } // namespace Strings

@@ -4055,40 +4055,78 @@ OPTBLD_FLT_INLINE void iopIssetL(local_var tv) {
   topTv->m_type = KindOfBoolean;
 }
 
-OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
+OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
+  assertx(cellIsPlausible(*val));
+
   switch (op) {
-  case IsTypeOp::Uninit: return tv->m_type == KindOfUninit;
-  case IsTypeOp::Null:   return is_null(tvAsCVarRef(tv));
-  case IsTypeOp::Bool:   return is_bool(tvAsCVarRef(tv));
-  case IsTypeOp::Int:    return is_int(tvAsCVarRef(tv));
-  case IsTypeOp::Dbl:    return is_double(tvAsCVarRef(tv));
+  case IsTypeOp::Uninit: return val->m_type == KindOfUninit;
+  case IsTypeOp::Null:   return is_null(tvAsCVarRef(val));
+  case IsTypeOp::Bool:   return is_bool(tvAsCVarRef(val));
+  case IsTypeOp::Int:    return is_int(tvAsCVarRef(val));
+  case IsTypeOp::Dbl:    return is_double(tvAsCVarRef(val));
   case IsTypeOp::Arr:
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
-      if (isArrayType(tv->m_type)) {
-        if (tv->m_data.parr->isVArray()) {
+      if (isArrayType(val->m_type)) {
+        if (val->m_data.parr->isVArray()) {
           raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_ARR);
-        } else if (tv->m_data.parr->isDArray()) {
+        } else if (val->m_data.parr->isDArray()) {
           raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_ARR);
         }
         return true;
+      } else if (isVecType(val->m_type)) {
+        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);
+      } else if (isDictType(val->m_type)) {
+        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_ARR);
+      } else if (isKeysetType(val->m_type)) {
+        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
       }
       return false;
     }
-    return is_array(tvAsCVarRef(tv));
-  case IsTypeOp::Vec:    return is_vec(tvAsCVarRef(tv));
-  case IsTypeOp::Dict:   return is_dict(tvAsCVarRef(tv));
-  case IsTypeOp::Keyset: return is_keyset(tvAsCVarRef(tv));
-  case IsTypeOp::Obj:    return is_object(tvAsCVarRef(tv));
-  case IsTypeOp::Str:    return is_string(tvAsCVarRef(tv));
-  case IsTypeOp::Res:    return tv->m_type == KindOfResource;
-  case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(tv));
-  case IsTypeOp::ArrLike: return isArrayLikeType(tv->m_type);
+    return is_array(tvAsCVarRef(val));
+  case IsTypeOp::Vec:
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+      if (isArrayType(val->m_type)) {
+        if (val->m_data.parr->isVArray()) {
+          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_VEC);
+        }
+        return false;
+      }
+    }
+    return is_vec(tvAsCVarRef(val));
+  case IsTypeOp::Dict:
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+      if (isArrayType(val->m_type)) {
+        if (val->m_data.parr->isDArray()) {
+          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
+        }
+        return false;
+      }
+    }
+    return is_dict(tvAsCVarRef(val));
+  case IsTypeOp::Keyset: return is_keyset(tvAsCVarRef(val));
+  case IsTypeOp::Obj:    return is_object(tvAsCVarRef(val));
+  case IsTypeOp::Str:    return is_string(tvAsCVarRef(val));
+  case IsTypeOp::Res:    return val->m_type == KindOfResource;
+  case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(val));
+  case IsTypeOp::ArrLike: return isArrayLikeType(val->m_type);
   case IsTypeOp::VArray:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return is_varray(tvAsCVarRef(tv));
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+      if (isVecType(val->m_type)) {
+        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_VARR);
+        return false;
+      }
+    }
+    return is_varray(tvAsCVarRef(val));
   case IsTypeOp::DArray:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return is_darray(tvAsCVarRef(tv));
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+      if (isDictType(val->m_type)) {
+        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_DARR);
+        return false;
+      }
+    }
+    return is_darray(tvAsCVarRef(val));
   }
   not_reached();
 }
@@ -4097,18 +4135,12 @@ OPTBLD_INLINE void iopIsTypeL(local_var loc, IsTypeOp op) {
   if (loc.ptr->m_type == KindOfUninit) {
     raise_undefined_local(vmfp(), loc.index);
   }
-  TypedValue* topTv = vmStack().allocTV();
-  topTv->m_data.num = isTypeHelper(loc.ptr, op);
-  topTv->m_type = KindOfBoolean;
+  vmStack().pushBool(isTypeHelper(tvToCell(loc.ptr), op));
 }
 
 OPTBLD_INLINE void iopIsTypeC(IsTypeOp op) {
-  TypedValue* topTv = vmStack().topTV();
-  assertx(topTv->m_type != KindOfRef);
-  bool ret = isTypeHelper(topTv, op);
-  tvDecRefGen(topTv);
-  topTv->m_data.num = ret;
-  topTv->m_type = KindOfBoolean;
+  auto val = vmStack().topC();
+  vmStack().replaceC(make_tv<KindOfBoolean>(isTypeHelper(val, op)));
 }
 
 OPTBLD_INLINE void iopIsUninit() {

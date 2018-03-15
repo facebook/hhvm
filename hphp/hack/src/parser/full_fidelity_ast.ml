@@ -117,31 +117,32 @@ let invariant_failure node msg env =
 let scuba_table = Scuba.Table.of_name "hh_missing_lowerer_cases"
 
 let log_missing ?(caught = false) ~env ~expecting node : unit =
-  let source = source_text node in
-  let start = start_offset node in
-  let end_ = end_offset node in
-  let pos = SourceText.relative_pos env.file source start end_ in
-  let file = Relative_path.to_absolute env.file in
-  let contents =
-    let context_size = 5000 in
-    let start = max 0 (start - context_size) in
-    let length = min (2 * context_size) (SourceText.length source - start) in
-    SourceText.sub source start length
-  in
-  let kind = SyntaxKind.to_string (Syntax.kind node) in
-  let line = Pos.line pos in
-  let column = Pos.start_cnum pos in
-  let synthetic = value node = Value.Synthetic in
-  Scuba.new_sample (Some scuba_table)
-  |> Scuba.add_normal "filename" file
-  |> Scuba.add_normal "expecting" expecting
-  |> Scuba.add_normal "contents" contents
-  |> Scuba.add_normal "found_kind" kind
-  |> Scuba.add_int "line" line
-  |> Scuba.add_int "column" column
-  |> Scuba.add_int "is_synthetic" (if synthetic then 1 else 0)
-  |> Scuba.add_int "caught" (if caught then 1 else 0)
-  |> EventLogger.log
+  EventLogger.log_if_initialized @@ fun () ->
+    let source = source_text node in
+    let start = start_offset node in
+    let end_ = end_offset node in
+    let pos = SourceText.relative_pos env.file source start end_ in
+    let file = Relative_path.to_absolute env.file in
+    let contents =
+      let context_size = 5000 in
+      let start = max 0 (start - context_size) in
+      let length = min (2 * context_size) (SourceText.length source - start) in
+      SourceText.sub source start length
+    in
+    let kind = SyntaxKind.to_string (Syntax.kind node) in
+    let line = Pos.line pos in
+    let column = Pos.start_cnum pos in
+    let synthetic = value node = Value.Synthetic in
+    Scuba.new_sample (Some scuba_table)
+    |> Scuba.add_normal "filename" file
+    |> Scuba.add_normal "expecting" expecting
+    |> Scuba.add_normal "contents" contents
+    |> Scuba.add_normal "found_kind" kind
+    |> Scuba.add_int "line" line
+    |> Scuba.add_int "column" column
+    |> Scuba.add_int "is_synthetic" (if synthetic then 1 else 0)
+    |> Scuba.add_int "caught" (if caught then 1 else 0)
+    |> EventLogger.log
 
 exception API_Missing_syntax of string * env * node
 let missing_syntax : ?fallback:'a -> string -> node -> env -> 'a =

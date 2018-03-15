@@ -103,9 +103,28 @@ let test_trivia source =
 let test_mode source =
   let file_path = Relative_path.(create Dummy "<test_mode>") in
   let source_text = SourceText.make file_path source in
+  let lang', _org_mode, mode' =
+    let lang, mode = Full_fidelity_parser.get_language_and_mode source_text in
+    let lang =
+      match lang with
+      | FileInfo.PhpFile -> "php"
+      | FileInfo.HhFile -> "hh"
+    in
+    let mode' =
+      match mode with
+      | Some FileInfo.Mstrict -> "strict"
+      | Some FileInfo.Mdecl -> "decl"
+      | Some FileInfo.Mpartial
+      | None
+      | _
+        -> ""
+    in
+    lang, mode, mode'
+  in
   let syntax_tree = CallOrder.verify source_text in
   let lang = SyntaxTree.language syntax_tree in
   let mode = SyntaxTree.mode syntax_tree in
+  let () = assert (lang = lang' && mode = mode') in
   let is_strict = SyntaxTree.is_strict syntax_tree in
   let is_hack = SyntaxTree.is_hack syntax_tree in
   let is_php = SyntaxTree.is_php syntax_tree in

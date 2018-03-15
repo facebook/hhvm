@@ -22,6 +22,7 @@ sig
   val env : t -> Env.t
   val sc_state : t -> SCI.t
   val parse_script : t -> t * SCI.r
+  val parse_header_only : Env.t -> Full_fidelity_source_text.t -> SCI.r
 end = struct
 module SCWithToken = SmartConstructorsWrappers.SyntaxKind(SCI)
 
@@ -105,6 +106,12 @@ let env parser = parser.env
 
 let sc_state parser = parser.sc_state
 
+let parse_header_only env text =
+  let { env; lexer; errors; context; sc_state } = make env text in
+  let decl_parser = DeclParser.make env lexer errors context sc_state in
+  let _, result = DeclParser.parse_leading_markup_section decl_parser in
+  SCWithToken.extract result
+
 let parse_script parser =
   let decl_parser =
     DeclParser.make
@@ -128,3 +135,59 @@ module SC = Full_fidelity_syntax_smart_constructors.WithSyntax(Syntax)
 include WithSmartConstructors(SC)
 
 end (* WithSyntax *)
+
+(* Parsing only the header of the file for language and mode information *)
+let get_language_and_mode text =
+  let module SourceText = Full_fidelity_source_text in
+  let module Syntax = Full_fidelity_minimal_syntax in
+  let module Parser = WithSyntax(Syntax) in
+  let open Syntax in
+  let php = FileInfo.PhpFile in
+  let hh = FileInfo.HhFile in
+  let header = Parser.parse_header_only (Env.make ()) text in
+  match syntax header with
+  | MarkupSection
+    { markup_prefix = pfx
+    ; markup_text = txt
+    ; markup_suffix =
+      { syntax = MarkupSuffix
+        { markup_suffix_less_than_question = ltq
+        ; markup_suffix_name = name
+        }
+      ; _
+      }
+    ; _
+    } ->
+      (match syntax name with
+      | Missing -> php, None
+      | Token t when Token.kind t = Full_fidelity_token_kind.Equal -> php, None
+      | _ ->
+        let skip_length =
+          full_width pfx + full_width txt + full_width ltq + leading_width name
+        in
+        let language =
+          let s = SourceText.sub text skip_length (width name) in
+          match String.lowercase_ascii s with
+          | "hh" -> hh
+          | "php" -> php
+          | _ -> php (* Default choice; should become hh at some point *)
+        in
+        let skip_length = skip_length + width name in
+        let mode =
+          let s = SourceText.sub text skip_length (trailing_width name) in
+          let s = String.trim s in
+          let l = String.length s in
+          let mode =
+            if l < 2 || s.[0] <> '/' || s.[1] <> '/' then "" else
+              String.trim (String.sub s 2 (l - 2))
+          in
+          match mode with
+          | "decl" | "only-header" -> Some FileInfo.Mdecl
+          | "strict" ->
+            Some FileInfo.(if !(Ide.is_ide_mode) then Mpartial else Mstrict)
+          | "" | "partial" -> Some FileInfo.Mpartial
+          | _ -> None
+        in
+        language, mode
+      )
+  | _ -> php, None

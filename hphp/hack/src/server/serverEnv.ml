@@ -39,7 +39,6 @@ type genv = {
     options          : ServerArgs.options;
     config           : ServerConfig.t;
     local_config     : ServerLocalConfig.t;
-    debug_port       : Debug_port.out_port option;
     workers          : MultiWorker.worker list option;
     (* Returns the list of files under .hhconfig, subject to a filter *)
     indexer          : (string -> bool) -> (unit -> string list);

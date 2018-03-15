@@ -80,11 +80,6 @@ module Program =
         Relative_path.Set.filter updates begin fun update ->
           ServerEnv.file_filter (Relative_path.to_absolute update)
         end in
-      let genv = if Relative_path.Set.is_empty to_recheck then genv else {
-        genv with
-        debug_port = Debug_port.write_opt (Debug_event.Disk_files_modified
-          (Relative_path.Set.elements to_recheck)) genv.debug_port
-      } in
       let config_in_updates =
         Relative_path.Set.mem updates ServerConfig.filename in
       if config_in_updates then begin
@@ -254,10 +249,8 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
   let genv, acc, raw_updates = match raw_updates with
   | Notifier_unavailable ->
     genv, { acc with updates_stale = true; }, SSet.empty
-  | Notifier_state_enter (name, _) ->
-    let event = (Debug_event.Fresh_vcs_state name) in
-    { genv with debug_port = Debug_port.write_opt event genv.debug_port },
-    { acc with updates_stale = true; }, SSet.empty
+  | Notifier_state_enter _ ->
+    genv, { acc with updates_stale = true; }, SSet.empty
   | Notifier_state_leave _ ->
     genv, { acc with updates_stale = true; }, SSet.empty
   | Notifier_async_changes updates ->

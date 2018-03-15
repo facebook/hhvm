@@ -445,18 +445,7 @@ module ServerInitCommon = struct
     let updates = genv.notifier_async () in
     let open ServerNotifierTypes in
     let updates = match updates with
-      | Notifier_state_enter (name, _) ->
-        (** We ignore the returned debut port result. This is unfortunate but
-         * harmless (since we should be using write_opt everywhere and it is
-         * crash-resilient and handles the Option for us anyway).
-         *
-         * We can't easily use the returned result and set the env.debug_port
-         * without making it a mutable reference (gross), and we can't return
-         * a new genv in this function because we're in the Error/Result
-         * monad for the state. *)
-        let _ = Debug_port.write_opt
-        (Debug_event.Fresh_vcs_state name) genv.debug_port in
-        SSet.empty
+      | Notifier_state_enter _
       | Notifier_state_leave _
       | Notifier_unavailable -> SSet.empty
       | Notifier_synchronous_changes updates
@@ -575,8 +564,8 @@ module ServerEagerInit : InitKind = struct
     let state = get_state_future genv root state_future timeout in
     match state with
     | Ok (
-      saved_state_fn,
-      corresponding_rev,
+      _saved_state_fn,
+      _corresponding_rev,
       dirty_files,
       changed_while_parsing,
       old_saved,
@@ -587,16 +576,6 @@ module ServerEagerInit : InitKind = struct
       *)
       let build_targets, _ = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
-      let global_state = ServerGlobalState.save () in
-      let loaded_event = Debug_event.Loaded_saved_state ({
-        Debug_event.filename = saved_state_fn;
-        corresponding_rev;
-        dirty_files;
-        changed_while_parsing;
-        build_targets;
-      }, global_state) in
-      let () = Printf.eprintf "Sending Loaded_saved_state debug event\n%!" in
-      let _ = Debug_port.write_opt loaded_event genv.debug_port in
       (* Build targets are untracked by version control, so we must always
        * recheck them. While we could query hg / git for the untracked files,
        * it's much slower. *)
@@ -687,20 +666,10 @@ module ServerIncrementalInit : InitKind = struct
     let state = get_state_future genv root state_future timeout in
     match state with
     | Ok (
-      saved_state_fn, corresponding_rev,
+      _saved_state_fn, corresponding_rev,
       dirty_files, changed_while_parsing, old_saved, _state_distance) ->
       let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
-      let global_state = ServerGlobalState.save () in
-      let loaded_event = Debug_event.Loaded_saved_state ({
-        Debug_event.filename = saved_state_fn;
-        corresponding_rev;
-        dirty_files;
-        changed_while_parsing;
-        build_targets;
-      }, global_state) in
-      Hh_logger.log "Sending Loaded_saved_state debug event\n";
-      let _ = Debug_port.write_opt loaded_event genv.debug_port in
       let t = Unix.gettimeofday () in
       (* Grab all the files that have changed since the base revision *)
       let dirty_files =
@@ -789,20 +758,10 @@ module ServerLazyInit : InitKind = struct
 
     match state with
     | Ok (
-      saved_state_fn, corresponding_rev,
+      _saved_state_fn, _corresponding_rev,
       dirty_files, changed_while_parsing, old_saved, _state_distance) ->
       let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
-      let global_state = ServerGlobalState.save () in
-      let loaded_event = Debug_event.Loaded_saved_state ({
-        Debug_event.filename = saved_state_fn;
-        corresponding_rev;
-        dirty_files;
-        changed_while_parsing;
-        build_targets;
-      }, global_state) in
-      Hh_logger.log "Sending Loaded_saved_state debug event\n";
-      let _ = Debug_port.write_opt loaded_event genv.debug_port in
       let t = Unix.gettimeofday () in
       (* Build targets are untracked by version control, so we must always
        * recheck them. While we could query hg / git for the untracked files,

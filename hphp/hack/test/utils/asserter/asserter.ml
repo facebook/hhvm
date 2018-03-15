@@ -40,15 +40,6 @@ module Hh_json_json_comparator = struct
     String.equal exp actual
 end;;
 
-
-module Recorder_event_comparator = struct
-  type t = Recorder_types.event
-  let to_string x = Recorder_types.to_string x
-  let is_equal x y =
-    (Recorder_types.to_string x) = (Recorder_types.to_string y)
-end;;
-
-
 module Process_status_comparator = struct
   type t = Unix.process_status
   let to_string v = match v with
@@ -193,4 +184,3 @@ module Bool_asserter = Make_asserter (Bool_comparator);;
 module Hh_json_json_asserter = Make_asserter (Hh_json_json_comparator);;
 module Int_asserter = Make_asserter (Int_comparator);;
 module Process_status_asserter = Make_asserter (Process_status_comparator);;
-module Recorder_event_asserter = Make_asserter (Recorder_event_comparator);;

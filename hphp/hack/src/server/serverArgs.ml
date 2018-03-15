@@ -29,7 +29,6 @@ type options = {
   save_filename    : string option;
   use_gen_deps     : bool;
   waiting_client   : Unix.file_descr option;
-  debug_client     : Handle.handle option;
   ignore_hh_version : bool;
   file_info_on_disk : bool;
 }
@@ -79,7 +78,6 @@ module Messages = struct
                         mini_state_json_descr
   let waiting_client= " send message to fd/handle when server has begun \
                       \ starting and again when it's done starting"
-  let debug_client  = " send significant server events to this file descriptor"
   let ignore_hh_version = " ignore hh_version check when loading saved states"
   let file_info_on_disk = " [experimental] store file-info in sqlite db."
 end
@@ -177,7 +175,6 @@ let parse_options () =
   let with_mini_state = ref None in
   let version       = ref false in
   let waiting_client= ref None in
-  let debug_client  = ref None in
   let ignore_hh     = ref false in
   let file_info_on_disk = ref false in
   let cdir          = fun s -> convert_dir := Some s in
@@ -188,7 +185,6 @@ let parse_options () =
   let set_save_mini = fun s -> save := Some s in
   let set_wait      = fun fd ->
     waiting_client := Some (Handle.wrap_handle fd) in
-  let set_debug = fun fd -> debug_client := Some fd in
   let set_with_mini_state = fun s -> with_mini_state := Some s in
   let options =
     ["--debug"         , Arg.Set debug           , Messages.debug;
@@ -212,7 +208,6 @@ let parse_options () =
        Messages.with_mini_state;
      "--version"       , Arg.Set version       , "";
      "--waiting-client", Arg.Int set_wait      , Messages.waiting_client;
-     "--debug-client"  , Arg.Int set_debug     , Messages.debug_client;
      "--ignore-hh-version", Arg.Set ignore_hh  , Messages.ignore_hh_version;
      "--file-info-on-disk", Arg.Set file_info_on_disk , Messages.file_info_on_disk;
     ] in
@@ -262,7 +257,6 @@ let parse_options () =
     with_mini_state = with_mini_state;
     save_filename = !save;
     waiting_client= !waiting_client;
-    debug_client  = !debug_client;
     ignore_hh_version = !ignore_hh;
     file_info_on_disk = !file_info_on_disk;
   }
@@ -283,7 +277,6 @@ let default_options ~root = {
   save_filename = None;
   use_gen_deps = false;
   waiting_client = None;
-  debug_client = None;
   ignore_hh_version = false;
   file_info_on_disk = false;
 }
@@ -306,7 +299,6 @@ let with_mini_state options = options.with_mini_state
 let save_filename options = options.save_filename
 let use_gen_deps options = options.use_gen_deps
 let waiting_client options = options.waiting_client
-let debug_client options = options.debug_client
 let ignore_hh_version options = options.ignore_hh_version
 let file_info_on_disk options = options.file_info_on_disk
 
@@ -341,7 +333,6 @@ let to_string
     with_mini_state;
     save_filename;
     waiting_client;
-    debug_client;
     ignore_hh_version;
     file_info_on_disk;
   } =
@@ -354,9 +345,6 @@ let to_string
     let waiting_client_str = match waiting_client with
       | None -> "<>"
       | Some _ -> "WaitingClient(...)" in
-    let debug_client_str = match debug_client with
-      | None -> "<>"
-      | Some _ -> "DebugClient(...)" in
     let convert_str = match convert with
       | None -> "<>"
       | Some path -> Path.to_string path in
@@ -379,7 +367,6 @@ let to_string
       "with_mini_state: "; mini_state_str; ", ";
       "save_filename: "; save_filename_str; ", ";
       "waiting_client: "; waiting_client_str; ", ";
-      "debug_client: "; debug_client_str; ", ";
       "ignore_hh_version: "; string_of_bool ignore_hh_version;
       "file_info_on_disk: "; string_of_bool file_info_on_disk;
       "})"

@@ -78,24 +78,6 @@ let make_genv options config local_config handle =
     }
   in
   if Option.is_some watchman_env then Hh_logger.log "Using watchman";
-  let debug_port = Option.map (ServerArgs.debug_client options)
-    ~f:(fun handle -> Debug_port.out_port_of_handle handle)
-  in
-  let debug_port = match debug_port,
-    local_config.SLC.start_with_recorder_on with
-    | Some _, _ ->
-      Hh_logger.log "Using debug-client pre-fork fd";
-      debug_port
-    | None, true ->
-      let daemon = Recorder_daemon.start_daemon
-        (ServerFiles.recorder_out_link root)
-        (ServerFiles.recorder_log_link root) in
-      Hh_logger.log "Spawned recorder daemon with pid: %d." daemon.Daemon.pid;
-      Some (Debug_port.out_port_of_out_channel @@ snd @@ daemon.Daemon.channels)
-    | _ ->
-      Hh_logger.log "No debug port attached";
-      None
-  in
   let max_bucket_size = local_config.SLC.max_bucket_size in
   Bucket.set_max_bucket_size max_bucket_size;
   let indexer, notifier_async, notifier, wait_until_ready =
@@ -175,7 +157,6 @@ let make_genv options config local_config handle =
   { options;
     config;
     local_config;
-    debug_port;
     workers;
     indexer;
     notifier_async;
@@ -189,7 +170,6 @@ let default_genv =
   { options          = ServerArgs.default_options "";
     config           = ServerConfig.default_config;
     local_config     = ServerLocalConfig.default;
-    debug_port       = None;
     workers          = None;
     indexer          = (fun _ -> fun () -> []);
     notifier_async   = (fun () ->

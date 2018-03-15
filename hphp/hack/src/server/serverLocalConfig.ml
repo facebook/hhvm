@@ -36,7 +36,6 @@ type t = {
   cpu_priority: int;
   saved_state_cache_limit: int;
   shm_dirs: string list;
-  start_with_recorder_on : bool;
   state_loader_timeouts : State_loader_config.timeouts;
   max_workers : int;
   max_bucket_size : int;
@@ -72,7 +71,6 @@ let default = {
   shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir;];
   max_workers = GlobalConfig.nbr_procs;
   max_bucket_size = Bucket.max_size ();
-  start_with_recorder_on = false;
   state_loader_timeouts = State_loader_config.default_timeouts;
   use_dummy_informant = true;
   informant_min_distance_restart = 100;
@@ -141,8 +139,6 @@ let load_ fn ~silent =
     ~default:default.load_state_natively config in
   let use_hackfmt = bool_ "use_hackfmt"
     ~default:default.use_hackfmt config in
-  let start_with_recorder_on = bool_ "start_with_recorder_on"
-    ~default:default.start_with_recorder_on config in
   let state_loader_timeouts = state_loader_timeouts_
     ~default:State_loader_config.default_timeouts config in
   let use_dummy_informant = bool_ "use_dummy_informant"
@@ -203,7 +199,6 @@ let load_ fn ~silent =
     shm_dirs;
     max_workers;
     max_bucket_size;
-    start_with_recorder_on;
     state_loader_timeouts;
     use_dummy_informant;
     informant_min_distance_restart;

@@ -48,7 +48,6 @@ module type S = sig
   val save_filename       : options -> string option
   val use_gen_deps        : options -> bool
   val waiting_client      : options -> Unix.file_descr option
-  val debug_client        : options -> Handle.handle option
   val ignore_hh_version   : options -> bool
   val file_info_on_disk   : options -> bool
 

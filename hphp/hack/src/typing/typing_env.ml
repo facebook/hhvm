@@ -58,7 +58,9 @@ let rename env x x' =
 
 let add env x ty =
   let env, x = get_var env x in
-  { env with tenv = IMap.add x ty env.tenv }
+  match ty with
+  | _, Tvar x' -> add_subst env x x'
+  | _ -> { env with tenv = IMap.add x ty env.tenv }
 
 let fresh_unresolved_type env =
   let v = Ident.tmp () in

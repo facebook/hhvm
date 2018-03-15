@@ -752,6 +752,12 @@ let first_parent_function_name parents =
     | _ -> None
   end
 
+let rec is_immediately_in_lambda = function
+  | { syntax = LambdaExpression _; _} :: _ -> true
+  | [] | { syntax = (FunctionDeclaration _ | MethodishDeclaration _); _} :: _
+    -> false
+  | _ :: xs -> is_immediately_in_lambda xs
+
 (* Returns the whether the current context is in an active class scope *)
 let is_in_active_class_scope parents =
   Hh_core.List.exists parents ~f:begin fun node ->
@@ -856,13 +862,22 @@ let extract_async_node md_node =
   |> Option.value_map ~default:[] ~f:syntax_to_list_no_separators
   |> Hh_core.List.find ~f:is_async
 
-let first_parent_function_declaration parents =
+let get_params_and_is_async_for_first_parent_function_or_lambda parents =
   Hh_core.List.find_map parents ~f:begin fun node ->
     match syntax node with
     | FunctionDeclaration { function_declaration_header = header; _ }
     | MethodishDeclaration { methodish_function_decl_header = header; _ } ->
       begin match syntax header with
-      | FunctionDeclarationHeader fdh -> Some (fdh.function_parameter_list, fdh.function_modifiers)
+      | FunctionDeclarationHeader fdh ->
+        let is_async = Hh_core.List.exists ~f:is_async @@
+          syntax_to_list_no_separators fdh.function_modifiers in
+        Some (fdh.function_parameter_list, is_async)
+      | _ -> None
+      end
+    | LambdaExpression { lambda_signature; lambda_async; _} ->
+      begin match syntax lambda_signature with
+      | LambdaSignature { lambda_parameters; _ } ->
+        Some (lambda_parameters, not @@ is_missing lambda_async)
       | _ -> None
       end
     | _ -> None
@@ -896,17 +911,15 @@ let is_parameter_with_callconv param =
   | _ -> false
 
 let has_inout_params parents =
-  match first_parent_function_declaration parents with
+  match get_params_and_is_async_for_first_parent_function_or_lambda parents with
   | Some (function_parameter_list, _) ->
     let params = syntax_to_list_no_separators function_parameter_list in
     Hh_core.List.exists params ~f:is_parameter_with_callconv
   | _ -> false
 
 let is_inside_async_method parents =
-  match first_parent_function_declaration parents with
-  | Some (_,m) ->
-    syntax_to_list_no_separators m
-    |> Hh_core.List.exists ~f:is_async
+  match get_params_and_is_async_for_first_parent_function_or_lambda parents with
+  | Some (_, is_async) -> is_async
   | None -> false
 
 let make_name_already_used_error node name short_name original_location
@@ -1305,6 +1318,7 @@ let class_has_a_construct_method parents =
 
 let is_in_construct_method parents =
   match first_parent_function_name parents, first_parent_class_name parents with
+  | _ when is_immediately_in_lambda parents -> false
   | None, _ -> false
   (* Function name is __construct *)
   | Some s, _ when String.lowercase_ascii s = SN.Members.__construct -> true
@@ -1414,7 +1428,8 @@ let parameter_errors env node parents namespace_name names errors =
             node SyntaxError.inout_param_in_construct :: errors
           else errors in
         let errors = if first_parent_function_attributes_contains
-              parents SN.UserAttributes.uaMemoize then
+              parents SN.UserAttributes.uaMemoize &&
+              not @@ is_immediately_in_lambda parents then
           make_error_from_node ~error_type:SyntaxError.RuntimeError
             node SyntaxError.memoize_with_inout :: errors
           else errors in

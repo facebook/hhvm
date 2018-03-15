@@ -150,9 +150,9 @@ final class AsyncMysqlClient {
    * @param $password - The password to connect with.
    * @param $connection_options - A set of options used for connection.
    *
-   * @return - an `Awaitable` representing the result of your query. Use
-   *           `await` or `join` to get the actual `AsyncMysqlQueryResult`
-   *           object.
+   * @return - an `Awaitable` representing the result of your connect and query
+   * This is a tuple where the latter contains information about the connection
+   * retrieval, and the former has the query results
    */
   <<__HipHopSpecific, __Native>>
     public static function connectAndQuery(
@@ -163,7 +163,10 @@ final class AsyncMysqlClient {
                                         string $user,
                                         string $password,
                                         AsyncMysqlConnectionOptions $conn_opts,
-                                      ): Awaitable<Vector<AsyncMysqlQueryResult>>;
+                                      ): Awaitable<(
+                                          AsyncMysqlConnectResult,
+                                          Vector<AsyncMysqlQueryResult>
+                                      )>;
 
   /**
    * Create a new async connection from a synchronous MySQL instance.

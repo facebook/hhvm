@@ -41,7 +41,7 @@ namespace HPHP {
       s_class = Unit::lookupClass(s_className.get());                          \
       assertx(s_class);                                                        \
     }                                                                          \
-  return s_class;                                                              \
+    return s_class;                                                              \
   }                                                                            \
 
 typedef am::ClientPool<am::AsyncMysqlClient, am::AsyncMysqlClientFactory>
@@ -357,10 +357,17 @@ Object HHVM_STATIC_METHOD(
   auto* obj = Native::data<AsyncMysqlConnectionOptions>(asyncMysqlConnOpts);
   const auto& connOpts = obj->getConnectionOptions();
   connectOp->setConnectionOptions(connOpts);
-  auto event = new AsyncMysqlMultiQueryEvent();
+  auto event = new AsyncMysqlConnectAndMultiQueryEvent(connectOp);
   try {
     connectOp->setCallback([clientPtr, event, queries]
         (am::ConnectOperation& op) {
+
+        if (!op.ok()) {
+          // early exit must collect stats
+          event->setClientStats(clientPtr->collectPerfStats());
+          event->opFinished();
+          return;
+        }
 
         auto query_op = am::Connection::beginMultiQuery(
           op.releaseConnection(), transformQueries(queries));
@@ -1238,6 +1245,22 @@ String FieldIndex::getFieldString(size_t field_index) const {
 }
 
 namespace {
+
+req::ptr<c_Vector> transformQueryResults(
+  std::shared_ptr<am::MultiQueryOperation> op,
+  db::ClientPerfStats stats) {
+  auto results = req::make<c_Vector>();
+  auto query_results = op->stealQueryResults();
+  results->reserve(query_results.size());
+  for (int i = 0; i < query_results.size(); ++i) {
+    auto ret = AsyncMysqlQueryResult::newInstance(
+        op, stats, std::move(query_results[i]), op->noIndexUsed());
+    results->add(std::move(ret));
+  }
+  query_results.clear();
+  return results;
+}
+
 void throwAsyncMysqlException(const char* exception_type,
                               std::shared_ptr<am::Operation> op,
                               db::ClientPerfStats clientStats) {
@@ -1268,6 +1291,7 @@ void throwAsyncMysqlQueryException(const char* exception_type,
   params.append(std::move(error));
   throw_object(exception_type, params, true /* init */);
 }
+
 }
 
 void AsyncMysqlConnectEvent::unserialize(Cell& result) {
@@ -1306,29 +1330,37 @@ void AsyncMysqlQueryEvent::unserialize(Cell& result) {
 void AsyncMysqlMultiQueryEvent::unserialize(Cell& result) {
   // Same as unserialize from AsyncMysqlQueryEvent but the result is a
   // vector of query results
-  if (getPrivData() != nullptr) {
-    assertx(getPrivData()->instanceof(AsyncMysqlConnection::getClass()));
-    auto* conn = Native::data<AsyncMysqlConnection>(getPrivData());
-    conn->setConnection(m_multi_op->releaseConnection());
-  }
+  assertx(getPrivData()->instanceof(AsyncMysqlConnection::getClass()));
+  auto* conn = Native::data<AsyncMysqlConnection>(getPrivData());
+  conn->setConnection(m_multi_op->releaseConnection());
+
 
   // Retrieving the results for all executed queries
-  auto results = req::make<c_Vector>();
-  std::vector<am::QueryResult> query_results = m_multi_op->stealQueryResults();
-  results->reserve(query_results.size());
-  for (int i = 0; i < query_results.size(); ++i) {
-    auto ret = AsyncMysqlQueryResult::newInstance(m_multi_op, m_clientStats,
-                                                  std::move(query_results[i]),
-                                                  m_multi_op->noIndexUsed());
-    results->add(std::move(ret));
-  }
-  query_results.clear();
+  auto results = transformQueryResults(m_multi_op, m_clientStats);
 
   if (m_multi_op->ok()) {
     cellDup(make_tv<KindOfObject>(results.get()), result);
   } else {
     throwAsyncMysqlQueryException("AsyncMysqlQueryException", m_multi_op,
                                   std::move(m_clientStats), results);
+  }
+}
+
+void AsyncMysqlConnectAndMultiQueryEvent::unserialize(Cell& result) {
+  if (!m_connect_op->ok()) {
+    throwAsyncMysqlException("AsyncMysqlConnectException", m_connect_op,
+                             std::move(m_clientStats));
+  }
+  // Retrieving the results for all executed queries
+  auto queryResults = transformQueryResults(m_multi_query_op, m_clientStats);
+  auto connResult = AsyncMysqlConnectResult::newInstance(
+      m_connect_op, m_clientStats);
+  auto resTuple = make_packed_array(connResult, queryResults);
+  if (m_multi_query_op->ok()) {
+    cellDup(make_tv<KindOfArray>(resTuple.detach()), result);
+  } else {
+    throwAsyncMysqlQueryException("AsyncMysqlQueryException", m_multi_query_op,
+                                  std::move(m_clientStats), queryResults);
   }
 }
 

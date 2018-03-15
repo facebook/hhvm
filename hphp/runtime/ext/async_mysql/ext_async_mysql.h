@@ -315,10 +315,28 @@ struct AsyncMysqlMultiQueryEvent final : AsioExternalThreadEvent {
     m_multi_op = op;
   }
 
-  AsyncMysqlMultiQueryEvent() : AsioExternalThreadEvent() {}
+  void opFinished() { markAsFinished(); }
+
+  void setClientStats(db::ClientPerfStats stats) {
+    m_clientStats = std::move(stats);
+  }
+
+ protected:
+  void unserialize(Cell& result) final;
+
+ private:
+  std::shared_ptr<am::MultiQueryOperation> m_multi_op;
+  db::ClientPerfStats m_clientStats;
+};
+
+struct AsyncMysqlConnectAndMultiQueryEvent final : AsioExternalThreadEvent {
+  explicit AsyncMysqlConnectAndMultiQueryEvent(
+      std::shared_ptr<am::ConnectOperation> op) {
+    m_connect_op = op;
+  }
 
   void setQueryOp(std::shared_ptr<am::MultiQueryOperation> op) {
-    m_multi_op = std::move(op);
+    m_multi_query_op = std::move(op);
   }
 
   void opFinished() { markAsFinished(); }
@@ -331,7 +349,8 @@ struct AsyncMysqlMultiQueryEvent final : AsioExternalThreadEvent {
   void unserialize(Cell& result) final;
 
  private:
-  std::shared_ptr<am::MultiQueryOperation> m_multi_op;
+  std::shared_ptr<am::ConnectOperation> m_connect_op;
+  std::shared_ptr<am::MultiQueryOperation> m_multi_query_op;
   db::ClientPerfStats m_clientStats;
 };
 

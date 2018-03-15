@@ -797,8 +797,9 @@ module GenerateFFSyntaxSmartConstructors = struct
     let fields = Core_list.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i)
     in
     let stack = String.concat " " fields in
-    sprintf "  let make_%s %s () = (), Syntax.make_%s %s\n"
-      x.type_name stack x.type_name stack
+    let arr = String.concat "; " fields in
+    sprintf "    let make_%s %s state = State.next state [%s], Syntax.make_%s %s\n"
+      x.type_name stack arr x.type_name stack
 
   let full_fidelity_syntax_smart_constructors_template: string =
     (make_header MLStyle "
@@ -806,19 +807,38 @@ module GenerateFFSyntaxSmartConstructors = struct
  * build AST.
  ") ^ "
 
-module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
-  module Token = Syntax.Token
-  type t = unit
-  type r = Syntax.t
+module type SC_S = SmartConstructors.SmartConstructors_S
+module type State_S = sig
+  type r
+  type t
+  val initial : unit -> t
+  val next : t -> r list -> t
+end
 
-  let initial_state () = ()
-  let make_token token () = (), Syntax.make_token token
-  let make_missing (s, o) () = (), Syntax.make_missing s o
-  let make_list (s, o) items () =
-    if items <> []
-    then (), Syntax.make_list s o items
-    else make_missing (s, o) ()
+module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
+  module WithState(State : State_S with type r = Syntax.t) = struct
+    module Token = Syntax.Token
+    type t = State.t
+    type r = Syntax.t
+
+    let initial_state = State.initial
+    let make_token token state = State.next state [], Syntax.make_token token
+    let make_missing (s, o) state = State.next state [], Syntax.make_missing s o
+    let make_list (s, o) items state =
+      if items <> []
+      then State.next state [], Syntax.make_list s o items
+      else make_missing (s, o) state
 CONSTRUCTOR_METHODS
+  end (* WithState *)
+
+  include WithState(
+    struct
+      type r = Syntax.t
+      type t = unit
+      let initial () = ()
+      let next () _ = ()
+    end
+  )
 end (* WithSyntax *)
 "
 

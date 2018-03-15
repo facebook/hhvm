@@ -30,7 +30,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | COVERAGE_LEVELS fn -> env, ServerColorFile.go env fn
     | INFER_TYPE (fn, line, char, dynamic_view) ->
         env, ServerInferType.go env (fn, line, char, dynamic_view)
-    | INFER_TYPE_BATCH positions ->
+    | INFER_TYPE_BATCH (positions, dynamic_view) ->
+        let tcopt = env.ServerEnv.tcopt in
+        let tcopt = { tcopt with GlobalOptions.tco_dynamic_view=dynamic_view } in
+        let env = { env with tcopt } in
         env, ServerInferTypeBatch.go genv.workers positions env
     | IDE_HOVER (fn, line, char) ->
         env, ServerHover.go env (fn, line, char)

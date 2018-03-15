@@ -256,7 +256,7 @@ let main args =
           Printf.eprintf "Invalid position\n";
           raise Exit_status.(Exit_with Input_error)
       end in
-      let responses = rpc args @@ Rpc.INFER_TYPE_BATCH positions in
+      let responses = rpc args @@ Rpc.INFER_TYPE_BATCH (positions, args.dynamic_view) in
       List.iter responses print_endline;
       Exit_status.No_error
     | MODE_AUTO_COMPLETE ->

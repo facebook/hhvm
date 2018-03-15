@@ -34,7 +34,7 @@ type _ t =
   | STATUS : bool -> Server_status.t t
   | INFER_TYPE : ServerUtils.file_input * int * int * bool ->
       InferAtPosService.result t
-  | INFER_TYPE_BATCH : (string * int * int) list -> string list t
+  | INFER_TYPE_BATCH : (string * int * int) list * bool -> string list t
   | IDE_HOVER : ServerUtils.file_input * int * int ->
       HoverService.result t
   | COVERAGE_LEVELS : ServerUtils.file_input -> Coverage_level.result t

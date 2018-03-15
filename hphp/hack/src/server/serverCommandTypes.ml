@@ -140,6 +140,9 @@ type 'a persistent_connection_message_type =
   (* persistent and non-persistent connections. It's included in this  *)
   (* type, though, because ocaml typing forces a single type to come   *)
   (* Marshal.from_fd_with_preamble.                                    *)
+  | Ping
+  (* Pings can be sent to non-persistent connection after Hello and before
+   * sending RPC response. *)
 
 (** Timeout on reading the command from the client - client probably frozen. *)
 exception Read_command_timeout

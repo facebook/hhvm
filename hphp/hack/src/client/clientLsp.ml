@@ -257,6 +257,7 @@ let read_message_from_server (server: server_conn) : event =
       failwith "unexpected response without request"
     | Push m -> Server_message m
     | Hello -> Server_hello
+    | Ping -> failwith "unexpected ping on persistent connection"
   with e ->
     let message = Printexc.to_string e in
     let stack = Printexc.get_backtrace () in

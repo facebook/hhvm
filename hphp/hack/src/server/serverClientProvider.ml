@@ -157,3 +157,12 @@ let shutdown_client client =
         Timeout.in_channel_of_descr fd, Unix.out_channel_of_descr fd
   in
   ServerUtils.shutdown_client (ic, oc)
+
+let ping = function
+  | Non_persistent_client (_, oc) ->
+    let fd = Unix.descr_of_out_channel oc in
+    let _ : int = try
+      Marshal_tools.to_fd_with_preamble fd ServerCommandTypes.Ping
+    with _ -> raise Client_went_away in
+    ()
+  | Persistent_client _ -> ()

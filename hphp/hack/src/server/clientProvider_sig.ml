@@ -35,6 +35,7 @@ module type S = sig
   val make_persistent : client -> client
   val is_persistent : client -> bool
   val shutdown_client: client -> unit
+  val ping: client -> unit
 
   (* TODO: temporary way to break the module abstraction. Remove after
    * converting all the callsites to use methods on this module instead of

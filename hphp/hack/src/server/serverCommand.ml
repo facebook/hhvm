@@ -97,6 +97,7 @@ let rec wait_for_rpc_response fd push_messages =
     raise (Remote_nonfatal_exception remote_e_data)
   | Push m -> wait_for_rpc_response fd (m :: push_messages)
   | Hello -> failwith "unexpected hello after connection already established"
+  | Ping -> failwith "unexpected ping on persistent connection"
 
 let rpc_persistent :
   type a. Timeout.in_channel * out_channel -> a t -> a * push list
@@ -223,6 +224,7 @@ let handle
   match msg with
   | Rpc cmd ->
     begin try
+      ClientProvider.ping client;
       let t = Unix.gettimeofday () in
       let new_env, response = ServerRpc.handle
         ~is_stale:env.ServerEnv.recent_recheck_loop_stats.ServerEnv.updates_stale

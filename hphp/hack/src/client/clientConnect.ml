@@ -214,7 +214,8 @@ let rec wait_for_server_message
     try
       let fd = Timeout.descr_of_in_channel ic in
       let msg = Marshal_tools.from_fd_with_preamble fd in
-      if Option.is_none expected_message || Some msg = expected_message then
+      if (msg <> ServerCommandTypes.Ping) &&
+          (Option.is_none expected_message || Some msg = expected_message) then
         msg
       else begin
         Option.iter tail_env

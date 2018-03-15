@@ -139,3 +139,5 @@ let is_persistent = function
 let make_persistent _ = ServerCommandTypes.Persistent
 
 let shutdown_client _ = ()
+
+let ping _ = ()

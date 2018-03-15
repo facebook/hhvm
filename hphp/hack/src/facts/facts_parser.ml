@@ -12,6 +12,7 @@ module Syntax     = Full_fidelity_positioned_syntax
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
 module TokenKind  = Full_fidelity_token_kind
 module J = Hh_json
+module SU = Hhbc_string_utils
 
 open Syntax
 
@@ -68,18 +69,26 @@ let qualified_name_part_to_string p =
   | ListItem li -> (text li.list_item) ^ (text li.list_separator)
   | _ -> text p
 
+let rec unwrap_name n =
+  match syntax n with
+  | SimpleTypeSpecifier { simple_type_specifier = t; _ }
+  | GenericTypeSpecifier { generic_class_type = t; _ } -> unwrap_name t
+  | _ -> n
+
 let qualified_name namespace name_node =
+  let name_node = unwrap_name name_node in
   let name_text =
-    match syntax name_node with
+    match syntax @@ name_node with
     | QualifiedName {
         qualified_name_parts = { syntax = SyntaxList parts; _}; _
       } ->
       String.concat "" @@ Core_list.map parts ~f:qualified_name_part_to_string
     | _ -> text name_node in
-  if String.length namespace = 0
-  then name_text
-  else if String.get name_text 0 = '\\'
+  let name_text = SU.Xhp.mangle_id name_text in
+  if String.get name_text 0 = '\\'
   then String.sub name_text 1 (String.length name_text - 1)
+  else if String.length namespace = 0
+  then name_text
   else namespace ^ "\\" ^ name_text
 
 let add_or_update_classish_declaration types name kind flags base_types
@@ -127,7 +136,7 @@ let add_or_update_classish_declaration types name kind flags base_types
       { base_types; flags; kind; require_extends; require_implements } in
     SMap.add name tf types
 
-let facts_from_define_argument facts node =
+let constants_from_define_argument constants node =
   let node = strip_list_item node in
   match syntax node with
   | LiteralExpression {
@@ -142,8 +151,8 @@ let facts_from_define_argument facts node =
     (* strip quotes *)
     let constant_name =
       String.sub constant_name 1 (String.length constant_name - 2) in
-    { facts with constants = constant_name :: facts.constants }
-  | _ -> facts
+    constant_name :: constants
+  | _ -> constants
 
 let type_names_from_list ns init list =
   let aux acc n =
@@ -170,24 +179,64 @@ let flags_from_modifiers modifiers =
     | _ -> acc in
   fold_over_children aux flags_default (syntax modifiers)
 
-let require_sections_from_classish_body ns body =
+let process_function_like_body ns ~in_method body facts =
+  let rec aux facts n =
+    match syntax n with
+    | DefineExpression {
+        define_argument_list = {
+          syntax = SyntaxList [ arg1; _ ];
+      _ }; _ } when ns = "" ->
+      let constants = constants_from_define_argument facts.constants arg1 in
+      if constants == facts.constants
+      then facts
+      else { facts with constants }
+    (* function declarations (both top level and nested) *)
+    | FunctionDeclaration {
+        function_declaration_header = {
+          syntax = FunctionDeclarationHeader { function_name = n; _ }; _
+        };
+        function_body; _
+      } ->
+      (* dive into body to track nested define calls or functions *)
+      let facts = aux facts function_body in
+      let facts =
+        if is_missing n || in_method
+        then facts
+        else begin
+          let function_name = qualified_name ns n in
+          { facts with functions = function_name :: facts.functions; }
+        end in
+      facts
+    | n -> fold_over_children aux facts n in
+  aux facts body
+
+let process_classish_body check_require_clause ns body facts =
   match syntax body with
   | ClassishBody { classish_body_elements = e; _ } ->
-    let aux ((extends, implements) as acc) n =
+    let aux ((extends, implements, trait_uses, facts) as acc) n =
       begin match syntax n with
-      | RequireClause { require_kind; require_name; _ } ->
+      | RequireClause { require_kind; require_name; _ }
+        when check_require_clause ->
         let name = qualified_name ns require_name in
         begin match syntax require_kind with
         | Token { Token.kind = TokenKind.Extends; _ } ->
-          SSet.add name extends, implements
+          SSet.add name extends, implements, trait_uses, facts
         | Token { Token.kind = TokenKind.Implements; _ } ->
-          extends, SSet.add name implements
+          extends, SSet.add name implements, trait_uses, facts
         | _ -> acc
         end
+      | TraitUse { trait_use_names; _ } ->
+        let trait_uses = type_names_from_list ns trait_uses trait_use_names in
+        extends, implements, trait_uses, facts
+      | MethodishDeclaration {
+          methodish_function_body = body; _
+        } when ns = "" ->
+          let facts = process_function_like_body ~in_method:true ns body facts in
+          extends, implements, trait_uses, facts
       | _ -> acc
       end in
-    fold_over_children aux (SSet.empty, SSet.empty) (syntax e)
-  | _ -> SSet.empty, SSet.empty
+    fold_over_children aux (SSet.empty, SSet.empty, SSet.empty, facts) (syntax e)
+  | _ -> SSet.empty, SSet.empty, SSet.empty, facts
 
 let facts_from_classish_declaration ns facts
   modifiers keyword name extends_list implements_list body =
@@ -203,18 +252,16 @@ let facts_from_classish_declaration ns facts
     | Token { Token.kind = TokenKind.Enum; _ } ->
       TKEnum, flags_final
     | _ -> TKUnknown, flags_default in
-  let base_types = type_names_from_list ns SSet.empty extends_list in
+  let require_extends, require_implements, trait_uses, facts =
+    process_classish_body (kind = TKTrait || kind = TKInterface) ns body facts in
+  (* put content of trait_uses to base types *)
+  let base_types = type_names_from_list ns trait_uses extends_list in
   let base_types = type_names_from_list ns base_types implements_list in
-  let require_extends, require_implements =
-    begin match kind with
-    | TKTrait | TKInterface -> require_sections_from_classish_body ns body
-    | _ -> SSet.empty, SSet.empty
-    end in
   let types =
     add_or_update_classish_declaration facts.types name kind flags
       base_types require_extends require_implements in
   if types == facts.types then facts
-  else { facts with types }
+  else { facts with types; }
 
 let rec collect_facts (ns, facts as acc) node =
   match syntax node with
@@ -267,16 +314,6 @@ let rec collect_facts (ns, facts as acc) node =
         enum_name TKEnum flags_final SSet.empty SSet.empty SSet.empty in
     ns, if types == facts.types then facts else { facts with types }
 
-  (* top level define call *)
-  | ExpressionStatement {
-      expression_statement_expression = {
-        syntax = DefineExpression {
-        define_argument_list = {
-        syntax = SyntaxList [ arg1; _ ];
-      _ }; _ }; _ }; _
-    } when String.length ns = 0 ->
-    ns, facts_from_define_argument facts arg1
-
   (*  constants *)
   | ConstDeclaration { const_declarators = { syntax = SyntaxList l; _}; _ } ->
     let aux constants n =
@@ -290,15 +327,9 @@ let rec collect_facts (ns, facts as acc) node =
     let constants = Core_list.fold_left ~init:facts.constants ~f:aux l in
     ns, { facts with constants }
 
-  (* function declarations *)
-  | FunctionDeclaration {
-      function_declaration_header = {
-        syntax = FunctionDeclarationHeader { function_name = n; _ }; _
-      }; _
-    } when not @@ is_missing n ->
-    let function_name = qualified_name ns n in
-    ns, { facts with functions = function_name :: facts.functions }
-  | _ -> acc
+  | _ ->
+    let facts = process_function_like_body ~in_method:false ns node facts in
+    ns, facts
 
 let hex_number_to_json s =
   let number =

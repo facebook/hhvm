@@ -498,10 +498,9 @@ let decl_and_run_mode compiler_options popt =
           let get_lines_in_file filename =
             let inch = open_in filename in
             let rec go lines =
-              try
-                let line = input_line inch |> String.trim in
-                go (line :: lines)
-              with End_of_file -> lines in
+              match input_line inch with
+              | line -> go (String.trim line :: lines)
+              | exception End_of_file -> lines in
             go [] in
           let handle_output _filename output =
             if compiler_options.dump_config then

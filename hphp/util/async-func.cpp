@@ -21,6 +21,10 @@
 #include <folly/portability/SysResource.h>
 #include <folly/portability/Unistd.h>
 
+#ifdef __linux__
+#include <sys/prctl.h>
+#endif
+
 #include "hphp/util/alloc.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/numa.h"
@@ -54,6 +58,7 @@ void *AsyncFuncImpl::ThreadFunc(void *obj) {
   s_firstSlab = self->m_firstSlab;
   assertx(!s_firstSlab.ptr || s_firstSlab.size);
   set_numa_binding(self->m_node);
+  self->setThreadName();
   self->threadFuncImpl();
   return nullptr;
 }
@@ -218,6 +223,20 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
   }
 
   return true;
+}
+
+void AsyncFuncImpl::setThreadName() {
+#ifdef __linux__
+  if (use_numa) {
+    static constexpr size_t kMaxCommNameLen = 16; // TASK_COMM_LEN in kernel
+    char name[kMaxCommNameLen];
+    snprintf(name, sizeof(name), "hhvmworker.ND%d", m_node);
+    prctl(PR_SET_NAME, name);
+  } else {
+    // On single-socket servers
+    prctl(PR_SET_NAME, "hhvmworker");
+  }
+#endif
 }
 
 void AsyncFuncImpl::threadFuncImpl() {

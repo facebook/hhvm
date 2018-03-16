@@ -20,10 +20,6 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#ifdef HAVE_NUMA
-#include <sys/prctl.h>
-#endif
-
 #ifdef __APPLE__
 #include <sys/sysctl.h>
 #endif
@@ -337,10 +333,6 @@ void set_numa_binding(int node) {
     int arena = base_arena + node;
     mallctlWrite("thread.arena", arena);
   }
-
-  char buf[32];
-  snprintf(buf, sizeof(buf), "hhvm.node.%d", node);
-  prctl(PR_SET_NAME, buf);
 }
 
 void* mallocx_on_node(size_t size, int node, size_t align) {

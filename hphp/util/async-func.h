@@ -160,6 +160,8 @@ struct AsyncFuncImpl {
 
   void setNoInitFini() { m_noInitFini = true; }
 
+  void setThreadName();
+
   static uint32_t count() { return s_count; }
 private:
   Synchronizable m_stopMonitor;

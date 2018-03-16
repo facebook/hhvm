@@ -517,6 +517,7 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, list_item) = Make.list_item parser item comma in
       (parser, list_item, comma)
     | Parent
+    | Enum
     | Shape
     | Self when Env.hhvm_compat_mode (env parser) ->
       (* HHVM allows these keywords here for some reason *)

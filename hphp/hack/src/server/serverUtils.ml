@@ -82,13 +82,44 @@ let with_exit_on_exception f =
     Hh_logger.exc e;
     Hh_logger.log "Exiting. Failed due to watchman error: %s" s;
     Exit_status.(exit Watchman_failed)
-  | WorkerController.Worker_oomed as e->
+  | MultiThreadedCall.Coalesced_failures failures as e -> begin
+    Hh_logger.exc e;
+    let is_oom_failure f = match f with
+      | WorkerController.Worker_oomed -> true
+      | _ -> false in
+    let has_oom_failure = List.exists is_oom_failure failures in
+    if has_oom_failure then
+      let () = Hh_logger.log "Worker oomed. Exiting" in
+      Exit_status.(exit Worker_oomed)
+    else
+      (** We attempt to exit with the same code as a worker by folding over
+       * all the failures and looking for a WEXITED. *)
+      let worker_exit f = match f with
+        | WorkerController.Worker_quit (Unix.WEXITED i) ->
+          Some i
+        | _ ->
+          None
+      in
+      let exit_code = List.fold_left (fun acc f ->
+        if Option.is_some acc then acc else worker_exit f
+        ) None failures
+      in
+      match exit_code with
+      | Some i ->
+        (** Exit with same code. *)
+        exit i
+      | None ->
+        raise e
+  end
+  (** In single-threaded mode, WorkerController exceptions are raised directly
+   * instead of being grouped into MultiThreaadedCall.Coalesced_failures *)
+  | WorkerController.(Worker_failed (_, Worker_oomed)) as e->
     Hh_logger.exc e;
     Exit_status.(exit Worker_oomed)
   | WorkerController.Worker_busy as e ->
     Hh_logger.exc e;
     Exit_status.(exit Worker_busy)
-  | (WorkerController.Worker_failed (_, Unix.WEXITED i)) as e ->
+  | (WorkerController.(Worker_failed (_, Worker_quit(Unix.WEXITED i)))) as e ->
     Hh_logger.exc e;
     (** Exit with the same exit code that that worker used. *)
     exit i

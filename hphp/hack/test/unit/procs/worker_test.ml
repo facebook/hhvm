@@ -42,7 +42,7 @@ let test_wrapped_worker_with_custom_exit heap_handle () =
   | worker :: workers ->
     try call_and_verify_result worker
     (fun () -> raise (Failure "oops")) () "dummy" with
-    | WorkerController.Worker_failed (_, Unix.WEXITED i) ->
+    | WorkerController.Worker_failed (_, WorkerController.Worker_quit(Unix.WEXITED i)) ->
       i = 17
 
 let test_worker_uncaught_exception_exits_with_2 heap_handle () =
@@ -54,7 +54,7 @@ let test_worker_uncaught_exception_exits_with_2 heap_handle () =
   | worker :: workers ->
     try call_and_verify_result worker (fun () -> raise (Failure "oops"))
     () "dummy" with
-    | WorkerController.Worker_failed (_, Unix.WEXITED i) ->
+    | WorkerController.Worker_failed (_, WorkerController.Worker_quit(Unix.WEXITED i)) ->
       i = 2
 
 let test_simple_worker_spawn heap_handle () =

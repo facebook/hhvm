@@ -70,6 +70,7 @@ let multi_worker_one_worker_throws _workers () =
     else
       bucket.work
   in
+  let open MultiThreadedCall in
   try begin
     let _result =
       MultiWorker.call (Some workers)
@@ -80,7 +81,7 @@ let multi_worker_one_worker_throws _workers () =
     in
     false
   end with
-  | MultiThreadedCall.Coalesced_failures [ Unix.WEXITED 3 ] ->
+  | Coalesced_failures [ WorkerController.Worker_quit (Unix.WEXITED 3) ] ->
     true
 
 let multi_worker_with_failure_handler _workers () =
@@ -101,6 +102,7 @@ let multi_worker_with_failure_handler _workers () =
     (** Each bucket exits abnormally with exit code 3*)
     exit 3
   in
+  let open MultiThreadedCall in
   try
     let _ = MultiWorker.call
       (Some workers)
@@ -112,13 +114,13 @@ let multi_worker_with_failure_handler _workers () =
     Printf.eprintf "Expected MultiWorker.call to throw, but it didn't!\n";
     false
   with
-  | MultiThreadedCall.Coalesced_failures failures ->
+  | Coalesced_failures failures ->
     (** Every single bucket failed, and we should have processed all of them since
      * we have 10 worker processes. *)
     assert ((List.length failures) = 5);
     let sum = List.fold_left (
       fun acc e -> match e with
-      | Unix.WEXITED 3 ->
+      | WorkerController.Worker_quit (Unix.WEXITED 3) ->
         acc + 3
       | _ ->
         failwith "Unexpected worker exit") 0 failures

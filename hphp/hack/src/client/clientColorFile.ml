@@ -43,11 +43,8 @@ let go file_input output_json pos_level_l =
   in
   let results = ColorFile.go str pos_level_l in
   if output_json then
-    let open Ide_message in
-    let response = Coverage_levels_response
-      (Deprecated_text_span_coverage_levels_response results)
-    in
-    Nuclide_rpc_message_printer.print_json ~response
+    Nuclide_rpc_message_printer.
+      (coverage_levels_response_to_json results |> print_json)
   else if Unix.isatty Unix.stdout
   then C.cprint (replace_colors results)
   else print_endline str

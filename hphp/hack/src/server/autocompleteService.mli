@@ -12,10 +12,6 @@ val autocomplete_result_to_json :
   AutocompleteTypes.complete_autocomplete_result ->
   Hh_json.json
 
-val autocomplete_result_to_ide_response :
-  AutocompleteTypes.ide_result ->
-  Ide_message.response
-
 val get_results :
   tcopt:TypecheckerOptions.t ->
   delimit_on_namespaces:bool ->

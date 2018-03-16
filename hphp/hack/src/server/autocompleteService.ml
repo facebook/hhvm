@@ -75,28 +75,6 @@ let autocomplete_result_to_json res =
       "expected_ty", Hh_json.JSON_Bool false; (* legacy field, left here in case clients need it *)
   ]
 
-let autocomplete_result_to_ide_response res =
-  let param_to_ide_response x = {
-    Ide_message.callable_param_name = x.param_name;
-    callable_param_type = x.param_ty;
-  } in
-
-  let callable_details_to_ide_response res = {
-    Ide_message.return_type = res.return_ty;
-    callable_params = List.map res.params param_to_ide_response;
-  } in
-
-  let callable_details_to_ide_response =
-    Option.map ~f:callable_details_to_ide_response in
-
-  let autocomplete_result_to_ide_response res = {
-    Ide_message.autocomplete_item_text = res.res_name;
-    autocomplete_item_type = res.res_ty;
-    callable_details = callable_details_to_ide_response res.func_details;
-  } in
-  Ide_message.Autocomplete_response
-    (List.map res.completions ~f:autocomplete_result_to_ide_response)
-
 let get_partial_result name ty kind =
   Partial { ty; name; kind_=kind; }
 

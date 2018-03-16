@@ -11,8 +11,8 @@
 open Hh_core
 
 let print_json res =
-  let response = IdentifySymbolService.result_to_ide_message res in
-  Nuclide_rpc_message_printer.print_json ~response
+  Nuclide_rpc_message_printer.
+    (identify_symbol_response_to_json res |> print_json)
 
 let print_readable ?short_pos:(short_pos=false) x =
   List.iter x begin function (occurrence, definition) ->

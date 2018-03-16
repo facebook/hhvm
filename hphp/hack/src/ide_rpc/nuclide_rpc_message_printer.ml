@@ -8,9 +8,12 @@
  *
  *)
 open Hh_core
-open Ide_message
-open Ide_parser_utils
 open Hh_json
+
+let opt_field ~v_opt ~label ~f =
+  Option.value_map v_opt
+    ~f:(fun x -> [label, f x])
+    ~default:[]
 
 (* There are fields that Nuclide doesn't use anymore, but the RPC framework
  * still requires them in responses. Stub them with some default values in the
@@ -24,39 +27,13 @@ let should_not_happen = JSON_Object [
   ("this_should", JSON_String "not_happen");
 ]
 
-let autocomplete_response_to_json x =
-  let param_to_json x = JSON_Object [
-    ("name", JSON_String x.callable_param_name);
-    ("type", JSON_String x.callable_param_type);
-    ("variadic", deprecated_bool_field);
-  ] in
-
-  let callable_details_to_json x = JSON_Object [
-    ("return_type", JSON_String x.return_type);
-    ("params", JSON_Array (List.map x.callable_params ~f:param_to_json));
-    ("min_arity", deprecated_int_field);
-  ] in
-
-  let callable_details_to_json = function
-    | None -> []
-    | Some x -> [("func_details", callable_details_to_json x)] in
-
-  let autocomplete_response_to_json x = JSON_Object ([
-    ("name", JSON_String x.autocomplete_item_text);
-    ("type", JSON_String x.autocomplete_item_type);
-    ("pos", deprecated_pos_field);
-    ("expected_ty", deprecated_bool_field)
-  ] @ (callable_details_to_json x.callable_details)) in
-
-  JSON_Array (List.map x ~f:autocomplete_response_to_json)
-
-let infer_type_response_to_json x =
+let infer_type_response_to_json (type_string, type_json) =
   Hh_json.JSON_Object (
     [
-      ("type", opt_string_to_json x.type_string);
+      ("type", opt_string_to_json type_string);
       ("pos", deprecated_pos_field)
     ] @
-    (match x.type_json with
+    (match type_json with
     | Some json -> [("full_type", json_of_string json)]
     | _ -> [])
   )
@@ -86,7 +63,7 @@ let identify_symbol_response_to_json results =
     | GConst -> "global_const"
   in
 
-  let symbol_to_json { occurrence; definition; } =
+  let symbol_to_json (occurrence, definition) =
     let definition_pos, definition_span, definition_id =
       get_definition_data definition in
     let open SymbolOccurrence in
@@ -129,20 +106,18 @@ let rec definition_to_json def =
 and outline_response_to_json x =
   Hh_json.JSON_Array (List.map x ~f:definition_to_json)
 
-let coverage_levels_response_to_json = function
-  | Range_coverage_levels_response _ -> should_not_happen
-  | Deprecated_text_span_coverage_levels_response spans ->
-      let opt_coverage_level_to_string = Option.value_map
-        ~f:Coverage_level.string_of_level
-        ~default:"default"
-      in
-      let span_to_json (color, text) =
-        JSON_Object [
-          ("color", JSON_String (opt_coverage_level_to_string color));
-          ("text", JSON_String text);
-        ]
-      in
-      JSON_Array (List.map spans ~f:span_to_json)
+let coverage_levels_response_to_json spans =
+  let opt_coverage_level_to_string = Option.value_map
+    ~f:Coverage_level.string_of_level
+    ~default:"default"
+  in
+  let span_to_json (color, text) =
+    JSON_Object [
+      ("color", JSON_String (opt_coverage_level_to_string color));
+      ("text", JSON_String text);
+    ]
+  in
+  JSON_Array (List.map spans ~f:span_to_json)
 
 let symbol_by_id_response_to_json = function
   | Some def -> definition_to_json def
@@ -150,7 +125,7 @@ let symbol_by_id_response_to_json = function
 
 let find_references_response_to_json = function
   | None -> JSON_Array []
-  | Some {symbol_name; references} ->
+  | Some (symbol_name, references) ->
     let entries = List.map references begin fun x ->
       let open Ide_api_types in
       Hh_json.JSON_Object [
@@ -175,35 +150,6 @@ let highlight_references_response_to_json l =
     end
   end
 
-let diagnostics_to_json x =
-  JSON_Object [
-    ("filename", JSON_String x.diagnostics_notification_filename);
-    ("errors", JSON_Array (List.map x.diagnostics ~f:Errors.to_json));
-  ]
-
-let response_to_json = function
-  (* Init request is not part of Nuclide protocol *)
-  | Init_response _ -> should_not_happen
-  | Autocomplete_response x -> autocomplete_response_to_json x
-  | Infer_type_response x -> infer_type_response_to_json x
-  | Identify_symbol_response x -> identify_symbol_response_to_json x
-  | Outline_response x -> outline_response_to_json x
-  | Coverage_levels_response x -> coverage_levels_response_to_json x
-  | Symbol_by_id_response x -> symbol_by_id_response_to_json x
-  | Find_references_response x -> find_references_response_to_json x
-  | Highlight_references_response x -> highlight_references_response_to_json x
-  | Format_response _ -> should_not_happen
-
-let notification_to_json = function
-  | Diagnostics_notification x -> diagnostics_to_json x
-
-let to_json ~message = match message with
-  | Response r -> response_to_json r
-  | Request (Server_notification n) -> notification_to_json n
-  (* There is no use-case for printing client requests for now *)
-  | Request (Client_request _) ->  failwith "not implemented"
-
-let print_json ~response =
-  to_json (Response response) |>
-  Hh_json.json_to_string |>
+let print_json json =
+  Hh_json.json_to_string json |>
   print_endline

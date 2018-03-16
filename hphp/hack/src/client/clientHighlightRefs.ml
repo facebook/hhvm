@@ -11,8 +11,8 @@
 open Hh_core
 
 let print_json res =
-  let response = Ide_message.Highlight_references_response res in
-  Nuclide_rpc_message_printer.print_json ~response
+  Nuclide_rpc_message_printer.
+    (highlight_references_response_to_json res |> print_json)
 
 let print_result pos =
   Printf.printf "%s\n" (Ide_api_types.range_to_string_single_line pos)

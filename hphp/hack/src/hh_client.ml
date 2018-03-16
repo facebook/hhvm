@@ -57,7 +57,6 @@ let () =
     | ClientCommand.CStop _ -> "Stop"
     | ClientCommand.CRestart _ -> "Restart"
     | ClientCommand.CBuild _ -> "Build"
-    | ClientCommand.CIde _ -> "Ide"
     | ClientCommand.CLsp _ -> "Lsp"
     | ClientCommand.CDebug _ -> "Debug"
   in
@@ -69,7 +68,6 @@ let () =
         | ClientCommand.CStop env -> ClientStop.main env
         | ClientCommand.CRestart env -> ClientRestart.main env
         | ClientCommand.CBuild env -> ClientBuild.main env
-        | ClientCommand.CIde env -> ClientIde.main env (* never terminates *)
         | ClientCommand.CLsp env -> ClientLsp.main env (* never terminates *)
         | ClientCommand.CDebug env -> ClientDebug.main env
     with Exit_status.Exit_with es ->

@@ -231,12 +231,6 @@ let level_of_type_mapper fn =
   let fixme_map = Fixmes.HH_FIXMES.find_unsafe fn in
   level_of_type fixme_map
 
-let result_to_ide_message x =
-  let offsets_to_range (pos, level) = (Ide_api_types.pos_to_range pos, level) in
-  let open Ide_message in
-  Coverage_levels_response
-    (Range_coverage_levels_response (List.map x ~f:offsets_to_range))
-
 (* Coverage analysis will return multiple overlapping ranges, e.g. for *)
 (* "$user = $vc->getUserID()" it can report three uncovered ranges:    *)
 (* "$vc" and "$vc->getUserID()" and "$user = $vc->getUserID()".        *)

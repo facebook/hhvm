@@ -284,11 +284,8 @@ let get_dependent_files _workers input_set =
   get_deps_set input_set
 
 let result_to_ide_message x =
-  let open Ide_message in
-  Find_references_response (
     Option.map x ~f:begin fun (symbol_name, references) ->
       let references =
         List.map references ~f:Ide_api_types.pos_to_file_range in
-      {symbol_name; references}
+      (symbol_name, references)
     end
-  )

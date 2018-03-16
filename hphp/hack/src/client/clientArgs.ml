@@ -43,7 +43,6 @@ let parse_command () =
   | "stop" -> CKStop
   | "restart" -> CKRestart
   | "build" -> CKBuild
-  | "ide" -> CKIde
   | "lsp" -> CKLsp
   | "debug" -> CKDebug
   | _ -> CKNone
@@ -603,23 +602,6 @@ let parse_build_args () =
     }
   }
 
-let parse_ide_args () =
-  let usage =
-    Printf.sprintf
-      "Usage: %s ide [WWW-ROOT]\n"
-      Sys.argv.(0) in
-
-  let options = [] in
-  let args = parse_without_command options usage "ide" in
-  let root =
-    match args with
-    | [] -> ClientArgsUtils.get_root None
-    | [x] -> ClientArgsUtils.get_root (Some x)
-    | _ -> Printf.printf "%s\n" usage; exit 2 in
-  CIde { ClientIde.
-    root = root
-  }
-
 let parse_lsp_args () =
   let usage = Printf.sprintf
     "Usage: %s lsp [OPTION]...\n\
@@ -669,7 +651,6 @@ let parse_args () =
     | CKRestart -> parse_restart_args ()
     | CKBuild -> parse_build_args ()
     | CKDebug -> parse_debug_args ()
-    | CKIde -> parse_ide_args ()
     | CKLsp -> parse_lsp_args ()
 
 let root = function
@@ -678,6 +659,5 @@ let root = function
   | CStart { ClientStart.root; _ }
   | CRestart { ClientStart.root; _ }
   | CStop { ClientStop.root; _ }
-  | CIde { ClientIde.root; _}
   | CDebug { ClientDebug.root } -> root
   | CLsp _ -> Path.dummy_path

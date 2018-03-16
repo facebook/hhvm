@@ -8,19 +8,16 @@
  *
  *)
 
-open Ide_message
-
 let go result output_json =
   if output_json
   then begin
     let response =
       (match result with
-        | None -> Infer_type_response
-          { type_string = None; type_json = None }
-        | Some (str, json) -> Infer_type_response
-          { type_string = Some str; type_json = Some json }
+        | None -> None, None
+        | Some (str, json) -> Some str, Some json
       ) in
-    Nuclide_rpc_message_printer.print_json ~response
+    Nuclide_rpc_message_printer.
+      (infer_type_response_to_json response |> print_json)
   end else begin
     match result with
       | Some (str, _) -> print_endline str

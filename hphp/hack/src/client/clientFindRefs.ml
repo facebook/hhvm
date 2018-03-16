@@ -31,7 +31,8 @@ let go (res : FindRefsService.result) output_json =
 (* Versions used by the editor's "references to symbol at position" command *)
 let print_ide_json res =
   let response = FindRefsService.result_to_ide_message res in
-  Nuclide_rpc_message_printer.print_json ~response
+  Nuclide_rpc_message_printer.
+    (find_references_response_to_json response |> print_json)
 
 let print_ide_readable res =
   Option.iter res ~f:begin fun (s, results) ->

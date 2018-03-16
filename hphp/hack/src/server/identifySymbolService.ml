@@ -37,14 +37,6 @@ let filter_redundant results =
   then List.filter results ~f:result_is_method
   else results
 
-let result_to_ide_message x =
-  let open Ide_message in
-  Identify_symbol_response (
-    List.map x begin fun (occurrence, definition) ->
-      {occurrence; definition}
-    end
-  )
-
 let is_target target_line target_char pos =
   let l, start, end_ = Pos.info_pos pos in
   (* We need to filter out by filename too, due to lazy decl firing hooks in

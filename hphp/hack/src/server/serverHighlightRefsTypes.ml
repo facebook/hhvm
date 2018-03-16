@@ -8,4 +8,4 @@
  *
  *)
 
- type result = Ide_message.highlight_references_response
+ type result = Ide_api_types.range list

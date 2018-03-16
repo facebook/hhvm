@@ -894,6 +894,7 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
       auto const key = elm.strKey();
       int64_t n;
       if (key->isStrictlyInteger(n)) {
+        if (checkHACIntishCast()) raise_intish_index_cast();
         init.set(n, make_tv<KindOfInt64>(n));
       } else {
         init.set(key, tvAsCVarRef(&elm.tv));

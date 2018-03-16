@@ -145,9 +145,10 @@ static CallMap s_callMap {
                            {{TV, 0}}},
     {ConvVecToArr,       convVecToArrHelper, DSSA, SNone,
                            {{SSA, 0}}},
-    {ConvDictToArr,      convDictToArrHelper, DSSA, SNone,
+    // These two need to sync because of Hack array compat notices
+    {ConvDictToArr,      convDictToArrHelper, DSSA, SSync,
                            {{SSA, 0}}},
-    {ConvKeysetToArr,    convKeysetToArrHelper, DSSA, SNone,
+    {ConvKeysetToArr,    convKeysetToArrHelper, DSSA, SSync,
                            {{SSA, 0}}},
     {ConvCellToArr,      convCellToArrHelper, DSSA, SSync,
                            {{TV, 0}}},

@@ -465,11 +465,13 @@ void cgConvVecToDArr(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgConvDictToDArr(IRLS& env, const IRInstruction* inst) {
-  convToDArrHelper(env, inst, CallSpec::direct(convDictToDArrImpl), false);
+  // These have to sync because of Hack array compat notices
+  convToDArrHelper(env, inst, CallSpec::direct(convDictToDArrImpl), true);
 }
 
 void cgConvKeysetToDArr(IRLS& env, const IRInstruction* inst) {
-  convToDArrHelper(env, inst, CallSpec::direct(convKeysetToDArrImpl), false);
+  // These have to sync because of Hack array compat notices
+  convToDArrHelper(env, inst, CallSpec::direct(convKeysetToDArrImpl), true);
 }
 
 void cgConvObjToDArr(IRLS& env, const IRInstruction* inst) {

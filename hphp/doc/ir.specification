@@ -436,9 +436,9 @@ To array conversions:
 
 | ConvVecToArr,                 D(Arr), S(Vec),                      PRc|CRc
 
-| ConvDictToArr,                D(Arr), S(Dict),                     PRc|CRc
+| ConvDictToArr,                D(Arr), S(Dict),                  Er|PRc|CRc
 
-| ConvKeysetToArr,              D(Arr), S(Keyset),                   PRc|CRc
+| ConvKeysetToArr,              D(Arr), S(Keyset),                Er|PRc|CRc
 
 | ConvCellToArr,                D(Arr), S(Cell),                  Er|PRc|CRc
 
@@ -498,9 +498,9 @@ To darray conversion:
 
 | ConvVecToDArr,                DArrMixed, S(Vec),                   PRc|CRc
 
-| ConvDictToDArr,               DArrMixed, S(Dict),                  PRc|CRc
+| ConvDictToDArr,               DArrMixed, S(Dict),               Er|PRc|CRc
 
-| ConvKeysetToDArr,             DArrMixed, S(Keyset),                PRc|CRc
+| ConvKeysetToDArr,             DArrMixed, S(Keyset),             Er|PRc|CRc
 
 | ConvObjToDArr,                DArrMixed, S(Obj),                Er|PRc|CRc
 

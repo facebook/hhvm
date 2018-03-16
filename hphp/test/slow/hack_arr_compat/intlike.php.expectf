@@ -140,3 +140,104 @@ string(3) "abc"
 =============== set ================================
 
 Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 32
+======================= array cast =================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 38
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 38
+array(2) {
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+}
+======================= darray cast ================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 40
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 40
+array(2) {
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+}
+======================= array cast =================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 38
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 38
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 38
+array(3) {
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+}
+======================= darray cast ================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 40
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 40
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 40
+array(3) {
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+}
+======================= literals ===================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 56
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 56
+array(2) {
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+}
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 57
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 57
+array(2) {
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+}
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 58
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 58
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 58
+array(3) {
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+}
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 59
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 59
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 59
+array(3) {
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+}

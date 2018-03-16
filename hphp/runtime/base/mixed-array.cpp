@@ -1619,6 +1619,7 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn, bool copy, bool toDArray) {
     } else {
       int64_t n;
       if (e.skey->isStrictlyInteger(n)) {
+        if (checkHACIntishCast()) raise_intish_index_cast();
         out->update(n, *tvAssertCell(&e.data));
       } else {
         out->update(e.skey, *tvAssertCell(&e.data));

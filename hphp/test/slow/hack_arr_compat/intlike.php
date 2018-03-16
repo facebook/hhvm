@@ -33,6 +33,13 @@ function test_const_key($a) {
   return $a;
 }
 
+function test_casting($a) {
+  echo "======================= array cast =================\n";
+  var_dump((array)$a);
+  echo "======================= darray cast ================\n";
+  var_dump(darray($a));
+}
+
 function run_tests() {
   test([], '10');
   test([1, 2, 3, 4], '2');
@@ -41,5 +48,14 @@ function run_tests() {
   test_const_key([]);
   test_const_key([1, 2, 3, 4]);
   test_const_key([2 => 'abc']);
+
+  test_casting(dict['1' => true, '2' => false]);
+  test_casting(keyset['1', '2', '3']);
+
+  echo "======================= literals ===================\n";
+  var_dump((array)dict['1' => true, '2' => false]);
+  var_dump(darray(dict['1' => true, '2' => false]));
+  var_dump((array)keyset['1', '2', '3']);
+  var_dump(darray(keyset['1', '2', '3']));
 }
 run_tests();

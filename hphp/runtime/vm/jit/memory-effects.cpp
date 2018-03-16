@@ -1996,11 +1996,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvArrToKeyset: // Decrefs input values
   case ConvVecToKeyset:
   case ConvDictToKeyset:
+  case ConvDictToDArr: // These 4 may raise Hack array compat notices
+  case ConvKeysetToDArr:
+  case ConvDictToArr:
+  case ConvKeysetToArr:
     return may_raise(inst, may_load_store(AElemAny, AEmpty));
 
   case ConvVecToArr:
-  case ConvDictToArr:
-  case ConvKeysetToArr:
   case ConvArrToNonDVArr:
   case ConvDictToVec:
   case ConvKeysetToVec:
@@ -2012,8 +2014,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvKeysetToVArr:
   case ConvArrToDArr:
   case ConvVecToDArr:
-  case ConvDictToDArr:
-  case ConvKeysetToDArr:
     return may_load_store(AElemAny, AEmpty);
 
   case ReleaseVVAndSkip:  // can decref ExtraArgs or VarEnv and Locals

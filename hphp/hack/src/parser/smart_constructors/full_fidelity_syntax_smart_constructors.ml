@@ -42,7 +42,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     let make_missing (s, o) state = State.next state [], Syntax.make_missing s o
     let make_list (s, o) items state =
       if items <> []
-      then State.next state [], Syntax.make_list s o items
+      then State.next state items, Syntax.make_list s o items
       else make_missing (s, o) state
     let make_end_of_file arg0 state = State.next state [arg0], Syntax.make_end_of_file arg0
     let make_script arg0 state = State.next state [arg0], Syntax.make_script arg0

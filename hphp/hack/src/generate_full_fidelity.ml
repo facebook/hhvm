@@ -830,7 +830,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     let make_missing (s, o) state = State.next state [], Syntax.make_missing s o
     let make_list (s, o) items state =
       if items <> []
-      then State.next state [], Syntax.make_list s o items
+      then State.next state items, Syntax.make_list s o items
       else make_missing (s, o) state
 CONSTRUCTOR_METHODS
   end (* WithState *)

@@ -1,7 +1,6 @@
 <?hh
 
 $algos = [
-  'aead_aes256gcm',
   'aead_chacha20poly1305',
   'aead_chacha20poly1305_ietf',
   'aead_xchacha20poly1305_ietf',

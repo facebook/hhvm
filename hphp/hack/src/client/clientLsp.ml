@@ -594,7 +594,6 @@ let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
   | Some (s, _) -> { Hover.contents = [MarkedString s]; range = None; }
 
 let do_enhanced_hover (conn: server_conn) (params: Hover.params) : Hover.result =
-  (* todo(wipi): return doc blocks too. *)
   let (file, line, column) = lsp_file_position_to_hack params in
   let command = ServerCommandTypes.IDE_HOVER (ServerUtils.FileName file, line, column) in
   let contents = rpc conn command
@@ -637,7 +636,7 @@ let do_definition (conn: server_conn) (params: Definition.params)
   in
   hack_to_lsp filtered_results
 
-let make_ide_completion_response (result:AutocompleteTypes.ide_result) =
+let make_ide_completion_response (result:AutocompleteTypes.ide_result) (filename:string) =
   let open AutocompleteTypes in
   let open Completion in
   (* We use snippets to provide parentheses+arguments when autocompleting     *)
@@ -649,20 +648,24 @@ let make_ide_completion_response (result:AutocompleteTypes.ide_result) =
   let rec hack_completion_to_lsp (completion: complete_autocomplete_result)
     : Completion.completionItem =
     let (insertText, insertTextFormat) = hack_to_insert completion in
+    let pos = if Pos.filename completion.res_pos = ""
+      then Pos.set_file filename completion.res_pos
+      else completion.res_pos
+    in
     {
       label = completion.res_name ^ (if completion.res_kind = Namespace_kind then "\\" else "");
       kind = hack_to_kind completion;
       detail = Some (hack_to_detail completion);
       inlineDetail = Some (hack_to_inline_detail completion);
       itemType = hack_to_itemType completion;
-      documentation = None; (* TODO: provide doc-comments *)
+      documentation = None; (* This will be filled in by completionItem/resolve. *)
       sortText = None;
       filterText = None;
       insertText = Some insertText;
-      insertTextFormat = insertTextFormat;
+      insertTextFormat = Some insertTextFormat;
       textEdits = [];
       command = None;
-      data = None;
+      data = Some (Pos.json pos);
     }
   and hack_to_kind (completion: complete_autocomplete_result)
     : Completion.completionItemKind option =
@@ -721,7 +724,7 @@ let do_completion_ffp (conn: server_conn) (params: Completion.params) : Completi
   let filename = lsp_uri_to_path params.TextDocumentPositionParams.textDocument.uri in
   let command = ServerCommandTypes.IDE_FFP_AUTOCOMPLETE (filename, pos) in
   let result = rpc conn command in
-  make_ide_completion_response result
+  make_ide_completion_response result filename
 
 let do_completion_legacy (conn: server_conn) (params: Completion.params)
   : Completion.result =
@@ -731,7 +734,22 @@ let do_completion_legacy (conn: server_conn) (params: Completion.params)
   let delimit_on_namespaces = true in
   let command = ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos, delimit_on_namespaces) in
   let result = rpc conn command in
-  make_ide_completion_response result
+  make_ide_completion_response result filename
+
+let do_completionItemResolve
+  (conn: server_conn)
+  (params: CompletionItemResolve.params)
+: CompletionItemResolve.result =
+  match params.Completion.data with
+  | None -> params
+  | Some _ as data ->
+    let filename = Jget.string_exn data "filename" in
+    let line = Jget.int_exn data "line" in
+    let command =
+      ServerCommandTypes.DOCBLOCK_AT (filename, line)
+    in
+    let contents = rpc conn command in
+    { params with Completion.documentation = contents }
 
 let do_workspaceSymbol
     (conn: server_conn)
@@ -1208,7 +1226,7 @@ let do_initialize () : Initialize.result =
       };
       hoverProvider = true;
       completionProvider = Some {
-        resolveProvider = false;
+        resolveProvider = true;
         completion_triggerCharacters = ["$"; ">"; "\\"; ":"; "<"];
       };
       signatureHelpProvider = None;
@@ -1712,6 +1730,14 @@ let handle_event
     cancel_if_stale client c short_timeout;
     parse_completion c.params |> do_completion menv.conn
       |> print_completion |> Jsonrpc.respond to_stdout c
+
+  (* completionItem/resolve request *)
+  | Main_loop menv, Client_message c when c.method_ = "completionItem/resolve" ->
+    cancel_if_stale client c short_timeout;
+    parse_completionItem c.params
+    |> do_completionItemResolve menv.conn
+    |> print_completionItem
+    |> Jsonrpc.respond to_stdout c
 
   (* workspace/symbol request *)
   | Main_loop menv, Client_message c when c.method_ = "workspace/symbol" ->

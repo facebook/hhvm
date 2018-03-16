@@ -37,6 +37,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerInferTypeBatch.go genv.workers positions env
     | IDE_HOVER (fn, line, char) ->
         env, ServerHover.go env (fn, line, char)
+    | DOCBLOCK_AT (fn, line) ->
+        env, ServerDocblockAt.go env fn line
     | AUTOCOMPLETE content ->
         let result = try
           let autocomplete_context = { AutocompleteTypes.

@@ -15,7 +15,7 @@
         },
         "hoverProvider": true,
         "completionProvider": {
-          "resolveProvider": false,
+          "resolveProvider": true,
           "triggerCharacters": [
             "$",
             ">",
@@ -40,14 +40,6 @@
   },
   {
     "jsonrpc": "2.0",
-    "method": "telemetry/event",
-    "params": {
-      "type": 4,
-      "message": "Version in hhconfig=[NoVersion]"
-    }
-  },
-  {
-    "jsonrpc": "2.0",
     "id": 2,
     "result": {
       "isIncomplete": false,
@@ -58,7 +50,13 @@
           "detail": "class",
           "inlineDetail": "class",
           "insertText": "ab:cd:alpha",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 9,
+            "char_start": 13,
+            "char_end": 24
+          }
         },
         {
           "label": "ab:cd:text",
@@ -66,7 +64,13 @@
           "detail": "class",
           "inlineDetail": "class",
           "insertText": "ab:cd:text",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 4,
+            "char_start": 13,
+            "char_end": 23
+          }
         }
       ]
     }
@@ -83,7 +87,13 @@
           "detail": "class",
           "inlineDetail": "class",
           "insertText": "ab:cd:alpha",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 9,
+            "char_start": 13,
+            "char_end": 24
+          }
         },
         {
           "label": "ab:cd:text",
@@ -91,7 +101,13 @@
           "detail": "class",
           "inlineDetail": "class",
           "insertText": "ab:cd:text",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 4,
+            "char_start": 13,
+            "char_end": 23
+          }
         }
       ]
     }
@@ -108,7 +124,13 @@
           "detail": "?int",
           "inlineDetail": "?int",
           "insertText": "width",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char_start": 27,
+            "char_end": 29
+          }
         },
         {
           "label": "color",
@@ -116,7 +138,13 @@
           "detail": "?string",
           "inlineDetail": "?string",
           "insertText": "color",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char_start": 13,
+            "char_end": 18
+          }
         }
       ]
     }
@@ -133,7 +161,13 @@
           "detail": "?int",
           "inlineDetail": "?int",
           "insertText": "width",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char_start": 27,
+            "char_end": 29
+          }
         },
         {
           "label": "color",
@@ -141,7 +175,13 @@
           "detail": "?string",
           "inlineDetail": "?string",
           "insertText": "color",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char_start": 13,
+            "char_end": 18
+          }
         }
       ]
     }
@@ -159,7 +199,13 @@
           "inlineDetail": "()",
           "itemType": ":ab:cd:alpha",
           "insertText": ":ab:cd:alpha",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 9,
+            "char_start": 13,
+            "char_end": 24
+          }
         },
         {
           "label": ":ab:cd:text",
@@ -168,7 +214,13 @@
           "inlineDetail": "()",
           "itemType": ":ab:cd:text",
           "insertText": ":ab:cd:text",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 4,
+            "char_start": 13,
+            "char_end": 23
+          }
         }
       ]
     }
@@ -186,7 +238,13 @@
           "inlineDetail": "()",
           "itemType": ":ab:cd:alpha",
           "insertText": ":ab:cd:alpha",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 9,
+            "char_start": 13,
+            "char_end": 24
+          }
         },
         {
           "label": ":ab:cd:text",
@@ -195,7 +253,13 @@
           "inlineDetail": "()",
           "itemType": ":ab:cd:text",
           "insertText": ":ab:cd:text",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 4,
+            "char_start": 13,
+            "char_end": 23
+          }
         }
       ]
     }
@@ -204,25 +268,20 @@
     "jsonrpc": "2.0",
     "id": 8,
     "result": {
-      "isIncomplete": false,
-      "items": [
-        {
-          "label": ":width",
-          "kind": 10,
-          "detail": "?int",
-          "inlineDetail": "?int",
-          "insertText": ":width",
-          "insertTextFormat": 1
-        },
-        {
-          "label": ":color",
-          "kind": 10,
-          "detail": "?string",
-          "inlineDetail": "?string",
-          "insertText": ":color",
-          "insertTextFormat": 1
-        }
-      ]
+      "label": ":ab:cd:alpha",
+      "kind": 4,
+      "detail": "function(): :ab:cd:alpha",
+      "inlineDetail": "()",
+      "itemType": ":ab:cd:alpha",
+      "documentation": ":ab:cd:alpha docblock",
+      "insertText": ":ab:cd:alpha",
+      "insertTextFormat": 1,
+      "data": {
+        "filename": "${root_path}${path_sep}completion_extras.php",
+        "line": 9,
+        "char_start": 13,
+        "char_end": 24
+      }
     }
   },
   {
@@ -237,7 +296,13 @@
           "detail": "?int",
           "inlineDetail": "?int",
           "insertText": ":width",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char_start": 27,
+            "char_end": 29
+          }
         },
         {
           "label": ":color",
@@ -245,14 +310,109 @@
           "detail": "?string",
           "inlineDetail": "?string",
           "insertText": ":color",
-          "insertTextFormat": 1
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char_start": 13,
+            "char_end": 18
+          }
         }
       ]
     }
   },
   {
     "jsonrpc": "2.0",
+    "id": 10,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": ":width",
+          "kind": 10,
+          "detail": "?int",
+          "inlineDetail": "?int",
+          "insertText": ":width",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char_start": 27,
+            "char_end": 29
+          }
+        },
+        {
+          "label": ":color",
+          "kind": 10,
+          "detail": "?string",
+          "inlineDetail": "?string",
+          "insertText": ":color",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char_start": 13,
+            "char_end": 18
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 11,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": "test_function",
+          "kind": 3,
+          "detail": "function(): void",
+          "inlineDetail": "()",
+          "itemType": "void",
+          "insertText": "test_function",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion.php",
+            "line": 8,
+            "char_start": 10,
+            "char_end": 22
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 12,
+    "result": {
+      "label": "test_function",
+      "kind": 3,
+      "detail": "function(): void",
+      "inlineDetail": "()",
+      "itemType": "void",
+      "documentation": "test_function docblock.",
+      "insertText": "test_function",
+      "insertTextFormat": 1,
+      "data": {
+        "filename": "${root_path}${path_sep}completion.php",
+        "line": 8,
+        "char_start": 10,
+        "char_end": 22
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 99,
     "result": null
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "telemetry/event",
+    "params": {
+      "type": 4,
+      "message": "Version in hhconfig=[NoVersion]"
+    }
   }
 ]

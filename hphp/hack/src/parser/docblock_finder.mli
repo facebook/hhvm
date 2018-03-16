@@ -30,5 +30,7 @@ val make_docblock_finder: ((Pos.t * Prim_defs.comment) list) -> finder
 
 val find_docblock: finder -> ?last_line:int -> int -> string option
 
+val find_single_docblock: ?tidy:bool -> Relative_path.t -> int -> string option
+
 (** Find the last comment on `line` if it exists. *)
 val find_inline_comment: finder -> int -> string option

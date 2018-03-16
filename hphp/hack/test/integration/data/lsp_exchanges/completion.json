@@ -198,6 +198,27 @@
    }
 },
 {
+  "comment": "autocomplete resolving after '$x = new :a'",
+  "jsonrpc": "2.0",
+  "method": "completionItem/resolve",
+  "id": 8,
+  "params": {
+    "label": ":ab:cd:alpha",
+    "kind": 4,
+    "detail": "function(): :ab:cd:alpha",
+    "inlineDetail": "()",
+    "itemType": ":ab:cd:alpha",
+    "insertText": ":ab:cd:alpha",
+    "insertTextFormat": 1,
+    "data": {
+      "filename": "${root_path}${path_sep}completion_extras.php",
+      "line": 9,
+      "char_start": 13,
+      "char_end": 24
+    }
+  }
+},
+{
   "comment": "Add '$x = <ab:cd:text/>; $y = $x->'",
   "jsonrpc": "2.0",
   "method": "textDocument/didChange",
@@ -218,7 +239,7 @@
   "comment": "autocomplete after '$x = <ab:cd:text/>; $y = $x->'",
   "jsonrpc": "2.0",
   "method": "textDocument/completion",
-  "id": 8,
+  "id": 9,
   "params": {
       "textDocument": {
         "uri":"${php_file_uri}"
@@ -247,13 +268,63 @@
   "comment": "autocomplete after '$x = <ab:cd:text/>; $y = $x->:'",
   "jsonrpc": "2.0",
   "method": "textDocument/completion",
-  "id": 9,
+  "id": 10,
   "params": {
       "textDocument": {
         "uri":"${php_file_uri}"
        },
        "position": {"line": 3, "character": 30}
    }
+},
+{
+  "comment": "Remove all text in the function",
+  "jsonrpc": "2.0",
+  "method": "textDocument/didChange",
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "contentChanges": [{
+         "range": {
+           "start": {"line":3, "character":0},
+           "end": {"line":3, "character":30}
+         },
+         "text":"test_fun"
+       }]
+   }
+},
+{
+  "comment": "autocomplete after 'test_fun'",
+  "jsonrpc": "2.0",
+  "method": "textDocument/completion",
+  "id": 11,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "position": {"line": 3, "character": 8}
+   }
+},
+{
+  "comment": "autocomplete resolving after '$x = new :a'",
+  "jsonrpc": "2.0",
+  "method": "completionItem/resolve",
+  "id": 12,
+  "params": {
+    "label": "test_function",
+    "kind": 3,
+    "detail": "function(): void",
+    "inlineDetail": "()",
+    "itemType": "void",
+    "insertText": "test_function",
+    "insertTextFormat": 1,
+    "data": {
+      "filename": "${root_path}${path_sep}completion.php",
+      "line": 8,
+      "char_start": 10,
+      "char_end": 22
+    }
+  }
 },
 {
   "jsonrpc": "2.0",

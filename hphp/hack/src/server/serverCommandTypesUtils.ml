@@ -5,6 +5,7 @@ let debug_describe_t : type a. a t -> string = function
   | INFER_TYPE               _ -> "INFER_TYPE"
   | INFER_TYPE_BATCH         _ -> "INFER_TYPE_BATCH"
   | IDE_HOVER                _ -> "IDE_HOVER"
+  | DOCBLOCK_AT              _ -> "DOCBLOCK_AT"
   | COVERAGE_LEVELS          _ -> "COVERAGE_LEVELS"
   | AUTOCOMPLETE             _ -> "AUTOCOMPLETE"
   | IDENTIFY_FUNCTION        _ -> "IDENTIFY_FUNCTION"

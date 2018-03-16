@@ -163,6 +163,9 @@ class TestLsp(LspTestDriver, unittest.TestCase):
             'root_path': self.repo_dir,
             'php_file_uri': self.repo_file_uri(test_php),
             'php_file': self.read_repo_file(test_php),
+
+            # Sometimes Windows happens.
+            'path_sep': os.sep,
         }
 
     def test_init_shutdown(self):

@@ -15,7 +15,7 @@
         },
         "hoverProvider": true,
         "completionProvider": {
-          "resolveProvider": false,
+          "resolveProvider": true,
           "triggerCharacters": [
             "$",
             ">",

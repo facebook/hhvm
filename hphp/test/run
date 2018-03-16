@@ -1201,7 +1201,7 @@ class Status {
   public static function setMode($mode) {
     self::$mode = $mode;
   }
-  
+
   public static function getMode() {
     return self::$mode;
   }
@@ -1461,6 +1461,9 @@ function run($options, $tests, $bad_test_file) {
       clean_intermediate_files($test, $options);
     } else if ($status === 'skip-onlyrepo') {
       Status::skip($test, 'onlyrepo', $time, $stime, $etime);
+      clean_intermediate_files($test, $options);
+    } else if ($status === 'skip-onlyhackc') {
+      Status::skip($test, 'onlyhackc', $time, $stime, $etime);
       clean_intermediate_files($test, $options);
     } else if ($status === 'skip-nosemdiff') {
       Status::skip($test, 'no-semdiff', $time, $stime, $etime);
@@ -2129,8 +2132,11 @@ function run_test($options, $test) {
     if (substr($test, -5) === ".hhas") return 'skip';
   }
 
-  // Skip any tests tht would require HPHPC for HackC-only features
-  $only_hackc = file_exists($test.'.onlyhackc');
+  // Skip any tests that would require HPHPC for HackC-only features
+  // If the test_name.onlyhackc exists or the foler has .onlyhackc
+  $only_hackc_tag = '.onlyhackc';
+  $only_hackc = file_exists($test.$only_hackc_tag) ||
+                file_exists(dirname($test).'/'.$only_hackc_tag);
   if ($only_hackc) {
     if (!isset($options['hackc']) || isset($options['compare-hh-codegen'])) {
       return 'skip-onlyhackc';
@@ -2674,26 +2680,26 @@ function aggregate_srcloc_info($tests) {
   $all_missing_on_lhs = [];
   $all_missing_on_rhs = [];
   $all_mismatched_srcloc = [];
-  
+
   foreach ($tests as $test) {
     $file = "$test.diff";
     $json_content = file_get_contents($file);
     $srcloc_info = json_decode($json_content, true);
-    
+
     $mismatched_srcloc = $srcloc_info['mismatched_srcloc'];
     foreach ($mismatched_srcloc as $instr) {
       $all_mismatched_srcloc[] = $instr;
     }
     $all_mismatched_srcloc = array_unique($all_mismatched_srcloc);
     sort($all_mismatched_srcloc);
-    
+
     $missing_on_lhs_srcloc = $srcloc_info['missing_on_lhs_srcloc'];
     foreach ($missing_on_lhs_srcloc as $instr) {
       $all_missing_on_lhs[] = $instr;
     }
     $all_missing_on_lhs = array_unique($all_missing_on_lhs);
     sort($all_missing_on_lhs);
-    
+
     $missing_on_rhs_srcloc = $srcloc_info['missing_on_rhs_srcloc'];
     foreach ($missing_on_rhs_srcloc as $instr) {
       $all_missing_on_rhs[] = $instr;
@@ -2701,7 +2707,7 @@ function aggregate_srcloc_info($tests) {
     $all_missing_on_rhs = array_unique($all_missing_on_rhs);
     sort($all_missing_on_rhs);
   }
-  
+
   print "\nInstructions with mismatched srcloc:\n";
   print "  - " . implode(",\n  - ", $all_mismatched_srcloc) . "\n\n";
   print "Instructions with missing srcloc in HackC:\n";
@@ -2733,7 +2739,7 @@ function print_failure($argv, $results, $options) {
 
   if (isset($options['srcloc'])) {
     aggregate_srcloc_info ($failed);
-  } else {  
+  } else {
     print make_header("See the diffs:").
       implode("\n", array_map(
         function($test) { return 'cat '.$test.'.diff'; },

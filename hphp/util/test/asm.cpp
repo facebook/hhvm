@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#if defined(__x86_64__)
+
 #include "hphp/util/asm-x64.h"
 #include <gtest/gtest.h>
 
@@ -974,3 +976,5 @@ TEST(Asm, Psllq) {
 }
 
 }}
+
+#endif

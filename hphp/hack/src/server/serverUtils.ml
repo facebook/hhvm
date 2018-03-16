@@ -88,7 +88,7 @@ let with_exit_on_exception f =
   | WorkerController.Worker_busy as e ->
     Hh_logger.exc e;
     Exit_status.(exit Worker_busy)
-  | (WorkerController.Worker_exited_abnormally i) as e ->
+  | (WorkerController.Worker_failed (_, Unix.WEXITED i)) as e ->
     Hh_logger.exc e;
     (** Exit with the same exit code that that worker used. *)
     exit i

@@ -25,4 +25,7 @@ type t = {
 
   (* Was there an explicit return type hint? *)
   return_explicit: bool;
+
+  (* Is the function expected to return a reference? *)
+  return_by_ref: bool;
 }

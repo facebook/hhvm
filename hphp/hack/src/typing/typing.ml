@@ -425,7 +425,7 @@ and fun_def tcopt f =
           let ty = TI.instantiable_hint env ret in
           Phase.localize_with_self env ty in
       let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
-        ~is_explicit:(Option.is_some f.f_ret) ty in
+        ~is_explicit:(Option.is_some f.f_ret) ~is_by_ref:f.f_ret_by_ref ty in
       TI.check_params_instantiable env f.f_params;
       TI.check_tparams_instantiable env f.f_tparams;
       let env, param_tys = List.map_env env f.f_params make_param_local_ty in
@@ -655,7 +655,7 @@ and stmt env = function
       let env = check_inout_return env in
       let pos = fst e in
       let Typing_env_return_info.{
-        return_type; return_disposable; return_mutable; return_explicit } =
+        return_type; return_disposable; return_mutable; return_explicit; return_by_ref } =
         Env.get_return env in
       let expected =
         if return_explicit
@@ -665,6 +665,13 @@ and stmt env = function
       if return_disposable then enforce_return_disposable env e;
       let env, te, rty = expr ~is_using_clause:return_disposable ?expected:expected env e in
       if return_mutable then enforce_mutable_return env te;
+      if return_by_ref && TypecheckerOptions.experimental_feature_enabled
+        (Env.get_options env)
+        TypecheckerOptions.experimental_disallow_refs_in_array
+      then begin match snd e with
+        | Array_get _ -> Errors.return_ref_in_array p
+        | _ -> ()
+      end;
       let rty = Typing_return.wrap_awaitable env p rty in
       (match snd (Env.expand_type env return_type) with
       | r, Tprim Tvoid ->
@@ -2554,7 +2561,9 @@ and anon_make tenv p f ft idl =
             Phase.localize ~ety_env env ret in
         let env = Env.set_return env
           (Typing_return.make_info f.f_fun_kind [] env
-            ~is_explicit:(Option.is_some ret_ty) hret) in
+            ~is_explicit:(Option.is_some ret_ty)
+            ~is_by_ref:f.f_ret_by_ref
+            hret) in
         let env, tb = block env nb.fnb_nast in
         let env =
           if Nast_terminality.Terminal.block tenv nb.fnb_nast
@@ -6251,7 +6260,7 @@ and method_def env m =
           from_class = Some CIstatic } in
       Phase.localize ~ety_env env ret in
   let return = Typing_return.make_info m.m_fun_kind m.m_user_attributes env
-    ~is_explicit:(Option.is_some m.m_ret) ty in
+    ~is_explicit:(Option.is_some m.m_ret) ~is_by_ref:m.m_ret_by_ref ty in
   TI.check_params_instantiable env m.m_params;
   let env, param_tys = List.map_env env m.m_params make_param_local_ty in
   if Env.is_strict env then begin

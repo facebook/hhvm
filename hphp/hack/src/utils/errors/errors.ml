@@ -3224,6 +3224,11 @@ let binding_ref_in_array pos =
   let msg = "Binding a reference in an array is no longer supported in Hack." in
   add Typing.binding_ref_in_array pos msg
 
+let return_ref_in_array pos =
+  let msg = "Returning a reference to an element in an array is no longer " ^
+    "supported in Hack." in
+  add Typing.binding_ref_in_array pos msg
+
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

@@ -310,7 +310,9 @@ let empty tcopt file ~droot = {
       return_type = fresh_type ();
       return_disposable = false;
       return_mutable = false;
-      return_explicit = false; };
+      return_explicit = false;
+      return_by_ref = false;
+    };
     params  = Local_id.Map.empty;
     self_id = "";
     self    = Reason.none, Tany;

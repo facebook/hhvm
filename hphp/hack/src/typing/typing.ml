@@ -2048,6 +2048,16 @@ and expr_
               (TUtils.IsExprHint.print ty_);
             expr_error env p (Reason.Rwitness p)
       end
+  | As (_e, _hint, _is_nullable) ->
+    if not (TypecheckerOptions.experimental_feature_enabled
+      (Env.get_options env)
+      TypecheckerOptions.experimental_as_expression)
+    then begin
+      Errors.experimental_feature p "as expression";
+      expr_error env p (Reason.Rnone)
+    end else
+      (* TODO(T26859386): Implement as expressions *)
+      expr_error env p (Reason.Rnone)
   | Efun (f, idl) ->
       (* This is the function type as declared on the lambda itself.
        * If type hints are absent then use Tany instead. *)

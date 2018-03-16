@@ -1355,7 +1355,15 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
   | Syntax.IsExpression {
       is_left_operand = left;
       is_operator = kw;
-      is_right_operand = right; } ->
+      is_right_operand = right; }
+  | Syntax.AsExpression {
+      as_left_operand = left;
+      as_operator = kw;
+      as_right_operand = right; }
+  | Syntax.NullableAsExpression {
+      nullable_as_left_operand = left;
+      nullable_as_operator = kw;
+      nullable_as_right_operand = right; } ->
     Concat [
       t env left;
       Space;

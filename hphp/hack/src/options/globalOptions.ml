@@ -115,6 +115,12 @@ let tco_experimental_no_trait_reuse = "no_trait_reuse"
 let tco_experimental_is_expression = "is_expression"
 
 (**
+ * Typechecker support for `as` expressions. This feature is incomplete and
+ * under development, see T26859386 for details and progress.
+ *)
+let tco_experimental_as_expression = "as_expression"
+
+(**
  * If enabled:
  *
  * namespace Foo {
@@ -185,6 +191,7 @@ let tco_experimental_all =
      tco_experimental_disable_optional_and_unknown_shape_fields;
      tco_experimental_no_trait_reuse;
      tco_experimental_is_expression;
+     tco_experimental_as_expression;
      tco_experimental_dynamic_types;
      tco_experimental_no_fallback_in_namespaces;
      tco_experimental_nonnull;

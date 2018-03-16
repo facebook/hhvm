@@ -208,6 +208,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.BinaryExpression _ -> tag validate_binary_expression (fun x -> ExprBinary x) x
     | Syntax.InstanceofExpression _ -> tag validate_instanceof_expression (fun x -> ExprInstanceof x) x
     | Syntax.IsExpression _ -> tag validate_is_expression (fun x -> ExprIs x) x
+    | Syntax.AsExpression _ -> tag validate_as_expression (fun x -> ExprAs x) x
+    | Syntax.NullableAsExpression _ -> tag validate_nullable_as_expression (fun x -> ExprNullableAs x) x
     | Syntax.ConditionalExpression _ -> tag validate_conditional_expression (fun x -> ExprConditional x) x
     | Syntax.EvalExpression _ -> tag validate_eval_expression (fun x -> ExprEval x) x
     | Syntax.EmptyExpression _ -> tag validate_empty_expression (fun x -> ExprEmpty x) x
@@ -259,6 +261,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | ExprBinary                        thing -> invalidate_binary_expression              (value, thing)
     | ExprInstanceof                    thing -> invalidate_instanceof_expression          (value, thing)
     | ExprIs                            thing -> invalidate_is_expression                  (value, thing)
+    | ExprAs                            thing -> invalidate_as_expression                  (value, thing)
+    | ExprNullableAs                    thing -> invalidate_nullable_as_expression         (value, thing)
     | ExprConditional                   thing -> invalidate_conditional_expression         (value, thing)
     | ExprEval                          thing -> invalidate_eval_expression                (value, thing)
     | ExprEmpty                         thing -> invalidate_empty_expression               (value, thing)
@@ -463,6 +467,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.BinaryExpression _ -> tag validate_binary_expression (fun x -> LambdaBinary x) x
     | Syntax.InstanceofExpression _ -> tag validate_instanceof_expression (fun x -> LambdaInstanceof x) x
     | Syntax.IsExpression _ -> tag validate_is_expression (fun x -> LambdaIs x) x
+    | Syntax.AsExpression _ -> tag validate_as_expression (fun x -> LambdaAs x) x
+    | Syntax.NullableAsExpression _ -> tag validate_nullable_as_expression (fun x -> LambdaNullableAs x) x
     | Syntax.ConditionalExpression _ -> tag validate_conditional_expression (fun x -> LambdaConditional x) x
     | Syntax.EvalExpression _ -> tag validate_eval_expression (fun x -> LambdaEval x) x
     | Syntax.EmptyExpression _ -> tag validate_empty_expression (fun x -> LambdaEmpty x) x
@@ -515,6 +521,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | LambdaBinary                        thing -> invalidate_binary_expression              (value, thing)
     | LambdaInstanceof                    thing -> invalidate_instanceof_expression          (value, thing)
     | LambdaIs                            thing -> invalidate_is_expression                  (value, thing)
+    | LambdaAs                            thing -> invalidate_as_expression                  (value, thing)
+    | LambdaNullableAs                    thing -> invalidate_nullable_as_expression         (value, thing)
     | LambdaConditional                   thing -> invalidate_conditional_expression         (value, thing)
     | LambdaEval                          thing -> invalidate_eval_expression                (value, thing)
     | LambdaEmpty                         thing -> invalidate_empty_expression               (value, thing)
@@ -565,6 +573,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.BinaryExpression _ -> tag validate_binary_expression (fun x -> CExprBinary x) x
     | Syntax.InstanceofExpression _ -> tag validate_instanceof_expression (fun x -> CExprInstanceof x) x
     | Syntax.IsExpression _ -> tag validate_is_expression (fun x -> CExprIs x) x
+    | Syntax.AsExpression _ -> tag validate_as_expression (fun x -> CExprAs x) x
+    | Syntax.NullableAsExpression _ -> tag validate_nullable_as_expression (fun x -> CExprNullableAs x) x
     | Syntax.ConditionalExpression _ -> tag validate_conditional_expression (fun x -> CExprConditional x) x
     | Syntax.EvalExpression _ -> tag validate_eval_expression (fun x -> CExprEval x) x
     | Syntax.EmptyExpression _ -> tag validate_empty_expression (fun x -> CExprEmpty x) x
@@ -617,6 +627,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | CExprBinary                        thing -> invalidate_binary_expression              (value, thing)
     | CExprInstanceof                    thing -> invalidate_instanceof_expression          (value, thing)
     | CExprIs                            thing -> invalidate_is_expression                  (value, thing)
+    | CExprAs                            thing -> invalidate_as_expression                  (value, thing)
+    | CExprNullableAs                    thing -> invalidate_nullable_as_expression         (value, thing)
     | CExprConditional                   thing -> invalidate_conditional_expression         (value, thing)
     | CExprEval                          thing -> invalidate_eval_expression                (value, thing)
     | CExprEmpty                         thing -> invalidate_empty_expression               (value, thing)
@@ -2469,6 +2481,38 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { is_left_operand = invalidate_expression x.is_left_operand
       ; is_operator = invalidate_token x.is_operator
       ; is_right_operand = invalidate_specifier x.is_right_operand
+      }
+    ; Syntax.value = v
+    }
+  and validate_as_expression : as_expression validator = function
+  | { Syntax.syntax = Syntax.AsExpression x; value = v } -> v,
+    { as_right_operand = validate_specifier x.as_right_operand
+    ; as_operator = validate_token x.as_operator
+    ; as_left_operand = validate_expression x.as_left_operand
+    }
+  | s -> validation_fail (Some SyntaxKind.AsExpression) s
+  and invalidate_as_expression : as_expression invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.AsExpression
+      { as_left_operand = invalidate_expression x.as_left_operand
+      ; as_operator = invalidate_token x.as_operator
+      ; as_right_operand = invalidate_specifier x.as_right_operand
+      }
+    ; Syntax.value = v
+    }
+  and validate_nullable_as_expression : nullable_as_expression validator = function
+  | { Syntax.syntax = Syntax.NullableAsExpression x; value = v } -> v,
+    { nullable_as_right_operand = validate_specifier x.nullable_as_right_operand
+    ; nullable_as_operator = validate_token x.nullable_as_operator
+    ; nullable_as_left_operand = validate_expression x.nullable_as_left_operand
+    }
+  | s -> validation_fail (Some SyntaxKind.NullableAsExpression) s
+  and invalidate_nullable_as_expression : nullable_as_expression invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.NullableAsExpression
+      { nullable_as_left_operand = invalidate_expression x.nullable_as_left_operand
+      ; nullable_as_operator = invalidate_token x.nullable_as_operator
+      ; nullable_as_right_operand = invalidate_specifier x.nullable_as_right_operand
       }
     ; Syntax.value = v
     }

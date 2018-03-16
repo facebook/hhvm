@@ -130,6 +130,8 @@ module type SmartConstructors_S = sig
   val make_binary_expression : r -> r -> r -> t -> t * r
   val make_instanceof_expression : r -> r -> r -> t -> t * r
   val make_is_expression : r -> r -> r -> t -> t * r
+  val make_as_expression : r -> r -> r -> t -> t * r
+  val make_nullable_as_expression : r -> r -> r -> t -> t * r
   val make_conditional_expression : r -> r -> r -> r -> r -> t -> t * r
   val make_eval_expression : r -> r -> r -> r -> t -> t * r
   val make_empty_expression : r -> r -> r -> r -> t -> t * r
@@ -309,6 +311,8 @@ end) = struct
     let binary_expression parser arg0 arg1 arg2 = call parser (SCI.make_binary_expression arg0 arg1 arg2)
     let instanceof_expression parser arg0 arg1 arg2 = call parser (SCI.make_instanceof_expression arg0 arg1 arg2)
     let is_expression parser arg0 arg1 arg2 = call parser (SCI.make_is_expression arg0 arg1 arg2)
+    let as_expression parser arg0 arg1 arg2 = call parser (SCI.make_as_expression arg0 arg1 arg2)
+    let nullable_as_expression parser arg0 arg1 arg2 = call parser (SCI.make_nullable_as_expression arg0 arg1 arg2)
     let conditional_expression parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_conditional_expression arg0 arg1 arg2 arg3 arg4)
     let eval_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_eval_expression arg0 arg1 arg2 arg3)
     let empty_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_empty_expression arg0 arg1 arg2 arg3)

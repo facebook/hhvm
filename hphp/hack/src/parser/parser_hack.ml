@@ -267,7 +267,7 @@ let rec check_lvalue env = function
   | Await _ | Suspend _ | Expr_list _ | Cast _ | Unop _
   | Binop _ | Eif _ | NullCoalesce _ | InstanceOf _
   | New _ | NewAnonClass _ | Efun _ | Lfun _
-  | Xml _ | Import _ | Pipe _ | Callconv _ | Is _ | Execution_operator _
+  | Xml _ | Import _ | Pipe _ | Callconv _ | Is _ | Execution_operator _ | As _
   | ParenthesizedExpr _) ->
       error_at env pos "Invalid lvalue"
 

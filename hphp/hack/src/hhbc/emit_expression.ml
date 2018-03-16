@@ -679,6 +679,13 @@ and emit_instanceof env pos e1 e2 =
       emit_expr ~need_ref:false env e2;
       instr_instanceof ]
 
+and emit_as _env pos _lhs _h _is_nullable =
+  if not @@ Hhbc_options.enable_hackc_only_feature !Hhbc_options.compiler_options
+  then Emit_fatal.raise_fatal_runtime pos "As expression is not allowed"
+  else
+    (* TODO(T26859386): Implement as expressions *)
+    emit_nyi "As expression"
+
 and emit_is env pos lhs h =
   if not @@ Hhbc_options.enable_hackc_only_feature !Hhbc_options.compiler_options
   then Emit_fatal.raise_fatal_runtime pos "Is expression is not allowed"
@@ -1924,6 +1931,9 @@ and emit_expr env ?last_pos ?(need_ref=false) (pos, expr_ as expr) =
     emit_box_if_necessary pos need_ref @@ emit_instanceof env pos e1 e2
   | A.Is (e, h) ->
     emit_box_if_necessary pos need_ref @@ emit_is env pos (IsExprExpr e) h
+  | A.As (e, h, is_nullable) ->
+    emit_box_if_necessary pos need_ref @@
+      emit_as env pos (IsExprExpr e) h is_nullable
   | A.NullCoalesce (e1, e2) ->
     emit_box_if_necessary pos need_ref @@ emit_null_coalesce env pos e1 e2
   | A.Cast((_, hint), e) ->

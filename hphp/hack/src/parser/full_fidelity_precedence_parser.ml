@@ -34,6 +34,7 @@ type t = {
   errors : Full_fidelity_syntax_error.t list;
   context: Context.t;
   precedence : int;
+  allow_as_expressions: bool;
   env : Full_fidelity_parser_env.t;
   sc_state : SC.t;
   prefix_unary_expression_stack : prefix_unary_expression_type list;
@@ -57,6 +58,7 @@ let make env lexer errors context sc_state =
   ; env
   ; sc_state
   ; prefix_unary_expression_stack = []
+  ; allow_as_expressions = true
   }
 
 let errors parser =
@@ -64,6 +66,22 @@ let errors parser =
 
 let env parser =
   parser.env
+
+let allow_as_expressions parser =
+  parser.allow_as_expressions
+
+let with_as_expresssions parser ~enabled f =
+  let old_enabled = allow_as_expressions parser in
+  let parser =
+    if old_enabled <> enabled
+    then { parser with allow_as_expressions = enabled }
+    else parser in
+  let parser, r = f parser in
+  let parser =
+    if old_enabled <> allow_as_expressions parser
+    then { parser with allow_as_expressions = old_enabled }
+    else parser in
+  parser, r
 
 let with_errors parser errors =
   { parser with errors }

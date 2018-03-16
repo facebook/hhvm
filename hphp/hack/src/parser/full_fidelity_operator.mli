@@ -55,6 +55,8 @@ not how they look on the page. *)
 | LogicalNotOperator
 | InstanceofOperator
 | IsOperator
+| AsOperator
+| NullableAsOperator
 | NotOperator
 | PrefixIncrementOperator
 | PrefixDecrementOperator

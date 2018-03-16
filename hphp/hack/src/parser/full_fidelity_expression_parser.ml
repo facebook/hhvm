@@ -900,6 +900,10 @@ module WithStatementAndDeclAndTypeParser
       parse_instanceof_expression parser term
     | Is ->
       parse_is_expression parser term
+    | As when allow_as_expressions parser ->
+      parse_as_expression parser term
+    | QuestionAs ->
+      parse_nullable_as_expression parser term
     | QuestionMinusGreaterThan
     | MinusGreaterThan ->
       let (parser, result) = parse_member_selection_expression parser term in
@@ -1413,6 +1417,7 @@ module WithStatementAndDeclAndTypeParser
     | As
     | Instanceof
     | Is
+    | QuestionAs
     | Or
     | Xor -> false
     (* Symbols that imply parenthesized expression *)
@@ -1617,7 +1622,10 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_parenthesized_expression parser =
     let (parser, left_paren) = assert_token parser LeftParen in
-    let (parser, expression) = with_reset_precedence parser parse_expression in
+    let (parser, expression) =
+      with_as_expresssions parser ~enabled:true (fun p ->
+        with_reset_precedence p parse_expression
+      ) in
     let (parser, right_paren) = require_right_paren parser in
     Make.parenthesized_expression parser left_paren expression right_paren
 
@@ -1758,6 +1766,12 @@ module WithStatementAndDeclAndTypeParser
     let (parser, result) = Make.instanceof_expression parser left op right in
     parse_remaining_expression parser result
 
+  and parse_is_as_helper parser f left kw =
+    let (parser, op) = assert_token parser kw in
+    let (parser, right) = with_type_parser parser TypeParser.parse_type_specifier in
+    let (parser, result) = f parser left op right in
+    parse_remaining_expression parser result
+
   and parse_is_expression parser left =
     (* SPEC:
     is-expression:
@@ -1766,12 +1780,24 @@ module WithStatementAndDeclAndTypeParser
     is-subject:
       expression
     *)
-    let (parser, op) = assert_token parser Is in
-    let (parser, right) =
-      with_type_parser parser TypeParser.parse_type_specifier
-    in
-    let (parser, result) = Make.is_expression parser left op right in
-    parse_remaining_expression parser result
+    parse_is_as_helper parser Make.is_expression left Is
+
+  and parse_as_expression parser left =
+    (* SPEC:
+    as-expression:
+      as-subject  as  type-specifier
+
+    as-subject:
+      expression
+    *)
+    parse_is_as_helper parser Make.as_expression left As
+
+  and parse_nullable_as_expression parser left =
+    (* SPEC:
+    nullable-as-expression:
+      as-subject  ?as  type-specifier
+    *)
+    parse_is_as_helper parser Make.nullable_as_expression left QuestionAs
 
   and parse_remaining_binary_expression
     parser left_term assignment_prefix_kind =
@@ -1882,7 +1908,8 @@ module WithStatementAndDeclAndTypeParser
        would be the precedence of +.
        See comments above for more details. *)
     let kind = Token.kind (peek_token parser) in
-    if Operator.is_trailing_operator_token kind then
+    if Operator.is_trailing_operator_token kind &&
+      (kind <> As || allow_as_expressions parser) then
       let right_operator = Operator.trailing_from_token kind in
       let right_precedence = Operator.precedence right_operator in
       let associativity = Operator.associativity right_operator in

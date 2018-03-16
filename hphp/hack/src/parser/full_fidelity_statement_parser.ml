@@ -15,6 +15,7 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
+module Env = Full_fidelity_parser_env
 module SimpleParserSyntax =
   Full_fidelity_simple_parser.WithSyntax(Syntax)
 module SimpleParser = SimpleParserSyntax.WithLexer(
@@ -332,7 +333,10 @@ module WithExpressionAndDeclAndTypeParser
     let parser, foreach_keyword_token = assert_token parser Foreach in
     let parser, foreach_left_paren = require_left_paren parser in
     let parser = Parser.expect_in_new_scope parser [ RightParen ] in
-    let parser, foreach_collection_name = parse_expression parser in
+    let parser, foreach_collection_name =
+      with_expr_parser parser (fun p ->
+        ExpressionParser.with_as_expresssions p ~enabled:false ExpressionParser.parse_expression
+      ) in
     let parser, await_token = optional_token parser Await in
     let parser, as_token = require_as parser in
     let (parser1, after_as) = parse_expression parser in

@@ -743,6 +743,16 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; is_operator                                        : t
     ; is_right_operand                                   : t
     }
+  | AsExpression                            of
+    { as_left_operand                                    : t
+    ; as_operator                                        : t
+    ; as_right_operand                                   : t
+    }
+  | NullableAsExpression                    of
+    { nullable_as_left_operand                           : t
+    ; nullable_as_operator                               : t
+    ; nullable_as_right_operand                          : t
+    }
   | ConditionalExpression                   of
     { conditional_test                                   : t
     ; conditional_question                               : t
@@ -1187,6 +1197,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprBinary                        of binary_expression
   | ExprInstanceof                    of instanceof_expression
   | ExprIs                            of is_expression
+  | ExprAs                            of as_expression
+  | ExprNullableAs                    of nullable_as_expression
   | ExprConditional                   of conditional_expression
   | ExprEval                          of eval_expression
   | ExprEmpty                         of empty_expression
@@ -1306,6 +1318,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaBinary                        of binary_expression
   | LambdaInstanceof                    of instanceof_expression
   | LambdaIs                            of is_expression
+  | LambdaAs                            of as_expression
+  | LambdaNullableAs                    of nullable_as_expression
   | LambdaConditional                   of conditional_expression
   | LambdaEval                          of eval_expression
   | LambdaEmpty                         of empty_expression
@@ -1355,6 +1369,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprBinary                        of binary_expression
   | CExprInstanceof                    of instanceof_expression
   | CExprIs                            of is_expression
+  | CExprAs                            of as_expression
+  | CExprNullableAs                    of nullable_as_expression
   | CExprConditional                   of conditional_expression
   | CExprEval                          of eval_expression
   | CExprEmpty                         of empty_expression
@@ -1994,6 +2010,16 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { is_left_operand: expression value
     ; is_operator: Token.t value
     ; is_right_operand: specifier value
+    }
+  and as_expression =
+    { as_left_operand: expression value
+    ; as_operator: Token.t value
+    ; as_right_operand: specifier value
+    }
+  and nullable_as_expression =
+    { nullable_as_left_operand: expression value
+    ; nullable_as_operator: Token.t value
+    ; nullable_as_right_operand: specifier value
     }
   and conditional_expression =
     { conditional_test: expression value

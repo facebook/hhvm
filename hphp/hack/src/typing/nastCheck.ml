@@ -268,12 +268,9 @@ module CheckFunctionBody = struct
       List.iter el (expr f_type env);
       List.iter uel (expr f_type env);
       ()
-    | _, InstanceOf (e, _) ->
-        expr f_type env e;
-        ()
-    | _, Is (e, _) ->
-        expr f_type env e;
-        ()
+    | _, InstanceOf (e, _)
+    | _, Is (e, _)
+    | _, As (e, _, _)
     | _, Cast (_, e) ->
         expr f_type env e;
         ()
@@ -743,7 +740,7 @@ and check_class_property_initialization prop =
       | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
       | Call _ | Special_func _ | Yield_break | Yield _ | Suspend _
       | Await _ | InstanceOf _ | Is _ | New _ | Efun _ | Xml _ | Callconv _
-      | Assert _ | Clone _ ->
+      | Assert _ | Clone _ | As _ ->
         Errors.class_property_only_static_literal (fst e)
     and assert_static_literal_for_field_list (expr1, expr2) =
       rec_assert_static_literal expr1;
@@ -1196,7 +1193,8 @@ and expr_ env p = function
   | InstanceOf (e, _) ->
       expr env e;
       ()
-  | Is (e, h) ->
+  | Is (e, h)
+  | As (e, h, _)->
       expr env e;
       hint env h;
       ()

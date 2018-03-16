@@ -101,6 +101,7 @@ struct
     | S.NullCoalesce (e1, e2) -> T.NullCoalesce (map_expr menv e1, map_expr menv e2)
     | S.InstanceOf (e, ci) -> T.InstanceOf (map_expr menv e, map_class_id menv ci)
     | S.Is (e, h) -> T.Is (map_expr menv e, h)
+    | S.As (e, h, b) -> T.As (map_expr menv e, h, b)
     | S.New (ci, el1, el2) ->
       T.New (map_class_id menv ci, map_exprl menv el1, map_exprl menv el2)
     | S.Efun (ef, ids) -> T.Efun(map_fun menv ef, ids)

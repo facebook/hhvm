@@ -393,6 +393,7 @@ and expr_ =
   | NullCoalesce of expr * expr
   | InstanceOf of expr * expr
   | Is of expr * hint
+  | As of expr * hint * (* is nullable *) bool
   | BracedExpr of expr
   | ParenthesizedExpr of expr
   | New of expr * expr list * expr list

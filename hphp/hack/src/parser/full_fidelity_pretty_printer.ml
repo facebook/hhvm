@@ -1095,15 +1095,29 @@ let rec get_doc node =
     let op = get_doc x.binary_operator in
     let right = get_doc x.binary_right_operand in
     group_doc (left ^| op ^| right)
-  | InstanceofExpression x ->
-    let left = get_doc x.instanceof_left_operand in
-    let op = get_doc x.instanceof_operator in
-    let right = get_doc x.instanceof_right_operand in
-    group_doc (left ^| op ^| right)
-  | IsExpression x ->
-    let left = get_doc x.is_left_operand in
-    let op = get_doc x.is_operator in
-    let right = get_doc x.is_right_operand in
+  | InstanceofExpression
+    { instanceof_left_operand = left
+    ; instanceof_operator = op
+    ; instanceof_right_operand = right
+    }
+  | IsExpression
+    { is_left_operand = left
+    ; is_operator = op
+    ; is_right_operand = right
+    }
+  | AsExpression
+    { as_left_operand = left
+    ; as_operator = op
+    ; as_right_operand = right
+    }
+  | NullableAsExpression
+    { nullable_as_left_operand = left
+    ; nullable_as_operator = op
+    ; nullable_as_right_operand = right
+    } ->
+    let left = get_doc left in
+    let op = get_doc op in
+    let right = get_doc right in
     group_doc (left ^| op ^| right)
   | ConditionalExpression x ->
     let tst = get_doc x.conditional_test in

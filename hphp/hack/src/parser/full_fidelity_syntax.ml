@@ -156,6 +156,8 @@ module WithToken(Token: TokenType) = struct
       | BinaryExpression                        _ -> SyntaxKind.BinaryExpression
       | InstanceofExpression                    _ -> SyntaxKind.InstanceofExpression
       | IsExpression                            _ -> SyntaxKind.IsExpression
+      | AsExpression                            _ -> SyntaxKind.AsExpression
+      | NullableAsExpression                    _ -> SyntaxKind.NullableAsExpression
       | ConditionalExpression                   _ -> SyntaxKind.ConditionalExpression
       | EvalExpression                          _ -> SyntaxKind.EvalExpression
       | EmptyExpression                         _ -> SyntaxKind.EmptyExpression
@@ -334,6 +336,8 @@ module WithToken(Token: TokenType) = struct
     let is_binary_expression                            = has_kind SyntaxKind.BinaryExpression
     let is_instanceof_expression                        = has_kind SyntaxKind.InstanceofExpression
     let is_is_expression                                = has_kind SyntaxKind.IsExpression
+    let is_as_expression                                = has_kind SyntaxKind.AsExpression
+    let is_nullable_as_expression                       = has_kind SyntaxKind.NullableAsExpression
     let is_conditional_expression                       = has_kind SyntaxKind.ConditionalExpression
     let is_eval_expression                              = has_kind SyntaxKind.EvalExpression
     let is_empty_expression                             = has_kind SyntaxKind.EmptyExpression
@@ -1562,6 +1566,24 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc is_left_operand in
          let acc = f acc is_operator in
          let acc = f acc is_right_operand in
+         acc
+      | AsExpression {
+        as_left_operand;
+        as_operator;
+        as_right_operand;
+      } ->
+         let acc = f acc as_left_operand in
+         let acc = f acc as_operator in
+         let acc = f acc as_right_operand in
+         acc
+      | NullableAsExpression {
+        nullable_as_left_operand;
+        nullable_as_operator;
+        nullable_as_right_operand;
+      } ->
+         let acc = f acc nullable_as_left_operand in
+         let acc = f acc nullable_as_operator in
+         let acc = f acc nullable_as_right_operand in
          acc
       | ConditionalExpression {
         conditional_test;
@@ -3350,6 +3372,24 @@ module WithToken(Token: TokenType) = struct
         is_operator;
         is_right_operand;
       ]
+      | AsExpression {
+        as_left_operand;
+        as_operator;
+        as_right_operand;
+      } -> [
+        as_left_operand;
+        as_operator;
+        as_right_operand;
+      ]
+      | NullableAsExpression {
+        nullable_as_left_operand;
+        nullable_as_operator;
+        nullable_as_right_operand;
+      } -> [
+        nullable_as_left_operand;
+        nullable_as_operator;
+        nullable_as_right_operand;
+      ]
       | ConditionalExpression {
         conditional_test;
         conditional_question;
@@ -5137,6 +5177,24 @@ module WithToken(Token: TokenType) = struct
         "is_left_operand";
         "is_operator";
         "is_right_operand";
+      ]
+      | AsExpression {
+        as_left_operand;
+        as_operator;
+        as_right_operand;
+      } -> [
+        "as_left_operand";
+        "as_operator";
+        "as_right_operand";
+      ]
+      | NullableAsExpression {
+        nullable_as_left_operand;
+        nullable_as_operator;
+        nullable_as_right_operand;
+      } -> [
+        "nullable_as_left_operand";
+        "nullable_as_operator";
+        "nullable_as_right_operand";
       ]
       | ConditionalExpression {
         conditional_test;
@@ -7078,6 +7136,26 @@ module WithToken(Token: TokenType) = struct
           is_left_operand;
           is_operator;
           is_right_operand;
+        }
+      | (SyntaxKind.AsExpression, [
+          as_left_operand;
+          as_operator;
+          as_right_operand;
+        ]) ->
+        AsExpression {
+          as_left_operand;
+          as_operator;
+          as_right_operand;
+        }
+      | (SyntaxKind.NullableAsExpression, [
+          nullable_as_left_operand;
+          nullable_as_operator;
+          nullable_as_right_operand;
+        ]) ->
+        NullableAsExpression {
+          nullable_as_left_operand;
+          nullable_as_operator;
+          nullable_as_right_operand;
         }
       | (SyntaxKind.ConditionalExpression, [
           conditional_test;
@@ -9360,6 +9438,32 @@ module WithToken(Token: TokenType) = struct
           is_left_operand;
           is_operator;
           is_right_operand;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_as_expression
+        as_left_operand
+        as_operator
+        as_right_operand
+      =
+        let syntax = AsExpression {
+          as_left_operand;
+          as_operator;
+          as_right_operand;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_nullable_as_expression
+        nullable_as_left_operand
+        nullable_as_operator
+        nullable_as_right_operand
+      =
+        let syntax = NullableAsExpression {
+          nullable_as_left_operand;
+          nullable_as_operator;
+          nullable_as_right_operand;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

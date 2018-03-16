@@ -379,6 +379,7 @@ and expr_ env acc p e =
       expr acc e2
   | InstanceOf (e, _) -> expr acc e
   | Is (e, _) -> expr acc e
+  | As (e, _, _) -> expr acc e
   | Efun (f, _) ->
       let acc = fun_paraml acc f.f_params in
       (* We don't need to analyze the body of closures *)

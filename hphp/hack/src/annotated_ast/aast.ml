@@ -1,6 +1,6 @@
 (* @generated from aast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<215018ed44790a56ca3f79cf857a60faa917a504>> *)
+(* SourceShasum<<3f769d25e0d8f020696f08d0e9092631a6741035>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -127,6 +127,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       | NullCoalesce of expr * expr 
       | InstanceOf of expr * class_id 
       | Is of expr * hint 
+      | As of expr * hint * bool 
       | New of class_id * expr list * expr list 
       | Efun of fun_ * lid list 
       | Xml of sid * xhp_attribute list * expr list 
@@ -678,15 +679,19 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       fun x  -> Format.asprintf "%a" pp_expr x
     
     and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
-      let __79 () = pp_sid
+      let __81 () = pp_sid
       
-      and __78 () = pp_assert_expr
+      and __80 () = pp_assert_expr
       
-      and __77 () = pp_expr
+      and __79 () = pp_expr
       
-      and __76 () = pp_expr
+      and __78 () = pp_expr
       
-      and __75 () = pp_special_func
+      and __77 () = pp_special_func
+      
+      and __76 () = pp_pstring
+      
+      and __75 () = pp_sid
       
       and __74 () = pp_pstring
       
@@ -694,35 +699,35 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __72 () = pp_pstring
       
-      and __71 () = pp_sid
+      and __71 () = pp_expr
       
-      and __70 () = pp_pstring
+      and __70 () = pp_sid
       
-      and __69 () = pp_expr
+      and __69 () = pp_pos
       
-      and __68 () = pp_sid
+      and __68 () = pp_expr
       
-      and __67 () = pp_pos
+      and __67 () = Ast.pp_param_kind
       
       and __66 () = pp_expr
       
-      and __65 () = Ast.pp_param_kind
+      and __65 () = pp_xhp_attribute
       
-      and __64 () = pp_expr
+      and __64 () = pp_sid
       
-      and __63 () = pp_xhp_attribute
+      and __63 () = pp_lid
       
-      and __62 () = pp_sid
+      and __62 () = pp_fun_
       
-      and __61 () = pp_lid
+      and __61 () = pp_expr
       
-      and __60 () = pp_fun_
+      and __60 () = pp_expr
       
-      and __59 () = pp_expr
+      and __59 () = pp_class_id
       
-      and __58 () = pp_expr
+      and __58 () = pp_hint
       
-      and __57 () = pp_class_id
+      and __57 () = pp_expr
       
       and __56 () = pp_hint
       
@@ -1137,9 +1142,17 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   Format.fprintf fmt ",@ ";
                   ((__56 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
+            | As (a0,a1,a2) ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.As (@,";
+                 ((((__57 ()) fmt) a0;
+                   Format.fprintf fmt ",@ ";
+                   ((__58 ()) fmt) a1);
+                  Format.fprintf fmt ",@ ";
+                  (Format.fprintf fmt "%B") a2);
+                 Format.fprintf fmt "@,))@]")
             | New (a0,a1,a2) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.New (@,";
-                 ((((__57 ()) fmt) a0;
+                 ((((__59 ()) fmt) a0;
                    Format.fprintf fmt ",@ ";
                    ((fun x  ->
                        Format.fprintf fmt "@[<2>[";
@@ -1148,24 +1161,9 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                             (fun sep  ->
                                fun x  ->
                                  if sep then Format.fprintf fmt ";@ ";
-                                 ((__58 ()) fmt) x;
+                                 ((__60 ()) fmt) x;
                                  true) false x);
                        Format.fprintf fmt "@,]@]")) a1);
-                  Format.fprintf fmt ",@ ";
-                  ((fun x  ->
-                      Format.fprintf fmt "@[<2>[";
-                      ignore
-                        (List.fold_left
-                           (fun sep  ->
-                              fun x  ->
-                                if sep then Format.fprintf fmt ";@ ";
-                                ((__59 ()) fmt) x;
-                                true) false x);
-                      Format.fprintf fmt "@,]@]")) a2);
-                 Format.fprintf fmt "@,))@]")
-            | Efun (a0,a1) ->
-                (Format.fprintf fmt "(@[<2>AnnotatedAST.Efun (@,";
-                 (((__60 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
                   ((fun x  ->
                       Format.fprintf fmt "@[<2>[";
@@ -1176,11 +1174,26 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                                 if sep then Format.fprintf fmt ";@ ";
                                 ((__61 ()) fmt) x;
                                 true) false x);
+                      Format.fprintf fmt "@,]@]")) a2);
+                 Format.fprintf fmt "@,))@]")
+            | Efun (a0,a1) ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Efun (@,";
+                 (((__62 ()) fmt) a0;
+                  Format.fprintf fmt ",@ ";
+                  ((fun x  ->
+                      Format.fprintf fmt "@[<2>[";
+                      ignore
+                        (List.fold_left
+                           (fun sep  ->
+                              fun x  ->
+                                if sep then Format.fprintf fmt ";@ ";
+                                ((__63 ()) fmt) x;
+                                true) false x);
                       Format.fprintf fmt "@,]@]")) a1);
                  Format.fprintf fmt "@,))@]")
             | Xml (a0,a1,a2) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Xml (@,";
-                 ((((__62 ()) fmt) a0;
+                 ((((__64 ()) fmt) a0;
                    Format.fprintf fmt ",@ ";
                    ((fun x  ->
                        Format.fprintf fmt "@[<2>[";
@@ -1189,7 +1202,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                             (fun sep  ->
                                fun x  ->
                                  if sep then Format.fprintf fmt ";@ ";
-                                 ((__63 ()) fmt) x;
+                                 ((__65 ()) fmt) x;
                                  true) false x);
                        Format.fprintf fmt "@,]@]")) a1);
                   Format.fprintf fmt ",@ ";
@@ -1200,59 +1213,59 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                            (fun sep  ->
                               fun x  ->
                                 if sep then Format.fprintf fmt ";@ ";
-                                ((__64 ()) fmt) x;
+                                ((__66 ()) fmt) x;
                                 true) false x);
                       Format.fprintf fmt "@,]@]")) a2);
                  Format.fprintf fmt "@,))@]")
             | Callconv (a0,a1) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Callconv (@,";
-                 (((__65 ()) fmt) a0;
+                 (((__67 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
-                  ((__66 ()) fmt) a1);
+                  ((__68 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
             | Lplaceholder a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Lplaceholder@ ";
-                 ((__67 ()) fmt) a0;
+                 ((__69 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Fun_id a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Fun_id@ ";
-                 ((__68 ()) fmt) a0;
+                 ((__70 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Method_id (a0,a1) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Method_id (@,";
-                 (((__69 ()) fmt) a0;
-                  Format.fprintf fmt ",@ ";
-                  ((__70 ()) fmt) a1);
-                 Format.fprintf fmt "@,))@]")
-            | Method_caller (a0,a1) ->
-                (Format.fprintf fmt "(@[<2>AnnotatedAST.Method_caller (@,";
                  (((__71 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
                   ((__72 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
-            | Smethod_id (a0,a1) ->
-                (Format.fprintf fmt "(@[<2>AnnotatedAST.Smethod_id (@,";
+            | Method_caller (a0,a1) ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Method_caller (@,";
                  (((__73 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
                   ((__74 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
+            | Smethod_id (a0,a1) ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Smethod_id (@,";
+                 (((__75 ()) fmt) a0;
+                  Format.fprintf fmt ",@ ";
+                  ((__76 ()) fmt) a1);
+                 Format.fprintf fmt "@,))@]")
             | Special_func a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Special_func@ ";
-                 ((__75 ()) fmt) a0;
+                 ((__77 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Pair (a0,a1) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Pair (@,";
-                 (((__76 ()) fmt) a0;
+                 (((__78 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
-                  ((__77 ()) fmt) a1);
+                  ((__79 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
             | Assert a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Assert@ ";
-                 ((__78 ()) fmt) a0;
+                 ((__80 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Typename a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Typename@ ";
-                 ((__79 ()) fmt) a0;
+                 ((__81 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Any  -> Format.pp_print_string fmt "AnnotatedAST.Any")
         [@ocaml.warning "-A"])
@@ -2797,6 +2810,10 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
             method on_Is env _visitors_c0 _visitors_c1 =
               let _visitors_r0 = self#on_expr env _visitors_c0  in
               let _visitors_r1 = self#on_hint env _visitors_c1  in ()
+            method on_As env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_hint env _visitors_c1  in
+              let _visitors_r2 = self#on_bool env _visitors_c2  in ()
             method on_New env _visitors_c0 _visitors_c1 _visitors_c2 =
               let _visitors_r0 = self#on_class_id env _visitors_c0  in
               let _visitors_r1 = self#on_list self#on_expr env _visitors_c1
@@ -2901,6 +2918,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   self#on_InstanceOf env _visitors_c0 _visitors_c1
               | Is (_visitors_c0,_visitors_c1) ->
                   self#on_Is env _visitors_c0 _visitors_c1
+              | As (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_As env _visitors_c0 _visitors_c1 _visitors_c2
               | New (_visitors_c0,_visitors_c1,_visitors_c2) ->
                   self#on_New env _visitors_c0 _visitors_c1 _visitors_c2
               | Efun (_visitors_c0,_visitors_c1) ->
@@ -3586,6 +3605,11 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_s0 = self#on_expr env _visitors_c0  in
               let _visitors_s1 = self#on_hint env _visitors_c1  in
               self#plus _visitors_s0 _visitors_s1
+            method on_As env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_hint env _visitors_c1  in
+              let _visitors_s2 = self#on_bool env _visitors_c2  in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
             method on_New env _visitors_c0 _visitors_c1 _visitors_c2 =
               let _visitors_s0 = self#on_class_id env _visitors_c0  in
               let _visitors_s1 = self#on_list self#on_expr env _visitors_c1
@@ -3700,6 +3724,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   self#on_InstanceOf env _visitors_c0 _visitors_c1
               | Is (_visitors_c0,_visitors_c1) ->
                   self#on_Is env _visitors_c0 _visitors_c1
+              | As (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_As env _visitors_c0 _visitors_c1 _visitors_c2
               | New (_visitors_c0,_visitors_c1,_visitors_c2) ->
                   self#on_New env _visitors_c0 _visitors_c1 _visitors_c2
               | Efun (_visitors_c0,_visitors_c1) ->
@@ -4501,6 +4527,11 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_r0 = self#on_expr env _visitors_c0  in
               let _visitors_r1 = self#on_hint env _visitors_c1  in
               Is (_visitors_r0, _visitors_r1)
+            method on_As env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_hint env _visitors_c1  in
+              let _visitors_r2 = self#on_bool env _visitors_c2  in
+              As (_visitors_r0, _visitors_r1, _visitors_r2)
             method on_New env _visitors_c0 _visitors_c1 _visitors_c2 =
               let _visitors_r0 = self#on_class_id env _visitors_c0  in
               let _visitors_r1 = self#on_list self#on_expr env _visitors_c1
@@ -4615,6 +4646,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   self#on_InstanceOf env _visitors_c0 _visitors_c1
               | Is (_visitors_c0,_visitors_c1) ->
                   self#on_Is env _visitors_c0 _visitors_c1
+              | As (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_As env _visitors_c0 _visitors_c1 _visitors_c2
               | New (_visitors_c0,_visitors_c1,_visitors_c2) ->
                   self#on_New env _visitors_c0 _visitors_c1 _visitors_c2
               | Efun (_visitors_c0,_visitors_c1) ->
@@ -5682,6 +5715,18 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   (Pervasives.(==) _visitors_c1 _visitors_r1)
               then _visitors_this
               else Is (_visitors_r0, _visitors_r1)
+            method on_As env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_hint env _visitors_c1  in
+              let _visitors_r2 = self#on_bool env _visitors_c2  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else As (_visitors_r0, _visitors_r1, _visitors_r2)
             method on_New env _visitors_this _visitors_c0 _visitors_c1
               _visitors_c2 =
               let _visitors_r0 = self#on_class_id env _visitors_c0  in
@@ -5883,6 +5928,10 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                     _visitors_c1
               | Is (_visitors_c0,_visitors_c1) as _visitors_this ->
                   self#on_Is env _visitors_this _visitors_c0 _visitors_c1
+              | As (_visitors_c0,_visitors_c1,_visitors_c2) as _visitors_this
+                  ->
+                  self#on_As env _visitors_this _visitors_c0 _visitors_c1
+                    _visitors_c2
               | New (_visitors_c0,_visitors_c1,_visitors_c2) as
                   _visitors_this ->
                   self#on_New env _visitors_this _visitors_c0 _visitors_c1
@@ -6797,6 +6846,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       | NullCoalesce _ -> "NullCoalesce"
       | InstanceOf _ -> "InstanceOf"
       | Is _ -> "Is"
+      | As _ -> "As"
       | New _ -> "New"
       | Efun _ -> "Efun"
       | Xml _ -> "Xml"
@@ -6876,6 +6926,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
             method  on_typename : 'a -> sid -> 'a
             method  on_instanceOf : 'a -> expr -> class_id -> 'a
             method  on_is : 'a -> expr -> hint -> 'a
+            method  on_as : 'a -> expr -> hint -> bool -> 'a
             method  on_class_id : 'a -> class_id -> 'a
             method  on_class_id_ : 'a -> class_id_ -> 'a
             method  on_new : 'a -> class_id -> expr list -> expr list -> 'a
@@ -7027,6 +7078,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               | NullCoalesce (e1,e2) -> this#on_nullCoalesce acc e1 e2
               | InstanceOf (e1,e2) -> this#on_instanceOf acc e1 e2
               | Is (e,h) -> this#on_is acc e h
+              | As (e,h,b) -> this#on_as acc e h b
               | Typename n -> this#on_typename acc n
               | New (cid,el,uel) -> this#on_new acc cid el uel
               | Efun (f,idl) -> this#on_efun acc f idl
@@ -7113,6 +7165,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let acc = this#on_expr acc e1  in
               let acc = this#on_class_id acc e2  in acc
             method on_is acc e _ = this#on_expr acc e
+            method on_as acc e _ _ = this#on_expr acc e
             method on_class_id acc (_,cid) = this#on_class_id_ acc cid
             method on_class_id_ acc =
               function | CIexpr e -> this#on_expr acc e | _ -> acc

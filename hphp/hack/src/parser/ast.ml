@@ -1,6 +1,6 @@
 (* @generated from ast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<50ad225618216ee265ef16526dbbcad454340d50>> *)
+(* SourceShasum<<6babededef0412942fa9525da21f7cc15b327cfc>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -290,6 +290,7 @@ and expr_ =
   | NullCoalesce of expr * expr 
   | InstanceOf of expr * expr 
   | Is of expr * hint 
+  | As of expr * hint * bool 
   | BracedExpr of expr 
   | ParenthesizedExpr of expr 
   | New of expr * expr list * expr list 
@@ -2411,31 +2412,35 @@ and show_expr : expr -> Ppx_deriving_runtime.string =
   fun x  -> Format.asprintf "%a" pp_expr x
 
 and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
-  let __74 () = pp_expr
+  let __76 () = pp_expr
+  
+  and __75 () = pp_expr
+  
+  and __74 () = pp_param_kind
   
   and __73 () = pp_expr
   
-  and __72 () = pp_param_kind
+  and __72 () = pp_import_flavor
   
   and __71 () = pp_expr
   
-  and __70 () = pp_import_flavor
+  and __70 () = pp_expr
   
-  and __69 () = pp_expr
+  and __69 () = pp_xhp_attribute
   
-  and __68 () = pp_expr
+  and __68 () = pp_id
   
-  and __67 () = pp_xhp_attribute
+  and __67 () = pp_fun_
   
   and __66 () = pp_id
   
   and __65 () = pp_fun_
   
-  and __64 () = pp_id
+  and __64 () = pp_class_
   
-  and __63 () = pp_fun_
+  and __63 () = pp_expr
   
-  and __62 () = pp_class_
+  and __62 () = pp_expr
   
   and __61 () = pp_expr
   
@@ -2447,7 +2452,7 @@ and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
   
   and __57 () = pp_expr
   
-  and __56 () = pp_expr
+  and __56 () = pp_hint
   
   and __55 () = pp_expr
   
@@ -2869,17 +2874,25 @@ and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
               Format.fprintf fmt ",@ ";
               ((__54 ()) fmt) a1);
              Format.fprintf fmt "@,))@]")
+        | As (a0,a1,a2) ->
+            (Format.fprintf fmt "(@[<2>As (@,";
+             ((((__55 ()) fmt) a0;
+               Format.fprintf fmt ",@ ";
+               ((__56 ()) fmt) a1);
+              Format.fprintf fmt ",@ ";
+              (Format.fprintf fmt "%B") a2);
+             Format.fprintf fmt "@,))@]")
         | BracedExpr a0 ->
             (Format.fprintf fmt "(@[<2>BracedExpr@ ";
-             ((__55 ()) fmt) a0;
+             ((__57 ()) fmt) a0;
              Format.fprintf fmt "@])")
         | ParenthesizedExpr a0 ->
             (Format.fprintf fmt "(@[<2>ParenthesizedExpr@ ";
-             ((__56 ()) fmt) a0;
+             ((__58 ()) fmt) a0;
              Format.fprintf fmt "@])")
         | New (a0,a1,a2) ->
             (Format.fprintf fmt "(@[<2>New (@,";
-             ((((__57 ()) fmt) a0;
+             ((((__59 ()) fmt) a0;
                Format.fprintf fmt ",@ ";
                ((fun x  ->
                    Format.fprintf fmt "@[<2>[";
@@ -2888,7 +2901,7 @@ and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
                         (fun sep  ->
                            fun x  ->
                              if sep then Format.fprintf fmt ";@ ";
-                             ((__58 ()) fmt) x;
+                             ((__60 ()) fmt) x;
                              true) false x);
                    Format.fprintf fmt "@,]@]")) a1);
               Format.fprintf fmt ",@ ";
@@ -2899,7 +2912,7 @@ and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
                        (fun sep  ->
                           fun x  ->
                             if sep then Format.fprintf fmt ";@ ";
-                            ((__59 ()) fmt) x;
+                            ((__61 ()) fmt) x;
                             true) false x);
                   Format.fprintf fmt "@,]@]")) a2);
              Format.fprintf fmt "@,))@]")
@@ -2912,7 +2925,7 @@ and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
                         (fun sep  ->
                            fun x  ->
                              if sep then Format.fprintf fmt ";@ ";
-                             ((__60 ()) fmt) x;
+                             ((__62 ()) fmt) x;
                              true) false x);
                    Format.fprintf fmt "@,]@]")) a0;
                Format.fprintf fmt ",@ ";
@@ -2923,15 +2936,15 @@ and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
                         (fun sep  ->
                            fun x  ->
                              if sep then Format.fprintf fmt ";@ ";
-                             ((__61 ()) fmt) x;
+                             ((__63 ()) fmt) x;
                              true) false x);
                    Format.fprintf fmt "@,]@]")) a1);
               Format.fprintf fmt ",@ ";
-              ((__62 ()) fmt) a2);
+              ((__64 ()) fmt) a2);
              Format.fprintf fmt "@,))@]")
         | Efun (a0,a1) ->
             (Format.fprintf fmt "(@[<2>Efun (@,";
-             (((__63 ()) fmt) a0;
+             (((__65 ()) fmt) a0;
               Format.fprintf fmt ",@ ";
               ((fun x  ->
                   Format.fprintf fmt "@[<2>[";
@@ -2942,7 +2955,7 @@ and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
                             if sep then Format.fprintf fmt ";@ ";
                             ((fun (a0,a1)  ->
                                 Format.fprintf fmt "(@[";
-                                (((__64 ()) fmt) a0;
+                                (((__66 ()) fmt) a0;
                                  Format.fprintf fmt ",@ ";
                                  (Format.fprintf fmt "%B") a1);
                                 Format.fprintf fmt "@])")) x;
@@ -2951,11 +2964,11 @@ and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
              Format.fprintf fmt "@,))@]")
         | Lfun a0 ->
             (Format.fprintf fmt "(@[<2>Lfun@ ";
-             ((__65 ()) fmt) a0;
+             ((__67 ()) fmt) a0;
              Format.fprintf fmt "@])")
         | Xml (a0,a1,a2) ->
             (Format.fprintf fmt "(@[<2>Xml (@,";
-             ((((__66 ()) fmt) a0;
+             ((((__68 ()) fmt) a0;
                Format.fprintf fmt ",@ ";
                ((fun x  ->
                    Format.fprintf fmt "@[<2>[";
@@ -2964,7 +2977,7 @@ and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
                         (fun sep  ->
                            fun x  ->
                              if sep then Format.fprintf fmt ";@ ";
-                             ((__67 ()) fmt) x;
+                             ((__69 ()) fmt) x;
                              true) false x);
                    Format.fprintf fmt "@,]@]")) a1);
               Format.fprintf fmt ",@ ";
@@ -2975,25 +2988,25 @@ and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
                        (fun sep  ->
                           fun x  ->
                             if sep then Format.fprintf fmt ";@ ";
-                            ((__68 ()) fmt) x;
+                            ((__70 ()) fmt) x;
                             true) false x);
                   Format.fprintf fmt "@,]@]")) a2);
              Format.fprintf fmt "@,))@]")
         | Unsafeexpr a0 ->
             (Format.fprintf fmt "(@[<2>Unsafeexpr@ ";
-             ((__69 ()) fmt) a0;
+             ((__71 ()) fmt) a0;
              Format.fprintf fmt "@])")
         | Import (a0,a1) ->
             (Format.fprintf fmt "(@[<2>Import (@,";
-             (((__70 ()) fmt) a0;
-              Format.fprintf fmt ",@ ";
-              ((__71 ()) fmt) a1);
-             Format.fprintf fmt "@,))@]")
-        | Callconv (a0,a1) ->
-            (Format.fprintf fmt "(@[<2>Callconv (@,";
              (((__72 ()) fmt) a0;
               Format.fprintf fmt ",@ ";
               ((__73 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | Callconv (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Callconv (@,";
+             (((__74 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__75 ()) fmt) a1);
              Format.fprintf fmt "@,))@]")
         | Execution_operator a0 ->
             (Format.fprintf fmt "(@[<2>Execution_operator@ ";
@@ -3004,7 +3017,7 @@ and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
                       (fun sep  ->
                          fun x  ->
                            if sep then Format.fprintf fmt ";@ ";
-                           ((__74 ()) fmt) x;
+                           ((__76 ()) fmt) x;
                            true) false x);
                  Format.fprintf fmt "@,]@]")) a0;
              Format.fprintf fmt "@])"))
@@ -4779,6 +4792,17 @@ include
               (Pervasives.(==) _visitors_c1 _visitors_r1)
           then _visitors_this
           else Is (_visitors_r0, _visitors_r1)
+        method on_As env _visitors_this _visitors_c0 _visitors_c1
+          _visitors_c2 =
+          let _visitors_r0 = self#on_expr env _visitors_c0  in
+          let _visitors_r1 = self#on_hint env _visitors_c1  in
+          let _visitors_r2 = self#on_bool env _visitors_c2  in
+          if
+            Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+              (Pervasives.(&&) (Pervasives.(==) _visitors_c1 _visitors_r1)
+                 (Pervasives.(==) _visitors_c2 _visitors_r2))
+          then _visitors_this
+          else As (_visitors_r0, _visitors_r1, _visitors_r2)
         method on_BracedExpr env _visitors_this _visitors_c0 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           if Pervasives.(==) _visitors_c0 _visitors_r0
@@ -4959,6 +4983,9 @@ include
               self#on_InstanceOf env _visitors_this _visitors_c0 _visitors_c1
           | Is (_visitors_c0,_visitors_c1) as _visitors_this ->
               self#on_Is env _visitors_this _visitors_c0 _visitors_c1
+          | As (_visitors_c0,_visitors_c1,_visitors_c2) as _visitors_this ->
+              self#on_As env _visitors_this _visitors_c0 _visitors_c1
+                _visitors_c2
           | BracedExpr _visitors_c0 as _visitors_this ->
               self#on_BracedExpr env _visitors_this _visitors_c0
           | ParenthesizedExpr _visitors_c0 as _visitors_this ->
@@ -5943,6 +5970,11 @@ include
           let _visitors_s0 = self#on_expr env _visitors_c0  in
           let _visitors_s1 = self#on_hint env _visitors_c1  in
           self#plus _visitors_s0 _visitors_s1
+        method on_As env _visitors_c0 _visitors_c1 _visitors_c2 =
+          let _visitors_s0 = self#on_expr env _visitors_c0  in
+          let _visitors_s1 = self#on_hint env _visitors_c1  in
+          let _visitors_s2 = self#on_bool env _visitors_c2  in
+          self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
         method on_BracedExpr env _visitors_c0 =
           let _visitors_s0 = self#on_expr env _visitors_c0  in _visitors_s0
         method on_ParenthesizedExpr env _visitors_c0 =
@@ -6045,6 +6077,8 @@ include
               self#on_InstanceOf env _visitors_c0 _visitors_c1
           | Is (_visitors_c0,_visitors_c1) ->
               self#on_Is env _visitors_c0 _visitors_c1
+          | As (_visitors_c0,_visitors_c1,_visitors_c2) ->
+              self#on_As env _visitors_c0 _visitors_c1 _visitors_c2
           | BracedExpr _visitors_c0 -> self#on_BracedExpr env _visitors_c0
           | ParenthesizedExpr _visitors_c0 ->
               self#on_ParenthesizedExpr env _visitors_c0
@@ -7023,6 +7057,11 @@ include
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_hint env _visitors_c1  in
           Is (_visitors_r0, _visitors_r1)
+        method on_As env _visitors_c0 _visitors_c1 _visitors_c2 =
+          let _visitors_r0 = self#on_expr env _visitors_c0  in
+          let _visitors_r1 = self#on_hint env _visitors_c1  in
+          let _visitors_r2 = self#on_bool env _visitors_c2  in
+          As (_visitors_r0, _visitors_r1, _visitors_r2)
         method on_BracedExpr env _visitors_c0 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           BracedExpr _visitors_r0
@@ -7129,6 +7168,8 @@ include
               self#on_InstanceOf env _visitors_c0 _visitors_c1
           | Is (_visitors_c0,_visitors_c1) ->
               self#on_Is env _visitors_c0 _visitors_c1
+          | As (_visitors_c0,_visitors_c1,_visitors_c2) ->
+              self#on_As env _visitors_c0 _visitors_c1 _visitors_c2
           | BracedExpr _visitors_c0 -> self#on_BracedExpr env _visitors_c0
           | ParenthesizedExpr _visitors_c0 ->
               self#on_ParenthesizedExpr env _visitors_c0
@@ -7927,6 +7968,10 @@ include
         method on_Is env _visitors_c0 _visitors_c1 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_hint env _visitors_c1  in ()
+        method on_As env _visitors_c0 _visitors_c1 _visitors_c2 =
+          let _visitors_r0 = self#on_expr env _visitors_c0  in
+          let _visitors_r1 = self#on_hint env _visitors_c1  in
+          let _visitors_r2 = self#on_bool env _visitors_c2  in ()
         method on_BracedExpr env _visitors_c0 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in ()
         method on_ParenthesizedExpr env _visitors_c0 =
@@ -8026,6 +8071,8 @@ include
               self#on_InstanceOf env _visitors_c0 _visitors_c1
           | Is (_visitors_c0,_visitors_c1) ->
               self#on_Is env _visitors_c0 _visitors_c1
+          | As (_visitors_c0,_visitors_c1,_visitors_c2) ->
+              self#on_As env _visitors_c0 _visitors_c1 _visitors_c2
           | BracedExpr _visitors_c0 -> self#on_BracedExpr env _visitors_c0
           | ParenthesizedExpr _visitors_c0 ->
               self#on_ParenthesizedExpr env _visitors_c0

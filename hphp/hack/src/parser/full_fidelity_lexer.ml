@@ -1099,6 +1099,8 @@ let rec scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
     | ('-', '>') -> (advance lexer 3, TokenKind.QuestionMinusGreaterThan)
     | ('?', _) -> (advance lexer 2, TokenKind.QuestionQuestion)
     | ('>', _) -> (advance lexer 2, TokenKind.QuestionGreaterThan)
+    | ('a', 's') when not @@ is_name_nondigit @@ peek_char lexer 3 ->
+      (advance lexer 3, TokenKind.QuestionAs)
     | _ -> (advance lexer 1, TokenKind.Question)
     end
   | ':' ->

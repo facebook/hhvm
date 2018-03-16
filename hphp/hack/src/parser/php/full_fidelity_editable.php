@@ -344,6 +344,10 @@ abstract class EditableSyntax implements ArrayAccess {
       return InstanceofExpression::from_json($json, $position, $source);
     case 'is_expression':
       return IsExpression::from_json($json, $position, $source);
+    case 'as_expression':
+      return AsExpression::from_json($json, $position, $source);
+    case 'nullable_as_expression':
+      return NullableAsExpression::from_json($json, $position, $source);
     case 'conditional_expression':
       return ConditionalExpression::from_json($json, $position, $source);
     case 'eval_expression':
@@ -1097,6 +1101,8 @@ abstract class EditableToken extends EditableSyntax {
        return new BarBarToken($leading, $trailing);
     case '?':
        return new QuestionToken($leading, $trailing);
+    case '?as':
+       return new QuestionAsToken($leading, $trailing);
     case '?:':
        return new QuestionColonToken($leading, $trailing);
     case '??':
@@ -3469,6 +3475,21 @@ final class QuestionToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): QuestionToken {
     return new QuestionToken($this->leading(), $trailing);
+  }
+}
+final class QuestionAsToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('?as', $leading, $trailing, '?as');
+  }
+
+  public function with_leading(EditableSyntax $leading): QuestionAsToken {
+    return new QuestionAsToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): QuestionAsToken {
+    return new QuestionAsToken($this->leading(), $trailing);
   }
 }
 final class QuestionColonToken extends EditableToken {
@@ -16304,6 +16325,176 @@ final class IsExpression extends EditableSyntax {
       $json->is_right_operand, $position, $source);
     $position += $right_operand->width();
     return new IsExpression(
+        $left_operand,
+        $operator,
+        $right_operand);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_left_operand;
+    yield $this->_operator;
+    yield $this->_right_operand;
+    yield break;
+  }
+}
+final class AsExpression extends EditableSyntax {
+  private EditableSyntax $_left_operand;
+  private EditableSyntax $_operator;
+  private EditableSyntax $_right_operand;
+  public function __construct(
+    EditableSyntax $left_operand,
+    EditableSyntax $operator,
+    EditableSyntax $right_operand) {
+    parent::__construct('as_expression');
+    $this->_left_operand = $left_operand;
+    $this->_operator = $operator;
+    $this->_right_operand = $right_operand;
+  }
+  public function left_operand(): EditableSyntax {
+    return $this->_left_operand;
+  }
+  public function operator(): EditableSyntax {
+    return $this->_operator;
+  }
+  public function right_operand(): EditableSyntax {
+    return $this->_right_operand;
+  }
+  public function with_left_operand(EditableSyntax $left_operand): AsExpression {
+    return new AsExpression(
+      $left_operand,
+      $this->_operator,
+      $this->_right_operand);
+  }
+  public function with_operator(EditableSyntax $operator): AsExpression {
+    return new AsExpression(
+      $this->_left_operand,
+      $operator,
+      $this->_right_operand);
+  }
+  public function with_right_operand(EditableSyntax $right_operand): AsExpression {
+    return new AsExpression(
+      $this->_left_operand,
+      $this->_operator,
+      $right_operand);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $left_operand = $this->left_operand()->rewrite($rewriter, $new_parents);
+    $operator = $this->operator()->rewrite($rewriter, $new_parents);
+    $right_operand = $this->right_operand()->rewrite($rewriter, $new_parents);
+    if (
+      $left_operand === $this->left_operand() &&
+      $operator === $this->operator() &&
+      $right_operand === $this->right_operand()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new AsExpression(
+        $left_operand,
+        $operator,
+        $right_operand), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $left_operand = EditableSyntax::from_json(
+      $json->as_left_operand, $position, $source);
+    $position += $left_operand->width();
+    $operator = EditableSyntax::from_json(
+      $json->as_operator, $position, $source);
+    $position += $operator->width();
+    $right_operand = EditableSyntax::from_json(
+      $json->as_right_operand, $position, $source);
+    $position += $right_operand->width();
+    return new AsExpression(
+        $left_operand,
+        $operator,
+        $right_operand);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_left_operand;
+    yield $this->_operator;
+    yield $this->_right_operand;
+    yield break;
+  }
+}
+final class NullableAsExpression extends EditableSyntax {
+  private EditableSyntax $_left_operand;
+  private EditableSyntax $_operator;
+  private EditableSyntax $_right_operand;
+  public function __construct(
+    EditableSyntax $left_operand,
+    EditableSyntax $operator,
+    EditableSyntax $right_operand) {
+    parent::__construct('nullable_as_expression');
+    $this->_left_operand = $left_operand;
+    $this->_operator = $operator;
+    $this->_right_operand = $right_operand;
+  }
+  public function left_operand(): EditableSyntax {
+    return $this->_left_operand;
+  }
+  public function operator(): EditableSyntax {
+    return $this->_operator;
+  }
+  public function right_operand(): EditableSyntax {
+    return $this->_right_operand;
+  }
+  public function with_left_operand(EditableSyntax $left_operand): NullableAsExpression {
+    return new NullableAsExpression(
+      $left_operand,
+      $this->_operator,
+      $this->_right_operand);
+  }
+  public function with_operator(EditableSyntax $operator): NullableAsExpression {
+    return new NullableAsExpression(
+      $this->_left_operand,
+      $operator,
+      $this->_right_operand);
+  }
+  public function with_right_operand(EditableSyntax $right_operand): NullableAsExpression {
+    return new NullableAsExpression(
+      $this->_left_operand,
+      $this->_operator,
+      $right_operand);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $left_operand = $this->left_operand()->rewrite($rewriter, $new_parents);
+    $operator = $this->operator()->rewrite($rewriter, $new_parents);
+    $right_operand = $this->right_operand()->rewrite($rewriter, $new_parents);
+    if (
+      $left_operand === $this->left_operand() &&
+      $operator === $this->operator() &&
+      $right_operand === $this->right_operand()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new NullableAsExpression(
+        $left_operand,
+        $operator,
+        $right_operand), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $left_operand = EditableSyntax::from_json(
+      $json->nullable_as_left_operand, $position, $source);
+    $position += $left_operand->width();
+    $operator = EditableSyntax::from_json(
+      $json->nullable_as_operator, $position, $source);
+    $position += $operator->width();
+    $right_operand = EditableSyntax::from_json(
+      $json->nullable_as_right_operand, $position, $source);
+    $position += $right_operand->width();
+    return new NullableAsExpression(
         $left_operand,
         $operator,
         $right_operand);

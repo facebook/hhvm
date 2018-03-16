@@ -120,6 +120,8 @@ type t =
   | BinaryExpression
   | InstanceofExpression
   | IsExpression
+  | AsExpression
+  | NullableAsExpression
   | ConditionalExpression
   | EvalExpression
   | EmptyExpression
@@ -291,6 +293,8 @@ let to_string kind =
   | BinaryExpression                        -> "binary_expression"
   | InstanceofExpression                    -> "instanceof_expression"
   | IsExpression                            -> "is_expression"
+  | AsExpression                            -> "as_expression"
+  | NullableAsExpression                    -> "nullable_as_expression"
   | ConditionalExpression                   -> "conditional_expression"
   | EvalExpression                          -> "eval_expression"
   | EmptyExpression                         -> "empty_expression"

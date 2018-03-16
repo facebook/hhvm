@@ -149,6 +149,7 @@ and expr_ =
   | NullCoalesce of expr * expr
   | InstanceOf of expr * class_id
   | Is of expr * hint
+  | As of expr * hint * (* is nullable *) bool
   | New of class_id * expr list * expr list
   | Efun of fun_ * lid list
   | Xml of sid * xhp_attribute list * expr list
@@ -409,6 +410,7 @@ let expr_to_string expr =
   | NullCoalesce _  -> "NullCoalesce"
   | InstanceOf _  -> "InstanceOf"
   | Is _ -> "Is"
+  | As _ -> "As"
   | New _  -> "New"
   | Efun _  -> "Efun"
   | Xml _  -> "Xml"
@@ -500,6 +502,7 @@ class type ['a] visitor_type = object
   method on_typename : 'a -> sid -> 'a
   method on_instanceOf : 'a -> expr -> class_id -> 'a
   method on_is : 'a -> expr -> hint -> 'a
+  method on_as : 'a -> expr -> hint -> bool -> 'a
   method on_class_id : 'a -> class_id -> 'a
   method on_class_id_ : 'a -> class_id_ -> 'a
   method on_new : 'a -> class_id -> expr list -> expr list -> 'a
@@ -695,6 +698,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | NullCoalesce (e1, e2)     -> this#on_nullCoalesce acc e1 e2
    | InstanceOf  (e1, e2)         -> this#on_instanceOf acc e1 e2
    | Is          (e, h)           -> this#on_is acc e h
+   | As          (e, h, b)           -> this#on_as acc e h b
    | Typename n -> this#on_typename acc n
    | New         (cid, el, uel)   -> this#on_new acc cid el uel
    | Efun        (f, idl)         -> this#on_efun acc f idl
@@ -822,6 +826,8 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     acc
 
   method on_is acc e _ = this#on_expr acc e
+
+  method on_as acc e _ _ = this#on_expr acc e
 
   method on_class_id acc (_, cid) = this#on_class_id_ acc cid
 

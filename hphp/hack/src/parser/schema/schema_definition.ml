@@ -1312,6 +1312,30 @@ let schema : schema_node list =
       ; "right_operand", Aggregate Specifier
       ]
     }
+  ; { kind_name   = "AsExpression"
+    ; type_name   = "as_expression"
+    ; func_name   = "as_expression"
+    ; description = "as_expression"
+    ; prefix      = "as"
+    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
+    ; fields =
+      [ "left_operand", Aggregate Expression
+      ; "operator", Token
+      ; "right_operand", Aggregate Specifier
+      ]
+    }
+  ; { kind_name   = "NullableAsExpression"
+    ; type_name   = "nullable_as_expression"
+    ; func_name   = "nullable_as_expression"
+    ; description = "nullable_as_expression"
+    ; prefix      = "nullable_as"
+    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
+    ; fields =
+      [ "left_operand", Aggregate Expression
+      ; "operator", Token
+      ; "right_operand", Aggregate Specifier
+      ]
+    }
   ; { kind_name   = "ConditionalExpression"
     ; type_name   = "conditional_expression"
     ; func_name   = "conditional_expression"

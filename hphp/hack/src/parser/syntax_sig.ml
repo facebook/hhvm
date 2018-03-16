@@ -629,6 +629,16 @@ module type Syntax_S = sig
     ; is_operator                                        : t
     ; is_right_operand                                   : t
     }
+  | AsExpression                            of
+    { as_left_operand                                    : t
+    ; as_operator                                        : t
+    ; as_right_operand                                   : t
+    }
+  | NullableAsExpression                    of
+    { nullable_as_left_operand                           : t
+    ; nullable_as_operator                               : t
+    ; nullable_as_right_operand                          : t
+    }
   | ConditionalExpression                   of
     { conditional_test                                   : t
     ; conditional_question                               : t
@@ -1120,6 +1130,8 @@ module type Syntax_S = sig
   val make_binary_expression : t -> t -> t -> t
   val make_instanceof_expression : t -> t -> t -> t
   val make_is_expression : t -> t -> t -> t
+  val make_as_expression : t -> t -> t -> t
+  val make_nullable_as_expression : t -> t -> t -> t
   val make_conditional_expression : t -> t -> t -> t -> t -> t
   val make_eval_expression : t -> t -> t -> t -> t
   val make_empty_expression : t -> t -> t -> t -> t
@@ -1290,6 +1302,8 @@ module type Syntax_S = sig
   val is_binary_expression : t -> bool
   val is_instanceof_expression : t -> bool
   val is_is_expression : t -> bool
+  val is_as_expression : t -> bool
+  val is_nullable_as_expression : t -> bool
   val is_conditional_expression : t -> bool
   val is_eval_expression : t -> bool
   val is_empty_expression : t -> bool

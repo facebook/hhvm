@@ -1262,7 +1262,12 @@ and string_of_param_default_value ~env expr =
   | A.Is (e, h) ->
     let e = string_of_param_default_value ~env e in
     let h = string_of_hint ~ns:true h in
-      e ^ " is " ^ h
+    e ^ " is " ^ h
+  | A.As (e, h, b) ->
+    let e = string_of_param_default_value ~env e in
+    let o = if b then " ?as " else " as " in
+    let h = string_of_hint ~ns:true h in
+    e ^ o ^ h
   | A.Varray es ->
     if env.in_xhp
     then begin

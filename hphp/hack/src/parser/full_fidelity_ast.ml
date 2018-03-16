@@ -1301,6 +1301,14 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | IsExpression
       { is_left_operand; is_right_operand; _ } ->
       Is (pExpr is_left_operand env, pHint is_right_operand env)
+    | AsExpression
+      { as_left_operand; as_right_operand; _ } ->
+      As (pExpr as_left_operand env, pHint as_right_operand env, false)
+    | NullableAsExpression
+      { nullable_as_left_operand; nullable_as_right_operand; _ } ->
+      As (pExpr nullable_as_left_operand env,
+          pHint nullable_as_right_operand env,
+          true)
     | AnonymousFunction
       { anonymous_static_keyword
       ; anonymous_async_keyword

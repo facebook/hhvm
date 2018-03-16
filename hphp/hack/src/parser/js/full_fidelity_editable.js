@@ -281,6 +281,10 @@ class EditableSyntax
       return InstanceofExpression.from_json(json, position, source);
     case 'is_expression':
       return IsExpression.from_json(json, position, source);
+    case 'as_expression':
+      return AsExpression.from_json(json, position, source);
+    case 'nullable_as_expression':
+      return NullableAsExpression.from_json(json, position, source);
     case 'conditional_expression':
       return ConditionalExpression.from_json(json, position, source);
     case 'eval_expression':
@@ -992,6 +996,8 @@ class EditableToken extends EditableSyntax
        return new BarBarToken(leading, trailing);
     case '?':
        return new QuestionToken(leading, trailing);
+    case '?as':
+       return new QuestionAsToken(leading, trailing);
     case '?:':
        return new QuestionColonToken(leading, trailing);
     case '??':
@@ -2190,6 +2196,13 @@ class QuestionToken extends EditableToken
   constructor(leading, trailing)
   {
     super('?', leading, trailing, '?');
+  }
+}
+class QuestionAsToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('?as', leading, trailing, '?as');
   }
 }
 class QuestionColonToken extends EditableToken
@@ -13999,6 +14012,172 @@ class IsExpression extends EditableSyntax
     return IsExpression._children_keys;
   }
 }
+class AsExpression extends EditableSyntax
+{
+  constructor(
+    left_operand,
+    operator,
+    right_operand)
+  {
+    super('as_expression', {
+      left_operand: left_operand,
+      operator: operator,
+      right_operand: right_operand });
+  }
+  get left_operand() { return this.children.left_operand; }
+  get operator() { return this.children.operator; }
+  get right_operand() { return this.children.right_operand; }
+  with_left_operand(left_operand){
+    return new AsExpression(
+      left_operand,
+      this.operator,
+      this.right_operand);
+  }
+  with_operator(operator){
+    return new AsExpression(
+      this.left_operand,
+      operator,
+      this.right_operand);
+  }
+  with_right_operand(right_operand){
+    return new AsExpression(
+      this.left_operand,
+      this.operator,
+      right_operand);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_operand = this.left_operand.rewrite(rewriter, new_parents);
+    var operator = this.operator.rewrite(rewriter, new_parents);
+    var right_operand = this.right_operand.rewrite(rewriter, new_parents);
+    if (
+      left_operand === this.left_operand &&
+      operator === this.operator &&
+      right_operand === this.right_operand)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new AsExpression(
+        left_operand,
+        operator,
+        right_operand), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let left_operand = EditableSyntax.from_json(
+      json.as_left_operand, position, source);
+    position += left_operand.width;
+    let operator = EditableSyntax.from_json(
+      json.as_operator, position, source);
+    position += operator.width;
+    let right_operand = EditableSyntax.from_json(
+      json.as_right_operand, position, source);
+    position += right_operand.width;
+    return new AsExpression(
+        left_operand,
+        operator,
+        right_operand);
+  }
+  get children_keys()
+  {
+    if (AsExpression._children_keys == null)
+      AsExpression._children_keys = [
+        'left_operand',
+        'operator',
+        'right_operand'];
+    return AsExpression._children_keys;
+  }
+}
+class NullableAsExpression extends EditableSyntax
+{
+  constructor(
+    left_operand,
+    operator,
+    right_operand)
+  {
+    super('nullable_as_expression', {
+      left_operand: left_operand,
+      operator: operator,
+      right_operand: right_operand });
+  }
+  get left_operand() { return this.children.left_operand; }
+  get operator() { return this.children.operator; }
+  get right_operand() { return this.children.right_operand; }
+  with_left_operand(left_operand){
+    return new NullableAsExpression(
+      left_operand,
+      this.operator,
+      this.right_operand);
+  }
+  with_operator(operator){
+    return new NullableAsExpression(
+      this.left_operand,
+      operator,
+      this.right_operand);
+  }
+  with_right_operand(right_operand){
+    return new NullableAsExpression(
+      this.left_operand,
+      this.operator,
+      right_operand);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_operand = this.left_operand.rewrite(rewriter, new_parents);
+    var operator = this.operator.rewrite(rewriter, new_parents);
+    var right_operand = this.right_operand.rewrite(rewriter, new_parents);
+    if (
+      left_operand === this.left_operand &&
+      operator === this.operator &&
+      right_operand === this.right_operand)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new NullableAsExpression(
+        left_operand,
+        operator,
+        right_operand), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let left_operand = EditableSyntax.from_json(
+      json.nullable_as_left_operand, position, source);
+    position += left_operand.width;
+    let operator = EditableSyntax.from_json(
+      json.nullable_as_operator, position, source);
+    position += operator.width;
+    let right_operand = EditableSyntax.from_json(
+      json.nullable_as_right_operand, position, source);
+    position += right_operand.width;
+    return new NullableAsExpression(
+        left_operand,
+        operator,
+        right_operand);
+  }
+  get children_keys()
+  {
+    if (NullableAsExpression._children_keys == null)
+      NullableAsExpression._children_keys = [
+        'left_operand',
+        'operator',
+        'right_operand'];
+    return NullableAsExpression._children_keys;
+  }
+}
 class ConditionalExpression extends EditableSyntax
 {
   constructor(
@@ -20630,6 +20809,7 @@ exports.AmpersandToken = AmpersandToken;
 exports.AmpersandAmpersandToken = AmpersandAmpersandToken;
 exports.BarBarToken = BarBarToken;
 exports.QuestionToken = QuestionToken;
+exports.QuestionAsToken = QuestionAsToken;
 exports.QuestionColonToken = QuestionColonToken;
 exports.QuestionQuestionToken = QuestionQuestionToken;
 exports.ColonToken = ColonToken;
@@ -20803,6 +20983,8 @@ exports.PostfixUnaryExpression = PostfixUnaryExpression;
 exports.BinaryExpression = BinaryExpression;
 exports.InstanceofExpression = InstanceofExpression;
 exports.IsExpression = IsExpression;
+exports.AsExpression = AsExpression;
+exports.NullableAsExpression = NullableAsExpression;
 exports.ConditionalExpression = ConditionalExpression;
 exports.EvalExpression = EvalExpression;
 exports.EmptyExpression = EmptyExpression;

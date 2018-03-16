@@ -167,6 +167,7 @@ type t =
   | AmpersandAmpersand
   | BarBar
   | Question
+  | QuestionAs
   | QuestionColon
   | QuestionQuestion
   | Colon
@@ -379,6 +380,7 @@ let from_string keyword =
   | "&&"              -> Some AmpersandAmpersand
   | "||"              -> Some BarBar
   | "?"               -> Some Question
+  | "?as"             -> Some QuestionAs
   | "?:"              -> Some QuestionColon
   | "??"              -> Some QuestionQuestion
   | ":"               -> Some Colon
@@ -563,6 +565,7 @@ let to_string kind =
   | AmpersandAmpersand            -> "&&"
   | BarBar                        -> "||"
   | Question                      -> "?"
+  | QuestionAs                    -> "?as"
   | QuestionColon                 -> "?:"
   | QuestionQuestion              -> "??"
   | Colon                         -> ":"

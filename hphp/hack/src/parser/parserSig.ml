@@ -148,6 +148,8 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val binary_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val instanceof_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val is_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val as_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val nullable_as_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val conditional_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val eval_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val empty_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

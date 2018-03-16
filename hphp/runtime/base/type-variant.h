@@ -1545,6 +1545,14 @@ inline Array& forceToDict(Variant& var) {
   return var.toArrRef();
 }
 
+inline Array& forceToDict(member_lval lval) {
+  auto const inner = lval.unboxed();
+  if (!isDictType(inner.type())) {
+    tvSet(make_tv<KindOfDict>(ArrayData::CreateDict()), inner);
+  }
+  return asArrRef(inner);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE Variant empty_string_variant() {

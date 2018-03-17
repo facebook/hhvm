@@ -13,6 +13,12 @@ open HoverService
 
 module Test = Integration_test_base
 
+let pos_at (line1, column1) (line2, column2) =
+  Some (Pos.make_from_file_pos
+    Relative_path.default
+    (File_pos.of_line_column_offset line1 (column1 - 1) 0)
+    (File_pos.of_line_column_offset line2 column2 0))
+
 let builtins = "<?hh // strict
 class Awaitable<T> {}"
 
@@ -56,56 +62,65 @@ let class_members_cases = [
   ("class_members.php", 18, 18), [
     {
       snippet = "public async function genDoStuff(): Awaitable<void>";
-      addendum = ["Full name: `ClassMembers::genDoStuff`"]
+      addendum = ["Full name: `ClassMembers::genDoStuff`"];
+      pos = pos_at (18, 18) (18, 27);
     }
   ];
   ("class_members.php", 20, 12), [
     {
       snippet = "public string ClassMembers::public";
-      addendum = []
+      addendum = [];
+      pos = pos_at (20, 12) (20, 17);
     };
   ];
   ("class_members.php", 22, 12), [
     {
       snippet = "protected string ClassMembers::protected";
-      addendum = []
+      addendum = [];
+      pos = pos_at (22, 12) (22, 20);
     };
   ];
   ("class_members.php", 24, 12), [
     {
       snippet = "private string ClassMembers::private";
-      addendum = []
+      addendum = [];
+      pos = pos_at (24, 12) (24, 18);
     };
   ];
   ("class_members.php", 26, 19), [
     {
       snippet = "public static string ClassMembers::staticVar";
-      addendum = []
+      addendum = [];
+      pos = pos_at (26, 19) (26, 28);
     };
   ];
   ("class_members.php", 28, 12), [
     {
       snippet = "public abstract function abstractMethod(): string";
-      addendum = ["Full name: `ClassMembers::abstractMethod`"]
+      addendum = ["Full name: `ClassMembers::abstractMethod`"];
+      pos = pos_at (28, 12) (28, 25);
     }
   ];
   ("class_members.php", 30, 12), [
     {
       snippet = "public final function finalMethod(string $arg): void";
-      addendum = ["Full name: `ClassMembers::finalMethod`"]
+      addendum = ["Full name: `ClassMembers::finalMethod`"];
+      pos = pos_at (30, 12) (30, 22);
     };
   ];
   ("class_members.php", 32, 11), [
     {
       snippet = "abstract class ClassMembers";
-      addendum = []
+      addendum = [];
+      pos = pos_at (32, 11) (32, 22);
     };
   ];
   ("class_members.php", 32, 25), [
     {
       snippet = "protected final static async\n\
                  function genLotsOfModifiers(): Awaitable<void>";
-      addendum = ["Full name: `ClassMembers::genLotsOfModifiers`"]
+      addendum = ["Full name: `ClassMembers::genLotsOfModifiers`"];
+      pos = pos_at (32, 25) (32, 42);
     };
   ];
 ]
@@ -125,11 +140,13 @@ function call_foo(): void {
 let classname_call_cases = [
   ("classname_call.php", 9, 4), [{
       snippet = "class ClassnameCall";
-      addendum = []
+      addendum = [];
+      pos = pos_at (9, 3) (9, 15);
     }];
   ("classname_call.php", 9, 18), [{
       snippet = "static function foo(): int";
-      addendum = ["Full name: `ClassnameCall::foo`"]
+      addendum = ["Full name: `ClassnameCall::foo`"];
+      pos = pos_at (9, 18) (9, 20);
     }];
 ]
 
@@ -153,7 +170,8 @@ let chained_calls_cases = [
   ("chained_calls.php", 13, 8), [
     {
       snippet = "public function foo(): ChainedCalls";
-      addendum = ["Full name: `ChainedCalls::foo`"]
+      addendum = ["Full name: `ChainedCalls::foo`"];
+      pos = pos_at (13, 7) (13, 9);
     };
   ];
 ]
@@ -170,16 +188,19 @@ function test_multiple_type(C1 $c1, C2 $c2, bool $cond): arraykey {
 let multiple_potential_types_cases = [
   ("multiple_potential_types.php", 6, 11), [{
       snippet = "(C1 | C2)";
-      addendum = []
+      addendum = [];
+      pos = None;
     }];
   ("multiple_potential_types.php", 6, 16), [
     {
       snippet = "((function(): string) | (function(): int))";
-      addendum = []
+      addendum = [];
+      pos = None;
     };
     {
       snippet = "((function(): string) | (function(): int))";
-      addendum = []
+      addendum = [];
+      pos = None;
     };
   ];
 ]
@@ -198,13 +219,15 @@ function test_classname(): void {
 let classname_variable_cases = [
   ("classname_variable.php", 8, 4), [{
       snippet = "classname<ClassnameVariable>";
-      addendum = []
+      addendum = [];
+      pos = pos_at (8, 3) (8, 6);
     }];
 
   (* TODO(wipi): make this return something useful. *)
   ("classname_variable.php", 8, 10), [{
       snippet = "_";
-      addendum = []
+      addendum = [];
+      pos = None;
     }];
 ]
 
@@ -300,13 +323,15 @@ let docblockCases = [
                    block\n\
                    has\n\
                    multiple\n\
-                   lines."]
+                   lines."];
+       pos = pos_at (7, 3) (7, 10);
     }
   ];
   ("docblock.php", 7, 13), [
     {
       snippet = "public static function doStuff(): void";
-      addendum = ["Method doc block with double star."; "Full name: `DocBlock::doStuff`"]
+      addendum = ["Method doc block with double star."; "Full name: `DocBlock::doStuff`"];
+      pos = pos_at (7, 13) (7, 19);
     }
   ];
   ("docblock.php", 9, 3), [
@@ -314,7 +339,8 @@ let docblockCases = [
       snippet = "function queryDocBlocks(): void";
       addendum = ["Multiline\n\
                    function\n\
-                   doc block."]
+                   doc block."];
+      pos = pos_at (9, 3) (9, 16);
     }
   ];
   ("docblock.php", 11, 13), [
@@ -323,7 +349,8 @@ let docblockCases = [
       addendum = ["Multiline doc block with
 a certain amount of
     indentation
-we want to preserve."; "Full name: `DocBlock::preserveIndentation`"]
+we want to preserve."; "Full name: `DocBlock::preserveIndentation`"];
+      pos = pos_at (11, 13) (11, 31);
     }
   ];
   ("docblock.php", 13, 13), [
@@ -333,7 +360,8 @@ we want to preserve."; "Full name: `DocBlock::preserveIndentation`"]
 leading stars, as well as
   * a Markdown list!
 and we'd really like to preserve the Markdown list while getting rid of
-the other stars."; "Full name: `DocBlock::leadingStarsAndMDList`"]
+the other stars."; "Full name: `DocBlock::leadingStarsAndMDList`"];
+      pos = pos_at (13, 13) (13, 33);
     }
   ];
   ("docblock.php", 15, 13), [
@@ -348,7 +376,8 @@ the other stars."; "Full name: `DocBlock::leadingStarsAndMDList`"]
          to have separate paragraphs\n\
          \n\
          in Markdown.\n";
-      "Full name: `DocBlock::manyLineBreaks`"]
+      "Full name: `DocBlock::manyLineBreaks`"];
+      pos = pos_at (15, 13) (15, 26);
     }
   ];
   ("docblock.php", 17, 12), [
@@ -362,13 +391,15 @@ the other stars."; "Full name: `DocBlock::leadingStarsAndMDList`"]
       addendum = [
         "\nClass doc block for a class whose constructor doesn't have a doc block.\n";
         "Full name: `DocBlockOnClassButNotConstructor::__construct`";
-      ]
+      ];
+      pos = pos_at (17, 8) (17, 45);
     }
   ];
   ("docblock.php", 21, 28), [
     {
       snippet = "DocBlockBase";
-      addendum = ["DocBlockBase: class doc block."]
+      addendum = ["DocBlockBase: class doc block."];
+      pos = pos_at (21, 28) (21, 39);
     }
   ];
   ("docblock.php", 23, 12), [
@@ -377,7 +408,8 @@ the other stars."; "Full name: `DocBlock::leadingStarsAndMDList`"]
       addendum = [
         "DocBlockBase: constructor doc block.";
         "Full name: `DocBlockBase::__construct`";
-      ]
+      ];
+      pos = pos_at (23, 8) (23, 25);
     }
   ];
   ("docblock.php", 25, 14), [
@@ -385,7 +417,9 @@ the other stars."; "Full name: `DocBlock::leadingStarsAndMDList`"]
       snippet = "public function __construct(): _";
       addendum = [
         "DocBlockBase: constructor doc block.";
-        "Full name: `DocBlockBase::__construct`"]
+        "Full name: `DocBlockBase::__construct`";
+      ];
+      pos = pos_at (25, 10) (25, 30);
     }
   ]
 ]
@@ -412,18 +446,26 @@ let () =
 
   Test.assert_no_errors env;
 
-  List.iter cases ~f:begin fun ((file, line, col), expectedHover) ->
-    let list_to_string hover_list =
-      let string_list = hover_list |> List.map ~f:HoverService.string_of_result in
-      let inner = match string_list |> List.reduce ~f:(fun a b -> a ^ "; " ^ b) with
-        | None -> ""
-        | Some s -> s
+  let failed_cases =
+    List.filter_map cases ~f:begin fun ((file, line, col), expectedHover) ->
+      let list_to_string hover_list =
+        let string_list = hover_list |> List.map ~f:HoverService.string_of_result in
+        let inner = match string_list |> List.reduce ~f:(fun a b -> a ^ "; " ^ b) with
+          | None -> ""
+          | Some s -> s
+        in
+        Printf.sprintf "%s:%d:%d: [%s]" file line col inner
       in
-      Printf.sprintf "%s:%d:%d: [%s]" file line col inner
+      let fn = ServerUtils.FileName ("/" ^ file) in
+      let hover = ServerHover.go env (fn, line, col) in
+      let expected = list_to_string expectedHover in
+      let actual = list_to_string hover in
+      if expected <> actual then Some (expected, actual) else None
+  end in
+  match failed_cases with
+  | [] -> ()
+  | cases ->
+    let display_case (expected, actual) =
+      Printf.sprintf "Expected:\n%s\nGot:\n%s" expected actual
     in
-    let fn = ServerUtils.FileName ("/" ^ file) in
-    let hover = ServerHover.go env (fn, line, col) in
-    Test.assertEqual
-      (list_to_string expectedHover)
-      (list_to_string hover)
-  end
+    Test.fail @@ String.concat "\n\n" (List.map ~f:display_case cases)

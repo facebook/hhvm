@@ -84,7 +84,7 @@ let make_hover_info tcopt (file, _line, _char) env_and_ty (occurrence, def_opt) 
         [Printf.sprintf "Full name: `%s`" (Utils.strip_ns name)]
       | _ -> []);
   ] |> List.concat in
-  { snippet; addendum }
+  HoverService.{ snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos }
 
 let go env (file, line, char) =
   let position = (file, line, char) in
@@ -96,7 +96,8 @@ let go env (file, line, char) =
   match identities with
   | [] ->
     begin match env_and_ty with
-    | Some (env, ty) -> [{ snippet = Typing_print.full_strip_ns env ty; addendum = [] }]
+    | Some (env, ty) ->
+      [{ snippet = Typing_print.full_strip_ns env ty; addendum = []; pos = None }]
     | None -> []
     end
   | identities ->

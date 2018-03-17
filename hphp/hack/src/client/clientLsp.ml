@@ -596,19 +596,34 @@ let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
 let do_enhanced_hover (conn: server_conn) (params: Hover.params) : Hover.result =
   let (file, line, column) = lsp_file_position_to_hack params in
   let command = ServerCommandTypes.IDE_HOVER (ServerUtils.FileName file, line, column) in
-  let contents = rpc conn command
+  let infos = rpc conn command in
+  let contents =
+    infos
     |> List.map ~f:begin fun hoverInfo ->
       (* Hack server uses None to indicate absence of a result. *)
       (* We're also catching the non-result "" just in case...               *)
       match hoverInfo with
       | { HoverService.snippet = ""; _ } -> []
-      | { HoverService.snippet; addendum } ->
+      | { HoverService.snippet; addendum; _ } ->
         (MarkedCode ("hack", snippet)) :: (List.map ~f:(fun s -> MarkedString s) addendum)
     end
     |> List.concat
     |> List.remove_consecutive_duplicates ~equal:(=)
   in
-  { Hover.contents; range = None; }
+  (* We pull the position from the SymbolOccurrence.t record, so I would be
+     surprised if there were any different ones in here. Just take the first
+     non-None one.
+     -wipi *)
+  let pos =
+    infos
+    |> List.filter_map ~f:(fun { HoverService.pos; _ } -> pos)
+    |> List.hd
+    |> Option.map ~f:hack_pos_to_lsp_range
+  in
+  {
+    Hover.contents;
+    range = pos;
+  }
 
 let do_definition (conn: server_conn) (params: Definition.params)
   : Definition.result =

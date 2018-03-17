@@ -18,11 +18,17 @@ type hover_info = {
   (** Additional information, such as doc string and declaration file. Displayed
       as Markdown. *)
   addendum : string list;
+
+  (** Position of this result. *)
+  pos : Pos.t option;
 }
 
 type result = hover_info list
 
-let string_of_result { snippet; addendum } =
-  Printf.sprintf "{ snippet = \"%s\"; addendum = [%s] }"
+let string_of_result { snippet; addendum; pos } =
+  Printf.sprintf "{ snippet = \"%s\"; addendum = [%s]; pos = %s }"
     snippet
     (String.concat "; " (List.map (fun s -> Printf.sprintf "\"%s\"" s) addendum))
+    (match pos with
+      | None -> "None"
+      | Some p -> Printf.sprintf "Some \"%s\"" (Pos.multiline_string_no_file p))

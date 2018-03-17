@@ -60,11 +60,11 @@ let error_to_string (info, e) =
   | Process_failure (status, stderr) ->
     Printf.sprintf "Process_failure(%s, stderr: %s)" (status_string status) stderr
   | Timed_out (stdout , stderr) ->
-    Printf.sprintf "Timed_out((stdout: %s) (stderr: %s))" stdout stderr
+    Printf.sprintf "Timed_out(%s (stdout: %s) (stderr: %s))" info stdout stderr
   | Process_aborted ->
-    "Process_aborted"
+    Printf.sprintf "Process_aborted(%s)" info
   | Transformer_raised e ->
-    Printf.sprintf "Transformer_raised(%s)" (Printexc.to_string e)
+    Printf.sprintf "Transformer_raised(%s %s)" info (Printexc.to_string e)
 
 let error_to_exn e = raise (Failure e)
 

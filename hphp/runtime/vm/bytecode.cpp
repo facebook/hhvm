@@ -2795,6 +2795,12 @@ OPTBLD_INLINE void iopIsNameD(Id id) {
   );
 }
 
+OPTBLD_INLINE void iopAsTypeStruct(const ArrayData* a) {
+  // TODO(oulgen): implement for type structures
+  // Currently does not do anything, leaves the item on the stack
+  not_implemented();
+}
+
 OPTBLD_INLINE void iopPrint() {
   Cell* c1 = vmStack().topC();
   g_context->write(cellAsVariant(*c1).toString());

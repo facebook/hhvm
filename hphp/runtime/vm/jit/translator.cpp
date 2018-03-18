@@ -198,6 +198,7 @@ static const struct {
   { OpInstanceOf,  {StackTop2,        Stack1,       OutBoolean      }},
   { OpInstanceOfD, {Stack1,           Stack1,       OutPredBool     }},
   { OpIsNameD,     {Stack1,           Stack1,       OutBoolean      }},
+  { OpAsTypeStruct,{Stack1,           Stack1,       OutSameAsInput1 }},
   { OpPrint,       {Stack1,           Stack1,       OutInt64        }},
   { OpClone,       {Stack1,           Stack1,       OutObject       }},
   { OpExit,        {Stack1,           Stack1,       OutNull         }},
@@ -1019,6 +1020,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::InstanceOf:
   case Op::InstanceOfD:
   case Op::IsNameD:
+  case Op::AsTypeStruct:
   case Op::Int:
   case Op::IssetG:
   case Op::IssetL:

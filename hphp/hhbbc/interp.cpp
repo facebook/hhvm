@@ -2069,6 +2069,12 @@ void in(ISS& env, const bc::IsNameD& op) {
   return reduce(env, bc::InstanceOfD { op.str1 });
 }
 
+void in(ISS& env, const bc::AsTypeStruct& op) {
+  // TODO(oulgen): implement for type structures
+  // Currently does not do anything, leaves the item on the stack
+  not_implemented();
+}
+
 void in(ISS& env, const bc::InstanceOf& /*op*/) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);

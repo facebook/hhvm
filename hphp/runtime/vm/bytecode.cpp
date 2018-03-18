@@ -2702,6 +2702,14 @@ bool implTypeStructureHelper(const Array& ts, Cell* c1) {
       return type == KindOfInt64 || type == KindOfDouble;
     case TypeStructure::Kind::T_arraykey:
       return type == KindOfInt64 || isStringType(type);
+    case TypeStructure::Kind::T_dict:
+      return isDictType(type);
+    case TypeStructure::Kind::T_vec:
+      return isVecType(type);
+    case TypeStructure::Kind::T_keyset:
+      return isKeysetType(type);
+    case TypeStructure::Kind::T_vec_or_dict:
+      return isVecType(type) || isDictType(type);
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
@@ -2714,10 +2722,6 @@ bool implTypeStructureHelper(const Array& ts, Cell* c1) {
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_trait:
     case TypeStructure::Kind::T_enum:
-    case TypeStructure::Kind::T_dict:
-    case TypeStructure::Kind::T_vec:
-    case TypeStructure::Kind::T_keyset:
-    case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_xhp:

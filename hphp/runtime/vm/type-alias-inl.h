@@ -24,10 +24,6 @@ namespace HPHP {
 struct StringData;
 struct ArrayData;
 
-namespace TypeStructure {
-ArrayData* resolve(const StringData* aliasName, const ArrayData* arr);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Static constructors.
 

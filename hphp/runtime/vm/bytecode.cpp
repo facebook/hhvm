@@ -61,6 +61,7 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
@@ -188,6 +189,7 @@ const StaticString s_call_user_func_array("call_user_func_array");
 const StaticString s___call("__call");
 const StaticString s___callStatic("__callStatic");
 const StaticString s_file("file");
+const StaticString s_kind("kind");
 const StaticString s_line("line");
 const StaticString s_construct("__construct");
 
@@ -2680,6 +2682,80 @@ OPTBLD_INLINE void iopInstanceOfD(Id id) {
   vmStack().replaceC<KindOfBoolean>(r);
 }
 
+namespace {
+
+ALWAYS_INLINE
+bool implTypeStructureHelper(const Array& ts, Cell* c1) {
+  auto const type = c1->m_type;
+  switch (static_cast<TypeStructure::Kind>(ts[s_kind].toInt64Val())) {
+    case TypeStructure::Kind::T_int:
+      return type == KindOfInt64;
+    case TypeStructure::Kind::T_bool:
+      return type == KindOfBoolean;
+    case TypeStructure::Kind::T_float:
+      return type == KindOfDouble;
+    case TypeStructure::Kind::T_string:
+      return isStringType(type);
+    case TypeStructure::Kind::T_resource:
+      return type == KindOfResource;
+    case TypeStructure::Kind::T_num:
+      return type == KindOfInt64 || type == KindOfDouble;
+    case TypeStructure::Kind::T_arraykey:
+      return type == KindOfInt64 || isStringType(type);
+    case TypeStructure::Kind::T_void:
+    case TypeStructure::Kind::T_noreturn:
+    case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_tuple:
+    case TypeStructure::Kind::T_fun:
+    case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_typevar:
+    case TypeStructure::Kind::T_shape:
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_trait:
+    case TypeStructure::Kind::T_enum:
+    case TypeStructure::Kind::T_dict:
+    case TypeStructure::Kind::T_vec:
+    case TypeStructure::Kind::T_keyset:
+    case TypeStructure::Kind::T_vec_or_dict:
+    case TypeStructure::Kind::T_unresolved:
+    case TypeStructure::Kind::T_typeaccess:
+    case TypeStructure::Kind::T_xhp:
+      break;
+  }
+  return false;
+}
+
+OPTBLD_INLINE bool cellIsTypeAlias(
+  Cell* cell,
+  const StringData* name,
+  const TypeAliasReq* alias
+) {
+  auto const ts = alias->typeStructure;
+  assertx(!ts.empty());
+  assertx(ts.isDictOrDArray());
+  Array resolved;
+  try {
+    bool persistent = true;
+    resolved = TypeStructure::resolve(
+      StrNR(name).asString(),
+      ts,
+      persistent
+    );
+  } catch (Exception& e) {
+    raise_error(
+      "resolving type alias %s failed. "
+      "Have you declared all classes in the type alias?",
+      name->data()
+    );
+  }
+  assertx(!resolved.empty());
+  assertx(resolved.isDictOrDArray());
+  return implTypeStructureHelper(resolved, cell);
+}
+
+} // namespace
+
 OPTBLD_INLINE void iopIsNameD(Id id) {
   vmStack().replaceC<KindOfBoolean>(
     [id]() {
@@ -2687,10 +2763,17 @@ OPTBLD_INLINE void iopIsNameD(Id id) {
       auto const ne = nep.second;
       auto const name = nep.first;
       auto c1 = vmStack().topC();
+
       auto cls = Unit::loadClass(ne, name);
       if (cls && isEnum(cls)) {
         return enumHasValue(cls, c1);
       }
+
+      auto alias = Unit::loadTypeAlias(name);
+      if (alias) {
+        return cellIsTypeAlias(c1, name, alias);
+      }
+
       return cellInstanceOf(c1, ne);
     }()
   );

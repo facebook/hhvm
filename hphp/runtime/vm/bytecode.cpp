@@ -2723,8 +2723,11 @@ bool implTypeStructureHelper(const Array& ts, Cell* c1) {
       return cellInstanceOf(c1, ne);
     }
     case TypeStructure::Kind::T_void:
+      return type == KindOfNull;
     case TypeStructure::Kind::T_noreturn:
+      return false;
     case TypeStructure::Kind::T_mixed:
+      return true;
     case TypeStructure::Kind::T_tuple:
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_array:

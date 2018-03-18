@@ -188,6 +188,7 @@ const StaticString s_call_user_func("call_user_func");
 const StaticString s_call_user_func_array("call_user_func_array");
 const StaticString s___call("__call");
 const StaticString s___callStatic("__callStatic");
+const StaticString s_classname("classname");
 const StaticString s_file("file");
 const StaticString s_kind("kind");
 const StaticString s_line("line");
@@ -2710,6 +2711,11 @@ bool implTypeStructureHelper(const Array& ts, Cell* c1) {
       return isKeysetType(type);
     case TypeStructure::Kind::T_vec_or_dict:
       return isVecType(type) || isDictType(type);
+    case TypeStructure::Kind::T_enum: {
+      assertx(ts.exists(s_classname));
+      auto const cls = Unit::loadClass(ts[s_classname].asStrRef().get());
+      return enumHasValue(cls, c1);
+    }
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
@@ -2721,7 +2727,6 @@ bool implTypeStructureHelper(const Array& ts, Cell* c1) {
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_trait:
-    case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_xhp:

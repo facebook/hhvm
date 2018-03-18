@@ -46,6 +46,7 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/enum-util.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/hhprof.h"
@@ -2680,11 +2681,19 @@ OPTBLD_INLINE void iopInstanceOfD(Id id) {
 }
 
 OPTBLD_INLINE void iopIsNameD(Id id) {
-  const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
-  Cell* c1 = vmStack().topC();
-  bool r = cellInstanceOf(c1, ne);
-  // TODO(kunalm): implement for type aliases, enums, etc.
-  vmStack().replaceC<KindOfBoolean>(r);
+  vmStack().replaceC<KindOfBoolean>(
+    [id]() {
+      auto nep = vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
+      auto const ne = nep.second;
+      auto const name = nep.first;
+      auto c1 = vmStack().topC();
+      auto cls = Unit::loadClass(ne, name);
+      if (cls && isEnum(cls)) {
+        return enumHasValue(cls, c1);
+      }
+      return cellInstanceOf(c1, ne);
+    }()
+  );
 }
 
 OPTBLD_INLINE void iopPrint() {

@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/enum-cache.h"
+#include "hphp/runtime/base/enum-util.h"
 
 namespace HPHP {
 
@@ -43,17 +44,7 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
 }
 
 static bool HHVM_STATIC_METHOD(BuiltinEnum, isValid, const Variant &value) {
-  if (UNLIKELY(!value.isInteger() && !value.isString())) return false;
-
-  const EnumValues* values = EnumCache::getValuesBuiltin(self_);
-
-  // Manually perform int-like key conversion even if names is a dict, for
-  // backwards compatibility.
-  int64_t num;
-  if (value.isString() && value.getStringData()->isStrictlyInteger(num)) {
-    return values->names.exists(num);
-  }
-  return values->names.exists(value);
+  return enumHasValue(self_, value.asCell());
 }
 
 static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {

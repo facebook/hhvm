@@ -65,9 +65,14 @@ and is_resolved_classname = function
   | "HH\\vec_or_dict" -> true
   | _ -> false
 
+let check_shape_key (pos, name) =
+  if String.length name > 0 && String_utils.is_decimal_digit name.[0]
+  then Emit_fatal.raise_fatal_parse
+    pos "Shape key names may not start with integers"
+
 let shape_field_name = function
   | A.SFlit ((_, s) as id) ->
-    Emit_expression.check_shape_key id;
+    check_shape_key id;
     s, false
   | A.SFclass_const ((_, id), (_, s)) -> id ^ "::" ^ s, true
 

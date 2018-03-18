@@ -267,6 +267,7 @@ type instruct_operator =
   | InstanceOf
   | InstanceOfD of class_id
   | IsNameD of class_id
+  | AsTypeStruct of adata_id
   | Print
   | Clone
   | Exit

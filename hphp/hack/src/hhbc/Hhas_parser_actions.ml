@@ -851,9 +851,15 @@ let makeunaryinst s arg = match s with
                                | "RuntimeOmitFrame" -> FatalOp.RuntimeOmitFrame
                                | _ -> report_error "bad fatal op arg"))
        | _ -> report_error "bad fatal op arg")
-   | "InstanceOfD"-> (match arg with
+   | "InstanceOfD" -> (match arg with
        | IAString sa -> IOp (InstanceOfD (Hhbc_id.Class.from_raw_string sa))
        | _ -> report_error "bad InstanceOfD arg")
+   | "IsNamedD" -> (match arg with
+       | IAString sa -> IOp (IsNameD (Hhbc_id.Class.from_raw_string sa))
+       | _ -> report_error "bad IsNamedD arg")
+   | "AsTypeStruct" -> (match arg with
+       | IAArrayno n -> IOp (AsTypeStruct n)
+       | _ -> report_error "bad array lit cst")
 (* instruct_control_flow *)
    | "Jmp" -> (match arg with
        | IAId l -> IContFlow (Jmp (makelabel l))

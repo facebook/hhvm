@@ -446,14 +446,9 @@ let get_queryMOpMode need_ref op =
   | QueryOp.Empty when need_ref -> MemberOpMode.Define
   | _ -> MemberOpMode.ModeNone
 
-let check_shape_key (pos,name) =
-  if String.length name > 0 && String_utils.is_decimal_digit name.[0]
-  then Emit_fatal.raise_fatal_parse
-    pos "Shape key names may not start with integers"
-
 let extract_shape_field_name_pstring = function
   | A.SFlit s ->
-    check_shape_key s; A.String s
+    Emit_type_constant.check_shape_key s; A.String s
   | A.SFclass_const ((pn, _) as id, p) -> A.Class_const ((pn, A.Id id), p)
 
 let rec text_of_expr e_ = match e_ with
@@ -679,12 +674,36 @@ and emit_instanceof env pos e1 e2 =
       emit_expr ~need_ref:false env e2;
       instr_instanceof ]
 
-and emit_as _env pos _lhs _h _is_nullable =
+and emit_as env pos e h is_nullable =
   if not @@ Hhbc_options.enable_hackc_only_feature !Hhbc_options.compiler_options
   then Emit_fatal.raise_fatal_runtime pos "As expression is not allowed"
   else
-    (* TODO(T26859386): Implement as expressions *)
-    emit_nyi "As expression"
+    if is_nullable then begin
+      Local.scope @@ fun () ->
+        let local = Local.get_unnamed_local () in
+        let true_label = Label.next_regular () in
+        let done_label = Label.next_regular () in
+        gather [
+          emit_expr ~need_ref:false env e;
+          instr_popl local;
+          (* (e is h) ? e : null *)
+          emit_is env pos (IsExprUnnamedLocal local) h;
+          instr_jmpnz true_label;
+          instr_null;
+          instr_unsetl local;
+          instr_jmp done_label;
+          instr_label true_label;
+          instr_pushl local;
+          instr_label done_label;
+        ]
+    end else begin
+      let namespace = Emit_env.get_namespace env in
+      let tv = Emit_type_constant.hint_to_type_constant
+        ~is_typedef:true ~tparams:[] ~namespace h in
+      gather [
+        emit_expr ~need_ref:false env e;
+        instr_astypestruct @@ Emit_adata.get_array_identifier tv
+      ] end
 
 and emit_is env pos lhs h =
   if not @@ Hhbc_options.enable_hackc_only_feature !Hhbc_options.compiler_options
@@ -1932,8 +1951,7 @@ and emit_expr env ?last_pos ?(need_ref=false) (pos, expr_ as expr) =
   | A.Is (e, h) ->
     emit_box_if_necessary pos need_ref @@ emit_is env pos (IsExprExpr e) h
   | A.As (e, h, is_nullable) ->
-    emit_box_if_necessary pos need_ref @@
-      emit_as env pos (IsExprExpr e) h is_nullable
+    emit_box_if_necessary pos need_ref @@ emit_as env pos e h is_nullable
   | A.NullCoalesce (e1, e2) ->
     emit_box_if_necessary pos need_ref @@ emit_null_coalesce env pos e1 e2
   | A.Cast((_, hint), e) ->

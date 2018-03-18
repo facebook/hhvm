@@ -708,7 +708,7 @@ let check_instruct_operator i i' =
   | CastBool, _ | CastInt, _ | CastDouble, _ | CastString, _ | CastArray, _
   | CastObject, _ | CastVec, _ | CastDict, _ | CastKeyset, _ | CastVArray, _
   | CastDArray, _ | InstanceOf, _ | InstanceOfD _, _ | IsNameD _, _ | Print, _
-  | Clone, _ ->
+  | AsTypeStruct _, _ | Clone, _ ->
     if i=i' then Some false else None
 
 let check_instruct_special_flow i i' =

@@ -187,6 +187,7 @@ let string_of_operator instruction =
     | InstanceOf -> "InstanceOf"
     | InstanceOfD id -> sep ["InstanceOfD"; string_of_class_id id]
     | IsNameD id -> sep ["IsNameD"; string_of_class_id id]
+    | AsTypeStruct id -> sep ["AsTypeStruct"; string_of_adata_id id]
     | Print -> "Print"
     | Clone -> "Clone"
     | H.Exit -> "Exit"

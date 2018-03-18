@@ -2716,6 +2716,12 @@ bool implTypeStructureHelper(const Array& ts, Cell* c1) {
       auto const cls = Unit::loadClass(ts[s_classname].asStrRef().get());
       return enumHasValue(cls, c1);
     }
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface: {
+      assertx(ts.exists(s_classname));
+      auto const ne = NamedEntity::get(ts[s_classname].asStrRef().get());
+      return cellInstanceOf(c1, ne);
+    }
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
@@ -2724,8 +2730,6 @@ bool implTypeStructureHelper(const Array& ts, Cell* c1) {
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_shape:
-    case TypeStructure::Kind::T_class:
-    case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_trait:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:

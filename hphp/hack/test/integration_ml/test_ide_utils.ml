@@ -30,7 +30,7 @@ let () =
     FileInfo.n_classes = SSet.of_list classes
   } in
   let elems = Decl_class_elements.get_for_classes ~old:false classes in
-  Decl_redecl_service.remove_defs ~collect_garbage:false defs elems;
+  Decl_redecl_service.remove_defs ~collect_garbage:false None defs elems;
   SharedMem.invalidate_caches();
 
   let tcopt = TypecheckerOptions.default in

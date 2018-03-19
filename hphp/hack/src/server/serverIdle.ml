@@ -106,7 +106,8 @@ let init genv (root : Path.t) =
      * major_slice takes something like ~0.0001s to run, so why not *)
     Periodical.always   , (fun () -> ignore @@ Gc.major_slice 0);
     Periodical.one_hour *. 3., EventLogger.log_gc_stats;
-    Periodical.always   , (fun () -> SharedMem.collect `aggressive);
+    Periodical.always   , (fun () ->
+      WorkerCollect.go genv.ServerEnv.workers `aggressive);
     Periodical.always   , EventLogger.flush;
     Periodical.always   , SearchServiceRunner.run genv;
     Periodical.one_day  , exit_if_unused;

@@ -55,7 +55,7 @@ let () =
   } in
 
   let elems = Decl_class_elements.get_for_classes ~old:false classes in
-  Decl_redecl_service.remove_defs ~collect_garbage:false defs elems;
+  Decl_redecl_service.remove_defs ~collect_garbage:false None defs elems;
   SharedMem.invalidate_caches();
   (* Local caches need to be invalidated whenever things are removed from shared
    * memory (to avoid getting cached old versions of declarations) *)

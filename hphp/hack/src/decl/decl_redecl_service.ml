@@ -207,33 +207,34 @@ let parallel_otf_decl workers bucket_size tcopt fast fnl =
 (*****************************************************************************)
 (* Code invalidating the heap *)
 (*****************************************************************************)
-let oldify_defs { FileInfo.n_funs; n_classes; n_types; n_consts }
+let oldify_defs workers { FileInfo.n_funs; n_classes; n_types; n_consts }
     elems ~collect_garbage =
   Decl_heap.Funs.oldify_batch n_funs;
   Decl_class_elements.oldify_all elems;
   Decl_heap.Classes.oldify_batch n_classes;
   Decl_heap.Typedefs.oldify_batch n_types;
   Decl_heap.GConsts.oldify_batch n_consts;
-  if collect_garbage then SharedMem.collect `gentle;
+  if collect_garbage then WorkerCollect.go workers `gentle;
   ()
 
-let remove_old_defs { FileInfo.n_funs; n_classes; n_types; n_consts } elems =
+let remove_old_defs workers { FileInfo.n_funs; n_classes; n_types; n_consts }
+    elems =
   Decl_heap.Funs.remove_old_batch n_funs;
   Decl_class_elements.remove_old_all elems;
   Decl_heap.Classes.remove_old_batch n_classes;
   Decl_heap.Typedefs.remove_old_batch n_types;
   Decl_heap.GConsts.remove_old_batch n_consts;
-  SharedMem.collect `gentle;
+  WorkerCollect.go workers  `gentle;
   ()
 
-let remove_defs { FileInfo.n_funs; n_classes; n_types; n_consts }
+let remove_defs workers { FileInfo.n_funs; n_classes; n_types; n_consts }
     elems ~collect_garbage =
   Decl_heap.Funs.remove_batch n_funs;
   Decl_class_elements.remove_all elems;
   Decl_heap.Classes.remove_batch n_classes;
   Decl_heap.Typedefs.remove_batch n_types;
   Decl_heap.GConsts.remove_batch n_consts;
-  if collect_garbage then SharedMem.collect `gentle;
+  if collect_garbage then WorkerCollect.go workers `gentle;
   ()
 
 let intersection_nonempty s1 mem_f s2  =
@@ -343,7 +344,7 @@ let redo_type_decl workers ~bucket_size tcopt all_oldified_defs fast defs =
   (* Oldify the remaining defs along with their elements *)
   let get_elems = get_elems workers ~bucket_size in
   let current_elems = get_elems current_defs ~old:false in
-  oldify_defs current_defs current_elems ~collect_garbage:true;
+  oldify_defs workers current_defs current_elems ~collect_garbage:true;
 
   (* Fetch the already oldified elements too so we can remove them later *)
   let oldified_elems = get_elems oldified_defs ~old:true in
@@ -359,7 +360,7 @@ let redo_type_decl workers ~bucket_size tcopt all_oldified_defs fast defs =
       errors, to_redecl, to_recheck
     else parallel_otf_decl workers bucket_size tcopt fast fnl
   in
-  remove_old_defs defs all_elems;
+  remove_old_defs workers defs all_elems;
   result
 
 let oldify_type_decl
@@ -373,11 +374,11 @@ let oldify_type_decl
   let get_elems = get_elems workers ~bucket_size in
   (* Oldify things that are not oldified yet *)
   let current_elems = get_elems current_defs ~old:false in
-  oldify_defs current_defs current_elems ~collect_garbage;
+  oldify_defs workers current_defs current_elems ~collect_garbage;
 
   (* For the rest, just invalidate their current versions *)
   let oldified_elems = get_elems oldified_defs ~old:false in
-  remove_defs oldified_defs oldified_elems ~collect_garbage;
+  remove_defs workers oldified_defs oldified_elems ~collect_garbage;
 
   (* Oldifying/removing classes also affects their elements
    * (see Decl_class_elements), which might be shared with other classes. We
@@ -390,4 +391,4 @@ let oldify_type_decl
     n_classes = SSet.diff dependent_classes all_classes
   }) in
 
-  remove_defs dependent_classes SMap.empty ~collect_garbage
+  remove_defs workers dependent_classes SMap.empty ~collect_garbage

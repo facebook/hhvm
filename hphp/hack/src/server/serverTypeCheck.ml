@@ -247,7 +247,7 @@ let parsing genv env to_check ~stop_at_errors =
   Parser_heap.ParserHeap.remove_batch ide_files;
   Fixmes.HH_FIXMES.remove_batch ide_files;
   HackSearchService.MasterApi.clear_shared_memory to_check;
-  SharedMem.collect `gentle;
+  WorkerCollect.go genv.workers `gentle;
   let get_next = MultiWorker.next
     genv.workers (Relative_path.Set.elements disk_files) in
   let (fast, errors, failed_parsing) as res =

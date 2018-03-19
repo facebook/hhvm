@@ -36,21 +36,17 @@ let recheck_naming filename_l tcopt =
 
 let recheck_typing filetuple_l tcopt =
   let tcopt = TypecheckerOptions.make_permissive tcopt in
-  ignore(ServerIdeUtils.recheck tcopt filetuple_l)
+  ServerIdeUtils.recheck tcopt filetuple_l
 
 let helper tcopt acc filetuple_l  =
   let fun_call_map = ref Pos.Map.empty in
   SymbolFunCallService.attach_hooks fun_call_map;
-  let type_map = ref Pos.Map.empty in
-  let lvar_map = ref Pos.Map.empty in
-  SymbolTypeService.attach_hooks type_map lvar_map;
   let filename_l = List.rev_map filetuple_l fst in
   recheck_naming filename_l tcopt;
-  recheck_typing filetuple_l tcopt;
+  let tasts = recheck_typing filetuple_l tcopt in
   SymbolFunCallService.detach_hooks ();
-  SymbolTypeService.detach_hooks ();
   let fun_calls = Pos.Map.values !fun_call_map in
-  let symbol_types = SymbolTypeService.generate_types !lvar_map !type_map in
+  let symbol_types = SymbolTypeService.generate_types tasts in
   (fun_calls, symbol_types) :: acc
 
 let parallel_helper workers filetuple_l tcopt =

@@ -11,47 +11,47 @@
     {
       "pos":{"filename":"lambda_argument.php","line":3,"char_start":33,"char_end":34},
       "type":"vec<Tv1>",
-      "ident":0
+      "ident":-750199006
     },
     {
       "pos":{"filename":"lambda_argument.php","line":3,"char_start":58,"char_end":59},
       "type":"(function(Tv1): Tv2)",
-      "ident":1
+      "ident":-121072395
     },
     {
       "pos":{"filename":"lambda_argument.php","line":8,"char_start":3,"char_end":4},
       "type":"[fun]",
-      "ident":2
-    },
-    {
-      "pos":{"filename":"lambda_argument.php","line":8,"char_start":8,"char_end":12},
-      "type":"[fun]",
-      "ident":3
-    },
-    {
-      "pos":{"filename":"lambda_argument.php","line":9,"char_start":5,"char_end":6},
-      "type":"vec<int>",
       "ident":4
     },
     {
-      "pos":{"filename":"lambda_argument.php","line":9,"char_start":14,"char_end":18},
-      "type":"vec<int>",
+      "pos":{"filename":"lambda_argument.php","line":8,"char_start":8,"char_end":12},
+      "type":"_",
+      "ident":-602022284
+    },
+    {
+      "pos":{"filename":"lambda_argument.php","line":9,"char_start":5,"char_end":6},
+      "type":"vec<_>",
       "ident":3
     },
     {
+      "pos":{"filename":"lambda_argument.php","line":9,"char_start":14,"char_end":18},
+      "type":"_",
+      "ident":-602022284
+    },
+    {
       "pos":{"filename":"lambda_argument.php","line":9,"char_start":21,"char_end":22},
-      "type":"(function(int $n): int)",
-      "ident":5
+      "type":"_",
+      "ident":-336303992
     },
     {
       "pos":{"filename":"lambda_argument.php","line":9,"char_start":28,"char_end":29},
-      "type":"int",
-      "ident":5
+      "type":"_",
+      "ident":-336303992
     },
     {
       "pos":{"filename":"lambda_argument.php","line":11,"char_start":3,"char_end":4},
       "type":"[fun]",
-      "ident":2
+      "ident":4
     }
   ]
 }

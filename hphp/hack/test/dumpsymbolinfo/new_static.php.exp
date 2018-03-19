@@ -17,12 +17,12 @@
     {
       "pos":{"filename":"new_static.php","line":8,"char_start":5,"char_end":6},
       "type":"<static>",
-      "ident":0
+      "ident":3
     },
     {
       "pos":{"filename":"new_static.php","line":9,"char_start":5,"char_end":6},
       "type":"<static>",
-      "ident":0
+      "ident":3
     }
   ]
 }

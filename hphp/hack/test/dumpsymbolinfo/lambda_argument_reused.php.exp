@@ -37,18 +37,18 @@
   "symbol_types":[
     {
       "pos":{"filename":"lambda_argument_reused.php","line":12,"char_start":3,"char_end":4},
-      "type":"[rx fun]",
-      "ident":0
+      "type":"[fun]",
+      "ident":4
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":12,"char_start":8,"char_end":9},
-      "type":"[rx fun]",
-      "ident":1
+      "type":"_",
+      "ident":-187650736
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":13,"char_start":5,"char_end":6},
-      "type":"int",
-      "ident":2
+      "type":"_",
+      "ident":3
     },
     {
       "pos":{
@@ -57,8 +57,8 @@
         "char_start":10,
         "char_end":11
       },
-      "type":"D",
-      "ident":1
+      "type":"_",
+      "ident":-187650736
     },
     {
       "pos":{
@@ -67,18 +67,18 @@
         "char_start":12,
         "char_end":13
       },
-      "type":"int",
-      "ident":2
+      "type":"_",
+      "ident":3
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":16,"char_start":3,"char_end":4},
-      "type":"[rx fun]",
-      "ident":0
+      "type":"[fun]",
+      "ident":4
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":17,"char_start":3,"char_end":4},
-      "type":"[rx fun]",
-      "ident":0
+      "type":"[fun]",
+      "ident":4
     }
   ]
 }

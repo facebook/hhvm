@@ -17,12 +17,12 @@
     {
       "pos":{"filename":"new_self.php","line":7,"char_start":5,"char_end":6},
       "type":"A",
-      "ident":0
+      "ident":3
     },
     {
       "pos":{"filename":"new_self.php","line":8,"char_start":5,"char_end":6},
       "type":"A",
-      "ident":0
+      "ident":3
     }
   ]
 }

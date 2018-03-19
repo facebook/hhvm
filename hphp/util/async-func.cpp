@@ -21,7 +21,7 @@
 #include <folly/portability/SysResource.h>
 #include <folly/portability/Unistd.h>
 
-#ifdef __linux__
+#ifdef HAVE_NUMA
 #include <sys/prctl.h>
 #endif
 
@@ -226,7 +226,7 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
 }
 
 void AsyncFuncImpl::setThreadName() {
-#ifdef __linux__
+#ifdef HAVE_NUMA
   if (use_numa) {
     static constexpr size_t kMaxCommNameLen = 16; // TASK_COMM_LEN in kernel
     char name[kMaxCommNameLen];

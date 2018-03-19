@@ -31,7 +31,8 @@ let rec expr_returns_owned_mutable
  | T.Call (_, (_, T.Id id), _, _, _)
  | T.Call (_, (_, T.Fun_id id), _, _, _) ->
    fun_returns_mutable env id
- | T.Call (_, ((_, (Some (_, Tfun fty))), T.Obj_get _), _, _, _) ->
+ | T.Call (_, ((_, (Some (_, Tfun fty))), T.Obj_get _), _, _, _)
+ | T.Call (_, ((_, (Some (_, Tfun fty))), T.Class_const _), _, _, _)->
    fty.ft_returns_mutable
  (* conditional operator returns owned mutable if both consequence and alternative
     return owned mutable *)

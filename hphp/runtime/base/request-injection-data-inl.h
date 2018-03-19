@@ -33,6 +33,14 @@ inline bool RequestInjectionData::getJit() const {
   return m_jit;
 }
 
+inline bool RequestInjectionData::isJittingDisabled() const {
+  return m_jittingDisabled;
+}
+
+inline void RequestInjectionData::setJittingDisabled(bool flag) {
+  m_jittingDisabled = flag;
+}
+
 inline bool RequestInjectionData::getJitFolding() const {
   return m_jitFolding;
 }

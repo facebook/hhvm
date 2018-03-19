@@ -139,7 +139,7 @@ TCA getTranslation(TransArgs args) {
   }
 
   if (!RID().getJit()) {
-    SKTRACE(2, sk, "punting because jitting was disabled\n");
+    SKTRACE(2, sk, "punting because jit was disabled\n");
     return nullptr;
   }
 
@@ -148,6 +148,11 @@ TCA getTranslation(TransArgs args) {
       SKTRACE(2, sk, "getTranslation: found %p\n", tca);
       return tca;
     }
+  }
+
+  if (UNLIKELY(RID().isJittingDisabled())) {
+    SKTRACE(2, sk, "punting because jitting code was disabled\n");
+    return nullptr;
   }
 
   args.kind = tc::profileFunc(args.sk.func()) ?
@@ -186,6 +191,10 @@ TCA getFuncBody(Func* func) {
 
   auto const dvs = func->getDVFunclets();
   if (dvs.size() || func->hasThisVaries()) {
+    if (UNLIKELY(RID().isJittingDisabled())) {
+      TRACE(2, "punting because jitting code was disabled\n");
+      return nullptr;
+    }
     auto const kind = tc::profileFunc(func) ? TransKind::Profile
                                             : TransKind::Live;
     tca = tc::emitFuncBodyDispatch(func, dvs, kind);

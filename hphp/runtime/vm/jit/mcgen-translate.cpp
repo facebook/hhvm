@@ -508,6 +508,11 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   }
   SKTRACE(1, args.sk, "retranslate\n");
 
+  if (UNLIKELY(RID().isJittingDisabled())) {
+    SKTRACE(2, args.sk, "punting because jitting code was disabled\n");
+    return nullptr;
+  }
+
   args.kind = kind();
   if (!writer.checkKind(args.kind)) return nullptr;
 

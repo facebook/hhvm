@@ -158,6 +158,16 @@ struct RequestInjectionData {
   void updateJit();
 
   /*
+   * Whether jitting is disabled.
+   *
+   * This is distinct from getJit(), in that it allows us to _run_ jitted code,
+   * but not to _compile_ it.  Also, the restriction applies only to jitting
+   * new code; optimizing retranslations is not affected.
+   */
+  bool isJittingDisabled() const;
+  void setJittingDisabled(bool);
+
+  /*
    * Whether the JIT is performing function folding.
    */
   bool getJitFolding() const;
@@ -289,6 +299,7 @@ private:
   bool m_debuggerAttached{false};
   bool m_coverage{false};
   bool m_jit{false};
+  bool m_jittingDisabled{false};
   bool m_jitFolding{false};
   bool m_debuggerIntr{false};
   bool m_suppressHackArrayCompatNotices{false};

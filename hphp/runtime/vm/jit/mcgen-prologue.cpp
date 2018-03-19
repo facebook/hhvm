@@ -251,6 +251,11 @@ TCA getFuncPrologue(Func* func, int nPassed) {
 
   if (!tc::shouldTranslate(func, kind)) return nullptr;
 
+  if (UNLIKELY(RID().isJittingDisabled())) {
+    TRACE(2, "punting because jitting code was disabled\n");
+    return nullptr;
+  }
+
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
   if (auto const p = checkCachedPrologue(func, paramIndex)) return p;

@@ -628,6 +628,7 @@ void RequestInjectionData::resetCPUTimer(int seconds /* = 0 */) {
 void RequestInjectionData::reset() {
   m_sflagsAndStkPtr->fetch_and(kSurpriseFlagStackMask);
   m_coverage = RuntimeOption::RecordCodeCoverage;
+  m_jittingDisabled = false;
   m_debuggerAttached = false;
   m_debuggerIntr = false;
   m_debuggerStepIn = false;

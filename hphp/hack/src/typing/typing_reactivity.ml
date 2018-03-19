@@ -88,3 +88,19 @@ let check_call env receiver_type pos reason ft =
       receiver_type_str;
   | _ -> ()
   end
+
+let rec get_name = function
+(* name *)
+| _, Nast.Lvar (_, id) -> Local_id.to_string id
+(* name = initializer *)
+| _, Nast.Binop (_, lhs, _) -> get_name lhs
+| _ -> "_"
+
+let disallow_static_or_global_in_reactive_context ~is_static env el =
+  Env.error_if_reactive_context env @@ begin fun () ->
+    (Core_list.hd el) |> Option.iter ~f:(fun n ->
+      let p = fst n in
+      let name = get_name n in
+      if is_static then Errors.static_in_reactive_context p name
+      else Errors.global_in_reactive_context p name)
+  end

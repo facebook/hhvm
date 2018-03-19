@@ -801,7 +801,8 @@ and stmt env = function
     let env, ttb, tcl, tfb = try_catch env tb cl fb in
     env, T.Try (ttb, tcl, tfb)
   | Static_var el ->
-    Env.not_lambda_reactive ();
+    Typing_reactivity.disallow_static_or_global_in_reactive_context env el
+      ~is_static:true;
     let env = List.fold_left el ~f:begin fun env e ->
       match e with
         | _, Binop (Ast.Eq _, (_, Lvar (p, x)), _) ->
@@ -811,7 +812,8 @@ and stmt env = function
     let env, tel, _ = exprs env el in
     env, T.Static_var tel
   | Global_var el ->
-    Env.not_lambda_reactive ();
+    Typing_reactivity.disallow_static_or_global_in_reactive_context env el
+      ~is_static:false;
     let env = List.fold_left el ~f:begin fun env e ->
       match e with
         | _, Binop (Ast.Eq _, (_, Lvar (p, x)), _) ->
@@ -1674,6 +1676,11 @@ and expr_
       make_result env (T.Dollardollar id) ty
   | Lvar ((_, x) as id) ->
       Typing_hooks.dispatch_lvar_hook id env;
+      let local_id = Local_id.to_string x in
+      if SN.Superglobals.is_superglobal local_id
+      then Env.error_if_reactive_context env @@ begin fun () ->
+        Errors.superglobal_in_reactive_context p local_id;
+      end;
       if not accept_using_var
       then check_escaping_var env id;
       let ty = Env.get_local env x in
@@ -1871,14 +1878,18 @@ and expr_
   | Class_const (cid, mid) -> class_const env p (cid, mid)
   | Class_get (((), x), (py, y))
       when Env.FakeMembers.get_static env x y <> None ->
-        Env.not_lambda_reactive ();
+        Env.error_if_reactive_context env @@ begin fun () ->
+          Errors.static_property_in_reactive_context p
+        end;
         let env, local = Env.FakeMembers.make_static p env x y in
         let local = p, Lvar (p, local) in
         let env, _, ty = expr env local in
         let env, te, _ = static_class_id p env x in
         make_result env (T.Class_get (te, (py, y))) ty
   | Class_get (((), cid), mid) ->
-      Env.not_lambda_reactive ();
+      Env.error_if_reactive_context env @@ begin fun () ->
+        Errors.static_property_in_reactive_context p
+      end;
       TUtils.process_static_find_ref cid mid;
       let env, te, cty = static_class_id p env cid in
       let env, ty, _ =

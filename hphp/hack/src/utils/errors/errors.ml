@@ -786,7 +786,6 @@ module NastCheck                            = struct
   let inout_params_ret_by_ref               = 3046 (* DONT MODIFY!!!! *)
   let reading_from_append                   = 3047 (* DONT MODIFY!!!! *)
   let const_attribute_prohibited            = 3048 (* DONT MODIFY!!!! *)
-  let global_in_reactive_context            = 3049 (* DONT MODIFY!!!! *)
   let inout_argument_bad_expr               = 3050 (* DONT MODIFY!!!! *)
   let mutable_params_outside_of_sync        = 3051 (* DONT MODIFY!!!! *)
   let mutable_async_method                  = 3052 (* DONT MODIFY!!!! *)
@@ -797,11 +796,8 @@ module NastCheck                            = struct
   let conditionally_reactive_function       = 3057 (* DONT MODIFY!!!! *)
   let multiple_conditionally_reactive_annotations = 3058 (* DONT MODIFY!!!! *)
   let conditionally_reactive_annotation_invalid_arguments = 3059 (* DONT MODIFY!!!! *)
-  let superglobal_in_reactive_context       = 3060 (* DONT MODIFY!!!! *)
-  let static_property_in_reactive_context   = 3061 (* DONT MODIFY!!!! *)
-  let static_in_reactive_context            = 3062 (* DONT MODIFY!!!! *)
-  let missing_reactivity_for_condition      = 3063 (* DONT MODIFY!!!! *)
-  let multiple_reactivity_annotations       = 3064 (* DONT MODIFY!!!! *)
+  let missing_reactivity_for_condition      = 3060 (* DONT MODIFY!!!! *)
+  let multiple_reactivity_annotations       = 3061 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1030,6 +1026,12 @@ module Typing                               = struct
   let binding_ref_in_array                  = 4225 (* DONT MODIFY!!!! *)
   let invalid_conditionally_reactive_call   = 4225 (* DONT MODIFY!!!! *)
   let echo_in_reactive_context              = 4226 (* DONT MODIFY!!!! *)
+  let superglobal_in_reactive_context       = 4227 (* DONT MODIFY!!!! *)
+  let static_property_in_reactive_context   = 4228 (* DONT MODIFY!!!! *)
+  let static_in_reactive_context            = 4229 (* DONT MODIFY!!!! *)
+  let global_in_reactive_context            = 4230 (* DONT MODIFY!!!! *)
+
+
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1746,21 +1748,6 @@ let const_attribute_prohibited pos kind =
   add NastCheck.const_attribute_prohibited pos
     ("Cannot apply __Const attribute to " ^ kind)
 
-let global_in_reactive_context pos name =
-  add NastCheck.global_in_reactive_context pos (
-    "Global " ^ name ^ " cannot be used in a reactive context."
-  )
-
-let static_property_in_reactive_context pos =
-  add NastCheck.static_property_in_reactive_context pos (
-    "Static property cannot be used in a reactive context."
-  )
-
-let static_in_reactive_context pos name =
-  add NastCheck.static_in_reactive_context pos (
-    "Static " ^ name ^ " cannot be used in a reactive context."
-  )
-
 let missing_reactivity_for_condition pos =
   add NastCheck.missing_reactivity_for_condition pos (
     "__OnlyRxIfImpl annotation cannot be used without __Rx, __RxShallow " ^
@@ -1801,12 +1788,6 @@ let conditionally_reactive_annotation_invalid_arguments pos =
     "invalid arguments. This attribute must have one argument and it should be " ^
     "'::class' class constant."
   )
-
-let superglobal_in_reactive_context pos name =
-  add NastCheck.superglobal_in_reactive_context pos (
-    "Superglobal "^  name ^ " cannot be used in a reactive context."
-  )
-
 (*****************************************************************************)
 (* Nast terminality *)
 (*****************************************************************************)
@@ -3229,6 +3210,25 @@ let return_ref_in_array pos =
     "supported in Hack." in
   add Typing.binding_ref_in_array pos msg
 
+let superglobal_in_reactive_context pos name =
+  add Typing.superglobal_in_reactive_context pos (
+    "Superglobal "^  name ^ " cannot be used in a reactive context."
+  )
+
+let global_in_reactive_context pos name =
+  add Typing.global_in_reactive_context pos (
+    "Global " ^ name ^ " cannot be used in a reactive context."
+  )
+
+let static_property_in_reactive_context pos =
+  add Typing.static_property_in_reactive_context pos (
+    "Static property cannot be used in a reactive context."
+  )
+
+let static_in_reactive_context pos name =
+  add Typing.static_in_reactive_context pos (
+    "Static " ^ name ^ " cannot be used in a reactive context."
+  )
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

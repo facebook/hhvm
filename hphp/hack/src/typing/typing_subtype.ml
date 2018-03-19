@@ -416,14 +416,26 @@ and subtype_reactivity
      *)
   | Nonreactive, (Reactive (Some t) | Shallow (Some t) | Local (Some t)),
     Some (method_name, is_static) ->
-    let _, cond_type_name, _ = TUtils.unwrap_class_type t in
-    begin match Env.get_class env (snd cond_type_name) with
+    let condition_type_opt =
+      Option.bind
+        (TUtils.try_unwrap_class_type t)
+        (fun (_, (_, x), _) -> Env.get_class env x) in
+    begin match condition_type_opt with
     | None -> false
     | Some cls ->
       let m = if is_static then cls.tc_smethods else cls.tc_methods in
       begin match SMap.get method_name m with
-      | Some { ce_type = lazy (_, Typing_defs.Tfun f); _  }
-        -> f.ft_reactive = Reactive None
+      | Some { ce_type = lazy (_, Typing_defs.Tfun f); _  } ->
+        (* check that reactivity of interface method (effectively a promised
+           reactivity of a method in derived class) is a subtype of r_super.
+           NOTE: we check only for unconditional reactivity since conditional
+           version does not seems to yield a lot and will requre implementing
+           cycle detection for condition types *)
+        begin match f.ft_reactive with
+        | Reactive None | Shallow None | Local None ->
+          subtype_reactivity ?method_info env f.ft_reactive r_super
+        | _ -> false
+        end
       | _ -> false
       end
     end

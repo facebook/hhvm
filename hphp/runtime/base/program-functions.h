@@ -98,7 +98,7 @@ std::string get_right_option_name(
 struct ExecutionContext;
 
 void hphp_process_init();
-void hphp_session_init();
+void hphp_session_init(Transport* transport = nullptr);
 
 bool hphp_invoke_simple(const std::string& filename, bool warmupOnly);
 bool hphp_invoke(ExecutionContext *context,

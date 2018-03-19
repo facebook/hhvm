@@ -367,7 +367,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   std::string tmpfile = HttpProtocol::RecordRequest(transport);
 
   // main body
-  hphp_session_init();
+  hphp_session_init(transport);
   ThreadInfo::s_threadInfo->m_reqInjectionData.
     setTimeout(requestTimeoutSeconds);
 
@@ -435,7 +435,6 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
       context->obStart(String(RuntimeOption::OutputHandler));
     }
   }
-  context->setTransport(transport);
   InitFiniNode::RequestStart();
 
   string file = reqURI.absolutePath().c_str();

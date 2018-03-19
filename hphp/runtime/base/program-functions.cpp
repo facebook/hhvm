@@ -2354,7 +2354,7 @@ static bool hphp_warmup(ExecutionContext *context,
   return ret;
 }
 
-void hphp_session_init() {
+void hphp_session_init(Transport* transport) {
   assertx(!s_sessionInitialized);
   g_context.getCheck();
   AsioSession::Init();
@@ -2379,7 +2379,9 @@ void hphp_session_init() {
   g_context->acceptRequestEventHandlers(true);
 
   g_context->requestInit();
+  if (transport != nullptr) g_context->setTransport(transport);
   s_sessionInitialized = true;
+
   ExtensionRegistry::requestInit();
 
   // Sample function calls for this request

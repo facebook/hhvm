@@ -3197,7 +3197,7 @@ let rx_enabled_in_lambdas pos =
   )
 
 let nonreactive_append pos =
-  let msg = "Cannot append to a Hack Collection types in a reactive context" in
+  let msg = "Cannot append to a Hack Collection object in a reactive context" in
   add Typing.nonreactive_append pos msg
 
 let obj_set_reactive pos =

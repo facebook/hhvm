@@ -309,7 +309,6 @@ let make_param_local_ty env param =
       r, Tarraykind akind
     | x -> x
   in
-  Typing_hooks.dispatch_infer_ty_hook ty param.param_pos env;
   env, ty
 
 (* Given a localized parameter type and parameter information, infer
@@ -1087,7 +1086,6 @@ and raw_expr
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
     | None -> () in
-  Typing_hooks.dispatch_infer_ty_hook ty (fst e) env;
   env, te, ty
 
 and lvalue env e =

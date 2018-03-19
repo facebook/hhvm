@@ -63,9 +63,6 @@ let (constructor_hooks: (Typing_defs.class_type ->
                          targs:Typing_defs.locl Typing_defs.ty list ->
                          Typing_env.env -> Pos.t -> unit) list ref) = ref []
 
-let (infer_ty_hooks: (Typing_defs.locl Typing_defs.ty -> Pos.t ->
-                      Typing_env.env -> unit) list ref) = ref []
-
 let (enter_method_def_hooks: (Nast.method_ -> unit) list ref) = ref []
 
 let (exit_method_def_hooks: (Nast.method_ -> unit) list ref) = ref []
@@ -112,9 +109,6 @@ let attach_parent_construct_hook hook =
 
 let attach_constructor_hook hook =
   constructor_hooks := hook :: !constructor_hooks
-
-let attach_infer_ty_hook hook =
-  infer_ty_hooks := hook :: !infer_ty_hooks
 
 let attach_method_def_hook enter_hook exit_hook =
   assert (enter_hook <> None || exit_hook <> None);
@@ -189,9 +183,6 @@ let dispatch_parent_construct_hook env p =
 let dispatch_constructor_hook c targs env p =
   List.iter !constructor_hooks begin fun hook -> hook c ~targs env p end
 
-let dispatch_infer_ty_hook ty pos env =
-  List.iter !infer_ty_hooks begin fun hook -> hook ty pos env end
-
 let dispatch_enter_method_def_hook method_ =
   List.iter !enter_method_def_hooks begin fun hook -> hook method_ end
 
@@ -221,7 +212,6 @@ let remove_all_hooks () =
   fun_id_hooks := [];
   global_const_hooks := [];
   constructor_hooks := [];
-  infer_ty_hooks := [];
   enter_method_def_hooks := [];
   exit_method_def_hooks := [];
   enter_fun_def_hooks := [];

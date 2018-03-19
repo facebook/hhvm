@@ -87,7 +87,7 @@ static uint32_t furc_get_bit(const char* const key, const size_t len,
     return (hash[ord] >> (idx&0x3f)) & 0x1;
 }
 
-inline uint32_t furc_maximum_pool_size(void) {
+uint32_t furc_maximum_pool_size(void) {
     return (1 << FURC_SHIFT);
 }
 

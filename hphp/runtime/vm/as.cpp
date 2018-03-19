@@ -91,8 +91,10 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/as-shared.h"
+#include "hphp/runtime/vm/bc-pattern.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/native.h"
@@ -781,6 +783,10 @@ struct AsmState {
 
   std::map<std::string,ArrayData*> adataMap;
 
+  // In whole program mode it isn't possible to lookup a litstr in the global
+  // table while emitting, so keep a lookaside of litstrs seen by the assembler.
+  std::unordered_map<Id, const StringData*> litstrMap;
+
   // When inside a class, this state is active.
   PreClassEmitter* pce;
 
@@ -1266,6 +1272,13 @@ LocalRange read_local_range(AsmState& as) {
   return LocalRange{uint32_t(firstLoc), restCount};
 }
 
+Id create_litstr_id(AsmState& as) {
+  auto const sd = read_litstr(as);
+  auto const id = as.ue->mergeLitstr(sd);
+  as.litstrMap.emplace(id, sd);
+  return id;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 std::map<std::string,ParserFunc> opcode_parsers;
@@ -1291,7 +1304,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
     as.ue->emitInt32(as.ue->mergeLitstr(String(vecImm[i]).get()));      \
   }
 
-#define IMM_SA     as.ue->emitInt32(as.ue->mergeLitstr(read_litstr(as)))
+#define IMM_SA     as.ue->emitInt32(create_litstr_id(as))
 #define IMM_RATA   encodeRAT(*as.ue, read_repo_auth_type(as))
 #define IMM_I64A   as.ue->emitInt64(read_opcode_arg<int64_t>(as))
 #define IMM_DA     as.ue->emitDouble(read_opcode_arg<double>(as))
@@ -1798,6 +1811,115 @@ void parse_func_doccomment(AsmState& as) {
   as.in.expectWs(';');
 
   as.fe->docComment = makeStaticString(doc);
+}
+
+/*
+ * fixup_default_values: This function does a *rough* match of the default value
+ * initializers for a function and attempts to construct corresponding default
+ * TypedValues for them. It will also attempt to normalize the phpCode using a
+ * variable serializer.
+ */
+void fixup_default_values(AsmState& as, FuncEmitter* fe) {
+  using Atom = BCPattern::Atom;
+  using Captures = BCPattern::CaptureVec;
+
+  auto end = as.ue->bc() + fe->past;
+  for (uint32_t paramIdx = 0; paramIdx < fe->params.size(); ++paramIdx) {
+    auto& pi = fe->params[paramIdx];
+    if (!pi.hasDefaultValue() || pi.funcletOff == kInvalidOffset) continue;
+    auto inst = as.ue->bc() + pi.funcletOff;
+
+    // Check that the DV intitializer is actually setting the local for the
+    // parameter being initialized.
+    auto checkloc = [&] (PC pc, const Captures&) {
+      auto const UNUSED op = decode_op(pc);
+      assertx(op == OpSetL || op == OpPopL);
+      auto const loc = decode_iva(pc);
+      return loc == paramIdx;
+    };
+
+    // Look for DV initializers which push a primitive value onto the stack and
+    // then immediately use it to set the parameter local and pop it from the
+    // stack. Currently the following relatively limited sequences are accepted:
+    //
+    // Int | String | Double | Null | True | False | Array | Dict | Keyset | Vec
+    // SetL loc, PopC | PopL loc
+    auto result = BCPattern {
+      Atom::alt(
+        Atom(OpInt), Atom(OpString), Atom(OpDouble), Atom(OpNull), Atom(OpTrue),
+        Atom(OpFalse), Atom(OpArray), Atom(OpDict), Atom(OpVec), Atom(OpKeyset)
+      ).capture(),
+      Atom::alt(
+        Atom(OpPopL).onlyif(checkloc),
+        Atom::seq(Atom(OpSetL).onlyif(checkloc), Atom(OpPopC))
+      ),
+    }.ignore({OpAssertRATL, OpAssertRATStk}).matchAnchored(inst, end);
+
+    // Verify that the pattern we matched is either for the last DV initializer,
+    // in which case it must end with a JmpNS that targets the function entry,
+    // or is immediately followed by the next DV initializer.
+    if (!result.found() || result.getEnd() >= end) continue;
+    auto pc = result.getEnd();
+    auto off = pc - as.ue->bc();
+    auto const valid = [&] {
+      for (uint32_t next = paramIdx + 1; next < fe->params.size(); ++next) {
+        auto& npi = fe->params[next];
+        if (!npi.hasDefaultValue() || npi.funcletOff == kInvalidOffset) {
+          continue;
+        }
+        return npi.funcletOff == off;
+      }
+      auto const orig = pc;
+      auto const base = as.ue->bc() + fe->base;
+      return decode_op(pc) == OpJmpNS && orig + decode_raw<Offset>(pc) == base;
+    }();
+    if (!valid) continue;
+
+    // Use the captured initializer bytecode to construct the default value for
+    // this parameter.
+    auto capture = result.getCapture(0);
+    assertx(capture);
+
+    TypedValue dv = make_tv<KindOfUninit>();
+    auto decode_array = [&] (DataType dt) {
+      if (auto arr = as.ue->lookupArray(decode_raw<uint32_t>(capture))) {
+        dv.m_type = dt;
+        dv.m_data.parr = const_cast<ArrayData*>(arr);
+      }
+    };
+
+    switch (decode_op(capture)) {
+    case OpNull:   dv = make_tv<KindOfNull>();           break;
+    case OpTrue:   dv = make_tv<KindOfBoolean>(true);    break;
+    case OpFalse:  dv = make_tv<KindOfBoolean>(false);   break;
+    case OpArray:  decode_array(KindOfPersistentArray);  break;
+    case OpVec:    decode_array(KindOfPersistentVec);    break;
+    case OpDict:   decode_array(KindOfPersistentDict);   break;
+    case OpKeyset: decode_array(KindOfPersistentKeyset); break;
+    case OpInt:
+      dv = make_tv<KindOfInt64>(decode_raw<int64_t>(capture));
+      break;
+    case OpDouble:
+      dv = make_tv<KindOfDouble>(decode_raw<double>(capture));
+      break;
+    case OpString:
+      if (auto str = as.litstrMap[decode_raw<uint32_t>(capture)]) {
+        dv = make_tv<KindOfPersistentString>(str);
+      }
+      break;
+    default:
+      always_assert(false);
+    }
+
+    // Use the variable serializer to construct a serialized version of the
+    // default value, matching the behavior of hphpc.
+    if (dv.m_type != KindOfUninit) {
+      VariableSerializer vs(VariableSerializer::Type::PHPOutput);
+      auto str = vs.serialize(tvAsCVarRef(&dv), true);
+      pi.defaultValue = dv;
+      pi.phpCode = makeStaticString(str.get());
+    }
+  }
 }
 
 /*
@@ -3092,6 +3214,13 @@ void parse(AsmState& as) {
 
   if (!ensure_pseudomain(as)) {
     as.error("no .main found in hhas unit");
+  }
+
+  if (RuntimeOption::EvalAssemblerFoldDefaultValues) {
+    for (auto fe : as.ue->fevec()) fixup_default_values(as, fe);
+    for (size_t n = 0; n < as.ue->numPreClasses(); ++n) {
+      for (auto fe : as.ue->pce(n)->methods()) fixup_default_values(as, fe);
+    }
   }
 }
 

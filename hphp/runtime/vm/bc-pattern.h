@@ -84,6 +84,7 @@ struct BCPattern {
      */
     Atom& capture() {
       m_capture = true;
+      for (auto& a : m_alt) a = a.capture();
       return *this;
     }
 

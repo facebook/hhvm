@@ -118,7 +118,8 @@ let make_genv options config local_config handle =
       let notifier () =
         let watchman', changes =
           (** Timeout is arbitrary. We just use 30 seconds for now. *)
-          Watchman.get_changes_synchronously ~timeout:30 !watchman in
+          Watchman.get_changes_synchronously
+            ~timeout:(local_config.SLC.watchman_synchronous_timeout) !watchman in
         watchman := watchman';
         changes
       in

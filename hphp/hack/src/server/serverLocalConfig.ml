@@ -15,6 +15,7 @@ type t = {
   use_watchman: bool;
   watchman_init_timeout: int; (* in seconds *)
   watchman_subscribe: bool;
+  watchman_synchronous_timeout : int; (* in seconds *)
   use_mini_state: bool;
   use_hackfmt: bool;
   load_mini_script_timeout: int; (* in seconds *)
@@ -52,6 +53,7 @@ let default = {
   (* Buck and hgwatchman use a 10 second timeout too *)
   watchman_init_timeout = 10;
   watchman_subscribe = false;
+  watchman_synchronous_timeout = 120;
   use_mini_state = false;
   use_hackfmt = false;
   load_mini_script_timeout = 20;
@@ -153,6 +155,8 @@ let load_ fn ~silent =
     ~default:default.watchman_init_timeout config in
   let watchman_subscribe = bool_ "watchman_subscribe_v2"
     ~default:default.watchman_subscribe config in
+  let watchman_synchronous_timeout = int_ "watchman_synchronous_timeout"
+    ~default:default.watchman_synchronous_timeout config in
   let io_priority = int_ "io_priority"
     ~default:default.io_priority config in
   let cpu_priority = int_ "cpu_priority"
@@ -180,6 +184,7 @@ let load_ fn ~silent =
     use_watchman;
     watchman_init_timeout;
     watchman_subscribe;
+    watchman_synchronous_timeout;
     use_mini_state;
     use_hackfmt;
     load_mini_script_timeout;

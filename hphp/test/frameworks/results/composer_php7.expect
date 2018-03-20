@@ -732,6 +732,54 @@ Composer\Test\InstallerTest::testIntegration with data set "update-all-dry-run.t
 .
 Composer\Test\InstallerTest::testIntegration with data set "update-all.test"
 .
+Composer\Test\InstallerTest::testIntegration with data set "update-changes-url.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-dev-ignores-providers.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-dev-packages-updates-repo-url.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-dev-to-new-ref-picks-up-changes.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-downgrades-unstable-packages.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-ignore-platform-package-requirements.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-installed-alias-dry-run.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-installed-alias.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-installed-reference-dry-run.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-installed-reference.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-no-dev-still-resolves-dev.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-picks-up-change-of-vcs-type.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-prefer-lowest-stable.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-reference.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-syncs-outdated.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-whitelist-locked-require.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-whitelist-patterns.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-whitelist-reads-lock.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-whitelist-removes-unused.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-whitelist-with-dependencies.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-whitelist-with-dependency-conflict.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "update-whitelist.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "updating-dev-from-lock-removes-old-deps.test"
+.
+Composer\Test\InstallerTest::testIntegration with data set "updating-dev-updates-url-and-reference.test"
+.
 Composer\Test\Installer\InstallationManagerTest::testAddGetInstaller
 .
 Composer\Test\Installer\InstallationManagerTest::testAddRemoveInstaller

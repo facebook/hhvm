@@ -470,6 +470,16 @@ phpbb_dbal_connect_test::test_failing_connect
 S
 phpbb_dbal_cross_join_test::test_cross_join
 S
+phpbb_dbal_db_tools_test::test_column_exists
+S
+phpbb_dbal_db_tools_test::test_column_remove
+S
+phpbb_dbal_db_tools_test::test_column_remove_primary
+S
+phpbb_dbal_db_tools_test::test_create_index_against_index_exists
+S
+phpbb_dbal_db_tools_test::test_create_unique_index_against_unique_index_exists
+S
 phpbb_dbal_db_tools_test::test_created_and_drop_table
 S
 phpbb_dbal_db_tools_test::test_created_column with data set #0
@@ -480,7 +490,37 @@ phpbb_dbal_db_tools_test::test_created_column with data set #10
 S
 phpbb_dbal_db_tools_test::test_created_column with data set #11
 S
+phpbb_dbal_db_tools_test::test_created_column with data set #12
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #13
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #14
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #15
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #16
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #17
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #18
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #19
+S
 phpbb_dbal_db_tools_test::test_created_column with data set #2
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #20
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #21
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #22
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #23
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #24
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #25
+S
+phpbb_dbal_db_tools_test::test_created_column with data set #26
 S
 phpbb_dbal_db_tools_test::test_created_column with data set #3
 S
@@ -495,6 +535,22 @@ S
 phpbb_dbal_db_tools_test::test_created_column with data set #8
 S
 phpbb_dbal_db_tools_test::test_created_column with data set #9
+S
+phpbb_dbal_db_tools_test::test_index_exists
+S
+phpbb_dbal_db_tools_test::test_list_columns
+S
+phpbb_dbal_db_tools_test::test_list_tables
+S
+phpbb_dbal_db_tools_test::test_peform_schema_changes_drop_columns
+S
+phpbb_dbal_db_tools_test::test_peform_schema_changes_drop_tables
+S
+phpbb_dbal_db_tools_test::test_table_drop
+S
+phpbb_dbal_db_tools_test::test_table_exists
+S
+phpbb_dbal_db_tools_test::test_unique_index_exists
 S
 phpbb_dbal_migrator_test::test_fail
 S
@@ -1790,68 +1846,6 @@ phpbb_passwords_helper_test::test_helper_encode64 with data set #1
 .
 phpbb_passwords_helper_test::test_helper_encode64 with data set #2
 .
-phpbb_passwords_manager_test::test_check_hash_exceptions with data set #0
-.
-phpbb_passwords_manager_test::test_check_hash_exceptions with data set #1
-.
-phpbb_passwords_manager_test::test_check_hash_exceptions with data set #2
-.
-phpbb_passwords_manager_test::test_check_hash_exceptions with data set #3
-.
-phpbb_passwords_manager_test::test_check_hash_exceptions with data set #4
-.
-phpbb_passwords_manager_test::test_check_hash_exceptions with data set #5
-.
-phpbb_passwords_manager_test::test_check_hash_with_large_input
-.
-phpbb_passwords_manager_test::test_check_password with data set #0
-.
-phpbb_passwords_manager_test::test_check_password with data set #1
-.
-phpbb_passwords_manager_test::test_check_password with data set #2
-.
-phpbb_passwords_manager_test::test_check_password with data set #3
-.
-phpbb_passwords_manager_test::test_combined_hash_data
-.
-phpbb_passwords_manager_test::test_combined_hash_password with data set #0
-.
-phpbb_passwords_manager_test::test_combined_hash_password with data set #1
-.
-phpbb_passwords_manager_test::test_combined_hash_password with data set #2
-.
-phpbb_passwords_manager_test::test_combined_hash_password with data set #3
-.
-phpbb_passwords_manager_test::test_combined_hash_password with data set #4
-.
-phpbb_passwords_manager_test::test_combined_hash_password with data set #5
-.
-phpbb_passwords_manager_test::test_combined_hash_password with data set #6
-.
-phpbb_passwords_manager_test::test_hash_password with data set #0
-.
-phpbb_passwords_manager_test::test_hash_password with data set #1
-.
-phpbb_passwords_manager_test::test_hash_password with data set #2
-.
-phpbb_passwords_manager_test::test_hash_password with data set #3
-.
-phpbb_passwords_manager_test::test_hash_password with data set #4
-.
-phpbb_passwords_manager_test::test_hash_password_8bit_bcrypt
-.
-phpbb_passwords_manager_test::test_hash_password_length with data set #0
-.
-phpbb_passwords_manager_test::test_hash_password_length with data set #1
-.
-phpbb_passwords_manager_test::test_hash_password_length with data set #2
-.
-phpbb_passwords_manager_test::test_hash_password_length with data set #3
-.
-phpbb_passwords_manager_test::test_hash_password_with_large_input
-.
-phpbb_passwords_manager_test::test_unique_id
-.
 phpbb_path_helper_web_root_path_test::test_basic_update_web_root_path with data set #0
 .
 phpbb_path_helper_web_root_path_test::test_basic_update_web_root_path with data set #1
@@ -1967,10 +1961,6 @@ phpbb_quoteattr_test::test_quoteattr with data set #7
 phpbb_quoteattr_test::test_quoteattr with data set #8
 .
 phpbb_quoteattr_test::test_quoteattr with data set #9
-.
-phpbb_random_gen_rand_string_test::test_gen_rand_string
-.
-phpbb_random_gen_rand_string_test::test_gen_rand_string_friendly
 .
 phpbb_regex_censor_test::test_censor_no_unicode with data set #0
 .

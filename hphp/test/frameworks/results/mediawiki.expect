@@ -988,6 +988,8 @@ DatabaseSQLTest::testUpdate with data set #2
 .
 DatabaseSQLTest::testUpsert with data set #0
 .
+DiffHistoryBlobTest::testMediaWikiTestCaseParentSetupCalled
+S
 DiffHistoryBlobTest::testXdiffAdler32 with data set #0
 S
 DiffHistoryBlobTest::testXdiffAdler32 with data set #1
@@ -995,6 +997,8 @@ S
 DiffHistoryBlobTest::testXdiffAdler32 with data set #2
 S
 DiffHistoryBlobTest::testXdiffAdler32 with data set #3
+S
+DiffHistoryBlobTest::testXdiffAdler32 with data set #4
 S
 DjVuTest::testGetImageSize
 S
@@ -10150,6 +10154,14 @@ WikitextContentHandlerTest::testSerializeContent
 .
 WikitextContentHandlerTest::testUnserializeContent
 .
+XMPTest::testExtendedXMP
+.
+XMPTest::testExtendedXMPMissingPacket
+.
+XMPTest::testExtendedXMPWithWrongGUID
+.
+XMPTest::testMediaWikiTestCaseParentSetupCalled
+.
 XMPTest::testXMPParse with data set #0
 .
 XMPTest::testXMPParse with data set #1
@@ -10163,6 +10175,14 @@ XMPTest::testXMPParse with data set #12
 XMPTest::testXMPParse with data set #13
 .
 XMPTest::testXMPParse with data set #14
+.
+XMPTest::testXMPParse with data set #15
+.
+XMPTest::testXMPParse with data set #16
+.
+XMPTest::testXMPParse with data set #17
+.
+XMPTest::testXMPParse with data set #18
 .
 XMPTest::testXMPParse with data set #2
 .

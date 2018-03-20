@@ -1198,6 +1198,16 @@ Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set 
 .
 Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #2
 .
+Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #3
+.
+Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #4
+.
+Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #5
+.
+Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #6
+.
+Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRenderInvalidType
+.
 Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #0
 .
 Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #1

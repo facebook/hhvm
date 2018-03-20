@@ -250,10 +250,25 @@ class Runner {
     if (!$this->checkReadStream()) {
       return Statuses::TIMEOUT;
     }
-    $line = stream_get_line($this->pipes[1], 4096, PHP_EOL);
-    // No more data
-    if ($line === false || $line === null || strlen($line) === 4096) {
-      return null;
+    $line = "";
+
+    while (true) {
+      $part = stream_get_line($this->pipes[1], 4096, PHP_EOL);
+      if ($part === false || $part === null) {
+        if ($line === "") {
+          // We never read anything, so there is no line here.
+          return null;
+        } else {
+          // We've buffered some output already. Exit the loop and return
+          // that to the caller.
+          break;
+        }
+      } else {
+        $line = $line.$part;
+        if (strlen($part) < 4096) {
+          break;
+        }
+      }
     }
     $line = remove_color_codes($line);
     return $line;

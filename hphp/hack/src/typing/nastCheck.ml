@@ -745,8 +745,8 @@ and interface c =
     match m.m_body with
     | UnnamedBody { fub_ast = [] ; _}
     | NamedBody { fnb_nast = [] ; _} ->
-      if m.m_visibility <> Public
-      then Errors.not_public_interface (fst m.m_name)
+      if m.m_visibility = Private
+      then Errors.not_public_or_protected_interface (fst m.m_name)
       else ()
     | _ -> Errors.abstract_body (fst m.m_name)
   end in

@@ -1660,9 +1660,9 @@ let requires_non_class (p: Pos.t) (n: string) (t: string) =
 let abstract_body pos =
   add NastCheck.abstract_body pos "This method shouldn't have a body"
 
-let not_public_interface pos =
+let not_public_or_protected_interface pos =
   add NastCheck.not_public_interface pos
-    "Access type for interface method must be public"
+    "Access type for interface method must be public or protected."
 
 let interface_with_member_variable pos =
   add NastCheck.interface_with_member_variable pos

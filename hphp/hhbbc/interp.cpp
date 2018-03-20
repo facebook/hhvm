@@ -2071,9 +2071,8 @@ void in(ISS& env, const bc::IsNameD& op) {
 }
 
 void in(ISS& env, const bc::AsTypeStruct& op) {
-  // TODO(oulgen): implement for type structures
-  // Currently does not do anything, leaves the item on the stack
-  not_implemented();
+  // To indicate that this value is touched
+  push(env, popC(env));
 }
 
 void in(ISS& env, const bc::InstanceOf& /*op*/) {

@@ -2796,9 +2796,16 @@ OPTBLD_INLINE void iopIsNameD(Id id) {
 }
 
 OPTBLD_INLINE void iopAsTypeStruct(const ArrayData* a) {
-  // TODO(oulgen): implement for type structures
-  // Currently does not do anything, leaves the item on the stack
-  not_implemented();
+  auto c1 = vmStack().topC();
+  auto const ts = ArrNR(a).asArray();
+  assertx(!ts.empty());
+  assertx(ts.isDictOrDArray());
+  if (!implTypeStructureHelper(ts, c1)) {
+    auto ts_str = TypeStructure::toString(ts);
+    auto input_str = tname(c1->m_type);
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Expected {}, got {}", ts_str, input_str));
+  }
 }
 
 OPTBLD_INLINE void iopPrint() {

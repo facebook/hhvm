@@ -1,0 +1,13 @@
+$x is 1
+string(29) "Expected HH\string, got Int64"
+$x is 2
+string(29) "Expected HH\string, got Int64"
+$x is 3
+string(29) "Expected HH\string, got Int64"
+$x is 3.14
+string(30) "Expected HH\string, got Double"
+string(32) "Expected HH\arraykey, got Double"
+$x is Vector
+string(30) "Expected HH\string, got Object"
+string(32) "Expected HH\arraykey, got Object"
+$x is hiii

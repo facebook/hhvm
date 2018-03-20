@@ -586,6 +586,7 @@ private:
 
 struct ArrNR {
   explicit ArrNR(ArrayData* data = nullptr) { m_px = data; }
+  explicit ArrNR(const ArrayData *ad) : m_px(const_cast<ArrayData*>(ad)) {}
 
   ArrNR(const ArrNR& a) { m_px = a.m_px; }
 

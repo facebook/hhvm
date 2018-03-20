@@ -171,6 +171,9 @@ void DebuggerSession::runDummy() {
                             RuntimeOption::ServerVariables,
                             RuntimeOption::EnvVariables);
   SCOPE_EXIT {
+    g_context->setStdout(nullptr);
+    Logger::SetThreadHook(nullptr);
+
     if (m_dummyRequestInfo->m_flags.hookAttached) {
       DebuggerHook::detach();
       m_dummyRequestInfo->m_flags.hookAttached = false;
@@ -197,6 +200,12 @@ void DebuggerSession::runDummy() {
   m_dummyRequestInfo->m_flags.memoryLimitRemoved = true;
 
   std::atomic_thread_fence(std::memory_order_acquire);
+
+  // Redirect the dummy's stdout and stderr and enable implicit flushing
+  // so output is sent to the client right away, instead of being buffered.
+  g_context->setStdout(m_debugger->getStdoutHook());
+  Logger::SetThreadHook(m_debugger->getStderrHook());
+  g_context->obSetImplicitFlush(true);
 
   // Setup sandbox variables for dummy request context.
   if (m_sourceRootInfo != nullptr) {

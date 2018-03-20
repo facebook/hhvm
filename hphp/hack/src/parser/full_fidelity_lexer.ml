@@ -1395,7 +1395,8 @@ let as_case_insensitive_keyword text =
   | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
   | "true" | "false" | "null" | "array" | "instanceof"
   | "trait" | "class" | "interface" | "using" | "static" | "inout"
-  | "self" | "parent" | "__halt_compiler" | "foreach" | "echo" -> lower
+  | "self" | "parent" | "__halt_compiler" | "foreach" | "echo"
+  | "abstract" | "final" -> lower
   | _ -> text
 
 let as_keyword kind lexer =

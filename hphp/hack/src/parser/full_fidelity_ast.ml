@@ -2381,7 +2381,7 @@ and pDef : def list parser = fun node env ->
       let c_enum = None in
       let c_span = pPos node env in
       let c_kind =
-        let is_abs = Str.(string_match (regexp ".*abstract.*") (text mods) 0) in
+        let is_abs = List.mem (pKinds mods env) Abstract in
         match token_kind kw with
         | Some TK.Class when is_abs -> Cabstract
         | Some TK.Class             -> Cnormal

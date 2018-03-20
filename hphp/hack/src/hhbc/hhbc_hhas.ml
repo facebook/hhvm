@@ -17,6 +17,9 @@ module SN = Naming_special_names
 module ULS = Unique_list_string
 open H
 
+let hack_arr_dv_arrs () =
+  Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
+
 (* Generic helpers *)
 let sep pieces = String.concat " " pieces
 
@@ -1109,6 +1112,15 @@ and string_of_param_default_value ~env expr =
       Some (string_of_param_default_value ~env e)
     | _ -> None
   in
+  let is_static_expr () =
+    let env = Option.value ~default:Emit_env.empty env.codegen_env in
+    Option.is_some @@
+      Ast_constant_folder.expr_to_opt_typed_value
+        ~allow_maps:true
+        ~restrict_keys:(hack_arr_dv_arrs ())
+        (Emit_env.get_namespace env)
+        expr
+  in
   let escape_char_for_printing = function
     | '\\' | '$' | '"' -> "\\\\"
     | '\n' | '\r' | '\t' -> "\\"
@@ -1270,7 +1282,10 @@ and string_of_param_default_value ~env expr =
     let h = string_of_hint ~ns:true h in
     e ^ o ^ h
   | A.Varray es ->
-    if env.in_xhp
+    (* TODO(T27176468):
+     * Everything should be printed as varray not only static ones *)
+    if env.in_xhp ||
+      (Emit_env.is_hh_syntax_enabled () && not (is_static_expr ()))
     then begin
       let es = List.map (string_of_param_default_value ~env) es in
       "varray[" ^ (String.concat ", " es) ^ "]"
@@ -1281,8 +1296,11 @@ and string_of_param_default_value ~env expr =
        (p, A.Array (List.mapi (fun i e -> A.AFkvalue (index i, e)) es))
     end
   | A.Darray es ->
+    (* TODO(T27176468):
+     * Everything should be printed as darray not only static ones *)
     let es = List.map (fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
-    if env.in_xhp
+    if env.in_xhp ||
+      (Emit_env.is_hh_syntax_enabled () && not (is_static_expr ()))
     then "darray[" ^ (string_of_afield_list ~env es) ^ "]"
     else string_of_param_default_value ~env @@ (p, A.Array es)
   | A.Import (fl, e) ->

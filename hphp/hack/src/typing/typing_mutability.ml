@@ -195,16 +195,22 @@ let handle_assignment_mutability
  (* Check for modifying immutable objects *)
  (match snd te1 with
   (* Setting mutable locals is okay *)
- | T.Obj_get (e1, _, _) when expr_is_mutable env e1 -> ()
+ | T.Obj_get (e1, _, _)
+ | T.Array_get (e1, _) when expr_is_mutable env e1 -> ()
  | T.Class_get _
- | T.Obj_get _ ->
-    let pos = T.get_position te1 in
-    Errors.obj_set_reactive pos
+ | T.Obj_get _
+ | T.Array_get _ ->
+    Env.error_if_reactive_context env @@ begin fun () ->
+      let pos = T.get_position te1 in
+      Errors.obj_set_reactive pos
+    end
  | _ -> ());
  let mut_env = match snd te1, snd te2 with
  | _, T.Lvar(p, id2) when LMap.mem id2 mut_env ->
-   (* Reassigning mutables is not allowed; error *)
-   Errors.reassign_mutable_var p;
+   Env.error_if_reactive_context env @@ begin fun () ->
+     (* Reassigning mutables is not allowed; error *)
+     Errors.reassign_mutable_var p
+   end;
    mut_env
  (* If the expression is a new owned mutable, add the var to the env *)
  | T.Lvar (_, id), _  when expr_returns_owned_mutable env te2 ->

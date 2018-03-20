@@ -2189,6 +2189,9 @@ void parse_parameter_list(AsmState& as) {
       seenRef = true;
       param.byRef = true;
       ch = as.in.getc();
+      if (param.variadic) {
+        as.fe->attrs |= AttrVariadicByRef;
+      }
     }
     if (ch != '$') {
       as.error("function parameters must have a $ prefix");

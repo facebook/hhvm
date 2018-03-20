@@ -155,3 +155,11 @@ let to_dot node with_labels =
 
 let offset _ = None
 let position _ _ = None
+
+let to_json node =
+  let version = Full_fidelity_schema.full_fidelity_schema_version_number in
+  let tree = EditableSyntax.to_json node in
+  Hh_json.JSON_Object [
+    "parse_tree", tree;
+    "version", Hh_json.JSON_String version
+  ]

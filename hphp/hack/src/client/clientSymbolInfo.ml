@@ -12,8 +12,7 @@ open Hh_core
 open Hh_json
 
 let fun_call_to_json fun_call_results =
-  (* List.rev_map is used here for performance purpose(tail recursive) *)
-  List.rev_map fun_call_results begin fun item ->
+  List.map fun_call_results begin fun item ->
     let item_type =
       match item.SymbolFunCallService.type_ with
       | SymbolFunCallService.Function        -> "Function"

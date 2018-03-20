@@ -1,13 +1,13 @@
 {
   "function_calls":[
     {
-      "name":"D::__construct",
-      "type":"Constructor",
+      "name":"D::foo",
+      "type":"Method",
       "pos":{
         "filename":"lambda_argument_reused.php",
-        "line":17,
-        "char_start":6,
-        "char_end":12
+        "line":13,
+        "char_start":14,
+        "char_end":16
       },
       "caller":"test"
     },
@@ -23,13 +23,13 @@
       "caller":"test"
     },
     {
-      "name":"D::foo",
-      "type":"Method",
+      "name":"D::__construct",
+      "type":"Constructor",
       "pos":{
         "filename":"lambda_argument_reused.php",
-        "line":13,
-        "char_start":14,
-        "char_end":16
+        "line":17,
+        "char_start":6,
+        "char_end":12
       },
       "caller":"test"
     }

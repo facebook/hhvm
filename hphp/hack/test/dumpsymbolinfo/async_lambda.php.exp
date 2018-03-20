@@ -3,13 +3,13 @@
     {
       "name":"genString",
       "type":"Function",
-      "pos":{"filename":"async_lambda.php","line":10,"char_start":18,"char_end":26},
+      "pos":{"filename":"async_lambda.php","line":7,"char_start":18,"char_end":26},
       "caller":"test"
     },
     {
       "name":"genString",
       "type":"Function",
-      "pos":{"filename":"async_lambda.php","line":7,"char_start":18,"char_end":26},
+      "pos":{"filename":"async_lambda.php","line":10,"char_start":18,"char_end":26},
       "caller":"test"
     }
   ],

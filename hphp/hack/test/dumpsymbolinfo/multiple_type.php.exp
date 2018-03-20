@@ -1,9 +1,9 @@
 {
   "function_calls":[
     {
-      "name":"C2::foo",
+      "name":"C1::foo",
       "type":"Method",
-      "pos":{"filename":"multiple_type.php","line":21,"char_start":7,"char_end":9},
+      "pos":{"filename":"multiple_type.php","line":15,"char_start":9,"char_end":11},
       "caller":"test"
     },
     {
@@ -13,9 +13,9 @@
       "caller":"test"
     },
     {
-      "name":"C1::foo",
+      "name":"C2::foo",
       "type":"Method",
-      "pos":{"filename":"multiple_type.php","line":15,"char_start":9,"char_end":11},
+      "pos":{"filename":"multiple_type.php","line":21,"char_start":7,"char_end":9},
       "caller":"test"
     }
   ],

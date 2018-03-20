@@ -887,6 +887,12 @@ let run_search genv t =
 
 let save_state genv env fn =
   let db_name = fn ^ ".sql" in
+  let () = if Sys.file_exists fn then
+             failwith (Printf.sprintf "Cowardly refusing to overwrite '%s'." fn)
+           else () in
+  let () = if Sys.file_exists db_name then
+             failwith (Printf.sprintf "Cowardly refusing to overwrite '%s'." db_name)
+           else () in
   let t = Unix.gettimeofday () in
   if not (Errors.is_empty env.errorl)
   then failwith "--save-mini only works if there are no type errors!";

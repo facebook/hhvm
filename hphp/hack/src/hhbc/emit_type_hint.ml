@@ -36,7 +36,7 @@ let transform_dv_arr_names name =
 
 let fmt_name_or_prim ~tparams ~namespace x =
   let name = snd x in
-  if List.mem tparams name || is_self name
+  if List.mem tparams name || is_self name || is_parent name
   then name
   else
     let needs_unmangling = Xhp.is_xhp (strip_ns name) in
@@ -165,13 +165,14 @@ let rec hint_to_type_constraint
       let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeVar] in
       TC.make tc_name tc_flags
     else
-      if kind = TypeDef && (name = "self" || name = "parent")
+      if kind = TypeDef && (is_self name || is_parent name)
       then Emit_fatal.raise_fatal_runtime pos
         (Printf.sprintf "Cannot access %s when no class scope is active" name)
       else
       let tc_name =
         transform_dv_arr_names
-          (let fq_id, _ = Hhbc_id.Class.elaborate_id namespace id in
+          (if is_self name || is_parent name then name else
+          let fq_id, _ = Hhbc_id.Class.elaborate_id namespace id in
            Hhbc_id.Class.to_raw_string fq_id) in
       let tc_flags = [TC.HHType] in
       TC.make (Some tc_name) tc_flags

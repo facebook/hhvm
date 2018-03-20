@@ -43,6 +43,8 @@ void tvCastToKeysetInPlace(TypedValue*);
 void tvCastToVArrayInPlace(TypedValue*);
 void tvCastToDArrayInPlace(TypedValue*);
 
+struct OptionalVariant;
+
 /*
  * This class predates HHVM.
  *
@@ -74,6 +76,10 @@ void tvCastToDArrayInPlace(TypedValue*);
  */
 
 struct Variant : private TypedValue {
+  // Used by VariantTraits to create a folly::Optional-like
+  // optional Variant which fits in 16 bytes.
+  using Optional = OptionalVariant;
+
   enum class NullInit {};
   enum class NoInit {};
   enum class CellCopy {};
@@ -1591,6 +1597,113 @@ ALWAYS_INLINE Cell Array::convertKey(const Variant& k) const {
 inline VarNR Variant::toKey(const ArrayData* ad) const {
   return VarNR(tvToKey(*this, ad));
 }
+
+struct alignas(16) OptionalVariant {
+  OptionalVariant() {
+    m_tv.m_type = kInvalidDataType;
+  }
+  ~OptionalVariant() {
+    clear();
+  }
+  OptionalVariant(const OptionalVariant& other) {
+    if (other.hasValue()) {
+      construct(other.value());
+      return;
+    }
+    m_tv.m_type = kInvalidDataType;
+  }
+  OptionalVariant(OptionalVariant&& other) noexcept {
+    if (other.hasValue()) {
+      construct(std::move(other.value()));
+      other.m_tv.m_type = kInvalidDataType;
+      return;
+    }
+    m_tv.m_type = kInvalidDataType;
+  }
+
+  template<typename Arg>
+  OptionalVariant& operator=(Arg&& arg) {
+    assign(std::forward<Arg>(arg));
+    return *this;
+  }
+  OptionalVariant& operator=(const OptionalVariant& arg) {
+    assign(arg);
+    return *this;
+  }
+  OptionalVariant& operator=(OptionalVariant&& arg) {
+    assign(std::move(arg));
+    return *this;
+  }
+
+  bool hasValue() const {
+    return m_tv.m_type != kInvalidDataType;
+  }
+  bool has_value() const {
+    return hasValue();
+  }
+  Variant& value() {
+    assertx(hasValue());
+    return tvAsVariant(&m_tv);
+  }
+  const Variant& value() const {
+    assertx(hasValue());
+    return tvAsCVarRef(&m_tv);
+  }
+  void clear() {
+    if (hasValue()) {
+      auto const old = m_tv;
+      m_tv.m_type = kInvalidDataType;
+      tvDecRefGen(old);
+    }
+  }
+  template <class... Args>
+  Variant& emplace(Args&&... args) {
+    clear();
+    construct(std::forward<Args>(args)...);
+    return value();
+  }
+  void assign(const Variant& other) {
+    if (hasValue()) {
+      value() = other;
+      return;
+    }
+    construct(other);
+  }
+  void assign(Variant&& other) {
+    if (hasValue()) {
+      value() = std::move(other);
+      return;
+    }
+    construct(std::move(other));
+  }
+  void assign(const OptionalVariant& other) {
+    if (other.hasValue()) return assign(other.value());
+    clear();
+  }
+  void assign(OptionalVariant&& other) {
+    if (other.hasValue()) {
+      assign(std::move(other.value()));
+      other.m_tv.m_type = kInvalidDataType;
+      return;
+    }
+    clear();
+  }
+
+  operator bool() const { return hasValue(); }
+
+  const Variant* operator->() const { return &value(); }
+  Variant* operator->() { return &value(); }
+
+  const Variant& operator*() const & { return value(); }
+  Variant& operator*() & { return value(); }
+  Variant&& operator*() && { return std::move(value()); }
+private:
+  template<typename... Args>
+  void construct(Args&&... args) {
+    new (&m_tv) Variant(std::forward<Args>(args)...);
+  }
+  TypedValue m_tv;
+};
 
 //////////////////////////////////////////////////////////////////////
 

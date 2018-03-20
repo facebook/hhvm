@@ -776,15 +776,22 @@ module WithStatementAndDeclAndTypeParser
     || SC.is_subscript_expression t
     || SC.is_member_selection_expression t
     || SC.is_scope_resolution_expression t
-    || prefix_unary_expression_checker_helper parser t Dollar
+    || prefix_unary_expression_checker_helper ~is_rhs:false parser t Dollar
+
+  and can_be_used_as_right_hand_side_of_byref_asignment parser t =
+    can_be_used_as_lvalue parser t
+    || SC.is_object_creation_expression t
+    || SC.is_function_call_expression t
 
   (* Checks if given node is prefix unary expression and verifies operator kind.
   Recursively run can_be_used_as_lvalue *)
-  and prefix_unary_expression_checker_helper parser t kind =
+  and prefix_unary_expression_checker_helper ~is_rhs parser t kind =
     match find_in_prefix_unary_expression_stack parser t with
     | Some { operator_kind; operand; _ } ->
       if operator_kind = kind then
-        can_be_used_as_lvalue parser operand
+        if is_rhs
+        then can_be_used_as_right_hand_side_of_byref_asignment parser operand
+        else can_be_used_as_lvalue parser operand
       else
         false
     | None -> false
@@ -792,7 +799,7 @@ module WithStatementAndDeclAndTypeParser
   (* checks if expression is a valid right hand side in by-ref assignment
    which is '&'PHP variable *)
   and is_byref_assignment_source parser t =
-    prefix_unary_expression_checker_helper parser t Ampersand
+    prefix_unary_expression_checker_helper ~is_rhs:true parser t Ampersand
 
   (*detects if left_term and operator can be treated as a beginning of
    assignment (respecting the precedence of operator on the left of

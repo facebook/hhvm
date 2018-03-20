@@ -209,8 +209,6 @@ let error_tests =
     make_test_case_from_files testname test_errors in
   List.map
   [
-    "is_expression/test_callable_hint";
-    "is_expression/test_soft_hint";
     "test_default_param_errors";
     "test_alias_errors";
     "test_method_modifier_errors";
@@ -267,6 +265,8 @@ let error_tests =
     "test_variadic_ref_decorators";
     "test_lambda_variadic_errors";
     "test_lambda_no_typehints_errors";
+    "test_is_expression_errors";
+    "test_as_expression_errors";
   ] ~f:mapper
 
 let test_data = minimal_tests @ trivia_tests @ error_tests @

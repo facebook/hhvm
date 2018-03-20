@@ -9,6 +9,7 @@
  *
  */
 
-function test(mixed $e): bool {
-  return $e is @int;
+function test(mixed $e): void {
+  $e as (function(): int); // error
+  $e as @int; // error
 }

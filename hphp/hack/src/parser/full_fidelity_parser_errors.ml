@@ -1901,14 +1901,20 @@ let expression_errors env node parents errors =
     (* End of bug-port *)
   | IsExpression
     { is_right_operand = hint
-    ; _ } ->
+    ; _
+    }
+  | AsExpression
+    { as_right_operand = hint
+    ; _
+    } ->
+    let n = match syntax node with IsExpression _ -> "is" | _ -> "as" in
     begin match syntax hint with
       | ClosureTypeSpecifier _ ->
         make_error_from_node hint
-          (SyntaxError.invalid_is_expression_hint "Callable") :: errors
+          (SyntaxError.invalid_is_as_expression_hint n "Callable") :: errors
       | SoftTypeSpecifier _ ->
         make_error_from_node hint
-          (SyntaxError.invalid_is_expression_hint "Soft") :: errors
+          (SyntaxError.invalid_is_as_expression_hint n "Soft") :: errors
       | _ -> errors
     end
   | ConditionalExpression

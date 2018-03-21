@@ -730,6 +730,15 @@ and emit_is env pos lhs h =
                       || id = SN.Typehints.nonnull
                       || id = SN.Typehints.dynamic ->
                     emit_is_classname_exists local true_label
+                  | A.Happly ((_, id), _)
+                    when id = SN.Typehints.this ->
+                    gather [
+                      instr_cgetl local;
+                      instr_fcallbuiltin 0 0 "get_called_class";
+                      instr_unboxr_nop;
+                      instr (IOp Same);
+                      instr_jmpnz true_label;
+                    ]
                   | A.Happly ((_, id), _) ->
                     gather [
                       instr_cgetl local;

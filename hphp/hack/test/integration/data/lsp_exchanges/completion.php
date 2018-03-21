@@ -1,6 +1,6 @@
 <?hh  //strict
 
-function xhp_consumption(): void {
+function testing_area(): void {
 
 }
 

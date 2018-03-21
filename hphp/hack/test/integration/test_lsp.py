@@ -8,6 +8,7 @@ import json
 import os
 import unittest
 import urllib.parse
+import re
 from lspcommand import LspCommandProcessor
 
 
@@ -146,6 +147,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
             self.assertEqual(observed_items[i], expected_items[i])
 
     def prepare_environment(self):
+        self.maxDiff = None
         self.write_load_config()
         (output, err, _) = self.run_check()
         if 'Error: Ran out of retries' in err:
@@ -159,7 +161,14 @@ class TestLsp(LspTestDriver, unittest.TestCase):
                           expected=expected)
 
     def setup_php_file(self, test_php):
+        # We want the path to the builtins directory. This is best we can do.
+        (output, err, retcode) = self.run_check(
+            options=['--identify-function', '2:21', '--json'],
+            stdin="<?hh\nfunction f():void {PHP_EOL;}\n")
+        self.assertEquals(retcode, 0)
+        constants_path = json.loads(output)[0]['definition_pos']['filename']
         return {
+            'hhi_path': re.sub('/constants.hhi$', '', constants_path),
             'root_path': self.repo_dir,
             'php_file_uri': self.repo_file_uri(test_php),
             'php_file': self.read_repo_file(test_php),

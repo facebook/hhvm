@@ -9,3 +9,8 @@ final class :ab:cd:text implements XHPChild {
 final class :ab:cd:alpha implements XHPChild {
   attribute string name;
 }
+
+enum Elsa: string {
+  Alonso = "hello";
+  Bard = "world";
+}

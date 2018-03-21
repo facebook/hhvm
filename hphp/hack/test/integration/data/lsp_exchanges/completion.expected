@@ -40,7 +40,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 2,
+    "id": 20,
     "result": {
       "isIncomplete": false,
       "items": [
@@ -77,7 +77,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 3,
+    "id": 30,
     "result": {
       "isIncomplete": false,
       "items": [
@@ -114,7 +114,15 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 4,
+    "id": 32,
+    "result": {
+      "isIncomplete": false,
+      "items": []
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 40,
     "result": {
       "isIncomplete": false,
       "items": [
@@ -151,7 +159,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 5,
+    "id": 50,
     "result": {
       "isIncomplete": false,
       "items": [
@@ -188,7 +196,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 6,
+    "id": 60,
     "result": {
       "isIncomplete": false,
       "items": [
@@ -227,7 +235,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 7,
+    "id": 70,
     "result": {
       "isIncomplete": false,
       "items": [
@@ -266,7 +274,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 8,
+    "id": 80,
     "result": {
       "label": ":ab:cd:alpha",
       "kind": 4,
@@ -286,7 +294,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 9,
+    "id": 90,
     "result": {
       "isIncomplete": false,
       "items": [
@@ -323,7 +331,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 10,
+    "id": 100,
     "result": {
       "isIncomplete": false,
       "items": [
@@ -360,7 +368,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 11,
+    "id": 110,
     "result": {
       "isIncomplete": false,
       "items": [
@@ -384,7 +392,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 12,
+    "id": 120,
     "result": {
       "label": "test_function",
       "kind": 3,
@@ -404,7 +412,196 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 99,
+    "id": 130,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": "testing_area",
+          "kind": 3,
+          "detail": "function(): void",
+          "inlineDetail": "()",
+          "itemType": "void",
+          "insertText": "testing_area",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion.php",
+            "line": 3,
+            "char_start": 10,
+            "char_end": 21
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 140,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": "class",
+          "kind": 12,
+          "detail": "classname<this>",
+          "inlineDetail": "classname<this>",
+          "insertText": "class",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 13,
+            "char_start": 6,
+            "char_end": 9
+          }
+        },
+        {
+          "label": "Bard",
+          "kind": 12,
+          "detail": "enum Elsa",
+          "inlineDetail": "enum Elsa",
+          "insertText": "Bard",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 13,
+            "char_start": 12,
+            "char_end": 17
+          }
+        },
+        {
+          "label": "Alonso",
+          "kind": 12,
+          "detail": "enum Elsa",
+          "inlineDetail": "enum Elsa",
+          "insertText": "Alonso",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 13,
+            "char_start": 12,
+            "char_end": 17
+          }
+        },
+        {
+          "label": "isValid",
+          "kind": 2,
+          "detail": "function(mixed $value): bool",
+          "inlineDetail": "(mixed $value)",
+          "itemType": "bool",
+          "insertText": "isValid",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "line": 47,
+            "char_start": 32,
+            "char_end": 38
+          }
+        },
+        {
+          "label": "getValues",
+          "kind": 2,
+          "detail": "function(): array<string, enum Elsa>",
+          "inlineDetail": "()",
+          "itemType": "array<string, enum Elsa>",
+          "insertText": "getValues",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "line": 34,
+            "char_start": 32,
+            "char_end": 40
+          }
+        },
+        {
+          "label": "getNames",
+          "kind": 2,
+          "detail": "function(): array<enum Elsa, string>",
+          "inlineDetail": "()",
+          "itemType": "array<enum Elsa, string>",
+          "insertText": "getNames",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "line": 42,
+            "char_start": 32,
+            "char_end": 39
+          }
+        },
+        {
+          "label": "coerce",
+          "kind": 2,
+          "detail": "function(mixed $value): ?enum Elsa",
+          "inlineDetail": "(mixed $value)",
+          "itemType": "?enum Elsa",
+          "insertText": "coerce",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "line": 53,
+            "char_start": 32,
+            "char_end": 37
+          }
+        },
+        {
+          "label": "assertAll",
+          "kind": 2,
+          "detail": "function(Traversable<mixed> $values): Container<enum Elsa>",
+          "inlineDetail": "(Traversable<mixed> $values)",
+          "itemType": "Container<enum Elsa>",
+          "insertText": "assertAll",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "line": 65,
+            "char_start": 32,
+            "char_end": 40
+          }
+        },
+        {
+          "label": "assert",
+          "kind": 2,
+          "detail": "function(mixed $value): enum Elsa",
+          "inlineDetail": "(mixed $value)",
+          "itemType": "enum Elsa",
+          "insertText": "assert",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "line": 59,
+            "char_start": 32,
+            "char_end": 37
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 150,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": "testing_area",
+          "kind": 3,
+          "detail": "function(): void",
+          "inlineDetail": "()",
+          "itemType": "void",
+          "insertText": "testing_area",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion.php",
+            "line": 3,
+            "char_start": 10,
+            "char_end": 21
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
     "result": null
   },
   {

@@ -44,7 +44,7 @@
   "comment": "autocomplete after '$x = <'",
   "jsonrpc": "2.0",
   "method": "textDocument/completion",
-  "id": 2,
+  "id": 20,
   "params": {
       "textDocument": {
         "uri":"${php_file_uri}"
@@ -73,12 +73,41 @@
   "comment": "autocomplete after '$x = <a'",
   "jsonrpc": "2.0",
   "method": "textDocument/completion",
-  "id": 3,
+  "id": 30,
   "params": {
       "textDocument": {
         "uri":"${php_file_uri}"
        },
        "position": {"line": 3, "character": 7}
+   }
+},
+{
+  "comment": "Add '$x = <ab:'",
+  "jsonrpc": "2.0",
+  "method": "textDocument/didChange",
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "contentChanges": [{
+         "range": {
+           "start": {"line":3, "character":0},
+           "end": {"line":3, "character":7}
+         },
+         "text":"$x = <ab:"
+       }]
+   }
+},
+{
+  "comment": "autocomplete after '$x = <ab:'. KNOWN BUG.",
+  "jsonrpc": "2.0",
+  "method": "textDocument/completion",
+  "id": 32,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "position": {"line": 3, "character": 9}
    }
 },
 {
@@ -92,7 +121,7 @@
        "contentChanges": [{
          "range": {
            "start": {"line":3, "character":0},
-           "end": {"line":3, "character":7}
+           "end": {"line":3, "character":9}
          },
          "text":"$x = <ab:cd:text "
        }]
@@ -102,7 +131,7 @@
   "comment": "autocomplete after '$x = <ab:cd:text '",
   "jsonrpc": "2.0",
   "method": "textDocument/completion",
-  "id": 4,
+  "id": 40,
   "params": {
       "textDocument": {
         "uri":"${php_file_uri}"
@@ -131,7 +160,7 @@
   "comment": "autocomplete after '$x = <ab:cd:text w'",
   "jsonrpc": "2.0",
   "method": "textDocument/completion",
-  "id": 5,
+  "id": 50,
   "params": {
       "textDocument": {
         "uri":"${php_file_uri}"
@@ -160,7 +189,7 @@
   "comment": "autocomplete after '$x = new :'",
   "jsonrpc": "2.0",
   "method": "textDocument/completion",
-  "id": 6,
+  "id": 60,
   "params": {
       "textDocument": {
         "uri":"${php_file_uri}"
@@ -189,7 +218,7 @@
   "comment": "autocomplete after '$x = new :a'",
   "jsonrpc": "2.0",
   "method": "textDocument/completion",
-  "id": 7,
+  "id": 70,
   "params": {
       "textDocument": {
         "uri":"${php_file_uri}"
@@ -201,7 +230,7 @@
   "comment": "autocomplete resolving after '$x = new :a'",
   "jsonrpc": "2.0",
   "method": "completionItem/resolve",
-  "id": 8,
+  "id": 80,
   "params": {
     "label": ":ab:cd:alpha",
     "kind": 4,
@@ -239,7 +268,7 @@
   "comment": "autocomplete after '$x = <ab:cd:text/>; $y = $x->'",
   "jsonrpc": "2.0",
   "method": "textDocument/completion",
-  "id": 9,
+  "id": 90,
   "params": {
       "textDocument": {
         "uri":"${php_file_uri}"
@@ -268,7 +297,7 @@
   "comment": "autocomplete after '$x = <ab:cd:text/>; $y = $x->:'",
   "jsonrpc": "2.0",
   "method": "textDocument/completion",
-  "id": 10,
+  "id": 100,
   "params": {
       "textDocument": {
         "uri":"${php_file_uri}"
@@ -277,7 +306,7 @@
    }
 },
 {
-  "comment": "Remove all text in the function",
+  "comment": "Add 'test_fun'",
   "jsonrpc": "2.0",
   "method": "textDocument/didChange",
   "params": {
@@ -297,7 +326,7 @@
   "comment": "autocomplete after 'test_fun'",
   "jsonrpc": "2.0",
   "method": "textDocument/completion",
-  "id": 11,
+  "id": 110,
   "params": {
       "textDocument": {
         "uri":"${php_file_uri}"
@@ -306,10 +335,10 @@
    }
 },
 {
-  "comment": "autocomplete resolving after '$x = new :a'",
+  "comment": "autocomplete resolving after 'test_fun'",
   "jsonrpc": "2.0",
   "method": "completionItem/resolve",
-  "id": 12,
+  "id": 120,
   "params": {
     "label": "test_function",
     "kind": 3,
@@ -327,8 +356,95 @@
   }
 },
 {
+  "comment": "Add 'switch (Elsa::Alonso) { case Elsa:'",
   "jsonrpc": "2.0",
-  "id": 99,
+  "method": "textDocument/didChange",
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "contentChanges": [{
+         "range": {
+           "start": {"line":3, "character":0},
+           "end": {"line":3, "character":8}
+         },
+         "text":"switch (Elsa::Alonso) { case Elsa:"
+       }]
+   }
+},
+{
+  "comment": "autocomplete after 'switch (Elsa::Alonso) { case Elsa:'",
+  "jsonrpc": "2.0",
+  "method": "textDocument/completion",
+  "id": 130,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "position": {"line": 3, "character": 34}
+   }
+},
+{
+  "comment": "Add 'switch (Elsa::Alonso) { case Elsa::'",
+  "jsonrpc": "2.0",
+  "method": "textDocument/didChange",
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "contentChanges": [{
+         "range": {
+           "start": {"line":3, "character":0},
+           "end": {"line":3, "character":34}
+         },
+         "text":"switch (Elsa::Alonso) { case Elsa::"
+       }]
+   }
+},
+{
+  "comment": "autocomplete after 'switch (Elsa::Alonso) { case Elsa::'",
+  "jsonrpc": "2.0",
+  "method": "textDocument/completion",
+  "id": 140,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "position": {"line": 3, "character": 35}
+   }
+},
+{
+  "comment": "Add 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
+  "jsonrpc": "2.0",
+  "method": "textDocument/didChange",
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "contentChanges": [{
+         "range": {
+           "start": {"line":3, "character":0},
+           "end": {"line":3, "character":35}
+         },
+         "text":"switch (Elsa::Alonso) { case Elsa::Alonso:"
+       }]
+   }
+},
+{
+  "comment": "autocomplete after 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
+  "jsonrpc": "2.0",
+  "method": "textDocument/completion",
+  "id": 150,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "position": {"line": 3, "character": 42}
+   }
+},
+{
+  "jsonrpc": "2.0",
+  "id": 999,
   "method": "shutdown",
   "params": {}
 }

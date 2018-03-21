@@ -787,8 +787,35 @@ and emit_is env pos lhs h =
           instr_istypec OpNull;
           instr_not;
         ]
-    | A.Happly ((_, id), _) when id = SN.Typehints.mixed ->
+    | A.Happly ((_, id), _)
+      when id = SN.Typehints.mixed
+        || id = SN.Typehints.dynamic ->
         instr_true
+    | A.Happly ((_, id), _) when id = SN.Typehints.this ->
+      begin match lhs with
+        | IsExprExpr e -> emit_is_create_local env pos e h
+        | IsExprUnnamedLocal local ->
+          let true_label = Label.next_regular () in
+          let done_label = Label.next_regular () in
+          let skip_label = Label.next_regular () in
+          gather [
+            instr_istypel local OpObj;
+            instr_jmpz skip_label;
+            instr_cgetl local;
+            instr_fcallbuiltin 1 1 "get_class";
+            instr_unboxr_nop;
+            instr_fcallbuiltin 0 0 "get_called_class";
+            instr_unboxr_nop;
+            instr (IOp Same);
+            instr_jmpnz true_label;
+            instr_label skip_label;
+            instr_false;
+            instr_jmp done_label;
+            instr_label true_label;
+            instr_true;
+            instr_label done_label;
+          ]
+      end
     | A.Happly ((_, id), _) ->
       begin match is_expr_primitive_op id with
         | Some op ->

@@ -167,9 +167,9 @@ bool VSCommand::parseCommand(
     // since it's not standard, but Nuclide can send it.
     *command = new RunToLocationCommand(debugger, clientMessage);
 
-  } else if (cmdString == "terminateThread") {
+  } else if (cmdString == "terminateThreads") {
 
-    *command = new TerminateThreadCommand(debugger, clientMessage);
+    *command = new TerminateThreadsCommand(debugger, clientMessage);
 
   } else if (cmdString == "initialize") {
 
@@ -265,9 +265,7 @@ const folly::dynamic VSCommand::getDebuggerCapabilities() {
   capabilities["supportTerminateDebuggee"] = false;
   capabilities["supportsDelayedStackTraceLoading"] = true;
   capabilities["supportsLoadedSourcesRequest"] = false;
-
-  // Experimental support for terminate thread
-  capabilities["supportsTerminateThread"] = true;
+  capabilities["supportsTerminateThreadsRequest"] = true;
 
   folly::dynamic exceptionBreakpointFilters = folly::dynamic::array;
 

@@ -965,6 +965,33 @@ void Debugger::pauseTarget(RequestInfo* ri, const char* stopReason) {
   interruptAllThreads();
 }
 
+void Debugger::dispatchCommandToRequest(
+  request_id_t requestId,
+  VSCommand* command
+) {
+  m_lock.assertOwnedBySelf();
+
+  RequestInfo* ri = nullptr;
+  if (requestId == kDummyTheadId) {
+    ri = getDummyRequestInfo();
+  } else {
+    auto it = m_requestIdMap.find(requestId);
+    if (it != m_requestIdMap.end()) {
+      const auto request = m_requests.find(it->second);
+      assert(request != m_requests.end());
+      ri = request->second;
+    }
+  }
+
+  if (ri == nullptr) {
+    // Delete the command because the caller expects the command queue
+    // to have taken ownership of it.
+    delete command;
+  } else {
+    ri->m_commandQueue.dispatchCommand(command);
+  }
+}
+
 void Debugger::onClientMessage(folly::dynamic& message) {
   Lock lock(m_lock);
 

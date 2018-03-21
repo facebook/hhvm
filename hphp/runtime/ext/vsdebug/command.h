@@ -141,10 +141,9 @@ protected:
 
 // Common implementation for all the subcommands of VSCommand so we don't have
 // to repeat it in every subclass.
-#define VS_COMMAND_COMMON_IMPL(ClassName, Target, RequiresBreak)  \
+#define VS_COMMAND_COMMON_NOTARGET(ClassName, Target, RequiresBreak)  \
   virtual ~ClassName();                                           \
   const char* commandName() override { return #ClassName; }       \
-  CommandTarget commandTarget() override { return Target; }       \
   bool requiresBreak() override { return RequiresBreak; }         \
   ClassName(Debugger* debugger, folly::dynamic message);          \
 protected:                                                        \
@@ -153,6 +152,13 @@ protected:                                                        \
     folly::dynamic* responseMsg                                   \
   ) override;                                                     \
 
+#define VS_COMMAND_COMMON_TARGET(ClassName, Target, RequiresBreak)  \
+VS_COMMAND_COMMON_NOTARGET(ClassName, Target, RequiresBreak)      \
+public:                                                           \
+  CommandTarget commandTarget() override { return Target; }       \
+
+#define VS_COMMAND_COMMON_IMPL(ClassName, Target, RequiresBreak)  \
+  VS_COMMAND_COMMON_TARGET(ClassName, Target, RequiresBreak)
 
 ////// Represents an InitializeRequest command from the debugger client. //////
 struct InitializeCommand : public VSCommand {
@@ -534,8 +540,28 @@ struct ThreadsCommand : public VSCommand {
 };
 
 //////  Handles terminate thread requests from the client           //////
-struct TerminateThreadCommand : public VSCommand {
-  VS_COMMAND_COMMON_IMPL(TerminateThreadCommand, CommandTarget::Request, false);
+struct TerminateThreadsCommand : public VSCommand {
+  VS_COMMAND_COMMON_NOTARGET(
+    TerminateThreadsCommand,
+    CommandTarget::None,
+    false
+  );
+  static TerminateThreadsCommand* createInstance(
+    Debugger* debugger,
+    folly::dynamic message,
+    request_id_t requestId
+  );
+
+  CommandTarget commandTarget() override;
+private:
+
+  TerminateThreadsCommand(
+    Debugger* debugger,
+    folly::dynamic message,
+    request_id_t requestId
+  );
+
+  request_id_t m_requestId;
 };
 
 //////  Handles completions requests from the client                //////

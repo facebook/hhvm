@@ -397,6 +397,12 @@ struct Debugger final {
     return std::pair<const Unit*, HPHP::SourceLoc> (nullptr, loc);
   }
 
+  // Dispatches the specified command to a request.
+  void dispatchCommandToRequest(
+    request_id_t requestId,
+    VSCommand* command
+  );
+
 private:
 
   // Cleans up server objects for a request.

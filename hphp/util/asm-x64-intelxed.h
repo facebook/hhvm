@@ -320,7 +320,9 @@ public:
 #undef IMM64R_OP
 
   // 64-bit immediates work with mov to a register.
-  void movq(Immed64 imm, Reg64 r) { xedInstrIR(XED_ICLASS_MOV, imm, r); }
+  void movq(Immed64 imm, Reg64 r) { xedInstrIR(XED_ICLASS_MOV, imm, r,
+                                               sz::qword | sz::dword,
+                                               IMMFITFUNC_SIGNED); }
 
   // movzbx is a special snowflake. We don't have movzbq because it behaves
   // exactly the same as movzbl but takes an extra byte.
@@ -727,28 +729,6 @@ public:
     }
     assertx(available() == 0);
   }
-  /*
-   * Low-level emitter functions.
-   *
-   * These functions are the core of the assembler, and can also be
-   * used directly.
-   */
-
-  void byte(uint8_t b) {
-    codeBlock.byte(b);
-  }
-  void word(uint16_t w) {
-    codeBlock.word(w);
-  }
-  void dword(uint32_t dw) {
-    codeBlock.dword(dw);
-  }
-  void qword(uint64_t qw) {
-    codeBlock.qword(qw);
-  }
-  void bytes(size_t n, const uint8_t* bs) {
-    codeBlock.bytes(n, bs);
-  }
 
 public:
   /*
@@ -842,6 +822,13 @@ private:
   }
 
   ALWAYS_INLINE
+  void xedInstrIR(xed_iclass_enum_t instr, const Immed64& i, const Reg64& r,
+                  int immSize, immFitFunc fitFunc) {
+    xedEmit2(instr, XED_REG(r), XED_IMM_RED(i, immSize, fitFunc),
+             SZ_TO_BITS(sz::qword));
+  }
+
+  ALWAYS_INLINE
   void xedInstrIR(xed_iclass_enum_t instr, const Immed& i,
                   const RegXMM& r, int immSize) {
     xedEmit2(instr, XED_REG(r), XED_IMM(i, immSize));
@@ -902,7 +889,7 @@ private:
 
   ALWAYS_INLINE
   void xedInstrI(xed_iclass_enum_t instr, const Immed& i, int immSize) {
-      xedEmit1(instr, XED_IMM(i, immSize), SZ_TO_BITS(immSize));
+    xedEmit1(instr, XED_IMM(i, immSize), SZ_TO_BITS(immSize));
   }
 
   // instr(mem)
@@ -927,22 +914,22 @@ private:
   ALWAYS_INLINE
   void xedInstrIM(xed_iclass_enum_t instr, const Immed& i, const MemoryRef& m,
                   int size = sz::qword) {
-      xedEmit2(instr,  XED_MEMREF(m, size), XED_IMM(i, size),
-               SZ_TO_BITS(size));
+    xedEmit2(instr,  XED_MEMREF(m, size), XED_IMM(i, size),
+             SZ_TO_BITS(size));
   }
 
   ALWAYS_INLINE
   void xedInstrIM(xed_iclass_enum_t instr, const Immed& i, const MemoryRef& m,
                   int immSize, int memSize) {
-      xedEmit2(instr,  XED_MEMREF(m, memSize), XED_IMM(i, immSize),
-               SZ_TO_BITS(memSize));
+    xedEmit2(instr,  XED_MEMREF(m, memSize), XED_IMM(i, immSize),
+             SZ_TO_BITS(memSize));
   }
 
   ALWAYS_INLINE
   void xedInstrIM(xed_iclass_enum_t instr, const Immed& i, const MemoryRef& m,
                   int immSize, immFitFunc fitFunc, int memSize) {
-      xedEmit2(instr, XED_MEMREF(m, memSize), XED_IMM_RED(i, immSize, fitFunc),
-               SZ_TO_BITS(memSize));
+    xedEmit2(instr, XED_MEMREF(m, memSize), XED_IMM_RED(i, immSize, fitFunc),
+             SZ_TO_BITS(memSize));
   }
 
   // instr(mem, reg)

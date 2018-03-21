@@ -1,0 +1,400 @@
+commit d464d669852a972a6b5949f3fc0fe6519eccd2aa
+Author: Woo Xie <woo@fb.com>
+Date:   Fri Mar 16 17:10:52 2018 -0700
+
+    apply frame size limit per h2 session
+    
+    Summary: remove the global frame size limit
+    
+    Reviewed By: afrind
+    
+    Differential Revision: D7223476
+    
+    fbshipit-source-id: 79ccb9dcc7c6d264712c61a6219f7d4cde3c59c9
+
+diff --git a/third-party/proxygen/src/proxygen/lib/http/codec/HTTP2Codec.cpp b/third-party/proxygen/src/proxygen/lib/http/codec/HTTP2Codec.cpp
+index 1f6a1b7a..29431ee8 100644
+--- a/third-party/proxygen/src/proxygen/lib/http/codec/HTTP2Codec.cpp
++++ b/third-party/proxygen/src/proxygen/lib/http/codec/HTTP2Codec.cpp
+@@ -38,7 +38,6 @@ std::string base64url_decode(const std::string& str) {
+ 
+ namespace proxygen {
+ 
+-uint32_t HTTP2Codec::kHeaderSplitSize{http2::kMaxFramePayloadLengthMin};
+ 
+ HTTP2Codec::HTTP2Codec(TransportDirection direction)
+     : HTTPParallelCodec(direction),
+@@ -747,7 +746,7 @@ ErrorCode HTTP2Codec::handleSettings(const std::deque<SettingPair>& settings) {
+           VLOG(4) << goawayErrorMessage_;
+           return ErrorCode::PROTOCOL_ERROR;
+         }
+-        kHeaderSplitSize = setting.second;
++        ingressSettings_.setSetting(SettingsId::MAX_FRAME_SIZE, setting.second);
+         break;
+       case SettingsId::MAX_HEADER_LIST_SIZE:
+         break;
+@@ -1072,18 +1071,19 @@ void HTTP2Codec::generateHeader(folly::IOBufQueue& writeBuf,
+ 
+   IOBufQueue queue(IOBufQueue::cacheChainLength());
+   queue.append(std::move(out));
++  auto maxFrameSize = maxSendFrameSize();
+   if (queue.chainLength() > 0) {
+     boost::optional<http2::PriorityUpdate> pri;
+     auto res = msg.getHTTP2Priority();
+-    size_t split = kHeaderSplitSize;
++    auto remainingFrameSize = maxFrameSize;
+     if (res) {
+       pri = http2::PriorityUpdate{std::get<0>(*res), std::get<1>(*res),
+                                   std::get<2>(*res)};
+-      if (split > http2::kFramePrioritySize) {
+-        split -= http2::kFramePrioritySize;
+-      }
++      DCHECK_GE(remainingFrameSize, http2::kFramePrioritySize)
++        << "no enough space for priority? frameHeadroom=" << remainingFrameSize;
++      remainingFrameSize -= http2::kFramePrioritySize;
+     }
+-    auto chunk = queue.split(std::min(split, queue.chainLength()));
++    auto chunk = queue.split(std::min(remainingFrameSize, queue.chainLength()));
+ 
+     bool endHeaders = queue.chainLength() == 0;
+     if (assocStream == 0) {
+@@ -1106,8 +1106,7 @@ void HTTP2Codec::generateHeader(folly::IOBufQueue& writeBuf,
+     }
+ 
+     while (!endHeaders) {
+-      chunk = queue.split(std::min(size_t(kHeaderSplitSize),
+-                                   queue.chainLength()));
++      chunk = queue.split(std::min(maxFrameSize, queue.chainLength()));
+       endHeaders = queue.chainLength() == 0;
+       VLOG(4) << "generating CONTINUATION for stream=" << stream;
+       http2::writeContinuation(writeBuf,
+@@ -1133,8 +1132,9 @@ size_t HTTP2Codec::generateBody(folly::IOBufQueue& writeBuf,
+   }
+   IOBufQueue queue(IOBufQueue::cacheChainLength());
+   queue.append(std::move(chain));
+-  while (queue.chainLength() > maxSendFrameSize()) {
+-    auto chunk = queue.split(maxSendFrameSize());
++  size_t maxFrameSize = maxSendFrameSize();
++  while (queue.chainLength() > maxFrameSize) {
++    auto chunk = queue.split(maxFrameSize);
+     written += http2::writeData(writeBuf, std::move(chunk), stream,
+                                 padding, false, reuseIOBufHeadroomForData_);
+   }
+diff --git a/third-party/proxygen/src/proxygen/lib/http/codec/HTTP2Codec.h b/third-party/proxygen/src/proxygen/lib/http/codec/HTTP2Codec.h
+index 5b181685..0f2b7c2d 100644
+--- a/third-party/proxygen/src/proxygen/lib/http/codec/HTTP2Codec.h
++++ b/third-party/proxygen/src/proxygen/lib/http/codec/HTTP2Codec.h
+@@ -127,10 +127,6 @@ public:
+   }
+ #endif
+ 
+-  static void setHeaderSplitSize(uint32_t splitSize) {
+-    kHeaderSplitSize = splitSize;
+-  }
+-
+   // Whether turn on the optimization to reuse IOBuf headroom when write DATA
+   // frame. For other frames, it's always ON.
+   void setReuseIOBufHeadroomForData(bool enabled) {
+@@ -204,7 +200,7 @@ public:
+   ErrorCode checkNewStream(uint32_t stream);
+   bool checkConnectionError(ErrorCode, const folly::IOBuf* buf);
+   ErrorCode handleSettings(const std::deque<SettingPair>& settings);
+-  uint32_t maxSendFrameSize() const {
++  size_t maxSendFrameSize() const {
+     return ingressSettings_.getSetting(SettingsId::MAX_FRAME_SIZE,
+                                        http2::kMaxFramePayloadLengthMin);
+   }
+@@ -251,7 +247,6 @@ public:
+   size_t pendingDataFrameBytes_{0};
+   size_t pendingDataFramePaddingBytes_{0};
+ 
+-  static uint32_t kHeaderSplitSize;
+   HeaderDecodeInfo decodeInfo_;
+   std::vector<StreamID> virtualPriorityNodes_;
+   bool reuseIOBufHeadroomForData_{true};
+diff --git a/third-party/proxygen/src/proxygen/lib/http/codec/test/HTTP2CodecTest.cpp b/third-party/proxygen/src/proxygen/lib/http/codec/test/HTTP2CodecTest.cpp
+index 97008421..38506886 100644
+--- a/third-party/proxygen/src/proxygen/lib/http/codec/test/HTTP2CodecTest.cpp
++++ b/third-party/proxygen/src/proxygen/lib/http/codec/test/HTTP2CodecTest.cpp
+@@ -32,12 +32,10 @@ class HTTP2CodecTest : public HTTPParallelCodecTest {
+     :HTTPParallelCodecTest(upstreamCodec_, downstreamCodec_) {}
+ 
+   void SetUp() override {
+-    HTTP2Codec::setHeaderSplitSize(http2::kMaxFramePayloadLengthMin);
+     HTTPParallelCodecTest::SetUp();
+   }
+-
+-  void testBigHeader(bool continuation);
+-
++  void testHeaderListSize(bool oversized);
++  void testFrameSizeLimit(bool oversized);
+ 
+  protected:
+   HTTP2Codec upstreamCodec_{TransportDirection::UPSTREAM};
+@@ -272,14 +270,12 @@ TEST_F(HTTP2CodecTest, BadConnect) {
+   EXPECT_EQ(callbacks_.sessionErrors, 0);
+ }
+ 
+-void HTTP2CodecTest::testBigHeader(bool continuation) {
+-  if (continuation) {
+-    HTTP2Codec::setHeaderSplitSize(1);
++void HTTP2CodecTest::testHeaderListSize(bool oversized) {
++  if (oversized) {
++    auto settings = downstreamCodec_.getEgressSettings();
++    settings->setSetting(SettingsId::MAX_HEADER_LIST_SIZE, 37);
+   }
+-  auto settings = downstreamCodec_.getEgressSettings();
+-  settings->setSetting(SettingsId::MAX_HEADER_LIST_SIZE, 37);
+-  IOBufQueue dummy;
+-  downstreamCodec_.generateSettings(dummy);
++
+   HTTPMessage req = getGetRequest("/guacamole");
+   req.getHeaders().add(HTTP_HEADER_USER_AGENT, "coolio");
+   req.getHeaders().add("x-long-long-header",
+@@ -288,19 +284,53 @@ void HTTP2CodecTest::testBigHeader(bool continuation) {
+ 
+   parse();
+   // session error
+-  EXPECT_EQ(callbacks_.messageBegin, continuation ? 1 : 0);
+-  EXPECT_EQ(callbacks_.headersComplete, 0);
+-  EXPECT_EQ(callbacks_.messageComplete, 0);
++  EXPECT_EQ(callbacks_.messageBegin, oversized ? 0 : 1);
++  EXPECT_EQ(callbacks_.headersComplete, oversized ? 0 : 1);
++  EXPECT_EQ(callbacks_.messageComplete, oversized ? 0 : 1);
+   EXPECT_EQ(callbacks_.streamErrors, 0);
+-  EXPECT_EQ(callbacks_.sessionErrors, 1);
++  EXPECT_EQ(callbacks_.sessionErrors, oversized ? 1 : 0);
++}
++
++void HTTP2CodecTest::testFrameSizeLimit(bool oversized) {
++  HTTPMessage req = getBigGetRequest("/guacamole");
++  auto settings = downstreamCodec_.getEgressSettings();
++
++  parse(); // consume preface
++  if (oversized) {
++    // trick upstream for sending a 2x bigger HEADERS frame
++    settings->setSetting(SettingsId::MAX_FRAME_SIZE,
++                         http2::kMaxFramePayloadLengthMin * 2);
++    downstreamCodec_.generateSettings(output_);
++    parseUpstream();
++  }
++
++  settings->setSetting(SettingsId::MAX_FRAME_SIZE,
++                       http2::kMaxFramePayloadLengthMin);
++  upstreamCodec_.generateHeader(output_, 1, req, 0, true /* eom */);
++
++  parse();
++  // session error
++  EXPECT_EQ(callbacks_.messageBegin, oversized ? 0 : 1);
++  EXPECT_EQ(callbacks_.headersComplete, oversized ? 0 : 1);
++  EXPECT_EQ(callbacks_.messageComplete, oversized ? 0 : 1);
++  EXPECT_EQ(callbacks_.streamErrors, 0);
++  EXPECT_EQ(callbacks_.sessionErrors, oversized ? 1 : 0);
+ }
+ 
+-TEST_F(HTTP2CodecTest, BigHeader) {
+-  testBigHeader(false);
++TEST_F(HTTP2CodecTest, normalSizeHeader) {
++  testHeaderListSize(false);
+ }
+ 
+-TEST_F(HTTP2CodecTest, BigHeaderContinuation) {
+-  testBigHeader(true);
++TEST_F(HTTP2CodecTest, oversizedHeader) {
++  testHeaderListSize(true);
++}
++
++TEST_F(HTTP2CodecTest, normalSizeFrame) {
++  testFrameSizeLimit(false);
++}
++
++TEST_F(HTTP2CodecTest, oversizedFrame) {
++  testFrameSizeLimit(true);
+ }
+ 
+ TEST_F(HTTP2CodecTest, BigHeaderCompressed) {
+@@ -407,9 +437,7 @@ TEST_F(HTTP2CodecTest, Cookies) {
+ }
+ 
+ TEST_F(HTTP2CodecTest, BasicContinuation) {
+-  HTTPMessage req = getGetRequest();
+-  req.getHeaders().add(HTTP_HEADER_USER_AGENT, "coolio");
+-  HTTP2Codec::setHeaderSplitSize(1);
++  HTTPMessage req = getBigGetRequest();
+   upstreamCodec_.generateHeader(output_, 1, req, 0);
+ 
+   parse();
+@@ -428,9 +456,7 @@ TEST_F(HTTP2CodecTest, BasicContinuation) {
+ 
+ TEST_F(HTTP2CodecTest, BasicContinuationEndStream) {
+   // CONTINUATION with END_STREAM flag set on the preceding HEADERS frame
+-  HTTPMessage req = getGetRequest();
+-  req.getHeaders().add(HTTP_HEADER_USER_AGENT, "coolio");
+-  HTTP2Codec::setHeaderSplitSize(1);
++  HTTPMessage req = getBigGetRequest();
+   upstreamCodec_.generateHeader(output_, 1, req, 0, true /* eom */);
+ 
+   parse();
+@@ -463,16 +489,12 @@ TEST_F(HTTP2CodecTest, BadContinuation) {
+ 
+ TEST_F(HTTP2CodecTest, MissingContinuation) {
+   IOBufQueue output(IOBufQueue::cacheChainLength());
+-  HTTPMessage req = getGetRequest();
+-  req.getHeaders().add(HTTP_HEADER_USER_AGENT, "coolio");
++  HTTPMessage req = getBigGetRequest();
+ 
+-  // empirically determined the header block will be 20 bytes, so split at N-1
+-  HTTP2Codec::setHeaderSplitSize(19);
+   size_t prevLen = output_.chainLength();
+   upstreamCodec_.generateHeader(output_, 1, req, 0);
+-  EXPECT_EQ(output_.chainLength() - prevLen, 20 + 2 * 9);
+-  // strip the continuation frame (1 byte payload)
+-  output_.trimEnd(http2::kFrameHeaderSize + 1);
++  // empirically determined the size of continuation frame, and strip it
++  output_.trimEnd(http2::kFrameHeaderSize + 4134);
+ 
+   // insert a non-continuation (but otherwise valid) frame
+   http2::writeGoaway(output_, 17, ErrorCode::ENHANCE_YOUR_CALM);
+@@ -490,19 +512,14 @@ TEST_F(HTTP2CodecTest, MissingContinuation) {
+ 
+ TEST_F(HTTP2CodecTest, MissingContinuationBadFrame) {
+   IOBufQueue output(IOBufQueue::cacheChainLength());
+-  HTTPMessage req = getGetRequest();
+-  req.getHeaders().add(HTTP_HEADER_USER_AGENT, "coolio");
+-
+-  // empirically determined the header block will be 20 bytes, so split at N-1
+-  HTTP2Codec::setHeaderSplitSize(19);
+-  size_t prevLen = output_.chainLength();
++  HTTPMessage req = getBigGetRequest();
+   upstreamCodec_.generateHeader(output_, 1, req, 0);
+-  EXPECT_EQ(output_.chainLength() - prevLen, 20 + 2 * 9);
+-  // strip the continuation frame (1 byte payload)
+-  output_.trimEnd(http2::kFrameHeaderSize + 1);
++
++  // empirically determined the size of continuation frame, and fake it
++  output_.trimEnd(http2::kFrameHeaderSize + 4134);
+ 
+   // insert an invalid frame
+-  auto frame = makeBuf(9);
++  auto frame = makeBuf(http2::kFrameHeaderSize + 4134);
+   *((uint32_t *)frame->writableData()) = 0xfa000000;
+   output_.append(std::move(frame));
+ 
+@@ -518,18 +535,13 @@ TEST_F(HTTP2CodecTest, MissingContinuationBadFrame) {
+ }
+ 
+ TEST_F(HTTP2CodecTest, BadContinuationStream) {
+-  HTTPMessage req = getGetRequest();
+-  req.getHeaders().add(HTTP_HEADER_USER_AGENT, "coolio");
+-
+-  // empirically determined the header block will be 16 bytes, so split at N-1
+-  HTTP2Codec::setHeaderSplitSize(15);
++  HTTPMessage req = getBigGetRequest();
+   upstreamCodec_.generateHeader(output_, 1, req, 0);
+-  // strip the continuation frame (1 byte payload)
+-  output_.trimEnd(http2::kFrameHeaderSize + 1);
+ 
+-  auto fakeHeaders = makeBuf(1);
+-  http2::writeContinuation(output_, 3, true, std::move(fakeHeaders),
+-                           http2::kNoPadding);
++  // empirically determined the size of continuation frame, and fake it
++  output_.trimEnd(http2::kFrameHeaderSize + 4134);
++  auto fakeHeaders = makeBuf(4134);
++  http2::writeContinuation(output_, 3, true, std::move(fakeHeaders), http2::kNoPadding);
+ 
+   parse();
+   EXPECT_EQ(callbacks_.messageBegin, 1);
+diff --git a/third-party/proxygen/src/proxygen/lib/http/codec/test/TestUtils.cpp b/third-party/proxygen/src/proxygen/lib/http/codec/test/TestUtils.cpp
+index 23c6c2aa..e3fbcdb5 100644
+--- a/third-party/proxygen/src/proxygen/lib/http/codec/test/TestUtils.cpp
++++ b/third-party/proxygen/src/proxygen/lib/http/codec/test/TestUtils.cpp
+@@ -7,8 +7,9 @@
+  *  of patent rights can be found in the PATENTS file in the same directory.
+  *
+  */
+-#include <proxygen/lib/http/codec/test/TestUtils.h>
++#include <proxygen/lib/http/codec/HTTP2Constants.h>
+ #include <proxygen/lib/http/codec/SPDYConstants.h>
++#include <proxygen/lib/http/codec/test/TestUtils.h>
+ 
+ #include <boost/optional/optional_io.hpp>
+ #include <folly/Random.h>
+@@ -81,6 +82,19 @@ HTTPMessage getGetRequest(const std::string& url) {
+   return req;
+ }
+ 
++HTTPMessage getBigGetRequest(const std::string& url) {
++  HTTPMessage req;
++  req.setMethod("GET");
++  req.setURL(url);
++  req.setHTTPVersion(1, 1);
++  req.getHeaders().set(HTTP_HEADER_HOST, "www.foo.com");
++  req.getHeaders().add(HTTP_HEADER_USER_AGENT, "coolio");
++  req.getHeaders().add(
++      "x-huge-header",
++      std::string(http2::kMaxFramePayloadLengthMin, '!'));
++  return req;
++}
++
+ std::unique_ptr<HTTPMessage> makeGetRequest() {
+   return std::make_unique<HTTPMessage>(getGetRequest());
+ }
+diff --git a/third-party/proxygen/src/proxygen/lib/http/codec/test/TestUtils.h b/third-party/proxygen/src/proxygen/lib/http/codec/test/TestUtils.h
+index c6df5e21..43e5951f 100644
+--- a/third-party/proxygen/src/proxygen/lib/http/codec/test/TestUtils.h
++++ b/third-party/proxygen/src/proxygen/lib/http/codec/test/TestUtils.h
+@@ -318,6 +318,7 @@ std::unique_ptr<testing::NiceMock<MockHTTPCodec>>
+ makeUpstreamParallelCodec();
+ 
+ HTTPMessage getGetRequest(const std::string& url = std::string("/"));
++HTTPMessage getBigGetRequest(const std::string& url = std::string("/"));
+ HTTPMessage getPostRequest(uint32_t contentLength = 200);
+ HTTPMessage getResponse(uint32_t code, uint32_t bodyLen = 0);
+ HTTPMessage getUpgradeRequest(const std::string& upgradeHeader,
+diff --git a/third-party/proxygen/src/proxygen/lib/http/session/test/HTTPDownstreamSessionTest.cpp b/third-party/proxygen/src/proxygen/lib/http/session/test/HTTPDownstreamSessionTest.cpp
+index 7be3a80a..944250a5 100644
+--- a/third-party/proxygen/src/proxygen/lib/http/session/test/HTTPDownstreamSessionTest.cpp
++++ b/third-party/proxygen/src/proxygen/lib/http/session/test/HTTPDownstreamSessionTest.cpp
+@@ -439,11 +439,9 @@ class HTTP2DownstreamSessionTest : public HTTPDownstreamTest<HTTP2CodecPair> {
+ 
+   void SetUp() override {
+     HTTPDownstreamTest<HTTP2CodecPair>::SetUp();
+-    HTTP2Codec::setHeaderSplitSize(http2::kMaxFramePayloadLengthMin);
+   }
+ 
+   void TearDown() override {
+-    HTTP2Codec::setHeaderSplitSize(http2::kMaxFramePayloadLengthMin);
+   }
+ };
+ }
+@@ -2827,9 +2825,7 @@ TEST_F(HTTP2DownstreamSessionTest, test_disable_priorities) {
+ 
+ TEST_F(HTTP2DownstreamSessionTest, continuation_timeout) {
+   // Split the headers at 15 bytes to force a CONTINUATION frame
+-  HTTP2Codec::setHeaderSplitSize(15);
+-  auto req = getGetRequest();
+-  req.getHeaders().add("x", "ZZZZZZZ");
++  auto req = getBigGetRequest();
+   sendRequest(req);
+ 
+   HTTPSession::DestructorGuard g(httpSession_);
+diff --git a/third-party/proxygen/src/proxygen/lib/http/session/test/HTTPUpstreamSessionTest.cpp b/third-party/proxygen/src/proxygen/lib/http/session/test/HTTPUpstreamSessionTest.cpp
+index 8fade541..a2675476 100644
+--- a/third-party/proxygen/src/proxygen/lib/http/session/test/HTTPUpstreamSessionTest.cpp
++++ b/third-party/proxygen/src/proxygen/lib/http/session/test/HTTPUpstreamSessionTest.cpp
+@@ -190,7 +190,6 @@ class HTTPUpstreamTest: public testing::Test,
+   void commonSetUp(unique_ptr<HTTPCodec> codec) {
+     HTTPSession::setDefaultReadBufferLimit(65536);
+     HTTPSession::setDefaultWriteBufferLimit(65536);
+-    HTTP2Codec::setHeaderSplitSize(http2::kMaxFramePayloadLengthMin);
+     EXPECT_CALL(*transport_, writeChain(_, _, _))
+       .WillRepeatedly(Invoke(this, &HTTPUpstreamTest<C>::onWriteChain));
+     EXPECT_CALL(*transport_, setReadCB(_))
+@@ -750,7 +749,6 @@ class HTTP2UpstreamSessionWithVirtualNodesTest:
+   void commonSetUp(unique_ptr<HTTPCodec> codec) {
+     HTTPSession::setDefaultReadBufferLimit(65536);
+     HTTPSession::setDefaultWriteBufferLimit(65536);
+-    HTTP2Codec::setHeaderSplitSize(http2::kMaxFramePayloadLengthMin);
+     EXPECT_CALL(*transport_, writeChain(_, _, _))
+       .WillRepeatedly(Invoke(
+             this,

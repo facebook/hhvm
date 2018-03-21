@@ -5804,7 +5804,8 @@ and check_null_wtf env p ty =
       | _, Toption ty ->
         (* Find sketchy nulls hidden under singleton Tunresolved *)
         let env, ty = TUtils.fold_unresolved env ty in
-        (match ty with
+        let env, ety = Env.expand_type env ty in
+        (match ety with
           | _, (Tmixed | Tnonnull) ->
             Errors.sketchy_null_check p
           | _, Tprim _ ->

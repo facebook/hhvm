@@ -8,13 +8,14 @@
  *
  *)
 
-module Syntax     = Full_fidelity_positioned_syntax
-module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
-module TokenKind  = Full_fidelity_token_kind
 module J = Hh_json
 module SU = Hhbc_string_utils
+module FSC = Facts_smart_constructors
 
-open Syntax
+module FactsParser_ = Full_fidelity_parser
+  .WithSyntax(Full_fidelity_positioned_syntax)
+module FactsParser = FactsParser_
+  .WithSmartConstructors(FSC.SC)
 
 type type_kind =
   | TKClass
@@ -50,46 +51,63 @@ let flags_abstract = 1
 let flags_final = 2
 let flags_multiple_declarations = 4
 
+let set_flag flags flag = flags lor flag
+
 let has_multiple_declarations_flag tf =
   (tf.flags land flags_multiple_declarations) <> 0
 
 let combine_flags tf flags =
-  { tf with flags = tf.flags lor flags }
+  { tf with flags = set_flag tf.flags flags }
 
 let set_multiple_declarations_flag tf =
   combine_flags tf flags_multiple_declarations
 
-let strip_list_item node =
-  match node with
-  | { syntax = ListItem { list_item = n; _ }; _} -> n
-  | n -> n
+let qualified_name_from_parts ns l =
+  let open FSC in
+  let rec aux l acc =
+    match l with
+    | [] -> Some (String.concat "" @@ List.rev acc)
+    | Name n :: xs -> aux xs (n () :: acc)
+    (* ignore leading backslash *)
+    | Backslash :: xs -> aux xs acc
+    | ListItem (Name n, Backslash) :: xs -> aux xs ( (n () ^ "\\") :: acc)
+    | _ -> None in
+  match aux l [], l with
+  (* globally qualified name *)
+  | Some n, Backslash :: _ -> Some n
+  | Some n, _ -> if ns = "" then Some n else Some (ns ^ "\\" ^ n)
+  | _ -> None
 
-let qualified_name_part_to_string p =
-  match syntax p with
-  | ListItem li -> (text li.list_item) ^ (text li.list_separator)
-  | _ -> text p
+let qualified_name ns name =
+  let open FSC in
+  match name with
+  | Name n ->
+    (* always simple name *)
+    let n = n () in
+    if ns = "" then Some n
+    else Some (ns ^ "\\" ^ n)
+  | XhpName n ->
+    (* xhp names are always unqualified *)
+    Some (SU.Xhp.mangle_id @@ n ())
+  | QualifiedName l -> qualified_name_from_parts ns l
+  | _ -> None
 
-let rec unwrap_name n =
-  match syntax n with
-  | SimpleTypeSpecifier { simple_type_specifier = t; _ }
-  | GenericTypeSpecifier { generic_class_type = t; _ } -> unwrap_name t
-  | _ -> n
-
-let qualified_name namespace name_node =
-  let name_node = unwrap_name name_node in
-  let name_text =
-    match syntax @@ name_node with
-    | QualifiedName {
-        qualified_name_parts = { syntax = SyntaxList parts; _}; _
-      } ->
-      String.concat "" @@ Core_list.map parts ~f:qualified_name_part_to_string
-    | _ -> text name_node in
-  let name_text = SU.Xhp.mangle_id name_text in
-  if String.get name_text 0 = '\\'
-  then String.sub name_text 1 (String.length name_text - 1)
-  else if String.length namespace = 0
-  then name_text
-  else namespace ^ "\\" ^ name_text
+let flags_from_modifiers modifiers =
+  let open FSC in
+  let rec aux l f =
+    match l with
+    | [] -> f
+    | Abstract :: xs ->
+      aux xs (set_flag f flags_abstract)
+    | Final :: xs ->
+      aux xs (set_flag f flags_final)
+    | Static :: xs ->
+      aux xs (set_flag f @@ set_flag flags_final flags_abstract)
+    | _ :: xs ->
+      aux xs f in
+  match modifiers with
+  | List l -> aux l 0
+  | _ -> 0
 
 let add_or_update_classish_declaration types name kind flags base_types
   require_extends require_implements =
@@ -136,200 +154,142 @@ let add_or_update_classish_declaration types name kind flags base_types
       { base_types; flags; kind; require_extends; require_implements } in
     SMap.add name tf types
 
-let constants_from_define_argument constants node =
-  let node = strip_list_item node in
-  match syntax node with
-  | LiteralExpression {
-      literal_expression = {
-        syntax = Token {
-          Token.kind = TokenKind.DoubleQuotedStringLiteral
-                       | TokenKind.SingleQuotedStringLiteral; _
-        }; _
-      }; _
-    } ->
-    let constant_name = text node in
-    (* strip quotes *)
-    let constant_name =
-      String.sub constant_name 1 (String.length constant_name - 2) in
-    constant_name :: constants
-  | _ -> constants
-
-let type_names_from_list ns init list =
-  let aux acc n =
-    match syntax @@ strip_list_item n with
-    | SimpleTypeSpecifier { simple_type_specifier = t; _ }
-    | GenericTypeSpecifier { generic_class_type = t; _ }
-      when not @@ is_missing t ->
-      let name = qualified_name ns t in
-      SSet.add name acc
-    | _ -> acc in
-  match syntax list with
-  | SyntaxList l -> Core_list.fold_left ~init ~f:aux l
+let typenames_from_list ns init l =
+  let open FSC in
+  let aux s n =
+    match qualified_name ns n with
+    | Some n -> SSet.add n s
+    | None -> s in
+  match l with
+  | List l -> Core_list.fold_left l ~init ~f:aux
   | _ -> init
 
-let flags_from_modifiers modifiers =
-  let aux acc n =
-    match syntax n with
-    | Token { Token.kind = TokenKind.Abstract; _ } ->
-      acc lor flags_abstract
-    | Token { Token.kind = TokenKind.Final; _ } ->
-      acc lor flags_final
-    | Token { Token.kind = TokenKind.Static; _ } ->
-      acc lor flags_abstract lor flags_final
+let define_name n =
+  let n = n () in
+  (* strip quotes *)
+  String.sub n 1 (String.length n - 2)
+
+let defines_from_method_body constants body =
+  let open FSC in
+  let rec aux acc l =
+    match l with
+    | List l -> Core_list.fold_left l ~init:acc ~f:aux
+    | Define (String name) -> (define_name name) :: acc
     | _ -> acc in
-  fold_over_children aux flags_default (syntax modifiers)
+  aux constants body
+let type_info_from_class_body facts ns check_require body =
+  let open FSC in
+  let aux (extends, implements, trait_uses, constants as acc) n =
+    match n with
+    | RequireExtendsClause name when check_require ->
+      begin match qualified_name ns name with
+      | Some name -> SSet.add name extends, implements, trait_uses, constants
+      | None -> acc
+      end
+    | RequireImplementsClause name when check_require ->
+      begin match qualified_name ns name with
+      | Some name -> extends, SSet.add name implements, trait_uses, constants
+      | None -> acc
+      end
+    | TraitUseClause uses ->
+      let trait_uses = typenames_from_list ns trait_uses uses in
+      extends, implements, trait_uses, constants
+    | MethodDecl body when ns = "" ->
+      (* in methods we collect only defines *)
+      let constants = defines_from_method_body constants body in
+      extends, implements, trait_uses, constants
+    | _ -> acc in
+  let init = SSet.empty, SSet.empty, SSet.empty, facts.constants in
+  let extends, implements, trait_uses, constants =
+    match body with
+    | List l -> Core_list.fold_left l ~init ~f:aux
+    | _ -> init in
+  let facts =
+    if constants == facts.constants
+    then facts
+    else { facts with constants } in
+  extends, implements, trait_uses, facts
 
-let process_function_like_body ns ~in_method body facts =
-  let rec aux facts n =
-    match syntax n with
-    | DefineExpression {
-        define_argument_list = {
-          syntax = SyntaxList [ arg1; _ ];
-      _ }; _ } when ns = "" ->
-      let constants = constants_from_define_argument facts.constants arg1 in
-      if constants == facts.constants
-      then facts
-      else { facts with constants }
-    (* function declarations (both top level and nested) *)
-    | FunctionDeclaration {
-        function_declaration_header = {
-          syntax = FunctionDeclarationHeader { function_name = n; _ }; _
-        };
-        function_body; _
-      } ->
-      (* dive into body to track nested define calls or functions *)
-      let facts = aux facts function_body in
-      let facts =
-        if is_missing n || in_method
-        then facts
-        else begin
-          let function_name = qualified_name ns n in
-          { facts with functions = function_name :: facts.functions; }
-        end in
-      facts
-    | n -> fold_over_children aux facts n in
-  aux facts body
-
-let process_classish_body check_require_clause ns body facts =
-  match syntax body with
-  | ClassishBody { classish_body_elements = e; _ } ->
-    let aux ((extends, implements, trait_uses, facts) as acc) n =
-      begin match syntax n with
-      | RequireClause { require_kind; require_name; _ }
-        when check_require_clause ->
-        let name = qualified_name ns require_name in
-        begin match syntax require_kind with
-        | Token { Token.kind = TokenKind.Extends; _ } ->
-          SSet.add name extends, implements, trait_uses, facts
-        | Token { Token.kind = TokenKind.Implements; _ } ->
-          extends, SSet.add name implements, trait_uses, facts
-        | _ -> acc
-        end
-      | TraitUse { trait_use_names; _ } ->
-        let trait_uses = type_names_from_list ns trait_uses trait_use_names in
-        extends, implements, trait_uses, facts
-      | MethodishDeclaration {
-          methodish_function_body = body; _
-        } when ns = "" ->
-          let facts = process_function_like_body ~in_method:true ns body facts in
-          extends, implements, trait_uses, facts
-      | _ -> acc
-      end in
-    fold_over_children aux (SSet.empty, SSet.empty, SSet.empty, facts) (syntax e)
-  | _ -> SSet.empty, SSet.empty, SSet.empty, facts
-
-let facts_from_classish_declaration ns facts
-  modifiers keyword name extends_list implements_list body =
-  let name = qualified_name ns name in
-  let kind, flags =
-    match syntax keyword with
-    | Token { Token.kind = TokenKind.Class; _ } ->
-      TKClass, flags_from_modifiers modifiers
-    | Token { Token.kind = TokenKind.Interface; _ } ->
-      TKInterface, flags_abstract
-    | Token { Token.kind = TokenKind.Trait; _ } ->
-      TKTrait, flags_abstract
-    | Token { Token.kind = TokenKind.Enum; _ } ->
-      TKEnum, flags_final
-    | _ -> TKUnknown, flags_default in
-  let require_extends, require_implements, trait_uses, facts =
-    process_classish_body (kind = TKTrait || kind = TKInterface) ns body facts in
-  (* put content of trait_uses to base types *)
-  let base_types = type_names_from_list ns trait_uses extends_list in
-  let base_types = type_names_from_list ns base_types implements_list in
-  let types =
-    add_or_update_classish_declaration facts.types name kind flags
-      base_types require_extends require_implements in
-  if types == facts.types then facts
-  else { facts with types; }
-
-let rec collect_facts (ns, facts as acc) node =
-  match syntax node with
-  (* top level - collect facts for all top level declarations *)
-  | Script { script_declarations; _ } ->
-    fold_over_children collect_facts acc (syntax script_declarations)
-  (* namespaces *)
-  | NamespaceDeclaration { namespace_name; namespace_body; _ } ->
-    (* if namespace body is empty - treat the rest of the file as if it is
-       nested in current namespace  *)
-    if is_namespace_empty_body namespace_body
-    then
-      (qualified_name "" namespace_name), facts
-    else begin
-    (* if namespace name is not specified - keep current *)
-      let namespace_name =
-        if is_missing namespace_name then ns
-        else qualified_name ns namespace_name in
-      match syntax namespace_body with
-      | NamespaceBody { namespace_declarations = decls; _ } ->
-        (* dive into namespace body, collect facts and restore namespace name *)
-        let _, facts =
-          fold_over_children collect_facts (namespace_name, facts) (syntax decls) in
-        ns, facts
-      | _ -> acc
-    end
-  (* class-like declarations *)
-  | ClassishDeclaration {
-      classish_modifiers = modifiers;
-      classish_name = name;
-      classish_keyword = keyword;
-      classish_extends_list = extends_list;
-      classish_implements_list = implements_list;
-      classish_body = body; _ } when not @@ is_missing name ->
-    let facts =
-      facts_from_classish_declaration ns facts
-        modifiers keyword name extends_list implements_list body in
-    ns, facts
-
-  (* type/newtype *)
-  | AliasDeclaration { alias_name; _ } ->
-    let alias_name = qualified_name ns alias_name in
-    ns, { facts with type_aliases = alias_name :: facts.type_aliases }
-
-  (* enums *)
-  | EnumDeclaration { enum_name; _ } ->
-    let enum_name = qualified_name ns enum_name in
+let facts_from_class_decl facts ns modifiers kind name extends implements body =
+  let open FSC in
+  match qualified_name ns name with
+  | None -> facts
+  | Some name ->
+    let kind, flags =
+      match kind with
+      | Class -> TKClass, flags_from_modifiers modifiers
+      | Interface -> TKInterface, flags_abstract
+      | Trait -> TKTrait, flags_abstract
+      | _ -> TKUnknown, flags_default in
+    let require_extends, require_implements, trait_uses, facts =
+      type_info_from_class_body facts ns
+        (kind = TKInterface || kind = TKTrait) body in
+    let base_types = typenames_from_list ns trait_uses extends in
+    let base_types = typenames_from_list ns base_types implements in
     let types =
-      add_or_update_classish_declaration facts.types
-        enum_name TKEnum flags_final SSet.empty SSet.empty SSet.empty in
-    ns, if types == facts.types then facts else { facts with types }
+      add_or_update_classish_declaration facts.types name kind flags
+        base_types require_extends require_implements in
+    if types == facts.types
+    then facts
+    else { facts with types }
 
-  (*  constants *)
-  | ConstDeclaration { const_declarators = { syntax = SyntaxList l; _}; _ } ->
-    let aux constants n =
-      begin match syntax @@ strip_list_item n with
-      | ConstantDeclarator { constant_declarator_name = n; _ }
-        when not @@ is_missing n ->
-        let constant_name = qualified_name ns n in
-        constant_name :: constants
-      | _ -> constants
-      end in
-    let constants = Core_list.fold_left ~init:facts.constants ~f:aux l in
-    ns, { facts with constants }
-
-  | _ ->
-    let facts = process_function_like_body ~in_method:false ns node facts in
+let rec collect (ns, facts as acc) n =
+  let open FSC in
+  match n with
+  | List l ->
+    Core_list.fold_left ~init:acc ~f:collect l
+  | ClassDecl decl ->
+    let facts = facts_from_class_decl facts ns
+      decl.modifiers decl.kind decl.name
+      decl.extends decl.implements decl.body in
     ns, facts
+  | EnumDecl name ->
+    begin match qualified_name ns name with
+    | Some name ->
+      let types =
+        add_or_update_classish_declaration facts.types name
+          TKEnum flags_final SSet.empty SSet.empty SSet.empty in
+      let facts =
+        if types == facts.types
+        then facts
+        else { facts with types } in
+      ns, facts
+    | None -> acc
+    end
+  | FunctionDecl name ->
+    begin match qualified_name ns name with
+    | Some name -> ns, { facts with functions = name :: facts.functions }
+    | None -> acc
+    end
+  | ConstDecl name ->
+    begin match qualified_name ns name with
+    | Some name -> ns, { facts with constants = name :: facts.constants }
+    | None -> acc
+    end
+  | TypeAliasDecl name ->
+    begin match qualified_name ns name with
+    | Some name -> ns, { facts with type_aliases = name :: facts.type_aliases }
+    | None -> acc
+    end
+  | Define (String name) when ns = "" ->
+    ns, { facts with constants = (define_name name) :: facts.constants }
+  | NamespaceDecl (name, FSC.EmptyBody) ->
+    begin match qualified_name "" name with
+    | Some name -> name, facts
+    | None -> acc
+    end
+  | NamespaceDecl (name, body) ->
+    let name =
+      if name = Ignored
+      then Some ns
+      else qualified_name ns name in
+    begin match name with
+    | Some name ->
+      let _, facts = collect (name, facts) body in
+      ns, facts
+    | None -> acc
+    end
+  | _ -> acc
 
 let hex_number_to_json s =
   let number =
@@ -390,17 +350,17 @@ let facts_to_json md5 facts =
 
 let from_text php5_compat_mode s =
   let env = Full_fidelity_parser_env.make ~php5_compat_mode () in
-  let root =
-    Full_fidelity_source_text.make Relative_path.default s
-    |> SyntaxTree.make ~env
-    |> SyntaxTree.root in
+  let text = Full_fidelity_source_text.make Relative_path.default s in
+  let (_, root) =
+    let p = FactsParser.make env text in
+    FactsParser.parse_script p in
   let initial_facts = {
     types = SMap.empty;
     functions = [];
     constants = [];
     type_aliases = []
   } in
-  let _, facts = collect_facts ("", initial_facts) root in
+  let _, facts = collect ("", initial_facts) root in
   facts
 
 let extract_as_json ~php5_compat_mode text =

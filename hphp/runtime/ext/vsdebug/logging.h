@@ -70,8 +70,8 @@ private:
   std::mutex m_condLock;
 
   // Log will be rotated approximately this often.
-  static constexpr int kLogRotateIntervalSec = 24 * 60;
-  static constexpr int kLogHistoryMaxDays = 5;
+  static constexpr int kLogFileMaxSizeBytes = 512 * 1024; // 0.5MB
+  static constexpr int kLogFilesToRetain = 5;
 };
 
 }

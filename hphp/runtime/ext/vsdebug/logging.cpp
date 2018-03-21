@@ -148,10 +148,8 @@ void VSDebugLogger::TryRotateLogs() {
     return;
   }
 
-  struct tm* timeInfo = gmtime(&statBuffer.st_ctime);
-  auto now = std::time(nullptr);
-  double diff = difftime(mktime(timeInfo), mktime(gmtime(&now)));
-  if (diff < kLogRotateIntervalSec) {
+  auto fileSizeBytes = statBuffer.st_size;
+  if (fileSizeBytes < kLogFileMaxSizeBytes) {
     return;
   }
 
@@ -161,7 +159,7 @@ void VSDebugLogger::TryRotateLogs() {
   s_logger.m_logFile = nullptr;
 
   // Rotate the files.
-  for (int i = kLogHistoryMaxDays - 1; i >= 0; i--) {
+  for (int i = kLogFilesToRetain - 1; i >= 0; i--) {
     // Try to rename the file if it exists, ignore return code.
     const std::string fromFile = i > 0
       ? s_logger.m_logFilePath + std::to_string(i)

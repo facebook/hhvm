@@ -43,6 +43,7 @@ module ExprDepTy    = Typing_dependent_type.ExprDepTy
 module TCO          = TypecheckerOptions
 module EnvFromDef   = Typing_env_from_def.EnvFromDef(Nast.Annotations)
 module TySet        = Typing_set
+module IsAsExprHint = TUtils.IsAsExprHint
 
 (*****************************************************************************)
 (* Debugging *)
@@ -2052,28 +2053,47 @@ and expr_
       end else begin
         let env, te, _ = expr env e in
         let env, hint_ty = Phase.hint_locl env hint in
-        match (TUtils.IsExprHint.validate hint_ty) with
-          | TUtils.IsExprHint.Valid ->
+        match (IsAsExprHint.validate hint_ty) with
+          | IsAsExprHint.Valid ->
             make_result env (T.Is (te, hint)) (Reason.Rwitness p, Tprim Tbool)
-          | TUtils.IsExprHint.Partial (r, ty_) ->
-            Errors.partially_valid_is_expression_hint (Reason.to_pos r)
-              (TUtils.IsExprHint.print ty_);
+          | IsAsExprHint.Partial (r, ty_) ->
+            Errors.partially_valid_is_as_expression_hint (Reason.to_pos r) "is"
+              (IsAsExprHint.print ty_);
             make_result env (T.Is (te, hint)) (Reason.Rwitness p, Tprim Tbool)
-          | TUtils.IsExprHint.Invalid (r, ty_) ->
-            Errors.invalid_is_expression_hint (Reason.to_pos r)
-              (TUtils.IsExprHint.print ty_);
+          | IsAsExprHint.Invalid (r, ty_) ->
+            Errors.invalid_is_as_expression_hint (Reason.to_pos r) "is"
+              (IsAsExprHint.print ty_);
             expr_error env p (Reason.Rwitness p)
       end
-  | As (_e, _hint, _is_nullable) ->
+  | As (e, hint, is_nullable) ->
     if not (TypecheckerOptions.experimental_feature_enabled
       (Env.get_options env)
       TypecheckerOptions.experimental_as_expression)
     then begin
       Errors.experimental_feature p "as expression";
       expr_error env p (Reason.Rnone)
-    end else
-      (* TODO(T26859386): Implement as expressions *)
-      expr_error env p (Reason.Rnone)
+    end else begin
+      let env, _, _ = expr env e in
+      let env, hint_ty = Phase.hint_locl env hint in
+      let hint_ty =
+        if not is_nullable then hint_ty else
+          match hint_ty with
+          (* Dont create ??hint *)
+          | _ , Toption _ -> hint_ty
+          | _ -> Reason.Rwitness p, Toption (hint_ty) in
+      let env, te, ty = assign p env e hint_ty in
+      match (IsAsExprHint.validate hint_ty) with
+        | IsAsExprHint.Valid ->
+          make_result env (T.As (te, hint, is_nullable)) ty
+        | IsAsExprHint.Partial (r, ty_) ->
+          Errors.partially_valid_is_as_expression_hint (Reason.to_pos r) "as"
+            (IsAsExprHint.print ty_);
+          make_result env (T.As (te, hint, is_nullable)) ty
+        | IsAsExprHint.Invalid (r, ty_) ->
+          Errors.invalid_is_as_expression_hint (Reason.to_pos r) "as"
+            (IsAsExprHint.print ty_);
+          expr_error env p (Reason.Rwitness p)
+    end
   | Efun (f, idl) ->
       (* This is the function type as declared on the lambda itself.
        * If type hints are absent then use Tany instead. *)
@@ -5740,11 +5760,11 @@ and condition ?lhs_of_null_coalesce env tparamet =
     let env, ivar = get_instance_var env ivar in
     (* Resolve the typehint to a type *)
     let env, hint_ty = Phase.hint_locl env h in
-    begin match (TUtils.IsExprHint.validate hint_ty) with
-      | TUtils.IsExprHint.Valid
-      | TUtils.IsExprHint.Partial _ ->
+    begin match (IsAsExprHint.validate hint_ty) with
+      | IsAsExprHint.Valid
+      | IsAsExprHint.Partial _ ->
         set_local env ivar hint_ty
-      | TUtils.IsExprHint.Invalid _ -> env
+      | IsAsExprHint.Invalid _ -> env
     end
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null))
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), (_, Null), e) ->

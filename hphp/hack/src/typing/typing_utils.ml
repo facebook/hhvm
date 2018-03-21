@@ -656,10 +656,10 @@ end = struct
 end
 
 (*****************************************************************************)
-(* Check if a type may be used in an `is` expression *)
+(* Check if a type may be used in an is-expression or an as-expression *)
 (*****************************************************************************)
 
-module IsExprHint : sig
+module IsAsExprHint : sig
   type t =
     | Valid
     | Partial of locl ty

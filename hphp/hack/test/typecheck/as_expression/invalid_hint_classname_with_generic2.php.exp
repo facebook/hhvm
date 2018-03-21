@@ -1,0 +1,4 @@
+File "invalid_hint_classname_with_generic2.php", line 7, characters 3-13:
+  classname<C<T>>
+File "invalid_hint_classname_with_generic2.php", line 6, characters 21-21:
+The "as" operator cannot be used with a value of generic type T (Typing[4195])

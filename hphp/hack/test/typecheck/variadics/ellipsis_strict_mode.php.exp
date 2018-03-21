@@ -1,0 +1,20 @@
+File "ellipsis_strict_mode.php", line 6, characters 10-10:
+Cannot use ... without a parameter name in strict mode. Please add a parameter name. (Typing[4223])
+File "ellipsis_strict_mode.php", line 10, characters 8-8:
+Cannot use ... without a parameter name in strict mode. Please add a parameter name. (Typing[4223])
+File "ellipsis_strict_mode.php", line 11, characters 8-25:
+Cannot use ... without a parameter name in strict mode. Please add a parameter name. (Typing[4223])
+File "ellipsis_strict_mode.php", line 16, characters 10-61:
+Cannot use ... without a parameter name in strict mode. Please add a parameter name. (Typing[4223])
+File "ellipsis_strict_mode.php", line 24, characters 7-7:
+Cannot use ... without a parameter name in strict mode. Please add a parameter name. (Typing[4223])
+File "ellipsis_strict_mode.php", line 28, characters 7-14:
+Cannot use ... without a parameter name in strict mode. Please add a parameter name. (Typing[4223])
+File "ellipsis_strict_mode.php", line 31, characters 19-38:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])
+File "ellipsis_strict_mode.php", line 41, characters 16-36:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])
+File "ellipsis_strict_mode.php", line 43, characters 10-14:
+Cannot use ... without a type hint and parameter name in strict mode. Please add a type hint and parameter name. (Typing[4223])
+File "ellipsis_strict_mode.php", line 36, characters 28-47:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])

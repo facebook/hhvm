@@ -2503,14 +2503,15 @@ let fun_variadicity_hh_vs_php56 pos1 pos2 =
   pos2, "Because of this definition";
 ]
 
-let ellipsis_strict_mode ~require_param_name pos =
-  let msg =
-    if require_param_name then
-      "Cannot use ... without a type hint and parameter name in strict mode. \
-      Please add a type hint and parameter name."
-    else
-      "Cannot use ... without a type hint in strict mode. Please add a type hint."
-    in
+let ellipsis_strict_mode ~require pos =
+  let msg = match require with
+  | `Type -> "Cannot use ... without a type hint in strict mode. Please add a type hint."
+  | `Param_name ->
+    "Cannot use ... without a parameter name in strict mode. Please add a parameter name."
+  | `Type_and_param_name ->
+    "Cannot use ... without a type hint and parameter name in strict mode. \
+    Please add a type hint and parameter name."
+  in
   add Typing.ellipsis_strict_mode pos msg
 
 let untyped_lambda_strict_mode pos =

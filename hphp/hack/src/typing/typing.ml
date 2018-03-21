@@ -359,8 +359,6 @@ let rec bind_param env (ty1, param) =
 and check_param env param ty =
   match param.param_hint with
   | None -> suggest env param.param_pos ty
-  | Some (pos, Hfun (_, _, _, _, Hvariadic None, _)) ->
-    Errors.ellipsis_strict_mode ~require_param_name:false pos
   | Some _ ->
     (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
     enforce_param_not_disposable env param ty
@@ -444,7 +442,7 @@ and fun_def tcopt f =
           env, T.FVvariadicArg t_vparam
         | FVellipsis ->
           if Env.is_strict env then
-            Errors.ellipsis_strict_mode ~require_param_name:true pos;
+            Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
           env, T.FVellipsis
         | FVnonVariadic -> env, T.FVnonVariadic in
       let env, tb = fun_ env return pos nb f.f_fun_kind in
@@ -2105,6 +2103,12 @@ and expr_
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
       let env, declared_ft = Phase.localize_ft ~use_pos:p ~ety_env env declared_ft in
       List.iter idl (check_escaping_var env);
+      (* Ensure lambda arity is not Fellipsis in strict mode *)
+      begin match declared_ft.ft_arity with
+      | Fellipsis _ when Env.is_strict env ->
+        Errors.ellipsis_strict_mode ~require:`Param_name p
+      | _ -> ()
+      end;
       (* Is the return type declared? *)
       let is_explicit_ret = Option.is_some f.f_ret in
       let check_body_under_known_params ?ret_ty ft =

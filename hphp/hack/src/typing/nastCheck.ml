@@ -461,11 +461,16 @@ and hint_ env p = function
   | Htuple hl -> List.iter hl (hint env)
   | Hoption h ->
       hint env h; ()
-  | Hfun (_, is_coroutine, hl, _, _, h) ->
+  | Hfun (_, is_coroutine, hl, _, variadic_hint, h) ->
       check_coroutines_enabled is_coroutine env p;
       List.iter hl (hint env);
       hint env h;
-      ()
+      begin match variadic_hint with
+      | Hvariadic (Some h) -> hint env h;
+      | Hvariadic (None) when Env.is_strict env.tenv ->
+        Errors.ellipsis_strict_mode ~require:`Type p;
+      | _ -> ()
+      end
   | Happly ((_, x), hl) as h when Env.is_typedef x ->
     begin match Typing_lazy_heap.get_typedef (Env.get_options env.tenv) x with
       | Some {td_tparams; _} ->

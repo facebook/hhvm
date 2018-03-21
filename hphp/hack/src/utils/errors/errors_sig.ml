@@ -485,7 +485,8 @@ module type S = sig
   val rx_enabled_in_non_rx_context : Pos.t -> unit
   val rx_enabled_in_lambdas : Pos.t -> unit
   val ambiguous_lambda : Pos.t -> int -> unit
-  val ellipsis_strict_mode : require_param_name:bool -> Pos.t -> unit
+  val ellipsis_strict_mode :
+    require:[< `Param_name | `Type | `Type_and_param_name ] -> Pos.t -> unit
   val untyped_lambda_strict_mode : Pos.t -> unit
   val binding_ref_in_array : Pos.t -> unit
   val return_ref_in_array : Pos.t -> unit

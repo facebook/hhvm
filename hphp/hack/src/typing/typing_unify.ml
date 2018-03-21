@@ -488,6 +488,7 @@ and unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =
       a_min = f_min
     | Fvariadic (a_min, _), Fstandard (f_min, _)
     | Fvariadic (a_min, _), Fvariadic (f_min, _)
+    | Fellipsis a_min, Fstandard (f_min, _)
     | Fellipsis a_min, Fellipsis f_min ->
       a_min <= f_min
     | Fstandard (a_min, a_max), Fstandard (f_min, f_max) ->

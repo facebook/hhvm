@@ -1,2 +1,0 @@
-File "ellipsis_as_function_param_strict.php", line 3, characters 10-12:
-Cannot use ... without a type hint and parameter name in strict mode. Please add a type hint and parameter name. (Typing[4223])

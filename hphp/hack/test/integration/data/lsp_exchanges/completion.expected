@@ -415,23 +415,7 @@
     "id": 130,
     "result": {
       "isIncomplete": false,
-      "items": [
-        {
-          "label": "testing_area",
-          "kind": 3,
-          "detail": "function(): void",
-          "inlineDetail": "()",
-          "itemType": "void",
-          "insertText": "testing_area",
-          "insertTextFormat": 1,
-          "data": {
-            "filename": "${root_path}${path_sep}completion.php",
-            "line": 3,
-            "char_start": 10,
-            "char_end": 21
-          }
-        }
-      ]
+      "items": []
     }
   },
   {
@@ -580,23 +564,7 @@
     "id": 150,
     "result": {
       "isIncomplete": false,
-      "items": [
-        {
-          "label": "testing_area",
-          "kind": 3,
-          "detail": "function(): void",
-          "inlineDetail": "()",
-          "itemType": "void",
-          "insertText": "testing_area",
-          "insertTextFormat": 1,
-          "data": {
-            "filename": "${root_path}${path_sep}completion.php",
-            "line": 3,
-            "char_start": 10,
-            "char_end": 21
-          }
-        }
-      ]
+      "items": []
     }
   },
   {

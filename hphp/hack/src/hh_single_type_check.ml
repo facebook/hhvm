@@ -651,6 +651,7 @@ let handle_mode
       let autocomplete_context = { AutocompleteTypes.
         is_xhp_classname = false;
         is_instance_member = false;
+        is_after_single_colon = false;
       } in (* feature not implemented here; it only works for LSP *)
       let result = ServerAutoComplete.auto_complete
         ~tcopt ~delimit_on_namespaces:false ~autocomplete_context file in

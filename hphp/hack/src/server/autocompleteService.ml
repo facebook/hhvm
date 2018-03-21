@@ -222,197 +222,204 @@ let compute_complete_global
   let gname = Utils.strip_ns !auto_complete_for_global in
   let gname = strip_suffix gname in
   let gname = if autocomplete_context.is_xhp_classname then (":" ^ gname) else gname in
+  (* Colon hack: in "case Foo::Bar:", we wouldn't want to show autocomplete *)
+  (* here, but we would in "<nt:" and "$a->:" and "function f():". We can   *)
+  (* recognize this case by whether the prefix is empty.                    *)
+  if autocomplete_context.is_after_single_colon && gname = "" then
+    ()
+  else begin
 
-  (* Objective: given "fo|", we should suggest functions in both the current *)
-  (* namespace and also in the global namespace. We'll use gname_gns to      *)
-  (* indicate what prefix to look for (if any) in the global namespace...    *)
+    (* Objective: given "fo|", we should suggest functions in both the current *)
+    (* namespace and also in the global namespace. We'll use gname_gns to      *)
+    (* indicate what prefix to look for (if any) in the global namespace...    *)
 
-  (* "$z = S|"      => gname = "S",      gname_gns = Some "S"   *)
-  (* "$z = Str|"    => gname = "Str",    gname_gns = Some "Str" *)
-  (* "$z = Str\\|"  => gname = "Str\\",  gname_gns = None       *)
-  (* "$z = Str\\s|" => gname = "Str\\s", gname_gns = None       *)
-  (* "$z = \\s|"    => gname = "\\s",    gname_gns = None       *)
-  (* "...; |"       => gname = "",       gname_gns = Some ""    *)
-  let gname_gns = if should_complete_fun completion_type then
-    (* Disgusting hack alert!
-     *
-     * In PHP/Hack, namespaced function lookup falls back into the global
-     * namespace if no function in the current namespace exists. The
-     * typechecker knows everything that exists, and resolves all of this
-     * during naming -- meaning that by the time that we get to typing, not
-     * only has "gname" been fully qualified, but we've lost whatever it
-     * might have looked like originally. This makes it tough to do the full
-     * namespace fallback behavior here -- we'd like to know if whatever
-     * "gname" corresponds to in the source code has a '\' to qualify it, but
-     * since it's already fully qualified here, we can't know.
-     *
-     *   [NOTE(ljw): is this really even true? if user wrote "foo|" then name
-     *   lookup of "fooAUTO332" is guaranteed to fail in the current namespace,
-     *   and guaranteed to fail in the global namespace, so how would the
-     *   typechecker fully qualify it? to what? Experimentally I've only
-     *   ever seen gname to be the exact string that the user typed.]
-     *
-     * Except, we can kinda reverse engineer and figure it out. We have the
-     * positional information, which we can use to figure out how long the
-     * original source code token was, and then figure out what portion of
-     * "gname" that corresponds to, and see if it has a '\'. Since fully
-     * qualifying a name will always prepend, this all works.
-     *)
-    match !auto_complete_pos with
-      | None -> None
-      | Some p ->
-          let len = (Pos.length p) - suffix_len in
-          let start = String.length gname - len in
-          if start < 0 || String.contains_from gname start '\\'
-          then None else Some (strip_all_ns gname)
-    else None in
+    (* "$z = S|"      => gname = "S",      gname_gns = Some "S"   *)
+    (* "$z = Str|"    => gname = "Str",    gname_gns = Some "Str" *)
+    (* "$z = Str\\|"  => gname = "Str\\",  gname_gns = None       *)
+    (* "$z = Str\\s|" => gname = "Str\\s", gname_gns = None       *)
+    (* "$z = \\s|"    => gname = "\\s",    gname_gns = None       *)
+    (* "...; |"       => gname = "",       gname_gns = Some ""    *)
+    let gname_gns = if should_complete_fun completion_type then
+      (* Disgusting hack alert!
+       *
+       * In PHP/Hack, namespaced function lookup falls back into the global
+       * namespace if no function in the current namespace exists. The
+       * typechecker knows everything that exists, and resolves all of this
+       * during naming -- meaning that by the time that we get to typing, not
+       * only has "gname" been fully qualified, but we've lost whatever it
+       * might have looked like originally. This makes it tough to do the full
+       * namespace fallback behavior here -- we'd like to know if whatever
+       * "gname" corresponds to in the source code has a '\' to qualify it, but
+       * since it's already fully qualified here, we can't know.
+       *
+       *   [NOTE(ljw): is this really even true? if user wrote "foo|" then name
+       *   lookup of "fooAUTO332" is guaranteed to fail in the current namespace,
+       *   and guaranteed to fail in the global namespace, so how would the
+       *   typechecker fully qualify it? to what? Experimentally I've only
+       *   ever seen gname to be the exact string that the user typed.]
+       *
+       * Except, we can kinda reverse engineer and figure it out. We have the
+       * positional information, which we can use to figure out how long the
+       * original source code token was, and then figure out what portion of
+       * "gname" that corresponds to, and see if it has a '\'. Since fully
+       * qualifying a name will always prepend, this all works.
+       *)
+      match !auto_complete_pos with
+        | None -> None
+        | Some p ->
+            let len = (Pos.length p) - suffix_len in
+            let start = String.length gname - len in
+            if start < 0 || String.contains_from gname start '\\'
+            then None else Some (strip_all_ns gname)
+      else None in
 
-  let does_fully_qualified_name_match_prefix ?(funky_gns_rules=false) name =
-    let stripped_name = strip_ns name in
-    if delimit_on_namespaces then
-      (* name must match gname, and have no additional namespace slashes, e.g. *)
-      (* name="Str\\co" gname="S" -> false *)
-      (* name="Str\\co" gname="Str\\co" -> true *)
-      string_starts_with stripped_name gname &&
-        not (String.contains_from stripped_name (String.length gname) '\\')
-    else
-      match gname_gns with
-      | _ when string_starts_with stripped_name gname -> true
-      | Some gns when funky_gns_rules -> string_starts_with stripped_name gns
-      | _ -> false
-  in
-
-  let string_to_replace_prefix name =
-    let stripped_name = strip_ns name in
-    if delimit_on_namespaces then
-      (* returns the part of 'name' after its rightmost slash *)
-      try
-        let len = String.length stripped_name in
-        let i = (String.rindex stripped_name '\\') + 1 in
-        String.sub stripped_name i (len - i)
-      with _ ->
-        stripped_name
-    else
-      stripped_name
-  in
-
-  let result_count = ref 0 in
-
-  let on_class name ~seen =
-    if SSet.mem seen name then None else
-    if not (does_fully_qualified_name_match_prefix name) then None else
-    let target = Typing_lazy_heap.get_class tcopt name in
-    let target_kind = Option.map target ~f:(fun c -> c.Typing_defs.tc_kind) in
-    if not (should_complete_class completion_type target_kind) then None else
-    Option.map target ~f:(fun c ->
-      incr result_count;
-      if completion_type = Some Acnew then
-        get_partial_result
-          (string_to_replace_prefix name) (Phase.decl (get_constructor_ty c)) Constructor_kind
+    let does_fully_qualified_name_match_prefix ?(funky_gns_rules=false) name =
+      let stripped_name = strip_ns name in
+      if delimit_on_namespaces then
+        (* name must match gname, and have no additional namespace slashes, e.g. *)
+        (* name="Str\\co" gname="S" -> false *)
+        (* name="Str\\co" gname="Str\\co" -> true *)
+        string_starts_with stripped_name gname &&
+          not (String.contains_from stripped_name (String.length gname) '\\')
       else
-        let kind = match c.Typing_defs.tc_kind with
-          | Ast.Cabstract -> Abstract_class_kind
-          | Ast.Cnormal -> Class_kind
-          | Ast.Cinterface -> Interface_kind
-          | Ast.Ctrait -> Trait_kind
-          | Ast.Cenum -> Enum_kind
-        in
-        let ty =
-          Typing_reason.Rwitness c.Typing_defs.tc_pos,
-          Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), []) in
-        get_partial_result (string_to_replace_prefix name) (Phase.decl ty) kind
-    )
-  in
-
-  let on_function name ~seen =
-    if autocomplete_context.is_xhp_classname then None else
-    if SSet.mem seen name then None else
-    if not (should_complete_fun completion_type) then None else
-    if not (does_fully_qualified_name_match_prefix ~funky_gns_rules:true name) then None else
-    Option.map (Typing_lazy_heap.get_fun tcopt name) ~f:(fun fun_ ->
-      incr result_count;
-      let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
-      get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind
-    )
-  in
-
-  let on_namespace name : autocomplete_result option =
-    (* name will have the form "Str" or "HH\\Lib\\Str" *)
-    (* Our autocomplete will show up in the list as "Str". *)
-    if autocomplete_context.is_xhp_classname then None else
-    if not delimit_on_namespaces then None else
-    if not (does_fully_qualified_name_match_prefix name) then None else
-    Some (Complete {
-      res_pos = Pos.none |> Pos.to_absolute;
-      res_ty = "namespace";
-      res_name = string_to_replace_prefix name;
-      res_kind = Namespace_kind;
-      func_details = None;
-    })
-  in
-
-  (* Try using the names in local content buffer first *)
-  List.iter
-    (List.filter_map (SSet.elements content_classes) (on_class ~seen:SSet.empty))
-      add_res;
-  List.iter
-    (List.filter_map (SSet.elements content_funs) (on_function ~seen:SSet.empty))
-      add_res;
-
-  (* Add namespaces. The hack server doesn't index namespaces themselves; it  *)
-  (* only stores names of functions and classes in fully qualified form, e.g. *)
-  (*   \\HH\\Lib\\Str\\length                                                 *)
-  (* If the project's .hhconfig has auto_namesspace_map "Str": "HH\Lib\\Str"  *)
-  (* then the hack server will index the function just as                     *)
-  (*   \\Str\\length                                                          *)
-  (* The main index, having only a global list if functions/classes, doesn't  *)
-  (* actually offer any way for us to iterate over namespaces. And changing   *)
-  (* its trie-indexer to do so is kind of ugly. So as a temporary workaround, *)
-  (* to give an okay user-experience at least for the Hack standard library,  *)
-  (* we're just going to list all the possible standard namespaces right here *)
-  (* and see if any of them really exist in the current codebase/hhconfig!    *)
-  (* This will give a good experience only for codebases where users rarely   *)
-  (* define their own namespaces...                                           *)
-  let standard_namespaces =
-    ["C"; "Vec"; "Dict"; "Str"; "Keyset"; "Math"; "Regex"; "SecureRandom"; "PHP"; "JS"] in
-  let namespace_permutations ns = [
-     Printf.sprintf "%s" ns;
-     Printf.sprintf "%s\\fb" ns;
-     Printf.sprintf "HH\\Lib\\%s" ns;
-     Printf.sprintf "HH\\Lib\\%s\\fb" ns;
-  ] in
-  let all_possible_namespaces =
-    List.map standard_namespaces ~f:namespace_permutations |> List.concat
-  in
-  List.iter all_possible_namespaces ~f:(fun ns ->
-    let ns_results = search_funs_and_classes (ns ^ "\\") ~limit:(Some 1)
-      ~on_class:(fun _className -> on_namespace ns)
-      ~on_function:(fun _functionName -> on_namespace ns)
+        match gname_gns with
+        | _ when string_starts_with stripped_name gname -> true
+        | Some gns when funky_gns_rules -> string_starts_with stripped_name gns
+        | _ -> false
     in
-    List.iter ns_results.With_complete_flag.value add_res
-  );
 
-  (* Use search results to look for matches, while excluding names we have
-   * already seen in local content buffer *)
-  let gname_results = search_funs_and_classes gname ~limit:(Some 100)
-    ~on_class:(on_class ~seen:content_classes)
-    ~on_function:(on_function ~seen:content_funs)
-  in
-  autocomplete_is_complete :=
-    !autocomplete_is_complete && gname_results.With_complete_flag.is_complete;
-  List.iter gname_results.With_complete_flag.value add_res;
+    let string_to_replace_prefix name =
+      let stripped_name = strip_ns name in
+      if delimit_on_namespaces then
+        (* returns the part of 'name' after its rightmost slash *)
+        try
+          let len = String.length stripped_name in
+          let i = (String.rindex stripped_name '\\') + 1 in
+          String.sub stripped_name i (len - i)
+        with _ ->
+          stripped_name
+      else
+        stripped_name
+    in
 
-  (* Compute global namespace fallback results for functions, if applicable *)
-  match gname_gns with
-  | Some gname_gns when gname <> gname_gns ->
-    let gname_gns_results = search_funs_and_classes gname_gns ~limit:(Some 100)
-      ~on_class:(fun _ -> None)
+    let result_count = ref 0 in
+
+    let on_class name ~seen =
+      if SSet.mem seen name then None else
+      if not (does_fully_qualified_name_match_prefix name) then None else
+      let target = Typing_lazy_heap.get_class tcopt name in
+      let target_kind = Option.map target ~f:(fun c -> c.Typing_defs.tc_kind) in
+      if not (should_complete_class completion_type target_kind) then None else
+      Option.map target ~f:(fun c ->
+        incr result_count;
+        if completion_type = Some Acnew then
+          get_partial_result
+            (string_to_replace_prefix name) (Phase.decl (get_constructor_ty c)) Constructor_kind
+        else
+          let kind = match c.Typing_defs.tc_kind with
+            | Ast.Cabstract -> Abstract_class_kind
+            | Ast.Cnormal -> Class_kind
+            | Ast.Cinterface -> Interface_kind
+            | Ast.Ctrait -> Trait_kind
+            | Ast.Cenum -> Enum_kind
+          in
+          let ty =
+            Typing_reason.Rwitness c.Typing_defs.tc_pos,
+            Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), []) in
+          get_partial_result (string_to_replace_prefix name) (Phase.decl ty) kind
+      )
+    in
+
+    let on_function name ~seen =
+      if autocomplete_context.is_xhp_classname then None else
+      if SSet.mem seen name then None else
+      if not (should_complete_fun completion_type) then None else
+      if not (does_fully_qualified_name_match_prefix ~funky_gns_rules:true name) then None else
+      Option.map (Typing_lazy_heap.get_fun tcopt name) ~f:(fun fun_ ->
+        incr result_count;
+        let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
+        get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind
+      )
+    in
+
+    let on_namespace name : autocomplete_result option =
+      (* name will have the form "Str" or "HH\\Lib\\Str" *)
+      (* Our autocomplete will show up in the list as "Str". *)
+      if autocomplete_context.is_xhp_classname then None else
+      if not delimit_on_namespaces then None else
+      if not (does_fully_qualified_name_match_prefix name) then None else
+      Some (Complete {
+        res_pos = Pos.none |> Pos.to_absolute;
+        res_ty = "namespace";
+        res_name = string_to_replace_prefix name;
+        res_kind = Namespace_kind;
+        func_details = None;
+      })
+    in
+
+    (* Try using the names in local content buffer first *)
+    List.iter
+      (List.filter_map (SSet.elements content_classes) (on_class ~seen:SSet.empty))
+        add_res;
+    List.iter
+      (List.filter_map (SSet.elements content_funs) (on_function ~seen:SSet.empty))
+        add_res;
+
+    (* Add namespaces. The hack server doesn't index namespaces themselves; it  *)
+    (* only stores names of functions and classes in fully qualified form, e.g. *)
+    (*   \\HH\\Lib\\Str\\length                                                 *)
+    (* If the project's .hhconfig has auto_namesspace_map "Str": "HH\Lib\\Str"  *)
+    (* then the hack server will index the function just as                     *)
+    (*   \\Str\\length                                                          *)
+    (* The main index, having only a global list if functions/classes, doesn't  *)
+    (* actually offer any way for us to iterate over namespaces. And changing   *)
+    (* its trie-indexer to do so is kind of ugly. So as a temporary workaround, *)
+    (* to give an okay user-experience at least for the Hack standard library,  *)
+    (* we're just going to list all the possible standard namespaces right here *)
+    (* and see if any of them really exist in the current codebase/hhconfig!    *)
+    (* This will give a good experience only for codebases where users rarely   *)
+    (* define their own namespaces...                                           *)
+    let standard_namespaces =
+      ["C"; "Vec"; "Dict"; "Str"; "Keyset"; "Math"; "Regex"; "SecureRandom"; "PHP"; "JS"] in
+    let namespace_permutations ns = [
+       Printf.sprintf "%s" ns;
+       Printf.sprintf "%s\\fb" ns;
+       Printf.sprintf "HH\\Lib\\%s" ns;
+       Printf.sprintf "HH\\Lib\\%s\\fb" ns;
+    ] in
+    let all_possible_namespaces =
+      List.map standard_namespaces ~f:namespace_permutations |> List.concat
+    in
+    List.iter all_possible_namespaces ~f:(fun ns ->
+      let ns_results = search_funs_and_classes (ns ^ "\\") ~limit:(Some 1)
+        ~on_class:(fun _className -> on_namespace ns)
+        ~on_function:(fun _functionName -> on_namespace ns)
+      in
+      List.iter ns_results.With_complete_flag.value add_res
+    );
+
+    (* Use search results to look for matches, while excluding names we have
+     * already seen in local content buffer *)
+    let gname_results = search_funs_and_classes gname ~limit:(Some 100)
+      ~on_class:(on_class ~seen:content_classes)
       ~on_function:(on_function ~seen:content_funs)
     in
     autocomplete_is_complete :=
-      !autocomplete_is_complete && gname_gns_results.With_complete_flag.is_complete;
-    List.iter gname_gns_results.With_complete_flag.value add_res;
-  | _ -> ()
+      !autocomplete_is_complete && gname_results.With_complete_flag.is_complete;
+    List.iter gname_results.With_complete_flag.value add_res;
+
+    (* Compute global namespace fallback results for functions, if applicable *)
+    match gname_gns with
+    | Some gname_gns when gname <> gname_gns ->
+      let gname_gns_results = search_funs_and_classes gname_gns ~limit:(Some 100)
+        ~on_class:(fun _ -> None)
+        ~on_function:(on_function ~seen:content_funs)
+      in
+      autocomplete_is_complete :=
+        !autocomplete_is_complete && gname_gns_results.With_complete_flag.is_complete;
+      List.iter gname_gns_results.With_complete_flag.value add_res;
+    | _ -> ()
+  end
 
 (* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
 (* by using typing environment to convert ty information into strings. *)

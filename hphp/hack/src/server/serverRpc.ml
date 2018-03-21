@@ -44,6 +44,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           let autocomplete_context = { AutocompleteTypes.
             is_xhp_classname = false;
             is_instance_member = false;
+            is_after_single_colon = false;
           } in (* feature not implemented here; it only works for LSP *)
           ServerAutoComplete.auto_complete
             ~tcopt:env.tcopt ~delimit_on_namespaces:false ~autocomplete_context content

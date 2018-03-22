@@ -185,6 +185,27 @@ let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
   (* TAny, T.Calls that don't have types, etc *)
   | _ -> ()
 
+let is_byval_collection_type env ty =
+  let check t =
+    match t with
+    | (_, Tclass ((_, x), _)) ->
+      x = SN.Collections.cVec ||
+      x = SN.Collections.cDict ||
+      x = SN.Collections.cKeyset
+    | _, (Tarraykind (AKvarray _ | AKdarray _ | AKvarray_or_darray _ | AKvec _))
+      -> true
+    | _ -> false in
+  let _, tl = Typing_utils.get_all_supertypes env ty in
+  Core_list.for_all tl ~f:check
+
+let rec is_byval_collection_value env v =
+  match v with
+  | (_, Some ty), T.Lvar _ ->
+    is_byval_collection_type env ty
+  | (_, Some ty), T.Array_get (e, _) ->
+    is_byval_collection_type env ty &&
+    is_byval_collection_value env e
+  | _ -> false
 
 (* Checks for assignment errors as a pass on the TAST *)
 let handle_assignment_mutability
@@ -195,8 +216,9 @@ let handle_assignment_mutability
  (* Check for modifying immutable objects *)
  (match snd te1 with
   (* Setting mutable locals is okay *)
- | T.Obj_get (e1, _, _)
- | T.Array_get (e1, _) when expr_is_mutable env e1 -> ()
+ | T.Obj_get (e1, _, _) when expr_is_mutable env e1 -> ()
+ | T.Array_get (e1, _)
+   when expr_is_mutable env e1 || is_byval_collection_value env e1 -> ()
  | T.Class_get _
  | T.Obj_get _
  | T.Array_get _ ->

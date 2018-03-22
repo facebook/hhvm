@@ -209,9 +209,12 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         self.load_and_run('formatting', variables)
 
     def test_did_change(self):
-        self.prepare_environment()
-        variables = self.setup_php_file('didchange.php')
-        self.load_and_run('didchange', variables)
+        # Disabling this test because it has a race condition:
+        # see T27194253 for transcript
+        # self.prepare_environment()
+        # variables = self.setup_php_file('didchange.php')
+        # self.load_and_run('didchange', variables)
+        return
 
     def test_non_existing_method(self):
         self.prepare_environment()

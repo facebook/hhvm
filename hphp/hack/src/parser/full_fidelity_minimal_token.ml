@@ -60,6 +60,13 @@ let with_leading leading token =
 let with_trailing trailing token =
   { token with trailing }
 
+let filter_leading_trivia_by_kind token kind =
+  List.filter (fun t -> Trivia.kind t = kind) token.leading
+
+let has_trivia_kind token kind =
+  List.exists (fun t -> Trivia.kind t = kind) token.leading ||
+  List.exists (fun t -> Trivia.kind t = kind) token.trailing
+
 let leading_start_offset _ =
   0 (* Not available *)
 

@@ -161,6 +161,15 @@ let position file node =
     Some (SourceText.relative_pos file source_text start_offset end_offset)
   | Value.Synthetic -> None
 
+let position_exclusive file node =
+  match value node with
+  | Value.Positioned source_data ->
+    let source_text = SourceData.source_text source_data in
+    let start_offset = SourceData.start_offset source_data in
+    let end_offset = SourceData.end_offset source_data + 1 in
+    Some (SourceText.relative_pos file source_text start_offset end_offset)
+  | Value.Synthetic -> None
+
 let extract_text node =
   Some (text node)
 
@@ -201,5 +210,41 @@ module ValueBuilder = struct
       Syntax.fold_over_children folder (Value.Synthetic, Value.Synthetic) syntax in
     pr first last
 end
+
+(* TODO: This code is duplicated in the positioned syntax; consider pulling it
+out into its own module. *)
+(* Takes a node and an offset; produces the descent through the parse tree
+   to that position. *)
+let parentage node position =
+  let rec aux nodes position acc =
+    match nodes with
+    | [] -> acc
+    | h :: t ->
+      let width = full_width h in
+      if position < width then
+        aux (children h) position (h :: acc)
+      else
+        aux t (position - width) acc in
+  aux [node] position []
+
+let is_in_body node position =
+  let rec aux parents =
+    match parents with
+    | [] -> false
+    | h1 :: t1 ->
+      if is_compound_statement h1 then
+        match t1 with
+        | [] -> false
+        | h2 :: _ ->
+          is_methodish_declaration h2 || is_function_declaration h2 || aux t1
+      else
+        aux t1 in
+  let parents = parentage node position in
+  aux parents
+
+let is_synthetic node =
+  match value node with
+  | Value.Synthetic -> true
+  | Value.Positioned _ -> false
 
 include Syntax.WithValueBuilder(ValueBuilder)

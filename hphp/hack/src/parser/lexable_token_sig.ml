@@ -7,6 +7,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
+module TriviaKind = Full_fidelity_trivia_kind
+
 module type LexableToken_S = sig
   module Trivia : Lexable_trivia_sig.LexableTrivia_S
   type t
@@ -29,4 +31,6 @@ module type LexableToken_S = sig
   val with_leading: Trivia.t list -> t -> t
   val with_kind: t -> Full_fidelity_token_kind.t -> t
   val with_trailing: Trivia.t list -> t -> t
+  val filter_leading_trivia_by_kind: t -> TriviaKind.t -> Trivia.t list
+  val has_trivia_kind: t -> TriviaKind.t -> bool
 end

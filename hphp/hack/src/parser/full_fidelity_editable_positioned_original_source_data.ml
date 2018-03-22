@@ -88,11 +88,17 @@ let with_leading leading data =
 let trailing data =
   data.trailing
 
+let with_trailing trailing data =
+  (* TODO: Do we need to update trailing_width and offset? *)
+  { data with trailing }
+
 let start_offset data =
   leading_start_offset data + leading_width data
 
 let end_offset data =
-  start_offset data + width data
+  let w = leading_width data - 1 in
+  let w = if w < 0 then 0 else w in
+  leading_start_offset data + w
 
 let full_width data =
   leading_width data + width data + trailing_width data
@@ -121,7 +127,7 @@ let spanning_between b e =
     source_text = b.source_text;
     offset = b.offset;
     leading_width = b.leading_width;
-    width = end_offset e - start_offset b;
+    width = end_offset e + 1 - start_offset b;
     trailing_width = e.trailing_width;
     leading = b.leading;
     trailing = e.trailing;

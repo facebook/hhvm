@@ -106,7 +106,7 @@ let filter_leading_trivia_by_kind token kind =
   | Original orig_token
   | SynthesizedFromOriginal (_, orig_token)
     ->
-      List.filter (fun t -> Full_fidelity_positioned_trivia.kind t = kind)
+      List.filter (fun t -> Trivia.kind t = kind)
         (SourceData.leading orig_token)
   | _ -> []
 
@@ -115,7 +115,7 @@ let has_trivia_kind token kind =
   | Original orig_token
   | SynthesizedFromOriginal (_, orig_token)
     ->
-      let kind_of = Full_fidelity_positioned_trivia.kind in
+      let kind_of = Trivia.kind in
       List.exists (fun t -> kind_of t = kind) (SourceData.leading orig_token) ||
       List.exists (fun t -> kind_of t = kind) (SourceData.trailing orig_token)
   | _ -> false (* Assume we don't introduce well-formed trivia *)
@@ -175,11 +175,14 @@ let with_updated_original_source_data token update_original_source_data =
 let with_leading leading token =
   with_updated_original_source_data token (SourceData.with_leading leading)
 
-let with_trailing_text trailing_text token =
-  { token with trailing_text }
-
 let with_kind token kind =
   { token with kind }
+
+let with_trailing trailing token =
+  with_updated_original_source_data token (SourceData.with_trailing trailing)
+
+let with_trailing_text trailing_text token =
+  { token with trailing_text }
 
 let concatenate b e =
   let token_data =
@@ -201,6 +204,27 @@ let concatenate b e =
     trailing_text = trailing_text e;
     token_data;
   }
+
+let trim_left ~n t =
+  with_updated_original_source_data
+    t
+    SourceData.(fun t ->
+      { t with
+        leading_width = leading_width t + n
+      ; width = width t - n
+      }
+    )
+
+let trim_right ~n t =
+  with_updated_original_source_data
+    t
+    SourceData.(fun t ->
+      { t with
+        trailing_width = trailing_width t + n
+      ; width = width t - n
+      }
+    )
+
 
 let to_json token =
   let original_source_data = original_source_data_or_default token in

@@ -76,6 +76,9 @@ let trailing token =
 let with_trailing trailing token =
   { token with trailing }
 
+let filter_leading_trivia_by_kind token kind =
+  List.filter (fun t -> Trivia.kind t = kind) token.leading
+
 let has_trivia_kind token kind =
   List.exists (fun t -> Trivia.kind t = kind) token.leading ||
   List.exists (fun t -> Trivia.kind t = kind) token.trailing
@@ -159,6 +162,25 @@ let from_minimal source_text minimal_token offset =
   let trailing = Trivia.from_minimal_list source_text
     (MinimalToken.trailing minimal_token) (offset + leading_width + width) in
   make kind source_text offset width leading trailing
+
+let concatenate b e =
+  { b with
+    width = (end_offset e + 1) - start_offset b;
+    trailing_width = e.trailing_width;
+    trailing = e.trailing
+  }
+
+let trim_left ~n t =
+  { t with
+    leading_width = t.leading_width + n
+  ; width = t.width - n
+  }
+
+let trim_right ~n t =
+  { t with
+    trailing_width = t.trailing_width + n
+  ; width = t.width - n
+  }
 
 let to_json token =
   let open Hh_json in

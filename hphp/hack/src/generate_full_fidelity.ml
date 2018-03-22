@@ -513,8 +513,10 @@ SYNTAX
   val children : t -> t list
   val syntax : t -> syntax
   val kind : t -> Full_fidelity_syntax_kind.t
+  val value : t -> value
   val make_token : Token.t -> t
   val get_token : t -> Token.t option
+  val all_tokens : t -> Token.t list
   val make_missing : Full_fidelity_source_text.t -> int -> t
   val make_list : Full_fidelity_source_text.t -> int -> t list -> t
   val is_namespace_prefix : t -> bool

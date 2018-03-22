@@ -7,32 +7,10 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-
-module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_positioned_syntax)
-module Syntax = Full_fidelity_editable_positioned_syntax
-module SyntaxValue = Syntax.Value
-module NS = Namespaces
-
-module SyntaxKind = Full_fidelity_syntax_kind
-module TK = Full_fidelity_token_kind
-module Trivia = Full_fidelity_positioned_trivia
-module TriviaKind = Full_fidelity_trivia_kind
-module ParserErrors = Full_fidelity_parser_errors
-  .WithSyntax(Full_fidelity_positioned_syntax)
 open Prim_defs
-
 open Hh_core
-
-(* What we're lowering from *)
-open Syntax
-type node = Syntax.t (* Let's be more explicit *)
-(* What we're lowering to *)
+(* What we are lowering to *)
 open Ast
-
-let drop_pstr : int -> pstring -> pstring = fun cnt (pos, str) ->
-  let len = String.length str in
-  pos, if cnt >= len then "" else String.sub str cnt (len - cnt)
 
 (* Context of the file being parsed, as (hopefully some day read-only) state. *)
 type env =
@@ -69,6 +47,90 @@ type env =
   ; mutable saw_compiler_halt_offset : int option
   }
 
+let make_env
+  ?(codegen                  = false                   )
+  ?(systemlib_compat_mode    = false                   )
+  ?(php5_compat_mode         = false                   )
+  ?(elaborate_namespaces     = true                    )
+  ?(include_line_comments    = false                   )
+  ?(keep_errors              = true                    )
+  ?(ignore_pos               = false                   )
+  ?(quick_mode               = false                   )
+  ?(lower_coroutines         = false                   )
+  ?(enable_hh_syntax         = false                   )
+  ?(disallow_elvis_space     = false                   )
+  ?(fail_open                = true                    )
+  ?(parser_options           = ParserOptions.default   )
+  ?(fi_mode                  = FileInfo.Mpartial       )
+  ?(is_hh_file               = false                   )
+  ?stats
+  (file : Relative_path.t)
+  : env
+  = let parser_options = ParserOptions.with_hh_syntax_for_hhvm parser_options
+      (codegen && (enable_hh_syntax || is_hh_file)) in
+    let parser_options = ParserOptions.with_disallow_elvis_space parser_options
+      disallow_elvis_space in
+    { is_hh_file
+    ; codegen = codegen || systemlib_compat_mode
+    ; systemlib_compat_mode
+    ; php5_compat_mode
+    ; elaborate_namespaces
+    ; include_line_comments
+    ; keep_errors
+    ; quick_mode =
+         not codegen
+      && (match fi_mode with
+         | FileInfo.Mdecl
+         | FileInfo.Mphp -> true
+         | _ -> quick_mode
+         )
+    ; lower_coroutines
+    ; enable_hh_syntax
+    ; disallow_elvis_space
+    ; parser_options
+    ; fi_mode
+    ; fail_open
+    ; file
+    ; stats
+    ; top_level_statements = true
+    ; ignore_pos
+    ; max_depth = 42
+    ; saw_yield = false
+    ; unsafes = ISet.empty
+    ; saw_std_constant_redefinition = false
+    ; saw_compiler_halt_offset = None
+    }
+
+type result =
+  { fi_mode  : FileInfo.mode
+  ; is_hh_file : bool
+  ; ast      : Ast.program
+  ; content  : string
+  ; file     : Relative_path.t
+  ; comments : (Pos.t * comment) list
+  }
+
+module WithPositionedSyntax(Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
+
+(* What we're lowering from *)
+open Syntax
+
+type node = Syntax.t
+
+module Token = Syntax.Token
+module Trivia = Token.Trivia
+module TriviaKind = Trivia.TriviaKind
+
+module SyntaxKind = Full_fidelity_syntax_kind
+module TK = Full_fidelity_token_kind
+module SourceText = Trivia.SourceText
+
+module NS = Namespaces
+
+let drop_pstr : int -> pstring -> pstring = fun cnt (pos, str) ->
+  let len = String.length str in
+  pos, if cnt >= len then "" else String.sub str cnt (len - cnt)
+
 let non_tls env = if not env.top_level_statements then env else
   { env with top_level_statements = false }
 
@@ -80,15 +142,9 @@ let mode_annotation = function
   | m -> m
 
 let pPos : Pos.t parser = fun node env ->
-  if env.ignore_pos || value node = Value.Synthetic
+  if env.ignore_pos
   then Pos.none
-  else begin
-    let pos_file = env.file in
-    let text = source_text node in
-    let start_offset = start_offset node in
-    let end_offset = end_offset node in
-    SourceText.relative_pos pos_file text start_offset end_offset
-  end
+  else Option.value ~default:Pos.none (position_exclusive env.file node)
 
 (* HHVM starts range of function declaration from the 'function' keyword *)
 let pFunction node env =
@@ -108,7 +164,6 @@ let pFunction node env =
     end
   | _ -> p
 
-
 exception Lowerer_invariant_failure of string * string
 let invariant_failure node msg env =
   let pos = Pos.string (Pos.to_absolute (pPos node env)) in
@@ -116,7 +171,7 @@ let invariant_failure node msg env =
 
 let scuba_table = Scuba.Table.of_name "hh_missing_lowerer_cases"
 
-let log_missing ?(caught = false) ~env ~expecting node : unit =
+let log_missing ?(caught = false) ~(env:env) ~expecting node : unit =
   EventLogger.log_if_initialized @@ fun () ->
     let source = source_text node in
     let start = start_offset node in
@@ -132,7 +187,7 @@ let log_missing ?(caught = false) ~env ~expecting node : unit =
     let kind = SyntaxKind.to_string (Syntax.kind node) in
     let line = Pos.line pos in
     let column = Pos.start_cnum pos in
-    let synthetic = value node = Value.Synthetic in
+    let synthetic = is_synthetic node in
     Scuba.new_sample (Some scuba_table)
     |> Scuba.add_normal "filename" file
     |> Scuba.add_normal "expecting" expecting
@@ -354,40 +409,13 @@ let pParamKind : param_kind parser = fun node env ->
   | Some TK.Inout -> Pinout
   | _ -> missing_syntax "param kind" node env
 
-let syntax_of_token : Token.t -> node = fun t ->
-  let value =
-    SyntaxValue.from_token t in
-  make (Token t) value
-
 (* TODO: Clean up string escaping *)
 let prepString2 : node list -> node list =
   let is_double_quote_or_backtick ch = ch = '"' || ch = '`' in
   let is_binary_string_header s =
     (String.length s > 1) && (s.[0] = 'b') && (s.[1] = '"') in
-  let trimLeft ~n t =
-    Token.(
-      with_updated_original_source_data
-        t
-        SourceData.(fun t ->
-          { t with
-            leading_width = leading_width t + n;
-            width = width t - n;
-          }
-        )
-    )
-  in
-  let trimRight ~n t =
-    Token.(
-      with_updated_original_source_data
-        t
-        SourceData.(fun t ->
-          { t with
-            trailing_width = trailing_width t + n;
-            width = width t - n;
-          }
-        )
-    )
-  in
+  let trimLeft = Token.trim_left in
+  let trimRight = Token.trim_right in
   function
   | ({ syntax = Token t; _ }::ss)
   when (Token.width t) > 0 &&
@@ -397,14 +425,14 @@ let prepString2 : node list -> node list =
       | [{ syntax = Token t; _ }]
       when (Token.width t) > 0 &&
           is_double_quote_or_backtick ((Token.text t).[(Token.width t) - 1]) ->
-        let s = syntax_of_token (trimRight ~n:1 t) in
+        let s = make_token (trimRight ~n:1 t) in
         if width s > 0 then [s] else []
       | x :: xs -> x :: unwind xs
       | _ -> raise (Invalid_argument "Malformed String2 SyntaxList")
     in
     (* Trim the starting b and double quote *)
     let left_trim = if (Token.text t).[0] = 'b' then 2 else 1 in
-    let s = syntax_of_token (trimLeft ~n:left_trim t) in
+    let s = make_token (trimLeft ~n:left_trim t) in
     if width s > 0 then s :: unwind ss else unwind ss
   | ({ syntax = Token t; _ }::ss)
   when (Token.width t) > 3 && String.sub (Token.text t) 0 3 = "<<<" ->
@@ -413,14 +441,14 @@ let prepString2 : node list -> node list =
         let content = Token.text t in
         let len = (Token.width t) in
         let n = len - (String.rindex_from content (len - 2) '\n') in
-        let s = syntax_of_token (trimRight ~n t) in
+        let s = make_token (trimRight ~n t) in
         if width s > 0 then [s] else []
       | x :: xs -> x :: unwind xs
       | _ -> raise (Invalid_argument "Malformed String2 SyntaxList")
     in
     let content = Token.text t in
     let n = (String.index content '\n') + 1 in
-    let s = syntax_of_token (trimLeft ~n t) in
+    let s = make_token (trimLeft ~n t) in
     if width s > 0 then s :: unwind ss else unwind ss
   | x -> x (* unchanged *)
 
@@ -786,7 +814,7 @@ and pAField : afield parser = fun node env ->
 and pString2: expr_location -> node list -> env -> expr list =
   let rec convert_name_to_lvar location env n =
     match syntax n with
-    | Token { Token.kind = TK.Name; _ } ->
+    | Token token when Token.kind token = TK.Name ->
       let pos, name = pos_name n env in
       let id = Lvar (pos, "$" ^ name) in
       Some (pos, id)
@@ -806,11 +834,11 @@ and pString2: expr_location -> node list -> env -> expr list =
     *)
     match l with
     | [] -> List.rev acc
-    | ({ syntax = Token { Token.kind = TK.Dollar; _ }; _ })::
+    | ({ syntax = Token token; _ })::
       ({ syntax = EmbeddedBracedExpression {
           embedded_braced_expression_expression = e; _ }; _
         } as expr_with_braces)::
-      tl ->
+      tl when Token.kind token = TK.Dollar ->
         let e =
           begin match convert_name_to_lvar loc env e with
           | Some e -> e
@@ -829,11 +857,11 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     match List.rev (as_list arg_list) with
     | { syntax = DecoratedExpression
         { decorated_expression_decorator =
-          { syntax = Token { Token.kind = Token.TokenKind.DotDotDot; _ }; _ }
+          { syntax = Token token; _ }
         ; decorated_expression_expression = e
         }
       ; _
-      } :: xs ->
+      } :: xs when Token.kind token = TK.DotDotDot ->
       let args = List.rev_map xs (fun x -> pExpr x env) in
       let vararg = pExpr e env in
       args, [vararg]
@@ -1128,7 +1156,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | qual -> qual
       in
       begin match syntax scope_resolution_name with
-      | Token { Token.kind = TK.Variable; _ } ->
+      | Token token when Token.kind token = TK.Variable ->
         let name =
           ( pPos scope_resolution_name env
           , Lvar (pos_name scope_resolution_name env)
@@ -1277,9 +1305,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           Execution_operator [pos, String (pos, mkStr Php_escaping.unescape_backtick s)]
         | _ -> missing_syntax "literal" expr env
         )
-      | SyntaxList (
-         { syntax = Token { Token.kind = TK.ExecutionStringLiteralHead; _ }; _ }
-         :: _ as ts) ->
+      | SyntaxList ({ syntax = Token token; _ } :: _ as ts)
+        when Token.kind token = TK.ExecutionStringLiteralHead ->
         Execution_operator (pString2 InBacktickedString (prepString2 ts) env)
       | SyntaxList ts -> String2 (pString2 InDoubleQuotedString (prepString2 ts) env)
       | _ -> missing_syntax "literal expression" expr env
@@ -1387,7 +1414,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         (pos, ":" ^ name)
       in
       let combine b e =
-        syntax_of_token Token.(
+        make_token Token.(
           concatenate b e
         )
       in
@@ -1406,16 +1433,16 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       in
       let pEmbedded escaper node env =
         match syntax node with
-        | Token { Token.kind = TK.XHPStringLiteral; _ }
-          when env.codegen ->
+        | Token token
+          when env.codegen && Token.kind token = TK.XHPStringLiteral ->
           let p = pPos node env in
           (* for XHP string literals (attribute values) just extract
               value from quotes and decode HTML entities  *)
           let text =
             Html_entities.decode @@ get_quoted_content (full_text node) in
           p, String (p, text)
-        | Token { Token.kind = TK.XHPBody; _ }
-          when env.codegen ->
+        | Token token
+          when env.codegen && Token.kind token = TK.XHPBody ->
           let p = pPos node env in
           (* for XHP body - only decode HTML entities *)
           let text = Html_entities.decode @@ unesc_xhp (full_text node) in
@@ -1678,9 +1705,10 @@ and pStmt : stmt parser = fun node env ->
     ; _ } ->
     let col = pExpr foreach_collection env in
     let akw =
-      if is_specific_token TK.Await foreach_await_keyword
-      then Some (pPos foreach_await_keyword env)
-      else None
+      match syntax foreach_await_keyword with
+      | Token token when Token.kind token = TK.Await ->
+        Some (pPos foreach_await_keyword env)
+      | _ -> None
     in
     let akv =
       let value = pExpr foreach_value env in
@@ -1869,9 +1897,10 @@ and pFunHdr : fun_hdr parser = fun node env ->
                 let l = pHint where_constraint_left_type env in
                 let o =
                   match syntax where_constraint_operator with
-                  | Token { Token.kind = TK.Equal; _ } -> Constraint_eq
-                  | Token { Token.kind = TK.As; _ } -> Constraint_as
-                  | Token { Token.kind = TK.Super; _ } -> Constraint_super
+                  | Token token when Token.kind token = TK.Equal ->
+                    Constraint_eq
+                  | Token token when Token.kind token = TK.As -> Constraint_as
+                  | Token token when Token.kind token = TK.Super -> Constraint_super
                   | _ -> missing_syntax "constraint operator" where_constraint_operator env
                 in
                 let r = pHint where_constraint_right_type env in
@@ -2291,10 +2320,10 @@ and pNamespaceUseClause ~prefix env kind node =
     end;
     let kind =
       match syntax kind with
-      | Token { Token.kind = TK.Namespace; _ } -> NSNamespace
-      | Token { Token.kind = TK.Type     ; _ } -> NSClass
-      | Token { Token.kind = TK.Function ; _ } -> NSFun
-      | Token { Token.kind = TK.Const    ; _ } -> NSConst
+      | Token token when Token.kind token = TK.Namespace -> NSNamespace
+      | Token token when Token.kind token = TK.Type      -> NSClass
+      | Token token when Token.kind token = TK.Function  -> NSFun
+      | Token token when Token.kind token = TK.Const     -> NSConst
       | Missing                             -> NSClassAndNamespace
       | _ -> missing_syntax "namespace use kind" kind env
     in
@@ -2727,69 +2756,6 @@ let scour_comments
  * Front-end matter
 )*****************************************************************************)
 
-type result =
-  { fi_mode  : FileInfo.mode
-  ; is_hh_file : bool
-  ; ast      : Ast.program
-  ; content  : string
-  ; file     : Relative_path.t
-  ; comments : (Pos.t * comment) list
-  }
-
-let make_env
-  ?(codegen                  = false                   )
-  ?(systemlib_compat_mode    = false                   )
-  ?(php5_compat_mode         = false                   )
-  ?(elaborate_namespaces     = true                    )
-  ?(include_line_comments    = false                   )
-  ?(keep_errors              = true                    )
-  ?(ignore_pos               = false                   )
-  ?(quick_mode               = false                   )
-  ?(lower_coroutines         = false                   )
-  ?(enable_hh_syntax         = false                   )
-  ?(disallow_elvis_space     = false                   )
-  ?(fail_open                = true                    )
-  ?(parser_options           = ParserOptions.default   )
-  ?(fi_mode                  = FileInfo.Mpartial       )
-  ?(is_hh_file               = false                   )
-  ?stats
-  (file : Relative_path.t)
-  : env
-  = let parser_options = ParserOptions.with_hh_syntax_for_hhvm parser_options
-      (codegen && (enable_hh_syntax || is_hh_file)) in
-    let parser_options = ParserOptions.with_disallow_elvis_space parser_options
-      disallow_elvis_space in
-    { is_hh_file
-    ; codegen = codegen || systemlib_compat_mode
-    ; systemlib_compat_mode
-    ; php5_compat_mode
-    ; elaborate_namespaces
-    ; include_line_comments
-    ; keep_errors
-    ; quick_mode =
-         not codegen
-      && (match fi_mode with
-         | FileInfo.Mdecl
-         | FileInfo.Mphp -> true
-         | _ -> quick_mode
-         )
-    ; lower_coroutines
-    ; enable_hh_syntax
-    ; disallow_elvis_space
-    ; parser_options
-    ; fi_mode
-    ; fail_open
-    ; file
-    ; stats
-    ; top_level_statements = true
-    ; ignore_pos
-    ; max_depth = 42
-    ; saw_yield = false
-    ; unsafes = ISet.empty
-    ; saw_std_constant_redefinition = false
-    ; saw_compiler_halt_offset = None
-    }
-
 let elaborate_toplevel_and_std_constants ast env source_text =
   match env.elaborate_namespaces, env.saw_std_constant_redefinition with
   | true, true ->
@@ -2858,6 +2824,18 @@ let lower env ~source_text ~script : result =
   ; comments
   ; file = env.file
   }
+end (* FromPositionedSyntax *)
+
+(* TODO: Make these not default to positioned_syntax *)
+module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_positioned_syntax)
+module ParserErrors = Full_fidelity_parser_errors
+  .WithSyntax(Full_fidelity_positioned_syntax)
+module SourceText = Full_fidelity_source_text
+module FromEditablePositionedSyntax =
+  WithPositionedSyntax(Full_fidelity_editable_positioned_syntax)
+module FromPositionedSyntax =
+  WithPositionedSyntax(Full_fidelity_positioned_syntax)
 
 let from_text (env : env) (source_text : SourceText.t) : result =
   let tree =
@@ -2888,13 +2866,6 @@ let from_text (env : env) (source_text : SourceText.t) : result =
     | e :: _, _ ->
       raise @@ Full_fidelity_syntax_error.ParserFatal e
   in
-  let script = SyntaxTree.root tree in
-  let script = from_positioned_syntax script in
-  let script =
-    if env.lower_coroutines then
-      Coroutine_lowerer.lower_coroutines script
-    else
-      script in
   let fi_mode = if SyntaxTree.is_php tree then FileInfo.Mphp else
     let mode_string = String.trim (SyntaxTree.mode tree) in
     let mode_word =
@@ -2922,10 +2893,21 @@ let from_text (env : env) (source_text : SourceText.t) : result =
   let popt = ParserOptions.with_disallow_elvis_space popt
     env.disallow_elvis_space in
   let env = { env with parser_options = popt } in
-  lower
-    env
-    ~source_text
-    ~script
+  let script = SyntaxTree.root tree in
+  if env.lower_coroutines
+  then
+    let script =
+      Full_fidelity_editable_positioned_syntax.from_positioned_syntax script
+      |> Coroutine_lowerer.lower_coroutines in
+    FromEditablePositionedSyntax.lower
+      env
+      ~source_text
+      ~script
+  else
+    FromPositionedSyntax.lower
+      env
+      ~source_text
+      ~script
 
 let from_file (env : env) : result =
   let source_text = SourceText.from_file env.file in

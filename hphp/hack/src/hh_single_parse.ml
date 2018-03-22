@@ -94,7 +94,8 @@ let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
       invalidated in
   let is_hh_file = is_hack tree in
   let env = Lowerer.make_env ~is_hh_file file in
-  Lowerer.lower env ~source_text ~script:invalidated
+  let module Lowerer = Lowerer.WithPositionedSyntax(Full_fidelity_editable_positioned_syntax) in
+    Lowerer.lower env ~source_text ~script:invalidated
 
 let measure : ('a -> 'b) -> 'a -> 'b * float = fun f x ->
   let start = Unix.gettimeofday () in

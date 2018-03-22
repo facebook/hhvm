@@ -270,3 +270,11 @@ let position file node =
   Some (SourceText.relative_pos file source_text start_offset end_offset)
 
 let offset node = Some (start_offset node)
+
+let position_exclusive file node =
+  let source_text = source_text node in
+  let start_offset = start_offset node in
+  let end_offset = end_offset node + 1 in
+  Some (SourceText.relative_pos file source_text start_offset end_offset)
+
+let is_synthetic node = false

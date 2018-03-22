@@ -8,11 +8,7 @@
  *
  *)
 
-(**
- * Explicitly exporting the definition of `Syntax` used in the lowerer. This
- * should
- *)
-module Syntax = Full_fidelity_editable_positioned_syntax
+module SourceText = Full_fidelity_source_text
 
 (**
  * The `env` of the lowerer is "full request." It provides all the settings the
@@ -55,12 +51,18 @@ type result =
   ; file       : Relative_path.t
   ; comments   : (Pos.t * Prim_defs.comment) list
   }
-val lower
-  :  env
-  -> source_text:Syntax.SourceText.t
-  -> script:Syntax.t
-  -> result
-val from_text : env -> Syntax.SourceText.t -> result
+
+module WithPositionedSyntax : functor (Syntax : Positioned_syntax_sig.PositionedSyntax_S) -> sig
+
+  val lower
+    :  env
+    -> source_text:SourceText.t
+    -> script:Syntax.t
+    -> result
+
+end (* WithPositionedSyntax *)
+
+val from_text : env -> SourceText.t -> result
 val from_file : env -> result
 
 (**

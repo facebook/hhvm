@@ -2805,7 +2805,7 @@ and uninstantiable_error reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
   Errors.uninstantiable_class c_usage_pos c_tc_pos c_name reason_msgl
 
 and exception_ty pos env ty =
-  let exn_ty = Reason.Rthrow pos, Tclass ((pos, SN.Classes.cException), []) in
+  let exn_ty = Reason.Rthrow pos, Tclass ((pos, SN.Classes.cThrowable), []) in
   Type.sub_type pos (Reason.URthrow) env ty exn_ty
 
 and shape_field_pos = function

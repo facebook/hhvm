@@ -3463,6 +3463,7 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
     (* Statically known *)
     | Class_id cid ->
       let fq_cid, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
+      Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_cid);
       instr_fpushclsmethodd nargs method_id fq_cid
     | Class_static ->
       instr_fpushclsmethodsd nargs SpecialClsRef.Static method_id

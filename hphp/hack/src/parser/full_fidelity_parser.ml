@@ -136,12 +136,13 @@ include WithSmartConstructors(SC)
 
 end (* WithSyntax *)
 
+module SourceText = Full_fidelity_source_text
+module Syntax = Full_fidelity_minimal_syntax
+module Parser = WithSyntax(Syntax)
+open Syntax
+
 (* Parsing only the header of the file for language and mode information *)
 let get_language_and_mode text =
-  let module SourceText = Full_fidelity_source_text in
-  let module Syntax = Full_fidelity_minimal_syntax in
-  let module Parser = WithSyntax(Syntax) in
-  let open Syntax in
   let php = FileInfo.PhpFile in
   let hh = FileInfo.HhFile in
   let header = Parser.parse_header_only (Env.make ()) text in

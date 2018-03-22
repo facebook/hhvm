@@ -28,7 +28,7 @@ module Classes = struct
 
   let cHH_BuiltinEnum = "\\HH\\BuiltinEnum"
 
-  let cException = "\\Exception"
+  let cThrowable= "\\Throwable"
   let cStdClass = "\\stdClass"
   let cDateTime = "\\DateTime"
 

@@ -227,7 +227,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
         else
           let type_argument env hint =
             match hint with
-            | (pos, Nast.Happly ((_, "_"), [])) ->
+            | (pos, Nast.Happly ((_, id), [])) when id = SN.Typehints.wildcard ->
               let reason = Reason.Rwitness pos in
               TUtils.in_var env (reason, Tunresolved [])
             | _ -> hint_locl env hint in

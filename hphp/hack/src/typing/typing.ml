@@ -4659,7 +4659,7 @@ and trait_most_concrete_req_class trait env =
  *)
 and type_argument env hint =
   match hint with
-  | (_, Happly((_, "_"), [])) ->
+  | (_, Happly((_, id), [])) when id = SN.Typehints.wildcard  ->
     Env.fresh_unresolved_type env
   | _ ->
     Phase.hint_locl env hint
@@ -5604,81 +5604,6 @@ and condition ?lhs_of_null_coalesce env tparamet =
        * position data for the latter. *)
       let env, _te, obj_ty = static_class_id p env cid in
 
-      (* New implementation of instanceof that is statically safe *)
-      let safe_instanceof env obj_ty _c class_info =
-        (* Generate fresh names consisting of formal type parameter name
-         * with unique suffix *)
-        let env, tparams_with_new_names =
-          List.map_env env class_info.tc_tparams
-            (fun env ((_, (_,name), _) as tp) ->
-              let env, name = Env.add_fresh_generic_parameter env name in
-              env, (tp, name)) in
-        let s =
-            snd _c ^ "<" ^
-            String.concat "," (List.map tparams_with_new_names ~f:snd)
-            ^ ">" in
-        let reason = Reason.Rinstanceof (ivar_pos, s) in
-        let tyl_fresh = List.map
-            ~f:(fun (_, newname) -> (reason, Tabstract(AKgeneric newname, None)))
-            tparams_with_new_names in
-
-        (* Type of variable in block will be class name
-         * with fresh type parameters *)
-        let obj_ty = (fst obj_ty, Tclass(_c, tyl_fresh)) in
-
-        (* Add in constraints as assumptions on those type parameters *)
-        let ety_env = {
-          type_expansions = [];
-          substs = Subst.make class_info.tc_tparams tyl_fresh;
-          this_ty = obj_ty; (* In case `this` appears in constraints *)
-          from_class = None;
-        } in
-        let add_bounds env ((_, _, cstr_list), ty_fresh) =
-            List.fold_left cstr_list ~init:env ~f:begin fun env (ck, ty) ->
-              (* Substitute fresh type parameters for
-               * original formals in constraint *)
-            let env, ty = Phase.localize ~ety_env env ty in
-            SubType.add_constraint p env ck ty_fresh ty end in
-        let env =
-          List.fold_left (List.zip_exn class_info.tc_tparams tyl_fresh)
-            ~f:add_bounds ~init:env in
-
-        (* Finally, if we have a class-test on something with static class type,
-         * then we can chase the hierarchy and decompose the types to deduce
-         * further assumptions on type parameters. For example, we might have
-         *   class B<Tb> { ... }
-         *   class C extends B<int>
-         * and have obj_ty = C and x_ty = B<T> for a generic parameter T.
-         * Then SubType.add_constraint will deduce that T=int and add int as
-         * both lower and upper bound on T in env.lenv.tpenv
-         *)
-        let env = SubType.add_constraint p env Ast.Constraint_as obj_ty x_ty in
-
-        (* It's often the case that the fresh name isn't necessary. For
-         * example, if C<T> extends B<T>, and we have $x:B<t> for some type t
-         * then $x instanceof B should refine to $x:C<t>.
-         * We take a simple approach:
-         *    For a fresh type parameter T#1, if
-         *    1) There is an eqality constraint T#1 = t then replace T#1 with t.
-         *    2) T#1 is covariant, and T#1 <: t and occurs nowhere else in the constraints
-         *    3) T#1 is contravariant, and t <: T#1 and occurs nowhere else in the constraints
-         *)
-        let tparams_in_constraints = Env.get_tpenv_tparams env in
-        let tyl_fresh_simplified =
-          List.map tparams_with_new_names
-          ~f:begin fun ((variance, _, _), newname) ->
-            match variance,
-              TySet.elements (Env.get_lower_bounds env newname),
-              TySet.elements (Env.get_equal_bounds env newname),
-              TySet.elements (Env.get_upper_bounds env newname) with
-            | _, _, [ty], _ -> ty
-            | Ast.Covariant, _, _, [ty]
-            | Ast.Contravariant, [ty], _, _
-              when not (SSet.mem newname tparams_in_constraints) -> ty
-            | _, _, _, _ -> (reason, Tabstract(AKgeneric newname, None)) end in
-        let obj_ty_simplified = (fst obj_ty, Tclass(_c, tyl_fresh_simplified)) in
-        env, obj_ty_simplified in
-
       if SubType.is_sub_type env obj_ty (
         Reason.none, Tclass ((Pos.none, SN.Classes.cAwaitable), [Reason.none, Typing_utils.tany env])
       ) then () else Async.enforce_nullable_or_not_awaitable env (fst ivar) x_ty;
@@ -5745,7 +5670,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
                 (* Also: for generic types we implememt it only with
                  * experimental feature enabled *)
               if Env.is_strict env && (tyl = [] || safe_instanceof_enabled)
-              then safe_instanceof env obj_ty _c class_info
+              then safe_instanceof env p ivar x_ty obj_ty _c class_info
               else env, obj_ty
           end
         | r, Tunresolved tyl ->
@@ -5777,6 +5702,81 @@ and condition ?lhs_of_null_coalesce env tparamet =
   | e ->
       let env, _ = expr env e in
       env
+
+and safe_instanceof env p ivar ivar_ty obj_ty _c class_info =
+  let ivar_pos = fst ivar in
+  (* Generate fresh names consisting of formal type parameter name
+   * with unique suffix *)
+  let env, tparams_with_new_names =
+    List.map_env env class_info.tc_tparams
+      (fun env ((_, (_,name), _) as tp) ->
+        let env, name = Env.add_fresh_generic_parameter env name in
+        env, (tp, name)) in
+  let s =
+      snd _c ^ "<" ^
+      String.concat "," (List.map tparams_with_new_names ~f:snd)
+      ^ ">" in
+  let reason = Reason.Rinstanceof (ivar_pos, s) in
+  let tyl_fresh = List.map
+      ~f:(fun (_, newname) -> (reason, Tabstract(AKgeneric newname, None)))
+      tparams_with_new_names in
+
+  (* Type of variable in block will be class name
+   * with fresh type parameters *)
+  let obj_ty = (fst obj_ty, Tclass(_c, tyl_fresh)) in
+
+  (* Add in constraints as assumptions on those type parameters *)
+  let ety_env = {
+    type_expansions = [];
+    substs = Subst.make class_info.tc_tparams tyl_fresh;
+    this_ty = obj_ty; (* In case `this` appears in constraints *)
+    from_class = None;
+  } in
+  let add_bounds env ((_, _, cstr_list), ty_fresh) =
+      List.fold_left cstr_list ~init:env ~f:begin fun env (ck, ty) ->
+        (* Substitute fresh type parameters for
+         * original formals in constraint *)
+      let env, ty = Phase.localize ~ety_env env ty in
+      SubType.add_constraint p env ck ty_fresh ty end in
+  let env =
+    List.fold_left (List.zip_exn class_info.tc_tparams tyl_fresh)
+      ~f:add_bounds ~init:env in
+
+  (* Finally, if we have a class-test on something with static class type,
+   * then we can chase the hierarchy and decompose the types to deduce
+   * further assumptions on type parameters. For example, we might have
+   *   class B<Tb> { ... }
+   *   class C extends B<int>
+   * and have obj_ty = C and x_ty = B<T> for a generic parameter T.
+   * Then SubType.add_constraint will deduce that T=int and add int as
+   * both lower and upper bound on T in env.lenv.tpenv
+   *)
+  let env = SubType.add_constraint p env Ast.Constraint_as obj_ty ivar_ty in
+
+  (* It's often the case that the fresh name isn't necessary. For
+   * example, if C<T> extends B<T>, and we have $x:B<t> for some type t
+   * then $x instanceof B should refine to $x:C<t>.
+   * We take a simple approach:
+   *    For a fresh type parameter T#1, if
+   *    1) There is an eqality constraint T#1 = t then replace T#1 with t.
+   *    2) T#1 is covariant, and T#1 <: t and occurs nowhere else in the constraints
+   *    3) T#1 is contravariant, and t <: T#1 and occurs nowhere else in the constraints
+   *)
+  let tparams_in_constraints = Env.get_tpenv_tparams env in
+  let tyl_fresh_simplified =
+    List.map tparams_with_new_names
+    ~f:begin fun ((variance, _, _), newname) ->
+      match variance,
+        TySet.elements (Env.get_lower_bounds env newname),
+        TySet.elements (Env.get_equal_bounds env newname),
+        TySet.elements (Env.get_upper_bounds env newname) with
+      | _, _, [ty], _ -> ty
+      | Ast.Covariant, _, _, [ty]
+      | Ast.Contravariant, [ty], _, _
+        when not (SSet.mem newname tparams_in_constraints) -> ty
+      | _, _, _, _ -> (reason, Tabstract(AKgeneric newname, None)) end in
+  let obj_ty_simplified = (fst obj_ty, Tclass(_c, tyl_fresh_simplified)) in
+  env, obj_ty_simplified
 
 and is_instance_var = function
   | _, (Lvar _ | This) -> true

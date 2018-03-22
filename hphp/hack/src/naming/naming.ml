@@ -876,7 +876,7 @@ module Make (GetLocals : GetLocals) = struct
     | Some h -> h
     | None -> begin
       match x with
-        | x when x = "_" && allow_wildcard ->
+        | x when x = SN.Typehints.wildcard && allow_wildcard ->
           if hl <> [] then
             (Errors.tparam_with_tparam p x;
             N.Hany)

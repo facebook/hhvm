@@ -241,6 +241,8 @@ module Typehints = struct
   let object_cast = "object"
   let unset_cast = "unset"
 
+  let wildcard = "_"
+
   let is_reserved_global_name x =
     let x = String.lowercase_ascii x in
     x = array    || x = callable || x = Classes.cSelf || x = Classes.cParent
@@ -250,7 +252,7 @@ module Typehints = struct
     x = void     || x = noreturn || x = int      || x = bool     || x = float ||
     x = num      || x = string   || x = resource || x = mixed    || x = array ||
     x = arraykey || x = integer  || x = boolean  || x = double   || x = real  ||
-    x = dynamic
+    x = dynamic  || x = wildcard
 
   let is_namespace_with_reserved_hh_name x =
     let unqualify qualified_name =

@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
- open Core_result.Monad_infix
+open Core_result.Monad_infix
 
 (* TODO t14922604: Further improve error handling *)
 let call_external_formatter
@@ -45,17 +45,13 @@ let call_external_formatter
 let range_offsets_to_args from to_ =
   ["--range"; string_of_int from; string_of_int to_]
 
-let go_hackfmt genv ?filename ~content args =
+let go_hackfmt ?filename ~content args =
   let args = match filename with
     | Some filename -> args @ ["--filename-for-logging"; filename]
     | None -> args
   in
   Hh_logger.log "%s" (String.concat " " args);
-  let path = match ServerConfig.formatter_override genv.ServerEnv.config with
-    | None -> Path.make BuildOptions.default_hackfmt_path
-    | Some p -> p
-  in
-  let path = Path.to_string path in
+  let path = Path.make BuildOptions.default_hackfmt_path |> Path.to_string in
   if Sys.file_exists path
   then call_external_formatter path content args
   else begin
@@ -71,19 +67,20 @@ let hh_format_result_to_response x =
   | Internal_error -> Error ("Formatter internal error")
   | Success s -> Ok s
 
-let go_hh_format _ content from to_ =
+let go_hh_format content from to_ =
     let modes = [Some FileInfo.Mstrict; Some FileInfo.Mpartial] in
     hh_format_result_to_response @@
       Format_hack.region modes Path.dummy_path from to_ content
 
 (* This function takes 1-based offsets, and 'to_' is exclusive. *)
-let go genv ?filename ~content from to_ =
-  if genv.ServerEnv.local_config.ServerLocalConfig.use_hackfmt
-  then
-    let args = range_offsets_to_args from to_ in
-    go_hackfmt genv ?filename ~content args >>| fun lines ->
-    (String.concat "\n" lines) ^ "\n"
-  else go_hh_format genv content from to_
+let go ?filename ~content from to_ use_hackfmt =
+    if use_hackfmt
+    then
+      let args = range_offsets_to_args from to_ in
+      go_hackfmt ?filename ~content args >>| fun lines ->
+      (String.concat "\n" lines) ^ "\n"
+    else
+    go_hh_format content from to_
 
 (* Our formatting engine can only handle ranges that span entire rows.  *)
 (* This is signified by a range that starts at column 1 on one row,     *)
@@ -116,19 +113,21 @@ let expand_range_to_whole_rows content (range: File_content.range)
 let range_regexp = Str.regexp "^\\([0-9]+\\) \\([0-9]+\\)$"
 
 let go_ide
-  (genv: ServerEnv.genv)
+  (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
   (action: ServerFormatTypes.ide_action)
+  (use_hackfmt: bool)
   : ServerFormatTypes.ide_result =
   let open File_content in
   let open ServerFormatTypes in
+  let open Lsp.TextDocumentItem in
   let filename = match action with
     | Document filename -> filename
     | Range range -> range.Ide_api_types.range_filename
     | Position position -> position.Ide_api_types.filename
   in
-  let content =
-    ServerFileSync.get_file_content (ServerUtils.FileName filename)
-  in
+  let uri = Lsp_helpers.path_to_lsp_uri ~default_path:"" filename in
+  let lsp_doc = SMap.get uri editor_open_files in
+  let content = Option.value_map ~default:"" ~f:(fun item -> item.text) lsp_doc in
 
   let convert_to_ide_result
     (old_format_result: ServerFormatTypes.result)
@@ -147,14 +146,14 @@ let go_ide
     let ed = offset_to_position content to0 in
     let range = {st = {line = 1; column = 1;}; ed;} in
     (* hackfmt currently takes one-indexed integers for range formatting. *)
-    go genv ~filename ~content (from0 + 1) (to0 + 1)
+    go ~filename ~content (from0 + 1) (to0 + 1) use_hackfmt
       |> convert_to_ide_result ~range
 
   | Range range ->
     let file_range = range.Ide_api_types.file_range |> Ide_api_types.ide_range_to_fc in
     let (range, from0, to0) =
       expand_range_to_whole_rows content file_range in
-    go genv ~filename ~content (from0 + 1) (to0 + 1)
+    go ~filename ~content (from0 + 1) (to0 + 1) use_hackfmt
       |> convert_to_ide_result ~range
 
   | Position { Ide_api_types.position; _} ->
@@ -163,7 +162,7 @@ let go_ide
     let position = position |> Ide_api_types.ide_pos_to_fc in
     let offset = get_offset content position in
     let args = ["--at-char"; string_of_int offset] in
-    go_hackfmt genv ~filename ~content args >>= fun lines ->
+    go_hackfmt ~filename ~content args >>= fun lines ->
 
     (* `hackfmt --at-char` returns the range that was formatted, as well as the
        contents of that range. For example, it might return

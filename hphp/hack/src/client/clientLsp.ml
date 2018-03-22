@@ -39,6 +39,7 @@ module Main_env = struct
   type t = {
     conn: server_conn;
     needs_idle: bool;
+    editor_open_files: Lsp.TextDocumentItem.t SMap.t;
     uris_with_diagnostics: SSet.t;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     dialog: ShowMessageRequest.t; (* "hack server is now ready" *)
@@ -52,6 +53,7 @@ module In_init_env = struct
     conn: server_conn;
     first_start_time: float; (* our first attempt to connect *)
     most_recent_start_time: float; (* for subsequent retries *)
+    editor_open_files: Lsp.TextDocumentItem.t SMap.t;
     file_edits: Hh_json.json ImmQueue.t;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     tail_env: Tail.env option;
@@ -64,6 +66,7 @@ end
 module Lost_env = struct
   type t = {
     p: params;
+    editor_open_files: Lsp.TextDocumentItem.t SMap.t;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     lock_file: string;
     dialog: ShowMessageRequest.t; (* "hh_server stopped" *)
@@ -117,6 +120,13 @@ let initialize_params_exc () : Lsp.Initialize.params =
 let to_stdout (json: Hh_json.json) : unit =
   let s = (Hh_json.json_to_string json) ^ "\r\n\r\n" in
   Http_lite.write_message stdout s
+
+let get_editor_open_files (state: state) : Lsp.TextDocumentItem.t SMap.t option =
+  match state with
+  | Main_loop menv -> let open Main_env in Some menv.editor_open_files
+  | In_init ienv -> let open In_init_env in Some ienv.editor_open_files
+  | Lost_server lenv -> let open Lost_env in Some lenv.editor_open_files
+  | _ -> None
 
 type event =
   | Server_hello
@@ -471,6 +481,25 @@ let hack_errors_to_lsp_diagnostic
     diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
   }
 
+let apply_edit (text: string) (edit: DidChange.textDocumentContentChangeEvent) : string =
+  let lsp_position_to_fc (pos: Lsp.position) : File_content.position =
+    { File_content.
+      line = pos.Lsp.line + 1;  (* LSP is 0-based; File_content is 1-based. *)
+      column = pos.Lsp.character + 1;
+    } in
+  let lsp_range_to_fc (range: Lsp.range) : File_content.range =
+    { File_content.
+      st = lsp_position_to_fc range.Lsp.start;
+      ed = lsp_position_to_fc range.Lsp.end_;
+    } in
+  let lsp_edit_to_fc (edit: Lsp.DidChange.textDocumentContentChangeEvent) : File_content.text_edit =
+    { File_content.
+      range = Option.map edit.DidChange.range ~f:lsp_range_to_fc;
+      text = edit.DidChange.text;
+    } in
+  match File_content.edit_file text [edit |> lsp_edit_to_fc] with
+  | Ok text -> text
+  | Error msg -> failwith msg
 
 (************************************************************************)
 (** Protocol                                                           **)
@@ -948,11 +977,19 @@ let do_typeCoverage (conn: server_conn) (params: TypeCoverage.params)
 
 let do_formatting_common
     (conn: server_conn)
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (args: ServerFormatTypes.ide_action)
   : TextEdit.t list =
+  let open ServerLocalConfig in
   let open ServerFormatTypes in
-  let command = ServerCommandTypes.IDE_FORMAT args in
-  let response: ServerFormatTypes.ide_result = rpc conn command in
+  let local_config = load ~silent:true in
+  let use_hackfmt = local_config.use_hackfmt in
+  let response: ServerFormatTypes.ide_result =
+    if use_hackfmt then ServerFormat.go_ide editor_open_files args use_hackfmt
+    else
+      let command = ServerCommandTypes.HH_FORMAT (editor_open_files, args, use_hackfmt) in
+      rpc conn command
+  in
   match response with
   | Error message ->
     raise (Error.InternalError message)
@@ -964,6 +1001,7 @@ let do_formatting_common
 
 let do_documentRangeFormatting
     (conn: server_conn)
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: DocumentRangeFormatting.params)
   : DocumentRangeFormatting.result =
   let open DocumentRangeFormatting in
@@ -974,11 +1012,12 @@ let do_documentRangeFormatting
         file_range = lsp_range_to_ide params.range;
       }
   in
-  do_formatting_common conn action
+  do_formatting_common conn editor_open_files action
 
 
 let do_documentOnTypeFormatting
     (conn: server_conn)
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: DocumentOnTypeFormatting.params)
   : DocumentOnTypeFormatting.result =
   let open DocumentOnTypeFormatting in
@@ -988,17 +1027,18 @@ let do_documentOnTypeFormatting
         filename = lsp_uri_to_path params.textDocument.uri;
         position = lsp_position_to_ide params.position;
       } in
-  do_formatting_common conn action
+  do_formatting_common conn editor_open_files action
 
 
 let do_documentFormatting
     (conn: server_conn)
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: DocumentFormatting.params)
   : DocumentFormatting.result =
   let open DocumentFormatting in
   let open TextDocumentIdentifier in
   let action = ServerFormatTypes.Document (lsp_uri_to_path params.textDocument.uri) in
-  do_formatting_common conn action
+  do_formatting_common conn editor_open_files action
 
 
 (* do_server_busy: controls the progress / action-required indicator          *)
@@ -1132,6 +1172,7 @@ let report_connect_end
     { Main_env.
       conn = ienv.In_init_env.conn;
       needs_idle = true;
+      editor_open_files = ienv.editor_open_files;
       uris_with_diagnostics = SSet.empty;
       uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
       dialog = ShowMessageRequest.None;
@@ -1321,6 +1362,8 @@ let rec connect (state: state) : state =
         conn;
         first_start_time = Unix.time();
         most_recent_start_time = Unix.time();
+        editor_open_files =
+          Option.value (get_editor_open_files state) ~default:SMap.empty;
         (* uris_with_unsaved_changes should always be empty here: *)
         (* Pre_init will of course be empty; *)
         (* Lost_server will exit rather than reconnect with unsaved changes. *)
@@ -1422,6 +1465,8 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
 
   let state = dismiss_ui state in
   let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
+  let editor_open_files =
+    Option.value (get_editor_open_files state) ~default:SMap.empty in
 
   let lock_file = match get_root_opt () with
     | None -> assert false
@@ -1469,6 +1514,7 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
   if reconnect_immediately then
     let lost_state = Lost_server { Lost_env.
       p;
+      editor_open_files;
       uris_with_unsaved_changes;
       lock_file;
       dialog = ShowMessageRequest.None;
@@ -1494,6 +1540,7 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
     dialog_ref := dialog;
     Lost_server { Lost_env.
       p;
+      editor_open_files;
       uris_with_unsaved_changes;
       lock_file;
       dialog;
@@ -1526,6 +1573,46 @@ let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
 let handle_idle_if_necessary (state: state) (event: event) : state =
   match state with
   | Main_loop menv when event <> Tick -> Main_loop { menv with Main_env.needs_idle = true; }
+  | _ -> state
+
+let track_open_files (state: state) (event: event) : state =
+  let open Jsonrpc in
+  (* We'll keep track of which files are opened by the editor. *)
+  let prev_opened_files =
+    Option.value (get_editor_open_files state) ~default:SMap.empty in
+  let editor_open_files = match event with
+    | Client_message c when c.method_ = "textDocument/didOpen" ->
+      let params = parse_didOpen c.params in
+      let doc = params.DidOpen.textDocument in
+      let uri = params.DidOpen.textDocument.TextDocumentItem.uri in
+      SMap.add uri doc prev_opened_files
+    | Client_message c when c.method_ = "textDocument/didChange" ->
+      let params = parse_didChange c.params in
+      let uri = params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri in
+      let doc = SMap.get uri prev_opened_files in
+      begin
+      let open Lsp.TextDocumentItem in
+      match doc with
+      | Some doc ->
+        let text = doc.TextDocumentItem.text in
+        let doc' = { doc with
+         version = params.DidChange.textDocument.VersionedTextDocumentIdentifier.version;
+         text = List.fold_left ~init:text ~f:apply_edit params.DidChange.contentChanges;
+       } in
+      SMap.add uri doc' prev_opened_files
+      | None -> prev_opened_files
+      end
+    | Client_message c when c.method_ = "textDocument/didClose" ->
+      let params = parse_didClose c.params in
+      let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
+      SMap.remove uri prev_opened_files
+    | _ ->
+      prev_opened_files
+  in
+  match state with
+  | Main_loop menv -> Main_loop { menv with Main_env.editor_open_files; }
+  | In_init ienv -> In_init { ienv with In_init_env.editor_open_files; }
+  | Lost_server lenv -> Lost_server { lenv with Lost_env.editor_open_files; }
   | _ -> state
 
 
@@ -1783,19 +1870,22 @@ let handle_event
 
   (* textDocument/formatting *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/formatting" ->
-    parse_documentFormatting c.params |> do_documentFormatting menv.conn
+    parse_documentFormatting c.params
+    |> do_documentFormatting menv.conn menv.editor_open_files
     |> print_documentFormatting |> Jsonrpc.respond to_stdout c
 
   (* textDocument/formatting *)
   | Main_loop menv, Client_message c
     when c.method_ = "textDocument/rangeFormatting" ->
-    parse_documentRangeFormatting c.params |> do_documentRangeFormatting menv.conn
+    parse_documentRangeFormatting c.params
+    |> do_documentRangeFormatting menv.conn menv.editor_open_files
     |> print_documentRangeFormatting |> Jsonrpc.respond to_stdout c
 
   (* textDocument/onTypeFormatting *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/onTypeFormatting" ->
     cancel_if_stale client c short_timeout;
-    parse_documentOnTypeFormatting c.params |> do_documentOnTypeFormatting menv.conn
+    parse_documentOnTypeFormatting c.params
+    |> do_documentOnTypeFormatting menv.conn menv.editor_open_files
     |> print_documentOnTypeFormatting |> Jsonrpc.respond to_stdout c
 
   (* textDocument/didOpen notification *)
@@ -1900,6 +1990,8 @@ let main (env: env) : 'a =
       state := reconnect_from_lost_if_necessary !state (`Event event);
       (* if the user does any interaction, then dismiss the "ready" dialog *)
       state := dismiss_ready_dialog_if_necessary !state event;
+      (* we keep track of all open files and their contents *)
+      state := track_open_files !state event;
       (* we keep track of all files that have unsaved changes in them *)
       state := track_edits_if_necessary !state event;
 

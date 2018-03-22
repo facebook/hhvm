@@ -323,7 +323,7 @@ class ObjectDataPrinter(object):
             decl_props = self.cls['m_declProperties']
 
             try:
-                name = idx.indexed_string_map_at(decl_props, self.cur)['m_name']
+                name = idx.indexed_string_map_at(decl_props, self.cur)['name']
                 try:
                     val = idx.object_data_at(self.obj, name)
                 except gdb.MemoryError:

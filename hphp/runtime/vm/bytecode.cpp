@@ -188,12 +188,15 @@ const StaticString s_call_user_func("call_user_func");
 const StaticString s_call_user_func_array("call_user_func_array");
 const StaticString s___call("__call");
 const StaticString s___callStatic("__callStatic");
+const StaticString s_allows_unknown_fields("allows_unknown_fields");
 const StaticString s_classname("classname");
 const StaticString s_elem_types("elem_types");
+const StaticString s_fields("fields");
 const StaticString s_file("file");
 const StaticString s_kind("kind");
 const StaticString s_line("line");
 const StaticString s_nullable("nullable");
+const StaticString s_optional_shape_field("optional_shape_field");
 const StaticString s_construct("__construct");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2687,6 +2690,19 @@ OPTBLD_INLINE void iopInstanceOfD(Id id) {
 
 namespace {
 
+ALWAYS_INLINE
+bool shapeAllowsUnknownFields(const Array& ts) {
+  return
+    ts.exists(s_allows_unknown_fields) &&
+    ts[s_allows_unknown_fields].asBooleanVal();
+}
+
+ALWAYS_INLINE
+bool isOptionalShapeField(const ArrayData* field) {
+  auto const property = s_optional_shape_field.get();
+  return field->exists(property) && tvCastToBoolean(field->at(property));
+}
+
 bool implTypeStructureHelper(const Array& ts, const Cell* c1) {
   auto const type = c1->m_type;
   if (ts.exists(s_nullable) &&
@@ -2763,10 +2779,65 @@ bool implTypeStructureHelper(const Array& ts, const Cell* c1) {
       );
       return elemsDidMatch;
     }
+    case TypeStructure::Kind::T_shape: {
+      if (!isArrayLikeType(type)) {
+        return false;
+      }
+      auto const fields = c1->m_data.parr;
+      if (!fields->isDictOrDArray()) {
+        return false;
+      }
+      assertx(ts.exists(s_fields));
+      auto const tsFields = ts[s_fields].getArrayData();
+      auto const numDefinedFields = tsFields->size();
+      auto const numFields = fields->size();
+      auto numRequiredFields = 0;
+      IterateV(
+        tsFields,
+        [&](TypedValue v) {
+          assertx(isArrayLikeType(v.m_type));
+          numRequiredFields += !isOptionalShapeField(v.m_data.parr);
+        }
+      );
+      if (numFields < numRequiredFields) {
+        return false;
+      }
+      auto const allowsUnknownFields = shapeAllowsUnknownFields(ts);
+      if (!allowsUnknownFields && numFields > numDefinedFields) {
+        return false;
+      }
+      auto fieldsDidMatch = true;
+      auto numExpectedFields = 0;
+      IterateKV(
+        tsFields,
+        [&](Cell k, TypedValue v) {
+          assertx(isArrayLikeType(v.m_type));
+          auto const tsFieldData = v.m_data.parr;
+          if (!fields->exists(k)) {
+            if (isOptionalShapeField(tsFieldData)) {
+              return false;
+            }
+            fieldsDidMatch = false;
+            return true;
+          }
+          auto const tsField = Array(tsFieldData);
+          auto const field = fields->at(k);
+          if (!implTypeStructureHelper(tsField, tvToCell(&field))) {
+            fieldsDidMatch = false;
+            return true;
+          }
+          numExpectedFields++;
+          return false;
+        }
+      );
+      if (!fieldsDidMatch) {
+        return false;
+      }
+      return allowsUnknownFields || numFields == numExpectedFields;
+    }
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_typevar:
-    case TypeStructure::Kind::T_shape:
     case TypeStructure::Kind::T_trait:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:

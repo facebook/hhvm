@@ -396,6 +396,12 @@ inline TypedValue ArrayData::at(const StringData* k) const {
   return rval(k).tv();
 }
 
+inline TypedValue ArrayData::at(Cell k) const {
+  assertx(IsValidKey(k));
+  return detail::isIntKey(k) ? at(detail::getIntKey(k))
+                             : at(detail::getStringKey(k));
+}
+
 inline TypedValue ArrayData::atPos(ssize_t pos) const {
   return rvalPos(pos).tv();
 }

@@ -377,6 +377,7 @@ public:
    */
   TypedValue at(int64_t k) const;
   TypedValue at(const StringData* k) const;
+  TypedValue at(Cell k) const;
 
   /*
    * Get the value or key for the element at raw position `pos'.

@@ -189,9 +189,11 @@ const StaticString s_call_user_func_array("call_user_func_array");
 const StaticString s___call("__call");
 const StaticString s___callStatic("__callStatic");
 const StaticString s_classname("classname");
+const StaticString s_elem_types("elem_types");
 const StaticString s_file("file");
 const StaticString s_kind("kind");
 const StaticString s_line("line");
+const StaticString s_nullable("nullable");
 const StaticString s_construct("__construct");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2593,7 +2595,7 @@ OPTBLD_INLINE void iopCastDArray() {
   tvCastToDArrayInPlace(c1);
 }
 
-OPTBLD_INLINE bool cellInstanceOf(TypedValue* tv, const NamedEntity* ne) {
+OPTBLD_INLINE bool cellInstanceOf(const TypedValue* tv, const NamedEntity* ne) {
   assertx(tv->m_type != KindOfRef);
   Class* cls = nullptr;
   switch (tv->m_type) {
@@ -2685,9 +2687,14 @@ OPTBLD_INLINE void iopInstanceOfD(Id id) {
 
 namespace {
 
-ALWAYS_INLINE
-bool implTypeStructureHelper(const Array& ts, Cell* c1) {
+bool implTypeStructureHelper(const Array& ts, const Cell* c1) {
   auto const type = c1->m_type;
+  if (ts.exists(s_nullable) &&
+      ts[s_nullable].asBooleanVal() &&
+      type == KindOfNull) {
+    return true;
+  }
+  assertx(ts.exists(s_kind));
   switch (static_cast<TypeStructure::Kind>(ts[s_kind].toInt64Val())) {
     case TypeStructure::Kind::T_int:
       return type == KindOfInt64;
@@ -2728,7 +2735,34 @@ bool implTypeStructureHelper(const Array& ts, Cell* c1) {
       return false;
     case TypeStructure::Kind::T_mixed:
       return true;
-    case TypeStructure::Kind::T_tuple:
+    case TypeStructure::Kind::T_tuple: {
+      if (!isArrayLikeType(type)) {
+        return false;
+      }
+      auto const elems = c1->m_data.parr;
+      if (!elems->isVecOrVArray()) {
+        return false;
+      }
+      assertx(ts.exists(s_elem_types));
+      auto const tsElems = ts[s_elem_types].getArrayData();
+      if (elems->size() != tsElems->size()) {
+        return false;
+      }
+      bool elemsDidMatch = true;
+      PackedArray::IterateKV(
+        elems,
+        [&](Cell k, TypedValue elem) {
+          assertx(k.m_type == KindOfInt64);
+          auto const ts2 = tsElems->getValue(k.m_data.num).asCArrRef();
+          if (!implTypeStructureHelper(ts2, tvToCell(&elem))) {
+            elemsDidMatch = false;
+            return true;
+          }
+          return false;
+        }
+      );
+      return elemsDidMatch;
+    }
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_typevar:

@@ -674,42 +674,50 @@ end = struct
     | Partial: locl ty -> t
     | Invalid: 'a ty -> t
 
+  let update old_acc new_acc =
+    (* Invalid > Partial > Valid *)
+    match old_acc, new_acc with
+    | Valid, _ | Partial _, Invalid _ -> new_acc
+    | _ -> old_acc
+
   let visitor =
     object(_this)
       inherit [t] Type_visitor.type_visitor as super
-      method! on_tany _ r = Invalid (r, Tany)
-      method! on_terr _ r = Invalid (r, Terr)
+      method! on_tany acc r = update acc @@ Invalid (r, Tany)
+      method! on_terr acc r = update acc @@ Invalid (r, Terr)
       method! on_tprim acc r prim =
         match prim with
         | N.Tvoid
-        | N.Tnoreturn -> Invalid (r, Tprim prim)
+        | N.Tnoreturn -> update acc @@ Invalid (r, Tprim prim)
         | _ -> acc
-      method! on_tfun _ r fun_type = Invalid (r, Tfun fun_type)
-      method! on_tvar _ r id = Invalid (r, Tvar id)
+      method! on_tfun acc r fun_type = update acc @@  Invalid (r, Tfun fun_type)
+      method! on_tvar acc r id = update acc @@ Invalid (r, Tvar id)
       method! on_tabstract acc r ak ty_opt =
         match ak with
         | AKenum _ -> acc
         | AKnewtype (alias, [cls]) when alias = SN.Classes.cClassname ->
           super#on_type acc cls
         (* TODO(kunalm) support `this`, `self`, `static`, type consts *)
-        | _ -> Invalid (r, Tabstract (ak, ty_opt))
-      method! on_tanon _ r arity id = Invalid (r, Tanon (arity, id))
-      method! on_tunresolved _ r tyl = Invalid (r, Tunresolved tyl)
-      method! on_tobject _ r = Invalid (r, Tobject)
+        | _ -> update acc @@ Invalid (r, Tabstract (ak, ty_opt))
+      method! on_tanon acc r arity id =
+        update acc @@ Invalid (r, Tanon (arity, id))
+      method! on_tunresolved acc r tyl =
+        update acc @@ Invalid (r, Tunresolved tyl)
+      method! on_tobject acc r = update acc @@ Invalid (r, Tobject)
       method! on_tclass acc r cls tyl =
         match tyl with
           | [] -> acc
           | _ ->
             let acc = super#on_tclass acc r cls tyl in
             begin match acc with
-              | Valid -> Partial (r, Tclass (cls, tyl))
+              | Valid -> update acc @@  Partial (r, Tclass (cls, tyl))
               | _ -> acc
             end
       method! on_tarraykind acc r array_kind =
         match array_kind with
         | AKempty
         | AKshape _
-        | AKtuple _ -> Invalid (r, Tarraykind array_kind)
+        | AKtuple _ -> update acc @@  Invalid (r, Tarraykind array_kind)
         | _ -> acc (* TODO(kunalm): actually handle arrays with generics *)
     end
 

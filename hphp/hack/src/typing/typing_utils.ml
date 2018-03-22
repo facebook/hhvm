@@ -662,17 +662,17 @@ end
 module IsAsExprHint : sig
   type t =
     | Valid
-    | Partial of locl ty
-    | Invalid of locl ty
+    | Partial: locl ty -> t
+    | Invalid: 'a ty -> t
 
   val validate: locl ty -> t
-  val print: locl ty_ -> string
+  val print: 'a ty_ -> string
 end = struct
 
   type t =
     | Valid
-    | Partial of locl ty
-    | Invalid of locl ty
+    | Partial: locl ty -> t
+    | Invalid: 'a ty -> t
 
   let visitor =
     object(_this)
@@ -684,7 +684,7 @@ end = struct
         | N.Tvoid
         | N.Tnoreturn -> Invalid (r, Tprim prim)
         | _ -> acc
-      (* method! on_tfun _ r fun_type = Invalid (r, Tfun fun_type) *)
+      method! on_tfun _ r fun_type = Invalid (r, Tfun fun_type)
       method! on_tvar _ r id = Invalid (r, Tvar id)
       method! on_tabstract acc r ak ty_opt =
         match ak with
@@ -715,10 +715,10 @@ end = struct
 
   let validate ty = visitor#on_type Valid ty
 
-  let print ty_ = match ty_ with
+  let print : type a. a ty_ -> string = function
     | Tclass (_, tyl) when tyl <> [] ->
         "a type with generics, because generics are erased at runtime"
-    | _ -> Typing_print.error ty_
+    | ty_ -> Typing_print.error ty_
 end
 
 (*****************************************************************************)

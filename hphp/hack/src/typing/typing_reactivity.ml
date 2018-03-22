@@ -36,7 +36,7 @@ let check_call env receiver_type pos reason ft =
   let callee_condition_matches =
     begin match callee_t, caller_t, receiver_type with
     | Some callee_ty, Some caller_ty, _
-      when SubType.is_sub_type env callee_ty caller_ty -> true
+      when SubType.is_sub_type env caller_ty callee_ty -> true
     | Some callee_ty, _, Some receiver_ty
       when SubType.is_sub_type env receiver_ty callee_ty -> true
     | _ -> false

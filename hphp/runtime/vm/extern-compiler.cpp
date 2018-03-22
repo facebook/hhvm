@@ -177,6 +177,10 @@ struct ExternCompiler {
     // Called from forked processes. Resets inherited pid of compiler process to
     // prevent it being closed in case child process exits
     m_pid = kInvalidPid;
+    // Don't call the destructor of the thread object.  The thread doesn't
+    // belong to this child process, so we just silently make sure we don't
+    // touch it.
+    m_logStderrThread.release();
   }
   ~ExternCompiler() { stop(); }
 
@@ -259,7 +263,7 @@ private:
   std::string m_version;
 
   FILE* m_err{nullptr};
-  std::thread m_logStderrThread;
+  std::unique_ptr<std::thread> m_logStderrThread;
 
   unsigned m_compilations{0};
   const CompilerOptions& m_options;
@@ -352,11 +356,12 @@ void CompilerPool::start() {
 
 void CompilerPool::shutdown(bool detach_compilers) {
   for (int i = 0; i < m_compilers.size(); ++i) {
-    auto c = m_compilers.exchange(i, nullptr);
-    if (detach_compilers) {
-      c->detach_from_process();
+    if (auto c = m_compilers.exchange(i, nullptr)) {
+      if (detach_compilers) {
+        c->detach_from_process();
+      }
+      delete c;
     }
-    delete c;
   }
 }
 
@@ -451,8 +456,8 @@ void ExternCompiler::stopLogStderrThread() {
   if (m_err) {
     fclose(m_err);   // need to unblock getline()
   }
-  if (m_logStderrThread.joinable()) {
-    m_logStderrThread.join();
+  if (m_logStderrThread && m_logStderrThread->joinable()) {
+    m_logStderrThread->join();
   }
 }
 
@@ -684,7 +689,7 @@ void ExternCompiler::start() {
   m_out = out.detach("r");
   m_err = err.detach("r");
 
-  m_logStderrThread = std::thread([&]() {
+  m_logStderrThread = std::make_unique<std::thread>([&]() {
       int ret = 0;
       auto pid = m_pid;
       try {

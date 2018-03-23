@@ -26,23 +26,51 @@ module FunCanonHeap : CanonHeap = SharedMem.NoCache (StringKey) (struct
   let description = "FunCanon"
 end)
 
+let check_valid key pos =
+  if FileInfo.get_pos_filename pos = Relative_path.default then begin
+    Hh_logger.log
+      ("WARNING: setting canonical position of %s to be in dummy file. If this \
+  happens in incremental mode, things will likely break later.") key;
+    Hh_logger.log "%s"
+      (Printexc.raw_backtrace_to_string (Printexc.get_callstack 100));
+  end
+
 (* TypeIdHeap records both class names and typedefs since they live in the
  * same namespace. That is, one cannot both define a class Foo and a typedef
  * Foo (or FOO or fOo, due to case insensitivity). *)
-module TypeIdHeap = SharedMem.WithCache (StringKey) (struct
-  type t = FileInfo.pos * [`Class | `Typedef]
-  let prefix = Prefix.make ()
-  let description = "TypeId"
-end)
+module TypeIdHeap = struct
+  include SharedMem.WithCache (StringKey) (struct
+    type t = FileInfo.pos * [`Class | `Typedef]
+    let prefix = Prefix.make ()
+    let description = "TypeId"
+  end)
+  let add x y =
+    if not @@ LocalChanges.has_local_changes () then check_valid x (fst y);
+    add x y
 
-module FunPosHeap = SharedMem.NoCache (StringKey) (struct
-  type t = FileInfo.pos
-  let prefix = Prefix.make()
-  let description = "FunPos"
-end)
+  let write_through x y =
+    if not @@ LocalChanges.has_local_changes () then check_valid x (fst y);
+    write_through x y
+end
 
-module ConstPosHeap = SharedMem.NoCache (StringKey) (struct
-  type t = FileInfo.pos
-  let prefix = Prefix.make()
-  let description = "ConstPos"
-end)
+module FunPosHeap = struct
+  include SharedMem.NoCache (StringKey) (struct
+    type t = FileInfo.pos
+    let prefix = Prefix.make()
+    let description = "FunPos"
+  end)
+  let add x y =
+    if not @@  LocalChanges.has_local_changes () then check_valid x y;
+    add x y
+end
+
+module ConstPosHeap = struct
+  include SharedMem.NoCache (StringKey) (struct
+    type t = FileInfo.pos
+    let prefix = Prefix.make()
+    let description = "ConstPos"
+  end)
+let add x y =
+  if not @@ LocalChanges.has_local_changes () then check_valid x y;
+  add x y
+end

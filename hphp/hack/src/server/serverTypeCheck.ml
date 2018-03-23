@@ -741,6 +741,8 @@ end = functor(CheckKind:CheckKindType) -> struct
     ServerCheckpoint.process_updates fast;
     debug_print_fast_keys genv "to_recheck" fast;
     debug_print_path_set genv "lazy_check_later" lazy_check_later;
+    if Relative_path.(Map.mem fast default) then
+      Hh_logger.log "WARNING: recheking defintion in a dummy file";
     let errorl'=
       Typing_check_service.go genv.workers env.tcopt fast in
     let errorl' = match ServerArgs.ai_mode genv.options with

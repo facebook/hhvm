@@ -60,7 +60,7 @@ let files_t_merge ~f x y =
   Relative_path.Map.merge x y ~f:begin fun k x y ->
     let x = Option.value x ~default:PhaseMap.empty in
     let y = Option.value y ~default:PhaseMap.empty in
-    Some (PhaseMap.merge x y ~f:(fun _k x y -> f k x y))
+    Some (PhaseMap.merge x y ~f:(fun phase x y -> f phase k x y))
   end
 
 let files_t_to_list x =
@@ -489,7 +489,7 @@ and add_list code pos_msg_l =
   add_ignored_fixme_code_error pos code
 
 and merge (err',fixmes') (err,fixmes) =
-  let append = fun _ x y ->
+  let append = fun _ _ x y ->
     let x = Option.value x ~default: [] in
     let y = Option.value y ~default: [] in
     Some (List.rev_append x y)
@@ -527,13 +527,21 @@ and incremental_update :
     | Some x -> Relative_path.Map.add acc path x
   in
   (* Replace old errors with new *)
-  let res = files_t_merge old new_ ~f:begin fun path old new_ ->
-    if path = Relative_path.default then
+  let res = files_t_merge old new_ ~f:begin fun phase path old new_ ->
+    if path = Relative_path.default then begin
+      let phase = match phase with
+        | Parsing -> "Parsing"
+        | Naming -> "Naming"
+        | Decl -> "Decl"
+        | Typing -> "Typing"
+      in
       Utils.assert_false_log_backtrace (Some(
         "Default (untracked) error sources should not get into incremental " ^
         "mode. There might be a missing call to Errors.do_with_context/" ^
-        "run_in_context somwhere or incorrectly used Errors.from_error_list"
-      ));
+        "run_in_context somwhere or incorrectly used Errors.from_error_list." ^
+        "Phase: " ^ phase
+      ))
+    end;
     match new_ with
     | Some new_ -> Some (List.rev new_)
     | None -> old

@@ -6937,7 +6937,6 @@ void EmitterVisitor::emitConstMethodCallNoParams(Emitter& e,
 const StaticString
   s_hh_invariant_violation("hh\\invariant_violation"),
   s_invariant_violation("invariant_violation"),
-  s_gennull("HH\\Asio\\null"),
   s_fromDArray("fromDArray"),
   s_fromDict("fromDict"),
   s_AwaitAllWaitHandle("HH\\AwaitAllWaitHandle")
@@ -6977,26 +6976,8 @@ bool EmitterVisitor::emitInlineGenva(
     return false;
   }
   for (auto i = int{0}; i < num_params; i++) {
-    Label done;
-
     visit((*params)[i]);
     emitConvertToCell(e);
-
-    // if $_ is null, create a HH\Asio\null()
-    e.Dup();
-    emitIsType(e, IsTypeOp::Null);
-    e.JmpZ(done);
-    emitPop(e);
-
-    Offset fpiStart = m_ue.bcPos();
-    e.FPushFuncD(0, s_gennull.get());
-    {
-      FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-    }
-    e.FCall(0);
-    e.UnboxR();
-
-    done.set(e);
   }
 
   std::vector<Id> waithandles(num_params);
@@ -7017,16 +6998,36 @@ bool EmitterVisitor::emitInlineGenva(
   if (deadResult) {
     // Resolve waithandles, and observe any exceptions
     for (const auto wh : waithandles) {
+      Label done;
+
       emitVirtualLocal(wh);
       emitPushL(e);
+
+      // Null can't trigger any exception.
+      e.Dup();
+      emitIsType(e, IsTypeOp::Null);
+      e.JmpNZ(done);
+
       e.WHResult();
+
+      done.set(e);
       emitPop(e);
     }
   } else if (!assign) {
     for (const auto wh : waithandles) {
+      Label done;
+
       emitVirtualLocal(wh);
       emitPushL(e);
+
+      // Null unpacks to null.
+      e.Dup();
+      emitIsType(e, IsTypeOp::Null);
+      e.JmpNZ(done);
+
       e.WHResult();
+
+      done.set(e);
     }
     if (RuntimeOption::EvalHackArrDVArrs) {
       e.NewVecArray(num_params);
@@ -7035,11 +7036,20 @@ bool EmitterVisitor::emitInlineGenva(
     }
   } else {
     for (const auto wh : waithandles) {
+      Label done;
+
+      // Null unpacks to null.
+      emitVirtualLocal(wh);
+      emitIsType(e, IsTypeOp::Null);
+      e.JmpNZ(done);
+
       emitVirtualLocal(wh); // immediate for PopL
       emitVirtualLocal(wh); // immediate for PushL
       emitPushL(e);
       e.WHResult();
       e.PopL(wh);
+
+      done.set(e);
     }
     std::vector<IndexPair> indexPairs;
     IndexChain workingChain;

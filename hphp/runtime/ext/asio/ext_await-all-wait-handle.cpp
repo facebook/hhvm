@@ -138,7 +138,9 @@ ObjectData* c_AwaitAllWaitHandle::fromFrameNoCheck(
   uint32_t idx = cnt;
 
   for (int64_t i = 0; i < total; i++) {
-    auto const waitHandle = c_Awaitable::fromCellAssert(stk[-i]);
+    auto const local = stk[-i];
+    if (cellIsNull(local)) continue;
+    auto const waitHandle = c_Awaitable::fromCellAssert(local);
     if (waitHandle->isFinished()) continue;
 
     auto const child = static_cast<c_WaitableWaitHandle*>(waitHandle);

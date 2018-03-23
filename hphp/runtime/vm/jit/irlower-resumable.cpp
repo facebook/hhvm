@@ -288,6 +288,21 @@ constexpr ptrdiff_t ar_rel(ptrdiff_t off) {
   return off - AFWH::arOff();
 };
 
+/*
+ * Check if obj is an Awaitable. Passes CC_BE on sf if it is.
+ */
+void emitIsAwaitable(Vout& v, Vreg obj, Vreg sf) {
+  auto constexpr minwh = (int)HeaderKind::WaitHandle;
+  auto constexpr maxwh = (int)HeaderKind::AwaitAllWH;
+  static_assert(maxwh - minwh == 2, "WH range check needs updating");
+
+  auto const kind = v.makeReg();
+  auto const wh_index = v.makeReg();
+  v << loadzbl{obj[HeaderKindOffset], kind};
+  v << subli{minwh, kind, wh_index, v.makeReg()};
+  v << cmpli{maxwh - minwh, wh_index, sf};
+}
+
 }
 
 IMPL_OPCODE_CALL(CreateAFWH)
@@ -328,17 +343,39 @@ void cgCountWHNotDone(IRLS& env, const IRInstruction* inst) {
     [&] (const VregList& in, const VregList& out) {
       auto const loc_in  = in[0],  cnt_in  = in[1];
       auto const loc_out = out[0], cnt_out = out[1];
-      auto const sf1 = v.makeReg();
-      auto const sf2 = v.makeReg();
+      auto const type_loc = base[loc_in * 8 + TVOFF(m_type)];
+      auto const data_loc = base[loc_in * 8 + TVOFF(m_data)];
+      auto const sf_is_wh = v.makeReg();
+      auto const sf_is_finished = v.makeReg();
+      auto const sf_cont = v.makeReg();
       auto const obj = v.makeReg();
+      auto const cnt_new = v.makeReg();
+      auto const loop_cont = v.makeBlock();
+
+      // Skip nulls.
+      emitTypeTest(
+        v, env, TNull, type_loc, data_loc, v.makeReg(),
+        [&] (ConditionCode cc, Vreg sf) {
+          ifThen(v, cc, sf, [&] (Vout& v) {
+            v << phijmp{loop_cont, v.makeTuple({cnt_in})};
+          });
+        }
+      );
+
+      // Take exit on non-objects.
+      emitTypeCheck(v, env, TObj, type_loc, data_loc, inst->taken());
+
+      // Take exit on non-Awaitables.
+      v << load{data_loc, obj};
+      emitIsAwaitable(v, obj, sf_is_wh);
+      fwdJcc(v, env, CC_A, sf_is_wh, inst->taken());
 
       // We depend on this in the test with 0x0E below.
       static_assert(c_Awaitable::STATE_SUCCEEDED == 0, "");
       static_assert(c_Awaitable::STATE_FAILED == 1, "");
 
-      v << load{base[loc_in * 8], obj};
-      v << testbim{0x0E, obj[WH::stateOff()], sf1};
-      cond(v, CC_NZ, sf1, cnt_out,
+      v << testbim{0x0E, obj[WH::stateOff()], sf_is_finished};
+      cond(v, CC_NZ, sf_is_finished, cnt_new,
         [&] (Vout& v) {
           auto ret = v.makeReg();
           v << incq{cnt_in, ret, v.makeReg()};
@@ -347,9 +384,13 @@ void cgCountWHNotDone(IRLS& env, const IRInstruction* inst) {
         [&] (Vout& v) { return cnt_in; }
       );
 
+      v << phijmp{loop_cont, v.makeTuple({cnt_new})};
+
       // Add 2 to the loop variable because we can only scale by at most 8.
-      v << subqi{2, loc_in, loc_out, sf2};
-      return sf2;
+      v = loop_cont;
+      v << phidef{v.makeTuple({cnt_out})};
+      v << subqi{2, loc_in, loc_out, sf_cont};
+      return sf_cont;
     }
   );
 
@@ -398,17 +439,10 @@ void cgIsWaitHandle(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const obj = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-
   auto const sf = v.makeReg();
-  auto const kind = v.makeReg();
-  auto const wh_index = v.makeReg();
-  auto constexpr minwh = (int)HeaderKind::WaitHandle;
-  auto constexpr maxwh = (int)HeaderKind::AwaitAllWH;
-  v << loadzbl{obj[HeaderKindOffset], kind};
-  v << subli{minwh, kind, wh_index, v.makeReg()};
-  v << cmpli{maxwh - minwh, wh_index, sf};
+
+  emitIsAwaitable(v, obj, sf);
   v << setcc{CC_BE, sf, dst};
-  static_assert(maxwh - minwh == 2, "WH range check needs updating");
 }
 
 void cgLdWHState(IRLS& env, const IRInstruction* inst) {

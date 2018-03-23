@@ -6837,7 +6837,13 @@ OPTBLD_INLINE TCA iopAwait(PC& pc) {
 OPTBLD_INLINE TCA iopAwaitAll(PC& pc, LocalRange locals) {
   uint32_t cnt = 0;
   for (auto i = locals.first; i < locals.first + locals.restCount + 1; ++i) {
-    if (!c_Awaitable::fromCellAssert(*frame_local(vmfp(), i))->isFinished()) {
+    auto const local = *frame_local(vmfp(), i);
+    if (cellIsNull(local)) continue;
+    auto const awaitable = c_Awaitable::fromCell(local);
+    if (UNLIKELY(awaitable == nullptr)) {
+      SystemLib::throwBadMethodCallExceptionObject("Await on a non-Awaitable");
+    }
+    if (!awaitable->isFinished()) {
       ++cnt;
     }
   }

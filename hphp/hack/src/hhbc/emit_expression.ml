@@ -1825,10 +1825,14 @@ and try_inline_genva_call_ env pos args uargs inline_context =
         aux (lhs_instrs::lhs_acc) (set_instrs::set_acc) tail in
       aux [] [] (if is_ltr then values else List.rev values) in
     let reify = gather @@ Core_list.map rhs ~f:begin fun l ->
+      let label_done = Label.next_regular () in
       gather [
+        instr_istypel l OpNull;
+        instr_jmpnz label_done;
         instr_pushl l;
         instr_whresult;
         instr_popl l;
+        instr_label label_done;
       ]
     end in
     let pairs = combine lhs rhs in
@@ -1855,18 +1859,7 @@ and try_inline_genva_call_ env pos args uargs inline_context =
   Local.scope @@ begin fun () ->
   let load_args =
     gather @@ Core_list.map args ~f:begin fun arg ->
-      let label_done = Label.next_regular () in
-      gather [
-        emit_expr ~need_ref:false env arg;
-        instr_dup;
-        instr_istypec OpNull;
-        instr_jmpz label_done;
-        instr_popc;
-        instr_fpushfuncd 0 (Hhbc_id.Function.from_raw_string "HH\\Asio\\null");
-        instr_fcall 0;
-        instr_unboxr;
-        instr_label label_done;
-      ]
+      emit_expr ~need_ref:false env arg
     end in
   let reserved_locals =
     List.init args_count (fun _ -> Local.get_unnamed_local ()) in
@@ -1889,9 +1882,14 @@ and try_inline_genva_call_ env pos args uargs inline_context =
       let process_results =
         let reify ~pop_result =
           gather @@ Core_list.map reserved_locals ~f:begin fun l ->
+            let label_done = Label.next_regular() in
             gather [
               instr_pushl l;
+              instr_dup;
+              instr_istypec OpNull;
+              instr_jmpnz label_done;
               instr_whresult;
+              instr_label label_done;
               if pop_result then instr_popc else empty;
             ]
           end in

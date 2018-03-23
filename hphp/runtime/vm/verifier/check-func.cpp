@@ -1401,7 +1401,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       break;
     }
     case Op::FCallAwait:
-    case Op::Await: {
+    case Op::Await:
+    case Op::AwaitAll: {
       if (!m_func->isAsync()) {
         ferror("{} may only appear in an async function\n", opcodeToName(op));
         return false;

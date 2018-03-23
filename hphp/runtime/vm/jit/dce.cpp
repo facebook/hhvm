@@ -232,7 +232,6 @@ bool canDCE(IRInstruction* inst) {
   case LdWHState:
   case LdWHResult:
   case LdWHNotDone:
-  case CountWHNotDone:
   case LdAFWHActRec:
   case LdMIStateAddr:
   case StringIsset:
@@ -551,6 +550,7 @@ bool canDCE(IRInstruction* inst) {
   case StContArValue:
   case StContArKey:
   case AFWHBlockOn:
+  case CountWHNotDone:
   case IncStat:
   case IncStatGrouped:
   case IncProfCounter:

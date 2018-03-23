@@ -2439,10 +2439,11 @@ To string conversions:
 
   Returns 1 if S0 is not finished, and 0 if S0 is finished.
 
-| CountWHNotDone<local,count>, D(Int), S(FramePtr), NF
+| CountWHNotDone<local,count>, D(Int), S(FramePtr), B
 
-  Returns the number of unfinished waithandles contained in the contiguous
-  locals beginning at local and extending count.
+  Returns the number of unfinished awaitables contained in the contiguous
+  locals beginning at local and extending count, skipping all nulls. A branch
+  is taken if a non-Awaitable non-null value is encountered.
 
 | LdAFWHActRec, D(FramePtr), S(Obj), NF
 

@@ -339,21 +339,24 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
   if (curFunc(env)->isAsyncGenerator() &&
       resumeMode(env) == ResumeMode::Async) PUNT(Await-AsyncGenerator);
 
+  auto const exitSlow = makeExitSlow(env);
+
   auto const cnt = [&] {
     if (locals.restCount + 1 > RuntimeOption::EvalJitMaxAwaitAllUnroll) {
       return gen(
         env,
         CountWHNotDone,
         CountWHNotDoneData { locals.first, locals.restCount + 1 },
+        exitSlow,
         fp(env)
       );
     }
     auto cnt = cns(env, 0);
     for (int i = 0; i < locals.restCount + 1; ++i) {
-      assertTypeLocal(
-        env, locals.first + i, Type::SubObj(c_Awaitable::classof())
-      );
       auto const loc = ldLoc(env, locals.first + i, nullptr, DataTypeSpecific);
+      if (loc->isA(TNull)) continue;
+      if (!loc->isA(TObj)) PUNT(Await-NonObject);
+      gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, loc));
       auto const not_done = gen(env, LdWHNotDone, loc);
       cnt = gen(env, AddInt, cnt, not_done);
     }

@@ -1418,12 +1418,37 @@ void Debugger::onCompilationUnitLoaded(
     return;
   }
 
+  BreakpointManager* bpMgr = m_session->getBreakpointManager();
   const auto filePath = getFilePathForUnit(compilationUnit);
+
+  if (ri->m_breakpointInfo->m_loadedUnits[filePath] != nullptr &&
+      ri->m_breakpointInfo->m_loadedUnits[filePath] != compilationUnit) {
+
+    const auto& bpsForUnit = bpMgr->getBreakpointIdsByFile(filePath);
+
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Compilation unit for %s changed/reloaded in request %d. "
+        "Re-placing %d breakpoints.",
+      filePath.c_str(),
+      getCurrentThreadId(),
+      bpsForUnit.size()
+    );
+
+    // The unit has been re-loaded from disk since the last time we saw it.
+    // We must re-place any breakpoints in this file into the new unit.
+    for (const auto bpId : bpsForUnit) {
+      auto it = ri->m_breakpointInfo->m_unresolvedBreakpoints.find(bpId);
+      if (it == ri->m_breakpointInfo->m_unresolvedBreakpoints.end()) {
+        ri->m_breakpointInfo->m_unresolvedBreakpoints.emplace(bpId);
+      }
+    }
+  }
+
   ri->m_breakpointInfo->m_loadedUnits[filePath] = compilationUnit;
 
   // See if any unresolved breakpoints for this request can be placed in the
   // compilation unit that just loaded.
-  BreakpointManager* bpMgr = m_session->getBreakpointManager();
   auto& unresolvedBps = ri->m_breakpointInfo->m_unresolvedBreakpoints;
   for (auto it = unresolvedBps.begin(); it != unresolvedBps.end();) {
     const int bpId = *it;

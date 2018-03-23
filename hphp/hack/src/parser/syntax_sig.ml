@@ -524,7 +524,8 @@ module type Syntax_S = sig
     ; anonymous_class_body                               : t
     }
   | AnonymousFunction                       of
-    { anonymous_static_keyword                           : t
+    { anonymous_attribute_spec                           : t
+    ; anonymous_static_keyword                           : t
     ; anonymous_async_keyword                            : t
     ; anonymous_coroutine_keyword                        : t
     ; anonymous_function_keyword                         : t
@@ -538,7 +539,8 @@ module type Syntax_S = sig
     ; anonymous_body                                     : t
     }
   | Php7AnonymousFunction                   of
-    { php7_anonymous_static_keyword                      : t
+    { php7_anonymous_attribute_spec                      : t
+    ; php7_anonymous_static_keyword                      : t
     ; php7_anonymous_async_keyword                       : t
     ; php7_anonymous_coroutine_keyword                   : t
     ; php7_anonymous_function_keyword                    : t
@@ -558,7 +560,8 @@ module type Syntax_S = sig
     ; anonymous_use_right_paren                          : t
     }
   | LambdaExpression                        of
-    { lambda_async                                       : t
+    { lambda_attribute_spec                              : t
+    ; lambda_async                                       : t
     ; lambda_coroutine                                   : t
     ; lambda_signature                                   : t
     ; lambda_arrow                                       : t
@@ -785,7 +788,8 @@ module type Syntax_S = sig
     ; embedded_subscript_right_bracket                   : t
     }
   | AwaitableCreationExpression             of
-    { awaitable_async                                    : t
+    { awaitable_attribute_spec                           : t
+    ; awaitable_async                                    : t
     ; awaitable_coroutine                                : t
     ; awaitable_compound_statement                       : t
     }
@@ -1115,10 +1119,10 @@ module type Syntax_S = sig
   val make_global_statement : t -> t -> t -> t
   val make_simple_initializer : t -> t -> t
   val make_anonymous_class : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_php7_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_php7_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_anonymous_function_use_clause : t -> t -> t -> t -> t
-  val make_lambda_expression : t -> t -> t -> t -> t -> t
+  val make_lambda_expression : t -> t -> t -> t -> t -> t -> t
   val make_lambda_signature : t -> t -> t -> t -> t -> t
   val make_cast_expression : t -> t -> t -> t -> t
   val make_scope_resolution_expression : t -> t -> t -> t
@@ -1159,7 +1163,7 @@ module type Syntax_S = sig
   val make_element_initializer : t -> t -> t -> t
   val make_subscript_expression : t -> t -> t -> t -> t
   val make_embedded_subscript_expression : t -> t -> t -> t -> t
-  val make_awaitable_creation_expression : t -> t -> t -> t
+  val make_awaitable_creation_expression : t -> t -> t -> t -> t
   val make_xhp_children_declaration : t -> t -> t -> t
   val make_xhp_children_parenthesized_list : t -> t -> t -> t
   val make_xhp_category_declaration : t -> t -> t -> t

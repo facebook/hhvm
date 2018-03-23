@@ -1373,6 +1373,7 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc anonymous_class_body in
          acc
       | AnonymousFunction {
+        anonymous_attribute_spec;
         anonymous_static_keyword;
         anonymous_async_keyword;
         anonymous_coroutine_keyword;
@@ -1386,6 +1387,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_use;
         anonymous_body;
       } ->
+         let acc = f acc anonymous_attribute_spec in
          let acc = f acc anonymous_static_keyword in
          let acc = f acc anonymous_async_keyword in
          let acc = f acc anonymous_coroutine_keyword in
@@ -1400,6 +1402,7 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc anonymous_body in
          acc
       | Php7AnonymousFunction {
+        php7_anonymous_attribute_spec;
         php7_anonymous_static_keyword;
         php7_anonymous_async_keyword;
         php7_anonymous_coroutine_keyword;
@@ -1413,6 +1416,7 @@ module WithToken(Token: TokenType) = struct
         php7_anonymous_type;
         php7_anonymous_body;
       } ->
+         let acc = f acc php7_anonymous_attribute_spec in
          let acc = f acc php7_anonymous_static_keyword in
          let acc = f acc php7_anonymous_async_keyword in
          let acc = f acc php7_anonymous_coroutine_keyword in
@@ -1438,12 +1442,14 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc anonymous_use_right_paren in
          acc
       | LambdaExpression {
+        lambda_attribute_spec;
         lambda_async;
         lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
       } ->
+         let acc = f acc lambda_attribute_spec in
          let acc = f acc lambda_async in
          let acc = f acc lambda_coroutine in
          let acc = f acc lambda_signature in
@@ -1851,10 +1857,12 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc embedded_subscript_right_bracket in
          acc
       | AwaitableCreationExpression {
+        awaitable_attribute_spec;
         awaitable_async;
         awaitable_coroutine;
         awaitable_compound_statement;
       } ->
+         let acc = f acc awaitable_attribute_spec in
          let acc = f acc awaitable_async in
          let acc = f acc awaitable_coroutine in
          let acc = f acc awaitable_compound_statement in
@@ -3178,6 +3186,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_class_body;
       ]
       | AnonymousFunction {
+        anonymous_attribute_spec;
         anonymous_static_keyword;
         anonymous_async_keyword;
         anonymous_coroutine_keyword;
@@ -3191,6 +3200,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_use;
         anonymous_body;
       } -> [
+        anonymous_attribute_spec;
         anonymous_static_keyword;
         anonymous_async_keyword;
         anonymous_coroutine_keyword;
@@ -3205,6 +3215,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_body;
       ]
       | Php7AnonymousFunction {
+        php7_anonymous_attribute_spec;
         php7_anonymous_static_keyword;
         php7_anonymous_async_keyword;
         php7_anonymous_coroutine_keyword;
@@ -3218,6 +3229,7 @@ module WithToken(Token: TokenType) = struct
         php7_anonymous_type;
         php7_anonymous_body;
       } -> [
+        php7_anonymous_attribute_spec;
         php7_anonymous_static_keyword;
         php7_anonymous_async_keyword;
         php7_anonymous_coroutine_keyword;
@@ -3243,12 +3255,14 @@ module WithToken(Token: TokenType) = struct
         anonymous_use_right_paren;
       ]
       | LambdaExpression {
+        lambda_attribute_spec;
         lambda_async;
         lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
       } -> [
+        lambda_attribute_spec;
         lambda_async;
         lambda_coroutine;
         lambda_signature;
@@ -3656,10 +3670,12 @@ module WithToken(Token: TokenType) = struct
         embedded_subscript_right_bracket;
       ]
       | AwaitableCreationExpression {
+        awaitable_attribute_spec;
         awaitable_async;
         awaitable_coroutine;
         awaitable_compound_statement;
       } -> [
+        awaitable_attribute_spec;
         awaitable_async;
         awaitable_coroutine;
         awaitable_compound_statement;
@@ -4984,6 +5000,7 @@ module WithToken(Token: TokenType) = struct
         "anonymous_class_body";
       ]
       | AnonymousFunction {
+        anonymous_attribute_spec;
         anonymous_static_keyword;
         anonymous_async_keyword;
         anonymous_coroutine_keyword;
@@ -4997,6 +5014,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_use;
         anonymous_body;
       } -> [
+        "anonymous_attribute_spec";
         "anonymous_static_keyword";
         "anonymous_async_keyword";
         "anonymous_coroutine_keyword";
@@ -5011,6 +5029,7 @@ module WithToken(Token: TokenType) = struct
         "anonymous_body";
       ]
       | Php7AnonymousFunction {
+        php7_anonymous_attribute_spec;
         php7_anonymous_static_keyword;
         php7_anonymous_async_keyword;
         php7_anonymous_coroutine_keyword;
@@ -5024,6 +5043,7 @@ module WithToken(Token: TokenType) = struct
         php7_anonymous_type;
         php7_anonymous_body;
       } -> [
+        "php7_anonymous_attribute_spec";
         "php7_anonymous_static_keyword";
         "php7_anonymous_async_keyword";
         "php7_anonymous_coroutine_keyword";
@@ -5049,12 +5069,14 @@ module WithToken(Token: TokenType) = struct
         "anonymous_use_right_paren";
       ]
       | LambdaExpression {
+        lambda_attribute_spec;
         lambda_async;
         lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
       } -> [
+        "lambda_attribute_spec";
         "lambda_async";
         "lambda_coroutine";
         "lambda_signature";
@@ -5462,10 +5484,12 @@ module WithToken(Token: TokenType) = struct
         "embedded_subscript_right_bracket";
       ]
       | AwaitableCreationExpression {
+        awaitable_attribute_spec;
         awaitable_async;
         awaitable_coroutine;
         awaitable_compound_statement;
       } -> [
+        "awaitable_attribute_spec";
         "awaitable_async";
         "awaitable_coroutine";
         "awaitable_compound_statement";
@@ -6926,6 +6950,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_class_body;
         }
       | (SyntaxKind.AnonymousFunction, [
+          anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
@@ -6940,6 +6965,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_body;
         ]) ->
         AnonymousFunction {
+          anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
@@ -6954,6 +6980,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_body;
         }
       | (SyntaxKind.Php7AnonymousFunction, [
+          php7_anonymous_attribute_spec;
           php7_anonymous_static_keyword;
           php7_anonymous_async_keyword;
           php7_anonymous_coroutine_keyword;
@@ -6968,6 +6995,7 @@ module WithToken(Token: TokenType) = struct
           php7_anonymous_body;
         ]) ->
         Php7AnonymousFunction {
+          php7_anonymous_attribute_spec;
           php7_anonymous_static_keyword;
           php7_anonymous_async_keyword;
           php7_anonymous_coroutine_keyword;
@@ -6994,6 +7022,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_use_right_paren;
         }
       | (SyntaxKind.LambdaExpression, [
+          lambda_attribute_spec;
           lambda_async;
           lambda_coroutine;
           lambda_signature;
@@ -7001,6 +7030,7 @@ module WithToken(Token: TokenType) = struct
           lambda_body;
         ]) ->
         LambdaExpression {
+          lambda_attribute_spec;
           lambda_async;
           lambda_coroutine;
           lambda_signature;
@@ -7448,11 +7478,13 @@ module WithToken(Token: TokenType) = struct
           embedded_subscript_right_bracket;
         }
       | (SyntaxKind.AwaitableCreationExpression, [
+          awaitable_attribute_spec;
           awaitable_async;
           awaitable_coroutine;
           awaitable_compound_statement;
         ]) ->
         AwaitableCreationExpression {
+          awaitable_attribute_spec;
           awaitable_async;
           awaitable_coroutine;
           awaitable_compound_statement;
@@ -9180,6 +9212,7 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_anonymous_function
+        anonymous_attribute_spec
         anonymous_static_keyword
         anonymous_async_keyword
         anonymous_coroutine_keyword
@@ -9194,6 +9227,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_body
       =
         let syntax = AnonymousFunction {
+          anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
@@ -9211,6 +9245,7 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_php7_anonymous_function
+        php7_anonymous_attribute_spec
         php7_anonymous_static_keyword
         php7_anonymous_async_keyword
         php7_anonymous_coroutine_keyword
@@ -9225,6 +9260,7 @@ module WithToken(Token: TokenType) = struct
         php7_anonymous_body
       =
         let syntax = Php7AnonymousFunction {
+          php7_anonymous_attribute_spec;
           php7_anonymous_static_keyword;
           php7_anonymous_async_keyword;
           php7_anonymous_coroutine_keyword;
@@ -9257,6 +9293,7 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_lambda_expression
+        lambda_attribute_spec
         lambda_async
         lambda_coroutine
         lambda_signature
@@ -9264,6 +9301,7 @@ module WithToken(Token: TokenType) = struct
         lambda_body
       =
         let syntax = LambdaExpression {
+          lambda_attribute_spec;
           lambda_async;
           lambda_coroutine;
           lambda_signature;
@@ -9834,11 +9872,13 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_awaitable_creation_expression
+        awaitable_attribute_spec
         awaitable_async
         awaitable_coroutine
         awaitable_compound_statement
       =
         let syntax = AwaitableCreationExpression {
+          awaitable_attribute_spec;
           awaitable_async;
           awaitable_coroutine;
           awaitable_compound_statement;
@@ -10460,6 +10500,7 @@ module WithToken(Token: TokenType) = struct
           methodish_semicolon;
        }
      let from_anonymous_function {
+          anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
@@ -10473,6 +10514,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_use;
           anonymous_body;
        } = AnonymousFunction {
+          anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
@@ -10487,12 +10529,14 @@ module WithToken(Token: TokenType) = struct
           anonymous_body;
        }
      let from_lambda_expression {
+          lambda_attribute_spec;
           lambda_async;
           lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
        } = LambdaExpression {
+          lambda_attribute_spec;
           lambda_async;
           lambda_coroutine;
           lambda_signature;
@@ -10592,6 +10636,7 @@ module WithToken(Token: TokenType) = struct
      let get_anonymous_function x =
         match x with
         | AnonymousFunction {
+          anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
@@ -10605,6 +10650,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_use;
           anonymous_body;
             } -> {
+          anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
@@ -10622,12 +10668,14 @@ module WithToken(Token: TokenType) = struct
      let get_lambda_expression x =
         match x with
         | LambdaExpression {
+          lambda_attribute_spec;
           lambda_async;
           lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
             } -> {
+          lambda_attribute_spec;
           lambda_async;
           lambda_coroutine;
           lambda_signature;

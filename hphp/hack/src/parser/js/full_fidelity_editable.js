@@ -12009,6 +12009,7 @@ class AnonymousClass extends EditableSyntax
 class AnonymousFunction extends EditableSyntax
 {
   constructor(
+    attribute_spec,
     static_keyword,
     async_keyword,
     coroutine_keyword,
@@ -12023,6 +12024,7 @@ class AnonymousFunction extends EditableSyntax
     body)
   {
     super('anonymous_function', {
+      attribute_spec: attribute_spec,
       static_keyword: static_keyword,
       async_keyword: async_keyword,
       coroutine_keyword: coroutine_keyword,
@@ -12036,6 +12038,7 @@ class AnonymousFunction extends EditableSyntax
       use: use,
       body: body });
   }
+  get attribute_spec() { return this.children.attribute_spec; }
   get static_keyword() { return this.children.static_keyword; }
   get async_keyword() { return this.children.async_keyword; }
   get coroutine_keyword() { return this.children.coroutine_keyword; }
@@ -12048,8 +12051,25 @@ class AnonymousFunction extends EditableSyntax
   get type() { return this.children.type; }
   get use() { return this.children.use; }
   get body() { return this.children.body; }
+  with_attribute_spec(attribute_spec){
+    return new AnonymousFunction(
+      attribute_spec,
+      this.static_keyword,
+      this.async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      this.ampersand,
+      this.left_paren,
+      this.parameters,
+      this.right_paren,
+      this.colon,
+      this.type,
+      this.use,
+      this.body);
+  }
   with_static_keyword(static_keyword){
     return new AnonymousFunction(
+      this.attribute_spec,
       static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12065,6 +12085,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_async_keyword(async_keyword){
     return new AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       async_keyword,
       this.coroutine_keyword,
@@ -12080,6 +12101,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_coroutine_keyword(coroutine_keyword){
     return new AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       coroutine_keyword,
@@ -12095,6 +12117,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_function_keyword(function_keyword){
     return new AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12110,6 +12133,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_ampersand(ampersand){
     return new AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12125,6 +12149,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_left_paren(left_paren){
     return new AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12140,6 +12165,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_parameters(parameters){
     return new AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12155,6 +12181,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_right_paren(right_paren){
     return new AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12170,6 +12197,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_colon(colon){
     return new AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12185,6 +12213,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_type(type){
     return new AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12200,6 +12229,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_use(use){
     return new AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12215,6 +12245,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_body(body){
     return new AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12234,6 +12265,7 @@ class AnonymousFunction extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
     var static_keyword = this.static_keyword.rewrite(rewriter, new_parents);
     var async_keyword = this.async_keyword.rewrite(rewriter, new_parents);
     var coroutine_keyword = this.coroutine_keyword.rewrite(rewriter, new_parents);
@@ -12247,6 +12279,7 @@ class AnonymousFunction extends EditableSyntax
     var use = this.use.rewrite(rewriter, new_parents);
     var body = this.body.rewrite(rewriter, new_parents);
     if (
+      attribute_spec === this.attribute_spec &&
       static_keyword === this.static_keyword &&
       async_keyword === this.async_keyword &&
       coroutine_keyword === this.coroutine_keyword &&
@@ -12265,6 +12298,7 @@ class AnonymousFunction extends EditableSyntax
     else
     {
       return rewriter(new AnonymousFunction(
+        attribute_spec,
         static_keyword,
         async_keyword,
         coroutine_keyword,
@@ -12281,6 +12315,9 @@ class AnonymousFunction extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let attribute_spec = EditableSyntax.from_json(
+      json.anonymous_attribute_spec, position, source);
+    position += attribute_spec.width;
     let static_keyword = EditableSyntax.from_json(
       json.anonymous_static_keyword, position, source);
     position += static_keyword.width;
@@ -12318,6 +12355,7 @@ class AnonymousFunction extends EditableSyntax
       json.anonymous_body, position, source);
     position += body.width;
     return new AnonymousFunction(
+        attribute_spec,
         static_keyword,
         async_keyword,
         coroutine_keyword,
@@ -12335,6 +12373,7 @@ class AnonymousFunction extends EditableSyntax
   {
     if (AnonymousFunction._children_keys == null)
       AnonymousFunction._children_keys = [
+        'attribute_spec',
         'static_keyword',
         'async_keyword',
         'coroutine_keyword',
@@ -12353,6 +12392,7 @@ class AnonymousFunction extends EditableSyntax
 class Php7AnonymousFunction extends EditableSyntax
 {
   constructor(
+    attribute_spec,
     static_keyword,
     async_keyword,
     coroutine_keyword,
@@ -12367,6 +12407,7 @@ class Php7AnonymousFunction extends EditableSyntax
     body)
   {
     super('php7_anonymous_function', {
+      attribute_spec: attribute_spec,
       static_keyword: static_keyword,
       async_keyword: async_keyword,
       coroutine_keyword: coroutine_keyword,
@@ -12380,6 +12421,7 @@ class Php7AnonymousFunction extends EditableSyntax
       type: type,
       body: body });
   }
+  get attribute_spec() { return this.children.attribute_spec; }
   get static_keyword() { return this.children.static_keyword; }
   get async_keyword() { return this.children.async_keyword; }
   get coroutine_keyword() { return this.children.coroutine_keyword; }
@@ -12392,8 +12434,25 @@ class Php7AnonymousFunction extends EditableSyntax
   get colon() { return this.children.colon; }
   get type() { return this.children.type; }
   get body() { return this.children.body; }
+  with_attribute_spec(attribute_spec){
+    return new Php7AnonymousFunction(
+      attribute_spec,
+      this.static_keyword,
+      this.async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      this.ampersand,
+      this.left_paren,
+      this.parameters,
+      this.right_paren,
+      this.use,
+      this.colon,
+      this.type,
+      this.body);
+  }
   with_static_keyword(static_keyword){
     return new Php7AnonymousFunction(
+      this.attribute_spec,
       static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12409,6 +12468,7 @@ class Php7AnonymousFunction extends EditableSyntax
   }
   with_async_keyword(async_keyword){
     return new Php7AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       async_keyword,
       this.coroutine_keyword,
@@ -12424,6 +12484,7 @@ class Php7AnonymousFunction extends EditableSyntax
   }
   with_coroutine_keyword(coroutine_keyword){
     return new Php7AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       coroutine_keyword,
@@ -12439,6 +12500,7 @@ class Php7AnonymousFunction extends EditableSyntax
   }
   with_function_keyword(function_keyword){
     return new Php7AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12454,6 +12516,7 @@ class Php7AnonymousFunction extends EditableSyntax
   }
   with_ampersand(ampersand){
     return new Php7AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12469,6 +12532,7 @@ class Php7AnonymousFunction extends EditableSyntax
   }
   with_left_paren(left_paren){
     return new Php7AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12484,6 +12548,7 @@ class Php7AnonymousFunction extends EditableSyntax
   }
   with_parameters(parameters){
     return new Php7AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12499,6 +12564,7 @@ class Php7AnonymousFunction extends EditableSyntax
   }
   with_right_paren(right_paren){
     return new Php7AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12514,6 +12580,7 @@ class Php7AnonymousFunction extends EditableSyntax
   }
   with_use(use){
     return new Php7AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12529,6 +12596,7 @@ class Php7AnonymousFunction extends EditableSyntax
   }
   with_colon(colon){
     return new Php7AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12544,6 +12612,7 @@ class Php7AnonymousFunction extends EditableSyntax
   }
   with_type(type){
     return new Php7AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12559,6 +12628,7 @@ class Php7AnonymousFunction extends EditableSyntax
   }
   with_body(body){
     return new Php7AnonymousFunction(
+      this.attribute_spec,
       this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
@@ -12578,6 +12648,7 @@ class Php7AnonymousFunction extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
     var static_keyword = this.static_keyword.rewrite(rewriter, new_parents);
     var async_keyword = this.async_keyword.rewrite(rewriter, new_parents);
     var coroutine_keyword = this.coroutine_keyword.rewrite(rewriter, new_parents);
@@ -12591,6 +12662,7 @@ class Php7AnonymousFunction extends EditableSyntax
     var type = this.type.rewrite(rewriter, new_parents);
     var body = this.body.rewrite(rewriter, new_parents);
     if (
+      attribute_spec === this.attribute_spec &&
       static_keyword === this.static_keyword &&
       async_keyword === this.async_keyword &&
       coroutine_keyword === this.coroutine_keyword &&
@@ -12609,6 +12681,7 @@ class Php7AnonymousFunction extends EditableSyntax
     else
     {
       return rewriter(new Php7AnonymousFunction(
+        attribute_spec,
         static_keyword,
         async_keyword,
         coroutine_keyword,
@@ -12625,6 +12698,9 @@ class Php7AnonymousFunction extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let attribute_spec = EditableSyntax.from_json(
+      json.php7_anonymous_attribute_spec, position, source);
+    position += attribute_spec.width;
     let static_keyword = EditableSyntax.from_json(
       json.php7_anonymous_static_keyword, position, source);
     position += static_keyword.width;
@@ -12662,6 +12738,7 @@ class Php7AnonymousFunction extends EditableSyntax
       json.php7_anonymous_body, position, source);
     position += body.width;
     return new Php7AnonymousFunction(
+        attribute_spec,
         static_keyword,
         async_keyword,
         coroutine_keyword,
@@ -12679,6 +12756,7 @@ class Php7AnonymousFunction extends EditableSyntax
   {
     if (Php7AnonymousFunction._children_keys == null)
       Php7AnonymousFunction._children_keys = [
+        'attribute_spec',
         'static_keyword',
         'async_keyword',
         'coroutine_keyword',
@@ -12801,6 +12879,7 @@ class AnonymousFunctionUseClause extends EditableSyntax
 class LambdaExpression extends EditableSyntax
 {
   constructor(
+    attribute_spec,
     async,
     coroutine,
     signature,
@@ -12808,19 +12887,31 @@ class LambdaExpression extends EditableSyntax
     body)
   {
     super('lambda_expression', {
+      attribute_spec: attribute_spec,
       async: async,
       coroutine: coroutine,
       signature: signature,
       arrow: arrow,
       body: body });
   }
+  get attribute_spec() { return this.children.attribute_spec; }
   get async() { return this.children.async; }
   get coroutine() { return this.children.coroutine; }
   get signature() { return this.children.signature; }
   get arrow() { return this.children.arrow; }
   get body() { return this.children.body; }
+  with_attribute_spec(attribute_spec){
+    return new LambdaExpression(
+      attribute_spec,
+      this.async,
+      this.coroutine,
+      this.signature,
+      this.arrow,
+      this.body);
+  }
   with_async(async){
     return new LambdaExpression(
+      this.attribute_spec,
       async,
       this.coroutine,
       this.signature,
@@ -12829,6 +12920,7 @@ class LambdaExpression extends EditableSyntax
   }
   with_coroutine(coroutine){
     return new LambdaExpression(
+      this.attribute_spec,
       this.async,
       coroutine,
       this.signature,
@@ -12837,6 +12929,7 @@ class LambdaExpression extends EditableSyntax
   }
   with_signature(signature){
     return new LambdaExpression(
+      this.attribute_spec,
       this.async,
       this.coroutine,
       signature,
@@ -12845,6 +12938,7 @@ class LambdaExpression extends EditableSyntax
   }
   with_arrow(arrow){
     return new LambdaExpression(
+      this.attribute_spec,
       this.async,
       this.coroutine,
       this.signature,
@@ -12853,6 +12947,7 @@ class LambdaExpression extends EditableSyntax
   }
   with_body(body){
     return new LambdaExpression(
+      this.attribute_spec,
       this.async,
       this.coroutine,
       this.signature,
@@ -12865,12 +12960,14 @@ class LambdaExpression extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
     var async = this.async.rewrite(rewriter, new_parents);
     var coroutine = this.coroutine.rewrite(rewriter, new_parents);
     var signature = this.signature.rewrite(rewriter, new_parents);
     var arrow = this.arrow.rewrite(rewriter, new_parents);
     var body = this.body.rewrite(rewriter, new_parents);
     if (
+      attribute_spec === this.attribute_spec &&
       async === this.async &&
       coroutine === this.coroutine &&
       signature === this.signature &&
@@ -12882,6 +12979,7 @@ class LambdaExpression extends EditableSyntax
     else
     {
       return rewriter(new LambdaExpression(
+        attribute_spec,
         async,
         coroutine,
         signature,
@@ -12891,6 +12989,9 @@ class LambdaExpression extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let attribute_spec = EditableSyntax.from_json(
+      json.lambda_attribute_spec, position, source);
+    position += attribute_spec.width;
     let async = EditableSyntax.from_json(
       json.lambda_async, position, source);
     position += async.width;
@@ -12907,6 +13008,7 @@ class LambdaExpression extends EditableSyntax
       json.lambda_body, position, source);
     position += body.width;
     return new LambdaExpression(
+        attribute_spec,
         async,
         coroutine,
         signature,
@@ -12917,6 +13019,7 @@ class LambdaExpression extends EditableSyntax
   {
     if (LambdaExpression._children_keys == null)
       LambdaExpression._children_keys = [
+        'attribute_spec',
         'async',
         'coroutine',
         'signature',
@@ -16682,32 +16785,45 @@ class EmbeddedSubscriptExpression extends EditableSyntax
 class AwaitableCreationExpression extends EditableSyntax
 {
   constructor(
+    attribute_spec,
     async,
     coroutine,
     compound_statement)
   {
     super('awaitable_creation_expression', {
+      attribute_spec: attribute_spec,
       async: async,
       coroutine: coroutine,
       compound_statement: compound_statement });
   }
+  get attribute_spec() { return this.children.attribute_spec; }
   get async() { return this.children.async; }
   get coroutine() { return this.children.coroutine; }
   get compound_statement() { return this.children.compound_statement; }
+  with_attribute_spec(attribute_spec){
+    return new AwaitableCreationExpression(
+      attribute_spec,
+      this.async,
+      this.coroutine,
+      this.compound_statement);
+  }
   with_async(async){
     return new AwaitableCreationExpression(
+      this.attribute_spec,
       async,
       this.coroutine,
       this.compound_statement);
   }
   with_coroutine(coroutine){
     return new AwaitableCreationExpression(
+      this.attribute_spec,
       this.async,
       coroutine,
       this.compound_statement);
   }
   with_compound_statement(compound_statement){
     return new AwaitableCreationExpression(
+      this.attribute_spec,
       this.async,
       this.coroutine,
       compound_statement);
@@ -16718,10 +16834,12 @@ class AwaitableCreationExpression extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
     var async = this.async.rewrite(rewriter, new_parents);
     var coroutine = this.coroutine.rewrite(rewriter, new_parents);
     var compound_statement = this.compound_statement.rewrite(rewriter, new_parents);
     if (
+      attribute_spec === this.attribute_spec &&
       async === this.async &&
       coroutine === this.coroutine &&
       compound_statement === this.compound_statement)
@@ -16731,6 +16849,7 @@ class AwaitableCreationExpression extends EditableSyntax
     else
     {
       return rewriter(new AwaitableCreationExpression(
+        attribute_spec,
         async,
         coroutine,
         compound_statement), parents);
@@ -16738,6 +16857,9 @@ class AwaitableCreationExpression extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let attribute_spec = EditableSyntax.from_json(
+      json.awaitable_attribute_spec, position, source);
+    position += attribute_spec.width;
     let async = EditableSyntax.from_json(
       json.awaitable_async, position, source);
     position += async.width;
@@ -16748,6 +16870,7 @@ class AwaitableCreationExpression extends EditableSyntax
       json.awaitable_compound_statement, position, source);
     position += compound_statement.width;
     return new AwaitableCreationExpression(
+        attribute_spec,
         async,
         coroutine,
         compound_statement);
@@ -16756,6 +16879,7 @@ class AwaitableCreationExpression extends EditableSyntax
   {
     if (AwaitableCreationExpression._children_keys == null)
       AwaitableCreationExpression._children_keys = [
+        'attribute_spec',
         'async',
         'coroutine',
         'compound_statement'];

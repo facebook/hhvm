@@ -115,7 +115,7 @@
        (list
         (expression_statement
          (binary_expression
-          (subscript_expression (variable ((whitespace) (variable))) 
+          (subscript_expression (variable ((whitespace) (variable)))
            (([)) (missing) ((]) (whitespace)))
           ((=) (whitespace)) (variable ((variable))))
          ((";") (end_of_line))))
@@ -170,7 +170,7 @@
          ((,) (whitespace)))
         (list_item
          (keyset_intrinsic_expression ((keyset)) (([))
-          (list (list_item (literal ((decimal_literal))) (missing))) 
+          (list (list_item (literal ((decimal_literal))) (missing)))
           ((])))
          (missing)))
        ((rparen)))
@@ -396,7 +396,7 @@
      (expression_statement
       (binary_expression (variable ((whitespace) (variable) (whitespace)))
        ((=) (whitespace))
-       (lambda_expression (missing) (missing)
+       (lambda_expression (missing) (missing) (missing)
         (lambda_signature ((lparen)) (missing) ((rparen) (whitespace))
          (missing) (missing))
         ((==>) (whitespace)) (literal ((single_quoted_string_literal)))))

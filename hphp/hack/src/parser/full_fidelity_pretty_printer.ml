@@ -986,18 +986,20 @@ let rec get_doc node =
     let o = get_doc x.cast_operand in
     group_doc (l ^^^ t ^^^ r ^^^ o)
   | LambdaExpression {
+      lambda_attribute_spec;
       lambda_async;
       lambda_coroutine;
       lambda_signature;
       lambda_arrow;
       lambda_body;
     } ->
+    let attrs = get_doc lambda_attribute_spec in
     let async = get_doc lambda_async in
     let coroutine = get_doc lambda_coroutine in
     let signature = get_doc lambda_signature in
     let arrow = get_doc lambda_arrow in
     let body = get_doc lambda_body in
-    group_doc (async ^| coroutine ^| signature ^| arrow ^| body)
+    group_doc (attrs ^| async ^| coroutine ^| signature ^| arrow ^| body)
   | LambdaSignature
     { lambda_left_paren; lambda_parameters; lambda_right_paren;
       lambda_colon; lambda_type } ->
@@ -1008,7 +1010,8 @@ let rec get_doc node =
     let ty = get_doc lambda_type in
     group_doc (left ^| params ^| right ^| colon ^| ty)
   | AnonymousFunction
-    { anonymous_static_keyword;
+    { anonymous_attribute_spec;
+      anonymous_static_keyword;
       anonymous_async_keyword;
       anonymous_coroutine_keyword;
       anonymous_function_keyword;
@@ -1020,6 +1023,7 @@ let rec get_doc node =
       anonymous_type;
       anonymous_use;
       anonymous_body } ->
+    let attrs = get_doc anonymous_attribute_spec in
     let static = get_doc anonymous_static_keyword in
     let async = get_doc anonymous_async_keyword in
     let coroutine = get_doc anonymous_coroutine_keyword in
@@ -1030,7 +1034,7 @@ let rec get_doc node =
     let right = get_doc anonymous_right_paren in
     let colon = get_doc anonymous_colon in
     let return_type = get_doc anonymous_type in
-    let preface = group_doc ( static ^| async ^| coroutine ^| fn ^| amp ) in
+    let preface = group_doc (attrs ^| static ^| async ^| coroutine ^| fn ^| amp ) in
     let parameters = indent_block_no_space left params right indt in
     let type_declaration = group_doc (colon ^| return_type) in
     let uses = get_doc anonymous_use in
@@ -1042,7 +1046,8 @@ let rec get_doc node =
       ) in
       handle_compound_inline_brace before_body body missing
     | Php7AnonymousFunction
-      { php7_anonymous_static_keyword;
+      { php7_anonymous_attribute_spec;
+        php7_anonymous_static_keyword;
         php7_anonymous_async_keyword;
         php7_anonymous_coroutine_keyword;
         php7_anonymous_function_keyword;
@@ -1054,6 +1059,7 @@ let rec get_doc node =
         php7_anonymous_type;
         php7_anonymous_use;
         php7_anonymous_body } ->
+      let attrs = get_doc php7_anonymous_attribute_spec in
       let static = get_doc php7_anonymous_static_keyword in
       let async = get_doc php7_anonymous_async_keyword in
       let coroutine = get_doc php7_anonymous_coroutine_keyword in
@@ -1064,7 +1070,7 @@ let rec get_doc node =
       let right = get_doc php7_anonymous_right_paren in
       let colon = get_doc php7_anonymous_colon in
       let return_type = get_doc php7_anonymous_type in
-      let preface = group_doc ( static ^| async ^| coroutine ^| fn ^| amp ) in
+      let preface = group_doc (attrs ^| static ^| async ^| coroutine ^| fn ^| amp ) in
       let parameters = indent_block_no_space left params right indt in
       let type_declaration = group_doc (colon ^| return_type) in
       let uses = get_doc php7_anonymous_use in
@@ -1398,10 +1404,11 @@ let rec get_doc node =
     let right = get_doc x.embedded_subscript_right_bracket in
     receiver ^^^ left ^^^ index ^^^ right
   | AwaitableCreationExpression x ->
+    let attrs = get_doc x.awaitable_attribute_spec in
     let async = get_doc x.awaitable_async in
     let coroutine = get_doc x.awaitable_coroutine in
     let stmt = x.awaitable_compound_statement in
-    handle_compound_brace_prefix_indent (async ^| coroutine) stmt indt
+    handle_compound_brace_prefix_indent (attrs ^| async ^| coroutine) stmt indt
   | XHPExpression x ->
     let left = get_doc x.xhp_open in
     let expr = get_doc x.xhp_body in

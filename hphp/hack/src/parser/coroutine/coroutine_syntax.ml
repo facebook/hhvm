@@ -585,6 +585,7 @@ let make_lambda_from_method_syntax existing_node lambda_signature lambda_body =
   synthesize_from
     existing_node
     (LambdaExpression {
+      lambda_attribute_spec = make_missing();
       lambda_async = make_missing();
       lambda_coroutine = make_missing();
       lambda_signature = lambda_signature;

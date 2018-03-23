@@ -1172,6 +1172,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Nest [t env value];
     ]
   | Syntax.AnonymousFunction {
+      anonymous_attribute_spec = attr;
       anonymous_static_keyword = static_kw;
       anonymous_async_keyword = async_kw;
       anonymous_coroutine_keyword = coroutine_kw;
@@ -1185,6 +1186,8 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       anonymous_use = use;
       anonymous_body = body; } ->
     Concat [
+      t env attr;
+      when_present attr space;
       t env static_kw;
       when_present static_kw space;
       t env async_kw;
@@ -1201,6 +1204,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         body;
     ]
   | Syntax.Php7AnonymousFunction {
+      php7_anonymous_attribute_spec = attr;
       php7_anonymous_static_keyword = static_kw;
       php7_anonymous_async_keyword = async_kw;
       php7_anonymous_coroutine_keyword = coroutine_kw;
@@ -1214,6 +1218,8 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       php7_anonymous_type = ret_type;
       php7_anonymous_body = body; } ->
     Concat [
+      t env attr;
+      when_present attr space;
       t env static_kw;
       when_present static_kw space;
       t env async_kw;
@@ -1245,12 +1251,15 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       transform_argish env left_p vars right_p;
     ]
   | Syntax.LambdaExpression {
+      lambda_attribute_spec = attr;
       lambda_async = async;
       lambda_coroutine = coroutine;
       lambda_signature = signature;
       lambda_arrow = arrow;
       lambda_body = body; } ->
     Concat [
+      t env attr;
+      when_present attr space;
       t env async;
       when_present async space;
       t env coroutine;
@@ -1644,10 +1653,13 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       transform_braced_item env lb expr rb;
     ]
   | Syntax.AwaitableCreationExpression {
+      awaitable_attribute_spec = attr;
       awaitable_async = async_kw;
       awaitable_coroutine = coroutine_kw;
       awaitable_compound_statement = body; } ->
     Concat [
+      t env attr;
+      when_present attr space;
       t env async_kw;
       when_present async_kw space;
       t env coroutine_kw;

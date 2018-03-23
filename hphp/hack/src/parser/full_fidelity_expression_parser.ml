@@ -269,10 +269,15 @@ module WithStatementAndDeclAndTypeParser
     | LeftBracket -> parse_array_creation_expression parser
     | Tuple -> parse_tuple_expression parser
     | Shape -> parse_shape_expression parser
-    | Function -> parse_anon parser
+    | Function ->
+      let (parser, attribute_spec) = Make.missing parser (pos parser) in
+      parse_anon parser attribute_spec
     | DollarDollar ->
       let (parser, token) = Make.token parser1 token in
       Make.pipe_variable_expression parser token
+    (* LessThanLessThan start attribute spec that is allowed on anonymous
+       functions or lambdas *)
+    | LessThanLessThan
     | Async
     | Coroutine -> parse_anon_or_lambda_or_awaitable parser
     | Include
@@ -1233,7 +1238,8 @@ module WithStatementAndDeclAndTypeParser
   and parse_variable_or_lambda parser =
     let (parser1, variable) = assert_token parser Variable in
     if peek_token_kind parser1 = EqualEqualGreaterThan then
-      parse_lambda_expression parser
+      let (parser, attribute_spec) = Make.missing parser (pos parser) in
+      parse_lambda_expression parser attribute_spec
     else
       Make.variable_expression parser1 variable
 
@@ -1272,8 +1278,9 @@ module WithStatementAndDeclAndTypeParser
       Make.cast_expression parser left cast_type right operand
     | _ -> begin
       match possible_lambda_expression parser with
-      | Some (parser, async, coroutine, signature) ->
-        parse_lambda_expression_after_signature parser async coroutine signature
+      | Some (parser, attribute_spec, async, coroutine, signature) ->
+        parse_lambda_expression_after_signature parser
+          attribute_spec async coroutine signature
       | None ->
         parse_parenthesized_expression parser
       end
@@ -1571,14 +1578,15 @@ module WithStatementAndDeclAndTypeParser
 
     let old_errors = errors parser in
     try
+      let (parser, attribute_spec) = Make.missing parser (pos parser) in
       let (parser, async, coroutine, signature) = parse_lambda_header parser in
       if old_errors = errors parser
       && peek_token_kind parser = EqualEqualGreaterThan
-      then Some (parser, async, coroutine, signature)
+      then Some (parser, attribute_spec, async, coroutine, signature)
       else None
     with Failure _ -> None
 
-  and parse_lambda_expression parser =
+  and parse_lambda_expression parser attribute_spec =
     (* SPEC
       lambda-expression:
         async-opt  lambda-function-signature  ==>  lambda-body
@@ -1586,14 +1594,14 @@ module WithStatementAndDeclAndTypeParser
     let (parser, async, coroutine, signature) = parse_lambda_header parser in
     let (parser, arrow) = require_lambda_arrow parser in
     let (parser, body) = parse_lambda_body parser in
-    Make.lambda_expression parser async coroutine signature arrow body
+    Make.lambda_expression parser attribute_spec async coroutine signature arrow body
 
-  and parse_lambda_expression_after_signature parser async coroutine signature =
+  and parse_lambda_expression_after_signature parser attribute_spec async coroutine signature =
     (* We had a signature with no async or coroutine, and we disambiguated it
     from a cast. *)
     let (parser, arrow) = require_lambda_arrow parser in
     let (parser, body) = parse_lambda_body parser in
-    Make.lambda_expression parser async coroutine signature arrow body
+    Make.lambda_expression parser attribute_spec async coroutine signature arrow body
 
   and parse_lambda_header parser =
     let (parser, async) = optional_token parser Async in
@@ -2326,17 +2334,19 @@ module WithStatementAndDeclAndTypeParser
     (* Skip any async or coroutine declarations that may be present. When we
        feed the original parser into the syntax parsers. they will take care of
        them as appropriate. *)
+    let (parser, attribute_spec) =
+      with_decl_parser parser DeclParser.parse_attribute_specification_opt in
     let (parser1, _) = optional_token parser Static in
     let (parser1, _) = optional_token parser1 Async in
     let (parser1, _) = optional_token parser1 Coroutine in
     match peek_token_kind parser1 with
-    | Function -> parse_anon parser
-    | LeftBrace -> parse_async_block parser
+    | Function -> parse_anon parser attribute_spec
+    | LeftBrace -> parse_async_block parser attribute_spec
     | Variable
-    | LeftParen -> parse_lambda_expression parser
+    | LeftParen -> parse_lambda_expression parser attribute_spec
     | _ -> parse_as_name_or_error parser
 
-  and parse_async_block parser =
+  and parse_async_block parser attribute_spec =
     (*
      * grammar:
      *  awaitable-creation-expression :
@@ -2347,7 +2357,7 @@ module WithStatementAndDeclAndTypeParser
     let (parser, async) = optional_token parser Async in
     let (parser, coroutine) = optional_token parser Coroutine in
     let (parser, stmt) = parse_compound_statement parser in
-    Make.awaitable_creation_expression parser async coroutine stmt
+    Make.awaitable_creation_expression parser attribute_spec async coroutine stmt
 
   and parse_anon_use_opt parser =
     (* SPEC:
@@ -2384,7 +2394,7 @@ module WithStatementAndDeclAndTypeParser
     in
     (parser, colon, return_type)
 
-  and parse_anon parser =
+  and parse_anon parser attribute_spec =
     (* SPEC
       anonymous-function-creation-expression:
         static-opt async-opt coroutine-opt  function
@@ -2412,6 +2422,7 @@ module WithStatementAndDeclAndTypeParser
       let (parser, body) = parse_compound_statement parser in
       Make.php7_anonymous_function
         parser
+        attribute_spec
         static
         async
         coroutine
@@ -2430,6 +2441,7 @@ module WithStatementAndDeclAndTypeParser
       let (parser, body) = parse_compound_statement parser in
       Make.anonymous_function
         parser
+        attribute_spec
         static
         async
         coroutine
@@ -2667,6 +2679,7 @@ module WithStatementAndDeclAndTypeParser
     if peek_token_kind ~lookahead:1 parser = ColonColon then
       parse_scope_resolution_or_name parser
     else
+      (* allow_attribute_spec since we end up here after seeing static *)
       parse_anon_or_lambda_or_awaitable parser
 
   and parse_scope_resolution_or_name parser =

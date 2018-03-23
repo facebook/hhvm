@@ -1094,7 +1094,8 @@ let schema : schema_node list =
     ; prefix      = "anonymous"
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
-      [ "static_keyword", ZeroOrOne Token
+      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      ; "static_keyword", ZeroOrOne Token
       ; "async_keyword", ZeroOrOne Token
       ; "coroutine_keyword", ZeroOrOne Token
       ; "function_keyword", Token
@@ -1115,7 +1116,8 @@ let schema : schema_node list =
     ; prefix      = "php7_anonymous"
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
-      [ "static_keyword", ZeroOrOne Token
+      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      ; "static_keyword", ZeroOrOne Token
       ; "async_keyword", ZeroOrOne Token
       ; "coroutine_keyword", ZeroOrOne Token
       ; "function_keyword", Token
@@ -1149,7 +1151,8 @@ let schema : schema_node list =
     ; prefix      = "lambda"
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
-      [ "async", ZeroOrOne Token
+      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      ; "async", ZeroOrOne Token
       ; "coroutine", ZeroOrOne Token
       ; "signature", Aggregate Specifier
       ; "arrow", Token
@@ -1663,7 +1666,8 @@ let schema : schema_node list =
     ; prefix      = "awaitable"
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
-      [ "async", Token
+      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      ; "async", Token
       ; "coroutine", ZeroOrOne Token
       ; "compound_statement", Just "CompoundStatement"
       ]

@@ -103,7 +103,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; methodish_semicolon                                : t
     }
   and anonymous_function =
-    { anonymous_static_keyword                           : t
+    { anonymous_attribute_spec                           : t
+    ; anonymous_static_keyword                           : t
     ; anonymous_async_keyword                            : t
     ; anonymous_coroutine_keyword                        : t
     ; anonymous_function_keyword                         : t
@@ -117,7 +118,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_body                                     : t
     }
   and lambda_expression =
-    { lambda_async                                       : t
+    { lambda_attribute_spec                              : t
+    ; lambda_async                                       : t
     ; lambda_coroutine                                   : t
     ; lambda_signature                                   : t
     ; lambda_arrow                                       : t
@@ -638,7 +640,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_class_body                               : t
     }
   | AnonymousFunction                       of
-    { anonymous_static_keyword                           : t
+    { anonymous_attribute_spec                           : t
+    ; anonymous_static_keyword                           : t
     ; anonymous_async_keyword                            : t
     ; anonymous_coroutine_keyword                        : t
     ; anonymous_function_keyword                         : t
@@ -652,7 +655,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_body                                     : t
     }
   | Php7AnonymousFunction                   of
-    { php7_anonymous_static_keyword                      : t
+    { php7_anonymous_attribute_spec                      : t
+    ; php7_anonymous_static_keyword                      : t
     ; php7_anonymous_async_keyword                       : t
     ; php7_anonymous_coroutine_keyword                   : t
     ; php7_anonymous_function_keyword                    : t
@@ -672,7 +676,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_use_right_paren                          : t
     }
   | LambdaExpression                        of
-    { lambda_async                                       : t
+    { lambda_attribute_spec                              : t
+    ; lambda_async                                       : t
     ; lambda_coroutine                                   : t
     ; lambda_signature                                   : t
     ; lambda_arrow                                       : t
@@ -899,7 +904,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; embedded_subscript_right_bracket                   : t
     }
   | AwaitableCreationExpression             of
-    { awaitable_async                                    : t
+    { awaitable_attribute_spec                           : t
+    ; awaitable_async                                    : t
     ; awaitable_coroutine                                : t
     ; awaitable_compound_statement                       : t
     }
@@ -1906,7 +1912,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_class_body: classish_body value
     }
   and anonymous_function =
-    { anonymous_static_keyword: Token.t option value
+    { anonymous_attribute_spec: attribute_specification option value
+    ; anonymous_static_keyword: Token.t option value
     ; anonymous_async_keyword: Token.t option value
     ; anonymous_coroutine_keyword: Token.t option value
     ; anonymous_function_keyword: Token.t value
@@ -1920,7 +1927,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_body: compound_statement value
     }
   and php7_anonymous_function =
-    { php7_anonymous_static_keyword: Token.t option value
+    { php7_anonymous_attribute_spec: attribute_specification option value
+    ; php7_anonymous_static_keyword: Token.t option value
     ; php7_anonymous_async_keyword: Token.t option value
     ; php7_anonymous_coroutine_keyword: Token.t option value
     ; php7_anonymous_function_keyword: Token.t value
@@ -1940,7 +1948,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_use_right_paren: Token.t value
     }
   and lambda_expression =
-    { lambda_async: Token.t option value
+    { lambda_attribute_spec: attribute_specification option value
+    ; lambda_async: Token.t option value
     ; lambda_coroutine: Token.t option value
     ; lambda_signature: specifier value
     ; lambda_arrow: Token.t value
@@ -2167,7 +2176,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; embedded_subscript_right_bracket: Token.t value
     }
   and awaitable_creation_expression =
-    { awaitable_async: Token.t value
+    { awaitable_attribute_spec: attribute_specification option value
+    ; awaitable_async: Token.t value
     ; awaitable_coroutine: Token.t option value
     ; awaitable_compound_statement: compound_statement value
     }

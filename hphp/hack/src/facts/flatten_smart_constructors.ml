@@ -277,18 +277,18 @@ module WithOp(Op : Op_S) = struct
   let make_anonymous_class arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 && Op.is_zero arg5 && Op.is_zero arg6 && Op.is_zero arg7 && Op.is_zero arg8 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7; arg8]
-  let make_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 && Op.is_zero arg5 && Op.is_zero arg6 && Op.is_zero arg7 && Op.is_zero arg8 && Op.is_zero arg9 && Op.is_zero arg10 && Op.is_zero arg11 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7; arg8; arg9; arg10; arg11]
-  let make_php7_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 && Op.is_zero arg5 && Op.is_zero arg6 && Op.is_zero arg7 && Op.is_zero arg8 && Op.is_zero arg9 && Op.is_zero arg10 && Op.is_zero arg11 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7; arg8; arg9; arg10; arg11]
+  let make_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 arg12 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 && Op.is_zero arg5 && Op.is_zero arg6 && Op.is_zero arg7 && Op.is_zero arg8 && Op.is_zero arg9 && Op.is_zero arg10 && Op.is_zero arg11 && Op.is_zero arg12 then state, Op.zero
+    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7; arg8; arg9; arg10; arg11; arg12]
+  let make_php7_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 arg12 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 && Op.is_zero arg5 && Op.is_zero arg6 && Op.is_zero arg7 && Op.is_zero arg8 && Op.is_zero arg9 && Op.is_zero arg10 && Op.is_zero arg11 && Op.is_zero arg12 then state, Op.zero
+    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7; arg8; arg9; arg10; arg11; arg12]
   let make_anonymous_function_use_clause arg0 arg1 arg2 arg3 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2; arg3]
-  let make_lambda_expression arg0 arg1 arg2 arg3 arg4 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4]
+  let make_lambda_expression arg0 arg1 arg2 arg3 arg4 arg5 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 && Op.is_zero arg5 then state, Op.zero
+    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4; arg5]
   let make_lambda_signature arg0 arg1 arg2 arg3 arg4 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2; arg3; arg4]
@@ -409,9 +409,9 @@ module WithOp(Op : Op_S) = struct
   let make_embedded_subscript_expression arg0 arg1 arg2 arg3 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2; arg3]
-  let make_awaitable_creation_expression arg0 arg1 arg2 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2]
+  let make_awaitable_creation_expression arg0 arg1 arg2 arg3 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 then state, Op.zero
+    else state, Op.flatten [arg0; arg1; arg2; arg3]
   let make_xhp_children_declaration arg0 arg1 arg2 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2]

@@ -34,6 +34,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val parse_classish_extends_opt : t -> t * SC.r * SC.r
       val parse_classish_implements_opt : t -> t * SC.r * SC.r
       val parse_classish_body : t -> t * SC.r
+      val parse_attribute_specification_opt : t -> t * SC.r
     end (* DeclarationParser_S *)
   end (* WithLexer *)
 end (* WithSyntax *)

@@ -2184,12 +2184,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_coroutine_keyword = validate_option_with (validate_token) x.anonymous_coroutine_keyword
     ; anonymous_async_keyword = validate_option_with (validate_token) x.anonymous_async_keyword
     ; anonymous_static_keyword = validate_option_with (validate_token) x.anonymous_static_keyword
+    ; anonymous_attribute_spec = validate_option_with (validate_attribute_specification) x.anonymous_attribute_spec
     }
   | s -> validation_fail (Some SyntaxKind.AnonymousFunction) s
   and invalidate_anonymous_function : anonymous_function invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.AnonymousFunction
-      { anonymous_static_keyword = invalidate_option_with (invalidate_token) x.anonymous_static_keyword
+      { anonymous_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.anonymous_attribute_spec
+      ; anonymous_static_keyword = invalidate_option_with (invalidate_token) x.anonymous_static_keyword
       ; anonymous_async_keyword = invalidate_option_with (invalidate_token) x.anonymous_async_keyword
       ; anonymous_coroutine_keyword = invalidate_option_with (invalidate_token) x.anonymous_coroutine_keyword
       ; anonymous_function_keyword = invalidate_token x.anonymous_function_keyword
@@ -2218,12 +2220,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; php7_anonymous_coroutine_keyword = validate_option_with (validate_token) x.php7_anonymous_coroutine_keyword
     ; php7_anonymous_async_keyword = validate_option_with (validate_token) x.php7_anonymous_async_keyword
     ; php7_anonymous_static_keyword = validate_option_with (validate_token) x.php7_anonymous_static_keyword
+    ; php7_anonymous_attribute_spec = validate_option_with (validate_attribute_specification) x.php7_anonymous_attribute_spec
     }
   | s -> validation_fail (Some SyntaxKind.Php7AnonymousFunction) s
   and invalidate_php7_anonymous_function : php7_anonymous_function invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.Php7AnonymousFunction
-      { php7_anonymous_static_keyword = invalidate_option_with (invalidate_token) x.php7_anonymous_static_keyword
+      { php7_anonymous_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.php7_anonymous_attribute_spec
+      ; php7_anonymous_static_keyword = invalidate_option_with (invalidate_token) x.php7_anonymous_static_keyword
       ; php7_anonymous_async_keyword = invalidate_option_with (invalidate_token) x.php7_anonymous_async_keyword
       ; php7_anonymous_coroutine_keyword = invalidate_option_with (invalidate_token) x.php7_anonymous_coroutine_keyword
       ; php7_anonymous_function_keyword = invalidate_token x.php7_anonymous_function_keyword
@@ -2263,12 +2267,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; lambda_signature = validate_specifier x.lambda_signature
     ; lambda_coroutine = validate_option_with (validate_token) x.lambda_coroutine
     ; lambda_async = validate_option_with (validate_token) x.lambda_async
+    ; lambda_attribute_spec = validate_option_with (validate_attribute_specification) x.lambda_attribute_spec
     }
   | s -> validation_fail (Some SyntaxKind.LambdaExpression) s
   and invalidate_lambda_expression : lambda_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.LambdaExpression
-      { lambda_async = invalidate_option_with (invalidate_token) x.lambda_async
+      { lambda_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.lambda_attribute_spec
+      ; lambda_async = invalidate_option_with (invalidate_token) x.lambda_async
       ; lambda_coroutine = invalidate_option_with (invalidate_token) x.lambda_coroutine
       ; lambda_signature = invalidate_specifier x.lambda_signature
       ; lambda_arrow = invalidate_token x.lambda_arrow
@@ -2961,12 +2967,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { awaitable_compound_statement = validate_compound_statement x.awaitable_compound_statement
     ; awaitable_coroutine = validate_option_with (validate_token) x.awaitable_coroutine
     ; awaitable_async = validate_token x.awaitable_async
+    ; awaitable_attribute_spec = validate_option_with (validate_attribute_specification) x.awaitable_attribute_spec
     }
   | s -> validation_fail (Some SyntaxKind.AwaitableCreationExpression) s
   and invalidate_awaitable_creation_expression : awaitable_creation_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.AwaitableCreationExpression
-      { awaitable_async = invalidate_token x.awaitable_async
+      { awaitable_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.awaitable_attribute_spec
+      ; awaitable_async = invalidate_token x.awaitable_async
       ; awaitable_coroutine = invalidate_option_with (invalidate_token) x.awaitable_coroutine
       ; awaitable_compound_statement = invalidate_compound_statement x.awaitable_compound_statement
       }

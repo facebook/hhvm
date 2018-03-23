@@ -131,10 +131,10 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val global_statement : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val simple_initializer : t -> SC.r -> SC.r -> t * SC.r
         val anonymous_class : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val anonymous_function : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val php7_anonymous_function : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val anonymous_function : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val php7_anonymous_function : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val anonymous_function_use_clause : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val lambda_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val lambda_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val lambda_signature : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val cast_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val scope_resolution_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
@@ -175,7 +175,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val element_initializer : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val subscript_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val embedded_subscript_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val awaitable_creation_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val awaitable_creation_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val xhp_children_declaration : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val xhp_children_parenthesized_list : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val xhp_category_declaration : t -> SC.r -> SC.r -> SC.r -> t * SC.r

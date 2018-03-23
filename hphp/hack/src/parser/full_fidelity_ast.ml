@@ -774,8 +774,7 @@ and pFunParam : fun_param parser = fun node env ->
     ; param_id              = pos_name name env
     ; param_expr            =
       mpOptional pSimpleInitializer parameter_default_value env
-    ; param_user_attributes = List.concat @@
-      couldMap ~f:pUserAttribute parameter_attribute env
+    ; param_user_attributes = pUserAttributes env parameter_attribute
     ; param_callconv        =
       mpOptional pParamKind parameter_call_convention env
     (* implicit field via constructor parameter.
@@ -806,6 +805,9 @@ and pUserAttribute : user_attribute list parser = fun node env ->
       | node -> missing_syntax "attribute" node
     end
   | _ -> missing_syntax "attribute specification" node env
+
+and pUserAttributes env attrs =
+  List.concat @@ couldMap ~f:pUserAttribute attrs env
 and pAField : afield parser = fun node env ->
   match syntax node with
   | ElementInitializer { element_key; element_value; _ } ->
@@ -872,7 +874,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     let pos = pPos node env in
     match syntax node with
     | LambdaExpression {
-        lambda_async; lambda_coroutine; lambda_signature; lambda_body; _ } ->
+        lambda_async; lambda_coroutine; lambda_signature; lambda_body;
+        lambda_attribute_spec; _ } ->
       let suspension_kind =
         mk_suspension_kind lambda_async lambda_coroutine in
       let f_params, f_ret =
@@ -893,6 +896,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         f_ret
       ; f_params
       ; f_body
+      ; f_user_attributes = pUserAttributes env lambda_attribute_spec
       }
 
     | BracedExpression        { braced_expression_expression        = expr; _ }
@@ -1337,7 +1341,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           pHint nullable_as_right_operand env,
           true)
     | AnonymousFunction
-      { anonymous_static_keyword
+      { anonymous_attribute_spec = attribute_spec
+      ; anonymous_static_keyword
       ; anonymous_async_keyword
       ; anonymous_coroutine_keyword
       ; anonymous_ampersand
@@ -1347,7 +1352,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; anonymous_body
       ; _ }
     | Php7AnonymousFunction
-      { php7_anonymous_static_keyword = anonymous_static_keyword
+      { php7_anonymous_attribute_spec = attribute_spec
+      ; php7_anonymous_static_keyword = anonymous_static_keyword
       ; php7_anonymous_async_keyword = anonymous_async_keyword
       ; php7_anonymous_coroutine_keyword = anonymous_coroutine_keyword
       ; php7_anonymous_ampersand = anonymous_ampersand
@@ -1381,6 +1387,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | Some _ as doc_comment -> doc_comment
           | None -> top_docblock() in
         let f_ret_by_ref = is_ret_by_ref anonymous_ampersand in
+        let user_attributes = pUserAttributes env attribute_spec in
         Efun
         ( { (fun_template yield node suspension_kind env) with
             f_ret         = mpOptional pHint anonymous_type env
@@ -1389,18 +1396,21 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           ; f_static      = not (is_missing anonymous_static_keyword)
           ; f_ret_by_ref
           ; f_doc_comment = doc_comment
+          ; f_user_attributes = user_attributes
           }
         , try pUse anonymous_use env with _ -> []
         )
 
     | AwaitableCreationExpression
-      { awaitable_async; awaitable_coroutine; awaitable_compound_statement } ->
+      { awaitable_async; awaitable_coroutine; awaitable_compound_statement;
+        awaitable_attribute_spec; } ->
       let suspension_kind =
         mk_suspension_kind awaitable_async awaitable_coroutine in
       let blk, yld = mpYielding pFunctionBody awaitable_compound_statement env in
       let body =
         { (fun_template yld node suspension_kind env) with
-           f_body = mk_noop (pPos awaitable_compound_statement env) blk }
+           f_body = mk_noop (pPos awaitable_compound_statement env) blk;
+           f_user_attributes = pUserAttributes env awaitable_attribute_spec }
       in
       Call ((pPos node env, Lfun body), [], [], [])
     | XHPExpression
@@ -2150,8 +2160,7 @@ and pClassElt : class_elt list parser = fun node env ->
       ; m_name            = hdr.fh_name
       ; m_params          = hdr.fh_parameters
       ; m_body            = body
-      ; m_user_attributes = List.concat @@
-        couldMap ~f:pUserAttribute methodish_attribute env
+      ; m_user_attributes = pUserAttributes env methodish_attribute
       ; m_ret             = hdr.fh_return_type
       ; m_ret_by_ref      = hdr.fh_ret_by_ref
       ; m_span            = pFunction node env
@@ -2363,8 +2372,7 @@ and pDef : def list parser = fun node env ->
           | [p, Noop] when containsUNSAFE function_body -> [p, Unsafe]
           | b -> b
         end
-      ; f_user_attributes =
-        List.concat @@ couldMap ~f:pUserAttribute function_attribute_spec env
+      ; f_user_attributes = pUserAttributes env function_attribute_spec
       ; f_doc_comment = doc_comment_opt
       }]
   | ClassishDeclaration
@@ -2380,7 +2388,7 @@ and pDef : def list parser = fun node env ->
     ; _ } ->
       let env = non_tls env in
       let c_mode = mode_annotation env.fi_mode in
-      let c_user_attributes = List.concat @@ couldMap ~f:pUserAttribute attr env in
+      let c_user_attributes = pUserAttributes env attr in
       let c_final = List.mem (pKinds mods env) Final in
       let c_is_xhp =
         match token_kind name with
@@ -2501,7 +2509,7 @@ and pDef : def list parser = fun node env ->
       in
       [ Class
       { c_mode            = mode_annotation env.fi_mode
-      ; c_user_attributes = List.concat @@ couldMap ~f:pUserAttribute attrs env
+      ; c_user_attributes = pUserAttributes env attrs
       ; c_final           = false
       ; c_kind            = Cenum
       ; c_is_xhp          = false

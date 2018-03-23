@@ -1263,6 +1263,7 @@
       "description" : "anonymous_function",
       "prefix" : "anonymous",
       "fields" : [
+        { "field_name" : "attribute_spec" },
         { "field_name" : "static_keyword" },
         { "field_name" : "async_keyword" },
         { "field_name" : "coroutine_keyword" },
@@ -1281,6 +1282,7 @@
       "description" : "php7_anonymous_function",
       "prefix" : "php7_anonymous",
       "fields" : [
+        { "field_name" : "attribute_spec" },
         { "field_name" : "static_keyword" },
         { "field_name" : "async_keyword" },
         { "field_name" : "coroutine_keyword" },
@@ -1309,6 +1311,7 @@
       "description" : "lambda_expression",
       "prefix" : "lambda",
       "fields" : [
+        { "field_name" : "attribute_spec" },
         { "field_name" : "async" },
         { "field_name" : "coroutine" },
         { "field_name" : "signature" },
@@ -1700,6 +1703,7 @@
       "description" : "awaitable_creation_expression",
       "prefix" : "awaitable",
       "fields" : [
+        { "field_name" : "attribute_spec" },
         { "field_name" : "async" },
         { "field_name" : "coroutine" },
         { "field_name" : "compound_statement" }

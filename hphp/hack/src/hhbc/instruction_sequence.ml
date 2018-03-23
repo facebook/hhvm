@@ -731,7 +731,7 @@ let get_input_output_count i =
     | Nop | EntryNop -> (0, 0)
     | PopC | PopV | PopR | PopU -> (1, 0)
     | Dup -> (1, 2)
-    | Box | Unbox | BoxR | UnboxR | UnboxRNop | RGetCNop -> (1, 1)
+    | Box | Unbox | BoxR | BoxRNop | UnboxR | UnboxRNop | RGetCNop -> (1, 1)
     end
   | ILitConst i ->
     begin match i with
@@ -785,6 +785,7 @@ let get_input_output_count i =
     | CastVArray | CastDArray | InstanceOfD _ | IsNameD _ | AsTypeStruct _
     | Print | Clone | Hhbc_ast.Exit | Abs -> (1, 1)
     | Fatal _ -> (1, 0)
+    | ConcatN n -> (n, 1)
     end
   | ICall i ->
     begin match i with

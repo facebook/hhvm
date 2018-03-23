@@ -68,6 +68,7 @@ let string_of_basic instruction =
     | Box         -> "Box"
     | Unbox       -> "Unbox"
     | BoxR        -> "BoxR"
+    | BoxRNop     -> "BoxRNop"
     | UnboxR      -> "UnboxR"
     | UnboxRNop   -> "UnboxRNop"
     | RGetCNop    -> "RGetCNop"
@@ -146,6 +147,7 @@ let string_of_lit_const instruction =
 let string_of_operator instruction =
   match instruction with
     | Concat -> "Concat"
+    | ConcatN n -> sep ["ConcatN"; string_of_int n]
     | Abs -> "Abs"
     | Add -> "Add"
     | Sub -> "Sub"
@@ -335,6 +337,17 @@ let string_of_switch kind base labels =
   let labels = String.concat " " @@ List.map string_of_label labels in
   Printf.sprintf "Switch %s %d <%s>" kind base labels
 
+let string_of_sswitch cases =
+  let revcases = List.rev cases in
+  match revcases with
+   | [] -> failwith "sswitch should have at least one case"
+   | (_dummystring, lastlabel) :: revrest ->
+       let reststring =
+         String.concat " " @@
+         List.rev_map (function (s,l) -> SU.quote_string s ^ ":" ^ string_of_label l) revrest in
+       let laststring = "-:" ^ string_of_label lastlabel in
+         Printf.sprintf "SSwitch <%s %s>" reststring laststring
+
 let string_of_control_flow instruction =
   match instruction with
   | Jmp l -> "Jmp " ^ string_of_label l
@@ -347,7 +360,7 @@ let string_of_control_flow instruction =
   | Throw -> "Throw"
   | Unwind -> "Unwind"
   | Switch (kind, base, labels) -> string_of_switch kind base labels
-  | _ -> failwith "instruction_control_flow Not Implemented"
+  | SSwitch cases -> string_of_sswitch cases
 
 let string_of_iterator_id i = Iterator.to_string i
 let string_of_null_flavor nf =
@@ -607,7 +620,9 @@ let string_of_misc instruction =
     | AssertRATStk (n, s) ->
       sep ["AssertRATStk"; string_of_int n; s]
     | NativeImpl -> "NativeImpl"
-    | _ -> failwith "instruct_misc Not Implemented"
+    | BreakTraceHint -> "BreakTraceHint"
+    | IncStat (counter, value) ->
+      sep ["IncStat"; string_of_int counter; string_of_int value]
 
 let iterator_instruction_name_prefix instruction =
   let iterator_instruction_name =
@@ -1310,6 +1325,7 @@ and string_of_param_default_value ~env expr =
   | A.Xml (id, attributes, children) ->
     string_of_xml ~env id attributes children
   | A.Efun (f, use_list) -> string_of_fun ~env f use_list
+  | A.Omitted -> ""
   | A.Lfun _ ->
     failwith "expected Lfun to be converted to Efun during closure conversion"
   | A.Yield _
@@ -1318,7 +1334,6 @@ and string_of_param_default_value ~env expr =
   | A.Await _
   | A.Suspend _
   | A.List _
-  | A.Omitted
   | A.Callconv _
   | A.Expr_list _ -> failwith "illegal default value"
 

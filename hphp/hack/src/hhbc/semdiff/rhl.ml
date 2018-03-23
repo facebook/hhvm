@@ -656,7 +656,7 @@ let check_instruct_basic i i' =
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
   | Nop, _ | EntryNop, _ | PopC, _ | PopV, _ | PopR, _ | PopU, _ | Dup, _
-  | Box, _ | Unbox, _ | BoxR, _ | UnboxR, _ | UnboxRNop, _ | RGetCNop, _ ->
+  | Box, _ | Unbox, _ | BoxR, _ | BoxRNop, _ | UnboxR, _ | UnboxRNop, _ | RGetCNop, _ ->
     if i=i' then Some () else None
 
 let check_instruct_lit_const asn i i' =
@@ -701,7 +701,7 @@ let check_instruct_operator i i' =
     None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | Concat, _ | Abs, _ | Add, _ | Sub, _ | Mul, _ | AddO, _ | SubO, _ | MulO, _
+  | Concat, _ | ConcatN _, _ | Abs, _ | Add, _ | Sub, _ | Mul, _ | AddO, _ | SubO, _ | MulO, _
   | Div, _ | Mod, _ | Pow, _ | Sqrt, _ | Xor, _ | Not, _ | Same, _ | NSame, _
   | Eq, _ | Neq, _ | Lt, _ | Lte, _ | Gt, _ | Gte, _ | Cmp, _ | BitAnd, _
   | BitOr, _ | BitXor, _ | BitNot, _ | Shl, _ | Shr, _ | Floor, _ | Ceil, _
@@ -829,6 +829,8 @@ let equiv prog prog' startlabelpairs =
   | ITry TryCatchEnd
   | ITry TryFaultBegin _
   | ITry TryFaultEnd
+  | ITry TryCatchLegacyBegin _
+  | ITry TryCatchLegacyEnd
   | ILabel _
   | IComment _
   | IBasic Nop
@@ -837,9 +839,6 @@ let equiv prog prog' startlabelpairs =
 
   | ISrcLoc p when p.line_begin < 0 ->
       Some (succ pc, pc', asn)
-
-  | ITry TryCatchLegacyBegin _
-  | ITry TryCatchLegacyEnd -> failwith "Legacy try instructions not implemented"
 
   | IContFlow Unwind ->
     begin match hs_of_pc pc with
@@ -871,6 +870,8 @@ let equiv prog prog' startlabelpairs =
   | ITry TryCatchEnd
   | ITry TryFaultBegin _
   | ITry TryFaultEnd
+  | ITry TryCatchLegacyBegin _
+  | ITry TryCatchLegacyEnd
   | ILabel _
   | IComment _
   | IBasic Nop
@@ -879,9 +880,6 @@ let equiv prog prog' startlabelpairs =
 
   | ISrcLoc p when p.line_begin < 0 ->
      Some (pc, succ pc', asn)
-
-  | ITry TryCatchLegacyBegin _
-  | ITry TryCatchLegacyEnd -> failwith "Legacy try instructions not implemented"
 
   | IContFlow Unwind ->
     begin match hs_of_pc pc' with

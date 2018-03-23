@@ -173,6 +173,7 @@ type instruct_basic =
   | Box
   | Unbox
   | BoxR
+  | BoxRNop
   | UnboxR
   | UnboxRNop
   | RGetCNop
@@ -223,6 +224,7 @@ type instruct_lit_const =
 
 type instruct_operator =
   | Concat
+  | ConcatN of int
   | Abs
   | Add
   | Sub

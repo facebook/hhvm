@@ -56,7 +56,8 @@ open Hhas_parser_actions
 %type <Hhas_asm.t> functionbodywithdirectives
 %%
 program:
-    nl decllist nl EOF { split_decl_list $2 false false [] [] None [] [] Hhas_symbol_refs.IncludePathSet.empty SSet.empty SSet.empty SSet.empty}
+    nl decllist nl EOF { split_decl_list $2 false false [] [] None [] []
+                         Hhas_symbol_refs.IncludePathSet.empty SSet.empty SSet.empty SSet.empty}
 ;
 decl:
     | maindecl {Main_decl $1}
@@ -190,6 +191,8 @@ paramdefaultvalueopt:
   | /* empty */  {None}
   | EQUALS ID LPAR TRIPLEQUOTEDSTRING RPAR
    {Some (makelabel $2, (Pos.none, Ast.String(Pos.none,$4)))}
+  | EQUALS ID
+   {Some (makelabel $2, (Pos.none, Ast.Omitted))}
 ;
 is_variadic:
   | /* empty */ {false}
@@ -546,6 +549,10 @@ instruction:
     | ID iarg iarg PLUS INT {maketernaryinst $1 $2 $3 (IAInt64 $5)}
     | ID iarg iarg iarg iarg {makequaternaryinst $1 $2 $3 $4 $5}
 ;
+sswitchcaselist:
+    | MINUS COLON ID {[IASswitchcase ("", $3)]}
+    | STRING COLON ID sswitchcaselist {IASswitchcase ($1, $3) :: $4}
+;
 iarg:
     | ID     {IAId $1}
     | ASSERTCONSTRAINT {IAString $1}
@@ -559,12 +566,17 @@ iarg:
     | MINUS ID {match to_inf_nan $2 with
                  | None -> report_error "bad negated pseudo-float"
                  | Some s -> IADouble ("-" ^ s)}
+    | LANGLE sswitchcaselist RANGLE {IAArglist $2}
     | LANGLE iarglist RANGLE {IAArglist $2}
     | LANGLE iterbreaklist RANGLE {IAArglist $2}
     | ID LPAR iarglist RPAR
       {let inner_string_list = List.map
-        (function | IAString s -> s | _ -> report_error "bad AssertRATL list") $3 in
+        (function | IAString s -> s | IAId s -> s| _ -> report_error "bad AssertRATL list") $3 in
        IAString ($1 ^ "(" ^ String.concat "," inner_string_list ^ ")")}
+    | ID LPAR LBRACK iarglist RBRACK RPAR
+      {let inner_string_list = List.map
+        (function | IAString s -> s | IAId s -> s| _ -> report_error "bad AssertRATL list") $4 in
+       IAString ($1 ^ "([" ^ String.concat "," inner_string_list ^ "])")}
 ;
 iarglist:
     | /* empty */ {[]}

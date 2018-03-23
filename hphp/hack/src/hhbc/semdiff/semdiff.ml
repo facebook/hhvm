@@ -144,5 +144,6 @@ let _ =
        expected one (i.e. in given file without CRLF). *)
     set_binary_mode_out stdout true;
     let options = parse_options () in
+    (* TODO: double-check what we should do about the return codes *)
     let all_the_same = Unix.handle_unix_error run options in
     exit (if all_the_same then 0 else 1)

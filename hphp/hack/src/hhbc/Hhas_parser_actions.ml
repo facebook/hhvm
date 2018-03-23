@@ -301,6 +301,7 @@ let make_nullary_inst s =
  | "Box"  -> IBasic (Box)
  | "Unbox" -> IBasic (Unbox)
  | "BoxR"  -> IBasic (BoxR)
+ | "BoxRNop"  -> IBasic (BoxRNop)
  | "UnboxR" -> IBasic (UnboxR)
  | "UnboxRNop" -> IBasic (UnboxRNop)
  | "RGetCNop" -> IBasic (RGetCNop)
@@ -456,6 +457,7 @@ type iarg =
   | IAMemberkey of string*iarg (* these are not seriously recursive *)
   | IAArglist of iarg list
   | IAIteratorid of string*int64
+  | IASswitchcase of string*string (* second should be a label *)
 
 let class_id_of_iarg arg =
   match arg with
@@ -843,6 +845,7 @@ let makeunaryinst s arg = match s with
    | "CnsE" -> (match arg with
        | IAString sa -> ILitConst (CnsE (Hhbc_id.Const.from_raw_string sa))
        | _ -> report_error "bad cnse arg")
+
  (* instruct_operator *)
    | "Fatal" -> (match arg with
        | IAId op -> IOp (Fatal
@@ -860,6 +863,8 @@ let makeunaryinst s arg = match s with
    | "AsTypeStruct" -> (match arg with
        | IAArrayno n -> IOp (AsTypeStruct n)
        | _ -> report_error "bad array lit cst")
+   | "ConcatN" -> IOp (ConcatN (intofiarg arg))
+
 (* instruct_control_flow *)
    | "Jmp" -> (match arg with
        | IAId l -> IContFlow (Jmp (makelabel l))
@@ -873,6 +878,12 @@ let makeunaryinst s arg = match s with
    | "JmpNZ" -> (match arg with
        | IAId l -> IContFlow (JmpNZ (makelabel l))
        | _ -> report_error "bad jmp label")
+   | "SSwitch" -> (match arg with
+       | IAArglist cases ->
+          let args = List.map (function IASswitchcase (s, l) -> (s, makelabel l)
+                                        | _ -> report_error "bad sswitch case") cases
+          in IContFlow (SSwitch args)
+       | _ -> report_error "sswitch expects list of cases")
 
   (* instruct_get *)
    | "CGetL" -> IGet (CGetL (localidofiarg arg))
@@ -926,6 +937,11 @@ let makeunaryinst s arg = match s with
    | "MIterFree" ->IIterator(MIterFree (Iterator.Id (intofiarg arg)))
    | "CIterFree" ->IIterator(CIterFree (Iterator.Id (intofiarg arg)))
 
+   (* async_functions
+      TODO: double-check the +1 in this case
+   *)
+   | "AwaitAll" -> let l,i = memoargofiarg arg in IAsync(AwaitAll (l,i+1))
+
    (* instruct_include_eval_define *)
    | "DefFunc" -> IIncludeEvalDefine(DefFunc (function_num_of_iarg arg))
    | "DefCls" -> IIncludeEvalDefine(DefCls (class_num_of_iarg arg))
@@ -953,9 +969,6 @@ let makeunaryinst s arg = match s with
       textual bytecode format represents them using directives and braces rather
       than instructions
    *)
-   | "AwaitAll" ->
-    let l, i = memoargofiarg arg in
-    IAsync (AwaitAll (l, i + 1))
    | "ContCheck" -> IGenerator (ContCheck (checkstarted_of_arg arg))
    | _ -> failwith ("NYI unary: " ^ s)
 

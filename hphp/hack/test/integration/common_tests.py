@@ -223,13 +223,6 @@ class CommonTestDriver(object):
             ], env={})
         return DebugSubscription(proc)
 
-    def connect_ide(self):
-        proc = self.proc_create([
-            hh_client,
-            'ide',
-            self.repo_dir], env={})
-        return IdeConnection(proc, self.repo_dir)
-
 
 class DebugSubscription(object):
     """
@@ -253,153 +246,6 @@ class DebugSubscription(object):
                 break
             msgs[msg['name']] = msg
         return msgs
-
-
-class IdeConnection(object):
-    """
-    Wraps `hh_client ide`.
-    """
-    def __init__(self, proc, root):
-        self.proc = proc
-        self.root = root
-
-    def close_stdin(self):
-        self.proc.stdin.close()
-
-    def write_cmd(self, cmd):
-        self.proc.stdin.write(cmd)
-
-    def read_msg(self):
-        line = self.proc.stdout.readline()
-        return line
-
-    def get_return(self):
-        (stdout_data, stderr_data) = self.proc.communicate()
-        retcode = self.proc.wait()
-        return (stdout_data, stderr_data, retcode)
-
-    def make_absolute(self, file):
-        return self.root + "/" + file
-
-    def open(self, file):
-        file = self.make_absolute(file)
-        f = open(file)
-        contents = f.read()
-        f.close()
-        return(
-            '{"protocol" : "service_framework3_rpc","id" : 123,"type" : ' +
-            '"call","method" : "didOpenFile","args" : {"filename":"' +
-            file +
-            '","contents" : ' + json.dumps(contents) + '}}\n'
-        )
-
-    def close(self, file):
-        file = self.make_absolute(file)
-        return(
-            '{"protocol" : "service_framework3_rpc","id" : 123,"type" : ' +
-            '"call","method" : "didCloseFile","args" : {"filename":"' +
-            file +
-            '"}}\n'
-        )
-
-    def edit(self, file, st_line, st_column, ed_line, ed_column, text):
-        file = self.make_absolute(file)
-        return(
-            '{"protocol" : "service_framework3_rpc","id" : 456,"type" : ' +
-            '"call","method" : "didChangeFile","args" : {"filename" : "' +
-            file +
-            '","changes" : [{"range" : {"start" : {"line" : ' +
-            st_line +
-            ', "column" : ' +
-            st_column +
-            '},"end" : {"line" : ' +
-            ed_line +
-            ', "column" : ' +
-            ed_column +
-            '}},"text" : "' +
-            text +
-            '"}]}}\n'
-        )
-
-    def auto_complete(self, file, line, column):
-        file = self.make_absolute(file)
-        return(
-            '{"protocol" : "service_framework3_rpc","id" : 789,"type" : ' +
-            '"call","method" : "getCompletions","args" : {"filename" : "' +
-            file +
-            '","position" : {"line" :' +
-            line +
-            ', "column" :' +
-            column +
-            '}}}\n'
-        )
-
-    def sleep(self):
-        return('{"protocol" : "service_framework3_rpc","id" : 000,"type" : ' +
-                '"call","method" : "sleep","args" : {}}\n')
-
-    def disconnect(self):
-        return('{"protocol" : "service_framework3_rpc","id" : 233,"type" : ' +
-                '"call","method" : "disconnect","args" : {}}\n')
-
-    def subscribe_diagnostic(self, id):
-        return('{"protocol" : "service_framework3_rpc","id" : ' + id +
-               ',"type" : "call","method" : "notifyDiagnostics","args" : {}}\n')
-
-    def unsubscribe_diagnostic(self, id):
-        return('{"protocol" : "service_framework3_rpc","id" : ' + id +
-               ',"type":"unsubscribe"}\n')
-
-    def highlight_ref(self, file, line, column):
-        file = self.make_absolute(file)
-        return(
-            '{"protocol" : "service_framework3_rpc","id" : 987,"type" : ' +
-            '"call","method" : "getSourceHighlights","args" : {"filename" : "' +
-            file +
-            '","position" : {"line" :' +
-            line +
-            ', "column" :' +
-            column +
-            '}}}\n'
-        )
-
-    def identify_function(self, file, line, column):
-        file = self.make_absolute(file)
-        return(
-            '{"protocol" : "service_framework3_rpc","id" : 987,"type" : ' +
-            '"call","method" : "getDefinition","args" : {"filename" : "' +
-            file +
-            '","position" : {"line" :' +
-            line +
-            ', "column" :' +
-            column +
-            '}}}\n'
-        )
-
-    def json_rpc_init(self):
-        return '''{ \
-            "jsonrpc" : "2.0", \
-            "id" : 234, \
-            "method" : "init", \
-            "params" : { \
-                "client_name" : "python_test", \
-                "client_api_version" : 4 \
-            }   \
-        }\n'''
-
-    def json_rpc_open(self, file, contents):
-        file = self.make_absolute(file)
-        contents = json.dumps(contents)
-        return '''{ \
-            "jsonrpc" : "2.0", \
-            "id" : 654, \
-            "method" : "didOpenFile", \
-            "params" : { \
-                "filename" : "%s", \
-                "text" : %s \
-            }   \
-        }\n''' % (file, contents)
-
 
 class CommonTests(object):
 
@@ -1100,41 +946,6 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             }
             """)
 
-    def test_ide_exit_status(self):
-        """
-        Test multiple exit status of "hh_client ide"
-        """
-        # Test the exit status of ide call under no hh_server
-        (_, _, exit_code) = self.proc_call([hh_client, 'ide', self.repo_dir])
-        self.assertEqual(exit_code, 202, msg="Test IDE_no_server status failed")
-
-        self.start_hh_server()
-        # Test the exit status of ide call when another ide client exists
-        self.check_cmd(['No errors!'])
-        first_ide_con = self.connect_ide()
-        time.sleep(1)
-        second_ide_con = self.connect_ide()
-
-        # Test ide abnormally exit. It make sure exit ide connection with EOF
-        # does not crash the server. (This is assured by the test below since
-        # ide connection cannot exit with code 0 if there is no server exists)
-        second_ide_con.close_stdin()
-
-        time.sleep(1)
-
-        (_, _, exit_code) = first_ide_con.get_return()
-        self.assertEqual(
-            exit_code,
-            207,
-            msg="Test IDE_new_client_connected status failed")
-
-        # Test the exit status of ide call when normally exit
-        ide_con = self.connect_ide()
-        ide_con.write_cmd(ide_con.disconnect())
-        (_, _, exit_code) = ide_con.get_return()
-        self.assertEqual(exit_code, 0, msg="Test normal exit status failed")
-        self.check_cmd(['No errors!'])
-
     def test_auto_namespace_alias_addition(self):
         """
         Add namespace alias and check if it is still good
@@ -1153,26 +964,3 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             """)
 
         self.check_cmd(['No errors!'])
-
-    def test_json_rpc(self):
-        self.start_hh_server()
-        self.check_cmd(['No errors!'])
-        ide_con = self.connect_ide()
-        cmd = (
-            ide_con.json_rpc_init() +
-            ide_con.json_rpc_open("a.php", "<?hh // strict\n {") +
-            ide_con.sleep()
-        )
-        ide_con.write_cmd(cmd)
-
-        (stdout, _, _) = ide_con.get_return()
-
-        self.assertEqualString(
-            stdout,
-            '{{"jsonrpc":"2.0","id":234,"result":' +
-            '{{"server_api_version":0}}}}\n' +
-            '{{"jsonrpc":"2.0","method":"diagnostics","params":{{"filename":"' +
-            '{root}a.php","errors":[[{{"message":"Expected }}","range":' +
-            '{{"filename":"{root}a.php","range":{{"start":' +
-            '{{"line":3,"column":1}},"end":{{"line":3,"column":1}}}}}}}}]]}}}}\n'
-        )

@@ -192,6 +192,25 @@ using ArgVec = jit::vector<Arg>;
 template<typename... Args>
 TCA emit_persistent(CodeBlock& cb,
                     DataBlock& data,
+                    CGMeta& meta,
+                    folly::Optional<FPInvOffset> spOff,
+                    ServiceRequest sr,
+                    Args... args);
+template<typename... Args>
+TCA emit_ephemeral(CodeBlock& cb,
+                   DataBlock& data,
+                   CGMeta& meta,
+                   TCA start,
+                   folly::Optional<FPInvOffset> spOff,
+                   ServiceRequest sr,
+                   Args... args);
+/*
+ * These emit service request stubs that may not be relocated.  This distinction
+ * is important, because these discard metadata that allows relocation.
+ */
+template<typename... Args>
+TCA emit_persistent(CodeBlock& cb,
+                    DataBlock& data,
                     folly::Optional<FPInvOffset> spOff,
                     ServiceRequest sr,
                     Args... args);
@@ -209,16 +228,13 @@ TCA emit_ephemeral(CodeBlock& cb,
 TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                       FPInvOffset spOff,
                       TCA jmp, SrcKey target, TransFlags trflags);
-TCA emit_bindjcc1st_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                         FPInvOffset spOff, TCA jcc, SrcKey taken, SrcKey next,
-                         ConditionCode cc);
 TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                        FPInvOffset spOff, TCA* addr, SrcKey target,
                        TransFlags trflags);
-TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
-                          SrcKey target, TransFlags trflags);
-TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
-                              SrcKey sk);
+TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                          FPInvOffset spOff, SrcKey target, TransFlags trflags);
+TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                              FPInvOffset spOff, SrcKey sk);
 
 /*
  * Space used by an ephemeral stub.

@@ -465,6 +465,11 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
 
   if (!src->IsMovz()) return false;
 
+  // Don't turn non address immediates into PC relative instructions.  PC
+  // relative instructions are considered to be addresses by other parts of
+  // the relocator.
+  if (!env.meta.addressImmediates.count(srcAddr)) return false;
+
   const auto rd = src->Rd();
   uint64_t target = src->ImmMoveWide() << (16 * src->ShiftMoveWide());
   auto next = src->NextInstruction();
@@ -477,6 +482,7 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
 
   auto adjusted = env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
   if (!adjusted) { adjusted = reinterpret_cast<TCA>(target); }
+
   auto imm = static_cast<int64_t>(Instruction::Cast(adjusted) - dest);
   bool isAbsolute = true;
 
@@ -835,7 +841,14 @@ size_t relocateImpl(Env& env) {
               auto adjusted =
                 env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
               if (adjusted) {
-                patchTarget32(addr, adjusted);
+                if (env.meta.addressImmediates.count(srcAddr)) {
+                  patchTarget32(addr, adjusted);
+                } else {
+                  FTRACE(3,
+                         "relocate: instruction at {} has immediate 0x{} "
+                         "which looks like an address that needs relocating\n",
+                         srcAddr, target);
+                }
               }
             } else {
               auto const target = *reinterpret_cast<uintptr_t*>(addr);
@@ -855,9 +868,18 @@ size_t relocateImpl(Env& env) {
                     return munge(destAddr);
                   }
                 } else {
-                  return reinterpret_cast<uintptr_t>(
+                  auto const ret = reinterpret_cast<uintptr_t>(
                     env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target))
                   );
+                  if (ret && env.meta.addressImmediates.count(srcAddr)) {
+                    return ret;
+                  } else if (ret) {
+                    FTRACE(3,
+                           "relocate: instruction at {} has immediate 0x{} "
+                           "which looks like an address that needs "
+                           "relocating\n",
+                           srcAddr, target);
+                  }
                 }
                 return 0;
               }();
@@ -885,7 +907,7 @@ size_t relocateImpl(Env& env) {
             auto adjusted = env.rel.adjustedAddressAfter(
               reinterpret_cast<TCA>(target)
             );
-            if (adjusted) {
+            if (adjusted && env.meta.addressImmediates.count(srcAddr)) {
               // Save the frontier for restoration below.
               auto savedFrontier = env.destBlock.frontier();
               env.destBlock.setFrontier(destAddr);
@@ -912,6 +934,11 @@ size_t relocateImpl(Env& env) {
 
               // Restore the frontier
               env.destBlock.setFrontier(savedFrontier);
+            } else if (adjusted) {
+              FTRACE(3,
+                     "relocate: instruction at {} has immediate 0x{} "
+                     "which looks like an address that needs relocating\n",
+                     srcAddr, target);
             }
           }
         }
@@ -1007,12 +1034,30 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
       auto addr = reinterpret_cast<uint32_t*>(instr->LiteralAddress());
       auto target = *addr;
       auto adjusted = rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
-      if (adjusted) patchTarget32(reinterpret_cast<TCA>(addr), adjusted);
+      if (adjusted) {
+        if (rel.isAddressImmediate(reinterpret_cast<TCA>(instr))) {
+          patchTarget32(reinterpret_cast<TCA>(addr), adjusted);
+        } else {
+          FTRACE(3,
+                 "relocate: instruction at {} has immediate 0x{} "
+                 "which looks like an address that needs relocating\n",
+                 reinterpret_cast<TCA>(instr), target);
+        }
+      }
     } else {
       auto addr = reinterpret_cast<TCA*>(instr->LiteralAddress());
       auto target = *addr;
       auto adjusted = rel.adjustedAddressAfter(target);
-      if (adjusted) patchTarget64(reinterpret_cast<TCA>(addr), adjusted);
+      if (adjusted) {
+        if (rel.isAddressImmediate(reinterpret_cast<TCA>(instr))) {
+          patchTarget64(reinterpret_cast<TCA>(addr), adjusted);
+        } else {
+          FTRACE(3,
+                 "relocate: instruction at {} has immediate 0x{} "
+                 "which looks like an address that needs relocating\n",
+                 reinterpret_cast<TCA>(instr), target);
+        }
+      }
     }
   } else if (instr->IsMovz()) {
     const auto rd = instr->Rd();
@@ -1029,7 +1074,7 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
     auto adjusted = (uint64_t)rel.adjustedAddressAfter(
       reinterpret_cast<TCA>(target)
     );
-    if (adjusted) {
+    if (adjusted && rel.isAddressImmediate(reinterpret_cast<TCA>(instr))) {
       always_assert_flog(!live, "Can't adjust MOV/MOVK for a live region.\n");
 
       // Create a temporary CodeBlock over the mov/movk sequence
@@ -1051,6 +1096,11 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
 
       // Sync the region
       movBlock.sync();
+    } else if (adjusted) {
+      FTRACE(3,
+             "relocate: instruction at {} has immediate 0x{} "
+             "which looks like an address that needs relocating\n",
+             reinterpret_cast<TCA>(instr), target);
     }
   }
 }
@@ -1083,10 +1133,9 @@ void adjustForRelocation(RelocationInfo& rel) {
 }
 
 /*
- * This will update a single range that was not relocated, but that
- * might refer to relocated code (such as the cold code corresponding
- * to a tracelet). Unless its guaranteed to be all position independent,
- * its "fixups" should have been passed into a relocate call earlier.
+ * This will update a single range that might refer to relocated code (such
+ * as the cold code corresponding to a tracelet).  The range being adjusted
+ * may or may not have been relocated.
  */
 void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
   auto start = Instruction::Cast(rel.adjustedAddressAfter(srcStart));

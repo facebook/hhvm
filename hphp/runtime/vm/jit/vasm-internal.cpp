@@ -222,7 +222,8 @@ bool emit(Venv& env, const fallbackcc& i) {
 }
 
 bool emit(Venv& env, const retransopt& i) {
-  svcreq::emit_retranslate_opt_stub(*env.cb, env.text.data(), i.spOff, i.sk);
+  svcreq::emit_retranslate_opt_stub(*env.cb, env.text.data(), env.meta,
+                                    i.spOff, i.sk);
   return true;
 }
 
@@ -276,7 +277,7 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
         auto const srcrec = tc::findSrcRec(i.target);
         always_assert(srcrec);
         stub = i.trflags.packed
-          ? svcreq::emit_retranslate_stub(frozen, env.text.data(),
+          ? svcreq::emit_retranslate_stub(frozen, env.text.data(), env.meta,
                                           i.spOff, i.target, i.trflags)
           : srcrec->getFallbackTranslation();
       } break;
@@ -288,7 +289,7 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
         auto const srcrec = tc::findSrcRec(i.target);
         always_assert(srcrec);
         stub = i.trflags.packed
-          ? svcreq::emit_retranslate_stub(frozen, env.text.data(),
+          ? svcreq::emit_retranslate_stub(frozen, env.text.data(), env.meta,
                                           i.spOff, i.target, i.trflags)
           : srcrec->getFallbackTranslation();
       } break;

@@ -319,7 +319,7 @@ struct Vgen {
   void emit(const jmpr& i) { a->Br(X(i.target)); }
   void emit(const lea& i);
   void emit(const leap& i);
-  void emit(const lead& i) { a->Mov(X(i.d), i.s.get()); }
+  void emit(const lead& i);
   void emit(const loadb& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadl& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const loadsd& i) { a->Ldr(D(i.d), M(i.s)); }
@@ -400,6 +400,9 @@ struct Vgen {
 
 private:
   CodeBlock& frozen() { return env.text.frozen().code; }
+  void recordAddressImmediate() {
+    env.meta.addressImmediates.insert(env.cb->frontier());
+  }
 
 private:
   Venv& env;
@@ -563,6 +566,7 @@ void Vgen::emit(const mcprep& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const call& i) {
+  recordAddressImmediate();
   a->Mov(rAsm, reinterpret_cast<uint64_t>(i.target));
   a->Blr(rAsm);
   if (i.watch) {
@@ -626,6 +630,7 @@ void Vgen::emit(const calltc& i) {
   vixl::Label stub;
 
   // Preserve the LR (exittc) on the stack, pushing twice for SP alignment.
+  recordAddressImmediate();
   a->Mov(rAsm, i.exittc);
   a->Stp(rAsm, rAsm, MemOperand(sp, -16, PreIndex));
 
@@ -755,6 +760,7 @@ void Vgen::emit(const jcc& i) {
     // Emit a sequence similar to a smashable for easy patching later.
     // Static relocation might be able to simplify the branch.
     a->B(&skip, vixl::InvertCondition(C(i.cc)));
+    recordAddressImmediate();
     a->Ldr(rAsm_w, &data);
     a->Br(rAsm);
     a->bind(&data);
@@ -780,6 +786,7 @@ void Vgen::emit(const jmp& i) {
 
   // Emit a sequence similar to a smashable for easy patching later.
   // Static relocation might be able to simplify the branch.
+  recordAddressImmediate();
   a->Ldr(rAsm_w, &data);
   a->Br(rAsm);
   a->bind(&data);
@@ -793,10 +800,12 @@ void Vgen::emit(const jmpi& i) {
   // PC relative jump. Else, emit target address into code and load from there.
   auto diff = (i.target - a->frontier()) >> vixl::kInstructionSizeLog2;
   if (vixl::is_int26(diff)) {
+    recordAddressImmediate();
     a->b(diff);
   } else {
     // Cannot use simple a->Mov() since such a sequence cannot be
     // adjusted while live following a relocation.
+    recordAddressImmediate();
     a->Ldr(rAsm_w, &data);
     a->Br(rAsm);
     a->bind(&data);
@@ -821,11 +830,17 @@ void Vgen::emit(const leap& i) {
 
   // Cannot use simple a->Mov() since such a sequence cannot be
   // adjusted while live following a relocation.
+  recordAddressImmediate();
   a->Ldr(W(i.d), &imm_data);
   a->B(&after_data);
   a->bind(&imm_data);
   a->dc32(makeTarget32(i.s.r.disp));
   a->bind(&after_data);
+}
+
+void Vgen::emit(const lead& i) {
+  recordAddressImmediate();
+  a->Mov(X(i.d), i.s.get());
 }
 
 #define Y(vasm_opc, arm_opc, src_dst, m)                             \

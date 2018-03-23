@@ -89,6 +89,7 @@ TCA emitSmashableCall(CodeBlock& cb, CGMeta& meta, TCA target) {
   a.    dc64 (target);
   a.    bind (&after_data);
 
+  meta.addressImmediates.insert(cb.frontier());
   // Load the target address and call it
   a.    Ldr  (rAsm, &target_data);
   a.    Blr  (rAsm);
@@ -106,6 +107,7 @@ TCA emitSmashableJmp(CodeBlock& cb, CGMeta& meta, TCA target) {
   meta.smashableLocations.insert(cb.frontier());
   auto const the_start = cb.frontier();
 
+  meta.addressImmediates.insert(cb.frontier());
   a.    Ldr  (rAsm_w, &target_data);
   a.    Br   (rAsm);
 
@@ -138,6 +140,7 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& meta, TCA target,
   // Emit the conditional branch
   a.    B    (&after_data, InvertCondition(arm::convertCC(cc)));
 
+  meta.addressImmediates.insert(cb.frontier());
   // Emit the smashable jump
   a.    Ldr  (rAsm_w, &target_data);
   a.    Br   (rAsm);

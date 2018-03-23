@@ -58,6 +58,7 @@ namespace detail {
  */
 void emit_svcreq(CodeBlock& cb,
                  DataBlock& data,
+                 CGMeta& meta,
                  TCA start,
                  bool persist,
                  folly::Optional<FPInvOffset> spOff,
@@ -74,10 +75,7 @@ void emit_svcreq(CodeBlock& cb,
   stub.init(start, realAddr, stub_size(), "svcreq_stub");
 
   {
-    CGMeta fixups;
-    SCOPE_EXIT { assertx(fixups.empty()); };
-
-    Vauto vasm{stub, stub, data, fixups};
+    Vauto vasm{stub, stub, data, meta};
     auto& v = vasm.main();
 
     // If we have an spOff, materialize rvmsp() so that handleSRHelper() can do
@@ -156,6 +154,7 @@ TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   return emit_ephemeral(
     cb,
     data,
+    fixups,
     allocTCStub(cb, &fixups),
     target.resumeMode() != ResumeMode::None
       ? folly::none : folly::make_optional(spOff),
@@ -178,6 +177,7 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     return emit_ephemeral(
       cb,
       data,
+      fixups,
       allocTCStub(cb, &fixups),
       target.resumeMode() != ResumeMode::None
         ? folly::none : folly::make_optional(spOff),
@@ -191,6 +191,7 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   return emit_ephemeral(
     cb,
     data,
+    fixups,
     allocTCStub(cb, &fixups),
     target.resumeMode() != ResumeMode::None
       ? folly::none : folly::make_optional(spOff),
@@ -201,11 +202,13 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   );
 }
 
-TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
+TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                          FPInvOffset spOff,
                           SrcKey target, TransFlags trflags) {
   return emit_persistent(
     cb,
     data,
+    fixups,
     target.resumeMode() != ResumeMode::None
       ? folly::none : folly::make_optional(spOff),
     REQ_RETRANSLATE,
@@ -214,11 +217,13 @@ TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
   );
 }
 
-TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
+TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                              FPInvOffset spOff,
                               SrcKey sk) {
   return emit_persistent(
     cb,
     data,
+    fixups,
     sk.resumeMode() != ResumeMode::None
       ? folly::none : folly::make_optional(spOff),
     REQ_RETRANSLATE_OPT,

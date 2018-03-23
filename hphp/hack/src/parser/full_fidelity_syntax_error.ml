@@ -422,3 +422,6 @@ let namespace_not_a_classname =
 
 let missing_double_quote = (* error0010 analogue *)
   "A double quote is expected here."
+
+let await_in_finally_block =
+  "Await inside a finally block is not supported"

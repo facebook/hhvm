@@ -462,14 +462,8 @@ NEVER_INLINE member_rval ElemSlow(TypedValue& tvRef,
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      if (mode != MOpMode::None && checkHACFalseyPromote()) {
-        raise_hackarr_compat_notice("Cannot index into null");
-      }
       return ElemEmptyish();
     case KindOfBoolean:
-      if (mode != MOpMode::None && checkHACFalseyPromote()) {
-        raise_hackarr_compat_notice("Cannot index into a boolean");
-      }
       return ElemBoolean(base);
     case KindOfInt64:
     case KindOfDouble:

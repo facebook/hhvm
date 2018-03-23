@@ -579,10 +579,13 @@ void checkRetranslateAll() {
   // treadmill, the thread is joined in the processExit handler for mcgen.
   if (RuntimeOption::ServerExecutionMode()) {
     Logger::Info("Scheduling the retranslation of all profiled translations");
-  }
-  Treadmill::enqueue([] {
+    Treadmill::enqueue([] {
+      s_retranslateAllThread = std::thread([] { retranslateAll(); });
+    });
+  } else {
     s_retranslateAllThread = std::thread([] { retranslateAll(); });
-  });
+    s_retranslateAllThread.join();
+  }
 }
 
 bool retranslateAllPending() {

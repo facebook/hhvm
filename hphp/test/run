@@ -107,10 +107,14 @@ Examples:
   % $argv[0] -b ~/code/hhvm/hphp/hhvm/hhvm
   % $argv[0] --hhvm-binary-path ~/code/hhvm/hphp/hhvm/hhvm
 
-  # Use relocation to run tests in the same thread. e.g, 6 times in the same thread,
-  # where the 3 specifies a random relocation for the 3rd request and the test is
-  # run 3 * 2 times.
+  # Use live relocation to run tests in the same thread. e.g, 6 times in the same
+  # thread, where the 3 specifies a random relocation for the 3rd request and the
+  # test is run 3 * 2 times.
   % $argv[0] --relocate 3 test/quick/silencer.php
+
+  # Use retranslate all.  Run the test n times, then run retranslate all, then
+  # run the test n more on the new code.
+  % $argv[0] --retranslate-all 2 quick
 
   # Run the Hack typechecker against quick typechecker.expect[f] files
   # Could explcitly use quick here too
@@ -510,6 +514,7 @@ function get_options($argv) {
     'list-tests' => '',
     'relocate:' => '',
     'recycle-tc:' => '',
+    'retranslate-all:' => '',
     'hhvm-binary-path:' => 'b:',
     'typechecker' => '',
     'hhserver-binary-path:' => '',
@@ -572,8 +577,13 @@ function get_options($argv) {
     exit(1);
   }
 
-  if (isset($options['relocate']) && isset($options['recycle-tc'])) {
-    echo "relocate and recycle-tc are mutually exclusive options\n";
+  if (count(array_filter(array(
+        isset($options['relocate']),
+        isset($options['recycle-tc']),
+        isset($options['retranslate-all'])
+      ))) > 1) {
+    echo "relocate, retranslate-all and recycle-tc are mutually exclusive ".
+         "options\n";
     exit(1);
   }
 
@@ -782,6 +792,11 @@ function list_tests($files, $options) {
     $args[] = $options['relocate'];
   }
 
+  if (isset($options['retranslate-all'])) {
+    $args[] = '--retranslate-all';
+    $args[] = $options['retranslate-all'];
+  }
+
   if (isset($options['recycle-tc'])) {
     $args[] = '--recycle-tc';
     $args[] = $options['recycle-tc'];
@@ -905,6 +920,14 @@ function hhvm_cmd_impl() {
       $args[] = '-vEval.JitAHotSize=6000000';
       $args[] = '-vEval.HotFuncCount=0';
       $args[] = '-vEval.PerfRelocate='.$options['relocate'];
+    }
+
+    if (isset($options['retranslate-all'])) {
+      $args[] = '--count='.($options['retranslate-all'] * 2);
+      $args[] = '-vEval.JitPGO=true';
+      $args[] = '-vEval.JitRetranslateAllRequest='.$options['retranslate-all'];
+      // Set to timeout.  We want requests to trigger retranslate all.
+      $args[] = '-vEval.JitRetranslateAllSeconds=300';
     }
 
     if (isset($options['recycle-tc'])) {
@@ -1922,6 +1945,10 @@ function run_config_post($outputs, $test, $options) {
     $repeats = $options['relocate'] * 2;
   }
 
+  if (isset($options['retranslate-all'])) {
+    $repeats = $options['retranslate-all'] * 2;
+  }
+
   if (isset($options['recycle-tc'])) {
     $repeats = $options['recycle-tc'];
   }
@@ -2145,12 +2172,15 @@ function run_test($options, $test) {
 
   $test_ext = pathinfo($test, PATHINFO_EXTENSION);
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
-  if ((isset($options['relocate']) || isset($options['recycle-tc'])) &&
+  if ((isset($options['relocate']) ||
+       isset($options['recycle-tc']) ||
+       isset($options['retranslate-all'])) &&
       preg_grep('/ --count[ =].* --count[ =]/', (array)$hhvm)) {
     return 'skip';
   }
 
   if(file_exists($test . ".verify") && (isset($options['relocate'])   ||
+                                        isset($options['retranslate-all']) ||
                                         isset($options['recycle-tc']) ||
                                         isset($options['repo'])))     {
       return 'skip-verify';

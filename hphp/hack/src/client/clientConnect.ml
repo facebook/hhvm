@@ -216,8 +216,10 @@ let rec wait_for_server_message
       let msg = Marshal_tools.from_fd_with_preamble fd in
       if (msg <> ServerCommandTypes.Ping) &&
           (Option.is_none expected_message || Some msg = expected_message) then
+      begin
+        progress_callback None;
         msg
-      else begin
+      end else begin
         Option.iter tail_env
           (fun t -> print_wait_msg progress_callback start_time t);
         wait_for_server_message ~expected_message ~ic ~retries
@@ -226,6 +228,7 @@ let rec wait_for_server_message
     with
     | End_of_file
     | Sys_error _ ->
+      progress_callback None;
       raise Server_hung_up
 
 let wait_for_server_hello ic retries progress_callback start_time tail_env =
@@ -288,8 +291,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
       if env.do_post_handoff_handshake then begin
         with_server_hung_up @@ fun () ->
           wait_for_server_hello ic retries env.progress_callback start_time
-            (Some tail_env);
-          env.progress_callback None
+            (Some tail_env)
       end;
       {
         channels = (ic, oc);

@@ -257,7 +257,7 @@ void processInit() {
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
 
-  g_code = new(low_malloc_data(sizeof(CodeCache))) CodeCache();
+  g_code = new(low_malloc(sizeof(CodeCache))) CodeCache();
   g_ustubs.emitAll(*g_code, *Debug::DebugInfo::Get());
 
   // Write an .eh_frame section that covers the whole TC.

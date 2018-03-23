@@ -154,7 +154,11 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
   mw->slen += slen;
 }
 
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
 extern unsigned low_arena;
+#else
+extern unsigned dss_arena;
+#endif
 #endif
 
 void WarnIfNotOK(Transport* transport) {
@@ -622,10 +626,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
       std::string msg =
         folly::sformat("{} 1G huge pages active\n", num_1g_pages());
-      if (auto a = alloc::low_huge_arena()) {
+      if (auto a = alloc::lowArena()) {
         msg += a->reportStats();
       }
-      if (auto a = alloc::high_arena()) {
+      if (auto a = alloc::highArena()) {
         msg += a->reportStats();
       }
       transport->sendString(msg, 200);
@@ -848,6 +852,9 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         size_t allocated = call_mallctl("stats.allocated");
         size_t active = call_mallctl("stats.active");
         size_t mapped = call_mallctl("stats.mapped");
+#if !USE_JEMALLOC_EXTENT_HOOKS
+        unsigned low_arena = dss_arena;
+#endif
         size_t low_mapped = call_mallctl(
             folly::format("stats.arenas.{}.mapped",
               low_arena).str().c_str());

@@ -2000,7 +2000,6 @@ struct FreedAPCHandle {
       }
     }
     APCStats::getAPCStats().removePendingDelete(m_memSize);
-    try_reenable_huge1g_arena(m_memSize);
   }
 private:
   size_t m_memSize;

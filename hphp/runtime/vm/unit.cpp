@@ -249,11 +249,11 @@ Unit::~Unit() {
 }
 
 void* Unit::operator new(size_t sz) {
-  return low_malloc_data(sz);
+  return low_malloc(sz);
 }
 
 void Unit::operator delete(void* p, size_t /*sz*/) {
-  low_free_data(p);
+  low_free(p);
 }
 
 

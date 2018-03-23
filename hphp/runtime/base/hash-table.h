@@ -203,7 +203,7 @@ struct HashTable : HashTableCommon {
   ArrayType* staticAlloc(uint32_t scale) {
     auto const allocBytes = computeAllocBytes(scale);
     return static_cast<ArrayType*>(RuntimeOption::EvalLowStaticArrays ?
-                                   low_malloc_data(allocBytes) :
+                                   low_malloc(allocBytes) :
                                    malloc(allocBytes));
   }
 

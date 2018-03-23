@@ -24,11 +24,8 @@
 #include <sys/sysctl.h>
 #endif
 
-#include <folly/Bits.h>
-#include <folly/Format.h>
 #include <folly/portability/SysMman.h>
 #include <folly/portability/SysResource.h>
-#include <folly/portability/SysTime.h>
 
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/extent-hooks.h"
@@ -46,7 +43,7 @@ void flush_thread_caches() {
     mallctlCall("thread.tcache.flush", true);
   }
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
-  thread_huge_tcache_flush();
+  high_arena_tcache_flush();
 #endif
 #endif
 #ifdef USE_TCMALLOC
@@ -201,20 +198,14 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
 #endif
 
 #ifdef USE_JEMALLOC
-unsigned low_arena = 0;
 
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
-// When an arena backed by 1G huge page is full, we set the arena index to 0, so
-// that subsequent allocations won't try the arena.  The _real index is still
-// kept, and we periodically set the index back when more space become available
-// there.
-unsigned low_huge1g_arena = 0;
-unsigned low_huge1g_arena_real = 0;
-unsigned high_huge1g_arena = 0;
-unsigned high_huge1g_arena_real = 0;
+unsigned low_arena = 0;
+unsigned high_arena = 0;
+
 // Keep track of the size of recently freed memory that might be in the high1g
 // arena when it is disabled, so that we know when to reenable it.
-std::atomic_uint g_high1GRecentlyFreed;
+std::atomic_uint g_highArenaRecentlyFreed;
 
 alloc::Bump2MMapper* low_2m_mapper = nullptr;
 
@@ -235,16 +226,13 @@ static std::atomic<size_t> a0ReservedLeft(0);
 // Explicit per-thread tcache for huge arenas.  -1 means no tcache.
 // In jemalloc/include/jemalloc/jemalloc_macros.h.in, we have
 // #define MALLOCX_TCACHE_NONE MALLOCX_TCACHE(-1)
-__thread int high_huge1g_tcache = -1;
+__thread int high_arena_tcache = -1;
 static_assert(MALLOCX_TCACHE(-1) == MALLOCX_TCACHE_NONE,
-              "Are you using jemalloc 4.x/5.x?");
+              "Are you using jemalloc 5.x?");
+#else
+// legacy implementation of low arena using brk
+unsigned dss_arena = 0;
 #endif
-
-std::atomic<int> low_huge_pages(0);
-std::atomic<void*> highest_lowmall_addr;
-static const unsigned kLgHugeGranularity = 21;
-static const unsigned kHugePageSize = 1 << kLgHugeGranularity;
-static const unsigned kHugePageMask = (1 << kLgHugeGranularity) - 1;
 
 #ifdef HAVE_NUMA
 static uint32_t base_arena;
@@ -268,8 +256,7 @@ void enable_numa(bool local) {
       int arena, ret;
 
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
-      if (high_huge1g_arena_real && jemallocMetadataCanUseHuge.load() &&
-          enableNumaArenaMetadata1GPage) {
+      if (jemallocMetadataCanUseHuge.load() && enableNumaArenaMetadata1GPage) {
         size_t size = sizeof(unsigned);
         extent_hooks_t *hooks = &huge_page_metadata_hooks;
         ret = mallctl(JEMALLOC_NEW_ARENA_CMD, &arena, &size, &hooks,
@@ -350,7 +337,7 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
   return mallocx(size, flags);
 }
 
-#endif
+#endif // HAVE_NUMA
 
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
 static void set_arena_retain_grow_limit(unsigned id) {
@@ -402,31 +389,29 @@ static BumpMapper* getHugeMapperWithFallback(unsigned n1GPages,
   return mapper;
 }
 
-void setup_low_1g_arena(unsigned n1GPages) {
+void setup_low_arena(unsigned n1GPages) {
   auto mapper = getHugeMapperWithFallback(n1GPages, true, 0);
   if (n1GPages == 0) {
     // If we are using 2M pages, save this so we can change how many 2M huge
     // pages to use.
     low_2m_mapper = dynamic_cast<Bump2MMapper*>(mapper);
   }
-  auto ma =
-    LowHugeArena::CreateAt(&g_lowHugeArena,
-                           kLowArenaMaxAddr, kLowArenaMaxCap, false, mapper);
+  auto ma = LowArena::CreateAt(&g_lowArena, kLowArenaMaxAddr,
+                                   kLowArenaMaxCap, false, mapper);
   set_arena_retain_grow_limit(ma->id());
-  low_huge1g_arena = low_huge1g_arena_real = ma->id();
+  low_arena = ma->id();
 }
 
-void setup_high_1g_arena(unsigned n1GPages) {
+void setup_high_arena(unsigned n1GPages) {
   // If we use 1G huge pages on NUMA servers, start grabbing 1G huge pages from
   // a node different from the one for low arena.
   auto mapper = getHugeMapperWithFallback(n1GPages, false,
                                           num_numa_nodes() / 2 + 1);
-  using namespace alloc;
   auto ma = HighArena::CreateAt(&g_highArena,
                                 kHighArenaMaxAddr, kHighArenaMaxCap,
                                 false, mapper);
   set_arena_retain_grow_limit(ma->id());
-  high_huge1g_arena = high_huge1g_arena_real = ma->id();
+  high_arena = ma->id();
 }
 
 void* huge_page_extent_alloc(extent_hooks_t* extent_hooks, void* addr,
@@ -457,10 +442,10 @@ void* huge_page_extent_alloc(extent_hooks_t* extent_hooks, void* addr,
                                    (a0MetadataReservedSize - oldValue));
       }
     }
-  } else if (auto ma = alloc::high_arena()) {
+  } else if (auto ma = alloc::highArena()) {
     // For non arena 0: malloc / free allowed in this branch.
     void* ret = ma->extent_alloc(extent_hooks, addr, size, alignment, zero,
-                                 commit, high_huge1g_arena_real);
+                                 commit, high_arena);
     if (ret != nullptr) return ret;
   }
 default_alloc:
@@ -481,7 +466,7 @@ void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
   enableNumaArenaMetadata1GPage = enable_numa_arena;
   a0MetadataReservedSize = reserved;
 
-  auto ma = alloc::high_arena();
+  auto ma = alloc::highArena();
   if (!ma) return;
   bool retain_enabled = false;
   mallctlRead("opt.retain", &retain_enabled);
@@ -489,7 +474,7 @@ void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
 
   bool zero = true, commit = true;
   void* ret = ma->extent_alloc(nullptr, nullptr, a0MetadataReservedSize, size2m,
-                               &zero, &commit, high_huge1g_arena_real);
+                               &zero, &commit, high_arena);
   if (!ret) return;
 
   a0ReservedBase = ret;
@@ -509,7 +494,8 @@ void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
   jemallocMetadataCanUseHuge.store(true);
 }
 
-#endif
+#endif // USE_JEMALLOC_EXTENT_HOOKS
+#endif // USE_JEMALLOC
 
 struct JEMallocInitializer {
   JEMallocInitializer() {
@@ -539,14 +525,18 @@ struct JEMallocInitializer {
     setenv("UNW_RBP_ALWAYS_VALID", "1", false);
 
     initNuma();
-
-    // Create a special arena to be used for allocating objects in low memory.
-    if (mallctlRead(JEMALLOC_NEW_ARENA_CMD, &low_arena, true) != 0) {
+#ifdef USE_JEMALLOC
+#if !USE_JEMALLOC_EXTENT_HOOKS
+    // Create the legacy low arena that uses brk() instead of mmap().  When
+    // using newer versions of jemalloc, we use extent hooks to get more
+    // control.
+    if (mallctlRead(JEMALLOC_NEW_ARENA_CMD, &dss_arena, true) != 0) {
       // Error; bail out.
       return;
     }
-    if (mallctlWrite(folly::sformat("arena.{}.dss", low_arena).c_str(),
-                     "primary", true) != 0) {
+    char buf[32];
+    snprintf(buf, sizeof(buf), "arena.%u.dss", dss_arena);
+    if (mallctlWrite(buf, "primary", true) != 0) {
       // Error; bail out.
       return;
     }
@@ -555,13 +545,13 @@ struct JEMallocInitializer {
     // current brk is mapped huge, but we don't know yet whether huge pages
     // are enabled for low memory. Round up to the start of a huge page,
     // and set the high water mark to one below.
+    constexpr size_t kHugePageSize = size2m;
+    constexpr size_t kHugePageMask = kHugePageSize - 1;
     unsigned leftInPage = kHugePageSize - (uintptr_t(sbrk(0)) & kHugePageMask);
     (void) sbrk(leftInPage);
     assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
-    highest_lowmall_addr = (char*)sbrk(0) - 1;
 
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
-    // Number of 1G huge pages for data in low memeory
+#else // USE_JEMALLOC_EXTENT_HOOKS
     unsigned low_1g_pages = 0;
     if (char* buffer = getenv("HHVM_LOW_1G_PAGE")) {
       if (!sscanf(buffer, "%u", &low_1g_pages)) {
@@ -570,7 +560,6 @@ struct JEMallocInitializer {
         abort();
       }
     }
-    // Number of 1G pages for shared data not in low memory (e.g., APC)
     unsigned high_1g_pages = 0;
     if (char* buffer = getenv("HHVM_HIGH_1G_PAGE")) {
       if (!sscanf(buffer, "%u", &high_1g_pages)) {
@@ -612,7 +601,7 @@ struct JEMallocInitializer {
               "using %u (specified %u) 1G huge pages for low arena\n",
               low_1g_pages, origLow1G);
     }
-    setup_low_1g_arena(low_1g_pages);
+    setup_low_arena(low_1g_pages);
 
     if (high_1g_pages > remaining) {
       high_1g_pages = remaining;
@@ -622,7 +611,8 @@ struct JEMallocInitializer {
               "using %u (specified %u) 1G huge pages for high arena\n",
               high_1g_pages, origHigh1G);
     }
-    setup_high_1g_arena(high_1g_pages);
+    setup_high_arena(high_1g_pages);
+#endif
 #endif
   }
 };
@@ -642,100 +632,33 @@ struct JEMallocInitializer {
 
 static JEMallocInitializer initJEMalloc MAX_CONSTRUCTOR_PRIORITY;
 
-static void low_malloc_hugify(void* ptr) {
-  // In practice, the things we low_malloc are both long-lived and likely
-  // to be randomly accessed. This makes them good candidates for mapping
-  // with huge pages. Track a high water mark, and incrementally map each
-  // huge page we low_malloc with a huge mapping.
-  int remaining = low_huge_pages.load();
-  if (!remaining) return;
-  for (void* oldValue = highest_lowmall_addr.load(); ptr > oldValue; ) {
-    if (highest_lowmall_addr.compare_exchange_weak(oldValue, ptr)) {
-      uintptr_t prevRegion = uintptr_t(oldValue) >> kLgHugeGranularity;
-      uintptr_t newRegion = uintptr_t(ptr) >> kLgHugeGranularity;
-      if (prevRegion != newRegion) {
-        // Whoever updates highest_ever is responsible for hinting all the
-        // intervening regions. prevRegion is already huge, so bump the
-        // region we're hugening by 1.
-        int pages = newRegion - prevRegion;
-        do {
-          if (pages > remaining) pages = remaining;
-
-          if (low_huge_pages.compare_exchange_weak(remaining,
-                                                   remaining - pages)) {
-            hintHuge((void*)((prevRegion + 1) << kLgHugeGranularity),
-                     pages << kLgHugeGranularity);
-            break;
-          }
-        } while (remaining);
-      }
-      break;
-    }
-    // Try again.
-  }
-}
-
+#ifdef USE_JEMALLOC
 void* low_malloc_impl(size_t size) {
   if (size == 0) return nullptr;
   void* ptr = mallocx(size, low_mallocx_flags());
-  low_malloc_hugify((char*)ptr + size - 1);
+#ifndef USE_LOWPTR
+  if (!ptr) {
+    if (size < size2m) {
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
+      low_arena = 0;
+#else
+      dss_arena = 0;
+#endif
+    }
+    return malloc(size);
+  }
+#endif
   return ptr;
 }
-
-void low_malloc_skip_huge(void* start, void* end) {
-  if (low_huge_pages.load()) {
-    low_malloc_hugify((char*)start - 1);
-    for (void* oldValue = highest_lowmall_addr.load(); end > oldValue; ) {
-      if (highest_lowmall_addr.compare_exchange_weak(oldValue, end)) break;
-    }
-  }
-}
-
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
-void* low_malloc_huge1g_impl(size_t size) {
-  if (size == 0) return nullptr;
-  if (low_huge1g_arena == 0) return low_malloc(size);
-  auto ret = mallocx(size, low_mallocx_huge1g_flags());
-  if (ret) return ret;
-  if (size < size2m) {
-    // We are out of space in the arena, avoid trying in this arena in the near
-    // future.
-    static_assert(low_dallocx_huge1g_flags() == low_dallocx_flags(), "");
-    low_huge1g_arena = 0;
-  }
-  return low_malloc(size);
-}
-
-void* malloc_huge1g_impl(size_t size) {
-  if (size == 0) return nullptr;
-  if (high_huge1g_arena == 0) return malloc(size);
-  auto ret = mallocx(size, mallocx_huge1g_flags());
-  if (ret) return ret;
-  if (size < size2m) {
-    // We are out of space in the arena, avoid trying in this arena in the near
-    // future.
-    high_huge1g_arena = 0;
-  }
-  return malloc(size);
-}
-
-#endif
-
-#else
-
-void low_malloc_skip_huge(void* start, void* end) {}
 
 #endif // USE_JEMALLOC
 
 void low_malloc_huge_pages(int pages) {
-#ifdef USE_JEMALLOC
-  if (pages <= 0) return;
-  low_huge_pages = pages;
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
+  if (pages <= 0) return;
   if (low_2m_mapper) {
     low_2m_mapper->setMaxPages(pages);
   }
-#endif
 #endif
 }
 
@@ -774,28 +697,27 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
 
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
 
-void thread_huge_tcache_create() {
-  if (high_huge1g_arena_real) {
-    int tc = -1;
-    if (mallctlRead("tcache.create", &tc, true)) {
-      return;
-    }
-    assert(high_huge1g_tcache == -1);   // no previous tcache
-    high_huge1g_tcache = tc;
-  }
-};
+void* malloc_huge_impl(size_t size) {
+  if (size == 0) return nullptr;
+  return mallocx(size, mallocx_huge_flags());
+}
 
-void thread_huge_tcache_flush() {
+void high_arena_tcache_create() {
+  assert(high_arena_tcache == -1);
+  mallctlRead("tcache.create", &high_arena_tcache, true);
+}
+
+void high_arena_tcache_flush() {
   // It is OK if flushing fails
-  if (MALLOCX_TCACHE(high_huge1g_tcache) != MALLOCX_TCACHE_NONE) {
-    mallctlWrite("tcache.flush", high_huge1g_tcache, true);
+  if (MALLOCX_TCACHE(high_arena_tcache) != MALLOCX_TCACHE_NONE) {
+    mallctlWrite("tcache.flush", high_arena_tcache, true);
   }
 }
 
-void thread_huge_tcache_destroy() {
-  if (MALLOCX_TCACHE(high_huge1g_tcache) != MALLOCX_TCACHE_NONE) {
-    mallctlWrite("tcache.destroy", high_huge1g_tcache, true);
-    high_huge1g_tcache = -1;
+void high_arena_tcache_destroy() {
+  if (MALLOCX_TCACHE(high_arena_tcache) != MALLOCX_TCACHE_NONE) {
+    mallctlWrite("tcache.destroy", high_arena_tcache, true);
+    high_arena_tcache = -1;
   }
 }
 
@@ -806,12 +728,10 @@ void thread_huge_tcache_destroy() {
 
 extern "C" {
   const char* malloc_conf = "narenas:1,lg_tcache_max:16"
-#if (JEMALLOC_VERSION_MAJOR >= 5)
-#ifdef FACEBOOK
-    // FB-only as this feature does not exist in any jemalloc release as of
-    // 2017-11-02 (latest: 5.0.1)
+#if (JEMALLOC_VERSION_MAJOR >= 5) && defined(FACEBOOK)
+// FB-only as this feature does not exist in any jemalloc release as of
+// 2017-11-02 (latest: 5.0.1)
     ",metadata_thp:disabled"
-#endif
 #endif
 #ifdef ENABLE_HHPROF
     ",prof:true,prof_active:false,prof_thread_active_init:false"

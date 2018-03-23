@@ -129,33 +129,12 @@ struct OutOfMemoryException : Exception {
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef USE_JEMALLOC
-extern unsigned low_arena;
+
+#if !USE_JEMALLOC_EXTENT_HOOKS
+extern unsigned dss_arena;
 extern std::atomic<int> low_huge_pages;
 
-inline int low_mallocx_flags() {
-  // Allocate from low_arena, and bypass the implicit tcache to assure that the
-  // result actually comes from low_arena.
-#ifdef MALLOCX_TCACHE_NONE
-  return MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
-#else
-  return MALLOCX_ARENA(low_arena);
-#endif
-}
-
-#ifdef MALLOCX_TCACHE_NONE
-inline constexpr int low_dallocx_flags() {
-  // Bypass the implicit tcache for this deallocation.
-  return MALLOCX_TCACHE_NONE;
-}
-#else
-inline int low_dallocx_flags() {
-  // Prior to the introduction of MALLOCX_TCACHE_NONE, explicitly specifying
-  // MALLOCX_ARENA(a) caused jemalloc to bypass tcache.
-  return MALLOCX_ARENA(low_arena);
-}
-#endif
-
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#else // USE_JEMALLOC_EXTENT_HOOKS
 
 #ifndef MAX_MANAGED_ARENA_COUNT
 #define MAX_MANAGED_ARENA_COUNT 4
@@ -177,51 +156,61 @@ template<typename T> inline T* GetByArenaId(unsigned id) {
   return nullptr;
 }
 
-extern unsigned low_huge1g_arena;
-extern unsigned low_huge1g_arena_real;
-extern unsigned high_huge1g_arena;
-extern unsigned high_huge1g_arena_real;
+extern unsigned low_arena;
+extern unsigned high_arena;
 
 // Address ranges for the managed arenas.  Low arena is in [3G, 4G), and high
 // arena in [4G, 32G) at most.  Both grows down and can be smaller.  But things
 // won't work well if either overflows.
 constexpr uintptr_t kLowArenaMaxAddr = 4ull << 30;
 constexpr uintptr_t kHighArenaMaxAddr = 32ull << 30;
-constexpr size_t kLowArenaMaxCap = 2ull << 30;
+constexpr size_t kLowArenaMaxCap = 3ull << 30;
 constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
 
 // Explicit per-thread tcache for the huge arenas.
-extern __thread int high_huge1g_tcache;
+extern __thread int high_arena_tcache;
 
-inline int low_mallocx_huge1g_flags() {
-  // MALLOCX_TCACHE_NONE is introduced earlier than the chunk hook API
-  return MALLOCX_ARENA(low_huge1g_arena) | MALLOCX_TCACHE_NONE;
+inline int mallocx_huge_flags() {
+  return MALLOCX_ARENA(high_arena) | MALLOCX_TCACHE(high_arena_tcache);
 }
 
-inline constexpr int low_dallocx_huge1g_flags() {
-  return MALLOCX_TCACHE_NONE;
-}
-
-inline int mallocx_huge1g_flags() {
-  return MALLOCX_ARENA(high_huge1g_arena) | MALLOCX_TCACHE(high_huge1g_tcache);
-}
-
-inline int dallocx_huge1g_flags() {
-  return MALLOCX_TCACHE(high_huge1g_tcache);
+inline int dallocx_huge_flags() {
+  return MALLOCX_TCACHE(high_arena_tcache);
 }
 
 /* Set up extent hooks to use 1g pages for jemalloc metadata. */
 void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
                                          size_t reserved);
 
-// Functions to manipulate tcaches for huge arenas
-void thread_huge_tcache_create();       // tcache.create
-void thread_huge_tcache_flush();        // tcache.flush
-void thread_huge_tcache_destroy();      // tcache.destroy
+// Functions to manipulate tcaches for the high arena
+void high_arena_tcache_create();        // tcache.create
+void high_arena_tcache_flush();         // tcache.flush
+void high_arena_tcache_destroy();       // tcache.destroy
 
-#endif
+#endif // USE_JEMALLOC_EXTENT_HOOKS
 
+inline int low_mallocx_flags() {
+  // Allocate from low_arena if extend hooks are available, otherwise allocate
+  // from dss_arena.  Bypass the implicit tcache to assure that the result
+  // actually comes from the desired arena.
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
+  return MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
+#elif defined(MALLOCX_TCACHE_NONE)
+  return MALLOCX_ARENA(dss_arena) | MALLOCX_TCACHE_NONE;
+#else
+  return MALLOCX_ARENA(dss_arena);
 #endif
+}
+
+inline int low_dallocx_flags() {
+#ifdef MALLOCX_TCACHE_NONE
+  return MALLOCX_TCACHE_NONE;
+#else
+  return MALLOCX_ARENA(dss_arena);
+#endif
+}
+
+#endif // USE_JEMALLOC
 
 inline void* low_malloc(size_t size) {
 #ifndef USE_JEMALLOC
@@ -241,31 +230,13 @@ inline void low_free(void* ptr) {
 }
 
 void low_malloc_huge_pages(int pages);
-void low_malloc_skip_huge(void* start, void* end);
-
-inline void* low_malloc_data(size_t size) {
-#ifndef USE_JEMALLOC_EXTENT_HOOKS
-  return low_malloc(size);
-#else
-  extern void* low_malloc_huge1g_impl(size_t);
-  return low_malloc_huge1g_impl(size);
-#endif
-}
-
-inline void low_free_data(void* ptr) {
-#ifndef USE_JEMALLOC_EXTENT_HOOKS
-  low_free(ptr);
-#else
-  if (ptr) dallocx(ptr, low_dallocx_huge1g_flags());
-#endif
-}
 
 inline void* malloc_huge(size_t size) {
-#ifndef USE_JEMALLOC_EXTENT_HOOKS
+#if !USE_JEMALLOC_EXTENT_HOOKS
   return malloc(size);
 #else
-  extern void* malloc_huge1g_impl(size_t);
-  return malloc_huge1g_impl(size);
+  extern void* malloc_huge_impl(size_t);
+  return malloc_huge_impl(size);
 #endif
 }
 
@@ -274,28 +245,10 @@ inline void free_huge(void* ptr) {
   free(ptr);
 #else
   if (LIKELY(reinterpret_cast<uintptr_t>(ptr) < kHighArenaMaxAddr)) {
-    if (ptr) dallocx(ptr, dallocx_huge1g_flags());
+    if (ptr) dallocx(ptr, dallocx_huge_flags());
   } else {
     // Not from the high 1G arena
     free(ptr);
-  }
-#endif
-}
-
-// If high1g arena was full some time ago, try to reenable it after some bytes
-// are freed.
-inline void try_reenable_huge1g_arena(size_t bytes) {
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
-  extern std::atomic_uint g_high1GRecentlyFreed;
-  if (high_huge1g_arena_real != high_huge1g_arena) {
-    auto const curr =
-      g_high1GRecentlyFreed.fetch_add((unsigned)bytes,
-                                      std::memory_order_relaxed);
-    constexpr unsigned kReenableThreashold = 4u << 20;
-    if (curr >= kReenableThreashold) {
-      g_high1GRecentlyFreed.store(0, std::memory_order_relaxed);
-      high_huge1g_arena = high_huge1g_arena_real;
-    }
   }
 #endif
 }
@@ -438,8 +391,8 @@ int mallctlHelper(const char *cmd, T* out, T* in, bool errOk) {
       // function and JEMallocInitializer has the highest constructor priority.
       // The static variables in Logger are not initialized yet.
       fprintf(stderr, "%s\n", errStr.c_str());
+      always_assert(false);
     }
-    always_assert(errOk || err == 0);
   }
   return err;
 }
@@ -497,7 +450,7 @@ struct LowAllocator {
   }
 
   pointer allocate(size_type num, const void* = nullptr) {
-    pointer ret = (pointer)low_malloc_data(num * sizeof(T));
+    pointer ret = (pointer)low_malloc(num * sizeof(T));
     return ret;
   }
 
@@ -510,7 +463,7 @@ struct LowAllocator {
     p->~T();
   }
 
-  void deallocate(pointer p, size_type /*num*/) { low_free_data((void*)p); }
+  void deallocate(pointer p, size_type /*num*/) { low_free((void*)p); }
 
   template<class U> bool operator==(const LowAllocator<U>&) const {
     return true;

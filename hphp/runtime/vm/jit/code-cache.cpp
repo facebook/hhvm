@@ -154,8 +154,6 @@ CodeCache::CodeCache()
     }
     baseAdjustment = -(uint64_t)base & (kRoundUp - 1);
     baseAdjustment += shiftTC();
-  } else {
-    low_malloc_skip_huge(base, base + allocationSize - 1);
   }
   assertx(base);
   base += baseAdjustment;

@@ -255,7 +255,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const size = sizeof_Class + prefix_sz
                     + sizeof(m_classVec[0]) * classVecLen;
 
-  auto const mem = low_malloc_data(size);
+  auto const mem = low_malloc(size);
   auto const classPtr = reinterpret_cast<void*>(
     reinterpret_cast<uintptr_t>(mem) + prefix_sz
   );
@@ -263,7 +263,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
     return new (classPtr) Class(preClass, parent, std::move(usedTraits),
                                 classVecLen, funcVecLen);
   } catch (...) {
-    low_free_data(mem);
+    low_free(mem);
     throw;
   }
 }
@@ -451,7 +451,7 @@ void Class::atomicRelease() {
   assertx(!m_cachedClass.bound());
   assertx(!getCount());
   this->~Class();
-  low_free_data(mallocPtr());
+  low_free(mallocPtr());
 }
 
 Class::~Class() {
@@ -481,7 +481,7 @@ Class::~Class() {
   // clean enum cache
   EnumCache::deleteValues(this);
 
-  low_free_data(m_vtableVec.get());
+  low_free(m_vtableVec.get());
 
 #ifdef DEBUG
   validate();
@@ -2806,7 +2806,7 @@ void Class::setInterfaceVtables() {
   const size_t nVtables = maxSlot + 1;
   auto const vtableVecSz = nVtables * sizeof(VtableVecSlot);
   auto const memSz = vtableVecSz + totalMethods * sizeof(LowPtr<Func>);
-  auto const mem = static_cast<char*>(low_malloc_data(memSz));
+  auto const mem = static_cast<char*>(low_malloc(memSz));
   auto cursor = mem;
 
   ITRACE(3, "Setting interface vtables for class {}. "

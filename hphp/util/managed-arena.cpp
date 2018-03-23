@@ -25,9 +25,9 @@ ArenaArray g_arenas;
 namespace alloc {
 
 static_assert(alignof(HighArena) <= 64, "");
-static_assert(alignof(LowHugeArena) <= 64, "");
+static_assert(alignof(LowArena) <= 64, "");
 alignas(64) uint8_t g_highArena[sizeof(HighArena)];
-alignas(64) uint8_t g_lowHugeArena[sizeof(LowHugeArena)];
+alignas(64) uint8_t g_lowArena[sizeof(LowArena)];
 
 //////////////////////////////////////////////////////////////////////
 

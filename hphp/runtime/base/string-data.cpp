@@ -71,7 +71,7 @@ std::aligned_storage<
 
 ALWAYS_INLINE static bool UncountedStringOnHugePage() {
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
-  return high_huge1g_arena && RuntimeOption::EvalUncountedStringHuge;
+  return high_arena && RuntimeOption::EvalUncountedStringHuge;
 #else
   return false;
 #endif
@@ -89,7 +89,7 @@ StringData* StringData::MakeShared(folly::StringPiece sl) {
 
   auto const allocSize = sl.size() + kStringOverhead;
   StringData* sd = reinterpret_cast<StringData*>(
-    trueStatic ? low_malloc_data(allocSize)
+    trueStatic ? low_malloc(allocSize)
                : UncountedStringOnHugePage() ? malloc_huge(allocSize)
                : malloc(allocSize));
   auto const data = reinterpret_cast<char*>(sd + 1);
@@ -151,7 +151,7 @@ StringData* StringData::MakeEmpty() {
 void StringData::destructStatic() {
   assertx(checkSane() && isStatic());
   assertx(isFlat());
-  low_free_data(this);
+  low_free(this);
 }
 
 void StringData::ReleaseUncounted(const StringData* str) {

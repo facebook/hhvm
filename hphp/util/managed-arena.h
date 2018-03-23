@@ -76,19 +76,19 @@ struct ManagedArena : public ExtentAllocator {
 };
 
 // Eventually we'd just call it LowArena, when we kill the current low_arena.
-using LowHugeArena = alloc::ManagedArena<alloc::BumpExtentAllocator>;
+using LowArena = alloc::ManagedArena<alloc::BumpExtentAllocator>;
 using HighArena = alloc::ManagedArena<alloc::BumpExtentAllocator>;
 // Not using std::aligned_storage<> because zero initialization can be useful.
-extern uint8_t g_lowHugeArena[sizeof(LowHugeArena)];
+extern uint8_t g_lowArena[sizeof(LowArena)];
 extern uint8_t g_highArena[sizeof(HighArena)];
 
-inline LowHugeArena* low_huge_arena() {
-  auto p = reinterpret_cast<LowHugeArena*>(&g_lowHugeArena);
+inline LowArena* lowArena() {
+  auto p = reinterpret_cast<LowArena*>(&g_lowArena);
   if (p->id()) return p;
   return nullptr;
 }
 
-inline HighArena* high_arena() {
+inline HighArena* highArena() {
   auto p = reinterpret_cast<HighArena*>(&g_highArena);
   if (p->id()) return p;
   return nullptr;

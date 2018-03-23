@@ -157,6 +157,22 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& meta, TCA target,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+// The vasm instruction after a smashable may have had nops inserted before it.
+// In that case the branch jumping over its immediate will point after the nop
+// sequence rather than immediately after the smashable.  This helper is used
+// to check the branch is pointing to an appropriate address.
+//
+// Returns true if target points to inst or a chain of Nops leading to inst.
+// Otherwise it returns false.
+bool targetsInst(vixl::Instruction* target, vixl::Instruction* inst) {
+  while (target != inst && inst->IsNop()) {
+    inst = inst->NextInstruction();
+  }
+  return target == inst;
+}
+}
+
 bool isSmashableMovq(TCA inst) {
   using namespace vixl;
 
@@ -169,7 +185,7 @@ bool isSmashableMovq(TCA inst) {
           ldr->Mask(LoadLiteralMask) == LDR_x_lit &&
           ldr->ImmPCOffsetTarget() == target &&
           b->Mask(UnconditionalBranchMask) == B &&
-          b->ImmPCOffsetTarget() == after);
+          targetsInst(b->ImmPCOffsetTarget(), after));
 }
 
 bool isSmashableCall(TCA inst) {
@@ -215,7 +231,7 @@ bool isSmashableJcc(TCA inst) {
   const auto rd = ldr->Rd();
 
   return (b->IsCondBranchImm() &&
-          b->ImmPCOffsetTarget() == after &&
+          targetsInst(b->ImmPCOffsetTarget(), after) &&
           ldr->IsLoadLiteral() &&
           ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
           ldr->ImmPCOffsetTarget() == target &&

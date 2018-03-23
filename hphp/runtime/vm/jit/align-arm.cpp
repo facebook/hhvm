@@ -82,6 +82,12 @@ void align(CodeBlock& cb, CGMeta* meta,
   return jit::align<AlignImpl>(cb, meta, alignment, context);
 }
 
+const AlignInfo& alignment_info(Alignment alignment) {
+  auto const idx = static_cast<uint32_t>(alignment);
+
+  return AlignImpl::s_table[idx];
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

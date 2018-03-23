@@ -197,10 +197,12 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
 }
 
 /*
- * Returns true if the instruction sequence is a smashable jcc/jmp and the
- * sequence is relocated as a simple PC relative branch. Otherwise return false
- * so that the individual instructions in the sequence can be relocated
- * one-by-one.
+ * This attempts to shrink Ldr, Br, Imm sequences to PC relative branches.
+ * This pattern is exactly the pattern of a smashable jmp sequence.  This
+ * relies on alignment constraints preventing this optimization from happening
+ * to smashable locations.
+ * This returns true if it was able to shrink the the sequence, otherwise it
+ * returns false.
  *
  * NOTE: This helper will optimize sequences that are not smashables but which
  *       are identical to smashables. Namely the sequences emitted for
@@ -215,42 +217,29 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
  * destCount, srcCount and rewrites are updated to reflect when an
  * instruction(s) is rewritten to a different instruction sequence.
  */
-bool relocateSmashable(Env& env, TCA srcAddr, TCA destAddr,
-                       size_t& srcCount, size_t& destCount) {
-
+bool relocateSmashableLookingJmp(Env& env, TCA srcAddr, TCA destAddr,
+                                 size_t& srcCount, size_t& destCount) {
   auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
   auto const src = Instruction::Cast(srcAddrActual);
 
   if (env.far.count(src)) return false;
 
   /*
-   * A smashable jcc looks exactly like a smashable jmp with a preceding
-   * conditional branch. The checks below determine if there is a smashable
-   * jmp that can be optimized. It's important to not simply analyze this
-   * smashable jmp without first considering if it's part of a jcc.
+   * We rely on the alignment constraints preventing this optimization from
+   * happening to smashable locations.
    */
   auto target = smashableJmpTarget(srcAddrActual);
-  if (target) {
-    // Look up the smashable (jmp, jcc, etc) from the target. Note this is
-    // an actual address, and so we'll use the offset with the (potentially)
-    // virtual srcAddr when we search through smashableLocation.
-    auto smashableLocations =
-      getSmashablesFromTargetAddr(srcAddrActual + kSmashJmpTargetOff);
-    for (auto smashableLocation : smashableLocations) {
-      auto slAddrActual = reinterpret_cast<TCA>(smashableLocation);
-      auto slAddr = srcAddr + (slAddrActual - srcAddrActual);
-      if (env.meta.smashableLocations.count(slAddr)) {
-        FTRACE(3, "Can't optimize this smashable: {}.\n", slAddr);
-        target = nullptr;
-        break;
-      }
-    }
-  }
 
   assertx(((uint64_t)target & 3) == 0);
 
   if (!target) return false;
 
+  // If adjusted is not found, the target may point forward in the range, and
+  // not have a known destination address yet.  We will make the jmp point back
+  // to the source range.  This should then be updated by the
+  // adjustForRelocaiton phase to point back to the destination range.
+  // Unfortunately this means we may not be able to shrink it to a PC relative
+  // jmp.
   auto adjusted = env.rel.adjustedAddressAfter(target);
   if (!adjusted) adjusted = target;
   auto const imm =
@@ -284,7 +273,8 @@ bool relocateSmashable(Env& env, TCA srcAddr, TCA destAddr,
   }
   env.updateInternalRefs = true;
   FTRACE(3,
-         "Relocated and optimized smashable at src {} with target {} to {}.\n",
+         "Relocated and optimized smashable looking jmp at src {} with target "
+         "{} to {}.\n",
          srcAddrActual, target, env.destBlock.toDestAddress(destAddr));
 
   return true;
@@ -725,48 +715,103 @@ size_t relocateImpl(Env& env) {
                    Instruction::Cast(env.srcBlock.toDestAddress(env.end)));
 
     // Relocate each instruction to the destination.
-    size_t srcCount, destCount;
+    size_t srcCount, destCount, alignCount;
+    TCA protectedStart = nullptr, protectedEnd = nullptr;
     for (auto srcAddr = env.start;
          srcAddr < env.end;
          srcAddr += srcCount << kInstructionSizeLog2) {
       auto const srcPtr = env.srcBlock.toDestAddress(srcAddr);
       auto const src = Instruction::Cast(srcPtr);
-      auto destAddr = env.destBlock.frontier();
       srcCount = 1;
       destCount = 1;
+      alignCount = 0;
+      auto destAddr = env.destBlock.frontier();
+
+      // Align the frontier to follow any potential aligment constraints.
+      auto af = env.meta.alignments.equal_range(srcAddr);
+      while (af.first != af.second) {
+        auto const alignPair = af.first->second;
+        auto const alignInfo = alignment_info(alignPair.first);
+
+        // We want to prevent resizing of intstruction that are protected by
+        // this alignment constraint.  Save the range of bytes that should
+        // be protected.
+        auto const low = srcAddr + alignInfo.offset;
+        auto const hi = srcAddr + alignInfo.nbytes;
+        assertx(low < hi);
+
+        if (!protectedStart || protectedStart > low) protectedStart = low;
+        if (!protectedEnd || protectedEnd < hi) protectedEnd = hi;
+
+        // The adjust metadata for relocation phase will handle updating the
+        // alignment constraints.
+        TCA tmp = env.destBlock.frontier();
+        align(env.destBlock, nullptr,
+              alignPair.first, alignPair.second);
+        auto const adjustment = env.destBlock.frontier() - tmp;
+        if (adjustment) {
+          destAddr += adjustment;
+          alignCount += adjustment;
+          // Padding was added we should update internal references since PC
+          // relative addresses will be skewed.
+          env.updateInternalRefs = true;
+        }
+        ++af.first;
+      }
+      auto const preserveAlignment = protectedStart <= srcAddr &&
+                                     srcAddr < protectedEnd;
 
       // Initially copy the instruction word
       env.destBlock.bytes(kInstructionSize,
                           env.srcBlock.toDestAddress(srcAddr));
 
-      // If it's not a literal, then attempt any special relocations
-      if (!literals.count(src)) {
-        auto align = [&] (Alignment a) {
-          while (!is_aligned(destAddr, a)) {
-            env.destBlock.setFrontier(destAddr);
-            vixl::MacroAssembler as { env.destBlock };
-            as.Nop();
-            destAddr = env.destBlock.frontier();
-            env.destBlock.bytes(kInstructionSize,
-                                env.srcBlock.toDestAddress(srcAddr));
+      // If it's not a literal, and we don't need to satisfy an aligment
+      // constraint, then attempt any special relocations.
+      if (!literals.count(src) && !preserveAlignment) {
+        relocateSmashableLookingJmp(env, srcAddr, destAddr,
+                                    srcCount, destCount) ||
+        relocatePCRelative(env, srcAddr, destAddr, srcCount, destCount) ||
+        relocateImmediate(env, srcAddr, destAddr, srcCount, destCount) ||
+        relocatePadding(env, srcAddr, destAddr, srcCount,
+                        destCount, destStart);
+      }
+
+      // If we just copied the Ldr of a mcprep instruction.  Flag internal refs
+      // to get updated so its immediate can reflect its new location.
+      if (env.meta.addressImmediates.count(reinterpret_cast<TCA>(
+              ~reinterpret_cast<uintptr_t>(srcAddr)))) {
+        assertx(isSmashableMovq(srcPtr));
+        env.updateInternalRefs = true;
+      }
+      // Address immediates may be internal references that need updating.
+      if (env.meta.addressImmediates.count(srcAddr)) {
+        auto updateInternalRefsCheck = [&](uintptr_t addr) {
+          if (env.start <= reinterpret_cast<TCA>(addr) &&
+              reinterpret_cast<TCA>(addr) < env.end) {
+            env.updateInternalRefs = true;
           }
         };
-        // If we just copied the first instruction of a smashableMovq,
-        // then it may have an internal reference that'll need to be
-        // adjusted below.
-        if (isSmashableMovq(srcPtr)) {
-          env.updateInternalRefs = true;
-          align(Alignment::SmashMovq);
-        } else if (isSmashableCall(srcPtr)) {
-          env.updateInternalRefs = true;
-          align(Alignment::SmashCall);
+        if (src->IsLoadLiteral()) {
+          auto const addr = src->LiteralAddress();
+          assertx(env.srcBlock.toDestAddress(env.start) <= addr &&
+                  addr < env.srcBlock.toDestAddress(env.end));
+          if (src->Mask(LoadLiteralMask) == LDR_w_lit) {
+            updateInternalRefsCheck(*reinterpret_cast<uint32_t*>(addr));
+          } else {
+            updateInternalRefsCheck(*reinterpret_cast<uintptr_t*>(addr));
+          }
         } else {
-          relocateSmashable(env, srcAddr, destAddr, srcCount, destCount) ||
-          relocatePCRelative(env, srcAddr, destAddr, srcCount, destCount) ||
-          relocateImmediate(env, srcAddr, destAddr, srcCount, destCount) ||
-          relocatePadding(env, srcAddr, destAddr, srcCount,
-                          destCount, destStart);
+          uint32_t rd;
+          uint64_t target;
+          if (decodePossibleMovSequence(src, target, rd)) {
+            updateInternalRefsCheck(target);
+          }
         }
+      }
+
+      // Remove nops that are not necessary for alignment constraints.
+      if (src->IsNop() && !preserveAlignment) {
+        destCount = 0;
       }
 
       if (srcAddr == env.start) {
@@ -779,7 +824,7 @@ size_t relocateImpl(Env& env) {
          */
         destStart = destAddr;
       } else {
-        env.rel.recordAddress(srcAddr, destAddr, 0);
+        env.rel.recordAddress(srcAddr, destAddr - alignCount, alignCount);
       }
 
       // Update the destAddr and reset the frontier
@@ -872,8 +917,8 @@ size_t relocateImpl(Env& env) {
            *   MOV/MOVK
            */
           if (src->IsLoadLiteral()) {
-            auto const addr =
-              env.destBlock.toDestAddress(dest->LiteralAddress());
+            assertx(dest->IsLoadLiteral());
+            auto const addr = dest->LiteralAddress();
             if (src->Mask(LoadLiteralMask) == LDR_w_lit) {
               auto target = *reinterpret_cast<uint32_t*>(addr);
               auto adjusted =

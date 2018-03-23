@@ -5670,7 +5670,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
                 (* Also: for generic types we implememt it only with
                  * experimental feature enabled *)
               if Env.is_strict env && (tyl = [] || safe_instanceof_enabled)
-              then safe_instanceof env p ivar x_ty obj_ty _c class_info
+              then safe_instanceof env p _c class_info ivar_pos x_ty obj_ty
               else env, obj_ty
           end
         | r, Tunresolved tyl ->
@@ -5703,27 +5703,35 @@ and condition ?lhs_of_null_coalesce env tparamet =
       let env, _ = expr env e in
       env
 
-and safe_instanceof env p ivar ivar_ty obj_ty _c class_info =
-  let ivar_pos = fst ivar in
+and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
   (* Generate fresh names consisting of formal type parameter name
    * with unique suffix *)
   let env, tparams_with_new_names =
     List.map_env env class_info.tc_tparams
       (fun env ((_, (_,name), _) as tp) ->
         let env, name = Env.add_fresh_generic_parameter env name in
-        env, (tp, name)) in
+        env, Some (tp, name)) in
+  let new_names = List.map
+    ~f:(fun x -> snd @@ Option.value_exn x)
+    tparams_with_new_names in
   let s =
-      snd _c ^ "<" ^
-      String.concat "," (List.map tparams_with_new_names ~f:snd)
+      snd class_name ^ "<" ^
+      String.concat "," new_names
       ^ ">" in
   let reason = Reason.Rinstanceof (ivar_pos, s) in
   let tyl_fresh = List.map
-      ~f:(fun (_, newname) -> (reason, Tabstract(AKgeneric newname, None)))
-      tparams_with_new_names in
+      ~f:(fun new_name -> (reason, Tabstract (AKgeneric new_name, None)))
+      new_names in
+  let env, obj_ty =
+    safely_refine_class_type
+      env p class_name class_info ivar_ty obj_ty tparams_with_new_names tyl_fresh in
+  env, obj_ty
 
+and safely_refine_class_type
+  env p class_name class_info ivar_ty obj_ty tparams_with_new_names tyl_fresh =
   (* Type of variable in block will be class name
    * with fresh type parameters *)
-  let obj_ty = (fst obj_ty, Tclass(_c, tyl_fresh)) in
+  let obj_ty = (fst obj_ty, Tclass (class_name, tyl_fresh)) in
 
   (* Add in constraints as assumptions on those type parameters *)
   let ety_env = {
@@ -5764,18 +5772,22 @@ and safe_instanceof env p ivar ivar_ty obj_ty _c class_info =
    *)
   let tparams_in_constraints = Env.get_tpenv_tparams env in
   let tyl_fresh_simplified =
-    List.map tparams_with_new_names
-    ~f:begin fun ((variance, _, _), newname) ->
-      match variance,
-        TySet.elements (Env.get_lower_bounds env newname),
-        TySet.elements (Env.get_equal_bounds env newname),
-        TySet.elements (Env.get_upper_bounds env newname) with
-      | _, _, [ty], _ -> ty
-      | Ast.Covariant, _, _, [ty]
-      | Ast.Contravariant, [ty], _, _
-        when not (SSet.mem newname tparams_in_constraints) -> ty
-      | _, _, _, _ -> (reason, Tabstract(AKgeneric newname, None)) end in
-  let obj_ty_simplified = (fst obj_ty, Tclass(_c, tyl_fresh_simplified)) in
+    List.map2_exn tparams_with_new_names tyl_fresh
+      ~f:begin fun x y -> match x, y with
+        | Some ((variance, _, _), newname), ty_fresh ->
+          begin match variance,
+            TySet.elements (Env.get_lower_bounds env newname),
+            TySet.elements (Env.get_equal_bounds env newname),
+            TySet.elements (Env.get_upper_bounds env newname) with
+            | _, _, [ty], _ -> ty
+            | Ast.Covariant, _, _, [ty]
+            | Ast.Contravariant, [ty], _, _
+              when not (SSet.mem newname tparams_in_constraints) -> ty
+            | _, _, _, _ -> ty_fresh
+          end
+        | None, ty_fresh -> ty_fresh
+      end in
+  let obj_ty_simplified = (fst obj_ty, Tclass (class_name, tyl_fresh_simplified)) in
   env, obj_ty_simplified
 
 and is_instance_var = function

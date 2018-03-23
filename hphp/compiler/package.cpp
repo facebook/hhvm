@@ -371,8 +371,7 @@ bool Package::parseImpl(const std::string* fileName) {
     }
   };
 
-  if (RuntimeOption::EvalHackCompilerDefault &&
-      !RuntimeOption::EvalHackCompilerCommand.empty()) {
+  if (hackc_mode() != HackcMode::kNever) {
     std::ifstream s(fullPath);
     std::string content {
       std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };

@@ -1443,7 +1443,8 @@ void emit_class(EmitUnitState& state,
       prop.typeConstraint,
       prop.docComment,
       &prop.val,
-      makeRat(propTy)
+      makeRat(propTy),
+      prop.userAttributes
     );
   }
   assert(uvIt == useVars.end());

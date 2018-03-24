@@ -42,7 +42,7 @@ module type SmartConstructors_S = sig
   val make_enum_declaration : r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_enumerator : r -> r -> r -> r -> t -> t * r
   val make_alias_declaration : r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
-  val make_property_declaration : r -> r -> r -> r -> t -> t * r
+  val make_property_declaration : r -> r -> r -> r -> r -> t -> t * r
   val make_property_declarator : r -> r -> t -> t * r
   val make_namespace_declaration : r -> r -> r -> t -> t * r
   val make_namespace_body : r -> r -> r -> t -> t * r
@@ -223,7 +223,7 @@ end) = struct
     let enum_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 = call parser (SCI.make_enum_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8)
     let enumerator parser arg0 arg1 arg2 arg3 = call parser (SCI.make_enumerator arg0 arg1 arg2 arg3)
     let alias_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 = call parser (SCI.make_alias_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7)
-    let property_declaration parser arg0 arg1 arg2 arg3 = call parser (SCI.make_property_declaration arg0 arg1 arg2 arg3)
+    let property_declaration parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_property_declaration arg0 arg1 arg2 arg3 arg4)
     let property_declarator parser arg0 arg1 = call parser (SCI.make_property_declarator arg0 arg1)
     let namespace_declaration parser arg0 arg1 arg2 = call parser (SCI.make_namespace_declaration arg0 arg1 arg2)
     let namespace_body parser arg0 arg1 arg2 = call parser (SCI.make_namespace_body arg0 arg1 arg2)

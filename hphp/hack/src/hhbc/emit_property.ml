@@ -58,11 +58,19 @@ and aexpr_requires_deep_init aexpr =
   | A.AFkvalue (expr1, expr2) ->
     expr_requires_deep_init expr1 || expr_requires_deep_init expr2
 
-let from_ast ast_class cv_kind_list type_hint tparams namespace doc_comment_opt
-             (_, (pos, cv_name), initial_value) =
+let from_ast
+    ast_class
+    cv_user_attributes
+    cv_kind_list
+    type_hint
+    tparams
+    namespace
+    doc_comment_opt
+    (_, (pos, cv_name), initial_value) =
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
   let pid = Hhbc_id.Prop.from_ast_name cv_name in
+  let attributes = Emit_attribute.from_asts namespace cv_user_attributes in
   let is_private = Hh_core.List.mem cv_kind_list Ast.Private in
   let is_protected = Hh_core.List.mem cv_kind_list Ast.Protected in
   let is_public =
@@ -125,6 +133,7 @@ let from_ast ast_class cv_kind_list type_hint tparams namespace doc_comment_opt
             Emit_expression.emit_expr ~need_ref:false env expr;
             epilog]) in
   Hhas_property.make
+    attributes
     is_private
     is_protected
     is_public

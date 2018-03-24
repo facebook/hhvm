@@ -155,7 +155,8 @@ let schema : schema_node list =
     ; prefix      = "property"
     ; aggregates  = [ ClassBodyDeclaration ]
     ; fields =
-      [ "modifiers", ZeroOrMore Token
+      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      ; "modifiers", ZeroOrMore Token
       ; "type", ZeroOrOne (Aggregate Specifier)
       ; "declarators", ZeroOrMore (Just "PropertyDeclarator")
       ; "semicolon", Token

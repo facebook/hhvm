@@ -3829,23 +3829,35 @@ class AliasDeclaration extends EditableSyntax
 class PropertyDeclaration extends EditableSyntax
 {
   constructor(
+    attribute_spec,
     modifiers,
     type,
     declarators,
     semicolon)
   {
     super('property_declaration', {
+      attribute_spec: attribute_spec,
       modifiers: modifiers,
       type: type,
       declarators: declarators,
       semicolon: semicolon });
   }
+  get attribute_spec() { return this.children.attribute_spec; }
   get modifiers() { return this.children.modifiers; }
   get type() { return this.children.type; }
   get declarators() { return this.children.declarators; }
   get semicolon() { return this.children.semicolon; }
+  with_attribute_spec(attribute_spec){
+    return new PropertyDeclaration(
+      attribute_spec,
+      this.modifiers,
+      this.type,
+      this.declarators,
+      this.semicolon);
+  }
   with_modifiers(modifiers){
     return new PropertyDeclaration(
+      this.attribute_spec,
       modifiers,
       this.type,
       this.declarators,
@@ -3853,6 +3865,7 @@ class PropertyDeclaration extends EditableSyntax
   }
   with_type(type){
     return new PropertyDeclaration(
+      this.attribute_spec,
       this.modifiers,
       type,
       this.declarators,
@@ -3860,6 +3873,7 @@ class PropertyDeclaration extends EditableSyntax
   }
   with_declarators(declarators){
     return new PropertyDeclaration(
+      this.attribute_spec,
       this.modifiers,
       this.type,
       declarators,
@@ -3867,6 +3881,7 @@ class PropertyDeclaration extends EditableSyntax
   }
   with_semicolon(semicolon){
     return new PropertyDeclaration(
+      this.attribute_spec,
       this.modifiers,
       this.type,
       this.declarators,
@@ -3878,11 +3893,13 @@ class PropertyDeclaration extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
     var modifiers = this.modifiers.rewrite(rewriter, new_parents);
     var type = this.type.rewrite(rewriter, new_parents);
     var declarators = this.declarators.rewrite(rewriter, new_parents);
     var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
+      attribute_spec === this.attribute_spec &&
       modifiers === this.modifiers &&
       type === this.type &&
       declarators === this.declarators &&
@@ -3893,6 +3910,7 @@ class PropertyDeclaration extends EditableSyntax
     else
     {
       return rewriter(new PropertyDeclaration(
+        attribute_spec,
         modifiers,
         type,
         declarators,
@@ -3901,6 +3919,9 @@ class PropertyDeclaration extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let attribute_spec = EditableSyntax.from_json(
+      json.property_attribute_spec, position, source);
+    position += attribute_spec.width;
     let modifiers = EditableSyntax.from_json(
       json.property_modifiers, position, source);
     position += modifiers.width;
@@ -3914,6 +3935,7 @@ class PropertyDeclaration extends EditableSyntax
       json.property_semicolon, position, source);
     position += semicolon.width;
     return new PropertyDeclaration(
+        attribute_spec,
         modifiers,
         type,
         declarators,
@@ -3923,6 +3945,7 @@ class PropertyDeclaration extends EditableSyntax
   {
     if (PropertyDeclaration._children_keys == null)
       PropertyDeclaration._children_keys = [
+        'attribute_spec',
         'modifiers',
         'type',
         'declarators',

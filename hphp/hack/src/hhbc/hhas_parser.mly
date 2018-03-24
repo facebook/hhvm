@@ -318,28 +318,27 @@ idorvname:
   | vname {$1}
 ;
 classproperty:
-  | PROPERTYDIRECTIVE propertyattributes doc_comment typeinfo idorvname EQUALS nl propertyvalue
-  {Hhas_property.make
-    (List.mem "private" $2)
-    (List.mem "protected" $2)
-    (List.mem "public" $2)
-    (List.mem "static" $2)
-    (List.mem "deep_init" $2)
-    (List.mem "no_serialize" $2)
-    (Hhbc_id.Prop.from_raw_string $5) (*name *)
-    $8 (*initial value *)
-    None (* initializer instructions. already been emitted elsewhere *)
-    $4 (* type_info *)
-    $3 (* doc_comment *)
+  | PROPERTYDIRECTIVE attributes doc_comment typeinfo idorvname EQUALS nl propertyvalue
+  {
+    let user_attrs, attrs = $2 in
+    Hhas_property.make
+      user_attrs
+      (List.mem "private" attrs)
+      (List.mem "protected" attrs)
+      (List.mem "public" attrs)
+      (List.mem "static" attrs)
+      (List.mem "deep_init" attrs)
+      (List.mem "no_serialize" attrs)
+      (Hhbc_id.Prop.from_raw_string $5) (*name *)
+      $8 (*initial value *)
+      None (* initializer instructions. already been emitted elsewhere *)
+      $4 (* type_info *)
+      $3 (* doc_comment *)
   }
 ;
 doc_comment:
   | /* empty */ {None}
   | TRIPLEQUOTEDSTRING {Some $1}
-;
-propertyattributes:
-  | /* empty */ {[]}
-  | LBRACK idlist RBRACK {$2}
 ;
 propertyvalue:
   | ID SEMI {if $1 = "uninit" then None else report_error "bad property value"}

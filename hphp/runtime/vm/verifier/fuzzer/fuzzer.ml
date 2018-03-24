@@ -747,6 +747,7 @@ let mutate_metadata (input : HP.t)  =
         (m |> Hhas_method.is_memoize_impl   |> mutate_bool) in
     let mutate_property (prop : Hhas_property.t) : Hhas_property.t =
       Hhas_property.make
+        (prop |> Hhas_property.attributes)
         (prop |> Hhas_property.is_private         |> mutate_bool)
         (prop |> Hhas_property.is_protected       |> mutate_bool)
         (prop |> Hhas_property.is_public          |> mutate_bool)

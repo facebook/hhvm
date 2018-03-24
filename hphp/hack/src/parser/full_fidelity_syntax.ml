@@ -556,11 +556,13 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc alias_semicolon in
          acc
       | PropertyDeclaration {
+        property_attribute_spec;
         property_modifiers;
         property_type;
         property_declarators;
         property_semicolon;
       } ->
+         let acc = f acc property_attribute_spec in
          let acc = f acc property_modifiers in
          let acc = f acc property_type in
          let acc = f acc property_declarators in
@@ -2369,11 +2371,13 @@ module WithToken(Token: TokenType) = struct
         alias_semicolon;
       ]
       | PropertyDeclaration {
+        property_attribute_spec;
         property_modifiers;
         property_type;
         property_declarators;
         property_semicolon;
       } -> [
+        property_attribute_spec;
         property_modifiers;
         property_type;
         property_declarators;
@@ -4183,11 +4187,13 @@ module WithToken(Token: TokenType) = struct
         "alias_semicolon";
       ]
       | PropertyDeclaration {
+        property_attribute_spec;
         property_modifiers;
         property_type;
         property_declarators;
         property_semicolon;
       } -> [
+        "property_attribute_spec";
         "property_modifiers";
         "property_type";
         "property_declarators";
@@ -6062,12 +6068,14 @@ module WithToken(Token: TokenType) = struct
           alias_semicolon;
         }
       | (SyntaxKind.PropertyDeclaration, [
+          property_attribute_spec;
           property_modifiers;
           property_type;
           property_declarators;
           property_semicolon;
         ]) ->
         PropertyDeclaration {
+          property_attribute_spec;
           property_modifiers;
           property_type;
           property_declarators;
@@ -8111,12 +8119,14 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_property_declaration
+        property_attribute_spec
         property_modifiers
         property_type
         property_declarators
         property_semicolon
       =
         let syntax = PropertyDeclaration {
+          property_attribute_spec;
           property_modifiers;
           property_type;
           property_declarators;

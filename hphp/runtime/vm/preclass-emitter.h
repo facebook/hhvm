@@ -60,6 +60,7 @@ struct PreClassEmitter {
       , m_typeConstraint(nullptr)
       , m_docComment(nullptr)
       , m_repoAuthType{}
+      , m_userAttributes{}
     {}
 
     Prop(const PreClassEmitter* pce,
@@ -68,7 +69,8 @@ struct PreClassEmitter {
          const StringData* typeConstraint,
          const StringData* docComment,
          const TypedValue* val,
-         RepoAuthType repoAuthType);
+         RepoAuthType repoAuthType,
+         UserAttributeMap userAttributes);
     ~Prop();
 
     const StringData* name() const { return m_name; }
@@ -78,6 +80,7 @@ struct PreClassEmitter {
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
     RepoAuthType repoAuthType() const { return m_repoAuthType; }
+    UserAttributeMap userAttributes() const { return m_userAttributes; }
 
     template<class SerDe> void serde(SerDe& sd) {
       sd(m_name)
@@ -87,6 +90,7 @@ struct PreClassEmitter {
         (m_docComment)
         (m_val)
         (m_repoAuthType)
+        (m_userAttributes)
         ;
     }
 
@@ -104,6 +108,7 @@ struct PreClassEmitter {
     LowStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
+    UserAttributeMap m_userAttributes;
   };
 
   struct Const {
@@ -193,7 +198,8 @@ struct PreClassEmitter {
                    const StringData* typeConstraint,
                    const StringData* docComment,
                    const TypedValue* val,
-                   RepoAuthType);
+                   RepoAuthType,
+                   UserAttributeMap);
   const Prop& lookupProp(const StringData* propName) const;
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode,

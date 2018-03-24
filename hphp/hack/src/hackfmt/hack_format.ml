@@ -242,11 +242,14 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Newline;
     ]
   | Syntax.PropertyDeclaration {
+      property_attribute_spec = attr;
       property_modifiers = modifiers;
       property_type = prop_type;
       property_declarators = declarators;
       property_semicolon = semi } ->
     Concat [
+      t env attr;
+      when_present attr newline;
       handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
       t env prop_type;
       handle_declarator_list env declarators;

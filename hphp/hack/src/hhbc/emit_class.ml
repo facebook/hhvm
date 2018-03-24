@@ -156,7 +156,13 @@ let from_class_elt_classvars ast_class tparams namespace elt =
     in
     List.map cv.A.cv_names
       (Emit_property.from_ast
-        ast_class cv.A.cv_kinds hint tparams namespace cv.A.cv_doc_comment)
+        ast_class
+        cv.A.cv_user_attributes
+        cv.A.cv_kinds
+        hint
+        tparams
+        namespace
+        cv.A.cv_doc_comment)
   | _ -> []
 
 let from_class_elt_constants ns elt =

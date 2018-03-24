@@ -1335,6 +1335,7 @@ public:
   void finishFunc(Emitter& e, FuncEmitter* fe, int32_t stackPad);
   void initScalar(TypedValue& tvVal, ExpressionPtr val,
                   folly::Optional<ArrayType> type = folly::none);
+  UserAttributeMap userAttributeListToMap(ExpressionListPtr attrList);
   bool requiresDeepInit(ExpressionPtr initExpr) const;
 
   void emitClassTraitPrecRule(PreClassEmitter* pce, TraitPrecStatementPtr rule);
@@ -6747,7 +6748,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     tvWriteUninit(uninit);
     for (auto& useVar : useVars) {
       pce->addProperty(useVar.first, AttrPrivate, staticEmptyString(), nullptr,
-                       &uninit, RepoAuthType{});
+                       &uninit, RepoAuthType{}, UserAttributeMap{});
     }
 
     // The __invoke method. This is the body of the closure, preceded by
@@ -9382,7 +9383,7 @@ void EmitterVisitor::emitPostponedMeths() {
         auto const str = makeStaticString(
           folly::format("86static_{}", sv.name->data()).str());
         fe->pce()->addProperty(str, AttrPrivate, staticEmptyString(), nullptr,
-                               &uninit, RepoAuthType{});
+                               &uninit, RepoAuthType{}, UserAttributeMap{});
       }
     }
 
@@ -10000,7 +10001,8 @@ void EmitterVisitor::addMemoizeProp(MethodStatementPtr meth) {
     Attr attrs = AttrPrivate | AttrNoSerialize;
     attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
     pce->addProperty(
-      name, attrs, staticEmptyString(), nullptr, &val, RepoAuthType{}
+      name, attrs, staticEmptyString(), nullptr, &val, RepoAuthType{},
+      UserAttributeMap{}
     );
     return name;
   };
@@ -10741,6 +10743,24 @@ void EmitterVisitor::emitClassUseTrait(PreClassEmitter* pce,
   }
 }
 
+UserAttributeMap
+EmitterVisitor::userAttributeListToMap(ExpressionListPtr attrList) {
+  UserAttributeMap userAttrs;
+  if (attrList) {
+    for (int i = 0; i < attrList->getCount(); ++i) {
+      auto attr = dynamic_pointer_cast<UserAttribute>((*attrList)[i]);
+      auto const uaName = makeStaticString(attr->getName());
+      auto uaValue = attr->getExp();
+      assert(uaValue);
+      assert(uaValue->isScalar());
+      TypedValue tv;
+      initScalar(tv, uaValue);
+      userAttrs[uaName] = tv;
+    }
+  }
+  return userAttrs;
+}
+
 Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   auto const nullable = td->annot->isNullable();
   auto const annot = td->annot->stripNullable();
@@ -10771,21 +10791,6 @@ Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
     }
   }
 
-  UserAttributeMap userAttrs;
-  ExpressionListPtr attrList = td->attrList;
-  if (attrList) {
-    for (int i = 0; i < attrList->getCount(); ++i) {
-      auto attr = dynamic_pointer_cast<UserAttribute>((*attrList)[i]);
-      auto const uaName = makeStaticString(attr->getName());
-      auto uaValue = attr->getExp();
-      assert(uaValue);
-      assert(uaValue->isScalar());
-      TypedValue tv;
-      initScalar(tv, uaValue);
-      userAttrs[uaName] = tv;
-    }
-  }
-
   TypeAlias record;
   record.typeStructure = td->annot->getScalarArrayRep();
   assertx(record.typeStructure.isDictOrDArray());
@@ -10793,7 +10798,7 @@ Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   record.value = value;
   record.type = type;
   record.nullable = nullable;
-  record.userAttrs = userAttrs;
+  record.userAttrs = userAttributeListToMap(td->attrList);
   record.attrs = !SystemLib::s_inited ? AttrPersistent : AttrNone;
   Id id = m_ue.addTypeAlias(record);
   e.DefTypeAlias(id);
@@ -10919,6 +10924,9 @@ Id EmitterVisitor::emitClass(Emitter& e,
         Attr declAttrs = buildAttrs(mod);
         StringData* typeConstraint = makeStaticString(
           cv->getTypeConstraint());
+        auto const propUserAttrs = userAttributeListToMap(
+          cv->userAttributeList());
+
         int nVars = el->getCount();
         for (int ii = 0; ii < nVars; ii++) {
           ExpressionPtr exp((*el)[ii]);
@@ -10966,7 +10974,8 @@ Id EmitterVisitor::emitClass(Emitter& e,
             tvWriteNull(tvVal);
           }
           if (!pce->addProperty(propName, propAttrs, typeConstraint,
-                                propDoc, &tvVal, RepoAuthType{})) {
+                                propDoc, &tvVal, RepoAuthType{},
+                                propUserAttrs)) {
             auto exn = EmitterVisitor::IncludeTimeFatalException(
               var, "Cannot redeclare %s::$%s",
               pce->name()->data(), propName->data());

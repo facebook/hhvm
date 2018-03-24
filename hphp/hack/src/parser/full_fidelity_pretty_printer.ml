@@ -453,13 +453,14 @@ let rec get_doc node =
     let s = get_doc x.alias_semicolon in
     attr ^| a ^| n ^| generic ^| c ^| e ^| t ^^^ s
   | PropertyDeclaration
-    { property_modifiers; property_type;
+    { property_attribute_spec; property_modifiers; property_type;
       property_declarators; property_semicolon } ->
+    let a = get_doc property_attribute_spec in
     let m = get_doc property_modifiers in
     let t = get_doc property_type in
     let d = get_doc property_declarators in
     let s = get_doc property_semicolon in
-    m ^| t ^| d ^^^ s
+    a ^| m ^| t ^| d ^^^ s
   | PropertyDeclarator { property_name; property_initializer } ->
     let n = get_doc property_name in
     let i = get_doc property_initializer in

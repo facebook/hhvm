@@ -1615,7 +1615,8 @@ let add_implements buf class_implements =
 
 let property_attributes p =
   let module P = Hhas_property in
-  let attrs = [] in
+  let user_attrs = P.attributes p in
+  let attrs = Emit_adata.attributes_to_strings user_attrs in
   let attrs = if P.no_serialize p then "no_serialize" :: attrs else attrs in
   let attrs = if P.is_deep_init p then "deep_init" :: attrs else attrs in
   let attrs = if P.is_static p then "static" :: attrs else attrs in

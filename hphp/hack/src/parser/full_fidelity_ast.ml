@@ -2080,7 +2080,12 @@ and pClassElt : class_elt list parser = fun node env ->
         }
       ]
   | PropertyDeclaration
-    { property_modifiers; property_type; property_declarators; _ } ->
+    { property_attribute_spec
+    ; property_modifiers
+    ; property_type
+    ; property_declarators
+    ; _
+    } ->
       (* TODO: doc comments do not have to be at the beginning, they can go in
        * the middle of the declaration, to be associated with individual
        * properties, right now we don't handle this *)
@@ -2104,7 +2109,8 @@ and pClassElt : class_elt list parser = fun node env ->
           | _ -> missing_syntax "property declarator" node env
           end
         ; cv_doc_comment = if env.quick_mode then None else doc_comment_opt
-        ; cv_user_attributes = [] (* TODO figure out how to inject attributes *)
+        ; cv_user_attributes = List.concat @@
+          couldMap ~f:pUserAttribute property_attribute_spec env
         }
       ]
   | MethodishDeclaration

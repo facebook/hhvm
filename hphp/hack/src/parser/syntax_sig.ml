@@ -80,7 +80,8 @@ module type Syntax_S = sig
     ; alias_semicolon                                    : t
     }
   | PropertyDeclaration                     of
-    { property_modifiers                                 : t
+    { property_attribute_spec                            : t
+    ; property_modifiers                                 : t
     ; property_type                                      : t
     ; property_declarators                               : t
     ; property_semicolon                                 : t
@@ -1048,7 +1049,7 @@ module type Syntax_S = sig
   val make_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_enumerator : t -> t -> t -> t -> t
   val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_property_declaration : t -> t -> t -> t -> t
+  val make_property_declaration : t -> t -> t -> t -> t -> t
   val make_property_declarator : t -> t -> t
   val make_namespace_declaration : t -> t -> t -> t
   val make_namespace_body : t -> t -> t -> t

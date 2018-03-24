@@ -31,7 +31,8 @@ struct ClassVariable : Statement, IParseHandler {
   ClassVariable(STATEMENT_CONSTRUCTOR_PARAMETERS,
                 ModifierExpressionPtr modifiers,
                 std::string typeConstraint,
-                ExpressionListPtr declaration);
+                ExpressionListPtr declaration,
+                ExpressionListPtr attrList);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
@@ -42,10 +43,12 @@ struct ClassVariable : Statement, IParseHandler {
   std::string getTypeConstraint() const { return m_typeConstraint; }
   ExpressionListPtr getVarList() const { return m_declaration; }
   ModifierExpressionPtr getModifiers() const { return m_modifiers; }
+  ExpressionListPtr userAttributeList() { return m_attributeList; }
 private:
   ModifierExpressionPtr m_modifiers;
   std::string m_typeConstraint;
   ExpressionListPtr m_declaration;
+  ExpressionListPtr m_attributeList;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

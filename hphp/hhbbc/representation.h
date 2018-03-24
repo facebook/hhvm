@@ -428,6 +428,7 @@ struct Func : FuncBase {
 struct Prop {
   LSString name;
   Attr attrs;
+  UserAttributeMap userAttributes;
   LSString docComment;
 
   /*

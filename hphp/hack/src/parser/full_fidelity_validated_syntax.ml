@@ -862,12 +862,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; property_declarators = validate_list_with (validate_property_declarator) x.property_declarators
     ; property_type = validate_option_with (validate_specifier) x.property_type
     ; property_modifiers = validate_list_with (validate_token) x.property_modifiers
+    ; property_attribute_spec = validate_option_with (validate_attribute_specification) x.property_attribute_spec
     }
   | s -> validation_fail (Some SyntaxKind.PropertyDeclaration) s
   and invalidate_property_declaration : property_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.PropertyDeclaration
-      { property_modifiers = invalidate_list_with (invalidate_token) x.property_modifiers
+      { property_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.property_attribute_spec
+      ; property_modifiers = invalidate_list_with (invalidate_token) x.property_modifiers
       ; property_type = invalidate_option_with (invalidate_specifier) x.property_type
       ; property_declarators = invalidate_list_with (invalidate_property_declarator) x.property_declarators
       ; property_semicolon = invalidate_token x.property_semicolon

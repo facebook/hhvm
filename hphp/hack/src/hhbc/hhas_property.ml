@@ -9,6 +9,7 @@
 *)
 
 type t = {
+  property_attributes   : Hhas_attribute.t list;
   property_is_private   : bool;
   property_is_protected : bool;
   property_is_public    : bool;
@@ -26,6 +27,7 @@ type t = {
 unlike formal parameters and return types. We might consider fixing this. *)
 
 let make
+  property_attributes
   property_is_private
   property_is_protected
   property_is_public
@@ -37,6 +39,7 @@ let make
   property_initializer_instrs
   property_type_info
   property_doc_comment = {
+    property_attributes;
     property_is_private;
     property_is_protected;
     property_is_public;
@@ -51,6 +54,7 @@ let make
   }
 
 let name hhas_property = hhas_property.property_name
+let attributes hhas_property = hhas_property.property_attributes
 let is_private hhas_property = hhas_property.property_is_private
 let is_protected hhas_property = hhas_property.property_is_protected
 let is_public hhas_property = hhas_property.property_is_public

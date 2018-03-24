@@ -652,7 +652,7 @@ void print_constant(Output& out, const PreClass::Const* cns) {
 
 void print_property(Output& out, const PreClass::Prop* prop) {
   out.fmtln(".property{}{} {}{} =",
-    opt_attrs(AttrContext::Prop, prop->attrs()),
+    opt_attrs(AttrContext::Prop, prop->attrs(), &prop->userAttributes()),
     RuntimeOption::EvalDisassemblerDocComments &&
     RuntimeOption::EvalDisassemblerPropDocComments
       ? opt_escaped_long(prop->docComment())

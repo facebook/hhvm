@@ -436,7 +436,7 @@ void Parser::onClassTypeConstant(Token &out, Token &var, Token &value) {
     typeConst.typeAnnotation = value.typeAnnotation;
   }
 
-  onClassVariableStart(out, nullptr, typeConst, nullptr, isAbstract,
+  onClassVariableStart(out, nullptr, typeConst, nullptr, nullptr, isAbstract,
                        /* isTypeConst = */ true,
                        typeConst.typeAnnotation);
 }
@@ -1570,7 +1570,8 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
       BlockScopePtr(), range);
     expList->addElement(svar);
     ClassVariablePtr var = std::make_shared<ClassVariable>(
-      BlockScopePtr(), getLabelScope(), range, modifier, type, expList);
+      BlockScopePtr(), getLabelScope(), range, modifier, type, expList,
+      dynamic_pointer_cast<ExpressionList>(param->userAttributeList()));
     cls->getStmts()->addElement(var);
   }
 
@@ -1742,7 +1743,8 @@ void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
 }
 
 void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
-                                  Token *type, bool abstract /* = false */,
+                                  Token *type, Token *attr,
+                                  bool abstract /* = false */,
                                   bool typeconst /* = false */,
                                   const TypeAnnotationPtr& typeAnnot) {
   if (modifiers) {
@@ -1750,10 +1752,16 @@ void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
       dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
       : NEW_EXP0(ModifierExpression);
 
+    ExpressionListPtr attrList;
+    if (attr && attr->exp) {
+      attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
+    }
+
     out->stmt = NEW_STMT(
       ClassVariable, exp,
       (type) ? type->typeAnnotationName() : "",
-      dynamic_pointer_cast<ExpressionList>(decl->exp));
+      dynamic_pointer_cast<ExpressionList>(decl->exp),
+      attrList);
   } else {
     out->stmt = NEW_STMT(
       ClassConstant,

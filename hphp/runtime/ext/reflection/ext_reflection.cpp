@@ -2072,6 +2072,58 @@ static TypedValue HHVM_METHOD(ReflectionProperty, getDefaultValue) {
   }
 }
 
+static Array HHVM_METHOD(ReflectionProperty, getAttributes) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  auto attrs = Array::CreateDict();
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Instance: {
+      auto const prop = data->getProp();
+      auto const preProp = prop->cls->preClass()->lookupProp(prop->name);
+      for (auto attr : preProp->userAttributes()) {
+        attrs.add(StrNR(attr.first), attr.second);
+      }
+      return attrs;
+    }
+    case ReflectionPropHandle::Type::Static: {
+      auto const prop = data->getSProp();
+      auto const preProp = prop->cls->preClass()->lookupProp(prop->name);
+      for (auto attr : preProp->userAttributes()) {
+        attrs.add(StrNR(attr.first), attr.second);
+      }
+      return attrs;
+    }
+    case ReflectionPropHandle::Type::Dynamic:
+      return attrs;
+    default:
+      reflection_property_internal_error();
+  }
+}
+
+static TypedValue HHVM_METHOD(ReflectionProperty, getAttribute,
+                              StringArg name) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Instance: {
+      auto const prop = data->getProp();
+      auto const preProp = prop->cls->preClass()->lookupProp(prop->name);
+      auto const attrs = preProp->userAttributes();
+      auto const attr = attrs.find(name.get());
+      return attr != attrs.end() ? attr->second : make_tv<KindOfNull>();
+    }
+    case ReflectionPropHandle::Type::Static: {
+      auto const prop = data->getSProp();
+      auto const preProp = prop->cls->preClass()->lookupProp(prop->name);
+      auto const attrs = preProp->userAttributes();
+      auto const attr = attrs.find(name.get());
+      return attr != attrs.end() ? attr->second : make_tv<KindOfNull>();
+    }
+    case ReflectionPropHandle::Type::Dynamic:
+      return make_tv<KindOfNull>();
+    default:
+      reflection_property_internal_error();
+  }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionTypeAlias
 
@@ -2201,6 +2253,8 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionProperty, getDocComment);
     HHVM_ME(ReflectionProperty, getTypeText);
     HHVM_ME(ReflectionProperty, getDefaultValue);
+    HHVM_ME(ReflectionProperty, getAttributes);
+    HHVM_ME(ReflectionProperty, getAttribute);
 
     HHVM_ME(ReflectionTypeAlias, __init);
     HHVM_ME(ReflectionTypeAlias, getTypeStructure);

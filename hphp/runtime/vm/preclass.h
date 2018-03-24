@@ -119,7 +119,8 @@ struct PreClass : AtomicCountable {
          const StringData* typeConstraint,
          const StringData* docComment,
          const TypedValue& val,
-         RepoAuthType repoAuthType);
+         RepoAuthType repoAuthType,
+         UserAttributeMap userAttributes);
 
     void prettyPrint(std::ostream&, const PreClass*) const;
 
@@ -130,6 +131,8 @@ struct PreClass : AtomicCountable {
     const StringData* docComment()     const { return m_docComment; }
     const TypedValue& val()            const { return m_val; }
     RepoAuthType      repoAuthType()   const { return m_repoAuthType; }
+    const UserAttributeMap&
+                      userAttributes() const { return m_userAttributes; }
 
   private:
     LowStringPtr m_name;
@@ -139,6 +142,7 @@ struct PreClass : AtomicCountable {
     LowStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
+    UserAttributeMap m_userAttributes;
   };
 
   /*

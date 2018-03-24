@@ -917,6 +917,19 @@ class ReflectionProperty implements Reflector {
    */
   <<__Native>>
   public function getDefaultValue(): mixed;
+
+  /**
+   * Get the user defined attributes from the property declaration.
+   */
+  <<__Native>>
+  public function getAttributes(): dict<string, mixed>;
+
+  /**
+   * Get the value of the given user-defined attribute from the property
+   * declaration; returns null if the named attribute was not present.
+   */
+  <<__Native>>
+  public function getAttribute(string $name): mixed;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

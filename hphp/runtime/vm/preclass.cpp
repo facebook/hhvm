@@ -133,7 +133,8 @@ PreClass::Prop::Prop(PreClass* preClass,
                      const StringData* typeConstraint,
                      const StringData* docComment,
                      const TypedValue& val,
-                     RepoAuthType repoAuthType)
+                     RepoAuthType repoAuthType,
+                     UserAttributeMap userAttributes)
   : m_name(name)
   , m_mangledName(manglePropName(preClass->name(), name, attrs))
   , m_attrs(attrs)
@@ -141,6 +142,7 @@ PreClass::Prop::Prop(PreClass* preClass,
   , m_docComment(docComment)
   , m_val(val)
   , m_repoAuthType{repoAuthType}
+  , m_userAttributes(userAttributes)
 {}
 
 void PreClass::Prop::prettyPrint(std::ostream& out,

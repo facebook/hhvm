@@ -666,18 +666,15 @@ module WithExpressionAndStatementAndTypeParser
         let (parser, const) = assert_token parser Const in
         parse_const_declaration parser visibility missing const
       else
-        parse_methodish_or_property parser
+        let (parser, missing) = Make.missing parser (pos parser) in
+        parse_methodish_or_property parser missing
     | Async
     | Static
-    | Final ->
-      (* Parse methods, constructors, destructors or properties. *)
-      parse_methodish_or_property parser
+    | Final
     | LessThanLessThan ->
-      (* Parse "methodish" declarations: methods, ctors and dtors *)
-      (* TODO: Consider whether properties ought to allow attributes. *)
+      (* Parse methods, constructors, destructors or properties. *)
       let (parser, attr) = parse_attribute_specification_opt parser in
-      let (parser, modifiers, _) = parse_modifiers parser in
-      parse_methodish parser attr modifiers
+      parse_methodish_or_property parser attr
     | Require ->
       (* We give an error if these are found where they should not be,
          in a later pass. *)
@@ -696,8 +693,9 @@ module WithExpressionAndStatementAndTypeParser
       (* We allow "var" as a synonym for "public" in a property; this
       is a PHP-ism that we do not support in Hack, but we parse anyways
       so as to give an error later. *)
+      let (parser, missing) = Make.missing parser (pos parser) in
       let (parser, var) = assert_token parser Var in
-      parse_property_declaration parser var
+      parse_property_declaration parser missing var
     | kind when Parser.expects parser kind ->
       Make.missing parser (pos parser)
     | _ ->
@@ -1012,47 +1010,36 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, semi) = require_semicolon parser in
     Make.require_clause parser req req_kind name semi
 
-  and parse_methodish_or_property parser =
-    (* If there is an attribute then it cannot be a property. *)
-    (* TODO: ERROR RECOVERY: Consider whether a property with an attribute
-       TODO: ought to be (1) parsed, with an error, or (2) perhaps
-       TODO: simply make it legal? A property seems like something that could
-       TODO: reasonably have an attribute. *)
-    let (parser1, modifiers, contains_abstract) = parse_modifiers parser in
-    (* We will do backtracking and reparse modifiers to call smart constructors
-     * in the correct order. Depending on what goes after modifiers we may want
-     * to pre-create missing node.*)
-
+  and parse_methodish_or_property parser attribute_spec =
+    let (parser, modifiers, contains_abstract) = parse_modifiers parser in
     (* ERROR RECOVERY: match against two tokens, because if one token is
      * in error but the next isn't, then it's likely that the user is
      * simply still typing. Throw an error on what's being typed, then eat
      * it and keep going. *)
-    let current_token_kind = peek_token_kind parser1 in
-    let next_token = peek_token ~lookahead:1 parser1 in
+    let current_token_kind = peek_token_kind parser in
+    let next_token = peek_token ~lookahead:1 parser in
     let next_token_kind = Token.kind next_token in
     match current_token_kind, next_token_kind with
     (* Detected the usual start to a method, so continue parsing as method. *)
     | (Async | Coroutine | Function) , _ ->
-      let (parser, missing) = Make.missing parser (pos parser) in
-      let (parser, modifiers, _) = parse_modifiers parser in
-      parse_methodish parser missing modifiers
+      parse_methodish parser attribute_spec modifiers
     | LeftParen, _ ->
-      parse_property_declaration parser1 modifiers ~contains_abstract
+      parse_property_declaration
+        parser attribute_spec modifiers ~contains_abstract
     (* We encountered one unexpected token, but the next still indicates that
      * we should be parsing a methodish. Throw an error, process the token
      * as an extra, and keep going. *)
     | _, (Async | Coroutine | Function)
       when not (Syntax.has_leading_trivia TriviaKind.EndOfLine next_token) ->
-      let (parser, missing) = Make.missing parser (pos parser) in
-      let (parser, modifiers, _) = parse_modifiers parser in
       let parser = with_error parser SyntaxError.error1056
         ~on_whole_token:true in
       let parser = skip_and_log_unexpected_token parser
         ~generate_error:false in
-      parse_methodish parser missing modifiers
+      parse_methodish parser attribute_spec modifiers
     (* Otherwise, continue parsing as a property (which might be a lambda). *)
     | ( _ , _ ) ->
-      parse_property_declaration parser1 modifiers ~contains_abstract
+      parse_property_declaration
+        parser attribute_spec modifiers ~contains_abstract
 
   and parse_trait_use_precendence_item parser name =
     let (parser, keyword) = assert_token parser Insteadof in
@@ -1158,10 +1145,12 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, semi) = require_semicolon parser in
       Make.trait_use parser use_token trait_name_list semi
 
-  and parse_property_declaration ?(contains_abstract=false) parser modifiers =
+  and parse_property_declaration
+    ?(contains_abstract=false) parser attribute_spec modifiers =
     (* SPEC:
         property-declaration:
-          property-modifier  type-specifier  property-declarator-list  ;
+          attribute-spec-opt  property-modifier  type-specifier
+            property-declarator-list  ;
 
        property-declarator-list:
          property-declarator
@@ -1179,7 +1168,8 @@ module WithExpressionAndStatementAndTypeParser
     in
     let (parser, semi) = require_semicolon parser in
     let (parser, result) =
-      Make.property_declaration parser modifiers prop_type decls semi
+      Make.property_declaration
+        parser attribute_spec modifiers prop_type decls semi
     in
     (* TODO: Move this to Full_fidelity_parser_errors. *)
     let parser =

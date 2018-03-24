@@ -5645,20 +5645,26 @@ final class AliasDeclaration extends EditableSyntax {
   }
 }
 final class PropertyDeclaration extends EditableSyntax {
+  private EditableSyntax $_attribute_spec;
   private EditableSyntax $_modifiers;
   private EditableSyntax $_type;
   private EditableSyntax $_declarators;
   private EditableSyntax $_semicolon;
   public function __construct(
+    EditableSyntax $attribute_spec,
     EditableSyntax $modifiers,
     EditableSyntax $type,
     EditableSyntax $declarators,
     EditableSyntax $semicolon) {
     parent::__construct('property_declaration');
+    $this->_attribute_spec = $attribute_spec;
     $this->_modifiers = $modifiers;
     $this->_type = $type;
     $this->_declarators = $declarators;
     $this->_semicolon = $semicolon;
+  }
+  public function attribute_spec(): EditableSyntax {
+    return $this->_attribute_spec;
   }
   public function modifiers(): EditableSyntax {
     return $this->_modifiers;
@@ -5672,8 +5678,17 @@ final class PropertyDeclaration extends EditableSyntax {
   public function semicolon(): EditableSyntax {
     return $this->_semicolon;
   }
+  public function with_attribute_spec(EditableSyntax $attribute_spec): PropertyDeclaration {
+    return new PropertyDeclaration(
+      $attribute_spec,
+      $this->_modifiers,
+      $this->_type,
+      $this->_declarators,
+      $this->_semicolon);
+  }
   public function with_modifiers(EditableSyntax $modifiers): PropertyDeclaration {
     return new PropertyDeclaration(
+      $this->_attribute_spec,
       $modifiers,
       $this->_type,
       $this->_declarators,
@@ -5681,6 +5696,7 @@ final class PropertyDeclaration extends EditableSyntax {
   }
   public function with_type(EditableSyntax $type): PropertyDeclaration {
     return new PropertyDeclaration(
+      $this->_attribute_spec,
       $this->_modifiers,
       $type,
       $this->_declarators,
@@ -5688,6 +5704,7 @@ final class PropertyDeclaration extends EditableSyntax {
   }
   public function with_declarators(EditableSyntax $declarators): PropertyDeclaration {
     return new PropertyDeclaration(
+      $this->_attribute_spec,
       $this->_modifiers,
       $this->_type,
       $declarators,
@@ -5695,6 +5712,7 @@ final class PropertyDeclaration extends EditableSyntax {
   }
   public function with_semicolon(EditableSyntax $semicolon): PropertyDeclaration {
     return new PropertyDeclaration(
+      $this->_attribute_spec,
       $this->_modifiers,
       $this->_type,
       $this->_declarators,
@@ -5707,11 +5725,13 @@ final class PropertyDeclaration extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
+    $attribute_spec = $this->attribute_spec()->rewrite($rewriter, $new_parents);
     $modifiers = $this->modifiers()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
     $declarators = $this->declarators()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
+      $attribute_spec === $this->attribute_spec() &&
       $modifiers === $this->modifiers() &&
       $type === $this->type() &&
       $declarators === $this->declarators() &&
@@ -5719,6 +5739,7 @@ final class PropertyDeclaration extends EditableSyntax {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new PropertyDeclaration(
+        $attribute_spec,
         $modifiers,
         $type,
         $declarators,
@@ -5727,6 +5748,9 @@ final class PropertyDeclaration extends EditableSyntax {
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
+    $attribute_spec = EditableSyntax::from_json(
+      $json->property_attribute_spec, $position, $source);
+    $position += $attribute_spec->width();
     $modifiers = EditableSyntax::from_json(
       $json->property_modifiers, $position, $source);
     $position += $modifiers->width();
@@ -5740,12 +5764,14 @@ final class PropertyDeclaration extends EditableSyntax {
       $json->property_semicolon, $position, $source);
     $position += $semicolon->width();
     return new PropertyDeclaration(
+        $attribute_spec,
         $modifiers,
         $type,
         $declarators,
         $semicolon);
   }
   public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_attribute_spec;
     yield $this->_modifiers;
     yield $this->_type;
     yield $this->_declarators;

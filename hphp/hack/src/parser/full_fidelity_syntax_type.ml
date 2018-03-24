@@ -196,7 +196,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; alias_semicolon                                    : t
     }
   | PropertyDeclaration                     of
-    { property_modifiers                                 : t
+    { property_attribute_spec                            : t
+    ; property_modifiers                                 : t
     ; property_type                                      : t
     ; property_declarators                               : t
     ; property_semicolon                                 : t
@@ -1468,7 +1469,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; alias_semicolon: Token.t value
     }
   and property_declaration =
-    { property_modifiers: Token.t listesque value
+    { property_attribute_spec: attribute_specification option value
+    ; property_modifiers: Token.t listesque value
     ; property_type: specifier option value
     ; property_declarators: property_declarator listesque value
     ; property_semicolon: Token.t value

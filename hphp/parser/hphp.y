@@ -1771,7 +1771,7 @@ enum_statement_list:
 ;
 enum_statement:
     enum_constant_declaration ';'      { _p->onClassVariableStart
-                                         ($$,NULL,$1,NULL);}
+                                         ($$,NULL,$1,NULL,NULL);}
 ;
 enum_constant_declaration:
     hh_constname_with_type '='
@@ -1787,16 +1787,25 @@ class_statement_list:
 class_statement:
     variable_modifiers
     class_variable_declaration ';'     { _p->onClassVariableStart
-                                         ($$,&$1,$2,NULL);}
+                                         ($$,&$1,$2,NULL,NULL);}
   | non_empty_member_modifiers
     hh_type
     class_variable_declaration ';'     { _p->onClassVariableStart
-                                         ($$,&$1,$3,&$2);}
+                                         ($$,&$1,$3,&$2,NULL);}
+  | non_empty_user_attributes
+    non_empty_member_modifiers
+    class_variable_declaration ';'     { _p->onClassVariableStart
+                                         ($$,&$2,$3,NULL,&$1);}
+  | non_empty_user_attributes
+    non_empty_member_modifiers
+    hh_type
+    class_variable_declaration ';'     { _p->onClassVariableStart
+                                         ($$,&$2,$4,&$3,&$1);}
   | class_constant_declaration ';'     { _p->onClassVariableStart
-                                         ($$,NULL,$1,NULL);}
+                                         ($$,NULL,$1,NULL,NULL);}
   | class_abstract_constant_declaration ';'
                                        { _p->onClassVariableStart
-                                         ($$,NULL,$1,NULL, true);}
+                                         ($$,NULL,$1,NULL,NULL,true);}
   | class_type_constant_declaration ';' { $$ = $1; }
   | method_modifiers function_loc
     is_reference hh_name_with_typevar '('

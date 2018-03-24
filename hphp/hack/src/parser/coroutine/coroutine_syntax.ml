@@ -652,6 +652,7 @@ let make_constructor_syntax parameter_list call_parent_syntax =
 
 let make_property_declaration_syntax type_syntax declaration_syntax =
   make_property_declaration
+    (make_missing ())
     (make_list [ public_syntax; ])
     type_syntax
     (make_comma_list [ declaration_syntax; ])

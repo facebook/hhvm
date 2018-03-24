@@ -57,12 +57,14 @@ PreClassEmitter::Prop::Prop(const PreClassEmitter* pce,
                             const StringData* typeConstraint,
                             const StringData* docComment,
                             const TypedValue* val,
-                            RepoAuthType repoAuthType)
+                            RepoAuthType repoAuthType,
+                            UserAttributeMap userAttributes)
   : m_name(n)
   , m_attrs(attrs)
   , m_typeConstraint(typeConstraint)
   , m_docComment(docComment)
   , m_repoAuthType(repoAuthType)
+  , m_userAttributes(userAttributes)
 {
   m_mangledName = PreClass::manglePropName(pce->name(), n, attrs);
   memcpy(&m_val, val, sizeof(TypedValue));
@@ -131,13 +133,14 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
                                   const StringData* typeConstraint,
                                   const StringData* docComment,
                                   const TypedValue* val,
-                                  RepoAuthType repoAuthType) {
+                                  RepoAuthType repoAuthType,
+                                  UserAttributeMap userAttributes) {
   PropMap::Builder::const_iterator it = m_propMap.find(n);
   if (it != m_propMap.end()) {
     return false;
   }
   PreClassEmitter::Prop prop(this, n, attrs, typeConstraint, docComment, val,
-    repoAuthType);
+    repoAuthType, userAttributes);
   m_propMap.add(prop.name(), prop);
   return true;
 }
@@ -290,7 +293,8 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
                                               prop.typeConstraint(),
                                               prop.docComment(),
                                               prop.val(),
-                                              prop.repoAuthType()));
+                                              prop.repoAuthType(),
+                                              prop.userAttributes()));
   }
   pc->m_properties.create(propBuild);
 

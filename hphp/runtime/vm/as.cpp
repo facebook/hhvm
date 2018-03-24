@@ -2558,7 +2558,8 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
 void parse_property(AsmState& as) {
   as.in.skipWhitespace();
 
-  Attr attrs = parse_attribute_list(as, AttrContext::Prop);
+  UserAttributeMap userAttributes;
+  Attr attrs = parse_attribute_list(as, AttrContext::Prop, &userAttributes);
 
   auto const heredoc = makeStaticString(parse_maybe_long_string(as));
   auto const userTy = parse_type_info(as, false).first;
@@ -2575,7 +2576,8 @@ void parse_property(AsmState& as) {
                       userTyStr,
                       heredoc,
                       &tvInit,
-                      RepoAuthType{});
+                      RepoAuthType{},
+                      userAttributes);
 }
 
 /*

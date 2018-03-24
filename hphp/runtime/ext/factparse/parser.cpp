@@ -539,6 +539,7 @@ void Parser::onTraitAliasRuleModify(Token& /*out*/, Token& /*rule*/,
 
 void Parser::onClassVariableStart(Token& /*out*/, Token* /*modifiers*/,
                                   Token& /*decl*/, Token* /*type*/,
+                                  Token* /*attr*/,
                                   bool /*abstract*/ /* = false */,
                                   bool /*typeconst*/ /* = false */) {}
 

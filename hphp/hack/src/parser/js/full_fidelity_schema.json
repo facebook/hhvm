@@ -535,6 +535,7 @@
       "description" : "property_declaration",
       "prefix" : "property",
       "fields" : [
+        { "field_name" : "attribute_spec" },
         { "field_name" : "modifiers" },
         { "field_name" : "type" },
         { "field_name" : "declarators" },

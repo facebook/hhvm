@@ -301,6 +301,7 @@ Id UnitEmitter::addTypeAlias(const TypeAlias& td) {
 // Source locations.
 
 SourceLocTable UnitEmitter::createSourceLocTable() const {
+  assertx(m_sourceLocTab.size() != 0);
   SourceLocTable locations;
   for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
     Offset endOff = i < m_sourceLocTab.size() - 1
@@ -670,16 +671,16 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
    */
   if (m_sourceLocTab.size() != 0) {
     stashLineTable(u.get(), createLineTable(m_sourceLocTab, m_bclen));
+    // If we plan to dump hhas we will need the extended line table information
+    // in the output, and if we're not writing the repo, stashing it here is
+    // necessary for it to make it through.
+    if (RuntimeOption::RepoDebugInfo &&
+        RuntimeOption::EvalDumpHhas &&
+        SystemLib::s_inited) {
+      stashExtendedLineTable(u.get(), createSourceLocTable());
+    }
   } else if (saveLineTable) {
     stashLineTable(u.get(), m_lineTable);
-  }
-
-  /*
-   * Similarly if we plan to dump hhas we will need the extended line table
-   * information in the output.
-   */
-  if (saveLineTable || (RuntimeOption::EvalDumpHhas && SystemLib::s_inited)) {
-    stashExtendedLineTable(u.get(), createSourceLocTable());
   }
 
   if (u->m_extended) {

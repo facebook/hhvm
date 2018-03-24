@@ -720,8 +720,13 @@ function find_tests($files, array $options = null) {
     ));
   } else {
     $tests = explode("\n", shell_exec(
-      "find $files -name '*.php' -o -name '*.php.type-errors' " .
-      "-o -name '*.hhas' | grep -v round_trip.hhas"
+      "find $files '(' " .
+          "-name '*.php' " .
+          "-o -name '*.php.type-errors' " .
+          "-o -name '*.hhas' " .
+        "')' " .
+        "-not -regex '.*round_trip[.]hhas' " .
+        "-not -regex '.*hhcodegen_output[.]hhas'"
     ));
   }
   if (!$tests) {
@@ -1444,8 +1449,26 @@ function clean_intermediate_files($test, $options) {
   if (isset($options['no-clean'])) {
     return;
   }
-  $exts = array('out', 'diff', 'repo', 'round_trip.hhas',
-                'hhcodegen_output.hhas', 'hhcodegen_messages', 'hhcodegen_config.json');
+  $exts = array(
+    // normal test output
+    'out',
+    'diff',
+    // repo mode tests
+    'repo',
+    // tests in --hhas-round-trip or --compare-hh-codegen mode
+    'round_trip.hhas',
+    // tests in --run-hh-codegen or --compare-hh-codegen mode
+    'hhcodegen_output.hhas',
+    'hhcodegen_messages',
+    'hhcodegen_config.json',
+    // tests in --compare-hh-codegen mode
+    'hhcodegen_output.hhas.round_trip.hhas',
+    'semdiff',
+    'semdiff_messages',
+    // tests in --hhbbc2 mode
+    'before.round_trip.hhas',
+    'after.round_trip.hhas',
+  );
   foreach ($exts as $ext) {
     $file = "$test.$ext";
     if (file_exists($file)) {

@@ -435,6 +435,11 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   // trying to load it from repo (which is the case when RepoAuthoritative is
   // true).
   RuntimeOption::RepoAuthoritative = true;
+  // We don't want debug info in repo builds, since we don't support attaching
+  // a debugger in repo authoritative mode, but we want the default for debug
+  // info to be true so that it's present in sandboxes. Override that default
+  // here, since we only get here when building for repo authoritatibe mode.
+  RuntimeOption::RepoDebugInfo = false;
   RuntimeOption::Load(ini, runtime);
   Option::Load(ini, config);
   RuntimeOption::RepoAuthoritative = false;
@@ -786,7 +791,6 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   }
   unlink(RuntimeOption::RepoCentralPath.c_str());
   RuntimeOption::RepoLocalMode = "--";
-  RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";
 
   // Turn off commits, because we don't want systemlib to get included

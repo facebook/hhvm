@@ -104,7 +104,6 @@ struct Option {
   static bool GenerateHhasHHBC;
   static bool GenerateBinaryHHBC;
   static std::string RepoCentralPath;
-  static bool RepoDebugInfo;
 
   static std::vector<std::string> APCProfile;
 

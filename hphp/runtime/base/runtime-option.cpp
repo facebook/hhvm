@@ -1132,7 +1132,7 @@ void RuntimeOption::Load(
     Config::Bind(RepoJournal, ini, config, "Repo.Journal", RepoJournal);
     Config::Bind(RepoCommit, ini, config, "Repo.Commit",
                  RepoCommit);
-    Config::Bind(RepoDebugInfo, ini, config, "Repo.DebugInfo", true);
+    Config::Bind(RepoDebugInfo, ini, config, "Repo.DebugInfo", RepoDebugInfo);
     Config::Bind(RepoAuthoritative, ini, config, "Repo.Authoritative",
                  RepoAuthoritative);
     Config::Bind(RepoPreload, ini, config, "Repo.Preload", false);

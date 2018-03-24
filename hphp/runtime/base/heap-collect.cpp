@@ -737,7 +737,7 @@ void MemoryManager::checkGC() {
  */
 void MemoryManager::updateNextGc() {
   t_trigger_allocated = -1;
-  if (!isGCEnabled()) {
+  if (!isGCEnabled() || m_usageLimit == std::numeric_limits<int64_t>::max()) {
     m_nextGC = kNoNextGC;
     updateMMDebt();
     return;

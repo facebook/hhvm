@@ -529,7 +529,7 @@ struct CompactWriter {
     }
 
     uint64_t i64ToZigzag(int64_t n) {
-      return (n << 1) ^ (n >> 63);
+      return (static_cast<uint64_t>(n) << 1) ^ (n >> 63);
     }
 };
 

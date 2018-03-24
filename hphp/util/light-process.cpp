@@ -366,12 +366,13 @@ void do_waitpid(int afdt_fd) {
   }
 
   rusage ru;
+  int64_t time_us = 0;
   const auto ret = ::wait4(pid, &stat, options, &ru);
   alarm(0); // cancel the previous alarm if not triggered yet
   waited = 0;
-  const auto time_us = ru2microseconds(ru);
   int64_t events[] = { 0, 0, 0 };
   if (ret > 0 && s_trackProcessTimes) {
+    time_us = ru2microseconds(ru);
     auto it = s_pidToHCWMap.find(ret);
     if (it == s_pidToHCWMap.end()) {
       throw Exception("pid not in map: %s",
@@ -836,7 +837,7 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
     // light process is not really there
     rusage ru;
     const auto ret = wait4(pid, stat_loc, options, &ru);
-    if (s_trackProcessTimes) {
+    if (ret > 0 && s_trackProcessTimes) {
       s_extra_request_nanoseconds += ru2microseconds(ru) * 1000;
     }
     return ret;
@@ -869,7 +870,7 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
 pid_t LightProcess::pcntl_waitpid(pid_t pid, int *stat_loc, int options) {
   rusage ru;
   const auto ret = wait4(pid, stat_loc, options, &ru);
-  if (s_trackProcessTimes) {
+  if (ret > 0 && s_trackProcessTimes) {
     s_extra_request_nanoseconds += ru2microseconds(ru) * 1000;
   }
   return ret;

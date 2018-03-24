@@ -262,7 +262,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     Timer::GetMonotonicTime(now);
     const timespec& queueTime = transport->getQueueTime();
 
-    if (gettime_diff_us(queueTime, now) > requestTimeoutSeconds * 1000000) {
+    if (gettime_diff_us(queueTime, now) > requestTimeoutSeconds * 1000000LL) {
       transport->sendString("Service Unavailable", 503);
       transport->onSendEnd();
       m_requestTimedOutOnQueue->addValue(1);

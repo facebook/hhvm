@@ -190,7 +190,11 @@ struct Mul {
   Cell operator()(double  a, int64_t b) const { return make_dbl(a * b); }
   Cell operator()(double  a, double  b) const { return make_dbl(a * b); }
   Cell operator()(int64_t a, double  b) const { return make_dbl(a * b); }
-  Cell operator()(int64_t a, int64_t b) const { return make_int(a * b); }
+  Cell operator()(int64_t a, int64_t b) const
+    // TODO: T26068998 fix signed-integer-overflow undefined behavior
+    FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
+    return make_int(a * b);
+  }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* /*a2*/) const {
     throw_bad_array_operand(a1);
@@ -645,7 +649,7 @@ Cell cellShl(Cell c1, Cell c2) {
     }
   }
 
-  return make_int(lhs << (shift & 63));
+  return make_int(static_cast<uint64_t>(lhs) << (shift & 63));
 }
 
 Cell cellShr(Cell c1, Cell c2) {

@@ -153,7 +153,7 @@ void BootStats::done() {
     StructuredLog::log("hhvm_boot_timer", cols);
     cols.clear();
     for (auto sample : s_instance->m_marks) {
-      cols.setInt(sample.first, sample.second.rssMb() << 20); // To bytes.
+      cols.setInt(sample.first, sample.second.rssMb() * (1 << 20)); // To bytes.
     }
     StructuredLog::log("hhvm_boot_memory", cols);
   }

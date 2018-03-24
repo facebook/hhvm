@@ -108,8 +108,9 @@ double php_math_round(double value, int places,
                       int mode /* = PHP_ROUND_HALF_UP */) {
   double tmp_value;
 
-  if (std::isinf(value)) {
-      return value;
+  // We need to avoid calculating log(0.0) later, but log(epsilon) is fine.
+  if (std::isinf(value) || value == 0.0) {
+    return value;
   }
 
   int precision_places = 14 - php_intlog10abs(value);

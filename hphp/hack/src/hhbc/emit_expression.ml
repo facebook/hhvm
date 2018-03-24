@@ -833,9 +833,12 @@ and emit_is env pos lhs h =
             instr_istypec op;
           ]
         | None ->
+          let namespace = Emit_env.get_namespace env in
+          let tv = Emit_type_constant.hint_to_type_constant
+            ~is_typedef:true ~tparams:[] ~namespace h in
           gather [
             emit_is_lhs env lhs;
-            instr_isnamed (Hhbc_id.Class.from_raw_string id);
+            instr_istypestruct @@ Emit_adata.get_array_identifier tv
           ]
       end
     | A.Hoption h2 ->

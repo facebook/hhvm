@@ -493,7 +493,8 @@ void emitYieldFromDelegate(IRGS& env, int32_t, int32_t)
                                               { INTERP }
 void emitContUnsetDelegate(IRGS& env, CudOp, int32_t)
                                               { INTERP }
-void emitIsNameD(IRGS& env, const StringData*){ INTERP }
+void emitIsTypeStruct(IRGS& env, const ArrayData*)
+                                              { INTERP }
 void emitAsTypeStruct(IRGS& env, const ArrayData*)
                                               { INTERP }
 

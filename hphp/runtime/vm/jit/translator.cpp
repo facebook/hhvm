@@ -197,7 +197,7 @@ static const struct {
   { OpCastDArray,  {Stack1,           Stack1,       OutArray        }},
   { OpInstanceOf,  {StackTop2,        Stack1,       OutBoolean      }},
   { OpInstanceOfD, {Stack1,           Stack1,       OutPredBool     }},
-  { OpIsNameD,     {Stack1,           Stack1,       OutBoolean      }},
+  { OpIsTypeStruct,{Stack1,           Stack1,       OutBoolean      }},
   { OpAsTypeStruct,{Stack1,           Stack1,       OutSameAsInput1 }},
   { OpPrint,       {Stack1,           Stack1,       OutInt64        }},
   { OpClone,       {Stack1,           Stack1,       OutObject       }},
@@ -1019,7 +1019,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::InitThisLoc:
   case Op::InstanceOf:
   case Op::InstanceOfD:
-  case Op::IsNameD:
+  case Op::IsTypeStruct:
   case Op::AsTypeStruct:
   case Op::Int:
   case Op::IssetG:

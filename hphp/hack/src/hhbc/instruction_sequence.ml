@@ -99,7 +99,7 @@ let instr_dup = instr (IBasic Dup)
 let instr_nop = instr (IBasic Nop)
 let instr_instanceofd s = instr (IOp (InstanceOfD s))
 let instr_instanceof = instr (IOp InstanceOf)
-let instr_isnamed s = instr (IOp (IsNameD s))
+let instr_istypestruct s = instr (IOp (IsTypeStruct s))
 let instr_astypestruct s = instr (IOp (AsTypeStruct s))
 let instr_int i = instr (ILitConst (Int (Int64.of_int i)))
 let instr_int64 i = instr (ILitConst (Int i))
@@ -782,7 +782,7 @@ let get_input_output_count i =
     | Shl | Shr | InstanceOf | Pow -> (2, 1)
     | Sqrt | Not | BitNot | Floor | Ceil | CastBool | CastInt | CastDouble
     | CastString | CastArray | CastObject | CastVec | CastDict | CastKeyset
-    | CastVArray | CastDArray | InstanceOfD _ | IsNameD _ | AsTypeStruct _
+    | CastVArray | CastDArray | InstanceOfD _ | IsTypeStruct _ | AsTypeStruct _
     | Print | Clone | Hhbc_ast.Exit | Abs -> (1, 1)
     | Fatal _ -> (1, 0)
     | ConcatN n -> (n, 1)

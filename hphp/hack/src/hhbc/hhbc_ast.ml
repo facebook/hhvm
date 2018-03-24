@@ -268,7 +268,7 @@ type instruct_operator =
   | CastDArray
   | InstanceOf
   | InstanceOfD of class_id
-  | IsNameD of class_id
+  | IsTypeStruct of adata_id
   | AsTypeStruct of adata_id
   | Print
   | Clone

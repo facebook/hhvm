@@ -482,7 +482,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(CastDArray,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(InstanceOf,      NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(InstanceOfD,     ONE(SA),          ONE(CV),         ONE(CV),    NF) \
-  O(IsNameD,         ONE(SA),          ONE(CV),         ONE(CV),    NF) \
+  O(IsTypeStruct,    ONE(AA),          ONE(CV),         ONE(CV),    NF) \
   O(AsTypeStruct,    ONE(AA),          ONE(CV),         ONE(CV),    NF) \
   O(Print,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Clone,           NA,               ONE(CV),         ONE(CV),    NF) \

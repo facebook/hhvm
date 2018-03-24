@@ -707,8 +707,8 @@ let check_instruct_operator i i' =
   | BitOr, _ | BitXor, _ | BitNot, _ | Shl, _ | Shr, _ | Floor, _ | Ceil, _
   | CastBool, _ | CastInt, _ | CastDouble, _ | CastString, _ | CastArray, _
   | CastObject, _ | CastVec, _ | CastDict, _ | CastKeyset, _ | CastVArray, _
-  | CastDArray, _ | InstanceOf, _ | InstanceOfD _, _ | IsNameD _, _ | Print, _
-  | AsTypeStruct _, _ | Clone, _ ->
+  | CastDArray, _ | InstanceOf, _ | InstanceOfD _, _ | IsTypeStruct _, _
+  | Print, _ | AsTypeStruct _, _ | Clone, _ ->
     if i=i' then Some false else None
 
 let check_instruct_special_flow i i' =

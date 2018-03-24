@@ -2064,7 +2064,7 @@ void in(ISS& env, const bc::InstanceOfD& op) {
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::IsNameD& op) {
+void in(ISS& env, const bc::IsTypeStruct& op) {
   // TODO(kunalm): implement for type aliases, enums, etc.
   popC(env);
   push(env, TBool);

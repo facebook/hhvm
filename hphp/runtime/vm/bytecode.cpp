@@ -2847,28 +2847,20 @@ bool implTypeStructureHelper(const Array& ts, const Cell* c1) {
   return false;
 }
 
-OPTBLD_INLINE bool cellIsTypeAlias(
-  Cell* cell,
-  const StringData* name,
-  const TypeAliasReq* alias
-) {
-  auto const ts = alias->typeStructure;
+OPTBLD_INLINE bool cellIsTypeStructure(Cell* cell, const Array& ts) {
   assertx(!ts.empty());
   assertx(ts.isDictOrDArray());
   Array resolved;
   try {
     bool persistent = true;
     resolved = TypeStructure::resolve(
-      StrNR(name).asString(),
+      String::FromCStr("TypeStruct$DummyTypeName"),
       ts,
       persistent
     );
   } catch (Exception& e) {
-    raise_error(
-      "resolving type alias %s failed. "
-      "Have you declared all classes in the type alias?",
-      name->data()
-    );
+    // Catch and throw again so we get a line number
+    raise_error(e.getMessage());
   }
   assertx(!resolved.empty());
   assertx(resolved.isDictOrDArray());
@@ -2877,35 +2869,17 @@ OPTBLD_INLINE bool cellIsTypeAlias(
 
 } // namespace
 
-OPTBLD_INLINE void iopIsNameD(Id id) {
-  vmStack().replaceC<KindOfBoolean>(
-    [id]() {
-      auto nep = vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
-      auto const ne = nep.second;
-      auto const name = nep.first;
-      auto c1 = vmStack().topC();
-
-      auto cls = Unit::loadClass(ne, name);
-      if (cls && isEnum(cls)) {
-        return enumHasValue(cls, c1);
-      }
-
-      auto alias = Unit::loadTypeAlias(name);
-      if (alias) {
-        return cellIsTypeAlias(c1, name, alias);
-      }
-
-      return cellInstanceOf(c1, ne);
-    }()
-  );
+OPTBLD_INLINE void iopIsTypeStruct(const ArrayData* a) {
+  auto c1 = vmStack().topC();
+  auto const ts = ArrNR(a).asArray();
+  auto b = cellIsTypeStructure(c1, ts);
+  vmStack().replaceC<KindOfBoolean>(b);
 }
 
 OPTBLD_INLINE void iopAsTypeStruct(const ArrayData* a) {
   auto c1 = vmStack().topC();
   auto const ts = ArrNR(a).asArray();
-  assertx(!ts.empty());
-  assertx(ts.isDictOrDArray());
-  if (!implTypeStructureHelper(ts, c1)) {
+  if (!cellIsTypeStructure(c1, ts)) {
     auto ts_str = TypeStructure::toString(ts);
     auto input_str = tname(c1->m_type);
     SystemLib::throwInvalidArgumentExceptionObject(

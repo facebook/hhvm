@@ -202,7 +202,7 @@ let stk_data : instruct -> stack_sig = function
   | IOp CastDict
   | IOp CastKeyset
   | IOp InstanceOfD _
-  | IOp IsNameD _
+  | IOp IsTypeStruct _
   | IOp AsTypeStruct _
   | IOp Print
   | IOp Clone

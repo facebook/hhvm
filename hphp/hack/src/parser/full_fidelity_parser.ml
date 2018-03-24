@@ -182,11 +182,12 @@ let get_language_and_mode text =
             if l < 2 || s.[0] <> '/' || s.[1] <> '/' then "" else
               String.trim (String.sub s 2 (l - 2))
           in
-          match mode with
+          match List.hd (Str.split (Str.regexp " +") mode) with
           | "decl" | "only-header" -> Some FileInfo.Mdecl
           | "strict" ->
             Some FileInfo.(if !(Ide.is_ide_mode) then Mpartial else Mstrict)
           | "" | "partial" -> Some FileInfo.Mpartial
+          | exception _ -> None
           | _ -> None
         in
         language, mode

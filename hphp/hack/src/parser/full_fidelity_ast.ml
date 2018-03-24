@@ -2846,13 +2846,17 @@ module FromPositionedSyntax =
   WithPositionedSyntax(Full_fidelity_positioned_syntax)
 
 let from_text (env : env) (source_text : SourceText.t) : result =
+  let lang, mode = Full_fidelity_parser.get_language_and_mode source_text in
   let tree =
-    let env =
+    let env' =
       Full_fidelity_parser_env.make
         ~hhvm_compat_mode:env.codegen
         ~php5_compat_mode:env.php5_compat_mode
-        () in
-    SyntaxTree.make ~env source_text in
+        ~lang:lang
+        ?mode:mode
+        ()
+    in
+    SyntaxTree.make ~env:env' source_text in
   let () = if env.codegen && not env.lower_coroutines then
     let hhvm_compat_mode = if env.systemlib_compat_mode
       then ParserErrors.SystemLibCompat
@@ -2874,23 +2878,11 @@ let from_text (env : env) (source_text : SourceText.t) : result =
     | e :: _, _ ->
       raise @@ Full_fidelity_syntax_error.ParserFatal e
   in
-  let fi_mode = if SyntaxTree.is_php tree then FileInfo.Mphp else
-    let mode_string = String.trim (SyntaxTree.mode tree) in
-    let mode_word =
-      try List.hd (Str.split (Str.regexp " +") mode_string) with
-      | _ -> None
-    in
-    Option.value_map mode_word ~default:FileInfo.Mpartial ~f:(function
-      | "decl" when env.codegen -> FileInfo.Mphp
-      | "decl"                           -> FileInfo.Mdecl
-      | "strict"                         -> FileInfo.Mstrict
-      | ("partial" | "")                 -> FileInfo.Mpartial
-      (* TODO: Come up with better mode detection *)
-      | _                                -> FileInfo.Mpartial
-    )
-  in
-  let env = if env.fi_mode = fi_mode then env else { env with fi_mode } in
-  let env = { env with is_hh_file = SyntaxTree.is_hack tree } in
+  let mode = Option.value ~default:FileInfo.Mpartial mode in
+  let mode = if lang = FileInfo.PhpFile then FileInfo.Mphp else mode in
+  let mode = if mode = FileInfo.Mdecl && env.codegen then FileInfo.Mphp else mode in
+  let env = { env with fi_mode = mode } in
+  let env = { env with is_hh_file = lang == FileInfo.HhFile } in
   let popt = env.parser_options in
   (* If we are generating code and this is an hh file or hh syntax is enabled,
    * then we want to inject auto import types into HH namespace during namespace

@@ -121,43 +121,6 @@ public:
   }
 
   /**
-   * getTyped() and is() are intended for use with C++ classes that derive
-   * from ObjectData.
-   *
-   * Prefer using the following functions instead of getTyped:
-   * o.getTyped<T>(false, false) -> cast<T>(o)
-   * o.getTyped<T>(true,  false) -> cast_or_null<T>(o)
-   * o.getTyped<T>(false, true) -> dyn_cast<T>(o)
-   * o.getTyped<T>(true,  true) -> dyn_cast_or_null<T>(o)
-   */
-  template<typename T>
-  [[deprecated("Please use one of the cast family of functions instead.")]]
-  req::ptr<T> getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
-    static_assert(std::is_base_of<ObjectData, T>::value, "");
-
-    ObjectData *cur = get();
-    if (!cur) {
-      if (!nullOkay) {
-        throw_null_pointer_exception();
-      }
-      return nullptr;
-    }
-    if (!cur->instanceof(T::classof())) {
-      if (!badTypeOkay) {
-        throw_invalid_object_type(classname_cstr());
-      }
-      return nullptr;
-    }
-
-    return req::ptr<T>(static_cast<T*>(cur));
-  }
-
-  template<typename T>
-  bool is() const {
-    return m_obj && m_obj->instanceof(T::classof());
-  }
-
-  /**
    * Type conversions
    */
   bool    toBoolean() const { return m_obj ? m_obj->toBoolean() : false; }

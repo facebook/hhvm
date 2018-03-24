@@ -1395,7 +1395,7 @@ bool HHVM_FUNCTION(socket_shutdown,
    * a memfile. As the fact that it's not really a socket is an implementation
    * detail, user code needs to be able to call shutdown on it.
    */
-  if (socket.is<MemFile>()) {
+  if (socket->instanceof<MemFile>()) {
     return true;
   }
   auto sock = cast<Socket>(socket);

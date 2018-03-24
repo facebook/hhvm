@@ -185,7 +185,7 @@ let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
   (* TAny, T.Calls that don't have types, etc *)
   | _ -> ()
 
-let is_byval_collection_type env ty =
+let rec is_byval_collection_type env ty =
   let check t =
     match t with
     | (_, Tclass ((_, x), _)) ->
@@ -194,6 +194,7 @@ let is_byval_collection_type env ty =
       x = SN.Collections.cKeyset
     | _, (Tarraykind (AKvarray _ | AKdarray _ | AKvarray_or_darray _ | AKvec _))
       -> true
+    | _, Tunresolved tl -> Core_list.for_all tl ~f:(is_byval_collection_type env)
     | _ -> false in
   let _, tl = Typing_utils.get_all_supertypes env ty in
   Core_list.for_all tl ~f:check

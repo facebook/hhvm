@@ -661,6 +661,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalHackArrCompatPromoteNotices ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatTypeHintNotices ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatDVCmpNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatSerializeNotices ? '1' : '0')
     + (RuntimeOption::EvalHackCompilerFallback ? '1' : '0')
     + (RuntimeOption::EvalHackCompilerDefault ? '1' : '0')
     + (RuntimeOption::EvalUseExternCompilerForSystemLib ? '1' : '0')

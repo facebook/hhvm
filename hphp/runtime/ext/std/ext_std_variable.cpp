@@ -298,7 +298,19 @@ const StaticString
   s_EmptyDictArray("D:0:{}"),
   s_EmptyKeysetArray("k:0:{}");
 
-ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
+ALWAYS_INLINE String serialize_impl(const Variant& value,
+                                    bool keepDVArrays,
+                                    bool forcePHPArrays,
+                                    bool hackWarn,
+                                    bool phpWarn) {
+  auto const empty_hack = [&](const ArrayData* arr, const StaticString& empty) {
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices &&
+                 hackWarn)) {
+      raise_hack_arr_compat_serialize_notice(arr);
+    }
+    return forcePHPArrays ? s_EmptyArray : empty;
+  };
+
   switch (value.getType()) {
     case KindOfUninit:
     case KindOfNull:
@@ -334,7 +346,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
     case KindOfVec: {
       ArrayData* arr = value.getArrayData();
       assertx(arr->isVecArray());
-      if (arr->empty()) return s_EmptyVecArray;
+      if (arr->empty()) return empty_hack(arr, s_EmptyVecArray);
       break;
     }
 
@@ -342,7 +354,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
     case KindOfDict: {
       ArrayData* arr = value.getArrayData();
       assertx(arr->isDict());
-      if (arr->empty()) return s_EmptyDictArray;
+      if (arr->empty()) return empty_hack(arr, s_EmptyDictArray);
       break;
     }
 
@@ -350,7 +362,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
     case KindOfKeyset: {
       ArrayData* arr = value.getArrayData();
       assertx(arr->isKeyset());
-      if (arr->empty()) return s_EmptyKeysetArray;
+      if (arr->empty()) return empty_hack(arr, s_EmptyKeysetArray);
       break;
     }
 
@@ -360,7 +372,11 @@ ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
       assertx(arr->isPHPArray());
       assertx(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
       if (arr->empty()) {
-        if (keepDVArrays) {
+        if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices &&
+                     phpWarn)) {
+          raise_hack_arr_compat_serialize_notice(arr);
+        }
+        if (keepDVArrays && !forcePHPArrays) {
           if (arr->isVArray()) return s_EmptyVArray;
           if (arr->isDArray()) return s_EmptyDArray;
         }
@@ -377,7 +393,10 @@ ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
   }
 
   VariableSerializer vs(VariableSerializer::Type::Serialize);
-  if (keepDVArrays) vs.keepDVArrays();
+  if (keepDVArrays)   vs.keepDVArrays();
+  if (forcePHPArrays) vs.setForcePHPArrays();
+  if (hackWarn)       vs.setHackWarn();
+  if (phpWarn)        vs.setPHPWarn();
   // Keep the count so recursive calls to serialize() embed references properly.
   return vs.serialize(value, true, true);
 }
@@ -385,12 +404,31 @@ ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
 }
 
 String HHVM_FUNCTION(serialize, const Variant& value) {
-  return serialize_impl(value, false);
+  return serialize_impl(value, false, false, false, false);
+}
+
+const StaticString
+  s_forcePHPArrays("forcePHPArrays"),
+  s_warnOnHackArrays("warnOnHackArrays"),
+  s_warnOnPHPArrays("warnOnPHPArrays");
+
+String HHVM_FUNCTION(HH_serialize_with_options,
+                     const Variant& value, const Array& options) {
+  return serialize_impl(
+    value,
+    false,
+    options.exists(s_forcePHPArrays) &&
+      options[s_forcePHPArrays].toBoolean(),
+    options.exists(s_warnOnHackArrays) &&
+      options[s_warnOnHackArrays].toBoolean(),
+    options.exists(s_warnOnPHPArrays) &&
+      options[s_warnOnPHPArrays].toBoolean()
+  );
 }
 
 String HHVM_FUNCTION(hhvm_intrinsics_serialize_keep_dvarrays,
                      const Variant& value) {
-  return serialize_impl(value, true);
+  return serialize_impl(value, true, false, false, false);
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,
@@ -630,6 +668,7 @@ void StandardExtension::initVariable() {
   HHVM_FE(extract);
   HHVM_FE(parse_str);
   HHVM_FALIAS(HH\\object_prop_array, HH_object_prop_array);
+  HHVM_FALIAS(HH\\serialize_with_options, HH_serialize_with_options);
 
   if (RuntimeOption::EnableIntrinsicsExtension) {
     HHVM_FALIAS(__hhvm_intrinsics\\serialize_keep_dvarrays,

@@ -140,6 +140,8 @@ void raise_call_to_undefined(const StringData* name, const Class* c = nullptr);
 
 void raise_intish_index_cast();
 
+void raise_hack_arr_compat_serialize_notice(const ArrayData*);
+
 ///////////////////////////////////////////////////////////////////////////////
 /*
  * Hack arrays.

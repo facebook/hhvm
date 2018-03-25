@@ -792,6 +792,7 @@ struct RuntimeOption {
   F(bool, HackArrCompatPromoteNotices, false)                           \
   F(bool, HackArrCompatTypeHintNotices, false)                          \
   F(bool, HackArrCompatDVCmpNotices, false)                             \
+  F(bool, HackArrCompatSerializeNotices, false)                         \
   F(bool, HackArrDVArrs, false)                                         \
   /* Switches on miscellaneous junk. */                                 \
   F(bool, CreateInOutWrapperFunctions, true)                            \

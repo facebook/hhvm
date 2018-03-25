@@ -12517,6 +12517,8 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
     RuntimeOption::EvalHackArrCompatTypeHintNotices;
   gd.HackArrCompatDVCmpNotices =
     RuntimeOption::EvalHackArrCompatDVCmpNotices;
+  gd.HackArrCompatSerializeNotices =
+    RuntimeOption::EvalHackArrCompatSerializeNotices;
   gd.UseMSRVForInOut = RuntimeOption::EvalUseMSRVForInOut;
   gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;
 

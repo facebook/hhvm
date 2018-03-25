@@ -84,6 +84,15 @@ struct VariableSerializer {
   // arrays. This flag can override that behavior.
   void keepDVArrays() { m_keepDVArrays = true; }
 
+  // Force Hack arrays to serialize as PHP arrays
+  void setForcePHPArrays() { m_forcePHPArrays = true; }
+
+  // Emit a Hack array compat notice on Hack array serialization
+  void setHackWarn()  { m_hackWarn = true; }
+
+  // Emit a Hack array compat notice on PHP array serialization
+  void setPHPWarn()   { m_phpWarn = true; }
+
   enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray };
 
 private:
@@ -183,6 +192,11 @@ private:
   int m_valueCount;              // Current ref index
   bool m_referenced;             // mark current array element as reference
   bool m_keepDVArrays;           // serialize d/varrays as themselves or arrays
+  bool m_forcePHPArrays;         // serialize PHP and Hack arrays as PHP arrays
+  bool m_hackWarn;               // warn when attempting on Hack arrays
+  bool m_phpWarn;                // warn when attempting on PHP arrays
+  bool m_hasHackWarned;          // have we already warned on Hack arrays?
+  bool m_hasPHPWarned;           // have we already warned on PHP arrays?
   int m_refCount;                // current variable's reference count
   String m_objClass;             // for object serialization
   int m_objId;                   // for object serialization

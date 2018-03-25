@@ -267,6 +267,8 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     gd.HackArrCompatTypeHintNotices;
   RuntimeOption::EvalHackArrCompatDVCmpNotices =
     gd.HackArrCompatDVCmpNotices;
+  RuntimeOption::EvalHackArrCompatSerializeNotices =
+    gd.HackArrCompatSerializeNotices;
   RuntimeOption::EvalUseMSRVForInOut = gd.UseMSRVForInOut;
   RuntimeOption::EvalHackArrDVArrs = gd.HackArrDVArrs;
 
@@ -339,6 +341,8 @@ void write_global_data(
     RuntimeOption::EvalHackArrCompatTypeHintNotices;
   gd.HackArrCompatDVCmpNotices =
     RuntimeOption::EvalHackArrCompatDVCmpNotices;
+  gd.HackArrCompatSerializeNotices =
+    RuntimeOption::EvalHackArrCompatSerializeNotices;
   gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;
   gd.InitialNamedEntityTableSize  =
     RuntimeOption::EvalInitialNamedEntityTableSize;

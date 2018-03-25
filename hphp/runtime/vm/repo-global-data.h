@@ -156,6 +156,7 @@ struct Repo::GlobalData {
   bool HackArrCompatPromoteNotices = false;
   bool HackArrCompatTypeHintNotices = false;
   bool HackArrCompatDVCmpNotices = false;
+  bool HackArrCompatSerializeNotices = false;
 
   /*
    * Are d/varrays dicts and vecs?
@@ -223,6 +224,7 @@ struct Repo::GlobalData {
       (HackArrCompatPromoteNotices)
       (HackArrCompatTypeHintNotices)
       (HackArrCompatDVCmpNotices)
+      (HackArrCompatSerializeNotices)
       (HackArrDVArrs)
       (EnableIntrinsicsExtension)
       (ReffinessInvariance)

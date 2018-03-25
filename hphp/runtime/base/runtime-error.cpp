@@ -123,6 +123,18 @@ void raise_hackarr_compat_notice(const std::string& msg) {
   raise_notice("Hack Array Compat: %s", msg.c_str());
 }
 
+
+void raise_hack_arr_compat_serialize_notice(const ArrayData* arr) {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+  auto const type = [&]{
+    if (arr->isVecArray()) return "vec";
+    if (arr->isDict())     return "dict";
+    if (arr->isKeyset())   return "keyset";
+    return "array";
+  }();
+  raise_notice("Hack Array Compat: Serializing %s", type);
+}
+
 namespace {
 
 void raise_hackarr_type_hint_impl(const Func* func,

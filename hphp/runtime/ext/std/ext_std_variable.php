@@ -233,6 +233,20 @@ namespace HH {
   <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
   function is_darray(mixed $var): bool;
 
+ /*
+  * Behaves like serialize() but takes an optional set of options.
+  *
+  * Options:
+  *
+  * warnOnHackArrays - If true, emit a Hack array compat notice if serializing a
+  *                    Hack array
+  * warnOnPHPArrays  - If true, emit a Hack array compat notice if serializing a
+  *                    PHP array
+  * forcePHPArrays   - If true, serialize all Hack arrays as PHP arrays
+  */
+  <<__Native, __IsFoldable>>
+  function serialize_with_options(mixed $value, dict $options = dict[]): string;
+
   /*
    * This function returns an array of an object's properties in the same manner
    * as casting the object to an array.

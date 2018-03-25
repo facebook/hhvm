@@ -80,6 +80,11 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   , m_valueCount(0)
   , m_referenced(false)
   , m_keepDVArrays{type != Type::Serialize}
+  , m_forcePHPArrays{false}
+  , m_hackWarn{false}
+  , m_phpWarn{false}
+  , m_hasHackWarned{false}
+  , m_hasPHPWarned{false}
   , m_refCount(1)
   , m_objId(0)
   , m_objCode(0)
@@ -97,9 +102,10 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
 VariableSerializer::ArrayKind
 VariableSerializer::getKind(const ArrayData* arr) const {
   assertx(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
-  if (arr->isDict()) return VariableSerializer::ArrayKind::Dict;
-  if (arr->isVecArray()) return VariableSerializer::ArrayKind::Vec;
-  if (arr->isKeyset()) return VariableSerializer::ArrayKind::Keyset;
+  if (UNLIKELY(m_forcePHPArrays)) return VariableSerializer::ArrayKind::PHP;
+  if (arr->isDict())              return VariableSerializer::ArrayKind::Dict;
+  if (arr->isVecArray())          return VariableSerializer::ArrayKind::Vec;
+  if (arr->isKeyset())            return VariableSerializer::ArrayKind::Keyset;
   assertx(arr->isPHPArray());
   if (m_keepDVArrays) {
     if (arr->isVArray()) return VariableSerializer::ArrayKind::VArray;
@@ -1498,6 +1504,17 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
 
 void VariableSerializer::serializeArray(const ArrayData* arr,
                                         bool skipNestCheck /* = false */) {
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices)) {
+    if (UNLIKELY(m_hackWarn && !m_hasHackWarned && arr->isHackArray())) {
+      raise_hack_arr_compat_serialize_notice(arr);
+      m_hasHackWarned = true;
+    }
+    if (UNLIKELY(m_phpWarn && !m_hasPHPWarned && arr->isPHPArray())) {
+      raise_hack_arr_compat_serialize_notice(arr);
+      m_hasPHPWarned = true;
+    }
+  }
+
   if (arr->size() == 0) {
     writeArrayHeader(0, arr->isVectorData(), getKind(arr));
     writeArrayFooter(getKind(arr));

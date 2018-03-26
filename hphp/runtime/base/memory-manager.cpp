@@ -163,8 +163,8 @@ void MemoryManager::traceStats(const char* event) {
 void MemoryManager::resetAllStats() {
   traceStats("resetAllStats pre");
   m_statsIntervalActive = false;
-  m_stats.mm_debt = 0;
-  m_stats.mm_allocated = 0;
+  m_stats.mm_udebt = 0;
+  m_stats.mm_uallocated = 0;
   m_stats.mm_freed = 0;
   m_stats.extUsage = 0;
   m_stats.malloc_cap = 0;
@@ -310,12 +310,11 @@ void MemoryManager::refreshStats() {
  * Calculate how many bytes of allocation should happen before the next
  * time the fast path is interrupted.
  */
-void MemoryManager::updateMMDebt()
-  // TODO: T26068998 fix signed-integer-overflow undefined behavior
-  FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
-  auto const new_debt = m_nextGC - m_stats.mmUsage();
-  m_stats.mm_allocated = m_stats.mm_allocated - m_stats.mm_debt + new_debt;
-  m_stats.mm_debt = new_debt;
+void MemoryManager::updateMMDebt() {
+  auto const delta = static_cast<uint64_t>(m_nextGC) - m_stats.mmUsage();
+  auto const new_debt = delta > std::numeric_limits<int64_t>::max() ? 0 : delta;
+  m_stats.mm_uallocated += new_debt - m_stats.mm_udebt;
+  m_stats.mm_udebt = new_debt;
 }
 
 void MemoryManager::sweep() {
@@ -780,10 +779,10 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
           RuntimeOption::PerAllocSampleF);
     }
 
-    // Stats correction; mallocBigSize() updates m_stats. Add to mm_debt rather
+    // Stats correction; mallocBigSize() updates m_stats. Add to mm_udebt rather
     // than adding to mm_freed because we're adjusting for double-counting, not
     // actually freeing anything.
-    m_stats.mm_debt += nbytes;
+    m_stats.mm_udebt += nbytes;
     return mallocBigSize<Unzeroed>(nbytes);
   }
 

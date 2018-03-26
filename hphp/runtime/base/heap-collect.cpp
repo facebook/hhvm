@@ -737,16 +737,19 @@ void MemoryManager::checkGC() {
  */
 void MemoryManager::updateNextGc() {
   t_trigger_allocated = -1;
-  if (!isGCEnabled() || m_usageLimit == std::numeric_limits<int64_t>::max()) {
+  if (!isGCEnabled()) {
     m_nextGC = kNoNextGC;
     updateMMDebt();
     return;
   }
 
-  auto stats = getStatsCopy();
-  auto mm_limit = m_usageLimit - stats.auxUsage();
-  int64_t delta = (mm_limit - stats.mmUsage()) *
-                  RuntimeOption::EvalGCTriggerPct;
+  auto const stats = getStatsCopy();
+  auto const clearance =
+    static_cast<uint64_t>(m_usageLimit) -
+    stats.auxUsage() - stats.mmUsage();
+
+  int64_t delta = clearance > std::numeric_limits<int64_t>::max() ?
+    0 : clearance * RuntimeOption::EvalGCTriggerPct;
   delta = std::max(delta, RuntimeOption::EvalGCMinTrigger);
   m_nextGC = stats.mmUsage() + delta;
   updateMMDebt();

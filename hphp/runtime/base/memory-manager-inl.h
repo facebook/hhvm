@@ -218,8 +218,10 @@ inline void* MemoryManager::mallocSmallIndexSize(size_t index, size_t bytes) {
   assertx(index < kNumSmallSizes);
   if (debug) requestEagerGC();
 
-  m_stats.mm_debt -= bytes;
-  if (UNLIKELY(m_stats.mm_debt < 0)) return mallocSmallIndexSlow(bytes, index);
+  m_stats.mm_udebt -= bytes;
+  if (UNLIKELY(m_stats.mm_udebt > std::numeric_limits<int64_t>::max())) {
+    return mallocSmallIndexSlow(bytes, index);
+  }
 
   return mallocSmallIndexTail(bytes, index);
 }

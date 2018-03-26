@@ -127,7 +127,7 @@ void* SparseHeap::allocBig(size_t bytes, HeaderKind kind,
   auto cap = malloc_usable_size(n);
 #endif
   enlist(n, kind, bytes + sizeof(MallocNode), tyindex);
-  stats.mm_debt -= cap;
+  stats.mm_udebt -= cap;
   stats.malloc_cap += cap;
   return n + 1;
 }
@@ -147,7 +147,7 @@ void* SparseHeap::callocBig(size_t nbytes, HeaderKind kind,
   auto cap = malloc_usable_size(n);
 #endif
   enlist(n, kind, nbytes + sizeof(MallocNode), tyindex);
-  stats.mm_debt -= cap;
+  stats.mm_udebt -= cap;
   stats.malloc_cap += cap;
   return n + 1;
 }
@@ -206,7 +206,7 @@ void* SparseHeap::resizeBig(void* ptr, size_t nbytes,
   if (newNode != n) {
     m_bigs[newNode->index()] = newNode;
   }
-  stats.mm_debt -= new_cap - old_cap;
+  stats.mm_udebt -= new_cap - old_cap;
   stats.malloc_cap += new_cap - old_cap;
   return newNode + 1;
 }

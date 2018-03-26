@@ -139,7 +139,7 @@ static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
 }
 
 inline Variant doIdnTranslate(const String& domain, int64_t options,
-                              IdnVariant variant, VRefParam info,
+                              int variant, VRefParam info,
                               bool toUtf8) {
   switch (variant) {
     case INTL_IDNA_VARIANT_2003:
@@ -154,14 +154,14 @@ static Variant HHVM_FUNCTION(idn_to_ascii, const String& domain,
                                            int64_t options /*= 0 */,
                                            int64_t variant /*= *_2003 */,
                                            VRefParam info /*= null */) {
-  return doIdnTranslate(domain, options, (IdnVariant)variant, info, false);
+  return doIdnTranslate(domain, options, (int)variant, info, false);
 }
 
 static Variant HHVM_FUNCTION(idn_to_utf8, const String& domain,
                                           int64_t options /*= 0 */,
                                           int64_t variant /*= *_2003 */,
                                           VRefParam info /*= null */) {
-  return doIdnTranslate(domain, options, (IdnVariant)variant, info, true);
+  return doIdnTranslate(domain, options, (int)variant, info, true);
 }
 
 /////////////////////////////////////////////////////////////////////////////

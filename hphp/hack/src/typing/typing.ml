@@ -5811,7 +5811,7 @@ and get_instance_var env = function
 and check_null_wtf env p ty =
   if not (Env.is_strict env) then env else
     let env, ty = TUtils.fold_unresolved env ty in
-    let env, ety = Env.expand_type env ty in
+    let env, ety = TUtils.push_option_out env ty in
     match ety with
       | _, Toption ty ->
         (* Find sketchy nulls hidden under singleton Tunresolved *)
@@ -5822,9 +5822,12 @@ and check_null_wtf env p ty =
             Errors.sketchy_null_check p
           | _, Tprim _ ->
             Errors.sketchy_null_check_primitive p
+          | _, Tunresolved tyl ->
+             if List.exists tyl (function _, Tprim _ -> true | _ -> false) then
+               Errors.sketchy_null_check_primitive p
           | _, (Terr | Tany | Tarraykind _ | Toption _ | Tvar _ | Tfun _
           | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
-          | Tunresolved _ | Tobject | Tshape _ | Tdynamic) -> ());
+          | Tobject | Tshape _ | Tdynamic) -> ());
         env
       | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _ | Tdynamic
         | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)

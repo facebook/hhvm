@@ -427,45 +427,6 @@ let shape_field_name env p field =
         Errors.invalid_shape_field_name p;
         None
 
-(**
- * Strips away all Toption that we possible can in a type, expanding type
- * variables along the way, turning ?T -> T. This exists to avoid ??T when
- * we wrap a type in Toption while typechecking.
- *)
-let rec non_null env ty =
-  let env, ety = Env.expand_type env ty in
-  match ety with
-  | _, Toption ty ->
-      (* When "??T" appears in the typing environment due to implicit
-       * typing, the recursion here ensures that it's treated as
-       * isomorphic to "?T"; that is, all nulls are created equal.
-       *)
-      non_null env ty
-  | r, Tunresolved tyl ->
-      let env, tyl = List.map_env env tyl
-        (fun env e -> non_null env e) in
-      (* We need to flatten the unresolved types, otherwise we could
-       * end up with "Tunresolved[Tunresolved _]" which is not supposed
-       * to happen.
-      *)
-      let env, tyl = List.fold_right tyl ~f:begin fun ty (env, tyl) ->
-        let env, ty = Env.expand_type env ty in
-        match ty with
-        | _, Tunresolved l -> env, l @ tyl
-        | x -> env, x :: tyl
-      end ~init:(env, []) in
-      env, (r, Tunresolved tyl)
-  | r, Tabstract (ak, _) ->
-    begin match get_concrete_supertypes env ty with
-      | env, [ty] -> let env, ty = non_null env ty in
-        env, (r, Tabstract (ak, Some ty))
-      | env, _ -> env, ty
-    end
-  | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
-    | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tobject | Tshape _ | Tdynamic) ->
-      env, ty
-
 (*****************************************************************************)
 (* Try to unify all the types in a intersection *)
 (*****************************************************************************)
@@ -514,6 +475,55 @@ let normalize_inter env tyl1 tyl2 =
         normalize_inter env tyl1 tyl2
       end
   end
+
+let rec push_option_out env ty =
+  let is_option = function
+    | _, Toption _ -> true
+    | _ -> false in
+  let env, ty = Env.expand_type env ty in
+  match ty with
+  | r, Toption ty ->
+    let env, ty = push_option_out env ty in
+    env, if is_option ty then ty else (r, Toption ty)
+  | r, Tunresolved tyl ->
+    let env, tyl = List.map_env env tyl push_option_out in
+    if List.exists tyl is_option then
+      let (env, tyl), r' =
+        List.fold_right tyl ~f:begin fun ty ((env, tyl), r) ->
+          match ty with
+          | r', Toption ty' -> flatten_unresolved env ty' tyl, r'
+          | _ -> flatten_unresolved env ty tyl, r
+          end ~init:((env, []), r) in
+      env, (r', Toption (r, Tunresolved tyl))
+    else
+      let env, tyl =
+        List.fold_right tyl ~f:begin fun ty (env, tyl) ->
+          flatten_unresolved env ty tyl
+          end ~init:(env, []) in
+      env, (r, Tunresolved tyl)
+  | r, Tabstract (ak, _) ->
+    begin match get_concrete_supertypes env ty with
+    | env, [ty'] ->
+      let env, ty' = push_option_out env ty' in
+      (match ty' with
+      | r', Toption ty' -> env, (r', Toption (r, Tabstract (ak, Some ty')))
+      | _ -> env, ty)
+    | env, _ -> env, ty
+    end
+  | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
+    | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
+    | Tobject | Tshape _ | Tdynamic) -> env, ty
+
+(**
+ * Strips away all Toption that we possible can in a type, expanding type
+ * variables along the way, turning ?T -> T. This exists to avoid ??T when
+ * we wrap a type in Toption while typechecking.
+ *)
+let non_null env ty =
+  let env, ty = push_option_out env ty in
+  match ty with
+  | _, Toption ty' -> env, ty'
+  | _ -> env, ty
 
 (*****************************************************************************)
 (* *)

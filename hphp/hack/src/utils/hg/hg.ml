@@ -8,11 +8,6 @@
  *
  *)
 
-let process_env = [
-  (** Disable user aliases or configs. *)
-  "HGPLAIN=1"
-]
-
 (** Tools for shelling out to Mercurial. *)
 
 module Hg_actual = struct
@@ -23,7 +18,9 @@ module Hg_actual = struct
     | Hg_rev hash -> hash
     | Svn_rev rev -> Printf.sprintf "r%d" rev
 
-let exec_hg = Process.exec "hg" ~env:process_env
+let exec_hg args =
+  (** Disable user aliases or configs. *)
+  Process.exec "env" ("HGPLAIN=1" :: "hg" :: args)
 
 (** Given a list of files and their revisions, saves the files to the output
  * directory. For example,

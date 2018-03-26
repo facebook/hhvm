@@ -550,8 +550,8 @@ SSATmp* simplifyAddInt(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
 
-  auto add = std::plus<int64_t>();
-  auto mul = std::multiplies<int64_t>();
+  auto add = std::plus<uint64_t>();
+  auto mul = std::multiplies<uint64_t>();
   if (auto simp = distributiveImpl(env, src1, src2, AddInt,
                                    MulInt, add, mul)) {
     return simp;
@@ -562,9 +562,11 @@ SSATmp* simplifyAddInt(State& env, const IRInstruction* inst) {
     if (src2Val == 0) return src1;
 
     // X + -C --> X - C
-    // Weird, but can show up as a result of other simplifications. Don't need
-    // to check for C == INT_MIN, simplifySubInt already checks.
-    if (src2Val < 0) return gen(env, SubInt, src1, cns(env, -src2Val));
+    // Weird, but can show up as a result of other simplifications.
+    auto const min = std::numeric_limits<int64_t>::min();
+    if (src2Val < 0 && src2Val > min) {
+      return gen(env, SubInt, src1, cns(env, -src2Val));
+    }
   }
   // X + (0 - Y) --> X - Y
   auto const inst2 = src2->inst();
@@ -623,6 +625,7 @@ SSATmp* simplifyAddIntO(State& env, const IRInstruction* inst) {
     auto const b = src2->intVal();
     if (add_overflow(a, b)) {
       gen(env, Jmp, inst->taken());
+      return cns(env, TBottom);
     }
     return cns(env, a + b);
   }
@@ -633,7 +636,7 @@ SSATmp* simplifySubInt(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
 
-  auto const sub = std::minus<int64_t>();
+  auto const sub = std::minus<uint64_t>();
   if (auto simp = constImpl(env, src1, src2, sub)) return simp;
 
   // X - X --> 0
@@ -669,6 +672,7 @@ SSATmp* simplifySubIntO(State& env, const IRInstruction* inst) {
     auto const b = src2->intVal();
     if (sub_overflow(a, b)) {
       gen(env, Jmp, inst->taken());
+      return cns(env, TBottom);
     }
     return cns(env, a - b);
   }
@@ -679,7 +683,7 @@ SSATmp* simplifyMulInt(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
 
-  auto const mul = std::multiplies<int64_t>();
+  auto const mul = std::multiplies<uint64_t>();
   if (auto simp = commutativeImpl(env, src1, src2, MulInt, mul)) return simp;
 
   if (!src2->hasConstVal()) return nullptr;
@@ -740,6 +744,7 @@ SSATmp* simplifyMulIntO(State& env, const IRInstruction* inst) {
     auto const b = src2->intVal();
     if (mul_overflow(a, b)) {
       gen(env, Jmp, inst->taken());
+      return cns(env, TBottom);
     }
     return cns(env, a * b);
   }
@@ -973,11 +978,19 @@ SSATmp* shiftImpl(State& env, const IRInstruction* inst, Oper op) {
 }
 
 SSATmp* simplifyShl(State& env, const IRInstruction* inst) {
-  return shiftImpl(env, inst, [] (int64_t a, int64_t b) { return a << b; });
+  return shiftImpl(env, inst,
+                   [] (uint64_t a, int64_t b) -> int64_t {
+                     return a << b;
+                   });
 }
 
 SSATmp* simplifyShr(State& env, const IRInstruction* inst) {
-  return shiftImpl(env, inst, [] (int64_t a, int64_t b) { return a >> b; });
+  return shiftImpl(env, inst,
+                   [] (int64_t a, int64_t b) {
+                     // avoid implementation defined behavior
+                     // gcc optimizes this to a signed right shift.
+                     return a >= 0 ? a >> b : -(-(a+1) >> b) - 1;
+                   });
 }
 
 // This function isn't meant to perform the actual comparison at

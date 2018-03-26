@@ -1945,7 +1945,7 @@ double zend_strtod (CONST char *s00, const char **se)
   CONST char *s, *s0, *s1;
   double aadj, aadj1, adj;
   _double rv, rv0;
-  Long L;
+  ULong L;
   ULong y, z;
   Bigint *bb = 0, *bb1, *bd = 0, *bd0, *bs = 0, *delta = 0, *tmp;
   double result;

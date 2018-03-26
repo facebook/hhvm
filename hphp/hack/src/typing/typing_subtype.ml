@@ -34,6 +34,10 @@ let decompose_array
   | _, AKany ->
     env
 
+  (* array is a subtype of varray_or_darray *)
+  | AKany, AKvarray_or_darray (_, Tany) ->
+    env
+
   (* varray_or_darray<ty1> <: varray_or_darray<ty2> iff t1 <: ty2
      But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
   | AKvarray_or_darray ty_sub, AKvarray_or_darray ty_super ->

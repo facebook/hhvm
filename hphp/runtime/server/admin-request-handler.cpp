@@ -136,7 +136,7 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
   malloc_write* mw = (malloc_write*)cbopaque;
   size_t slen = strlen(s);
 
-  if (mw->oom) {
+  if (mw->oom || slen == 0) {
     return;
   }
 
@@ -898,7 +898,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
           break;
         }
 
-        transport->sendString(mwo.s);
+        transport->sendString(mwo.s == nullptr ? "" : mwo.s);
         malloc_write_fini(&mwo);
         break;
       }

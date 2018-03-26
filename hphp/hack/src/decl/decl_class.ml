@@ -39,6 +39,7 @@ let element_to_class_elt ce_type {
   elt_const = ce_const;
   elt_origin = ce_origin;
   elt_visibility = ce_visibility;
+  elt_reactivity = _
 } =
   {
     ce_final;
@@ -79,6 +80,7 @@ let to_class_type {
   dc_xhp_attr_deps;
   dc_enum_type;
   dc_decl_errors;
+  dc_condition_types = _;
 } =
   let map_elements find elts = SMap.mapi begin fun name elt ->
     let ty = lazy begin

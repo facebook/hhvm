@@ -71,7 +71,19 @@ type decl_class_type = {
   dc_xhp_attr_deps       : SSet.t;
   dc_enum_type           : enum_type option;
   dc_decl_errors         : Errors.t option;
+  (* this field is used to prevent condition types being filtered
+       in Decl_redecl_service.is_dependent_class_of_any *)
+  dc_condition_types     : SSet.t;
 }
+
+(* name of condition type for conditional reactivity of methods.
+   If None - method is unconditionally reactive *)
+and condition_type_name = string option
+
+and method_reactivity =
+| Method_reactive of condition_type_name
+| Method_shallow of condition_type_name
+| Method_local of condition_type_name
 
 and element = {
   elt_final : bool;
@@ -80,6 +92,7 @@ and element = {
   (* Only relevant for methods *)
   elt_override : bool;
   elt_abstract : bool;
+  elt_reactivity : method_reactivity option;
 
   (* Only relevant for properties *)
   elt_is_xhp_attr : bool;

@@ -250,8 +250,10 @@ let is_dependent_class_of_any classes c =
     (intersection_nonempty classes SMap.mem c.Decl_defs.dc_ancestors) ||
     (intersection_nonempty classes SSet.mem c.Decl_defs.dc_extends) ||
     (intersection_nonempty classes SSet.mem c.Decl_defs.dc_xhp_attr_deps) ||
+    (intersection_nonempty classes SSet.mem c.Decl_defs.dc_condition_types) ||
     (intersection_nonempty classes SSet.mem
-      c.Decl_defs.dc_req_ancestors_extends)
+      c.Decl_defs.dc_req_ancestors_extends) ||
+    (intersection_nonempty classes SSet.mem c.Decl_defs.dc_condition_types)
 
 let get_maybe_dependent_classes_in_file file_info path =
   match Relative_path.Map.get file_info path with

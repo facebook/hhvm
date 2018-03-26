@@ -33,6 +33,9 @@ let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =
   (* convert class const expression to non-generic type hint *)
   | [p, Class_const ((_, CI (cls, _)), (_, name))]
     when name = SN.Members.mClass ->
+      (* set Extends dependency for between class that contains
+         method and condition type *)
+      Decl_env.add_extends_dependency env (snd cls);
       Decl_hint.hint env (p, Happly (cls, []))
   | _ ->
     (* error for invalid argument list was already reported during the
@@ -454,9 +457,9 @@ and class_decl tcopt c =
   let props =
     List.fold_left ~f:(class_var_decl env c) ~init:props c.c_vars in
   let m = inherited.Decl_inherit.ih_methods in
-  let m = List.fold_left
+  let m, condition_types = List.fold_left
       ~f:(method_decl_acc ~is_static:false env c )
-      ~init:m c.c_methods in
+      ~init:(m, SSet.empty) c.c_methods in
   let consts = inherited.Decl_inherit.ih_consts in
   let consts = List.fold_left ~f:(class_const_decl env c)
     ~init:consts c.c_consts in
@@ -468,9 +471,9 @@ and class_decl tcopt c =
   let sprops = inherited.Decl_inherit.ih_sprops in
   let sprops = List.fold_left c.c_static_vars ~f:sclass_var ~init:sprops in
   let sm = inherited.Decl_inherit.ih_smethods in
-  let sm = List.fold_left c.c_static_methods
+  let sm, condition_types = List.fold_left c.c_static_methods
       ~f:(method_decl_acc ~is_static:true env c )
-      ~init:sm in
+      ~init:(sm, condition_types) in
   let parent_cstr = inherited.Decl_inherit.ih_cstr in
   let cstr = constructor_decl env parent_cstr c in
   let has_concrete_cstr = match (fst cstr) with
@@ -561,6 +564,7 @@ and class_decl tcopt c =
     dc_req_ancestors_extends = req_ancestors_extends;
     dc_enum_type = enum;
     dc_decl_errors = None;
+    dc_condition_types = condition_types;
   } in
   if Ast.Cnormal = c.c_kind then
     begin
@@ -644,6 +648,7 @@ and build_constructor env class_ method_ =
     elt_synthesized = false;
     elt_visibility = vis;
     elt_origin = class_name;
+    elt_reactivity = None;
   } in
   Decl_heap.Constructors.add class_name ft;
   Some cstr, mconsist
@@ -737,6 +742,7 @@ and class_var_decl env c acc cv =
     elt_abstract = false;
     elt_visibility = vis;
     elt_origin = (snd c.c_name);
+    elt_reactivity = None;
   } in
   Decl_heap.Props.add (elt.elt_origin, id) ty;
   let acc = SMap.add id elt acc in
@@ -758,6 +764,7 @@ and static_class_var_decl env c acc cv =
     elt_synthesized = false;
     elt_visibility = vis;
     elt_origin = (snd c.c_name);
+    elt_reactivity = None;
   } in
   Decl_heap.StaticProps.add (elt.elt_origin, id) ty;
   let acc = SMap.add id elt acc in
@@ -873,10 +880,26 @@ and method_check_override c m acc  =
     false
   | None -> false
 
-and method_decl_acc ~is_static env c acc m  =
+and method_decl_acc ~is_static env c (acc, condition_types) m  =
   let check_override = method_check_override c m acc in
   let ft = method_decl env m in
   let _, id = m.m_name in
+  let condition_types, reactivity =
+    match ft.ft_reactive with
+    | Reactive (Some (_, Tapply ((_, cls), []))) ->
+      SSet.add cls condition_types, Some (Decl_defs.Method_reactive (Some cls))
+    | Reactive None ->
+      condition_types, Some (Decl_defs.Method_reactive None)
+    | Shallow (Some (_, Tapply ((_, cls), []))) ->
+      SSet.add cls condition_types, Some (Decl_defs.Method_shallow (Some cls))
+    | Shallow None ->
+      condition_types, Some (Decl_defs.Method_shallow None)
+    | Local (Some (_, Tapply ((_, cls), [])))  ->
+      SSet.add cls condition_types, Some (Decl_defs.Method_local (Some cls))
+    | Local None ->
+      condition_types, Some (Decl_defs.Method_local None)
+    | _ -> condition_types, None
+  in
   let vis =
     match SMap.get id acc, m.m_visibility with
     | Some { elt_visibility = Vprotected _ as parent_vis; _ }, Protected ->
@@ -892,6 +915,7 @@ and method_decl_acc ~is_static env c acc m  =
     elt_synthesized = false;
     elt_visibility = vis;
     elt_origin = snd (c.c_name);
+    elt_reactivity = reactivity;
   } in
   let add_meth = if is_static
     then Decl_heap.StaticMethods.add
@@ -899,7 +923,7 @@ and method_decl_acc ~is_static env c acc m  =
   in
   add_meth (elt.elt_origin, id) ft;
   let acc = SMap.add id elt acc in
-  acc
+  acc, condition_types
 
 and method_check_trait_overrides opt ~is_static c id meth =
   if meth.elt_override then begin

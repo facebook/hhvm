@@ -207,6 +207,7 @@ let rec ty (p, x) =
       dc_ancestors             = SMap.map ty dc.dc_ancestors          ;
       dc_enum_type             = Option.map dc.dc_enum_type enum_type ;
       dc_decl_errors           = None                                 ;
+      dc_condition_types       = dc.dc_condition_types                ;
     }
 
   and requirement (p, t) = (pos p, ty t)

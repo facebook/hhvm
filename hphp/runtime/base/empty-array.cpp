@@ -185,7 +185,7 @@ member_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
  */
 member_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   auto const ad = MixedArray::reqAlloc(MixedArray::SmallScale);
-  MixedArray::InitSmall(ad, 1/*size*/, (key >= 0) ? key + 1 : 0);
+  MixedArray::InitSmall(ad, 1/*size*/, (key >= 0) ? key + uint64_t{1} : 0);
   auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
 

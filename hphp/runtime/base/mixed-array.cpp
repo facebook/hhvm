@@ -683,16 +683,14 @@ int32_t* warnUnbalanced(MixedArray* a, size_t n, int32_t* ei) {
   return ei;
 }
 
-MixedArray::InsertPos MixedArray::insert(int64_t k)
-  // TODO: T26068998 fix signed-integer-overflow undefined behavior
-  FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
+MixedArray::InsertPos MixedArray::insert(int64_t k) {
   assertx(!isFull());
   auto h = hash_int64(k);
   auto ei = findForInsertUpdate(k, h);
   if (isValidPos(ei)) {
     return InsertPos(true, data()[(int32_t)*ei].data);
   }
-  if (k >= m_nextKI && m_nextKI >= 0) m_nextKI = k + 1;
+  if (k >= m_nextKI && m_nextKI >= 0) m_nextKI = static_cast<uint64_t>(k) + 1;
   auto e = allocElm(ei);
   e->setIntKey(k, h);
   return InsertPos(false, e->data);
@@ -723,7 +721,7 @@ int32_t MixedArray::findForRemove(int64_t ki, inthash_t h, bool updateNext) {
         if (((uint64_t)ki == (uint64_t)m_nextKI-1) &&
             (ki >= 0) &&
             (ki == 0x7fffffffffffffffLL || updateNext)) {
-          --m_nextKI;
+          m_nextKI = ki;
         }
       }
   );
@@ -988,7 +986,7 @@ bool MixedArray::nextInsert(Cell v) {
   // Allocate and initialize a new element.
   auto e = allocElm(ei);
   e->setIntKey(ki, h);
-  m_nextKI = ki + 1; // Update next free element.
+  m_nextKI = static_cast<uint64_t>(ki) + 1; // Update next free element.
   cellDup(v, e->data);
   return true;
 }
@@ -1005,7 +1003,7 @@ ArrayData* MixedArray::nextInsertRef(member_lval data) {
   auto ei = findForNewInsert(h);
   auto e = allocElm(ei);
   e->setIntKey(ki, h);
-  m_nextKI = ki + 1; // Update next free element.
+  m_nextKI = static_cast<uint64_t>(ki) + 1; // Update next free element.
   return initRef(e->data, data);
 }
 
@@ -1020,7 +1018,7 @@ ArrayData* MixedArray::nextInsertWithRef(TypedValue data) {
   // Allocate a new element.
   auto e = allocElm(ei);
   e->setIntKey(ki, h);
-  m_nextKI = ki + 1; // Update next free element.
+  m_nextKI = static_cast<uint64_t>(ki) + 1; // Update next free element.
   return initWithRef(e->data, data);
 }
 

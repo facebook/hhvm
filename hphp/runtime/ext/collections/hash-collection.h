@@ -506,7 +506,7 @@ struct HashCollection : ObjectData {
     assertx(!arrayData()->hasMultipleRefs());
     auto* a = arrayData();
     if (ki >= a->m_nextKI && a->m_nextKI >= 0) {
-      a->m_nextKI = ki + 1;
+      a->m_nextKI = static_cast<uint64_t>(ki) + 1;
     }
   }
 

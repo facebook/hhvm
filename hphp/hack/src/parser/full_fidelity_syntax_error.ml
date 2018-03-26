@@ -425,3 +425,6 @@ let missing_double_quote = (* error0010 analogue *)
 
 let await_in_finally_block =
   "Await inside a finally block is not supported"
+
+let for_with_as_expression =
+  "For loops can not use as-expressions. Did you mean foreach?"

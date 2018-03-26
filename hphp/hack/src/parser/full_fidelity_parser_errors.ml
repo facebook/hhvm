@@ -1539,6 +1539,12 @@ let redeclaration_errors env node parents namespace_name names errors =
     end
   | _ -> names, errors
 
+let is_foreach_in_for for_initializer =
+  match syntax_node_to_list for_initializer with
+  | ( { syntax = ListItem { list_item = item; _ }; _ } :: _) ->
+    is_as_expression item
+  | _ -> false
+
 let statement_errors env node parents errors =
   let result = match syntax node with
   | BreakStatement _
@@ -1553,6 +1559,9 @@ let statement_errors env node parents errors =
   | UsingStatementFunctionScoped _
     when not (using_statement_function_scoped_is_legal parents) ->
     Some (node, SyntaxError.using_st_function_scoped_top_level)
+  | ForStatement { for_initializer ; _ }
+    when is_foreach_in_for for_initializer ->
+    Some (node, SyntaxError.for_with_as_expression)
   | _ -> None in
   match result with
   | None -> errors

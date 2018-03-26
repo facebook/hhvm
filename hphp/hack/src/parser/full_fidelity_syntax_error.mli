@@ -250,3 +250,4 @@ val parent_static_const_decl : string
 val xhp_class_multiple_category_decls: string
 val missing_double_quote: string
 val await_in_finally_block: string
+val for_with_as_expression: string

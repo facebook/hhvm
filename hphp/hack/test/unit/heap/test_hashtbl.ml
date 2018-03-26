@@ -230,23 +230,24 @@ let test_heapsize_decrease () =
   add "1" "1";
   add "2" "2";
   add "3" "3";
+  expect_heap_size 4;
+  remove "2";
+  remove "1";
+  remove "0";
   add "4" "4";
   add "5" "5";
   expect_heap_size 6;
-  remove "1";
-  remove "0";
-  add "6" "6";
-  add "7" "7";
-  expect_heap_size 8;
-  gentle_collect (); (* This runs *)
-  expect_heap_size 6;
+  gentle_collect (); (* This runs because 6 >= 2*3 *)
+  expect_heap_size 3;
   add "0" "0";
   add "1" "1";
-  remove "6";
-  remove "7";
-  expect_heap_size 8; (* Latest heap size should be set to 6, not 8 *)
-  aggressive_collect (); (* Aggressive collection should kick in *)
-  expect_heap_size 6
+  remove "4";
+  remove "5";
+  expect_heap_size 5;
+  aggressive_collect (); (* Aggressive collection should kick in,
+                          * because 5 >= 1.2*3 *)
+  expect_heap_size 3;
+  ()
 
 
 let tests handle =

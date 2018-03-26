@@ -827,7 +827,7 @@ and sub_type_with_uenv
           (fun () ->
             sub_type env' ty_sub ty_super, false)
           (fun _ ->
-            env, true (* Remove from todo list if there was an error *)
+            env', true (* Remove from todo list if there was an error *)
           )
           end
 

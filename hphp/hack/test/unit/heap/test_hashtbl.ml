@@ -16,6 +16,7 @@ external hh_remove : key -> unit           = "hh_remove"
 external hh_move   : key -> key -> unit    = "hh_move"
 external hh_get    : key -> string         = "hh_get_and_deserialize"
 external hh_collect    : bool -> unit         = "hh_collect"
+external hh_should_collect : bool -> bool = "hh_should_collect"
 external heap_size: unit -> int = "hh_heap_size"
 
 let expect ~msg bool =
@@ -31,6 +32,9 @@ let mem key = hh_mem (to_key key)
 let remove key = hh_remove (to_key key)
 let move k1 k2 = hh_move (to_key k1) (to_key k2)
 let get key = hh_get (to_key key)
+
+let should_gentle_collect () = hh_should_collect false
+let should_aggresive_collect () = hh_should_collect true
 let gentle_collect () = hh_collect false
 let aggressive_collect () = hh_collect true
 
@@ -77,6 +81,20 @@ let expect_get key expected =
     Printf.sprintf "Expected key '%s' to have value '%s', got '%s"
       key expected value
   ) (value = expected)
+
+let expect_gentle_collect expected =
+  expect ~msg:(
+    Printf.sprintf "Expected gentle collection to be %sneeded"
+      (if expected then "" else "not ")
+    )
+    (should_gentle_collect () = expected)
+
+let expect_aggressive_collect expected =
+  expect ~msg:(
+    Printf.sprintf "Expected aggressive collection to be %sneeded"
+      (if expected then "" else "not ")
+    )
+    (should_aggresive_collect () = expected)
 
 let test_ops () =
   expect_stats ~nonempty:0 ~used:0;
@@ -193,6 +211,9 @@ let test_gc_collect () =
   expect_heap_size 0;
   add "0" "0";
   add "1" "1";
+  (* no memory is wasted *)
+  expect_gentle_collect false;
+  expect_aggressive_collect false;
   expect_heap_size 2;
   expect_mem "0";
   expect_mem "1";
@@ -212,15 +233,18 @@ let test_gc_aggressive () =
    (* Since latest heap size is zero,
       now it should gc, but theres nothing to gc,
       so the heap will stay the same *)
+  expect_gentle_collect false;
   gentle_collect ();
   expect_heap_size 2;
   remove "1";
   add "2" "2";
   expect_heap_size 3;
   (* Gentle garbage collection shouldn't catch this *)
+  expect_gentle_collect false;
   gentle_collect ();
   expect_heap_size 3;
   (* Aggressive garbage collection should run *)
+  expect_aggressive_collect true;
   aggressive_collect ();
   expect_heap_size 2
 

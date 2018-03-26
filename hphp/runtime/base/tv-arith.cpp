@@ -54,6 +54,39 @@ void throw_bad_array_operand(const ArrayData* ad) {
   );
 }
 
+/*
+ * unsigned to signed conversion when the unsigned value is out of
+ * range is implementation defined behavior. We can work around it
+ * with something like
+ *
+ *  return v > std::numeric_limits<int64_t>::max() ?
+ *             -int64_t(~v) - 1 : int64_t(v);
+ *
+ * which gcc appears to optimize to a no-op. But I'd rather avoid that
+ * until it becomes a problem.
+ *
+ * Putting this here as a placeholder.
+ */
+inline int64_t u2s(uint64_t v) {
+  return v;
+}
+
+inline int64_t add_ignore_overflow(int64_t a, int64_t b) {
+  return u2s(static_cast<uint64_t>(a) + b);
+}
+
+inline int64_t sub_ignore_overflow(int64_t a, int64_t b) {
+  return u2s(static_cast<uint64_t>(a) - b);
+}
+
+inline int64_t mul_ignore_overflow(int64_t a, int64_t b) {
+  return u2s(static_cast<uint64_t>(a) * b);
+}
+
+inline int64_t shl_ignore_overflow(int64_t a, int64_t b) {
+  return u2s(static_cast<uint64_t>(a) << (b & 63));
+}
+
 Cell make_int(int64_t n) { return make_tv<KindOfInt64>(n); }
 Cell make_dbl(double d)  { return make_tv<KindOfDouble>(d); }
 
@@ -155,10 +188,8 @@ struct Add {
   Cell operator()(double  a, int64_t b) const { return make_dbl(a + b); }
   Cell operator()(double  a, double  b) const { return make_dbl(a + b); }
   Cell operator()(int64_t a, double  b) const { return make_dbl(a + b); }
-  Cell operator()(int64_t a, int64_t b) const
-    // TODO: T26068998 fix signed-integer-overflow undefined behavior
-    FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
-    return make_int(a + b);
+  Cell operator()(int64_t a, int64_t b) const {
+    return make_int(add_ignore_overflow(a, b));
   }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
@@ -175,10 +206,8 @@ struct Sub {
   Cell operator()(double  a, int64_t b) const { return make_dbl(a - b); }
   Cell operator()(double  a, double  b) const { return make_dbl(a - b); }
   Cell operator()(int64_t a, double  b) const { return make_dbl(a - b); }
-  Cell operator()(int64_t a, int64_t b) const
-    // TODO: T26068998 fix signed-integer-overflow undefined behavior
-    FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
-    return make_int(a - b);
+  Cell operator()(int64_t a, int64_t b) const {
+    return make_int(sub_ignore_overflow(a, b));
   }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* /*a2*/) const {
@@ -190,10 +219,8 @@ struct Mul {
   Cell operator()(double  a, int64_t b) const { return make_dbl(a * b); }
   Cell operator()(double  a, double  b) const { return make_dbl(a * b); }
   Cell operator()(int64_t a, double  b) const { return make_dbl(a * b); }
-  Cell operator()(int64_t a, int64_t b) const
-    // TODO: T26068998 fix signed-integer-overflow undefined behavior
-    FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
-    return make_int(a * b);
+  Cell operator()(int64_t a, int64_t b) const {
+    return make_int(mul_ignore_overflow(a, b));
   }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* /*a2*/) const {
@@ -313,10 +340,8 @@ again:
 }
 
 struct AddEq {
-  int64_t operator()(int64_t a, int64_t b) const
-    // TODO: T26068998 fix signed-integer-overflow undefined behavior
-    FOLLY_DISABLE_UNDEFINED_BEHAVIOR_SANITIZER("signed-integer-overflow") {
-    return a + b;
+  int64_t operator()(int64_t a, int64_t b) const {
+    return add_ignore_overflow(a, b);
   }
   double  operator()(double  a, int64_t b) const { return a + b; }
   double  operator()(int64_t a, double  b) const { return a + b; }
@@ -336,7 +361,9 @@ struct AddEq {
 };
 
 struct SubEq {
-  int64_t operator()(int64_t a, int64_t b) const { return a - b; }
+  int64_t operator()(int64_t a, int64_t b) const {
+    return sub_ignore_overflow(a, b);
+  }
   double  operator()(double  a, int64_t b) const { return a - b; }
   double  operator()(int64_t a, double  b) const { return a - b; }
   double  operator()(double  a, double  b) const { return a - b; }
@@ -649,7 +676,7 @@ Cell cellShl(Cell c1, Cell c2) {
     }
   }
 
-  return make_int(static_cast<uint64_t>(lhs) << (shift & 63));
+  return make_int(shl_ignore_overflow(lhs, shift));
 }
 
 Cell cellShr(Cell c1, Cell c2) {

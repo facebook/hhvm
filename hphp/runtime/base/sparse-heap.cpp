@@ -200,7 +200,7 @@ void* SparseHeap::resizeBig(void* ptr, size_t nbytes,
   auto const newNode = static_cast<MallocNode*>(
     safe_realloc(n, new_size)
   );
-  auto new_cap = malloc_usable_size(n);
+  auto new_cap = malloc_usable_size(newNode);
 #endif
   newNode->nbytes = new_size;
   if (newNode != n) {

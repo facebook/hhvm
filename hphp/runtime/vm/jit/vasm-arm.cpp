@@ -610,6 +610,7 @@ void Vgen::emit(const contenter& i) {
   vixl::Label stub, end;
 
   // Jump past the stub below.
+  recordAddressImmediate();
   a->B(&end);
 
   // We call into this stub from the end below. Take that LR and store it in
@@ -620,6 +621,7 @@ void Vgen::emit(const contenter& i) {
 
   // Call to stub above and then unwind.
   a->bind(&end);
+  recordAddressImmediate();
   a->Bl(&stub);
   emit(unwind{{i.targets[0], i.targets[1]}});
 }
@@ -635,6 +637,7 @@ void Vgen::emit(const calltc& i) {
   a->Stp(rAsm, rAsm, MemOperand(sp, -16, PreIndex));
 
   // Branch and link to nowhere to balance the LR stack.
+  recordAddressImmediate();
   a->bl(&stub);
   a->bind(&stub);
 
@@ -703,8 +706,10 @@ void Vgen::emit(const imul& i) {
 
       // If hi is all 0's or 1's, then check the sign, else overflow
       // (fallthrough).
+      recordAddressImmediate();
       a->Cbz(rAsm, &checkSign);
       a->Cmp(rAsm, -1);
+      recordAddressImmediate();
       a->B(&checkSign, vixl::eq);
 
       // Overflow, so conditionally set N and Z bits and then or in V bit.
@@ -713,11 +718,13 @@ void Vgen::emit(const imul& i) {
       a->Mrs(rAsm, NZCV);
       a->Orr(rAsm, rAsm, 1<<28);
       a->Msr(NZCV, rAsm);
+      recordAddressImmediate();
       a->B(&after);
 
       // Check the signs of hi and lo.
       a->Bind(&checkSign);
       a->Eor(rAsm, rAsm, X(i.d));
+      recordAddressImmediate();
       a->Tbnz(rAsm, 63, &Overflow);
     }
 
@@ -742,6 +749,7 @@ void Vgen::emit(const decqmlock& i) {
     a->ldxr(rAsm, adr);
     a->Sub(rAsm, rAsm, 1, SetFlags);
     a->stxr(rVixlScratch0, rAsm, adr);
+    recordAddressImmediate();
     a->Cbnz(rVixlScratch0, &again);
   }
   /* Restore VIXL's scratch regs. */
@@ -759,6 +767,7 @@ void Vgen::emit(const jcc& i) {
 
     // Emit a sequence similar to a smashable for easy patching later.
     // Static relocation might be able to simplify the branch.
+    recordAddressImmediate();
     a->B(&skip, vixl::InvertCondition(C(i.cc)));
     recordAddressImmediate();
     a->Ldr(rAsm_w, &data);
@@ -773,6 +782,7 @@ void Vgen::emit(const jcc& i) {
 void Vgen::emit(const jcci& i) {
   vixl::Label skip;
 
+  recordAddressImmediate();
   a->B(&skip, vixl::InvertCondition(C(i.cc)));
   emit(jmpi{i.taken});
   a->bind(&skip);
@@ -832,6 +842,7 @@ void Vgen::emit(const leap& i) {
   // adjusted while live following a relocation.
   recordAddressImmediate();
   a->Ldr(W(i.d), &imm_data);
+  recordAddressImmediate();
   a->B(&after_data);
   a->bind(&imm_data);
   a->dc32(makeTarget32(i.s.r.disp));

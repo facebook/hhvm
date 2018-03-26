@@ -67,16 +67,19 @@ TEST(Relocation, RelocateBccImm2MovzMovkBccReg) {
     return;
   }
 
-  // 1. Init Blocks
+  // 1. Init
   CodeBlock main;
   DataBlock data;
   initBlocks(4096, main, data);
   SCOPE_EXIT { freeBlocks(); };
 
+  CGMeta meta;
+
   // 2. Emit b.cc <imm> of -0x40000 (19-bit int min)
   auto start = main.frontier();
 
   MacroAssembler a { main };
+  meta.addressImmediates.insert(main.frontier());
   a.b(-0x40000, eq);
   auto bccOrig = Instruction::Cast(start);
   auto const cond = static_cast<Condition>(bccOrig->ConditionBranch());
@@ -85,7 +88,6 @@ TEST(Relocation, RelocateBccImm2MovzMovkBccReg) {
 
   // 3. Call relocate()
   RelocationInfo rel;
-  CGMeta meta;
   AreaIndex ai;
   auto instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
@@ -130,16 +132,19 @@ TEST(Relocation, RelocateCbz2MovzMovkCbnzReg) {
     return;
   }
 
-  // 1. Init Blocks
+  // 1. Init
   CodeBlock main;
   DataBlock data;
   initBlocks(4096, main, data);
   SCOPE_EXIT { freeBlocks(); };
 
+  CGMeta meta;
+
   // 2. Emit cbz <imm> of -0x40000 (19-bit int min)
   auto start = main.frontier();
 
   MacroAssembler a { main };
+  meta.addressImmediates.insert(main.frontier());
   a.cbz(x0, -0x40000);
   auto cbzOrig = Instruction::Cast(start);
 
@@ -147,7 +152,6 @@ TEST(Relocation, RelocateCbz2MovzMovkCbnzReg) {
 
   // 3. Call relocate()
   RelocationInfo rel;
-  CGMeta meta;
   AreaIndex ai;
   auto instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
@@ -193,16 +197,19 @@ TEST(Relocation, RelocateTbz2MovzMovkTbnzReg) {
     return;
   }
 
-  // 1. Init Blocks
+  // 1. Init
   CodeBlock main;
   DataBlock data;
   initBlocks(4096, main, data);
   SCOPE_EXIT { freeBlocks(); };
 
+  CGMeta meta;
+
   // 2. Emit tbz <imm> of -0x2000 (14-bit int min)
   auto start = main.frontier();
 
   MacroAssembler a { main };
+  meta.addressImmediates.insert(main.frontier());
   a.tbz(x0, 3, -0x2000);
   auto tbzOrig = Instruction::Cast(start);
 
@@ -210,7 +217,6 @@ TEST(Relocation, RelocateTbz2MovzMovkTbnzReg) {
 
   // 3. Call relocate()
   RelocationInfo rel;
-  CGMeta meta;
   AreaIndex ai;
   auto instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
@@ -251,34 +257,40 @@ TEST(Relocation, RelocateMovzMovkLdr2LdrLiteral) {
     return;
   }
 
-  // 1. Init Blocks
+  // 1. Init
   CodeBlock main;
   DataBlock data;
   initBlocks(4096, main, data);
   SCOPE_EXIT { freeBlocks(); };
 
+  CGMeta meta;
+
   // 2. Emit movz $x17 addr; movk $x17 addr; ldr $0, $x17
   auto start = main.frontier();
 
   MacroAssembler a { main };
+  // We will kill this nop during relocation.
   a.nop();
+  // The relocator won't know this is a litteral.  This seems like a problem
+  // with this test.
   a.dc64(0xdeadbeef);
+  meta.addressImmediates.insert(main.frontier());
   a.Mov(x17, start + 4);
+
   a.Ldr(x0, MemOperand(x17, 0));
 
   auto end = main.frontier();
 
   // 3. Call relocate()
   RelocationInfo rel;
-  CGMeta meta;
   AreaIndex ai;
-  auto instr = Instruction::Cast(end + 12);
+  auto instr = Instruction::Cast(end + 8);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
   // 4. Expect a Ldr Literal to $x0 from addr
   EXPECT_TRUE(instr->IsLoadLiteral());
   EXPECT_EQ(instr->Rd(), 0);
-  EXPECT_EQ(reinterpret_cast<TCA>(instr->LiteralAddress()), end + 4);
+  EXPECT_EQ(reinterpret_cast<TCA>(instr->LiteralAddress()), end);
 }
 
 /*
@@ -291,24 +303,26 @@ TEST(Relocation, RelocateAdjustedMovzMovk) {
     return;
   }
 
-  // 1. Init Blocks
+  // 1. Init
   CodeBlock main;
   DataBlock data;
   initBlocks(5 << 20, main, data);
   SCOPE_EXIT { freeBlocks(); };
+
+  CGMeta meta;
 
   // 2. Emit Mov of start into x17 after padding out 2MB+.
   auto start = main.frontier();
 
   main.setFrontier(start + (2 << 20) + 16);
   MacroAssembler a { main };
+  meta.addressImmediates.insert(main.frontier());
   a.Mov(x17, start + 8);
 
   auto end = main.frontier();
 
   // 3. Call relocate()
   RelocationInfo rel;
-  CGMeta meta;
   AreaIndex ai;
   auto instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
@@ -340,16 +354,19 @@ TEST(Relocation, RelocateInternalAdjustedMovzMovk) {
     return;
   }
 
-  // 1. Init Blocks
+  // 1. Init
   CodeBlock main;
   DataBlock data;
   initBlocks(9 << 20, main, data);
   SCOPE_EXIT { freeBlocks(); };
 
+  CGMeta meta;
+
   // 2. Emit Mov of start + 2MB into x17 and then pad out 4MB+.
   auto start = main.frontier();
 
   MacroAssembler a { main };
+  meta.addressImmediates.insert(main.frontier());
   a.Mov(x17, start + (2 << 20) + 16);
   main.setFrontier(start + (4 << 20) + 32);
 
@@ -357,7 +374,6 @@ TEST(Relocation, RelocateInternalAdjustedMovzMovk) {
 
   // 3. Call relocate()
   RelocationInfo rel;
-  CGMeta meta;
   AreaIndex ai;
   auto instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
@@ -386,17 +402,20 @@ TEST(Relocation, AdjustMovzMovk) {
     return;
   }
 
-  // 1. Init Blocks
+  // 1. Init
   CodeBlock main;
   DataBlock data;
   initBlocks(3 << 20, main, data);
   SCOPE_EXIT { freeBlocks(); };
+
+  CGMeta meta;
 
   // 2. Emit Mov of start + 2MB+ into x17. This is not relocated, but
   //    its target at 2MB+ will be.
   auto orig = main.frontier();
 
   MacroAssembler a { main };
+  meta.addressImmediates.insert(main.frontier());
   a.Mov(x17, orig + (2 << 20) + 16);
   main.setFrontier(orig + (2 << 20) + 16);
 
@@ -406,7 +425,6 @@ TEST(Relocation, AdjustMovzMovk) {
 
   // 3. Call relocate() and then adjust the mov/movk
   RelocationInfo rel;
-  CGMeta meta;
   AreaIndex ai;
   relocate(rel, main, start, end, main, meta, nullptr, ai);
   adjustForRelocation(rel, orig, start);

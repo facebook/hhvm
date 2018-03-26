@@ -85,7 +85,7 @@ using std::abs;
    part of GD */
 typedef long gdFixed;
 /* Integer to fixed point */
-#define gd_itofx(x) ((x) << 8)
+#define gd_itofx(x) ((x) * 256)
 
 /* Float to fixed point */
 #define gd_ftofx(x) (long)((x) * 256)
@@ -106,7 +106,7 @@ typedef long gdFixed;
 #define gd_mulfx(x,y) (((x) * (y)) >> 8)
 
 /* Divide a fixed by a fixed */
-#define gd_divfx(x,y) (((x) << 8) / (y))
+#define gd_divfx(x,y) (((x) * 256) / (y))
 
 typedef struct
 {

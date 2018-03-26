@@ -1176,9 +1176,9 @@ String string_numeric_to_base(const Variant& value, int base) {
 #define PHP_UU_ENC(c) \
   ((c) ? ((c) & 077) + ' ' : '`')
 #define PHP_UU_ENC_C2(c) \
-  PHP_UU_ENC(((*(c) << 4) & 060) | ((*((c) + 1) >> 4) & 017))
+  PHP_UU_ENC(((*(c) * 16) & 060) | ((*((c) + 1) >> 4) & 017))
 #define PHP_UU_ENC_C3(c) \
-  PHP_UU_ENC(((*(c + 1) << 2) & 074) | ((*((c) + 2) >> 6) & 03))
+  PHP_UU_ENC(((*(c + 1) * 4) & 074) | ((*((c) + 2) >> 6) & 03))
 #define PHP_UU_DEC(c) \
   (((c) - ' ') & 077)
 

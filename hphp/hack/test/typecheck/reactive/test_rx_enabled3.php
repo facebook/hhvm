@@ -2,9 +2,6 @@
 
 <<__Rx>>
 function f(): void {
-  if (HH\Rx\IS_ENABLED) {
-    rx();
-  }
   nonrx(); // should error
 }
 

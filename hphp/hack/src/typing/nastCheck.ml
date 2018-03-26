@@ -139,6 +139,23 @@ module CheckFunctionBody = struct
   and block f_type env stl =
     List.iter stl (stmt f_type env)
 
+  and start f_type env stl =
+    match stl with
+    | [If ((_, Id (_, c)), then_stmt, else_stmt ) ]
+      (*
+        (* this is the only case when HH\Rx\IS_ENABLED can appear in
+           function body, other occurences are considered errors *)
+        {
+          if (HH\Rx\IS_ENABLED) {}
+          else {}
+        }
+      *)
+      when c = SN.HH.rx_is_enabled ->
+      block f_type env then_stmt;
+      block f_type env else_stmt;
+    | _ ->
+      block f_type env stl
+
   and case f_type env = function
     | Default b -> block f_type env b
     | Case (cond, b) ->
@@ -184,12 +201,15 @@ module CheckFunctionBody = struct
     | _, Smethod_id _
     | _, Method_caller _
     | _, This
-    | _, Id _
     | _, Class_get _
     | _, Class_const _
     | _, Typename _
     | _, Lplaceholder _
     | _, Dollardollar _ -> ()
+    | _, Id (pos, const) when const = SN.HH.rx_is_enabled ->
+        Errors.rx_is_enabled_invalid_location pos
+    | _, Id _ -> ()
+
     | _, Dollar e ->
         expr f_type env e
     | _, Lvar _ ->
@@ -435,7 +455,7 @@ and func env f named_body =
     | _ -> ()
   );
   block env named_body.fnb_nast;
-  CheckFunctionBody.block
+  CheckFunctionBody.start
     f.f_fun_kind
     env
     named_body.fnb_nast
@@ -926,7 +946,7 @@ and method_ (env, is_static) m =
   List.iter m.m_tparams (tparam env);
   block env named_body.fnb_nast;
   maybe hint env m.m_ret;
-  CheckFunctionBody.block
+  CheckFunctionBody.start
     m.m_fun_kind
     env
     named_body.fnb_nast;

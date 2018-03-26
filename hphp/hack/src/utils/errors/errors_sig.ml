@@ -499,4 +499,5 @@ module type S = sig
   val static_in_reactive_context : Pos.t -> string -> unit
   val missing_reactivity_for_condition: Pos.t -> unit
   val multiple_reactivity_annotations: Pos.t -> unit
+  val rx_is_enabled_invalid_location: Pos.t -> unit
 end

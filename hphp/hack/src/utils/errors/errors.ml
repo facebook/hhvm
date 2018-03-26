@@ -806,6 +806,7 @@ module NastCheck                            = struct
   let conditionally_reactive_annotation_invalid_arguments = 3059 (* DONT MODIFY!!!! *)
   let missing_reactivity_for_condition      = 3060 (* DONT MODIFY!!!! *)
   let multiple_reactivity_annotations       = 3061 (* DONT MODIFY!!!! *)
+  let rx_is_enabled_invalid_location        = 3062 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1788,6 +1789,12 @@ let conditionally_reactive_function pos =
 let multiple_conditionally_reactive_annotations pos name =
   add NastCheck.multiple_conditionally_reactive_annotations pos (
     "Method '" ^ name ^ "' has multiple <<__OnlyRxIfImpl>> annotations."
+  )
+
+let rx_is_enabled_invalid_location pos =
+  add NastCheck.rx_is_enabled_invalid_location pos (
+    "HH\\Rx\\IS_ENABLED must be the only condition in an if-statement, " ^
+    "and that if-statement must be the only statement in the function body."
   )
 
 let conditionally_reactive_annotation_invalid_arguments pos =

@@ -54,7 +54,7 @@ int64_t HHVM_FUNCTION(random_int, int64_t min, int64_t max) {
     return min;
   }
 
-  uint64_t umax = max - min;
+  auto umax = static_cast<uint64_t>(max) - min;
   uint64_t result;
   if (!getRandomBytes(&result, sizeof(result))) {
     SystemLib::throwErrorObject("Could not gather sufficient random data");

@@ -40,24 +40,37 @@
   },
   {
     "jsonrpc": "2.0",
-    "method": "telemetry/event",
-    "params": {
-      "type": 4,
-      "message": "Version in hhconfig=[NoVersion]"
-    }
-  },
-  {
-    "jsonrpc": "2.0",
     "id": 2,
     "result": {
       "contents": [
-        "int"
-      ]
+        {
+          "language": "hack",
+          "value": "int b_hover"
+        }
+      ],
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 9
+        },
+        "end": {
+          "line": 3,
+          "character": 16
+        }
+      }
     }
   },
   {
     "jsonrpc": "2.0",
     "id": 3,
     "result": null
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "telemetry/event",
+    "params": {
+      "type": 4,
+      "message": "Version in hhconfig=[NoVersion]"
+    }
   }
 ]

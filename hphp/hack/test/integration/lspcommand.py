@@ -20,7 +20,7 @@ class LspCommandProcessor:
     @classmethod
     @contextlib.contextmanager
     def create(cls, env):
-        proc = subprocess.Popen([hh_client, 'lsp'],
+        proc = subprocess.Popen([hh_client, 'lsp', '--enhanced-hover'],
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,

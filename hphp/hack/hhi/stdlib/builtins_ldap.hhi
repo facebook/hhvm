@@ -98,6 +98,8 @@ function ldap_control_paged_result_response($link, $result, &$cookie = null, &$e
 <<__PHPStdLib>>
 function ldap_escape(string $value, string $ignore = '', int $flags = 0) { }
 
+const int LDAP_ESCAPE_FILTER = 1;
+const int LDAP_ESCAPE_DN = 2;
 const int LDAP_OPT_DEREF = 2;
 const int LDAP_OPT_SIZELIMIT = 3;
 const int LDAP_OPT_TIMELIMIT = 4;

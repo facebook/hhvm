@@ -29,10 +29,8 @@ ThreadsCommand::ThreadsCommand(
 ThreadsCommand::~ThreadsCommand() {
 }
 
-bool ThreadsCommand::executeImpl(
-  DebuggerSession* session,
-  folly::dynamic* responseMsg
-) {
+bool ThreadsCommand::executeImpl(DebuggerSession* /*session*/,
+                                 folly::dynamic* responseMsg) {
 
   folly::dynamic threads = folly::dynamic::array;
   m_debugger->getAllThreadInfo(threads);

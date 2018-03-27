@@ -698,7 +698,8 @@ void Parser::useConst(const std::string& /*cnst*/, const std::string& /*as*/) {}
 
 void Parser::onXhpAttributesStart() {}
 
-void Parser::onXhpAttributeSpread(Token& out, Token* pairs, Token& expr) {}
+void Parser::onXhpAttributeSpread(Token& /*out*/, Token* /*pairs*/,
+                                  Token& /*expr*/) {}
 
 void Parser::onXhpAttributesEnd() {}
 

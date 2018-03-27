@@ -1294,13 +1294,10 @@ bool Debugger::tryResolveBreakpoint(
   return false;
 }
 
-bool Debugger::tryResolveBreakpointInUnit(
-  const RequestInfo* ri,
-  int bpId,
-  const Breakpoint* bp,
-  const std::string& unitFilePath,
-  const HPHP::Unit* compilationUnit
-) {
+bool Debugger::tryResolveBreakpointInUnit(const RequestInfo* /*ri*/, int bpId,
+                                          const Breakpoint* bp,
+                                          const std::string& unitFilePath,
+                                          const HPHP::Unit* compilationUnit) {
 
   if (bp->m_path != unitFilePath) {
     return false;
@@ -1671,12 +1668,9 @@ void Debugger::onAsyncBreak() {
   pauseTarget(nullptr, "Async-break");
 }
 
-void Debugger::onError(
-  RequestInfo* requestInfo,
-  const ExtendedException& extendedException,
-  int errnum,
-  const std::string& message
-) {
+void Debugger::onError(RequestInfo* requestInfo,
+                       const ExtendedException& /*extendedException*/,
+                       int errnum, const std::string& message) {
   const char* phpError;
   switch (static_cast<ErrorMode>(errnum)) {
     case ErrorMode::ERROR:
@@ -1766,10 +1760,8 @@ void DebuggerStdoutHook::operator()(const char* str, int len) {
     DebugTransport::OutputLevelStdout);
 }
 
-void DebuggerStderrHook::operator()(
-  const char*,
-  const char* msg,
-  const char* ending
+void DebuggerStderrHook::
+operator()(const char*, const char* msg, const char* /*ending*/
 ) {
   // Quickly no-op if there's no client.
   if (!m_debugger->clientConnected()) {

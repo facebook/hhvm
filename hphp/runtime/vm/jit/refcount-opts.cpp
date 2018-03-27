@@ -1642,8 +1642,8 @@ bool is_same(const RCState &dstState, const RCState& srcState) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Fn>
-void for_aset(Env& env, RCState& state, SSATmp* tmp, Fn fn) {
+template <class Fn>
+void for_aset(Env& env, RCState& /*state*/, SSATmp* tmp, Fn fn) {
   auto const asetID = env.asetMap[tmp];
   if (asetID == -1) { assertx(!tmp->type().maybe(TCounted)); return; }
   fn(asetID);
@@ -1695,7 +1695,7 @@ void pessimize_all(Env& env, RCState& state, PreAdder add_node) {
   }
 }
 
-void unsupport_all(Env& env, RCState& state) {
+void unsupport_all(Env& /*env*/, RCState& state) {
   FTRACE(3, "    unsupport_all\n");
   for (auto& aset : state.asets) {
     aset.unsupported_refs = aset.lower_bound;
@@ -1917,11 +1917,8 @@ void drop_support_bits(Env& env, RCState& state, ALocBits bits) {
   );
 }
 
-void create_store_support(Env& env,
-                          RCState& state,
-                          AliasClass dst,
-                          SSATmp* tmp,
-                          PreAdder add_node) {
+void create_store_support(Env& env, RCState& state, AliasClass dst, SSATmp* tmp,
+                          PreAdder /*add_node*/) {
   for_aset(env, state, tmp, [&] (ASetID asetID) {
     auto& aset = state.asets[asetID];
 

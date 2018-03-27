@@ -39,7 +39,7 @@ void BumpMapper::append(BumpMapper* m) {
   m_fallback = m;
 }
 
-bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
+bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
   // Check quota and alignment before mmap
   if (m_currNumPages >= m_maxNumPages) {
     m_failed = true;
@@ -98,7 +98,7 @@ bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
 
 constexpr size_t Bump4KMapper::kChunkSize;
 
-bool Bump4KMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
+bool Bump4KMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
   auto const currFrontier = state.m_base - state.m_currCapacity;
   if (currFrontier % size4k != 0) return false;
   void* newPageStart = reinterpret_cast<void*>(currFrontier - kChunkSize);

@@ -29,10 +29,8 @@ LaunchAttachCommand::LaunchAttachCommand(
 LaunchAttachCommand::~LaunchAttachCommand() {
 }
 
-bool LaunchAttachCommand::executeImpl(
-  DebuggerSession* session,
-  folly::dynamic* responseMsg
-) {
+bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
+                                      folly::dynamic* responseMsg) {
   folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   const std::string emptyString = std::string("");

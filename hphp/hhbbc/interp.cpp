@@ -2064,13 +2064,13 @@ void in(ISS& env, const bc::InstanceOfD& op) {
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::IsTypeStruct& op) {
+void in(ISS& env, const bc::IsTypeStruct& /*op*/) {
   // TODO(kunalm): implement for type aliases, enums, etc.
   popC(env);
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::AsTypeStruct& op) {
+void in(ISS& env, const bc::AsTypeStruct& /*op*/) {
   // To indicate that this value is touched
   push(env, popC(env));
 }
@@ -2815,8 +2815,7 @@ void in(ISS& env, const bc::FPushCufSafe&) {
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::RaiseFPassWarning& op) {
-}
+void in(ISS& /*env*/, const bc::RaiseFPassWarning& /*op*/) {}
 
 void in(ISS& env, const bc::FPassL& op) {
   auto const kind = prepKind(env, op.arg1);
@@ -3921,7 +3920,7 @@ void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
   verifyRetImpl(env, env.ctx.func->retTypeConstraint, true);
 }
 
-void in(ISS& env, const bc::VerifyRetNonNullC& op) {
+void in(ISS& env, const bc::VerifyRetNonNullC& /*op*/) {
   auto const constraint = env.ctx.func->retTypeConstraint;
   if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft()
       || (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis())) {

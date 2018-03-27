@@ -45,7 +45,7 @@ const char padding_bytes[7] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0'};
 namespace HPHP {
 namespace Debug {
 
-static int getEMachine(JitHeader *hdr)  {
+static int getEMachine(JitHeader* /*hdr*/) {
   char id[16];
   int fd;
   struct {

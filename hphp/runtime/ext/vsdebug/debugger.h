@@ -589,7 +589,7 @@ private:
 // A stdout hook that no-ops all writes to stdout.
 struct NoOpStdoutHook final : ExecutionContext::StdoutHook {
   explicit NoOpStdoutHook() {}
-  void operator()(const char* str, int len) override {}
+  void operator()(const char* /*str*/, int /*len*/) override {}
 };
 
 // When performing an evaluation on behalf of part of the debugger engine

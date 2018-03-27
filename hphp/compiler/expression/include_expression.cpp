@@ -153,10 +153,9 @@ static void parse_string_arg(ExpressionPtr exp,
   return;
 }
 
-std::string IncludeExpression::CheckInclude(ConstructPtr includeExp,
-                                            FileScopePtr scope,
-                                            ExpressionPtr fileExp,
-                                            bool &documentRoot) {
+std::string
+IncludeExpression::CheckInclude(ConstructPtr /*includeExp*/, FileScopePtr scope,
+                                ExpressionPtr fileExp, bool& documentRoot) {
   auto const& container = scope->getName();
   std::string var, lit;
   parse_string_arg(fileExp, var, lit);

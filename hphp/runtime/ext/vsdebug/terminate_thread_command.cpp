@@ -54,9 +54,8 @@ CommandTarget TerminateThreadsCommand::commandTarget() {
   return CommandTarget::None;
 }
 
-bool TerminateThreadsCommand::executeImpl(
-  DebuggerSession* session,
-  folly::dynamic* responseMsg
+bool TerminateThreadsCommand::executeImpl(DebuggerSession* /*session*/,
+                                          folly::dynamic* /*responseMsg*/
 ) {
   if (m_requestId > 0) {
     RequestInfo* ri = m_debugger->getRequestInfo();

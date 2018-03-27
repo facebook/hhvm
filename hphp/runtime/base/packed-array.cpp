@@ -725,8 +725,8 @@ auto MutableOpInt(ArrayData* adIn, int64_t k, bool copy,
   return promoted(mixed);
 }
 
-template<typename PromotedFn>
-auto MutableOpStr(ArrayData* adIn, StringData* k, bool copy,
+template <typename PromotedFn>
+auto MutableOpStr(ArrayData* adIn, StringData* /*k*/, bool copy,
                   PromotedFn promoted) {
   assertx(PackedArray::checkInvariants(adIn));
   assertx(adIn->isPacked());
@@ -1240,7 +1240,7 @@ ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
   return ad;
 }
 
-ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool copy) {
+ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
   assertx(checkInvariants(adIn));
 
   auto const size = adIn->getSize();

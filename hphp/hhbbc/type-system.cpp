@@ -873,19 +873,19 @@ struct DualDispatchIntersectionImpl {
   }
 
   // The SArray is known to not be a subtype, so the intersection must be empty
-  Type operator()(const DArrLikePacked& a, const SArray b) const {
+  Type operator()(const DArrLikePacked& /*a*/, const SArray /*b*/) const {
     return TBottom;
   }
-  Type operator()(const DArrLikePackedN& a, const SArray b) const {
+  Type operator()(const DArrLikePackedN& /*a*/, const SArray /*b*/) const {
     return TBottom;
   }
-  Type operator()(const DArrLikeMapN& a, const SArray b) const {
+  Type operator()(const DArrLikeMapN& /*a*/, const SArray /*b*/) const {
     return TBottom;
   }
-  Type operator()(const DArrLikeMap& a, const SArray b) const {
+  Type operator()(const DArrLikeMap& /*a*/, const SArray /*b*/) const {
     return TBottom;
   }
-  Type operator()(const SArray a, const SArray b) const {
+  Type operator()(const SArray /*a*/, const SArray /*b*/) const {
     return TBottom;
   }
 
@@ -904,7 +904,7 @@ struct DualDispatchIntersectionImpl {
     }
     return TBottom;
   }
-  Type operator()(const DArrLikePacked& a, const DArrLikeMap& b) const {
+  Type operator()(const DArrLikePacked& /*a*/, const DArrLikeMap& /*b*/) const {
     // We don't allow DArrLikeMaps which are packed
     return TBottom;
   }
@@ -921,7 +921,8 @@ struct DualDispatchIntersectionImpl {
     }
     return TBottom;
   }
-  Type operator()(const DArrLikePackedN& a, const DArrLikeMap& b) const {
+  Type
+  operator()(const DArrLikePackedN& /*a*/, const DArrLikeMap& /*b*/) const {
     return TBottom;
   }
 
@@ -2590,8 +2591,8 @@ struct tvHelper {
 
 template<>
 struct tvHelper<bool> {
-  template<DataType dt,typename... Args>
-  static bool make(Args&&... args) {
+  template <DataType dt, typename... Args>
+  static bool make(Args&&... /*args*/) {
     return true;
   }
   template<typename Init, typename... Args>

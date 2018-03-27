@@ -147,7 +147,7 @@ void reduce(ISS& env, Bytecodes&&... hhbc) {
   reduce(env, { std::forward<Bytecodes>(hhbc)... });
 }
 
-bool fpassCanThrow(ISS& env, PrepKind kind, FPassHint hint) {
+bool fpassCanThrow(ISS& /*env*/, PrepKind kind, FPassHint hint) {
   switch (kind) {
   case PrepKind::Unknown: return hint != FPassHint::Any;
   case PrepKind::Val:     return hint == FPassHint::Ref;

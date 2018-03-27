@@ -8,7 +8,5 @@ function return_untyped_array(): array {
 }
 
 function main(): void {
-  expect_untyped_varray_or_darray(
-    return_untyped_array(),
-  );
+  expect_untyped_varray_or_darray(return_untyped_array());
 }

@@ -25,6 +25,7 @@ module FileHeap = SharedMem.WithCache (Relative_path.S) (struct
     type t = disk_type
     let prefix = Prefix.make()
     let description = "Disk"
+    let use_sqlite_fallback () = false
   end)
 
 let get_contents fn =

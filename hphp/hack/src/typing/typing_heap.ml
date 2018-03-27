@@ -26,6 +26,7 @@ module Classes = struct
     type t = Typing_defs.class_type
     let prefix = Prefix.make()
     let description = "ClassType"
+    let use_sqlite_fallback () = false
   end
 
   module Cache = SharedMem.LocalCache (StringKey) (Class)

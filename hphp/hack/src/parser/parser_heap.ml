@@ -23,12 +23,14 @@ module ParserHeap = SharedMem.WithCache (Relative_path.S) (struct
     type t = Ast.program * parse_type
     let prefix = Prefix.make()
     let description = "Parser"
+    let use_sqlite_fallback () = false
   end)
 
 module LocalParserCache = SharedMem.LocalCache (Relative_path.S) (struct
     type t = Ast.program
     let prefix = Prefix.make()
     let description = "ParserLocal"
+    let use_sqlite_fallback () = false
   end)
 
 let get_from_local_cache ~full popt file_name =

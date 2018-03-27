@@ -47,6 +47,7 @@ module SearchKeys = SharedMem.NoCache (Relative_path.S) (struct
   type t = type_to_keyset
   let prefix = Prefix.make()
   let description = "SearchKeys"
+  let use_sqlite_fallback () = false
 end)
 
 (* The workers are in charge of keeping this up to date per file, we use it
@@ -71,6 +72,7 @@ module SearchKeyToTermMap = SharedMem.WithCache (Relative_path.S) (struct
   type t = type_to_key_to_term_list
   let prefix = Prefix.make()
   let description = "SearchKeyToTermMap"
+  let use_sqlite_fallback () = false
 end)
 
 (* This is the table which we can find which terms are relevant to the query.

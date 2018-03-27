@@ -24,6 +24,7 @@ module HH_FIXMES = SharedMem.WithCache (Relative_path.S) (struct
   type t = Pos.t IMap.t IMap.t
   let prefix = Prefix.make()
   let description = "HH_FIXMES"
+  let use_sqlite_fallback () = false
   end)
 
 (*****************************************************************************)

@@ -18,12 +18,14 @@ module TypeCanonHeap : CanonHeap = SharedMem.NoCache (StringKey) (struct
   type t = string
   let prefix = Prefix.make()
   let description = "TypeCanon"
+  let use_sqlite_fallback () = false
 end)
 
 module FunCanonHeap : CanonHeap = SharedMem.NoCache (StringKey) (struct
   type t = string
   let prefix = Prefix.make()
   let description = "FunCanon"
+  let use_sqlite_fallback () = false
 end)
 
 let check_valid key pos =
@@ -43,6 +45,7 @@ module TypeIdHeap = struct
     type t = FileInfo.pos * [`Class | `Typedef]
     let prefix = Prefix.make ()
     let description = "TypeId"
+    let use_sqlite_fallback () = false
   end)
   let add x y =
     if not @@ LocalChanges.has_local_changes () then check_valid x (fst y);
@@ -58,6 +61,7 @@ module FunPosHeap = struct
     type t = FileInfo.pos
     let prefix = Prefix.make()
     let description = "FunPos"
+    let use_sqlite_fallback () = false
   end)
   let add x y =
     if not @@  LocalChanges.has_local_changes () then check_valid x y;
@@ -69,6 +73,7 @@ module ConstPosHeap = struct
     type t = FileInfo.pos
     let prefix = Prefix.make()
     let description = "ConstPos"
+    let use_sqlite_fallback () = false
   end)
 let add x y =
   if not @@ LocalChanges.has_local_changes () then check_valid x y;

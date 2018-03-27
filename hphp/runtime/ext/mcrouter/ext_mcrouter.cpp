@@ -11,9 +11,9 @@
 #include <folly/Memory.h>
 #include <folly/Range.h>
 
+#include "mcrouter/config.h" // @nolint
 #include "mcrouter/McrouterClient.h" // @nolint
 #include "mcrouter/McrouterInstance.h" // @nolint
-#include "mcrouter/config.h" // @nolint
 #include "mcrouter/lib/McOperation.h" // @nolint
 #include "mcrouter/lib/McResUtil.h" // @nolint
 #include "mcrouter/lib/network/CarbonMessageList.h" // @nolint

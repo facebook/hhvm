@@ -764,17 +764,24 @@ private:
   // and removing the need to call xedEmit twice each time (once to get
   // the size, and once to actually emit the instruction).
 
+  // Maximum number of bits that can store a xed_iclass_enum_t value
+  // (there are currently ~1560 distinct values).
+#define XED_ICLASS_MAX_BITS        (16)
+#define XED_CACHE_KEY(instr, size) (int32_t(instr) |                \
+                                    (size << XED_ICLASS_MAX_BITS))
 #define XED_CACHE_LEN(call, size)                                   \
   uint32_t instrLen;                                                \
+  uint32_t key = XED_CACHE_KEY(instr, size);                        \
   static std::unordered_map<int32_t,                                \
                             uint32_t> instrLengths;                 \
-  auto res = instrLengths.find(int32_t(instr) | (size << 24));      \
+  auto res = instrLengths.find(key);                                \
   if (res != instrLengths.end()) {                                  \
     instrLen = res->second;                                         \
   } else {                                                          \
     instrLen = call;                                                \
-    instrLengths.insert({int32_t(instr) | (size << 24), instrLen}); \
+    instrLengths.insert({key, instrLen});                           \
   }
+
 
 #define XED_WRAP_IMPL() \
   XED_WRAP_X(64)        \

@@ -531,6 +531,7 @@ type instruct_misc =
   | StaticLocDef of local_id * Litstr.id
   | StaticLocInit of local_id * Litstr.id
   | Catch
+  | ChainFaults
   | OODeclExists of class_kind
   | VerifyParamType of param_id
   | VerifyOutType of param_id

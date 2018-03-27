@@ -495,20 +495,21 @@ and emit_using env pos is_block_scoped has_await e b =
         env pos ~verify_return:!verify_return ~verify_out:!verify_out
         jump_instructions finally_end
     in
-    let cleanup_local =
-      gather [
-        instr_unsetl (Local.get_label_id_local ());
-        instr_unsetl (Local.get_retval_local ()) ] in
-    let fault = gather [
-      Emit_pos.emit_pos (fst b);
-      cleanup_local;
-      finally;
-      Emit_pos.emit_pos pos;
-      instr_unwind ] in
-    let fault_label = Label.next_fault () in
+    let exn_local = Local.get_unnamed_local () in
+    let after_catch = Label.next_regular() in
     let middle =
       if is_empty_block b then empty
-      else instr_try_fault fault_label body fault
+      else gather [
+        instr_try_catch_begin;
+          body;
+          instr_jmp after_catch;
+        instr_try_catch_middle;
+          emit_pos (fst b);
+          make_finally_catch exn_local finally;
+          emit_pos pos;
+        instr_try_catch_end;
+        instr_label after_catch;
+      ]
     in
     gather [
       preamble;
@@ -689,8 +690,10 @@ and emit_try_finally env pos try_block finally_block =
     emit_try_finally_ env pos try_block finally_block
 
 and emit_try_finally_ env pos try_block finally_block =
-  let finally_body = Emit_env.do_in_finally_body env finally_block emit_stmt in
-  if is_empty_block try_block then finally_body
+  let make_finally_body () =
+    Emit_env.do_in_finally_body env finally_block emit_stmt
+  in
+  if is_empty_block try_block then make_finally_body ()
   else
   (*
   We need to generate four things:
@@ -698,7 +701,7 @@ and emit_try_finally_ env pos try_block finally_block =
   (2) the normal-continuation finally body, and
   (3) an epilogue to the finally body that deals with finally-blocked
       break and continue
-  (4) the exceptional-continuation fault body.
+  (4) the exceptional-continuation catch body.
   *)
 
   (* (1) Try body
@@ -734,7 +737,7 @@ and emit_try_finally_ env pos try_block finally_block =
   exceptional-continuation cases; we generate the same code twice.
 
   TODO: We might consider changing the codegen so that the finally block
-  is only generated once. We could do this by making the fault block set a
+  is only generated once. We could do this by making the catch block set a
   temp local to -1, and then branch to the finally block. In the finally block
   epilogue it can check to see if the local is -1, and if so, issue an unwind
   instruction.
@@ -746,8 +749,12 @@ and emit_try_finally_ env pos try_block finally_block =
 
   TODO: If we make this illegal at parse time then we can remove this pass.
   *)
-  let finally_body_for_fault =
-    Label_rewriter.clone_with_fresh_regular_labels finally_body
+  let exn_local = Local.get_unnamed_local () in
+  let finally_body = make_finally_body () in
+  let finally_body_for_catch =
+    finally_body
+    |> Label_rewriter.clone_with_fresh_regular_labels
+    |> strip_fault_bodies
   in
 
   (* (3) Finally epilogue *)
@@ -758,41 +765,57 @@ and emit_try_finally_ env pos try_block finally_block =
       jump_instructions finally_end
   in
 
-  (* (4) Fault body
+  (* (4) Catch body
 
-  We now emit the fault body; it is just cleanup code for the temp_local,
+  We now emit the catch body; it is just cleanup code for the temp_local,
   a copy of the finally body (without the branching epilogue, since we are
   going to unwind rather than branch), and an unwind instruction.
 
   TODO: The HHVM emitter sometimes emits seemingly spurious
-  unset-unnamed-local instructions into the fault block.  These look
+  unset-unnamed-local instructions into the catch block.  These look
   like bugs in the emitter. Investigate; if they are bugs in the HHVM
   emitter, get them fixed there. If not, get a clear explanation of
   what they are for and why they are required.
   *)
-
-  let cleanup_local =
-    gather [
+  let after_catch = Label.next_regular() in
+  let middle = gather [
+    instr_try_catch_begin;
+      try_body;
+      instr_jmp after_catch;
+    instr_try_catch_middle;
       emit_pos enclosing_span;
-      instr_unsetl (Local.get_label_id_local ());
-      instr_unsetl (Local.get_retval_local ())
-    ]
+      make_finally_catch exn_local finally_body_for_catch;
+    instr_try_catch_end;
+    instr_label after_catch;
+  ]
   in
-  let fault_body = gather [
-      cleanup_local;
-      finally_body_for_fault;
-      Emit_pos.emit_pos enclosing_span;
-      instr_unwind;
-    ] in
-  let fault_label = Label.next_fault () in
   (* Put it all together. *)
   gather [
-    instr_try_fault fault_label try_body fault_body;
+    middle;
     instr_label finally_start;
     Emit_pos.emit_pos (fst finally_block);
     finally_body;
     finally_epilogue;
     instr_label finally_end;
+  ]
+
+and make_finally_catch exn_local finally_body =
+  let after_catch = Label.next_regular() in
+  gather [
+    instr_popl exn_local;
+    instr_unsetl (Local.get_label_id_local ());
+    instr_unsetl (Local.get_retval_local ());
+    instr_try_catch_begin;
+      finally_body;
+      instr_jmp after_catch;
+    instr_try_catch_middle;
+      instr_pushl exn_local;
+      instr_chain_faults;
+      instr_throw;
+    instr_try_catch_end;
+    instr_label after_catch;
+    instr_pushl exn_local;
+    instr_throw;
   ]
 
 and is_mutable_iterator iterator =

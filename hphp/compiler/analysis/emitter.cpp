@@ -594,12 +594,11 @@ struct Region {
     Global,
     // Function body / method body entry.
     FuncBody,
-    // Entry for finally fault funclets emitted after the body of
-    // a function
-    FaultFunclet,
-    // Region protected by a finally clause
+    // Catch block containing a copy of the finally body.
+    FinallyCatch,
+    // Region protected by a finally clause.
     TryFinally,
-    // Finally block entry (begins after catches ends after finally)
+    // Finally block entry (begins after catches ends after finally).
     Finally,
     // Loop or switch statement.
     LoopOrSwitch,
@@ -626,7 +625,10 @@ struct Region {
 
   bool isForeach() { return m_iterId != -1; }
   bool isTryFinally() { return m_kind == Region::Kind::TryFinally; }
-  bool isFinally() { return m_kind == Region::Kind::Finally; }
+  bool isFinally() {
+    return m_kind == Region::Kind::Finally ||
+      m_kind == Region::Kind::FinallyCatch;
+  }
 
   bool isBreakUsed(int i) {
     auto it = m_breakTargets.find(i);
@@ -3089,43 +3091,42 @@ bool EmitterVisitor::emitTryCatch(
   return finally != nullptr;
 }
 
-struct FinallyThunklet final : Thunklet {
-  explicit FinallyThunklet(LabelScopePtr labelScope,
-                           std::function<void(Emitter&)> body,
-                           int numLiveIters)
-      : m_labelScope(std::move(labelScope))
-      , m_body(std::move(body))
-      , m_numLiveIters(numLiveIters)
-  {}
-
-  void emit(Emitter& e) override {
-    auto& visitor = e.getEmitterVisitor();
-    auto region =
-      visitor.createRegion(m_labelScope, Region::Kind::FaultFunclet);
-    visitor.enterRegion(region);
-    SCOPE_EXIT { visitor.leaveRegion(region); };
-    visitor.emitUnsetL(e, visitor.getStateLocal());
-    visitor.emitUnsetL(e, visitor.getRetLocal());
-    auto func = visitor.getFuncEmitter();
-    int oldNumLiveIters = func->numLiveIterators();
-    func->setNumLiveIterators(m_numLiveIters);
-    SCOPE_EXIT { func->setNumLiveIterators(oldNumLiveIters); };
-    m_body(e);
-    e.Unwind();
-  }
-private:
-  LabelScopePtr m_labelScope;
-  std::function<void(Emitter&)> m_body;
-  int m_numLiveIters;
-};
-
 void EmitterVisitor::emitPendingFinally(Emitter& e) {
   assertx(!m_pendingFinallies.empty());
   auto info = std::move(m_pendingFinallies.back());
   m_pendingFinallies.pop_back();
 
-  auto const endCatches = m_ue.bcPos();
   leaveRegion(info.tryRegion);
+
+  if (info.tryStart != m_ue.bcPos()) {
+    auto catchBody = [&] {
+      auto const exn = m_curFunc->allocUnnamedLocal();
+      m_evalStack.pop();
+      emitVirtualLocal(exn);
+      m_evalStack.push(StackSym::C);
+      e.PopL(exn);
+      emitUnsetL(e, getStateLocal());
+      emitUnsetL(e, getRetLocal());
+
+      auto region = createRegion(info.labelScope, Region::Kind::FinallyCatch);
+      enterRegion(region);
+      SCOPE_EXIT { leaveRegion(region); };
+      auto const bodyStart = e.getUnitEmitter().bcPos();
+      info.body(e);
+      auto innerCatch = [&] {
+        emitVirtualLocal(exn);
+        e.PushL(exn);
+        e.ChainFaults();
+      };
+      emitCatch(e, bodyStart, innerCatch);
+
+      emitVirtualLocal(exn);
+      e.PushL(exn);
+      m_curFunc->freeUnnamedLocal(exn);
+    };
+    emitCatch(e, info.tryStart, catchBody);
+  }
+
   if (info.tryRegion->m_finallyLabel.isUsed()) {
     info.tryRegion->m_finallyLabel.set(e);
   }
@@ -3139,17 +3140,6 @@ void EmitterVisitor::emitPendingFinally(Emitter& e) {
   }
 
   emitFinallyEpilogue(e, info.tryRegion.get());
-
-  if (info.tryStart != endCatches) {
-    auto func = getFunclet(info.memoKey);
-    if (func == nullptr) {
-      auto thunklet =
-        new FinallyThunklet(info.labelScope, std::move(info.body),
-                            m_curFunc->numLiveIterators());
-      func = addFunclet(info.memoKey, thunklet);
-    }
-    newFaultRegion(info.tryStart, endCatches, &func->m_entry);
-  }
 }
 
 void EmitterVisitor::emitUsingFinally(Emitter& e, Id localId,
@@ -3465,7 +3455,7 @@ RegionPtr EmitterVisitor::createRegion(StatementPtr s, Region::Kind kind) {
 
 RegionPtr EmitterVisitor::createRegion(LabelScopePtr ls, Region::Kind kind) {
   RegionPtr parent = nullptr;
-  if (kind != Region::Kind::FuncBody && kind != Region::Kind::FaultFunclet &&
+  if (kind != Region::Kind::FuncBody && kind != Region::Kind::FinallyCatch &&
       kind != Region::Kind::Global && !m_regions.empty()) {
     parent = m_regions.back();
   }

@@ -6182,6 +6182,23 @@ OPTBLD_INLINE void iopCatch() {
   vmStack().pushObjectNoRc(fault.m_userException);
 }
 
+OPTBLD_INLINE void iopChainFaults() {
+  auto const current = *vmStack().indC(1);
+  auto const prev = *vmStack().indC(0);
+  if (!isObjectType(current.m_type) ||
+      !current.m_data.pobj->instanceof(SystemLib::s_ThrowableClass) ||
+      !isObjectType(prev.m_type) ||
+      !prev.m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
+    raise_error(
+      "Inputs to ChainFault must be objects that implement Throwable"
+    );
+  }
+
+  // chainFaultObjects takes ownership of a reference to prev.
+  vmStack().discard();
+  chainFaultObjects(current.m_data.pobj, prev.m_data.pobj);
+}
+
 OPTBLD_INLINE void iopLateBoundCls(clsref_slot slot) {
   Class* cls = frameStaticClass(vmfp());
   if (!cls) {

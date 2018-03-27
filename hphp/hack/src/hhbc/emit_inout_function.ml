@@ -162,7 +162,7 @@ let emit_wrapper_function
   Local.reset_local @@ List.length decl_vars + List.length params;
   let body_instrs =
     emit_body_instrs ~wrapper_type env ast_fun.Ast.f_span params call_instrs in
-  let fault_instrs = extract_fault_instructions body_instrs in
+  let fault_instrs = extract_fault_funclets body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
   let doc = ast_fun.A.f_doc_comment in
   let body =
@@ -253,7 +253,7 @@ let emit_wrapper_method
   Local.reset_local @@ List.length decl_vars + List.length params;
   let body_instrs =
     emit_body_instrs ~wrapper_type env ast_method.Ast.m_span params call_instrs in
-  let fault_instrs = extract_fault_instructions body_instrs in
+  let fault_instrs = extract_fault_funclets body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
   let params =
     if wrapper_type = Emit_inout_helpers.InoutWrapper then

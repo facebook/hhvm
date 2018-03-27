@@ -584,6 +584,7 @@ let string_of_misc instruction =
     | VerifyRetTypeC -> "VerifyRetTypeC"
     | VerifyRetTypeV -> "VerifyRetTypeV"
     | Catch -> "Catch"
+    | ChainFaults -> "ChainFaults"
     | CheckThis -> "CheckThis"
     | IsUninit -> "IsUninit"
     | CGetCUNop -> "CGetCUNop"

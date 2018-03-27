@@ -95,6 +95,7 @@ let instr_retv = instr (IContFlow RetV)
 let instr_null = instr (ILitConst Null)
 let instr_nulluninit = instr (ILitConst NullUninit)
 let instr_catch = instr (IMisc Catch)
+let instr_chain_faults = instr (IMisc ChainFaults)
 let instr_dup = instr (IBasic Dup)
 let instr_nop = instr (IBasic Nop)
 let instr_instanceofd s = instr (IOp (InstanceOfD s))
@@ -433,39 +434,35 @@ let instr_try_catch_begin = instr (ITry TryCatchBegin)
 let instr_try_catch_middle = instr (ITry TryCatchMiddle)
 let instr_try_catch_end = instr (ITry TryCatchEnd)
 
-(*  Note that at this time we do NOT want to recurse on the instruction
-    sequence in the fault block. Why not?  Consider:
-    try { x } finally { try { y } finally { z } }
-    We make a copy of the code generated for "try { y } finally { z }" in
-    both the "finally" code which follows try-fault F1 { x }, and in
-    the fault block for the outer try. Which means that now there are two
-    places in the code where there is a TryFaultBegin instruction for the
-    *inner*  try. We don't want to detect it twice and generate fault blocks
-    twice.
-
-    This means that if we ever synthesize a fault-only try-fault, without
-    a finally block copying its contents, and that fault block itself
-    contains a try-fault or try-finally, then the fault block of the inner
-    try-fault will never be detected here. Right now we never do that; we
-    only generate synthetic try-faults for simple cleanup operations. If we
-    ever do generate nested try-faults then we'll need a more sophisticated
-    algorithm here to ensure that each fault block is emitted once.
- *)
-let extract_fault_instructions instrseq =
+(* Return a list of all fault funclets in instrseq, to be emitted after the
+function's main body. *)
+let extract_fault_funclets instrseq =
   let rec aux instrseq acc =
     match instrseq with
     | Instr_empty
     | Instr_one _ -> acc
     | Instr_try_fault (try_body, fault_body) ->
-    (* collect fault handlers in try body, then prepend
+    (* collect fault handlers in try body and fault body, then prepend
        the outer fault handler *)
-      fault_body :: aux try_body acc
+      fault_body :: aux fault_body (aux try_body acc)
     | Instr_list _ -> acc
     | Instr_concat ([]) -> acc
     | Instr_concat (h :: t) -> aux (Instr_concat t) (aux h acc) in
   (* fault handlers are accumulated in reverse so result list needs to
      be reversed to get the correct order *)
   gather (List.rev @@ aux instrseq [])
+
+(* Return a copy of instrseq with any fault bodies stripped out. This is used
+when we copy the body of a finally block, to avoid generating two copies of the
+fault body. *)
+let rec strip_fault_bodies instrseq =
+  match instrseq with
+  | Instr_empty
+  | Instr_one _
+  | Instr_list _ -> instrseq
+  | Instr_concat l -> Instr_concat (List.map l strip_fault_bodies)
+  | Instr_try_fault (try_body, _) ->
+      Instr_try_fault (strip_fault_bodies try_body, Instr_empty)
 
 let get_num_cls_ref_slots instrseq =
   InstrSeq.fold_left
@@ -806,7 +803,7 @@ let get_input_output_count i =
     end
   | IMisc i ->
     begin match i with
-    | This | BareThis _ | StaticLocCheck _ | Catch | ClsRefName _
+    | This | BareThis _ | StaticLocCheck _ | Catch | ChainFaults | ClsRefName _
     | GetMemoKeyL _ -> (0, 1)
     | CheckThis | InitThisLoc _ | VerifyParamType _ | Self _ | Parent _
     | LateBoundCls _ | NativeImpl | IncStat _ | AssertRATL _ | AssertRATStk _

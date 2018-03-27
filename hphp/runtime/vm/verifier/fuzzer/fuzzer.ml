@@ -581,7 +581,7 @@ let mutate_reorder (input : HP.t) : mutation_monad =
     (* Reattach fault regions that were discarded by converting to list *)
     IS.gather [IS.InstrSeq.flat_map (IS.Instr_list newseq)
                (maintain_stack (seq_data is) Hh_core.List.return);
-               IS.extract_fault_instructions is] in
+               IS.extract_fault_funclets is] in
   Nondet.return input |> mutate mut input !reorder_reps
 
 (* This will randomly remove some of the instructions in a sequence. *)
@@ -612,7 +612,7 @@ let mutate_exceptions (input : HP.t) : mutation_monad =
            let body, faults = subinstrs start end_pos |> IS.instrs |> f in
            IS.gather [subinstrs (-1) start |> IS.instrs; body;
                       subinstrs end_pos (primary_len - 1) |> IS.instrs;
-                      IS.extract_fault_instructions is; faults]
+                      IS.extract_fault_funclets is; faults]
          with Invalid_argument _ -> new_exn_region f is in
   let make_fault (label : Label.t) (body : IS.t) : IS.t * IS.t =
     let open IS in gather [ITry (TryFaultBegin label) |> instr; body;

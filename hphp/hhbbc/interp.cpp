@@ -1554,6 +1554,10 @@ void in(ISS& env, const bc::Catch&) {
   return push(env, subObj(env.index.builtin_class(s_Throwable.get())));
 }
 
+void in(ISS& env, const bc::ChainFaults&) {
+  popC(env);
+}
+
 void in(ISS& env, const bc::NativeImpl&) {
   killLocals(env);
   mayUseVV(env);

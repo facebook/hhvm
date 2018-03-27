@@ -517,7 +517,7 @@ let emit_body
     stmt_instrs;
     default_value_setters;
   ] in
-  let fault_instrs = extract_fault_instructions body_instrs in
+  let fault_instrs = extract_fault_funclets body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
   make_body_
     function_directives_opt

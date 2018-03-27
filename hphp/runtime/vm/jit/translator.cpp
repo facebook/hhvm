@@ -398,6 +398,7 @@ static const struct {
   { OpStaticLocInit,
                    {Stack1,           Local,        OutVUnknown     }},
   { OpCatch,       {None,             Stack1,       OutObject       }},
+  { OpChainFaults, {StackTop2,        Stack1,       OutObject       }},
   { OpVerifyParamType,
                    {Local,            Local,        OutUnknown      }},
   { OpVerifyRetTypeV,
@@ -1164,6 +1165,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::DefClsNop:
   case Op::DefTypeAlias:
   case Op::Catch:
+  case Op::ChainFaults:
   case Op::ContAssignDelegate:
   case Op::ContEnterDelegate:
   case Op::YieldFromDelegate:

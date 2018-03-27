@@ -4005,6 +4005,14 @@ Catch    []  ->  [C:Obj]
   The exception object must implement the builtin Throwable interface. This
   instruction may only be used at the beginning of a catch entry point.
 
+ChainFaults    [C C]  ->  [C]
+
+  Chain fault objects. If either $1 or $2 is not an object that implements
+  Throwable, raise a fatal error. Otherwise, start at $1 and walk the chain of
+  "previous" properties until an unset one is found. Set that property to $2,
+  unless the previous chain of $1 or $2 forms a cycle. In either case, $1 is
+  left on the top of the stack.
+
 OODeclExists <Class|Interface|Trait> [C C]  ->  [C:Bool]
 
   Check for class/interface/trait existence. If $1 cannot be cast to a bool or

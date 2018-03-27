@@ -642,7 +642,8 @@ let check_instruct_misc asn i i' =
     None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | This, _ | BareThis _, _ | CheckThis, _ | Catch, _ | OODeclExists _, _
+  | This, _ | BareThis _, _ | CheckThis, _ | Catch, _ | ChainFaults, _
+  | OODeclExists _, _
   | VerifyParamType _, _ | VerifyRetTypeC, _ | VerifyRetTypeV, _ | Self _, _
   | Parent _, _ | LateBoundCls _, _ | ClsRefName _, _ | NativeImpl, _
   | VerifyOutType _, _

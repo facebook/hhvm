@@ -321,8 +321,6 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   return phpException;
 }
 
-namespace {
-
 const StaticString s_previous("previous");
 const Slot s_previousIdx{6};
 
@@ -338,43 +336,6 @@ DEBUG_ONLY bool throwable_has_expected_props() {
   return
     erCls->lookupDeclProp(s_previous.get()) == s_previousIdx &&
     exCls->lookupDeclProp(s_previous.get()) == s_previousIdx;
-}
-
-}
-
-void chainFaultObjects(ObjectData* top, ObjectData* prev) {
-  assertx(throwable_has_expected_props());
-
-  // We don't chain the fault objects if there is a cycle in top, prev, or the
-  // resulting chained fault object.
-  std::unordered_set<uintptr_t> seen;
-
-  // Walk head's previous pointers untill we find an unset one, or determine
-  // they form a cycle.
-  auto findAcyclicPrev = [&](ObjectData* head) {
-    member_lval foundLval;
-    do {
-      assertx(is_throwable(head));
-
-      if (!seen.emplace((uintptr_t)head).second) {
-        decRefObj(prev);
-        return member_lval();
-      }
-
-      foundLval = head->propLvalAtOffset(s_previousIdx);
-      assertx(foundLval.type() != KindOfUninit);
-      head = foundLval.val().pobj;
-    } while (foundLval.type() == KindOfObject &&
-             foundLval.val().pobj->instanceof(SystemLib::s_ThrowableClass));
-    return foundLval;
-  };
-
-  auto const prevLval = findAcyclicPrev(top);
-  if (!prevLval || !findAcyclicPrev(prev)) return;
-
-  // Found an unset previous pointer, and result will not have a cycle so chain
-  // the fault objects.
-  tvSetIgnoreRef(make_tv<KindOfObject>(prev), prevLval);
 }
 
 bool chainFaults(Fault& fault) {
@@ -405,6 +366,41 @@ const StaticString s_xdebug_start_code_coverage("xdebug_start_code_coverage");
 
 //////////////////////////////////////////////////////////////////////
 
+}
+
+void chainFaultObjects(ObjectData* top, ObjectData* prev) {
+  assertx(throwable_has_expected_props());
+
+  // We don't chain the fault objects if there is a cycle in top, prev, or the
+  // resulting chained fault object.
+  std::unordered_set<uintptr_t> seen;
+
+  // Walk head's previous pointers untill we find an unset one, or determine
+  // they form a cycle.
+  auto findAcyclicPrev = [&](ObjectData* head) {
+    member_lval foundLval;
+    do {
+      assertx(is_throwable(head));
+
+      if (!seen.emplace((uintptr_t)head).second) return member_lval();
+
+      foundLval = head->propLvalAtOffset(s_previousIdx);
+      assertx(foundLval.type() != KindOfUninit);
+      head = foundLval.val().pobj;
+    } while (foundLval.type() == KindOfObject &&
+             foundLval.val().pobj->instanceof(SystemLib::s_ThrowableClass));
+    return foundLval;
+  };
+
+  auto const prevLval = findAcyclicPrev(top);
+  if (!prevLval || !findAcyclicPrev(prev)) {
+    decRefObj(prev);
+    return;
+  }
+
+  // Found an unset previous pointer, and result will not have a cycle so chain
+  // the fault objects.
+  tvMoveIgnoreRef(make_tv<KindOfObject>(prev), prevLval);
 }
 
 /*

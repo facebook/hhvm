@@ -62,6 +62,16 @@ void unwindBuiltinFrame();
  */
 template<class Action> void exception_handler(Action action);
 
+/*
+ * top and prev must implement Throwable. Walk the chain of top's previous
+ * pointers, finding the first unset one. If there is a cycle in either top or
+ * prev's previous chains, do nothing. Otherwise, add prev to the end of top's
+ * previous chain.
+ *
+ * Either way, this function takes ownership of one existing reference to prev.
+ */
+void chainFaultObjects(ObjectData* top, ObjectData* prev);
+
 //////////////////////////////////////////////////////////////////////
 
 /*

@@ -1761,10 +1761,12 @@ function dump_repo_to_hhas_files($test, $program, $hhas_target) {
 }
 
 function dump_hhas_cmd($hhvm_cmd, $test) {
-  $cmd = str_replace(
-    ' -- ', ' -m dumphhas -vEval.AllowHhas=1 -- ', $hhvm_cmd
-  );
-  if ($cmd == $hhvm_cmd) $cmd .= " -m dumphhas -vEval.AllowHhas=1";
+  $dump_flags = implode(' ', array(
+    '-m dumphhas',
+    '-vEval.LoadFilepathFromUnitCache=0',
+  ));
+  $cmd = str_replace(' -- ', " $dump_flags -- ", $hhvm_cmd);
+  if ($cmd == $hhvm_cmd) $cmd .= " $dump_flags";
   return $cmd;
 }
 

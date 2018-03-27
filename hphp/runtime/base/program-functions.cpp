@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/base/program-functions.h"
 
 #include "hphp/runtime/base/array-init.h"
@@ -116,6 +117,15 @@
 #include <boost/filesystem.hpp>
 
 #include <oniguruma.h>
+// Onigurama defines UChar to unsigned char, but ICU4C defines it to signed
+// 16-bit int. This is supposed to be resolved by ONIG_ESCAPE_UCHAR_COLLISION,
+// however this isn't fully supported in 6.8.0 or 6.8.1.
+//
+// As of 2018-03-21, not in any release; hopefully will be in 6.8.2 - it's
+// resolved by this commit:
+//
+// https://github.com/kkos/oniguruma/commit/e79406479b6be4a56e40ede6c1a87b51fba073a2
+#undef UChar
 #include <signal.h>
 #include <libxml/parser.h>
 

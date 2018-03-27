@@ -3331,8 +3331,8 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const String& pattern,
     rc = it->second;
   }
 
-  if (!rc || rc->options != options || rc->enc != enc ||
-      rc->syntax != syntax) {
+  if (!rc || onig_get_options(rc) != options || onig_get_encoding(rc) != enc ||
+      onig_get_syntax(rc) != syntax) {
     if (rc) {
       onig_free(rc);
       rc = nullptr;

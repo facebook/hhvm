@@ -20,9 +20,6 @@
 #include "hphp/runtime/base/types.h"
 #include <boost/program_options/parsers.hpp>
 
-// Needed for compatibility with oniguruma-5.9.4+
-#define ONIG_ESCAPE_UCHAR_COLLISION
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

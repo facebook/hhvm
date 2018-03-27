@@ -12,6 +12,14 @@ module J = Hh_json
 module SU = Hhbc_string_utils
 module FSC = Facts_smart_constructors
 
+module InvStringKey = struct
+  type t = string
+  let compare (x: t) (y: t) = Pervasives.compare y x
+end
+
+module InvSMap = MyMap.Make(InvStringKey)
+module InvSSet = Set.Make(InvStringKey)
+
 module FactsParser_ = Full_fidelity_parser
   .WithSyntax(Full_fidelity_positioned_syntax)
 module FactsParser = FactsParser_
@@ -34,14 +42,14 @@ let type_kind_to_string = function
   | TKMixed -> "mixed"
 
 type type_facts =
-{ base_types: SSet.t
+{ base_types: InvSSet.t
 ; kind: type_kind
 ; flags: int
-; require_extends: SSet.t
-; require_implements: SSet.t }
+; require_extends: InvSSet.t
+; require_implements: InvSSet.t }
 
 type facts =
-{ types: type_facts SMap.t
+{ types: type_facts InvSMap.t
 ; functions: string list
 ; constants: string list
 ; type_aliases: string list }
@@ -111,7 +119,7 @@ let flags_from_modifiers modifiers =
 
 let add_or_update_classish_declaration types name kind flags base_types
   require_extends require_implements =
-  match SMap.get name types with
+  match InvSMap.get name types with
   | Some old_tf ->
     let tf =
       if old_tf.kind <> kind then { old_tf with kind = TKMixed }
@@ -124,41 +132,41 @@ let add_or_update_classish_declaration types name kind flags base_types
       if tf.flags = flags then tf
       else combine_flags tf flags in
     let tf =
-      if SSet.is_empty base_types
+      if InvSSet.is_empty base_types
       then tf
       else {
         tf with base_types =
-          SSet.union base_types tf.base_types } in
+          InvSSet.union base_types tf.base_types } in
     let tf =
-      if SSet.is_empty require_extends
+      if InvSSet.is_empty require_extends
       then tf
       else {
         tf with require_extends =
-          SSet.union require_extends tf.require_extends } in
+          InvSSet.union require_extends tf.require_extends } in
     let tf =
-      if SSet.is_empty require_implements
+      if InvSSet.is_empty require_implements
       then tf
       else {
         tf with require_implements =
-          SSet.union require_implements tf.require_implements } in
+          InvSSet.union require_implements tf.require_implements } in
 
     if tf == old_tf then types
-    else SMap.add name tf types
+    else InvSMap.add name tf types
 
   | None ->
     let base_types =
       if kind = TKEnum
-      then SSet.add "HH\\BuiltinEnum" base_types
+      then InvSSet.add "HH\\BuiltinEnum" base_types
       else base_types in
     let tf =
       { base_types; flags; kind; require_extends; require_implements } in
-    SMap.add name tf types
+    InvSMap.add name tf types
 
 let typenames_from_list ns init l =
   let open FSC in
   let aux s n =
     match qualified_name ns n with
-    | Some n -> SSet.add n s
+    | Some n -> InvSSet.add n s
     | None -> s in
   match l with
   | List l -> Core_list.fold_left l ~init ~f:aux
@@ -183,12 +191,12 @@ let type_info_from_class_body facts ns check_require body =
     match n with
     | RequireExtendsClause name when check_require ->
       begin match qualified_name ns name with
-      | Some name -> SSet.add name extends, implements, trait_uses, constants
+      | Some name -> InvSSet.add name extends, implements, trait_uses, constants
       | None -> acc
       end
     | RequireImplementsClause name when check_require ->
       begin match qualified_name ns name with
-      | Some name -> extends, SSet.add name implements, trait_uses, constants
+      | Some name -> extends, InvSSet.add name implements, trait_uses, constants
       | None -> acc
       end
     | TraitUseClause uses ->
@@ -199,7 +207,7 @@ let type_info_from_class_body facts ns check_require body =
       let constants = defines_from_method_body constants body in
       extends, implements, trait_uses, constants
     | _ -> acc in
-  let init = SSet.empty, SSet.empty, SSet.empty, facts.constants in
+  let init = InvSSet.empty, InvSSet.empty, InvSSet.empty, facts.constants in
   let extends, implements, trait_uses, constants =
     match body with
     | List l -> Core_list.fold_left l ~init ~f:aux
@@ -248,7 +256,7 @@ let rec collect (ns, facts as acc) n =
     | Some name ->
       let types =
         add_or_update_classish_declaration facts.types name
-          TKEnum flags_final SSet.empty SSet.empty SSet.empty in
+          TKEnum flags_final InvSSet.empty InvSSet.empty InvSSet.empty in
       let facts =
         if types == facts.types
         then facts
@@ -299,10 +307,10 @@ let hex_number_to_json s =
   J.JSON_Number number
 
 let add_member ~include_empty name values members =
-  if SSet.is_empty values && not include_empty
+  if InvSSet.is_empty values && not include_empty
   then members
   else
-  let elements = SSet.fold (fun el acc -> J.JSON_String el :: acc ) values [] in
+  let elements = InvSSet.fold (fun el acc -> J.JSON_String el :: acc ) values [] in
   (name, J.JSON_Array elements) :: members
 
 let list_to_json_array l =
@@ -312,10 +320,10 @@ let list_to_json_array l =
 
 let type_facts_to_json name tf =
   let members =
-    add_member ~include_empty:(tf.kind = TKTrait)
-      "requireImplements" tf.require_implements []
-    |> add_member ~include_empty:(tf.kind = TKInterface || tf.kind = TKTrait)
-      "requireExtends" tf.require_extends
+    add_member ~include_empty:(tf.kind = TKInterface || tf.kind = TKTrait)
+    "requireExtends" tf.require_extends []
+    |> add_member ~include_empty:(tf.kind = TKTrait)
+      "requireImplements" tf.require_implements
     |> add_member ~include_empty:true "baseTypes" tf.base_types in
   let members =
     ("name", J.JSON_String name)::
@@ -331,7 +339,7 @@ let facts_to_json md5 facts =
     "md5sum1", hex_number_to_json (String.sub md5 16 16) in
   let type_facts_json =
     let elements =
-      SMap.fold (fun name v acc -> (type_facts_to_json name v) :: acc)
+      InvSMap.fold (fun name v acc -> (type_facts_to_json name v) :: acc)
         facts.types [] in
     "types", J.JSON_Array elements in
   let functions_json =
@@ -355,7 +363,7 @@ let from_text php5_compat_mode s =
     let p = FactsParser.make env text in
     FactsParser.parse_script p in
   let initial_facts = {
-    types = SMap.empty;
+    types = InvSMap.empty;
     functions = [];
     constants = [];
     type_aliases = []

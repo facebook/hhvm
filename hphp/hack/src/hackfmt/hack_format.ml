@@ -440,37 +440,43 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
         t env kw;
         Space;
-        Split;
+        SplitWith Cost.Base;
         Nest [
           t env name;
           t env type_params;
         ];
       ];
 
-      when_present extends_kw (fun () -> Concat [
-        Space;
-        Split;
-        WithRule (Rule.Parental, Nest [ Span [
+      WithRule (Rule.Parental, Concat [
+        when_present extends_kw (fun () -> Nest [
+          Space;
+          Split;
           t env extends_kw;
-          Space;
-          Split;
-          WithRule (Rule.Parental, Nest [
-            handle_possible_list env ~after_each:after_each_ancestor extends
-          ])
-        ]])
-      ]);
+          WithRule (Rule.Parental, Nest [ Span [
+            Space;
+            if list_length extends = 1
+            then SplitWith Cost.Base
+            else Split;
+            Nest [
+              handle_possible_list env ~after_each:after_each_ancestor extends
+            ]
+          ]])
+        ]);
 
-      when_present impl_kw (fun () -> Concat [
-        Space;
-        Split;
-        WithRule (Rule.Parental, Nest [ Span [
-          t env impl_kw;
+        when_present impl_kw (fun () -> Nest [
           Space;
           Split;
-          WithRule (Rule.Parental, Nest [
-            handle_possible_list env ~after_each:after_each_ancestor impls
-          ])
-        ]])
+          t env impl_kw;
+          WithRule (Rule.Parental, Nest [ Span [
+            Space;
+            if list_length impls = 1
+            then SplitWith Cost.Base
+            else Split;
+            Nest [
+              handle_possible_list env ~after_each:after_each_ancestor impls
+            ]
+          ]])
+        ]);
       ]);
       t env body;
     ]
@@ -2340,6 +2346,12 @@ and handle_list env
     | [] -> Nothing
   ) in
   aux list
+
+and list_length node =
+  match Syntax.syntax node with
+  | Syntax.Missing -> 0
+  | Syntax.SyntaxList x -> List.length x
+  | _ -> 1
 
 and handle_possible_list env
     ?(before_each=(fun () -> Nothing))

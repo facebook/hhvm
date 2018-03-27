@@ -46,6 +46,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/verifier/check.h"
 
+#include "hphp/util/logger.h"
 #include "hphp/util/md5.h"
 #include "hphp/util/read-only-arena.h"
 #include "hphp/util/trace.h"
@@ -53,6 +54,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <folly/Memory.h>
+#include <folly/FileUtil.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -743,8 +745,19 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
 
   if (RuntimeOption::EvalDumpHhas > 1 ||
     (SystemLib::s_inited && RuntimeOption::EvalDumpHhas == 1)) {
-    std::printf("%s", disassemble(u.get()).c_str());
-    std::fflush(stdout);
+    auto const& hhaspath = RuntimeOption::EvalDumpHhasToFile;
+    if (!hhaspath.empty()) {
+      static std::atomic<bool> first_unit{true};
+      auto const flags = O_WRONLY | O_CREAT | (first_unit ? O_TRUNC : O_APPEND);
+      if (!folly::writeFile(disassemble(u.get()), hhaspath.c_str(), flags)) {
+        Logger::Error("Failed to write hhas to %s", hhaspath.c_str());
+        _Exit(1);
+      }
+      first_unit = false;
+    } else {
+      std::printf("%s", disassemble(u.get()).c_str());
+      std::fflush(stdout);
+    }
     if (SystemLib::s_inited) {
       _Exit(0);
     }

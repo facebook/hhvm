@@ -595,30 +595,27 @@ module Full = struct
     in
     let body =
       let open SymbolOccurrence in
-      match occurrence with
-      | { type_ = Class; name; _ } -> Concat [text "class "; text_strip_ns name]
+      match occurrence, x with
+      | { type_ = Class; name; _ }, _ -> Concat [text "class "; text_strip_ns name]
 
-      | { type_ = Function; name; _ }
-      | { type_ = Method (_, name); _ }
-      | { type_ = Property (_, name); _ }
-      | { type_ = ClassConst (_, name); _ }
-      | { type_ = GConst; name; _ } ->
+      | { type_ = Function; name; _ }, (_, Tfun ft)
+      | { type_ = Method (_, name); _ }, (_, Tfun ft) ->
         (* Use short names for function types since they display a lot more
            information to the user. *)
-        begin match x with
-        | (_, Tfun ft) ->
-          Concat [
-            text "function ";
-            text_strip_ns name;
-            fun_type text_strip_ns ISet.empty env ft;
-          ]
-        | _ ->
-          Concat [
-            ty text_strip_ns ISet.empty env x;
-            Space;
-            text_strip_ns (occurrence.name);
-          ]
-        end
+         Concat [
+           text "function ";
+           text_strip_ns name;
+           fun_type text_strip_ns ISet.empty env ft;
+         ]
+
+      | { type_ = Property _; name; _ }, _
+      | { type_ = ClassConst _; name; _ }, _
+      | { type_ = GConst; name; _ }, _ ->
+        Concat [
+          ty text_strip_ns ISet.empty env x;
+          Space;
+          text_strip_ns name;
+        ]
 
       | _ -> ty text_strip_ns ISet.empty env x
     in

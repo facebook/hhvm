@@ -19,8 +19,13 @@ let pos_at (line1, column1) (line2, column2) =
     (File_pos.of_line_column_offset line1 (column1 - 1) 0)
     (File_pos.of_line_column_offset line2 column2 0))
 
-let builtins = "<?hh // strict
-class Awaitable<T> {}"
+let builtins = "<?hh // decl
+class Awaitable<T> {}
+interface Traversable<+Tv> {}
+interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
+interface Container<+Tv> extends Traversable<Tv> {}
+interface KeyedContainer<+Tk, +Tv> extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
+function idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $collection, Tk $index, $default = null): ?Tv {}"
 
 let class_members = "<?hh // strict
 abstract class ClassMembers {
@@ -424,6 +429,25 @@ the other stars."; "Full name: `DocBlock::leadingStarsAndMDList`"];
   ]
 ]
 
+let special_cases = "<?hh // strict
+function special_cases(): void {
+  idx(array(1, 2, 3), 1);
+//^3:3
+}
+"
+
+let special_cases_cases = [
+  ("special_cases.php", 3, 3), [
+    {
+      (* Without the `ft` corresponding to the `Tfun`, we can't give any useful
+         information here :/ *)
+      snippet = "?int";
+      addendum = [];
+      pos = pos_at (3, 3) (3, 24);
+    }
+  ]
+]
+
 let files = [
   "builtins.php", builtins;
   "class_members.php", class_members;
@@ -431,10 +455,12 @@ let files = [
   "chained_calls.php", chained_calls;
   "classname_variable.php", classname_variable;
   "docblock.php", docblock;
+  "special_cases.php", special_cases;
 ]
 
 let cases =
-  docblockCases
+  special_cases_cases
+  @ docblockCases
   @ class_members_cases
   @ classname_call_cases
   @ chained_calls_cases

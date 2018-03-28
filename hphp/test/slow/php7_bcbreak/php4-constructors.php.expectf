@@ -1,0 +1,3 @@
+Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; MyClass has a deprecated constructor in %s/test/slow/php7_bcbreak/php4-constructors.php on line 26
+
+Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; derp has a deprecated constructor in %s/test/slow/php7_bcbreak/php4-constructors.php on line 21

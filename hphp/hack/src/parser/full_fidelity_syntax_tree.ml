@@ -106,15 +106,24 @@ let remove_duplicates errors equals =
   let result = aux errors [] in
   List.rev result
 
-let from_root text root errors =
+let process_errors errors =
   (* We've got the lexical errors and the parser errors together, both
   with lexically later errors earlier in the list. We want to reverse the
   list so that later errors come later, and then do a stable sort to put the
   lexical and parser errors together. *)
   let errors = List.rev errors in
   let errors = List.stable_sort SyntaxError.compare errors in
-  let errors = remove_duplicates errors SyntaxError.exactly_equal in
+  remove_duplicates errors SyntaxError.exactly_equal
+
+let from_root text root errors =
+  let errors = process_errors errors in
   let (language, mode) = get_language_and_mode text root in
+  { text; root; errors; language; mode }
+
+let create text root errors lang mode =
+  let errors = process_errors errors in
+  let language = FileInfo.string_of_file_type lang in
+  let mode = FileInfo.string_of_mode @@ Option.value ~default:FileInfo.Mphp mode in
   { text; root; errors; language; mode }
 
 let make_impl ?(env = Env.default) text =

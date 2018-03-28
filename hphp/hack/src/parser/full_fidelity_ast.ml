@@ -1550,6 +1550,12 @@ and pBlock : block parser = fun node env ->
 and pFunctionBody : block parser = fun node env ->
   match syntax node with
   | Missing -> []
+  | CompoundStatement {compound_statements = {syntax = Missing; _}; _} ->
+    [ Pos.none, Noop ]
+  | CompoundStatement {compound_statements = {syntax = SyntaxList [t]; _}; _}
+    when Syntax.is_specific_token TK.Yield t ->
+    env.saw_yield <- true;
+    [ Pos.none, Noop ]
   | CompoundStatement _ ->
     let block = pBlock node env in
     if not env.top_level_statements
@@ -2223,7 +2229,7 @@ and pClassElt : class_elt list parser = fun node env ->
           Option.some_if (not (is_missing aliased_name)) (pos_name aliased_name env)
         in
         ClassUseAlias (qualifier, name, aliased_name, modifiers)
-      | _ -> missing_syntax "trait use conflict resolution item" node env
+     | _ -> missing_syntax "trait use conflict resolution item" node env
     in
     (couldMap ~f:(fun n e ->
         ClassUse (pHint n e)) trait_use_conflict_resolution_names env)
@@ -2841,15 +2847,17 @@ let lower env ~source_text ~script : result =
 end (* FromPositionedSyntax *)
 
 (* TODO: Make these not default to positioned_syntax *)
-module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_positioned_syntax)
-module ParserErrors = Full_fidelity_parser_errors
-  .WithSyntax(Full_fidelity_positioned_syntax)
+module PosSyntax = Full_fidelity_positioned_syntax
+module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(PosSyntax)
+module ParserErrors = Full_fidelity_parser_errors.WithSyntax(PosSyntax)
 module SourceText = Full_fidelity_source_text
 module FromEditablePositionedSyntax =
   WithPositionedSyntax(Full_fidelity_editable_positioned_syntax)
-module FromPositionedSyntax =
-  WithPositionedSyntax(Full_fidelity_positioned_syntax)
+module FromPositionedSyntax = WithPositionedSyntax(PosSyntax)
+
+module DeclModeSC = DeclModeSmartConstructors.WithSyntax(PosSyntax)
+module DeclModeParser_ = Full_fidelity_parser.WithSyntax(PosSyntax)
+module DeclModeParser = DeclModeParser_.WithSmartConstructors(DeclModeSC)
 
 let from_text (env : env) (source_text : SourceText.t) : result =
   let lang, mode = Full_fidelity_parser.get_language_and_mode source_text in
@@ -2862,7 +2870,14 @@ let from_text (env : env) (source_text : SourceText.t) : result =
         ?mode:mode
         ()
     in
-    SyntaxTree.make ~env:env' source_text in
+    if env.quick_mode then
+      let parser = DeclModeParser.make env' source_text in
+      let (parser, root) = DeclModeParser.parse_script parser in
+      let errors = DeclModeParser.errors parser in
+      SyntaxTree.create source_text root errors lang mode
+    else
+      SyntaxTree.make ~env:env' source_text
+  in
   let () = if env.codegen && not env.lower_coroutines then
     let hhvm_compat_mode = if env.systemlib_compat_mode
       then ParserErrors.SystemLibCompat

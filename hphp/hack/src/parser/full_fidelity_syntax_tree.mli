@@ -16,6 +16,13 @@ val from_root :
   Syntax.t ->
   Full_fidelity_syntax_error.t list ->
   t
+val create :
+  Full_fidelity_source_text.t ->
+  Syntax.t ->
+  Full_fidelity_syntax_error.t list ->
+  FileInfo.file_type ->
+  FileInfo.mode option ->
+  t
 val root : t -> Syntax.t
 val text : t -> Full_fidelity_source_text.t
 val all_errors : t -> Full_fidelity_syntax_error.t list

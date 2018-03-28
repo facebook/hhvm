@@ -22,6 +22,7 @@
  *)
 
 module TriviaKind = Full_fidelity_trivia_kind
+module TokenKind = Full_fidelity_token_kind
 
 module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
@@ -1379,6 +1380,7 @@ module type Syntax_S = sig
   val is_list_item : t -> bool
 
 
+  val is_specific_token : TokenKind.t -> t -> bool
   val is_loop_statement : t -> bool
   val is_semicolon      : t -> bool
   val is_name           : t -> bool

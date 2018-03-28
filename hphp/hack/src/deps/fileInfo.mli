@@ -29,12 +29,15 @@ type file_type =
   | PhpFile
   | HhFile
 
+val string_of_file_type : file_type -> string
+
 type mode =
   | Mphp     (* Do the best you can to support legacy PHP *)
   | Mdecl    (* just declare signatures, don't check anything *)
   | Mstrict  (* check everything! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)
 
+val string_of_mode : mode -> string
 val pp_mode : Format.formatter -> mode -> unit
 
 (*****************************************************************************)

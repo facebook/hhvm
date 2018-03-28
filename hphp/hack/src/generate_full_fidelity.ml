@@ -489,6 +489,7 @@ module GenerateFFSyntaxSig = struct
   ") ^ "
 
 module TriviaKind = Full_fidelity_trivia_kind
+module TokenKind = Full_fidelity_token_kind
 
 module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
@@ -528,6 +529,7 @@ CONSTRUCTOR_METHODS
   val is_list : t -> bool
 TYPE_TESTS
 
+  val is_specific_token : TokenKind.t -> t -> bool
   val is_loop_statement : t -> bool
   val is_semicolon      : t -> bool
   val is_name           : t -> bool

@@ -29,11 +29,21 @@ type file_type =
   | PhpFile
   | HhFile
 
+let string_of_file_type = function
+  | PhpFile -> "php"
+  | HhFile  -> "hh"
+
 type mode =
   | Mphp     (* Do the best you can to support legacy PHP *)
   | Mdecl    (* just declare signatures, don't check anything *)
   | Mstrict  (* check everything! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)
+
+let string_of_mode = function
+  | Mphp     -> "php"
+  | Mdecl    -> "decl"
+  | Mstrict  -> "strict"
+  | Mpartial -> "partial"
 
 let pp_mode fmt mode =
   Format.pp_print_string fmt @@

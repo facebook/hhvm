@@ -22,6 +22,8 @@
 #include <atomic>
 #include <vector>
 
+#include <fcntl.h>
+
 #ifndef _MSC_VER
 #include <execinfo.h>
 #endif
@@ -601,6 +603,35 @@ namespace {
 
 constexpr std::size_t kAllocBitNumBytes = 8;
 
+int allocateSpace(int fd, size_t size) {
+#ifdef __APPLE__
+  fstore_t fst;
+  fst.fst_flags = F_ALLOCATECONTIG;  // All or nothing
+  fst.fst_posmode = F_PEOFPOSMODE;  // Allocate from EOF
+  fst.fst_offset = 0;
+  fst.fst_length = size;
+
+  auto ret = fcntl(fd, F_PREALLOCATE, &fst);
+  if (ret < 0) {
+    fst.fst_flags = F_ALLOCATEALL;  // Try non contiguous
+    ret = fcntl(fd, F_PREALLOCATE, &fst);
+    if (ret < 0) {
+      return ret;
+    }
+  }
+  return ftruncate(fd, size);  // We may have overallocated.
+#elif _MSC_VER
+  // We don't know for sure if the space has actually been reserved.
+  return ftruncate(fd, size);
+#else
+  auto ret = posix_fallocate(fd, 0, size);
+  if (ret < 0) {
+    return ret;
+  }
+  return posix_fadvise(fd, 0, size, POSIX_FADV_DONTNEED);
+#endif
+}
+
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -653,35 +684,25 @@ bool isValidHandle(Handle handle) {
 static void initPersistentCache() {
   Guard g(s_allocMutex);
   if (s_tc_fd) return;
-  std::string tmpName = folly::sformat("/HHVM_tc{}", getpid());
-  always_assert(tmpName.size() <= NAME_MAX);
-  // Get a file descriptor to a shared memory object.  This is normally located
-  // in /dev/shm, which is a tmpfs filesystem that shouldn't run out of space
-  // unlike /tmp
-  s_tc_fd = shm_open(tmpName.c_str(),
-                     O_RDWR | O_CREAT | O_EXCL,
-                     S_IWUSR | S_IRUSR);
+  // Create a file to back our persistent shared RDS region.  We create the file
+  // in /tmp in the hopes that /tmp will be disk backed.  This way the in memory
+  // representation can be sparse even if there is no swap partition.  This also
+  // guarantees us space in the filesystem at startup so we can fail cleanly.
   s_persistent_base = RuntimeOption::EvalJitTargetCacheSize * 3 / 4;
   s_persistent_base -= s_persistent_base & (4 * 1024 - 1);
-  if (s_tc_fd != -1) {
-    shm_unlink(tmpName.c_str());
-    if (ftruncate(s_tc_fd,
-                  RuntimeOption::EvalJitTargetCacheSize - s_persistent_base)) {
-      close(s_tc_fd);
-      s_tc_fd = -1;
-    }
-  }
-  if (s_tc_fd == -1) {
-    // Fall back to a file in /tmp.  If things don't work out now kill the
-    // process.
-    char tmpName[] = "/tmp/tcXXXXXX";
-    s_tc_fd = mkstemp(tmpName);
-    always_assert(s_tc_fd != -1);
-    unlink(tmpName);
-    auto const fail = ftruncate(s_tc_fd,
-                                RuntimeOption::EvalJitTargetCacheSize
-                                - s_persistent_base);
-    always_assert(fail == 0);
+  char tmpName[] = "/tmp/tcXXXXXX";
+  s_tc_fd = mkstemp(tmpName);
+  always_assert_flog(s_tc_fd != -1,
+                     "Could not create backing file for shared RDS.");
+  unlink(tmpName);
+  auto const fail = allocateSpace(
+    s_tc_fd,
+    RuntimeOption::EvalJitTargetCacheSize - s_persistent_base
+  );
+  if (fail) {
+    close(s_tc_fd);
+    always_assert_flog(false,
+                       "Out of space for shared persistent RDS region.");
   }
   s_local_frontier = s_persistent_frontier = s_persistent_base;
 }

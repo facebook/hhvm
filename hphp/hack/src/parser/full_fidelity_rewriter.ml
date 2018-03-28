@@ -145,4 +145,49 @@ module WithSyntax(Syntax: RewritableType) = struct
       let (acc, result) = parented_aggregating_rewrite_pre f node [] in
       result
 
+    (**
+     * The same as the above, except does not recurse on children when a node
+     * is rewritten to avoid additional traversal.
+     *)
+    let rewrite_pre_and_stop_with_acc f node init_acc =
+      let rec aux node acc =
+        let mapping_fun (acc, changed) child =
+          match aux child acc with
+          | (acc, Keep) -> (acc, changed), Some child
+          | (acc, Replace new_child) -> (acc, true), Some new_child
+          | (acc, Remove) -> (acc, true), None
+        in (* end of mapping_fun *)
+        let rewrite_children node acc =
+          let children = Syntax.children node in
+          let (acc, changed), option_new_children =
+            Hh_core.List.map_env (acc, false) children ~f:mapping_fun in
+          if not changed
+          then (acc, Keep)
+          else
+            let new_children = Hh_core.List.filter_opt option_new_children in
+            let node = Syntax.from_children
+              SourceText.empty 0 (Syntax.kind node) new_children in
+            (acc, Replace node)
+        in (* end of rewrite_children *)
+        let (acc, result) = f node acc in
+        match result with
+        | Keep -> rewrite_children node acc
+        | Replace _
+        | Remove -> (acc, result)
+      in (* end of aux *)
+      let (acc, result) = aux node init_acc in
+      match result with
+      | Keep -> (acc, node)
+      | Replace new_node -> (acc, new_node)
+      | Remove -> failwith "Cannot remove root node"
+
+    (**
+     * The same as the above, except does not recurse on children when a node
+     * is rewritten to avoid duplicate work.
+     *)
+    let rewrite_pre_and_stop f node =
+      let f node acc = ([], f node) in
+      let _, result = rewrite_pre_and_stop_with_acc f node [] in
+      result
+
 end

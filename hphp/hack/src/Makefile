@@ -68,6 +68,7 @@ MODULES=\
 	parser/coroutine\
 	parser/schema\
 	parser/smart_constructors\
+	parser/ppl\
   procs\
   recorder\
   search\

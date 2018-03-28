@@ -128,6 +128,8 @@ module UserAttributes = struct
   let uaMutableReturn       = "__MutableReturn"
   let uaOptionalDestruct    = "__OptionalDestruct"
   let uaOnlyRxIfImpl      = "__OnlyRxIfImpl"
+  let uaProbabilisticModel  = "__PPL"
+
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
       uaOverride;
@@ -147,6 +149,7 @@ module UserAttributes = struct
       uaShallowReactive;
       uaOptionalDestruct;
       uaOnlyRxIfImpl;
+      uaProbabilisticModel;
     ]
 end
 

@@ -249,6 +249,8 @@ let constructor_member_name =
   "__construct"
 
 (* Syntax helper functions *)
+let has_coroutine_modifier n =
+  Core_list.exists (syntax_node_to_list n) ~f:is_coroutine
 
 let strip_dollar_sign (var : string) = String_utils.lstrip var "$"
 

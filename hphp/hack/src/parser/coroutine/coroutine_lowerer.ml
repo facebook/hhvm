@@ -133,9 +133,6 @@ let lower_coroutine_function
       new_body in
   (closure_syntax, new_function_syntax)
 
-let has_coroutine_modifier n =
-  Core_list.exists (syntax_node_to_list n) ~f:is_coroutine
-
 let lower_coroutine_functions_and_types
     parents
     current_node

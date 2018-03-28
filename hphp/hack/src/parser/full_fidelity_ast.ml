@@ -2919,6 +2919,7 @@ let from_text (env : env) (source_text : SourceText.t) : result =
   then
     let script =
       Full_fidelity_editable_positioned_syntax.from_positioned_syntax script
+      |> Ppl_class_rewriter.rewrite_ppl_classes
       |> Coroutine_lowerer.lower_coroutines in
     FromEditablePositionedSyntax.lower
       env

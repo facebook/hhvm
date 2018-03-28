@@ -45,7 +45,7 @@
       "contents": [
         {
           "language": "hack",
-          "value": "int b_hover"
+          "value": "int"
         }
       ],
       "range": {

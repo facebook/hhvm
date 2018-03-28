@@ -40,8 +40,8 @@ let class_A_cases = [
   ("A.php", 7, 19), ("int", "int");
 ]
 
-let pair = "<?hh // strict
-class Pair<T> {
+let mypair = "<?hh // strict
+class MyPair<T> {
   private T $fst;
   private T $snd;
 
@@ -64,31 +64,31 @@ class Pair<T> {
 }
 "
 
-let test_pair = "<?hh // strict
+let test_mypair = "<?hh // strict
 class B extends A {}
 class C extends A {}
 
-function test_pair(Pair<A> $v): Pair<A> {
+function test_mypair(MyPair<A> $v): MyPair<A> {
   $c = $v->getSnd();
 //     ^6:8  ^6:15
-  $v = new Pair(new B(1), new C(2));
-// ^8:4         ^8:17
+  $v = new MyPair(new B(1), new C(2));
+// ^8:4           ^8:19
   $v->setFst($c);
 //           ^10:14
-  return test_pair($v);
-//       ^12:10    ^12:20
+  return test_mypair($v);
+//       ^12:10      ^12:22
 }
 "
 
-let test_pair_cases = [
-  ("test_pair.php", 6, 8), ("Pair<A>", "Pair<A>");
-  ("test_pair.php", 6, 15), ("(function(): A)", "A");
-  ("test_pair.php", 8, 4), ("Pair", "Pair");
-  ("test_pair.php", 8, 17), ("B", "B");
-  ("test_pair.php", 10, 14), ("A", "A");
-  ("test_pair.php", 12, 10), ("(function(Pair<A> $v): Pair<A>)", "Pair<A>");
-  ("test_pair.php", 12, 19), ("Pair<A>", "Pair<A>");
-  ("test_pair.php", 12, 20), ("Pair", "Pair");
+let test_mypair_cases = [
+  ("test_mypair.php", 6, 8), ("MyPair<A>", "MyPair<A>");
+  ("test_mypair.php", 6, 15), ("(function(): A)", "A");
+  ("test_mypair.php", 8, 4), ("MyPair", "MyPair");
+  ("test_mypair.php", 8, 19), ("B", "B");
+  ("test_mypair.php", 10, 14), ("A", "A");
+  ("test_mypair.php", 12, 10), ("(function(MyPair<A> $v): MyPair<A>)", "MyPair<A>");
+  ("test_mypair.php", 12, 21), ("MyPair<A>", "MyPair<A>");
+  ("test_mypair.php", 12, 22), ("MyPair", "MyPair");
 ]
 
 let loop_assignment = "<?hh // strict
@@ -153,13 +153,6 @@ let callback_cases = [
   ("callback.php", 5, 3), ("(function(int): string)", "string");
   ("callback.php", 5, 8), ("string", "string");
 ]
-
-let invariant_violation = "<?hh // strict
-class Exception {}
-function invariant_violation(string $msg): noreturn {
-  throw new Exception();
-}
-"
 
 let nullthrows = "<?hh // strict
 function nullthrows<T>(?T $x): T {
@@ -267,12 +260,11 @@ let dynamic_view_cases = [
 let files = [
   "id.php", id;
   "A.php", class_A;
-  "Pair.php", pair;
-  "test_pair.php", test_pair;
+  "MyPair.php", mypair;
+  "test_mypair.php", test_mypair;
   "loop_assignment.php", loop_assignment;
   "lambda1.php", lambda1;
   "callback.php", callback;
-  "invariant_violation.php", invariant_violation;
   "nullthrows.php", nullthrows;
   "curried.php", curried;
   "multiple_type.php", multiple_type;
@@ -283,7 +275,7 @@ let files = [
 let cases =
     id_cases
   @ class_A_cases
-  @ test_pair_cases
+  @ test_mypair_cases
   @ loop_assignment_cases
   @ lambda_cases
   @ callback_cases
@@ -293,7 +285,10 @@ let cases =
   @ lambda_param_cases
 
 let () =
-  let env = Test.setup_server () in
+  let env =
+    Test.setup_server ()
+      ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
+  in
   let env = Test.setup_disk env files in
 
   let test_case ~dynamic ((file, line, col), (expected_type, expected_returned_type)) =

@@ -19,14 +19,6 @@ let pos_at (line1, column1) (line2, column2) =
     (File_pos.of_line_column_offset line1 (column1 - 1) 0)
     (File_pos.of_line_column_offset line2 column2 0))
 
-let builtins = "<?hh // decl
-class Awaitable<T> {}
-interface Traversable<+Tv> {}
-interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
-interface Container<+Tv> extends Traversable<Tv> {}
-interface KeyedContainer<+Tk, +Tv> extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
-function idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $collection, Tk $index, $default = null): ?Tv {}"
-
 let class_members = "<?hh // strict
 abstract class ClassMembers {
   public async function genDoStuff(): Awaitable<void> {}
@@ -228,11 +220,10 @@ let classname_variable_cases = [
       pos = pos_at (8, 3) (8, 6);
     }];
 
-  (* TODO(wipi): make this return something useful. *)
   ("classname_variable.php", 8, 10), [{
-      snippet = "_";
-      addendum = [];
-      pos = None;
+      snippet = "public static function foo(): void";
+      addendum = ["Full name: `ClassnameVariable::foo`"];
+      pos = pos_at (8, 9) (8, 11);
     }];
 ]
 
@@ -449,7 +440,6 @@ let special_cases_cases = [
 ]
 
 let files = [
-  "builtins.php", builtins;
   "class_members.php", class_members;
   "classname_call.php", classname_call;
   "chained_calls.php", chained_calls;
@@ -467,7 +457,10 @@ let cases =
   @ classname_variable_cases
 
 let () =
-  let env = Test.setup_server () in
+  let env =
+    Test.setup_server ()
+      ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
+  in
   let env = Test.setup_disk env files in
 
   Test.assert_no_errors env;

@@ -1466,7 +1466,7 @@ void Class::setSpecial() {
     return;
   }
 
-  if (!(attrs() & AttrTrait)) {
+  if (!(attrs() & (AttrTrait | AttrInterface))) {
     // Look for Foo::Foo() (old style constructor) declared in this class
     // and deprecate warning if we are in PHP 7 mode
     if (matchedClassOrIsTrait(m_preClass->name())) {

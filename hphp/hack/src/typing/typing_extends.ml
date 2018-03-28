@@ -156,7 +156,7 @@ let check_final_method member_source parent_class_elt class_elt =
 
 (* Check that overriding is correct *)
 let check_override env member_name mem_source ?(ignore_fun_return = false)
-    parent_class class_ parent_class_elt class_elt =
+    (parent_class, parent_ty) (class_, class_ty) parent_class_elt class_elt =
   (* We first verify that we aren't overriding a final method *)
   check_final_method mem_source parent_class_elt class_elt;
   let class_known, check_params = should_check_params parent_class class_ in
@@ -176,7 +176,12 @@ let check_override env member_name mem_source ?(ignore_fun_return = false)
       let is_static = SMap.mem member_name parent_class.tc_smethods in
       (* Add deps here when we override *)
       let subtype_funs = SubType.subtype_method
-          ~method_info:(member_name, is_static)
+          ~method_info:SubType.({
+            method_name = member_name;
+            is_static;
+            class_ty;
+            parent_class_ty = parent_ty
+           })
           ~check_return:(
           (not ignore_fun_return) &&
           (class_known || check_partially_known_method_returns)
@@ -208,7 +213,8 @@ let filter_privates members =
     else SMap.add name class_elt acc
   end members SMap.empty
 
-let check_members check_private env (parent_class, psubst) (class_, subst)
+let check_members check_private env (parent_class, psubst, parent_ty)
+  (class_, subst, class_ty)
     (mem_source, parent_members, members, dep) =
   let parent_members = if check_private then parent_members
     else filter_privates parent_members in
@@ -221,8 +227,9 @@ let check_members check_private env (parent_class, psubst) (class_, subst)
         Typing_deps.add_idep
           (Dep.Class class_.tc_name)
           (dep parent_class_elt.ce_origin member_name);
-      check_override env member_name mem_source parent_class class_
-                                     parent_class_elt class_elt
+      check_override env member_name mem_source
+        (parent_class, parent_ty) (class_, class_ty)
+        parent_class_elt class_elt
     | None -> ()
   end parent_members
 
@@ -282,7 +289,7 @@ let default_constructor_ce class_ =
      }
 
 (* When an interface defines a constructor, we check that they are compatible *)
-let check_constructors env parent_class class_ psubst subst =
+let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst subst =
   let explicit_consistency = snd parent_class.tc_construct in
   if parent_class.tc_kind = Ast.Cinterface || explicit_consistency
   then (
@@ -301,7 +308,8 @@ let check_constructors env parent_class class_ psubst subst =
             (Dep.Class class_.tc_name)
             (Dep.Cstr parent_cstr.ce_origin);
         check_override env "__construct" `FromMethod
-          ~ignore_fun_return:true parent_class class_ parent_cstr cstr
+          ~ignore_fun_return:true
+          (parent_class, parent_ty) (class_, class_ty) parent_cstr cstr
       | None, Some cstr when explicit_consistency ->
         let parent_cstr = default_constructor_ce parent_class in
         let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
@@ -311,7 +319,7 @@ let check_constructors env parent_class class_ psubst subst =
             (Dep.Class class_.tc_name)
             (Dep.Cstr parent_cstr.ce_origin);
         check_override env "__construct" `FromMethod
-          ~ignore_fun_return:true parent_class class_ parent_cstr cstr
+          ~ignore_fun_return:true (parent_class, parent_ty) (class_, class_ty) parent_cstr cstr
       | None, _ -> ()
   ) else ()
 
@@ -405,7 +413,7 @@ let check_consts env parent_class class_ psubst subst =
   end pconsts;
   ()
 
-let check_class_implements env parent_class class_ =
+let check_class_implements env (parent_class, parent_ty) (class_, class_ty) =
   check_typeconsts env parent_class class_;
   let parent_pos, parent_class, parent_tparaml = parent_class in
   let pos, class_, tparaml = class_ in
@@ -414,13 +422,14 @@ let check_class_implements env parent_class class_ =
   let subst = Inst.make_subst class_.tc_tparams tparaml in
   check_consts env parent_class class_ psubst subst;
   let memberl = make_all_members ~parent_class ~child_class:class_ in
-  check_constructors env parent_class class_ psubst subst;
+  check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst subst;
   let check_privates:bool = (parent_class.tc_kind = Ast.Ctrait) in
   if not fully_known then () else
     List.iter memberl
       (check_members_implemented check_privates parent_pos pos);
   List.iter memberl
-    (check_members check_privates env (parent_class, psubst) (class_, subst));
+    (check_members check_privates env
+      (parent_class, psubst, parent_ty) (class_, subst, class_ty));
   ()
 
 (*****************************************************************************)
@@ -440,7 +449,8 @@ let check_implements env parent_type type_ =
         (Reason.to_pos parent_r), parent_class, parent_tparaml in
       let class_ = (Reason.to_pos r), class_, tparaml in
       Errors.try_
-        (fun () -> check_class_implements env parent_class class_)
+        (fun () ->
+          check_class_implements env (parent_class, parent_type) (class_, type_))
         (fun errorl ->
           let p_name_pos, p_name_str = parent_name in
           let name_pos, name_str = name in

@@ -1,0 +1,96 @@
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:35-3:38], (Hprim Tint)));
+      f_name = ([3:10-3:14], "\\test"); f_tparams = [];
+      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_params =
+      [{ AnnotatedAST.param_annotation = ([3:19-3:21], Some int);
+         param_hint = (Some ([3:15-3:18], (Hprim Tint)));
+         param_is_reference = false; param_is_variadic = false;
+         param_pos = [3:19-3:21]; param_name = "$i"; param_expr = None;
+         param_callconv = None; param_user_attributes = [] };
+        { AnnotatedAST.param_annotation = ([3:30-3:32], Some string);
+          param_hint = (Some ([3:23-3:29], (Hprim Tstring)));
+          param_is_reference = false; param_is_variadic = false;
+          param_pos = [3:30-3:32]; param_name = "$s"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] }
+        ];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast =
+           [(AnnotatedAST.Expr
+               (([4:3-4:25], Some \Vector<(int | string)>),
+                (AnnotatedAST.Binop ((Eq None),
+                   (([4:3-4:9], Some \Vector<(int | string)>),
+                    (AnnotatedAST.Lvar ([4:3-4:9], $items))),
+                   (([4:12-4:25], Some \Vector<(int | string)>),
+                    (AnnotatedAST.ValCollection (<vc_kind>,
+                       [(([4:21-4:23], Some int),
+                         (AnnotatedAST.Lvar ([4:21-4:23], $i)))]
+                       )))
+                   ))));
+             (AnnotatedAST.Expr
+                (([5:3-5:9], Some (function(): int)),
+                 (AnnotatedAST.Binop ((Eq None),
+                    (([5:3-5:5], Some (function(): int)),
+                     (AnnotatedAST.Lvar ([5:3-5:5], $f))),
+                    (([5:8-5:9], Some (function(): int)),
+                     (AnnotatedAST.Efun (
+                        { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+                          f_ret = (Some ([5:12-5:15], (Hprim Tint)));
+                          f_name = ([Pos.none], ";anonymous");
+                          f_tparams = []; f_where_constraints = [];
+                          f_variadic = AnnotatedAST.FVnonVariadic;
+                          f_params = [];
+                          f_body =
+                          (AnnotatedAST.NamedBody
+                             { AnnotatedAST.fnb_nast =
+                               [(AnnotatedAST.Expr
+                                   (([10:5-10:22], Some (int | string)),
+                                    (AnnotatedAST.Binop ((Eq None),
+                                       (([10:5-10:10], Some (int | string)),
+                                        (AnnotatedAST.Lvar
+                                           ([10:5-10:10], $item))),
+                                       (([10:13-10:22], Some (int | string)),
+                                        (AnnotatedAST.Array_get (
+                                           (([10:13-10:19], Some \Vector<(int | string)>),
+                                            (AnnotatedAST.Lvar
+                                               ([10:13-10:19], $items))),
+                                           (Some (([10:20-10:21], Some int),
+                                                  (AnnotatedAST.Int
+                                                     ([10:20-10:21], "1"))))
+                                           )))
+                                       ))));
+                                 (AnnotatedAST.Return ([11:5-11:18],
+                                    (Some (([11:12-11:17], Some int),
+                                           (AnnotatedAST.Lvar
+                                              ([11:12-11:17], $item))))
+                                    ))
+                                 ];
+                               fnb_unsafe = false });
+                          f_fun_kind = FSync; f_user_attributes = [];
+                          f_ret_by_ref = false },
+                        [([10:13-10:19], $items)])))
+                    ))));
+             (AnnotatedAST.Expr
+                (([13:3-13:16], Some (int | string)),
+                 (AnnotatedAST.Binop ((Eq None),
+                    (([13:3-13:11], Some (int | string)),
+                     (AnnotatedAST.Array_get (
+                        (([13:3-13:9], Some \Vector<(int | string)>),
+                         (AnnotatedAST.Lvar ([13:3-13:9], $items))),
+                        None))),
+                    (([13:14-13:16], Some string),
+                     (AnnotatedAST.Lvar ([13:14-13:16], $s)))
+                    ))));
+             (AnnotatedAST.Return ([14:3-14:15],
+                (Some (([14:10-14:14], Some int),
+                       (AnnotatedAST.Call (Cnormal,
+                          (([14:10-14:12], Some (function(): int)),
+                           (AnnotatedAST.Lvar ([14:10-14:12], $f))),
+                          [], [], []))))
+                ))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+  ]

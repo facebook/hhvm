@@ -74,8 +74,6 @@ type state = {
   (* Free variables computed so far *)
   captured_vars : ULS.t;
   captured_this : bool;
-  (* Total number of closures or anonymous classes created *)
-  total_count : int;
   (* Closure classes and hoisted inline classes *)
   hoisted_classes : class_ list;
   (* Hoisted inline functions *)
@@ -137,7 +135,6 @@ let initial_state =
   anon_cls_cnt_per_fun = 0;
   captured_vars = ULS.empty;
   captured_this = false;
-  total_count = 0;
   hoisted_classes = [];
   hoisted_functions = [];
   inout_wrappers = [];
@@ -354,19 +351,18 @@ let add_class env st cd =
   { st with hoisted_classes = cd :: st.hoisted_classes },
   make_defcls cd n
 
-let make_closure_name total_count env st =
+let make_closure_name env st =
   let per_fun_idx = st.closure_cnt_per_fun in
   SU.Closures.mangle_closure
-    (make_scope_name st.namespace env.scope) per_fun_idx total_count
+    (make_scope_name st.namespace env.scope) per_fun_idx
 
 let make_anonymous_class_name env st =
   let per_fun_idx = st.anon_cls_cnt_per_fun + 1 in
-  let per_scope_idx = st.total_count in
   SU.Classes.mangle_anonymous_class
-    (make_scope_name st.namespace env.scope) per_fun_idx per_scope_idx
+    (make_scope_name st.namespace env.scope) per_fun_idx
 
 let make_closure ~class_num
-  p total_count env st lambda_vars tparams is_static fd body =
+  p env st lambda_vars tparams is_static fd body =
   let md = {
     m_kind = [Public] @ (if is_static then [Static] else []);
     m_tparams = fd.f_tparams;
@@ -393,7 +389,7 @@ let make_closure ~class_num
     c_final = false;
     c_kind = Cnormal;
     c_is_xhp = false;
-    c_name = (p, make_closure_name total_count env st);
+    c_name = (p, make_closure_name env st);
     c_tparams = tparams;
     c_extends = [(p, Happly((p, "Closure"), []))];
     c_implements = [];
@@ -639,7 +635,6 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, cls = convert_class env st cls in
     let st = { st with
       anon_cls_cnt_per_fun = st.anon_cls_cnt_per_fun + 1;
-      total_count = st.total_count + 1;
       hoisted_classes = cls :: st.hoisted_classes } in
     st, (p, NewAnonClass (args, varargs, cls_condensed))
   | Efun (fd, use_vars) ->
@@ -697,10 +692,8 @@ and convert_lambda env st p fd use_vars_opt =
   (* Remember the current capture and defined set across the lambda *)
   let captured_vars = st.captured_vars in
   let captured_this = st.captured_this in
-  let total_count = st.total_count in
   let static_vars = st.static_vars in
   let old_function_state = st.current_function_state in
-  let st = { st with total_count = total_count + 1; } in
   let st = enter_lambda st in
   let old_env = env in
   Option.iter use_vars_opt
@@ -760,7 +753,7 @@ and convert_lambda env st p fd use_vars_opt =
   let inline_fundef, cd, md =
       make_closure
       ~class_num
-      p total_count env st lambda_vars tparams is_static fd block in
+      p env st lambda_vars tparams is_static fd block in
   let explicit_use_set =
     if Option.is_some use_vars_opt
     then SSet.add (snd inline_fundef.f_name) st.explicit_use_set

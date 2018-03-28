@@ -2871,13 +2871,13 @@ void parse_class(AsmState& as) {
     as.error(".class must have a name");
   }
   if (ParserBase::IsAnonymousClassName(name)) {
-    // refresh names of anonymous classes
-    // to make sure they are unique
+    // assign unique numbers to anonymous classes
+    // they must not be pre-numbered in the hhas
     auto p = name.find(';');
     if (p != std::string::npos) {
-      name = name.substr(0, p);
-      name = HPHP::NewAnonymousClassName(name);
+      as.error("anonymous class and closure names may not contain ids in hhas");
     }
+    name = HPHP::NewAnonymousClassName(name);
   }
 
   int line0;

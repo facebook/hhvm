@@ -121,11 +121,10 @@ end
 
 module Classes = struct
 
-  let mangle_class prefix scope ix count =
+  let mangle_class prefix scope ix =
     prefix ^ "$"
     ^ scope
     ^ (if ix = 1 then "" else "#" ^ string_of_int ix)
-    ^ ";" ^ string_of_int count
 
   (* Anonymous classes have names of the form
    *   class@anonymous$ scope ix ; num
@@ -137,8 +136,8 @@ module Classes = struct
    *   ix ::=
    *     # <digits>
    *)
-  let mangle_anonymous_class scope ix count =
-    mangle_class "class@anonymous" scope ix count
+  let mangle_anonymous_class scope ix =
+    mangle_class "class@anonymous" scope ix
 
   let is_anonymous_class_name n =
     String_utils.string_starts_with n "class@anonymous"
@@ -162,17 +161,13 @@ module Closures = struct
     if is_closure_name s
     then
       let suffix = String_utils.lstrip s "Closure$" in
-      match Str.split_delim (Str.regexp ";") suffix with
-      | [prefix; _count] ->
-        begin match Str.split_delim (Str.regexp "#") prefix with
-        | [prefix; _] -> Some prefix
-        | _ -> Some prefix
-        end
-      | _ -> None
+      match Str.split_delim (Str.regexp "#") suffix with
+      | [prefix; _] -> Some prefix
+      | _ -> Some suffix
     else None
 
-  let mangle_closure scope ix count =
-    Classes.mangle_class "Closure" scope ix count
+  let mangle_closure scope ix =
+    Classes.mangle_class "Closure" scope ix
 end
 
 (* XHP name mangling *)

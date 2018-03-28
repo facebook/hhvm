@@ -23,6 +23,7 @@
 
 #include <folly/String.h>
 
+#include "hphp/parser/parser.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -772,10 +773,17 @@ void print_cls_directives(Output& out, const PreClass* cls) {
 
 void print_cls(Output& out, const PreClass* cls) {
   out.indent();
+  auto name = cls->name()->toCppString();
+  if (ParserBase::IsAnonymousClassName(name)) {
+    auto p = name.find(';');
+    if (p != std::string::npos) {
+      name = name.substr(0, p);
+    }
+  }
   out.fmt(".class{} {}",
     opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes(),
               cls->hoistability() != PreClass::NotHoistable),
-    cls->name(),
+    name,
     format_line_pair(cls));
   print_cls_inheritance_list(out, cls);
   out.fmt(" {{");

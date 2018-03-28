@@ -12,7 +12,7 @@
 }
 
 
-.class Uh$Foo::Bar;42 {
+.class Uh$Foo::Bar {
   .default_ctor;
   .method [public static] print$foo() {
     String "hi\n"

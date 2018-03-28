@@ -53,7 +53,7 @@ struct MemInfo {
  *
  * Kernel documentation: http://man7.org/linux/man-pages/man5/proc.5.html
  */
-struct MemStatus {
+struct ProcStatus {
   int64_t VmSize{-1};                   // virtual memory size
   int64_t VmRSS{-1};                    // RSS, not including hugetlb pages
   int64_t VmHWM{-1};                    // peak RSS
@@ -63,15 +63,21 @@ struct MemStatus {
   // unused space held by jemalloc.  This is mostly used to track regressions.
   int64_t adjustedRSS{-1};
 
+  // Number of threads running in the current process.
+  int Threads{-1};
+
   // Constructor reads /proc/self/status and fill in the fields.
-  MemStatus();
+  ProcStatus();
   // Subtrace memory that is mapped in but unused.
   void registerUnused(int64_t unused) {
     auto const r = adjustedRSS - unused;
     if (r >= 0) adjustedRSS = r;
   }
+
   bool valid() const {
-    return VmSize > 0 && VmRSS > 0 && VmHWM > 0 && HugetlbPages >= 0;
+    return VmSize > 0 && VmRSS > 0 && VmHWM > 0 &&
+      HugetlbPages >= 0 &&
+      Threads > 0;
   }
 };
 
@@ -108,6 +114,11 @@ struct Process {
    * Get memory usage in MB by a process.
    */
   static int64_t GetProcessRSS();
+
+  /**
+   * Get the number of threads running in the current process.
+   */
+  static int GetNumThreads();
 
   /**
    * Get system-wide memory usage information.  Returns false upon

@@ -98,28 +98,31 @@ bool Process::IsUnderGDB() {
 }
 
 int64_t Process::GetProcessRSS() {
-  string status;
-  FILE * f = fopen("/proc/self/status", "r");
-  if (f) {
-    readString(f, status);
-    fclose(f);
-  }
+  ProcStatus status;                    // read /proc/self/status
+  return status.valid() ? status.VmRSS / 1024 : 0;
+}
 
-  std::vector<std::string> lines;
-  folly::split('\n', status, lines, true /* ignoreEmpty */);
-  for (unsigned int i = 0; i < lines.size(); i++) {
-    string &line = lines[i];
-    if (line.find("VmRSS:") == 0) {
-      for (unsigned int j = strlen("VmRSS:"); j < line.size(); j++) {
-        if (line[j] != ' ') {
-          long long mem = atoll(line.c_str() + j);
-          return mem/1024;
-        }
-      }
-    }
-  }
+int Process::GetNumThreads() {
+  ProcStatus status;
+  return status.valid() ? status.Threads : 1;
+}
 
-  return 0;
+// Files such as /proc/meminfo and /proc/self/status contain many lines
+// formatted as one of the following:
+//   <fieldName>: <number>
+//   <fieldName>: <number> kB
+// This function parses the line and return the number in it.  -1 is returned
+// when the line isn't formatted as expected (until one day we need to read a
+// line where -1 is a legit value).
+static int64_t readSize(const char* line, bool expectKB = false) {
+  int64_t result = -1;
+  char tail[8];
+  auto n = sscanf(line, "%*s %" SCNd64 " %7s", &result, tail);
+  if (expectKB) {
+    if (n < 2) return -1;
+    if (tail[0] != 'k' || tail[1] != 'B') return -1;
+  }
+  return result;
 }
 
 bool Process::GetMemoryInfo(MemInfo& info) {
@@ -133,27 +136,18 @@ bool Process::GetMemoryInfo(MemInfo& info) {
   if (f) {
     SCOPE_EXIT{ fclose(f); };
 
-    // Return size in MB
-    auto const parseLine = [] (const char* item, const char* line) -> int64_t {
-      int64_t amount = -1;
-      char mult = 'b';
-      char format[64];
-      snprintf(format, sizeof(format), "%s: %%%s %%c", item, PRId64);
-      sscanf(line, format, &amount, &mult);
-      if (amount <= 0) return -1;
-      if (mult == 'k' || mult == 'K') return amount >> 10;
-      if (mult == 'm' || mult == 'M') return amount;
-      if (mult == 'g' || mult == 'G') return amount << 10;
-      return amount >> 20;
-    };
-
-    char buf[128];
-    while (fgets(buf, sizeof(buf), f)) {
-      info.freeMb = std::max(info.freeMb, parseLine("MemFree", buf));
-      info.buffersMb = std::max(info.buffersMb, parseLine("Buffers", buf));
-      info.cachedMb = std::max(info.cachedMb, parseLine("Cached", buf));
-      info.availableMb =
-        std::max(info.availableMb, parseLine("MemAvailable", buf));
+    char line[128];
+    while (fgets(line, sizeof(line), f)) {
+      auto const kb = readSize(line, true);
+      if (!strncmp(line, "MemFree:", 8)) {
+        if (kb >= 0) info.freeMb = kb / 1024;
+      } else if (!strncmp(line, "Buffers:", 8)) {
+        if (kb >= 0) info.buffersMb = kb / 1024;
+      } else if (!strncmp(line, "Cached:", 7)) {
+        if (kb >= 0) info.cachedMb = kb / 1024;
+      } else if (!strncmp(line, "MemAvailable:", 13)) {
+        if (kb >= 0) info.cachedMb = kb / 1024;
+      }
       if (info.valid()) return true;
     }
     // If MemAvailable isn't available, which shouldn't be the case for kernel
@@ -354,33 +348,21 @@ void Process::SetCoreDumpHugePages() {
 #endif
 }
 
-MemStatus::MemStatus() {
+ProcStatus::ProcStatus() {
 #ifdef __linux__
   if (FILE* f = fopen("/proc/self/status", "r")) {
-    auto const readSize = [](const char* line) -> int64_t {
-      // We expect the line to have the following format
-      // fieldName: <number> kB
-      int64_t resultKb = 0;
-      char b = 0;                       // should be 'B'
-      // Skip the field name, put <number> in `resultKb`, and the character
-      // following 'k' to `b`.
-      sscanf(line, "%*s %" SCNd64 " k%c", &resultKb, &b);
-      if (b != 'B') {
-        // Something is wrong, maybe the kernel changed the line format?
-        return -1;
-      }
-      return resultKb;
-    };
     char line[128];
     while (fgets(line, sizeof(line), f)) {
       if (!strncmp(line, "VmSize:", 7)) {
-        VmSize = readSize(line);
+        VmSize = readSize(line, true);
       } else if (!strncmp(line, "VmRSS:", 6)) {
-        VmRSS = readSize(line);
+        VmRSS = readSize(line, true);
       } else if (!strncmp(line, "VmHWM:", 6)) {
-        VmHWM = readSize(line);
+        VmHWM = readSize(line, true);
       } else if (!strncmp(line, "HugetlbPages:", 13)) {
-        HugetlbPages = readSize(line);
+        HugetlbPages = readSize(line, true);
+      } else if (!strncmp(line, "Threads:", 8)) {
+        Threads = readSize(line, false);
       }
     }
     fclose(f);

@@ -47,7 +47,7 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
 
   w->writeFileHeader();
 
-  MemStatus procStatus;                 // read /proc/self/status
+  ProcStatus procStatus;
   if (!procStatus.valid()) {
     w->writeFileFooter();
     return;

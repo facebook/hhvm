@@ -788,24 +788,7 @@ hugifyText(char* from, char* to) {
     // zero size or negative sizes.
     return;
   }
-#if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 5)
-  // jemalloc 5 has background threads, which handle purging asynchronously.
-  bool background_threads = false;
-  if (mallctlRead("background_thread", &background_threads)) {
-    background_threads = false;
-    Logger::Warning("Failed to determine jemalloc background thread state");
-  }
-  if (background_threads &&
-      mallctlWrite("background_thread", false, /* errorOK */ true)) {
-    Logger::Warning("Failed to disable jemalloc background threads");
-  }
-  SCOPE_EXIT {
-    if (background_threads &&
-        mallctlWrite("background_thread", true, /* errorOK */ true)) {
-      Logger::Warning("Failed to enable jemalloc background threads");
-    }
-  };
-#endif
+
   size_t sz = to - from;
   void* mem = malloc(sz);
   memcpy(mem, from, sz);
@@ -838,52 +821,73 @@ hugifyText(char* from, char* to) {
 }
 
 static void pagein_self(void) {
-  unsigned long begin, end, inode, pgoff;
-  char mapname[PATH_MAX];
-  char perm[5];
-  char dev[11];
-  char *buf;
-  int bufsz;
-  int r;
-  FILE *fp;
+#if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 5)
+  // jemalloc 5 has background threads, which handle purging asynchronously.
+  bool background_threads = false;
+  if (mallctlRead("background_thread", &background_threads)) {
+    background_threads = false;
+    Logger::Warning("Failed to determine jemalloc background thread state");
+  }
+  if (background_threads &&
+      mallctlWrite("background_thread", false, /* errorOK */ true)) {
+    Logger::Warning("Failed to disable jemalloc background threads");
+  }
+  SCOPE_EXIT {
+    if (background_threads &&
+        mallctlWrite("background_thread", true, /* errorOK */ true)) {
+      Logger::Warning("Failed to enable jemalloc background threads");
+    }
+  };
+#endif
+
+  // Other than the jemalloc background threads, which should've been stopped by
+  // now, the only thread allowed here is the current one.  Check that and alarm
+  // people when they accidentally created threads before this point.
+  int nThreads = Process::GetNumThreads();
+  if (nThreads > 1) {
+    Logger::Error("%d threads running, cannot hugify text!", nThreads);
+    fprintf(stderr,
+            "HHVM is broken: %u threads running in hugifyText()!\n",
+            nThreads);
+    if (debug) {
+      throw std::runtime_error{"you cannot create threads before pagein_self"};
+    }
+  }
 
   auto mapped_huge = false;
-#ifdef __APPLE__
-  // The normal implementation is theoretically safe on non-Linux platforms,
-  // boiling down to several if(false), including safely checking the
-  // result of failing to open /proc/self/maps.
-  //
-  // On MacOS Sierra and High Sierra, this is still true, but it makes
-  // XCode's toolchain *very* unhappy: it makes the HHVM binary ~ 3x the
-  // size, and the parser ~ 300x slower - so, let's just skip it.
-  auto const try_map_huge = false;
-#else
+#ifdef __linux__
   auto const try_map_huge =
+    hugePagesSupported() &&
     RuntimeOption::EvalMaxHotTextHugePages > 0 &&
     (char*)__hot_start != nullptr && (char*)__hot_end != nullptr &&
-    hugePagesSupported();
+    nThreads <= 1;
 
   SCOPE_EXIT {
-    if (try_map_huge && !mapped_huge) {
+    if (try_map_huge != mapped_huge) {
       Logger::Warning("Failed to hugify the .text section");
     }
   };
-#endif // __APPLE__
-
-  // pad due to the spaces between the inode number and the mapname
-  bufsz = sizeof(unsigned long) * 4 + sizeof(mapname) + sizeof(char) * 11 + 100;
-  buf = (char *)malloc(bufsz);
-  if (buf == nullptr)
-    return;
+#else
+  // MacOS doesn't have transparent huge pages.  It uses mmap() with
+  // VM_FLAGS_SUPERPAGE_SIZE_2MB, which we don't do here, so don't bother.
+  auto constexpr try_map_huge = false;
+#endif
 
   BootStats::Block timer("mapping self");
-  fp = fopen("/proc/self/maps", "r");
-  if (fp != nullptr) {
+  char mapname[PATH_MAX];
+  // pad due to the spaces between the inode number and the mapname
+  auto const bufsz =
+    sizeof(unsigned long) * 4 + sizeof(mapname) + sizeof(char) * 11 + 100;
+  auto buf = static_cast<char*>(malloc(bufsz));
+  if (auto fp = fopen("/proc/self/maps", "r")) {
     while (!feof(fp)) {
       if (fgets(buf, bufsz, fp) == 0)
         break;
-      r = sscanf(buf, "%lx-%lx %4s %lx %10s %ld %s",
-                 &begin, &end, perm, &pgoff, dev, &inode, mapname);
+      unsigned long begin, end, inode, pgoff;
+      char perm[5];
+      char dev[11];
+      int r = sscanf(buf, "%lx-%lx %4s %lx %10s %ld %s",
+                     &begin, &end, perm, &pgoff, dev, &inode, mapname);
 
       // page in read-only segments that correspond to a file on disk
       if (r != 7 ||

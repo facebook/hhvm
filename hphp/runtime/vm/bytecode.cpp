@@ -2836,9 +2836,12 @@ bool implTypeStructureHelper(const Array& ts, const Cell* c1) {
       return allowsUnknownFields || numFields == numExpectedFields;
     }
     case TypeStructure::Kind::T_fun:
-    case TypeStructure::Kind::T_array:
+      raise_error("the \"is\" operator cannot be used with a function");
     case TypeStructure::Kind::T_typevar:
+      raise_error("the \"is\" operator cannot be used with a generic type");
     case TypeStructure::Kind::T_trait:
+      raise_error("the \"is\" operator cannot be used with a trait");
+    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_xhp:

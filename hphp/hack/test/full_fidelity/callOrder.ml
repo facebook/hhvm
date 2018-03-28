@@ -1,7 +1,7 @@
 module TestUtils = Full_fidelity_test_utils
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
-module VerifySC = Full_fidelity_verify_smart_constructors.WithSyntax(Syntax)
+module VerifySC = VerifySmartConstructors.WithSyntax(Syntax)
 module VerifyParser_ = Full_fidelity_parser.WithSyntax(Syntax)
 module VerifyParser = VerifyParser_.WithSmartConstructors(VerifySC)
 

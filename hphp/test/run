@@ -1511,6 +1511,9 @@ function run($options, $tests, $bad_test_file) {
     } else if ($status === 'skip-onlyhackc') {
       Status::skip($test, 'onlyhackc', $time, $stime, $etime);
       clean_intermediate_files($test, $options);
+    } else if ($status === 'skip-nodumphhas') {
+      Status::skip($test, 'nodumphhas', $time, $stime, $etime);
+      clean_intermediate_files($test, $options);
     } else if ($status === 'skip-nosemdiff') {
       Status::skip($test, 'no-semdiff', $time, $stime, $etime);
       clean_intermediate_files($test, $options);
@@ -1760,9 +1763,11 @@ function dump_repo_to_hhas_files($test, $program, $hhas_target) {
   return $ret === 0 ? $hhas_target : false;
 }
 
-function dump_hhas_cmd($hhvm_cmd, $test) {
+function dump_hhas_cmd($hhvm_cmd, $test, $hhas_file) {
   $dump_flags = implode(' ', array(
-    '-m dumphhas',
+    '-vEval.HackCompilerDefault=false',
+    '-vEval.DumpHhas=1',
+    "-vEval.DumpHhasToFile=$hhas_file",
     '-vEval.LoadFilepathFromUnitCache=0',
   ));
   $cmd = str_replace(' -- ', " $dump_flags -- ", $hhvm_cmd);
@@ -1776,8 +1781,8 @@ function dump_hhas_to_temp($hhvm_cmd, $test) {
     return dump_repo_to_hhas_files($test, "hhvm", $temp_file);
   }
 
-  $cmd = dump_hhas_cmd($hhvm_cmd, $test);
-  system("$cmd > $temp_file 2> /dev/null", $ret);
+  $cmd = dump_hhas_cmd($hhvm_cmd, $test, $temp_file);
+  system("$cmd &> /dev/null", $ret);
   return $ret === 0 ? $temp_file : false;
 }
 
@@ -2195,6 +2200,18 @@ function run_test($options, $test) {
     }
   }
 
+  // Skip tests that don't make sense in modes where we dump/compare hhas
+  $no_hhas_tag = '.nodumphhas';
+  $no_hhas = file_exists($test.$no_hhas_tag) ||
+             file_exists(dirname($test).'/'.$no_hhas_tag);
+  if ($no_hhas && (
+    isset($options['hhbbc2']) ||
+    isset($options['hhas-round-trip']) ||
+    isset($options['compare-hh-codegen'])
+  )) {
+    return 'skip-nodumphhas';
+  }
+
   $test_ext = pathinfo($test, PATHINFO_EXTENSION);
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
   if ((isset($options['relocate']) ||
@@ -2250,20 +2267,27 @@ function run_test($options, $test) {
     if (isset($hhbbc)) {
       if (isset($options['hhbbc2'])) {
         $hhas_temp1 = dump_hhas_to_temp($hhvm, "$test.before");
+        if ($hhas_temp1 === false) {
+          file_put_contents(
+            "$test.diff",
+            "dumping hhas after first hhbbc pass failed"
+          );
+          return false;
+        }
         shell_exec("mv $hhbbc_hhvm_repo $hphp_hhvm_repo");
         shell_exec("$hhbbc 2>&1");
         $hhas_temp2 = dump_hhas_to_temp($hhvm, "$test.after");
-        if ($hhas_temp1 === false || $hhas_temp2 === false) {
-          if ($hhas_temp1 != $hhas_temp2)  {
-            shell_exec("cat $hhas_temp1$hhas_temp2 > $test.diff");
-            return false;
-          }
-        } else {
-          $diff = shell_exec("diff $hhas_temp1 $hhas_temp2 | wc -l");
-          if (trim($diff) != '0') {
-            shell_exec("diff $hhas_temp1 $hhas_temp2 > $test.diff");
-            return false;
-          }
+        if ($hhas_temp2 === false) {
+          file_put_contents(
+            "$test.diff",
+            "dumping hhas after second hhbbc pass failed"
+          );
+          return false;
+        }
+        $diff = shell_exec("diff $hhas_temp1 $hhas_temp2 | wc -l");
+        if (trim($diff) != '0') {
+          shell_exec("diff $hhas_temp1 $hhas_temp2 > $test.diff");
+          return false;
         }
       }
 
@@ -2279,7 +2303,9 @@ function run_test($options, $test) {
     if (substr($test, -5) === ".hhas") return 'skip';
     $hhas_temp = dump_hhas_to_temp($hhvm, $test);
     if ($hhas_temp === false) {
-      $err = "system failed: ".dump_hhas_cmd($hhvm, $test)."\n";
+      $err = "system failed: " .
+        dump_hhas_cmd($hhvm, $test, $test.'.round_trip.hhas') .
+        "\n";
       file_put_contents("$test.diff", $err);
       return false;
     }
@@ -2320,7 +2346,10 @@ function run_test($options, $test) {
 
     if (substr($test, -5) === ".hhas") return 'skip';
     $hhas = dump_hhas_to_temp($hhvm, $test);
-    if (!$hhas) return 'skip';
+    if ($hhas === false) {
+      file_put_contents($diff, "HPHPC CODEGEN FAILED");
+      return false;
+    }
     $hhcg = dump_hh_codegen($options, $test, $test_config);
     if (!$hhcg || file_get_contents($hhcg) === "") {
       file_put_contents($diff, "HACK CODEGEN FAILED");
@@ -2434,12 +2463,12 @@ function print_commands($tests, $options) {
     $hhbbc_cmds .= $hhbbc_cmd;
     if (isset($options['hhbbc2'])) {
       foreach ((array)$command as $c) {
-        $hhbbc_cmds .= $c." -m dumphhas > $test.before.round_trip.hhas\n";
+        $hhbbc_cmds .= $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
       }
       $hhbbc_cmds .= "mv $test.repo/$program.hhbbc $test.repo/$program.hhbc\n";
       $hhbbc_cmds .= $hhbbc_cmd;
       foreach ((array)$command as $c) {
-        $hhbbc_cmds .= $c." -m dumphhas > $test.after.round_trip.hhas\n";
+        $hhbbc_cmds .= $c." -vEval.DumpHhas=1 > $test.after.round_trip.hhas\n";
       }
       $hhbbc_cmds .=
         "diff $test.before.round_trip.hhas $test.after.round_trip.hhas\n";

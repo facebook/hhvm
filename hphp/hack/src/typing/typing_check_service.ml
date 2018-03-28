@@ -57,7 +57,12 @@ let check_const opts fn x =
     let cst = Naming.global_const opts cst in
     Some (Typing.gconst_def opts cst)
 
-let check_file opts errors (fn, file_infos) =
+let check_file dynamic_view_files opts errors (fn, file_infos) =
+
+  let opts = {
+      opts with
+      GlobalOptions.tco_dynamic_view = Relative_path.Set.mem dynamic_view_files fn;
+  } in
   let { FileInfo.n_funs; n_classes; n_types; n_consts } = file_infos in
   let ignore_type_fun opts fn name =
     ignore(type_fun opts fn name) in
@@ -76,38 +81,38 @@ let check_file opts errors (fn, file_infos) =
   end in
   Errors.merge errors' errors
 
-let check_files opts errors fnl =
+let check_files dynamic_view_files opts errors fnl  =
   SharedMem.invalidate_caches();
   let check_file =
     if !Utils.profile
     then (fun acc fn ->
       let t = Sys.time () in
-      let result = check_file opts acc fn in
+      let result = check_file dynamic_view_files opts acc fn in
       let t' = Sys.time () in
       let duration = t' -. t in
       let filepath = Relative_path.suffix (fst fn) in
         TypingLogger.log_typing_time duration filepath;
         !Utils.log (Printf.sprintf "%f %s [type-check]" duration filepath);
         result)
-    else check_file opts in
+    else check_file dynamic_view_files opts in
   let errors = List.fold_left fnl ~f:check_file ~init:errors in
   TypingLogger.flush_buffer ();
   errors
 
-let load_and_check_files acc fnl =
+let load_and_check_files dynamic_view_files acc fnl =
   let opts = TypeCheckStore.load() in
-  check_files opts acc fnl
+  check_files dynamic_view_files opts acc fnl
 
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
 (*****************************************************************************)
 
-let parallel_check workers opts fnl =
+let parallel_check dynamic_view_files workers opts fnl =
   TypeCheckStore.store opts;
   let result =
     MultiWorker.call
       workers
-      ~job:load_and_check_files
+      ~job:(load_and_check_files dynamic_view_files)
       ~neutral
       ~merge:Decl_service.merge_lazy_decl
       ~next:(MultiWorker.next workers fnl)
@@ -115,8 +120,8 @@ let parallel_check workers opts fnl =
   TypeCheckStore.clear();
   result
 
-let go workers opts fast =
+let go workers opts dynamic_view_files fast =
   let fnl = Relative_path.Map.elements fast in
   if List.length fnl < 10
-  then check_files opts neutral fnl
-  else parallel_check workers opts fnl
+  then check_files dynamic_view_files opts neutral fnl
+  else parallel_check dynamic_view_files workers opts fnl

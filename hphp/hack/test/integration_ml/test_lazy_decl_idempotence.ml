@@ -59,15 +59,15 @@ let () =
   SharedMem.invalidate_caches();
   (* Local caches need to be invalidated whenever things are removed from shared
    * memory (to avoid getting cached old versions of declarations) *)
-
-  let errors = Typing_check_service.go None tcopt bar_fast in
+  let empty = Relative_path.Set.empty in
+  let errors = Typing_check_service.go None tcopt empty bar_fast in
   Test.assert_errors errors "";
-  let errors = Typing_check_service.go None tcopt bar_fast in
+  let errors = Typing_check_service.go None tcopt empty bar_fast in
   Test.assert_errors errors "";
 
-  let errors = Typing_check_service.go None tcopt foo_fast in
+  let errors = Typing_check_service.go None tcopt empty foo_fast in
   Test.assert_errors errors expected_errors;
-  let errors = Typing_check_service.go None tcopt foo_fast in
+  let errors = Typing_check_service.go None tcopt empty foo_fast in
   Test.assert_errors errors expected_errors;
 
   ignore env;

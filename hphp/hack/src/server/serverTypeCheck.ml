@@ -743,8 +743,11 @@ end = functor(CheckKind:CheckKindType) -> struct
     debug_print_path_set genv "lazy_check_later" lazy_check_later;
     if Relative_path.(Map.mem fast default) then
       Hh_logger.log "WARNING: recheking defintion in a dummy file";
+    let dynamic_view_files = if ServerDynamicView.dynamic_view_on ()
+    then env.editor_open_files
+    else Relative_path.Set.empty in
     let errorl'=
-      Typing_check_service.go genv.workers env.tcopt fast in
+      Typing_check_service.go genv.workers env.tcopt dynamic_view_files fast in
     let errorl' = match ServerArgs.ai_mode genv.options with
       | None -> errorl'
       | Some ai_opt ->

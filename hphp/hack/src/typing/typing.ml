@@ -202,8 +202,13 @@ let try_over_concrete_supertypes env ty f =
           (fun _ -> iter_over_types env resl tyl) in
   iter_over_types env [] tyl
 
-let save_env env =
-  T.{tcopt = Env.get_tcopt env; tenv = env.Env.tenv; subst = env.Env.subst}
+let save_env local_tpenv env =
+  T.{
+    tcopt = Env.get_tcopt env;
+    tenv = env.Env.tenv;
+    subst = env.Env.subst;
+    tpenv = SMap.union local_tpenv env.Env.global_tpenv;
+  }
 
 
 (*****************************************************************************)
@@ -445,6 +450,7 @@ and fun_def tcopt f =
             Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
           env, T.FVellipsis
         | FVnonVariadic -> env, T.FVnonVariadic in
+      let local_tpenv = env.Env.lenv.Env.tpenv in
       let env, tb = fun_ env return pos nb f.f_fun_kind in
       let env = Env.check_todo env in
       if Env.is_strict env then Env.log_anonymous env;
@@ -456,7 +462,7 @@ and fun_def tcopt f =
           Typing_return.async_suggest_return (f.f_fun_kind) hint pos
       end;
       {
-        T.f_annotation = save_env env;
+        T.f_annotation = save_env local_tpenv env;
         T.f_mode = f.f_mode;
         T.f_ret = f.f_ret;
         T.f_name = f.f_name;
@@ -2597,6 +2603,7 @@ and anon_make tenv p f ft idl =
             ~is_explicit:(Option.is_some ret_ty)
             ~is_by_ref:f.f_ret_by_ref
             hret) in
+        let local_tpenv = env.Env.lenv.Env.tpenv in
         let env, tb = block env nb.fnb_nast in
         let env =
           if Nast_terminality.Terminal.block tenv nb.fnb_nast
@@ -2608,7 +2615,7 @@ and anon_make tenv p f ft idl =
         let env, hret = Env.unbind env hret in
         is_typing_self := false;
         let tfun_ = {
-          T.f_annotation = save_env env;
+          T.f_annotation = save_env local_tpenv env;
           T.f_mode = f.f_mode;
           T.f_ret = f.f_ret;
           T.f_name = f.f_name;
@@ -6050,7 +6057,7 @@ and class_def_ env c tc =
   let typed_static_methods = List.map c.c_static_methods (method_def env) in
   Typing_hooks.dispatch_exit_class_def_hook c tc;
   {
-    T.c_annotation = save_env env;
+    T.c_annotation = save_env env.Env.lenv.Env.tpenv env;
     T.c_mode = c.c_mode;
     T.c_final = c.c_final;
     T.c_is_xhp = c.c_is_xhp;
@@ -6329,6 +6336,7 @@ and method_def env m =
     | FVellipsis -> env, T.FVellipsis
     | FVnonVariadic -> env, T.FVnonVariadic in
   let nb = Nast.assert_named_body m.m_body in
+  let local_tpenv = env.Env.lenv.Env.tpenv in
   let env, tb =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
   let env =
@@ -6351,7 +6359,7 @@ and method_def env m =
   let m = { m with m_ret = m_ret; } in
   Typing_hooks.dispatch_exit_method_def_hook m;
   {
-    T.m_annotation = save_env env;
+    T.m_annotation = save_env local_tpenv env;
     T.m_final = m.m_final;
     T.m_abstract = m.m_abstract;
     T.m_visibility = m.m_visibility;
@@ -6405,7 +6413,7 @@ and typedef_def tcopt typedef  =
     | _ -> env
   end in
   {
-    T.t_annotation = save_env env;
+    T.t_annotation = save_env env.Env.lenv.Env.tpenv env;
     T.t_name = typedef.t_name;
     T.t_mode = typedef.t_mode;
     T.t_vis = typedef.t_vis;
@@ -6437,7 +6445,7 @@ and gconst_def tcopt cst =
         let env, te, _value_type = expr env value in
         Some te, env
   in
-  { T.cst_annotation = save_env env;
+  { T.cst_annotation = save_env env.Env.lenv.Env.tpenv env;
     T.cst_mode = cst.cst_mode;
     T.cst_name = cst.cst_name;
     T.cst_type = cst.cst_type;

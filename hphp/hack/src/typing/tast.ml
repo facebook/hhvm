@@ -26,6 +26,7 @@ type saved_env = {
   tcopt : TypecheckerOptions.t;
   tenv : ty IMap.t;
   subst : int IMap.t;
+  tpenv : Type_parameter_env.t;
 }
 
 let pp_saved_env fmt env =
@@ -43,6 +44,11 @@ let pp_saved_env fmt env =
 
   Format.fprintf fmt "@[%s =@ " "subst";
   IMap.pp Format.pp_print_int fmt env.subst;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "tpenv";
+  Type_parameter_env.pp fmt env.tpenv;
   Format.fprintf fmt "@]";
 
   Format.fprintf fmt " }@]"

@@ -11,6 +11,7 @@ include Typing_env_types_sig.S
 
 open Typing_defs
 open Typing_heap
+open Type_parameter_env
 
 val get_tcopt : env -> TypecheckerOptions.t
 val fresh : unit -> int

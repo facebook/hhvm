@@ -19,3 +19,17 @@ module Ty_ = struct
 end
 
 include Set.Make(Ty_)
+
+let pp fmt t =
+  Format.fprintf fmt "@[<hv 2>{";
+  ignore
+    (List.fold_left
+      (fun sep ty ->
+        if sep then Format.fprintf fmt ";@ ";
+        Pp_type.pp_ty fmt ty;
+        true)
+      false
+      (elements t));
+  Format.fprintf fmt "@,}@]"
+
+let show = Format.asprintf "%a" pp

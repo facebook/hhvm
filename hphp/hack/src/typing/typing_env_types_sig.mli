@@ -9,6 +9,7 @@
  *)
 
  open Typing_defs
+ open Type_parameter_env
  module TySet = Typing_set
  module type S = sig
 
@@ -27,12 +28,6 @@
  type local = locl ty * expression_id
  type local_history = locl ty list
  type old_local = locl ty list * locl ty * expression_id
- type tparam_bounds = TySet.t
- type tparam_info = {
-   lower_bounds : TySet.t;
-   upper_bounds : TySet.t;
- }
- type tpenv = tparam_info SMap.t
  type local_types = (local Local_id.Map.t) Typing_continuations.Map.t
 
  (* Local environment includes types of locals and bounds on type parameters. *)

@@ -439,6 +439,45 @@ let special_cases_cases = [
   ]
 ]
 
+let bounded_generic_fun = "<?hh // strict
+abstract class Base {}
+final class C extends Base {}
+function bounded_generic_fun<T as Base>(T $x): void {
+  $x;
+//^5:3
+  if ($x instanceof C) {
+//    ^7:7
+    $x;
+//  ^9:5
+  }
+  $x;
+//^12:3
+}
+"
+
+let bounded_generic_fun_cases = [
+  ("bounded_generic_fun.php", 5, 3), [{
+    snippet = "T\nwhere T as Base";
+    addendum = [];
+    pos = pos_at (5, 3) (5, 4);
+  }];
+  ("bounded_generic_fun.php", 7, 7), [{
+    snippet = "T\nwhere T as Base";
+    addendum = [];
+    pos = pos_at (7, 7) (7, 8);
+  }];
+  ("bounded_generic_fun.php", 9, 5), [{
+    snippet = "C";
+    addendum = [];
+    pos = pos_at (9, 5) (9, 6);
+  }];
+  ("bounded_generic_fun.php", 12, 3), [{
+    snippet = "(C | T)\nwhere T as Base";
+    addendum = [];
+    pos = pos_at (12, 3) (12, 4);
+  }];
+]
+
 let files = [
   "class_members.php", class_members;
   "classname_call.php", classname_call;
@@ -446,6 +485,7 @@ let files = [
   "classname_variable.php", classname_variable;
   "docblock.php", docblock;
   "special_cases.php", special_cases;
+  "bounded_generic_fun.php", bounded_generic_fun;
 ]
 
 let cases =
@@ -455,6 +495,7 @@ let cases =
   @ classname_call_cases
   @ chained_calls_cases
   @ classname_variable_cases
+  @ bounded_generic_fun_cases
 
 let () =
   let env =

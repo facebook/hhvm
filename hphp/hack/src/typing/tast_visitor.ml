@@ -18,6 +18,7 @@ let restore_saved_env env saved_env =
     Env.genv = {env.Env.genv with Env.tcopt = saved_env.Tast.tcopt};
     Env.tenv = saved_env.Tast.tenv;
     Env.subst = saved_env.Tast.subst;
+    Env.global_tpenv = saved_env.Tast.tpenv;
   }
 
 let restore_fun_env env f =

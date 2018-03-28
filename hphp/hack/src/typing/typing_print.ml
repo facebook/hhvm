@@ -554,9 +554,7 @@ module Full = struct
         list_sep to_doc ", " begin fun (tparam, ck, ty) ->
           Concat [to_doc tparam; tparam_constraint to_doc ISet.empty env (ck, ty)]
         end constraints;
-      ]
-      |> Libhackfmt.format_doc_unbroken format_env
-      |> String.trim)
+      ])
 
   let to_string_rec env n x =
     ty Doc.text (ISet.add n ISet.empty) env x
@@ -619,7 +617,11 @@ module Full = struct
 
       | _ -> ty text_strip_ns ISet.empty env x
     in
-    Concat [prefix; body]
+    let constraints =
+      constraints_for_type text_strip_ns env x
+      |> Option.value_map ~default:Nothing ~f:(fun x -> Concat [Newline; x])
+    in
+    Concat [prefix; body; constraints]
     |> Libhackfmt.format_doc format_env
     |> String.trim
 
@@ -1019,5 +1021,8 @@ let class_ tcopt c = PrintClass.class_type tcopt c
 let gconst tcopt gc = Full.to_string_decl tcopt (fst gc)
 let fun_ tcopt f = PrintFun.fun_type tcopt f
 let typedef tcopt td = PrintTypedef.typedef tcopt td
-let constraints_for_type env ty = Full.constraints_for_type Doc.text env ty
+let constraints_for_type env ty =
+  Full.constraints_for_type Doc.text env ty
+  |> Option.map ~f:(Libhackfmt.format_doc_unbroken Full.format_env)
+  |> Option.map ~f:String.trim
 let class_kind c_kind final = ErrorString.class_kind c_kind final

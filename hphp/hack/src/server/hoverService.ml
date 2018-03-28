@@ -26,9 +26,9 @@ type hover_info = {
 type result = hover_info list
 
 let string_of_result { snippet; addendum; pos } =
-  Printf.sprintf "{ snippet = \"%s\"; addendum = [%s]; pos = %s }"
+  Printf.sprintf "{ snippet = %S; addendum = [%s]; pos = %s }"
     snippet
-    (String.concat "; " (List.map (fun s -> Printf.sprintf "\"%s\"" s) addendum))
+    (String.concat "; " (List.map (fun s -> Printf.sprintf "%S" s) addendum))
     (match pos with
       | None -> "None"
-      | Some p -> Printf.sprintf "Some \"%s\"" (Pos.multiline_string_no_file p))
+      | Some p -> Printf.sprintf "Some %S" (Pos.multiline_string_no_file p))

@@ -14,6 +14,7 @@ open Decl_env
 open Typing_defs
 open Nast
 open Typing_env_return_info
+open Type_parameter_env
 
 module Dep = Typing_deps.Dep
 module TLazyHeap = Typing_lazy_heap

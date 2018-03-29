@@ -17,7 +17,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       res :: t
   end
 
-  module SyntaxSC = Full_fidelity_syntax_smart_constructors.WithSyntax(Syntax)
+  module SyntaxSC = SyntaxSmartConstructors.WithSyntax(Syntax)
   include SyntaxSC.WithState(State)
 
   let missing = Syntax.make_missing SourceText.empty 0

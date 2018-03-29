@@ -131,7 +131,7 @@ let parse_script parser =
 
 end (* WithSmartConstructors *)
 
-module SC = Full_fidelity_syntax_smart_constructors.WithSyntax(Syntax)
+module SC = SyntaxSmartConstructors.WithSyntax(Syntax)
 include WithSmartConstructors(SC)
 
 end (* WithSyntax *)

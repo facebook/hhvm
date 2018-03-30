@@ -3244,6 +3244,7 @@ and is_abstract_ft fty = match fty with
     env, T.make_typed_expr p ty (T.Call (call_type, te, thl, tel, tuel)), ty in
   let make_call_special env id tel ty =
     make_call env (T.make_implicitly_typed_expr fpos (T.Id id)) [] tel [] ty in
+  let overload_function = overload_function make_call fpos in
 
   let check_coroutine_call env fty =
     let () = if is_return_disposable_fun_type env fty && not is_using_clause
@@ -6455,24 +6456,29 @@ and gconst_def tcopt cst =
 
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)
-and overload_function p env ((), class_id) method_id el uel f =
-  let env, _ce, ty = static_class_id p env class_id in
+and overload_function make_call fpos p env ((), class_id) method_id el uel f =
+  let env, tcid, ty = static_class_id p env class_id in
   let env, _tel, _ = exprs ~is_func_arg:true env el in
   let env, fty, _ =
     class_get ~is_method:true ~is_const:false env ty method_id class_id in
   (* call the function as declared to validate arity and input types,
      but ignore the result and overwrite with custom one *)
-  let (env, res), has_error = Errors.try_with_error
-      (* TODO: Should we be passing hints here *)
-     (fun () -> (let env, _, _, ty =
-       call ~expected:None p env fty el uel in env, ty), false)
-     (fun () -> (env, (Reason.Rwitness p, Typing_utils.tany env)), true) in
-   (* if there are errors already stop here - going forward would
-    * report them twice *)
-   if has_error then env, T.make_typed_expr p res T.Any, res
-   else let env, ty = f env fty res el in
-   (* TODO TAST: do this right *)
-   env, T.make_typed_expr p ty T.Any, ty
+  let (env, tel, tuel, res), has_error = Errors.try_with_error
+    (* TODO: Should we be passing hints here *)
+    (fun () -> (call ~expected:None p env fty el uel), false)
+    (fun () -> (env, [], [], (Reason.Rwitness p, Typing_utils.tany env)), true) in
+  (* if there are errors already stop here - going forward would
+   * report them twice *)
+  if has_error
+  then env, T.make_typed_expr p res T.Any, res
+  else
+    let env, ty = f env fty res el in
+    let fty =
+      match fty with
+      | r, Tfun ft -> r, Tfun {ft with ft_ret = ty}
+      | _ -> fty in
+    let te = T.make_typed_expr fpos fty (T.Class_const(tcid, method_id)) in
+    make_call env te [] tel tuel ty
 
 and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
   let access_type = Typing_arrays.static_array_access env e2 in

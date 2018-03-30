@@ -338,13 +338,43 @@ type method_info = {
 }
 
 let rec subtype_params
+  ?(is_method : bool = false)
   (env : Env.env)
   (subl : locl fun_param list)
   (superl : locl fun_param list)
-  (variadic_ty : locl ty option) : Env.env =
+  (variadic_sub_ty : locl ty option)
+  (variadic_super_ty : locl ty option) : Env.env =
+
   match subl, superl with
-  | [], _ -> env
-  | _, [] -> (match variadic_ty with
+  (* When either list runs out, we still have to typecheck that
+  the remaining portion sub/super types with the other's variadic.
+  For example, if
+  ChildClass {
+    public function a(int $x = 0, string ... $args) // superl = [int], super_var = string
+  }
+  overrides
+  ParentClass {
+    public function a(string ... $args) // subl = [], sub_var = string
+  }
+  , there should be an error because the first argument will be checked against
+  int, not string that is, ChildClass::a("hello") would crash,
+  but ParentClass::a("hello") wouldn't.
+
+  Similarly, if the other list is longer, aka
+  ChildClass  extends ParentClass {
+    public function a(mixed ... $args) // superl = [], super_var = mixed
+  }
+  overrides
+  ParentClass {
+    //subl = [string], sub_var = string
+    public function a(string $x = 0, string ... $args)
+  }
+  It should also check that string is a subtype of mixed.
+  *)
+  | [], _ -> (match variadic_super_ty with
+    | None -> env
+    | Some ty -> supertype_params_with_variadic env superl ty)
+  | _, [] -> (match variadic_sub_ty with
     | None -> env
     | Some ty -> subtype_params_with_variadic env subl ty)
   | sub :: subl, super :: superl ->
@@ -353,7 +383,7 @@ let rec subtype_params
     (* Check that the calling conventions of the params are compatible.
      * We don't currently raise an error for reffiness because function
      * hints don't support '&' annotations (enforce_ctpbr = false). *)
-    Unify.unify_param_modes ~enforce_ctpbr:false sub super;
+    Unify.unify_param_modes ~enforce_ctpbr:is_method sub super;
     Unify.unify_accept_disposable sub super;
     let env = { env with Env.pos = Reason.to_pos (fst ty_sub) } in
     let env = match sub.fp_kind, super.fp_kind with
@@ -363,7 +393,7 @@ let rec subtype_params
       env
     | _ ->
       sub_type env ty_sub ty_super in
-    let env = subtype_params env subl superl variadic_ty in
+    let env = subtype_params ~is_method env subl superl variadic_sub_ty variadic_super_ty in
     env
 
 and subtype_params_with_variadic
@@ -376,6 +406,17 @@ and subtype_params_with_variadic
     let env = { env with Env.pos = Reason.to_pos (fst sub) } in
     let env = sub_type env sub variadic_ty in
     subtype_params_with_variadic env subl variadic_ty
+
+and supertype_params_with_variadic
+  (env : Env.env)
+  (superl : locl fun_param list)
+  (variadic_ty : locl ty) : Env.env =
+  match superl with
+  | [] -> env
+  | { fp_type = super; _ } :: superl ->
+    let env = { env with Env.pos = Reason.to_pos (fst super) } in
+    let env = sub_type env variadic_ty super in
+    supertype_params_with_variadic env superl variadic_ty
 
 and subtype_reactivity
   ?(method_info: method_info option)
@@ -547,7 +588,6 @@ and subtype_reactivity
  *)
 and subtype_funs_generic
   ~(check_return : bool)
-  ~(contravariant_arguments : bool)
   ?(method_info: method_info option)
   (env : Env.env)
   (r_sub : Reason.t)
@@ -583,33 +623,23 @@ and subtype_funs_generic
     | _, _ -> ()
   );
 
-  (* We support contravariance on arguments only for function type subtyping,
-   * and not for compatibility of signatures when overriding, as this is
-   * not supported by the runtime *)
-  (* However, if we are polymorphic in the superclass we have to be
-   * polymorphic in the subclass. *)
-  let env, var_opt = match ft_sub.ft_arity, ft_super.ft_arity with
+  let env  = match ft_sub.ft_arity, ft_super.ft_arity with
     | Fvariadic (_, fp_super), Fvariadic (_, { fp_type = var_sub; _ }) ->
-      let { fp_name = n_super; fp_type = var_super; _ } = fp_super in
-      if contravariant_arguments
-      then
-        sub_type env var_sub var_super, None
-      else
-        let env, var = Unify.unify env var_super var_sub in
-        env, Some (n_super, var)
-    | _ -> env, None
+      let {fp_type = var_super; _ } = fp_super in
+      sub_type env var_sub var_super
+    | _ -> env
   in
   (* This is (1) above *)
   let env =
-    (* Right now this is true only for function types; hence var_opt=None *)
-    if contravariant_arguments
-    then
-      let variadic_subtype = match ft_sub.ft_arity with
-        | Fvariadic (_, {fp_type = var_sub; _ }) -> Some var_sub
-        | _ -> None in
-      subtype_params env ft_super.ft_params ft_sub.ft_params variadic_subtype
-    else
-      fst (Unify.unify_params env ft_super.ft_params ft_sub.ft_params var_opt)
+    let variadic_subtype = match ft_sub.ft_arity with
+      | Fvariadic (_, {fp_type = var_sub; _ }) -> Some var_sub
+      | _ -> None in
+    let variadic_supertype =  match ft_super.ft_arity with
+      | Fvariadic (_, {fp_type = var_super; _ }) -> Some var_super
+      | _ -> None in
+    subtype_params
+      ~is_method:(method_info <> None)
+      env ft_super.ft_params ft_sub.ft_params variadic_subtype variadic_supertype
   in
 
   (* We check constraint entailment and invariant parameter/covariant result
@@ -706,7 +736,6 @@ and subtype_method
   subtype_funs_generic
     ~check_return env
     ~method_info
-    ~contravariant_arguments:false
     r_sub ft_sub_no_tvars
     r_super ft_super_no_tvars
 
@@ -1169,7 +1198,7 @@ and sub_type_with_uenv
     when List.length tyl_super = List.length tyl_sub ->
     wfold_left2 sub_type env tyl_sub tyl_super
   | (r_sub, Tfun ft_sub), (r_super, Tfun ft_super) ->
-    subtype_funs_generic ~contravariant_arguments:true ~check_return:true
+    subtype_funs_generic  ~check_return:true
       env r_sub ft_sub r_super ft_super
   | (r_sub, Tanon (anon_arity, id)), (r_super, Tfun ft)  ->
       (match Env.get_anonymous env id with

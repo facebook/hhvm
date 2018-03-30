@@ -9,3 +9,5 @@ File "generic_incompatible_implementation.php", line 7, characters 26-26:
 This is a value of generic type T
 File "generic_incompatible_implementation.php", line 11, characters 26-26:
 It is incompatible with an object of type D
+File "generic_incompatible_implementation.php", line 7, characters 26-26:
+Considering that this type argument is invariant with respect to C

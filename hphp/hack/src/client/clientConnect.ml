@@ -214,13 +214,14 @@ let rec wait_for_server_message
     try
       let fd = Timeout.descr_of_in_channel ic in
       let msg = Marshal_tools.from_fd_with_preamble fd in
-      if (msg <> ServerCommandTypes.Ping) &&
+      let is_ping = (msg = ServerCommandTypes.Ping) in
+      if (not is_ping) &&
           (Option.is_none expected_message || Some msg = expected_message) then
       begin
         progress_callback None;
         msg
       end else begin
-        Option.iter tail_env
+        if not is_ping then Option.iter tail_env
           (fun t -> print_wait_msg progress_callback start_time t);
         wait_for_server_message ~expected_message ~ic ~retries
           ~progress_callback ~start_time ~tail_env

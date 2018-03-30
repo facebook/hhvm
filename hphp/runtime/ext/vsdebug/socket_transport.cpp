@@ -202,16 +202,14 @@ bool SocketTransport::bindAndListen(
                   address->ai_socktype,
                   address->ai_protocol);
 
-  if (fd < 0 && errno == EAFNOSUPPORT) {
+  if (fd < 0) {
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelWarning,
       "SocketTransport: socket() call failed: %d",
       errno
     );
 
-    // Don't bind to this address, but still try to process other
-    // addresses if there are any.
-    return true;
+    return false;
   }
 
   constexpr int yes = 1;
@@ -219,8 +217,6 @@ bool SocketTransport::bindAndListen(
   if (address->ai_family == AF_INET6) {
     setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &yes, sizeof(yes));
   }
-
-  socketFds.push_back(fd);
 
   if (bind(fd, address->ai_addr, address->ai_addrlen) < 0) {
     VSDebugLogger::Log(
@@ -245,6 +241,7 @@ bool SocketTransport::bindAndListen(
     return false;
   }
 
+  socketFds.push_back(fd);
   return true;
 }
 

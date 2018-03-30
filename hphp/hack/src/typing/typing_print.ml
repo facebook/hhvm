@@ -271,22 +271,37 @@ module Full = struct
 
   let comma_sep = Concat [text ","; Space]
 
-  let list_sep (s : Doc.t) (f : 'a -> Doc.t) (l : 'a list) : Doc.t =
+  let id x = x
+
+  let list_sep ?(split=true) (s : Doc.t) (f : 'a -> Doc.t) (l : 'a list) : Doc.t =
+    let split = if split then Split else Nothing in
     let max_idx = List.length l - 1 in
     let elements = List.mapi l ~f:begin fun idx element ->
       if idx = max_idx
       then f element
-      else Concat [f element; s; Split]
+      else Concat [f element; s; split]
     end in
     match elements with
     | [] -> Nothing
-    | xs-> Nest xs
+    | xs -> Nest [split; Concat xs; split]
+
+  let delimited_list sep left_delimiter f l right_delimiter =
+    Span [
+      text left_delimiter;
+      WithRule (Rule.Parental, Concat [
+        list_sep sep f l;
+        text right_delimiter;
+      ]);
+    ]
+
+  let list: type c. _ -> (c -> Doc.t) -> c list -> _ -> _ =
+    fun ld x y rd -> delimited_list comma_sep ld x y rd
 
   let shape_map fdm f_field =
     let cmp = (fun (k1, _) (k2, _) ->
        compare (Env.get_shape_field_name k1) (Env.get_shape_field_name k2)) in
     let fields = List.sort ~cmp (Nast.ShapeMap.elements fdm) in
-    list_sep comma_sep f_field fields
+    List.map fields f_field
 
   let rec ty: type a. _ -> _ -> _ -> a ty -> Doc.t =
     fun to_doc st env (_, x) -> ty_ to_doc st env x
@@ -294,8 +309,6 @@ module Full = struct
   and ty_: type a. _ -> _ -> _ -> a ty_ -> Doc.t =
     fun to_doc st env x ->
     let k: type b. b ty -> _ = fun x -> ty to_doc st env x in
-    let list: type c. (c ty -> Doc.t) -> c ty list -> _ =
-      fun x y -> list_sep comma_sep x y in
     match x with
     | Tany -> text "_"
     | Terr -> text "_"
@@ -303,19 +316,19 @@ module Full = struct
     | Tmixed -> text "mixed"
     | Tdynamic -> text "dynamic"
     | Tnonnull -> text "nonnull"
-    | Tdarray (x, y) -> Concat [text "darray<"; k x; text ","; Space; k y; text ">"]
-    | Tvarray x -> Concat [text "varray<"; k x; text ">"]
-    | Tvarray_or_darray x -> Concat [text "varray_or_darray<"; k x; text ">"]
-    | Tarraykind (AKvarray_or_darray x) -> Concat [text "varray_or_darray<"; k x; text ">"]
+    | Tdarray (x, y) -> list "darray<" k [x; y] ">"
+    | Tvarray x -> list "varray<" k [x] ">"
+    | Tvarray_or_darray x -> list "varray_or_darray<" k [x] ">"
+    | Tarraykind (AKvarray_or_darray x) -> list "varray_or_darray<" k [x] ">"
     | Tarraykind AKany -> text "array"
     | Tarraykind AKempty -> text "array (empty)"
     | Tarray (None, None) -> text "array"
-    | Tarraykind AKvarray x -> Concat [text "varray<"; k x; text ">"]
-    | Tarraykind (AKvec x) -> Concat [text "array<"; k x; text ">"]
-    | Tarray (Some x, None) -> Concat [text "array<"; k x; text ">"]
-    | Tarray (Some x, Some y) -> Concat [text "array<"; k x; text ","; Space; k y; text ">"]
-    | Tarraykind AKdarray (x, y) -> Concat [text "darray<"; k x; text ","; Space; k y; text ">"]
-    | Tarraykind (AKmap (x, y)) -> Concat [text "array<"; k x; text ","; Space; k y; text ">"]
+    | Tarraykind AKvarray x -> list "varray<" k [x] ">"
+    | Tarraykind (AKvec x) -> list "array<" k [x] ">"
+    | Tarray (Some x, None) -> list "array<" k [x] ">"
+    | Tarray (Some x, Some y) -> list "array<" k [x; y] ">"
+    | Tarraykind AKdarray (x, y) -> list "darray<" k [x; y] ">"
+    | Tarraykind (AKmap (x, y)) -> list "array<" k [x; y] ">"
     | Tarraykind (AKshape fdm) ->
       let f_field (shape_map_key, (_tk, tv)) = Concat [
           to_doc (Env.get_shape_field_name shape_map_key);
@@ -324,16 +337,9 @@ module Full = struct
           Space;
           k tv
         ] in
-      Concat [
-        text "shape-like-array(";
-        shape_map fdm f_field;
-        text ")"
-      ]
-    | Tarraykind (AKtuple fields) -> Concat [
-        text "tuple-like-array(";
-        list k (List.rev (IMap.values fields));
-        text ")"
-      ]
+      list "shape-like-array(" id (shape_map fdm f_field) ")"
+    | Tarraykind (AKtuple fields) ->
+      list "tuple-like-array(" k (List.rev (IMap.values fields)) ")"
     | Tarray (None, Some _) -> assert false
     | Tclass ((_, s), []) -> to_doc s
     | Tapply ((_, s), []) -> to_doc s
@@ -371,10 +377,9 @@ module Full = struct
           | (Reason.Rdynamic_yield _, _) -> Space ^^ text "[DynamicYield]"
           | _ -> Nothing)
       ]
-    | Tclass ((_, s), tyl) -> Concat [to_doc s; text "<"; list k tyl; text ">"]
+    | Tclass ((_, s), tyl) -> to_doc s ^^ list "<" k tyl ">"
     | Tabstract (AKnewtype (s, []), _) -> to_doc s
-    | Tabstract (AKnewtype (s, tyl), _) ->
-      Concat [to_doc s; text "<"; list k tyl; text ">"]
+    | Tabstract (AKnewtype (s, tyl), _) -> to_doc s ^^ list "<" k tyl ">"
     | Tabstract (ak, cstr) ->
       let debug_info = if !debug_mode then
         match cstr with
@@ -385,8 +390,8 @@ module Full = struct
       Concat [to_doc @@ AbstractKind.to_string ak; debug_info]
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
     *)
-    | Tapply ((_, s), tyl) -> Concat [to_doc s; text "<"; list k tyl; text ">"]
-    | Ttuple tyl -> Concat [text "("; list k tyl; text ")"]
+    | Tapply ((_, s), tyl) -> to_doc s ^^ list "<" k tyl ">"
+    | Ttuple tyl -> list "(" k tyl ")"
     | Tanon (_, id) ->
       begin match Env.get_anonymous env id with
       | Some (Reactive _, true, _, _, _) -> text "[coroutine rx fun]"
@@ -397,20 +402,18 @@ module Full = struct
     | Tunresolved [] -> text "[unresolved]"
     | Tunresolved [ty] ->
       if !debug_mode then Concat [text "("; k ty; text ")"] else k ty
-    | Tunresolved tyl -> Concat [text "("; list_sep (Concat [Space; text "|"; Space]) k tyl; text ")"]
+    | Tunresolved tyl -> delimited_list (Space ^^ text "|" ^^ Space) "(" k tyl ")"
     | Tobject -> text "object"
-    | Tshape (fields_known, fdm) -> Concat [
-      text "shape";
-      text "(";
-      (let optional_shape_field_enabled =
+    | Tshape (fields_known, fdm) ->
+      let optional_shape_fields_enabled =
         not @@
           TypecheckerOptions.experimental_feature_enabled
             (Env.get_options env)
             TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields in
-      let f_field (shape_map_key, { sft_optional; sft_ty }) =
-        if optional_shape_field_enabled then
+      let fields =
+        let f_field (shape_map_key, { sft_optional; sft_ty }) =
           Concat [
-            if sft_optional then text "?" else Nothing;
+            if optional_shape_fields_enabled && sft_optional then text "?" else Nothing;
             text "'";
             to_doc (Env.get_shape_field_name shape_map_key);
             text "'";
@@ -419,31 +422,20 @@ module Full = struct
             Space;
             k sft_ty;
           ]
-        else
-          Concat [
-            text "'";
-            to_doc (Env.get_shape_field_name shape_map_key);
-            text "'";
-            Space;
-            text "=>";
-            Space;
-            k sft_ty
-          ] in
-      shape_map fdm f_field);
-      (match fields_known with
-      | FieldsFullyKnown -> Nothing
-      | FieldsPartiallyKnown _ -> Concat [
-          (match Nast.ShapeMap.elements fdm with
-          | [] -> Nothing
-          | _ -> text "," ^^ Space
-          );
-          text "..."
-        ]);
-      text ")";
-      (match fields_known with
-      | FieldsFullyKnown -> Nothing
-      | FieldsPartiallyKnown unset_fields ->
-        (match Nast.ShapeMap.elements unset_fields with
+        in
+        shape_map fdm f_field
+      in
+      let fields =
+        match fields_known with
+        | FieldsFullyKnown -> fields
+        | FieldsPartiallyKnown _ -> fields @ [text "..."]
+      in
+      Concat [
+        list "shape(" id fields ")";
+        match fields_known with
+        | FieldsFullyKnown -> Nothing
+        | FieldsPartiallyKnown unset_fields ->
+          match Nast.ShapeMap.elements unset_fields with
           | [] -> Nothing
           | _ -> Concat [
               text "(unset fields:";
@@ -453,9 +445,7 @@ module Full = struct
               end);
               text ")"
             ]
-        )
-      );
-    ]
+      ]
 
   and prim x =
     match x with
@@ -471,34 +461,32 @@ module Full = struct
 
   and fun_type: type a. _ -> _ -> _ -> a fun_type -> _ =
     fun to_doc st env ft ->
-    Concat [
+    let params = List.map ft.ft_params (fun_param to_doc st env) in
+    let variadic_param =
+      match ft.ft_arity with
+      | Fstandard _ -> None
+      | Fellipsis _ -> Some (text "...")
+      | Fvariadic (_, p) ->
+        Some (Concat [
+          (match p.fp_type with
+          | _, Tany -> Nothing
+          | _ -> fun_param to_doc st env p
+          );
+          text "..."
+        ])
+    in
+    let params =
+      match variadic_param with
+      | None -> params
+      | Some variadic_param -> params @ [variadic_param]
+    in
+    Span [
       (match ft.ft_tparams with
-        | [] -> Nothing
-        | l -> Concat [text "<"; list_sep comma_sep (tparam to_doc st env) l; text ">"]
+      | [] -> Nothing
+      | l -> list "<" (tparam to_doc st env) l ">"
       );
-      text "(";
-      WithRule (Rule.Parental, Concat [
-        (if List.length ft.ft_params > 0 then Split else Nothing);
-        list_sep comma_sep (fun_param to_doc st env) ft.ft_params;
-        begin match ft.ft_arity with
-          | Fstandard _ -> Nothing
-          | _ -> Concat [
-              if not (List.is_empty ft.ft_params) then text "," ^^ Space else Nothing;
-              begin match ft.ft_arity with
-              | Fvariadic(_, p) ->
-                begin match p.fp_type with
-                | _, Tany -> Nothing
-                | _, _ -> fun_param to_doc st env p
-                end
-              | _ -> Nothing
-              end;
-              text "..."
-            ]
-        end;
-        (if List.length ft.ft_params > 0 then Split else Nothing);
-        text "):";
-        Space;
-        ]);
+      list "(" id params "):";
+      Space;
       ty to_doc st env ft.ft_ret
     ]
 
@@ -518,7 +506,7 @@ module Full = struct
 
   and tparam: type a. _ -> _ -> _ ->  a Typing_defs.tparam -> _ =
     fun to_doc st env (_, (_, x), cstrl) ->
-      Concat [text x; list_sep Space (tparam_constraint to_doc st env) cstrl]
+      Concat [text x; list_sep ~split:false Space (tparam_constraint to_doc st env) cstrl]
 
   and tparam_constraint:
     type a. _ -> _ -> _ -> (Ast.constraint_kind * a ty) -> _ =
@@ -562,9 +550,11 @@ module Full = struct
       Some (Concat [
         text "where";
         Space;
-        list_sep comma_sep begin fun (tparam, ck, ty) ->
-          Concat [text tparam; tparam_constraint to_doc ISet.empty env (ck, ty)]
-        end constraints;
+        WithRule (Rule.Parental,
+          list_sep comma_sep begin fun (tparam, ck, ty) ->
+            Concat [text tparam; tparam_constraint to_doc ISet.empty env (ck, ty)]
+          end constraints
+        )
       ])
 
   let to_string_rec env n x =
@@ -584,21 +574,15 @@ module Full = struct
   let to_string_with_identity env x occurrence definition_opt =
     let prefix =
       let open SymbolDefinition in
-      let print_mod m = text_strip_ns (string_of_modifier m) in
+      let print_mod m = text (string_of_modifier m) ^^ Space in
       match definition_opt with
       | None -> Nothing
       | Some def ->
         begin match def.modifiers with
         | [] -> Nothing
-        | [m] ->
-          (* It looks weird if we line break after a single modifier. *)
-          Concat [print_mod m; Space]
-        | ms ->
-          Concat [
-            list_sep Space print_mod ms;
-            Space;
-            Split;
-          ]
+        (* It looks weird if we line break after a single modifier. *)
+        | [m] -> print_mod m
+        | ms -> Concat (List.map ms print_mod) ^^ SplitWith Cost.Base
         end
     in
     let body =

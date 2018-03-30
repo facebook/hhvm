@@ -432,8 +432,7 @@ let special_cases_cases = [
     {
       snippet = "\
 function idx(
-  ?KeyedContainer<int,
-    ?int> $collection,
+  ?KeyedContainer<int, ?int> $collection,
   ?int $index
 ): ?int";
       addendum = [];

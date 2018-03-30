@@ -430,9 +430,12 @@ function special_cases(): void {
 let special_cases_cases = [
   ("special_cases.php", 3, 3), [
     {
-      (* Without the `ft` corresponding to the `Tfun`, we can't give any useful
-         information here :/ *)
-      snippet = "?int";
+      snippet = "\
+function idx(
+  ?KeyedContainer<int, "^"
+    ?int> $collection, "^"
+  ?int $index
+): ?int";
       addendum = [];
       pos = pos_at (3, 3) (3, 24);
     }

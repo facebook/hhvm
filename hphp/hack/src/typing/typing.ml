@@ -3666,7 +3666,7 @@ and is_abstract_ft fty = match fty with
             let env, ty = TUtils.non_null env ty in
             env, (r, Toption ty)
           | _ -> env, ty in
-        make_call_special env id tel ty
+        make_call env (T.make_typed_expr fpos tfun (T.Id id)) [] tel [] ty
       | None -> unbound_name env id)
 
   (* Special function `Shapes::idx` *)

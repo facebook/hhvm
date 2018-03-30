@@ -1,9 +1,9 @@
 $x is 1
-string(29) "Expected HH\string, got Int64"
+string(27) "Expected HH\string, got Int"
 $x is 2
-string(29) "Expected HH\string, got Int64"
+string(27) "Expected HH\string, got Int"
 $x is 3
-string(29) "Expected HH\string, got Int64"
+string(27) "Expected HH\string, got Int"
 $x is 3.14
 string(30) "Expected HH\string, got Double"
 string(32) "Expected HH\arraykey, got Double"

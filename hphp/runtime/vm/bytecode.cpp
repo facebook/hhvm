@@ -2703,66 +2703,147 @@ bool isOptionalShapeField(const ArrayData* field) {
   return field->exists(property) && tvCastToBoolean(field->at(property));
 }
 
-bool implTypeStructureHelper(const Array& ts, const Cell* c1) {
-  auto const type = c1->m_type;
+std::string asExpressionTypeToString(DataType type) {
+  switch (type) {
+    case KindOfInt64:
+      return "Int";
+    case KindOfPersistentString:
+    case KindOfString:
+      return "String";
+    case KindOfPersistentVec:
+    case KindOfVec:
+      return "Vec";
+    case KindOfPersistentDict:
+    case KindOfDict:
+      return "Dict";
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+      return "Keyset";
+    case KindOfPersistentArray:
+    case KindOfArray:
+      return "Array";
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfDouble:
+    case KindOfUninit:
+    case KindOfRef:
+    case KindOfObject:
+    case KindOfResource:
+      return tname(type);
+  }
+  not_reached();
+}
+
+template <bool asExpression>
+bool implTypeStructureHelper(
+  const Array& ts,
+  Cell c1,
+  std::string& givenType,
+  std::string& expectedType,
+  std::string& errorKey
+) {
+  auto errOnLen = [&givenType](auto type, auto len) {
+    if (asExpression) {
+      givenType = folly::sformat("{} of length {}",
+        asExpressionTypeToString(type), len);
+    }
+  };
+
+  auto errOnKey = [&errorKey](Cell key) {
+    if (asExpression) {
+      std::string escapedKey;
+      if (isStringType(key.m_type)) {
+        escapedKey = folly::sformat("\"{}\"",
+          folly::cEscape<std::string>(key.m_data.pstr->toCppString()));
+      } else {
+        assertx(isIntType(key.m_type));
+        escapedKey = std::to_string(key.m_data.num);
+      }
+      errorKey = folly::sformat("[{}]{}", escapedKey, errorKey);
+    }
+  };
+
+  bool result = false;
+  auto type = c1.m_type;
+  auto expression_type = asExpression ? "as" : "is";
   if (ts.exists(s_nullable) &&
       ts[s_nullable].asBooleanVal() &&
-      type == KindOfNull) {
+      isNullType(type)) {
     return true;
   }
   assertx(ts.exists(s_kind));
-  switch (static_cast<TypeStructure::Kind>(ts[s_kind].toInt64Val())) {
+  auto ts_kind = static_cast<TypeStructure::Kind>(ts[s_kind].toInt64Val());
+  switch (ts_kind) {
     case TypeStructure::Kind::T_int:
-      return type == KindOfInt64;
+      result = isIntType(type);
+      break;
     case TypeStructure::Kind::T_bool:
-      return type == KindOfBoolean;
+      result = isBoolType(type);
+      break;
     case TypeStructure::Kind::T_float:
-      return type == KindOfDouble;
+      result = isDoubleType(type);
+      break;
     case TypeStructure::Kind::T_string:
-      return isStringType(type);
+      result = isStringType(type);
+      break;
     case TypeStructure::Kind::T_resource:
-      return type == KindOfResource;
+      result = isResourceType(type);
+      break;
     case TypeStructure::Kind::T_num:
-      return type == KindOfInt64 || type == KindOfDouble;
+      result = isIntType(type) || isDoubleType(type);
+      break;
     case TypeStructure::Kind::T_arraykey:
-      return type == KindOfInt64 || isStringType(type);
+      result = isIntType(type) || isStringType(type);
+      break;
     case TypeStructure::Kind::T_dict:
-      return isDictType(type);
+      result = isDictType(type);
+      break;
     case TypeStructure::Kind::T_vec:
-      return isVecType(type);
+      result = isVecType(type);
+      break;
     case TypeStructure::Kind::T_keyset:
-      return isKeysetType(type);
+      result = isKeysetType(type);
+      break;
     case TypeStructure::Kind::T_vec_or_dict:
-      return isVecType(type) || isDictType(type);
+      result = isVecType(type) || isDictType(type);
+      break;
     case TypeStructure::Kind::T_enum: {
       assertx(ts.exists(s_classname));
       auto const cls = Unit::loadClass(ts[s_classname].asStrRef().get());
-      return enumHasValue(cls, c1);
+      result = enumHasValue(cls, &c1);
+      break;
     }
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface: {
       assertx(ts.exists(s_classname));
       auto const ne = NamedEntity::get(ts[s_classname].asStrRef().get());
-      return cellInstanceOf(c1, ne);
+      result = cellInstanceOf(&c1, ne);
+      break;
     }
     case TypeStructure::Kind::T_void:
-      return type == KindOfNull;
+      result = isNullType(type);
+      break;
     case TypeStructure::Kind::T_noreturn:
-      return false;
+      result = false;
+      break;
     case TypeStructure::Kind::T_mixed:
       return true;
     case TypeStructure::Kind::T_tuple: {
       if (!isArrayLikeType(type)) {
-        return false;
+        result = false;
+        break;
       }
-      auto const elems = c1->m_data.parr;
+      auto const elems = c1.m_data.parr;
       if (!elems->isVecOrVArray()) {
-        return false;
+        result = false;
+        break;
       }
       assertx(ts.exists(s_elem_types));
       auto const tsElems = ts[s_elem_types].getArrayData();
       if (elems->size() != tsElems->size()) {
-        return false;
+        errOnLen(type, elems->size());
+        result = false;
+        break;
       }
       bool elemsDidMatch = true;
       PackedArray::IterateKV(
@@ -2770,8 +2851,10 @@ bool implTypeStructureHelper(const Array& ts, const Cell* c1) {
         [&](Cell k, TypedValue elem) {
           assertx(k.m_type == KindOfInt64);
           auto const ts2 = tsElems->getValue(k.m_data.num).asCArrRef();
-          if (!implTypeStructureHelper(ts2, tvToCell(&elem))) {
+          if (!implTypeStructureHelper<asExpression>(
+              ts2, tvToCell(elem), givenType, expectedType, errorKey)) {
             elemsDidMatch = false;
+            errOnKey(k);
             return true;
           }
           return false;
@@ -2781,11 +2864,13 @@ bool implTypeStructureHelper(const Array& ts, const Cell* c1) {
     }
     case TypeStructure::Kind::T_shape: {
       if (!isArrayLikeType(type)) {
-        return false;
+        result = false;
+        break;
       }
-      auto const fields = c1->m_data.parr;
+      auto const fields = c1.m_data.parr;
       if (!fields->isDictOrDArray()) {
-        return false;
+        result = false;
+        break;
       }
       assertx(ts.exists(s_fields));
       auto const tsFields = ts[s_fields].getArrayData();
@@ -2800,11 +2885,15 @@ bool implTypeStructureHelper(const Array& ts, const Cell* c1) {
         }
       );
       if (numFields < numRequiredFields) {
-        return false;
+        errOnLen(type, numFields);
+        result = false;
+        break;
       }
       auto const allowsUnknownFields = shapeAllowsUnknownFields(ts);
       if (!allowsUnknownFields && numFields > numDefinedFields) {
-        return false;
+        errOnLen(type, numFields);
+        result = false;
+        break;
       }
       auto fieldsDidMatch = true;
       auto numExpectedFields = 0;
@@ -2818,12 +2907,15 @@ bool implTypeStructureHelper(const Array& ts, const Cell* c1) {
               return false;
             }
             fieldsDidMatch = false;
+            errOnKey(k);
             return true;
           }
           auto const tsField = Array(tsFieldData);
           auto const field = fields->at(k);
-          if (!implTypeStructureHelper(tsField, tvToCell(&field))) {
+          if (!implTypeStructureHelper<asExpression>(
+              tsField, tvToCell(field), givenType, expectedType, errorKey)) {
             fieldsDidMatch = false;
+            errOnKey(k);
             return true;
           }
           numExpectedFields++;
@@ -2831,26 +2923,38 @@ bool implTypeStructureHelper(const Array& ts, const Cell* c1) {
         }
       );
       if (!fieldsDidMatch) {
-        return false;
+        result = false;
+        break;
       }
       return allowsUnknownFields || numFields == numExpectedFields;
     }
     case TypeStructure::Kind::T_fun:
-      raise_error("the \"is\" operator cannot be used with a function");
+      raise_error("the \"%s\" operator cannot be used with a function",
+        expression_type);
     case TypeStructure::Kind::T_typevar:
-      raise_error("the \"is\" operator cannot be used with a generic type");
+      raise_error("the \"%s\" operator cannot be used with a generic type",
+        expression_type);
     case TypeStructure::Kind::T_trait:
-      raise_error("the \"is\" operator cannot be used with a trait");
+      raise_error("the \"%s\" operator cannot be used with a trait",
+        expression_type);
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_xhp:
+      result = false;
       break;
   }
-  return false;
+  if (asExpression && !result) {
+    if (givenType.empty()) givenType = asExpressionTypeToString(type);
+    if (expectedType.empty()) {
+      expectedType = TypeStructure::toString(ts).toCppString();
+    }
+  }
+  return result;
 }
 
-OPTBLD_INLINE bool cellIsTypeStructure(Cell* cell, const Array& ts) {
+OPTBLD_INLINE
+Array resolveAndVerifyTypeStructure(const Array& ts) {
   assertx(!ts.empty());
   assertx(ts.isDictOrDArray());
   Array resolved;
@@ -2867,26 +2971,39 @@ OPTBLD_INLINE bool cellIsTypeStructure(Cell* cell, const Array& ts) {
   }
   assertx(!resolved.empty());
   assertx(resolved.isDictOrDArray());
-  return implTypeStructureHelper(resolved, cell);
+  return resolved;
 }
 
 } // namespace
 
 OPTBLD_INLINE void iopIsTypeStruct(const ArrayData* a) {
   auto c1 = vmStack().topC();
+  assertx(c1 != nullptr);
   auto const ts = ArrNR(a).asArray();
-  auto b = cellIsTypeStructure(c1, ts);
+  std::string givenType, expectedType, errorKey;
+  auto b = implTypeStructureHelper<false>(
+    resolveAndVerifyTypeStructure(ts), *c1, givenType, expectedType, errorKey);
   vmStack().replaceC<KindOfBoolean>(b);
 }
 
 OPTBLD_INLINE void iopAsTypeStruct(const ArrayData* a) {
   auto c1 = vmStack().topC();
+  assertx(c1 != nullptr);
   auto const ts = ArrNR(a).asArray();
-  if (!cellIsTypeStructure(c1, ts)) {
-    auto ts_str = TypeStructure::toString(ts);
-    auto input_str = tname(c1->m_type);
-    SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Expected {}, got {}", ts_str, input_str));
+  std::string givenType, expectedType, errorKey;
+  auto resolved = resolveAndVerifyTypeStructure(ts);
+  if (!implTypeStructureHelper<true>(
+        resolved, *c1, givenType, expectedType, errorKey)) {
+    assertx(!givenType.empty());
+    assertx(!expectedType.empty());
+    std::string error;
+    if (errorKey.empty()) {
+      error = folly::sformat("Expected {}, got {}", expectedType, givenType);
+    } else {
+      error = folly::sformat("Expected {} at {}, got {}",
+        expectedType, errorKey, givenType);
+    }
+    SystemLib::throwInvalidArgumentExceptionObject(error);
   }
 }
 

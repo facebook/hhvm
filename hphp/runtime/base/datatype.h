@@ -420,6 +420,7 @@ constexpr bool isIntType(DataType t) { return t == KindOfInt64; }
 constexpr bool isBoolType(DataType t) { return t == KindOfBoolean; }
 constexpr bool isDoubleType(DataType t) { return t == KindOfDouble; }
 constexpr bool isObjectType(DataType t) { return t == KindOfObject; }
+constexpr bool isResourceType(DataType t) { return t == KindOfResource; }
 
 constexpr bool isIntKeyType(DataType t) {
   return t <= KindOfInt64;

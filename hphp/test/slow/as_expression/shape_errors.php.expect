@@ -1,0 +1,14 @@
+string(72) "Expected HH\shape('hi'=>HH\int, 'wow'=>HH\string), got Array of length 1"
+string(38) "Expected HH\string at ["wow"], got Int"
+string(72) "Expected HH\shape('hi'=>HH\int, 'wow'=>HH\string), got Array of length 3"
+string(72) "Expected HH\shape('hi'=>HH\int, 'wow'=>HH\string), got Array of length 1"
+
+string(77) "Expected HH\shape('hi'=>HH\int, 'wow'=>HH\string, ...), got Array of length 1"
+string(38) "Expected HH\string at ["wow"], got Int"
+string(38) "Expected HH\string at ["wow"], got Int"
+string(77) "Expected HH\shape('hi'=>HH\int, 'wow'=>HH\string, ...), got Array of length 1"
+
+string(37) "Expected HH\int at ["hi"], got String"
+string(38) "Expected HH\string at ["wow"], got Int"
+string(73) "Expected HH\shape(?'hi'=>HH\int, 'wow'=>HH\string), got Array of length 3"
+OK

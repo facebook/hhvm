@@ -1,0 +1,15 @@
+OK
+string(32) "Expected HH\bool at [1], got Int"
+string(34) "Expected HH\string at [2], got Int"
+string(60) "Expected (HH\int, HH\bool, HH\string), got Array of length 2"
+string(60) "Expected (HH\int, HH\bool, HH\string), got Array of length 2"
+string(60) "Expected (HH\int, HH\bool, HH\string), got Array of length 2"
+string(60) "Expected (HH\int, HH\bool, HH\string), got Array of length 4"
+
+string(69) "Expected (HH\int, (HH\int, (HH\int, HH\bool))), got Array of length 3"
+string(69) "Expected (HH\int, (HH\int, (HH\int, HH\bool))), got Array of length 3"
+string(69) "Expected (HH\int, (HH\int, (HH\int, HH\bool))), got Array of length 3"
+OK
+string(41) "Expected HH\int at [1][1][0], got Boolean"
+string(37) "Expected HH\int at [1][0], got String"
+string(69) "Expected (HH\int, (HH\int, (HH\int, HH\bool))), got Array of length 4"

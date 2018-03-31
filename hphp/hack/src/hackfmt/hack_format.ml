@@ -543,9 +543,14 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       trait_use_semicolon = semi } ->
     Concat [
       t env kw;
-      WithRule (Rule.Parental, Nest [
-        handle_possible_list env ~before_each:space_split elements;
-      ]);
+      (match Syntax.syntax elements with
+      | Syntax.SyntaxList [x] -> Concat [Space; t env x]
+      | Syntax.SyntaxList _ ->
+        WithRule (Rule.Parental, Nest [
+          handle_possible_list env ~before_each:space_split elements;
+        ])
+      | _ -> Concat [Space; t env elements]
+      );
       t env semi;
       Newline;
     ]

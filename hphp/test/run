@@ -1124,12 +1124,12 @@ function hphp_cmd($options, $test, $timeout_prefix, $hackc) {
     '--hphp',
     '--config',
     find_test_ext($test, 'ini', 'hphp_config'),
-    read_opts_file("$test.hphp_opts"),
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
     '--nofork=1 -thhbc -l1 -k1',
     "-o \"$test.repo\" --program $program.hhbc \"$test\"",
     $extra_args,
     $hackc_args,
+    read_opts_file("$test.hphp_opts"),
   ));
 }
 

@@ -247,12 +247,13 @@ static String HHVM_METHOD(IntlDateFormatter, getErrorMessage) {
 }
 
 static String HHVM_METHOD(IntlDateFormatter, getLocale, const Variant& which) {
-  ULocDataLocaleType whichloc = ULOC_ACTUAL_LOCALE;
-  if (!which.isNull()) whichloc = (ULocDataLocaleType)which.toInt64();
+  std::underlying_type<ULocDataLocaleType>::type whichloc = ULOC_ACTUAL_LOCALE;
+  if (!which.isNull()) whichloc = which.toInt64();
 
   DATFMT_GET(data, this_, String());
   UErrorCode error = U_ZERO_ERROR;
-  const char *loc = udat_getLocaleByType(data->datefmt(), whichloc, &error);
+  const char *loc = udat_getLocaleByType(data->datefmt(),
+                                         (ULocDataLocaleType)whichloc, &error);
   if (U_FAILURE(error)) {
     data->setError(error);
     return String();

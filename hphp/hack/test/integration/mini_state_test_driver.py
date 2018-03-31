@@ -43,10 +43,12 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
         return os.path.join(cls.saved_state_dir, 'foo')
 
     @classmethod
-    def save_command(cls, init_dir):
+    def save_command(cls, init_dir, saved_state_path=None):
+        if saved_state_path is None:
+            saved_state_path = cls.saved_state_path()
         stdout, stderr, retcode = cls.proc_call([
             hh_client,
-            '--save-state', cls.saved_state_path(),
+            '--save-state', saved_state_path,
             init_dir,
         ])
         if retcode != 0:
@@ -82,14 +84,18 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         self.write_hhconfig()
         self.write_watchman_config()
 
-    def start_hh_server(self, changed_files=None):
+    def start_hh_server(self, changed_files=None, saved_state_path=None):
         if changed_files is None:
             changed_files = []
+        # Yeah, gross again. This function's default value for a parameter
+        # is from the object's state.
+        if saved_state_path is None:
+            saved_state_path = self.saved_state_path()
         state = {
-            'state': self.saved_state_path(),
+            'state': saved_state_path,
             'corresponding_base_revision': '1',
             'is_cached': True,
-            'deptable': self.saved_state_path() + '.sql',
+            'deptable': saved_state_path + '.sql',
         }
         if changed_files:
             state['changes'] = changed_files

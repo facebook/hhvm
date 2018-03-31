@@ -88,7 +88,7 @@ class CommonTestDriver(object):
                 max_wait_s -= 1
                 time.sleep(1)
 
-    def start_hh_server(self, changed_files=None):
+    def start_hh_server(self, changed_files=None, saved_state_path=None):
         """ Start an hh_server. changed_files is ignored here (as it
         has no meaning) and is only exposed in this API for the derived
         classes.

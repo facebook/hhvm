@@ -520,7 +520,6 @@ function get_options($argv) {
     'hhserver-binary-path:' => '',
     'compare-hh-codegen' => '',
     'no-semdiff' => '',
-    'run-hh-codegen' => '',
     'record-failures:' => '',
     'hackc' => '',
     'srcloc' => '',
@@ -941,14 +940,9 @@ function hhvm_cmd_impl() {
       $args[] = '-vEval.EnableReusableTC=true';
     }
 
-    if (isset($options['run-hh-codegen']) ||
-        isset($options['hhas-round-trip'])) {
+    if (isset($options['hhas-round-trip'])) {
       $args[] = '-vEval.AllowHhas=1';
       $args[] = '-vEval.LoadFilepathFromUnitCache=1';
-      if (isset($options['run-hh-codegen'])) {
-        $args[] = '-vEval.HackCompilerDefault=false';
-        $args[] = '-vEval.HackCompilerUseEmbedded=false';
-      }
     }
 
     if (isset($options['compare-hh-codegen'])) {
@@ -1457,11 +1451,10 @@ function clean_intermediate_files($test, $options) {
     'repo',
     // tests in --hhas-round-trip or --compare-hh-codegen mode
     'round_trip.hhas',
-    // tests in --run-hh-codegen or --compare-hh-codegen mode
+    // tests in --compare-hh-codegen mode
     'hhcodegen_output.hhas',
     'hhcodegen_messages',
     'hhcodegen_config.json',
-    // tests in --compare-hh-codegen mode
     'hhcodegen_output.hhas.round_trip.hhas',
     'semdiff',
     'semdiff_messages',
@@ -2241,9 +2234,7 @@ function run_test($options, $test) {
 
     $hhbbc = null;
 
-    if (isset($options['hackc']) ||
-        isset($options['compare-hh-codegen']) ||
-        isset($options['run-hh-codegen'])) {
+    if (isset($options['hackc']) || isset($options['compare-hh-codegen'])) {
       $hphp = hphp_cmd($options, $test, timeout_prefix(), true);
       shell_exec("$hphp 2>&1");
       if (!isset($options['compare-hh-codegen'])) {
@@ -2253,9 +2244,7 @@ function run_test($options, $test) {
       }
     }
 
-    if ((!isset($options['hackc']) &&
-         !isset($options['run-hh-codegen'])) ||
-        isset($options['compare-hh-codegen'])) {
+    if (!isset($options['hackc']) || isset($options['compare-hh-codegen'])) {
       $hphp = hphp_cmd($options, $test, timeout_prefix(), false);
       shell_exec("$hphp 2>&1");
       if (!isset($options['compare-hh-codegen'])) {
@@ -2312,43 +2301,24 @@ function run_test($options, $test) {
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $test, $hhas_temp);
   }
 
-  // For tests that should run HackC pull ini values from HHVM
-  //
-  // In repo mode, HackC will inherit configs from the hhvm process that invokes
-  // it.
-  $test_config = null;
-  if ((isset($options['run-hh-codegen']) ||
-       isset($options['compare-hh-codegen'])) &&
-      !isset($options['repo'])
-     ) {
-    $test_config = get_hhvm_ini_values($test, $options);
-  }
-
-  // Run the Hack code generator
-  if (isset($options['run-hh-codegen'])) {
-    if (substr($test, -5) === ".hhas") return 'skip';
-
-    $hhas_temp = dump_hh_codegen($options, $test, $test_config);
-    if (!$hhas_temp || file_get_contents($hhas_temp) === "") {
-      file_put_contents($test.'.diff', "CODEGEN FAILED: NO OUTPUT");
-      return false;
-    }
-    if (contains_nyi_line($hhas_temp) === true) {
-      file_put_contents($test.'.diff', "CODEGEN FAILED: NYI");
-      return false;
-    }
-    list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
-  }
-
   // Compare the output of Hack code gen with that of HHVM
   if (isset($options['compare-hh-codegen'])) {
+    if (substr($test, -5) === ".hhas") return 'skip';
+
     $diff = $test.'.diff';
 
-    if (substr($test, -5) === ".hhas") return 'skip';
     $hhas = dump_hhas_to_temp($hhvm, $test);
     if ($hhas === false) {
       file_put_contents($diff, "HPHPC CODEGEN FAILED");
       return false;
+    }
+
+    if (isset($options['repo'])) {
+      // In repo mode, HackC will inherit configs from the hhvm process that
+      // invokes it.
+      $test_config = null;
+    } else {
+      $test_config = get_hhvm_ini_values($test, $options);
     }
     $hhcg = dump_hh_codegen($options, $test, $test_config);
     if (!$hhcg || file_get_contents($hhcg) === "") {

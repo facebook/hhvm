@@ -211,23 +211,23 @@ struct ProfTransRec {
    */
   std::vector<TCA>& mainCallers() {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
-    return m_callers.main;
+    m_callers->lock.assertOwnedBySelf();
+    return m_callers->main;
   }
   const std::vector<TCA>& mainCallers() const {
     return const_cast<ProfTransRec*>(this)->mainCallers();
   }
   std::vector<TCA>& guardCallers() {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
-    return m_callers.guard;
+    m_callers->lock.assertOwnedBySelf();
+    return m_callers->guard;
   }
   const std::vector<TCA>& guardCallers() const {
     return const_cast<ProfTransRec*>(this)->guardCallers();
   }
   std::unique_lock<Mutex> lockCallerList() const {
     assertx(m_kind == TransKind::ProfPrologue);
-    return std::unique_lock<Mutex>{m_callers.lock};
+    return std::unique_lock<Mutex>{m_callers->lock};
   }
 
   /*
@@ -240,16 +240,16 @@ struct ProfTransRec {
    */
   void addMainCaller(TCA caller) {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
-    m_callers.main.emplace_back(caller);
+    m_callers->lock.assertOwnedBySelf();
+    m_callers->main.emplace_back(caller);
   }
   void addGuardCaller(TCA caller) {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
-    m_callers.guard.emplace_back(caller);
+    m_callers->lock.assertOwnedBySelf();
+    m_callers->guard.emplace_back(caller);
   }
-  void removeMainCaller(TCA caller) { removeCaller(m_callers.main, caller); }
-  void removeGuardCaller(TCA caller) { removeCaller(m_callers.guard, caller); }
+  void removeMainCaller(TCA caller) { removeCaller(m_callers->main, caller); }
+  void removeGuardCaller(TCA caller) { removeCaller(m_callers->guard, caller); }
 
   /*
    * Erase the record of all calls to this proflogue.
@@ -260,9 +260,9 @@ struct ProfTransRec {
    */
   void clearAllCallers() {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
-    m_callers.main.clear();
-    m_callers.guard.clear();
+    m_callers->lock.assertOwnedBySelf();
+    m_callers->main.clear();
+    m_callers->guard.clear();
   }
 private:
   struct CallerRec {
@@ -270,10 +270,11 @@ private:
     std::vector<TCA> guard;
     mutable Mutex lock;
   };
+  using CallerRecPtr = std::unique_ptr<CallerRec>;
 
   void removeCaller(std::vector<TCA>& v, TCA caller) {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
+    m_callers->lock.assertOwnedBySelf();
     auto pos = std::find(v.begin(), v.end(), caller);
     if (pos != v.end()) v.erase(pos);
   }
@@ -286,8 +287,8 @@ private:
   };
   SrcKey m_sk;
   union {
-    RegionDescPtr m_region; // for TransProfile translations
-    CallerRec m_callers; // for TransProfPrologue translations
+    RegionDescPtr   m_region; // for TransProfile translations
+    CallerRecPtr    m_callers; // for TransProfPrologue translations
   };
 };
 

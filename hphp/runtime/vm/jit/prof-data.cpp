@@ -49,8 +49,10 @@ ProfTransRec::ProfTransRec(SrcKey sk, int nArgs)
     : m_kind(TransKind::ProfPrologue)
     , m_prologueArgs(nArgs)
     , m_sk(sk)
-    , m_callers()
-{}
+    , m_callers{}
+{
+  m_callers = std::make_unique<CallerRec>();
+}
 
 ProfTransRec::~ProfTransRec() {
   if (m_kind == TransKind::Profile) {
@@ -58,7 +60,7 @@ ProfTransRec::~ProfTransRec() {
     return;
   }
   assertx(m_kind == TransKind::ProfPrologue);
-  m_callers.~CallerRec();
+  m_callers.~CallerRecPtr();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

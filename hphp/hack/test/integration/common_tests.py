@@ -88,7 +88,13 @@ class CommonTestDriver(object):
                 max_wait_s -= 1
                 time.sleep(1)
 
-    def start_hh_server(self, *changed_files_ignored):
+    def start_hh_server(self, changed_files=None):
+        """ Start an hh_server. changed_files is ignored here (as it
+        has no meaning) and is only exposed in this API for the derived
+        classes.
+        """
+        if changed_files is None:
+            changed_files = []
         cmd = [hh_server, "--daemon", self.repo_dir]
         self.proc_call(cmd)
         self.wait_until_server_ready()
@@ -272,7 +278,7 @@ class BarebonesTests(object):
             }
             """)
 
-        self.start_hh_server('foo_4.php')
+        self.start_hh_server(changed_files=['foo_4.php'])
 
         self.check_cmd([
             '{root}foo_4.php:4:24,26: Invalid return type (Typing[4110])',
@@ -291,7 +297,7 @@ class BarebonesTests(object):
             function H () {}
             """)
 
-        self.start_hh_server('foo_4.php')
+        self.start_hh_server(changed_files=['foo_4.php'])
 
         self.check_cmd([
             '{root}foo_4.php:3:19,21: Could not find FOO (Naming[2006])',
@@ -338,7 +344,7 @@ class CommonTests(BarebonesTests):
                   }
                 }
             """)
-        self.start_hh_server('class_1.php')
+        self.start_hh_server(changed_files=['class_1.php'])
         self.check_cmd([
             '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
             '  {root}class_3.php:4:28,30: This is an int',
@@ -357,7 +363,7 @@ class CommonTests(BarebonesTests):
             }
             """)
 
-        self.start_hh_server('foo_2.php')
+        self.start_hh_server(changed_files=['foo_2.php'])
 
         self.check_cmd([
             '{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])',
@@ -372,7 +378,7 @@ class CommonTests(BarebonesTests):
         """
         os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
 
-        self.start_hh_server('foo_2.php')
+        self.start_hh_server(changed_files=['foo_2.php'])
 
         self.check_cmd([
             '{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])',
@@ -400,7 +406,7 @@ class CommonTests(BarebonesTests):
             ])
 
     def test_duplicated_file(self):
-        self.start_hh_server('foo_2.php')
+        self.start_hh_server(changed_files=['foo_2.php'])
         self.check_cmd(['No errors!'])
 
         shutil.copyfile(
@@ -421,7 +427,7 @@ class CommonTests(BarebonesTests):
         """
 
         self.start_hh_server(
-            'foo_1.php', 'foo_2.php', 'bar_2.php',
+            changed_files=['foo_1.php', 'foo_2.php', 'bar_2.php'],
         )
 
         os.rename(
@@ -571,7 +577,7 @@ class CommonTests(BarebonesTests):
         Test hh_client --list-files
         """
         os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
-        self.start_hh_server('foo_2.php')
+        self.start_hh_server(changed_files=['foo_2.php'])
         self.check_cmd_and_json_cmd([
             '{root}foo_1.php',
             ], [
@@ -754,7 +760,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
                 return $a::$y;
             }
             """)
-        self.start_hh_server('foo_4.php', 'foo_5.php')
+        self.start_hh_server(changed_files=['foo_4.php', 'foo_5.php'])
         self.check_cmd([
             '{root}foo_4.php:3:19,21: Name already bound: Foo (Naming[2012])',
             '  {root}foo_3.php:7:15,17: Previous definition is here',
@@ -793,7 +799,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
                 }
             }
             """)
-        self.start_hh_server('foo_4.php')
+        self.start_hh_server(changed_files=['foo_4.php'])
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
@@ -865,7 +871,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
             function wat() {}
             """)
-        self.start_hh_server('foo_4.php')
+        self.start_hh_server(changed_files=['foo_4.php'])
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
@@ -919,7 +925,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
                 }
             }
             """)
-        self.start_hh_server('foo_4.php')
+        self.start_hh_server(changed_files=['foo_4.php'])
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
         ['[{{"filename":"{root}foo_4.php","patches":[{{'

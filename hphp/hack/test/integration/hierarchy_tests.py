@@ -64,7 +64,7 @@ class Qux {
   }
 }
 ''')
-        self.start_hh_server('qux.php')
+        self.start_hh_server(changed_files=['qux.php'])
         self.check_cmd(['No errors!'])
         debug_sub = self.subscribe_debug()
         with open(os.path.join(self.repo_dir, 'foo.php'), 'w') as f:

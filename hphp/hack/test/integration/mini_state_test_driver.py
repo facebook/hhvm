@@ -82,7 +82,9 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         self.write_hhconfig()
         self.write_watchman_config()
 
-    def start_hh_server(self, *changed_files):
+    def start_hh_server(self, changed_files=None):
+        if changed_files is None:
+            changed_files = []
         state = {
             'state': self.saved_state_path(),
             'corresponding_base_revision': '1',

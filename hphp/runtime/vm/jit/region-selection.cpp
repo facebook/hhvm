@@ -219,42 +219,46 @@ bool RegionDesc::hasBlock(BlockId id) const {
 }
 
 RegionDesc::BlockPtr RegionDesc::block(BlockId id) const {
-  return const_cast<RegionDesc*>(this)->data(id).block;
+  return data(id).block;
 }
 
 const RegionDesc::BlockIdSet& RegionDesc::succs(BlockId id) const {
-  return const_cast<RegionDesc*>(this)->data(id).succs;
+  return data(id).succs;
 }
 
 const RegionDesc::BlockIdSet& RegionDesc::preds(BlockId id) const {
-  return const_cast<RegionDesc*>(this)->data(id).preds;
+  return data(id).preds;
 }
 
 const RegionDesc::BlockIdSet& RegionDesc::merged(BlockId id) const {
-  return const_cast<RegionDesc*>(this)->data(id).merged;
+  return data(id).merged;
 }
 
 folly::Optional<RegionDesc::BlockId> RegionDesc::prevRetrans(BlockId id) const {
-  return const_cast<RegionDesc*>(this)->data(id).prevRetrans;
+  auto const prev = data(id).prevRetransId;
+  if (prev == kInvalidTransID) return folly::none;
+  return prev;
 }
 
 folly::Optional<RegionDesc::BlockId> RegionDesc::nextRetrans(BlockId id) const {
-  return const_cast<RegionDesc*>(this)->data(id).nextRetrans;
+  auto const next = data(id).nextRetransId;
+  if (next == kInvalidTransID) return folly::none;
+  return next;
 }
 
 void RegionDesc::setNextRetrans(BlockId id, BlockId next) {
-  assertx(!data(id).nextRetrans);
-  assertx(!data(next).prevRetrans);
-  data(id).nextRetrans = next;
-  data(next).prevRetrans = id;
+  assertx(data(id).nextRetransId == kInvalidTransID);
+  assertx(data(next).prevRetransId == kInvalidTransID);
+  data(id).nextRetransId = next;
+  data(next).prevRetransId = id;
 }
 
 void RegionDesc::clearNextRetrans(BlockId id) {
-  data(id).nextRetrans = folly::none;
+  data(id).nextRetransId = kInvalidTransID;
 }
 
 void RegionDesc::clearPrevRetrans(BlockId id) {
-  data(id).prevRetrans = folly::none;
+  data(id).prevRetransId = kInvalidTransID;
 }
 
 void RegionDesc::addArc(BlockId srcId, BlockId dstId) {

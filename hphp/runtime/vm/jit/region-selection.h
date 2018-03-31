@@ -163,13 +163,16 @@ private:
     BlockIdSet               preds;
     BlockIdSet               succs;
     BlockIdSet               merged; // other blocks that got merged into this
-    folly::Optional<BlockId> prevRetrans;
-    folly::Optional<BlockId> nextRetrans;
+    BlockId                  prevRetransId{kInvalidTransID};
+    BlockId                  nextRetransId{kInvalidTransID};
     explicit BlockData(BlockPtr b = nullptr) : block(b) {}
   };
 
   bool       hasBlock(BlockId id) const;
   BlockData& data(BlockId id);
+  const BlockData& data(BlockId id) const {
+    return const_cast<RegionDesc*>(this)->data(id);
+  }
   void       copyBlocksFrom(const RegionDesc& other,
                             BlockVec::iterator where);
   void       copyArcsFrom(const RegionDesc& other);

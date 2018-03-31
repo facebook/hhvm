@@ -28,6 +28,7 @@ let debug_describe_t : type a. a t -> string = function
   | CREATE_CHECKPOINT        _ -> "CREATE_CHECKPOINT"
   | RETRIEVE_CHECKPOINT      _ -> "RETRIEVE_CHECKPOINT"
   | DELETE_CHECKPOINT        _ -> "DELETE_CHECKPOINT"
+  | SAVE_STATE               _ -> "SAVE_STATE"
   | STATS                      -> "STATS"
   | KILL                       -> "KILL"
   | FORMAT                   _ -> "FORMAT"

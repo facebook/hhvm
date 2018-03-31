@@ -297,6 +297,14 @@ let main args =
       let results = rpc args @@ Rpc.METHOD_JUMP (class_, filter, false) in
       ClientMethodJumps.go results false args.output_json;
       Exit_status.No_error
+    | MODE_SAVE_STATE path ->
+      let () = Sys_utils.mkdir_p (Filename.dirname path) in
+      (** Convert to real path because Client and Server may have
+       * different cwd and we want to use the client processes' cwd. *)
+      let path = Path.make path in
+      let result = rpc args @@ Rpc.SAVE_STATE (Path.to_string path) in
+      ClientSaveState.go result args.output_json;
+      Exit_status.No_error
     | MODE_STATUS ->
       let ignore_ide = ClientMessages.ignore_ide_from args.from in
       let {

@@ -113,6 +113,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | DUMP_AI_INFO file_list ->
         env, Ai.InfoService.go Typing_check_utils.check_defs genv.workers
           file_list (ServerArgs.ai_mode genv.options) env.tcopt
+    | SAVE_STATE filename ->
+        if Errors.is_empty env.errorl then
+          (** TODO: file_info_on_disk should be read from the RPC, not from ServerEnv. *)
+          let file_info_on_disk = ServerArgs.file_info_on_disk genv.ServerEnv.options in
+          env, SaveStateService.go ~file_info_on_disk
+            env.ServerEnv.files_info filename
+        else
+          env, Error "There are typecheck errors; cannot generate saved state."
     | SEARCH (query, type_) ->
         env, ServerSearch.go env.tcopt genv.workers query type_
     | COVERAGE_COUNTS path -> env, ServerCoverageMetric.go path genv env

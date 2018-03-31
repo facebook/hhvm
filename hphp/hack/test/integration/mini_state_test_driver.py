@@ -11,7 +11,7 @@ import tempfile
 
 import common_tests
 
-from hh_paths import hh_server
+from hh_paths import hh_server, hh_client
 
 
 def write_echo_json(f, obj):
@@ -30,6 +30,7 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
         shutil.copytree(cls.template_repo, init_dir)
         cls.saved_state_dir = tempfile.mkdtemp()
         cls.save_command(init_dir)
+        cls.proc_call([hh_client, 'stop', init_dir])
         shutil.rmtree(init_dir)
 
     @classmethod
@@ -44,9 +45,9 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
     @classmethod
     def save_command(cls, init_dir):
         stdout, stderr, retcode = cls.proc_call([
-            hh_server,
-            '--check', init_dir,
-            '--save-mini', cls.saved_state_path()
+            hh_client,
+            '--save-state', cls.saved_state_path(),
+            init_dir,
         ])
         if retcode != 0:
             raise Exception('Failed to save! stdout: "%s" stderr: "%s"' %
@@ -127,3 +128,19 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         root = self.repo_dir + os.path.sep
         second = second.format(root=root)
         self.assertEqual(first, second, msg)
+
+
+# Like MiniStateTestDriver except saves the mini state by invoking hh_server
+# directly instead of over RPC via hh_client
+class MiniStateClassicTestDriver(MiniStateTestDriver):
+
+    @classmethod
+    def save_command(cls, init_dir):
+        stdout, stderr, retcode = cls.proc_call([
+            hh_server,
+            '--check', init_dir,
+            '--save-mini', cls.saved_state_path()
+        ])
+        if retcode != 0:
+            raise Exception('Failed to save! stdout: "%s" stderr: "%s"' %
+                            (stdout, stderr))

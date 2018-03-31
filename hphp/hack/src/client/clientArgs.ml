@@ -356,6 +356,9 @@ let parse_check_args cmd =
     "--timeout",
       Arg.Float (fun x -> timeout := Some (Unix.time() +. x)),
       " set the timeout in seconds (default: no timeout)";
+    "--save-state",
+      Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
+      " (mode) Save a saved state to the given file.";
     "--autostart-server",
       Arg.Bool (fun x -> autostart := x),
       " automatically start hh_server if it's not running (default: true)";

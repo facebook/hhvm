@@ -15,7 +15,7 @@ import hierarchy_tests
 
 from hh_paths import hh_client
 
-from mini_state_test_driver import MiniStateTestDriver
+from mini_state_test_driver import MiniStateTestDriver, MiniStateClassicTestDriver
 
 def write_echo_json(f, obj):
     f.write("echo %s\n" % shlex.quote(json.dumps(obj)))
@@ -53,6 +53,12 @@ class LazyInitHeirarchyTests(
 
 class MiniStateCommonTests(
     common_tests.CommonTests, MiniStateTestDriver, unittest.TestCase
+):
+    pass
+
+
+class MiniStateBarebonesTestsClassic(
+    common_tests.BarebonesTests, MiniStateClassicTestDriver, unittest.TestCase
 ):
     pass
 

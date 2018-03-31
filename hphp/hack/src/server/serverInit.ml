@@ -886,26 +886,11 @@ let run_search genv t =
   else ()
 
 let save_state genv env fn =
-  let db_name = fn ^ ".sql" in
-  let () = if Sys.file_exists fn then
-             failwith (Printf.sprintf "Cowardly refusing to overwrite '%s'." fn)
-           else () in
-  let () = if Sys.file_exists db_name then
-             failwith (Printf.sprintf "Cowardly refusing to overwrite '%s'." db_name)
-           else () in
-  let t = Unix.gettimeofday () in
   if not (Errors.is_empty env.errorl)
-  then failwith "--save-mini only works if there are no type errors!";
-  let chan = Sys_utils.open_out_no_fail fn in
-  let saved = FileInfo.info_to_saved env.files_info in
-  Marshal.to_channel chan saved [];
-  Sys_utils.close_out_no_fail fn chan;
-  let () = if ServerArgs.file_info_on_disk genv.ServerEnv.options then
-    SharedMem.save_file_info_sqlite db_name |> ignore
-  else () in
-  let sqlite_save_t = SharedMem.save_dep_table_sqlite db_name Build_id.build_revision in
-  Hh_logger.log "Saving deptable using sqlite took(seconds): %d" sqlite_save_t;
-  ignore @@ Hh_logger.log_duration "Saving" t
+    then failwith "Generating save state only works if there are no type errors!";
+  let file_info_on_disk = ServerArgs.file_info_on_disk genv.ServerEnv.options in
+  SaveStateService.save_state
+    ~file_info_on_disk env.ServerEnv.files_info fn
 
 let gen_deps genv env t =
   let files_list = Relative_path.Map.keys env.files_info in
@@ -915,7 +900,6 @@ let gen_deps genv env t =
     ~get_next:next
     env.popt;
   Hh_logger.log_duration "Generating dependencies" t
-
 
 let get_lazy_level genv =
   let lazy_decl = Option.is_none (ServerArgs.ai_mode genv.options) in
@@ -928,7 +912,6 @@ let get_lazy_level genv =
   | true, true, true, false -> Init
   | true, true, true, true -> Incremental
   | _ -> Off
-
 
 (* Initialize only to save a saved state *)
 let init_to_save_state genv =

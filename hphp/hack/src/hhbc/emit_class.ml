@@ -211,6 +211,8 @@ let validate_class_name ns (p, class_name) =
      hh_reserved names are checked either if
      - containing file is hack file and class is in global namespace
      - class is in HH namespace *)
+  let is_special_class =
+    String_utils.is_substring "$" class_name in
   let check_hh_name =
     (Emit_env.is_hh_syntax_enabled () && is_global_namespace ns) ||
     is_hh_namespace ns ||
@@ -218,8 +220,9 @@ let validate_class_name ns (p, class_name) =
   let name = SU.strip_ns class_name in
   let is_reserved_global_name = SN.Typehints.is_reserved_global_name name in
   let name_is_reserved =
-    is_reserved_global_name ||
-    (check_hh_name && SN.Typehints.is_reserved_hh_name name) in
+    not is_special_class &&
+    (is_reserved_global_name ||
+     (check_hh_name && SN.Typehints.is_reserved_hh_name name)) in
   if name_is_reserved
   then
     let message =

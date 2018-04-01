@@ -2419,7 +2419,7 @@ module Make (GetLocals : GetLocals) = struct
       N.Any
     | Is (e, h) ->
       let e1 = expr env e in
-      let h1 = hint env h in
+      let h1 = hint ~allow_wildcard:true env h in
       N.Is (e1, h1)
     | As (e, h, b) ->
       let e1 = expr env e in

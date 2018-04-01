@@ -691,7 +691,7 @@ end = struct
     | _ -> old_acc
 
   let visitor =
-    object(_this)
+    object(this)
       inherit [t] Type_visitor.type_visitor as super
       method! on_tany acc r = update acc @@ Invalid (r, Tany)
       method! on_terr acc r = update acc @@ Invalid (r, Terr)
@@ -717,6 +717,7 @@ end = struct
       method! on_tclass acc r cls tyl =
         match tyl with
           | [] -> acc
+          | tyl when List.for_all tyl this#is_wildcard -> acc
           | _ ->
             let acc = super#on_tclass acc r cls tyl in
             begin match acc with
@@ -729,6 +730,9 @@ end = struct
         | AKshape _
         | AKtuple _ -> update acc @@  Invalid (r, Tarraykind array_kind)
         | _ -> acc (* TODO(kunalm): actually handle arrays with generics *)
+      method is_wildcard = function
+        | (_r, Tclass ((_, x), _tyl)) when x = SN.Typehints.wildcard -> true
+        | _ -> false
     end
 
   let validate ty = visitor#on_type Valid ty

@@ -71,6 +71,7 @@ type t =
   | Rused_as_shape   of Pos.t
   | Rpredicated      of Pos.t * string
   | Rinstanceof      of Pos.t * string
+  | Ris              of Pos.t
   | Rfinal_property  of Pos.t
   | Rvarray_or_darray_key of Pos.t
   | Rusing           of Pos.t
@@ -197,6 +198,8 @@ let rec to_string prefix r =
       [(p, prefix ^ " from the argument to this "^ f ^" test")]
   | Rinstanceof (p,s) ->
       [(p, prefix ^ " from this instanceof test matching " ^ s)]
+  | Ris p ->
+    [(p, prefix ^ " from this is expression test")]
   | Rfinal_property _ ->
       [(p, prefix ^ " because properties cannot be declared final")]
   | Rvarray_or_darray_key _ ->
@@ -271,6 +274,7 @@ and to_pos = function
   | Rused_as_shape p -> p
   | Rpredicated (p, _) -> p
   | Rinstanceof (p, _) -> p
+  | Ris p -> p
   | Rvarray_or_darray_key p
   | Rfinal_property p -> p
   | Rusing p -> p
@@ -364,6 +368,7 @@ let pp fmt r =
     | Rused_as_shape _ -> "Rused_as_shape"
     | Rpredicated _ -> "Rpredicated"
     | Rinstanceof _ -> "Rinstanceof"
+    | Ris _ -> "Ris"
     | Rfinal_property _ -> "Rfinal_property"
     | Rvarray_or_darray_key _ -> "Rvarray_or_darray_key"
     | Rusing _ -> "Rusing"

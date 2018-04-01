@@ -5692,16 +5692,35 @@ and condition ?lhs_of_null_coalesce env tparamet =
       in
       let env, x_ty = resolve_obj env obj_ty in
       set_local env ivar x_ty
-  | _p, Is (ivar, h) ->
+  | p, Is (ivar, h) when is_instance_var ivar ->
+    (* Check the expession and determine its static type *)
+    let env, _te, ivar_ty = raw_expr ~in_cond:false env ivar in
     (* What is the local variable bound to the expression? *)
-    let env, ivar = get_instance_var env ivar in
+    let env, ((ivar_pos, _) as ivar) = get_instance_var env ivar in
     (* Resolve the typehint to a type *)
     let env, hint_ty = Phase.hint_locl env h in
     begin match (IsAsExprHint.validate hint_ty) with
-      | IsAsExprHint.Valid
-      | IsAsExprHint.Partial _ ->
-        set_local env ivar hint_ty
       | IsAsExprHint.Invalid _ -> env
+      | IsAsExprHint.Partial _
+      | IsAsExprHint.Valid ->
+        begin match snd hint_ty with
+          | Tclass ((_, cid) as _c, tyl) ->
+            begin match Env.get_class env cid with
+              | Some class_info ->
+                let env, tparams_with_new_names, tyl_fresh = isexpr_generate_fresh_tparams
+                  env class_info (fst ivar) tyl in
+                let env, hint_ty = safely_refine_class_type
+                  env p _c class_info ivar_ty hint_ty tparams_with_new_names tyl_fresh in
+                set_local env ivar hint_ty
+              | None ->
+                set_local env ivar (Reason.Rwitness ivar_pos, Tobject)
+            end
+          | Tany | Tmixed | Tnonnull | Tprim _ | Toption _ | Ttuple _
+          | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
+          | Tunresolved _ | Tobject | Terr | Tfun _  | Tdynamic ->
+            (* TODO(kunalm) Implement the type refinement for each type *)
+            set_local env ivar hint_ty
+        end
     end
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null))
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), (_, Null), e) ->
@@ -5734,6 +5753,20 @@ and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
     safely_refine_class_type
       env p class_name class_info ivar_ty obj_ty tparams_with_new_names tyl_fresh in
   env, obj_ty
+
+and isexpr_generate_fresh_tparams env class_info ivar_pos hint_tyl =
+  let reason = Reason.Ris (ivar_pos) in
+  let replace_wildcard env hint_ty ((_, (_, tparam_name), _) as tp) =
+    match hint_ty with
+      | _, Tclass ((_, name), _) when name = SN.Typehints.wildcard ->
+        let env, new_name = Env.add_fresh_generic_parameter env tparam_name in
+        env, (Some (tp, new_name), (reason, Tabstract (AKgeneric new_name, None)))
+      | _ -> env, (None, hint_ty)
+  in
+  let env, tparams_and_tyl = List.map2_env env hint_tyl class_info.tc_tparams
+    ~f:replace_wildcard in
+  let tparams_with_new_names, tyl_fresh = List.unzip tparams_and_tyl in
+  env, tparams_with_new_names, tyl_fresh
 
 and safely_refine_class_type
   env p class_name class_info ivar_ty obj_ty tparams_with_new_names tyl_fresh =

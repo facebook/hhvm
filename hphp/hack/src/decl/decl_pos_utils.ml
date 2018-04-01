@@ -84,6 +84,7 @@ let rec reason = function
   | Rused_as_shape p         -> Rused_as_shape (pos p)
   | Rpredicated (p, f)       -> Rpredicated (pos p, f)
   | Rinstanceof (p, f)       -> Rinstanceof (pos p, f)
+  | Ris p                    -> Ris (pos p)
   | Rfinal_property p        -> Rfinal_property (pos p)
   | Rvarray_or_darray_key p -> Rvarray_or_darray_key (pos p)
   | Rusing p                 -> Rusing (pos p)

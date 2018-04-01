@@ -140,6 +140,7 @@ let incr_reason_stats r p reason_stats =
     | Rused_as_shape _ -> "Rused_as_shape"
     | Rpredicated _ -> "Rpredicated"
     | Rinstanceof _ -> "Rinstanceof"
+    | Ris _ -> "Ris"
     | Rfinal_property _ -> "Rfinal_property"
     | Rvarray_or_darray_key _ -> "Rvarray_or_darray_key"
     | Rusing _ -> "Rusing"

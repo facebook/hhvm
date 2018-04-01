@@ -35,6 +35,7 @@ type _ t =
   | INFER_TYPE : ServerUtils.file_input * int * int * bool ->
       InferAtPosService.result t
   | INFER_TYPE_BATCH : (string * int * int) list * bool -> string list t
+  | TYPED_AST : string -> string t
   | IDE_HOVER : ServerUtils.file_input * int * int ->
       HoverService.result t
   | DOCBLOCK_AT : string * int -> DocblockService.result t

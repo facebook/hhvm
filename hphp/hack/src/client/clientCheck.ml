@@ -259,6 +259,17 @@ let main args =
       let responses = rpc args @@ Rpc.INFER_TYPE_BATCH (positions, args.dynamic_view) in
       List.iter responses print_endline;
       Exit_status.No_error
+    | MODE_TYPED_AST filename ->
+      let fn =
+        try
+          (expand_path filename)
+        with _ ->
+          Printf.eprintf "Invalid filename: %s\n" filename;
+          raise Exit_status.(Exit_with Input_error)
+      in
+      let result = rpc args @@ Rpc.TYPED_AST (fn) in
+      print_endline result;
+      Exit_status.No_error
     | MODE_AUTO_COMPLETE ->
       let content = Sys_utils.read_stdin_to_string () in
       let results = rpc args @@ Rpc.AUTOCOMPLETE content in

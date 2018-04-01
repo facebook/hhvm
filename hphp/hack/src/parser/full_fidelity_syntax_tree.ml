@@ -106,6 +106,14 @@ let remove_duplicates errors equals =
   let result = aux errors [] in
   List.rev result
 
+let build
+    (text: SourceText.t)
+    (root: Syntax.t)
+    (errors: SyntaxError.t list)
+    (language: string)
+    (mode: string): t =
+  { text; root; errors; language; mode }
+
 let process_errors errors =
   (* We've got the lexical errors and the parser errors together, both
   with lexically later errors earlier in the list. We want to reverse the
@@ -118,7 +126,8 @@ let process_errors errors =
 let from_root text root errors =
   let errors = process_errors errors in
   let (language, mode) = get_language_and_mode text root in
-  { text; root; errors; language; mode }
+  build text root errors language mode
+
 
 let create text root errors lang mode =
   let errors = process_errors errors in

@@ -14,6 +14,7 @@ type client_mode =
 | MODE_LIST_MODES
 | MODE_TYPE_AT_POS of string
 | MODE_TYPE_AT_POS_BATCH of string list
+| MODE_TYPED_AST of string (* filename *)
 | MODE_AUTO_COMPLETE
 | MODE_SAVE_STATE of string
 | MODE_STATUS
@@ -75,6 +76,7 @@ let mode_to_string = function
   | MODE_LIST_MODES -> "MODE_LIST_MODES"
   | MODE_TYPE_AT_POS _ -> "MODE_TYPE_AT_POS"
   | MODE_TYPE_AT_POS_BATCH _ -> "MODE_TYPE_AT_POS_BATCH"
+  | MODE_TYPED_AST _ -> "MODE_TYPED_AST"
   | MODE_AUTO_COMPLETE -> "MODE_AUTO_COMPLETE"
   | MODE_SAVE_STATE _ -> "MODE_SAVE_STATE"
   | MODE_STATUS -> "MODE_STATUS"

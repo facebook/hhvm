@@ -97,9 +97,9 @@ bool Process::IsUnderGDB() {
   return binaryPath.filename() == "gdb ";
 }
 
-int64_t Process::GetProcessRSS() {
+int64_t Process::GetMemUsageMb() {
   ProcStatus status;                    // read /proc/self/status
-  return status.valid() ? status.VmRSS / 1024 : 0;
+  return status.valid() ? status.adjustedRSSKb / 1024 : 0;
 }
 
 int Process::GetNumThreads() {
@@ -354,21 +354,21 @@ ProcStatus::ProcStatus() {
     char line[128];
     while (fgets(line, sizeof(line), f)) {
       if (!strncmp(line, "VmSize:", 7)) {
-        VmSize = readSize(line, true);
+        VmSizeKb = readSize(line, true);
       } else if (!strncmp(line, "VmRSS:", 6)) {
-        VmRSS = readSize(line, true);
+        VmRSSKb = readSize(line, true);
       } else if (!strncmp(line, "VmHWM:", 6)) {
-        VmHWM = readSize(line, true);
+        VmHWMKb = readSize(line, true);
       } else if (!strncmp(line, "HugetlbPages:", 13)) {
-        HugetlbPages = readSize(line, true);
+        HugetlbPagesKb = readSize(line, true);
       } else if (!strncmp(line, "Threads:", 8)) {
         Threads = readSize(line, false);
       }
     }
     fclose(f);
     if (!valid()) return;
-    adjustedRSS = VmRSS + HugetlbPages;
-    VmHWM += HugetlbPages;
+    adjustedRSSKb = VmRSSKb + HugetlbPagesKb;
+    VmHWMKb += HugetlbPagesKb;
   }
 #endif
 }

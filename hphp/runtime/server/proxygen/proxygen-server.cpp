@@ -614,7 +614,7 @@ void ProxygenServer::reportShutdownStatus() {
                 getQueuedJobs(),
                 getLibEventConnectionCount(),
                 m_pendingTransports.size(),
-                Process::GetProcessRSS());
+                Process::GetMemUsageMb());
   m_worker.getEventBase()->runAfterDelay([this]{reportShutdownStatus();}, 500);
 }
 

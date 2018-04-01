@@ -36,7 +36,7 @@ ResourceUsage ResourceUsage::sinceEpoch() {
     std::chrono::duration_cast<TimeUnit>(
       std::chrono::microseconds(
         HPHP::Timer::GetRusageMicros(Timer::TotalCPU, Timer::Self))),
-    Process::GetProcessRSS());
+    Process::GetMemUsageMb());
 }
 
 std::string ResourceUsage::toString() const {

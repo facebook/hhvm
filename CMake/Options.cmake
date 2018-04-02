@@ -26,7 +26,11 @@ option(CPACK_GENERATOR "Enable build of distribution packages using CPack" OFF)
 
 option(ENABLE_COTIRE "Speed up the build by precompiling headers" OFF)
 option(ENABLE_ASYNC_MYSQL "Build the async_mysql extension" ON)
-option(ENABLE_MCROUTER "Build the mcrouter library and extension" ON)
+if (APPLE)
+  option(ENABLE_MCROUTER "Build the mcrouter library and extension" OFF)
+else()
+  option(ENABLE_MCROUTER "Build the mcrouter library and extension" ON)
+endif()
 option(ENABLE_PROXYGEN_SERVER "Build the Proxygen HTTP server" ON)
 
 option(ENABLE_SPLIT_DWARF "Reduce linker memory usage by putting debugging information into .dwo files" OFF)

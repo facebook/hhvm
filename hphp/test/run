@@ -1094,21 +1094,35 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   return array($cmd, $env);
 }
 
-function hphp_cmd($options, $test, $timeout_prefix, $hackc) {
+function hphp_cmd($options, $test, $timeout_prefix, $program) {
   $extra_args = preg_replace("/-v\s*/", "-vRuntime.", extra_args($options));
 
-  $program = "hhvm";
-  $hackc_args = "";
-  if ($hackc) {
-    $program = "hackc";
+  $compiler_args = "";
+  if (isset($options['hackc'])) {
     $hh_single_compile = hh_codegen_path();
-    $hackc_args = implode(" ", array(
+    $compiler_args = implode(" ", array(
       "-vRuntime.Eval.HackCompilerReset=1",
       "-vRuntime.Eval.HackCompilerDefault=true",
       '-vRuntime.Eval.HackCompilerUseEmbedded=false',
       "-vRuntime.Eval.HackCompilerInheritConfig=true",
       "-vRuntime.Eval.HackCompilerCommand=\"${hh_single_compile} -v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs\""
     ));
+  }
+  if (isset($options['hphpc'])) {
+    $compiler_args = '-vRuntime.Eval.HackCompilerDefault=false';
+  }
+  if (isset($options['compare-hh-codegen'])) {
+    // If we want to compare hphpc to hackc codegen, we have to force the
+    // compiler in both directions, because the default is uncertain - it
+    // depends on whether HHVM_NO_DEFAULT_HACKC was defined at build time
+    if ($program === 'hackc') {
+      $compiler_args = implode(' ', array(
+        '-vRuntime.Eval.HackCompilerDefault=true',
+        '-vRuntime.Eval.HackCompilerUseEmbedded=true',
+      ));
+    } else {
+      $compiler_args = '-vRuntime.Eval.HackCompilerDefault=false';
+    }
   }
 
   return implode(" ", array(
@@ -1122,7 +1136,7 @@ function hphp_cmd($options, $test, $timeout_prefix, $hackc) {
     '--nofork=1 -thhbc -l1 -k1',
     "-o \"$test.repo\" --program $program.hhbc \"$test\"",
     $extra_args,
-    $hackc_args,
+    $compiler_args,
     read_opts_file("$test.hphp_opts"),
   ));
 }
@@ -1137,6 +1151,13 @@ function hhbbc_cmd($options, $test, $timeout_prefix, $program) {
     read_opts_file("$test.hhbbc_opts"),
     "-o \"$test.repo/$program.hhbbc\" \"$test.repo/$program.hhbc\"",
   ));
+}
+
+function repo_mode_compile($options, $test, $program) {
+  $hphp = hphp_cmd($options, $test, timeout_prefix(), $program);
+  shell_exec("$hphp 2>&1");
+  $hhbbc = hhbbc_cmd($options, $test, timeout_prefix(), $program);
+  shell_exec("$hhbbc 2>&1");
 }
 
 function hh_server_cmd($options, $test) {
@@ -2228,21 +2249,13 @@ function run_test($options, $test) {
     $hhbbc_hackc_repo = "$test.repo/hackc.hhbbc";
     shell_exec("rm -f \"$hphp_hhvm_repo\" \"$hhbbc_hhvm_repo\" \"$hphp_hackc_repo\" \"$hhbbc_hackc_repo\" ");
 
-    if (isset($options['hackc']) || isset($options['compare-hh-codegen'])) {
-      $hphp = hphp_cmd($options, $test, timeout_prefix(), true);
-      shell_exec("$hphp 2>&1");
-      $hhbbc = hhbbc_cmd($options, $test, timeout_prefix(), "hackc");
-      shell_exec("$hhbbc 2>&1");
-    }
+    if (isset($options['compare-hh-codegen'])) {
+      repo_mode_compile($options, $test, 'hhvm');
+      repo_mode_compile($options, $test, 'hackc');
+    } else {
+      $program = isset($options['hackc']) ? "hackc" : "hhvm";
+      repo_mode_compile($options, $test, $program);
 
-    if (!isset($options['hackc']) || isset($options['compare-hh-codegen'])) {
-      $hphp = hphp_cmd($options, $test, timeout_prefix(), false);
-      shell_exec("$hphp 2>&1");
-      $hhbbc = hhbbc_cmd($options, $test, timeout_prefix(), "hhvm");
-      shell_exec("$hhbbc 2>&1");
-    }
-
-    if (!isset($options['compare-hh-codegen'])) {
       if (isset($options['hhbbc2'])) {
         $hhas_temp1 = dump_hhas_to_temp($hhvm, "$test.before");
         if ($hhas_temp1 === false) {
@@ -2253,6 +2266,7 @@ function run_test($options, $test) {
           return false;
         }
         shell_exec("mv $hhbbc_hhvm_repo $hphp_hhvm_repo");
+        $hhbbc = hhbbc_cmd($options, $test, timeout_prefix(), $program);
         shell_exec("$hhbbc 2>&1");
         $hhas_temp2 = dump_hhas_to_temp($hhvm, "$test.after");
         if ($hhas_temp2 === false) {
@@ -2432,8 +2446,8 @@ function print_commands($tests, $options) {
     }
 
     // How to run it with hhbbc:
-    $hhbbc_cmds = hphp_cmd($options, $test, '', isset($options['hackc']))."\n";
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
+    $hhbbc_cmds = hphp_cmd($options, $test, '', $program)."\n";
     $hhbbc_cmd  = hhbbc_cmd($options, $test, '', $program)."\n";
     $hhbbc_cmds .= $hhbbc_cmd;
     if (isset($options['hhbbc2'])) {

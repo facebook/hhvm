@@ -407,9 +407,6 @@ let methodish_contains_private node =
 let is_visibility x =
   is_public x || is_private x || is_protected x
 
-let is_not_public_visibility x =
-  is_private x || is_protected x
-
 let has_static node parents f =
   match node with
   | FunctionDeclarationHeader node ->
@@ -2086,9 +2083,9 @@ let classish_errors env node parents namespace_name names errors =
         let methods = syntax_to_list_no_separators methods in
         let has_abstract_fn =
           Hh_core.List.exists methods ~f:methodish_contains_abstract in
-        let has_non_public_method =
+        let has_private_method =
           Hh_core.List.exists methods
-            ~f:(methodish_modifier_contains_helper is_not_public_visibility) in
+            ~f:(methodish_modifier_contains_helper is_private) in
         let has_multiple_xhp_category_decls =
           let cats = Hh_core.List.filter methods ~f:(fun m ->
             match syntax m with
@@ -2105,10 +2102,10 @@ let classish_errors env node parents namespace_name names errors =
                 (SyntaxError.class_with_abstract_method name) :: errors
           else errors in
         let errors =
-          if has_non_public_method &&
+          if has_private_method &&
              is_token_kind cd.classish_keyword TokenKind.Interface
           then make_error_from_node node
-            SyntaxError.interface_has_non_public_method :: errors
+            SyntaxError.interface_has_private_method :: errors
           else errors in
         let errors =
           if has_multiple_xhp_category_decls

@@ -386,7 +386,7 @@ let reference_to_static_scope_resolution =
 let class_with_abstract_method name =
   "Class " ^ name ^ " contains an abstract method and must " ^
   "therefore be declared abstract"
-let interface_has_non_public_method =
+let interface_has_private_method =
   "Access type for interface method must be omitted"
 let redeclaration_of_function ~name ~loc =
   "Cannot redeclare " ^ name ^ "() (previously declared in " ^ loc ^ ")"

@@ -228,12 +228,13 @@ void MethodStatement::onParseRecur(AnalysisResultConstRawPtr ar,
     }
 
     if (classScope->isInterface()) {
-      if (m_modifiers->isProtected() || m_modifiers->isPrivate() ||
+      if (m_modifiers->isPrivate() ||
           m_modifiers->isAbstract()  || m_modifiers->isFinal() ||
           isNative) {
         m_modifiers->parseTimeFatal(
           fileScope,
-          "Access type for interface method %s::%s() must be omitted",
+          "Private, abstract, final modifiers and <<__Native>> attribute on "
+          "interface method %s::%s() must be omitted",
           classScope->getOriginalName().c_str(), getOriginalName().c_str());
       }
       if (m_modifiers->isAsync()) {

@@ -228,10 +228,17 @@ ALWAYS_INLINE void HashTable<ArrayType, ElmType>::InitSmallHash(ArrayType* a) {
   //Use a2 since writeback == true for stp instruction
   auto a2 = a;
   __asm__ __volatile__(
+ #ifdef __clang__
+  "stp        %[data], %[data], %[addr]\n"
+  :[addr] "+o"(*((uint8_t*)a2 + (sizeof(ArrayType) + SmallSize * sizeof(Elm))))
+  :[data] "r"(emptyVal));
+#else
     "stp        %x1, %x1, %x0\n"
     : "+o"(*((uint8_t*)a2 + (sizeof(ArrayType) + SmallSize * sizeof(Elm))))
     : "r"(emptyVal)
   );
+#endif
+
 #elif defined(__powerpc__)
   static_assert(Empty == -1, "");
   static_assert(SmallSize == 3, "");

@@ -87,6 +87,7 @@ type _ t =
   | INFER_RETURN_TYPE : InferReturnTypeService.t ->
       InferReturnTypeService.result t
   | RAGE : ServerRageTypes.result t
+  | DYNAMIC_VIEW: bool -> unit t
 
 let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true

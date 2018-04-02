@@ -202,6 +202,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       {env with ide_idle = true;}, ()
     | RAGE ->
       env, ServerRage.go genv env
+    | DYNAMIC_VIEW toggle ->
+      ServerFileSync.toggle_dynamic_view env toggle, ()
     | INFER_RETURN_TYPE id_info ->
       match id_info with
       | InferReturnTypeService.Function fun_name ->

@@ -24,6 +24,10 @@ let symbols_at (file, line, char) tcopt =
 
 let type_at (file, line, char) tcopt files_info =
   let open Typing_defs in
+  let tcopt = {
+    tcopt with
+    GlobalOptions.tco_dynamic_view = ServerDynamicView.dynamic_view_on ();
+  } in
   let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
   match ServerInferType.type_at_pos tast line char with
   | Some (_, (_, Tanon _) as infer_type_results1) ->

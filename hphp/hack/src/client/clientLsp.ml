@@ -574,6 +574,10 @@ let do_rage (state: state) : Rage.result =
   (* that's it! *)
   !items
 
+let do_toggleTypeCoverage (conn : server_conn) (params: ToggleTypeCoverage.params) : unit =
+  (* Currently, the only thing to do on toggling type coverage is turn on dynamic view *)
+  let command = ServerCommandTypes.DYNAMIC_VIEW (params.ToggleTypeCoverage.toggle) in
+  rpc conn command
 
 let do_didOpen (conn: server_conn) (params: DidOpen.params) : unit =
   let open DidOpen in
@@ -1867,7 +1871,6 @@ let handle_event
   | Main_loop menv, Client_message c when c.method_ = "textDocument/typeCoverage" ->
     parse_typeCoverage c.params |> do_typeCoverage menv.conn
     |> print_typeCoverage |> Jsonrpc.respond to_stdout c
-
   (* textDocument/formatting *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/formatting" ->
     parse_documentFormatting c.params
@@ -1891,6 +1894,9 @@ let handle_event
   (* textDocument/didOpen notification *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/didOpen" ->
     parse_didOpen c.params |> do_didOpen menv.conn
+
+  | Main_loop menv, Client_message c when c.method_ = "workspace/toggleTypeCoverage" ->
+    parse_toggleTypeCoverage c.params |> do_toggleTypeCoverage menv.conn
 
   (* textDocument/didClose notification *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/didClose" ->

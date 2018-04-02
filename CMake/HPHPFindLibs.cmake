@@ -165,6 +165,10 @@ if (ICU_FOUND)
     add_definitions("-DU_EXPORT=")
     add_definitions("-DU_IMPORT=")
   endif()
+  # Everything is either in the `icu61` namespace or `icu` namespace, depending
+  # on another definition. There's an implicit `using namespace WHATEVER;` in
+  # ICU4c < 61.1, but now that's opt-in rather than opt-out.
+  add_definitions("-DU_USING_ICU_NAMESPACE=1")
 endif (ICU_FOUND)
 
 # jemalloc/tmalloc and profiler
@@ -508,6 +512,8 @@ macro(hphp_link target)
   else()
     target_link_libraries(${target} lz4)
   endif()
+  # The syntax used for these warnings is unparsable by Apple's Clang
+  add_definitions("-DLZ4_DISABLE_DEPRECATE_WARNINGS=1")
 
   if (LIBZIP_LIBRARY)
     target_link_libraries(${target} ${LIBZIP_LIBRARY})

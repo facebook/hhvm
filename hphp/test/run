@@ -2191,21 +2191,32 @@ function get_hhvm_ini_values($test, $options) {
   return $test_config;
 }
 
+function get_hhvm_compiler_frontend($options, $test) {
+  $get_fe_script = tempnam(sys_get_temp_dir(), "get_frontend");
+  $fe_temp_file = tempnam(sys_get_temp_dir(), "hhvm_frontend");
+  file_put_contents(
+    $get_fe_script,
+    "<?php\nfile_put_contents('$fe_temp_file', __COMPILER_FRONTEND__);"
+  );
+  list ($hhvm, $_) = hhvm_cmd($options, $test, $get_fe_script, true);
+  if (is_array($hhvm)) $hhvm = $hhvm[0];
+  system("$hhvm &> /dev/null");
+  $frontend = file_get_contents($fe_temp_file);
+  unlink($fe_temp_file);
+  return $frontend;
+}
+
 function run_test($options, $test) {
   if (skip_test($options, $test)) return 'skip';
 
-  // Skip pure hhas tests if we're running the Hack compiler
-  if (isset($options['hackc'])) {
-    if (substr($test, -5) === ".hhas") return 'skip';
-  }
-
   // Skip any tests that would require HPHPC for HackC-only features
-  // If the test_name.onlyhackc exists or the foler has .onlyhackc
+  // If the test_name.onlyhackc exists or the folder has .onlyhackc
   $only_hackc_tag = '.onlyhackc';
   $only_hackc = file_exists($test.$only_hackc_tag) ||
                 file_exists(dirname($test).'/'.$only_hackc_tag);
   if ($only_hackc) {
-    if (!isset($options['hackc']) || isset($options['compare-hh-codegen'])) {
+    if (isset($options['compare-hh-codegen']) ||
+        get_hhvm_compiler_frontend($options, $test) !== 'hackc') {
       return 'skip-onlyhackc';
     }
   }
@@ -2222,7 +2233,6 @@ function run_test($options, $test) {
     return 'skip-nodumphhas';
   }
 
-  $test_ext = pathinfo($test, PATHINFO_EXTENSION);
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
   if ((isset($options['relocate']) ||
        isset($options['recycle-tc']) ||
@@ -2265,7 +2275,7 @@ function run_test($options, $test) {
           );
           return false;
         }
-        shell_exec("mv $hhbbc_hhvm_repo $hphp_hhvm_repo");
+        shell_exec("mv $test.repo/$program.hhbbc $test.repo/$program.hhbc");
         $hhbbc = hhbbc_cmd($options, $test, timeout_prefix(), $program);
         shell_exec("$hhbbc 2>&1");
         $hhas_temp2 = dump_hhas_to_temp($hhvm, "$test.after");

@@ -8,6 +8,19 @@
  *
  *)
 
-let go _env filename line =
+open Hh_core
+
+let go env (filename, line, char) =
+  let open Option.Monad_infix in
   let relative_path = Relative_path.(create Root filename) in
-  Docblock_finder.find_single_docblock ~tidy:true relative_path line
+  let ServerEnv.{ tcopt; _ } = env in
+  File_heap.get_contents relative_path
+  >>= begin fun contents ->
+    let definitions =
+      ServerIdentifyFunction.go contents line char tcopt
+      |> List.filter_map ~f:(fun (_, def) -> def)
+    in
+    List.hd definitions
+  end
+  >>= ServerSymbolDefinition.get_definition_cst_node (ServerUtils.FileName filename)
+  >>= Docblock_finder.get_docblock

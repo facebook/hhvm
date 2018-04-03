@@ -13,6 +13,11 @@ open IdentifySymbolService
 open Option.Monad_infix
 open Typing_defs
 
+module SourceText = Full_fidelity_source_text
+module Syntax = Full_fidelity_positioned_syntax
+module SyntaxKind = Full_fidelity_syntax_kind
+module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Full_fidelity_positioned_syntax)
+
 (* Element type, class name, element name. Class name refers to "origin" class,
  * we expect to find said element in AST/NAST of this class *)
 type class_element = class_element_ * string * string
@@ -159,3 +164,38 @@ let go tcopt ast result =
     | SymbolOccurrence.LocalVar ->
       get_local_var_def
         ast result.SymbolOccurrence.name result.SymbolOccurrence.pos
+
+let get_definition_cst_node fallback_fn definition =
+  let open SymbolDefinition in
+  let env = Full_fidelity_parser_env.default in
+  let source_text = if Pos.filename definition.pos = ServerIdeUtils.path
+    then
+      (* When the definition is in an IDE buffer with local changes, the filename
+         in the definition will be empty. *)
+      match fallback_fn with
+      | ServerUtils.FileName filename ->
+        SourceText.from_file (Relative_path.create Relative_path.Root filename)
+      | ServerUtils.FileContent content ->
+        SourceText.make Relative_path.default content
+    else SourceText.from_file (Pos.filename definition.pos)
+  in
+  let tree = SyntaxTree.make ~env source_text in
+  let (line, start, _) = Pos.info_pos definition.pos in
+  let offset = SourceText.position_to_offset source_text (line, start) in
+  let parents = Syntax.parentage (SyntaxTree.root tree) offset in
+  List.find parents ~f:begin fun syntax ->
+    match definition.kind, Syntax.kind syntax with
+    | Function, SyntaxKind.FunctionDeclaration
+    | Class, SyntaxKind.ClassishDeclaration
+    | Method, SyntaxKind.MethodishDeclaration
+    | Property, SyntaxKind.PropertyDeclaration
+    | Const, SyntaxKind.ConstDeclaration
+    | Enum, SyntaxKind.EnumDeclaration
+    | Interface, SyntaxKind.ClassishDeclaration
+    | Trait, SyntaxKind.ClassishDeclaration
+    | LocalVar, SyntaxKind.VariableExpression
+    | Typeconst, SyntaxKind.TypeConstDeclaration
+    | Param, SyntaxKind.ParameterDeclaration
+    | Typedef, SyntaxKind.SimpleTypeSpecifier -> true
+    | _ -> false
+  end

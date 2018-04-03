@@ -793,8 +793,9 @@ let do_completionItemResolve
   | Some _ as data ->
     let filename = Jget.string_exn data "filename" in
     let line = Jget.int_exn data "line" in
+    let char = Jget.int_exn data "char_start" in
     let command =
-      ServerCommandTypes.DOCBLOCK_AT (filename, line)
+      ServerCommandTypes.DOCBLOCK_AT (filename, line, char)
     in
     let contents = rpc conn command in
     { params with Completion.documentation = contents }

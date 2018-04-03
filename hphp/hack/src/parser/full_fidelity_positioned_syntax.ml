@@ -278,3 +278,9 @@ let position_exclusive file node =
   Some (SourceText.relative_pos file source_text start_offset end_offset)
 
 let is_synthetic node = false
+
+let leading_trivia node =
+  let token = leading_token node in
+  match token with
+  | None -> []
+  | Some t -> Token.leading t

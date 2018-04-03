@@ -9,6 +9,9 @@
  *)
 
 open Hh_core
+module Syntax = Full_fidelity_positioned_syntax
+module Trivia = Full_fidelity_positioned_trivia
+module TriviaKind = Full_fidelity_trivia_kind
 
 (**
  * This is a simple data structure that allows querying for the docblock
@@ -66,74 +69,57 @@ let find_last_comment_index finder line =
 
 let open_multiline = Str.regexp "^/\\*\\(\\*?\\) *"
 let close_multiline = Str.regexp " *\\*/$"
-let line_prefix = Str.regexp "^// ?"
 
-(** Tidies up a comment.
+(** Tidies up a delimited comment.
 
-    # Multiline comment
-    When given a multiline comment (`/* */`), this will do the following tidying:
-      1. Strip the leading `/*` and trailing `*/`.
-      2. Remove leading whitespace equal to the least amount of whitespace
-         before any comment lines after the first (since the first line is on
-         the same line as the opening `/*`, it will almost always have only a
-         single leading space).
+    1. Strip the leading `/*` and trailing `*/`.
+    2. Remove leading whitespace equal to the least amount of whitespace
+       before any comment lines after the first (since the first line is on
+       the same line as the opening `/*`, it will almost always have only a
+       single leading space).
 
-         We remove leading whitespace equal to the least amount rather than
-         removing all leading whitespace in order to preserve manual indentation
-         of text in the doc block.
+       We remove leading whitespace equal to the least amount rather than
+       removing all leading whitespace in order to preserve manual indentation
+       of text in the doc block.
 
-      3. Remove leading `*` characters to properly handle box-style multiline
-         doc blocks. Without this they would be formatted as Markdown lists.
+    3. Remove leading `*` characters to properly handle box-style multiline
+       doc blocks. Without this they would be formatted as Markdown lists.
 
-    Known failure cases:
-      1. A doc block which is legitimately just a list of items will need at
-         least one non-list item which is under-indented compared to the list in
-         order to not strip all of the whitespace from the list items. The
-         easiest way to do this is to write a little one line summary before the
-         list and place it on its own line instead of directly after the `/*`.
-
-    # Single line comment
-    When given a list of single line comments (`//`), just strip the leading
-    forward slashes and the first space after the second slash.
+  Known failure cases:
+    1. A doc block which is legitimately just a list of items will need at
+       least one non-list item which is under-indented compared to the list in
+       order to not strip all of the whitespace from the list items. The
+       easiest way to do this is to write a little one line summary before the
+       list and place it on its own line instead of directly after the `/*`.
 *)
-let tidy_comment comment =
-  let is_line_comment = Str.string_match line_prefix comment 0 in
+let tidy_delimited_comment comment =
   let comment =
-    if is_line_comment
-    then comment
-    else
-      comment
-      |> Str.replace_first open_multiline ""
-      |> Str.replace_first close_multiline ""
+    comment
+    |> Str.replace_first open_multiline ""
+    |> Str.replace_first close_multiline ""
   in
   let lines = String_utils.split_into_lines comment in
-  if is_line_comment
-  then
-    lines
-    |> List.map ~f:(Str.replace_first line_prefix "")
-    |> String.concat "\n"
-  else
-    let line_trimmer = match lines with
-      | []
-      | [_] -> String.trim
-      | _hd :: tail ->
-        let get_whitespace_count x =
-          String_utils.index_not_opt x " "
-        in
-        let counts = List.filter_map ~f:get_whitespace_count tail in
-        let min =
-          List.min_elt counts ~cmp:(fun a b -> a - b)
-          |> Option.value ~default:0
-        in
-        let removal = Str.regexp (Printf.sprintf "^%s\\(\\* ?\\)?" (String.make min ' ')) in
-        Str.replace_first removal ""
-    in
-    lines
-    |> List.map ~f:line_trimmer
-    |> String.concat "\n"
+  let line_trimmer = match lines with
+    | []
+    | [_] -> String.trim
+    | _hd :: tail ->
+      let get_whitespace_count x =
+        String_utils.index_not_opt x " "
+      in
+      let counts = List.filter_map ~f:get_whitespace_count tail in
+      let min =
+        List.min_elt counts ~cmp:(fun a b -> a - b)
+        |> Option.value ~default:0
+      in
+      let removal = Str.regexp (Printf.sprintf "^%s\\(\\* ?\\)?" (String.make min ' ')) in
+      Str.replace_first removal ""
+  in
+  lines
+  |> List.map ~f:line_trimmer
+  |> String.concat "\n"
 
 let find_docblock (finder : finder)
-                  ?(last_line = 0)
+                  (last_line : int)
                   (line : int) : string option =
   match find_last_comment_index finder line with
   | Some comment_index ->
@@ -150,24 +136,6 @@ let find_docblock (finder : finder)
         None
   | None -> None
 
-let find_single_docblock ?(tidy = false)
-                         (relative_path : Relative_path.t)
-                         (line : int) : string option =
-  let open Option.Monad_infix in
-  File_heap.get_contents relative_path
-  >>= begin fun contents ->
-    let env = Full_fidelity_ast.make_env ~include_line_comments:true relative_path in
-    let results = Full_fidelity_ast.from_text_with_legacy env contents in
-    let finder = make_docblock_finder (results.Parser_hack.comments) in
-    find_docblock finder line
-  end
-  >>| (fun docblock -> if tidy then tidy_comment docblock else docblock)
-  |> Option.filter ~f:begin fun comment ->
-    (* Make sure to not add the `// strict` part of `<?hh // strict`
-       if we're looking for something at the start of the file. *)
-    not (line = 2 && comment = "strict")
-  end
-
 (* Find the last comment on `line` if it exists. *)
 let find_inline_comment (finder : finder) (line : int) : string option =
   match find_last_comment_index finder (line + 1) with
@@ -183,3 +151,48 @@ let find_inline_comment (finder : finder) (line : int) : string option =
     else
       None
   | None -> None
+
+let line_comment_prefix = Str.regexp "^// ?"
+
+let get_docblock node =
+  let rec helper trivia_list acc eols_until_exit =
+    match trivia_list, eols_until_exit with
+    | [], _
+    | Trivia.{kind = TriviaKind.EndOfLine; _} :: _, 0 ->
+      begin match acc with
+      | [] -> None
+      | comments ->
+        let comment =
+          comments
+          |> List.map ~f:(Str.replace_first line_comment_prefix "")
+          |> String.concat "\n"
+          |> String.trim
+        in
+        Some comment
+      end
+    | hd :: tail, _ ->
+      begin match Trivia.kind hd with
+      | TriviaKind.DelimitedComment when List.is_empty acc ->
+        Some (tidy_delimited_comment (Trivia.text hd))
+      | TriviaKind.SingleLineComment ->
+        helper tail (Trivia.text hd :: acc) 1
+      | TriviaKind.WhiteSpace -> helper tail acc eols_until_exit
+      | TriviaKind.EndOfLine -> helper tail acc (eols_until_exit - 1)
+      | TriviaKind.FixMe
+      | TriviaKind.IgnoreError -> helper tail acc 1
+      | TriviaKind.DelimitedComment
+      | TriviaKind.Unsafe
+      | TriviaKind.UnsafeExpression
+      | TriviaKind.FallThrough
+      | TriviaKind.ExtraTokenError
+      | TriviaKind.AfterHaltCompiler ->
+        (* Short circuit immediately. *)
+        helper [] acc 0
+      end
+  in
+  let trivia_list = Syntax.leading_trivia node in
+
+  (* Set the starting EOL count to 2 instead of 1 because it's valid to have up
+     to one blank line between the end of a docblock and the start of its
+     associated element. *)
+  helper (List.rev trivia_list) [] 2

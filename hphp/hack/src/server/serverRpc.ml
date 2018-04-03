@@ -39,8 +39,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerTypedAst.go env filename
     | IDE_HOVER (fn, line, char) ->
         env, ServerHover.go env (fn, line, char)
-    | DOCBLOCK_AT (fn, line) ->
-        env, ServerDocblockAt.go env fn line
+    | DOCBLOCK_AT (filename, line, char) ->
+        env, ServerDocblockAt.go env (filename, line, char)
     | AUTOCOMPLETE content ->
         let result = try
           let autocomplete_context = { AutocompleteTypes.

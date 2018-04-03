@@ -40,7 +40,7 @@ let type_at (file, line, char) tcopt files_info =
       ~default:infer_type_results1)
   | results -> results
 
-let make_hover_info tcopt (file, _line, _char) env_and_ty (occurrence, def_opt) =
+let make_hover_info tcopt env_and_ty file (occurrence, def_opt) =
   let open SymbolOccurrence in
   let open Typing_defs in
   let snippet = match occurrence, env_and_ty with
@@ -67,13 +67,8 @@ let make_hover_info tcopt (file, _line, _char) env_and_ty (occurrence, def_opt) 
         begin match def.SymbolDefinition.docblock with
         | Some s -> [s]
         | None ->
-          let def_file = match ((Pos.filename def.SymbolDefinition.pos), file) with
-            | (p, ServerUtils.FileName fn) when p = Relative_path.default ->
-              Relative_path.(create Root fn)
-            | fn, _ -> fn
-          in
-          let def_line = (Pos.end_line def.SymbolDefinition.pos) in
-          Docblock_finder.find_single_docblock ~tidy:true def_file def_line
+          ServerSymbolDefinition.get_definition_cst_node file def
+          |> (fun c -> Option.bind c Docblock_finder.get_docblock)
           |> Option.to_list
         end
       | None -> []);
@@ -107,4 +102,4 @@ let go env (file, line, char) =
   | identities ->
     identities
     |> IdentifySymbolService.filter_redundant
-    |> List.map ~f:(make_hover_info tcopt (file, line, char) env_and_ty)
+    |> List.map ~f:(make_hover_info tcopt env_and_ty file)

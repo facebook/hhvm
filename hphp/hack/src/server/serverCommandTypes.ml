@@ -38,7 +38,7 @@ type _ t =
   | TYPED_AST : string -> string t
   | IDE_HOVER : ServerUtils.file_input * int * int ->
       HoverService.result t
-  | DOCBLOCK_AT : string * int -> DocblockService.result t
+  | DOCBLOCK_AT : (string * int * int) -> DocblockService.result t
   | COVERAGE_LEVELS : ServerUtils.file_input -> Coverage_level.result t
   | AUTOCOMPLETE : string -> AutocompleteTypes.result t
   | IDENTIFY_FUNCTION : ServerUtils.file_input * int * int ->

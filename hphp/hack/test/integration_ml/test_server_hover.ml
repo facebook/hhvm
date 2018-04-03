@@ -279,15 +279,13 @@ class DocBlock {
     * the other stars. */
   public static function leadingStarsAndMDList(): void {}
 
-  /**
-   * This method has many line breaks, which
-   *
-   * someone might use if they wanted
-   *
-   * to have separate paragraphs
-   *
-   * in Markdown.
-   */
+  // This method has many line breaks, which
+  //
+  // someone might use if they wanted
+  //
+  // to have separate paragraphs
+  //
+  // in Markdown.
   public static function manyLineBreaks(): void {}
 }
 
@@ -307,6 +305,36 @@ class DocBlockBase {
 /* DocBlockDerived: extends a class with a constructor, but doesn't have one of
    its own. */
 class DocBlockDerived extends DocBlockBase {}
+
+// Line comments with breaks
+
+// We don't want the line comment above to be part of this docblock.
+// We do want both these lines though.
+function line_comment_with_break(): void {}
+//       84^:10
+
+// This is another special case.
+/** Only this should be part of the docblock. */
+function two_comment_types(): void {}
+//       ^89:10
+
+// There are too many blank lines between this comment and what it's commenting
+// on.
+
+
+function too_many_blank_lines(): void {}
+//       ^96:10
+
+// For legacy reasons, we have to support a single linebreak between a docblock
+// and the item the docblock is for.
+
+function one_linebreak_is_okay(): void {}
+//       ^102:10
+
+/** A function with an HH_FIXME. */
+/* HH_FIXME[4030] Missing return type hint. */
+function hh_fixme() {}
+//       ^107:10
 "
 
 let docblockCases = [
@@ -364,28 +392,21 @@ the other stars."; "Full name: `DocBlock::leadingStarsAndMDList`"];
     {
       snippet = "public static function manyLineBreaks(): void";
       addendum = [
-        "\n\
-         This method has many line breaks, which\n\
+        "This method has many line breaks, which\n\
          \n\
          someone might use if they wanted\n\
          \n\
          to have separate paragraphs\n\
          \n\
-         in Markdown.\n";
+         in Markdown.";
       "Full name: `DocBlock::manyLineBreaks`"];
       pos = pos_at (15, 13) (15, 26);
     }
   ];
   ("docblock.php", 17, 12), [
     {
-      snippet =
-        "public function __construct(): _";
-      (* This is because we set `last_line` to 0 in Docblock_finder, but we
-         can't get a proper `last_line` value without generating a TAST of the
-         file that contains this class. I'll be fixing this in a later diff.
-            -wipi *)
+      snippet = "public function __construct(): _";
       addendum = [
-        "\nClass doc block for a class whose constructor doesn't have a doc block.\n";
         "Full name: `DocBlockOnClassButNotConstructor::__construct`";
       ];
       pos = pos_at (17, 8) (17, 45);
@@ -417,7 +438,46 @@ the other stars."; "Full name: `DocBlock::leadingStarsAndMDList`"];
       ];
       pos = pos_at (25, 10) (25, 30);
     }
-  ]
+  ];
+  ("docblock.php", 84, 10), [
+    {
+      snippet = "line_comment_with_break";
+      addendum = [
+        "We don't want the line comment above to be part of this docblock.\n\
+        We do want both these lines though."
+      ];
+      pos = pos_at (84, 10) (84, 32);
+    }
+  ];
+  ("docblock.php", 89, 10), [
+    {
+      snippet = "two_comment_types";
+      addendum = ["Only this should be part of the docblock."];
+      pos = pos_at (89, 10) (89, 26);
+    }
+  ];
+  ("docblock.php", 96, 10), [
+    {
+      snippet = "too_many_blank_lines";
+      addendum = [];
+      pos = pos_at (96, 10) (96, 29);
+    }
+  ];
+  ("docblock.php", 102, 10), [
+    {
+      snippet = "one_linebreak_is_okay";
+      addendum = ["For legacy reasons, we have to support a single linebreak between a docblock\n\
+                   and the item the docblock is for."];
+      pos = pos_at (102, 10) (102, 30);
+    }
+  ];
+  ("docblock.php", 107, 10), [
+    {
+      snippet = "hh_fixme";
+      addendum = ["A function with an HH_FIXME."];
+      pos = pos_at (107, 10) (107, 17);
+    }
+  ];
 ]
 
 let special_cases = "<?hh // strict
@@ -435,7 +495,9 @@ function idx(
   ?KeyedContainer<int, ?int> $collection,
   ?int $index
 ): ?int";
-      addendum = [];
+      addendum = ["NB: the typechecker relies on the exact format of this signature and rewrites\n\
+                   parts of it in place during each call. Changes to the signature need to be\n\
+                   done in tandem with changes to the ocaml code that munges it."];
       pos = pos_at (3, 3) (3, 24);
     }
   ]

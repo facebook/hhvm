@@ -310,26 +310,9 @@ class BarebonesTests(object):
             '  {root}foo_3.php:3:18,18: Previous definition h differs only in capitalization ',
         ])
 
-
-# Common tests, includes the Barebones Tests above
-class CommonTests(BarebonesTests):
-
-    def test_json_errors(self):
-        """
-        If you ask for errors in JSON format, you will get them on standard
-        output. Changing this will break the tools that depend on it (like
-        editor plugins), and this test is here to remind you about it.
-        """
-        self.start_hh_server()
-
-        stderr = self.check_cmd([], options=["--json"])
-        last_line = stderr.splitlines()[-1]
-        output = json.loads(last_line)
-
-        self.assertEqual(output["errors"], [])
-        self.assertEqual(output["passed"], True)
-        self.assertIn("version", output)
-
+    # We put this test in Barebones tests so that dependencies on class B
+    # show an error (i.e. class_3.php) with both the save state driver
+    # and the classic save state driver
     def test_modify_extends_deps(self):
         """
         Introduce a change to a base class that causes an error
@@ -350,6 +333,26 @@ class CommonTests(BarebonesTests):
             '  {root}class_3.php:4:28,30: This is an int',
             '  {root}class_1.php:4:51,54: It is incompatible with a bool',
         ])
+
+
+# Common tests, includes the Barebones Tests above
+class CommonTests(BarebonesTests):
+
+    def test_json_errors(self):
+        """
+        If you ask for errors in JSON format, you will get them on standard
+        output. Changing this will break the tools that depend on it (like
+        editor plugins), and this test is here to remind you about it.
+        """
+        self.start_hh_server()
+
+        stderr = self.check_cmd([], options=["--json"])
+        last_line = stderr.splitlines()[-1]
+        output = json.loads(last_line)
+
+        self.assertEqual(output["errors"], [])
+        self.assertEqual(output["passed"], True)
+        self.assertIn("version", output)
 
     def test_modify_file(self):
         """

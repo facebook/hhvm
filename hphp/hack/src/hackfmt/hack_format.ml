@@ -204,13 +204,14 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       enumerator_equal = eq_kw;
       enumerator_value = value;
       enumerator_semicolon = semi } ->
+    let value = t env value in
     Concat [
       t env name;
       Space;
       t env eq_kw;
       Space;
-      SplitWith Cost.Base;
-      Nest [t env value];
+      if has_split value then SplitWith Cost.Base else Nothing;
+      Nest [value];
       t env semi;
       Newline;
     ]

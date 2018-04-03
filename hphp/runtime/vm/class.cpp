@@ -1797,8 +1797,7 @@ void Class::setMethods() {
       Func* f = m_parent->getMethod(i);
       assertx(f);
       ITRACE(5, "  - adding parent method {}\n", f->name()->data());
-      if ((f->attrs() & AttrClone) ||
-          (!(f->attrs() & AttrPrivate) && f->hasStaticLocals())) {
+      if (!(f->attrs() & AttrPrivate) && f->hasStaticLocals()) {
         // When copying down an entry for a non-private method that has
         // static locals, we want to make a copy of the Func so that it
         // gets a distinct set of static locals variables. We defer making
@@ -1878,11 +1877,10 @@ void Class::setMethods() {
        it != parentMethodsWithStaticLocals.end(); ++it) {
     Func*& f = builder[*it];
     if (f->cls() != this) {
-      // Don't update f's m_cls if it doesn't have AttrClone set:
-      // we're cloning it so that we get a distinct set of static
-      // locals and a separate translation, not a different context
-      // class.
-      f = f->clone(f->attrs() & AttrClone ? this : f->cls());
+      // Don't update f's m_cls.  We're cloning it so that we get a
+      // distinct set of static locals and a separate translation, not
+      // a different context class.
+      f = f->clone(f->cls());
       f->setNewFuncId();
       if (RuntimeOption::EvalPerfDataMap) {
         if (!s_funcIdToClassMap) {

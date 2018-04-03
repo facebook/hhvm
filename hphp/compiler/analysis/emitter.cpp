@@ -12249,11 +12249,6 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
     case METH_SEND:
     case METH_RAISE:
     case METH_NEXT: {
-      // We always want these methods to be cloned with new funcids in
-      // subclasses so we can burn Class*s and Func*s into the
-      // translations
-      fe->attrs |= AttrClone;
-
       // check generator status; send()/raise() also checks started
       ue.emitOp(OpContCheck);
       ue.emitByte(static_cast<uint8_t>(

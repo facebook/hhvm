@@ -104,9 +104,6 @@ enum Attr {
   // not extended, or on a method that no extending class defines the method.
   AttrNoOverride           = (1 << 13), //    X  |          |    X    //
                                         //       |          |         //
-  // Indicates that this method should always be cloned when inherited.
-  AttrClone                = (1 << 14), //       |          |    X    //
-                                        //       |          |         //
   // Indicates that a function is a builtin that takes variadic arguments,
   // where the arguments are either by ref or optionally by ref.  It is
   // equivalent to ClassInfo's (RefVariableArguments).

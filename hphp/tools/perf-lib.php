@@ -25,7 +25,7 @@ function filter_func(string $func): string {
 
 # Read perf samples from the given file stream into a Vector of stack traces.
 # The stream should contain the output of "perf script -f comm,ip,sym".
-function read_perf_samples($file, $desired_binary_prefix = 'hhvm.node') {
+function read_perf_samples($file, $desired_binary_prefix = 'hhvmworker') {
   $samples = Vector {};
   $skip_sample = false;
   $stack = null;

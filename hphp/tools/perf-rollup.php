@@ -89,6 +89,7 @@ function categorize_helper($func) {
     },
     'CacheClient' => Vector {
       '/c_CacheClient2/',
+      '/c_PhpTaoClient/',
     },
     'Arrays' => Vector {
       '/Elem/i',

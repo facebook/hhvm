@@ -249,8 +249,11 @@ let exec_no_chdir prog ?input ?env args =
   | None ->
     Unix.create_process prog args stdin_child stdout_child stderr_child
   | Some env ->
+    (* deduping the env is not necessary. glibc putenv/getenv will grab the first
+     * one *)
+    let fullenv = Array.append (Array.of_list env) (Unix.environment ()) in
     Unix.create_process_env prog args
-      (Array.of_list env) stdin_child stdout_child stderr_child
+      fullenv stdin_child stdout_child stderr_child
   in
   Unix.close stdin_child;
   Unix.close stdout_child;
@@ -294,8 +297,8 @@ let exec_ ~cwd ~prog ~(input:string option) ~env ~args =
   | Some cwd ->
     run_entry ?input chdir_entry (cwd, prog, env, args)
 
-let exec ?cwd prog ?input args =
-  exec_ ~cwd ~prog ~input ~env:None ~args
+let exec ?cwd prog ?input ?env args =
+  exec_ ~cwd ~prog ~input ~env ~args
 
 let exec_with_replacement_env ?cwd prog ~env ?input args =
   exec_ ~cwd ~prog ~input ~env:(Some env) ~args

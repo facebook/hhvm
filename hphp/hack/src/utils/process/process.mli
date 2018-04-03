@@ -24,7 +24,7 @@ end
  * Sets its current working directory if given.
  * Sends input to stdin of spawned process if given.
  *)
-val exec : ?cwd:string -> string -> ?input:string ->
+val exec : ?cwd:string -> string -> ?input:string -> ?env:string list ->
   string list -> Process_types.t
 
 (* spawns a process just like exec, EXCEPT that the environment is REPLACED instead

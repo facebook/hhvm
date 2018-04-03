@@ -45,7 +45,7 @@ inline bool ffs64(I64 input, J64 &out) {
     "rbit  %2, %2\n\t"  // reverse bits
     "clz   %1, %2\n\t"  // count leading zeros
     "cmp   %1, #64\n\t"
-    "cset  %0, NE":     // return (result != 64)
+    "cset  %w0, NE":    // return (result != 64)
     "=r"(retval), "=r"(out), "+r"(input):
     :
     "cc"
@@ -89,7 +89,7 @@ inline bool fls64(I64 input, J64 &out) {
     "neg   %1, %1\n\t"
     "adds  %1, %1, #63\n\t" // result = 63 - (# of leading zeros)
                             // "s" suffix sets condition flags
-    "cset  %0, PL":         // return (result >= 0)
+    "cset  %w0, PL":        // return (result >= 0)
                             //   because result < 0 iff input == 0
     "=r"(retval), "=r"(out):
     "r"(input):

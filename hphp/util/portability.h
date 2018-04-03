@@ -164,9 +164,11 @@
 #elif defined(__AARCH64EL__)
 
 # if defined(__clang__)
-#  error Clang implementation not done for ARM
-# endif
+# define DECLARE_FRAME_POINTER(fp) register ActRec* fp = (ActRec*) \
+  __builtin_frame_address(0)
+#else
 # define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("x29")
+#endif
 
 #elif defined(__powerpc64__)
 

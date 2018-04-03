@@ -32,6 +32,7 @@ let rpc_command_needs_full_check : type a. a t -> bool = function
   (* Finding references uses global dependency table *)
   | FIND_REFS _ -> true
   | IDE_FIND_REFS _ -> true
+  | SAVE_STATE _ -> true
   (* Codebase-wide rename, uses find references *)
   | REFACTOR _ -> true
   (* Same case as Ai commands *)

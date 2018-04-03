@@ -327,7 +327,19 @@ void Debugger::sendStoppedEvent(
   Lock lock(m_lock);
 
   folly::dynamic event = folly::dynamic::object;
-  event["allThreadsStopped"] = m_pausedRequestCount == m_requests.size();
+  const bool allThreadsStopped = m_pausedRequestCount == m_requests.size();
+
+  if (!allThreadsStopped && threadId < 0) {
+    // Don't send a stop message for a specific thread if this stop
+    // event doesn't have a valid thread id.
+    return;
+  }
+
+  event["allThreadsStopped"] = allThreadsStopped;
+
+  if (threadId >= 0) {
+    event["threadId"] = threadId;
+  }
 
   if (reason != nullptr) {
     event["reason"] = reason;
@@ -337,10 +349,6 @@ void Debugger::sendStoppedEvent(
     event["description"] = "execution paused";
   } else {
     event["description"] = displayReason;
-  }
-
-  if (threadId >= 0) {
-    event["threadId"] = threadId;
   }
 
   event["threadCausedFocus"] = focusedThread;

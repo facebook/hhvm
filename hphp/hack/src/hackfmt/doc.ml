@@ -120,6 +120,39 @@ let rec has_printable_content node =
   | Space
   | TrailingComma _ -> false
 
+let rec has_split node =
+  match node with
+  | Split
+  | SplitWith _
+  | Newline
+  | BlankLine
+  | MultilineString _
+  | DocLiteral _ -> true
+
+  | Concat nodes
+  | Span nodes
+  | Nest nodes
+  | ConditionalNest nodes
+  | BlockNest nodes ->
+    List.exists nodes has_split
+
+  | WithRule (_, action) ->
+    has_split action
+
+  | WithLazyRule (_, before, action)
+  | WithPossibleLazyRule (_, before, action) ->
+    has_split before || has_split action
+
+  | Text _
+  | Comment _
+  | SingleLineComment _
+  | NumericLiteral _
+  | ConcatOperator _
+  | Nothing
+  | Ignore _
+  | Space
+  | TrailingComma _ -> false
+
 (* Add "dump @@" before any Doc.t expression to dump it to stderr. *)
 let dump ?(ignored=false) node =
   let open Printf in

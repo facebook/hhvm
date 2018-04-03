@@ -559,14 +559,15 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       require_kind = kind;
       require_name = name;
       require_semicolon = semi } ->
+    let name = t env name in
     Concat [
       t env kw;
       Space;
       t env kind;
       Space;
-      SplitWith Cost.High;
+      if has_split name then SplitWith Cost.High else Nothing;
       Nest [
-        t env name;
+        name;
         t env semi;
       ];
       Newline;

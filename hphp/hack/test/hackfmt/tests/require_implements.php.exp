@@ -16,8 +16,6 @@ trait C {
     >;
 
   require implements ShortNameWithNoSplits;
-  require implements
-    LongNameWithNoSplits________________________________________;
-  require implements
-    VeryLongNameWithNoSplits_____________________________________________________;
+  require implements LongNameWithNoSplits________________________________________;
+  require implements VeryLongNameWithNoSplits_____________________________________________________;
 }

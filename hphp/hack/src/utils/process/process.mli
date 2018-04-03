@@ -24,7 +24,13 @@ end
  * Sets its current working directory if given.
  * Sends input to stdin of spawned process if given.
  *)
-val exec : ?cwd:string -> string -> ?input:string -> ?env:string list ->
+val exec : ?cwd:string -> string -> ?input:string ->
+  string list -> Process_types.t
+
+(* spawns a process just like exec, EXCEPT that the environment is REPLACED instead
+ * of AUGMENTED. This is almost certainly not what you want to do. The program you
+ * are calling or one of the things it calls probably depends on "PATH". *)
+val exec_with_replacement_env : ?cwd:string -> string -> env:string list -> ?input:string ->
   string list -> Process_types.t
 
 val register_entry_point :

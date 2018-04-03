@@ -38,7 +38,7 @@ let test_process_read_idempotent () =
     false
 
 let test_env_variable () =
-  let process = Process.exec "printenv" ~env:[ "NAME=world" ] [ ] in
+  let process = Process.exec_with_replacement_env "printenv" ~env:[ "NAME=world" ] [ ] in
   match Process.read_and_wait_pid ~timeout:2 process with
   | Ok (result, _stderr) ->
     let () = String_asserter.assert_equals "NAME=world\n" result "" in

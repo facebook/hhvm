@@ -287,9 +287,15 @@ let chdir_entry = Entry.register "chdir_main" chdir_main
  *
  * Note: See Input_too_large
  *)
-let exec ?cwd prog ?input ?env args =
+let exec_ ~cwd ~prog ~(input:string option) ~env ~args =
   match cwd with
   | None ->
     exec_no_chdir prog ?input ?env args
   | Some cwd ->
     run_entry ?input chdir_entry (cwd, prog, env, args)
+
+let exec ?cwd prog ?input args =
+  exec_ ~cwd ~prog ~input ~env:None ~args
+
+let exec_with_replacement_env ?cwd prog ~env ?input args =
+  exec_ ~cwd ~prog ~input ~env:(Some env) ~args

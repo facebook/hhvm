@@ -52,8 +52,7 @@ const static std::string
   s_systemlibHhasName("systemlib.hhas.");
 
 bool Extension::IsSystemlibPath(const std::string& name) {
-  return !name.compare(0, s_systemlibPhpName.length(), s_systemlibPhpName) ||
-         !name.compare(0, s_systemlibHhasName.length(), s_systemlibHhasName);
+  return !name.compare(0, 2, "/:");
 }
 
 void Extension::CompileSystemlib(const std::string &slib,
@@ -61,10 +60,10 @@ void Extension::CompileSystemlib(const std::string &slib,
   // TODO (t3443556) Bytecode repo compilation expects that any errors
   // encountered during systemlib compilation have valid filename pointers
   // which won't be the case for now unless these pointers are long-lived.
-  auto const moduleName = makeStaticString(name.c_str());
+  auto const moduleName = makeStaticString("/:" + name);
   auto const unit = compile_systemlib_string(slib.c_str(), slib.size(),
                                              moduleName->data());
-  always_assert_flog(unit, "No unit created for systemlib `{}'", name);
+  always_assert_flog(unit, "No unit created for systemlib `{}'", moduleName);
 
   const StringData* msg;
   int line;

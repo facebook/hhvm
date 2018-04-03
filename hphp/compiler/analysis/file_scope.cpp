@@ -76,7 +76,7 @@ void FileScope::setFileLevel(StatementListPtr stmtList) {
 }
 
 void FileScope::setSystem() {
-  m_fileName = "/:" + m_fileName;
+  assertx(m_fileName[0] == '/' && m_fileName[1] == ':');
   m_system = true;
 }
 

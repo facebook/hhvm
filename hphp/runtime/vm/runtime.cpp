@@ -171,17 +171,9 @@ Unit* compile_string(const char* s,
 }
 
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname) {
-  if (RuntimeOption::RepoAuthoritative) {
-    String systemName = String("/:") + fname;
-    auto md5 = MD5{mangleUnitMd5(string_md5(folly::StringPiece{s,sz}))};
-    if (Repo::get().findFile(systemName.data(),
-                             SourceRootInfo::GetCurrentSourceRoot(),
-                             md5) == RepoStatus::success) {
-      if (auto u = Repo::get().loadUnit(fname, md5)) {
-        return u.release();
-      }
-    }
-  }
+  assertx(fname[0] == '/' && fname[1] == ':');
+  if (auto u = lookupSyslibUnit(makeStaticString(fname))) return u;
+
   return compile_string(s, sz, fname);
 }
 

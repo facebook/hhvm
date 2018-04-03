@@ -213,21 +213,22 @@ bool stressUnitCache() {
   return ++g_units_seen_count % RuntimeOption::EvalStressUnitCacheFreq == 0;
 }
 
-bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
+bool isChanged(const CachedUnitNonRepo& cu, const struct stat* s) {
   // If the cached unit is null, we always need to consider it out of date (in
   // case someone created the file).  This case should only happen if something
   // successfully stat'd the file, but then it was gone by the time we tried to
   // open() it.
+  if (!s) return false;
   return !cu.cachedUnit ||
          cu.cachedUnit->cu.unit == nullptr ||
 #ifdef _MSC_VER
-         cu.mtime - s.st_mtime < 0 ||
+         cu.mtime - s->st_mtime < 0 ||
 #else
-         timespecCompare(cu.mtime, s.st_mtim) < 0 ||
-         timespecCompare(cu.ctime, s.st_ctim) < 0 ||
+         timespecCompare(cu.mtime, s->st_mtim) < 0 ||
+         timespecCompare(cu.ctime, s->st_ctim) < 0 ||
 #endif
-         cu.ino != s.st_ino ||
-         cu.devId != s.st_dev ||
+         cu.ino != s->st_ino ||
+         cu.devId != s->st_dev ||
          stressUnitCache();
 }
 
@@ -336,7 +337,7 @@ NonRepoUnitCache& getNonRepoCache(const StringData* rpath,
 }
 
 CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
-                               const struct stat& statInfo,
+                               const struct stat* statInfo,
                                OptLog& ent) {
   LogTimer loadTime("load_ms", ent);
   if (strstr(requestedPath->data(), "://") != nullptr) {
@@ -384,6 +385,19 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
   Unit* releaseUnit = nullptr;
   SCOPE_EXIT { if (releaseUnit) delete releaseUnit; };
 
+  auto const updateStatInfo = [&] (NonRepoUnitCache::accessor& acc) {
+    if (statInfo) {
+#ifdef _MSC_VER
+      acc->second.mtime      = statInfo->st_mtime;
+#else
+      acc->second.mtime      = statInfo->st_mtim;
+      acc->second.ctime      = statInfo->st_ctim;
+#endif
+      acc->second.ino        = statInfo->st_ino;
+      acc->second.devId      = statInfo->st_dev;
+    }
+  };
+
   auto const cuptr = [&] () -> std::shared_ptr<CachedUnitWithFree> {
     NonRepoUnitCache::accessor rpathAcc;
 
@@ -409,37 +423,21 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
 
     auto const cu = createUnitFromFile(rpath, &releaseUnit, w, ent);
     rpathAcc->second.cachedUnit = std::make_shared<CachedUnitWithFree>(cu);
-#ifdef _MSC_VER
-    rpathAcc->second.mtime      = statInfo.st_mtime;
-#else
-    rpathAcc->second.mtime      = statInfo.st_mtim;
-    rpathAcc->second.ctime      = statInfo.st_ctim;
-#endif
-    rpathAcc->second.ino        = statInfo.st_ino;
-    rpathAcc->second.devId      = statInfo.st_dev;
-
+    updateStatInfo(rpathAcc);
     return rpathAcc->second.cachedUnit;
   }();
 
   if (path != rpath) {
     NonRepoUnitCache::accessor pathAcc;
     cache.insert(pathAcc, path);
-    pathAcc->second.cachedUnit = cuptr;
-#ifdef _MSC_VER
-    pathAcc->second.mtime      = statInfo.st_mtime;
-#else
-    pathAcc->second.mtime      = statInfo.st_mtim;
-    pathAcc->second.ctime      = statInfo.st_ctim;
-#endif
-    pathAcc->second.ino        = statInfo.st_ino;
-    pathAcc->second.devId      = statInfo.st_dev;
+    updateStatInfo(pathAcc);
   }
 
   return cuptr->cu;
 }
 
 CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
-                                 const struct stat& statInfo,
+                                 const struct stat* statInfo,
                                  OptLog& ent) {
   // Steady state, its probably already in the cache. Try that first
   {
@@ -605,7 +603,7 @@ CachedUnit checkoutFile(
 ) {
   return RuntimeOption::RepoAuthoritative
     ? lookupUnitRepoAuth(path)
-    : lookupUnitNonRepoAuth(path, statInfo, ent);
+    : lookupUnitNonRepoAuth(path, &statInfo, ent);
 }
 
 const std::string mangleUnitPHP7Options() {
@@ -771,6 +769,12 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
   lookupTimer.stop();
   if (ent) logLoad(*ent, path, currentDir, spath, cunit);
   return cunit.unit;
+}
+
+Unit* lookupSyslibUnit(StringData* path) {
+  if (RuntimeOption::RepoAuthoritative) return lookupUnitRepoAuth(path).unit;
+  OptLog ent;
+  return lookupUnitNonRepoAuth(path, nullptr, ent).unit;
 }
 
 //////////////////////////////////////////////////////////////////////

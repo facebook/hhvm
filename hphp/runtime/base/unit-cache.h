@@ -57,6 +57,11 @@ struct StringData;
 Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt);
 
 /*
+ * As above, but for system units.
+ */
+Unit* lookupSyslibUnit(StringData* path);
+
+/*
  * Mangle a file's md5sum with runtime options that affect the Unit output.
  * The parser and this module need to agree on how this is done.
  */

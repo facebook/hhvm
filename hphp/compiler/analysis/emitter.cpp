@@ -12740,8 +12740,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
         if (!strcmp(dot + 1, hhbc_ext)) {
           ue = assemble_string(code, codeLen, filename, md5);
           if (BuiltinSymbols::s_systemAr) {
-            ue->m_filepath = makeStaticString(
-              "/:" + ue->m_filepath->toCppString());
+            assertx(ue->m_filepath->data()[0] == '/' &&
+                    ue->m_filepath->data()[1] == ':');
             BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
             ue = assemble_string(code, codeLen, filename, md5);
           }
@@ -12756,8 +12756,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
         try {
           ue = uc->compile();
           if (BuiltinSymbols::s_systemAr) {
-            ue->m_filepath = makeStaticString(
-              "/:" + ue->m_filepath->toCppString());
+            assertx(ue->m_filepath->data()[0] == '/' &&
+                    ue->m_filepath->data()[1] == ':');
             BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
             ue = uc->compile();
           }

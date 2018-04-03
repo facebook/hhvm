@@ -2380,11 +2380,6 @@ void check_native(AsmState& as, bool is_construct_or_destruct) {
     // set extra attributes
     as.fe->attrs |= AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
 
-    if (as.fe->pce() &&
-        !(as.fe->attrs & AttrStatic) &&
-        !as.fe->userAttributes.count(s_AllowStatic.get())) {
-      as.fe->attrs |= AttrRequiresThis;
-    }
     if (as.fe->userAttributes.count(s_ParamCoerceModeFalse.get())) {
       as.fe->attrs |= AttrParamCoerceModeFalse;
     }
@@ -2473,6 +2468,10 @@ void parse_method(AsmState& as) {
 
   if (!SystemLib::s_inited) {
     attrs |= AttrBuiltin;
+
+    if (!(attrs & AttrStatic) && !userAttrs.count(s_AllowStatic.get())) {
+      attrs |= AttrRequiresThis;
+    }
   }
 
   int line0;

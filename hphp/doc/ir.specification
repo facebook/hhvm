@@ -1131,13 +1131,13 @@ To string conversions:
 
 | LdClsCtx, DCtxCls, S(Ctx), NF
 
-  Loads into D the class representing the current context. Extracts the class
-  from S0, which can be either the this pointer or the context class.
+  Loads into D the class representing the context in S0, which can be either
+  the this pointer or the context class.
 
 | LdClsCctx, DCtxCls, S(Cctx), NF
 
-  Loads into D the class representing the current context. Extracts the class
-  from the S0, which is a context class.
+  Loads into D the class representing the context in S0, which is a context
+  class.
 
 | LdClsCtor, D(Func), S(Cls) S(FramePtr), Er
 

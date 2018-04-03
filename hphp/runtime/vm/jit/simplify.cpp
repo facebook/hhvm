@@ -344,7 +344,6 @@ SSATmp* simplifyRaiseMissingThis(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
-  assertx(inst->marker().func()->cls());
   auto const ctx = inst->src(0);
 
   if (ctx->hasConstVal(TCctx)) {
@@ -362,7 +361,6 @@ SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyLdClsCctx(State& env, const IRInstruction* inst) {
-  assertx(inst->marker().func()->cls());
   SSATmp* ctx = inst->src(0);
 
   if (ctx->hasConstVal(TCctx)) {

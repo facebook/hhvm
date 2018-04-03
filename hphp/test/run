@@ -1337,11 +1337,11 @@ class Status {
                array($test, $reason, $time, $stime, $etime));
   }
 
-  public static function fail($test, $time, $stime, $etime) {
+  public static function fail($test, $time, $stime, $etime, $diff) {
     array_push(self::$results, array(
       'name' => $test,
       'status' => 'failed',
-      'details' => self::utf8Sanitize(@file_get_contents("$test.diff")),
+      'details' => self::utf8Sanitize($diff),
       'start_time' => $stime,
       'end_time' => $etime,
       'time' => $time
@@ -1504,39 +1504,7 @@ function clean_intermediate_files($test, $options) {
 
 function run($options, $tests, $bad_test_file) {
   foreach ($tests as $test) {
-    $stime = time();
-    $time = microtime(true);
-    $status = run_and_lock_test($options, $test);
-    $time = microtime(true) - $time;
-    $etime = time();
-    Status::setTestTime($time);
-    if ($status === 'skip') {
-      Status::skip($test, null, $time, $stime, $etime);
-      clean_intermediate_files($test, $options);
-    } else if ($status === 'skip-norepo') {
-      Status::skip($test, 'norepo', $time, $stime, $etime);
-      clean_intermediate_files($test, $options);
-    } else if ($status === 'skip-verify') {
-      Status::skip($test, 'verify', $time, $stime, $etime);
-      clean_intermediate_files($test, $options);
-    } else if ($status === 'skip-onlyrepo') {
-      Status::skip($test, 'onlyrepo', $time, $stime, $etime);
-      clean_intermediate_files($test, $options);
-    } else if ($status === 'skip-onlyhackc') {
-      Status::skip($test, 'onlyhackc', $time, $stime, $etime);
-      clean_intermediate_files($test, $options);
-    } else if ($status === 'skip-nodumphhas') {
-      Status::skip($test, 'nodumphhas', $time, $stime, $etime);
-      clean_intermediate_files($test, $options);
-    } else if ($status === 'skip-nosemdiff') {
-      Status::skip($test, 'no-semdiff', $time, $stime, $etime);
-      clean_intermediate_files($test, $options);
-    } else if ($status) {
-      Status::pass($test, $status, $time, $stime, $etime);
-      clean_intermediate_files($test, $options);
-    } else {
-      Status::fail($test, $time, $stime, $etime);
-    }
+    run_and_lock_test($options, $test);
   }
   file_put_contents($bad_test_file, json_encode(Status::getResults()));
   foreach (Status::getResults() as $result) {
@@ -2152,16 +2120,52 @@ function run_one_config($options, $test, $cmd, $cmd_env) {
 }
 
 function run_and_lock_test($options, $test) {
+  $stime = time();
+  $time = microtime(true);
+  $failmsg = "";
+  $status = false;
   $lock = fopen($test, 'r');
-  if (!flock($lock, LOCK_EX)) return false;
-  if (isset($options['typechecker'])) {
-    $result = run_typechecker_test($options, $test);
+  if (!$lock || !flock($lock, LOCK_EX)) {
+    $failmsg = "Failed to lock test";
+    if ($lock) fclose($lock);
+    $lock = null;
   } else {
-    $result = run_test($options, $test);
+    if (isset($options['typechecker'])) {
+      $status = run_typechecker_test($options, $test);
+    } else {
+      $status = run_test($options, $test);
+    }
   }
-  if (!flock($lock, LOCK_UN)) return false;
-  fclose($lock);
-  return $result;
+  $time = microtime(true) - $time;
+  $etime = time();
+  Status::setTestTime($time);
+  if ($lock) {
+    if ($status) {
+      clean_intermediate_files($test, $options);
+    } else if ($failmsg === '') {
+      $failmsg = @file_get_contents("$test.diff");
+      if (!$failmsg) $failmsg = "Test failed with empty diff";
+    }
+    if (!flock($lock, LOCK_UN)) {
+      if ($failmsg !== '') $failmsg .= "\n";
+      $failmsg .= "Failed to release test lock";
+    }
+    if (!fclose($lock)) {
+      if ($failmsg !== '') $failmsg .= "\n";
+      $failmsg .= "Failed to close lock file";
+    }
+  }
+  if ($failmsg !== "") {
+    Status::fail($test, $time, $stime, $etime, $failmsg);
+  } else if ($status === 'skip') {
+    Status::skip($test, null, $time, $stime, $etime);
+  } else if (is_string($status) && substr($status, 0, 5) === 'skip-') {
+    Status::skip($test, substr($status, 5), $time, $stime, $etime);
+  } else if ($status) {
+    Status::pass($test, $status, $time, $stime, $etime);
+  } else {
+    Status::fail($test, $time, $stime, $etime, "Unknown failure");
+  }
 }
 
 function run_typechecker_test($options, $test) {

@@ -564,9 +564,11 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Space;
       t env kind;
       Space;
-      Split;
-      t env name;
-      t env semi;
+      SplitWith Cost.High;
+      Nest [
+        t env name;
+        t env semi;
+      ];
       Newline;
     ]
   | Syntax.ConstDeclaration {
@@ -2499,7 +2501,7 @@ and handle_possible_chaining env (obj, arrow1, member1) argish =
       Span [t env obj];
       if node_has_trailing_newline obj
       then Newline
-      else SplitWith Cost.SimpleMemberSelection;
+      else SplitWith Cost.High;
       Nest [transform_chain hd];
     ]
   | hd :: tl ->

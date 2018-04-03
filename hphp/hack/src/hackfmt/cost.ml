@@ -8,9 +8,9 @@
  *
  *)
 
-type t = NoCost | Base | SimpleMemberSelection
+type t = NoCost | Base | High
 
 let get_cost t = match t with
   | NoCost -> 0
   | Base -> 1
-  | SimpleMemberSelection -> 2
+  | High -> 2

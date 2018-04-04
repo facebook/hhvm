@@ -554,8 +554,8 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
 //////////////////////////////////////////////////////////////////////
 
 FuncAnalysisResult::FuncAnalysisResult(Context ctx)
-  : ctx{ctx}
-  , inferredReturn{TBottom}
+  : ctx(ctx)
+  , inferredReturn(TBottom)
 {
 }
 

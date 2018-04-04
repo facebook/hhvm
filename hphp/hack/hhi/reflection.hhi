@@ -53,6 +53,7 @@ class ReflectionClass implements Reflector {
   public function getInterfaces(): array<string, ReflectionClass>;
   final public function getAttributes(): array<string, array<mixed>>;
   final public function getAttribute(string $name): ?array<mixed>;
+  final public function getAttributeClass<T as HH\ClassAttribute>(classname<T> $c): ?T;
   final public function getAttributesRecursive(): array<string, array<mixed>>;
   final public function getAttributeRecursive(string $name): ?array<mixed>;
   public function getMethod(string $name): ReflectionMethod;
@@ -155,6 +156,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
   public function invoke(...);
   public function invokeArgs(array $args);
   public function getClosure();
+  final public function getAttributeClass<T as HH\FunctionAttribute>(classname<T> $c): ?T;
 }
 
 class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
@@ -189,6 +191,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function setAccessible($accessible);
   final public function getAttributesRecursive(): array<string, array<mixed>>;
   final public function getAttributeRecursive(string $name): ?array<mixed>;
+  final public function getAttributeClass<T as HH\MethodAttribute>(classname<T> $c): ?T;
 }
 
 class ReflectionParameter implements Reflector {
@@ -220,6 +223,7 @@ class ReflectionParameter implements Reflector {
   public function hasType(): bool;
   public function getType(): ?ReflectionType;
   final public function getAttribute(string $name);
+  final public function getAttributeClass<T as HH\ParameterAttribute>(classname<T> $c): ?T;
   final public function getAttributes();
   final public function getAttributeRecursive(string $name);
   final public function getAttributesRecursive();
@@ -313,6 +317,7 @@ class ReflectionTypeAlias implements Reflector {
   public function getFileName(): string;
   final public function getAttributes(): array;
   final public function getAttribute(string $name);
+  final public function getAttributeClass<T as HH\TypeAliasAttribute>(classname<T> $c): ?T;
 }
 
 class ReflectionType {

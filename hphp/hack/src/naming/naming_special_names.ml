@@ -153,6 +153,30 @@ module UserAttributes = struct
     ]
 end
 
+module AttributeKinds = struct
+  let cls = "\\HH\\ClassAttribute"
+  let typealias = "\\HH\\TypeAliasAttribute"
+
+  let fn = "\\HH\\FunctionAttribute"
+  let mthd = "\\HH\\MethodAttribute"
+
+  let instProperty = "\\HH\\InstancePropertyAttribute"
+  let staticProperty = "\\HH\\StaticPropertyAttribute"
+
+  let parameter = "\\HH\\ParameterAttribute"
+
+  let plain_english_map =
+    List.fold_left ~init:SMap.empty ~f:(fun acc (k, v) -> SMap.add k v acc)
+      [ (cls, "a class")
+      ; (typealias, "a typealias")
+      ; (fn, "a function")
+      ; (mthd, "a method")
+      ; (instProperty, "an instance property")
+      ; (staticProperty, "a static property")
+      ; (parameter, "a parameter")
+      ]
+end
+
 (* Tested before \\-prepending name-canonicalization *)
 module SpecialFunctions = struct
 

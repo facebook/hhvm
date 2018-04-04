@@ -67,4 +67,19 @@ function serialize_memoize_param(mixed $param): arraykey;
 <<__Native("WritesCallerFrame")>>
 function set_frame_metadata(mixed $metadata): void;
 
+// class-like
+interface ClassAttribute {}
+interface TypeAliasAttribute {}
+
+// function-like
+interface FunctionAttribute {}
+interface MethodAttribute {}
+
+// properties
+interface PropertyAttribute {}
+interface InstancePropertyAttribute extends PropertyAttribute {}
+interface StaticPropertyAttribute extends PropertyAttribute {}
+
+interface ParameterAttribute {}
+
 }

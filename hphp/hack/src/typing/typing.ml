@@ -362,6 +362,8 @@ let rec bind_param env (ty1, param) =
 (* In strict mode, we force you to give a type declaration on a parameter *)
 (* But the type checker is nice: it makes a suggestion :-) *)
 and check_param env param ty =
+  let env = Typing_attributes.check_def env new_object
+    SN.AttributeKinds.parameter param.param_user_attributes in
   match param.param_hint with
   | None -> suggest env param.param_pos ty
   | Some _ ->
@@ -479,6 +481,8 @@ and fun_def tcopt f =
         T.f_ret_by_ref = f.f_ret_by_ref;
       }
   ) in
+  let _ = Typing_attributes.check_def env new_object
+    SN.AttributeKinds.fn f.f_user_attributes in
   Typing_hooks.dispatch_exit_fun_def_hook f;
   tfun_def
 
@@ -6040,6 +6044,11 @@ and class_def tcopt c =
 and class_def_ env c tc =
   Typing_hooks.dispatch_enter_class_def_hook c tc;
   let env = Env.set_mode env c.c_mode in
+  let env = match c.c_kind with
+    | Ast.Cenum | Ast.Ctrait | Ast.Cinterface -> env
+    | Ast.Cabstract | Ast.Cnormal ->
+      Typing_attributes.check_def env new_object
+        SN.AttributeKinds.cls c.c_user_attributes in
   let pc, _ = c.c_name in
   let impl = List.map
     (c.c_extends @ c.c_implements @ c.c_uses)
@@ -6255,6 +6264,12 @@ and class_var_def env ~is_static c cv =
         | None -> env
         | Some (p, ur, cty) -> Type.sub_type p ur env ty cty in
       env, Some te, ty in
+  let env =
+    if is_static
+    then Typing_attributes.check_def env new_object
+      SN.AttributeKinds.staticProperty cv.cv_user_attributes
+    else Typing_attributes.check_def env new_object
+      SN.AttributeKinds.instProperty cv.cv_user_attributes in
   begin
     if Option.is_none cv.cv_type
     then begin
@@ -6375,6 +6390,8 @@ and method_def env m =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
   let env =
     Env.check_todo env in
+  let env = Typing_attributes.check_def env new_object
+    SN.AttributeKinds.mthd m.m_user_attributes in
   let m_ret =
     match m.m_ret with
     | None when
@@ -6446,6 +6463,8 @@ and typedef_def tcopt typedef  =
       check_shape_keys_validity env pos (ShapeMap.keys nsi_field_map)
     | _ -> env
   end in
+  let env = Typing_attributes.check_def env new_object
+    SN.AttributeKinds.typealias typedef.t_user_attributes in
   {
     T.t_annotation = save_env env.Env.lenv.Env.tpenv env;
     T.t_name = typedef.t_name;

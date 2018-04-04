@@ -678,6 +678,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     }
     return null;
   }
+
+  use ReflectionTypedAttribute;
 }
 
 /**
@@ -1110,6 +1112,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     }
     return $attrs;
   }
+
+  use ReflectionTypedAttribute;
 }
 
 /**
@@ -2200,6 +2204,8 @@ class ReflectionClass implements Reflector {
     return hphp_array_idx($this->getAttributes(), $name, null);
   }
 
+  use ReflectionTypedAttribute;
+
   <<__Native>>
   public function getAttributes(): array;
 
@@ -2438,6 +2444,8 @@ class ReflectionTypeAlias implements Reflector {
   final public function getAttribute(string $name) {
     return hphp_array_idx($this->getAttributes(), $name, null);
   }
+
+  use ReflectionTypedAttribute;
 
   /**
    * Get the TypeStructure with type information resolved. Call at

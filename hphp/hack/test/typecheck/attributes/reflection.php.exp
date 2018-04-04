@@ -1,0 +1,8 @@
+File "reflection.php", line 18, characters 8-24:
+Some type constraint(s) here are violated (Typing[4110])
+File "hhi_lib__srcs/reflection.hhi", line 56, characters 43-43:
+'T' is a constrained type parameter
+File "hhi_lib__srcs/reflection.hhi", line 56, characters 48-64:
+This is an object of type HH\ClassAttribute
+File "reflection.php", line 18, characters 26-43:
+It is incompatible with an object of type __Attribute__FAttr

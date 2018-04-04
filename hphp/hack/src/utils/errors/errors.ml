@@ -1039,7 +1039,8 @@ module Typing                               = struct
   let static_property_in_reactive_context   = 4228 (* DONT MODIFY!!!! *)
   let static_in_reactive_context            = 4229 (* DONT MODIFY!!!! *)
   let global_in_reactive_context            = 4230 (* DONT MODIFY!!!! *)
-
+  let wrong_expression_kind_attribute       = 4231 (* DONT MODIFY!!!! *)
+  let attribute_class_no_constructor_args   = 4232 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -3216,6 +3217,28 @@ let ambiguous_lambda pos n =
        body was checked %d times. Please add type hints"
       n in
   add Typing.ambiguous_lambda pos msg
+
+let wrong_expression_kind_attribute expr_kind pos attr attr_class_pos attr_class_name intf_name =
+  let msg1 =
+    Printf.sprintf "The %s attribute cannot be used on %s." attr expr_kind in
+  let msg2 =
+    Printf.sprintf "The attribute's class is defined here. To be available for use on \
+                    %s, the %s class must implement %s." expr_kind
+                    (String_utils.string_after attr_class_name 1)
+                    (String_utils.string_after intf_name 1) in
+  add_list Typing.wrong_expression_kind_attribute [
+    pos, msg1;
+    attr_class_pos, msg2
+  ]
+
+let attribute_class_no_constructor_args pos def_pos =
+  let msg =
+    "The class associated with this attribute has no constructor. " ^
+    "Please add a constructor to use arguments with this attribute." in
+  add_list Typing.attribute_class_no_constructor_args [
+      pos, msg;
+      def_pos, "The attribute's class is defined here."
+  ]
 
 let binding_ref_in_array pos =
   let msg = "Binding a reference in an array is no longer supported in Hack." in

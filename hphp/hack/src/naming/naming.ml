@@ -1202,7 +1202,6 @@ module Make (GetLocals : GetLocals) = struct
 
   and user_attributes env attrl =
     let seen = Hashtbl.create 0 in
-    let tc_options = (fst env).tcopt in
     let validate_seen = begin fun ua_name ->
       let pos, name = ua_name in
       let existing_attr_pos =
@@ -1213,18 +1212,8 @@ module Make (GetLocals : GetLocals) = struct
         | None -> Hashtbl.add seen name pos; true
       )
     end in
-    let validate_name = begin fun ua_name ->
-      (validate_seen ua_name) && begin
-        let pos, name = ua_name in
-        let valid = if string_starts_with name "__"
-          then SSet.mem name SN.UserAttributes.as_set
-          else (TypecheckerOptions.allowed_attribute tc_options name)
-        in if not valid then Errors.unbound_attribute_name pos name;
-        valid
-      end
-    end in
     List.fold_left attrl ~init:[] ~f:begin fun acc {ua_name; ua_params} ->
-      if not (validate_name ua_name) then acc
+      if not (validate_seen ua_name) then acc
       else let attr = {
              N.ua_name = ua_name;
              N.ua_params = List.map ua_params (expr env)

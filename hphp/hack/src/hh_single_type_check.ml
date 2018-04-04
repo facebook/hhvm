@@ -34,6 +34,14 @@ module TASTStringMapper =
 module TASTTypeStripper =
   Aast_mapper.MapAnnotatedAST(Tast.Annotations)(Nast.Annotations)
 
+module PS = Full_fidelity_positioned_syntax
+module PositionedTree = Full_fidelity_syntax_tree
+  .WithSyntax(PS)
+
+module TS = Full_fidelity_typed_positioned_syntax
+module TypedTree = Full_fidelity_syntax_tree
+  .WithSyntax(TS)
+
 
 (*****************************************************************************)
 (* Types, constants *)
@@ -60,6 +68,7 @@ type mode =
   | Dump_nast
   | Dump_stripped_tast
   | Dump_tast
+  | Dump_typed_full_fidelity_json
   | Find_refs of int * int
   | Highlight_refs of int * int
   | Decl_compare
@@ -228,6 +237,9 @@ let parse_options () =
       Arg.Unit (set_mode Dump_stripped_tast),
       " Print out the typed AST, stripped of type information." ^
       " This can be compared against the named AST to look for holes.";
+    "--typed-full-fidelity-json",
+      Arg.Unit (set_mode Dump_typed_full_fidelity_json),
+      " (mode) show full fidelity parse tree with types in json format.";
     "--find-refs",
       Arg.Tuple ([
         Arg.Int (fun x -> line := x);
@@ -824,6 +836,24 @@ let handle_mode
     in
     let string_ast = stringify_types tast in
     Printf.printf "%s\n" (StringNAST.show_program string_ast)
+
+  | Dump_typed_full_fidelity_json ->
+    (*
+      Ideally we'd reuse ServerTypedAst.go here. Unfortunately relative file
+      paths are not compatible between hh_single_type_check and server modules.
+      So we copy here instead.
+    *)
+
+    (* get the typed ast *)
+    let _, tast = get_tast tcopt filename files_info in
+
+    (* get the parse tree *)
+    let source_text = Full_fidelity_source_text.from_file filename in
+    let positioned_tree = PositionedTree.make source_text in
+
+    let result = ServerTypedAst.create_typed_parse_tree_json_string filename positioned_tree tast in
+
+    Printf.printf "%s\n" result;
   | Dump_stripped_tast ->
     let _, tast = get_tast tcopt filename files_info in
     let strip_types =

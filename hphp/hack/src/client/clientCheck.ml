@@ -259,7 +259,7 @@ let main args =
       let responses = rpc args @@ Rpc.INFER_TYPE_BATCH (positions, args.dynamic_view) in
       List.iter responses print_endline;
       Exit_status.No_error
-    | MODE_TYPED_AST filename ->
+    | MODE_TYPED_FULL_FIDELITY_PARSE filename ->
       let fn =
         try
           (expand_path filename)

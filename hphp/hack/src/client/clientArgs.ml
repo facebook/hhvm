@@ -139,8 +139,8 @@ let parse_check_args cmd =
           | _ -> raise (Arg.Bad "only a single mode should be specified")
         end,
       " (mode) show types at multiple positions [file:line:character list]";
-    "--typed-ast",
-      Arg.String (fun filename -> set_mode (MODE_TYPED_AST filename) ()),
+    "--typed-full-fidelity-json",
+      Arg.String (fun filename -> set_mode (MODE_TYPED_FULL_FIDELITY_PARSE filename) ()),
       " (mode) show full fidelity parse tree with types. Implies --json.";
     "--list-files",
       Arg.Unit (set_mode MODE_LIST_FILES),

@@ -87,7 +87,7 @@ function test($name, $options) {
   var_dump(json_encode($obj, $options));
 }
 
-//literals();
+literals();
 
 test("normal", 0);
 test("force PHP", JSON_FB_FORCE_PHP_ARRAYS);

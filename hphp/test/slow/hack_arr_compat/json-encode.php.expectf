@@ -1,3 +1,30 @@
+================== literals ==================
+
+Notice: Hack Array Compat: Serializing array in %s/json-encode.php on line 9
+
+Notice: Hack Array Compat: Serializing array in %s/json-encode.php on line 13
+
+Notice: Hack Array Compat: Serializing vec in %s/json-encode.php on line 17
+
+Notice: Hack Array Compat: Serializing vec in %s/json-encode.php on line 21
+
+Notice: Hack Array Compat: Serializing dict in %s/json-encode.php on line 25
+
+Notice: Hack Array Compat: Serializing dict in %s/json-encode.php on line 29
+
+Notice: Hack Array Compat: Serializing keyset in %s/json-encode.php on line 33
+
+Notice: Hack Array Compat: Serializing keyset in %s/json-encode.php on line 37
+
+Notice: Hack Array Compat: Serializing array in %s/json-encode.php on line 42
+
+Notice: Hack Array Compat: Serializing vec in %s/json-encode.php on line 46
+
+Notice: Hack Array Compat: Serializing dict in %s/json-encode.php on line 50
+
+Notice: Hack Array Compat: Serializing array in %s/json-encode.php on line 55
+
+Notice: Hack Array Compat: Serializing vec in %s/json-encode.php on line 55
 ==================== normal =========================
 string(2) "[]"
 string(9) "[1,2,3,4]"

@@ -42,7 +42,7 @@ namespace arm {
  */
 constexpr size_t smashableMovqLen() { return 2 * 4 + 8; }
 constexpr size_t smashableCmpqLen() { return 0; }
-constexpr size_t smashableCallLen() { return 4 + 8 + 2 * 4; }
+constexpr size_t smashableCallLen() { return 4 + 4 + 4 * 2; }
 constexpr size_t smashableJmpLen()  { return 2 * 4 + 4; }
 constexpr size_t smashableJccLen()  { return 4 + smashableJmpLen(); }
 

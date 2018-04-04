@@ -163,15 +163,13 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
   for (auto instr = start; instr < end; instr = instr->NextInstruction()) {
     if (literals.count(instr)) continue;
 
-    // Skip over smashable calls (sequence: B ; TARGET(64b) ; LDR ; BLR), and
+    // Skip over smashable calls (sequence: B ; TARGET(32b) ; LDR ; BLR), and
     // mark their targets as literals.
     if ((TCA)instr + smashableCallLen() <= (TCA)end &&
         isSmashableCall((TCA)instr)) {
-      auto target1 = instr->NextInstruction();
-      auto target2 = target1->NextInstruction();
-      literals.insert(target1);
-      literals.insert(target2);
-      instr = target2->NextInstruction()->NextInstruction();
+      auto const target = instr->NextInstruction();
+      literals.insert(target);
+      instr = target->NextInstruction()->NextInstruction();
       continue;
     }
     if (instr->IsLoadLiteral()) {

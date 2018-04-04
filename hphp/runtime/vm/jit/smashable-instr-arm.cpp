@@ -86,12 +86,12 @@ TCA emitSmashableCall(CodeBlock& cb, CGMeta& meta, TCA target) {
 
   // Emit the call target into the instruction stream.
   a.    bind (&target_data);
-  a.    dc64 (target);
+  a.    dc32 (makeTarget32(target));
   a.    bind (&after_data);
 
   meta.addressImmediates.insert(cb.frontier());
   // Load the target address and call it
-  a.    Ldr  (rAsm, &target_data);
+  a.    Ldr  (rAsm_w, &target_data);
   a.    Blr  (rAsm);
 
   cb.sync(the_start);
@@ -193,13 +193,13 @@ bool isSmashableCall(TCA inst) {
 
   Instruction* b = Instruction::Cast(inst);
   Instruction* target = b->NextInstruction();
-  Instruction* ldr = target->NextInstruction()->NextInstruction();
+  Instruction* ldr = target->NextInstruction();
   Instruction* blr = ldr->NextInstruction();
   const auto rd = ldr->Rd();
 
   return (b->Mask(UnconditionalBranchMask) == B &&
           b->ImmPCOffsetTarget() == ldr &&
-          ldr->Mask(LoadLiteralMask) == LDR_x_lit &&
+          ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
           ldr->ImmPCOffsetTarget() == target &&
           blr->Mask(UnconditionalBranchToRegisterMask) == BLR &&
           blr->Rn() == rd);
@@ -253,7 +253,7 @@ void smashCmpq(TCA /*inst*/, uint32_t /*target*/) {
 void smashCall(TCA inst, TCA target) {
   assertx(isSmashableCall(inst));
   // Note: The target is not at the end of the smashableCall.
-  patchTarget64(inst + (1 * 4), target);
+  patchTarget32(inst + (1 * 4), target);
 }
 
 void smashJmp(TCA inst, TCA target) {
@@ -297,7 +297,8 @@ TCA smashableCallTarget(TCA inst) {
 
   if (isSmashableCall(inst)) {
     assertx((reinterpret_cast<uintptr_t>(target) & 3) == 0);
-    return *reinterpret_cast<TCA*>(target);
+    auto const target32 = *reinterpret_cast<uint32_t*>(target);
+    return reinterpret_cast<TCA>(target32);
   }
   return nullptr;
 }

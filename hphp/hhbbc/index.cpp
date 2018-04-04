@@ -4431,7 +4431,7 @@ void Index::refine_class_constants(
   find_deps(*m_data, ctx.func, Dep::ClsConst, deps);
 }
 
-void Index::refine_constants(const FuncAnalysis& fa,
+void Index::refine_constants(const FuncAnalysisResult& fa,
                              DependencyContextSet& deps) {
   auto const func = fa.ctx.func;
   for (auto const& it : fa.cnsMap) {

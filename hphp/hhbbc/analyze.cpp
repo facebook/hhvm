@@ -553,11 +553,16 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
 
 //////////////////////////////////////////////////////////////////////
 
+FuncAnalysisResult::FuncAnalysisResult(Context ctx)
+  : ctx{ctx}
+  , inferredReturn{TBottom}
+{
+}
+
 FuncAnalysis::FuncAnalysis(Context ctx)
-  : ctx(ctx)
-  , rpoBlocks(rpoSortAddDVs(*ctx.func))
-  , bdata(ctx.func->blocks.size())
-  , inferredReturn(TBottom)
+  : FuncAnalysisResult{ctx}
+  , rpoBlocks{rpoSortAddDVs(*ctx.func)}
+  , bdata{ctx.func->blocks.size()}
 {
   for (auto rpoId = size_t{0}; rpoId < rpoBlocks.size(); ++rpoId) {
     bdata[rpoBlocks[rpoId]->id].rpoId = rpoId;
@@ -800,8 +805,14 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     if (previousProps   == clsAnalysis.privateProperties &&
         previousStatics == clsAnalysis.privateStatics &&
         noExceptionalChanges()) {
-      clsAnalysis.methods  = std::move(methodResults);
-      clsAnalysis.closures = std::move(closureResults);
+      clsAnalysis.methods.reserve(methodResults.size());
+      for (auto& m : methodResults) {
+        clsAnalysis.methods.push_back(std::move(m));
+      }
+      clsAnalysis.closures.reserve(closureResults.size());
+      for (auto& m : closureResults) {
+        clsAnalysis.closures.push_back(std::move(m));
+      }
       break;
     }
 

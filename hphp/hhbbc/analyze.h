@@ -32,23 +32,19 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * The result of a function-at-a-time type analysis.
- *
- * For each block, contains an input state describing the types of
- * locals, stack elements, etc.
+ * The result of a function-at-a-time type analysis, as needed for
+ * updating the index. Does not include per-block state.
  */
-struct FuncAnalysis {
-  using BlockData = struct { uint32_t rpoId; State stateIn; };
-
+struct FuncAnalysisResult {
   /*
    * Initializes this structure so rpoBlocks contains the func's
    * blocks according to rpoSortAddDVs(), each bdata entry has an
    * rpoId index, and all block states are uninitialized.
    */
-  explicit FuncAnalysis(Context);
+  explicit FuncAnalysisResult(Context);
 
-  FuncAnalysis(FuncAnalysis&&) = default;
-  FuncAnalysis& operator=(FuncAnalysis&&) = default;
+  FuncAnalysisResult(FuncAnalysisResult&&) = default;
+  FuncAnalysisResult& operator=(FuncAnalysisResult&&) = default;
 
   /*
    * FuncAnalysis carries the Context it was created for because
@@ -61,12 +57,6 @@ struct FuncAnalysis {
    * ctx->cls in this case.
    */
   Context ctx;
-
-  // Blocks in a reverse post order, with DV initializers.
-  std::vector<borrowed_ptr<php::Block>> rpoBlocks;
-
-  // Block data is indexed by Block::id.
-  std::vector<BlockData> bdata;
 
   /*
    * The inferred function return type.  May be TBottom if the
@@ -124,6 +114,21 @@ struct FuncAnalysis {
   CompactVector<std::pair<size_t,TypedValue>> resolvedConstants;
 };
 
+struct FuncAnalysis : FuncAnalysisResult {
+  using BlockData = struct { uint32_t rpoId; State stateIn; };
+
+  explicit FuncAnalysis(Context);
+
+  FuncAnalysis(FuncAnalysis&&) = default;
+  FuncAnalysis& operator=(FuncAnalysis&&) = default;
+
+  // Blocks in a reverse post order, with DV initializers.
+  std::vector<borrowed_ptr<php::Block>> rpoBlocks;
+
+  // Block data is indexed by Block::id.
+  std::vector<BlockData> bdata;
+};
+
 /*
  * The result of a class-at-a-time analysis.
  */
@@ -139,8 +144,8 @@ struct ClassAnalysis {
 
   // FuncAnalysis results for each of the methods on the class, and
   // for each closure allocated in the class's context.
-  CompactVector<FuncAnalysis> methods;
-  CompactVector<FuncAnalysis> closures;
+  CompactVector<FuncAnalysisResult> methods;
+  CompactVector<FuncAnalysisResult> closures;
 
   // Inferred types for private instance and static properties.
   PropState privateProperties;

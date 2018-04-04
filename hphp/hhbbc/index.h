@@ -43,7 +43,7 @@ namespace HPHP { namespace HHBBC {
 struct Type;
 struct Index;
 struct PublicSPropIndexer;
-struct FuncAnalysis;
+struct FuncAnalysisResult;
 struct Context;
 struct ContextHash;
 struct CallContext;
@@ -772,7 +772,8 @@ struct Index {
    * Merges the set of Contexts that depended on the constants defined
    * by this php::Func into deps.
    */
-  void refine_constants(const FuncAnalysis& fa, DependencyContextSet& deps);
+  void refine_constants(const FuncAnalysisResult& fa,
+                        DependencyContextSet& deps);
 
   /*
    * Refine the types of the local statics owned by the function.

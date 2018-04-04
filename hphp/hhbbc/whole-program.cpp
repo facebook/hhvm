@@ -83,7 +83,7 @@ struct WorkResult {
     , cls(std::move(cls))
   {}
 
-  explicit WorkResult(FuncAnalysis func)
+  explicit WorkResult(FuncAnalysisResult func)
     : type(WorkType::Func)
     , func(std::move(func))
   {}
@@ -92,8 +92,12 @@ struct WorkResult {
     : type(wr.type)
   {
     switch (type) {
-    case WorkType::Class: new (&cls) ClassAnalysis(std::move(wr.cls));  break;
-    case WorkType::Func:  new (&func) FuncAnalysis(std::move(wr.func)); break;
+    case WorkType::Class:
+      new (&cls) ClassAnalysis(std::move(wr.cls));
+      break;
+    case WorkType::Func:
+      new (&func) FuncAnalysisResult(std::move(wr.func));
+      break;
     }
   }
 
@@ -112,7 +116,7 @@ struct WorkResult {
       cls.~ClassAnalysis();
       break;
     case WorkType::Func:
-      func.~FuncAnalysis();
+      func.~FuncAnalysisResult();
       break;
     }
   }
@@ -120,7 +124,7 @@ struct WorkResult {
   WorkType type;
   union {
     ClassAnalysis cls;
-    FuncAnalysis func;
+    FuncAnalysisResult func;
   };
 };
 
@@ -311,7 +315,7 @@ void analyze_iteratively(Index& index, php::Program& program,
 
     DependencyContextSet deps;
 
-    auto update_func = [&] (const FuncAnalysis& fa) {
+    auto update_func = [&] (const FuncAnalysisResult& fa) {
       index.refine_effect_free(fa.ctx.func, fa.effectFree);
       index.refine_return_type(fa.ctx.func, fa.inferredReturn, deps);
       index.refine_constants(fa, deps);

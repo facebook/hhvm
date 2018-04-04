@@ -434,6 +434,10 @@ int main(int argc, char** argv) try {
   RuntimeOption::RepoCommit          = false;
   RuntimeOption::EvalJit             = false;
 
+  // We shouldn't be running the compiler anyway, and this keeps us from
+  // uselessly extracting the embedded one.
+  RuntimeOption::EvalHackCompilerDefault = false;
+
   RuntimeOption::EvalThisTypeHintLevel = gd.ThisTypeHintLevel;
 
   register_process_init();

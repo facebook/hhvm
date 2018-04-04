@@ -55,7 +55,6 @@ module Value = struct
         ("width", int_ width);
         ("trailing_width", int_ trailing_width) ]
     | Synthetic -> JSON_String "synthetic"
-
 end
 
 module SyntaxWithToken = Full_fidelity_syntax.WithToken(Token)

@@ -10,10 +10,16 @@
 
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
+module WithSmartConstructors(SCI : SmartConstructors.SmartConstructors_S
+  with type r = Syntax.t
+  with module Token = Syntax.Token
+) = struct
+
 open Syntax
 
-module SyntaxTree = Full_fidelity_syntax_tree
+module SyntaxTree_ = Full_fidelity_syntax_tree
   .WithSyntax(Syntax)
+module SyntaxTree = SyntaxTree_.WithSmartConstructors(SCI)
 
 module Token = Syntax.Token
 module SyntaxError = Full_fidelity_syntax_error
@@ -2888,4 +2894,9 @@ let parse_errors env =
     ?stats:(Stats_container.get_instance ())
     ~key:"full_fidelity_parse_errors:parse_errors"
     ~f:(fun () -> parse_errors_impl env)
+
+end (* WithSmartConstructors *)
+
+include WithSmartConstructors(SyntaxSmartConstructors.WithSyntax(Syntax))
+
 end (* WithSyntax *)

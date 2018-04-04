@@ -23,7 +23,14 @@ module SyntaxError = Full_fidelity_syntax_error
 module TK = Full_fidelity_token_kind
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
-module Parser = Full_fidelity_parser.WithSyntax(Syntax)
+module WithSmartConstructors(SCI : SmartConstructors.SmartConstructors_S
+  with type r = Syntax.t
+  with module Token = Syntax.Token
+) = struct
+
+module Parser_ = Full_fidelity_parser.WithSyntax(Syntax)
+module Parser = Parser_.WithSmartConstructors(SCI)
+
 open Syntax
 
 type t = {
@@ -31,7 +38,8 @@ type t = {
   root : Syntax.t;
   errors : SyntaxError.t list;
   language : string;
-  mode : string
+  mode : string;
+  state : SCI.t;
 }
 
 let strip_comment_start s =
@@ -111,8 +119,9 @@ let build
     (root: Syntax.t)
     (errors: SyntaxError.t list)
     (language: string)
-    (mode: string): t =
-  { text; root; errors; language; mode }
+    (mode: string)
+    (state: SCI.t): t =
+  { text; root; errors; language; mode; state }
 
 let process_errors errors =
   (* We've got the lexical errors and the parser errors together, both
@@ -123,23 +132,23 @@ let process_errors errors =
   let errors = List.stable_sort SyntaxError.compare errors in
   remove_duplicates errors SyntaxError.exactly_equal
 
-let from_root text root errors =
+let from_root text root errors state =
   let errors = process_errors errors in
   let (language, mode) = get_language_and_mode text root in
-  build text root errors language mode
+  build text root errors language mode state
 
-
-let create text root errors lang mode =
+let create text root errors lang mode state =
   let errors = process_errors errors in
   let language = FileInfo.string_of_file_type lang in
   let mode = FileInfo.string_of_mode @@ Option.value ~default:FileInfo.Mphp mode in
-  { text; root; errors; language; mode }
+  { text; root; errors; language; mode; state }
 
 let make_impl ?(env = Env.default) text =
   let parser = Parser.make env text in
   let (parser, root) = Parser.parse_script parser in
   let errors = Parser.errors parser in
-  from_root text root errors
+  let state = Parser.sc_state parser in
+  from_root text root errors state
 
 let make ?(env = Env.default) text =
   Stats_container.wrap_nullary_fn_timing
@@ -165,6 +174,9 @@ let language tree =
 
 let mode tree =
   tree.mode
+
+let sc_state tree =
+  tree.state
 
 let is_hack tree =
   tree.language = "hh"
@@ -203,5 +215,17 @@ let to_json ?with_value tree =
     "program_text", text;
     "version", Hh_json.JSON_String version
   ]
+end (* WithSmartConstructors *)
+
+include WithSmartConstructors(SyntaxSmartConstructors.WithSyntax(Syntax))
+
+let from_root text root errors =
+  from_root text root errors ()
+
+let create text root errors lang mode =
+  create text root errors lang mode ()
+
+let build text root errors language mode =
+  build text root errors language mode ()
 
 end (* WithSyntax *)

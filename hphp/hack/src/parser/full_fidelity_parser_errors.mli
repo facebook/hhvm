@@ -9,6 +9,10 @@
  *)
 
 module WithSyntax : functor (Syntax : Syntax_sig.Syntax_S) -> sig
+module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.SmartConstructors_S
+  with type r = Syntax.t
+  with module Token = Syntax.Token
+) -> sig
   type error_level = Minimum | Typical | Maximum
 
   type hhvm_compat_mode = NoCompat | HHVMCompat | SystemLibCompat
@@ -21,8 +25,13 @@ module WithSyntax : functor (Syntax : Syntax_sig.Syntax_S) -> sig
     -> ?enable_hh_syntax:bool
     -> ?disallow_elvis_space:bool
     (* Required parts *)
-    -> Full_fidelity_syntax_tree.WithSyntax(Syntax).t
+    -> Full_fidelity_syntax_tree.WithSyntax(Syntax).WithSmartConstructors(SmartConstructors).t
     -> env
 
   val parse_errors : env -> Full_fidelity_syntax_error.t list
-end
+
+end (* WithSmartConstructors *)
+
+include module type of WithSmartConstructors(SyntaxSmartConstructors.WithSyntax(Syntax))
+
+end (* WithSyntax *)

@@ -2848,16 +2848,24 @@ end (* FromPositionedSyntax *)
 
 (* TODO: Make these not default to positioned_syntax *)
 module PosSyntax = Full_fidelity_positioned_syntax
-module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(PosSyntax)
-module ParserErrors = Full_fidelity_parser_errors.WithSyntax(PosSyntax)
-module SourceText = Full_fidelity_source_text
-module FromEditablePositionedSyntax =
-  WithPositionedSyntax(Full_fidelity_editable_positioned_syntax)
-module FromPositionedSyntax = WithPositionedSyntax(PosSyntax)
 
+module CoroutineSC = Coroutine_smart_constructor.WithSyntax(PosSyntax)
+
+module SyntaxTree_ = Full_fidelity_syntax_tree
+  .WithSyntax(PosSyntax)
+module SyntaxTree = SyntaxTree_.WithSmartConstructors(CoroutineSC)
+
+module ParserErrors_ = Full_fidelity_parser_errors
+  .WithSyntax(PosSyntax)
+module ParserErrors = ParserErrors_.WithSmartConstructors(CoroutineSC)
+
+module SourceText = Full_fidelity_source_text
 module DeclModeSC = DeclModeSmartConstructors.WithSyntax(PosSyntax)
 module DeclModeParser_ = Full_fidelity_parser.WithSyntax(PosSyntax)
 module DeclModeParser = DeclModeParser_.WithSmartConstructors(DeclModeSC)
+module FromPositionedSyntax = WithPositionedSyntax(PosSyntax)
+module FromEditablePositionedSyntax =
+  WithPositionedSyntax(Full_fidelity_editable_positioned_syntax)
 
 let from_text (env : env) (source_text : SourceText.t) : result =
   let lang, mode = Full_fidelity_parser.get_language_and_mode source_text in
@@ -2874,11 +2882,12 @@ let from_text (env : env) (source_text : SourceText.t) : result =
       let parser = DeclModeParser.make env' source_text in
       let (parser, root) = DeclModeParser.parse_script parser in
       let errors = DeclModeParser.errors parser in
-      SyntaxTree.create source_text root errors lang mode
+      SyntaxTree.create source_text root errors lang mode false
     else
       SyntaxTree.make ~env:env' source_text
   in
-  let () = if env.codegen && not env.lower_coroutines then
+  let lower_coroutines = env.lower_coroutines && SyntaxTree.sc_state tree in
+  let () = if env.codegen && not lower_coroutines then
     let hhvm_compat_mode = if env.systemlib_compat_mode
       then ParserErrors.SystemLibCompat
       else ParserErrors.HHVMCompat in
@@ -2915,7 +2924,7 @@ let from_text (env : env) (source_text : SourceText.t) : result =
     env.disallow_elvis_space in
   let env = { env with parser_options = popt } in
   let script = SyntaxTree.root tree in
-  if env.lower_coroutines
+  if lower_coroutines
   then
     let script =
       Full_fidelity_editable_positioned_syntax.from_positioned_syntax script

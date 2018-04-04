@@ -1424,83 +1424,6 @@ Variant mysql_makevalue(const String& data, enum_field_types field_type) {
   return data;
 }
 
-#ifdef FACEBOOK
-extern "C" {
-struct MEM_ROOT;
-unsigned long net_field_length(unsigned char**);
-void free_root(::MEM_ROOT*, int);
-}
-
-static bool php_mysql_read_rows(MYSQL *mysql, const Variant& result) {
-  unsigned long pkt_len;
-  unsigned char *cp;
-  unsigned int fields = mysql->field_count;
-  NET* net = &mysql->net;
-  auto res = php_mysql_extract_result(result);
-  my_bool is_data = 0;
-
-  if ((pkt_len = cli_safe_read(mysql, &is_data)) == packet_error) {
-    return false;
-  }
-
-  res->setFieldCount((int64_t)fields);
-
-  // localizes all the rows
-  while (*(cp = net->read_pos) != 254 || pkt_len >= 8) {
-    res->addRow();
-    for (unsigned int i = 0; i < fields; i++) {
-      unsigned long len = net_field_length(&cp);
-      Variant data;
-      if (len != NULL_LENGTH) {
-        data = mysql_makevalue(String((char *)cp, len, CopyString),
-                               mysql->fields + i);
-        cp += len;
-        if (mysql->fields) {
-          if (mysql->fields[i].max_length < len)
-            mysql->fields[i].max_length = len;
-        }
-      }
-      res->addField(std::move(data));
-    }
-    if ((pkt_len = cli_safe_read(mysql, &is_data)) == packet_error) {
-      return false;
-    }
-  }
-
-  // localizes all the field info
-  for (unsigned int i = 0; i < fields; i++) {
-    res->setFieldInfo((int64_t)i, mysql->fields + i);
-  }
-
-  return true;
-}
-
-static Variant php_mysql_localize_result(MYSQL *mysql) {
-#if MYSQL_VERSION_ID <= 50138
-  mysql = mysql->last_used_con;
-#endif
-
-  if (!mysql->fields) return true;
-  if (mysql->status != MYSQL_STATUS_GET_RESULT) {
-    // consistent with php_mysql_do_query_and_get_result
-    return true;
-  }
-  mysql->status = MYSQL_STATUS_READY;
-  Variant result(req::make<MySQLResult>(nullptr, true));
-  if (!php_mysql_read_rows(mysql, result)) {
-    return false;
-  }
-
-  // clean up
-  if (mysql->fields) {
-    free_root(&mysql->field_alloc, 0);
-  }
-  mysql->unbuffered_fetch_owner = 0;
-
-  return result;
-}
-#endif // FACEBOOK
-
 MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
                                     bool async_mode) {
   SYNC_VM_REGS_SCOPED();
@@ -1659,17 +1582,6 @@ Variant php_mysql_get_result(const Variant& link_id, bool use_store) {
 
   MYSQL_RES *mysql_result;
   if (use_store) {
-#ifdef FACEBOOK
-    // Facebook specific optimization which depends
-    // on versions of MySQL which allow access to the
-    // grotty internals of libmysqlclient
-    //
-    // If php_mysql_localize_result ever gets rewritten
-    // to use standard APIs, this can be opened up to everyone.
-    if (mysqlExtension::Localize) {
-      return php_mysql_localize_result(conn);
-    }
-#endif
     mysql_result = mysql_store_result(conn);
   } else {
     mysql_result = mysql_use_result(conn);

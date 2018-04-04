@@ -84,7 +84,12 @@ void DataWalker::traverseData(
     return; // avoid infinite recursion
   }
   if (!canStopWalk(features)) {
-    traverseData(data->toArray().get(), features, visited);
+    // Use asArray to avoid int-like string key coercion (which can hide
+    // values).
+    auto const arr = data->isCollection()
+      ? collections::asArray(data)
+      : nullptr;
+    traverseData(arr ? arr : data->toArray().get(), features, visited);
   }
 }
 

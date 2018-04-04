@@ -1886,7 +1886,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseVarEnvDynCall:
   case RaiseHackArrCompatNotice:
   case RaiseHackArrParamNotice:
-  case RaiseParamRefMismatch:
+  case RaiseParamRefMismatchForFunc:
+  case RaiseParamRefMismatchForFuncName:
   case RaiseForbiddenDynCall:
   case ConvCellToStr:
   case ConvObjToStr:

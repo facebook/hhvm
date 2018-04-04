@@ -1327,16 +1327,6 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
   ar->setVarEnv(nullptr);
 }
 
-static void raiseFPassHintWarning(const StringData* fname, uint32_t id,
-                                  FPassHint hint) {
-  if (!RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) return;
-
-  assertx(hint != FPassHint::Any);
-  raise_warning(
-    formatParamRefMismatch(fname->data(), id, hint == FPassHint::Cell)
-  );
-}
-
 // offset is the number of params already on the stack to which the
 // contents of args are to be added; for call_user_func_array, this is
 // always 0; for unpacked arguments, it may be greater if normally passed
@@ -1380,22 +1370,19 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
         cellDup(tvToCell(from), *to);
       } else if (LIKELY(from.m_type == KindOfRef &&
                         from.m_data.pref->hasMultipleRefs())) {
-          if (checkRefAnnot) {
-            WRAP(
-              raiseFPassHintWarning(f->fullDisplayName(), i, FPassHint::Cell)
-            );
-          }
+        if (checkRefAnnot) {
+          WRAP(raiseParamRefMismatchForFunc(f, i));
+        }
         refDup(from, *to);
       } else {
         if (checkRefAnnot) {
-          WRAP(raiseFPassHintWarning(f->fullDisplayName(), i, FPassHint::Cell));
+          WRAP(raiseParamRefMismatchForFunc(f, i));
         }
         if (doCufRefParamChecks && f->mustBeRef(i)) {
           WRAP(raise_warning("Parameter %d to %s() expected to be a reference, "
                              "value given", i + 1, f->fullName()->data()));
           if (skipCufOnInvalidParams) {
             stack.discard();
-            cleanupParamsAndActRec(stack, ar, nullptr, &i);
             if (retval) { tvWriteNull(*retval); }
             return false;
           }
@@ -4092,7 +4079,10 @@ OPTBLD_INLINE void iopVGetM(uint32_t nDiscard, MemberKey mk) {
 static void checkFPassHint(ActRec* ar, uint32_t paramId, FPassHint hint) {
   assertx(paramId < ar->numArgs());
 
-  if (!RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) return;
+  if (!RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
+      !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
+    return;
+  }
 
   switch (hint) {
   case FPassHint::Any: return;
@@ -4103,7 +4093,7 @@ static void checkFPassHint(ActRec* ar, uint32_t paramId, FPassHint hint) {
     if (ar->m_func->byRef(paramId)) return;
     break;
   }
-  raiseFPassHintWarning(ar->m_func->fullDisplayName(), paramId, hint);
+  raiseParamRefMismatchForFunc(ar->m_func, paramId);
 }
 
 OPTBLD_INLINE
@@ -5525,7 +5515,8 @@ OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
 OPTBLD_INLINE void iopRaiseFPassWarning(
   FPassHint hint, const StringData* fname, uint32_t arg
 ) {
-  raiseFPassHintWarning(fname, arg, hint);
+  assertx(hint != FPassHint::Any);
+  raiseParamRefMismatchForFuncName(fname, arg, hint == FPassHint::Cell);
 }
 
 OPTBLD_INLINE void iopFPushCuf(uint32_t numArgs) {

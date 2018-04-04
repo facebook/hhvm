@@ -1,0 +1,92 @@
+Builtin calls:
+ksort() expects parameter 1 by reference, but the call was not annotated with '&' on line 22
+array(3) {
+  ["red"]=>
+  int(4)
+  ["apple"]=>
+  int(12)
+  ["foo"]=>
+  int(1)
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(4)
+  [2]=>
+  int(12)
+}
+Literal calls:
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 29
+array(1) {
+  ["x"]=>
+  array(1) {
+    ["y"]=>
+    string(1) "z"
+  }
+}
+array(2) {
+  ["x"]=>
+  array(1) {
+    ["y"]=>
+    string(1) "z"
+  }
+  ["a"]=>
+  array(1) {
+    ["b"]=>
+    int(0)
+  }
+}
+Plain calls:
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 38
+foo() expects parameter 2 by value, but the call was annotated with '&' on line 40
+foo() expects parameter 2 by value, but the call was annotated with '&' on line 41
+foo() expects parameter 1 by value, but the call was annotated with '&' on line 42
+foo() expects parameter 1 by value, but the call was annotated with '&' on line 43
+foo() expects parameter 1 by value, but the call was annotated with '&' on line 44
+foo() expects parameter 1 by value, but the call was annotated with '&' on line 45
+$b[$c][$d] = $b[q][r] = 1
+Dynamic calls:
+foo() expects parameter 1 by value, but the call was annotated with '&' on line 49
+foo() expects parameter 2 by value, but the call was annotated with '&' on line 50
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 51
+$b[$c][$d] = $b[q][r] = 2
+CUF/dynamic-CUF calls:
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 56
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 57
+$b[$c][$d] = $b[q][r] = 2
+CUF + ref calls:
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 61
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 62
+call_user_func() expects parameter 2 by value, but the call was annotated with '&' on line 63
+call_user_func() expects parameter 3 by value, but the call was annotated with '&' on line 64
+call_user_func() expects parameter 4 by value, but the call was annotated with '&' on line 65
+$b[$c][$d] = $b[q][r] = 2
+dynamic-CUF + ref calls:
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 69
+call_user_func() expects parameter 1 by value, but the call was annotated with '&' on line 70
+call_user_func() expects parameter 2 by value, but the call was annotated with '&' on line 71
+call_user_func() expects parameter 3 by value, but the call was annotated with '&' on line 72
+call_user_func() expects parameter 4 by value, but the call was annotated with '&' on line 73
+$b[$c][$d] = $b[q][r] = 2
+CUFA calls:
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 81
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 82
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 83
+$b[$c][$d] = $b[q][r] = 2
+CUFA + ref calls:
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 87
+call_user_func_array() expects parameter 2 by value, but the call was annotated with '&' on line 88
+$b[$c][$d] = $b[q][r] = 2
+dynamic-CUFA calls:
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 92
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 93
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 94
+$b[$c][$d] = $b[q][r] = 2
+dynamic-CUFA + ref calls:
+call_user_func_array() expects parameter 1 by value, but the call was annotated with '&' on line 98
+call_user_func_array() expects parameter 2 by value, but the call was annotated with '&' on line 99
+$b[$c][$d] = $b[q][r] = 2
+fb_intercept:
+Fatal call:
+foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 106

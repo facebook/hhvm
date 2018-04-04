@@ -230,6 +230,8 @@ void raiseArrayKeyNotice(const StringData* key, bool isInOut) {
                isInOut ? " on inout parameter" : "", key->data());
 }
 
+namespace {
+
 std::string formatParamRefMismatch(const char* fname, uint32_t index,
                                    bool funcByRef) {
   if (funcByRef) {
@@ -245,11 +247,23 @@ std::string formatParamRefMismatch(const char* fname, uint32_t index,
   }
 }
 
-void raiseParamRefMismatch(uint32_t index, const Func* func) {
-  raise_warning(
-    formatParamRefMismatch(func->fullDisplayName()->data(),
-                           index, func->byRef(index))
-  );
+}
+
+void raiseParamRefMismatchForFuncName(const StringData* fname, uint32_t index,
+                                      bool funcByRef) {
+  if (RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      formatParamRefMismatch(fname->data(), index, funcByRef));
+  }
+
+  if (RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
+    raise_warning(formatParamRefMismatch(fname->data(), index, funcByRef));
+  }
+}
+
+void raiseParamRefMismatchForFunc(const Func* func, uint32_t index) {
+  raiseParamRefMismatchForFuncName(func->fullDisplayName(), index,
+                                   func->byRef(index));
 }
 
 //////////////////////////////////////////////////////////////////////

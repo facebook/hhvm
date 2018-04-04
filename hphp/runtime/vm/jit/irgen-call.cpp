@@ -1407,7 +1407,11 @@ void emitFPushClsMethodSD(IRGS& env,
 
 void checkFPassHint(IRGS& env, uint32_t paramId, int off, FPassHint hint,
                     bool byRef) {
-  if (!RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) return;
+  if (!RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
+      !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
+    return;
+  }
+
   switch (hint) {
   case FPassHint::Any: return;
   case FPassHint::Cell:
@@ -1418,30 +1422,20 @@ void checkFPassHint(IRGS& env, uint32_t paramId, int off, FPassHint hint,
     break;
   }
 
-  auto const& fpiStack = env.irb->fs().fpiStack();
-  if (!fpiStack.empty() && fpiStack.back().func) {
-    auto const str = makeStaticString([&] {
-      if (hint == FPassHint::Ref) {
-        return folly::sformat(
-          "{}() expects parameter {} by value, but the call was "
-          "annotated with '&'",
-          fpiStack.back().func->fullName(), paramId + 1);
-      }
-      return folly::sformat(
-        "{}() expects parameter {} by reference, but the call was "
-        "not annotated with '&'",
-        fpiStack.back().func->fullName(), paramId + 1);
-    }());
-    gen(env, RaiseWarning, cns(env, str));
-    return;
-  }
+  auto const funcptr = [&] {
+    auto const& fpiStack = env.irb->fs().fpiStack();
+    if (!fpiStack.empty() && fpiStack.back().func) {
+      return cns(env, fpiStack.back().func);
+    }
 
-  auto const actRecOff = offsetFromIRSP(env, BCSPRelOffset { off });
-  auto const funcptr = gen(env, LdARFuncPtr, TFunc,
-                           IRSPRelOffsetData { actRecOff }, sp(env));
+    auto const actRecOff = offsetFromIRSP(env, BCSPRelOffset { off });
+    return gen(env, LdARFuncPtr, TFunc,
+               IRSPRelOffsetData { actRecOff }, sp(env));
+  }();
+
   gen(
     env,
-    RaiseParamRefMismatch,
+    RaiseParamRefMismatchForFunc,
     ParamData { (int32_t)paramId },
     funcptr
   );
@@ -1450,14 +1444,19 @@ void checkFPassHint(IRGS& env, uint32_t paramId, int off, FPassHint hint,
 void emitRaiseFPassWarning(
   IRGS& env, FPassHint hint, const StringData* fname, uint32_t arg
 ) {
-  if (!RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) return;
+  if (!RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
+      !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
+    return;
+  }
 
   assertx(hint != FPassHint::Any);
-  auto const str = makeStaticString(
-    formatParamRefMismatch(fname->data(), arg, hint == FPassHint::Cell)
+  gen(
+    env,
+    RaiseParamRefMismatchForFuncName,
+    ParamData { (int32_t)arg },
+    cns(env, fname),
+    cns(env, hint == FPassHint::Cell)
   );
-
-  gen(env, RaiseWarning, cns(env, str));
 }
 
 /*

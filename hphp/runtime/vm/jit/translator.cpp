@@ -644,8 +644,10 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
     return true;
   case Op::FPassC:
   case Op::FPassVNop:
-    return !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch ||
-      static_cast<FPassHint>(ni.imm[1].u_OA) == FPassHint::Any;
+    return static_cast<FPassHint>(ni.imm[1].u_OA) == FPassHint::Any || (
+      !RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
+      !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch
+    );
   case Op::VerifyRetTypeC:
   case Op::VerifyRetTypeV:
     return !RuntimeOption::EvalCheckReturnTypeHints;
@@ -1178,8 +1180,10 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FPassVNop:
   case Op::FPassN:
   case Op::FPassC:
-    return !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch ||
-      static_cast<FPassHint>(ni.imm[1].u_OA) == FPassHint::Any;
+    return static_cast<FPassHint>(ni.imm[1].u_OA) == FPassHint::Any || (
+      !RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
+      !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch
+    );
   }
 
   always_assert_flog(0, "invalid opcode {}\n", static_cast<uint32_t>(ni.op()));

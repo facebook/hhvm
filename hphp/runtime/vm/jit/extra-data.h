@@ -1477,7 +1477,9 @@ X(LdFuncCachedSafe,             LdFuncCachedData);
 X(LdFuncCachedU,                LdFuncCachedUData);
 X(LdObjMethod,                  LdObjMethodData);
 X(RaiseMissingArg,              FuncArgData);
-X(RaiseParamRefMismatch,        ParamData);
+X(RaiseParamRefMismatchForFunc, ParamData);
+X(RaiseParamRefMismatchForFuncName,
+                                ParamData);
 X(RaiseArrayIndexNotice,        RaiseArrayIndexNoticeData);
 X(RaiseArrayKeyNotice,          RaiseArrayKeyNoticeData);
 X(InterpOne,                    InterpOneData);

@@ -88,9 +88,15 @@ Warning: call_user_func() expects parameter 4 by value, but the call was annotat
 
 Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 52
 
+Warning: Parameter 3 to foo() expected to be a reference, value given in %s/ref-annotate.php on line 52
+
+Warning: call_user_func() expects parameter 1 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 53
+
 Warning: call_user_func() expects parameter 3 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 53
 
 Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 53
+
+Warning: Parameter 3 to foo() expected to be a reference, value given in %s/ref-annotate.php on line 53
 $b[$c][$d] = $b[q][r] = 10
 CUFA calls:
 

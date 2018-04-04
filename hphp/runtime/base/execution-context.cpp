@@ -1574,7 +1574,15 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   }
 #endif
 
-  if (doInitArgs(ar, retval)) return retval;
+  try {
+    if (doInitArgs(ar, retval)) return retval;
+  } catch (...) {
+    while (vmStack().top() != (void*)ar) {
+      vmStack().popTV();
+    }
+    vmStack().popAR();
+    throw;
+  }
 
   if (useWeakTypes) {
     ar->setUseWeakTypes();

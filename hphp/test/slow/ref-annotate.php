@@ -49,8 +49,8 @@ function main($foo_str, $cuf, $cufa) {
 
 
   echo "dynamic-CUF + ref calls:\n";
-  call_user_func($foo_str, &$c, $d, &$b);
-  call_user_func(&$foo_str, $c, &$d, $b);
+  $cuf($foo_str, &$c, $d, &$b);
+  $cuf(&$foo_str, $c, &$d, $b);
   echo '$b[$c][$d] = $b['.$c.']['.$d.'] = '.$b[$c][$d]."\n";
 
   $x = array($c, $d, &$b);

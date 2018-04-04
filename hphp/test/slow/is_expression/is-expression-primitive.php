@@ -41,5 +41,5 @@ main(STDIN);
 main(vec[]);
 main(dict[]);
 main(keyset[]);
-main(varray[]);
-main(darray[]);
+// TODO(T27918561) main(varray[]);
+// TODO(T27918561) main(darray[]);

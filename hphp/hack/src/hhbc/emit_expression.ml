@@ -398,21 +398,6 @@ let istype_op lower_fq_id =
   | "hh\\is_darray" -> Some (if hack_arr_dv_arrs () then OpDict else OpDArray)
   | _ -> None
 
-(* Return the IsType op associated with a given primitive typehint. *)
-let is_expr_primitive_op id =
-  match id with
-  | "bool" -> Some OpBool
-  | "int" -> Some OpInt
-  | "float" -> Some OpDbl
-  | "string" -> Some OpStr
-  | "resource" -> Some OpRes
-  | "vec" -> Some OpVec
-  | "dict" -> Some OpDict
-  | "keyset" -> Some OpKeyset
-  | "varray" -> Some OpVArray
-  | "darray" -> Some OpDArray
-  | _ -> None
-
 (* See EmitterVisitor::getPassByRefKind in emitter.cpp *)
 let get_passByRefKind is_splatted expr  =
   let open PassByRefKind in
@@ -770,36 +755,12 @@ and emit_is env pos lhs h =
             instr_label done_label;
           ]
       end
-    | A.Happly ((_, id), _)
-      when id = SN.Typehints.arraykey || id = SN.Typehints.num ->
-      begin match lhs with
-        | IsExprExpr e -> emit_is_create_local env pos e h
-        | IsExprUnnamedLocal local ->
-          let op2 = if id = SN.Typehints.arraykey then OpStr else OpDbl in
-          let its_true = Label.next_regular () in
-          let its_done = Label.next_regular () in
-          gather [
-            instr_istypel local OpInt;
-            instr_jmpnz its_true;
-            instr_istypel local op2;
-            instr_jmpnz its_true;
-            instr_false;
-            instr_jmp its_done;
-            instr_label its_true;
-            instr_true;
-            instr_label its_done;
-          ]
-      end
     | A.Happly ((_, id), _) when id = SN.Typehints.nonnull ->
         gather [
           emit_is_lhs env lhs;
           instr_istypec OpNull;
           instr_not;
         ]
-    | A.Happly ((_, id), _)
-      when id = SN.Typehints.mixed
-        || id = SN.Typehints.dynamic ->
-        instr_true
     | A.Happly ((_, id), _) when id = SN.Typehints.this ->
       begin match lhs with
         | IsExprExpr e -> emit_is_create_local env pos e h
@@ -825,132 +786,14 @@ and emit_is env pos lhs h =
             instr_label done_label;
           ]
       end
-    | A.Happly ((_, id), _) ->
-      begin match is_expr_primitive_op id with
-        | Some op ->
-          gather [
-            emit_is_lhs env lhs;
-            instr_istypec op;
-          ]
-        | None ->
-          let namespace = Emit_env.get_namespace env in
-          let tv = Emit_type_constant.hint_to_type_constant
-            ~is_typedef:true ~tparams:[] ~namespace h in
-          gather [
-            emit_is_lhs env lhs;
-            instr_istypestruct @@ Emit_adata.get_array_identifier tv
-          ]
-      end
-    | A.Hoption h2 ->
-      begin match lhs with
-        | IsExprExpr e -> emit_is_create_local env pos e h
-        | IsExprUnnamedLocal local ->
-          let its_true = Label.next_regular () in
-          let its_done = Label.next_regular () in
-          gather [
-            instr_istypel local OpNull;
-            instr_jmpnz its_true;
-            emit_is env pos lhs h2;
-            instr_jmpnz its_true;
-            instr_false;
-            instr_jmp its_done;
-            instr_label its_true;
-            instr_true;
-            instr_label its_done
-          ]
-      end
-    | A.Hshape {
-        A.si_allows_unknown_fields = shape_is_open;
-        si_shape_field_list = field_list;
-      } ->
-      begin match lhs with
-        | IsExprExpr e -> emit_is_create_local env pos e h
-        | IsExprUnnamedLocal local ->
-          let pass_label = Label.next_regular () in
-          let done_label = Label.next_regular () in
-          let fail_label = Label.next_regular () in
-          let count_local = Local.get_unnamed_local () in
-          let expected_count =
-            if shape_is_open
-            then None
-            else Some (Local.get_unnamed_local ())
-          in
-          let verify_field = emit_is_shape_verify_field
-            env pos local fail_label expected_count
-          in
-          gather [
-            instr_istypel local OpDArray;
-            instr_jmpz fail_label;
-
-            instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "count");
-            instr_fpassl 0 local H.Cell;
-            instr_fcall 1;
-            instr_unboxr_nop;
-            instr_setl count_local;
-
-            emit_is_shape_verify_count count_local fail_label shape_is_open
-              field_list;
-
-            begin match expected_count with
-              | Some expected_count_local ->
-                gather [
-                  instr_int 0;
-                  instr_popl expected_count_local;
-                  gather (List.map ~f:verify_field field_list);
-                  instr_cgetl count_local;
-                  instr_cgetl expected_count_local;
-                  instr (IOp Gt);
-                  instr_jmpnz fail_label;
-                ]
-              | None ->
-                gather (List.map ~f:verify_field field_list)
-            end;
-
-            instr_jmp pass_label;
-            instr_label fail_label;
-            instr_false;
-            instr_jmp done_label;
-            instr_label pass_label;
-            instr_true;
-            instr_label done_label;
-          ]
-      end
-    | A.Htuple hl ->
-      begin match lhs with
-        | IsExprExpr e -> emit_is_create_local env pos e h
-        | IsExprUnnamedLocal local ->
-          let its_true = Label.next_regular () in
-          let its_done = Label.next_regular () in
-          let skip_label = Label.next_regular () in
-          gather [
-            instr_istypel local OpVArray;
-            instr_jmpz skip_label;
-
-            instr_int (List.length hl);
-            instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "count");
-            instr_fpassl 0 local H.Cell;
-            instr_fcall 1;
-            instr_unboxr_nop;
-            instr (IOp Same);
-            instr_jmpz skip_label;
-
-            gather (List.mapi ~f:(emit_is_tuple_elem env pos local skip_label) hl);
-            instr_jmp its_true;
-
-            instr_label skip_label;
-            instr_false;
-            instr_jmp its_done;
-            instr_label its_true;
-            instr_true;
-            instr_label its_done
-          ]
-      end
-    | A.Haccess _ ->
-      emit_nyi "is expression: unsupported type const access"
-    | A.Hsoft _ ->
-      failwith "Soft typehints cannot be used with `is` expressions"
-    | A.Hfun _ ->
-      failwith "Function typehints cannot be used with `is` expressions"
+    | _ ->
+      let namespace = Emit_env.get_namespace env in
+      let ts = Emit_type_constant.hint_to_type_constant
+        ~is_typedef:true ~tparams:[] ~namespace h in
+      gather [
+        emit_is_lhs env lhs;
+        instr_istypestruct @@ Emit_adata.get_array_identifier ts
+      ]
 
 and emit_is_create_local env pos e h =
   Local.scope @@ fun () ->
@@ -979,82 +822,6 @@ and emit_is_classname_exists local true_label =
     instr_fcall 1;
     instr_unboxr_nop;
     instr_jmpnz true_label;
-  ]
-
-and emit_is_shape_verify_count count_local fail_label shape_is_open field_list =
-  let num_fields = List.length field_list in
-  let num_required_fields = List.count field_list
-    ~f:(fun field -> not field.A.sf_optional) in
-  if shape_is_open
-  then
-    gather [
-      instr_int num_required_fields;
-      instr (IOp Lt);
-      instr_jmpnz fail_label;
-    ]
-  else if num_required_fields = num_fields
-  then
-    gather [
-      instr_int num_required_fields;
-      instr (IOp Same);
-      instr_jmpz fail_label;
-    ]
-  else
-    gather [
-      instr_int num_required_fields;
-      instr (IOp Lt);
-      instr_jmpnz fail_label;
-      instr_cgetl count_local;
-      instr_int num_fields;
-      instr (IOp Gt);
-      instr_jmpnz fail_label;
-    ]
-
-and emit_is_shape_verify_field env pos local fail_label expected_count field =
-  let key_instrs = match field.A.sf_name with
-    | Ast_defs.SFlit (_, field_name) ->
-      instr_string field_name
-    | Ast_defs.SFclass_const (cid, (_, const)) ->
-      emit_class_const_impl env cid const
-  in
-  let local_fname = Local.get_unnamed_local () in
-  let local_f = Local.get_unnamed_local () in
-  let skip_label = Label.next_regular () in
-  gather [
-    key_instrs;
-    instr_setl local_fname;
-    instr_cgetl local;
-    instr (IMisc AKExists);
-    instr_jmpz (if field.A.sf_optional then skip_label else fail_label);
-
-    instr_basel local MemberOpMode.Warn;
-    instr_querym 0 H.QueryOp.CGet (MemberKey.EL local_fname);
-    instr_popl local_f;
-    emit_is env pos (IsExprUnnamedLocal local_f) field.A.sf_hint;
-    instr_unsetl local_f;
-    instr_jmpz fail_label;
-
-    begin match expected_count with
-      | Some expected_count_local ->
-        gather [
-          instr (IMutator (IncDecL (expected_count_local, PreInc)));
-          instr_popc;
-        ]
-      | None -> empty
-    end;
-
-    instr_label skip_label;
-  ]
-
-and emit_is_tuple_elem env pos local skip_label i h =
-  let local_i = Local.get_unnamed_local () in
-  gather [
-    instr_basel local MemberOpMode.Warn;
-    instr_querym 0 H.QueryOp.CGet (MemberKey.EI (Int64.of_int i));
-    instr_popl local_i;
-    emit_is env pos (IsExprUnnamedLocal local_i) h;
-    instr_unsetl local_i;
-    instr_jmpz skip_label;
   ]
 
 and emit_null_coalesce env pos e1 e2 =

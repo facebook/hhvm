@@ -6,5 +6,3 @@ resource
 vec
 dict
 keyset
-varray
-darray

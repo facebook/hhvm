@@ -101,9 +101,9 @@ is_keyset_(keyset[]);
 echo "---\n";
 
 is_varray_(null);
-is_varray_(varray[]);
+// TODO(T27918561) is_varray_(varray[]);
 
 echo "---\n";
 
 is_darray_(null);
-is_darray_(darray[]);
+// TODO(T27918561) is_darray_(darray[]);

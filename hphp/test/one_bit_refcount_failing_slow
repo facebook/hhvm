@@ -18,3 +18,4 @@ slow/inout/tuple/tests/complex-expr.php
 slow/inout/tuple/tests/invalid-index.php
 slow/vec/ref-fail-leak.php
 slow/unserialize-reference-overwritten.php
+slow/hack_arr_compat/parse-str.php

@@ -610,6 +610,7 @@ int64_t HHVM_FUNCTION(extract,
 void HHVM_FUNCTION(parse_str,
                    const String& str,
                    VRefParam arr /* = null */) {
+  SuppressHackArrCompatNotices suppress;
   Array result = Array::Create();
   HttpProtocol::DecodeParameters(result, str.data(), str.size());
   if (!arr.isReferenced()) {

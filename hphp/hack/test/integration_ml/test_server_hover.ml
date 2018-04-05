@@ -495,9 +495,13 @@ function idx(
   ?KeyedContainer<int, ?int> $collection,
   ?int $index
 ): ?int";
-      addendum = ["NB: the typechecker relies on the exact format of this signature and rewrites\n\
-                   parts of it in place during each call. Changes to the signature need to be\n\
-                   done in tandem with changes to the ocaml code that munges it."];
+      addendum = ["\n\
+                    Index into the given KeyedContainer using the provided key.\n\
+                    \n\
+                    If the key doesn't exist, the key is `null`, or the collection is `null`,\n\
+                    return the provided default value instead, or `null` if no default value was\n\
+                    provided. If the key is `null`, the default value will be returned even if\n\
+                    `null` is a valid key in the container.\n"];
       pos = pos_at (3, 3) (3, 24);
     }
   ]

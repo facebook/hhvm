@@ -1248,7 +1248,20 @@ void Debugger::tryInstallBreakpoints(RequestInfo* ri) {
             resolved = tryResolveBreakpoint(ri, breakpointId, bp);
           }
 
-          if (!resolved) {
+          // In debugger clients that support multiple languages like Nuclide,
+          // users tend to leave breakpoints set in files that are for other
+          // debuggers. It's annoying to see warnings in those cases. Assume
+          // any file path that doesn't end in PHP is ok not to tell the user
+          // that the breakpoint failed to set.
+          const bool phpFile =
+            bp->m_path.size() >= 4 &&
+            std::equal(
+              bp->m_path.rbegin(),
+              bp->m_path.rend(),
+              std::string(".php").rbegin()
+            );
+
+          if (phpFile && !resolved) {
             std::string resolveMsg = "Warning: request ";
             resolveMsg += std::to_string(getCurrentThreadId());
             resolveMsg += " could not resolve breakpoint #";

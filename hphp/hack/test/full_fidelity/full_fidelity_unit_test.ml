@@ -224,6 +224,7 @@ let error_tests =
     "test_errors_variadic_param";
     "test_errors_variadic_param_default";
     "test_errors_statements";
+    "test_incomplete_file";
     "test_implements_errors";
     "test_object_creation_errors";
     "test_classish_inside_function_errors";

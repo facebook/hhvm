@@ -877,6 +877,8 @@ module WithParser(Parser : Parser_S) = struct
       let (parser, maybe_item) = parse_item parser in
       match maybe_item with
       | None -> (parser, acc)
+      | Some item when peek_token_kind parser = TokenKind.EndOfFile ->
+        parser, item :: acc
       | Some item -> aux parser (item :: acc)
     in
     let (parser, items) = aux parser [] in

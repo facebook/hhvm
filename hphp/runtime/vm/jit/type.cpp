@@ -18,12 +18,13 @@
 
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/tv-type.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/minstr-effects.h"
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/text-util.h"
@@ -277,6 +278,113 @@ std::string Type::toString() const {
 
 std::string Type::debugString(Type t) {
   return t.toString();
+}
+
+namespace {
+enum TypeKey : uint8_t {
+  None,
+  Const,
+  ClsSub,
+  ClsExact,
+  ArrSpec
+};
+}
+
+void Type::serialize(ProfDataSerializer& ser) {
+  SCOPE_EXIT {
+    ITRACE_MOD(Trace::hhbc, 2, "Type: {}\n", toString());
+  };
+  ITRACE_MOD(Trace::hhbc, 2, "Type>\n");
+  Trace::Indent _;
+
+  write_raw(ser, m_bits);
+  write_raw(ser, m_ptrKind);
+
+  Type t = *this;
+  if (t.maybe(TNullptr)) t = t - TNullptr;
+  if (t <= TBoxedCell) t = inner();
+
+  auto const key = m_hasConstVal ? TypeKey::Const :
+    t.clsSpec() ? (t.clsSpec().exact() ? TypeKey::ClsExact : TypeKey::ClsSub) :
+    t.arrSpec() ? TypeKey::ArrSpec : TypeKey::None;
+
+  write_raw(ser, key);
+
+  if (key == TypeKey::Const) {
+    if (t <= TCls)       return write_class(ser, t.m_clsVal);
+    if (t <= TFunc)      return write_func(ser, t.m_funcVal);
+    if (t <= TStaticStr) return write_string(ser, t.m_strVal);
+    if (t < TArrLike) {
+      return write_array(ser, t.m_arrVal);
+    }
+    if (t <= TCctx)      return write_class(ser, t.m_cctxVal.cls());
+    assertx(t.subtypeOfAny(TBool, TInt, TDbl));
+    return write_raw(ser, t.m_extra);
+  }
+
+  if (key == TypeKey::ClsSub || key == TypeKey::ClsExact) {
+    return write_class(ser, t.clsSpec().cls());
+  }
+  if (key == TypeKey::ArrSpec) {
+    return write_raw(ser, t.m_extra);
+  }
+}
+
+Type Type::deserialize(ProfDataDeserializer& ser) {
+  ITRACE_MOD(Trace::hhbc, 2, "Type>\n");
+  auto const ret = [&] {
+    Trace::Indent _;
+    Type t{};
+
+    read_raw(ser, t.m_bits);
+    read_raw(ser, t.m_ptrKind);
+    auto const key = read_raw<TypeKey>(ser);
+    if (key == TypeKey::Const) {
+      t.m_hasConstVal = true;
+      if (t <= TCls) {
+        t.m_clsVal = read_class(ser);
+        return t;
+      }
+      if (t <= TFunc) {
+        t.m_funcVal = read_func(ser);
+        return t;
+      }
+      if (t <= TStaticStr) {
+        t.m_strVal = read_string(ser);
+        return t;
+      }
+      if (t < TArrLike) {
+        t.m_arrVal = read_array(ser);
+        return t;
+      }
+      if (t <= TCctx) {
+        t.m_cctxVal = ConstCctx::cctx(read_class(ser));
+        return t;
+      }
+      read_raw(ser, t.m_extra);
+      return t;
+    }
+
+    t.m_hasConstVal = false;
+    if (key == TypeKey::None) return t;
+    if (key == TypeKey::ClsSub || key == TypeKey::ClsExact) {
+      auto const cls = read_class(ser);
+      if (key == TypeKey::ClsExact) {
+        t.m_clsSpec = ClassSpec{cls, ClassSpec::ExactTag{}};
+      } else {
+        t.m_clsSpec = ClassSpec{cls, ClassSpec::SubTag{}};
+      }
+    } else {
+      assertx(key == TypeKey::ArrSpec);
+      read_raw(ser, t.m_extra);
+      if (auto const arr = t.m_arrSpec.type()) {
+        t.m_arrSpec.adjust(ser.remap(arr));
+      }
+    }
+    return t;
+  }();
+  ITRACE_MOD(Trace::hhbc, 2, "Type: {}\n", ret.toString());
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

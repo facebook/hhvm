@@ -99,6 +99,9 @@ struct RegionDesc {
    */
   const BlockIdSet& merged(BlockId id) const;
 
+  const BlockIdSet* incoming() const;
+  void incoming(BlockIdSet&& ids);
+
   /*
    * Modify this RegionDesc so that its list of blocks is sorted in a reverse
    * post order.
@@ -126,6 +129,7 @@ struct RegionDesc {
   int64_t           blockProfCount(BlockId bid) const;
 
   Block*            addBlock(SrcKey sk, int length, FPInvOffset spOffset);
+  void              addBlock(BlockPtr newBlock);
   void              replaceBlock(BlockId bid, BlockPtr newBlock);
   void              deleteBlock(BlockId bid);
   BlockVec::iterator deleteBlock(RegionDesc::BlockVec::iterator it);
@@ -165,6 +169,7 @@ private:
     BlockIdSet               merged; // other blocks that got merged into this
     BlockId                  prevRetransId{kInvalidTransID};
     BlockId                  nextRetransId{kInvalidTransID};
+    bool                     hasIncoming{false};
     explicit BlockData(BlockPtr b = nullptr) : block(b) {}
   };
 
@@ -298,8 +303,8 @@ struct RegionDesc::Block {
   using ParamByRefMap = boost::container::flat_map<SrcKey,bool>;
   using KnownFuncMap  = boost::container::flat_map<SrcKey,const Func*>;
 
-  explicit Block(const Func* func, ResumeMode resumeMode, bool hasThis,
-                 Offset start, int length, FPInvOffset initSpOff);
+  Block(BlockId id, const Func* func, ResumeMode resumeMode, bool hasThis,
+        Offset start, int length, FPInvOffset initSpOff);
 
   Block& operator=(const Block&) = delete;
 

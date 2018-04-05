@@ -188,6 +188,7 @@ Unit::Unit()
   , m_interpretOnly(false)
   , m_isHHFile(false)
   , m_extended(false)
+  , m_serialized(false)
   , m_mainReturn(make_tv<KindOfUninit>())
 {}
 
@@ -643,7 +644,6 @@ void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
     }
   }
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Func lookup.

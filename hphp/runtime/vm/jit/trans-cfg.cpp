@@ -26,12 +26,19 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(pgo);
 
-static TransIDSet findPredTrans(TransID dstID, const ProfData* profData) {
+TransIDSet findPredTrans(TransID dstID, const ProfData* profData) {
   auto const dstRec = profData->transRec(dstID);
+  auto const incoming = dstRec->region()->incoming();
+  TransIDSet predSet;
+  if (incoming) {
+    for (auto id : *incoming) {
+      predSet.insert(id);
+    }
+    return predSet;
+  }
   auto const dstSK = dstRec->srcKey();
   const SrcRec* dstSR = tc::findSrcRec(dstSK);
   assertx(dstSR);
-  TransIDSet predSet;
 
   auto srLock = dstSR->readlock();
   for (auto& inBr : dstSR->incomingBranches()) {

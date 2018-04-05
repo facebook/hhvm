@@ -35,6 +35,30 @@ function get_expect_file_and_type($test, $options) {
   return array(null, null);
 }
 
+function multi_request_modes() {
+  return array('relocate',
+               'retranslate-all',
+               'recycle-tc',
+               'jit-serialize');
+}
+
+function has_multi_request_mode($options) {
+  foreach (multi_request_modes() as $option) {
+    if (isset($options[$option])) return true;
+  }
+  return false;
+}
+
+function jit_serialize_option($cmd, $test, $options, $serialize) {
+  $serialized = "$test.repo/jit.dump";
+  $cmds = explode(' -- ', $cmd, 2);
+  $cmds[0] .=
+    ' --count=' . ($serialize ? $options['jit-serialize'] : 1) .
+    " -vEval.Jit" .
+    ($serialize ? 'SerializeTo=' : 'DeserializeFrom=+') . $serialized;
+  return implode(' -- ', $cmds);
+}
+
 function usage() {
   global $argv;
   return "usage: $argv[0] [-m jit|interp] [-r] <test/directories>";
@@ -115,6 +139,11 @@ Examples:
   # Use retranslate all.  Run the test n times, then run retranslate all, then
   # run the test n more on the new code.
   % $argv[0] --retranslate-all 2 quick
+
+  # Use jit-serialize.  Run the test n times, then run retranslate all,
+  # serialize the state, and then restart hhvm, load the serialized state and
+  # run retranslate-all before starting the test.
+  % $argv[0] --jit-serialize  2 -r quick
 
   # Run the Hack typechecker against quick typechecker.expect[f] files
   # Could explcitly use quick here too
@@ -515,6 +544,7 @@ function get_options($argv) {
     'relocate:' => '',
     'recycle-tc:' => '',
     'retranslate-all:' => '',
+    'jit-serialize:' => '',
     'hhvm-binary-path:' => 'b:',
     'typechecker' => '',
     'hhserver-binary-path:' => '',
@@ -571,18 +601,29 @@ function get_options($argv) {
     }
   }
 
+  if (isset($options['jit-serialize'])) {
+    if (!isset($options['repo'])) {
+      echo "jit-serialize only works in repo mode\n";
+      exit(1);
+    }
+    if (isset($options['mode']) && $options['mode'] != 'jit') {
+      echo "jit-serialize only works in jit mode\n";
+      exit(1);
+    }
+  }
+
   if (isset($options['repo']) && isset($options['hhas-round-trip'])) {
     echo "repo and hhas-round-trip are mutually exclusive options\n";
     exit(1);
   }
 
-  if (count(array_filter(array(
-        isset($options['relocate']),
-        isset($options['recycle-tc']),
-        isset($options['retranslate-all'])
-      ))) > 1) {
-    echo "relocate, retranslate-all and recycle-tc are mutually exclusive ".
-         "options\n";
+  $multi_request_modes = array_filter(multi_request_modes(),
+                                      function($x) use ($options) {
+                                        return isset($options[$x]);
+                                      });
+  if (count($multi_request_modes) > 1) {
+    echo "The options\n -", implode("\n -", $multi_request_modes),
+         "\nare mutually exclusive options\n";
     exit(1);
   }
 
@@ -791,19 +832,11 @@ function list_tests($files, $options) {
     $args[] = '-r';
   }
 
-  if (isset($options['relocate'])) {
-    $args[] = '--relocate';
-    $args[] = $options['relocate'];
-  }
-
-  if (isset($options['retranslate-all'])) {
-    $args[] = '--retranslate-all';
-    $args[] = $options['retranslate-all'];
-  }
-
-  if (isset($options['recycle-tc'])) {
-    $args[] = '--recycle-tc';
-    $args[] = $options['recycle-tc'];
+  foreach (multi_request_modes() as $option) {
+    if (isset($options[$option])) {
+      $args[] = '--' . $option;
+      $args[] = $options[$option];
+    }
   }
 
   foreach (find_tests($files, $options) as $test) {
@@ -938,6 +971,13 @@ function hhvm_cmd_impl() {
       $args[] = '--count='.$options['recycle-tc'];
       $args[] = '-vEval.StressUnitCacheFreq=1';
       $args[] = '-vEval.EnableReusableTC=true';
+    }
+
+    if (isset($options['jit-serialize'])) {
+      $args[] = '-vEval.JitPGO=true';
+      $args[] = '-vEval.JitRetranslateAllRequest='.$options['jit-serialize'];
+      // Set to timeout.  We want requests to trigger retranslate all.
+      $args[] = '-vEval.JitRetranslateAllSeconds=300';
     }
 
     if (isset($options['hhas-round-trip'])) {
@@ -2239,17 +2279,20 @@ function run_test($options, $test) {
   }
 
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
-  if ((isset($options['relocate']) ||
-       isset($options['recycle-tc']) ||
-       isset($options['retranslate-all'])) &&
-      preg_grep('/ --count[ =].* --count[ =]/', (array)$hhvm)) {
-    return 'skip';
+  if (has_multi_request_mode($options)) {
+    if (isset($options['jit-serialize'])) {
+      if (preg_grep('/ --count[ =][0-9]+ /', (array)$hhvm)) {
+        return 'skip';
+      }
+    } else {
+      if (preg_grep('/ --count[ =][0-9]+ .* --count[ =][0-9]+ /', (array)$hhvm)) {
+        return 'skip';
+      }
+    }
   }
 
-  if(file_exists($test . ".verify") && (isset($options['relocate'])   ||
-                                        isset($options['retranslate-all']) ||
-                                        isset($options['recycle-tc']) ||
-                                        isset($options['repo'])))     {
+  if (file_exists($test . ".verify") && (has_multi_request_mode($options) ||
+                                         isset($options['repo']))) {
       return 'skip-verify';
   }
 
@@ -2296,6 +2339,14 @@ function run_test($options, $test) {
           shell_exec("diff $hhas_temp1 $hhas_temp2 > $test.diff");
           return false;
         }
+      }
+
+      if (isset($options['jit-serialize'])) {
+        $cmd = timeout_prefix() .
+          jit_serialize_option($hhvm, $test, $options, true);
+        $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
+        if ($outputs === false) return false;
+        $hhvm = jit_serialize_option($hhvm, $test, $options, false);
       }
 
       return run_one_config($options, $test, $hhvm, $hhvm_env);
@@ -2476,6 +2527,11 @@ function print_commands($tests, $options) {
       }
       $hhbbc_cmds .=
         "diff $test.before.round_trip.hhas $test.after.round_trip.hhas\n";
+    }
+    if (isset($options['jit-serialize'])) {
+      $hhbbc_cmds .=
+        jit_serialize_option($command, $test, $options, true) . "\n";
+      $command = jit_serialize_option($command, $test, $options, false);
     }
     foreach ((array)$command as $c) {
       $hhbbc_cmds .= $c."\n";

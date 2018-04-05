@@ -41,6 +41,9 @@ struct TypedValue;
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
+
 /*
  * The Ptr enum is a lattice that represents the "pointerness" of a type:
  * whether it's a pointer at all, and what kind of location it may point to.
@@ -384,6 +387,11 @@ public:
   std::string constValString() const;
   static std::string debugString(Type t);
 
+  /*
+   * Serialization/deserialization.
+   */
+  void serialize(ProfDataSerializer&);
+  static Type deserialize(ProfDataDeserializer&);
 
   /////////////////////////////////////////////////////////////////////////////
   // DataType.

@@ -88,6 +88,7 @@ struct FixedVector {
 
   uint32_t size()  const { return m_impl.m_sp.size(); }
   bool     empty() const { return !size(); }
+  const T& back()  const { assertx(size()); return end()[-1]; }
 
   const T& operator[](uint32_t idx) const { return m_impl.m_sp.ptr()[idx]; }
         T& operator[](uint32_t idx)       { return m_impl.m_sp.ptr()[idx]; }

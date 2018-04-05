@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
@@ -90,6 +91,7 @@ void optimize(tc::FuncMetaInfo& info) {
     transArgs.kind = TransKind::Optimize;
 
     auto const spOff = region->entry()->initialSpOffset();
+    tc::createSrcRec(regionSk, spOff);
     auto data = translate(transArgs, spOff, info.tcBuf.view());
     if (data) {
       info.add(std::move(*data));
@@ -262,6 +264,11 @@ void retranslateAll() {
 
   if (serverMode) {
     Logger::Info("retranslateAll: starting to build the call graph");
+  }
+
+  if (RuntimeOption::RepoAuthoritative &&
+      !RuntimeOption::EvalJitSerializeTo.empty()) {
+    serializeProfData(RuntimeOption::EvalJitSerializeTo);
   }
 
   jit::hash_map<hfsort::TargetId, FuncId> target2FuncId;
@@ -560,12 +567,12 @@ bool retranslateAllEnabled() {
     RuntimeOption::EvalJitRetranslateAllSeconds != 0;
 }
 
-void checkRetranslateAll() {
+void checkRetranslateAll(bool force) {
   static std::atomic<bool> scheduled(false);
 
   if (!retranslateAllEnabled() ||
       scheduled.load(std::memory_order_relaxed) ||
-      !hasEnoughProfDataToRetranslateAll()) {
+      !(force || hasEnoughProfDataToRetranslateAll())) {
     return;
   }
   if (scheduled.exchange(true)) {
@@ -577,7 +584,7 @@ void checkRetranslateAll() {
   // emitted when retranslateAll() runs, which avoids the need for additional
   // locking on the ProfData. We use a fresh thread to avoid stalling the
   // treadmill, the thread is joined in the processExit handler for mcgen.
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (!force && RuntimeOption::ServerExecutionMode()) {
     Logger::Info("Scheduling the retranslation of all profiled translations");
     Treadmill::enqueue([] {
       s_retranslateAllThread = std::thread([] { retranslateAll(); });

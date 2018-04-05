@@ -837,6 +837,14 @@ public:
 
   UserAttributeMap metaData() const;
 
+  // Return true, and set the m_serialized flag, iff this Unit hasn't
+  // been serialized yet (see prof-data-serialize.cpp).
+  bool serialize() const {
+    if (m_serialized) return false;
+    const_cast<Unit*>(this)->m_serialized = true;
+    return true;
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
@@ -880,6 +888,7 @@ private:
   bool m_useStrictTypes : 1;
   bool m_useStrictTypesForBuiltins : 1;
   bool m_extended : 1;
+  bool m_serialized : 1;
   LowStringPtr m_dirpath{nullptr};
 
   TypedValue m_mainReturn;

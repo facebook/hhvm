@@ -40,6 +40,8 @@ namespace HPHP {
  */
 struct ArrayTypeTable {
   struct Builder;
+  using Table = CompactVector<const RepoAuthType::Array*>;
+  using iterator = Table::const_iterator;
 
   /*
    * Re-populate an ArrayTypeTable using a builder object.
@@ -66,6 +68,9 @@ struct ArrayTypeTable {
   template<class SerDe>
   typename std::enable_if<!SerDe::deserializing>::type serde(SerDe&);
 
+  iterator begin() const { return m_arrTypes.begin(); }
+  iterator end() const { return m_arrTypes.end(); }
+  size_t size() const { return m_arrTypes.size(); }
 private:
   /*
    * Check that the ArrayTypeTable is fully resolved after deserialization.
@@ -73,7 +78,7 @@ private:
   bool check(const RepoAuthType::Array*) const;
 
 private:
-  CompactVector<const RepoAuthType::Array*> m_arrTypes;
+  Table m_arrTypes;
 };
 
 //////////////////////////////////////////////////////////////////////

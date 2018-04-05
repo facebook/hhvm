@@ -272,7 +272,11 @@ void invalidateSrcKey(SrcKey sk) {
    * new one.
    */
   auto const sr = srcDB().find(sk);
-  always_assert(sr);
+  if (!sr) {
+    always_assert(profData()->wasDeserialized());
+    return;
+  }
+
   /*
    * Since previous translations aren't reachable from here, we know we
    * just created some garbage in the TC. We currently have no mechanism

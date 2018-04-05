@@ -938,7 +938,9 @@ UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   }
 #endif
 
-  return ue.create();
+  auto unit = ue.create();
+  FTRACE(1, "Creating unit {} for `{}`\n", unit.get(), name);
+  return unit;
 }
 
 void UnitRepoProxy::InsertUnitStmt

@@ -110,10 +110,13 @@ TCA retranslate(TransArgs args, const RegionContext& ctx);
 bool retranslateOpt(FuncId funcId);
 
 /*
- * In JitPGO mode, check whether enough profile data has been collected and,
- * if we haven't retranslated
+ * In JitPGO mode, run retranslateAll if its enabled, we haven't already run it,
+ * and either force is true, or we've collected "enough" profile data.
+ *
+ * In CLI mode, or when force is true, wait for retranslateAll to
+ * finish; otherwise let it run in parallel.
  */
-void checkRetranslateAll();
+void checkRetranslateAll(bool force = false);
 
 /*
  * Called once when the JIT is activated to initialize internal mcgen structures

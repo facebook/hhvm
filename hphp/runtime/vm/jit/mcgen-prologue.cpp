@@ -135,6 +135,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
         args.kind = TransKind::Optimize;
         args.region = selectHotRegion(funcletTransId);
         auto const spOff = args.region->entry()->initialSpOffset();
+        tc::createSrcRec(funcletSK, spOff);
         if (auto res = translate(args, spOff, info.tcBuf.view())) {
           // Flag that this translation has been retranslated, so that
           // it's not retranslated again along with the function body.

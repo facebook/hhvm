@@ -158,6 +158,11 @@ inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind,
   , m_ptr(reinterpret_cast<uintptr_t>(arrTy))
 {}
 
+inline void ArraySpec::adjust(const RepoAuthType::Array* adjusted) {
+  assertx(type() && adjusted);
+  m_ptr = reinterpret_cast<uintptr_t>(adjusted);
+}
+
 inline folly::Optional<ArrayData::ArrayKind> ArraySpec::kind() const {
   auto kind = static_cast<ArrayData::ArrayKind>(m_kind);
   return (m_sort & HasKind) ? folly::make_optional(kind) : folly::none;

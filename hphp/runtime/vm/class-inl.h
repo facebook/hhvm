@@ -190,6 +190,14 @@ inline const Func* Class::getToString() const {
   return m_toString;
 }
 
+inline const Func* Class::get86pinit() const {
+  return m_pinitVec.back();
+}
+
+inline const Func* Class::get86sinit() const {
+  return m_sinitVec.back();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Builtin classes.
 
@@ -277,6 +285,16 @@ inline bool Class::forbidsDynamicProps() const {
 
 inline bool Class::hasImmutableProps() const {
   return attrs() & AttrHasImmutable;
+}
+
+inline bool Class::serialize() const {
+  if (m_serialized) return false;
+  m_serialized = true;
+  return true;
+}
+
+inline bool Class::wasSerialized() const {
+  return m_serialized;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

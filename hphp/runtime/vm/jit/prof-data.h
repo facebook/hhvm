@@ -160,7 +160,10 @@ struct ProfTransRec {
   /*
    * First BC offset in this translation.
    */
-  Offset startBcOff() const { return m_region->start().offset(); }
+  Offset startBcOff() const {
+    assertx(m_kind == TransKind::Profile);
+    return m_region->start().offset();
+  }
 
   /*
    * Last BC offset in this translation.
@@ -317,6 +320,9 @@ struct ProfData {
     Treadmill::Session m_ts;
   };
 
+  bool wasDeserialized() const { return m_wasDeserialized; }
+  void setDeserialized() { m_wasDeserialized = true; }
+
   /*
    * Allocate a new id for a translation. Depending on the kind of the
    * translation, a TransRec for it may or may not be created later by calling
@@ -367,6 +373,16 @@ struct ProfData {
     return initVal - counter;
   }
 
+  /*
+   * Used for save/restore during serialization.
+   */
+  int64_t counterDefault() const {
+    return m_counters.getDefault();
+  }
+  void resetCounters(int64_t val) {
+    m_counters.resetAllCounters(val);
+  }
+
   ProfCounters<int64_t> takeCounters() {
     return std::move(m_counters);
   }
@@ -377,6 +393,13 @@ struct ProfData {
   int64_t* transCounterAddr(TransID id) {
     // getAddr() can grow the slab list, so grab a write lock.
     folly::SharedMutex::WriteHolder lock{m_transLock};
+    return m_counters.getAddr(id);
+  }
+
+  /*
+   * As above, if we already hold the lock.
+   */
+  int64_t* transCounterAddrNoLock(TransID id) {
     return m_counters.getAddr(id);
   }
 
@@ -407,6 +430,12 @@ struct ProfData {
    */
   void addTransProfile(TransID, const RegionDescPtr&, const PostConditions&);
   void addTransProfPrologue(TransID, SrcKey, int);
+
+  /*
+   * Add a ProfTransRec. Only used when deserializing the profile data, and
+   * must be called in single threaded context.
+   */
+  void addProfTrans(TransID transID, std::unique_ptr<ProfTransRec> tr);
 
   /*
    * Check if a (function|SrcKey) has been marked as optimized.
@@ -649,6 +678,8 @@ private:
 
   mutable folly::SharedMutex m_targetProfilesLock;
   std::unordered_map<TransID, std::vector<TargetProfileInfo>> m_targetProfiles;
+
+  bool m_wasDeserialized{false};
 };
 
 //////////////////////////////////////////////////////////////////////

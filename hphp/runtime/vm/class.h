@@ -542,6 +542,8 @@ public:
   const Func* getDeclaredCtor() const;
   const Func* getDtor() const;
   const Func* getToString() const;
+  const Func* get86pinit() const;
+  const Func* get86sinit() const;
 
   /*
    * Look up a class' cached __invoke function.  We only cache __invoke methods
@@ -643,7 +645,7 @@ public:
   /*
    * Number of declared instance properties that are actually accessible from
    * this class's context.
-   *
+    *
    * Only really used when iterating over an object's properties.
    */
   uint32_t declPropNumAccessible() const;
@@ -687,6 +689,18 @@ public:
    */
   bool hasImmutableProps() const;
 
+  /*
+   * Return true, and set the m_serialized flag, iff this Class hasn't
+   * been serialized yet (see prof-data-serialize.cpp).
+   *
+   * Not thread safe - caller is responsible for any necessary locking.
+   */
+  bool serialize() const;
+
+  /*
+   * Return true if this class was already serialized.
+   */
+  bool wasSerialized() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Property initialization.                                           [const]
@@ -1429,7 +1443,10 @@ private:
 
   bool m_needsInitThrowable : 1;
   bool m_hasDeepInitProps : 1;
-
+  /*
+   * Whether this class has been serialized yet.
+   */
+  mutable bool m_serialized : 1;
   /*
    * Cache of m_preClass->attrs().
    */

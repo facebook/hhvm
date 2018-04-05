@@ -1130,6 +1130,10 @@ struct Func final {
   void setHasPrivateAncestor(bool b);
   void setMethodSlot(Slot s);
 
+  // Return true, and set the m_serialized flag, iff this Func hasn't
+  // been serialized yet (see prof-data-serialize.cpp).
+  bool serialize() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
@@ -1381,6 +1385,7 @@ private:
   bool m_hasPrivateAncestor : 1;
   bool m_shouldSampleJit : 1;
   bool m_hot : 1;
+  bool m_serialized : 1;
   int m_maxStackCells{0};
   uint64_t m_refBitVal{0};
   Unit* const m_unit;

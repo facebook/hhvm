@@ -70,6 +70,8 @@
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
@@ -2296,6 +2298,21 @@ void hphp_process_init() {
       apc_load(apcExtension::LoadThread);
     }
     BootStats::mark("apc_load");
+  }
+
+  if (RuntimeOption::RepoAuthoritative &&
+      !RuntimeOption::EvalJitDeserializeFrom.empty() &&
+      jit::mcgen::retranslateAllEnabled()) {
+    auto const name = RuntimeOption::EvalJitDeserializeFrom[0] == '+' ?
+      RuntimeOption::EvalJitDeserializeFrom.substr(1) :
+      RuntimeOption::EvalJitDeserializeFrom;
+    if (jit::deserializeProfData(name)) {
+      jit::mcgen::checkRetranslateAll(true);
+    } else if (RuntimeOption::EvalJitDeserializeFrom[0] == '+') {
+      Logger::Error("Failed to deserialize jit profile.");
+      hphp_process_exit();
+      exit(1);
+    }
   }
 
   rds::requestExit();

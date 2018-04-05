@@ -163,6 +163,23 @@ void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, int nArgs) {
   m_transRecs[transID].reset(new ProfTransRec(sk, nArgs));
 }
 
+void ProfData::addProfTrans(TransID transID,
+                            std::unique_ptr<ProfTransRec> ptr) {
+  assertx(transID >= m_transRecs.size());
+  if (transID > m_transRecs.size()) m_transRecs.resize(transID);
+  auto const sk = ptr->srcKey();
+  if (ptr->kind() == TransKind::Profile) {
+    if (sk.func()->isDVEntry(sk.offset())) {
+      m_dvFuncletDB.emplace(sk.toAtomicInt(), transID);
+    }
+    m_funcProfTrans[sk.funcID()].push_back(transID);
+  } else {
+    m_proflogueDB.emplace(PrologueID{sk.funcID(), ptr->prologueArgs()},
+                          transID);
+  }
+  m_transRecs.emplace_back(std::move(ptr));
+}
+
 bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
   auto it = m_blockEndOffsets.find(func->getFuncId());
   if (it == m_blockEndOffsets.end()) {

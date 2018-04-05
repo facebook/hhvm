@@ -159,11 +159,16 @@ RegionDesc::Block* RegionDesc::addBlock(SrcKey      sk,
                                         int         length,
                                         FPInvOffset spOffset) {
   m_blocks.push_back(
-    std::make_shared<Block>(sk.func(), sk.resumeMode(), sk.hasThis(),
-                            sk.offset(), length, spOffset));
+    std::make_shared<Block>(kInvalidTransID, sk.func(), sk.resumeMode(),
+                            sk.hasThis(), sk.offset(), length, spOffset));
   BlockPtr block = m_blocks.back();
   m_data[block->id()] = BlockData(block);
   return block.get();
+}
+
+void RegionDesc::addBlock(BlockPtr newBlock) {
+  m_blocks.push_back(newBlock);
+  m_data[newBlock->id()] = BlockData{newBlock};
 }
 
 void RegionDesc::replaceBlock(BlockId bid, BlockPtr newBlock) {
@@ -227,7 +232,26 @@ const RegionDesc::BlockIdSet& RegionDesc::succs(BlockId id) const {
 }
 
 const RegionDesc::BlockIdSet& RegionDesc::preds(BlockId id) const {
-  return data(id).preds;
+  auto const& data = this->data(id);
+  if (data.hasIncoming) {
+    assertx(data.succs.empty());
+    return data.succs;
+  }
+  return data.preds;
+}
+
+const RegionDesc::BlockIdSet* RegionDesc::incoming() const {
+  auto const& data = this->data(entry()->id());
+  return data.hasIncoming ? &data.preds : nullptr;
+}
+
+void RegionDesc::incoming(RegionDesc::BlockIdSet&& ids) {
+  auto& data = this->data(entry()->id());
+  assertx(data.succs.empty());
+  assertx(data.preds.empty());
+  assertx(!data.hasIncoming);
+  data.hasIncoming = true;
+  data.preds = std::move(ids);
 }
 
 const RegionDesc::BlockIdSet& RegionDesc::merged(BlockId id) const {
@@ -588,14 +612,14 @@ bool hasTransID(RegionDesc::BlockId blockId) {
   return blockId >= 0;
 }
 
-RegionDesc::Block::Block(const Func* func,
+RegionDesc::Block::Block(BlockId     id,
+                         const Func* func,
                          ResumeMode  resumeMode,
                          bool        hasThis,
                          Offset      start,
                          int         length,
                          FPInvOffset initSpOff)
-  : m_id(s_nextId.fetch_sub(1, std::memory_order_relaxed))
-  , m_func(func)
+  : m_func(func)
   , m_resumeMode(resumeMode)
   , m_hasThis(hasThis)
   , m_start(start)
@@ -604,6 +628,20 @@ RegionDesc::Block::Block(const Func* func,
   , m_initialSpOffset(initSpOff)
   , m_profTransID(kInvalidTransID)
 {
+  if (id == kInvalidTransID) {
+    m_id = s_nextId.fetch_sub(1, std::memory_order_relaxed);
+  } else {
+    m_id = id;
+    while (true) {
+      auto expected = s_nextId.load(std::memory_order_relaxed);
+      if (id > expected) break;
+      if (s_nextId.compare_exchange_weak(expected, id - 1,
+                                         std::memory_order_relaxed)) {
+        break;
+      }
+    }
+  }
+
   assertx(length >= 0);
   if (length > 0) {
     SrcKey sk(func, start, resumeMode, hasThis);

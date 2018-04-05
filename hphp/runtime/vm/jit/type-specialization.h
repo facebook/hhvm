@@ -47,6 +47,11 @@ struct ArraySpec {
   ArraySpec(ArrayData::ArrayKind kind, const RepoAuthType::Array* arrTy);
 
   /*
+   * Post-deserialization fixup.
+   */
+  void adjust(const RepoAuthType::Array* adjusted);
+
+  /*
    * Accessors.
    *
    * These return falsey values (folly::none or nullptr) if the respective bit

@@ -20,7 +20,8 @@ module Hg_actual = struct
 
 let exec_hg args =
   (** Disable user aliases or configs. *)
-  Process.exec "env" ("HGPLAIN=1" :: "hg" :: args)
+  Process.exec "/bin/bash" ("--norc" :: "--noprofile" :: "-c" ::
+    "HGPLAIN=1 \"$@\"" :: "bash" :: "hg" :: args)
 
 (** Given a list of files and their revisions, saves the files to the output
  * directory. For example,

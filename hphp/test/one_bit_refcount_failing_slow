@@ -13,3 +13,8 @@ slow/ext_vsdebug/initialize.php
 slow/ext_vsdebug/launch.php
 slow/ext_vsdebug/set_variable.php
 slow/ext_vsdebug/step.php
+slow/dict/ref-fail-leak.php
+slow/inout/tuple/tests/complex-expr.php
+slow/inout/tuple/tests/invalid-index.php
+slow/vec/ref-fail-leak.php
+slow/unserialize-reference-overwritten.php

@@ -102,7 +102,7 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
 
   bool isReferenced() const {
     assertx(kindIsValid());
-    return m_count >= 2;
+    return hasMultipleRefs();
   }
 
 private:

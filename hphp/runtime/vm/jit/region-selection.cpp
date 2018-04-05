@@ -19,6 +19,7 @@
 #include <fstream>
 #include <functional>
 #include <exception>
+#include <sstream>
 #include <utility>
 #include <iostream>
 

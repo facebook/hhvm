@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
+#include <sstream>
+
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 

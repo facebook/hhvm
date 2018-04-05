@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
+#include <sstream>
 #include <type_traits>
 
 #include "hphp/runtime/base/stats.h"

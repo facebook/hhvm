@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <algorithm>
 

@@ -15,6 +15,8 @@
 */
 #include "hphp/runtime/vm/repo.h"
 
+#include <sstream>
+
 #include <folly/Format.h>
 #include <folly/Singleton.h>
 

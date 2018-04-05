@@ -27,6 +27,7 @@
 
 #include "hphp/util/dataflow-worklist.h"
 
+#include <sstream>
 #include <unordered_map>
 
 namespace HPHP { namespace jit {

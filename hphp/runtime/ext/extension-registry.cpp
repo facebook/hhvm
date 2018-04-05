@@ -1,4 +1,7 @@
 #include "hphp/runtime/ext/extension-registry.h"
+
+#include <sstream>
+
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/litstr-table.h"

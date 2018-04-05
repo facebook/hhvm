@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/param.h>
+#include <sstream>
 #include <vector>
 
 #include <folly/MapUtil.h>

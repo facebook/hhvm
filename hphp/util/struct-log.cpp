@@ -16,6 +16,8 @@
 
 #include "hphp/util/struct-log.h"
 
+#include <sstream>
+
 #include <folly/Random.h>
 
 #include "hphp/util/stack-trace.h"

@@ -30,6 +30,7 @@
 #include <folly/MapUtil.h>
 
 #include <algorithm>
+#include <sstream>
 
 /*
  * This module implements two code layout strategies for sorting a Vunit's

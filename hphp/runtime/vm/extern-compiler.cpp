@@ -19,6 +19,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <signal.h>
+#include <sstream>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>

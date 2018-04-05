@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/ref-deps.h"
 
 #include <iostream>
+#include <sstream>
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

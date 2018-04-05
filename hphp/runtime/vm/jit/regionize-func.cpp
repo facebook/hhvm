@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 #include <vector>
 
 #include "hphp/util/assertions.h"

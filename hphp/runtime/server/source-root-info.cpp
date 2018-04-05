@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/server/source-root-info.h"
+
+#include <sstream>
+
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/php-globals.h"

@@ -30,6 +30,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <sstream>
 
 namespace HPHP { namespace jit {
 

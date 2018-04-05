@@ -1949,6 +1949,7 @@ let expression_errors env node parents errors =
     make_error_from_node node SyntaxError.elvis_operator_space :: errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
+
 let require_errors env node parents trait_use_clauses errors =
   match syntax node with
   | RequireClause p ->
@@ -2209,12 +2210,17 @@ let use_class_or_namespace_clause_errors
       | Some p -> combine_names p name_text in
     let short_name = get_short_name_from_qualified_name name_text (text alias) in
 
-    let do_check ~error_on_global_redefinition names errors
+    let do_check ?(case_sensitive = false) ~error_on_global_redefinition names errors
       get_map update_map report_error =
-
+      (* We store the original names in the SMap of names for error messaging purposes
+        but we check for case sensitivity specifically. *)
+      let find_name name =
+        if case_sensitive
+        then short_name = name
+        else (String.lowercase_ascii short_name) = String.lowercase_ascii name in
       let map = get_map names in
-      match SMap.get short_name map with
-      | Some { f_location = location; f_kind; _ } ->
+      match SMap.find_first_opt find_name map with
+      | Some (_, { f_location = location; f_kind; _ }) ->
         if (f_kind <> Name_def
            || (error_on_global_redefinition && is_global_namespace))
         then
@@ -2230,7 +2236,8 @@ let use_class_or_namespace_clause_errors
             ~kind:Name_use
             (make_location_of_node name)
             global_namespace_name qualified_name in
-        update_map names (SMap.add short_name new_use map), errors in
+        update_map names (SMap.add short_name new_use map), errors
+    in
 
     begin match syntax kind with
     | Token token ->
@@ -2255,7 +2262,7 @@ let use_class_or_namespace_clause_errors
           SyntaxError.function_name_is_already_in_use
 
       | Const ->
-        do_check ~error_on_global_redefinition:true names errors
+        do_check ~case_sensitive:true ~error_on_global_redefinition:true names errors
           (fun n -> n.t_constants)
           (fun n v -> { n with t_constants = v })
           SyntaxError.const_name_is_already_in_use

@@ -922,9 +922,12 @@ int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
   assertx(ad1->isPHPArray());
   assertx(ad2->isPHPArray());
 
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatDVCmpNotices &&
-               !ArrayData::dvArrayEqual(ad1, ad2))) {
-    raiseHackArrCompatDVArrCmp(ad1, ad2);
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatDVCmpNotices)) {
+    if (!ArrayData::dvArrayEqual(ad1, ad2)) {
+      raiseHackArrCompatDVArrCmp(ad1, ad2);
+    } else if (ad1->isDArray()) {
+      raise_hackarr_compat_notice("Comparing two darrays relationally");
+    }
   }
 
   auto const size1 = ad1->size();

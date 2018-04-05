@@ -36,6 +36,7 @@ function test_literals() {
   try { darray[] == []; } catch (Exception $e) { report($e); }
   try { [] == varray[]; } catch (Exception $e) { report($e); }
   try { [] == darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] == darray[]; } catch (Exception $e) { report($e); }
 
   try { varray[] != darray[]; } catch (Exception $e) { report($e); }
   try { varray[] != []; } catch (Exception $e) { report($e); }
@@ -43,6 +44,7 @@ function test_literals() {
   try { darray[] != []; } catch (Exception $e) { report($e); }
   try { [] != varray[]; } catch (Exception $e) { report($e); }
   try { [] != darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] != darray[]; } catch (Exception $e) { report($e); }
 
   try { varray[] === darray[]; } catch (Exception $e) { report($e); }
   try { varray[] === []; } catch (Exception $e) { report($e); }
@@ -50,6 +52,7 @@ function test_literals() {
   try { darray[] === []; } catch (Exception $e) { report($e); }
   try { [] === varray[]; } catch (Exception $e) { report($e); }
   try { [] === darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] === darray[]; } catch (Exception $e) { report($e); }
 
   try { varray[] !== darray[]; } catch (Exception $e) { report($e); }
   try { varray[] !== []; } catch (Exception $e) { report($e); }
@@ -57,6 +60,7 @@ function test_literals() {
   try { darray[] !== []; } catch (Exception $e) { report($e); }
   try { [] !== varray[]; } catch (Exception $e) { report($e); }
   try { [] !== darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] !== darray[]; } catch (Exception $e) { report($e); }
 
   try { varray[] < darray[]; } catch (Exception $e) { report($e); }
   try { varray[] < []; } catch (Exception $e) { report($e); }
@@ -64,6 +68,7 @@ function test_literals() {
   try { darray[] < []; } catch (Exception $e) { report($e); }
   try { [] < varray[]; } catch (Exception $e) { report($e); }
   try { [] < darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] < darray[]; } catch (Exception $e) { report($e); }
 
   try { varray[] > darray[]; } catch (Exception $e) { report($e); }
   try { varray[] > []; } catch (Exception $e) { report($e); }
@@ -71,6 +76,7 @@ function test_literals() {
   try { darray[] > []; } catch (Exception $e) { report($e); }
   try { [] > varray[]; } catch (Exception $e) { report($e); }
   try { [] > darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] > darray[]; } catch (Exception $e) { report($e); }
 
   try { varray[] <=> darray[]; } catch (Exception $e) { report($e); }
   try { varray[] <=> []; } catch (Exception $e) { report($e); }
@@ -78,6 +84,7 @@ function test_literals() {
   try { darray[] <=> []; } catch (Exception $e) { report($e); }
   try { [] <=> varray[]; } catch (Exception $e) { report($e); }
   try { [] <=> darray[]; } catch (Exception $e) { report($e); }
+  try { darray[] <=> darray[]; } catch (Exception $e) { report($e); }
 }
 
 function handler($errno, $errstr) { throw new Exception($errstr); }

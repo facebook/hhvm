@@ -1,0 +1,51 @@
+<?hh
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+function test_preg_match() {
+  echo "====================== preg_match ============================\n";
+
+  preg_match_all('/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\\])?\s\*(?:=[^,;]+)?)*)\s*;/S', 'unsigned int xpto = 124; short a, b;', $m, PREG_SET_ORDER | PREG_HACK_ARR);
+  var_dump($m);
+
+  preg_match_all('/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\\])?\s\*(?:=[^,;]+)?)*)\s*;/S', 'unsigned int xpto = 124; short a, b;', $m, PREG_SET_ORDER | PREG_OFFSET_CAPTURE | PREG_HACK_ARR);
+  var_dump($m);
+
+  preg_match_all('/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\\])?\s\*(?:=[^,;]+)?)*)\s*;/S', 'unsigned int xpto = 124; short a, b;', $m, PREG_OFFSET_CAPTURE | PREG_HACK_ARR);
+  var_dump($m);
+
+  preg_match_all('/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\\])?\s\*(?:=[^,;]+)?)*)\s*;/S', 'unsigned int xpto = 124; short a, b;', $m, PREG_PATTERN_ORDER | PREG_HACK_ARR);
+  var_dump($m);
+
+  preg_match_all('/((?P<foobaz1>(?:unsigned|struct)\s+)?\w+)(?P<foobaz2>\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\\[\s*\w*\s*\\])?\s*(?:=[^,;]+)?)*)\s*;/S', 'unsigned int xpto = 124; short a, b;', $m, PREG_PATTERN_ORDER | PREG_HACK_ARR);
+  var_dump($m);
+
+  preg_match('/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\\])?\s*(?:\=[^,;]+)?)*)\s*;/S', 'unsigned int xpto = 124; short a, b;', $m, PREG_HACK_ARR);
+  var_dump($m);
+
+  preg_match('/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\\])?\s*(?:\=[^,;]+)?)*)\s*;/S', 'unsigned int xpto = 124; short a, b;', $m, PREG_OFFSET_CAPTURE | PREG_HACK_ARR);
+  var_dump($m);
+}
+
+function test_preg_grep() {
+  echo "====================== preg_grep =============================\n";
+  $strs1 = ['a', '1', 'q6', 'h20'];
+  $strs2 = ['key1' => 'a', 'key2' =>'1', 'key3' => 'q6', 'key4' => 'h20'];
+  var_dump(preg_grep('/^(\d|.\d)$/', $strs1, PREG_HACK_ARR));
+  var_dump(preg_grep('/^(\d|.\d)$/', $strs1, PREG_GREP_INVERT | PREG_HACK_ARR));
+  var_dump(preg_grep('/^(\d|.\d)$/', $strs2, PREG_HACK_ARR));
+  var_dump(preg_grep('/^(\d|.\d)$/', $strs2, PREG_GREP_INVERT | PREG_HACK_ARR));
+}
+
+function test_preg_split() {
+  echo "====================== preg_split =============================\n";
+  var_dump(preg_split("//", "string", -1, PREG_HACK_ARR));
+  var_dump(preg_split("//", "string", 3, PREG_HACK_ARR));
+  var_dump(preg_split("//", "string", -1, PREG_SPLIT_OFFSET_CAPTURE | PREG_HACK_ARR));
+  var_dump(preg_split("//", "string", 3, PREG_SPLIT_OFFSET_CAPTURE | PREG_HACK_ARR));
+  var_dump(preg_split("//", "string", -1, PREG_SPLIT_OFFSET_CAPTURE | PREG_HACK_ARR | PREG_SPLIT_NO_EMPTY));
+  var_dump(preg_split("//", "string", 3, PREG_SPLIT_OFFSET_CAPTURE | PREG_HACK_ARR | PREG_SPLIT_NO_EMPTY));
+}
+
+test_preg_match();
+test_preg_grep();
+test_preg_split();

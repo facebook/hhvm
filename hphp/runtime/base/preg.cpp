@@ -914,8 +914,11 @@ static int* create_offset_array(const pcre_cache_entry* pce,
 static inline void add_offset_pair(Array& result,
                                    const String& str,
                                    int offset,
-                                   const char* name) {
-  auto match_pair = make_packed_array(str, offset);
+                                   const char* name,
+                                   bool hackArrOutput) {
+  auto match_pair = hackArrOutput
+    ? make_vec_array(str, offset)
+    : make_packed_array(str, offset);
   if (name) result.set(String(name), match_pair);
   result.append(match_pair);
 }
@@ -999,8 +1002,10 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
   }
   SmartFreeHelper freer(offsets);
 
+  const bool hackArrOutput = flags & PREG_HACK_ARR;
+
   /* Initialize return array */
-  Array ret = Array::Create();
+  auto ret = hackArrOutput ? Array::CreateDict() : Array::Create();
   tl_last_error_code = PHP_PCRE_NO_ERROR;
 
   /* Go through the input array */
@@ -1045,6 +1050,18 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+Array& forceToOutput(Variant& var, bool hackArrOutput) {
+  return hackArrOutput ? forceToDict(var) : forceToArray(var);
+}
+
+Array& forceToOutput(member_lval lval, bool hackArrOutput) {
+  return hackArrOutput ? forceToDict(lval) : forceToArray(lval);
+}
+
+}
+
 static Variant preg_match_impl(const StringData* pattern,
                                const StringData* subject,
                                Variant* subpats, int flags, int start_offset,
@@ -1055,10 +1072,12 @@ static Variant preg_match_impl(const StringData* pattern,
   }
   const pcre_cache_entry* pce = accessor.get();
 
+  const bool hackArrOutput = flags & PREG_HACK_ARR;
+
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
   if (subpats) {
-    *subpats = Array::Create();
+    *subpats = hackArrOutput ? Array::CreateDict() : Array::Create();
   }
   int exec_options = 0;
 
@@ -1104,11 +1123,12 @@ static Variant preg_match_impl(const StringData* pattern,
   }
 
   /* Allocate match sets array and initialize the values. */
-  Array match_sets; /* An array of sets of matches for each
-                       subpattern after a global match */
+
+  /* An array of sets of matches for each subpattern after a global match */
+  auto match_sets = hackArrOutput ? Array::CreateDict() : Array::Create();
   if (global && subpats_order == PREG_PATTERN_ORDER) {
     for (int i = 0; i < num_subpats; i++) {
-      match_sets.set(i, Array::Create());
+      match_sets.set(i, hackArrOutput ? Array::CreateDict() : Array::Create());
     }
   }
 
@@ -1168,14 +1188,16 @@ static Variant preg_match_impl(const StringData* pattern,
             for (i = 0; i < count; i++) {
               if (offset_capture) {
                 auto const lval = match_sets.lvalAt(i);
-                add_offset_pair(forceToArray(lval),
+                add_offset_pair(forceToOutput(lval, hackArrOutput),
                                 String(stringlist[i],
                                        offsets[(i<<1)+1] - offsets[i<<1],
                                        CopyString),
-                                offsets[i<<1], nullptr);
+                                offsets[i<<1],
+                                nullptr,
+                                hackArrOutput);
               } else {
                 auto const lval = match_sets.lvalAt(i);
-                forceToArray(lval).append(
+                forceToOutput(lval, hackArrOutput).append(
                   String(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                     CopyString)
                 );
@@ -1189,11 +1211,13 @@ static Variant preg_match_impl(const StringData* pattern,
             if (count < num_subpats) {
               for (; i < num_subpats; i++) {
                 auto const lval = match_sets.lvalAt(i);
-                forceToArray(lval).append("");
+                forceToOutput(lval, hackArrOutput).append("");
               }
             }
           } else {
-            Array result_set = Array::Create();
+            auto result_set = hackArrOutput
+              ? Array::CreateDict()
+              : Array::Create();
 
             /* Add all the subpatterns to it */
             for (i = 0; i < count; i++) {
@@ -1202,7 +1226,9 @@ static Variant preg_match_impl(const StringData* pattern,
                                 String(stringlist[i],
                                        offsets[(i<<1)+1] - offsets[i<<1],
                                        CopyString),
-                                offsets[i<<1], subpat_names[i]);
+                                offsets[i<<1],
+                                subpat_names[i],
+                                hackArrOutput);
               } else {
                 String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                              CopyString);
@@ -1213,24 +1239,30 @@ static Variant preg_match_impl(const StringData* pattern,
               }
             }
             /* And add it to the output array */
-            forceToArray(*subpats).append(std::move(result_set));
+            forceToOutput(*subpats, hackArrOutput).append(
+              std::move(result_set)
+            );
           }
         } else {      /* single pattern matching */
           /* For each subpattern, insert it into the subpatterns array. */
           for (i = 0; i < count; i++) {
             if (offset_capture) {
-              add_offset_pair(forceToArray(*subpats),
+              add_offset_pair(forceToOutput(*subpats, hackArrOutput),
                               String(stringlist[i],
                                      offsets[(i<<1)+1] - offsets[i<<1],
                                      CopyString),
-                              offsets[i<<1], subpat_names[i]);
+                              offsets[i<<1],
+                              subpat_names[i],
+                              hackArrOutput);
             } else {
               String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                            CopyString);
               if (subpat_names[i]) {
-                forceToArray(*subpats).set(String(subpat_names[i]), value);
+                forceToOutput(*subpats, hackArrOutput).set(
+                  String(subpat_names[i]), value
+                );
               }
-              forceToArray(*subpats).append(value);
+              forceToOutput(*subpats, hackArrOutput).append(value);
             }
           }
         }
@@ -1272,9 +1304,11 @@ static Variant preg_match_impl(const StringData* pattern,
   if (subpats && global && subpats_order == PREG_PATTERN_ORDER) {
     for (i = 0; i < num_subpats; i++) {
       if (subpat_names[i]) {
-        forceToArray(*subpats).set(String(subpat_names[i]), match_sets[i]);
+        forceToOutput(*subpats, hackArrOutput).set(
+          String(subpat_names[i]), match_sets[i]
+        );
       }
-      forceToArray(*subpats).append(match_sets[i]);
+      forceToOutput(*subpats, hackArrOutput).append(match_sets[i]);
     }
   }
   return matched;
@@ -1834,8 +1868,10 @@ Variant preg_split(const String& pattern, const String& subject,
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
 
+  const bool hackArrOutput = flags & PREG_HACK_ARR;
+
   // Get next piece if no limit or limit not yet reached and something matched
-  Array return_value = Array::Create();
+  Array return_value = hackArrOutput ? Array::CreateDict() : Array::Create();
   int g_notempty = 0;   /* If the match should not be empty */
   int utf8_check = 0;
   PCRECache::Accessor bump_accessor;
@@ -1867,7 +1903,9 @@ Variant preg_split(const String& pattern, const String& subject,
                           String(last_match,
                                  subject.data() + offsets[0] - last_match,
                                  CopyString),
-                          next_offset, nullptr);
+                          next_offset,
+                          nullptr,
+                          hackArrOutput);
         } else {
           /* Add the piece to the return value */
           return_value.append(String(last_match,
@@ -1893,7 +1931,9 @@ Variant preg_split(const String& pattern, const String& subject,
               add_offset_pair(return_value,
                               String(subject.data() + offsets[i<<1],
                                      match_len, CopyString),
-                              offsets[i<<1], nullptr);
+                              offsets[i<<1],
+                              nullptr,
+                              hackArrOutput);
             } else {
               return_value.append(subject.substr(offsets[i<<1], match_len));
             }
@@ -1968,7 +2008,7 @@ Variant preg_split(const String& pattern, const String& subject,
       /* Add the last (match, offset) pair to the return value */
       add_offset_pair(return_value,
                       subject.substr(start_offset),
-                      start_offset, nullptr);
+                      start_offset, nullptr, hackArrOutput);
     } else {
       /* Add the last piece to the return value */
       return_value.append

@@ -2815,6 +2815,8 @@ bool implTypeStructureHelper(
       break;
     case TypeStructure::Kind::T_mixed:
       return true;
+    case TypeStructure::Kind::T_nonnull:
+      return type != KindOfNull;
     case TypeStructure::Kind::T_tuple: {
       if (!isArrayLikeType(type)) {
         result = false;

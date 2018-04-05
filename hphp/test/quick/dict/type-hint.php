@@ -69,6 +69,9 @@ function takes_vector_container(Vector $v): Vector {
 function takes_map_container(Map $m): Map {
   return $m;
 }
+function takes_nonnull(nonnull $x): nonnull {
+  return $x;
+}
 function takes_mixed(mixed $m): mixed {
   return $m;
 }
@@ -107,6 +110,7 @@ function test_all_hints($x) {
     |> takes_array_access($$)
     |> takes_vector_container($$)
     |> takes_map_container($$)
+    |> takes_nonnull($$)
     |> takes_mixed($$)
     |> takes_vec_or_dict1($$)
     |> takes_vec_or_dict2($$)

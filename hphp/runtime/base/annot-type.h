@@ -46,6 +46,7 @@ enum class AnnotMetaType : uint8_t {
   DArray = 9,
   VArrOrDArr = 10,
   VecOrDict = 11,
+  Nonnull = 12,
 };
 
 enum class AnnotType : uint16_t {
@@ -63,6 +64,7 @@ enum class AnnotType : uint16_t {
   Keyset   = (uint8_t)KindOfKeyset   | (uint16_t)AnnotMetaType::Precise << 8,
   // Precise is intentionally excluded
   Mixed    = (uint16_t)AnnotMetaType::Mixed << 8        | (uint8_t)KindOfUninit,
+  Nonnull  = (uint16_t)AnnotMetaType::Nonnull << 8      | (uint8_t)KindOfUninit,
   Self     = (uint16_t)AnnotMetaType::Self << 8         | (uint8_t)KindOfUninit,
   Parent   = (uint16_t)AnnotMetaType::Parent << 8       | (uint8_t)KindOfUninit,
   Callable = (uint16_t)AnnotMetaType::Callable << 8     | (uint8_t)KindOfUninit,
@@ -183,6 +185,8 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   switch (metatype) {
     case AnnotMetaType::Mixed:
       return AnnotAction::Pass;
+    case AnnotMetaType::Nonnull:
+      return (dt == KindOfNull) ? AnnotAction::Fail : AnnotAction::Pass;
     case AnnotMetaType::Number:
       return (isIntType(dt) || isDoubleType(dt))
         ? AnnotAction::Pass : AnnotAction::Fail;

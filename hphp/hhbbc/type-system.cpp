@@ -2917,6 +2917,7 @@ Type from_hni_constraint(SString s) {
   if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
   if (!strcasecmp(p, "HH\\arraykey")) return union_of(ret, TArrKey);
   if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;
+  if (!strcasecmp(p, "HH\\nonnull"))  return TInitGen;
   if (!strcasecmp(p, "HH\\vec_or_dict")) {
     return union_of(ret, union_of(TVec, TDict));
   }

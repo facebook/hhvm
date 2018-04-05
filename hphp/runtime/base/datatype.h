@@ -148,6 +148,7 @@ inline MaybeDataType get_datatype(
   if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return folly::none;
   if (!strcasecmp(name.c_str(), "HH\\resource")) return KindOfResource;
   if (!strcasecmp(name.c_str(), "HH\\mixed"))    return folly::none;
+  if (!strcasecmp(name.c_str(), "HH\\nonnull"))  return folly::none;
 
   return KindOfObject;
 }

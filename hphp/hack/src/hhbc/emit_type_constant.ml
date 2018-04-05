@@ -45,6 +45,7 @@ let get_kind_num ~tparams p =
   | "hh\\vec" -> 20
   | "hh\\keyset" -> 21
   | "hh\\vec_or_dict" -> 22
+  | "hh\\nonnull" -> 23
   | "typeaccess" -> 102
   | _ when String.length p > 4 && String.sub p 0 4 = "xhp_" -> 103
   | "unresolved"
@@ -55,7 +56,8 @@ and is_prim = function
   | "HH\\bool" | "HH\\float"
   | "HH\\string" | "HH\\resource"
   | "HH\\num" | "HH\\noreturn"
-  | "HH\\arraykey" | "HH\\mixed" -> true
+  | "HH\\arraykey" | "HH\\mixed"
+  | "HH\\nonnull" -> true
   | _ -> false
 
 and is_resolved_classname = function

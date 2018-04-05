@@ -89,6 +89,7 @@ let alias_map = List.fold_left ~f:add_alias ~init:SMap.empty
   HH_ONLY_TYPE("this");
   HH_ONLY_TYPE("varray_or_darray");
   HH_ONLY_TYPE("vec_or_dict");
+  HH_ONLY_TYPE("nonnull");
 
   HH_ALIAS("classname", "string");
   HH_ALIAS("typename", "string");
@@ -97,7 +98,6 @@ let alias_map = List.fold_left ~f:add_alias ~init:SMap.empty
   HH_ALIAS("double", "float");
   HH_ALIAS("real", "float");
   HH_ALIAS("dynamic", "mixed");
-  HH_ALIAS("nonnull", "mixed");
 
 (*
   PHP7_TYPE("Throwable"; PHP7_EngineExceptions);

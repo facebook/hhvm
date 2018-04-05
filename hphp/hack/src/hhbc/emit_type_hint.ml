@@ -117,8 +117,6 @@ let rec hint_to_type_constraint
   match h with
   (* The dynamic and nonnull types are treated by the runtime as mixed *)
   | A.Happly ((_, "dynamic"), [])
-  | A.Happly ((_, "nonnull"), [])
-  | A.Hoption (_, A.Happly ((_, "nonnull"), _))
   | A.Happly ((_, "mixed"), []) ->
     if Emit_env.is_hh_syntax_enabled ()
     then TC.make None []

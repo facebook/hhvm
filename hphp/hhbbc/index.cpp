@@ -3946,6 +3946,11 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
        * typehints (ex. "(function(..): ..)" typehints).
        */
       return TGen;
+    case AnnotMetaType::Nonnull:
+      if (candidate.subtypeOf(TInitNull)) return TBottom;
+      if (!candidate.couldBe(TInitNull))  return candidate;
+      if (is_opt(candidate))              return unopt(candidate);
+      return folly::none;
     case AnnotMetaType::This:
       if (auto s = selfCls(ctx)) return setctx(subObj(*s));
       break;

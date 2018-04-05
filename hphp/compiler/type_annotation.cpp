@@ -272,6 +272,9 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
   if (isMixed()) {
     return TypeStructure::Kind::T_mixed;
   }
+  if (isNonnull()) {
+    return TypeStructure::Kind::T_nonnull;
+  }
   if (m_tuple) {
     return TypeStructure::Kind::T_tuple;
   }

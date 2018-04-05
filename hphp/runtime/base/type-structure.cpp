@@ -76,6 +76,7 @@ const std::string
   s_arraykey("HH\\arraykey"),
   s_noreturn("HH\\noreturn"),
   s_mixed("HH\\mixed"),
+  s_nonnull("HH\\nonnull"),
   s_array("array"),
   s_shape("HH\\shape"),
   s_dict("HH\\dict"),
@@ -246,6 +247,9 @@ std::string fullName(const Array& arr) {
       break;
     case TypeStructure::Kind::T_mixed:
       name += s_mixed;
+      break;
+    case TypeStructure::Kind::T_nonnull:
+      name += s_nonnull;
       break;
     case TypeStructure::Kind::T_tuple:
       tupleTypeName(arr, name);

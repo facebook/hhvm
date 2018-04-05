@@ -157,6 +157,8 @@ struct TypeAnnotation {
 
   bool isMixed() const { return !strcasecmp(m_name.c_str(), "HH\\mixed"); }
 
+  bool isNonnull() const { return !strcasecmp(m_name.c_str(), "HH\\nonnull"); }
+
   bool isVoid() const { return !strcasecmp(m_name.c_str(), "HH\\void"); }
 
   bool isThis() const { return !strcasecmp(m_name.c_str(), "HH\\this"); }

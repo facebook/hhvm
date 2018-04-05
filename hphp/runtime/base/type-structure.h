@@ -59,6 +59,8 @@ enum class Kind : uint8_t {
   T_keyset = 21,
   T_vec_or_dict = 22,
 
+  T_nonnull = 23,
+
   /* The following kinds needs class/alias resolution, and
    * are not exposed to the users. */
   T_unresolved = 101,

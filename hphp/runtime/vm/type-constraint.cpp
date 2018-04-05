@@ -124,6 +124,7 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/,
           break;
         case 5: strip = !strcasecmp(stripped, "float"); break;
         case 6: strip = !strcasecmp(stripped, "string"); break;
+        case 7: strip = !strcasecmp(stripped, "nonnull"); break;
         case 8:
           strip = (!strcasecmp(stripped, "resource") ||
                    !strcasecmp(stripped, "noreturn") ||
@@ -158,6 +159,7 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/,
       case AnnotType::DArray:   str = "darray"; break;
       case AnnotType::VArrOrDArr: str = "varray_or_darray"; break;
       case AnnotType::VecOrDict: str = "vec_or_dict"; break;
+      case AnnotType::Nonnull:  str = "nonnull"; break;
       case AnnotType::Self:
       case AnnotType::This:
       case AnnotType::Parent:
@@ -391,6 +393,7 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
       return td->type == AnnotType::Object && td->klass &&
              cls->classof(td->klass);
     case AnnotMetaType::Mixed:
+    case AnnotMetaType::Nonnull:
       return true;
     case AnnotMetaType::Callable:
       return cls->lookupMethod(s___invoke.get()) != nullptr;
@@ -488,6 +491,8 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
         case MetaType::VArrOrDArr:
         case MetaType::VecOrDict:
           return false;
+        case MetaType::Nonnull:
+          return tv->m_type != KindOfNull;
         case MetaType::Mixed:
           // We assert'd at the top of this function that the
           // metatype cannot be Mixed
@@ -892,6 +897,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::ArrayKey:
       return tc.isNullable() ? MK::None : MK::IntOrStr;
     case AnnotMetaType::Mixed:
+    case AnnotMetaType::Nonnull:
     case AnnotMetaType::Self:
     case AnnotMetaType::This:
     case AnnotMetaType::Parent:

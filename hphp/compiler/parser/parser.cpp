@@ -1479,6 +1479,7 @@ void Parser::checkClassDeclName(const std::string& name) {
       case AnnotType::String:
       case AnnotType::Resource:
       case AnnotType::Mixed:
+      case AnnotType::Nonnull:
       case AnnotType::Number:
       case AnnotType::ArrayKey:
       case AnnotType::Dict:
@@ -2663,10 +2664,10 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
     HH_ONLY_TYPE(this),
     HH_ONLY_TYPE(varray_or_darray),
     HH_ONLY_TYPE(vec_or_dict),
+    HH_ONLY_TYPE(nonnull),
     HH_ALIAS(classname, string),
     HH_ALIAS(typename, string),
     HH_ALIAS(dynamic, mixed),
-    HH_ALIAS(nonnull, mixed),
 
     // Support a handful of synonyms for backwards compat with code written
     // against older versions of HipHop, and to be consistent with PHP5 casting

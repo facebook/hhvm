@@ -261,8 +261,9 @@ interface MysqlRow extends Countable, KeyedTraversable<string, mixed>, IteratorA
   public function getIterator(): KeyedIterator<string, mixed>;
 }
 class AsyncMysqlException extends Exception {
-  // Not actually protected, but no good comes of php code constructing these
-  protected function __construct(private AsyncMysqlErrorResult $result) {}
+  // This should not be constructed from Hack source, but since the Exception
+  // has a public constructor, we can not restrict the visibility here.
+  public function __construct(private AsyncMysqlErrorResult $result) {}
   public function mysqlErrorCode(): int;
   public function mysqlErrorString(): string;
   public function timedOut(): bool;

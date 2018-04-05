@@ -321,7 +321,13 @@ let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst s
         check_override env "__construct" `FromMethod
           ~ignore_fun_return:true (parent_class, parent_ty) (class_, class_ty) parent_cstr cstr
       | None, _ -> ()
-  ) else ()
+  ) else (
+    match fst parent_class.tc_construct, fst class_.tc_construct with
+    | Some parent_cstr, _ when parent_cstr.ce_synthesized -> ()
+    | Some parent_cstr, Some child_cstr ->
+      check_visibility parent_cstr child_cstr
+    | _, _ -> ()
+  )
 
 (* Checks if a child is compatible with the type constant of its parent.
  * This requires the child's constraint and assigned type to be a subtype of

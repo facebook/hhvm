@@ -94,7 +94,8 @@ let rec parse_type_specifier ?(allow_var=false) parser =
   | Mixed
   | Name -> parse_simple_type_or_type_constant_or_generic parser
   | Namespace ->
-    scan_name_or_qualified_name parser
+    let (parser, name) = scan_name_or_qualified_name parser in
+    parse_remaining_simple_type_or_type_constant_or_generic parser name
   | Backslash ->
     let (parser, missing) = Make.missing parser1 (pos parser1) in
     let (parser, token) = Make.token parser token in

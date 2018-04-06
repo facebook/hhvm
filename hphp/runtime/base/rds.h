@@ -163,13 +163,13 @@ extern __thread void* tl_base;
  * in RDS.
  */
 struct StaticLocal { FuncId funcId;
-                     const StringData* name; };
+                     LowStringPtr name; };
 
 /*
  * Class constant values are TypedValue's stored in RDS.
  */
-struct ClsConstant { const StringData* clsName;
-                     const StringData* cnsName; };
+struct ClsConstant { LowStringPtr clsName;
+                     LowStringPtr cnsName; };
 
 /*
  * StaticMethod{F,}Cache allocations.  These are used to cache static
@@ -177,8 +177,8 @@ struct ClsConstant { const StringData* clsName;
  * here is a string that encodes the target class, property, and
  * source context.
  */
-struct StaticMethod  { const StringData* name; };
-struct StaticMethodF { const StringData* name; };
+struct StaticMethod  { LowStringPtr name; };
+struct StaticMethodF { LowStringPtr name; };
 
 /*
  * Profiling translations may store various kinds of junk under
@@ -187,13 +187,13 @@ struct StaticMethodF { const StringData* name; };
  */
 struct Profile { TransID transId;
                  Offset bcOff;
-                 const StringData* name; };
+                 LowStringPtr name; };
 
 /*
  * Static class properties in Mode::Local
  */
 
-struct SPropCache { const Class* cls;
+struct SPropCache { LowPtr<const Class> cls;
                     Slot slot; };
 
 using Symbol = boost::variant< StaticLocal

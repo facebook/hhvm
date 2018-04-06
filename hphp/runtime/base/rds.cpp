@@ -178,7 +178,7 @@ struct SymbolHash : boost::static_visitor<size_t> {
 
   size_t operator()(SPropCache k) const {
     return folly::hash::hash_combine(
-      k.cls, k.slot
+      k.cls.get(), k.slot
     );
   }
 

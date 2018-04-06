@@ -99,6 +99,10 @@ const StaticString
 
 // Extra information about a HeapGraph::Node.
 union CapturedNode {
+  CapturedNode() : static_local() {}
+  CapturedNode(const CapturedNode& other) {
+    memcpy(this, &other, sizeof other);
+  }
   rds::StaticLocal static_local; // only for rds::StaticLocalData
   rds::SPropCache sprop_cache; // only for HPHP::SPropCache
   struct {

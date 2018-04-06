@@ -1238,6 +1238,10 @@ void emit_finish_func(EmitUnitState& state,
   emit_locals_and_params(fe, func, info);
   emit_ehent_tree(fe, func, info);
 
+  // Nothing should look at the bytecode from now on. Free it up to
+  // compensate for the UnitEmitter we're creating.
+  const_cast<php::Func&>(func).blocks.clear();
+
   fe.userAttributes = func.userAttributes;
   fe.retUserType = func.returnUserType;
   fe.originalFilename =
@@ -1250,7 +1254,7 @@ void emit_finish_func(EmitUnitState& state,
   fe.isNative = func.nativeInfo != nullptr;
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
 
-  auto const retTy = state.index.lookup_return_type_raw(&func);
+  auto const retTy = state.index.lookup_return_type_and_clear(&func);
   if (!retTy.subtypeOf(TBottom)) {
     auto const rat = make_repo_type(*state.index.array_table_builder(), retTy);
     merge_repo_auth_type(fe.ue(), rat);
@@ -1400,12 +1404,12 @@ void emit_class(EmitUnitState& state,
   std::vector<Type> useVars;
   if (is_closure(cls)) {
     auto f = find_method(&cls, s_invoke.get());
-    useVars = state.index.lookup_closure_use_vars(f);
+    useVars = state.index.lookup_closure_use_vars(f, true);
   }
   auto uvIt = useVars.begin();
 
-  auto const privateProps   = state.index.lookup_private_props(&cls);
-  auto const privateStatics = state.index.lookup_private_statics(&cls);
+  auto const privateProps   = state.index.lookup_private_props(&cls, true);
+  auto const privateStatics = state.index.lookup_private_statics(&cls, true);
   for (auto& prop : cls.properties) {
     auto const makeRat = [&] (const Type& ty) -> RepoAuthType {
       if (ty.couldBe(TCls)) {

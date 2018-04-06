@@ -299,6 +299,11 @@ struct res::Func::FuncInfo {
   uint32_t returnRefinments{0};
 
   /*
+   * Whether the function is effectFree.
+   */
+  bool effectFree{false};
+
+  /*
    * Call-context sensitive return types are cached here.  This is not
    * an optimization.
    *
@@ -316,11 +321,6 @@ struct res::Func::FuncInfo {
    * Type info for local statics.
    */
   CompactVector<Type> localStaticTypes;
-
-  /*
-   * Whether the function is effectFree.
-   */
-  bool effectFree{false};
 };
 
 namespace {
@@ -4255,7 +4255,8 @@ Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
 }
 
 std::vector<Type>
-Index::lookup_closure_use_vars(borrowed_ptr<const php::Func> func) const {
+Index::lookup_closure_use_vars(borrowed_ptr<const php::Func> func,
+                               bool move) const {
   assert(func->isClosureBody);
 
   auto const numUseVars = closure_num_use_vars(func);
@@ -4264,6 +4265,7 @@ Index::lookup_closure_use_vars(borrowed_ptr<const php::Func> func) const {
   if (it == end(m_data->closureUseVars)) {
     return std::vector<Type>(numUseVars, TGen);
   }
+  if (move) return std::move(it->second);
   return it->second;
 }
 
@@ -4274,6 +4276,16 @@ Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
     return it->returnTy;
   }
   return TInitGen;
+}
+
+Type Index::lookup_return_type_and_clear(
+  borrowed_ptr<const php::Func> f) const {
+  auto it = func_info(*m_data, f);
+
+  it->contextualReturnTypes = ContextRetTyMap{};
+  it->localStaticTypes.clear();
+
+  return std::move(it->returnTy);
 }
 
 CompactVector<Type>
@@ -4336,9 +4348,13 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
 }
 
 PropState
-Index::lookup_private_props(borrowed_ptr<const php::Class> cls) const {
+Index::lookup_private_props(borrowed_ptr<const php::Class> cls,
+                            bool move) const {
   auto it = m_data->privatePropInfo.find(cls);
-  if (it != end(m_data->privatePropInfo)) return it->second;
+  if (it != end(m_data->privatePropInfo)) {
+    if (move) return std::move(it->second);
+    return it->second;
+  }
   return make_unknown_propstate(
     cls,
     [&] (const php::Prop& prop) {
@@ -4348,9 +4364,13 @@ Index::lookup_private_props(borrowed_ptr<const php::Class> cls) const {
 }
 
 PropState
-Index::lookup_private_statics(borrowed_ptr<const php::Class> cls) const {
+Index::lookup_private_statics(borrowed_ptr<const php::Class> cls,
+                              bool move) const {
   auto it = m_data->privateStaticPropInfo.find(cls);
-  if (it != end(m_data->privateStaticPropInfo)) return it->second;
+  if (it != end(m_data->privateStaticPropInfo)) {
+    if (move) return std::move(it->second);
+    return it->second;
+  }
   return make_unknown_propstate(
     cls,
     [&] (const php::Prop& prop) {
@@ -4815,6 +4835,29 @@ bool Index::frozen() const {
 void Index::freeze() {
   m_data->frozen = true;
   m_data->ever_frozen = true;
+}
+
+void Index::cleanup_for_emit() {
+  m_data->classes.clear();
+  m_data->methods.clear();
+  m_data->method_ref_params_by_name.clear();
+  m_data->funcs.clear();
+  m_data->typeAliases.clear();
+  m_data->classAliases.clear();
+
+  m_data->classClosureMap.clear();
+  m_data->classExtraMethodMap.clear();
+
+  m_data->classInfo.clear();
+  /*
+   * We can't clear allClassInfos, because although nothing will look
+   * up ClassInfos from now on, Types can contain pointers to them,
+   * which are needed when emitting RepoAuthTypes.
+   */
+  m_data->funcFamilies.clear();
+
+  m_data->dependencyMap.clear();
+  m_data->foldableReturnTypeMap.clear();
 }
 
 void Index::thaw() {

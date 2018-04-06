@@ -575,6 +575,8 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
   debug_dump_program(*index, *program);
   print_stats(*index, *program);
 
+  index->cleanup_for_emit();
+
   LitstrTable::fini();
   LitstrTable::init();
   LitstrTable::get().setWriting();

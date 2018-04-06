@@ -418,6 +418,12 @@ struct Index {
   void thaw();
 
   /*
+   * Throw away data structures that won't be needed during the emit
+   * stage (or beyond).
+   */
+  void cleanup_for_emit();
+
+  /*
    * The Index contains a Builder for an ArrayTypeTable.
    *
    * If we're creating assert types with options.InsertAssertions, we
@@ -651,11 +657,21 @@ struct Index {
   Type lookup_return_type_raw(borrowed_ptr<const php::Func>) const;
 
   /*
+   * As lookup_return_type_raw, but also clean out the FuncInfo struct.
+   * For use during emit, to keep memory usage down.
+   */
+  Type lookup_return_type_and_clear(borrowed_ptr<const php::Func>) const;
+
+  /*
    * Return the best known types of a closure's used variables (on
    * entry to the closure).  The function is the closure body.
+   *
+   * If move is true, the value will be moved out of the index. This
+   * should only be done at emit time.
    */
   std::vector<Type>
-    lookup_closure_use_vars(borrowed_ptr<const php::Func>) const;
+    lookup_closure_use_vars(borrowed_ptr<const php::Func>,
+                            bool move = false) const;
 
   CompactVector<Type>
     lookup_local_static_types(borrowed_ptr<const php::Func> f) const;
@@ -681,8 +697,12 @@ struct Index {
    *
    * The Index tracks the largest types for private properties that
    * are guaranteed to hold at any program point.
+   *
+   * If move is true, the value will be moved out of the index. This
+   * should only be done at emit time.
    */
-  PropState lookup_private_props(borrowed_ptr<const php::Class>) const;
+  PropState lookup_private_props(borrowed_ptr<const php::Class>,
+                                 bool move = false) const;
 
   /*
    * Returns the control-flow insensitive inferred private static
@@ -691,8 +711,12 @@ struct Index {
    *
    * The Index tracks the largest types for private static properties
    * that are guaranteed to hold at any program point.
+   *
+   * If move is true, the value will be moved out of the index. This
+   * should only be done at emit time.
    */
-  PropState lookup_private_statics(borrowed_ptr<const php::Class>) const;
+  PropState lookup_private_statics(borrowed_ptr<const php::Class>,
+                                   bool move = false) const;
 
   /*
    * Lookup the best known type for a public static property, with a given

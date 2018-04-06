@@ -451,10 +451,6 @@ void Parser::onOptExprListElem(Token&, Token*, Token&) {}
 void Parser::onListAssignment(Token& /*out*/, Token& /*vars*/, Token* /*expr*/,
                               bool /*rhsFirst*/ /* = false */) {}
 
-void Parser::onAListVar(Token& /*out*/, Token* /*list*/, Token* /*var*/) {}
-
-void Parser::onAListSub(Token& /*out*/, Token* /*list*/, Token& /*sublist*/) {}
-
 void Parser::onAssign(Token& /*out*/, Token& /*var*/, Token& /*expr*/,
                       bool /*ref*/, bool /*rhsFirst*/ /* = false */) {}
 
@@ -489,7 +485,7 @@ void Parser::onVArray(Token& /*out*/, Token& /*exprs*/) {}
 void Parser::onDArray(Token& /*out*/, Token& /*exprs*/) {}
 
 void Parser::onArrayPair(Token& /*out*/, Token* /*pairs*/, Token* /*name*/,
-                         Token& /*value*/, bool /*ref*/) {}
+                         Token* /*value*/, bool /*ref*/) {}
 
 void Parser::onEmptyCollection(Token& /*out*/) {}
 

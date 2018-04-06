@@ -195,8 +195,8 @@ bool TestParserExpr::TestListAssignment() {
   V("<?php list(,$b) = 1;",            "list(, $b) = 1;\n");
   V("<?php list($b) = 1;",             "list($b) = 1;\n");
   V("<?php list($a,$b) = 1;",          "list($a, $b) = 1;\n");
-  V("<?php list($a,list($c),$b) = 1;", "list($a, list($c), $b) = 1;\n");
-  V("<?php list($a,list(),$b) = 1;",   "list($a, list(), $b) = 1;\n");
+  V("<?php list($a,list($c),$b) = 1;", "list($a, array($c), $b) = 1;\n");
+  V("<?php list($a,list(),$b) = 1;",   "list($a, array(), $b) = 1;\n");
   return true;
 }
 
@@ -291,10 +291,10 @@ bool TestParserExpr::TestArrayPairExpression() {
   V("<?php array();",                     "array();\n");
   V("<?php array($a);",                   "array($a);\n");
   V("<?php array($a, $b);",               "array($a, $b);\n");
-  V("<?php array($a, $b,);",              "array($a, $b);\n");
+  V("<?php array($a, $b,);",              "array($a, $b, );\n");
   V("<?php array($a => $b);",             "array($a => $b);\n");
   V("<?php array($a => $b, $c => $d);",   "array($a => $b, $c => $d);\n");
-  V("<?php array($a => $b, $c => $d,);",  "array($a => $b, $c => $d);\n");
+  V("<?php array($a => $b, $c => $d,);",  "array($a => $b, $c => $d, );\n");
 
   V("<?php array(&$a);",                  "array(&$a);\n");
   V("<?php array(&$a, &$b);",             "array(&$a, &$b);\n");

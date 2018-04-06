@@ -233,8 +233,6 @@ struct Parser : ParserBase {
 
   void onListAssignment(Token &out, Token &vars, Token *expr,
                         bool rhsFirst = false);
-  void onAListVar(Token &out, Token *list, Token *var);
-  void onAListSub(Token &out, Token *list, Token &sublist);
   void onAssign(Token &out, Token &var, Token &expr, bool ref,
                 bool rhsFirst = false);
   void onAssignNew(Token &out, Token &var, Token &name, Token &args);
@@ -244,7 +242,7 @@ struct Parser : ParserBase {
   void onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo);
   void onNullCoalesce(Token &out, Token &expFirst, Token &expSecond);
   void onArray(Token &out, Token &pairs, int op = T_ARRAY);
-  void onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
+  void onArrayPair(Token &out, Token *pairs, Token *name, Token *value,
                    bool ref);
   void onDict(Token &out, Token &pairs);
   void onVec(Token& out, Token& exprs);

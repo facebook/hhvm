@@ -117,7 +117,7 @@ void ProcessInit() {
     Logger::Error("An error has been introduced into the systemlib, "
                   "but we cannot give you a file and line number right now.");
     Logger::Error("Check all of your changes to hphp/system/php");
-    Logger::Error("HipHop Parse Error: %s", msg->data());
+    Logger::Error("HipHop Parse Error: %s %d", msg->data(), line);
     _exit(1);
   }
 

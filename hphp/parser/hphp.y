@@ -309,7 +309,7 @@ static void xhp_attribute_list(Parser *_p, Token &out, Token *list,
     }
   } else {
     Token name; _p->onScalar(name, T_CONSTANT_ENCAPSED_STRING, decl);
-    _p->onArrayPair(out, list, &name, decl, 0);
+    _p->onArrayPair(out, list, &name, &decl, 0);
     if (list) {
       out.setText(list->text());
     } else {
@@ -1452,7 +1452,7 @@ foreach_optional_arg:
 foreach_variable:
     variable                           { $$ = $1; $$ = 0;}
   | '&' variable                       { $$ = $2; $$ = 1;}
-  | T_LIST '(' assignment_list ')'     { _p->onListAssignment($$, $3, NULL);}
+  | array_literal                      { _p->onListAssignment($$, $1, NULL);}
 ;
 
 for_statement:
@@ -1941,10 +1941,10 @@ xhp_attribute_is_required:
 
 xhp_category_stmt:
     xhp_category_decl                  { Token t; scalar_num(_p, t, "1");
-                                         _p->onArrayPair($$,0,&$1,t,0);}
+                                         _p->onArrayPair($$,0,&$1,&t,0);}
   | xhp_category_stmt ','
     xhp_category_decl                  { Token t; scalar_num(_p, t, "1");
-                                         _p->onArrayPair($$,&$1,&$3,t,0);}
+                                         _p->onArrayPair($$,&$1,&$3,&t,0);}
 ;
 
 xhp_category_decl:
@@ -2100,8 +2100,8 @@ yield_assign_expr:
 ;
 
 yield_list_assign_expr:
-    T_LIST '(' assignment_list ')'
-    '=' yield_expr                     { _p->onListAssignment($$, $3, &$6, true);}
+    array_literal
+    '=' yield_expr                     { _p->onListAssignment($$, $1, &$3, true);}
 ;
 
 yield_from_expr:
@@ -2121,8 +2121,8 @@ await_assign_expr:
 ;
 
 await_list_assign_expr:
-    T_LIST '(' assignment_list ')'
-    '=' await_expr                     { _p->onListAssignment($$, $3, &$6, true);}
+    array_literal
+    '=' await_expr                     { _p->onListAssignment($$, $1, &$3, true);}
 ;
 
 parenthesis_expr:
@@ -2142,8 +2142,8 @@ parenthesis_expr_no_variable:
 ;
 
 expr_no_variable:
-    T_LIST '(' assignment_list ')'
-    '=' expr                           { _p->onListAssignment($$, $3, &$6);}
+    array_literal
+    '=' expr                           { _p->onListAssignment($$, $1, &$3);}
   | variable '=' expr                  { _p->onAssign($$, $1, $3, 0);}
   | variable '=' '&' variable          { _p->onAssign($$, $1, $4, 1);}
   | variable '=' '&' T_NEW
@@ -2379,20 +2379,20 @@ non_empty_shape_pair_list:
     non_empty_shape_pair_list ','
       shape_keyname
       T_DOUBLE_ARROW
-      expr                            { _p->onArrayPair($$,&$1,&$3,$5,0); }
+      expr                            { _p->onArrayPair($$,&$1,&$3,&$5,0); }
   | shape_keyname
       T_DOUBLE_ARROW
-      expr                            { _p->onArrayPair($$,  0,&$1,$3,0); }
+      expr                            { _p->onArrayPair($$,  0,&$1,&$3,0); }
 ;
 
 non_empty_static_shape_pair_list:
     non_empty_static_shape_pair_list ','
       shape_keyname
       T_DOUBLE_ARROW
-      static_expr                     { _p->onArrayPair($$,&$1,&$3,$5,0); }
+      static_expr                     { _p->onArrayPair($$,&$1,&$3,&$5,0); }
   | shape_keyname
       T_DOUBLE_ARROW
-      static_expr                     { _p->onArrayPair($$,  0,&$1,$3,0); }
+      static_expr                     { _p->onArrayPair($$,  0,&$1,&$3,0); }
 ;
 
 shape_pair_list:
@@ -2414,6 +2414,7 @@ shape_literal:
 array_literal:
     T_ARRAY '(' array_pair_list ')'   { _p->onArray($$,$3,T_ARRAY);}
   | '[' array_pair_list ']'           { _p->onArray($$,$2,T_ARRAY);}
+  | T_LIST '(' array_pair_list ')'    { _p->onArray($$,$3,T_ARRAY);}
 ;
 
 dict_pair_list:
@@ -2424,8 +2425,8 @@ dict_pair_list:
 
 non_empty_dict_pair_list:
     non_empty_dict_pair_list
-    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,$5,0);}
-  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,$3,0);}
+    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,&$5,0);}
+  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,&$3,0);}
 ;
 
 static_dict_pair_list:
@@ -2437,9 +2438,9 @@ static_dict_pair_list:
 non_empty_static_dict_pair_list:
     non_empty_static_dict_pair_list
     ',' static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onArrayPair($$,&$1,&$3,$5,0);}
+    static_expr                        { _p->onArrayPair($$,&$1,&$3,&$5,0);}
   | static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onArrayPair($$,  0,&$1,$3,0);}
+    static_expr                        { _p->onArrayPair($$,  0,&$1,&$3,0);}
 ;
 
 static_dict_pair_list_ae:
@@ -2451,9 +2452,9 @@ static_dict_pair_list_ae:
 non_empty_static_dict_pair_list_ae:
     non_empty_static_dict_pair_list_ae
     ',' static_scalar_ae T_DOUBLE_ARROW
-    static_scalar_ae                   { _p->onArrayPair($$,&$1,&$3,$5,0);}
+    static_scalar_ae                   { _p->onArrayPair($$,&$1,&$3,&$5,0);}
   | static_scalar_ae T_DOUBLE_ARROW
-    static_scalar_ae                   { _p->onArrayPair($$,  0,&$1,$3,0);}
+    static_scalar_ae                   { _p->onArrayPair($$,  0,&$1,&$3,0);}
 ;
 
 dict_literal:
@@ -2636,7 +2637,7 @@ xhp_attributes:
     '{' T_ELLIPSIS expr '}'            { _p->onXhpAttributeSpread($$, &$1, $4);}
   | xhp_attributes
     xhp_attribute_name '='
-    xhp_attribute_value                { _p->onArrayPair($$,&$1,&$2,$4,0);}
+    xhp_attribute_value                { _p->onArrayPair($$,&$1,&$2,&$4,0);}
 ;
 xhp_children:
 xhp_children xhp_child                 { _p->onOptExprListElem($$, &$1, $2); }
@@ -2967,12 +2968,12 @@ hh_possible_comma:
 non_empty_static_array_pair_list:
     non_empty_static_array_pair_list
     ',' static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onArrayPair($$,&$1,&$3,$5,0);}
+    static_expr                        { _p->onArrayPair($$,&$1,&$3,&$5,0);}
   | non_empty_static_array_pair_list
-    ',' static_expr                    { _p->onArrayPair($$,&$1,  0,$3,0);}
+    ',' static_expr                    { _p->onArrayPair($$,&$1,  0,&$3,0);}
   | static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | static_expr                        { _p->onArrayPair($$,  0,  0,$1,0);}
+    static_expr                        { _p->onArrayPair($$,  0,&$1,&$3,0);}
+  | static_expr                        { _p->onArrayPair($$,  0,  0,&$1,0);}
 ;
 
 common_scalar_ae:
@@ -3040,17 +3041,17 @@ static_array_pair_list_ae:
 non_empty_static_array_pair_list_ae:
     non_empty_static_array_pair_list_ae
     ',' static_scalar_ae T_DOUBLE_ARROW
-    static_scalar_ae                   { _p->onArrayPair($$,&$1,&$3,$5,0);}
+    static_scalar_ae                   { _p->onArrayPair($$,&$1,&$3,&$5,0);}
   | non_empty_static_array_pair_list_ae
-    ',' static_scalar_ae               { _p->onArrayPair($$,&$1,  0,$3,0);}
+    ',' static_scalar_ae               { _p->onArrayPair($$,&$1,  0,&$3,0);}
   | static_scalar_ae T_DOUBLE_ARROW
-    static_scalar_ae                   { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | static_scalar_ae                   { _p->onArrayPair($$,  0,  0,$1,0);}
+    static_scalar_ae                   { _p->onArrayPair($$,  0,&$1,&$3,0);}
+  | static_scalar_ae                   { _p->onArrayPair($$,  0,  0,&$1,0);}
 ;
 non_empty_static_scalar_list_ae:
     non_empty_static_scalar_list_ae
-    ',' static_scalar_ae               { _p->onArrayPair($$,&$1,  0,$3,0);}
-  | static_scalar_ae                   { _p->onArrayPair($$,  0,  0,$1,0);}
+    ',' static_scalar_ae               { _p->onArrayPair($$,&$1,  0,&$3,0);}
+  | static_scalar_ae                   { _p->onArrayPair($$,  0,  0,&$1,0);}
 ;
 
 static_shape_pair_list_ae:
@@ -3061,10 +3062,10 @@ static_shape_pair_list_ae:
 non_empty_static_shape_pair_list_ae:
     non_empty_static_shape_pair_list_ae
       ',' shape_keyname
-      T_DOUBLE_ARROW static_scalar_ae  {  _p->onArrayPair($$,&$1,&$3,$5,0); }
+      T_DOUBLE_ARROW static_scalar_ae  {  _p->onArrayPair($$,&$1,&$3,&$5,0); }
   | shape_keyname
       T_DOUBLE_ARROW
-      static_scalar_ae                 { _p->onArrayPair($$,  0,&$1,$3,0); }
+      static_scalar_ae                 { _p->onArrayPair($$,  0,&$1,&$3,0); }
 ;
 
 static_scalar_list_ae:
@@ -3409,34 +3410,25 @@ dimmable_variable_no_calls:
   | '(' variable ')'                   { $$ = $2;}
 ;
 
-assignment_list:
-    assignment_list ','                { _p->onAListVar($$,&$1,NULL);}
-  | assignment_list ',' variable       { _p->onAListVar($$,&$1,&$3);}
-  | assignment_list ','
-    T_LIST '(' assignment_list ')'     { _p->onAListSub($$,&$1,$5);}
-  |                                    { _p->onAListVar($$,NULL,NULL);}
-  | variable                           { _p->onAListVar($$,NULL,&$1);}
-  | T_LIST '(' assignment_list ')'     { _p->onAListSub($$,NULL,$3);}
-;
-
 array_pair_list:
-    non_empty_array_pair_list
-    possible_comma                     { $$ = $1;}
-  |                                    { $$.reset();}
-;
-non_empty_array_pair_list:
-    non_empty_array_pair_list
-    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,$5,0);}
-  | non_empty_array_pair_list ',' expr { _p->onArrayPair($$,&$1,  0,$3,0);}
-  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | expr                               { _p->onArrayPair($$,  0,  0,$1,0);}
-  | non_empty_array_pair_list
-    ',' expr T_DOUBLE_ARROW
-    '&' variable                       { _p->onArrayPair($$,&$1,&$3,$6,1);}
-  | non_empty_array_pair_list ','
-    '&' variable                       { _p->onArrayPair($$,&$1,  0,$4,1);}
-  | expr T_DOUBLE_ARROW '&' variable   { _p->onArrayPair($$,  0,&$1,$4,1);}
-  | '&' variable                       { _p->onArrayPair($$,  0,  0,$2,1);}
+  /**** single elements ****/
+    expr T_DOUBLE_ARROW '&' variable   { _p->onArrayPair($$,  0,&$1,&$4,1);}
+  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,&$3,0);}
+  | '&' variable                       { _p->onArrayPair($$,  0,  0,&$2,1);}
+  | expr                               { _p->onArrayPair($$,  0,  0,&$1,0);}
+  /**** list followed by single element ****/
+  | array_pair_list ','
+    expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,&$1,&$3,&$5,0);}
+  | array_pair_list ','
+    expr T_DOUBLE_ARROW '&' variable   { _p->onArrayPair($$,&$1,&$3,&$6,1);}
+  | array_pair_list ',' '&' variable   { _p->onArrayPair($$,&$1,  0,&$4,1);}
+  | array_pair_list ',' expr           { _p->onArrayPair($$,&$1,  0,&$3,0);}
+  /**** special cases ****/
+  /* [,$b,,,] = [,'b',] is valid; multiple trailing on RHS aren't, but we
+   * need to catch that later as we don't know yet if we have an LHS or RHS */
+  | array_pair_list ','                { _p->onArrayPair($$,&$1,  0,  0,0);}
+  /* [,$b] = ['a', 'b'] is valid */
+  |                                    { _p->onArrayPair($$,  0,  0,  0,0);}
 ;
 
 collection_init:
@@ -3446,10 +3438,10 @@ collection_init:
 ;
 non_empty_collection_init:
     non_empty_collection_init
-    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,$5,0);}
-  | non_empty_collection_init ',' expr { _p->onArrayPair($$,&$1,  0,$3,0);}
-  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | expr                               { _p->onArrayPair($$,  0,  0,$1,0);}
+    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,&$5,0);}
+  | non_empty_collection_init ',' expr { _p->onArrayPair($$,&$1,  0,&$3,0);}
+  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,&$3,0);}
+  | expr                               { _p->onArrayPair($$,  0,  0,&$1,0);}
 ;
 
 static_collection_init:
@@ -3460,12 +3452,12 @@ static_collection_init:
 non_empty_static_collection_init:
     non_empty_static_collection_init
     ',' static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onArrayPair($$,&$1,&$3,$5,0);}
+    static_expr                        { _p->onArrayPair($$,&$1,&$3,&$5,0);}
   | non_empty_static_collection_init
-    ',' static_expr                    { _p->onArrayPair($$,&$1,  0,$3,0);}
+    ',' static_expr                    { _p->onArrayPair($$,&$1,  0,&$3,0);}
   | static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | static_expr                        { _p->onArrayPair($$,  0,  0,$1,0);}
+    static_expr                        { _p->onArrayPair($$,  0,&$1,&$3,0);}
+  | static_expr                        { _p->onArrayPair($$,  0,  0,&$1,0);}
 ;
 
 encaps_list:

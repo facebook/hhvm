@@ -710,6 +710,7 @@ public:
   void assignLocalVariableIds(FunctionScopePtr fs);
   void assignFinallyVariableIds();
 
+  void processEmptyArrayPairs(ExpressionListPtr el);
   void listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
                               IndexChain& indexChain,
                               std::vector<IndexPair>& chainList);
@@ -3987,6 +3988,35 @@ private:
 };
 
 /**
+ * Helper to process validate RHS array pair lists.
+ *
+ * - remove a single trailing comma (`[a, b,]`)
+ * - fatal if there are any empty elements (`[a,,c]`). Valid in LValue context.
+ */
+void EmitterVisitor::processEmptyArrayPairs(ExpressionListPtr el) {
+  if (!el) {
+    return;
+  }
+  const auto count = el->getCount();
+  for (size_t i = 0; i < count; ++i) {
+    const auto exp = (*el)[i];
+    if (exp->getKindOf() != Expression::KindOfArrayPairExpression) {
+      continue;
+    }
+    const auto pair = static_pointer_cast<ArrayPairExpression>(exp);
+    if (!pair->getValue()) {
+      if (i != count - 1) {
+        throw EmitterVisitor::IncludeTimeFatalException(
+          pair,
+          "Cannot use empty array elements in arrays"
+        );
+      }
+      el->removeElement(i);
+    }
+  }
+}
+
+/**
  * Helper to deal with emitting list assignment and keeping track of some
  * associated info.  A list assignment can be thought of as a list of "index
  * chains"; that is, sequences of indices that should be accessed for each
@@ -3997,13 +4027,31 @@ private:
 void EmitterVisitor::listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
                                             IndexChain& indexChain,
                                             std::vector<IndexPair>& all) {
+  if (exp && exp->getKindOf() == Expression::KindOfArrayPairExpression) {
+    const auto ap_exp = static_pointer_cast<ArrayPairExpression>(exp);
+    assert(ap_exp->getName() == nullptr && "Keyed destructuring not supported");
+    exp = ap_exp->getValue();
+  }
+
   if (!exp) {
     // Empty slot
     return;
   }
 
-  if (exp->is(Expression::KindOfListAssignment)) {
+  if (exp->getKindOf() == Expression::KindOfUnaryOpExpression) {
     // Nested assignment
+    const auto uoe = static_pointer_cast<UnaryOpExpression>(exp);
+    assert(uoe->getOp() == T_ARRAY && "Parser::checkAllowedInWriteContext bug");
+    const auto pairs = uoe->getExpression();
+
+    const auto lhs = dynamic_pointer_cast<ExpressionList>(pairs);
+    const auto n = lhs->getCount();
+    for (int i = 0; i < n; ++i) {
+      indexChain.push_back(i);
+      listAssignmentVisitLHS(e, (*lhs)[i], indexChain, all);
+      indexChain.pop_back();
+    }
+  } else if (exp->is(Expression::KindOfListAssignment)) {
     auto la = static_pointer_cast<ListAssignment>(exp);
     auto lhs = la->getVariables();
     int n = lhs->getCount();
@@ -6648,6 +6696,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
   case Construct::KindOfExpressionList: {
     auto el = static_pointer_cast<ExpressionList>(node);
+    processEmptyArrayPairs(el);
     if (!m_staticArrays.empty() &&
         (m_staticColType.back() == ArrayType::Vec ||
          m_staticColType.back() == ArrayType::VArray ||
@@ -9836,6 +9885,7 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
                                               Label& topOfBody) {
   bool hasOptional = false;
   ExpressionListPtr params = meth->getParams();
+  processEmptyArrayPairs(params);
   int numParam = params ? params->getCount() : 0;
   Offset skippedDefault = kInvalidOffset;
 
@@ -10548,6 +10598,7 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
 
   ExpressionListPtr params = func->getParams();
   if (!params) return false;
+  processEmptyArrayPairs(params);
   int nParams = params->getCount();
   if (!nParams) return false;
   CallUserFuncFlags flags = CallUserFuncNone;
@@ -10632,6 +10683,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   ExpressionPtr nameExp = node->getNameExp();
   ExpressionListPtr params(paramsOverride ? paramsOverride :
                                             node->getParams());
+  processEmptyArrayPairs(params);
   emitPrePush(e, params);
 
   auto const nameStr = mangleInOutFuncName(
@@ -10640,7 +10692,6 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
 
   int numParams = params ? params->getCount() : 0;
 
-  ExpressionListPtr funcParams;
   Offset fpiStart = 0;
   if (node->getClass() || node->hasStaticClass()) {
     emitVirtualClassBase(e, node.get());
@@ -11763,6 +11814,8 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
+  processEmptyArrayPairs(el);
+
   auto const scalar = [&]{
     switch (type) {
       case ArrayType::Array:
@@ -11933,6 +11986,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
 }
 
 void EmitterVisitor::emitPairInit(Emitter& e, ExpressionListPtr el) {
+  processEmptyArrayPairs(el);
   if (el->getCount() != 2) {
     throw IncludeTimeFatalException(el,
       "Pair objects must have exactly 2 elements");
@@ -11951,6 +12005,7 @@ void EmitterVisitor::emitPairInit(Emitter& e, ExpressionListPtr el) {
 
 void EmitterVisitor::emitVectorInit(Emitter&e, CollectionType ct,
                                     ExpressionListPtr el) {
+  processEmptyArrayPairs(el);
   // Do not allow specification of keys even if the resulting array is packed.
   // It doesn't make sense to specify keys for Vectors. Also, unwrap the values
   // out of these ArrayPairExpressions so that we can use the vec init code.
@@ -11975,6 +12030,7 @@ void EmitterVisitor::emitVectorInit(Emitter&e, CollectionType ct,
 
 void EmitterVisitor::emitSetInit(Emitter&e, CollectionType ct,
                                  ExpressionListPtr el) {
+  processEmptyArrayPairs(el);
   // Do not allow keys; it doesn't make sense to specify keys for Sets.
   for (int i = 0; i < el->getCount(); i++) {
     auto const expr = (*el)[i];
@@ -11991,6 +12047,7 @@ void EmitterVisitor::emitSetInit(Emitter&e, CollectionType ct,
 
 void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
                                  ExpressionListPtr el) {
+  processEmptyArrayPairs(el);
   // Make sure all the ArrayPairExpressions have keys.
   for (int i = 0; i < el->getCount(); i++) {
     auto const expr = (*el)[i];

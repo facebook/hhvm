@@ -50,6 +50,7 @@ bool ArrayPairExpression::isScalar() const {
 // parser functions
 
 bool ArrayPairExpression::isScalarArrayPair() const {
+  if (!m_value) return true;
   if (!m_value->isScalar()) return false;
   if (!m_name) return true;
   if (!m_name->isScalar()) return false;
@@ -108,5 +109,7 @@ void ArrayPairExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf(" => ");
   }
   if (m_ref) cg_printf("&");
-  m_value->outputPHP(cg, ar);
+  if (m_value) {
+    m_value->outputPHP(cg, ar);
+  }
 }

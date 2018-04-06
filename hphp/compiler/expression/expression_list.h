@@ -63,6 +63,7 @@ struct ExpressionList : Expression {
   bool isSetCollectionScalar() const;
 
   int getCount() const { return m_exps.size();}
+
   ExpressionPtr &operator[](int index);
   iterator begin() { return m_exps.begin(); }
   iterator end() { return m_exps.end(); }
@@ -107,11 +108,16 @@ inline bool ExpressionList::getListScalars(F f) const {
     return true;
   }
   if (!isScalarArrayPairs()) return false;
-  for (const auto ape : m_exps) {
+  const auto count = m_exps.size();
+  for (size_t i = 0; i < count; ++i) {
+    const auto ape = m_exps[i];
     auto exp = dynamic_pointer_cast<ArrayPairExpression>(ape);
     if (!exp) return false;
     auto name = exp->getName();
     auto val = exp->getValue();
+    if (!val) {
+      return i == count - 1;
+    }
     if (!name) {
       Variant v;
       auto const ret = val->getScalarValue(v);

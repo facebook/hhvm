@@ -886,37 +886,43 @@ void Parser::checkAllowedInWriteContext(ExpressionPtr e) {
     if (op->isNullSafe()) {
       PARSE_ERROR_AT(e, Strings::NULLSAFE_PROP_WRITE_ERROR);
     }
+  } if (e->is(Expression::KindOfArrayPairExpression)) {
+    auto ap = static_pointer_cast<ArrayPairExpression>(e);
+    if (ap->isRef()) {
+      PARSE_ERROR_AT(e, "[] and list() assignments cannot be by reference");
+    }
+    if (ap->getName() != nullptr) {
+      PARSE_ERROR_AT(e, "keyed [] and list() assignments are not supported");
+    }
+    checkAllowedInWriteContext(ap->getValue());
+    checkThisContext(ap->getValue(), ThisContextError::Assign);
+  } if (e->is(Expression::KindOfUnaryOpExpression)) {
+    auto uoe = static_pointer_cast<UnaryOpExpression>(e);
+    if (uoe->getOp() != T_ARRAY) {
+      PARSE_ERROR_AT(e, "can't assign to unary op");
+    }
+    const auto pairs = uoe->getExpression();
+    const auto el = static_pointer_cast<ExpressionList>(pairs);
+    const auto count = el->getCount();
+    for (int i = 0; i < count; ++i) {
+      checkAllowedInWriteContext((*el)[i]);
+    }
   }
 }
 
-void Parser::onListAssignment(Token &out, Token &vars, Token *expr,
+void Parser::onListAssignment(Token &out, Token &array_op, Token *expr,
                               bool rhsFirst /* = false */) {
-  auto el = dynamic_pointer_cast<ExpressionList>(vars->exp);
+  auto pairs = dynamic_pointer_cast<UnaryOpExpression>(array_op.exp)
+    ->getExpression();
+  auto el = dynamic_pointer_cast<ExpressionList>(pairs);
   for (int i = 0; i < el->getCount(); i++) {
-    checkAllowedInWriteContext((*el)[i]);
-    checkThisContext((*el)[i], ThisContextError::Assign);
+    auto const pair = static_pointer_cast<ArrayPairExpression>((*el)[i]);
+    checkAllowedInWriteContext(pair);
+    checkThisContext(pair->getValue(), ThisContextError::Assign);
   }
   out->exp = NEW_EXP(ListAssignment,
-                     dynamic_pointer_cast<ExpressionList>(vars->exp),
+                     el,
                      expr ? expr->exp : ExpressionPtr(), rhsFirst);
-}
-
-void Parser::onAListVar(Token &out, Token *list, Token *var) {
-  Token empty_list, empty_var;
-  if (!var) {
-    empty_var.exp = ExpressionPtr();
-    var = &empty_var;
-  }
-  if (!list) {
-    empty_list.exp = NEW_EXP0(ExpressionList);
-    list = &empty_list;
-  }
-  onExprListElem(out, list, *var);
-}
-
-void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
-  onListAssignment(out, sublist, nullptr);
-  onExprListElem(out, list, out);
 }
 
 void Parser::checkThisContext(ExpressionPtr e,
@@ -1068,10 +1074,8 @@ void Parser::onDArray(Token& out, Token& exprs) {
   );
 }
 
-void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
+void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token *value,
                          bool ref) {
-  if (!value->exp) return;
-
   ExpressionPtr expList;
   if (pairs && pairs->exp) {
     expList = pairs->exp;
@@ -1079,7 +1083,8 @@ void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
     expList = NEW_EXP0(ExpressionList);
   }
   ExpressionPtr nameExp = name ? name->exp : ExpressionPtr();
-  expList->addElement(NEW_EXP(ArrayPairExpression, nameExp, value->exp, ref));
+  ExpressionPtr valueExp = value ? value->exp : ExpressionPtr();
+  expList->addElement(NEW_EXP(ArrayPairExpression, nameExp, valueExp, ref));
   out->exp = expList;
 }
 
@@ -2774,7 +2779,7 @@ void Parser::onXhpAttributeSpread(Token& out, Token* pairs, Token& expr) {
   // Add it to the running attribute list
   Token attrName;
   onScalar(attrName, T_CONSTANT_ENCAPSED_STRING, tname);
-  onArrayPair(out, pairs, &attrName, expr, 0);
+  onArrayPair(out, pairs, &attrName, &expr, 0);
 }
 
 void Parser::onXhpAttributesEnd() {

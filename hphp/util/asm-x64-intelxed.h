@@ -17,8 +17,10 @@
 #ifndef incl_HPHP_UTIL_ASM_X64_INTELXED_H_
 #define incl_HPHP_UTIL_ASM_X64_INTELXED_H_
 
+#include <functional>
+
 extern "C" {
-    #include <xed-interface.h>
+#include <xed-interface.h>
 }
 /*
  * A macro assembler for x64, based on the Intel XED library, that strives
@@ -28,18 +30,25 @@ namespace HPHP { namespace jit {
 
 struct XedInit {
   XedInit() {
-      xed_tables_init();
+    xed_tables_init();
   }
 };
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-#define SZ_TO_BITS(sz)                    (sz << 3)
-#define BITS_TO_SZ(bits)                  (bits >> 3)
-#define RIP_ZERO_DISP                     RIPRelativeRef(DispRIP(0))
+inline constexpr int sizeToBits(int sz) {
+  return (sz << 3);
+}
+
+inline constexpr int bitsToSize(int bits) {
+  return (bits >> 3);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 typedef bool(*immFitFunc)(int64_t, int);
-#define IMMFITFUNC_SIGNED                 deltaFits
-#define IMMFITFUNC_UNSIGNED               (immFitFunc) magFits
+
+///////////////////////////////////////////////////////////////////////////////
 
 struct XedOperand
 {
@@ -56,7 +65,7 @@ struct XedOperand
     template<typename immtype>
     xed_imm_value(const immtype& imm, int immSize) {
       uq = 0;
-      switch(immSize) {
+      switch (immSize) {
         case sz::byte:
           b = imm.b(); break;
         case sz::word:
@@ -64,49 +73,47 @@ struct XedOperand
         case sz::dword:
           l = imm.l(); break;
         case sz::qword:
-          q = imm.q();
+          q = imm.q(); break;
       }
     }
   };
 
-  inline xed_reg_enum_t xedFromReg (const Reg64& reg) {
+  inline xed_reg_enum_t xedFromReg(const Reg64& reg) {
     return xed_reg_enum_t(int(reg) + XED_REG_RAX);
   }
 
-  inline xed_reg_enum_t xedFromReg (const Reg32& reg) {
+  inline xed_reg_enum_t xedFromReg(const Reg32& reg) {
     return xed_reg_enum_t(int(reg) + XED_REG_EAX);
   }
 
-  inline xed_reg_enum_t xedFromReg (const Reg16& reg) {
+  inline xed_reg_enum_t xedFromReg(const Reg16& reg) {
     return xed_reg_enum_t(int(reg) + XED_REG_AX);
   }
 
-  inline xed_reg_enum_t xedFromReg (const Reg8& reg) {
-    int regid = int(reg);
+  inline xed_reg_enum_t xedFromReg(const Reg8& reg) {
+    auto regid = int(reg);
     if ((regid & 0x80) == 0) {
       return xed_reg_enum_t(regid + XED_REG_AL);
     }
     return xed_reg_enum_t((regid - 0x84) + XED_REG_AH);
   }
 
-  inline xed_reg_enum_t xedFromReg (const RegXMM& reg) {
+  inline xed_reg_enum_t xedFromReg(const RegXMM& reg) {
     return xed_reg_enum_t(int(reg) + XED_REG_XMM0);
   }
 
   static int getDisplSize(intptr_t value) {
-    if (value == 0) {
-      return sz::nosize;
-    }
+    if (value == 0) return sz::nosize;
     return deltaFits(value, sz::byte) ? sz::byte : sz::dword;
   }
 
   xed_enc_displacement_t xedDispFromValue(intptr_t value, int size) {
-    switch(size) {
+    switch (size) {
       case sz::nosize:  return {0, 0};
-      case sz::byte:    return {(xed_uint64_t)(safe_cast<int8_t>(value)),
-                                SZ_TO_BITS((xed_uint32_t) size)};
-      default:          return {(xed_uint64_t)(safe_cast<int32_t>(value)),
-                                SZ_TO_BITS((xed_uint32_t) size)};
+      case sz::byte:    return {(xed_uint64_t)safe_cast<int8_t>(value),
+                                (xed_uint32_t)sizeToBits(size)};
+      default:          return {(xed_uint64_t)safe_cast<int32_t>(value),
+                                (xed_uint32_t)sizeToBits(size)};
     }
   }
 
@@ -124,48 +131,47 @@ struct XedOperand
   }
 
   explicit XedOperand(const MemoryRef& m, int memSize) {
-    xed_reg_enum_t base = (int(m.r.base) != -1 ?
-                            xedFromReg(m.r.base) : XED_REG_INVALID);
-    xed_reg_enum_t index = (int(m.r.index) != -1 ?
-                            xedFromReg(m.r.index) : XED_REG_INVALID);
+    xed_reg_enum_t base = int(m.r.base) != -1 ?
+                          xedFromReg(m.r.base) : XED_REG_INVALID;
+    xed_reg_enum_t index = int(m.r.index) != -1 ?
+                           xedFromReg(m.r.index) : XED_REG_INVALID;
     op = xed_mem_gbisd(xed_reg_enum_t(m.segment), base, index, m.r.scale,
-                       xedDispFromValue(m.r.disp), SZ_TO_BITS(memSize));
+                       xedDispFromValue(m.r.disp), sizeToBits(memSize));
   }
 
   explicit XedOperand(const RIPRelativeRef& r, int memSize) {
     op = xed_mem_bd(XED_REG_RIP, xedDispFromValue(r.r.disp, sz::dword),
-                    SZ_TO_BITS(memSize));
+                    sizeToBits(memSize));
   }
 
   template<typename immtype>
   explicit XedOperand(const immtype& immed, int immSize) {
-    op = xed_imm0(xed_imm_value(immed, immSize).uq, SZ_TO_BITS(immSize));
+    op = xed_imm0(xed_imm_value(immed, immSize).uq, sizeToBits(immSize));
   }
 
   explicit XedOperand(CodeAddress address, int size) {
-    int64_t target = (int64_t)address;
-    assert(deltaFits(target, size) &&
-           "Relative address doesn't fit selected size");
-    op = xed_relbr((int32_t)target, SZ_TO_BITS(size));
+    op = xed_relbr(safe_cast<int32_t>((int64_t)address), sizeToBits(size));
   }
 
   template<typename immtype>
   explicit XedOperand(const immtype& immed, int immSizes, immFitFunc func) {
     immSizes = reduceImmSize(immed.q(), immSizes, func);
-    op = xed_imm0(xed_imm_value(immed, immSizes).uq, SZ_TO_BITS(immSizes));
+    op = xed_imm0(xed_imm_value(immed, immSizes).uq, sizeToBits(immSizes));
   }
 
   inline int reduceImmSize(int64_t value, int allowedSizes, immFitFunc func) {
     for (int crtSize = sz::byte; crtSize < sz::qword; crtSize <<= 1) {
-      if ((allowedSizes & crtSize) && (*func)(value, crtSize))
-        return crtSize;
-      }
-    assert((allowedSizes & sz::qword) &&
-           "Could not find an optimal size for Immed");
+      if ((allowedSizes & crtSize) && (*func)(value, crtSize)) return crtSize;
+    }
+    assertx((allowedSizes & sz::qword) &&
+            "Could not find an optimal size for Immed");
     return sz::qword;
   }
 };
 
+#define RIP_ZERO_DISP                     RIPRelativeRef(DispRIP(0))
+#define IMMFITFUNC_SIGNED                 deltaFits
+#define IMMFITFUNC_UNSIGNED               (immFitFunc) magFitsc
 #define XED_REG(reg)                      XedOperand(reg).op
 #define XED_IMM(imm, size)                XedOperand(imm, size).op
 #define XED_IMM_RED(imm, sizes, redfunc)  XedOperand(imm, sizes, redfunc).op
@@ -178,8 +184,8 @@ struct XedOperand
 struct XedAssembler : public X64AssemblerBase {
 private:
   constexpr static xed_state_t s_xedState = {
-        XED_MACHINE_MODE_LONG_64,
-        XED_ADDRESS_WIDTH_64b
+    XED_MACHINE_MODE_LONG_64,
+    XED_ADDRESS_WIDTH_64b
   };
 
   CodeAddress dest() const {
@@ -212,7 +218,6 @@ public:
    *   a.  call   (rax);            // indirect call
    *
    */
-#define XED_INVERSE(x, y)   y, x
 
 #define BYTE_LOAD_OP(name, instr)                                     \
   void name##b(MemoryRef m, Reg8 r)     { xedInstrMR(instr, m, r); }
@@ -372,7 +377,7 @@ public:
   void ud2()          { xedInstr(XED_ICLASS_UD2,    sz::byte); }
   void pushf()        { xedInstr(XED_ICLASS_PUSHF,  sz::word); }
   void popf()         { xedInstr(XED_ICLASS_POPF,   sz::word); }
-  void lock()         { assert(false); }
+  void lock()         { always_assert(false); }
 
   void push(MemoryRef m)      { xedInstrM(XED_ICLASS_PUSH,m); }
   void pop (MemoryRef m)      { xedInstrM(XED_ICLASS_POP, m); }
@@ -387,7 +392,7 @@ public:
   //special case for push(imm)
   void push(Immed64 i) {
     XedOperand oper(i, sz::byte | sz::word | sz::dword, IMMFITFUNC_SIGNED);
-    xedEmit1(XED_ICLASS_PUSH, oper.op, oper.op.width_bits < 32 ? 16 : 64);
+    xedEmit(XED_ICLASS_PUSH, oper.op, oper.op.width_bits < 32 ? 16 : 64);
   }
 
   void movups(RegXMM x, MemoryRef m)        { xedInstrRM(XED_ICLASS_MOVUPS,
@@ -399,13 +404,13 @@ public:
   void movdqu(MemoryRef m, RegXMM x)        { xedInstrMR(XED_ICLASS_MOVDQU,
                                                          m, x); }
   void movdqa(RegXMM x, RegXMM y)           { xedInstrRR(XED_ICLASS_MOVDQA,
-                                                         XED_INVERSE(x, y)); }
+                                                         y, x); }
   void movdqa(RegXMM x, MemoryRef m)        { xedInstrRM(XED_ICLASS_MOVDQA,
                                                          x, m); }
   void movdqa(MemoryRef m, RegXMM x)        { xedInstrMR(XED_ICLASS_MOVDQA,
                                                          m, x); }
   void movsd (RegXMM x, RegXMM y)           { xedInstrRR(XED_ICLASS_MOVSD_XMM,
-                                                         XED_INVERSE(x, y)); }
+                                                         y, x); }
   void movsd (RegXMM x, MemoryRef m)        { xedInstrRM(XED_ICLASS_MOVSD_XMM,
                                                          x, m); }
   void movsd (MemoryRef m, RegXMM x)        { xedInstrMR(XED_ICLASS_MOVSD_XMM,
@@ -415,7 +420,7 @@ public:
   void lddqu (MemoryRef m, RegXMM x)        { xedInstrMR(XED_ICLASS_LDDQU,
                                                          m, x); }
   void unpcklpd(RegXMM s, RegXMM d)         { xedInstrRR(XED_ICLASS_UNPCKLPD,
-                                                         XED_INVERSE(s, d)); }
+                                                         d, s); }
 
   void rorq  (Immed i, Reg64 r) { xedInstrIR(XED_ICLASS_ROR, i, r, sz::byte); }
   void shlq  (Immed i, Reg64 r) { xedInstrIR(XED_ICLASS_SHL, i, r, sz::byte); }
@@ -487,11 +492,11 @@ public:
   void psrlq(Immed i, RegXMM r) { xedInstrIR(XED_ICLASS_PSRLQ, i, r,
                                              sz::byte); }
 
-  void movq_rx(Reg64 rSrc, RegXMM rdest) {
-    xedInstrRR(XED_ICLASS_MOVQ, XED_INVERSE(rdest, rSrc));
+  void movq_rx(Reg64 rsrc, RegXMM rdest) {
+    xedInstrRR(XED_ICLASS_MOVQ, rsrc, rdest);
   }
-  void movq_xr(RegXMM rSrc, Reg64 rdest) {
-    xedInstrRR(XED_ICLASS_MOVQ, rSrc, rdest);
+  void movq_xr(RegXMM rsrc, Reg64 rdest) {
+    xedInstrRR(XED_ICLASS_MOVQ, rsrc, rdest);
   }
 
   void addsd(RegXMM src, RegXMM srcdest) {
@@ -507,7 +512,7 @@ public:
     xedInstrRR(XED_ICLASS_PXOR, srcdest, src);
   }
   void cvtsi2sd(Reg64 src, RegXMM dest) {
-    xedInstrRR(XED_ICLASS_CVTSI2SD, XED_INVERSE(dest, src));
+    xedInstrRR(XED_ICLASS_CVTSI2SD, src, dest);
   }
   void cvtsi2sd(MemoryRef m, RegXMM dest) {
     xedInstrMR(XED_ICLASS_CVTSI2SD, m, dest);
@@ -523,7 +528,7 @@ public:
     xedInstrRR(XED_ICLASS_DIVSD, srcdest, src);
   }
   void cvttsd2siq(RegXMM src, Reg64 dest) {
-    xedInstrRR(XED_ICLASS_CVTTSD2SI, XED_INVERSE(dest, src));
+    xedInstrRR(XED_ICLASS_CVTTSD2SI, src, dest);
   }
 
 private:
@@ -549,21 +554,21 @@ private:
 
   ALWAYS_INLINE
   xed_iclass_enum_t ccToXedJump(ConditionCode c) {
-    assert(c != CC_None);
+    assertx(c != CC_None);
     static xed_iclass_enum_t jumps[] = CC_TO_XED_ARRAY(J);
     return jumps[(int)c];
   }
 
   ALWAYS_INLINE
   xed_iclass_enum_t ccToXedSetCC(int c) {
-    assert(c != -1);
+    assertx(c != -1);
     static xed_iclass_enum_t setccs[] = CC_TO_XED_ARRAY(SET);
     return setccs[c];
   }
 
   ALWAYS_INLINE
   xed_iclass_enum_t ccToXedCMov(ConditionCode c) {
-    assert(c != CC_None);
+    assertx(c != CC_None);
     static xed_iclass_enum_t cmovs[] = CC_TO_XED_ARRAY(CMOV);
     return cmovs[(int)c];
   }
@@ -572,115 +577,120 @@ private:
 
 #define DECLARE_UNUSED(type, name)  type name; static_cast<void>(name)
 
-#define XED_EMIT_BEGIN()                                                    \
-  xed_encoder_instruction_t instruction;                                    \
-  xed_encoder_request_t request;                                            \
-  uint32_t encodedSize = 0;                                                 \
-  DECLARE_UNUSED(xed_error_enum_t, xedError);                               \
-  DECLARE_UNUSED(xed_bool_t, convert_ok)
-
-#define XED_EMIT_ENCODE()                                                   \
-  xed_encoder_request_zero(&request);                                       \
-  convert_ok = xed_convert_to_encoder_request(&request, &instruction);      \
-  assert(convert_ok);                                                       \
-  xedError = xed_encode(&request, destination, XED_MAX_INSTRUCTION_BYTES,   \
-                        &encodedSize)
-
-#define XED_ASSERT_ERR(args)                                                \
-  assert_flog(xedError == XED_ERROR_NONE,                                   \
-              "XED: Error when encoding {}(" args ")"                       \
-              "with effOpSize({}): {}",                                     \
-              xed_iclass_enum_t2str(instr),                                 \
-              effOperandSizeBits,                                           \
-              xed_error_enum_t2str(xedError))
-
   ALWAYS_INLINE
-  uint32_t xedEmit0(xed_iclass_enum_t instr,
-                    xed_uint_t effOperandSizeBits,
-                    CodeAddress destination) {
-    XED_EMIT_BEGIN();
-    xed_inst0(&instruction, s_xedState, instr, effOperandSizeBits);
-    XED_EMIT_ENCODE();
-    XED_ASSERT_ERR("");
+  uint32_t xedEmitImpl(xed_iclass_enum_t instr, CodeAddress destination,
+                       std::function<void(xed_encoder_instruction_t*)>
+                                          xedFunc) {
+    xed_encoder_instruction_t instruction;
+    xed_encoder_request_t request;
+    uint32_t encodedSize = 0;
+    xed_error_enum_t xedError;
+    xed_bool_t convert_ok;
+
+    xedFunc(&instruction);
+
+    xed_encoder_request_zero(&request);
+    convert_ok = xed_convert_to_encoder_request(&request, &instruction);
+    always_assert(convert_ok && "Unable to convert instruction"
+                  " to encoder request");
+    xedError = xed_encode(&request, destination, XED_MAX_INSTRUCTION_BYTES,
+                          &encodedSize);
+    always_assert_flog(xedError == XED_ERROR_NONE,
+                       "XED: Error when encoding {}(): {}",
+                       xed_iclass_enum_t2str(instr),
+                       xed_error_enum_t2str(xedError));
     return encodedSize;
   }
 
   ALWAYS_INLINE
-  void xedEmit0(xed_iclass_enum_t instr, xed_uint_t effOperandSizeBits = 0) {
-    codeBlock.moveFrontier(xedEmit0(instr, effOperandSizeBits, dest()));
+  uint32_t xedEmit(xed_iclass_enum_t instr,
+                   xed_uint_t effOperandSizeBits,
+                   CodeAddress destination) {
+    return xedEmitImpl(instr, destination,
+                        [&](xed_encoder_instruction_t* i) {
+                          xed_inst0(i, s_xedState, instr, effOperandSizeBits);
+                        });
   }
 
   ALWAYS_INLINE
-  uint32_t xedEmit1(xed_iclass_enum_t instr,
-                        const xed_encoder_operand_t& op,
-                        xed_uint_t effOperandSizeBits,
-                        CodeAddress destination) {
-    XED_EMIT_BEGIN();
-    xed_inst1(&instruction, s_xedState, instr, effOperandSizeBits, op);
-    XED_EMIT_ENCODE();
-    XED_ASSERT_ERR("arg");
-    return encodedSize;
+  void xedEmit(xed_iclass_enum_t instr, xed_uint_t effOperandSizeBits = 0) {
+    codeBlock.moveFrontier(xedEmit(instr, effOperandSizeBits, dest()));
   }
 
   ALWAYS_INLINE
-  void xedEmit1(xed_iclass_enum_t instr, const xed_encoder_operand_t& op,
-                    xed_uint_t effOperandSizeBits = 0) {
-    codeBlock.moveFrontier(xedEmit1(instr, op, effOperandSizeBits, dest()));
+  uint32_t xedEmit(xed_iclass_enum_t instr,
+                   const xed_encoder_operand_t& op,
+                   xed_uint_t effOperandSizeBits,
+                   CodeAddress destination) {
+    return xedEmitImpl(instr, destination,
+                        [&](xed_encoder_instruction_t* i) {
+                          xed_inst1(i, s_xedState, instr,
+                                    effOperandSizeBits, op);
+                        });
   }
 
   ALWAYS_INLINE
-  uint32_t xedEmit2(xed_iclass_enum_t instr,
-                    const xed_encoder_operand_t& op_1,
-                    const xed_encoder_operand_t& op_2,
-                    xed_uint_t effOperandSizeBits,
-                    CodeAddress destination) {
-    XED_EMIT_BEGIN();
-    xed_inst2(&instruction, s_xedState, instr, effOperandSizeBits, op_1, op_2);
-    XED_EMIT_ENCODE();
-    XED_ASSERT_ERR("arg, arg");
-    return encodedSize;
+  void xedEmit(xed_iclass_enum_t instr, const xed_encoder_operand_t& op,
+               xed_uint_t effOperandSizeBits = 0) {
+    codeBlock.moveFrontier(xedEmit(instr, op, effOperandSizeBits, dest()));
   }
 
   ALWAYS_INLINE
-  void xedEmit2(xed_iclass_enum_t instr, const xed_encoder_operand_t& op_1,
-                const xed_encoder_operand_t& op_2,
-                xed_uint_t effOperandSizeBits = 0) {
-    codeBlock.moveFrontier(xedEmit2(instr, op_1, op_2, effOperandSizeBits,
-                           dest()));
+  uint32_t xedEmit(xed_iclass_enum_t instr,
+                   const xed_encoder_operand_t& op_1,
+                   const xed_encoder_operand_t& op_2,
+                   xed_uint_t effOperandSizeBits,
+                   CodeAddress destination) {
+    return xedEmitImpl(instr, destination,
+                        [&](xed_encoder_instruction_t* i) {
+                          xed_inst2(i, s_xedState, instr,
+                                    effOperandSizeBits, op_1, op_2);
+                        });
   }
 
   ALWAYS_INLINE
-  uint32_t xedEmit3(xed_iclass_enum_t instr,
-                    const xed_encoder_operand_t& op_1,
-                    const xed_encoder_operand_t& op_2,
-                    const xed_encoder_operand_t& op_3,
-                    xed_uint_t effOperandSizeBits,
-                    CodeAddress destination) {
-    XED_EMIT_BEGIN();
-    xed_inst3(&instruction, s_xedState, instr, effOperandSizeBits,
-              op_1, op_2, op_3);
-    XED_EMIT_ENCODE();
-    XED_ASSERT_ERR("arg, arg, arg");
-    return encodedSize;
+  void xedEmit(xed_iclass_enum_t instr,
+               const xed_encoder_operand_t& op_1,
+               const xed_encoder_operand_t& op_2,
+               xed_uint_t effOperandSizeBits = 0) {
+    codeBlock.moveFrontier(xedEmit(instr, op_1, op_2, effOperandSizeBits,
+                                   dest()));
   }
 
   ALWAYS_INLINE
-  void xedEmit3(xed_iclass_enum_t instr,
-                const xed_encoder_operand_t& op_1,
-                const xed_encoder_operand_t& op_2,
-                const xed_encoder_operand_t& op_3,
-                xed_uint_t effOperandSizeBits = 0) {
-    codeBlock.moveFrontier(xedEmit3(instr, op_1, op_2, op_3, effOperandSizeBits,
-                           dest()));
+  uint32_t xedEmit(xed_iclass_enum_t instr,
+                   const xed_encoder_operand_t& op_1,
+                   const xed_encoder_operand_t& op_2,
+                   const xed_encoder_operand_t& op_3,
+                   xed_uint_t effOperandSizeBits,
+                   CodeAddress destination) {
+    return xedEmitImpl(instr, destination,
+                        [&](xed_encoder_instruction_t* i) {
+                          xed_inst3(i, s_xedState, instr,
+                                    effOperandSizeBits, op_1, op_2, op_3);
+                        });
+  }
+
+  ALWAYS_INLINE
+  void xedEmit(xed_iclass_enum_t instr,
+               const xed_encoder_operand_t& op_1,
+               const xed_encoder_operand_t& op_2,
+               const xed_encoder_operand_t& op_3,
+               xed_uint_t effOperandSizeBits = 0) {
+    codeBlock.moveFrontier(xedEmit(instr, op_1, op_2, op_3, effOperandSizeBits,
+                                   dest()));
   }
 
 public:
+#define INT3_SIZE   (sz::byte)
+#define UD2_SIZE    (sz::word)
+
   void emitInt3s(int n) {
-    if (n == 0) return;
     static uint8_t instr = 0;
-    static uint32_t int3size = xedEmit0(XED_ICLASS_INT3, sz::byte, &instr);
-    static_cast<void> (int3size);
-    assert(int3size == 1);
+    if (n == 0) return;
+    if (instr == 0) {
+      xedEmit(XED_ICLASS_INT3, sz::byte, &instr);
+    }
     for (auto i = 0; i < n; ++i) {
       byte(instr);
     }
@@ -713,21 +723,19 @@ public:
 
   void pad() {
     auto remaining = available();
-    static uint32_t int3 = 0;
-    static uint32_t ud2 = 0;
-    static uint32_t int3_size = xedEmit0(XED_ICLASS_INT3, 0,
-                                         (CodeAddress)&int3);
-    static uint32_t ud2_size = xedEmit0(XED_ICLASS_UD2, 0,
-                                        (CodeAddress)&ud2);
-    while(remaining >= ud2_size) {
-      bytes(ud2_size, (uint8_t*)&ud2);
-      remaining -= ud2_size;
+    static uint8_t padInstructs[UD2_SIZE + INT3_SIZE] = {0};
+    if (padInstructs[0] == 0) {
+      xedEmit(XED_ICLASS_UD2, 0, padInstructs);
+      xedEmit(XED_ICLASS_INT3, 0, padInstructs + UD2_SIZE);
     }
-    while(remaining >= int3_size) {
-      bytes(int3_size, (uint8_t*)&int3);
-      remaining -= int3_size;
+    while (remaining >= UD2_SIZE) {
+      bytes(UD2_SIZE, padInstructs);
+      remaining -= UD2_SIZE;
     }
-    assertx(available() == 0);
+    while (remaining >= INT3_SIZE) {
+      byte(padInstructs[UD2_SIZE]);
+      remaining -= INT3_SIZE;
+    }
   }
 
 public:
@@ -794,7 +802,7 @@ private:
 #define XED_INSTR_WRAPPER_IMPL(bitsize)                             \
   ALWAYS_INLINE                                                     \
   void xedInstrR(xed_iclass_enum_t instr, const Reg##bitsize& r) {  \
-    xedEmit1(instr, XED_REG(r), bitsize);                           \
+    xedEmit(instr, XED_REG(r), bitsize);                            \
   }
 
 #define XED_WRAP_X XED_INSTR_WRAPPER_IMPL
@@ -807,16 +815,16 @@ private:
   ALWAYS_INLINE                                                     \
   void xedInstrIR(xed_iclass_enum_t instr, const Immed& i,          \
                   const Reg##bitsize& r,                            \
-                  int immSize = BITS_TO_SZ(bitsize)) {              \
-    xedEmit2(instr, XED_REG(r), XED_IMM(i, immSize), bitsize);      \
+                  int immSize = bitsToSize(bitsize)) {              \
+    xedEmit(instr, XED_REG(r), XED_IMM(i, immSize), bitsize);       \
   }                                                                 \
                                                                     \
   ALWAYS_INLINE                                                     \
   void xedInstrIR(xed_iclass_enum_t instr, const Immed& i,          \
                   const Reg##bitsize& r,                            \
                   int immSize, immFitFunc fitFunc) {                \
-    xedEmit2(instr, XED_REG(r),                                     \
-             XED_IMM_RED(i, immSize, fitFunc), bitsize);            \
+    xedEmit(instr, XED_REG(r),                                      \
+            XED_IMM_RED(i, immSize, fitFunc), bitsize);             \
   }
 
 #define XED_WRAP_X XED_INSTIR_WRAPPER_IMPL
@@ -825,20 +833,20 @@ private:
 
   ALWAYS_INLINE
   void xedInstrIR(xed_iclass_enum_t instr, const Immed64& i, const Reg64& r) {
-    xedEmit2(instr, XED_REG(r), XED_IMM(i, sz::qword), SZ_TO_BITS(sz::qword));
+    xedEmit(instr, XED_REG(r), XED_IMM(i, sz::qword), sizeToBits(sz::qword));
   }
 
   ALWAYS_INLINE
   void xedInstrIR(xed_iclass_enum_t instr, const Immed64& i, const Reg64& r,
                   int immSize, immFitFunc fitFunc) {
-    xedEmit2(instr, XED_REG(r), XED_IMM_RED(i, immSize, fitFunc),
-             SZ_TO_BITS(sz::qword));
+    xedEmit(instr, XED_REG(r), XED_IMM_RED(i, immSize, fitFunc),
+            sizeToBits(sz::qword));
   }
 
   ALWAYS_INLINE
   void xedInstrIR(xed_iclass_enum_t instr, const Immed& i,
                   const RegXMM& r, int immSize) {
-    xedEmit2(instr, XED_REG(r), XED_IMM(i, immSize));
+    xedEmit(instr, XED_REG(r), XED_IMM(i, immSize));
   }
 
   // instr(reg, reg)
@@ -847,7 +855,7 @@ private:
   ALWAYS_INLINE                                                     \
   void xedInstrRR(xed_iclass_enum_t instr, const Reg##bitsize& r1,  \
                   const Reg##bitsize& r2) {                         \
-    xedEmit2(instr, XED_REG(r2), XED_REG(r1), bitsize);             \
+    xedEmit(instr, XED_REG(r2), XED_REG(r1), bitsize);              \
   }
 
 #define XED_WRAP_X XED_INSTRR_WRAPPER_IMPL
@@ -856,32 +864,32 @@ private:
 
   ALWAYS_INLINE
   void xedInstrRR_CL(xed_iclass_enum_t instr, const Reg64& r) {
-    xedEmit2(instr, XED_REG(r), XED_REG(XED_REG_CL), SZ_TO_BITS(sz::qword));
+    xedEmit(instr, XED_REG(r), XED_REG(XED_REG_CL), sizeToBits(sz::qword));
   }
 
   ALWAYS_INLINE
   void xedInstrRR(xed_iclass_enum_t instr, const Reg8& r1, const Reg32& r2) {
-    xedEmit2(instr, XED_REG(r2), XED_REG(r1), SZ_TO_BITS(sz::byte));
+    xedEmit(instr, XED_REG(r2), XED_REG(r1), sizeToBits(sz::byte));
   }
 
   ALWAYS_INLINE
   void xedInstrRR(xed_iclass_enum_t instr, const Reg16& r1, const Reg32& r2) {
-    xedEmit2(instr, XED_REG(r2), XED_REG(r1), SZ_TO_BITS(sz::word));
+    xedEmit(instr, XED_REG(r2), XED_REG(r1), sizeToBits(sz::word));
   }
 
   ALWAYS_INLINE
   void xedInstrRR(xed_iclass_enum_t instr, const Reg8& r1, const Reg64& r2) {
-    xedEmit2(instr, XED_REG(r2), XED_REG(r1), SZ_TO_BITS(sz::byte));
+    xedEmit(instr, XED_REG(r2), XED_REG(r1), sizeToBits(sz::byte));
   }
 
   ALWAYS_INLINE
   void xedInstrRR(xed_iclass_enum_t instr, const Reg64& r1, const RegXMM& r2) {
-    xedEmit2(instr, XED_REG(r2), XED_REG(r1));
+    xedEmit(instr, XED_REG(r2), XED_REG(r1));
   }
 
   ALWAYS_INLINE
   void xedInstrRR(xed_iclass_enum_t instr, const RegXMM& r1, const Reg64& r2) {
-    xedEmit2(instr, XED_REG(r2), XED_REG(r1));
+    xedEmit(instr, XED_REG(r2), XED_REG(r1));
   }
 
   // most instr(xmm_1, xmm_2) instructions take operands in reverse order
@@ -889,14 +897,14 @@ private:
 
   ALWAYS_INLINE
   void xedInstrRR(xed_iclass_enum_t instr, const RegXMM& r1, const RegXMM& r2) {
-    xedEmit2(instr, XED_REG(r1), XED_REG(r2));
+    xedEmit(instr, XED_REG(r1), XED_REG(r2));
   }
 
   // instr(imm)
 
   ALWAYS_INLINE
   void xedInstrI(xed_iclass_enum_t instr, const Immed& i, int immSize) {
-    xedEmit1(instr, XED_IMM(i, immSize), SZ_TO_BITS(immSize));
+    xedEmit(instr, XED_IMM(i, immSize), sizeToBits(immSize));
   }
 
   // instr(mem)
@@ -904,16 +912,16 @@ private:
   ALWAYS_INLINE
   void xedInstrM(xed_iclass_enum_t instr, const MemoryRef& m,
                  int size = sz::qword) {
-      xedEmit1(instr, XED_MEMREF(m, size), SZ_TO_BITS(size));
+      xedEmit(instr, XED_MEMREF(m, size), sizeToBits(size));
   }
 
   ALWAYS_INLINE
   void xedInstrM(xed_iclass_enum_t instr, RIPRelativeRef m,
                  int size = sz::qword) {
-    XED_CACHE_LEN(xedEmit1(instr, XED_MEMREF_RIP(RIP_ZERO_DISP, size), 0,
-                           dest()), 0);
+    XED_CACHE_LEN(xedEmit(instr, XED_MEMREF_RIP(RIP_ZERO_DISP, size), 0,
+                          dest()), 0);
     m.r.disp -= ((int64_t)frontier() + (int64_t)instrLen);
-    xedEmit1(instr, XED_MEMREF_RIP(m, size), 0);
+    xedEmit(instr, XED_MEMREF_RIP(m, size), 0);
   }
 
   // instr(imm, mem)
@@ -921,22 +929,22 @@ private:
   ALWAYS_INLINE
   void xedInstrIM(xed_iclass_enum_t instr, const Immed& i, const MemoryRef& m,
                   int size = sz::qword) {
-    xedEmit2(instr,  XED_MEMREF(m, size), XED_IMM(i, size),
-             SZ_TO_BITS(size));
+    xedEmit(instr,  XED_MEMREF(m, size), XED_IMM(i, size),
+            sizeToBits(size));
   }
 
   ALWAYS_INLINE
   void xedInstrIM(xed_iclass_enum_t instr, const Immed& i, const MemoryRef& m,
                   int immSize, int memSize) {
-    xedEmit2(instr,  XED_MEMREF(m, memSize), XED_IMM(i, immSize),
-             SZ_TO_BITS(memSize));
+    xedEmit(instr, XED_MEMREF(m, memSize), XED_IMM(i, immSize),
+            sizeToBits(memSize));
   }
 
   ALWAYS_INLINE
   void xedInstrIM(xed_iclass_enum_t instr, const Immed& i, const MemoryRef& m,
                   int immSize, immFitFunc fitFunc, int memSize) {
-    xedEmit2(instr, XED_MEMREF(m, memSize), XED_IMM_RED(i, immSize, fitFunc),
-             SZ_TO_BITS(memSize));
+    xedEmit(instr, XED_MEMREF(m, memSize), XED_IMM_RED(i, immSize, fitFunc),
+            sizeToBits(memSize));
   }
 
   // instr(mem, reg)
@@ -945,19 +953,19 @@ private:
   ALWAYS_INLINE                                                         \
   void xedInstrMR(xed_iclass_enum_t instr, const MemoryRef& m,          \
                   const Reg##bitsize& r,                                \
-                  int memSize = BITS_TO_SZ(bitsize)) {                  \
-    xedEmit2(instr, XED_REG(r), XED_MEMREF(m, memSize), bitsize);       \
+                  int memSize = bitsToSize(bitsize)) {                  \
+    xedEmit(instr, XED_REG(r), XED_MEMREF(m, memSize), bitsize);        \
   }                                                                     \
                                                                         \
   ALWAYS_INLINE                                                         \
   void xedInstrMR(xed_iclass_enum_t instr, RIPRelativeRef m,            \
                   const Reg##bitsize& r) {                              \
-    XED_CACHE_LEN(xedEmit2(instr, XED_REG(r),                           \
-                           XED_MEMREF_RIP(RIP_ZERO_DISP,                \
-                           BITS_TO_SZ(bitsize)),  bitsize, dest()),     \
+    XED_CACHE_LEN(xedEmit(instr, XED_REG(r),                            \
+                          XED_MEMREF_RIP(RIP_ZERO_DISP,                 \
+                          bitsToSize(bitsize)),  bitsize, dest()),      \
                   0);                                                   \
     m.r.disp -= ((int64_t)frontier() + (int64_t)instrLen);              \
-    xedEmit2(instr, XED_REG(r), XED_MEMREF_RIP(m, BITS_TO_SZ(bitsize)), \
+    xedEmit(instr, XED_REG(r), XED_MEMREF_RIP(m, bitsToSize(bitsize)),  \
              bitsize);                                                  \
   }
 
@@ -968,17 +976,17 @@ private:
   ALWAYS_INLINE
   void xedInstrMR(xed_iclass_enum_t instr, const MemoryRef& m,
                   const RegXMM& r, int memSize = sz::qword) {
-    xedEmit2(instr, XED_REG(r), XED_MEMREF(m, memSize));
+    xedEmit(instr, XED_REG(r), XED_MEMREF(m, memSize));
   }
 
   ALWAYS_INLINE
   void xedInstrMR(xed_iclass_enum_t instr, RIPRelativeRef m,
                   const RegXMM& r, int memSize = sz::qword) {
-    XED_CACHE_LEN(xedEmit2(instr, XED_REG(r),
-                           XED_MEMREF_RIP(RIP_ZERO_DISP, memSize),
-                           0, dest()), 0);
+    XED_CACHE_LEN(xedEmit(instr, XED_REG(r),
+                          XED_MEMREF_RIP(RIP_ZERO_DISP, memSize),
+                          0, dest()), 0);
     m.r.disp -= ((int64_t)frontier() + (int64_t)instrLen);
-    xedEmit2(instr, XED_REG(r), XED_MEMREF_RIP(m, memSize));
+    xedEmit(instr, XED_REG(r), XED_MEMREF_RIP(m, memSize));
   }
 
   // instr(reg, mem)
@@ -987,8 +995,8 @@ private:
   ALWAYS_INLINE                                                     \
   void xedInstrRM(xed_iclass_enum_t instr, const Reg##bitsize& r,   \
                   const MemoryRef& m) {                             \
-    xedEmit2(instr, XED_MEMREF(m, BITS_TO_SZ(bitsize)), XED_REG(r), \
-             bitsize);                                              \
+    xedEmit(instr, XED_MEMREF(m, bitsToSize(bitsize)), XED_REG(r),  \
+            bitsize);                                               \
   }
 
 #define XED_WRAP_X XED_INSTRM_WRAPPER_IMPL
@@ -998,7 +1006,7 @@ private:
   ALWAYS_INLINE
   void xedInstrRM(xed_iclass_enum_t instr, const RegXMM& r,
                   const MemoryRef& m, int memSize = sz::qword) {
-    xedEmit2(instr, XED_MEMREF(m, memSize), XED_REG(r));
+    xedEmit(instr, XED_MEMREF(m, memSize), XED_REG(r));
   }
 
   // instr(xmm, xmm, imm)
@@ -1006,24 +1014,24 @@ private:
   ALWAYS_INLINE
   void xedInstrIRR(xed_iclass_enum_t instr, const RegXMM& r1, const RegXMM& r2,
                    const Immed& i, int immSize) {
-    xedEmit3(instr, XED_REG(r1), XED_REG(r2), XED_IMM(i, immSize));
+    xedEmit(instr, XED_REG(r1), XED_REG(r2), XED_IMM(i, immSize));
   }
 
   // instr(relbr)
 
   void xedInstrRelBr(xed_iclass_enum_t instr, CodeAddress destination, int size)
   {
-    XED_CACHE_LEN(xedEmit1(instr, XED_BRREL((CodeAddress)0, size), 0,
+    XED_CACHE_LEN(xedEmit(instr, XED_BRREL((CodeAddress)0, size), 0,
                   dest()), size);
     auto target = destination - (codeBlock.frontier() + instrLen);
-    xedEmit1(instr, XED_BRREL(target, size));
+    xedEmit(instr, XED_BRREL(target, size));
   }
 
   // instr()
 
   ALWAYS_INLINE
   void xedInstr(xed_iclass_enum_t instr, int size = sz::qword) {
-    xedEmit0(instr, SZ_TO_BITS(size));
+    xedEmit(instr, sizeToBits(size));
   }
 };
 

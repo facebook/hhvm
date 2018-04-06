@@ -66,7 +66,13 @@ let from_ast ~is_hh_file ~is_evaled ast =
       let strict_types =
         (* is scalar_types is set - always assume strict_types to have value *)
         if Hhbc_options.php7_scalar_types !(Hhbc_options.compiler_options)
-        then if strict_types = None then Some false else strict_types
+        then begin match strict_types with
+          (* If scalar types AND hack is on, then strict mode is on *)
+          | _ when Hhbc_options.enable_hiphop_syntax !(Hhbc_options.compiler_options) ->
+            Some true
+          | None -> Some false
+          | _ -> strict_types
+          end
         else None in
       Emit_env.set_global_state global_state;
       let flat_closed_ast = List.map snd closed_ast in

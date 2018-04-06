@@ -47,6 +47,7 @@ let write_patches_to_buffer buf original_content patch_list =
   let add_original_content j =
     if j <= !i then () else
     let size = (j - !i + 1) in
+    let size = min (-(!i) + String.length original_content) size in
     let str_to_write = String.sub original_content !i size in
     Buffer.add_string buf str_to_write;
     i := !i + size

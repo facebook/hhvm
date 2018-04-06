@@ -127,6 +127,16 @@ void checkPathAndError(const String& path,
                        const char* func_name,
                        int param_pos);
 
+/**
+ * If any parent of the directory the script cmd was run from includes the
+ * relative path suffix, and the file at that path is readable, then perform
+ * action() on that file. Continues processing up the directory tree until
+ * action() returns true.
+ */
+template <class Action>
+bool runRelative(std::string suffix, String cmd,
+                 const char* currentDir, Action action);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

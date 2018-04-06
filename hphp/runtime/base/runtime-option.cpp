@@ -65,6 +65,7 @@
 #include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/file-util-defs.h"
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/init-fini-node.h"
@@ -72,6 +73,7 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/extension-registry.h"
 
@@ -450,6 +452,7 @@ bool RuntimeOption::PHP7_UVS = false;
 bool RuntimeOption::PHP7_DisallowUnsafeCurlUploads = false;
 
 std::map<std::string, std::string> RuntimeOption::AliasedNamespaces;
+std::vector<std::string> s_RelativeConfigs;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -857,7 +860,8 @@ void RuntimeOption::Load(
   IniSetting::Map& ini, Hdf& config,
   const std::vector<std::string>& iniClis /* = std::vector<std::string>() */,
   const std::vector<std::string>& hdfClis /* = std::vector<std::string>() */,
-  std::vector<std::string>* messages /* = nullptr */) {
+  std::vector<std::string>* messages /* = nullptr */,
+  std::string cmd /* = "" */) {
 
   // Intialize the memory manager here because various settings and
   // initializations that we do here need it
@@ -874,9 +878,61 @@ void RuntimeOption::Load(
   for (auto& hstr : hdfClis) {
     Config::ParseHdfString(hstr, config);
   }
+
   // See if there are any Tier-based overrides
   auto m = getTierOverwrites(ini, config);
   if (messages) *messages = std::move(m);
+
+  // RelativeConfigs can be set by commandline flags and tier overwrites, they
+  // may also contain tier overwrites. They are, however, only included once, so
+  // relative configs may not specify other relative configs which must to be
+  // loaded. If RelativeConfigs is modified while loading configs an error is
+  // raised, but we defer doing so until the logger is initialized below. If a
+  // relative config cannot be found it is silently skipped (this is to allow
+  // configs to be conditionally applied to scripts based on their location). By
+  // reading the "hhvm.relative_configs" ini setting at runtime it is possible
+  // to determine which configs were actually loaded.
+  std::string relConfigsError;
+  Config::Bind(s_RelativeConfigs, ini, config, "RelativeConfigs");
+  if (!cmd.empty() && !s_RelativeConfigs.empty()) {
+    String strcmd(cmd, CopyString);
+    Process::InitProcessStatics();
+    auto const currentDir = Process::CurrentWorkingDirectory.data();
+    std::vector<std::string> newConfigs;
+    auto const original = s_RelativeConfigs;
+    for (auto& str : original) {
+      if (str.empty()) continue;
+
+      std::string fullpath;
+      auto const found = FileUtil::runRelative(
+        str, strcmd, currentDir,
+        [&] (const String& f) {
+          if (access(f.data(), R_OK) == 0) {
+            fullpath = f.toCppString();
+            Config::ParseConfigFile(fullpath, ini, config);
+            return true;
+          }
+          return false;
+        }
+      );
+      if (found) newConfigs.emplace_back(std::move(fullpath));
+    }
+    if (!newConfigs.empty()) {
+      auto m2 = getTierOverwrites(ini, config);
+      if (messages) *messages = std::move(m2);
+      if (s_RelativeConfigs != original) {
+        relConfigsError = folly::sformat(
+          "RelativeConfigs node was modified while loading configs from [{}] "
+          "to [{}]",
+          folly::join(", ", original),
+          folly::join(", ", s_RelativeConfigs)
+        );
+      }
+    }
+    s_RelativeConfigs.swap(newConfigs);
+  } else {
+    s_RelativeConfigs.clear();
+  }
 
   // Then get the ini and hdf cli strings again, in case the tier overwrites
   // overrode any non-tier based command line option we set. The tier-based
@@ -1037,6 +1093,11 @@ void RuntimeOption::Load(
     Config::Bind(WarningFrequency, ini, config,
                  "ErrorHandling.WarningFrequency", 1);
   }
+
+  // If we generated errors while loading RelativeConfigs report those now that
+  // error reporting is initialized
+  if (!relConfigsError.empty()) Logger::Error(relConfigsError);
+
   {
     if (Config::GetInt64(ini, config, "ResourceLimit.CoreFileSizeOverride")) {
       setResourceLimit(RLIMIT_CORE, ini,  config,

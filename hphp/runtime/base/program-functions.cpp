@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/file-util-defs.h"
 #include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/member-reflection.h"
@@ -1699,9 +1700,22 @@ static int execute_program_impl(int argc, char** argv) {
         );
       }
     }
+
+    auto const scriptFilePath =
+      !po.file.empty() ? po.file :
+      !po.args.empty() ? po.args[0] :
+      std::string("");
+
     // Now, take care of CLI options and then officially load and bind things
     s_ini_strings = po.iniStrings;
-    RuntimeOption::Load(ini, config, po.iniStrings, po.confStrings, &messages);
+    RuntimeOption::Load(
+      ini,
+      config,
+      po.iniStrings,
+      po.confStrings,
+      &messages,
+      scriptFilePath
+    );
     std::vector<std::string> badnodes;
     config.lint(badnodes);
     for (const auto& badnode : badnodes) {
@@ -2441,27 +2455,6 @@ bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
                      RuntimeOption::EvalPreludePath);
 }
 
-const StaticString s_slash("/");
-
-static void run_prelude(std::string prelude, String cmd,
-                        const char* currentDir) {
-  prelude = "/" + prelude;
-  struct stat s;
-  auto cwd = resolveVmInclude(cmd.get(), currentDir, &s);
-  if (cwd.isNull()) return;
-  auto const w = Stream::getWrapperFromURI(cwd, nullptr, false);
-  do {
-    cwd = f_dirname(cwd);
-    auto const f = String::attach(
-      StringData::Make(cwd.data(), prelude.data())
-    );
-    if (w->access(f, R_OK) == 0) {
-      require(f.data(), false, currentDir, true);
-      break;
-    }
-  } while (!cwd.empty() && !cwd.equal(s_slash));
-}
-
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, const Array& funcParams, VRefParam funcRet,
                  const std::string &reqInitFunc, const std::string &reqInitDoc,
@@ -2501,7 +2494,20 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                 context->getCwd().data(), true);
       }
       if (!prelude.empty()) {
-        run_prelude(prelude, String(cmd, CopyString), context->getCwd().data());
+        auto const currentDir = context->getCwd().data();
+        FileUtil::runRelative(
+          prelude,
+          String(cmd, CopyString),
+          currentDir,
+          [&] (const String& f) {
+            auto const w = Stream::getWrapperFromURI(f, nullptr, false);
+            if (w->access(f, R_OK) == 0) {
+              require(f.data(), false, currentDir, true);
+              return true;
+            }
+            return false;
+          }
+        );
       }
       if (func) {
         funcRet.assignIfRef(invoke(cmd.c_str(), funcParams));

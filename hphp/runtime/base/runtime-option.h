@@ -56,7 +56,8 @@ struct RuntimeOption {
     IniSettingMap &ini, Hdf& config,
     const std::vector<std::string>& iniClis = std::vector<std::string>(),
     const std::vector<std::string>& hdfClis = std::vector<std::string>(),
-    std::vector<std::string>* messages = nullptr);
+    std::vector<std::string>* messages = nullptr,
+    std::string cmd = "");
 
   static bool ServerExecutionMode() {
     return ServerMode;

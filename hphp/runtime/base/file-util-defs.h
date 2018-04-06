@@ -20,6 +20,9 @@
 #define incl_HPHP_FILE_UTIL_DEFS_H_
 
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/logger.h"
 
 #include <string>
@@ -109,6 +112,29 @@ void find(const std::string &root, const std::string& path, bool php,
   }
 
   closedir(dir);
+}
+
+const StaticString s_slash("/");
+
+template <class Action>
+bool runRelative(std::string suffix, String cmd,
+                 const char* currentDir, Action action) {
+  suffix = "/" + suffix;
+  auto cwd = resolve_include(
+    cmd,
+    currentDir,
+    [] (const String& f, void*) { return access(f.data(), R_OK) == 0; },
+    nullptr
+  );
+  if (cwd.isNull()) return false;
+  do {
+    cwd = f_dirname(cwd);
+    auto const f = String::attach(
+      StringData::Make(cwd.data(), suffix.data())
+    );
+    if (action(f)) return true;
+  } while (!cwd.empty() && !cwd.equal(s_slash));
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

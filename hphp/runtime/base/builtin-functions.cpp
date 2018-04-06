@@ -1020,6 +1020,11 @@ String resolve_include(const String& file, const char* currentDir,
                        bool (*tryFile)(const String& file, void*), void* ctx) {
   const char* c_file = file.data();
 
+  auto const getCwd = [] () -> String {
+    if (LIKELY(!g_context.isNull())) return g_context->getCwd();
+    return String(Process::CurrentWorkingDirectory, CopyString);
+  };
+
   if (!File::IsPlainFilePath(file)) {
     // URIs don't have an include path
     if (tryFile(file, ctx)) {
@@ -1036,7 +1041,7 @@ String resolve_include(const String& file, const char* currentDir,
   } else if ((c_file[0] == '.' && (c_file[1] == '/' || (
     c_file[1] == '.' && c_file[2] == '/')))) {
 
-    String path(String(g_context->getCwd() + "/" + file));
+    String path(String(getCwd() + "/" + file));
     String can_path = FileUtil::canonicalize(path);
 
     if (tryFile(can_path, ctx)) {
@@ -1044,34 +1049,36 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else {
-    auto const& includePaths = RID().getIncludePaths();
+    if (!ThreadInfo::s_threadInfo.isNull()) {
+      auto const& includePaths = RID().getIncludePaths();
 
-    for (auto const& includePath : includePaths) {
-      String path("");
-      auto const is_stream_wrapper =
-        includePath.find("://") != std::string::npos;
+      for (auto const& includePath : includePaths) {
+        String path("");
+        auto const is_stream_wrapper =
+          includePath.find("://") != std::string::npos;
 
-      if (!is_stream_wrapper && !FileUtil::isAbsolutePath(includePath)) {
-        path += (g_context->getCwd() + "/");
-      }
+        if (!is_stream_wrapper && !FileUtil::isAbsolutePath(includePath)) {
+          path += (getCwd() + "/");
+        }
 
-      path += includePath;
+        path += includePath;
 
-      if (path[path.size() - 1] != '/') {
-        path += "/";
-      }
+        if (path[path.size() - 1] != '/') {
+          path += "/";
+        }
 
-      path += file;
+        path += file;
 
-      String can_path;
-      if (!is_stream_wrapper) {
-        can_path = FileUtil::canonicalize(path);
-      } else {
-        can_path = String(path.c_str());
-      }
+        String can_path;
+        if (!is_stream_wrapper) {
+          can_path = FileUtil::canonicalize(path);
+        } else {
+          can_path = String(path.c_str());
+        }
 
-      if (tryFile(can_path, ctx)) {
-        return can_path;
+        if (tryFile(can_path, ctx)) {
+          return can_path;
+        }
       }
     }
 
@@ -1085,7 +1092,7 @@ String resolve_include(const String& file, const char* currentDir,
         return can_path;
       }
     } else {
-      String path(g_context->getCwd() + "/" + currentDir + file);
+      String path(getCwd() + "/" + currentDir + file);
       String can_path = FileUtil::canonicalize(path);
 
       if (tryFile(can_path, ctx)) {

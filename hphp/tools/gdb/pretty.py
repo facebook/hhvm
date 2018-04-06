@@ -47,6 +47,37 @@ class StringDataPrinter(object):
 #------------------------------------------------------------------------------
 # TypedValue.
 
+_tv_recurse = False
+
+
+class SetTVRecurseCommand(gdb.Command):
+    """Whether to recurse into TypedValue data ptrs when pretty-printing."""
+
+    def __init__(self):
+        super(SetTVRecurseCommand, self).__init__('set tv-recurse',
+                                                  gdb.COMMAND_STATUS)
+
+    @errorwrap
+    def invoke(self, args, from_tty):
+        argv = gdb.string_to_argv(args)
+
+        if len(argv) != 1:
+            print('Requires an argument. Valid arguments are true, false.')
+            return
+
+        global _tv_recurse
+
+        if argv[0] == 'true':
+            _tv_recurse = True
+        elif argv[0] == 'false':
+            _tv_recurse = False
+        else:
+            print('Undefined item: "%s"'.format(argv[0]))
+
+
+SetTVRecurseCommand()
+
+
 class TypedValuePrinter(object):
     RECOGNIZE = '^HPHP::(TypedValue|Cell|Ref|Variant|VarNR)$'
 
@@ -54,6 +85,8 @@ class TypedValuePrinter(object):
         self.val = val.cast(T('HPHP::TypedValue'))
 
     def to_string(self):
+        global _tv_recurse
+
         data = self.val['m_data']
         t = self.val['m_type']
         val = None
@@ -83,9 +116,13 @@ class TypedValuePrinter(object):
         elif (t == V('HPHP::KindOfArray') or
               t == V('HPHP::KindOfPersistentArray')):
             val = data['parr']
+            if _tv_recurse:
+                val = val.dereference()
 
         elif t == V('HPHP::KindOfObject'):
             val = data['pobj']
+            if _tv_recurse:
+                val = val.dereference()
             name = nameof(val)
 
         elif t == V('HPHP::KindOfResource'):

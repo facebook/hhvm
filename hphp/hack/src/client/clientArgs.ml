@@ -489,6 +489,7 @@ let parse_start_env command =
     exit_on_failure = true;
     debug_port = None;
     ignore_hh_version = !ignore_hh_version;
+    dynamic_view = false;
   }
 
 let parse_start_args () =

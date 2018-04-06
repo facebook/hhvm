@@ -21,6 +21,9 @@ type env = {
   use_enhanced_hover: bool; (* Flag to turn on enhanced hover information *)
 }
 
+(* We cache the state of the typecoverageToggle button, so that when Hack restarts,
+  dynamic view stays in sync with the button in Nuclide *)
+let cached_toggle_state = ref false
 
 (************************************************************************)
 (** Protocol orchestration & helpers                                   **)
@@ -577,6 +580,7 @@ let do_rage (state: state) : Rage.result =
 let do_toggleTypeCoverage (conn : server_conn) (params: ToggleTypeCoverage.params) : unit =
   (* Currently, the only thing to do on toggling type coverage is turn on dynamic view *)
   let command = ServerCommandTypes.DYNAMIC_VIEW (params.ToggleTypeCoverage.toggle) in
+  cached_toggle_state := params.ToggleTypeCoverage.toggle;
   rpc conn command
 
 let do_didOpen (conn: server_conn) (params: DidOpen.params) : unit =
@@ -1333,6 +1337,7 @@ let start_server (root: Path.t) : unit =
       exit_on_failure = false;
       debug_port = None;
       ignore_hh_version = false;
+      dynamic_view = !cached_toggle_state;
     } in
   let _exit_status = ClientStart.main env_start in
   ()

@@ -494,6 +494,7 @@ let setup_server ~informant_managed ~monitor_pid options handle =
   Hh_logger.log "Version: %s" Build_id.build_id_ohai;
   Hh_logger.log "Hostname: %s" (Unix.gethostname ());
   let root = ServerArgs.root options in
+  ServerDynamicView.toggle := ServerArgs.dynamic_view options;
   (* The OCaml default is 500, but we care about minimizing the memory
    * overhead *)
   let gc_control = Gc.get () in

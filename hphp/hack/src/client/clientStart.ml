@@ -28,6 +28,7 @@ type env = {
   ai_mode : string option;
   debug_port: Unix.file_descr option;
   ignore_hh_version : bool;
+  dynamic_view : bool;
 }
 
 let start_server env =
@@ -56,6 +57,7 @@ let start_server env =
        * it doesn't, and shouldn't, use it. *)
       [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
       if env.ignore_hh_version then [| "--ignore-hh-version" |] else [||];
+      if env.dynamic_view then [| "--dynamic-view"|] else [||];
       match env.debug_port with
         | None -> [| |]
         | Some fd ->

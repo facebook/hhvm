@@ -31,6 +31,7 @@ type options = {
   waiting_client   : Unix.file_descr option;
   ignore_hh_version : bool;
   file_info_on_disk : bool;
+  dynamic_view      : bool;
 }
 
 (*****************************************************************************)
@@ -80,6 +81,7 @@ module Messages = struct
                       \ starting and again when it's done starting"
   let ignore_hh_version = " ignore hh_version check when loading saved states"
   let file_info_on_disk = " [experimental] store file-info in sqlite db."
+  let dynamic_view      = " start with dynamic view for IDE files on by default."
 end
 
 let print_json_version () =
@@ -176,6 +178,8 @@ let parse_options () =
   let version       = ref false in
   let waiting_client= ref None in
   let ignore_hh     = ref false in
+  let dynamic_view  = ref false in 
+
   let file_info_on_disk = ref false in
   let cdir          = fun s -> convert_dir := Some s in
   let set_ai        = fun s ->
@@ -199,17 +203,18 @@ let parse_options () =
      "--convert"       , Arg.String cdir         , Messages.convert;
      "--save"          , Arg.Unit set_save       , Messages.save;
      "--save-mini"     , Arg.String set_save_mini, Messages.save_mini;
-     "--use-gen-deps"  , Arg.Set use_gen_deps   , Messages.use_gen_deps;
+     "--use-gen-deps"  , Arg.Set use_gen_deps    , Messages.use_gen_deps;
      "--max-procs"     , Arg.Int set_max_procs   , Messages.max_procs;
      "--no-load"       , Arg.Set no_load         , Messages.no_load;
      "--profile-log"   , Arg.Set profile_log     , Messages.profile_log;
      "--load-state-canary", Arg.Set load_state_canary, Messages.load_state_canary;
      "--with-mini-state", Arg.String set_with_mini_state,
        Messages.with_mini_state;
-     "--version"       , Arg.Set version       , "";
-     "--waiting-client", Arg.Int set_wait      , Messages.waiting_client;
+     "--version"       , Arg.Set version         , "";
+     "--waiting-client", Arg.Int set_wait        , Messages.waiting_client;
      "--ignore-hh-version", Arg.Set ignore_hh  , Messages.ignore_hh_version;
      "--file-info-on-disk", Arg.Set file_info_on_disk , Messages.file_info_on_disk;
+     "--dynamic-view", Arg.Set dynamic_view,     Messages.dynamic_view;
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -259,6 +264,7 @@ let parse_options () =
     waiting_client= !waiting_client;
     ignore_hh_version = !ignore_hh;
     file_info_on_disk = !file_info_on_disk;
+    dynamic_view      = !dynamic_view;
   }
 
 (* useful in testing code *)
@@ -279,6 +285,7 @@ let default_options ~root = {
   waiting_client = None;
   ignore_hh_version = false;
   file_info_on_disk = false;
+  dynamic_view = false;
 }
 
 (*****************************************************************************)
@@ -301,6 +308,7 @@ let use_gen_deps options = options.use_gen_deps
 let waiting_client options = options.waiting_client
 let ignore_hh_version options = options.ignore_hh_version
 let file_info_on_disk options = options.file_info_on_disk
+let dynamic_view options = options.dynamic_view
 
 (*****************************************************************************)
 (* Setters *)
@@ -335,6 +343,7 @@ let to_string
     waiting_client;
     ignore_hh_version;
     file_info_on_disk;
+    dynamic_view;
   } =
     let ai_mode_str = match ai_mode with
       | None -> "<>"
@@ -367,7 +376,8 @@ let to_string
       "with_mini_state: "; mini_state_str; ", ";
       "save_filename: "; save_filename_str; ", ";
       "waiting_client: "; waiting_client_str; ", ";
-      "ignore_hh_version: "; string_of_bool ignore_hh_version;
-      "file_info_on_disk: "; string_of_bool file_info_on_disk;
+      "ignore_hh_version: "; string_of_bool ignore_hh_version; ", ";
+      "file_info_on_disk: "; string_of_bool file_info_on_disk; ", ";
+      "dynamic_view: "; string_of_bool dynamic_view;
       "})"
     ] |> String.concat "")

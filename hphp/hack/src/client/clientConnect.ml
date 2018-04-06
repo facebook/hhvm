@@ -322,6 +322,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
           ai_mode = env.ai_mode;
           debug_port = None;
           ignore_hh_version = env.ignore_hh_version;
+          dynamic_view = false;
         };
         connect env retries start_time tail_env
       end else begin

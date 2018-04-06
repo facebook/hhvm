@@ -223,7 +223,7 @@ Variant ArrayIter::second() {
   return obj->o_invoke_few_args(s_current, 0);
 }
 
-member_rval ArrayIter::secondRval() const {
+tv_rval ArrayIter::secondRval() const {
   if (!hasArrayData()) {
     raise_fatal_error("taking reference on iterator objects");
   }
@@ -234,7 +234,7 @@ member_rval ArrayIter::secondRval() const {
   return ad->rvalPos(m_pos);
 }
 
-member_rval ArrayIter::secondRvalPlus() {
+tv_rval ArrayIter::secondRvalPlus() {
   if (LIKELY(hasArrayData())) {
     const ArrayData* ad = getArrayData();
     assertx(ad);

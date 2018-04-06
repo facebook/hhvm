@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -51,30 +51,30 @@ struct MixedArray;
 struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static void Release(ArrayData*);
 
-  static member_rval::ptr_u NvGetInt(const ArrayData*, int64_t) {
+  static tv_rval NvGetInt(const ArrayData*, int64_t) {
     return nullptr;
   }
   static constexpr auto NvTryGetInt = &NvGetInt;
 
-  static member_rval::ptr_u NvGetStr(const ArrayData*, const StringData*) {
+  static tv_rval NvGetStr(const ArrayData*, const StringData*) {
     return nullptr;
   }
   static constexpr auto NvTryGetStr = &NvGetStr;
 
-  static member_rval RvalInt(const ArrayData* ad, int64_t k) {
-    return member_rval { ad, NvGetInt(ad, k) };
+  static tv_rval RvalInt(const ArrayData* ad, int64_t k) {
+    return NvGetInt(ad, k);
   }
-  static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
-    return member_rval { ad, NvTryGetInt(ad, k) };
+  static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
+    return NvTryGetInt(ad, k);
   }
-  static member_rval RvalStr(const ArrayData* ad, const StringData* k) {
-    return member_rval { ad, NvGetStr(ad, k) };
+  static tv_rval RvalStr(const ArrayData* ad, const StringData* k) {
+    return NvGetStr(ad, k);
   }
-  static member_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
-    return member_rval { ad, NvTryGetStr(ad, k) };
+  static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
+    return NvTryGetStr(ad, k);
   }
-  static member_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
-    return member_rval { ad, GetValueRef(ad, pos) };
+  static tv_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
+    return GetValueRef(ad, pos);
   }
 
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
@@ -91,7 +91,7 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
     return ad;
   }
   static size_t Vsize(const ArrayData*);
-  static member_rval::ptr_u GetValueRef(const ArrayData* ad, ssize_t pos);
+  static tv_rval GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {
     return true;
   }
@@ -101,16 +101,16 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static bool ExistsStr(const ArrayData*, const StringData*) {
     return false;
   }
-  static member_lval LvalInt(ArrayData*, int64_t k, bool copy);
-  static member_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
-  static member_lval LvalStr(ArrayData*, StringData* k, bool copy);
-  static member_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
-  static member_lval LvalNew(ArrayData*, bool copy);
-  static member_lval LvalNewRef(ArrayData*, bool copy);
+  static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
+  static arr_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
+  static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static arr_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
+  static arr_lval LvalNew(ArrayData*, bool copy);
+  static arr_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k,
-                              member_lval v, bool copy);
+                              tv_lval v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k,
-                              member_lval v, bool copy);
+                              tv_lval v, bool copy);
   static constexpr auto AddInt = &SetInt;
   static constexpr auto AddStr = &SetStr;
   static constexpr auto IterBegin = &ArrayCommon::ReturnInvalidIndex;
@@ -146,7 +146,7 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, member_lval v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, tv_lval v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
@@ -170,10 +170,10 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   }
 
 private:
-  static member_lval MakePacked(TypedValue);
-  static member_lval MakePackedInl(TypedValue);
-  static member_lval MakeMixed(StringData*, TypedValue);
-  static member_lval MakeMixed(int64_t, TypedValue);
+  static arr_lval MakePacked(TypedValue);
+  static arr_lval MakePackedInl(TypedValue);
+  static arr_lval MakeMixed(StringData*, TypedValue);
+  static arr_lval MakeMixed(int64_t, TypedValue);
 
 private:
   struct Initializer;

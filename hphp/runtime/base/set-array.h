@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/hash-table.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -410,34 +410,34 @@ private:
 // ArrayData API
 
 public:
-  static member_rval::ptr_u NvTryGetInt(const ArrayData*, int64_t);
-  static member_rval::ptr_u NvTryGetStr(const ArrayData*, const StringData*);
-  static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
-    return member_rval { ad, NvTryGetInt(ad, k) };
+  static tv_rval NvTryGetInt(const ArrayData*, int64_t);
+  static tv_rval NvTryGetStr(const ArrayData*, const StringData*);
+  static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
+    return NvTryGetInt(ad, k);
   }
-  static member_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
-    return member_rval { ad, NvTryGetStr(ad, k) };
+  static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
+    return NvTryGetStr(ad, k);
   }
-  static member_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
-    return member_rval { ad, GetValueRef(ad, pos) };
+  static tv_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
+    return GetValueRef(ad, pos);
   }
   static size_t Vsize(const ArrayData*);
-  static member_rval::ptr_u GetValueRef(const ArrayData*, ssize_t);
+  static tv_rval GetValueRef(const ArrayData*, ssize_t);
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t);
   static bool ExistsStr(const ArrayData*, const StringData*);
-  static member_lval LvalInt(ArrayData*, int64_t, bool);
-  static member_lval LvalIntRef(ArrayData*, int64_t, bool);
-  static member_lval LvalStr(ArrayData*, StringData*, bool);
-  static member_lval LvalStrRef(ArrayData*, StringData*, bool);
-  static member_lval LvalNew(ArrayData*, bool);
-  static member_lval LvalNewRef(ArrayData*, bool);
+  static arr_lval LvalInt(ArrayData*, int64_t, bool);
+  static arr_lval LvalIntRef(ArrayData*, int64_t, bool);
+  static arr_lval LvalStr(ArrayData*, StringData*, bool);
+  static arr_lval LvalStrRef(ArrayData*, StringData*, bool);
+  static arr_lval LvalNew(ArrayData*, bool);
+  static arr_lval LvalNewRef(ArrayData*, bool);
   static ArrayData* SetInt(ArrayData*, int64_t, Cell, bool);
   static ArrayData* SetStr(ArrayData*, StringData*, Cell, bool);
   static ArrayData* SetWithRefInt(ArrayData*, int64_t, TypedValue, bool);
   static ArrayData* SetWithRefStr(ArrayData*, StringData*, TypedValue, bool);
-  static ArrayData* SetRefInt(ArrayData*, int64_t, member_lval, bool);
-  static ArrayData* SetRefStr(ArrayData*, StringData*, member_lval, bool);
+  static ArrayData* SetRefInt(ArrayData*, int64_t, tv_lval, bool);
+  static ArrayData* SetRefStr(ArrayData*, StringData*, tv_lval, bool);
   static ArrayData* RemoveInt(ArrayData*, int64_t, bool);
   static ArrayData* RemoveStr(ArrayData*, const StringData*, bool);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
@@ -445,7 +445,7 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell, bool);
-  static ArrayData* AppendRef(ArrayData*, member_lval, bool);
+  static ArrayData* AppendRef(ArrayData*, tv_lval, bool);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue, bool);
   static ArrayData* PlusEq(ArrayData*, const ArrayData*);
   static ArrayData* Merge(ArrayData*, const ArrayData*);

@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/hash-table.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -319,33 +319,33 @@ private:
 
 public:
   static size_t Vsize(const ArrayData*);
-  static member_rval::ptr_u GetValueRef(const ArrayData*, ssize_t pos);
+  static tv_rval GetValueRef(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
   static bool IsStrictVector(const ArrayData* ad) {
     return ad->m_size == asMixed(ad)->m_nextKI && IsVectorData(ad);
   }
   static constexpr auto NvTryGetInt = &NvGetInt;
   static constexpr auto NvTryGetStr = &NvGetStr;
-  static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
+  static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
     assertx(ad->isMixed());
-    return member_rval { ad, NvTryGetInt(ad, k) };
+    return NvTryGetInt(ad, k);
   }
-  static member_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
+  static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
     assertx(ad->isMixed());
-    return member_rval { ad, NvTryGetStr(ad, k) };
+    return NvTryGetStr(ad, k);
   }
-  static member_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
+  static tv_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
     assertx(ad->isMixed());
-    return member_rval { ad, GetValueRef(ad, pos) };
+    return GetValueRef(ad, pos);
   }
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
-  static member_lval LvalInt(ArrayData* ad, int64_t k, bool copy);
-  static member_lval LvalIntRef(ArrayData* ad, int64_t k, bool copy);
-  static member_lval LvalStr(ArrayData* ad, StringData* k, bool copy);
-  static member_lval LvalStrRef(ArrayData* ad, StringData* k, bool copy);
-  static member_lval LvalNew(ArrayData*, bool copy);
-  static member_lval LvalNewRef(ArrayData*, bool copy);
+  static arr_lval LvalInt(ArrayData* ad, int64_t k, bool copy);
+  static arr_lval LvalIntRef(ArrayData* ad, int64_t k, bool copy);
+  static arr_lval LvalStr(ArrayData* ad, StringData* k, bool copy);
+  static arr_lval LvalStrRef(ArrayData* ad, StringData* k, bool copy);
+  static arr_lval LvalNew(ArrayData*, bool copy);
+  static arr_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* SetWithRefInt(ArrayData*, int64_t k,
@@ -353,9 +353,9 @@ public:
   static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
                                   TypedValue v, bool copy);
   static ArrayData* SetRefInt(ArrayData* ad, int64_t k,
-                              member_lval v, bool copy);
+                              tv_lval v, bool copy);
   static ArrayData* SetRefStr(ArrayData* ad, StringData* k,
-                              member_lval v, bool copy);
+                              tv_lval v, bool copy);
   static ArrayData* AddInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
@@ -363,7 +363,7 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, member_lval v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, tv_lval v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
@@ -398,27 +398,27 @@ public:
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
 
-  static member_rval::ptr_u NvTryGetIntDict(const ArrayData*, int64_t);
+  static tv_rval NvTryGetIntDict(const ArrayData*, int64_t);
   static constexpr auto NvGetIntDict = &NvGetInt;
-  static member_rval::ptr_u NvTryGetStrDict(const ArrayData*,
+  static tv_rval NvTryGetStrDict(const ArrayData*,
                                             const StringData*);
   static constexpr auto NvGetStrDict = &NvGetStr;
-  static member_rval RvalIntDict(const ArrayData* ad, int64_t k) {
+  static tv_rval RvalIntDict(const ArrayData* ad, int64_t k) {
     assertx(ad->isDict());
-    return member_rval { ad, NvGetIntDict(ad, k) };
+    return NvGetIntDict(ad, k);
   }
-  static member_rval RvalIntStrictDict(const ArrayData* ad, int64_t k) {
+  static tv_rval RvalIntStrictDict(const ArrayData* ad, int64_t k) {
     assertx(ad->isDict());
-    return member_rval { ad, NvTryGetIntDict(ad, k) };
+    return NvTryGetIntDict(ad, k);
   }
-  static member_rval RvalStrDict(const ArrayData* ad, const StringData* k) {
+  static tv_rval RvalStrDict(const ArrayData* ad, const StringData* k) {
     assertx(ad->isDict());
-    return member_rval { ad, NvGetStrDict(ad, k) };
+    return NvGetStrDict(ad, k);
   }
-  static member_rval RvalStrStrictDict(const ArrayData* ad,
+  static tv_rval RvalStrStrictDict(const ArrayData* ad,
                                        const StringData* k) {
     assertx(ad->isDict());
-    return member_rval { ad, NvTryGetStrDict(ad, k) };
+    return NvTryGetStrDict(ad, k);
   }
   static constexpr auto ReleaseDict = &Release;
   static constexpr auto NvGetKeyDict = &NvGetKey;
@@ -453,16 +453,16 @@ public:
   static constexpr auto CopyDict = &Copy;
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
-  static member_lval LvalIntRefDict(ArrayData*, int64_t, bool);
-  static member_lval LvalStrRefDict(ArrayData*, StringData*, bool);
-  static member_lval LvalNewRefDict(ArrayData*, bool);
+  static arr_lval LvalIntRefDict(ArrayData*, int64_t, bool);
+  static arr_lval LvalStrRefDict(ArrayData*, StringData*, bool);
+  static arr_lval LvalNewRefDict(ArrayData*, bool);
   static ArrayData* SetWithRefIntDict(ArrayData*, int64_t k,
                                       TypedValue v, bool copy);
   static ArrayData* SetWithRefStrDict(ArrayData*, StringData* k,
                                       TypedValue v, bool copy);
-  static ArrayData* SetRefIntDict(ArrayData*, int64_t, member_lval, bool);
-  static ArrayData* SetRefStrDict(ArrayData*, StringData*, member_lval, bool);
-  static ArrayData* AppendRefDict(ArrayData*, member_lval, bool);
+  static ArrayData* SetRefIntDict(ArrayData*, int64_t, tv_lval, bool);
+  static ArrayData* SetRefStrDict(ArrayData*, StringData*, tv_lval, bool);
+  static ArrayData* AppendRefDict(ArrayData*, tv_lval, bool);
   static ArrayData* AppendWithRefDict(ArrayData*, TypedValue, bool);
   static constexpr auto PlusEqDict = &PlusEq;
   static constexpr auto MergeDict = &Merge;
@@ -483,8 +483,8 @@ public:
 
   // Like Lval[Int,Str], but silently does nothing if the element does not
   // exist. Not part of the ArrayData interface, but used for member operations.
-  static member_lval LvalSilentInt(ArrayData*, int64_t, bool);
-  static member_lval LvalSilentStr(ArrayData*, const StringData*, bool);
+  static arr_lval LvalSilentInt(ArrayData*, int64_t, bool);
+  static arr_lval LvalSilentStr(ArrayData*, const StringData*, bool);
 
   static constexpr auto LvalSilentIntDict = &LvalSilentInt;
   static constexpr auto LvalSilentStrDict = &LvalSilentStr;
@@ -643,7 +643,7 @@ private:
   int32_t findForRemove(const StringData* s, strhash_t h);
 
   bool nextInsert(Cell);
-  ArrayData* nextInsertRef(member_lval data);
+  ArrayData* nextInsertRef(tv_lval data);
   ArrayData* nextInsertWithRef(TypedValue data);
   ArrayData* nextInsertWithRef(const Variant& data);
   ArrayData* addVal(int64_t ki, Cell data);
@@ -652,10 +652,10 @@ private:
 
   Elm& addKeyAndGetElem(StringData* key);
 
-  template <bool warn, class K> member_lval addLvalImpl(K k);
+  template <bool warn, class K> arr_lval addLvalImpl(K k);
   template <class K> ArrayData* update(K k, Cell data);
   template <class K> ArrayData* updateWithRef(K k, TypedValue data);
-  template <class K> ArrayData* updateRef(K k, member_lval data);
+  template <class K> ArrayData* updateRef(K k, tv_lval data);
 
   void adjustMArrayIter(ssize_t pos);
   void eraseNoCompact(ssize_t pos);
@@ -669,7 +669,7 @@ private:
 
   MixedArray* copyImpl(MixedArray* target) const;
 
-  MixedArray* initRef(TypedValue& tv, member_lval v);
+  MixedArray* initRef(TypedValue& tv, tv_lval v);
   MixedArray* initWithRef(TypedValue& tv, TypedValue v);
   MixedArray* initWithRef(TypedValue& tv, const Variant& v);
   MixedArray* moveVal(TypedValue& tv, TypedValue v);

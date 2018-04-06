@@ -648,26 +648,26 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T> ALWAYS_INLINE
-member_rval Array::rvalAtImpl(const T& key, AccessFlags flags) const {
+tv_rval Array::rvalAtImpl(const T& key, AccessFlags flags) const {
   return m_arr ? m_arr->get(key, any(flags & AccessFlags::Error))
-               : member_rval::dummy();
+               : tv_rval::dummy();
 }
 
 template<typename T> ALWAYS_INLINE
-member_lval Array::lvalAtImpl(const T& key, AccessFlags) {
+arr_lval Array::lvalAtImpl(const T& key, AccessFlags) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lval(key, m_arr->cowCheck());
-  if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
-  assertx(lval.has_ref());
+  if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
+  assertx(lval);
   return lval;
 }
 
 template<typename T> ALWAYS_INLINE
-member_lval Array::lvalAtRefImpl(const T& key, AccessFlags) {
+arr_lval Array::lvalAtRefImpl(const T& key, AccessFlags) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalRef(key, m_arr->cowCheck());
-  if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
-  assertx(lval.has_ref());
+  if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
+  assertx(lval);
   return lval;
 }
 
@@ -741,11 +741,11 @@ template<> bool not_found<bool>() { return false; }
 template<> const Variant& not_found<const Variant&>() { return uninit_variant; }
 template<> Variant& not_found<Variant&>() { return lvalBlackHole(); }
 
-template<> member_rval not_found<member_rval>() {
-  return member_rval::dummy();
+template<> tv_rval not_found<tv_rval>() {
+  return tv_rval::dummy();
 }
-template<> member_lval not_found<member_lval>() {
-  return member_lval { nullptr, lvalBlackHole().asTypedValue() };
+template<> arr_lval not_found<arr_lval>() {
+  return arr_lval { nullptr, lvalBlackHole().asTypedValue() };
 }
 
 /*
@@ -828,9 +828,9 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
     return name##Impl(int64_t(k), fl);              \
   }
 
-FOR_EACH_KEY_TYPE(rvalAt, member_rval, const)
-FOR_EACH_KEY_TYPE(lvalAt, member_lval, )
-FOR_EACH_KEY_TYPE(lvalAtRef, member_lval, )
+FOR_EACH_KEY_TYPE(rvalAt, tv_rval, const)
+FOR_EACH_KEY_TYPE(lvalAt, arr_lval, )
+FOR_EACH_KEY_TYPE(lvalAtRef, arr_lval, )
 
 #undef I
 #undef V
@@ -896,18 +896,18 @@ FOR_EACH_KEY_TYPE(add)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-member_lval Array::lvalAt() {
+arr_lval Array::lvalAt() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalNew(m_arr->cowCheck());
-  if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
+  if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
   assertx(lval);
   return lval;
 }
 
-member_lval Array::lvalAtRef() {
+arr_lval Array::lvalAtRef() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalNewRef(m_arr->cowCheck());
-  if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
+  if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
   assertx(lval);
   return lval;
 }

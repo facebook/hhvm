@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -582,13 +582,13 @@ const TypedValue* SetArray::tvOfPos(uint32_t pos) const {
   return !elm.isTombstone() ? &elm.tv : nullptr;
 }
 
-member_rval::ptr_u SetArray::NvTryGetInt(const ArrayData* ad, int64_t ki) {
+tv_rval SetArray::NvTryGetInt(const ArrayData* ad, int64_t ki) {
   auto const tv = SetArray::NvGetInt(ad, ki);
   if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki, ad);
   return tv;
 }
 
-member_rval::ptr_u SetArray::NvTryGetStr(const ArrayData* ad,
+tv_rval SetArray::NvTryGetStr(const ArrayData* ad,
                                         const StringData* ks) {
   auto const ptr = SetArray::NvGetStr(ad, ks);
   if (UNLIKELY(!ptr)) throwOOBArrayKeyException(ks, ad);
@@ -597,7 +597,7 @@ member_rval::ptr_u SetArray::NvTryGetStr(const ArrayData* ad,
 
 size_t SetArray::Vsize(const ArrayData*) { not_reached(); }
 
-member_rval::ptr_u SetArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+tv_rval SetArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asSet(ad);
   assertx(0 <= pos && pos < a->m_used);
   return a->tvOfPos(pos);
@@ -632,41 +632,41 @@ bool SetArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   return asSet(ad)->findForExists(k, k->hash());
 }
 
-member_lval SetArray::LvalInt(ArrayData*, int64_t, bool) {
+arr_lval SetArray::LvalInt(ArrayData*, int64_t, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval int)"
   );
 }
 
-member_lval SetArray::LvalIntRef(ArrayData* ad, int64_t, bool) {
+arr_lval SetArray::LvalIntRef(ArrayData* ad, int64_t, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-member_lval SetArray::LvalStr(ArrayData*, StringData*, bool) {
+arr_lval SetArray::LvalStr(ArrayData*, StringData*, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval string)"
   );
 }
 
-member_lval SetArray::LvalStrRef(ArrayData* ad, StringData*, bool) {
+arr_lval SetArray::LvalStrRef(ArrayData* ad, StringData*, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-member_lval SetArray::LvalNew(ArrayData*, bool) {
+arr_lval SetArray::LvalNew(ArrayData*, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval new)"
   );
 }
 
-member_lval SetArray::LvalNewRef(ArrayData* ad, bool) {
+arr_lval SetArray::LvalNewRef(ArrayData* ad, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayData* SetArray::SetRefInt(ArrayData* ad, int64_t, member_lval, bool) {
+ArrayData* SetArray::SetRefInt(ArrayData* ad, int64_t, tv_lval, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayData* SetArray::SetRefStr(ArrayData* ad, StringData*, member_lval, bool) {
+ArrayData* SetArray::SetRefStr(ArrayData* ad, StringData*, tv_lval, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
@@ -762,7 +762,7 @@ ArrayData* SetArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
   return Append(ad, tvToInitCell(v), copy);
 }
 
-ArrayData* SetArray::AppendRef(ArrayData* ad, member_lval, bool) {
+ArrayData* SetArray::AppendRef(ArrayData* ad, tv_lval, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 

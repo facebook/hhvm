@@ -1831,7 +1831,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
 
         // If we have a DebugDisplay prop saved, use it.
         auto const debugDisp = obj->getProp(nullptr, s_PHP_DebugDisplay.get());
-        if (debugDisp.has_val()) {
+        if (debugDisp) {
           serializeVariant(tvAsCVarRef(debugDisp.tv_ptr()), false, false, true);
           return;
         }
@@ -1852,7 +1852,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           nullptr,
           s_PHP_Incomplete_Class_Name.get()
         ).unboxed();
-        if (cname.has_val() && isStringType(cname.type())) {
+        if (cname && isStringType(cname.type())) {
           pushObjectInfo(StrNR(cname.val().pstr), obj->getId(), 'O');
           properties.remove(s_PHP_Incomplete_Class_Name, true);
           serializeArray(properties, true);

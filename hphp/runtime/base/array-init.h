@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
@@ -34,7 +34,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define LV(v) member_lval::raw(v.asTypedValue())
+#define LV(v) tv_lval{v.asTypedValue()}
 
 /*
  * Flag indicating whether an array allocation should be pre-checked for OOM.

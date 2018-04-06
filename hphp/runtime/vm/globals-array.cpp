@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
 
@@ -96,7 +96,7 @@ Cell GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   return make_tv<KindOfUninit>();
 }
 
-member_rval::ptr_u GlobalsArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+tv_rval GlobalsArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
   return iter.valid() ? iter.curVal() : uninit_variant.asTypedValue();
@@ -112,21 +112,19 @@ GlobalsArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   return asGlobals(ad)->m_tab->lookup(k) != nullptr;
 }
 
-member_rval::ptr_u
-GlobalsArray::NvGetStr(const ArrayData* ad, const StringData* k) {
+tv_rval GlobalsArray::NvGetStr(const ArrayData* ad, const StringData* k) {
   return asGlobals(ad)->m_tab->lookup(k);
 }
 
-member_rval::ptr_u
-GlobalsArray::NvGetInt(const ArrayData* ad, int64_t k) {
+tv_rval GlobalsArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return asGlobals(ad)->m_tab->lookup(String(k).get());
 }
 
-member_lval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
+arr_lval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   return LvalStr(ad, String(k).get(), copy);
 }
 
-member_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
+arr_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
   auto a = asGlobals(ad);
   TypedValue* tv = a->m_tab->lookup(k);
   if (!tv) {
@@ -134,11 +132,11 @@ member_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
     tvWriteNull(nulVal);
     tv = a->m_tab->set(k, &nulVal);
   }
-  return member_lval { a, tv };
+  return arr_lval { ad, tv };
 }
 
-member_lval GlobalsArray::LvalNew(ArrayData* ad, bool /*copy*/) {
-  return member_lval { ad, lvalBlackHole().asTypedValue() };
+arr_lval GlobalsArray::LvalNew(ArrayData* ad, bool /*copy*/) {
+  return arr_lval { ad, lvalBlackHole().asTypedValue() };
 }
 
 ArrayData* GlobalsArray::SetInt(ArrayData* ad,
@@ -168,12 +166,12 @@ ArrayData* GlobalsArray::SetWithRefStr(ArrayData* ad, StringData* k,
 }
 
 ArrayData* GlobalsArray::SetRefInt(ArrayData* ad, int64_t k,
-                                   member_lval v, bool copy) {
+                                   tv_lval v, bool copy) {
   return asGlobals(ad)->setRef(String(k).get(), v, copy);
 }
 
 ArrayData* GlobalsArray::SetRefStr(ArrayData* ad, StringData* k,
-                                   member_lval v, bool) {
+                                   tv_lval v, bool) {
   auto a = asGlobals(ad);
   tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(tvAsVariant(v.tv_ptr()));
   return a;
@@ -201,7 +199,7 @@ ArrayData* GlobalsArray::Append(ArrayData*, Cell /*v*/, bool /*copy*/) {
   throw_not_implemented("append on $GLOBALS");
 }
 
-ArrayData* GlobalsArray::AppendRef(ArrayData*, member_lval, bool) {
+ArrayData* GlobalsArray::AppendRef(ArrayData*, tv_lval, bool) {
   throw_not_implemented("appendRef on $GLOBALS");
 }
 

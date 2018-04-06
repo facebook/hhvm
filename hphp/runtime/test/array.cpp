@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <gtest/gtest.h>
+#include <folly/portability/GTest.h>
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
@@ -473,8 +473,8 @@ TEST(ARRAY, Membership) {
   {
     Array arr;
     auto const lval = arr.lvalAt();
-    lval.type() = KindOfString;
-    lval.val().pstr = StringData::Make("test", CopyString);
+    type(lval) = KindOfString;
+    val(lval).pstr = StringData::Make("test", CopyString);
     EXPECT_TRUE(equal(arr, make_packed_array("test")));
   }
   {

@@ -280,7 +280,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Release)
 
   /*
-   * member_rval::ptr_u NvGetInt(const ArrayData*, int64_t key)
+   * tv_rval NvGetInt(const ArrayData*, int64_t key)
    *
    *   Lookup a value in an array using an integer key.  Returns nullptr if the
    *   key is not in the array.  Must not throw if key isn't present.
@@ -288,7 +288,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(NvGetInt)
 
   /*
-   * member_rval::ptr_u NvTryGetInt(const ArrayData*, int64_t key)
+   * tv_rval NvTryGetInt(const ArrayData*, int64_t key)
    *
    *   Lookup a value in an array using an integer key.  Either throws or
    *   returns nullptr if the key is not in the array.
@@ -296,7 +296,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(NvTryGetInt)
 
   /*
-   * member_rval::ptr_u NvGetStr(const ArrayData*, const StringData*)
+   * tv_rval NvGetStr(const ArrayData*, const StringData*)
    *
    *   Lookup a value in an array using a string key.  The string key must not
    *   be an integer-like string.  Returns nullptr if the key is not in the
@@ -305,7 +305,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(NvGetStr)
 
   /*
-   * member_rval::ptr_u NvTryGetStr(const ArrayData*, const StringData*)
+   * tv_rval NvTryGetStr(const ArrayData*, const StringData*)
    *
    *   Lookup a value in an array using a string key.  Either throws or returns
    *   nullptr if the key is not in the array.
@@ -368,7 +368,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Vsize)
 
   /*
-   * member_rval::ptr_u GetValueRef(const ArrayData*, ssize_t pos)
+   * tv_rval GetValueRef(const ArrayData*, ssize_t pos)
    *
    *   Return a reference to the value at an iterator position.  `pos' must be
    *   a valid position for this array.
@@ -401,8 +401,8 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(ExistsStr)
 
   /*
-   * member_lval LvalInt(ArrayData*, int64_t k, bool copy)
-   * member_lval LvalIntRef(ArrayData*, int64_t k, bool copy)
+   * arr_lval LvalInt(ArrayData*, int64_t k, bool copy)
+   * arr_lval LvalIntRef(ArrayData*, int64_t k, bool copy)
    *
    *   Look up a value in the array by the supplied integer key, creating it as
    *   a KindOfNull if it doesn't exist, and return a reference to it.  Use the
@@ -413,8 +413,8 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(LvalIntRef)
 
   /*
-   * member_lval LvalStr(ArrayData*, StringData* key, bool copy)
-   * member_lval LvalStrRef(ArrayData*, StringData* key, bool copy)
+   * arr_lval LvalStr(ArrayData*, StringData* key, bool copy)
+   * arr_lval LvalStrRef(ArrayData*, StringData* key, bool copy)
    *
    *   Look up a value in the array by the supplied string key, creating it as
    *   a KindOfNull if it doesn't exist, and return a reference to it.  The
@@ -426,8 +426,8 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(LvalStrRef)
 
   /*
-   * member_lval LvalNew(ArrayData*, bool copy)
-   * member_lval LvalNewRef(ArrayData*, bool copy)
+   * arr_lval LvalNew(ArrayData*, bool copy)
+   * arr_lval LvalNewRef(ArrayData*, bool copy)
    *
    *   Insert a new null value in the array at the next available integer key,
    *   and return a reference to it.  In the case that there is no next
@@ -439,7 +439,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(LvalNewRef)
 
   /*
-   * ArrayData* SetRefInt(ArrayData*, int64_t key, member_lval v, bool copy)
+   * ArrayData* SetRefInt(ArrayData*, int64_t key, tv_lval v, bool copy)
    *
    *   Binding set with an integer key.  Box `v' if it is not already
    *   boxed, and then insert a KindOfRef that points to v's RefData.
@@ -448,7 +448,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(SetRefInt)
 
   /*
-   * ArrayData* SetRefStr(ArrayData*, StringData* key, member_lval v, bool copy)
+   * ArrayData* SetRefStr(ArrayData*, StringData* key, tv_lval v, bool copy)
    *
    *  Binding set with a string key.  The string `key' must not be an
    *  integer-like string.  Box `v' if it is not already boxed, and
@@ -646,7 +646,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Append)
 
   /*
-   * ArrayData* AppendRef(ArrayData*, member_lval v, bool copy)
+   * ArrayData* AppendRef(ArrayData*, tv_lval v, bool copy)
    *
    *   Binding append.  This function appends a new KindOfRef to the
    *   array with the next available integer key, boxes v if it is not
@@ -1130,24 +1130,24 @@ Variant ArrayData::each() {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-member_rval ArrayData::getNotFound(int64_t k) {
+tv_rval ArrayData::getNotFound(int64_t k) {
   raise_notice("Undefined index: %" PRId64, k);
-  return member_rval::dummy();
+  return tv_rval::dummy();
 }
 
-member_rval ArrayData::getNotFound(const StringData* k) {
+tv_rval ArrayData::getNotFound(const StringData* k) {
   raise_notice("Undefined index: %s", k->data());
-  return member_rval::dummy();
+  return tv_rval::dummy();
 }
 
-member_rval ArrayData::getNotFound(int64_t k, bool error) const {
+tv_rval ArrayData::getNotFound(int64_t k, bool error) const {
   return error && kind() != kGlobalsKind ? getNotFound(k) :
-         member_rval::dummy();
+         tv_rval::dummy();
 }
 
-member_rval ArrayData::getNotFound(const StringData* k, bool error) const {
+tv_rval ArrayData::getNotFound(const StringData* k, bool error) const {
   return error && kind() != kGlobalsKind ? getNotFound(k) :
-         member_rval::dummy();
+         tv_rval::dummy();
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {

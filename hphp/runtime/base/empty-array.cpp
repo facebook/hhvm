@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
@@ -60,8 +60,7 @@ Cell EmptyArray::NvGetKey(const ArrayData*, ssize_t /*pos*/) {
 
 size_t EmptyArray::Vsize(const ArrayData*) { not_reached(); }
 
-member_rval::ptr_u
-EmptyArray::GetValueRef(const ArrayData* /*ad*/, ssize_t /*pos*/) {
+tv_rval EmptyArray::GetValueRef(const ArrayData* /*ad*/, ssize_t /*pos*/) {
   // We have no valid positions---no one should call this function.
   not_reached();
 }
@@ -118,7 +117,7 @@ ArrayData* EmptyArray::Copy(const ArrayData*) { return staticEmptyArray(); }
  * already be incref'd).
  */
 ALWAYS_INLINE
-member_lval EmptyArray::MakePackedInl(TypedValue tv) {
+arr_lval EmptyArray::MakePackedInl(TypedValue tv) {
   auto const ad = static_cast<ArrayData*>(
     tl_heap->objMallocIndex(PackedArray::SmallSizeIndex)
   );
@@ -141,11 +140,11 @@ member_lval EmptyArray::MakePackedInl(TypedValue tv) {
   assertx(ad->m_pos == 0);
   assertx(ad->hasExactlyOneRef());
   assertx(PackedArray::checkInvariants(ad));
-  return member_lval { ad, elem };
+  return arr_lval { ad, elem };
 }
 
 NEVER_INLINE
-member_lval EmptyArray::MakePacked(TypedValue tv) {
+arr_lval EmptyArray::MakePacked(TypedValue tv) {
   return MakePackedInl(tv);
 }
 
@@ -155,7 +154,7 @@ member_lval EmptyArray::MakePacked(TypedValue tv) {
  * Note: the key is not already incref'd, but the value must be.
  */
 NEVER_INLINE
-member_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
+arr_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   auto const ad = MixedArray::reqAlloc(MixedArray::SmallScale);
   MixedArray::InitSmall(ad, 1/*size*/, 0/*nextIntKey*/);
   auto const data = ad->data();
@@ -176,14 +175,14 @@ member_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_used == 1);
   assertx(ad->checkInvariants());
-  return member_lval { ad, &elem };
+  return arr_lval { ad, &elem };
 }
 
 /*
  * Creating a single-element mixed array with a integer key.  The
  * value is already incref'd.
  */
-member_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
+arr_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   auto const ad = MixedArray::reqAlloc(MixedArray::SmallScale);
   MixedArray::InitSmall(ad, 1/*size*/, (key >= 0) ? key + uint64_t{1} : 0);
   auto const data = ad->data();
@@ -205,7 +204,7 @@ member_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   assertx(ad->m_scale == MixedArray::SmallScale);
   assertx(ad->m_used == 1);
   assertx(ad->checkInvariants());
-  return member_lval { ad, &elem };
+  return arr_lval { ad, &elem };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -216,7 +215,7 @@ ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, Cell v, bool) {
   tvIncRefGen(v);
   auto const lval = k == 0 ? EmptyArray::MakePacked(v)
                            : EmptyArray::MakeMixed(k, v);
-  return lval.arr_base();
+  return lval.arr;
 }
 
 ArrayData*
@@ -224,7 +223,7 @@ EmptyArray::SetStr(ArrayData*, StringData* k, Cell v, bool /*copy*/) {
   tvIncRefGen(v);
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (v.m_type == KindOfUninit) v.m_type = KindOfNull;
-  return EmptyArray::MakeMixed(k, v).arr_base();
+  return EmptyArray::MakeMixed(k, v).arr;
 }
 
 ArrayData* EmptyArray::SetWithRefInt(ArrayData* ad, int64_t k,
@@ -234,7 +233,7 @@ ArrayData* EmptyArray::SetWithRefInt(ArrayData* ad, int64_t k,
   }
   auto const lval = LvalInt(ad, k, copy);
   tvSetWithRef(v, lval);
-  return lval.arr_base();
+  return lval.arr;
 }
 
 ArrayData* EmptyArray::SetWithRefStr(ArrayData* ad, StringData* k,
@@ -244,65 +243,65 @@ ArrayData* EmptyArray::SetWithRefStr(ArrayData* ad, StringData* k,
   }
   auto const lval = LvalStr(ad, k, copy);
   tvSetWithRef(v, lval);
-  return lval.arr_base();
+  return lval.arr;
 }
 
-member_lval EmptyArray::LvalInt(ArrayData*, int64_t k, bool) {
+arr_lval EmptyArray::LvalInt(ArrayData*, int64_t k, bool) {
   return k == 0 ? EmptyArray::MakePacked(make_tv<KindOfNull>())
                 : EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
 }
 
-member_lval EmptyArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
+arr_lval EmptyArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
   if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   return LvalInt(ad, k, copy);
 }
 
-member_lval EmptyArray::LvalStr(ArrayData*, StringData* k, bool) {
+arr_lval EmptyArray::LvalStr(ArrayData*, StringData* k, bool) {
   return EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
 }
 
-member_lval EmptyArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
+arr_lval EmptyArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
   if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   return LvalStr(ad, k, copy);
 }
 
-member_lval EmptyArray::LvalNew(ArrayData*, bool) {
+arr_lval EmptyArray::LvalNew(ArrayData*, bool) {
   return EmptyArray::MakePacked(make_tv<KindOfNull>());
 }
 
-member_lval EmptyArray::LvalNewRef(ArrayData* ad, bool copy) {
+arr_lval EmptyArray::LvalNewRef(ArrayData* ad, bool copy) {
   if (checkHACRefBind()) raiseHackArrCompatRefNew();
   return LvalNew(ad, copy);
 }
 
 ArrayData* EmptyArray::SetRefInt(ArrayData*, int64_t k,
-                                 member_lval v, bool) {
+                                 tv_lval v, bool) {
   if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   tvBoxIfNeeded(v);
   tvIncRefCountable(v.tv());
   auto const lval = k == 0 ? EmptyArray::MakePacked(v.tv())
                            : EmptyArray::MakeMixed(k, v.tv());
-  return lval.arr_base();
+  return lval.arr;
 }
 
 ArrayData* EmptyArray::SetRefStr(ArrayData*, StringData* k,
-                                 member_lval v, bool) {
+                                 tv_lval v, bool) {
   if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   tvBoxIfNeeded(v);
   tvIncRefCountable(v.tv());
-  return EmptyArray::MakeMixed(k, v.tv()).arr_base();
+  return EmptyArray::MakeMixed(k, v.tv()).arr;
 }
 
 ArrayData* EmptyArray::Append(ArrayData*, Cell v, bool /*copy*/) {
   tvIncRefGen(v);
-  return EmptyArray::MakePackedInl(v).arr_base();
+  return EmptyArray::MakePackedInl(v).arr;
 }
 
-ArrayData* EmptyArray::AppendRef(ArrayData*, member_lval v, bool) {
+ArrayData* EmptyArray::AppendRef(ArrayData*, tv_lval v, bool) {
   if (checkHACRefBind()) raiseHackArrCompatRefNew();
   tvBoxIfNeeded(v);
   tvIncRefCountable(v.tv());
-  return EmptyArray::MakePacked(v.tv()).arr_base();
+  return EmptyArray::MakePacked(v.tv()).arr;
 }
 
 ArrayData* EmptyArray::AppendWithRef(ArrayData*, TypedValue v, bool /*copy*/) {
@@ -311,7 +310,7 @@ ArrayData* EmptyArray::AppendWithRef(ArrayData*, TypedValue v, bool /*copy*/) {
   }
   auto tv = make_tv<KindOfNull>();
   tvAsVariant(&tv).setWithRef(v);
-  return EmptyArray::MakePacked(tv).arr_base();
+  return EmptyArray::MakePacked(tv).arr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -351,7 +350,7 @@ ArrayData* EmptyArray::PopOrDequeue(ArrayData* ad, Variant& value) {
 
 ArrayData* EmptyArray::Prepend(ArrayData*, Cell v, bool) {
   tvIncRefGen(v);
-  return EmptyArray::MakePacked(v).arr_base();
+  return EmptyArray::MakePacked(v).arr;
 }
 
 ArrayData* EmptyArray::ToDict(ArrayData*, bool) {

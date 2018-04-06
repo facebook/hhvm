@@ -506,7 +506,7 @@ ELEM_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 template<bool warn, bool intishWarn>
-inline member_rval checkedGet(ArrayData* a, StringData* key) {
+inline tv_rval checkedGet(ArrayData* a, StringData* key) {
   int64_t i;
   assertx(a->isPHPArray());
   if (UNLIKELY(key->isStrictlyInteger(i))) {
@@ -518,7 +518,7 @@ inline member_rval checkedGet(ArrayData* a, StringData* key) {
 }
 
 template <bool warn, bool intishWarn>
-inline member_rval checkedGet(ArrayData* /*a*/, int64_t /*key*/) {
+inline tv_rval checkedGet(ArrayData* /*a*/, int64_t /*key*/) {
   not_reached();
 }
 

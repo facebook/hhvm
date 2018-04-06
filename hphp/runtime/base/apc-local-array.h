@@ -23,7 +23,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/apc-array.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 
 namespace HPHP {
 
@@ -46,15 +46,15 @@ struct APCLocalArray final : ArrayData,
   static APCLocalArray* Make(const APCArray*);
 
   static size_t Vsize(const ArrayData*);
-  static member_rval::ptr_u GetValueRef(const ArrayData* ad, ssize_t pos);
+  static tv_rval GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
-  static member_lval LvalInt(ArrayData*, int64_t k, bool copy);
-  static member_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
-  static member_lval LvalStr(ArrayData*, StringData* k, bool copy);
-  static member_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
-  static member_lval LvalNew(ArrayData*, bool copy);
-  static member_lval LvalNewRef(ArrayData*, bool copy);
+  static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
+  static arr_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
+  static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static arr_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
+  static arr_lval LvalNew(ArrayData*, bool copy);
+  static arr_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* SetWithRefInt(ArrayData*, int64_t k,
@@ -62,38 +62,38 @@ struct APCLocalArray final : ArrayData,
   static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
                                   TypedValue v, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k,
-                              member_lval v, bool copy);
+                              tv_lval v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k,
-                              member_lval v, bool copy);
+                              tv_lval v, bool copy);
   static constexpr auto AddInt = &SetInt;
   static constexpr auto AddStr = &SetStr;
   static ArrayData *RemoveInt(ArrayData* ad, int64_t k, bool copy);
   static ArrayData *RemoveStr(ArrayData* ad, const StringData* k, bool copy);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* Append(ArrayData* a, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, member_lval v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, tv_lval v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData *elems);
   static ArrayData* Merge(ArrayData*, const ArrayData *elems);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
-  static member_rval::ptr_u NvGetInt(const ArrayData*, int64_t k);
+  static tv_rval NvGetInt(const ArrayData*, int64_t k);
   static constexpr auto NvTryGetInt = &NvGetInt;
-  static member_rval::ptr_u NvGetStr(const ArrayData*, const StringData* k);
+  static tv_rval NvGetStr(const ArrayData*, const StringData* k);
   static constexpr auto NvTryGetStr = &NvGetStr;
-  static member_rval RvalInt(const ArrayData* ad, int64_t k) {
-    return member_rval { ad, NvGetInt(ad, k) };
+  static tv_rval RvalInt(const ArrayData* ad, int64_t k) {
+    return NvGetInt(ad, k);
   }
-  static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
-    return member_rval { ad, NvTryGetInt(ad, k) };
+  static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
+    return NvTryGetInt(ad, k);
   }
-  static member_rval RvalStr(const ArrayData* ad, const StringData* k) {
-    return member_rval { ad, NvGetStr(ad, k) };
+  static tv_rval RvalStr(const ArrayData* ad, const StringData* k) {
+    return NvGetStr(ad, k);
   }
-  static member_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
-    return member_rval { ad, NvTryGetStr(ad, k) };
+  static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
+    return NvTryGetStr(ad, k);
   }
-  static member_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
-    return member_rval { ad, GetValueRef(ad, pos) };
+  static tv_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
+    return GetValueRef(ad, pos);
   }
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData* ad);

@@ -385,7 +385,7 @@ req::ptr<DateTime> DateTimeData::unwrap(const Object& datetime) {
       SystemLib::s_DateTimeImmutableClass,
       s_data.get()
     );
-    assertx(rval.has_val() && rval.type() == KindOfObject);
+    assertx(rval.is_set() && type(rval) == KindOfObject);
     Object impl(rval.val().pobj);
     return unwrap(impl);
   }

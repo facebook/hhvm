@@ -413,7 +413,7 @@ static bool couldRecur(const Variant& v, const ArrayData* arr) {
   return v.isReferenced() || arr->kind() == ArrayData::kGlobalsKind;
 }
 
-static bool couldRecur(member_lval lval, const ArrayData* arr) {
+static bool couldRecur(tv_lval lval, const ArrayData* arr) {
   return tvIsReferenced(lval.tv()) || arr->kind() == ArrayData::kGlobalsKind;
 }
 

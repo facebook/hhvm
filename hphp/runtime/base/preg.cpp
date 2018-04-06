@@ -1056,7 +1056,7 @@ Array& forceToOutput(Variant& var, bool hackArrOutput) {
   return hackArrOutput ? forceToDict(var) : forceToArray(var);
 }
 
-Array& forceToOutput(member_lval lval, bool hackArrOutput) {
+Array& forceToOutput(tv_lval lval, bool hackArrOutput) {
   return hackArrOutput ? forceToDict(lval) : forceToArray(lval);
 }
 

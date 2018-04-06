@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -189,7 +189,7 @@ ArrayData* MixedArray::updateWithRef(K k, TypedValue data) {
 }
 
 template <class K>
-ArrayData* MixedArray::updateRef(K k, member_lval data) {
+ArrayData* MixedArray::updateRef(K k, tv_lval data) {
   assertx(!isFull());
 
   auto p = insert(k);
@@ -204,7 +204,7 @@ ArrayData* MixedArray::updateRef(K k, member_lval data) {
 }
 
 template <bool warn, class K>
-member_lval MixedArray::addLvalImpl(K k) {
+arr_lval MixedArray::addLvalImpl(K k) {
   assertx(!isFull());
   auto p = insert(k);
   if (!p.found) {
@@ -213,7 +213,7 @@ member_lval MixedArray::addLvalImpl(K k) {
       raise_hackarr_compat_notice("Lval on missing array element");
     }
   }
-  return member_lval { this, &p.tv };
+  return arr_lval { this, &p.tv };
 }
 
 //////////////////////////////////////////////////////////////////////

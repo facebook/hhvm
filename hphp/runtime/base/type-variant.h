@@ -1538,7 +1538,7 @@ inline Array& forceToArray(Variant& var) {
   return var.toArrRef();
 }
 
-inline Array& forceToArray(member_lval lval) {
+inline Array& forceToArray(tv_lval lval) {
   auto const inner = lval.unboxed();
   if (!isArrayLikeType(inner.type())) {
     tvSet(make_tv<KindOfArray>(ArrayData::Create()), inner);
@@ -1551,7 +1551,7 @@ inline Array& forceToDict(Variant& var) {
   return var.toArrRef();
 }
 
-inline Array& forceToDict(member_lval lval) {
+inline Array& forceToDict(tv_lval lval) {
   auto const inner = lval.unboxed();
   if (!isDictType(inner.type())) {
     tvSet(make_tv<KindOfDict>(ArrayData::CreateDict()), inner);

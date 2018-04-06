@@ -1274,7 +1274,7 @@ Array VariableUnserializer::unserializeDict() {
         ? MixedArray::LvalIntDict(arr.get(), key.asInt64Val(), false)
         : MixedArray::LvalStrDict(arr.get(), key.asCStrRef().get(), false);
     }();
-    assertx(lval.arr_base() == arr.get());
+    assertx(lval.arr == arr.get());
 
     auto& val = tvAsVariant(lval.tv_ptr());
 
@@ -1321,7 +1321,7 @@ Array VariableUnserializer::unserializeVec() {
 
   for (int64_t i = 0; i < size; i++) {
     auto const lval = PackedArray::LvalNewVec(arr.get(), false);
-    assertx(lval.arr_base() == arr.get());
+    assertx(lval.arr == arr.get());
     auto& val = tvAsVariant(lval.tv_ptr());
     unserializeVariant(val, UnserializeMode::VecValue);
     assertx(val.getRawType() != KindOfRef);
@@ -1394,7 +1394,7 @@ Array VariableUnserializer::unserializeVArray() {
       SuppressHackArrCompatNotices shacn;
       return arr.lvalAt();
     }();
-    assertx(lval.arr_base() == arr.get());
+    assertx(lval.arr == arr.get());
     unserializeVariant(tvAsVariant(lval.tv_ptr()));
     if (i < (size - 1)) {
       auto lastChar = peekBack();

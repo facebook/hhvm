@@ -18,7 +18,7 @@
 #define incl_HPHP_TV_MUTATE_H_
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -95,18 +95,12 @@ ALWAYS_INLINE Cell* tvToCell(TypedValue* tv) {
 ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
 }
-ALWAYS_INLINE member_lval tvToCell(member_lval lval) {
-  return LIKELY(lval.type() != KindOfRef)
-    ? lval
-    : member_lval { lval.val().pref, lval.val().pref->tv() };
+ALWAYS_INLINE tv_lval tvToCell(tv_lval lval) {
+  return lval.unboxed();
 }
-inline member_lval member_lval::unboxed() const {
-  return tvToCell(*this);
-}
-inline member_rval member_rval::unboxed() const {
-  return LIKELY(type() != KindOfRef)
-    ? *this
-    : member_rval { val().pref, val().pref->tv() };
+template<bool is_const>
+inline tv_val<is_const> tv_val<is_const>::unboxed() const {
+  return LIKELY(type() != KindOfRef) ? *this : tv_val { val().pref->tv() };
 }
 
 /*

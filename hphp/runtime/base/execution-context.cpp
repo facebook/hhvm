@@ -858,7 +858,7 @@ void ExecutionContext::handleError(const std::string& msg,
         );
       } else if (!deferred.empty()) {
         auto const last = deferred.lvalAt(int64_t{deferred.size() - 1});
-        if (isDictType(last.type())) {
+        if (isDictType(type(last))) {
           asArrRef(last).set(s_overflow, true);
         }
       }

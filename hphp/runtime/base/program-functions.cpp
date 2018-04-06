@@ -343,8 +343,8 @@ void register_variable(Array& variables, char *name, const Variant& value,
 
       if (!index) {
         auto lval = symtable->lvalAt();
-        lval.type() = KindOfPersistentArray;
-        lval.val().parr = staticEmptyArray();
+        type(lval) = KindOfPersistentArray;
+        val(lval).parr = staticEmptyArray();
         gpc_elements.push_back(uninit_null());
         gpc_elements.back().assignRef(tvAsVariant(lval.tv_ptr()));
       } else {

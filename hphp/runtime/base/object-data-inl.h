@@ -256,15 +256,15 @@ inline const TypedValue* ObjectData::propVec() const {
   return reinterpret_cast<const TypedValue*>(uintptr_t(this + 1));
 }
 
-inline member_lval ObjectData::propLvalAtOffset(Slot idx) {
+inline tv_lval ObjectData::propLvalAtOffset(Slot idx) {
   assertx(idx < m_cls->numDeclProperties());
   assertx(!(m_cls->declProperties()[idx].attrs & AttrIsImmutable));
-  return member_lval { this, const_cast<TypedValue*>(&propVec()[idx]) };
+  return tv_lval { const_cast<TypedValue*>(&propVec()[idx]) };
 }
 
-inline member_rval ObjectData::propRvalAtOffset(Slot idx) const {
+inline tv_rval ObjectData::propRvalAtOffset(Slot idx) const {
   assertx(idx < m_cls->numDeclProperties());
-  return member_rval { this, &propVec()[idx] };
+  return tv_rval { &propVec()[idx] };
 }
 
 inline bool ObjectData::hasDynProps() const {

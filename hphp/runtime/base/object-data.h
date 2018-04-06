@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/weakref-data.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -342,8 +342,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   // accessors for declared properties at statically known offsets
   // in the lval case, the property must be statically known to be mutable
-  member_lval propLvalAtOffset(Slot);
-  member_rval propRvalAtOffset(Slot) const;
+  tv_lval propLvalAtOffset(Slot);
+  tv_rval propRvalAtOffset(Slot) const;
 
  public:
   const Func* methodNamed(const StringData*) const;
@@ -360,11 +360,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
  public:
   // never box the lval returned from getPropLval; use propB or vGetProp instead
-  member_lval getPropLval(const Class*, const StringData*);
-  member_rval getProp(const Class*, const StringData*) const;
-  member_lval vGetProp(const Class*, const StringData*);
+  tv_lval getPropLval(const Class*, const StringData*);
+  tv_rval getProp(const Class*, const StringData*) const;
+  tv_lval vGetProp(const Class*, const StringData*);
   // don't use vGetPropIgnoreAccessibility in new code
-  member_lval vGetPropIgnoreAccessibility(const StringData*);
+  tv_lval vGetPropIgnoreAccessibility(const StringData*);
 
  private:
   template <class T>

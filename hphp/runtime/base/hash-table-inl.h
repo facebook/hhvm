@@ -257,8 +257,8 @@ ALWAYS_INLINE void HashTable<ArrayType, ElmType>::InitSmallHash(ArrayType* a) {
 }
 
 template<typename ArrayType, typename ElmType>
-member_rval::ptr_u
-HashTable<ArrayType, ElmType>::NvGetInt(const ArrayData* ad, int64_t k) {
+tv_rval HashTable<ArrayType, ElmType>::NvGetInt(const ArrayData* ad,
+                                                int64_t k) {
   auto a = asArrayType(ad);
   auto i = a->find(k, hash_int64(k));
   return LIKELY(validPos(i)) ? a->data()[i].datatv() : nullptr;
@@ -268,9 +268,8 @@ HashTable<ArrayType, ElmType>::NvGetInt(const ArrayData* ad, int64_t k) {
   defined(_MSC_VER)
 // This function is implemented directly in ASM in hash-table-x64.S otherwise.
 template<typename ArrayType, typename ElmType>
-member_rval::ptr_u
-HashTable<ArrayType, ElmType>::NvGetStr(const ArrayData* ad,
-                                        const StringData* k) {
+tv_rval HashTable<ArrayType, ElmType>::NvGetStr(const ArrayData* ad,
+                                                const StringData* k) {
   auto a = asArrayType(ad);
   auto i = a->find(k, k->hash());
   return LIKELY(validPos(i)) ? a->data()[i].datatv() : nullptr;

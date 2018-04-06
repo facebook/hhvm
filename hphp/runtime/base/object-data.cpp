@@ -69,7 +69,7 @@ static Array convert_to_array(const ObjectData* obj, Class* cls) {
   // We currently do not special case ArrayObjects / ArrayIterators in
   // reflectionClass. Until, either ArrayObject moves to HNI or a special
   // case is added to reflection unset should be turned off.
-  assertx(prop.has_val() /* && prop.type() != KindOfUninit */);
+  assertx(prop.is_set() /* && prop.type() != KindOfUninit */);
   return tvCastToArrayLike(prop.tv());
 }
 
@@ -483,7 +483,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
     return SimpleXMLElement_objectCast(this, KindOfArray).toArray();
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
     auto const flags = getProp(SystemLib::s_ArrayObjectClass, s_flags.get());
-    assertx(flags.has_val());
+    assertx(flags.is_set());
 
     if (UNLIKELY(flags.type() == KindOfInt64 &&
                  flags.val().num == ARRAYOBJ_STD_PROP_LIST)) {
@@ -1044,44 +1044,40 @@ ObjectData::PropLookup<TypedValue*> ObjectData::getPropImpl(
   return PropLookup<TypedValue*> { nullptr, false, forWrite ? false : true };
 }
 
-member_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
+tv_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
   auto const lookup = getPropImpl<true>(ctx, key);
   if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
     throwMutateImmutable(lookup.prop);
   }
-  return member_lval {
-    this, lookup.prop && lookup.accessible ? lookup.prop : nullptr
-  };
+  return tv_lval { lookup.prop && lookup.accessible ? lookup.prop : nullptr };
 }
 
-member_rval ObjectData::getProp(const Class* ctx, const StringData* key) const {
+tv_rval ObjectData::getProp(const Class* ctx, const StringData* key) const {
   auto const lookup = const_cast<ObjectData*>(this)
     ->getPropImpl<false>(ctx, key);
-  return member_rval {
-    this, lookup.prop && lookup.accessible ? lookup.prop : nullptr
-  };
+  return tv_rval { lookup.prop && lookup.accessible ? lookup.prop : nullptr };
 }
 
-member_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
+tv_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
   auto const lookup = getPropImpl<true>(ctx, key);
   auto prop = lookup.prop;
   if (UNLIKELY(lookup.immutable)) throwBindImmutable(prop);
   if (lookup.accessible && prop && prop->m_type != KindOfUninit) {
     tvBoxIfNeeded(*prop);
-    return member_lval { this, prop };
+    return tv_lval { prop };
   }
-  return member_lval { this, nullptr };
+  return tv_lval{};
 }
 
-member_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {
+tv_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {
   auto const lookup = getPropImpl<true>(nullptr, key);
   auto prop = lookup.prop;
   if (UNLIKELY(lookup.immutable)) throwBindImmutable(prop);
   if (prop && prop->m_type != KindOfUninit) {
     tvBoxIfNeeded(*prop);
-    return member_lval { this, prop };
+    return tv_lval { prop };
   }
-  return member_lval { this, nullptr };
+  return tv_lval{};
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -81,7 +81,7 @@ void APCLocalArray::sweep() {
   m_arr = nullptr;
 }
 
-member_rval::ptr_u APCLocalArray::GetValueRef(const ArrayData* adIn,
+tv_rval APCLocalArray::GetValueRef(const ArrayData* adIn,
                                               ssize_t pos) {
   auto const ad = asApcArray(adIn);
   assertx(unsigned(pos) < ad->getSize());
@@ -158,42 +158,42 @@ ArrayData* APCLocalArray::loadElems() const {
   return elems;
 }
 
-member_lval APCLocalArray::LvalInt(ArrayData* ad, int64_t k, bool /*copy*/) {
+arr_lval APCLocalArray::LvalInt(ArrayData* ad, int64_t k, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lval(k, false);
-  return member_lval { helper.release(lval.arr_base()), lval.elem() };
+  return arr_lval { helper.release(lval.arr), lval };
 }
 
-member_lval APCLocalArray::LvalIntRef(ArrayData* ad, int64_t k, bool /*copy*/) {
+arr_lval APCLocalArray::LvalIntRef(ArrayData* ad, int64_t k, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lvalRef(k, false);
-  return member_lval { helper.release(lval.arr_base()), lval.elem() };
+  return arr_lval { helper.release(lval.arr), lval };
 }
 
-member_lval
+arr_lval
 APCLocalArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lval(k, false);
-  return member_lval { helper.release(lval.arr_base()), lval.elem() };
+  return arr_lval { helper.release(lval.arr), lval };
 }
 
-member_lval
+arr_lval
 APCLocalArray::LvalStrRef(ArrayData* ad, StringData* k, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lvalRef(k, false);
-  return member_lval { helper.release(lval.arr_base()), lval.elem() };
+  return arr_lval { helper.release(lval.arr), lval };
 }
 
-member_lval APCLocalArray::LvalNew(ArrayData* ad, bool /*copy*/) {
+arr_lval APCLocalArray::LvalNew(ArrayData* ad, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lvalNew(false);
-  return member_lval { helper.release(lval.arr_base()), lval.elem() };
+  return arr_lval { helper.release(lval.arr), lval };
 }
 
-member_lval APCLocalArray::LvalNewRef(ArrayData* ad, bool /*copy*/) {
+arr_lval APCLocalArray::LvalNewRef(ArrayData* ad, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lvalNewRef(false);
-  return member_lval { helper.release(lval.arr_base()), lval.elem() };
+  return arr_lval { helper.release(lval.arr), lval };
 }
 
 ArrayData*
@@ -221,13 +221,13 @@ APCLocalArray::SetWithRefStr(ArrayData* ad, StringData* k, TypedValue v, bool) {
 }
 
 ArrayData*
-APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, member_lval v, bool) {
+APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, tv_lval v, bool) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->setRef(k, v, false));
 }
 
 ArrayData*
-APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, member_lval v, bool) {
+APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, tv_lval v, bool) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->setRef(k, v, false));
 }
@@ -252,7 +252,7 @@ ArrayData* APCLocalArray::Append(ArrayData* ad, Cell v, bool /*copy*/) {
   return helper.release(helper.escalated->append(v, false));
 }
 
-ArrayData* APCLocalArray::AppendRef(ArrayData* ad, member_lval v, bool) {
+ArrayData* APCLocalArray::AppendRef(ArrayData* ad, tv_lval v, bool) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->appendRef(v, false));
 }
@@ -287,14 +287,14 @@ ArrayData *APCLocalArray::Escalate(const ArrayData* ad) {
   return ret;
 }
 
-member_rval::ptr_u APCLocalArray::NvGetInt(const ArrayData* ad, int64_t k) {
+tv_rval APCLocalArray::NvGetInt(const ArrayData* ad, int64_t k) {
   auto a = asApcArray(ad);
   auto index = a->getIndex(k);
   if (index == -1) return nullptr;
   return GetValueRef(a, index);
 }
 
-member_rval::ptr_u APCLocalArray::NvGetStr(const ArrayData* ad,
+tv_rval APCLocalArray::NvGetStr(const ArrayData* ad,
                                            const StringData* key) {
   auto a = asApcArray(ad);
   auto index = a->getIndex(key);

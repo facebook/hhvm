@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/req-ptr.h"
@@ -164,15 +164,15 @@ struct ArrayIter {
   Variant second();
 
   /*
-   * Get a member_rval for the current iterator position.
+   * Get a tv_rval for the current iterator position.
    *
    * The difference between secondRval and secondRvalPlus is that, if called
    * when iterating an Iterable object the former will fatal and the latter
    * will throw (whereas second will invoke the current() method on the
    * Iterable object). Why this is has been lost in the mists of time.
    */
-  member_rval secondRval() const;
-  member_rval secondRvalPlus();
+  tv_rval secondRval() const;
+  tv_rval secondRvalPlus();
 
   TypedValue secondVal() const { return secondRval().tv(); }
   TypedValue secondValPlus() { return secondRvalPlus().tv(); }
@@ -182,7 +182,7 @@ struct ArrayIter {
   }
 
   // Inline version of secondRef.  Only for use in iterator helpers.
-  member_rval nvSecond() const {
+  tv_rval nvSecond() const {
     auto const ad = getArrayData();
     assertx(ad && m_pos != ad->iter_end());
     return ad->rvalPos(m_pos);
@@ -358,7 +358,7 @@ struct MArrayIter {
     // Normally it's not ok to modify the return value of rvalPos,
     // but the whole point of mutable array iteration is that this is
     // allowed, so this const_cast is not actually evil.
-    // TODO(#9077255): Use member_lval for this somehow.
+    // TODO(#9077255): Use tv_lval for this somehow.
     return tvAsVariant(const_cast<TypedValue*>(
       data->rvalPos(m_pos).tv_ptr()
     ));

@@ -20,9 +20,9 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/md5.h"
@@ -46,6 +46,23 @@ struct StringData;
 struct RefData;
 struct VariableSerializer;
 struct Variant;
+
+/*
+ * arr_lval is a tv_lval augmented with an ArrayData*, and is used to return an
+ * lval from array mutations. `arr` holds the copied/escalated/grown array if
+ * any of those happened during the operation, or the original array if not. It
+ * can otherwise be treated as a tv_lval, and is implicitly converted to one
+ * shortly after being created in most cases.
+ */
+struct arr_lval : tv_lval {
+  template<typename... Args>
+  arr_lval(ArrayData* arr, Args... lval_args)
+    : tv_lval{std::forward<Args>(lval_args)...}
+    , arr{arr}
+  {}
+
+  ArrayData* const arr;
+};
 
 struct ArrayData : MaybeCountable {
   /*
@@ -327,16 +344,16 @@ public:
    * The lvalRef() variant should be used when the caller might box the
    * returned lval.
    */
-  member_lval lval(int64_t k, bool copy);
-  member_lval lval(StringData* k, bool copy);
-  member_lval lval(Cell k, bool copy);
-  member_lval lval(const String& k, bool copy);
-  member_lval lval(const Variant& k, bool copy);
-  member_lval lvalRef(int64_t k, bool copy);
-  member_lval lvalRef(StringData* k, bool copy);
-  member_lval lvalRef(Cell k, bool copy);
-  member_lval lvalRef(const String& k, bool copy);
-  member_lval lvalRef(const Variant& k, bool copy);
+  arr_lval lval(int64_t k, bool copy);
+  arr_lval lval(StringData* k, bool copy);
+  arr_lval lval(Cell k, bool copy);
+  arr_lval lval(const String& k, bool copy);
+  arr_lval lval(const Variant& k, bool copy);
+  arr_lval lvalRef(int64_t k, bool copy);
+  arr_lval lvalRef(StringData* k, bool copy);
+  arr_lval lvalRef(Cell k, bool copy);
+  arr_lval lvalRef(const String& k, bool copy);
+  arr_lval lvalRef(const Variant& k, bool copy);
 
   /*
    * Get an lval for a new element at the next available integer key.
@@ -345,30 +362,30 @@ public:
    * fail, in which case we return the lval blackhole (see lvalBlackHole() for
    * details).
    */
-  member_lval lvalNew(bool copy);
-  member_lval lvalNewRef(bool copy);
+  arr_lval lvalNew(bool copy);
+  arr_lval lvalNewRef(bool copy);
 
   /*
    * Get an rval for the element at key `k'.
    *
-   * If the array has no element at `k', return a null member_rval.
+   * If the array has no element at `k', return a null tv_rval.
    */
-  member_rval rval(int64_t k) const;
-  member_rval rval(const StringData* k) const;
+  tv_rval rval(int64_t k) const;
+  tv_rval rval(const StringData* k) const;
 
   /*
    * Like rval(), except throws an exception instead if `k' is out of bounds
    * and the array is a Hack array.
    */
-  member_rval rvalStrict(int64_t k) const;
-  member_rval rvalStrict(const StringData* k) const;
+  tv_rval rvalStrict(int64_t k) const;
+  tv_rval rvalStrict(const StringData* k) const;
 
   /*
    * Get an rval for the element at raw position `pos'.
    *
    * @requires: `pos' refers to a valid array element.
    */
-  member_rval rvalPos(ssize_t pos) const;
+  tv_rval rvalPos(ssize_t pos) const;
 
   /*
    * Get the value of the element at key `k'.
@@ -400,11 +417,11 @@ public:
    * resultant rval !has_val(), we raise a notice and return a dummy rval
    * instead.
    */
-  member_rval get(Cell k, bool error = false) const;
-  member_rval get(int64_t k, bool error = false) const;
-  member_rval get(const StringData* k, bool error = false) const;
-  member_rval get(const String& k, bool error = false) const;
-  member_rval get(const Variant& k, bool error = false) const;
+  tv_rval get(Cell k, bool error = false) const;
+  tv_rval get(int64_t k, bool error = false) const;
+  tv_rval get(const StringData* k, bool error = false) const;
+  tv_rval get(const String& k, bool error = false) const;
+  tv_rval get(const Variant& k, bool error = false) const;
 
   /*
    * Set the element at key `k' to `v', making a copy first if `copy' is set.
@@ -438,12 +455,12 @@ public:
   /*
    * Like set(), except `v' is first boxed if it's not already a ref.
    */
-  ArrayData* setRef(int64_t k, member_lval v, bool copy);
-  ArrayData* setRef(StringData* k, member_lval v, bool copy);
-  ArrayData* setRef(const StringData*, member_lval, bool) = delete;
-  ArrayData* setRef(Cell k, member_lval v, bool copy);
-  ArrayData* setRef(const String& k, member_lval v, bool copy);
-  ArrayData* setRef(const Variant& k, member_lval v, bool copy);
+  ArrayData* setRef(int64_t k, tv_lval v, bool copy);
+  ArrayData* setRef(StringData* k, tv_lval v, bool copy);
+  ArrayData* setRef(const StringData*, tv_lval, bool) = delete;
+  ArrayData* setRef(Cell k, tv_lval v, bool copy);
+  ArrayData* setRef(const String& k, tv_lval v, bool copy);
+  ArrayData* setRef(const Variant& k, tv_lval v, bool copy);
 
   ArrayData* setRef(int64_t k, Variant& v, bool copy);
   ArrayData* setRef(StringData* k, Variant& v, bool copy);
@@ -498,7 +515,7 @@ public:
   /*
    * Like append(), except `v' is first boxed if it's not already a ref.
    */
-  ArrayData* appendRef(member_lval v, bool copy);
+  ArrayData* appendRef(tv_lval v, bool copy);
   ArrayData* appendRef(Variant& v, bool copy);
 
   /////////////////////////////////////////////////////////////////////////////
@@ -760,15 +777,15 @@ protected:
   /*
    * Raise a notice that `k' is undefined, and return an Uninit.
    */
-  static member_rval getNotFound(int64_t k);
-  static member_rval getNotFound(const StringData* k);
+  static tv_rval getNotFound(int64_t k);
+  static tv_rval getNotFound(const StringData* k);
 
   /*
    * Raise a notice that `k' is undefined if `error' is set (and if this is not
    * the globals array), and return an Uninit.
    */
-  member_rval getNotFound(int64_t k, bool error) const;
-  member_rval getNotFound(const StringData* k, bool error) const;
+  tv_rval getNotFound(int64_t k, bool error) const;
+  tv_rval getNotFound(const StringData* k, bool error) const;
 
   /*
    * Is `k' of an arraykey type (i.e., int or string)?
@@ -872,10 +889,10 @@ struct ArrayFunctions {
   static auto const NK = size_t{8};
 
   void (*release[NK])(ArrayData*);
-  member_rval::ptr_u (*nvGetInt[NK])(const ArrayData*, int64_t k);
-  member_rval::ptr_u (*nvTryGetInt[NK])(const ArrayData*, int64_t k);
-  member_rval::ptr_u (*nvGetStr[NK])(const ArrayData*, const StringData* k);
-  member_rval::ptr_u (*nvTryGetStr[NK])(const ArrayData*, const StringData* k);
+  tv_rval (*nvGetInt[NK])(const ArrayData*, int64_t k);
+  tv_rval (*nvTryGetInt[NK])(const ArrayData*, int64_t k);
+  tv_rval (*nvGetStr[NK])(const ArrayData*, const StringData* k);
+  tv_rval (*nvTryGetStr[NK])(const ArrayData*, const StringData* k);
   Cell (*nvGetKey[NK])(const ArrayData*, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v, bool copy);
@@ -884,20 +901,20 @@ struct ArrayFunctions {
   ArrayData* (*setWithRefStr[NK])(ArrayData*, StringData* k,
                                   TypedValue v, bool copy);
   size_t (*vsize[NK])(const ArrayData*);
-  member_rval::ptr_u (*nvGetPos[NK])(const ArrayData*, ssize_t pos);
+  tv_rval (*nvGetPos[NK])(const ArrayData*, ssize_t pos);
   bool (*isVectorData[NK])(const ArrayData*);
   bool (*existsInt[NK])(const ArrayData*, int64_t k);
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);
-  member_lval (*lvalInt[NK])(ArrayData*, int64_t k, bool copy);
-  member_lval (*lvalIntRef[NK])(ArrayData*, int64_t k, bool copy);
-  member_lval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
-  member_lval (*lvalStrRef[NK])(ArrayData*, StringData* k, bool copy);
-  member_lval (*lvalNew[NK])(ArrayData*, bool copy);
-  member_lval (*lvalNewRef[NK])(ArrayData*, bool copy);
+  arr_lval (*lvalInt[NK])(ArrayData*, int64_t k, bool copy);
+  arr_lval (*lvalIntRef[NK])(ArrayData*, int64_t k, bool copy);
+  arr_lval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
+  arr_lval (*lvalStrRef[NK])(ArrayData*, StringData* k, bool copy);
+  arr_lval (*lvalNew[NK])(ArrayData*, bool copy);
+  arr_lval (*lvalNewRef[NK])(ArrayData*, bool copy);
   ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k,
-                              member_lval v, bool copy);
+                              tv_lval v, bool copy);
   ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k,
-                              member_lval v, bool copy);
+                              tv_lval v, bool copy);
   ArrayData* (*addInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
   ArrayData* (*addStr[NK])(ArrayData*, StringData* k, Cell v, bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k, bool copy);
@@ -919,7 +936,7 @@ struct ArrayFunctions {
   ArrayData* (*copy[NK])(const ArrayData*);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, Cell v, bool copy);
-  ArrayData* (*appendRef[NK])(ArrayData*, member_lval v, bool copy);
+  ArrayData* (*appendRef[NK])(ArrayData*, tv_lval v, bool copy);
   ArrayData* (*appendWithRef[NK])(ArrayData*, TypedValue v, bool copy);
   ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);

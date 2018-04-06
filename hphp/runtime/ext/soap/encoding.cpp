@@ -540,7 +540,7 @@ static bool soap_check_xml_ref(Variant& data, xmlNodePtr node) {
     if (!(data.isObject() && isObjectType(inner2.type()) &&
           data.getObjectData() == inner2.val().pobj) &&
         !(data.isReferenced() && tvIsReferenced(data2.tv()) &&
-          data.getRefData() == data2.val().pref->var())) {
+          data.getRefData() == val(data2).pref->var())) {
       tvBoxIfNeeded(data2);
       tvBind(data2.tv(), *data.asTypedValue());
       return true;

@@ -2855,7 +2855,7 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst, bool& skip) {
     if (arr->arrVal()->convertKey(idx->strVal(), val, false)) {
       if (checkHACIntishCast()) {
         skip = true;
-        return member_rval{};
+        return tv_rval{};
       }
       return arr->arrVal()->rval(val);
     }
@@ -3041,7 +3041,7 @@ SSATmp* hackArrGetImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (member_rval rval) {
+    [&] (tv_rval rval) {
       if (rval) return cns(env, rval.tv());
       gen(env, ThrowOutOfBounds, inst->taken(), inst->src(0), inst->src(1));
       return cns(env, TBottom);
@@ -3055,7 +3055,7 @@ SSATmp* hackArrGetQuietImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (member_rval rval) {
+    [&] (tv_rval rval) {
       return rval ? cns(env, rval.tv()) : cns(env, TInitNull);
     }
   );
@@ -3067,7 +3067,7 @@ SSATmp* hackArrIssetImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (member_rval rval) { return cns(env, rval && !cellIsNull(rval.tv())); }
+    [&] (tv_rval rval) { return cns(env, rval && !cellIsNull(rval.tv())); }
   );
 }
 
@@ -3077,7 +3077,7 @@ SSATmp* hackArrEmptyElemImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (member_rval rval) { return cns(env, !rval || !cellToBool(rval.tv())); }
+    [&] (tv_rval rval) { return cns(env, !rval || !cellToBool(rval.tv())); }
   );
 }
 
@@ -3087,7 +3087,7 @@ SSATmp* hackArrIdxImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (member_rval rval) { return rval ? cns(env, rval.tv()) : inst->src(2); }
+    [&] (tv_rval rval) { return rval ? cns(env, rval.tv()) : inst->src(2); }
   );
 }
 
@@ -3097,7 +3097,7 @@ SSATmp* hackArrAKExistsImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (member_rval rval) { return cns(env, !!rval); }
+    [&] (tv_rval rval) { return cns(env, !!rval); }
   );
 }
 

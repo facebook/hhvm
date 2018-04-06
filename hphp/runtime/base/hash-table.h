@@ -229,14 +229,14 @@ struct HashTable : HashTableCommon {
   // Non variant interface
   /////////////////////////////////////////////////////////////////////////////
 
-  static member_rval::ptr_u NvGetInt(const ArrayData* ad, int64_t k);
-  static member_rval::ptr_u NvGetStr(const ArrayData* ad, const StringData* k);
+  static tv_rval NvGetInt(const ArrayData* ad, int64_t k);
+  static tv_rval NvGetStr(const ArrayData* ad, const StringData* k);
 
-  static member_rval RvalInt(const ArrayData* ad, int64_t k) {
-    return member_rval { ad, NvGetInt(ad, k) };
+  static tv_rval RvalInt(const ArrayData* ad, int64_t k) {
+    return NvGetInt(ad, k);
   }
-  static member_rval RvalStr(const ArrayData* ad, const StringData* k) {
-    return member_rval { ad, NvGetStr(ad, k) };
+  static tv_rval RvalStr(const ArrayData* ad, const StringData* k) {
+    return NvGetStr(ad, k);
   }
 
   static Cell NvGetKey(const ArrayData* ad, ssize_t pos);

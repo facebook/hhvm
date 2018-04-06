@@ -378,11 +378,11 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
   // Walk head's previous pointers untill we find an unset one, or determine
   // they form a cycle.
   auto findAcyclicPrev = [&](ObjectData* head) {
-    member_lval foundLval;
+    tv_lval foundLval;
     do {
       assertx(is_throwable(head));
 
-      if (!seen.emplace((uintptr_t)head).second) return member_lval();
+      if (!seen.emplace((uintptr_t)head).second) return tv_lval();
 
       foundLval = head->propLvalAtOffset(s_previousIdx);
       assertx(foundLval.type() != KindOfUninit);

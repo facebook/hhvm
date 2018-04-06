@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/types.h"
@@ -430,7 +430,7 @@ public:
   /*
    * Get an rval to the element at `key'.
    */
-  FOR_EACH_KEY_TYPE(rvalAt, member_rval, const)
+  FOR_EACH_KEY_TYPE(rvalAt, tv_rval, const)
 
   /*
    * Get an lval to the element at `key'.
@@ -439,8 +439,8 @@ public:
    * escalation.  As with those functions, the Ref versions should be used if
    * the lval will be boxed, and the non-Ref versions should be used otherwise.
    */
-  FOR_EACH_KEY_TYPE(lvalAt, member_lval, )
-  FOR_EACH_KEY_TYPE(lvalAtRef, member_lval, )
+  FOR_EACH_KEY_TYPE(lvalAt, arr_lval, )
+  FOR_EACH_KEY_TYPE(lvalAtRef, arr_lval, )
 
 #undef D
 #undef I
@@ -450,8 +450,8 @@ public:
   /*
    * Get an lval to a newly created element.
    */
-  member_lval lvalAt();
-  member_lval lvalAtRef();
+  arr_lval lvalAt();
+  arr_lval lvalAtRef();
 
   /////////////////////////////////////////////////////////////////////////////
   // Element access and mutation.
@@ -563,9 +563,9 @@ private:
                  PFUNC_CMP key_cmp_function, const void* key_data,
                  PFUNC_CMP value_cmp_function, const void* value_data) const;
 
-  template<typename T> member_rval rvalAtImpl(const T& key, Flags) const;
-  template<typename T> member_lval lvalAtImpl(const T& key, Flags);
-  template<typename T> member_lval lvalAtRefImpl(const T& key, Flags);
+  template<typename T> tv_rval rvalAtImpl(const T& key, Flags) const;
+  template<typename T> arr_lval lvalAtImpl(const T& key, Flags);
+  template<typename T> arr_lval lvalAtRefImpl(const T& key, Flags);
 
   template<typename T> bool existsImpl(const T& key) const;
   template<typename T> void removeImpl(const T& key);
@@ -658,7 +658,7 @@ ALWAYS_INLINE Array empty_vec_array() {
  *
  * asArrRef() unconditionally removes Persistent bits from the referenced type.
  */
-ALWAYS_INLINE Array& asArrRef(member_lval lval) {
+ALWAYS_INLINE Array& asArrRef(tv_lval lval) {
   assertx(isArrayLikeType(lval.type()));
   lval.type() = lval.val().parr->toDataType();
   return *reinterpret_cast<Array*>(&lval.val().parr);

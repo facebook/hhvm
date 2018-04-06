@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-helpers.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -643,19 +643,19 @@ void PackedArray::ReleaseUncounted(ArrayData* ad) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-member_rval::ptr_u PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
+tv_rval PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   assertx(checkInvariants(ad));
   auto const data = packedData(ad);
   return LIKELY(size_t(ki) < ad->m_size) ? &data[ki] : nullptr;
 }
 
-member_rval::ptr_u
+tv_rval
 PackedArray::NvGetStr(const ArrayData* ad, const StringData* /*s*/) {
   assertx(checkInvariants(ad));
   return nullptr;
 }
 
-member_rval::ptr_u PackedArray::NvTryGetIntVec(const ArrayData* ad, int64_t k) {
+tv_rval PackedArray::NvTryGetIntVec(const ArrayData* ad, int64_t k) {
   assertx(checkInvariants(ad));
   assertx(ad->isVecArray());
   auto const data = packedData(ad);
@@ -663,7 +663,7 @@ member_rval::ptr_u PackedArray::NvTryGetIntVec(const ArrayData* ad, int64_t k) {
   throwOOBArrayKeyException(k, ad);
 }
 
-member_rval::ptr_u PackedArray::NvTryGetStrVec(const ArrayData* ad,
+tv_rval PackedArray::NvTryGetStrVec(const ArrayData* ad,
                                                const StringData* s) {
   assertx(checkInvariants(ad));
   assertx(ad->isVecArray());
@@ -681,7 +681,7 @@ size_t PackedArray::Vsize(const ArrayData*) {
   always_assert(false);
 }
 
-member_rval::ptr_u PackedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+tv_rval PackedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   assertx(checkInvariants(ad));
   assertx(pos != ad->m_size);
   return &packedData(ad)[pos];
@@ -750,80 +750,80 @@ auto MutableOpIntVec(ArrayData* adIn, int64_t k, bool copy, FoundFn found) {
 
 }
 
-member_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
+arr_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
   return MutableOpInt(adIn, k, copy,
-    [&] (ArrayData* ad) { return member_lval { ad, &packedData(ad)[k] }; },
+    [&] (ArrayData* ad) { return arr_lval { ad, &packedData(ad)[k] }; },
     [&] { return LvalNew(adIn, copy); },
     // TODO(#2606310): Make use of our knowledge that the key is missing.
     [&] (MixedArray* mixed) { return mixed->addLvalImpl<true>(k); }
   );
 }
 
-member_lval PackedArray::LvalIntRef(ArrayData* adIn, int64_t k, bool copy) {
+arr_lval PackedArray::LvalIntRef(ArrayData* adIn, int64_t k, bool copy) {
   if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   return LvalInt(adIn, k, copy);
 }
 
-member_lval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k, bool copy) {
+arr_lval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k, bool copy) {
   return MutableOpIntVec(adIn, k, copy,
-    [&] (ArrayData* ad) { return member_lval { ad, &packedData(ad)[k] }; }
+    [&] (ArrayData* ad) { return arr_lval { ad, &packedData(ad)[k] }; }
   );
 }
 
-member_lval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
+arr_lval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
   assertx(checkInvariants(adIn));
   if (UNLIKELY(size_t(k) >= adIn->m_size)) return {adIn, nullptr};
   auto const ad = copy ? Copy(adIn) : adIn;
-  return member_lval { ad, &packedData(ad)[k] };
+  return arr_lval { ad, &packedData(ad)[k] };
 }
 
-member_lval PackedArray::LvalStr(ArrayData* adIn, StringData* k, bool copy) {
+arr_lval PackedArray::LvalStr(ArrayData* adIn, StringData* k, bool copy) {
   return MutableOpStr(adIn, k, copy,
     // TODO(#2606310): Make use of our knowledge that the key is missing.
     [&] (MixedArray* mixed) { return mixed->addLvalImpl<true>(k); }
   );
 }
 
-member_lval
+arr_lval
 PackedArray::LvalStrRef(ArrayData* adIn, StringData* key, bool copy) {
   if (checkHACRefBind()) raiseHackArrCompatRefBind(key);
   return LvalStr(adIn, key, copy);
 }
 
-member_lval
+arr_lval
 PackedArray::LvalStrVec(ArrayData* adIn, StringData* key, bool) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());
   throwInvalidArrayKeyException(key, adIn);
 }
 
-member_lval PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t /*k*/, bool) {
+arr_lval PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t /*k*/, bool) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);
 }
 
-member_lval
+arr_lval
 PackedArray::LvalStrRefVec(ArrayData* adIn, StringData* key, bool) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());
   throwInvalidArrayKeyException(key, adIn);
 }
 
-member_lval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
+arr_lval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
   auto const ad = PrepareForInsert(adIn, copy);
   auto& tv = packedData(ad)[ad->m_size++];
   tv.m_type = KindOfNull;
-  return member_lval { ad, &tv };
+  return arr_lval { ad, &tv };
 }
 
-member_lval PackedArray::LvalNewRef(ArrayData* adIn, bool copy) {
+arr_lval PackedArray::LvalNewRef(ArrayData* adIn, bool copy) {
   if (checkHACRefBind()) raiseHackArrCompatRefNew();
   return LvalNew(adIn, copy);
 }
 
-member_lval PackedArray::LvalNewRefVec(ArrayData* adIn, bool) {
+arr_lval PackedArray::LvalNewRefVec(ArrayData* adIn, bool) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);
@@ -876,7 +876,7 @@ ArrayData* PackedArray::SetWithRefInt(ArrayData* adIn, int64_t k,
       checkHackArrRef();
       auto const lval = mixed->addLvalImpl<false>(k);
       tvSetWithRef(v, lval);
-      return lval.arr_base();
+      return lval.arr;
     }
   );
 }
@@ -899,7 +899,7 @@ ArrayData* PackedArray::SetWithRefStr(ArrayData* adIn, StringData* k,
       }
       auto const lval = mixed->addLvalImpl<false>(k);
       tvSetWithRef(v, lval);
-      return lval.arr_base();
+      return lval.arr;
     }
   );
 }
@@ -912,7 +912,7 @@ ArrayData* PackedArray::SetWithRefStrVec(ArrayData* adIn, StringData* k,
 }
 
 ArrayData* PackedArray::SetRefInt(ArrayData* adIn, int64_t k,
-                                  member_lval v, bool copy) {
+                                  tv_lval v, bool copy) {
   if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
 
   return MutableOpInt(adIn, k, copy,
@@ -928,14 +928,14 @@ ArrayData* PackedArray::SetRefInt(ArrayData* adIn, int64_t k,
 }
 
 ArrayData* PackedArray::SetRefIntVec(ArrayData* adIn, int64_t,
-                                     member_lval, bool) {
+                                     tv_lval, bool) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData* PackedArray::SetRefStr(ArrayData* adIn, StringData* k,
-                                  member_lval v, bool copy) {
+                                  tv_lval v, bool copy) {
   if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
 
   return MutableOpStr(adIn, k, copy,
@@ -945,7 +945,7 @@ ArrayData* PackedArray::SetRefStr(ArrayData* adIn, StringData* k,
 }
 
 ArrayData* PackedArray::SetRefStrVec(ArrayData* adIn, StringData* k,
-                                     member_lval, bool) {
+                                     tv_lval, bool) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());
   throwInvalidArrayKeyException(k, adIn);
@@ -1074,7 +1074,7 @@ ArrayData* PackedArray::Append(ArrayData* adIn, Cell v, bool copy) {
   return ad;
 }
 
-ArrayData* PackedArray::AppendRef(ArrayData* adIn, member_lval v, bool copy) {
+ArrayData* PackedArray::AppendRef(ArrayData* adIn, tv_lval v, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isPacked());
   if (checkHACRefBind()) raiseHackArrCompatRefNew();
@@ -1087,7 +1087,7 @@ ArrayData* PackedArray::AppendRef(ArrayData* adIn, member_lval v, bool copy) {
   return ad;
 }
 
-ArrayData* PackedArray::AppendRefVec(ArrayData* adIn, member_lval, bool) {
+ArrayData* PackedArray::AppendRefVec(ArrayData* adIn, tv_lval, bool) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);

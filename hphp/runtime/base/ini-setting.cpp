@@ -491,7 +491,7 @@ IniSettingMap& IniSettingMap::operator=(const IniSettingMap& i) {
 }
 
 namespace {
-void mergeSettings(member_lval curval, TypedValue v) {
+void mergeSettings(tv_lval curval, TypedValue v) {
   auto const cur_inner = curval.unboxed();
   auto const cell = tvToCell(v);
 

@@ -685,7 +685,7 @@ void VerifyRetTypeFail(int32_t id, TypedValue* tv) {
 
 namespace {
 ALWAYS_INLINE
-TypedValue getDefaultIfNullCell(member_rval rval, const TypedValue& def) {
+TypedValue getDefaultIfNullCell(tv_rval rval, const TypedValue& def) {
   return UNLIKELY(!rval) ? def : rval.tv();
 }
 

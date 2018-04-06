@@ -146,7 +146,7 @@ bool Process::GetMemoryInfo(MemInfo& info) {
       } else if (!strncmp(line, "Cached:", 7)) {
         if (kb >= 0) info.cachedMb = kb / 1024;
       } else if (!strncmp(line, "MemAvailable:", 13)) {
-        if (kb >= 0) info.cachedMb = kb / 1024;
+        if (kb >= 0) info.availableMb = kb / 1024;
       }
       if (info.valid()) return true;
     }

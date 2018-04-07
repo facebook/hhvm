@@ -646,7 +646,9 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) noexcept {
         for (auto it = m_pushHandlers.begin(); it != m_pushHandlers.end(); ) {
           auto pushTxn = it++->second->getTransaction();
           if (pushTxn && !pushTxn->isEgressEOMSeen()) {
-            LOG(ERROR) << "Aborting unfinished push txn=" << *pushTxn;
+            std::ostringstream oss;
+            oss << *pushTxn;
+            Logger::Error("Aborting unfinished push txn=" + oss.str());
             pushTxn->sendAbort();
           }
         }

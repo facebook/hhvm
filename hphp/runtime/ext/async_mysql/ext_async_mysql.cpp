@@ -52,7 +52,7 @@ int HdfAsyncMysqlClientPoolSize = -1;
 
 folly::Singleton<AsyncMysqlClientPool> clientPool([]() {
   if (HdfAsyncMysqlClientPoolSize == -1) {
-    LOG(DFATAL) << "AsyncMysql Config should have been initialized.";
+    Logger::Error("AsyncMysql Config should have been initialized");
     HdfAsyncMysqlClientPoolSize = 2;
   }
   return new AsyncMysqlClientPool(
@@ -381,8 +381,8 @@ Object HHVM_STATIC_METHOD(
             DCHECK(reason != am::QueryCallbackReason::RowsFetched);
             DCHECK(reason != am::QueryCallbackReason::QueryBoundary);
             if (!op.done()) {
-              LOG(ERROR) << "Invalid state! Callback called as finished "
-                         << "but operation didn't finish";
+              Logger::Error("Invalid state! Callback called as finished "
+                            "but operation didn't finish");
             }
             op.setQueryResults(std::move(query_results));
             event->setClientStats(clientPtr->collectPerfStats());
@@ -391,7 +391,7 @@ Object HHVM_STATIC_METHOD(
           query_op->setCallback(am::resultAppender(appender_callback));
           query_op->run();
         } catch (...) {
-          LOG(ERROR) << "Unexpected exception while executing Query";
+          Logger::Error("Unexpected exception while executing Query");
           event->abandon();
         }
 
@@ -399,7 +399,7 @@ Object HHVM_STATIC_METHOD(
     connectOp->run();
     return Object{event->getWaitHandle()};
   } catch (...) {
-    LOG(ERROR) << "Unexpected exception while creating Connection";
+    Logger::Error("Unexpected exception while creating Connection");
     event->abandon();
     return Object{};
   }
@@ -651,8 +651,8 @@ Object AsyncMysqlConnection::query(
         am::QueryCallbackReason reason) {
       DCHECK(reason != am::QueryCallbackReason::RowsFetched);
       if (!op.done()) {
-        LOG(ERROR) << "Invalid state! Callback called as finished "
-                   << "but operation didn't finish";
+        Logger::Error("Invalid state! Callback called as finished "
+                      "but operation didn't finish");
       }
 
       op.setQueryResult(std::move(query_result));
@@ -665,7 +665,7 @@ Object AsyncMysqlConnection::query(
     return Object{event->getWaitHandle()};
   }
   catch (...) {
-    LOG(ERROR) << "Unexpected exception while beginning ConnectOperation";
+    Logger::Error("Unexpected exception while beginning ConnectOperation");
     assertx(false);
     event->abandon();
     return Object{};
@@ -776,8 +776,8 @@ static Object HHVM_METHOD(
       DCHECK(reason != am::QueryCallbackReason::RowsFetched);
       DCHECK(reason != am::QueryCallbackReason::QueryBoundary);
       if (!op.done()) {
-        LOG(ERROR) << "Invalid state! Callback called as finished "
-                   << "but operation didn't finish";
+        Logger::Error("Invalid state! Callback called as finished "
+                      "but operation didn't finish");
       }
 
       op.setQueryResults(std::move(query_results));
@@ -817,7 +817,7 @@ static String HHVM_METHOD(AsyncMysqlConnection, serverInfo) {
   if (data->isValidConnection()) {
     ret = data->m_conn->serverInfo();
   } else {
-    LOG(ERROR) << "Accessing closed connection";
+    Logger::Error("Accessing closed connection");
   }
   return ret;
 }
@@ -845,7 +845,7 @@ static int HHVM_METHOD(AsyncMysqlConnection, warningCount) {
   if (data->isValidConnection()) {
     count = data->m_conn->warningCount();
   } else {
-    LOG(ERROR) << "Accessing closed connection";
+    Logger::Error("Accessing closed connection");
   }
   return count;
 }
@@ -866,7 +866,7 @@ static void HHVM_METHOD(AsyncMysqlConnection, setReusable, bool reusable) {
   if (data->m_conn) {
     data->m_conn->setReusable(reusable);
   } else {
-    LOG(ERROR) << "Accessing closed connection";
+    Logger::Error("Accessing closed connection");
   }
 }
 
@@ -876,7 +876,7 @@ static bool HHVM_METHOD(AsyncMysqlConnection, isReusable) {
   if (data->m_conn) {
     return data->m_conn->isReusable();
   } else {
-    LOG(ERROR) << "Accessing closed connection";
+    Logger::Error("Accessing closed connection");
   }
   return false;
 }
@@ -888,8 +888,8 @@ static Variant HHVM_METHOD(AsyncMysqlConnection, connectResult) {
     return AsyncMysqlConnectResult::newInstance(data->m_op,
                                                 data->m_clientStats);
   } else {
-    LOG(ERROR) << "ConnectResult only available when Connection created by "
-                  "AsyncMysqlClient";
+    Logger::Error("ConnectResult only available when Connection created by "
+                  "AsyncMysqlClient");
   }
   return false;
 }
@@ -902,7 +902,7 @@ static double HHVM_METHOD(AsyncMysqlConnection, lastActivityTime) {
         data->m_op->startTime().time_since_epoch());
     return d.count() / 1000.0 / 1000.0;
   } else {
-    LOG(ERROR) << "Accessing closed connection";
+    Logger::Error("Accessing closed connection");
   }
   return false;
 }

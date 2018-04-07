@@ -1498,7 +1498,6 @@ and expr_
       make_result env (T.Fun_id x) fty
   | Id ((cst_pos, cst_name) as id) ->
       Typing_hooks.dispatch_id_hook id env;
-      Typing_hooks.dispatch_global_const_hook id;
       (match Env.get_gconst env cst_name with
       | None when Env.is_strict env ->
           Errors.unbound_global cst_pos;
@@ -6480,7 +6479,6 @@ and typedef_def tcopt typedef  =
   }
 
 and gconst_def tcopt cst =
-  Typing_hooks.dispatch_global_const_hook cst.cst_name;
   let env = EnvFromDef.gconst_env tcopt cst in
   let env = Typing_env.set_mode env cst.cst_mode in
   add_decl_errors (Option.map (Env.get_gconst env (snd cst.cst_name)) ~f:snd);

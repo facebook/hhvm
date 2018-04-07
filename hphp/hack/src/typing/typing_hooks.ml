@@ -54,8 +54,6 @@ let (new_id_hooks: (Nast.class_id_ -> Typing_env.env ->
 
 let (fun_id_hooks: (Pos.t * string -> unit) list ref) = ref []
 
-let (global_const_hooks: (Pos.t * string -> unit) list ref) = ref []
-
 let (parent_construct_hooks: (Typing_env.env ->
                     Pos.t -> unit) list ref) = ref []
 
@@ -100,9 +98,6 @@ let attach_new_id_hook hook =
 
 let attach_fun_id_hook hook =
   fun_id_hooks := hook :: !fun_id_hooks
-
-let attach_global_const_hook hook =
-  global_const_hooks := hook :: !global_const_hooks
 
 let attach_parent_construct_hook hook =
   parent_construct_hooks := hook :: !parent_construct_hooks
@@ -174,9 +169,6 @@ let dispatch_new_id_hook cid env p =
 let dispatch_fun_id_hook id =
   List.iter !fun_id_hooks begin fun hook -> hook id end
 
-let dispatch_global_const_hook id =
-  List.iter !global_const_hooks begin fun hook -> hook id end
-
 let dispatch_parent_construct_hook env p =
   List.iter !parent_construct_hooks begin fun hook -> hook env p end
 
@@ -210,7 +202,6 @@ let remove_all_hooks () =
   fun_call_hooks := [];
   new_id_hooks := [];
   fun_id_hooks := [];
-  global_const_hooks := [];
   constructor_hooks := [];
   enter_method_def_hooks := [];
   exit_method_def_hooks := [];

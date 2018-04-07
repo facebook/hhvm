@@ -233,7 +233,6 @@ and get_typeconst env class_pos class_name pos tconst =
       | Some tc -> tc in
     let tc_tuple = (class_.tc_name, snd typeconst.ttc_name, pos) in
     let env = {env with typeconsts_seen = tc_tuple :: env.typeconsts_seen} in
-    Typing_hooks.dispatch_taccess_hook class_ typeconst pos;
     (* Check for cycles. We do this by combining the name of the current class
      * with the remaining ids that we need to expand. If we encounter the same
      * class name + ids that means we have entered a cycle.

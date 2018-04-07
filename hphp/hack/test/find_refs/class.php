@@ -19,7 +19,7 @@ abstract class Foo {
 type Alias = Foo;
 
 trait T {
-  require extends Foo; // TODO: this is not found
+  require extends Foo;
 }
 
 abstract class C extends Foo {}

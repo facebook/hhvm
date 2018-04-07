@@ -44,9 +44,10 @@ type action_internal  =
 type result = (string * Pos.absolute) list
 type ide_result = (string * Pos.absolute list) option
 
-let process_fun_id results_acc target_fun id =
+let process_fun_id target_fun id =
   if target_fun = (snd id)
-  then results_acc := Pos.Map.add (fst id) (snd id) !results_acc
+  then Pos.Map.singleton (fst id) (snd id)
+  else Pos.Map.empty
 
 let check_if_extends_class tcopt target_class_name class_name =
   let class_ = Typing_lazy_heap.get_class tcopt class_name in
@@ -61,9 +62,9 @@ let is_target_class tcopt target_classes class_name =
   | Subclasses_of s ->
     s = class_name || check_if_extends_class tcopt s class_name
 
-let process_member_id tcopt results_acc target_classes target_member
-    class_ ~targs:_ ~pos_params:_ id _ _ ~is_method ~is_const =
-  let member_name = snd id in
+let process_member_id tcopt target_classes target_member class_name mid
+    ~is_method ~is_const =
+  let member_name = snd mid in
   let is_target = match target_member with
     | Method target_name  -> is_method && (member_name = target_name)
     | Property target_name ->
@@ -72,63 +73,31 @@ let process_member_id tcopt results_acc target_classes target_member
     | Class_const target_name -> is_const && (member_name = target_name)
     | Typeconst _ -> false
   in
-  if not is_target then () else
-  let class_name = class_.Typing_defs.tc_name in
-  if is_target_class tcopt target_classes class_name then
-    results_acc :=
-      Pos.Map.add (fst id) (class_name ^ "::" ^ (snd id)) !results_acc
+  if is_target && is_target_class tcopt target_classes class_name
+  then Pos.Map.singleton (fst mid) (class_name ^ "::" ^ (snd mid))
+  else Pos.Map.empty
 
-let process_constructor tcopt results_acc
-    target_classes target_member class_ ~targs _ p =
-  process_member_id
-    tcopt results_acc target_classes target_member class_ ~targs
-    ~pos_params:None (p, "__construct") () () ~is_method:true ~is_const:false
-
-let process_class_id results_acc target_classes cid mid_option =
-   if (SSet.mem target_classes (snd cid))
+let process_class_id target_class cid mid_option =
+   if target_class = (snd cid)
    then begin
      let class_name = match mid_option with
      | None -> snd cid
      | Some n -> (snd cid)^"::"^(snd n) in
-     results_acc := Pos.Map.add (fst cid) class_name !results_acc
+     Pos.Map.singleton (fst cid) class_name
    end
+   else Pos.Map.empty
 
-let process_taccess tcopt results_acc target_classes target_typeconst
-    class_ typeconst p =
-  let class_name = class_.tc_name in
-  let tconst_name = (snd typeconst.ttc_name) in
+let process_taccess tcopt target_classes target_typeconst
+    (class_name, tconst_name, p) =
   if (is_target_class tcopt target_classes class_name) &&
-    (target_typeconst = tconst_name) then
-  results_acc :=
-    Pos.Map.add p (class_name ^ "::" ^ tconst_name) !results_acc
+    (target_typeconst = tconst_name)
+  then Pos.Map.singleton p (class_name ^ "::" ^ tconst_name)
+  else Pos.Map.empty
 
-let process_gconst_id results_acc target_gconst id =
+let process_gconst_id target_gconst id =
   if target_gconst = (snd id)
-  then results_acc := Pos.Map.add (fst id) (snd id) !results_acc
-
-let attach_hooks tcopt results_acc = function
-  | IMember (classes, ((Method _ | Property _ | Class_const _) as member)) ->
-    let process_member_id =
-      process_member_id tcopt results_acc classes member in
-    Typing_hooks.attach_cmethod_hook process_member_id;
-    Typing_hooks.attach_smethod_hook process_member_id;
-    Typing_hooks.attach_constructor_hook
-      (process_constructor tcopt results_acc classes member);
-  | IMember (classes, Typeconst t) ->
-    Typing_hooks.attach_taccess_hook
-      (process_taccess tcopt results_acc classes t)
-  | IFunction fun_name ->
-    Typing_hooks.attach_fun_id_hook (process_fun_id results_acc fun_name)
-  | IClass c ->
-    let classes = SSet.singleton c in
-    Decl_hooks.attach_class_id_hook (process_class_id results_acc classes)
-  | IGConst cst_name ->
-    Typing_hooks.attach_global_const_hook
-      (process_gconst_id results_acc cst_name)
-
-let detach_hooks () =
-  Decl_hooks.remove_all_hooks ();
-  Typing_hooks.remove_all_hooks ()
+  then Pos.Map.singleton (fst id) (snd id)
+  else Pos.Map.empty
 
 let add_if_extends_class tcopt target_class_name class_name acc =
   if check_if_extends_class tcopt target_class_name class_name
@@ -200,14 +169,39 @@ let get_deps_set_gconst cst_name =
     Relative_path.Set.empty
 
 let find_refs tcopt target acc fileinfo_l =
-  let results_acc = ref Pos.Map.empty in
-  attach_hooks tcopt results_acc target;
   let tcopt = TypecheckerOptions.make_permissive tcopt in
-  ignore (ServerIdeUtils.recheck tcopt fileinfo_l);
-  detach_hooks ();
-  Pos.Map.fold begin fun p str acc ->
-    (str, p) :: acc
-  end !results_acc acc
+  let tasts = ServerIdeUtils.recheck tcopt fileinfo_l in
+  let results =
+    let module SO = SymbolOccurrence in
+    List.fold tasts ~init:Pos.Map.empty ~f:begin fun acc (_, tast) ->
+      IdentifySymbolService.all_symbols tast
+      |> List.filter ~f:(fun symbol -> not symbol.SO.is_declaration)
+      |> List.fold ~init:Pos.Map.empty ~f:begin fun acc symbol ->
+        let SO.{type_; pos; name; _} = symbol in
+        Pos.Map.union acc @@
+        match target, type_ with
+        | IMember (classes, Typeconst tc), SO.Typeconst (c_name, tc_name) ->
+          process_taccess tcopt classes tc (c_name, tc_name, pos)
+        | IMember (classes, member), SO.Method (c_name, m_name)
+        | IMember (classes, member), SO.ClassConst (c_name, m_name)
+        | IMember (classes, member), SO.Property (c_name, m_name) ->
+          let mid = (pos, m_name) in
+          let is_method = match type_ with SO.Method _ -> true | _ -> false in
+          let is_const = match type_ with SO.ClassConst _ -> true | _ -> false in
+          process_member_id tcopt classes member c_name mid
+            ~is_method ~is_const
+        | IFunction fun_name, SO.Function ->
+          process_fun_id fun_name (pos, name)
+        | IClass c, SO.Class ->
+          process_class_id c (pos, name) None
+        | IGConst cst_name, SO.GConst ->
+          process_gconst_id cst_name (pos, name)
+        | _ -> Pos.Map.empty
+      end
+      |> Pos.Map.union acc
+    end
+  in
+  Pos.Map.fold (fun p str acc -> (str, p) :: acc) results acc
 
 let parallel_find_refs workers fileinfo_l target tcopt =
   MultiWorker.call

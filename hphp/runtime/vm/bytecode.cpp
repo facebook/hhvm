@@ -2950,7 +2950,7 @@ Array resolveAndVerifyTypeStructure(const Array& ts) {
   try {
     bool persistent = true;
     resolved = TypeStructure::resolve(
-      String::FromCStr("TypeStruct$DummyTypeName"),
+      StrNR(),
       ts,
       persistent
     );

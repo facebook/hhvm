@@ -341,7 +341,9 @@ Array resolveList(const Array& arr,
 std::string resolveContextMsg(const Class::Const& typeCns,
                               const Class* typeCnsCls) {
   std::string msg("when resolving ");
-  if (typeCnsCls) {
+  if (!typeCns.name) {
+    folly::toAppend("anonymous type structure", &msg);
+  } else if (typeCnsCls) {
     folly::toAppend("type constant ", typeCnsCls->name()->data(),
                     "::", typeCns.name->data(),
                     &msg);
@@ -723,10 +725,10 @@ Array TypeStructure::resolve(const String& aliasName,
                              bool& persistent,
                              const Array& generics) {
   // use a bogus constant to store the name
-  Class::Const cns;
-  cns.name = aliasName.get();
+  Class::Const typeCns;
+  typeCns.name = aliasName.get();
 
-  auto newarr = resolveTS(arr, cns, nullptr, generics, persistent);
+  auto newarr = resolveTS(arr, typeCns, nullptr, generics, persistent);
   newarr.add(s_alias, Variant(aliasName));
   return newarr;
 }

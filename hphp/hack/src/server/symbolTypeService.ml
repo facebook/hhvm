@@ -24,8 +24,8 @@ end)
 class ['self] visitor = object (self : 'self)
   inherit [_] Tast_visitor.reduce as super
 
-  method private zero = Result_set.empty
-  method private plus = Result_set.union
+  method zero = Result_set.empty
+  method plus = Result_set.union
 
   method! on_expr env (((pos, ty), expr_) as expr) =
     let acc =
@@ -57,7 +57,7 @@ class ['self] visitor = object (self : 'self)
 end
 
 let generate_types tasts =
-  List.fold tasts
-    ~init:Result_set.empty
-    ~f:(fun acc (_, tast) -> Result_set.union acc (new visitor#go tast))
+  tasts
+  |> List.map ~f:new visitor#go
+  |> List.fold ~init:Result_set.empty ~f:Result_set.union
   |> Result_set.elements

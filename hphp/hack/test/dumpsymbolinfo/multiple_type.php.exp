@@ -13,6 +13,12 @@
       "caller":"test"
     },
     {
+      "name":"C1::foo",
+      "type":"Method",
+      "pos":{"filename":"multiple_type.php","line":21,"char_start":7,"char_end":9},
+      "caller":"test"
+    },
+    {
       "name":"C2::foo",
       "type":"Method",
       "pos":{"filename":"multiple_type.php","line":21,"char_start":7,"char_end":9},

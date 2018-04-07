@@ -220,6 +220,9 @@ let get_class_ids env ty =
     | _, Tclass ((_, cid), _) -> cid::acc
     | _, (Toption ty | Tabstract (_, Some ty)) -> aux acc ty
     | _, Tunresolved tys -> List.fold tys ~init:acc ~f:aux
+    | _, Tabstract (AKgeneric name, None) ->
+      let upper_bounds = Env.get_upper_bounds env name in
+      TySet.fold (fun ty acc -> aux acc ty) upper_bounds acc
     | _ -> acc
   in
   List.rev (aux [] (Typing_expand.fully_expand env ty))

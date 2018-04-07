@@ -39,13 +39,10 @@ let recheck_typing filetuple_l tcopt =
   ServerIdeUtils.recheck tcopt filetuple_l
 
 let helper tcopt acc filetuple_l  =
-  let fun_call_map = ref Pos.Map.empty in
-  SymbolFunCallService.attach_hooks fun_call_map;
   let filename_l = List.rev_map filetuple_l fst in
   recheck_naming filename_l tcopt;
-  let tasts = recheck_typing filetuple_l tcopt in
-  SymbolFunCallService.detach_hooks ();
-  let fun_calls = Pos.Map.values !fun_call_map in
+  let tasts = recheck_typing filetuple_l tcopt |> List.map ~f:snd in
+  let fun_calls = SymbolFunCallService.find_fun_calls tasts in
   let symbol_types = SymbolTypeService.generate_types tasts in
   (fun_calls, symbol_types) :: acc
 

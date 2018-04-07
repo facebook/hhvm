@@ -1,17 +1,6 @@
 {
   "function_calls":[
     {
-      "name":"D::foo",
-      "type":"Method",
-      "pos":{
-        "filename":"lambda_argument_reused.php",
-        "line":13,
-        "char_start":14,
-        "char_end":16
-      },
-      "caller":"test"
-    },
-    {
       "name":"C::__construct",
       "type":"Constructor",
       "pos":{

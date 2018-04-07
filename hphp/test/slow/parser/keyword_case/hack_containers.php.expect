@@ -1,0 +1,30 @@
+vec(1) {
+  int(1)
+}
+dict(1) {
+  ["a"]=>
+  int(1)
+}
+keyset(1) {
+  int(1)
+}
+array(1) {
+  ["a"]=>
+  int(1)
+}
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+vec(1) {
+  int(52)
+}
+dict(1) {
+  ["b"]=>
+  int(52)
+}
+keyset(1) {
+  int(52)
+}

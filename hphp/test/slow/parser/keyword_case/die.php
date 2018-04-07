@@ -1,0 +1,5 @@
+<?php
+
+ECHO "PRINT ME\n";
+DIE("HORRIBLY");
+ECHO "DON'T PRINT ME BRO\n";

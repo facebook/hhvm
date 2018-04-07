@@ -347,7 +347,6 @@ end = struct
   (* Adds a local variable, without any check *)
   let add_lvar (_, lenv) (_, name) (p, x) =
     lenv.locals := SMap.add name (p, x) !(lenv.locals);
-    Naming_hooks.dispatch_lvar_hook x (p, name) !(lenv.locals);
     ()
 
   let add_param env param =
@@ -360,7 +359,6 @@ end = struct
   (* Defines a new local variable.
      Side effects:
      1) if the local is not in the local environment then it is added.
-     2) the naming hook callback is invoked.
      Return value: the given position and deduced/created identifier. *)
   let new_lvar (_, lenv) (p, x) =
     let lcl = SMap.get x !(lenv.locals) in
@@ -375,7 +373,6 @@ end = struct
           lenv.locals := SMap.add x (p, ident) !(lenv.locals);
           ident
     in
-    Naming_hooks.dispatch_lvar_hook ident (p, x) !(lenv.locals);
     p, ident
 
   (* Defines a new local variable for this dollardollar (or reuses
@@ -420,7 +417,6 @@ end = struct
             handle_undefined_variable (genv, env) (p, x)
         | None -> p, Local_id.tmp()
     in
-    Naming_hooks.dispatch_lvar_hook ident (p, x) !(env.locals);
     p, ident
 
   let get_name genv namespace x =

@@ -1003,7 +1003,6 @@ and catch parent_lenv after_try env (sid, exn, b) =
   let env = LEnv.fully_integrate env parent_lenv in
   let cid = CI (sid, []) in
   let ety_p = (fst sid) in
-  TUtils.process_class_id cid;
   let env, _, _ = instantiable_cid ety_p env cid in
   let env, _te, ety = static_class_id ety_p env cid in
   let env = exception_ty ety_p env ety in
@@ -1899,7 +1898,6 @@ and expr_
       Env.error_if_reactive_context env @@ begin fun () ->
         Errors.static_property_in_reactive_context p
       end;
-      TUtils.process_static_find_ref cid mid;
       let env, te, cty = static_class_id p env cid in
       let env, ty, _ =
         class_get ~is_method:false ~is_const:false env cty mid cid in
@@ -2022,7 +2020,6 @@ and expr_
   | Special_func func -> special_func env p func
   | New (((), c), el, uel) ->
       Typing_hooks.dispatch_new_id_hook c env p;
-      TUtils.process_static_find_ref c (p, SN.Members.__construct);
       let env, tc, tel, tuel, ty, _ =
         new_object ~expected ~is_using_clause ~check_parent:false ~check_not_abstract:true
           p env c el uel in
@@ -2048,7 +2045,6 @@ and expr_
       make_result env (T.Cast (hint, te)) ty
   | InstanceOf (e, ((), cid)) ->
       let env, te, _ = expr env e in
-      TUtils.process_class_id cid;
       let env, te2, _class = instantiable_cid p env cid in
       make_result env (T.InstanceOf (te, te2)) (Reason.Rwitness p, Tprim Tbool)
   | Is (e, hint) ->
@@ -2339,7 +2335,6 @@ and expr_
         (Reason.Rwitness p, Tshape (FieldsFullyKnown, fdm))
 
 and class_const ?(incl_tc=false) env p (((), cid), mid) =
-  TUtils.process_static_find_ref cid mid;
   let env, ce, cty = static_class_id p env cid in
   let env, const_ty, cc_abstract_info =
     class_get ~is_method:false ~is_const:true ~incl_tc env cty mid cid in
@@ -3806,7 +3801,6 @@ and is_abstract_ft fty = match fty with
       end
   (* Call class method *)
   | Class_const(((), e1), m) ->
-      TUtils.process_static_find_ref e1 m;
       let env, te1, ty1 = static_class_id p env e1 in
       let env, fty, _ =
         class_get ~is_method:true ~is_const:false ~explicit_tparams:hl

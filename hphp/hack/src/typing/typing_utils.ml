@@ -290,17 +290,6 @@ let simplified_uerror env ty1 ty2 =
   else
     uerror (fst ty1) (snd ty1) (fst ty2) (snd ty2)
 
-let process_class_id = function
-  | Nast.CI (c, _) ->
-    Decl_hooks.dispatch_class_id_hook c None;
-  | _ -> ()
-
-let process_static_find_ref cid mid =
-  match cid with
-  | Nast.CI (c, _) ->
-    Decl_hooks.dispatch_class_id_hook c (Some mid);
-  | _ -> ()
-
 (* Find the first defined position in a list of types *)
 let rec find_pos p_default tyl =
   match tyl with

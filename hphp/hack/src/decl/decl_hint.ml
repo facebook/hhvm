@@ -97,7 +97,6 @@ and hint_ p env = function
     Errors.tuple_syntax p;
     Terr
   | Happly (((_p, c) as id), argl) ->
-    Decl_hooks.dispatch_class_id_hook id None;
     Decl_env.add_wclass env c;
     let argl = List.map argl (hint env) in
     Tapply (id, argl)

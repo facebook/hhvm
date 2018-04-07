@@ -2643,7 +2643,18 @@ and transform_argish env
     [transform_arg_list env ~allow_trailing arg_list]
 
 and transform_braced_item env left_p item right_p =
-  delimited_nest env left_p right_p [t env item]
+  let has_no_surrounding_trivia =
+    List.is_empty (Syntax.trailing_trivia left_p) &&
+    List.is_empty (Syntax.leading_trivia item) &&
+    List.is_empty (Syntax.trailing_trivia item) &&
+    List.is_empty (Syntax.leading_trivia right_p)
+  in
+  match Syntax.syntax item with
+  | Syntax.LiteralExpression _
+  | Syntax.VariableExpression _ when has_no_surrounding_trivia ->
+    Concat (List.map [left_p; item; right_p] (t env))
+  | _ ->
+    delimited_nest env left_p right_p [t env item]
 
 and transform_argish_item env x =
   match Syntax.syntax x with

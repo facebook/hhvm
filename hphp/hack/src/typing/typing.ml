@@ -2023,7 +2023,7 @@ and expr_
   | New (((), c), el, uel) ->
       Typing_hooks.dispatch_new_id_hook c env p;
       TUtils.process_static_find_ref c (p, SN.Members.__construct);
-      let env, tc, tel, tuel, ty =
+      let env, tc, tel, tuel, ty, _ =
         new_object ~expected ~is_using_clause ~check_parent:false ~check_not_abstract:true
           p env c el uel in
       let env = Env.forget_members env p in
@@ -2706,11 +2706,11 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
   (* Obtain class info from the cid expression. We get multiple
    * results with a CIexpr that has a union type *)
   let env, tcid, classes = instantiable_cid p env cid in
-  let finish env tcid tel tuel ty =
+  let finish env tcid tel tuel ty ctor_fty =
     let env, new_ty =
       if check_parent then env, ty
       else ExprDepTy.make env cid ty in
-    env, tcid, tel, tuel, new_ty in
+    env, tcid, tel, tuel, new_ty, ctor_fty in
   let rec gather env tel tuel res classes =
     match classes with
     | [] ->
@@ -2718,9 +2718,13 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
         match res with
         | [] ->
           let _ = exprs env el in
-          finish env tcid tel tuel (Reason.Runknown_class p, Tobject)
-        | [ty] -> finish env tcid tel tuel ty
-        | tyl -> finish env tcid tel tuel (Reason.Rwitness p, Tunresolved tyl)
+          let r = Reason.Runknown_class p in
+          finish env tcid tel tuel (r, Tobject) (r, TUtils.terr env)
+        | [ty,ctor_fty] -> finish env tcid tel tuel ty ctor_fty
+        | l ->
+          let tyl, ctyl = List.unzip l in
+          let r = Reason.Rwitness p in
+          finish env tcid tel tuel (r, Tunresolved tyl) (r, Tunresolved ctyl)
       end
 
     | (cname, class_info, c_ty)::classes ->
@@ -2747,7 +2751,7 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
         if check_parent
         then env, c_ty
         else ExprDepTy.make env cid c_ty in
-      let env, _tcid, tel, tuel =
+      let env, _tcid, tel, tuel, ctor_fty =
         let env = check_expected_ty "New" env new_ty expected in
         call_construct p env class_info params el uel cid in
       if not (snd class_info.tc_construct) then
@@ -2757,7 +2761,8 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
           | _ -> ());
       match cid with
         | CIparent ->
-          (match (fst class_info.tc_construct) with
+          let ctor_fty =
+            match (fst class_info.tc_construct) with
             | Some {ce_type = lazy ty; _ } ->
               let ety_env = {
                 type_expansions = [];
@@ -2765,11 +2770,12 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
                 this_ty = obj_ty;
                 from_class = None;
               } in
-              let _, ce_type = Phase.localize ~ety_env env ty in
-              ignore (check_abstract_parent_meth SN.Members.__construct p ce_type)
-            | None -> ());
-          gather env tel tuel (obj_ty::res) classes
-        | CIstatic | CI _ | CIself -> gather env tel tuel (c_ty::res) classes
+              let _, ctor_fty = Phase.localize ~ety_env env ty in
+              check_abstract_parent_meth SN.Members.__construct p ctor_fty
+            | None -> ctor_fty
+          in
+          gather env tel tuel ((obj_ty,ctor_fty)::res) classes
+        | CIstatic | CI _ | CIself -> gather env tel tuel ((c_ty,ctor_fty)::res) classes
         | CIexpr _ ->
           (* When constructing from a (classname) variable, the variable
            * dictates what the constructed object is going to be. This allows
@@ -2777,7 +2783,7 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
            * through the 'new $foo()' iff the constructed obj_ty is a
            * supertype of the variable-dictated c_ty *)
           let env = SubType.sub_type env c_ty obj_ty in
-          gather env tel tuel (c_ty::res) classes
+          gather env tel tuel ((c_ty,ctor_fty)::res) classes
   in
   gather env [] [] [] classes
 
@@ -3167,12 +3173,12 @@ and aktuple_field env = function
 and check_parent_construct pos env el uel env_parent =
   let check_not_abstract = false in
   let env, env_parent = Phase.localize_with_self env env_parent in
-  let env, _tcid, tel, tuel, parent =
+  let env, _tcid, tel, tuel, parent, fty =
     new_object ~expected:None ~check_parent:true ~check_not_abstract
       ~is_using_clause:false
       pos env CIparent el uel in
-  let env, _ = Type.unify pos (Reason.URnone) env env_parent parent in
-  env, tel, tuel, (Reason.Rwitness pos, Tprim Tvoid)
+  let env, parent = Type.unify pos (Reason.URnone) env env_parent parent in
+  env, tel, tuel, (Reason.Rwitness pos, Tprim Tvoid), parent, fty
 
 and call_parent_construct pos env el uel =
   let parent = Env.get_parent env in
@@ -3199,7 +3205,8 @@ and call_parent_construct pos env el uel =
         | Taccess (_, _)
         | Tthis
       ) -> (* continue here *)
-      let default = env, [], [], (Reason.Rwitness pos, Typing_utils.tany env) in
+      let ty = (Reason.Rwitness pos, Typing_utils.tany env) in
+      let default = env, [], [], ty, ty, ty in
       match Env.get_self env with
         | _, Tclass ((_, self), _) ->
           (match Env.get_class env self with
@@ -3221,7 +3228,8 @@ and call_parent_construct pos env el uel =
               | Tabstract (_, _) | Tanon (_, _) | Tunresolved _ | Tobject
              ) ->
            Errors.parent_outside_class pos;
-           env, [], [], (Reason.Rwitness pos, Typing_utils.terr env)
+           let ty = (Reason.Rwitness pos, Typing_utils.terr env) in
+           env, [], [], ty, ty, ty
 
 (* parent::method() in a class definition invokes the specific parent
  * version of the method ... it better be callable *)
@@ -3741,9 +3749,10 @@ and is_abstract_ft fty = match fty with
     when construct = SN.Members.__construct ->
       check_class_function_in_suspend "parent" SN.Members.__construct;
       Typing_hooks.dispatch_parent_construct_hook env callee_pos;
-      let env, tel, tuel, ty = call_parent_construct p env el uel in
-      make_call env (T.make_implicitly_typed_expr fpos
-        (T.Class_const ((Some ty, T.CIparent), id))) hl tel tuel ty
+      let env, tel, tuel, ty, pty, ctor_fty =
+        call_parent_construct p env el uel in
+      make_call env (T.make_typed_expr fpos ctor_fty
+        (T.Class_const ((Some pty, T.CIparent), id))) hl tel tuel ty
 
   (* Calling parent method *)
   | Class_const (((), CIparent), m) ->
@@ -4820,7 +4829,7 @@ and call_construct p env class_ params el uel cid =
     from_class = Some cid;
   } in
   let env = Phase.check_tparams_constraints ~use_pos:p ~ety_env env class_.tc_tparams in
-  if class_.tc_is_xhp then env, tcid, [], [] else
+  if class_.tc_is_xhp then env, tcid, [], [], (Reason.Rnone, TUtils.tany env) else
   let cstr = Env.get_construct env class_ in
   let mode = Env.get_mode env in
   Typing_hooks.dispatch_constructor_hook class_ params env p;
@@ -4831,12 +4840,12 @@ and call_construct p env class_ params el uel cid =
         class_.tc_members_fully_known
       then Errors.constructor_no_args p;
       let env, tel, _tyl = exprs env el in
-      env, tcid, tel, []
+      env, tcid, tel, [], (Reason.Rnone, TUtils.terr env)
     | Some { ce_visibility = vis; ce_type = lazy m; _ } ->
       TVis.check_obj_access p env (Reason.to_pos (fst m), vis);
       let env, m = Phase.localize ~ety_env env m in
       let env, tel, tuel, _ty = call ~expected:None p env m el uel in
-      env, tcid, tel, tuel
+      env, tcid, tel, tuel, m
 
 and check_arity ?(check_min=true) ?(did_unpack=false) pos pos_def (arity:int) exp_arity =
   let exp_min = (Typing_defs.arity_min exp_arity) in

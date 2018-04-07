@@ -44,7 +44,7 @@ let check_implements check_new_object attr_interface
           attr_pos attr_name attr_class.tc_pos attr_class.tc_name intf_class.tc_name;
         env end
       else
-        let env, _, _, _, _ = check_new_object
+        let env, _, _, _, _, _ = check_new_object
           ~expected:None
           ~check_parent:false
           ~check_not_abstract:false

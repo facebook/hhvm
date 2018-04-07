@@ -3750,7 +3750,7 @@ and is_abstract_ft fty = match fty with
 
   (* Calling parent method *)
   | Class_const (((), CIparent), m) ->
-      let env, _te, ty1 = static_class_id p env CIparent in
+      let env, tcid, ty1 = static_class_id p env CIparent in
       if Env.is_static env
       then begin
         (* in static context, you can only call parent::foo() on static
@@ -3761,7 +3761,7 @@ and is_abstract_ft fty = match fty with
         check_coroutine_call env fty;
         let env, tel, tuel, ty = call ~expected ~receiver_type:ty1 p env fty el uel in
         make_call env (T.make_typed_expr fpos fty
-          (T.Class_const ((Some ty1, T.CIparent), m))) hl tel tuel ty
+          (T.Class_const (tcid, m))) hl tel tuel ty
       end
       else begin
         (* in instance context, you can call parent:foo() on static
@@ -3788,7 +3788,7 @@ and is_abstract_ft fty = match fty with
               k_lhs
             in
             make_call env (T.make_typed_expr fpos this_ty
-              (T.Class_const ((Some ty1, T.CIparent), m))) hl [] [] method_
+              (T.Class_const (tcid, m))) hl [] [] method_
         else
             let env, fty, _ =
               class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
@@ -3796,7 +3796,7 @@ and is_abstract_ft fty = match fty with
             check_coroutine_call env fty;
             let env, tel, tuel, ty = call ~expected ~receiver_type:ty1 p env fty el uel in
             make_call env (T.make_typed_expr fpos fty
-              (T.Class_const ((Some ty1, T.CIparent), m))) hl tel tuel ty
+              (T.Class_const (tcid, m))) hl tel tuel ty
       end
   (* Call class method *)
   | Class_const(((), e1), m) ->

@@ -12,15 +12,10 @@ open Hh_core
 
 let (hint_hooks: (Pos.t * string -> unit) list ref) = ref []
 
-let (class_named_hooks: (Nast.class_ -> unit) list ref) = ref []
-
 let (fun_named_hooks: (Nast.fun_ -> unit) list ref) = ref []
 
 let attach_hint_hook hook =
   hint_hooks := hook :: !hint_hooks
-
-let attach_class_named_hook hook =
-  class_named_hooks := hook :: !class_named_hooks
 
 let attach_fun_named_hook hook =
   fun_named_hooks := hook :: !fun_named_hooks
@@ -28,13 +23,9 @@ let attach_fun_named_hook hook =
 let dispatch_hint_hook id =
   List.iter !hint_hooks begin fun hook -> hook id end
 
-let dispatch_class_named_hook class_ =
-  List.iter !class_named_hooks begin fun hook -> hook class_ end
-
 let dispatch_fun_named_hook fun_ =
   List.iter !fun_named_hooks begin fun hook -> hook fun_ end
 
 let remove_all_hooks () =
   hint_hooks := [];
-  class_named_hooks := [];
   fun_named_hooks := [];

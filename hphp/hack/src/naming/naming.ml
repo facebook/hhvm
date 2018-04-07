@@ -1193,7 +1193,6 @@ module Make (GetLocals : GetLocals) = struct
         N.c_enum           = enum
       }
     in
-    Naming_hooks.dispatch_class_named_hook named_class;
     named_class
 
   and user_attributes env attrl =

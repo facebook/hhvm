@@ -70,14 +70,14 @@ forAllStates(
 
 foo(
   $predicate_with_a_very_long_identifier &&
-  $other_predicate_with_a_long_identifier,
+    $other_predicate_with_a_long_identifier,
 );
 foo(
   $nullable_value_with_a_long_identifier ?? $some_result_with_a_very_long_name,
 );
 foo(
   $nullable_value_with_a_long_identifier ??
-  $some_result_with_a_very_long_identifier,
+    $some_result_with_a_very_long_identifier,
 );
 foo(
   $predicate_with_a_very_long_identifier

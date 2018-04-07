@@ -2335,7 +2335,8 @@ and handle_declarator_list env declarators =
 and handle_list env
     ?(before_each=(fun () -> Nothing))
     ?(after_each=(fun _is_last -> Nothing))
-    ?(handle_last=t env)
+    ?(handle_element=t env)
+    ?(handle_last=handle_element)
     list =
   let rec aux l = (
     match l with
@@ -2363,15 +2364,16 @@ and list_length node =
   | _ -> 1
 
 and handle_possible_list env
-    ?(before_each=(fun () -> Nothing))
-    ?(after_each=(fun _is_last -> Nothing))
-    ?(handle_last=t env)
+    ?before_each
+    ?after_each
+    ?handle_element
+    ?handle_last
     node =
   match Syntax.syntax node with
   | Syntax.Missing -> Nothing
   | Syntax.SyntaxList x ->
-    handle_list env x ~before_each ~after_each ~handle_last
-  | _ -> handle_list env [node] ~before_each ~after_each ~handle_last
+    handle_list env x ?before_each ?after_each ?handle_element ?handle_last
+  | _ -> handle_list env [node] ?before_each ?after_each ?handle_element ?handle_last
 
 and handle_xhp_open_right_angle_token env attrs node =
   match Syntax.syntax node with
@@ -2643,6 +2645,15 @@ and transform_argish env
 and transform_braced_item env left_p item right_p =
   delimited_nest env left_p right_p [t env item]
 
+and transform_argish_item env x =
+  match Syntax.syntax x with
+  | Syntax.BinaryExpression {
+      binary_left_operand  = left;
+      binary_operator      = op;
+      binary_right_operand = right; } ->
+    transform_binary_expression env ~is_nested:true (left, op, right)
+  | _ -> t env x
+
 and transform_trailing_comma env ~allow_trailing item comma =
   (* PHP does not permit trailing commas in function calls. Rather than try to
    * account for where PHP's parser permits trailing commas, we just never add
@@ -2651,7 +2662,7 @@ and transform_trailing_comma env ~allow_trailing item comma =
   match Syntax.syntax comma with
   | Syntax.Token tok ->
     Concat [
-      t env item;
+      transform_argish_item env item;
       transform_leading_trivia (Token.leading tok);
       if allow_trailing then TrailingComma true else Nothing;
       Ignore (Token.text tok, Token.width tok);
@@ -2660,7 +2671,7 @@ and transform_trailing_comma env ~allow_trailing item comma =
   | Syntax.Missing ->
     let item, item_trailing = remove_trailing_trivia item in
     Concat [
-      t env item;
+      transform_argish_item env item;
       if allow_trailing then TrailingComma false else Nothing;
       transform_trailing_trivia item_trailing;
     ]
@@ -2676,6 +2687,7 @@ and transform_arg_list env ?(allow_trailing=true) items =
   handle_possible_list env items
     ~after_each:after_each_argument
     ~handle_last:(transform_last_arg env ~allow_trailing)
+    ~handle_element:(transform_argish_item env)
 
 and transform_possible_comma_list env ?(allow_trailing=true) ?(spaces=false)
     items right_p =

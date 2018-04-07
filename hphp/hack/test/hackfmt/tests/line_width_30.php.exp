@@ -34,7 +34,7 @@ class Point {
   ) {
     return sqrt(
       $this->x ** 2 +
-      $this->y ** 2,
+        $this->y ** 2,
     );
   }
 

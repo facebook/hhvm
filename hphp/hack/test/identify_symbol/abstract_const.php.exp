@@ -1,4 +1,5 @@
-name: \C::FOO, kind: member_const, span: line 4, characters 25-27, definition: 
+name: \C::FOO, kind: member_const, span: line 4, characters 25-27, is_declaration: true
+definition:
  FOO
    kind: const
    id: class_const::C::FOO

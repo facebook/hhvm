@@ -1,4 +1,5 @@
-name: \C::foo, kind: property, span: line 4, characters 15-18, definition: 
+name: \C::foo, kind: property, span: line 4, characters 15-18, is_declaration: true
+definition:
  foo
    kind: property
    id: property::C::foo

@@ -1,4 +1,5 @@
-name: \C::FOO, kind: typeconst, span: line 4, characters 14-16, definition: 
+name: \C::FOO, kind: typeconst, span: line 4, characters 14-16, is_declaration: true
+definition:
  FOO
    kind: typeconst
    id: class_const::C::FOO

@@ -1,4 +1,5 @@
-name: \C1::foo, kind: method, span: line 17, characters 7-9, definition: 
+name: \C1::foo, kind: method, span: line 17, characters 7-9, is_declaration: false
+definition:
  foo
    kind: method
    id: method::C1::foo
@@ -8,7 +9,8 @@ name: \C1::foo, kind: method, span: line 17, characters 7-9, definition:
    params:
 
 
-name: \C2::foo, kind: method, span: line 17, characters 7-9, definition: 
+name: \C2::foo, kind: method, span: line 17, characters 7-9, is_declaration: false
+definition:
  foo
    kind: method
    id: method::C2::foo

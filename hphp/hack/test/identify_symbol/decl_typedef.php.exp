@@ -1,1 +1,10 @@
-None
+name: \Foo, kind: type_id, span: line 3, characters 6-8, is_declaration: true
+definition:
+ Foo
+   kind: typedef
+   id: type_id::Foo
+   position: line 3, characters 6-8
+   span: line 3, character 6 - line 3, character 14
+   modifiers: 
+
+

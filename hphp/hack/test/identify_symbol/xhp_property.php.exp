@@ -1,4 +1,5 @@
-name: \C:::xhp_string, kind: property, span: line 8, characters 12-22, definition: 
+name: \C:::xhp_string, kind: property, span: line 8, characters 12-22, is_declaration: false
+definition:
  :xhp_string
    kind: property
    id: property::C:::xhp_string

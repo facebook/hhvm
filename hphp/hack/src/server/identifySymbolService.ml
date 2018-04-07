@@ -49,16 +49,17 @@ let is_target target_line target_char { pos; _ } =
   (Pos.filename pos = ServerIdeUtils.path) &&
   l = target_line && start <= target_char && target_char - 1 <= end_
 
-let process_class_id cid =
+let process_class_id ?(is_declaration=false) cid =
   Result_set.singleton {
     name  = snd cid;
     type_ = Class;
+    is_declaration;
     pos   = fst cid
   }
 
 let clean_member_name name = String_utils.lstrip name "$"
 
-let process_member c_name id ~is_method ~is_const =
+let process_member ?(is_declaration=false) c_name id ~is_method ~is_const =
   let member_name = (snd id) in
   let type_ =
     if is_const then ClassConst (c_name, member_name)
@@ -68,6 +69,7 @@ let process_member c_name id ~is_method ~is_const =
   Result_set.singleton {
     name = (c_name ^ "::" ^ (clean_member_name member_name));
     type_;
+    is_declaration;
     pos = fst id
   }
 
@@ -83,55 +85,62 @@ let process_property c_name mid =
 let process_constructor c_name pos =
   process_method c_name (pos, SN.Members.__construct)
 
-let process_fun_id id =
+let process_fun_id ?(is_declaration=false) id =
   Result_set.singleton {
     name  = snd id;
     type_ = Function;
+    is_declaration;
     pos   = fst id
   }
 
-let process_global_const id =
+let process_global_const ?(is_declaration=false) id =
   Result_set.singleton {
     name  = snd id;
     type_ = GConst;
+    is_declaration;
     pos   = fst id
   }
 
-let process_lvar_id id =
+let process_lvar_id ?(is_declaration=false) id =
   Result_set.singleton {
     name  = snd id;
     type_ = LocalVar;
+    is_declaration;
     pos   = fst id
   }
 
-let process_typeconst (class_name, tconst_name, pos) =
+let process_typeconst ?(is_declaration=false) (class_name, tconst_name, pos) =
   Result_set.singleton {
     name = class_name ^ "::" ^ tconst_name;
     type_ = Typeconst (class_name, tconst_name);
+    is_declaration;
     pos;
   }
 
 let process_class class_ =
-  let acc = process_class_id class_.Tast.c_name in
+  let acc = process_class_id ~is_declaration:true class_.Tast.c_name in
   let c_name = snd class_.Tast.c_name in
   let all_methods = class_.Tast.c_methods @ class_.Tast.c_static_methods in
   let acc = List.fold all_methods ~init:acc ~f:begin fun acc method_ ->
     Result_set.union acc @@
-      process_member c_name method_.Tast.m_name ~is_method:true ~is_const:false
+      process_member c_name method_.Tast.m_name
+        ~is_declaration:true ~is_method:true ~is_const:false
   end in
   let all_props = class_.Tast.c_vars @ class_.Tast.c_static_vars in
   let acc = List.fold all_props ~init:acc ~f:begin fun acc prop ->
     Result_set.union acc @@
-      process_member c_name prop.Tast.cv_id ~is_method:false ~is_const:false
+      process_member c_name prop.Tast.cv_id
+        ~is_declaration:true ~is_method:false ~is_const:false
   end in
   let acc = List.fold class_.Tast.c_consts ~init:acc ~f:begin fun acc (_, const_id, _) ->
     Result_set.union acc @@
-      process_member c_name const_id ~is_method:false ~is_const:true
+      process_member c_name const_id
+        ~is_declaration:true ~is_method:false ~is_const:true
   end in
   let acc = List.fold class_.Tast.c_typeconsts ~init:acc ~f:begin fun acc typeconst ->
     let pos, tconst_name = typeconst.Tast.c_tconst_name in
     Result_set.union acc @@
-      process_typeconst (c_name, tconst_name, pos)
+      process_typeconst ~is_declaration:true (c_name, tconst_name, pos)
   end in
   (* We don't check anything about xhp attributes, so the hooks won't fire when
      typechecking the class. Need to look at them individually. *)
@@ -146,7 +155,8 @@ let process_class class_ =
     | Some method_ ->
       let id = fst method_.Tast.m_name, SN.Members.__construct in
       Result_set.union acc @@
-        process_member c_name id ~is_method:true ~is_const:false
+        process_member c_name id
+          ~is_declaration:true ~is_method:true ~is_const:false
     | None -> acc
 
 let typed_member_id env receiver_ty mid ~is_method ~is_const =
@@ -279,11 +289,15 @@ class ['self] visitor = object (self : 'self)
     self#plus acc (super#on_class_ env class_)
 
   method! on_fun_ env fun_ =
-    let acc = process_fun_id fun_.Tast.f_name in
+    let acc = process_fun_id ~is_declaration:true fun_.Tast.f_name in
     self#plus acc (super#on_fun_ env fun_)
 
+  method! on_typedef env typedef =
+    let acc = process_class_id ~is_declaration:true typedef.Tast.t_name in
+    self#plus acc (super#on_typedef env typedef)
+
   method! on_gconst env cst =
-    let acc = process_global_const cst.Tast.cst_name in
+    let acc = process_global_const ~is_declaration:true cst.Tast.cst_name in
     self#plus acc (super#on_gconst env cst)
 
   method! on_Id env id =

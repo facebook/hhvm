@@ -1,4 +1,4 @@
-name: \foo, kind: function, span: line 6, characters 3-5, is_declaration: false
+name: \foo, kind: function, span: line 3, characters 10-12, is_declaration: true
 definition:
  foo
    kind: function

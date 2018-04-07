@@ -64,6 +64,12 @@ struct ThreadInfo {
   static THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
   /*
+   * Actively kill inflight requests when memory is tight.  Some or all ongoing
+   * request will terminate with fatal error.
+   */
+  static void InvokeOOMKiller();
+
+  /*
    * This is the amount of "slack" in stack usage checks - if the stack pointer
    * gets within this distance from the end (minus overhead), throw an infinite
    * recursion exception.

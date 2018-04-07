@@ -91,6 +91,19 @@ struct FileOpenException : Exception {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+struct HostOutOfMemoryException : Exception {
+  explicit HostOutOfMemoryException(size_t usedBytes)
+    : m_bytes(usedBytes) {
+  }
+
+  EXCEPTION_COMMON_IMPL(HostOutOfMemoryException);
+
+  size_t m_bytes;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // incl_HPHP_EXCEPTION_H_

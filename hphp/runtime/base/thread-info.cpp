@@ -24,6 +24,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/perf-event.h"
+#include "hphp/util/service-data.h"
 
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -114,6 +115,19 @@ int ThreadInfo::SetPendingGCForAllOnRequestThread() {
     }
   } );
   return cnt;
+}
+
+void ThreadInfo::InvokeOOMKiller() {
+  ExecutePerThread(
+    [] (ThreadInfo* t) {
+      t->m_reqInjectionData.setHostOOMFlag();
+    }
+  );
+  Logger::Error("Invoking request-level OOM killer");
+  static auto OOMKillerInvokeCounter = ServiceData::createTimeSeries(
+    "hhvm_oom_killer_invoke", {ServiceData::StatsType::COUNT}
+  );
+  OOMKillerInvokeCounter->addValue(1);
 }
 
 void ThreadInfo::onSessionInit() {
@@ -268,7 +282,30 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   if (flags & MemExceededFlag) {
     if (pendingException) {
       setSurpriseFlag(MemExceededFlag);
+    } else if (p.hostOOMFlag()) {
+      // When the host is running out of memory, don't abort all requests.
+      // Instead, only kill a request if it uses a nontrivial amount of memory.
+      auto const currUsage = tl_heap->currentUsage();
+      // Once a request has the OOM abort flag set, it is never unset through
+      // the lifetime of the request.
+      // TODO(#T25950158): add flags to indicate whether a request is safe to
+      // retry, etc. to help the OOM killer to make better decisions.
+      if (currUsage > RuntimeOption::RequestMemoryOOMKillBytes) {
+        p.setRequestOOMAbort();
+      }
+      if (p.shouldOOMAbort()) {
+        pendingException =
+          new HostOutOfMemoryException(static_cast<size_t>(currUsage));
+        // In case this exception doesn't stop other pieces of code from
+        // running, keep aborting them until all are dead.
+        p.setHostOOMFlag();
+      } else {
+        // Let this request survive. If the OOM killer comes back again, we will
+        // check again then.
+        p.clearHostOOMFlag();
+      }
     } else {
+      // Request exceeded memory limit, but the host is fine.
       pendingException = generate_memory_exceeded_exception(wh);
     }
   }

@@ -152,6 +152,30 @@ struct RequestInjectionData {
   void setFlag(SurpriseFlag);
 
   /*
+   * Flags for rquest-level OOM killer.  The `m_hostOutOfMemory` flag is set on
+   * all requests when host is low in memory, which triggers a memory check upon
+   * checking surprise flags.  The `m_OOMAbort` is set when we decide to kill
+   * the request.
+   */
+  void setHostOOMFlag() {
+    m_hostOutOfMemory.store(true, std::memory_order_release);
+    setFlag(MemExceededFlag);
+  }
+  void clearHostOOMFlag() {
+    clearFlag(MemExceededFlag);
+    m_hostOutOfMemory.store(false, std::memory_order_relaxed);
+  }
+  bool hostOOMFlag() const {
+    return m_hostOutOfMemory.load(std::memory_order_acquire);
+  }
+  void setRequestOOMAbort() {
+    m_OOMAbort = true;
+  }
+  bool shouldOOMAbort() const {
+    return m_OOMAbort;
+  }
+
+  /*
    * Whether the JIT is enabled.
    */
   bool getJit() const;
@@ -326,6 +350,17 @@ private:
   bool m_htmlErrors{false};
   bool m_safeFileAccess{false};
   bool m_logFunctionCalls{false};
+
+  /*
+   * `m_hostOutOfMemory` is a flag used together with MemExceededFlag, to
+   * indicate whether the host is running low on memory.  Note that the presence
+   * of this flag doesn't necessarily lead to the request being aborted.  A
+   * request is only affected when it satisfies some other criteria, e.g., when
+   * it uses more memory than RequestMemoryOOMKillBytes.  If we do decide to
+   * abort the request, `m_OOMAbort` is set.
+   */
+  std::atomic<bool> m_hostOutOfMemory{false};
+  bool m_OOMAbort{false};
 
   /* Pointer to surprise flags stored in RDS. */
   std::atomic<size_t>* m_sflagsAndStkPtr{nullptr};

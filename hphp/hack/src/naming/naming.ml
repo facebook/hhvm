@@ -1800,7 +1800,6 @@ module Make (GetLocals : GetLocals) = struct
       f_user_attributes = user_attributes env f.f_user_attributes;
       f_ret_by_ref = f.f_ret_by_ref;
     } in
-    Naming_hooks.dispatch_fun_named_hook named_fun;
     named_fun
 
   and cut_and_flatten ?(replacement=Noop) env = function

@@ -17,26 +17,34 @@ open Hh_core
  * marshalling and unmarshalling the same FileInfo many times over. There are
  * probably ways we could avoid this, but it doesn't seem to be a major problem.
  *)
-type pos = Relative_path.t * int * int
+type pos = Relative_path.t * int * int * (int * int) option
 type pos_info = pos * FileInfo.t
 
 let recheck_typing tcopt (pos_infos : pos_info list) =
   let files_to_check =
     pos_infos
-    |> List.map ~f:(fun ((filename,_,_), file_info) -> filename, file_info)
+    |> List.map ~f:(fun ((filename,_,_,_), file_info) -> filename, file_info)
     |> List.remove_consecutive_duplicates ~equal:(fun (a,_) (b,_) -> a = b)
   in
   let tcopt = TypecheckerOptions.make_permissive tcopt in
   ServerIdeUtils.recheck tcopt files_to_check
 
-let result_to_string result (fn, line, char) =
+let result_to_string result (fn, line, char, range_end) =
   let open Hh_json in
   let obj = JSON_Object [
-    "position", JSON_Object [
-      "file", JSON_String (Relative_path.to_absolute fn);
-      "line", int_ line;
-      "character", int_ char;
-    ];
+    "position", JSON_Object (
+      ["file", JSON_String (Relative_path.to_absolute fn)] @
+      begin
+        match range_end with
+        | None -> ["line", int_ line; "character", int_ char]
+        | Some (end_line, end_char) ->
+          let pos l c = JSON_Object ["line", int_ l; "character", int_ c] in
+          [
+            "start", pos line char;
+            "end", pos end_line end_char;
+          ]
+      end
+    );
     match result with
     | Ok ty -> "type", Option.value ty ~default:JSON_Null
     | Error e -> "error", JSON_String e
@@ -50,13 +58,19 @@ let helper tcopt acc pos_infos =
       ~f:(fun map (key, data) -> Relative_path.Map.add map ~key ~data)
   in
   List.fold pos_infos ~init:acc ~f:begin fun acc (pos, _) ->
-    let fn, line, char = pos in
+    let fn, line, char, range_end = pos in
     let result =
       Relative_path.Map.get tasts fn
       |> Core_result.of_option ~error:"No such file or directory"
       |> Core_result.map ~f:begin fun tast ->
-        ServerInferType.returned_type_at_pos tast line char
-        |> Option.map ~f:(fun (env, ty) -> Typing_print.to_json env ty)
+        let env_and_ty =
+          match range_end with
+          | None ->
+            ServerInferType.returned_type_at_pos tast line char
+          | Some (end_line, end_char) ->
+            ServerInferType.type_at_range tast line char end_line end_char
+        in
+        Option.map env_and_ty ~f:(fun (env, ty) -> Typing_print.to_json env ty)
       end
     in
     result_to_string result pos :: acc
@@ -73,7 +87,7 @@ let parallel_helper workers tcopt pos_infos =
 (* Entry Point *)
 let go:
   MultiWorker.worker list option ->
-  (string * int * int) list ->
+  (string * int * int * (int * int) option) list ->
   ServerEnv.env ->
   string list =
 fun workers pos_list env ->
@@ -84,11 +98,11 @@ fun workers pos_list env ->
      * dispatched to the same worker. *)
     |> List.sort ~cmp:compare
     (* Dedup identical queries *)
-    |> List.remove_consecutive_duplicates ~equal:(fun a b -> compare a b = 0)
+    |> List.remove_consecutive_duplicates ~equal:(=)
     (* Get the FileInfo for each query *)
-    |> List.map ~f:begin fun (fn, line, char) ->
+    |> List.map ~f:begin fun (fn, line, char, range_end) ->
       let fn = Relative_path.(create Root fn) in
-      let pos = (fn, line, char) in
+      let pos = (fn, line, char, range_end) in
       match Relative_path.Map.get files_info fn with
       | Some fileinfo -> Ok (pos, fileinfo)
       | None -> Error pos

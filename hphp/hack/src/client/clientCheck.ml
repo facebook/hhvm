@@ -250,7 +250,14 @@ let main args =
         try
           match Str.split (Str.regexp ":") pos with
           | [filename; line; char] ->
-              expand_path filename, int_of_string line, int_of_string char
+              expand_path filename, int_of_string line, int_of_string char, None
+          | [filename; start_line; start_char; end_line; end_char] ->
+              let filename = expand_path filename in
+              let start_line = int_of_string start_line in
+              let start_char = int_of_string start_char in
+              let end_line = int_of_string end_line in
+              let end_char = int_of_string end_char in
+              (filename, start_line, start_char, Some (end_line, end_char))
           | _ -> raise Exit
         with _ ->
           Printf.eprintf "Invalid position\n";

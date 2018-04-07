@@ -133,6 +133,21 @@ class ['self] function_following_visitor line char = object (self : 'self)
     else super#on_Call env ct e hl el uel
 end
 
+(** Return the type of the node associated with exactly the given range.
+
+    When more than one node has the given range, return the type of the first
+    node visited in a preorder traversal.
+*)
+class ['self] range_visitor startl startc endl endc = object (_ : 'self)
+  inherit [_] Tast_visitor.reduce
+  inherit [_] Ast.option_monoid
+  method merge x _ = x
+  method! on_expr_annotation env (pos, ty) =
+    if Pos.exactly_matches_range pos startl startc endl endc
+    then ty >>| fun ty -> env, ty
+    else None
+end
+
 let type_at_pos
   (tast : Tast.program)
   (line : int)
@@ -148,6 +163,15 @@ let returned_type_at_pos
 : (Typing_env.env * Tast.ty) option =
   (new function_following_visitor line char)#go tast
   >>| (fun (_, env, ty) -> (env, ty))
+
+let type_at_range
+  (tast : Tast.program)
+  (start_line : int)
+  (start_char : int)
+  (end_line : int)
+  (end_char : int)
+: (Typing_env.env * Tast.ty) option =
+  (new range_visitor start_line start_char end_line end_char)#go tast
 
 let go:
   ServerEnv.env ->

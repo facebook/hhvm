@@ -17,11 +17,9 @@ open Hh_core
  * content ASTs and defs will still be available in shared memory for the
  * subsequent operation. *)
 let get_occurrence_and_map tcopt content line char ~f =
-  let result = ref [] in
-  IdentifySymbolService.attach_hooks result line char;
-  ServerIdeUtils.declare_and_check content ~f:begin fun path file_info _ ->
-    IdentifySymbolService.detach_hooks ();
-    f path file_info !result
+  ServerIdeUtils.declare_and_check content ~f:begin fun path file_info tast ->
+    let result = IdentifySymbolService.go tast line char in
+    f path file_info result
   end tcopt
 
 (** NOTE: the paths of any positions within any returned `SymbolOccurrence` or

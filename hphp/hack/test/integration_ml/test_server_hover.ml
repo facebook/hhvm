@@ -502,7 +502,7 @@ function idx(
                     return the provided default value instead, or `null` if no default value was\n\
                     provided. If the key is `null`, the default value will be returned even if\n\
                     `null` is a valid key in the container.\n"];
-      pos = pos_at (3, 3) (3, 24);
+      pos = pos_at (3, 3) (3, 5);
     }
   ]
 ]

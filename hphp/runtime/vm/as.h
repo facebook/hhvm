@@ -66,6 +66,11 @@ enum class AsmResult {
   Unreachable
 };
 
+struct AssemblerError : std::runtime_error {
+  explicit AssemblerError(const std::string& msg) : std::runtime_error(msg) {}
+  AssemblerError(int where, const std::string& what);
+};
+
 AsmResult assemble_expression(UnitEmitter&, FuncEmitter*, int,
                               const std::string&);
 

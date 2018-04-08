@@ -528,7 +528,7 @@ RepoStatus Repo::insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
 }
 
 void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {
-  if (!RuntimeOption::RepoCommit) return;
+  if (!RuntimeOption::RepoCommit || ue->m_ICE) return;
 
   try {
     commitMd5(unitOrigin, ue);

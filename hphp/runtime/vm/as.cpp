@@ -107,19 +107,17 @@ TRACE_SET_MOD(hhas);
 
 namespace HPHP {
 
+AssemblerError::AssemblerError(int where, const std::string& what)
+  : std::runtime_error(
+      folly::sformat("Assembler Error: line {}: {}", where, what))
+{}
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {
 
 struct AsmState;
 typedef void (*ParserFunc)(AsmState& as);
-
-struct Error : std::runtime_error {
-  explicit Error(int where, const std::string& what)
-    : std::runtime_error(folly::sformat(
-        "Assembler Error: line {}: {}", where, what))
-  {}
-};
 
 struct Input {
   explicit Input(std::istream& in)
@@ -158,7 +156,7 @@ struct Input {
     const int currentLine = m_lineNumber;
     skipWhitespace();
     if (getc() != c) {
-      throw Error(currentLine,
+      throw AssemblerError(currentLine,
         folly::sformat("expected character `{}'", char(c)));
     }
   }
@@ -203,7 +201,7 @@ struct Input {
     if (peek() == '-') buf += (char)getc();
     consumePred(isdigit, std::back_inserter(buf));
     if (buf.empty() || buf == "-") {
-      throw Error(m_lineNumber, "expected integral value");
+      throw AssemblerError(m_lineNumber, "expected integral value");
     }
     return folly::to<int32_t>(buf);
   }
@@ -403,7 +401,7 @@ private:
   };
 
   void error(const std::string& what) {
-    throw Error(getLineNumber(), what);
+    throw AssemblerError(getLineNumber(), what);
   }
 
   void io_error_if_bad() {
@@ -527,8 +525,8 @@ struct AsmState {
 
   template<typename... Args>
   void error(const std::string& fmt, Args&&... args) {
-    throw Error(in.getLineNumber(),
-                folly::sformat(fmt, std::forward<Args>(args)...));
+    throw AssemblerError(in.getLineNumber(),
+      folly::sformat(fmt, std::forward<Args>(args)...));
   }
 
 
@@ -850,7 +848,7 @@ void StackDepth::setBase(AsmState& as, int stackDepth) {
 
   // We finally know the base value. Update AsmState accordingly.
   if (*baseValue + minOffset < 0) {
-    throw Error(
+    throw AssemblerError(
       minOffsetLine,
       "opcode sequence caused stack depth to go negative"
     );

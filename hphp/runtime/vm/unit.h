@@ -351,6 +351,11 @@ public:
   const StringData* filepath() const;
   const StringData* dirpath() const;
 
+  /*
+   * Was this unit created in response to an internal compiler error?
+   */
+  bool isICE() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode.                                                          [const]
 
@@ -889,6 +894,7 @@ private:
   bool m_useStrictTypesForBuiltins : 1;
   bool m_extended : 1;
   bool m_serialized : 1;
+  bool m_ICE : 1; // was this unit the result of an internal compiler error
   LowStringPtr m_dirpath{nullptr};
 
   TypedValue m_mainReturn;

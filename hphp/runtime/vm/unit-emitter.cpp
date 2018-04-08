@@ -568,6 +568,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
   }
   u->m_typeAliases = m_typeAliases;
   u->m_metaData = m_metaData;
+  u->m_ICE = m_ICE;
 
   size_t ix = m_fes.size() + m_hoistablePceIdList.size();
   if (m_mergeOnly && !m_allClassesHoistable) {

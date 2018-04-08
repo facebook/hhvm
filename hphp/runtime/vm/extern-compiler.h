@@ -50,11 +50,6 @@ void compilers_detach_after_fork();
 // type of error encountered
 using CompilerResult = boost::variant<std::unique_ptr<UnitEmitter>,std::string>;
 
-CompilerResult hackc_compile(const char* code,
-                             int len,
-                             const char* filename,
-                             const MD5& md5,
-                             AsmCallbacks* callbacks = nullptr);
 std::string hackc_version();
 
 struct UnitCompiler {

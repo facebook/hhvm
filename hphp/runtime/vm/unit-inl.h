@@ -159,6 +159,10 @@ inline const StringData* Unit::dirpath() const {
   return m_dirpath;
 }
 
+inline bool Unit::isICE() const {
+  return m_ICE;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode.
 

@@ -384,7 +384,8 @@ bool Package::parseImpl(const std::string* fileName) {
     if (auto uc = UnitCompiler::create(
           content.data(), content.size(), fileName->c_str(), md5)) {
       try {
-        if (auto ue = uc->compile(m_ar->getParseOnDemandCallBacks())) {
+        auto ue = uc->compile(m_ar->getParseOnDemandCallBacks());
+        if (ue && !ue->m_ICE) {
           m_ar->lock()->addHhasFile(std::move(ue));
           report(0);
           return true;

@@ -398,13 +398,13 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     }
   };
 
-  auto const cuptr = [&] () -> std::shared_ptr<CachedUnitWithFree> {
+  auto const cu = [&] () -> CachedUnit {
     NonRepoUnitCache::accessor rpathAcc;
 
     if (!cache.insert(rpathAcc, rpath)) {
       if (!isChanged(rpathAcc->second, statInfo)) {
         if (ent) ent->setStr("type", "cache_hit_writelock");
-        return rpathAcc->second.cachedUnit;
+        return rpathAcc->second.cachedUnit->cu;
       }
       if (ent) ent->setStr("type", "cache_stale");
     } else {
@@ -422,9 +422,18 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
      */
 
     auto const cu = createUnitFromFile(rpath, &releaseUnit, w, ent);
+
+    // Don't cache the unit if it was created in response to an internal error
+    // in ExternCompiler. Such units represent transient events.
+    if (UNLIKELY(cu.unit && cu.unit->isICE())) {
+      auto const unit = cu.unit;
+      Treadmill::enqueue([unit] { delete unit; });
+      return cu;
+    }
+
     rpathAcc->second.cachedUnit = std::make_shared<CachedUnitWithFree>(cu);
     updateStatInfo(rpathAcc);
-    return rpathAcc->second.cachedUnit;
+    return rpathAcc->second.cachedUnit->cu;
   }();
 
   if (path != rpath) {
@@ -433,7 +442,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     updateStatInfo(pathAcc);
   }
 
-  return cuptr->cu;
+  return cu;
 }
 
 CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,

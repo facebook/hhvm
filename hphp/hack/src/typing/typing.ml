@@ -5705,28 +5705,36 @@ and condition ?lhs_of_null_coalesce env tparamet =
     let env, ((ivar_pos, _) as ivar) = get_instance_var env ivar in
     (* Resolve the typehint to a type *)
     let env, hint_ty = Phase.hint_locl env h in
+    let reason = Reason.Ris ivar_pos in
+    let rec safely_refine_type env ivar_ty hint_ty =
+      match snd ivar_ty, snd hint_ty with
+        | _, Tclass ((_, cid) as _c, tyl) ->
+          begin match Env.get_class env cid with
+            | Some class_info ->
+              let env, tparams_with_new_names, tyl_fresh =
+                isexpr_generate_fresh_tparams env class_info reason tyl in
+              safely_refine_class_type
+                env p _c class_info ivar_ty hint_ty tparams_with_new_names
+                tyl_fresh
+            | None ->
+              env, (Reason.Rwitness ivar_pos, Tobject)
+          end
+        | Ttuple ivar_tyl, Ttuple hint_tyl
+          when (List.length ivar_tyl) = (List.length hint_tyl) ->
+          let env, tyl = List.map2_env env ivar_tyl hint_tyl safely_refine_type in
+          env, (reason, Ttuple tyl)
+        | _, (Tany | Tmixed | Tnonnull | Tprim _ | Toption _ | Ttuple _
+            | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
+            | Tunresolved _ | Tobject | Terr | Tfun _  | Tdynamic) ->
+          (* TODO(kunalm) Implement the type refinement for each type *)
+          env, hint_ty
+    in
     begin match (IsAsExprHint.validate hint_ty) with
       | IsAsExprHint.Invalid _ -> env
       | IsAsExprHint.Partial _
       | IsAsExprHint.Valid ->
-        begin match snd hint_ty with
-          | Tclass ((_, cid) as _c, tyl) ->
-            begin match Env.get_class env cid with
-              | Some class_info ->
-                let env, tparams_with_new_names, tyl_fresh = isexpr_generate_fresh_tparams
-                  env class_info (fst ivar) tyl in
-                let env, hint_ty = safely_refine_class_type
-                  env p _c class_info ivar_ty hint_ty tparams_with_new_names tyl_fresh in
-                set_local env ivar hint_ty
-              | None ->
-                set_local env ivar (Reason.Rwitness ivar_pos, Tobject)
-            end
-          | Tany | Tmixed | Tnonnull | Tprim _ | Toption _ | Ttuple _
-          | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
-          | Tunresolved _ | Tobject | Terr | Tfun _  | Tdynamic ->
-            (* TODO(kunalm) Implement the type refinement for each type *)
-            set_local env ivar hint_ty
-        end
+        let env, hint_ty = safely_refine_type env ivar_ty hint_ty in
+        set_local env ivar hint_ty
     end
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null))
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), (_, Null), e) ->
@@ -5760,8 +5768,7 @@ and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
       env p class_name class_info ivar_ty obj_ty tparams_with_new_names tyl_fresh in
   env, obj_ty
 
-and isexpr_generate_fresh_tparams env class_info ivar_pos hint_tyl =
-  let reason = Reason.Ris (ivar_pos) in
+and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
   let replace_wildcard env hint_ty ((_, (_, tparam_name), _) as tp) =
     match hint_ty with
       | _, Tclass ((_, name), _) when name = SN.Typehints.wildcard ->

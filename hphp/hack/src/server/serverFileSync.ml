@@ -21,8 +21,8 @@ let get_file_content_from_disk path =
   Option.try_with f
 
 let get_file_content = function
-  | ServerUtils.FileContent s -> s
-  | ServerUtils.FileName path ->
+  | ServerCommandTypes.FileContent s -> s
+  | ServerCommandTypes.FileName path ->
     begin try_relativize_path path >>= fun path ->
       match File_heap.FileHeap.get path with
         | Some (Ide f) -> Some f
@@ -49,7 +49,7 @@ let update_diagnostics diag_subscribe editor_open_files errorl  =
   end
 
 let open_file env path content =
-  let prev_content = get_file_content (ServerUtils.FileName path) in
+  let prev_content = get_file_content (ServerCommandTypes.FileName path) in
   let new_env = try_relativize_path path >>= fun path ->
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     FileHeap.remove_batch (Relative_path.Set.singleton path);

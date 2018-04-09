@@ -13,8 +13,6 @@ open Reordered_argument_collections
 open SymbolDefinition
 module Parser = Full_fidelity_ast
 
-type outline = string SymbolDefinition.t list
-
 let modifiers_of_ast_kinds l =
   List.map l begin function
     | Ast.Final -> Final

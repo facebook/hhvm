@@ -18,14 +18,15 @@ let get_fixme_patches codes (env: env) =
   List.map ~f:(fun pos -> Remove (Pos.to_absolute pos)) poslist
 
 let go action genv env =
+  let module Types = ServerCommandTypes.Find_refs in
   let find_refs_action, new_name = match action with
     | ClassRename (old_name, new_name) ->
-        FindRefsService.Class old_name, new_name
+        Types.Class old_name, new_name
     | MethodRename (class_name, old_name, new_name) ->
-        FindRefsService.Member (class_name, FindRefsService.Method old_name),
+        Types.Member (class_name, Types.Method old_name),
           new_name
     | FunctionRename (old_name, new_name) ->
-      FindRefsService.Function old_name, new_name in
+      Types.Function old_name, new_name in
   let include_defs = true in
   let refs = ServerFindRefs.get_refs find_refs_action include_defs genv env in
   let changes = List.fold_left refs ~f:begin fun acc x ->

@@ -22,7 +22,7 @@ val check_file_input :
    * is used to find the declarations and run only the typechecking phase.
    * When given content buffer it will be parsed, named, and declared before
    * that. The declarations will be removed from shared memory afterwards. *)
-  ServerUtils.file_input ->
+  ServerCommandTypes.file_input ->
   Relative_path.t * Tast.program
 
 (* Parses, names, declares and typechecks the content buffer, then run f

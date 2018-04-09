@@ -12,9 +12,6 @@ open Hh_core
 open SymbolOccurrence
 open Typing_defs
 
-type single_result = (string SymbolOccurrence.t) * (string SymbolDefinition.t option)
-type result = single_result list
-
 module Result_set = Set.Make(struct
   type t = Relative_path.t SymbolOccurrence.t
   let compare = Pervasives.compare

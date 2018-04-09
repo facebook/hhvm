@@ -160,7 +160,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let open File_content in
         let open With_complete_flag in
         let pos = pos |> Ide_api_types.ide_pos_to_fc in
-        let fc = ServerFileSync.get_file_content (ServerUtils.FileName path) in
+        let fc = ServerFileSync.get_file_content (ServerCommandTypes.FileName path) in
         let offset = File_content.get_offset fc pos in (* will raise if out of bounds *)
         let char_at_pos = File_content.get_char fc offset in
         let autocomplete_context = ServerAutoComplete.get_autocomplete_context fc pos in
@@ -173,7 +173,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, { AutocompleteTypes.completions; char_at_pos; is_complete; }
     | IDE_FFP_AUTOCOMPLETE (path, pos) ->
         let pos = pos |> Ide_api_types.ide_pos_to_fc in
-        let content = ServerFileSync.get_file_content (ServerUtils.FileName path) in
+        let content = ServerFileSync.get_file_content (ServerCommandTypes.FileName path) in
         let offset = File_content.get_offset content pos in (* will raise if out of bounds *)
         let char_at_pos = File_content.get_char content offset in
         let result =
@@ -195,7 +195,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let new_env = { env with diag_subscribe } in
         new_env, ()
     | OUTLINE path ->
-      env, ServerUtils.FileName path |>
+      env, ServerCommandTypes.FileName path |>
       ServerFileSync.get_file_content |>
       FileOutline.outline env.popt
     | IDE_IDLE ->
@@ -205,10 +205,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | DYNAMIC_VIEW toggle ->
       ServerFileSync.toggle_dynamic_view env toggle, ()
     | INFER_RETURN_TYPE id_info ->
+      let open ServerCommandTypes.Infer_return_type in
       match id_info with
-      | InferReturnTypeService.Function fun_name ->
+      | Function fun_name ->
         env, InferReturnTypeService.get_fun_return_ty
           env.tcopt env.popt fun_name
-      | InferReturnTypeService.Method (class_name, meth_name) ->
+      | Method (class_name, meth_name) ->
         env, InferReturnTypeService.get_meth_return_ty
           env.tcopt env.popt class_name meth_name

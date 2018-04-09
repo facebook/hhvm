@@ -22,5 +22,5 @@ let go env (filename, line, char) =
     in
     List.hd definitions
   end
-  >>= ServerSymbolDefinition.get_definition_cst_node (ServerUtils.FileName filename)
+  >>= ServerSymbolDefinition.get_definition_cst_node (ServerCommandTypes.FileName filename)
   >>= Docblock_finder.get_docblock

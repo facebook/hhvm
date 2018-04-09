@@ -12,22 +12,23 @@ open Hh_core
 
 let get_target symbol =
   let open SymbolOccurrence in
+  let module Types = ServerCommandTypes.Find_refs in
   let open FindRefsService in
   match symbol.type_ with
   | SymbolOccurrence.Class -> Some (IClass symbol.name)
   | SymbolOccurrence.Function -> Some (IFunction symbol.name)
   | SymbolOccurrence.Method (class_name, member_name) ->
       Some (IMember (Subclasses_of class_name,
-        FindRefsService.Method member_name))
+        Types.Method member_name))
   | SymbolOccurrence.Property (class_name, member_name) ->
       Some (IMember (Subclasses_of class_name,
-        FindRefsService.Property member_name))
+        Types.Property member_name))
   | SymbolOccurrence.ClassConst (class_name, member_name) ->
       Some (IMember (Subclasses_of class_name,
-        FindRefsService.Class_const member_name))
+        Types.Class_const member_name))
   | SymbolOccurrence.Typeconst  (class_name, member_name) ->
       Some (IMember (Subclasses_of class_name,
-        FindRefsService.Typeconst member_name))
+        Types.Typeconst member_name))
   | SymbolOccurrence.GConst -> Some (IGConst symbol.name)
   | _ -> None
 

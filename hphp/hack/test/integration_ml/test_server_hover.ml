@@ -584,7 +584,7 @@ let () =
         in
         Printf.sprintf "%s:%d:%d: [%s]" file line col inner
       in
-      let fn = ServerUtils.FileName ("/" ^ file) in
+      let fn = ServerCommandTypes.FileName ("/" ^ file) in
       let hover = ServerHover.go env (fn, line, col) in
       let expected = list_to_string expectedHover in
       let actual = list_to_string hover in

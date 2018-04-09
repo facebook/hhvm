@@ -621,7 +621,8 @@ let do_didChange
 
 let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
   let (file, line, column) = lsp_file_position_to_hack params in
-  let command = ServerCommandTypes.INFER_TYPE (ServerUtils.FileName file, line, column, false) in
+  let command =
+    ServerCommandTypes.(INFER_TYPE (FileName file, line, column, false)) in
   let inferred_type = rpc conn command in
   match inferred_type with
   (* Hack server uses None to indicate absence of a result. *)
@@ -632,7 +633,7 @@ let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
 
 let do_enhanced_hover (conn: server_conn) (params: Hover.params) : Hover.result =
   let (file, line, column) = lsp_file_position_to_hack params in
-  let command = ServerCommandTypes.IDE_HOVER (ServerUtils.FileName file, line, column) in
+  let command = ServerCommandTypes.IDE_HOVER (ServerCommandTypes.FileName file, line, column) in
   let infos = rpc conn command in
   let contents =
     infos
@@ -665,7 +666,8 @@ let do_enhanced_hover (conn: server_conn) (params: Hover.params) : Hover.result 
 let do_definition (conn: server_conn) (params: Definition.params)
   : Definition.result =
   let (file, line, column) = lsp_file_position_to_hack params in
-  let command = ServerCommandTypes.IDENTIFY_FUNCTION (ServerUtils.FileName file, line, column) in
+  let command =
+    ServerCommandTypes.(IDENTIFY_FUNCTION (FileName file, line, column)) in
   let results = rpc conn command in
   (* What's it like when we return multiple definitions? For instance, if you ask *)
   (* for the definition of "new C()" then we've now got the definition of the     *)
@@ -909,7 +911,7 @@ let do_findReferences
   let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument in
   let include_defs = params.context.includeDeclaration in
   let command = ServerCommandTypes.IDE_FIND_REFS
-      (ServerUtils.FileName filename, line, column, include_defs) in
+      (ServerCommandTypes.FileName filename, line, column, include_defs) in
   let results = rpc conn command in
   (* TODO: respect params.context.include_declaration *)
   match results with
@@ -925,7 +927,8 @@ let do_documentHighlight
   let open DocumentHighlight in
 
   let (file, line, column) = lsp_file_position_to_hack params in
-  let command = ServerCommandTypes.IDE_HIGHLIGHT_REFS (ServerUtils.FileName file, line, column) in
+  let command =
+    ServerCommandTypes.(IDE_HIGHLIGHT_REFS (FileName file, line, column)) in
   let results = rpc conn command in
 
   let hack_range_to_lsp_highlight range =
@@ -942,7 +945,7 @@ let do_typeCoverage (conn: server_conn) (params: TypeCoverage.params)
   let open TypeCoverage in
 
   let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument in
-  let command = ServerCommandTypes.COVERAGE_LEVELS (ServerUtils.FileName filename) in
+  let command = ServerCommandTypes.COVERAGE_LEVELS (ServerCommandTypes.FileName filename) in
   let results: Coverage_level.result = rpc conn command in
   let results = Coverage_level.merge_adjacent_results results in
 

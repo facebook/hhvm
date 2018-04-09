@@ -10,6 +10,8 @@
 
 open Hh_core
 
+module MethodJumps = ServerCommandTypes.Method_jumps
+
 let pos_to_json pos =
   let line, start, end_ = Pos.info_pos pos in
   Hh_json.JSON_Object [

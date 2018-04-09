@@ -12,34 +12,37 @@ open Hh_core
 open Hh_json
 
 let fun_call_to_json fun_call_results =
+  let  open ServerCommandTypes.Symbol_info_service in
   List.map fun_call_results begin fun item ->
     let item_type =
-      match item.SymbolFunCallService.type_ with
-      | SymbolFunCallService.Function        -> "Function"
-      | SymbolFunCallService.Method          -> "Method"
-      | SymbolFunCallService.Constructor     -> "Constructor" in
+      match item.type_ with
+      | Function        -> "Function"
+      | Method          -> "Method"
+      | Constructor     -> "Constructor" in
     JSON_Object [
-      "name",           JSON_String item.SymbolFunCallService.name;
+      "name",           JSON_String item.name;
       "type",           JSON_String item_type;
-      "pos",            Pos.json item.SymbolFunCallService.pos;
-      "caller",         JSON_String item.SymbolFunCallService.caller;
+      "pos",            Pos.json item.pos;
+      "caller",         JSON_String item.caller;
     ]
   end
 
 let symbol_type_to_json symbol_type_results =
+  let open ServerCommandTypes.Symbol_type in
   List.rev_map symbol_type_results begin fun item ->
     JSON_Object [
-      "pos",    Pos.json item.SymbolTypeService.pos;
-      "type",   JSON_String item.SymbolTypeService.type_;
-      "ident",  int_ item.SymbolTypeService.ident_;
+      "pos",    Pos.json item.pos;
+      "type",   JSON_String item.type_;
+      "ident",  int_ item.ident_;
     ]
   end
 
 let to_json result =
+  let open ServerCommandTypes.Symbol_info_service in
   let fun_call_json =
-    fun_call_to_json result.SymbolInfoServiceTypes.fun_calls in
+    fun_call_to_json result.fun_calls in
   let symbol_type_json =
-    symbol_type_to_json result.SymbolInfoServiceTypes.symbol_types in
+    symbol_type_to_json result.symbol_types in
   JSON_Object [
     "function_calls",   JSON_Array fun_call_json;
     "symbol_types",     JSON_Array symbol_type_json;

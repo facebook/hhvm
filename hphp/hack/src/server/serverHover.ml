@@ -13,10 +13,10 @@ open HoverService
 
 let symbols_at (file, line, char) tcopt =
   let contents = match file with
-    | ServerUtils.FileName file_name ->
+    | ServerCommandTypes.FileName file_name ->
       let relative_path = Relative_path.(create Root file_name) in
       File_heap.get_contents relative_path
-    | ServerUtils.FileContent content -> Some content
+    | ServerCommandTypes.FileContent content -> Some content
   in
   match contents with
   | None -> []

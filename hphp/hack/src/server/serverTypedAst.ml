@@ -31,7 +31,8 @@ fun env filename ->
   let ServerEnv.{tcopt; files_info; _} = env in
 
   (* get the typed ast *)
-  let _, tast = ServerIdeUtils.check_file_input tcopt files_info (ServerUtils.FileName filename) in
+  let _, tast = ServerIdeUtils.check_file_input tcopt files_info
+    (ServerCommandTypes.FileName filename) in
 
   (* get the parse tree *)
   let file = Relative_path.create Relative_path.Dummy filename in

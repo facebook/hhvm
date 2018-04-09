@@ -15,6 +15,6 @@ val go :
   Relative_path.t SymbolDefinition.t option
 
 val get_definition_cst_node :
-  ServerUtils.file_input ->
+  ServerCommandTypes.file_input ->
   Relative_path.t SymbolDefinition.t ->
   Full_fidelity_positioned_syntax.t option

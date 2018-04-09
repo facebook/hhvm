@@ -177,7 +177,7 @@ let type_at_range
 
 let go:
   ServerEnv.env ->
-  (ServerUtils.file_input * int * int * bool) ->
+  (ServerCommandTypes.file_input * int * int * bool) ->
   (string * string) option =
 fun env (file, line, char, dynamic_view) ->
   let ServerEnv.{tcopt; files_info; _} = env in

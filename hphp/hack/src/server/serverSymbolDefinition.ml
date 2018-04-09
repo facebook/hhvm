@@ -173,9 +173,9 @@ let get_definition_cst_node fallback_fn definition =
       (* When the definition is in an IDE buffer with local changes, the filename
          in the definition will be empty. *)
       match fallback_fn with
-      | ServerUtils.FileName filename ->
+      | ServerCommandTypes.FileName filename ->
         SourceText.from_file (Relative_path.create Relative_path.Root filename)
-      | ServerUtils.FileContent content ->
+      | ServerCommandTypes.FileContent content ->
         SourceText.make Relative_path.default content
     else SourceText.from_file (Pos.filename definition.pos)
   in

@@ -138,9 +138,9 @@ let recheck tcopt filetuple_l =
 
 let check_file_input tcopt files_info fi =
   match fi with
-  | ServerUtils.FileContent content ->
+  | ServerCommandTypes.FileContent content ->
       declare_and_check content ~f:(fun path _ tast -> path, tast) tcopt
-  | ServerUtils.FileName fn ->
+  | ServerCommandTypes.FileName fn ->
       let path = Relative_path.create Relative_path.Root fn in
       match Relative_path.Map.get files_info path with
       | Some fileinfo -> List.hd_exn (recheck tcopt [(path, fileinfo)])

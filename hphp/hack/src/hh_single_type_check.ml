@@ -764,6 +764,7 @@ let handle_mode
       Dependency_visitors.print_deps popt ast
     end
   | Dump_inheritance ->
+    let open ServerCommandTypes.Method_jumps in
     Typing_deps.update_files files_info;
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
       if Relative_path.Map.mem builtins fn then () else begin
@@ -771,7 +772,7 @@ let handle_mode
           Printf.printf "Ancestors of %s and their overridden methods:\n"
             class_;
           let ancestors = MethodJumps.get_inheritance tcopt class_
-            ~filter:MethodJumps.No_filter ~find_children:false files_info
+            ~filter:No_filter ~find_children:false files_info
             None in
           ClientMethodJumps.print_readable ancestors ~find_children:false;
           Printf.printf "\n";
@@ -781,7 +782,7 @@ let handle_mode
           Printf.printf "Children of %s and the methods they override:\n"
             class_;
           let children = MethodJumps.get_inheritance tcopt class_
-            ~filter:MethodJumps.No_filter ~find_children:true files_info None in
+            ~filter:No_filter ~find_children:true files_info None in
           ClientMethodJumps.print_readable children ~find_children:true;
           Printf.printf "\n";
         end;

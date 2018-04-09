@@ -26,35 +26,117 @@ module Ignore_fixmes_result = struct
   }
 end
 
+module Identify_symbol = struct
+  type single_result = (string SymbolOccurrence.t) * (string SymbolDefinition.t option)
+  type result = single_result list
+end
+
+module Method_jumps = struct
+  type result = {
+    orig_name: string;
+    orig_pos: Pos.absolute;
+    dest_name: string;
+    dest_pos: Pos.absolute;
+    orig_p_name: string; (* Used for methods to find their parent class *)
+    dest_p_name: string;
+  }
+
+  type filter =
+    | No_filter
+    | Class
+    | Interface
+    | Trait
+end
+
+module Find_refs = struct
+  type member = Ai.ServerFindRefs.member =
+    | Method of string
+    | Property of string
+    | Class_const of string
+    | Typeconst of string
+
+  type action = Ai.ServerFindRefs.action =
+    | Class of string
+    | Member of string * member
+    | Function of string
+    | GConst of string
+
+    type result = (string * Pos.absolute) list
+    type ide_result = (string * Pos.absolute list) option
+end
+
+module Symbol_type = struct
+  type t = {
+    pos: string Pos.pos;
+    type_: string;
+    ident_: int;
+  }
+end
+
+module Symbol_info_service = struct
+  type target_type =
+    | Function
+    | Method
+    | Constructor
+
+  type symbol_fun_call = {
+    name:  string;
+    type_: target_type;
+    pos: string Pos.pos;
+    caller: string;
+  }
+
+  type result = {
+    fun_calls: symbol_fun_call list;
+    symbol_types: Symbol_type.t list;
+  }
+end
+
+module Outline = struct
+  type outline = string SymbolDefinition.t list
+end
+
+module Infer_return_type = struct
+  type t =
+  | Function of string
+  | Method of string * string
+
+  type result = (string, string) Pervasives.result
+end
+
+type file_input =
+  | FileName of string
+  | FileContent of string
+
 type lint_stdin_input = { filename: string; contents: string }
 
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
   | STATUS : bool -> Server_status.t t
-  | INFER_TYPE : ServerUtils.file_input * int * int * bool ->
+  | INFER_TYPE : file_input * int * int * bool ->
       InferAtPosService.result t
   | INFER_TYPE_BATCH : (string * int * int * (int * int) option) list * bool -> string list t
   | TYPED_AST : string -> string t
-  | IDE_HOVER : ServerUtils.file_input * int * int ->
+  | IDE_HOVER : file_input * int * int ->
       HoverService.result t
   | DOCBLOCK_AT : (string * int * int) -> DocblockService.result t
-  | COVERAGE_LEVELS : ServerUtils.file_input -> Coverage_level.result t
+  | COVERAGE_LEVELS : file_input -> Coverage_level.result t
   | AUTOCOMPLETE : string -> AutocompleteTypes.result t
-  | IDENTIFY_FUNCTION : ServerUtils.file_input * int * int ->
-      IdentifySymbolService.result t
-  | METHOD_JUMP : (string * MethodJumps.filter * bool) ->
-      MethodJumps.result list t
+  | IDENTIFY_FUNCTION : file_input * int * int ->
+      Identify_symbol.result t
+  | METHOD_JUMP : (string * Method_jumps.filter * bool) ->
+      Method_jumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t
-  | FIND_REFS : FindRefsService.action -> FindRefsService.result t
-  | IDE_FIND_REFS : ServerUtils.file_input * int * int * bool ->
-      FindRefsService.ide_result t
-  | IDE_HIGHLIGHT_REFS : ServerUtils.file_input * int * int ->
+  | FIND_REFS : Find_refs.action -> Find_refs.result t
+  | IDE_FIND_REFS : file_input * int * int * bool ->
+      Find_refs.ide_result t
+  | IDE_HIGHLIGHT_REFS : file_input * int * int ->
       ServerHighlightRefsTypes.result t
   | REFACTOR : ServerRefactorTypes.action -> ServerRefactorTypes.patch list t
-  | IDE_REFACTOR : ServerUtils.file_input * int * int * string ->
+  | IDE_REFACTOR : file_input * int * int * string ->
       ServerRefactorTypes.patch list t
-  | DUMP_SYMBOL_INFO : string list -> SymbolInfoServiceTypes.result t
+  | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
   | REMOVE_DEAD_FIXMES : int list -> [`Ok of ServerRefactorTypes.patch list | `Error of string] t
   | IGNORE_FIXMES : string list -> Ignore_fixmes_result.t t
@@ -82,10 +164,10 @@ type _ t =
   | DISCONNECT : unit t
   | SUBSCRIBE_DIAGNOSTIC : int -> unit t
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t
-  | OUTLINE : string -> FileOutline.outline t
+  | OUTLINE : string -> Outline.outline t
   | IDE_IDLE : unit t
-  | INFER_RETURN_TYPE : InferReturnTypeService.t ->
-      InferReturnTypeService.result t
+  | INFER_RETURN_TYPE : Infer_return_type.t ->
+      Infer_return_type.result t
   | RAGE : ServerRageTypes.result t
   | DYNAMIC_VIEW: bool -> unit t
 

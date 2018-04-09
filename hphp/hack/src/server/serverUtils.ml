@@ -17,10 +17,6 @@ let shutdown_client (_ic, oc) =
     close_out oc
   with _ -> ()
 
-type file_input =
-  | FileName of string
-  | FileContent of string
-
 let hh_monitor_config root = ServerMonitorUtils.({
   lock_file = ServerFiles.lock_file root;
   socket_file = ServerFiles.socket_file root;

@@ -13,6 +13,8 @@ open Option.Monad_infix
 open ServerEnv
 open Reordered_argument_collections
 
+open ServerCommandTypes.Find_refs
+
 let to_json input =
   let entries = List.map input begin fun (name, pos) ->
     let filename = Pos.filename pos in
@@ -74,13 +76,13 @@ let search_class class_name include_defs genv env =
 
 let get_refs action include_defs genv env =
   match action with
-  | FindRefsService.Member (class_name, member) ->
+  | Member (class_name, member) ->
       search_member class_name member include_defs genv env
-  | FindRefsService.Function function_name ->
+  | Function function_name ->
       search_function function_name include_defs genv env
-  | FindRefsService.Class class_name ->
+  | Class class_name ->
       search_class class_name include_defs genv env
-  | FindRefsService.GConst cst_name ->
+  | GConst cst_name ->
       search_gconst cst_name include_defs genv env
 
 let go action include_defs genv env =
@@ -91,21 +93,21 @@ let go action include_defs genv env =
 let get_action symbol =
   let name = symbol.SymbolOccurrence.name in
   begin match symbol.SymbolOccurrence.type_ with
-    | SymbolOccurrence.Class -> Some (FindRefsService.Class name)
-    | SymbolOccurrence.Function -> Some (FindRefsService.Function name)
+    | SymbolOccurrence.Class -> Some (Class name)
+    | SymbolOccurrence.Function -> Some (Function name)
     | SymbolOccurrence.Method (class_name, method_name) ->
-        Some (FindRefsService.Member
-          (class_name, FindRefsService.Method method_name))
+        Some (Member
+          (class_name, Method method_name))
     | SymbolOccurrence.Property (class_name, prop_name) ->
-        Some (FindRefsService.Member
-          (class_name, FindRefsService.Property prop_name))
+        Some (Member
+          (class_name, Property prop_name))
     | SymbolOccurrence.ClassConst (class_name, const_name) ->
-        Some (FindRefsService.Member
-          (class_name, FindRefsService.Class_const const_name))
+        Some (Member
+          (class_name, Class_const const_name))
     | SymbolOccurrence.Typeconst (class_name, tconst_name) ->
-        Some (FindRefsService.Member
-          (class_name, FindRefsService.Typeconst tconst_name))
-    | SymbolOccurrence.GConst -> Some (FindRefsService.GConst name)
+        Some (Member
+          (class_name, Typeconst tconst_name))
+    | SymbolOccurrence.GConst -> Some (GConst name)
     | _ -> None
   end
 

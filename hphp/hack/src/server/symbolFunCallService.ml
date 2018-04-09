@@ -11,21 +11,10 @@
 module SN = Naming_special_names
 
 open Hh_core
-
-type target_type =
-  | Function
-  | Method
-  | Constructor
-
-type result = {
-  name:  string;
-  type_: target_type;
-  pos: string Pos.pos;
-  caller: string;
-}
+open ServerCommandTypes.Symbol_info_service
 
 module Result_set = Set.Make(struct
-  type t = result
+  type t = ServerCommandTypes.Symbol_info_service.symbol_fun_call
   let compare a b =
     (* Descending order, since SymbolInfoService.format_result uses rev_append
        and will reverse our sorted result list. *)

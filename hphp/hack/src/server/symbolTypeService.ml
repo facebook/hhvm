@@ -10,14 +10,10 @@
 
 open Hh_core
 
-type result = {
-  pos: string Pos.pos;
-  type_: string;
-  ident_: int;
-}
+open ServerCommandTypes.Symbol_type
 
 module Result_set = Set.Make(struct
-  type t = result
+  type t = ServerCommandTypes.Symbol_type.t
   let compare a b = Pos.compare a.pos b.pos
 end)
 

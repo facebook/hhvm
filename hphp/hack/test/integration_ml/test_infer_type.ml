@@ -332,7 +332,7 @@ let () =
       Test.assertEqual (fmt expected) (fmt ty_str)
     in
 
-    let fn = ServerUtils.FileName ("/" ^ file) in
+    let fn = ServerCommandTypes.FileName ("/" ^ file) in
 
     let ServerEnv.{tcopt; files_info; _} = env in
     let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic } in

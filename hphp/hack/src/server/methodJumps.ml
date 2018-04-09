@@ -10,25 +10,11 @@
 
 open Hh_core
 open Reordered_argument_collections
+open ServerCommandTypes.Method_jumps
 open Typing_defs
 
 module Reason = Typing_reason
 module TLazyHeap = Typing_lazy_heap
-
-type result = {
-  orig_name: string;
-  orig_pos: Pos.absolute;
-  dest_name: string;
-  dest_pos: Pos.absolute;
-  orig_p_name: string; (* Used for methods to find their parent class *)
-  dest_p_name: string;
-}
-
-type filter =
-  | No_filter
-  | Class
-  | Interface
-  | Trait
 
 let string_filter_to_method_jump_filter = function
   | "No_filter" -> Some No_filter

@@ -8,7 +8,7 @@
  *
  *)
 
-open FindRefsService
+open ServerCommandTypes.Find_refs
 
 val to_json: result -> Hh_json.json
 

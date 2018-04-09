@@ -133,10 +133,10 @@ let main args =
       let file_input = match file with
         | "-" ->
           let content = Sys_utils.read_stdin_to_string () in
-          ServerUtils.FileContent content
+          ServerCommandTypes.FileContent content
         | _ ->
           let file = expand_path file in
-          ServerUtils.FileName file
+          ServerCommandTypes.FileName file
       in
       let pos_level_l = rpc args @@ Rpc.COVERAGE_LEVELS file_input in
       ClientColorFile.go file_input args.output_json pos_level_l;
@@ -148,16 +148,17 @@ let main args =
       Exit_status.No_error
     | MODE_FIND_CLASS_REFS name ->
       let results =
-        rpc args @@ Rpc.FIND_REFS (FindRefsService.Class name) in
+        rpc args @@ Rpc.FIND_REFS (ServerCommandTypes.Find_refs.Class name) in
       ClientFindRefs.go results args.output_json;
       Exit_status.No_error
     | MODE_FIND_REFS name ->
+      let open ServerCommandTypes.Find_refs in
       let action =
         parse_function_or_method_id
           ~meth_action:(fun class_name method_name ->
-            FindRefsService.Member
-              (class_name, FindRefsService.Method method_name))
-          ~func_action:(fun fun_name -> FindRefsService.Function fun_name)
+            Member
+              (class_name, Method method_name))
+          ~func_action:(fun fun_name -> Function fun_name)
           name
       in
       let results = rpc args @@ Rpc.FIND_REFS action in
@@ -167,7 +168,7 @@ let main args =
       let line, char = parse_position_string arg in
       let include_defs = false in
       let content =
-        ServerUtils.FileContent (Sys_utils.read_stdin_to_string ()) in
+        ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ()) in
       let results =
         rpc args @@ Rpc.IDE_FIND_REFS (content, line, char, include_defs) in
       ClientFindRefs.go_ide results args.output_json;
@@ -175,7 +176,7 @@ let main args =
     | MODE_IDE_HIGHLIGHT_REFS arg ->
       let line, char = parse_position_string arg in
       let content =
-        ServerUtils.FileContent (Sys_utils.read_stdin_to_string ()) in
+        ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ()) in
       let results =
         rpc args @@ Rpc.IDE_HIGHLIGHT_REFS (content, line, char) in
       ClientHighlightRefs.go results ~output_json:args.output_json;
@@ -204,7 +205,7 @@ let main args =
           match tpos with
           | [filename; line; char; new_name] ->
             let filename = expand_path filename in
-            ServerUtils.FileName filename,
+            ServerCommandTypes.FileName filename,
               int_of_string line,
               int_of_string char,
               new_name
@@ -220,7 +221,7 @@ let main args =
     | MODE_IDENTIFY_SYMBOL3 arg ->
       let line, char = parse_position_string arg in
       let content =
-        ServerUtils.FileContent (Sys_utils.read_stdin_to_string ()) in
+        ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ()) in
       let result = rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
       ClientGetDefinition.go result args.output_json;
       Exit_status.No_error
@@ -231,10 +232,10 @@ let main args =
           match tpos with
           | [filename; line; char] ->
               let fn = expand_path filename in
-              ServerUtils.FileName fn, int_of_string line, int_of_string char
+              ServerCommandTypes.FileName fn, int_of_string line, int_of_string char
           | [line; char] ->
               let content = Sys_utils.read_stdin_to_string () in
-              ServerUtils.FileContent content,
+              ServerCommandTypes.FileContent content,
               int_of_string line,
               int_of_string char
           | _ -> raise Exit
@@ -300,7 +301,7 @@ let main args =
       ClientOutline.go results args.output_json;
       Exit_status.No_error
     | MODE_METHOD_JUMP_CHILDREN class_ ->
-      let filter = MethodJumps.No_filter in
+      let filter = ServerCommandTypes.Method_jumps.No_filter in
       let results = rpc args @@ Rpc.METHOD_JUMP (class_, filter, true) in
       ClientMethodJumps.go results true args.output_json;
       Exit_status.No_error
@@ -476,11 +477,12 @@ let main args =
       print_string schema;
       Exit_status.No_error
     | MODE_INFER_RETURN_TYPE name ->
+      let open ServerCommandTypes.Infer_return_type in
       let action =
         parse_function_or_method_id
-          ~func_action:(fun fun_name -> InferReturnTypeService.Function fun_name)
+          ~func_action:(fun fun_name -> Function fun_name)
           ~meth_action:(fun class_name meth_name ->
-            InferReturnTypeService.Method (class_name, meth_name))
+            Method (class_name, meth_name))
           name
       in
       let result = rpc args @@ Rpc.INFER_RETURN_TYPE action in

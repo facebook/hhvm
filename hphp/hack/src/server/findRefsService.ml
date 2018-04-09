@@ -11,19 +11,9 @@
 open Hh_core
 open Option.Monad_infix
 open Reordered_argument_collections
+open ServerCommandTypes.Find_refs
 open Typing_defs
 
-type member = Ai.ServerFindRefs.member =
-  | Method of string
-  | Property of string
-  | Class_const of string
-  | Typeconst of string
-
-type action = Ai.ServerFindRefs.action =
-  | Class of string
-  | Member of string * member
-  | Function of string
-  | GConst of string
 
 (* The class containing the member can be specified in two ways:
  * - Class_set - as an explicit, pre-computed set of names, which are then
@@ -41,8 +31,6 @@ type action_internal  =
   | IFunction of string
   | IGConst of string
 
-type result = (string * Pos.absolute) list
-type ide_result = (string * Pos.absolute list) option
 
 let process_fun_id target_fun id =
   if target_fun = (snd id)

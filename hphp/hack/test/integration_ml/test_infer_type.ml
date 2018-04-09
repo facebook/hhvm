@@ -32,6 +32,9 @@ class A {
     return $this->id;
     //     ^7:12  ^7:19
   }
+  public static function foo(): int { return 3; }
+  public static int $foo = 3;
+  const int foo = 5;
 }
 "
 
@@ -224,6 +227,29 @@ let lambda_param_cases = [
   ("lambda_param.php", 6, 14), ("(function(int $x): num)", "(function(int $x): num)");
 ]
 
+let class_id = "<?hh // strict
+function class_id(): void {
+  $x = new A(5);
+//         ^3:12
+  A::foo();
+//^5:3
+  A::$foo;
+//^7:3
+  A::foo;
+//^9:3
+  if ($x instanceof B) {}
+//                  ^11:21
+}
+"
+
+let class_id_cases = [
+  ("class_id.php", 3, 12), ("A", "A");
+  ("class_id.php", 5, 3), ("A", "A");
+  ("class_id.php", 7, 3), ("A", "A");
+  ("class_id.php", 9, 3), ("A", "A");
+  ("class_id.php", 11, 21), ("B", "B");
+]
+
 
 let dynamic_view = "<?hh
 function any() {
@@ -269,6 +295,7 @@ let files = [
   "curried.php", curried;
   "multiple_type.php", multiple_type;
   "lambda_param.php", lambda_param;
+  "class_id.php", class_id;
   "dynamic_view.php", dynamic_view;
 ]
 
@@ -283,6 +310,7 @@ let cases =
   @ curried_cases
   @ multiple_type_cases
   @ lambda_param_cases
+  @ class_id_cases
 
 let () =
   let env =

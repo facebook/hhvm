@@ -66,23 +66,25 @@ class ['self] base_visitor line char = object (self : 'self)
     let rpos, _, _ = rhs in
     if Pos.length lpos <= Pos.length rpos then lhs else rhs
 
-  method! on_expr env e =
-    let (pos, ty) = fst e in
-    let acc =
-      if Pos.inside pos line char
-      then ty >>| fun ty -> pos, env, ty
-      else None
-    in
-    self#plus acc (super#on_expr env e)
+  method! on_expr_annotation env (pos, ty) =
+    if Pos.inside pos line char
+    then ty >>| fun ty -> pos, env, ty
+    else None
 
-  method! on_fun_param env param =
-    let (pos, ty) = param.Tast.param_annotation in
+  method! on_class_id env cid =
     let acc =
-      if Pos.inside pos line char
-      then ty >>| fun ty -> pos, env, ty
-      else None
+      match cid with
+      | Some ty, Tast.CI ((pos, _), _) ->
+        if Pos.inside pos line char
+        then Some (pos, env, ty)
+        else None
+      (* Don't use the resolved class type when hovering over a CIexpr--we will
+         want to show the type the expression is annotated with
+         (e.g., classname<C>) and it will not have a smaller position. *)
+      | _, Tast.CIexpr _ -> None
+      | _ -> None (* TODO: Associate other class_id_ variants with a pos *)
     in
-    self#plus acc (super#on_fun_param env param)
+    self#plus acc (super#on_class_id env cid)
 end
 
 (** Same as `base_visitor`, except:

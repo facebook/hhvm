@@ -474,10 +474,11 @@ class CommonTests(BarebonesTests):
             ], options=['--find-refs', 'Foo::__construct'])
 
         self.check_cmd_and_json_cmd([
-            'File "{root}foo_3.php", line 10, characters 17-19: Foo::__construct',
+            'File "{root}foo_3.php", line 10, characters 17-19: Foo',
             '1 total results'
             ], [
-            '[{{"name":"Foo::__construct","filename":"{root}foo_3.php","line":10,"char_start":17,"char_end":19}}]'
+            '[{{"name":"Foo","filename":"{root}foo_3.php","line":10,'
+            '"char_start":17,"char_end":19}}]'
             ], options=['--find-class-refs', 'Foo'])
 
     def test_ide_find_refs(self):
@@ -608,8 +609,9 @@ class CommonTests(BarebonesTests):
         self.start_hh_server()
 
         self.check_cmd_and_json_cmd([
-            'name: \\bar, kind: function, span: line 1, characters 42-44, '
-            'definition: ',
+            'name: \\bar, kind: function, span: line 1, characters 42-44,'
+            ' is_declaration: false',
+            'definition:',
             ' bar',
             '   kind: function',
             '   id: function::bar',
@@ -671,7 +673,8 @@ class CommonTests(BarebonesTests):
 
         self.check_cmd_and_json_cmd([
             'name: \\ClassToBeIdentified::methodToBeIdentified, kind: method,'
-            ' span: line 1, characters 45-64, definition: ',
+            ' span: line 1, characters 45-64, is_declaration: false',
+            'definition:',
             ' methodToBeIdentified',
             '   kind: method',
             '   id: method::ClassToBeIdentified::methodToBeIdentified',

@@ -115,6 +115,9 @@ OCAML_LIBRARIES=\
   unix\
   bigarray
 
+OPAM_LIBRARIES=\
+  ppx_deriving
+
 NATIVE_LIBRARIES=\
   pthread\
   $(RT)
@@ -144,6 +147,7 @@ OBJECT_FILES_TO_BUILD=$(patsubst %.c,%.o,$(NATIVE_C_FILES))
 NATIVE_OBJECT_FILES=$(OBJECT_FILES_TO_BUILD) utils/get_build_id.gen.o utils/get_build_id.o utils/compiler_id_impl.o
 INCLUDE_OPTS=$(foreach dir,$(MODULES),-I $(dir))
 LIB_OPTS=$(foreach lib,$(OCAML_LIBRARIES),-lib $(lib))
+OPAM_LIB_OPTS=$(foreach lib,$(OPAM_LIBRARIES),-pkg $(lib))
 NATIVE_LIB_OPTS=$(foreach lib, $(NATIVE_LIBRARIES),-cclib -l$(lib))
 EXTRA_NATIVE_LIB_OPTS=$(foreach lib, $(EXTRA_NATIVE_LIBRARIES),-cclib -l$(lib))
 EXTRA_INCLUDE_OPTS=$(foreach dir, $(EXTRA_INCLUDE_PATHS),-ccopt -I$(dir))
@@ -204,7 +208,7 @@ _build/hack.stamp: $(ALL_SRC_FILES) copy-hhis _build/ppx/ppx_gen_hhi
 	#  - means it will never relink just for C changes
 	#  - doesn't really help that much as it needs to do the bulk of the work anyway
 	rm -f $(TARGETS)
-	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -no-links -cflag -g $(INCLUDE_OPTS) $(LIB_OPTS) \
+	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -no-links -cflag -g $(INCLUDE_OPTS) $(LIB_OPTS) $(OPAM_LIB_OPTS) \
 		-lflags "-g $(LINKER_FLAGS)" -tag custom \
 		$(patsubst _build/%,%,$(TARGETS))
 	touch _build/hack.stamp

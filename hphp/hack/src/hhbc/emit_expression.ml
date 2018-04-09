@@ -755,12 +755,6 @@ and emit_is env pos lhs h =
             instr_label done_label;
           ]
       end
-    | A.Happly ((_, id), _) when id = SN.Typehints.nonnull ->
-        gather [
-          emit_is_lhs env lhs;
-          instr_istypec OpNull;
-          instr_not;
-        ]
     | A.Happly ((_, id), _) when id = SN.Typehints.this ->
       begin match lhs with
         | IsExprExpr e -> emit_is_create_local env pos e h

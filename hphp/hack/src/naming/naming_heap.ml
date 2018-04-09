@@ -79,3 +79,11 @@ let add x y =
   if not @@ LocalChanges.has_local_changes () then check_valid x y;
   add x y
 end
+
+let heap_string_of_key heap (str : string) : string =
+  match heap with
+  | `TypeCanon -> ConstPosHeap.string_of_key str
+  | `FunCanon -> FunCanonHeap.string_of_key str
+  | `TypeId -> TypeIdHeap.string_of_key str
+  | `FunPos -> FunPosHeap.string_of_key str
+  | `ConstPos -> ConstPosHeap.string_of_key str

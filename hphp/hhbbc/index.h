@@ -25,6 +25,7 @@
 #include <boost/variant.hpp>
 #include <tbb/concurrent_hash_map.h>
 
+#include <folly/synchronization/Baton.h>
 #include <folly/Optional.h>
 #include <folly/Hash.h>
 
@@ -421,7 +422,7 @@ struct Index {
    * Throw away data structures that won't be needed during the emit
    * stage (or beyond).
    */
-  void cleanup_for_emit();
+  void cleanup_for_emit(folly::Baton<>* done);
 
   /*
    * The Index contains a Builder for an ArrayTypeTable.

@@ -4837,27 +4837,43 @@ void Index::freeze() {
   m_data->ever_frozen = true;
 }
 
-void Index::cleanup_for_emit() {
-  m_data->classes.clear();
-  m_data->methods.clear();
-  m_data->method_ref_params_by_name.clear();
-  m_data->funcs.clear();
-  m_data->typeAliases.clear();
-  m_data->classAliases.clear();
+template<typename T>
+void clobber(T& t) {
+  if (debug) {
+    char*p = (char*)&t;
+    for (auto i = sizeof(t); i--; ) p[i] ^= 0xa5;
+  }
+}
 
-  m_data->classClosureMap.clear();
-  m_data->classExtraMethodMap.clear();
+#define CLEAR(x)                                \
+  (x).clear();                                  \
+  clobber(x);                                   \
+  SCOPE_EXIT { clobber(x); };
 
-  m_data->classInfo.clear();
+void Index::cleanup_for_emit(folly::Baton<>* done) {
+  CLEAR(m_data->classes);
+  CLEAR(m_data->methods);
+  CLEAR(m_data->method_ref_params_by_name);
+  CLEAR(m_data->funcs);
+  CLEAR(m_data->typeAliases);
+  CLEAR(m_data->classAliases);
+
+  CLEAR(m_data->classClosureMap);
+  CLEAR(m_data->classExtraMethodMap);
+
   /*
-   * We can't clear allClassInfos, because although nothing will look
-   * up ClassInfos from now on, Types can contain pointers to them,
-   * which are needed when emitting RepoAuthTypes.
+   * allClassInfos, is what's keeping the ClassInfos alive, and Type's
+   * can still have references to them. In addition, we can still use
+   * classInfos from lookup_public_static, so we can't clear either
+   * member here.
    */
-  m_data->funcFamilies.clear();
 
-  m_data->dependencyMap.clear();
-  m_data->foldableReturnTypeMap.clear();
+  CLEAR(m_data->funcFamilies);
+
+  CLEAR(m_data->dependencyMap);
+  CLEAR(m_data->foldableReturnTypeMap);
+
+  if (done) done->wait();
 }
 
 void Index::thaw() {

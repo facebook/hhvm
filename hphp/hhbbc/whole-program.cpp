@@ -575,7 +575,10 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
   debug_dump_program(*index, *program);
   print_stats(*index, *program);
 
-  index->cleanup_for_emit();
+  // running cleanup_for_emit can take a while... do it in parallel
+  // with making the unit emitters.
+  folly::Baton<> done;
+  auto cleanup_thread = std::thread([&] { index->cleanup_for_emit(&done); });
 
   LitstrTable::fini();
   LitstrTable::init();
@@ -585,6 +588,8 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
   });
   LitstrTable::get().setReading();
   arrTable = std::move(index->array_table_builder());
+  done.post();
+  cleanup_thread.join();
   ueq.push(nullptr);
 }
 

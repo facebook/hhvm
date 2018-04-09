@@ -45,7 +45,6 @@ type t = {
   informant_min_distance_restart: int;
   informant_use_xdb: bool;
   load_script_config: LoadScriptConfig.t;
-  typecheck_after_init: bool;
 }
 
 let default = {
@@ -78,7 +77,6 @@ let default = {
   informant_min_distance_restart = 100;
   informant_use_xdb = false;
   load_script_config = LoadScriptConfig.default;
-  typecheck_after_init = false;
 }
 
 let path =
@@ -177,8 +175,6 @@ let load_ fn ~silent =
   let max_workers = min GlobalConfig.nbr_procs max_workers in
   let max_bucket_size = int_ "max_bucket_size"
     ~default:default.max_bucket_size config in
-  let typecheck_after_init = bool_ "typecheck_after_init"
-    ~default:default.typecheck_after_init config in
   let load_script_config = LoadScriptConfig.default in
   {
     use_watchman;
@@ -209,7 +205,6 @@ let load_ fn ~silent =
     informant_min_distance_restart;
     informant_use_xdb;
     load_script_config;
-    typecheck_after_init;
   }
 
 let load ~silent =

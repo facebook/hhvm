@@ -227,6 +227,24 @@ end = struct
     namespace;
   }
 
+  let unbound_name_error genv pos name kind =
+    (* Naming pretends to be local and not dependent on other files, so it
+     * doesn't bother with adding dependencies (even though it does look up
+     * things in global state). This is mostly brushed aside because "they
+     * will be added during typing". Unfortunately, there are multiple scenarios
+     * when typechecker will name an expression, but gives up on typechecking
+     * it. We are then left with a unrecorded dependency. This should be fixed
+     * on some more basic level, but so far the only incorrectness that anyone
+     * has observed due to this is that we fail to remove "unbound name" errors
+     * sometimes. I add this dependency here for now to fix the annoyance it
+     * causes developers. *)
+    begin match kind with
+      | `func -> Typing_deps.Dep.Fun name
+      | `cls -> Typing_deps.Dep.Class name
+      | `const -> Typing_deps.Dep.GConst name
+    end |> Typing_deps.add_idep genv.droot;
+    Errors.unbound_name pos name kind
+
   let make_class_env tcopt tparams c =
     let genv = make_class_genv tcopt tparams c.c_mode
       (c.c_name, c.c_kind) c.c_namespace in
@@ -297,10 +315,10 @@ end = struct
     match v with
     | None ->
       (match genv.in_mode with
-        | FileInfo.Mstrict -> Errors.unbound_name p x `const
+        | FileInfo.Mstrict -> unbound_name_error genv p x `const
         | FileInfo.Mpartial | FileInfo.Mdecl when not
             (TypecheckerOptions.assume_php genv.tcopt) ->
-          Errors.unbound_name p x `const
+          unbound_name_error genv p x `const
         | FileInfo.Mphp | FileInfo.Mdecl | FileInfo.Mpartial -> ()
       )
     | _ -> ()
@@ -328,9 +346,9 @@ end = struct
               when TypecheckerOptions.assume_php genv.tcopt
               || name = SN.Classes.cUnknown -> ()
           | FileInfo.Mphp -> ()
-          | FileInfo.Mstrict -> Errors.unbound_name p name kind
+          | FileInfo.Mstrict -> unbound_name_error genv p name kind
           | FileInfo.Mpartial | FileInfo.Mdecl ->
-              Errors.unbound_name p name kind
+              unbound_name_error genv p name kind
         );
         p, name
 

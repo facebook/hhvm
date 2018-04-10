@@ -150,7 +150,7 @@ void SourceRootInfo::createFromUserConfig() {
     alp = Config::Get(
         ini, config, (m_sandbox + ".accesslog").c_str(), "", false
     );
-  } catch (HdfException &e) {
+  } catch (HdfException& e) {
     Logger::Error("%s ignored: %s", confFileName.c_str(),
                   e.getMessage().c_str());
   }

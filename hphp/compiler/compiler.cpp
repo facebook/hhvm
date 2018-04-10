@@ -190,9 +190,9 @@ int compiler_main(int argc, char **argv) {
       Logger::Info("all files saved in %s ...", po.outputDir.c_str());
     }
     return ret;
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     Logger::Error("Exception: %s\n", e.getMessage().c_str());
-  } catch (std::exception &e) {
+  } catch (std::exception& e) {
     Logger::Error("std::exception: %s\n", e.what());
   } catch (...) {
     Logger::Error("(unknown exception was thrown)\n");
@@ -713,7 +713,7 @@ int lintTarget(const CompilerOptions &po) {
       } else {
         Logger::Info("%s parsed successfully...", filename.c_str());
       }
-    } catch (FileOpenException &e) {
+    } catch (FileOpenException& e) {
       Logger::Error("%s", e.getMessage().c_str());
       ret = 1;
     }

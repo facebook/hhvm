@@ -193,8 +193,8 @@ struct ParserWorker
         }
         m_context->addPHPDirectory(job.dirName, job.force);
         return true;
-      } catch (Exception &e) {
-        Logger::Error("%s", e.getMessage().c_str());
+      } catch (Exception& e) {
+        Logger::Error(e.getMessage());
         return false;
       } catch (...) {
         Logger::Error("Fatal: An unexpected exception was thrown");
@@ -410,8 +410,8 @@ bool Package::parseImpl(const std::string* fileName) {
     Compiler::Parser parser(scanner, fileName->c_str(), m_ar, sb.st_size);
     parser.parse();
     lines = parser.line1();
-  } catch (FileOpenException &e) {
-    Logger::Error("%s", e.getMessage().c_str());
+  } catch (FileOpenException& e) {
+    Logger::Error(e.getMessage());
     return false;
   }
 

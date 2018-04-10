@@ -341,7 +341,7 @@ void HttpServer::runOrExitProcess() {
     try {
       m_satellites[i]->start();
       Logger::Info("satellite server %s started", name.c_str());
-    } catch (Exception &e) {
+    } catch (Exception& e) {
       startupFailure(
         folly::format("Unable to start satellite server {}: {}",
                       name, e.getMessage()).str()
@@ -359,7 +359,7 @@ void HttpServer::runOrExitProcess() {
 
   try {
     InitFiniNode::ServerInit();
-  } catch (std::exception &e) {
+  } catch (std::exception& e) {
     startupFailure(
       folly::sformat("Exception in InitFiniNode::ServerInit(): {}",
                      e.what()));
@@ -829,7 +829,7 @@ bool HttpServer::startServer(bool pageServer) {
         m_adminServer->start();
       }
       return true;
-    } catch (FailedToListenException &e) {
+    } catch (FailedToListenException& e) {
       if (RuntimeOption::ServerExitOnBindFail) return false;
 
       StopOldServer();
@@ -869,7 +869,7 @@ bool HttpServer::startServer(bool pageServer) {
           m_adminServer->start();
         }
         return true;
-      } catch (FailedToListenException &e) {
+      } catch (FailedToListenException& e) {
         if (i == 0) {
           Logger::Info("shutting down old HPHP server by pid file");
         }
@@ -889,7 +889,7 @@ bool HttpServer::startServer(bool pageServer) {
           m_adminServer->start();
         }
         return true;
-      } catch (FailedToListenException &e) {
+      } catch (FailedToListenException& e) {
         if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
           if (i == 0) {
             Logger::Info("unlinking socket at %s",

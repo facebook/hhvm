@@ -43,7 +43,7 @@ struct SystemProfiler {
   /*
    * Called when a PHP execution error is handled.
    */
-  virtual void errorCallBack(const ExtendedException &ee,
+  virtual void errorCallBack(const ExtendedException& ee,
                              int errnum,
                              const std::string &msg) = 0;
   /*

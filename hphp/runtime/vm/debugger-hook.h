@@ -217,7 +217,7 @@ void phpDebuggerFuncEntryHook(const ActRec* ar);
 void phpDebuggerFuncExitHook(const ActRec* ar);
 void phpDebuggerExceptionThrownHook(ObjectData* exception);
 void phpDebuggerExceptionHandlerHook() noexcept;
-void phpDebuggerErrorHook(const ExtendedException &ee,
+void phpDebuggerErrorHook(const ExtendedException& ee,
                           int errnum,
                           const std::string& message);
 void phpDebuggerEvalHook(const Func* f);

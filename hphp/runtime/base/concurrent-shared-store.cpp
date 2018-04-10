@@ -1095,7 +1095,7 @@ void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
       try {
         auto valS = internal_serialize(value);
         out << valS.toCppString();
-      } catch (const Exception &e) {
+      } catch (const Exception& e) {
         out << "Exception: " << e.what();
       }
     }

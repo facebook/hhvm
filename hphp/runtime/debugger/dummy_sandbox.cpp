@@ -153,10 +153,10 @@ void DummySandbox::run() {
         }
         m_signum = CmdSignal::SignalNone;
       }
-    } catch (const DebuggerClientExitException &e) {
+    } catch (const DebuggerClientExitException& e) {
       // stopped by the dummy sandbox thread itself
       break;
-    } catch (const DebuggerException &e) {
+    } catch (const DebuggerException& e) {
     }
   }
 }

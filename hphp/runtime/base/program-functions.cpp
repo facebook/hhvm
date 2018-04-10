@@ -480,9 +480,9 @@ static void handle_exception_helper(bool& ret,
 
   try {
     bump_counter_and_rethrow(false /* isPsp */);
-  } catch (const Eval::DebuggerException &e) {
+  } catch (const Eval::DebuggerException& e) {
     throw;
-  } catch (const ExitException &e) {
+  } catch (const ExitException& e) {
     if (where == ContextOfException::ReqInit) {
       ret = false;
     } else if (where != ContextOfException::Handler &&
@@ -494,22 +494,22 @@ static void handle_exception_helper(bool& ret,
     }
   } catch (const XDebugExitExn&) {
     // Do nothing, this is normal behavior.
-  } catch (const PhpFileDoesNotExistException &e) {
+  } catch (const PhpFileDoesNotExistException& e) {
     ret = false;
     if (where != ContextOfException::Handler) {
-      raise_notice("%s", e.getMessage().c_str());
+      raise_notice(e.getMessage());
     } else {
-      Logger::Error("%s", e.getMessage().c_str());
+      Logger::Error(e.getMessage());
     }
     if (richErrorMsg) {
       handle_exception_append_bt(errorMsg, e);
     }
-  } catch (const HostOutOfMemoryException &e) {
+  } catch (const HostOutOfMemoryException& e) {
     ret = false;
     error = true;
     errorMsg = "OOM";
     context->onOOMKill(e);
-  } catch (const Exception &e) {
+  } catch (const Exception& e) {
     bool oldRet = ret;
     bool origError = error;
     std::string origErrorMsg = errorMsg;
@@ -528,15 +528,15 @@ static void handle_exception_helper(bool& ret,
         errorMsg = origErrorMsg;
       }
     } else {
-      Logger::Error("%s", errorMsg.c_str());
+      Logger::Error(errorMsg);
     }
     if (richErrorMsg) {
-      const ExtendedException *ee = dynamic_cast<const ExtendedException *>(&e);
+      auto const ee = dynamic_cast<const ExtendedException*>(&e);
       if (ee) {
         handle_exception_append_bt(errorMsg, *ee);
       }
     }
-  } catch (const Object &e) {
+  } catch (const Object& e) {
     bool oldRet = ret;
     bool origError = error;
     auto const origErrorMsg = errorMsg;
@@ -559,13 +559,13 @@ static void handle_exception_helper(bool& ret,
         errorMsg = origErrorMsg;
       }
     } else {
-      Logger::Error("%s", errorMsg.c_str());
+      Logger::Error(errorMsg);
     }
   } catch (...) {
     ret = false;
     error = true;
     errorMsg = "(unknown exception was thrown)";
-    Logger::Error("%s", errorMsg.c_str());
+    Logger::Error(errorMsg);
   }
 }
 
@@ -611,7 +611,7 @@ void handle_destructor_exception(const char* situation) {
 
   try {
     throw;
-  } catch (ExitException &e) {
+  } catch (ExitException& e) {
     // ExitException is fine, no need to show a warning.
     TI().setPendingException(e.clone());
     return;
@@ -625,7 +625,7 @@ void handle_destructor_exception(const char* situation) {
       handle_resource_exceeded_exception();
       errorMsg += "(unable to call toString())";
     }
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     TI().setPendingException(e.clone());
     errorMsg = situation;
     errorMsg += " raised a fatal error: ";
@@ -638,13 +638,13 @@ void handle_destructor_exception(const char* situation) {
   // If there is a user error handler it will be invoked, otherwise
   // the default error handler will be invoked.
   try {
-    raise_warning_unsampled("%s", errorMsg.c_str());
+    raise_warning_unsampled(errorMsg);
   } catch (...) {
     handle_resource_exceeded_exception();
 
     // The user error handler fataled or threw an exception,
     // print out the error message directly to the log
-    Logger::Warning("%s", errorMsg.c_str());
+    Logger::Warning(errorMsg);
   }
 }
 
@@ -1270,10 +1270,10 @@ int execute_program(int argc, char **argv) {
     try {
       initialize_repo();
       ret_code = execute_program_impl(argc, argv);
-    } catch (const Exception &e) {
+    } catch (const Exception& e) {
       Logger::Error("Uncaught exception: %s", e.what());
       throw;
-    } catch (const std::exception &e) {
+    } catch (const std::exception& e) {
       Logger::Error("Uncaught exception: %s", e.what());
       throw;
     } catch (...) {
@@ -1927,8 +1927,8 @@ static int execute_program_impl(int argc, char** argv) {
                                    .setParserFrame(&parserFrame));
         raise_fatal_error(msg->data(), bt);
       }
-    } catch (FileOpenException &e) {
-      Logger::Error("%s", e.getMessage().c_str());
+    } catch (FileOpenException& e) {
+      Logger::Error(e.getMessage());
       return 1;
     } catch (const FatalErrorException& e) {
       RuntimeOption::CallUserHandlerOnFatals = false;
@@ -2026,7 +2026,7 @@ static int execute_program_impl(int argc, char** argv) {
           Eval::Debugger::DebuggerSession(po.debugger_options, restart);
           restart = false;
           execute_command_line_end(po.xhprofFlags, true, file.c_str());
-        } catch (const Eval::DebuggerRestartException &e) {
+        } catch (const Eval::DebuggerRestartException& e) {
           execute_command_line_end(0, false, nullptr);
 
           if (!e.m_args->empty()) {
@@ -2037,7 +2037,7 @@ static int execute_program_impl(int argc, char** argv) {
             prepare_args(new_argc, new_argv, *client_args, nullptr);
           }
           restart = true;
-        } catch (const Eval::DebuggerClientExitException &e) {
+        } catch (const Eval::DebuggerClientExitException& e) {
           execute_command_line_end(0, false, nullptr);
           break; // end user quitting debugger
         }
@@ -2371,7 +2371,7 @@ static void handle_exception(bool& ret, ExecutionContext* context,
          where == ContextOfException::ReqInit);
   try {
     handle_exception_helper(ret, context, errorMsg, where, error, richErrorMsg);
-  } catch (const ExitException &e) {
+  } catch (const ExitException& e) {
     // Got an ExitException during exception handling, handle
     // similarly to the case below but don't call obEndAll().
   } catch (...) {

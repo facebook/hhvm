@@ -78,7 +78,7 @@ std::map<std::string, Logger*> Logger::s_loggers = {
   {Logger::DEFAULT, new Logger()},
 };
 
-void Logger::Log(LogLevelType level, const char *type, const Exception &e,
+void Logger::Log(LogLevelType level, const char* type, const Exception& e,
                  const char *file /* = NULL */, int line /* = 0 */) {
   if (!IsEnabled()) return;
   auto msg = type + e.getMessage();

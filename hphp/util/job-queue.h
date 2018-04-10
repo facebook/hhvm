@@ -690,7 +690,7 @@ struct JobQueueDispatcher : IHostHealthObserver {
       }
       try {
         func->waitForEnd();
-      } catch (Exception &e) {
+      } catch (Exception& e) {
         exceptioned = true;
         exception = e;
       }

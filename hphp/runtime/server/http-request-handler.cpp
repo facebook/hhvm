@@ -380,7 +380,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     int code = 500;
     try {
       throw;
-    } catch (const Eval::DebuggerException &e) {
+    } catch (const Eval::DebuggerException& e) {
       code = 200;
       response = e.what();
     } catch (const XDebugExitExn& e) {
@@ -392,7 +392,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       } catch (...) {
         emsg = "Unknown";
       }
-    } catch (const std::exception &e) {
+    } catch (const std::exception& e) {
       emsg = e.what();
     } catch (...) {
       emsg = "Unknown";

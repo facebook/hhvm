@@ -245,10 +245,10 @@ void AsyncFuncImpl::threadFuncImpl() {
   }
   try {
     m_func(m_obj);
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     m_exception = e.clone();
-  } catch (std::exception &e) {
-    m_exception = new Exception("%s", e.what());
+  } catch (std::exception& e) {
+    m_exception = new Exception(std::string{e.what()});
   } catch (...) {
     m_exception = new Exception("(unknown exception)");
   }

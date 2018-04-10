@@ -187,11 +187,11 @@ struct PHPInputTransport {
   ~PHPInputTransport() {
     try {
       put_back();
-    } catch (Exception &e) {
-      Logger::Error("%s", e.getMessage().c_str());
+    } catch (Exception& e) {
+      Logger::Error(e.getMessage());
     } catch (Object &e) {
       try {
-        Logger::Error("%s", e.toString().c_str());
+        Logger::Error(e.toString().toCppString());
       } catch (...) {
         Logger::Error("(e.toString() failed)");
       }

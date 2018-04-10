@@ -227,7 +227,7 @@ Variant HHVM_FUNCTION(print_r, const Variant& expression,
       vs.serialize(expression, ret);
       res = true;
     }
-  } catch (StringBufferLimitException &e) {
+  } catch (StringBufferLimitException& e) {
     raise_notice("print_r() exceeded max bytes limit");
     res = e.m_result;
   }
@@ -245,7 +245,7 @@ Variant HHVM_FUNCTION(var_export, const Variant& expression,
       vs.serialize(expression, ret);
       res = true;
     }
-  } catch (StringBufferLimitException &e) {
+  } catch (StringBufferLimitException& e) {
     raise_notice("var_export() exceeded max bytes limit");
   }
   return res;

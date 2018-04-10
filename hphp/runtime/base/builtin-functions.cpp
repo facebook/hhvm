@@ -884,14 +884,14 @@ Variant unserialize_ex(const char* str, int len,
   Variant v;
   try {
     v = vu.unserialize();
-  } catch (FatalErrorException &e) {
+  } catch (FatalErrorException& e) {
     throw;
-  } catch (InvalidAllowedClassesException &e) {
+  } catch (InvalidAllowedClassesException& e) {
     raise_warning(
       "unserialize(): allowed_classes option should be array or boolean"
     );
     return false;
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     raise_notice("Unable to unserialize: [%.1000s]. %s.", str,
                  e.getMessage().c_str());
     return false;
@@ -967,7 +967,7 @@ Variant include_impl_invoke(const String& file, bool once,
     if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
       try {
         return invoke_file(file, once, currentDir);
-      } catch(PhpFileDoesNotExistException &e) {}
+      } catch(PhpFileDoesNotExistException& e) {}
     }
 
     try {
@@ -976,7 +976,7 @@ Variant include_impl_invoke(const String& file, bool once,
 
       // Don't try/catch - We want the exception to be passed along
       return invoke_file(rel_path, once, currentDir);
-    } catch(PhpFileDoesNotExistException &e) {
+    } catch(PhpFileDoesNotExistException& e) {
       throw PhpFileDoesNotExistException(file.c_str());
     }
   } else {

@@ -255,13 +255,13 @@ public:
                    int errnum,
                    bool callUserHandler,
                    ErrorThrowMode mode,
-                   const std::string &prefix,
+                   const std::string& prefix,
                    bool skipFrame = false);
-  bool callUserErrorHandler(const Exception &e, int errnum,
+  bool callUserErrorHandler(const Exception& e, int errnum,
                             bool swallowExceptions);
-  void recordLastError(const Exception &e, int errnum = 0);
+  void recordLastError(const Exception& e, int errnum = 0);
   void clearLastError();
-  bool onFatalError(const Exception &e); // returns handled
+  bool onFatalError(const Exception& e); // returns handled
   bool onUnhandledException(Object e);
   void onOOMKill(const HostOutOfMemoryException& e);
   ErrorState getErrorState() const;

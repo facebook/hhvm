@@ -12423,8 +12423,8 @@ class EmitterWorker
     try {
       AnalysisResultPtr ar = ((AnalysisResult*)m_context)->shared_from_this();
       s_ueq.push(std::unique_ptr<UnitEmitter>{emitHHBCVisitor(ar, job)});
-    } catch (Exception &e) {
-      Logger::Error("%s", e.getMessage().c_str());
+    } catch (Exception& e) {
+      Logger::Error(e.getMessage());
       m_ret = false;
     } catch (...) {
       Logger::Error("Fatal: An unexpected exception was thrown");
@@ -12487,8 +12487,8 @@ class GenTextWorker
   void doJob(JobType job) override {
     try {
       genText(job, *m_context);
-    } catch (Exception &e) {
-      Logger::Error("%s", e.getMessage().c_str());
+    } catch (Exception& e) {
+      Logger::Error(e.getMessage());
     } catch (...) {
       Logger::Error("Fatal: An unexpected exception was thrown");
     }

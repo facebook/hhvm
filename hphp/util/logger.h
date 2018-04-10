@@ -99,8 +99,8 @@ struct Logger {
   template<typename... Args> static void FInfo(Args&&... args);
   template<typename... Args> static void FVerbose(Args&&... args);
 
-  static void Log(LogLevelType level, const char *type, const Exception &e,
-                  const char *file = nullptr, int line = 0);
+  static void Log(LogLevelType level, const char* type, const Exception& e,
+                  const char* file = nullptr, int line = 0);
   static void OnNewRequest();
   static void ResetRequestCount();
 

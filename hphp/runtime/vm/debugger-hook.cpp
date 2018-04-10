@@ -341,7 +341,7 @@ void phpDebuggerExceptionHandlerHook() noexcept {
 }
 
 // Hook called when the VM raises an error.
-void phpDebuggerErrorHook(const ExtendedException &ee,
+void phpDebuggerErrorHook(const ExtendedException& ee,
                           int errnum,
                           const std::string& message) {
   VMRegAnchor anchor;

@@ -519,7 +519,7 @@ void Debugger::cleanupRetiredProxies() {
         TRACE(2, "Proxy %p has not stopped yet\n", proxy.get());
         m_retiredProxyQueue.push(proxy);
       }
-    } catch (Exception &e) {
+    } catch (Exception& e) {
       Logger::Error("Exception during proxy %p retirement: %s",
                     proxy.get(), e.getMessage().c_str());
     }

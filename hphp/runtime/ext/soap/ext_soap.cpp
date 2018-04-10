@@ -169,7 +169,7 @@ static Object create_soap_fault(const String& code, const String& fault) {
   return SystemLib::AllocSoapFaultObject(code, fault);
 }
 
-static Object create_soap_fault(Exception &e) {
+static Object create_soap_fault(Exception& e) {
   USE_SOAP_GLOBAL;
   return create_soap_fault(SOAP_GLOBAL(error_code), String(e.getMessage()));
 }
@@ -2021,7 +2021,7 @@ void HHVM_METHOD(SoapServer, __construct,
     data->m_typemap = soap_create_typemap(data->m_sdl, typemap_ht);
   }
 
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     throw_object(create_soap_fault(e));
   }
 }
@@ -2222,7 +2222,7 @@ void HHVM_METHOD(SoapServer, handle,
                                          data->m_actor.c_str(),
                                          function_name, params, soap_version,
                                          data->m_soap_headers);
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     xmlFreeDoc(doc_request);
     send_soap_server_fault(function, e, nullptr);
     return;
@@ -2237,7 +2237,7 @@ void HHVM_METHOD(SoapServer, handle,
     try {
       soap_obj = create_object(data->m_soap_class.name,
                                data->m_soap_class.argv);
-    } catch (Exception &e) {
+    } catch (Exception& e) {
       send_soap_server_fault(function, e, nullptr);
       return;
     }
@@ -2262,7 +2262,7 @@ void HHVM_METHOD(SoapServer, handle,
         } else {
           h->retval = vm_call_user_func(fn_name, h->parameters);
         }
-      } catch (Exception &e) {
+      } catch (Exception& e) {
         send_soap_server_fault(function, e, h);
         return;
       }
@@ -2287,7 +2287,7 @@ void HHVM_METHOD(SoapServer, handle,
       } else {
         retval = vm_call_user_func(fn_name, params);
       }
-    } catch (Exception &e) {
+    } catch (Exception& e) {
       send_soap_server_fault(function, e, nullptr);
       return;
     }
@@ -2319,7 +2319,7 @@ void HHVM_METHOD(SoapServer, handle,
       return;
     }
     throw_object(e);
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     send_soap_server_fault(function, e, nullptr);
     return;
   }
@@ -2538,7 +2538,7 @@ void HHVM_METHOD(SoapClient, __construct,
     }
   }
 
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     throw_object(create_soap_fault(e));
   }
 }
@@ -2635,7 +2635,7 @@ Variant HHVM_METHOD(SoapClient, __soapcall,
           ret = do_request(this_, request, location.data(), nullptr,
                            data->m_soap_version, one_way, response);
         }
-      } catch (Exception &e) {
+      } catch (Exception& e) {
         xmlFreeDoc(request);
         throw_object(create_soap_fault(e));
       }
@@ -2679,7 +2679,7 @@ Variant HHVM_METHOD(SoapClient, __soapcall,
       try {
         ret = do_request(this_, request, location.c_str(), action.c_str(),
                          data->m_soap_version, 0, response);
-      } catch (Exception &e) {
+      } catch (Exception& e) {
         xmlFreeDoc(request);
         throw_object(create_soap_fault(e));
       }

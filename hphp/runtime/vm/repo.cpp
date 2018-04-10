@@ -585,7 +585,7 @@ void Repo::initCentral() {
   auto fail_no_repo = [&error] {
     error = "Failed to initialize central HHBC repository:\n" + error;
     // Database initialization failed; this is an unrecoverable state.
-    Logger::Error("%s", error.c_str());
+    Logger::Error(error);
 
     if (Process::IsInMainThread()) {
       exit(1);

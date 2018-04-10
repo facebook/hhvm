@@ -181,10 +181,10 @@ void DebuggerServer::accept() {
           } else {
             Logger::Error("unable to accept incoming debugger request");
           }
-        } catch (Exception &e) {
-          Logger::Error("%s", e.getMessage().c_str());
-        } catch (std::exception &e) {
-          Logger::Error("%s", e.what());
+        } catch (Exception& e) {
+          Logger::Error(e.getMessage());
+        } catch (std::exception& e) {
+          Logger::Error(std::string{e.what()});
         } catch (...) {
           Logger::Error("(unknown exception was thrown)");
         }

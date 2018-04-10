@@ -174,7 +174,7 @@ ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstRawPtr ar) {
   ExpressionPtr optExp;
   try {
     optExp = foldConst(ar);
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     // runtime/base threw an exception, perhaps bad operands
   }
   if (optExp) optExp = replaceValue(optExp);

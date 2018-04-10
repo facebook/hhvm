@@ -203,7 +203,7 @@ String VariableSerializer::serializeWithLimit(const Variant& v, int limit) {
   //Does not need m_valueCount, which is only useful with the unsupported types
   try {
     write(v);
-  } catch (StringBufferLimitException &e) {
+  } catch (StringBufferLimitException& e) {
     return e.m_result;
   }
   return m_buf->detach();

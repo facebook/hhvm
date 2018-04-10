@@ -691,13 +691,13 @@ void ExecutionContext::onShutdownPostSend() {
     } catch (...) {
       try {
         bump_counter_and_rethrow(true /* isPsp */);
-      } catch (const ExitException &e) {
+      } catch (const ExitException& e) {
         // do nothing
-      } catch (const HostOutOfMemoryException &e) {
+      } catch (const HostOutOfMemoryException& e) {
         onOOMKill(e);
-      } catch (const Exception &e) {
+      } catch (const Exception& e) {
         onFatalError(e);
-      } catch (const Object &e) {
+      } catch (const Object& e) {
         onUnhandledException(e);
       }
     }
@@ -881,7 +881,7 @@ void ExecutionContext::handleError(const std::string& msg,
   }
 }
 
-bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
+bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
                                                 bool swallowExceptions) {
   switch (getErrorState()) {
   case ErrorState::ExecutingUserHandler:
@@ -953,7 +953,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
   return false;
 }
 
-bool ExecutionContext::onFatalError(const Exception &e) {
+bool ExecutionContext::onFatalError(const Exception& e) {
   tl_heap->resetCouldOOM(isStandardRequest());
   RID().resetTimer();
   // need to restore the error reporting level, because the fault
@@ -973,7 +973,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
 
   bool silenced = false;
   auto fileAndLine = std::make_pair(empty_string(), 0);
-  if (auto const ee = dynamic_cast<const ExtendedException *>(&e)) {
+  if (auto const ee = dynamic_cast<const ExtendedException*>(&e)) {
     silenced = ee->isSilent();
     fileAndLine = ee->getFileAndLine();
   }
@@ -1984,12 +1984,12 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
   return Variant::wrap(lv.tv());
 }
 
-void ExecutionContext::recordLastError(const Exception &e, int errnum) {
+void ExecutionContext::recordLastError(const Exception& e, int errnum) {
   m_lastError = String(e.getMessage());
   m_lastErrorNum = errnum;
   m_lastErrorPath = String::attach(getContainingFileName());
   m_lastErrorLine = getLine();
-  if (auto const ee = dynamic_cast<const ExtendedException *>(&e)) {
+  if (auto const ee = dynamic_cast<const ExtendedException*>(&e)) {
     m_lastErrorPath = ee->getFileAndLine().first;
     m_lastErrorLine = ee->getFileAndLine().second;
   }
@@ -2251,18 +2251,18 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
                    this_, frameClass, fp ? fp->m_varEnv : nullptr, nullptr,
                    InvokePseudoMain)
     ), ""};
-  } catch (FatalErrorException &e) {
+  } catch (FatalErrorException& e) {
     errorString << s_fatal.data();
     errorString << " : ";
     errorString << e.getMessage().c_str();
     errorString << "\n";
     stack = ExtendedLogger::StringOfStackTrace(e.getBacktrace());
-  } catch (ExitException &e) {
+  } catch (ExitException& e) {
     errorString << s_exit.data();
     errorString << " : ";
     errorString << tl_exit_code;
-  } catch (Eval::DebuggerException &e) {
-  } catch (Exception &e) {
+  } catch (Eval::DebuggerException& e) {
+  } catch (Exception& e) {
     errorString << s_cppException.data();
     errorString << " : ";
     errorString << e.getMessage().c_str();

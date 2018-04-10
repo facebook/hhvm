@@ -246,8 +246,8 @@ class AnalyzeWorker
   void doJob(JobType job) override {
     try {
       job->analyzeProgram(AnalysisResultConstRawPtr{m_context});
-    } catch (Exception &e) {
-      Logger::Error("%s", e.getMessage().c_str());
+    } catch (Exception& e) {
+      Logger::Error(e.getMessage());
     } catch (...) {
       Logger::Error("Fatal: An unexpected exception was thrown");
     }

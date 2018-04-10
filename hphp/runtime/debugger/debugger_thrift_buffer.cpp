@@ -54,7 +54,7 @@ static inline int serializeImpl(T data, String& sdata) {
   VariableSerializer vs(VariableSerializer::Type::DebuggerSerialize);
   try {
     sdata = vs.serialize(data, true);
-  } catch (StringBufferLimitException &e) {
+  } catch (StringBufferLimitException& e) {
     sdata = s_hit_limit;
     return DebuggerWireHelpers::HitLimit;
   } catch (...) {

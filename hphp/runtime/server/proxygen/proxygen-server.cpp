@@ -656,7 +656,7 @@ bool ProxygenServer::initialCertHandler(const std::string& /*server_name*/,
       m_httpConfig.sslContextConfigs.emplace_back(sslCtxConfig);
     }
     return true;
-  } catch (const std::exception &ex) {
+  } catch (const std::exception& ex) {
     Logger::Error(folly::to<std::string>(
       "Invalid certificate file or key file: ", ex.what()));
     return false;
@@ -698,7 +698,7 @@ bool ProxygenServer::dynamicCertHandler(const std::string& /*server_name*/,
       m_httpAcceptor->addSSLContextConfig(sslCtxConfig);
     }
     return true;
-  } catch (const std::exception &ex) {
+  } catch (const std::exception& ex) {
     Logger::Error("Invalid certificate file or key file: %s", ex.what());
     return false;
   }
@@ -722,7 +722,7 @@ bool ProxygenServer::sniNoMatchHandler(const char *server_name) {
                                            std::placeholders::_3));
       return true;
     }
-  } catch (const std::exception &ex) {
+  } catch (const std::exception& ex) {
     Logger::Error("Failed to reload certificate files or key files");
   }
   return false;
@@ -765,7 +765,7 @@ wangle::SSLContextConfig ProxygenServer::createContextConfig() {
         std::begin(RuntimeOption::ServerNextProtocols),
         std::end(RuntimeOption::ServerNextProtocols)
       });
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
       Logger::Error("Invalid certificate file or key file: %s", ex.what());
     }
   } else {

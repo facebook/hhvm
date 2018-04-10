@@ -114,13 +114,13 @@ protected:
         transport->onSendEnd();
         return;
       }
-    } catch (Exception &e) {
+    } catch (Exception& e) {
       if (Server::StackTraceOnError) {
         errorMsg = e.what();
       } else {
         errorMsg = e.getMessage();
       }
-    } catch (std::exception &e) {
+    } catch (std::exception& e) {
       errorMsg = e.what();
     } catch (...) {
       errorMsg = "(unknown exception)";

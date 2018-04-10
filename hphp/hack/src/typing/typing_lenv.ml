@@ -71,8 +71,6 @@ let intersect env parent_lenv lenv1 lenv2 =
            * new one when intersecting
            *)
           let eid = if eid1 = eid2 then eid1 else Ident.tmp() in
-          let env, ty1 = TUtils.unresolved env ty1 in
-          let env, ty2 = TUtils.unresolved env ty2 in
           let (all_small, all_large) =
             if List.length all_types1 < List.length all_types2
             then (all_types1, all_types2)
@@ -81,7 +79,13 @@ let intersect env parent_lenv lenv1 lenv2 =
             List.fold_left ~f:begin fun acc ty ->
               if List.exists acc (equiv env ty) then acc else ty::acc
             end ~init:all_large all_small in
-          let env, ty = Type.unify env.Env.pos Reason.URnone env ty1 ty2 in
+          let env, ty =
+            if ty1 == ty2
+            then env, ty1
+            else
+              let env, ty1 = TUtils.unresolved env ty1 in
+              let env, ty2 = TUtils.unresolved env ty2 in
+              Type.unify env.Env.pos Reason.URnone env ty1 ty2 in
           env, LMap.add local_id (all_types, ty, eid) locals
     end lenv1_locals_with_hist (env, parent_locals_with_hist)
   in

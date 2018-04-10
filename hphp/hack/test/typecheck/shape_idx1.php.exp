@@ -1,5 +1,5 @@
 File "shape_idx1.php", line 19, characters 3-31:
-  ?^(A)
+  ^(A)
 File "shape_idx1.php", line 20, characters 3-35:
   ^(A)
 File "shape_idx1.php", line 21, characters 3-32:

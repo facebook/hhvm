@@ -156,7 +156,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
   // We profile generic IncRefs to see which ones are unlikely to see
   // refcounted values.
   if (RuntimeOption::EvalHHIROutlineGenericIncDecRef && profile.optimizing()) {
-    auto const data = profile.data(RefcountProfile::reduce);
+    auto const data = profile.data();
     if (data.total > 0) {
       if (data.percent(data.refcounted) <
           RuntimeOption::EvalJitPGOUnlikelyIncRefCountedPercent
@@ -242,7 +242,7 @@ float decRefDestroyedPercent(Vout& v, IRLS& /*env*/,
                              const TargetProfile<DecRefProfile>& profile) {
   if (!profile.optimizing()) return 0.0;
 
-  auto const data = profile.data(DecRefProfile::reduce);
+  auto const data = profile.data();
 
   if (data.percent(data.destroyed()) == 0) {
     emitIncStat(v, Stats::TC_DecRef_Profiled_0);
@@ -469,7 +469,7 @@ template<class Destroy>
 void emitDecRefOpt(Vout& v, Vout& vcold, Vreg base,
                    const TargetProfile<DecRefProfile>& profile,
                    Destroy destroy) {
-  const auto data = profile.data(DecRefProfile::reduce);
+  const auto data = profile.data();
   const auto persistPct = data.percent(data.persistent());
   const auto destroyPct = data.percent(data.destroyed());
   const auto survivePct = data.percent(data.survived());
@@ -623,7 +623,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
   if (Trace::moduleEnabled(Trace::irlower, 3) && profile.optimizing()) {
     FTRACE(3, "irlower-refcount: DecRefProfile<{}, {}>: {}\n",
            inst->marker().show(), decRefProfileKey(inst)->data(),
-           profile.data(DecRefProfile::reduce));
+           profile.data());
   }
 
   if (profile.profiling()) {
@@ -655,7 +655,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
   if (RuntimeOption::EvalHHIROutlineGenericIncDecRef &&
       profile.optimizing() &&
       !ty.isKnownDataType()) {
-    auto const data = profile.data(DecRefProfile::reduce);
+    auto const data = profile.data();
     auto const unlikelyCountedPct =
       RuntimeOption::EvalJitPGOUnlikelyDecRefCountedPercent;
     if (data.percent(data.refcounted) < unlikelyCountedPct) {
@@ -717,7 +717,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   bool unlikelyCounted = false;
   bool unlikelyDecrement = false;
   if (RuntimeOption::EvalHHIROutlineGenericIncDecRef && profile.optimizing()) {
-    auto const data = profile.data(RefcountProfile::reduce);
+    auto const data = profile.data();
     if (data.total > 0) {
       if (data.percent(data.refcounted) <
           RuntimeOption::EvalJitPGOUnlikelyDecRefCountedPercent

@@ -663,7 +663,7 @@ SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
   }
 
   if (prof.optimizing()) {
-    auto const data = prof.data(ArrayKindProfile::reduce);
+    auto const data = prof.data();
     auto const typePackedArr = Type::Array(ArrayData::kPackedKind);
     if (base->type().maybe(typePackedArr) &&
         (data.fraction(ArrayData::kPackedKind) == 1.0 ||

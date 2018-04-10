@@ -38,7 +38,7 @@ sortedSwitchProfile(TargetProfile<SwitchProfile>& profile, int32_t nCases) {
     calloc(nCases, sizeof(SwitchProfile::cases[0]))
   );
   SCOPE_EXIT { free(&data); };
-  profile.data(data, SwitchProfile::reduce, nCases);
+  profile.data(data, nCases * sizeof(SwitchProfile::cases[0]));
 
   std::vector<SwitchCaseCount> values;
   for (int i = 0; i < nCases; ++i) {

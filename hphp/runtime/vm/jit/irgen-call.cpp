@@ -425,7 +425,7 @@ bool optimizeProfiledPushMethod(IRGS& env,
     return ret;
   };
 
-  MethProfile data = profile.data(MethProfile::reduce);
+  MethProfile data = profile.data();
 
   if (auto const uniqueMeth = data.uniqueMeth()) {
     bool isMagic = !uniqueMeth->name()->isame(methodName);

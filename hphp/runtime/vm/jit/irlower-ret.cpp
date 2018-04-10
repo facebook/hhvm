@@ -235,7 +235,7 @@ void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
   auto const releaseUnlikely = [&] {
     if (!profile.optimizing()) return true;
 
-    auto const data = profile.data(ReleaseVVProfile::reduce);
+    auto const data = profile.data();
     FTRACE(3, "cgReleaseVVAndSkip({}): percentReleased = {}\n",
            inst->toString(), data.percentReleased());
 

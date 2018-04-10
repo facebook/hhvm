@@ -32,13 +32,15 @@ struct SwitchProfile {
   SwitchProfile(const SwitchProfile&) = delete;
   SwitchProfile& operator=(const SwitchProfile&) = delete;
 
-  std::string toString(int nCases) const {
-    std::ostringstream out;
-    for (int i = 0; i < nCases; ++i) out << folly::format("{},", cases[i]);
-    return out.str();
+  std::string toString(uint32_t size) const {
+    auto const nCases = size / sizeof(uint32_t);
+    std::string out;
+    for (int i = 0; i < nCases; ++i) folly::format(&out, "{},", cases[i]);
+    return out;
   }
 
-  static void reduce(SwitchProfile& a, const SwitchProfile& b, int nCases) {
+  static void reduce(SwitchProfile& a, const SwitchProfile& b, uint32_t size) {
+    auto const nCases = size / sizeof(uint32_t);
     for (uint32_t i = 0; i < nCases; ++i) {
       a.cases[i] += b.cases[i];
     }

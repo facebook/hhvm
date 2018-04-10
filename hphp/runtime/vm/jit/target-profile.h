@@ -41,6 +41,29 @@ namespace jit {
 namespace detail {
 void addTargetProfileInfo(const rds::Profile<void>& key,
                           const std::string& dbgInfo);
+
+template<typename T>
+auto call_reduce(T& out, const T& in, uint32_t size) ->
+  decltype(T::reduce(out, in, size)) {
+  return T::reduce(out, in, size);
+}
+
+template<typename T>
+void call_reduce(T& out, const T& in, uint64_t size) {
+  return T::reduce(out, in);
+}
+
+template<typename T>
+auto call_tostring(const T& t, uint32_t size) ->
+  decltype(t.toString(size)) {
+  return t.toString(size);
+}
+
+template<typename T>
+auto call_tostring(const T& t, uint64_t size) -> decltype(auto) {
+  return t.toString();
+}
+
 }
 
 /*
@@ -71,9 +94,16 @@ void addTargetProfileInfo(const rds::Profile<void>& key,
  *      gen(ProfMyTarget, RDSHandleData { prof.handle() }, ...);
  *    }
  *
- * The type must have a toString(...) method returning a std::string with a
- * single human-readable line representing the state of the profile, taking
- * the same set of extra arguments as the reduce function passed to 'data'.
+ * MyType::toString([uint32_t]) should return a std::string with a
+ * single human-readable line representing the state of the
+ * profile. The optional parameter is the actual size allocated in
+ * rds (only needed for variable size types).
+ *
+ * MyType::reduce(T& out, const T& in[, uint32_t]) should accumulate
+ * the in into out, and should assume that another thread might be
+ * writing to in while its reading it. The third, optional, parameter
+ * is the actual size allocated in rds (see SwitchProfile for an
+ * example of a variably sized profiler).
  *
  * rds::Profile<MyType> also needs to be added to rds::Symbol.
  */
@@ -102,40 +132,40 @@ struct TargetProfile {
   {}
 
   /*
-   * Access the data we collected during profiling.
+   * Calls T::reduce to fold the data from each local RDS slot.
    *
-   * ReduceFn is used to fold the data from each local RDS slot.  It must have
-   * the signature void(T&, const T&, Args...), and should assume the second
-   * argument might be concurrently written to by other threads running in the
-   * translation cache. Any arguments passed to data() after reduce will be
-   * forwarded to the reduce function.
-   *
-   * Most callers probably want the second overload, for simplicity. The
-   * two-argument version is for variable-sized T, and the caller must ensure
-   * that out is zero-initialized before calling data().
-   *
-   * Pre: optimizing()
+   * Its the caller's responsibility to ensure that size is correct,
+   * and that refers to a block of at least size bytes, which is
+   * initially zeroed.
    */
-  template<class ReduceFn, class... Args>
-  void data(T& out, ReduceFn reduce, Args&&... extraArgs) const {
-    assertx(optimizing());
-    auto const hand = handle();
+  static void reduce(T& out, rds::Handle hand, uint32_t size) {
     for (auto& base : rds::allTLBases()) {
-      reduce(out, rds::handleToRef<T>(base, hand),
-             std::forward<Args>(extraArgs)...);
-    }
-    if (RuntimeOption::EvalDumpTargetProfiles) {
-      detail::addTargetProfileInfo(
-        m_key,
-        out.toString(std::forward<Args>(extraArgs)...)
-      );
+      detail::call_reduce(out, rds::handleToRef<T>(base, hand), size);
     }
   }
 
-  template<class ReduceFn, class... Args>
-  T data(ReduceFn reduce, Args&&... extraArgs) const {
+  /*
+   * Access the data we collected during profiling.
+   *
+   * It calls reduce to populate out (see description above).
+   *
+   * Most callers want the second overload, for simplicity. This
+   * version is just for variable-sized T (and has the same
+   * assumptions about out and size as reduce).
+   *
+   * Pre: optimizing()
+   */
+  void data(T& out, uint32_t size) const {
+    assertx(optimizing());
+    reduce(out, handle(), size);
+    if (RuntimeOption::EvalDumpTargetProfiles) {
+      detail::addTargetProfileInfo(m_key, detail::call_tostring(out, size));
+    }
+  }
+
+  T data(uint32_t size = sizeof(T)) const {
     auto accum = T{};
-    data(accum, reduce, std::forward<Args>(extraArgs)...);
+    data(accum, size);
     return accum;
   }
 

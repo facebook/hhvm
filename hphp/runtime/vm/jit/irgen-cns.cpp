@@ -205,7 +205,7 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t clsRefSlot) {
         return;
       }
       if (profile.optimizing()) {
-        auto const slot = profile.data(ClsCnsProfile::reduce).getSlot();
+        auto const slot = profile.data().getSlot();
         if (slot != kInvalidSlot) {
           auto const exit = makeExitSlow(env);
           auto const len = gen(env, LdClsCnsVecLen, clsTmp);

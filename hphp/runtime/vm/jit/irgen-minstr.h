@@ -85,7 +85,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
   }
 
   if (profile.optimizing()) {
-    auto const data = profile.data(ArrayOffsetProfile::reduce);
+    auto const data = profile.data();
 
     if (auto const pos = data.choose()) {
       return cond(
@@ -156,7 +156,7 @@ SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
 
   if (!prof.optimizing()) return tmp;
 
-  auto const reducedType = prof.data(TypeProfile::reduce).type;
+  auto const reducedType = prof.data().type;
 
   if (reducedType == TBottom) {
     // We got no samples

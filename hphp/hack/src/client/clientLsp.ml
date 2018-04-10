@@ -50,6 +50,7 @@ type hh_server_state =
   | Hh_server_typechecking_local
   | Hh_server_typechecking_global
   | Hh_server_stolen
+  | Hh_server_forgot
 
 (** A push message from the server might come while we're waiting for a server-rpc
    response, or while we're free. The current architecture allows us to have
@@ -146,7 +147,7 @@ let initialize_params_ref: Lsp.Initialize.params option ref = ref None
 let hhconfig_version: string ref = ref "[NotYetInitialized]"
 let can_autostart_after_mismatch: bool ref = ref true
 let callbacks_outstanding: (on_result * on_error) IdMap.t ref = ref IdMap.empty
-let hh_server_state: hh_server_state ref = ref Hh_server_unknown
+let hh_server_state: (float * hh_server_state) list ref = ref [] (* head is newest *)
 
 let initialize_params_exc () : Lsp.Initialize.params =
   match !initialize_params_ref with
@@ -205,9 +206,37 @@ let hh_server_state_to_string (hh_server_state: hh_server_state) : string =
   | Hh_server_typechecking_global -> "hh_server typechecking (global)"
   | Hh_server_handling_or_ready -> "hh_server ready"
   | Hh_server_unknown -> "hh_server unknown state"
+  | Hh_server_forgot -> "hh_server forgotten state"
 
+(** We keep a log of server state over the past 2mins. When adding a new server
+   state: if this state is the same as the current one, then ignore it. Also,
+   retain only states younger than 2min plus the first one older than 2min.
+   Newest state is at head of list. *)
 let set_hh_server_state (new_hh_server_state: hh_server_state) : unit =
-  hh_server_state := new_hh_server_state
+  let new_time = Unix.gettimeofday () in
+  let rec retain rest = match rest with
+    | [] -> []
+    | (time, state)::rest when time >= new_time -. 120.0 -> (time, state)::(retain rest)
+    | (time, state)::_rest -> (time, state)::[] (* retain only the first that's older *)
+  in
+  hh_server_state := match !hh_server_state with
+  | (prev_time, prev_hh_server_state)::rest when prev_hh_server_state = new_hh_server_state ->
+    (prev_time, prev_hh_server_state)::(retain rest)
+  | rest ->
+    (new_time, new_hh_server_state)::(retain rest)
+
+let get_current_hh_server_state () : hh_server_state =
+  (* current state is at head of list. *)
+  match List.hd !hh_server_state with
+  | None -> Hh_server_unknown
+  | Some (_, hh_server_state) -> hh_server_state
+
+let get_older_hh_server_state (requested_time: float) : hh_server_state =
+  (* find the first item which is older than the specified time. *)
+  match List.find !hh_server_state ~f:(fun (time, _) -> time <= requested_time) with
+  | None -> Hh_server_forgot
+  | Some (_, hh_server_state) -> hh_server_state
+
 
 let get_root_opt () : Path.t option =
   match !initialize_params_ref with
@@ -1788,6 +1817,7 @@ let log_response_if_necessary
       ~method_:(if c.kind = Response then "[response]" else c.method_)
       ~kind:(kind_to_string c.kind)
       ~start_queue_time:c.timestamp
+      ~start_hh_server_state:(get_older_hh_server_state c.timestamp |> hh_server_state_to_string)
       ~start_handle_time:unblocked_time
       ~json
       ~json_response
@@ -1807,9 +1837,22 @@ let hack_log_error
     let open Jsonrpc in
     let json = c.json |> Hh_json.json_truncate |> Hh_json.json_to_string in
     HackEventLogger.client_lsp_method_exception
-      root c.method_ (kind_to_string c.kind) c.timestamp unblocked_time json message stack source
+      ~root
+      ~method_:c.method_
+      ~kind:(kind_to_string c.kind)
+      ~start_queue_time:c.timestamp
+      ~start_hh_server_state:(get_older_hh_server_state c.timestamp |> hh_server_state_to_string)
+      ~start_handle_time:unblocked_time
+      ~json
+      ~message
+      ~stack
+      ~source
   | _ ->
-    HackEventLogger.client_lsp_exception root message stack source
+    HackEventLogger.client_lsp_exception
+      ~root
+      ~message
+      ~stack
+      ~source
 
 
 (* cancel_if_stale: If a message is stale, throw the necessary exception to

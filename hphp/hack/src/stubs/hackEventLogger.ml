@@ -49,10 +49,11 @@ let client_build_finish
   ~rev_changed:_ ~build_type:_ ~request_id:_ ~exit_status:_ = ()
 let client_check_finish _ = ()
 let client_lsp_method_handled
-  ~root:_ ~method_:_ ~kind:_ ~start_queue_time:_ ~start_handle_time:_ ~json:_ ~json_response:_ = ()
+  ~root:_ ~method_:_ ~kind:_ ~start_queue_time:_ ~start_hh_server_state:_ ~start_handle_time:_
+  ~json:_ ~json_response:_ = ()
 let client_lsp_method_exception
-  ~root:_ ~method_:_ ~kind:_ ~start_queue_time:_ ~start_handle_time:_ ~json:_
-  ~message:_ ~stack:_ ~source:_ = ()
+  ~root:_ ~method_:_ ~kind:_ ~start_queue_time:_ ~start_hh_server_state:_ ~start_handle_time:_
+  ~json:_ ~message:_ ~stack:_ ~source:_ = ()
 let client_lsp_exception
   ~root:_ ~message:_ ~stack:_ ~source:_ = ()
 let client_bad_exit ~command _ = ()

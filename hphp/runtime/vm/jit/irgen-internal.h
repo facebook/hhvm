@@ -952,6 +952,26 @@ inline void putClsRef(IRGS& env, uint32_t slot, SSATmp* cls) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Creates a catch block and calls body immediately as the catch block begins
+ */
+template<class Body>
+Block* create_catch_block(IRGS& env, Body body) {
+ auto const catchBlock = defBlock(env, Block::Hint::Unused);
+ BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
+
+ auto const& exnState = env.irb->exceptionStackState();
+ env.irb->fs().setBCSPOff(exnState.syncedSpLevel);
+
+ gen(env, BeginCatch);
+ body();
+ gen(env, EndCatch, IRSPRelOffsetData { spOffBCFromIRSP(env) },
+     fp(env), sp(env));
+ return catchBlock;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}}
 
 #endif

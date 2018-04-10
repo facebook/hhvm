@@ -29,19 +29,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-Block* create_catch_block(IRGS& env) {
-  auto const catchBlock = defBlock(env, Block::Hint::Unused);
-  BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
-
-  auto const& exnState = env.irb->exceptionStackState();
-  env.irb->fs().setBCSPOff(exnState.syncedSpLevel);
-
-  gen(env, BeginCatch);
-  gen(env, EndCatch, IRSPRelOffsetData { spOffBCFromIRSP(env) },
-      fp(env), sp(env));
-  return catchBlock;
-}
-
 void check_catch_stack_state(IRGS& env, const IRInstruction* inst) {
   always_assert_flog(
     !env.irb->fs().stackModified(),
@@ -102,7 +89,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
      * information.
      */
     check_catch_stack_state(env, inst);
-    inst->setTaken(create_catch_block(env));
+    inst->setTaken(create_catch_block(env, []{}));
   }
 
   if (inst->mayRaiseError()) {

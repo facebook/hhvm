@@ -533,6 +533,11 @@ static CallMap s_callMap {
     {OODeclExists, &Unit::classExists, DSSA, SSync,
                      {{SSA, 0}, {SSA, 1}, extra(&ClassKindData::kind)}},
 
+    /* is/as expressions */
+    {ResolveTypeStruct, resolveTypeStructHelper, DSSA, SSync, {{SSA, 0}}},
+    {IsTypeStruct, isTypeStructHelper, DSSA, SNone, {{SSA, 0}, {TV, 1}}},
+    {AsTypeStruct, asTypeStructHelper, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
+
     /* surprise flag support */
     {SuspendHookAwaitEF, &EventHook::onFunctionSuspendAwaitEF, DNone,
                             SSync, {{SSA, 0}, {SSA, 1}}},

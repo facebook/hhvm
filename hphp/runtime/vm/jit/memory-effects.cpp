@@ -1989,9 +1989,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowArithmeticError:
   case ThrowDivisionByZeroError:
   case SetOpCell:
+  case AsTypeStruct:
+  case ResolveTypeStruct:
     return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
 
   case AddNewElemVec:
+  case IsTypeStruct:
     return may_load_store(AElemAny, AEmpty);
 
   case ConvArrToKeyset: // Decrefs input values

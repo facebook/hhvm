@@ -64,6 +64,8 @@ struct SSATmp;
  *     DArrMixed    single dst has a mixed array type
  *     DVArr        single dst is either a packed array type or vec, depending
                       on configuration
+ *     DDArr        single dst is either a mixed array type or dict, depending
+                      on configuration
  *     DArrElem     single dst has type based on reading an array element,
  *                    intersected with an optional type parameter
  *     DVecElem    single dst has type based on reading a vec element,
@@ -101,6 +103,10 @@ struct SSATmp;
  *     C(type)          source must be a constant, and subtype of type
  *     CStr             same as C(StaticStr)
  *     SVar(t1,...,tn)  variadic source list, all subtypes of {t1|..|tn}
+ *     SDArr            source must be a mixed array type or dict, depending
+ *                      on configuration
+ *     CDArr            source must be a constant mixed array type or dict,
+ *                      depending on configuration
  *
  * flags:
  *

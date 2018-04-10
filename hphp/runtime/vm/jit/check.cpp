@@ -455,6 +455,19 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     return true;
   };
 
+  auto checkDArr = [&] (bool is_const) {
+    auto t = src()->type();
+    auto cond_type = RuntimeOption::EvalHackArrDVArrs
+      ? TDict : Type::Array(ArrayData::kMixedKind);
+    if (is_const) {
+      auto expected = folly::sformat("constant {}", t.toString());
+      check(src()->hasConstVal(cond_type), t, expected.c_str());
+    } else {
+      check(src()->isA(cond_type), t, nullptr);
+    }
+    ++curSrc;
+  };
+
   auto checkDst = [&] (bool cond, const std::string& errorMessage) {
     if (cond) return true;
 
@@ -505,12 +518,14 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
                       }
 #define AK(kind)      Type::Array(ArrayData::k##kind##Kind)
 #define C(T)          check(src()->hasConstVal(T) ||     \
-                            src()->isA(TBottom),    \
+                            src()->isA(TBottom),         \
                             Type(),                      \
                             "constant " #T);             \
                       ++curSrc;
 #define CStr          C(StaticStr)
 #define SVar(...)     checkVariadic(buildUnion(__VA_ARGS__));
+#define SDArr         checkDArr(false);
+#define CDArr         checkDArr(true);
 #define ND
 #define DMulti
 #define DSetElem
@@ -545,6 +560,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #define DArrPacked
 #define DArrMixed
 #define DVArr
+#define DDArr
 #define DCol
 #define DCtx
 #define DCtxCls
@@ -567,6 +583,8 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #undef C
 #undef CStr
 #undef SVar
+#undef SDArr
+#undef CDArr
 
 #undef ND
 #undef D
@@ -592,6 +610,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #undef DArrPacked
 #undef DArrMixed
 #undef DVArr
+#undef DDArr
 #undef DCol
 #undef DCtx
 #undef DCtxCls

@@ -206,6 +206,11 @@ void registerLiveObj(ObjectData* obj);
 /* Check if a method of the given name exists on the class. */
 bool methodExistsHelper(Class*, StringData*);
 
+/* Is/As Helpers */
+ArrayData* resolveTypeStructHelper(const ArrayData*);
+bool isTypeStructHelper(ArrayData*, Cell);
+void asTypeStructHelper(ArrayData*, Cell);
+
 /*
  * Throw a VMSwitchMode exception.
  */

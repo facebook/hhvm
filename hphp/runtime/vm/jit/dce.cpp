@@ -155,6 +155,7 @@ bool canDCE(IRInstruction* inst) {
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:
   case HasToString:
+  case IsTypeStruct:
   case IsType:
   case IsNType:
   case IsTypeMem:
@@ -694,6 +695,8 @@ bool canDCE(IRInstruction* inst) {
   case KillClsRef:
   case KillCufIter:
   case BoxPtr:
+  case AsTypeStruct:
+  case ResolveTypeStruct:
     return false;
 
   case AKExistsArr:

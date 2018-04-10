@@ -701,6 +701,36 @@ void emitInstanceOf(IRGS& env) {
   decRef(env, t1);
 }
 
+void emitIsTypeStruct(IRGS& env, const ArrayData* a) {
+  auto const tc = gen(env, ResolveTypeStruct, cns(env, a));
+  auto const c = popC(env);
+  push(env, gen(env, IsTypeStruct, tc, c));
+  decRef(env, c);
+  decRef(env, tc);
+}
+
+void emitAsTypeStruct(IRGS& env, const ArrayData* a) {
+  /*
+   * Expecting as-check to fail rarely and since is-check is cheaper,
+   * run is-check first and if it fails run the as-check to generate the
+   * exception
+   */
+  auto const c = topC(env);
+  auto const tc = gen(env, ResolveTypeStruct, cns(env, a));
+  ifThen(
+    env,
+    [&](Block* taken) {
+      auto const res = gen(env, IsTypeStruct, tc, c);
+      gen(env, JmpZero, taken, res);
+    },
+    [&]{
+      auto block = create_catch_block(env, [&]{ decRef(env, tc); });
+      gen(env, AsTypeStruct, block, tc, c);
+    }
+  );
+  decRef(env, tc);
+}
+
 void emitVerifyRetTypeC(IRGS& env) {
   verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId, true);
 }

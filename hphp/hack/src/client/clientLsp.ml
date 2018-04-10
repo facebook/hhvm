@@ -210,21 +210,19 @@ let rpc
     (ref_unblocked_time: float ref)
     (command: 'a ServerCommandTypes.t)
   : 'a =
-  try
-    let res, start_handle_time, pending_messages =
-      ServerCommand.rpc_persistent (server_conn.ic, server_conn.oc) command in
-    ref_unblocked_time := start_handle_time;
-    List.iter pending_messages
-      ~f:(fun x -> Queue.push x server_conn.pending_messages);
+  let callback () push_message = Queue.push push_message server_conn.pending_messages in
+  let result = ServerCommand.rpc_persistent
+    (server_conn.ic, server_conn.oc) () callback command in
+  match result with
+  | Ok ((), res, start_server_handle_time) ->
+    ref_unblocked_time := start_server_handle_time;
     res
-  with
-  | ServerCommand.Remote_fatal_exception remote_e_data ->
+  | Error ((), Utils.Callstack _, ServerCommand.Remote_fatal_exception remote_e_data) ->
     raise (Server_fatal_connection_exception remote_e_data)
-  | ServerCommand.Remote_nonfatal_exception remote_e_data ->
+  | Error ((), Utils.Callstack _, ServerCommand.Remote_nonfatal_exception remote_e_data) ->
     raise (Server_nonfatal_exception remote_e_data)
-  | e ->
+  | Error ((), Utils.Callstack stack, e) ->
     let message = Printexc.to_string e in
-    let stack = Printexc.get_backtrace () in
     raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
 
 

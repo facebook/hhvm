@@ -89,24 +89,48 @@ let full_recheck_if_needed genv env msg =
 exception Remote_fatal_exception of Marshal_tools.remote_exception_data
 exception Remote_nonfatal_exception of Marshal_tools.remote_exception_data
 
-let rec wait_for_rpc_response fd push_messages =
-  match Marshal_tools.from_fd_with_preamble fd with
-  | Response (r, t) -> r, t, List.rev push_messages
-  | Push (ServerCommandTypes.FATAL_EXCEPTION remote_e_data) ->
-    raise (Remote_fatal_exception remote_e_data)
-  | Push (ServerCommandTypes.NONFATAL_EXCEPTION remote_e_data) ->
-    raise (Remote_nonfatal_exception remote_e_data)
-  | Push m -> wait_for_rpc_response fd (m :: push_messages)
-  | Hello -> failwith "unexpected hello after connection already established"
-  | Ping -> failwith "unexpected ping on persistent connection"
+let rec wait_for_rpc_response fd state callback =
+  let error state e =
+    let stack = Printexc.get_callstack 100 |> Printexc.raw_backtrace_to_string in
+    Error (state, Utils.Callstack stack, e)
+  in
+  try
+    begin match Marshal_tools.from_fd_with_preamble fd with
+    | Response (r, t) ->
+      Ok (state, r, t)
+    | Push (ServerCommandTypes.FATAL_EXCEPTION remote_e_data) ->
+      error state (Remote_fatal_exception remote_e_data)
+    | Push (ServerCommandTypes.NONFATAL_EXCEPTION remote_e_data) ->
+      error state (Remote_nonfatal_exception remote_e_data)
+    | Push m ->
+      let state = callback state m in
+      wait_for_rpc_response fd state callback
+    | Hello ->
+      error state (Failure "unexpected hello after connection already established")
+    | Ping ->
+      error state (Failure "unexpected ping on persistent connection")
+  end with e ->
+    let stack = Printexc.get_backtrace () in
+    Error (state, Utils.Callstack stack, e)
 
+
+(** rpc_persistent blocks until it can send a message. Then it sends the message
+   and listens for incoming messages - either an exception which it raises,
+   or a push which it dispatches via the supplied callback, or a response
+   which it returns. *)
 let rpc_persistent :
-  type a. Timeout.in_channel * out_channel -> a t -> a * float * push list
-= fun (_, oc) cmd ->
-  Marshal.to_channel oc (Rpc cmd) [];
-  flush oc;
-  let fd = Unix.descr_of_out_channel oc in
-  wait_for_rpc_response fd []
+  type a s.
+  Timeout.in_channel * out_channel -> s -> (s -> push -> s) -> a t
+  -> (s * a * float, s * Utils.callstack * exn) result
+  = fun (_, oc) state callback cmd ->
+  try
+    Marshal.to_channel oc (Rpc cmd) [];
+    flush oc;
+    let fd = Unix.descr_of_out_channel oc in
+    wait_for_rpc_response fd state callback
+  with e ->
+    let stack = Printexc.get_backtrace () in
+    Error (state, Utils.Callstack stack, e)
 
 let stream_request oc cmd =
   Marshal.to_channel oc (Stream cmd) [];

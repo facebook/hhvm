@@ -191,8 +191,12 @@ let format_intervals ?config intervals tree =
 (** Format a node at the given offset.
  *
  * Finds the node which is the direct parent of the token at the given byte
- * offset and formats a range containing that node. The range that was formatted
- * is returned along with the formatted text of the node.
+ * offset and formats a range containing that node which ends at the given
+ * offset. The range that was formatted is returned (as a pair of 0-based byte
+ * offsets in the original file) along with the formatted text.
+ *
+ * The provided offset must point to the last byte in a token. If not, an
+ * invalid_arg exception will be raised.
  *
  * Designed to be suitable for as-you-type-formatting. *)
 let format_at_offset ?config (tree : SyntaxTree.t) offset =
@@ -219,8 +223,9 @@ let format_at_offset ?config (tree : SyntaxTree.t) offset =
     | token :: parent :: _ -> token, parent
     | _ -> invalid_arg "Invalid offset"
   in
-  (* Format up to the end of the token at the given offset. *)
-  let offset = PS.end_offset token in
+  (* Only format at the end of a token. *)
+  if offset <> PS.end_offset token
+  then invalid_arg "Offset must point to the last character of a token";
   (* Our ranges are half-open, so the range end is the token end offset + 1. *)
   let ed = offset + 1 in
   (* Take a half-open range which starts at the beginning of the parent node *)

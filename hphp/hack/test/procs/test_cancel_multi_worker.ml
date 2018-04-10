@@ -43,7 +43,7 @@ let run_interrupter fd_in fd_out =
   done;
   assert false
 
-let interrupt_handler fds =
+let interrupt_handler acc fds =
   let fd = List.hd_exn fds in
   let exclamation_mark = Bytes.create 1 in
   begin try
@@ -54,20 +54,23 @@ let interrupt_handler fds =
       assert (read = 1 && exclamation_mark = "!")
     done
   with Not_found -> () end;
-  true
+  acc, MultiThreadedCall.Cancel
 
 let rec run_until_done fd_in workers (acc, iterations) = function
 | [] -> (acc, iterations)
 | work ->
   Hh_logger.log "Left: %d" (List.length work);
-  let result, unfinished =
+  let result, (), unfinished =
     MultiWorker.call_with_interrupt (Some workers)
       ~job:do_work
       ~merge:sum
       ~neutral:0
       ~next:(Bucket.make ~num_workers:num_workers ~max_size:10 work)
-      ~interrupt_fds:[fd_in]
-      ~interrupt_handler
+      ~interrupt:{ MultiThreadedCall.
+        fds = [fd_in];
+        handler = interrupt_handler;
+        env = ();
+      }
   in
   let unfinished = List.concat unfinished in
   run_until_done fd_in workers (sum acc result, iterations + 1) unfinished

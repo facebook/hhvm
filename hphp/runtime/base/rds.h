@@ -30,9 +30,23 @@
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
-  struct Array;
-  struct StringData;
-  struct Class;
+
+struct Array;
+struct StringData;
+struct Class;
+
+namespace jit {
+struct ArrayKindProfile;
+struct ArrayOffsetProfile;
+struct ClsCnsProfile;
+struct DecRefProfile;
+struct MethProfile;
+struct RefcountProfile;
+struct SwitchProfile;
+struct TypeProfile;
+struct ReleaseVVProfile;
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -185,6 +199,7 @@ struct StaticMethodF { LowStringPtr name; };
  * symbols that are keyed on translation id.  These generally should
  * go in Mode::Local or Mode::Persistent, depending on the use case.
  */
+template<typename T>
 struct Profile { TransID transId;
                  Offset bcOff;
                  LowStringPtr name; };
@@ -200,7 +215,15 @@ using Symbol = boost::variant< StaticLocal
                              , ClsConstant
                              , StaticMethod
                              , StaticMethodF
-                             , Profile
+                             , Profile<jit::ArrayKindProfile>
+                             , Profile<jit::ArrayOffsetProfile>
+                             , Profile<jit::ClsCnsProfile>
+                             , Profile<jit::DecRefProfile>
+                             , Profile<jit::MethProfile>
+                             , Profile<jit::RefcountProfile>
+                             , Profile<jit::ReleaseVVProfile>
+                             , Profile<jit::SwitchProfile>
+                             , Profile<jit::TypeProfile>
                              , SPropCache
                              >;
 

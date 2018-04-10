@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TYPE_PROFILE_H_
-#define incl_HPHP_JIT_TYPE_PROFILE_H_
+#ifndef incl_HPHP_JIT_SWITCH_PROFILE_H_
+#define incl_HPHP_JIT_SWITCH_PROFILE_H_
 
 #include "hphp/runtime/vm/jit/target-profile.h"
 

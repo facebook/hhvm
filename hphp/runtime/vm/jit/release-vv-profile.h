@@ -14,28 +14,38 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_JIT_RELEASE_VV_PROFILE_H_
+#define incl_HPHP_JIT_RELEASE_VV_PROFILE_H_
+
+#include <folly/Format.h>
+
 #include "hphp/runtime/vm/jit/target-profile.h"
-
-#include "hphp/runtime/base/rds.h"
-
-#include "hphp/runtime/vm/jit/prof-data.h"
-
-#include <string>
 
 namespace HPHP { namespace jit {
 
-namespace detail {
-
 ///////////////////////////////////////////////////////////////////////////////
 
-void addTargetProfileInfo(const rds::Profile<void>& key,
-                          const std::string& dbgInfo) {
-  if (auto profD = profData()) {
-    ProfData::TargetProfileInfo info{key, dbgInfo};
-    profD->addTargetProfile(info);
+struct ReleaseVVProfile {
+  std::string toString() const {
+    return folly::sformat("{}/{} released", released, executed);
   }
-}
+
+  int percentReleased() const {
+    return executed ? (100 * released / executed) : 0;
+  };
+
+  static void reduce(ReleaseVVProfile& a, const ReleaseVVProfile& b) {
+    // Racy but OK---just used for profiling to trigger optimization.
+    a.executed += b.executed;
+    a.released += b.released;
+  }
+
+  uint16_t executed;
+  uint16_t released;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+} }
+
+#endif

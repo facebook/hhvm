@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/release-vv-profile.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -216,25 +217,6 @@ void cgGenericRetDecRefs(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_ReleaseVV("ReleaseVV");
-
-struct ReleaseVVProfile {
-  std::string toString() const {
-    return folly::sformat("{}/{} released", released, executed);
-  }
-
-  int percentReleased() const {
-    return executed ? (100 * released / executed) : 0;
-  };
-
-  static void reduce(ReleaseVVProfile& a, const ReleaseVVProfile& b) {
-    // Racy but OK---just used for profiling to trigger optimization.
-    a.executed += b.executed;
-    a.released += b.released;
-  }
-
-  uint16_t executed;
-  uint16_t released;
-};
 
 void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();

@@ -39,8 +39,8 @@ namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {
-  void addTargetProfileInfo(const rds::Profile& key,
-                            const std::string& dbgInfo);
+void addTargetProfileInfo(const rds::Profile<void>& key,
+                          const std::string& dbgInfo);
 }
 
 /*
@@ -74,6 +74,8 @@ namespace detail {
  * The type must have a toString(...) method returning a std::string with a
  * single human-readable line representing the state of the profile, taking
  * the same set of extra arguments as the reduce function passed to 'data'.
+ *
+ * rds::Profile<MyType> also needs to be added to rds::Symbol.
  */
 template<class T>
 struct TargetProfile {
@@ -162,7 +164,7 @@ private:
                                  Offset bcOff,
                                  const StringData* name,
                                  size_t extraSize) {
-    auto const rdsKey = rds::Profile{profTransID, bcOff, name};
+    auto const rdsKey = rds::Profile<T>{profTransID, bcOff, name};
 
     switch (kind) {
     case TransKind::Profile:
@@ -184,13 +186,10 @@ private:
     not_reached();
   }
 
-  static void addDebugInfo(const rds::Profile& key,
-                           const std::string& dbgInfo);
-
 private:
   rds::Link<T> const m_link;
   TransKind const m_kind;
-  rds::Profile const m_key;
+  rds::Profile<void> const m_key;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

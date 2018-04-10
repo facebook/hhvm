@@ -123,10 +123,11 @@ module Revision_map = struct
           |> Core_result.map_error ~f:Future.error_to_string
           |> Core_result.map_error ~f:(HackEventLogger.find_svn_rev_failed (Future.start_t future))
         in
+        (* TODO (achow): make it log less often
         let () = Core_result.iter result ~f:(fun _ ->
           HackEventLogger.find_svn_rev_success (Future.start_t future)
         )
-        in
+        in*)
         Some (result
           |> Core_result.ok
           |> Option.value ~default:0)

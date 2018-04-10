@@ -28,7 +28,7 @@ module type S = sig
     client option * bool
   val accept_client : t -> client
   val read_connection_type : client -> ServerCommandTypes.connection_type
-  val send_response_to_client : client -> 'a -> unit
+  val send_response_to_client : client -> 'a -> float -> unit
   val send_push_message_to_client : client -> ServerCommandTypes.push -> unit
   val client_has_message: client -> bool
   val read_client_msg: client -> 'a ServerCommandTypes.command

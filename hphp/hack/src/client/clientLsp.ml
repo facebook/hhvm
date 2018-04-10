@@ -207,11 +207,13 @@ let get_uris_with_unsaved_changes (state: state): SSet.t =
 
 let rpc
     (server_conn: server_conn)
+    (ref_unblocked_time: float ref)
     (command: 'a ServerCommandTypes.t)
   : 'a =
   try
-    let res, pending_messages =
+    let res, start_handle_time, pending_messages =
       ServerCommand.rpc_persistent (server_conn.ic, server_conn.oc) command in
+    ref_unblocked_time := start_handle_time;
     List.iter pending_messages
       ~f:(fun x -> Queue.push x server_conn.pending_messages);
     res
@@ -508,15 +510,15 @@ let apply_edit (text: string) (edit: DidChange.textDocumentContentChangeEvent) :
 (** Protocol                                                           **)
 (************************************************************************)
 
-let do_shutdown (state: state) : state =
+let do_shutdown (state: state) (ref_unblocked_time: float ref): state =
   let state = dismiss_ui state in
   begin match state with
   | Main_loop menv ->
     (* In Main_loop state, we're expected to unsubscribe diagnostics and tell *)
     (* server to disconnect so it can revert the state of its unsaved files.  *)
     let open Main_env in
-    rpc menv.conn (ServerCommandTypes.UNSUBSCRIBE_DIAGNOSTIC 0);
-    rpc menv.conn (ServerCommandTypes.DISCONNECT)
+    rpc menv.conn ref_unblocked_time (ServerCommandTypes.UNSUBSCRIBE_DIAGNOSTIC 0);
+    rpc menv.conn (ref 0.0) (ServerCommandTypes.DISCONNECT)
   | In_init _ienv ->
     (* In In_init state, even though we have a 'conn', it's still waiting for *)
     (* the server to become responsive, so there's no use sending any rpc     *)
@@ -529,7 +531,7 @@ let do_shutdown (state: state) : state =
   Post_shutdown
 
 
-let do_rage (state: state) : Rage.result =
+let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result =
   let open Rage in
   let items: rageItem list ref = ref [] in
   let add item = items := item :: !items in
@@ -568,7 +570,7 @@ let do_rage (state: state) : Rage.result =
   begin match state with
     | Main_loop menv -> begin
         let open Main_env in
-        let items = rpc menv.conn ServerCommandTypes.RAGE in
+        let items = rpc menv.conn ref_unblocked_time ServerCommandTypes.RAGE in
         let add i = add { title = i.ServerRageTypes.title; data = i.ServerRageTypes.data; } in
         List.iter items ~f:add
       end
@@ -577,31 +579,38 @@ let do_rage (state: state) : Rage.result =
   (* that's it! *)
   !items
 
-let do_toggleTypeCoverage (conn : server_conn) (params: ToggleTypeCoverage.params) : unit =
+let do_toggleTypeCoverage
+    (conn : server_conn)
+    (ref_unblocked_time: float ref)
+    (params: ToggleTypeCoverage.params)
+  : unit =
   (* Currently, the only thing to do on toggling type coverage is turn on dynamic view *)
   let command = ServerCommandTypes.DYNAMIC_VIEW (params.ToggleTypeCoverage.toggle) in
   cached_toggle_state := params.ToggleTypeCoverage.toggle;
-  rpc conn command
+  rpc conn ref_unblocked_time command
 
-let do_didOpen (conn: server_conn) (params: DidOpen.params) : unit =
+let do_didOpen (conn: server_conn) (ref_unblocked_time: float ref) (params: DidOpen.params)
+  : unit =
   let open DidOpen in
   let open TextDocumentItem in
   let filename = lsp_uri_to_path params.textDocument.uri in
   let text = params.textDocument.text in
   let command = ServerCommandTypes.OPEN_FILE (filename, text) in
-  rpc conn command;
+  rpc conn ref_unblocked_time command;
   ()
 
-let do_didClose (conn: server_conn) (params: DidClose.params) : unit =
+let do_didClose (conn: server_conn) (ref_unblocked_time: float ref) (params: DidClose.params)
+  : unit =
   let open DidClose in
   let open TextDocumentIdentifier in
   let filename = lsp_uri_to_path params.textDocument.uri in
   let command = ServerCommandTypes.CLOSE_FILE filename in
-  rpc conn command;
+  rpc conn ref_unblocked_time command;
   ()
 
 let do_didChange
     (conn: server_conn)
+    (ref_unblocked_time: float ref)
     (params: DidChange.params)
   : unit =
   let open VersionedTextDocumentIdentifier in
@@ -616,14 +625,18 @@ let do_didChange
   let filename = lsp_uri_to_path params.textDocument.uri in
   let changes = List.map params.contentChanges ~f:lsp_change_to_ide in
   let command = ServerCommandTypes.EDIT_FILE (filename, changes) in
-  rpc conn command;
+  rpc conn ref_unblocked_time command;
   ()
 
-let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
+let do_hover
+    (conn: server_conn)
+    (ref_unblocked_time: float ref)
+    (params: Hover.params)
+  : Hover.result =
   let (file, line, column) = lsp_file_position_to_hack params in
   let command =
     ServerCommandTypes.(INFER_TYPE (FileName file, line, column, false)) in
-  let inferred_type = rpc conn command in
+  let inferred_type = rpc conn ref_unblocked_time command in
   match inferred_type with
   (* Hack server uses None to indicate absence of a result. *)
   (* We're also catching the non-result "" just in case...               *)
@@ -631,10 +644,14 @@ let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
   | Some ("", _) -> { Hover.contents = []; range = None; }
   | Some (s, _) -> { Hover.contents = [MarkedString s]; range = None; }
 
-let do_enhanced_hover (conn: server_conn) (params: Hover.params) : Hover.result =
+let do_enhanced_hover
+    (conn: server_conn)
+    (ref_unblocked_time: float ref)
+    (params: Hover.params)
+  : Hover.result =
   let (file, line, column) = lsp_file_position_to_hack params in
   let command = ServerCommandTypes.IDE_HOVER (ServerCommandTypes.FileName file, line, column) in
-  let infos = rpc conn command in
+  let infos = rpc conn ref_unblocked_time command in
   let contents =
     infos
     |> List.map ~f:begin fun hoverInfo ->
@@ -663,12 +680,12 @@ let do_enhanced_hover (conn: server_conn) (params: Hover.params) : Hover.result 
     range = pos;
   }
 
-let do_definition (conn: server_conn) (params: Definition.params)
+let do_definition (conn: server_conn) (ref_unblocked_time: float ref) (params: Definition.params)
   : Definition.result =
   let (file, line, column) = lsp_file_position_to_hack params in
   let command =
     ServerCommandTypes.(IDENTIFY_FUNCTION (FileName file, line, column)) in
-  let results = rpc conn command in
+  let results = rpc conn ref_unblocked_time command in
   (* What's it like when we return multiple definitions? For instance, if you ask *)
   (* for the definition of "new C()" then we've now got the definition of the     *)
   (* class "\C" and also of the constructor "\\C::__construct". I think that      *)
@@ -772,26 +789,34 @@ let make_ide_completion_response (result:AutocompleteTypes.ide_result) (filename
     items = List.map result.completions ~f:hack_completion_to_lsp;
   }
 
-let do_completion_ffp (conn: server_conn) (params: Completion.params) : Completion.result =
+let do_completion_ffp
+    (conn: server_conn)
+    (ref_unblocked_time: float ref)
+    (params: Completion.params)
+  : Completion.result =
   let open TextDocumentIdentifier in
   let pos = lsp_position_to_ide params.TextDocumentPositionParams.position in
   let filename = lsp_uri_to_path params.TextDocumentPositionParams.textDocument.uri in
   let command = ServerCommandTypes.IDE_FFP_AUTOCOMPLETE (filename, pos) in
-  let result = rpc conn command in
+  let result = rpc conn ref_unblocked_time command in
   make_ide_completion_response result filename
 
-let do_completion_legacy (conn: server_conn) (params: Completion.params)
+let do_completion_legacy
+    (conn: server_conn)
+    (ref_unblocked_time: float ref)
+    (params: Completion.params)
   : Completion.result =
   let open TextDocumentIdentifier in
   let pos = lsp_position_to_ide params.TextDocumentPositionParams.position in
   let filename = lsp_uri_to_path params.TextDocumentPositionParams.textDocument.uri in
   let delimit_on_namespaces = true in
   let command = ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos, delimit_on_namespaces) in
-  let result = rpc conn command in
+  let result = rpc conn ref_unblocked_time command in
   make_ide_completion_response result filename
 
 let do_completionItemResolve
   (conn: server_conn)
+  (ref_unblocked_time: float ref)
   (params: CompletionItemResolve.params)
 : CompletionItemResolve.result =
   match params.Completion.data with
@@ -803,11 +828,12 @@ let do_completionItemResolve
     let command =
       ServerCommandTypes.DOCBLOCK_AT (filename, line, char)
     in
-    let contents = rpc conn command in
+    let contents = rpc conn ref_unblocked_time command in
     { params with Completion.documentation = contents }
 
 let do_workspaceSymbol
     (conn: server_conn)
+    (ref_unblocked_time: float ref)
     (params: WorkspaceSymbol.params)
   : WorkspaceSymbol.result =
   let open WorkspaceSymbol in
@@ -816,7 +842,7 @@ let do_workspaceSymbol
   let query = params.query in
   let query_type = "" in
   let command = ServerCommandTypes.SEARCH (query, query_type) in
-  let results = rpc conn command in
+  let results = rpc conn ref_unblocked_time command in
 
   let hack_to_lsp_kind = function
     | HackSearchService.Class (Some Ast.Cabstract) -> SymbolInformation.Class
@@ -854,6 +880,7 @@ let do_workspaceSymbol
 
 let do_documentSymbol
     (conn: server_conn)
+    (ref_unblocked_time: float ref)
     (params: DocumentSymbol.params)
   : DocumentSymbol.result =
   let open DocumentSymbol in
@@ -862,7 +889,7 @@ let do_documentSymbol
 
   let filename = lsp_uri_to_path params.textDocument.uri in
   let command = ServerCommandTypes.OUTLINE filename in
-  let results = rpc conn command in
+  let results = rpc conn ref_unblocked_time command in
 
   let hack_to_lsp_kind = function
     | SymbolDefinition.Function -> SymbolInformation.Function
@@ -903,6 +930,7 @@ let do_documentSymbol
 
 let do_findReferences
     (conn: server_conn)
+    (ref_unblocked_time: float ref)
     (params: FindReferences.params)
   : FindReferences.result =
   let open FindReferences in
@@ -912,7 +940,7 @@ let do_findReferences
   let include_defs = params.context.includeDeclaration in
   let command = ServerCommandTypes.IDE_FIND_REFS
       (ServerCommandTypes.FileName filename, line, column, include_defs) in
-  let results = rpc conn command in
+  let results = rpc conn ref_unblocked_time command in
   (* TODO: respect params.context.include_declaration *)
   match results with
   | None -> []
@@ -922,6 +950,7 @@ let do_findReferences
 
 let do_documentHighlight
     (conn: server_conn)
+    (ref_unblocked_time: float ref)
     (params: DocumentHighlight.params)
   : DocumentHighlight.result =
   let open DocumentHighlight in
@@ -929,7 +958,7 @@ let do_documentHighlight
   let (file, line, column) = lsp_file_position_to_hack params in
   let command =
     ServerCommandTypes.(IDE_HIGHLIGHT_REFS (FileName file, line, column)) in
-  let results = rpc conn command in
+  let results = rpc conn ref_unblocked_time command in
 
   let hack_range_to_lsp_highlight range =
     {
@@ -940,13 +969,16 @@ let do_documentHighlight
   List.map results ~f:hack_range_to_lsp_highlight
 
 
-let do_typeCoverage (conn: server_conn) (params: TypeCoverage.params)
+let do_typeCoverage
+    (conn: server_conn)
+    (ref_unblocked_time: float ref)
+    (params: TypeCoverage.params)
   : TypeCoverage.result =
   let open TypeCoverage in
 
   let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument in
   let command = ServerCommandTypes.COVERAGE_LEVELS (ServerCommandTypes.FileName filename) in
-  let results: Coverage_level.result = rpc conn command in
+  let results: Coverage_level.result = rpc conn ref_unblocked_time command in
   let results = Coverage_level.merge_adjacent_results results in
 
   (* We want to get a percentage-covered number. We could do that with an *)
@@ -989,6 +1021,7 @@ let do_typeCoverage (conn: server_conn) (params: TypeCoverage.params)
 
 let do_formatting_common
     (conn: server_conn)
+    (ref_unblocked_time: float ref)
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (args: ServerFormatTypes.ide_action)
   : TextEdit.t list =
@@ -1000,7 +1033,7 @@ let do_formatting_common
     if use_hackfmt then ServerFormat.go_ide editor_open_files args use_hackfmt
     else
       let command = ServerCommandTypes.HH_FORMAT (editor_open_files, args, use_hackfmt) in
-      rpc conn command
+      rpc conn ref_unblocked_time command
   in
   match response with
   | Error message ->
@@ -1013,6 +1046,7 @@ let do_formatting_common
 
 let do_documentRangeFormatting
     (conn: server_conn)
+    (ref_unblocked_time: float ref)
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: DocumentRangeFormatting.params)
   : DocumentRangeFormatting.result =
@@ -1024,11 +1058,12 @@ let do_documentRangeFormatting
         file_range = lsp_range_to_ide params.range;
       }
   in
-  do_formatting_common conn editor_open_files action
+  do_formatting_common conn ref_unblocked_time editor_open_files action
 
 
 let do_documentOnTypeFormatting
     (conn: server_conn)
+    (ref_unblocked_time: float ref)
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: DocumentOnTypeFormatting.params)
   : DocumentOnTypeFormatting.result =
@@ -1039,18 +1074,19 @@ let do_documentOnTypeFormatting
         filename = lsp_uri_to_path params.textDocument.uri;
         position = lsp_position_to_ide params.position;
       } in
-  do_formatting_common conn editor_open_files action
+  do_formatting_common conn ref_unblocked_time editor_open_files action
 
 
 let do_documentFormatting
     (conn: server_conn)
+    (ref_unblocked_time: float ref)
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: DocumentFormatting.params)
   : DocumentFormatting.result =
   let open DocumentFormatting in
   let open TextDocumentIdentifier in
   let action = ServerFormatTypes.Document (lsp_uri_to_path params.textDocument.uri) in
-  do_formatting_common conn editor_open_files action
+  do_formatting_common conn ref_unblocked_time editor_open_files action
 
 
 (* do_server_busy: controls the progress / action-required indicator          *)
@@ -1215,6 +1251,7 @@ let connect_after_hello
     (file_edits: Hh_json.json ImmQueue.t)
   : unit =
   let open Marshal_tools in
+  let ignore = ref 0.0 in
   begin try
       let oc = server_conn.oc in
       ServerCommand.send_connection_type oc ServerCommandTypes.Persistent;
@@ -1227,9 +1264,9 @@ let connect_after_hello
         let open Jsonrpc in
         let c = Jsonrpc.parse_message ~json ~timestamp:0.0 in
         match c.method_ with
-        | "textDocument/didOpen" -> parse_didOpen c.params |> do_didOpen server_conn
-        | "textDocument/didChange" -> parse_didChange c.params |> do_didChange server_conn
-        | "textDocument/didClose" -> parse_didClose c.params |> do_didClose server_conn
+        | "textDocument/didOpen" -> parse_didOpen c.params |> do_didOpen server_conn ignore
+        | "textDocument/didChange" -> parse_didChange c.params |> do_didChange server_conn ignore
+        | "textDocument/didClose" -> parse_didClose c.params |> do_didClose server_conn ignore
         | _ -> failwith "should only buffer up didOpen/didChange/didClose"
       in
       ImmQueue.iter file_edits ~f:handle_file_edit;
@@ -1239,7 +1276,7 @@ let connect_after_hello
       raise (Server_fatal_connection_exception { message; stack; })
   end;
 
-  rpc server_conn (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0)
+  rpc server_conn ignore (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0)
 
 
 let rec connect_client
@@ -1660,7 +1697,7 @@ let track_edits_if_necessary (state: state) (event: event) : state =
 let log_response_if_necessary
     (event: event)
     (response: Hh_json.json option)
-    (start_handle_t: float)
+    (unblocked_time: float)
   : unit =
   let open Jsonrpc in
   match event with
@@ -1674,8 +1711,8 @@ let log_response_if_necessary
       ~root:(get_root_opt ())
       ~method_:(if c.kind = Response then "[response]" else c.method_)
       ~kind:(kind_to_string c.kind)
-      ~start_queue_t:c.timestamp
-      ~start_handle_t
+      ~start_queue_time:c.timestamp
+      ~start_handle_time:unblocked_time
       ~json
       ~json_response
   | _ -> ()
@@ -1686,7 +1723,7 @@ let hack_log_error
     (message: string)
     (stack: string)
     (source: string)
-    (start_handle_t: float)
+    (unblocked_time: float)
   : unit =
   let root = get_root_opt () in
   match event with
@@ -1694,7 +1731,7 @@ let hack_log_error
     let open Jsonrpc in
     let json = c.json |> Hh_json.json_truncate |> Hh_json.json_to_string in
     HackEventLogger.client_lsp_method_exception
-      root c.method_ (kind_to_string c.kind) c.timestamp start_handle_t json message stack source
+      root c.method_ (kind_to_string c.kind) c.timestamp unblocked_time json message stack source
   | _ ->
     HackEventLogger.client_lsp_exception root message stack source
 
@@ -1724,6 +1761,7 @@ let handle_event
     ~(state: state ref)
     ~(client: Jsonrpc.queue)
     ~(event: event)
+    ~(ref_unblocked_time: float ref)
   : unit =
   let open Jsonrpc in
   let open Main_env in
@@ -1748,7 +1786,7 @@ let handle_event
 
   (* shutdown request *)
   | _, Client_message c when c.method_ = "shutdown" ->
-    state := do_shutdown !state;
+    state := do_shutdown !state ref_unblocked_time;
     print_shutdown () |> Jsonrpc.respond to_stdout c;
 
   (* cancel notification *)
@@ -1762,7 +1800,7 @@ let handle_event
 
   (* rage request *)
   | _, Client_message c when c.method_ = "telemetry/rage" ->
-    do_rage !state |> print_rage |> Jsonrpc.respond to_stdout c
+    do_rage !state ref_unblocked_time |> print_rage |> Jsonrpc.respond to_stdout c
 
   (* initialize request *)
   | Pre_init, Client_message c when c.method_ = "initialize" ->
@@ -1824,18 +1862,19 @@ let handle_event
     (* then we must let the server know we're idle, so it will be free to     *)
     (* handle command-line requests.                                          *)
     state := Main_loop { menv with needs_idle = false; };
-    rpc menv.conn ServerCommandTypes.IDE_IDLE
+    rpc menv.conn ref_unblocked_time ServerCommandTypes.IDE_IDLE
 
   (* textDocument/hover request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/hover" ->
     cancel_if_stale client c short_timeout;
     let hover_command = if env.use_enhanced_hover then do_enhanced_hover else do_hover in
-    parse_hover c.params |> hover_command menv.conn |> print_hover |> Jsonrpc.respond to_stdout c
+    parse_hover c.params |> hover_command menv.conn ref_unblocked_time
+      |> print_hover |> Jsonrpc.respond to_stdout c
 
   (* textDocument/definition request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/definition" ->
     cancel_if_stale client c short_timeout;
-    parse_definition c.params |> do_definition menv.conn
+    parse_definition c.params |> do_definition menv.conn ref_unblocked_time
       |> print_definition |> Jsonrpc.respond to_stdout c
 
   (* textDocument/completion request *)
@@ -1843,77 +1882,77 @@ let handle_event
     let do_completion =
       if env.use_ffp_autocomplete then do_completion_ffp else do_completion_legacy in
     cancel_if_stale client c short_timeout;
-    parse_completion c.params |> do_completion menv.conn
+    parse_completion c.params |> do_completion menv.conn ref_unblocked_time
       |> print_completion |> Jsonrpc.respond to_stdout c
 
   (* completionItem/resolve request *)
   | Main_loop menv, Client_message c when c.method_ = "completionItem/resolve" ->
     cancel_if_stale client c short_timeout;
     parse_completionItem c.params
-    |> do_completionItemResolve menv.conn
+    |> do_completionItemResolve menv.conn ref_unblocked_time
     |> print_completionItem
     |> Jsonrpc.respond to_stdout c
 
   (* workspace/symbol request *)
   | Main_loop menv, Client_message c when c.method_ = "workspace/symbol" ->
-    parse_workspaceSymbol c.params |> do_workspaceSymbol menv.conn
+    parse_workspaceSymbol c.params |> do_workspaceSymbol menv.conn ref_unblocked_time
     |> print_workspaceSymbol |> Jsonrpc.respond to_stdout c
 
   (* textDocument/documentSymbol request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/documentSymbol" ->
-    parse_documentSymbol c.params |> do_documentSymbol menv.conn
+    parse_documentSymbol c.params |> do_documentSymbol menv.conn ref_unblocked_time
     |> print_documentSymbol |> Jsonrpc.respond to_stdout c
 
   (* textDocument/references request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/references" ->
     cancel_if_stale client c long_timeout;
-    parse_findReferences c.params |> do_findReferences menv.conn
+    parse_findReferences c.params |> do_findReferences menv.conn ref_unblocked_time
     |> print_findReferences |> Jsonrpc.respond to_stdout c
 
   (* textDocument/documentHighlight *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/documentHighlight" ->
     cancel_if_stale client c short_timeout;
-    parse_documentHighlight c.params |> do_documentHighlight menv.conn
+    parse_documentHighlight c.params |> do_documentHighlight menv.conn ref_unblocked_time
     |> print_documentHighlight |> Jsonrpc.respond to_stdout c
 
   (* textDocument/typeCoverage *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/typeCoverage" ->
-    parse_typeCoverage c.params |> do_typeCoverage menv.conn
+    parse_typeCoverage c.params |> do_typeCoverage menv.conn ref_unblocked_time
     |> print_typeCoverage |> Jsonrpc.respond to_stdout c
   (* textDocument/formatting *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/formatting" ->
     parse_documentFormatting c.params
-    |> do_documentFormatting menv.conn menv.editor_open_files
+    |> do_documentFormatting menv.conn ref_unblocked_time menv.editor_open_files
     |> print_documentFormatting |> Jsonrpc.respond to_stdout c
 
   (* textDocument/formatting *)
   | Main_loop menv, Client_message c
     when c.method_ = "textDocument/rangeFormatting" ->
     parse_documentRangeFormatting c.params
-    |> do_documentRangeFormatting menv.conn menv.editor_open_files
+    |> do_documentRangeFormatting menv.conn ref_unblocked_time menv.editor_open_files
     |> print_documentRangeFormatting |> Jsonrpc.respond to_stdout c
 
   (* textDocument/onTypeFormatting *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/onTypeFormatting" ->
     cancel_if_stale client c short_timeout;
     parse_documentOnTypeFormatting c.params
-    |> do_documentOnTypeFormatting menv.conn menv.editor_open_files
+    |> do_documentOnTypeFormatting menv.conn ref_unblocked_time menv.editor_open_files
     |> print_documentOnTypeFormatting |> Jsonrpc.respond to_stdout c
 
   (* textDocument/didOpen notification *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/didOpen" ->
-    parse_didOpen c.params |> do_didOpen menv.conn
+    parse_didOpen c.params |> do_didOpen menv.conn ref_unblocked_time
 
   | Main_loop menv, Client_message c when c.method_ = "workspace/toggleTypeCoverage" ->
-    parse_toggleTypeCoverage c.params |> do_toggleTypeCoverage menv.conn
+    parse_toggleTypeCoverage c.params |> do_toggleTypeCoverage menv.conn ref_unblocked_time
 
   (* textDocument/didClose notification *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/didClose" ->
-    parse_didClose c.params |> do_didClose menv.conn
+    parse_didClose c.params |> do_didClose menv.conn ref_unblocked_time
 
   (* textDocument/didChange notification *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/didChange" ->
-    parse_didChange c.params |> do_didChange menv.conn
+    parse_didChange c.params |> do_didChange menv.conn ref_unblocked_time
 
   (* textDocument/didSave notification *)
   | Main_loop _menv, Client_message c when c.method_ = "textDocument/didSave" ->
@@ -1990,14 +2029,16 @@ let main (env: env) : 'a =
   let state = ref Pre_init in
   while true do
     let ref_event = ref None in
-    let start_handle_t = Unix.gettimeofday () in
-    (* TODO: we should log how much of the "handling" time was spent *)
-    (* idle just waiting for an RPC response from hh_server.         *)
+    let ref_unblocked_time = ref (Unix.gettimeofday ()) in
+    (* ref_unblocked_time is the time at which we're no longer blocked on either *)
+    (* clientLsp message-loop or hh_server, and can start actually handling.  *)
+    (* Everything that blocks will update this variable.                      *)
     try
       Option.call () !deferred_action;
       deferred_action := None;
       let event = get_next_event !state client in
       ref_event := Some event;
+      ref_unblocked_time := Unix.gettimeofday ();
 
       (* maybe set a flag to indicate that we'll need to send an idle message *)
       state := handle_idle_if_necessary !state event;
@@ -2012,15 +2053,15 @@ let main (env: env) : 'a =
 
       (* this is the main handler for each message*)
       Jsonrpc.clear_last_sent ();
-      handle_event ~env ~state ~client ~event;
+      handle_event ~env ~state ~client ~event ~ref_unblocked_time;
       let response = Jsonrpc.last_sent () in
       (* for LSP requests and notifications, we keep a log of what+when we responded *)
-      log_response_if_necessary event response start_handle_t
+      log_response_if_necessary event response !ref_unblocked_time;
     with
     | Server_fatal_connection_exception edata ->
       if !state <> Post_shutdown then begin
         let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
-        hack_log_error !ref_event edata.message stack "from_server" start_handle_t;
+        hack_log_error !ref_event edata.message stack "from_server" !ref_unblocked_time;
         Lsp_helpers.telemetry_error to_stdout (edata.message ^ ", from_server\n" ^ stack);
         (* The server never tells us why it closed the connection - it simply   *)
         (* closes. We don't have privilege to inspect its exit status.          *)
@@ -2050,21 +2091,21 @@ let main (env: env) : 'a =
         end
     | Client_fatal_connection_exception edata ->
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
-      hack_log_error !ref_event edata.message stack "from_client" start_handle_t;
+      hack_log_error !ref_event edata.message stack "from_client" !ref_unblocked_time;
       Lsp_helpers.telemetry_error to_stdout (edata.message ^ ", from_client\n" ^ stack);
       exit_fail ()
     | Client_recoverable_connection_exception edata ->
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
-      hack_log_error !ref_event edata.message stack "from_client" start_handle_t;
+      hack_log_error !ref_event edata.message stack "from_client" !ref_unblocked_time;
       Lsp_helpers.telemetry_error to_stdout (edata.message ^ ", from_client\n" ^ stack);
     | Server_nonfatal_exception edata ->
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
-      hack_log_error !ref_event edata.message stack "from_server" start_handle_t;
+      hack_log_error !ref_event edata.message stack "from_server" !ref_unblocked_time;
       respond_to_error !ref_event (Error.Unknown edata.message) stack
     | e ->
       let message = Printexc.to_string e in
       let stack = Printexc.get_backtrace () in
       respond_to_error !ref_event e stack;
-      hack_log_error !ref_event message stack "from_lsp" start_handle_t;
+      hack_log_error !ref_event message stack "from_lsp" !ref_unblocked_time;
   done;
   failwith "unreachable"

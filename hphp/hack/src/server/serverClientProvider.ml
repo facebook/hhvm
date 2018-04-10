@@ -88,13 +88,13 @@ let read_connection_type = function
      * (via make_persistent). *)
     assert false
 
-let send_response_to_client client response =
+let send_response_to_client client response t =
   match client with
   | Non_persistent_client (_, oc) ->
     let fd = Unix.descr_of_out_channel oc in
     Marshal_tools.to_fd_with_preamble fd response |> ignore
   | Persistent_client fd ->
-    Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Response response) |> ignore
+    Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Response (response, t)) |> ignore
 
 let send_push_message_to_client client response =
   match client with

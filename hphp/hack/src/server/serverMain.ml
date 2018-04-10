@@ -144,6 +144,7 @@ let handle_connection_exception env client e = match e with
 
 let handle_connection_ genv env client =
   let open ServerCommandTypes in
+  let t = Unix.gettimeofday () in
   try
     match ClientProvider.read_connection_type client with
     | Persistent ->
@@ -154,7 +155,7 @@ let handle_connection_ genv env client =
           shutdown_persistent_client env old_client
         | None -> env
       in
-      ClientProvider.send_response_to_client client Connected;
+      ClientProvider.send_response_to_client client Connected t;
       { env with persistent_client =
           Some (ClientProvider.make_persistent client)}
     | Non_persistent ->

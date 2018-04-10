@@ -91,7 +91,7 @@ exception Remote_nonfatal_exception of Marshal_tools.remote_exception_data
 
 let rec wait_for_rpc_response fd push_messages =
   match Marshal_tools.from_fd_with_preamble fd with
-  | Response r -> r, List.rev push_messages
+  | Response (r, t) -> r, t, List.rev push_messages
   | Push (ServerCommandTypes.FATAL_EXCEPTION remote_e_data) ->
     raise (Remote_fatal_exception remote_e_data)
   | Push (ServerCommandTypes.NONFATAL_EXCEPTION remote_e_data) ->
@@ -101,7 +101,7 @@ let rec wait_for_rpc_response fd push_messages =
   | Ping -> failwith "unexpected ping on persistent connection"
 
 let rpc_persistent :
-  type a. Timeout.in_channel * out_channel -> a t -> a * push list
+  type a. Timeout.in_channel * out_channel -> a t -> a * float * push list
 = fun (_, oc) cmd ->
   Marshal.to_channel oc (Rpc cmd) [];
   flush oc;
@@ -232,7 +232,7 @@ let handle
         genv env cmd in
       let cmd_string = ServerCommandTypesUtils.debug_describe_t cmd in
       HackEventLogger.handled_command cmd_string t;
-      ClientProvider.send_response_to_client client response;
+      ClientProvider.send_response_to_client client response t;
       if ServerCommandTypes.is_disconnect_rpc cmd ||
           not @@ (ClientProvider.is_persistent client)
         then ClientProvider.shutdown_client client;

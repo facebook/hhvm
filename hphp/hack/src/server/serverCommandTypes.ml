@@ -220,7 +220,7 @@ and busy_status =
 
 type 'a persistent_connection_message_type =
   | Push of push
-  | Response of 'a
+  | Response of 'a * float (* records the time at which hh_server started handling *)
   | Hello
   (* Hello is the first message sent after handoff. It's used for both *)
   (* persistent and non-persistent connections. It's included in this  *)

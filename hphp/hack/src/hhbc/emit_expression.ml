@@ -695,66 +695,6 @@ and emit_is env pos lhs h =
   then Emit_fatal.raise_fatal_runtime pos "Is expression is not allowed"
   else
   match snd h with
-    | A.Happly ((_, id), tyl) when (SU.strip_global_ns id) = "classname" ->
-      begin match lhs with
-        | IsExprExpr e -> emit_is_create_local env pos e h
-        | IsExprUnnamedLocal local ->
-          let true_label = Label.next_regular () in
-          let done_label = Label.next_regular () in
-          let skip_label = Label.next_regular () in
-          gather [
-            instr_istypel local OpStr;
-            instr_jmpz skip_label;
-            begin match List.hd tyl with
-              | None ->
-                emit_is_classname_exists local true_label
-              | Some (_, h2) ->
-                begin match h2 with
-                  | A.Happly ((_, id), _)
-                    when id = SN.Typehints.mixed
-                      || id = SN.Typehints.nonnull
-                      || id = SN.Typehints.dynamic ->
-                    emit_is_classname_exists local true_label
-                  | A.Happly ((_, id), _)
-                    when id = SN.Typehints.this ->
-                    gather [
-                      instr_cgetl local;
-                      instr_fcallbuiltin 0 0 "get_called_class";
-                      instr_unboxr_nop;
-                      instr (IOp Same);
-                      instr_jmpnz true_label;
-                    ]
-                  | A.Happly ((_, id), _) ->
-                    gather [
-                      instr_cgetl local;
-                      instr_string id;
-                      instr_true;
-                      instr_fcallbuiltin 3 3 "is_a";
-                      instr_unboxr_nop;
-                      instr_jmpnz true_label;
-                    ]
-                  | A.Haccess _ ->
-                    emit_nyi "Type constants"
-                  | A.Hoption _ ->
-                    failwith "Invalid classname: nullable typehint"
-                  | A.Hfun _ ->
-                    failwith "Invalid classname: callable typehint"
-                  | A.Htuple _ ->
-                    failwith "Invalid classname: tuple typehint"
-                  | A.Hshape _ ->
-                    failwith "Invalid classname: shape typehint"
-                  | A.Hsoft _ ->
-                    failwith "Invalid classname: soft typehint"
-                end
-            end;
-            instr_label skip_label;
-            instr_false;
-            instr_jmp done_label;
-            instr_label true_label;
-            instr_true;
-            instr_label done_label;
-          ]
-      end
     | A.Happly ((_, id), _) when id = SN.Typehints.this ->
       begin match lhs with
         | IsExprExpr e -> emit_is_create_local env pos e h
@@ -803,20 +743,6 @@ and emit_is_lhs env lhs =
   match lhs with
     | IsExprExpr e -> emit_expr ~need_ref:false env e
     | IsExprUnnamedLocal local -> instr_cgetl local
-
-and emit_is_classname_exists local true_label =
-  gather [
-    instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "class_exists");
-    instr_fpassl 0 local H.Cell;
-    instr_fcall 1;
-    instr_unboxr_nop;
-    instr_jmpnz true_label;
-    instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "interface_exists");
-    instr_fpassl 0 local H.Cell;
-    instr_fcall 1;
-    instr_unboxr_nop;
-    instr_jmpnz true_label;
-  ]
 
 and emit_null_coalesce env pos e1 e2 =
   let end_label = Label.next_regular () in

@@ -697,9 +697,7 @@ end = struct
       method! on_tabstract acc r ak ty_opt =
         match ak with
         | AKenum _ -> acc
-        | AKnewtype (alias, [cls]) when alias = SN.Classes.cClassname ->
-          super#on_type acc cls
-        (* TODO(kunalm) support `this`, `self`, `static`, type consts *)
+        (* TODO(kunalm) support `this`, type consts *)
         | _ -> update acc @@ Invalid (r, Tabstract (ak, ty_opt))
       method! on_tanon acc r arity id =
         update acc @@ Invalid (r, Tanon (arity, id))

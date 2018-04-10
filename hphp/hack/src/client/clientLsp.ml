@@ -29,13 +29,44 @@ let cached_toggle_state = ref false
 (** Protocol orchestration & helpers                                   **)
 (************************************************************************)
 
+(** We have an idea of server state based on what we hear from the server:
+   When we attempt a connection, we hear hopefully hear back that it's
+   INITIALIZING, and when we eventually receive "hello" that means it's
+   HANDLING_OR_READY, i.e. either handling a message, or ready to accept one.
+   But at connection attempt, we might see that it's STOPPED, or hear from it
+   that it's DENYING_CONNECTION (typically due to rebase).
+   When the server's running normally, we sometimes here push notifications to
+   tell us that it's TYPECHECKING, or has been STOLEN by another editor.
+   At any point of communication we might hear from the server that it
+   encountered a fatal exception, i.e. shutting down the pipe, so presumably
+   it has been STOPPED. When we reattempt to connect once a second, maybe we'll
+   get a better idea. *)
+type hh_server_state =
+  | Hh_server_stopped
+  | Hh_server_initializing
+  | Hh_server_handling_or_ready
+  | Hh_server_denying_connection
+  | Hh_server_unknown
+  | Hh_server_typechecking_local
+  | Hh_server_typechecking_global
+  | Hh_server_stolen
+
+(** A push message from the server might come while we're waiting for a server-rpc
+   response, or while we're free. The current architecture allows us to have
+   arbitrary responses to push messages while we're free, but only a limited set
+   of responses while we're waiting for a server-rpc - e.g. we can update our
+   notion of the server_state, or send a message to the client, but we can't
+   update our own state monad. The has_* fields are ad-hoc push-specific indicators
+   of whether we've done some part of the response during the rpc. *)
+type server_message = {
+  push: ServerCommandTypes.push;
+  has_updated_server_state: bool;
+}
+
 type server_conn = {
   ic: Timeout.in_channel;
   oc: out_channel;
-
-  (* Pending messages sent from the server. They need to be relayed to the
-     client. *)
-  pending_messages: ServerCommandTypes.push Queue.t;
+  pending_messages: server_message Queue.t; (* ones that arrived during current rpc *)
 }
 
 module Main_env = struct
@@ -83,6 +114,7 @@ module Lost_env = struct
 
   and params = {
     explanation: how_to_explain_loss_to_user;
+    new_hh_server_state: hh_server_state;
     start_on_click: bool; (* if user clicks Restart, do we ClientStart before reconnecting? *)
     trigger_on_lsp: bool; (* reconnect if we receive any LSP request/notification *)
     trigger_on_lock_file: bool; (* reconnect if lockfile is created *)
@@ -114,6 +146,7 @@ let initialize_params_ref: Lsp.Initialize.params option ref = ref None
 let hhconfig_version: string ref = ref "[NotYetInitialized]"
 let can_autostart_after_mismatch: bool ref = ref true
 let callbacks_outstanding: (on_result * on_error) IdMap.t ref = ref IdMap.empty
+let hh_server_state: hh_server_state ref = ref Hh_server_unknown
 
 let initialize_params_exc () : Lsp.Initialize.params =
   match !initialize_params_ref with
@@ -133,7 +166,7 @@ let get_editor_open_files (state: state) : Lsp.TextDocumentItem.t SMap.t option 
 
 type event =
   | Server_hello
-  | Server_message of ServerCommandTypes.push
+  | Server_message of server_message
   | Client_message of Jsonrpc.message
   | Tick (* once per second, on idle *)
 
@@ -162,6 +195,19 @@ let state_to_string (state: state) : string =
   | Lost_server _lenv -> "Lost_server"
   | Post_shutdown -> "Post_shutdown"
 
+let hh_server_state_to_string (hh_server_state: hh_server_state) : string =
+  match hh_server_state with
+  | Hh_server_denying_connection -> "hh_server denying connection"
+  | Hh_server_initializing -> "hh_server initializing"
+  | Hh_server_stopped -> "hh_server stopped"
+  | Hh_server_stolen -> "hh_server stolen"
+  | Hh_server_typechecking_local -> "hh_server typechecking (local)"
+  | Hh_server_typechecking_global -> "hh_server typechecking (global)"
+  | Hh_server_handling_or_ready -> "hh_server ready"
+  | Hh_server_unknown -> "hh_server unknown state"
+
+let set_hh_server_state (new_hh_server_state: hh_server_state) : unit =
+  hh_server_state := new_hh_server_state
 
 let get_root_opt () : Path.t option =
   match !initialize_params_ref with
@@ -205,12 +251,33 @@ let get_uris_with_unsaved_changes (state: state): SSet.t =
   | _ -> SSet.empty
 
 
+let update_hh_server_state_if_necessary (event: event) : unit =
+  let open ServerCommandTypes in
+  let helper push = match push with
+    | BUSY_STATUS Needs_local_typecheck
+    | BUSY_STATUS Done_local_typecheck
+    | BUSY_STATUS Done_global_typecheck -> set_hh_server_state Hh_server_handling_or_ready
+    | BUSY_STATUS Doing_local_typecheck -> set_hh_server_state Hh_server_typechecking_local
+    | BUSY_STATUS Doing_global_typecheck -> set_hh_server_state Hh_server_typechecking_global
+    | NEW_CLIENT_CONNECTED -> set_hh_server_state Hh_server_stolen
+    | DIAGNOSTIC _
+    | FATAL_EXCEPTION _
+    | NONFATAL_EXCEPTION _ -> ()
+  in
+  match event with
+  | Server_message {push; has_updated_server_state=false} -> helper push
+  | _ -> ()
+
+
 let rpc
     (server_conn: server_conn)
     (ref_unblocked_time: float ref)
     (command: 'a ServerCommandTypes.t)
   : 'a =
-  let callback () push_message = Queue.push push_message server_conn.pending_messages in
+  let callback () push =
+    update_hh_server_state_if_necessary (Server_message {push; has_updated_server_state=false;});
+    Queue.push {push; has_updated_server_state=true;} server_conn.pending_messages
+  in
   let result = ServerCommand.rpc_persistent
     (server_conn.ic, server_conn.oc) () callback command in
   match result with
@@ -268,7 +335,7 @@ let read_message_from_server (server: server_conn) : event =
     match Marshal_tools.from_fd_with_preamble fd with
     | Response _ ->
       failwith "unexpected response without request"
-    | Push m -> Server_message m
+    | Push push -> Server_message {push; has_updated_server_state=false;}
     | Hello -> Server_hello
     | Ping -> failwith "unexpected ping on persistent connection"
   with e ->
@@ -1257,6 +1324,7 @@ let connect_after_hello
       let response = Marshal_tools.from_fd_with_preamble fd in
       if response <> ServerCommandTypes.Connected then
         failwith "Didn't get server Connected response";
+      set_hh_server_state Hh_server_handling_or_ready;
 
       let handle_file_edit (json: Hh_json.json) =
         let open Jsonrpc in
@@ -1401,6 +1469,7 @@ let rec connect (state: state) : state =
   end;
   try
     let conn = connect_client root ~autostart:false in
+    set_hh_server_state Hh_server_initializing;
     match state with
     | In_init ienv ->
       In_init { ienv with In_init_env.conn; most_recent_start_time = Unix.time(); }
@@ -1440,6 +1509,13 @@ let rec connect (state: state) : state =
     let longMessage = Printf.sprintf "connect failed: %s [%i]\n%s" message code stack in
     let () = Lsp_helpers.telemetry_error to_stdout longMessage in
     let open Exit_status in
+    let new_hh_server_state = match e with
+      | Exit_with Build_id_mismatch
+      | Exit_with No_server_running -> Hh_server_stopped
+      | Exit_with Out_of_retries
+      | Exit_with Out_of_time -> Hh_server_denying_connection
+      | _ -> Hh_server_unknown
+    in
     let explanation = match e with
       | Exit_with Out_of_retries
       | Exit_with Out_of_time ->
@@ -1450,6 +1526,7 @@ let rec connect (state: state) : state =
     do_lost_server state ~allow_immediate_reconnect:false
       { Lost_env.
         explanation;
+        new_hh_server_state;
         start_on_click = true;
         trigger_on_lock_file = true;
         trigger_on_lsp = false;
@@ -1496,6 +1573,7 @@ and reconnect_from_lost_if_necessary
 (* of getting the server back.                                                *)
 and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_env.params) : state =
   let open Lost_env in
+  set_hh_server_state p.new_hh_server_state;
   let initialize_params = initialize_params_exc () in
 
   let no_op = match p.explanation, state with
@@ -1609,7 +1687,7 @@ let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
       | Client_message {kind = Jsonrpc.Response; _} ->
         state
       | Client_message _
-      | Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
+      | Server_message {push=ServerCommandTypes.NEW_CLIENT_CONNECTED; _} ->
         let dialog = dismiss_showMessageRequest menv.dialog in
         Main_loop { menv with dialog; }
       | _ ->
@@ -1917,6 +1995,7 @@ let handle_event
   | Main_loop menv, Client_message c when c.method_ = "textDocument/typeCoverage" ->
     parse_typeCoverage c.params |> do_typeCoverage menv.conn ref_unblocked_time
     |> print_typeCoverage |> Jsonrpc.respond to_stdout c
+
   (* textDocument/formatting *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/formatting" ->
     parse_documentFormatting c.params
@@ -1957,16 +2036,16 @@ let handle_event
     ()
 
   (* server busy status *)
-  | _, Server_message ServerCommandTypes.BUSY_STATUS status ->
+  | _, Server_message {push=ServerCommandTypes.BUSY_STATUS status; _} ->
     state := do_server_busy !state status
 
   (* textDocument/publishDiagnostics notification *)
-  | Main_loop menv, Server_message ServerCommandTypes.DIAGNOSTIC (_, errors) ->
+  | Main_loop menv, Server_message {push=ServerCommandTypes.DIAGNOSTIC (_, errors); _} ->
     let uris_with_diagnostics = do_diagnostics menv.uris_with_diagnostics errors in
     state := Main_loop { menv with uris_with_diagnostics; }
 
   (* any server diagnostics that come after we've shut down *)
-  | _, Server_message ServerCommandTypes.DIAGNOSTIC _ ->
+  | _, Server_message {push=ServerCommandTypes.DIAGNOSTIC _; _} ->
     ()
 
   (* catch-all for client reqs/notifications we haven't yet implemented *)
@@ -1979,27 +2058,29 @@ let handle_event
     raise (Error.InvalidRequest "already received shutdown request")
 
   (* server shut-down request *)
-  | Main_loop _menv, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
+  | Main_loop _menv, Server_message {push=ServerCommandTypes.NEW_CLIENT_CONNECTED; _} ->
     state := dismiss_ready_dialog_if_necessary !state event;
     state := do_lost_server !state { Lost_env.
       explanation = Lost_env.Action_required "hh_server is active in another window.";
+      new_hh_server_state = Hh_server_stolen;
       start_on_click = false;
       trigger_on_lock_file = false;
       trigger_on_lsp = true;
     }
 
   (* server shut-down request, unexpected *)
-  | _, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
+  | _, Server_message {push=ServerCommandTypes.NEW_CLIENT_CONNECTED; _} ->
     let open Marshal_tools in
     let message = "unexpected close of absent server" in
     let stack = "" in
     raise (Server_fatal_connection_exception { message; stack; })
 
   (* server fatal shutdown *)
-  | _, Server_message ServerCommandTypes.FATAL_EXCEPTION e ->
+  | _, Server_message {push=ServerCommandTypes.FATAL_EXCEPTION e; _} ->
     raise (Server_fatal_connection_exception e)
 
-  | _, Server_message ServerCommandTypes.NONFATAL_EXCEPTION e ->
+  (* server non-fatal exception *)
+  | _, Server_message {push=ServerCommandTypes.NONFATAL_EXCEPTION e; _} ->
     raise (Server_nonfatal_exception e)
 
   (* idle tick. No-op. *)
@@ -2048,6 +2129,8 @@ let main (env: env) : 'a =
       state := track_open_files !state event;
       (* we keep track of all files that have unsaved changes in them *)
       state := track_edits_if_necessary !state event;
+      (* if a message comes from the server, maybe update our record of server state *)
+      update_hh_server_state_if_necessary event;
 
       (* this is the main handler for each message*)
       Jsonrpc.clear_last_sent ();
@@ -2082,6 +2165,7 @@ let main (env: env) : 'a =
         deferred_action := Some (fun () ->
           state := do_lost_server !state { Lost_env.
             explanation = Lost_env.Action_required "hh_server has stopped";
+            new_hh_server_state = Hh_server_stopped;
             start_on_click = true;
             trigger_on_lock_file = true;
             trigger_on_lsp = false;

@@ -2237,13 +2237,22 @@ function get_hhvm_ini_values($test, $options) {
 }
 
 function get_hhvm_compiler_frontend($options, $test) {
+  // run the check in non-repo mode to avoid having to build a repo for it
+  $options_without_repo = $options;
+  unset($options_without_repo['repo']);
+
   $get_fe_script = tempnam(sys_get_temp_dir(), "get_frontend");
   $fe_temp_file = tempnam(sys_get_temp_dir(), "hhvm_frontend");
   file_put_contents(
     $get_fe_script,
     "<?php\nfile_put_contents('$fe_temp_file', __COMPILER_FRONTEND__);"
   );
-  list ($hhvm, $_) = hhvm_cmd($options, $test, $get_fe_script, true);
+  list ($hhvm, $_) = hhvm_cmd(
+    $options_without_repo,
+    $test,
+    $get_fe_script,
+    true
+  );
   if (is_array($hhvm)) $hhvm = $hhvm[0];
   system("$hhvm &> /dev/null");
   $frontend = file_get_contents($fe_temp_file);

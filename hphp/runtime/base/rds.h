@@ -551,6 +551,8 @@ void recordRds(Handle h, size_t size,
                const std::string& type, const std::string& msg);
 void recordRds(Handle h, size_t size, const Symbol& sym);
 
+void visitSymbols(std::function<void(const Symbol&,Handle,uint32_t)> fun);
+
 /*
  * Return a list of all the tl_bases for any threads that are using RDS
  */

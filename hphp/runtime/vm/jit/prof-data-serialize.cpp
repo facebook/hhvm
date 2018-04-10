@@ -26,6 +26,14 @@
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/array-kind-profile.h"
+#include "hphp/runtime/vm/jit/array-offset-profile.h"
+#include "hphp/runtime/vm/jit/cls-cns-profile.h"
+#include "hphp/runtime/vm/jit/meth-profile.h"
+#include "hphp/runtime/vm/jit/profile-refcount.h"
+#include "hphp/runtime/vm/jit/release-vv-profile.h"
+#include "hphp/runtime/vm/jit/switch-profile.h"
+#include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
@@ -411,6 +419,127 @@ void read_prof_data(ProfDataDeserializer& ser, ProfData* pd) {
   }
 }
 
+template<typename T>
+auto write_impl(ProfDataSerializer& ser, const T& out, bool) ->
+  decltype(std::declval<T&>().serialize(ser),void()) {
+  out.serialize(ser);
+}
+
+template<typename T>
+void write_impl(ProfDataSerializer& ser, const T& out, int) {
+  write_raw(ser, out);
+}
+
+template<typename T>
+void write_maybe_serializable(ProfDataSerializer& ser, const T& out) {
+  write_impl(ser, out, false);
+}
+
+struct TargetProfileVisitor : boost::static_visitor<void> {
+  TargetProfileVisitor(ProfDataSerializer& ser,
+                       const rds::Symbol& sym,
+                       rds::Handle handle,
+                       uint32_t size) :
+      ser{ser},
+      sym{sym},
+      handle{handle},
+      size{size} {}
+
+  template<typename T>
+  void process(T& out, const StringData* name) {
+    write_raw(ser, size);
+    write_string(ser, name);
+    write_raw(ser, sym);
+    TargetProfile<T>::reduce(out, handle, size);
+    if (size == sizeof(T)) {
+      write_maybe_serializable(ser, out);
+    } else {
+      write_raw(ser, &out, size);
+    }
+  }
+
+  template<typename T> void operator()(const T&) {}
+  template<typename T>
+  void operator()(const rds::Profile<T>& pt) {
+    if (size == sizeof(T)) {
+      T out{};
+      process(out, pt.name.get());
+    } else {
+      auto const mem = calloc(1, size);
+      SCOPE_EXIT { free(mem); };
+      process(*reinterpret_cast<T*>(mem), pt.name.get());
+    }
+  }
+
+  ProfDataSerializer& ser;
+  const rds::Symbol& sym;
+  rds::Handle handle;
+  uint32_t size;
+};
+
+void write_target_profiles(ProfDataSerializer& ser) {
+  rds::visitSymbols(
+    [&] (const rds::Symbol& symbol, rds::Handle handle, uint32_t size) {
+      TargetProfileVisitor tv(ser, symbol, handle, size);
+      boost::apply_visitor(tv, symbol);
+    }
+  );
+  write_raw(ser, uint32_t{});
+}
+
+template<typename T>
+auto read_impl(ProfDataDeserializer& ser, T& out, bool) ->
+  decltype(out.deserialize(ser),void()) {
+  out.deserialize(ser);
+}
+
+template<typename T>
+void read_impl(ProfDataDeserializer& ser, T& out, int) {
+  read_raw(ser, out);
+}
+
+template<typename T>
+void read_maybe_serializable(ProfDataDeserializer& ser, T& out) {
+  read_impl(ser, out, false);
+}
+
+struct SymbolFixup : boost::static_visitor<void> {
+  SymbolFixup(ProfDataDeserializer& ser, StringData* name, uint32_t size) :
+      ser{ser}, name{name}, size{size} {}
+
+  template<typename T> void operator()(T&) { always_assert(false); }
+  template<typename T>
+  void operator()(rds::Profile<T>& pt) {
+    TargetProfile<T> prof(pt.transId,
+                          TransKind::Profile,
+                          pt.bcOff,
+                          name,
+                          size - sizeof(T));
+
+    if (size == sizeof(T)) {
+      read_maybe_serializable(ser, prof.value());
+    } else {
+      read_raw(ser, &prof.value(), size);
+    }
+  }
+
+  ProfDataDeserializer& ser;
+  StringData* name;
+  // The size of the original rds allocation.
+  uint32_t size;
+};
+
+void read_target_profiles(ProfDataDeserializer& ser) {
+  while (true) {
+    auto const size = read_raw<uint32_t>(ser);
+    if (!size) break;
+    auto const name = read_string(ser);
+    auto sym = read_raw<rds::Symbol>(ser);
+    auto sf = SymbolFixup{ser, name, size};
+    boost::apply_visitor(sf, sym);
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 }
 
@@ -784,6 +913,8 @@ bool serializeProfData(const std::string& filename) {
     auto const pd = profData();
     write_prof_data(ser, pd);
 
+    write_target_profiles(ser);
+
     return true;
   } catch (std::runtime_error& err) {
     FTRACE(1, "serializeProfData - Failed: {}\n", err.what());
@@ -801,6 +932,8 @@ bool deserializeProfData(const std::string& filename) {
     auto const pd = profData();
     read_prof_data(ser, pd);
     pd->setDeserialized();
+
+    read_target_profiles(ser);
 
     return true;
   } catch (std::runtime_error& err) {

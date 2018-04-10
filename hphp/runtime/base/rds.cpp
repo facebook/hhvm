@@ -198,9 +198,14 @@ struct HashCompare {
   }
 };
 
+struct LinkEntry {
+  Handle   handle;
+  uint32_t size;
+};
+
 using LinkTable = tbb::concurrent_hash_map<
   Symbol,
-  Handle,
+  LinkEntry,
   HashCompare
 >;
 LinkTable s_linkTable;
@@ -397,17 +402,19 @@ Handle allocUnlocked(Mode mode, size_t numBytes,
 Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
                 size_t align, type_scan::Index tyIndex) {
   LinkTable::const_accessor acc;
-  if (s_linkTable.find(acc, key)) return acc->second;
+  if (s_linkTable.find(acc, key)) return acc->second.handle;
 
   Guard g(s_allocMutex);
-  if (s_linkTable.find(acc, key)) return acc->second;
+  if (s_linkTable.find(acc, key)) return acc->second.handle;
 
   auto const handle = alloc(mode, sizeBytes, align, tyIndex);
   recordRds(handle, sizeBytes, key);
 
   LinkTable::const_accessor insert_acc;
   // insert_acc lives until after s_handleTable is updated
-  if (!s_linkTable.insert(insert_acc, LinkTable::value_type(key, handle))) {
+  if (!s_linkTable.insert(
+        insert_acc,
+        LinkTable::value_type(key, {handle, safe_cast<uint32_t>(sizeBytes)}))) {
     always_assert(0);
   }
   if (type_scan::hasScanner(tyIndex)) {
@@ -418,7 +425,7 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
 
 Handle attachImpl(Symbol key) {
   LinkTable::const_accessor acc;
-  if (s_linkTable.find(acc, key)) return acc->second;
+  if (s_linkTable.find(acc, key)) return acc->second.handle;
   return kUninitHandle;
 }
 
@@ -471,6 +478,15 @@ void unbind(Symbol key, Handle handle) {
 }
 
 using namespace detail;
+
+void visitSymbols(std::function<void(const Symbol&,Handle,uint32_t)> fun) {
+  Guard g(s_allocMutex);
+  // make sure that find/count don't interfere with iteration.
+  s_linkTable.rehash();
+  for (auto it : s_linkTable) {
+    fun(it.first, it.second.handle, it.second.size);
+  }
+}
 
 //////////////////////////////////////////////////////////////////////
 

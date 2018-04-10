@@ -106,6 +106,15 @@ auto call_tostring(const T& t, uint64_t size) -> decltype(auto) {
  * example of a variably sized profiler).
  *
  * rds::Profile<MyType> also needs to be added to rds::Symbol.
+ *
+ * If the MyType contains pointers, or other data that needs updating
+ * when serializing/deserializing, it should also define
+ *
+ *  void MyType::serialize(ProfDataSerializer& ser, const T& t) const;
+ *  void MyType::deserialize(ProfDataDeserializer& ser, T& t);
+ *
+ * Note that custom serialization/deserialization is currently not
+ * supported for variable sized profilers.
  */
 template<class T>
 struct TargetProfile {
@@ -187,7 +196,7 @@ struct TargetProfile {
    * if profiling().
    */
   rds::Handle handle() const { return m_link.handle(); }
-
+  T& value() const { return *m_link; }
 private:
   static rds::Link<T> createLink(TransID profTransID,
                                  TransKind kind,

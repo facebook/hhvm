@@ -1193,9 +1193,9 @@ StringData* ExecutionContext::getContainingFileName() {
   if (ar->skipFrame()) ar = getPrevVMStateSkipFrame(ar);
   if (ar == nullptr) return staticEmptyString();
   Unit* unit = ar->m_func->unit();
-  assertx(unit->filepath()->isStatic());
-  // XXX: const StringData* -> Variant(bool) conversion problem makes this ugly
-  return const_cast<StringData*>(unit->filepath());
+  auto const path = ar->m_func->originalFilename() ?
+    ar->m_func->originalFilename() : unit->filepath();
+  return const_cast<StringData*>(path);
 }
 
 int ExecutionContext::getLine() {
@@ -1235,19 +1235,21 @@ Array ExecutionContext::getCallerInfo() {
     if (!ar->func()->name()->isame(s_call_user_func.get())
         && !ar->func()->name()->isame(s_call_user_func_array.get())) {
       auto const unit = ar->func()->unit();
+      auto const path = ar->func()->originalFilename() ?
+        ar->func()->originalFilename() : unit->filepath();
       int lineNumber;
       if ((lineNumber = unit->getLineNumber(pc)) != -1) {
         auto const cls = ar->func()->cls();
         if (cls != nullptr && !ar->func()->isClosureBody()) {
           return make_map_array(
             s_class, const_cast<StringData*>(cls->name()),
-            s_file, const_cast<StringData*>(unit->filepath()),
+            s_file, const_cast<StringData*>(path),
             s_function, const_cast<StringData*>(ar->func()->name()),
             s_line, lineNumber
           );
         } else {
           return make_map_array(
-            s_file, const_cast<StringData*>(unit->filepath()),
+            s_file, const_cast<StringData*>(path),
             s_function, const_cast<StringData*>(ar->func()->name()),
             s_line, lineNumber
           );

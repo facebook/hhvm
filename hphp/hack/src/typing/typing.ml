@@ -596,9 +596,6 @@ and enforce_return_disposable _env e =
   | p, _ ->
     Errors.invalid_return_disposable p
 
-and enforce_mutable_return env e =
-  Typing_mutability.verify_valid_mutable_return_value env env.Env.function_pos e
-
 and stmt env = function
   | Fallthrough ->
       env, T.Fallthrough
@@ -672,7 +669,14 @@ and stmt env = function
         else Some (pos, Reason.URreturn, (Reason.Rwitness p, Typing_utils.tany env)) in
       if return_disposable then enforce_return_disposable env e;
       let env, te, rty = expr ~is_using_clause:return_disposable ?expected:expected env e in
-      if return_mutable then enforce_mutable_return env te;
+      if Env.env_reactivity env <> Nonreactive
+      then begin
+        Typing_mutability.check_function_return_value
+          ~function_returns_mutable:return_mutable
+          env
+          env.Env.function_pos
+          te
+      end;
       if return_by_ref && TypecheckerOptions.experimental_feature_enabled
         (Env.get_options env)
         TypecheckerOptions.experimental_disallow_refs_in_array

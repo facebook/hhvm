@@ -1042,6 +1042,8 @@ module Typing                               = struct
   let wrong_expression_kind_attribute       = 4231 (* DONT MODIFY!!!! *)
   let attribute_class_no_constructor_args   = 4232 (* DONT MODIFY!!!! *)
 
+  let cannot_return_borrowed_value_as_immutable = 4233 (* DONT MODIFY!!!! *)
+
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -3238,6 +3240,13 @@ let attribute_class_no_constructor_args pos def_pos =
   add_list Typing.attribute_class_no_constructor_args [
       pos, msg;
       def_pos, "The attribute's class is defined here."
+  ]
+
+let cannot_return_borrowed_value_as_immutable fun_pos value_pos =
+  add_list Typing.cannot_return_borrowed_value_as_immutable [
+    fun_pos, "Values returned from reactive function by default are treated \
+    as immutable.";
+    value_pos, "This value is mutably borrowed and cannot be returned as immutable"
   ]
 
 let binding_ref_in_array pos =

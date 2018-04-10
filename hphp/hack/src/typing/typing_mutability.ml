@@ -53,8 +53,12 @@ let rec expr_returns_owned_mutable
    expr_returns_owned_mutable env r
  | _ -> false
 
-let verify_valid_mutable_return_value (env: Typing_env.env) fun_pos (e: T.expr) =
-  let error e mut_opt =
+let check_function_return_value
+  ~function_returns_mutable
+  (env: Typing_env.env)
+  fun_pos
+  (e: T.expr) =
+  let error_mutable e mut_opt =
     let kind =
       match mut_opt with
       | None -> "non-mutable"
@@ -62,15 +66,30 @@ let verify_valid_mutable_return_value (env: Typing_env.env) fun_pos (e: T.expr) 
       | Some Borrowed -> "borrowed"
       | Some Mutable -> assert false in
     Errors.invalid_mutable_return_result (T.get_position e) fun_pos kind in
+  let error_borrowed_as_immutable e =
+    (* attempt to return borrowed value as immutable *)
+    Errors.cannot_return_borrowed_value_as_immutable
+      fun_pos
+      (T.get_position e) in
   let rec aux e =
     match snd e with
     | T.Lvar (_, id) ->
       let mut_env = Env.get_env_mutability env in
       begin match LMap.get id mut_env with
-      | Some (_, Mutable) -> ()
-      | Some (_, mut) -> error e (Some mut)
-      | _ -> error e None
+      | Some (_, Mutable) ->
+        (* it is ok to return mutably owned values *)
+        ()
+      | Some (_, mut) when function_returns_mutable ->
+        error_mutable e (Some mut)
+      | Some (_, Borrowed) when not function_returns_mutable ->
+        (* attempt to return borrowed value as immutable *)
+        error_borrowed_as_immutable e
+      | _ ->
+        if function_returns_mutable then error_mutable e None
       end
+    | T.This when not function_returns_mutable && Env.function_is_mutable env ->
+      (* mutable this is treated as borrowed and this cannot be returned as immutable *)
+      error_borrowed_as_immutable e
     | T.Eif (_, e1_opt, e2) ->
       Option.iter e1_opt ~f:aux;
       aux e2
@@ -95,7 +114,8 @@ let verify_valid_mutable_return_value (env: Typing_env.env) fun_pos (e: T.expr) 
       return value is known to be literal\primitive\value with immutable semantics.
       *)
     | _ ->
-      if not (expr_returns_owned_mutable env e) then error e None in
+      if function_returns_mutable && not (expr_returns_owned_mutable env e)
+      then error_mutable e None in
  aux e
 
 (* Returns true if we can modify properties of the expression *)

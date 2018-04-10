@@ -502,4 +502,5 @@ module type S = sig
   val rx_is_enabled_invalid_location: Pos.t -> unit
   val wrong_expression_kind_attribute: string -> Pos.t -> string -> Pos.t -> string -> string -> unit
   val attribute_class_no_constructor_args: Pos.t -> Pos.t -> unit
+  val cannot_return_borrowed_value_as_immutable: Pos.t -> Pos.t -> unit
 end

@@ -1945,7 +1945,7 @@ let handle_event
         (* up so we'll be able to handle them when we're ready.               *)
         state := In_init { ienv with file_edits = ImmQueue.push ienv.file_edits c.json }
       | _ ->
-        raise (Error.RequestCancelled "Server busy")
+        raise (Error.RequestCancelled (Hh_server_initializing |> hh_server_state_to_string))
         (* We deny all other requests. Operation_cancelled is the only *)
         (* error-response that won't produce logs/warnings on most clients. *)
     end
@@ -2137,8 +2137,8 @@ let handle_event
     (* transitioned away from this state.                                     *)
     assert (not lenv.p.trigger_on_lsp);
     (* We deny all other requests. This is the only response that won't       *)
-    (* produce logs/warnings on most clients.                                 *)
-    raise (Error.RequestCancelled "Server busy")
+    (* produce logs/warnings on most clients...                               *)
+    raise (Error.RequestCancelled (lenv.p.new_hh_server_state |> hh_server_state_to_string))
 
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. Never returns. *)

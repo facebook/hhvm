@@ -161,6 +161,10 @@ module InoutLocals = struct
             | A.Uincr | A.Udecr -> collect_lvars_lhs i acc e
             | _ -> acc in
           super#on_unop acc op e
+        (* $v *)
+        method! on_lvar acc (_p, id) =
+          let acc = add_use id 0 acc in
+          super#on_lvar acc (_p, id)
         (* f(inout $v) or f(&$v) *)
         method! on_call acc _ _ args uargs =
           let f = handle_arg ~is_top:false i in

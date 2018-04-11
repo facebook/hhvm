@@ -1,0 +1,33 @@
+object(C)#1 (4) {
+  ["ci"]=>
+  int(0)
+  ["cv"]=>
+  vec(1) {
+    int(1)
+  }
+  ["i"]=>
+  int(2)
+  ["v"]=>
+  vec(1) {
+    int(3)
+  }
+}
+Cannot modify immutable property ci of class C after construction
+Cannot modify immutable property cv of class C after construction
+object(C)#1 (5) {
+  ["ci"]=>
+  int(0)
+  ["cv"]=>
+  vec(1) {
+    int(1)
+  }
+  ["i"]=>
+  int(4)
+  ["v"]=>
+  vec(2) {
+    int(3)
+    int(5)
+  }
+  ["lol"]=>
+  string(4) "whut"
+}

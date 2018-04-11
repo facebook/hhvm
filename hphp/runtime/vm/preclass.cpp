@@ -101,6 +101,14 @@ void PreClass::prettyPrint(std::ostream &out) const {
   if (m_attrs & AttrNoOverride){ out << " (nooverride)"; }
   if (m_attrs & AttrUnique)     out << " (unique)";
   if (m_attrs & AttrPersistent) out << " (persistent)";
+  if (m_attrs & AttrIsImmutable) {
+    // AttrIsImmutable classes will always also have AttrHasImmutable and
+    // AttrForbidDynamicProps set, so don't bother printing those
+    out << " (immutable)";
+  } else {
+    if (m_attrs & AttrHasImmutable) out << " (has-immutable)";
+    if (m_attrs & AttrForbidDynamicProps) out << " (no-dynamic-props)";
+  }
   if (m_id != -1) {
     out << " (ID " << m_id << ")";
   }
@@ -154,6 +162,7 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_attrs & AttrPrivate) { out << "private "; }
   if (m_attrs & AttrPersistent) { out << "(persistent) "; }
   if (m_attrs & AttrNoSerialize) { out << "(no-serialize) "; }
+  if (m_attrs & AttrIsImmutable) { out << "(immutable) "; }
   out << preClass->name()->data() << "::" << m_name->data() << " = ";
   if (m_val.m_type == KindOfUninit) {
     out << "<non-scalar>";

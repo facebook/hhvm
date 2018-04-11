@@ -16,6 +16,7 @@ type t = {
   property_is_static    : bool;
   property_is_deep_init : bool;
   property_no_serialize : bool;
+  property_is_immutable : bool;
   property_name         : Hhbc_id.Prop.t;
   property_initial_value  : Typed_value.t option;
   property_initializer_instrs : Instruction_sequence.t option;
@@ -34,6 +35,7 @@ let make
   property_is_static
   property_is_deep_init
   property_no_serialize
+  property_is_immutable
   property_name
   property_initial_value
   property_initializer_instrs
@@ -46,6 +48,7 @@ let make
     property_is_static;
     property_is_deep_init;
     property_no_serialize;
+    property_is_immutable;
     property_name;
     property_initial_value;
     property_initializer_instrs;
@@ -63,5 +66,6 @@ let is_deep_init hhas_property = hhas_property.property_is_deep_init
 let initial_value hhas_property = hhas_property.property_initial_value
 let initializer_instrs hhas_property = hhas_property.property_initializer_instrs
 let no_serialize hhas_property = hhas_property.property_no_serialize
+let is_immutable hhas_property = hhas_property.property_is_immutable
 let type_info hhas_property = hhas_property.property_type_info
 let doc_comment hhas_property = hhas_property.property_doc_comment

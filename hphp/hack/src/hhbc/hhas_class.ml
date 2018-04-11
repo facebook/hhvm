@@ -28,6 +28,9 @@ type t = {
   class_is_trait     : bool;
   class_is_xhp       : bool;
   class_is_top       : bool;
+  class_is_immutable : bool;
+  class_has_immutable : bool;
+  class_no_dynamic_props : bool;
   class_uses         : Litstr.id list;
   class_use_aliases  :
     (Litstr.id option * Litstr.id * Litstr.id option * Ast.kind list) list;
@@ -53,6 +56,9 @@ let make
   class_is_trait
   class_is_xhp
   class_is_top
+  class_is_immutable
+  class_has_immutable
+  class_no_dynamic_props
   class_uses
   class_use_aliases
   class_use_precedences
@@ -75,6 +81,9 @@ let make
     class_is_trait;
     class_is_xhp;
     class_is_top;
+    class_is_immutable;
+    class_has_immutable;
+    class_no_dynamic_props;
     class_uses;
     class_use_aliases;
     class_use_precedences;
@@ -98,6 +107,9 @@ let is_interface hhas_class = hhas_class.class_is_interface
 let is_trait hhas_class = hhas_class.class_is_trait
 let is_xhp hhas_class = hhas_class.class_is_xhp
 let is_top hhas_class = hhas_class.class_is_top
+let is_immutable hhas_class = hhas_class.class_is_immutable
+let has_immutable hhas_class = hhas_class.class_has_immutable
+let no_dynamic_props hhas_class = hhas_class.class_no_dynamic_props
 let class_uses hhas_class = hhas_class.class_uses
 let class_use_aliases hhas_class = hhas_class.class_use_aliases
 let class_use_precedences hhas_class = hhas_class.class_use_precedences

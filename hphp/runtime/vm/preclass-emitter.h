@@ -227,7 +227,6 @@ struct PreClassEmitter {
     return m_traitPrecRules;
   }
 
-  void addUserAttribute(const StringData* name, TypedValue tv);
   void setUserAttributes(UserAttributeMap map) {
     m_userAttributes = std::move(map);
   }

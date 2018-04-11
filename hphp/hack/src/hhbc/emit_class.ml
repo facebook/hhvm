@@ -144,7 +144,8 @@ let ast_methods ast_class_body =
     | _ -> None in
   List.filter_map ast_class_body mapper
 
-let from_class_elt_classvars ast_class tparams namespace elt =
+let from_class_elt_classvars
+  ast_class class_is_immutable tparams namespace elt =
   match elt with
   | A.ClassVars cv ->
     (* TODO: we need to emit doc comments for each property,
@@ -159,6 +160,7 @@ let from_class_elt_classvars ast_class tparams namespace elt =
         ast_class
         cv.A.cv_user_attributes
         cv.A.cv_kinds
+        class_is_immutable
         hint
         tparams
         namespace
@@ -237,6 +239,11 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
 
   let class_attributes =
     Emit_attribute.from_asts namespace ast_class.Ast.c_user_attributes in
+  let class_is_immutable = Hhas_attribute.has_const class_attributes in
+  (* In the future, we intend to set class_no_dynamic_props independently from
+   * class_is_immutable, but for now class_is_immutable is the only thing that
+   * turns it on. *)
+  let class_no_dynamic_props = class_is_immutable in
   let class_id, _ =
     Hhbc_id.Class.elaborate_id_at_definition_site namespace ast_class.Ast.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
@@ -356,7 +363,9 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   Label.reset_label ();
   let class_properties =
     List.concat_map class_body
-    (from_class_elt_classvars ast_class tparams namespace) in
+    (from_class_elt_classvars ast_class class_is_immutable tparams namespace) in
+  let class_has_immutable = class_is_immutable ||
+    List.exists class_properties (fun p -> Hhas_property.is_immutable p) in
   let env = Emit_env.make_class_env ast_class in
   let class_constants =
     List.concat_map class_body (from_class_elt_constants env) in
@@ -475,6 +484,9 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     class_is_trait
     ast_class.A.c_is_xhp
     is_top
+    class_is_immutable
+    class_has_immutable
+    class_no_dynamic_props
     class_uses
     class_use_aliases
     class_use_precedences

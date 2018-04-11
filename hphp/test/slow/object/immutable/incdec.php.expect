@@ -1,0 +1,13 @@
+object(C)#1 (2) {
+  ["ci"]=>
+  int(0)
+  ["i"]=>
+  int(1)
+}
+Cannot modify immutable property ci of class C after construction
+object(C)#1 (2) {
+  ["ci"]=>
+  int(0)
+  ["i"]=>
+  int(2)
+}

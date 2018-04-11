@@ -62,6 +62,7 @@ let from_ast
     ast_class
     cv_user_attributes
     cv_kind_list
+    class_is_immutable
     type_hint
     tparams
     namespace
@@ -71,6 +72,8 @@ let from_ast
   HHVM does not allow this.  Fix this in the Hack parser? *)
   let pid = Hhbc_id.Prop.from_ast_name cv_name in
   let attributes = Emit_attribute.from_asts namespace cv_user_attributes in
+  let is_immutable = class_is_immutable ||
+    Hhas_attribute.has_const attributes in
   let is_private = Hh_core.List.mem cv_kind_list Ast.Private in
   let is_protected = Hh_core.List.mem cv_kind_list Ast.Protected in
   let is_public =
@@ -140,6 +143,7 @@ let from_ast
     is_static
     is_deep_init
     false (*no_serialize*)
+    is_immutable
     pid
     initial_value
     initializer_instrs

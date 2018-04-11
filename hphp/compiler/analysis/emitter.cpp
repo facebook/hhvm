@@ -10842,6 +10842,8 @@ Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   return id;
 }
 
+const StaticString s_Const("__Const");
+
 Id EmitterVisitor::emitClass(Emitter& e,
                              ClassScopePtr cNode,
                              bool toplevel) {
@@ -10874,6 +10876,22 @@ Id EmitterVisitor::emitClass(Emitter& e,
     attr |= AttrBuiltin | AttrUnique | AttrPersistent;
   }
 
+  UserAttributeMap userAttrs;
+  for (auto const& attr : cNode->userAttributes()) {
+    auto const uaName = makeStaticString(attr.first);
+    auto const uaValue = attr.second;
+    assert(uaValue);
+    assert(uaValue->isScalar());
+    TypedValue tv;
+    initScalar(tv, uaValue);
+    userAttrs[uaName] = tv;
+  }
+  bool classIsImmutable = false;
+  if (userAttrs.count(s_Const.get())) {
+    attr |= AttrIsImmutable | AttrHasImmutable | AttrForbidDynamicProps;
+    classIsImmutable = true;
+  }
+
   const std::vector<std::string>& bases(cNode->getBases());
   int firstInterface = cNode->getOriginalParent().empty() ? 0 : 1;
   int nInterfaces = bases.size();
@@ -10902,6 +10920,7 @@ Id EmitterVisitor::emitClass(Emitter& e,
                                                  hoistable);
   pce->init(is->line0(), is->line1(), m_ue.bcPos(), attr, parentName,
             classDoc);
+  pce->setUserAttributes(userAttrs);
   auto r = is->getRange();
   r.line1 = r.line0;
   r.char1 = r.char0;
@@ -10931,17 +10950,8 @@ Id EmitterVisitor::emitClass(Emitter& e,
         PreClass::ClassRequirement(makeStaticString(reqImplements), false));
     }
   }
-  auto const& userAttrs = cNode->userAttributes();
-  for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
-    const StringData* uaName = makeStaticString(it->first);
-    ExpressionPtr uaValue = it->second;
-    assert(uaValue);
-    assert(uaValue->isScalar());
-    TypedValue tv;
-    initScalar(tv, uaValue);
-    pce->addUserAttribute(uaName, tv);
-  }
 
+  bool classHadImmutableProps = false;
   NonScalarVec* nonScalarPinitVec = nullptr;
   NonScalarVec* nonScalarSinitVec = nullptr;
   NonScalarVec* nonScalarConstVec = nullptr;
@@ -10962,6 +10972,10 @@ Id EmitterVisitor::emitClass(Emitter& e,
           cv->getTypeConstraint());
         auto const propUserAttrs = userAttributeListToMap(
           cv->userAttributeList());
+        if (classIsImmutable || propUserAttrs.count(s_Const.get())) {
+          declAttrs |= AttrIsImmutable;
+          classHadImmutableProps = true;
+        }
 
         int nVars = el->getCount();
         for (int ii = 0; ii < nVars; ii++) {
@@ -11084,6 +11098,10 @@ Id EmitterVisitor::emitClass(Emitter& e,
         emitClassUseTrait(pce, useStmt);
       }
     }
+  }
+
+  if (!classIsImmutable && classHadImmutableProps) {
+    pce->setAttrs(pce->attrs() | AttrHasImmutable);
   }
 
   if (nonScalarPinitVec != nullptr) {

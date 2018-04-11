@@ -202,10 +202,6 @@ void PreClassEmitter::addTraitAliasRule(
   m_traitAliasRules.push_back(rule);
 }
 
-void PreClassEmitter::addUserAttribute(const StringData* name, TypedValue tv) {
-  m_userAttributes[name] = tv;
-}
-
 void PreClassEmitter::commit(RepoTxn& txn) const {
   Repo& repo = Repo::get();
   PreClassRepoProxy& pcrp = repo.pcrp();

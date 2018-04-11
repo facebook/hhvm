@@ -1565,6 +1565,12 @@ let add_method_def buf method_def =
 let class_special_attributes c =
   let user_attrs = Hhas_class.attributes c in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
+  let attrs = if Hhas_class.no_dynamic_props c
+    then "no_dynamic_props" :: attrs else attrs in
+  let attrs =
+    if Hhas_class.has_immutable c then "has_immutable" :: attrs else attrs in
+  let attrs =
+    if Hhas_class.is_immutable c then "is_immutable" :: attrs else attrs in
   let attrs =
     if Hhas_attribute.has_foldable user_attrs then "foldable" :: attrs else attrs in
   let attrs = if Emit_env.is_systemlib ()
@@ -1612,6 +1618,7 @@ let property_attributes p =
   let module P = Hhas_property in
   let user_attrs = P.attributes p in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
+  let attrs = if P.is_immutable p then "is_immutable" :: attrs else attrs in
   let attrs = if P.no_serialize p then "no_serialize" :: attrs else attrs in
   let attrs = if P.is_deep_init p then "deep_init" :: attrs else attrs in
   let attrs = if P.is_static p then "static" :: attrs else attrs in

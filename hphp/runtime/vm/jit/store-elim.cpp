@@ -721,7 +721,7 @@ BlockAnalysis analyze_block(Global& genv, Block* block) {
 
 void find_all_stores(Global& genv, Block* blk, uint32_t id,
                      jit::vector<IRInstruction*>& stores,
-                     jit::hash_set<Block*>& seen) {
+                     jit::hash_set<void*>& seen) {
   ITRACE(7, "find_all_stores: {} B{}\n", id, blk->id());
   Trace::Indent _i;
   blk->forEachPred(
@@ -738,7 +738,7 @@ void find_all_stores(Global& genv, Block* blk, uint32_t id,
       IRInstruction* inst;
       if ((inst = pst.instruction()) != nullptr ||
           (inst = pst.processed()) != nullptr) {
-        if (inst->block() == pred || seen.insert(inst->block()).second) {
+        if (seen.insert(inst).second) {
           ITRACE(7, "find_all_stores: {} B{} pred B{}: adding {}\n",
                  id, blk->id(), pred->id(), inst->toString());
           stores.push_back(inst);
@@ -751,6 +751,12 @@ void find_all_stores(Global& genv, Block* blk, uint32_t id,
       Block* b;
       if ((b = pst.block()) != nullptr ||
           (b = pst.pending()) != nullptr) {
+        if (b != pred && seen.count(b)) {
+          ITRACE(7,
+                 "find_all_stores: {} B{} pred B{} previously processed B{}\n",
+                 id, blk->id(), pred->id(), b->id());
+          return;
+        }
         ITRACE(7, "find_all_stores: {} B{} pred B{} recur to B{}\n",
                id, blk->id(), pred->id(), b->id());
         return find_all_stores(genv, b, id, stores, seen);
@@ -767,7 +773,7 @@ IRInstruction* resolve_ts(Global& genv, Block* blk,
 void resolve_cycle(Global& genv, TrackedStore& ts, Block* blk, uint32_t id) {
   genv.needsReflow = true;
   jit::vector<IRInstruction*> stores;
-  jit::hash_set<Block*> seen;
+  jit::hash_set<void*> seen;
   // find all the stores, so we can determine
   // whether a phi is actually required for each
   // src (also, we need a candidate store to clone)

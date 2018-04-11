@@ -100,7 +100,7 @@ class ReflectionClass implements Reflector {
   public function newInstance(...$args);
   public function newInstanceArgs(Traversable<mixed> $args = array());
   public function newInstanceWithoutConstructor();
-  public function setStaticPropertyValue(string $name, string $value): void;
+  public function setStaticPropertyValue(string $name, mixed $value): void;
   public function __toString(): string;
 }
 

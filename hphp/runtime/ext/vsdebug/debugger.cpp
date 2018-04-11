@@ -351,7 +351,7 @@ void Debugger::sendStoppedEvent(
     event["description"] = displayReason;
   }
 
-  event["threadCausedFocus"] = focusedThread;
+  event["preserveFocusHint"] = !focusedThread;
   sendEventMessage(event, "stopped");
 }
 

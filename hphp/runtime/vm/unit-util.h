@@ -98,6 +98,23 @@ inline String stripInOutSuffix(String& s) {
   return String(stripInOutSuffix(s.get()));
 }
 
+inline std::string mangleInOutFuncName(const char* name,
+                                       std::vector<uint32_t> params) {
+  return folly::sformat("{}${}$inout", name, folly::join(";", params));
+}
+
+inline std::string mangleInOutFuncName(const std::string& name,
+                                       std::vector<uint32_t> params) {
+  return mangleInOutFuncName(name.data(), std::move(params));
+}
+
+inline String mangleInOutFuncName(const StringData* name,
+                                  std::vector<uint32_t> params) {
+  return String(makeStaticString(
+    mangleInOutFuncName(name->data(), std::move(params))
+  ));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

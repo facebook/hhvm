@@ -4792,16 +4792,11 @@ std::vector<uint32_t> computeInOutParamVec(ExpressionListPtr params) {
 }
 
 std::string mangleInOutFuncName(const std::string& name,
-                                std::vector<uint32_t> params) {
-  return folly::sformat("{}${}$inout", name, folly::join(";", params));
-}
-
-std::string mangleInOutFuncName(const std::string& name,
                                 ExpressionListPtr params) {
   if (name.empty()) return name;
   auto v = computeInOutParamVec(params);
   if (v.empty()) return name;
-  return mangleInOutFuncName(name, std::move(v));
+  return HPHP::mangleInOutFuncName(name, std::move(v));
 }
 
 static bool isNormalLocalVariable(const ExpressionPtr& expr) {
@@ -8884,7 +8879,7 @@ FuncEmitter* EmitterVisitor::createInOutWrapper(MethodStatementPtr m,
       if (m->isInOut(i) || m->isRef(i)) inOutParams.push_back(i);
     }
     auto const name = makeStaticString(
-      mangleInOutFuncName(fe->name->data(), inOutParams)
+      HPHP::mangleInOutFuncName(fe->name->data(), inOutParams)
     );
     FuncEmitter* wrapper = nullptr;
     if (auto pce = fe->pce()) {
@@ -9150,7 +9145,7 @@ void EmitterVisitor::emitFuncWrapper(PostponedMeth& p, FuncEmitter* fe,
         if (fe->params[i].inout) iovec.push_back(i);
       }
       return makeStaticString(
-        mangleInOutFuncName(meth->getOriginalName(), iovec)
+        HPHP::mangleInOutFuncName(meth->getOriginalName(), iovec)
       );
     }
     return makeStaticString(meth->getOriginalName());

@@ -558,6 +558,11 @@ struct Func final {
   bool takesInOutParams() const;
 
   /*
+   * Returns the number of inout parameters taken by func.
+   */
+  uint32_t numInOutParams() const;
+
+  /*
    * When isInOutWrapper() is true--
    *
    * If takesInOutParams() this function has inout params and wraps a function

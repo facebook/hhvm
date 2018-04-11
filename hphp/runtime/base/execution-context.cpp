@@ -1565,6 +1565,10 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   TypedValue retval;
   if (doStackCheck(retval)) return retval;
 
+  if (UNLIKELY(RuntimeOption::EvalUseMSRVForInOut && f->takesInOutParams())) {
+    for (auto i = f->numInOutParams(); i > 0; --i) vmStack().pushNull();
+  }
+
   ActRec* ar = vmStack().allocA();
   ar->setReturnVMExit();
   ar->m_func = f;
@@ -1582,6 +1586,10 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     ar->setMagicDispatch(invName);
   } else {
     ar->trashVarEnv();
+  }
+
+  if (UNLIKELY(RuntimeOption::EvalUseMSRVForInOut && f->takesInOutParams())) {
+    ar->setFCallM();
   }
 
 #ifdef HPHP_TRACE
@@ -1628,8 +1636,18 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
 
     // `retptr' might point somewhere that is affected by {push,pop}VMState(),
     // so don't write to it until after we pop the nested VM state.
-    tvCopy(*vmStack().topTV(), retval);
-    vmStack().discard();
+    if (UNLIKELY(RuntimeOption::EvalUseMSRVForInOut && f->takesInOutParams())) {
+      VArrayInit varr(f->numInOutParams() + 1);
+      for (uint32_t i = 0; i < f->numInOutParams() + 1; ++i) {
+        varr.append(*vmStack().topTV());
+        vmStack().popC();
+      }
+      auto arr = varr.toArray();
+      retval = make_array_like_tv(arr.detach());
+    } else {
+      tvCopy(*vmStack().topTV(), retval);
+      vmStack().discard();
+    }
   }
   return retval;
 }

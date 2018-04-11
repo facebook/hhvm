@@ -17,10 +17,12 @@
 #include "hphp/runtime/vm/event-hook.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
@@ -34,6 +36,8 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/interp-helpers.h"
+#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/struct-log.h"
@@ -247,6 +251,72 @@ static Array get_frame_args_with_ref(const ActRec* ar) {
   return retArray.toArray();
 }
 
+static Variant call_intercept_handler(
+  const Variant& function,
+  const Variant& called,
+  const Variant& called_on,
+  Array& args,
+  const Variant& ctx,
+  Variant& done
+) {
+  ObjectData* obj = nullptr;
+  Class* cls = nullptr;
+  CallerFrame cf;
+  StringData* invName = nullptr;
+  bool dynamic = false;
+  auto f = vm_decode_function(function, cf(), false,
+                              obj, cls, invName, dynamic);
+  if (!f) {
+    return uninit_null();
+  }
+
+  PackedArrayInit par(5);
+  par.append(called);
+  par.append(called_on);
+  par.append(args);
+  par.append(ctx);
+
+  Variant intArgs;
+
+  auto const inout = f->isInOutWrapper();
+  if (inout) {
+    auto const name = mangleInOutFuncName(f->name(), {2,4});
+
+    if (!f->isMethod()) {
+      f = Unit::lookupFunc(name.get());
+    } else {
+      assertx(cls);
+      f = cls->lookupMethod(name.get());
+    }
+    if (!f) {
+      raise_error(
+        "fb_intercept used with an inout handler with a bad signature "
+        "(expected parameters three and five to be inout)"
+      );
+    }
+    intArgs = par.append(done).toArray();
+  } else {
+    intArgs = par.appendRef(done).toArray();
+  }
+
+  auto ret = Variant::attach(
+    g_context->invokeFunc(f, intArgs, obj, cls,
+                          nullptr, invName, ExecutionContext::InvokeCuf,
+                          false, dynamic, false)
+  );
+  if (UNLIKELY(ret.getRawType() == KindOfRef)) {
+    tvUnbox(*ret.asTypedValue());
+  }
+
+  if (inout) {
+    auto& arr = ret.asCArrRef();
+    if (arr[1].isArray()) args = arr[1].toArray();
+    if (arr[2].isBoolean()) done = arr[2].toBoolean();
+    return arr[0];
+  }
+  return ret;
+}
+
 bool EventHook::RunInterceptHandler(ActRec* ar) {
   const Func* func = ar->func();
   if (LIKELY(func->maybeIntercepted() == 0)) return true;
@@ -254,8 +324,14 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   // Intercept only original generator / async function calls, not resumption.
   if (ar->resumed()) return true;
 
-  Variant* h = get_intercept_handler(func->fullNameStr(),
-                                     &func->maybeIntercepted());
+  // Don't intercept inout wrappers. We'll intercept the inner function.
+  if (func->isInOutWrapper()) return true;
+
+  auto const name = func->takesInOutParams()
+    ? stripInOutSuffix(func->fullName())
+    : func->fullName();
+
+  Variant* h = get_intercept_handler(StrNR(name), &func->maybeIntercepted());
   if (!h) return true;
 
   /*
@@ -270,6 +346,8 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
                   "in RepoAuthoritative mode", func->fullName()->data());
     }
   }
+
+  checkForRequiredCallM(ar);
 
   VMRegAnchor _;
 
@@ -287,16 +365,13 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     return init_null();
   }();
 
-  Variant intArgs =
-    PackedArrayInit(5)
-      .append(VarNR(ar->func()->fullName()).tv())
-      .append(called_on)
-      .append(get_frame_args_with_ref(ar))
-      .append(h->asCArrRef()[1])
-      .appendRef(doneFlag)
-      .toArray();
+  auto args = get_frame_args_with_ref(ar);
+  VarNR called(ar->func()->fullDisplayName());
 
-  Variant ret = vm_call_user_func(h->asCArrRef()[0], intArgs);
+  Variant ret = call_intercept_handler(
+    h->asCArrRef()[0], called, called_on, args, h->asCArrRef()[1], doneFlag
+  );
+
   if (doneFlag.toBoolean()) {
     Offset pcOff;
     ActRec* outer = g_context->getPrevVMState(ar, &pcOff);
@@ -307,7 +382,49 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     // Tear down the callee frame, then push the return value.
     Stack& stack = vmStack();
     stack.trim((Cell*)(ar + 1));
-    cellDup(*ret.asCell(), *stack.allocTV());
+    if (UNLIKELY(func->takesInOutParams())) {
+      uint32_t count = func->numInOutParams();
+
+      if (RuntimeOption::EvalUseMSRVForInOut) {
+        auto start = stack.topTV();
+        auto const end = start + count;
+
+        auto push = [&] (TypedValue v) {
+          assertx(start < end);
+          tvIncRefGen(v);
+          *start++ = v;
+        };
+
+        uint32_t param = 0;
+        IterateKV(args.get(), [&] (Cell, TypedValue v) {
+          if (param >= func->numParams() || !func->params()[param++].inout) {
+            return;
+          }
+          push(v);
+        });
+
+        while (start < end) push(make_tv<KindOfNull>());
+        cellDup(*ret.asCell(), *stack.allocTV());
+      } else {
+        VArrayInit varr(count + 1);
+        varr.append(*ret.asCell());
+
+        uint32_t param = 0;
+        uint32_t added = 0;
+        IterateKV(args.get(), [&] (Cell, TypedValue v) {
+          if (param >= func->numParams() || !func->params()[param++].inout) {
+            return;
+          }
+          added++;
+          varr.append(v);
+        });
+
+        for (; added < count; ++added) varr.append(make_tv<KindOfNull>());
+        *stack.allocTV() = make_array_like_tv(varr.toArray().detach());
+      }
+    } else {
+      cellDup(*ret.asCell(), *stack.allocTV());
+    }
 
     vmfp() = outer;
     vmpc() = outer ? outer->func()->unit()->at(pcOff) : nullptr;

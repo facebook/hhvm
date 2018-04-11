@@ -305,6 +305,15 @@ inline bool Func::isInOutWrapper() const {
   return m_attrs & AttrIsInOutWrapper;
 }
 
+inline uint32_t Func::numInOutParams() const {
+  if (!takesInOutParams()) return 0;
+  uint32_t count = 0;
+  for (uint32_t i = 0; i < numParams(); ++i) {
+    if (params()[i].inout) ++count;
+  }
+  return count;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Locals, iterators, and stack.
 

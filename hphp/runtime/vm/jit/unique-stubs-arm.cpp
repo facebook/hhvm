@@ -174,13 +174,12 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
   // All the stub entrypoints share the same ret.
   vwrap(cb, data, fixups, [] (Vout& v) {
-    v << popp{rfp(), rlr()};
-    v << ret{};
+    v << stubret{RegSet{}, true};
   });
 
   // Create a table of branches
   us.freeManyLocalsHelper = vwrap(cb, data, [&] (Vout& v) {
-    v << pushp{rlr(), rfp()};
+    v << stublogue{true};
 
     // rvmfp() is needed by the freeManyLocalsHelper stub above, so frame
     // linkage setup is deferred until after its use in freeManyLocalsHelper.
@@ -189,7 +188,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
     us.freeLocalsHelpers[i] = vwrap(cb, data, [&] (Vout& v) {
       // We set up frame linkage to avoid an indirect fixup.
-      v << pushp{rlr(), rfp()};
+      v << stublogue{true};
       v << copy{rsp(), rfp()};
       v << jmpi{freeLocalsHelpers[i]};
     });

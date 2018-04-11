@@ -743,30 +743,35 @@ module type Syntax_S = sig
     }
   | DarrayIntrinsicExpression               of
     { darray_intrinsic_keyword                           : t
+    ; darray_intrinsic_explicit_type                     : t
     ; darray_intrinsic_left_bracket                      : t
     ; darray_intrinsic_members                           : t
     ; darray_intrinsic_right_bracket                     : t
     }
   | DictionaryIntrinsicExpression           of
     { dictionary_intrinsic_keyword                       : t
+    ; dictionary_intrinsic_explicit_type                 : t
     ; dictionary_intrinsic_left_bracket                  : t
     ; dictionary_intrinsic_members                       : t
     ; dictionary_intrinsic_right_bracket                 : t
     }
   | KeysetIntrinsicExpression               of
     { keyset_intrinsic_keyword                           : t
+    ; keyset_intrinsic_explicit_type                     : t
     ; keyset_intrinsic_left_bracket                      : t
     ; keyset_intrinsic_members                           : t
     ; keyset_intrinsic_right_bracket                     : t
     }
   | VarrayIntrinsicExpression               of
     { varray_intrinsic_keyword                           : t
+    ; varray_intrinsic_explicit_type                     : t
     ; varray_intrinsic_left_bracket                      : t
     ; varray_intrinsic_members                           : t
     ; varray_intrinsic_right_bracket                     : t
     }
   | VectorIntrinsicExpression               of
     { vector_intrinsic_keyword                           : t
+    ; vector_intrinsic_explicit_type                     : t
     ; vector_intrinsic_left_bracket                      : t
     ; vector_intrinsic_members                           : t
     ; vector_intrinsic_right_bracket                     : t
@@ -1156,11 +1161,11 @@ module type Syntax_S = sig
   val make_constructor_call : t -> t -> t -> t -> t
   val make_array_creation_expression : t -> t -> t -> t
   val make_array_intrinsic_expression : t -> t -> t -> t -> t
-  val make_darray_intrinsic_expression : t -> t -> t -> t -> t
-  val make_dictionary_intrinsic_expression : t -> t -> t -> t -> t
-  val make_keyset_intrinsic_expression : t -> t -> t -> t -> t
-  val make_varray_intrinsic_expression : t -> t -> t -> t -> t
-  val make_vector_intrinsic_expression : t -> t -> t -> t -> t
+  val make_darray_intrinsic_expression : t -> t -> t -> t -> t -> t
+  val make_dictionary_intrinsic_expression : t -> t -> t -> t -> t -> t
+  val make_keyset_intrinsic_expression : t -> t -> t -> t -> t -> t
+  val make_varray_intrinsic_expression : t -> t -> t -> t -> t -> t
+  val make_vector_intrinsic_expression : t -> t -> t -> t -> t -> t
   val make_element_initializer : t -> t -> t -> t
   val make_subscript_expression : t -> t -> t -> t -> t
   val make_embedded_subscript_expression : t -> t -> t -> t -> t

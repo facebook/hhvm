@@ -18,7 +18,7 @@
       (compound_statement (({) (end_of_line))
        (list
         (expression_statement
-         (darray_intrinsic_expression ((whitespace) (darray)) (([))
+         (darray_intrinsic_expression ((whitespace) (darray)) (missing) (([))
           (list
            (list_item
             (element_initializer
@@ -38,7 +38,7 @@
           ((])))
          ((";") (end_of_line)))
         (expression_statement
-         (varray_intrinsic_expression ((whitespace) (varray)) (([))
+         (varray_intrinsic_expression ((whitespace) (varray)) (missing) (([))
           (list (list_item (literal ((boolean_literal))) ((,) (whitespace)))
            (list_item (literal ((boolean_literal))) (missing)))
           ((])))

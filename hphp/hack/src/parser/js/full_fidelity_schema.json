@@ -1626,6 +1626,7 @@
       "prefix" : "darray_intrinsic",
       "fields" : [
         { "field_name" : "keyword" },
+        { "field_name" : "explicit_type" },
         { "field_name" : "left_bracket" },
         { "field_name" : "members" },
         { "field_name" : "right_bracket" }
@@ -1636,6 +1637,7 @@
       "prefix" : "dictionary_intrinsic",
       "fields" : [
         { "field_name" : "keyword" },
+        { "field_name" : "explicit_type" },
         { "field_name" : "left_bracket" },
         { "field_name" : "members" },
         { "field_name" : "right_bracket" }
@@ -1646,6 +1648,7 @@
       "prefix" : "keyset_intrinsic",
       "fields" : [
         { "field_name" : "keyword" },
+        { "field_name" : "explicit_type" },
         { "field_name" : "left_bracket" },
         { "field_name" : "members" },
         { "field_name" : "right_bracket" }
@@ -1656,6 +1659,7 @@
       "prefix" : "varray_intrinsic",
       "fields" : [
         { "field_name" : "keyword" },
+        { "field_name" : "explicit_type" },
         { "field_name" : "left_bracket" },
         { "field_name" : "members" },
         { "field_name" : "right_bracket" }
@@ -1666,6 +1670,7 @@
       "prefix" : "vector_intrinsic",
       "fields" : [
         { "field_name" : "keyword" },
+        { "field_name" : "explicit_type" },
         { "field_name" : "left_bracket" },
         { "field_name" : "members" },
         { "field_name" : "right_bracket" }

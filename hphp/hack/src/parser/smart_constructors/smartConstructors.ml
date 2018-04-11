@@ -148,11 +148,11 @@ module type SmartConstructors_S = sig
   val make_constructor_call : r -> r -> r -> r -> t -> t * r
   val make_array_creation_expression : r -> r -> r -> t -> t * r
   val make_array_intrinsic_expression : r -> r -> r -> r -> t -> t * r
-  val make_darray_intrinsic_expression : r -> r -> r -> r -> t -> t * r
-  val make_dictionary_intrinsic_expression : r -> r -> r -> r -> t -> t * r
-  val make_keyset_intrinsic_expression : r -> r -> r -> r -> t -> t * r
-  val make_varray_intrinsic_expression : r -> r -> r -> r -> t -> t * r
-  val make_vector_intrinsic_expression : r -> r -> r -> r -> t -> t * r
+  val make_darray_intrinsic_expression : r -> r -> r -> r -> r -> t -> t * r
+  val make_dictionary_intrinsic_expression : r -> r -> r -> r -> r -> t -> t * r
+  val make_keyset_intrinsic_expression : r -> r -> r -> r -> r -> t -> t * r
+  val make_varray_intrinsic_expression : r -> r -> r -> r -> r -> t -> t * r
+  val make_vector_intrinsic_expression : r -> r -> r -> r -> r -> t -> t * r
   val make_element_initializer : r -> r -> r -> t -> t * r
   val make_subscript_expression : r -> r -> r -> r -> t -> t * r
   val make_embedded_subscript_expression : r -> r -> r -> r -> t -> t * r
@@ -329,11 +329,11 @@ end) = struct
     let constructor_call parser arg0 arg1 arg2 arg3 = call parser (SCI.make_constructor_call arg0 arg1 arg2 arg3)
     let array_creation_expression parser arg0 arg1 arg2 = call parser (SCI.make_array_creation_expression arg0 arg1 arg2)
     let array_intrinsic_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_array_intrinsic_expression arg0 arg1 arg2 arg3)
-    let darray_intrinsic_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_darray_intrinsic_expression arg0 arg1 arg2 arg3)
-    let dictionary_intrinsic_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_dictionary_intrinsic_expression arg0 arg1 arg2 arg3)
-    let keyset_intrinsic_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_keyset_intrinsic_expression arg0 arg1 arg2 arg3)
-    let varray_intrinsic_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_varray_intrinsic_expression arg0 arg1 arg2 arg3)
-    let vector_intrinsic_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_vector_intrinsic_expression arg0 arg1 arg2 arg3)
+    let darray_intrinsic_expression parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_darray_intrinsic_expression arg0 arg1 arg2 arg3 arg4)
+    let dictionary_intrinsic_expression parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_dictionary_intrinsic_expression arg0 arg1 arg2 arg3 arg4)
+    let keyset_intrinsic_expression parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_keyset_intrinsic_expression arg0 arg1 arg2 arg3 arg4)
+    let varray_intrinsic_expression parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_varray_intrinsic_expression arg0 arg1 arg2 arg3 arg4)
+    let vector_intrinsic_expression parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_vector_intrinsic_expression arg0 arg1 arg2 arg3 arg4)
     let element_initializer parser arg0 arg1 arg2 = call parser (SCI.make_element_initializer arg0 arg1 arg2)
     let subscript_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_subscript_expression arg0 arg1 arg2 arg3)
     let embedded_subscript_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_embedded_subscript_expression arg0 arg1 arg2 arg3)

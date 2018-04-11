@@ -15997,23 +15997,35 @@ class DarrayIntrinsicExpression extends EditableSyntax
 {
   constructor(
     keyword,
+    explicit_type,
     left_bracket,
     members,
     right_bracket)
   {
     super('darray_intrinsic_expression', {
       keyword: keyword,
+      explicit_type: explicit_type,
       left_bracket: left_bracket,
       members: members,
       right_bracket: right_bracket });
   }
   get keyword() { return this.children.keyword; }
+  get explicit_type() { return this.children.explicit_type; }
   get left_bracket() { return this.children.left_bracket; }
   get members() { return this.children.members; }
   get right_bracket() { return this.children.right_bracket; }
   with_keyword(keyword){
     return new DarrayIntrinsicExpression(
       keyword,
+      this.explicit_type,
+      this.left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_explicit_type(explicit_type){
+    return new DarrayIntrinsicExpression(
+      this.keyword,
+      explicit_type,
       this.left_bracket,
       this.members,
       this.right_bracket);
@@ -16021,6 +16033,7 @@ class DarrayIntrinsicExpression extends EditableSyntax
   with_left_bracket(left_bracket){
     return new DarrayIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       left_bracket,
       this.members,
       this.right_bracket);
@@ -16028,6 +16041,7 @@ class DarrayIntrinsicExpression extends EditableSyntax
   with_members(members){
     return new DarrayIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       this.left_bracket,
       members,
       this.right_bracket);
@@ -16035,6 +16049,7 @@ class DarrayIntrinsicExpression extends EditableSyntax
   with_right_bracket(right_bracket){
     return new DarrayIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       this.left_bracket,
       this.members,
       right_bracket);
@@ -16046,11 +16061,13 @@ class DarrayIntrinsicExpression extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var explicit_type = this.explicit_type.rewrite(rewriter, new_parents);
     var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
     var members = this.members.rewrite(rewriter, new_parents);
     var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
+      explicit_type === this.explicit_type &&
       left_bracket === this.left_bracket &&
       members === this.members &&
       right_bracket === this.right_bracket)
@@ -16061,6 +16078,7 @@ class DarrayIntrinsicExpression extends EditableSyntax
     {
       return rewriter(new DarrayIntrinsicExpression(
         keyword,
+        explicit_type,
         left_bracket,
         members,
         right_bracket), parents);
@@ -16071,6 +16089,9 @@ class DarrayIntrinsicExpression extends EditableSyntax
     let keyword = EditableSyntax.from_json(
       json.darray_intrinsic_keyword, position, source);
     position += keyword.width;
+    let explicit_type = EditableSyntax.from_json(
+      json.darray_intrinsic_explicit_type, position, source);
+    position += explicit_type.width;
     let left_bracket = EditableSyntax.from_json(
       json.darray_intrinsic_left_bracket, position, source);
     position += left_bracket.width;
@@ -16082,6 +16103,7 @@ class DarrayIntrinsicExpression extends EditableSyntax
     position += right_bracket.width;
     return new DarrayIntrinsicExpression(
         keyword,
+        explicit_type,
         left_bracket,
         members,
         right_bracket);
@@ -16091,6 +16113,7 @@ class DarrayIntrinsicExpression extends EditableSyntax
     if (DarrayIntrinsicExpression._children_keys == null)
       DarrayIntrinsicExpression._children_keys = [
         'keyword',
+        'explicit_type',
         'left_bracket',
         'members',
         'right_bracket'];
@@ -16101,23 +16124,35 @@ class DictionaryIntrinsicExpression extends EditableSyntax
 {
   constructor(
     keyword,
+    explicit_type,
     left_bracket,
     members,
     right_bracket)
   {
     super('dictionary_intrinsic_expression', {
       keyword: keyword,
+      explicit_type: explicit_type,
       left_bracket: left_bracket,
       members: members,
       right_bracket: right_bracket });
   }
   get keyword() { return this.children.keyword; }
+  get explicit_type() { return this.children.explicit_type; }
   get left_bracket() { return this.children.left_bracket; }
   get members() { return this.children.members; }
   get right_bracket() { return this.children.right_bracket; }
   with_keyword(keyword){
     return new DictionaryIntrinsicExpression(
       keyword,
+      this.explicit_type,
+      this.left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_explicit_type(explicit_type){
+    return new DictionaryIntrinsicExpression(
+      this.keyword,
+      explicit_type,
       this.left_bracket,
       this.members,
       this.right_bracket);
@@ -16125,6 +16160,7 @@ class DictionaryIntrinsicExpression extends EditableSyntax
   with_left_bracket(left_bracket){
     return new DictionaryIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       left_bracket,
       this.members,
       this.right_bracket);
@@ -16132,6 +16168,7 @@ class DictionaryIntrinsicExpression extends EditableSyntax
   with_members(members){
     return new DictionaryIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       this.left_bracket,
       members,
       this.right_bracket);
@@ -16139,6 +16176,7 @@ class DictionaryIntrinsicExpression extends EditableSyntax
   with_right_bracket(right_bracket){
     return new DictionaryIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       this.left_bracket,
       this.members,
       right_bracket);
@@ -16150,11 +16188,13 @@ class DictionaryIntrinsicExpression extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var explicit_type = this.explicit_type.rewrite(rewriter, new_parents);
     var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
     var members = this.members.rewrite(rewriter, new_parents);
     var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
+      explicit_type === this.explicit_type &&
       left_bracket === this.left_bracket &&
       members === this.members &&
       right_bracket === this.right_bracket)
@@ -16165,6 +16205,7 @@ class DictionaryIntrinsicExpression extends EditableSyntax
     {
       return rewriter(new DictionaryIntrinsicExpression(
         keyword,
+        explicit_type,
         left_bracket,
         members,
         right_bracket), parents);
@@ -16175,6 +16216,9 @@ class DictionaryIntrinsicExpression extends EditableSyntax
     let keyword = EditableSyntax.from_json(
       json.dictionary_intrinsic_keyword, position, source);
     position += keyword.width;
+    let explicit_type = EditableSyntax.from_json(
+      json.dictionary_intrinsic_explicit_type, position, source);
+    position += explicit_type.width;
     let left_bracket = EditableSyntax.from_json(
       json.dictionary_intrinsic_left_bracket, position, source);
     position += left_bracket.width;
@@ -16186,6 +16230,7 @@ class DictionaryIntrinsicExpression extends EditableSyntax
     position += right_bracket.width;
     return new DictionaryIntrinsicExpression(
         keyword,
+        explicit_type,
         left_bracket,
         members,
         right_bracket);
@@ -16195,6 +16240,7 @@ class DictionaryIntrinsicExpression extends EditableSyntax
     if (DictionaryIntrinsicExpression._children_keys == null)
       DictionaryIntrinsicExpression._children_keys = [
         'keyword',
+        'explicit_type',
         'left_bracket',
         'members',
         'right_bracket'];
@@ -16205,23 +16251,35 @@ class KeysetIntrinsicExpression extends EditableSyntax
 {
   constructor(
     keyword,
+    explicit_type,
     left_bracket,
     members,
     right_bracket)
   {
     super('keyset_intrinsic_expression', {
       keyword: keyword,
+      explicit_type: explicit_type,
       left_bracket: left_bracket,
       members: members,
       right_bracket: right_bracket });
   }
   get keyword() { return this.children.keyword; }
+  get explicit_type() { return this.children.explicit_type; }
   get left_bracket() { return this.children.left_bracket; }
   get members() { return this.children.members; }
   get right_bracket() { return this.children.right_bracket; }
   with_keyword(keyword){
     return new KeysetIntrinsicExpression(
       keyword,
+      this.explicit_type,
+      this.left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_explicit_type(explicit_type){
+    return new KeysetIntrinsicExpression(
+      this.keyword,
+      explicit_type,
       this.left_bracket,
       this.members,
       this.right_bracket);
@@ -16229,6 +16287,7 @@ class KeysetIntrinsicExpression extends EditableSyntax
   with_left_bracket(left_bracket){
     return new KeysetIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       left_bracket,
       this.members,
       this.right_bracket);
@@ -16236,6 +16295,7 @@ class KeysetIntrinsicExpression extends EditableSyntax
   with_members(members){
     return new KeysetIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       this.left_bracket,
       members,
       this.right_bracket);
@@ -16243,6 +16303,7 @@ class KeysetIntrinsicExpression extends EditableSyntax
   with_right_bracket(right_bracket){
     return new KeysetIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       this.left_bracket,
       this.members,
       right_bracket);
@@ -16254,11 +16315,13 @@ class KeysetIntrinsicExpression extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var explicit_type = this.explicit_type.rewrite(rewriter, new_parents);
     var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
     var members = this.members.rewrite(rewriter, new_parents);
     var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
+      explicit_type === this.explicit_type &&
       left_bracket === this.left_bracket &&
       members === this.members &&
       right_bracket === this.right_bracket)
@@ -16269,6 +16332,7 @@ class KeysetIntrinsicExpression extends EditableSyntax
     {
       return rewriter(new KeysetIntrinsicExpression(
         keyword,
+        explicit_type,
         left_bracket,
         members,
         right_bracket), parents);
@@ -16279,6 +16343,9 @@ class KeysetIntrinsicExpression extends EditableSyntax
     let keyword = EditableSyntax.from_json(
       json.keyset_intrinsic_keyword, position, source);
     position += keyword.width;
+    let explicit_type = EditableSyntax.from_json(
+      json.keyset_intrinsic_explicit_type, position, source);
+    position += explicit_type.width;
     let left_bracket = EditableSyntax.from_json(
       json.keyset_intrinsic_left_bracket, position, source);
     position += left_bracket.width;
@@ -16290,6 +16357,7 @@ class KeysetIntrinsicExpression extends EditableSyntax
     position += right_bracket.width;
     return new KeysetIntrinsicExpression(
         keyword,
+        explicit_type,
         left_bracket,
         members,
         right_bracket);
@@ -16299,6 +16367,7 @@ class KeysetIntrinsicExpression extends EditableSyntax
     if (KeysetIntrinsicExpression._children_keys == null)
       KeysetIntrinsicExpression._children_keys = [
         'keyword',
+        'explicit_type',
         'left_bracket',
         'members',
         'right_bracket'];
@@ -16309,23 +16378,35 @@ class VarrayIntrinsicExpression extends EditableSyntax
 {
   constructor(
     keyword,
+    explicit_type,
     left_bracket,
     members,
     right_bracket)
   {
     super('varray_intrinsic_expression', {
       keyword: keyword,
+      explicit_type: explicit_type,
       left_bracket: left_bracket,
       members: members,
       right_bracket: right_bracket });
   }
   get keyword() { return this.children.keyword; }
+  get explicit_type() { return this.children.explicit_type; }
   get left_bracket() { return this.children.left_bracket; }
   get members() { return this.children.members; }
   get right_bracket() { return this.children.right_bracket; }
   with_keyword(keyword){
     return new VarrayIntrinsicExpression(
       keyword,
+      this.explicit_type,
+      this.left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_explicit_type(explicit_type){
+    return new VarrayIntrinsicExpression(
+      this.keyword,
+      explicit_type,
       this.left_bracket,
       this.members,
       this.right_bracket);
@@ -16333,6 +16414,7 @@ class VarrayIntrinsicExpression extends EditableSyntax
   with_left_bracket(left_bracket){
     return new VarrayIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       left_bracket,
       this.members,
       this.right_bracket);
@@ -16340,6 +16422,7 @@ class VarrayIntrinsicExpression extends EditableSyntax
   with_members(members){
     return new VarrayIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       this.left_bracket,
       members,
       this.right_bracket);
@@ -16347,6 +16430,7 @@ class VarrayIntrinsicExpression extends EditableSyntax
   with_right_bracket(right_bracket){
     return new VarrayIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       this.left_bracket,
       this.members,
       right_bracket);
@@ -16358,11 +16442,13 @@ class VarrayIntrinsicExpression extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var explicit_type = this.explicit_type.rewrite(rewriter, new_parents);
     var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
     var members = this.members.rewrite(rewriter, new_parents);
     var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
+      explicit_type === this.explicit_type &&
       left_bracket === this.left_bracket &&
       members === this.members &&
       right_bracket === this.right_bracket)
@@ -16373,6 +16459,7 @@ class VarrayIntrinsicExpression extends EditableSyntax
     {
       return rewriter(new VarrayIntrinsicExpression(
         keyword,
+        explicit_type,
         left_bracket,
         members,
         right_bracket), parents);
@@ -16383,6 +16470,9 @@ class VarrayIntrinsicExpression extends EditableSyntax
     let keyword = EditableSyntax.from_json(
       json.varray_intrinsic_keyword, position, source);
     position += keyword.width;
+    let explicit_type = EditableSyntax.from_json(
+      json.varray_intrinsic_explicit_type, position, source);
+    position += explicit_type.width;
     let left_bracket = EditableSyntax.from_json(
       json.varray_intrinsic_left_bracket, position, source);
     position += left_bracket.width;
@@ -16394,6 +16484,7 @@ class VarrayIntrinsicExpression extends EditableSyntax
     position += right_bracket.width;
     return new VarrayIntrinsicExpression(
         keyword,
+        explicit_type,
         left_bracket,
         members,
         right_bracket);
@@ -16403,6 +16494,7 @@ class VarrayIntrinsicExpression extends EditableSyntax
     if (VarrayIntrinsicExpression._children_keys == null)
       VarrayIntrinsicExpression._children_keys = [
         'keyword',
+        'explicit_type',
         'left_bracket',
         'members',
         'right_bracket'];
@@ -16413,23 +16505,35 @@ class VectorIntrinsicExpression extends EditableSyntax
 {
   constructor(
     keyword,
+    explicit_type,
     left_bracket,
     members,
     right_bracket)
   {
     super('vector_intrinsic_expression', {
       keyword: keyword,
+      explicit_type: explicit_type,
       left_bracket: left_bracket,
       members: members,
       right_bracket: right_bracket });
   }
   get keyword() { return this.children.keyword; }
+  get explicit_type() { return this.children.explicit_type; }
   get left_bracket() { return this.children.left_bracket; }
   get members() { return this.children.members; }
   get right_bracket() { return this.children.right_bracket; }
   with_keyword(keyword){
     return new VectorIntrinsicExpression(
       keyword,
+      this.explicit_type,
+      this.left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_explicit_type(explicit_type){
+    return new VectorIntrinsicExpression(
+      this.keyword,
+      explicit_type,
       this.left_bracket,
       this.members,
       this.right_bracket);
@@ -16437,6 +16541,7 @@ class VectorIntrinsicExpression extends EditableSyntax
   with_left_bracket(left_bracket){
     return new VectorIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       left_bracket,
       this.members,
       this.right_bracket);
@@ -16444,6 +16549,7 @@ class VectorIntrinsicExpression extends EditableSyntax
   with_members(members){
     return new VectorIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       this.left_bracket,
       members,
       this.right_bracket);
@@ -16451,6 +16557,7 @@ class VectorIntrinsicExpression extends EditableSyntax
   with_right_bracket(right_bracket){
     return new VectorIntrinsicExpression(
       this.keyword,
+      this.explicit_type,
       this.left_bracket,
       this.members,
       right_bracket);
@@ -16462,11 +16569,13 @@ class VectorIntrinsicExpression extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var explicit_type = this.explicit_type.rewrite(rewriter, new_parents);
     var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
     var members = this.members.rewrite(rewriter, new_parents);
     var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
+      explicit_type === this.explicit_type &&
       left_bracket === this.left_bracket &&
       members === this.members &&
       right_bracket === this.right_bracket)
@@ -16477,6 +16586,7 @@ class VectorIntrinsicExpression extends EditableSyntax
     {
       return rewriter(new VectorIntrinsicExpression(
         keyword,
+        explicit_type,
         left_bracket,
         members,
         right_bracket), parents);
@@ -16487,6 +16597,9 @@ class VectorIntrinsicExpression extends EditableSyntax
     let keyword = EditableSyntax.from_json(
       json.vector_intrinsic_keyword, position, source);
     position += keyword.width;
+    let explicit_type = EditableSyntax.from_json(
+      json.vector_intrinsic_explicit_type, position, source);
+    position += explicit_type.width;
     let left_bracket = EditableSyntax.from_json(
       json.vector_intrinsic_left_bracket, position, source);
     position += left_bracket.width;
@@ -16498,6 +16611,7 @@ class VectorIntrinsicExpression extends EditableSyntax
     position += right_bracket.width;
     return new VectorIntrinsicExpression(
         keyword,
+        explicit_type,
         left_bracket,
         members,
         right_bracket);
@@ -16507,6 +16621,7 @@ class VectorIntrinsicExpression extends EditableSyntax
     if (VectorIntrinsicExpression._children_keys == null)
       VectorIntrinsicExpression._children_keys = [
         'keyword',
+        'explicit_type',
         'left_bracket',
         'members',
         'right_bracket'];

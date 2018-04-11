@@ -1332,59 +1332,41 @@ let rec get_doc node =
     let left_part = group_doc (keyword ^^| left) in
     indent_block_no_space left_part members right indt
   | DarrayIntrinsicExpression {
-    darray_intrinsic_keyword;
-    darray_intrinsic_left_bracket;
-    darray_intrinsic_members;
-    darray_intrinsic_right_bracket } ->
-    let keyword = get_doc darray_intrinsic_keyword in
-    let left = get_doc darray_intrinsic_left_bracket in
-    let members = get_doc darray_intrinsic_members in
-    let right = get_doc darray_intrinsic_right_bracket in
-    let left_part = group_doc (keyword ^^| left) in
-    indent_block_no_space left_part members right indt
+    darray_intrinsic_keyword = keyword;
+    darray_intrinsic_explicit_type = explicit_type;
+    darray_intrinsic_left_bracket = left_bracket;
+    darray_intrinsic_members = members;
+    darray_intrinsic_right_bracket = right_bracket }
   | DictionaryIntrinsicExpression {
-    dictionary_intrinsic_keyword;
-    dictionary_intrinsic_left_bracket;
-    dictionary_intrinsic_members;
-    dictionary_intrinsic_right_bracket } ->
-    let keyword = get_doc dictionary_intrinsic_keyword in
-    let left = get_doc dictionary_intrinsic_left_bracket in
-    let members = get_doc dictionary_intrinsic_members in
-    let right = get_doc dictionary_intrinsic_right_bracket in
-    let left_part = group_doc (keyword ^^| left) in
-    indent_block_no_space left_part members right indt
+    dictionary_intrinsic_keyword = keyword;
+    dictionary_intrinsic_explicit_type = explicit_type;
+    dictionary_intrinsic_left_bracket = left_bracket;
+    dictionary_intrinsic_members = members;
+    dictionary_intrinsic_right_bracket = right_bracket }
   | KeysetIntrinsicExpression {
-    keyset_intrinsic_keyword;
-    keyset_intrinsic_left_bracket;
-    keyset_intrinsic_members;
-    keyset_intrinsic_right_bracket } ->
-    let keyword = get_doc keyset_intrinsic_keyword in
-    let left = get_doc keyset_intrinsic_left_bracket in
-    let members = get_doc keyset_intrinsic_members in
-    let right = get_doc keyset_intrinsic_right_bracket in
-    let left_part = group_doc (keyword ^^| left) in
-    indent_block_no_space left_part members right indt
+    keyset_intrinsic_keyword = keyword;
+    keyset_intrinsic_explicit_type = explicit_type;
+    keyset_intrinsic_left_bracket = left_bracket;
+    keyset_intrinsic_members = members;
+    keyset_intrinsic_right_bracket = right_bracket }
   | VarrayIntrinsicExpression {
-    varray_intrinsic_keyword;
-    varray_intrinsic_left_bracket;
-    varray_intrinsic_members;
-    varray_intrinsic_right_bracket } ->
-    let keyword = get_doc varray_intrinsic_keyword in
-    let left = get_doc varray_intrinsic_left_bracket in
-    let members = get_doc varray_intrinsic_members in
-    let right = get_doc varray_intrinsic_right_bracket in
-    let left_part = group_doc (keyword ^^| left) in
-    indent_block_no_space left_part members right indt
+    varray_intrinsic_keyword = keyword;
+    varray_intrinsic_explicit_type = explicit_type;
+    varray_intrinsic_left_bracket = left_bracket;
+    varray_intrinsic_members = members;
+    varray_intrinsic_right_bracket = right_bracket }
   | VectorIntrinsicExpression {
-    vector_intrinsic_keyword;
-    vector_intrinsic_left_bracket;
-    vector_intrinsic_members;
-    vector_intrinsic_right_bracket } ->
-    let keyword = get_doc vector_intrinsic_keyword in
-    let left = get_doc vector_intrinsic_left_bracket in
-    let members = get_doc vector_intrinsic_members in
-    let right = get_doc vector_intrinsic_right_bracket in
-    let left_part = group_doc (keyword ^^| left) in
+    vector_intrinsic_keyword = keyword;
+    vector_intrinsic_explicit_type = explicit_type;
+    vector_intrinsic_left_bracket = left_bracket;
+    vector_intrinsic_members = members;
+    vector_intrinsic_right_bracket = right_bracket } ->
+    let keyword = get_doc keyword in
+    let explicit = get_doc explicit_type in
+    let left = get_doc left_bracket in
+    let members = get_doc members in
+    let right = get_doc right_bracket in
+    let left_part = group_doc (keyword ^^| explicit ^^| left) in
     indent_block_no_space left_part members right indt
   | ElementInitializer x ->
     let k = get_doc x.element_key in

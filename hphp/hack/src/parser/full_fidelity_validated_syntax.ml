@@ -2826,6 +2826,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { darray_intrinsic_right_bracket = validate_token x.darray_intrinsic_right_bracket
     ; darray_intrinsic_members = validate_list_with (validate_element_initializer) x.darray_intrinsic_members
     ; darray_intrinsic_left_bracket = validate_token x.darray_intrinsic_left_bracket
+    ; darray_intrinsic_explicit_type = validate_option_with (validate_type_arguments) x.darray_intrinsic_explicit_type
     ; darray_intrinsic_keyword = validate_token x.darray_intrinsic_keyword
     }
   | s -> validation_fail (Some SyntaxKind.DarrayIntrinsicExpression) s
@@ -2833,6 +2834,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.DarrayIntrinsicExpression
       { darray_intrinsic_keyword = invalidate_token x.darray_intrinsic_keyword
+      ; darray_intrinsic_explicit_type = invalidate_option_with (invalidate_type_arguments) x.darray_intrinsic_explicit_type
       ; darray_intrinsic_left_bracket = invalidate_token x.darray_intrinsic_left_bracket
       ; darray_intrinsic_members = invalidate_list_with (invalidate_element_initializer) x.darray_intrinsic_members
       ; darray_intrinsic_right_bracket = invalidate_token x.darray_intrinsic_right_bracket
@@ -2844,6 +2846,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { dictionary_intrinsic_right_bracket = validate_token x.dictionary_intrinsic_right_bracket
     ; dictionary_intrinsic_members = validate_list_with (validate_element_initializer) x.dictionary_intrinsic_members
     ; dictionary_intrinsic_left_bracket = validate_token x.dictionary_intrinsic_left_bracket
+    ; dictionary_intrinsic_explicit_type = validate_option_with (validate_type_arguments) x.dictionary_intrinsic_explicit_type
     ; dictionary_intrinsic_keyword = validate_token x.dictionary_intrinsic_keyword
     }
   | s -> validation_fail (Some SyntaxKind.DictionaryIntrinsicExpression) s
@@ -2851,6 +2854,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.DictionaryIntrinsicExpression
       { dictionary_intrinsic_keyword = invalidate_token x.dictionary_intrinsic_keyword
+      ; dictionary_intrinsic_explicit_type = invalidate_option_with (invalidate_type_arguments) x.dictionary_intrinsic_explicit_type
       ; dictionary_intrinsic_left_bracket = invalidate_token x.dictionary_intrinsic_left_bracket
       ; dictionary_intrinsic_members = invalidate_list_with (invalidate_element_initializer) x.dictionary_intrinsic_members
       ; dictionary_intrinsic_right_bracket = invalidate_token x.dictionary_intrinsic_right_bracket
@@ -2862,6 +2866,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { keyset_intrinsic_right_bracket = validate_token x.keyset_intrinsic_right_bracket
     ; keyset_intrinsic_members = validate_list_with (validate_expression) x.keyset_intrinsic_members
     ; keyset_intrinsic_left_bracket = validate_token x.keyset_intrinsic_left_bracket
+    ; keyset_intrinsic_explicit_type = validate_option_with (validate_type_arguments) x.keyset_intrinsic_explicit_type
     ; keyset_intrinsic_keyword = validate_token x.keyset_intrinsic_keyword
     }
   | s -> validation_fail (Some SyntaxKind.KeysetIntrinsicExpression) s
@@ -2869,6 +2874,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.KeysetIntrinsicExpression
       { keyset_intrinsic_keyword = invalidate_token x.keyset_intrinsic_keyword
+      ; keyset_intrinsic_explicit_type = invalidate_option_with (invalidate_type_arguments) x.keyset_intrinsic_explicit_type
       ; keyset_intrinsic_left_bracket = invalidate_token x.keyset_intrinsic_left_bracket
       ; keyset_intrinsic_members = invalidate_list_with (invalidate_expression) x.keyset_intrinsic_members
       ; keyset_intrinsic_right_bracket = invalidate_token x.keyset_intrinsic_right_bracket
@@ -2880,6 +2886,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { varray_intrinsic_right_bracket = validate_token x.varray_intrinsic_right_bracket
     ; varray_intrinsic_members = validate_list_with (validate_expression) x.varray_intrinsic_members
     ; varray_intrinsic_left_bracket = validate_token x.varray_intrinsic_left_bracket
+    ; varray_intrinsic_explicit_type = validate_option_with (validate_type_arguments) x.varray_intrinsic_explicit_type
     ; varray_intrinsic_keyword = validate_token x.varray_intrinsic_keyword
     }
   | s -> validation_fail (Some SyntaxKind.VarrayIntrinsicExpression) s
@@ -2887,6 +2894,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.VarrayIntrinsicExpression
       { varray_intrinsic_keyword = invalidate_token x.varray_intrinsic_keyword
+      ; varray_intrinsic_explicit_type = invalidate_option_with (invalidate_type_arguments) x.varray_intrinsic_explicit_type
       ; varray_intrinsic_left_bracket = invalidate_token x.varray_intrinsic_left_bracket
       ; varray_intrinsic_members = invalidate_list_with (invalidate_expression) x.varray_intrinsic_members
       ; varray_intrinsic_right_bracket = invalidate_token x.varray_intrinsic_right_bracket
@@ -2898,6 +2906,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { vector_intrinsic_right_bracket = validate_token x.vector_intrinsic_right_bracket
     ; vector_intrinsic_members = validate_list_with (validate_expression) x.vector_intrinsic_members
     ; vector_intrinsic_left_bracket = validate_token x.vector_intrinsic_left_bracket
+    ; vector_intrinsic_explicit_type = validate_option_with (validate_type_arguments) x.vector_intrinsic_explicit_type
     ; vector_intrinsic_keyword = validate_token x.vector_intrinsic_keyword
     }
   | s -> validation_fail (Some SyntaxKind.VectorIntrinsicExpression) s
@@ -2905,6 +2914,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.VectorIntrinsicExpression
       { vector_intrinsic_keyword = invalidate_token x.vector_intrinsic_keyword
+      ; vector_intrinsic_explicit_type = invalidate_option_with (invalidate_type_arguments) x.vector_intrinsic_explicit_type
       ; vector_intrinsic_left_bracket = invalidate_token x.vector_intrinsic_left_bracket
       ; vector_intrinsic_members = invalidate_list_with (invalidate_expression) x.vector_intrinsic_members
       ; vector_intrinsic_right_bracket = invalidate_token x.vector_intrinsic_right_bracket

@@ -858,30 +858,35 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   | DarrayIntrinsicExpression               of
     { darray_intrinsic_keyword                           : t
+    ; darray_intrinsic_explicit_type                     : t
     ; darray_intrinsic_left_bracket                      : t
     ; darray_intrinsic_members                           : t
     ; darray_intrinsic_right_bracket                     : t
     }
   | DictionaryIntrinsicExpression           of
     { dictionary_intrinsic_keyword                       : t
+    ; dictionary_intrinsic_explicit_type                 : t
     ; dictionary_intrinsic_left_bracket                  : t
     ; dictionary_intrinsic_members                       : t
     ; dictionary_intrinsic_right_bracket                 : t
     }
   | KeysetIntrinsicExpression               of
     { keyset_intrinsic_keyword                           : t
+    ; keyset_intrinsic_explicit_type                     : t
     ; keyset_intrinsic_left_bracket                      : t
     ; keyset_intrinsic_members                           : t
     ; keyset_intrinsic_right_bracket                     : t
     }
   | VarrayIntrinsicExpression               of
     { varray_intrinsic_keyword                           : t
+    ; varray_intrinsic_explicit_type                     : t
     ; varray_intrinsic_left_bracket                      : t
     ; varray_intrinsic_members                           : t
     ; varray_intrinsic_right_bracket                     : t
     }
   | VectorIntrinsicExpression               of
     { vector_intrinsic_keyword                           : t
+    ; vector_intrinsic_explicit_type                     : t
     ; vector_intrinsic_left_bracket                      : t
     ; vector_intrinsic_members                           : t
     ; vector_intrinsic_right_bracket                     : t
@@ -2131,30 +2136,35 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and darray_intrinsic_expression =
     { darray_intrinsic_keyword: Token.t value
+    ; darray_intrinsic_explicit_type: type_arguments option value
     ; darray_intrinsic_left_bracket: Token.t value
     ; darray_intrinsic_members: element_initializer listesque value
     ; darray_intrinsic_right_bracket: Token.t value
     }
   and dictionary_intrinsic_expression =
     { dictionary_intrinsic_keyword: Token.t value
+    ; dictionary_intrinsic_explicit_type: type_arguments option value
     ; dictionary_intrinsic_left_bracket: Token.t value
     ; dictionary_intrinsic_members: element_initializer listesque value
     ; dictionary_intrinsic_right_bracket: Token.t value
     }
   and keyset_intrinsic_expression =
     { keyset_intrinsic_keyword: Token.t value
+    ; keyset_intrinsic_explicit_type: type_arguments option value
     ; keyset_intrinsic_left_bracket: Token.t value
     ; keyset_intrinsic_members: expression listesque value
     ; keyset_intrinsic_right_bracket: Token.t value
     }
   and varray_intrinsic_expression =
     { varray_intrinsic_keyword: Token.t value
+    ; varray_intrinsic_explicit_type: type_arguments option value
     ; varray_intrinsic_left_bracket: Token.t value
     ; varray_intrinsic_members: expression listesque value
     ; varray_intrinsic_right_bracket: Token.t value
     }
   and vector_intrinsic_expression =
     { vector_intrinsic_keyword: Token.t value
+    ; vector_intrinsic_explicit_type: type_arguments option value
     ; vector_intrinsic_left_bracket: Token.t value
     ; vector_intrinsic_members: expression listesque value
     ; vector_intrinsic_right_bracket: Token.t value

@@ -384,21 +384,21 @@ module WithOp(Op : Op_S) = struct
   let make_array_intrinsic_expression arg0 arg1 arg2 arg3 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2; arg3]
-  let make_darray_intrinsic_expression arg0 arg1 arg2 arg3 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3]
-  let make_dictionary_intrinsic_expression arg0 arg1 arg2 arg3 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3]
-  let make_keyset_intrinsic_expression arg0 arg1 arg2 arg3 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3]
-  let make_varray_intrinsic_expression arg0 arg1 arg2 arg3 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3]
-  let make_vector_intrinsic_expression arg0 arg1 arg2 arg3 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3]
+  let make_darray_intrinsic_expression arg0 arg1 arg2 arg3 arg4 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 then state, Op.zero
+    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4]
+  let make_dictionary_intrinsic_expression arg0 arg1 arg2 arg3 arg4 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 then state, Op.zero
+    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4]
+  let make_keyset_intrinsic_expression arg0 arg1 arg2 arg3 arg4 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 then state, Op.zero
+    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4]
+  let make_varray_intrinsic_expression arg0 arg1 arg2 arg3 arg4 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 then state, Op.zero
+    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4]
+  let make_vector_intrinsic_expression arg0 arg1 arg2 arg3 arg4 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 then state, Op.zero
+    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4]
   let make_element_initializer arg0 arg1 arg2 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2]

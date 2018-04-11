@@ -1627,34 +1627,35 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
     transform_container_literal env kw left_p members right_p
   | Syntax.DarrayIntrinsicExpression {
       darray_intrinsic_keyword = kw;
+      darray_intrinsic_explicit_type = explicit_type;
       darray_intrinsic_left_bracket = left_p;
       darray_intrinsic_members = members;
-      darray_intrinsic_right_bracket = right_p; } ->
-    transform_container_literal env kw left_p members right_p
+      darray_intrinsic_right_bracket = right_p; }
   | Syntax.DictionaryIntrinsicExpression {
       dictionary_intrinsic_keyword = kw;
+      dictionary_intrinsic_explicit_type = explicit_type;
       dictionary_intrinsic_left_bracket = left_p;
       dictionary_intrinsic_members = members;
-      dictionary_intrinsic_right_bracket = right_p; } ->
-    transform_container_literal env kw left_p members right_p
+      dictionary_intrinsic_right_bracket = right_p; }
   | Syntax.KeysetIntrinsicExpression {
       keyset_intrinsic_keyword = kw;
+      keyset_intrinsic_explicit_type = explicit_type;
       keyset_intrinsic_left_bracket = left_p;
       keyset_intrinsic_members = members;
-      keyset_intrinsic_right_bracket = right_p; } ->
-    transform_container_literal env kw left_p members right_p
+      keyset_intrinsic_right_bracket = right_p; }
   | Syntax.VarrayIntrinsicExpression {
       varray_intrinsic_keyword = kw;
+      varray_intrinsic_explicit_type = explicit_type;
       varray_intrinsic_left_bracket = left_p;
       varray_intrinsic_members = members;
-      varray_intrinsic_right_bracket = right_p; } ->
-    transform_container_literal env kw left_p members right_p
+      varray_intrinsic_right_bracket = right_p; }
   | Syntax.VectorIntrinsicExpression {
       vector_intrinsic_keyword = kw;
+      vector_intrinsic_explicit_type = explicit_type;
       vector_intrinsic_left_bracket = left_p;
       vector_intrinsic_members = members;
       vector_intrinsic_right_bracket = right_p; } ->
-    transform_container_literal env kw left_p members right_p
+    transform_container_literal env kw ~explicit_type left_p members right_p
   | Syntax.ElementInitializer {
       element_key = key;
       element_arrow = arrow;
@@ -2706,10 +2707,14 @@ and transform_possible_comma_list env ?(allow_trailing=true) ?(spaces=false)
   ]
 
 and transform_container_literal env
-    ?(spaces=false) ?allow_trailing kw left_p members right_p =
+    ?(spaces=false) ?allow_trailing ?explicit_type kw left_p members right_p =
   let force_newlines = node_has_trailing_newline left_p in
+  let ty = match explicit_type with
+  | Some ex_ty -> t env ex_ty
+  | None -> Nothing in
   Concat [
     t env kw;
+    ty;
     if spaces then Space else Nothing;
     transform_argish env
       ~spaces ~force_newlines ?allow_trailing left_p members right_p;

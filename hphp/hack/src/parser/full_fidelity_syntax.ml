@@ -1773,55 +1773,65 @@ module WithToken(Token: TokenType) = struct
          acc
       | DarrayIntrinsicExpression {
         darray_intrinsic_keyword;
+        darray_intrinsic_explicit_type;
         darray_intrinsic_left_bracket;
         darray_intrinsic_members;
         darray_intrinsic_right_bracket;
       } ->
          let acc = f acc darray_intrinsic_keyword in
+         let acc = f acc darray_intrinsic_explicit_type in
          let acc = f acc darray_intrinsic_left_bracket in
          let acc = f acc darray_intrinsic_members in
          let acc = f acc darray_intrinsic_right_bracket in
          acc
       | DictionaryIntrinsicExpression {
         dictionary_intrinsic_keyword;
+        dictionary_intrinsic_explicit_type;
         dictionary_intrinsic_left_bracket;
         dictionary_intrinsic_members;
         dictionary_intrinsic_right_bracket;
       } ->
          let acc = f acc dictionary_intrinsic_keyword in
+         let acc = f acc dictionary_intrinsic_explicit_type in
          let acc = f acc dictionary_intrinsic_left_bracket in
          let acc = f acc dictionary_intrinsic_members in
          let acc = f acc dictionary_intrinsic_right_bracket in
          acc
       | KeysetIntrinsicExpression {
         keyset_intrinsic_keyword;
+        keyset_intrinsic_explicit_type;
         keyset_intrinsic_left_bracket;
         keyset_intrinsic_members;
         keyset_intrinsic_right_bracket;
       } ->
          let acc = f acc keyset_intrinsic_keyword in
+         let acc = f acc keyset_intrinsic_explicit_type in
          let acc = f acc keyset_intrinsic_left_bracket in
          let acc = f acc keyset_intrinsic_members in
          let acc = f acc keyset_intrinsic_right_bracket in
          acc
       | VarrayIntrinsicExpression {
         varray_intrinsic_keyword;
+        varray_intrinsic_explicit_type;
         varray_intrinsic_left_bracket;
         varray_intrinsic_members;
         varray_intrinsic_right_bracket;
       } ->
          let acc = f acc varray_intrinsic_keyword in
+         let acc = f acc varray_intrinsic_explicit_type in
          let acc = f acc varray_intrinsic_left_bracket in
          let acc = f acc varray_intrinsic_members in
          let acc = f acc varray_intrinsic_right_bracket in
          acc
       | VectorIntrinsicExpression {
         vector_intrinsic_keyword;
+        vector_intrinsic_explicit_type;
         vector_intrinsic_left_bracket;
         vector_intrinsic_members;
         vector_intrinsic_right_bracket;
       } ->
          let acc = f acc vector_intrinsic_keyword in
+         let acc = f acc vector_intrinsic_explicit_type in
          let acc = f acc vector_intrinsic_left_bracket in
          let acc = f acc vector_intrinsic_members in
          let acc = f acc vector_intrinsic_right_bracket in
@@ -3588,55 +3598,65 @@ module WithToken(Token: TokenType) = struct
       ]
       | DarrayIntrinsicExpression {
         darray_intrinsic_keyword;
+        darray_intrinsic_explicit_type;
         darray_intrinsic_left_bracket;
         darray_intrinsic_members;
         darray_intrinsic_right_bracket;
       } -> [
         darray_intrinsic_keyword;
+        darray_intrinsic_explicit_type;
         darray_intrinsic_left_bracket;
         darray_intrinsic_members;
         darray_intrinsic_right_bracket;
       ]
       | DictionaryIntrinsicExpression {
         dictionary_intrinsic_keyword;
+        dictionary_intrinsic_explicit_type;
         dictionary_intrinsic_left_bracket;
         dictionary_intrinsic_members;
         dictionary_intrinsic_right_bracket;
       } -> [
         dictionary_intrinsic_keyword;
+        dictionary_intrinsic_explicit_type;
         dictionary_intrinsic_left_bracket;
         dictionary_intrinsic_members;
         dictionary_intrinsic_right_bracket;
       ]
       | KeysetIntrinsicExpression {
         keyset_intrinsic_keyword;
+        keyset_intrinsic_explicit_type;
         keyset_intrinsic_left_bracket;
         keyset_intrinsic_members;
         keyset_intrinsic_right_bracket;
       } -> [
         keyset_intrinsic_keyword;
+        keyset_intrinsic_explicit_type;
         keyset_intrinsic_left_bracket;
         keyset_intrinsic_members;
         keyset_intrinsic_right_bracket;
       ]
       | VarrayIntrinsicExpression {
         varray_intrinsic_keyword;
+        varray_intrinsic_explicit_type;
         varray_intrinsic_left_bracket;
         varray_intrinsic_members;
         varray_intrinsic_right_bracket;
       } -> [
         varray_intrinsic_keyword;
+        varray_intrinsic_explicit_type;
         varray_intrinsic_left_bracket;
         varray_intrinsic_members;
         varray_intrinsic_right_bracket;
       ]
       | VectorIntrinsicExpression {
         vector_intrinsic_keyword;
+        vector_intrinsic_explicit_type;
         vector_intrinsic_left_bracket;
         vector_intrinsic_members;
         vector_intrinsic_right_bracket;
       } -> [
         vector_intrinsic_keyword;
+        vector_intrinsic_explicit_type;
         vector_intrinsic_left_bracket;
         vector_intrinsic_members;
         vector_intrinsic_right_bracket;
@@ -5404,55 +5424,65 @@ module WithToken(Token: TokenType) = struct
       ]
       | DarrayIntrinsicExpression {
         darray_intrinsic_keyword;
+        darray_intrinsic_explicit_type;
         darray_intrinsic_left_bracket;
         darray_intrinsic_members;
         darray_intrinsic_right_bracket;
       } -> [
         "darray_intrinsic_keyword";
+        "darray_intrinsic_explicit_type";
         "darray_intrinsic_left_bracket";
         "darray_intrinsic_members";
         "darray_intrinsic_right_bracket";
       ]
       | DictionaryIntrinsicExpression {
         dictionary_intrinsic_keyword;
+        dictionary_intrinsic_explicit_type;
         dictionary_intrinsic_left_bracket;
         dictionary_intrinsic_members;
         dictionary_intrinsic_right_bracket;
       } -> [
         "dictionary_intrinsic_keyword";
+        "dictionary_intrinsic_explicit_type";
         "dictionary_intrinsic_left_bracket";
         "dictionary_intrinsic_members";
         "dictionary_intrinsic_right_bracket";
       ]
       | KeysetIntrinsicExpression {
         keyset_intrinsic_keyword;
+        keyset_intrinsic_explicit_type;
         keyset_intrinsic_left_bracket;
         keyset_intrinsic_members;
         keyset_intrinsic_right_bracket;
       } -> [
         "keyset_intrinsic_keyword";
+        "keyset_intrinsic_explicit_type";
         "keyset_intrinsic_left_bracket";
         "keyset_intrinsic_members";
         "keyset_intrinsic_right_bracket";
       ]
       | VarrayIntrinsicExpression {
         varray_intrinsic_keyword;
+        varray_intrinsic_explicit_type;
         varray_intrinsic_left_bracket;
         varray_intrinsic_members;
         varray_intrinsic_right_bracket;
       } -> [
         "varray_intrinsic_keyword";
+        "varray_intrinsic_explicit_type";
         "varray_intrinsic_left_bracket";
         "varray_intrinsic_members";
         "varray_intrinsic_right_bracket";
       ]
       | VectorIntrinsicExpression {
         vector_intrinsic_keyword;
+        vector_intrinsic_explicit_type;
         vector_intrinsic_left_bracket;
         vector_intrinsic_members;
         vector_intrinsic_right_bracket;
       } -> [
         "vector_intrinsic_keyword";
+        "vector_intrinsic_explicit_type";
         "vector_intrinsic_left_bracket";
         "vector_intrinsic_members";
         "vector_intrinsic_right_bracket";
@@ -7392,60 +7422,70 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.DarrayIntrinsicExpression, [
           darray_intrinsic_keyword;
+          darray_intrinsic_explicit_type;
           darray_intrinsic_left_bracket;
           darray_intrinsic_members;
           darray_intrinsic_right_bracket;
         ]) ->
         DarrayIntrinsicExpression {
           darray_intrinsic_keyword;
+          darray_intrinsic_explicit_type;
           darray_intrinsic_left_bracket;
           darray_intrinsic_members;
           darray_intrinsic_right_bracket;
         }
       | (SyntaxKind.DictionaryIntrinsicExpression, [
           dictionary_intrinsic_keyword;
+          dictionary_intrinsic_explicit_type;
           dictionary_intrinsic_left_bracket;
           dictionary_intrinsic_members;
           dictionary_intrinsic_right_bracket;
         ]) ->
         DictionaryIntrinsicExpression {
           dictionary_intrinsic_keyword;
+          dictionary_intrinsic_explicit_type;
           dictionary_intrinsic_left_bracket;
           dictionary_intrinsic_members;
           dictionary_intrinsic_right_bracket;
         }
       | (SyntaxKind.KeysetIntrinsicExpression, [
           keyset_intrinsic_keyword;
+          keyset_intrinsic_explicit_type;
           keyset_intrinsic_left_bracket;
           keyset_intrinsic_members;
           keyset_intrinsic_right_bracket;
         ]) ->
         KeysetIntrinsicExpression {
           keyset_intrinsic_keyword;
+          keyset_intrinsic_explicit_type;
           keyset_intrinsic_left_bracket;
           keyset_intrinsic_members;
           keyset_intrinsic_right_bracket;
         }
       | (SyntaxKind.VarrayIntrinsicExpression, [
           varray_intrinsic_keyword;
+          varray_intrinsic_explicit_type;
           varray_intrinsic_left_bracket;
           varray_intrinsic_members;
           varray_intrinsic_right_bracket;
         ]) ->
         VarrayIntrinsicExpression {
           varray_intrinsic_keyword;
+          varray_intrinsic_explicit_type;
           varray_intrinsic_left_bracket;
           varray_intrinsic_members;
           varray_intrinsic_right_bracket;
         }
       | (SyntaxKind.VectorIntrinsicExpression, [
           vector_intrinsic_keyword;
+          vector_intrinsic_explicit_type;
           vector_intrinsic_left_bracket;
           vector_intrinsic_members;
           vector_intrinsic_right_bracket;
         ]) ->
         VectorIntrinsicExpression {
           vector_intrinsic_keyword;
+          vector_intrinsic_explicit_type;
           vector_intrinsic_left_bracket;
           vector_intrinsic_members;
           vector_intrinsic_right_bracket;
@@ -9764,12 +9804,14 @@ module WithToken(Token: TokenType) = struct
 
       let make_darray_intrinsic_expression
         darray_intrinsic_keyword
+        darray_intrinsic_explicit_type
         darray_intrinsic_left_bracket
         darray_intrinsic_members
         darray_intrinsic_right_bracket
       =
         let syntax = DarrayIntrinsicExpression {
           darray_intrinsic_keyword;
+          darray_intrinsic_explicit_type;
           darray_intrinsic_left_bracket;
           darray_intrinsic_members;
           darray_intrinsic_right_bracket;
@@ -9779,12 +9821,14 @@ module WithToken(Token: TokenType) = struct
 
       let make_dictionary_intrinsic_expression
         dictionary_intrinsic_keyword
+        dictionary_intrinsic_explicit_type
         dictionary_intrinsic_left_bracket
         dictionary_intrinsic_members
         dictionary_intrinsic_right_bracket
       =
         let syntax = DictionaryIntrinsicExpression {
           dictionary_intrinsic_keyword;
+          dictionary_intrinsic_explicit_type;
           dictionary_intrinsic_left_bracket;
           dictionary_intrinsic_members;
           dictionary_intrinsic_right_bracket;
@@ -9794,12 +9838,14 @@ module WithToken(Token: TokenType) = struct
 
       let make_keyset_intrinsic_expression
         keyset_intrinsic_keyword
+        keyset_intrinsic_explicit_type
         keyset_intrinsic_left_bracket
         keyset_intrinsic_members
         keyset_intrinsic_right_bracket
       =
         let syntax = KeysetIntrinsicExpression {
           keyset_intrinsic_keyword;
+          keyset_intrinsic_explicit_type;
           keyset_intrinsic_left_bracket;
           keyset_intrinsic_members;
           keyset_intrinsic_right_bracket;
@@ -9809,12 +9855,14 @@ module WithToken(Token: TokenType) = struct
 
       let make_varray_intrinsic_expression
         varray_intrinsic_keyword
+        varray_intrinsic_explicit_type
         varray_intrinsic_left_bracket
         varray_intrinsic_members
         varray_intrinsic_right_bracket
       =
         let syntax = VarrayIntrinsicExpression {
           varray_intrinsic_keyword;
+          varray_intrinsic_explicit_type;
           varray_intrinsic_left_bracket;
           varray_intrinsic_members;
           varray_intrinsic_right_bracket;
@@ -9824,12 +9872,14 @@ module WithToken(Token: TokenType) = struct
 
       let make_vector_intrinsic_expression
         vector_intrinsic_keyword
+        vector_intrinsic_explicit_type
         vector_intrinsic_left_bracket
         vector_intrinsic_members
         vector_intrinsic_right_bracket
       =
         let syntax = VectorIntrinsicExpression {
           vector_intrinsic_keyword;
+          vector_intrinsic_explicit_type;
           vector_intrinsic_left_bracket;
           vector_intrinsic_members;
           vector_intrinsic_right_bracket;

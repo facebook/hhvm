@@ -1564,6 +1564,7 @@ let schema : schema_node list =
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
       [ "keyword", Token
+      ; "explicit_type", ZeroOrOne (Just "TypeArguments")
       ; "left_bracket", Token
       ; "members", ZeroOrMore (Just "ElementInitializer")
       ; "right_bracket", Token
@@ -1577,6 +1578,7 @@ let schema : schema_node list =
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
       [ "keyword", Token
+      ; "explicit_type", ZeroOrOne (Just "TypeArguments")
       ; "left_bracket", Token
       ; "members", ZeroOrMore (Just "ElementInitializer")
       ; "right_bracket", Token
@@ -1590,6 +1592,7 @@ let schema : schema_node list =
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
       [ "keyword", Token
+      ; "explicit_type", ZeroOrOne (Just "TypeArguments")
       ; "left_bracket", Token
       ; "members", ZeroOrMore (Aggregate Expression)
       ; "right_bracket", Token
@@ -1603,6 +1606,7 @@ let schema : schema_node list =
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
       [ "keyword", Token
+      ; "explicit_type", ZeroOrOne (Just "TypeArguments")
       ; "left_bracket", Token
       ; "members", ZeroOrMore (Aggregate Expression)
       ; "right_bracket", Token
@@ -1616,6 +1620,7 @@ let schema : schema_node list =
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
       [ "keyword", Token
+      ; "explicit_type", ZeroOrOne (Just "TypeArguments")
       ; "left_bracket", Token
       ; "members", ZeroOrMore (Aggregate Expression)
       ; "right_bracket", Token

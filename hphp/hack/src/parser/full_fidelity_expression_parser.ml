@@ -2170,6 +2170,14 @@ module WithStatementAndDeclAndTypeParser
       parse_element_function
       make_intrinsinc_function =
     let (parser1, keyword) = assert_token parser keyword_token in
+    let (parser1, explicit_type) =
+      match peek_token_kind parser1 with
+      | LessThan ->
+        let (parser1, (type_arguments, _)) = parse_generic_type_arguments parser1 in
+        (* skip no_arg_is_missing check since there must only be 1 or 2 type arguments*)
+        parser1, type_arguments
+      | _ -> Make.missing parser1 (pos parser1)
+    in
     let (parser1, left_bracket) = optional_token parser1 LeftBracket in
     if SC.is_missing left_bracket then
       (* Fall back to dict being an ordinary name. Perhaps we're calling a
@@ -2183,7 +2191,7 @@ module WithStatementAndDeclAndTypeParser
           SyntaxError.error1015
           parse_element_function in
       let (parser, right_bracket) = require_right_bracket parser in
-      make_intrinsinc_function parser keyword left_bracket members right_bracket
+      make_intrinsinc_function parser keyword explicit_type left_bracket members right_bracket
 
 
   and parse_darray_intrinsic_expression parser =

@@ -166,11 +166,11 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val constructor_call : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val array_creation_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val array_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val darray_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val dictionary_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val keyset_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val varray_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val vector_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val darray_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val dictionary_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val keyset_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val varray_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val vector_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val element_initializer : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val subscript_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val embedded_subscript_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

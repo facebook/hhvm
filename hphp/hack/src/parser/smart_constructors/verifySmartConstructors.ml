@@ -1005,43 +1005,43 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
-  let make_darray_intrinsic_expression p0 p1 p2 p3 stack =
+  let make_darray_intrinsic_expression p0 p1 p2 p3 p4 stack =
     match stack with
-    | a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3] [a0; a1; a2; a3] "darray_intrinsic_expression" in
-      let node = Syntax.make_darray_intrinsic_expression p0 p1 p2 p3 in
+    | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4] [a0; a1; a2; a3; a4] "darray_intrinsic_expression" in
+      let node = Syntax.make_darray_intrinsic_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
-  let make_dictionary_intrinsic_expression p0 p1 p2 p3 stack =
+  let make_dictionary_intrinsic_expression p0 p1 p2 p3 p4 stack =
     match stack with
-    | a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3] [a0; a1; a2; a3] "dictionary_intrinsic_expression" in
-      let node = Syntax.make_dictionary_intrinsic_expression p0 p1 p2 p3 in
+    | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4] [a0; a1; a2; a3; a4] "dictionary_intrinsic_expression" in
+      let node = Syntax.make_dictionary_intrinsic_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
-  let make_keyset_intrinsic_expression p0 p1 p2 p3 stack =
+  let make_keyset_intrinsic_expression p0 p1 p2 p3 p4 stack =
     match stack with
-    | a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3] [a0; a1; a2; a3] "keyset_intrinsic_expression" in
-      let node = Syntax.make_keyset_intrinsic_expression p0 p1 p2 p3 in
+    | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4] [a0; a1; a2; a3; a4] "keyset_intrinsic_expression" in
+      let node = Syntax.make_keyset_intrinsic_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
-  let make_varray_intrinsic_expression p0 p1 p2 p3 stack =
+  let make_varray_intrinsic_expression p0 p1 p2 p3 p4 stack =
     match stack with
-    | a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3] [a0; a1; a2; a3] "varray_intrinsic_expression" in
-      let node = Syntax.make_varray_intrinsic_expression p0 p1 p2 p3 in
+    | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4] [a0; a1; a2; a3; a4] "varray_intrinsic_expression" in
+      let node = Syntax.make_varray_intrinsic_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
-  let make_vector_intrinsic_expression p0 p1 p2 p3 stack =
+  let make_vector_intrinsic_expression p0 p1 p2 p3 p4 stack =
     match stack with
-    | a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3] [a0; a1; a2; a3] "vector_intrinsic_expression" in
-      let node = Syntax.make_vector_intrinsic_expression p0 p1 p2 p3 in
+    | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4] [a0; a1; a2; a3; a4] "vector_intrinsic_expression" in
+      let node = Syntax.make_vector_intrinsic_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     

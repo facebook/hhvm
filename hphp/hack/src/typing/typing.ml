@@ -5726,7 +5726,9 @@ and condition ?lhs_of_null_coalesce env tparamet =
           when (List.length ivar_tyl) = (List.length hint_tyl) ->
           let env, tyl = List.map2_env env ivar_tyl hint_tyl safely_refine_type in
           env, (reason, Ttuple tyl)
-        | _, (Tany | Tmixed | Tnonnull | Tprim _ | Toption _ | Ttuple _
+        | _, Tnonnull ->
+          TUtils.non_null env ivar_ty
+        | _, (Tany | Tmixed | Tprim _ | Toption _ | Ttuple _
             | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
             | Tunresolved _ | Tobject | Terr | Tfun _  | Tdynamic) ->
           (* TODO(kunalm) Implement the type refinement for each type *)

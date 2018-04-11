@@ -3,26 +3,26 @@ definition:
  idx
    kind: function
    id: function::idx
-   position: line 30, characters 10-12
-   span: line 29, character 1 - line 31, character 21
+   position: line 29, characters 10-12
+   span: line 28, character 1 - line 30, character 21
    modifiers: 
    params:
      $collection
        kind: param
-       position: line 30, characters 46-56
-       span: line 30, character 22 - line 30, character 56
+       position: line 29, characters 46-56
+       span: line 29, character 22 - line 29, character 56
        modifiers: 
 
      $index
        kind: param
-       position: line 30, characters 59-64
-       span: line 30, character 59 - line 30, character 64
+       position: line 29, characters 59-64
+       span: line 29, character 59 - line 29, character 64
        modifiers: 
 
      $default
        kind: param
-       position: line 31, characters 3-10
-       span: line 31, character 3 - line 31, character 17
+       position: line 30, characters 3-10
+       span: line 30, character 3 - line 30, character 17
        modifiers: 
 
 

@@ -1,10 +1,10 @@
 (* @generated from ast_defs.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<d1c8b7bb10a148220cf9d9d912dba33a41672dfe>> *)
+(* SourceShasum<<18fc2ed5c170fa11f116735da8f1a7d39c7b6f7f>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
-  "\n * Copyright (c) 2017, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the BSD-style license found in the\n * LICENSE file in the \"hack\" directory of this source tree. An additional grant\n * of patent rights can be found in the PATENTS file in the same directory.\n *\n "]
+  "\n * Copyright (c) 2017, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n "]
 include Ast_defs_visitors_ancestors
 type cst_kind =
   | Cst_define 

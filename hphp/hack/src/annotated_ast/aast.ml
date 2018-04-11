@@ -1,10 +1,10 @@
 (* @generated from aast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<3f769d25e0d8f020696f08d0e9092631a6741035>> *)
+(* SourceShasum<<aa111ce07076fd893c2e5909604c14656156702a>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
-  "\n * Copyright (c) 2015, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the BSD-style license found in the\n * LICENSE file in the \"hack\" directory of this source tree. An additional grant\n * of patent rights can be found in the PATENTS file in the same directory.\n *\n "]
+  "\n * Copyright (c) 2015, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n "]
 include Aast_defs
 module type AnnotationType  =
   sig type t val pp : Format.formatter -> t -> unit end

@@ -1,10 +1,10 @@
 (* @generated from nast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<62d52bec361a362a46dcd7be0dd835d1595471fa>> *)
+(* SourceShasum<<2a843432cebba3586ceae50ae30e40c35ade755a>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
-  "\n * Copyright (c) 2015, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the BSD-style license found in the\n * LICENSE file in the \"hack\" directory of this source tree. An additional grant\n * of patent rights can be found in the PATENTS file in the same directory.\n *\n "]
+  "\n * Copyright (c) 2015, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n "]
 module SN = Naming_special_names
 include Aast
 module PosAnnotation =

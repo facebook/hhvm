@@ -96,7 +96,7 @@ class AsyncMysqlClient {
       string $user,
       string $password,
       AsyncMysqlConnectionOptions $conn_opts
-    ): Awaitable<Vector<AsyncMysqlQueryResult>>{ }
+    ): Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)> { }
 
    static public function adoptConnection($connection) { }
 }

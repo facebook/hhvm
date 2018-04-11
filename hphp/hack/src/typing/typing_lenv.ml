@@ -226,13 +226,13 @@ let fully_integrate env parent_lenv =
             env, LMap.add local_id lcl locals
       else
         let eid = if child_eid = parent_eid then child_eid else Ident.tmp() in
-        let env, child_all_types =
-          List.map_env env child_all_types TUtils.unresolved in
         let env, ty =
           match child_all_types with
           | [] -> assert false
           | [first] -> env, first
           | first :: rest ->
+              let env, first = TUtils.unresolved env first in
+              let env, rest = List.map_env env rest TUtils.unresolved in
               List.fold_left ~f:begin fun (env, ty_acc) ty ->
                 Type.unify env.Env.pos Reason.URnone env ty_acc ty
               end ~init:(env, first) rest

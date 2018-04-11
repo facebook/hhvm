@@ -3,5 +3,5 @@ File "foreach.php", line 6, characters 5-16:
 File "foreach.php", line 6, characters 5-16:[2]
   dynamic
 File "foreach.php", line 10, characters 3-13:
-  ^(dynamic)
+  dynamic
 No errors

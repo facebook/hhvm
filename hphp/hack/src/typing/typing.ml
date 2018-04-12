@@ -3451,7 +3451,11 @@ and is_abstract_ft fty = match fty with
                     tv))))
                 (fun _ -> env, res)))
       in let env, rty = get_array_filter_return_type env ty in
-      make_call env (T.make_implicitly_typed_expr fpos (T.Id id)) hl tel tuel rty
+      let fty =
+        match fty with
+        | r, Tfun ft -> r, Tfun {ft with ft_ret = rty}
+        | _ -> fty in
+      make_call env (T.make_typed_expr fpos fty (T.Id id)) hl tel tuel rty
   (* Special function `type_structure` *)
   | Id (p, type_structure)
       when type_structure = SN.StdlibFunctions.type_structure

@@ -813,8 +813,18 @@ void resolve_cycle(Global& genv, TrackedStore& ts, Block* blk, uint32_t id) {
     ts.set(cand);
     return;
   }
+  bool needsProcessed = false;
   auto const inst = genv.unit.clone(cand);
   for (auto i : srcsToPhi) {
+    auto t = TBottom;
+    for (auto const st : stores) {
+      t |= st->src(i)->type();
+    }
+    if (t.admitsSingleVal()) {
+      inst->setSrc(i, genv.unit.cns(t));
+      continue;
+    }
+    needsProcessed = true;
     // create a Mov; we'll use its dst as the src of the store, and
     // when we eventually create the phi, we'll set its dst as the src
     // of the Mov (this allows us to avoid creating a new phi if
@@ -825,9 +835,14 @@ void resolve_cycle(Global& genv, TrackedStore& ts, Block* blk, uint32_t id) {
     blk->prepend(mv);
     inst->setSrc(i, mv->dst());
     mv->setSrc(0, mv->dst());
+    mv->dst()->setType(t);
     ITRACE(7, "  + created {} for {}\n", mv->toString(), inst->toString());
   }
-  ts.setProcessed(inst);
+  if (needsProcessed) {
+    ts.setProcessed(inst);
+  } else {
+    ts.set(inst);
+  }
 }
 
 IRInstruction* resolve_flat(Global& genv, Block* blk, uint32_t id,
@@ -852,7 +867,10 @@ IRInstruction* resolve_flat(Global& genv, Block* blk, uint32_t id,
     bool same = true;
     jit::vector<SSATmp*> phiInputs;
     for (auto const st : stores) {
-      auto const si = st->src(i);
+      auto si = st->src(i);
+      if (!si->inst()->is(DefConst) && si->type().admitsSingleVal()) {
+        si = genv.unit.cns(si->type());
+      }
       phiInputs.push_back(si);
       if (si != phiInputs[0]) same = false;
     }

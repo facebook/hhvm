@@ -3253,8 +3253,9 @@ and is_abstract_ft fty = match fty with
     (fpos, fun_expr as e) hl el uel ~in_suspend =
   let make_call env te thl tel tuel ty =
     env, T.make_typed_expr p ty (T.Call (call_type, te, thl, tel, tuel)), ty in
+  (* TODO: Avoid Tany annotations in TAST by eliminating `make_call_special` *)
   let make_call_special env id tel ty =
-    make_call env (T.make_implicitly_typed_expr fpos (T.Id id)) [] tel [] ty in
+    make_call env (T.make_typed_expr fpos (Reason.Rnone, TUtils.tany env) (T.Id id)) [] tel [] ty in
   let overload_function = overload_function make_call fpos in
 
   let check_coroutine_call env fty =

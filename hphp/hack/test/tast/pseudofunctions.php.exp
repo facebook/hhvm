@@ -1,0 +1,182 @@
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([8:22-8:26], (Hprim Tvoid)));
+      f_name = ([8:10-8:14], "\\test"); f_tparams = [];
+      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_params =
+      [{ AnnotatedAST.param_annotation = ([8:17-8:19], Some \C);
+         param_hint =
+         (Some ([8:15-8:16], (Happly (([8:15-8:16], "\\C"), []))));
+         param_is_reference = false; param_is_variadic = false;
+         param_pos = [8:17-8:19]; param_name = "$c"; param_expr = None;
+         param_callconv = None; param_user_attributes = [] }
+        ];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast =
+           [(AnnotatedAST.Expr
+               (([9:3-9:7], Some void),
+                (AnnotatedAST.Call (Cnormal,
+                   (([9:3-9:7], Some _),
+                    (AnnotatedAST.Id ([9:3-9:7], "echo"))),
+                   [],
+                   [(([9:7-9:14], Some string),
+                     (AnnotatedAST.String ([9:8-9:13], "foo")))],
+                   []))));
+             (AnnotatedAST.Expr
+                (([10:3-10:8], Some void),
+                 (AnnotatedAST.Call (Cnormal,
+                    (([10:3-10:8], Some _),
+                     (AnnotatedAST.Id ([10:3-10:8], "echo"))),
+                    [],
+                    [(([10:8-10:15], Some string),
+                      (AnnotatedAST.String ([10:9-10:14], "foo")))],
+                    []))));
+             (AnnotatedAST.Expr
+                (([12:3-12:15], Some void),
+                 (AnnotatedAST.Assert
+                    (AnnotatedAST.AE_assert
+                       (([12:10-12:14], Some bool), AnnotatedAST.True)))));
+             (AnnotatedAST.If (
+                (([13:13-13:17], Some bool),
+                 (AnnotatedAST.Unop (Unot,
+                    (([13:13-13:17], Some bool), AnnotatedAST.True)))),
+                [(AnnotatedAST.Expr
+                    (([13:3-13:25], Some noreturn),
+                     (AnnotatedAST.Call (Cnormal,
+                        (([13:3-13:12], Some (function(\HH\FormatString<\PlainSprintf> $fmt, ...): noreturn)),
+                         (AnnotatedAST.Id
+                            ([13:3-13:12], "\\invariant_violation"))),
+                        [],
+                        [(([13:19-13:24], Some string),
+                          (AnnotatedAST.String ([13:19-13:24], "foo")))],
+                        []))))
+                  ],
+                [AnnotatedAST.Noop]));
+             (AnnotatedAST.Expr
+                (([14:3-14:29], Some noreturn),
+                 (AnnotatedAST.Call (Cnormal,
+                    (([14:3-14:22], Some (function(\HH\FormatString<\PlainSprintf> $fmt, ...): noreturn)),
+                     (AnnotatedAST.Id ([14:3-14:22], "\\invariant_violation"))),
+                    [],
+                    [(([14:23-14:28], Some string),
+                      (AnnotatedAST.String ([14:23-14:28], "foo")))],
+                    []))));
+             (AnnotatedAST.Expr
+                (([16:3-16:14], Some (function(\C $c): void)),
+                 (AnnotatedAST.Fun_id ([16:7-16:13], "\\test"))));
+             (AnnotatedAST.Expr
+                (([17:3-17:36], Some (function(): void)),
+                 (AnnotatedAST.Smethod_id (([17:14-17:15], "\\C"),
+                    ([17:24-17:35], "staticFoo")))));
+             (AnnotatedAST.Expr
+                (([18:3-18:31], Some (function(): void)),
+                 (AnnotatedAST.Method_id (
+                    (([18:13-18:15], Some \C),
+                     (AnnotatedAST.Lvar ([18:13-18:15], $c))),
+                    ([18:17-18:30], "instanceFoo")))));
+             (AnnotatedAST.Expr
+                (([19:3-19:39], Some (function(\C): void)),
+                 (AnnotatedAST.Method_caller (([19:15-19:16], "\\C"),
+                    ([19:25-19:38], "instanceFoo")))));
+             (AnnotatedAST.Expr
+                (([21:3-21:12], Some bool),
+                 (AnnotatedAST.Call (Cnormal,
+                    (([21:3-21:8], Some (function($x): bool)),
+                     (AnnotatedAST.Id ([21:3-21:8], "\\empty"))),
+                    [],
+                    [(([21:9-21:11], Some \C),
+                      (AnnotatedAST.Lvar ([21:9-21:11], $c)))],
+                    []))));
+             (AnnotatedAST.Expr
+                (([22:3-22:12], Some bool),
+                 (AnnotatedAST.Call (Cnormal,
+                    (([22:3-22:8], Some (function($x): bool)),
+                     (AnnotatedAST.Id ([22:3-22:8], "\\isset"))),
+                    [],
+                    [(([22:9-22:11], Some \C),
+                      (AnnotatedAST.Lvar ([22:9-22:11], $c)))],
+                    []))));
+             (AnnotatedAST.Expr
+                (([23:3-23:12], Some void),
+                 (AnnotatedAST.Call (Cnormal,
+                    (([23:3-23:8], Some (function($x): void)),
+                     (AnnotatedAST.Id ([23:3-23:8], "\\unset"))),
+                    [],
+                    [(([23:9-23:11], Some \C),
+                      (AnnotatedAST.Lvar ([23:9-23:11], $c)))],
+                    []))))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+  (AnnotatedAST.Fun
+     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([27:21-27:25], (Hprim Tvoid)));
+       f_name = ([27:10-27:17], "\\rx_test"); f_tparams = [];
+       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+       f_params = [];
+       f_body =
+       (AnnotatedAST.NamedBody
+          { AnnotatedAST.fnb_nast =
+            [(AnnotatedAST.Expr
+                (([28:3-28:15], Some \C),
+                 (AnnotatedAST.Binop ((Eq None),
+                    (([28:3-28:5], Some \C),
+                     (AnnotatedAST.Lvar ([28:3-28:5], $c))),
+                    (([28:8-28:15], Some \C),
+                     (AnnotatedAST.New (
+                        ((Some \C),
+                         (AnnotatedAST.CI (([28:12-28:13], "\\C"), []))),
+                        [], [])))
+                    ))));
+              (AnnotatedAST.Expr
+                 (([29:3-29:13], Some void),
+                  (AnnotatedAST.Call (Cnormal,
+                     (([29:3-29:9], Some (function($x): void)),
+                      (AnnotatedAST.Id ([29:3-29:9], "\\freeze"))),
+                     [],
+                     [(([29:10-29:12], Some \C),
+                       (AnnotatedAST.Lvar ([29:10-29:12], $c)))],
+                     []))))
+              ];
+            fnb_unsafe = false });
+       f_fun_kind = FSync;
+       f_user_attributes =
+       [{ AnnotatedAST.ua_name = ([26:3-26:7], "__Rx"); ua_params = [] }];
+       f_ret_by_ref = false });
+  (AnnotatedAST.Class
+     { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
+       c_is_xhp = false; c_kind = Cnormal; c_name = ([3:7-3:8], "\\C");
+       c_tparams = <opaque>; c_extends = []; c_uses = [];
+       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
+       c_req_implements = []; c_implements = []; c_consts = [];
+       c_typeconsts = []; c_static_vars = []; c_vars = [];
+       c_constructor = None;
+       c_static_methods =
+       [{ AnnotatedAST.m_annotation = (); m_final = false;
+          m_abstract = false; m_visibility = Public;
+          m_name = ([4:26-4:35], "staticFoo"); m_tparams = [];
+          m_where_constraints = []; m_variadic = AnnotatedAST.FVnonVariadic;
+          m_params = [];
+          m_body =
+          (AnnotatedAST.NamedBody
+             { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop];
+               fnb_unsafe = false });
+          m_fun_kind = FSync; m_user_attributes = [];
+          m_ret = (Some ([4:39-4:43], (Hprim Tvoid))); m_ret_by_ref = false }
+         ];
+       c_methods =
+       [{ AnnotatedAST.m_annotation = (); m_final = false;
+          m_abstract = false; m_visibility = Public;
+          m_name = ([5:19-5:30], "instanceFoo"); m_tparams = [];
+          m_where_constraints = []; m_variadic = AnnotatedAST.FVnonVariadic;
+          m_params = [];
+          m_body =
+          (AnnotatedAST.NamedBody
+             { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop];
+               fnb_unsafe = false });
+          m_fun_kind = FSync; m_user_attributes = [];
+          m_ret = (Some ([5:34-5:38], (Hprim Tvoid))); m_ret_by_ref = false }
+         ];
+       c_user_attributes = []; c_enum = None })
+  ]

@@ -3256,6 +3256,13 @@ and is_abstract_ft fty = match fty with
   (* TODO: Avoid Tany annotations in TAST by eliminating `make_call_special` *)
   let make_call_special env id tel ty =
     make_call env (T.make_typed_expr fpos (Reason.Rnone, TUtils.tany env) (T.Id id)) [] tel [] ty in
+  (* For special functions and pseudofunctions with a definition in hhi. *)
+  let make_call_special_from_def env id tel ty_ =
+    let env, fty = fun_type_of_id env id hl in
+    let ty = match fty with
+      | _, Tfun ft -> ft.ft_ret
+      | _ -> (Reason.Rwitness p, ty_) in
+    make_call env (T.make_typed_expr fpos fty (T.Id id)) [] tel [] ty in
   let overload_function = overload_function make_call fpos in
 
   let check_coroutine_call env fty =
@@ -3321,7 +3328,7 @@ and is_abstract_ft fty = match fty with
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
     if Env.is_strict env then
       Errors.empty_in_strict p;
-    make_call_special env id tel (Reason.Rwitness p, Tprim Tbool)
+    make_call_special_from_def env id tel (Tprim Tbool)
   (* Special function `isset` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.isset ->
     check_function_in_suspend SN.PseudoFunctions.isset;
@@ -3330,7 +3337,7 @@ and is_abstract_ft fty = match fty with
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
     if Env.is_strict env then
       Errors.isset_in_strict p;
-    make_call_special env id tel (Reason.Rwitness p, Tprim Tbool)
+    make_call_special_from_def env id tel (Tprim Tbool)
   (* Special function `unset` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.unset ->
     check_function_in_suspend SN.PseudoFunctions.unset;
@@ -3365,10 +3372,10 @@ and is_abstract_ft fty = match fty with
         | [(p, Obj_get (_, _, OG_nullsafe))] ->
           begin
             Errors.nullsafe_property_write_context p;
-            make_call_special env id tel (Reason.Rwitness p, Typing_utils.terr env)
+            make_call_special_from_def env id tel (TUtils.terr env)
           end;
         | _ ->
-          make_call_special env id tel (Reason.Rwitness p, Tprim Tvoid))
+          make_call_special_from_def env id tel (Tprim Tvoid))
   (* Special function `freeze` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.freeze ->
       check_function_in_suspend SN.PseudoFunctions.freeze;
@@ -3378,7 +3385,7 @@ and is_abstract_ft fty = match fty with
       if not (Env.env_local_reactive env) then
         Errors.freeze_in_nonreactive_context p;
       let env = Typing_mutability.freeze_local p env tel in
-      make_call_special env id tel (Reason.Rwitness p, Tprim Tvoid)
+      make_call_special_from_def env id tel (Tprim Tvoid)
   (* Pseudo-function `get_called_class` *)
   | Id (cp, get_called_class) when
       get_called_class = SN.StdlibFunctions.get_called_class

@@ -11,7 +11,7 @@ Errors:
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Expr
-               (([4:3-4:17], None),
+               (([4:3-4:17], Some _),
                 (AnnotatedAST.Id ([4:3-4:17], "\\unbound_global"))))
              ];
            fnb_unsafe = false });

@@ -1505,7 +1505,7 @@ and expr_
       | None when Env.is_strict env ->
           Errors.unbound_global cst_pos;
           let ty = (Reason.Rwitness cst_pos, Typing_utils.terr env) in
-          let te = T.make_implicitly_typed_expr cst_pos (T.Id id) in
+          let te = T.make_typed_expr cst_pos ty (T.Id id) in
           env, te, ty
       | None ->
           make_result env (T.Id id) (Reason.Rwitness cst_pos, Typing_utils.tany env)
@@ -1762,7 +1762,7 @@ and expr_
       make_result env
         (T.Call(
           Cnormal,
-          T.make_implicitly_typed_expr pos_id (T.Id id),
+          T.make_typed_expr pos_id (Reason.Rnone, TUtils.tany env) (T.Id id),
           hl,
           tel,
           [])) (Env.fresh_type())

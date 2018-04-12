@@ -36,7 +36,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
              (AnnotatedAST.Expr
                 (([6:3-6:14], Some _),
                  (AnnotatedAST.Call (Cnormal,
-                    (([6:3-6:10], None),
+                    (([6:3-6:10], Some _),
                      (AnnotatedAST.Id ([6:3-6:10], "\\hh_show"))),
                     [],
                     [(([6:11-6:13], Some int),
@@ -55,7 +55,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                      [(AnnotatedAST.Expr
                          (([12:7-12:18], Some _),
                           (AnnotatedAST.Call (Cnormal,
-                             (([12:7-12:14], None),
+                             (([12:7-12:14], Some _),
                               (AnnotatedAST.Id ([12:7-12:14], "\\hh_show"))),
                              [],
                              [(([12:15-12:17], Some int),
@@ -72,7 +72,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                        (AnnotatedAST.Expr
                           (([15:7-15:18], Some _),
                            (AnnotatedAST.Call (Cnormal,
-                              (([15:7-15:14], None),
+                              (([15:7-15:14], Some _),
                                (AnnotatedAST.Id ([15:7-15:14], "\\hh_show"))),
                               [],
                               [(([15:15-15:17], Some string),
@@ -86,7 +86,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                      [(AnnotatedAST.Expr
                          (([19:7-19:18], Some _),
                           (AnnotatedAST.Call (Cnormal,
-                             (([19:7-19:14], None),
+                             (([19:7-19:14], Some _),
                               (AnnotatedAST.Id ([19:7-19:14], "\\hh_show"))),
                              [],
                              [(([19:15-19:17], Some (int | string)),
@@ -102,7 +102,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                        (AnnotatedAST.Expr
                           (([22:7-22:18], Some _),
                            (AnnotatedAST.Call (Cnormal,
-                              (([22:7-22:14], None),
+                              (([22:7-22:14], Some _),
                                (AnnotatedAST.Id ([22:7-22:14], "\\hh_show"))),
                               [],
                               [(([22:15-22:17], Some bool),
@@ -116,7 +116,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                      [(AnnotatedAST.Expr
                          (([26:7-26:18], Some _),
                           (AnnotatedAST.Call (Cnormal,
-                             (([26:7-26:14], None),
+                             (([26:7-26:14], Some _),
                               (AnnotatedAST.Id ([26:7-26:14], "\\hh_show"))),
                              [],
                              [(([26:15-26:17], Some (string | bool | int)),
@@ -130,7 +130,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                      [(AnnotatedAST.Expr
                          (([30:7-30:18], Some _),
                           (AnnotatedAST.Call (Cnormal,
-                             (([30:7-30:14], None),
+                             (([30:7-30:14], Some _),
                               (AnnotatedAST.Id ([30:7-30:14], "\\hh_show"))),
                              [],
                              [(([30:15-30:17], Some int),
@@ -147,7 +147,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                        (AnnotatedAST.Expr
                           (([33:7-33:18], Some _),
                            (AnnotatedAST.Call (Cnormal,
-                              (([33:7-33:14], None),
+                              (([33:7-33:14], Some _),
                                (AnnotatedAST.Id ([33:7-33:14], "\\hh_show"))),
                               [],
                               [(([33:15-33:17], Some float),
@@ -160,7 +160,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
              (AnnotatedAST.Expr
                 (([37:3-37:14], Some _),
                  (AnnotatedAST.Call (Cnormal,
-                    (([37:3-37:10], None),
+                    (([37:3-37:10], Some _),
                      (AnnotatedAST.Id ([37:3-37:10], "\\hh_show"))),
                     [],
                     [(([37:11-37:13], Some (int | string | float | bool)),

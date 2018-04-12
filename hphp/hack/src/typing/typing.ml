@@ -3644,8 +3644,8 @@ and is_abstract_ft fty = match fty with
               build_function env (fun tr ->
                 (r_fty, Tarraykind (AKvec(tr)))))
         | _ -> env, fty in
-      let env, tel, _tuel, ty = call ~expected p env fty el [] in
-      make_call_special env x tel ty
+      let env, tel, tuel, ty = call ~expected p env fty el [] in
+      make_call env (T.make_typed_expr fpos fty (T.Id x)) hl tel tuel ty
   (* Special function `idx` *)
   | Id ((_, idx) as id) when idx = SN.FB.idx ->
       check_function_in_suspend SN.FB.idx;

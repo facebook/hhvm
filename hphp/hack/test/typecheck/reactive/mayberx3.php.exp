@@ -1,0 +1,2 @@
+File "mayberx3.php", line 5, characters 14-22:
+<<__MaybeRx>> attribute can only be put on parameters of conditionally reactive function or method annotated with <<__OnlyRxIfArgs>> attribute. (NastCheck[3063])

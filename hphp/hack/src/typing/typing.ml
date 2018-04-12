@@ -282,7 +282,7 @@ let enforce_param_not_disposable env param ty =
  *
  * A similar line of reasoning is applied for the static method create.
  *)
-let make_param_local_ty env param =
+let make_param_local_ty attrs env param =
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
   let env, ty =
@@ -297,6 +297,11 @@ let make_param_local_ty env param =
       env, (r, ty)
     | Some x ->
       let ty = Decl_hint.hint env.Env.decl_env x in
+      let ty =
+        Decl.adjust_reactivity_of_mayberx_parameter
+          attrs
+          (Env.env_reactivity env)
+          ty in
       Phase.localize ~ety_env env ty
   in
   let ty = match ty with
@@ -314,6 +319,7 @@ let make_param_local_ty env param =
       r, Tarraykind akind
     | x -> x
   in
+  Typing_reactivity.disallow_mayberx_on_non_functions env param ty;
   env, ty
 
 (* Given a localized parameter type and parameter information, infer
@@ -432,7 +438,8 @@ and fun_def tcopt f =
         ~is_explicit:(Option.is_some f.f_ret) ~is_by_ref:f.f_ret_by_ref ty in
       TI.check_params_instantiable env f.f_params;
       TI.check_tparams_instantiable env f.f_tparams;
-      let env, param_tys = List.map_env env f.f_params make_param_local_ty in
+      let env, param_tys =
+        List.map_env env f.f_params (make_param_local_ty f.f_user_attributes) in
       if Env.is_strict env then
         List.iter2_exn ~f:(check_param env) f.f_params param_tys;
       Typing_memoize.check_function env f;
@@ -441,7 +448,7 @@ and fun_def tcopt f =
       let env, t_variadic = match f.f_variadic with
         | FVvariadicArg vparam ->
           TI.check_param_instantiable env vparam;
-          let env, ty = make_param_local_ty env vparam in
+          let env, ty = make_param_local_ty f.f_user_attributes env vparam in
           if Env.is_strict env then
             check_param env vparam ty;
           let env, t_vparam = bind_param env (ty, vparam) in
@@ -4987,8 +4994,6 @@ and call_ ~expected ~receiver_type pos env fty el uel =
     let pos_def = Reason.to_pos r2 in
     let env, var_param = variadic_param env ft in
 
-    Typing_reactivity.check_call env receiver_type pos r2 ft;
-
     (* Force subtype with expected result *)
     let env = check_expected_ty "Call result" env ft.ft_ret expected in
 
@@ -5042,7 +5047,11 @@ and call_ ~expected ~receiver_type pos env fty el uel =
       match opt with
       | Some x -> x
       | None -> failwith "missing parameter in check_args" in
-    let tel = List.map rl (fun (_, opt) -> fst (get_param opt)) in
+    let tel, tys =
+      let l = List.map rl (fun (_, opt) -> get_param opt) in
+      Core_list.unzip l in
+    Typing_reactivity.check_call env receiver_type pos r2 ft tys;
+
     let env, tuel, arity, check_min, did_unpack =
       match uel with
       | [] -> env, [], List.length el, true, false
@@ -6395,7 +6404,8 @@ and method_def env m =
   let return = Typing_return.make_info m.m_fun_kind m.m_user_attributes env
     ~is_explicit:(Option.is_some m.m_ret) ~is_by_ref:m.m_ret_by_ref ty in
   TI.check_params_instantiable env m.m_params;
-  let env, param_tys = List.map_env env m.m_params make_param_local_ty in
+  let env, param_tys =
+    List.map_env env m.m_params (make_param_local_ty m.m_user_attributes) in
   if Env.is_strict env then begin
     List.iter2_exn ~f:(check_param env) m.m_params param_tys;
   end;
@@ -6405,7 +6415,7 @@ and method_def env m =
   let env, t_variadic = match m.m_variadic with
     | FVvariadicArg vparam ->
       TI.check_param_instantiable env vparam;
-      let env, ty = make_param_local_ty env vparam in
+      let env, ty = make_param_local_ty m.m_user_attributes env vparam in
       if Env.is_strict env then
         check_param env vparam ty;
       let env, t_variadic = bind_param env (ty, vparam) in

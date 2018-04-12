@@ -13,7 +13,15 @@
 exception Decl_not_found of string
 
 val fun_reactivity :
-  Decl_env.env -> Nast.user_attribute list -> Typing_defs.reactivity
+  Decl_env.env ->
+  Nast.user_attribute list ->
+  Typing_defs.reactivity
+
+val adjust_reactivity_of_mayberx_parameter:
+  Nast.user_attribute list ->
+  Typing_defs.reactivity ->
+  Typing_defs.decl Typing_defs.ty ->
+  Typing_defs.decl Typing_defs.ty
 
 (*
  * This function works by side effects. It is adding in the

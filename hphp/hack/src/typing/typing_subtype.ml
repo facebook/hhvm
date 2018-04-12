@@ -453,7 +453,7 @@ and subtype_reactivity
      A::f is conditionally reactive with condition type Rx and B states
      that it implements Rx so in context of B A::f will be unconditionally reactive
   *)
-  let effective_reactivity r containing_ty =
+  let rec effective_reactivity r containing_ty =
     match r, containing_ty with
     | Local (Some t), Some containing_ty
       when is_sub_type env (maybe_localize containing_ty) (localize t) -> Local None
@@ -461,6 +461,7 @@ and subtype_reactivity
       when is_sub_type env (maybe_localize containing_ty) (localize t) -> Shallow None
     | Reactive (Some t), Some containing_ty
       when is_sub_type env (maybe_localize containing_ty) (localize t) -> Reactive None
+    | MaybeReactive r, _ -> MaybeReactive (effective_reactivity r containing_ty)
     | _ -> r in
   let r_sub =
     Option.bind extra_info (fun { class_ty = c; _ } -> c)
@@ -501,6 +502,9 @@ and subtype_reactivity
       end
     end in
   match r_sub, r_super, extra_info with
+  | MaybeReactive sub, MaybeReactive super, _ ->
+    subtype_reactivity ?extra_info env sub super
+  | _, MaybeReactive _, _ -> true
   (* anything is a subtype of nonreactive functions *)
   | _, Nonreactive, _ -> true
   (* unconditional local/shallow/reactive functions are subtypes of Local *.

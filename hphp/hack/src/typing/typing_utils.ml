@@ -234,14 +234,17 @@ let reactivity_to_string env r =
   let cond_reactive prefix t =
     let str = Typing_print.full env t in
     prefix ^ " (condition type: " ^ str ^ ")" in
-  match r with
-  | Reactive None -> "reactive"
-  | Reactive (Some ty) -> cond_reactive "conditionally reactive" ty
-  | Shallow None -> "shallow reactive"
-  | Shallow (Some ty) -> cond_reactive "conditionally shallow reactive" ty
-  | Local None -> "local reactive"
-  | Local (Some ty) -> cond_reactive "conditionally local reactive" ty
-  | Nonreactive -> "non-reactive"
+  let rec aux r =
+    match r with
+    | Reactive None -> "reactive"
+    | Reactive (Some ty) -> cond_reactive "conditionally reactive" ty
+    | Shallow None -> "shallow reactive"
+    | Shallow (Some ty) -> cond_reactive "conditionally shallow reactive" ty
+    | Local None -> "local reactive"
+    | Local (Some ty) -> cond_reactive "conditionally local reactive" ty
+    | MaybeReactive n -> "maybe (" ^ (aux n) ^ ")"
+    | Nonreactive -> "non-reactive" in
+  aux r
 
 (*****************************************************************************)
 (* Unification error *)

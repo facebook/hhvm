@@ -1,0 +1,2 @@
+File "only_rx_if_args1.php", line 4, characters 3-16:
+Function or method annotated with <<__OnlyRxIfArgs>> attribute should have at least one parameter with <<__MaybeRx>> annotation. (NastCheck[3064])

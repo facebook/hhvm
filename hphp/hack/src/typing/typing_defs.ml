@@ -347,11 +347,24 @@ and shape_fields_known =
   | FieldsFullyKnown
   | FieldsPartiallyKnown of Pos.t Nast.ShapeMap.t
 
+(* represents reactivity of function
+   - None corresponds to non-reactive function
+   - Some reactivity - to reactive function with specified reactivity flavor
+
+ Nonreactive <: Local -t <: Shallow -t <: Reactive -t
+
+ MaybeReactive represents conditional reactivity of function that depends on
+   reactivity of function arguments
+   <<__Rx>>
+   function f(<<__MaybeRx>> $g) { ... }
+   call to function f will be treated as reactive only if $g is reactive
+  *)
 and reactivity =
   | Nonreactive
   | Local of decl ty option
   | Shallow of decl ty option
   | Reactive of decl ty option
+  | MaybeReactive of reactivity
 
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)

@@ -1,0 +1,11 @@
+File "mayberx12.php", line 8, characters 11-11:
+Class B does not correctly implement all required methods  (Typing[4203])
+File "mayberx12.php", line 8, characters 21-21:
+Some methods are incompatible with those declared in type A
+Read the following to see why:
+File "mayberx12.php", line 12, characters 19-19:
+Member f has the wrong type
+File "mayberx12.php", line 12, characters 34-51:
+This function is maybe (reactive).
+File "mayberx12.php", line 5, characters 34-51:
+This function is maybe (local reactive).

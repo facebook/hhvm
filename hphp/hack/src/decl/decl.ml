@@ -54,6 +54,22 @@ let fun_reactivity env user_attributes =
   else if has UA.uaLocalReactive then Local rx_condition
   else Nonreactive
 
+let adjust_reactivity_of_mayberx_parameter attrs reactivity param_ty =
+  let has_only_rx_if_args =
+    Attributes.mem SN.UserAttributes.uaOnlyRxIfArgs attrs in
+  match has_only_rx_if_args, param_ty with
+  | true, (r, Tfun tfun) ->
+    (* strip conditional reactivity if parent has one *)
+    let reactivity =
+      match reactivity with
+      | Local (Some _) -> Local None
+      | Shallow (Some _) -> Shallow None
+      | Reactive (Some _) -> Reactive None
+      | r -> r in
+    r, Tfun { tfun with ft_reactive = MaybeReactive reactivity }
+  | _ ->
+    param_ty
+
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
  * For example, a class cannot extend an interface, an interface cannot
@@ -221,7 +237,7 @@ let rec ifun_decl tcopt (f: Ast.fun_) =
   fun_decl f tcopt;
   ()
 
-and make_param_ty env param =
+and make_param_ty env attrs reactivity param =
   let ty = match param.param_hint with
     | None ->
       let r = Reason.Rwitness param.param_pos in
@@ -237,6 +253,7 @@ and make_param_ty env param =
       Reason.Rvar_param param.param_pos, t
     | x -> x
   in
+  let ty = adjust_reactivity_of_mayberx_parameter attrs reactivity ty in
   let mode = get_param_mode param.param_is_reference param.param_callconv in
   {
     fp_pos  = param.param_pos;
@@ -283,7 +300,7 @@ and fun_decl_in_env env f =
   let returns_mutable = fun_returns_mutable f.f_user_attributes in
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let arity_min = minimum_arity f.f_params in
-  let params = make_params env f.f_params in
+  let params = make_params env f.f_user_attributes reactivity f.f_params in
   let ret_ty = match f.f_ret with
     | None -> ret_from_fun_kind (fst f.f_name) f.f_fun_kind
     | Some ty -> Decl_hint.hint env ty in
@@ -291,7 +308,7 @@ and fun_decl_in_env env f =
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       assert (param.param_expr = None);
-      Fvariadic (arity_min, make_param_ty env param)
+      Fvariadic (arity_min, make_param_ty env f.f_user_attributes reactivity param)
     | FVellipsis    -> Fellipsis (arity_min)
     | FVnonVariadic -> Fstandard (arity_min, List.length f.f_params)
   in
@@ -362,8 +379,8 @@ and check_params env paraml =
   if (env.Decl_env.mode <> FileInfo.Mphp) then
     loop false paraml
 
-and make_params env paraml =
-  List.map paraml ~f:(make_param_ty env)
+and make_params env attrs reactivity paraml =
+  List.map paraml ~f:(make_param_ty env attrs reactivity)
 
 (*****************************************************************************)
 (* Section declaring the type of a class *)
@@ -831,7 +848,7 @@ and method_decl env m =
   let returns_mutable = fun_returns_mutable m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
   let arity_min = minimum_arity m.m_params in
-  let params = make_params env m.m_params in
+  let params = make_params env m.m_user_attributes reactivity m.m_params in
   let ret = match m.m_ret with
     | None -> ret_from_fun_kind (fst m.m_name) m.m_fun_kind
     | Some ret -> Decl_hint.hint env ret in
@@ -839,7 +856,7 @@ and method_decl env m =
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       assert (param.param_expr = None);
-      Fvariadic (arity_min, make_param_ty env param)
+      Fvariadic (arity_min, make_param_ty env m.m_user_attributes reactivity param)
     | FVellipsis    -> Fellipsis arity_min
     | FVnonVariadic -> Fstandard (arity_min, List.length m.m_params)
   in

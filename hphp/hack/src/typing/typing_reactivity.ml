@@ -21,7 +21,33 @@ let type_to_str: type a. Env.env -> a ty -> string = fun env ty ->
   | ty -> ty in
   Typing_print.full env (unwrap ty)
 
-let check_call env receiver_type pos reason ft =
+let check_call env receiver_type pos reason ft arg_types =
+  let callee_reactivity =
+    (* if function we are about to call is maybe reactive with reactivity flavor R
+      - check its arguments: call to maybe reactive function is treated as reactive
+       if arguments that correspond to parameters marked with <<__MaybeRx>> are functions
+       with reactivity <: R *)
+    let callee_has_mayberx_parameters =
+      Core_list.exists ft.ft_params ~f:begin function
+      | { fp_type = (_, Tfun { ft_reactive = MaybeReactive _; _ }); _ } -> true
+      | _ -> false
+      end in
+    if not callee_has_mayberx_parameters then ft.ft_reactive
+    else
+    let is_reactive =
+      match Core_list.zip ft.ft_params arg_types with
+      | None -> false
+      | Some l -> Core_list.for_all l ~f:(fun (p, (_, arg_ty)) ->
+        match p.fp_type with
+        | _, Tfun { ft_reactive = MaybeReactive r_super; _ } ->
+          begin match arg_ty with
+          | Tfun { ft_reactive = MaybeReactive r_sub; _}
+          | Tfun { ft_reactive = r_sub; _} ->
+            SubType.subtype_reactivity env r_sub r_super
+          | _ -> false
+          end
+        | _ -> true) in
+    if is_reactive then ft.ft_reactive else Nonreactive in
   (* call is allowed if reactivity of callee is a subtype of reactivity of
      enlosing environment *)
   let allow_call =
@@ -30,7 +56,7 @@ let check_call env receiver_type pos reason ft =
       ~extra_info: SubType.({ empty_extra_info with class_ty = receiver_type })
       ~is_call_site:true
       env
-      ft.ft_reactive
+      callee_reactivity
       (Env.env_reactivity env) in
   let allow_call =
     if not allow_call && Env.is_checking_lambda () then begin
@@ -41,7 +67,7 @@ let check_call env receiver_type pos reason ft =
     else allow_call in
   (* call is not allowed, report error *)
   if not allow_call then begin
-    begin match Env.env_reactivity env, ft.ft_reactive with
+    begin match Env.env_reactivity env, callee_reactivity with
     | Reactive _, (Shallow _ | Local _ | Nonreactive) ->
       Errors.nonreactive_function_call pos (Reason.to_pos reason)
     | Shallow _, Nonreactive ->
@@ -72,4 +98,20 @@ let disallow_static_or_global_in_reactive_context ~is_static env el =
       let name = get_name n in
       if is_static then Errors.static_in_reactive_context p name
       else Errors.global_in_reactive_context p name)
+  end
+
+let disallow_mayberx_on_non_functions env param param_ty =
+  let module UA = Naming_special_names.UserAttributes in
+  if Attributes.mem UA.uaMaybeRx param.Nast.param_user_attributes
+  then begin
+    (* if parameter has <<__MaybeRx>> annotation then:
+       - parameter should be typed as function *)
+    match param.Nast.param_hint with
+    | Some (_, Nast.Hfun _) -> ()
+    | None ->
+      Errors.missing_annotation_for_mayberx_parameter param.Nast.param_pos;
+    | _ ->
+      Errors.invalid_type_for_mayberx_parameter
+        (Reason.to_pos (fst param_ty))
+        (Typing_print.full env param_ty)
   end

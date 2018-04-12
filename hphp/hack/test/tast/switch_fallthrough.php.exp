@@ -26,131 +26,126 @@ File "switch_fallthrough.php", line 37, characters 3-13:
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Expr
-               (([5:3-5:9], Some int),
+               (([5:3-5:9], int),
                 (AnnotatedAST.Binop ((Eq None),
-                   (([5:3-5:5], Some int),
-                    (AnnotatedAST.Lvar ([5:3-5:5], $x))),
-                   (([5:8-5:9], Some int),
-                    (AnnotatedAST.Int ([5:8-5:9], "0")))
-                   ))));
+                   (([5:3-5:5], int), (AnnotatedAST.Lvar ([5:3-5:5], $x))),
+                   (([5:8-5:9], int), (AnnotatedAST.Int ([5:8-5:9], "0")))))));
              (AnnotatedAST.Expr
-                (([6:3-6:14], Some _),
+                (([6:3-6:14], _),
                  (AnnotatedAST.Call (Cnormal,
-                    (([6:3-6:10], Some _),
+                    (([6:3-6:10], _),
                      (AnnotatedAST.Id ([6:3-6:10], "\\hh_show"))),
                     [],
-                    [(([6:11-6:13], Some int),
+                    [(([6:11-6:13], int),
                       (AnnotatedAST.Lvar ([6:11-6:13], $x)))],
                     []))));
              (AnnotatedAST.Switch (
-                (([7:11-7:13], Some int),
-                 (AnnotatedAST.Lvar ([7:11-7:13], $x))),
+                (([7:11-7:13], int), (AnnotatedAST.Lvar ([7:11-7:13], $x))),
                 [(AnnotatedAST.Case (
-                    (([8:10-8:11], Some int),
+                    (([8:10-8:11], int),
                      (AnnotatedAST.Int ([8:10-8:11], "0"))),
                     []));
                   (AnnotatedAST.Case (
-                     (([10:10-10:11], Some int),
+                     (([10:10-10:11], int),
                       (AnnotatedAST.Int ([10:10-10:11], "1"))),
                      [(AnnotatedAST.Expr
-                         (([12:7-12:18], Some _),
+                         (([12:7-12:18], _),
                           (AnnotatedAST.Call (Cnormal,
-                             (([12:7-12:14], Some _),
+                             (([12:7-12:14], _),
                               (AnnotatedAST.Id ([12:7-12:14], "\\hh_show"))),
                              [],
-                             [(([12:15-12:17], Some int),
+                             [(([12:15-12:17], int),
                                (AnnotatedAST.Lvar ([12:15-12:17], $x)))],
                              []))));
                        (AnnotatedAST.Expr
-                          (([14:7-14:14], Some string),
+                          (([14:7-14:14], string),
                            (AnnotatedAST.Binop ((Eq None),
-                              (([14:7-14:9], Some string),
+                              (([14:7-14:9], string),
                                (AnnotatedAST.Lvar ([14:7-14:9], $x))),
-                              (([14:12-14:14], Some string),
+                              (([14:12-14:14], string),
                                (AnnotatedAST.String ([14:12-14:14], "")))
                               ))));
                        (AnnotatedAST.Expr
-                          (([15:7-15:18], Some _),
+                          (([15:7-15:18], _),
                            (AnnotatedAST.Call (Cnormal,
-                              (([15:7-15:14], Some _),
+                              (([15:7-15:14], _),
                                (AnnotatedAST.Id ([15:7-15:14], "\\hh_show"))),
                               [],
-                              [(([15:15-15:17], Some string),
+                              [(([15:15-15:17], string),
                                 (AnnotatedAST.Lvar ([15:15-15:17], $x)))],
                               []))));
                        AnnotatedAST.Fallthrough]
                      ));
                   (AnnotatedAST.Case (
-                     (([17:10-17:11], Some int),
+                     (([17:10-17:11], int),
                       (AnnotatedAST.Int ([17:10-17:11], "3"))),
                      [(AnnotatedAST.Expr
-                         (([19:7-19:18], Some _),
+                         (([19:7-19:18], _),
                           (AnnotatedAST.Call (Cnormal,
-                             (([19:7-19:14], Some _),
+                             (([19:7-19:14], _),
                               (AnnotatedAST.Id ([19:7-19:14], "\\hh_show"))),
                              [],
-                             [(([19:15-19:17], Some (int | string)),
+                             [(([19:15-19:17], (int | string)),
                                (AnnotatedAST.Lvar ([19:15-19:17], $x)))],
                              []))));
                        (AnnotatedAST.Expr
-                          (([20:7-20:16], Some bool),
+                          (([20:7-20:16], bool),
                            (AnnotatedAST.Binop ((Eq None),
-                              (([20:7-20:9], Some bool),
+                              (([20:7-20:9], bool),
                                (AnnotatedAST.Lvar ([20:7-20:9], $x))),
-                              (([20:12-20:16], Some bool), AnnotatedAST.True)
-                              ))));
+                              (([20:12-20:16], bool), AnnotatedAST.True)))));
                        (AnnotatedAST.Expr
-                          (([22:7-22:18], Some _),
+                          (([22:7-22:18], _),
                            (AnnotatedAST.Call (Cnormal,
-                              (([22:7-22:14], Some _),
+                              (([22:7-22:14], _),
                                (AnnotatedAST.Id ([22:7-22:14], "\\hh_show"))),
                               [],
-                              [(([22:15-22:17], Some bool),
+                              [(([22:15-22:17], bool),
                                 (AnnotatedAST.Lvar ([22:15-22:17], $x)))],
                               []))));
                        AnnotatedAST.Fallthrough]
                      ));
                   (AnnotatedAST.Case (
-                     (([24:10-24:11], Some int),
+                     (([24:10-24:11], int),
                       (AnnotatedAST.Int ([24:10-24:11], "4"))),
                      [(AnnotatedAST.Expr
-                         (([26:7-26:18], Some _),
+                         (([26:7-26:18], _),
                           (AnnotatedAST.Call (Cnormal,
-                             (([26:7-26:14], Some _),
+                             (([26:7-26:14], _),
                               (AnnotatedAST.Id ([26:7-26:14], "\\hh_show"))),
                              [],
-                             [(([26:15-26:17], Some (string | bool | int)),
+                             [(([26:15-26:17], (string | bool | int)),
                                (AnnotatedAST.Lvar ([26:15-26:17], $x)))],
                              []))));
                        (AnnotatedAST.Break [27:7-27:13])]
                      ));
                   (AnnotatedAST.Case (
-                     (([28:10-28:11], Some int),
+                     (([28:10-28:11], int),
                       (AnnotatedAST.Int ([28:10-28:11], "4"))),
                      [(AnnotatedAST.Expr
-                         (([30:7-30:18], Some _),
+                         (([30:7-30:18], _),
                           (AnnotatedAST.Call (Cnormal,
-                             (([30:7-30:14], Some _),
+                             (([30:7-30:14], _),
                               (AnnotatedAST.Id ([30:7-30:14], "\\hh_show"))),
                              [],
-                             [(([30:15-30:17], Some int),
+                             [(([30:15-30:17], int),
                                (AnnotatedAST.Lvar ([30:15-30:17], $x)))],
                              []))));
                        (AnnotatedAST.Expr
-                          (([32:7-32:15], Some float),
+                          (([32:7-32:15], float),
                            (AnnotatedAST.Binop ((Eq None),
-                              (([32:7-32:9], Some float),
+                              (([32:7-32:9], float),
                                (AnnotatedAST.Lvar ([32:7-32:9], $x))),
-                              (([32:12-32:15], Some float),
+                              (([32:12-32:15], float),
                                (AnnotatedAST.Float ([32:12-32:15], "1.0")))
                               ))));
                        (AnnotatedAST.Expr
-                          (([33:7-33:18], Some _),
+                          (([33:7-33:18], _),
                            (AnnotatedAST.Call (Cnormal,
-                              (([33:7-33:14], Some _),
+                              (([33:7-33:14], _),
                                (AnnotatedAST.Id ([33:7-33:14], "\\hh_show"))),
                               [],
-                              [(([33:15-33:17], Some float),
+                              [(([33:15-33:17], float),
                                 (AnnotatedAST.Lvar ([33:15-33:17], $x)))],
                               []))));
                        (AnnotatedAST.Break [34:7-34:13])]
@@ -158,12 +153,12 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                   ]
                 ));
              (AnnotatedAST.Expr
-                (([37:3-37:14], Some _),
+                (([37:3-37:14], _),
                  (AnnotatedAST.Call (Cnormal,
-                    (([37:3-37:10], Some _),
+                    (([37:3-37:10], _),
                      (AnnotatedAST.Id ([37:3-37:10], "\\hh_show"))),
                     [],
-                    [(([37:11-37:13], Some (int | string | float | bool)),
+                    [(([37:11-37:13], (int | string | float | bool)),
                       (AnnotatedAST.Lvar ([37:11-37:13], $x)))],
                     []))))
              ];

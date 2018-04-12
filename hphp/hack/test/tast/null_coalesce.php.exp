@@ -4,7 +4,7 @@
       f_name = ([3:10-3:11], "\\f"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_annotation = ([3:17-3:19], Some ?int);
+      [{ AnnotatedAST.param_annotation = ([3:17-3:19], ?int);
          param_hint =
          (Some ([3:12-3:16], (Hoption ([3:13-3:16], (Hprim Tint)))));
          param_is_reference = false; param_is_variadic = false;
@@ -15,11 +15,11 @@
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Return ([4:3-4:18],
-               (Some (([4:10-4:17], Some int),
+               (Some (([4:10-4:17], int),
                       (AnnotatedAST.NullCoalesce (
-                         (([4:10-4:12], Some ?int),
+                         (([4:10-4:12], ?int),
                           (AnnotatedAST.Lvar ([4:10-4:12], $x))),
-                         (([4:16-4:17], Some int),
+                         (([4:16-4:17], int),
                           (AnnotatedAST.Int ([4:16-4:17], "0")))
                          ))))
                ))

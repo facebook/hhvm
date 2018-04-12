@@ -4,13 +4,13 @@
       f_name = ([3:10-3:27], "\\test_array_filter"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_annotation = ([4:9-4:23], Some array);
+      [{ AnnotatedAST.param_annotation = ([4:9-4:23], array);
          param_hint = (Some ([4:3-4:8], (Harray (None, None))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [4:9-4:23]; param_name = "$untyped_array";
          param_expr = None; param_callconv = None; param_user_attributes = []
          };
-        { AnnotatedAST.param_annotation = ([5:18-5:31], Some array<?string>);
+        { AnnotatedAST.param_annotation = ([5:18-5:31], array<?string>);
           param_hint =
           (Some ([5:3-5:8],
                  (Harray (
@@ -21,8 +21,7 @@
           param_pos = [5:18-5:31]; param_name = "$vector_array";
           param_expr = None; param_callconv = None;
           param_user_attributes = [] };
-        { AnnotatedAST.param_annotation =
-          ([6:22-6:32], Some \Container<?string>);
+        { AnnotatedAST.param_annotation = ([6:22-6:32], \Container<?string>);
           param_hint =
           (Some ([6:3-6:12],
                  (Happly (([6:3-6:12], "\\Container"),
@@ -33,7 +32,7 @@
           param_expr = None; param_callconv = None;
           param_user_attributes = [] };
         { AnnotatedAST.param_annotation =
-          ([7:32-7:48], Some \KeyedContainer<int, ?string>);
+          ([7:32-7:48], \KeyedContainer<int, ?string>);
           param_hint =
           (Some ([7:3-7:17],
                  (Happly (([7:3-7:17], "\\KeyedContainer"),
@@ -45,12 +44,11 @@
           param_pos = [7:32-7:48]; param_name = "$keyed_container";
           param_expr = None; param_callconv = None;
           param_user_attributes = [] };
-        { AnnotatedAST.param_annotation = ([8:3-8:11], Some _);
-          param_hint = None; param_is_reference = false;
-          param_is_variadic = false; param_pos = [8:3-8:11];
-          param_name = "$untyped"; param_expr = None; param_callconv = None;
-          param_user_attributes = [] };
-        { AnnotatedAST.param_annotation = ([9:8-9:10], Some bool);
+        { AnnotatedAST.param_annotation = ([8:3-8:11], _); param_hint = None;
+          param_is_reference = false; param_is_variadic = false;
+          param_pos = [8:3-8:11]; param_name = "$untyped"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] };
+        { AnnotatedAST.param_annotation = ([9:8-9:10], bool);
           param_hint = (Some ([9:3-9:7], (Hprim Tbool)));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [9:8-9:10]; param_name = "$b"; param_expr = None;
@@ -60,80 +58,80 @@
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Expr
-               (([11:3-11:51], Some (\Container<?string> | \KeyedContainer<int, ?string>)),
+               (([11:3-11:51], (\Container<?string> | \KeyedContainer<int, ?string>)),
                 (AnnotatedAST.Binop ((Eq None),
-                   (([11:3-11:14], Some (\Container<?string> | \KeyedContainer<int, ?string>)),
+                   (([11:3-11:14], (\Container<?string> | \KeyedContainer<int, ?string>)),
                     (AnnotatedAST.Lvar ([11:3-11:14], $unresolved))),
-                   (([11:17-11:51], Some (\Container<?string> | \KeyedContainer<int, ?string>)),
+                   (([11:17-11:51], (\Container<?string> | \KeyedContainer<int, ?string>)),
                     (AnnotatedAST.Eif (
-                       (([11:17-11:19], Some bool),
+                       (([11:17-11:19], bool),
                         (AnnotatedAST.Lvar ([11:17-11:19], $b))),
-                       (Some (([11:22-11:32], Some \Container<?string>),
+                       (Some (([11:22-11:32], \Container<?string>),
                               (AnnotatedAST.Lvar ([11:22-11:32], $container)))),
-                       (([11:35-11:51], Some \KeyedContainer<int, ?string>),
+                       (([11:35-11:51], \KeyedContainer<int, ?string>),
                         (AnnotatedAST.Lvar ([11:35-11:51], $keyed_container)))
                        )))
                    ))));
              (AnnotatedAST.Expr
-                (([13:3-13:31], Some array),
+                (([13:3-13:31], array),
                  (AnnotatedAST.Call (Cnormal,
-                    (([13:3-13:15], Some (function(\Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): array)),
+                    (([13:3-13:15], (function(\Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): array)),
                      (AnnotatedAST.Id ([13:3-13:15], "\\array_filter"))),
                     [],
-                    [(([13:16-13:30], Some array),
+                    [(([13:16-13:30], array),
                       (AnnotatedAST.Lvar ([13:16-13:30], $untyped_array)))],
                     []))));
              (AnnotatedAST.Expr
-                (([14:3-14:30], Some array<string>),
+                (([14:3-14:30], array<string>),
                  (AnnotatedAST.Call (Cnormal,
-                    (([14:3-14:15], Some (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<string>)),
+                    (([14:3-14:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<string>)),
                      (AnnotatedAST.Id ([14:3-14:15], "\\array_filter"))),
                     [],
-                    [(([14:16-14:29], Some array<?string>),
+                    [(([14:16-14:29], array<?string>),
                       (AnnotatedAST.Lvar ([14:16-14:29], $vector_array)))],
                     []))));
              (AnnotatedAST.Expr
-                (([15:3-15:27], Some array<arraykey, string>),
+                (([15:3-15:27], array<arraykey, string>),
                  (AnnotatedAST.Call (Cnormal,
-                    (([15:3-15:15], Some (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<arraykey, string>)),
+                    (([15:3-15:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<arraykey, string>)),
                      (AnnotatedAST.Id ([15:3-15:15], "\\array_filter"))),
                     [],
-                    [(([15:16-15:26], Some \Container<?string>),
+                    [(([15:16-15:26], \Container<?string>),
                       (AnnotatedAST.Lvar ([15:16-15:26], $container)))],
                     []))));
              (AnnotatedAST.Expr
-                (([16:3-16:33], Some array<int, string>),
+                (([16:3-16:33], array<int, string>),
                  (AnnotatedAST.Call (Cnormal,
-                    (([16:3-16:15], Some (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<int, string>)),
+                    (([16:3-16:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<int, string>)),
                      (AnnotatedAST.Id ([16:3-16:15], "\\array_filter"))),
                     [],
-                    [(([16:16-16:32], Some \KeyedContainer<int, ?string>),
+                    [(([16:16-16:32], \KeyedContainer<int, ?string>),
                       (AnnotatedAST.Lvar ([16:16-16:32], $keyed_container)))],
                     []))));
              (AnnotatedAST.Expr
-                (([17:3-17:25], Some _),
+                (([17:3-17:25], _),
                  (AnnotatedAST.Call (Cnormal,
-                    (([17:3-17:15], Some (function(\Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): _)),
+                    (([17:3-17:15], (function(\Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): _)),
                      (AnnotatedAST.Id ([17:3-17:15], "\\array_filter"))),
                     [],
-                    [(([17:16-17:24], Some _),
+                    [(([17:16-17:24], _),
                       (AnnotatedAST.Lvar ([17:16-17:24], $untyped)))],
                     []))));
              (AnnotatedAST.Expr
-                (([18:3-18:28], Some (array<arraykey, string> | array<int, string>)),
+                (([18:3-18:28], (array<arraykey, string> | array<int, string>)),
                  (AnnotatedAST.Call (Cnormal,
-                    (([18:3-18:15], Some (function(\Container<?string> $input, ?(function(?string): bool) $callback): (array<arraykey, string> | array<int, string>))),
+                    (([18:3-18:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): (array<arraykey, string> | array<int, string>))),
                      (AnnotatedAST.Id ([18:3-18:15], "\\array_filter"))),
                     [],
-                    [(([18:16-18:27], Some (\Container<?string> | \KeyedContainer<int, ?string>)),
+                    [(([18:16-18:27], (\Container<?string> | \KeyedContainer<int, ?string>)),
                       (AnnotatedAST.Lvar ([18:16-18:27], $unresolved)))],
                     []))));
              (AnnotatedAST.Expr
-                (([20:3-20:9], Some (function(?string $x): bool)),
+                (([20:3-20:9], (function(?string $x): bool)),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([20:3-20:5], Some (function(?string $x): bool)),
+                    (([20:3-20:5], (function(?string $x): bool)),
                      (AnnotatedAST.Lvar ([20:3-20:5], $f))),
-                    (([20:8-20:9], Some (function(?string $x): bool)),
+                    (([20:8-20:9], (function(?string $x): bool)),
                      (AnnotatedAST.Efun (
                         { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                           f_ret = (Some ([20:22-20:26], (Hprim Tbool)));
@@ -142,7 +140,7 @@
                           f_variadic = AnnotatedAST.FVnonVariadic;
                           f_params =
                           [{ AnnotatedAST.param_annotation =
-                             ([20:17-20:19], Some ?string);
+                             ([20:17-20:19], ?string);
                              param_hint =
                              (Some ([20:9-20:16],
                                     (Hoption ([20:10-20:16], (Hprim Tstring)))));
@@ -156,7 +154,7 @@
                           (AnnotatedAST.NamedBody
                              { AnnotatedAST.fnb_nast =
                                [(AnnotatedAST.Return ([20:31-20:35],
-                                   (Some (([20:31-20:35], Some bool),
+                                   (Some (([20:31-20:35], bool),
                                           AnnotatedAST.True))
                                    ))
                                  ];
@@ -166,74 +164,74 @@
                         [])))
                     ))));
              (AnnotatedAST.Expr
-                (([22:3-22:35], Some array),
+                (([22:3-22:35], array),
                  (AnnotatedAST.Call (Cnormal,
-                    (([22:3-22:15], Some (function(\Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): array)),
+                    (([22:3-22:15], (function(\Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): array)),
                      (AnnotatedAST.Id ([22:3-22:15], "\\array_filter"))),
                     [],
-                    [(([22:16-22:30], Some array),
+                    [(([22:16-22:30], array),
                       (AnnotatedAST.Lvar ([22:16-22:30], $untyped_array)));
-                      (([22:32-22:34], Some (function(?string $x): bool)),
+                      (([22:32-22:34], (function(?string $x): bool)),
                        (AnnotatedAST.Lvar ([22:32-22:34], $f)))
                       ],
                     []))));
              (AnnotatedAST.Expr
-                (([23:3-23:34], Some array<?string>),
+                (([23:3-23:34], array<?string>),
                  (AnnotatedAST.Call (Cnormal,
-                    (([23:3-23:15], Some (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<?string>)),
+                    (([23:3-23:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<?string>)),
                      (AnnotatedAST.Id ([23:3-23:15], "\\array_filter"))),
                     [],
-                    [(([23:16-23:29], Some array<?string>),
+                    [(([23:16-23:29], array<?string>),
                       (AnnotatedAST.Lvar ([23:16-23:29], $vector_array)));
-                      (([23:31-23:33], Some (function(?string $x): bool)),
+                      (([23:31-23:33], (function(?string $x): bool)),
                        (AnnotatedAST.Lvar ([23:31-23:33], $f)))
                       ],
                     []))));
              (AnnotatedAST.Expr
-                (([24:3-24:31], Some array<arraykey, ?string>),
+                (([24:3-24:31], array<arraykey, ?string>),
                  (AnnotatedAST.Call (Cnormal,
-                    (([24:3-24:15], Some (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<arraykey, ?string>)),
+                    (([24:3-24:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<arraykey, ?string>)),
                      (AnnotatedAST.Id ([24:3-24:15], "\\array_filter"))),
                     [],
-                    [(([24:16-24:26], Some \Container<?string>),
+                    [(([24:16-24:26], \Container<?string>),
                       (AnnotatedAST.Lvar ([24:16-24:26], $container)));
-                      (([24:28-24:30], Some (function(?string $x): bool)),
+                      (([24:28-24:30], (function(?string $x): bool)),
                        (AnnotatedAST.Lvar ([24:28-24:30], $f)))
                       ],
                     []))));
              (AnnotatedAST.Expr
-                (([25:3-25:37], Some array<int, ?string>),
+                (([25:3-25:37], array<int, ?string>),
                  (AnnotatedAST.Call (Cnormal,
-                    (([25:3-25:15], Some (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<int, ?string>)),
+                    (([25:3-25:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<int, ?string>)),
                      (AnnotatedAST.Id ([25:3-25:15], "\\array_filter"))),
                     [],
-                    [(([25:16-25:32], Some \KeyedContainer<int, ?string>),
+                    [(([25:16-25:32], \KeyedContainer<int, ?string>),
                       (AnnotatedAST.Lvar ([25:16-25:32], $keyed_container)));
-                      (([25:34-25:36], Some (function(?string $x): bool)),
+                      (([25:34-25:36], (function(?string $x): bool)),
                        (AnnotatedAST.Lvar ([25:34-25:36], $f)))
                       ],
                     []))));
              (AnnotatedAST.Expr
-                (([26:3-26:29], Some _),
+                (([26:3-26:29], _),
                  (AnnotatedAST.Call (Cnormal,
-                    (([26:3-26:15], Some (function(\Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): _)),
+                    (([26:3-26:15], (function(\Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): _)),
                      (AnnotatedAST.Id ([26:3-26:15], "\\array_filter"))),
                     [],
-                    [(([26:16-26:24], Some _),
+                    [(([26:16-26:24], _),
                       (AnnotatedAST.Lvar ([26:16-26:24], $untyped)));
-                      (([26:26-26:28], Some (function(?string $x): bool)),
+                      (([26:26-26:28], (function(?string $x): bool)),
                        (AnnotatedAST.Lvar ([26:26-26:28], $f)))
                       ],
                     []))));
              (AnnotatedAST.Expr
-                (([27:3-27:32], Some (array<arraykey, ?string> | array<int, ?string>)),
+                (([27:3-27:32], (array<arraykey, ?string> | array<int, ?string>)),
                  (AnnotatedAST.Call (Cnormal,
-                    (([27:3-27:15], Some (function(\Container<?string> $input, ?(function(?string): bool) $callback): (array<arraykey, ?string> | array<int, ?string>))),
+                    (([27:3-27:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): (array<arraykey, ?string> | array<int, ?string>))),
                      (AnnotatedAST.Id ([27:3-27:15], "\\array_filter"))),
                     [],
-                    [(([27:16-27:27], Some (\Container<?string> | \KeyedContainer<int, ?string>)),
+                    [(([27:16-27:27], (\Container<?string> | \KeyedContainer<int, ?string>)),
                       (AnnotatedAST.Lvar ([27:16-27:27], $unresolved)));
-                      (([27:29-27:31], Some (function(?string $x): bool)),
+                      (([27:29-27:31], (function(?string $x): bool)),
                        (AnnotatedAST.Lvar ([27:29-27:31], $f)))
                       ],
                     []))))

@@ -8,23 +8,23 @@
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Using (false,
-               (([8:3-8:47], Some (\Handle, \Handle)),
+               (([8:3-8:47], (\Handle, \Handle)),
                 (AnnotatedAST.Expr_list
-                   [(([8:10-8:27], Some \Handle),
+                   [(([8:10-8:27], \Handle),
                      (AnnotatedAST.Binop ((Eq None),
-                        (([8:10-8:12], Some \Handle),
+                        (([8:10-8:12], \Handle),
                          (AnnotatedAST.Lvar ([8:10-8:12], $x))),
-                        (([8:15-8:27], Some \Handle),
+                        (([8:15-8:27], \Handle),
                          (AnnotatedAST.New (
                             (\Handle,
                              (AnnotatedAST.CI (([8:19-8:25], "\\Handle"), []))),
                             [], [])))
                         )));
-                     (([8:29-8:46], Some \Handle),
+                     (([8:29-8:46], \Handle),
                       (AnnotatedAST.Binop ((Eq None),
-                         (([8:29-8:31], Some \Handle),
+                         (([8:29-8:31], \Handle),
                           (AnnotatedAST.Lvar ([8:29-8:31], $y))),
-                         (([8:34-8:46], Some \Handle),
+                         (([8:34-8:46], \Handle),
                           (AnnotatedAST.New (
                              (\Handle,
                               (AnnotatedAST.CI
@@ -33,13 +33,13 @@
                          )))
                      ])),
                [(AnnotatedAST.Using (false,
-                   (([9:5-9:30], Some (\Handle)),
+                   (([9:5-9:30], (\Handle)),
                     (AnnotatedAST.Expr_list
-                       [(([9:12-9:29], Some \Handle),
+                       [(([9:12-9:29], \Handle),
                          (AnnotatedAST.Binop ((Eq None),
-                            (([9:12-9:14], Some \Handle),
+                            (([9:12-9:14], \Handle),
                              (AnnotatedAST.Lvar ([9:12-9:14], $z))),
-                            (([9:17-9:29], Some \Handle),
+                            (([9:17-9:29], \Handle),
                              (AnnotatedAST.New (
                                 (\Handle,
                                  (AnnotatedAST.CI

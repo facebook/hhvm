@@ -24,9 +24,9 @@ class ['self] visitor = object (self : 'self)
 
   method! on_expr env (((pos, ty), expr_) as expr) =
     let acc =
-      match expr_, ty with
-      | Tast.Lvar (_, id), Some ty
-      | Tast.Dollardollar (_, id), Some ty ->
+      match expr_ with
+      | Tast.Lvar (_, id)
+      | Tast.Dollardollar (_, id) ->
         Result_set.singleton {
           pos = Pos.to_relative_string pos;
           type_ = Typing_print.full_strip_ns env ty;
@@ -39,14 +39,11 @@ class ['self] visitor = object (self : 'self)
   method! on_fun_param env param =
     let acc =
       let (pos, ty) = param.Tast.param_annotation in
-      match ty with
-      | Some ty ->
-        Result_set.singleton {
-          pos = Pos.to_relative_string pos;
-          type_ = Typing_print.full_strip_ns env ty;
-          ident_ = Local_id.to_int (Local_id.get param.Tast.param_name);
-        }
-      | None -> self#zero
+      Result_set.singleton {
+        pos = Pos.to_relative_string pos;
+        type_ = Typing_print.full_strip_ns env ty;
+        ident_ = Local_id.to_int (Local_id.get param.Tast.param_name);
+      }
     in
     self#plus acc @@ super#on_fun_param env param
 end

@@ -8,24 +8,24 @@
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Expr
-               (([13:3-13:13], Some array<string, _>),
+               (([13:3-13:13], array<string, _>),
                 (AnnotatedAST.Binop ((Eq None),
-                   (([13:3-13:5], Some array<string, _>),
+                   (([13:3-13:5], array<string, _>),
                     (AnnotatedAST.Lvar ([13:3-13:5], $x))),
-                   (([13:8-13:13], Some array<string, _>),
+                   (([13:8-13:13], array<string, _>),
                     (AnnotatedAST.Array
                        [(AnnotatedAST.AFkvalue (
-                           (([13:14-13:17], Some string),
+                           (([13:14-13:17], string),
                             (AnnotatedAST.String ([13:14-13:17], "k"))),
-                           (([13:21-13:22], Some int),
+                           (([13:21-13:22], int),
                             (AnnotatedAST.Int ([13:21-13:22], "0")))
                            ));
                          (AnnotatedAST.AFkvalue (
-                            (([13:24-13:28], Some string),
+                            (([13:24-13:28], string),
                              (AnnotatedAST.String ([13:24-13:28], "k2"))),
-                            (([13:32-13:49], Some _),
+                            (([13:32-13:49], _),
                              (AnnotatedAST.Call (Cnormal,
-                                (([13:32-13:47], Some _),
+                                (([13:32-13:47], _),
                                  (AnnotatedAST.Id
                                     ([13:32-13:47], "\\my_php_function"))),
                                 [], [], [])))
@@ -33,19 +33,19 @@
                          ]))
                    ))));
              (AnnotatedAST.Expr
-                (([14:3-14:13], Some array<_>),
+                (([14:3-14:13], array<_>),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([14:3-14:5], Some array<_>),
+                    (([14:3-14:5], array<_>),
                      (AnnotatedAST.Lvar ([14:3-14:5], $y))),
-                    (([14:8-14:13], Some array<_>),
+                    (([14:8-14:13], array<_>),
                      (AnnotatedAST.Array
                         [(AnnotatedAST.AFvalue
-                            (([14:14-14:15], Some int),
+                            (([14:14-14:15], int),
                              (AnnotatedAST.Int ([14:14-14:15], "0"))));
                           (AnnotatedAST.AFvalue
-                             (([14:17-14:34], Some _),
+                             (([14:17-14:34], _),
                               (AnnotatedAST.Call (Cnormal,
-                                 (([14:17-14:32], Some _),
+                                 (([14:17-14:32], _),
                                   (AnnotatedAST.Id
                                      ([14:17-14:32], "\\my_php_function"))),
                                  [], [], []))))

@@ -30,8 +30,8 @@ let rec expr_returns_owned_mutable
  | T.Call (_, (_, T.Id id), _, _, _)
  | T.Call (_, (_, T.Fun_id id), _, _, _) ->
    fun_returns_mutable env id
- | T.Call (_, ((_, (Some (_, Tfun fty))), T.Obj_get _), _, _, _)
- | T.Call (_, ((_, (Some (_, Tfun fty))), T.Class_const _), _, _, _)->
+ | T.Call (_, ((_, (_, Tfun fty)), T.Obj_get _), _, _, _)
+ | T.Call (_, ((_, (_, Tfun fty)), T.Class_const _), _, _, _)->
    fty.ft_returns_mutable
  (* conditional operator returns owned mutable if both consequence and alternative
     return owned mutable *)
@@ -194,7 +194,7 @@ let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
     | None -> ()
     end
   (* $x->method() where method is mutable *)
-  | T.Call (_, ((pos, (Some (r, Tfun fty))), T.Obj_get (expr, _, _)), _, el, _) ->
+  | T.Call (_, ((pos, (r, Tfun fty)), T.Obj_get (expr, _, _)), _, el, _) ->
     (if fty.ft_mutable && not (expr_is_mutable env expr) then
       Env.error_if_reactive_context env @@ begin fun () ->
         let fpos = Reason.to_pos r in
@@ -220,9 +220,9 @@ let rec is_byval_collection_type env ty =
 
 let rec is_byval_collection_value env v =
   match v with
-  | (_, Some ty), T.Lvar _ ->
+  | (_, ty), T.Lvar _ ->
     is_byval_collection_type env ty
-  | (_, Some ty), T.Array_get (e, _) ->
+  | (_, ty), T.Array_get (e, _) ->
     is_byval_collection_type env ty &&
     is_byval_collection_value env e
   | _ -> false

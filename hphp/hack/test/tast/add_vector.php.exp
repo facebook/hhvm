@@ -4,8 +4,7 @@
       f_name = ([32:10-32:14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_annotation =
-         ([32:32-32:34], Some \MyPhonyVector<\X>);
+      [{ AnnotatedAST.param_annotation = ([32:32-32:34], \MyPhonyVector<\X>);
          param_hint =
          (Some ([32:15-32:28],
                 (Happly (([32:15-32:28], "\\MyPhonyVector"),
@@ -18,11 +17,11 @@
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Expr
-               (([33:3-33:27], Some \MyPhonyVector),
+               (([33:3-33:27], \MyPhonyVector),
                 (AnnotatedAST.Binop ((Eq None),
-                   (([33:3-33:5], Some \MyPhonyVector),
+                   (([33:3-33:5], \MyPhonyVector),
                     (AnnotatedAST.Lvar ([33:3-33:5], $x))),
-                   (([33:8-33:27], Some \MyPhonyVector),
+                   (([33:8-33:27], \MyPhonyVector),
                     (AnnotatedAST.New (
                        (\MyPhonyVector<[unresolved]>,
                         (AnnotatedAST.CI
@@ -30,46 +29,46 @@
                        [], [])))
                    ))));
              (AnnotatedAST.Expr
-                (([34:3-34:19], Some void),
+                (([34:3-34:19], void),
                  (AnnotatedAST.Call (Cnormal,
-                    (([34:3-34:10], Some (function(\X $x): void)),
+                    (([34:3-34:10], (function(\X $x): void)),
                      (AnnotatedAST.Obj_get (
-                        (([34:3-34:5], Some \MyPhonyVector),
+                        (([34:3-34:5], \MyPhonyVector),
                          (AnnotatedAST.Lvar ([34:3-34:5], $x))),
-                        (([34:7-34:10], Some (function(\X $x): void)),
+                        (([34:7-34:10], (function(\X $x): void)),
                          (AnnotatedAST.Id ([34:7-34:10], "add"))),
                         OG_nullthrows))),
                     [],
-                    [(([34:11-34:18], Some \B),
+                    [(([34:11-34:18], \B),
                       (AnnotatedAST.New (
                          (\B, (AnnotatedAST.CI (([34:15-34:16], "\\B"), []))),
                          [], [])))
                       ],
                     []))));
              (AnnotatedAST.Expr
-                (([35:3-35:19], Some void),
+                (([35:3-35:19], void),
                  (AnnotatedAST.Call (Cnormal,
-                    (([35:3-35:10], Some (function(\X $x): void)),
+                    (([35:3-35:10], (function(\X $x): void)),
                      (AnnotatedAST.Obj_get (
-                        (([35:3-35:5], Some \MyPhonyVector),
+                        (([35:3-35:5], \MyPhonyVector),
                          (AnnotatedAST.Lvar ([35:3-35:5], $x))),
-                        (([35:7-35:10], Some (function(\X $x): void)),
+                        (([35:7-35:10], (function(\X $x): void)),
                          (AnnotatedAST.Id ([35:7-35:10], "add"))),
                         OG_nullthrows))),
                     [],
-                    [(([35:11-35:18], Some \A),
+                    [(([35:11-35:18], \A),
                       (AnnotatedAST.New (
                          (\A, (AnnotatedAST.CI (([35:15-35:16], "\\A"), []))),
                          [], [])))
                       ],
                     []))));
              (AnnotatedAST.Expr
-                (([36:3-36:11], Some void),
+                (([36:3-36:11], void),
                  (AnnotatedAST.Call (Cnormal,
-                    (([36:3-36:7], Some (function(\MyPhonyVector<\X> $v): void)),
+                    (([36:3-36:7], (function(\MyPhonyVector<\X> $v): void)),
                      (AnnotatedAST.Id ([36:3-36:7], "\\test"))),
                     [],
-                    [(([36:8-36:10], Some \MyPhonyVector),
+                    [(([36:8-36:10], \MyPhonyVector),
                       (AnnotatedAST.Lvar ([36:8-36:10], $x)))],
                     []))))
              ];
@@ -103,16 +102,15 @@
                (AnnotatedAST.NamedBody
                   { AnnotatedAST.fnb_nast =
                     [(AnnotatedAST.Expr
-                        (([16:5-16:25], Some \Vector<T>),
+                        (([16:5-16:25], \Vector<T>),
                          (AnnotatedAST.Binop ((Eq None),
-                            (([16:5-16:13], Some \Vector<T>),
+                            (([16:5-16:13], \Vector<T>),
                              (AnnotatedAST.Obj_get (
-                                (([16:5-16:10], Some <static>),
-                                 AnnotatedAST.This),
-                                (([16:12-16:13], Some \Vector<T>),
+                                (([16:5-16:10], <static>), AnnotatedAST.This),
+                                (([16:12-16:13], \Vector<T>),
                                  (AnnotatedAST.Id ([16:12-16:13], "x"))),
                                 OG_nullthrows))),
-                            (([16:16-16:25], Some \Vector<T>),
+                            (([16:16-16:25], \Vector<T>),
                              (AnnotatedAST.ValCollection (<vc_kind>, [])))
                             ))))
                       ];
@@ -128,7 +126,7 @@
           m_name = ([19:19-19:22], "add"); m_tparams = [];
           m_where_constraints = []; m_variadic = AnnotatedAST.FVnonVariadic;
           m_params =
-          [{ AnnotatedAST.param_annotation = ([19:25-19:27], Some T);
+          [{ AnnotatedAST.param_annotation = ([19:25-19:27], T);
              param_hint = (Some ([19:23-19:24], (Habstr "T")));
              param_is_reference = false; param_is_variadic = false;
              param_pos = [19:25-19:27]; param_name = "$x"; param_expr = None;
@@ -138,19 +136,18 @@
           (AnnotatedAST.NamedBody
              { AnnotatedAST.fnb_nast =
                [(AnnotatedAST.Expr
-                   (([20:5-20:20], Some T),
+                   (([20:5-20:20], T),
                     (AnnotatedAST.Binop ((Eq None),
-                       (([20:5-20:15], Some T),
+                       (([20:5-20:15], T),
                         (AnnotatedAST.Array_get (
-                           (([20:5-20:13], Some \Vector<T>),
+                           (([20:5-20:13], \Vector<T>),
                             (AnnotatedAST.Obj_get (
-                               (([20:5-20:10], Some <static>),
-                                AnnotatedAST.This),
-                               (([20:12-20:13], Some \Vector<T>),
+                               (([20:5-20:10], <static>), AnnotatedAST.This),
+                               (([20:12-20:13], \Vector<T>),
                                 (AnnotatedAST.Id ([20:12-20:13], "x"))),
                                OG_nullthrows))),
                            None))),
-                       (([20:18-20:20], Some T),
+                       (([20:18-20:20], T),
                         (AnnotatedAST.Lvar ([20:18-20:20], $x)))
                        ))))
                  ];
@@ -163,7 +160,7 @@
            m_name = ([23:19-23:22], "get"); m_tparams = [];
            m_where_constraints = []; m_variadic = AnnotatedAST.FVnonVariadic;
            m_params =
-           [{ AnnotatedAST.param_annotation = ([23:27-23:29], Some int);
+           [{ AnnotatedAST.param_annotation = ([23:27-23:29], int);
               param_hint = (Some ([23:23-23:26], (Hprim Tint)));
               param_is_reference = false; param_is_variadic = false;
               param_pos = [23:27-23:29]; param_name = "$x";
@@ -174,16 +171,16 @@
            (AnnotatedAST.NamedBody
               { AnnotatedAST.fnb_nast =
                 [(AnnotatedAST.Return ([24:5-24:24],
-                    (Some (([24:12-24:23], Some T),
+                    (Some (([24:12-24:23], T),
                            (AnnotatedAST.Array_get (
-                              (([24:12-24:20], Some \Vector<T>),
+                              (([24:12-24:20], \Vector<T>),
                                (AnnotatedAST.Obj_get (
-                                  (([24:12-24:17], Some <static>),
+                                  (([24:12-24:17], <static>),
                                    AnnotatedAST.This),
-                                  (([24:19-24:20], Some \Vector<T>),
+                                  (([24:19-24:20], \Vector<T>),
                                    (AnnotatedAST.Id ([24:19-24:20], "x"))),
                                   OG_nullthrows))),
-                              (Some (([24:21-24:22], Some int),
+                              (Some (([24:21-24:22], int),
                                      (AnnotatedAST.Int ([24:21-24:22], "0"))))
                               ))))
                     ))

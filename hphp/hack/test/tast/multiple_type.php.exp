@@ -4,19 +4,19 @@
       f_name = ([16:10-16:14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_annotation = ([16:18-16:21], Some \C1);
+      [{ AnnotatedAST.param_annotation = ([16:18-16:21], \C1);
          param_hint =
          (Some ([16:15-16:17], (Happly (([16:15-16:17], "\\C1"), []))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [16:18-16:21]; param_name = "$c1"; param_expr = None;
          param_callconv = None; param_user_attributes = [] };
-        { AnnotatedAST.param_annotation = ([16:26-16:29], Some \C2);
+        { AnnotatedAST.param_annotation = ([16:26-16:29], \C2);
           param_hint =
           (Some ([16:23-16:25], (Happly (([16:23-16:25], "\\C2"), []))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [16:26-16:29]; param_name = "$c2"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };
-        { AnnotatedAST.param_annotation = ([16:36-16:41], Some bool);
+        { AnnotatedAST.param_annotation = ([16:36-16:41], bool);
           param_hint = (Some ([16:31-16:35], (Hprim Tbool)));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [16:36-16:41]; param_name = "$cond"; param_expr = None;
@@ -26,28 +26,28 @@
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Expr
-               (([17:3-17:25], Some (\C1 | \C2)),
+               (([17:3-17:25], (\C1 | \C2)),
                 (AnnotatedAST.Binop ((Eq None),
-                   (([17:3-17:5], Some (\C1 | \C2)),
+                   (([17:3-17:5], (\C1 | \C2)),
                     (AnnotatedAST.Lvar ([17:3-17:5], $x))),
-                   (([17:8-17:25], Some (\C1 | \C2)),
+                   (([17:8-17:25], (\C1 | \C2)),
                     (AnnotatedAST.Eif (
-                       (([17:8-17:13], Some bool),
+                       (([17:8-17:13], bool),
                         (AnnotatedAST.Lvar ([17:8-17:13], $cond))),
-                       (Some (([17:16-17:19], Some \C1),
+                       (Some (([17:16-17:19], \C1),
                               (AnnotatedAST.Lvar ([17:16-17:19], $c1)))),
-                       (([17:22-17:25], Some \C2),
+                       (([17:22-17:25], \C2),
                         (AnnotatedAST.Lvar ([17:22-17:25], $c2)))
                        )))
                    ))));
              (AnnotatedAST.Return ([18:3-18:20],
-                (Some (([18:10-18:19], Some (int | string)),
+                (Some (([18:10-18:19], (int | string)),
                        (AnnotatedAST.Call (Cnormal,
-                          (([18:10-18:17], Some ((function(): string) | (function(): int))),
+                          (([18:10-18:17], ((function(): string) | (function(): int))),
                            (AnnotatedAST.Obj_get (
-                              (([18:10-18:12], Some (\C1 | \C2)),
+                              (([18:10-18:12], (\C1 | \C2)),
                                (AnnotatedAST.Lvar ([18:10-18:12], $x))),
-                              (([18:14-18:17], Some ((function(): string) | (function(): int))),
+                              (([18:14-18:17], ((function(): string) | (function(): int))),
                                (AnnotatedAST.Id ([18:14-18:17], "foo"))),
                               OG_nullthrows))),
                           [], [], []))))
@@ -73,7 +73,7 @@
           (AnnotatedAST.NamedBody
              { AnnotatedAST.fnb_nast =
                [(AnnotatedAST.Return ([6:5-6:14],
-                   (Some (([6:12-6:13], Some int),
+                   (Some (([6:12-6:13], int),
                           (AnnotatedAST.Int ([6:12-6:13], "5"))))
                    ))
                  ];
@@ -100,7 +100,7 @@
           (AnnotatedAST.NamedBody
              { AnnotatedAST.fnb_nast =
                [(AnnotatedAST.Return ([12:5-12:16],
-                   (Some (([12:12-12:15], Some string),
+                   (Some (([12:12-12:15], string),
                           (AnnotatedAST.String ([12:12-12:15], "s"))))
                    ))
                  ];

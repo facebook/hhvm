@@ -588,9 +588,7 @@ and check_using_clause env has_await ((pos, content) as using_clause) =
   | Expr_list using_clauses ->
     let env, pairs = List.map_env env using_clauses (check_using_expr has_await) in
     let typed_using_clauses, vars_list = List.unzip pairs in
-    let ty_ =
-      try Ttuple (List.map typed_using_clauses (fun ((_,ty),_) -> unsafe_opt ty)) with
-      | _ -> TUtils.tany env in
+    let ty_ = Ttuple (List.map typed_using_clauses T.get_type) in
     let ty = (Reason.Rnone, ty_) in
     env, T.make_typed_expr pos ty (T.Expr_list typed_using_clauses),
       List.concat vars_list
@@ -2290,7 +2288,7 @@ and expr_
       let env, te, ty = expr env e in
       let rec check_types env = function
         | _, T.Lvar _ -> ()
-        | _, T.Array_get (((_, Some ty1), _) as te1, Some _) ->
+        | _, T.Array_get (((_, ty1), _) as te1, Some _) ->
           let rec iter = function
             | _, Tany -> true
             | _, Tprim Tstring -> true
@@ -2307,8 +2305,6 @@ and expr_
             let msgl = Reason.to_string ("This is " ^ ty_str) (fst ety1) in
             Errors.inout_argument_bad_type (fst e) msgl
           end
-        | _, T.Array_get (te2, Some _) ->
-          check_types env te2
         (* Other invalid expressions are caught in NastCheck. *)
         | _ -> ()
       in

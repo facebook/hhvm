@@ -8,16 +8,16 @@
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Static_var
-               [(([4:10-4:17], Some int),
+               [(([4:10-4:17], int),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([4:10-4:12], Some int),
+                    (([4:10-4:12], int),
                      (AnnotatedAST.Lvar ([4:10-4:12], $x))),
-                    (([4:15-4:17], Some int),
+                    (([4:15-4:17], int),
                      (AnnotatedAST.Int ([4:15-4:17], "42")))
                     )))
                  ]);
              (AnnotatedAST.Return ([5:3-5:13],
-                (Some (([5:10-5:12], Some int),
+                (Some (([5:10-5:12], int),
                        (AnnotatedAST.Lvar ([5:10-5:12], $x))))
                 ))
              ];
@@ -36,8 +36,7 @@
           cv_type = (Some ([9:11-9:14], (Hprim Tint)));
           cv_id = ([9:15-9:17], "x");
           cv_expr =
-          (Some (([9:20-9:22], Some int),
-                 (AnnotatedAST.Int ([9:20-9:22], "42"))));
+          (Some (([9:20-9:22], int), (AnnotatedAST.Int ([9:20-9:22], "42"))));
           cv_user_attributes = [] }
          ];
        c_constructor = None; c_static_methods = [];
@@ -51,11 +50,10 @@
           (AnnotatedAST.NamedBody
              { AnnotatedAST.fnb_nast =
                [(AnnotatedAST.Return ([11:5-11:21],
-                   (Some (([11:12-11:20], Some int),
+                   (Some (([11:12-11:20], int),
                           (AnnotatedAST.Obj_get (
-                             (([11:12-11:17], Some <static>),
-                              AnnotatedAST.This),
-                             (([11:19-11:20], Some int),
+                             (([11:12-11:17], <static>), AnnotatedAST.This),
+                             (([11:19-11:20], int),
                               (AnnotatedAST.Id ([11:19-11:20], "x"))),
                              OG_nullthrows))))
                    ))

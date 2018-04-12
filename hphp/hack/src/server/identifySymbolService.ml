@@ -182,7 +182,7 @@ class ['self] visitor = object (self : 'self)
       match snd expr with
       | Tast.New ((ty, _), _, _) ->
         typed_constructor env ty pos
-      | Tast.Obj_get (((_, Some ty), _), (_, Tast.Id mid), _) ->
+      | Tast.Obj_get (((_, ty), _), (_, Tast.Id mid), _) ->
         typed_property env ty mid
       | Tast.Class_const ((ty, _), mid) ->
         typed_const env ty mid
@@ -219,7 +219,7 @@ class ['self] visitor = object (self : 'self)
       match snd e with
       | Tast.Id id ->
         process_fun_id id
-      | Tast.Obj_get (((_, Some ty), _) as obj, (_, Tast.Id mid), _) ->
+      | Tast.Obj_get (((_, ty), _) as obj, (_, Tast.Id mid), _) ->
         self#on_expr env obj + typed_method env ty mid
       | Tast.Class_const ((ty, _) as cid, mid) ->
         self#on_class_id env cid + typed_method env ty mid

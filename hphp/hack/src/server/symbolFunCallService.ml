@@ -74,14 +74,14 @@ class ['self] visitor = object (self : 'self)
   method! on_expr env (((pos, ty), expr_) as expr) =
     let acc =
       match expr_ with
-      | Tast.New _ when Option.is_some ty ->
+      | Tast.New _ ->
         let mid = (pos, SN.Members.__construct) in
-        Typing_utils.get_class_ids env (Utils.unsafe_opt ty)
+        Typing_utils.get_class_ids env ty
         |> List.map ~f:(fun cid -> self#method_call env Constructor cid mid)
         |> List.fold ~init:self#zero ~f:self#plus
       | Tast.Fun_id (pos, name) ->
         self#fun_call env Function name pos
-      | Tast.Method_id (((_, Some ty), _), mid) ->
+      | Tast.Method_id (((_, ty), _), mid) ->
         Typing_utils.get_class_ids env ty
         |> List.map ~f:(fun cid -> self#method_call env Method cid mid)
         |> List.fold ~init:self#zero ~f:self#plus
@@ -109,7 +109,7 @@ class ['self] visitor = object (self : 'self)
       | Tast.Id (pos, name) ->
         self#fun_call env Function name pos
       | Tast.Class_const ((ty, _), mid)
-      | Tast.Obj_get (((_, Some ty), _), (_, Tast.Id mid), _) ->
+      | Tast.Obj_get (((_, ty), _), (_, Tast.Id mid), _) ->
         let target_type =
           if snd mid = SN.Members.__construct then Constructor else Method in
         Typing_utils.get_class_ids env ty

@@ -4,7 +4,7 @@
       f_name = ([3:10-3:22], "\\takes_string"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_annotation = ([3:30-3:32], Some string);
+      [{ AnnotatedAST.param_annotation = ([3:30-3:32], string);
          param_hint = (Some ([3:23-3:29], (Hprim Tstring)));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:30-3:32]; param_name = "$s"; param_expr = None;
@@ -24,12 +24,12 @@
        (AnnotatedAST.NamedBody
           { AnnotatedAST.fnb_nast =
             [(AnnotatedAST.Expr
-                (([6:3-6:24], Some void),
+                (([6:3-6:24], void),
                  (AnnotatedAST.Call (Cnormal,
-                    (([6:3-6:15], Some (function(string $s): void)),
+                    (([6:3-6:15], (function(string $s): void)),
                      (AnnotatedAST.Id ([6:3-6:15], "\\takes_string"))),
                     [],
-                    [(([6:16-6:23], Some string),
+                    [(([6:16-6:23], string),
                       (AnnotatedAST.String ([6:16-6:23], "hello")))],
                     []))))
               ];

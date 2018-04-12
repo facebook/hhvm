@@ -14,13 +14,6 @@
  *)
 type ty = Typing_defs.locl Typing_defs.ty
 
-let pp_ty_option fmt = function
-  | None -> Format.pp_print_string fmt "None"
-  | Some ty ->
-    Format.pp_print_string fmt "(Some ";
-    Pp_type.pp_ty fmt ty;
-    Format.pp_print_string fmt ")"
-
 type saved_env = {
   tcopt : TypecheckerOptions.t;
   tenv : ty IMap.t;
@@ -53,11 +46,9 @@ let pp_saved_env fmt env =
   Format.fprintf fmt " }@]"
 
 (* Typed AST.
- * We re-use the NAST but annotate expressions with position *and*
- * type not just position. The type is optional, the idea being that *if*
- * present then it should be correct according to the typing rules, and if
- * absent it should be cheaply and uniquely derivable from the subexpressions,
- * given particular types for local variables.
+ *
+ * We re-use the NAST, but annotate expressions with position *and* type, not
+ * just position.
  *
  * Going forward, we will need further annotations
  * such as type arguments to generic methods and `new`, annotations on locals
@@ -70,12 +61,12 @@ let pp_saved_env fmt env =
  *)
 module Annotations = struct
   module ExprAnnotation = struct
-    type t = Pos.t * ty option
+    type t = Pos.t * ty
     let pp fmt (pos, ty) =
       Format.fprintf fmt "(@[";
       Pos.pp fmt pos;
       Format.fprintf fmt ",@ ";
-      pp_ty_option fmt ty;
+      Pp_type.pp_ty fmt ty;
       Format.fprintf fmt "@])"
   end
 
@@ -99,7 +90,7 @@ include TypeAndPosAnnotatedAST
  * some abstraction in so that we can change the representation (e.g. put
  * further annotations on the expression) as we see fit.
  *)
-let make_expr_annotation p ty : Annotations.ExprAnnotation.t = (p, Some ty)
+let make_expr_annotation p ty : Annotations.ExprAnnotation.t = (p, ty)
 
 (* Helper function to create a typed and positioned expression.
  * Do not construct this triple directly - at some point we will build
@@ -108,10 +99,8 @@ let make_expr_annotation p ty : Annotations.ExprAnnotation.t = (p, Some ty)
  *)
 let make_typed_expr p ty te : expr = (make_expr_annotation p ty, te)
 
-(* Given types for locals, the type of the expression should be cheaply
- * and uniquely derivable.
- *)
-let make_implicitly_typed_expr p te : expr = ((p, None), te)
-
 (* Get the position of an expression *)
 let get_position (((p, _), _) : expr) = p
+
+(* Get the type of an expression *)
+let get_type (((_, ty), _) : expr) = ty

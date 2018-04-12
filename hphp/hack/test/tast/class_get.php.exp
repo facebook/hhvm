@@ -11,7 +11,7 @@
          cv_type =
          (Some ([13:18-13:22], (Hoption ([13:19-13:22], (Hprim Tint)))));
          cv_id = ([13:23-13:25], "x");
-         cv_expr = (Some (([13:28-13:32], Some ?_), AnnotatedAST.Null));
+         cv_expr = (Some (([13:28-13:32], ?_), AnnotatedAST.Null));
          cv_user_attributes = [] }
         ];
       c_vars = []; c_constructor = None;
@@ -24,19 +24,19 @@
          (AnnotatedAST.NamedBody
             { AnnotatedAST.fnb_nast =
               [(AnnotatedAST.If (
-                  (([16:9-16:17], Some ?int),
+                  (([16:9-16:17], ?int),
                    (AnnotatedAST.Class_get (
                       (\TestClass, AnnotatedAST.CIself),
                       ([16:15-16:17], "$x")))),
                   [(AnnotatedAST.Return ([17:7-17:23],
-                      (Some (([17:14-17:22], Some int),
+                      (Some (([17:14-17:22], int),
                              (AnnotatedAST.Class_get (
                                 (\TestClass, AnnotatedAST.CIself),
                                 ([17:20-17:22], "$x")))))
                       ))
                     ],
                   [(AnnotatedAST.Return ([19:7-19:16],
-                      (Some (([19:14-19:15], Some int),
+                      (Some (([19:14-19:15], int),
                              (AnnotatedAST.Int ([19:14-19:15], "0"))))
                       ))
                     ]

@@ -4,8 +4,7 @@
       f_name = ([3:10-3:19], "\\takes_fun"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_annotation =
-         ([3:42-3:44], Some (function(int): num));
+      [{ AnnotatedAST.param_annotation = ([3:42-3:44], (function(int): num));
          param_hint =
          (Some ([3:20-3:41],
                 (Hfun (false, false, [([3:31-3:34], (Hprim Tint))], [None],
@@ -28,12 +27,12 @@
        (AnnotatedAST.NamedBody
           { AnnotatedAST.fnb_nast =
             [(AnnotatedAST.Expr
-                (([6:3-6:23], Some void),
+                (([6:3-6:23], void),
                  (AnnotatedAST.Call (Cnormal,
-                    (([6:3-6:12], Some (function((function(int): num) $f): void)),
+                    (([6:3-6:12], (function((function(int): num) $f): void)),
                      (AnnotatedAST.Id ([6:3-6:12], "\\takes_fun"))),
                     [],
-                    [(([6:13-6:15], Some (function(int $x): num)),
+                    [(([6:13-6:15], (function(int $x): num)),
                       (AnnotatedAST.Efun (
                          { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                            f_ret = None; f_name = ([Pos.none], ";anonymous");
@@ -41,7 +40,7 @@
                            f_variadic = AnnotatedAST.FVnonVariadic;
                            f_params =
                            [{ AnnotatedAST.param_annotation =
-                              ([6:13-6:15], Some int); param_hint = None;
+                              ([6:13-6:15], int); param_hint = None;
                               param_is_reference = false;
                               param_is_variadic = false;
                               param_pos = [6:13-6:15]; param_name = "$x";
@@ -52,7 +51,7 @@
                            (AnnotatedAST.NamedBody
                               { AnnotatedAST.fnb_nast =
                                 [(AnnotatedAST.Return ([6:20-6:22],
-                                    (Some (([6:20-6:22], Some int),
+                                    (Some (([6:20-6:22], int),
                                            (AnnotatedAST.Lvar
                                               ([6:20-6:22], $x))))
                                     ))

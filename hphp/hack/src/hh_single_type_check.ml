@@ -823,10 +823,7 @@ let handle_mode
       TASTStringMapper.map_program tast
         ~map_env_annotation:(fun () -> ())
         ~map_expr_annotation:begin fun () (pos, ty) ->
-          match ty with
-          | None -> Format.asprintf "(%a, None)" Pos.pp pos
-          | Some ty ->
-            Format.asprintf "(%a, Some %s)" Pos.pp pos (Typing_print.full env ty)
+          Format.asprintf "(%a, %s)" Pos.pp pos (Typing_print.full env ty)
         end
         ~map_class_id_annotation:(fun () -> Typing_print.full env)
     in

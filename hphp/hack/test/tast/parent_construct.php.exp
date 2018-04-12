@@ -12,7 +12,7 @@
               m_where_constraints = [];
               m_variadic = AnnotatedAST.FVnonVariadic;
               m_params =
-              [{ AnnotatedAST.param_annotation = ([4:35-4:37], Some num);
+              [{ AnnotatedAST.param_annotation = ([4:35-4:37], num);
                  param_hint = (Some ([4:31-4:34], (Hprim Tnum)));
                  param_is_reference = false; param_is_variadic = false;
                  param_pos = [4:35-4:37]; param_name = "$x";
@@ -44,7 +44,7 @@
                m_where_constraints = [];
                m_variadic = AnnotatedAST.FVnonVariadic;
                m_params =
-               [{ AnnotatedAST.param_annotation = ([7:35-7:37], Some int);
+               [{ AnnotatedAST.param_annotation = ([7:35-7:37], int);
                   param_hint = (Some ([7:31-7:34], (Hprim Tint)));
                   param_is_reference = false; param_is_variadic = false;
                   param_pos = [7:35-7:37]; param_name = "$x";
@@ -55,14 +55,14 @@
                (AnnotatedAST.NamedBody
                   { AnnotatedAST.fnb_nast =
                     [(AnnotatedAST.Expr
-                        (([8:5-8:28], Some void),
+                        (([8:5-8:28], void),
                          (AnnotatedAST.Call (Cnormal,
-                            (([8:5-8:24], Some (function(num $x): _)),
+                            (([8:5-8:24], (function(num $x): _)),
                              (AnnotatedAST.Class_const (
                                 (\B, AnnotatedAST.CIparent),
                                 ([8:13-8:24], "__construct")))),
                             [],
-                            [(([8:25-8:27], Some int),
+                            [(([8:25-8:27], int),
                               (AnnotatedAST.Lvar ([8:25-8:27], $x)))],
                             []))))
                       ];

@@ -4,13 +4,12 @@
       f_name = ([3:10-3:14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_annotation = ([3:20-3:22], Some bool);
+      [{ AnnotatedAST.param_annotation = ([3:20-3:22], bool);
          param_hint = (Some ([3:15-3:19], (Hprim Tbool)));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:20-3:22]; param_name = "$b"; param_expr = None;
          param_callconv = None; param_user_attributes = [] };
-        { AnnotatedAST.param_annotation =
-          ([3:46-3:48], Some (function(int): int));
+        { AnnotatedAST.param_annotation = ([3:46-3:48], (function(int): int));
           param_hint =
           (Some ([3:24-3:45],
                  (Hfun (false, false, [([3:35-3:38], (Hprim Tint))], 
@@ -23,15 +22,15 @@
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.If (
-               (([4:7-4:9], Some bool), (AnnotatedAST.Lvar ([4:7-4:9], $b))),
+               (([4:7-4:9], bool), (AnnotatedAST.Lvar ([4:7-4:9], $b))), 
                [], [AnnotatedAST.Noop]));
              (AnnotatedAST.Return ([5:3-5:16],
-                (Some (([5:10-5:15], Some int),
+                (Some (([5:10-5:15], int),
                        (AnnotatedAST.Call (Cnormal,
-                          (([5:10-5:12], Some (function(int): int)),
+                          (([5:10-5:12], (function(int): int)),
                            (AnnotatedAST.Lvar ([5:10-5:12], $f))),
                           [],
-                          [(([5:13-5:14], Some int),
+                          [(([5:13-5:14], int),
                             (AnnotatedAST.Int ([5:13-5:14], "1")))],
                           []))))
                 ))

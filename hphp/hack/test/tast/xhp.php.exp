@@ -8,51 +8,51 @@
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Expr
-               (([9:4-9:21], Some \:foo),
+               (([9:4-9:21], \:foo),
                 (AnnotatedAST.Xml (([9:4-9:7], "\\:foo"),
                    [(AnnotatedAST.Xhp_simple (([9:8-9:11], "bar"),
-                       (([9:12-9:18], Some string),
+                       (([9:12-9:18], string),
                         (AnnotatedAST.String ([9:12-9:18], "herp")))
                        ))
                      ],
                    []))));
              (AnnotatedAST.Expr
-                (([10:3-10:17], Some string),
+                (([10:3-10:17], string),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([10:3-10:8], Some string),
+                    (([10:3-10:8], string),
                      (AnnotatedAST.Lvar ([10:3-10:8], $derp))),
-                    (([10:11-10:17], Some string),
+                    (([10:11-10:17], string),
                      (AnnotatedAST.String ([10:11-10:17], "derp")))
                     ))));
              (AnnotatedAST.Expr
-                (([11:4-11:22], Some \:foo),
+                (([11:4-11:22], \:foo),
                  (AnnotatedAST.Xml (([11:4-11:7], "\\:foo"),
                     [(AnnotatedAST.Xhp_simple (([11:8-11:11], "bar"),
-                        (([11:13-11:18], Some string),
+                        (([11:13-11:18], string),
                          (AnnotatedAST.Lvar ([11:13-11:18], $derp)))
                         ))
                       ],
                     []))));
              (AnnotatedAST.Expr
-                (([14:4-18:9], Some \:foo),
+                (([14:4-18:9], \:foo),
                  (AnnotatedAST.Xml (([14:4-14:7], "\\:foo"),
                     [(AnnotatedAST.Xhp_simple (([14:8-14:11], "bar"),
-                        (([14:12-14:18], Some string),
+                        (([14:12-14:18], string),
                          (AnnotatedAST.String ([14:12-14:18], "herp")))
                         ))
                       ],
-                    [(([15:6-17:11], Some \:foo),
+                    [(([15:6-17:11], \:foo),
                       (AnnotatedAST.Xml (([15:6-15:9], "\\:foo"),
                          [(AnnotatedAST.Xhp_simple (([15:10-15:13], "bar"),
-                             (([15:14-15:20], Some string),
+                             (([15:14-15:20], string),
                               (AnnotatedAST.String ([15:14-15:20], "derp")))
                              ))
                            ],
-                         [(([16:8-16:25], Some \:foo),
+                         [(([16:8-16:25], \:foo),
                            (AnnotatedAST.Xml (([16:8-16:11], "\\:foo"),
                               [(AnnotatedAST.Xhp_simple (
                                   ([16:12-16:15], "bar"),
-                                  (([16:16-16:22], Some string),
+                                  (([16:16-16:22], string),
                                    (AnnotatedAST.String
                                       ([16:16-16:22], "herp")))
                                   ))

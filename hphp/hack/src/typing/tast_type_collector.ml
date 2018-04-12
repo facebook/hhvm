@@ -15,9 +15,7 @@ class ['self] type_collector = object (_ : 'self)
   method zero = Pos.AbsolutePosMap.empty
   method plus = Pos.AbsolutePosMap.union ~combine:(fun _ a b -> Some (a @ b))
   method! on_expr_annotation env (p,ty) =
-    match ty with
-    | Some ty -> Pos.AbsolutePosMap.singleton (Pos.to_absolute p) [Typing_print.to_json env ty]
-    | None -> Pos.AbsolutePosMap.empty
+    Pos.AbsolutePosMap.singleton (Pos.to_absolute p) [Typing_print.to_json env ty]
   method! on_class_id env (ty,cid) =
     match cid with
     | Tast.CI ((p,_),_) ->

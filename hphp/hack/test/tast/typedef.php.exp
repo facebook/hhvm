@@ -6,9 +6,9 @@
       [{ AnnotatedAST.ua_name = ([3:15-3:18], "Bar"); ua_params = [] };
         { AnnotatedAST.ua_name = ([3:3-3:6], "Foo");
           ua_params =
-          [(([3:7-3:8], Some int), (AnnotatedAST.Int ([3:7-3:8], "1")));
-            (([3:9-3:10], Some int), (AnnotatedAST.Int ([3:9-3:10], "2")));
-            (([3:11-3:12], Some int), (AnnotatedAST.Int ([3:11-3:12], "3")))]
+          [(([3:7-3:8], int), (AnnotatedAST.Int ([3:7-3:8], "1")));
+            (([3:9-3:10], int), (AnnotatedAST.Int ([3:9-3:10], "2")));
+            (([3:11-3:12], int), (AnnotatedAST.Int ([3:11-3:12], "3")))]
           }
         ];
       t_mode = <opaque>; t_vis = Transparent });

@@ -10,17 +10,16 @@
 open Hh_core
 open Option.Monad_infix
 
-(** Return the type of the smallest typed expression node whose associated span
+(** Return the type of the smallest expression node whose associated span
  * (the Pos.t in its Tast.ExprAnnotation.t) contains the given position.
  * "Smallest" here refers to the size of the node's associated span, in terms of
- * its byte length in the original source file. "Typed" means that the Tast.ty
- * option in the expression's Tast.ExprAnnotation.t is not None.
+ * its byte length in the original source file.
  *
- * If there is no single smallest node (i.e., multiple typed expression nodes
- * have spans of the same length containing the given position, where that
- * length is less than the length of all other spans containing the given
- * position), return the type of the first of these nodes visited in a preorder
- * traversal of the Tast.
+ * If there is no single smallest node (i.e., multiple expression nodes have
+ * spans of the same length containing the given position, where that length is
+ * less than the length of all other spans containing the given position),
+ * return the type of the first of these nodes visited in a preorder traversal
+ * of the Tast.
  *
  * This choice is somewhat arbitrary, and would seem to be unnecessary at first
  * blush (and indeed would be in a concrete syntax tree). In most situations,
@@ -67,7 +66,7 @@ class ['self] base_visitor line char = object (self : 'self)
 
   method! on_expr_annotation env (pos, ty) =
     if Pos.inside pos line char
-    then ty >>| fun ty -> pos, env, ty
+    then Some (pos, env, ty)
     else None
 
   method! on_class_id env cid =
@@ -88,10 +87,10 @@ end
 
 (** Same as `base_visitor`, except:
 
-    If the smallest typed expression containing the given position has a
-    function type and is being invoked in a Call expression, return that
-    function's return type rather than the type of the function (i.e., the type
-    of the expression returned by the Call expression).
+    If the smallest expression containing the given position has a function type
+    and is being invoked in a Call expression, return that function's return
+    type rather than the type of the function (i.e., the type of the expression
+    returned by the Call expression).
 
 *)
 class ['self] function_following_visitor line char = object (self : 'self)
@@ -145,7 +144,7 @@ class ['self] range_visitor startl startc endl endc = object (_ : 'self)
   method merge x _ = x
   method! on_expr_annotation env (pos, ty) =
     if Pos.exactly_matches_range pos startl startc endl endc
-    then ty >>| fun ty -> env, ty
+    then Some (env, ty)
     else None
 end
 

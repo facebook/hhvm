@@ -4,7 +4,7 @@
       f_name = ([8:10-8:14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_annotation = ([8:17-8:19], Some \C);
+      [{ AnnotatedAST.param_annotation = ([8:17-8:19], \C);
          param_hint =
          (Some ([8:15-8:16], (Happly (([8:15-8:16], "\\C"), []))));
          param_is_reference = false; param_is_variadic = false;
@@ -15,95 +15,94 @@
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Expr
-               (([9:3-9:7], Some void),
+               (([9:3-9:7], void),
                 (AnnotatedAST.Call (Cnormal,
-                   (([9:3-9:7], Some _),
-                    (AnnotatedAST.Id ([9:3-9:7], "echo"))),
+                   (([9:3-9:7], _), (AnnotatedAST.Id ([9:3-9:7], "echo"))),
                    [],
-                   [(([9:7-9:14], Some string),
+                   [(([9:7-9:14], string),
                      (AnnotatedAST.String ([9:8-9:13], "foo")))],
                    []))));
              (AnnotatedAST.Expr
-                (([10:3-10:8], Some void),
+                (([10:3-10:8], void),
                  (AnnotatedAST.Call (Cnormal,
-                    (([10:3-10:8], Some _),
+                    (([10:3-10:8], _),
                      (AnnotatedAST.Id ([10:3-10:8], "echo"))),
                     [],
-                    [(([10:8-10:15], Some string),
+                    [(([10:8-10:15], string),
                       (AnnotatedAST.String ([10:9-10:14], "foo")))],
                     []))));
              (AnnotatedAST.Expr
-                (([12:3-12:15], Some void),
+                (([12:3-12:15], void),
                  (AnnotatedAST.Assert
                     (AnnotatedAST.AE_assert
-                       (([12:10-12:14], Some bool), AnnotatedAST.True)))));
+                       (([12:10-12:14], bool), AnnotatedAST.True)))));
              (AnnotatedAST.If (
-                (([13:13-13:17], Some bool),
+                (([13:13-13:17], bool),
                  (AnnotatedAST.Unop (Unot,
-                    (([13:13-13:17], Some bool), AnnotatedAST.True)))),
+                    (([13:13-13:17], bool), AnnotatedAST.True)))),
                 [(AnnotatedAST.Expr
-                    (([13:3-13:25], Some noreturn),
+                    (([13:3-13:25], noreturn),
                      (AnnotatedAST.Call (Cnormal,
-                        (([13:3-13:12], Some (function(\HH\FormatString<\PlainSprintf> $fmt, ...): noreturn)),
+                        (([13:3-13:12], (function(\HH\FormatString<\PlainSprintf> $fmt, ...): noreturn)),
                          (AnnotatedAST.Id
                             ([13:3-13:12], "\\invariant_violation"))),
                         [],
-                        [(([13:19-13:24], Some string),
+                        [(([13:19-13:24], string),
                           (AnnotatedAST.String ([13:19-13:24], "foo")))],
                         []))))
                   ],
                 [AnnotatedAST.Noop]));
              (AnnotatedAST.Expr
-                (([14:3-14:29], Some noreturn),
+                (([14:3-14:29], noreturn),
                  (AnnotatedAST.Call (Cnormal,
-                    (([14:3-14:22], Some (function(\HH\FormatString<\PlainSprintf> $fmt, ...): noreturn)),
+                    (([14:3-14:22], (function(\HH\FormatString<\PlainSprintf> $fmt, ...): noreturn)),
                      (AnnotatedAST.Id ([14:3-14:22], "\\invariant_violation"))),
                     [],
-                    [(([14:23-14:28], Some string),
+                    [(([14:23-14:28], string),
                       (AnnotatedAST.String ([14:23-14:28], "foo")))],
                     []))));
              (AnnotatedAST.Expr
-                (([16:3-16:14], Some (function(\C $c): void)),
+                (([16:3-16:14], (function(\C $c): void)),
                  (AnnotatedAST.Fun_id ([16:7-16:13], "\\test"))));
              (AnnotatedAST.Expr
-                (([17:3-17:36], Some (function(): void)),
+                (([17:3-17:36], (function(): void)),
                  (AnnotatedAST.Smethod_id (([17:14-17:15], "\\C"),
                     ([17:24-17:35], "staticFoo")))));
              (AnnotatedAST.Expr
-                (([18:3-18:31], Some (function(): void)),
+                (([18:3-18:31], (function(): void)),
                  (AnnotatedAST.Method_id (
-                    (([18:13-18:15], Some \C),
+                    (([18:13-18:15], \C),
                      (AnnotatedAST.Lvar ([18:13-18:15], $c))),
                     ([18:17-18:30], "instanceFoo")))));
              (AnnotatedAST.Expr
-                (([19:3-19:39], Some (function(\C): void)),
+                (([19:3-19:39], (function(\C): void)),
                  (AnnotatedAST.Method_caller (([19:15-19:16], "\\C"),
                     ([19:25-19:38], "instanceFoo")))));
              (AnnotatedAST.Expr
-                (([21:3-21:12], Some bool),
+                (([21:3-21:12], bool),
                  (AnnotatedAST.Call (Cnormal,
-                    (([21:3-21:8], Some (function($x): bool)),
+                    (([21:3-21:8], (function($x): bool)),
                      (AnnotatedAST.Id ([21:3-21:8], "\\empty"))),
                     [],
-                    [(([21:9-21:11], Some \C),
+                    [(([21:9-21:11], \C),
                       (AnnotatedAST.Lvar ([21:9-21:11], $c)))],
                     []))));
              (AnnotatedAST.Expr
-                (([22:3-22:12], Some bool),
+                (([22:3-22:12], bool),
                  (AnnotatedAST.Call (Cnormal,
-                    (([22:3-22:8], Some (function($x): bool)),
+                    (([22:3-22:8], (function($x): bool)),
                      (AnnotatedAST.Id ([22:3-22:8], "\\isset"))),
                     [],
-                    [(([22:9-22:11], Some \C),
+                    [(([22:9-22:11], \C),
                       (AnnotatedAST.Lvar ([22:9-22:11], $c)))],
                     []))));
              (AnnotatedAST.Expr
-                (([23:3-23:12], Some void),
+                (([23:3-23:12], void),
                  (AnnotatedAST.Call (Cnormal,
-                    (([23:3-23:8], Some (function($x): void)),
+                    (([23:3-23:8], (function($x): void)),
                      (AnnotatedAST.Id ([23:3-23:8], "\\unset"))),
                     [],
-                    [(([23:9-23:11], Some \C),
+                    [(([23:9-23:11], \C),
                       (AnnotatedAST.Lvar ([23:9-23:11], $c)))],
                     []))))
              ];
@@ -119,22 +118,21 @@
        (AnnotatedAST.NamedBody
           { AnnotatedAST.fnb_nast =
             [(AnnotatedAST.Expr
-                (([28:3-28:15], Some \C),
+                (([28:3-28:15], \C),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([28:3-28:5], Some \C),
-                     (AnnotatedAST.Lvar ([28:3-28:5], $c))),
-                    (([28:8-28:15], Some \C),
+                    (([28:3-28:5], \C), (AnnotatedAST.Lvar ([28:3-28:5], $c))),
+                    (([28:8-28:15], \C),
                      (AnnotatedAST.New (
                         (\C, (AnnotatedAST.CI (([28:12-28:13], "\\C"), []))),
                         [], [])))
                     ))));
               (AnnotatedAST.Expr
-                 (([29:3-29:13], Some void),
+                 (([29:3-29:13], void),
                   (AnnotatedAST.Call (Cnormal,
-                     (([29:3-29:9], Some (function($x): void)),
+                     (([29:3-29:9], (function($x): void)),
                       (AnnotatedAST.Id ([29:3-29:9], "\\freeze"))),
                      [],
-                     [(([29:10-29:12], Some \C),
+                     [(([29:10-29:12], \C),
                        (AnnotatedAST.Lvar ([29:10-29:12], $c)))],
                      []))))
               ];

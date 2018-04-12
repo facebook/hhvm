@@ -101,8 +101,7 @@ let expand_ty env ty =
   and exp_where_constraint (ty1, ck, ty2) = (exp_ty ty1, ck, exp_ty ty2) in
   exp_ty ty
 
-let expand_annotation env (pos, tyopt) =
-  (pos, Option.map tyopt (expand_ty env))
+let expand_annotation env (pos, ty) = (pos, expand_ty env ty)
 
 class ['self] expander = object (_ : 'self)
   inherit [_] Tast_visitor.endo

@@ -204,6 +204,18 @@ void FileUtil::syncdir(const std::string &dest_, const std::string &src_,
 int FileUtil::copy(const char *srcfile, const char *dstfile) {
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
+
+  struct stat st;
+  int ret = fstat(srcFd, &st);
+  if (ret == -1) {
+    Logger::Error("fstat failed: %s", folly::errnoStr(errno).c_str());
+    return -1;
+  }
+  if (!S_ISREG(st.st_mode)) {
+    Logger::Error("copy failed: the first argument must be a regular file");
+    return -1;
+  }
+
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (dstFd == -1) return -1;
 
@@ -243,6 +255,18 @@ static int force_sync(int fd) {
 int FileUtil::directCopy(const char *srcfile, const char *dstfile) {
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
+
+  struct stat st;
+  int ret = fstat(srcFd, &st);
+  if (ret == -1) {
+    Logger::Error("fstat failed: %s", folly::errnoStr(errno).c_str());
+    return -1;
+  }
+  if (!S_ISREG(st.st_mode)) {
+    Logger::Error("copy failed: the first argument must be a regular file");
+    return -1;
+  }
+
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (dstFd == -1) return -1;
 

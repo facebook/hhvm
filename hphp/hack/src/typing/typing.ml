@@ -3135,8 +3135,8 @@ and array_field_value ~expected env = function
 and array_field_key ~expected env = function
   (* This shouldn't happen *)
   | Nast.AFvalue (p, _) ->
-      env, (T.make_implicitly_typed_expr p T.Any,
-        (Reason.Rwitness p, Tprim Tint))
+      let ty = (Reason.Rwitness p, Tprim Tint) in
+      env, (T.make_typed_expr p ty T.Any, ty)
   | Nast.AFkvalue (x, _) ->
       array_value ~expected env x
 

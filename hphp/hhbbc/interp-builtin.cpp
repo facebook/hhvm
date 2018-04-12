@@ -409,6 +409,12 @@ bool can_emit_builtin(borrowed_ptr<const php::Func> func,
     return false;
   }
 
+  // Don't convert to FCallBuiltin if there are too many variadic args.
+  if (variadic && !hasUnpack &&
+      numArgs - func->params.size() + 1 > ArrayData::MaxElemsOnStack) {
+    return false;
+  }
+
   auto const allowDoubleArgs = Native::allowFCallBuiltinDoubles();
 
   if (!allowDoubleArgs && func->nativeInfo->returnType == KindOfDouble) {

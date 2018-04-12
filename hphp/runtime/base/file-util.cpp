@@ -322,7 +322,10 @@ int FileUtil::rename(const char *oldname, const char *newname) {
   if (ret == 0) return 0;
   if (errno != EXDEV) return -1;
 
-  copy(oldname, newname);
+  ret = copy(oldname, newname);
+  if (ret != 0) {
+    return -1;
+  }
   unlink(oldname);
   return 0;
 }
@@ -332,7 +335,10 @@ int FileUtil::directRename(const char *oldname, const char *newname) {
   if (ret == 0) return 0;
   if (errno != EXDEV) return -1;
 
-  directCopy(oldname, newname);
+  ret = directCopy(oldname, newname);
+  if (ret != 0) {
+    return -1;
+  }
   unlink(oldname);
   return 0;
 }

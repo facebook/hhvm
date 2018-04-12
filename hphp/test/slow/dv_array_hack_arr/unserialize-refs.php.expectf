@@ -1,0 +1,6 @@
+
+Notice: Unable to unserialize: [y:3:{y:1:{i:987;}i:456;R:2;}]. Vecs cannot contain references. in %s/unserialize-refs.php on line 7
+bool(false)
+
+Notice: Unable to unserialize: [Y:2:{i:1;i:123;i:2;R:2;}]. Dicts cannot contain references. in %s/unserialize-refs.php on line 7
+bool(false)

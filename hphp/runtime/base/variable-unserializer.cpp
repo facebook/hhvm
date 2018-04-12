@@ -1389,13 +1389,23 @@ Array VariableUnserializer::unserializeVArray() {
   }();
   reserveForAdd(size);
 
+  auto const mode = arr.isPHPArray()
+    ? UnserializeMode::Value
+    : (arr.isVecArray()
+       ? UnserializeMode::VecValue
+       : UnserializeMode::DictValue);
+
   for (int64_t i = 0; i < size; i++) {
     auto lval = [&]() -> decltype(auto) {
       SuppressHackArrCompatNotices shacn;
       return arr.lvalAt();
     }();
     assertx(lval.arr == arr.get());
-    unserializeVariant(tvAsVariant(lval.tv_ptr()));
+
+    auto& val = tvAsVariant(lval.tv_ptr());
+    unserializeVariant(val, mode);
+    assertx(!arr.isHackArray() || val.getRawType() != KindOfRef);
+
     if (i < (size - 1)) {
       auto lastChar = peekBack();
       if ((lastChar != ';' && lastChar != '}')) {
@@ -1439,6 +1449,10 @@ Array VariableUnserializer::unserializeDArray() {
     : MixedArrayInit(size).toArray();
   reserveForAdd(size);
 
+  auto const mode = arr.isPHPArray()
+    ? UnserializeMode::Value
+    : UnserializeMode::DictValue;
+
   for (int64_t i = 0; i < size; i++) {
     Variant key;
     unserializeVariant(key, UnserializeMode::Key);
@@ -1457,7 +1471,9 @@ Array VariableUnserializer::unserializeDArray() {
     if (UNLIKELY(isRefcountedType(value.getRawType()))) {
       putInOverwrittenList(value);
     }
-    unserializeVariant(value);
+
+    unserializeVariant(value, mode);
+    assertx(!arr.isHackArray() || value.getRawType() != KindOfRef);
 
     if (i < (size - 1)) {
       auto lastChar = peekBack();

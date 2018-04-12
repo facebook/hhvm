@@ -329,11 +329,16 @@ let add_constraint
         Typing_log.Log_type ("ty_super", ty_super)])];
   add_constraint_with_fail env ck ty_sub ty_super (fun env -> env)
 
-type method_info = {
-  is_static: bool;
-  method_name: string;
-  class_ty: decl ty;
-  parent_class_ty: decl ty;
+type reactivity_extra_info = {
+  method_info: ((* method_name *) string * (* is_static *) bool) option;
+  class_ty: phase_ty option;
+  parent_class_ty: phase_ty option
+}
+
+let empty_extra_info = {
+  method_info = None;
+  class_ty = None;
+  parent_class_ty = None
 }
 
 let rec subtype_params
@@ -418,7 +423,8 @@ and supertype_params_with_variadic
     supertype_params_with_variadic env superl variadic_ty
 
 and subtype_reactivity
-  ?(method_info: method_info option)
+  ?(extra_info: reactivity_extra_info option)
+  ?(is_call_site = false)
   (env : Env.env)
   (r_sub : reactivity)
   (r_super : reactivity) : bool =
@@ -426,6 +432,10 @@ and subtype_reactivity
   let localize ty =
     let _, t = Phase.localize ~ety_env env ty in
     t in
+  let maybe_localize ty =
+    match ty with
+    | LoclTy t -> t
+    | DeclTy t -> localize t in
   (* for methods compute effective reactivity
      with respect to containing classes:
      interface Rx {
@@ -446,21 +456,51 @@ and subtype_reactivity
   let effective_reactivity r containing_ty =
     match r, containing_ty with
     | Local (Some t), Some containing_ty
-      when is_sub_type env (localize containing_ty) (localize t) -> Local None
+      when is_sub_type env (maybe_localize containing_ty) (localize t) -> Local None
     | Shallow (Some t), Some containing_ty
-      when is_sub_type env (localize containing_ty) (localize t) -> Shallow None
+      when is_sub_type env (maybe_localize containing_ty) (localize t) -> Shallow None
     | Reactive (Some t), Some containing_ty
-      when is_sub_type env (localize containing_ty) (localize t) -> Reactive None
+      when is_sub_type env (maybe_localize containing_ty) (localize t) -> Reactive None
     | _ -> r in
   let r_sub =
-    method_info
-    |> Option.map ~f:(fun { class_ty = c; _ } -> c)
+    Option.bind extra_info (fun { class_ty = c; _ } -> c)
     |> effective_reactivity r_sub in
   let r_super =
-    method_info
-    |> Option.map ~f:(fun { parent_class_ty = c; _ } -> c)
+    Option.bind extra_info (fun { parent_class_ty = c; _ } -> c)
     |> effective_reactivity r_super in
-  match r_sub, r_super, method_info with
+  (* for method declarations check if condition type for r_super includes
+     reactive method with a matching name. If yes - then it will act as a guarantee
+     that derived class will have to redefine the method with a shape required
+     by condition type (reactivity of redefined method must be subtype of reactivity
+     of method in interface) *)
+  let condition_type_has_matching_reactive_method condition_type_super (method_name, is_static) =
+    let condition_type_opt =
+      Option.bind
+        (TUtils.try_unwrap_class_type condition_type_super)
+        (fun (_, (_, x), _) -> Env.get_class env x) in
+    begin match condition_type_opt with
+    | None -> false
+    | Some cls ->
+      let m = if is_static then cls.tc_smethods else cls.tc_methods in
+      begin match SMap.get method_name m with
+      | Some { ce_type = lazy (_, Typing_defs.Tfun f); _  } ->
+        (* check that reactivity of interface method (effectively a promised
+           reactivity of a method in derived class) is a subtype of r_super.
+           NOTE: we check only for unconditional reactivity since conditional
+           version does not seems to yield a lot and will requre implementing
+           cycle detection for condition types *)
+        begin match f.ft_reactive with
+        | Reactive None | Shallow None | Local None ->
+          (* adjust r_super since now we are doing the check assuming
+             that dervied class implements the condition type interface *)
+          let r_super = effective_reactivity r_super (Some (DeclTy condition_type_super)) in
+          subtype_reactivity env f.ft_reactive r_super
+        | _ -> false
+        end
+      | _ -> false
+      end
+    end in
+  match r_sub, r_super, extra_info with
   (* anything is a subtype of nonreactive functions *)
   | _, Nonreactive, _ -> true
   (* unconditional local/shallow/reactive functions are subtypes of Local *.
@@ -473,15 +513,9 @@ and subtype_reactivity
   (* unconditional reactive functions are subtype of reactive *.
      Reason: same as above *)
   | Reactive None, Reactive _, _ -> true
-  (* conditionally reactive function are subtypes of conditionally reactive
-     functions only if condition type matches *)
-  | Reactive (Some t), Reactive (Some t1), _
-  | (Shallow (Some t) | Reactive (Some t)), Shallow (Some t1), _
-  | (Local (Some t) | Shallow (Some t) | Reactive (Some t)), Local (Some t1), _ ->
-    ty_equal (localize t) (localize t1)
-  (* non reactive function type TSub of method M in derive class can be subtype of
-     conditionally reactive function type TSuper of method M defined in base class
-     when condition type has reactive method M.
+  (* function type TSub of method M with arbitrary reactivity in derive class
+     can be subtype of conditionally reactive function type TSuper of method M
+     defined in base class when condition type has reactive method M.
      interface Rx {
        <<__Rx>>
        public function f(): int;
@@ -500,31 +534,23 @@ and subtype_reactivity
      to redeclare f which now will shadow B::f. Note that B::f will still be
      accessible as parent::f() but will be treated as non-reactive call.
      *)
-  | Nonreactive, (Reactive (Some t) | Shallow (Some t) | Local (Some t)),
-    Some { method_name; is_static; _ } ->
-    let condition_type_opt =
-      Option.bind
-        (TUtils.try_unwrap_class_type t)
-        (fun (_, (_, x), _) -> Env.get_class env x) in
-    begin match condition_type_opt with
-    | None -> false
-    | Some cls ->
-      let m = if is_static then cls.tc_smethods else cls.tc_methods in
-      begin match SMap.get method_name m with
-      | Some { ce_type = lazy (_, Typing_defs.Tfun f); _  } ->
-        (* check that reactivity of interface method (effectively a promised
-           reactivity of a method in derived class) is a subtype of r_super.
-           NOTE: we check only for unconditional reactivity since conditional
-           version does not seems to yield a lot and will requre implementing
-           cycle detection for condition types *)
-        begin match f.ft_reactive with
-        | Reactive None | Shallow None | Local None ->
-          subtype_reactivity ?method_info env f.ft_reactive r_super
-        | _ -> false
-        end
-      | _ -> false
-      end
-    end
+  | _, (Reactive (Some t) | Shallow (Some t) | Local (Some t)), Some { method_info = Some mi; _ }
+    when condition_type_has_matching_reactive_method t mi ->
+    true
+  (* conditionally reactive function A is a subtype of conditionally reactive
+     function B only if condition type of B is a subtype of condition type of A *)
+  | Reactive (Some t), Reactive (Some t1), _
+  | (Shallow (Some t) | Reactive (Some t)), Shallow (Some t1), _
+  | (Local (Some t) | Shallow (Some t) | Reactive (Some t)), Local (Some t1), _ ->
+    is_sub_type env (localize t1) (localize t)
+
+  (* call_site specific cases *)
+  (* shallow can call into local *)
+  | Local None, Shallow None, _ when is_call_site -> true
+  | Local (Some t), Shallow (Some t1), _ when is_call_site ->
+    is_sub_type env (localize t1) (localize t)
+  (* local can call into non-reactive *)
+  | Nonreactive, Local _, _ when is_call_site -> true
   | _ -> false
 
 
@@ -587,7 +613,7 @@ and subtype_reactivity
  *)
 and subtype_funs_generic
   ~(check_return : bool)
-  ?(method_info: method_info option)
+  ?(extra_info: reactivity_extra_info option)
   (env : Env.env)
   (r_sub : Reason.t)
   (ft_sub : locl fun_type)
@@ -595,7 +621,7 @@ and subtype_funs_generic
   (ft_super : locl fun_type) : Env.env =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
-  if not (subtype_reactivity ?method_info env ft_sub.ft_reactive ft_super.ft_reactive) then
+  if not (subtype_reactivity ?extra_info env ft_sub.ft_reactive ft_super.ft_reactive) then
     Errors.fun_reactivity_mismatch
       p_super (TUtils.reactivity_to_string env ft_super.ft_reactive)
       p_sub (TUtils.reactivity_to_string env ft_sub.ft_reactive);
@@ -644,8 +670,10 @@ and subtype_funs_generic
     let variadic_supertype =  match ft_super.ft_arity with
       | Fvariadic (_, {fp_type = var_super; _ }) -> Some var_super
       | _ -> None in
+    let is_method =
+      (Option.map extra_info (fun i -> i.method_info <> None)) = Some true in
     subtype_params
-      ~is_method:(method_info <> None)
+      ~is_method
       env ft_super.ft_params ft_sub.ft_params variadic_subtype variadic_supertype
   in
 
@@ -723,7 +751,7 @@ and subtype_funs_generic
  *)
 and subtype_method
   ~(check_return : bool)
-  ~(method_info: method_info)
+  ~(extra_info: reactivity_extra_info)
   (env : Env.env)
   (r_sub : Reason.t)
   (ft_sub : decl fun_type)
@@ -742,7 +770,7 @@ and subtype_method
     Phase.localize_ft ~use_pos:ft_sub.ft_pos ~ety_env ~instantiate_tparams:false env ft_sub in
   subtype_funs_generic
     ~check_return env
-    ~method_info
+    ~extra_info
     r_sub ft_sub_no_tvars
     r_super ft_super_no_tvars
 

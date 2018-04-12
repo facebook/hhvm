@@ -1,0 +1,4 @@
+File "rx_if_impl_local.php", line 22, characters 10-18:
+Conditionally reactive method with condition type '\Rx2' cannot be called (Typing[4225])
+File "rx_if_impl_local.php", line 13, characters 25-27:
+Calling such methods is allowed only from conditionally reactive methods with the same condition type or if static type of method receiver is a subtype of condition type, now '\Cls'.

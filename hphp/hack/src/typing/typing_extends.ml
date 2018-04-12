@@ -175,11 +175,10 @@ let check_override env member_name mem_source ?(ignore_fun_return = false)
       let is_static = SMap.mem member_name parent_class.tc_smethods in
       (* Add deps here when we override *)
       let subtype_funs = SubType.subtype_method
-          ~method_info:SubType.({
-            method_name = member_name;
-            is_static;
-            class_ty;
-            parent_class_ty = parent_ty
+          ~extra_info:SubType.({
+            method_info = Some (member_name, is_static);
+            class_ty = Some (DeclTy class_ty);
+            parent_class_ty = Some (DeclTy parent_ty)
            })
           ~check_return:(
           (not ignore_fun_return) &&

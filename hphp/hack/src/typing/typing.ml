@@ -588,7 +588,11 @@ and check_using_clause env has_await ((pos, content) as using_clause) =
   | Expr_list using_clauses ->
     let env, pairs = List.map_env env using_clauses (check_using_expr has_await) in
     let typed_using_clauses, vars_list = List.unzip pairs in
-    env, T.make_implicitly_typed_expr pos (T.Expr_list typed_using_clauses),
+    let ty_ =
+      try Ttuple (List.map typed_using_clauses (fun ((_,ty),_) -> unsafe_opt ty)) with
+      | _ -> TUtils.tany env in
+    let ty = (Reason.Rnone, ty_) in
+    env, T.make_typed_expr pos ty (T.Expr_list typed_using_clauses),
       List.concat vars_list
   | _ ->
     let env, (typed_using_clause, vars) = check_using_expr has_await env using_clause in

@@ -193,6 +193,12 @@ final class Map implements \MutableMap {
   <<__Native>>
   public function toArray(): array;
 
+  <<__Native>>
+  public function toVArray(): varray;
+
+  <<__Native>>
+  public function toDArray(): darray;
+
   /* Returns a Vector built from the values of this Map.
    * @return object
    */
@@ -787,6 +793,12 @@ final class ImmMap implements \ConstMap {
    */
   <<__Native>>
   public function toArray(): array;
+
+  <<__Native>>
+  public function toVArray(): varray;
+
+  <<__Native>>
+  public function toDArray(): darray;
 
   /* Returns a Vector built from the values of this ImmMap.
    * @return object

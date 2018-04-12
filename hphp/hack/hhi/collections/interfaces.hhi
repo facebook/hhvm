@@ -30,6 +30,11 @@ interface ConstCollection<+Te> extends Countable {
    *   the collection.
    */
   public function items(): Iterable<Te>;
+
+  /* HH_FIXME[0002] */
+  public function toVArray(): varray;
+  /* HH_FIXME[0001] */
+  public function toDArray(): darray;
 }
 
 /**
@@ -510,6 +515,11 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    * @guide /hack/generics/constraints
    */
   public function linearSearch<Tu super Tv>(Tu $search_value): int;
+
+  /* HH_FIXME[0002] */
+  public function toVArray(): varray<Tv>;
+  /* HH_FIXME[0001] */
+  public function toDArray(): darray<int, Tv>;
 }
 
 /**
@@ -765,6 +775,11 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    * @guide /hack/generics/constraints
    */
   public function linearSearch<Tu super Tv>(Tu $search_value): int;
+
+  /* HH_FIXME[0002] */
+  public function toVArray(): varray<Tv>;
+  /* HH_FIXME[0001] */
+  public function toDArray(): darray<int, Tv>;
 }
 
 /**
@@ -1014,6 +1029,11 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    *           is empty.
    */
   public function lastKey(): ?Tk;
+
+  /* HH_FIXME[0002] */
+  public function toVArray(): varray<Tv>;
+  /* HH_FIXME[0001] */
+  public function toDArray(): darray<Tk, Tv>;
 }
 
 /**
@@ -1268,6 +1288,11 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
    *           `MutableMap` is empty.
    */
   public function lastKey(): ?Tk;
+
+  /* HH_FIXME[0002] */
+  public function toVArray(): varray<Tv>;
+  /* HH_FIXME[0001] */
+  public function toDArray(): darray<Tk, Tv>;
 }
 
 /**
@@ -1522,6 +1547,11 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    *           current `ConstSet` is empty.
    */
   public function lastKey(): mixed;
+
+  /* HH_FIXME[0002] */
+  public function toVArray(): varray<Tv>;
+  /* HH_FIXME[0001] */
+  public function toDArray(): darray<Tv, Tv>;
 }
 
 /**
@@ -1780,4 +1810,9 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    *           current `MutableSet` is empty.
    */
   public function lastKey(): mixed;
+
+  /* HH_FIXME[0002] */
+  public function toVArray(): varray<Tv>;
+  /* HH_FIXME[0001] */
+  public function toDArray(): darray<Tv, Tv>;
 }

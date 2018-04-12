@@ -917,6 +917,8 @@ void CollectionsExtension::initVector() {
   BASE_ME(at,           &BaseVector::php_at);
   BASE_ME(get,          &BaseVector::php_get);
   BASE_ME(toArray,      &BaseVector::toArray);
+  BASE_ME(toVArray,     &BaseVector::toVArray);
+  BASE_ME(toDArray,     &BaseVector::toDArray);
   BASE_ME(getIterator,  &BaseVector::getIterator);
   BASE_ME(firstValue,   &BaseVector::firstValue);
   BASE_ME(lastValue,    &BaseVector::lastValue);

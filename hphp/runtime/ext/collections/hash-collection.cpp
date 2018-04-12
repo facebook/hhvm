@@ -109,6 +109,21 @@ Array HashCollection::toArray() {
   return Array::attach(ad);
 }
 
+Array HashCollection::toVArray() {
+  if (!m_size) return Array::attach(staticEmptyVArray());
+  auto ad = arrayData()->toVArray(true);
+  assertx(ad->m_pos == 0);
+  return Array::attach(ad);
+}
+
+Array HashCollection::toDArray() {
+  if (!m_size) return Array::attach(staticEmptyDArray());
+  auto ad = arrayData()->toDArray(true);
+  if (UNLIKELY(ad->size() < m_size)) warnOnStrIntDup();
+  assertx(ad->m_pos == 0);
+  return Array::attach(ad);
+}
+
 Array HashCollection::toKeysArray() {
   PackedArrayInit ai(m_size);
   auto* eLimit = elmLimit();

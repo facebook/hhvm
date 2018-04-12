@@ -522,4 +522,9 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           `ImmSet` is empty.
    */
   public function lastKey(): mixed;
+
+  /* HH_FIXME[0002] */
+  public function toVArray(): varray<Tv>;
+  /* HH_FIXME[0001] */
+  public function toDArray(): darray<Tv, Tv>;
 }

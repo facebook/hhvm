@@ -232,6 +232,12 @@ final class Vector implements \MutableVector {
   <<__Native>>
   public function toArray(): array;
 
+  <<__Native>>
+  public function toVArray(): varray;
+
+  <<__Native>>
+  public function toDArray(): darray;
+
   /* Returns a copy of this Vector.
    * @return object
    */
@@ -815,6 +821,12 @@ final class ImmVector implements \ConstVector {
    */
   <<__Native>>
   public function toArray(): array;
+
+  <<__Native>>
+  public function toVArray(): varray;
+
+  <<__Native>>
+  public function toDArray(): darray;
 
   /* Returns an array built from the keys from this ImmVector.
    * @return array

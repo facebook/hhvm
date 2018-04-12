@@ -47,6 +47,9 @@ struct HashCollection : ObjectData {
   }
 
   Array toArray();
+  Array toVArray();
+  Array toDArray();
+
   Array toKeysArray();
   Array toValuesArray();
 

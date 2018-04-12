@@ -164,6 +164,12 @@ final class Pair implements \ConstVector {
   <<__Native>>
   public function toArray(): array;
 
+  <<__Native>>
+  public function toVArray(): varray;
+
+  <<__Native>>
+  public function toDArray(): darray;
+
   /**
     * Returns a `Vector` containing the elements of the current `Pair`.
     *

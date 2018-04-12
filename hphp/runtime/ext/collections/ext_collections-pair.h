@@ -122,6 +122,9 @@ struct c_Pair : ObjectData {
   }
 
   Array toArrayImpl() const;
+  Array toVArrayImpl() const;
+  Array toDArrayImpl() const;
+
   Object getIterator();
 
   [[noreturn]] static void throwBadKeyType();

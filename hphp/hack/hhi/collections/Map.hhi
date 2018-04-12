@@ -655,6 +655,11 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @return - The `Iterable` view of the current `Map`.
    */
   public function items(): Iterable<Pair<Tk, Tv>>;
+
+  /* HH_FIXME[0002] */
+  public function toVArray(): varray<Tv>;
+  /* HH_FIXME[0001] */
+  public function toDArray(): darray<Tk, Tv>;
 }
 
 /**

@@ -585,4 +585,9 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *           if the current `ImmVector` is empty.
    */
   public function lastKey(): ?int;
+
+  /* HH_FIXME[0002] */
+  public function toVArray(): varray<Tv>;
+  /* HH_FIXME[0001] */
+  public function toDArray(): darray<int, Tv>;
 }

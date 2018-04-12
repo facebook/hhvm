@@ -472,6 +472,11 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - The `string` "Pair".
    */
   public function __toString(): string;
+
+  /* HH_FIXME[0002] */
+  public function toVArray(): varray;
+  /* HH_FIXME[0001] */
+  public function toDArray(): darray<int, mixed>;
 }
 
 /**

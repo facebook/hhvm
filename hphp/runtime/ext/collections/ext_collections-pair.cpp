@@ -63,6 +63,14 @@ Array c_Pair::toArrayImpl() const {
   return make_packed_array(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
 }
 
+Array c_Pair::toVArrayImpl() const {
+  return make_varray(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
+}
+
+Array c_Pair::toDArrayImpl() const {
+  return make_darray(0, tvAsCVarRef(&elm0), 1, tvAsCVarRef(&elm1));
+}
+
 c_Pair* c_Pair::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Pair*>(obj);
   auto pair = req::make<c_Pair>(thiz->elm0, thiz->elm1);
@@ -150,6 +158,8 @@ void CollectionsExtension::initPair() {
   HHVM_NAMED_ME(HH\\Pair, get,            &c_Pair::php_get);
   HHVM_NAMED_ME(HH\\Pair, linearSearch,   &c_Pair::linearSearch);
   HHVM_NAMED_ME(HH\\Pair, toArray,        &c_Pair::toArrayImpl);
+  HHVM_NAMED_ME(HH\\Pair, toVArray,       &c_Pair::toVArrayImpl);
+  HHVM_NAMED_ME(HH\\Pair, toDArray,       &c_Pair::toDArrayImpl);
   HHVM_NAMED_ME(HH\\Pair, toValuesArray,  &c_Pair::toArrayImpl);
   HHVM_NAMED_ME(HH\\Pair, getIterator,    &c_Pair::getIterator);
 

@@ -148,6 +148,12 @@ final class Set implements \MutableSet {
   <<__Native>>
   public function toArray(): array;
 
+  <<__Native>>
+  public function toVArray(): varray;
+
+  <<__Native>>
+  public function toDArray(): darray;
+
   /* Returns a Vector built from the values of this Set.
    * @return object
    */
@@ -491,6 +497,12 @@ final class ImmSet implements \ConstSet {
    */
   <<__Native>>
   public function toArray(): array;
+
+  <<__Native>>
+  public function toVArray(): varray;
+
+  <<__Native>>
+  public function toDArray(): darray;
 
   /* Returns a Vector built from the values of this ImmSet.
    * @return object

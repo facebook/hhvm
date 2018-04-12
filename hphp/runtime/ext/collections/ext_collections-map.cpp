@@ -818,6 +818,8 @@ void CollectionsExtension::initMap() {
   BASE_ME(__construct,   &BaseMap::init);
   BASE_ME(count,         &BaseMap::size);
   BASE_ME(toArray,       &BaseMap::toArray);
+  BASE_ME(toVArray,      &BaseMap::toVArray);
+  BASE_ME(toDArray,      &BaseMap::toDArray);
   BASE_ME(toKeysArray,   &BaseMap::toKeysArray);
   BASE_ME(toValuesArray, &BaseMap::toValuesArray);
   BASE_ME(firstKey,      &BaseMap::firstKey);

@@ -219,6 +219,16 @@ public:
     return Array::attach(const_cast<ArrayData*>(arrayData()->toPHPArray(true)));
   }
 
+  Array toVArray() {
+    if (!m_size) return Array::attach(staticEmptyVArray());
+    return Array::attach(arrayData()->toVArray(true));
+  }
+
+  Array toDArray() {
+    if (!m_size) return Array::attach(staticEmptyDArray());
+    return Array::attach(arrayData()->toDArray(true));
+  }
+
   static constexpr size_t sizeOffset() { return offsetof(BaseVector, m_size); }
   static constexpr size_t arrOffset() { return offsetof(BaseVector, m_arr); }
 

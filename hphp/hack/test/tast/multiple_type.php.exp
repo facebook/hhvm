@@ -47,7 +47,7 @@
                            (AnnotatedAST.Obj_get (
                               (([18:10-18:12], Some (\C1 | \C2)),
                                (AnnotatedAST.Lvar ([18:10-18:12], $x))),
-                              (([18:14-18:17], None),
+                              (([18:14-18:17], Some ((function(): string) | (function(): int))),
                                (AnnotatedAST.Id ([18:14-18:17], "foo"))),
                               OG_nullthrows))),
                           [], [], []))))

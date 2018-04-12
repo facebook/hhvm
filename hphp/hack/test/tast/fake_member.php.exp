@@ -27,7 +27,7 @@
                   (([7:9-7:19], Some ?int),
                    (AnnotatedAST.Obj_get (
                       (([7:9-7:14], Some <static>), AnnotatedAST.This),
-                      (([7:16-7:19], None),
+                      (([7:16-7:19], Some ?int),
                        (AnnotatedAST.Id ([7:16-7:19], "foo"))),
                       OG_nullthrows))),
                   [(AnnotatedAST.Expr

@@ -1941,7 +1941,7 @@ and expr_
           env, result
       in
       make_result env (T.Obj_get(te1,
-        T.make_implicitly_typed_expr pm (T.Id m), nullflavor)) result
+        T.make_typed_expr pm result (T.Id m), nullflavor)) result
     (* Dynamic instance property access e.g. $x->$f *)
   | Obj_get (e1, e2, nullflavor) ->
     let env, te1, ty1 = expr ~accept_using_var:true env e1 in
@@ -1957,6 +1957,8 @@ and expr_
       else
       (Reason.Rwitness p, Typing_utils.tany env)
       end in
+    let (pos, _), te2 = te2 in
+    let te2 = T.make_typed_expr pos ty te2 in
     make_result env (T.Obj_get(te1, te2, nullflavor)) ty
   | Yield_break ->
       make_result env T.Yield_break (Reason.Rwitness p, Typing_utils.tany env)
@@ -3869,7 +3871,7 @@ and is_abstract_ft fty = match fty with
         | tftyl -> (Reason.none, Tunresolved tftyl)
       in
       make_call env (T.make_typed_expr fpos tfty (T.Obj_get(te1,
-        T.make_implicitly_typed_expr pos_id (T.Id m), nullflavor))) hl !tel !tuel ty
+        T.make_typed_expr pos_id tfty (T.Id m), nullflavor))) hl !tel !tuel ty
 
   (* Function invocation *)
   | Fun_id x ->

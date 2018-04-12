@@ -55,7 +55,7 @@
                           (AnnotatedAST.Obj_get (
                              (([11:12-11:17], Some <static>),
                               AnnotatedAST.This),
-                             (([11:19-11:20], None),
+                             (([11:19-11:20], Some int),
                               (AnnotatedAST.Id ([11:19-11:20], "x"))),
                              OG_nullthrows))))
                    ))

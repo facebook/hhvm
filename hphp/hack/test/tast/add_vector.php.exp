@@ -36,7 +36,7 @@
                      (AnnotatedAST.Obj_get (
                         (([34:3-34:5], Some \MyPhonyVector),
                          (AnnotatedAST.Lvar ([34:3-34:5], $x))),
-                        (([34:7-34:10], None),
+                        (([34:7-34:10], Some (function(\X $x): void)),
                          (AnnotatedAST.Id ([34:7-34:10], "add"))),
                         OG_nullthrows))),
                     [],
@@ -54,7 +54,7 @@
                      (AnnotatedAST.Obj_get (
                         (([35:3-35:5], Some \MyPhonyVector),
                          (AnnotatedAST.Lvar ([35:3-35:5], $x))),
-                        (([35:7-35:10], None),
+                        (([35:7-35:10], Some (function(\X $x): void)),
                          (AnnotatedAST.Id ([35:7-35:10], "add"))),
                         OG_nullthrows))),
                     [],
@@ -111,7 +111,7 @@
                              (AnnotatedAST.Obj_get (
                                 (([16:5-16:10], Some <static>),
                                  AnnotatedAST.This),
-                                (([16:12-16:13], None),
+                                (([16:12-16:13], Some \Vector<T>),
                                  (AnnotatedAST.Id ([16:12-16:13], "x"))),
                                 OG_nullthrows))),
                             (([16:16-16:25], Some \Vector<T>),
@@ -148,7 +148,7 @@
                             (AnnotatedAST.Obj_get (
                                (([20:5-20:10], Some <static>),
                                 AnnotatedAST.This),
-                               (([20:12-20:13], None),
+                               (([20:12-20:13], Some \Vector<T>),
                                 (AnnotatedAST.Id ([20:12-20:13], "x"))),
                                OG_nullthrows))),
                            None))),
@@ -182,7 +182,7 @@
                                (AnnotatedAST.Obj_get (
                                   (([24:12-24:17], Some <static>),
                                    AnnotatedAST.This),
-                                  (([24:19-24:20], None),
+                                  (([24:19-24:20], Some \Vector<T>),
                                    (AnnotatedAST.Id ([24:19-24:20], "x"))),
                                   OG_nullthrows))),
                               (Some (([24:21-24:22], Some int),

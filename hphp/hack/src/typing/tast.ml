@@ -85,8 +85,8 @@ module Annotations = struct
   end
 
   module ClassIdAnnotation = struct
-    type t = ty option
-    let pp = pp_ty_option
+    type t = ty
+    let pp = Pp_type.pp_ty
   end
 end
 

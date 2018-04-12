@@ -107,7 +107,7 @@ let expand_annotation env (pos, tyopt) =
 class ['self] expander = object (_ : 'self)
   inherit [_] Tast_visitor.endo
   method! on_expr_annotation = expand_annotation
-  method! on_class_id_annotation env tyopt = Option.map tyopt (expand_ty env)
+  method! on_class_id_annotation = expand_ty
 end
 
 module ExpandAST =

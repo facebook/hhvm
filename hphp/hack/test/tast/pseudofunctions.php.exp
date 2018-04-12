@@ -125,8 +125,7 @@
                      (AnnotatedAST.Lvar ([28:3-28:5], $c))),
                     (([28:8-28:15], Some \C),
                      (AnnotatedAST.New (
-                        ((Some \C),
-                         (AnnotatedAST.CI (([28:12-28:13], "\\C"), []))),
+                        (\C, (AnnotatedAST.CI (([28:12-28:13], "\\C"), []))),
                         [], [])))
                     ))));
               (AnnotatedAST.Expr

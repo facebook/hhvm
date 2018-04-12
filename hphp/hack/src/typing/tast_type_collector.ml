@@ -19,8 +19,8 @@ class ['self] type_collector = object (_ : 'self)
     | Some ty -> Pos.AbsolutePosMap.singleton (Pos.to_absolute p) [Typing_print.to_json env ty]
     | None -> Pos.AbsolutePosMap.empty
   method! on_class_id env (ty,cid) =
-    match ty, cid with
-    | Some ty, Tast.CI ((p,_),_) ->
+    match cid with
+    | Tast.CI ((p,_),_) ->
       Pos.AbsolutePosMap.singleton (Pos.to_absolute p) [Typing_print.to_json env ty]
     | _ -> Pos.AbsolutePosMap.empty
 

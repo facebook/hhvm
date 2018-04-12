@@ -73,7 +73,7 @@ class ['self] base_visitor line char = object (self : 'self)
   method! on_class_id env cid =
     let acc =
       match cid with
-      | Some ty, Tast.CI ((pos, _), _) ->
+      | ty, Tast.CI ((pos, _), _) ->
         if Pos.inside pos line char
         then Some (pos, env, ty)
         else None

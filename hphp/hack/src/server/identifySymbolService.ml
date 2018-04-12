@@ -72,15 +72,6 @@ let process_member ?(is_declaration=false) c_name id ~is_method ~is_const =
 let process_method c_name mid =
   process_member c_name mid ~is_method:true ~is_const:false
 
-let process_const c_name mid =
-  process_member c_name mid ~is_method:false ~is_const:true
-
-let process_property c_name mid =
-  process_member c_name mid ~is_method:false ~is_const:false
-
-let process_constructor c_name pos =
-  process_method c_name (pos, SN.Members.__construct)
-
 let process_fun_id ?(is_declaration=false) id =
   Result_set.singleton {
     name  = snd id;
@@ -189,20 +180,14 @@ class ['self] visitor = object (self : 'self)
     let pos = fst (fst expr) in
     let acc =
       match snd expr with
-      | Tast.New ((Some ty, _), _, _) ->
+      | Tast.New ((ty, _), _, _) ->
         typed_constructor env ty pos
-      | Tast.New ((None, Tast.CI ((pos, c_name), _)), _, _) ->
-        process_constructor c_name pos
       | Tast.Obj_get (((_, Some ty), _), (_, Tast.Id mid), _) ->
         typed_property env ty mid
-      | Tast.Class_const ((Some ty, _), mid) ->
+      | Tast.Class_const ((ty, _), mid) ->
         typed_const env ty mid
-      | Tast.Class_const ((None, Tast.CI ((_, c_name), _)), mid) ->
-        process_const c_name mid
-      | Tast.Class_get ((Some ty, _), mid) ->
+      | Tast.Class_get ((ty, _), mid) ->
         typed_property env ty mid
-      | Tast.Class_get ((None, Tast.CI ((_, c_name), _)), mid) ->
-        process_property c_name mid
       | Tast.Smethod_id _ ->
         process_fun_id (pos, "\\"^SN.SpecialFunctions.class_meth)
       | Tast.Method_caller _ ->
@@ -213,9 +198,9 @@ class ['self] visitor = object (self : 'self)
      * access to the position of the containing expression. *)
     let class_id_acc =
       match snd expr with
-      | Tast.Class_get ((Some ty, cid), _)
-      | Tast.Class_const ((Some ty, cid), _)
-      | Tast.New ((Some ty, cid), _, _) ->
+      | Tast.Class_get ((ty, cid), _)
+      | Tast.Class_const ((ty, cid), _)
+      | Tast.New ((ty, cid), _, _) ->
         typed_class_id env ty pos cid
       | _ -> self#zero
     in
@@ -236,7 +221,7 @@ class ['self] visitor = object (self : 'self)
         process_fun_id id
       | Tast.Obj_get (((_, Some ty), _) as obj, (_, Tast.Id mid), _) ->
         self#on_expr env obj + typed_method env ty mid
-      | Tast.Class_const ((Some ty, _) as cid, mid) ->
+      | Tast.Class_const ((ty, _) as cid, mid) ->
         self#on_class_id env cid + typed_method env ty mid
       | _ -> self#on_expr env e
     in

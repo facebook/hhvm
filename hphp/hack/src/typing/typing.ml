@@ -3770,7 +3770,7 @@ and is_abstract_ft fty = match fty with
       let env, tel, tuel, ty, pty, ctor_fty =
         call_parent_construct p env el uel in
       make_call env (T.make_typed_expr fpos ctor_fty
-        (T.Class_const ((Some pty, T.CIparent), id))) hl tel tuel ty
+        (T.Class_const ((pty, T.CIparent), id))) hl tel tuel ty
 
   (* Calling parent method *)
   | Class_const (((), CIparent), m) ->
@@ -4750,7 +4750,7 @@ and this_for_method env cid default_ty = match cid with
 
 and static_class_id p env =
   let make_result env te ty =
-    env, (Some ty, te), ty in
+    env, (ty, te), ty in
   function
   | CIparent ->
     (match Env.get_self env with

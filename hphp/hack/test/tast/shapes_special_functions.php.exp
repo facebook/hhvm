@@ -20,7 +20,7 @@
                 (AnnotatedAST.Call (Cnormal,
                    (([6:3-6:14], Some (function(shape(...) $shape, arraykey $index, $default): int)),
                     (AnnotatedAST.Class_const (
-                       ((Some \Shapes),
+                       (\Shapes,
                         (AnnotatedAST.CI (([6:3-6:9], "\\Shapes"), []))),
                        ([6:11-6:14], "idx")))),
                    [],
@@ -35,7 +35,7 @@
                  (AnnotatedAST.Call (Cnormal,
                     (([7:3-7:14], Some (function(shape(...) $shape, arraykey $index, $default): int)),
                      (AnnotatedAST.Class_const (
-                        ((Some \Shapes),
+                        (\Shapes,
                          (AnnotatedAST.CI (([7:3-7:9], "\\Shapes"), []))),
                         ([7:11-7:14], "idx")))),
                     [],
@@ -52,7 +52,7 @@
                  (AnnotatedAST.Call (Cnormal,
                     (([8:3-8:20], Some (function(shape(...) $shape, arraykey $index): bool)),
                      (AnnotatedAST.Class_const (
-                        ((Some \Shapes),
+                        (\Shapes,
                          (AnnotatedAST.CI (([8:3-8:9], "\\Shapes"), []))),
                         ([8:11-8:20], "keyExists")))),
                     [],
@@ -67,7 +67,7 @@
                  (AnnotatedAST.Call (Cnormal,
                     (([9:3-9:20], Some (function(shape(...) $shape, arraykey $index): void)),
                      (AnnotatedAST.Class_const (
-                        ((Some \Shapes),
+                        (\Shapes,
                          (AnnotatedAST.CI (([9:3-9:9], "\\Shapes"), []))),
                         ([9:11-9:20], "removeKey")))),
                     [],
@@ -85,7 +85,7 @@
                  (AnnotatedAST.Call (Cnormal,
                     (([10:3-10:18], Some (function(shape(...) $shape): array<string, int>)),
                      (AnnotatedAST.Class_const (
-                        ((Some \Shapes),
+                        (\Shapes,
                          (AnnotatedAST.CI (([10:3-10:9], "\\Shapes"), []))),
                         ([10:11-10:18], "toArray")))),
                     [],

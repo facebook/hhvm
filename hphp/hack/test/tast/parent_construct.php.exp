@@ -59,7 +59,7 @@
                          (AnnotatedAST.Call (Cnormal,
                             (([8:5-8:24], Some (function(num $x): _)),
                              (AnnotatedAST.Class_const (
-                                ((Some \B), AnnotatedAST.CIparent),
+                                (\B, AnnotatedAST.CIparent),
                                 ([8:13-8:24], "__construct")))),
                             [],
                             [(([8:25-8:27], Some int),

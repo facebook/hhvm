@@ -828,11 +828,7 @@ let handle_mode
           | Some ty ->
             Format.asprintf "(%a, Some %s)" Pos.pp pos (Typing_print.full env ty)
         end
-        ~map_class_id_annotation:begin fun () ty ->
-          match ty with
-          | None -> "(None)"
-          | Some ty -> Printf.sprintf "(Some %s)" (Typing_print.full env ty)
-        end
+        ~map_class_id_annotation:(fun () -> Typing_print.full env)
     in
     let string_ast = stringify_types tast in
     Printf.printf "%s\n" (StringNAST.show_program string_ast)

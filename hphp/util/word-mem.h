@@ -130,6 +130,7 @@ inline void bcopy32_inline(void* dst, const void* src, size_t len) {
                        "bgt    " ASM_LOCAL_LABEL("BCP32%=") "\n"
                        : "+r"(len), "+r"(src), "+r"(dst),
                          "=r"(t3), "=r"(t4), "=r"(t5), "=r"(t6), "=r"(t7)
+                       :: "cc"
                       );
 #else
   bcopy32(dst, src, len);
@@ -179,6 +180,7 @@ inline void memcpy16_inline(void* dst, const void* src, size_t len) {
                        : "+r"(len), "+r"(src), "+r"(dst),
                          "=r"(t3), "=r"(t4), "=r"(t5), "=r"(t6),
                          "=r"(s1), "=r"(d1), "=r"(d2)
+                       :: "cc"
                       );
 #else
   memcpy16(dst, src, len);

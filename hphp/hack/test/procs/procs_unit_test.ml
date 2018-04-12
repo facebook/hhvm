@@ -88,19 +88,33 @@ let multi_worker_with_failure_handler _workers () =
   (** Spawn new workers since some will be failing and the rest non-reusable. *)
   let workers = make_workers 10 in
   let split ~bucket =
-    (** We want the first 5 buckets to all have exited while the MultiWorker result
-     * is being collected. But that's racy. Since the work is fanned out
-     * statically, we can ensure the first 5 have all "failed completely" by
-     * sleeping when handing out the 6th job. *)
+    (**
+     * We want the first 5 buckets to all have exited when the MultiWorker result
+     * is merged. Yes, they fail quickly, but it's still racy. We don't want to
+     * see "just 3" failures or something when merging.
+     *
+     * To ensure all 5 have failed, we delay merging.
+     *
+     * To do that, we delay handing out the last 5 buckets.
+     *
+     * To do that, we add a sleep when creating the 6th bucket.
+     *
+     * This works because the result isn't merged until all buckets are handed
+     * out.
+     *)
     if bucket = 5 then
-      let () = Unix.sleep 1 in
+      let () = Unix.sleep 3 in
       bucket + 1
     else
       bucket + 1 in
   let open Bucket in
-  let do_work _ _ =
-    (** Each bucket exits abnormally with exit code 3*)
-    exit 3
+  let do_work _ { Bucket.work; _ } =
+    (** First 5 buckets exit abnormally. The rest sleep. *)
+    if work <= 5 then
+      exit 3
+    else
+      let () = Unix.sleep 10 in
+      work
   in
   let open MultiThreadedCall in
   try

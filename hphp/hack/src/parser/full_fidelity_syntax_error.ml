@@ -378,7 +378,7 @@ let invalid_number_of_args name n =
   "Method " ^ name ^ " must take exactly " ^ (string_of_int n) ^ " arguments"
 let invalid_args_by_ref name =
   "Method " ^ name ^ " cannot take arguments by reference"
-let redeclation_of_const name =
+let redeclaration_error name =
   "Cannot redeclare " ^ name
 let reference_to_static_scope_resolution =
   "Cannot take a reference to a static scope resolution expression"

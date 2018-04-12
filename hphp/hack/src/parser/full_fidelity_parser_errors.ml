@@ -1948,7 +1948,29 @@ let expression_errors env node parents errors =
     make_error_from_node node SyntaxError.elvis_operator_space :: errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
-
+let check_repeated_properties namespace_name class_name (errors, p_names) prop =
+  let full_name = combine_names namespace_name class_name in
+  match syntax prop with
+  | PropertyDeclaration { property_declarators; _} ->
+    let declarators = syntax_to_list_no_separators property_declarators in
+      Hh_core.List.fold declarators ~init:(errors, p_names)
+        ~f:begin fun (errors, p_names) prop ->
+            match syntax prop with
+            | PropertyDeclarator {property_name; _} ->
+                let prop_name = text property_name in
+                (* If the property name is empty, then there was an earlier
+                  parsing error that should supercede this one. *)
+                if prop_name = "" then errors, p_names else
+                let errors, p_names =
+                  if SSet.mem prop_name p_names
+                  then make_error_from_node prop
+                  (SyntaxError.redeclaration_error
+                      ((Utils.strip_ns full_name) ^ "::" ^ prop_name)) :: errors, p_names
+                  else errors, SSet.add prop_name p_names in
+                errors, p_names
+            | _ -> errors, p_names
+          end
+  | _ -> (errors, p_names)
 let require_errors env node parents trait_use_clauses errors =
   match syntax node with
   | RequireClause p ->
@@ -2087,6 +2109,11 @@ let classish_errors env node parents namespace_name names errors =
       match syntax cd.classish_body with
       | ClassishBody {classish_body_elements = methods; _} ->
         let methods = syntax_to_list_no_separators methods in
+        let declared_name_str =
+          Option.value ~default:"" (Syntax.extract_text cd.classish_name) in
+        let errors, _ =
+          Hh_core.List.fold methods ~f:(check_repeated_properties namespace_name declared_name_str)
+          ~init:(errors, SSet.empty) in
         let has_abstract_fn =
           Hh_core.List.exists methods ~f:methodish_contains_abstract in
         let has_private_method =
@@ -2527,7 +2554,7 @@ let const_decl_errors env node parents namespace_name names errors =
           | Some class_name ->
             let full_name = class_name ^ "::" ^ constant_name in
             make_error_from_node
-              node (SyntaxError.redeclation_of_const full_name) :: errors
+              node (SyntaxError.redeclaration_error full_name) :: errors
         end
     in
     let names = {

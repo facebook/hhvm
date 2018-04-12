@@ -1,8 +1,6 @@
 zend/good/Zend/tests/bug62907.php
 zend/good/Zend/tests/bug63305.php
-zend/good/Zend/tests/errmsg_039.php
 zend/good/Zend/tests/heredoc_013.php
-zend/good/Zend/tests/use_function/case_insensivity.php
 zend/good/Zend/tests/use_function/no_global_fallback2.php
 zend/good/ext/pcntl/tests/pcntl_wait.php
 zend/good/ext/reflection/tests/ReflectionClass_getDocComment_001.php

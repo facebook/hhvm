@@ -146,7 +146,6 @@ let parse_options () =
   let forbid_nullable_cast = ref false in
   let deregister_attributes = ref false in
   let disable_optional_and_unknown_shape_fields = ref false in
-  let disallow_destruct = ref false in
   let disallow_ambiguous_lambda = ref false in
   let no_fallback_in_namespaces = ref false in
   let disallow_refs_in_array = ref false in
@@ -266,9 +265,6 @@ let parse_options () =
     "--forbid_nullable_cast",
       Arg.Set forbid_nullable_cast,
       " Forbid casting from nullable values.";
-    "--disallow-destruct",
-      Arg.Set disallow_destruct,
-      " Disallow definition of destructors without __OptionalDestruct.";
     "--disallow-ambiguous-lambda",
       Arg.Set disallow_ambiguous_lambda,
       " Disallow definition of lambdas that require use-site checking.";
@@ -303,7 +299,6 @@ let parse_options () =
       GlobalOptions.tco_safe_array = !safe_array;
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
       GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;
-      GlobalOptions.tco_disallow_destruct = !disallow_destruct;
       GlobalOptions.tco_disallow_ambiguous_lambda = !disallow_ambiguous_lambda;
       GlobalOptions.po_disallow_elvis_space = !disallow_elvis_space;
       GlobalOptions.tco_dynamic_view = !dynamic_view;

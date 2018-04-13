@@ -49,7 +49,6 @@ let () =
     ~po_auto_namespace_map:
       [("ShortName", "HH\\LongName\\EvenLonger\\ShortName")]
     ~po_deregister_php_stdlib: true
-    ~tco_disallow_destruct:false
     ~tco_disallow_ambiguous_lambda:false
     ~po_disallow_elvis_space:false
     ~ignored_fixme_codes: ISet.empty

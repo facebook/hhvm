@@ -917,7 +917,6 @@ and method_ (env, is_static) m =
 
   (* If this is a destructor make sure it is allowed *)
   if name = SN.Members.__destruct
-    && TypecheckerOptions.disallow_destruct (Env.get_options env.tenv)
     && not (Attributes.mem SN.UserAttributes.uaOptionalDestruct m.m_user_attributes)
   then Errors.illegal_destructor p;
 

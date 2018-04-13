@@ -5,6 +5,7 @@
 class bar {
   private $x = "asd";
 
+  <<__OptionalDestruct>>
   public function __destruct() {
     echo "~bar()\n";
   }

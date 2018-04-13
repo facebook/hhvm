@@ -12,7 +12,6 @@ let assume_php = GlobalOptions.tco_assume_php
 let safe_array = GlobalOptions.tco_safe_array
 let safe_vector_array = GlobalOptions.tco_safe_vector_array
 let allowed_attribute = GlobalOptions.tco_allowed_attribute
-let disallow_destruct = GlobalOptions.tco_disallow_destruct
 let disallow_ambiguous_lambda = GlobalOptions.tco_disallow_ambiguous_lambda
 let experimental_feature_enabled =
   GlobalOptions.tco_experimental_feature_enabled

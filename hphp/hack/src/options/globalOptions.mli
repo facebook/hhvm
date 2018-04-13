@@ -71,12 +71,6 @@ type t = {
  (* Flag for disabling functions in HHI files with the __PHPStdLib attribute *)
  po_deregister_php_stdlib : bool;
 
- (**
-  * Flag to disallow the definition of destructors unless the
-  * __OptionalDestruct attribute is added to the __destruct method.
-  *)
- tco_disallow_destruct : bool;
-
  (*
   * Flag to disalow any lambda that has to be checked using the legacy
   * per-use technique
@@ -102,7 +96,6 @@ val make :
   tco_migration_flags: SSet.t ->
   tco_dynamic_view: bool ->
   po_auto_namespace_map: (string * string) list ->
-  tco_disallow_destruct: bool ->
   tco_disallow_ambiguous_lambda: bool ->
   po_disallow_elvis_space: bool ->
   ignored_fixme_codes: ISet.t -> t
@@ -112,12 +105,11 @@ val tco_safe_vector_array : t -> bool
 val tco_user_attrs : t -> SSet.t option
 val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_migration_flag_enabled : t -> SSet.elt -> bool
-val tco_dynamic_view : t -> bool 
+val tco_dynamic_view : t -> bool
 val tco_allowed_attribute : t -> SSet.elt -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool
 val po_enable_hh_syntax_for_hhvm : t -> bool
-val tco_disallow_destruct : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool
 val po_disallow_elvis_space : t -> bool
 val default : t

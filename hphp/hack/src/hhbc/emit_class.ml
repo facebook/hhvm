@@ -154,16 +154,21 @@ let from_class_elt_classvars
       Some (Pos.none, A.Happly((Pos.none, "array"), hint_list))
       else cv.A.cv_hint
     in
-    List.map cv.A.cv_names
-      (Emit_property.from_ast
-        ast_class
-        cv.A.cv_user_attributes
-        cv.A.cv_kinds
-        class_is_immutable
-        hint
-        tparams
-        namespace
-        cv.A.cv_doc_comment)
+    let emit_prop = Emit_property.from_ast
+      ast_class
+      cv.A.cv_user_attributes
+      cv.A.cv_kinds
+      class_is_immutable
+      hint
+      tparams
+      namespace in
+    (* The doc comment is only for the first name in the list *)
+    begin match cv.A.cv_names with
+    | x::xs ->
+        (emit_prop cv.A.cv_doc_comment x) ::
+        List.map xs (emit_prop None)
+    | [] -> []
+    end
   | _ -> []
 
 let from_class_elt_constants ns elt =

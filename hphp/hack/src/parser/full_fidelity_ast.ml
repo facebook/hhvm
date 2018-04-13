@@ -1978,7 +1978,9 @@ and extract_docblock = fun node ->
           | `MaybeDoc, '*'              -> go start `MaybeDoc2   next
           | `MaybeDoc, _                -> go start `EmbeddedCmt next
           | `MaybeDoc2, '/'             -> go next  `Free        next
-          | `MaybeDoc2, _               -> go start `DocComment  next
+          (* Doc comments have a space after the second star *)
+          | `MaybeDoc2, (' ' | '\t' | '\n') -> go start `DocComment idx
+          | `MaybeDoc2, _               -> go start `EmbeddedCmt  next
           | `DocComment, '*'            -> go start `EndDoc      next
           | `DocComment, _              -> go start `DocComment  next
           | `EndDoc, _                  -> go start `DocComment  next

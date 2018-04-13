@@ -1062,7 +1062,7 @@ module WithExpressionAndStatementAndTypeParser
       if (peek_token_kind parser) = ColonColon then
         (* scope resolution expression case *)
         let (parser, cc_token) = require_coloncolon parser in
-        let (parser, name) = require_name parser in
+        let (parser, name) = require_token_one_of parser [Name; Construct] SyntaxError.error1004 in
         Make.scope_resolution_expression parser qualifier cc_token name
       else
         (* plain qualified name case *)

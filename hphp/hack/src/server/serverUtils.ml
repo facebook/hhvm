@@ -79,6 +79,14 @@ let with_exit_on_exception f =
     Exit_status.(exit Watchman_failed)
   | MultiThreadedCall.Coalesced_failures failures as e -> begin
     Hh_logger.exc e;
+    let failure_strings = List.fold_left
+      (fun acc f -> (WorkerController.failure_to_string f) :: acc)
+      []
+      failures
+    in
+    let failure_msg = Printf.sprintf "Coalesced_failures[%s]"
+      (String.concat ", " failure_strings) in
+    Hh_logger.log "%s" failure_msg;
     let is_oom_failure f = match f with
       | WorkerController.Worker_oomed -> true
       | _ -> false in
@@ -104,7 +112,7 @@ let with_exit_on_exception f =
         (** Exit with same code. *)
         exit i
       | None ->
-        raise e
+        failwith failure_msg
   end
   (** In single-threaded mode, WorkerController exceptions are raised directly
    * instead of being grouped into MultiThreaadedCall.Coalesced_failures *)

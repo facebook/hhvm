@@ -103,7 +103,7 @@ let multi_worker_with_failure_handler _workers () =
      * out.
      *)
     if bucket = 5 then
-      let () = Unix.sleep 3 in
+      let () = Unix.sleep 10 in
       bucket + 1
     else
       bucket + 1 in
@@ -113,7 +113,7 @@ let multi_worker_with_failure_handler _workers () =
     if work <= 5 then
       exit 3
     else
-      let () = Unix.sleep 10 in
+      let () = Unix.sleep 60 in
       work
   in
   let open MultiThreadedCall in
@@ -129,8 +129,8 @@ let multi_worker_with_failure_handler _workers () =
     false
   with
   | Coalesced_failures failures ->
-    (** Every single bucket failed, and we should have processed all of them since
-     * we have 10 worker processes. *)
+    (** The first 5 buckets all failed; Last 5 buckets are still sleeping. *)
+    Printf.eprintf "Got %d failed jobs. Expecting 5." (List.length failures);
     assert ((List.length failures) = 5);
     let sum = List.fold_left (
       fun acc e -> match e with

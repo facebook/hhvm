@@ -244,8 +244,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IMutator UnsetG);
     (fun () -> IMutator (CheckProp (Prop.from_raw_string "")));
     (fun () -> IMutator (InitProp (Prop.from_raw_string "", random_p_op ())));
-    (fun () -> ICall CufSafeArray);
-    (fun () -> ICall CufSafeReturn);
     (fun () -> IIncludeEvalDefine Incl);
     (fun () -> IIncludeEvalDefine InclOnce);
     (fun () -> IIncludeEvalDefine Req);

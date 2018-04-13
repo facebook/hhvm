@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($s1) { return $s1; }
 
@@ -23,12 +23,12 @@ function d() {
 }
 
 function e() {
-  $ret = fb_call_user_func_array_safe("TEst", "param");
+  $ret = fb_call_user_func_array_safe("TEst", varray["param"]);
   var_dump($ret);
 }
 
 function f() {
-  $ret = fb_call_user_func_array_safe("NonTest", "param");
+  $ret = fb_call_user_func_array_safe("NonTest", varray["param"]);
   var_dump($ret);
 }
 

@@ -5113,8 +5113,8 @@ OPTBLD_INLINE void iopFPushCufIter(uint32_t numArgs, Iter* it) {
   setTypesFlag(vmfp(), ar);
 }
 
-OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
-  TypedValue func = vmStack().topTV()[safe];
+OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward) {
+  TypedValue func = *vmStack().topTV();
 
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
@@ -5123,19 +5123,13 @@ OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
 
   const Func* f = vm_decode_function(
     tvAsVariant(&func), vmfp(), forward, obj, cls, invName,
-    dynamic, safe ? DecodeFlags::NoWarn : DecodeFlags::Warn);
+    dynamic, DecodeFlags::Warn);
 
-  if (safe) vmStack().topTV()[1] = vmStack().topTV()[0];
   vmStack().ndiscard(1);
   if (f == nullptr) {
     f = SystemLib::s_nullFunc;
     obj = nullptr;
     cls = nullptr;
-    if (safe) {
-      vmStack().pushBool(false);
-    }
-  } else if (safe) {
-    vmStack().pushBool(true);
   }
 
   ActRec* ar = vmStack().allocA();
@@ -5169,15 +5163,11 @@ OPTBLD_INLINE void iopRaiseFPassWarning(
 }
 
 OPTBLD_INLINE void iopFPushCuf(uint32_t numArgs) {
-  doFPushCuf(numArgs, false, false);
+  doFPushCuf(numArgs, false);
 }
 
 OPTBLD_INLINE void iopFPushCufF(uint32_t numArgs) {
-  doFPushCuf(numArgs, true, false);
-}
-
-OPTBLD_INLINE void iopFPushCufSafe(uint32_t numArgs) {
-  doFPushCuf(numArgs, false, true);
+  doFPushCuf(numArgs, true);
 }
 
 OPTBLD_INLINE void iopFPassC(ActRec* ar, uint32_t paramId, FPassHint hint) {
@@ -5489,23 +5479,6 @@ OPTBLD_INLINE void iopFCallUnpackM(PC& pc, ActRec* ar, uint32_t numArgs,
                                    uint32_t /* numRet */) {
   ar->setFCallM();
   iopFCallUnpack(pc, ar, numArgs);
-}
-
-OPTBLD_INLINE void iopCufSafeArray() {
-  auto ret = Array::CreateVArray();
-  ret.append(tvAsVariant(vmStack().top() + 1));
-  ret.appendWithRef(tvAsVariant(vmStack().top() + 0));
-  vmStack().popTV();
-  vmStack().popTV();
-  tvAsVariant(vmStack().top()) = ret;
-}
-
-OPTBLD_INLINE void iopCufSafeReturn() {
-  bool ok = cellToBool(*tvToCell(vmStack().top() + 1));
-  tvDecRefGen(vmStack().top() + 1);
-  tvDecRefGen(vmStack().top() + (ok ? 2 : 0));
-  if (ok) vmStack().top()[2] = vmStack().top()[0];
-  vmStack().ndiscard(2);
 }
 
 inline bool initIterator(PC& pc, PC targetpc, Iter* it, Cell* c1) {

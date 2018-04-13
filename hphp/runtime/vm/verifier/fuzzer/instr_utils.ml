@@ -220,9 +220,6 @@ let stk_data : instruct -> stack_sig = function
   | IMisc MaybeMemoType
   | ILitConst ColFromArray _               -> ["C"], ["C"]
   | IMisc VerifyRetTypeV                   -> ["V"], ["V"]
-  | ICall FPushCufSafe _                   -> ["C"; "C"], ["C"; "C"]
-  | ICall CufSafeArray                     -> ["C"; "C"; "R"], ["C"]
-  | ICall CufSafeReturn                    -> ["C"; "C"; "R"], ["R"]
   | ICall FPassCW _
   | ICall FPassCE _
   | ICall FPassN _

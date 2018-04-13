@@ -189,10 +189,7 @@ let instr_fpushctor nargs id = instr (ICall (FPushCtor (nargs, id)))
 let instr_fpushctors nargs scref = instr (ICall (FPushCtorS (nargs, scref)))
 let instr_fpushctori nargs clsnum = instr (ICall (FPushCtorI (nargs, clsnum)))
 let instr_fpushcuf nargs = instr (ICall (FPushCuf nargs))
-let instr_fpushcuf_safe nargs = instr (ICall (FPushCufSafe nargs))
 let instr_fpushcuff nargs = instr (ICall (FPushCufF nargs))
-let instr_cuf_safe_array = instr (ICall CufSafeArray)
-let instr_cuf_safe_return = instr (ICall CufSafeReturn)
 let instr_clone = instr (IOp Clone)
 let instr_newstructarray keys = instr (ILitConst (NewStructArray keys))
 let instr_newstructdarray keys = instr (ILitConst (NewStructDArray keys))
@@ -792,8 +789,6 @@ let get_input_output_count i =
     | FPushObjMethod _ -> (2, 0)
     | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPassL _
     | FPushCtorS _ -> (0, 1)
-    | FPushCufSafe _ -> (2, 2)
-    | CufSafeArray | CufSafeReturn -> (3, 1)
     | FPassC _ | FPassCW _ | FPassCE _ | FPassV _ | FPassVNop _ | FPassR _
     | FPassN _ | FPassG _ | FPassS _ | FCallArray -> (1, 1)
     | FCall n | FCallD (n, _, _) | FCallAwait (n, _, _)| FCallUnpack n

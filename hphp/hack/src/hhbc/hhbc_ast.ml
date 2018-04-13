@@ -420,9 +420,6 @@ type instruct_call =
   | FPushCufIter of num_params * Iterator.t
   | FPushCuf of num_params
   | FPushCufF of num_params
-  | FPushCufSafe of num_params
-  | CufSafeArray
-  | CufSafeReturn
   | FPassC of param_num * fpass_hint
   | FPassCW of param_num * fpass_hint
   | FPassCE of param_num * fpass_hint

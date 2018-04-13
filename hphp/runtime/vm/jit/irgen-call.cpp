@@ -674,9 +674,8 @@ SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
 }
 
 void implFPushCufOp(IRGS& env, Op op, uint32_t numArgs) {
-  const bool safe = op == OpFPushCufSafe;
   bool forward = op == OpFPushCufF;
-  SSATmp* callable = topC(env, BCSPRelOffset{safe ? 1 : 0});
+  SSATmp* callable = topC(env, BCSPRelOffset{0});
 
   const Class* cls = nullptr;
   StringData* invName = nullptr;
@@ -686,8 +685,6 @@ void implFPushCufOp(IRGS& env, Op op, uint32_t numArgs) {
   if (!callee) return fpushCufUnknown(env, op, numArgs);
 
   SSATmp* ctx;
-  auto const safeFlag = cns(env, true); // This is always true until the slow
-                                        // exits below are implemented
   auto func = cns(env, callee);
   if (cls) {
     auto const exitSlow = makeExitSlow(env);
@@ -717,12 +714,7 @@ void implFPushCufOp(IRGS& env, Op op, uint32_t numArgs) {
     }
   }
 
-  auto const defaultVal = safe ? popC(env) : nullptr;
   popDecRef(env); // callable
-  if (safe) {
-    push(env, defaultVal);
-    push(env, safeFlag);
-  }
 
   fpushActRec(
     env,
@@ -828,7 +820,6 @@ bool callAccessesLocals(const NormalizedInstruction& inst,
     case OpFPushCufIter:
     case OpFPushCuf:
     case OpFPushCufF:
-    case OpFPushCufSafe:
       // Dynamic calls.  If we've forbidden dynamic calls to functions which
       // access the caller's frame, we know this can't be one.
       return !disallowDynamicVarEnvFuncs();
@@ -993,9 +984,6 @@ void emitFPushCuf(IRGS& env, uint32_t numArgs) {
 }
 void emitFPushCufF(IRGS& env, uint32_t numArgs) {
   implFPushCufOp(env, Op::FPushCufF, numArgs);
-}
-void emitFPushCufSafe(IRGS& env, uint32_t numArgs) {
-  implFPushCufOp(env, Op::FPushCufSafe, numArgs);
 }
 
 void emitFPushCtor(IRGS& env, uint32_t numParams, uint32_t slot) {

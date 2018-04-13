@@ -1195,11 +1195,7 @@ public:
     CallUserFuncNone = -1,
     CallUserFuncPlain = 0,
     CallUserFuncArray = 1,
-    CallUserFuncSafe = 2,
-    CallUserFuncReturn = 4,
-    CallUserFuncForward = 8,
-    CallUserFuncSafeArray = CallUserFuncSafe | CallUserFuncArray,
-    CallUserFuncSafeReturn = CallUserFuncSafe | CallUserFuncReturn,
+    CallUserFuncForward = 2,
     CallUserFuncForwardArray = CallUserFuncForward | CallUserFuncArray
   };
 
@@ -10584,9 +10580,6 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
     { "call_user_func_array", 2, 2, CallUserFuncArray },
     { "forward_static_call", 1, INT_MAX, CallUserFuncForward },
     { "forward_static_call_array", 2, 2, CallUserFuncForwardArray },
-    { "fb_call_user_func_safe", 1, INT_MAX, CallUserFuncSafe },
-    { "fb_call_user_func_array_safe", 2, 2, CallUserFuncSafeArray },
-    { "fb_call_user_func_safe_return", 2, INT_MAX, CallUserFuncSafeReturn },
   };
 
   if (RuntimeOption::EvalDisableHphpcOpts) return false;
@@ -10619,16 +10612,6 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
   Offset fpiStart = m_ue.bcPos();
   if (flags & CallUserFuncForward) {
     e.FPushCufF(nParams - param);
-  } else if (flags & CallUserFuncSafe) {
-    if (flags & CallUserFuncReturn) {
-      assert(nParams >= 2);
-      visit((*params)[param++]);
-      emitConvertToCell(e);
-    } else {
-      e.Null();
-    }
-    fpiStart = m_ue.bcPos();
-    e.FPushCufSafe(nParams - param);
   } else {
     e.FPushCuf(nParams - param);
   }
@@ -10661,13 +10644,6 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
     e.FCallArray();
   } else {
     e.FCall(nParams - param);
-  }
-  if (flags & CallUserFuncSafe) {
-    if (flags & CallUserFuncReturn) {
-      e.CufSafeReturn();
-    } else {
-      e.CufSafeArray();
-    }
   }
   return true;
 }

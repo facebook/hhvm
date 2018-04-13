@@ -579,7 +579,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        PF) \
   O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        PF) \
   O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        PF) \
-  O(FPushCufSafe,    ONE(IVA),         TWO(CV,CV),      TWO(CV,CV), PF) \
   O(FPassC,          TWO(IVA,OA(FPassHint)),                            \
                                        ONE(CV),         ONE(FV),    FF) \
   O(FPassCW,         TWO(IVA,OA(FPassHint)),                            \
@@ -611,8 +610,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FCallUnpack,     ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    NF) \
-  O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
-  O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(MIterInit,       THREE(IA,BA,LA),  ONE(VV),         NOV,        CF) \
   O(WIterInit,       THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
@@ -1018,8 +1015,7 @@ constexpr bool isFPushCuf(Op opcode) {
   return
     opcode == OpFPushCufIter ||
     opcode == OpFPushCuf     ||
-    opcode == OpFPushCufF    ||
-    opcode == OpFPushCufSafe;
+    opcode == OpFPushCufF;
 }
 
 constexpr bool isFPushClsMethod(Op opcode) {

@@ -287,8 +287,6 @@ enum OutTypeConstraints {
   OutBitOp,             // For BitAnd, BitOr, BitXor
   OutSetOp,             // For SetOpL
   OutIncDec,            // For IncDecL
-  OutFPushCufSafe,      // FPushCufSafe pushes two values of different
-                        // types and an ActRec
 
   OutIsTypeL,           // output for IsTypeL instructions
 

@@ -2256,23 +2256,6 @@ FPushCufF <num params>    [C]   ->  []
   warning, and push an entry representing a function which does nothing, takes
   no argument, and returns null.
 
-FPushCufSafe <num params> [C C] ->  [C C:Bool]
-
-  FPI push call user function. This instruction pops $1 and $2, then pushes $1
-  back onto the stack. It then looks up $2 as a callable, and pushes a new
-  entry onto the FPI stack. If $2 is not callable, it pushes an entry
-  representing a function which does nothing, takes no argument, and returns
-  null, and in addition pushes boolean false onto the evaluation stack;
-  otherwise it pushes true onto the evaluation stack.
-
-CufSafeArray   [C C R] -> [C]
-
-  Pops 3 elements from the stack, and pushes varray[$2, $1], preserving refs.
-
-CufSafeReturn  [C C R] -> [R]
-
-  Pops 3 elements from the stack, and pushes $2 ? $1 : $3, preserving refs.
-
 
 Reffiness hints
 --------------------

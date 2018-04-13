@@ -1075,9 +1075,9 @@ Array HHVM_FUNCTION(fb_call_user_func_array_safe,
                     const Variant& function,
                     const Array& params) {
   if (is_callable(function)) {
-    return make_packed_array(true, vm_call_user_func(function, params));
+    return make_varray(true, vm_call_user_func(function, params));
   }
-  return make_packed_array(false, uninit_variant);
+  return make_varray(false, uninit_variant);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

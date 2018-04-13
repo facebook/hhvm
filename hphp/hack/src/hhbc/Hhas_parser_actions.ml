@@ -397,8 +397,6 @@ let make_nullary_inst s =
  | "UnsetG" -> IMutator (UnsetG)
 
  (* instruct_call *)
- | "CufSafeArray" -> ICall(CufSafeArray)
- | "CufSafeReturn" -> ICall(CufSafeReturn)
  | "FCallArray" -> ICall(FCallArray)
 
  (* instruct_base *)
@@ -920,7 +918,6 @@ let makeunaryinst s arg = match s with
    | "FPushFunc" -> ICall(FPushFunc (intofiarg arg, []))
    | "FPushCuf" -> ICall(FPushCuf (intofiarg arg))
    | "FPushCufF" -> ICall(FPushCufF (intofiarg arg))
-   | "FPushCufSafe" -> ICall(FPushCufSafe (intofiarg arg))
    | "RetM" -> IContFlow(RetM (intofiarg arg))
    | "FCall" -> ICall(FCall (intofiarg arg))
    | "FCallUnpack" -> ICall(FCallUnpack (intofiarg arg))

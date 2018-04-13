@@ -3241,9 +3241,6 @@ and get_call_user_func_info = function
   | "call_user_func_array" -> (true, 2, 2)
   | "forward_static_call" -> (true, 1, max_int)
   | "forward_static_call_array"  -> (true, 2, 2)
-  | "fb_call_user_func_safe" -> (true, 1, max_int)
-  | "fb_call_user_func_array_safe" -> (true, 2, 2)
-  | "fb_call_user_func_safe_return" -> (true, 2, max_int)
   | _ -> (false, 0, 0)
 
 and is_call_user_func id num_args =
@@ -3284,41 +3281,16 @@ and emit_call_user_func_arg env f i expr =
   ]
 
 and emit_call_user_func env id arg args =
-  let return_default, args = match id with
-    | "fb_call_user_func_safe_return" ->
-      begin match args with
-        | [] -> failwith "fb_call_user_func_safe_return - requires default arg"
-        | a :: args -> emit_expr ~need_ref:false env a, args
-      end
-    | _ -> empty, args
-  in
   let num_params = List.length args in
   let begin_instr = match id with
     | "forward_static_call"
     | "forward_static_call_array" -> instr_fpushcuff num_params
-    | "fb_call_user_func_safe"
-    | "fb_call_user_func_array_safe" ->
-      gather [instr_null; instr_fpushcuf_safe num_params]
-    | "fb_call_user_func_safe_return" ->
-      gather [return_default; instr_fpushcuf_safe num_params]
     | _ -> instr_fpushcuf num_params
   in
   let call_instr = match id with
     | "call_user_func_array"
-    | "forward_static_call_array"
-    | "fb_call_user_func_array_safe" -> instr (ICall FCallArray)
+    | "forward_static_call_array" -> instr (ICall FCallArray)
     | _ -> instr (ICall (FCall num_params))
-  in
-  let end_instr = match id with
-    | "fb_call_user_func_safe_return" -> instr (ICall CufSafeReturn)
-    | "fb_call_user_func_safe"
-    | "fb_call_user_func_array_safe" -> instr (ICall CufSafeArray)
-    | _ -> empty
-  in
-  let flavor = match id with
-    | "fb_call_user_func_safe"
-    | "fb_call_user_func_array_safe" -> Flavor.Cell
-    | _ -> Flavor.ReturnVal
   in
   gather [
     (* first arg is always emitted as cell *)
@@ -3326,8 +3298,7 @@ and emit_call_user_func env id arg args =
     begin_instr;
     gather (List.mapi args (emit_call_user_func_arg env id));
     call_instr;
-    end_instr;
-  ], flavor
+  ], Flavor.ReturnVal
 
 (* TODO: work out what HHVM does special here *)
 and emit_name_string env e =

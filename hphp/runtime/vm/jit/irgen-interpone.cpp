@@ -172,8 +172,6 @@ folly::Optional<Type> interpOutputType(IRGS& env,
       auto ty = localType().unbox();
       return ty <= TDbl ? ty : TCell;
     }
-    case OutFPushCufSafe: return folly::none;
-
     case OutNone:       return folly::none;
 
     case OutCInput: {
@@ -469,8 +467,6 @@ void emitBindN(IRGS& env)                     { INTERP }
 void emitUnsetN(IRGS& env)                    { INTERP }
 void emitUnsetG(IRGS& env)                    { INTERP }
 void emitFPassN(IRGS& env,uint32_t,FPassHint) { INTERP }
-void emitCufSafeArray(IRGS& env)              { INTERP }
-void emitCufSafeReturn(IRGS& env)             { INTERP }
 void emitIncl(IRGS& env)                      { INTERP }
 void emitInclOnce(IRGS& env)                  { INTERP }
 void emitReq(IRGS& env)                       { INTERP }

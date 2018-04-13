@@ -91,7 +91,6 @@ protected:
     InterfaceExists,
     Unserialize,
     GetDefinedVars,
-    FBCallUserFuncSafe,
     ThrowFatal,
     ThrowParseFatal,
     ClassAlias,

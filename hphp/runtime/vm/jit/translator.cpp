@@ -316,9 +316,6 @@ static const struct {
   { OpFPushCufIter,{None,             FStack,       OutFDesc        }},
   { OpFPushCuf,    {Stack1,           FStack,       OutFDesc        }},
   { OpFPushCufF,   {Stack1,           FStack,       OutFDesc        }},
-  { OpFPushCufSafe,{StackTop2|DontGuardAny,
-                                      StackTop2|FStack,
-                                                    OutFPushCufSafe }},
   { OpRaiseFPassWarning,
                    {None,             None,         OutNone         }},
   { OpFPassC,      {FuncdRef,         None,         OutSameAsInput1 }},
@@ -344,10 +341,6 @@ static const struct {
   { OpFCallUnpack, {FStack,           Stack1,       OutUnknown      }},
   { OpFCallArray,  {FStack,           Stack1,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
-                                      Stack1,       OutUnknown      }},
-  { OpCufSafeArray,{StackTop3|DontGuardAny,
-                                      Stack1,       OutArray        }},
-  { OpCufSafeReturn,{StackTop3|DontGuardAny,
                                       Stack1,       OutUnknown      }},
   { OpDecodeCufIter,{Stack1,          None,         OutNone         }},
 
@@ -918,7 +911,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::AliasCls:
   case Op::FPushCuf:
   case Op::FPushCufF:
-  case Op::FPushCufSafe:
   case Op::IncStat:
   case Op::Eq:
   case Op::Neq:
@@ -1156,8 +1148,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::UnsetG:
   case Op::FPushObjMethod:
   case Op::FCallUnpack:
-  case Op::CufSafeArray:
-  case Op::CufSafeReturn:
   case Op::Incl:
   case Op::InclOnce:
   case Op::Req:

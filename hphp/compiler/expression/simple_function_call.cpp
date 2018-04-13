@@ -79,12 +79,6 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
     FunctionTypeMap["apc_fetch"]            = FunType::Unserialize;
 
     FunctionTypeMap["get_defined_vars"]     = FunType::GetDefinedVars;
-
-    FunctionTypeMap["fb_call_user_func_safe"] = FunType::FBCallUserFuncSafe;
-    FunctionTypeMap["fb_call_user_func_array_safe"] =
-      FunType::FBCallUserFuncSafe;
-    FunctionTypeMap["fb_call_user_func_safe_return"] =
-      FunType::FBCallUserFuncSafe;
   }
 }
 

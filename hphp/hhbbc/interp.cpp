@@ -2818,14 +2818,6 @@ void in(ISS& env, const bc::FPushCufF&) {
   fpiPush(env, ActRec { FPIKind::Unknown, TTop });
 }
 
-void in(ISS& env, const bc::FPushCufSafe&) {
-  auto t1 = popC(env);
-  popC(env);
-  push(env, std::move(t1));
-  fpiPush(env, ActRec { FPIKind::Unknown, TTop });
-  push(env, TBool);
-}
-
 void in(ISS& /*env*/, const bc::RaiseFPassWarning& /*op*/) {}
 
 void in(ISS& env, const bc::FPassL& op) {
@@ -3366,23 +3358,6 @@ void in(ISS& env, const bc::FCallDM& op) {
 
 void in(ISS& env, const bc::FCallUnpackM& op) {
   fcallArrayImpl(env, op.arg1, op.arg2);
-}
-
-void in(ISS& env, const bc::CufSafeArray&) {
-  auto val1 = popR(env);
-  auto val2 = popC(env);
-  popC(env);
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    if (!val1.subtypeOf(TInitCell)) val1 = TInitCell;
-    push(env, vec({std::move(val2), std::move(val1)}));
-  } else {
-    push(env, arr_packed_varray({std::move(val2), std::move(val1)}));
-  }
-}
-
-void in(ISS& env, const bc::CufSafeReturn&) {
-  popR(env); popC(env); popC(env);
-  push(env, TInitCell);
 }
 
 void in(ISS& env, const bc::DecodeCufIter& op) {

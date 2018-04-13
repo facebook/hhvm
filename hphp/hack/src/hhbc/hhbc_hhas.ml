@@ -509,10 +509,6 @@ let string_of_call instruction =
     sep ["FPushCuf"; string_of_int n]
   | FPushCufF n ->
     sep ["FPushCufF"; string_of_int n]
-  | FPushCufSafe n ->
-    sep ["FPushCufSafe"; string_of_int n]
-  | CufSafeArray -> "CufSafeArray"
-  | CufSafeReturn -> "CufSafeReturn"
   | FPassC (i, h) ->
     sep ["FPassC"; string_of_param_num i; string_of_fpasshint h]
   | FPassCW (i, h) ->

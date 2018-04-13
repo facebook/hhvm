@@ -446,9 +446,8 @@ let check_instruct_call asn i i' =
   | FPushObjMethodD _, _ | FPushClsMethod _, _
   | FPushClsMethodS _, _ | FPushClsMethodSD _, _
   | FPushClsMethodD _, _ | FPushCtor _, _ | FPushCtorD _, _
-  | FPushCtorI _, _ | FPushCtorS _, _
-  | FPushCufIter _, _ | FPushCuf _, _ | FPushCufF _, _ | FPushCufSafe _, _
-  | CufSafeArray, _ | CufSafeReturn, _ | FPassC _, _ | FPassCW _, _
+  | FPushCtorI _, _ | FPushCtorS _, _ | FPushCufIter _, _ | FPushCuf _, _
+  | FPushCufF _, _ | FPassC _, _ | FPassCW _, _
   | FPassCE _, _ | FPassV _, _ | FPassVNop _, _ | FPassR _, _ | FPassN _, _
   | FPassG _, _ | FPassS _, _ | FCall _, _ | FCallD _, _ | FCallArray, _
   | FCallAwait _, _ | FCallUnpack _, _ | FCallBuiltin _, _

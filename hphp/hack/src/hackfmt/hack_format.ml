@@ -500,8 +500,9 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Space;
       t env kw;
       Space;
-      t env removed_names;
-      Newline;
+      WithRule (Rule.Parental, Nest [
+        handle_possible_list env ~before_each:space_split removed_names;
+      ]);
     ]
   | Syntax.TraitUseAliasItem {
       trait_use_alias_item_aliasing_name = aliasing_name;
@@ -516,7 +517,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env visibility;
       Space;
       t env aliased_name;
-      Newline;
     ]
   | Syntax.TraitUseConflictResolution {
       trait_use_conflict_resolution_keyword = kw;
@@ -529,11 +529,12 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       WithRule (Rule.Parental, Nest [
         handle_possible_list env ~before_each:space_split elements;
       ]);
+      Space;
       t env lb;
       Newline;
-      WithRule (Rule.Parental, Nest [
-        handle_possible_list env ~before_each:space_split clauses;
-      ]);
+      Nest [
+        handle_possible_list env ~before_each:newline clauses;
+      ];
       Newline;
       t env rb;
     ]

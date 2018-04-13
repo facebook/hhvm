@@ -1040,7 +1040,7 @@ module WithExpressionAndStatementAndTypeParser
       parse_property_declaration
         parser attribute_spec modifiers ~contains_abstract
 
-  and parse_trait_use_precendence_item parser name =
+  and parse_trait_use_precedence_item parser name =
     let (parser, keyword) = assert_token parser Insteadof in
     let (parser, removed_names) =
       parse_trait_name_list
@@ -1071,7 +1071,7 @@ module WithExpressionAndStatementAndTypeParser
     if (peek_token_kind parser) = As then
       parse_trait_use_alias_item parser name
     else
-      parse_trait_use_precendence_item parser name
+      parse_trait_use_precedence_item parser name
 
   (*  SPEC:
     trait-use-conflict-resolution:
@@ -1082,9 +1082,15 @@ module WithExpressionAndStatementAndTypeParser
       trait-use-conflict-resolution-item  trait-use-conflict-resolution-list
 
     trait-use-conflict-resolution-item:
+      trait-use-alias-item
+      trait-use-precedence-item
+
+    trait-use-alias-item:
       trait-use-conflict-resolution-item-name  as  name;
       trait-use-conflict-resolution-item-name  as  visibility-modifier  name;
       trait-use-conflict-resolution-item-name  as  visibility-modifier;
+
+    trait-use-precedence-item:
       scope-resolution-expression  insteadof  trait-name-list
 
     trait-use-conflict-resolution-item-name:

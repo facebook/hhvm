@@ -17,11 +17,13 @@
 #ifndef incl_HPHP_UTIL_ASM_X64_INTELXED_H_
 #define incl_HPHP_UTIL_ASM_X64_INTELXED_H_
 
-#include <functional>
-
 extern "C" {
 #include <xed-interface.h>
 }
+
+#include <functional>
+#include <unordered_map>
+
 /*
  * A macro assembler for x64, based on the Intel XED library, that strives
  * for low coupling to the runtime environment and ease of extendability.
@@ -244,7 +246,7 @@ public:
   void popf()         { xedInstr(XED_ICLASS_POPF,   sz::word); }
   void lock()         { always_assert(false); }
 
-  void push(MemoryRef m)      { xedInstrM(XED_ICLASS_PUSH,m); }
+  void push(MemoryRef m)      { xedInstrM(XED_ICLASS_PUSH, m); }
   void pop (MemoryRef m)      { xedInstrM(XED_ICLASS_POP, m); }
   void incq(MemoryRef m)      { xedInstrM(XED_ICLASS_INC, m); }
   void incl(MemoryRef m)      { xedInstrM(XED_ICLASS_INC, m, sz::dword); }
@@ -398,7 +400,7 @@ public:
   }
 
 private:
-  //Xed conversion funcs
+  // XED conditional jump conversion functions
 #define CC_TO_XED_ARRAY(xed_instr) {                            \
     XED_ICLASS_##xed_instr##O,    /*CC_O                  */    \
     XED_ICLASS_##xed_instr##NO,   /*CC_NO                 */    \
@@ -421,25 +423,25 @@ private:
   ALWAYS_INLINE
   xed_iclass_enum_t ccToXedJump(ConditionCode c) {
     assertx(c != CC_None);
-    static xed_iclass_enum_t jumps[] = CC_TO_XED_ARRAY(J);
+    static const xed_iclass_enum_t jumps[] = CC_TO_XED_ARRAY(J);
     return jumps[(int)c];
   }
 
   ALWAYS_INLINE
   xed_iclass_enum_t ccToXedSetCC(int c) {
     assertx(c != -1);
-    static xed_iclass_enum_t setccs[] = CC_TO_XED_ARRAY(SET);
+    static const xed_iclass_enum_t setccs[] = CC_TO_XED_ARRAY(SET);
     return setccs[c];
   }
 
   ALWAYS_INLINE
   xed_iclass_enum_t ccToXedCMov(ConditionCode c) {
     assertx(c != CC_None);
-    static xed_iclass_enum_t cmovs[] = CC_TO_XED_ARRAY(CMOV);
+    static const xed_iclass_enum_t cmovs[] = CC_TO_XED_ARRAY(CMOV);
     return cmovs[(int)c];
   }
 
-  //Xed Emit funcs
+  // XED emit functions
 
 #define DECLARE_UNUSED(type, name)  type name; static_cast<void>(name)
 
@@ -630,12 +632,14 @@ public:
                                      return *this; }
   XedAssembler& gs(MemoryRef* mr)  { mr->setSegment(int(XED_REG_GS));
                                      return *this; }
+
 private:
   /*
    * The following section contains conversion methods that take a Reg8/32/64,
    * RegXMM, MemoryRef, RipRelative struct and convert it to a
    * xed_encoder_operand_t.
    */
+
   static constexpr int sizeToBits(int sz) {
     return (sz << 3);
   }
@@ -759,31 +763,36 @@ private:
     return sz::qword;
   }
 
-  // Caches sizes for instruction types in a certain xedInstr* context.
-  // This helps with instructions where you need to know in advance
-  // the length of the instruction being emitted (such as when one of
-  // the operands is RIP_RELATIVE) by caching the size of the instruction
-  // and removing the need to call xedEmit twice each time (once to get
-  // the size, and once to actually emit the instruction).
+  /*
+   * Cache sizes for instruction types in a certain xedInstr context.
+   * This helps with emitting instructions where you need to know in advance
+   * the length of the instruction being emitted (such as when one of
+   * the operands is a RIPRelativeRef) by caching the size of the instruction
+   * and removing the need to call xedEmit twice each time (once to get
+   * the size, and once to actually emit the instruction).
+   */
+  typedef std::unordered_map<int32_t, uint32_t> XedLenCache;
 
-  // Maximum number of bits that can store a xed_iclass_enum_t value
-  // (there are currently ~1560 distinct values).
-#define XED_ICLASS_MAX_BITS        (16)
-#define XED_CACHE_KEY(instr, size) (int32_t(instr) |                \
-                                    (size << XED_ICLASS_MAX_BITS))
-#define XED_CACHE_LEN(call, size)                                   \
-  uint32_t instrLen;                                                \
-  uint32_t key = XED_CACHE_KEY(instr, size);                        \
-  static std::unordered_map<int32_t,                                \
-                            uint32_t> instrLengths;                 \
-  auto res = instrLengths.find(key);                                \
-  if (res != instrLengths.end()) {                                  \
-    instrLen = res->second;                                         \
-  } else {                                                          \
-    instrLen = call;                                                \
-    instrLengths.insert({key, instrLen});                           \
+  ALWAYS_INLINE
+  uint32_t xedCacheLen(XedLenCache* lenCache,
+                       std::function<uint32_t(void)> xedFunc, uint32_t key) {
+    auto res = lenCache->find(key);
+    if (res != lenCache->end()) {
+      return res->second;
+    }
+    auto instrLen = xedFunc();
+    lenCache->insert({key, instrLen});
+    return instrLen;
   }
 
+  static constexpr uint32_t xedLenCacheKey(xed_iclass_enum_t instr,
+                                           uint32_t size) {
+    // 16 bits should fit a xed_iclass_enum_t value (there are currently ~1560
+    // distinct values).
+    return uint32_t(instr) | (size << 16);
+  }
+
+// XEDInstr* wrappers
 
 #define XED_WRAP_IMPL() \
   XED_WRAP_X(64)        \
@@ -889,7 +898,7 @@ private:
     xedEmit(instr, toXedOperand(r2), toXedOperand(r1));
   }
 
-  // most instr(xmm_1, xmm_2) instructions take operands in reverse order
+  // Most instr(xmm_1, xmm_2) instructions take operands in reverse order
   // compared to instr(reg_1, reg_2): source and destination are swapped
 
   ALWAYS_INLINE
@@ -915,8 +924,13 @@ private:
   ALWAYS_INLINE
   void xedInstrM(xed_iclass_enum_t instr, RIPRelativeRef m,
                  int size = sz::qword) {
-    XED_CACHE_LEN(xedEmit(instr, toXedOperand(RIP_ZERO_DISP, size), 0,
-                          dest()), 0);
+    static XedLenCache lenCache;
+    auto instrLen = xedCacheLen(
+                      &lenCache,
+                      [&]() {
+                        return xedEmit(instr, toXedOperand(RIP_ZERO_DISP, size),
+                                       0, dest());
+                      }, xedLenCacheKey(instr, 0));
     m.r.disp -= ((int64_t)frontier() + (int64_t)instrLen);
     xedEmit(instr, toXedOperand(m, size), 0);
   }
@@ -957,10 +971,16 @@ private:
   ALWAYS_INLINE                                                         \
   void xedInstrMR(xed_iclass_enum_t instr, RIPRelativeRef m,            \
                   const Reg##bitsize& r) {                              \
-    XED_CACHE_LEN(xedEmit(instr, toXedOperand(r),                       \
-                          toXedOperand(RIP_ZERO_DISP,                   \
-                          bitsToSize(bitsize)),  bitsize, dest()),      \
-                  0);                                                   \
+    static XedLenCache lenCache;                                        \
+    auto instrLen = xedCacheLen(                                        \
+                      &lenCache,                                        \
+                      [&] {                                             \
+                        return xedEmit(                                 \
+                                instr, toXedOperand(r),                 \
+                                toXedOperand(RIP_ZERO_DISP,             \
+                                             bitsToSize(bitsize)),      \
+                                bitsize, dest());                       \
+                      }, xedLenCacheKey(instr, 0));                     \
     m.r.disp -= ((int64_t)frontier() + (int64_t)instrLen);              \
     xedEmit(instr, toXedOperand(r),                                     \
             toXedOperand(m, bitsToSize(bitsize)), bitsize);             \
@@ -979,9 +999,15 @@ private:
   ALWAYS_INLINE
   void xedInstrMR(xed_iclass_enum_t instr, RIPRelativeRef m,
                   const RegXMM& r, int memSize = sz::qword) {
-    XED_CACHE_LEN(xedEmit(instr, toXedOperand(r),
-                          toXedOperand(RIP_ZERO_DISP, memSize),
-                          0, dest()), 0);
+    static XedLenCache lenCache;
+    auto instrLen = xedCacheLen(
+                      &lenCache,
+                      [&]() {
+                        return xedEmit(
+                                instr, toXedOperand(r),
+                                toXedOperand(RIP_ZERO_DISP, memSize),
+                                0, dest());
+                      }, xedLenCacheKey(instr, 0));
     m.r.disp -= ((int64_t)frontier() + (int64_t)instrLen);
     xedEmit(instr, toXedOperand(r), toXedOperand(m, memSize));
   }
@@ -1017,10 +1043,15 @@ private:
 
   // instr(relbr)
 
-  void xedInstrRelBr(xed_iclass_enum_t instr, CodeAddress destination, int size)
-  {
-    XED_CACHE_LEN(xedEmit(instr, toXedOperand((CodeAddress)0, size), 0,
-                  dest()), size);
+  void xedInstrRelBr(xed_iclass_enum_t instr,
+                     CodeAddress destination, int size) {
+    static XedLenCache lenCache;
+    auto instrLen = xedCacheLen(
+                      &lenCache,
+                      [&]() {
+                        return xedEmit(instr, toXedOperand((CodeAddress)0,
+                                       size), 0, dest());
+                      }, xedLenCacheKey(instr, size));
     auto target = destination - (frontier() + instrLen);
     xedEmit(instr, toXedOperand((CodeAddress)target, size));
   }

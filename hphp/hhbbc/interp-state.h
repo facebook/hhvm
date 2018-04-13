@@ -83,12 +83,14 @@ struct ActRec {
 
 /*
  * State of an iterator in the program.
+ *
+ * We track iterator liveness precisely, so if an iterator is DeadIter, its
+ * definitely dead and vice-versa. We only track "normal" iterators (non-weak,
+ * non-mutable), so iterators not of those type are considered "dead".
  */
-struct UnknownIter {};
-struct TrackedIter { IterTypes types; };
-using Iter = boost::variant< UnknownIter
-                           , TrackedIter
-                           >;
+struct DeadIter {};
+struct LiveIter { IterTypes types; };
+using Iter = boost::variant<DeadIter, LiveIter>;
 
 /*
  * Tag indicating what sort of thing contains the current member base.

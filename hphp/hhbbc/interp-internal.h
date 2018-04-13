@@ -983,7 +983,15 @@ void setIter(ISS& env, IterId iter, Iter iterState) {
   env.state.iters[iter] = std::move(iterState);
 }
 void freeIter(ISS& env, IterId iter) {
-  env.state.iters[iter] = UnknownIter {};
+  env.state.iters[iter] = DeadIter {};
+}
+
+bool iterIsDead(ISS& env, IterId iter) {
+  return match<bool>(
+    env.state.iters[iter],
+    [] (DeadIter) { return true; },
+    [] (const LiveIter&) { return false; }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

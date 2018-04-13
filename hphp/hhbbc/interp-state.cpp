@@ -52,15 +52,24 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
 
   return match<bool>(
     dst,
-    [&] (UnknownIter) { return false; },
-    [&] (TrackedIter& diter) {
+    [&] (DeadIter) {
+      match<void>(
+        src,
+        [] (DeadIter) {},
+        [] (const LiveIter&) {
+          always_assert(false && "merging dead iter with live iter");
+        }
+      );
+      return false;
+    },
+    [&] (LiveIter& diter) {
       return match<bool>(
         src,
-        [&] (UnknownIter) {
-          dst = UnknownIter {};
-          return true;
+        [&] (DeadIter) {
+          always_assert(false && "merging live iter with dead iter");
+          return false;
         },
-        [&] (const TrackedIter& siter) {
+        [&] (const LiveIter& siter) {
           auto key = join(diter.types.key, siter.types.key);
           auto value = join(diter.types.value, siter.types.value);
           auto const count = mergeCounts(diter.types.count, siter.types.count);
@@ -92,8 +101,8 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
 std::string show(const Iter& iter) {
   return match<std::string>(
     iter,
-    [&] (UnknownIter) { return "unk"; },
-    [&] (const TrackedIter& ti) {
+    [&] (DeadIter) { return "dead"; },
+    [&] (const LiveIter& ti) {
       return folly::sformat("{}, {}", show(ti.types.key),
                             show(ti.types.value));
     }

@@ -3391,6 +3391,8 @@ void in(ISS& env, const bc::DecodeCufIter& op) {
 }
 
 void in(ISS& env, const bc::IterInit& op) {
+  assert(iterIsDead(env, op.iter1));
+
   auto const t1 = popC(env);
   auto ity = iter_types(t1);
   if (!ity.mayThrowOnInit) nothrow(env);
@@ -3405,7 +3407,7 @@ void in(ISS& env, const bc::IterInit& op) {
 
   auto const fallthrough = [&]{
     setLoc(env, op.loc3, ity.value);
-    setIter(env, op.iter1, TrackedIter { std::move(ity) });
+    setIter(env, op.iter1, LiveIter { std::move(ity) });
   };
 
   switch (ity.count) {
@@ -3435,6 +3437,8 @@ void in(ISS& env, const bc::MIterInit& op) {
 }
 
 void in(ISS& env, const bc::IterInitK& op) {
+  assert(iterIsDead(env, op.iter1));
+
   auto const t1 = popC(env);
   auto ity = iter_types(t1);
   if (!ity.mayThrowOnInit) nothrow(env);
@@ -3447,7 +3451,7 @@ void in(ISS& env, const bc::IterInitK& op) {
   auto const fallthrough = [&]{
     setLoc(env, op.loc3, ity.value);
     setLoc(env, op.loc4, ity.key);
-    setIter(env, op.iter1, TrackedIter { std::move(ity) });
+    setIter(env, op.iter1, LiveIter { std::move(ity) });
   };
 
   switch (ity.count) {
@@ -3499,11 +3503,11 @@ void in(ISS& env, const bc::IterNext& op) {
 
   auto const noTaken = match<bool>(
     env.state.iters[op.iter1],
-    [&] (UnknownIter)           {
-      setLoc(env, op.loc3, TInitCell);
+    [&] (DeadIter)           {
+      always_assert(false && "IterNext on dead iter");
       return false;
     },
-    [&] (const TrackedIter& ti) {
+    [&] (const LiveIter& ti) {
       if (!ti.types.mayThrowOnNext) nothrow(env);
       switch (ti.types.count) {
         case IterTypes::Count::Single:
@@ -3543,12 +3547,11 @@ void in(ISS& env, const bc::IterNextK& op) {
 
   auto const noTaken = match<bool>(
     env.state.iters[op.iter1],
-    [&] (UnknownIter)           {
-      setLoc(env, op.loc3, TInitCell);
-      setLoc(env, op.loc4, TInitCell);
+    [&] (DeadIter)           {
+      always_assert(false && "IterNextK on dead iter");
       return false;
     },
-    [&] (const TrackedIter& ti) {
+    [&] (const LiveIter& ti) {
       if (!ti.types.mayThrowOnNext) nothrow(env);
       switch (ti.types.count) {
         case IterTypes::Count::Single:
@@ -3597,6 +3600,7 @@ void in(ISS& env, const bc::WIterNextK& op) {
 }
 
 void in(ISS& env, const bc::IterFree& op) {
+  // IterFree is used for weak iterators too, so we can't assert !iterIsDead.
   nothrow(env);
   freeIter(env, op.iter1);
 }

@@ -2339,6 +2339,7 @@ void hphp_process_init() {
       RuntimeOption::EvalJitDeserializeFrom.substr(1) :
       RuntimeOption::EvalJitDeserializeFrom;
     if (jit::deserializeProfData(name)) {
+      StructuredLog::log("", {});
       jit::mcgen::checkRetranslateAll(true);
     } else if (RuntimeOption::EvalJitDeserializeFrom[0] == '+') {
       Logger::Error("Failed to deserialize jit profile.");

@@ -66,6 +66,8 @@ auto deserialize(ProfDataDeserializer&ser, F&& f) -> decltype(f()) {
     auto& ent = ser.getEnt(reinterpret_cast<T>(ptr - 1));
     assertx(!ent);
     ent = f();
+    ITRACE(3, "0x{:08x} => 0x{:08x}\n",
+           ptr - 1, reinterpret_cast<uintptr_t>(ent));
     assertx(ent);
     return ent;
   }
@@ -291,7 +293,7 @@ RegionDesc::BlockPtr read_region_block(ProfDataDeserializer& ser) {
 
 void write_region_desc(ProfDataSerializer& ser, const RegionDesc* rd) {
   write_container(ser, rd->blocks(), write_region_block);
-  write_container(ser, findPredTrans(rd->entry()->id(), profData()),
+  write_container(ser, findPredTrans(*rd, profData()),
                   [&] (RegionDesc::BlockId id) {
                     write_raw(ser, id);
                   });
@@ -664,6 +666,9 @@ Unit* read_unit(ProfDataDeserializer& ser) {
     [&] () -> Unit* {
       auto const filepath = read_string(ser);
       ITRACE(2, "Unit: {}\n", filepath);
+      if (filepath->data()[0] == '/' && filepath->data()[1] == ':') {
+        return lookupSyslibUnit(filepath);
+      }
       return lookupUnit(filepath, "", nullptr);
     }
   );

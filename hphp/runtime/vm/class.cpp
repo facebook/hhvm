@@ -1717,6 +1717,7 @@ Class::Class(PreClass* preClass, Class* parent,
   , m_preClass(PreClassPtr(preClass))
   , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
   , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
+  , m_serialized(false)
 {
   if (usedTraits.size()) {
     allocExtraData();

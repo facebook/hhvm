@@ -533,15 +533,15 @@ std::string state_string(const php::Func& f, const State& st,
       }
 
       if (i >= collect.localStaticTypes.size()) {
-        return "(!!! unknown static !!!)";
+        return " (!!! unknown static !!!)";
       }
 
       return folly::sformat(
-        "({}static: {})",
+        " ({}static: {})",
         st.localStaticBindings[i] == LocalStaticBinding::Maybe ? "maybe-" : "",
         show(collect.localStaticTypes[i]));
     };
-    folly::format(&ret, "{: <8} :: {} {}\n",
+    folly::format(&ret, "{: <8} :: {}{}\n",
                   local_string(f, i),
                   show(st.locals[i]),
                   staticLocal());

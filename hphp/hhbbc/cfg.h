@@ -110,33 +110,52 @@ void forEachTakenEdge(const T& op, Fun f) {
  * Order unspecified, and the types of successor edges are not
  * distinguished.
  *
- * Factored exit edges are traversed only if the block consists of
+ * Exit edges are traversed only if the block consists of
  * more than a single Nop instruction.  The order_blocks routine in
  * emit.cpp relies on this for correctness: if the only block for a
  * protected fault region is empty, we need to not include the fault
  * funclet blocks as reachable, or we can end up with fault funclet
  * handlers without an EHEnt pointing at them.  In cases other than
  * emit.cpp, this is not required for correctness, but is slightly
- * better than always traversing the factored exit edges.
+ * better than always traversing the exit edges.
  */
 template<class Fun>
 void forEachSuccessor(const php::Block& block, Fun f) {
   if (!is_single_nop(block)) {
     forEachTakenEdge(block.hhbcs.back(), f);
-    for (auto& ex : block.factoredExits) f(ex);
+    for (auto& ex : block.throwExits)  f(ex);
+    for (auto& ex : block.unwindExits) f(ex);
   }
   if (block.fallthrough != NoBlockId) f(block.fallthrough);
 }
 
 /*
  * Call a function for every successor of `block' that is reachable
- * through a non-factored edge.
+ * through a fallthrough or taken edge.
  */
 template<class Fun>
 void forEachNormalSuccessor(const php::Block& block, Fun f) {
   forEachTakenEdge(block.hhbcs.back(), f);
   if (block.fallthrough != NoBlockId) f(block.fallthrough);
 }
+
+/*
+ * Call a function for every successor of `block' that is reachable
+ * through a non-throw edge.
+ */
+template<class Fun>
+void forEachNonThrowSuccessor(const php::Block& block, Fun f) {
+  forEachTakenEdge(block.hhbcs.back(), f);
+  for (auto& ex : block.unwindExits) f(ex);
+  if (block.fallthrough != NoBlockId) f(block.fallthrough);
+}
+
+/*
+ * Obtain the blocks for a function in a reverse post order, starting
+ * with the specified block.  The exact order is not specified.
+ */
+std::vector<borrowed_ptr<php::Block>>
+rpoSortFromBlock(const php::Func&, BlockId);
 
 /*
  * Obtain the blocks for a function in a reverse post order, starting
@@ -167,7 +186,7 @@ using BlockToBlocks = std::vector<
 >;
 
 /*
- * Find the immediate non-exceptional predecessors for each block in
+ * Find the immediate non-throw predecessors for each block in
  * an RPO-sorted list of blocks.
  *
  * The BlockToBlocks map returned will have any entry for each block
@@ -175,10 +194,10 @@ using BlockToBlocks = std::vector<
  * in the list.
  */
 BlockToBlocks
-computeNormalPreds(const std::vector<borrowed_ptr<php::Block>>&);
+computeNonThrowPreds(const std::vector<borrowed_ptr<php::Block>>&);
 
 /*
- * Find the immediate exceptional predecessors for each block in an
+ * Find the immediate throw predecessors for each block in an
  * RPO-sorted list of blocks.
  *
  * The BlockToBlocks map returned will have any entry for each block
@@ -186,7 +205,7 @@ computeNormalPreds(const std::vector<borrowed_ptr<php::Block>>&);
  * in the list.
  */
 BlockToBlocks
-computeFactoredPreds(const std::vector<borrowed_ptr<php::Block>>&);
+computeThrowPreds(const std::vector<borrowed_ptr<php::Block>>&);
 
 /*
  * Visit each leaf in the ExnNode tree.

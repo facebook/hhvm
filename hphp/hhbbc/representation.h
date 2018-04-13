@@ -62,7 +62,7 @@ struct SrcInfo {
  * A basic block in our factored control flow graph.
  *
  * Blocks terminate on control flow, except exceptional control flow.
- * We keep a set of "factored edges" representing all possible early
+ * We keep a set of "throw exits" representing all possible early
  * exits due to exceptional control flow.
  */
 struct Block {
@@ -103,16 +103,20 @@ struct Block {
    *
    *  - Taken edges (these are encoded in the last instruction in hhbcs).
    *
-   *  - factoredExits (these represent edges traversed for exceptions
-   *    mid-block)
+   *  - throwExits (these represent edges traversed for exceptions mid-block)
+   *
+   *  - unwindExits (these represent edges traversed for block-ending Unwind
+   *                 ops)
    *
    * For the idea behind the factored exit edge thing, see "Efficient
    * and Precise Modeling of Exceptions for the Analysis of Java
    * Programs" (http://dl.acm.org/citation.cfm?id=316171).
    */
   BlockId fallthrough{NoBlockId};
-  bool fallthroughNS = false;
-  CompactVector<BlockId> factoredExits;
+  bool fallthroughNS{false};
+
+  CompactVector<BlockId> throwExits;
+  CompactVector<BlockId> unwindExits;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -137,7 +141,7 @@ struct Block {
  * factored exit edges (see php::Block).  This tree structure just
  * exists to get the EHEnts right.
  *
- * Note: blocks in fault funclets will have factored edges to the
+ * Note: blocks in fault funclets will have exceptional edges to the
  * blocks listed as handlers in any ExnNode that contained the
  * fault-protected region, since those control flow paths are
  * possible.  Generally they will have nullptr for their exnNode
@@ -292,8 +296,7 @@ struct FuncBase {
    * within a try or fault region has a pointer to the inner-most
    * ExnNode protecting it.
    *
-   * Note that this, together with the Blocks' factoredExits are updated
-   * during the concurrent analyze pass.
+   * Note that this is updated during the concurrent analyze pass.
    */
   CompactVector<std::unique_ptr<ExnNode>> exnNodes;
 

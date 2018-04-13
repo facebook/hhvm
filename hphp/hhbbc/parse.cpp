@@ -30,8 +30,9 @@
 
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
-#include <folly/ScopeGuard.h>
 #include <folly/Memory.h>
+#include <folly/ScopeGuard.h>
+#include <folly/sorted_vector_types.h>
 
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -50,7 +51,7 @@
 
 namespace HPHP { namespace HHBBC {
 
-TRACE_SET_MOD(hhbbc);
+TRACE_SET_MOD(hhbbc_parse);
 
 namespace {
 
@@ -231,23 +232,6 @@ struct ExnTreeInfo {
   std::map<const EHEntEmitter*,borrowed_ptr<php::ExnNode>> ehMap;
 
   /*
-   * Fault funclets don't actually fall in the EHEnt region for all of
-   * their parent handlers in HHBC.  There may be EHEnt regions
-   * covering the fault funclet, but if an exception occurs in the
-   * funclet it can also propagate to any EH region from the code that
-   * entered the funclet.  We want factored exit edges from the fault
-   * funclets to any of these enclosing catch blocks (or other
-   * enclosing funclet blocks).
-   *
-   * Moreover, funclet offsets can be entered from multiple protected
-   * regions, so we need to keep a map of all the possible regions
-   * that could have entered a given funclet, so we can add exit edges
-   * to all their parent EHEnt handlers.
-   */
-  std::map<borrowed_ptr<php::Block>,std::vector<borrowed_ptr<php::ExnNode>>>
-    funcletNodes;
-
-  /*
    * Keep track of the start offsets for all fault funclets.  This is
    * used to find the extents of each handler for find_fault_funclets.
    * It is assumed that each fault funclet handler extends from its
@@ -284,7 +268,6 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
     case EHEnt::Type::Fault:
       {
         auto const fault = findBlock(eh.m_handler);
-        ret.funcletNodes[fault].push_back(borrow(node));
         ret.faultFuncletStarts.insert(eh.m_handler);
         node->info = php::FaultRegion { fault->id, eh.m_iterId, eh.m_itRef };
       }
@@ -316,33 +299,8 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
 }
 
 /*
- * Instead of breaking blocks on instructions that could throw, we
- * represent the control flow edges for exception paths as a factored
- * edge at the end of each block.
- *
- * When we initially add them here, no attempt is made to determine if
- * the edge is actually possible to traverse.
- */
-void add_factored_exits(php::Block& blk,
-                        borrowed_ptr<const php::ExnNode> node) {
-  if (!node) return;
-
-  match<void>(
-    node->info,
-    [&] (const php::CatchRegion& cr) {
-      blk.factoredExits.push_back(cr.catchEntry);
-    },
-    [&] (const php::FaultRegion& fr) {
-      blk.factoredExits.push_back(fr.faultEntry);
-    }
-  );
-}
-
-/*
  * Locate all the basic blocks associated with fault funclets, and
- * mark them as such.  Also, add factored exit edges for exceptional
- * control flow through any parent protected regions of the region(s)
- * that pointed at each fault handler.
+ * mark them as such.
  */
 template <class BlockStarts, class FindBlock>
 void find_fault_funclets(ExnTreeInfo& tinfo, const php::Func& /*func*/,
@@ -357,33 +315,340 @@ void find_fault_funclets(ExnTreeInfo& tinfo, const php::Func& /*func*/,
     auto offIt = blockStarts.find(*funcletStartIt);
     assert(offIt != end(blockStarts));
 
-    auto const firstBlk  = findBlock(*offIt);
-    auto const funcletIt = tinfo.funcletNodes.find(firstBlk);
-    assert(funcletIt != end(tinfo.funcletNodes));
-    assert(!funcletIt->second.empty());
-
     do {
       auto const blk = findBlock(*offIt);
       blk->section   = static_cast<php::Block::Section>(sectionId);
-
-      // Propagate the exit edges to the containing fault/try handlers,
-      // if there were any.
-      for (auto& node : funcletIt->second) {
-        add_factored_exits(*blk, node->parent);
-      }
-
-      // Fault funclets can have protected regions which may point to
-      // handlers that are also listed in parents of the EH-region that
-      // targets the funclet.  This means we might have duplicate
-      // factored exits now, so we need to remove them.
-      std::sort(begin(blk->factoredExits), end(blk->factoredExits));
-      blk->factoredExits.resize(
-        std::unique(begin(blk->factoredExits), end(blk->factoredExits)) -
-        begin(blk->factoredExits)
-      );
-
       ++offIt;
     } while (offIt != end(blockStarts) && *offIt < nextFunclet);
+  }
+}
+
+BlockId node_entry_block(const php::ExnNode& node) {
+  return match<BlockId>(
+    node.info,
+    [] (const php::CatchRegion& cr) { return cr.catchEntry; },
+    [] (const php::FaultRegion& fr) { return fr.faultEntry; }
+  );
+}
+
+/*
+ * Build the exceptional edge lists for a function for the simple (and common
+ * case). If the function's exception tree is all flat (no children), then
+ * unwind edges are always empty (you cannot unwind from the main section, and
+ * if you're in the fault handler you'll exit the function). Throw exits just
+ * jump to the associated handler (and any throw in the handler will exit the
+ * function).
+ */
+void build_exceptional_edges_simple(const php::Func& func) {
+  for (auto& blk : func.blocks) {
+    assert(blk->throwExits.empty());
+    assert(blk->unwindExits.empty());
+    if (!blk->exnNode) continue;
+    blk->throwExits.push_back(node_entry_block(*blk->exnNode));
+  }
+}
+
+/*
+ * Populate the throw and unwind edges for all blocks in the function.
+ *
+ * - An Unwind instruction will jump to the handler's parent, if any. If the
+ *   handler has no parent, it will either exit the function (and thus no edge),
+ *   or it will jump to a different handler, depending on the unwinder's state
+ *   machine.
+ *
+ * - A throwing instruction (which can happen anytime within a block) will jump
+ *   to the block's exception handler (given by the exnNode), if any. If there
+ *   is not, and we're in a handler, it will jump to the same place an Unwind
+ *   instruction would (which may be nowhere).
+ *
+ * These cases are difficult to get right (especially when unwinding without a
+ * parent region). So, we simulate the unwinder as a state machine and find the
+ * closure of all of its possible states. From these states we can then infer
+ * which edges can be traversed by the unwinder. Once we have the unwinder
+ * edges, we can then calculate the throw edges.
+ */
+void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
+  // Check for the simple and quicker cases
+  if (func.exnNodes.empty()) return;
+  if (std::all_of(
+        func.exnNodes.begin(),
+        func.exnNodes.end(),
+        [](auto const& n){ return n->children.empty(); })
+     ) {
+    return build_exceptional_edges_simple(func);
+  }
+
+  FTRACE(4, "    -------- build exceptional edges (full) --------\n");
+  FTRACE(8, "{}\n", show(func));
+
+  // Map of exceptional regions that can be entered from other exceptional
+  // regions via throws.
+  folly::sorted_vector_map<
+    borrowed_ptr<const php::ExnNode>,
+    folly::sorted_vector_set<borrowed_ptr<const php::ExnNode>>
+  > throws;
+
+  // Map of blocks to the exceptional regions that block belongs to (a block can
+  // belong to multiple exceptional regions at once).
+  folly::sorted_vector_map<
+    BlockId,
+    folly::sorted_vector_set<borrowed_ptr<const php::ExnNode>>
+  > blocksToNodes;
+
+  auto const add = [&] (const php::Block& blk, const php::ExnNode* node) {
+    assert(blk.throwExits.empty());
+    assert(blk.unwindExits.empty());
+    if (node) blocksToNodes[blk.id].insert(node);
+    if (!blk.exnNode) return;
+    throws[node].insert(blk.exnNode);
+  };
+
+  // There's no easy way to determine which blocks belong to which exceptional
+  // regions, except by doing a walk from each region's entry block.
+  auto const mainBlocks = rpoSortAddDVs(func);
+  for (auto const& blk : mainBlocks) add(*blk, nullptr);
+
+  uint32_t nodeCount = 0;
+  visitExnLeaves(
+    func,
+    [&] (const php::ExnNode& node) {
+      ++nodeCount;
+      auto const blocks = rpoSortFromBlock(func, node_entry_block(node));
+      for (auto const& blk : blocks) add(*blk, &node);
+    }
+  );
+
+  FTRACE(
+    8, "    throws: {}\n",
+    [&]{
+      using namespace folly::gen;
+      return from(throws)
+        | map([] (auto const& p) {
+            return folly::sformat(
+              "{} -> {}",
+              p.first ? folly::sformat("E{}", p.first->id) : "*",
+              from(p.second)
+                | map([] (auto const& n) {
+                    return folly::sformat("E{}", n->id);
+                  })
+                | unsplit<std::string>(",")
+            );
+          })
+        | unsplit<std::string>(", ");
+    }()
+  );
+
+  FTRACE(
+    8, "    blocks to nodes: {}\n",
+    [&]{
+      using namespace folly::gen;
+      return from(blocksToNodes)
+        | map([] (auto const& p) {
+            return folly::sformat(
+              "B{} -> {}",
+              p.first,
+              from(p.second)
+                | map([] (auto const& n) {
+                    return folly::sformat("E{}", n->id);
+                  })
+                | unsplit<std::string>(",")
+            );
+          })
+        | unsplit<std::string>(", ");
+    }()
+  );
+
+  /* Unwinder state machine simulation */
+
+  // The unwinder's state is a stack of regions (the current region is just the
+  // top of the stack).
+  using State = std::vector<borrowed_ptr<const php::ExnNode>>;
+
+  DEBUG_ONLY auto const showState = [&](const State& state) {
+    using namespace folly::gen;
+    return from(state)
+    | map([&] (borrowed_ptr<const php::ExnNode> n) {
+        return folly::sformat("E{}", n->id);
+      })
+    | unsplit<std::string>("->");
+  };
+
+  folly::sorted_vector_set<State> states;
+  folly::sorted_vector_set<State> newStates;
+  folly::sorted_vector_map<
+    borrowed_ptr<const php::ExnNode>,
+    folly::sorted_vector_set<borrowed_ptr<const php::ExnNode>>
+  > unwindEdges;
+
+  auto iters = 0;
+  auto changed = false;
+
+  auto const dumpStates = [&] (const char* header, int space, int level) {
+    FTRACE(
+      level, "{}{}:\n{}\n",
+      std::string(space, ' '),
+      header,
+      [&]{
+        using namespace folly::gen;
+        return from(states)
+          | map([&] (const State& state) {
+              return folly::sformat(
+                "{}{}",
+                std::string(space+2, ' '),
+                showState(state)
+              );
+            })
+          | unsplit<std::string>("\n");
+      }()
+    );
+  };
+
+  /*
+   * We need to find all the possible states that the unwinder can be in from
+   * the (known) initial states. These initial states are just the regions that
+   * are reachable via throws from the main region.
+   *
+   * At each round, we take the current known states and then apply the various
+   * unwinder rules to them to generate new states. We accumulate the states
+   * until we reach a fixed point (no new states encountered). At this point,
+   * the edges between the various states give the unwind edges between regions.
+   */
+
+  for (auto const& dst : throws[nullptr]) states.insert({dst});
+  do {
+    FTRACE(6, "    -- iteration #{}\n", iters+1);
+    dumpStates("start", 6, 6);
+
+    FTRACE(6, "      update:\n");
+    // Iterate over new states, generate new ones.
+    for (auto state : states) {
+      assert(!state.empty());
+      auto const current = state.back();
+      assert(current);
+
+      FTRACE(6, "        * {}\n", showState(state));
+
+      // Sanity check. In a well-formed func, we should always reach a
+      // fixed-point. This is a very crude test to avoid looping forever. We
+      // should never have a stack with duplicate regions.
+      always_assert(state.size() <= nodeCount);
+
+      // If this is a catch region, the unwinder pops off the top of its stack
+      // first.
+      match<void>(
+        current->info,
+        [&](const php::CatchRegion&) {
+          state.pop_back();
+          FTRACE(6, "          Pop (catch)\n");
+        },
+        [] (const php::FaultRegion&) {}
+      );
+
+      // For each region that we can jump to via a throw from this region,
+      // record a new state. The new state is the current state with the
+      // destination region pushed onto it.
+      for (auto const& dst : throws[current]) {
+        state.push_back(dst);
+        FTRACE(6, "          => {} (throw)\n", showState(state));
+        newStates.insert(state);
+        state.pop_back();
+      }
+
+      // Handle the unwind case. While the top doesn't have a parent, pop. If
+      // the stack is now empty, an unwind will exit the function, so there's no
+      // new state.
+      while (!state.empty() && !state.back()->parent) state.pop_back();
+      if (state.empty()) continue;
+
+      // The stack is non-empty and the top has a parent. We'll unwind to the
+      // top's parent, so record that new state and record the edge.
+      auto const oldNode = state.back();
+      state.back() = oldNode->parent;
+      FTRACE(6, "          =>  {} (unwind E{} to E{})\n",
+             showState(state), oldNode->id, state.back()->id);
+      newStates.insert(state);
+      unwindEdges[current].insert(state.back());
+    }
+
+    // Merge the new states into the old ones. If we've generated new ones, then
+    // we have to repeat.
+    auto const old = states.size();
+    states.insert(newStates.begin(), newStates.end());
+    changed = states.size() != old;
+    newStates.clear();
+    ++iters;
+  } while (changed);
+
+  FTRACE(4, "    fixed-point reached in {} iterations\n", iters);
+  dumpStates("fixed-point", 4, 4);
+
+  FTRACE(
+    6, "    unwind edges: {}\n",
+    [&]{
+      using namespace folly::gen;
+      return from(unwindEdges)
+        | map([] (auto const& p) {
+            return folly::sformat(
+              "E{} -> {}",
+              p.first->id,
+              from(p.second)
+                | map([] (auto const& n) {
+                    return folly::sformat("E{}", n->id);
+                  })
+                | unsplit<std::string>(",")
+            );
+          })
+        | unsplit<std::string>(", ");
+    }()
+  );
+
+  // Now that we have the unwind edges for regions, we can populate the block's
+  // unwind edges. For each block, they're just the union of the unwind edges of
+  // all the regions the block belongs to. With the unwind edges done, the throw
+  // edges are easily computed.
+  auto const unwindExitsForBlock = [&] (BlockId blk) {
+    CompactVector<BlockId> exits;
+    for (auto const& node : blocksToNodes[blk]) {
+      for (auto const& edge : unwindEdges[node]) {
+        exits.push_back(node_entry_block(*edge));
+      }
+    }
+    // We might have duplicate exits now, so we need to remove them.
+    std::sort(exits.begin(), exits.end());
+    exits.resize(std::unique(exits.begin(), exits.end()) - exits.begin());
+    return exits;
+  };
+
+  for (auto& blk : func.blocks) {
+    assert(blk->throwExits.empty());
+    assert(blk->unwindExits.empty());
+
+    if (ends_with_unwind(*blk)) {
+      blk->unwindExits = unwindExitsForBlock(blk->id);
+    }
+
+    if (blk->exnNode) {
+      blk->throwExits.push_back(node_entry_block(*blk->exnNode));
+    } else if (blk->section != php::Block::Section::Main) {
+      blk->throwExits = unwindExitsForBlock(blk->id);
+    }
+
+    FTRACE(
+      8, "    blk:{} (throw:{}) (unwind:{})\n",
+      blk->id,
+      [&]{
+        using namespace folly::gen;
+        return from(blk->throwExits)
+          | map([] (BlockId b) { return folly::sformat(" blk:{}", b); })
+          | unsplit<std::string>("");
+      }(),
+      [&]{
+        using namespace folly::gen;
+        return from(blk->unwindExits)
+          | map([] (BlockId b) { return folly::sformat(" blk:{}", b); })
+          | unsplit<std::string>("");
+      }()
+    );
   }
 }
 
@@ -790,7 +1055,6 @@ void build_cfg(ParseUnitState& puState,
       auto it = exnTreeInfo.ehMap.find(eh);
       assert(it != end(exnTreeInfo.ehMap));
       block->exnNode = it->second;
-      add_factored_exits(*block, block->exnNode);
     }
 
     populate_block(puState, fe, func, *block, bcStart, bcStop, findBlock);
@@ -804,6 +1068,8 @@ void build_cfg(ParseUnitState& puState,
     auto const id = kv.second->id;
     func.blocks[id] = std::move(kv.second);
   }
+
+  build_exceptional_edges(exnTreeInfo, func);
 }
 
 void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
@@ -1168,7 +1434,7 @@ void find_additional_metadata(const ParseUnitState& puState,
 
 std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
                                       std::unique_ptr<UnitEmitter> uep) {
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, uep->isASystemLib()};
+  Trace::Bump bumper{Trace::hhbbc_parse, kSystemLibBump, uep->isASystemLib()};
   FTRACE(2, "parse_unit {}\n", uep->m_filepath->data());
 
   auto const& ue = *uep;
@@ -1225,6 +1491,7 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
     record_const_init(prog, encoded_val);
   }
 
+  assert(check(*ret));
   return ret;
 }
 

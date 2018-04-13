@@ -1544,7 +1544,14 @@ void in(ISS& env, const bc::RetM& op) {
   doRet(env, vec(std::move(ret)), false);
 }
 
-void in(ISS& /*env*/, const bc::Unwind& /*op*/) {}
+void in(ISS& env, const bc::Unwind&) {
+  nothrow(env); // Don't propagate to throw edges
+  for (auto exit : env.blk.unwindExits) {
+    auto const stackLess = without_stacks(env.state);
+    env.propagate(exit, &stackLess);
+  }
+}
+
 void in(ISS& env, const bc::Throw& /*op*/) {
   popC(env);
 }
@@ -4331,10 +4338,10 @@ StepFlags interpOps(Interp& interp,
   auto flags = StepFlags{};
   ISS env { interp, flags, propagate };
 
-  // If there are factored edges, make a copy of the state (except
-  // stacks) in case we need to propagate across factored exits (if
+  // If there are throw exit edges, make a copy of the state (except
+  // stacks) in case we need to propagate across throw exits (if
   // it's a PEI).
-  auto const stateBefore = interp.blk->factoredExits.empty()
+  auto const stateBefore = interp.blk->throwExits.empty()
     ? State{}
     : without_stacks(interp.state);
 
@@ -4379,8 +4386,8 @@ StepFlags interpOps(Interp& interp,
   assertx(!flags.effectFree || !flags.wasPEI);
   if (flags.wasPEI) {
     FTRACE(2, "   PEI.\n");
-    for (auto factored : interp.blk->factoredExits) {
-      propagate(factored, &stateBefore);
+    for (auto exit : interp.blk->throwExits) {
+      propagate(exit, &stateBefore);
     }
   }
   return flags;

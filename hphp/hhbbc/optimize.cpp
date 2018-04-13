@@ -339,6 +339,7 @@ void insert_assertions(const Index& index,
 
     if (state.unreachable) {
       blk->fallthrough = NoBlockId;
+      blk->unwindExits = {};
       if (!(instrFlags(op.op) & TF)) {
         gen(bc::BreakTraceHint {});
         gen(bc::String { s_unreachable.get() });
@@ -512,7 +513,8 @@ borrowed_ptr<php::Block> make_block(FuncAnalysis& ainfo,
   newBlk->id            = ainfo.ctx.func->blocks.size();
   newBlk->section       = srcBlk->section;
   newBlk->exnNode       = srcBlk->exnNode;
-  newBlk->factoredExits = srcBlk->factoredExits;
+  newBlk->throwExits    = srcBlk->throwExits;
+  newBlk->unwindExits   = srcBlk->unwindExits;
   auto const blk        = borrow(newBlk);
   ainfo.ctx.func->blocks.push_back(std::move(newBlk));
 
@@ -535,6 +537,8 @@ borrowed_ptr<php::Block> make_fatal_block(FuncAnalysis& ainfo,
     bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
   };
   blk->fallthrough = NoBlockId;
+  blk->throwExits = {};
+  blk->unwindExits = {};
   blk->exnNode = nullptr;
   return blk;
 }
@@ -615,6 +619,7 @@ void first_pass(const Index& index,
       // FCallBuiltin, for example
       auto opc = genOut(&op);
       blk->fallthrough = NoBlockId;
+      blk->unwindExits = {};
       if (!(instrFlags(opc) & TF)) {
         gen(bc::BreakTraceHint {});
         gen(bc::String { s_unreachable.get() });

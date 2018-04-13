@@ -306,11 +306,11 @@ folly::Optional<Type> array_do_newelem(ISS& env, const Type& value) {
 //////////////////////////////////////////////////////////////////////
 
 // MInstrs can throw in between each op, so the states of locals
-// need to be propagated across factored exit edges.
+// need to be propagated across throw exit edges.
 void miThrow(ISS& env) {
-  for (auto factored : env.blk.factoredExits) {
+  for (auto exit : env.blk.throwExits) {
     auto const stackLess = without_stacks(env.state);
-    env.propagate(factored, &stackLess);
+    env.propagate(exit, &stackLess);
   }
 }
 

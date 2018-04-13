@@ -76,13 +76,18 @@ void postorderWalk(const php::Func& func,
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<borrowed_ptr<php::Block>> rpoSortFromMain(const php::Func& func) {
+std::vector<borrowed_ptr<php::Block>> rpoSortFromBlock(const php::Func& func,
+                                                       BlockId start) {
   boost::dynamic_bitset<> visited(func.blocks.size());
   std::vector<borrowed_ptr<php::Block>> ret;
   ret.reserve(func.blocks.size());
-  postorderWalk(func, ret, visited, *func.blocks[func.mainEntry]);
+  postorderWalk(func, ret, visited, *func.blocks[start]);
   std::reverse(begin(ret), end(ret));
   return ret;
+}
+
+std::vector<borrowed_ptr<php::Block>> rpoSortFromMain(const php::Func& func) {
+  return rpoSortFromBlock(func, func.mainEntry);
 }
 
 std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func& func) {
@@ -107,14 +112,14 @@ std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func& func) {
 }
 
 BlockToBlocks
-computeNormalPreds(const std::vector<borrowed_ptr<php::Block>>& rpoBlocks) {
+computeNonThrowPreds(const std::vector<borrowed_ptr<php::Block>>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
   for (auto& b : rpoBlocks) {
     if (preds.size() < b->id + 1) {
       preds.resize(b->id + 1);
     }
-    forEachNormalSuccessor(*b, [&] (BlockId blkId) {
+    forEachNonThrowSuccessor(*b, [&] (BlockId blkId) {
       if (preds.size() < blkId + 1) {
         preds.resize(blkId + 1);
       }
@@ -125,14 +130,14 @@ computeNormalPreds(const std::vector<borrowed_ptr<php::Block>>& rpoBlocks) {
 }
 
 BlockToBlocks
-computeFactoredPreds(const std::vector<borrowed_ptr<php::Block>>& rpoBlocks) {
+computeThrowPreds(const std::vector<borrowed_ptr<php::Block>>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
   for (auto& b : rpoBlocks) {
     if (preds.size() < b->id + 1) {
       preds.resize(b->id + 1);
     }
-    for (auto& ex : b->factoredExits) {
+    for (auto& ex : b->throwExits) {
       if (preds.size() < ex + 1) {
         preds.resize(ex + 1);
       }

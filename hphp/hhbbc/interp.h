@@ -80,7 +80,7 @@ struct StepFlags {
    *
    * Instructions are assumed to be PEIs unless the abstract
    * interpreter says they aren't.  A PEI must propagate the state
-   * from before the instruction across all factored exit edges.
+   * from before the instruction across all throw exit edges.
    *
    * Some instructions that can throw with mid-opcode states need to
    * handle those cases specially.

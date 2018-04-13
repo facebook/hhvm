@@ -117,7 +117,7 @@ php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
 
 /*
  * We need to ensure that all blocks in an fpi region are
- * congiguous. This will normally be guaranteed by rpo order (since
+ * contiguous. This will normally be guaranteed by rpo order (since
  * the blocks are dominated by the FPush and post-dominated by the
  * FCall). If there are exceptional edges from the fpi region,
  * however, but the FCall is still reachable its possible that the
@@ -201,9 +201,9 @@ std::vector<borrowed_ptr<php::Block>> initial_sort(const php::Func& f) {
           continue;
         }
         changes = true;
-        FTRACE(4, "blk:{} add factored edge to {}\n",
+        FTRACE(4, "blk:{} add throw edge to {}\n",
                blk->id, (*blkPtr)->id);
-        blk->factoredExits.push_back((*blkPtr)->id);
+        blk->throwExits.push_back((*blkPtr)->id);
       }
     }
     if (changes) {
@@ -214,7 +214,7 @@ std::vector<borrowed_ptr<php::Block>> initial_sort(const php::Func& f) {
         auto const blk = borrow(f.blocks[elm.first]);
         for (auto const blkPtr : elm.second) {
           if (*blkPtr) {
-            blk->factoredExits.pop_back();
+            blk->throwExits.pop_back();
           }
         }
       }
@@ -854,9 +854,14 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       }
     }
 
-    if (b->factoredExits.size()) {
-      FTRACE(4, "      factored:");
-      for (auto DEBUG_ONLY id : b->factoredExits) FTRACE(4, " {}", id);
+    if (b->throwExits.size()) {
+      FTRACE(4, "      throw:");
+      for (auto DEBUG_ONLY id : b->throwExits) FTRACE(4, " {}", id);
+      FTRACE(4, "\n");
+    }
+    if (b->unwindExits.size()) {
+      FTRACE(4, "      unwind:");
+      for (auto DEBUG_ONLY id : b->unwindExits) FTRACE(4, " {}", id);
       FTRACE(4, "\n");
     }
     if (b->fallthrough != NoBlockId) {
@@ -934,9 +939,25 @@ void emit_eh_region(FuncEmitter& fe,
                     const BlockInfo& blockInfo,
                     ParentIndexMap& parentIndexMap) {
   FTRACE(2,  "    func {}: ExnNode {}\n", fe.name, region->node->id);
+
+  auto const unreachable = [&] (const php::ExnNode& node) {
+    return match<bool>(
+      node.info,
+      [&] (const php::CatchRegion& cr) {
+        return blockInfo[cr.catchEntry].offset == kInvalidOffset;
+      },
+      [&] (const php::FaultRegion& fr) {
+        return blockInfo[fr.faultEntry].offset == kInvalidOffset;
+      }
+    );
+  };
+
   // A region on a single empty block.
   if (region->start == region->past) {
     FTRACE(2, "    Skipping\n");
+    return;
+  } else if (unreachable(*region->node)) {
+    FTRACE(2, "    Unreachable\n");
     return;
   }
 
@@ -948,8 +969,12 @@ void emit_eh_region(FuncEmitter& fe,
   assert(eh.m_past >= eh.m_base);
   assert(eh.m_base != kInvalidOffset && eh.m_past != kInvalidOffset);
 
-  if (region->parent) {
-    auto parentIt = parentIndexMap.find(region->parent);
+  // An unreachable parent won't be emitted (and thus its offset won't be set),
+  // so find the closest reachable one.
+  auto parent = region->parent;
+  while (parent && unreachable(*parent->node)) parent = parent->parent;
+  if (parent) {
+    auto parentIt = parentIndexMap.find(parent);
     assert(parentIt != end(parentIndexMap));
     eh.m_parentIndex = parentIt->second;
   } else {
@@ -974,6 +999,8 @@ void emit_eh_region(FuncEmitter& fe,
       eh.m_itRef = fr.itRef;
     }
   );
+
+  assert(eh.m_handler != kInvalidOffset);
 }
 
 void exn_path(std::vector<const php::ExnNode*>& ret, const php::ExnNode* n) {
@@ -1470,6 +1497,8 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   Trace::Bump bumper{
     Trace::hhbbc_emit, kSystemLibBump, is_systemlib_part(unit)
   };
+
+  assert(check(unit));
 
   auto ue = std::make_unique<UnitEmitter>(unit.md5);
   FTRACE(1, "  unit {}\n", unit.filename->data());

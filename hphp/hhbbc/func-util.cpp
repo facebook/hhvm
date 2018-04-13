@@ -147,7 +147,8 @@ void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
     if (delta) {
       ours->id += delta;
       if (ours->fallthrough != NoBlockId) ours->fallthrough += delta;
-      for (auto &id : ours->factoredExits) id += delta;
+      for (auto &id : ours->throwExits) id += delta;
+      for (auto &id : ours->unwindExits) id += delta;
       for (auto& bc : ours->hhbcs) {
         // When merging functions (used for 86xints) we have to drop
         // the src info, because it might reference a different unit

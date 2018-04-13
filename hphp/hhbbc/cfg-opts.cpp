@@ -57,6 +57,8 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
       bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
     };
     blk->fallthrough = NoBlockId;
+    blk->throwExits = {};
+    blk->unwindExits = {};
     blk->exnNode = nullptr;
   }
 
@@ -319,7 +321,9 @@ bool buildSwitches(php::Func& func,
           removed->id = NoBlockId;
           removed->hhbcs = { bc::Nop {} };
           removed->fallthrough = NoBlockId;
-          removed->factoredExits = {};
+          removed->throwExits = {};
+          removed->unwindExits = {};
+          removed->exnNode = nullptr;
         }
         ret = true;
       }
@@ -328,12 +332,10 @@ bool buildSwitches(php::Func& func,
   }
 }
 
-template<typename S>
 bool strip_exn_tree(const php::Func& func,
                     CompactVector<std::unique_ptr<php::ExnNode>>& nodes,
                     const std::set<borrowed_ptr<php::ExnNode>> &seenExnNodes,
-                    uint32_t& nextId,
-                    S& sectionExits) {
+                    uint32_t& nextId) {
   auto it = std::remove_if(nodes.begin(), nodes.end(),
                            [&] (const std::unique_ptr<php::ExnNode>& node) {
                              if (seenExnNodes.count(borrow(node))) return false;
@@ -347,21 +349,7 @@ bool strip_exn_tree(const php::Func& func,
   }
   for (auto& n : nodes) {
     n->id = nextId++;
-    if (n->parent) {
-      match<void>(
-        n->info, [&](const php::CatchRegion& /*cr*/) {},
-        [&](const php::FaultRegion& fr) {
-          auto pentry = match<BlockId>(
-            n->parent->info,
-            [&] (const php::CatchRegion& cr2) { return cr2.catchEntry; },
-            [&] (const php::FaultRegion& fr2) { return fr2.faultEntry; }
-          );
-          auto const sectionId =
-            static_cast<size_t>(func.blocks[fr.faultEntry]->section);
-          sectionExits[sectionId].insert(pentry);
-        });
-    }
-    if (strip_exn_tree(func, n->children, seenExnNodes, nextId, sectionExits)) {
+    if (strip_exn_tree(func, n->children, seenExnNodes, nextId)) {
       ret = true;
     }
   }
@@ -383,8 +371,6 @@ bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
     auto const& state = ainfo.bdata[id].stateIn;
     return state.initialized && !state.unreachable;
   };
-  std::unordered_map<BlockId,std::set<BlockId>> factoredExits;
-  std::unordered_map<size_t, std::set<BlockId>> sectionExits;
   std::set<borrowed_ptr<php::ExnNode>> seenExnNodes;
 
   for (auto const& blk : ainfo.rpoBlocks) {
@@ -393,12 +379,6 @@ bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
       continue;
     }
     if (auto node = blk->exnNode) {
-      auto entry = match<BlockId>(
-        node->info,
-        [&] (const php::CatchRegion& cr) { return cr.catchEntry; },
-        [&] (const php::FaultRegion& fr) { return fr.faultEntry; }
-      );
-      factoredExits[blk->id].insert(entry);
       do {
         if (!seenExnNodes.insert(node).second) break;
       } while ((node = node->parent) != nullptr);
@@ -406,42 +386,16 @@ bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
   }
 
   uint32_t nextId = 0;
-  if (!strip_exn_tree(func, func.exnNodes,
-                      seenExnNodes, nextId, sectionExits)) {
+  if (!strip_exn_tree(func, func.exnNodes, seenExnNodes, nextId)) {
     return false;
   }
 
   for (auto const& blk : func.blocks) {
     if (!reachable(blk->id)) {
       blk->exnNode = nullptr;
+      blk->throwExits = {};
+      blk->unwindExits = {};
       continue;
-    }
-    auto &fe = factoredExits[blk->id];
-    auto it = sectionExits.find(static_cast<size_t>(blk->section));
-    if (it != sectionExits.end()) {
-      fe.insert(it->second.begin(), it->second.end());
-    }
-    auto update = false;
-    if (blk->factoredExits.size() != fe.size()) {
-      update = true;
-      FTRACE(2, "Old factored edges: blk:{} -", blk->id);
-      for (auto DEBUG_ONLY id : blk->factoredExits) FTRACE(2, " {}", id);
-      FTRACE(2, "\n");
-      blk->factoredExits.resize(fe.size());
-    }
-
-    size_t i = 0;
-    for (auto b : fe) {
-      if (blk->factoredExits[i] != b) {
-        assert(update);
-        blk->factoredExits[i] = b;
-      }
-      i++;
-    }
-    if (update) {
-      FTRACE(2, "New factored edges: blk:{} -", blk->id);
-      for (auto DEBUG_ONLY id : blk->factoredExits) FTRACE(2, " {}", id);
-      FTRACE(2, "\n");
     }
   }
 
@@ -490,7 +444,8 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
         handleSucc(succId);
         numSucc++;
       });
-    for (auto& ex : blk->factoredExits) handleSucc(ex);
+    for (auto& ex : blk->throwExits)  handleSucc(ex);
+    for (auto& ex : blk->unwindExits) handleSucc(ex);
     if (numSucc > 1) bbi.multipleSuccs = true;
   }
   blockInfo[func.mainEntry].multiplePreds = true;
@@ -507,11 +462,12 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
       if (blockInfo[blk->id].multipleSuccs ||
           blockInfo[nxt->id].multiplePreds ||
           blk->exnNode != nxt->exnNode ||
-          blk->section != nxt->section) {
+          blk->section != nxt->section ||
+          blk->throwExits != nxt->throwExits) {
         break;
       }
 
-      FTRACE(1, "merging: {} into {}\n", (void*)nxt, (void*)blk.get());
+      FTRACE(2, "   merging: {} into {}\n", nxt->id, blk->id);
       auto& bInfo = blockInfo[blk->id];
       auto const& nInfo = blockInfo[nxt->id];
       bInfo.multipleSuccs = nInfo.multipleSuccs;
@@ -520,9 +476,10 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
 
       blk->fallthrough = nxt->fallthrough;
       blk->fallthroughNS = nxt->fallthroughNS;
-      // The blocks have the same exnNode, and the same section
-      // so they must have the same factoredExits.
-      assert(blk->factoredExits == nxt->factoredExits);
+      // The predecessor should not have any unwind exits (because that
+      // would make the block terminal), while the successor might.
+      assert(blk->unwindExits.empty());
+      blk->unwindExits = nxt->unwindExits;
       std::copy(nxt->hhbcs.begin(), nxt->hhbcs.end(),
                 std::back_inserter(blk->hhbcs));
       nxt->fallthrough = NoBlockId;

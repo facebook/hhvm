@@ -108,12 +108,12 @@ TRACE_SET_MOD(hhbbc_dce);
  *
  *   This analysis is basically normal, but slightly modified from the
  *   usual in order to deal with the way exceptional control flow is
- *   represented in our CFG (with factored edges).
+ *   represented in our CFG.
  *
  *   It essentially is the liveness analysis algorithm described at
  *   http://dl.acm.org/citation.cfm?id=316171, except that we don't
  *   need to track kill sets for each PEI because we don't have a
- *   means of determining which factored edges may be traversed by any
+ *   means of determining which exceptional edges may be traversed by any
  *   given PEI.  (Maybe that may be more usual to have in the context
  *   of a language with declared exception clauses...)
  *
@@ -2313,8 +2313,8 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   );
   for (auto& b : ai.rpoBlocks) incompleteQ.push(rpoId(b->id));
 
-  auto const normalPreds   = computeNormalPreds(ai.rpoBlocks);
-  auto const factoredPreds = computeFactoredPreds(ai.rpoBlocks);
+  auto const nonThrowPreds   = computeNonThrowPreds(ai.rpoBlocks);
+  auto const throwPreds      = computeThrowPreds(ai.rpoBlocks);
 
   /*
    * Suppose a stack slot isn't used, but it was pushed on two separate
@@ -2428,7 +2428,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * This algorithm treats the exceptional live-out states differently
    * from the live-out states during normal control flow.  The
    * liveOutExn sets only take part in the liveIn computation when the
-   * block has factored exits.
+   * block has exceptional exits.
    */
   while (!incompleteQ.empty()) {
     auto const blk = ai.rpoBlocks[incompleteQ.pop()];
@@ -2466,7 +2466,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 
     // Merge the liveIn into the liveOut of each normal predecessor.
     // If the set changes, reschedule that predecessor.
-    for (auto& pred : normalPreds[blk->id]) {
+    for (auto& pred : nonThrowPreds[blk->id]) {
       FTRACE(2, "  -> {}\n", pred->id);
       auto& pbs = blockStates[pred->id];
       auto const oldPredLocLive = pbs.locLive;
@@ -2492,10 +2492,10 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       }
     }
 
-    // Merge the liveIn into the liveOutExn state for each exceptional
-    // precessor.  The liveIn computation also depends on the
-    // liveOutExn state, so again reschedule if it changes.
-    for (auto& pred : factoredPreds[blk->id]) {
+    // Merge the liveIn into the liveOutExn state for each throw predecessor.
+    // The liveIn computation also depends on the liveOutExn state, so again
+    // reschedule if it changes.
+    for (auto& pred : throwPreds[blk->id]) {
       FTRACE(2, "  => {}\n", pred->id);
       auto& pbs = blockStates[pred->id];
       auto const oldPredLocLiveExn = pbs.locLiveExn;

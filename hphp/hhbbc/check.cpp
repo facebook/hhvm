@@ -54,11 +54,42 @@ bool DEBUG_ONLY checkBlock(const php::Block& b) {
     });
   }
 
-  // The factored exit list contains unique elements.
+  // If the block has an exnNode, it should always have a throw edge to it (and
+  // nothing else).
+  if (b.exnNode) {
+    assert(b.throwExits.size() == 1);
+    match<void>(
+      b.exnNode->info,
+      [&] (const CatchRegion& cr) {
+        assert(cr.catchEntry == b.throwExits[0]);
+      },
+      [&] (const FaultRegion& fr) {
+        assert(fr.faultEntry == b.throwExits[0]);
+      }
+    );
+  }
+
+  if (b.section == php::Block::Section::Main) {
+    // Non-fault funclets should not have unwind exits. It can only have a throw
+    // exit if it has an exnNode (which was checked above).
+    assert(!ends_with_unwind(b));
+    assert(b.unwindExits.empty());
+    assert(b.exnNode || b.throwExits.empty());
+  } else if (!ends_with_unwind(b)) {
+    // Only blocks which end with an unwind can have unwind exits.
+    assert(b.unwindExits.empty());
+  }
+
+  // The exit lists contains unique elements.
   std::set<BlockId> exitSet;
-  std::copy(begin(b.factoredExits), end(b.factoredExits),
+  std::copy(begin(b.throwExits), end(b.throwExits),
             std::inserter(exitSet, begin(exitSet)));
-  assert(exitSet.size() == b.factoredExits.size());
+  assert(exitSet.size() == b.throwExits.size());
+
+  exitSet.clear();
+  std::copy(begin(b.unwindExits), end(b.unwindExits),
+            std::inserter(exitSet, begin(exitSet)));
+  assert(exitSet.size() == b.unwindExits.size());
 
   return true;
 }
@@ -124,25 +155,6 @@ void checkFaultEntryRec(const php::Func& func,
    */
   assert(faultEntry.section != php::Block::Section::Main);
 
-  /*
-   * The fault blocks should all have factored exits to the parent
-   * catch/fault, if there is any.
-   *
-   * Note: for now this is an invariant, but if we start pruning
-   * factoredExits this might need to change.
-   */
-  if (auto parent = exnNode.parent) {
-    match<void>(
-      parent->info,
-      [&] (const CatchRegion& cr) {
-        assert(has_edge_linear(faultEntry.factoredExits, cr.catchEntry));
-      },
-      [&] (const FaultRegion& fr) {
-        assert(has_edge_linear(faultEntry.factoredExits, fr.faultEntry));
-      }
-    );
-  }
-
   // Note: right now we're only asserting about normal successors, but
   // there can be exception-only successors for catch blocks inside of
   // fault funclets for finally handlers.  (Just going un-asserted for
@@ -153,13 +165,14 @@ void checkFaultEntryRec(const php::Func& func,
 }
 
 void checkExnTreeMore(const php::Func& func, borrowed_ptr<const ExnNode> node) {
-  // Fault entries have a few things to assert.
-  match<void>(node->info,
-              [&](const FaultRegion& fr) {
-                boost::dynamic_bitset<> seenBlocks;
-                checkFaultEntryRec(func, seenBlocks, fr.faultEntry, *node);
-              },
-              [&](const CatchRegion& /*cr*/) {});
+  match<void>(
+    node->info,
+    [&](const FaultRegion& fr) {
+      boost::dynamic_bitset<> seenBlocks;
+      checkFaultEntryRec(func, seenBlocks, fr.faultEntry, *node);
+    },
+    [] (const CatchRegion&) {}
+  );
 
   for (auto& c : node->children) checkExnTreeMore(func, borrow(c));
 }
@@ -210,7 +223,6 @@ bool check(const php::Func& f) {
   boost::dynamic_bitset<> seenId(f.blocks.size());
   for (auto& block : f.blocks) {
     if (block->id == NoBlockId) continue;
-    assert(checkBlock(*block));
 
     // All blocks have unique ids in a given function; not necessarily
     // consecutive.

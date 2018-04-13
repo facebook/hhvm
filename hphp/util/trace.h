@@ -116,6 +116,7 @@ namespace Trace {
       TM(hhbbc_cfg)     \
       TM(hhbbc_dce)     \
       TM(hhbbc_dump)    \
+      TM(hhbbc_parse)   \
       TM(hhbbc_emit)    \
       TM(hhbbc_iface)   \
       TM(hhbbc_index)   \

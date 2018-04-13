@@ -1,0 +1,16 @@
+(jbuild_version 1)
+
+(ocamllex (cppo_lexer))
+(ocamlyacc (cppo_parser))
+
+(rule
+ ((targets (cppo_version.ml))
+  (action
+   (with-stdout-to ${@}
+    (echo "let cppo_version = \"${version:cppo}\"")))))
+
+(executable
+ ((name cppo_main)
+  (package cppo)
+  (public_name cppo)
+  (libraries (unix str))))

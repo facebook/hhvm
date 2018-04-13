@@ -1,0 +1,21 @@
+opam-version: "1.2"
+maintainer: "martin@mjambon.com"
+authors: ["Martin Jambon"]
+homepage: "http://mjambon.com/cppo.html"
+dev-repo: "https://github.com/mjambon/cppo.git"
+bug-reports: "https://github.com/mjambon/cppo/issues"
+license: "BSD-3-Clause"
+
+build: [
+  ["jbuilder" "subst"] {pinned}
+  ["jbuilder" "build" "-p" name "-j" jobs]
+]
+build-test: [
+  ["jbuilder" "runtest" "-p" name]
+]
+
+depends: [
+  "jbuilder" {build & >= "1.0+beta17"}
+  "base-bytes"
+  "base-unix"
+]

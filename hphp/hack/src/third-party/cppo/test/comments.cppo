@@ -1,0 +1,7 @@
+(* '"' *)
+
+#define BE_GONE
+
+(* "*)"
+#define DONT_TOUCH_THIS
+*)

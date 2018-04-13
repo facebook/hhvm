@@ -1,0 +1,38 @@
+#if (2 + 2, 5) < (4, 5)
+  mountain
+  #error ""
+#else
+  pistachios
+#endif
+
+#if (3 * 3) = 10 - 1
+  trees
+#else
+  rocks
+  #error ""
+#endif
+
+#if (1) = (1)
+  waves
+#else
+  sharks
+  #error ""
+#endif
+
+
+#define x 11
+#if (x, 2) <> (x, 4/2)
+  honey
+  #error ""
+#else
+  bees
+#endif
+
+#define tuple (0, -5, 3)
+#define tuple2 tuple
+#if (0, -5, x) > tuple2
+  steamboat
+#else
+  koalas
+  #error ""
+#endif

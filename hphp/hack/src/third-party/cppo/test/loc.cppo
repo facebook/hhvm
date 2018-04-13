@@ -1,0 +1,8 @@
+#define loc __FILE__ __LINE__
+loc
+X(loc)
+X(loc)
+X(Y(loc))
+
+#define F(x) loc
+F()

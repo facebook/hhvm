@@ -1,0 +1,28 @@
+# 1 "ext.cppo"
+hello
+nop
+#raqrkg
+qrs
+# 7 "ext.cppo"
+goodbye
+
+# 9
+(*
+hello
+#ext rot13
+abc
+\#endext
+def
+#endext
+goodbye
+
+#ext source
+#endext
+*)
+(*
+   Environment variables:
+     CPPO_FILE=ext.cppo
+     CPPO_FIRST_LINE=9
+     CPPO_LAST_LINE=11
+*)
+# 11

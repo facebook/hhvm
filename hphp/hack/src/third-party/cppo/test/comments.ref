@@ -1,0 +1,8 @@
+# 1 "comments.cppo"
+(* '"' *)
+
+
+# 5 "comments.cppo"
+(* "*)"
+#define DONT_TOUCH_THIS
+*)

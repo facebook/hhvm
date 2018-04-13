@@ -290,7 +290,7 @@ void refineTmps(IRUnit& unit,
 }
 
 SSATmp* insertPhi(IRUnit& unit, Block* blk,
-                  const jit::vector<SSATmp*>& inputs) {
+                  const jit::hash_map<Block*, SSATmp*>& inputs) {
   assertx(blk->numPreds() > 1);
   auto label = &blk->front();
   if (!label->is(DefLabel)) {
@@ -299,11 +299,12 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
   } else {
     for (auto d = label->numDsts(); d--; ) {
       auto result = label->dst(d);
-      uint32_t i = 0;
       blk->forEachPred([&](Block* pred) {
           if (result) {
             auto& jmp = pred->back();
-            if (jmp.src(d) != inputs[i++]) {
+            auto it = inputs.find(pred);
+            assertx(it != inputs.end());
+            if (jmp.src(d) != it->second) {
               result = nullptr;
             }
           }
@@ -313,9 +314,10 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
     unit.expandLabel(label, 1);
   }
 
-  uint32_t i = 0;
   blk->forEachPred([&](Block* pred) {
-      unit.expandJmp(&pred->back(), inputs[i++]);
+      auto it = inputs.find(pred);
+      assertx(it != inputs.end());
+      unit.expandJmp(&pred->back(), it->second);
     });
   retypeDests(label, &unit);
   return label->dst(label->numDsts() - 1);

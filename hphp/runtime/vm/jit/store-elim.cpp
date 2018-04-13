@@ -861,18 +861,24 @@ IRInstruction* resolve_flat(Global& genv, Block* blk, uint32_t id,
 
   auto const cand = stores[0];
   if (stores.size() == 1) return cand;
+  assertx(blk->numPreds() == stores.size());
+  auto& preds = blk->preds();
   jit::vector<SSATmp*> newSrcs;
   jit::vector<uint32_t> srcsToPhi;
   for (uint32_t i = 0; i < cand->numSrcs(); i++) {
     bool same = true;
-    jit::vector<SSATmp*> phiInputs;
-    for (auto const st : stores) {
+    SSATmp* temp = nullptr;
+    jit::hash_map<Block*, SSATmp*> phiInputs;
+    uint32_t j = 0;
+    for (auto const& edge : preds) {
+      auto const st = stores[j++];
       auto si = st->src(i);
       if (!si->inst()->is(DefConst) && si->type().admitsSingleVal()) {
         si = genv.unit.cns(si->type());
       }
-      phiInputs.push_back(si);
-      if (si != phiInputs[0]) same = false;
+      phiInputs[edge.from()] = si;
+      if (temp == nullptr) temp = si;
+      if (si != temp) same = false;
     }
     if (!same) {
       srcsToPhi.push_back(i);
@@ -883,7 +889,7 @@ IRInstruction* resolve_flat(Global& genv, Block* blk, uint32_t id,
       auto const mv = ts.processed()->src(i)->inst();
       if (mv->is(Mov) && mv->src(0) == mv->dst()) {
         srcsToPhi.push_back(i);
-        newSrcs.push_back(phiInputs[0]);
+        newSrcs.push_back(temp);
       }
     }
   }

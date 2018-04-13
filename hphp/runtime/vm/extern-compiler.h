@@ -56,6 +56,13 @@ CompilerResult hackc_compile(const char* code,
                              const MD5& md5,
                              AsmCallbacks* callbacks = nullptr);
 
+struct FactsParser {
+  virtual ~FactsParser() {
+  }
+};
+
+std::unique_ptr<FactsParser> acquire_facts_parser();
+
 struct FactsJSONString {
   std::string value;
 };
@@ -64,7 +71,8 @@ struct FactsJSONString {
 // facts extraction and on failure returns a string with error text
 using ParseFactsResult = boost::variant<FactsJSONString, std::string>;
 
-ParseFactsResult extract_facts(const std::string& filename,
+ParseFactsResult extract_facts(const FactsParser&,
+                               const std::string& filename,
                                const char* code,
                                int len);
 

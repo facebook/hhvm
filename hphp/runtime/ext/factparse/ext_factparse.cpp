@@ -80,7 +80,8 @@ void parse_file(
   const std::string& root,
   const char* path,
   bool allowHipHopSyntax,
-  typename T::result_type& res
+  typename T::result_type& res,
+  const typename T::state_type& state
 ) {
   T::mark_failed(res);
   std::string cleanPath;
@@ -106,7 +107,7 @@ void parse_file(
     if (!f) return;
     auto str = f->read();
     T::parse_file_impl(cleanPath,
-      allowHipHopSyntax, str.data(), str.size(), res);
+      allowHipHopSyntax, str.data(), str.size(), res, state);
   } else {
     // It would be nice to have an atomic stat + open operation here but this
     // doesn't seem to be possible with STL in a portable way.
@@ -116,7 +117,7 @@ void parse_file(
     if (S_ISDIR(st.st_mode)) {
       return;
     }
-    T::parse_file_impl(cleanPath, allowHipHopSyntax, "", 0, res);
+    T::parse_file_impl(cleanPath, allowHipHopSyntax, "", 0, res, state);
   }
 }
 
@@ -127,11 +128,12 @@ void facts_parse_sequential(
   ArrayInit& outResArr,
   bool allowHipHopSyntax
 ) {
+  const auto state = T::init_state();
   for (auto i = 0; i < pathList->size(); ++i) {
     typename T::result_type workerResult;
     auto path = tvCastToString(pathList->atPos(i));
     try {
-      parse_file<T>(root, path.c_str(), allowHipHopSyntax, workerResult);
+      parse_file<T>(root, path.c_str(), allowHipHopSyntax, workerResult, state);
     } catch (...) {
       T::mark_failed(workerResult);
     }
@@ -162,27 +164,32 @@ using BaseWorker = JobQueueWorker<size_t, const JobContext<T>*, false, true>;
 template<class T>
 struct ParseFactsWorker: public BaseWorker<T> {
   void doJob(typename BaseWorker<T>::JobType job) override {
-    parse(*(this->m_context), job);
+    parse(m_state, *(this->m_context), job);
   }
   void onThreadEnter() override {
     hphp_session_init();
+    m_state = T::init_state();
   }
   void onThreadExit() override {
     hphp_context_exit();
     hphp_session_exit();
   }
-  static void parse(const JobContext<T>& ctx, size_t i) {
+  static void parse(const typename T::state_type& state,
+                    const JobContext<T>& ctx, size_t i) {
     try {
       parse_file<T>(
         ctx.m_root,
         ctx.m_paths[i].c_str(),
         ctx.m_allowHipHopSyntax,
-        ctx.m_worker_results[i]);
+        ctx.m_worker_results[i],
+        state);
     } catch (...) {
       T::mark_failed(ctx.m_worker_results[i]);
     }
     ctx.m_result_q.write(i);
   }
+private:
+  typename T::state_type m_state;
 };
 
 template<class T>
@@ -310,9 +317,14 @@ void buildOneResult(
 
 struct HHVMFactsExtractor {
   using result_type = Facts::ParseResult;
+  using state_type = void*;
 
   static int get_workers_count() {
     return Process::GetCPUCount();
+  }
+
+  static state_type init_state() {
+    return nullptr;
   }
 
   static void parse_stream(
@@ -341,7 +353,8 @@ struct HHVMFactsExtractor {
     bool allowHipHopSyntax,
     const char* code,
     int len,
-    result_type& res
+    result_type& res,
+    const state_type&
   ) {
     if (len == 0) {
       std::ifstream stream(path);
@@ -369,8 +382,14 @@ struct HHVMFactsExtractor {
 
 struct HackCFactsExtractor {
   using result_type = folly::Optional<FactsJSONString>;
+  using state_type = std::unique_ptr<FactsParser>;
+
   static int get_workers_count() {
     return RuntimeOption::EvalHackCompilerWorkers;
+  }
+
+  static state_type init_state() {
+    return acquire_facts_parser();
   }
 
   static void mark_failed(result_type& workerResult) {
@@ -382,9 +401,10 @@ struct HackCFactsExtractor {
     bool allowHipHopSyntax,
     const char* code,
     int len,
-    result_type& res
+    result_type& res,
+    const state_type& state
   ) {
-    auto result = extract_facts(path, code, len);
+    auto result = extract_facts(*state, path, code, len);
     match<void>(
       result,
       [&](FactsJSONString& r) {

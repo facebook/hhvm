@@ -308,6 +308,8 @@ private:
   const CompilerOptions& m_options;
 };
 
+struct CompilerGuard;
+
 struct CompilerPool {
   explicit CompilerPool(CompilerOptions&& options)
     : m_options(options)
@@ -324,11 +326,14 @@ struct CompilerPool {
                          const MD5& md5,
                          AsmCallbacks* callbacks,
                          bool& internal_error);
-  ParseFactsResult extract_facts(const std::string& filename,
+  ParseFactsResult extract_facts(const CompilerGuard& compiler,
+                                 const std::string& filename,
                                  const char* code,
                                  int len);
   std::string getVersionString() { return m_version; }
-
+  std::pair<uint64_t, bool> getMaxRetriesAndVerbosity() const {
+    return std::make_pair(m_options.maxRetries, m_options.verboseErrors);
+  }
  private:
   CompilerOptions m_options;
   std::atomic<size_t> m_freeCount{0};
@@ -338,7 +343,7 @@ struct CompilerPool {
   std::string m_version;
 };
 
-struct CompilerGuard final {
+struct CompilerGuard final: public FactsParser {
   explicit CompilerGuard(CompilerPool& pool)
     : m_pool(pool) {
     std::tie(m_index, m_ptr) = m_pool.getCompiler();
@@ -411,7 +416,7 @@ void CompilerPool::shutdown(bool detach_compilers) {
 
 template<typename F>
 auto run_compiler(
-  CompilerPool& compilerPool,
+  const CompilerGuard& compiler,
   int maxRetries,
   bool verboseErrors,
   F&& func,
@@ -421,7 +426,6 @@ auto run_compiler(
     std::string
   >
 {
-  const CompilerGuard compiler(compilerPool);
   std::stringstream err;
 
   size_t retry = 0;
@@ -457,19 +461,22 @@ auto run_compiler(
   return err.str();
 }
 
-ParseFactsResult CompilerPool::extract_facts(const std::string& filename,
-                                             const char* code,
-                                             int len
+ParseFactsResult extract_facts_worker(const CompilerGuard& compiler,
+                               const std::string& filename,
+                               const char* code,
+                               int len,
+                               int maxRetries,
+                               bool verboseErrors
 ) {
   auto extract = [&](const CompilerGuard& c) {
     auto result = c->extract_facts(filename, folly::StringPiece(code, len));
     return FactsJSONString { result };
   };
-  auto internal_error =false;
+  auto internal_error = false;
   return run_compiler(
-    *this,
-    m_options.maxRetries,
-    m_options.verboseErrors,
+    compiler,
+    maxRetries,
+    verboseErrors,
     extract,
     internal_error);
 }
@@ -488,7 +495,7 @@ CompilerResult CompilerPool::compile(const char* code,
                       callbacks);
   };
   return run_compiler(
-    *this,
+    CompilerGuard(*this),
     m_options.maxRetries,
     m_options.verboseErrors,
     compile,
@@ -968,12 +975,27 @@ void compilers_detach_after_fork() {
   }
 }
 
+std::unique_ptr<FactsParser> acquire_facts_parser() {
+  return std::make_unique<CompilerGuard>(s_manager.get_hackc_pool());
+}
+
 ParseFactsResult extract_facts(
+  const FactsParser& facts_parser,
   const std::string& filename,
   const char* code,
   int len
 ) {
-  return s_manager.get_hackc_pool().extract_facts(filename, code, len);
+  size_t maxRetries;
+  bool verboseErrors;
+  std::tie(maxRetries, verboseErrors) =
+    s_manager.get_hackc_pool().getMaxRetriesAndVerbosity();
+  return extract_facts_worker(
+    dynamic_cast<const CompilerGuard&>(facts_parser),
+    filename,
+    code,
+    len,
+    maxRetries,
+    verboseErrors);
 }
 
 std::string hackc_version() {

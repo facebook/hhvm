@@ -42,11 +42,6 @@ typedef bool(*immFitFunc)(int64_t, int);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define IMMFITFUNC_SIGNED                 deltaFits
-#define IMMFITFUNC_UNSIGNED               (immFitFunc)magFits
-
-///////////////////////////////////////////////////////////////////////////////
-
 struct XedAssembler : public X64AssemblerBase {
 private:
   constexpr static xed_state_t s_xedState = {
@@ -60,6 +55,8 @@ private:
   }
 
   static constexpr auto nullrip = RIPRelativeRef(DispRIP(0));
+  static constexpr auto immfitSigned = deltaFits;
+  static constexpr auto immfitUnsigned = (immFitFunc)magFits;
 
 public:
   explicit XedAssembler(CodeBlock& cb) : X64AssemblerBase(cb) {}
@@ -106,12 +103,12 @@ public:
   void name##w(Immed i, MemoryRef m) {                                \
     xedInstrIM(instr, i, m, IMMPROP(sz::word,                         \
                                     sz::word | sz::byte,              \
-                                    IMMFITFUNC_SIGNED), sz::word);    \
+                                    immfitSigned), sz::word);         \
   }                                                                   \
   void name##l(Immed i, MemoryRef m) {                                \
     xedInstrIM(instr, i, m, IMMPROP(sz::dword,                        \
                                     sz::dword | sz::byte,             \
-                                    IMMFITFUNC_SIGNED), sz::dword);   \
+                                    immfitSigned), sz::dword);        \
   }                                                                   \
   void name##w(Reg16 r, MemoryRef m) { xedInstrRM(instr, r, m); }     \
   void name##l(Reg32 r, MemoryRef m) { xedInstrRM(instr, r, m); }     \
@@ -129,12 +126,12 @@ public:
   void name##l(Immed i, Reg32 r) {                                    \
     xedInstrIR(instr, i, r, IMMPROP(sz::dword,                        \
                                     sz::dword | sz::byte,             \
-                                    IMMFITFUNC_SIGNED));              \
+                                    immfitSigned));                   \
   }                                                                   \
   void name##w(Immed i, Reg16 r) {                                    \
     xedInstrIR(instr, i, r, IMMPROP(sz::word,                         \
                                     sz::word | sz::byte,              \
-                                    IMMFITFUNC_SIGNED));              \
+                                    immfitSigned));                   \
   }                                                                   \
   BYTE_REG_OP(name, instr)
 
@@ -142,7 +139,7 @@ public:
   void name##q(Immed i, MemoryRef m) {                                \
     xedInstrIM(instr, i, m, IMMPROP(sz::dword,                        \
                                     sz::dword | sz::byte,             \
-                                    IMMFITFUNC_SIGNED), sz::qword);   \
+                                    immfitSigned), sz::qword);        \
   }
 
 #define IMM64R_OP(name, instr)                                        \
@@ -150,7 +147,7 @@ public:
     always_assert(imm.fits(sz::dword));                               \
     xedInstrIR(instr, imm, r, IMMPROP(sz::dword,                      \
                                       sz::dword | sz::byte,           \
-                                      IMMFITFUNC_SIGNED));            \
+                                      immfitSigned));                 \
   }
 
 #define FULL_OP(name, instr)                                          \
@@ -195,7 +192,7 @@ public:
   // 64-bit immediates work with mov to a register.
   void movq(Immed64 imm, Reg64 r) { xedInstrIR(XED_ICLASS_MOV, imm, r,
                                                sz::qword | sz::dword,
-                                               IMMFITFUNC_SIGNED); }
+                                               immfitSigned); }
 
   // movzbx is a special snowflake. We don't have movzbq because it behaves
   // exactly the same as movzbl but takes an extra byte.
@@ -260,7 +257,7 @@ public:
   //special case for push(imm)
   void push(Immed64 i) {
     xed_encoder_operand_t op = toXedOperand(i, sz::byte | sz::word | sz::dword,
-                                            IMMFITFUNC_SIGNED);
+                                            immfitSigned);
     xedEmit(XED_ICLASS_PUSH, op, op.width_bits < 32 ? 16 : 64);
   }
 

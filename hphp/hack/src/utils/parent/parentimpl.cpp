@@ -2,7 +2,13 @@
 #include <mutex>
 #include <cassert>
 #include <atomic>
+
+#ifdef USE_UNISTD
+#include <unistd.h>
+#else
 #include <folly/portability/Unistd.h>
+#endif
+
 #include "parentimpl.h"
 
 

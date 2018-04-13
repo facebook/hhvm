@@ -18,6 +18,8 @@
       hh_server (detached mode).
 *)
 
+let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
+
 module Program = HhServerMonitorConfig.Program
 module SM = ServerMonitor.Make_monitor
   (HhServerMonitorConfig.HhServerConfig) (HhMonitorInformant);;
@@ -40,8 +42,8 @@ let monitor_daemon_main (options: ServerArgs.options) =
   let () = ServerLoadFlag.set_no_load (ServerArgs.no_load options) in
   let init_id = Random_id.short_string () in
   if Sys_utils.is_test_mode ()
-  then EventLogger.init EventLogger.Event_logger_fake 0.0
-  else HackEventLogger.init_monitor (ServerArgs.root options) init_id
+  then EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
+  else HackEventLogger.init_monitor ~exit_on_parent_exit (ServerArgs.root options) init_id
       (Unix.gettimeofday ());
   Utils.profile := ServerArgs.profile_log options;
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;

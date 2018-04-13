@@ -12,10 +12,12 @@ type t = Path.t option
 type svn_rev = int
 let dummy = None
 
+let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
+
 let of_script_opt v = v
 
 let run_and_log (script, svn_rev) =
-  HackEventLogger.init_informant_prefetcher_runner (Unix.time ());
+  HackEventLogger.init_informant_prefetcher_runner ~exit_on_parent_exit (Unix.time ());
   let start_t = Unix.time () in
   let process = Process.exec
     (Path.to_string script) [(string_of_int svn_rev)] in

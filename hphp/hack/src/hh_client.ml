@@ -37,6 +37,8 @@
  *  Use --help or see clientArgs.ml for more options
  *)
 
+let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
+
 let () =
   (* no-op, needed at entry-point for Daemon hookup *)
   Daemon.check_entry_point ();
@@ -49,7 +51,7 @@ let () =
     raise Exit_status.(Exit_with Interrupted)));
   let command = ClientArgs.parse_args () in
   let root = ClientArgs.root command in
-  HackEventLogger.client_init root;
+  HackEventLogger.client_init ~exit_on_parent_exit root;
   let command_name = function
     | ClientCommand.CCheck _ -> "Check"
     | ClientCommand.CStart _ -> "Start"

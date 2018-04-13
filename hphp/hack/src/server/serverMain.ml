@@ -16,6 +16,8 @@ open String_utils
 (* Main initialization *)
 (*****************************************************************************)
 
+let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
+
 module MainInit : sig
   val go:
     genv ->
@@ -518,8 +520,9 @@ let setup_server ~informant_managed ~monitor_pid options handle =
   let use_sql =
     LoadScriptConfig.use_sql load_script_config in
   if Sys_utils.is_test_mode ()
-  then EventLogger.init EventLogger.Event_logger_fake 0.0
+  then EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
   else HackEventLogger.init
+    ~exit_on_parent_exit
     root
     init_id
     informant_managed

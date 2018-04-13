@@ -87,6 +87,7 @@ MODULES=\
   utils/lint\
   utils/disk\
   utils/process\
+  utils/parent\
   utils/hg\
   utils/hh_json\
   utils/sys\
@@ -109,6 +110,8 @@ NATIVE_C_FILES=\
   utils/sys/processor_info.c\
   utils/sys/realpath.c\
   utils/sys/sysinfo.c\
+  utils/parent/libparent.c\
+  utils/parent/stubparentimpl.c\
   $(INOTIFY)/$(notdir $(INOTIFY))_stubs.c
 
 OCAML_LIBRARIES=\
@@ -156,6 +159,7 @@ EXTRA_CC_OPTS=$(foreach opt, $(EXTRA_CC_FLAGS),-ccopt $(opt))
 EXTRA_LINK=$(EXTRA_LINK_OPTS) $(foreach dir, $(EXTRA_LIB_PATHS),-cclib -L$(dir))
 FRAMEWORK_OPTS=$(foreach framework, $(FRAMEWORKS),-cclib -framework -cclib $(framework))
 BUILD_ID_OBJECTS=_build/utils/compiler_id_impl.o _build/utils/get_build_id.o _build/utils/get_build_id.gen.o
+CC_DEFINES=-cflag -ccopt -cflag -DUSE_UNISTD=1
 
 .PHONY: $(BUILD_ID_OBJECTS)
 
@@ -209,7 +213,7 @@ _build/hack.stamp: $(ALL_SRC_FILES) copy-hhis _build/ppx/ppx_gen_hhi
 	#  - means it will never relink just for C changes
 	#  - doesn't really help that much as it needs to do the bulk of the work anyway
 	rm -f $(TARGETS)
-	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -no-links -cflag -g $(INCLUDE_OPTS) $(LIB_OPTS) $(OPAM_LIB_OPTS) \
+	$(OCAMLBUILD) $(CC_DEFINES) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -no-links -cflag -g $(INCLUDE_OPTS) $(LIB_OPTS) $(OPAM_LIB_OPTS) \
 		-lflags "-g $(LINKER_FLAGS)" -tag custom \
 		$(patsubst _build/%,%,$(TARGETS))
 	touch _build/hack.stamp
@@ -222,7 +226,7 @@ _build/hackc/build-id: $(ALL_SRC_FILES)
 	INSTALL_DIR=./hphp/hack/src/_build/hackc FBCODE_DIR=./ hphp/tools/generate-build-id.sh IGNORED IGNORED hackc hphp/hack/src)
 
 _build/utils/compiler_id_impl.o: _build/hackc/build-id
-	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) \
+	$(OCAMLBUILD) $(CC_DEFINES) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) \
 		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -ccopt -DHACKC_COMPILER_ID=$(shell cat _build/hackc/build-id)" \
 	utils/compiler_id_impl.o
 
@@ -232,12 +236,12 @@ _build/hack/build-id: $(ALL_SRC_FILES)
 	INSTALL_DIR=./hphp/hack/src/_build/hack FBCODE_DIR=./ hphp/tools/generate-build-id.sh IGNORED IGNORED hh hphp/hack/src)
 
 _build/utils/get_build_id.o: _build/hack/build-id
-	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) \
+	$(OCAMLBUILD) $(CC_DEFINES) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) \
 		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -ccopt -DHH_BUILD_ID=$(shell cat _build/hack/build-id) -ccopt -DHH_BUILD_TIMESTAMP=$(shell date +%s)ul" \
 		utils/get_build_id.o
 
 build-hack-native-deps: $(NATIVE_C_FILES) $(BUILD_ID_OBJECTS)
-	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) \
+	$(OCAMLBUILD) $(CC_DEFINES) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) \
 		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" \
 		$(OBJECT_FILES_TO_BUILD)
 

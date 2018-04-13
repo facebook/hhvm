@@ -121,6 +121,8 @@ end Relative_path.Map.empty (Array.append magic_builtins hhi_builtins)
 (* Helpers *)
 (*****************************************************************************)
 
+let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
+
 let die str =
   let oc = stderr in
   output_string oc str;
@@ -923,7 +925,7 @@ let main_hack ({filename; mode; no_builtins; tcopt; _} as opts) =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
-  EventLogger.init EventLogger.Event_logger_fake 0.0;
+  EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0;
   let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   let tmp_hhi = Path.concat (Path.make Sys_utils.temp_dir_name) "hhi" in
   Hhi.set_hhi_root_for_unit_test tmp_hhi;

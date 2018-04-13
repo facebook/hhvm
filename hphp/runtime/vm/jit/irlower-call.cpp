@@ -193,8 +193,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   }
 }
 
-void cgCallArray(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<CallArray>();
+void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<CallUnpack>();
   auto const sp = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
@@ -211,19 +211,14 @@ void cgCallArray(IRLS& env, const IRInstruction* inst) {
     };
   }
 
-  auto const target = extra->numParams == 0
-    ? tc::ustubs().fcallArrayHelper
-    : tc::ustubs().fcallUnpackHelper;
-
+  auto const target = tc::ustubs().fcallUnpackHelper;
   auto const pc = v.cns(extra->pc);
   auto const after = v.cns(extra->after);
-  auto const args = extra->numParams == 0
-    ? v.makeTuple({pc, after})
-    : v.makeTuple({pc, after, v.cns(extra->numParams)});
+  auto const args = v.makeTuple({pc, after, v.cns(extra->numParams)});
 
   auto const done = v.makeBlock();
-  v << vcallarray{target, fcall_array_regs(), args,
-                  {done, label(env, inst->taken())}};
+  v << vcallunpack{target, fcall_unpack_regs(), args,
+                   {done, label(env, inst->taken())}};
   v = done;
 
   auto const dst = dstLoc(env, inst, 0);

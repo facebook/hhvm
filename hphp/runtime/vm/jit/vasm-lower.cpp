@@ -284,8 +284,8 @@ void lower(VLS& env, vinvoke& inst, Vlabel b, size_t i) {
   lower_vcall(env.unit, inst, b, i);
 }
 
-void lower(VLS& env, vcallarray& inst, Vlabel b, size_t i) {
-  // vcallarray can only appear at the end of a block.
+void lower(VLS& env, vcallunpack& inst, Vlabel b, size_t i) {
+  // vcallunpack can only appear at the end of a block.
   assertx(i == env.unit.blocks[b].code.size() - 1);
 
   lower_impl(env.unit, b, i, [&] (Vout& v) {
@@ -300,7 +300,7 @@ void lower(VLS& env, vcallarray& inst, Vlabel b, size_t i) {
 
     v << copyargs{env.unit.makeTuple(srcs),
                   env.unit.makeTuple(std::move(dsts))};
-    v << callarray{inst.target, args};
+    v << callunpack{inst.target, args};
     v << unwind{{inst.targets[0], inst.targets[1]}};
   });
 }

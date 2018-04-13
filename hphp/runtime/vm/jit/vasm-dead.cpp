@@ -198,7 +198,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::inlinestart:
     case Vinstr::inlineend:
     case Vinstr::call:
-    case Vinstr::callarray:
+    case Vinstr::callunpack:
     case Vinstr::callfaststub:
     case Vinstr::callm:
     case Vinstr::callphp:
@@ -278,7 +278,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::trap:
     case Vinstr::unwind:
     case Vinstr::vcall:
-    case Vinstr::vcallarray:
+    case Vinstr::vcallunpack:
     case Vinstr::vinvoke:
     case Vinstr::vregrestrict:
     case Vinstr::vregunrestrict:

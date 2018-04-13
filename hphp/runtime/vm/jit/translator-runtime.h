@@ -181,8 +181,6 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
 void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
-void fpushCufHelperArray(ArrayData*, ActRec* preLiveAR, ActRec* fp);
-void fpushCufHelperString(StringData*, ActRec* preLiveAR, ActRec* fp);
 
 const Func* loadClassCtor(Class* cls, ActRec* fp);
 

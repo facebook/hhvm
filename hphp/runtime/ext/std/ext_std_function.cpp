@@ -21,6 +21,9 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/server/http-protocol.h"
@@ -64,7 +67,13 @@ Variant HHVM_FUNCTION(call_user_func, const Variant& function,
 }
 
 Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
-                      const Array& params) {
+                      const Variant& params) {
+  if (UNLIKELY(!isContainer(params))) {
+    raise_warning("call_user_func_array() expects parameter 2 to be an array "
+                  "or collection, %s given",
+                  getDataTypeString(params.getType()).data());
+    return init_null();
+  }
   return vm_call_user_func(function, params, /* forward */ false,
                            /* check ref */ true);
 }
@@ -147,7 +156,14 @@ Variant HHVM_FUNCTION(func_get_arg, int arg_num) {
   return false;
 }
 
+const StaticString s_call_user_func("call_user_func");
+const StaticString s_call_user_func_array("call_user_func_array");
+
 Array hhvm_get_frame_args(const ActRec* ar, int offset) {
+  while (ar && (ar->func()->name()->isame(s_call_user_func.get()) ||
+                ar->func()->name()->isame(s_call_user_func_array.get()))) {
+    ar = g_context->getPrevVMState(ar);
+  }
   if (ar == nullptr) {
     return Array();
   }

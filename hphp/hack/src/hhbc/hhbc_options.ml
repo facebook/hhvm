@@ -19,7 +19,6 @@ type t = {
   option_enable_xhp                       : bool;
   option_constant_folding                 : bool;
   option_optimize_null_check              : bool;
-  option_optimize_cuf                     : bool;
   option_max_array_elem_size_on_the_stack : int;
   option_aliased_namespaces               : (string * string) list option;
   option_source_mapping                   : bool;
@@ -50,7 +49,6 @@ let default = {
   option_enable_xhp = false;
   option_constant_folding = false;
   option_optimize_null_check = false;
-  option_optimize_cuf = true;
   option_max_array_elem_size_on_the_stack = 64;
   option_aliased_namespaces = None;
   option_source_mapping = false;
@@ -82,7 +80,6 @@ let php7_scalar_types o = o.option_php7_scalar_types
 let enable_xhp o = o.option_enable_xhp
 let constant_folding o = o.option_constant_folding
 let optimize_null_check o = o.option_optimize_null_check
-let optimize_cuf o = o.option_optimize_cuf
 let max_array_elem_size_on_the_stack o =
   o.option_max_array_elem_size_on_the_stack
 let aliased_namespaces o = o.option_aliased_namespaces
@@ -119,7 +116,6 @@ let to_string o =
     ; Printf.sprintf "enable_xhp: %B" @@ enable_xhp o
     ; Printf.sprintf "constant_folding: %B" @@ constant_folding o
     ; Printf.sprintf "optimize_null_check: %B" @@ optimize_null_check o
-    ; Printf.sprintf "optimize_cuf: %B" @@ optimize_cuf o
     ; Printf.sprintf "max_array_elem_size_on_the_stack: %d"
       @@ max_array_elem_size_on_the_stack o
     ; Printf.sprintf "source_mapping: %B" @@ source_mapping o
@@ -169,8 +165,6 @@ let set_option options name value =
     { options with option_constant_folding = as_bool value }
   | "hack.compiler.optimizenullcheck" ->
     { options with option_optimize_null_check = as_bool value }
-  | "hack.compiler.optimizecuf" ->
-    { options with option_optimize_cuf = as_bool value }
   (* Keep both for backwards compatibility until next release *)
   | "hack.compiler.sourcemapping" | "eval.disassemblersourcemapping" ->
     { options with option_source_mapping = as_bool value }
@@ -198,8 +192,7 @@ let set_option options name value =
     { options with option_jit_enable_rename_function = as_bool value }
   | "eval.disablehphpcopts" ->
     let v = not (as_bool value) in
-    { options with option_optimize_cuf = v;
-                   option_constant_folding = v;
+    { options with option_constant_folding = v;
                    option_can_inline_gen_functions = v}
   | "hhvm.use_msrv_for_in_out" ->
     { options with option_use_msrv_for_inout = as_bool value }
@@ -282,11 +275,8 @@ let value_setters = [
   (set_value "hack.compiler.optimize_null_checks" get_value_from_config_int @@
     fun opts v -> { opts with option_optimize_null_check = (v = 1) });
   (set_value "hhvm.disable_hphpc_opts" get_value_from_config_int @@
-    fun opts v -> { opts with option_optimize_cuf = (v = 0);
-                              option_constant_folding = (v = 0);
+    fun opts v -> { opts with option_constant_folding = (v = 0);
                               option_can_inline_gen_functions = (v = 0) });
-  (set_value "hack.compiler.optimize_cuf" get_value_from_config_int @@
-    fun opts v -> { opts with option_optimize_cuf = (v = 1) });
   (set_value "eval.disassembler_source_mapping" get_value_from_config_int @@
     fun opts v -> { opts with option_source_mapping = (v = 1) });
   (set_value "hhvm.php7.uvs" get_value_from_config_int @@

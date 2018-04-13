@@ -505,10 +505,6 @@ let string_of_call instruction =
     sep ["DecodeCufIter"; string_of_iterator_id id; string_of_label l]
   | FPushCufIter (n, id) ->
     sep ["FPushCufIter"; string_of_int n; string_of_iterator_id id]
-  | FPushCuf n ->
-    sep ["FPushCuf"; string_of_int n]
-  | FPushCufF n ->
-    sep ["FPushCufF"; string_of_int n]
   | FPassC (i, h) ->
     sep ["FPassC"; string_of_param_num i; string_of_fpasshint h]
   | FPassCW (i, h) ->
@@ -536,7 +532,6 @@ let string_of_call instruction =
   | FCallD (n, c, f) ->
     sep ["FCallD";
       string_of_int n; string_of_class_id c; string_of_function_id f]
-  | FCallArray -> "FCallArray"
   | FCallAwait (n, c, f) ->
     sep ["FCallAwait";
       string_of_int n; string_of_class_id c; string_of_function_id f]

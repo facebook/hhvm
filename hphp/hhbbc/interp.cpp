@@ -2809,15 +2809,6 @@ void in(ISS& env, const bc::FPushCufIter&) {
   fpiPush(env, ActRec { FPIKind::Unknown, TTop });
 }
 
-void in(ISS& env, const bc::FPushCuf&) {
-  popC(env);
-  fpiPush(env, ActRec { FPIKind::Unknown, TTop });
-}
-void in(ISS& env, const bc::FPushCufF&) {
-  popC(env);
-  fpiPush(env, ActRec { FPIKind::Unknown, TTop });
-}
-
 void in(ISS& /*env*/, const bc::RaiseFPassWarning& /*op*/) {}
 
 void in(ISS& env, const bc::FPassL& op) {
@@ -3252,7 +3243,7 @@ void in(ISS& env, const bc::FCallAwait& op) {
        bc::Await {});
 }
 
-void fcallArrayImpl(ISS& env, int arg, int32_t unpack = kNoUnpack) {
+void fcallUnpackImpl(ISS& env, int arg, int32_t unpack = kNoUnpack) {
   auto const ar = fpiTop(env);
   if (ar.kind == FPIKind::Builtin) {
     always_assert(unpack == kNoUnpack);
@@ -3285,12 +3276,8 @@ void fcallArrayImpl(ISS& env, int arg, int32_t unpack = kNoUnpack) {
   return push(env, TInitGen);
 }
 
-void in(ISS& env, const bc::FCallArray& /*op*/) {
-  fcallArrayImpl(env, 1);
-}
-
 void in(ISS& env, const bc::FCallUnpack& op) {
-  fcallArrayImpl(env, op.arg1);
+  fcallUnpackImpl(env, op.arg1);
 }
 
 void in(ISS& env, const bc::FCallM& op) {
@@ -3357,7 +3344,7 @@ void in(ISS& env, const bc::FCallDM& op) {
 }
 
 void in(ISS& env, const bc::FCallUnpackM& op) {
-  fcallArrayImpl(env, op.arg1, op.arg2);
+  fcallUnpackImpl(env, op.arg1, op.arg2);
 }
 
 void in(ISS& env, const bc::DecodeCufIter& op) {

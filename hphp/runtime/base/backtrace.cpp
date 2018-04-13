@@ -258,7 +258,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       // pointing at the cell conversion (Unbox/Pop) instruction, not the call
       // itself. For multi-line calls, this instruction is associated with the
       // subsequent line which results in an off-by-n. We're subtracting one
-      // in order to look up the line associated with the FCall/FCallArray
+      // in order to look up the line associated with the FCall/FCallUnpack
       // instruction. Exception handling and the other opcodes (ex. BoxR)
       // already do the right thing. The emitter associates object access with
       // the subsequent expression and this would be difficult to modify.

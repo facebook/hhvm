@@ -1,4 +1,4 @@
-array(5) {
+array(6) {
   [0]=>
   array(6) {
     ["file"]=>
@@ -48,11 +48,7 @@ array(5) {
     }
   }
   [2]=>
-  array(4) {
-    ["file"]=>
-    string(%d) "%s"
-    ["line"]=>
-    int(20)
+  array(2) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
@@ -64,6 +60,20 @@ array(5) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
+    int(20)
+    ["function"]=>
+    string(14) "call_user_func"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      string(3) "bar"
+    }
+  }
+  [4]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
     int(29)
     ["function"]=>
     string(3) "foo"
@@ -71,7 +81,7 @@ array(5) {
     array(0) {
     }
   }
-  [4]=>
+  [5]=>
   array(4) {
     ["file"]=>
     string(%d) "%s"
@@ -84,7 +94,7 @@ array(5) {
     }
   }
 }
-array(5) {
+array(6) {
   [0]=>
   array(6) {
     ["file"]=>
@@ -121,11 +131,7 @@ array(5) {
     }
   }
   [2]=>
-  array(4) {
-    ["file"]=>
-    string(%d) "%s"
-    ["line"]=>
-    int(20)
+  array(2) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
@@ -137,6 +143,20 @@ array(5) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
+    int(20)
+    ["function"]=>
+    string(14) "call_user_func"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      string(3) "bar"
+    }
+  }
+  [4]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
     int(29)
     ["function"]=>
     string(3) "foo"
@@ -144,7 +164,7 @@ array(5) {
     array(0) {
     }
   }
-  [4]=>
+  [5]=>
   array(4) {
     ["file"]=>
     string(%d) "%s"
@@ -157,7 +177,7 @@ array(5) {
     }
   }
 }
-array(5) {
+array(6) {
   [0]=>
   array(6) {
     ["file"]=>
@@ -194,11 +214,7 @@ array(5) {
     }
   }
   [2]=>
-  array(4) {
-    ["file"]=>
-    string(%d) "%s"
-    ["line"]=>
-    int(20)
+  array(2) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
@@ -210,6 +226,20 @@ array(5) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
+    int(20)
+    ["function"]=>
+    string(14) "call_user_func"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      string(3) "bar"
+    }
+  }
+  [4]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
     int(29)
     ["function"]=>
     string(3) "foo"
@@ -217,7 +247,7 @@ array(5) {
     array(0) {
     }
   }
-  [4]=>
+  [5]=>
   array(4) {
     ["file"]=>
     string(%d) "%s"

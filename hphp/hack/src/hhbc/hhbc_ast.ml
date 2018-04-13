@@ -418,8 +418,6 @@ type instruct_call =
   | FPushCtorS of num_params * SpecialClsRef.t
   | DecodeCufIter of Iterator.t * Label.t
   | FPushCufIter of num_params * Iterator.t
-  | FPushCuf of num_params
-  | FPushCufF of num_params
   | FPassC of param_num * fpass_hint
   | FPassCW of param_num * fpass_hint
   | FPassCE of param_num * fpass_hint
@@ -435,7 +433,6 @@ type instruct_call =
   | FCallDM of num_params * num_params * class_id * function_id
   | FCallUnpackM of num_params * num_params
   | FCallD of num_params * class_id * function_id
-  | FCallArray
   | FCallAwait of num_params * class_id * function_id
   | FCallUnpack of num_params
   | FCallBuiltin of num_params * num_params * Litstr.id

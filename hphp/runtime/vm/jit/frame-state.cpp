@@ -452,12 +452,11 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     }
     break;
 
-  case CallArray:
+  case CallUnpack:
     {
-      auto const extra = inst->extra<CallArray>();
+      auto const extra = inst->extra<CallUnpack>();
       // Remove tracked state for the actrec and array arg.
-      uint32_t numCells = kNumActRecCells +
-        (extra->numParams ? extra->numParams : 1);
+      uint32_t numCells = kNumActRecCells + extra->numParams;
       for (auto i = uint32_t{0}; i < numCells; ++i) {
         setValue(stk(extra->spOffset + i), nullptr);
       }
@@ -471,7 +470,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
         stk(extra->spOffset + numCells - 1),
         extra->numOut ? TInitCell : TGen
       );
-      // A CallArray pops the ActRec, actual args, and an array arg.
+      // A CallUnpack pops the ActRec, actual args, and an array arg.
       assertx(cur().bcSPOff == inst->marker().spOff());
       cur().bcSPOff -= numCells;
 
@@ -696,8 +695,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
                         inst->src(1));
     break;
   case LdArrFuncCtx:
-  case LdArrFPushCuf:
-  case LdStrFPushCuf:
   case LdFunc:
     writeToSpilledFrame(inst->extra<IRSPRelOffsetData>()->offset,
                         inst->src(1));

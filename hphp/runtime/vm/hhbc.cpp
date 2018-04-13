@@ -611,8 +611,6 @@ bool pushesActRec(Op opcode) {
     case OpFPushCtorI:
     case OpFPushCtorS:
     case OpFPushCufIter:
-    case OpFPushCuf:
-    case OpFPushCufF:
       return true;
     default:
       return false;

@@ -548,19 +548,14 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
   });
 }
 
-TCA emitFCallArrayHelper(CodeBlock& main, CodeBlock& cold,
-                         DataBlock& data, UniqueStubs& us) {
+TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
+                          DataBlock& data, UniqueStubs& us) {
   align(main, nullptr, Alignment::CacheLine, AlignContext::Dead);
 
   CGMeta meta;
 
-  auto const ret = vwrap(main, data, [] (Vout& v) {
-    v << movl{v.cns(0), rarg(2)};
-  });
-
-  us.fcallUnpackHelper = vwrap2(main, cold, data, meta,
-                                [&] (Vout& v, Vout& vc) {
-    // We reach fcallArrayHelper in the same context as a func prologue, so
+  auto const ret = vwrap2(main, cold, data, meta, [&] (Vout& v, Vout& vc) {
+    // We reach fcallUnpackHelper in the same context as a func prologue, so
     // this should really be a phplogue{}---but we don't need the return
     // address in the ActRec until later, and in the event the callee is
     // intercepted, we must save it on the stack because the callee frame will
@@ -593,7 +588,7 @@ TCA emitFCallArrayHelper(CodeBlock& main, CodeBlock& cold,
     auto const done = v.makeBlock();
     auto const ctch = vc.makeBlock();
     auto const should_continue = v.makeReg();
-    bool (*helper)(PC, int32_t, void*) = &doFCallArrayTC;
+    bool (*helper)(PC, int32_t, void*) = &doFCallUnpackTC;
 
     v << vinvoke{
       CallSpec::direct(helper),
@@ -1098,9 +1093,9 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(debuggerGenRetHelper,       emitDebuggerInterpGenRet<false>(cold, data));
   ADD(debuggerAsyncGenRetHelper,  emitDebuggerInterpGenRet<true>(cold, data));
 
-  ADD(bindCallStub,           emitBindCallStub<false>(cold, data));
-  ADD(immutableBindCallStub,  emitBindCallStub<true>(cold, data));
-  ADD(fcallArrayHelper,       emitFCallArrayHelper(hot(), frozen, data, *this));
+  ADD(bindCallStub,          emitBindCallStub<false>(cold, data));
+  ADD(immutableBindCallStub, emitBindCallStub<true>(cold, data));
+  ADD(fcallUnpackHelper,     emitFCallUnpackHelper(hot(), frozen, data, *this));
 
   ADD(decRefGeneric,  emitDecRefGeneric(cold, data));
 

@@ -63,7 +63,7 @@ bool beginInlining(IRGS& env,
   }
 
   always_assert(isFPush(info.fpushOpc) &&
-                !isFPushCuf(info.fpushOpc) &&
+                !isFPushCufIter(info.fpushOpc) &&
                 info.inlineEligible);
 
   auto const prevSP = fpiStack.back().returnSP;

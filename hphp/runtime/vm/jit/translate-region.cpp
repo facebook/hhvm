@@ -512,10 +512,10 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  // Make sure the FPushOp wasn't interpreted, based on an FPushCuf, spanned
+  // Make sure the FPushOp wasn't interpreted, based on an FPushCufIter, spanned
   // another call, or marked as not eligible for inlining by frame-state.
   auto const& info = fpiStack.back();
-  if (isFPushCuf(info.fpushOpc) || !info.inlineEligible || info.spansCall) {
+  if (isFPushCufIter(info.fpushOpc) || !info.inlineEligible || info.spansCall) {
     return nullptr;
   }
 

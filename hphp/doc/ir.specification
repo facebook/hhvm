@@ -1378,14 +1378,6 @@ To string conversions:
   FPushFunc when the callee is an array. This instruction attempts to populate
   a partially created ActRec pointed to by S1 + `offset' (in cells).
 
-| LdArrFPushCuf<offset>, ND, S(Arr,Vec) S(StkPtr) S(FramePtr), Er
-
-| LdStrFPushCuf<offset>, ND, S(Str) S(StkPtr) S(FramePtr), Er
-
-  Try to resolve a method target for FPushCuf when the callee is an Arr or Str,
-  respectively. These instructions mutate a partially created ActRec pointed to
-  by S1 + `offset' (in cells).
-
 | LdObjClass, DLdObjCls, S(Obj), NF
 
   Load the class out of the object in S0 and put it in D.
@@ -1411,11 +1403,6 @@ To string conversions:
   Try to load a Func named funcName from the RDS, if it isn't defined, try to
   load a Func named fallbackName. If that also isn't defined, invoke autoload.
   If this still doesn't result in a Func, raise a fatal error.
-
-| LdFuncCachedSafe<funcName>, D(Func), NA, B
-
-  Try to load the Func named funcName from the RDS. If the function is not
-  defined, branch to B.
 
 | LdARFuncPtr<offset>, DParam(Func), S(StkPtr), NF
 
@@ -1666,17 +1653,17 @@ To string conversions:
   dead. InlineFrameStart is the caller FP-relative offset of the start of the
   callee frame. Everything below InlineFrameStart is dead.
 
-| CallArray<spOffset,numParams,callOff,after,funcd,destroyLocals>,
+| CallUnpack<spOffset,numParams,callOff,after,funcd,destroyLocals>,
 |                       DCall,
 |                       S(StkPtr) S(FramePtr),
 |                       Er
 
   Invoke function corresponding to the current FPI with numParams arguments,
-  the last of which is an array of the remaining args. Used for FCallArray (in
-  which case numParams == 1), and FCallUnpack. S0+spOffset points to the stack
-  resulting after the ActRec for the function and numParams arguments have been
-  pushed. CallArray pops the array off the stack, pushes the elements of the
-  array as arguments, and invokes the function in the ActRec.
+  the last of which is an array of the remaining args. Used for FCallUnpack.
+  S0+spOffset points to the stack resulting after the ActRec for the function
+  and numParams arguments have been pushed. CallUnpack pops the array off the
+  stack, pushes the elements of the array as arguments, and invokes the
+  function in the ActRec.
 
 | SyncReturnBC<spOffset,bcOffset>, ND, S(StkPtr) S(FramePtr), NF
 

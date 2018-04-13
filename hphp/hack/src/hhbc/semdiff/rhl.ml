@@ -445,11 +445,10 @@ let check_instruct_call asn i i' =
   | FPushFunc _, _ | FPushFuncD _, _ | FPushFuncU _, _ | FPushObjMethod _, _
   | FPushObjMethodD _, _ | FPushClsMethod _, _
   | FPushClsMethodS _, _ | FPushClsMethodSD _, _
-  | FPushClsMethodD _, _ | FPushCtor _, _ | FPushCtorD _, _
-  | FPushCtorI _, _ | FPushCtorS _, _ | FPushCufIter _, _ | FPushCuf _, _
-  | FPushCufF _, _ | FPassC _, _ | FPassCW _, _
+  | FPushClsMethodD _, _ | FPushCtor _, _ | FPushCtorD _, _ | FPushCtorI _, _
+  | FPushCtorS _, _ | FPushCufIter _, _ | FPassC _, _ | FPassCW _, _
   | FPassCE _, _ | FPassV _, _ | FPassVNop _, _ | FPassR _, _ | FPassN _, _
-  | FPassG _, _ | FPassS _, _ | FCall _, _ | FCallD _, _ | FCallArray, _
+  | FPassG _, _ | FPassS _, _ | FCall _, _ | FCallD _, _
   | FCallAwait _, _ | FCallUnpack _, _ | FCallBuiltin _, _
   | FCallM _, _ | FCallUnpackM _, _ | FCallDM _, _ ->
     if i=i' then Some asn else None

@@ -64,6 +64,8 @@ CUF/dynamic-CUF calls:
 
 Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 41
 
+Warning: Parameter 3 to foo() expected to be a reference, value given in %s/ref-annotate.php on line 41
+
 Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 42
 
 Warning: Parameter 3 to foo() expected to be a reference, value given in %s/ref-annotate.php on line 42
@@ -76,9 +78,15 @@ Warning: call_user_func() expects parameter 4 by value, but the call was annotat
 
 Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 46
 
+Warning: Parameter 3 to foo() expected to be a reference, value given in %s/ref-annotate.php on line 46
+
+Warning: call_user_func() expects parameter 1 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 47
+
 Warning: call_user_func() expects parameter 3 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 47
 
 Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 47
+
+Warning: Parameter 3 to foo() expected to be a reference, value given in %s/ref-annotate.php on line 47
 $b[$c][$d] = $b[q][r] = 10
 dynamic-CUF + ref calls:
 
@@ -107,6 +115,8 @@ Warning: foo() expects parameter 3 by reference, but the call was not annotated 
 Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 63
 $b[$c][$d] = $b[q][r] = 19
 CUFA + ref calls:
+
+Warning: call_user_func_array() expects parameter 1 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 67
 
 Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 67
 

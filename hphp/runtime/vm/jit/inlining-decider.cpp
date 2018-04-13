@@ -516,11 +516,6 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
       if (isReturnish(op)) {
         hasRet = true;
       }
-
-      // We can't inline FCallArray.  XXX: Why?
-      if (op == Op::FCallArray) {
-        return refuse("can't inline FCallArray");
-      }
     }
   }
 

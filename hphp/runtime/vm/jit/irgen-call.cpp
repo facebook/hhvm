@@ -42,88 +42,6 @@ const StaticString s_static("static");
 
 //////////////////////////////////////////////////////////////////////
 
-const Func*
-findCuf(Op /*op*/, SSATmp* callable, const Func* ctxFunc, const Class*& cls,
-        StringData*& invName, bool& forward, bool& needsUnitLoad) {
-  cls = nullptr;
-  invName = nullptr;
-  needsUnitLoad = false;
-
-  const StringData* str =
-    callable->hasConstVal(TStr) ? callable->strVal() : nullptr;
-  auto arr = [&]() -> const ArrayData* {
-    if (callable->hasConstVal(TArr)) return callable->arrVal();
-    if (callable->hasConstVal(TVec)) return callable->vecVal();
-    return nullptr;
-  }();
-
-  StringData* sclass = nullptr;
-  StringData* sname = nullptr;
-  if (str) {
-    auto const lookup = lookupImmutableFunc(ctxFunc->unit(), str);
-    if (lookup.func) {
-      needsUnitLoad = lookup.needsUnitLoad;
-      return lookup.func;
-    }
-    String name(const_cast<StringData*>(str));
-    int pos = name.find("::");
-    if (pos <= 0 || pos + 2 >= name.size() ||
-        name.find("::", pos + 2) != String::npos) {
-      return nullptr;
-    }
-    sclass = makeStaticString(name.substr(0, pos).get());
-    sname = makeStaticString(name.substr(pos + 2).get());
-  } else if (arr) {
-    if (arr->size() != 2) return nullptr;
-    auto const e0 = arr->get(int64_t(0), false).unboxed();
-    auto const e1 = arr->get(int64_t(1), false).unboxed();
-    if (!isStringType(e0.type()) || !isStringType(e1.type())) return nullptr;
-    sclass = e0.val().pstr;
-    sname = e1.val().pstr;
-    String name(sname);
-    if (name.find("::") != String::npos) return nullptr;
-  } else {
-    return nullptr;
-  }
-
-  auto ctx = ctxFunc->cls();
-  bool isExact = true;
-  if (sclass->isame(s_self.get())) {
-    if (!ctx) return nullptr;
-    cls = ctx;
-    forward = true;
-  } else if (sclass->isame(s_parent.get())) {
-    if (!ctx || !ctx->parent()) return nullptr;
-    cls = ctx->parent();
-    forward = true;
-  } else if (sclass->isame(s_static.get())) {
-    if (!ctx) return nullptr;
-    cls = ctx;
-    isExact = false;
-  } else {
-    cls = Unit::lookupUniqueClassInContext(sclass, ctx);
-    if (!cls) return nullptr;
-  }
-
-  bool magicCall = false;
-  const Func* f = lookupImmutableMethod(
-    cls, sname, magicCall, /* staticLookup = */ true, ctxFunc, isExact);
-  if (!f || (!isExact && !f->isImmutableFrom(cls))) return nullptr;
-  if (forward && !ctx->classof(f->cls())) {
-    /*
-     * To preserve the invariant that the lsb class
-     * is an instance of the context class, we require
-     * that f's class is an instance of the context class.
-     * This is conservative, but without it, we would need
-     * a runtime check to decide whether or not to forward
-     * the lsb class
-     */
-    return nullptr;
-  }
-  if (magicCall) invName = sname;
-  return f;
-}
-
 bool canInstantiateClass(const Class* cls) {
   return cls && isNormalClass(cls) && !isAbstract(cls);
 }
@@ -597,48 +515,6 @@ void fpushFuncArr(IRGS& env, uint32_t numParams) {
   decRef(env, arr);
 }
 
-// FPushCuf when the callee is not known at compile time.
-void fpushCufUnknown(IRGS& env, Op op, uint32_t numParams) {
-  if (op != Op::FPushCuf) {
-    PUNT(fpushCufUnknown-nonFPushCuf);
-  }
-
-  if (topC(env)->isA(TObj)) return fpushFuncObj(env, numParams);
-
-  if (!topC(env)->type().subtypeOfAny(TArr, TVec, TStr)) {
-    PUNT(fpushCufUnknown);
-  }
-
-  auto const callable = popC(env);
-  fpushActRec(
-    env,
-    cns(env, TNullptr),
-    cns(env, TNullptr),
-    numParams,
-    nullptr,
-    cns(env, true)
-  );
-
-  /*
-   * This is a similar case to lookup for functions in FPushFunc or
-   * FPushObjMethod.  We can throw in a weird situation where the
-   * ActRec is already on the stack, but this bytecode isn't done
-   * executing yet.  See arPreliveOverwriteCells for details about why
-   * we need this marker.
-   */
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
-  auto const opcode =
-    callable->type().subtypeOfAny(TArr, TVec)
-      ? LdArrFPushCuf
-      : LdStrFPushCuf;
-  gen(env, opcode,
-      IRSPRelOffsetData { spOffBCFromIRSP(env) },
-      callable, sp(env), fp(env));
-  decRef(env, callable);
-}
-
 SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
   assertx(ctx->type() <= TCtx);
   assertx(funcTmp->type() <= TFunc);
@@ -671,59 +547,6 @@ SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
               [&] {
                 return gen(env, FwdCtxStaticCall, ctx);
               });
-}
-
-void implFPushCufOp(IRGS& env, Op op, uint32_t numArgs) {
-  bool forward = op == OpFPushCufF;
-  SSATmp* callable = topC(env, BCSPRelOffset{0});
-
-  const Class* cls = nullptr;
-  StringData* invName = nullptr;
-  bool needsUnitLoad = false;
-  auto const callee = findCuf(op, callable, curFunc(env), cls, invName,
-                              forward, needsUnitLoad);
-  if (!callee) return fpushCufUnknown(env, op, numArgs);
-
-  SSATmp* ctx;
-  auto func = cns(env, callee);
-  if (cls) {
-    auto const exitSlow = makeExitSlow(env);
-    if (!classIsPersistentOrCtxParent(env, cls)) {
-      // The miss path is complicated and rare.  Punt for now.  This must be
-      // checked before we IncRef the context below, because the slow exit will
-      // want to do that same IncRef via InterpOne.
-      gen(env, LdClsCachedSafe, exitSlow, cns(env, cls->name()));
-    }
-
-    if (forward) {
-      ctx = forwardCtx(env, ldCtx(env), cns(env, callee));
-    } else {
-      ctx = ldCtxForClsMethod(env, callee, cns(env, cls), cls, true);
-    }
-  } else {
-    ctx = cns(env, TNullptr);
-    if (needsUnitLoad) {
-      // Ensure the function's unit is loaded. The miss path is complicated and
-      // rare. Punt for now.
-      gen(
-        env,
-        LdFuncCachedSafe,
-        LdFuncCachedData { callee->name() },
-        makeExitSlow(env)
-      );
-    }
-  }
-
-  popDecRef(env); // callable
-
-  fpushActRec(
-    env,
-    func,
-    ctx,
-    numArgs,
-    invName,
-    cns(env, !callable->isA(TObj))
-  );
 }
 
 void fpushFuncCommon(IRGS& env,
@@ -818,8 +641,6 @@ bool callAccessesLocals(const NormalizedInstruction& inst,
   switch (op) {
     case OpFPushFunc:
     case OpFPushCufIter:
-    case OpFPushCuf:
-    case OpFPushCufF:
       // Dynamic calls.  If we've forbidden dynamic calls to functions which
       // access the caller's frame, we know this can't be one.
       return !disallowDynamicVarEnvFuncs();
@@ -977,13 +798,6 @@ void emitFPushCufIter(IRGS& env, uint32_t numParams, int32_t itId) {
   ifNonNull(env, ctx, [&](SSATmp* t) { gen(env, IncRef, t); });
   ifNonNull(env, invName, [&](SSATmp* t) { gen(env, IncRef, t); });
   gen(env, SpillFrame, info, sp(env), func, ctx, invName, dynamic);
-}
-
-void emitFPushCuf(IRGS& env, uint32_t numArgs) {
-  implFPushCufOp(env, Op::FPushCuf, numArgs);
-}
-void emitFPushCufF(IRGS& env, uint32_t numArgs) {
-  implFPushCufOp(env, Op::FPushCufF, numArgs);
 }
 
 void emitFPushCtor(IRGS& env, uint32_t numParams, uint32_t slot) {
@@ -1587,32 +1401,6 @@ void emitCallerDynamicCallChecks(IRGS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-void emitFCallArray(IRGS& env) {
-  auto const callee = env.currentNormalizedInstruction->funcd;
-
-  auto const writeLocals = callee
-    ? funcWritesLocals(callee)
-    : callWritesLocals(*env.currentNormalizedInstruction, curFunc(env));
-  auto const readLocals = callee
-    ? funcReadsLocals(callee)
-    : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
-
-  emitCallerDynamicCallChecks(env, callee, 1);
-
-  auto const data = CallArrayData {
-    spOffBCFromIRSP(env),
-    0,
-    0,
-    bcOff(env),
-    nextBcOff(env),
-    callee,
-    writeLocals,
-    readLocals
-  };
-  auto const retVal = gen(env, CallArray, data, sp(env), fp(env));
-  push(env, retVal);
-}
-
 void implFCallUnpack(IRGS& env, uint32_t numParams, uint32_t numOut) {
   auto const callee = env.currentNormalizedInstruction->funcd;
 
@@ -1625,7 +1413,7 @@ void implFCallUnpack(IRGS& env, uint32_t numParams, uint32_t numOut) {
 
   emitCallerDynamicCallChecks(env, callee, numParams);
 
-  auto const data = CallArrayData {
+  auto const data = CallUnpackData {
     spOffBCFromIRSP(env),
     numParams,
     numOut,
@@ -1635,7 +1423,7 @@ void implFCallUnpack(IRGS& env, uint32_t numParams, uint32_t numOut) {
     writeLocals,
     readLocals
   };
-  auto const retVal = gen(env, CallArray, data, sp(env), fp(env));
+  auto const retVal = gen(env, CallUnpack, data, sp(env), fp(env));
   push(env, retVal);
 }
 

@@ -91,7 +91,6 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
       return ControlFlowInfo::BreaksBB;
     case Op::FCall:
     case Op::FCallD:
-    case Op::FCallArray:
     case Op::FCallUnpack:
     case Op::FCallM:
     case Op::FCallDM:

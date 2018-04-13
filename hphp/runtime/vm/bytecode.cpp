@@ -185,8 +185,6 @@ void frame_free_locals_no_hook(ActRec* fp) {
   frame_free_locals_inl_no_hook(fp, fp->func()->numLocals());
 }
 
-const StaticString s_call_user_func("call_user_func");
-const StaticString s_call_user_func_array("call_user_func_array");
 const StaticString s___call("__call");
 const StaticString s___callStatic("__callStatic");
 const StaticString s_allows_unknown_fields("allows_unknown_fields");
@@ -5113,61 +5111,11 @@ OPTBLD_INLINE void iopFPushCufIter(uint32_t numArgs, Iter* it) {
   setTypesFlag(vmfp(), ar);
 }
 
-OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward) {
-  TypedValue func = *vmStack().topTV();
-
-  ObjectData* obj = nullptr;
-  HPHP::Class* cls = nullptr;
-  StringData* invName = nullptr;
-  bool dynamic = false;
-
-  const Func* f = vm_decode_function(
-    tvAsVariant(&func), vmfp(), forward, obj, cls, invName,
-    dynamic, DecodeFlags::Warn);
-
-  vmStack().ndiscard(1);
-  if (f == nullptr) {
-    f = SystemLib::s_nullFunc;
-    obj = nullptr;
-    cls = nullptr;
-  }
-
-  ActRec* ar = vmStack().allocA();
-  ar->m_func = f;
-  if (obj) {
-    ar->setThis(obj);
-    obj->incRefCount();
-  } else if (cls) {
-    ar->setClass(cls);
-  } else {
-    ar->trashThis();
-  }
-  ar->initNumArgs(numArgs);
-
-  if (dynamic) ar->setDynamicCall();
-
-  if (invName) {
-    ar->setMagicDispatch(invName);
-  } else {
-    ar->trashVarEnv();
-  }
-  setTypesFlag(vmfp(), ar);
-  tvDecRefGen(&func);
-}
-
 OPTBLD_INLINE void iopRaiseFPassWarning(
   FPassHint hint, const StringData* fname, uint32_t arg
 ) {
   assertx(hint != FPassHint::Any);
   raiseParamRefMismatchForFuncName(fname, arg, hint == FPassHint::Cell);
-}
-
-OPTBLD_INLINE void iopFPushCuf(uint32_t numArgs) {
-  doFPushCuf(numArgs, false);
-}
-
-OPTBLD_INLINE void iopFPushCufF(uint32_t numArgs) {
-  doFPushCuf(numArgs, true);
 }
 
 OPTBLD_INLINE void iopFPassC(ActRec* ar, uint32_t paramId, FPassHint hint) {
@@ -5359,41 +5307,18 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
   tvCopy(ret, *vmStack().allocTV());
 }
 
-enum class CallArrOnInvalidContainer {
-  // task #1756122: warning and returning null is what we /should/ always
-  // do in call_user_func_array, but some code depends on the broken
-  // behavior of casting the list of args to FCallArray to an array.
-  CastToArray,
-  WarnAndReturnNull,
-  WarnAndContinue
-};
-
-static bool doFCallArray(PC& pc, ActRec* ar, int numStackValues,
-                         CallArrOnInvalidContainer onInvalid,
-                         void* ret = nullptr) {
+static bool doFCallUnpack(PC& pc, ActRec* ar, int numStackValues,
+                          void* ret = nullptr) {
   assertx(numStackValues >= 1);
   assertx(ar->numArgs() == numStackValues);
 
   Cell* c1 = vmStack().topC();
   if (UNLIKELY(!isContainer(*c1))) {
-    switch (onInvalid) {
-      case CallArrOnInvalidContainer::CastToArray:
-        tvCastToArrayInPlace(c1);
-        break;
-      case CallArrOnInvalidContainer::WarnAndReturnNull:
-        vmStack().pushNull();
-        cleanupParamsAndActRec(vmStack(), ar, nullptr, nullptr);
-        raise_warning("call_user_func_array() expects parameter 2 to be array");
-        return false;
-      case CallArrOnInvalidContainer::WarnAndContinue: {
-        Cell tmp = *c1;
-        // argument_unpacking RFC dictates "containers and Traversables"
-        raise_warning_unsampled("Only containers may be unpacked");
-        *c1 = make_persistent_array_like_tv(staticEmptyVArray());
-        tvDecRefGen(&tmp);
-        break;
-      }
-    }
+    Cell tmp = *c1;
+    // argument_unpacking RFC dictates "containers and Traversables"
+    raise_warning_unsampled("Only containers may be unpacked");
+    *c1 = make_persistent_array_like_tv(staticEmptyVArray());
+    tvDecRefGen(&tmp);
   }
 
   const Func* func = ar->m_func;
@@ -5405,7 +5330,7 @@ static bool doFCallArray(PC& pc, ActRec* ar, int numStackValues,
     checkStack(vmStack(), func, 0);
 
     assertx(!ar->resumed());
-    TRACE(3, "FCallArray: pc %p func %p base %d\n", vmpc(),
+    TRACE(3, "FCallUnpack: pc %p func %p base %d\n", vmpc(),
           vmfp()->unit()->entry(),
           int(vmfp()->m_func->base()));
     ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
@@ -5435,31 +5360,20 @@ static bool doFCallArray(PC& pc, ActRec* ar, int numStackValues,
   return true;
 }
 
-bool doFCallArrayTC(PC pc, int32_t numArgs, void* retAddr) {
+bool doFCallUnpackTC(PC pc, int32_t numArgs, void* retAddr) {
   assert_native_stack_aligned();
   assertx(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
-  auto onInvalid = CallArrOnInvalidContainer::WarnAndContinue;
-  if (!numArgs) {
-    numArgs = 1;
-    onInvalid = CallArrOnInvalidContainer::CastToArray;
-  }
-  auto const ret = doFCallArray(pc, arFromSp(numArgs), numArgs,
-                                onInvalid, retAddr);
+  auto const ret = doFCallUnpack(pc, arFromSp(numArgs), numArgs, retAddr);
   tl_regState = VMRegState::DIRTY;
   return ret;
-}
-
-OPTBLD_INLINE void iopFCallArray(PC& pc, ActRec* ar) {
-  if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
-  doFCallArray(pc, ar, 1, CallArrOnInvalidContainer::CastToArray);
 }
 
 OPTBLD_INLINE void iopFCallUnpack(PC& pc, ActRec* ar, uint32_t numArgs) {
   assertx(numArgs == ar->numArgs());
   if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
   checkStack(vmStack(), ar->m_func, 0);
-  doFCallArray(pc, ar, numArgs, CallArrOnInvalidContainer::WarnAndContinue);
+  doFCallUnpack(pc, ar, numArgs);
 }
 
 OPTBLD_FLT_INLINE
@@ -6883,8 +6797,6 @@ ALWAYS_INLINE ActRec* ar_for_inst(Op op, PC origpc,
     case Op::FPassM:
       assertx(iva_count >= 2);
       return arFromSp(ivas[0] + ivas[1]);
-    case Op::FCallArray:
-      return arFromSp(1);
     default:
       return arFromInstr(origpc);
   }

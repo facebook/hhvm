@@ -122,20 +122,5 @@ SimpleFunctionCallPtr NewSimpleFunctionCall(
   ExpressionPtr cls);
 
 ///////////////////////////////////////////////////////////////////////////////
-// hphp_opt functions
-
-ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
-                                         AnalysisResultConstRawPtr ar,
-                                         SimpleFunctionCallPtr call, int mode);
-
-ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
-                                   AnalysisResultConstRawPtr ar,
-                                   SimpleFunctionCallPtr call, int mode);
-
-ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
-                                      AnalysisResultConstRawPtr ar,
-                                      SimpleFunctionCallPtr call, int mode);
-
-///////////////////////////////////////////////////////////////////////////////
 } // HPHP
 #endif // incl_HPHP_SIMPLE_FUNCTION_CALL_H_

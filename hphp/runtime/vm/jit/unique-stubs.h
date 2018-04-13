@@ -93,7 +93,7 @@ struct UniqueStubs {
    *  +---------+---------------------+---------+-----------+
    *  | native  | call{,r,m,s}        | ret     | N/A       |
    *  +---------+---------------------+---------+-----------+
-   *  | PHP     | phpcall, callarray  | phpret  | phplogue  |
+   *  | PHP     | phpcall, callunpack | phpret  | phplogue  |
    *  +---------+---------------------+---------+----------+
    *  | stub    | callstub            | stubret | stublogue |
    *  +---------+---------------------+---------+-----------+
@@ -149,7 +149,7 @@ struct UniqueStubs {
    * translation.
    *
    * @reached:  call from enterTCHelper$callTC
-   *            jmp from fcallArrayHelper
+   *            jmp from fcallUnpackHelper
    * @context:  func body
    */
   TCA funcBodyHelperThunk;
@@ -269,19 +269,11 @@ struct UniqueStubs {
 
   /*
    * Use interpreter functions to enter the pre-live ActRec that we place on
-   * the stack (along with the Array of parameters) in a CallArray instruction.
+   * the stack (along with the Array of parameters) in a CallUnpack instruction.
+   * The last arg specifies the total number of args, including the array
+   * parameter (which must be the last one).
    *
-   * @reached:  callarray from TC
-   * @context:  func prologue
-   */
-  TCA fcallArrayHelper;
-
-  /*
-   * Similar to fcallArrayHelper, but takes an additional arg specifying the
-   * total number of args, including the array parameter (which must be the
-   * last one).
-   *
-   * @reached:  callarray from TC
+   * @reached:  callunpack from TC
    * @context:  func prologue
    */
   TCA fcallUnpackHelper;

@@ -426,12 +426,9 @@ bool canDCE(IRInstruction* inst) {
   case LdObjMethod:
   case LdObjInvoke:
   case LdArrFuncCtx:
-  case LdArrFPushCuf:
-  case LdStrFPushCuf:
   case LdFunc:
   case LdFuncCached:
   case LdFuncCachedU:
-  case LdFuncCachedSafe:
   case AllocObj:
   case RegisterLiveObj:
   case CheckInitProps:
@@ -454,7 +451,7 @@ bool canDCE(IRInstruction* inst) {
   case NewStructDict:
   case Clone:
   case InlineReturn:
-  case CallArray:
+  case CallUnpack:
   case Call:
   case NativeImpl:
   case CallBuiltin:

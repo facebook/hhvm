@@ -314,8 +314,6 @@ static const struct {
   { OpFPushCtorI,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCtorS,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCufIter,{None,             FStack,       OutFDesc        }},
-  { OpFPushCuf,    {Stack1,           FStack,       OutFDesc        }},
-  { OpFPushCufF,   {Stack1,           FStack,       OutFDesc        }},
   { OpRaiseFPassWarning,
                    {None,             None,         OutNone         }},
   { OpFPassC,      {FuncdRef,         None,         OutSameAsInput1 }},
@@ -339,7 +337,6 @@ static const struct {
   { OpFCallD,      {FStack,           Stack1,       OutUnknown      }},
   { OpFCallAwait,  {FStack,           Stack1,       OutUnknown      }},
   { OpFCallUnpack, {FStack,           Stack1,       OutUnknown      }},
-  { OpFCallArray,  {FStack,           Stack1,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
                                       Stack1,       OutUnknown      }},
   { OpDecodeCufIter,{Stack1,          None,         OutNone         }},
@@ -557,14 +554,16 @@ int64_t countOperands(uint64_t mask) {
 int64_t getStackPopped(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
-    case Op::FCall:        return getImm(pc, 0).u_IVA + kNumActRecCells;
-    case Op::FCallD:       return getImm(pc, 0).u_IVA + kNumActRecCells;
-    case Op::FCallAwait:   return getImm(pc, 0).u_IVA + kNumActRecCells;
+    case Op::FCall:
+    case Op::FCallD:
+    case Op::FCallUnpack:
+    case Op::FCallAwait:
+      return getImm(pc, 0).u_IVA + kNumActRecCells;
+
     case Op::FCallM:
     case Op::FCallDM:
     case Op::FCallUnpackM:
       return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA + kNumActRecCells - 1;
-    case Op::FCallArray:   return kNumActRecCells + 1;
 
     case Op::QueryM:
     case Op::VGetM:
@@ -877,9 +876,9 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::JmpNZ:
   case Op::Jmp:
   case Op::JmpNS:
-  case Op::FCallArray:
   case Op::FCall:
   case Op::FCallD:
+  case Op::FCallUnpack:
   case Op::FCallAwait:
   case Op::ClsCnsD:
   case Op::FPassCW:
@@ -909,8 +908,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::IncDecL:
   case Op::DefCls:
   case Op::AliasCls:
-  case Op::FPushCuf:
-  case Op::FPushCufF:
   case Op::IncStat:
   case Op::Eq:
   case Op::Neq:
@@ -1147,7 +1144,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::UnsetN:
   case Op::UnsetG:
   case Op::FPushObjMethod:
-  case Op::FCallUnpack:
   case Op::Incl:
   case Op::InclOnce:
   case Op::Req:

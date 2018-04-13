@@ -435,7 +435,7 @@ struct Vgen {
   // order to guarantee that the desired vasm is already defined or else it'll
   // fallback to the templated emit function.
   void emit(const call& i);
-  void emit(const callarray& i);
+  void emit(const callunpack& i);
   void emit(const callfaststub& i);
   void emit(const callr& i);
   void emit(const calls& i);
@@ -828,8 +828,8 @@ void Vgen::emit(const calls& i) {
                     Assembler::CallArg::SmashExt);
 }
 
-void Vgen::emit(const callarray& i) {
-  // callarray target can indeed start with stublogue, therefore reuse callstub
+void Vgen::emit(const callunpack& i) {
+  // callunpack target can indeed start with stublogue, therefore reuse callstub
   // approach
   emit(callstub{i.target});
 }

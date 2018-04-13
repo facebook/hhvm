@@ -2,6 +2,7 @@ statically known invoke
 
 Fatal error: Non-static method __invoke() cannot be called statically in %s/test/slow/closure/static_invoke.php on line 20
 call_user_func
+string(1) "f"
 
 Fatal error: Non-static method __invoke() cannot be called statically in %s/test/slow/closure/static_invoke.php on line 23
 X::bar

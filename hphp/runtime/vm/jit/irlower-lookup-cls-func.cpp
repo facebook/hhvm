@@ -277,48 +277,29 @@ void cgLdClsCachedSafe(IRLS& env, const IRInstruction* inst) {
   implLdCachedSafe<Class>(env, inst, name);
 }
 
-void cgLdFuncCachedSafe(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LdFuncCachedSafe>();
-  implLdCachedSafe<Func>(env, inst, extra->name);
-}
-
 IMPL_OPCODE_CALL(LookupClsRDS)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-enum class OnFail { Warn, Fatal };
-
-template<OnFail FailBehavior, class FooNR>
-void loadFuncContextImpl(FooNR callableNR, ActRec* preLiveAR, ActRec* fp) {
-  static_assert(
-    std::is_same<FooNR,ArrNR>::value ||
-    std::is_same<FooNR,StrNR>::value,
-    "check loadFuncContextImpl for a new FooNR"
-  );
-
+void loadFuncContextImpl(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   ObjectData* inst = nullptr;
   Class* cls = nullptr;
   StringData* invName = nullptr;
   bool dynamic = false;
 
   auto func = vm_decode_function(
-    VarNR(callableNR),
+    VarNR(arr),
     fp,
     false, // forward
     inst,
     cls,
     invName,
     dynamic,
-    FailBehavior == OnFail::Warn ? DecodeFlags::Warn : DecodeFlags::NoWarn
+    DecodeFlags::NoWarn
   );
   assertx(dynamic);
   if (UNLIKELY(func == nullptr)) {
-    if (FailBehavior == OnFail::Fatal) {
-      raise_error("Invalid callable (array)");
-    }
-    func = SystemLib::s_nullFunc;
-    inst = nullptr;
-    cls = nullptr;
+    raise_error("Invalid callable (array)");
   }
 
   preLiveAR->m_func = func;
@@ -337,102 +318,9 @@ void loadFuncContextImpl(FooNR callableNR, ActRec* preLiveAR, ActRec* fp) {
 
 void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   try {
-    loadFuncContextImpl<OnFail::Fatal>(ArrNR(arr), preLiveAR, fp);
+    loadFuncContextImpl(arr, preLiveAR, fp);
   } catch (...) {
     *arPreliveOverwriteCells(preLiveAR) = make_array_like_tv(arr);
-    throw;
-  }
-}
-
-NEVER_INLINE
-static void fpushCufHelperArraySlowPath(ArrayData* arr,
-                                        ActRec* preLiveAR,
-                                        ActRec* fp) {
-  loadFuncContextImpl<OnFail::Warn>(ArrNR(arr), preLiveAR, fp);
-}
-
-ALWAYS_INLINE
-static bool strHasColon(StringData* sd) {
-  auto const sl = sd->slice();
-  auto const e = sl.end();
-  for (auto p = sl.begin(); p != e; ++p) {
-    if (*p == ':') return true;
-  }
-  return false;
-}
-
-void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
-  try {
-    if (UNLIKELY(!arr->hasPackedLayout() || arr->getSize() != 2)) {
-      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
-    }
-
-    auto const rval = [&] (int64_t idx) {
-      return arr->isPacked()
-        ? PackedArray::RvalInt(arr, idx).unboxed()
-        : PackedArray::RvalIntVec(arr, idx).unboxed();
-    };
-    auto const elem0 = rval(0);
-    auto const elem1 = rval(1);
-
-    if (UNLIKELY(elem0.type() != KindOfObject ||
-                 !isStringType(elem1.type()))) {
-      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
-    }
-
-    // If the string contains a class name (e.g. Foo::bar), all kinds of weird
-    // junk happens (w.r.t. forwarding class contexts and things).  We just do
-    // a quick loop to try to bail out of this case.
-    if (UNLIKELY(strHasColon(elem1.val().pstr))) {
-      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
-    }
-
-    auto const inst = elem0.val().pobj;
-    auto const func = lookupMethodCtx(
-      inst->getVMClass(),
-      elem1.val().pstr,
-      fp->func()->cls(),
-      CallType::ObjMethod
-    );
-    if (UNLIKELY(!func || func->isStaticInPrologue())) {
-      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
-    }
-
-    preLiveAR->m_func = func;
-    inst->incRefCount();
-    preLiveAR->setThis(inst);
-  } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_array_like_tv(arr);
-    throw;
-  }
-}
-
-NEVER_INLINE
-static void fpushCufHelperStringSlowPath(StringData* sd,
-                                         ActRec* preLiveAR,
-                                         ActRec* fp) {
-  loadFuncContextImpl<OnFail::Warn>(StrNR(sd), preLiveAR, fp);
-}
-
-NEVER_INLINE
-static void fpushStringFail(const StringData* sd, ActRec* preLiveAR) {
-  throw_invalid_argument("function: method '%s' not found", sd->data());
-  preLiveAR->m_func = SystemLib::s_nullFunc;
-}
-
-void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
-  try {
-    if (UNLIKELY(strHasColon(sd))) {
-      return fpushCufHelperStringSlowPath(sd, preLiveAR, fp);
-    }
-
-    auto const func = Unit::loadFunc(sd);
-    preLiveAR->m_func = func;
-    if (UNLIKELY(!func)) {
-      return fpushStringFail(sd, preLiveAR);
-    }
-  } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfString>(sd);
     throw;
   }
 }
@@ -447,28 +335,6 @@ void cgLdArrFuncCtx(IRLS& env, const IRInstruction* inst) {
     .ssa(2);
 
   cgCallHelper(vmain(env), env, CallSpec::direct(loadArrayFunctionContext),
-               callDest(env, inst), SyncOptions::Sync, args);
-}
-
-void cgLdArrFPushCuf(IRLS& env, const IRInstruction* inst) {
-  auto const args = argGroup(env, inst)
-    .ssa(0)
-    .addr(srcLoc(env, inst, 1).reg(),
-          cellsToBytes(inst->extra<LdArrFPushCuf>()->offset.offset))
-    .ssa(2);
-
-  cgCallHelper(vmain(env), env, CallSpec::direct(fpushCufHelperArray),
-               callDest(env, inst), SyncOptions::Sync, args);
-}
-
-void cgLdStrFPushCuf(IRLS& env, const IRInstruction* inst) {
-  auto const args = argGroup(env, inst)
-    .ssa(0)
-    .addr(srcLoc(env, inst, 1).reg(),
-          cellsToBytes(inst->extra<LdStrFPushCuf>()->offset.offset))
-    .ssa(2);
-
-  cgCallHelper(vmain(env), env, CallSpec::direct(fpushCufHelperString),
                callDest(env, inst), SyncOptions::Sync, args);
 }
 

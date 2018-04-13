@@ -805,7 +805,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FCallD:       // THREE(IVA,SA,SA),    FMANY,   ONE(RV)
   case Op::FCallAwait:   // THREE(IVA,SA,SA),    FMANY,   ONE(CV)
   case Op::FCallUnpack:  // ONE(IVA),            FMANY,   ONE(RV)
-  case Op::FCallArray:   // NA,                  ONE(FV), ONE(RV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
     }
@@ -993,7 +992,7 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* /*b*/) {
 
   if (isFCallStar(op)) {
     --cur->fpilen;
-    int call_params = op == Op::FCallArray ? 1 : getImmIva(pc);
+    int call_params = getImmIva(pc);
     int push_params = getImmIva(at(fpi.fpush));
     if (call_params != push_params) {
       error("FCall* param_count (%d) doesn't match FPush* (%d)\n",

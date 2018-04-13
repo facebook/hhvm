@@ -105,7 +105,7 @@ struct Vgen {
   // php function abi
   void emit(const phpret& i);
   void emit(const tailcallphp& i);
-  void emit(const callarray& i);
+  void emit(const callunpack& i);
   void emit(const contenter& i);
 
   // vm entry abi
@@ -670,7 +670,7 @@ void Vgen::emit(const tailcallphp& i) {
   emit(jmpr{i.target, i.args});
 }
 
-void Vgen::emit(const callarray& i) {
+void Vgen::emit(const callunpack& i) {
   emit(call{i.target, i.args});
 }
 

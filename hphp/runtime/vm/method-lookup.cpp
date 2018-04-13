@@ -31,8 +31,6 @@ namespace HPHP {
 const StaticString s___construct("__construct");
 const StaticString s___call("__call");
 const StaticString s___callStatic("__callStatic");
-const StaticString s_call_user_func("call_user_func");
-const StaticString s_call_user_func_array("call_user_func_array");
 
 // Look up the method specified by methodName from the class specified by cls
 // and enforce accessibility. Accessibility checks depend on the relationship

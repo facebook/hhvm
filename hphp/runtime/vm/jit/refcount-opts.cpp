@@ -2131,8 +2131,6 @@ bool consumes_reference_taken(const IRInstruction& inst, uint32_t srcID) {
   case LookupClsMethod:
     return srcID == 1;
   case LdArrFuncCtx:
-  case LdArrFPushCuf:
-  case LdStrFPushCuf:
   case SuspendHookAwaitEF:
   case SuspendHookAwaitEG:
   case SuspendHookCreateCont:

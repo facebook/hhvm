@@ -577,8 +577,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushCtorS,      TWO(IVA,OA(SpecialClsRef)),                        \
                                        NOV,             ONE(CV),    PF) \
   O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        PF) \
-  O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        PF) \
-  O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        PF) \
   O(FPassC,          TWO(IVA,OA(FPassHint)),                            \
                                        ONE(CV),         ONE(FV),    FF) \
   O(FPassCW,         TWO(IVA,OA(FPassHint)),                            \
@@ -608,7 +606,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FCallAwait,      THREE(IVA,SA,SA), FMANY,           ONE(CV),    CF_FF) \
   O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
   O(FCallUnpack,     ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
-  O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(MIterInit,       THREE(IA,BA,LA),  ONE(VV),         NOV,        CF) \
@@ -1011,11 +1008,8 @@ constexpr bool isFPush(Op opcode) {
   return (instrFlags(opcode) & PF) != 0;
 }
 
-constexpr bool isFPushCuf(Op opcode) {
-  return
-    opcode == OpFPushCufIter ||
-    opcode == OpFPushCuf     ||
-    opcode == OpFPushCufF;
+constexpr bool isFPushCufIter(Op opcode) {
+  return opcode == OpFPushCufIter;
 }
 
 constexpr bool isFPushClsMethod(Op opcode) {
@@ -1049,7 +1043,6 @@ inline bool isFCallStar(Op opcode) {
     case Op::FCall:
     case Op::FCallD:
     case Op::FCallAwait:
-    case Op::FCallArray:
     case Op::FCallUnpack:
     case Op::FCallM:
     case Op::FCallDM:

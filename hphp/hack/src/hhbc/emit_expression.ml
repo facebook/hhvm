@@ -294,9 +294,6 @@ let is_special_function env e args =
 let optimize_null_check () =
   Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
 
-let optimize_cuf () =
-  Hhbc_options.optimize_cuf !Hhbc_options.compiler_options
-
 let hack_arr_compat_notices () =
   Hhbc_options.hack_arr_compat_notices !Hhbc_options.compiler_options
 
@@ -3234,19 +3231,6 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
       instr_fpushfunc nargs inout_arg_positions
     ]
 
-(* Retuns whether the function is a call_user_func function,
-  min args, max args *)
-and get_call_user_func_info = function
-  | "call_user_func" -> (true, 1, max_int)
-  | "call_user_func_array" -> (true, 2, 2)
-  | "forward_static_call" -> (true, 1, max_int)
-  | "forward_static_call_array"  -> (true, 2, 2)
-  | _ -> (false, 0, 0)
-
-and is_call_user_func id num_args =
-  let (is_fn, min_args, max_args) = get_call_user_func_info id in
-  is_fn && num_args >= min_args && num_args <= max_args
-
 and get_call_builtin_func_info lower_fq_id =
   match lower_fq_id with
   | "array_key_exists" -> Some (2, IMisc AKExists)
@@ -3261,44 +3245,6 @@ and get_call_builtin_func_info lower_fq_id =
   | "hh\\varray" -> Some (1, IOp (if hack_arr_dv_arrs () then CastVec else CastVArray))
   | "hh\\darray" -> Some (1, IOp (if hack_arr_dv_arrs () then CastDict else CastDArray))
   | _ -> None
-
-and emit_call_user_func_arg env f i expr =
-  let hint = get_pass_by_ref_hint expr in
-  let hint, warning, expr =
-    if hint = Ref
-    then
-      (* for warning - adjust the argument id *)
-      let param_id = Param_unnamed (i + 1) in
-      (* emitter.cpp:
-         The passthrough type of call_user_func is always cell or any, so
-         any call to a function taking a ref will result in a warning *)
-      Cell, instr_raise_fpass_warning hint f param_id, strip_ref expr
-    else hint, empty, expr in
-  gather [
-    emit_expr ~need_ref:false env expr;
-    warning;
-    instr_fpass PassByRefKind.AllowCell i hint;
-  ]
-
-and emit_call_user_func env id arg args =
-  let num_params = List.length args in
-  let begin_instr = match id with
-    | "forward_static_call"
-    | "forward_static_call_array" -> instr_fpushcuff num_params
-    | _ -> instr_fpushcuf num_params
-  in
-  let call_instr = match id with
-    | "call_user_func_array"
-    | "forward_static_call_array" -> instr (ICall FCallArray)
-    | _ -> instr (ICall (FCall num_params))
-  in
-  gather [
-    (* first arg is always emitted as cell *)
-    emit_expr ~need_ref:false env (strip_ref arg);
-    begin_instr;
-    gather (List.mapi args (emit_call_user_func_arg env id));
-    call_instr;
-  ], Flavor.ReturnVal
 
 (* TODO: work out what HHVM does special here *)
 and emit_name_string env e =
@@ -3334,16 +3280,6 @@ and emit_special_function env pos id args uargs default =
 
   | "hh\\asm", [_, A.String (_, s)] ->
     Some (emit_inline_hhas s, Flavor.Cell)
-
-  | id, _ when
-    (optimize_cuf ()) && (is_call_user_func id (List.length args)) ->
-    if List.length uargs != 0 then
-    failwith "Using argument unpacking for a call_user_func is not supported";
-    begin match args with
-      | [] -> failwith "call_user_func - needs a name"
-      | arg :: args ->
-        Some (emit_call_user_func env id arg args)
-    end
 
   | "hh\\invariant", e::rest when hh_enabled ->
     let l = Label.next_regular () in

@@ -2248,14 +2248,6 @@ FPushCufIter <num params> <iterator id>   []  ->  []
 
   FPI push the result of a previous DecodeCufIter. No warning is raised.
 
-FPushCuf <num params>     [C]   ->  []
-FPushCufF <num params>    [C]   ->  []
-
-  FPI push call user function. These instructions lookup $1 as a callable, and
-  push a new entry onto the FPI stack. If $1 is not callable, they issue a
-  warning, and push an entry representing a function which does nothing, takes
-  no argument, and returns null.
-
 
 Reffiness hints
 --------------------
@@ -2337,16 +2329,6 @@ FCallD <num params> <class name> <func name>   [F..F]  ->  [R]
   determining the callee. The strings in %2 and %3 are statically known names
   of the class (if any) and method being called. If the call is targeting a
   non-method, %2 must be the empty string.
-
-FCallArray    [F]  ->  [R]
-
-  FPI call with array. This instruction gets the bytecode address of the
-  function associated with the current FPI (the callee), transfers the elements
-  of $1 (which must be an array) to the callee as parameters, pops the current
-  FPI off of the FPI stack, and then invokes the dispatcher to call the callee.
-
-  When the callee returns, it will transfer the return value onto the caller's
-  evaluation stack using the R flavor.
 
 FCallAwait <num params> <class name> <func name> [F..F] -> [R]
 

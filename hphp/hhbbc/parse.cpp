@@ -779,7 +779,7 @@ void populate_block(ParseUnitState& puState,
     auto const fpi = Func::findFPI(&*fe.fpitab.begin(),
                                    &*fe.fpitab.end(), pc - ue.bc());
     auto const op = peek_op(ue.bc() + fpi->m_fpiEndOff);
-    return op == OpFCallArray || op == OpFCallUnpack;
+    return op == OpFCallUnpack;
   };
 
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);

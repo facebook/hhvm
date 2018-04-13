@@ -98,8 +98,6 @@ let stk_data : instruct -> stack_sig = function
   | IMutator UnsetN
   | IMutator InitProp _
   | ICall FPushFunc _
-  | ICall FPushCuf _
-  | ICall FPushCufF _
   | ICall FPushObjMethodD _
   | ICall DecodeCufIter _
   | IIterator IterInit _
@@ -229,7 +227,6 @@ let stk_data : instruct -> stack_sig = function
   | ICall FPassVNop _
   | ICall FPassV _                         -> ["V"], ["F"]
   | ICall FPassR _                         -> ["R"], ["F"]
-  | ICall FCallArray                       -> ["F"], ["R"]
   | ILitConst NewPair
   | IOp _
   | ILitConst AddNewElemC                  -> ["C"; "C"], ["C"]

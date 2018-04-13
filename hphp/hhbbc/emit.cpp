@@ -609,8 +609,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
 
     auto fcall = [&] (Op op) {
-      // FCallArray and FCallUnpack do their own stack overflow checking
-      if (op != Op::FCallArray && op != Op::FCallUnpack) {
+      // FCallUnpack do their own stack overflow checking
+      if (op != Op::FCallUnpack) {
         ret.containsCalls = true;
       }
       end_fpi(startOffset);

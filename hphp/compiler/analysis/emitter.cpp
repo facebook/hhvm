@@ -1199,7 +1199,6 @@ public:
     CallUserFuncForwardArray = CallUserFuncForward | CallUserFuncArray
   };
 
-  bool emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr node);
   void emitFuncCall(Emitter& e, FunctionCallPtr node,
                     const char* nameOverride = nullptr,
                     ExpressionListPtr paramsOverride = nullptr);
@@ -5976,8 +5975,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         }
         not_reached();
       }
-    } else if (emitCallUserFunc(e, call)) {
-      return true;
     } else if (call->isCallToFunction("array_key_exists")) {
       if (params && params->getCount() == 2) {
         visit((*params)[0]);
@@ -10568,84 +10565,6 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
         makeStaticString(node->getOriginalClassName()));
     }
   }
-}
-
-bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
-  static struct {
-    const char* name;
-    int minParams, maxParams;
-    CallUserFuncFlags flags;
-  } cufTab[] = {
-    { "call_user_func", 1, INT_MAX, CallUserFuncPlain },
-    { "call_user_func_array", 2, 2, CallUserFuncArray },
-    { "forward_static_call", 1, INT_MAX, CallUserFuncForward },
-    { "forward_static_call_array", 2, 2, CallUserFuncForwardArray },
-  };
-
-  if (RuntimeOption::EvalDisableHphpcOpts) return false;
-
-  ExpressionListPtr params = func->getParams();
-  if (!params) return false;
-  processEmptyArrayPairs(params);
-  int nParams = params->getCount();
-  if (!nParams) return false;
-  CallUserFuncFlags flags = CallUserFuncNone;
-  for (unsigned i = 0; i < sizeof(cufTab) / sizeof(cufTab[0]); i++) {
-    if (func->isCallToFunction(cufTab[i].name) &&
-        nParams >= cufTab[i].minParams &&
-        nParams <= cufTab[i].maxParams) {
-      flags = cufTab[i].flags;
-      break;
-    }
-  }
-  if (flags == CallUserFuncNone) return false;
-  if (func->hasUnpack()) {
-    throw EmitterVisitor::IncludeTimeFatalException(
-      func,
-      "Using argument unpacking for a call_user_func is not supported"
-    );
-  }
-  int param = 1;
-  ExpressionPtr callable = (*params)[0];
-  visit(callable);
-  emitConvertToCell(e);
-  Offset fpiStart = m_ue.bcPos();
-  if (flags & CallUserFuncForward) {
-    e.FPushCufF(nParams - param);
-  } else {
-    e.FPushCuf(nParams - param);
-  }
-
-  {
-    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-    for (int i = param; i < nParams; i++) {
-      visit((*params)[i]);
-      emitConvertToCell(e);
-      auto hint = getPassByRefHint((*params)[i]);
-
-      // The passthrough type of call_user_func is always cell or any, so
-      // any call to a function taking a ref will result in a warning. In
-      // addition designating a ref on a parameter to call_user_func will
-      // itself result in a warning.
-      if (hint == FPassHint::Ref) {
-        e.RaiseFPassWarning(
-          hint, makeStaticString(func->getOriginalName()), i
-        );
-        hint = FPassHint::Cell;
-      }
-
-      // TODO(T21236852): This is broken, we need to raise a warning here if
-      // the callee does not expect the parameter to be by value.
-      e.FPassC(i - param, hint);
-    }
-  }
-
-  if (flags & CallUserFuncArray) {
-    e.FCallArray();
-  } else {
-    e.FCall(nParams - param);
-  }
-  return true;
 }
 
 void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,

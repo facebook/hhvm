@@ -784,9 +784,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyRetFailHard:
     return may_raise(inst, may_load_store(AHeapAny | AStackAny, AHeapAny));
 
-  case CallArray:
+  case CallUnpack:
     {
-      auto const extra = inst.extra<CallArray>();
+      auto const extra = inst.extra<CallUnpack>();
       return CallEffects {
         extra->writeLocals,
         // Kills. Everything on the stack below the incoming parameters.
@@ -1764,7 +1764,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case FwdCtxStaticCall:
   case ProfileArrayKind:
   case ProfileSwitchDest:
-  case LdFuncCachedSafe:
   case LdFuncNumParams:
   case LdGblAddr:
   case LdGblAddrDef:
@@ -1838,9 +1837,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return IrrelevantEffects{};
   }
 
-  case LdArrFPushCuf:
   case LdArrFuncCtx:
-  case LdStrFPushCuf:
   case LdFunc: // these all can autoload
     {
       AliasClass effects =

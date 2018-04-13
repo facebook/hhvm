@@ -398,7 +398,7 @@ Type builtinReturn(const IRInstruction* inst) {
 }
 
 Type callReturn(const IRInstruction* inst) {
-  assertx(inst->is(Call, CallArray));
+  assertx(inst->is(Call, CallUnpack));
 
   if (inst->is(Call)) {
     // FCallAwait needs to load TVAux
@@ -407,9 +407,9 @@ Type callReturn(const IRInstruction* inst) {
     auto callee = inst->extra<Call>()->callee;
     return callee ? irgen::callReturnType(callee) : TInitGen;
   }
-  if (inst->is(CallArray)) {
-    if (inst->extra<CallArray>()->numOut) return TInitCell;
-    auto callee = inst->extra<CallArray>()->callee;
+  if (inst->is(CallUnpack)) {
+    if (inst->extra<CallUnpack>()->numOut) return TInitCell;
+    auto callee = inst->extra<CallUnpack>()->callee;
     return callee ? irgen::callReturnType(callee) : TInitGen;
   }
   not_reached();

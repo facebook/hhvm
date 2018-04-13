@@ -6,8 +6,9 @@ Args: 777 500
 Use: 246 4000
 Args: 888 500
 #0  funk(888, 500) called at %s:17]
-#1  Closure$main(888) called at %s:28]
-#2  main() called at %s:33]
+#1  Closure$main(888)
+#2  call_user_func(Object of class %s could not be converted to string, 888) called at %s:28]
+#3  main() called at %s:33]
 object(Closure%s)#1 (2) {
   ["static"]=>
   array(2) {

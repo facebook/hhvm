@@ -30,7 +30,7 @@ of a catch trace, where the unwinder will have to walk the callee frame and
 inspect its live ActRec.
 
 In particular notice that any instructions which may raise, as well as Call,
-CallArray, and CallBuiltin all require catch traces. Many of these instructions
+CallUnpack, and CallBuiltin all require catch traces. Many of these instructions
 can be found within very simple callees and without such a pass would require
 that the callee's frame be stored to the stack and the frame pointer be updated
 to reference it.
@@ -421,7 +421,7 @@ bool canAdjustFrame(IRInstruction& inst) {
    * caller frame (e.g. for the value of m_thisOrClass). If these functions
    * are called we cannot elide the inlined frame.
    *
-   * TODO(#9876778): we should be able to support CallArray here as well.
+   * TODO(#9876778): we should be able to support CallUnpack here as well.
    */
   case CallBuiltin: {
     auto data = inst.extra<CallBuiltin>();
@@ -524,7 +524,7 @@ bool isCallCatch(Block* block) {
     }
   }
   for (auto& pred : block->preds()) {
-    if (pred.inst()->is(Call, CallArray)) {
+    if (pred.inst()->is(Call, CallUnpack)) {
       return true;
     }
   }
@@ -836,7 +836,7 @@ void syncCatchTraces(OptimizeContext& ctx, BlockSet& exitBlocks) {
      * fixup the call frame to contain the inlined frame.
      *
      * Note: when unwinding from an exception the callee may not be the first
-     * AR on the stack, however, with the exception of Call, and CallArray, the
+     * AR on the stack, however, with the exception of Call, and CallUnpack, the
      * next frame will always be native. This means that the callee will always
      * be the first frame in its nested VM. The unwinder will unwind through
      * VMs nested under this one first, making it safe to assume that we can

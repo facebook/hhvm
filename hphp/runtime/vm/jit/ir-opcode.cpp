@@ -169,7 +169,7 @@ bool isCallOp(Opcode opc) {
   // call a C++ helper and we can push/pop around it normally.)
   switch (opc) {
   case Call:
-  case CallArray:
+  case CallUnpack:
   case ContEnter:
     return true;
   default:

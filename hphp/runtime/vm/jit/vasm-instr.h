@@ -116,8 +116,8 @@ struct Vunit;
   O(phpret, Inone, U(fp) U(args), D(d))\
   O(callphp, I(stub), U(args), Dn)\
   O(tailcallphp, Inone, U(target) U(fp) U(args), Dn)\
-  O(callarray, I(target), U(args), Dn)\
-  O(vcallarray, I(target), U(args) U(extraArgs), Dn)\
+  O(callunpack, I(target), U(args), Dn)\
+  O(vcallunpack, I(target), U(args) U(extraArgs), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
   /* vm entry intrinsics */\
   O(calltc, Inone, U(target) U(fp) U(args), Dn)\
@@ -664,11 +664,11 @@ struct stubunwind {};
  * Convert from a stublogue{} context to a phplogue{} context.  `fp' is the
  * target PHP context's frame.
  *
- * This is only used by fcallArrayHelper, which needs to begin with a
+ * This is only used by fcallUnpackHelper, which needs to begin with a
  * stublogue{} (see unique-stubs.cpp) and later perform the work of phplogue{}.
  *
  * This instruction should, in theory, teleport the stub frame's saved %rip
- * onto the PHP callee's frame.  However, since fcallArrayHelper is the only
+ * onto the PHP callee's frame.  However, since fcallUnpackHelper is the only
  * user, and since the PHP frame's m_savedRip always gets updated by a native
  * helper before stubtophp{} is hit, for now, implementations of stubtophp{}
  * needn't touch the callee frame at all.
@@ -792,18 +792,18 @@ struct tailcallphp { Vreg target; Vreg fp; RegSet args; };
 /*
  * Non-smashable PHP function call with (almost) the same ABI as callphp{}.
  *
- * NB: The only difference is that callarray preserves vmfp.  Currently only
- * used by the CallArray instruction.
+ * NB: The only difference is that callunpack preserves vmfp.  Currently only
+ * used by the CallUnpack instruction.
  */
-struct callarray { TCA target; RegSet args; };
+struct callunpack { TCA target; RegSet args; };
 
 /*
- * High-level version of callarray.
+ * High-level version of callunpack.
  *
  * Has exception edges and additional integer args (used by the `target' stub).
  */
-struct vcallarray { TCA target; RegSet args; Vtuple extraArgs;
-                    Vlabel targets[2]; };
+struct vcallunpack { TCA target; RegSet args; Vtuple extraArgs;
+                     Vlabel targets[2]; };
 
 /*
  * Enter a continuation (with exception edges).

@@ -57,7 +57,7 @@ foo() expects parameter 3 by reference, but the call was not annotated with '&' 
 $b[$c][$d] = $b[q][r] = 2
 CUF + ref calls:
 foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 61
-foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 62
+call_user_func() expects parameter 1 by value, but the call was annotated with '&' on line 62
 call_user_func() expects parameter 2 by value, but the call was annotated with '&' on line 63
 call_user_func() expects parameter 3 by value, but the call was annotated with '&' on line 64
 call_user_func() expects parameter 4 by value, but the call was annotated with '&' on line 65
@@ -75,7 +75,7 @@ foo() expects parameter 3 by reference, but the call was not annotated with '&' 
 foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 83
 $b[$c][$d] = $b[q][r] = 2
 CUFA + ref calls:
-foo() expects parameter 3 by reference, but the call was not annotated with '&' on line 87
+call_user_func_array() expects parameter 1 by value, but the call was annotated with '&' on line 87
 call_user_func_array() expects parameter 2 by value, but the call was annotated with '&' on line 88
 $b[$c][$d] = $b[q][r] = 2
 dynamic-CUFA calls:

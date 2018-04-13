@@ -530,7 +530,7 @@ Flags handle_call_effects(Local& env,
   // frame.
   auto const knownCallee = [&]() -> const Func* {
     if (inst.is(Call)) return inst.extra<Call>()->callee;
-    if (inst.is(CallArray)) return inst.extra<CallArray>()->callee;
+    if (inst.is(CallUnpack)) return inst.extra<CallUnpack>()->callee;
     return nullptr;
   }();
 
@@ -906,8 +906,8 @@ void resolve_call(Global& env,
     return;
   }
 
-  if (inst.is(CallArray)) {
-    auto& extra = *inst.extra<CallArray>();
+  if (inst.is(CallUnpack)) {
+    auto& extra = *inst.extra<CallUnpack>();
     assertx(extra.callee == nullptr);
     extra.callee = flags.callee;
     extra.writeLocals = funcWritesLocals(flags.callee);

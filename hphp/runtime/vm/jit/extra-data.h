@@ -575,15 +575,15 @@ struct SyncReturnBCData : IRExtraData {
   IRSPRelOffset spOffset;
 };
 
-struct CallArrayData : IRExtraData {
-  explicit CallArrayData(IRSPRelOffset spOffset,
-                         uint32_t numParams,
-                         uint32_t numOut,
-                         Offset pcOffset,
-                         Offset after,
-                         const Func* callee,
-                         bool writeLocals,
-                         bool readLocals)
+struct CallUnpackData : IRExtraData {
+  explicit CallUnpackData(IRSPRelOffset spOffset,
+                          uint32_t numParams,
+                          uint32_t numOut,
+                          Offset pcOffset,
+                          Offset after,
+                          const Func* callee,
+                          bool writeLocals,
+                          bool readLocals)
     : spOffset(spOffset)
     , numParams(numParams)
     , numOut(numOut)
@@ -592,7 +592,9 @@ struct CallArrayData : IRExtraData {
     , callee(callee)
     , writeLocals(writeLocals)
     , readLocals(readLocals)
-  {}
+  {
+    assertx(numParams > 0);
+  }
 
   std::string show() const {
     return folly::to<std::string>(
@@ -1447,14 +1449,12 @@ X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);
-X(CallArray,                    CallArrayData);
+X(CallUnpack,                   CallUnpackData);
 X(RetCtrl,                      RetCtrlData);
 X(AsyncFuncRet,                 IRSPRelOffsetData);
 X(AsyncFuncRetSlow,             IRSPRelOffsetData);
 X(AsyncSwitchFast,              IRSPRelOffsetData);
 X(LdArrFuncCtx,                 IRSPRelOffsetData);
-X(LdArrFPushCuf,                IRSPRelOffsetData);
-X(LdStrFPushCuf,                IRSPRelOffsetData);
 X(LdFunc,                       IRSPRelOffsetData);
 X(LookupClsMethod,              LookupClsMethodData);
 X(LookupClsMethodCache,         ClsMethodData);
@@ -1473,7 +1473,6 @@ X(LdSubClsCns,                  LdSubClsCnsData);
 X(CheckSubClsCns,               LdSubClsCnsData);
 X(ProfileSubClsCns,             ProfileSubClsCnsData);
 X(LdFuncCached,                 LdFuncCachedData);
-X(LdFuncCachedSafe,             LdFuncCachedData);
 X(LdFuncCachedU,                LdFuncCachedUData);
 X(LdObjMethod,                  LdObjMethodData);
 X(RaiseMissingArg,              FuncArgData);

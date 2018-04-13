@@ -259,7 +259,7 @@ struct Vgen {
   void emit(const callfaststub& i);
 
   // php function abi
-  void emit(const callarray& i);
+  void emit(const callunpack& i);
   void emit(const contenter& i);
   void emit(const phpret& i);
 
@@ -602,7 +602,7 @@ void Vgen::emit(const phpret& i) {
   emit(ret{});
 }
 
-void Vgen::emit(const callarray& i) {
+void Vgen::emit(const callunpack& i) {
   emit(call{i.target, i.args});
 }
 

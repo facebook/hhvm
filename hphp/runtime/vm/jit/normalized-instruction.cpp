@@ -42,9 +42,6 @@ static void populateImmediates(NormalizedInstruction& inst) {
   if (hasImmVector(inst.op())) {
     inst.immVec = getImmVector(inst.pc());
   }
-  if (inst.op() == OpFCallArray) {
-    inst.imm[0].u_IVA = 1;
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

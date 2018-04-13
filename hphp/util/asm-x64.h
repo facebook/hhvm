@@ -244,7 +244,7 @@ struct IndexedDispReg {
 
 // rip+x
 struct DispRIP {
-  explicit DispRIP(intptr_t disp) : disp(disp) {}
+  explicit constexpr DispRIP(intptr_t disp) : disp(disp) {}
 
   RIPRelativeRef operator*() const;
   RIPRelativeRef operator[](intptr_t x) const;
@@ -265,7 +265,7 @@ struct DispRIP {
 
 // *(rip + x)
 struct RIPRelativeRef {
-  explicit RIPRelativeRef(DispRIP r) : r(r) {}
+  explicit constexpr RIPRelativeRef(DispRIP r) : r(r) {}
   DispRIP r;
 
   bool operator==(const RIPRelativeRef& o) const { return r == o.r; }

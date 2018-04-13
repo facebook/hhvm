@@ -42,7 +42,6 @@ typedef bool(*immFitFunc)(int64_t, int);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define RIP_ZERO_DISP                     RIPRelativeRef(DispRIP(0))
 #define IMMFITFUNC_SIGNED                 deltaFits
 #define IMMFITFUNC_UNSIGNED               (immFitFunc)magFits
 
@@ -59,6 +58,8 @@ private:
     codeBlock.assertCanEmit(XED_MAX_INSTRUCTION_BYTES);
     return codeBlock.toDestAddress(codeBlock.frontier());
   }
+
+  static constexpr auto nullrip = RIPRelativeRef(DispRIP(0));
 
 public:
   explicit XedAssembler(CodeBlock& cb) : X64AssemblerBase(cb) {}
@@ -928,7 +929,7 @@ private:
     auto instrLen = xedCacheLen(
                       &lenCache,
                       [&]() {
-                        return xedEmit(instr, toXedOperand(RIP_ZERO_DISP, size),
+                        return xedEmit(instr, toXedOperand(nullrip, size),
                                        0, dest());
                       }, xedLenCacheKey(instr, 0));
     m.r.disp -= ((int64_t)frontier() + (int64_t)instrLen);
@@ -977,7 +978,7 @@ private:
                       [&] {                                             \
                         return xedEmit(                                 \
                                 instr, toXedOperand(r),                 \
-                                toXedOperand(RIP_ZERO_DISP,             \
+                                toXedOperand(nullrip,                   \
                                              bitsToSize(bitsize)),      \
                                 bitsize, dest());                       \
                       }, xedLenCacheKey(instr, 0));                     \
@@ -1005,7 +1006,7 @@ private:
                       [&]() {
                         return xedEmit(
                                 instr, toXedOperand(r),
-                                toXedOperand(RIP_ZERO_DISP, memSize),
+                                toXedOperand(nullrip, memSize),
                                 0, dest());
                       }, xedLenCacheKey(instr, 0));
     m.r.disp -= ((int64_t)frontier() + (int64_t)instrLen);

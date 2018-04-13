@@ -50,6 +50,24 @@ void compilers_detach_after_fork();
 // type of error encountered
 using CompilerResult = boost::variant<std::unique_ptr<UnitEmitter>,std::string>;
 
+CompilerResult hackc_compile(const char* code,
+                             int len,
+                             const char* filename,
+                             const MD5& md5,
+                             AsmCallbacks* callbacks = nullptr);
+
+struct FactsJSONString {
+  std::string value;
+};
+
+// On success returns a Json with value containing json-serialized results of
+// facts extraction and on failure returns a string with error text
+using ParseFactsResult = boost::variant<FactsJSONString, std::string>;
+
+ParseFactsResult extract_facts(const std::string& filename,
+                               const char* code,
+                               int len);
+
 std::string hackc_version();
 
 struct UnitCompiler {

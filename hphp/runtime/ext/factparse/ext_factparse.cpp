@@ -35,11 +35,14 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/server/writer.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/file.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
+#include "hphp/util/job-queue.h"
 
 TRACE_SET_MOD(factparse)
 
@@ -72,13 +75,14 @@ const StaticString* g_factKindOfMap[] = {
   #undef FACT_KIND_MAP
 };
 
-void parseFile(
+template<class T>
+void parse_file(
   const std::string& root,
   const char* path,
-  Facts::ParseResult& res,
-  bool allowHipHopSyntax)
-{
-  res.error = true;
+  bool allowHipHopSyntax,
+  typename T::result_type& res
+) {
+  T::mark_failed(res);
   std::string cleanPath;
   if (FileUtil::isAbsolutePath(path)) {
     cleanPath = path;
@@ -88,22 +92,6 @@ void parseFile(
     cleanPath =
       folly::sformat("{}{}{}", root, FileUtil::getDirSeparator(), path);
   }
-  auto parse = [&] (std::istream& stream) {
-    if (!stream.good()) {
-      return;
-    }
-    Scanner scanner(
-      stream,
-      allowHipHopSyntax ? Scanner::Type::AllowHipHopSyntax : 0,
-      path,
-      true);
-    Facts::Parser parser(scanner, path, res);
-    try {
-      parser.parse();
-    } catch (ParseTimeFatalException& e) {
-      FTRACE(1, "Parse fatal @{}: {}\n", e.m_line, e.getMessage());
-    }
-  };
 
   struct stat st;
   auto w = Stream::getWrapperFromURI(StrNR(cleanPath));
@@ -117,9 +105,8 @@ void parseFile(
     const auto f = w->open(StrNR(cleanPath), "r", 0, nullptr);
     if (!f) return;
     auto str = f->read();
-    std::string content(str.data(), str.size());
-    std::istringstream stream(content);
-    parse(stream);
+    T::parse_file_impl(cleanPath,
+      allowHipHopSyntax, str.data(), str.size(), res);
   } else {
     // It would be nice to have an atomic stat + open operation here but this
     // doesn't seem to be possible with STL in a portable way.
@@ -129,9 +116,113 @@ void parseFile(
     if (S_ISDIR(st.st_mode)) {
       return;
     }
-    std::ifstream stream(cleanPath);
-    parse(stream);
+    T::parse_file_impl(cleanPath, allowHipHopSyntax, "", 0, res);
   }
+}
+
+template<class T>
+void facts_parse_sequential(
+  const std::string& root,
+  const Array& pathList,
+  ArrayInit& outResArr,
+  bool allowHipHopSyntax
+) {
+  for (auto i = 0; i < pathList->size(); ++i) {
+    typename T::result_type workerResult;
+    auto path = tvCastToString(pathList->atPos(i));
+    try {
+      parse_file<T>(root, path.c_str(), allowHipHopSyntax, workerResult);
+    } catch (...) {
+      T::mark_failed(workerResult);
+    }
+    T::merge_result(workerResult, outResArr, path);
+  }
+}
+template<class T>
+struct JobContext {
+  JobContext(
+    const std::string& root,
+    bool allowHipHopSyntax,
+    std::vector<std::string>& paths,
+    std::vector<typename T::result_type>& worker_results,
+    folly::MPMCQueue<size_t>& result_q
+  ) : m_root(root), m_allowHipHopSyntax(allowHipHopSyntax), m_paths(paths),
+      m_worker_results(worker_results), m_result_q(result_q) {
+  }
+  const std::string& m_root;
+  bool m_allowHipHopSyntax;
+  std::vector<std::string>& m_paths;
+  std::vector<typename T::result_type>& m_worker_results;
+  folly::MPMCQueue<size_t>& m_result_q;
+};
+
+template<class T>
+using BaseWorker = JobQueueWorker<size_t, const JobContext<T>*, false, true>;
+
+template<class T>
+struct ParseFactsWorker: public BaseWorker<T> {
+  void doJob(typename BaseWorker<T>::JobType job) override {
+    parse(*(this->m_context), job);
+  }
+  void onThreadEnter() override {
+    hphp_session_init();
+  }
+  void onThreadExit() override {
+    hphp_context_exit();
+    hphp_session_exit();
+  }
+  static void parse(const JobContext<T>& ctx, size_t i) {
+    try {
+      parse_file<T>(
+        ctx.m_root,
+        ctx.m_paths[i].c_str(),
+        ctx.m_allowHipHopSyntax,
+        ctx.m_worker_results[i]);
+    } catch (...) {
+      T::mark_failed(ctx.m_worker_results[i]);
+    }
+    ctx.m_result_q.write(i);
+  }
+};
+
+template<class T>
+void facts_parse_threaded(
+  const std::string& root,
+  const Array& pathList,
+  ArrayInit& outResArr,
+  bool allowHipHopSyntax
+) {
+  auto numPaths = pathList->size();
+  std::vector<std::string> pathListCopy;
+  for(auto i = 0; i < numPaths; i++) {
+    pathListCopy.push_back(
+      tvCastToString(pathList->atPos(i)).toCppString()
+    );
+  }
+  std::vector<typename T::result_type> workerResults;
+  workerResults.resize(numPaths);
+  folly::MPMCQueue<size_t> result_q{numPaths};
+
+  JobContext<T> jobContext { root, allowHipHopSyntax,
+    pathListCopy, workerResults, result_q };
+  JobQueueDispatcher<ParseFactsWorker<T>> dispatcher {
+    T::get_workers_count(), 0, false, &jobContext
+  };
+  dispatcher.start();
+
+  for (auto i = 0; i < numPaths; ++i) {
+    dispatcher.enqueue(i);
+  }
+
+  for (auto numProcessed = 0; numProcessed < numPaths; ++numProcessed) {
+    size_t i;
+    result_q.blockingRead(i);
+    T::merge_result(
+      workerResults[i],
+      outResArr,
+      tvCastToString(pathList->atPos(i)));
+  }
+  dispatcher.waitEmpty();
 }
 
 void buildOneResult(
@@ -217,100 +308,115 @@ void buildOneResult(
   outResArr.set(path, resArr);
 }
 
-void facts_parse_impl(
-  const std::string& root,
-  const Array& pathList,
-  ArrayInit& outResArr,
-  bool allowHipHopSyntax
-) {
-  for (auto i = 0; i < pathList->size(); ++i) {
-    Facts::ParseResult workerResult;
-    auto path = tvCastToString(pathList->atPos(i));
-    try {
-      parseFile(root, path.c_str(), workerResult, allowHipHopSyntax);
-    } catch (...) {
-      workerResult.error = true;
+struct HHVMFactsExtractor {
+  using result_type = Facts::ParseResult;
+
+  static int get_workers_count() {
+    return Process::GetCPUCount();
+  }
+
+  static void parse_stream(
+    std::istream& stream,
+    const std::string& path,
+    bool allowHipHopSyntax,
+    result_type& res) {
+    if (!stream.good()) {
+      return;
     }
+    Scanner scanner(
+      stream,
+      allowHipHopSyntax ? Scanner::Type::AllowHipHopSyntax : 0,
+      path.c_str(),
+      true);
+    Facts::Parser parser(scanner, path.c_str(), res);
+    try {
+      parser.parse();
+    } catch (ParseTimeFatalException& e) {
+      FTRACE(1, "Parse fatal @{}: {}\n", e.m_line, e.getMessage());
+    }
+  }
+
+  static void parse_file_impl(
+    const std::string& path,
+    bool allowHipHopSyntax,
+    const char* code,
+    int len,
+    result_type& res
+  ) {
+    if (len == 0) {
+      std::ifstream stream(path);
+      parse_stream(stream, path, allowHipHopSyntax, res);
+    }
+    else {
+      std::string content(code, len);
+      std::istringstream stream(content);
+      parse_stream(stream, path, allowHipHopSyntax, res);
+    }
+  };
+
+  static void mark_failed(result_type& workerResult) {
+    workerResult.error = true;
+  }
+
+  static void merge_result(
+    result_type& workerResult,
+    ArrayInit& outResArr,
+    const HPHP::String& path
+  )  {
     buildOneResult(workerResult, outResArr, path);
-  }
-}
+  };
+};
 
-void facts_parse_impl_threaded(
-  const std::string& root,
-  const Array& pathList,
-  ArrayInit& outResArr,
-  bool allowHHSyntax
-) {
-  auto numPaths = pathList->size();
-  std::vector<Facts::ParseResult> workerResults;
-  workerResults.resize(numPaths);
-  std::vector<std::thread> workers;
-  auto numWorkers = Process::GetCPUCount();
-  // Compute a batch size that causes each thread to process approximately 16
-  // batches.  Even if the batches are somewhat imbalanced in what they contain,
-  // the straggler workers are very unlikey to take more than 10% longer than
-  // the first worker to finish.
-  size_t batchSize{std::max(numPaths / numWorkers / 16, size_t(1))};
-  std::atomic<size_t> index{0};
-  folly::MPMCQueue<size_t> result_q{numPaths};
-
-  std::vector<std::string> pathListCopy;
-  for(auto i = 0; i < numPaths; i++) {
-    pathListCopy.push_back(
-      tvCastToString(pathList->atPos(i)).toCppString()
-    );
+struct HackCFactsExtractor {
+  using result_type = folly::Optional<FactsJSONString>;
+  static int get_workers_count() {
+    return RuntimeOption::EvalHackCompilerWorkers;
   }
 
-  for (auto worker = 0; worker < numWorkers; ++worker) {
-    workers.push_back(std::thread([&] {
-      hphp_thread_init();
-      SCOPE_EXIT {
-        hphp_thread_exit();
-      };
-      hphp_session_init();
-      SCOPE_EXIT {
-        hphp_context_exit();
-        hphp_session_exit();
-      };
+  static void mark_failed(result_type& workerResult) {
+    workerResult = folly::none;
+  }
 
-      while (true) {
-        auto begin = index.fetch_add(batchSize);
-        auto end = std::min(begin + batchSize, numPaths);
-        if (begin >= end) {
-          break;
-        }
-        auto unitCount = end - begin;
-        for (auto i = 0; i < unitCount; ++i) {
-          const auto& path = pathListCopy[begin + i];
-          const auto overallIdx = begin + i;
-          try {
-            parseFile(
-              root,
-              path.c_str(),
-              workerResults[overallIdx],
-              allowHHSyntax);
-          } catch (...) {
-            workerResults[overallIdx].error = true;
-          }
-          result_q.write(overallIdx);
-        }
+  static void parse_file_impl(
+    const std::string& path,
+    bool allowHipHopSyntax,
+    const char* code,
+    int len,
+    result_type& res
+  ) {
+    auto result = extract_facts(path, code, len);
+    match<void>(
+      result,
+      [&](FactsJSONString& r) {
+        res = std::move(r);
+      },
+      [&](std::string& err) {
+        FTRACE(1, "Error extracting facts {}: {}\n", path, err);
       }
-    }));
-  }
+    );
+  };
 
-  for (auto numProcessed = 0; numProcessed < numPaths; ++numProcessed) {
-    size_t i;
-    result_q.blockingRead(i);
-    buildOneResult(
-      workerResults[i],
-      outResArr,
-      tvCastToString(pathList->atPos(i)));
-  }
-
-  for (auto& worker : workers) {
-    worker.join();
-  }
-}
+  static void merge_result(
+    result_type& workerResult,
+    ArrayInit& outResArr,
+    const HPHP::String& path
+  ) {
+    try {
+      if (workerResult.hasValue() && !workerResult.value().value.empty()) {
+        outResArr.set(
+          path,
+          f_json_decode(String(workerResult.value().value), true, 512,
+            k_JSON_FB_LOOSE));
+      }
+      else {
+        outResArr.set(path, uninit_null());
+      }
+    }
+    catch (std::runtime_error& e) {
+      FTRACE(1, "Error during json conversion {}: {}\n", path, e.what());
+    }
+  };
+};
 
 Array HHVM_FUNCTION(
   HH_facts_parse,
@@ -330,10 +436,25 @@ Array HHVM_FUNCTION(
   ArrayInit outResArr(pathList->size(), ArrayInit::Map{});
 
   if (!pathList.isNull() && pathList->size()) {
+    auto useHackc = hackc_mode() != HackcMode::kNever;
     if (useThreads) {
-      facts_parse_impl_threaded(root, pathList, outResArr, allowHipHopSyntax);
+      if (useHackc) {
+        facts_parse_threaded<HackCFactsExtractor>(root, pathList,
+          outResArr, allowHipHopSyntax);
+      }
+      else {
+        facts_parse_threaded<HHVMFactsExtractor>(root, pathList,
+          outResArr, allowHipHopSyntax);
+      }
     } else {
-      facts_parse_impl(root, pathList, outResArr, allowHipHopSyntax);
+      if (useHackc) {
+        facts_parse_sequential<HackCFactsExtractor>(root, pathList,
+          outResArr, allowHipHopSyntax);
+      }
+      else {
+        facts_parse_sequential<HHVMFactsExtractor>(root, pathList,
+          outResArr, allowHipHopSyntax);
+      }
     }
   }
 

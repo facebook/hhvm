@@ -382,7 +382,8 @@ let do_compile filename compiler_options text fail_or_ast debug_time =
 
 let extract_facts ?pretty text =
   Facts_parser.extract_as_json ~php5_compat_mode:true text
-  |> Hh_json.json_to_string ?pretty
+  (* return empty string if file has syntax errors *)
+  |> Option.value_map ~default:"" ~f:(Hh_json.json_to_string ?pretty)
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -432,7 +433,7 @@ let decl_and_run_mode compiler_options popt =
         let abs_path = Relative_path.to_absolute filename in
         let bytes = String.length output in
         let msg = json_to_string @@ JSON_Object
-          [ ("type", JSON_String "hhas")
+          [ ("type", JSON_String "success")
           ; ("file", JSON_String abs_path)
           ; ("bytes", int_ bytes)
           ] in
@@ -472,8 +473,19 @@ let decl_and_run_mode compiler_options popt =
             handle_exception
             (Relative_path.create Relative_path.Dummy filename)
             body)
-        ; facts = (fun _header body -> (
-          handle_output Relative_path.default @@ extract_facts body)
+        ; facts = (fun header body -> (
+          (* if body is empty - read file from disk *)
+          let filename = get_field
+            (get_string "file")
+            (fun af -> fail_daemon None ("Cannot determine file name of source unit: " ^ af))
+            header in
+          let body =
+            if String.length body = 0
+            then Sys_utils.cat filename
+            else body in
+          handle_output
+            (Relative_path.create Relative_path.Dummy filename)
+            (extract_facts body))
         )} in
       dispatch_loop handlers
 

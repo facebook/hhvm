@@ -7,4 +7,4 @@
  *
  *)
 
- val extract_as_json: php5_compat_mode: bool -> string -> Hh_json.json
+ val extract_as_json: php5_compat_mode: bool -> string -> Hh_json.json option

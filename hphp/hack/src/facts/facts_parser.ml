@@ -358,19 +358,23 @@ let facts_to_json md5 facts =
 let from_text php5_compat_mode s =
   let env = Full_fidelity_parser_env.make ~php5_compat_mode () in
   let text = Full_fidelity_source_text.make Relative_path.default s in
-  let (_, root) =
+  let (parser, root) =
     let p = FactsParser.make env text in
     FactsParser.parse_script p in
-  let initial_facts = {
-    types = InvSMap.empty;
-    functions = [];
-    constants = [];
-    type_aliases = []
-  } in
-  let _, facts = collect ("", initial_facts) root in
-  facts
-
+  if not @@ Core_list.is_empty (FactsParser.errors parser)
+  then None
+  else begin
+    let initial_facts = {
+      types = InvSMap.empty;
+      functions = [];
+      constants = [];
+      type_aliases = []
+    } in
+    let _, facts = collect ("", initial_facts) root in
+    Some facts
+  end
 let extract_as_json ~php5_compat_mode text =
-  let md5 = Digest.to_hex @@ Digest.string text in
-  let facts = from_text php5_compat_mode text in
-  facts_to_json md5 facts
+  from_text php5_compat_mode text
+  |> Option.map ~f:(fun facts ->
+    let md5 = Digest.to_hex @@ Digest.string text in
+    facts_to_json md5 facts)

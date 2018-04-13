@@ -529,7 +529,7 @@ struct RuntimeOption {
   /* The command to invoke to spawn hh_single_compile in server mode. */\
   F(string, HackCompilerCommand,       "")                              \
   /* The number of hh_single_compile daemons to keep alive. */          \
-  F(uint64_t, HackCompilerWorkers,     Process::GetCPUCount() / 2)      \
+  F(uint64_t, HackCompilerWorkers,     Process::GetCPUCount())      \
   /* The number of times to retry after an infra failure communicating
      with a compiler process. */                                        \
   F(uint64_t, HackCompilerMaxRetries,  0)                               \

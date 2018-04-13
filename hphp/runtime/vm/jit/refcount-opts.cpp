@@ -2178,6 +2178,35 @@ void rc_analyze_inst(Env& env,
   FTRACE(2, "  {}\n", inst);
 
   switch (inst.op()) {
+  case DefLabel:
+    for (auto i = 0; i < inst.numDsts(); i++) {
+      for_aset(
+        env, state, inst.dst(i),
+        [&] (ASetID dstID) {
+          auto& dset = state.asets[dstID];
+
+          auto lb = std::numeric_limits<int>::max();
+          inst.block()->forEachSrc(
+            i,
+            [&](IRInstruction*, SSATmp* src) {
+              for_aset(env, state, src,
+                       [&] (ASetID asetID) {
+                         auto const& aset = state.asets[asetID];
+                         if (aset.lower_bound < lb) lb = aset.lower_bound;
+                       });
+            }
+          );
+
+          if (dset.lower_bound < lb) {
+            FTRACE(3, "    {} DefLabel lb += {}\n",
+                   dstID, lb - dset.lower_bound);
+            dset.unsupported_refs += lb - dset.lower_bound;
+            dset.lower_bound = lb;
+            state.has_unsupported_refs = true;
+          }
+        });
+    }
+    return;
   case IncRef:
     for_aset(env, state, inst.src(0), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];

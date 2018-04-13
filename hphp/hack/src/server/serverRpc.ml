@@ -156,17 +156,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let edits = List.map edits ~f:Ide_api_types.ide_text_edit_to_fc in
         ServerFileSync.edit_file env path edits, ()
     | IDE_AUTOCOMPLETE (path, pos, delimit_on_namespaces) ->
-        let open File_content in
         let open With_complete_flag in
         let pos = pos |> Ide_api_types.ide_pos_to_fc in
-        let fc = ServerFileSync.get_file_content (ServerCommandTypes.FileName path) in
-        let offset = File_content.get_offset fc pos in (* will raise if out of bounds *)
-        let char_at_pos = File_content.get_char fc offset in
-        let autocomplete_context = ServerAutoComplete.get_autocomplete_context fc pos in
-        let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
-        let content = File_content.edit_file_unsafe fc edits in
-        let results = ServerAutoComplete.auto_complete
-          ~tcopt:env.tcopt ~delimit_on_namespaces ~autocomplete_context content in
+        let file_content = ServerFileSync.get_file_content (ServerCommandTypes.FileName path) in
+        let offset = File_content.get_offset file_content pos in (* will raise if out of bounds *)
+        let char_at_pos = File_content.get_char file_content offset in
+        let results = ServerAutoComplete.auto_complete_at_position
+          ~delimit_on_namespaces ~file_content ~pos ~tcopt:env.tcopt in
         let completions = results.value in
         let is_complete = results.is_complete in
         env, { AutocompleteTypes.completions; char_at_pos; is_complete; }

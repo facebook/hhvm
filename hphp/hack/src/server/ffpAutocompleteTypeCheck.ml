@@ -37,7 +37,8 @@ let run
      should_complete_function context ||
      is_complete_class_member context
   then
-    let ac_results = ServerAutoComplete.auto_complete_at_position ~file_content ~pos ~tcopt in
+    let ac_results = ServerAutoComplete.auto_complete_at_position
+      ~delimit_on_namespaces:true ~file_content ~pos ~tcopt in
     let open Utils.With_complete_flag in
     ac_results.value
   else

@@ -800,7 +800,10 @@ let do_definition (conn: server_conn) (ref_unblocked_time: float ref) (params: D
   in
   hack_to_lsp filtered_results
 
-let make_ide_completion_response (result:AutocompleteTypes.ide_result) (filename:string) =
+let make_ide_completion_response
+  (result:AutocompleteTypes.ide_result)
+  (filename:string)
+: Completion.completionList =
   let open AutocompleteTypes in
   let open Completion in
   (* We use snippets to provide parentheses+arguments when autocompleting     *)
@@ -809,29 +812,7 @@ let make_ide_completion_response (result:AutocompleteTypes.ide_result) (filename
   let is_caret_followed_by_lparen = result.char_at_pos = '(' in
   let p = initialize_params_exc () in
 
-  let rec hack_completion_to_lsp (completion: complete_autocomplete_result)
-    : Completion.completionItem =
-    let (insertText, insertTextFormat) = hack_to_insert completion in
-    let pos = if Pos.filename completion.res_pos = ""
-      then Pos.set_file filename completion.res_pos
-      else completion.res_pos
-    in
-    {
-      label = completion.res_name ^ (if completion.res_kind = Namespace_kind then "\\" else "");
-      kind = hack_to_kind completion;
-      detail = Some (hack_to_detail completion);
-      inlineDetail = Some (hack_to_inline_detail completion);
-      itemType = hack_to_itemType completion;
-      documentation = None; (* This will be filled in by completionItem/resolve. *)
-      sortText = None;
-      filterText = None;
-      insertText = Some insertText;
-      insertTextFormat = Some insertTextFormat;
-      textEdits = [];
-      command = None;
-      data = Some (Pos.json pos);
-    }
-  and hack_to_kind (completion: complete_autocomplete_result)
+  let hack_to_kind (completion: complete_autocomplete_result)
     : Completion.completionItemKind option =
     match completion.res_kind with
     | Abstract_class_kind
@@ -847,11 +828,13 @@ let make_ide_completion_response (result:AutocompleteTypes.ide_result) (filename
     | Namespace_kind -> Some Completion.Module
     | Constructor_kind -> Some Completion.Constructor
     | Keyword_kind -> Some Completion.Keyword
-  and hack_to_itemType (completion: complete_autocomplete_result) : string option =
+  in
+  let hack_to_itemType (completion: complete_autocomplete_result) : string option =
     (* TODO: we're using itemType (left column) for function return types, and *)
     (* the inlineDetail (right column) for variable/field types. Is that good? *)
     Option.map completion.func_details ~f:(fun details -> details.return_ty)
-  and hack_to_detail (completion: complete_autocomplete_result) : string =
+  in
+  let hack_to_detail (completion: complete_autocomplete_result) : string =
     (* TODO: retrieve the actual signature including name+modifiers     *)
     (* For now we just return the type of the completion. In the case   *)
     (* of functions, their function-types have parentheses around them  *)
@@ -859,7 +842,8 @@ let make_ide_completion_response (result:AutocompleteTypes.ide_result) (filename
     match completion.func_details with
     | None -> completion.res_ty
     | Some _ -> String_utils.rstrip (String_utils.lstrip completion.res_ty "(") ")"
-  and hack_to_inline_detail (completion: complete_autocomplete_result) : string =
+  in
+  let hack_to_inline_detail (completion: complete_autocomplete_result) : string =
     match completion.func_details with
     | None -> hack_to_detail completion
     | Some details ->
@@ -867,15 +851,54 @@ let make_ide_completion_response (result:AutocompleteTypes.ide_result) (filename
       let f param = Printf.sprintf "%s %s" param.param_ty param.param_name in
       let params = String.concat ", " (List.map details.params ~f) in
       Printf.sprintf "(%s)" params
-  and hack_to_insert (completion: complete_autocomplete_result) : (string * insertTextFormat) =
-    match completion.func_details with
-    | Some details when Lsp_helpers.supports_snippets p && not is_caret_followed_by_lparen ->
+  (** Returns a tuple of (insertText, insertTextFormat, textEdits). *)
+  in
+  let hack_to_insert
+    (completion: complete_autocomplete_result)
+  : [`InsertText of string | `TextEdit of TextEdit.t list] * Completion.insertTextFormat =
+    let use_textedits =
+      let open Initialize in
+      p.initializationOptions.use_textedit_autocomplete
+    in
+    match completion.func_details, use_textedits with
+    | Some details, _ when Lsp_helpers.supports_snippets p && not is_caret_followed_by_lparen ->
       (* "method(${1:arg1}, ...)" but for args we just use param names. *)
       let f i param = Printf.sprintf "${%i:%s}" (i + 1) param.param_name in
       let params = String.concat ", " (List.mapi details.params ~f) in
-      (Printf.sprintf "%s(%s)" completion.res_name params, SnippetFormat)
-    | _ ->
-      (completion.res_name, PlainText)
+      (`InsertText (Printf.sprintf "%s(%s)" completion.res_name params), SnippetFormat)
+    | _, false ->
+      (`InsertText completion.res_name, PlainText)
+    | _, true ->
+      (`TextEdit [TextEdit.{
+          range = ide_range_to_lsp (completion.res_replace_pos);
+          newText = completion.res_name;
+        }], PlainText)
+  in
+  let hack_completion_to_lsp (completion: complete_autocomplete_result)
+    : Completion.completionItem =
+    let (insertText, insertTextFormat, textEdits) = match hack_to_insert completion with
+      | (`InsertText text, format) -> (Some text, format, [])
+      | (`TextEdit edits, format) -> (None, format, edits)
+    in
+    let pos = if Pos.filename completion.res_pos = ""
+      then Pos.set_file filename completion.res_pos
+      else completion.res_pos
+    in
+    {
+      label = completion.res_name ^ (if completion.res_kind = Namespace_kind then "\\" else "");
+      kind = hack_to_kind completion;
+      detail = Some (hack_to_detail completion);
+      inlineDetail = Some (hack_to_inline_detail completion);
+      itemType = hack_to_itemType completion;
+      documentation = None; (* This will be filled in by completionItem/resolve. *)
+      sortText = None;
+      filterText = None;
+      insertText;
+      insertTextFormat = Some insertTextFormat;
+      textEdits;
+      command = None;
+      data = Some (Pos.json pos);
+    }
   in
   {
     isIncomplete = not result.is_complete;

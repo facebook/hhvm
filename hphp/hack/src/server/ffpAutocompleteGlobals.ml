@@ -60,10 +60,11 @@ let should_get_globals (context:context) : bool =
   should_complete_interface context ||
   should_complete_trait context
 
-let make_class_completion (context:context) (name:string) =
+let make_class_completion (context:context) (replace_pos:Ide_api_types.range) (name:string) =
   if should_complete_class context then
     Some ({
       res_pos = Pos.none |> Pos.to_absolute;
+      res_replace_pos = replace_pos;
       res_ty = "class";
       res_name = name;
       res_kind = Class_kind;
@@ -72,10 +73,11 @@ let make_class_completion (context:context) (name:string) =
   else
     None
 
-let make_interface_completion (context:context) (name:string) =
+let make_interface_completion (context:context) (replace_pos:Ide_api_types.range) (name:string) =
   if should_complete_interface context then
     Some ({
       res_pos = Pos.none |> Pos.to_absolute;
+      res_replace_pos = replace_pos;
       res_ty = "interface";
       res_name = name;
       res_kind = Interface_kind;
@@ -84,10 +86,11 @@ let make_interface_completion (context:context) (name:string) =
   else
     None
 
-let make_trait_completion (context:context) (name:string) =
+let make_trait_completion (context:context) (replace_pos:Ide_api_types.range) (name:string) =
   if should_complete_trait context then
     Some ({
       res_pos = Pos.none |> Pos.to_absolute;
+      res_replace_pos = replace_pos;
       res_ty = "trait";
       res_name = name;
       res_kind = Trait_kind;
@@ -122,15 +125,19 @@ let get_same_file_definitions (positioned_tree:PositionedSyntax.t)
   in
   fold ([], [], []) positioned_tree
 
-let get_globals (context:context) (input:string) (positioned_tree:PositionedSyntax.t)
-  : complete_autocomplete_result list =
+let get_globals
+  (context:context)
+  (input:string)
+  (positioned_tree:PositionedSyntax.t)
+  (replace_pos:Ide_api_types.range)
+: complete_autocomplete_result list =
   if should_get_globals context then
     let open Utils.With_complete_flag in
     let (classes, interfaces, traits) = get_same_file_definitions positioned_tree in
     let completions = List.concat_no_order [
-      List.filter_map ~f:(make_class_completion context) classes;
-      List.filter_map ~f:(make_trait_completion context) traits;
-      List.filter_map ~f:(make_interface_completion context) interfaces;
+      List.filter_map ~f:(make_class_completion context replace_pos) classes;
+      List.filter_map ~f:(make_trait_completion context replace_pos) traits;
+      List.filter_map ~f:(make_interface_completion context replace_pos) interfaces;
     ]
     in
     let {value; _} =
@@ -138,9 +145,12 @@ let get_globals (context:context) (input:string) (positioned_tree:PositionedSynt
         ~filter_map:begin fun _ _ res ->
           let name = Utils.strip_ns res.SearchUtils.name in
           match res.SearchUtils.result_type with
-          | HackSearchService.Class (Some Ast.Ctrait) -> make_trait_completion context name
-          | HackSearchService.Class (Some Ast.Cinterface) -> make_interface_completion context name
-          | HackSearchService.Class _ -> make_class_completion context name
+          | HackSearchService.Class (Some Ast.Ctrait) ->
+            make_trait_completion context replace_pos name
+          | HackSearchService.Class (Some Ast.Cinterface) ->
+            make_interface_completion context replace_pos name
+          | HackSearchService.Class _ ->
+            make_class_completion context replace_pos name
           | _ -> None
         end
     in

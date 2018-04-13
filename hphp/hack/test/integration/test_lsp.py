@@ -189,6 +189,11 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         variables = self.setup_php_file('completion.php')
         self.load_and_run('completion', variables)
 
+    def test_completion_legacy(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('completion.php')
+        self.load_and_run('completion_legacy', variables)
+
     def test_definition(self):
         self.prepare_environment()
         variables = self.setup_php_file('definition.php')

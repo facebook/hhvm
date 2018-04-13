@@ -18,9 +18,10 @@ open AutocompleteTypes
 
 let empty_autocomplete_token = "PLACEHOLDER"
 
-let make_keyword_completion (keyword_name:string) =
+let make_keyword_completion (replace_pos:Ide_api_types.range) (keyword_name:string) =
   {
     res_pos = Pos.none |> Pos.to_absolute;
+    res_replace_pos = replace_pos;
     res_ty = "keyword";
     res_name = keyword_name;
     res_kind = Keyword_kind;
@@ -45,12 +46,32 @@ let auto_complete
   (pos:File_content.position)
   ~(filter_by_token:bool) : result =
   let open File_content in
+  (* The part of the line from the far left end to the point where the caret is. *)
   let new_file_content = handle_empty_autocomplete pos file_content in
   let dummy_path = Relative_path.(create Dummy "<autocomplete>") in
   let source_text = SourceText.make dummy_path new_file_content in
   let offset = SourceText.position_to_offset source_text (pos.line, pos.column) in
   let syntax_tree = SyntaxTree.make source_text in
   let positioned_tree = SyntaxTree.root syntax_tree in
+  let replace_pos =
+    let syntax = List.hd_exn (PositionedSyntax.parentage positioned_tree offset) in
+    let (start_line, start_col) =
+      SourceText.offset_to_position source_text (PositionedSyntax.start_offset syntax)
+    in
+    let (end_line, end_col) =
+      SourceText.offset_to_position source_text (PositionedSyntax.end_offset syntax)
+    in
+    {
+      Ide_api_types.st = {
+        Ide_api_types.line = start_line;
+        column = start_col;
+      };
+      ed = {
+        Ide_api_types.line = end_line;
+        column = end_col;
+      }
+    }
+  in
 
   let (context, stub) = FfpAutocompleteContextParser.get_context_and_stub positioned_tree offset in
   (* If we are running a test, filter the keywords and local variables based on
@@ -69,13 +90,13 @@ let auto_complete
      type is valid in the current context *)
   let keyword_completions =
     FfpAutocompleteKeywords.autocomplete_keyword context
-    |> List.map ~f:make_keyword_completion
+    |> List.map ~f:(make_keyword_completion replace_pos)
   in
   let type_based_completions =
     FfpAutocompleteTypeCheck.run ~context ~file_content ~stub ~pos ~tcopt
   in
   let global_completions =
-    FfpAutocompleteGlobals.get_globals context stub positioned_tree
+    FfpAutocompleteGlobals.get_globals context stub positioned_tree replace_pos
   in
   [keyword_completions; type_based_completions; global_completions]
   |> List.concat_no_order

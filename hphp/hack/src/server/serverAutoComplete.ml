@@ -67,6 +67,7 @@ let get_autocomplete_context
 
 
 let auto_complete_at_position
+  ~(delimit_on_namespaces:bool)
   ~(file_content:string)
   ~(pos:File_content.position)
   ~(tcopt:TypecheckerOptions.t)
@@ -76,4 +77,4 @@ let auto_complete_at_position
   let autocomplete_context = get_autocomplete_context file_content pos in
   let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
   let content = File_content.edit_file_unsafe file_content edits in
-  auto_complete ~tcopt ~delimit_on_namespaces:true ~autocomplete_context content
+  auto_complete ~tcopt ~delimit_on_namespaces ~autocomplete_context content

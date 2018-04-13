@@ -37,11 +37,12 @@ type autocomplete_kind =
 
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
-    res_pos      : Pos.absolute;
-    res_ty       : string;
-    res_name     : string;
-    res_kind     : autocomplete_kind;
-    func_details : func_details_result option;
+    res_pos         : Pos.absolute;
+    res_replace_pos : Ide_api_types.range;
+    res_ty          : string;
+    res_name        : string;
+    res_kind        : autocomplete_kind;
+    func_details    : func_details_result option;
   }
 
 (* Results that still need a typing environment to convert ty information

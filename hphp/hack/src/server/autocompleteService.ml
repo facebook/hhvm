@@ -23,7 +23,7 @@ let autocomplete_is_complete : bool ref = ref true
 
 (* The position we're autocompleting at. This is used when computing completions
  * for global identifiers. *)
-let (auto_complete_pos: Pos.t option ref) = ref None
+let autocomplete_identifier: (Pos.t * string) option ref = ref None
 
 type autocomplete_type =
   | Acid
@@ -46,6 +46,25 @@ let is_auto_complete x =
     suffix = auto_complete_suffix
   end else
     false
+
+let get_replace_pos_exn ~delimit_on_namespaces =
+  match !autocomplete_identifier with
+  | None -> failwith "No autocomplete position was set."
+  | Some (pos, text) ->
+    if Pos.length pos < suffix_len
+    then failwith "Matched position is shorter than autocomplete suffix."
+    else
+    let open Ide_api_types in
+    let range = pos_to_range pos in
+    let st = if delimit_on_namespaces
+      then match String.rindex_opt text '\\' with
+        | Some index ->
+          { range.st with column = range.st.column + index }
+        | None -> range.st
+      else range.st in
+    let ed = { range.ed with column = range.ed.column - suffix_len } in
+    { st; ed }
+
 
 let autocomplete_result_to_json res =
   let func_param_to_json param =
@@ -87,7 +106,7 @@ let autocomplete_token ac_type env x =
   if is_auto_complete (snd x)
   then begin
     ac_env := env;
-    auto_complete_pos := Some (fst x);
+    autocomplete_identifier := Some x;
     argument_global_type := Some ac_type;
     auto_complete_for_global := snd x
   end
@@ -115,7 +134,7 @@ let autocomplete_method is_static class_ ~targs:_ ~pos_params:_ id env cid
   if is_auto_complete (snd id)
   then begin
     ac_env := Some env;
-    auto_complete_pos := Some (fst id);
+    autocomplete_identifier := Some id;
     argument_global_type := Some Acclass_get;
     let add kind name ty = add_partial_result name (Phase.decl ty) kind in
     if is_static then begin
@@ -134,14 +153,15 @@ let autocomplete_cmethod = autocomplete_method false
 
 let autocomplete_lvar id env =
   (* This is used for "$|" and "$x = $|" local variables. *)
-  if is_auto_complete (Local_id.get_name (snd id))
+  let text = Local_id.get_name (snd id) in
+  if is_auto_complete text
   then begin
     argument_global_type := Some Acprop;
     (* The typechecker might call this hook more than once (loops) so we
      * need to clear the list of results first or we could have repeat locals *)
     autocomplete_results := [];
     ac_env := Some env;
-    auto_complete_pos := Some (fst id);
+    autocomplete_identifier := Some (fst id, text);
     (* Get the types of all the variables in scope at this point *)
     Local_id.Map.iter begin fun x (ty, _) ->
       add_partial_result (Local_id.get_name x) (Phase.locl ty) Variable_kind
@@ -263,9 +283,9 @@ let compute_complete_global
        * "gname" that corresponds to, and see if it has a '\'. Since fully
        * qualifying a name will always prepend, this all works.
        *)
-      match !auto_complete_pos with
+      match !autocomplete_identifier with
         | None -> None
-        | Some p ->
+        | Some (p, _) ->
             let len = (Pos.length p) - suffix_len in
             let start = String.length gname - len in
             if start < 0 || String.contains_from gname start '\\'
@@ -349,6 +369,7 @@ let compute_complete_global
       if not (does_fully_qualified_name_match_prefix name) then None else
       Some (Complete {
         res_pos = Pos.none |> Pos.to_absolute;
+        res_replace_pos = get_replace_pos_exn ~delimit_on_namespaces;
         res_ty = "namespace";
         res_name = string_to_replace_prefix name;
         res_kind = Namespace_kind;
@@ -426,6 +447,7 @@ let resolve_ty
     (env: Typing_env.env)
     (autocomplete_context: legacy_autocomplete_context)
     (x: partial_autocomplete_result)
+    ~(delimit_on_namespaces: bool)
   : complete_autocomplete_result =
   let env, ty = match x.ty with
     | DeclTy ty -> Phase.localize_with_self env ty
@@ -485,11 +507,12 @@ let resolve_ty
     | _ -> x.name
   in
   {
-    res_pos      = (fst ty) |> Typing_reason.to_pos |> Pos.to_absolute;
-    res_ty       = desc_string;
-    res_name     = name;
-    res_kind     = x.kind_;
-    func_details = func_details;
+    res_pos         = (fst ty) |> Typing_reason.to_pos |> Pos.to_absolute;
+    res_replace_pos = get_replace_pos_exn ~delimit_on_namespaces;
+    res_ty          = desc_string;
+    res_name        = name;
+    res_kind        = x.kind_;
+    func_details    = func_details;
   }
 
 
@@ -513,7 +536,7 @@ let get_results
     in
     let resolve (result: autocomplete_result) : complete_autocomplete_result =
       match result with
-      | Partial res -> resolve_ty env autocomplete_context res
+      | Partial res -> resolve_ty env autocomplete_context res ~delimit_on_namespaces
       | Complete res -> res
     in
     {
@@ -525,7 +548,7 @@ end
 let reset () =
   auto_complete_for_global := "";
   argument_global_type := None;
-  auto_complete_pos := None;
+  autocomplete_identifier := None;
   ac_env := None;
   autocomplete_results := [];
   autocomplete_is_complete := true

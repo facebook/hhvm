@@ -1,5 +1,3 @@
-zend/good/Zend/tests/heredoc_013.php
-zend/good/ext/reflection/tests/ReflectionClass_getDocComment_001.php
-zend/good/ext/reflection/tests/ReflectionFunction_getDocComment.001.php
-zend/good/ext/reflection/tests/ReflectionMethod_getDocComment_basic.php
-zend/good/ext/reflection/tests/ReflectionProperty_getDocComment_basic.php
+zend/good/Zend/tests/use_function/no_global_fallback2.php
+zend/good/ext/pcntl/tests/pcntl_wait.php
+zend/good/ext/standard/tests/serialize/006.php

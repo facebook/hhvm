@@ -38,6 +38,8 @@ struct Unit;
 struct UnitEmitter;
 struct Func;
 
+constexpr size_t kMaxHhbcImms = 5;
+
 // A contiguous range of locals. The range always includes at least a single
 // local (first), plus some number of additional locals immediately after
 // (restCount).

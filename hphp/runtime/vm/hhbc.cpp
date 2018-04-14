@@ -41,6 +41,7 @@ int numImmediates(Op opcode) {
 #define TWO(...)   2
 #define THREE(...) 3
 #define FOUR(...)  4
+#define FIVE(...)  5
 #define O(name, imm, unusedPop, unusedPush, unusedFlags) imm,
     OPCODES
 #undef O
@@ -49,6 +50,7 @@ int numImmediates(Op opcode) {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
   };
   return values[size_t(opcode)];
 }
@@ -56,13 +58,14 @@ int numImmediates(Op opcode) {
 ArgType immType(const Op opcode, int idx) {
   assertx(isValidOpcode(opcode));
   assertx(idx >= 0 && idx < numImmediates(opcode));
-  always_assert(idx < 4); // No opcodes have more than four immediates
-  static const int8_t argTypes[][4] = {
-#define NA               {-1, -1, -1, -1},
-#define ONE(a)           { a, -1, -1, -1},
-#define TWO(a, b)        { a,  b, -1, -1},
-#define THREE(a, b, c)   { a,  b,  c, -1},
-#define FOUR(a, b, c, d) { a,  b,  c,  d},
+  always_assert(idx < kMaxHhbcImms); // No opcodes have more than 5 immediates
+  static const int8_t argTypes[][kMaxHhbcImms] = {
+#define NA                  {-1, -1, -1, -1, -1},
+#define ONE(a)              { a, -1, -1, -1, -1},
+#define TWO(a, b)           { a,  b, -1, -1, -1},
+#define THREE(a, b, c)      { a,  b,  c, -1, -1},
+#define FOUR(a, b, c, d)    { a,  b,  c,  d, -1},
+#define FIVE(a, b, c, d, e) { a,  b,  c,  d,  e},
 #define OA(x) OA
 #define O(name, imm, unusedPop, unusedPush, unusedFlags) imm
     OPCODES
@@ -73,6 +76,7 @@ ArgType immType(const Op opcode, int idx) {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
   };
   auto opInt = size_t(opcode);
   return (ArgType)argTypes[opInt][idx];
@@ -87,7 +91,7 @@ int immSize(PC origPC, int idx) {
   auto pc = origPC;
   auto const op = decode_op(pc);
   assertx(idx >= 0 && idx < numImmediates(op));
-  always_assert(idx < 4); // No origPCs have more than four immediates
+  always_assert(idx < kMaxHhbcImms); // No origPCs have more than 5 immediates
   static const int8_t argTypeToSizes[] = {
 #define ARGTYPE(nm, type) sizeof(type),
 #define ARGTYPEVEC(nm, type) 0,
@@ -104,6 +108,7 @@ int immSize(PC origPC, int idx) {
     if (idx >= 1) pc += immSize(origPC, 0);
     if (idx >= 2) pc += immSize(origPC, 1);
     if (idx >= 3) pc += immSize(origPC, 2);
+    if (idx >= 4) pc += immSize(origPC, 3);
     return encoded_iva_size(decode_raw<uint8_t>(pc));
   }
 
@@ -111,6 +116,7 @@ int immSize(PC origPC, int idx) {
     if (idx >= 1) pc += immSize(origPC, 0);
     if (idx >= 2) pc += immSize(origPC, 1);
     if (idx >= 3) pc += immSize(origPC, 2);
+    if (idx >= 4) pc += immSize(origPC, 3);
 
     switch (decode_raw<MemberCode>(pc)) {
       case MW:
@@ -129,6 +135,7 @@ int immSize(PC origPC, int idx) {
     if (idx >= 1) pc += immSize(origPC, 0);
     if (idx >= 2) pc += immSize(origPC, 1);
     if (idx >= 3) pc += immSize(origPC, 2);
+    if (idx >= 4) pc += immSize(origPC, 3);
     return encodedRATSize(pc);
   }
 
@@ -136,6 +143,7 @@ int immSize(PC origPC, int idx) {
     if (idx >= 1) pc += immSize(origPC, 0);
     if (idx >= 2) pc += immSize(origPC, 1);
     if (idx >= 3) pc += immSize(origPC, 2);
+    if (idx >= 4) pc += immSize(origPC, 3);
     auto start = pc;
     decode_iva(pc); // first
     decode_iva(pc); // restCount
@@ -146,6 +154,7 @@ int immSize(PC origPC, int idx) {
     if (idx >= 1) pc += immSize(origPC, 0);
     if (idx >= 2) pc += immSize(origPC, 1);
     if (idx >= 3) pc += immSize(origPC, 2);
+    if (idx >= 4) pc += immSize(origPC, 3);
     int vecElemSz;
     auto itype = immType(op, idx);
     if (itype == BLA) {
@@ -268,6 +277,7 @@ Offset* instrJumpOffset(PC const origPC) {
 #define TWO(a, b) (IMM_##a + 2 * IMM_##b)
 #define THREE(a, b, c) (IMM_##a + 2 * IMM_##b + 4 * IMM_##c)
 #define FOUR(a, b, c, d) (IMM_##a + 2 * IMM_##b + 4 * IMM_##c + 8 * IMM_##d)
+#define FIVE(a, b, c, d, e) (IMM_##a + 2 * IMM_##b + 4 * IMM_##c + 8 * IMM_##d + 16 * IMM_##e)
 #define O(name, imm, pop, push, flags) imm,
     OPCODES
 #undef IMM_NA
@@ -294,6 +304,7 @@ Offset* instrJumpOffset(PC const origPC) {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 #undef O
   };
 
@@ -317,6 +328,7 @@ Offset* instrJumpOffset(PC const origPC) {
   case 2: immNum = 1; break;
   case 4: immNum = 2; break;
   case 8: immNum = 3; break;
+  case 16: immNum = 4; break;
   default: assertx(false); return nullptr;
   }
 
@@ -392,6 +404,7 @@ int instrNumPops(PC pc) {
 #define TWO(...) 2
 #define THREE(...) 3
 #define FOUR(...) 4
+#define FIVE(...) 5
 #define MFINAL -3
 #define F_MFINAL -6
 #define C_MFINAL -5
@@ -408,6 +421,7 @@ int instrNumPops(PC pc) {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 #undef MFINAL
 #undef F_MFINAL
 #undef C_MFINAL
@@ -455,6 +469,7 @@ int instrNumPushes(PC pc) {
 #define TWO(...) 2
 #define THREE(...) 3
 #define FOUR(...) 4
+#define FIVE(...) 5
 #define INS_1(...) 0
 #define CMANY -1
 #define O(name, imm, pop, push, flags) push,
@@ -464,6 +479,7 @@ int instrNumPushes(PC pc) {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 #undef INS_1
 #undef CMANY
 #undef O
@@ -507,6 +523,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define TWO(f1, f2) return doFlavor(idx, f1, f2);
 #define THREE(f1, f2, f3) return doFlavor(idx, f1, f2, f3);
 #define FOUR(f1, f2, f3, f4) return doFlavor(idx, f1, f2, f3, f4);
+#define FIVE(f1, f2, f3, f4, f5) return doFlavor(idx, f1, f2, f3, f4, f5);
 #define MFINAL return manyFlavor(op, idx, CRV);
 #define F_MFINAL MFINAL
 #define C_MFINAL return idx == 0 ? CV : CRV;
@@ -526,6 +543,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 #undef MFINAL
 #undef F_MFINAL
 #undef C_MFINAL
@@ -545,6 +563,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #define TWO(...) StackTransInfo::Kind::PushPop
 #define THREE(...) StackTransInfo::Kind::PushPop
 #define FOUR(...) StackTransInfo::Kind::PushPop
+#define FIVE(...) StackTransInfo::Kind::PushPop
 #define CMANY StackTransInfo::Kind::PushPop
 #define INS_1(...) StackTransInfo::Kind::InsertMid
 #define O(name, imm, pop, push, flags) push,
@@ -554,6 +573,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 #undef INS_1
 #undef CMANY
 #undef O
@@ -564,6 +584,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #define TWO(...) -1
 #define THREE(...) -1
 #define FOUR(...) -1
+#define FIVE(...) -1
 #define CMANY -1
 #define INS_1(...) 0
 #define O(name, imm, pop, push, flags) push,
@@ -573,6 +594,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 #undef INS_1
 #undef CMANY
 #undef O
@@ -825,6 +847,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define TWO(a, b) H_##a; H_##b
 #define THREE(a, b, c) H_##a; H_##b; H_##c;
 #define FOUR(a, b, c, d) H_##a; H_##b; H_##c; H_##d;
+#define FIVE(a, b, c, d, e) H_##a; H_##b; H_##c; H_##d; H_##e;
 #define NA
 #define H_BLA READSVEC()
 #define H_SLA READSVEC()
@@ -872,6 +895,7 @@ OPCODES
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 #undef NA
 #undef H_BLA
 #undef H_SLA

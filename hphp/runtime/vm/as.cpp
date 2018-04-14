@@ -1286,6 +1286,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_TWO(t1, t2) IMM_ONE(t1); ++immIdx; IMM_##t2
 #define IMM_THREE(t1, t2, t3) IMM_TWO(t1, t2); ++immIdx; IMM_##t3
 #define IMM_FOUR(t1, t2, t3, t4) IMM_THREE(t1, t2, t3); ++immIdx; IMM_##t4
+#define IMM_FIVE(t1, t2, t3, t4, t5) IMM_FOUR(t1, t2, t3, t4); ++immIdx; IMM_##t5
 
 // Some bytecodes need to know an iva imm for (PUSH|POP)_*.
 #define IMM_IVA do {                                      \

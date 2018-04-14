@@ -379,6 +379,7 @@ std::string show(const php::Func& func, const Bytecode& bc) {
 #define IMM_TWO(x, y)        IMM_##x(1);         IMM_##y(2);
 #define IMM_THREE(x, y, z)   IMM_TWO(x, y);      IMM_##z(3);
 #define IMM_FOUR(x, y, z, n) IMM_THREE(x, y, z); IMM_##n(4);
+#define IMM_FIVE(x, y, z, n, m) IMM_FOUR(x, y, z, n); IMM_##m(5);
 
 #define O(opcode, imms, inputs, outputs, flags) \
   case Op::opcode:                              \
@@ -419,6 +420,7 @@ std::string show(const php::Func& func, const Bytecode& bc) {
 #undef IMM_TWO
 #undef IMM_THREE
 #undef IMM_FOUR
+#undef IMM_FIVE
 
   return ret;
 }

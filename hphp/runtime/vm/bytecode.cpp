@@ -6858,18 +6858,20 @@ struct litstr_id {
 #define DECODE_THREE(a, b, c) DECODE_TWO(a, b) auto const imm3 = DECODE_##c;
 #define DECODE_FOUR(a, b, c, d) \
   DECODE_THREE(a, b, c) auto const imm4 = DECODE_##d;
+#define DECODE_FIVE(a, b, c, d, e) \
+  DECODE_FOUR(a, b, c, d) auto const imm5 = DECODE_##e;
 
 #define PASS_NA
 #define PASS_ONE(...) , imm1
 #define PASS_TWO(...) , imm1, imm2
 #define PASS_THREE(...) , imm1, imm2, imm3
 #define PASS_FOUR(...) , imm1, imm2, imm3, imm4
-constexpr size_t kMaxImms = 4;
+#define PASS_FIVE(...) , imm1, imm2, imm3, imm4, imm5
 
 #define O(name, imm, in, out, flags)                                 \
   OPTBLD_INLINE TCA iopWrap##name(PC& pc) {                          \
     UNUSED int iva_count = 0;                                        \
-    UNUSED uint32_t ivas[kMaxImms];                                  \
+    UNUSED uint32_t ivas[kMaxHhbcImms];                              \
     UNUSED auto const op = Op::name;                                 \
     UNUSED auto const origpc = pc - encoded_op_size(op);             \
     DECODE_##imm                                                     \
@@ -6910,12 +6912,15 @@ OPCODES
 #undef DECODE_TWO
 #undef DECODE_THREE
 #undef DECODE_FOUR
+#undef DECODE_FIVE
 
 #undef PASS_NA
 #undef PASS_ONE
 #undef PASS_TWO
 #undef PASS_THREE
 #undef PASS_FOUR
+#undef PASS_FIVE
+
 #undef O
 
 }

@@ -360,6 +360,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_TWO(x,y)         IMM_ONE(x)       IMM_ONE(y)
 #define IMM_THREE(x,y,z)     IMM_TWO(x,y)     IMM_ONE(z)
 #define IMM_FOUR(x,y,z,l)    IMM_THREE(x,y,z) IMM_ONE(l)
+#define IMM_FIVE(x,y,z,l,m)  IMM_FOUR(x,y,z,l) IMM_ONE(m)
 
   out.indent();
 #define O(opcode, imms, ...)                              \
@@ -378,6 +379,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_TWO
 #undef IMM_THREE
 #undef IMM_FOUR
+#undef IMM_FIVE
 
 #undef IMM_BLA
 #undef IMM_SLA

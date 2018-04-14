@@ -653,6 +653,7 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define TWO(a, b) a(0) b(1)
 #define THREE(a, b, c) a(0) b(1) c(2)
 #define FOUR(a, b, c, d) a(0) b(1) c(2) d(3)
+#define FIVE(a, b, c, d, e) a(0) b(1) c(2) d(3) e(4)
 // Iterator bytecodes have multiple local immediates but not the Local flag, so
 // they should never flow through this function.
 #define LA(n) assertx(idx == 0xff); idx = n;
@@ -703,6 +704,7 @@ size_t memberKeyImmIdx(Op op) {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 #undef LA
 #undef MA
 #undef BLA
@@ -1224,6 +1226,7 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 #define TWO(x0,x1)        , IMM_##x0(0), IMM_##x1(1)
 #define THREE(x0,x1,x2)   , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2)
 #define FOUR(x0,x1,x2,x3) , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3)
+#define FIVE(x0,x1,x2,x3,x4) , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3), IMM_##x4(4)
 #define NA                   /*  */
 
 static void translateDispatch(irgen::IRGS& irgs,
@@ -1233,6 +1236,7 @@ static void translateDispatch(irgen::IRGS& irgs,
 #undef O
 }
 
+#undef FIVE
 #undef FOUR
 #undef THREE
 #undef TWO

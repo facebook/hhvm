@@ -216,7 +216,7 @@ interpOutputLocals(IRGS& env,
     locals.emplace_back(id, relaxToGuardable(t));
   };
   auto setImmLocType = [&](uint32_t id, Type t) {
-    assertx(id < 4);
+    assertx(id < kMaxHhbcImms);
     setLocType(inst.imm[id].u_LA, t);
   };
   auto handleBoxiness = [&] (Type testTy, Type useTy) {

@@ -680,6 +680,7 @@ bool FuncChecker::checkImmediates(const char* name, PC const instr) {
 #define TWO(a, b) ONE(a); ok &= checkImm##b(pc, instr)
 #define THREE(a, b, c) TWO(a, b); ok &= checkImm##c(pc, instr)
 #define FOUR(a, b, c, d) THREE(a, b, c); ok &= checkImm##d(pc, instr)
+#define FIVE(a, b, c, d, e) FOUR(a, b, c, d); ok &= checkImm##e(pc, instr)
 #define O(name, imm, in, out, flags) case Op::name: imm; break;
       OPCODES
 #undef NA
@@ -688,6 +689,7 @@ bool FuncChecker::checkImmediates(const char* name, PC const instr) {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 #undef O
     }
   } catch (const unknown_length&) {
@@ -745,7 +747,7 @@ bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
 }
 
 const FlavorDesc* FuncChecker::sig(PC pc) {
-  static const FlavorDesc inputSigs[][4] = {
+  static const FlavorDesc inputSigs[][kMaxHhbcImms] = {
   #define NOV { },
   #define FMANY { },
   #define UFMANY { },
@@ -756,6 +758,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define TWO(a,b) { b, a },
   #define THREE(a,b,c) { c, b, a },
   #define FOUR(a,b,c,d) { d, c, b, a },
+  #define FIVE(a,b,c,d,e) { e, d, c, b, a },
   #define MFINAL { },
   #define F_MFINAL { },
   #define C_MFINAL { },
@@ -772,6 +775,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef CVUMANY
   #undef CMANY
   #undef SMANY
+  #undef FIVE
   #undef FOUR
   #undef THREE
   #undef TWO
@@ -1115,6 +1119,7 @@ std::set<int> localImmediates(Op op) {
 #define TWO(a, b) ONE(a) b(1)
 #define THREE(a, b, c) TWO(a, b) c(2)
 #define FOUR(a, b, c, d) THREE(a, b, c) d(3)
+#define FIVE(a, b, c, d, e) FOUR(a, b, c, d) e(4)
 #define LA(n) imms.insert(n);
 #define MA(n)
 #define BLA(n)
@@ -1143,6 +1148,7 @@ std::set<int> localImmediates(Op op) {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 #undef LA
 #undef MA
 #undef BLA
@@ -1505,6 +1511,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define TWO(a,b) { a, b },
   #define THREE(a,b,c) { a, b, c },
   #define FOUR(a,b,c,d) { a, b, c, d },
+  #define FIVE(a,b,c,d,e) { a, b, c, d, e },
   #define INS_1(a) { a },
   #define O(name, imm, pop, push, flags) push
     OPCODES
@@ -1514,6 +1521,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #undef CMANY
   #undef SMANY
   #undef INS_1
+  #undef FIVE
   #undef FOUR
   #undef THREE
   #undef TWO

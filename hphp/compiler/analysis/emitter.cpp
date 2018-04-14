@@ -314,6 +314,8 @@ struct Emitter {
   IMM_##typ1, IMM_##typ2, IMM_##typ3
 #define FOUR(typ1, typ2, typ3, typ4) \
   IMM_##typ1, IMM_##typ2, IMM_##typ3, IMM_##typ4
+#define FIVE(typ1, typ2, typ3, typ4, typ5) \
+  IMM_##typ1, IMM_##typ2, IMM_##typ3, IMM_##typ4, IMM_##typ5
 #define IMM_BLA const std::vector<Label*>&
 #define IMM_SLA const std::vector<StrOff>&
 #define IMM_ILA const std::vector<IterPair>&
@@ -341,6 +343,7 @@ struct Emitter {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 #undef IMM_MA
 #undef IMM_BLA
 #undef IMM_SLA
@@ -1499,6 +1502,7 @@ struct OpEmitContext {
 #define COUNT_TWO(t1,t2) 2
 #define COUNT_THREE(t1,t2,t3) 3
 #define COUNT_FOUR(t1,t2,t3,t4) 4
+#define COUNT_FIVE(t1,t2,t3,t4,t5) 5
 #define COUNT_MFINAL 0
 #define COUNT_F_MFINAL 0
 #define COUNT_C_MFINAL 0
@@ -1517,6 +1521,8 @@ struct OpEmitContext {
   DEC_##t1 a1, DEC_##t2 a2, DEC_##t3 a3
 #define FOUR(t1, t2, t3, t4) \
   DEC_##t1 a1, DEC_##t2 a2, DEC_##t3 a3, DEC_##t4 a4
+#define FIVE(t1, t2, t3, t4, t5) \
+  DEC_##t1 a1, DEC_##t2 a2, DEC_##t3 a3, DEC_##t4 a4, DEC_##t5 a5
 #define NA
 #define DEC_BLA const std::vector<Label*>&
 #define DEC_SLA const std::vector<StrOff>&
@@ -1553,6 +1559,12 @@ struct OpEmitContext {
   POP_##t2(1);                   \
   POP_##t3(2);                   \
   POP_##t4(3)
+#define POP_FIVE(t1, t2, t3, t4, t5) \
+  POP_##t1(0);                   \
+  POP_##t2(1);                   \
+  POP_##t3(2);                   \
+  POP_##t4(3);                   \
+  POP_##t5(4)
 #define POP_MFINAL \
   getEmitterVisitor().popEvalStackMMany()
 #define POP_F_MFINAL POP_MFINAL
@@ -1596,6 +1608,12 @@ struct OpEmitContext {
   POP_LA_##t2(nIn);             \
   POP_LA_##t3(nIn);             \
   POP_LA_##t4(nIn)
+#define POP_LA_FIVE(t1, t2, t3, t4, t5) \
+  POP_LA_##t1(nIn);             \
+  POP_LA_##t2(nIn);             \
+  POP_LA_##t3(nIn);             \
+  POP_LA_##t4(nIn);             \
+  POP_LA_##t5(nIn)
 
 #define POP_LA_NA
 #define POP_LA_BLA(i)
@@ -1636,6 +1654,12 @@ struct OpEmitContext {
   POP_CAR_##t2(nIn);             \
   POP_CAR_##t3(nIn);             \
   POP_CAR_##t4(nIn)
+#define POP_CAR_FIVE(t1, t2, t3, t4, t5) \
+  POP_CAR_##t1(nIn);             \
+  POP_CAR_##t2(nIn);             \
+  POP_CAR_##t3(nIn);             \
+  POP_CAR_##t4(nIn);             \
+  POP_CAR_##t5(nIn)
 
 #define POP_CAR_NA
 #define POP_CAR_BLA(i)
@@ -1674,6 +1698,12 @@ struct OpEmitContext {
   PUSH_CAW_##t2(nIn);             \
   PUSH_CAW_##t3(nIn);             \
   PUSH_CAW_##t4(nIn)
+#define PUSH_CAW_FIVE(t1, t2, t3, t4, t5) \
+  PUSH_CAW_##t1(nIn);             \
+  PUSH_CAW_##t2(nIn);             \
+  PUSH_CAW_##t3(nIn);             \
+  PUSH_CAW_##t4(nIn);             \
+  PUSH_CAW_##t5(nIn)
 
 #define PUSH_CAW_NA
 #define PUSH_CAW_BLA(i)
@@ -1712,6 +1742,12 @@ struct OpEmitContext {
   PUSH_##t3; \
   PUSH_##t2; \
   PUSH_##t1
+#define PUSH_FIVE(t1, t2, t3, t4, t5) \
+  PUSH_##t5; \
+  PUSH_##t4; \
+  PUSH_##t3; \
+  PUSH_##t2; \
+  PUSH_##t1
 #define PUSH_INS_1(t) PUSH_INS_1_##t
 #define PUSH_CMANY getEmitterVisitor().pushEvalStackMany(a2, StackSym::C)
 
@@ -1740,6 +1776,12 @@ struct OpEmitContext {
   IMPL2_##t2; \
   IMPL3_##t3; \
   IMPL4_##t4
+#define IMPL_FIVE(t1, t2, t3, t4, t5) \
+  IMPL1_##t1; \
+  IMPL2_##t2; \
+  IMPL3_##t3; \
+  IMPL4_##t4; \
+  IMPL5_##t5
 
 #define IMPL_BLA(var) do {                            \
   getUnitEmitter().emitInt32(var.size());             \
@@ -1751,6 +1793,7 @@ struct OpEmitContext {
 #define IMPL2_BLA IMPL_BLA(a2)
 #define IMPL3_BLA IMPL_BLA(a3)
 #define IMPL4_BLA IMPL_BLA(a4)
+#define IMPL5_BLA IMPL_BLA(a5)
 
 #define IMPL_ILA(var) do {     \
   auto& ue = getUnitEmitter(); \
@@ -1764,6 +1807,7 @@ struct OpEmitContext {
 #define IMPL2_ILA IMPL_ILA(a2)
 #define IMPL3_ILA IMPL_ILA(a3)
 #define IMPL4_ILA IMPL_ILA(a4)
+#define IMPL5_ILA IMPL_ILA(a5)
 
 #define IMPL_I32LA(var) do {   \
   auto& ue = getUnitEmitter(); \
@@ -1776,6 +1820,7 @@ struct OpEmitContext {
 #define IMPL2_I32LA IMPL_I32LA(a2)
 #define IMPL3_I32LA IMPL_I32LA(a3)
 #define IMPL4_I32LA IMPL_I32LA(a4)
+#define IMPL5_I32LA IMPL_I32LA(a5)
 
 #define IMPL_SLA(var) do {                      \
   auto& ue = getUnitEmitter();                  \
@@ -1788,6 +1833,8 @@ struct OpEmitContext {
 #define IMPL1_SLA IMPL_SLA(a1)
 #define IMPL2_SLA IMPL_SLA(a2)
 #define IMPL3_SLA IMPL_SLA(a3)
+#define IMPL4_SLA IMPL_SLA(a4)
+#define IMPL5_SLA IMPL_SLA(a5)
 
 #define IMPL_VSA(var) do {                          \
   auto n = var.size();                              \
@@ -1800,6 +1847,7 @@ struct OpEmitContext {
 #define IMPL2_VSA IMPL_VSA(a2)
 #define IMPL3_VSA IMPL_VSA(a3)
 #define IMPL4_VSA IMPL_VSA(a4)
+#define IMPL5_VSA IMPL_VSA(a5)
 
 #define IMPL_IVA(var) do { \
   getUnitEmitter().emitIVA(var); \
@@ -1808,16 +1856,19 @@ struct OpEmitContext {
 #define IMPL2_IVA IMPL_IVA(a2)
 #define IMPL3_IVA IMPL_IVA(a3)
 #define IMPL4_IVA IMPL_IVA(a4)
+#define IMPL5_IVA IMPL_IVA(a5)
 
 #define IMPL1_LA IMPL_IVA(a1)
 #define IMPL2_LA IMPL_IVA(a2)
 #define IMPL3_LA IMPL_IVA(a3)
 #define IMPL4_LA IMPL_IVA(a4)
+#define IMPL5_LA IMPL_IVA(a5)
 
 #define IMPL1_IA IMPL_IVA(a1)
 #define IMPL2_IA IMPL_IVA(a2)
 #define IMPL3_IA IMPL_IVA(a3)
 #define IMPL4_IA IMPL_IVA(a4)
+#define IMPL5_IA IMPL_IVA(a5)
 
 #define IMPL_CAR do {                         \
   getUnitEmitter().emitIVA(                   \
@@ -1828,6 +1879,7 @@ struct OpEmitContext {
 #define IMPL2_CAR IMPL_CAR
 #define IMPL3_CAR IMPL_CAR
 #define IMPL4_CAR IMPL_CAR
+#define IMPL5_CAR IMPL_CAR
 
 #define IMPL_CAW do {                         \
   getUnitEmitter().emitIVA(                   \
@@ -1838,12 +1890,14 @@ struct OpEmitContext {
 #define IMPL2_CAW IMPL_CAW
 #define IMPL3_CAW IMPL_CAW
 #define IMPL4_CAW IMPL_CAW
+#define IMPL5_CAW IMPL_CAW
 
 #define IMPL_I64A(var) getUnitEmitter().emitInt64(var)
 #define IMPL1_I64A IMPL_I64A(a1)
 #define IMPL2_I64A IMPL_I64A(a2)
 #define IMPL3_I64A IMPL_I64A(a3)
 #define IMPL4_I64A IMPL_I64A(a4)
+#define IMPL5_I64A IMPL_I64A(a5)
 
 #define IMPL_SA(var) \
   getUnitEmitter().emitInt32(getUnitEmitter().mergeLitstr(var))
@@ -1851,6 +1905,7 @@ struct OpEmitContext {
 #define IMPL2_SA IMPL_SA(a2)
 #define IMPL3_SA IMPL_SA(a3)
 #define IMPL4_SA IMPL_SA(a4)
+#define IMPL5_SA IMPL_SA(a5)
 
 // Emitting RATAs isn't supported here right now.  (They're only
 // created in hhbbc.)
@@ -1859,6 +1914,7 @@ struct OpEmitContext {
 #define IMPL2_RATA IMPL_RATA(a2)
 #define IMPL3_RATA IMPL_RATA(a3)
 #define IMPL4_RATA IMPL_RATA(a4)
+#define IMPL5_RATA IMPL_RATA(a5)
 
 #define IMPL_AA(var) \
   getUnitEmitter().emitInt32(getUnitEmitter().mergeArray(var))
@@ -1866,12 +1922,14 @@ struct OpEmitContext {
 #define IMPL2_AA IMPL_AA(a2)
 #define IMPL3_AA IMPL_AA(a3)
 #define IMPL4_AA IMPL_AA(a4)
+#define IMPL5_AA IMPL_AA(a5)
 
 #define IMPL_DA(var) getUnitEmitter().emitDouble(var)
 #define IMPL1_DA IMPL_DA(a1)
 #define IMPL2_DA IMPL_DA(a2)
 #define IMPL3_DA IMPL_DA(a3)
 #define IMPL4_DA IMPL_DA(a4)
+#define IMPL5_DA IMPL_DA(a5)
 
 #define IMPL_BA(var) \
   if ((var).getAbsoluteOffset() == InvalidAbsoluteOffset) { \
@@ -1889,24 +1947,28 @@ struct OpEmitContext {
 #define IMPL2_BA IMPL_BA(a2)
 #define IMPL3_BA IMPL_BA(a3)
 #define IMPL4_BA IMPL_BA(a4)
+#define IMPL5_BA IMPL_BA(a5)
 
 #define IMPL_OA(var) getUnitEmitter().emitByte(static_cast<uint8_t>(var))
 #define IMPL1_OA(type) IMPL_OA(a1)
 #define IMPL2_OA(type) IMPL_OA(a2)
 #define IMPL3_OA(type) IMPL_OA(a3)
 #define IMPL4_OA(type) IMPL_OA(a4)
+#define IMPL5_OA(type) IMPL_OA(a5)
 
 #define IMPL_KA(var) encode_member_key(var, getUnitEmitter())
 #define IMPL1_KA IMPL_KA(a1)
 #define IMPL2_KA IMPL_KA(a2)
 #define IMPL3_KA IMPL_KA(a3)
 #define IMPL4_KA IMPL_KA(a4)
+#define IMPL5_KA IMPL_KA(a5)
 
 #define IMPL_LAR(var) encodeLocalRange(getUnitEmitter(), var)
 #define IMPL1_LAR IMPL_LAR(a1)
 #define IMPL2_LAR IMPL_LAR(a2)
 #define IMPL3_LAR IMPL_LAR(a3)
 #define IMPL4_LAR IMPL_LAR(a4)
+#define IMPL5_LAR IMPL_LAR(a5)
 
  OPCODES
 
@@ -1915,6 +1977,7 @@ struct OpEmitContext {
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 #undef NA
 #undef DEC_IVA
 #undef DEC_LA
@@ -1935,6 +1998,7 @@ struct OpEmitContext {
 #undef POP_TWO
 #undef POP_THREE
 #undef POP_FOUR
+#undef POP_FIVE
 #undef POP_MFINAL
 #undef POP_F_MFINAL
 #undef POP_C_MFINAL
@@ -1954,6 +2018,7 @@ struct OpEmitContext {
 #undef POP_LA_TWO
 #undef POP_LA_THREE
 #undef POP_LA_FOUR
+#undef POP_LA_FIVE
 #undef POP_LA_NA
 #undef POP_LA_IVA
 #undef POP_LA_IA
@@ -1974,6 +2039,7 @@ struct OpEmitContext {
 #undef POP_CAR_TWO
 #undef POP_CAR_THREE
 #undef POP_CAR_FOUR
+#undef POP_CAR_FIVE
 #undef POP_CAR_NA
 #undef POP_CAR_IVA
 #undef POP_CAR_IA
@@ -1994,6 +2060,7 @@ struct OpEmitContext {
 #undef PUSH_CAW_TWO
 #undef PUSH_CAW_THREE
 #undef PUSH_CAW_FOUR
+#undef PUSH_CAW_FIVE
 #undef PUSH_CAW_NA
 #undef PUSH_CAW_IVA
 #undef PUSH_CAW_IA
@@ -2015,6 +2082,7 @@ struct OpEmitContext {
 #undef PUSH_TWO
 #undef PUSH_THREE
 #undef PUSH_FOUR
+#undef PUSH_FIVE
 #undef PUSH_INS_1
 #undef PUSH_CMANY
 #undef PUSH_CV
@@ -2028,6 +2096,7 @@ struct OpEmitContext {
 #undef IMPL_TWO
 #undef IMPL_THREE
 #undef IMPL_FOUR
+#undef IMPL_FIVE
 #undef IMPL_NA
 #undef IMPL_BLA
 #undef IMPL1_BLA

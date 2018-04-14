@@ -143,20 +143,6 @@ let tco_experimental_nonnull = "nonnull"
 let tco_experimental_disallow_untyped_lambda_as_non_function_type =
   "disallow_untyped_lambda_as_non_function_type"
 
-(*
- * Check that the minimum number of arguments to a variadic
- * function are passed in, e.g. given the function:
- *
- * function max<T as num>(T $first, T $second, T ...$rest): T;
- *
- * The following calls will be errors if this option is enabled:
- *
- * $max = max(...$my_numbers);
- * $max = max($first, ...$my_numbers);
- *)
-let tco_unpacking_check_arity =
-"unpacking_check_arity"
-
  (*
   * Typechecker support for `dynamic` expressions.
   *)
@@ -193,7 +179,6 @@ let tco_experimental_all =
      tco_experimental_dynamic_types;
      tco_experimental_no_fallback_in_namespaces;
      tco_experimental_nonnull;
-     tco_unpacking_check_arity;
      tco_experimental_disallow_untyped_lambda_as_non_function_type;
      tco_experimental_disallow_refs_in_array;
    ]

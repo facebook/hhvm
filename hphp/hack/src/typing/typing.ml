@@ -4864,14 +4864,14 @@ and call_construct p env class_ params el uel cid =
       let env, tel, tuel, _ty = call ~expected:None p env m el uel in
       env, tcid, tel, tuel, m
 
-and check_arity ?(check_min=true) ?(did_unpack=false) pos pos_def (arity:int) exp_arity =
+and check_arity ?(did_unpack=false) pos pos_def (arity:int) exp_arity =
   let exp_min = (Typing_defs.arity_min exp_arity) in
-  if check_min && arity < exp_min then
-    Errors.typing_too_few_args pos pos_def;
+  if arity < exp_min
+  then Errors.typing_too_few_args pos pos_def;
   match exp_arity with
     | Fstandard (_, exp_max) ->
       let arity = if did_unpack then arity + 1 else arity in
-      if (arity > exp_max)
+      if arity > exp_max
       then Errors.typing_too_many_args pos pos_def;
     | Fvariadic _ | Fellipsis _ -> ()
 
@@ -5051,10 +5051,9 @@ and call_ ~expected ~receiver_type pos env fty el uel =
       let l = List.map rl (fun (_, opt) -> get_param opt) in
       Core_list.unzip l in
     Typing_reactivity.check_call env receiver_type pos r2 ft tys;
-
-    let env, tuel, arity, check_min, did_unpack =
+    let env, tuel, arity, did_unpack =
       match uel with
-      | [] -> env, [], List.length el, true, false
+      | [] -> env, [], List.length el, false
       | e :: _ ->
         (* Enforces that e is unpackable. If e is a tuple, check types against
          * parameter types *)
@@ -5072,7 +5071,7 @@ and call_ ~expected ~receiver_type pos env fty el uel =
                 let env = call_param env param (e, ty) in
                 check_elements env tyl paraml in
           let env = check_elements env tyl paraml in
-          env, [te], List.length el + List.length tyl, true, false
+          env, [te], List.length el + List.length tyl, false
         | _ ->
           let param_tyl = List.map paraml (fun param -> param.fp_type) in
           let add_variadic_param_ty param_tyl =
@@ -5086,16 +5085,13 @@ and call_ ~expected ~receiver_type pos env fty el uel =
             let traversable_ty = make_unpacked_traversable_ty pos param_ty in
             Type.sub_type pos Reason.URparam env ety traversable_ty)
           in
-          let check_min = (TypecheckerOptions.experimental_feature_enabled
-            (Env.get_options env)
-            TypecheckerOptions.experimental_unpacking_check_arity) in
-          env, [te], List.length el, check_min, true
+          env, [te], List.length el, true
     in
     (* If we unpacked an array, we don't check arity exactly. Since each
      * unpacked array consumes 1 or many parameters, it is nonsensical to say
      * that not enough args were passed in (so we don't do the min check).
      *)
-    let () = check_arity ~check_min ~did_unpack pos pos_def arity ft.ft_arity in
+    let () = check_arity ~did_unpack pos pos_def arity ft.ft_arity in
     (* Variadic params cannot be inout so we can stop early *)
     let env = wfold_left2 inout_write_back env ft.ft_params el in
     Typing_hooks.dispatch_fun_call_hooks

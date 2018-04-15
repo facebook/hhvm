@@ -211,7 +211,7 @@ let rec is_byval_collection_type env ty =
       x = SN.Collections.cVec ||
       x = SN.Collections.cDict ||
       x = SN.Collections.cKeyset
-    | _, (Tarraykind (AKvarray _ | AKdarray _ | AKvarray_or_darray _ | AKvec _))
+    | _, (Tarraykind _ | Ttuple _ | Tshape _)
       -> true
     | _, Tunresolved tl -> Core_list.for_all tl ~f:(is_byval_collection_type env)
     | _ -> false in

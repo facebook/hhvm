@@ -82,5 +82,6 @@ namespace HH {
     string $root,
   ): bool;
 
+  <<__Rx>>
   function set_frame_metadata(mixed $metadata): void;
 }

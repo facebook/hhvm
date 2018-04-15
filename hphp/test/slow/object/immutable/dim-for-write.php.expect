@@ -1,0 +1,34 @@
+object(C)#3 (2) {
+  ["cv"]=>
+  object(HH\Vector)#4 (1) {
+    [0]=>
+    int(0)
+  }
+  ["cvv"]=>
+  vec(1) {
+    object(HH\Vector)#5 (1) {
+      [0]=>
+      int(1)
+    }
+  }
+}
+Cannot modify immutable property cv of class C after construction
+Cannot modify immutable property cvv of class C after construction
+object(C)#3 (2) {
+  ["cv"]=>
+  object(HH\Vector)#4 (2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(3)
+  }
+  ["cvv"]=>
+  vec(1) {
+    object(HH\Vector)#5 (2) {
+      [0]=>
+      int(1)
+      [1]=>
+      int(5)
+    }
+  }
+}

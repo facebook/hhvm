@@ -1282,14 +1282,7 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
         }
         if (mode == PropMode::DimForWrite) {
           if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
-            // After an object is done being constructed, dimming through an
-            // immutable property for a write is only OK if the property value
-            // is of reference type
-            auto const type = prop->m_type;
-            assertx(type != KindOfRef);
-            if (type != KindOfObject && type != KindOfResource) {
-              throwMutateImmutable(prop);
-            }
+            throwMutateImmutable(prop);
           }
         }
         return prop;

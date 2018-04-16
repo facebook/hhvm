@@ -189,6 +189,8 @@ class ['self] visitor = object (self : 'self)
         typed_const env ty mid
       | Tast.Class_get ((ty, _), mid) ->
         typed_property env ty mid
+      | Tast.Xml (cid, _, _) ->
+        process_class_id cid
       | Tast.Fun_id id ->
         process_fun_id (pos, "\\"^SN.SpecialFunctions.fun_) +
         process_fun_id id

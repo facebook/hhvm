@@ -1114,19 +1114,17 @@ let do_typeCoverage
 
   let ntotal = nchecked + nunchecked + npartial in
   let coveredPercent = if ntotal = 0 then 100
-    else ((nchecked * 100) + (npartial * 50)) / ntotal in
+    else ((nchecked * 100) + (npartial * 100)) / ntotal in
 
   let hack_coverage_to_lsp (pos, level) =
     let range = hack_pos_to_lsp_range pos in
     match level with
+    (* We only show diagnostics for completely untypechecked code. *)
+    | Ide_api_types.Partial
     | Ide_api_types.Checked -> None
     | Ide_api_types.Unchecked -> Some
         { range;
           message = "Un-type checked code. Consider adding type annotations.";
-        }
-    | Ide_api_types.Partial -> Some
-        { range;
-          message = "Partially type checked code. Consider adding type annotations.";
         }
   in
   {

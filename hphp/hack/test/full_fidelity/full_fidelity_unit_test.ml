@@ -91,7 +91,7 @@ let test_trivia source =
   let syntax_tree = CallOrder.verify source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in
   let (no_trivia_tree, trivia) = TestUtils.rewrite_editable_tree_no_trivia editable in
-  let pretty_no_trivia = Full_fidelity_pretty_printer.pretty_print no_trivia_tree in
+  let pretty_no_trivia = Libhackfmt.format_node no_trivia_tree in
   let formatted_trivia = List.map trivia
       (fun t ->
         Printf.sprintf "%s: (%s)"

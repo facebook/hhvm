@@ -1,4 +1,7 @@
-<?hh function foo(dict<int, Plain,> $x) : dict<int, Plain,> { return $x; }
+<?hh
+function foo(dict<int, Plain> $x): dict<int, Plain> {
+  return $x;
+}
 whitespace: ( )
 single_line_comment: (// strict)
 end_of_line: (

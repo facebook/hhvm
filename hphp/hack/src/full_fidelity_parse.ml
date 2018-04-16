@@ -351,7 +351,7 @@ let handle_existing_file args filename =
     Printf.printf "%s\n" text
   end;
   if args.pretty_print then begin
-    let pretty = Full_fidelity_pretty_printer.pretty_print editable in
+    let pretty = Libhackfmt.format_tree syntax_tree in
     Printf.printf "%s\n" pretty
   end;
 

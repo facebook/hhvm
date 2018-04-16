@@ -19,6 +19,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
+#include <vector>
 
 #include <folly/Optional.h>
 #include <folly/Traits.h>
@@ -33,6 +34,7 @@
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/tv-comparisons.h"
+#include "hphp/runtime/base/type-structure.h"
 
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/index.h"
@@ -2795,6 +2797,129 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::ArrLike:
   case IsTypeOp::Scalar: always_assert(0);
   }
+  not_reached();
+}
+
+folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
+  if (t.subtypeOf(TNull))   return IsTypeOp::Null;
+  if (t.subtypeOf(TBool))   return IsTypeOp::Bool;
+  if (t.subtypeOf(TInt))    return IsTypeOp::Int;
+  if (t.subtypeOf(TDbl))    return IsTypeOp::Dbl;
+  if (t.subtypeOf(TStr))    return IsTypeOp::Str;
+  if (t.subtypeOf(TArr))    return IsTypeOp::Arr;
+  if (t.subtypeOf(TVec))    return IsTypeOp::Vec;
+  if (t.subtypeOf(TDict))   return IsTypeOp::Dict;
+  if (t.subtypeOf(TRes))    return IsTypeOp::Res;
+  if (t.subtypeOf(TKeyset)) return IsTypeOp::Keyset;
+  if (t.subtypeOf(TObj))    return IsTypeOp::Obj;
+  if (t.subtypeOf(TVArr)) {
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    return IsTypeOp::VArray;
+  }
+  if (t.subtypeOf(TDArr)) {
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    return IsTypeOp::DArray;
+  }
+  return folly::none;
+}
+
+const StaticString s_allows_unknown_fields("allows_unknown_fields");
+const StaticString s_elem_types("elem_types");
+const StaticString s_fields("fields");
+const StaticString s_kind("kind");
+const StaticString s_value("value");
+const StaticString s_nullable("nullable");
+const StaticString s_optional_shape_field("optional_shape_field");
+
+folly::Optional<Type> type_of_type_structure(SArray ts) {
+  auto const nullable_field = ts->rval(s_nullable.get());
+  auto const is_nullable =
+    nullable_field != nullptr && nullable_field.val().num;
+  auto const kind_field = ts->rval(s_kind.get());
+  assertx(kind_field != nullptr);
+  auto const ts_kind = static_cast<TypeStructure::Kind>(kind_field.val().num);
+  switch (ts_kind) {
+    case TypeStructure::Kind::T_int:
+      return is_nullable ? TOptInt : TInt;
+    case TypeStructure::Kind::T_bool:
+      return is_nullable ? TOptBool : TBool;
+    case TypeStructure::Kind::T_float:
+      return is_nullable ? TOptDbl : TDbl;
+    case TypeStructure::Kind::T_string:
+      return is_nullable ? TOptStr : TStr;
+    case TypeStructure::Kind::T_resource:
+      return is_nullable ? TOptRes : TRes;
+    case TypeStructure::Kind::T_num:
+      return is_nullable ? TOptNum : TNum;
+    case TypeStructure::Kind::T_arraykey:
+      return is_nullable ? TOptArrKey : TArrKey;
+    case TypeStructure::Kind::T_dict:
+      return is_nullable ? TOptDict : TDict;
+    case TypeStructure::Kind::T_vec:
+      return is_nullable ? TOptVec : TVec;
+    case TypeStructure::Kind::T_keyset:
+      return is_nullable ? TOptKeyset : TKeyset;
+    case TypeStructure::Kind::T_vec_or_dict:
+      return is_nullable ? union_of(TOptVec, TOptDict) : union_of(TVec, TDict);
+    case TypeStructure::Kind::T_void:
+      return TNull;
+    case TypeStructure::Kind::T_tuple: {
+      auto const elem_types_field = ts->rval(s_elem_types.get());
+      assertx(elem_types_field != nullptr);
+      auto const tsElems = elem_types_field.val().parr;
+      std::vector<Type> v;
+      for (auto i = 0; i < tsElems->size(); i++) {
+        auto t = type_of_type_structure(tsElems->getValue(i).getArrayData());
+        if (!t) return folly::none;
+        v.emplace_back(std::move(t.value()));
+      }
+      if (v.empty()) return folly::none;
+      auto const arrT = arr_packed_varray(v);
+      return is_nullable ? union_of(std::move(arrT), TNull) : arrT;
+    }
+    case TypeStructure::Kind::T_shape: {
+      // Taking a very conservative approach to shapes where we dont do any
+      // conversions if the shape contains unknown or optional fields
+      if (ts->rval(s_allows_unknown_fields.get()) != nullptr) {
+        return folly::none;
+      }
+      auto const fields_field = ts->rval(s_fields.get());
+      assertx(fields_field != nullptr);
+      auto map = MapElems{};
+      auto const fields = fields_field.val().parr;
+      for (auto i = 0; i < fields->size(); i++) {
+        auto const key = fields->getKey(i).getStringData();
+        auto const wrapper = fields->getValue(i).getArrayData();
+        // Optional fields are hard to represent as a type
+        auto const optional_field = wrapper->rval(s_optional_shape_field.get());
+        if (optional_field != nullptr) return folly::none;
+        auto const value_field = wrapper->rval(s_value.get());
+        assertx(value_field != nullptr);
+        auto t = type_of_type_structure(value_field.val().parr);
+        if (!t) return folly::none;
+        map.emplace_back(
+          make_tv<KindOfPersistentString>(key), std::move(t.value()));
+      }
+      if (map.empty()) return folly::none;
+      auto const arrT = arr_map_darray(map);
+      return is_nullable ? union_of(std::move(arrT), TNull) : arrT;
+    }
+    case TypeStructure::Kind::T_noreturn:
+    case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_nonnull:
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_unresolved:
+    case TypeStructure::Kind::T_typeaccess:
+    case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_xhp:
+    case TypeStructure::Kind::T_enum:
+    case TypeStructure::Kind::T_fun:
+    case TypeStructure::Kind::T_typevar:
+    case TypeStructure::Kind::T_trait:
+      return folly::none;
+  }
+
   not_reached();
 }
 

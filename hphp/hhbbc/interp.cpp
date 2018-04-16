@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
@@ -2075,17 +2076,6 @@ void in(ISS& env, const bc::InstanceOfD& op) {
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::IsTypeStruct& /*op*/) {
-  // TODO(kunalm): implement for type aliases, enums, etc.
-  popC(env);
-  push(env, TBool);
-}
-
-void in(ISS& env, const bc::AsTypeStruct& /*op*/) {
-  // To indicate that this value is touched
-  push(env, popC(env));
-}
-
 void in(ISS& env, const bc::InstanceOf& /*op*/) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
@@ -2108,6 +2098,175 @@ void in(ISS& env, const bc::InstanceOf& /*op*/) {
   popC(env);
   popC(env);
   push(env, TBool);
+}
+
+namespace {
+
+const StaticString s_kind("kind");
+const StaticString s_nullable("nullable");
+const StaticString s_classname("classname");
+
+bool isValidTypeOpForIsAs(const IsTypeOp& op) {
+  switch (op) {
+    case IsTypeOp::Null:
+    case IsTypeOp::Bool:
+    case IsTypeOp::Int:
+    case IsTypeOp::Dbl:
+    case IsTypeOp::Str:
+    case IsTypeOp::Res:
+    case IsTypeOp::Obj:
+      return true;
+    case IsTypeOp::Arr:
+    case IsTypeOp::Vec:
+    case IsTypeOp::Dict:
+    case IsTypeOp::Keyset:
+    case IsTypeOp::VArray:
+    case IsTypeOp::DArray:
+    case IsTypeOp::ArrLike:
+    case IsTypeOp::Scalar:
+    case IsTypeOp::Uninit:
+      return false;
+  }
+  not_reached();
+}
+
+template<bool asExpression>
+void isAsTypeStructImpl(ISS& env, SArray ts) {
+  auto const t = topC(env);
+
+  auto result = [&] (
+    const Type& out,
+    const folly::Optional<Type>& test = folly::none
+  ) {
+    auto const location = topStkEquiv(env);
+    popC(env);
+    if (!asExpression) return push(env, out);
+    if (out.subtypeOf(TTrue)) {
+      constprop(env);
+      push(env, t);
+      return reduce(env, bc::Nop {});
+    }
+    if (out.subtypeOf(TFalse)) {
+      push(env, t);
+      return unreachable(env);
+    }
+
+    assertx(out == TBool);
+    if (!test) return push(env, t);
+    auto const newT = intersection_of(test.value(), t);
+    if (newT == TBottom) unreachable(env);
+    refineLocation(env, location, [&] (Type t) { return newT; });
+    return push(env, newT);
+  };
+
+  auto check = [&] (const Type& test) {
+    if (t.subtypeOf(test))  return result(TTrue);
+    if (!t.couldBe(test))   return result(TFalse);
+    auto const op = type_to_istypeop(test);
+    if (asExpression || !op || !isValidTypeOpForIsAs(op.value())) {
+      return result(TBool, test);
+    }
+    return reduce(env, bc::IsTypeC { *op });
+  };
+
+  auto const ts_nullable_field = ts->rval(s_nullable.get());
+  auto const is_ts_nullable =
+    ts_nullable_field != nullptr && ts_nullable_field.val().num;
+  auto const is_definitely_null = t.subtypeOf(TNull);
+  auto const is_definitely_not_null = !t.couldBe(TNull);
+
+  if (is_ts_nullable && is_definitely_null) return result(TTrue);
+
+  auto const ts_type = type_of_type_structure(ts);
+
+  if (is_ts_nullable && !is_definitely_not_null && ts_type == folly::none) {
+    // Ts is nullable and we know that t could be null but we dont know for sure
+    // Also we didn't get a type out of the type structure
+    return result(TBool);
+  }
+
+  auto const kind_field = ts->rval(s_kind.get());
+  assertx(kind_field != nullptr);
+  if (!asExpression) constprop(env);
+  auto const ts_kind = static_cast<TypeStructure::Kind>(kind_field.val().num);
+  switch (ts_kind) {
+    case TypeStructure::Kind::T_int:
+    case TypeStructure::Kind::T_bool:
+    case TypeStructure::Kind::T_float:
+    case TypeStructure::Kind::T_string:
+    case TypeStructure::Kind::T_resource:
+    case TypeStructure::Kind::T_num:
+    case TypeStructure::Kind::T_arraykey:
+    case TypeStructure::Kind::T_dict:
+    case TypeStructure::Kind::T_vec:
+    case TypeStructure::Kind::T_keyset:
+    case TypeStructure::Kind::T_vec_or_dict:
+    case TypeStructure::Kind::T_void:
+    case TypeStructure::Kind::T_tuple:
+    case TypeStructure::Kind::T_shape:
+      return !ts_type ? result(TBool) : check(ts_type.value());
+    case TypeStructure::Kind::T_noreturn:
+      return result(TFalse);
+    case TypeStructure::Kind::T_mixed:
+      return result(TTrue);
+    case TypeStructure::Kind::T_nonnull:
+      if (is_definitely_null) return result(TFalse);
+      if (is_definitely_not_null) return result(TTrue);
+      if (!asExpression) {
+        return reduce(env, bc::IsTypeC { IsTypeOp::Null }, bc::Not {});
+      }
+      return result(TBool);
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface: {
+      if (asExpression) return result(TBool);
+      auto const classname_field = ts->rval(s_classname.get());
+      assertx(classname_field != nullptr);
+      return reduce(
+        env,
+        bc::InstanceOfD { makeStaticString(classname_field.val().pstr) }
+      );
+    }
+    case TypeStructure::Kind::T_unresolved: {
+      if (asExpression) return result(TBool);
+      auto const classname_field = ts->rval(s_classname.get());
+      assertx(classname_field != nullptr);
+      auto const rcls =
+        env.index.resolve_class(
+          env.ctx, makeStaticString(classname_field.val().pstr));
+      // We can only reduce to instance of if we know for sure that this class
+      // can be resolved since instanceof undefined class does not throw
+      if (!rcls || !rcls->resolved() || rcls->cls()->attrs & AttrEnum) {
+        return result(TBool);
+      }
+      return reduce(env, bc::InstanceOfD { rcls->name() });
+    }
+    case TypeStructure::Kind::T_typeaccess:
+    case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_xhp:
+    case TypeStructure::Kind::T_enum:
+      // TODO(T26877589): implement
+      return result(TBool);
+    case TypeStructure::Kind::T_fun:
+    case TypeStructure::Kind::T_typevar:
+    case TypeStructure::Kind::T_trait:
+      // We will error on these at the JIT
+      return result(TBool);
+  }
+
+  not_reached();
+}
+
+}
+
+void in(ISS& env, const bc::IsTypeStruct& op) {
+  // TODO(T26877589): implement grouping for istypestruct + jmp
+  assertx(op.arr1->isDictOrDArray());
+  isAsTypeStructImpl<false>(env, op.arr1);
+}
+
+void in(ISS& env, const bc::AsTypeStruct& op) {
+  assertx(op.arr1->isDictOrDArray());
+  isAsTypeStructImpl<true>(env, op.arr1);
 }
 
 namespace {

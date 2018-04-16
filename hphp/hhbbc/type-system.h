@@ -1171,6 +1171,21 @@ Type scalarize(Type t);
 Type type_of_istype(IsTypeOp op);
 
 /*
+ * Get the hhbc IsTypeOp that corresponds to the type in our typesystem.
+ * Returns folly::none if no matching IsTypeOp is found.
+ */
+folly::Optional<IsTypeOp> type_to_istypeop(const Type& t);
+
+/*
+ * Get the type in our typesystem that corresponds to type given by the
+ * potentially unresolved type structure.
+ * Returns folly::none if the type structure is unresolved or
+ * no matching Type is found.
+ *
+ */
+folly::Optional<Type> type_of_type_structure(SArray ts);
+
+/*
  * Return the DObj structure for a strict subtype of TObj or TOptObj.
  *
  * Pre: is_specialized_obj(t)

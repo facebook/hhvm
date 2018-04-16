@@ -8,37 +8,44 @@
  *)
 
 open Hh_core
-open Hh_json
+
+type collected_type = Typing_env.env * Typing_defs.phase_ty
 
 class ['self] type_collector = object (_ : 'self)
   inherit [_] Tast_visitor.reduce
   method zero = Pos.AbsolutePosMap.empty
   method plus = Pos.AbsolutePosMap.union ~combine:(fun _ a b -> Some (a @ b))
   method! on_expr_annotation env (p,ty) =
-    Pos.AbsolutePosMap.singleton (Pos.to_absolute p) [Typing_print.to_json env ty]
+    Pos.AbsolutePosMap.singleton
+      (Pos.to_absolute p)
+      [(env, Typing_defs.LoclTy ty)]
+
   method! on_class_id env (ty,cid) =
     match cid with
     | Tast.CI ((p,_),_) ->
-      Pos.AbsolutePosMap.singleton (Pos.to_absolute p) [Typing_print.to_json env ty]
+      Pos.AbsolutePosMap.singleton
+        (Pos.to_absolute p)
+        [(env, Typing_defs.LoclTy ty)]
     | _ -> Pos.AbsolutePosMap.empty
 
   method! on_hint (env: Typing_env.env) hint =
     let (pos, _) = hint in
     let ty = Decl_hint.hint env.Typing_env.decl_env hint in
-    Pos.AbsolutePosMap.singleton (Pos.to_absolute pos) [Typing_print.to_json env ty]
+    Pos.AbsolutePosMap.singleton
+      (Pos.to_absolute pos)
+      [(env, Typing_defs.DeclTy ty)]
 end
 
 let collect_types = new type_collector#go
 
-let types_to_json tast =
-  let types_list =
-    tast
-    |> collect_types
-    |> Pos.AbsolutePosMap.elements
-    |> List.map ~f:(fun (pos, tys) ->
-      JSON_Array [Pos.json pos; JSON_Array tys])
-  in
-  JSON_Array types_list
+let collected_types_to_json
+  (collected_types: collected_type list)
+  : Hh_json.json list =
+  List.map collected_types ~f:(fun (env, ty) ->
+    match ty with
+    | Typing_defs.DeclTy ty -> Typing_print.to_json env ty
+    | Typing_defs.LoclTy ty -> Typing_print.to_json env ty
+  )
 
 (*
   Ideally this would be just Pos.AbsolutePosMap.get, however the positions
@@ -46,13 +53,15 @@ let types_to_json tast =
 
   TODO: Fix this when the full fidelity parse tree becomes the parser for type checking.
 *)
-let get_from_pos_map (position: Pos.absolute) (map: Hh_json.json list Pos.AbsolutePosMap.t) =
+let get_from_pos_map
+    (position: Pos.absolute)
+    (map: collected_type list Pos.AbsolutePosMap.t) =
   let rec aux es =
     match es with
     | [] -> []
     | (pos, tys) :: tl ->
-        if ((Pos.start_cnum pos) == (Pos.start_cnum position)
-            && (Pos.end_cnum pos) == (1 + (Pos.end_cnum position))) then
+        if ((Pos.start_cnum pos) = (Pos.start_cnum position)
+            && (Pos.end_cnum pos) = (1 + (Pos.end_cnum position))) then
           tys
         else
           aux tl

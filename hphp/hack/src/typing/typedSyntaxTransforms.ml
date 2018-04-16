@@ -17,7 +17,7 @@ module TypedTree = Full_fidelity_syntax_tree
 
 let typed_from_positioned
     (file: Relative_path.t)
-    (map: Hh_json.json list Pos.AbsolutePosMap.t)
+    (map: Tast_type_collector.collected_type list Pos.AbsolutePosMap.t)
     (tree: PositionedTree.t): TypedTree.t =
   let rec aux (positioned_node: PS.t): TS.t =
     let value = PS.value positioned_node in

@@ -76,7 +76,7 @@ module Value = struct
     leading_width: int;
     width: int; (* Width of node, not counting trivia *)
     trailing_width: int;
-    tys: Hh_json.json list;
+    tys: Tast_type_collector.collected_type list;
     position: Pos.absolute;
   }
 
@@ -92,14 +92,16 @@ module Value = struct
       (["position", pos_to_zero_indexed_json value.position
       ] @ match value.tys with
       | [] -> []
-      | tys -> [("types", JSON_Array tys)])
+      | tys ->
+        let json_tys = Tast_type_collector.collected_types_to_json tys in
+        [("types", JSON_Array json_tys)])
 end
 
 module PositionedSyntaxValue = Full_fidelity_positioned_syntax.PositionedSyntaxValue
 
 let positioned_value_to_typed
   (position: Pos.absolute)
-  (types: Hh_json.json list)
+  (types: Tast_type_collector.collected_type list)
   (value: PositionedSyntaxValue.t): Value.t =
   {
     Value.source_text = value.PositionedSyntaxValue.source_text;

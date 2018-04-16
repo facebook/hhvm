@@ -2662,7 +2662,8 @@ and transform_argish_item env x =
   | Syntax.BinaryExpression {
       binary_left_operand  = left;
       binary_operator      = op;
-      binary_right_operand = right; } ->
+      binary_right_operand = right; }
+      when not (is_concat op) ->
     transform_binary_expression env ~is_nested:true (left, op, right)
   | _ -> t env x
 
@@ -2797,15 +2798,16 @@ and transform_condition env left_p condition right_p =
     ])
   ]
 
+and get_operator_type op =
+  match Syntax.syntax op with
+  | Syntax.Token t -> Full_fidelity_operator.trailing_from_token
+    (Token.kind t)
+  | _ -> failwith "Operator should always be a token"
+
+and is_concat op =
+  get_operator_type op = Full_fidelity_operator.ConcatenationOperator
+
 and transform_binary_expression env ~is_nested (left, operator, right) =
-  let get_operator_type op =
-    match Syntax.syntax op with
-    | Syntax.Token t -> Full_fidelity_operator.trailing_from_token
-      (Token.kind t)
-    | _ -> failwith "Operator should always be a token"
-  in
-  let is_concat op =
-    get_operator_type op = Full_fidelity_operator.ConcatenationOperator in
   let operator_has_surrounding_spaces op = not (is_concat op) in
   let operator_is_leading op =
     get_operator_type op = Full_fidelity_operator.PipeOperator in

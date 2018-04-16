@@ -118,7 +118,7 @@ let shutdown_persistent_client env client =
 (* The main loop *)
 (*****************************************************************************)
 
-let handle_connection_exception env client e = match e with
+let handle_connection_exception env client e stack = match e with
   | ClientProvider.Client_went_away | ServerCommandTypes.Read_command_timeout ->
     ClientProvider.shutdown_client client;
     env
@@ -137,7 +137,7 @@ let handle_connection_exception env client e = match e with
   | e ->
     HackEventLogger.handle_connection_exception e;
     let msg = Printexc.to_string e in
-    EventLogger.master_exception e;
+    EventLogger.master_exception e stack;
     Printf.fprintf stderr "Error: %s\n%!" msg;
     Printexc.print_backtrace stderr;
     ClientProvider.shutdown_client client;
@@ -162,10 +162,10 @@ let handle_connection_ genv env client =
     | Non_persistent ->
       ServerCommand.handle genv env client
   with
-  | ServerCommand.Nonfatal_rpc_exception (e, _, env) ->
-    handle_connection_exception env client e
+  | ServerCommand.Nonfatal_rpc_exception (e, stack, env) ->
+    handle_connection_exception env client e (Some stack)
   | e ->
-    handle_connection_exception env client e
+    handle_connection_exception env client e None
 
 let report_persistent_exception
     ~(e: exn)
@@ -178,7 +178,7 @@ let report_persistent_exception
   let push = if is_fatal then ServerCommandTypes.FATAL_EXCEPTION { message; stack; }
   else ServerCommandTypes.NONFATAL_EXCEPTION { message; stack; } in
   begin try ClientProvider.send_push_message_to_client client push with _ -> () end;
-  EventLogger.master_exception e;
+  EventLogger.master_exception e (Some stack);
   Printf.eprintf "Error: %s\n%s\n%!" message stack
 
 

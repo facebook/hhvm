@@ -1550,8 +1550,13 @@ and pBlock : block parser = fun node env ->
 and pFunctionBody : block parser = fun node env ->
   match syntax node with
   | Missing -> []
-  | CompoundStatement {compound_statements = {syntax = Missing; _}; _} ->
-    [ Pos.none, Noop ]
+  | CompoundStatement
+    { compound_statements = {syntax = Missing; _}
+    ; compound_right_brace = { syntax = Token t; _ }
+    ; _} ->
+      [ Pos.none
+      , if Token.has_trivia_kind t TriviaKind.Unsafe then Unsafe else Noop
+      ]
   | CompoundStatement {compound_statements = {syntax = SyntaxList [t]; _}; _}
     when Syntax.is_specific_token TK.Yield t ->
     env.saw_yield <- true;

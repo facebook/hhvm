@@ -22,7 +22,7 @@ extern "C" {
 }
 
 #include <functional>
-#include <unordered_map>
+#include <tbb/concurrent_unordered_map.h>
 
 /*
  * A macro assembler for x64, based on the Intel XED library, that strives
@@ -769,7 +769,7 @@ private:
    * and removing the need to call xedEmit twice each time (once to get
    * the size, and once to actually emit the instruction).
    */
-  typedef std::unordered_map<int32_t, uint32_t> XedLenCache;
+  typedef tbb::concurrent_unordered_map<int32_t, uint32_t> XedLenCache;
 
   ALWAYS_INLINE
   uint32_t xedCacheLen(XedLenCache* lenCache,

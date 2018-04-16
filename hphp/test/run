@@ -4,6 +4,8 @@
 * Run the test suites in various configurations.
 */
 
+const TIMEOUT_SECONDS = 300;
+
 function is_testing_dso_extension() {
   // detecting if we're running outside of the hhvm codebase.
   return !is_file(__DIR__ . "/../../hphp/test/run");
@@ -964,7 +966,7 @@ function hhvm_cmd_impl() {
       $args[] = '-vEval.JitPGO=true';
       $args[] = '-vEval.JitRetranslateAllRequest='.$options['retranslate-all'];
       // Set to timeout.  We want requests to trigger retranslate all.
-      $args[] = '-vEval.JitRetranslateAllSeconds=300';
+      $args[] = '-vEval.JitRetranslateAllSeconds=' . TIMEOUT_SECONDS;
     }
 
     if (isset($options['recycle-tc'])) {
@@ -977,7 +979,7 @@ function hhvm_cmd_impl() {
       $args[] = '-vEval.JitPGO=true';
       $args[] = '-vEval.JitRetranslateAllRequest='.$options['jit-serialize'];
       // Set to timeout.  We want requests to trigger retranslate all.
-      $args[] = '-vEval.JitRetranslateAllSeconds=300';
+      $args[] = '-vEval.JitRetranslateAllSeconds=' . TIMEOUT_SECONDS;
     }
 
     if (isset($options['hhas-round-trip'])) {
@@ -1134,7 +1136,7 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   return array($cmd, $env);
 }
 
-function hphp_cmd($options, $test, $timeout_prefix, $program) {
+function hphp_cmd($options, $test, $program) {
   $extra_args = preg_replace("/-v\s*/", "-vRuntime.", extra_args($options));
 
   $compiler_args = "";
@@ -1165,10 +1167,9 @@ function hphp_cmd($options, $test, $timeout_prefix, $program) {
   }
 
   return implode(" ", array(
-    "HHVM_DISABLE_HHBBC=1",
-    $timeout_prefix,
     hhvm_path(),
     '--hphp',
+    '-vUseHHBBC=false',
     '--config',
     find_test_ext($test, 'ini', 'hphp_config'),
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
@@ -1181,9 +1182,8 @@ function hphp_cmd($options, $test, $timeout_prefix, $program) {
   ));
 }
 
-function hhbbc_cmd($options, $test, $timeout_prefix, $program) {
+function hhbbc_cmd($options, $test, $program) {
   return implode(" ", array(
-    $timeout_prefix,
     hhvm_path(),
     '--hhbbc',
     '--no-logging',
@@ -1193,11 +1193,81 @@ function hhbbc_cmd($options, $test, $timeout_prefix, $program) {
   ));
 }
 
+// Execute $cmd and return its output, including any stacktrace.log
+// file it generated.
+function exec_with_stack($cmd) {
+  $proc = proc_open($cmd,
+                    array(0 => array('pipe', 'r'),
+                          1 => array('pipe', 'w'),
+                          2 => array('pipe', 'w')), $pipes);
+  fclose($pipes[0]);
+  $s = '';
+  $all_selects_failed=true;
+  $end = microtime(true) + TIMEOUT_SECONDS;
+  $timedout = false;
+  while (true) {
+    $now = microtime(true);
+    if ($now >= $end) break;
+    $read = array($pipes[1], $pipes[2]);
+    $write = null;
+    $except = null;
+    $available = @stream_select($read, $write, $except, (int)($end - $now));
+    if ($available === false) {
+      usleep(1000);
+      $s .= "select failed:\n" . print_r(error_get_last(), true);
+      continue;
+    }
+    $all_selects_failed=false;
+    if ($available === 0) continue;
+    # var_dump($read);
+    foreach ($read as $pipe) {
+      $t = fread($pipe, 4096);
+      # var_dump($t);
+      if ($t === false) continue;
+      $s .= $t;
+    }
+    if (feof($pipes[1]) && feof($pipes[2])) break;
+  }
+  fclose($pipes[1]);
+  fclose($pipes[2]);
+  while (true) {
+    $status = proc_get_status($proc);
+    if (!$status['running']) break;
+    $now = microtime(true);
+    if ($now >= $end) {
+      $timedout = true;
+      system('pkill -P ' . $status['pid']);
+      posix_kill($status['pid'], SIGTERM);
+    }
+    usleep(1000);
+  }
+  proc_close($proc);
+  if ($timedout) {
+    if ($all_selects_failed) {
+      return "All selects failed running `$cmd'\n\n$s";
+    }
+    return "Timed out running `$cmd'\n\n$s";
+  }
+  if (!$status['exitcode']) return true;
+  $pid = $status['pid'];
+  $stack =
+    @file_get_contents("/tmp/stacktrace.$pid.log") ?:
+    @file_get_contents("/var/tmp/cores/stacktrace.$pid.log");
+  if ($stack !== false) {
+    $s .= "\n" . $stack;
+  }
+  return "Running `$cmd' failed (".$status['exitcode']."):\n\n$s";
+}
+
 function repo_mode_compile($options, $test, $program) {
-  $hphp = hphp_cmd($options, $test, timeout_prefix(), $program);
-  shell_exec("$hphp 2>&1");
-  $hhbbc = hhbbc_cmd($options, $test, timeout_prefix(), $program);
-  shell_exec("$hhbbc 2>&1");
+  $hphp = hphp_cmd($options, $test, $program);
+  $result = exec_with_stack($hphp);
+  if ($result === true) {
+    $hhbbc = hhbbc_cmd($options, $test, $program);
+    $result = exec_with_stack($hhbbc);
+  }
+  if ($result === true) return true;
+  file_put_contents("$test.diff", $result);
 }
 
 function hh_server_cmd($options, $test) {
@@ -1820,7 +1890,8 @@ function dump_hh_codegen($options, $test, $test_config) {
   else {
     $cmd = hh_codegen_cmd($options, null, $disable_hphpc_opts);
   }
-  system("/usr/bin/timeout 300 $cmd $test > $temp_file 2> $msgs_file", $ret);
+  system("/usr/bin/timeout " . TIMEOUT_SECONDS .
+         " $cmd $test > $temp_file 2> $msgs_file", $ret);
   return $ret === 0 ? $temp_file : false;
 }
 
@@ -1831,7 +1902,9 @@ function semdiff_output($options, $test) {
   $hhvm_output = $test.'.round_trip.hhas';
   $cmd = hh_semdiff_cmd($options);
   $ret = false;
-  system("/usr/bin/timeout 300 $cmd $hhcodegen_output $hhvm_output > $temp_file 2> $msgs_file", $ret);
+  system("/usr/bin/timeout " . TIMEOUT_SECONDS .
+         " $cmd $hhcodegen_output $hhvm_output > $temp_file 2> $msgs_file",
+         $ret);
   return array($ret, $temp_file);
 }
 
@@ -2139,9 +2212,9 @@ function run_config_post($outputs, $test, $options) {
 
 function timeout_prefix() {
   if (is_executable('/usr/bin/timeout')) {
-    return '/usr/bin/timeout 300 ';
+    return '/usr/bin/timeout ' . TIMEOUT_SECONDS . ' ';
   } else {
-    return __DIR__.'/../tools/timeout.sh -t 300 ';
+    return __DIR__.'/../tools/timeout.sh -t ' . TIMEOUT_SECONDS . ' ';
   }
 }
 
@@ -2242,10 +2315,9 @@ function get_hhvm_compiler_frontend($options, $test) {
   unset($options_without_repo['repo']);
 
   $get_fe_script = tempnam(sys_get_temp_dir(), "get_frontend");
-  $fe_temp_file = tempnam(sys_get_temp_dir(), "hhvm_frontend");
   file_put_contents(
     $get_fe_script,
-    "<?php\nfile_put_contents('$fe_temp_file', __COMPILER_FRONTEND__);"
+    '<?php echo __COMPILER_FRONTEND__, "\n";'
   );
   list ($hhvm, $_) = hhvm_cmd(
     $options_without_repo,
@@ -2254,10 +2326,7 @@ function get_hhvm_compiler_frontend($options, $test) {
     true
   );
   if (is_array($hhvm)) $hhvm = $hhvm[0];
-  system("$hhvm &> /dev/null");
-  $frontend = file_get_contents($fe_temp_file);
-  unlink($fe_temp_file);
-  return $frontend;
+  return system($hhvm);
 }
 
 function run_test($options, $test) {
@@ -2294,7 +2363,8 @@ function run_test($options, $test) {
         return 'skip';
       }
     } else {
-      if (preg_grep('/ --count[ =][0-9]+ .* --count[ =][0-9]+ /', (array)$hhvm)) {
+      if (preg_grep('/ --count[ =][0-9]+ .* --count[ =][0-9]+ /',
+                    (array)$hhvm)) {
         return 'skip';
       }
     }
@@ -2317,11 +2387,15 @@ function run_test($options, $test) {
     shell_exec("rm -f \"$hphp_hhvm_repo\" \"$hhbbc_hhvm_repo\" \"$hphp_hackc_repo\" \"$hhbbc_hackc_repo\" ");
 
     if (isset($options['compare-hh-codegen'])) {
-      repo_mode_compile($options, $test, 'hhvm');
-      repo_mode_compile($options, $test, 'hackc');
+      if (!repo_mode_compile($options, $test, 'hhvm') ||
+          !repo_mode_compile($options, $test, 'hackc')) {
+        return false;
+      }
     } else {
       $program = isset($options['hackc']) ? "hackc" : "hhvm";
-      repo_mode_compile($options, $test, $program);
+      if (!repo_mode_compile($options, $test, $program)) {
+        return false;
+      }
 
       if (isset($options['hhbbc2'])) {
         $hhas_temp1 = dump_hhas_to_temp($hhvm, "$test.before");
@@ -2333,8 +2407,12 @@ function run_test($options, $test) {
           return false;
         }
         shell_exec("mv $test.repo/$program.hhbbc $test.repo/$program.hhbc");
-        $hhbbc = hhbbc_cmd($options, $test, timeout_prefix(), $program);
-        shell_exec("$hhbbc 2>&1");
+        $hhbbc = hhbbc_cmd($options, $test, $program);
+        $result = exec_with_stack($hhbbc);
+        if ($result !== true) {
+          file_put_contents("$test.diff", $result);
+          return false;
+        }
         $hhas_temp2 = dump_hhas_to_temp($hhvm, "$test.after");
         if ($hhas_temp2 === false) {
           file_put_contents(
@@ -2522,8 +2600,8 @@ function print_commands($tests, $options) {
 
     // How to run it with hhbbc:
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
-    $hhbbc_cmds = hphp_cmd($options, $test, '', $program)."\n";
-    $hhbbc_cmd  = hhbbc_cmd($options, $test, '', $program)."\n";
+    $hhbbc_cmds = hphp_cmd($options, $test, $program)."\n";
+    $hhbbc_cmd  = hhbbc_cmd($options, $test, $program)."\n";
     $hhbbc_cmds .= $hhbbc_cmd;
     if (isset($options['hhbbc2'])) {
       foreach ((array)$command as $c) {

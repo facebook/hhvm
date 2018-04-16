@@ -24,8 +24,10 @@
 
 #include <boost/range/adaptors.hpp>
 #include <folly/Memory.h>
+#include <folly/small_vector.h>
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/compatibility.h"
@@ -68,10 +70,8 @@ namespace HPHP {
  *   ...
  *   dispatcher.stop();
  *
- * Note this class is different from JobListDispatcher that uses a vector to
- * store prepared jobs. With JobQueueDispatcher, job queue is normally empty
- * initially and new jobs are pushed into the queue over time. Also, workers
- * can be stopped individually.
+ * Note that a job queue is normally empty initially and new jobs are pushed
+ * into the queue over time. Workers can be stopped individually.
  *
  * Job process ordering
  * ====================
@@ -80,12 +80,12 @@ namespace HPHP {
  * In addition, we support an option where the request processing order can flip
  * between FIFO or LIFO based on the length of the queue. This can be enabled by
  * setting the 'lifoSwitchThreshold' parameter. If the job queue is configured
- * to be in FIFO mode, and the current queue length exceeds
- * lifoSwitchThreshold, then the workers will begin work on requests in LIFO
- * order until the queue size is below the threshold in which case we resume in
- * FIFO order. Setting the queue to be in LIFO mode initially will have the
- * opposite behavior. This is useful when we are in a loaded situation and we
- * want to prioritize the newest requests.
+ * to be in FIFO mode, and the current queue length exceeds lifoSwitchThreshold,
+ * then the workers will begin work on requests in LIFO order until the queue
+ * size is below the threshold in which case we resume in FIFO order. Setting
+ * the queue to be in LIFO mode initially will have the opposite behavior. This
+ * is useful when we are in a loaded situation and we want to prioritize the
+ * newest requests.
  *
  * You can configure a LIFO ordered queue by setting lifoSwitchThreshold to 0.
  */
@@ -93,23 +93,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {
-  struct NoDropCachePolicy { static void dropCache() {} };
+struct NoDropCachePolicy { static void dropCache() {} };
 }
-
-struct IQueuedJobsReleaser {
-  virtual ~IQueuedJobsReleaser() { }
-  virtual int32_t numOfJobsToRelease() = 0;
-};
-
-struct SimpleReleaser : IQueuedJobsReleaser {
-  explicit SimpleReleaser(int32_t rate)
-    : m_queuedJobsReleaseRate(rate){}
-  int32_t numOfJobsToRelease() override {
-    return m_queuedJobsReleaseRate;
-  }
- private:
-  int m_queuedJobsReleaseRate = 3;
-};
 
 /**
  * A job queue that's suitable for multiple threads to work on.
@@ -128,17 +113,13 @@ public:
   JobQueue(int maxThreadCount, int dropCacheTimeout,
            bool dropStack, int lifoSwitchThreshold=INT_MAX,
            int maxJobQueuingMs = -1, int numPriorities = 1,
-           int queuedJobsReleaseRate = 3,
            IHostHealthObserver* healthStatus = nullptr)
       : SynchronizableMulti(maxThreadCount + 1), // reaper added
-        m_jobCount(0), m_stopped(false), m_workerCount(0),
         m_dropCacheTimeout(dropCacheTimeout), m_dropStack(dropStack),
         m_lifoSwitchThreshold(lifoSwitchThreshold),
         m_maxJobQueuingMs(maxJobQueuingMs),
-        m_jobReaperId(maxThreadCount), m_healthStatus(healthStatus),
-        m_queuedJobsReleaser(
-            std::make_shared<SimpleReleaser>(queuedJobsReleaseRate)) {
-    assert(maxThreadCount > 0);
+        m_jobReaperId(maxThreadCount), m_healthStatus(healthStatus) {
+    assertx(maxThreadCount > 0);
     m_jobQueues.resize(numPriorities);
   }
 
@@ -146,8 +127,8 @@ public:
    * Put a job into the queue and notify a worker to pick it up.
    */
   void enqueue(TJob job, int priority=0) {
-    assert(priority >= 0);
-    assert(priority < m_jobQueues.size());
+    assertx(priority >= 0);
+    assertx(priority < m_jobQueues.size());
     timespec enqueueTime;
     Timer::GetMonotonicTime(enqueueTime);
     Lock lock(this);
@@ -205,17 +186,15 @@ public:
   }
 
   int releaseQueuedJobs() {
-    int toRelease = m_queuedJobsReleaser->numOfJobsToRelease();
-    if (toRelease <= 0) {
-      return 0;
+    if (m_jobCount) {
+      Lock lock(this);
+      auto const toRelease = std::min(3, m_jobCount);
+      for (int i = 0; i < toRelease; ++i) {
+        notify();
+      }
+      return toRelease;
     }
-
-    Lock lock(this);
-    int iter;
-    for (iter = 0; iter < toRelease && iter < m_jobCount; iter++) {
-      notify();
-    }
-    return iter;
+    return 0;
   }
 
  private:
@@ -231,7 +210,6 @@ public:
     while (m_jobCount == 0 || !ableToDeque) {
       uint32_t kNumPriority = m_jobQueues.size();
       if (m_jobQueues[kNumPriority - 1].size() > 0) {
-        // we do not block HealthMon requests (with the highest priority)
         break;
       }
 
@@ -297,8 +275,7 @@ public:
       jobs.pop_front();
       return job;
     }
-    assert(false);
-    return TJob();  // make compiler happy.
+    not_reached();
   }
 
   /*
@@ -311,8 +288,8 @@ public:
    * expires.
    */
   TJob dequeueOnlyExpiredImpl(int id, int q, bool inc) {
-    assert(id == m_jobReaperId);
-    assert(m_maxJobQueuingMs > 0);
+    assertx(id == m_jobReaperId);
+    assertx(m_maxJobQueuingMs > 0);
     Lock lock(this);
     while(!m_stopped) {
       long waitTimeUs = m_maxJobQueuingMs * 1000;
@@ -348,18 +325,16 @@ public:
     throw StopSignal();
   }
 
-  int m_jobCount;
-  std::vector<std::deque<std::pair<TJob, timespec>>> m_jobQueues;
-  bool m_stopped;
-  std::atomic<int> m_workerCount;
+  int m_jobCount{0};
+  folly::small_vector<std::deque<std::pair<TJob, timespec>>, 2> m_jobQueues;
+  bool m_stopped{false};
+  std::atomic<int> m_workerCount{0};
   const int m_dropCacheTimeout;
   const bool m_dropStack;
   const int m_lifoSwitchThreshold;
   const int m_maxJobQueuingMs;
   const int m_jobReaperId;              // equals max worker thread count
-  IHostHealthObserver* m_healthStatus;  // the dispatcher responsible for this
-                                        // JobQueue
-  std::shared_ptr<IQueuedJobsReleaser> m_queuedJobsReleaser;
+  IHostHealthObserver* m_healthStatus;
 };
 
 template<class TJob, class Policy>
@@ -367,7 +342,6 @@ struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
   JobQueue(int threadCount, int dropCacheTimeout,
            bool dropStack, int lifoSwitchThreshold=INT_MAX,
            int maxJobQueuingMs = -1, int numPriorities = 1,
-           int queuedJobsReleaseRate = 3,
            IHostHealthObserver* healthStatus = nullptr) :
     JobQueue<TJob,false,Policy>(threadCount,
                                 dropCacheTimeout,
@@ -375,7 +349,6 @@ struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
                                 lifoSwitchThreshold,
                                 maxJobQueuingMs,
                                 numPriorities,
-                                queuedJobsReleaseRate,
                                 healthStatus) {
     pthread_cond_init(&m_cond, nullptr);
   }
@@ -420,22 +393,15 @@ struct JobQueueWorker {
 
   static const bool Waitable = waitable;
   static const bool CountActive = countActive;
-  /**
-   * Default constructor.
-   */
-  JobQueueWorker()
-      : m_func(nullptr), m_context(), m_stopped(false), m_queue(nullptr) {
-  }
 
-  virtual ~JobQueueWorker() {
-  }
+  virtual ~JobQueueWorker() {}
 
   /**
    * Two-phase object creation for easier derivation and for JobQueueDispatcher
    * to easily create a vector of workers.
    */
-  void create(int id, QueueType* queue, void *func, ContextType context) {
-    assert(queue);
+  void create(int id, QueueType* queue, void* func, ContextType context) {
+    assertx(queue);
     m_id = id;
     m_queue = queue;
     m_func = func;
@@ -456,7 +422,7 @@ struct JobQueueWorker {
    * Start this worker thread.
    */
   void start() {
-    assert(m_queue);
+    assertx(m_queue);
     onThreadEnter();
     bool highPri = (s_firstSlab.ptr != nullptr);
     while (!m_stopped) {
@@ -495,11 +461,11 @@ struct JobQueueWorker {
 protected:
   int m_id{-1};
   void* m_func{nullptr};
-  ContextType m_context;
+  ContextType m_context{};
   bool m_stopped{false};
 
 private:
-  QueueType* m_queue;
+  QueueType* m_queue{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -517,20 +483,16 @@ struct JobQueueDispatcher : IHostHealthObserver {
                      typename TWorker::ContextType context,
                      int lifoSwitchThreshold = INT_MAX,
                      int maxJobQueuingMs = -1, int numPriorities = 1,
-                     int queuedJobsReleaseRate = 3,
                      int hugeCount = 0,
-                     int initThreadCount = -1,
-                     int queueToWorkerRatio = 1) // A worker per 1 queued job.
-      : m_stopped(true), m_healthStatus(HealthLevel::Bold), m_id(0),
+                     int initThreadCount = -1)
+      : m_startReaperThread(maxJobQueuingMs > 0),
         m_context(context), m_maxThreadCount(maxThreadCount),
         m_currThreadCountLimit(initThreadCount),
         m_hugeThreadCount(hugeCount),
-        m_startReaperThread(maxJobQueuingMs > 0),
-        m_queueToWorkerRatio(queueToWorkerRatio),
         m_queue(maxThreadCount, dropCacheTimeout, dropStack,
                 lifoSwitchThreshold, maxJobQueuingMs, numPriorities,
-                queuedJobsReleaseRate, this) {
-    assert(maxThreadCount >= 1);
+                this) {
+    assertx(maxThreadCount >= 1);
     if (initThreadCount < 0 || initThreadCount > maxThreadCount) {
       m_currThreadCountLimit = maxThreadCount;
     }
@@ -561,15 +523,7 @@ struct JobQueueDispatcher : IHostHealthObserver {
 
   int getTargetNumWorkers() {
     if (TWorker::CountActive) {
-      int target = getActiveWorker();
-      const auto queued = getQueuedJobs();
-      const auto r = m_queueToWorkerRatio;
-      always_assert(r >= 1);
-      if (target == 0) {
-        target += (queued + r - 1) / r; // Round up.
-      } else {
-        target += queued / r; // Round down.
-      }
+      int target = getActiveWorker() +  getQueuedJobs();
       if (target > m_currThreadCountLimit) return m_currThreadCountLimit;
       return target;
     } else {
@@ -629,7 +583,7 @@ struct JobQueueDispatcher : IHostHealthObserver {
     Lock lock(m_mutex);
     if (m_stopped) return;
     int limit = m_maxThreadCount - m_currThreadCountLimit;
-    assert(limit >= 0);
+    assertx(limit >= 0);
     if (n > limit) n = limit;
     m_currThreadCountLimit += n;
     if (!TWorker::CountActive) {
@@ -643,9 +597,10 @@ struct JobQueueDispatcher : IHostHealthObserver {
     }
   }
 
-  void getWorkers(std::vector<TWorker*> &workers) {
+  std::vector<TWorker*> getWorkers() {
     Lock lock(m_mutex);
-    workers.insert(workers.end(), m_workers.begin(), m_workers.end());
+    std::vector<TWorker*> ret{m_workers};
+    return ret;
   }
 
   void waitEmpty(bool stop = true) {
@@ -725,29 +680,29 @@ struct JobQueueDispatcher : IHostHealthObserver {
   }
 
 private:
-  bool m_stopped;
-  HealthLevel m_healthStatus;
-  int m_id;
+  bool m_stopped{true};
+  const bool m_startReaperThread;
+  HealthLevel m_healthStatus{HealthLevel::Bold};
+  int m_id{0};
   typename TWorker::ContextType m_context;
   const int m_maxThreadCount;           // not including the possible reaper
   int m_currThreadCountLimit;           // initial limit can be lower than max
   int m_hugeThreadCount{0};
-  const bool m_startReaperThread;
   int m_queueToWorkerRatio{1};
   JobQueue<typename TWorker::JobType,
            TWorker::Waitable,
            typename TWorker::DropCachePolicy> m_queue;
 
   Mutex m_mutex;
-  std::set<TWorker*> m_workers;
-  std::set<AsyncFunc<TWorker> *> m_funcs;
+  std::vector<TWorker*> m_workers;
+  std::set<AsyncFunc<TWorker>*> m_funcs;
   std::unique_ptr<TWorker> m_reaper;
   std::unique_ptr<AsyncFunc<TWorker>> m_reaperFunc;
 
   int addReaper() {
     m_reaper = std::make_unique<TWorker>();
     m_reaperFunc = std::make_unique<AsyncFunc<TWorker>>(m_reaper.get(),
-                                                          &TWorker::start);
+                                                        &TWorker::start);
     m_reaper->create(m_maxThreadCount, &m_queue, m_reaperFunc.get(), m_context);
     m_reaperFunc->start();
     return m_maxThreadCount;
@@ -758,14 +713,13 @@ private:
   void addWorkerImpl(bool start) {
     if (m_workers.size() >= m_maxThreadCount) {
       // another thread raced with us to add a worker.
-      assert(m_workers.size() == m_maxThreadCount);
+      assertx(m_workers.size() == m_maxThreadCount);
       return;
     }
-    TWorker *worker = new TWorker();
+    auto worker = new TWorker();
     bool huge = m_workers.size() < m_hugeThreadCount;
-    AsyncFunc<TWorker> *func =
-      new AsyncFunc<TWorker>(worker, &TWorker::start, huge);
-    m_workers.insert(worker);
+    auto func = new AsyncFunc<TWorker>(worker, &TWorker::start, huge);
+    m_workers.push_back(worker);
     m_funcs.insert(func);
     int id = m_id++;
     worker->create(id, &m_queue, func, m_context);

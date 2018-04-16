@@ -128,10 +128,9 @@ ProxygenServer::ProxygenServer(
                    RuntimeOption::ServerThreadDropStack,
                    this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
                    RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
-                   kNumPriorities, RuntimeOption::QueuedJobsReleaseRate,
+                   kNumPriorities,
                    options.m_hugeThreads,
-                   options.m_initThreads,
-                   options.m_queueToWorkerRatio) {
+                   options.m_initThreads) {
   SocketAddress address;
   if (options.m_address.empty()) {
     address.setFromLocalPort(options.m_port);

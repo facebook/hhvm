@@ -143,7 +143,6 @@ struct RuntimeOption {
   static int ServerThreadCount;
   // Number of worker threads with stack partially on huge pages.
   static int ServerHugeThreadCount;
-  static int QueuedJobsReleaseRate;
   static int ServerWarmupThrottleRequestCount;
   static int ServerThreadDropCacheTimeoutSeconds;
   static int ServerThreadJobLIFOSwitchThreshold;
@@ -333,7 +332,6 @@ struct RuntimeOption {
   static std::string AdminServerIP;
   static int AdminServerPort;
   static int AdminThreadCount;
-  static int AdminServerQueueToWorkerRatio;
   static std::string AdminPassword;
   static std::set<std::string> AdminPasswords;
   static std::set<std::string> HashedAdminPasswords;

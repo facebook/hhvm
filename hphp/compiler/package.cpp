@@ -298,8 +298,7 @@ bool Package::parse(bool check) {
 
   m_dispatcher = 0;
 
-  std::vector<ParserWorker*> workers;
-  dispatcher.getWorkers(workers);
+  auto workers = dispatcher.getWorkers();
   for (unsigned int i = 0; i < workers.size(); i++) {
     ParserWorker *worker = workers[i];
     if (!worker->m_ret) return false;

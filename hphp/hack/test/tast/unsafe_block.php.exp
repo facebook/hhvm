@@ -1,14 +1,11 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>; f_ret = None;
       f_name = ([12:10-12:13], "\\foo"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
-      f_params = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
-      (AnnotatedAST.NamedBody
+      (NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.If ((([13:8-13:12], bool), AnnotatedAST.True),
-               [AnnotatedAST.Noop], [AnnotatedAST.Noop]))
-             ];
+           [(If ((([13:8-13:12], bool), True), [Noop], [Noop]))];
            fnb_unsafe = true });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

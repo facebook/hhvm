@@ -1,24 +1,22 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([7:33-7:39], (Hprim Tstring)));
       f_name = ([7:10-7:29], "\\returnsTheStringFoo"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
-      f_params = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
-      (AnnotatedAST.NamedBody
+      (NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Return ([7:42-7:55],
-               (Some (([7:49-7:54], string),
-                      (AnnotatedAST.String ([7:49-7:54], "foo"))))
+           [(Return ([7:42-7:55],
+               (Some (([7:49-7:54], string), (String ([7:49-7:54], "foo"))))
                ))
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Fun
+  (Fun
      { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([9:22-9:26], (Hprim Tvoid)));
        f_name = ([9:10-9:14], "\\test"); f_tparams = [];
-       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+       f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
        [{ AnnotatedAST.param_annotation = ([9:17-9:19], \C);
           param_hint =
@@ -28,52 +26,41 @@
           param_callconv = None; param_user_attributes = [] }
          ];
        f_body =
-       (AnnotatedAST.NamedBody
+       (NamedBody
           { AnnotatedAST.fnb_nast =
-            [(AnnotatedAST.Expr
+            [(Expr
                 (([10:3-10:15], string),
-                 (AnnotatedAST.Binop ((Eq None),
-                    (([10:3-10:7], string),
-                     (AnnotatedAST.Lvar ([10:3-10:7], $foo))),
-                    (([10:10-10:15], string),
-                     (AnnotatedAST.String ([10:10-10:15], "foo")))
+                 (Binop ((Eq None),
+                    (([10:3-10:7], string), (Lvar ([10:3-10:7], $foo))),
+                    (([10:10-10:15], string), (String ([10:10-10:15], "foo")))
                     ))));
-              (AnnotatedAST.Expr
+              (Expr
                  (([11:3-11:10], ?int),
-                  (AnnotatedAST.Obj_get (
-                     (([11:3-11:5], \C),
-                      (AnnotatedAST.Lvar ([11:3-11:5], $c))),
-                     (([11:7-11:10], ?int),
-                      (AnnotatedAST.Id ([11:7-11:10], "foo"))),
+                  (Obj_get ((([11:3-11:5], \C), (Lvar ([11:3-11:5], $c))),
+                     (([11:7-11:10], ?int), (Id ([11:7-11:10], "foo"))),
                      OG_nullthrows))));
-              (AnnotatedAST.Expr
+              (Expr
                  (([12:3-12:11], _),
-                  (AnnotatedAST.Obj_get (
-                     (([12:3-12:5], \C),
-                      (AnnotatedAST.Lvar ([12:3-12:5], $c))),
-                     (([12:7-12:11], _),
-                      (AnnotatedAST.Lvar ([12:7-12:11], $foo))),
+                  (Obj_get ((([12:3-12:5], \C), (Lvar ([12:3-12:5], $c))),
+                     (([12:7-12:11], _), (Lvar ([12:7-12:11], $foo))),
                      OG_nullthrows))));
-              (AnnotatedAST.Expr
+              (Expr
                  (([13:3-13:29], _),
-                  (AnnotatedAST.Array_get (
+                  (Array_get (
                      (([13:3-13:8], _),
-                      (AnnotatedAST.Obj_get (
-                         (([13:3-13:5], \C),
-                          (AnnotatedAST.Lvar ([13:3-13:5], $c))),
-                         (([13:7-13:8], _), AnnotatedAST.Null), OG_nullthrows
-                         ))),
+                      (Obj_get (
+                         (([13:3-13:5], \C), (Lvar ([13:3-13:5], $c))),
+                         (([13:7-13:8], _), Null), OG_nullthrows))),
                      (Some (([13:8-13:29], string),
-                            (AnnotatedAST.Call (Cnormal,
+                            (Call (Cnormal,
                                (([13:8-13:27], (function(): string)),
-                                (AnnotatedAST.Id
-                                   ([13:8-13:27], "\\returnsTheStringFoo"))),
+                                (Id ([13:8-13:27], "\\returnsTheStringFoo"))),
                                [], [], []))))
                      ))))
               ];
             fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Class
+  (Class
      { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
        c_is_xhp = false; c_kind = Cnormal; c_name = ([3:7-3:8], "\\C");
        c_tparams = <opaque>; c_extends = []; c_uses = [];

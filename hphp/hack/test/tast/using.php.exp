@@ -1,49 +1,41 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([7:18-7:22], (Hprim Tvoid)));
       f_name = ([7:10-7:14], "\\test"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
-      f_params = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
-      (AnnotatedAST.NamedBody
+      (NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Using (false,
+           [(Using (false,
                (([8:3-8:47], (\Handle, \Handle)),
-                (AnnotatedAST.Expr_list
+                (Expr_list
                    [(([8:10-8:27], \Handle),
-                     (AnnotatedAST.Binop ((Eq None),
-                        (([8:10-8:12], \Handle),
-                         (AnnotatedAST.Lvar ([8:10-8:12], $x))),
+                     (Binop ((Eq None),
+                        (([8:10-8:12], \Handle), (Lvar ([8:10-8:12], $x))),
                         (([8:15-8:27], \Handle),
-                         (AnnotatedAST.New (
-                            (\Handle,
-                             (AnnotatedAST.CI (([8:19-8:25], "\\Handle"), []))),
+                         (New (
+                            (\Handle, (CI (([8:19-8:25], "\\Handle"), []))),
                             [], [])))
                         )));
                      (([8:29-8:46], \Handle),
-                      (AnnotatedAST.Binop ((Eq None),
-                         (([8:29-8:31], \Handle),
-                          (AnnotatedAST.Lvar ([8:29-8:31], $y))),
+                      (Binop ((Eq None),
+                         (([8:29-8:31], \Handle), (Lvar ([8:29-8:31], $y))),
                          (([8:34-8:46], \Handle),
-                          (AnnotatedAST.New (
-                             (\Handle,
-                              (AnnotatedAST.CI
-                                 (([8:38-8:44], "\\Handle"), []))),
+                          (New (
+                             (\Handle, (CI (([8:38-8:44], "\\Handle"), []))),
                              [], [])))
                          )))
                      ])),
-               [(AnnotatedAST.Using (false,
+               [(Using (false,
                    (([9:5-9:30], (\Handle)),
-                    (AnnotatedAST.Expr_list
+                    (Expr_list
                        [(([9:12-9:29], \Handle),
-                         (AnnotatedAST.Binop ((Eq None),
-                            (([9:12-9:14], \Handle),
-                             (AnnotatedAST.Lvar ([9:12-9:14], $z))),
+                         (Binop ((Eq None),
+                            (([9:12-9:14], \Handle), (Lvar ([9:12-9:14], $z))),
                             (([9:17-9:29], \Handle),
-                             (AnnotatedAST.New (
+                             (New (
                                 (\Handle,
-                                 (AnnotatedAST.CI
-                                    (([9:21-9:27], "\\Handle"), []))),
+                                 (CI (([9:21-9:27], "\\Handle"), []))),
                                 [], [])))
                             )))
                          ])),
@@ -53,7 +45,7 @@
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Class
+  (Class
      { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
        c_is_xhp = false; c_kind = Cnormal; c_name = ([3:7-3:13], "\\Handle");
        c_tparams = <opaque>; c_extends = []; c_uses = [];
@@ -67,12 +59,10 @@
        [{ AnnotatedAST.m_annotation = (); m_final = false;
           m_abstract = false; m_visibility = Public;
           m_name = ([4:19-4:28], "__dispose"); m_tparams = [];
-          m_where_constraints = []; m_variadic = AnnotatedAST.FVnonVariadic;
+          m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params = [];
           m_body =
-          (AnnotatedAST.NamedBody
-             { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop];
-               fnb_unsafe = false });
+          (NamedBody { AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
           m_fun_kind = FSync; m_user_attributes = [];
           m_ret = (Some ([4:32-4:36], (Hprim Tvoid))); m_ret_by_ref = false }
          ];

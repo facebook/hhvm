@@ -1,8 +1,8 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:47-3:51], (Hprim Tvoid)));
       f_name = ([3:10-3:19], "\\takes_fun"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ AnnotatedAST.param_annotation = ([3:42-3:44], (function(int): num));
          param_hint =
@@ -14,30 +14,28 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (AnnotatedAST.NamedBody
-         { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop]; fnb_unsafe = false });
+      (NamedBody { AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Fun
+  (Fun
      { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([5:18-5:22], (Hprim Tvoid)));
        f_name = ([5:10-5:14], "\\test"); f_tparams = [];
-       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
-       f_params = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
-       (AnnotatedAST.NamedBody
+       (NamedBody
           { AnnotatedAST.fnb_nast =
-            [(AnnotatedAST.Expr
+            [(Expr
                 (([6:3-6:23], void),
-                 (AnnotatedAST.Call (Cnormal,
+                 (Call (Cnormal,
                     (([6:3-6:12], (function((function(int): num) $f): void)),
-                     (AnnotatedAST.Id ([6:3-6:12], "\\takes_fun"))),
+                     (Id ([6:3-6:12], "\\takes_fun"))),
                     [],
                     [(([6:13-6:15], (function(int $x): num)),
-                      (AnnotatedAST.Efun (
+                      (Efun (
                          { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                            f_ret = None; f_name = ([Pos.none], ";anonymous");
                            f_tparams = []; f_where_constraints = [];
-                           f_variadic = AnnotatedAST.FVnonVariadic;
+                           f_variadic = FVnonVariadic;
                            f_params =
                            [{ AnnotatedAST.param_annotation =
                               ([6:13-6:15], int); param_hint = None;
@@ -48,12 +46,11 @@
                               param_user_attributes = [] }
                              ];
                            f_body =
-                           (AnnotatedAST.NamedBody
+                           (NamedBody
                               { AnnotatedAST.fnb_nast =
-                                [(AnnotatedAST.Return ([6:20-6:22],
+                                [(Return ([6:20-6:22],
                                     (Some (([6:20-6:22], int),
-                                           (AnnotatedAST.Lvar
-                                              ([6:20-6:22], $x))))
+                                           (Lvar ([6:20-6:22], $x))))
                                     ))
                                   ];
                                 fnb_unsafe = false });

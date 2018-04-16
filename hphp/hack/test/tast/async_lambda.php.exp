@@ -1,11 +1,11 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret =
       (Some ([3:38-3:47],
              (Happly (([3:38-3:47], "\\Awaitable"),
                 [([3:48-3:54], (Hprim Tstring))]))));
       f_name = ([3:16-3:25], "\\genString"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ AnnotatedAST.param_annotation = ([3:33-3:35], string);
          param_hint = (Some ([3:26-3:32], (Hprim Tstring)));
@@ -14,56 +14,51 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (AnnotatedAST.NamedBody
+      (NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Return ([3:58-3:68],
-               (Some (([3:65-3:67], string),
-                      (AnnotatedAST.Lvar ([3:65-3:67], $s))))
-               ))
+           [(Return ([3:58-3:68],
+               (Some (([3:65-3:67], string), (Lvar ([3:65-3:67], $s))))))
              ];
            fnb_unsafe = false });
       f_fun_kind = FAsync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Fun
+  (Fun
      { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([5:18-5:22], (Hprim Tvoid)));
        f_name = ([5:10-5:14], "\\test"); f_tparams = [];
-       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
-       f_params = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
-       (AnnotatedAST.NamedBody
+       (NamedBody
           { AnnotatedAST.fnb_nast =
-            [(AnnotatedAST.Expr
+            [(Expr
                 (([6:3-6:14], (function(): \Awaitable<void>)),
-                 (AnnotatedAST.Binop ((Eq None),
+                 (Binop ((Eq None),
                     (([6:3-6:6], (function(): \Awaitable<void>)),
-                     (AnnotatedAST.Lvar ([6:3-6:6], $f0))),
+                     (Lvar ([6:3-6:6], $f0))),
                     (([6:9-6:14], (function(): \Awaitable<_>)),
-                     (AnnotatedAST.Efun (
+                     (Efun (
                         { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                           f_ret = None; f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
-                          f_variadic = AnnotatedAST.FVnonVariadic;
-                          f_params = [];
+                          f_variadic = FVnonVariadic; f_params = [];
                           f_body =
-                          (AnnotatedAST.NamedBody
+                          (NamedBody
                              { AnnotatedAST.fnb_nast =
-                               [(AnnotatedAST.Expr
+                               [(Expr
                                    (([7:5-7:34], string),
-                                    (AnnotatedAST.Binop ((Eq None),
+                                    (Binop ((Eq None),
                                        (([7:5-7:9], string),
-                                        (AnnotatedAST.Lvar ([7:5-7:9], $str))),
+                                        (Lvar ([7:5-7:9], $str))),
                                        (([7:12-7:34], string),
-                                        (AnnotatedAST.Await
+                                        (Await
                                            (([7:18-7:34], \Awaitable<string>),
-                                            (AnnotatedAST.Call (Cnormal,
+                                            (Call (Cnormal,
                                                (([7:18-7:27], (function(string $s): \Awaitable<string>)),
-                                                (AnnotatedAST.Id
+                                                (Id
                                                    ([7:18-7:27],
                                                     "\\genString"))),
                                                [],
                                                [(([7:28-7:33], string),
-                                                 (AnnotatedAST.String
-                                                    ([7:28-7:33], "foo")))
+                                                 (String ([7:28-7:33], "foo")))
                                                  ],
                                                [])))))
                                        ))))
@@ -73,17 +68,16 @@
                           f_ret_by_ref = false },
                         [])))
                     ))));
-              (AnnotatedAST.Expr
+              (Expr
                  (([9:3-9:14], [fun]),
-                  (AnnotatedAST.Binop ((Eq None),
-                     (([9:3-9:6], [fun]),
-                      (AnnotatedAST.Lvar ([9:3-9:6], $f1))),
+                  (Binop ((Eq None),
+                     (([9:3-9:6], [fun]), (Lvar ([9:3-9:6], $f1))),
                      (([9:9-9:14], (function($x): \Awaitable<_>)),
-                      (AnnotatedAST.Efun (
+                      (Efun (
                          { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                            f_ret = None; f_name = ([Pos.none], ";anonymous");
                            f_tparams = []; f_where_constraints = [];
-                           f_variadic = AnnotatedAST.FVnonVariadic;
+                           f_variadic = FVnonVariadic;
                            f_params =
                            [{ AnnotatedAST.param_annotation =
                               ([9:15-9:17], _); param_hint = None;
@@ -94,26 +88,24 @@
                               param_user_attributes = [] }
                              ];
                            f_body =
-                           (AnnotatedAST.NamedBody
+                           (NamedBody
                               { AnnotatedAST.fnb_nast =
-                                [(AnnotatedAST.Expr
+                                [(Expr
                                     (([10:5-10:31], string),
-                                     (AnnotatedAST.Binop ((Eq None),
+                                     (Binop ((Eq None),
                                         (([10:5-10:9], string),
-                                         (AnnotatedAST.Lvar
-                                            ([10:5-10:9], $str))),
+                                         (Lvar ([10:5-10:9], $str))),
                                         (([10:12-10:31], string),
-                                         (AnnotatedAST.Await
+                                         (Await
                                             (([10:18-10:31], \Awaitable<string>),
-                                             (AnnotatedAST.Call (Cnormal,
+                                             (Call (Cnormal,
                                                 (([10:18-10:27], (function(string $s): \Awaitable<string>)),
-                                                 (AnnotatedAST.Id
+                                                 (Id
                                                     ([10:18-10:27],
                                                      "\\genString"))),
                                                 [],
                                                 [(([10:28-10:30], _),
-                                                  (AnnotatedAST.Lvar
-                                                     ([10:28-10:30], $x)))
+                                                  (Lvar ([10:28-10:30], $x)))
                                                   ],
                                                 [])))))
                                         ))))

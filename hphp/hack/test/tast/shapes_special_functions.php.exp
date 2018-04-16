@@ -1,8 +1,8 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([5:26-5:30], (Hprim Tvoid)));
       f_name = ([5:10-5:14], "\\test"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ AnnotatedAST.param_annotation =
          ([5:21-5:23], shape('x' => int, 'y' => int));
@@ -13,89 +13,75 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (AnnotatedAST.NamedBody
+      (NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Expr
+           [(Expr
                (([6:3-6:23], int),
-                (AnnotatedAST.Call (Cnormal,
+                (Call (Cnormal,
                    (([6:3-6:14], (function(shape(...) $shape, arraykey $index, $default): int)),
-                    (AnnotatedAST.Class_const (
-                       (\Shapes,
-                        (AnnotatedAST.CI (([6:3-6:9], "\\Shapes"), []))),
+                    (Class_const (
+                       (\Shapes, (CI (([6:3-6:9], "\\Shapes"), []))),
                        ([6:11-6:14], "idx")))),
                    [],
                    [(([6:15-6:17], shape('x' => int, 'y' => int)),
-                     (AnnotatedAST.Lvar ([6:15-6:17], $p)));
-                     (([6:19-6:22], string),
-                      (AnnotatedAST.String ([6:19-6:22], "x")))
-                     ],
+                     (Lvar ([6:15-6:17], $p)));
+                     (([6:19-6:22], string), (String ([6:19-6:22], "x")))],
                    []))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([7:3-7:26], int),
-                 (AnnotatedAST.Call (Cnormal,
+                 (Call (Cnormal,
                     (([7:3-7:14], (function(shape(...) $shape, arraykey $index, $default): int)),
-                     (AnnotatedAST.Class_const (
-                        (\Shapes,
-                         (AnnotatedAST.CI (([7:3-7:9], "\\Shapes"), []))),
+                     (Class_const (
+                        (\Shapes, (CI (([7:3-7:9], "\\Shapes"), []))),
                         ([7:11-7:14], "idx")))),
                     [],
                     [(([7:15-7:17], shape('x' => int, 'y' => int)),
-                      (AnnotatedAST.Lvar ([7:15-7:17], $p)));
-                      (([7:19-7:22], string),
-                       (AnnotatedAST.String ([7:19-7:22], "x")));
-                      (([7:24-7:25], int),
-                       (AnnotatedAST.Int ([7:24-7:25], "3")))
-                      ],
+                      (Lvar ([7:15-7:17], $p)));
+                      (([7:19-7:22], string), (String ([7:19-7:22], "x")));
+                      (([7:24-7:25], int), (Int ([7:24-7:25], "3")))],
                     []))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([8:3-8:29], bool),
-                 (AnnotatedAST.Call (Cnormal,
+                 (Call (Cnormal,
                     (([8:3-8:20], (function(shape(...) $shape, arraykey $index): bool)),
-                     (AnnotatedAST.Class_const (
-                        (\Shapes,
-                         (AnnotatedAST.CI (([8:3-8:9], "\\Shapes"), []))),
+                     (Class_const (
+                        (\Shapes, (CI (([8:3-8:9], "\\Shapes"), []))),
                         ([8:11-8:20], "keyExists")))),
                     [],
                     [(([8:21-8:23], shape('x' => int, 'y' => int)),
-                      (AnnotatedAST.Lvar ([8:21-8:23], $p)));
-                      (([8:25-8:28], string),
-                       (AnnotatedAST.String ([8:25-8:28], "y")))
-                      ],
+                      (Lvar ([8:21-8:23], $p)));
+                      (([8:25-8:28], string), (String ([8:25-8:28], "y")))],
                     []))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([9:3-9:30], void),
-                 (AnnotatedAST.Call (Cnormal,
+                 (Call (Cnormal,
                     (([9:3-9:20], (function(shape(...) $shape, arraykey $index): void)),
-                     (AnnotatedAST.Class_const (
-                        (\Shapes,
-                         (AnnotatedAST.CI (([9:3-9:9], "\\Shapes"), []))),
+                     (Class_const (
+                        (\Shapes, (CI (([9:3-9:9], "\\Shapes"), []))),
                         ([9:11-9:20], "removeKey")))),
                     [],
                     [(([9:21-9:24], shape('x' => int, 'y' => int)),
-                      (AnnotatedAST.Unop (Uref,
+                      (Unop (Uref,
                          (([9:22-9:24], shape('x' => int, 'y' => int)),
-                          (AnnotatedAST.Lvar ([9:22-9:24], $p)))
+                          (Lvar ([9:22-9:24], $p)))
                          )));
-                      (([9:26-9:29], string),
-                       (AnnotatedAST.String ([9:26-9:29], "y")))
-                      ],
+                      (([9:26-9:29], string), (String ([9:26-9:29], "y")))],
                     []))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([10:3-10:22], array<string, int>),
-                 (AnnotatedAST.Call (Cnormal,
+                 (Call (Cnormal,
                     (([10:3-10:18], (function(shape(...) $shape): array<string, int>)),
-                     (AnnotatedAST.Class_const (
-                        (\Shapes,
-                         (AnnotatedAST.CI (([10:3-10:9], "\\Shapes"), []))),
+                     (Class_const (
+                        (\Shapes, (CI (([10:3-10:9], "\\Shapes"), []))),
                         ([10:11-10:18], "toArray")))),
                     [],
                     [(([10:19-10:21], shape('x' => int)),
-                      (AnnotatedAST.Lvar ([10:19-10:21], $p)))],
+                      (Lvar ([10:19-10:21], $p)))],
                     []))))
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Typedef
+  (Typedef
      { AnnotatedAST.t_annotation = (); t_name = ([3:6-3:11], "\\Point");
        t_tparams = []; t_constraint = None;
        t_kind =

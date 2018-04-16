@@ -1,53 +1,46 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([12:18-12:22], (Hprim Tvoid)));
       f_name = ([12:10-12:14], "\\test"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
-      f_params = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
-      (AnnotatedAST.NamedBody
+      (NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Expr
+           [(Expr
                (([13:3-13:13], array<string, _>),
-                (AnnotatedAST.Binop ((Eq None),
-                   (([13:3-13:5], array<string, _>),
-                    (AnnotatedAST.Lvar ([13:3-13:5], $x))),
+                (Binop ((Eq None),
+                   (([13:3-13:5], array<string, _>), (Lvar ([13:3-13:5], $x))),
                    (([13:8-13:13], array<string, _>),
-                    (AnnotatedAST.Array
-                       [(AnnotatedAST.AFkvalue (
+                    (Array
+                       [(AFkvalue (
                            (([13:14-13:17], string),
-                            (AnnotatedAST.String ([13:14-13:17], "k"))),
-                           (([13:21-13:22], int),
-                            (AnnotatedAST.Int ([13:21-13:22], "0")))
+                            (String ([13:14-13:17], "k"))),
+                           (([13:21-13:22], int), (Int ([13:21-13:22], "0")))
                            ));
-                         (AnnotatedAST.AFkvalue (
+                         (AFkvalue (
                             (([13:24-13:28], string),
-                             (AnnotatedAST.String ([13:24-13:28], "k2"))),
+                             (String ([13:24-13:28], "k2"))),
                             (([13:32-13:49], _),
-                             (AnnotatedAST.Call (Cnormal,
+                             (Call (Cnormal,
                                 (([13:32-13:47], _),
-                                 (AnnotatedAST.Id
-                                    ([13:32-13:47], "\\my_php_function"))),
+                                 (Id ([13:32-13:47], "\\my_php_function"))),
                                 [], [], [])))
                             ))
                          ]))
                    ))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([14:3-14:13], array<_>),
-                 (AnnotatedAST.Binop ((Eq None),
-                    (([14:3-14:5], array<_>),
-                     (AnnotatedAST.Lvar ([14:3-14:5], $y))),
+                 (Binop ((Eq None),
+                    (([14:3-14:5], array<_>), (Lvar ([14:3-14:5], $y))),
                     (([14:8-14:13], array<_>),
-                     (AnnotatedAST.Array
-                        [(AnnotatedAST.AFvalue
-                            (([14:14-14:15], int),
-                             (AnnotatedAST.Int ([14:14-14:15], "0"))));
-                          (AnnotatedAST.AFvalue
+                     (Array
+                        [(AFvalue
+                            (([14:14-14:15], int), (Int ([14:14-14:15], "0"))));
+                          (AFvalue
                              (([14:17-14:34], _),
-                              (AnnotatedAST.Call (Cnormal,
+                              (Call (Cnormal,
                                  (([14:17-14:32], _),
-                                  (AnnotatedAST.Id
-                                     ([14:17-14:32], "\\my_php_function"))),
+                                  (Id ([14:17-14:32], "\\my_php_function"))),
                                  [], [], []))))
                           ]))
                     ))))

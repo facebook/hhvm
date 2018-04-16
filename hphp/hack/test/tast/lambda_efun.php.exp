@@ -1,29 +1,26 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([12:17-12:21], (Hprim Tvoid)));
       f_name = ([12:10-12:13], "\\foo"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
-      f_params = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
-      (AnnotatedAST.NamedBody
+      (NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Expr
+           [(Expr
                (([13:3-13:9], int),
-                (AnnotatedAST.Binop ((Eq None),
-                   (([13:3-13:5], int), (AnnotatedAST.Lvar ([13:3-13:5], $y))),
-                   (([13:8-13:9], int), (AnnotatedAST.Int ([13:8-13:9], "2")))
-                   ))));
-             (AnnotatedAST.Expr
+                (Binop ((Eq None),
+                   (([13:3-13:5], int), (Lvar ([13:3-13:5], $y))),
+                   (([13:8-13:9], int), (Int ([13:8-13:9], "2")))))));
+             (Expr
                 (([15:3-15:10], [fun]),
-                 (AnnotatedAST.Binop ((Eq None),
-                    (([15:3-15:5], [fun]),
-                     (AnnotatedAST.Lvar ([15:3-15:5], $x))),
+                 (Binop ((Eq None),
+                    (([15:3-15:5], [fun]), (Lvar ([15:3-15:5], $x))),
                     (([15:8-15:10], (function($z): _)),
-                     (AnnotatedAST.Efun (
+                     (Efun (
                         { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                           f_ret = None; f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
-                          f_variadic = AnnotatedAST.FVnonVariadic;
+                          f_variadic = FVnonVariadic;
                           f_params =
                           [{ AnnotatedAST.param_annotation =
                              ([15:8-15:10], _); param_hint = None;
@@ -34,17 +31,15 @@
                              param_user_attributes = [] }
                             ];
                           f_body =
-                          (AnnotatedAST.NamedBody
+                          (NamedBody
                              { AnnotatedAST.fnb_nast =
-                               [(AnnotatedAST.Return ([15:15-15:22],
+                               [(Return ([15:15-15:22],
                                    (Some (([15:15-15:22], int),
-                                          (AnnotatedAST.Binop (Plus,
+                                          (Binop (Plus,
                                              (([15:15-15:17], int),
-                                              (AnnotatedAST.Lvar
-                                                 ([15:15-15:17], $y))),
+                                              (Lvar ([15:15-15:17], $y))),
                                              (([15:20-15:22], _),
-                                              (AnnotatedAST.Lvar
-                                                 ([15:20-15:22], $z)))
+                                              (Lvar ([15:20-15:22], $z)))
                                              ))))
                                    ))
                                  ];
@@ -53,31 +48,27 @@
                           f_ret_by_ref = false },
                         [([15:15-15:17], $y)])))
                     ))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([16:3-16:13], int),
-                 (AnnotatedAST.Binop ((Eq None),
-                    (([16:3-16:5], int),
-                     (AnnotatedAST.Lvar ([16:3-16:5], $l))),
+                 (Binop ((Eq None),
+                    (([16:3-16:5], int), (Lvar ([16:3-16:5], $l))),
                     (([16:8-16:13], int),
-                     (AnnotatedAST.Call (Cnormal,
-                        (([16:8-16:10], [fun]),
-                         (AnnotatedAST.Lvar ([16:8-16:10], $x))),
+                     (Call (Cnormal,
+                        (([16:8-16:10], [fun]), (Lvar ([16:8-16:10], $x))),
                         [],
-                        [(([16:11-16:12], int),
-                          (AnnotatedAST.Int ([16:11-16:12], "2")))],
+                        [(([16:11-16:12], int), (Int ([16:11-16:12], "2")))],
                         [])))
                     ))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([18:3-18:16], [fun]),
-                 (AnnotatedAST.Binop ((Eq None),
-                    (([18:3-18:5], [fun]),
-                     (AnnotatedAST.Lvar ([18:3-18:5], $x))),
+                 (Binop ((Eq None),
+                    (([18:3-18:5], [fun]), (Lvar ([18:3-18:5], $x))),
                     (([18:8-18:16], (function($z): _)),
-                     (AnnotatedAST.Efun (
+                     (Efun (
                         { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                           f_ret = None; f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
-                          f_variadic = AnnotatedAST.FVnonVariadic;
+                          f_variadic = FVnonVariadic;
                           f_params =
                           [{ AnnotatedAST.param_annotation =
                              ([18:17-18:19], _); param_hint = None;
@@ -88,17 +79,15 @@
                              param_user_attributes = [] }
                             ];
                           f_body =
-                          (AnnotatedAST.NamedBody
+                          (NamedBody
                              { AnnotatedAST.fnb_nast =
-                               [(AnnotatedAST.Return ([19:5-19:20],
+                               [(Return ([19:5-19:20],
                                    (Some (([19:12-19:19], int),
-                                          (AnnotatedAST.Binop (Plus,
+                                          (Binop (Plus,
                                              (([19:12-19:14], int),
-                                              (AnnotatedAST.Lvar
-                                                 ([19:12-19:14], $y))),
+                                              (Lvar ([19:12-19:14], $y))),
                                              (([19:17-19:19], _),
-                                              (AnnotatedAST.Lvar
-                                                 ([19:17-19:19], $z)))
+                                              (Lvar ([19:17-19:19], $z)))
                                              ))))
                                    ))
                                  ];
@@ -107,17 +96,16 @@
                           f_ret_by_ref = false },
                         [([18:26-18:28], $y)])))
                     ))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([23:3-23:9], [fun]),
-                 (AnnotatedAST.Binop ((Eq None),
-                    (([23:3-23:5], [fun]),
-                     (AnnotatedAST.Lvar ([23:3-23:5], $x))),
+                 (Binop ((Eq None),
+                    (([23:3-23:5], [fun]), (Lvar ([23:3-23:5], $x))),
                     (([23:8-23:9], (function($a, $b): _)),
-                     (AnnotatedAST.Efun (
+                     (Efun (
                         { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                           f_ret = None; f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
-                          f_variadic = AnnotatedAST.FVnonVariadic;
+                          f_variadic = FVnonVariadic;
                           f_params =
                           [{ AnnotatedAST.param_annotation =
                              ([23:9-23:11], _); param_hint = None;
@@ -135,17 +123,15 @@
                               param_user_attributes = [] }
                             ];
                           f_body =
-                          (AnnotatedAST.NamedBody
+                          (NamedBody
                              { AnnotatedAST.fnb_nast =
-                               [(AnnotatedAST.Return ([23:21-23:28],
+                               [(Return ([23:21-23:28],
                                    (Some (([23:21-23:28], _),
-                                          (AnnotatedAST.Binop (Plus,
+                                          (Binop (Plus,
                                              (([23:21-23:23], _),
-                                              (AnnotatedAST.Lvar
-                                                 ([23:21-23:23], $a))),
+                                              (Lvar ([23:21-23:23], $a))),
                                              (([23:26-23:28], _),
-                                              (AnnotatedAST.Lvar
-                                                 ([23:26-23:28], $b)))
+                                              (Lvar ([23:26-23:28], $b)))
                                              ))))
                                    ))
                                  ];
@@ -154,21 +140,16 @@
                           f_ret_by_ref = false },
                         [])))
                     ))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([24:3-24:17], int),
-                 (AnnotatedAST.Binop ((Eq None),
-                    (([24:3-24:5], int),
-                     (AnnotatedAST.Lvar ([24:3-24:5], $l))),
+                 (Binop ((Eq None),
+                    (([24:3-24:5], int), (Lvar ([24:3-24:5], $l))),
                     (([24:8-24:17], int),
-                     (AnnotatedAST.Call (Cnormal,
-                        (([24:8-24:10], [fun]),
-                         (AnnotatedAST.Lvar ([24:8-24:10], $x))),
+                     (Call (Cnormal,
+                        (([24:8-24:10], [fun]), (Lvar ([24:8-24:10], $x))),
                         [],
-                        [(([24:11-24:12], int),
-                          (AnnotatedAST.Int ([24:11-24:12], "2")));
-                          (([24:14-24:16], int),
-                           (AnnotatedAST.Lvar ([24:14-24:16], $y)))
-                          ],
+                        [(([24:11-24:12], int), (Int ([24:11-24:12], "2")));
+                          (([24:14-24:16], int), (Lvar ([24:14-24:16], $y)))],
                         [])))
                     ))))
              ];

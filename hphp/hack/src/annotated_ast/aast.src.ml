@@ -29,7 +29,7 @@ module ClassIdAnnotation = Annotations.ClassIdAnnotation
 
 type program = def list
 [@@deriving
-  show,
+  show { with_path = false },
   visitors {
     variety = "iter";
     nude = true;

@@ -1,8 +1,8 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([32:37-32:41], (Hprim Tvoid)));
       f_name = ([32:10-32:14], "\\test"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ AnnotatedAST.param_annotation = ([32:32-32:34], \MyPhonyVector<\X>);
          param_hint =
@@ -14,67 +14,61 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (AnnotatedAST.NamedBody
+      (NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Expr
+           [(Expr
                (([33:3-33:27], \MyPhonyVector),
-                (AnnotatedAST.Binop ((Eq None),
-                   (([33:3-33:5], \MyPhonyVector),
-                    (AnnotatedAST.Lvar ([33:3-33:5], $x))),
+                (Binop ((Eq None),
+                   (([33:3-33:5], \MyPhonyVector), (Lvar ([33:3-33:5], $x))),
                    (([33:8-33:27], \MyPhonyVector),
-                    (AnnotatedAST.New (
+                    (New (
                        (\MyPhonyVector<[unresolved]>,
-                        (AnnotatedAST.CI
-                           (([33:12-33:25], "\\MyPhonyVector"), []))),
+                        (CI (([33:12-33:25], "\\MyPhonyVector"), []))),
                        [], [])))
                    ))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([34:3-34:19], void),
-                 (AnnotatedAST.Call (Cnormal,
+                 (Call (Cnormal,
                     (([34:3-34:10], (function(\X $x): void)),
-                     (AnnotatedAST.Obj_get (
+                     (Obj_get (
                         (([34:3-34:5], \MyPhonyVector),
-                         (AnnotatedAST.Lvar ([34:3-34:5], $x))),
+                         (Lvar ([34:3-34:5], $x))),
                         (([34:7-34:10], (function(\X $x): void)),
-                         (AnnotatedAST.Id ([34:7-34:10], "add"))),
+                         (Id ([34:7-34:10], "add"))),
                         OG_nullthrows))),
                     [],
                     [(([34:11-34:18], \B),
-                      (AnnotatedAST.New (
-                         (\B, (AnnotatedAST.CI (([34:15-34:16], "\\B"), []))),
-                         [], [])))
+                      (New ((\B, (CI (([34:15-34:16], "\\B"), []))), [], [])))
                       ],
                     []))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([35:3-35:19], void),
-                 (AnnotatedAST.Call (Cnormal,
+                 (Call (Cnormal,
                     (([35:3-35:10], (function(\X $x): void)),
-                     (AnnotatedAST.Obj_get (
+                     (Obj_get (
                         (([35:3-35:5], \MyPhonyVector),
-                         (AnnotatedAST.Lvar ([35:3-35:5], $x))),
+                         (Lvar ([35:3-35:5], $x))),
                         (([35:7-35:10], (function(\X $x): void)),
-                         (AnnotatedAST.Id ([35:7-35:10], "add"))),
+                         (Id ([35:7-35:10], "add"))),
                         OG_nullthrows))),
                     [],
                     [(([35:11-35:18], \A),
-                      (AnnotatedAST.New (
-                         (\A, (AnnotatedAST.CI (([35:15-35:16], "\\A"), []))),
-                         [], [])))
+                      (New ((\A, (CI (([35:15-35:16], "\\A"), []))), [], [])))
                       ],
                     []))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([36:3-36:11], void),
-                 (AnnotatedAST.Call (Cnormal,
+                 (Call (Cnormal,
                     (([36:3-36:7], (function(\MyPhonyVector<\X> $v): void)),
-                     (AnnotatedAST.Id ([36:3-36:7], "\\test"))),
+                     (Id ([36:3-36:7], "\\test"))),
                     [],
                     [(([36:8-36:10], \MyPhonyVector),
-                      (AnnotatedAST.Lvar ([36:8-36:10], $x)))],
+                      (Lvar ([36:8-36:10], $x)))],
                     []))))
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Class
+  (Class
      { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
        c_is_xhp = false; c_kind = Cnormal;
        c_name = ([12:7-12:20], "\\MyPhonyVector"); c_tparams = <opaque>;
@@ -96,22 +90,21 @@
        (Some { AnnotatedAST.m_annotation = (); m_final = false;
                m_abstract = false; m_visibility = Public;
                m_name = ([15:19-15:30], "__construct"); m_tparams = [];
-               m_where_constraints = [];
-               m_variadic = AnnotatedAST.FVnonVariadic; m_params = [];
+               m_where_constraints = []; m_variadic = FVnonVariadic;
+               m_params = [];
                m_body =
-               (AnnotatedAST.NamedBody
+               (NamedBody
                   { AnnotatedAST.fnb_nast =
-                    [(AnnotatedAST.Expr
+                    [(Expr
                         (([16:5-16:25], \Vector<T>),
-                         (AnnotatedAST.Binop ((Eq None),
+                         (Binop ((Eq None),
                             (([16:5-16:13], \Vector<T>),
-                             (AnnotatedAST.Obj_get (
-                                (([16:5-16:10], <static>), AnnotatedAST.This),
+                             (Obj_get ((([16:5-16:10], <static>), This),
                                 (([16:12-16:13], \Vector<T>),
-                                 (AnnotatedAST.Id ([16:12-16:13], "x"))),
+                                 (Id ([16:12-16:13], "x"))),
                                 OG_nullthrows))),
                             (([16:16-16:25], \Vector<T>),
-                             (AnnotatedAST.ValCollection (<vc_kind>, [])))
+                             (ValCollection (<vc_kind>, [])))
                             ))))
                       ];
                     fnb_unsafe = false });
@@ -124,7 +117,7 @@
        [{ AnnotatedAST.m_annotation = (); m_final = false;
           m_abstract = false; m_visibility = Public;
           m_name = ([19:19-19:22], "add"); m_tparams = [];
-          m_where_constraints = []; m_variadic = AnnotatedAST.FVnonVariadic;
+          m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params =
           [{ AnnotatedAST.param_annotation = ([19:25-19:27], T);
              param_hint = (Some ([19:23-19:24], (Habstr "T")));
@@ -133,23 +126,20 @@
              param_callconv = None; param_user_attributes = [] }
             ];
           m_body =
-          (AnnotatedAST.NamedBody
+          (NamedBody
              { AnnotatedAST.fnb_nast =
-               [(AnnotatedAST.Expr
+               [(Expr
                    (([20:5-20:20], T),
-                    (AnnotatedAST.Binop ((Eq None),
+                    (Binop ((Eq None),
                        (([20:5-20:15], T),
-                        (AnnotatedAST.Array_get (
+                        (Array_get (
                            (([20:5-20:13], \Vector<T>),
-                            (AnnotatedAST.Obj_get (
-                               (([20:5-20:10], <static>), AnnotatedAST.This),
+                            (Obj_get ((([20:5-20:10], <static>), This),
                                (([20:12-20:13], \Vector<T>),
-                                (AnnotatedAST.Id ([20:12-20:13], "x"))),
+                                (Id ([20:12-20:13], "x"))),
                                OG_nullthrows))),
                            None))),
-                       (([20:18-20:20], T),
-                        (AnnotatedAST.Lvar ([20:18-20:20], $x)))
-                       ))))
+                       (([20:18-20:20], T), (Lvar ([20:18-20:20], $x)))))))
                  ];
                fnb_unsafe = false });
           m_fun_kind = FSync; m_user_attributes = [];
@@ -158,7 +148,7 @@
          { AnnotatedAST.m_annotation = (); m_final = false;
            m_abstract = false; m_visibility = Public;
            m_name = ([23:19-23:22], "get"); m_tparams = [];
-           m_where_constraints = []; m_variadic = AnnotatedAST.FVnonVariadic;
+           m_where_constraints = []; m_variadic = FVnonVariadic;
            m_params =
            [{ AnnotatedAST.param_annotation = ([23:27-23:29], int);
               param_hint = (Some ([23:23-23:26], (Hprim Tint)));
@@ -168,20 +158,18 @@
               param_user_attributes = [] }
              ];
            m_body =
-           (AnnotatedAST.NamedBody
+           (NamedBody
               { AnnotatedAST.fnb_nast =
-                [(AnnotatedAST.Return ([24:5-24:24],
+                [(Return ([24:5-24:24],
                     (Some (([24:12-24:23], T),
-                           (AnnotatedAST.Array_get (
+                           (Array_get (
                               (([24:12-24:20], \Vector<T>),
-                               (AnnotatedAST.Obj_get (
-                                  (([24:12-24:17], <static>),
-                                   AnnotatedAST.This),
+                               (Obj_get ((([24:12-24:17], <static>), This),
                                   (([24:19-24:20], \Vector<T>),
-                                   (AnnotatedAST.Id ([24:19-24:20], "x"))),
+                                   (Id ([24:19-24:20], "x"))),
                                   OG_nullthrows))),
                               (Some (([24:21-24:22], int),
-                                     (AnnotatedAST.Int ([24:21-24:22], "0"))))
+                                     (Int ([24:21-24:22], "0"))))
                               ))))
                     ))
                   ];
@@ -191,7 +179,7 @@
            }
          ];
        c_user_attributes = []; c_enum = None });
-  (AnnotatedAST.Class
+  (Class
      { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
        c_is_xhp = false; c_kind = Cnormal; c_name = ([28:7-28:8], "\\X");
        c_tparams = <opaque>; c_extends = []; c_uses = [];
@@ -200,7 +188,7 @@
        c_typeconsts = []; c_static_vars = []; c_vars = [];
        c_constructor = None; c_static_methods = []; c_methods = [];
        c_user_attributes = []; c_enum = None });
-  (AnnotatedAST.Class
+  (Class
      { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
        c_is_xhp = false; c_kind = Cnormal; c_name = ([29:7-29:8], "\\A");
        c_tparams = <opaque>;
@@ -210,7 +198,7 @@
        c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
        c_constructor = None; c_static_methods = []; c_methods = [];
        c_user_attributes = []; c_enum = None });
-  (AnnotatedAST.Class
+  (Class
      { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
        c_is_xhp = false; c_kind = Cnormal; c_name = ([30:7-30:8], "\\B");
        c_tparams = <opaque>;

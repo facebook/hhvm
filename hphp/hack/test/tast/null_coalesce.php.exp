@@ -1,8 +1,8 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:22-3:25], (Hprim Tint)));
       f_name = ([3:10-3:11], "\\f"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ AnnotatedAST.param_annotation = ([3:17-3:19], ?int);
          param_hint =
@@ -12,16 +12,13 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (AnnotatedAST.NamedBody
+      (NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Return ([4:3-4:18],
+           [(Return ([4:3-4:18],
                (Some (([4:10-4:17], int),
-                      (AnnotatedAST.NullCoalesce (
-                         (([4:10-4:12], ?int),
-                          (AnnotatedAST.Lvar ([4:10-4:12], $x))),
-                         (([4:16-4:17], int),
-                          (AnnotatedAST.Int ([4:16-4:17], "0")))
-                         ))))
+                      (NullCoalesce (
+                         (([4:10-4:12], ?int), (Lvar ([4:10-4:12], $x))),
+                         (([4:16-4:17], int), (Int ([4:16-4:17], "0")))))))
                ))
              ];
            fnb_unsafe = false });

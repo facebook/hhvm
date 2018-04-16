@@ -1,8 +1,8 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:51-3:54], (Hprim Tint)));
       f_name = ([3:10-3:14], "\\test"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ AnnotatedAST.param_annotation = ([3:20-3:22], bool);
          param_hint = (Some ([3:15-3:19], (Hprim Tbool)));
@@ -19,19 +19,16 @@
           param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (AnnotatedAST.NamedBody
+      (NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.If (
-               (([4:7-4:9], bool), (AnnotatedAST.Lvar ([4:7-4:9], $b))), 
-               [], [AnnotatedAST.Noop]));
-             (AnnotatedAST.Return ([5:3-5:16],
+           [(If ((([4:7-4:9], bool), (Lvar ([4:7-4:9], $b))), [], [Noop]));
+             (Return ([5:3-5:16],
                 (Some (([5:10-5:15], int),
-                       (AnnotatedAST.Call (Cnormal,
+                       (Call (Cnormal,
                           (([5:10-5:12], (function(int): int)),
-                           (AnnotatedAST.Lvar ([5:10-5:12], $f))),
+                           (Lvar ([5:10-5:12], $f))),
                           [],
-                          [(([5:13-5:14], int),
-                            (AnnotatedAST.Int ([5:13-5:14], "1")))],
+                          [(([5:13-5:14], int), (Int ([5:13-5:14], "1")))],
                           []))))
                 ))
              ];

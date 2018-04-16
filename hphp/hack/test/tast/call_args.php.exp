@@ -1,8 +1,8 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:35-3:39], (Hprim Tvoid)));
       f_name = ([3:10-3:22], "\\takes_string"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ AnnotatedAST.param_annotation = ([3:30-3:32], string);
          param_hint = (Some ([3:23-3:29], (Hprim Tstring)));
@@ -11,26 +11,24 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (AnnotatedAST.NamedBody
-         { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop]; fnb_unsafe = false });
+      (NamedBody { AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Fun
+  (Fun
      { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([5:15-5:19], (Hprim Tvoid)));
        f_name = ([5:10-5:11], "\\f"); f_tparams = [];
-       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
-       f_params = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
-       (AnnotatedAST.NamedBody
+       (NamedBody
           { AnnotatedAST.fnb_nast =
-            [(AnnotatedAST.Expr
+            [(Expr
                 (([6:3-6:24], void),
-                 (AnnotatedAST.Call (Cnormal,
+                 (Call (Cnormal,
                     (([6:3-6:15], (function(string $s): void)),
-                     (AnnotatedAST.Id ([6:3-6:15], "\\takes_string"))),
+                     (Id ([6:3-6:15], "\\takes_string"))),
                     [],
-                    [(([6:16-6:23], string),
-                      (AnnotatedAST.String ([6:16-6:23], "hello")))],
+                    [(([6:16-6:23], string), (String ([6:16-6:23], "hello")))
+                      ],
                     []))))
               ];
             fnb_unsafe = false });

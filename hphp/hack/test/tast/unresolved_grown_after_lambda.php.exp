@@ -1,8 +1,8 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:35-3:38], (Hprim Tint)));
       f_name = ([3:10-3:14], "\\test"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ AnnotatedAST.param_annotation = ([3:19-3:21], int);
          param_hint = (Some ([3:15-3:18], (Hprim Tint)));
@@ -16,55 +16,47 @@
           param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (AnnotatedAST.NamedBody
+      (NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Expr
+           [(Expr
                (([4:3-4:25], \Vector<(int | string)>),
-                (AnnotatedAST.Binop ((Eq None),
+                (Binop ((Eq None),
                    (([4:3-4:9], \Vector<(int | string)>),
-                    (AnnotatedAST.Lvar ([4:3-4:9], $items))),
+                    (Lvar ([4:3-4:9], $items))),
                    (([4:12-4:25], \Vector<(int | string)>),
-                    (AnnotatedAST.ValCollection (<vc_kind>,
-                       [(([4:21-4:23], int),
-                         (AnnotatedAST.Lvar ([4:21-4:23], $i)))]
-                       )))
+                    (ValCollection (<vc_kind>,
+                       [(([4:21-4:23], int), (Lvar ([4:21-4:23], $i)))])))
                    ))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([5:3-5:9], (function(): int)),
-                 (AnnotatedAST.Binop ((Eq None),
-                    (([5:3-5:5], (function(): int)),
-                     (AnnotatedAST.Lvar ([5:3-5:5], $f))),
+                 (Binop ((Eq None),
+                    (([5:3-5:5], (function(): int)), (Lvar ([5:3-5:5], $f))),
                     (([5:8-5:9], (function(): int)),
-                     (AnnotatedAST.Efun (
+                     (Efun (
                         { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
                           f_ret = (Some ([5:12-5:15], (Hprim Tint)));
                           f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
-                          f_variadic = AnnotatedAST.FVnonVariadic;
-                          f_params = [];
+                          f_variadic = FVnonVariadic; f_params = [];
                           f_body =
-                          (AnnotatedAST.NamedBody
+                          (NamedBody
                              { AnnotatedAST.fnb_nast =
-                               [(AnnotatedAST.Expr
+                               [(Expr
                                    (([10:5-10:22], (int | string)),
-                                    (AnnotatedAST.Binop ((Eq None),
+                                    (Binop ((Eq None),
                                        (([10:5-10:10], (int | string)),
-                                        (AnnotatedAST.Lvar
-                                           ([10:5-10:10], $item))),
+                                        (Lvar ([10:5-10:10], $item))),
                                        (([10:13-10:22], (int | string)),
-                                        (AnnotatedAST.Array_get (
+                                        (Array_get (
                                            (([10:13-10:19], \Vector<(int | string)>),
-                                            (AnnotatedAST.Lvar
-                                               ([10:13-10:19], $items))),
+                                            (Lvar ([10:13-10:19], $items))),
                                            (Some (([10:20-10:21], int),
-                                                  (AnnotatedAST.Int
-                                                     ([10:20-10:21], "1"))))
+                                                  (Int ([10:20-10:21], "1"))))
                                            )))
                                        ))));
-                                 (AnnotatedAST.Return ([11:5-11:18],
+                                 (Return ([11:5-11:18],
                                     (Some (([11:12-11:17], int),
-                                           (AnnotatedAST.Lvar
-                                              ([11:12-11:17], $item))))
+                                           (Lvar ([11:12-11:17], $item))))
                                     ))
                                  ];
                                fnb_unsafe = false });
@@ -72,22 +64,20 @@
                           f_ret_by_ref = false },
                         [([10:13-10:19], $items)])))
                     ))));
-             (AnnotatedAST.Expr
+             (Expr
                 (([13:3-13:16], (int | string)),
-                 (AnnotatedAST.Binop ((Eq None),
+                 (Binop ((Eq None),
                     (([13:3-13:11], (int | string)),
-                     (AnnotatedAST.Array_get (
+                     (Array_get (
                         (([13:3-13:9], \Vector<(int | string)>),
-                         (AnnotatedAST.Lvar ([13:3-13:9], $items))),
+                         (Lvar ([13:3-13:9], $items))),
                         None))),
-                    (([13:14-13:16], string),
-                     (AnnotatedAST.Lvar ([13:14-13:16], $s)))
-                    ))));
-             (AnnotatedAST.Return ([14:3-14:15],
+                    (([13:14-13:16], string), (Lvar ([13:14-13:16], $s)))))));
+             (Return ([14:3-14:15],
                 (Some (([14:10-14:14], int),
-                       (AnnotatedAST.Call (Cnormal,
+                       (Call (Cnormal,
                           (([14:10-14:12], (function(): int)),
-                           (AnnotatedAST.Lvar ([14:10-14:12], $f))),
+                           (Lvar ([14:10-14:12], $f))),
                           [], [], []))))
                 ))
              ];

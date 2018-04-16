@@ -1,8 +1,8 @@
-[(AnnotatedAST.Fun
+[(Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:22-3:25], (Hprim Tint)));
       f_name = ([3:10-3:11], "\\f"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ AnnotatedAST.param_annotation = ([3:17-3:19], ?int);
          param_hint =
@@ -12,36 +12,26 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (AnnotatedAST.NamedBody
+      (NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.If (
+           [(If (
                (([4:7-4:18], bool),
-                (AnnotatedAST.Binop (EQeqeq,
-                   (([4:7-4:9], ?int), (AnnotatedAST.Lvar ([4:7-4:9], $x))),
-                   (([4:14-4:18], ?int), AnnotatedAST.Null)))),
-               [(AnnotatedAST.Return ([4:18-4:29],
-                   (Some (([4:27-4:28], int),
-                          (AnnotatedAST.Int ([4:27-4:28], "1"))))
-                   ))
+                (Binop (EQeqeq, (([4:7-4:9], ?int), (Lvar ([4:7-4:9], $x))),
+                   (([4:14-4:18], ?int), Null)))),
+               [(Return ([4:18-4:29],
+                   (Some (([4:27-4:28], int), (Int ([4:27-4:28], "1"))))))
                  ],
-               [AnnotatedAST.Noop]));
-             (AnnotatedAST.If (
+               [Noop]));
+             (If (
                 (([5:7-5:18], bool),
-                 (AnnotatedAST.Binop (EQeqeq,
-                    (([5:7-5:11], int), AnnotatedAST.Null),
-                    (([5:16-5:18], int),
-                     (AnnotatedAST.Lvar ([5:16-5:18], $x)))
-                    ))),
-                [(AnnotatedAST.Return ([5:18-5:29],
-                    (Some (([5:27-5:28], int),
-                           (AnnotatedAST.Int ([5:27-5:28], "2"))))
-                    ))
+                 (Binop (EQeqeq, (([5:7-5:11], int), Null),
+                    (([5:16-5:18], int), (Lvar ([5:16-5:18], $x)))))),
+                [(Return ([5:18-5:29],
+                    (Some (([5:27-5:28], int), (Int ([5:27-5:28], "2"))))))
                   ],
-                [AnnotatedAST.Noop]));
-             (AnnotatedAST.Return ([6:3-6:12],
-                (Some (([6:10-6:11], int),
-                       (AnnotatedAST.Int ([6:10-6:11], "0"))))
-                ))
+                [Noop]));
+             (Return ([6:3-6:12],
+                (Some (([6:10-6:11], int), (Int ([6:10-6:11], "0"))))))
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })

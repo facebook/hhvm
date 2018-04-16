@@ -55,6 +55,14 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
             raise Exception('Failed to save! stdout: "%s" stderr: "%s"' %
                             (stdout, stderr))
 
+    @classmethod
+    def dump_saved_state(cls):
+        # Dump a saved state to a temporary directory.
+        # Return the path to the saved state.
+        saved_state_path = os.path.join(tempfile.mkdtemp(), 'new_saved_state')
+        cls.save_command(cls.repo_dir, saved_state_path=saved_state_path)
+        return saved_state_path
+
     def write_local_conf(self):
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
             f.write(r"""

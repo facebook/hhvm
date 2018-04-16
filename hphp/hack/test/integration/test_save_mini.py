@@ -119,47 +119,46 @@ watchman_init_timeout = 1
         self.proc_call([hh_client, 'stop', self.repo_dir])
         self.assertIn('Watchman_sig.Types.Timeout', self.get_server_logs())
 
-    def test_incrementally_generated_saved_state(self):
-        def dump_saved_state(obj):
-            saved_state_path = os.path.join(tempfile.mkdtemp(), 'new_saved_state')
-            obj.save_command(obj.repo_dir, saved_state_path=saved_state_path)
-            return saved_state_path
-        def add_file_that_depends_on_class_a(filename):
-            with open(filename, 'w') as f:
-                f.write("""<?hh // strict
+    def add_file_that_depends_on_class_a(self, filename):
+        with open(filename, 'w') as f:
+            f.write("""<?hh // strict
 
 class UsesAToo {
-  public function test() : int {
-    return A::foo();
-  }
+public function test() : int {
+return A::foo();
+}
 
 }
-                """)
-        def change_return_type_on_base_class(filename):
-            # Change the return type from into to string
-            with open(filename, 'w') as f:
-                f.write("""<?hh // strict
+            """)
+
+    def change_return_type_on_base_class(self, filename):
+        # Change the return type from into to string
+        with open(filename, 'w') as f:
+            f.write("""<?hh // strict
 
 class B {
 
-  public static function foo () : string {
-      return "hello";
-  }
+public static function foo () : string {
+  return "hello";
 }
-                """)
-        old_saved_state = dump_saved_state(self)
+}
+            """)
+
+    def test_incrementally_generated_saved_state(self):
+        old_saved_state = self.dump_saved_state()
         new_file = os.path.join(self.repo_dir, 'class_3b.php')
-        add_file_that_depends_on_class_a(new_file)
+        self.add_file_that_depends_on_class_a(new_file)
         self.check_cmd(['No errors!'], assert_loaded_mini_state=False)
-        new_saved_state = dump_saved_state(self)
-        change_return_type_on_base_class(os.path.join(self.repo_dir, 'class_1.php'))
+        new_saved_state = self.dump_saved_state()
+        self.change_return_type_on_base_class(
+            os.path.join(self.repo_dir, 'class_1.php'))
         self.check_cmd([
             '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
             '  {root}class_3.php:4:28,30: This is an int',
-            '  {root}class_1.php:5:35,40: It is incompatible with a string',
-            '{root}class_3b.php:5:12,19: Invalid return type (Typing[4110])',
-            '  {root}class_3b.php:4:28,30: This is an int',
-            '  {root}class_1.php:5:35,40: It is incompatible with a string',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
+            '{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])',
+            '  {root}class_3b.php:4:26,28: This is an int',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
         ], assert_loaded_mini_state=False)
         self.proc_call([hh_client, 'stop', self.repo_dir])
         # Start server with the original saved state. Will be missing the
@@ -168,7 +167,51 @@ class B {
         self.check_cmd([
             '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
             '  {root}class_3.php:4:28,30: This is an int',
-            '  {root}class_1.php:5:35,40: It is incompatible with a string',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
+        ])
+        self.proc_call([hh_client, 'stop', self.repo_dir])
+        # Start another server with the new saved state. Will have both errors.
+        self.start_hh_server(
+            changed_files=['class_1.php'], saved_state_path=new_saved_state)
+        self.check_cmd([
+            '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
+            '  {root}class_3.php:4:28,30: This is an int',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
+            '{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])',
+            '  {root}class_3b.php:4:26,28: This is an int',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
+        ])
+
+    def test_incrementally_generated_saved_state_after_loaded_saved_state(self):
+        # Same as the above test, except we begin the test by starting up
+        # a Hack Server that loads a saved state.
+        self.start_hh_server()
+        # Hack server is now started with a saved state
+        self.check_cmd(['No errors!'], assert_loaded_mini_state=True)
+        old_saved_state = self.dump_saved_state()
+        new_file = os.path.join(self.repo_dir, 'class_3b.php')
+        self.add_file_that_depends_on_class_a(new_file)
+        self.check_cmd(['No errors!'], assert_loaded_mini_state=True)
+        new_saved_state = self.dump_saved_state()
+        self.change_return_type_on_base_class(
+            os.path.join(self.repo_dir, 'class_1.php'))
+        self.check_cmd([
+            '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
+            '  {root}class_3.php:4:28,30: This is an int',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
+            '{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])',
+            '  {root}class_3b.php:4:26,28: This is an int',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
+        ], assert_loaded_mini_state=True)
+        self.proc_call([hh_client, 'stop', self.repo_dir])
+        # Start server with the original saved state. Will be missing the
+        # second error because of the missing edge.
+        self.start_hh_server(
+            changed_files=['class_1.php'], saved_state_path=old_saved_state)
+        self.check_cmd([
+            '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
+            '  {root}class_3.php:4:28,30: This is an int',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
         ])
         self.proc_call([hh_client, 'stop', self.repo_dir])
         # Start another server with the new saved state. Will have both errors.
@@ -176,8 +219,8 @@ class B {
         self.check_cmd([
             '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
             '  {root}class_3.php:4:28,30: This is an int',
-            '  {root}class_1.php:5:35,40: It is incompatible with a string',
-            '{root}class_3b.php:5:12,19: Invalid return type (Typing[4110])',
-            '  {root}class_3b.php:4:28,30: This is an int',
-            '  {root}class_1.php:5:35,40: It is incompatible with a string',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
+            '{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])',
+            '  {root}class_3b.php:4:26,28: This is an int',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
         ])

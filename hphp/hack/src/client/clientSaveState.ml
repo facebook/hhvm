@@ -21,7 +21,10 @@ let print_json res =
 
 let print_readable = function
   | Ok () -> ()
-  | Error s -> print_endline (Printf.sprintf "Error: %s" s)
+  | Error s ->
+    let msg = Printf.sprintf "Error: %s" s in
+    print_endline msg;
+    exit 1
 
 let go res output_json =
   if output_json then

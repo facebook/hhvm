@@ -178,6 +178,7 @@ class ['self] visitor = object (self : 'self)
 
   method! on_expr env expr =
     let pos = fst (fst expr) in
+    let (+) = self#plus in
     let acc =
       match snd expr with
       | Tast.New ((ty, _), _, _) ->
@@ -188,10 +189,20 @@ class ['self] visitor = object (self : 'self)
         typed_const env ty mid
       | Tast.Class_get ((ty, _), mid) ->
         typed_property env ty mid
-      | Tast.Smethod_id _ ->
-        process_fun_id (pos, "\\"^SN.SpecialFunctions.class_meth)
-      | Tast.Method_caller _ ->
-        process_fun_id (pos, "\\"^SN.SpecialFunctions.meth_caller)
+      | Tast.Fun_id id ->
+        process_fun_id (pos, "\\"^SN.SpecialFunctions.fun_) +
+        process_fun_id id
+      | Tast.Method_id (((_, ty), _), mid) ->
+        process_fun_id (pos, "\\"^SN.SpecialFunctions.inst_meth) +
+        typed_method env ty mid
+      | Tast.Smethod_id ((_, cid) as pcid, mid) ->
+        process_fun_id (pos, "\\"^SN.SpecialFunctions.class_meth) +
+        process_class_id pcid +
+        process_member cid mid ~is_method:true ~is_const:false
+      | Tast.Method_caller ((_, cid) as pcid, mid) ->
+        process_fun_id (pos, "\\"^SN.SpecialFunctions.meth_caller) +
+        process_class_id pcid +
+        process_member cid mid ~is_method:true ~is_const:false
       | _ -> self#zero
     in
     (* This is done here instead of overriding on_class_id so that we have
@@ -204,7 +215,6 @@ class ['self] visitor = object (self : 'self)
         typed_class_id env ty pos cid
       | _ -> self#zero
     in
-    let (+) = self#plus in
     acc + class_id_acc + super#on_expr env expr
 
   method! on_Call env ct e hl el uel =

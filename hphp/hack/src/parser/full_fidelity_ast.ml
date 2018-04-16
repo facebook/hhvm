@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+module SyntaxError = Full_fidelity_syntax_error
 open Prim_defs
 open Hh_core
 (* What we are lowering to *)
@@ -2900,14 +2901,21 @@ let from_text (env : env) (source_text : SourceText.t) : result =
     let errors = ParserErrors.parse_errors error_env in
     (* Prioritize runtime errors *)
     let runtime_errors =
-      List.filter errors
-        ~f:(fun e -> Full_fidelity_syntax_error.error_type e =
-                     Full_fidelity_syntax_error.RuntimeError) in
+      List.filter errors ~f:SyntaxError.(fun e -> error_type e = RuntimeError) in
     match errors, runtime_errors with
     | [], [] -> ()
     | _, e :: _
-    | e :: _, _ ->
-      raise @@ Full_fidelity_syntax_error.ParserFatal e
+    | e :: _, _
+      -> raise @@ SyntaxError.ParserFatal e
+  in
+  let () = if env.keep_errors then
+    match List.last (SyntaxTree.all_errors tree) with
+    | None -> ()
+    | Some e ->
+      let so = SyntaxError.start_offset e in
+      let eo = SyntaxError.end_offset e in
+      let p = SourceText.relative_pos env.file source_text so eo in
+      Errors.parsing_error (p, SyntaxError.message e)
   in
   let mode = Option.value ~default:FileInfo.Mpartial mode in
   let mode = if lang = FileInfo.PhpFile then FileInfo.Mphp else mode in

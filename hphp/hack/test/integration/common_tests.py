@@ -57,36 +57,13 @@ class CommonTestDriver(object):
         """
         raise NotImplementedError()
 
-    def wait_until_server_ready(self, max_wait_s=30):
-        # We don't want to grab the old log-file, so we wait 2 seconds for the monitor
-        # to start up the new server first.
+    def wait_until_server_ready(self):
+        """
+        We don't want to accidentally connect to an old hh_server, so we wait 2
+        seconds for the monitor to start up the new server first.
+        """
         time.sleep(2)
-        log_file = self.proc_call([
-            hh_client, '--logname', self.repo_dir])[0].strip()
-        f = subprocess.Popen(
-            ['tail', '-f', log_file],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        p = select.poll()
-        p.register(f.stdout)
-        while True:
-            if max_wait_s <= 0:
-                print(
-                    "Warning: waiting for server ready took too long",
-                    file=sys.stderr
-                )
-                print("Moving along", file=sys.stderr)
-                return
-            if p.poll(1):
-                line = f.stdout.readline()
-                if b"Server is READY" in line:
-                    return
-                else:
-                    continue
-            else:
-                max_wait_s -= 1
-                time.sleep(1)
+        self.run_check()
 
     def start_hh_server(self, changed_files=None, saved_state_path=None):
         """ Start an hh_server. changed_files is ignored here (as it
@@ -95,7 +72,7 @@ class CommonTestDriver(object):
         """
         if changed_files is None:
             changed_files = []
-        cmd = [hh_server, "--daemon", self.repo_dir]
+        cmd = [hh_server, "--daemon", "--max-procs", "2", self.repo_dir]
         self.proc_call(cmd)
         self.wait_until_server_ready()
 

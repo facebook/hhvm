@@ -66,7 +66,7 @@ class LspCommandProcessor:
             # Hack: HackLSP server only connects to hh_server asynchronously.
             # We want to delay until after it's connected before testing more.
             if command["method"] == "initialize":
-                time.sleep(0.5)
+                time.sleep(5)
 
         return transcript
 

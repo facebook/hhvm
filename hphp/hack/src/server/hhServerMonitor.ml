@@ -44,7 +44,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
   if Sys_utils.is_test_mode ()
   then EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
   else HackEventLogger.init_monitor ~exit_on_parent_exit (ServerArgs.root options) init_id
-      (Unix.gettimeofday ());
+      (Unix.gettimeofday ()) false;
   Utils.profile := ServerArgs.profile_log options;
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
 
@@ -66,6 +66,8 @@ let monitor_daemon_main (options: ServerArgs.options) =
 
   let config, local_config  =
     ServerConfig.(load filename options) in
+  if local_config.ServerLocalConfig.use_full_fidelity_parser then
+    HackEventLogger.set_use_full_fidelity_parser true;
   if local_config.ServerLocalConfig.incremental_init then
     HackEventLogger.set_incremental_init ();
   HackEventLogger.set_use_tiny_state

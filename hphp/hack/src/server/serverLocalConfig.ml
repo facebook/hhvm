@@ -44,6 +44,7 @@ type t = {
   informant_min_distance_restart: int;
   informant_use_xdb: bool;
   load_script_config: LoadScriptConfig.t;
+  use_full_fidelity_parser : bool;
 }
 
 let default = {
@@ -76,6 +77,7 @@ let default = {
   informant_min_distance_restart = 100;
   informant_use_xdb = false;
   load_script_config = LoadScriptConfig.default;
+  use_full_fidelity_parser = false;
 }
 
 let path =
@@ -175,6 +177,8 @@ let load_ fn ~silent =
   let max_bucket_size = int_ "max_bucket_size"
     ~default:default.max_bucket_size config in
   let load_script_config = LoadScriptConfig.default in
+  let use_full_fidelity_parser = bool_ "use_full_fidelity_parser"
+    ~default:default.use_full_fidelity_parser config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -204,6 +208,7 @@ let load_ fn ~silent =
     informant_min_distance_restart;
     informant_use_xdb;
     load_script_config;
+    use_full_fidelity_parser;
   }
 
 let load ~silent =

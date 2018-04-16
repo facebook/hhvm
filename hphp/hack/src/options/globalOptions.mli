@@ -71,6 +71,9 @@ type t = {
  (* Flag for disabling functions in HHI files with the __PHPStdLib attribute *)
  po_deregister_php_stdlib : bool;
 
+ (* Flag to signal whether parsing via FFP or legacy parser *)
+ po_use_full_fidelity : bool;
+
  (*
   * Flag to disalow any lambda that has to be checked using the legacy
   * per-use technique
@@ -91,6 +94,7 @@ val make :
   tco_safe_array: bool ->
   tco_safe_vector_array: bool ->
   po_deregister_php_stdlib: bool ->
+  po_use_full_fidelity: bool ->
   tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
   tco_migration_flags: SSet.t ->
@@ -109,6 +113,7 @@ val tco_dynamic_view : t -> bool
 val tco_allowed_attribute : t -> SSet.elt -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool
+val po_use_full_fidelity : t -> bool
 val po_enable_hh_syntax_for_hhvm : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool
 val po_disallow_elvis_space : t -> bool

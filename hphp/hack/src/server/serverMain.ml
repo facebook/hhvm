@@ -512,6 +512,7 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     max_workers;
     max_bucket_size;
     load_tiny_state;
+    use_full_fidelity_parser;
     _
   } as local_config = local_config in
   List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
@@ -533,7 +534,9 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     search_chunk_size
     max_workers
     max_bucket_size
-    load_tiny_state;
+    load_tiny_state
+    use_full_fidelity_parser
+    ;
   let root_s = Path.to_string root in
   let check_mode = ServerArgs.check_mode options in
   if not check_mode && Sys_utils.is_nfs root_s && not enable_on_nfs then begin

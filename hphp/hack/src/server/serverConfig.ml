@@ -209,6 +209,10 @@ let load config_filename options =
     (bool_ "safe_array" ~default:true config)
     (bool_ "safe_vector_array" ~default:true config)
     (bool_ "deregister_php_stdlib" ~default:false config)
+    (* Although it's locally configured, the use_full_fidelity_parser flag needs
+     * to end up in the parser options to reach all consumers of it.
+     *)
+    local_config.ServerLocalConfig.use_full_fidelity_parser
     (config_user_attributes config)
     (config_experimental_tc_features config)
     (config_tc_migration_flags config)

@@ -953,6 +953,7 @@ private:
   std::set<std::string,stdltistr> m_hoistables;
   OptLocation m_tempLoc;
   std::unordered_set<std::string> m_staticEmitted;
+  VariableSerializer::DVOverrides* m_dvOverrides = nullptr;
 
   // The stack of all Regions that this EmitterVisitor is currently inside
   std::vector<RegionPtr> m_regions;
@@ -5496,16 +5497,22 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     }
 
     if (op == T_VARRAY) {
-      assertx(!RuntimeOption::EvalHackArrDVArrs);
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
-      emitArrayInit(e, el, ArrayType::VArray);
+      emitArrayInit(
+        e,
+        el,
+        RuntimeOption::EvalHackArrDVArrs ? ArrayType::Vec : ArrayType::VArray
+      );
       return true;
     }
 
     if (op == T_DARRAY) {
-      assertx(!RuntimeOption::EvalHackArrDVArrs);
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
-      emitArrayInit(e, el, ArrayType::DArray);
+      emitArrayInit(
+        e,
+        el,
+        RuntimeOption::EvalHackArrDVArrs ? ArrayType::Dict : ArrayType::DArray
+      );
       return true;
     }
 
@@ -9762,6 +9769,12 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
       ExpressionPtr vNode = par->defaultValue();
       if (vNode->isScalar()) {
         TypedValue dv;
+
+        VariableSerializer::DVOverrides overrides;
+        assertx(!m_dvOverrides);
+        if (RuntimeOption::EvalHackArrDVArrs) m_dvOverrides = &overrides;
+        SCOPE_EXIT { m_dvOverrides = nullptr; };
+
         initScalar(dv, vNode);
         pi.defaultValue = dv;
 
@@ -9769,6 +9782,7 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
         if (orig.empty()) {
           // Simple case: it's a scalar value so we just serialize it
           VariableSerializer vs(VariableSerializer::Type::PHPOutput);
+          if (RuntimeOption::EvalHackArrDVArrs) vs.setDVOverrides(&overrides);
           String result = vs.serialize(tvAsCVarRef(&dv), true);
           phpCode = makeStaticString(result.get());
         } else {
@@ -11640,6 +11654,18 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
   tvVal.m_type = KindOfUninit;
   // static array initilization
   auto initArray = [&](ExpressionPtr el, ArrayType t) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      if (t == ArrayType::VArray) {
+        t = ArrayType::Vec;
+        if (m_dvOverrides) m_dvOverrides->push_back(true);
+      } else if (t == ArrayType::DArray) {
+        t = ArrayType::Dict;
+        if (m_dvOverrides) m_dvOverrides->push_back(true);
+      } else if (t == ArrayType::Vec || t == ArrayType::Dict) {
+        if (m_dvOverrides) m_dvOverrides->push_back(false);
+      }
+    }
+
     switch (t) {
       case ArrayType::Array:
         m_staticArrays.push_back(Array::attach(PackedArray::MakeReserve(0)));
@@ -11724,12 +11750,10 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
         break;
       }
       if (u->getOp() == T_VARRAY) {
-        assertx(!RuntimeOption::EvalHackArrDVArrs);
         initArray(u->getExpression(), ArrayType::VArray);
         break;
       }
       if (u->getOp() == T_DARRAY) {
-        assertx(!RuntimeOption::EvalHackArrDVArrs);
         initArray(u->getExpression(), ArrayType::DArray);
         break;
       }

@@ -25,8 +25,6 @@
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/vm/class.h"
 
-#include <boost/noncopyable.hpp>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -94,6 +92,14 @@ struct VariableSerializer {
   void setPHPWarn()   { m_phpWarn = true; }
 
   enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray };
+
+  // One entry for each vec or dict in the value being serialized (in a
+  // pre-order walk). If the bool is true, and mode is PHPOutput, the vec or
+  // dict will be output like a varray or darray.
+  using DVOverrides = std::vector<bool>;
+  void setDVOverrides(const DVOverrides* overrides) {
+    m_dvOverrides = overrides;
+  }
 
 private:
   /**
@@ -208,6 +214,7 @@ private:
   int m_maxLevelDebugger;        // for max level of DebuggerSerialize
   size_t m_currentDepth;         // current depth (nasted objects/arrays)
   size_t m_maxDepth;             // max depth limit before an error (0 -> none)
+  bool m_keyPrinted;
 
   struct ArrayInfo {
     bool is_object;     // nested arrays or objects
@@ -226,6 +233,9 @@ private:
     int    rsrcId;
   };
   req::vector<ObjectInfo> m_objectInfos;
+
+  const DVOverrides* m_dvOverrides = nullptr;
+  size_t m_dvOverridesIndex = 0;
 
   // The func parameter will be invoked only if there is no overflow.
   // Otherwise, writeOverflow will be invoked instead.

@@ -1060,7 +1060,7 @@ void Parser::onVArray(Token& out, Token& exprs) {
   onUnaryOpExp(
     out,
     exprs,
-    RuntimeOption::EvalHackArrDVArrs ? T_VEC : T_VARRAY,
+    T_VARRAY,
     true
   );
 }
@@ -1069,7 +1069,7 @@ void Parser::onDArray(Token& out, Token& exprs) {
   onUnaryOpExp(
     out,
     exprs,
-    RuntimeOption::EvalHackArrDVArrs ? T_DICT : T_DARRAY,
+    T_DARRAY,
     true
   );
 }

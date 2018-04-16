@@ -47,10 +47,9 @@ let get_hint_display_name hint =
     match h with
     |  "HH\\bool"                ->   "bool"
     |  "array"                   ->   "array"
-    |  "HH\\varray"              ->   if hack_arr_dv_arrs () then "HH\\vec" else "HH\\varray"
-    |  "HH\\darray"              ->   if hack_arr_dv_arrs () then "HH\\dict" else "HH\\darray"
-    |  "HH\\varray_or_darray"    ->   if hack_arr_dv_arrs ()
-                                      then "HH\\vec_or_dict" else "HH\\varray_or_darray"
+    |  "HH\\varray"              ->   "HH\\varray"
+    |  "HH\\darray"              ->   "HH\\darray"
+    |  "HH\\varray_or_darray"    ->   "HH\\varray_or_darray"
     |  "HH\\vec_or_dict"         ->   "HH\\vec_or_dict"
     |  "HH\\int"                 ->   "int"
     |  "HH\\num"                 ->   "num"

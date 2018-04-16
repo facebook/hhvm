@@ -89,8 +89,6 @@ UnaryOpExpression::UnaryOpExpression
 (EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS, ExpressionPtr exp, int op, bool front)
   : Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETER_VALUES),
     m_exp(exp), m_op(op), m_front(front) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs ||
-          (m_op != T_VARRAY && m_op != T_DARRAY));
   ctorInit();
 }
 
@@ -245,7 +243,7 @@ bool UnaryOpExpression::isThis() const {
 
 bool UnaryOpExpression::getScalarValue(Variant &value) {
   if (m_exp) {
-    if (m_op == T_ARRAY || m_op == T_DARRAY) {
+    if (m_op == T_ARRAY) {
       return m_exp->getScalarValue(value);
     }
     if (m_op == T_VARRAY) {
@@ -256,6 +254,22 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
         [&](const Variant& n, const Variant& v) {
           if (n.isInitialized()) return false;
           init.append(v);
+          return true;
+        }
+      );
+      if (!result) return false;
+      value = init.toVariant();
+      return true;
+    }
+    if (m_op == T_DARRAY) {
+      auto exp_list = dynamic_pointer_cast<ExpressionList>(m_exp);
+      if (!exp_list) return false;
+      DArrayInit init(exp_list->getCount());
+      auto const result = exp_list->getListScalars(
+        [&](const Variant& n, const Variant& v) {
+          if (!n.isInitialized()) return false;
+          if (!n.isInteger() && !n.isString()) return false;
+          init.setValidKey(n, v);
           return true;
         }
       );

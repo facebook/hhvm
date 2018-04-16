@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 
 namespace HPHP {
@@ -81,6 +82,10 @@ struct VariableUnserializer {
    * Set the beginning and end of internal buffer.
    */
   void set(const char* buf, const char* end);
+
+  void setDVOverrides(VariableSerializer::DVOverrides* overrides) {
+    m_dvOverrides = overrides;
+  }
 
  private:
   bool readOnly() const { return m_readOnly; }
@@ -197,6 +202,7 @@ private:
   req::vector<Object> m_sleepingObjects;
   const char* const m_begin;
   bool m_forceDArrays;
+  VariableSerializer::DVOverrides* m_dvOverrides = nullptr;
 
   void unserializeVariant(Variant& self,
                           UnserializeMode mode = UnserializeMode::Value);

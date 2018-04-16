@@ -44,15 +44,6 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_allowsUnknownFields(false),
                                 m_clsCnsShapeField(false),
                                 m_optionalShapeField(false) {
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    if (!strcasecmp(m_name.c_str(), "HH\\varray")) {
-      m_name = "HH\\vec";
-    } else if (!strcasecmp(m_name.c_str(), "HH\\darray")) {
-      m_name = "HH\\dict";
-    } else if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) {
-      m_name = "HH\\vec_or_dict";
-    }
-  }
 }
 
 std::string TypeAnnotation::vanillaName() const {
@@ -288,16 +279,19 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
     return TypeStructure::Kind::T_array;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\varray")) {
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return TypeStructure::Kind::T_array;
+    return RuntimeOption::EvalHackArrDVArrs
+      ? TypeStructure::Kind::T_vec
+      : TypeStructure::Kind::T_array;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\darray")) {
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return TypeStructure::Kind::T_array;
+    return RuntimeOption::EvalHackArrDVArrs
+      ? TypeStructure::Kind::T_dict
+      : TypeStructure::Kind::T_array;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) {
-    assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return TypeStructure::Kind::T_array;
+    return RuntimeOption::EvalHackArrDVArrs
+      ? TypeStructure::Kind::T_vec_or_dict
+      : TypeStructure::Kind::T_array;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\vec_or_dict")) {
     return TypeStructure::Kind::T_vec_or_dict;

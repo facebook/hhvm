@@ -93,6 +93,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   , m_levelDebugger(0)
   , m_currentDepth(0)
   , m_maxDepth(0)
+  , m_keyPrinted{false}
 {
   if (type == Type::DebuggerSerialize) {
     m_maxLevelDebugger = g_context->debuggerSettings.printLevel;
@@ -836,7 +837,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     break;
   case Type::VarExport:
   case Type::PHPOutput:
-    if (m_indent > 0 && m_rsrcName.empty()) {
+    if (m_indent > 0 && m_rsrcName.empty() && m_keyPrinted) {
       m_buf->append('\n');
       indent();
     }
@@ -853,18 +854,36 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
-        m_buf->append("dict [\n");
+        if (m_type == Type::PHPOutput && m_dvOverrides) {
+          m_buf->append(
+            (*m_dvOverrides)[m_dvOverridesIndex] ? "darray [\n" : "dict [\n"
+          );
+          m_dvOverridesIndex++;
+        } else {
+          m_buf->append("dict [\n");
+        }
         break;
       case ArrayKind::Vec:
-        m_buf->append("vec [\n");
+        if (m_type == Type::PHPOutput && m_dvOverrides) {
+          m_buf->append(
+            (*m_dvOverrides)[m_dvOverridesIndex] ? "varray [\n" : "vec [\n"
+          );
+          m_dvOverridesIndex++;
+        } else {
+          m_buf->append("vec [\n");
+        }
         break;
       case ArrayKind::Keyset:
         m_buf->append("keyset [\n");
         break;
       case ArrayKind::PHP:
-      case ArrayKind::VArray:
-      case ArrayKind::DArray:
         m_buf->append("array (\n");
+        break;
+      case ArrayKind::VArray:
+        m_buf->append(m_type == Type::PHPOutput ? "varray [\n" : "array (\n");
+        break;
+      case ArrayKind::DArray:
+        m_buf->append(m_type == Type::PHPOutput ? "darray [\n" : "array (\n");
         break;
       }
     }
@@ -1060,6 +1079,7 @@ void VariableSerializer::writeArrayKey(
   case Type::PHPOutput:
     indent();
     if (kind == AK::Vec || kind == AK::Keyset) return;
+    if (kind == AK::VArray && m_type == Type::PHPOutput) return;
     write(key, true);
     m_buf->append(" => ");
     break;
@@ -1173,10 +1193,16 @@ void VariableSerializer::writeArrayValue(
     break;
 
   case Type::VarExport:
-  case Type::PHPOutput:
+  case Type::PHPOutput: {
+    auto const oldKeyPrinted = m_keyPrinted;
+    m_keyPrinted =
+      (kind != ArrayKind::Vec && kind != ArrayKind::Keyset) &&
+      (kind != ArrayKind::VArray || m_type != Type::PHPOutput);
+    SCOPE_EXIT { m_keyPrinted = oldKeyPrinted; };
     write(value);
     m_buf->append(",\n");
     break;
+  }
 
   case Type::JSON: {
     ArrayInfo &info = m_arrayInfos.back();
@@ -1238,13 +1264,14 @@ void VariableSerializer::writeArrayFooter(
       case ArrayKind::Dict:
       case ArrayKind::Vec:
       case ArrayKind::Keyset:
-        m_buf->append("]");
+        m_buf->append(']');
         break;
       case ArrayKind::PHP:
-      case ArrayKind::VArray:
-      case ArrayKind::DArray:
         m_buf->append(')');
         break;
+      case ArrayKind::VArray:
+      case ArrayKind::DArray:
+        m_buf->append(m_type == Type::PHPOutput ? ']' : ')');
       }
     }
     break;
@@ -1516,8 +1543,9 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
   }
 
   if (arr->size() == 0) {
-    writeArrayHeader(0, arr->isVectorData(), getKind(arr));
-    writeArrayFooter(getKind(arr));
+    auto const kind = getKind(arr);
+    writeArrayHeader(0, arr->isVectorData(), kind);
+    writeArrayFooter(kind);
     return;
   }
   if (!skipNestCheck) {

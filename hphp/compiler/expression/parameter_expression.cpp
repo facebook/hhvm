@@ -253,14 +253,22 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
       case KindOfVec:
         compat = (acceptAny ||
                   !strcasecmp(hint, "HH\\vec") ||
-                  !strcasecmp(hint, "HH\\vec_or_dict"));
+                  !strcasecmp(hint, "HH\\vec_or_dict") ||
+                  (RuntimeOption::EvalHackArrDVArrs &&
+                   (!strcasecmp(hint, "HH\\varray") ||
+                    !strcasecmp(hint, "HH\\varray_or_darray")))
+                 );
         return;
 
       case KindOfPersistentDict:
       case KindOfDict:
         compat = (acceptAny ||
                   !strcasecmp(hint, "HH\\dict") ||
-                  !strcasecmp(hint, "HH\\vec_or_dict"));
+                  !strcasecmp(hint, "HH\\vec_or_dict") ||
+                  (RuntimeOption::EvalHackArrDVArrs &&
+                   (!strcasecmp(hint, "HH\\darray") ||
+                    !strcasecmp(hint, "HH\\varray_or_darray")))
+                 );
         return;
 
       case KindOfPersistentKeyset:
@@ -272,10 +280,11 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
       case KindOfArray:
         compat = (acceptAny ||
                   !strcasecmp(hint, "array") ||
-                  !strcasecmp(hint, "HH\\varray") ||
-                  !strcasecmp(hint, "HH\\darray") ||
-                  !strcasecmp(hint, "HH\\varray_or_darray")
-                 );
+                  (!RuntimeOption::EvalHackArrDVArrs &&
+                   (!strcasecmp(hint, "HH\\varray") ||
+                    !strcasecmp(hint, "HH\\darray") ||
+                    !strcasecmp(hint, "HH\\varray_or_darray"))
+                  ));
         return;
 
       case KindOfObject:

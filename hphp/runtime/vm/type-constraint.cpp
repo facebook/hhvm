@@ -63,18 +63,6 @@ void TypeConstraint::init() {
   if (mptr) {
     m_type = *mptr;
     assertx(getAnnotDataType(m_type) != KindOfPersistentString);
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      assertx(m_type != AnnotType::VArray &&
-             m_type != AnnotType::DArray &&
-             m_type != AnnotType::VArrOrDArr);
-      if (m_typeName->isame(s_varray.get())) {
-        m_typeName = s_vec.get();
-      } else if (m_typeName->isame(s_darray.get())) {
-        m_typeName = s_dict.get();
-      } else if (m_typeName->isame(s_varray_or_darray.get())) {
-        m_typeName = s_vec_or_dict.get();
-      }
-    }
     return;
   }
   if (m_flags & Flags::Resolved) {

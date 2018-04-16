@@ -16,9 +16,6 @@ module SN = Naming_special_names
 module ULS = Unique_list_string
 open H
 
-let hack_arr_dv_arrs () =
-  Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
-
 (* Generic helpers *)
 let sep pieces = String.concat " " pieces
 
@@ -1118,15 +1115,6 @@ and string_of_param_default_value ~env expr =
       Some (string_of_param_default_value ~env e)
     | _ -> None
   in
-  let is_static_expr () =
-    let env = Option.value ~default:Emit_env.empty env.codegen_env in
-    Option.is_some @@
-      Ast_constant_folder.expr_to_opt_typed_value
-        ~allow_maps:true
-        ~restrict_keys:(hack_arr_dv_arrs ())
-        (Emit_env.get_namespace env)
-        expr
-  in
   let escape_char_for_printing = function
     | '\\' | '$' | '"' -> "\\\\"
     | '\n' | '\r' | '\t' -> "\\"
@@ -1179,10 +1167,10 @@ and string_of_param_default_value ~env expr =
     let fl =
       List.map
         (fun (f_name, e) ->
-          A.AFkvalue (shape_field_name_to_expr f_name, e))
+          (shape_field_name_to_expr f_name, e))
         fl
     in
-    string_of_param_default_value ~env (fst expr, A.Array fl)
+    string_of_param_default_value ~env (fst expr, A.Darray fl)
   | A.Binop (bop, e1, e2) ->
     let bop = string_of_bop bop in
     let e1 = string_of_param_default_value ~env e1 in
@@ -1288,27 +1276,11 @@ and string_of_param_default_value ~env expr =
     let h = string_of_hint ~ns:true h in
     e ^ o ^ h
   | A.Varray es ->
-    (* TODO(T27176468):
-     * Everything should be printed as varray not only static ones *)
-    if env.in_xhp ||
-      (Emit_env.is_hh_syntax_enabled () && not (is_static_expr ()))
-    then begin
-      let es = List.map (string_of_param_default_value ~env) es in
-      "varray[" ^ (String.concat ", " es) ^ "]"
-    end
-    else begin
-      let index i = p, A.Int (p, string_of_int i) in
-      string_of_param_default_value ~env @@
-       (p, A.Array (List.mapi (fun i e -> A.AFkvalue (index i, e)) es))
-    end
+     let es = List.map (string_of_param_default_value ~env) es in
+     "varray[" ^ (String.concat ", " es) ^ "]"
   | A.Darray es ->
-    (* TODO(T27176468):
-     * Everything should be printed as darray not only static ones *)
-    let es = List.map (fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
-    if env.in_xhp ||
-      (Emit_env.is_hh_syntax_enabled () && not (is_static_expr ()))
-    then "darray[" ^ (string_of_afield_list ~env es) ^ "]"
-    else string_of_param_default_value ~env @@ (p, A.Array es)
+     let es = List.map (fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
+     "darray[" ^ (string_of_afield_list ~env es) ^ "]"
   | A.Import (fl, e) ->
     let fl = string_of_import_flavor fl in
     let e = string_of_param_default_value ~env e in

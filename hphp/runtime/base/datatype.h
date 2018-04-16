@@ -102,7 +102,7 @@ using MaybeDataType = folly::Optional<DataType>;
 /*
  * Extracts the DataType from the given type
  */
-inline MaybeDataType get_datatype(
+MaybeDataType get_datatype(
   const std::string& name,
   bool can_be_collection,
   bool is_function,
@@ -110,49 +110,7 @@ inline MaybeDataType get_datatype(
   bool is_tuple,
   bool is_nullable,
   bool is_soft
-) {
-  if (is_function || is_xhp || is_tuple) {
-    return KindOfObject;
-  }
-  if (can_be_collection) {
-    if (!strcasecmp(name.c_str(), "array"))      return KindOfArray;
-    if (!strcasecmp(name.c_str(), "HH\\vec"))    return KindOfVec;
-    if (!strcasecmp(name.c_str(), "HH\\dict"))   return KindOfDict;
-    if (!strcasecmp(name.c_str(), "HH\\keyset")) return KindOfKeyset;
-    if (!strcasecmp(name.c_str(), "HH\\varray")) return KindOfArray;
-    if (!strcasecmp(name.c_str(), "HH\\darray")) return KindOfArray;
-    if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return folly::none;
-    if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return folly::none;
-    return KindOfObject;
-  }
-  if (is_nullable || is_soft) {
-    return folly::none;
-  }
-  if (!strcasecmp(name.c_str(), "null") ||
-      !strcasecmp(name.c_str(), "HH\\void")) {
-    return KindOfNull;
-  }
-  if (!strcasecmp(name.c_str(), "HH\\bool"))     return KindOfBoolean;
-  if (!strcasecmp(name.c_str(), "HH\\int"))      return KindOfInt64;
-  if (!strcasecmp(name.c_str(), "HH\\float"))    return KindOfDouble;
-  if (!strcasecmp(name.c_str(), "HH\\num"))      return folly::none;
-  if (!strcasecmp(name.c_str(), "HH\\arraykey")) return folly::none;
-  if (!strcasecmp(name.c_str(), "HH\\string"))   return KindOfString;
-  if (!strcasecmp(name.c_str(), "array"))        return KindOfArray;
-  if (!strcasecmp(name.c_str(), "HH\\dict"))     return KindOfDict;
-  if (!strcasecmp(name.c_str(), "HH\\vec"))      return KindOfVec;
-  if (!strcasecmp(name.c_str(), "HH\\keyset"))   return KindOfKeyset;
-  if (!strcasecmp(name.c_str(), "HH\\varray"))   return KindOfArray;
-  if (!strcasecmp(name.c_str(), "HH\\darray"))   return KindOfArray;
-  if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return folly::none;
-  if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return folly::none;
-  if (!strcasecmp(name.c_str(), "HH\\resource")) return KindOfResource;
-  if (!strcasecmp(name.c_str(), "HH\\mixed"))    return folly::none;
-  if (!strcasecmp(name.c_str(), "HH\\nonnull"))  return folly::none;
-
-  return KindOfObject;
-}
-
+);
 
 ///////////////////////////////////////////////////////////////////////////////
 

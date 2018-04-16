@@ -226,10 +226,6 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstRawPtr ar,
 
     auto const token = [&]{
       if (value.isPHPArray()) {
-        assertx(
-          !RuntimeOption::EvalHackArrDVArrs ||
-          (!value.asCArrRef().isVArray() && !value.asCArrRef().isDArray())
-        );
         if (value.asCArrRef().isVArray()) return T_VARRAY;
         if (value.asCArrRef().isDArray()) return T_DARRAY;
         return T_ARRAY;

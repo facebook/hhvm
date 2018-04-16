@@ -3,6 +3,9 @@
 
 type T1 = (bool, int, string, array);
 type T2 = shape('a' => bool, 'c' => int, 'd' => array);
+type T3 = varray;
+type T4 = darray;
+type T5 = varray_or_darray;
 
 class C {
   const type T = ?array<int, @bool>;
@@ -41,6 +44,9 @@ function dump($x) {
 function main() {
   dump(type_structure(T1::class));
   dump(type_structure(T2::class));
+  dump(type_structure(T3::class));
+  dump(type_structure(T4::class));
+  dump(type_structure(T5::class));
 
   $x = new ReflectionTypeConstant('C', 'T');
   dump($x->getTypeStructure());

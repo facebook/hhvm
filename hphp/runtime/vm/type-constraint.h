@@ -223,16 +223,31 @@ struct TypeConstraint {
     return m_type == Type::Array ||
       isVArray() || isDArray() || isVArrayOrDArray();
   }
-  bool isDict()     const { return m_type == Type::Dict; }
-  bool isVec()      const { return m_type == Type::Vec; }
+  bool isDict()     const {
+    return m_type == Type::Dict ||
+      (RuntimeOption::EvalHackArrDVArrs && m_type == Type::DArray);
+  }
+  bool isVec()      const {
+    return m_type == Type::Vec ||
+      (RuntimeOption::EvalHackArrDVArrs && m_type == Type::VArray);
+  }
   bool isKeyset()   const { return m_type == Type::Keyset; }
-  bool isVecOrDict() const { return m_type == Type::VecOrDict; }
+  bool isVecOrDict() const {
+    return m_type == Type::VecOrDict ||
+      (RuntimeOption::EvalHackArrDVArrs && m_type == Type::VArrOrDArr);
+  }
 
   bool isObject()   const { return m_type == Type::Object; }
 
-  bool isVArray()   const { return m_type == Type::VArray; }
-  bool isDArray()   const { return m_type == Type::DArray; }
-  bool isVArrayOrDArray() const { return m_type == Type::VArrOrDArr; }
+  bool isVArray()   const {
+    return !RuntimeOption::EvalHackArrDVArrs && m_type == Type::VArray;
+  }
+  bool isDArray()   const {
+    return !RuntimeOption::EvalHackArrDVArrs && m_type == Type::DArray;
+  }
+  bool isVArrayOrDArray() const {
+    return !RuntimeOption::EvalHackArrDVArrs && m_type == Type::VArrOrDArr;
+  }
 
   AnnotType type()  const { return m_type; }
 

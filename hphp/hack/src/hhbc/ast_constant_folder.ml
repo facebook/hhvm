@@ -235,7 +235,7 @@ and array_to_typed_value ns fields =
 
 and varray_to_typed_value ns fields =
   let tv_fields = (List.map fields ~f:(expr_to_typed_value ns)) in
-  if hack_arr_dv_arrs () then (TV.Vec tv_fields) else (TV.VArray tv_fields)
+  TV.VArray tv_fields
 
 and darray_to_typed_value ns fields =
   let fields =
@@ -255,7 +255,7 @@ and darray_to_typed_value ns fields =
         | _ -> (key_expr_to_typed_value ns v1, expr_to_typed_value ns v2))
   in
   let a = update_duplicates_in_map fields in
-  if hack_arr_dv_arrs () then (TV.Dict a) else (TV.DArray a)
+  TV.DArray a
 
 and shape_to_typed_value ns fields =
   let a = List.map fields (fun (sf, expr) ->
@@ -267,7 +267,7 @@ and shape_to_typed_value ns fields =
         class_const_to_typed_value ns (Pos.none, A.Id class_id) id in
     (key, expr_to_typed_value ns expr))
   in
-  if hack_arr_dv_arrs () then (TV.Dict a) else (TV.DArray a)
+  TV.DArray a
 
 and key_expr_to_typed_value ?(restrict_keys=false) ns expr =
   let tv = expr_to_typed_value ns expr in

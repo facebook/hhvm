@@ -845,17 +845,17 @@ static void pagein_self(void) {
 #if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 5)
   // jemalloc 5 has background threads, which handle purging asynchronously.
   bool background_threads = false;
-  if (mallctlRead("background_thread", &background_threads)) {
+  if (mallctlRead("background_thread", &background_threads, /* errOK */ true)) {
     background_threads = false;
     Logger::Warning("Failed to determine jemalloc background thread state");
   }
   if (background_threads &&
-      mallctlWrite("background_thread", false, /* errorOK */ true)) {
+      mallctlWrite("background_thread", false, /* errOK */ true)) {
     Logger::Warning("Failed to disable jemalloc background threads");
   }
   SCOPE_EXIT {
     if (background_threads &&
-        mallctlWrite("background_thread", true, /* errorOK */ true)) {
+        mallctlWrite("background_thread", true, /* errOK */ true)) {
       Logger::Warning("Failed to enable jemalloc background threads");
     }
   };

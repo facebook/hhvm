@@ -115,8 +115,7 @@ The first utility of this information is pretty obvious: if a DecRef
 instruction is encountered when the lower bound of must-alias-set is greater
 than one, that DecRef instruction can be converted to DecRefNZ, since it can't
 possibly free the object.  Knowledge of the lower bound is also required for
-folding unobservable incref/decref pairs, and generally this information is
-inspected by most of the things done as RC flowgraph transformations.
+folding unobservable incref/decref pairs, sinking increfs or hoisting decrefs.
 
 The lower bound must be tracked conservatively to ensure that our
 transformations are correct.  This means we can increase a lower bound only
@@ -396,10 +395,8 @@ With this in mind, we'll discuss all four cases:
 
   Unknown target, Zero LB:
 
-     We flag all must-alias-sets as "pessimized".  This state inserts a Halt
-     node in each of the RC flowgraphs, and stops all optimizations along that
-     control flow path: it prevents us from doing anything else in any
-     successor blocks.
+     We flag all must-alias-sets as "pessimized".  This state removes all
+     support, and sets all lower bounds to zero.
 
   Known target, Zero LB:
 
@@ -444,12 +441,10 @@ our tracked objects.
 The way we maintain correctness here is to never move or eliminate reference
 counting operations unless we know about at least /two/ references to the
 object being counted.  The importance of this is easiest to illustrate with
-delayed increfs (relevant to rules inc_pass_req, inc_pass_phi, and
-inc_pass_sig), although it applies to inc/dec pair removal also: it is fine to
-move an incref forward in the IR instruction stream, as long as nothing could
-observe the difference between the reference count the object "should" have,
-and the one it will have after we delay the incref.  We need to consider how
-reachability from the heap can affect this.
+delayed increfs: it is fine to move an incref forward in the IR instruction
+stream, as long as nothing could observe the difference between the reference
+count the object "should" have, and the one it will have after we delay the
+incref.  We need to consider how reachability from the heap can affect this.
 
 If the lower bound at an incref instruction is two or greater, we know we can
 push the incref down as much as we want (basically until we reach an exit from
@@ -460,10 +455,7 @@ any instruction that could decref /anything/ in any memory location, since
 we're making the assumption that there may be other live pointers to the
 object---if we were to push that incref forward, we could change whether other
 pointers to the object are considered the last reference, and cause a decref to
-free the object when it shouldn't.  (We could try to do this on the rc
-flowgraphs, but at least in a trivial implementation it would lead to a much
-larger number of flowgraph nodes, so instead we leave easy cases to a separate,
-local, "remove_trivial_incdecs" pass and ignore hard cases.)
+free the object when it shouldn't.
 
 The above two cases are relatively straightforward.  The remaining case is when
 the lower bound before an incref is one.  It turns out to be safe to sink in
@@ -494,34 +486,12 @@ pointers we don't know about constitute the last counted reference to an
 object, we are both preventing decrefs from going to zero when they shouldn't,
 and modifications to objects from failing to COW when they should.
 
-A fundamental meta-rule that arises out of all the above considerations for any
-of the RC flowgraph transformation rules is that we cannot move (or remove)
-increfs unless the lower bound on the incref node is at least one (meaning
-after the incref we "know about two references").  Similarly, anything that
-could reduce the lower bound must put a node in the RC flowgraph to update that
-information (a Req{1} node usually) so we don't push increfs too far or remove
+A fundamental meta-rule that arises out of all the above considerations is that
+we cannot move (or remove) increfs unless the lower bound on the incref node is
+at least one (meaning after the incref we "know about two references").
+Similarly, anything that could reduce the lower bound must observe the refcount
+at that point (an NReq{1} usually) so we don't push increfs too far or remove
 them when we shouldn't.
-
-
--- "Trivial" incdec removal pass --
-
-This module also contains a local optimization that removes IncRef/DecRefNZ
-pairs in a block that have no non-"pure" memory-accessing instructions in
-between them.
-
-This optimization can be performed without regard to the lower bound of any
-objects involved, and the DecRef -> DecRefNZ transformations the rest of the
-code makes can create situations where these opportunities are visible.  Some
-of these situations would be removable by the main pass if we had a more
-complicated scheme for dealing with "unknown heap pointers" (i.e. the stuff in
-the "more about memory" section described above).  But other situations may
-also occur because the main pass may create unnecessary Req nodes in the middle
-of code sequences that don't really observe references when we're dealing with
-unrelated PureStores of possibly-aliasing tmps that have lower bounds of zero.
-
-In general it is a simple pass to reason about the correctness of, and it
-cleans up some things we can miss, so it is easier to do some of the work this
-way than to complicate the main pass further.
 
 */
 

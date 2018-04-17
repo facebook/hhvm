@@ -2326,7 +2326,7 @@ function get_hhvm_compiler_frontend($options, $test) {
     true
   );
   if (is_array($hhvm)) $hhvm = $hhvm[0];
-  return system($hhvm);
+  return exec($hhvm);
 }
 
 function run_test($options, $test) {

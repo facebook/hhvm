@@ -337,7 +337,7 @@ function hh_fixme() {}
 //       ^107:10
 "
 
-let docblockCases = [
+let docblock_cases = [
   ("docblock.php", 7, 3), [
     {
       snippet = "class DocBlock";
@@ -558,7 +558,7 @@ let files = [
 
 let cases =
   special_cases_cases
-  @ docblockCases
+  @ docblock_cases
   @ class_members_cases
   @ classname_call_cases
   @ chained_calls_cases

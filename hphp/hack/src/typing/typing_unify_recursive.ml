@@ -116,10 +116,12 @@ let rec findFirstVarOrOptionVar env n tyl =
 
   | ty::tyl ->
     match occursUnderOptions 0 env n ty with
-    | Some count ->
+    | Some count1 ->
       begin match findFirstVarOrOptionVar env n tyl with
-      | None -> Some(count,tyl)
-      | Some _ -> None
+      | None -> Some (count1, tyl)
+      | Some (count2, tys) ->
+        let maxcount = if count1 > count2 then count1 else count2 in
+        Some (maxcount, tys)
       end
     | None ->
       begin match findFirstVarOrOptionVar env n tyl with

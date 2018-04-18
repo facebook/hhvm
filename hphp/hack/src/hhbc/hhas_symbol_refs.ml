@@ -13,7 +13,7 @@ type include_path =
   | SearchPathRelative of string           (* foo/bar/baz.php *)
   | IncludeRootRelative of string * string (* $_SERVER['PHP_ROOT'] . "foo/bar/baz.php" *)
   | DocRootRelative of string
-[@@deriving compare, show]
+[@@deriving show]
 
 module IncludePathSet = Set.Make(struct
   type nonrec t = include_path

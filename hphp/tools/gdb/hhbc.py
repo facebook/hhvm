@@ -32,7 +32,11 @@ def iva_imm_types():
 
 @memoized
 def vec_imm_types():
-    return [V('HPHP::' + t) for t in ['BLA', 'ILA', 'VSA', 'SLA']]
+    return [V('HPHP::' + t) for t in ['BLA', 'VSA', 'SLA']]
+
+@memoized
+def iter_table_types():
+    return [V('HPHP::' + t) for t in ['ILA']]
 
 @memoized
 def cell_loc_mcodes():
@@ -172,6 +176,26 @@ class HHBC(object):
 
             info['size'] = T('int32_t').sizeof + elm_size * num_elms
             info['value'] = '<vector>'
+
+        elif immtype in iter_table_types():
+            info['size'] = 0
+            info['value'] = '<vector>'
+
+            size = HHBC.decode_iva(ptr)
+            info['size'] += size['size']
+            ptr += size['size']
+
+            for _x in range(0, size['value']):
+                itertype = HHBC.decode_iva(ptr)
+                ptr += itertype['size']
+                info['size'] += itertype['size']
+                iterid = HHBC.decode_iva(ptr)
+                ptr += iterid['size']
+                info['size'] += iterid['size']
+                if itertype['value'] == V('HPHP::KindOfLIter'):
+                    localid = HHBC.decode_iva(ptr)
+                    ptr += localid['size']
+                    info['size'] += localid['size']
 
         elif immtype == V('HPHP::KA'):
             ptr = ptr.cast(T('unsigned char').pointer())
@@ -339,7 +363,7 @@ remains where it left off after the previous call.
 
         bcstart = self.bcpos - self.bcoff
 
-        for i in xrange(0, self.count):
+        for _i in xrange(0, self.count):
             instr = HHBC.instr_info(self.bcpos)
             if instr is None:
                 print('hhx: Bytecode dump failed')

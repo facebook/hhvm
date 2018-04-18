@@ -114,7 +114,20 @@ inline bool operator!=(const LocalRange& a, const LocalRange& b) {
   return !(a == b);
 }
 
-using IterTabEnt    = std::pair<IterKind,IterId>;
+struct IterTabEnt {
+  IterKind kind;
+  IterId id;
+  LocalId local;
+};
+
+inline bool operator==(const IterTabEnt& a, const IterTabEnt& b) {
+  return std::tie(a.kind, a.id, a.local) == std::tie(b.kind, b.id, b.local);
+}
+
+inline bool operator!=(const IterTabEnt& a, const IterTabEnt& b) {
+  return !(a == b);
+}
+
 using IterTab       = CompactVector<IterTabEnt>;
 
 using SwitchTab     = CompactVector<BlockId>;
@@ -146,8 +159,13 @@ struct hasher_impl {
   static size_t hash(LSString s) { return s->hash(); }
   static size_t hash(RepoAuthType rat) { return rat.hash(); }
 
-  static size_t hash(std::pair<IterKind,IterId> kv) {
-    return std::hash<IterId>()(kv.second);
+  static size_t hash(const IterTabEnt& iterTab) {
+    auto const partial = folly::hash::hash_128_to_64(
+      iterTab.kind, iterTab.id
+    );
+    return static_cast<size_t>(
+      folly::hash::hash_128_to_64(iterTab.local, partial)
+    );
   }
 
   static size_t hash(MKey mkey) {

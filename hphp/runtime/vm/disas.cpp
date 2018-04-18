@@ -285,20 +285,29 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   };
 
   auto print_itertab = [&] {
-    auto const vecLen = decode<int32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     out.fmt(" <");
     for (auto i = int32_t{0}; i < vecLen; ++i) {
-      auto const kind = static_cast<IterKind>(decode<int32_t>(pc));
-      auto const id   = decode<int32_t>(pc);
+      auto const kind = static_cast<IterKind>(decode_iva(pc));
+      auto const id   = decode_iva(pc);
       auto const kindStr = [&]() -> const char* {
         switch (kind) {
         case KindOfIter:   return "(Iter)";
         case KindOfMIter:  return "(MIter)";
         case KindOfCIter:  return "(CIter)";
+        case KindOfLIter:  return "(LIter)";
         }
         not_reached();
       }();
-      out.fmt("{}{} {}", i != 0 ? ", " : "", kindStr, id);
+      if (kind == KindOfLIter) {
+        out.fmt(
+          "{}{} {} {}",
+          i != 0 ? ", " : " ",
+          kindStr, id, loc_name(finfo, decode_iva(pc))
+        );
+      } else {
+        out.fmt("{}{} {}", i != 0 ? ", " : " ", kindStr, id);
+      }
     }
     out.fmt(">");
   };

@@ -42,6 +42,9 @@ static void populateImmediates(NormalizedInstruction& inst) {
   if (hasImmVector(inst.op())) {
     inst.immVec = getImmVector(inst.pc());
   }
+  if (hasIterTable(inst.op())) {
+    inst.immIters = getIterTable(inst.pc());
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

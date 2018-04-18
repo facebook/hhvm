@@ -312,8 +312,23 @@ std::string show(const php::Func& func, const Bytecode& bc) {
 
   auto append_itertab = [&] (const IterTab& tab) {
     ret += "<";
-    for (auto& kv : tab) {
-      folly::toAppend(kv.first, ",", kv.second, " ", &ret);
+    auto const kindStr = [&] (IterKind kind) -> const char* {
+      switch (kind) {
+      case KindOfIter:   return "Iter";
+      case KindOfMIter:  return "MIter";
+      case KindOfCIter:  return "CIter";
+      case KindOfLIter:  return "LIter";
+      }
+      not_reached();
+    };
+
+    const char* sep = "";
+    for (auto const& kv : tab) {
+      folly::toAppend(sep, kindStr(kv.kind), ",iter:", kv.id, &ret);
+      if (kv.kind == KindOfLIter) {
+        folly::toAppend(",", local_string(func, kv.local), &ret);
+      }
+      sep = " ";
     }
     ret += ">";
   };

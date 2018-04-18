@@ -80,7 +80,9 @@ struct BlockInfo {
 struct IterKindId {
   IterKind kind;
   Id id;
+  int local;
 };
+using IterKindIdTable = std::vector<IterKindId>;
 
 struct FuncChecker {
   FuncChecker(const Func* func, ErrorMode mode);
@@ -148,7 +150,7 @@ struct FuncChecker {
   int numParams() const { return m_func->numParams(); }
   int numClsRefSlots() const { return m_func->numClsRefSlots(); }
   const Unit* unit() const { return m_func->unit(); }
-  folly::Range<const IterKindId*> iterBreakIds(PC pc) const;
+  IterKindIdTable iterBreakIds(PC& pc) const;
 
  private:
   template<class... Args>
@@ -470,15 +472,15 @@ bool FuncChecker::checkImmI32LA(PC& pc, PC const instr) {
 }
 
 bool FuncChecker::checkImmILA(PC& pc, PC const /*instr*/) {
-  auto ids = iterBreakIds(pc);
+  auto const ids = iterBreakIds(pc);
   if (ids.size() < 1) {
-    error("invalid length of immediate vector %lu at Offset %d\n",
+    error("invalid length of iterator table %lu at Offset %d\n",
           ids.size(), offset(pc));
     return false;
   }
   auto ok = true;
-  for (auto& iter : ids) {
-    if (iter.kind < KindOfIter || iter.kind > KindOfCIter) {
+  for (auto const& iter : ids) {
+    if (iter.kind < KindOfIter || iter.kind > KindOfLIter) {
       error("invalid iterator kind %d in iter-vec at offset %d\n",
       iter.kind, offset(pc));
       ok = false;
@@ -488,9 +490,17 @@ bool FuncChecker::checkImmILA(PC& pc, PC const /*instr*/) {
       iter.id, offset(pc));
       ok = false;
     }
+    if (iter.kind == KindOfLIter) {
+      if (iter.local < 0 || iter.local >= numLocals()) {
+        error("invalid iterator local %d at %d\n", iter.local, offset(pc));
+        ok = false;
+      }
+    } else if (iter.local != kInvalidId) {
+      error("invalid iterator local for non-LIter at %d\n", offset(pc));
+      ok = false;
+    }
   }
-  // now skip the vec
-  return checkImmVec(pc, sizeof(IterKindId)) && ok;
+  return ok;
 }
 
 bool FuncChecker::checkImmIVA(PC& pc, PC const instr) {
@@ -651,10 +661,18 @@ bool FuncChecker::checkImmLAR(PC& pc, PC const instr) {
   return ok;
 }
 
-folly::Range<const IterKindId*> FuncChecker::iterBreakIds(PC pc) const {
-  auto vec = reinterpret_cast<const int32_t*>(pc);
-  auto itervec = reinterpret_cast<const IterKindId*>(vec + 1);
-  return {itervec, itervec + vec[0]};
+IterKindIdTable FuncChecker::iterBreakIds(PC& pc) const {
+  IterKindIdTable ret;
+  auto const length = decode_iva(pc);
+  for (int i = 0; i < length; ++i) {
+    auto const kind = static_cast<IterKind>(decode_iva(pc));
+    auto const id = static_cast<Id>(decode_iva(pc));
+    auto const local = (kind == KindOfLIter)
+      ? static_cast<int32_t>(decode_iva(pc))
+      : kInvalidId;
+    ret.push_back(IterKindId{kind, id, local});
+  }
+  return ret;
 }
 
 /**
@@ -1489,7 +1507,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
 bool FuncChecker::checkIterBreak(State* cur, PC pc) {
   pc += encoded_op_size(Op::IterBreak); // skip opcode
   decode_raw<Offset>(pc); // skip target offset
-  for (auto& iter : iterBreakIds(pc)) {
+  for (auto const& iter : iterBreakIds(pc)) {
     if (!cur->iters[iter.id]) {
       error("Cannot access un-initialized iter %d\n", iter.id);
       return false;
@@ -1790,7 +1808,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   } else if (Op(*b->last) == Op::IterBreak) {
     auto pc = b->last + encoded_op_size(Op::IterBreak);
     decode_raw<Offset>(pc);
-    for (auto& iter : iterBreakIds(pc)) {
+    for (auto const& iter : iterBreakIds(pc)) {
       cur->iters[iter.id] = false;
     }
     ok &= checkEdge(b, *cur, b->succs[0]);

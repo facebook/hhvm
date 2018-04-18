@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/vm/member-key.h"
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/either.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
@@ -218,6 +219,7 @@ enum IterKind {
   KindOfIter  = 0,
   KindOfMIter = 1,
   KindOfCIter = 2,
+  KindOfLIter = 3,
 };
 
 #define FATAL_OPS                               \
@@ -868,18 +870,32 @@ private:
   const uint8_t* m_start;
 };
 
+struct IterTableEnt {
+  IterKind kind;
+  int32_t id;
+  int32_t local;
+};
+using IterTable = CompactVector<IterTableEnt>;
+
 // Must be an opcode that actually has an ImmVector.
 ImmVector getImmVector(PC opcode);
+
+// Must be an opcode that actually has an IterTable.
+IterTable getIterTable(PC opcode);
 
 // Some decoding helper functions.
 int numImmediates(Op opcode);
 ArgType immType(Op opcode, int idx);
 int immSize(PC opcode, int idx);
 bool immIsVector(Op opcode, int idx);
+bool immIsIterTable(Op opcode, int idx);
 bool hasImmVector(Op opcode);
+bool hasIterTable(Op opcode);
 int instrLen(PC opcode);
 int numSuccs(PC opcode);
 bool pushesActRec(Op opcode);
+
+IterTable iterTableFromStream(PC&);
 
 /*
  * The returned struct has normalized variable-sized immediates. u must be

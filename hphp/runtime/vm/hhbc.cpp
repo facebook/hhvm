@@ -159,8 +159,6 @@ int immSize(PC origPC, int idx) {
     auto itype = immType(op, idx);
     if (itype == BLA) {
       vecElemSz = sizeof(Offset);
-    } else if (itype == ILA) {
-      vecElemSz = 2 * sizeof(uint32_t);
     } else if (itype == VSA) {
       vecElemSz = sizeof(Id);
     } else if (itype == I32LA) {
@@ -172,20 +170,47 @@ int immSize(PC origPC, int idx) {
     return sizeof(int32_t) + vecElemSz * decode_raw<int32_t>(pc);
   }
 
+  if (immIsIterTable(op, idx)) {
+    if (idx >= 1) pc += immSize(origPC, 0);
+    if (idx >= 2) pc += immSize(origPC, 1);
+    if (idx >= 3) pc += immSize(origPC, 2);
+    if (idx >= 4) pc += immSize(origPC, 3);
+    auto start = pc;
+    auto const size = decode_iva(pc);
+    for (int i = 0; i < size; ++i) {
+      auto const kind = static_cast<IterKind>(decode_iva(pc));
+      decode_iva(pc);
+      if (kind == KindOfLIter) decode_iva(pc);
+    }
+    return pc - start;
+  }
+
   ArgType type = immType(op, idx);
   return (type >= 0) ? argTypeToSizes[type] : 0;
 }
 
 bool immIsVector(Op opcode, int idx) {
   ArgType type = immType(opcode, idx);
-  return type == BLA || type == SLA || type == ILA || type == VSA ||
-         type == I32LA;
+  return type == BLA || type == SLA || type == VSA || type == I32LA;
+}
+
+bool immIsIterTable(Op opcode, int idx) {
+  auto const type = immType(opcode, idx);
+  return type == ILA;
 }
 
 bool hasImmVector(Op opcode) {
   const int num = numImmediates(opcode);
   for (int i = 0; i < num; ++i) {
     if (immIsVector(opcode, i)) return true;
+  }
+  return false;
+}
+
+bool hasIterTable(Op opcode) {
+  auto const num = numImmediates(opcode);
+  for (int i = 0; i < num; ++i) {
+    if (immIsIterTable(opcode, i)) return true;
   }
   return false;
 }
@@ -825,19 +850,23 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
   out += ">";                                                  \
 } while (false)
 
-#define READIVEC() do {                                 \
-  int sz = decode_raw<int>(it);                         \
+#define READITERTAB() do {                              \
+  auto const sz = decode_iva(it);                       \
   out += " <";                                          \
   const char* sep = "";                                 \
   for (int i = 0; i < sz; ++i) {                        \
     out += sep;                                         \
-    IterKind k = (IterKind)decode_raw<Id>(it);          \
-    switch(k) {                                         \
+    auto const k = (IterKind)decode_iva(it);            \
+    switch (k) {                                        \
       case KindOfIter:  out += "(Iter) ";  break;       \
       case KindOfMIter: out += "(MIter) "; break;       \
       case KindOfCIter: out += "(CIter) "; break;       \
+      case KindOfLIter: out += "(LIter) "; break;       \
     }                                                   \
-    folly::format(&out, "{}", decode_raw<Id>(it));      \
+    folly::format(&out, "{}", decode_iva(it));           \
+    if (k == KindOfLIter) {                             \
+      folly::format(&out, " L:{}", decode_iva(it));     \
+    }                                                   \
     sep = ", ";                                         \
   }                                                     \
   out += ">";                                           \
@@ -851,7 +880,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define NA
 #define H_BLA READSVEC()
 #define H_SLA READSVEC()
-#define H_ILA READIVEC()
+#define H_ILA READITERTAB()
 #define H_I32LA READI32VEC()
 #define H_IVA READIVA()
 #define H_I64A READ(int64_t)
@@ -1149,7 +1178,7 @@ ImmVector getImmVector(PC opcode) {
   int numImm = numImmediates(op);
   for (int k = 0; k < numImm; ++k) {
     ArgType t = immType(op, k);
-    if (t == BLA || t == SLA || t == ILA || t == I32LA) {
+    if (t == BLA || t == SLA || t == I32LA) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
         static_cast<const int32_t*>(vp)
@@ -1162,6 +1191,32 @@ ImmVector getImmVector(PC opcode) {
     }
   }
 
+  not_reached();
+}
+
+IterTable iterTableFromStream(PC& pc) {
+  IterTable ret;
+  auto const length = decode_iva(pc);
+  for (int32_t i = 0; i < length; ++i) {
+    auto const kind = static_cast<IterKind>(decode_iva(pc));
+    auto const id = decode_iva(pc);
+    auto const local = (kind == KindOfLIter)
+      ? static_cast<int32_t>(decode_iva(pc))
+      : kInvalidId;
+    ret.push_back(IterTableEnt{kind, static_cast<int32_t>(id), local});
+  }
+  return ret;
+}
+
+IterTable getIterTable(PC opcode) {
+  auto const op = peek_op(opcode);
+  auto const numImm = numImmediates(op);
+  for (int k = 0; k < numImm; ++k) {
+    auto const type = immType(op, k);
+    if (type != ILA) continue;
+    auto ptr = reinterpret_cast<PC>(getImmPtr(opcode, k));
+    return iterTableFromStream(ptr);
+  }
   not_reached();
 }
 

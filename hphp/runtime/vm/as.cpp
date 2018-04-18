@@ -1133,11 +1133,12 @@ std::vector<uint32_t> read_argv(AsmState& as) {
 }
 
 // Read in a vector of iterators the format for this vector is:
-// <(TYPE) ID, (TYPE) ID, ...>
+// <(TYPE) ID LOCAL?, (TYPE) ID LOCAL?, ...>
 // Where TYPE := Iter | MIter | CIter
 // and   ID   := Integer
-std::vector<uint32_t> read_itervec(AsmState& as) {
-  std::vector<uint32_t> ret;
+// and   LOCAL := String (only valid when TYPE = LIter)
+IterTable read_iter_table(AsmState& as) {
+  IterTable ret;
 
   as.in.skipSpaceTab();
   as.in.expect('<');
@@ -1145,18 +1146,30 @@ std::vector<uint32_t> read_itervec(AsmState& as) {
   std::string word;
 
   for (;;) {
+    IterTableEnt ent;
     as.in.expectWs('(');
     if (!as.in.readword(word)) as.error("Was expecting Iterator type.");
-    if (!word.compare("Iter")) ret.push_back(KindOfIter);
-    else if (!word.compare("MIter")) ret.push_back(KindOfMIter);
-    else if (!word.compare("CIter")) ret.push_back(KindOfCIter);
+    if (!word.compare("Iter")) ent.kind = KindOfIter;
+    else if (!word.compare("MIter")) ent.kind = KindOfMIter;
+    else if (!word.compare("CIter")) ent.kind = KindOfCIter;
+    else if (!word.compare("LIter")) ent.kind = KindOfLIter;
     else as.error("Unknown iterator type `" + word + "'");
     as.in.expectWs(')');
 
     as.in.skipSpaceTab();
 
     if (!as.in.readword(word)) as.error("Was expecting iterator id.");
-    ret.push_back(folly::to<uint32_t>(word));
+    ent.id = as.getIterId(folly::to<uint32_t>(word));
+
+    if (ent.kind == KindOfLIter) {
+      as.in.skipSpaceTab();
+      if (!as.in.readword(word)) as.error("Was expecting local.");
+      ent.local = as.getLocalId(word);
+    } else {
+      ent.local = kInvalidId;
+    }
+
+    ret.push_back(std::move(ent));
 
     if (!isdigit(word.back())) {
       if (word.back() == '>') break;
@@ -1341,10 +1354,14 @@ std::map<std::string,ParserFunc> opcode_parsers;
  * integer.
  */
 #define IMM_ILA do {                               \
-  std::vector<uint32_t> vecImm = read_itervec(as); \
-  as.ue->emitInt32(vecImm.size() / 2);             \
-  for (auto& i : vecImm) {                         \
-    as.ue->emitInt32(i);                           \
+  auto const immTable = read_iter_table(as);       \
+  as.ue->emitIVA(immTable.size());                 \
+  for (auto const& it : immTable) {                \
+    as.ue->emitIVA(it.kind);                       \
+    as.ue->emitIVA(it.id);                         \
+    if (it.kind == KindOfLIter) {                  \
+      as.ue->emitIVA(it.local);                    \
+    }                                              \
   }                                                \
 } while (0)
 

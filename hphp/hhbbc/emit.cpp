@@ -570,10 +570,16 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
 
     auto emit_itertab = [&] (const IterTab& iterTab) {
-      ue.emitInt32(iterTab.size());
-      for (auto& kv : iterTab) {
-        ue.emitInt32(kv.first);
-        ue.emitInt32(kv.second);
+      ue.emitIVA(iterTab.size());
+      for (auto const& kv : iterTab) {
+        ue.emitIVA(kv.kind);
+        ue.emitIVA(kv.id);
+        if (kv.kind == KindOfLIter) {
+          always_assert(kv.local != NoLocalId);
+          ue.emitIVA(map_local(kv.local));
+        } else {
+          always_assert(kv.local == NoLocalId);
+        }
       }
     };
 

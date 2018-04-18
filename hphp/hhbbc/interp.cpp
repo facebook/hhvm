@@ -3735,7 +3735,7 @@ void in(ISS& env, const bc::CIterFree& op) {
 }
 
 void in(ISS& env, const bc::IterBreak& op) {
-  for (auto& kv : op.iterTab) freeIter(env, kv.second);
+  for (auto const& it : op.iterTab) freeIter(env, it.id);
   env.propagate(op.target, &env.state);
 }
 

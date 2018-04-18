@@ -344,6 +344,10 @@ OPTBLD_INLINE imm_array<T> decode_imm_array(PC& pc) {
   return imm_array<T>{size, arr_pc};
 }
 
+OPTBLD_INLINE IterTable decode_iter_table(PC& pc) {
+  return iterTableFromStream(pc);
+}
+
 OPTBLD_INLINE RepoAuthType decode_rat(PC& pc) {
   if (debug) return decodeRAT(liveUnit(), pc);
 
@@ -2760,21 +2764,15 @@ OPTBLD_INLINE void iopJmpNZ(PC& pc, PC targetpc) {
   jmpOpImpl<OpJmpNZ>(pc, targetpc);
 }
 
-struct IterBreakElem {
-  Id type, iter;
-};
-
 OPTBLD_INLINE
-void iopIterBreak(PC& pc, PC targetpc, imm_array<IterBreakElem> vec) {
-  auto const n = vec.size;
-  assertx(n > 0);
-  for (auto i = 0; i < n; ++i) {
-    auto e = vec[i];
-    auto iter = frame_iter(vmfp(), e.iter);
-    switch (e.type) {
+void iopIterBreak(PC& pc, PC targetpc, const IterTable& iterTab) {
+  for (auto const& ent : iterTab) {
+    auto iter = frame_iter(vmfp(), ent.id);
+    switch (ent.kind) {
       case KindOfIter:  iter->free();  break;
       case KindOfMIter: iter->mfree(); break;
       case KindOfCIter: iter->cfree(); break;
+      case KindOfLIter: iter->free();  break;
     }
   }
   pc = targetpc;
@@ -6867,7 +6865,7 @@ struct litstr_id {
 #define DECODE_LAR decodeLocalRange(pc)
 #define DECODE_BLA decode_imm_array<Offset>(pc)
 #define DECODE_SLA decode_imm_array<StrVecItem>(pc)
-#define DECODE_ILA decode_imm_array<IterBreakElem>(pc)
+#define DECODE_ILA decode_iter_table(pc)
 #define DECODE_I32LA decode_imm_array<uint32_t>(pc)
 #define DECODE_VSA decode_imm_array<Id>(pc)
 

@@ -1798,10 +1798,11 @@ struct OpEmitContext {
 
 #define IMPL_ILA(var) do {     \
   auto& ue = getUnitEmitter(); \
-  ue.emitInt32(var.size());    \
+  ue.emitIVA(var.size());      \
   for (auto& i : var) {        \
-    ue.emitInt32(i.kind);      \
-    ue.emitInt32(i.id);        \
+    always_assert(i.kind != KindOfLIter); \
+    ue.emitIVA(i.kind);        \
+    ue.emitIVA(i.id);          \
   }                            \
 } while(0)
 #define IMPL1_ILA IMPL_ILA(a1)

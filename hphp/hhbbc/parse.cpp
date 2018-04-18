@@ -729,11 +729,17 @@ void populate_block(ParseUnitState& puState,
 
   auto decode_itertab = [&] {
     IterTab ret;
-    auto const vecLen = decode<int32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     for (int32_t i = 0; i < vecLen; ++i) {
-      auto const kind = static_cast<IterKind>(decode<int32_t>(pc));
-      auto const id = decode<int32_t>(pc);
-      ret.emplace_back(kind, id);
+      auto const kind = static_cast<IterKind>(decode_iva(pc));
+      auto const id = decode_iva(pc);
+      auto const local = [&]{
+        if (kind != KindOfLIter) return NoLocalId;
+        auto const loc = decode_iva(pc);
+        always_assert(loc < func.locals.size());
+        return loc;
+      }();
+      ret.push_back(IterTabEnt{kind, static_cast<IterId>(id), local});
     }
     return ret;
   };

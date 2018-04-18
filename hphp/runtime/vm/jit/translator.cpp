@@ -1203,7 +1203,7 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 
 #define IMM_BLA(n)     ni.immVec
 #define IMM_SLA(n)     ni.immVec
-#define IMM_ILA(n)     ni.immVec
+#define IMM_ILA(n)     ni.immIters
 #define IMM_I32LA(n)   ni.immVec
 #define IMM_VSA(n)     ni.immVec
 #define IMM_IVA(n)     ni.imm[n].u_IVA

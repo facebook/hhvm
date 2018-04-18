@@ -386,12 +386,18 @@ module type CheckKindType = sig
     env:ServerEnv.env ->
     FileInfo.fast * Relative_path.Set.t
 
-  (* Update the global state based on resuts of all phases *)
-  val get_new_env :
+
+  (* Update the global state based on resuts of parsing, naming and decl *)
+  val get_env_after_decl :
     old_env:ServerEnv.env ->
     files_info:FileInfo.t Relative_path.Map.t ->
-    errorl:Errors.t ->
     failed_naming:Relative_path.Set.t ->
+    ServerEnv.env
+
+  (* Update the global state based on resuts of typing *)
+  val get_env_after_typing :
+    old_env:ServerEnv.env ->
+    errorl:Errors.t ->
     needs_phase2_redecl:Relative_path.Set.t ->
     lazy_check_later:Relative_path.Set.t ->
     diag_subscribe:Diagnostic_subscription.t option ->
@@ -445,28 +451,37 @@ module FullCheckKind : CheckKindType = struct
     let to_recheck = Relative_path.Set.union env.needs_recheck to_recheck in
     extend_fast phase_2_decl_defs files_info to_recheck, Relative_path.Set.empty
 
-  let get_new_env
+    let get_env_after_decl
+        ~old_env
+        ~files_info
+        ~failed_naming =
+      { old_env with
+          files_info;
+          failed_naming;
+          ide_needs_parsing = Relative_path.Set.empty;
+          disk_needs_parsing = Relative_path.Set.empty;
+      }
+
+  let get_env_after_typing
       ~old_env
-      ~files_info
       ~errorl
-      ~failed_naming
       ~needs_phase2_redecl:_
       ~lazy_check_later:_
       ~diag_subscribe =
     {
-      files_info;
+      files_info = old_env.files_info;
       tcopt = old_env.tcopt;
       popt = old_env.popt;
       errorl = errorl;
-      failed_naming = failed_naming;
+      failed_naming = old_env.failed_naming;
       persistent_client = old_env.persistent_client;
       ide_idle = old_env.ide_idle;
       last_command_time = old_env.last_command_time;
       last_notifier_check_time = old_env.last_notifier_check_time;
       last_idle_job_time = old_env.last_idle_job_time;
       editor_open_files = old_env.editor_open_files;
-      ide_needs_parsing = Relative_path.Set.empty;
-      disk_needs_parsing = Relative_path.Set.empty;
+      ide_needs_parsing = old_env.ide_needs_parsing;
+      disk_needs_parsing = old_env.disk_needs_parsing;
       needs_phase2_redecl = Relative_path.Set.empty;
       needs_recheck = Relative_path.Set.empty;
       full_check = Full_check_done;
@@ -540,11 +555,19 @@ module LazyCheckKind : CheckKindType = struct
       Relative_path.Set.partition (is_ide_file env) to_recheck in
     extend_fast phase_2_decl_defs files_info to_recheck_now, to_recheck_later
 
-  let get_new_env
+  let get_env_after_decl
       ~old_env
       ~files_info
+      ~failed_naming =
+    { old_env with
+        files_info;
+        failed_naming;
+        ide_needs_parsing = Relative_path.Set.empty;
+    }
+
+  let get_env_after_typing
+      ~old_env
       ~errorl
-      ~failed_naming
       ~needs_phase2_redecl
       ~lazy_check_later
       ~diag_subscribe =
@@ -556,9 +579,7 @@ module LazyCheckKind : CheckKindType = struct
       | _ -> Full_check_needed
     in
     { old_env with
-       files_info;
        errorl;
-       failed_naming = failed_naming;
        ide_needs_parsing = Relative_path.Set.empty;
        needs_phase2_redecl;
        needs_recheck;
@@ -736,6 +757,8 @@ end = functor(CheckKind:CheckKindType) -> struct
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.second_redecl_end t hs;
     let t = Hh_logger.log_duration logstring t in
+    let env = CheckKind.get_env_after_decl
+      ~old_env:env ~files_info ~failed_naming in
 
     (* TYPE CHECKING *)
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck
@@ -781,11 +804,9 @@ end = functor(CheckKind:CheckKindType) -> struct
     Hh_logger.log "Total: %f\n%!" (t -. start_t);
     ServerDebug.info genv "incremental_done";
 
-    let new_env = CheckKind.get_new_env
-      old_env
-      files_info
+    let new_env = CheckKind.get_env_after_typing
+      env
       errors
-      failed_naming
       needs_phase2_redecl
       lazy_check_later
       diag_subscribe

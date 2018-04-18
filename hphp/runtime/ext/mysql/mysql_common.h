@@ -40,6 +40,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+#if MYSQL_VERSION_ID >= 80004
+using my_bool = bool;
+#endif
+
 struct MySQLUtil {
   enum TimeoutType { ConnectTimeout, ReadTimeout, WriteTimeout };
 

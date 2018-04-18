@@ -36,6 +36,10 @@
 
 namespace HPHP {
 
+#if MYSQL_VERSION_ID >= 80004
+using my_bool = bool;
+#endif
+
 struct PDOMySqlStatement;
 
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_mysql, 1.0.2);

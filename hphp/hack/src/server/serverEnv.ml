@@ -54,6 +54,23 @@ type genv = {
 (* The environment constantly maintained by the server *)
 (*****************************************************************************)
 
+type full_check_status =
+  (* Some updates have not been fully processed. We get into this state every
+   * time file contents change (on disk, or through IDE notifications).
+   * Operations that depend on global state (like taking full error list, or
+   * looking up things in dependency table) will have stale results. *)
+  | Full_check_needed
+  (* Same as above, except server will actively try to process outstanding
+   * changes (by going into ServerTypeCheck from main loop - this might need to
+   * be repeated several times before progressing to Full_check_done, due to
+   * ability to interrupt typecheck jobs).
+   * Server starts in this state, and we also enter it from Full_check_needed
+   * whenever there is a command requiring full check pending, or when user
+   * saves a file. *)
+  | Full_check_started
+  (* All the changes have been fully processed. *)
+  | Full_check_done
+
 (* In addition to this environment, many functions are storing and
  * updating ASTs, NASTs, and types in a shared space
  * (see respectively Parser_heap, Naming_heap, Typing_env).
@@ -109,7 +126,7 @@ type env = {
     needs_phase2_redecl : Relative_path.Set.t;
     needs_recheck : Relative_path.Set.t;
     init_env : init_env;
-    needs_full_check : bool;
+    full_check : full_check_status;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;
     recent_recheck_loop_stats : recheck_loop_stats;

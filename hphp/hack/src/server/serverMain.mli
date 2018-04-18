@@ -18,8 +18,6 @@ val run_once: ServerArgs.options -> SharedMem.handle -> 'a
 
 val save_state: ServerArgs.options -> SharedMem.handle -> 'a
 
-val initial_check: ServerEnv.genv -> ServerEnv.env -> ServerEnv.env
-
 val serve_one_iteration:
   ServerEnv.genv ->
   ServerEnv.env ->

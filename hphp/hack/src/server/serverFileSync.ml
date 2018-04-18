@@ -54,7 +54,7 @@ let open_file env path content =
     FileHeap.remove_batch (Relative_path.Set.singleton path);
     FileHeap.add path (Ide content);
     let ide_needs_parsing, diag_subscribe =
-      if content = prev_content && (not env.needs_full_check) then begin
+      if content = prev_content && (env.full_check = Full_check_done) then begin
         (* Try to avoid telling the user that a check is needed when the file
          * was unchanged. But even in this case, we might need to push
          * errors that were previously throttled. They are available only

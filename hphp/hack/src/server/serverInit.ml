@@ -340,7 +340,8 @@ module ServerInitCommon = struct
       in
       let env = { env with
         needs_recheck = Relative_path.Set.union env.needs_recheck needs_recheck;
-        needs_full_check = true;
+        (* eagerly start rechecking after init *)
+        full_check = Full_check_started;
         init_env = { env.init_env with
           needs_full_init = true;
         };

@@ -267,7 +267,12 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
       * 60/200 = 0.3 *)
      t -. env.last_command_time > 0.3 in
 
-  let disk_recheck = not (Relative_path.Set.is_empty updates) in
+  let disk_recheck =
+    (* We have some new updates *)
+    (not @@ Relative_path.Set.is_empty updates) ||
+    (* ... or previously unprocessed ones *)
+    env.full_check = Full_check_started
+  in
   let ide_recheck =
     (not @@ Relative_path.Set.is_empty env.ide_needs_parsing) && is_idle in
   if (not disk_recheck) && (not ide_recheck) then
@@ -407,27 +412,10 @@ let serve_one_iteration genv env client_provider =
       env)
   else env
 
-let initial_check genv env =
-  if not env.init_env.needs_full_init then begin
-    finalize_init genv env.init_env;
-    env
-  end else
-    let start_t = Unix.gettimeofday () in
-    let recheck_id = new_serve_iteration_id () in
-    HackEventLogger.with_id ~stage:`Init recheck_id @@ fun () ->
-      let env, rechecked, total_rechecked =
-        recheck genv env ServerTypeCheck.Full_check in
-      if total_rechecked > 0 then begin
-        HackEventLogger.recheck_end start_t
-          1 (* number of batches *)
-          rechecked total_rechecked;
-        Hh_logger.log "Recheck id: %s" recheck_id
-      end;
-      env
-
 let serve genv env in_fd _ =
   let client_provider = ClientProvider.provider_from_file_descriptor in_fd in
-  let env = initial_check genv env in
+  (* This is needed when typecheck_after_init option is disabled. *)
+  if not env.init_env.needs_full_init then finalize_init genv env.init_env;
   let env = ref env in
   while true do
     let new_env = serve_one_iteration genv !env client_provider in

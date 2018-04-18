@@ -469,7 +469,7 @@ module FullCheckKind : CheckKindType = struct
       disk_needs_parsing = Relative_path.Set.empty;
       needs_phase2_redecl = Relative_path.Set.empty;
       needs_recheck = Relative_path.Set.empty;
-      needs_full_check = false;
+      full_check = Full_check_done;
       init_env = { old_env.init_env with
         needs_full_init = false;
       };
@@ -550,6 +550,11 @@ module LazyCheckKind : CheckKindType = struct
       ~diag_subscribe =
     let needs_recheck =
       Relative_path.Set.union old_env.needs_recheck lazy_check_later in
+    (* If it was started, it's still started, otherwise it needs starting *)
+    let full_check = match old_env.full_check with
+      | Full_check_started -> Full_check_started
+      | _ -> Full_check_needed
+    in
     { old_env with
        files_info;
        errorl;
@@ -557,7 +562,7 @@ module LazyCheckKind : CheckKindType = struct
        ide_needs_parsing = Relative_path.Set.empty;
        needs_phase2_redecl;
        needs_recheck;
-       needs_full_check = true;
+       full_check;
        diag_subscribe;
      }
 
@@ -600,6 +605,8 @@ end = functor(CheckKind:CheckKindType) -> struct
     end
 
   let type_check genv env =
+    let env = if CheckKind.is_full
+      then { env with full_check = Full_check_started } else env in
     let start_t = Unix.gettimeofday () in
     let t = start_t in
     (* Files in env.needs_decl contain declarations which were not finished.

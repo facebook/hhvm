@@ -864,7 +864,7 @@ To string conversions:
 
   Returns whether t instanceof S0 returns true when t is of the given type.
 
-| ResolveTypeStruct,           DDArr, CDArr,                             Er
+| ResolveTypeStruct<class>,    DDArr, CDArr S(Cls|Nullptr),              Er
 
   Applies class/alias resolution on the S0 type structure. Returns a copy.
   Raises an error if S0 contains traits, functions types or typevars.

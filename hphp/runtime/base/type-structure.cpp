@@ -733,4 +733,18 @@ Array TypeStructure::resolve(const String& aliasName,
   return newarr;
 }
 
+/*
+ * Called when resolving anonymous type structures, e.g. from `is` expressions.
+ */
+Array TypeStructure::resolve(const Array& ts,
+                             const Class* typeCnsCls,
+                             const Class* declCls,
+                             bool& persistent) {
+  // Use a bogus constant, because the type structure is anonymous.
+  Class::Const typeCns;
+  typeCns.name = nullptr;
+  typeCns.cls = declCls;
+  return resolveTS(ts, typeCns, typeCnsCls, Array(), persistent);
+}
+
 } // namespace HPHP

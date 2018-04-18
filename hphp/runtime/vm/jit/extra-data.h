@@ -136,6 +136,31 @@ struct ClassData : IRExtraData {
 };
 
 /*
+ * Class pointer.
+ *
+ * Could be null.
+ */
+struct OptClassData : IRExtraData {
+  explicit OptClassData(const Class* cls)
+    : cls(cls)
+  {}
+
+  std::string show() const {
+    return cls ? folly::to<std::string>(cls->name()->data()) : "nullptr";
+  }
+
+  bool equals(const OptClassData& o) const {
+    return cls == o.cls;
+  }
+
+  size_t hash() const {
+    return hash_int64(reinterpret_cast<intptr_t>(cls));
+  }
+
+  const Class* cls;
+};
+
+/*
  * ExtendsClass.
  */
 struct ExtendsClassData : IRExtraData {
@@ -1419,6 +1444,7 @@ X(InitSProps,                   ClassData);
 X(NewInstanceRaw,               ClassData);
 X(InitObjProps,                 ClassData);
 X(InstanceOfIfaceVtable,        ClassData);
+X(ResolveTypeStruct,            OptClassData);
 X(ExtendsClass,                 ExtendsClassData);
 X(SpillFrame,                   ActRecInfo);
 X(CheckStk,                     IRSPRelOffsetData);

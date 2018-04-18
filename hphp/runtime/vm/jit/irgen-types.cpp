@@ -15,6 +15,8 @@
 */
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
+#include "hphp/runtime/base/type-structure-helpers.h"
+
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -701,8 +703,30 @@ void emitInstanceOf(IRGS& env) {
   decRef(env, t1);
 }
 
+namespace {
+
+SSATmp* resolveTypeStructImpl(IRGS& env, const ArrayData* ts) {
+  // TODO(T28423611): If we know that the type structure cannot contain `this`
+  // references, we should be able to resolve the type structure at compile time
+  // and elide this instruction altogether.
+  auto const declaringCls = curFunc(env) ? curClass(env) : nullptr;
+  auto const calledCls =
+    declaringCls && typeStructureCouldBeNonStatic(ArrNR(ts))
+      ? gen(env, LdClsCtx, ldCtx(env))
+      : cns(env, nullptr);
+  return gen(
+    env,
+    ResolveTypeStruct,
+    OptClassData(declaringCls),
+    cns(env, ts),
+    calledCls
+  );
+}
+
+} // namespace
+
 void emitIsTypeStruct(IRGS& env, const ArrayData* a) {
-  auto const tc = gen(env, ResolveTypeStruct, cns(env, a));
+  auto const tc = resolveTypeStructImpl(env, a);
   auto const c = popC(env);
   push(env, gen(env, IsTypeStruct, tc, c));
   decRef(env, c);
@@ -716,7 +740,7 @@ void emitAsTypeStruct(IRGS& env, const ArrayData* a) {
    * exception
    */
   auto const c = topC(env);
-  auto const tc = gen(env, ResolveTypeStruct, cns(env, a));
+  auto const tc = resolveTypeStructImpl(env, a);
   ifThen(
     env,
     [&](Block* taken) {

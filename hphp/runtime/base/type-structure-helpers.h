@@ -34,12 +34,27 @@ namespace HPHP {
 bool cellInstanceOf(const Cell* tv, const NamedEntity* ne);
 
 /*
- * Resolves the given array as a type structure
- * Raises an error if the type structure contains a trait, typevar
- * or a function type
- * May throw if the type structure cannot be resolved
+ * Resolves the given Array as a type structure.
+ *
+ * Raises an error if the type structure contains a trait, typevar or a function
+ * type. May throw if the type structure cannot be resolved.
+ *
+ * Because the type structure might contain unresolved nested structures, we
+ * must manually supply the called class and the declaring class so that `this`,
+ *`self`, and `parent` references are resolved correctly and error messages
+ * are displayed correctly.
  */
-Array resolveAndVerifyTypeStructure(const Array& ts);
+Array resolveAndVerifyTypeStructure(
+  const Array& ts,
+  const Class* declaringCls,
+  const Class* calledCls
+);
+
+/**
+ * Returns whether the type structure may not be able to be resolved statically,
+ * i.e. if it contains `this` references.
+ */
+bool typeStructureCouldBeNonStatic(const Array& ts);
 
 /*
  * Checks whether the type of the given cell matches the type structure

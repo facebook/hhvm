@@ -205,7 +205,11 @@ void registerLiveObj(ObjectData* obj);
 bool methodExistsHelper(Class*, StringData*);
 
 /* Is/As Helpers */
-ArrayData* resolveTypeStructHelper(const ArrayData*);
+ArrayData* resolveTypeStructHelper(
+  const ArrayData*,
+  const Class* declaringCls,
+  const Class* calledCls
+);
 bool isTypeStructHelper(ArrayData*, Cell);
 void asTypeStructHelper(ArrayData*, Cell);
 

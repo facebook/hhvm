@@ -968,20 +968,24 @@ bool methodExistsHelper(Class* cls, StringData* meth) {
   return cls->lookupMethod(meth) != nullptr;
 }
 
-ArrayData* resolveTypeStructHelper(const ArrayData* a) {
-  auto const ts = ArrNR(a).asArray();
-  auto resolved = resolveAndVerifyTypeStructure(ts);
+ArrayData* resolveTypeStructHelper(
+  const ArrayData* a,
+  const Class* declaringCls,
+  const Class* calledCls
+) {
+  auto const ts = ArrNR(a);
+  auto resolved = resolveAndVerifyTypeStructure(ts, declaringCls, calledCls);
   return resolved.detach();
 }
 
 bool isTypeStructHelper(ArrayData* a, Cell c) {
-  auto const ts = ArrNR(a).asArray();
+  auto const ts = ArrNR(a);
   return checkTypeStructureMatchesCell(ts, c);
 }
 
 void asTypeStructHelper(ArrayData* a, Cell c) {
   std::string givenType, expectedType, errorKey;
-  auto const ts = ArrNR(a).asArray();
+  auto const ts = ArrNR(a);
   if (!checkTypeStructureMatchesCell(
     ts, c, givenType, expectedType, errorKey)) {
     throwTypeStructureDoesNotMatchCellException(

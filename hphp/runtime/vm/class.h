@@ -186,7 +186,7 @@ struct Class : AtomicCountable {
    */
   struct Const {
     /* Most derived class that declared this constant. */
-    LowPtr<Class> cls;
+    LowPtr<const Class> cls;
     LowStringPtr name;
     TypedValueAux val;
 

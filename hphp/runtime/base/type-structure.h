@@ -79,6 +79,11 @@ Array resolve(const String& aliasName,
               bool& persistent,
               const Array& generics = Array());
 
+Array resolve(const Array& ts,
+              const Class* typeCnsCls,
+              const Class* declCls,
+              bool& persistent);
+
 }
 
 }

@@ -534,7 +534,8 @@ static CallMap s_callMap {
                      {{SSA, 0}, {SSA, 1}, extra(&ClassKindData::kind)}},
 
     /* is/as expressions */
-    {ResolveTypeStruct, resolveTypeStructHelper, DSSA, SSync, {{SSA, 0}}},
+    {ResolveTypeStruct, resolveTypeStructHelper, DSSA, SSync,
+                            {{SSA, 0}, {extra(&OptClassData::cls)}, {SSA, 1}}},
     {IsTypeStruct, isTypeStructHelper, DSSA, SNone, {{SSA, 0}, {TV, 1}}},
     {AsTypeStruct, asTypeStructHelper, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
 

@@ -432,17 +432,57 @@ void errorOnIsAsExpressionInvalidTypes(const Array& ts) {
   not_reached();
 }
 
-Array resolveAndVerifyTypeStructure(const Array& ts) {
+/**
+ * Returns whether the type structure may not be able to be resolved statically,
+ * i.e. if it contains `this` references.
+ */
+bool typeStructureCouldBeNonStatic(const Array& ts) {
+  assertx(ts.exists(s_kind));
+  switch (static_cast<TypeStructure::Kind>(ts[s_kind].toInt64Val())) {
+    case TypeStructure::Kind::T_tuple:
+    case TypeStructure::Kind::T_fun:
+    case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_shape:
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_trait:
+    case TypeStructure::Kind::T_dict:
+    case TypeStructure::Kind::T_vec:
+    case TypeStructure::Kind::T_keyset:
+    case TypeStructure::Kind::T_vec_or_dict:
+    case TypeStructure::Kind::T_unresolved:
+    case TypeStructure::Kind::T_typeaccess:
+      return true;
+    case TypeStructure::Kind::T_void:
+    case TypeStructure::Kind::T_int:
+    case TypeStructure::Kind::T_bool:
+    case TypeStructure::Kind::T_float:
+    case TypeStructure::Kind::T_string:
+    case TypeStructure::Kind::T_resource:
+    case TypeStructure::Kind::T_num:
+    case TypeStructure::Kind::T_arraykey:
+    case TypeStructure::Kind::T_noreturn:
+    case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_typevar:
+    case TypeStructure::Kind::T_enum:
+    case TypeStructure::Kind::T_nonnull:
+    case TypeStructure::Kind::T_xhp:
+      return false;
+  }
+  not_reached();
+}
+
+Array resolveAndVerifyTypeStructure(
+  const Array& ts,
+  const Class* declaringCls,
+  const Class* calledCls
+) {
   assertx(!ts.empty());
   assertx(ts.isDictOrDArray());
   Array resolved;
   try {
     bool persistent = true;
-    resolved = TypeStructure::resolve(
-      String(),
-      ts,
-      persistent
-    );
+    resolved = TypeStructure::resolve(ts, calledCls, declaringCls, persistent);
   } catch (Exception& e) {
     // Catch and throw again so we get a line number
     raise_error(e.getMessage());

@@ -144,7 +144,7 @@
              (Expr
                 (([18:3-18:29], (array<arraykey, bool> | array<int, bool>)),
                  (Call (Cnormal,
-                    (([18:3-18:12], (function((function(num): bool), \Container<num>): (array<arraykey, bool> | array<int, bool>))),
+                    (([18:3-18:12], (function((function((num | int)): bool), \Container<(num | int)>): (array<arraykey, bool> | array<int, bool>))),
                      (Id ([18:3-18:12], "\\array_map"))),
                     [],
                     [(([18:13-18:15], (function(num): bool)),

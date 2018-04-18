@@ -1,0 +1,12 @@
+File "array_map10.php", line 4, characters 13-14:
+Invalid argument (Typing[4110])
+File "array_map10.php", line 3, characters 37-38:
+This is a value of generic type TA
+File "array_map10.php", line 3, characters 54-55:
+It is incompatible with a value of generic type TC
+File "hhi_lib__srcs/experimental/interfaces.hhi", line 13, characters 55-55:
+  via this generic T
+File "hhi_lib__srcs/interfaces.hhi", line 101, characters 57-58:
+  via this generic Tv
+File "hhi_lib__srcs/interfaces.hhi", line 82, characters 54-55:
+  via this generic Tv

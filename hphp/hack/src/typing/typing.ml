@@ -3535,11 +3535,15 @@ and is_abstract_ft fty = match fty with
               if List.length hl = 0
               then
                 let env, tr = Env.fresh_unresolved_type env in
-                env, List.map args (fun _ -> Env.fresh_type()), tr
+                let env, vars = List.map_env env args
+                  ~f:(fun env _ -> Env.fresh_unresolved_type env) in
+                env, vars, tr
               else if List.length hl <> List.length args + 1 then begin
                 let env, tr = Env.fresh_unresolved_type env in
                 Errors.expected_tparam fty.ft_pos (1 + (List.length args));
-                env, List.map args (fun _ -> Env.fresh_type()), tr end
+                let env, vars = List.map_env env args
+                  ~f:(fun env _ -> Env.fresh_unresolved_type env) in
+                env, vars, tr end
               else
               let env, vars_and_tr = List.map_env env hl Phase.hint_locl in
               let vars, trl = List.split_n vars_and_tr (List.length vars_and_tr - 1) in

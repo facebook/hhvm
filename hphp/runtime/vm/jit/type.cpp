@@ -290,7 +290,7 @@ enum TypeKey : uint8_t {
 };
 }
 
-void Type::serialize(ProfDataSerializer& ser) {
+void Type::serialize(ProfDataSerializer& ser) const {
   SCOPE_EXIT {
     ITRACE_MOD(Trace::hhbc, 2, "Type: {}\n", toString());
   };

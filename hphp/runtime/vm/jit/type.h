@@ -390,7 +390,7 @@ public:
   /*
    * Serialization/deserialization.
    */
-  void serialize(ProfDataSerializer&);
+  void serialize(ProfDataSerializer&) const;
   static Type deserialize(ProfDataDeserializer&);
 
   /////////////////////////////////////////////////////////////////////////////

@@ -101,7 +101,7 @@ let rec occursUnderOptions level env n ty =
       end
     end
   | Toption t -> occursUnderOptions (level+1) env n t
-  | Tunresolved [t] -> occursUnderOptions level env n t
+  | Tunresolved [t] when level > 0 -> occursUnderOptions level env n t
   | _ -> None
 
 (* Given a list of types [tyl], locate the first type that is
@@ -166,6 +166,18 @@ let occursTop env n rty =
  * variables in functions that recurse over type structure.
  *)
 let add env x ty =
+  let extend_unresolved env ty tyl =
+    let v = Ident.tmp () in
+    let ty = match ty with
+      | _, Tunresolved _ -> ty
+      | _, Tany -> (Reason.Rnone, Tunresolved [])
+      | _ -> (Reason.Rnone, Tunresolved [ty])
+    in
+    let env = Env.add env v ty in
+    match tyl with
+    | [] -> env, snd ty
+    | _ -> env, Tunresolved (ty::tyl)
+  in
   let env, x' = Env.get_var env x in
   match occursTop env x' ty with
   | DoesOccurAtTop ->
@@ -193,13 +205,15 @@ let add env x ty =
      * substitution n := ?(m | t1 | ... | tk) for fresh variable m
      *)
   | DoesOccurUnderUnresolvedOptions ts ->
-    let env, ty' = Env.fresh_unresolved_type env in
-    Env.add env x (fst ty, Toption (fst ty, Tunresolved (ty'::ts)))
+    let env, ty' = Env.get_type_unsafe env x' in
+    let env, ty' = extend_unresolved env ty' ts in
+    Env.add env x (fst ty, Toption (fst ty, ty'))
 
     (* We solve the unification problem [n]
      * against ([n] | t1 | ... |k) by the
      * substitution n := (m | t1 | ... | tk) for fresh variable m
      *)
   | DoesOccurUnderUnresolved ts ->
-    let env, ty' = Env.fresh_unresolved_type env in
-    Env.add env x (fst ty, Tunresolved (ty'::ts))
+    let env, ty' = Env.get_type_unsafe env x' in
+    let env, ty' = extend_unresolved env ty' ts in
+    Env.add env x (fst ty, ty')

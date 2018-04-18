@@ -139,3 +139,4 @@ val merge_locals_and_history : local_env -> old_local Local_id.Map.t
 val separate_locals_and_history :
   old_local Local_id.Map.t ->
   (local_types * local_history Local_id.Map.t)
+val save : tpenv -> env -> Tast.saved_env

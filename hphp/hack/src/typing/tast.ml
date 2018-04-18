@@ -104,3 +104,20 @@ let get_position (((p, _), _) : expr) = p
 
 (* Get the type of an expression *)
 let get_type (((_, ty), _) : expr) = ty
+
+module NastMapper = Aast_mapper.MapAnnotatedAST(Annotations)(Nast.Annotations)
+
+let nast_mapping_env env =
+  NastMapper.{
+    env;
+    map_env_annotation = (fun _ -> ());
+    map_expr_annotation = (fun _ (pos, _) -> pos);
+    map_class_id_annotation = (fun _ _ -> ());
+  }
+
+let to_nast program =
+  NastMapper.map_program
+    ~map_env_annotation:(fun _ -> ())
+    ~map_expr_annotation:(fun _ (pos, _) -> pos)
+    ~map_class_id_annotation:(fun _ _ -> ())
+    program

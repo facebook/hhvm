@@ -38,14 +38,16 @@ let auto_complete_for_global = ref ""
 let auto_complete_suffix = "AUTO332"
 let suffix_len = String.length auto_complete_suffix
 let strip_suffix s = String.sub s 0 (String.length s - suffix_len)
+
+let matches_auto_complete_suffix x =
+  String.length x >= suffix_len &&
+  let suffix = String.sub x (String.length x - suffix_len) suffix_len in
+  suffix = auto_complete_suffix
+
 let is_auto_complete x =
   if !autocomplete_results = []
-  then begin
-    String.length x >= suffix_len &&
-    let suffix = String.sub x (String.length x - suffix_len) suffix_len in
-    suffix = auto_complete_suffix
-  end else
-    false
+  then matches_auto_complete_suffix x
+  else false
 
 let get_replace_pos_exn ~delimit_on_namespaces =
   match !autocomplete_identifier with
@@ -115,7 +117,7 @@ let autocomplete_id id env = autocomplete_token Acid (Some env) id
 
 let autocomplete_hint = autocomplete_token Actype None
 
-let autocomplete_new cid env _ =
+let autocomplete_new cid env =
   match cid with
   | Nast.CI (sid, _) -> autocomplete_token Acnew (Some env) sid
   | _ -> ()
@@ -126,8 +128,7 @@ let get_class_elt_types env class_ cid elts =
   end in
   SMap.map elts (fun { ce_type = lazy ty; _ } -> ty)
 
-let autocomplete_method is_static class_ ~targs:_ ~pos_params:_ id env cid
-    ~is_method:_ ~is_const:_ =
+let autocomplete_member ~is_static env class_ cid id =
   (* This is used for instance "$x->|" and static "Class1::|" members. *)
   (* It's also used for "<nt:fb:text |" XHP attributes, in which case  *)
   (* class_ is ":nt:fb:text" and its attributes are in tc_props.       *)
@@ -147,25 +148,14 @@ let autocomplete_method is_static class_ ~targs:_ ~pos_params:_ id env cid
     end
   end
 
-let autocomplete_smethod = autocomplete_method true
-
-let autocomplete_cmethod = autocomplete_method false
-
 let autocomplete_lvar id env =
   (* This is used for "$|" and "$x = $|" local variables. *)
   let text = Local_id.get_name (snd id) in
   if is_auto_complete text
   then begin
     argument_global_type := Some Acprop;
-    (* The typechecker might call this hook more than once (loops) so we
-     * need to clear the list of results first or we could have repeat locals *)
-    autocomplete_results := [];
     ac_env := Some env;
     autocomplete_identifier := Some (fst id, text);
-    (* Get the types of all the variables in scope at this point *)
-    Local_id.Map.iter begin fun x (ty, _) ->
-      add_partial_result (Local_id.get_name x) (Phase.locl ty) Variable_kind
-    end (Typing_env.get_locals env);
   end
 
 let should_complete_class completion_type class_kind =
@@ -515,14 +505,157 @@ let resolve_ty
     func_details    = func_details;
   }
 
+let tast_cid_to_nast_cid env cid =
+  let nmenv = Tast.nast_mapping_env (Typing_env.save SMap.empty env) in
+  Tast.NastMapper.map_class_id_ nmenv cid
 
-let get_results
+let autocomplete_typed_member ~is_static env class_ty cid mid =
+  Typing_utils.get_class_ids env class_ty
+  |> List.iter ~f:begin fun cname ->
+    Typing_env.get_class env cname
+    |> Option.iter ~f:begin fun class_ ->
+      let cid = Option.map cid (tast_cid_to_nast_cid env) in
+      autocomplete_member ~is_static env class_ cid mid
+    end
+  end
+
+let autocomplete_static_member env (ty, cid) mid =
+  autocomplete_typed_member ~is_static:true env ty (Some cid) mid
+
+class ['self] visitor = object (_ : 'self)
+  inherit [_] Tast_visitor.iter as super
+
+  method! on_Id env id =
+    autocomplete_id id env;
+    super#on_Id env id
+
+  method! on_Fun_id env id =
+    autocomplete_id id env;
+    super#on_Fun_id env id
+
+  method! on_New env cid el uel =
+    autocomplete_new (tast_cid_to_nast_cid env (snd cid)) env;
+    super#on_New env cid el uel
+
+  method! on_Happly env sid hl =
+    autocomplete_hint sid;
+    super#on_Happly env sid hl
+
+  method! on_Lvar env lid =
+    autocomplete_lvar lid env;
+    super#on_Lvar env lid
+
+  method! on_Class_get env cid mid =
+    autocomplete_static_member env cid mid;
+    super#on_Class_get env cid mid
+
+  method! on_Class_const env cid mid =
+    autocomplete_static_member env cid mid;
+    super#on_Class_const env cid mid
+
+  method! on_Obj_get env obj mid ognf =
+    (match mid with
+    | _, Tast.Id mid ->
+      autocomplete_typed_member ~is_static:false env (Tast.get_type obj) None mid
+    | _ -> ()
+    );
+    super#on_Obj_get env obj mid ognf
+
+  method! on_Xml env sid attrs el =
+    let cid = Nast.CI (sid, []) in
+    Typing_env.get_class env (snd sid)
+    |> Option.iter ~f:begin fun c ->
+      List.iter attrs ~f:begin function
+        | Tast.Xhp_simple (id, _) ->
+          autocomplete_member ~is_static:false env c (Some cid) id
+        | Tast.Xhp_spread _ -> ()
+      end
+    end;
+    super#on_Xml env sid attrs el
+end
+
+class ['self] auto_complete_suffix_finder = object (_ : 'self)
+  inherit [_] Tast.reduce
+  method zero = false
+  method plus = (||)
+  method! on_Lvar () (_, id) =
+    matches_auto_complete_suffix (Local_id.get_name id)
+end
+
+let method_contains_cursor = new auto_complete_suffix_finder#on_method_ ()
+let fun_contains_cursor = new auto_complete_suffix_finder#on_fun_ ()
+
+class ['self] local_types = object (self : 'self)
+  inherit [_] Tast_visitor.iter as super
+
+  val mutable results = Local_id.Map.empty;
+  val mutable after_cursor = false;
+
+  method get_types tast =
+    self#go tast;
+    results
+
+  method add id ty =
+    (* If we already have a type for this identifier, don't overwrite it with
+       results from after the cursor position. *)
+    if not (Local_id.Map.mem id results && after_cursor) then
+      results <- Local_id.Map.add id ty results
+
+  method! on_fun_ env f =
+    if fun_contains_cursor f then
+      super#on_fun_ env f
+
+  method! on_method_ env m =
+    if method_contains_cursor m then begin
+      if not (Typing_env.is_static env) then
+        self#add Typing_defs.this (Typing_env.get_self env);
+      super#on_method_ env m
+    end
+
+  method! on_expr env e =
+    let (_, ty), e_ = e in
+    match e_ with
+    | Tast.Lvar (_, id) ->
+      if matches_auto_complete_suffix (Local_id.get_name id)
+      then after_cursor <- true
+      else self#add id ty
+    | Tast.Binop (Ast.Eq _, e1, e2) ->
+      (* Process the rvalue before the lvalue, since the lvalue is annotated
+         with its type after the assignment. *)
+      self#on_expr env e2;
+      self#on_expr env e1;
+    | _ -> super#on_expr env e
+
+  method! on_fun_param _ fp =
+    let id = Local_id.get fp.Tast.param_name in
+    let _, ty = fp.Tast.param_annotation in
+    self#add id ty
+end
+
+let compute_complete_local tast =
+  new local_types#get_types tast
+  |> Local_id.Map.iter begin fun x ty ->
+    add_partial_result (Local_id.get_name x) (Phase.locl ty) Variable_kind
+  end
+
+let reset () =
+  auto_complete_for_global := "";
+  argument_global_type := None;
+  autocomplete_identifier := None;
+  ac_env := None;
+  autocomplete_results := [];
+  autocomplete_is_complete := true
+
+let go
     ~tcopt
     ~delimit_on_namespaces
     ~content_funs
     ~content_classes
     ~autocomplete_context
+    tast
   =
+  reset ();
+  new visitor#go tast;
   Errors.ignore_ begin fun () ->
     let completion_type = !argument_global_type in
     if completion_type = Some Acid ||
@@ -530,6 +663,7 @@ let get_results
        completion_type = Some Actype
     then compute_complete_global
       ~tcopt ~delimit_on_namespaces ~autocomplete_context ~content_funs ~content_classes;
+    if completion_type = Some Acprop then compute_complete_local tast;
     let env = match !ac_env with
       | Some e -> e
       | None -> Typing_env.empty tcopt Relative_path.default ~droot:None
@@ -543,28 +677,4 @@ let get_results
       With_complete_flag.is_complete = !autocomplete_is_complete;
       value = !autocomplete_results |> List.map ~f:resolve;
     }
-end
-
-let reset () =
-  auto_complete_for_global := "";
-  argument_global_type := None;
-  autocomplete_identifier := None;
-  ac_env := None;
-  autocomplete_results := [];
-  autocomplete_is_complete := true
-
-let attach_hooks () =
-  reset();
-  Autocomplete.auto_complete := true;
-  Typing_hooks.attach_id_hook autocomplete_id;
-  Typing_hooks.attach_smethod_hook autocomplete_smethod;
-  Typing_hooks.attach_cmethod_hook autocomplete_cmethod;
-  Typing_hooks.attach_lvar_hook autocomplete_lvar;
-  Typing_hooks.attach_new_id_hook autocomplete_new;
-  Naming_hooks.attach_hint_hook autocomplete_hint
-
-let detach_hooks () =
-  reset();
-  Autocomplete.auto_complete := false;
-  Typing_hooks.remove_all_hooks();
-  Naming_hooks.remove_all_hooks()
+  end

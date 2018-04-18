@@ -16,15 +16,19 @@ let get_results
     ~(tcopt:TypecheckerOptions.t)
     ~(delimit_on_namespaces:bool)
     ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
-    _
+    (_:Relative_path.t)
     (file_info:FileInfo.t)
-    _
+    (tast:Tast.program)
   : AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t =
   let {
     FileInfo.n_funs = content_funs; n_classes = content_classes; _
   } = FileInfo.simplify file_info in
-  AutocompleteService.get_results
-    ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes ~autocomplete_context
+  AutocompleteService.go tast
+    ~tcopt
+    ~delimit_on_namespaces
+    ~content_funs
+    ~content_classes
+    ~autocomplete_context
 
 let auto_complete
     ~(tcopt:TypecheckerOptions.t)
@@ -32,11 +36,9 @@ let auto_complete
     ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
     (content:string)
   : AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t =
-  AutocompleteService.attach_hooks();
   let result =
     ServerIdeUtils.declare_and_check content
       ~f:(get_results ~tcopt ~delimit_on_namespaces ~autocomplete_context) tcopt in
-  AutocompleteService.detach_hooks();
   result
 
 let context_xhp_classname_regex = Str.regexp ".*<[a-zA-Z_0-9:]*$"

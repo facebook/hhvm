@@ -983,3 +983,13 @@ let separate_locals_and_history locals_and_history =
     (fun (hist, _, _) -> hist) locals_and_history
   in
   locals, history
+
+
+(* Return the subset of env which is saved in the Typed AST's EnvAnnotation. *)
+let save local_tpenv env =
+  {
+    Tast.tcopt = get_tcopt env;
+    Tast.tenv = env.tenv;
+    Tast.subst = env.subst;
+    Tast.tpenv = SMap.union local_tpenv env.global_tpenv;
+  }

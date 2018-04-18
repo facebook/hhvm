@@ -234,7 +234,7 @@ let mpStripNoop pThing node env = match pThing node env with
   | stmtl -> stmtl
 
 let mpOptional : ('a, 'a option) metaparser = fun p -> fun node env ->
-  Option.try_with (fun () -> p node env)
+  Option.try_with (fun () -> p node { env with fail_open = false })
 let mpYielding : ('a, ('a * bool)) metaparser = fun p node env ->
   let outer_saw_yield = env.saw_yield in
   let () = env.saw_yield <- false in

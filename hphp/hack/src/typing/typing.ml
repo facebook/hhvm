@@ -1117,7 +1117,20 @@ and lvalue env e =
 and is_pseudo_function s =
   s = SN.PseudoFunctions.hh_show ||
   s = SN.PseudoFunctions.hh_show_env ||
-  s = SN.PseudoFunctions.hh_log_level
+  s = SN.PseudoFunctions.hh_log_level ||
+  s = SN.PseudoFunctions.hh_loop_forever
+
+and loop_forever env =
+  (* forever = up to 10 minutes, to avoid accidentally stuck processes *)
+  for i = 1 to 600 do
+    (* Look up things in shared memory occasionally to have a chance to be
+     * interrupted *)
+    match Env.get_class env "FOR_TEST_ONLY" with
+    | None -> Unix.sleep 1;
+    | _ -> assert false
+  done;
+  Utils.assert_false_log_backtrace
+    (Some "hh_loop_forever was looping for more than 10 minutes")
 
 (* $x ?? 0 is handled similarly to $x ?: 0, except that the latter will also
  * look for sketchy null checks in the condition. *)
@@ -1767,6 +1780,8 @@ and expr_
         | [(_, Int (_, level_str))] ->
           Typing_log.hh_log_level (int_of_string level_str)
         | _ -> ()
+      else
+      if s = SN.PseudoFunctions.hh_loop_forever then loop_forever env
       else ();
       make_result env
         (T.Call(

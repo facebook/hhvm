@@ -217,6 +217,7 @@ module PseudoFunctions = struct
   let hh_show = "\\hh_show"
   let hh_show_env = "\\hh_show_env"
   let hh_log_level = "\\hh_log_level"
+  let hh_loop_forever = "\\hh_loop_forever"
 
 end
 

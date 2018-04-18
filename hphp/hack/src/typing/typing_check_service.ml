@@ -106,21 +106,69 @@ let load_and_check_files dynamic_view_files acc fnl =
 (* Let's go! That's where the action is *)
 (*****************************************************************************)
 
-let parallel_check dynamic_view_files workers opts fnl =
+let parallel_check dynamic_view_files workers opts fnl ~interrupt =
   TypeCheckStore.store opts;
-  let result =
-    MultiWorker.call
+  let result, env, cancelled =
+    MultiWorker.call_with_interrupt
       workers
       ~job:(load_and_check_files dynamic_view_files)
       ~neutral
       ~merge:Decl_service.merge_lazy_decl
       ~next:(MultiWorker.next workers fnl)
+      ~interrupt
   in
   TypeCheckStore.clear();
-  result
+  result, env, List.concat cancelled
+
+type 'a job = Relative_path.t * 'a
+type ('a, 'b, 'c) job_result = 'b * 'c * 'a job list
+
+module type Mocking_sig = sig
+  val with_test_mocking :
+    (* real job payload, that we can modify... *)
+    'a job list ->
+    (* ... before passing it to the real job executor... *)
+    ('a job list -> ('a, 'b, 'c) job_result) ->
+    (* ... which output we can also modify. *)
+    ('a, 'b, 'c) job_result
+end
+
+module NoMocking = struct
+  let with_test_mocking fnl f = f fnl
+end
+
+module TestMocking = struct
+
+  let cancelled = ref Relative_path.Set.empty
+  let set_is_cancelled x =
+    cancelled := Relative_path.Set.add !cancelled x
+  let is_cancelled x = Relative_path.Set.mem !cancelled x
+
+  let with_test_mocking fnl f =
+    let mock_cancelled, fnl =
+      List.partition_tf fnl ~f:(fun (path, _) -> is_cancelled path) in
+    (* Only cancel once to avoid infinite loops *)
+    cancelled := Relative_path.Set.empty;
+    let res, env, cancelled = f fnl in
+    res, env, mock_cancelled @ cancelled
+end
+
+module Mocking =
+  (val (if Injector_config.use_test_stubbing
+  then (module TestMocking : Mocking_sig)
+  else (module NoMocking : Mocking_sig)
+))
+
+let go_with_interrupt workers opts dynamic_view_files fast ~interrupt =
+  let fnl = Relative_path.Map.elements fast in
+  Mocking.with_test_mocking fnl @@ fun fnl ->
+    if List.length fnl < 10
+    then check_files dynamic_view_files opts neutral fnl, interrupt.MultiThreadedCall.env, []
+    else parallel_check dynamic_view_files workers opts fnl ~interrupt
 
 let go workers opts dynamic_view_files fast =
-  let fnl = Relative_path.Map.elements fast in
-  if List.length fnl < 10
-  then check_files dynamic_view_files opts neutral fnl
-  else parallel_check dynamic_view_files workers opts fnl
+  let interrupt = MultiThreadedCall.no_interrupt () in
+  let res, (), cancelled =
+    go_with_interrupt workers opts dynamic_view_files fast interrupt in
+  assert (cancelled = []);
+  res

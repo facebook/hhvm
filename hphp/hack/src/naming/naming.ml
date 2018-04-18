@@ -876,7 +876,6 @@ module Make (GetLocals : GetLocals) = struct
 
   and hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
     env is_static_var (p, x as id) hl =
-    Naming_hooks.dispatch_hint_hook id;
     let params = (fst env).type_params in
     if   is_alok_type_name id && not (SMap.mem x params)
     then Errors.typeparam_alok id;

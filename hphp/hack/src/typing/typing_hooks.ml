@@ -39,9 +39,6 @@ let (cmethod_hooks: (Typing_defs.class_type ->
                      Typing_env.env -> Nast.class_id_ option -> is_method:bool ->
                      is_const:bool -> unit) list ref) = ref []
 
-let (lvar_hooks: (Pos.t * Local_id.t -> Typing_env.env ->
-                  unit) list ref) = ref []
-
 let (fun_call_hooks: (Typing_defs.locl Typing_defs.fun_params ->
                       Pos.t list -> Typing_env.env -> unit) list ref) = ref []
 
@@ -82,9 +79,6 @@ let attach_binop_hook hook =
 
 let attach_id_hook hook =
   id_hooks := hook :: !id_hooks
-
-let attach_lvar_hook hook =
-  lvar_hooks := hook :: !lvar_hooks
 
 let attach_new_id_hook hook =
   new_id_hooks := hook :: !new_id_hooks
@@ -147,9 +141,6 @@ let dispatch_cmethod_hook class_ targs ~pos_params id env cid ~is_method =
     (fun hook -> hook class_ ~targs ~pos_params id env cid ~is_method
                    ~is_const:false)
 
-let dispatch_lvar_hook id env =
-  List.iter !lvar_hooks begin fun hook -> hook id env end
-
 let dispatch_fun_call_hooks ft_params posl env =
   List.iter !fun_call_hooks begin fun hook -> hook ft_params posl env end
 
@@ -188,7 +179,6 @@ let remove_all_hooks () =
   id_hooks := [];
   cmethod_hooks := [];
   smethod_hooks := [];
-  lvar_hooks := [];
   fun_call_hooks := [];
   new_id_hooks := [];
   fun_id_hooks := [];

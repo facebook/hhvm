@@ -1699,7 +1699,6 @@ and expr_
       let ty = Env.get_local env x in
       make_result env (T.Dollardollar id) ty
   | Lvar ((_, x) as id) ->
-      Typing_hooks.dispatch_lvar_hook id env;
       let local_id = Local_id.to_string x in
       if SN.Superglobals.is_superglobal local_id
       then Env.error_if_reactive_context env @@ begin fun () ->

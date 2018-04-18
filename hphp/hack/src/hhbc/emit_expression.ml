@@ -39,10 +39,6 @@ type genva_inline_context =
   | GI_ignore_result
   | GI_list_assignment of A.expr list
 
-type is_expr_lhs =
-  | IsExprExpr of A.expr
-  | IsExprUnnamedLocal of Local.t
-
 type emit_jmp_result = {
   (* generated instruction sequence *)
   instrs: Instruction_sequence.t;
@@ -670,9 +666,9 @@ and emit_as env pos e h is_nullable =
         let done_label = Label.next_regular () in
         gather [
           emit_expr ~need_ref:false env e;
-          instr_popl local;
+          instr_setl local;
           (* (e is h) ? e : null *)
-          emit_is env pos (IsExprUnnamedLocal local) h;
+          emit_is env pos h;
           instr_jmpnz true_label;
           instr_null;
           instr_unsetl local;
@@ -690,59 +686,14 @@ and emit_as env pos e h is_nullable =
         instr_astypestruct @@ Emit_adata.get_array_identifier tv
       ] end
 
-and emit_is env pos lhs h =
+and emit_is env pos h =
   if not @@ Hhbc_options.enable_hackc_only_feature !Hhbc_options.compiler_options
   then Emit_fatal.raise_fatal_runtime pos "Is expression is not allowed"
   else
-  match snd h with
-    | A.Happly ((_, id), _) when id = SN.Typehints.this ->
-      begin match lhs with
-        | IsExprExpr e -> emit_is_create_local env pos e h
-        | IsExprUnnamedLocal local ->
-          let true_label = Label.next_regular () in
-          let done_label = Label.next_regular () in
-          let skip_label = Label.next_regular () in
-          gather [
-            instr_istypel local OpObj;
-            instr_jmpz skip_label;
-            instr_cgetl local;
-            instr_fcallbuiltin 1 1 "get_class";
-            instr_unboxr_nop;
-            instr_fcallbuiltin 0 0 "get_called_class";
-            instr_unboxr_nop;
-            instr (IOp Same);
-            instr_jmpnz true_label;
-            instr_label skip_label;
-            instr_false;
-            instr_jmp done_label;
-            instr_label true_label;
-            instr_true;
-            instr_label done_label;
-          ]
-      end
-    | _ ->
-      let namespace = Emit_env.get_namespace env in
-      let ts = Emit_type_constant.hint_to_type_constant
-        ~is_typedef:true ~tparams:[] ~namespace h in
-      gather [
-        emit_is_lhs env lhs;
-        instr_istypestruct @@ Emit_adata.get_array_identifier ts
-      ]
-
-and emit_is_create_local env pos e h =
-  Local.scope @@ fun () ->
-    let local = Local.get_unnamed_local () in
-    gather [
-      emit_expr ~need_ref:false env e;
-      instr_popl local;
-      emit_is env pos (IsExprUnnamedLocal local) h;
-      instr_unsetl local;
-    ]
-
-and emit_is_lhs env lhs =
-  match lhs with
-    | IsExprExpr e -> emit_expr ~need_ref:false env e
-    | IsExprUnnamedLocal local -> instr_cgetl local
+    let namespace = Emit_env.get_namespace env in
+    let ts = Emit_type_constant.hint_to_type_constant
+      ~is_typedef:true ~tparams:[] ~namespace h in
+    instr_istypestruct @@ Emit_adata.get_array_identifier ts
 
 and emit_null_coalesce env pos e1 e2 =
   let end_label = Label.next_regular () in
@@ -1673,7 +1624,10 @@ and emit_expr env ?last_pos ?(need_ref=false) (pos, expr_ as expr) =
   | A.InstanceOf (e1, e2) ->
     emit_box_if_necessary pos need_ref @@ emit_instanceof env pos e1 e2
   | A.Is (e, h) ->
-    emit_box_if_necessary pos need_ref @@ emit_is env pos (IsExprExpr e) h
+    emit_box_if_necessary pos need_ref @@ gather [
+      emit_expr ~need_ref:false env e;
+      emit_is env pos h;
+    ]
   | A.As (e, h, is_nullable) ->
     emit_box_if_necessary pos need_ref @@ emit_as env pos e h is_nullable
   | A.NullCoalesce (e1, e2) ->

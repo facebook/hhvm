@@ -1,5 +1,5 @@
 this
-not this
+this
 not this
 not this
 not this
@@ -16,5 +16,5 @@ not this
 not this
 not this
 
-not this
-not this
+
+Fatal error: "is" and "as" operators cannot be used with a trait in %s on line %d

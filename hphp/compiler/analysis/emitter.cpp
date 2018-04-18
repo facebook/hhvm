@@ -12525,8 +12525,15 @@ void genText(const std::vector<std::unique_ptr<UnitEmitter>>& ues,
 }
 
 void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
+  auto const now = std::chrono::high_resolution_clock::now();
+  auto const nanos =
+    std::chrono::duration_cast<std::chrono::nanoseconds>(
+      now.time_since_epoch()
+    );
+
   auto gd                        = Repo::GlobalData{};
   gd.UsedHHBBC                   = RuntimeOption::EvalUseHHBBC;
+  gd.Signature                   = nanos.count();
   gd.EnableHipHopSyntax          = RuntimeOption::EnableHipHopSyntax;
   gd.HardTypeHints               = RuntimeOption::EvalHardTypeHints;
   gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;

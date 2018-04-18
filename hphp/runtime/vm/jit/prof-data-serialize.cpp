@@ -37,7 +37,11 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit.h"
+
+#include "hphp/util/build-info.h"
 
 #include <fstream>
 
@@ -900,6 +904,11 @@ bool serializeProfData(const std::string& filename) {
   try {
     ProfDataSerializer ser{filename};
 
+    write_raw(ser, Repo::get().global().Signature);
+    auto schema = repoSchemaId();
+    write_raw(ser, schema.size());
+    write_raw(ser, schema.begin(), schema.size());
+
     Func::s_treadmill = true;
     hphp_thread_init();
     hphp_session_init();
@@ -930,6 +939,18 @@ bool serializeProfData(const std::string& filename) {
 bool deserializeProfData(const std::string& filename) {
   try {
     ProfDataDeserializer ser{filename};
+
+    auto signature = read_raw<decltype(Repo::get().global().Signature)>(ser);
+    if (signature != Repo::get().global().Signature) {
+      throw std::runtime_error("Mismatched repo-schema");
+    }
+    auto size = read_raw<size_t>(ser);
+    std::string schema;
+    schema.resize(size);
+    read_raw(ser, &schema[0], size);
+    if (schema != repoSchemaId()) {
+      throw std::runtime_error("Mismatched repo-schema");
+    }
 
     read_global_array_map(ser);
 

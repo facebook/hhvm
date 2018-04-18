@@ -308,8 +308,15 @@ void write_global_data(
   std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
   std::vector<SString> apcProfile) {
 
+  auto const now = std::chrono::high_resolution_clock::now();
+  auto const nanos =
+    std::chrono::duration_cast<std::chrono::nanoseconds>(
+      now.time_since_epoch()
+    );
+
   auto gd                        = Repo::GlobalData{};
   gd.UsedHHBBC                   = true;
+  gd.Signature                   = nanos.count();
   gd.EnableHipHopSyntax          = RuntimeOption::EnableHipHopSyntax;
   gd.HardTypeHints               = RuntimeOption::EvalHardTypeHints;
   gd.ThisTypeHintLevel           = RuntimeOption::EvalThisTypeHintLevel;

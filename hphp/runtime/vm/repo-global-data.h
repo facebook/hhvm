@@ -196,6 +196,11 @@ struct Repo::GlobalData {
    */
   bool AllowObjectDestructors = false;
 
+  /*
+   * A more-or-less unique identifier for the repo
+   */
+  uint64_t Signature = 0;
+
   std::vector<const StringData*> APCProfile;
 
   std::vector<std::pair<std::string,Cell>> ConstantFunctions;
@@ -232,6 +237,7 @@ struct Repo::GlobalData {
       (NoticeOnBuiltinDynamicCalls)
       (UseMSRVForInOut)
       (AllowObjectDestructors)
+      (Signature)
       ;
   }
 };

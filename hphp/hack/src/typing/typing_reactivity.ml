@@ -104,12 +104,12 @@ let disallow_onlyrx_if_rxfunc_on_non_functions env param param_ty =
   let module UA = Naming_special_names.UserAttributes in
   if Attributes.mem UA.uaOnlyRxIfRxFunc param.Nast.param_user_attributes
   then begin
+    if param.Nast.param_hint = None
+    then Errors.missing_annotation_for_onlyrx_if_rxfunc_parameter param.Nast.param_pos
+    else match param_ty with
     (* if parameter has <<__OnlyRxIfRxFunc>> annotation then:
        - parameter should be typed as function *)
-    match param.Nast.param_hint with
-    | Some (_, Nast.Hfun _) -> ()
-    | None ->
-      Errors.missing_annotation_for_onlyrx_if_rxfunc_parameter param.Nast.param_pos;
+    | _, Tfun _ -> ()
     | _ ->
       Errors.invalid_type_for_onlyrx_if_rxfunc_parameter
         (Reason.to_pos (fst param_ty))

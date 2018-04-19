@@ -419,10 +419,32 @@ let serve_one_iteration genv env client_provider =
       env)
   else env
 
+let setup_interrupts genv env = { env with
+  interrupt_handler =
+    if not genv.local_config.ServerLocalConfig.interrupt_on_watchman then None
+    else Some (
+    fun env _watchman_fd ->
+      let t = Unix.gettimeofday () in
+      let env, updates, updates_stale = query_notifier genv env `Async t in
+      (* Async updates can always be stale, so we don't care *)
+      ignore updates_stale;
+      let size = Relative_path.Set.cardinal updates in
+      if size > 0 then begin
+        Hh_logger.log
+          "Interrupted by Watchman message: %d files changed" size;
+        { env with disk_needs_parsing =
+            Relative_path.Set.union env.disk_needs_parsing updates },
+        MultiThreadedCall.Cancel
+      end else
+        env, MultiThreadedCall.Continue
+  );
+}
+
 let serve genv env in_fd _ =
   let client_provider = ClientProvider.provider_from_file_descriptor in_fd in
   (* This is needed when typecheck_after_init option is disabled. *)
   if not env.init_env.needs_full_init then finalize_init genv env.init_env;
+  let env = setup_interrupts genv env in
   let env = ref env in
   while true do
     let new_env = serve_one_iteration genv !env client_provider in
@@ -508,6 +530,7 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     max_bucket_size;
     load_tiny_state;
     use_full_fidelity_parser;
+    interrupt_on_watchman;
     _
   } as local_config = local_config in
   List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
@@ -531,6 +554,7 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     max_bucket_size
     load_tiny_state
     use_full_fidelity_parser
+    interrupt_on_watchman
     ;
   let root_s = Path.to_string root in
   let check_mode = ServerArgs.check_mode options in

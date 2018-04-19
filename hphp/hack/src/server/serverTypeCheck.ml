@@ -340,10 +340,15 @@ let union_set_and_map_keys set map =
     ~init:set
     ~f:(fun k _ acc  -> Relative_path.Set.add acc k)
 
-let get_interrupt_config _genv env =
-  (* TODO: not interrupting anything yet aside from tests (which use injection
-   * inside Typing_check_service to trigger it) *)
-  MultiThreadedCall.no_interrupt env
+let get_interrupt_config genv env =
+  match env.interrupt_handler with
+  | Some handler when env.can_interrupt ->
+    { MultiThreadedCall.
+      fds = Option.to_list @@ genv.notifier_async_fd ();
+      handler;
+      env;
+    }
+  | _ -> MultiThreadedCall.no_interrupt env
 
 (*****************************************************************************)
 (* Where the action is! *)
@@ -497,6 +502,8 @@ module FullCheckKind : CheckKindType = struct
       };
       diag_subscribe;
       recent_recheck_loop_stats = old_env.recent_recheck_loop_stats;
+      can_interrupt = old_env.can_interrupt;
+      interrupt_handler = old_env.interrupt_handler;
     }
 
     let is_full = true

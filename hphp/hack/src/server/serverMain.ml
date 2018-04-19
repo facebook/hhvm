@@ -209,8 +209,11 @@ let handle_connection genv env client is_from_existing_persistent_client =
     | false -> handle_connection_ genv env client
 
 let recheck genv old_env check_kind =
+  let can_interrupt = check_kind = ServerTypeCheck.Full_check in
+  let old_env = { old_env with can_interrupt } in
   let new_env, to_recheck, total_rechecked =
     ServerTypeCheck.check genv old_env check_kind in
+  let new_env = { new_env with can_interrupt = false } in
   if old_env.init_env.needs_full_init &&
       not new_env.init_env.needs_full_init then
         finalize_init genv new_env.init_env;

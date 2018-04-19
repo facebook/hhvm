@@ -176,7 +176,7 @@ void VirtualHost::initRuntimeOption(const IniSetting::Map& ini, const Hdf& vh) {
       ini,
       vh, "overwrite.ResourceLimit.SerializationSizeLimit",
       StringData::MaxSize, false);
-  m_runtimeOption.allowedDirectories = Config::GetVector(
+  m_runtimeOption.allowedDirectories = Config::GetStrVector(
     ini,
     vh, "overwrite.Server.AllowedDirectories",
     m_runtimeOption.allowedDirectories, false);
@@ -320,7 +320,7 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
     std::string namePattern = Config::GetString(ini_lf, hdf_lf, "pattern", "",
                                             false);
     std::vector<std::string> names;
-    names = Config::GetVector(ini_lf, hdf_lf, "params", names, false);
+    names = Config::GetStrVector(ini_lf, hdf_lf, "params", names, false);
 
     if (namePattern.empty()) {
       for (unsigned int i = 0; i < names.size(); i++) {

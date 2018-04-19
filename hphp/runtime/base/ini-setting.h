@@ -47,7 +47,10 @@ bool ini_on_update(const Variant& value, std::string& p);
 bool ini_on_update(const Variant& value, String& p);
 bool ini_on_update(const Variant& value, Array& p);
 bool ini_on_update(const Variant& value, std::set<std::string>& p);
+bool ini_on_update(const Variant& value, std::vector<uint32_t>& p);
 bool ini_on_update(const Variant& value, std::vector<std::string>& p);
+bool ini_on_update(const Variant& value,
+                   std::unordered_map<std::string, int>& p);
 bool ini_on_update(const Variant& value,
                    std::map<std::string, std::string>& p);
 bool ini_on_update(const Variant& value,
@@ -72,7 +75,9 @@ Variant ini_get(std::string& p);
 Variant ini_get(String& p);
 Variant ini_get(Array& p);
 Variant ini_get(std::set<std::string>& p);
-Variant ini_get(std::vector<std::string>& p);
+template<typename T>
+Variant ini_get(std::vector<T>& p);
+Variant ini_get(std::unordered_map<std::string, int>& p);
 Variant ini_get(std::map<std::string, std::string>& p);
 Variant ini_get(std::map<std::string, std::string, stdltistr>& p);
 Variant ini_get(std::set<std::string, stdltistr>& p);

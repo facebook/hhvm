@@ -477,7 +477,7 @@ bool TestCppBase::TestVirtualHost() {
   RuntimeOption::AllowedDirectories.clear();
   std::vector<VirtualHost> hosts;
   RuntimeOption::AllowedDirectories =
-    Config::GetVector(ini, hdf, "Server.AllowedDirectories");
+    Config::GetStrVector(ini, hdf, "Server.AllowedDirectories");
   auto cb = [&] (const IniSetting::Map &ini_cb, const Hdf &hdf_cb,
                  const std::string &host) {
     if (VirtualHost::IsDefault(ini_cb, hdf_cb, host)) {
@@ -589,7 +589,7 @@ bool TestCppBase::TestVirtualHostIni() {
 
   Config::ParseIniString(inistr, ini);
   RuntimeOption::AllowedDirectories =
-    Config::GetVector(ini, empty, "Server.AllowedDirectories");
+    Config::GetStrVector(ini, empty, "Server.AllowedDirectories");
   auto cb = [&] (const IniSetting::Map &ini_cb,
                  const Hdf &hdf_cb,
                  const std::string &host){
@@ -673,7 +673,7 @@ bool TestCppBase::TestCollectionHdf() {
                hdf, "Server.AllowedDirectories");
   VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
   std::vector<std::string> ad =
-    Config::GetVector(ini, hdf, "Server.AllowedDirectories",
+    Config::GetStrVector(ini, hdf, "Server.AllowedDirectories",
                       RuntimeOption::AllowedDirectories);
   VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
   VERIFY(ad.size() == 2);
@@ -704,7 +704,7 @@ bool TestCppBase::TestCollectionIni() {
                "Server.AllowedDirectories"); // Test converting name
   VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
   std::vector<std::string> ad =
-    Config::GetVector(ini, empty, "Server.AllowedDirectories",
+    Config::GetStrVector(ini, empty, "Server.AllowedDirectories",
                       RuntimeOption::AllowedDirectories, false);
   // This should still be 2. In other words, Get shouldn't append
   // values.

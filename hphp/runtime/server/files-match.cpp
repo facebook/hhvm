@@ -28,7 +28,7 @@ FilesMatch::FilesMatch(const IniSetting::Map& ini, const Hdf& vh) {
 
   m_pattern = format_pattern(Config::GetString(ini, vh, "pattern", "", false),
                              true);
-  m_headers = Config::GetVector(ini, vh, "headers", m_headers, false);
+  m_headers = Config::GetStrVector(ini, vh, "headers", m_headers, false);
 }
 
 bool FilesMatch::match(const std::string &filename) const {

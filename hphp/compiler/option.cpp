@@ -155,7 +155,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::GetBool(ini, config, "FlattenTraits");
 
-  for (auto& str : Config::GetVector(ini, config, "ConstantFunctions")) {
+  for (auto& str : Config::GetStrVector(ini, config, "ConstantFunctions")) {
     std::string func;
     std::string value;
     if (folly::split('|', str, func, value)) {

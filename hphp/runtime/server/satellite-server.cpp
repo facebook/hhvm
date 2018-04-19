@@ -67,7 +67,7 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
   if (type == "InternalPageServer") {
     m_type = SatelliteServer::Type::KindOfInternalPageServer;
     std::vector<std::string> urls;
-    urls = Config::GetVector(ini, hdf, "URLs", urls, false);
+    urls = Config::GetStrVector(ini, hdf, "URLs", urls, false);
     for (unsigned int i = 0; i < urls.size(); i++) {
       m_urls.insert(format_pattern(urls[i], true));
     }

@@ -108,6 +108,9 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(long long v) noexcept {
     m_type = KindOfInt64; m_data.num = v;
   }
+  /* implicit */ Variant(unsigned v) noexcept {
+    m_type = KindOfInt64; m_data.num = v;
+  }
   /* implicit */ Variant(unsigned long v) noexcept {
     m_type = KindOfInt64; m_data.num = v;
   }

@@ -253,10 +253,27 @@ bool ini_on_update(const Variant& value,
   return true;
 }
 
+bool ini_on_update(const Variant& value, std::vector<uint32_t>& p) {
+  INI_ASSERT_ARR(value);
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p.push_back(iter.second().toInt64());
+  }
+  return true;
+}
+
 bool ini_on_update(const Variant& value, std::vector<std::string>& p) {
   INI_ASSERT_ARR(value);
   for (ArrayIter iter(value.toArray()); iter; ++iter) {
     p.push_back(iter.second().toString().toCppString());
+  }
+  return true;
+}
+
+bool ini_on_update(const Variant& value,
+                   std::unordered_map<std::string, int>& p) {
+  INI_ASSERT_ARR(value);
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p[iter.first().toString().toCppString()] = iter.second().toInt64();
   }
   return true;
 }
@@ -339,6 +356,14 @@ Variant ini_get(String& p) {
   return p.data();
 }
 
+Variant ini_get(std::unordered_map<std::string, int>& p) {
+  ArrayInit ret(p.size(), ArrayInit::Map{});
+  for (auto& pair : p) {
+    ret.add(String(pair.first), pair.second);
+  }
+  return ret.toArray();
+}
+
 Variant ini_get(std::map<std::string, std::string>& p) {
   ArrayInit ret(p.size(), ArrayInit::Map{});
   for (auto& pair : p) {
@@ -394,7 +419,8 @@ Variant ini_get(boost::container::flat_set<std::string>& p) {
   return ret.toArray();
 }
 
-Variant ini_get(std::vector<std::string>& p) {
+template<typename T>
+Variant ini_get(std::vector<T>& p) {
   ArrayInit ret(p.size(), ArrayInit::Map{});
   auto idx = 0;
   for (auto& s : p) {
@@ -402,6 +428,9 @@ Variant ini_get(std::vector<std::string>& p) {
   }
   return ret.toArray();
 }
+
+template Variant ini_get<uint32_t>(std::vector<uint32_t>&);
+template Variant ini_get<std::string>(std::vector<std::string>&);
 
 const IniSettingMap ini_iterate(const IniSettingMap &ini,
                                 const std::string &name) {

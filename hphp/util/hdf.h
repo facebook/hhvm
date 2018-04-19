@@ -140,10 +140,12 @@ struct Hdf {
   uint64_t configGetUInt64(uint64_t defValue = 0) const;
   double configGetDouble(double defValue = 0) const;
 
+  void configGet(std::vector<uint32_t> &values) const;
   void configGet(std::vector<std::string> &values) const;
   void configGet(std::set<std::string> &values) const;
   void configGet(std::set<std::string, stdltistr> &values) const;
   void configGet(boost::container::flat_set<std::string> &values) const;
+  void configGet(std::unordered_map<std::string, int> &values) const;
   void configGet(std::map<std::string, std::string> &values) const;
   void configGet(std::map<std::string, std::string, stdltistr> &values) const;
   void configGet(hphp_string_imap<std::string> &values) const;

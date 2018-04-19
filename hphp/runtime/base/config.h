@@ -23,7 +23,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 struct Variant;
 struct IniSettingMap;
-typedef std::vector<std::string> ConfigVector;
 typedef std::map<std::string, std::string> ConfigMap;
 typedef std::set<std::string> ConfigSet;
 // with comparer
@@ -131,10 +130,23 @@ struct Config {
   static void Bind(HackStrictOption& loc, const IniSettingMap &ini,
                    const Hdf& config, const std::string& name,
                    HackStrictOption def);
-  static void Bind(ConfigVector& loc, const IniSettingMap& ini,
-                   const Hdf& config, const std::string& name = "",
-                   const ConfigVector& defValue = ConfigVector(),
-                   const bool prepend_hhvm = true);
+  static void
+  Bind(std::vector<uint32_t>& loc, const IniSettingMap& ini,
+       const Hdf& config, const std::string& name = "",
+       const std::vector<uint32_t>& defValue = std::vector<uint32_t>(),
+       const bool prepend_hhvm = true);
+  static void
+  Bind(std::vector<std::string>& loc, const IniSettingMap& ini,
+       const Hdf& config, const std::string& name = "",
+       const std::vector<std::string>& defValue = std::vector<std::string>(),
+       const bool prepend_hhvm = true);
+  static void
+  Bind(std::unordered_map<std::string, int>& loc,
+       const IniSettingMap& ini, const Hdf& config,
+       const std::string& name = "",
+       const std::unordered_map<std::string, int>& defValue =
+         std::unordered_map<std::string, int>{},
+       const bool prepend_hhvm = true);
   static void Bind(ConfigMap& loc, const IniSettingMap& ini, const Hdf& config,
                    const std::string& name = "",
                    const ConfigMap& defValue = ConfigMap(),
@@ -212,10 +224,22 @@ struct Config {
                           const std::string& name = "",
                           const double defValue = 0,
                           const bool prepend_hhvm = true);
-  static ConfigVector GetVector(const IniSettingMap& ini, const Hdf& config,
-                                const std::string& name = "",
-                                const ConfigVector& defValue = ConfigVector(),
-                                const bool prepend_hhvm = true);
+  static std::vector<uint32_t>
+  GetUInt32Vector(const IniSettingMap& ini, const Hdf& config,
+                  const std::string& name = "",
+                  const std::vector<uint32_t>& def = std::vector<uint32_t>{},
+                  const bool prepend_hhvm = true);
+  static std::vector<std::string>
+  GetStrVector(const IniSettingMap& ini, const Hdf& config,
+               const std::string& name = "",
+               const std::vector<std::string>& def = std::vector<std::string>{},
+               const bool prepend_hhvm = true);
+  static std::unordered_map<std::string, int>
+  GetIntMap(const IniSettingMap& ini, const Hdf& config,
+            const std::string& name = "",
+            const std::unordered_map<std::string, int>& defValue =
+              std::unordered_map<std::string, int>{},
+            const bool prepend_hhvm = true);
   static ConfigMap GetMap(const IniSettingMap& ini, const Hdf& config,
                           const std::string& name = "",
                           const ConfigMap& defValue = ConfigMap(),

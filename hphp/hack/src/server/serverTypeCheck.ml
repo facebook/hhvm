@@ -340,6 +340,11 @@ let union_set_and_map_keys set map =
     ~init:set
     ~f:(fun k _ acc  -> Relative_path.Set.add acc k)
 
+let get_interrupt_config _genv env =
+  (* TODO: not interrupting anything yet aside from tests (which use injection
+   * inside Typing_check_service to trigger it) *)
+  MultiThreadedCall.no_interrupt env
+
 (*****************************************************************************)
 (* Where the action is! *)
 (*****************************************************************************)
@@ -399,7 +404,7 @@ module type CheckKindType = sig
     old_env:ServerEnv.env ->
     errorl:Errors.t ->
     needs_phase2_redecl:Relative_path.Set.t ->
-    lazy_check_later:Relative_path.Set.t ->
+    needs_recheck:Relative_path.Set.t ->
     diag_subscribe:Diagnostic_subscription.t option ->
     ServerEnv.env
 
@@ -466,8 +471,10 @@ module FullCheckKind : CheckKindType = struct
       ~old_env
       ~errorl
       ~needs_phase2_redecl:_
-      ~lazy_check_later:_
+      ~needs_recheck
       ~diag_subscribe =
+    let full_check = if Relative_path.Set.is_empty needs_recheck then
+      Full_check_done else old_env.full_check in
     {
       files_info = old_env.files_info;
       tcopt = old_env.tcopt;
@@ -483,8 +490,8 @@ module FullCheckKind : CheckKindType = struct
       ide_needs_parsing = old_env.ide_needs_parsing;
       disk_needs_parsing = old_env.disk_needs_parsing;
       needs_phase2_redecl = Relative_path.Set.empty;
-      needs_recheck = Relative_path.Set.empty;
-      full_check = Full_check_done;
+      needs_recheck;
+      full_check;
       init_env = { old_env.init_env with
         needs_full_init = false;
       };
@@ -569,10 +576,8 @@ module LazyCheckKind : CheckKindType = struct
       ~old_env
       ~errorl
       ~needs_phase2_redecl
-      ~lazy_check_later
+      ~needs_recheck
       ~diag_subscribe =
-    let needs_recheck =
-      Relative_path.Set.union old_env.needs_recheck lazy_check_later in
     (* If it was started, it's still started, otherwise it needs starting *)
     let full_check = match old_env.full_check with
       | Full_check_started -> Full_check_started
@@ -764,9 +769,9 @@ end = functor(CheckKind:CheckKindType) -> struct
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck
       files_to_parse fast files_info to_recheck env in
     let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
-    let total_rechecked_count = Relative_path.Map.cardinal fast in
-    let logstring = Printf.sprintf "Type-check %d files" total_rechecked_count in
-    Hh_logger.log "Begin %s" logstring;
+    let to_recheck_count = Relative_path.Map.cardinal fast in
+    let logstring = Printf.sprintf "Type-check %d files" in
+    Hh_logger.log "Begin %s" (logstring to_recheck_count);
     ServerCheckpoint.process_updates fast;
     debug_print_fast_keys genv "to_recheck" fast;
     debug_print_path_set genv "lazy_check_later" lazy_check_later;
@@ -775,8 +780,9 @@ end = functor(CheckKind:CheckKindType) -> struct
     let dynamic_view_files = if ServerDynamicView.dynamic_view_on ()
     then env.editor_open_files
     else Relative_path.Set.empty in
-    let errorl'=
-      Typing_check_service.go genv.workers env.tcopt dynamic_view_files fast in
+    let interrupt = get_interrupt_config genv env in
+    let errorl', env , cancelled = Typing_check_service.go_with_interrupt
+      genv.workers env.tcopt dynamic_view_files fast ~interrupt in
     let errorl' = match ServerArgs.ai_mode genv.options with
       | None -> errorl'
       | Some ai_opt ->
@@ -786,20 +792,36 @@ end = functor(CheckKind:CheckKindType) -> struct
           genv.workers fast_infos env.tcopt ai_opt in
         (Errors.merge errorl' ae)
     in
+    (* Add new things that need to be rechecked *)
+    let needs_recheck =
+      Relative_path.Set.union old_env.needs_recheck lazy_check_later in
+    (* Remove things that were cancelled from things we started rechecking... *)
+    let fast, needs_recheck = List.fold cancelled ~init:(fast, needs_recheck)
+      ~f:begin fun (fast, needs_recheck) (path, _) ->
+        Relative_path.Map.remove fast path,
+        Relative_path.Set.add needs_recheck path
+      end
+    in
+    (* ... leaving only things that we actually checked, and which can be
+     * removed from needs_recheck *)
+    let needs_recheck = diff_set_and_map_keys needs_recheck fast in
 
     let errors = Errors.(incremental_update_map errors errorl' fast Typing) in
 
+    let full_check_done =
+      CheckKind.is_full && Relative_path.Set.is_empty needs_recheck in
     let diag_subscribe = Option.map old_env.diag_subscribe ~f:begin fun x ->
       Diagnostic_subscription.update x
         ~priority_files:env.editor_open_files
         ~reparsed:files_to_parse
         ~rechecked:fast
         ~global_errors:errors
-        ~full_check_done:CheckKind.is_full
+        ~full_check_done
     end in
 
-    HackEventLogger.type_check_end total_rechecked_count t;
-    let t = Hh_logger.log_duration logstring t in
+    let total_rechecked_count = Relative_path.Map.cardinal fast in
+    HackEventLogger.type_check_end to_recheck_count total_rechecked_count t;
+    let t = Hh_logger.log_duration (logstring total_rechecked_count) t in
 
     Hh_logger.log "Total: %f\n%!" (t -. start_t);
     ServerDebug.info genv "incremental_done";
@@ -808,7 +830,7 @@ end = functor(CheckKind:CheckKindType) -> struct
       env
       errors
       needs_phase2_redecl
-      lazy_check_later
+      needs_recheck
       diag_subscribe
     in
 
@@ -838,8 +860,9 @@ let type_check genv env kind =
       res
     | Full_check ->
       ServerBusyStatus.send env ServerCommandTypes.Doing_global_typecheck;
-      let res = FC.type_check genv env in
-      ServerBusyStatus.send env ServerCommandTypes.Done_global_typecheck;
+      let (env, _, _) as res = FC.type_check genv env in
+      if env.full_check = Full_check_done then
+        ServerBusyStatus.send env ServerCommandTypes.Done_global_typecheck;
       res
   end
 

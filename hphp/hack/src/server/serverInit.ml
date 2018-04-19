@@ -328,7 +328,7 @@ module ServerInitCommon = struct
         Typing_check_service.go genv.workers env.tcopt Relative_path.Set.empty fast in
       let hs = SharedMem.heap_size () in
       Hh_logger.log "Heap size: %d" hs;
-      HackEventLogger.type_check_end count t;
+      HackEventLogger.type_check_end count count t;
       let env = { env with
         errorl = Errors.merge errorl env.errorl;
       } in

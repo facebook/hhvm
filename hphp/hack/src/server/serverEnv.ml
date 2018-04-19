@@ -119,11 +119,16 @@ type env = {
      * or in editor) and need to be re-parsed *)
     ide_needs_parsing : Relative_path.Set.t;
     disk_needs_parsing : Relative_path.Set.t;
-    (* Definitions that became invalidated and removed from heap. Depending
-     * on lazy decl to update them on as-needed basis. Things that require
-     * entire global state to be up to date (like global list of errors, build,
-     * or find all references) must be preceded by Full_check. *)
+    (* Declarations that became invalidated and moved to "old" part of the heap.
+     * We keep them there to be used in "determining changes" step of recheck.
+     * (when they are compared to "new" versions). Depending on lazy decl to
+     * compute "new" versions in all the other scenarios (like IDE queries) *)
     needs_phase2_redecl : Relative_path.Set.t;
+    (* Files that need to be typechecked before commands that depend on global
+     * state (like full list of errors, build, or find all references) can be
+     * executed . After full check this should be empty, unless that check was
+     * cancelled mid-flight, in which case full_check will be set to
+     * Full_check_started and entire thing will be retried on next iteration. *)
     needs_recheck : Relative_path.Set.t;
     init_env : init_env;
     full_check : full_check_status;

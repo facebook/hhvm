@@ -44,6 +44,9 @@ type genv = {
     (* Each time this is called, it should return the files that have changed
      * since the last invocation *)
     notifier_async   : unit -> ServerNotifierTypes.notifier_changes;
+    (* If this FD is readable, next call to notifier_async () should read
+     * something from it. *)
+    notifier_async_fd : unit -> Unix.file_descr option;
     notifier         : unit -> SSet.t;
     (* If daemons are spawned as part of the init process, wait for them here *)
     wait_until_ready : unit -> unit;

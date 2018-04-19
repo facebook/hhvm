@@ -6371,7 +6371,10 @@ and method_def env m =
   in
   let env = Env.set_env_function_pos env pos in
   let reactive = Decl.fun_reactivity env.Env.decl_env m.m_user_attributes in
-  let mut = TUtils.fun_mutable m.m_user_attributes in
+  let mut =
+    TUtils.fun_mutable m.m_user_attributes ||
+    (* <<__Mutable>> is implicit on constructors  *)
+    snd m.m_name = SN.Members.__construct in
   let env = Env.set_env_reactive env reactive in
   let env = Env.set_fun_mutable env mut in
   let ety_env =

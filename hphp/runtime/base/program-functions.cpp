@@ -1207,9 +1207,12 @@ static int start_server(const std::string &username, int xhprof) {
 
   if (!RuntimeOption::EvalUnixServerPath.empty()) {
     start_cli_server();
+  } else {
+    // allocate hugetlb pages for pooled slabs
+    // it is not safe to do this after any threads that do hphp_thread_init
+    // have started (and start_cli_server creates such a thread)
+    SlabManager::init();
   }
-
-  SlabManager::init();                // allocate hugetlb pages for pooled slabs
 
   HttpServer::Server->runOrExitProcess();
   HttpServer::Server.reset();

@@ -109,25 +109,21 @@ let rec occursUnderOptions level env n ty =
  * Toption wrappers. Return Some(k, tys) where tys is the
  * other types in tyl (in arbitrary order). Otherwise return None.
 *)
-let rec findFirstVarOrOptionVar env n tyl =
-  match tyl with
-  | [] ->
-    None
-
-  | ty::tyl ->
-    match occursUnderOptions 0 env n ty with
-    | Some count1 ->
-      begin match findFirstVarOrOptionVar env n tyl with
-      | None -> Some (count1, tyl)
-      | Some (count2, tys) ->
-        let maxcount = if count1 > count2 then count1 else count2 in
-        Some (maxcount, tys)
-      end
-    | None ->
-      begin match findFirstVarOrOptionVar env n tyl with
-      | None -> None
-      | Some (count,tys) -> Some (count,ty::tys)
-      end
+let findFirstVarOrOptionVar env n tyl =
+  let rec aux tyl maxcount tys_wo_n found =
+    match tyl with
+    | [] ->
+      if found
+        then Some (maxcount, tys_wo_n)
+        else None
+    | ty::tyl ->
+      match occursUnderOptions 0 env n ty with
+      | Some count ->
+        let maxcount = if count > maxcount then count else maxcount in
+        aux tyl maxcount tys_wo_n true
+      | None ->
+        aux tyl maxcount (ty::tys_wo_n) found in
+  aux tyl 0 [] false
 
 (* Does variable n (which must be normalized with respect to env.subst)
  * occur inside type rty? See comment above occursResult for meaning

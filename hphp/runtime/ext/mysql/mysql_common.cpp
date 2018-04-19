@@ -1220,7 +1220,7 @@ Variant MySQLStmt::attr_get(int64_t attr) {
 
 #if MYSQL_VERSION_ID >= 50107
   if ((enum_stmt_attr_type)attr == STMT_ATTR_UPDATE_MAX_LENGTH) {
-    value = *(my_bool *)&value;
+    value = (value != 0);
   }
 #endif
 

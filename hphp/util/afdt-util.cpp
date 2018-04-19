@@ -15,8 +15,11 @@
 */
 #include "hphp/util/afdt-util.h"
 #include <afdt.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <limits.h>
+
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 namespace afdt {
@@ -91,6 +94,13 @@ bool send_fd(int afdt_fd, int fd) {
 }
 
 int recv_fd(int afdt_fd) {
+#ifdef __APPLE__
+  {
+    errno = 0;
+    int flags = fcntl(0, F_GETFD);
+    always_assert(flags != -1 || errno != EBADF);
+  }
+#endif
   int fd;
   afdt_error_t err = AFDT_ERROR_T_INIT;
   uint32_t afdt_len = 0;

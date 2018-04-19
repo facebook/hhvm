@@ -887,10 +887,6 @@ HackcMode hackc_mode() {
 }
 
 void CompilerManager::ensure_started() {
-#ifdef __APPLE__
-    return;
-#endif
-
   if (m_started.load(std::memory_order_acquire)) {
     return;
   }

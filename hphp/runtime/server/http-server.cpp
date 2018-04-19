@@ -90,11 +90,9 @@ HttpServer::HttpServer()
   LockProfiler::s_pfunc_profile = server_stats_log_mutex;
 
   int startingThreadCount = RuntimeOption::ServerThreadCount;
-  uint32_t additionalThreads = 0;
   if (RuntimeOption::ServerWarmupThrottleRequestCount > 0 &&
       RuntimeOption::ServerThreadCount > kNumProcessors) {
     startingThreadCount = kNumProcessors;
-    additionalThreads = RuntimeOption::ServerThreadCount - startingThreadCount;
   }
 
   auto serverFactory = ServerFactoryRegistry::getInstance()->getFactory
@@ -112,9 +110,9 @@ HttpServer::HttpServer()
   m_pageServer->addTakeoverListener(this);
   m_pageServer->addServerEventListener(this);
 
-  if (additionalThreads) {
+  if (startingThreadCount != RuntimeOption::ServerThreadCount) {
     auto handlerFactory = std::make_shared<WarmupRequestHandlerFactory>(
-      m_pageServer.get(), additionalThreads,
+      m_pageServer.get(),
       RuntimeOption::ServerWarmupThrottleRequestCount,
       RuntimeOption::RequestTimeoutSeconds);
     m_pageServer->setRequestHandlerFactory([handlerFactory] {

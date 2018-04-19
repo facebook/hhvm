@@ -212,7 +212,7 @@ public:
   /**
    * Add additional worker threads
    */
-  virtual void addWorkers(int numWorkers) = 0;
+  virtual void saturateWorkers() = 0;
 
   /**
    * Informational.

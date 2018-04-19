@@ -576,16 +576,15 @@ struct JobQueueDispatcher : IHostHealthObserver {
   }
 
   /*
-   * Increase the limit on number of workers by n, without exceeding the initial
-   * upper bound.
+   * Increase the limit on the number of workers to the maximum.
    */
-  void addWorkers(int n) {
+  void saturateWorkers() {
     Lock lock(m_mutex);
     if (m_stopped) return;
-    int limit = m_maxThreadCount - m_currThreadCountLimit;
-    assertx(limit >= 0);
-    if (n > limit) n = limit;
-    m_currThreadCountLimit += n;
+
+    auto const n = m_maxThreadCount - m_currThreadCountLimit;
+    m_currThreadCountLimit = m_maxThreadCount;
+
     if (!TWorker::CountActive) {
       for (int i = 0; i < n; ++i) {
         addWorkerImpl(true);

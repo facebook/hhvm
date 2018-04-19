@@ -104,8 +104,8 @@ struct ProxygenServer : Server,
 
   void addTakeoverListener(TakeoverListener* listener) override;
   void removeTakeoverListener(TakeoverListener* listener) override;
-  void addWorkers(int numWorkers) override {
-    m_dispatcher.addWorkers(numWorkers);
+  void saturateWorkers() override {
+    m_dispatcher.saturateWorkers();
   }
   void start() override;
   void waitForEnd() override;

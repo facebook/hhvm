@@ -85,7 +85,6 @@ ExecutionContext::ExecutionContext()
   , m_sb(nullptr)
   , m_implicitFlush(false)
   , m_protectedLevel(0)
-  , m_stdout(nullptr)
   , m_stdoutBytesWritten(0)
   , m_errorState(ExecutionContext::ErrorState::NoError)
   , m_lastErrorNum(0)
@@ -214,8 +213,16 @@ void ExecutionContext::write(const String& s) {
   write(s.data(), s.size());
 }
 
-void ExecutionContext::setStdout(StdoutHook* hook) {
-  m_stdout = hook;
+void ExecutionContext::addStdoutHook(StdoutHook* hook) {
+  m_stdoutHooks.insert(hook);
+}
+
+bool ExecutionContext::removeStdoutHook(StdoutHook* hook) {
+  if (hook == nullptr) {
+    return false;
+  }
+
+  return m_stdoutHooks.erase(hook) != 0;
 }
 
 static void safe_stdout(const  void  *ptr,  size_t  size) {
@@ -224,7 +231,7 @@ static void safe_stdout(const  void  *ptr,  size_t  size) {
 
 void ExecutionContext::writeStdout(const char *s, int len) {
   fflush(stdout);
-  if (m_stdout == nullptr) {
+  if (m_stdoutHooks.empty()) {
     if (s_stdout_color) {
       safe_stdout(s_stdout_color, strlen(s_stdout_color));
       safe_stdout(s, len);
@@ -234,7 +241,9 @@ void ExecutionContext::writeStdout(const char *s, int len) {
     }
     m_stdoutBytesWritten += len;
   } else {
-    (*m_stdout)(s, len);
+    for (auto const hook : m_stdoutHooks) {
+      (*hook)(s, len);
+    }
   }
 }
 

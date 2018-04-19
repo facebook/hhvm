@@ -786,16 +786,30 @@ DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   StringBuffer *save = g_context->swapOutputBuffer(nullptr);
   DebuggerStdoutHook stdout_hook(sb);
   DebuggerLoggerHook stderr_hook(sb);
-  g_context->setStdout(&stdout_hook);
+
+  auto const previousEvalOutputHook = m_evalOutputHook;
+  if (previousEvalOutputHook != nullptr) {
+    g_context->removeStdoutHook(previousEvalOutputHook);
+  }
+
+  m_evalOutputHook = &stdout_hook;
+  g_context->addStdoutHook(&stdout_hook);
+
   if (flags & ExecutePHPFlagsLog) {
     Logger::SetThreadHook(&stderr_hook);
   }
   SCOPE_EXIT {
-    g_context->setStdout(nullptr);
+    g_context->removeStdoutHook(&stdout_hook);
     g_context->swapOutputBuffer(save);
     if (flags & ExecutePHPFlagsLog) {
       Logger::SetThreadHook(nullptr);
     }
+
+    if (previousEvalOutputHook != nullptr) {
+      g_context->addStdoutHook(previousEvalOutputHook);
+    }
+
+    m_evalOutputHook = previousEvalOutputHook;
   };
   String code(php.c_str(), php.size(), CopyString);
   // We're about to start executing more PHP. This is typically done

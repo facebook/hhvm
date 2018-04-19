@@ -252,7 +252,7 @@ void VSDebugHook::tryEnterDebugger(
     bool scriptAttachMode = RuntimeOption::VSDebuggerListenPort > 0;
     if (!Debugger::hasSameTty()) {
       if (!g_context.isNull()) {
-        g_context->setStdout(debugger->getStdoutHook());
+        g_context->addStdoutHook(debugger->getStdoutHook());
       }
 
       if (scriptAttachMode || debugger->isDummyRequest()) {

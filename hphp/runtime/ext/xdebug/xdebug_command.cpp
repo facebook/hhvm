@@ -1481,7 +1481,7 @@ template<bool copy>
 struct XDebugStdoutHook final : ExecutionContext::StdoutHook {
   void operator()(const char* bytes, int len) override {
     if (XDEBUG_GLOBAL(Server) == nullptr) {
-      g_context->setStdout(nullptr);
+      g_context->removeStdoutHook(this);
     }
     XDEBUG_GLOBAL(Server)->sendStream("stdout", bytes, len);
 
@@ -1522,13 +1522,14 @@ struct StdoutCmd : XDebugCommand {
   void handleImpl(xdebug_xml_node& xml) override {
     switch (m_mode) {
       case MODE_DISABLE:
-        g_context->setStdout(nullptr);
+        g_context->removeStdoutHook(&onStdoutWriteCopy);
+        g_context->removeStdoutHook(&onStdoutWriteNoCopy);
         break;
       case MODE_COPY:
-        g_context->setStdout(&onStdoutWriteCopy);
+        g_context->addStdoutHook(&onStdoutWriteCopy);
         break;
       case MODE_REDIRECT:
-        g_context->setStdout(&onStdoutWriteNoCopy);
+        g_context->addStdoutHook(&onStdoutWriteNoCopy);
         break;
       default:
         throw Exception("Invalid mode type");

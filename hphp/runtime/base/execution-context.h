@@ -197,7 +197,8 @@ public:
     virtual void operator()(const char* s, int len) = 0;
     virtual ~StdoutHook() {};
   };
-  void setStdout(StdoutHook*);
+  void addStdoutHook(StdoutHook*);
+  bool removeStdoutHook(StdoutHook*);
 
   /**
    * Output buffering.
@@ -529,7 +530,8 @@ private:
   bool m_insideOBHandler{false};
   bool m_implicitFlush;
   int m_protectedLevel;
-  StdoutHook* m_stdout;
+
+  std::unordered_set<StdoutHook*> m_stdoutHooks;
   size_t m_stdoutBytesWritten;
   String m_rawPostData;
 

@@ -1024,11 +1024,14 @@ void CLIWorker::doJob(int client) {
 
     int ret = 255;
     init_command_line_session(args.size(), buf.get());
+    CliStdoutHook stdout_hook(cli_out.fd);
+    CliLoggerHook logging_hook(cli_err.fd);
+
     {
       SCOPE_EXIT {
         tl_env = nullptr;
         envArr.reset();
-        g_context->setStdout(nullptr);
+        g_context->removeStdoutHook(&stdout_hook);
         clearThreadLocalIO();
         LightProcess::setThreadLocalAfdtOverride(nullptr);
         Logger::SetThreadHook(nullptr);
@@ -1071,9 +1074,7 @@ void CLIWorker::doJob(int client) {
                                 envp.get());
       tl_env = &envArr;
 
-      CliStdoutHook stdout_hook(cli_out.fd);
-      CliLoggerHook logging_hook(cli_err.fd);
-      g_context->setStdout(&stdout_hook);
+      g_context->addStdoutHook(&stdout_hook);
       g_context->setCwd(String(cwd.c_str(), CopyString));
       setThreadLocalIO(cli_in.release(), cli_out.release(), cli_err.release());
       LightProcess::setThreadLocalAfdtOverride(cli_afdt.fd);

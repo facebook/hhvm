@@ -718,7 +718,7 @@ void Debugger::requestShutdown() {
     m_requestIdMap.erase(idItr);
     m_requestInfoMap.erase(infoItr);
 
-    g_context->setStdout(nullptr);
+    g_context->removeStdoutHook(getStdoutHook());
     Logger::SetThreadHook(nullptr);
   }
 }
@@ -1811,7 +1811,8 @@ SilentEvaluationContext::SilentEvaluationContext(
     // Disable all sorts of output during this eval.
     m_oldHook = debugger->getStdoutHook();
     m_savedOutputBuffer = g_context->swapOutputBuffer(nullptr);
-    g_context->setStdout(&m_noOpHook);
+    g_context->removeStdoutHook(m_oldHook);
+    g_context->addStdoutHook(&m_noOpHook);
   }
 
   // Set aside the flow filters to disable all stepping and bp filtering.
@@ -1828,7 +1829,8 @@ SilentEvaluationContext::~SilentEvaluationContext() {
   if (m_suppressOutput) {
     rid.setErrorReportingLevel(m_errorLevel);
     g_context->swapOutputBuffer(m_savedOutputBuffer);
-    g_context->setStdout(m_oldHook);
+    g_context->removeStdoutHook(&m_noOpHook);
+    g_context->addStdoutHook(m_oldHook);
   }
 
   m_savedFlowFilter.swap(rid.m_flowFilter);

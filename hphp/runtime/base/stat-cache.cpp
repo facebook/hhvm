@@ -847,9 +847,9 @@ std::string StatCache::realpathImpl(const char* path) {
     }
     if (next_token.size() == 0) {
       continue;
-    } else if (next_token.compare(".") == 0) {
+    } else if (next_token == ".") {
       continue;
-    } else if (next_token.compare("..") == 0) {
+    } else if (next_token == "..") {
       // Strip the last path component except when we have single "/".
       if (resolved.size() > 1) {
         resolved.erase(resolved.size() - 1);

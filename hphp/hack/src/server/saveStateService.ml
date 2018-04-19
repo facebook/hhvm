@@ -7,6 +7,45 @@
  *
  *)
 
+module List = Hh_core.List
+
+let save_all_file_info_sqlite db_name files_info =
+  begin
+    SharedMem.save_file_info_init db_name;
+    Relative_path.Map.iter files_info (
+      fun path file_info ->
+        let funs = file_info.FileInfo.funs in
+        let classes = file_info.FileInfo.classes in
+        let typedefs = file_info.FileInfo.typedefs in
+        let consts = file_info.FileInfo.consts in
+        let path = Relative_path.S.to_string path in
+        begin
+          List.iter funs ~f:(fun (_pos, name) ->
+            SharedMem.save_file_info_sqlite ~hash:(
+              Naming_heap.heap_string_of_key `FunPos name
+            ) ~name:name `FuncK path
+          );
+          List.iter classes ~f:(fun (_pos, name) ->
+            SharedMem.save_file_info_sqlite ~hash:(
+              Naming_heap.heap_string_of_key `TypeId name
+            ) ~name:name `ClassK path
+          );
+          List.iter typedefs ~f:(fun (_pos, name) ->
+            SharedMem.save_file_info_sqlite ~hash:(
+              Naming_heap.heap_string_of_key `TypeId name
+            ) ~name:name `ClassK path
+          );
+          List.iter consts ~f:(fun (_pos, name) ->
+            SharedMem.save_file_info_sqlite ~hash:(
+              Naming_heap.heap_string_of_key `ConstPos name
+            ) ~name:name `ConstantK path
+          )
+        end
+    );
+    SharedMem.save_file_info_free ()
+  end
+
+
 let dump_filesinfo fn files_info =
   let chan = Sys_utils.open_out_no_fail fn in
   let saved = FileInfo.info_to_saved files_info in
@@ -19,11 +58,12 @@ let update_save_state ~file_info_on_disk files_info fn t =
     failwith "Given existing save state SQL file missing";
   dump_filesinfo fn files_info;
   let () = if file_info_on_disk then
-    SharedMem.save_file_info_sqlite db_name |> ignore
+    save_all_file_info_sqlite db_name |> ignore
   else () in
   let sqlite_save_t = SharedMem.update_dep_table_sqlite db_name Build_id.build_revision in
   Hh_logger.log "Updating deptable using sqlite took(seconds): %d" sqlite_save_t;
   ignore @@ Hh_logger.log_duration "Updating saved state took" t
+
 
 let save_state ~file_info_on_disk files_info fn t =
   let () = Sys_utils.mkdir_p (Filename.dirname fn) in
@@ -38,7 +78,7 @@ let save_state ~file_info_on_disk files_info fn t =
   | None ->
     dump_filesinfo fn files_info;
     let () = if file_info_on_disk then
-      SharedMem.save_file_info_sqlite db_name |> ignore
+      save_all_file_info_sqlite db_name |> ignore
     else () in
     let sqlite_save_t = SharedMem.save_dep_table_sqlite db_name Build_id.build_revision in
     Hh_logger.log "Saving deptable using sqlite took(seconds): %d" sqlite_save_t;

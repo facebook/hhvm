@@ -579,25 +579,6 @@ let hack_errors_to_lsp_diagnostic
     diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
   }
 
-let apply_edit (text: string) (edit: DidChange.textDocumentContentChangeEvent) : string =
-  let lsp_position_to_fc (pos: Lsp.position) : File_content.position =
-    { File_content.
-      line = pos.Lsp.line + 1;  (* LSP is 0-based; File_content is 1-based. *)
-      column = pos.Lsp.character + 1;
-    } in
-  let lsp_range_to_fc (range: Lsp.range) : File_content.range =
-    { File_content.
-      st = lsp_position_to_fc range.Lsp.start;
-      ed = lsp_position_to_fc range.Lsp.end_;
-    } in
-  let lsp_edit_to_fc (edit: Lsp.DidChange.textDocumentContentChangeEvent) : File_content.text_edit =
-    { File_content.
-      range = Option.map edit.DidChange.range ~f:lsp_range_to_fc;
-      text = edit.DidChange.text;
-    } in
-  match File_content.edit_file text [edit |> lsp_edit_to_fc] with
-  | Ok text -> text
-  | Error msg -> failwith msg
 
 (************************************************************************)
 (** Protocol                                                           **)
@@ -1769,10 +1750,9 @@ let track_open_files (state: state) (event: event) : state =
       let open Lsp.TextDocumentItem in
       match doc with
       | Some doc ->
-        let text = doc.TextDocumentItem.text in
         let doc' = { doc with
          version = params.DidChange.textDocument.VersionedTextDocumentIdentifier.version;
-         text = List.fold_left ~init:text ~f:apply_edit params.DidChange.contentChanges;
+         text = Lsp_helpers.apply_changes_unsafe doc.text params.DidChange.contentChanges;
        } in
       SMap.add uri doc' prev_opened_files
       | None -> prev_opened_files

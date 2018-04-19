@@ -960,3 +960,56 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             """)
 
         self.check_cmd(['No errors!'])
+
+    def test_interrupt(self):
+        # filesystem interruptions are only triggered by Watchman
+        with open(os.path.join(self.repo_dir, '.watchmanconfig'), 'w') as f:
+            f.write("\n")
+        with open(os.path.join(self.repo_dir, 'hh.conf'), 'a') as f:
+            f.write("use_watchman = true\n" +
+                    "interrupt_on_watchman = true\n" +
+                    "watchman_subscribe_v2 = true\n"
+                    )
+
+        self.start_hh_server()
+        # create a file with 10 dependencies. Only "big" jobs, that use
+        # workers can be interrupted at the moment.
+        with open(os.path.join(self.repo_dir, 'foo.php'), 'w') as f:
+            f.write("""<?hh //strict
+            function foo(): int {
+              return 4;
+            }""")
+
+        for i in range(1, 10):
+            with open(os.path.join(self.repo_dir, 'bar%d.php' % i), 'w') as f:
+                f.write("""<?hh //strict
+                function bar%d(): int {
+                  return foo();
+                }""" % i)
+
+        self.check_cmd(['No errors!'])
+
+        # trigger rechecking of all 11 files, and make one of them loop
+        # until cancelled
+        with open(os.path.join(self.repo_dir, 'foo.php'), 'w') as f:
+            f.write("""<?hh //strict
+            function foo(): string {
+              hh_loop_forever();
+            }""")
+
+        # this should timeout due to infinite loop
+        try:
+            # empty output means no results due to timeout
+            self.check_cmd([], options=['--retries', '1'])
+        except AssertionError:
+            # one of the test drivers doesn't like timoeuts
+            pass
+
+        # subsequent change should interrupt the "loop forever" part
+        with open(os.path.join(self.repo_dir, 'foo.php'), 'w') as f:
+            f.write("""<?hh //strict
+            function foo(): int {
+              return 4;
+            }""")
+
+        self.check_cmd(['No errors!'])

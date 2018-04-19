@@ -25,14 +25,14 @@ let check_call env receiver_type pos reason ft arg_types =
   let callee_reactivity =
     (* if function we are about to call is maybe reactive with reactivity flavor R
       - check its arguments: call to maybe reactive function is treated as reactive
-       if arguments that correspond to parameters marked with <<__MaybeRx>> are functions
+       if arguments that correspond to parameters marked with <<__OnlyRxIfRxFunc>> are functions
        with reactivity <: R *)
-    let callee_has_mayberx_parameters =
+    let callee_has_onlyrx_if_rxfunc_parameters =
       Core_list.exists ft.ft_params ~f:begin function
       | { fp_type = (_, Tfun { ft_reactive = MaybeReactive _; _ }); _ } -> true
       | _ -> false
       end in
-    if not callee_has_mayberx_parameters then ft.ft_reactive
+    if not callee_has_onlyrx_if_rxfunc_parameters then ft.ft_reactive
     else
     let is_reactive =
       match Core_list.zip ft.ft_params arg_types with
@@ -100,18 +100,18 @@ let disallow_static_or_global_in_reactive_context ~is_static env el =
       else Errors.global_in_reactive_context p name)
   end
 
-let disallow_mayberx_on_non_functions env param param_ty =
+let disallow_onlyrx_if_rxfunc_on_non_functions env param param_ty =
   let module UA = Naming_special_names.UserAttributes in
-  if Attributes.mem UA.uaMaybeRx param.Nast.param_user_attributes
+  if Attributes.mem UA.uaOnlyRxIfRxFunc param.Nast.param_user_attributes
   then begin
-    (* if parameter has <<__MaybeRx>> annotation then:
+    (* if parameter has <<__OnlyRxIfRxFunc>> annotation then:
        - parameter should be typed as function *)
     match param.Nast.param_hint with
     | Some (_, Nast.Hfun _) -> ()
     | None ->
-      Errors.missing_annotation_for_mayberx_parameter param.Nast.param_pos;
+      Errors.missing_annotation_for_onlyrx_if_rxfunc_parameter param.Nast.param_pos;
     | _ ->
-      Errors.invalid_type_for_mayberx_parameter
+      Errors.invalid_type_for_onlyrx_if_rxfunc_parameter
         (Reason.to_pos (fst param_ty))
         (Typing_print.full env param_ty)
   end

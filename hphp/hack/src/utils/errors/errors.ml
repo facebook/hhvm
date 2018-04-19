@@ -807,7 +807,7 @@ module NastCheck                            = struct
   let multiple_reactivity_annotations       = 3061 (* DONT MODIFY!!!! *)
   let rx_is_enabled_invalid_location        = 3062 (* DONT MODIFY!!!! *)
   let maybe_rx_invalid_location             = 3063 (* DONT MODIFY!!!! *)
-  let no_maybe_rx_for_rx_if_args            = 3064 (* DONT MODIFY!!!! *)
+  let no_onlyrx_if_rxfunc_for_rx_if_args    = 3064 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1042,8 +1042,8 @@ module Typing                               = struct
   let global_in_reactive_context            = 4230 (* DONT MODIFY!!!! *)
   let wrong_expression_kind_attribute       = 4231 (* DONT MODIFY!!!! *)
   let attribute_class_no_constructor_args   = 4232 (* DONT MODIFY!!!! *)
-  let invalid_type_for_mayberx_parameter   = 4233 (* DONT MODIFY!!!! *)
-  let missing_annotation_for_mayberx_parameter = 4234 (* DONT MODIFY!!!! *)
+  let invalid_type_for_onlyrx_if_rxfunc_parameter   = 4233 (* DONT MODIFY!!!! *)
+  let missing_annotation_for_onlyrx_if_rxfunc_parameter = 4234 (* DONT MODIFY!!!! *)
   let cannot_return_borrowed_value_as_immutable = 4235 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
@@ -1802,17 +1802,17 @@ let rx_is_enabled_invalid_location pos =
     "and that if-statement must be the only statement in the function body."
   )
 
-let maybe_rx_invalid_location pos =
+let onlyrx_if_rxfunc_invalid_location pos =
   add NastCheck.maybe_rx_invalid_location pos (
-    "<<__MaybeRx>> attribute can only be put on parameters of \
+    "<<__OnlyRxIfRxFunc>> attribute can only be put on parameters of \
     conditionally reactive function or method annotated with \
     <<__OnlyRxIfArgs>> attribute."
   )
 
-let no_maybe_rx_for_rx_if_args pos =
-  add NastCheck.no_maybe_rx_for_rx_if_args pos (
+let no_onlyrx_if_rxfunc_for_rx_if_args pos =
+  add NastCheck.no_onlyrx_if_rxfunc_for_rx_if_args pos (
     "Function or method annotated with <<__OnlyRxIfArgs>> attribute \
-    should have at least one parameter with <<__MaybeRx>> annotation."
+    should have at least one parameter with <<__OnlyRxIfRxFunc>> annotation."
   )
 
 let conditionally_reactive_annotation_invalid_arguments pos =
@@ -3264,15 +3264,15 @@ let cannot_return_borrowed_value_as_immutable fun_pos value_pos =
     value_pos, "This value is mutably borrowed and cannot be returned as immutable"
   ]
 
-let invalid_type_for_mayberx_parameter pos type_str =
-  add Typing.invalid_type_for_mayberx_parameter pos (
-    "Parameter annotated with <<__MaybeRx>> attribute must be function, \
+let invalid_type_for_onlyrx_if_rxfunc_parameter pos type_str =
+  add Typing.invalid_type_for_onlyrx_if_rxfunc_parameter pos (
+    "Parameter annotated with <<__OnlyRxIfRxFunc>> attribute must be function, \
     now '" ^ type_str ^ "'."
   )
 
-let missing_annotation_for_mayberx_parameter pos =
-  add Typing.missing_annotation_for_mayberx_parameter pos (
-    "Missing function type annotation on parameter marked with <<__MaybeRx>> attribute."
+let missing_annotation_for_onlyrx_if_rxfunc_parameter pos =
+  add Typing.missing_annotation_for_onlyrx_if_rxfunc_parameter pos (
+    "Missing function type annotation on parameter marked with <<__OnlyRxIfRxFunc>> attribute."
   )
 
 let binding_ref_in_array pos =

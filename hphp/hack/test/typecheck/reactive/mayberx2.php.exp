@@ -1,2 +1,2 @@
-File "mayberx2.php", line 5, characters 3-11:
-<<__MaybeRx>> attribute can only be put on parameters of conditionally reactive function or method annotated with <<__OnlyRxIfArgs>> attribute. (NastCheck[3063])
+File "mayberx2.php", line 5, characters 3-18:
+<<__OnlyRxIfRxFunc>> attribute can only be put on parameters of conditionally reactive function or method annotated with <<__OnlyRxIfArgs>> attribute. (NastCheck[3063])

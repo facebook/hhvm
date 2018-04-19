@@ -311,7 +311,7 @@ let make_param_local_ty attrs env param =
       r, Tarraykind akind
     | x -> x
   in
-  Typing_reactivity.disallow_mayberx_on_non_functions env param ty;
+  Typing_reactivity.disallow_onlyrx_if_rxfunc_on_non_functions env param ty;
   env, ty
 
 (* Given a localized parameter type and parameter information, infer

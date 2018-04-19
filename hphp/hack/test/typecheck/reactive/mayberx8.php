@@ -1,7 +1,7 @@
 <?hh // strict
 
 <<__Rx, __OnlyRxIfArgs>>
-function mayberx(<<__MaybeRx>>(function(): int) $a): int {
+function mayberx(<<__OnlyRxIfRxFunc>>(function(): int) $a): int {
   return $a() + 1;
 }
 

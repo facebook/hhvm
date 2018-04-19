@@ -2,5 +2,5 @@
 
 // OK
 <<__Rx, __OnlyRxIfArgs>>
-function f(<<__MaybeRx>>(function(): int) $s): void {
+function f(<<__OnlyRxIfRxFunc>>(function(): int) $s): void {
 }

@@ -66,10 +66,10 @@ let check_coroutines_enabled condition env p =
   if condition && not (coroutines_enabled env)
   then report_coroutines_not_enabled p
 
-let error_if_has_maybe_rx_attribute attrs =
-  match Attributes.find SN.UserAttributes.uaMaybeRx attrs with
+let error_if_has_onlyrx_if_rxfunc_attribute attrs =
+  match Attributes.find SN.UserAttributes.uaOnlyRxIfRxFunc attrs with
   | Some { ua_name = (p, _); _ } ->
-    Errors.maybe_rx_invalid_location p;
+    Errors.onlyrx_if_rxfunc_invalid_location p;
   | _ -> ()
 
 module CheckFunctionBody = struct
@@ -446,7 +446,7 @@ and func env f named_body =
   if env.is_reactive
   then ensure_single_reactivity_attribute f.f_user_attributes;
 
-  error_if_has_maybe_rx_attribute f.f_user_attributes;
+  error_if_has_onlyrx_if_rxfunc_attribute f.f_user_attributes;
   check_maybe_rx_attributes_on_params env f.f_user_attributes f.f_params;
 
   List.iter f.f_tparams (tparam env);
@@ -605,7 +605,7 @@ and class_ tenv c =
   let tenv = add_constraints (fst c.c_name) tenv constraints in
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
 
-  error_if_has_maybe_rx_attribute c.c_user_attributes;
+  error_if_has_onlyrx_if_rxfunc_attribute c.c_user_attributes;
 
   (* Const handling:
    * prevent for abstract final classes, traits, and interfaces
@@ -939,7 +939,7 @@ and method_ (env, is_static) m =
   then ensure_single_reactivity_attribute m.m_user_attributes;
 
   check_conditionally_reactive_annotations env.is_reactive p name m.m_user_attributes;
-  error_if_has_maybe_rx_attribute m.m_user_attributes;
+  error_if_has_onlyrx_if_rxfunc_attribute m.m_user_attributes;
   check_maybe_rx_attributes_on_params env m.m_user_attributes m.m_params;
 
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
@@ -977,18 +977,18 @@ and method_ (env, is_static) m =
 and check_maybe_rx_attributes_on_params env parent_attrs params =
   let parent_only_rx_if_args =
     Attributes.find SN.UserAttributes.uaOnlyRxIfArgs parent_attrs in
-  let check_param seen_mayberx p =
-    match Attributes.find SN.UserAttributes.uaMaybeRx p.param_user_attributes with
+  let check_param seen_onlyrx_if_rxfunc p =
+    match Attributes.find SN.UserAttributes.uaOnlyRxIfRxFunc p.param_user_attributes with
     | Some { ua_name = (p, _); _ } ->
       if parent_only_rx_if_args = None || not env.is_reactive
-      then Errors.maybe_rx_invalid_location p;
+      then Errors.onlyrx_if_rxfunc_invalid_location p;
       true
-    | _ -> seen_mayberx in
-  let has_param_with_mayberx =
+    | _ -> seen_onlyrx_if_rxfunc in
+  let has_param_with_onlyrx_if_rxfunc =
     Core_list.fold_left params ~init:false ~f:check_param in
-  match parent_only_rx_if_args, has_param_with_mayberx with
+  match parent_only_rx_if_args, has_param_with_onlyrx_if_rxfunc with
   | Some { ua_name = (p, _); _ }, false ->
-    Errors.no_maybe_rx_for_rx_if_args p
+    Errors.no_onlyrx_if_rxfunc_for_rx_if_args p
   | _ -> ()
 
 and param_is_mutable p =

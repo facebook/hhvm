@@ -6,7 +6,7 @@ function mayberx1(Rx<(function(): int)> $a): int {
 }
 
 <<__RxLocal, __OnlyRxIfArgs>>
-function mayberx2(<<__MaybeRx>>(function(): int) $a): int {
+function mayberx2(<<__OnlyRxIfRxFunc>>(function(): int) $a): int {
   // Error: cannot pass mayberx parameter as rx value
   return mayberx1($a);
 }

@@ -6,7 +6,7 @@ class A {
   // function is only reactive if caller is known to implement Rx
   // and argument is reactive
   <<__Rx, __OnlyRxIfImpl(Rx::class), __OnlyRxIfArgs>>
-  public function f(<<__MaybeRx>>(function(): int) $a): int {
+  public function f(<<__OnlyRxIfRxFunc>>(function(): int) $a): int {
     return $a();
   }
 }

@@ -128,7 +128,7 @@ module UserAttributes = struct
   let uaOptionalDestruct    = "__OptionalDestruct"
   let uaOnlyRxIfImpl        = "__OnlyRxIfImpl"
   let uaProbabilisticModel  = "__PPL"
-  let uaMaybeRx             = "__MaybeRx"
+  let uaOnlyRxIfRxFunc      = "__OnlyRxIfRxFunc"
   let uaOnlyRxIfArgs        = "__OnlyRxIfArgs"
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
@@ -151,7 +151,7 @@ module UserAttributes = struct
       uaOptionalDestruct;
       uaOnlyRxIfImpl;
       uaProbabilisticModel;
-      uaMaybeRx;
+      uaOnlyRxIfRxFunc;
       uaOnlyRxIfArgs;
     ]
 end

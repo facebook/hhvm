@@ -5,7 +5,7 @@ Some methods are incompatible with those declared in type A
 Read the following to see why:
 File "mayberx12.php", line 12, characters 19-19:
 Member f has the wrong type
-File "mayberx12.php", line 12, characters 34-51:
+File "mayberx12.php", line 12, characters 41-58:
 This function is maybe (reactive).
-File "mayberx12.php", line 5, characters 34-51:
+File "mayberx12.php", line 5, characters 41-58:
 This function is maybe (local reactive).

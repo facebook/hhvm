@@ -2,5 +2,5 @@
 
 // ERROR, missing <<__OnlyRxIfArgs>>
 <<__Rx>>
-function f(<<__MaybeRx>>(function(): void) $a): void {
+function f(<<__OnlyRxIfRxFunc>>(function(): void) $a): void {
 }

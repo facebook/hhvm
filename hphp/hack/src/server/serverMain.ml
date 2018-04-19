@@ -71,7 +71,7 @@ module Program =
          exit 0
 
     (* filter and relativize updated file paths *)
-    let process_updates genv _env updates =
+    let process_updates genv updates =
       let root = Path.to_string @@ ServerArgs.root genv.options in
       (* Because of symlinks, we can have updates from files that aren't in
        * the .hhconfig directory *)
@@ -221,6 +221,30 @@ let recheck genv old_env check_kind =
                                  (Errors.get_error_list new_env.errorl);
   new_env, to_recheck, total_rechecked
 
+let query_notifier genv env query_kind t =
+  let open ServerNotifierTypes in
+  let env, raw_updates = match query_kind with
+    | `Sync ->
+      env, begin try Notifier_synchronous_changes (genv.notifier ()) with
+      | Watchman.Timeout -> Notifier_unavailable
+      end
+    | `Async ->
+      { env with last_notifier_check_time = t; }, genv.notifier_async ()
+    | `Skip ->
+      env, Notifier_async_changes SSet.empty
+  in
+  let updates_stale, raw_updates = match raw_updates with
+    | Notifier_unavailable -> true, SSet.empty
+    | Notifier_state_enter _ -> true, SSet.empty
+    | Notifier_state_leave _ -> true, SSet.empty
+    | Notifier_async_changes updates -> true, updates
+    | Notifier_synchronous_changes updates -> false, updates
+  in
+  let updates = Program.process_updates genv raw_updates in
+  if not @@ Relative_path.Set.is_empty updates then
+    HackEventLogger.notifier_returned t (SSet.cardinal raw_updates);
+  env, updates, updates_stale
+
 (* When a rebase occurs, dfind takes a while to give us the full list of
  * updates, and it often comes in batches. To get an accurate measurement
  * of rebase time, we use the heuristic that any changes that come in
@@ -228,7 +252,6 @@ let recheck genv old_env check_kind =
  * rebase, and we don't log the recheck_end event until the update list
  * is no longer getting populated. *)
 let rec recheck_loop acc genv env new_client has_persistent_connection_request =
-  let open ServerNotifierTypes in
   let t = Unix.gettimeofday () in
   (** When a new client connects, we use the synchronous notifier.
    * This is to get synchronous file system changes when invoking
@@ -236,34 +259,16 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
    *
    * NB: This also uses synchronous notify on establishing a persistent
    * connection. This is harmless, but could maybe be filtered away. *)
-  let env, raw_updates =
-    match new_client, has_persistent_connection_request with
-    | Some _, false -> begin
-      env, try Notifier_synchronous_changes (genv.notifier ()) with
-      | Watchman.Timeout -> Notifier_unavailable
-      end
-    |  None, false when t -. env.last_notifier_check_time > 0.5 ->
-      { env with last_notifier_check_time = t; }, genv.notifier_async ()
-      (* Do not process any disk changes when there are pending persistent
-       * client requests - some of them might be edits, and we don't want to
-       * do analysis on mid-edit state of the world *)
-    | _, true
-    | None , _->
-      env, Notifier_async_changes SSet.empty
+  let query_kind = match new_client, has_persistent_connection_request with
+    | Some _, false -> `Sync
+    | None, false when t -. env.last_notifier_check_time > 0.5 -> `Async
+    (* Do not process any disk changes when there are pending persistent
+    * client requests - some of them might be edits, and we don't want to
+    * do analysis on mid-edit state of the world *)
+    | _ -> `Skip
   in
-  let genv, acc, raw_updates = match raw_updates with
-  | Notifier_unavailable ->
-    genv, { acc with updates_stale = true; }, SSet.empty
-  | Notifier_state_enter _ ->
-    genv, { acc with updates_stale = true; }, SSet.empty
-  | Notifier_state_leave _ ->
-    genv, { acc with updates_stale = true; }, SSet.empty
-  | Notifier_async_changes updates ->
-    genv, { acc with updates_stale = true; }, updates
-  | Notifier_synchronous_changes updates ->
-    genv, { acc with updates_stale = false; }, updates
-  in
-  let updates = Program.process_updates genv env raw_updates in
+  let env, updates, updates_stale = query_notifier genv env query_kind t in
+  let acc = { acc with updates_stale } in
 
   let is_idle = (not has_persistent_connection_request) &&
      (* "average person types [...] between 190 and 200 characters per minute"
@@ -281,7 +286,6 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
   if (not disk_recheck) && (not ide_recheck) then
     acc, env
   else begin
-    HackEventLogger.notifier_returned t (SSet.cardinal raw_updates);
     let disk_needs_parsing =
       Relative_path.Set.union updates env.disk_needs_parsing in
 

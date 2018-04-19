@@ -125,6 +125,10 @@ struct AsyncFuncImpl {
 
   /**
    * Waits until this thread finishes running.
+   *
+   * If `seconds' is positive, we wait that many seconds.  If `seconds' is
+   * zero, we wait without a timeout.  If `seconds' is negative, we don't wait
+   * at all, and return false if we aren't already stopped.
    */
   bool waitForEnd(int seconds = 0);
 

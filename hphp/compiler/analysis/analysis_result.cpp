@@ -276,7 +276,9 @@ void AnalysisResult::analyzeProgram(AnalysisResult::Phase phase) {
       threadCount = nFiles;
     }
     if (!threadCount) threadCount = 1;
-    JobQueueDispatcher<AnalyzeWorker> dispatcher(threadCount, 0, false, this);
+    JobQueueDispatcher<AnalyzeWorker> dispatcher(
+      threadCount, threadCount, 0, false, this
+    );
 
     dispatcher.start();
     for (auto const& file : m_fileScopes) {

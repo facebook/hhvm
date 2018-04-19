@@ -141,6 +141,7 @@ struct RuntimeOption {
   static int ServerBacklog;
   static int ServerConnectionLimit;
   static int ServerThreadCount;
+  static int ServerQueueCount;
   // Number of worker threads with stack partially on huge pages.
   static int ServerHugeThreadCount;
   static int ServerWarmupThrottleRequestCount;

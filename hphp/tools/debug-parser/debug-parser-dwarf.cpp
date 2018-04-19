@@ -27,7 +27,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #include <dwarf.h>
 #include <libdwarf.h>
@@ -385,7 +384,9 @@ TypeParserImpl::TypeParserImpl(const std::string& filename)
 
   // Fire up the thread pool
   Context context{filename, m_states, m_state_map};
-  HPHP::JobQueueDispatcher<Worker> dispatcher{kNumThreads, 0, false, &context};
+  HPHP::JobQueueDispatcher<Worker> dispatcher{
+    kNumThreads, kNumThreads, 0, false, &context
+  };
   dispatcher.start();
 
   // Iterate over every compilation-unit, enqueuing jobs which will

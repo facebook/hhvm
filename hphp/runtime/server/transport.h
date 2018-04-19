@@ -430,6 +430,11 @@ public:
   void setSSL() {m_isSSL = true;}
   bool isSSL() const {return m_isSSL;}
 
+  /*
+   * Request to adjust the maximum number of threads on the server.
+   */
+  virtual void trySetMaxThreadCount(int max) {}
+
 protected:
   /**
    * Parameter parsing in this class is done by making just one copy of the

@@ -12510,7 +12510,9 @@ void genText(const std::vector<std::unique_ptr<UnitEmitter>>& ues,
   Timer timer(Timer::WallTime, "Generating text bytcode");
   if (ues.size() > Option::ParserThreadCount && Option::ParserThreadCount > 1) {
     JobQueueDispatcher<GenTextWorker> dispatcher {
-      Option::ParserThreadCount, 0, false, &outputPath
+      Option::ParserThreadCount,
+      Option::ParserThreadCount,
+      0, false, &outputPath
     };
     dispatcher.start();
     for (auto& ue : ues) {
@@ -12605,7 +12607,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
   }
 
   JobQueueDispatcher<EmitterWorker>
-    dispatcher(threadCount, 0, false, ar.get());
+    dispatcher(threadCount, threadCount, 0, false, ar.get());
 
   auto setPreloadPriority = [&ar](const std::string& f, int p) {
     auto fs = ar->findFileScope(f);

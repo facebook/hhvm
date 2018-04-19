@@ -213,7 +213,7 @@ void facts_parse_threaded(
   JobContext<T> jobContext { root, allowHipHopSyntax,
     pathListCopy, workerResults, result_q };
   JobQueueDispatcher<ParseFactsWorker<T>> dispatcher {
-    T::get_workers_count(), 0, false, &jobContext
+    T::get_workers_count(), T::get_workers_count(), 0, false, &jobContext
   };
   dispatcher.start();
 

@@ -135,6 +135,7 @@ WorkerDispatcher& dispatcher() {
   if (auto ptr = s_dispatcher.load(std::memory_order_acquire)) return *ptr;
 
   auto dispatcher = new WorkerDispatcher(
+    RuntimeOption::EvalJitWorkerThreads,
     RuntimeOption::EvalJitWorkerThreads, 0, false, nullptr
   );
   dispatcher->start();

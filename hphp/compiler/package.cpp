@@ -281,7 +281,7 @@ bool Package::parse(bool check) {
 
   // If we're using the hack compiler, make sure it agrees on the thread count.
   RuntimeOption::EvalHackCompilerWorkers = threadCount;
-  ParserDispatcher dispatcher { threadCount, 0, false, this };
+  ParserDispatcher dispatcher { threadCount, threadCount, 0, false, this };
 
   m_dispatcher = &dispatcher;
 

@@ -124,6 +124,7 @@ ProxygenServer::ProxygenServer(
       m_accept_sock_ssl(options.m_sslFD),
       m_worker(&m_eventBaseManager),
       m_dispatcher(options.m_maxThreads,
+                   options.m_maxQueue,
                    RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
                    RuntimeOption::ServerThreadDropStack,
                    this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,

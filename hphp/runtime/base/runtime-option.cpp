@@ -165,6 +165,7 @@ int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
+int RuntimeOption::ServerQueueCount = 50;
 int RuntimeOption::ServerHugeThreadCount = 0;
 int RuntimeOption::ServerWarmupThrottleRequestCount = 0;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
@@ -1473,6 +1474,8 @@ void RuntimeOption::Load(
                  "Server.ConnectionLimit", 0);
     Config::Bind(ServerThreadCount, ini, config, "Server.ThreadCount",
                  Process::GetCPUCount() * 2);
+    Config::Bind(ServerQueueCount, ini, config, "Server.QueueCount",
+                 ServerThreadCount);
     Config::Bind(ServerHugeThreadCount, ini, config,
                  "Server.HugeThreadCount", 0);
     extern unsigned s_hugeStackSizeKb;

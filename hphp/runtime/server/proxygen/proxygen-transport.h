@@ -301,6 +301,8 @@ struct ProxygenTransport final
 
   void setShouldRepost(bool shouldRepost) { m_shouldRepost = shouldRepost; }
 
+  void trySetMaxThreadCount(int max) override;
+
  private:
   bool bufferRequest() const;
 

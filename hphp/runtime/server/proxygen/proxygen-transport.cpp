@@ -834,5 +834,9 @@ void ProxygenTransport::abort() {
   s_requestErrorCount->addValue(1);
 }
 
+void ProxygenTransport::trySetMaxThreadCount(int max) {
+  m_server->setMaxThreadCount(max);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

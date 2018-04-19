@@ -176,6 +176,7 @@ void XboxServer::Restart() {
       Lock l(s_dispatchMutex);
       s_dispatcher = new JobQueueDispatcher<XboxWorker>
         (RuntimeOption::XboxServerThreadCount,
+         RuntimeOption::XboxServerThreadCount,
          RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
          RuntimeOption::ServerThreadDropStack,
          nullptr);

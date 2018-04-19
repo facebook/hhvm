@@ -69,7 +69,7 @@ FastCGIServer::FastCGIServer(const std::string &address,
                              bool useFileSocket)
   : Server(address, port),
     m_worker(&m_eventBaseManager),
-    m_dispatcher(workers,
+    m_dispatcher(workers, workers,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
                  RuntimeOption::ServerThreadDropStack,
                  this,

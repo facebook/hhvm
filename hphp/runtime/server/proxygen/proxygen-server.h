@@ -120,6 +120,10 @@ struct ProxygenServer : Server,
   bool enableSSL(int port) override;
   bool enableSSLWithPlainText() override;
 
+  void setMaxThreadCount(int max) {
+    return m_dispatcher.setMaxThreadCount(max);
+  }
+
   folly::EventBase *getEventBase() {
     return m_eventBaseManager.getEventBase();
   }

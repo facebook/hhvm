@@ -547,6 +547,7 @@ void CLIServer::start() {
 
   m_dispatcher = std::make_unique<JobQueue>(
     RuntimeOption::EvalUnixServerWorkers,
+    RuntimeOption::EvalUnixServerWorkers,
     RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
     RuntimeOption::ServerThreadDropStack,
     nullptr

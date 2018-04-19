@@ -197,7 +197,11 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
           // wait timed out
           return false;
         }
+      } else if (seconds < 0) {
+        // Don't wait.
+        return false;
       } else {
+        // Wait with no timeout.
         m_stopMonitor.wait();
       }
     }

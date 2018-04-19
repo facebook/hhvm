@@ -312,11 +312,13 @@ struct ServerOptions {
   ServerOptions(const std::string &address,
                 uint16_t port,
                 int maxThreads,
-                int initThreads = -1)
+                int initThreads = -1,
+                int maxQueue = -1)
     : m_address(address),
       m_port(port),
       m_maxThreads(maxThreads),
       m_initThreads(initThreads),
+      m_maxQueue(maxQueue == -1 ? maxThreads : maxQueue),
       m_serverFD(-1),
       m_sslFD(-1),
       m_takeoverFilename(),
@@ -332,6 +334,7 @@ struct ServerOptions {
   uint16_t m_port;
   int m_maxThreads;
   int m_initThreads;
+  int m_maxQueue;
   int m_serverFD;
   int m_sslFD;
   std::string m_takeoverFilename;

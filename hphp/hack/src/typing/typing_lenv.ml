@@ -79,7 +79,7 @@ let intersect env parent_lenv lenv1 lenv2 =
               if List.exists acc (equiv env ty) then acc else ty::acc
             end ~init:all_large all_small in
           let env, ty =
-            if ty1 == ty2
+            if Typing_defs.ty_equal ty1 ty2
             then env, ty1
             else
               let env, ty1 = TUtils.unresolved env ty1 in

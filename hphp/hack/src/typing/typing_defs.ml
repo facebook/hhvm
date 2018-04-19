@@ -702,6 +702,8 @@ let rec ty_compare ty1 ty2 =
       end
     | Tvar v1, Tvar v2 ->
       compare v1 v2
+    | Tanon (_, id1), Tanon (_, id2) ->
+      compare id1 id2
     | _ ->
       ty_con_ordinal ty1 - ty_con_ordinal ty2
 

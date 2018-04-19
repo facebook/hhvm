@@ -20,16 +20,16 @@ File "lvar_expr_dependent2.php", line 42, characters 7-24:
   <expr#4>::T
   where <expr#4>::T as \C::T
 File "lvar_expr_dependent2.php", line 46, characters 5-22:
-  ^(<expr#5>::T)
+  <expr#5>::T
   where <expr#5>::T as \C::T
 File "lvar_expr_dependent2.php", line 49, characters 5-22:
-  ^(<expr#5>::T)
+  <expr#5>::T
   where <expr#5>::T as \C::T
 File "lvar_expr_dependent2.php", line 53, characters 7-24:
   <expr#6>::T
   where <expr#6>::T as \C::T
 File "lvar_expr_dependent2.php", line 57, characters 5-22:
-  ^(<expr#5>::T)
+  <expr#5>::T
   where <expr#5>::T as \C::T
 File "lvar_expr_dependent2.php", line 61, characters 7-24:
   <expr#7>::T
@@ -44,6 +44,6 @@ File "lvar_expr_dependent2.php", line 63, characters 7-24:[2]
   <expr#8>::T
   where <expr#8>::T as \C::T
 File "lvar_expr_dependent2.php", line 67, characters 5-22:
-  ^(<expr#9>::T)
+  <expr#9>::T
   where <expr#9>::T as \C::T
 No errors

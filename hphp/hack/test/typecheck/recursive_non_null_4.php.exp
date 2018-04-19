@@ -7,5 +7,5 @@ File "recursive_non_null_4.php", line 17, characters 5-18:
 File "recursive_non_null_4.php", line 20, characters 3-16:
   Map<^string, ^mixed>
 File "recursive_non_null_4.php", line 24, characters 3-16:
-  ^(Map<^string, ^mixed>)
+  Map<^string, ^mixed>
 No errors

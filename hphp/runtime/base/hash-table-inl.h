@@ -62,7 +62,7 @@ void HashTableCommon::InitHash(int32_t* hash, uint32_t scale) {
     "stp        %x2, %x2, [%x1], #16\n"
     "subs       %x0, %x0, #16\n"
     "bhi        .l%=\n"
-    : "+r"(offset), "+r"(hash2) : "r"(ones)
+    : "+r"(offset), "+r"(hash2) : "r"(ones) : "cc"
   );
 #elif defined(__powerpc__)
   static_assert(Empty == -1, "The following fills with all 1's.");

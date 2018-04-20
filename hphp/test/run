@@ -181,7 +181,7 @@ function check_executable($path, $typechecker) {
     error($msg);
   }
   $output = array();
-  exec($rpath . " --help", $output);
+  exec($rpath . " --help 2> /dev/null", $output);
   $str = implode($output);
   $msg = "Provided file (".$rpath.") is not a/an ".$type." executable.\n"
        . "If using ".$type."_BIN, make sure that is set correctly.";
@@ -294,7 +294,7 @@ function hhvm_path() {
 
   if (!is_file($file)) {
     if (is_testing_dso_extension()) {
-      exec("which hhvm", $output);
+      exec("which hhvm 2> /dev/null", $output);
       if (isset($output[0]) && $output[0]) {
         return $output[0];
       }
@@ -1236,7 +1236,7 @@ function exec_with_stack($cmd) {
     $now = microtime(true);
     if ($now >= $end) {
       $timedout = true;
-      system('pkill -P ' . $status['pid']);
+      exec('pkill -P ' . $status['pid'] . ' 2> /dev/null');
       posix_kill($status['pid'], SIGTERM);
     }
     usleep(1000);
@@ -2296,17 +2296,11 @@ function run_typechecker_test($options, $test) {
 
 function get_hhvm_ini_values($test, $options) {
   // prepare script to setting values from HHVM
-  $get_ini_file = tempnam(sys_get_temp_dir(), "get_ini");
+  $get_ini_file = tempnam(dirname($test), "get_ini");
   $tmp_file = tempnam(sys_get_temp_dir(), "output");
-  // write JSON encoded values from the script
-  // instead of just 'echo' to make sure result
-  // is not mixed with some another writes to stdout
-  file_put_contents($get_ini_file, "<?php\nfile_put_contents('$tmp_file', json_encode(ini_get_all()));");
+  file_put_contents($get_ini_file, "<?php echo json_encode(ini_get_all());");
   list($hhvm_get_ini_cmd, $_) = hhvm_cmd($options, $test, $get_ini_file, true);
-  system("$hhvm_get_ini_cmd 1> /dev/null 2> /dev/null");
-  $test_config = file_get_contents($tmp_file);
-  unlink($tmp_file);
-  return $test_config;
+  return exec("$hhvm_get_ini_cmd 2> /dev/null");
 }
 
 function get_hhvm_compiler_frontend($options, $test) {
@@ -2314,7 +2308,7 @@ function get_hhvm_compiler_frontend($options, $test) {
   $options_without_repo = $options;
   unset($options_without_repo['repo']);
 
-  $get_fe_script = tempnam(sys_get_temp_dir(), "get_frontend");
+  $get_fe_script = tempnam(dirname($test), "get_frontend");
   file_put_contents(
     $get_fe_script,
     '<?php echo __COMPILER_FRONTEND__, "\n";'

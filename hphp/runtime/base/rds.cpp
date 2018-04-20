@@ -45,6 +45,8 @@
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 
 namespace HPHP { namespace rds {
@@ -556,11 +558,14 @@ void flush() {
     Logger::Warning("RDS madvise failure: %s\n",
                     folly::errnoStr(errno).c_str());
   }
-  size_t offset = s_local_frontier & ~0xfff;
-  if (madvise(static_cast<char*>(tl_base) + offset,
-              s_persistent_base - offset, MADV_DONTNEED)) {
-    Logger::Warning("RDS local madvise failure: %s\n",
-                    folly::errnoStr(errno).c_str());
+  if (jit::mcgen::retranslateAllEnabled() &&
+      !jit::mcgen::retranslateAllPending()) {
+    size_t offset = s_local_frontier & ~0xfff;
+    if (madvise(static_cast<char*>(tl_base) + offset,
+                s_persistent_base - offset, MADV_DONTNEED)) {
+      Logger::Warning("RDS local madvise failure: %s\n",
+                      folly::errnoStr(errno).c_str());
+    }
   }
 }
 

@@ -416,6 +416,39 @@
    }
 },
 {
+  "comment": "autocomplete resolving after 'switch (Elsa::Alonso) { case Elsa::'",
+  "jsonrpc": "2.0",
+  "method": "completionItem/resolve",
+  "id": 145,
+  "params": {
+    "label": "isValid",
+    "kind": 2,
+    "detail": "function(mixed $value): bool",
+    "inlineDetail": "(mixed $value)",
+    "itemType": "bool",
+    "insertTextFormat": 1,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 35
+        },
+        "end": {
+          "line": 3,
+          "character": 35
+        }
+      },
+      "newText": "isValid"
+    },
+    "data": {
+      "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+      "line": 46,
+      "char_start": 32,
+      "char_end": 38
+    }
+  }
+},
+{
   "comment": "Add 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
   "jsonrpc": "2.0",
   "method": "textDocument/didChange",

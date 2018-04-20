@@ -873,6 +873,38 @@
   },
   {
     "jsonrpc": "2.0",
+    "id": 145,
+    "result": {
+      "label": "isValid",
+      "kind": 2,
+      "detail": "function(mixed $value): bool",
+      "inlineDetail": "(mixed $value)",
+      "itemType": "bool",
+      "documentation": "\nReturns whether or not the value is defined as a constant.\n",
+      "insertTextFormat": 1,
+      "textEdit": {
+        "range": {
+          "start": {
+            "line": 3,
+            "character": 35
+          },
+          "end": {
+            "line": 3,
+            "character": 35
+          }
+        },
+        "newText": "isValid"
+      },
+      "data": {
+        "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+        "line": 46,
+        "char_start": 32,
+        "char_end": 38
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 150,
     "result": {
       "isIncomplete": false,

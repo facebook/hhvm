@@ -11,8 +11,8 @@ open Hh_core
 
 let go env (filename, line, char) =
   let open Option.Monad_infix in
-  let relative_path = Relative_path.(create Root filename) in
   let ServerEnv.{ tcopt; _ } = env in
+  let relative_path = Relative_path.create_detect_prefix filename in
   File_heap.get_contents relative_path
   >>= begin fun contents ->
     let definitions =

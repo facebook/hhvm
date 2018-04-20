@@ -143,7 +143,7 @@ function unlink($filename, $context = null);
 function link($target, $link);
 <<__PHPStdLib>>
 function symlink($target, $link);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function basename($path, $suffix = null);
 <<__PHPStdLib>>
 function fnmatch($pattern, $filename, $flags = 0);
@@ -213,7 +213,7 @@ function disk_total_space($directory);
 function mkdir($pathname, $mode = 0777, $recursive = false, $context = null);
 <<__PHPStdLib>>
 function rmdir($dirname, $context = null);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function dirname($path);
 <<__PHPStdLib>>
 function getcwd();

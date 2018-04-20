@@ -27,20 +27,20 @@ function unset($x): void;
 function freeze($x) : void;
 
 //
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function array_fill<T>(int $start_index, int $num, T $value): array<T>;
 // TODO make non-nullable once Thrift files are fixed
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function chr(int $ascii): string;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function count(mixed $x, int $mode = COUNT_NORMAL): int; // count takes Countable or array. We'll need to hardcode this...
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function dechex(int $number): string;
 <<__Rx>>
 function func_get_args(): array;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function implode(string $glue, $pieces): string; // could be Container<Stringish>
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function explode(string $delimiter, ?Stringish $str, int $limit = 0x7FFFFFFF): array; // : array<string> & false for '' delimiter
 <<__Rx>>
 function is_array(mixed $arg): bool;
@@ -50,20 +50,20 @@ function is_vec(mixed $arg): bool;
 function is_dict(mixed $arg): bool;
 <<__Rx>>
 function is_keyset(mixed $arg): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function ord(string $string): int;
 <<__PHPStdLib>>
 function strip_tags(string $str, string $allowable_tags = ''): string;
 
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function intval($v, $base = 10): int;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function doubleval($v): float;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function floatval($v): float;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function strval($v): string;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function boolval($v): bool;
 
 <<__PHPStdLib>>

@@ -73,13 +73,13 @@ function getprotobynumber($number);
 function getservbyname($service, $protocol);
 <<__PHPStdLib>>
 function getservbyport($port, $protocol);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function inet_ntop($in_addr);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function inet_pton($address);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function ip2long($ip_address);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function long2ip($proper_address);
 <<__PHPStdLib>>
 function dns_check_record($host, $type = null);

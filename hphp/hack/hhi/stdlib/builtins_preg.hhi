@@ -36,7 +36,7 @@ function preg_replace_callback_array($patterns_and_callbacks, $subject,
                                      $limit = -1, &$count = null) { }
 <<__PHPStdLib>>
 function preg_split($pattern, $subject, $limit = -1, $flags = 0) { }
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function preg_quote($str, $delimiter = null) { }
 <<__PHPStdLib>>
 function preg_last_error() { }

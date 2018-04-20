@@ -14,12 +14,12 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function array_key_exists<Tk, Tv>(mixed $key, ?KeyedContainer<Tk, Tv> $search): bool;
 
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function array_sum/*<T>*/(/*Container<T>*/ $input)/*: num*/;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function array_product/*<T>*/(/*Container<T>*/ $input)/*: num*/;
 
 <<__PHPStdLib>>

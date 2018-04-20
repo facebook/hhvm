@@ -24,7 +24,7 @@ function bzerrstr($bz) { }
 function bzerror($bz) { }
 <<__PHPStdLib>>
 function bzerrno($bz) { }
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function bzcompress($source, $blocksize = 4, $workfactor = 0) { }
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function bzdecompress($source, $small = 0) { }

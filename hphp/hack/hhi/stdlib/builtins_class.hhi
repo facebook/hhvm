@@ -30,7 +30,7 @@ function get_class_vars(string $class_name);
 function get_class($object = null);
 <<__Rx>>
 function get_parent_class($object = null);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function is_a($class_or_object, string $class_name, bool $allow_string = false): bool;
 <<__PHPStdLib>>
 function is_subclass_of($class_or_object, string $class_name, bool $allow_string = true): bool;

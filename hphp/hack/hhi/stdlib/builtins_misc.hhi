@@ -36,7 +36,7 @@ function show_source($filename, $ret = false);
 function highlight_string($str, $ret = false);
 <<__PHPStdLib>>
 function ignore_user_abort($setting = false);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function pack($format, ...);
 <<__PHPStdLib>>
 function php_check_syntax($filename, &$error_message = null);
@@ -52,11 +52,11 @@ function time_nanosleep($seconds, $nanoseconds);
 function time_sleep_until($timestamp);
 <<__PHPStdLib>>
 function uniqid($prefix = null, $more_entropy = false);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function unpack($format, $data);
 <<__PHPStdLib>>
 function sys_getloadavg();
 <<__PHPStdLib>>
 function hphp_process_abort($magic);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function hphp_to_string($v);

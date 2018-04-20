@@ -82,7 +82,7 @@ function xml_get_current_line_number($parser) { }
 function xml_get_error_code($parser) { }
 <<__PHPStdLib>>
 function xml_error_string($code) { }
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function utf8_decode($data) { }
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function utf8_encode($data) { }

@@ -114,7 +114,7 @@ function set_magic_quotes_runtime($new_setting);
 function set_time_limit($seconds);
 <<__PHPStdLib>>
 function sys_get_temp_dir();
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function version_compare($version1, $version2, $sop = null);
 <<__PHPStdLib>>
 function gc_enabled();

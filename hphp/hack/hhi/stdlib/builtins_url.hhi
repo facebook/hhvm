@@ -20,23 +20,23 @@ const int PHP_URL_FRAGMENT = 7;
 const int PHP_QUERY_RFC1738 = 1;
 const int PHP_QUERY_RFC3986 = 2;
 
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function base64_decode($data, $strict = false);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function base64_encode($data);
 <<__PHPStdLib>>
 function get_headers($url, $format = 0);
 <<__PHPStdLib>>
 function get_meta_tags($filename, $use_include_path = false);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function http_build_query($formdata, $numeric_prefix = null, $arg_separator = null, $enc_type = PHP_QUERY_RFC1738): string;
 <<__PHPStdLib>>
 function parse_url($url, $component = -1);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function rawurldecode($str);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function rawurlencode($str);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function urldecode($str);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function urlencode($str);

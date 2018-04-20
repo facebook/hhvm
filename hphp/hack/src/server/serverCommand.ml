@@ -38,6 +38,7 @@ let rpc_command_needs_full_check : type a. a t -> bool = function
   | CREATE_CHECKPOINT _ -> true
   | RETRIEVE_CHECKPOINT _ -> true
   | DELETE_CHECKPOINT _ -> true
+  | IN_MEMORY_DEP_TABLE_SIZE -> false
   | _ -> false
 
 let command_needs_full_check = function

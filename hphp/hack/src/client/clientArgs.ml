@@ -358,6 +358,9 @@ let parse_check_args cmd =
     "--timeout",
       Arg.Float (fun x -> timeout := Some (Unix.time() +. x)),
       " set the timeout in seconds (default: no timeout)";
+    "--in-memory-dep-table-size",
+      Arg.Unit (set_mode MODE_IN_MEMORY_DEP_TABLE_SIZE),
+      " number of entries in the in-memory dependency table";
     "--save-state",
       Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
       " (mode) Save a saved state to the given file.";

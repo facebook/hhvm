@@ -94,6 +94,11 @@ let save_state ~file_info_on_disk files_info fn t =
     let t = Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t in
     update_save_state ~file_info_on_disk files_info fn t
 
+let get_in_memory_dep_table_entry_count () =
+  Core_result.try_with (fun () ->
+    SharedMem.get_in_memory_dep_table_entry_count ())
+  |> Core_result.map_error ~f:Printexc.to_string
+
 let go ~file_info_on_disk files_info filename =
   Core_result.try_with (fun () ->
     let t = Unix.gettimeofday () in

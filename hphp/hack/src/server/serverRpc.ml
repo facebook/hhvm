@@ -114,6 +114,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | DUMP_AI_INFO file_list ->
         env, Ai.InfoService.go Typing_check_utils.check_defs genv.workers
           file_list (ServerArgs.ai_mode genv.options) env.tcopt
+    | IN_MEMORY_DEP_TABLE_SIZE ->
+      env, SaveStateService.get_in_memory_dep_table_entry_count ()
     | SAVE_STATE filename ->
         if Errors.is_empty env.errorl then
           (** TODO: file_info_on_disk should be read from the RPC, not from ServerEnv. *)

@@ -315,6 +315,10 @@ let main args =
       let results = rpc args @@ Rpc.METHOD_JUMP (class_, filter, false) in
       ClientMethodJumps.go results false args.output_json;
       Exit_status.No_error
+    | MODE_IN_MEMORY_DEP_TABLE_SIZE ->
+      let result = rpc args @@ Rpc.IN_MEMORY_DEP_TABLE_SIZE in
+      ClientResultPrinter.Int_printer.go result args.output_json;
+      Exit_status.No_error
     | MODE_SAVE_STATE path ->
       let () = Sys_utils.mkdir_p (Filename.dirname path) in
       (** Convert to real path because Client and Server may have

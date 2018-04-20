@@ -140,6 +140,7 @@ type _ t =
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
   | REMOVE_DEAD_FIXMES : int list -> [`Ok of ServerRefactorTypes.patch list | `Error of string] t
   | IGNORE_FIXMES : string list -> Ignore_fixmes_result.t t
+  | IN_MEMORY_DEP_TABLE_SIZE : ((int, string) Pervasives.result) t
   | SAVE_STATE : string -> ((unit, string) Pervasives.result) t
   | SEARCH : string * string -> HackSearchService.result t
   | COVERAGE_COUNTS : string -> ServerCoverageMetricTypes.result t

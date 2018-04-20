@@ -30,6 +30,13 @@ module Unit_converter = struct
 end;;
 
 
+module Int_converter = struct
+  type t = int
+  let to_string : t -> string = string_of_int
+  let to_json : t -> Hh_json.json = fun i -> JSON_Number (string_of_int i)
+end;;
+
+
 module Make(Converter : Result_converter) : Result_printer with type t = Converter.t  = struct
 
   type t = Converter.t
@@ -61,3 +68,4 @@ end;;
 
 
 module Unit_printer = Make(Unit_converter);;
+module Int_printer = Make(Int_converter);;

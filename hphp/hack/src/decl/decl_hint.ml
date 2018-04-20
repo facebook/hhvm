@@ -64,6 +64,7 @@ and hint_ p env = function
         fp_kind = get_param_mode ~is_ref:false k;
         fp_accept_disposable = false;
         fp_mutable = false;
+        fp_rx_condition = None;
       }
     in
     let paraml = List.map (List.zip_exn hl kl) make_param in

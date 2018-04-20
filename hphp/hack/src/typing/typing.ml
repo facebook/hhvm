@@ -5149,6 +5149,7 @@ and call_ ~expected ~receiver_type pos env fty el uel =
              fp_kind = FPnormal;
              fp_accept_disposable = false;
              fp_mutable = false;
+             fp_rx_condition = None;
            }
          in
          env, Fvariadic (min_arity, param)

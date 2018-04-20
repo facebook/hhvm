@@ -746,6 +746,7 @@ let default_fun_param ty : 'a fun_param = {
   fp_kind = FPnormal;
   fp_accept_disposable = false;
   fp_mutable = false;
+  fp_rx_condition = None;
 }
 
 let fun_mutable user_attributes =

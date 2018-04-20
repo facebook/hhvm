@@ -57,16 +57,18 @@ let fun_reactivity env user_attributes =
 let adjust_reactivity_of_mayberx_parameter attrs reactivity param_ty =
   let has_only_rx_if_args =
     Attributes.mem SN.UserAttributes.uaOnlyRxIfArgs attrs in
+  (* strip conditional reactivity if parent has one *)
+  let reactivity =
+    match reactivity with
+    | Local (Some _) -> Local None
+    | Shallow (Some _) -> Shallow None
+    | Reactive (Some _) -> Reactive None
+    | r -> r in
   match has_only_rx_if_args, param_ty with
   | true, (r, Tfun tfun) ->
-    (* strip conditional reactivity if parent has one *)
-    let reactivity =
-      match reactivity with
-      | Local (Some _) -> Local None
-      | Shallow (Some _) -> Shallow None
-      | Reactive (Some _) -> Reactive None
-      | r -> r in
     r, Tfun { tfun with ft_reactive = MaybeReactive reactivity }
+  | true, (r, Toption (r1, Tfun tfun)) ->
+    r, Toption (r1, Tfun { tfun with ft_reactive = MaybeReactive reactivity })
   | _ ->
     param_ty
 
@@ -255,6 +257,10 @@ and make_param_ty env attrs reactivity param =
   in
   let ty = adjust_reactivity_of_mayberx_parameter attrs reactivity ty in
   let mode = get_param_mode param.param_is_reference param.param_callconv in
+  let rx_condition =
+    if Attributes.mem SN.UserAttributes.uaOnlyRxIfRxFunc param.param_user_attributes
+    then Some Param_rxfunc
+    else None in
   {
     fp_pos  = param.param_pos;
     fp_name = Some param.param_name;
@@ -263,6 +269,7 @@ and make_param_ty env attrs reactivity param =
     fp_mutable = has_mutable_attribute param.param_user_attributes;
     fp_accept_disposable =
       has_accept_disposable_attribute param.param_user_attributes;
+    fp_rx_condition = rx_condition;
   }
 
 and fun_decl f decl_tcopt =

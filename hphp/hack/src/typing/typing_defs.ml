@@ -401,6 +401,9 @@ and param_mode =
   | FPref
   | FPinout
 
+and param_rx_condition =
+  | Param_rxfunc
+
 and 'phase fun_param = {
   fp_pos  : Pos.t;
   fp_name : string option;
@@ -408,6 +411,7 @@ and 'phase fun_param = {
   fp_kind : param_mode;
   fp_accept_disposable : bool;
   fp_mutable           : bool;
+  fp_rx_condition: param_rx_condition option;
 }
 
 and 'phase fun_params = 'phase fun_param list

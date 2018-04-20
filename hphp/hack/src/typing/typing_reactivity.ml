@@ -21,32 +21,33 @@ let type_to_str: type a. Env.env -> a ty -> string = fun env ty ->
   | ty -> ty in
   Typing_print.full env (unwrap ty)
 
+let rec strip_maybe_reactive t =
+  match t with
+  | r, Tfun ({ ft_reactive = MaybeReactive reactive; _ } as ft) ->
+    r, Tfun { ft with ft_reactive = reactive }
+  | r, Toption ty -> r, Toption (strip_maybe_reactive ty)
+  | t -> t
 let check_call env receiver_type pos reason ft arg_types =
   let callee_reactivity =
     (* if function we are about to call is maybe reactive with reactivity flavor R
       - check its arguments: call to maybe reactive function is treated as reactive
        if arguments that correspond to parameters marked with <<__OnlyRxIfRxFunc>> are functions
        with reactivity <: R *)
-    let callee_has_onlyrx_if_rxfunc_parameters =
+    let callee_has_rx_condition_parameters =
       Core_list.exists ft.ft_params ~f:begin function
-      | { fp_type = (_, Tfun { ft_reactive = MaybeReactive _; _ }); _ } -> true
-      | _ -> false
+      | { fp_rx_condition; _ } -> Option.is_some fp_rx_condition
       end in
-    if not callee_has_onlyrx_if_rxfunc_parameters then ft.ft_reactive
+    if not callee_has_rx_condition_parameters then ft.ft_reactive
     else
     let is_reactive =
       match Core_list.zip ft.ft_params arg_types with
       | None -> false
-      | Some l -> Core_list.for_all l ~f:(fun (p, (_, arg_ty)) ->
-        match p.fp_type with
-        | _, Tfun { ft_reactive = MaybeReactive r_super; _ } ->
-          begin match arg_ty with
-          | Tfun { ft_reactive = MaybeReactive r_sub; _}
-          | Tfun { ft_reactive = r_sub; _} ->
-            SubType.subtype_reactivity env r_sub r_super
-          | _ -> false
-          end
-        | _ -> true) in
+      | Some l -> Core_list.for_all l ~f:(function
+        | { fp_rx_condition = None; _ }, _ ->  true
+        | { fp_rx_condition = Some Param_rxfunc; fp_type; _ }, arg_ty ->
+          let param_type = strip_maybe_reactive fp_type in
+          let arg_ty = strip_maybe_reactive arg_ty in
+          SubType.is_sub_type env arg_ty param_type) in
     if is_reactive then ft.ft_reactive else Nonreactive in
   (* call is allowed if reactivity of callee is a subtype of reactivity of
      enlosing environment *)
@@ -106,10 +107,10 @@ let disallow_onlyrx_if_rxfunc_on_non_functions env param param_ty =
   then begin
     if param.Nast.param_hint = None
     then Errors.missing_annotation_for_onlyrx_if_rxfunc_parameter param.Nast.param_pos
-    else match param_ty with
+    else match Typing_utils.non_null env param_ty with
     (* if parameter has <<__OnlyRxIfRxFunc>> annotation then:
        - parameter should be typed as function *)
-    | _, Tfun _ -> ()
+    | _, (_, Tfun _) -> ()
     | _ ->
       Errors.invalid_type_for_onlyrx_if_rxfunc_parameter
         (Reason.to_pos (fst param_ty))

@@ -321,7 +321,7 @@ let main args =
        * different cwd and we want to use the client processes' cwd. *)
       let path = Path.make path in
       let result = rpc args @@ Rpc.SAVE_STATE (Path.to_string path) in
-      ClientSaveState.go result args.output_json;
+      ClientResultPrinter.Unit_printer.go result args.output_json;
       Exit_status.No_error
     | MODE_STATUS ->
       let ignore_ide = ClientMessages.ignore_ide_from args.from in

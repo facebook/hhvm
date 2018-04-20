@@ -11,7 +11,6 @@
 let test_process_data =
   ServerProcess.{
     pid = 2758734;
-    name = "typechecker";
     start_t = 0.0;
     in_fd = Unix.stdin;
     out_fd = Unix.stdout;

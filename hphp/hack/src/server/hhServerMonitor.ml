@@ -20,7 +20,6 @@
 
 let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
 
-module Program = HhServerMonitorConfig.Program
 module SM = ServerMonitor.Make_monitor
   (HhServerMonitorConfig.HhServerConfig) (HhMonitorInformant);;
 
@@ -136,7 +135,7 @@ let start_daemon options =
   let out_fd = Daemon.fd_of_path log_file_path in
   let {Daemon.pid; _} =
     Daemon.spawn (in_fd, out_fd, out_fd) daemon_entry options in
-  Printf.eprintf "Spawned %s (child pid=%d)\n" Program.hh_server pid;
+  Printf.eprintf "Spawned typechecker (child pid=%d)\n" pid;
   Printf.eprintf "Logs will go to %s\n%!" log_file_path;
   Exit_status.No_error
 

@@ -268,10 +268,8 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
   end;
   let connect_once_start_t = Unix.time () in
 
-  let server_name = HhServerMonitorConfig.Program.hh_server in
   let handoff_options = {
-    MonitorRpc.server_name = server_name;
-    force_dormant_start = env.force_dormant_start;
+    MonitorRpc.force_dormant_start = env.force_dormant_start;
   } in
   let retries, conn =
     let start_t = Unix.gettimeofday () in

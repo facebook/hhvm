@@ -11,22 +11,18 @@
 
 module SP = ServerProcess
 
-module Program = struct
-  let hh_server = "typechecker"
-end
-
-let start_server_daemon ~informant_managed options name log_link daemon_entry =
+let start_server_daemon ~informant_managed options log_link daemon_entry =
   let log_fds =
     let in_fd = Daemon.null_fd () in
     if ServerArgs.should_detach options then begin
       (try Sys.rename log_link (log_link ^ ".old") with _ -> ());
       let log_file = Sys_utils.make_link_of_timestamped log_link in
-      Hh_logger.log "About to spawn %s daemon. Logs will go to %s\n%!"
-        name (if Sys.win32 then log_file else log_link);
+      Hh_logger.log "About to spawn typechecker daemon. Logs will go to %s\n%!"
+        (if Sys.win32 then log_file else log_link);
       let fd = Daemon.fd_of_path log_file in
       in_fd, fd, fd
     end else begin
-      Hh_logger.log "About to spawn %s daemon. Logs will go here." name;
+      Hh_logger.log "About to spawn typechecker daemon. Logs will go here.";
       in_fd, Unix.stdout, Unix.stderr
     end
   in
@@ -39,11 +35,10 @@ let start_server_daemon ~informant_managed options name log_link daemon_entry =
       log_fds
       daemon_entry
       (informant_managed, state, options, monitor_pid) in
-  Hh_logger.log "Just started %s server with pid: %d." name pid;
+  Hh_logger.log "Just started typechecker server with pid: %d." pid;
   let server =
     SP.({
       pid = pid;
-      name = name;
       in_fd = Daemon.descr_of_in_channel ic;
       out_fd = Daemon.descr_of_out_channel oc;
       start_t = start_t;
@@ -54,7 +49,7 @@ let start_server_daemon ~informant_managed options name log_link daemon_entry =
 let start_hh_server ~informant_managed options =
   let log_link = ServerFiles.log_link (ServerArgs.root options) in
   start_server_daemon ~informant_managed options
-    Program.hh_server log_link ServerMain.entry
+    log_link ServerMain.entry
 
 
 (*
@@ -110,7 +105,7 @@ module HhServerConfig = struct
     | _ ->
       ignore (
         Hh_logger.log_duration (Printf.sprintf
-          "%s has exited. Time since sigterm: " process.ServerProcess.name) start_t)
+          "typechecker has exited. Time since sigterm: ") start_t)
 
   let wait_pid process =
     Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid

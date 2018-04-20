@@ -288,6 +288,7 @@ let parse_text compiler_options popt fn text =
       ~systemlib_compat_mode
       ~php5_compat_mode
       ~enable_hh_syntax
+      ~keep_errors:false
       fn
     in
     let parser_ret = Full_fidelity_ast.from_text_with_legacy env text in
@@ -565,9 +566,6 @@ let main_hack opts =
   let popt = ParserOptions.default in
   let start_time = Unix.gettimeofday () in
   if opts.log_stats then Logger.init start_time;
-  let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
-  let tmp_hhi = Path.concat (Path.make Sys_utils.temp_dir_name) "hhi" in
-  Hhi.set_hhi_root_for_unit_test tmp_hhi;
   decl_and_run_mode opts popt
 
 (* command line driver *)

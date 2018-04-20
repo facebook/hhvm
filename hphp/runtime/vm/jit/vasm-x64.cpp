@@ -128,6 +128,7 @@ struct Vgen {
   void emit(andli i) { binary(i); a.andl(i.s0, i.d); }
   void emit(andq i) { commuteSF(i); a.andq(i.s0, i.d); }
   void emit(andqi i);
+  void emit(const addwm& i) { a.addw(i.s0, i.m); }
   void emit(addli i) { binary(i); a.addl(i.s0, i.d); }
   void emit(const addlm& i) { a.addl(i.s0, i.m); }
   void emit(const addlim& i);

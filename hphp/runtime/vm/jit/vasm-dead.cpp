@@ -185,6 +185,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::xorqi:
       return false;
 
+    case Vinstr::addwm:
     case Vinstr::addlm:
     case Vinstr::addlim:
     case Vinstr::addqmr:

@@ -123,6 +123,28 @@ const StringData* decRefNZProfileKey(const IRInstruction* inst) {
   );
 }
 
+template<typename T>
+Vreg incrAmount(Vout& v, const TargetProfile<T>& profile) {
+  if (!profile.profiling()) return Vreg{};
+  auto const sf = v.makeReg();
+  auto const offset = profile.handle() + offsetof(T, total);
+  v << cmpwim{-1, rvmtl()[offset], sf};
+  auto const r1 = v.makeReg();
+  v << setcc{CC_NE, sf, r1};
+  auto const r2 = v.makeReg();
+  v << movzbw{r1, r2};
+  return r2;
+}
+
+template<typename T>
+void incrementProfile(Vout& v, const TargetProfile<T>& profile,
+                      Vreg incr, size_t offset) {
+  if (profile.profiling()) {
+    v << addwm{incr, rvmtl()[profile.handle() + offset],
+        v.makeReg()};
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -142,13 +164,8 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
                                                       inst->marker(),
                                                       incRefProfileKey(inst));
 
-  auto incrementProfile = [&](size_t offset) {
-    if (profile.profiling()) {
-      v << incwm{rvmtl()[profile.handle() + offset],
-                 v.makeReg()};
-    }
-  };
-  incrementProfile(offsetof(RefcountProfile, total));
+  auto const incr = incrAmount(v, profile);
+  incrementProfile(v, profile, incr, offsetof(RefcountProfile, total));
 
   bool unlikelyCounted = false;
   bool unlikelyIncrement = false;
@@ -178,40 +195,56 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     always_assert(ty <= TCtx && ty.maybe(TObj));
     auto const sf = v.makeReg();
     v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
-    ifThen(v, vcold(env), CC_Z, sf, [&] (Vout& v) {
-      incrementProfile(offsetof(RefcountProfile, incDeced));
-      emitIncRef(v, loc.reg(), TRAP_REASON);
-    }, unlikelyIncrement);
+    ifThen(v, vcold(env), CC_Z, sf,
+           [&] (Vout& v) {
+             incrementProfile(v, profile, incr,
+                              offsetof(RefcountProfile, incDeced));
+             emitIncRef(v, loc.reg(), TRAP_REASON);
+           },
+           unlikelyIncrement);
     return;
   }
 
   auto& vtaken = unlikelyCounted ? vcold(env) : v;
-  ifRefCountedType(v, vtaken, ty, loc, [&] (Vout& v) {
-    incrementProfile(offsetof(RefcountProfile, refcounted));
+  ifRefCountedType(
+    v, vtaken, ty, loc,
+    [&] (Vout& v) {
+      incrementProfile(v, profile, incr, offsetof(RefcountProfile, refcounted));
 
-    if (one_bit_refcount) {
-      if (unconditional_one_bit_incref && !ty.maybe(TPersistent)) {
-        incrementProfile(offsetof(RefcountProfile, incDeced));
-        emitIncRef(v, loc.reg(), TRAP_REASON);
-      } else {
-        // if (m_count == OneReference) m_count = MultiReference; This combines
-        // the persistence check and an attempt to reduce memory traffic,
-        // depending on why we ended up in this branch.
-        auto const sf = emitCmpRefCount(v, OneReference, loc.reg());
-        ifThen(v, vcold(env), CC_E, sf, [&](Vout& v) {
-          incrementProfile(offsetof(RefcountProfile, incDeced));
+      if (one_bit_refcount) {
+        if (unconditional_one_bit_incref && !ty.maybe(TPersistent)) {
+          incrementProfile(v, profile, incr,
+                           offsetof(RefcountProfile, incDeced));
           emitIncRef(v, loc.reg(), TRAP_REASON);
-        }, unlikelyIncrement);
+        } else {
+          // if (m_count == OneReference) m_count = MultiReference;
+          // This combines the persistence check and an attempt to
+          // reduce memory traffic, depending on why we ended up in
+          // this branch.
+          auto const sf = emitCmpRefCount(v, OneReference, loc.reg());
+          ifThen(
+            v, vcold(env), CC_E, sf,
+            [&](Vout& v) {
+              incrementProfile(v, profile, incr,
+                               offsetof(RefcountProfile, incDeced));
+              emitIncRef(v, loc.reg(), TRAP_REASON);
+            },
+            unlikelyIncrement);
+        }
+        return;
       }
-      return;
-    }
 
-    auto& vtaken = unlikelyIncrement ? vcold(env) : v;
-    ifNonPersistent(v, vtaken, ty, loc, [&] (Vout& v) {
-      incrementProfile(offsetof(RefcountProfile, incDeced));
-      emitIncRef(v, loc.reg(), TRAP_REASON);
-    });
-  });
+      auto& vtaken = unlikelyIncrement ? vcold(env) : v;
+      ifNonPersistent(
+        v, vtaken, ty, loc,
+        [&] (Vout& v) {
+          incrementProfile(v, profile, incr,
+                           offsetof(RefcountProfile, incDeced));
+          emitIncRef(v, loc.reg(), TRAP_REASON);
+        }
+      );
+    }
+  );
 }
 
 
@@ -310,28 +343,26 @@ CallSpec makeDtorCall(Type ty, Vloc loc, ArgGroup& args) {
 
 void implDecRefProf(Vout& v, IRLS& env,
                     const IRInstruction* inst, Type ty,
-                    const TargetProfile<DecRefProfile>& profile) {
+                    const TargetProfile<DecRefProfile>& profile,
+                    Vreg incr) {
   auto const base = srcLoc(env, inst, 0).reg(0);
 
   auto const destroy = [&] (Vout& v) {
-    v << incwm{rvmtl()[profile.handle() + offsetof(DecRefProfile, released)],
-               v.makeReg()};
+    incrementProfile(v, profile, incr, offsetof(DecRefProfile, released));
     auto args = argGroup(env, inst).reg(base);
     auto const dtor = makeDtorCall(ty, srcLoc(env, inst, 0), args);
     cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::Sync, args);
   };
 
-  v << incwm{rvmtl()[profile.handle() + offsetof(DecRefProfile, refcounted)],
-             v.makeReg()};
+  incrementProfile(v, profile, incr, offsetof(DecRefProfile, refcounted));
 
   if (!ty.maybe(TPersistent)) {
     auto const sf = emitDecRef(v, base, TRAP_REASON);
     ifThenElse(v, vcold(env), CC_E, sf,
                destroy,
                [&] (Vout& v) {
-                 v << incwm{rvmtl()[profile.handle() +
-                                    offsetof(DecRefProfile, decremented)],
-                            v.makeReg()};
+                 incrementProfile(v, profile, incr,
+                                  offsetof(DecRefProfile, decremented));
                },
                true /* unlikelyDestroy */);
     return;
@@ -345,10 +376,8 @@ void implDecRefProf(Vout& v, IRLS& env,
       // If it's not static, actually reduce the reference count.  This does
       // another branch using the same status flags from the cmplim above.
       ifThen(v, CC_NL, sf, [&] (Vout& v) {
-          v << incwm{
-            rvmtl()[profile.handle() + offsetof(DecRefProfile, decremented)],
-            v.makeReg()
-          };
+          incrementProfile(v, profile, incr,
+                           offsetof(DecRefProfile, decremented));
           emitDecRef(v, base, TRAP_REASON);
         },
         tag_from_string("decref-is-static"));
@@ -626,9 +655,9 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
            profile.data());
   }
 
+  auto const incr = incrAmount(v, profile);
   if (profile.profiling()) {
-    v << incwm{rvmtl()[profile.handle() + offsetof(DecRefProfile, total)],
-               v.makeReg()};
+    incrementProfile(v, profile, incr, offsetof(DecRefProfile, total));
   }
 
   auto impl = [&] (Vout& v, Type t) {
@@ -636,7 +665,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
   };
 
   auto implProf = [&] (Vout& v, Type t) {
-    implDecRefProf(v, env, inst, t, profile);
+    implDecRefProf(v, env, inst, t, profile, incr);
   };
 
   if (ty.maybe(TCctx)) {
@@ -706,13 +735,9 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   auto const profile = TargetProfile<RefcountProfile>(env.unit.context(),
                                                       inst->marker(),
                                                       decRefNZProfileKey(inst));
-  auto incrementProfile = [&](size_t offset) {
-    if (profile.profiling()) {
-      v << incwm{rvmtl()[profile.handle() + offset],
-                 v.makeReg()};
-    }
-  };
-  incrementProfile(offsetof(RefcountProfile, total));
+  auto const incr = incrAmount(v, profile);
+
+  incrementProfile(v, profile, incr, offsetof(RefcountProfile, total));
 
   bool unlikelyCounted = false;
   bool unlikelyDecrement = false;
@@ -740,10 +765,15 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
     if (ty.maybe(TObj)) {
       auto const sf = v.makeReg();
       v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
-      ifThen(v, vcold(env), CC_Z, sf, [&] (Vout& v) {
-        incrementProfile(offsetof(RefcountProfile, incDeced));
-        emitDecRef(v, loc.reg(), TRAP_REASON);
-      }, unlikelyDecrement);
+      ifThen(
+        v, vcold(env), CC_Z, sf,
+        [&] (Vout& v) {
+          incrementProfile(v, profile, incr,
+                           offsetof(RefcountProfile, incDeced));
+          emitDecRef(v, loc.reg(), TRAP_REASON);
+        },
+        unlikelyDecrement
+      );
     }
     return;
   }
@@ -752,14 +782,21 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   emitDecRefTypeStat(v, env, inst);
 
   auto& vtaken = unlikelyCounted ? vcold(env) : v;
-  ifRefCountedType(v, vtaken, ty, loc, [&] (Vout& v) {
-    incrementProfile(offsetof(RefcountProfile, refcounted));
-    auto& vtaken = unlikelyDecrement ? vcold(env) : v;
-    ifNonPersistent(v, vtaken, ty, loc, [&](Vout& v) {
-      incrementProfile(offsetof(RefcountProfile, incDeced));
-      emitDecRef(v, loc.reg(), TRAP_REASON);
-    });
-    });
+  ifRefCountedType(
+    v, vtaken, ty, loc,
+    [&] (Vout& v) {
+      incrementProfile(v, profile, incr, offsetof(RefcountProfile, refcounted));
+      auto& vtaken = unlikelyDecrement ? vcold(env) : v;
+      ifNonPersistent(
+        v, vtaken, ty, loc,
+        [&](Vout& v) {
+          incrementProfile(v, profile, incr,
+                           offsetof(RefcountProfile, incDeced));
+          emitDecRef(v, loc.reg(), TRAP_REASON);
+        }
+      );
+    }
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1308,25 +1308,26 @@ Y(storew, m)
 
 #undef Y
 
-#define Y(vasm_opc, lower_opc, load_opc, store_opc, s0, m)  \
+#define Y(vasm_opc, lower_opc, load_opc, store_opc, arg, m) \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
     lowerVptr(i.m, v);                                      \
     auto r0 = v.makeReg(), r1 = v.makeReg();                \
     v << load_opc{i.m, r0};                                 \
-    v << lower_opc{i.s0, r0, r1, i.sf};                     \
+    v << lower_opc{arg, r0, r1, i.sf};                      \
     v << store_opc{r1, i.m};                                \
   });                                                       \
 }
 
-Y(addlim, addli, loadl, storel, s0, m)
-Y(addlm, addl, loadl, storel, s0, m)
-Y(addqim, addqi, load, store, s0, m)
-Y(andbim, andbi, loadb, storeb, s, m)
-Y(orbim, orqi, loadb, storeb, s0, m)
-Y(orqim, orqi, load, store, s0, m)
-Y(orwim, orqi, loadw, storew, s0, m)
-Y(orlim, orqi, loadl, storel, s0, m)
+Y(addlim, addli, loadl, storel, i.s0, m)
+Y(addlm, addl, loadl, storel, i.s0, m)
+Y(addwm, addl, loadw, storew, Reg32(i.s0), m)
+Y(addqim, addqi, load, store, i.s0, m)
+Y(andbim, andbi, loadb, storeb, i.s, m)
+Y(orbim, orqi, loadb, storeb, i.s0, m)
+Y(orqim, orqi, load, store, i.s0, m)
+Y(orwim, orqi, loadw, storew, i.s0, m)
+Y(orlim, orqi, loadl, storel, i.s0, m)
 
 #undef Y
 

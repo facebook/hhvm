@@ -136,6 +136,7 @@ struct Vunit;
   O(vregrestrict, Inone, Un, Dn)\
   O(vregunrestrict, Inone, Un, Dn)\
   /* arithmetic instructions */\
+  O(addwm, I(fl), U(s0) UM(m), D(sf)) \
   O(addl, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(addli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(addlm, I(fl), U(s0) UM(m), D(sf)) \
@@ -920,6 +921,7 @@ struct vregunrestrict {};
  * Arithmetic instructions.
  */
 // add: s0 + {s1|m} => {d|m}, sf
+struct addwm  { Vreg16 s0; Vptr16 m; VregSF sf; Vflags fl; };
 struct addl   { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct addli  { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct addlm  { Vreg32 s0; Vptr32 m; VregSF sf; Vflags fl; };

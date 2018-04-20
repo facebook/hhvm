@@ -75,11 +75,25 @@ struct DecRefProfile {
     );
   }
 
+  // overflow handling isn't statistically correct; but its better
+  // than overflowing, and we're expecting threads to all have similar
+  // distributions.
   static void reduce(DecRefProfile& a, const DecRefProfile& b) {
-    a.total       += b.total;
-    a.refcounted  += b.refcounted;
-    a.released    += b.released;
-    a.decremented += b.decremented;
+    auto const total = static_cast<uint32_t>(a.total + b.total);
+    if (total > std::numeric_limits<uint16_t>::max()) {
+      auto scale = [&] (uint16_t& x, uint64_t y) {
+        x = (x + y) * std::numeric_limits<uint16_t>::max() / total;
+      };
+      a.total = std::numeric_limits<uint16_t>::max();
+      scale(a.refcounted, b.refcounted);
+      scale(a.released, b.released);
+      scale(a.decremented, b.decremented);
+    } else {
+      a.total       = total;
+      a.refcounted  += b.refcounted;
+      a.released    += b.released;
+      a.decremented += b.decremented;
+    }
   }
 
   /*
@@ -101,8 +115,6 @@ struct DecRefProfile {
    */
   uint16_t decremented;
 };
-
-using OptDecRefProfile = folly::Optional<TargetProfile<DecRefProfile>>;
 
 /*
  * Profile the frequency of the 3 possible different behaviors for an IncRef,
@@ -142,10 +154,23 @@ struct RefcountProfile {
     );
   }
 
+  // overflow handling isn't statistically correct; but its better
+  // than overflowing, and we're expecting threads to all have similar
+  // distributions.
   static void reduce(RefcountProfile& a, const RefcountProfile& b) {
-    a.total       += b.total;
-    a.refcounted  += b.refcounted;
-    a.incDeced    += b.incDeced;
+    auto const total = static_cast<uint32_t>(a.total + b.total);
+    if (total > std::numeric_limits<uint16_t>::max()) {
+      auto scale = [&] (uint16_t& x, uint64_t y) {
+        x = (x + y) * std::numeric_limits<uint16_t>::max() / total;
+      };
+      a.total = std::numeric_limits<uint16_t>::max();
+      scale(a.refcounted, b.refcounted);
+      scale(a.incDeced, b.incDeced);
+    } else {
+      a.total       += b.total;
+      a.refcounted  += b.refcounted;
+      a.incDeced    += b.incDeced;
+    }
   }
 
   /*

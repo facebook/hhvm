@@ -959,6 +959,7 @@ void lowerForPPC64(const VLS& /*e*/, Vout& /*v*/, Inst& /*inst*/) {}
 #define TWO(reg1, reg2)     inst.reg1, inst.reg2,
 #define ONE_R64(reg1)       Reg64(inst.reg1),
 #define TWO_R64(reg1, reg2) Reg64(inst.reg1), Reg64(inst.reg2),
+#define ONE_R32(reg1)       Reg32(inst.reg1),
 
 // Retrieve the immediate and emmit a related direct vasm
 #define X(vasm_src, vasm_dst, vasm_imm)                                 \
@@ -1008,7 +1009,8 @@ X(inclm, incl, loadl, storel, NONE)
 X(incqm, incq, load,  store,  NONE)
 X(declm, decl, loadl, storel, NONE)
 X(decqm, decq, load,  store,  NONE)
-X(addlm, addl, loadw, storew, ONE(s0))
+X(addlm, addl, loadl, storel, ONE(s0))
+X(addwm, addl, loadw, storew, ONE_R32(s0))
 
 #undef X
 

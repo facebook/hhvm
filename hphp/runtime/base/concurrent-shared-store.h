@@ -307,6 +307,11 @@ struct ConcurrentTableSharedStore {
     KeyAndMeta
   };
   void dump(std::ostream& out, DumpMode dumpMode);
+  /**
+   * Dump up to count keys that begin with the given prefix. This is a subset
+   * of what the dump `KeyAndValue` command would do.
+   */
+  void dumpPrefix(std::ostream& out, const std::string &prefix, uint32_t count);
 
   /*
    * Dump random key and entry size to output stream

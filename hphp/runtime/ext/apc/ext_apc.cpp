@@ -1122,6 +1122,19 @@ bool apc_dump(const char *filename, bool keyOnly, bool metaDump) {
   return true;
 }
 
+bool apc_dump_prefix(const char *filename,
+                     const std::string &prefix,
+                     uint32_t count) {
+  std::ofstream out(filename);
+  if (out.fail()) {
+    return false;
+  }
+  SCOPE_EXIT { out.close(); };
+
+  apc_store().dumpPrefix(out, prefix, count);
+  return true;
+}
+
 bool apc_get_random_entries(std::ostream &out, uint32_t count) {
   apc_store().dumpRandomKeys(out, count);
   return true;

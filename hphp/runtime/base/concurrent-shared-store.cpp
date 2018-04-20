@@ -1072,14 +1072,16 @@ std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
   return entries;
 }
 
-void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
-  SharedMutex::WriteHolder l(m_lock);
-  out << "Total " << m_vars.size() << std::endl;
-  for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
-    const char *key = iter->first;
+/**
+ * Dumps a single key and value from APC to `out`. This is used for debug
+ * commands only.
+ * This function generally needs to be called under m_lock, unless you know that
+ * sval won't be invalidated while this is called.
+ */
+static void dumpOneKeyAndValue(std::ostream &out,
+                               const char *key, const StoreValue *sval) {
     out << key;
     out << " #### ";
-    const StoreValue *sval = &iter->second;
     if (!sval->expired()) {
       auto const value = sval->data().match(
         [&] (APCHandle* handle) {
@@ -1099,9 +1101,7 @@ void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
         out << "Exception: " << e.what();
       }
     }
-
     out << std::endl;
-  }
 }
 
 static void dumpEntriesInfo(std::vector<EntryInfo> entries, std::ostream& out) {
@@ -1112,6 +1112,14 @@ static void dumpEntriesInfo(std::vector<EntryInfo> entries, std::ostream& out) {
         << entry.size << " "
         << entry.ttl << " "
         << static_cast<int32_t>(entry.type) << '\n';
+  }
+}
+
+void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
+  SharedMutex::WriteHolder l(m_lock);
+  out << "Total " << m_vars.size() << std::endl;
+  for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
+    dumpOneKeyAndValue(out, iter->first, &iter->second);
   }
 }
 
@@ -1135,6 +1143,24 @@ void ConcurrentTableSharedStore::dump(std::ostream& out, DumpMode dumpMode) {
   }
 
   Logger::Info("dumping apc done");
+}
+
+void ConcurrentTableSharedStore::dumpPrefix(std::ostream& out,
+                                            const std::string &prefix,
+                                            uint32_t count) {
+  Logger::Info("dumping apc prefix %s", prefix.c_str());
+  SharedMutex::WriteHolder l(m_lock);
+
+  uint32_t dumped = 0;
+  for (auto const &iter : m_vars) {
+    // dump key only if it matches the prefix
+    if (strncmp(iter.first, prefix.c_str(), prefix.size()) == 0) {
+      dumpOneKeyAndValue(out, iter.first, &iter.second);
+      if (++dumped >= count) break;
+    }
+  }
+
+  Logger::Info("dumping apc prefix done");
 }
 
 void ConcurrentTableSharedStore::dumpRandomKeys(std::ostream& out,

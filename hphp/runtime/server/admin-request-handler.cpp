@@ -327,6 +327,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/random-static-strings: return randomly selected static strings\n"
         "    count         number of strings to return, default 1\n"
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
+        "/dump-apc-prefix: dump a key prefix contents from APC to\n"
+        "                  /tmp/apc_dump_prefix\n"
+        "    prefix        required, the prefix to dump\n"
+        "    count         optional, the number of keys to dump, default 1\n"
         "/dump-apc-info:   show basic APC stats\n"
         "/dump-apc-meta:   dump meta information for all objects in APC to\n"
         "                  /tmp/apc_dump_meta\n"
@@ -1453,6 +1457,28 @@ bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
       keyOnly = true;
     }
     apc_dump("/tmp/apc_dump", keyOnly, false);
+    transport->sendString("Done");
+    return true;
+  }
+  if (cmd == "dump-apc-prefix") {
+    if (!apcExtension::Enable) {
+      transport->sendString("No APC\n");
+      return true;
+    }
+    auto const prefix = transport->getParam("prefix");
+    if (prefix.empty()) {
+      transport->sendString("No prefix provided\n");
+      return true;
+    }
+    auto const countStr = transport->getParam("count");
+
+    uint32_t count = 1;
+    try {
+      count = countStr.empty() ? count : folly::to<uint32_t>(countStr);
+    } catch (...) {
+      // use default if invalid count
+    }
+    apc_dump_prefix("/tmp/apc_dump_prefix", prefix, count);
     transport->sendString("Done");
     return true;
   }

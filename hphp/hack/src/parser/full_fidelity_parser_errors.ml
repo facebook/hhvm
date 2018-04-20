@@ -1931,7 +1931,7 @@ let expression_errors env node parents errors =
     } ->
     let n = match syntax node with IsExpression _ -> "is" | _ -> "as" in
     begin match syntax hint with
-      | ClosureTypeSpecifier _ ->
+      | ClosureTypeSpecifier _ when env.hhvm_compat_mode <> NoCompat ->
         make_error_from_node hint
           (SyntaxError.invalid_is_as_expression_hint n "Callable") :: errors
       | SoftTypeSpecifier _ ->

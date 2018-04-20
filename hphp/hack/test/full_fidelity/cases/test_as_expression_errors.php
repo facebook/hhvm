@@ -10,6 +10,5 @@
  */
 
 function test(mixed $e): void {
-  $e as (function(): int); // error
   $e as @int; // error
 }

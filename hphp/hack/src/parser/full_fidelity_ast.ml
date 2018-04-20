@@ -2894,33 +2894,48 @@ let from_text (env : env) (source_text : SourceText.t) : result =
       SyntaxTree.make ~env:env' source_text
   in
   let lower_coroutines = env.lower_coroutines && SyntaxTree.sc_state tree in
-  let () = if env.codegen && not lower_coroutines then
-    let hhvm_compat_mode = if env.systemlib_compat_mode
-      then ParserErrors.SystemLibCompat
-      else ParserErrors.HHVMCompat in
-    let error_env = ParserErrors.make_env tree
-      ~hhvm_compat_mode
-      ~enable_hh_syntax:env.enable_hh_syntax
-      ~disallow_elvis_space:env.disallow_elvis_space
-    in
-    let errors = ParserErrors.parse_errors error_env in
-    (* Prioritize runtime errors *)
-    let runtime_errors =
-      List.filter errors ~f:SyntaxError.(fun e -> error_type e = RuntimeError) in
-    match errors, runtime_errors with
-    | [], [] -> ()
-    | _, e :: _
-    | e :: _, _
-      -> raise @@ SyntaxError.ParserFatal e
-  in
-  let () = if env.keep_errors then
-    match List.last (SyntaxTree.all_errors tree) with
-    | None -> ()
-    | Some e ->
-      let so = SyntaxError.start_offset e in
-      let eo = SyntaxError.end_offset e in
-      let p = SourceText.relative_pos env.file source_text so eo in
-      Errors.parsing_error (p, SyntaxError.message e)
+  let () =
+    if env.codegen && not lower_coroutines then
+      let hhvm_compat_mode = if env.systemlib_compat_mode
+        then ParserErrors.SystemLibCompat
+        else ParserErrors.HHVMCompat in
+      let error_env = ParserErrors.make_env tree
+        ~hhvm_compat_mode
+        ~enable_hh_syntax:env.enable_hh_syntax
+        ~disallow_elvis_space:env.disallow_elvis_space
+      in
+      let errors = ParserErrors.parse_errors error_env in
+      (* Prioritize runtime errors *)
+      let runtime_errors =
+        List.filter errors ~f:SyntaxError.(fun e -> error_type e = RuntimeError)
+      in
+      match errors, runtime_errors with
+      | [], [] -> ()
+      | _, e :: _
+      | e :: _, _
+        -> raise @@ SyntaxError.ParserFatal e
+    else if env.keep_errors then
+      let pos_and_message_of error =
+        let so = SyntaxError.start_offset error in
+        let eo = SyntaxError.end_offset error in
+        let p = SourceText.relative_pos env.file source_text so eo in
+        p, SyntaxError.message error
+      in
+      let is_hhi =
+        String_utils.string_ends_with Relative_path.(suffix env.file) "hhi"
+      in
+      match List.last (SyntaxTree.all_errors tree) with
+      | None when is_hhi -> ()
+      | None ->
+        let errors : SyntaxError.t list =
+          ParserErrors.parse_errors @@ ParserErrors.make_env
+            ~enable_hh_syntax:env.enable_hh_syntax
+            ~disallow_elvis_space:env.disallow_elvis_space
+            tree
+        in
+        let f e = Errors.parsing_error (pos_and_message_of e) in
+        List.iter ~f errors
+      | Some e -> Errors.parsing_error (pos_and_message_of e)
   in
   let mode = Option.value ~default:FileInfo.Mpartial mode in
   let mode = if lang = FileInfo.PhpFile then FileInfo.Mphp else mode in

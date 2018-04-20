@@ -43,24 +43,37 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
         return os.path.join(cls.saved_state_dir, 'foo')
 
     @classmethod
-    def save_command(cls, init_dir, saved_state_path=None):
+    def save_command(cls, init_dir, saved_state_path=None, assert_edges_added=False):
         if saved_state_path is None:
             saved_state_path = cls.saved_state_path()
         stdout, stderr, retcode = cls.proc_call([
             hh_client,
+            '--json',
             '--save-state', saved_state_path,
             init_dir,
         ])
         if retcode != 0:
             raise Exception('Failed to save! stdout: "%s" stderr: "%s"' %
                             (stdout, stderr))
+        if assert_edges_added:
+            obj = json.loads(stdout)
+            if obj['result'] is None:
+                raise Exception('Failed. Missing result field: "%s" stderr: "%s"' %
+                                (stdout, stderr))
+            if obj['result'] <= 0:
+                raise Exception('Failed. Expected some edges added: "%s" stderr: "%s"' %
+                                (stdout, stderr))
+
 
     @classmethod
-    def dump_saved_state(cls):
+    def dump_saved_state(cls, assert_edges_added=False):
         # Dump a saved state to a temporary directory.
         # Return the path to the saved state.
         saved_state_path = os.path.join(tempfile.mkdtemp(), 'new_saved_state')
-        cls.save_command(cls.repo_dir, saved_state_path=saved_state_path)
+        cls.save_command(
+            cls.repo_dir,
+            saved_state_path=saved_state_path,
+            assert_edges_added=assert_edges_added)
         return saved_state_path
 
     def write_local_conf(self):

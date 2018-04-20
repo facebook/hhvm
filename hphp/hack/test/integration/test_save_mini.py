@@ -149,7 +149,7 @@ public static function foo () : string {
         new_file = os.path.join(self.repo_dir, 'class_3b.php')
         self.add_file_that_depends_on_class_a(new_file)
         self.check_cmd(['No errors!'], assert_loaded_mini_state=False)
-        new_saved_state = self.dump_saved_state()
+        new_saved_state = self.dump_saved_state(assert_edges_added=True)
         self.change_return_type_on_base_class(
             os.path.join(self.repo_dir, 'class_1.php'))
         self.check_cmd([
@@ -192,7 +192,7 @@ public static function foo () : string {
         new_file = os.path.join(self.repo_dir, 'class_3b.php')
         self.add_file_that_depends_on_class_a(new_file)
         self.check_cmd(['No errors!'], assert_loaded_mini_state=True)
-        new_saved_state = self.dump_saved_state()
+        new_saved_state = self.dump_saved_state(assert_edges_added=True)
         self.change_return_type_on_base_class(
             os.path.join(self.repo_dir, 'class_1.php'))
         self.check_cmd([

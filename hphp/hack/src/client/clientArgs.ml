@@ -363,7 +363,8 @@ let parse_check_args cmd =
       " number of entries in the in-memory dependency table";
     "--save-state",
       Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
-      " (mode) Save a saved state to the given file.";
+      (" (mode) Save a saved state to the given file." ^
+      " Returns number of edges dumped from memory to the database.");
     "--autostart-server",
       Arg.Bool (fun x -> autostart := x),
       " automatically start hh_server if it's not running (default: true)";

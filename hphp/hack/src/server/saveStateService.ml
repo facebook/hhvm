@@ -61,9 +61,12 @@ let update_save_state ~file_info_on_disk files_info fn =
   let () = if file_info_on_disk then
     save_all_file_info_sqlite db_name |> ignore
   else () in
-  SharedMem.update_dep_table_sqlite db_name Build_id.build_revision;
-  ignore @@ Hh_logger.log_duration "Updating saved state took" t
+  let edges_added = SharedMem.update_dep_table_sqlite db_name Build_id.build_revision in
+  ignore @@ Hh_logger.log_duration "Updating saved state took" t;
+  edges_added
 
+(** Saves the saved state to the given path. Returns number of dependency
+* edges dumped into the database. *)
 let save_state ~file_info_on_disk files_info fn =
   let () = Sys_utils.mkdir_p (Filename.dirname fn) in
   let db_name = fn ^ ".sql" in
@@ -80,8 +83,9 @@ let save_state ~file_info_on_disk files_info fn =
     let () = if file_info_on_disk then
       save_all_file_info_sqlite db_name |> ignore
     else () in
-    SharedMem.save_dep_table_sqlite db_name Build_id.build_revision;
-    ignore @@ Hh_logger.log_duration "Saving saved state took" t
+    let edges_added = SharedMem.save_dep_table_sqlite db_name Build_id.build_revision in
+    let _ : float = Hh_logger.log_duration "Saving saved state took" t in
+    edges_added
   | Some old_table_fn ->
     (** If server is running from a loaded saved state, it's in-memory
      * tracked depdnencies are incomplete - most of the actual dependencies

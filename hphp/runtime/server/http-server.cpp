@@ -374,7 +374,7 @@ void HttpServer::runOrExitProcess() {
       wait();
     }
     if (m_stopReason) {
-      Logger::Warning("Server stopping with reason: %s\n", m_stopReason);
+      Logger::Warning("Server stopping with reason: %s", m_stopReason);
     }
     // if we were killed, bail out immediately
     if (m_killed) {
@@ -433,7 +433,7 @@ static void oom_sacrifice() {
 }
 
 void HttpServer::stop(const char* stopReason) {
-  if (m_stopped) return;
+  if (m_stopping.exchange(true)) return;
   // we're shutting down flush http logs
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
@@ -475,7 +475,7 @@ void HttpServer::stop(const char* stopReason) {
 }
 
 void HttpServer::stopOnSignal(int sig) {
-  if (m_stopped) return;
+  if (m_stopping.exchange(true)) return;
   // we're shutting down flush http logs
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
@@ -501,15 +501,10 @@ void HttpServer::stopOnSignal(int sig) {
     alarm(RuntimeOption::ServerGracefulShutdownWait);
   }
 
-  // NOTE: Server->stop does a graceful stop by design.
-  if (m_pageServer) {
-    m_pageServer->stop();
-  }
-  if (m_adminServer) {
-    m_adminServer->stop();
-  }
-
-  waitForServers();
+  Lock lock(this);
+  m_stopped = true;
+  m_stopReason = "signal received";
+  notify();
 }
 
 void HttpServer::EvictFileCache() {

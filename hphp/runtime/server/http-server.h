@@ -24,6 +24,7 @@
 #include "hphp/util/async-func.h"
 #include "hphp/util/service-data.h"
 
+#include <atomic>
 #include <folly/MicroSpinLock.h>
 
 namespace HPHP {
@@ -137,6 +138,7 @@ private:
   void playShutdownRequest(const std::string& fileName);
 
 private:
+  std::atomic<bool> m_stopping{false};
   bool m_stopped;
   bool m_killed;
   const char* m_stopReason;

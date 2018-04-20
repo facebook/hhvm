@@ -891,7 +891,7 @@ let save_state genv env fn =
     then failwith "Generating save state only works if there are no type errors!";
   let file_info_on_disk = ServerArgs.file_info_on_disk genv.ServerEnv.options in
   SaveStateService.save_state
-    ~file_info_on_disk env.ServerEnv.files_info fn (Unix.gettimeofday ())
+    ~file_info_on_disk env.ServerEnv.files_info fn
 
 let gen_deps genv env t =
   let files_list = Relative_path.Map.keys env.files_info in

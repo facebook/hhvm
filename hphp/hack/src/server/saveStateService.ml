@@ -52,7 +52,8 @@ let dump_filesinfo fn files_info =
   Marshal.to_channel chan saved [];
   Sys_utils.close_out_no_fail fn chan
 
-let update_save_state ~file_info_on_disk files_info fn t =
+let update_save_state ~file_info_on_disk files_info fn =
+  let t = Unix.gettimeofday () in
   let db_name = fn ^ ".sql" in
   if not (Disk.file_exists db_name) then
     failwith "Given existing save state SQL file missing";
@@ -60,12 +61,10 @@ let update_save_state ~file_info_on_disk files_info fn t =
   let () = if file_info_on_disk then
     save_all_file_info_sqlite db_name |> ignore
   else () in
-  let sqlite_save_t = SharedMem.update_dep_table_sqlite db_name Build_id.build_revision in
-  Hh_logger.log "Updating deptable using sqlite took(seconds): %d" sqlite_save_t;
+  SharedMem.update_dep_table_sqlite db_name Build_id.build_revision;
   ignore @@ Hh_logger.log_duration "Updating saved state took" t
 
-
-let save_state ~file_info_on_disk files_info fn t =
+let save_state ~file_info_on_disk files_info fn =
   let () = Sys_utils.mkdir_p (Filename.dirname fn) in
   let db_name = fn ^ ".sql" in
   let () = if Sys.file_exists fn then
@@ -76,23 +75,24 @@ let save_state ~file_info_on_disk files_info fn t =
            else () in
   match SharedMem.loaded_dep_table_filename () with
   | None ->
+    let t = Unix.gettimeofday () in
     dump_filesinfo fn files_info;
     let () = if file_info_on_disk then
       save_all_file_info_sqlite db_name |> ignore
     else () in
-    let sqlite_save_t = SharedMem.save_dep_table_sqlite db_name Build_id.build_revision in
-    Hh_logger.log "Saving deptable using sqlite took(seconds): %d" sqlite_save_t;
+    SharedMem.save_dep_table_sqlite db_name Build_id.build_revision;
     ignore @@ Hh_logger.log_duration "Saving saved state took" t
   | Some old_table_fn ->
     (** If server is running from a loaded saved state, it's in-memory
      * tracked depdnencies are incomplete - most of the actual dependencies
      * are in the SQL table. We need to copy that file and update it with
      * the in-memory edges. *)
+    let t = Unix.gettimeofday () in
     let content = Sys_utils.cat old_table_fn in
     let () = Sys_utils.mkdir_p (Filename.dirname fn) in
     let () = Sys_utils.write_file ~file:db_name content in
-    let t = Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t in
-    update_save_state ~file_info_on_disk files_info fn t
+    let _ : float = Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t in
+    update_save_state ~file_info_on_disk files_info fn
 
 let get_in_memory_dep_table_entry_count () =
   Core_result.try_with (fun () ->
@@ -101,6 +101,5 @@ let get_in_memory_dep_table_entry_count () =
 
 let go ~file_info_on_disk files_info filename =
   Core_result.try_with (fun () ->
-    let t = Unix.gettimeofday () in
-    save_state ~file_info_on_disk files_info filename t)
+    save_state ~file_info_on_disk files_info filename)
   |> Core_result.map_error ~f:Printexc.to_string

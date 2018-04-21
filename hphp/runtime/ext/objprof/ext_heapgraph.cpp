@@ -465,7 +465,7 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
       cnode.heap_object.kind = node.h->kind();
       cnode.heap_object.cls = obj ? obj->getVMClass() : nullptr;
     } else if (isStaticLocal(node)) {
-      rds::Handle handle = uintptr_t(node.ptr) - uintptr_t(rds::tl_base);
+      rds::Handle handle = rds::ptrToHandle<rds::Mode::Any>(node.ptr);
       auto sym = rds::reverseLink(handle);
       if (sym) {
         cnode.static_local = boost::get<rds::StaticLocal>(sym.value());
@@ -473,7 +473,7 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
         cnode.static_local = {InvalidFuncId, nullptr};
       }
     } else if (isStaticProp(node)) {
-      rds::Handle handle = uintptr_t(node.ptr) - uintptr_t(rds::tl_base);
+      rds::Handle handle = rds::ptrToHandle<rds::Mode::Any>(node.ptr);
       auto sym = rds::reverseLink(handle);
       if (sym) {
         cnode.sprop_cache = boost::get<rds::SPropCache>(sym.value());

@@ -100,13 +100,6 @@ const StaticString s_stderr("STDERR");
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Read typed data from an offset relative to a base address
- */
-template<class T>
-T& getDataRef(void* base, unsigned offset) {
-  return *reinterpret_cast<T*>(static_cast<char*>(base) + offset);
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -652,25 +645,28 @@ void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
 void Unit::defFunc(Func* func, bool debugger) {
   assertx(!func->isMethod());
   auto const handle = func->funcHandle();
-  auto& funcAddr = rds::handleToRef<LowPtr<Func>>(handle);
 
   if (rds::isPersistentHandle(handle)) {
+    auto& funcAddr = rds::handleToRef<LowPtr<Func>,
+                                      rds::Mode::Persistent>(handle);
     auto const oldFunc = funcAddr.get();
     if (oldFunc == func) return;
     if (UNLIKELY(oldFunc != nullptr)) {
       assertx(oldFunc->isBuiltin() && !func->isBuiltin());
       raise_error(Strings::REDECLARE_BUILTIN, func->name()->data());
     }
+    funcAddr = func;
   } else {
     assertx(rds::isNormalHandle(handle));
+    auto& funcAddr = rds::handleToRef<LowPtr<Func>, rds::Mode::Normal>(handle);
     if (!rds::isHandleInit(handle, rds::NormalTag{})) {
       rds::initHandle(handle);
     } else {
       if (funcAddr.get() == func) return;
       raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
     }
+    funcAddr = func;
   }
-  funcAddr = func;
 
   if (func->isUnique()) func->getNamedEntity()->setUniqueFunc(func);
 
@@ -723,19 +719,26 @@ void Unit::bindFunc(Func *func) {
       auto const isPersistent =
         (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) &&
         (func->attrs() & AttrPersistent);
-      auto const link = rds::alloc<LowPtr<const Func>>(
-        isPersistent ? rds::Mode::Persistent : rds::Mode::Normal);
-      *link = func;
+      rds::Handle handle;
+      if (isPersistent) {
+        auto link = rds::alloc<LowPtr<const Func>, rds::Mode::Persistent>();
+        *link = func;
+        handle = link.handle();
+      } else {
+        auto link = rds::alloc<LowPtr<const Func>, rds::Mode::Normal>();
+        *link = func;
+        handle = link.handle();
+      }
       if (func->isUnique()) ne->setUniqueFunc(func);
       if (RuntimeOption::EvalPerfDataMap) {
         rds::recordRds(
-          link.handle(),
+          handle,
           sizeof(void*),
           "Func",
           func->name()->toCppString()
         );
       }
-      return link.handle();
+      return handle;
     }
   );
   func->setFuncHandle(ne->m_cachedFunc);
@@ -988,7 +991,7 @@ bool Unit::aliasClass(const StringData* original, const StringData* alias,
   }
 
   auto const aliasNe = NamedEntity::get(alias);
-  aliasNe->m_cachedClass.bind();
+  aliasNe->m_cachedClass.bind(rds::Mode::Normal);
 
   auto const aliasClass = aliasNe->getCachedClass();
   if (aliasClass) {
@@ -1042,7 +1045,7 @@ const Cell* Unit::lookupCns(const StringData* cnsName) {
 
   if (LIKELY(rds::isHandleBound(handle) &&
              rds::isHandleInit(handle))) {
-    auto const& tv = rds::handleToRef<TypedValue>(handle);
+    auto const& tv = rds::handleToRef<TypedValue, rds::Mode::NonLocal>(handle);
 
     if (LIKELY(tv.m_type != KindOfUninit)) {
       assertx(cellIsPlausible(tv));
@@ -1070,7 +1073,7 @@ const Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
   if (!rds::isHandleBound(handle) || !rds::isPersistentHandle(handle)) {
     return nullptr;
   }
-  auto const ret = &rds::handleToRef<TypedValue>(handle);
+  auto const ret = rds::handleToPtr<Cell, rds::Mode::Persistent>(handle);
   assertx(cellIsPlausible(*ret));
   return ret;
 }
@@ -1093,7 +1096,7 @@ const TypedValue* Unit::loadCns(const StringData* cnsName) {
 static bool defCnsHelper(rds::Handle ch,
                          const TypedValue *value,
                          const StringData *cnsName) {
-  TypedValue* cns = &rds::handleToRef<TypedValue>(ch);
+  auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(ch);
 
   if (!rds::isHandleInit(ch)) {
     cns->m_type = KindOfUninit;
@@ -1307,18 +1310,19 @@ bool Unit::defTypeAlias(Id id) {
 
   nameList->m_cachedTypeAlias.bind(
     [&] {
-      auto rdsMode = [&] {
-        if (!(thisType->attrs & AttrPersistent)) return rds::Mode::Normal;
-        if (resolved.klass && !classHasPersistentRDS(resolved.klass)) {
-          return rds::Mode::Normal;
-        }
-        return rds::Mode::Persistent;
-      }();
-      auto link = rds::alloc<TypeAliasReq>(rdsMode);
-      rds::recordRds(link.handle(),
+      rds::Handle handle;
+      auto const isNormal =
+        !(thisType->attrs & AttrPersistent) ||
+        (resolved.klass && !classHasPersistentRDS(resolved.klass));
+      if (isNormal) {
+        handle = rds::alloc<TypeAliasReq, rds::Mode::Normal>().handle();
+      } else {
+        handle = rds::alloc<TypeAliasReq, rds::Mode::Persistent>().handle();
+      }
+      rds::recordRds(handle,
                      sizeof(TypeAliasReq),
                      "TypeAlias", typeName->data());
-      return link.handle();
+      return handle;
     }
   );
   nameList->setCachedTypeAlias(resolved);
@@ -1463,9 +1467,9 @@ void Unit::merge() {
   }
 
   if (UNLIKELY(isDebuggerAttached())) {
-    mergeImpl<true>(rds::tl_base, mergeInfo());
+    mergeImpl<true>(mergeInfo());
   } else {
-    mergeImpl<false>(rds::tl_base, mergeInfo());
+    mergeImpl<false>(mergeInfo());
   }
 }
 
@@ -1625,9 +1629,8 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
 }
 
 template <bool debugger>
-void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
+void Unit::mergeImpl(MergeInfo* mi) {
   assertx(m_mergeState.load(std::memory_order_relaxed) & MergeState::Merged);
-
   autoTypecheck(this);
 
   Func** it = mi->funcHoistableBegin();
@@ -1640,8 +1643,13 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
         assertx(func->top());
         assertx(func->isUnique());
         auto const handle = func->funcHandle();
-        getDataRef<LowPtr<Func>>(tcbase, handle) = func;
-        if (rds::isNormalHandle(handle)) rds::initHandle(handle);
+        if (rds::isNormalHandle(handle)) {
+          rds::handleToRef<LowPtr<Func>, rds::Mode::Normal>(handle) = func;
+          rds::initHandle(handle);
+        } else {
+          assertx(rds::isPersistentHandle(handle));
+          rds::handleToRef<LowPtr<Func>, rds::Mode::Persistent>(handle) = func;
+        }
         func->getNamedEntity()->setUniqueFunc(func);
         if (debugger) phpDebuggerDefFuncHook(func);
       } while (++it != fend);
@@ -1668,34 +1676,39 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
       if (LIKELY(uintptr_t(pre) & 1)) {
         Stats::inc(Stats::UnitMerge_hoistable);
         Class* cls = (Class*)(uintptr_t(pre) & ~1);
+        auto const handle = cls->classHandle();
+        auto const handle_persistent = rds::isPersistentHandle(handle);
         if (cls->isPersistent()) {
           Stats::inc(Stats::UnitMerge_hoistable_persistent);
         }
-        if (Stats::enabled() &&
-            rds::isPersistentHandle(cls->classHandle())) {
+        if (Stats::enabled() && handle_persistent) {
           Stats::inc(Stats::UnitMerge_hoistable_persistent_cache);
         }
         if (Class* parent = cls->parent()) {
+          auto const parent_handle = parent->classHandle();
+          auto const parent_handle_persistent =
+            rds::isPersistentHandle(parent_handle);
           if (parent->isPersistent()) {
             Stats::inc(Stats::UnitMerge_hoistable_persistent_parent);
           }
-          if (Stats::enabled() &&
-              rds::isPersistentHandle(parent->classHandle())) {
+          if (Stats::enabled() && parent_handle_persistent) {
             Stats::inc(Stats::UnitMerge_hoistable_persistent_parent_cache);
           }
-
-          auto const parent_handle = parent->classHandle();
           auto const parent_cls_present =
             rds::isHandleInit(parent_handle) &&
-            getDataRef<LowPtr<Class>>(tcbase, parent_handle);
+            rds::handleToRef<LowPtr<Class>, rds::Mode::NonLocal>(parent_handle);
           if (UNLIKELY(!parent_cls_present)) {
             redoHoistable = true;
             continue;
           }
         }
-        auto const handle = cls->classHandle();
-        getDataRef<LowPtr<Class>>(tcbase, handle) = cls;
-        if (rds::isNormalHandle(handle)) rds::initHandle(handle);
+        if (handle_persistent) {
+          rds::handleToRef<LowPtr<Class>, rds::Mode::Persistent>(handle) = cls;
+        } else {
+          assertx(rds::isNormalHandle(handle));
+          rds::handleToRef<LowPtr<Class>, rds::Mode::Normal>(handle) = cls;
+          rds::initHandle(handle);
+        }
         if (debugger) phpDebuggerDefClassHook(cls);
       } else {
         if (UNLIKELY(!defClass(pre, false))) {
@@ -1760,11 +1773,12 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable_unique);
           Class* other = nullptr;
           Class* cls = (Class*)((char*)obj - (int)k);
+          auto const handle = cls->classHandle();
+          auto const handle_persistent = rds::isPersistentHandle(handle);
           if (cls->isPersistent()) {
             Stats::inc(Stats::UnitMerge_mergeable_unique_persistent);
           }
-          if (Stats::enabled() &&
-              rds::isPersistentHandle(cls->classHandle())) {
+          if (Stats::enabled() && handle_persistent) {
             Stats::inc(Stats::UnitMerge_mergeable_unique_persistent_cache);
           }
           Class::Avail avail = cls->avail(other, true);
@@ -1772,9 +1786,15 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
             raise_error("unknown class %s", other->name()->data());
           }
           assertx(avail == Class::Avail::True);
-          auto const handle = cls->classHandle();
-          getDataRef<LowPtr<Class>>(tcbase, handle) = cls;
-          if (rds::isNormalHandle(handle)) rds::initHandle(handle);
+          if (handle_persistent) {
+            rds::handleToRef<LowPtr<Class>,
+                             rds::Mode::Persistent>(handle) = cls;
+          } else {
+            assertx(rds::isNormalHandle(handle));
+            rds::handleToRef<LowPtr<Class>,
+                             rds::Mode::Normal>(handle) = cls;
+            rds::initHandle(handle);
+          }
           if (debugger) phpDebuggerDefClassHook(cls);
           obj = mi->mergeableObj(++ix);
           k = MergeKind(uintptr_t(obj) & 7);
@@ -1812,7 +1832,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           if (UNLIKELY(rds::isHandleInit(handle, rds::NormalTag{}))) {
             raise_notice(Strings::CONSTANT_ALREADY_DEFINED, name->data());
           } else {
-            getDataRef<TypedValue>(tcbase, handle) = *v;
+            rds::handleToRef<TypedValue, rds::Mode::Normal>(handle) = *v;
             rds::initHandle(handle);
           }
           ix += 1 + sizeof(*v) / sizeof(void*);
@@ -1840,7 +1860,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable_require);
           Unit *unit = (Unit*)((char*)obj - (int)k);
 
-          unit->mergeImpl<debugger>(tcbase, unit->mergeInfo());
+          unit->mergeImpl<debugger>(unit->mergeInfo());
           if (UNLIKELY(!unit->isMergeOnly())) {
             Stats::inc(Stats::PseudoMain_Reentered);
             VarEnv* ve = nullptr;

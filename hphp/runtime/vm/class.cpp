@@ -414,7 +414,7 @@ void Class::destroy() {
   // Need to recheck now we have the lock
   if (!m_cachedClass.bound()) return;
   // Only do this once.
-  m_cachedClass = rds::Link<LowPtr<Class>>(rds::kUninitHandle);
+  m_cachedClass = rds::Link<LowPtr<Class>, rds::Mode::NonLocal>{};
 
   /*
    * Regardless of refCount, this Class is now unusable.  Remove it
@@ -569,7 +569,7 @@ void Class::releaseRefs() {
           auto const it = scopedClones.find(CloneScope { this, attrs });
           assertx(it != scopedClones.end());
           it->second->m_cachedClass =
-            rds::Link<LowPtr<Class>>(rds::kUninitHandle);
+            rds::Link<LowPtr<Class>, rds::Mode::NonLocal>{};
           scopedClones.erase(it);
         }
       }
@@ -850,8 +850,6 @@ void Class::initSProps() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Property storage.
 
-static rds::Link<bool> s_persistentTrue{rds::kUninitHandle};
-
 void Class::initSPropHandles() const {
   if (m_sPropCacheInit.bound()) return;
 
@@ -874,19 +872,19 @@ void Class::initSPropHandles() const {
 
     if (sProp.cls == this) {
       if (usePersistentHandles && (sProp.attrs & AttrPersistent)) {
-          propHandle.bind(
-            [&] {
-              auto const link =
-                rds::alloc<StaticPropData>(rds::Mode::Persistent);
-              link->val = sProp.val;
-              rds::recordRds(link.handle(), sizeof(StaticPropData),
-                             rds::SPropCache{this, slot});
-              return link.handle();
-            }
-          );
-        } else {
-          propHandle = rds::bind<StaticPropData>(
-            rds::SPropCache{this, slot}, rds::Mode::Local
+        propHandle.bind(
+          [&] {
+            auto const link =
+              rds::alloc<StaticPropData, rds::Mode::Persistent>();
+            link->val = sProp.val;
+            rds::recordRds(link.handle(), sizeof(StaticPropData),
+                           rds::SPropCache{this, slot});
+            return link.handle();
+          }
+        );
+      } else {
+        propHandle = rds::bind<StaticPropData, rds::Mode::Local>(
+          rds::SPropCache{this, slot}
         );
       }
     } else {
@@ -905,16 +903,9 @@ void Class::initSPropHandles() const {
     // the wrong time. And rather than giving each Class its own persistent
     // handle that always points to an immutable 'true', share one between all
     // of them.
-    s_persistentTrue.bind(
-      [&] {
-        auto const link = rds::alloc<bool>(rds::Mode::Persistent);
-        *link = true;
-        return link.handle();
-      }
-    );
-    m_sPropCacheInit = s_persistentTrue;
+    m_sPropCacheInit = rds::s_persistentTrue;
   } else {
-    m_sPropCacheInit.bind();
+    m_sPropCacheInit.bind(rds::Mode::Normal);
   }
   rds::recordRds(m_sPropCacheInit.handle(),
                  sizeof(bool), "SPropCacheInit", name()->data());
@@ -1131,7 +1122,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
   // This constant has a non-scalar initializer, meaning it will be potentially
   // different in different requests, which we store separately in an array
   // living off in RDS.
-  m_nonScalarConstantCache.bind();
+  m_nonScalarConstantCache.bind(rds::Mode::Normal);
   auto& clsCnsData = *m_nonScalarConstantCache;
 
   /*
@@ -2419,10 +2410,12 @@ void Class::setProperties() {
   m_declProperties.create(curPropMap);
   m_staticProperties.create(curSPropMap);
 
-  m_sPropCache = (rds::Link<StaticPropData>*)
-    malloc_huge(numStaticProperties() * sizeof(*m_sPropCache));
+  using LinkT = std::remove_pointer<decltype(m_sPropCache)>::type;
+  m_sPropCache = static_cast<LinkT*>(
+    malloc_huge(numStaticProperties() * sizeof(*m_sPropCache))
+  );
   for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
-    new (&m_sPropCache[i]) rds::Link<StaticPropData>(rds::kUninitHandle);
+    new (&m_sPropCache[i]) LinkT;
   }
 
   m_declPropNumAccessible = m_declProperties.size() - numInaccessible;

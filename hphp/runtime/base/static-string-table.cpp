@@ -99,7 +99,7 @@ struct strintern_hash {
 // The uint32_t is used to hold RDS offsets for constants
 using StringDataMap = folly::AtomicHashMap<
   StrInternKey,
-  rds::Link<TypedValue>,
+  rds::Link<TypedValue, rds::Mode::NonLocal>,
   strintern_hash,
   strintern_eq,
   HugeAllocator<char>
@@ -161,7 +161,7 @@ StringData* insertStaticString(StringData* sd) {
   assertx(sd->isStatic());
   auto pair = s_stringDataMap->insert(
     safe_cast<StrInternKey>(reinterpret_cast<uintptr_t>(sd)),
-    rds::Link<TypedValue>(rds::kUninitHandle)
+    rds::Link<TypedValue, rds::Mode::NonLocal>{}
   );
 
   if (!pair.second) {
@@ -283,7 +283,7 @@ bool bindPersistentCns(const StringData* cnsName, const Cell& value) {
   it->second.bind(
     [&] {
       auto const link =
-        rds::alloc<TypedValue, kTVSimdAlign>(rds::Mode::Persistent);
+        rds::alloc<TypedValue, rds::Mode::Persistent, kTVSimdAlign>();
       *link = value;
       rds::recordRds(link.handle(), sizeof(TypedValue),
                      "Cns", cnsName->data());

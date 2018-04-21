@@ -85,11 +85,7 @@ struct NamedEntity {
   /////////////////////////////////////////////////////////////////////////////
   // Constructors.
 
-  explicit NamedEntity()
-    : m_cachedClass(rds::kUninitHandle)
-    , m_cachedFunc(rds::kUninitHandle)
-    , m_cachedTypeAlias(rds::kUninitHandle)
-  {}
+  explicit NamedEntity() {}
 
   NamedEntity(NamedEntity&& ne) noexcept;
 
@@ -214,9 +210,9 @@ private:
   // Data members.
 
 public:
-  mutable rds::Link<LowPtr<Class>> m_cachedClass;
-  mutable rds::Link<LowPtr<Func>> m_cachedFunc;
-  mutable rds::Link<TypeAliasReq> m_cachedTypeAlias;
+  mutable rds::Link<LowPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
+  mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
+  mutable rds::Link<TypeAliasReq, rds::Mode::NonLocal> m_cachedTypeAlias;
 
 private:
   AtomicLowPtr<Class, std::memory_order_acquire,

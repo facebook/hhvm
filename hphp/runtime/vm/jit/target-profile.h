@@ -149,7 +149,8 @@ struct TargetProfile {
    */
   static void reduce(T& out, rds::Handle hand, uint32_t size) {
     for (auto& base : rds::allTLBases()) {
-      detail::call_reduce(out, rds::handleToRef<T>(base, hand), size);
+      detail::call_reduce(
+        out, rds::handleToRef<T, rds::Mode::Local>(base, hand), size);
     }
   }
 
@@ -197,20 +198,24 @@ struct TargetProfile {
    */
   rds::Handle handle() const { return m_link.handle(); }
   T& value() const { return *m_link; }
+
 private:
-  static rds::Link<T> createLink(TransID profTransID,
-                                 TransKind kind,
-                                 Offset bcOff,
-                                 const StringData* name,
-                                 size_t extraSize) {
+  static rds::Link<T, rds::Mode::Local>
+  createLink(TransID profTransID,
+             TransKind kind,
+             Offset bcOff,
+             const StringData* name,
+             size_t extraSize) {
     auto const rdsKey = rds::Profile<T>{profTransID, bcOff, name};
 
     switch (kind) {
     case TransKind::Profile:
-      return rds::bind<T>(rdsKey, rds::Mode::Local, extraSize);
+      return rds::bind<T, rds::Mode::Local>(rdsKey, extraSize);
 
     case TransKind::Optimize:
-      if (isValidTransID(profTransID)) return rds::attach<T>(rdsKey);
+      if (isValidTransID(profTransID)) {
+        return rds::attach<T, rds::Mode::Local>(rdsKey);
+      }
 
       // fallthrough
     case TransKind::Anchor:
@@ -220,13 +225,13 @@ private:
     case TransKind::ProfPrologue:
     case TransKind::OptPrologue:
     case TransKind::Invalid:
-      return rds::Link<T>(rds::kUninitHandle);
+      return rds::Link<T, rds::Mode::Local>{};
     }
     not_reached();
   }
 
 private:
-  rds::Link<T> const m_link;
+  rds::Link<T, rds::Mode::Local> const m_link;
   TransKind const m_kind;
   rds::Profile<void> const m_key;
 };

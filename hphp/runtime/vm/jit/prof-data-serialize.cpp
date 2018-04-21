@@ -764,7 +764,7 @@ Class* read_class(ProfDataDeserializer& ser) {
                          // class_alias, so we need to make sure
                          // *that* points to the class too
                          auto const aliasNe = NamedEntity::get(depName);
-                         aliasNe->m_cachedClass.bind();
+                         aliasNe->m_cachedClass.bind(rds::Mode::Normal);
                          if (aliasNe->m_cachedClass.isNormal()) {
                            aliasNe->m_cachedClass.markUninit();
                          }
@@ -881,10 +881,12 @@ Func* read_func(ProfDataDeserializer& ser) {
         for (auto const f : unit->funcs()) {
           if (f->base() == id) {
             Unit::bindFunc(f);
-            if (!rds::isPersistentHandle(f->funcHandle()) &&
-                (!rds::isHandleInit(f->funcHandle(), rds::NormalTag{}) ||
-                 rds::handleToRef<LowPtr<Func>>(f->funcHandle()).get() != f)) {
-              rds::uninitHandle(f->funcHandle());
+            auto const handle = f->funcHandle();
+            if (!rds::isPersistentHandle(handle) &&
+                (!rds::isHandleInit(handle, rds::NormalTag{}) ||
+                 rds::handleToRef<LowPtr<Func>,
+                                  rds::Mode::Normal>(handle).get() != f)) {
+              rds::uninitHandle(handle);
               Unit::defFunc(f, false);
             }
             return f;

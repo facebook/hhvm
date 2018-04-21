@@ -92,7 +92,7 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
   }
   assertx(rds::isPersistentHandle(ch));
 
-  auto const& cns = rds::handleToRef<TypedValue>(ch);
+  auto const& cns = rds::handleToRef<TypedValue, rds::Mode::Persistent>(ch);
 
   if (cns.m_type == KindOfUninit) {
     loadTV(v, inst->dst(), dst, rvmtl()[ch]);
@@ -173,7 +173,7 @@ Cell lookupCnsHelperNormal(rds::Handle tv_handle,
                            StringData* nm, bool error) {
   assertx(rds::isNormalHandle(tv_handle));
   if (UNLIKELY(rds::isHandleInit(tv_handle))) {
-    auto const tv = &rds::handleToRef<TypedValue>(tv_handle);
+    auto const tv = rds::handleToPtr<TypedValue, rds::Mode::Normal>(tv_handle);
     if (tv->m_data.pref != nullptr) {
       auto callback = (Native::ConstantCallback)(tv->m_data.pref);
       const Cell* cns = callback().asTypedValue();
@@ -192,7 +192,7 @@ Cell lookupCnsHelperNormal(rds::Handle tv_handle,
 Cell lookupCnsHelperPersistent(rds::Handle tv_handle,
                                StringData* nm, bool error) {
   assertx(rds::isPersistentHandle(tv_handle));
-  auto const tv = &rds::handleToRef<TypedValue>(tv_handle);
+  auto tv = rds::handleToPtr<TypedValue, rds::Mode::Persistent>(tv_handle);
   assertx(tv->m_type == KindOfUninit);
 
   // Deferred system constants.
@@ -217,7 +217,7 @@ Cell lookupCnsUHelperNormal(rds::Handle tv_handle,
 
   // Try cache handle for unqualified name.
   if (UNLIKELY(!cns && rds::isHandleInit(tv_handle, rds::NormalTag{}))) {
-    cns = &rds::handleToRef<TypedValue>(tv_handle);
+    cns = rds::handleToPtr<TypedValue, rds::Mode::Normal>(tv_handle);
     assertx(cns->m_type != KindOfUninit);
   }
 
@@ -238,10 +238,11 @@ Cell lookupCnsUHelperPersistent(rds::Handle tv_handle,
   // Lookup qualified name in thread-local constants.
   auto cns = lookupCnsImpl(nm);
 
-  // Try cache handle for unqualified name.
-  auto const tv = &rds::handleToRef<TypedValue>(tv_handle);
-  if (UNLIKELY(!cns && tv->m_type != KindOfUninit)) {
-    cns = tv;
+  if (UNLIKELY(!cns)) {
+    // Try cache handle for unqualified name.
+    auto const tv =
+      rds::handleToPtr<TypedValue, rds::Mode::Persistent>(tv_handle);
+    if (tv->m_type != KindOfUninit) cns = tv;
   }
 
   if (LIKELY(cns != nullptr)) {

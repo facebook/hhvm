@@ -22,20 +22,18 @@ namespace HPHP { namespace rds {
 
 //////////////////////////////////////////////////////////////////////
 
-Link<StaticLocalData, true /* normal_only */>
+Link<StaticLocalData, Mode::Normal>
 bindStaticLocal(const Func* func, const StringData* name) {
-  auto ret = bind<StaticLocalData,true>(
-    StaticLocal { func->getFuncId(), name },
-    Mode::Normal
+  auto ret = bind<StaticLocalData,Mode::Normal>(
+    StaticLocal { func->getFuncId(), name }
   );
   return ret;
 }
 
-Link<TypedValue, true /* normal_only */>
+Link<TypedValue, Mode::Normal>
 bindClassConstant(const StringData* clsName, const StringData* cnsName) {
-  auto ret = bind<TypedValue,true,kTVSimdAlign>(
-    ClsConstant { clsName, cnsName },
-    Mode::Normal
+  auto ret = bind<TypedValue,Mode::Normal,kTVSimdAlign>(
+    ClsConstant { clsName, cnsName }
   );
   return ret;
 }

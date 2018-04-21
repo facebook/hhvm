@@ -772,8 +772,8 @@ public:
    * RDS handle for the static property at `index'.
    */
   rds::Handle sPropHandle(Slot index) const;
-  rds::Link<StaticPropData> sPropLink(Slot index) const;
-  rds::Link<bool> sPropInitLink() const;
+  rds::Link<StaticPropData, rds::Mode::NonNormal> sPropLink(Slot index) const;
+  rds::Link<bool, rds::Mode::NonLocal> sPropInitLink() const;
 
   /*
    * Get the PropInitVec for the current request.
@@ -966,7 +966,7 @@ public:
    * only a single name-to-class mapping will exist per request.
    */
   rds::Handle classHandle() const;
-  void setClassHandle(rds::Link<LowPtr<Class>> link) const;
+  void setClassHandle(rds::Link<LowPtr<Class>, rds::Mode::NonLocal> link) const;
 
   /*
    * Get and set the RDS-cached class with this class's name.
@@ -1344,8 +1344,7 @@ private:
   RequirementMap m_requirements;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;
   uint32_t m_numDeclInterfaces{0};
-  mutable rds::Link<Array, true /* normal_only */>
-    m_nonScalarConstantCache{rds::kUninitHandle};
+  mutable rds::Link<Array, rds::Mode::Normal> m_nonScalarConstantCache;
 
   LowPtr<Func> m_toString;
   LowPtr<Func> m_invoke; // __invoke, iff non-static (or closure)
@@ -1354,7 +1353,7 @@ private:
 
   ClassPtr m_parent;
   int32_t m_declPropNumAccessible;
-  mutable rds::Link<LowPtr<Class>> m_cachedClass{rds::kUninitHandle};
+  mutable rds::Link<LowPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
 
   /*
    * Whether this is a subclass of Closure whose m_invoke->m_cls has been set
@@ -1398,9 +1397,14 @@ private:
    *    bound, defaulting to false.
    * 3. The RDS value at m_sPropCacheInit is set to true when initSProps() is
    *    called, and the values are actually initialized.
+   *
+   * For non-persistent classes, we put sPropCache in rds::Local, but use the
+   * m_sPropCacheInit flag to indicate whether sPropCache needs to be
+   * reinitialized.
    */
-  mutable rds::Link<StaticPropData>* m_sPropCache{nullptr};
-  mutable rds::Link<bool> m_sPropCacheInit{rds::kUninitHandle};
+  mutable rds::Link<StaticPropData, rds::Mode::NonNormal>*
+    m_sPropCache{nullptr};
+  mutable rds::Link<bool, rds::Mode::NonLocal> m_sPropCacheInit;
 
   veclen_t m_classVecLen;
   veclen_t m_funcVecLen;
@@ -1432,8 +1436,7 @@ private:
    */
   uint8_t m_ODAttrs;
 
-  mutable rds::Link<PropInitVec*, true /* normal_only */>
-    m_propDataCache{rds::kUninitHandle};
+  mutable rds::Link<PropInitVec*, rds::Mode::Normal> m_propDataCache;
 
   /*
    * Whether the Class requires initialization, because it has either

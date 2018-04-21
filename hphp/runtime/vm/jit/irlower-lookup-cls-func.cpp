@@ -139,7 +139,7 @@ const Class* lookupKnownClass(rds::Handle cache_handle,
   if (UNLIKELY(!rds::isHandleInit(cache_handle, rds::NormalTag{}))) {
     raise_error(Strings::UNKNOWN_CLASS, name->data());
   }
-  return rds::handleToRef<LowPtr<Class>>(cache_handle).get();
+  return rds::handleToRef<LowPtr<Class>, rds::Mode::Normal>(cache_handle).get();
 }
 
 const Func* lookupUnknownFunc(const StringData* name) {

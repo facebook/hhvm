@@ -860,7 +860,7 @@ void implVecSet(IRLS& env, const IRInstruction* inst) {
 /*
  * Thread-local RDS packed array access sampling counter.
  */
-rds::Link<uint32_t> s_counter{rds::kUninitHandle};
+rds::Link<uint32_t, rds::Mode::Local> s_counter;
 
 }
 

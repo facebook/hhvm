@@ -698,7 +698,8 @@ inline void Func::setBaseCls(Class* baseCls) {
   m_baseCls = baseCls;
 }
 
-inline void Func::setFuncHandle(rds::Link<LowPtr<Func>> l) {
+inline void Func::setFuncHandle(rds::Link<LowPtr<Func>,
+                                          rds::Mode::NonLocal> l) {
   // TODO(#2950356): This assertion fails for create_function with an existing
   // declared function named __lambda_func.
   //assert(!m_cachedFunc.valid());

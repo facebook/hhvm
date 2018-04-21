@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <cinttypes>
 #include <string>
-#include <unordered_map>
+#include <type_traits>
 #include <boost/variant.hpp>
 #include <folly/Range.h>
 #include <folly/Optional.h>
@@ -151,7 +151,6 @@ size_t usedPersistentBytes();
 
 folly::Range<const char*> normalSection();
 folly::Range<const char*> localSection();
-folly::Range<const char*> persistentSection();
 
 // Invoke F on each initialized allocation in the normal section. F is invoked
 // with a void* pointer to the data, the size of the data, and the stored
@@ -229,16 +228,39 @@ using Symbol = boost::variant< StaticLocal
 
 //////////////////////////////////////////////////////////////////////
 
-enum class Mode { Normal, Local, Persistent };
+enum class Mode : unsigned {
+  Normal        = 1u << 0,
+  Local         = 1u << 1,
+  Persistent    = 1u << 2,
+
+  NonPersistent = Normal | Local,
+  NonLocal      = Normal | Persistent,
+  NonNormal     = Local  | Persistent,
+
+  Any           = Normal | Local | Persistent,
+};
+
+using ModeU = std::underlying_type<Mode>::type;
+
+template<Mode Mask> constexpr bool maybe(Mode mode) {
+  return !!(static_cast<ModeU>(mode) & static_cast<ModeU>(Mask));
+}
+
+template<Mode RHS> constexpr bool in(Mode LHS) {
+  return !(static_cast<ModeU>(LHS) & ~static_cast<ModeU>(RHS));
+}
+
+constexpr bool pure(Mode mask) {
+  return !(static_cast<ModeU>(mask) & (static_cast<ModeU>(mask) - 1));
+}
 
 /*
  * Handles into Request Data Segment.  These are offsets from rds::tl_base.
  */
 using Handle = uint32_t;
 constexpr Handle kUninitHandle = 0;
-constexpr Handle kInvalidHandleMask = 0x80000000;
-constexpr Handle kBeingBound = 0xffffffff;
-constexpr Handle kBeingBoundWithWaiters = 0xfffffffe;
+constexpr Handle kBeingBound = 1;
+constexpr Handle kBeingBoundWithWaiters = 2;
 
 /*
  * Normal segment element generation numbers.
@@ -257,7 +279,7 @@ constexpr GenNumber kInvalidGenNumber = 0;
 enum class NormalTag {};
 
 /*
- * rds::Link<T> is a thin, typed wrapper around an rds::Handle.
+ * rds::Link<T,M> is a thin, typed wrapper around an rds::Handle.
  *
  * Note that nothing prevents using non-POD types with this.  But nothing here
  * is going to run the constructor.  (In the non-persistent region, the space
@@ -267,13 +289,19 @@ enum class NormalTag {};
  * multiple threads, and the alloc() api guarantees only a single
  * caller will actually allocate new space in RDS.
  */
-template<class T, bool normal_only = false>
+template<class T, Mode M>
 struct Link {
-  explicit Link(Handle handle);
-  Link(const Link&);
-  ~Link() = default;
+  explicit Link(Handle handle = kUninitHandle);
 
-  Link& operator=(const Link& r);
+  // We allow construction or assignment from a Link of a narrower Mode.
+  Link(const Link<T,M>&);
+  Link<T,M>& operator=(const Link<T,M>&);
+
+  template<Mode OM> /* implicit */ Link(
+    const typename std::enable_if<in<M>(OM), Link<T,OM>>::type&);
+
+  template<Mode OM> typename std::enable_if<in<M>(OM),Link<T,M>>::type&
+  operator=(const Link<T,OM>&);
 
   /*
    * Ensure this Link is bound to an RDS allocation.  If it is not, allocate it
@@ -286,7 +314,7 @@ struct Link {
    *
    * Post: bound()
    */
-  template<size_t Align = alignof(T)> void bind(Mode mode = Mode::Normal);
+  template<size_t Align = alignof(T)> void bind(Mode mode);
 
   /*
    * Ensure this Link is bound to an RDS allocation.
@@ -356,7 +384,6 @@ struct Link {
    * Pre: bound()
    */
   bool isInit() const;
-  bool isInit(NormalTag) const;
 
   /*
    * Manually mark this element as initialized or uninitialized.
@@ -396,6 +423,10 @@ struct Link {
   }
 
 private:
+  template<class OT, Mode OM> friend struct Link;
+
+  void checkSanity();
+
   Handle raw() const { return m_handle.load(std::memory_order_relaxed); }
   std::atomic<Handle> m_handle;
 };
@@ -414,8 +445,8 @@ private:
  * region; it is allowed to be true only if `key' is only ever bound with
  * Mode::Normal.
  */
-template<class T, bool N = false, size_t Align = alignof(T)>
-Link<T,N> bind(Symbol key, Mode mode = Mode::Normal, size_t extraSize = 0);
+template<class T, Mode M, size_t Align = alignof(T)>
+Link<T,M> bind(Symbol key, size_t extraSize = 0);
 
 /*
  * Remove a bound link from RDS metadata. The actual space in RDS is
@@ -430,8 +461,8 @@ void unbind(Symbol, Handle);
  * fixed.  The `T' must be the same `T' that the symbol is mapped to,
  * if it's already mapped.
  */
-template<class T>
-Link<T> attach(Symbol key);
+template<class T, Mode M = Mode::Any>
+Link<T,M> attach(Symbol key);
 
 /*
  * Allocate anonymous memory from RDS.
@@ -439,8 +470,8 @@ Link<T> attach(Symbol key);
  * The memory is not keyed on any Symbol, so the handle in the returned Link
  * will be unique.
  */
-template<class T, size_t Align = alignof(T), bool N = false>
-Link<T,N> alloc(Mode mode = Mode::Normal);
+template<class T, Mode M = Mode::Normal, size_t Align = alignof(T)>
+Link<T,M> alloc();
 
 /*
  * Allocate a single anonymous bit from non-persistent RDS.  The bit
@@ -468,11 +499,18 @@ Handle currentGenNumberHandle();
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Dereference an un-typed rds::Handle, optionally specifying a
- * specific RDS base to use.
+ * Dereference an un-typed rds::Handle which is guaranteed to be in one of the
+ * `modes`, optionally specifying a specific RDS base to use.
  */
-template<class T> T& handleToRef(Handle h);
-template<class T> T& handleToRef(void* base, Handle h);
+template<class T, Mode M> T& handleToRef(Handle h);
+template<class T, Mode M> T& handleToRef(void* base, Handle h);
+
+/*
+ * Conversion between a pointer and an rds::Handle which is guaranteed to be in
+ * one of the modes specified in `M`.
+ */
+template<class T = void, Mode M> T* handleToPtr(Handle h);
+template<Mode M> Handle ptrToHandle(const void* ptr);
 
 /*
  * Whether `handle' looks valid---i.e., whether it lies within the RDS bounds.
@@ -565,6 +603,8 @@ std::vector<void*> allTLBases();
 Array& s_constants();
 
 //////////////////////////////////////////////////////////////////////
+
+extern rds::Link<bool, Mode::Persistent> s_persistentTrue;
 
 }}
 

@@ -204,7 +204,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   }
 
   if (f != this) {
-    f->m_cachedFunc = rds::Link<LowPtr<Func>>{rds::kUninitHandle};
+    f->m_cachedFunc = rds::Link<LowPtr<Func>, rds::Mode::NonLocal>{};
     f->m_maybeIntercepted = -1;
     f->m_isPreFunc = false;
   }

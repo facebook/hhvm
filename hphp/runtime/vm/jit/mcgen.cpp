@@ -53,7 +53,7 @@ bool s_inited{false};
 void processInit() {
   TRACE(1, "mcgen startup\n");
 
-  g_unwind_rds.bind();
+  g_unwind_rds.bind(rds::Mode::Normal);
 
   Debug::initDebugInfo();
   tc::processInit();

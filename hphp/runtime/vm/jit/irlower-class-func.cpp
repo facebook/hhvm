@@ -127,7 +127,7 @@ void cgLdClsInitData(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const cls = srcLoc(env, inst, 0).reg();
   auto const offset = Class::propDataCacheOff() +
-                      rds::Link<Class::PropInitVec*>::handleOff();
+    rds::Link<Class::PropInitVec*, rds::Mode::Normal>::handleOff();
   auto& v = vmain(env);
 
   auto const handle = v.makeReg();
@@ -156,7 +156,9 @@ void cgCheckInitSProps(IRLS& env, const IRInstruction* inst) {
   } else {
     // Always initialized; just fall through to inst->next().
     assertx(rds::isPersistentHandle(handle));
-    assertx(rds::handleToRef<bool>(handle));
+    DEBUG_ONLY bool initialized =
+      rds::handleToRef<bool, rds::Mode::Persistent>(handle);
+    assertx(initialized);
   }
 }
 

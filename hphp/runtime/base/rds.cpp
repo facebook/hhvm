@@ -14,25 +14,18 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
+#include <atomic>
 #include <cassert>
 #include <cstdio>
 #include <mutex>
-#include <atomic>
 #include <vector>
 
-#include <fcntl.h>
-
-#ifndef _MSC_VER
-#include <execinfo.h>
-#endif
-
+#include <folly/Bits.h>
+#include <folly/Hash.h>
+#include <folly/portability/SysMman.h>
 #include <folly/sorted_vector_types.h>
 #include <folly/String.h>
-#include <folly/Hash.h>
-#include <folly/Bits.h>
-#include <folly/portability/SysMman.h>
 
 #include <tbb/concurrent_hash_map.h>
 
@@ -44,10 +37,11 @@
 
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP { namespace rds {
 
@@ -266,16 +260,16 @@ void addFreeBlock(FreeLists& lists, size_t where, size_t size) {
 
 /*
  * Try to find a tracked free block of a suitable size. If an oversized block is
- * found instead, the remaining space before and/or after the return space it
+ * found instead, the remaining space before and/or after the return space is
  * re-added to the appropriate free lists.
  */
 folly::Optional<Handle> findFreeBlock(FreeLists& lists, size_t size,
                                       size_t align) {
   for (auto it = lists.lower_bound(size); it != lists.end(); ++it) {
+    auto const blockSize = it->first;
     for (auto list_it = it->second.begin();
          list_it != it->second.end();
          ++list_it) {
-      auto const blockSize = it->first;
       auto const raw = *list_it;
       auto const end = raw + blockSize;
 
@@ -321,7 +315,7 @@ Handle alloc(Mode mode, size_t numBytes,
       s_normal_frontier = roundUp(s_normal_frontier, align);
 
       addFreeBlock(s_normal_free_lists, oldFrontier,
-                  s_normal_frontier - oldFrontier);
+                   s_normal_frontier - oldFrontier);
       s_normal_frontier += adjBytes;
       if (debug && !jit::VMProtect::is_protected) {
         memset(
@@ -390,6 +384,8 @@ Handle alloc(Mode mode, size_t numBytes,
       }
       return frontier;
     }
+    default:
+      not_reached();
   }
 
   not_reached();
@@ -495,6 +491,8 @@ void visitSymbols(std::function<void(const Symbol&,Handle,uint32_t)> fun) {
 __thread void* tl_base = nullptr;
 
 THREAD_LOCAL_PROXY(ArrayData, s_constantsStorage);
+
+rds::Link<bool, Mode::Persistent> s_persistentTrue;
 
 // All threads tl_bases are kept in a set, to allow iterating Local
 // and Normal RDS sections across threads.
@@ -614,10 +612,6 @@ folly::Range<const char*> localSection() {
   return {(const char*)tl_base + s_local_frontier, usedLocalBytes()};
 }
 
-folly::Range<const char*> persistentSection() {
-  return {(const char*)tl_base + s_persistent_base, usedPersistentBytes()};
-}
-
 Array& s_constants() {
   return *reinterpret_cast<Array*>(&s_constantsStorage.m_p);
 }
@@ -692,12 +686,13 @@ bool testAndSetBit(size_t bit) {
   Handle handle = block & ~(kAllocBitNumBytes - 1);
 
   if (!isHandleInit(handle, NormalTag{})) {
-    auto ptr = &handleToRef<unsigned char>(handle);
-    for (size_t i = 0; i < kAllocBitNumBytes; ++i) ptr[i] = 0;
+    auto ptr = handleToPtr<unsigned char, Mode::Normal>(handle);
+    memset(ptr, 0, kAllocBitNumBytes);
     initHandle(handle);
   }
-  bool ret = handleToRef<unsigned char>(block) & mask;
-  handleToRef<unsigned char>(block) |= mask;
+  auto& ref = handleToRef<unsigned char, Mode::Normal>(block);
+  bool ret = ref & mask;
+  ref |= mask;
   return ret;
 }
 
@@ -770,7 +765,7 @@ void threadInit(bool shouldRegister) {
   if (shouldRegister) {
     Guard g(s_tlBaseListLock);
     assertx(std::find(begin(s_tlBaseList), end(s_tlBaseList), tl_base) ==
-             end(s_tlBaseList));
+            end(s_tlBaseList));
     s_tlBaseList.push_back(tl_base);
   }
 
@@ -793,6 +788,14 @@ void threadInit(bool shouldRegister) {
   }
 
   header()->currentGen = 1;
+
+  s_persistentTrue.bind([] {
+      Guard g(s_allocMutex);
+      auto h = alloc(Mode::Persistent, sizeof(bool), alignof(bool),
+                     type_scan::getIndexForScan<bool>());
+      handleToRef<bool, Mode::Persistent>(h) = true;
+      return h;
+    });
 }
 
 void threadExit(bool shouldUnregister) {

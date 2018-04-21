@@ -947,7 +947,7 @@ Class* lookupClsRDS(const StringData* name) {
   auto const handle = NamedEntity::get(name)->getClassHandle();
   assertx(rds::isHandleBound(handle));
   return rds::isHandleInit(handle)
-    ? &*rds::handleToRef<LowPtr<Class>>(handle)
+    ? &*rds::handleToRef<LowPtr<Class>, rds::Mode::NonLocal>(handle)
     : nullptr;
 }
 

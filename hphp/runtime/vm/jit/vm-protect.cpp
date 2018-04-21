@@ -46,7 +46,7 @@ void protect() {
       // the jit that could write to them (like allocating request memory).
       auto const base =
         static_cast<char*>(rds::tl_base) + sysconf(_SC_PAGESIZE);
-      auto const protlen = rds::persistentSection().begin() - base;
+      auto const protlen = rds::localSection().end() - base;
       if (protlen > 0) {
         auto const result = mprotect(base, protlen, PROT_READ);
         always_assert(result == 0);

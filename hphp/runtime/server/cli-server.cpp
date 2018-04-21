@@ -641,7 +641,7 @@ void define_stdio_constants() {
     always_assert(rds::isHandleBound(handle));
 
     rds::initHandle(handle);
-    auto cns = &rds::handleToRef<TypedValue>(handle);
+    auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(handle);
 
     cns->m_type = KindOfUninit;
     cns->m_data.pref = reinterpret_cast<RefData*>(func);

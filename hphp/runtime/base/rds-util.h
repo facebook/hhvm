@@ -46,13 +46,13 @@ struct StaticLocalData {
   RefData ref;
   static size_t ref_offset() { return offsetof(StaticLocalData, ref); }
 };
-Link<StaticLocalData, true /* normal_only */>
+Link<StaticLocalData, rds::Mode::Normal>
 bindStaticLocal(const Func*, const StringData*);
 
 /*
  * Allocate storage for the value of a class constant in RDS.
  */
-Link<TypedValue, true /* normal_only */>
+Link<TypedValue, rds::Mode::Normal>
 bindClassConstant(const StringData* clsName, const StringData* cnsName);
 
 //////////////////////////////////////////////////////////////////////

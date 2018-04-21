@@ -60,11 +60,6 @@ inline bool stringMatches(const StringData* rowString, const StringData* sd) {
       rowString->same(sd)));
 }
 
-template<class T = void>
-T* handleToPtr(rds::Handle h) {
-  return (T*)((char*)rds::tl_base + h);
-}
-
 template<class Cache>
 typename Cache::Pair* keyToPair(Cache* cache, const StringData* k) {
   assertx(folly::isPowTwo(Cache::kNumLines));
@@ -79,11 +74,10 @@ typename Cache::Pair* keyToPair(Cache* cache, const StringData* k) {
 // Set of FuncCache handles for dynamic function callsites, used for
 // invalidation when a function is renamed.
 static std::mutex funcCacheMutex;
-static std::vector<rds::Link<FuncCache, true /* normal_only */>>
-  funcCacheEntries;
+static std::vector<rds::Link<FuncCache,rds::Mode::Normal>> funcCacheEntries;
 
 rds::Handle FuncCache::alloc() {
-  auto const link = rds::alloc<FuncCache,sizeof(Pair),true>();
+  auto const link = rds::alloc<FuncCache,rds::Mode::Normal,sizeof(Pair)>();
   std::lock_guard<std::mutex> g(funcCacheMutex);
   funcCacheEntries.push_back(link);
   return link.handle();
@@ -93,7 +87,7 @@ void FuncCache::lookup(rds::Handle handle,
                        StringData* sd,
                        ActRec* ar,
                        ActRec* fp) {
-  auto const thiz = handleToPtr<FuncCache>(handle);
+  auto const thiz = rds::handleToPtr<FuncCache, rds::Mode::Normal>(handle);
   if (!rds::isHandleInit(handle, rds::NormalTag{})) {
     for (std::size_t i = 0; i < FuncCache::kNumLines; ++i) {
       thiz->m_pairs[i].m_key = nullptr;
@@ -168,11 +162,11 @@ void invalidateForRenameFunction(const StringData* name) {
 // ClassCache
 
 rds::Handle ClassCache::alloc() {
-  return rds::alloc<ClassCache,sizeof(Pair)>().handle();
+  return rds::alloc<ClassCache,rds::Mode::Normal,sizeof(Pair)>().handle();
 }
 
 const Class* ClassCache::lookup(rds::Handle handle, StringData* name) {
-  auto const thiz = handleToPtr<ClassCache>(handle);
+  auto const thiz = rds::handleToPtr<ClassCache, rds::Mode::Normal>(handle);
   if (!rds::isHandleInit(handle, rds::NormalTag{})) {
     for (std::size_t i = 0; i < ClassCache::kNumLines; ++i) {
       thiz->m_pairs[i].m_key = nullptr;
@@ -327,7 +321,7 @@ void handleSlowPath(rds::Handle mce_handle,
   assertx(ar->getThisUnsafe()->getVMClass() == cls);
   assertx(name->isStatic());
 
-  auto const mce = &rds::handleToRef<Entry>(mce_handle);
+  auto const mce = &rds::handleToRef<Entry, rds::Mode::Normal>(mce_handle);
   if (!rds::isHandleInit(mce_handle, rds::NormalTag{})) {
     mce->m_key = 0;
     mce->m_value = nullptr;
@@ -472,7 +466,7 @@ void handlePrimeCacheInit(rds::Handle mce_handle,
                           Class* cls,
                           Class* ctx,
                           uintptr_t rawTarget) {
-  auto const mce = &rds::handleToRef<Entry>(mce_handle);
+  auto const mce = rds::handleToPtr<Entry, rds::Mode::Normal>(mce_handle);
   if (!rds::isHandleInit(mce_handle, rds::NormalTag{})) {
     mce->m_key = 0;
     mce->m_value = nullptr;
@@ -602,7 +596,7 @@ static const StringData* mangleSmcName(const StringData* cls,
 rds::Handle StaticMethodCache::alloc(const StringData* clsName,
                                      const StringData* methName,
                                      const char* ctxName) {
-  return rds::bind<StaticMethodCache>(
+  return rds::bind<StaticMethodCache, rds::Mode::Normal>(
     rds::StaticMethod { mangleSmcName(clsName, methName, ctxName) }
   ).handle();
 }
@@ -610,7 +604,7 @@ rds::Handle StaticMethodCache::alloc(const StringData* clsName,
 rds::Handle StaticMethodFCache::alloc(const StringData* clsName,
                                       const StringData* methName,
                                       const char* ctxName) {
-  return rds::bind<StaticMethodFCache>(
+  return rds::bind<StaticMethodFCache, rds::Mode::Normal>(
     rds::StaticMethodF { mangleSmcName(clsName, methName, ctxName) }
   ).handle();
 }
@@ -620,8 +614,7 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
                           const StringData* clsName,
                           const StringData* methName, TypedValue* vmfp) {
   assertx(rds::isNormalHandle(handle));
-  StaticMethodCache* thiz = static_cast<StaticMethodCache*>
-    (handleToPtr(handle));
+  auto thiz = rds::handleToPtr<StaticMethodCache, rds::Mode::Normal>(handle);
   Stats::inc(Stats::TgtCache_StaticMethodMiss);
   TRACE(1, "miss %s :: %s caller %p\n",
         clsName->data(), methName->data(), __builtin_return_address(0));
@@ -636,9 +629,11 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
     // After this call, it's a post-condition that the RDS entry for `cls' is
     // initialized, so make sure it has been as a side-effect of
     // Unit::loadClass().
-    DEBUG_ONLY auto const cls_ch = ne->getClassHandle();
+    auto const cls_ch = ne->getClassHandle();
     assertx(rds::isHandleInit(cls_ch));
-    assertx(rds::handleToRef<LowPtr<Class>>(cls_ch).get() == cls);
+    DEBUG_ONLY auto const p =
+      rds::handleToRef<LowPtr<Class>, rds::Mode::NonLocal>(cls_ch);
+    assertx(cls == p.get());
   }
 
   LookupResult res = lookupClsMethod(f, cls, methName,
@@ -670,8 +665,7 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
                            const StringData* methName, TypedValue* vmfp) {
   assertx(cls);
   assertx(rds::isNormalHandle(handle));
-  StaticMethodFCache* thiz = static_cast<StaticMethodFCache*>
-    (handleToPtr(handle));
+  auto thiz = rds::handleToPtr<StaticMethodFCache, rds::Mode::Normal>(handle);
   Stats::inc(Stats::TgtCache_StaticMethodFMiss);
   Stats::inc(Stats::TgtCache_StaticMethodFHit, -1);
 

@@ -316,7 +316,7 @@ inline const FixedVector<const Func*>& Class::pinitVec() const {
 // Property storage.
 
 inline void Class::initPropHandle() const {
-  m_propDataCache.bind();
+  m_propDataCache.bind(rds::Mode::Normal);
 }
 
 inline rds::Handle Class::propHandle() const {
@@ -331,13 +331,14 @@ inline rds::Handle Class::sPropHandle(Slot index) const {
   return sPropLink(index).handle();
 }
 
-inline rds::Link<StaticPropData> Class::sPropLink(Slot index) const {
+inline rds::Link<StaticPropData, rds::Mode::NonNormal>
+Class::sPropLink(Slot index) const {
   assertx(m_sPropCacheInit.bound());
   assertx(numStaticProperties() > index);
   return m_sPropCache[index];
 }
 
-inline rds::Link<bool> Class::sPropInitLink() const {
+inline rds::Link<bool, rds::Mode::NonLocal> Class::sPropInitLink() const {
   return m_sPropCacheInit;
 }
 
@@ -424,7 +425,8 @@ inline rds::Handle Class::classHandle() const {
   return m_cachedClass.handle();
 }
 
-inline void Class::setClassHandle(rds::Link<LowPtr<Class>> link) const {
+inline void Class::setClassHandle(rds::Link<LowPtr<Class>,
+                                            rds::Mode::NonLocal> link) const {
   assertx(!m_cachedClass.bound());
   m_cachedClass = link;
 }

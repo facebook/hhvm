@@ -30,12 +30,12 @@ inline NamedEntity::NamedEntity(NamedEntity&& ne) noexcept
 }
 
 inline rds::Handle NamedEntity::getFuncHandle() const {
-  m_cachedFunc.bind();
+  m_cachedFunc.bind(rds::Mode::Normal);
   return m_cachedFunc.handle();
 }
 
 inline rds::Handle NamedEntity::getClassHandle() const {
-  m_cachedClass.bind();
+  m_cachedClass.bind(rds::Mode::Normal);
   return m_cachedClass.handle();
 }
 

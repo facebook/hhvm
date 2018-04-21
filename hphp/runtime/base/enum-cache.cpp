@@ -105,7 +105,7 @@ const EnumValues* EnumCache::cacheRequestEnumValues(
   assertx(names.isDictOrDArray());
   assertx(values.isDictOrDArray());
 
-  m_nonScalarEnumValuesMap.bind();
+  m_nonScalarEnumValuesMap.bind(rds::Mode::Normal);
   if (!m_nonScalarEnumValuesMap.isInit()) {
     m_nonScalarEnumValuesMap.initWith(req::make_raw<ReqEnumValuesMap>());
   }

@@ -56,6 +56,7 @@ void cgCheckStaticLoc(IRLS& env, const IRInstruction* inst) {
 void cgLdStaticLoc(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<LdStaticLoc>();
   auto const link = rds::bindStaticLocal(extra->func, extra->name);
+  assertx(link.isNormal());
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
@@ -65,6 +66,7 @@ void cgLdStaticLoc(IRLS& env, const IRInstruction* inst) {
 void cgInitStaticLoc(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<InitStaticLoc>();
   auto const link = rds::bindStaticLocal(extra->func, extra->name);
+  assertx(link.isNormal());
   auto& v = vmain(env);
 
   // Initialize the RefData by storing the new value into it's TypedValue and

@@ -1382,7 +1382,7 @@ static void php_session_reset_id() {
     if (!handle) {
       f_define(String{s_SID}, v);
     } else {
-      TypedValue* cns = &rds::handleToRef<TypedValue>(handle);
+      auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(handle);
       v.setEvalScalar();
       cns->m_data = v.asTypedValue()->m_data;
       cns->m_type = v.asTypedValue()->m_type;

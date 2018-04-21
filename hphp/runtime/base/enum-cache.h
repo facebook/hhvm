@@ -113,8 +113,7 @@ private:
   // Persistent values, recursive case. Non-recursive are cached in Class.
   EnumValuesMap m_enumValuesMap;
 
-  rds::Link<ReqEnumValuesMap*,true /* normal_only */>
-    m_nonScalarEnumValuesMap{rds::kUninitHandle};
+  rds::Link<ReqEnumValuesMap*, rds::Mode::Normal> m_nonScalarEnumValuesMap;
 };
 
 //////////////////////////////////////////////////////////////////////

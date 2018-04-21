@@ -863,7 +863,7 @@ public:
 private:
   void initialMerge();
   template<bool debugger>
-  void mergeImpl(void* tcbase, MergeInfo* mi);
+  void mergeImpl(MergeInfo* mi);
   UnitExtended* getExtended();
   const UnitExtended* getExtended() const;
   MergeInfo* mergeInfo() const {

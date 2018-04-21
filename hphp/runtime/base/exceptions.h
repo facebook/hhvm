@@ -32,11 +32,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct String;
-struct IMarker;
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * ExtendedException is the exception type for C++ exceptions that carry PHP
  * stack traces, but do not represent user-visible PHP exception objects.

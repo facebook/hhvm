@@ -25,8 +25,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct IMarker;
-
 struct BaseException : std::exception {};
 
 struct Exception : BaseException {

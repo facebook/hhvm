@@ -703,7 +703,7 @@ Array init_ini_settings(const std::string& settings) {
       FTRACE(5, "init_ini_settings: unable to set PHP_INI_USER setting: {} "
              "(access = {})\n", name, detail[s_access].toInt64());
       Logger::Warning("CLI server received an invalid INI setting: %s "
-                      "(access = %li)",
+                      "(access = %" PRId64 ")",
                       name.data(), detail[s_access].toInt64());
     } else {
       count++;
@@ -1061,7 +1061,8 @@ void CLIWorker::doJob(int client) {
       if (api_version != CLI_SERVER_API_VERSION) {
         cli_write(client, "version_bad");
         throw Exception(
-          "CLI_SERVER_API_VERSION (%lu) does not match client (%lu)",
+          "CLI_SERVER_API_VERSION (%" PRIu64") "
+          "does not match client (%" PRIu64 ")",
           CLI_SERVER_API_VERSION, api_version
         );
       } else {

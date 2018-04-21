@@ -137,12 +137,13 @@ void throwUnterminatedElement() {
 
 [[noreturn]] NEVER_INLINE
 void throwLargeStringSize(int64_t size) {
-  throw Exception("Size of serialized string (%ld) exceeds max", size);
+  throw Exception("Size of serialized string (%" PRId64 ") exceeds max", size);
 }
 
 [[noreturn]] NEVER_INLINE
 void throwNegativeStringSize(int64_t size) {
-  throw Exception("Size of serialized string (%ld) must not be negative", size);
+  throw Exception("Size of serialized string (%" PRId64 ") "
+                  "must not be negative", size);
 }
 
 [[noreturn]] NEVER_INLINE

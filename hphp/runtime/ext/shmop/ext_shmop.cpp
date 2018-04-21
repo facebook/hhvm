@@ -173,8 +173,8 @@ struct ShmopRequestLocal final : RequestEventHandler {
   ShmRec* findShm(const char* functionName, int64_t shmid) {
     auto const it = m_records.find(shmid);
     if (it == m_records.end()) {
-      raise_warning("%s(): no shared memory segment with an id of [%ld]",
-                    functionName, shmid);
+      raise_warning("%s(): no shared memory segment with an id of"
+                    " [%" PRId64 "]", functionName, shmid);
       return nullptr;
     } else {
       return it->second.get();

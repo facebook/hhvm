@@ -212,7 +212,7 @@ void raise_inout_undefined_index(TypedValue tv) {
 }
 
 void raise_inout_undefined_index(int64_t i) {
-  raise_notice("Undefined index on inout parameter: %li", i);
+  raise_notice("Undefined index on inout parameter: %" PRId64, i);
 }
 
 void raise_inout_undefined_index(const StringData* sd) {

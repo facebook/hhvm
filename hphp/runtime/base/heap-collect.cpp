@@ -54,10 +54,6 @@ struct Counter {
   }
 };
 
-bool hasNativeData(const HeapObject* h) {
-  return h->kind() == HeaderKind::NativeObject;
-}
-
 constexpr auto MinMark = GCBits(1);
 constexpr auto MaxMark = GCBits(3);
 

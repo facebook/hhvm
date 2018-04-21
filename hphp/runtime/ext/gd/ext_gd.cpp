@@ -3364,7 +3364,7 @@ Variant HHVM_FUNCTION(imageaffinematrixget,
 
     default:
       raise_warning("imageaffinematrixget():Invalid type for "
-                    "element %li", type);
+                    "element %" PRId64, type);
       return false;
   }
 

@@ -134,15 +134,16 @@ bool Bump2MMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
     }
     return false;
   }
-  auto newPages = state.m_base - state.m_currCapacity;
+  auto newPageBase = state.m_base - state.m_currCapacity;
   // Add some 4K pages before madvise()
   if (!Bump4KMapper::addMappingImpl(state, newSize)) {
     return false;
   }
-  auto const hugeSize = std::min(Bump4KMapper::kChunkSize,
-                                 size2m * (m_maxNumPages - m_currNumPages));
-  assert(newPages % size2m == 0);
-  hintHuge(reinterpret_cast<void*>(newPages), hugeSize);
+  auto const nHugePages =
+    std::min(static_cast<unsigned>(Bump4KMapper::kChunkSize / size2m),
+             m_maxNumPages - m_currNumPages);
+  hintHuge(reinterpret_cast<void*>(newPageBase), nHugePages * size2m);
+  m_currNumPages += nHugePages;
   return true;
 }
 

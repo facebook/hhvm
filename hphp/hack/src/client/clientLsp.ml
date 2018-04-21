@@ -1131,6 +1131,16 @@ let do_formatting_common
       rpc conn ref_unblocked_time command
   in
   match response with
+  | Error "File failed to parse without errors" ->
+    (* If LSP issues a formatting request at a given line+char, but we can't *)
+    (* calculate a better format for the file due to syntax errors in it,    *)
+    (* then we should return "success and there are no edits to apply"       *)
+    (* rather than "error".                                                  *)
+    (* TODO: let's eliminate hh_format, and incorporate hackfmt into the     *)
+    (* hh_client binary itself, and make make "hackfmt" just a wrapper for   *)
+    (* "hh_client format", and then make it return proper error that we can  *)
+    (* pattern-match upon, rather than hard-coding the string...             *)
+    []
   | Error message ->
     raise (Error.InternalError message)
   | Ok r ->

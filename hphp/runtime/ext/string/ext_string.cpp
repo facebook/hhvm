@@ -1480,63 +1480,9 @@ TypedValue HHVM_FUNCTION(strcspn,
   return make_tv<KindOfInt64>(length);
 }
 
-TypedValue HHVM_FUNCTION(strlen,
-                         const Variant& vstr) {
-  auto const cell = vstr.asCell();
-  switch (cell->m_type) {
-    case KindOfPersistentString:
-    case KindOfString:
-      return make_tv<KindOfInt64>(cell->m_data.pstr->size());
-
-    case KindOfPersistentVec:
-    case KindOfVec:
-      raise_warning("strlen() expects parameter 1 to be string, "
-                    "vec given");
-      return make_tv<KindOfNull>();
-
-    case KindOfPersistentDict:
-    case KindOfDict:
-      raise_warning("strlen() expects parameter 1 to be string, "
-                    "dict given");
-      return make_tv<KindOfNull>();
-
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-      raise_warning("strlen() expects parameter 1 to be string, "
-                    "keyset given");
-      return make_tv<KindOfNull>();
-
-    case KindOfPersistentArray:
-    case KindOfArray:
-      raise_warning("strlen() expects parameter 1 to be string, "
-                    "array given");
-      return make_tv<KindOfNull>();
-
-    case KindOfResource:
-      raise_warning("strlen() expects parameter 1 to be string, "
-                    "resource given");
-      return make_tv<KindOfNull>();
-
-    case KindOfObject:
-      if (!HHVM_FN(method_exists)(vstr, "__toString")) {
-        raise_warning("strlen() expects parameter 1 to be string, "
-                      "object given");
-        return make_tv<KindOfNull>();
-      }
-      // else fallback to default
-    case KindOfUninit:
-    case KindOfNull:
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble: {
-      const String& str = vstr.toString();
-      return make_tv<KindOfInt64>(str.size());
-    }
-
-    case KindOfRef:
-      break;
-  }
-  not_reached();
+int64_t HHVM_FUNCTION(strlen,
+                      StringArg str) {
+  return str.get()->size();
 }
 
 Array HHVM_FUNCTION(str_getcsv,

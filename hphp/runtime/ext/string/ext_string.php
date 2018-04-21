@@ -1561,7 +1561,7 @@ function strcspn(string $str1,
  *
  */
 <<__IsFoldable, __Native>>
-function strlen(mixed $vstr): mixed;
+function strlen(string $vstr): int;
 
 /**
  * Parses a string input for fields in CSV format and returns an array

@@ -332,8 +332,6 @@ TypedValue HHVM_FUNCTION(strcspn,
                          const String& str2,
                          int start = 0,
                          int length = 0x7FFFFFFF);
-TypedValue HHVM_FUNCTION(strlen,
-                         const Variant& vstr);
 Array HHVM_FUNCTION(str_getcsv,
                     const String& str,
                     const String& delimiter = ",",

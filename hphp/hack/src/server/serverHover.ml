@@ -63,13 +63,8 @@ let make_hover_info tcopt env_and_ty file (occurrence, def_opt) =
   let addendum = [
     (match def_opt with
       | Some def ->
-        begin match def.SymbolDefinition.docblock with
-        | Some s -> [s]
-        | None ->
-          ServerSymbolDefinition.get_definition_cst_node file def
-          |> (fun c -> Option.bind c Docblock_finder.get_docblock)
-          |> Option.to_list
-        end
+        ServerDocblockAt.go_def tcopt def ~base_class_name:(SymbolOccurrence.enclosing_class occurrence) ~file
+        |> Option.to_list
       | None -> []);
     (match occurrence, env_and_ty with
       | { type_ = Method _; _ }, _

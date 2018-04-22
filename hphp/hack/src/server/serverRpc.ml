@@ -39,7 +39,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | IDE_HOVER (fn, line, char) ->
         env, ServerHover.go env (fn, line, char)
     | DOCBLOCK_AT (filename, line, char) ->
-        env, ServerDocblockAt.go env (filename, line, char)
+        env, ServerDocblockAt.go_location env (filename, line, char) ~base_class_name:None
     | AUTOCOMPLETE content ->
         let result = try
           let autocomplete_context = { AutocompleteTypes.

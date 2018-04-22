@@ -7,5 +7,17 @@
  *
  *)
 
+(** Returns the docblock for the given symbol or expression. *)
+val go_def :
+  TypecheckerOptions.t ->
+  Relative_path.t SymbolDefinition.t ->
+  base_class_name: string option ->
+  file: ServerCommandTypes.file_input ->
+  DocblockService.result
+
 (** Returns the docblock for the symbol or expression at the given location. *)
-val go : ServerEnv.env -> (string * int * int) -> DocblockService.result
+val go_location :
+  ServerEnv.env ->
+  (string * int * int) ->
+  base_class_name: string option ->
+  DocblockService.result

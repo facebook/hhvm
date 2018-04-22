@@ -546,6 +546,137 @@ let bounded_generic_fun_cases = [
   }];
 ]
 
+let doc_block_fallback = "<?hh // strict
+function dbfb_func(DBFBClass2 $c, DBFBClass3 $d): void {
+  $c->doTheThing();
+//    ^3:7
+  $c->docBlockInClass();
+//    ^5:7
+  $c->identical();
+//    ^7:7
+  $c->slightlyDifferent();
+//    ^9:7
+  $c->noDocBlock();
+//    ^11:7
+  $d->docBlockInClass2();
+//    ^13:7
+}
+
+interface DBFBInterface1 {
+  /** DBFBInterface1. */
+  public function doTheThing(): void;
+
+  /** Identical. */
+  public function identical(): void;
+
+  /** Slightly different. */
+  public function slightlyDifferent(): void;
+
+  public function noDocBlock(): void;
+}
+
+interface DBFBInterface2 {
+  /** DBFBInterface2. */
+  public function doTheThing(): void;
+
+  /** DBFBInterface2. */
+  public function docBlockInClass(): void;
+
+  /** DBFBInterface2. */
+  public function docBlockInClass2(): void;
+
+  /** Identical. */
+  public function identical(): void;
+
+  /** Slightly different. */
+  public function slightlyDifferent(): void;
+
+  public function noDocBlock(): void;
+}
+
+interface DBFBInterface3 {
+  /** Slightly more different. */
+  public function slightlyDifferent(): void;
+}
+
+class DBFBClass1 implements DBFBInterface1 {
+  public function doTheThing(): void {}
+
+  /** DBFBClass1. */
+  public function docBlockInClass(): void {}
+
+  /** DBFBClass1. */
+  public function docBlockInClass2(): void {}
+
+  public function identical(): void {}
+
+  public function slightlyDifferent(): void {}
+
+  public function noDocBlock(): void {}
+}
+
+class DBFBClass2 extends DBFBClass1 implements DBFBInterface2, DBFBInterface3 {
+  public function docBlockInClass2(): void {}
+}
+
+class DBFBClass3 extends DBFBClass2 {
+  public function docBlockInClass2(): void {}
+}
+"
+
+let doc_block_fallback_cases = [
+  ("doc_block_fallback.php", 3, 7), [{
+    snippet = "public function doTheThing(): void";
+    addendum = [
+      "DBFBInterface2.\n(from DBFBInterface2)\n\n---\n\nDBFBInterface1.\n(from DBFBInterface1)";
+      "Full name: `DBFBClass1::doTheThing`";
+    ];
+    pos = pos_at (3, 7) (3, 16);
+  }];
+  ("doc_block_fallback.php", 5, 7), [{
+    snippet = "public function docBlockInClass(): void";
+    addendum = [
+      "DBFBClass1.";
+      "Full name: `DBFBClass1::docBlockInClass`";
+    ];
+    pos = pos_at (5, 7) (5, 21);
+  }];
+  ("doc_block_fallback.php", 7, 7), [{
+   snippet = "public function identical(): void";
+   addendum = [
+     "Identical.";
+     "Full name: `DBFBClass1::identical`";
+   ];
+   pos = pos_at (7, 7) (7, 15);
+  }];
+  ("doc_block_fallback.php", 9, 7), [{
+   snippet = "public function slightlyDifferent(): void";
+   addendum = [
+     "Slightly more different.\n(from DBFBInterface3)\n\n\
+        ---\n\n\
+        Slightly different.\n(from DBFBInterface1, DBFBInterface2)";
+     "Full name: `DBFBClass1::slightlyDifferent`";
+   ];
+   pos = pos_at (9, 7) (9, 23);
+  }];
+  ("doc_block_fallback.php", 11, 7), [{
+   snippet = "public function noDocBlock(): void";
+   addendum = ["Full name: `DBFBClass1::noDocBlock`"];
+   pos = pos_at (11, 7) (11, 16);
+  }];
+
+  (* When falling back, if any class ancestors have a doc block don't show any
+     doc blocks from interface ancestors. *)
+  ("doc_block_fallback.php", 13, 7), [{
+   snippet = "public function docBlockInClass2(): void";
+   addendum = [
+     "DBFBClass1.";
+     "Full name: `DBFBClass3::docBlockInClass2`";
+   ];
+   pos = pos_at (13, 7) (13, 22);
+  }];
+]
+
 let files = [
   "class_members.php", class_members;
   "classname_call.php", classname_call;
@@ -554,10 +685,12 @@ let files = [
   "docblock.php", docblock;
   "special_cases.php", special_cases;
   "bounded_generic_fun.php", bounded_generic_fun;
+  "doc_block_fallback.php", doc_block_fallback;
 ]
 
 let cases =
-  special_cases_cases
+  doc_block_fallback_cases
+  @ special_cases_cases
   @ docblock_cases
   @ class_members_cases
   @ classname_call_cases

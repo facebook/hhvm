@@ -164,26 +164,15 @@ let go tcopt ast result =
       get_local_var_def
         ast result.SymbolOccurrence.name result.SymbolOccurrence.pos
 
-let get_definition_cst_node fallback_fn definition =
-  let open SymbolDefinition in
+let get_definition_cst_node_from_pos kind source_text pos =
   let env = Full_fidelity_parser_env.default in
-  let source_text = if Pos.filename definition.pos = ServerIdeUtils.path
-    then
-      (* When the definition is in an IDE buffer with local changes, the filename
-         in the definition will be empty. *)
-      match fallback_fn with
-      | ServerCommandTypes.FileName filename ->
-        SourceText.from_file (Relative_path.create_detect_prefix filename)
-      | ServerCommandTypes.FileContent content ->
-        SourceText.make Relative_path.default content
-    else SourceText.from_file (Pos.filename definition.pos)
-  in
   let tree = SyntaxTree.make ~env source_text in
-  let (line, start, _) = Pos.info_pos definition.pos in
+  let (line, start, _) = Pos.info_pos pos in
   let offset = SourceText.position_to_offset source_text (line, start) in
   let parents = Syntax.parentage (SyntaxTree.root tree) offset in
+  let open SymbolDefinition in
   List.find parents ~f:begin fun syntax ->
-    match definition.kind, Syntax.kind syntax with
+    match kind, Syntax.kind syntax with
     | Function, SyntaxKind.FunctionDeclaration
     | Class, SyntaxKind.ClassishDeclaration
     | Method, SyntaxKind.MethodishDeclaration
@@ -198,3 +187,18 @@ let get_definition_cst_node fallback_fn definition =
     | Typedef, SyntaxKind.SimpleTypeSpecifier -> true
     | _ -> false
   end
+
+let get_definition_cst_node fallback_fn definition =
+  let open SymbolDefinition in
+  let source_text = if Pos.filename definition.pos = ServerIdeUtils.path
+    then
+      (* When the definition is in an IDE buffer with local changes, the filename
+         in the definition will be empty. *)
+      match fallback_fn with
+      | ServerCommandTypes.FileName filename ->
+        SourceText.from_file (Relative_path.create_detect_prefix filename)
+      | ServerCommandTypes.FileContent content ->
+        SourceText.make Relative_path.default content
+    else SourceText.from_file (Pos.filename definition.pos)
+  in
+  get_definition_cst_node_from_pos definition.kind source_text definition.pos

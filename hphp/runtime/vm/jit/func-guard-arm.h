@@ -37,6 +37,8 @@ namespace arm {
  * Mirrors the API of func-guard.h.
  */
 
+constexpr size_t funcGuardLen() { return 24; }
+
 void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups);
 TCA funcGuardFromPrologue(TCA prologue, const Func* func);
 bool funcGuardMatches(TCA guard, const Func* func);

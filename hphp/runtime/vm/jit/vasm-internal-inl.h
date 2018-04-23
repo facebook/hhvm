@@ -114,6 +114,7 @@ bool emit(Venv& env, const fallback& i);
 bool emit(Venv& env, const fallbackcc& i);
 bool emit(Venv& env, const retransopt& i);
 bool emit(Venv& env, const funcguard& i);
+bool emit(Venv& env, const debugguardjmp& i);
 
 inline void record_frame(Venv& env) {
   auto const& block = env.unit.blocks[env.current];
@@ -269,6 +270,8 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
     if (block.frame != -1) record_frame(env);
     irmu.register_block_end();
   }
+
+  Vemit::handleLiterals(env);
 
   // Emit service request stubs and register patch points.
   for (auto& p : env.stubs) emit_svcreq_stub(env, p);

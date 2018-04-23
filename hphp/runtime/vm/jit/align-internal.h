@@ -19,6 +19,8 @@
 
 #include "hphp/runtime/vm/jit/alignment.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/func-guard.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/data-block.h"
@@ -42,11 +44,14 @@ void align(CodeBlock& cb, CGMeta* meta,
     { cache_line_size(),  cache_line_size(),      0 }, /* CacheLine */        \
     { cache_line_size(),  cache_line_size() / 2,  0 }, /* CacheLineRoundUp */ \
     { kJmpTargetAlign,    kJmpTargetAlign,        0 }, /* JmpTarget */        \
-    { cache_line_size(),  smashableMovqLen(),     kSmashMovqImmOff },         \
-    { cache_line_size(),  smashableCmpqLen(),     kSmashCmpqImmOff },         \
-    { cache_line_size(),  smashableCallLen(),     0 },                        \
-    { cache_line_size(),  smashableJmpLen(),      0 },                        \
-    { cache_line_size(),  smashableJccLen(),      0 },                        \
+    { 8,                  8,                      0 }, /* QWord Lit */        \
+    { 0,                  funcGuardLen(),         0 }, /* FuncGuard */        \
+    { 0,                  svcreq::stub_size(),    0 }, /* EphemeralStub */    \
+    { smashableAlignTo(), smashableMovqLen(),     kSmashMovqImmOff },         \
+    { smashableAlignTo(), smashableCmpqLen(),     kSmashCmpqImmOff },         \
+    { smashableAlignTo(), smashableCallLen(),     0 },                        \
+    { smashableAlignTo(), smashableJmpLen(),      0 },                        \
+    { smashableAlignTo(), smashableJccLen(),      0 },                        \
   }
 
 #define DEFINE_ALIGN_TABLE(table) \

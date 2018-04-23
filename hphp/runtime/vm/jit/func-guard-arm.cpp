@@ -57,8 +57,14 @@ vixl::MemOperand M(Vptr p) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
+  // This should not need to insert nops, as it enforces no alignment.  It is
+  // only present to make sure we do not emit a literal pool in the middle of
+  // this sequence.  We don't want a literal pool in this sequence, because
+  // it messes up the arithmetic in funcGuardFromPrologue.
+  align(cb, &fixups, Alignment::FuncGuard, AlignContext::Dead);
+
   vixl::MacroAssembler a { cb };
-  vixl::Label after_data;
+  vixl::Label after;
   vixl::Label target_data;
   auto const begin = cb.frontier();
 
@@ -67,14 +73,18 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   emitSmashableMovq(cb, fixups, uint64_t(func), vixl::x0);
   a.  Ldr   (rAsm, M(rvmfp()[AROFF(m_func)]));
   a.  Cmp   (vixl::x0, rAsm);
-  a.  B     (&after_data, convertCC(CC_Z));
+  a.  B     (&after, convertCC(CC_Z));
 
+  // Although an address this unique stub should never change, so we don't
+  // need to mark it as an address.
+  poolLiteral(cb, fixups,
+              (uint64_t)makeTarget32(tc::ustubs().funcPrologueRedispatch),
+              32, false);
+  a.  bind  (&target_data);
   a.  Ldr   (rAsm_w, &target_data);
   a.  Br    (rAsm);
 
-  a.  bind  (&target_data);
-  a.  dc32  (makeTarget32(tc::ustubs().funcPrologueRedispatch));
-  a.  bind  (&after_data);
+  a.  bind  (&after);
 
   cb.sync(begin);
 }
@@ -82,11 +92,11 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
 TCA funcGuardFromPrologue(TCA prologue, const Func* /*func*/) {
   if (!isPrologueStub(prologue)) {
     // Typically a func guard is a smashable movq followed by an ldr, cmp, b.eq,
-    // ldr, br, and a 32 bit target. However, relocation can shorten the sequence,
+    // ldr, and a br. However, relocation can shorten the sequence,
     // so search backwards until the smashable movq is found.
-    for (int length = 0; length <= (5 * 4) + 4; length += 4) {
+    for (int length = 0; length <= (4 * 4) + 4; length += 4) {
       TCA inst = prologue - (smashableMovqLen() + length);
-      if (isSmashableMovq(inst)) return inst;
+      if (possiblySmashableMovq(inst)) return inst;
     }
     always_assert(false);
   }

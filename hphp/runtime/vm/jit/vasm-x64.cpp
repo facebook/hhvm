@@ -67,6 +67,7 @@ struct Vgen {
     , catches(env.catches)
   {}
 
+  static void handleLiterals(Venv& env) {}
   static void patch(Venv& env);
   static void pad(CodeBlock& cb);
 

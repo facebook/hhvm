@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -74,6 +75,13 @@ void emit_svcreq(CodeBlock& cb,
   auto const realAddr = is_reused ? start : cb.toDestAddress(start);
   stub.init(start, realAddr, stub_size(), "svcreq_stub");
 
+  if (!persist && arch() == Arch::ARM) {
+    // This should not need to insert nops, as it enforces no alignment.  It is
+    // only present to make sure we do not emit a literal pool in the middle of
+    // this sequence.  We don't want to put a literal pool in an ephemeral stub,
+    // since it may be freed.
+    align(stub, &meta, Alignment::EphemeralStub, AlignContext::Dead);
+  }
   {
     Vauto vasm{stub, stub, data, meta};
     auto& v = vasm.main();
@@ -229,55 +237,6 @@ TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     REQ_RETRANSLATE_OPT,
     sk.toAtomicInt()
   );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-namespace x64 {
-  static constexpr int kMovLen = 10;
-  static constexpr int kLeaVmSpLen = 7;
-}
-
-namespace arm {
-  // vasm lea is emitted in 4 bytes.
-  //   ADD imm
-  static constexpr int kLeaVmSpLen = 4;
-  // The largest of vasm setcc, copy, or leap is emitted in 16 bytes.
-  //   AND imm, MOV, LDR + B + dc32, or ADRP + ADD imm
-  static constexpr int kMovLen = 12;
-  // The largest of vasm copy or leap is emitted in 16 bytes.
-  //   MOV, LDR + B + dc32, or ADRP + ADD imm
-  static constexpr int kPersist = 12;
-  // vasm copy and jmpi is emitted in 16 bytes.
-  //   MOV + LDR + B + dc32
-  static constexpr int kSvcReqExit = 16;
-}
-
-namespace ppc64 {
-  // Standard ppc64 instructions are 4 bytes long
-  static constexpr int kStdIns = 4;
-  // Leap for ppc64, in worst case, have 5 standard ppc64 instructions.
-  static constexpr int kLeaVMSpLen = kStdIns * 5;
-}
-
-size_t stub_size() {
-  // The extra args are the request type and the stub address.
-  constexpr auto kTotalArgs = kMaxArgs + 2;
-
-  switch (arch()) {
-    case Arch::X64:
-      return kTotalArgs * x64::kMovLen + x64::kLeaVmSpLen;
-    case Arch::ARM:
-      return arm::kLeaVmSpLen +
-        kTotalArgs * arm::kMovLen +
-        arm::kPersist + arm::kSvcReqExit;
-    case Arch::PPC64:
-      // This calculus was based on the amount of emitted instructions in
-      // emit_svcreq.
-      return (ppc64::kStdIns + ppc64::kLeaVMSpLen) * kTotalArgs +
-          ppc64::kLeaVMSpLen + 3 * ppc64::kStdIns;
-  }
-  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

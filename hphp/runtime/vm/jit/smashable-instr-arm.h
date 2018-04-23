@@ -40,11 +40,17 @@ namespace arm {
  * Number of instructions (each of which is four bytes) in the sequence, plus
  * the size of the smashable immediate.
  */
-constexpr size_t smashableMovqLen() { return 2 * 4 + 8; }
+constexpr size_t smashableMovqLen() { return 4; }
 constexpr size_t smashableCmpqLen() { return 0; }
-constexpr size_t smashableCallLen() { return 4 + 4 + 4 * 2; }
-constexpr size_t smashableJmpLen()  { return 2 * 4 + 4; }
+constexpr size_t smashableCallLen() { return 4 + 4; }
+constexpr size_t smashableJmpLen()  { return 4 + 4; }
 constexpr size_t smashableJccLen()  { return 4 + smashableJmpLen(); }
+
+/*
+ * Don't align the smashables on arm.  The sensitive part of the instruction is
+ * the literal which is stored out of line.
+ */
+constexpr size_t smashableAlignTo() { return 0; }
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& meta, uint64_t imm,
                       PhysReg d);
@@ -60,8 +66,7 @@ void smashCall(TCA inst, TCA target);
 void smashJmp(TCA inst, TCA target);
 void smashJcc(TCA inst, TCA target);
 
-bool isSmashableMovq(TCA inst);
-bool isSmashableCall(TCA inst);
+bool possiblySmashableMovq(TCA inst);
 uint64_t smashableMovqImm(TCA inst);
 uint32_t smashableCmpqImm(TCA inst);
 TCA smashableCallTarget(TCA inst);
@@ -69,13 +74,11 @@ TCA smashableJmpTarget(TCA inst);
 TCA smashableJccTarget(TCA inst);
 ConditionCode smashableJccCond(TCA inst);
 
-std::array<vixl::Instruction*, 3> getSmashablesFromTargetAddr(TCA addr);
-
-constexpr size_t kSmashMovqImmOff = 8;
+constexpr size_t kSmashMovqImmOff = 0;
 constexpr size_t kSmashCmpqImmOff = 0;
-constexpr size_t kSmashCallTargetOff = 4;
-constexpr size_t kSmashJmpTargetOff = 8;
-constexpr size_t kSmashJccTargetOff = 12;
+constexpr size_t kSmashCallTargetOff = 0;
+constexpr size_t kSmashJmpTargetOff = 0;
+constexpr size_t kSmashJccTargetOff = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 

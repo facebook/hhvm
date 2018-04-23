@@ -94,6 +94,7 @@ struct Vgen {
     , catches(env.catches)
   {}
 
+  static void handleLiterals(Venv& env) {}
   static void patch(Venv& env) {
     for (auto& p : env.jmps) {
       assertx(env.addrs[p.target]);

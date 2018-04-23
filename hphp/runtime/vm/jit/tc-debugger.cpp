@@ -48,6 +48,7 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
   TCA realCode = sr->getTopTranslation();
   if (!realCode) return;  // No translations, nothing to do.
 
+  TCA dbgBranchGuardSrc = nullptr;
   auto const dbgGuard = vwrap(cb, data, fixups, [&] (Vout& v) {
     if (sk.resumeMode() == ResumeMode::None) {
       auto const off = sr->nonResumedSPOff();
@@ -73,11 +74,10 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
     v << jcci{CC_NZ, sf, done, ustubs().interpHelper};
 
     v = done;
-    v << fallthru{};
+    v << debugguardjmp{realCode, &dbgBranchGuardSrc};
   }, CodeKind::Helper);
 
-  // Emit a jump to the actual code.
-  auto const dbgBranchGuardSrc = emitSmashableJmp(cb, fixups, realCode);
+  assertx(dbgBranchGuardSrc);
 
   // Add the guard to the SrcRec.
   sr->addDebuggerGuard(dbgGuard, dbgBranchGuardSrc);

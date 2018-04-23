@@ -55,6 +55,18 @@ enum class Alignment : uint32_t {
   JmpTarget,
 
   /*
+   * Quad Word Smashable literals need to be 8 byte aligned on ARM.
+   */
+  QuadWordSmashable,
+
+  /*
+   * Continuous range constraints needed for FuncGuards, and ephemeral stubs
+   * on ARM.
+   */
+  FuncGuard,
+  EphemeralStub,
+
+  /*
    * Alignments needed by smashable instructions.
    */
   SmashMovq,

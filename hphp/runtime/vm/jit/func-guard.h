@@ -17,6 +17,10 @@
 #ifndef incl_HPHP_JIT_FUNC_GUARD_H
 #define incl_HPHP_JIT_FUNC_GUARD_H
 
+#include "hphp/runtime/vm/jit/func-guard-arm.h"
+#include "hphp/runtime/vm/jit/func-guard-ppc64.h"
+#include "hphp/runtime/vm/jit/func-guard-x64.h"
+
 #include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/data-block.h"
@@ -30,6 +34,11 @@ namespace jit {
 struct CGMeta;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Size of func guard sequence that should be kept continuous.
+ */
+size_t funcGuardLen();
 
 /*
  * Emit a func guard for `func' into `cb'.

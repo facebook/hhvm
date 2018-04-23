@@ -19,9 +19,6 @@
 #include "hphp/runtime/vm/func.h"
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
-#include "hphp/runtime/vm/jit/func-guard-arm.h"
-#include "hphp/runtime/vm/jit/func-guard-ppc64.h"
-#include "hphp/runtime/vm/jit/func-guard-x64.h"
 
 #include "hphp/util/arch.h"
 #include "hphp/util/data-block.h"
@@ -29,6 +26,10 @@
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
+
+size_t funcGuardLen() {
+  return ARCH_SWITCH_CALL(funcGuardLen);
+}
 
 void emitFuncGuard(const Func* func, CodeBlock& cb,
                    CGMeta& fixups, TCA* watch) {

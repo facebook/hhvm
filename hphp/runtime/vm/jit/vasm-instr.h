@@ -86,6 +86,7 @@ struct Vunit;
   O(conjure, Inone, Un, D(c))\
   O(conjureuse, Inone, U(c), Dn)\
   O(funcguard, Inone, Un, Dn)\
+  O(debugguardjmp, Inone, Un, Dn)\
   O(inlinestart, Inone, Un, Dn)\
   O(inlineend, Inone, Un, Dn)\
   /* native function abi */\
@@ -535,6 +536,12 @@ struct conjureuse { Vreg c; };
  * *watch will be set to the address following the guard.
  */
 struct funcguard { const Func* func; TCA* watch; };
+
+/*
+ * Emit a smashable jmp to realCode.
+ * *watch will be set to the address of the smashable.
+ */
+struct debugguardjmp { TCA realCode; TCA* watch; };
 
 /*
  * Marks the entry block of an inlined function, func, in the current unit,

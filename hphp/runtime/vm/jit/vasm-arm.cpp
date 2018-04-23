@@ -218,6 +218,7 @@ struct Vgen {
     env.cb->sync(base);
   }
 
+  static void handleLiterals(Venv& env);
   static void patch(Venv& env);
 
   static void pad(CodeBlock& cb) {
@@ -239,7 +240,7 @@ struct Vgen {
   void emit(const copy& i);
   void emit(const copy2& i);
   void emit(const debugtrap& /*i*/) { a->Brk(0); }
-  void emit(const fallthru& /*i*/) {}
+  void emit(const fallthru& /*i*/);
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
@@ -420,14 +421,10 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 static CodeBlock* getBlock(Venv& env, CodeAddress a) {
-  if (env.text.main().code.contains(a)) {
-    return &env.text.main().code;
-  }
-  if (env.text.cold().code.contains(a)) {
-    return &env.text.cold().code;
-  }
-  if (env.text.frozen().code.contains(a)) {
-    return &env.text.frozen().code;
+  for (auto const& area : env.text.areas()) {
+    if (area.code.contains(a)) {
+      return &area.code;
+    }
   }
   return nullptr;
 }
@@ -437,20 +434,91 @@ static CodeAddress toReal(Venv& env, CodeAddress a) {
   return (b == nullptr) ? a : b->toDestAddress(a);
 }
 
+void Vgen::handleLiterals(Venv& env) {
+  decltype(env.meta.literalsToPool) notEmitted;
+  std::unordered_map<CodeBlock*, CodeAddress> headers;
+  for (auto const& pl : env.meta.literalsToPool) {
+    auto const cb = getBlock(env, pl.patchAddress);
+    if (!cb) {
+      // If we can't find the code block it must have been emitted by a Vunit
+      // wrapping this one.  (retransopt emits a Vunit within a Vunit)
+      notEmitted.push_back(pl);
+      continue;
+    }
+    if (!headers.count(cb)) {
+      if (env.fallThrus.count(cb->frontier())) {
+        headers.emplace(cb, cb->frontier());
+        // leave room for a jmp.
+        cb->dword(0);
+      }
+    }
+
+    // Emit the literal.
+    auto literalAddress = cb->frontier();
+    if (pl.width == 32) {
+      cb->dword(static_cast<uint32_t>(pl.value));
+    } else if (pl.width == 64) {
+      if (pl.smashable) {
+        // Although the region is actually dead, we mark it as live, so that
+        // the relocator can remove the padding.
+        align(*cb, &env.meta, Alignment::QuadWordSmashable, AlignContext::Live);
+        literalAddress = cb->frontier();
+      }
+      cb->qword(pl.value);
+    } else {
+      not_reached();
+    }
+
+    // Patch the LDR.
+    auto const patchAddressActual =
+      Instruction::Cast(toReal(env, pl.patchAddress));
+    assertx(patchAddressActual->IsLoadLiteral());
+    patchAddressActual->SetImmPCOffsetTarget(
+      Instruction::Cast(literalAddress),
+      Instruction::Cast(pl.patchAddress));
+  }
+
+  for (auto const& h : headers) {
+    CodeBlock cb;
+    auto const startAddr = h.first->toDestAddress(h.second);
+    cb.init(startAddr, startAddr, 4, 4, "Tmp");
+    auto const poolSize = h.first->frontier() - h.second;
+    assertx(env.fallThrus.count(h.second));
+    // Write the jmp.
+    Assembler a { cb };
+    a.b(poolSize >> kInstructionSizeLog2);
+  }
+  env.meta.literalsToPool.swap(notEmitted);
+}
+
 void Vgen::patch(Venv& env) {
-  for (auto& p : env.jmps) {
-    auto addr = toReal(env, p.instr);
-    auto target = env.addrs[p.target];
-    assertx(target);
+  // Patch the 32 bit target of the LDR
+  auto patch = [&env](TCA instr, TCA target) {
+    // The LDR loading the address to branch to.
+    auto ldr = Instruction::Cast(instr);
+    auto const DEBUG_ONLY br = ldr->NextInstruction();
+    assertx(ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
+            br->Mask(UnconditionalBranchToRegisterMask) == BR &&
+            ldr->Rd() == br->Rn());
+    // The address the LDR loads.
+    auto targetAddr = ldr->LiteralAddress();
     // Patch the 32 bit target following the LDR and BR
-    patchTarget32(addr + 2 * 4, target);
+    patchTarget32(targetAddr, target);
+  };
+
+  for (auto& p : env.jmps) {
+    auto const addr = toReal(env, p.instr);
+    auto const target = env.addrs[p.target];
+    assertx(target);
+    // Patch the address we are jumping to.
+    patch(addr, target);
   }
   for (auto& p : env.jccs) {
-    auto addr = toReal(env, p.instr);
-    auto target = env.addrs[p.target];
-    assertx(p.target);
-    // Patch the 32 bit target following the B.<CC>, LDR, and BR
-    patchTarget32(addr + 3 * 4, target);
+    auto const addr = toReal(env, p.instr);
+    auto const target = env.addrs[p.target];
+    assertx(target);
+    // Patch the jump sequence following the B.<CC>.
+    patch(addr + 4, target);
   }
 }
 
@@ -506,6 +574,9 @@ void emitSimdImmInt(vixl::MacroAssembler* a, uint64_t val, Vreg d) {
     a->Fmov(D(d), rAsm);
   }
 }
+void Vgen::emit(const fallthru& /*i*/) {
+  env.fallThrus.insert(a->frontier());
+}
 
 #define Y(vasm_opc, simd_w, vr_w, gpr_w, imm) \
 void Vgen::emit(const vasm_opc& i) {          \
@@ -556,9 +627,10 @@ void Vgen::emit(const mcprep& i) {
    * Class*, so we'll always miss the inline check before it's smashed, and
    * handlePrimeCacheInit can tell it's not been smashed yet
    */
-  auto const mov_addr = emitSmashableMovq(a->code(), env.meta, 0, r64(i.d));
-  auto const imm = reinterpret_cast<uint64_t>(mov_addr);
-  smashMovq(a->code().toDestAddress(mov_addr), (imm << 1) | 1);
+
+  align(*env.cb, &env.meta, Alignment::SmashMovq, AlignContext::Live);
+  auto const imm = reinterpret_cast<uint64_t>(a->frontier());
+  emitSmashableMovq(*env.cb, env.meta, (imm << 1) | 1, r64(i.d));
 
   env.meta.addressImmediates.insert(reinterpret_cast<TCA>(~imm));
 }
@@ -576,7 +648,7 @@ void Vgen::emit(const call& i) {
 }
 
 void Vgen::emit(const calls& i) {
-  emitSmashableCall(a->code(), env.meta, i.target);
+  emitSmashableCall(*env.cb, env.meta, i.target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -770,10 +842,11 @@ void Vgen::emit(const jcc& i) {
     recordAddressImmediate();
     a->B(&skip, vixl::InvertCondition(C(i.cc)));
     recordAddressImmediate();
+    poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(a->frontier()),
+                32, false);
+    a->bind(&data);  // This will be remmaped during the handleLiterals phase.
     a->Ldr(rAsm_w, &data);
     a->Br(rAsm);
-    a->bind(&data);
-    a->dc32(makeTarget32(a->frontier()));
     a->bind(&skip);
   }
   emit(jmp{i.targets[0]});
@@ -797,10 +870,10 @@ void Vgen::emit(const jmp& i) {
   // Emit a sequence similar to a smashable for easy patching later.
   // Static relocation might be able to simplify the branch.
   recordAddressImmediate();
+  poolLiteral(*env.cb, env.meta, (uint64_t)a->frontier(), 32, false);
+  a->bind(&data); // This will be remapped during the handleLiterals phase.
   a->Ldr(rAsm_w, &data);
   a->Br(rAsm);
-  a->bind(&data);
-  a->dc32(makeTarget32(a->frontier()));
 }
 
 void Vgen::emit(const jmpi& i) {
@@ -816,10 +889,10 @@ void Vgen::emit(const jmpi& i) {
     // Cannot use simple a->Mov() since such a sequence cannot be
     // adjusted while live following a relocation.
     recordAddressImmediate();
+    poolLiteral(*env.cb, env.meta, (uint64_t)i.target, 32, false);
+    a->bind(&data); // This will be remapped during the handleLiterals phase.
     a->Ldr(rAsm_w, &data);
     a->Br(rAsm);
-    a->bind(&data);
-    a->dc32(makeTarget32(i.target));
   }
 }
 
@@ -841,12 +914,10 @@ void Vgen::emit(const leap& i) {
   // Cannot use simple a->Mov() since such a sequence cannot be
   // adjusted while live following a relocation.
   recordAddressImmediate();
+  poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(i.s.r.disp),
+              32, false);
+  a->bind(&imm_data);  // This will be remapped during the handleLiterals phase.
   a->Ldr(W(i.d), &imm_data);
-  recordAddressImmediate();
-  a->B(&after_data);
-  a->bind(&imm_data);
-  a->dc32(makeTarget32(i.s.r.disp));
-  a->bind(&after_data);
 }
 
 void Vgen::emit(const lead& i) {

@@ -65,6 +65,24 @@ struct CGMeta {
   std::vector<std::pair<CTCA,TCA>> catches;
   std::vector<std::pair<TCA,TransID>> jmpTransIDs;
   std::vector<std::pair<TCA,Reason>> trapReasons;
+
+  /*
+   * On some architectures (like ARM) we want to pool up literals and emit them
+   * at once.  This allows us to accumulate literals until the end of a
+   * Vunit, where we can emit them together.
+   */
+  struct PoolLiteralMeta {
+    uint64_t value;
+    CodeAddress patchAddress;
+    bool smashable;
+    uint8_t width;
+  };
+  std::vector<PoolLiteralMeta> literalsToPool;
+
+  /*
+   * We want to collapse emitting literals multiple times.  This map allows us
+   * to find the addresses of already emitted literals.
+   */
   std::unordered_map<uint64_t, const uint64_t*> literals;
 
   /*
@@ -145,6 +163,12 @@ void eraseCatchTrace(CTCA addr);
  * only be used in the current request.
  */
 Reason* getTrapReason(CTCA addr);
+
+/*
+ * Pool up literal to be emitted at patch time.
+ */
+void poolLiteral(CodeBlock& cb, CGMeta& meta, uint64_t val, uint8_t width,
+                  bool smashable);
 
 }}
 

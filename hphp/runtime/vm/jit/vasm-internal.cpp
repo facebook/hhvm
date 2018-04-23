@@ -232,6 +232,15 @@ bool emit(Venv& env, const funcguard& i) {
   return true;
 }
 
+bool emit(Venv& env, const debugguardjmp& i) {
+  auto const jmp = emitSmashableJmp(*env.cb, env.meta, i.realCode);
+  if (i.watch) {
+    *i.watch = jmp;
+    env.meta.watchpoints.push_back(i.watch);
+  }
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {

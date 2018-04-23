@@ -48,6 +48,7 @@ bool isBlockEnd(const Vinstr& inst) {
     case Vinstr::jmpi:
     case Vinstr::phijmp:
     case Vinstr::phijcc:
+    case Vinstr::debugguardjmp:
     // terminal calls
     case Vinstr::tailcallstub:
     case Vinstr::callphp:
@@ -109,6 +110,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::copy:
     case Vinstr::copy2:
     case Vinstr::copyargs:
+    case Vinstr::debugguardjmp:
     case Vinstr::debugtrap:
     case Vinstr::fallthru:
     case Vinstr::ldimmb:

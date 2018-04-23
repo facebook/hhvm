@@ -70,6 +70,18 @@ Reason* getTrapReason(CTCA addr) {
   return s_trapReasonMap.find(tc::addrToOffset(addr));
 }
 
+void poolLiteral(CodeBlock& cb, CGMeta& meta, uint64_t val, uint8_t width,
+                  bool smashable) {
+  meta.literalsToPool.emplace_back(
+    CGMeta::PoolLiteralMeta {
+      val,
+      cb.frontier(),
+      smashable,
+      width
+    }
+  );
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void CGMeta::setJmpTransID(TCA jmp, TransID transID, TransKind kind) {
@@ -87,6 +99,7 @@ void CGMeta::process(
 }
 
 void CGMeta::process_literals() {
+  assertx(literalsToPool.empty());
   for (auto& pair : literals) {
     if (s_literals.find(pair.first)) continue;
     s_literals.insert(pair.first, pair.second);
@@ -151,6 +164,7 @@ void CGMeta::clear() {
   fixups.clear();
   catches.clear();
   jmpTransIDs.clear();
+  literalsToPool.clear();
   literals.clear();
   alignments.clear();
   reusedStubs.clear();
@@ -166,6 +180,7 @@ bool CGMeta::empty() const {
     fixups.empty() &&
     catches.empty() &&
     jmpTransIDs.empty() &&
+    literalsToPool.empty() &&
     literals.empty() &&
     alignments.empty() &&
     reusedStubs.empty() &&

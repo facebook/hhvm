@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/smashable-instr-ppc64.h"
 
 #include "hphp/runtime/vm/jit/abi-ppc64.h"
-#include "hphp/runtime/vm/jit/align-ppc64.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -49,7 +48,8 @@ using ppc64_asm::DecodedInstruction;
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d) {
-  return EMIT_BODY(cb, fixups, limmediate, d, imm, ImmType::TocOnly, true);
+  return EMIT_BODY(cb, fixups, limmediate, d, imm, ImmType::TocOnly,
+                   true);
 }
 
 TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,

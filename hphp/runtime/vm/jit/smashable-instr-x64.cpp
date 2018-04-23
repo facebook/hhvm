@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
 
-#include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
@@ -55,7 +54,8 @@ namespace HPHP { namespace jit { namespace x64 {
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d) {
-  auto const start = EMIT_BODY(cb, movq, Movq, 0xdeadbeeffeedface, d);
+  auto const start =
+    EMIT_BODY(cb, movq, Movq, 0xdeadbeeffeedface, d);
 
   auto frontier = cb.toDestAddress(cb.frontier());
   auto immp = reinterpret_cast<uint64_t*>(

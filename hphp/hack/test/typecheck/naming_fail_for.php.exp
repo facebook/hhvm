@@ -1,0 +1,4 @@
+File "naming_fail_for.php", line 6, characters 8-9:
+The variable $x is defined (Naming[2007])
+File "naming_fail_for.php", line 4, characters 17-18:
+But in a different scope

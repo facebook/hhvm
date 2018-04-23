@@ -1,0 +1,2 @@
+File "naming_fail_for_2.php", line 5, characters 10-11:
+Undefined variable: $x (Naming[2050])

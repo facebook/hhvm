@@ -1936,12 +1936,17 @@ module Make (GetLocals : GetLocals) = struct
     N.Using (has_await, e, b)
 
   and for_stmt env e1 e2 e3 b =
+    (* The initialization and condition expression should be in the outer scope,
+     * as they are always executed. *)
     let e1 = expr env e1 in
     let e2 = expr env e2 in
-    let e3 = expr env e3 in
     Env.scope env (
     fun env ->
-      N.For (e1, e2, e3, block env b)
+      (* The third expression (iteration step) should have the same scope as the
+       * block, as it is not always executed. *)
+      let b = block env b in
+      let e3 = expr env e3 in
+      N.For (e1, e2, e3, b)
    )
 
   and switch_stmt env st e cl =

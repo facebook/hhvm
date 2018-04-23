@@ -215,16 +215,17 @@ let rec get_base_type env ty =
  * we would like the name of that class. *)
 (*****************************************************************************)
 let get_class_ids env ty =
-  let rec aux acc = function
+  let rec aux seen acc = function
     | _, Tclass ((_, cid), _) -> cid::acc
-    | _, (Toption ty | Tabstract (_, Some ty)) -> aux acc ty
-    | _, Tunresolved tys -> List.fold tys ~init:acc ~f:aux
-    | _, Tabstract (AKgeneric name, None) ->
+    | _, (Toption ty | Tabstract (_, Some ty)) -> aux seen acc ty
+    | _, Tunresolved tys -> List.fold tys ~init:acc ~f:(aux seen)
+    | _, Tabstract (AKgeneric name, None) when not (List.mem seen name) ->
+      let seen = name :: seen in
       let upper_bounds = Env.get_upper_bounds env name in
-      TySet.fold (fun ty acc -> aux acc ty) upper_bounds acc
+      TySet.fold (fun ty acc -> aux seen acc ty) upper_bounds acc
     | _ -> acc
   in
-  List.rev (aux [] (Typing_expand.fully_expand env ty))
+  List.rev (aux [] [] (Typing_expand.fully_expand env ty))
 
 (*****************************************************************************)
 (* Reactivity *)

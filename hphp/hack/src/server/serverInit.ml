@@ -630,6 +630,10 @@ module ServerLazyInit : InitKind = struct
         Relative_path.Set.union dirty_files build_targets in
       let dirty_files =
         Relative_path.Set.union dirty_files changed_while_parsing in
+      let dirty_files =
+        Relative_path.Set.filter dirty_files ~f:(fun fn ->
+          not (FilesToIgnore.should_ignore (Relative_path.suffix fn))
+       ) in
       (*
         Tracked targets are build files that are tracked by version control.
         We don't need to typecheck them, but we do need to parse them to load

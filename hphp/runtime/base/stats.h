@@ -41,10 +41,6 @@ namespace Stats {
   STAT(TC_CatchTrace) \
   STAT(TC_CatchSideExit) \
   STAT(TC_DecRef_NZ) \
-  STAT(TC_DecRef_Normal_Decl) \
-  STAT(TC_DecRef_Normal_Destroy) \
-  STAT(TC_DecRef_Likely_Decl) \
-  STAT(TC_DecRef_Likely_Destroy) \
   STAT(TC_DecRef_Profiled_100) \
   STAT(TC_DecRef_Profiled_0) \
   /* Execute pseudomain */ \
@@ -74,10 +70,6 @@ namespace Stats {
   /* stub reuse stats */ \
   STAT(Astub_New) \
   STAT(Astub_Reused) \
-  /* Switches */ \
-  STAT(Switch_Generic) \
-  STAT(Switch_Integer) \
-  STAT(Switch_String) \
   /* ObjectData construction */ \
   STAT(ObjectData_new_dtor_yes) \
   STAT(ObjectData_new_dtor_no) \

@@ -97,12 +97,16 @@ CodeCache::CodeCache()
     exit(1);
   }
 
-  auto enhugen = [&](void* base, int numMB) {
+  auto enhugen = [&](void* base, unsigned numMB) {
     if (CodeCache::MapTCHuge) {
       assertx((uintptr_t(base) & (kRoundUp - 1)) == 0);
+      assertx(numMB < (1 << 12));
       hintHugeDeleteData((char*)base, numMB << 20,
                          PROT_READ | PROT_WRITE | PROT_EXEC,
                          false /* MAP_SHARED */);
+#ifdef __linux__
+      madvise(base, numMB << 20, MADV_DONTFORK);
+#endif
     }
   };
 

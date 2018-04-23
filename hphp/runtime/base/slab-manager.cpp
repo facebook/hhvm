@@ -99,6 +99,9 @@ void SlabManager::init() {
                         node, num2MPages, actual2m);
         break;
       }
+#ifdef __linux__
+      madvise(ptr, size2m, MADV_DONTFORK);
+#endif
       ++actual2m;
       slabManager->addRange(ptr, size2m);
     }

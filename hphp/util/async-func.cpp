@@ -145,10 +145,19 @@ void AsyncFuncImpl::start() {
     assertx(reinterpret_cast<uintptr_t>(end) % size2m == 0);
     if (m_threadStack) {
       for (size_t i = 1; i <= nHugePages; i++) {
-        if (!mmap_2m(end - i * size2m, PROT_READ | PROT_WRITE, m_node,
+        auto hugePageBegin = end - i * size2m;
+        if (!mmap_2m(hugePageBegin, PROT_READ | PROT_WRITE, m_node,
                      /* MAP_SHARED */ false, /* MAP_FIXED */ true)) {
           // Try transparent huge pages if we are unable to get reserved ones.
-          hintHuge(end - i * size2m, size2m);
+          hintHuge(hugePageBegin, size2m);
+        } else {
+          // If the thread with its stack on huge page fork()s, the child
+          // process will crash when it tries to access its stack (which doesn't
+          // exist there), but HHVM will continue running.  Ideally, we should
+          // never fork() in the worker thread (and instead use light
+          // processes).  For now, if you really want to fork() you cannot use
+          // hugetlb pages.
+          madvise(hugePageBegin, size2m, MADV_DONTFORK);
         }
       }
       if (slabSize) {

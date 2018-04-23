@@ -18,7 +18,6 @@
 #define incl_HPHP_PROF_DATA_SERIALIZE_H_
 
 #include <string>
-#include <fstream>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -39,6 +38,7 @@ namespace jit {
 
 struct ProfDataSerializer {
   explicit ProfDataSerializer(const std::string& name);
+  ~ProfDataSerializer();
 
   friend void write_raw(ProfDataSerializer& ser, const void* data, size_t sz);
 
@@ -54,7 +54,10 @@ struct ProfDataSerializer {
     return serializedStatics.emplace(arr).second;
   }
 private:
-  std::ofstream m_ofs;
+  int fd;
+  static constexpr uint32_t buffer_size = 8192;
+  uint32_t offset{0};
+  char buffer[buffer_size];
   // keep track of which static strings and arrays have already been serialized
   std::unordered_set<const void*> serializedStatics;
 };
@@ -64,6 +67,7 @@ struct ProfDataDeserializer {
   using EntMap = std::unordered_map<uintptr_t, T>;
 
   explicit ProfDataDeserializer(const std::string& name);
+  ~ProfDataDeserializer();
 
   friend void read_raw(ProfDataDeserializer& ser, void* data, size_t sz);
 
@@ -106,8 +110,13 @@ struct ProfDataDeserializer {
   Func*& getEnt(const Func* p);
   Class*& getEnt(const Class* p);
   const RepoAuthType::Array*& getEnt(const RepoAuthType::Array* p);
-private:
-  std::ifstream m_ifs;
+
+  bool done();
+ private:
+  int fd;
+  static constexpr uint32_t buffer_size = 8192;
+  uint32_t offset{buffer_size};
+  char buffer[buffer_size];
 
   EntMap<StringData*>  stringMap;
   EntMap<ArrayData*>   arrayMap;

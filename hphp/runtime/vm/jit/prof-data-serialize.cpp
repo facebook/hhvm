@@ -43,7 +43,7 @@
 
 #include "hphp/util/build-info.h"
 
-#include <fstream>
+#include <folly/portability/Unistd.h>
 
 namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
@@ -549,25 +549,89 @@ void read_target_profiles(ProfDataDeserializer& ser) {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-ProfDataSerializer::ProfDataSerializer(const std::string& name) : m_ofs(name) {
-  if (!m_ofs.good()) throw std::runtime_error("Failed to open: " + name);
+ProfDataSerializer::ProfDataSerializer(const std::string& name) {
+  fd = open(name.c_str(), O_CLOEXEC | O_CREAT | O_TRUNC | O_WRONLY, 0644);
+  if (fd == -1) throw std::runtime_error("Failed to open: " + name);
 }
 
-ProfDataDeserializer::ProfDataDeserializer(const std::string& name)
-  : m_ifs(name) {
-  if (!m_ifs.good()) throw std::runtime_error("Failed to open: " + name);
+ProfDataSerializer::~ProfDataSerializer() {
+  assertx(fd != -1);
+  if (offset) ::write(fd, buffer, offset);
+  close(fd);
+}
+
+ProfDataDeserializer::ProfDataDeserializer(const std::string& name) {
+  fd = open(name.c_str(), O_CLOEXEC | O_RDONLY);
+  if (fd == -1) throw std::runtime_error("Failed to open: " + name);
+}
+
+ProfDataDeserializer::~ProfDataDeserializer() {
+  assertx(fd != -1);
+  close(fd);
+}
+
+bool ProfDataDeserializer::done() {
+  char byte;
+  return offset == buffer_size && ::read(fd, &byte, 1) == 0;
 }
 
 void write_raw(ProfDataSerializer& ser, const void* data, size_t sz) {
-  if (!ser.m_ofs.write(static_cast<const char*>(data), sz).good()) {
+  if (ser.offset + sz <= ProfDataSerializer::buffer_size) {
+    memcpy(ser.buffer + ser.offset, data, sz);
+    ser.offset += sz;
+    return;
+  }
+  if (ser.offset == 0) {
+    if (::write(ser.fd, data, sz) != sz) {
+      throw std::runtime_error("Failed to write serialized data");
+    }
+    return;
+  }
+  if (auto const delta = ProfDataSerializer::buffer_size - ser.offset) {
+    memcpy(ser.buffer + ser.offset, data, delta);
+    data = static_cast<const char*>(data) + delta;
+    sz -= delta;
+    ser.offset = ProfDataSerializer::buffer_size;
+  }
+  assertx(ser.offset == ProfDataSerializer::buffer_size);
+  if (::write(ser.fd, ser.buffer, ser.offset) != ser.offset) {
     throw std::runtime_error("Failed to write serialized data");
   }
+  ser.offset = 0;
+  write_raw(ser, data, sz);
 }
 
 void read_raw(ProfDataDeserializer& ser, void* data, size_t sz) {
-  if (!ser.m_ifs.read(static_cast<char*>(data), sz).good()) {
+  if (ser.offset + sz <= ProfDataDeserializer::buffer_size) {
+    memcpy(data, ser.buffer + ser.offset, sz);
+    ser.offset += sz;
+    return;
+  }
+  if (auto const delta = ProfDataDeserializer::buffer_size - ser.offset) {
+    memcpy(data, ser.buffer + ser.offset, delta);
+    data = static_cast<char*>(data) + delta;
+    sz -= delta;
+    ser.offset = ProfDataDeserializer::buffer_size;
+  }
+  if (sz >= ProfDataDeserializer::buffer_size) {
+    auto const bytes_read = ::read(ser.fd, data, sz);
+    if (bytes_read < 0 || bytes_read < sz) {
+      throw std::runtime_error("Failed to read serialized data");
+    }
+    return;
+  }
+
+  auto const bytes_read = ::read(ser.fd,
+                                 ser.buffer,
+                                 ProfDataDeserializer::buffer_size);
+  if (bytes_read < 0 || bytes_read < sz) {
     throw std::runtime_error("Failed to read serialized data");
   }
+  ser.offset = ProfDataDeserializer::buffer_size - bytes_read;
+  if (ser.offset) {
+    memmove(ser.buffer + ser.offset, ser.buffer, bytes_read);
+  }
+  return read_raw(ser, data, sz);
 }
 
 StringData*& ProfDataDeserializer::getEnt(const StringData* p) {
@@ -963,6 +1027,7 @@ bool deserializeProfData(const std::string& filename) {
 
     read_target_profiles(ser);
 
+    always_assert(ser.done());
     return true;
   } catch (std::runtime_error& err) {
     FTRACE(1, "deserializeProfData - Failed: {}\n", err.what());

@@ -48,18 +48,6 @@ function is_keyset_(mixed $x): void {
   }
 }
 
-function is_varray_(mixed $x): void {
-  if ($x is ?varray) {
-    echo "varray\n";
-  }
-}
-
-function is_darray_(mixed $x): void {
-  if ($x is ?darray) {
-    echo "darray\n";
-  }
-}
-
 is_bool_(null);
 is_bool_(true);
 
@@ -97,13 +85,3 @@ echo "---\n";
 
 is_keyset_(null);
 is_keyset_(keyset[]);
-
-echo "---\n";
-
-is_varray_(null);
-// TODO(T27918561) is_varray_(varray[]);
-
-echo "---\n";
-
-is_darray_(null);
-// TODO(T27918561) is_darray_(darray[]);

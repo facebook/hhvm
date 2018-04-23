@@ -403,12 +403,13 @@ void errorOnIsAsExpressionInvalidTypes(const Array& ts) {
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
-    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_xhp:
       return;
+    case TypeStructure::Kind::T_array:
+      raise_error("\"is\" and \"as\" operators cannot be used with an array");
     case TypeStructure::Kind::T_fun:
       raise_error("\"is\" and \"as\" operators cannot be used with a function");
     case TypeStructure::Kind::T_typevar:

@@ -25,12 +25,6 @@ function main(mixed $x): void {
   if ($x is keyset) {
     echo "keyset\n";
   }
-  if ($x is varray) {
-    echo "varray\n";
-  }
-  if ($x is darray) {
-    echo "darray\n";
-  }
 }
 
 main(true);
@@ -41,5 +35,3 @@ main(STDIN);
 main(vec[]);
 main(dict[]);
 main(keyset[]);
-// TODO(T27918561) main(varray[]);
-// TODO(T27918561) main(darray[]);

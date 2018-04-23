@@ -2843,6 +2843,7 @@ let lower env ~source_text ~script : result =
   let comments = if env.include_line_comments then comments else
     List.filter ~f:(fun (_,c) -> not (Prim_defs.is_line_comment c)) comments
   in
+  if env.codegen then Utils.MemGuard.gc_and_verify_value_collected script;
   let () = if env.keep_errors then Fixmes.HH_FIXMES.add env.file fixmes in
   { fi_mode = env.fi_mode
   ; is_hh_file = env.is_hh_file

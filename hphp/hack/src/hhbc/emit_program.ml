@@ -54,14 +54,15 @@ let emit_fatal_program ~ignore_message op pos message =
     false [] [] [] [] body Emit_symbol_refs.empty_symbol_refs None
 
 let from_ast ~is_hh_file ~is_evaled ast =
-  Utils.try_finally
-  ~f:begin fun () ->
+  Utils.try_finally_with ast
+  ~f:begin fun ast ->
     try
       Emit_env.set_is_hh_file is_hh_file;
       (* Convert closures to top-level classes;
        * also hoist inner classes and functions *)
       let { ast_defs = closed_ast; global_state; strict_types } =
         convert_toplevel_prog ast in
+      Utils.MemGuard.gc_and_verify_value_collected ast;
       let strict_types =
         (* is scalar_types is set - always assume strict_types to have value *)
         if Hhbc_options.php7_scalar_types !(Hhbc_options.compiler_options)

@@ -117,6 +117,7 @@ hphp/system/php/misc/php_strip_whitespace.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
 hphp/system/php/redis/RedisSessionModule.php
+hphp/system/php/rx/mutable.php
 hphp/system/php/shapes/Shapes.php
 hphp/system/php/soap/SoapFault.php
 hphp/system/php/spl/datastructures/SplFixedArray.php

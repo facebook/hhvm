@@ -523,7 +523,6 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     cpu_priority;
     io_priority;
     enable_on_nfs;
-    incremental_init;
     search_chunk_size;
     load_script_config;
     max_workers;
@@ -546,7 +545,6 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     init_id
     informant_managed
     (Unix.gettimeofday ())
-    incremental_init
     saved_state_load_type
     use_sql
     search_chunk_size

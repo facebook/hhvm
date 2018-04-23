@@ -25,7 +25,6 @@ type t = {
   enable_fuzzy_search: bool;
   lazy_parse: bool;
   lazy_init: bool;
-  incremental_init : bool;
   load_tiny_state : bool;
   (** Limit the number of clients that can sit in purgatory waiting
    * for a server to be started because we don't want this to grow
@@ -63,7 +62,6 @@ let default = {
   enable_fuzzy_search = true;
   lazy_parse = false;
   lazy_init = false;
-  incremental_init = false;
   load_tiny_state = false;
   max_purgatory_clients = 400;
   search_chunk_size = 0;
@@ -128,8 +126,6 @@ let load_ fn ~silent =
     ~default:default.lazy_parse config in
   let lazy_init = bool_ "lazy_init2"
     ~default:default.lazy_init config in
-  let incremental_init = bool_ "incremental_init"
-    ~default:default.incremental_init config in
   let load_tiny_state = bool_ "load_tiny_state"
     ~default:default.load_tiny_state config in
   let max_purgatory_clients = int_ "max_purgatory_clients"
@@ -198,7 +194,6 @@ let load_ fn ~silent =
     enable_fuzzy_search;
     lazy_parse;
     lazy_init;
-    incremental_init;
     load_tiny_state;
     search_chunk_size;
     io_priority;

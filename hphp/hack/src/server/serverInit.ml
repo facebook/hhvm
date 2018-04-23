@@ -36,17 +36,6 @@ type init_result =
   | Mini_load of int option
   | Mini_load_failed of string
 
-let delete_async path =
-  Sys_utils.rm_dir_tree path;
-  exit 0
-
-(* Utility functions for deleting a process, which have to be toplevel *)
-let delete_and_log : (string) Process.Entry.t =
-  Process.register_entry_point
-    "Remove directory" delete_async
-
-let rm_dir_tree_async path =
-  Process.run_entry delete_and_log path
 
 let load_mini_exn_to_string err = match err with
   | Future.Failure e ->
@@ -71,7 +60,6 @@ module ServerInitCommon = struct
     | SharedMem.Sql_assertion_failure 14 as e -> (* SQL_corrupt *)
       LoadScriptUtils.delete_corrupted_saved_state fn;
       raise e
-
 
   (* Return all the files that we need to typecheck *)
   let make_next_files genv : Relative_path.t list Bucket.next =
@@ -496,7 +484,7 @@ type state_result =
  result
 
 (* Laziness *)
-type lazy_level = Off | Decl | Parse | Init | Incremental
+type lazy_level = Off | Decl | Parse | Init
 
 module type InitKind = sig
   val init :
@@ -603,135 +591,6 @@ module ServerEagerInit : InitKind = struct
         Hh_logger.log "Could not load mini state: %s" err_str;
       end;
       type_check genv env fast t, state
-end
-
-(* In an incremental init, we start by querying hg using hg cat
-  to obtain the old versions of files that were loaded from the saved state.
-  This vastly decreases the number of files we need to typecheck, since we can
-  then compute the difference between the files and only typecheck files
-  affected by the differences. In a regular lazy init, we would have to
-  typecheck all of the dependencies and uses of extends dependencies of changed
-  files, which is way more conservative and ends up taking a lot more time.
-*)
-module ServerIncrementalInit : InitKind = struct
-  open ServerInitCommon
-
-  (* Runs the hg cat process to query for the old versions of dirty files *)
-  let send_hg_cat_command root rev dirty_file_paths_list t =
-    let tmp_dir = (Relative_path.path_of_prefix Relative_path.Tmp) in
-    (* First, we need to make the paths to mimic those in our repository. *)
-    List.iter dirty_file_paths_list
-      ~f:(fun path -> Sys_utils.mkdir_p (tmp_dir ^ (Filename.dirname path)));
-    (* Grab the old version of files from hg *)
-    let pid = Hg.get_old_version_of_files
-      ~rev
-      ~out: ( tmp_dir ^ "%p")
-      ~files: dirty_file_paths_list
-      ~repo: (Path.to_string root) in
-    HackEventLogger.send_hg_end t;
-    pid, Hh_logger.log_duration "Send hg cat command" t
-
-  (* Wait for hg cat command to finish *)
-  let wait_hg_cat pid t =
-    (* Ensure hg command has finished *)
-    begin
-      match Future.get pid with
-      | Error err ->
-      (* Errors don't really matter here, at worst we are just parsing empty
-        files and we'll get the real ones during incremental mode *)
-      Hh_logger.log "Error with hg, continuing. Error: %s" (Future.error_to_string err);
-      HackEventLogger.hg_cat_exn (Future.error_to_string err)
-      | Ok () ->
-        ()
-    end;
-    HackEventLogger.wait_hg_end t;
-    Hh_logger.log_duration "Extra time waiting for hg cat" t
-
-
-  let delete_tmp_directory t =
-    let tmp_dir = (Relative_path.path_of_prefix Relative_path.Tmp) in
-    ignore(rm_dir_tree_async tmp_dir);
-    Hh_logger.log_duration "Deleting tmp directory" t
-
-
-  let init ~load_mini_approach genv lazy_level env  root =
-    assert (lazy_level = Incremental);
-    let state_future =
-      load_mini_approach >>= invoke_approach genv root ~tiny:false in
-
-    let timeout = genv.local_config.SLC.load_mini_script_timeout in
-    let state_future = state_future >>= fun f ->
-      with_loader_timeout timeout "wait_for_state" f
-    in
-
-    let state = get_state_future genv root state_future timeout in
-    match state with
-    | Ok (
-      _saved_state_fn, corresponding_rev,
-      dirty_files, changed_while_parsing, old_saved, _state_distance) ->
-      let build_targets, tracked_targets = get_build_targets env in
-      Hh_logger.log "Successfully loaded mini-state";
-      let t = Unix.gettimeofday () in
-      (* Grab all the files that have changed since the base revision *)
-      let dirty_files =
-        Relative_path.Set.union dirty_files changed_while_parsing in
-      let dirty_file_list =
-        Relative_path.Set.elements dirty_files in
-      let dirty_file_paths_list =
-        List.map dirty_file_list (Relative_path.suffix) in
-      (* Send the hg cat command *)
-      let pid, t = send_hg_cat_command
-        root corresponding_rev dirty_file_paths_list t in
-      (* Find the temporary directories *)
-      let tmp_files_list = List.map ~f:Relative_path.to_tmp dirty_file_list in
-      (* Build targets are untracked by version control, so we must always
-       * recheck them. While we could query hg / git for the untracked files,
-       * it's much slower. *)
-      let dirty_files_and_build_targets =
-        Relative_path.Set.union dirty_files build_targets in
-      let old_hack_files = FileInfo.saved_to_hack_files old_saved in
-      let old_info = FileInfo.saved_to_info old_saved in
-      (* Run global naming on the old file info object *)
-      let t = naming_with_fast old_hack_files t in
-      let t = update_search old_saved t in
-      let t = wait_hg_cat pid t in
-      (*
-        Tracked targets are build files that are tracked by version control.
-        We don't need to typecheck them, but we do need to parse them to load
-        them into memory, since arc rebuild deletes them before running.
-        This avoids build step dependencies and file_heap_stale errors crashing
-        the server when build fails and the deleted files aren't properly
-        regenerated.
-      *)
-      let parsing_files_list =
-        (Relative_path.Set.elements tracked_targets) @ tmp_files_list in
-      let next = MultiWorker.next genv.workers parsing_files_list in
-      (* During parsing, we parse the temp files as if they were the real
-        ones they refer to *)
-      let env, t = parsing genv env ~lazy_parse:true ~get_next:next t in
-      let fast = FileInfo.simplify_fast env.files_info in
-      (* Declare the types of just the dirty files *)
-      let env, t = type_decl genv env fast t in
-      let env = { env with
-        disk_needs_parsing =
-          Relative_path.Set.union env.disk_needs_parsing changed_while_parsing;
-      } in
-      let env = { env with
-        files_info= old_info;
-      } in
-      (* The original dirty files and build targets need to be rechecked *)
-      let env = { env with
-        disk_needs_parsing = Relative_path.Set.union
-          env.disk_needs_parsing dirty_files_and_build_targets
-      } in
-      let t = update_files genv env.files_info t in
-      let t = delete_tmp_directory t in
-      let env, _, _ =
-        ServerTypeCheck.type_check genv env ServerTypeCheck.Full_check in
-      (env, t), state
-    | Error err ->
-      fallback_init genv env err, state
-
 end
 
 (* Lazy Initialization:
@@ -907,12 +766,10 @@ let get_lazy_level genv =
   let lazy_decl = Option.is_none (ServerArgs.ai_mode genv.options) in
   let lazy_parse = genv.local_config.SLC.lazy_parse in
   let lazy_initialize = genv.local_config.SLC.lazy_init in
-  let incremental_init = genv.local_config.SLC.incremental_init in
-  match lazy_decl, lazy_parse, lazy_initialize, incremental_init with
-  | true, false, false, false -> Decl
-  | true, true, false, false -> Parse
-  | true, true, true, false -> Init
-  | true, true, true, true -> Incremental
+  match lazy_decl, lazy_parse, lazy_initialize with
+  | true, false, false -> Decl
+  | true, true, false -> Parse
+  | true, true, true -> Init
   | _ -> Off
 
 (* Initialize only to save a saved state *)
@@ -937,8 +794,6 @@ let init ?load_mini_approach genv =
   let root = ServerArgs.root genv.options in
   let (env, t), state =
     match lazy_lev with
-    | Incremental ->
-      ServerIncrementalInit.init ~load_mini_approach genv lazy_lev env root
     | Init ->
       ServerLazyInit.init ~load_mini_approach genv lazy_lev env root
     | _ ->

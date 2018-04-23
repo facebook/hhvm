@@ -67,8 +67,6 @@ let monitor_daemon_main (options: ServerArgs.options) =
     ServerConfig.(load filename options) in
   if local_config.ServerLocalConfig.use_full_fidelity_parser then
     HackEventLogger.set_use_full_fidelity_parser true;
-  if local_config.ServerLocalConfig.incremental_init then
-    HackEventLogger.set_incremental_init ();
   HackEventLogger.set_use_tiny_state
     local_config.ServerLocalConfig.load_tiny_state;
 

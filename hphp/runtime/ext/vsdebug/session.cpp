@@ -101,18 +101,30 @@ void DebuggerSession::invokeDummyStartupDocument() {
                          RuntimeOption::EvalPreludePath);
 
   if (!ret || error) {
+    if (errorMsg == "") {
+      errorMsg = "An unknown error was returned from HPHP.";
+    }
+
     std::string displayError =
-      std::string("Failed to prepare the Hack/PHP console: ") + errorMsg;
+      std::string("Failed to prepare the Hack/PHP console. ");
+    displayError += "Error requiring document ";
+    displayError += m_dummyStartupDoc;
+    displayError += ": " + errorMsg;
+    displayError += ". This may cause Hack/PHP types and symbols to be ";
+    displayError += "unresolved in console expressions. You can try running ";
+    displayError += "`require('"
+        + m_dummyStartupDoc
+        + "')` in the console to attempt loading the document again.";
 
     VSDebugLogger::Log(
-      VSDebugLogger::LogLevelError,
+      VSDebugLogger::LogLevelWarning,
       "%s",
       displayError.c_str()
     );
 
     m_debugger->sendUserMessage(
       displayError.c_str(),
-      DebugTransport::OutputLevelError
+      DebugTransport::OutputLevelWarning
     );
   } else {
     m_debugger->sendUserMessage(

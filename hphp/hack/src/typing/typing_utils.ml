@@ -700,6 +700,7 @@ end = struct
       method! on_tabstract acc r ak ty_opt =
         match ak with
         | AKenum _ -> acc
+        | AKdependent (`this, _) -> acc
         (* TODO(kunalm) support `this`, type consts *)
         | _ -> update acc @@ Invalid (r, Tabstract (ak, ty_opt))
       method! on_tanon acc r arity id =

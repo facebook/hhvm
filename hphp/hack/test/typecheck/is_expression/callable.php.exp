@@ -1,2 +1,10 @@
 File "callable.php", line 6, characters 13-33:
 The "is" operator cannot be used with a function (Typing[4195])
+File "callable.php", line 7, characters 7-8:
+Invalid argument (Typing[4110])
+  File "callable.php", line 3, characters 12-14:
+  This is an int
+  File "callable.php", line 5, characters 12-16:
+  It is incompatible with a mixed value
+File "callable.php", line 6, characters 13-33:
+The "is" operator cannot be used with a function (Typing[4195])

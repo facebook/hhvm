@@ -3,9 +3,11 @@ File "invalid_hint_class_with_generics2.php", line 9, characters 5-15:
   where Tc#1 as string
 File "invalid_hint_class_with_generics2.php", line 6, characters 13-24:
 Some type constraint(s) here are violated (Typing[4110])
-File "invalid_hint_class_with_generics2.php", line 3, characters 23-24:
-'Tc' is a constrained type parameter
-File "invalid_hint_class_with_generics2.php", line 3, characters 29-34:
-This is a string
-File "invalid_hint_class_with_generics2.php", line 6, characters 23-23:
-It is incompatible with an object of type _
+  File "invalid_hint_class_with_generics2.php", line 3, characters 23-24:
+  'Tc' is a constrained type parameter
+  File "invalid_hint_class_with_generics2.php", line 3, characters 29-34:
+  This is a string
+  File "invalid_hint_class_with_generics2.php", line 6, characters 23-23:
+  It is incompatible with an object of type _
+File "invalid_hint_class_with_generics2.php", line 6, characters 13-24:
+The "is" operator should not be used with a type with generics, because generics are erased at runtime (Typing[4199])

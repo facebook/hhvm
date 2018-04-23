@@ -3,9 +3,9 @@ File "valid_hint_class2.php", line 7, characters 5-15:
   where T#1 as string
 File "valid_hint_class2.php", line 6, characters 13-16:
 Some type constraint(s) here are violated (Typing[4110])
-File "valid_hint_class2.php", line 3, characters 18-18:
-'T' is a constrained type parameter
-File "valid_hint_class2.php", line 3, characters 23-28:
-This is a string
-File "valid_hint_class2.php", line 6, characters 15-15:
-It is incompatible with an object of type _
+  File "valid_hint_class2.php", line 3, characters 18-18:
+  'T' is a constrained type parameter
+  File "valid_hint_class2.php", line 3, characters 23-28:
+  This is a string
+  File "valid_hint_class2.php", line 6, characters 15-15:
+  It is incompatible with an object of type _

@@ -5731,7 +5731,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
       in
       let env, x_ty = resolve_obj env obj_ty in
       set_local env ivar x_ty
-  | p, Is (ivar, h) when is_instance_var ivar ->
+  | p, Is (ivar, h) when tparamet && is_instance_var ivar ->
     (* Check the expession and determine its static type *)
     let env, _te, ivar_ty = raw_expr ~in_cond:false env ivar in
     (* What is the local variable bound to the expression? *)
@@ -5740,6 +5740,8 @@ and condition ?lhs_of_null_coalesce env tparamet =
     let env, hint_ty = Phase.hint_locl env h in
     let reason = Reason.Ris ivar_pos in
     let rec safely_refine_type env ivar_ty hint_ty =
+      (* Expand so that we don't modify ivar *)
+      let env, hint_ty = Env.expand_type env hint_ty in
       match snd ivar_ty, snd hint_ty with
         | _, Tclass ((_, cid) as _c, tyl) ->
           begin match Env.get_class env cid with
@@ -5758,6 +5760,8 @@ and condition ?lhs_of_null_coalesce env tparamet =
           env, (reason, Ttuple tyl)
         | _, Tnonnull ->
           TUtils.non_null env ivar_ty
+        | _, Tabstract (AKdependent (`this, []), Some (_, Tclass _)) ->
+          ExprDepTy.make env CIstatic hint_ty
         | _, (Tany | Tmixed | Tprim _ | Toption _ | Ttuple _
             | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
             | Tunresolved _ | Tobject | Terr | Tfun _  | Tdynamic) ->

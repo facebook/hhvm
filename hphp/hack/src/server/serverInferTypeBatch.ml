@@ -100,7 +100,7 @@ fun workers pos_list env ->
     |> List.remove_consecutive_duplicates ~equal:(=)
     (* Get the FileInfo for each query *)
     |> List.map ~f:begin fun (fn, line, char, range_end) ->
-      let fn = Relative_path.(create Root fn) in
+      let fn = Relative_path.create_detect_prefix fn in
       let pos = (fn, line, char, range_end) in
       match Relative_path.Map.get files_info fn with
       | Some fileinfo -> Ok (pos, fileinfo)

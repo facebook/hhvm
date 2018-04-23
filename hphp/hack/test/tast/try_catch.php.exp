@@ -1,21 +1,21 @@
 [(Fun
-    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([12:44-12:47], (Hprim Tint)));
+    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([12:44-12:47], (Aast_defs.Hprim Aast_defs.Tint)));
       f_name = ([12:10-12:40], "\\terminal_catch_can_do_whatever");
       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params = [];
       f_body =
       (NamedBody
-         { AnnotatedAST.fnb_nast =
+         { Aast.AnnotatedAST.fnb_nast =
            [(Expr
                (([13:3-13:10], int),
-                (Binop ((Eq None),
+                (Binop ((Ast_defs.Eq None),
                    (([13:3-13:5], int), (Lvar ([13:3-13:5], $a))),
                    (([13:8-13:10], int), (Int ([13:8-13:10], "23")))))));
              (Try (
                 [(Expr
                     (([15:5-15:13], int),
-                     (Binop ((Eq None),
+                     (Binop ((Ast_defs.Eq None),
                         (([15:5-15:7], int), (Lvar ([15:5-15:7], $a))),
                         (([15:10-15:13], int), (Int ([15:10-15:13], "456")))
                         ))))
@@ -28,7 +28,7 @@
                   (([18:12-18:23], "\\MyException"), ([18:24-18:26], $e),
                    [(Expr
                        (([20:5-20:16], string),
-                        (Binop ((Eq None),
+                        (Binop ((Ast_defs.Eq None),
                            (([20:5-20:7], string), (Lvar ([20:5-20:7], $a))),
                            (([20:10-20:16], string),
                             (String ([20:10-20:16], "duck")))
@@ -47,7 +47,7 @@
                   ],
                 [(Expr
                     (([25:5-25:11], int),
-                     (Binop ((Eq None),
+                     (Binop ((Ast_defs.Eq None),
                         (([25:5-25:7], int), (Lvar ([25:5-25:7], $a))),
                         (([25:10-25:11], int), (Int ([25:10-25:11], "4")))))))
                   ]
@@ -56,5 +56,6 @@
                 (Some (([28:10-28:12], int), (Lvar ([28:10-28:12], $a))))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
+      f_ret_by_ref = false })
   ]

@@ -1,11 +1,11 @@
 [(Fun
-    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([7:18-7:22], (Hprim Tvoid)));
+    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([7:18-7:22], (Aast_defs.Hprim Aast_defs.Tvoid)));
       f_name = ([7:10-7:14], "\\main"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       (NamedBody
-         { AnnotatedAST.fnb_nast =
+         { Aast.AnnotatedAST.fnb_nast =
            [(Expr
                (([9:4-9:21], \:foo),
                 (Xml (([9:4-9:7], "\\:foo"),
@@ -16,7 +16,7 @@
                    []))));
              (Expr
                 (([10:3-10:17], string),
-                 (Binop ((Eq None),
+                 (Binop ((Ast_defs.Eq None),
                     (([10:3-10:8], string), (Lvar ([10:3-10:8], $derp))),
                     (([10:11-10:17], string),
                      (String ([10:11-10:17], "derp")))
@@ -59,21 +59,24 @@
                     ))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
+      f_ret_by_ref = false });
   (Class
-     { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
-       c_is_xhp = true; c_kind = Cnormal; c_name = ([3:7-3:11], "\\:foo");
-       c_tparams = <opaque>; c_extends = []; c_uses = [];
-       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
-       c_req_implements = [];
+     { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
+       c_final = false; c_is_xhp = true; c_kind = Ast_defs.Cnormal;
+       c_name = ([3:7-3:11], "\\:foo"); c_tparams = <opaque>; c_extends = [];
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+       c_req_extends = []; c_req_implements = [];
        c_implements =
-       [([3:23-3:31], (Happly (([3:23-3:31], "\\XHPChild"), [])))];
+       [([3:23-3:31], (Aast_defs.Happly (([3:23-3:31], "\\XHPChild"), [])))];
        c_consts = []; c_typeconsts = []; c_static_vars = [];
        c_vars =
-       [{ AnnotatedAST.cv_final = false; cv_is_xhp = true;
-          cv_visibility = Public;
+       [{ Aast.AnnotatedAST.cv_final = false; cv_is_xhp = true;
+          cv_visibility = Aast_defs.Public;
           cv_type =
-          (Some ([4:13-4:17], (Hoption ([4:13-4:17], (Hprim Tstring)))));
+          (Some ([4:13-4:17],
+                 (Aast_defs.Hoption
+                    ([4:13-4:17], (Aast_defs.Hprim Aast_defs.Tstring)))));
           cv_id = ([4:35-4:38], ":bar"); cv_expr = None;
           cv_user_attributes = [] }
          ];

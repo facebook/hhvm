@@ -1,29 +1,31 @@
 [(Fun
-    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:35-3:39], (Hprim Tvoid)));
+    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:35-3:39], (Aast_defs.Hprim Aast_defs.Tvoid)));
       f_name = ([3:10-3:22], "\\takes_string"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_annotation = ([3:30-3:32], string);
-         param_hint = (Some ([3:23-3:29], (Hprim Tstring)));
+      [{ Aast.AnnotatedAST.param_annotation = ([3:30-3:32], string);
+         param_hint =
+         (Some ([3:23-3:29], (Aast_defs.Hprim Aast_defs.Tstring)));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:30-3:32]; param_name = "$s"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (NamedBody { AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+      (NamedBody { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
+      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
+      f_ret_by_ref = false });
   (Fun
-     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([5:15-5:19], (Hprim Tvoid)));
+     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([5:15-5:19], (Aast_defs.Hprim Aast_defs.Tvoid)));
        f_name = ([5:10-5:11], "\\f"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        (NamedBody
-          { AnnotatedAST.fnb_nast =
+          { Aast.AnnotatedAST.fnb_nast =
             [(Expr
                 (([6:3-6:24], void),
-                 (Call (Cnormal,
+                 (Call (Aast_defs.Cnormal,
                     (([6:3-6:15], (function(string $s): void)),
                      (Id ([6:3-6:15], "\\takes_string"))),
                     [],
@@ -32,5 +34,6 @@
                     []))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+       f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
+       f_ret_by_ref = false })
   ]

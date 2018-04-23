@@ -1,14 +1,14 @@
 [(Fun
-    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([12:18-12:22], (Hprim Tvoid)));
+    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([12:18-12:22], (Aast_defs.Hprim Aast_defs.Tvoid)));
       f_name = ([12:10-12:14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       (NamedBody
-         { AnnotatedAST.fnb_nast =
+         { Aast.AnnotatedAST.fnb_nast =
            [(Expr
                (([13:3-13:13], array<string, _>),
-                (Binop ((Eq None),
+                (Binop ((Ast_defs.Eq None),
                    (([13:3-13:5], array<string, _>), (Lvar ([13:3-13:5], $x))),
                    (([13:8-13:13], array<string, _>),
                     (Array
@@ -21,7 +21,7 @@
                             (([13:24-13:28], string),
                              (String ([13:24-13:28], "k2"))),
                             (([13:32-13:49], _),
-                             (Call (Cnormal,
+                             (Call (Aast_defs.Cnormal,
                                 (([13:32-13:47], _),
                                  (Id ([13:32-13:47], "\\my_php_function"))),
                                 [], [], [])))
@@ -30,7 +30,7 @@
                    ))));
              (Expr
                 (([14:3-14:13], array<_>),
-                 (Binop ((Eq None),
+                 (Binop ((Ast_defs.Eq None),
                     (([14:3-14:5], array<_>), (Lvar ([14:3-14:5], $y))),
                     (([14:8-14:13], array<_>),
                      (Array
@@ -38,7 +38,7 @@
                             (([14:14-14:15], int), (Int ([14:14-14:15], "0"))));
                           (AFvalue
                              (([14:17-14:34], _),
-                              (Call (Cnormal,
+                              (Call (Aast_defs.Cnormal,
                                  (([14:17-14:32], _),
                                   (Id ([14:17-14:32], "\\my_php_function"))),
                                  [], [], []))))
@@ -46,5 +46,6 @@
                     ))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
+      f_ret_by_ref = false })
   ]

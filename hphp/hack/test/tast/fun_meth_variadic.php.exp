@@ -1,40 +1,44 @@
 [(Fun
-    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:35-3:39], (Hprim Tvoid)));
+    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:35-3:39], (Aast_defs.Hprim Aast_defs.Tvoid)));
       f_name = ([3:10-3:22], "\\takes_string"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_annotation = ([3:30-3:32], string);
-         param_hint = (Some ([3:23-3:29], (Hprim Tstring)));
+      [{ Aast.AnnotatedAST.param_annotation = ([3:30-3:32], string);
+         param_hint =
+         (Some ([3:23-3:29], (Aast_defs.Hprim Aast_defs.Tstring)));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:30-3:32]; param_name = "$s"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (NamedBody { AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+      (NamedBody { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
+      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
+      f_ret_by_ref = false });
   (Fun
-     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([5:30-5:34], (Hprim Tvoid)));
+     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([5:30-5:34], (Aast_defs.Hprim Aast_defs.Tvoid)));
        f_name = ([5:10-5:11], "\\f"); f_tparams = [];
        f_where_constraints = [];
        f_variadic =
        (FVvariadicArg
-          { AnnotatedAST.param_annotation = ([5:22-5:27], varray<string>);
-            param_hint = (Some ([5:12-5:18], (Hprim Tstring)));
+          { Aast.AnnotatedAST.param_annotation =
+            ([5:22-5:27], varray<string>);
+            param_hint =
+            (Some ([5:12-5:18], (Aast_defs.Hprim Aast_defs.Tstring)));
             param_is_reference = false; param_is_variadic = true;
             param_pos = [5:22-5:27]; param_name = "$args"; param_expr = None;
             param_callconv = None; param_user_attributes = [] });
        f_params = [];
        f_body =
        (NamedBody
-          { AnnotatedAST.fnb_nast =
+          { Aast.AnnotatedAST.fnb_nast =
             [(Foreach (
                 (([6:12-6:17], varray<string>), (Lvar ([6:12-6:17], $args))),
                 (As_v (([6:21-6:25], string), (Lvar ([6:21-6:25], $arg)))),
                 [(Expr
                     (([7:5-7:23], void),
-                     (Call (Cnormal,
+                     (Call (Aast_defs.Cnormal,
                         (([7:5-7:17], (function(string $s): void)),
                          (Id ([7:5-7:17], "\\takes_string"))),
                         [],
@@ -44,33 +48,36 @@
                 ))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+       f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
+       f_ret_by_ref = false });
   (Class
-     { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
-       c_is_xhp = false; c_kind = Cnormal; c_name = ([11:7-11:9], "\\C1");
-       c_tparams = <opaque>; c_extends = []; c_uses = [];
-       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
-       c_req_implements = []; c_implements = []; c_consts = [];
-       c_typeconsts = []; c_static_vars = []; c_vars = [];
+     { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
+       c_final = false; c_is_xhp = false; c_kind = Ast_defs.Cnormal;
+       c_name = ([11:7-11:9], "\\C1"); c_tparams = <opaque>; c_extends = [];
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+       c_req_extends = []; c_req_implements = []; c_implements = [];
+       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
        c_constructor = None; c_static_methods = [];
        c_methods =
-       [{ AnnotatedAST.m_annotation = (); m_final = false;
-          m_abstract = false; m_visibility = Public;
+       [{ Aast.AnnotatedAST.m_annotation = (); m_final = false;
+          m_abstract = false; m_visibility = Aast_defs.Public;
           m_name = ([12:19-12:23], "meth"); m_tparams = [];
           m_where_constraints = [];
           m_variadic =
           (FVvariadicArg
-             { AnnotatedAST.param_annotation = ([12:27-12:32], varray<_>);
-               param_hint = None; param_is_reference = false;
-               param_is_variadic = true; param_pos = [12:27-12:32];
-               param_name = "$args"; param_expr = None;
-               param_callconv = None; param_user_attributes = [] });
+             { Aast.AnnotatedAST.param_annotation =
+               ([12:27-12:32], varray<_>); param_hint = None;
+               param_is_reference = false; param_is_variadic = true;
+               param_pos = [12:27-12:32]; param_name = "$args";
+               param_expr = None; param_callconv = None;
+               param_user_attributes = [] });
           m_params = [];
           m_body =
-          (NamedBody { AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
-          m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([12:35-12:39], (Hprim Tvoid))); m_ret_by_ref = false
-          }
+          (NamedBody
+             { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
+          m_fun_kind = Ast_defs.FSync; m_user_attributes = [];
+          m_ret = (Some ([12:35-12:39], (Aast_defs.Hprim Aast_defs.Tvoid)));
+          m_ret_by_ref = false }
          ];
        c_user_attributes = []; c_enum = None })
   ]

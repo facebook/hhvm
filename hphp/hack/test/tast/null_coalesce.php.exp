@@ -1,19 +1,21 @@
 [(Fun
-    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:22-3:25], (Hprim Tint)));
+    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:22-3:25], (Aast_defs.Hprim Aast_defs.Tint)));
       f_name = ([3:10-3:11], "\\f"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_annotation = ([3:17-3:19], ?int);
+      [{ Aast.AnnotatedAST.param_annotation = ([3:17-3:19], ?int);
          param_hint =
-         (Some ([3:12-3:16], (Hoption ([3:13-3:16], (Hprim Tint)))));
+         (Some ([3:12-3:16],
+                (Aast_defs.Hoption
+                   ([3:13-3:16], (Aast_defs.Hprim Aast_defs.Tint)))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:17-3:19]; param_name = "$x"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
       (NamedBody
-         { AnnotatedAST.fnb_nast =
+         { Aast.AnnotatedAST.fnb_nast =
            [(Return ([4:3-4:18],
                (Some (([4:10-4:17], int),
                       (NullCoalesce (
@@ -22,5 +24,6 @@
                ))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
+      f_ret_by_ref = false })
   ]

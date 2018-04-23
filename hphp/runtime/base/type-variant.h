@@ -1549,6 +1549,13 @@ inline Array& forceToArray(tv_lval lval) {
   return asArrRef(inner);
 }
 
+inline Array& forceToDArray(Variant& var) {
+  if (!(var.isPHPArray() && var.toCArrRef().isDArray())) {
+    var = Variant(Array::CreateDArray());
+  }
+  return var.toArrRef();
+}
+
 inline Array& forceToDict(Variant& var) {
   if (!var.isDict()) var = Variant(Array::CreateDict());
   return var.toArrRef();

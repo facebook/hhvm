@@ -49,6 +49,7 @@ const int64_t k_JSON_BIGINT_AS_STRING  = 1<<1;
 
 // FB json_decode() options
 // intentionally higher so when PHP adds more options we're fine
+const int64_t k_JSON_FB_DARRAYS        = 1<<19;
 const int64_t k_JSON_FB_LOOSE          = 1<<20;
 const int64_t k_JSON_FB_UNLIMITED      = 1<<21;
 const int64_t k_JSON_FB_EXTRA_ESCAPES  = 1<<22;
@@ -157,7 +158,8 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
     k_JSON_FB_COLLECTIONS |
     k_JSON_FB_STABLE_MAPS |
     k_JSON_BIGINT_AS_STRING |
-    k_JSON_FB_HACK_ARRAYS;
+    k_JSON_FB_HACK_ARRAYS |
+    k_JSON_FB_DARRAYS;
   int64_t parser_options = options & supported_options;
   Variant z;
   const auto ok =
@@ -260,6 +262,7 @@ struct JsonExtension final : Extension {
     HHVM_RC_INT(JSON_PRESERVE_ZERO_FRACTION, k_JSON_PRESERVE_ZERO_FRACTION);
     HHVM_RC_INT(JSON_OBJECT_AS_ARRAY, k_JSON_OBJECT_AS_ARRAY);
     HHVM_RC_INT(JSON_BIGINT_AS_STRING, k_JSON_BIGINT_AS_STRING);
+    HHVM_RC_INT(JSON_FB_DARRAYS, k_JSON_FB_DARRAYS);
     HHVM_RC_INT(JSON_FB_LOOSE, k_JSON_FB_LOOSE);
     HHVM_RC_INT(JSON_FB_UNLIMITED, k_JSON_FB_UNLIMITED);
     HHVM_RC_INT(JSON_FB_EXTRA_ESCAPES, k_JSON_FB_EXTRA_ESCAPES);

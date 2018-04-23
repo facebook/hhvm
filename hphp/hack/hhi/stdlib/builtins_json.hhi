@@ -35,6 +35,7 @@ const int JSON_PRESERVE_ZERO_FRACTION  = 1<<10;
 const int JSON_OBJECT_AS_ARRAY = 1<<0;
 const int JSON_BIGINT_AS_STRING = 1<<1;
 
+const int JSON_FB_DARRAYS = 0;
 const int JSON_FB_LOOSE = 0;
 const int JSON_FB_UNLIMITED = 0;
 const int JSON_FB_EXTRA_ESCAPES = 0;

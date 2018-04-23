@@ -895,6 +895,8 @@ static void object_set(Variant &var,
       collections::set(var.getObjectData(), &keyTV, value.asCell());
     } else if (container_type == JSONContainerType::HACK_ARRAYS) {
       forceToDict(var).set(key, value);
+    } else if (container_type == JSONContainerType::DARRAYS) {
+      forceToDArray(var).set(key, value);
     } else {
       forceToArray(var).set(key, value);
     }
@@ -934,6 +936,10 @@ JSONContainerType get_container_type_from_options(int64_t options) {
     return JSONContainerType::HACK_ARRAYS;
   }
 
+  if (options & k_JSON_FB_DARRAYS) {
+    return JSONContainerType::DARRAYS;
+  }
+
   return JSONContainerType::PHP_ARRAYS;
 }
 
@@ -956,6 +962,11 @@ JSONContainerType get_container_type_from_options(int64_t options) {
  * HACK_ARRAYS    | false    | "{}"       => stdClass
  * HACK_ARRAYS    | true     | "[]"       => vec
  * HACK_ARRAYS    | false    | "[]"       => stdClass
+ *
+ * DARRAYS        | true     | "{}"       => darray
+ * DARRAYS        | false    | "{}"       => stdClass
+ * DARRAYS        | true     | "[]"       => darray
+ * DARRAYS        | false    | "[]"       => stdClass
  *
  * PHP_ARRAYS     | true     | "{}"       => array
  * PHP_ARRAYS     | false    | "{}"       => stdClass
@@ -1121,6 +1132,8 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             /* <fb> */
             } else if (container_type == JSONContainerType::HACK_ARRAYS) {
               top = Array::CreateDict();
+            } else if (container_type == JSONContainerType::DARRAYS) {
+              top = Array::CreateDArray();
             /* </fb> */
             } else {
               top = Array::Create();
@@ -1191,6 +1204,8 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             top = req::make<c_Vector>();
           } else if (container_type == JSONContainerType::HACK_ARRAYS) {
             top = Array::CreateVec();
+          } else if (container_type == JSONContainerType::DARRAYS) {
+            top = Array::CreateDArray();
           } else {
             top = Array::Create();
           }

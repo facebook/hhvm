@@ -2992,3 +2992,34 @@ let from_text_with_legacy (env : env) (content : string)
     legacy @@ from_text env source_text
 
 let from_file_with_legacy env = legacy (from_file env)
+
+
+(******************************************************************************(
+ * For cut-over purposes only; this should be removed as soon as Parser_hack
+ * is removed.
+)******************************************************************************)
+let parse_failure_scuba_table = Scuba.Table.of_name "hh_parse_failure"
+
+let legacy_compliant_parse_defensively fn quick_mode parser_options content =
+  try begin
+    let source = Full_fidelity_source_text.make fn content in
+    let env = make_env ~fail_open:false ~quick_mode ~parser_options fn in
+    legacy @@ from_text env source
+  end with e ->
+    let err = Printexc.to_string e in
+    let fn = Relative_path.suffix fn in
+    let () =
+      Scuba.new_sample (Some parse_failure_scuba_table)
+      |> Scuba.add_normal "file" fn
+      |> Scuba.add_normal "error" err
+      |> EventLogger.log
+    in
+    let () =
+      !Utils.log (Printf.sprintf "!! FAILED FOR %s\n  - error: %s\n" fn err)
+    in
+    { Parser_hack.file_mode = None
+    ; Parser_hack.comments = []
+    ; Parser_hack.ast = []
+    ; Parser_hack.content = content
+    ; Parser_hack.is_hh_file = false
+    }

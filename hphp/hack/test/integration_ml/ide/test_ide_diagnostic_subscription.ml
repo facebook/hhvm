@@ -22,8 +22,8 @@ let foo_contents = "<?hh
 
 let foo_diagnostics = "
 /foo.php:
-File \"/foo.php\", line 3, characters 1-0:
-Expected } (Parsing[1002])
+File \"/foo.php\", line 2, characters 2-2:
+A right brace ('}') is expected here. (Parsing[1002])
 "
 
 let foo_clear_diagnostics = "

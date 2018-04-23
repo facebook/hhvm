@@ -50,13 +50,13 @@ let foo_ide_contents =
 "
 
 let foo_ide_errors = "
-File \"/foo.php\", line 4, characters 1-0:
-Expected } (Parsing[1002])
+File \"/foo.php\", line 3, characters 2-2:
+A right brace ('}') is expected here. (Parsing[1002])
 "
 let foo_ide_diagnostics = "
 /foo.php:
-File \"/foo.php\", line 4, characters 1-0:
-Expected } (Parsing[1002])
+File \"/foo.php\", line 3, characters 2-2:
+A right brace ('}') is expected here. (Parsing[1002])
 "
 
 let () =

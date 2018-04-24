@@ -21,6 +21,8 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/member-operations.h"
 
+#include "hphp/util/lock-free-ptr-wrapper.h"
+
 namespace HPHP { namespace jit { namespace {
 
 /* The following bunch of macros and functions are used to build up tables of
@@ -80,19 +82,28 @@ struct assert_same {
 #define CHECK_TYPE_MATCH(nm, ...)                               \
   (void)assert_same<columns, MAKE_TYPE_TUPLE(__VA_ARGS__)>{};
 
-#define BUILD_OPTAB(TABLE, ...)                                         \
-  using columns = MAKE_TYPE_TUPLE(__VA_ARGS__);                         \
-  TABLE(CHECK_TYPE_MATCH)                                               \
-  using OpFunc = void (*)();                                            \
-  static OpFunc* optab = nullptr;                                       \
-  if (!optab) {                                                         \
-    optab = static_cast<OpFunc*>(                                       \
-      calloc(1 << multiBitWidth(__VA_ARGS__), sizeof(OpFunc))           \
-    );                                                                  \
-    TABLE(FILL_ROW)                                                     \
-  }                                                                     \
-  unsigned idx = buildBitmask(__VA_ARGS__);                             \
-  auto const opFunc = optab[idx];                                       \
+#define BUILD_OPTAB(TABLE, ...)                                 \
+  using columns = MAKE_TYPE_TUPLE(__VA_ARGS__);                 \
+  TABLE(CHECK_TYPE_MATCH)                                       \
+  using OpFunc = void (*)();                                    \
+  static LockFreePtrWrapper<OpFunc*> optabWrapper;              \
+  auto optab = *optabWrapper.get().get();                       \
+  if (!optab) {                                                 \
+    optabWrapper.lock_for_update();                             \
+    optab = *optabWrapper.get().get();                          \
+    if (optab) {                                                \
+      optabWrapper.unlock();                                    \
+    } else {                                                    \
+      optab = static_cast<OpFunc*>(                             \
+        calloc(1 << multiBitWidth(__VA_ARGS__), sizeof(OpFunc)) \
+      );                                                        \
+      TABLE(FILL_ROW)                                           \
+      optabWrapper.update_and_unlock(std::move(optab));         \
+      optab = *optabWrapper.get().get();                        \
+    }                                                           \
+  }                                                             \
+  unsigned idx = buildBitmask(__VA_ARGS__);                     \
+  auto const opFunc = optab[idx];                               \
   always_assert(opFunc);
 
 // getKeyType determines the KeyType to be used as a template argument

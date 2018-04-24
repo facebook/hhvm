@@ -62,6 +62,7 @@ struct LockFreePtrWrapper {
   }
 
   struct Holder {
+    const T* get() { return &val; }
     T* operator->() { return &val; }
     Holder(const Holder& h) : bits{h.bits} { assertx(!(bits & ~kPtrMask)); }
     Holder(uintptr_t bits) : bits{bits} { assertx(!(bits & ~kPtrMask)); }

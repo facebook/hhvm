@@ -8,7 +8,6 @@
  *)
 
 open Hh_core
-module Lowerer = Full_fidelity_ast
 
 (*****************************************************************************)
 (* Table containing all the Abstract Syntax Trees (cf ast.ml) for each file.*)
@@ -33,18 +32,10 @@ module LocalParserCache = SharedMem.LocalCache (Relative_path.S) (struct
     let use_sqlite_fallback () = false
   end)
 
-let get_file_mode text =
-  match Full_fidelity_parser.get_language_and_mode text with
-  | _, m -> m
-
-let parse_failure_scuba_table = Scuba.Table.of_name "hh_parse_failure"
-
 let get_from_local_cache ~full popt file_name =
-  let fn = Relative_path.to_absolute file_name in
   match LocalParserCache.get file_name with
   | Some ast -> ast
-  | None when not (ParserOptions.use_full_fidelity popt) ->
-    (* Legacy branch during cutover phase; remove entire branch after *)
+  | None ->
         let contents =
         match File_heap.get_contents file_name with
         | Some contents -> contents
@@ -61,35 +52,6 @@ let get_from_local_cache ~full popt file_name =
         then Ast_utils.deregister_ignored_attributes ast else ast in
         if full then LocalParserCache.add file_name ast;
         ast
-  | None ->
-    let f contents =
-      let contents =
-        if (FindUtils.is_php fn
-        && not (FilesToIgnore.should_ignore fn))
-        && Parser_hack.get_file_mode popt file_name contents <> None
-        then contents
-        else ""
-      in
-      let source = Full_fidelity_source_text.make file_name contents in
-      match get_file_mode source with
-      | None -> []
-      | Some _ ->
-        (Full_fidelity_ast.legacy_compliant_parse_defensively
-          file_name
-          false
-          popt
-          contents
-        ).Parser_hack.ast
-    in
-    let ast = Option.value_map ~default:[] ~f (File_heap.get_contents file_name) in
-    let ast =
-      if (Relative_path.prefix file_name = Relative_path.Hhi)
-      && ParserOptions.deregister_php_stdlib popt
-      then Ast_utils.deregister_ignored_attributes ast
-      else ast
-    in
-    let () = if full then LocalParserCache.add file_name ast in
-    ast
 
 let get_class defs class_name =
   let rec get acc defs =

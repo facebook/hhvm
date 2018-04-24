@@ -29,6 +29,6 @@ let () =
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
   let expected_error =
-    "File \"/foo.php\", line 3, characters 2-2:\n" ^
-    "A right brace ('}') is expected here. (Parsing[1002])\n" in
+    "File \"/foo.php\", line 4, characters 1-0:\n" ^
+    "Expected } (Parsing[1002])\n" in
   Test.assertSingleError expected_error (Errors.get_error_list env.errorl);

@@ -45,8 +45,8 @@ class Fo
 
 let foo_diagnostics = "
 /foo.php:
-File \"/foo.php\", line 3, characters 9-9:
-A right brace ('}') is expected here. (Parsing[1002])
+File \"/foo.php\", line 4, characters 1-0:
+Expected { (Parsing[1002])
 "
 
 let autocomplete_contents =

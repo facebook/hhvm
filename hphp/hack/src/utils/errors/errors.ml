@@ -2812,7 +2812,8 @@ let array_get_with_optional_field pos1 pos2 name =
     [
       pos1,
       "Invalid index operation: '" ^ name ^ "' is marked as an optional shape \
-      field. It may not be present in the shape. Use Shapes::idx instead.";
+      field. It may not be present in the shape. Use the `??` operator \
+      instead.";
       pos2,
       "This is where the field was declared as optional."
     ]

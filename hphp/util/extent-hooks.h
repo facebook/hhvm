@@ -55,8 +55,6 @@ struct BumpExtentAllocator : private BumpAllocState {
                             size_t size, size_t alignment, bool* zero,
                             bool* commit, unsigned arena_ind);
 
-  static constexpr bool IsPurgingSupported() { return false; }
-
   // The hook passed to the underlying arena upon creation.
   static extent_hooks_t s_hooks;
 

@@ -106,19 +106,14 @@ void ManagedArena<ExtentAllocator>::init() {
   if (mallctl(command, nullptr, nullptr, &hooks_ptr, sizeof(hooks_ptr))) {
     throw std::runtime_error{command};
   }
-  // Turn off purging if we are unable to return memeory to the system.
-  if (ExtentAllocator::IsPurgingSupported()) {
-    ssize_t decay_time = -1;
-    std::snprintf(command, sizeof(command),
-                  "arena.%d.dirty_decay_ms", m_arenaId);
-    if (mallctl(command, nullptr, nullptr, &decay_time, sizeof(decay_time))) {
-      throw std::runtime_error{command};
-    }
-    std::snprintf(command, sizeof(command),
-                  "arena.%d.muzzy_decay_ms", m_arenaId);
-    if (mallctl(command, nullptr, nullptr, &decay_time, sizeof(decay_time))) {
-      throw std::runtime_error{command};
-    }
+  // Purge infrequently. Most of the purging will fail if hugetlb pages are
+  // used, yet it is possible to use normal pages when hugetlb pages are
+  // unavailable.
+  ssize_t decay_ms = 60 * 1000;
+  std::snprintf(command, sizeof(command),
+                "arena.%d.dirty_decay_ms", m_arenaId);
+  if (mallctl(command, nullptr, nullptr, &decay_ms, sizeof(decay_ms))) {
+    throw std::runtime_error{command};
   }
   assert(GetByArenaId<ManagedArena>(m_arenaId) == nullptr);
   for (auto& i : g_arenas) {

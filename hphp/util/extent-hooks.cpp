@@ -46,9 +46,11 @@ static bool extent_decommit(extent_hooks_t* /*extent_hooks*/, void* /*addr*/,
 }
 
 static bool
-extent_purge(extent_hooks_t* /*extent_hooks*/, void* /*addr*/, size_t /*size*/,
-             size_t /*offset*/, size_t /*length*/, unsigned /*arena_ind*/) {
-  return true;
+extent_purge(extent_hooks_t* /*extent_hooks*/, void* addr, size_t size,
+             size_t offset, size_t length, unsigned /*arena_ind*/) {
+  // This function should return false upon success, which is the case when
+  // madvise returns 0.
+  return madvise((char*)addr + offset, length, MADV_DONTNEED);
 }
 
 static bool extent_split(extent_hooks_t* /*extent_hooks*/, void* /*addr*/,

@@ -1,57 +1,52 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([2:17-2:20], (Aast_defs.Hprim Aast_defs.Tint)));
-      f_name = ([2:10-2:13], "\\foo"); f_tparams = [];
+      f_ret = (Some ([2:17-20], (Aast_defs.Hprim Aast_defs.Tint)));
+      f_name = ([2:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([3:3-3:15], array<int>),
+               (([3:3-15], array<int>),
                 (Binop ((Ast_defs.Eq None),
-                   (([3:3-3:7], array<int>), (Lvar ([3:3-3:7], $arr))),
-                   (([3:10-3:15], array<int>),
+                   (([3:3-7], array<int>), (Lvar ([3:3-7], $arr))),
+                   (([3:10-15], array<int>),
                     (Array
-                       [(AFvalue
-                           (([3:16-3:17], int), (Int ([3:16-3:17], "1"))));
-                         (AFvalue
-                            (([3:19-3:20], int), (Int ([3:19-3:20], "2"))));
-                         (AFvalue
-                            (([3:22-3:23], int), (Int ([3:22-3:23], "3"))))
+                       [(AFvalue (([3:16-17], int), (Int ([3:16-17], "1"))));
+                         (AFvalue (([3:19-20], int), (Int ([3:19-20], "2"))));
+                         (AFvalue (([3:22-23], int), (Int ([3:22-23], "3"))))
                          ]))
                    ))));
              (Expr
-                (([4:3-4:9], int),
+                (([4:3-9], int),
                  (Binop ((Ast_defs.Eq None),
-                    (([4:3-4:5], int), (Lvar ([4:3-4:5], $y))),
-                    (([4:8-4:9], int), (Int ([4:8-4:9], "0")))))));
-             (Foreach (
-                (([5:12-5:16], array<int>), (Lvar ([5:12-5:16], $arr))),
+                    (([4:3-5], int), (Lvar ([4:3-5], $y))),
+                    (([4:8-9], int), (Int ([4:8-9], "0")))))));
+             (Foreach ((([5:12-16], array<int>), (Lvar ([5:12-16], $arr))),
                 (As_v
-                   (([5:20-5:25], int),
+                   (([5:20-25], int),
                     (Unop (Ast_defs.Uref,
-                       (([5:21-5:25], int), (Lvar ([5:21-5:25], $val))))))),
+                       (([5:21-25], int), (Lvar ([5:21-25], $val))))))),
                 [(Expr
-                    (([6:5-6:17], int),
+                    (([6:5-17], int),
                      (Binop ((Ast_defs.Eq (Some Ast_defs.Plus)),
-                        (([6:5-6:7], int), (Lvar ([6:5-6:7], $y))),
-                        (([6:11-6:17], int),
+                        (([6:5-7], int), (Lvar ([6:5-7], $y))),
+                        (([6:11-17], int),
                          (Unop (Ast_defs.Upincr,
-                            (([6:11-6:15], int), (Lvar ([6:11-6:15], $val)))
-                            )))
+                            (([6:11-15], int), (Lvar ([6:11-15], $val))))))
                         ))))
                   ]
                 ));
              (Expr
-                (([8:3-8:17], _),
+                (([8:3-17], _),
                  (Call (Aast_defs.Cnormal,
-                    (([8:3-8:11], (function($expression, ...): _)),
-                     (Id ([8:3-8:11], "\\var_dump"))),
+                    (([8:3-11], (function($expression, ...): _)),
+                     (Id ([8:3-11], "\\var_dump"))),
                     [],
-                    [(([8:12-8:16], array<int>), (Lvar ([8:12-8:16], $arr)))],
+                    [(([8:12-16], array<int>), (Lvar ([8:12-16], $arr)))], 
                     []))));
-             (Return ([9:3-9:13],
-                (Some (([9:10-9:12], int), (Lvar ([9:10-9:12], $y))))))
+             (Return ([9:3-13],
+                (Some (([9:10-12], int), (Lvar ([9:10-12], $y))))))
              ];
            fnb_unsafe = false });
       f_fun_kind = Ast_defs.FSync; f_user_attributes = [];

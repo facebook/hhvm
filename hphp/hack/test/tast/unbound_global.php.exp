@@ -1,15 +1,15 @@
 Errors:
-  [4:3-4:17] Unbound name: unbound_global (a global constant)
-  [4:3-4:17] Unbound global constant (Typing)
+  [4:3-17] Unbound name: unbound_global (a global constant)
+  [4:3-17] Unbound global constant (Typing)
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:18-3:22], (Aast_defs.Hprim Aast_defs.Tvoid)));
-      f_name = ([3:10-3:14], "\\test"); f_tparams = [];
+      f_ret = (Some ([3:18-22], (Aast_defs.Hprim Aast_defs.Tvoid)));
+      f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
-           [(Expr (([4:3-4:17], _), (Id ([4:3-4:17], "\\unbound_global"))))];
+           [(Expr (([4:3-17], _), (Id ([4:3-17], "\\unbound_global"))))];
            fnb_unsafe = false });
       f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
       f_ret_by_ref = false })

@@ -1,44 +1,43 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:35-3:38], (Aast_defs.Hprim Aast_defs.Tint)));
-      f_name = ([3:10-3:14], "\\test"); f_tparams = [];
+      f_ret = (Some ([3:35-38], (Aast_defs.Hprim Aast_defs.Tint)));
+      f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([3:19-3:21], int);
-         param_hint = (Some ([3:15-3:18], (Aast_defs.Hprim Aast_defs.Tint)));
+      [{ Aast.AnnotatedAST.param_annotation = ([3:19-21], int);
+         param_hint = (Some ([3:15-18], (Aast_defs.Hprim Aast_defs.Tint)));
          param_is_reference = false; param_is_variadic = false;
-         param_pos = [3:19-3:21]; param_name = "$i"; param_expr = None;
+         param_pos = [3:19-21]; param_name = "$i"; param_expr = None;
          param_callconv = None; param_user_attributes = [] };
-        { Aast.AnnotatedAST.param_annotation = ([3:30-3:32], string);
+        { Aast.AnnotatedAST.param_annotation = ([3:30-32], string);
           param_hint =
-          (Some ([3:23-3:29], (Aast_defs.Hprim Aast_defs.Tstring)));
+          (Some ([3:23-29], (Aast_defs.Hprim Aast_defs.Tstring)));
           param_is_reference = false; param_is_variadic = false;
-          param_pos = [3:30-3:32]; param_name = "$s"; param_expr = None;
+          param_pos = [3:30-32]; param_name = "$s"; param_expr = None;
           param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([4:3-4:25], Vector<(int | string)>),
+               (([4:3-25], Vector<(int | string)>),
                 (Binop ((Ast_defs.Eq None),
-                   (([4:3-4:9], Vector<(int | string)>),
-                    (Lvar ([4:3-4:9], $items))),
-                   (([4:12-4:25], Vector<(int | string)>),
+                   (([4:3-9], Vector<(int | string)>),
+                    (Lvar ([4:3-9], $items))),
+                   (([4:12-25], Vector<(int | string)>),
                     (ValCollection (<vc_kind>,
-                       [(([4:21-4:23], int), (Lvar ([4:21-4:23], $i)))])))
+                       [(([4:21-23], int), (Lvar ([4:21-23], $i)))])))
                    ))));
              (Expr
-                (([5:3-5:9], (function(): int)),
+                (([5:3-9], (function(): int)),
                  (Binop ((Ast_defs.Eq None),
-                    (([5:3-5:5], (function(): int)), (Lvar ([5:3-5:5], $f))),
-                    (([5:8-5:9], (function(): int)),
+                    (([5:3-5], (function(): int)), (Lvar ([5:3-5], $f))),
+                    (([5:8-9], (function(): int)),
                      (Efun (
                         { Aast.AnnotatedAST.f_annotation = ();
                           f_mode = <opaque>;
                           f_ret =
-                          (Some ([5:12-5:15],
-                                 (Aast_defs.Hprim Aast_defs.Tint)));
+                          (Some ([5:12-15], (Aast_defs.Hprim Aast_defs.Tint)));
                           f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = FVnonVariadic; f_params = [];
@@ -46,42 +45,42 @@
                           (NamedBody
                              { Aast.AnnotatedAST.fnb_nast =
                                [(Expr
-                                   (([10:5-10:22], (int | string)),
+                                   (([10:5-22], (int | string)),
                                     (Binop ((Ast_defs.Eq None),
-                                       (([10:5-10:10], (int | string)),
-                                        (Lvar ([10:5-10:10], $item))),
-                                       (([10:13-10:22], (int | string)),
+                                       (([10:5-10], (int | string)),
+                                        (Lvar ([10:5-10], $item))),
+                                       (([10:13-22], (int | string)),
                                         (Array_get (
-                                           (([10:13-10:19], Vector<(int | string)>),
-                                            (Lvar ([10:13-10:19], $items))),
-                                           (Some (([10:20-10:21], int),
-                                                  (Int ([10:20-10:21], "1"))))
+                                           (([10:13-19], Vector<(int | string)>),
+                                            (Lvar ([10:13-19], $items))),
+                                           (Some (([10:20-21], int),
+                                                  (Int ([10:20-21], "1"))))
                                            )))
                                        ))));
-                                 (Return ([11:5-11:18],
-                                    (Some (([11:12-11:17], int),
-                                           (Lvar ([11:12-11:17], $item))))
+                                 (Return ([11:5-18],
+                                    (Some (([11:12-17], int),
+                                           (Lvar ([11:12-17], $item))))
                                     ))
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = Ast_defs.FSync;
                           f_user_attributes = []; f_ret_by_ref = false },
-                        [([10:13-10:19], $items)])))
+                        [([10:13-19], $items)])))
                     ))));
              (Expr
-                (([13:3-13:16], (int | string)),
+                (([13:3-16], (int | string)),
                  (Binop ((Ast_defs.Eq None),
-                    (([13:3-13:11], (int | string)),
+                    (([13:3-11], (int | string)),
                      (Array_get (
-                        (([13:3-13:9], Vector<(int | string)>),
-                         (Lvar ([13:3-13:9], $items))),
+                        (([13:3-9], Vector<(int | string)>),
+                         (Lvar ([13:3-9], $items))),
                         None))),
-                    (([13:14-13:16], string), (Lvar ([13:14-13:16], $s)))))));
-             (Return ([14:3-14:15],
-                (Some (([14:10-14:14], int),
+                    (([13:14-16], string), (Lvar ([13:14-16], $s)))))));
+             (Return ([14:3-15],
+                (Some (([14:10-14], int),
                        (Call (Aast_defs.Cnormal,
-                          (([14:10-14:12], (function(): int)),
-                           (Lvar ([14:10-14:12], $f))),
+                          (([14:10-12], (function(): int)),
+                           (Lvar ([14:10-12], $f))),
                           [], [], []))))
                 ))
              ];

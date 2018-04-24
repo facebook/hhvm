@@ -1,46 +1,44 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([12:18-12:22], (Aast_defs.Hprim Aast_defs.Tvoid)));
-      f_name = ([12:10-12:14], "\\test"); f_tparams = [];
+      f_ret = (Some ([12:18-22], (Aast_defs.Hprim Aast_defs.Tvoid)));
+      f_name = ([12:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([13:3-13:13], array<string, _>),
+               (([13:3-13], array<string, _>),
                 (Binop ((Ast_defs.Eq None),
-                   (([13:3-13:5], array<string, _>), (Lvar ([13:3-13:5], $x))),
-                   (([13:8-13:13], array<string, _>),
+                   (([13:3-5], array<string, _>), (Lvar ([13:3-5], $x))),
+                   (([13:8-13], array<string, _>),
                     (Array
                        [(AFkvalue (
-                           (([13:14-13:17], string),
-                            (String ([13:14-13:17], "k"))),
-                           (([13:21-13:22], int), (Int ([13:21-13:22], "0")))
-                           ));
+                           (([13:14-17], string), (String ([13:14-17], "k"))),
+                           (([13:21-22], int), (Int ([13:21-22], "0")))));
                          (AFkvalue (
-                            (([13:24-13:28], string),
-                             (String ([13:24-13:28], "k2"))),
-                            (([13:32-13:49], _),
+                            (([13:24-28], string),
+                             (String ([13:24-28], "k2"))),
+                            (([13:32-49], _),
                              (Call (Aast_defs.Cnormal,
-                                (([13:32-13:47], _),
-                                 (Id ([13:32-13:47], "\\my_php_function"))),
+                                (([13:32-47], _),
+                                 (Id ([13:32-47], "\\my_php_function"))),
                                 [], [], [])))
                             ))
                          ]))
                    ))));
              (Expr
-                (([14:3-14:13], array<_>),
+                (([14:3-13], array<_>),
                  (Binop ((Ast_defs.Eq None),
-                    (([14:3-14:5], array<_>), (Lvar ([14:3-14:5], $y))),
-                    (([14:8-14:13], array<_>),
+                    (([14:3-5], array<_>), (Lvar ([14:3-5], $y))),
+                    (([14:8-13], array<_>),
                      (Array
                         [(AFvalue
-                            (([14:14-14:15], int), (Int ([14:14-14:15], "0"))));
+                            (([14:14-15], int), (Int ([14:14-15], "0"))));
                           (AFvalue
-                             (([14:17-14:34], _),
+                             (([14:17-34], _),
                               (Call (Aast_defs.Cnormal,
-                                 (([14:17-14:32], _),
-                                  (Id ([14:17-14:32], "\\my_php_function"))),
+                                 (([14:17-32], _),
+                                  (Id ([14:17-32], "\\my_php_function"))),
                                  [], [], []))))
                           ]))
                     ))))

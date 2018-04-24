@@ -1,11 +1,11 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>; f_ret = None;
-      f_name = ([12:10-12:13], "\\foo"); f_tparams = [];
+      f_name = ([12:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
-           [(If ((([13:8-13:12], bool), True), [Noop], [Noop]))];
+           [(If ((([13:8-12], bool), True), [Noop], [Noop]))];
            fnb_unsafe = true });
       f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
       f_ret_by_ref = false })

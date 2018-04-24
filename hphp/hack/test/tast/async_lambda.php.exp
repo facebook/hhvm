@@ -1,42 +1,41 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret =
-      (Some ([3:38-3:47],
-             (Aast_defs.Happly (([3:38-3:47], "\\Awaitable"),
-                [([3:48-3:54], (Aast_defs.Hprim Aast_defs.Tstring))]))));
-      f_name = ([3:16-3:25], "\\genString"); f_tparams = [];
+      (Some ([3:38-47],
+             (Aast_defs.Happly (([3:38-47], "\\Awaitable"),
+                [([3:48-54], (Aast_defs.Hprim Aast_defs.Tstring))]))));
+      f_name = ([3:16-25], "\\genString"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([3:33-3:35], string);
-         param_hint =
-         (Some ([3:26-3:32], (Aast_defs.Hprim Aast_defs.Tstring)));
+      [{ Aast.AnnotatedAST.param_annotation = ([3:33-35], string);
+         param_hint = (Some ([3:26-32], (Aast_defs.Hprim Aast_defs.Tstring)));
          param_is_reference = false; param_is_variadic = false;
-         param_pos = [3:33-3:35]; param_name = "$s"; param_expr = None;
+         param_pos = [3:33-35]; param_name = "$s"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
-           [(Return ([3:58-3:68],
-               (Some (([3:65-3:67], string), (Lvar ([3:65-3:67], $s))))))
+           [(Return ([3:58-68],
+               (Some (([3:65-67], string), (Lvar ([3:65-67], $s))))))
              ];
            fnb_unsafe = false });
       f_fun_kind = Ast_defs.FAsync; f_user_attributes = [];
       f_ret_by_ref = false });
   (Fun
      { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([5:18-5:22], (Aast_defs.Hprim Aast_defs.Tvoid)));
-       f_name = ([5:10-5:14], "\\test"); f_tparams = [];
+       f_ret = (Some ([5:18-22], (Aast_defs.Hprim Aast_defs.Tvoid)));
+       f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        (NamedBody
           { Aast.AnnotatedAST.fnb_nast =
             [(Expr
-                (([6:3-6:14], (function(): Awaitable<void>)),
+                (([6:3-14], (function(): Awaitable<void>)),
                  (Binop ((Ast_defs.Eq None),
-                    (([6:3-6:6], (function(): Awaitable<void>)),
-                     (Lvar ([6:3-6:6], $f0))),
-                    (([6:9-6:14], (function(): Awaitable<_>)),
+                    (([6:3-6], (function(): Awaitable<void>)),
+                     (Lvar ([6:3-6], $f0))),
+                    (([6:9-14], (function(): Awaitable<_>)),
                      (Efun (
                         { Aast.AnnotatedAST.f_annotation = ();
                           f_mode = <opaque>; f_ret = None;
@@ -47,21 +46,20 @@
                           (NamedBody
                              { Aast.AnnotatedAST.fnb_nast =
                                [(Expr
-                                   (([7:5-7:34], string),
+                                   (([7:5-34], string),
                                     (Binop ((Ast_defs.Eq None),
-                                       (([7:5-7:9], string),
-                                        (Lvar ([7:5-7:9], $str))),
-                                       (([7:12-7:34], string),
+                                       (([7:5-9], string),
+                                        (Lvar ([7:5-9], $str))),
+                                       (([7:12-34], string),
                                         (Await
-                                           (([7:18-7:34], Awaitable<string>),
+                                           (([7:18-34], Awaitable<string>),
                                             (Call (Aast_defs.Cnormal,
-                                               (([7:18-7:27], (function(string $s): Awaitable<string>)),
+                                               (([7:18-27], (function(string $s): Awaitable<string>)),
                                                 (Id
-                                                   ([7:18-7:27],
-                                                    "\\genString"))),
+                                                   ([7:18-27], "\\genString"))),
                                                [],
-                                               [(([7:28-7:33], string),
-                                                 (String ([7:28-7:33], "foo")))
+                                               [(([7:28-33], string),
+                                                 (String ([7:28-33], "foo")))
                                                  ],
                                                [])))))
                                        ))))
@@ -72,10 +70,10 @@
                         [])))
                     ))));
               (Expr
-                 (([9:3-9:14], [fun]),
+                 (([9:3-14], [fun]),
                   (Binop ((Ast_defs.Eq None),
-                     (([9:3-9:6], [fun]), (Lvar ([9:3-9:6], $f1))),
-                     (([9:9-9:14], (function($x): Awaitable<_>)),
+                     (([9:3-6], [fun]), (Lvar ([9:3-6], $f1))),
+                     (([9:9-14], (function($x): Awaitable<_>)),
                       (Efun (
                          { Aast.AnnotatedAST.f_annotation = ();
                            f_mode = <opaque>; f_ret = None;
@@ -84,10 +82,10 @@
                            f_variadic = FVnonVariadic;
                            f_params =
                            [{ Aast.AnnotatedAST.param_annotation =
-                              ([9:15-9:17], _); param_hint = None;
+                              ([9:15-17], _); param_hint = None;
                               param_is_reference = false;
                               param_is_variadic = false;
-                              param_pos = [9:15-9:17]; param_name = "$x";
+                              param_pos = [9:15-17]; param_name = "$x";
                               param_expr = None; param_callconv = None;
                               param_user_attributes = [] }
                              ];
@@ -95,22 +93,21 @@
                            (NamedBody
                               { Aast.AnnotatedAST.fnb_nast =
                                 [(Expr
-                                    (([10:5-10:31], string),
+                                    (([10:5-31], string),
                                      (Binop ((Ast_defs.Eq None),
-                                        (([10:5-10:9], string),
-                                         (Lvar ([10:5-10:9], $str))),
-                                        (([10:12-10:31], string),
+                                        (([10:5-9], string),
+                                         (Lvar ([10:5-9], $str))),
+                                        (([10:12-31], string),
                                          (Await
-                                            (([10:18-10:31], Awaitable<string>),
+                                            (([10:18-31], Awaitable<string>),
                                              (Call (Aast_defs.Cnormal,
-                                                (([10:18-10:27], (function(string $s): Awaitable<string>)),
+                                                (([10:18-27], (function(string $s): Awaitable<string>)),
                                                  (Id
-                                                    ([10:18-10:27],
+                                                    ([10:18-27],
                                                      "\\genString"))),
                                                 [],
-                                                [(([10:28-10:30], _),
-                                                  (Lvar ([10:28-10:30], $x)))
-                                                  ],
+                                                [(([10:28-30], _),
+                                                  (Lvar ([10:28-30], $x)))],
                                                 [])))))
                                         ))))
                                   ];

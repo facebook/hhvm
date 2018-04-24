@@ -1,59 +1,54 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([12:44-12:47], (Aast_defs.Hprim Aast_defs.Tint)));
-      f_name = ([12:10-12:40], "\\terminal_catch_can_do_whatever");
+      f_ret = (Some ([12:44-47], (Aast_defs.Hprim Aast_defs.Tint)));
+      f_name = ([12:10-40], "\\terminal_catch_can_do_whatever");
       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params = [];
       f_body =
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([13:3-13:10], int),
+               (([13:3-10], int),
                 (Binop ((Ast_defs.Eq None),
-                   (([13:3-13:5], int), (Lvar ([13:3-13:5], $a))),
-                   (([13:8-13:10], int), (Int ([13:8-13:10], "23")))))));
+                   (([13:3-5], int), (Lvar ([13:3-5], $a))),
+                   (([13:8-10], int), (Int ([13:8-10], "23")))))));
              (Try (
                 [(Expr
-                    (([15:5-15:13], int),
+                    (([15:5-13], int),
                      (Binop ((Ast_defs.Eq None),
-                        (([15:5-15:7], int), (Lvar ([15:5-15:7], $a))),
-                        (([15:10-15:13], int), (Int ([15:10-15:13], "456")))
-                        ))))
+                        (([15:5-7], int), (Lvar ([15:5-7], $a))),
+                        (([15:10-13], int), (Int ([15:10-13], "456")))))))
                   ],
-                [(([16:12-16:25], "\\YourException"), ([16:26-16:28], $e),
-                  [(Return ([17:5-17:15],
-                      (Some (([17:12-17:14], int), (Lvar ([17:12-17:14], $a))))
-                      ))
+                [(([16:12-25], "\\YourException"), ([16:26-28], $e),
+                  [(Return ([17:5-15],
+                      (Some (([17:12-14], int), (Lvar ([17:12-14], $a))))))
                     ]);
-                  (([18:12-18:23], "\\MyException"), ([18:24-18:26], $e),
+                  (([18:12-23], "\\MyException"), ([18:24-26], $e),
                    [(Expr
-                       (([20:5-20:16], string),
+                       (([20:5-16], string),
                         (Binop ((Ast_defs.Eq None),
-                           (([20:5-20:7], string), (Lvar ([20:5-20:7], $a))),
-                           (([20:10-20:16], string),
-                            (String ([20:10-20:16], "duck")))
+                           (([20:5-7], string), (Lvar ([20:5-7], $a))),
+                           (([20:10-16], string),
+                            (String ([20:10-16], "duck")))
                            ))));
-                     (Return ([21:5-21:18],
-                        (Some (([21:12-21:17], int),
-                               (Int ([21:12-21:17], "23904"))))
+                     (Return ([21:5-18],
+                        (Some (([21:12-17], int), (Int ([21:12-17], "23904"))))
                         ))
                      ]);
-                  (([22:12-22:21], "\\Exception"), ([22:22-22:24], $e),
-                   [(Return ([23:5-23:15],
-                       (Some (([23:12-23:14], int),
-                              (Lvar ([23:12-23:14], $a))))
-                       ))
+                  (([22:12-21], "\\Exception"), ([22:22-24], $e),
+                   [(Return ([23:5-15],
+                       (Some (([23:12-14], int), (Lvar ([23:12-14], $a))))))
                      ])
                   ],
                 [(Expr
-                    (([25:5-25:11], int),
+                    (([25:5-11], int),
                      (Binop ((Ast_defs.Eq None),
-                        (([25:5-25:7], int), (Lvar ([25:5-25:7], $a))),
-                        (([25:10-25:11], int), (Int ([25:10-25:11], "4")))))))
+                        (([25:5-7], int), (Lvar ([25:5-7], $a))),
+                        (([25:10-11], int), (Int ([25:10-11], "4")))))))
                   ]
                 ));
-             (Return ([28:3-28:13],
-                (Some (([28:10-28:12], int), (Lvar ([28:10-28:12], $a))))))
+             (Return ([28:3-13],
+                (Some (([28:10-12], int), (Lvar ([28:10-12], $a))))))
              ];
            fnb_unsafe = false });
       f_fun_kind = Ast_defs.FSync; f_user_attributes = [];

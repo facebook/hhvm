@@ -1,70 +1,65 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:21-3:24], (Aast_defs.Hprim Aast_defs.Tint)));
-      f_name = ([3:10-3:11], "\\f"); f_tparams = [];
-      f_where_constraints = []; f_variadic = FVnonVariadic;
+      f_ret = (Some ([3:21-24], (Aast_defs.Hprim Aast_defs.Tint)));
+      f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
+      f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([3:16-3:18], int);
-         param_hint = (Some ([3:12-3:15], (Aast_defs.Hprim Aast_defs.Tint)));
+      [{ Aast.AnnotatedAST.param_annotation = ([3:16-18], int);
+         param_hint = (Some ([3:12-15], (Aast_defs.Hprim Aast_defs.Tint)));
          param_is_reference = false; param_is_variadic = false;
-         param_pos = [3:16-3:18]; param_name = "$x"; param_expr = None;
+         param_pos = [3:16-18]; param_name = "$x"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([4:3-4:10], int),
+               (([4:3-10], int),
                 (Binop ((Ast_defs.Eq (Some Ast_defs.Minus)),
-                   (([4:3-4:5], int), (Lvar ([4:3-4:5], $x))),
-                   (([4:9-4:10], int), (Int ([4:9-4:10], "4")))))));
+                   (([4:3-5], int), (Lvar ([4:3-5], $x))),
+                   (([4:9-10], int), (Int ([4:9-10], "4")))))));
              (Expr
-                (([5:3-5:10], int),
+                (([5:3-10], int),
                  (Binop ((Ast_defs.Eq (Some Ast_defs.Plus)),
-                    (([5:3-5:5], int), (Lvar ([5:3-5:5], $x))),
-                    (([5:9-5:10], int), (Int ([5:9-5:10], "4")))))));
+                    (([5:3-5], int), (Lvar ([5:3-5], $x))),
+                    (([5:9-10], int), (Int ([5:9-10], "4")))))));
              (Expr
-                (([6:3-6:10], int),
+                (([6:3-10], int),
                  (Binop ((Ast_defs.Eq (Some Ast_defs.Star)),
-                    (([6:3-6:5], int), (Lvar ([6:3-6:5], $x))),
-                    (([6:9-6:10], int), (Int ([6:9-6:10], "4")))))));
+                    (([6:3-5], int), (Lvar ([6:3-5], $x))),
+                    (([6:9-10], int), (Int ([6:9-10], "4")))))));
              (Expr
-                (([8:3-8:11], array<int>),
+                (([8:3-11], array<int>),
                  (Binop ((Ast_defs.Eq None),
-                    (([8:3-8:7], array<int>), (Lvar ([8:3-8:7], $arr))),
-                    (([8:10-8:11], array<int>),
+                    (([8:3-7], array<int>), (Lvar ([8:3-7], $arr))),
+                    (([8:10-11], array<int>),
                      (Array
-                        [(AFvalue
-                            (([8:11-8:12], int), (Int ([8:11-8:12], "1"))));
-                          (AFvalue
-                             (([8:14-8:15], int), (Int ([8:14-8:15], "2"))));
-                          (AFvalue
-                             (([8:17-8:18], int), (Int ([8:17-8:18], "3"))));
-                          (AFvalue
-                             (([8:20-8:21], int), (Int ([8:20-8:21], "4"))))
+                        [(AFvalue (([8:11-12], int), (Int ([8:11-12], "1"))));
+                          (AFvalue (([8:14-15], int), (Int ([8:14-15], "2"))));
+                          (AFvalue (([8:17-18], int), (Int ([8:17-18], "3"))));
+                          (AFvalue (([8:20-21], int), (Int ([8:20-21], "4"))))
                           ]))
                     ))));
              (Expr
-                (([8:24-8:30], int),
+                (([8:24-30], int),
                  (Binop ((Ast_defs.Eq None),
-                    (([8:24-8:26], int), (Lvar ([8:24-8:26], $i))),
-                    (([8:29-8:30], int), (Int ([8:29-8:30], "2")))))));
+                    (([8:24-26], int), (Lvar ([8:24-26], $i))),
+                    (([8:29-30], int), (Int ([8:29-30], "2")))))));
              (Expr
-                (([9:3-9:20], int),
+                (([9:3-20], int),
                  (Binop ((Ast_defs.Eq (Some Ast_defs.Plus)),
-                    (([9:3-9:15], int),
+                    (([9:3-15], int),
                      (Array_get (
-                        (([9:3-9:7], array<int>), (Lvar ([9:3-9:7], $arr))),
-                        (Some (([9:8-9:14], int),
+                        (([9:3-7], array<int>), (Lvar ([9:3-7], $arr))),
+                        (Some (([9:8-14], int),
                                (Binop (Ast_defs.Minus,
-                                  (([9:8-9:10], int), (Lvar ([9:8-9:10], $i))),
-                                  (([9:13-9:14], int),
-                                   (Int ([9:13-9:14], "1")))
+                                  (([9:8-10], int), (Lvar ([9:8-10], $i))),
+                                  (([9:13-14], int), (Int ([9:13-14], "1")))
                                   ))))
                         ))),
-                    (([9:19-9:20], int), (Int ([9:19-9:20], "4")))))));
-             (Return ([11:3-11:13],
-                (Some (([11:10-11:12], int), (Lvar ([11:10-11:12], $x))))))
+                    (([9:19-20], int), (Int ([9:19-20], "4")))))));
+             (Return ([11:3-13],
+                (Some (([11:10-12], int), (Lvar ([11:10-12], $x))))))
              ];
            fnb_unsafe = false });
       f_fun_kind = Ast_defs.FSync; f_user_attributes = [];

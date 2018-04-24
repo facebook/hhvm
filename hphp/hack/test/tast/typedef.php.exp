@@ -1,42 +1,42 @@
 [(Typedef
-    { Aast.AnnotatedAST.t_annotation = (); t_name = ([4:6-4:8], "\\T1");
+    { Aast.AnnotatedAST.t_annotation = (); t_name = ([4:6-8], "\\T1");
       t_tparams = []; t_constraint = None;
-      t_kind = ([4:11-4:14], (Aast_defs.Hprim Aast_defs.Tint));
+      t_kind = ([4:11-14], (Aast_defs.Hprim Aast_defs.Tint));
       t_user_attributes =
-      [{ Aast.AnnotatedAST.ua_name = ([3:15-3:18], "Bar"); ua_params = [] };
-        { Aast.AnnotatedAST.ua_name = ([3:3-3:6], "Foo");
+      [{ Aast.AnnotatedAST.ua_name = ([3:15-18], "Bar"); ua_params = [] };
+        { Aast.AnnotatedAST.ua_name = ([3:3-6], "Foo");
           ua_params =
-          [(([3:7-3:8], int), (Int ([3:7-3:8], "1")));
-            (([3:9-3:10], int), (Int ([3:9-3:10], "2")));
-            (([3:11-3:12], int), (Int ([3:11-3:12], "3")))]
+          [(([3:7-8], int), (Int ([3:7-8], "1")));
+            (([3:9-10], int), (Int ([3:9-10], "2")));
+            (([3:11-12], int), (Int ([3:11-12], "3")))]
           }
         ];
       t_mode = <opaque>; t_vis = Aast_defs.Transparent });
   (Typedef
-     { Aast.AnnotatedAST.t_annotation = (); t_name = ([7:6-7:8], "\\T2");
+     { Aast.AnnotatedAST.t_annotation = (); t_name = ([7:6-8], "\\T2");
        t_tparams = []; t_constraint = None;
        t_kind =
-       ([7:11-7:18],
-        (Aast_defs.Hoption ([7:12-7:18], (Aast_defs.Hprim Aast_defs.Tstring))));
+       ([7:11-18],
+        (Aast_defs.Hoption ([7:12-18], (Aast_defs.Hprim Aast_defs.Tstring))));
        t_user_attributes =
-       [{ Aast.AnnotatedAST.ua_name = ([6:3-6:18], "SingleAttribute");
+       [{ Aast.AnnotatedAST.ua_name = ([6:3-18], "SingleAttribute");
           ua_params = [] }
          ];
        t_mode = <opaque>; t_vis = Aast_defs.Transparent });
   (Typedef
      { Aast.AnnotatedAST.t_annotation = ();
-       t_name = ([9:6-9:23], "\\Serialized_contra");
-       t_tparams = [(Ast_defs.Contravariant, ([9:25-9:26], "T"), [])];
+       t_name = ([9:6-23], "\\Serialized_contra");
+       t_tparams = [(Ast_defs.Contravariant, ([9:25-26], "T"), [])];
        t_constraint = None;
-       t_kind = ([9:30-9:36], (Aast_defs.Hprim Aast_defs.Tstring));
+       t_kind = ([9:30-36], (Aast_defs.Hprim Aast_defs.Tstring));
        t_user_attributes = []; t_mode = <opaque>;
        t_vis = Aast_defs.Transparent });
   (Typedef
      { Aast.AnnotatedAST.t_annotation = ();
-       t_name = ([10:6-10:19], "\\Serialized_co");
-       t_tparams = [(Ast_defs.Covariant, ([10:21-10:22], "T"), [])];
+       t_name = ([10:6-19], "\\Serialized_co");
+       t_tparams = [(Ast_defs.Covariant, ([10:21-22], "T"), [])];
        t_constraint = None;
-       t_kind = ([10:26-10:32], (Aast_defs.Hprim Aast_defs.Tstring));
+       t_kind = ([10:26-32], (Aast_defs.Hprim Aast_defs.Tstring));
        t_user_attributes = []; t_mode = <opaque>;
        t_vis = Aast_defs.Transparent })
   ]

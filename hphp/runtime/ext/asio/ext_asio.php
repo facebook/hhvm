@@ -126,12 +126,20 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   public static function fromArray(array $dependencies): Awaitable;
 
   /* Create a wait handle that waits for a given array of dependencies
-   * @param array $dependencies - An DArray of dependencies to wait for
+   * @param array $dependencies - A DArray of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given array of
    * dependencies
    */
   <<__Native>>
   public static function fromDArray(darray $dependencies): Awaitable;
+
+  /* Create a wait handle that waits for a given array of dependencies
+   * @param array $dependencies - A VArray of dependencies to wait for
+   * @return object - A WaitHandle that will wait for a given array of
+   * dependencies
+   */
+  <<__Native>>
+  public static function fromVArray(varray $dependencies): Awaitable;
 
   /* Create a wait handle that waits for a given vec of dependencies
    * @param array $dependencies - A vec of dependencies to wait for

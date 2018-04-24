@@ -343,7 +343,13 @@ void AsioExtension::initAwaitAllWaitHandle() {
   AAWH_SME(fromVector);
   AAWH_SME(setOnCreateCallback);
 #undef AAWH_SME
-  HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromDArray, AwaitAllWaitHandle, fromArray);
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromDArray, AwaitAllWaitHandle, fromDict);
+    HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromVArray, AwaitAllWaitHandle, fromVec);
+  } else {
+    HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromDArray, AwaitAllWaitHandle, fromArray);
+    HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromVArray, AwaitAllWaitHandle, fromArray);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

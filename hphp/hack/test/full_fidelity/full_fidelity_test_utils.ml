@@ -125,7 +125,7 @@ let tree_to_sexp_string_ignore_trivia tree =
   |> SyntaxTree.root
   |> rewrite_tree_no_trivia
   |> to_sexp
-  |> Sexp.to_string_mach
+  |> Sexp.to_string_hum
 
 let tree_dump_node node =
   let print level text =

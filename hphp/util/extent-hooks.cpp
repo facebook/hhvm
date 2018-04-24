@@ -20,29 +20,13 @@
 
 namespace HPHP { namespace alloc {
 
-// trivial jemalloc extent hooks
-static bool
-extent_dalloc(extent_hooks_t* /*extent_hooks*/, void* /*addr*/, size_t /*size*/,
-              bool /*committed*/, unsigned /*arena_ind*/) {
-  return true;
-}
-
-static void
-extent_destroy(extent_hooks_t* /*extent_hooks*/, void* /*addr*/,
-               size_t /*size*/, bool /*committed*/, unsigned /*arena_ind*/) {
-  return;
-}
+// Trivial jemalloc extent hooks.  If a hook always returns true (indicating
+// failure), setting it to NULL can be more efficient.
 
 static bool
 extent_commit(extent_hooks_t* /*extent_hooks*/, void* /*addr*/, size_t /*size*/,
               size_t /*offset*/, size_t /*length*/, unsigned /*arena_ind*/) {
   return false;
-}
-
-static bool extent_decommit(extent_hooks_t* /*extent_hooks*/, void* /*addr*/,
-                            size_t /*size*/, size_t /*offset*/,
-                            size_t /*length*/, unsigned /*arena_ind*/) {
-  return true;
 }
 
 static bool
@@ -67,12 +51,12 @@ static bool extent_merge(extent_hooks_t* /*extent_hooks*/, void* /*addra*/,
 
 extent_hooks_t BumpExtentAllocator::s_hooks {
   BumpExtentAllocator::extent_alloc,
-  extent_dalloc,
-  extent_destroy,
+  nullptr,                              // dalloc
+  nullptr,                              // destroy
   extent_commit,
-  extent_decommit,
+  nullptr,                              // decommit
   extent_purge,                         // purge_lazy
-  extent_purge,                         // purge_forced
+  nullptr,                              // purge_forced
   extent_split,
   extent_merge
 };

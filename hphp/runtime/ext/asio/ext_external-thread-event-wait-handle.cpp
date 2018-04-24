@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
@@ -172,7 +173,12 @@ void c_ExternalThreadEventWaitHandle::process() {
 
   Cell result;
   try {
-    m_event->unserialize(result);
+    try {
+      m_event->unserialize(result);
+    } catch (ExtendedException& exception) {
+      exception.recomputeBacktraceFromWH(this);
+      throw exception;
+    }
   } catch (const Object& exception) {
     assertx(exception->instanceof(SystemLib::s_ThrowableClass));
     auto parentChain = getParentChain();

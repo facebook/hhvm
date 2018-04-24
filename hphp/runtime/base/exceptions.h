@@ -32,6 +32,8 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+struct c_WaitableWaitHandle;
+
 /*
  * ExtendedException is the exception type for C++ exceptions that carry PHP
  * stack traces, but do not represent user-visible PHP exception objects.
@@ -66,6 +68,7 @@ struct ExtendedException : Exception {
   // a silent exception does not have its exception message logged
   bool isSilent() const { return m_silent; }
   void setSilent(bool s = true) { m_silent = s; }
+  void recomputeBacktraceFromWH(c_WaitableWaitHandle* wh);
 
 protected:
   ExtendedException(const std::string& msg, ArrayData* backTrace);

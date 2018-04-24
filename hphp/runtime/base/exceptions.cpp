@@ -124,6 +124,15 @@ void ExtendedException::computeBacktrace(bool skipFrame /* = false */) {
   m_btp = bt.get();
 }
 
+void ExtendedException::recomputeBacktraceFromWH(c_WaitableWaitHandle* wh) {
+  assertx(wh);
+  Array bt = createBacktrace(BacktraceArgs()
+                             .fromWaitHandle(wh)
+                             .withSelf()
+                             .withMetadata());
+  m_btp = bt.get();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 FatalErrorException::FatalErrorException(int, const char *msg, ...) {

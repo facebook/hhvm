@@ -4,7 +4,7 @@
       f_name = ([8:10-8:14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([8:17-8:19], \C);
+      [{ Aast.AnnotatedAST.param_annotation = ([8:17-8:19], C);
          param_hint =
          (Some ([8:15-8:16], (Aast_defs.Happly (([8:15-8:16], "\\C"), []))));
          param_is_reference = false; param_is_variadic = false;
@@ -36,7 +36,7 @@
                 [(Expr
                     (([13:3-13:25], noreturn),
                      (Call (Aast_defs.Cnormal,
-                        (([13:3-13:12], (function(\HH\FormatString<\PlainSprintf> $fmt, ...): noreturn)),
+                        (([13:3-13:12], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
                          (Id ([13:3-13:12], "\\invariant_violation"))),
                         [],
                         [(([13:19-13:24], string),
@@ -47,14 +47,14 @@
              (Expr
                 (([14:3-14:29], noreturn),
                  (Call (Aast_defs.Cnormal,
-                    (([14:3-14:22], (function(\HH\FormatString<\PlainSprintf> $fmt, ...): noreturn)),
+                    (([14:3-14:22], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
                      (Id ([14:3-14:22], "\\invariant_violation"))),
                     [],
                     [(([14:23-14:28], string),
                       (String ([14:23-14:28], "foo")))],
                     []))));
              (Expr
-                (([16:3-16:14], (function(\C $c): void)),
+                (([16:3-16:14], (function(C $c): void)),
                  (Fun_id ([16:7-16:13], "\\test"))));
              (Expr
                 (([17:3-17:36], (function(): void)),
@@ -63,10 +63,10 @@
              (Expr
                 (([18:3-18:31], (function(): void)),
                  (Method_id (
-                    (([18:13-18:15], \C), (Lvar ([18:13-18:15], $c))),
+                    (([18:13-18:15], C), (Lvar ([18:13-18:15], $c))),
                     ([18:17-18:30], "instanceFoo")))));
              (Expr
-                (([19:3-19:39], (function(\C): void)),
+                (([19:3-19:39], (function(C): void)),
                  (Method_caller (([19:15-19:16], "\\C"),
                     ([19:25-19:38], "instanceFoo")))));
              (Expr
@@ -74,21 +74,21 @@
                  (Call (Aast_defs.Cnormal,
                     (([21:3-21:8], (function($x): bool)),
                      (Id ([21:3-21:8], "\\empty"))),
-                    [], [(([21:9-21:11], \C), (Lvar ([21:9-21:11], $c)))], 
+                    [], [(([21:9-21:11], C), (Lvar ([21:9-21:11], $c)))], 
                     []))));
              (Expr
                 (([22:3-22:12], bool),
                  (Call (Aast_defs.Cnormal,
                     (([22:3-22:8], (function($x): bool)),
                      (Id ([22:3-22:8], "\\isset"))),
-                    [], [(([22:9-22:11], \C), (Lvar ([22:9-22:11], $c)))], 
+                    [], [(([22:9-22:11], C), (Lvar ([22:9-22:11], $c)))], 
                     []))));
              (Expr
                 (([23:3-23:12], void),
                  (Call (Aast_defs.Cnormal,
                     (([23:3-23:8], (function($x): void)),
                      (Id ([23:3-23:8], "\\unset"))),
-                    [], [(([23:9-23:11], \C), (Lvar ([23:9-23:11], $c)))], 
+                    [], [(([23:9-23:11], C), (Lvar ([23:9-23:11], $c)))], 
                     []))))
              ];
            fnb_unsafe = false });
@@ -103,18 +103,18 @@
        (NamedBody
           { Aast.AnnotatedAST.fnb_nast =
             [(Expr
-                (([28:3-28:15], \C),
+                (([28:3-28:15], C),
                  (Binop ((Ast_defs.Eq None),
-                    (([28:3-28:5], \C), (Lvar ([28:3-28:5], $c))),
-                    (([28:8-28:15], \C),
-                     (New ((\C, (CI (([28:12-28:13], "\\C"), []))), [], [])))
+                    (([28:3-28:5], C), (Lvar ([28:3-28:5], $c))),
+                    (([28:8-28:15], C),
+                     (New ((C, (CI (([28:12-28:13], "\\C"), []))), [], [])))
                     ))));
               (Expr
                  (([29:3-29:13], void),
                   (Call (Aast_defs.Cnormal,
                      (([29:3-29:9], (function($x): void)),
                       (Id ([29:3-29:9], "\\freeze"))),
-                     [], [(([29:10-29:12], \C), (Lvar ([29:10-29:12], $c)))],
+                     [], [(([29:10-29:12], C), (Lvar ([29:10-29:12], $c)))],
                      []))))
               ];
             fnb_unsafe = false });

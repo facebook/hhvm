@@ -32,11 +32,11 @@
        (NamedBody
           { Aast.AnnotatedAST.fnb_nast =
             [(Expr
-                (([6:3-6:14], (function(): \Awaitable<void>)),
+                (([6:3-6:14], (function(): Awaitable<void>)),
                  (Binop ((Ast_defs.Eq None),
-                    (([6:3-6:6], (function(): \Awaitable<void>)),
+                    (([6:3-6:6], (function(): Awaitable<void>)),
                      (Lvar ([6:3-6:6], $f0))),
-                    (([6:9-6:14], (function(): \Awaitable<_>)),
+                    (([6:9-6:14], (function(): Awaitable<_>)),
                      (Efun (
                         { Aast.AnnotatedAST.f_annotation = ();
                           f_mode = <opaque>; f_ret = None;
@@ -53,9 +53,9 @@
                                         (Lvar ([7:5-7:9], $str))),
                                        (([7:12-7:34], string),
                                         (Await
-                                           (([7:18-7:34], \Awaitable<string>),
+                                           (([7:18-7:34], Awaitable<string>),
                                             (Call (Aast_defs.Cnormal,
-                                               (([7:18-7:27], (function(string $s): \Awaitable<string>)),
+                                               (([7:18-7:27], (function(string $s): Awaitable<string>)),
                                                 (Id
                                                    ([7:18-7:27],
                                                     "\\genString"))),
@@ -75,7 +75,7 @@
                  (([9:3-9:14], [fun]),
                   (Binop ((Ast_defs.Eq None),
                      (([9:3-9:6], [fun]), (Lvar ([9:3-9:6], $f1))),
-                     (([9:9-9:14], (function($x): \Awaitable<_>)),
+                     (([9:9-9:14], (function($x): Awaitable<_>)),
                       (Efun (
                          { Aast.AnnotatedAST.f_annotation = ();
                            f_mode = <opaque>; f_ret = None;
@@ -101,9 +101,9 @@
                                          (Lvar ([10:5-10:9], $str))),
                                         (([10:12-10:31], string),
                                          (Await
-                                            (([10:18-10:31], \Awaitable<string>),
+                                            (([10:18-10:31], Awaitable<string>),
                                              (Call (Aast_defs.Cnormal,
-                                                (([10:18-10:27], (function(string $s): \Awaitable<string>)),
+                                                (([10:18-10:27], (function(string $s): Awaitable<string>)),
                                                  (Id
                                                     ([10:18-10:27],
                                                      "\\genString"))),

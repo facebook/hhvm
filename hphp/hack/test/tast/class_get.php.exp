@@ -27,10 +27,10 @@
             { Aast.AnnotatedAST.fnb_nast =
               [(If (
                   (([16:9-16:17], ?int),
-                   (Class_get ((\TestClass, CIself), ([16:15-16:17], "$x")))),
+                   (Class_get ((TestClass, CIself), ([16:15-16:17], "$x")))),
                   [(Return ([17:7-17:23],
                       (Some (([17:14-17:22], int),
-                             (Class_get ((\TestClass, CIself),
+                             (Class_get ((TestClass, CIself),
                                 ([17:20-17:22], "$x")))))
                       ))
                     ],

@@ -19,7 +19,7 @@
        f_name = ([9:10-9:14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
-       [{ Aast.AnnotatedAST.param_annotation = ([9:17-9:19], \C);
+       [{ Aast.AnnotatedAST.param_annotation = ([9:17-9:19], C);
           param_hint =
           (Some ([9:15-9:16], (Aast_defs.Happly (([9:15-9:16], "\\C"), []))));
           param_is_reference = false; param_is_variadic = false;
@@ -37,20 +37,19 @@
                     ))));
               (Expr
                  (([11:3-11:10], ?int),
-                  (Obj_get ((([11:3-11:5], \C), (Lvar ([11:3-11:5], $c))),
+                  (Obj_get ((([11:3-11:5], C), (Lvar ([11:3-11:5], $c))),
                      (([11:7-11:10], ?int), (Id ([11:7-11:10], "foo"))),
                      OG_nullthrows))));
               (Expr
                  (([12:3-12:11], _),
-                  (Obj_get ((([12:3-12:5], \C), (Lvar ([12:3-12:5], $c))),
+                  (Obj_get ((([12:3-12:5], C), (Lvar ([12:3-12:5], $c))),
                      (([12:7-12:11], _), (Lvar ([12:7-12:11], $foo))),
                      OG_nullthrows))));
               (Expr
                  (([13:3-13:29], _),
                   (Array_get (
                      (([13:3-13:8], _),
-                      (Obj_get (
-                         (([13:3-13:5], \C), (Lvar ([13:3-13:5], $c))),
+                      (Obj_get ((([13:3-13:5], C), (Lvar ([13:3-13:5], $c))),
                          (([13:7-13:8], _), Null), OG_nullthrows))),
                      (Some (([13:8-13:29], string),
                             (Call (Aast_defs.Cnormal,

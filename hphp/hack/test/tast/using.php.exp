@@ -7,35 +7,34 @@
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Using (false,
-               (([8:3-8:47], (\Handle, \Handle)),
+               (([8:3-8:47], (Handle, Handle)),
                 (Expr_list
-                   [(([8:10-8:27], \Handle),
+                   [(([8:10-8:27], Handle),
                      (Binop ((Ast_defs.Eq None),
-                        (([8:10-8:12], \Handle), (Lvar ([8:10-8:12], $x))),
-                        (([8:15-8:27], \Handle),
+                        (([8:10-8:12], Handle), (Lvar ([8:10-8:12], $x))),
+                        (([8:15-8:27], Handle),
                          (New (
-                            (\Handle, (CI (([8:19-8:25], "\\Handle"), []))),
+                            (Handle, (CI (([8:19-8:25], "\\Handle"), []))),
                             [], [])))
                         )));
-                     (([8:29-8:46], \Handle),
+                     (([8:29-8:46], Handle),
                       (Binop ((Ast_defs.Eq None),
-                         (([8:29-8:31], \Handle), (Lvar ([8:29-8:31], $y))),
-                         (([8:34-8:46], \Handle),
+                         (([8:29-8:31], Handle), (Lvar ([8:29-8:31], $y))),
+                         (([8:34-8:46], Handle),
                           (New (
-                             (\Handle, (CI (([8:38-8:44], "\\Handle"), []))),
+                             (Handle, (CI (([8:38-8:44], "\\Handle"), []))),
                              [], [])))
                          )))
                      ])),
                [(Using (false,
-                   (([9:5-9:30], (\Handle)),
+                   (([9:5-9:30], (Handle)),
                     (Expr_list
-                       [(([9:12-9:29], \Handle),
+                       [(([9:12-9:29], Handle),
                          (Binop ((Ast_defs.Eq None),
-                            (([9:12-9:14], \Handle), (Lvar ([9:12-9:14], $z))),
-                            (([9:17-9:29], \Handle),
+                            (([9:12-9:14], Handle), (Lvar ([9:12-9:14], $z))),
+                            (([9:17-9:29], Handle),
                              (New (
-                                (\Handle,
-                                 (CI (([9:21-9:27], "\\Handle"), []))),
+                                (Handle, (CI (([9:21-9:27], "\\Handle"), []))),
                                 [], [])))
                             )))
                          ])),

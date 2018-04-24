@@ -21,7 +21,7 @@
                 (Call (Aast_defs.Cnormal,
                    (([6:3-6:14], (function(shape(...) $shape, arraykey $index, $default): int)),
                     (Class_const (
-                       (\Shapes, (CI (([6:3-6:9], "\\Shapes"), []))),
+                       (Shapes, (CI (([6:3-6:9], "\\Shapes"), []))),
                        ([6:11-6:14], "idx")))),
                    [],
                    [(([6:15-6:17], shape('x' => int, 'y' => int)),
@@ -33,7 +33,7 @@
                  (Call (Aast_defs.Cnormal,
                     (([7:3-7:14], (function(shape(...) $shape, arraykey $index, $default): int)),
                      (Class_const (
-                        (\Shapes, (CI (([7:3-7:9], "\\Shapes"), []))),
+                        (Shapes, (CI (([7:3-7:9], "\\Shapes"), []))),
                         ([7:11-7:14], "idx")))),
                     [],
                     [(([7:15-7:17], shape('x' => int, 'y' => int)),
@@ -46,7 +46,7 @@
                  (Call (Aast_defs.Cnormal,
                     (([8:3-8:20], (function(shape(...) $shape, arraykey $index): bool)),
                      (Class_const (
-                        (\Shapes, (CI (([8:3-8:9], "\\Shapes"), []))),
+                        (Shapes, (CI (([8:3-8:9], "\\Shapes"), []))),
                         ([8:11-8:20], "keyExists")))),
                     [],
                     [(([8:21-8:23], shape('x' => int, 'y' => int)),
@@ -58,7 +58,7 @@
                  (Call (Aast_defs.Cnormal,
                     (([9:3-9:20], (function(shape(...) $shape, arraykey $index): void)),
                      (Class_const (
-                        (\Shapes, (CI (([9:3-9:9], "\\Shapes"), []))),
+                        (Shapes, (CI (([9:3-9:9], "\\Shapes"), []))),
                         ([9:11-9:20], "removeKey")))),
                     [],
                     [(([9:21-9:24], shape('x' => int, 'y' => int)),
@@ -73,7 +73,7 @@
                  (Call (Aast_defs.Cnormal,
                     (([10:3-10:18], (function(shape(...) $shape): array<string, int>)),
                      (Class_const (
-                        (\Shapes, (CI (([10:3-10:9], "\\Shapes"), []))),
+                        (Shapes, (CI (([10:3-10:9], "\\Shapes"), []))),
                         ([10:11-10:18], "toArray")))),
                     [],
                     [(([10:19-10:21], shape('x' => int)),

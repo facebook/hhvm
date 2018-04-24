@@ -4,7 +4,7 @@
       f_name = ([14:10-14:13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([14:17-14:19], ?\A);
+      [{ Aast.AnnotatedAST.param_annotation = ([14:17-14:19], ?A);
          param_hint =
          (Some ([14:14-14:16],
                 (Aast_defs.Hoption
@@ -23,8 +23,8 @@
                    (AE_assert
                       (([15:10-15:25], bool),
                        (InstanceOf (
-                          (([15:10-15:12], ?\A), (Lvar ([15:10-15:12], $x))),
-                          (\A, (CI (([15:24-15:25], "\\A"), []))))))))))
+                          (([15:10-15:12], ?A), (Lvar ([15:10-15:12], $x))),
+                          (A, (CI (([15:24-15:25], "\\A"), []))))))))))
              ];
            fnb_unsafe = false });
       f_fun_kind = Ast_defs.FSync; f_user_attributes = [];

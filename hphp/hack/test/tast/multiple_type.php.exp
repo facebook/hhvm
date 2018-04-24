@@ -4,14 +4,14 @@
       f_name = ([16:10-16:14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([16:18-16:21], \C1);
+      [{ Aast.AnnotatedAST.param_annotation = ([16:18-16:21], C1);
          param_hint =
          (Some ([16:15-16:17],
                 (Aast_defs.Happly (([16:15-16:17], "\\C1"), []))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [16:18-16:21]; param_name = "$c1"; param_expr = None;
          param_callconv = None; param_user_attributes = [] };
-        { Aast.AnnotatedAST.param_annotation = ([16:26-16:29], \C2);
+        { Aast.AnnotatedAST.param_annotation = ([16:26-16:29], C2);
           param_hint =
           (Some ([16:23-16:25],
                  (Aast_defs.Happly (([16:23-16:25], "\\C2"), []))));
@@ -29,22 +29,22 @@
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([17:3-17:25], (\C1 | \C2)),
+               (([17:3-17:25], (C1 | C2)),
                 (Binop ((Ast_defs.Eq None),
-                   (([17:3-17:5], (\C1 | \C2)), (Lvar ([17:3-17:5], $x))),
-                   (([17:8-17:25], (\C1 | \C2)),
+                   (([17:3-17:5], (C1 | C2)), (Lvar ([17:3-17:5], $x))),
+                   (([17:8-17:25], (C1 | C2)),
                     (Eif (
                        (([17:8-17:13], bool), (Lvar ([17:8-17:13], $cond))),
-                       (Some (([17:16-17:19], \C1),
+                       (Some (([17:16-17:19], C1),
                               (Lvar ([17:16-17:19], $c1)))),
-                       (([17:22-17:25], \C2), (Lvar ([17:22-17:25], $c2))))))
+                       (([17:22-17:25], C2), (Lvar ([17:22-17:25], $c2))))))
                    ))));
              (Return ([18:3-18:20],
                 (Some (([18:10-18:19], (int | string)),
                        (Call (Aast_defs.Cnormal,
                           (([18:10-18:17], ((function(): string) | (function(): int))),
                            (Obj_get (
-                              (([18:10-18:12], (\C1 | \C2)),
+                              (([18:10-18:12], (C1 | C2)),
                                (Lvar ([18:10-18:12], $x))),
                               (([18:14-18:17], ((function(): string) | (function(): int))),
                                (Id ([18:14-18:17], "foo"))),

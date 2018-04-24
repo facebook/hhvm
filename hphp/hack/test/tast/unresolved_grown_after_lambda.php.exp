@@ -20,11 +20,11 @@
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([4:3-4:25], \Vector<(int | string)>),
+               (([4:3-4:25], Vector<(int | string)>),
                 (Binop ((Ast_defs.Eq None),
-                   (([4:3-4:9], \Vector<(int | string)>),
+                   (([4:3-4:9], Vector<(int | string)>),
                     (Lvar ([4:3-4:9], $items))),
-                   (([4:12-4:25], \Vector<(int | string)>),
+                   (([4:12-4:25], Vector<(int | string)>),
                     (ValCollection (<vc_kind>,
                        [(([4:21-4:23], int), (Lvar ([4:21-4:23], $i)))])))
                    ))));
@@ -52,7 +52,7 @@
                                         (Lvar ([10:5-10:10], $item))),
                                        (([10:13-10:22], (int | string)),
                                         (Array_get (
-                                           (([10:13-10:19], \Vector<(int | string)>),
+                                           (([10:13-10:19], Vector<(int | string)>),
                                             (Lvar ([10:13-10:19], $items))),
                                            (Some (([10:20-10:21], int),
                                                   (Int ([10:20-10:21], "1"))))
@@ -73,7 +73,7 @@
                  (Binop ((Ast_defs.Eq None),
                     (([13:3-13:11], (int | string)),
                      (Array_get (
-                        (([13:3-13:9], \Vector<(int | string)>),
+                        (([13:3-13:9], Vector<(int | string)>),
                          (Lvar ([13:3-13:9], $items))),
                         None))),
                     (([13:14-13:16], string), (Lvar ([13:14-13:16], $s)))))));

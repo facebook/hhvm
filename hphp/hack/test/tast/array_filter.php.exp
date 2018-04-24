@@ -24,7 +24,7 @@
           param_expr = None; param_callconv = None;
           param_user_attributes = [] };
         { Aast.AnnotatedAST.param_annotation =
-          ([6:22-6:32], \Container<?string>);
+          ([6:22-6:32], Container<?string>);
           param_hint =
           (Some ([6:3-6:12],
                  (Aast_defs.Happly (([6:3-6:12], "\\Container"),
@@ -38,7 +38,7 @@
           param_expr = None; param_callconv = None;
           param_user_attributes = [] };
         { Aast.AnnotatedAST.param_annotation =
-          ([7:32-7:48], \KeyedContainer<int, ?string>);
+          ([7:32-7:48], KeyedContainer<int, ?string>);
           param_hint =
           (Some ([7:3-7:17],
                  (Aast_defs.Happly (([7:3-7:17], "\\KeyedContainer"),
@@ -67,23 +67,23 @@
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([11:3-11:51], (\Container<?string> | \KeyedContainer<int, ?string>)),
+               (([11:3-11:51], (Container<?string> | KeyedContainer<int, ?string>)),
                 (Binop ((Ast_defs.Eq None),
-                   (([11:3-11:14], (\Container<?string> | \KeyedContainer<int, ?string>)),
+                   (([11:3-11:14], (Container<?string> | KeyedContainer<int, ?string>)),
                     (Lvar ([11:3-11:14], $unresolved))),
-                   (([11:17-11:51], (\Container<?string> | \KeyedContainer<int, ?string>)),
+                   (([11:17-11:51], (Container<?string> | KeyedContainer<int, ?string>)),
                     (Eif (
                        (([11:17-11:19], bool), (Lvar ([11:17-11:19], $b))),
-                       (Some (([11:22-11:32], \Container<?string>),
+                       (Some (([11:22-11:32], Container<?string>),
                               (Lvar ([11:22-11:32], $container)))),
-                       (([11:35-11:51], \KeyedContainer<int, ?string>),
+                       (([11:35-11:51], KeyedContainer<int, ?string>),
                         (Lvar ([11:35-11:51], $keyed_container)))
                        )))
                    ))));
              (Expr
                 (([13:3-13:31], array),
                  (Call (Aast_defs.Cnormal,
-                    (([13:3-13:15], (function(\Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): array)),
+                    (([13:3-13:15], (function(Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): array)),
                      (Id ([13:3-13:15], "\\array_filter"))),
                     [],
                     [(([13:16-13:30], array),
@@ -92,7 +92,7 @@
              (Expr
                 (([14:3-14:30], array<string>),
                  (Call (Aast_defs.Cnormal,
-                    (([14:3-14:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<string>)),
+                    (([14:3-14:15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<string>)),
                      (Id ([14:3-14:15], "\\array_filter"))),
                     [],
                     [(([14:16-14:29], array<?string>),
@@ -101,25 +101,25 @@
              (Expr
                 (([15:3-15:27], array<arraykey, string>),
                  (Call (Aast_defs.Cnormal,
-                    (([15:3-15:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<arraykey, string>)),
+                    (([15:3-15:15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<arraykey, string>)),
                      (Id ([15:3-15:15], "\\array_filter"))),
                     [],
-                    [(([15:16-15:26], \Container<?string>),
+                    [(([15:16-15:26], Container<?string>),
                       (Lvar ([15:16-15:26], $container)))],
                     []))));
              (Expr
                 (([16:3-16:33], array<int, string>),
                  (Call (Aast_defs.Cnormal,
-                    (([16:3-16:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<int, string>)),
+                    (([16:3-16:15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<int, string>)),
                      (Id ([16:3-16:15], "\\array_filter"))),
                     [],
-                    [(([16:16-16:32], \KeyedContainer<int, ?string>),
+                    [(([16:16-16:32], KeyedContainer<int, ?string>),
                       (Lvar ([16:16-16:32], $keyed_container)))],
                     []))));
              (Expr
                 (([17:3-17:25], _),
                  (Call (Aast_defs.Cnormal,
-                    (([17:3-17:15], (function(\Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): _)),
+                    (([17:3-17:15], (function(Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): _)),
                      (Id ([17:3-17:15], "\\array_filter"))),
                     [],
                     [(([17:16-17:24], _), (Lvar ([17:16-17:24], $untyped)))],
@@ -127,10 +127,10 @@
              (Expr
                 (([18:3-18:28], (array<arraykey, string> | array<int, string>)),
                  (Call (Aast_defs.Cnormal,
-                    (([18:3-18:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): (array<arraykey, string> | array<int, string>))),
+                    (([18:3-18:15], (function(Container<?string> $input, ?(function(?string): bool) $callback): (array<arraykey, string> | array<int, string>))),
                      (Id ([18:3-18:15], "\\array_filter"))),
                     [],
-                    [(([18:16-18:27], (\Container<?string> | \KeyedContainer<int, ?string>)),
+                    [(([18:16-18:27], (Container<?string> | KeyedContainer<int, ?string>)),
                       (Lvar ([18:16-18:27], $unresolved)))],
                     []))));
              (Expr
@@ -176,7 +176,7 @@
              (Expr
                 (([22:3-22:35], array),
                  (Call (Aast_defs.Cnormal,
-                    (([22:3-22:15], (function(\Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): array)),
+                    (([22:3-22:15], (function(Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): array)),
                      (Id ([22:3-22:15], "\\array_filter"))),
                     [],
                     [(([22:16-22:30], array),
@@ -188,7 +188,7 @@
              (Expr
                 (([23:3-23:34], array<?string>),
                  (Call (Aast_defs.Cnormal,
-                    (([23:3-23:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<?string>)),
+                    (([23:3-23:15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<?string>)),
                      (Id ([23:3-23:15], "\\array_filter"))),
                     [],
                     [(([23:16-23:29], array<?string>),
@@ -200,10 +200,10 @@
              (Expr
                 (([24:3-24:31], array<arraykey, ?string>),
                  (Call (Aast_defs.Cnormal,
-                    (([24:3-24:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<arraykey, ?string>)),
+                    (([24:3-24:15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<arraykey, ?string>)),
                      (Id ([24:3-24:15], "\\array_filter"))),
                     [],
-                    [(([24:16-24:26], \Container<?string>),
+                    [(([24:16-24:26], Container<?string>),
                       (Lvar ([24:16-24:26], $container)));
                       (([24:28-24:30], (function(?string $x): bool)),
                        (Lvar ([24:28-24:30], $f)))
@@ -212,10 +212,10 @@
              (Expr
                 (([25:3-25:37], array<int, ?string>),
                  (Call (Aast_defs.Cnormal,
-                    (([25:3-25:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): array<int, ?string>)),
+                    (([25:3-25:15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<int, ?string>)),
                      (Id ([25:3-25:15], "\\array_filter"))),
                     [],
-                    [(([25:16-25:32], \KeyedContainer<int, ?string>),
+                    [(([25:16-25:32], KeyedContainer<int, ?string>),
                       (Lvar ([25:16-25:32], $keyed_container)));
                       (([25:34-25:36], (function(?string $x): bool)),
                        (Lvar ([25:34-25:36], $f)))
@@ -224,7 +224,7 @@
              (Expr
                 (([26:3-26:29], _),
                  (Call (Aast_defs.Cnormal,
-                    (([26:3-26:15], (function(\Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): _)),
+                    (([26:3-26:15], (function(Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): _)),
                      (Id ([26:3-26:15], "\\array_filter"))),
                     [],
                     [(([26:16-26:24], _), (Lvar ([26:16-26:24], $untyped)));
@@ -235,10 +235,10 @@
              (Expr
                 (([27:3-27:32], (array<arraykey, ?string> | array<int, ?string>)),
                  (Call (Aast_defs.Cnormal,
-                    (([27:3-27:15], (function(\Container<?string> $input, ?(function(?string): bool) $callback): (array<arraykey, ?string> | array<int, ?string>))),
+                    (([27:3-27:15], (function(Container<?string> $input, ?(function(?string): bool) $callback): (array<arraykey, ?string> | array<int, ?string>))),
                      (Id ([27:3-27:15], "\\array_filter"))),
                     [],
-                    [(([27:16-27:27], (\Container<?string> | \KeyedContainer<int, ?string>)),
+                    [(([27:16-27:27], (Container<?string> | KeyedContainer<int, ?string>)),
                       (Lvar ([27:16-27:27], $unresolved)));
                       (([27:29-27:31], (function(?string $x): bool)),
                        (Lvar ([27:29-27:31], $f)))

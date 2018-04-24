@@ -719,11 +719,7 @@ end = struct
               | _ -> acc
             end
       method! on_tarraykind acc r array_kind =
-        match array_kind with
-        | AKempty
-        | AKshape _
-        | AKtuple _ -> update acc @@  Invalid (r, Tarraykind array_kind)
-        | _ -> acc (* TODO(kunalm): actually handle arrays with generics *)
+        update acc @@  Invalid (r, Tarraykind array_kind)
       method is_wildcard = function
         | (_r, Tclass ((_, x), _tyl)) when x = SN.Typehints.wildcard -> true
         | _ -> false

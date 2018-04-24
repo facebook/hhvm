@@ -2112,7 +2112,7 @@ and pClassElt : class_elt list parser = fun node env ->
           | PropertyDeclarator { property_name; property_initializer } ->
             ( let _, n as name = pos_name property_name env in
               ( pPos node env
-              , ( if n.[0] = '$'
+              , ( if String.length n > 0 && n.[0] = '$'
                   then drop_pstr 1 name
                   else name
                 )
@@ -2356,7 +2356,7 @@ and pNamespaceUseClause ~prefix env kind node =
       | _ -> missing_syntax "namespace use kind" kind env
     in
     ( kind
-    , (p, if n.[0] = '\\' then n else "\\" ^ n)
+    , (p, if String.length n > 0 && n.[0] = '\\' then n else "\\" ^ n)
     , alias
     )
   | _ -> missing_syntax "namespace use clause" node env

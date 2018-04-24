@@ -64,7 +64,8 @@ function is_equal($result1, $result2) {
     return true;
   }
 
-  invariant($type1 === 'array', 'expect array here');
+  invariant(is_darray($result1), 'expect darray here');
+  invariant(is_darray($result2), 'expect darray here');
 
   $keys1 = array_keys($result1);
   $keys2 = array_keys($result2);

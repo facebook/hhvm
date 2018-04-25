@@ -1723,6 +1723,7 @@ and expr_
       in
       (* TODO TAST: figure out role of unbind here *)
       let env, tyl = List.map_env env tyl Typing_env.unbind in
+      let env, tyl = List.map_env env tyl TUtils.unresolved in
       let ty = Reason.Rwitness p, Ttuple tyl in
       make_result env (T.List tel) ty
   | Pair (e1, e2) ->

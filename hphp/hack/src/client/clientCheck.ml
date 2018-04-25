@@ -489,7 +489,7 @@ let main args =
           name
       in
       let result = rpc args @@ Rpc.INFER_RETURN_TYPE action in
-      match result with
+      begin match result with
       | Error error_str ->
         Printf.eprintf "%s\n" error_str;
         raise Exit_status.(Exit_with Input_error)
@@ -499,6 +499,17 @@ let main args =
         else
           print_endline ty;
         Exit_status.No_error
+      end
+    | MODE_CST_SEARCH ->
+      let input = Sys_utils.read_stdin_to_string () |> Hh_json.json_of_string in
+      let result = rpc args @@ Rpc.CST_SEARCH input in
+      begin match result with
+      | Ok result ->
+        print_endline (Hh_json.json_to_string result);
+        Exit_status.No_error
+      | Error error -> print_endline error;
+        raise Exit_status.(Exit_with Input_error)
+      end
   in
   HackEventLogger.client_check_finish exit_status;
   exit_status

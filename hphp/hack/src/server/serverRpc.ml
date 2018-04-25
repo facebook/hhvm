@@ -203,10 +203,17 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       ServerFileSync.toggle_dynamic_view env toggle, ()
     | INFER_RETURN_TYPE id_info ->
       let open ServerCommandTypes.Infer_return_type in
-      match id_info with
+      begin match id_info with
       | Function fun_name ->
         env, InferReturnTypeService.get_fun_return_ty
           env.tcopt env.popt fun_name
       | Method (class_name, meth_name) ->
         env, InferReturnTypeService.get_meth_return_ty
           env.tcopt env.popt class_name meth_name
+      end
+    | CST_SEARCH input ->
+      let all_hack_files = Relative_path.Map.keys env.files_info
+        |> List.filter ~f:(fun path ->
+          Relative_path.prefix path = Relative_path.Root)
+      in
+      env, CstSearchService.go ~workers:genv.workers all_hack_files input

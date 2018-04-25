@@ -1,3 +1,12 @@
+(**
+ * Copyright (c) 2018, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
 open Hh_core
 
 module Syntax = Full_fidelity_positioned_syntax
@@ -76,24 +85,16 @@ type pattern =
       pattern: pattern;
     }
 
-type response = {
-  (**
-   * Map from file path to results for that file. Doesn't include files that
-   * didn't have any results.
-   *)
-  results: (string * result) list;
+type matched_node = {
+  match_name: match_name;
+  node: Syntax.t;
 }
 
-and result = {
+type result = {
   (**
    * The list of nodes for which a `MatchPattern` matched.
    *)
   matched_nodes: matched_node list;
-}
-
-and matched_node = {
-  match_name: match_name;
-  node: Syntax.t;
 }
 
 type env = {
@@ -324,3 +325,38 @@ let search
   let (_env, result) =
     search_node ~env ~pattern ~node:(SyntaxTree.root env.syntax_tree) in
   result
+
+let job
+    (acc: (Relative_path.t * result) list)
+    (inputs: (Relative_path.t * pattern) list)
+    : (Relative_path.t * result) list =
+  List.fold inputs
+    ~init:acc
+    ~f:(fun acc (path, pattern) ->
+      let source_text = Full_fidelity_source_text.from_file path in
+      let syntax_tree = SyntaxTree.make source_text in
+      match search ~syntax_tree pattern with
+      | Some result -> (path, result) :: acc
+      | None -> acc
+    )
+
+let go
+    ~(workers: MultiWorker.worker list option)
+    (files: Relative_path.t list)
+    (input: Hh_json.json)
+    : (Hh_json.json, string) Core_result.t
+  =
+  let open Core_result.Monad_infix in
+  compile_pattern input >>| fun pattern ->
+  let inputs = List.map files ~f:(fun path -> (path, pattern)) in
+  let results = MultiWorker.call
+    workers
+    ~job
+    ~neutral:[]
+    ~merge:List.rev_append
+    ~next:(MultiWorker.next workers inputs)
+  in
+
+  Hh_json.JSON_Object (List.map results ~f:(fun (path, result) ->
+    (Relative_path.to_absolute path, result_to_json (Some result))
+  ))

@@ -171,6 +171,7 @@ type _ t =
       Infer_return_type.result t
   | RAGE : ServerRageTypes.result t
   | DYNAMIC_VIEW: bool -> unit t
+  | CST_SEARCH: Hh_json.json -> (Hh_json.json, string) result t
 
 let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true

@@ -174,6 +174,9 @@ let parse_check_args cmd =
     "--dynamic-view",
       Arg.Set dynamic_view,
       " Replace occurrences of untyped code with dynamic";
+    "--cst-search",
+      Arg.Unit (set_mode MODE_CST_SEARCH),
+      " Search the concrete syntax trees of the codebase files for a pattern";
     "--dump-symbol-info",
       Arg.String (fun files -> set_mode (MODE_DUMP_SYMBOL_INFO files) ()),
       (*  Input format:

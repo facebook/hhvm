@@ -448,12 +448,8 @@ end = struct
       not (String.contains (snd x) '\\') in
     let use_fallback =
       need_fallback &&
-      (
-        (not (TypecheckerOptions.experimental_feature_enabled
-          genv.tcopt
-          TypecheckerOptions.experimental_no_fallback_in_namespaces)) ||
-        ((string_starts_with (snd x) "__") && (string_ends_with (snd x) "__"))
-      ) in
+      (* __FILE__, __LINE__ etc *)
+      (string_starts_with (snd x) "__") && (string_ends_with (snd x) "__") in
     if use_fallback then begin
       let global_x = (fst x, "\\" ^ (snd x)) in
       (* Explicitly add dependencies on both of the consts we could be
@@ -478,47 +474,14 @@ end = struct
     end else
       get_name fq_x
 
-  (* For dealing with namespace fallback on functions *)
+  (* For dealing with namespace resolution on functions *)
   let elaborate_and_get_name_with_canonicalized_fallback
-      mk_dep genv get_pos get_canon x =
+      genv get_pos get_canon x =
     let get_name x = get_name genv get_pos x in
     let canonicalize = canonicalize genv get_pos get_canon in
     let fq_x = NS.elaborate_id genv.namespace NS.ElaborateFun x in
-    let need_fallback =
-      genv.namespace.Namespace_env.ns_name <> None &&
-      not (String.contains (snd x) '\\') in
-    let use_fallback =
-      need_fallback &&
-      not (TypecheckerOptions.experimental_feature_enabled
-        genv.tcopt
-        TypecheckerOptions.experimental_no_fallback_in_namespaces) in
-    if use_fallback then begin
-      let global_x = (fst x, "\\" ^ (snd x)) in
-      (* Explicitly add dependencies on both of the functions we could be
-       * referring to here. Normally naming doesn't have to deal with deps at
-       * all -- they are added during typechecking just by the nature of
-       * looking up a class or function name. However, we're flattening
-       * namespaces here, and the fallback behavior of functions means that we
-       * might suddenly be referring to a different function without any
-       * change to the callsite at all. Adding both dependencies explicitly
-       * captures this action-at-a-distance. *)
-      Typing_deps.add_idep genv.droot (mk_dep (snd fq_x));
-      Typing_deps.add_idep genv.droot (mk_dep (snd global_x));
-      (* canonicalize the names being searched *)
-      let mem (_, nm) = get_canon nm in
-      match mem fq_x, mem global_x with
-      | Some _, _ -> (* Found in the current namespace *)
-        let fq_x = canonicalize fq_x `func in
-        get_name fq_x
-      | _, Some _ -> (* Found in the global namespace *)
-        let global_x = canonicalize global_x `func in
-        get_name global_x
-      | None, None ->
-        (* Not found. Pick the more specific one to error on. *)
-        get_name fq_x
-    end else
-      let fq_x = canonicalize fq_x `func in
-      get_name fq_x
+    let fq_x = canonicalize fq_x `func in
+    get_name fq_x
 
   let global_const (genv, _env) x  =
     elaborate_and_get_name_with_fallback
@@ -551,12 +514,6 @@ end = struct
 
   let fun_id (genv, _) x =
     elaborate_and_get_name_with_canonicalized_fallback
-      (* Not just Dep.Fun, but Dep.FunName. This forces an incremental full
-       * redeclaration of this class if the name changes, not just a
-       * retypecheck -- the name that is referred to here actually changes as
-       * a result of what else is defined, which is stronger than just the need
-       * to retypecheck. *)
-      (fun x -> Typing_deps.Dep.FunName x)
       genv
       (GEnv.fun_pos genv.tcopt)
       GEnv.fun_canon_name
@@ -926,22 +883,8 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
       | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey
       | x when x = SN.Typehints.mixed -> N.Hmixed
-      | x when x = SN.Typehints.nonnull ->
-        let nonnull_allowed =
-          TypecheckerOptions.experimental_feature_enabled
-            (fst env).tcopt
-            TypecheckerOptions.experimental_nonnull in
-        if nonnull_allowed then N.Hnonnull
-        else (Errors.nonnull_not_supported p; N.Hany)
-      | x when x = SN.Typehints.dynamic ->
-          if TypecheckerOptions.experimental_feature_enabled
-              (fst env).tcopt
-              TypecheckerOptions.experimental_dynamic_types
-          then
-            N.Hdynamic
-          else
-            let _ = Errors.experimental_feature p "dynamic as a keyword is experimental" in
-            N.Hany
+      | x when x = SN.Typehints.nonnull -> N.Hnonnull
+      | x when x = SN.Typehints.dynamic -> N.Hdynamic
       | x when x = SN.Typehints.this && not forbid_this ->
           if hl != []
           then Errors.this_no_argument p;

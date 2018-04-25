@@ -23,8 +23,6 @@ let experimental_instanceof = GlobalOptions.tco_experimental_instanceof
 let experimental_isarray = GlobalOptions.tco_experimental_isarray
 let experimental_darray_and_varray =
   GlobalOptions.tco_experimental_darray_and_varray
-let experimental_dynamic_types =
-  GlobalOptions.tco_experimental_dynamic_types
 let experimental_goto = GlobalOptions.tco_experimental_goto
 let experimental_tconst_on_generics =
   GlobalOptions.tco_experimental_tconst_on_generics
@@ -49,13 +47,6 @@ let experimental_disable_optional_and_unknown_shape_fields =
 let experimental_no_trait_reuse = GlobalOptions.tco_experimental_no_trait_reuse
 let experimental_is_expression = GlobalOptions.tco_experimental_is_expression
 let experimental_as_expression = GlobalOptions.tco_experimental_as_expression
-let experimental_no_fallback_in_namespaces =
-  GlobalOptions.tco_experimental_no_fallback_in_namespaces
-let experimental_disallow_untyped_lambda_as_non_function_type =
-  GlobalOptions.tco_experimental_disallow_untyped_lambda_as_non_function_type
-let experimental_nonnull = GlobalOptions.tco_experimental_nonnull
-let experimental_disallow_refs_in_array =
-  GlobalOptions.tco_experimental_disallow_refs_in_array
 
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

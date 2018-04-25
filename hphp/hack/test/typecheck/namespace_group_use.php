@@ -14,7 +14,7 @@ namespace X {
   function f(): void {
     new CL();
     f1();
-    var_dump(CN);
+    \var_dump(CN);
     new CL2();
   }
 }

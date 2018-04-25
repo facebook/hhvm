@@ -119,44 +119,6 @@ let tco_experimental_is_expression = "is_expression"
  *)
 let tco_experimental_as_expression = "as_expression"
 
-(**
- * If enabled:
- *
- * namespace Foo {
- *   // does not fall back to \bar() if `bar()` is not 'used' and
- *   // `Foo\bar()` does not exist
- *   bar();
- * }
- *)
-let tco_experimental_no_fallback_in_namespaces =
-  "no_fallback_in_namespaces"
-
-(**
- * Typechecker support for `nonnull` type. This feature is incomplete and is
- * under development, see T25474893 for details and progress.
- *)
-let tco_experimental_nonnull = "nonnull"
-
-(**
- * Disallow untyped lambdas in strict mode that are passed to a typed context
- * that isn't a function type
- *)
-let tco_experimental_disallow_untyped_lambda_as_non_function_type =
-  "disallow_untyped_lambda_as_non_function_type"
-
- (*
-  * Typechecker support for `dynamic` expressions.
-  *)
-let tco_experimental_dynamic_types = "dynamic_types"
-
-(**
- * Adds specific errors for binding PHP references inside arrays.
- *
- * Primarily affects partial mode since references are already forbidden in
- * strict mode. When enabled, some errors will be reported differently.
- *)
-let tco_experimental_disallow_refs_in_array = "disallow_refs_in_array"
-
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -177,11 +139,6 @@ let tco_experimental_all =
      tco_experimental_no_trait_reuse;
      tco_experimental_is_expression;
      tco_experimental_as_expression;
-     tco_experimental_dynamic_types;
-     tco_experimental_no_fallback_in_namespaces;
-     tco_experimental_nonnull;
-     tco_experimental_disallow_untyped_lambda_as_non_function_type;
-     tco_experimental_disallow_refs_in_array;
    ]
 
 let tco_migration_flags_all =
@@ -220,9 +177,7 @@ let make_permissive tcopt =
   { tcopt with
     tco_assume_php = true;
     tco_user_attrs = None;
-    tco_experimental_features = SSet.remove
-      tco_experimental_disallow_refs_in_array
-      tcopt.tco_experimental_features;
+    tco_experimental_features = tcopt.tco_experimental_features;
   }
 
 let make ~tco_assume_php

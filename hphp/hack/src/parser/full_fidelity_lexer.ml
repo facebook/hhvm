@@ -1056,15 +1056,13 @@ let rec scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
     end
   | '>' -> begin
     match (peek_char lexer 1, peek_char lexer 2) with
+    (* If we are parsing a generic type argument list then we might be at the >>
+     * in `List<List<int>>``, or at the >= of `let x:vec<int>=...`. In that case
+     * we want to lex two >'s instead of >> / one > and one = instead of >=.
+     *)
+    | (('>' | '='), _) when in_type -> (advance lexer 1, TokenKind.GreaterThan)
     | ('>', '=') -> (advance lexer 3, TokenKind.GreaterThanGreaterThanEqual)
-    | ('>', _) ->
-    (* If we are parsing a generic type argument list then we might be
-       at the >> in List<List<int>>.  In that case we want to lex two
-       >'s, not one >>. *)
-      if in_type then
-        (advance lexer 1, TokenKind.GreaterThan)
-      else
-        (advance lexer 2, TokenKind.GreaterThanGreaterThan)
+    | ('>', _) -> (advance lexer 2, TokenKind.GreaterThanGreaterThan)
     | ('=', _) -> (advance lexer 2, TokenKind.GreaterThanEqual)
     | _ -> (advance lexer 1, TokenKind.GreaterThan)
     end

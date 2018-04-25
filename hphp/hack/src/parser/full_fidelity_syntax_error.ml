@@ -19,7 +19,7 @@ type t = {
   message      : string;
 }
 
-exception ParserFatal of t
+exception ParserFatal of t * Pos.t
 
 let make
   ?(child = None) ?(error_type = ParseError) start_offset end_offset message =

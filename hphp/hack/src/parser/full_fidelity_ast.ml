@@ -2843,12 +2843,13 @@ let lower env ~source_text ~script : result =
   let comments = if env.include_line_comments then comments else
     List.filter ~f:(fun (_,c) -> not (Prim_defs.is_line_comment c)) comments
   in
+  let content = if env.codegen then "" else SourceText.text source_text in
   if env.codegen then Utils.MemGuard.gc_and_verify_value_collected script;
   let () = if env.keep_errors then Fixmes.HH_FIXMES.add env.file fixmes in
   { fi_mode = env.fi_mode
   ; is_hh_file = env.is_hh_file
   ; ast
-  ; content = SourceText.text source_text
+  ; content
   ; comments
   ; file = env.file
   }
@@ -2914,7 +2915,12 @@ let from_text (env : env) (source_text : SourceText.t) : result =
       | [], [] -> ()
       | _, e :: _
       | e :: _, _
-        -> raise @@ SyntaxError.ParserFatal e
+        ->
+        let p =
+          SourceText.relative_pos env.file source_text
+            (Full_fidelity_syntax_error.start_offset e)
+            (Full_fidelity_syntax_error.end_offset e) in
+        raise @@ SyntaxError.ParserFatal (e, p)
     else if env.keep_errors then
       let pos_and_message_of error =
         let so = SyntaxError.start_offset error in

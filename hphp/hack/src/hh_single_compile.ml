@@ -291,11 +291,15 @@ let parse_text compiler_options popt fn text =
       ~keep_errors:false
       fn
     in
-    let parser_ret = Full_fidelity_ast.from_text_with_legacy env text in
+    let source_text = SourceText.make fn text in
+    let { Full_fidelity_ast.ast; Full_fidelity_ast.is_hh_file; _ } =
+      Full_fidelity_ast.from_text env source_text in
     let () = write_stats_if_enabled ~compiler_options in
-    parser_ret
+    (ast, is_hh_file)
   | Legacy ->
-    Parser_hack.program popt fn text
+    let {Parser_hack.ast; Parser_hack.is_hh_file; _} =
+      Parser_hack.program popt fn text in
+    (ast, is_hh_file)
 
 let parse_file compiler_options popt filename text =
   try
@@ -304,9 +308,9 @@ let parse_file compiler_options popt filename text =
     end)
   with
     (* FFP failed to parse *)
-    | Failure s -> `ParseFailure (SyntaxError.make 0 0 s)
+    | Failure s -> `ParseFailure ((SyntaxError.make 0 0 s), Pos.none)
     (* FFP generated an error *)
-    | SyntaxError.ParserFatal e -> `ParseFailure e
+    | SyntaxError.ParserFatal (e, p) -> `ParseFailure (e, p)
 
 let add_to_time_ref r t0 =
   let t = Unix.gettimeofday () in
@@ -341,29 +345,24 @@ let log_fail compiler_options filename exc =
     ~exc:(Printexc.to_string exc ^ "\n" ^ Printexc.get_backtrace ())
 
 
-let do_compile filename compiler_options text fail_or_ast debug_time =
+let do_compile filename compiler_options original_text_length fail_or_ast debug_time =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
   let hhas_prog =
     match fail_or_ast with
-    | `ParseFailure e ->
+    | `ParseFailure (e, pos) ->
       let error_t = match SyntaxError.error_type e with
         | SyntaxError.ParseError -> Hhbc_ast.FatalOp.Parse
         | SyntaxError.RuntimeError -> Hhbc_ast.FatalOp.Runtime
       in
       let s = SyntaxError.message e in
-      let source_text = SourceText.make filename text in
-      let pos =
-        SourceText.relative_pos filename source_text
-          (SyntaxError.start_offset e) (SyntaxError.end_offset e) in
       Emit_program.emit_fatal_program ~ignore_message:false error_t pos s
-    | `ParseResult (errors, parser_return) ->
-      let ast = parser_return.Parser_hack.ast in
+    | `ParseResult (errors, (ast, is_hh_file)) ->
       List.iter (Errors.get_error_list errors) (fun e ->
         P.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
       if Errors.is_empty errors
       then Emit_program.from_ast
-        parser_return.Parser_hack.is_hh_file
+        is_hh_file
         (is_file_path_for_evaled_code filename)
         ast
       else Emit_program.emit_fatal_program ~ignore_message:true
@@ -373,7 +372,7 @@ let do_compile filename compiler_options text fail_or_ast debug_time =
   let hhas_text = Hhbc_hhas.to_string
     ~path:filename
     ~dump_symbol_refs:compiler_options.dump_symbol_refs
-    ~original_text_length:(String.length text)
+    ~original_text_length
     hhas_prog in
   ignore @@ add_to_time_ref debug_time.printing_t t;
   if compiler_options.debug_time
@@ -399,10 +398,11 @@ let process_single_source_unit compiler_options popt handle_output
       if compiler_options.extract_facts
       then extract_facts ~pretty:true source_text
       else begin
+        let original_text_length = String.length source_text in
         let fail_or_ast = parse_file compiler_options popt filename source_text in
         let debug_time = new_debug_time () in
         ignore @@ add_to_time_ref debug_time.parsing_t t;
-        do_compile filename compiler_options source_text fail_or_ast debug_time
+        do_compile filename compiler_options original_text_length fail_or_ast debug_time
       end in
     handle_output filename output
   with exc ->

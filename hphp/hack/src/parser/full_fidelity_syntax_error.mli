@@ -17,7 +17,7 @@ type t = {
   message      : string;
 }
 
-exception ParserFatal of t
+exception ParserFatal of t * Pos.t
 
 val make :
   ?child:t option -> ?error_type:error_type -> int -> int -> string -> t

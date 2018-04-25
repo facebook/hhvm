@@ -15,12 +15,17 @@ module TS = Full_fidelity_typed_positioned_syntax
 module TypedTree = Full_fidelity_syntax_tree
   .WithSyntax(TS)
 
-let create_typed_parse_tree_json_string
-  (filename: Relative_path.t) (positioned_tree: PositionedTree.t) (tast: Tast.program) : string =
+let create_typed_parse_tree
+    ~(filename: Relative_path.t)
+    ~(positioned_tree: PositionedTree.t)
+    ~(tast: Tast.program)
+    : TypedTree.t
+  =
   let type_map = Tast_type_collector.collect_types tast in
-  let typed = TypedSyntaxTransforms.typed_from_positioned filename type_map positioned_tree in
-  let json = TypedTree.to_json ~with_value:true typed in
-  Hh_json.json_to_string json
+  TypedSyntaxTransforms.typed_from_positioned filename type_map positioned_tree
+
+let typed_parse_tree_to_json (typed_tree: TypedTree.t): Hh_json.json =
+  TypedTree.to_json ~with_value:true typed_tree
 
 let go:
   ServerEnv.env ->
@@ -34,8 +39,10 @@ fun env filename ->
     (ServerCommandTypes.FileName filename) in
 
   (* get the parse tree *)
-  let file = Relative_path.create Relative_path.Dummy filename in
-  let source_text = Full_fidelity_source_text.from_file file in
+  let filename = Relative_path.create Relative_path.Dummy filename in
+  let source_text = Full_fidelity_source_text.from_file filename in
   let positioned_tree = PositionedTree.make source_text in
 
-  create_typed_parse_tree_json_string file positioned_tree tast
+  create_typed_parse_tree ~filename ~positioned_tree ~tast
+    |> typed_parse_tree_to_json
+    |> Hh_json.json_to_string

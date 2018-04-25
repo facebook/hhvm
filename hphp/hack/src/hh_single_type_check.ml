@@ -52,6 +52,7 @@ type mode =
   | Ffp_autocomplete
   | Color
   | Coverage
+  | Cst_search
   | Dump_symbol_info
   | Dump_inheritance
   | Errors
@@ -185,6 +186,11 @@ let parse_options () =
     "--coverage",
       Arg.Unit (set_mode Coverage),
       " Produce coverage output";
+    "--cst-search",
+        Arg.Unit (set_mode Cst_search),
+        " Search the concrete syntax tree of the given file using the pattern"^
+        " given on stdin."^
+        " (The pattern is a JSON object adhering to the search DSL.)";
     "--disable_optional_and_unknown_shape_fields",
       Arg.Set disable_optional_and_unknown_shape_fields,
       "Disables optional and unknown shape fields syntax and typechecking.";
@@ -710,6 +716,25 @@ let handle_mode
           print_coverage fn type_acc;
         end
       end
+  | Cst_search ->
+    (* TODO: read the pattern from the user's JSON query *)
+    let open CstSearchService in
+    let pattern = DescendantPattern {
+      pattern = NodePattern {
+        kind = SyntaxKind.MethodishDeclaration;
+        children = [];
+      }
+    } in
+
+    let source_text = Full_fidelity_source_text.from_file filename in
+    let syntax_tree = PositionedTree.make source_text in
+    let env = { syntax_tree } in
+
+    (* TODO: print actual JSON output *)
+    begin match CstSearchService.search ~env ~pattern with
+    | None -> Printf.printf "No result :(\n"
+    | Some _result -> Printf.printf "There was a result!\n"
+    end
   | Dump_symbol_info ->
       begin match Relative_path.Map.get files_info filename with
         | Some fileinfo ->
@@ -841,10 +866,11 @@ let handle_mode
     (* get the parse tree *)
     let source_text = Full_fidelity_source_text.from_file filename in
     let positioned_tree = PositionedTree.make source_text in
+    let typed_tree = ServerTypedAst.create_typed_parse_tree
+      ~filename ~positioned_tree ~tast in
 
-    let result = ServerTypedAst.create_typed_parse_tree_json_string filename positioned_tree tast in
-
-    Printf.printf "%s\n" result;
+    let result = ServerTypedAst.typed_parse_tree_to_json typed_tree in
+    Printf.printf "%s\n" (Hh_json.json_to_string result);
   | Dump_stripped_tast ->
     let _, tast = get_tast tcopt filename files_info in
     let strip_types =

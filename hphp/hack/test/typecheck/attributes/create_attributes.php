@@ -1,6 +1,7 @@
 <?hh // strict
 
 class __Attribute__C implements HH\ClassAttribute {}
+class __Attribute__E implements HH\EnumAttribute {}
 class __Attribute__F implements HH\FunctionAttribute {}
 class __Attribute__Met implements HH\MethodAttribute {}
 class __Attribute__IProp implements HH\InstancePropertyAttribute {}
@@ -20,6 +21,9 @@ class CC {
   <<Met>>
   private function met(): void {}
 }
+
+<<E>>
+enum EE: int {}
 
 <<T>>
 type t = int;

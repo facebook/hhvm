@@ -525,9 +525,9 @@ let non_null env ty =
 (*****************************************************************************)
 
 let in_var env ty =
-  let res = Env.fresh_type() in
-  let env, res = unify env ty res in
-  env, res
+  let x = Env.fresh () in
+  let env = Env.add env x ty in
+  env, (Reason.none, Tvar x)
 
 let unresolved_tparam env (_, (pos, _), _) =
   let reason = Reason.Rwitness pos in

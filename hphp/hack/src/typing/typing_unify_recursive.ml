@@ -163,16 +163,10 @@ let occursTop env n rty =
  *)
 let add env x ty =
   let extend_unresolved env ty tyl =
-    let v = Ident.tmp () in
-    let ty = match ty with
-      | _, Tunresolved _ -> ty
-      | _, Tany -> (Reason.Rnone, Tunresolved [])
-      | _ -> (Reason.Rnone, Tunresolved [ty])
-    in
-    let env = Env.add env v ty in
+    let env, ty' = TUtils.unresolved env ty in
     match tyl with
-    | [] -> env, snd ty
-    | _ -> env, Tunresolved (ty::tyl)
+    | [] -> env, snd ty'
+    | _ -> env, Tunresolved (ty'::tyl)
   in
   let env, x' = Env.get_var env x in
   match occursTop env x' ty with

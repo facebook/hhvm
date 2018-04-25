@@ -295,12 +295,26 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
   in
   compile_pattern ~json ~keytrace:[]
 
-(* TODO(T28495794): write a real implementation *)
+(* TODO(T28496995): This only converts a single result to JSON. We also need to
+convert an entire response -- a mapping from file path to result -- to JSON. *)
 let result_to_json (result: result option): Hh_json.json =
   let open Hh_json in
   match result with
-  | Some _ -> JSON_String "There was a match!"
-  | None -> JSON_String "No match :("
+  | None -> JSON_Null
+  | Some result ->
+    let matched_nodes = List.map result.matched_nodes ~f:(fun matched_node ->
+      let match_name =
+        match matched_node.match_name
+        with MatchName match_name -> match_name
+      in
+      JSON_Object [
+        "matchName", JSON_String match_name;
+        "node", Syntax.to_json matched_node.node;
+      ])
+    in
+    JSON_Object [
+      "matchedNodes", JSON_Array matched_nodes;
+    ]
 
 let search
     ~(syntax_tree: SyntaxTree.t)

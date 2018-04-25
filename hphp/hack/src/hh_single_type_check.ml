@@ -726,7 +726,7 @@ let handle_mode
       |> CstSearchService.compile_pattern
       >>| CstSearchService.search ~syntax_tree
       >>| CstSearchService.result_to_json
-      >>| Hh_json.json_to_string
+      >>| Hh_json.json_to_string ~pretty:true
     in
     begin match result with
     | Ok result -> Printf.printf "%s\n" result

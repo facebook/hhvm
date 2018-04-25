@@ -187,7 +187,8 @@ let add env x ty =
      * the substitution n := ?m for fresh variable m
      *)
   | DoesOccurUnderOptions ->
-    let env, ty' = Env.fresh_unresolved_type env in
+    let env, ty' = Env.get_type_unsafe env x' in
+    let env, ty' = TUtils.unresolved env ty' in
     Env.add env x (fst ty, Toption ty')
 
     (* We solve the unification problem [n]

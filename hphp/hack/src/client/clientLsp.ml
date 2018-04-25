@@ -713,10 +713,10 @@ let do_hover
   let inferred_type = rpc conn ref_unblocked_time command in
   match inferred_type with
   (* Hack server uses None to indicate absence of a result. *)
-  (* We're also catching the non-result "" just in case...               *)
-  | None
-  | Some ("", _) -> { Hover.contents = []; range = None; }
-  | Some (s, _) -> { Hover.contents = [MarkedString s]; range = None; }
+  (* We're also catching the non-result "" just in case...  *)
+  | None -> None
+  | Some ("", _) -> None
+  | Some (s, _) -> Some { Hover.contents = [MarkedString s]; range = None; }
 
 let do_enhanced_hover
     (conn: server_conn)
@@ -743,16 +743,13 @@ let do_enhanced_hover
      surprised if there were any different ones in here. Just take the first
      non-None one.
      -wipi *)
-  let pos =
+  let range =
     infos
     |> List.filter_map ~f:(fun { HoverService.pos; _ } -> pos)
     |> List.hd
     |> Option.map ~f:hack_pos_to_lsp_range
   in
-  {
-    Hover.contents;
-    range = pos;
-  }
+  if contents = [] then None else Some { Hover.contents; range; }
 
 let do_definition (conn: server_conn) (ref_unblocked_time: float ref) (params: Definition.params)
   : Definition.result =

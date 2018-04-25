@@ -8,3 +8,12 @@ function testing_area(): void {
 function test_function(): void {
 
 }
+
+interface CompletionInterface {
+  /** Doc block should fall back to interface. */
+  public function interfaceDocBlockMethod(): void;
+}
+
+class CompletionClass {
+  public function interfaceDocBlockMethod(): void {}
+}

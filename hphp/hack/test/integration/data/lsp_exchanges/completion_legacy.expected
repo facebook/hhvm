@@ -54,8 +54,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 9,
-            "char_start": 13,
-            "char_end": 24
+            "char": 13,
+            "base_class": null
           }
         },
         {
@@ -68,8 +68,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 4,
-            "char_start": 13,
-            "char_end": 23
+            "char": 13,
+            "base_class": null
           }
         }
       ]
@@ -91,8 +91,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 9,
-            "char_start": 13,
-            "char_end": 24
+            "char": 13,
+            "base_class": null
           }
         },
         {
@@ -105,8 +105,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 4,
-            "char_start": 13,
-            "char_end": 23
+            "char": 13,
+            "base_class": null
           }
         }
       ]
@@ -136,8 +136,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
-            "char_start": 27,
-            "char_end": 29
+            "char": 27,
+            "base_class": "\\:ab:cd:text"
           }
         },
         {
@@ -150,8 +150,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
-            "char_start": 13,
-            "char_end": 18
+            "char": 13,
+            "base_class": "\\:ab:cd:text"
           }
         }
       ]
@@ -173,8 +173,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
-            "char_start": 27,
-            "char_end": 29
+            "char": 27,
+            "base_class": "\\:ab:cd:text"
           }
         },
         {
@@ -187,8 +187,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
-            "char_start": 13,
-            "char_end": 18
+            "char": 13,
+            "base_class": "\\:ab:cd:text"
           }
         }
       ]
@@ -211,8 +211,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 9,
-            "char_start": 13,
-            "char_end": 24
+            "char": 13,
+            "base_class": "\\:ab:cd:alpha"
           }
         },
         {
@@ -226,8 +226,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 4,
-            "char_start": 13,
-            "char_end": 23
+            "char": 13,
+            "base_class": "\\:ab:cd:text"
           }
         }
       ]
@@ -250,8 +250,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 9,
-            "char_start": 13,
-            "char_end": 24
+            "char": 13,
+            "base_class": "\\:ab:cd:alpha"
           }
         },
         {
@@ -265,8 +265,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 4,
-            "char_start": 13,
-            "char_end": 23
+            "char": 13,
+            "base_class": "\\:ab:cd:text"
           }
         }
       ]
@@ -287,8 +287,7 @@
       "data": {
         "filename": "${root_path}${path_sep}completion_extras.php",
         "line": 9,
-        "char_start": 13,
-        "char_end": 24
+        "char": 13
       }
     }
   },
@@ -308,8 +307,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
-            "char_start": 27,
-            "char_end": 29
+            "char": 27,
+            "base_class": "\\:ab:cd:text"
           }
         },
         {
@@ -322,8 +321,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
-            "char_start": 13,
-            "char_end": 18
+            "char": 13,
+            "base_class": "\\:ab:cd:text"
           }
         }
       ]
@@ -345,8 +344,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
-            "char_start": 27,
-            "char_end": 29
+            "char": 27,
+            "base_class": "\\:ab:cd:text"
           }
         },
         {
@@ -359,8 +358,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
-            "char_start": 13,
-            "char_end": 18
+            "char": 13,
+            "base_class": "\\:ab:cd:text"
           }
         }
       ]
@@ -383,8 +382,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion.php",
             "line": 8,
-            "char_start": 10,
-            "char_end": 22
+            "char": 10,
+            "base_class": null
           }
         }
       ]
@@ -405,8 +404,7 @@
       "data": {
         "filename": "${root_path}${path_sep}completion.php",
         "line": 8,
-        "char_start": 10,
-        "char_end": 22
+        "char": 10
       }
     }
   },
@@ -434,8 +432,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 13,
-            "char_start": 6,
-            "char_end": 9
+            "char": 6,
+            "base_class": "\\Elsa"
           }
         },
         {
@@ -448,8 +446,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 13,
-            "char_start": 12,
-            "char_end": 17
+            "char": 12,
+            "base_class": "\\Elsa"
           }
         },
         {
@@ -462,8 +460,8 @@
           "data": {
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 13,
-            "char_start": 12,
-            "char_end": 17
+            "char": 12,
+            "base_class": "\\Elsa"
           }
         },
         {
@@ -477,8 +475,8 @@
           "data": {
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
             "line": 46,
-            "char_start": 32,
-            "char_end": 38
+            "char": 32,
+            "base_class": "\\Elsa"
           }
         },
         {
@@ -492,8 +490,8 @@
           "data": {
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
             "line": 33,
-            "char_start": 32,
-            "char_end": 40
+            "char": 32,
+            "base_class": "\\Elsa"
           }
         },
         {
@@ -507,8 +505,8 @@
           "data": {
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
             "line": 41,
-            "char_start": 32,
-            "char_end": 39
+            "char": 32,
+            "base_class": "\\Elsa"
           }
         },
         {
@@ -522,8 +520,8 @@
           "data": {
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
             "line": 52,
-            "char_start": 32,
-            "char_end": 37
+            "char": 32,
+            "base_class": "\\Elsa"
           }
         },
         {
@@ -537,8 +535,8 @@
           "data": {
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
             "line": 64,
-            "char_start": 32,
-            "char_end": 40
+            "char": 32,
+            "base_class": "\\Elsa"
           }
         },
         {
@@ -552,8 +550,8 @@
           "data": {
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
             "line": 58,
-            "char_start": 32,
-            "char_end": 37
+            "char": 32,
+            "base_class": "\\Elsa"
           }
         }
       ]

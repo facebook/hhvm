@@ -37,8 +37,17 @@ type autocomplete_kind =
 
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
+    (** The position of the declaration we're returning. *)
     res_pos         : Pos.absolute;
+
+    (** The position in the opened file that we're replacing with res_name. *)
     res_replace_pos : Ide_api_types.range;
+
+    (** If we're autocompleting a method, store the class name of the variable
+        we're calling the method on (for doc block fallback in autocomplete
+        resolution). *)
+    res_base_class  : string option;
+
     res_ty          : string;
     res_name        : string;
     res_kind        : autocomplete_kind;
@@ -51,6 +60,7 @@ type partial_autocomplete_result = {
     ty   : Typing_defs.phase_ty;
     name : string;
     kind_: autocomplete_kind;
+    base_class: string option;
   }
 
 type autocomplete_result =

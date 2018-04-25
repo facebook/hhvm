@@ -65,6 +65,7 @@ let make_class_completion (context:context) (replace_pos:Ide_api_types.range) (n
     Some ({
       res_pos = Pos.none |> Pos.to_absolute;
       res_replace_pos = replace_pos;
+      res_base_class = None;
       res_ty = "class";
       res_name = name;
       res_kind = Class_kind;
@@ -78,6 +79,7 @@ let make_interface_completion (context:context) (replace_pos:Ide_api_types.range
     Some ({
       res_pos = Pos.none |> Pos.to_absolute;
       res_replace_pos = replace_pos;
+      res_base_class = None;
       res_ty = "interface";
       res_name = name;
       res_kind = Interface_kind;
@@ -91,6 +93,7 @@ let make_trait_completion (context:context) (replace_pos:Ide_api_types.range) (n
     Some ({
       res_pos = Pos.none |> Pos.to_absolute;
       res_replace_pos = replace_pos;
+      res_base_class = None;
       res_ty = "trait";
       res_name = name;
       res_kind = Trait_kind;

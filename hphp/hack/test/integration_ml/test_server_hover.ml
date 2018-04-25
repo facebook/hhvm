@@ -560,6 +560,10 @@ function dbfb_func(DBFBClass2 $c, DBFBClass3 $d): void {
 //    ^11:7
   $d->docBlockInClass2();
 //    ^13:7
+  $c->traitFunction();
+//    ^15:7
+  $d->traitFunction2();
+//    ^17:7
 }
 
 interface DBFBInterface1 {
@@ -599,7 +603,17 @@ interface DBFBInterface3 {
   public function slightlyDifferent(): void;
 }
 
+trait DBFBTrait {
+  /** DBFBTrait. */
+  public function traitFunction(): void {}
+
+  /** DBFBTrait. */
+  public function traitFunction2(): void {}
+}
+
 class DBFBClass1 implements DBFBInterface1 {
+  use DBFBTrait;
+
   public function doTheThing(): void {}
 
   /** DBFBClass1. */
@@ -613,6 +627,9 @@ class DBFBClass1 implements DBFBInterface1 {
   public function slightlyDifferent(): void {}
 
   public function noDocBlock(): void {}
+
+  /** DBFBClass1. */
+  public function traitFunction2(): void {}
 }
 
 class DBFBClass2 extends DBFBClass1 implements DBFBInterface2, DBFBInterface3 {
@@ -621,6 +638,8 @@ class DBFBClass2 extends DBFBClass1 implements DBFBInterface2, DBFBInterface3 {
 
 class DBFBClass3 extends DBFBClass2 {
   public function docBlockInClass2(): void {}
+
+  public function traitFunction2(): void {}
 }
 "
 
@@ -665,8 +684,8 @@ let doc_block_fallback_cases = [
    pos = pos_at (11, 7) (11, 16);
   }];
 
-  (* When falling back, if any class ancestors have a doc block don't show any
-     doc blocks from interface ancestors. *)
+  (* When falling back, if any class/trait ancestors have a doc block don't show
+     any doc blocks from interface ancestors. *)
   ("doc_block_fallback.php", 13, 7), [{
    snippet = "public function docBlockInClass2(): void";
    addendum = [
@@ -674,6 +693,23 @@ let doc_block_fallback_cases = [
      "Full name: `DBFBClass3::docBlockInClass2`";
    ];
    pos = pos_at (13, 7) (13, 22);
+  }];
+
+  ("doc_block_fallback.php", 15, 7), [{
+    snippet = "public function traitFunction(): void";
+    addendum = [
+      "DBFBTrait.";
+      "Full name: `DBFBTrait::traitFunction`";
+    ];
+    pos = pos_at (15, 7) (15, 19);
+  }];
+  ("doc_block_fallback.php", 17, 7), [{
+    snippet = "public function traitFunction2(): void";
+    addendum = [
+      "DBFBClass1.";
+      "Full name: `DBFBClass3::traitFunction2`";
+    ];
+    pos = pos_at (17, 7) (17, 20);
   }];
 ]
 

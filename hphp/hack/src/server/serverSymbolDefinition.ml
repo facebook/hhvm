@@ -170,21 +170,20 @@ let get_definition_cst_node_from_pos kind source_text pos =
   let (line, start, _) = Pos.info_pos pos in
   let offset = SourceText.position_to_offset source_text (line, start) in
   let parents = Syntax.parentage (SyntaxTree.root tree) offset in
-  let open SymbolDefinition in
   List.find parents ~f:begin fun syntax ->
     match kind, Syntax.kind syntax with
-    | Function, SyntaxKind.FunctionDeclaration
-    | Class, SyntaxKind.ClassishDeclaration
-    | Method, SyntaxKind.MethodishDeclaration
-    | Property, SyntaxKind.PropertyDeclaration
-    | Const, SyntaxKind.ConstDeclaration
-    | Enum, SyntaxKind.EnumDeclaration
-    | Interface, SyntaxKind.ClassishDeclaration
-    | Trait, SyntaxKind.ClassishDeclaration
-    | LocalVar, SyntaxKind.VariableExpression
-    | Typeconst, SyntaxKind.TypeConstDeclaration
-    | Param, SyntaxKind.ParameterDeclaration
-    | Typedef, SyntaxKind.SimpleTypeSpecifier -> true
+    | SymbolDefinition.Function, SyntaxKind.FunctionDeclaration
+    | SymbolDefinition.Class, SyntaxKind.ClassishDeclaration
+    | SymbolDefinition.Method, SyntaxKind.MethodishDeclaration
+    | SymbolDefinition.Property, SyntaxKind.PropertyDeclaration
+    | SymbolDefinition.Const, SyntaxKind.ConstDeclaration
+    | SymbolDefinition.Enum, SyntaxKind.EnumDeclaration
+    | SymbolDefinition.Interface, SyntaxKind.ClassishDeclaration
+    | SymbolDefinition.Trait, SyntaxKind.ClassishDeclaration
+    | SymbolDefinition.LocalVar, SyntaxKind.VariableExpression
+    | SymbolDefinition.Typeconst, SyntaxKind.TypeConstDeclaration
+    | SymbolDefinition.Param, SyntaxKind.ParameterDeclaration
+    | SymbolDefinition.Typedef, SyntaxKind.SimpleTypeSpecifier -> true
     | _ -> false
   end
 

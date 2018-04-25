@@ -677,9 +677,7 @@ and stmt env = function
           env.Env.function_pos
           te
       end;
-      if return_by_ref && TypecheckerOptions.experimental_feature_enabled
-        (Env.get_options env)
-        TypecheckerOptions.experimental_disallow_refs_in_array
+      if return_by_ref
       then begin match snd e with
         | Array_get _ -> Errors.return_ref_in_array p
         | _ -> ()
@@ -1042,7 +1040,7 @@ and bind_as_expr env loop_ty ty aexpr =
   let p, ty1, ty2 =
     match ety with
     | _, Tclass ((p, _), [ty2]) ->
-      (p, (Reason.Rnone, TUtils.desugar_mixed env Reason.Rnone), ty2)
+      (p, (Reason.Rnone, TUtils.desugar_mixed Reason.Rnone), ty2)
     | _, Tclass ((p, _), [ty1; ty2]) -> (p, ty1, ty2)
     | _ -> assert false in
   (* Set id as dynamic if the foreach loop was dynamic *)
@@ -2229,8 +2227,7 @@ and expr_
           | Some _ ->
             (* If the expected type is something concrete but not a function
              * then we should reject in strict mode. Check body anyway *)
-            if Env.is_strict env && TypecheckerOptions.experimental_feature_enabled (Env.get_options env)
-              TypecheckerOptions.experimental_disallow_untyped_lambda_as_non_function_type
+            if Env.is_strict env
             then Errors.untyped_lambda_strict_mode p;
             Measure.sample "Lambda [non-function typed context]" 1.0;
             check_body_under_known_params declared_ft
@@ -3108,12 +3105,7 @@ and assign_ p ur env e1 ty2 =
      make_result env T.Any (Reason.Rwitness p, Typing_utils.terr env)
   | pref, Unop (Ast.Uref, e1') ->
     (* references can be "lvalues" in foreach bindings *)
-    if TypecheckerOptions.experimental_feature_enabled
-      (Env.get_options env)
-      TypecheckerOptions.experimental_disallow_refs_in_array
-    then Errors.binding_ref_in_array pref
-    else if Env.is_strict env
-    then Errors.reference_expr pref;
+    Errors.binding_ref_in_array pref;
     let env, texpr, ty = assign p env e1' ty2 in
     make_result env (T.Unop (Ast.Uref, texpr)) ty
   | _ ->
@@ -5253,9 +5245,7 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
       make_result env te ty
   | Ast.Uref ->
       (* We basically just ignore references in non-strict files *)
-      if forbid_uref && TypecheckerOptions.experimental_feature_enabled
-        (Env.get_options env)
-        TypecheckerOptions.experimental_disallow_refs_in_array
+      if forbid_uref
       then Errors.binding_ref_in_array p
       else if Env.is_strict env && not is_func_arg
       then Errors.reference_expr p;

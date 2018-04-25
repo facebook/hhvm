@@ -106,7 +106,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
   | _, (Tnonnull | Tprim _ | Tdynamic) as x ->
       env, (ety_env, x)
   | r, Tmixed ->
-      env, (ety_env, (r, TUtils.desugar_mixed env r))
+      env, (ety_env, (r, TUtils.desugar_mixed r))
   | r, Tthis ->
       let ty = match ety_env.this_ty with
         | Reason.Rnone, ty -> r, ty

@@ -127,7 +127,6 @@ val tco_experimental_tconst_on_generics : string
 val tco_experimental_disable_shape_and_tuple_arrays : string
 val tco_experimental_stronger_shape_idx_ret : string
 val tco_experimental_unresolved_fix : string
-val tco_experimental_dynamic_types : string
 val tco_experimental_generics_arity : string
 val tco_experimental_annotate_function_calls : string
 val tco_experimental_forbid_nullable_cast : string
@@ -137,10 +136,6 @@ val tco_experimental_disable_optional_and_unknown_shape_fields : string
 val tco_experimental_no_trait_reuse : string
 val tco_experimental_is_expression : string
 val tco_experimental_as_expression : string
-val tco_experimental_no_fallback_in_namespaces : string
-val tco_experimental_nonnull : string
-val tco_experimental_disallow_untyped_lambda_as_non_function_type : string
-val tco_experimental_disallow_refs_in_array : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t

@@ -1,6 +1,4 @@
 Fun \NS\bar -> Fun \NS\bar
 Fun \NS\bar -> Fun \NS\foo
-Fun \NS\bar -> FunName \NS\foo
-Fun \NS\bar -> FunName \foo
 Fun \NS\foo -> Fun \NS\foo
 Fun \foo -> Fun \foo

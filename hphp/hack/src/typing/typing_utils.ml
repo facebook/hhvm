@@ -750,12 +750,7 @@ let default_fun_param ty : 'a fun_param = {
 let fun_mutable user_attributes =
   Attributes.mem SN.UserAttributes.uaMutable user_attributes
 
-let desugar_mixed env r =
-  let nonnull_allowed =
-    TypecheckerOptions.experimental_feature_enabled
-      (Typing_env.get_tcopt env)
-      TypecheckerOptions.experimental_nonnull in
-  if nonnull_allowed then Toption (r, Tnonnull) else Tmixed
+let desugar_mixed r = Toption (r, Tnonnull)
 
 let tany env =
   let dynamic_view_enabled =

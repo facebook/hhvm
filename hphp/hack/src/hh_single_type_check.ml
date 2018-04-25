@@ -312,10 +312,6 @@ let parse_options () =
         then !forbid_nullable_cast
         else if x = GlobalOptions.tco_experimental_disable_optional_and_unknown_shape_fields
         then !disable_optional_and_unknown_shape_fields
-        else if x = GlobalOptions.tco_experimental_no_fallback_in_namespaces
-        then !no_fallback_in_namespaces
-        else if x = GlobalOptions.tco_experimental_disallow_refs_in_array
-        then !disallow_refs_in_array
         else true
       end tcopt.GlobalOptions.tco_experimental_features;
   } in

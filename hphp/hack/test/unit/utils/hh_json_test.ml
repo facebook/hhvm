@@ -211,7 +211,7 @@ let test_access_3_keys_one_object_wrong_type_middle () =
   match result with
   | Error access_failure ->
     Asserter.String_asserter.assert_equals
-      "Value expected to be String (at field [bar])"
+      "Value expected to be String (at field `bar`)"
       (access_failure_to_string access_failure)
       "Not the access failure we expected";
     true

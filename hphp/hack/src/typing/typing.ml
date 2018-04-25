@@ -6092,11 +6092,11 @@ and class_def tcopt c =
 and class_def_ env c tc =
   Typing_hooks.dispatch_enter_class_def_hook c tc;
   let env = Env.set_mode env c.c_mode in
-  let env = match c.c_kind with
-    | Ast.Cenum | Ast.Ctrait | Ast.Cinterface -> env
-    | Ast.Cabstract | Ast.Cnormal ->
-      Typing_attributes.check_def env new_object
-        SN.AttributeKinds.cls c.c_user_attributes in
+  let env =
+    let kind = match c.c_kind with
+    | Ast.Cenum -> SN.AttributeKinds.enum
+    | _ -> SN.AttributeKinds.cls in
+    Typing_attributes.check_def env new_object kind c.c_user_attributes in
   let pc, _ = c.c_name in
   let impl = List.map
     (c.c_extends @ c.c_implements @ c.c_uses)

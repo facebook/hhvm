@@ -1240,7 +1240,7 @@ let duplicate_user_attribute (pos, name) existing_attr_pos =
 let unbound_attribute_name pos name =
   let reason = if (string_starts_with name "__")
     then "starts with __ but is not a standard attribute"
-    else "is not listed in .hhconfig"
+    else "does not have a class and is not listed in .hhconfig"
   in add Naming.unbound_name pos
     ("Unrecognized user attribute: "^name^" "^reason)
 

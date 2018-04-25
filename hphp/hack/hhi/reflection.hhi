@@ -52,7 +52,7 @@ class ReflectionClass implements Reflector {
   public function getInterfaces(): array<string, ReflectionClass>;
   final public function getAttributes(): array<string, array<mixed>>;
   final public function getAttribute(string $name): ?array<mixed>;
-  final public function getAttributeClass<T as HH\ClassAttribute>(classname<T> $c): ?T;
+  final public function getAttributeClass<T as HH\ClassLikeAttribute>(classname<T> $c): ?T;
   final public function getAttributesRecursive(): array<string, array<mixed>>;
   final public function getAttributeRecursive(string $name): ?array<mixed>;
   public function getMethod(string $name): ReflectionMethod;

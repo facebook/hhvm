@@ -3,7 +3,10 @@
 namespace HH {
 
 // class-like
-interface ClassAttribute {}
+interface ClassLikeAttribute {}
+interface ClassAttribute extends ClassLikeAttribute {}
+interface EnumAttribute extends ClassLikeAttribute {}
+
 interface TypeAliasAttribute {}
 
 // function-like

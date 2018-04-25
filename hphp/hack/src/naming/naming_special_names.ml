@@ -158,6 +158,8 @@ end
 
 module AttributeKinds = struct
   let cls = "\\HH\\ClassAttribute"
+  let enum = "\\HH\\EnumAttribute"
+
   let typealias = "\\HH\\TypeAliasAttribute"
 
   let fn = "\\HH\\FunctionAttribute"
@@ -171,6 +173,7 @@ module AttributeKinds = struct
   let plain_english_map =
     List.fold_left ~init:SMap.empty ~f:(fun acc (k, v) -> SMap.add k v acc)
       [ (cls, "a class")
+      ; (enum, "an enum")
       ; (typealias, "a typealias")
       ; (fn, "a function")
       ; (mthd, "a method")

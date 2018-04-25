@@ -1,13 +1,13 @@
 {
-  "patternType": "descendant-pattern",
+  "pattern_type": "descendant_pattern",
   "pattern": {
-    "patternType": "node-pattern",
+    "pattern_type": "node_pattern",
     "kind": "methodish_declaration",
     "children": {
       "methodish_semicolon": {
-        "patternType": "descendant-pattern",
+        "pattern_type": "descendant_pattern",
         "pattern": {
-          "patternType": "node-pattern",
+          "pattern_type": "node_pattern",
           "kind": "methodish_declaration",
           "children": {}
         }

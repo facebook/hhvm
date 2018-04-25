@@ -1,5 +1,5 @@
 {
-  "patternType": "node-pattern",
+  "pattern_type": "node_pattern",
   "kind": "foo",
   "children": {}
 }

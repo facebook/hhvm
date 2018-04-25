@@ -1,16 +1,16 @@
 {
-  "patternType": "descendant-pattern",
+  "pattern_type": "descendant_pattern",
   "pattern": {
-    "patternType": "node-pattern",
+    "pattern_type": "node_pattern",
     "kind": "methodish_declaration",
     "children": {
       "methodish_function_decl_header": {
-        "patternType": "node-pattern",
+        "pattern_type": "node_pattern",
         "kind": "function_declaration_header",
         "children": {
           "function_name": {
-            "patternType": "match-pattern",
-            "matchName": "function name"
+            "pattern_type": "match_pattern",
+            "match_name": "function name"
           }
         }
       }

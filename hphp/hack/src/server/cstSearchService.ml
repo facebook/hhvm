@@ -202,15 +202,15 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
   in
 
   let rec compile_pattern ~json ~keytrace : (pattern, string) Core_result.t =
-    get_string "patternType" (json, keytrace)
+    get_string "pattern_type" (json, keytrace)
 
     >>= fun (pattern_type, pattern_type_keytrace) ->
     match pattern_type with
-    | "node-pattern" ->
+    | "node_pattern" ->
       compile_node_pattern ~json ~keytrace
-    | "match-pattern" ->
+    | "match_pattern" ->
       compile_match_pattern ~json ~keytrace
-    | "descendant-pattern" ->
+    | "descendant_pattern" ->
       compile_descendant_pattern ~json ~keytrace
     | pattern_type ->
       error_at_keytrace ~keytrace:pattern_type_keytrace
@@ -279,7 +279,7 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
     }
 
   and compile_match_pattern ~json ~keytrace =
-    get_string "matchName" (json, keytrace)
+    get_string "match_name" (json, keytrace)
     >>| fun (match_name, _match_name_keytrace) ->
     MatchPattern {
       match_name = MatchName match_name;
@@ -308,12 +308,12 @@ let result_to_json (result: result option): Hh_json.json =
         with MatchName match_name -> match_name
       in
       JSON_Object [
-        "matchName", JSON_String match_name;
+        "match_name", JSON_String match_name;
         "node", Syntax.to_json matched_node.node;
       ])
     in
     JSON_Object [
-      "matchedNodes", JSON_Array matched_nodes;
+      "matched_nodes", JSON_Array matched_nodes;
     ]
 
 let search

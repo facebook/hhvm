@@ -1,9 +1,9 @@
 {
-  "patternType": "node-pattern",
+  "pattern_type": "node_pattern",
   "kind": "methodish_declaration",
   "children": {
     "foo": {
-      "patternType": "match-pattern"
+      "pattern_type": "match_pattern"
     }
   }
 }

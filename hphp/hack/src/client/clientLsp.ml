@@ -865,6 +865,20 @@ let make_ide_completion_response
       then Pos.set_file filename completion.res_pos
       else completion.res_pos
     in
+    let data =
+      let (line, start, _) = Pos.info_pos pos in
+      let filename = Pos.filename pos in
+      let base_class = match completion.res_base_class with
+        | Some base_class -> Hh_json.JSON_String base_class
+        | None -> Hh_json.JSON_Null
+      in
+      Some (Hh_json.JSON_Object [
+        "filename", Hh_json.JSON_String filename;
+        "line", Hh_json.int_ line;
+        "char", Hh_json.int_ start;
+        "base_class", base_class;
+      ])
+    in
     {
       label = completion.res_name ^ (if completion.res_kind = Namespace_kind then "\\" else "");
       kind = hack_to_kind completion;
@@ -878,7 +892,7 @@ let make_ide_completion_response
       insertTextFormat = Some insertTextFormat;
       textEdits;
       command = None;
-      data = Some (Pos.json pos);
+      data;
     }
   in
   {
@@ -921,9 +935,10 @@ let do_completionItemResolve
   | Some _ as data ->
     let filename = Jget.string_exn data "filename" in
     let line = Jget.int_exn data "line" in
-    let char = Jget.int_exn data "char_start" in
+    let char = Jget.int_exn data "char" in
+    let base_class = Jget.string_opt data "base_class" in
     let command =
-      ServerCommandTypes.DOCBLOCK_AT (filename, line, char)
+      ServerCommandTypes.DOCBLOCK_AT (filename, line, char, base_class)
     in
     let contents = rpc conn ref_unblocked_time command in
     { params with Completion.documentation = contents }

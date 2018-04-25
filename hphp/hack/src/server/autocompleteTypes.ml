@@ -37,11 +37,9 @@ type autocomplete_kind =
 
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
-    (** The position of the declaration we're returning. *)
     res_pos         : Pos.absolute;
-
-    (** The position in the opened file that we're replacing with res_name. *)
     res_replace_pos : Ide_api_types.range;
+    res_base_class  : string option;
     res_ty          : string;
     res_name        : string;
     res_kind        : autocomplete_kind;
@@ -51,9 +49,10 @@ type complete_autocomplete_result = {
 (* Results that still need a typing environment to convert ty information
    into strings *)
 type partial_autocomplete_result = {
-    ty   : Typing_defs.phase_ty;
-    name : string;
-    kind_: autocomplete_kind;
+    ty        : Typing_defs.phase_ty;
+    name      : string;
+    kind_     : autocomplete_kind;
+    base_class: string option;
   }
 
 type autocomplete_result =

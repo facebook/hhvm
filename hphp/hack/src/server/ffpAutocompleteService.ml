@@ -22,6 +22,7 @@ let make_keyword_completion (replace_pos:Ide_api_types.range) (keyword_name:stri
   {
     res_pos = Pos.none |> Pos.to_absolute;
     res_replace_pos = replace_pos;
+    res_base_class = None;
     res_ty = "keyword";
     res_name = keyword_name;
     res_kind = Keyword_kind;

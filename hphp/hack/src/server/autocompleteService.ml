@@ -95,14 +95,15 @@ let autocomplete_result_to_json res =
       "expected_ty", Hh_json.JSON_Bool false; (* legacy field, left here in case clients need it *)
   ]
 
-let get_partial_result name ty kind =
-  Partial { ty; name; kind_=kind; }
+let get_partial_result name ty kind class_opt =
+  let base_class = Option.map ~f:(fun class_ -> class_.Typing_defs.tc_name) class_opt in
+  Partial { ty; name; kind_=kind; base_class; }
 
 let add_res (res: autocomplete_result) : unit =
   autocomplete_results := res :: !autocomplete_results
 
-let add_partial_result name ty kind =
-  add_res (get_partial_result name ty kind)
+let add_partial_result name ty kind class_opt =
+  add_res (get_partial_result name ty kind class_opt)
 
 let autocomplete_token ac_type env x =
   if is_auto_complete (snd x)
@@ -137,7 +138,7 @@ let autocomplete_member ~is_static env class_ cid id =
     ac_env := Some env;
     autocomplete_identifier := Some id;
     argument_global_type := Some Acclass_get;
-    let add kind name ty = add_partial_result name (Phase.decl ty) kind in
+    let add kind name ty = add_partial_result name (Phase.decl ty) kind (Some class_) in
     if is_static then begin
       SMap.iter (get_class_elt_types env class_ cid class_.tc_smethods) ~f:(add Method_kind);
       SMap.iter (get_class_elt_types env class_ cid class_.tc_sprops) ~f:(add Property_kind);
@@ -323,7 +324,11 @@ let compute_complete_global
         incr result_count;
         if completion_type = Some Acnew then
           get_partial_result
-            (string_to_replace_prefix name) (Phase.decl (get_constructor_ty c)) Constructor_kind
+            (string_to_replace_prefix name)
+            (Phase.decl (get_constructor_ty c))
+            Constructor_kind
+            (* Only do doc block fallback on constructors if they're consistent. *)
+            (if snd c.Typing_defs.tc_construct then Some c else None)
         else
           let kind = match c.Typing_defs.tc_kind with
             | Ast.Cabstract -> Abstract_class_kind
@@ -335,7 +340,7 @@ let compute_complete_global
           let ty =
             Typing_reason.Rwitness c.Typing_defs.tc_pos,
             Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), []) in
-          get_partial_result (string_to_replace_prefix name) (Phase.decl ty) kind
+          get_partial_result (string_to_replace_prefix name) (Phase.decl ty) kind None
       )
     in
 
@@ -347,7 +352,7 @@ let compute_complete_global
       Option.map (Typing_lazy_heap.get_fun tcopt name) ~f:(fun fun_ ->
         incr result_count;
         let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
-        get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind
+        get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind None
       )
     in
 
@@ -360,6 +365,7 @@ let compute_complete_global
       Some (Complete {
         res_pos = Pos.none |> Pos.to_absolute;
         res_replace_pos = get_replace_pos_exn ~delimit_on_namespaces;
+        res_base_class = None;
         res_ty = "namespace";
         res_name = string_to_replace_prefix name;
         res_kind = Namespace_kind;
@@ -499,6 +505,7 @@ let resolve_ty
   {
     res_pos         = (fst ty) |> Typing_reason.to_pos |> Pos.to_absolute;
     res_replace_pos = get_replace_pos_exn ~delimit_on_namespaces;
+    res_base_class  = x.base_class;
     res_ty          = desc_string;
     res_name        = name;
     res_kind        = x.kind_;
@@ -635,7 +642,7 @@ end
 let compute_complete_local tast =
   new local_types#get_types tast
   |> Local_id.Map.iter begin fun x ty ->
-    add_partial_result (Local_id.get_name x) (Phase.locl ty) Variable_kind
+    add_partial_result (Local_id.get_name x) (Phase.locl ty) Variable_kind None
   end
 
 let reset () =

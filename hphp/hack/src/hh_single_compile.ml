@@ -373,6 +373,7 @@ let do_compile filename compiler_options text fail_or_ast debug_time =
   let hhas_text = Hhbc_hhas.to_string
     ~path:filename
     ~dump_symbol_refs:compiler_options.dump_symbol_refs
+    ~original_text_length:(String.length text)
     hhas_prog in
   ignore @@ add_to_time_ref debug_time.printing_t t;
   if compiler_options.debug_time

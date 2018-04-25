@@ -7,6 +7,10 @@
  *
 *)
 
-val to_string : ?path:Relative_path.t -> ?dump_symbol_refs:bool -> Hhas_program.t -> string
+val to_string :
+  ?path:Relative_path.t ->
+  ?dump_symbol_refs:bool ->
+  ?original_text_length: int ->
+  Hhas_program.t -> string
 val string_of_instruction : Hhbc_ast.instruct -> string
 val string_of_local_id : Local.t -> string

@@ -11,7 +11,6 @@
 
 module EA = Emit_adata
 module Log = Semdiff_logging
-module SS = String_sequence
 module Utils = Semdiff_utils
 
 let concatstrs = String.concat ""
@@ -164,7 +163,10 @@ let primitive_comparer to_string = {
   string_of = to_string;
 }
 
-let typed_value_to_string v = SS.seq_to_string @@ EA.adata_to_string_seq v
+let typed_value_to_string v =
+  let buf = Buffer.create 16 in
+  EA.adata_to_buffer buf v;
+  Buffer.contents buf
 
 let typed_value_comparer = primitive_comparer typed_value_to_string
 

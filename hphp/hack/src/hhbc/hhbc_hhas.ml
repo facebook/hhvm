@@ -10,7 +10,6 @@
 module B = Buffer
 module H = Hhbc_ast
 module A = Ast
-module SS = String_sequence
 module SU = Hhbc_string_utils
 module SN = Naming_special_names
 module ULS = Unique_list_string
@@ -1613,11 +1612,10 @@ let add_property class_def buf property =
   then B.add_string buf "uninit;"
   else begin
     B.add_string buf "\"\"\"";
-    let init = match initial_value with
-      | None -> SS.str "N;"
-      | Some value -> Emit_adata.adata_to_string_seq value
-    in
-    SS.add_string_from_seq buf init;
+    begin match initial_value with
+      | None -> B.add_string buf "N;"
+      | Some value -> Emit_adata.adata_to_buffer buf value
+    end;
     B.add_string buf "\"\"\";"
   end
 
@@ -1631,7 +1629,7 @@ let add_constant buf c =
     B.add_string buf " = uninit"
   | Some value ->
     B.add_string buf " = \"\"\"";
-    SS.add_string_from_seq buf @@ Emit_adata.adata_to_string_seq value;
+    Emit_adata.adata_to_buffer buf value;
     B.add_string buf "\"\"\""
   | None -> ()
     end;
@@ -1645,8 +1643,7 @@ let add_type_constant buf c =
   match initializer_t with
   | Some init ->
     B.add_string buf " = \"\"\"";
-    B.add_string buf @@ SS.seq_to_string @@
-      Emit_adata.adata_to_string_seq init;
+    Emit_adata.adata_to_buffer buf init;
     B.add_string buf "\"\"\";"
   | None -> B.add_string buf ";"
 
@@ -1732,8 +1729,7 @@ let add_data_region_element buf argument =
   B.add_string buf ".adata ";
   B.add_string buf @@ (Hhas_adata.id argument);
   B.add_string buf " = \"\"\"";
-  SS.add_string_from_seq buf
-    @@ Emit_adata.adata_to_string_seq (Hhas_adata.value argument);
+  Emit_adata.adata_to_buffer buf (Hhas_adata.value argument);
   B.add_string buf "\"\"\";\n"
 
 let add_data_region buf adata =
@@ -1759,8 +1755,7 @@ let add_typedef buf typedef =
   match opt_ts with
   | Some ts ->
     B.add_string buf " \"\"\"";
-    B.add_string buf @@ SS.seq_to_string @@
-      Emit_adata.adata_to_string_seq ts;
+    Emit_adata.adata_to_buffer buf ts;
     B.add_string buf "\"\"\";\n"
   | None ->
     B.add_string buf ";\n"
@@ -1858,7 +1853,11 @@ let add_program ?path dump_symbol_refs buf hhas_prog =
       add_program_content dump_symbol_refs buf hhas_prog;
       B.add_string buf "\n#ends here\n"
 
-let to_string ?path ?(dump_symbol_refs=false) hhas_prog =
-  let buf = Buffer.create 1024 in
+let to_string ?path ?(dump_symbol_refs=false) ?(original_text_length = 1024) hhas_prog =
+  (* guestimage initial buffer size as 80% of the size of original program -
+     works for most of www *)
+  let initial_buffer_size =
+    int_of_float @@ (float_of_int original_text_length) *. 1.1 in
+  let buf = Buffer.create initial_buffer_size in
   add_program ?path dump_symbol_refs buf hhas_prog;
   B.contents buf

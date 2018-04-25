@@ -1002,7 +1002,7 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
   }
   SmartFreeHelper freer(offsets);
 
-  const bool hackArrOutput = flags & PREG_HACK_ARR;
+  const bool hackArrOutput = flags & PREG_FB_HACK_ARRAYS;
 
   /* Initialize return array */
   auto ret = hackArrOutput ? Array::CreateDict() : Array::Create();
@@ -1072,7 +1072,7 @@ static Variant preg_match_impl(const StringData* pattern,
   }
   const pcre_cache_entry* pce = accessor.get();
 
-  const bool hackArrOutput = flags & PREG_HACK_ARR;
+  const bool hackArrOutput = flags & PREG_FB_HACK_ARRAYS;
 
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
@@ -1868,7 +1868,7 @@ Variant preg_split(const String& pattern, const String& subject,
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
 
-  const bool hackArrOutput = flags & PREG_HACK_ARR;
+  const bool hackArrOutput = flags & PREG_FB_HACK_ARRAYS;
 
   // Get next piece if no limit or limit not yet reached and something matched
   Array return_value = hackArrOutput ? Array::CreateDict() : Array::Create();

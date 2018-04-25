@@ -4312,75 +4312,34 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
   auto const o3 = it + 1 != stop &&
                   it + 2 != stop ? it[2].op : Op::Nop;
 
+#define X(y)                                                             \
+  case Op::y:                                                            \
+    switch (o2) {                                                        \
+    case Op::Not:                                                        \
+      switch (o3) {                                                      \
+      case Op::JmpZ:                                                     \
+        return group(env, it, it[0].y, it[1].Not, it[2].JmpZ);           \
+      case Op::JmpNZ:                                                    \
+        return group(env, it, it[0].y, it[1].Not, it[2].JmpNZ);          \
+      default: break;                                                    \
+      }                                                                  \
+      break;                                                             \
+    case Op::JmpZ:                                                       \
+      return group(env, it, it[0].y, it[1].JmpZ);                        \
+    case Op::JmpNZ:                                                      \
+      return group(env, it, it[0].y, it[1].JmpNZ);                       \
+    default: break;                                                      \
+    }                                                                    \
+    break;
+
   switch (o1) {
-  case Op::InstanceOfD:
-    switch (o2) {
-    case Op::Not:
-      switch (o3) {
-      case Op::JmpZ:
-        return group(env, it, it[0].InstanceOfD, it[1].Not, it[2].JmpZ);
-      case Op::JmpNZ:
-        return group(env, it, it[0].InstanceOfD, it[1].Not, it[2].JmpNZ);
-      default: break;
-      }
-      break;
-    case Op::JmpZ:
-      return group(env, it, it[0].InstanceOfD, it[1].JmpZ);
-    case Op::JmpNZ:
-      return group(env, it, it[0].InstanceOfD, it[1].JmpNZ);
-    default: break;
-    }
-    break;
-  case Op::IsTypeL:
-    switch (o2) {
-    case Op::Not:
-      switch (o3) {
-      case Op::JmpZ:
-        return group(env, it, it[0].IsTypeL, it[1].Not, it[2].JmpZ);
-      case Op::JmpNZ:
-        return group(env, it, it[0].IsTypeL, it[1].Not, it[2].JmpNZ);
-      default: break;
-      }
-      break;
-    case Op::JmpZ:   return group(env, it, it[0].IsTypeL, it[1].JmpZ);
-    case Op::JmpNZ:  return group(env, it, it[0].IsTypeL, it[1].JmpNZ);
-    default: break;
-    }
-    break;
-  case Op::IsUninit:
-    switch (o2) {
-    case Op::Not:
-      switch (o3) {
-      case Op::JmpZ:
-        return group(env, it, it[0].IsUninit, it[1].Not, it[2].JmpZ);
-      case Op::JmpNZ:
-        return group(env, it, it[0].IsUninit, it[1].Not, it[2].JmpNZ);
-      default: break;
-      }
-      break;
-    case Op::JmpZ:   return group(env, it, it[0].IsUninit, it[1].JmpZ);
-    case Op::JmpNZ:  return group(env, it, it[0].IsUninit, it[1].JmpNZ);
-    default: break;
-    }
-    break;
-  case Op::IsTypeC:
-    switch (o2) {
-    case Op::Not:
-      switch (o3) {
-      case Op::JmpZ:
-        return group(env, it, it[0].IsTypeC, it[1].Not, it[2].JmpZ);
-      case Op::JmpNZ:
-        return group(env, it, it[0].IsTypeC, it[1].Not, it[2].JmpNZ);
-      default: break;
-      }
-      break;
-    case Op::JmpZ:
-      return group(env, it, it[0].IsTypeC, it[1].JmpZ);
-    case Op::JmpNZ:
-      return group(env, it, it[0].IsTypeC, it[1].JmpNZ);
-    default: break;
-    }
-    break;
+  X(InstanceOfD)
+  X(IsTypeL)
+  X(IsTypeC)
+  X(IsUninit)
+  X(StaticLocCheck)
+  X(Same)
+  X(NSame)
   case Op::MemoGet:
     switch (o2) {
     case Op::IsUninit:
@@ -4395,62 +4354,9 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
     default: break;
     }
     break;
-  case Op::StaticLocCheck:
-    switch (o2) {
-    case Op::Not:
-      switch (o3) {
-      case Op::JmpZ:
-        return group(env, it, it[0].StaticLocCheck, it[1].Not, it[2].JmpZ);
-      case Op::JmpNZ:
-        return group(env, it, it[0].StaticLocCheck, it[1].Not, it[2].JmpNZ);
-      default: break;
-      }
-      break;
-    case Op::JmpZ:
-      return group(env, it, it[0].StaticLocCheck, it[1].JmpZ);
-    case Op::JmpNZ:
-      return group(env, it, it[0].StaticLocCheck, it[1].JmpNZ);
-    default: break;
-    }
-    break;
-  case Op::Same:
-    switch (o2) {
-    case Op::Not:
-      switch (o3) {
-      case Op::JmpZ:
-        return group(env, it, it[0].Same, it[1].Not, it[2].JmpZ);
-      case Op::JmpNZ:
-        return group(env, it, it[0].Same, it[1].Not, it[2].JmpNZ);
-      default: break;
-      }
-      break;
-    case Op::JmpZ:
-      return group(env, it, it[0].Same, it[1].JmpZ);
-    case Op::JmpNZ:
-      return group(env, it, it[0].Same, it[1].JmpNZ);
-    default: break;
-    }
-    break;
-  case Op::NSame:
-    switch (o2) {
-    case Op::Not:
-      switch (o3) {
-      case Op::JmpZ:
-        return group(env, it, it[0].NSame, it[1].Not, it[2].JmpZ);
-      case Op::JmpNZ:
-        return group(env, it, it[0].NSame, it[1].Not, it[2].JmpNZ);
-      default: break;
-      }
-      break;
-    case Op::JmpZ:
-      return group(env, it, it[0].NSame, it[1].JmpZ);
-    case Op::JmpNZ:
-      return group(env, it, it[0].NSame, it[1].JmpNZ);
-    default: break;
-    }
-    break;
   default: break;
   }
+#undef X
 
   FTRACE(2, "  {}\n", show(env.ctx.func, *it));
   dispatch(env, *it++);

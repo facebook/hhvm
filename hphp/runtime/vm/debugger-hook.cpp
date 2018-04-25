@@ -84,31 +84,17 @@ DebuggerHook* DebuggerHook::s_activeHook {nullptr};
 
 namespace {
 
-// Ensure we interpret all code at the given offsets. This sets up a guard for
-// each piece of translated code to ensure we punt to the interpreter when the
-// debugger is attached.
-void blacklistRangesInJit(const Unit* unit, const OffsetRangeVec& offsets) {
-  for (auto const& range : offsets) {
-    for (PC pc = unit->at(range.base); pc < unit->at(range.past);
-         pc += instrLen(pc)) {
-      jit::addDbgBLPC(pc);
-    }
-  }
-  if (!jit::tc::addDbgGuards(unit)) {
-    Logger::Warning("Failed to set breakpoints in Jitted code");
-  }
-  // In this case, we may be setting a breakpoint in a tracelet which could
-  // already be jitted, and present on the stack. Make sure we don't return
-  // to it so we have a chance to honor breakpoints.
-  debuggerPreventReturnsToTC();
-}
-
 // Ensure we interpret an entire function when the debugger is attached.
 void blacklistFuncInJit(const Func* f) {
-  auto unit = f->unit();
-  OffsetRangeVec ranges;
-  ranges.push_back(OffsetRange(f->base(), f->past()));
-  blacklistRangesInJit(unit, ranges);
+  if (jit::addDbgBLFunc(f)) {
+    if (!jit::tc::addDbgGuards(f)) {
+      Logger::Warning("Failed to set breakpoints in Jitted code");
+    }
+    // In this case, we may be setting a breakpoint in a tracelet which could
+    // already be jitted, and present on the stack. Make sure we don't return
+    // to it so we have a chance to honor breakpoints.
+    debuggerPreventReturnsToTC();
+  }
 }
 
 }
@@ -500,9 +486,11 @@ void phpAddBreakPoint(const Unit* unit, Offset offset) {
   PC pc = unit->at(offset);
   getBreakPointFilter()->addPC(pc);
   if (RuntimeOption::EvalJit) {
-    if (jit::addDbgBLPC(pc)) {
+    auto const func = unit->getFunc(offset);
+    always_assert(func);
+    if (jit::addDbgBLFunc(func)) {
       // if a new entry is added in blacklist
-      if (!jit::tc::addDbgGuards(unit)) {
+      if (!jit::tc::addDbgGuards(func)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
       // In this case, we may be setting a breakpoint in a tracelet which could
@@ -529,9 +517,9 @@ void phpAddBreakPointFuncEntry(const Func* f) {
 
   // Blacklist the location
   if (RuntimeOption::EvalJit) {
-    if (jit::addDbgBLPC(pc)) {
+    if (jit::addDbgBLFunc(f)) {
       // if a new entry is added in blacklist
-      if (!jit::tc::addDbgGuard(f, base, ResumeMode::None)) {
+      if (!jit::tc::addDbgGuards(f)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }
@@ -553,8 +541,8 @@ void phpAddBreakPointFuncExit(const Func* f) {
     RID().m_retBreakPointFilter.addPC(pc);
 
     // Blacklist the location
-    if (RuntimeOption::EvalJit && jit::addDbgBLPC(pc)) {
-      if (!jit::tc::addDbgGuard(f, unit->offsetOf(pc), ResumeMode::None)) {
+    if (RuntimeOption::EvalJit && jit::addDbgBLFunc(f)) {
+      if (!jit::tc::addDbgGuards(f)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }

@@ -343,7 +343,7 @@ void freeTCStub(TCA stub);
  * Emit checks for (and hooks into) an attached debugger in front of each
  * translation in `unit' or for `SrcKey{func, offset, resumed}'.
  */
-bool addDbgGuards(const Unit* unit);
+bool addDbgGuards(const Func* func);
 bool addDbgGuard(const Func* func, Offset offset, ResumeMode resumeMode);
 
 ////////////////////////////////////////////////////////////////////////////////

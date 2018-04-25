@@ -86,7 +86,7 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-bool addDbgGuards(const Unit* unit) {
+bool addDbgGuards(const Func* func) {
   // TODO refactor
   // It grabs the write lease and iterates through whole SrcDB...
   struct timespec tsBegin, tsEnd;
@@ -109,7 +109,7 @@ bool addDbgGuards(const Unit* unit) {
       if (!Func::isFuncIdValid(sk.funcID())) continue;
       SrcRec* sr = pair.second;
       auto srLock = sr->writelock();
-      if (sk.func()->unit() == unit &&
+      if (sk.func() == func &&
           !sr->hasDebuggerGuard() &&
           isSrcKeyInDbgBL(sk)) {
         addDbgGuardImpl(sk, sr, main, data, fixups);

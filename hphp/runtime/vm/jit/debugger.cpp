@@ -38,8 +38,7 @@
 TRACE_SET_MOD(debugger);
 
 namespace HPHP { namespace jit { namespace {
-PCFilter s_dbgBLPC;
-hphp_hash_set<SrcKey,SrcKey::Hasher> s_dbgBLSrcKey;
+hphp_hash_set<const Func*> s_dbgBLFuncs;
 Mutex s_dbgBlacklistLock;
 }
 
@@ -47,38 +46,17 @@ bool isSrcKeyInDbgBL(SrcKey sk) {
   auto unit = sk.unit();
   if (unit->isInterpretOnly()) return true;
   Lock l(s_dbgBlacklistLock);
-  if (s_dbgBLSrcKey.find(sk) != s_dbgBLSrcKey.end()) {
-    return true;
-  }
-
-  // Loop until the end of the basic block inclusively. This is useful for
-  // function exit breakpoints, which are implemented by blacklisting the RetC
-  // opcodes.
-  PC pc = nullptr;
-  do {
-    pc = (pc == nullptr) ? unit->at(sk.offset()) : pc + instrLen(pc);
-    if (s_dbgBLPC.checkPC(pc)) {
-      s_dbgBLSrcKey.insert(sk);
-      return true;
-    }
-  } while (!opcodeBreaksBB(peek_op(pc)));
-  return false;
+  return s_dbgBLFuncs.count(sk.func());
 }
 
 void clearDbgBL() {
   Lock l(s_dbgBlacklistLock);
-  s_dbgBLSrcKey.clear();
-  s_dbgBLPC.clear();
+  s_dbgBLFuncs.clear();
 }
 
-bool addDbgBLPC(PC pc) {
+bool addDbgBLFunc(const Func* func) {
   Lock l(s_dbgBlacklistLock);
-  if (s_dbgBLPC.checkPC(pc)) {
-    // already there
-    return false;
-  }
-  s_dbgBLPC.addPC(pc);
-  return true;
+  return s_dbgBLFuncs.emplace(func).second;
 }
 
 struct DebuggerCatches {

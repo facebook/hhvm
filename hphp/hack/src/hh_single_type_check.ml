@@ -717,23 +717,22 @@ let handle_mode
         end
       end
   | Cst_search ->
-    (* TODO: read the pattern from the user's JSON query *)
-    let open CstSearchService in
-    let pattern = DescendantPattern {
-      pattern = NodePattern {
-        kind = SyntaxKind.MethodishDeclaration;
-        children = [];
-      }
-    } in
-
+    let open Core_result.Monad_infix in
     let source_text = Full_fidelity_source_text.from_file filename in
     let syntax_tree = PositionedTree.make source_text in
-    let env = { syntax_tree } in
 
-    (* TODO: print actual JSON output *)
-    begin match CstSearchService.search ~env ~pattern with
-    | None -> Printf.printf "No result :(\n"
-    | Some _result -> Printf.printf "There was a result!\n"
+    let result = Sys_utils.read_stdin_to_string ()
+      |> Hh_json.json_of_string
+      |> CstSearchService.compile_pattern
+      >>| CstSearchService.search ~syntax_tree
+      >>| CstSearchService.result_to_json
+      >>| Hh_json.json_to_string
+    in
+    begin match result with
+    | Ok result -> Printf.printf "%s\n" result
+    | Error message ->
+      Printf.printf "%s\n" message;
+      exit 1
     end
   | Dump_symbol_info ->
       begin match Relative_path.Map.get files_info filename with

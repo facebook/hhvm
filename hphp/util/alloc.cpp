@@ -373,6 +373,7 @@ static BumpMapper* getHugeMapperWithFallback(unsigned n1GPages,
     } else if (use2MFallback) {
       mapper = new Bump2MMapper;
     }
+#ifdef HAVE_NUMA
   } else {
     fallback = new Bump4KMapper(numa_node_set);
     if (n1GPages) {
@@ -380,6 +381,7 @@ static BumpMapper* getHugeMapperWithFallback(unsigned n1GPages,
     } else {
       mapper = new Bump2MMapper(numa_node_set);
     }
+#endif
   }
   if (mapper) {
     mapper->append(fallback);

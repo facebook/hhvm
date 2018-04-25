@@ -95,7 +95,7 @@ and uop =
 | Unot | Uplus | Uminus | Uincr
 | Udecr | Upincr | Updecr
 | Uref | Usilence
-[@@deriving show,
+[@@deriving show { with_path = false },
             visitors {
               name="iter_defs";
               variety = "iter";
@@ -130,7 +130,7 @@ type fun_decl_kind =
   | FDeclAsync
   | FDeclSync
   | FDeclCoroutine
-  [@@deriving show]
+  [@@deriving show { with_path = false }]
 
 (*****************************************************************************)
 (* Helpers *)

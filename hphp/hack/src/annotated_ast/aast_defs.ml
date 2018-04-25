@@ -134,7 +134,7 @@ and instantiated_sid = sid * hint list
 
 and where_constraint = hint * Ast.constraint_kind * hint
 [@@deriving
-  show,
+  show { with_path = false },
   visitors {
     name="iter_defs";
     variety = "iter";

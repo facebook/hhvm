@@ -2,15 +2,13 @@
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret =
       (Some ([3:18-20],
-             (Aast_defs.Hfun (true, false,
-                [([3:32-35], (Aast_defs.Hprim Aast_defs.Tint))], [None],
-                Aast_defs.Hnon_variadic,
-                ([3:39-43], (Aast_defs.Hprim Aast_defs.Tvoid))))));
+             (Hfun (true, false, [([3:32-35], (Hprim Tint))], [None],
+                Hnon_variadic, ([3:39-43], (Hprim Tvoid))))));
       f_name = ([3:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       (NamedBody { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = true });
-      f_fun_kind = Ast_defs.FSync;
+      f_fun_kind = FSync;
       f_user_attributes =
       [{ Aast.AnnotatedAST.ua_name = ([2:3-7], "__Rx"); ua_params = [] }];
       f_ret_by_ref = false })

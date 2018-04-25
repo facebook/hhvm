@@ -1,6 +1,6 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([12:17-21], (Aast_defs.Hprim Aast_defs.Tvoid)));
+      f_ret = (Some ([12:17-21], (Hprim Tvoid)));
       f_name = ([12:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
@@ -8,12 +8,11 @@
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
                (([13:3-9], int),
-                (Binop ((Ast_defs.Eq None),
-                   (([13:3-5], int), (Lvar ([13:3-5], $y))),
+                (Binop ((Eq None), (([13:3-5], int), (Lvar ([13:3-5], $y))),
                    (([13:8-9], int), (Int ([13:8-9], "2")))))));
              (Expr
                 (([15:3-10], [fun]),
-                 (Binop ((Ast_defs.Eq None),
+                 (Binop ((Eq None),
                     (([15:3-5], [fun]), (Lvar ([15:3-5], $x))),
                     (([15:8-10], (function($z): _)),
                      (Efun (
@@ -36,7 +35,7 @@
                              { Aast.AnnotatedAST.fnb_nast =
                                [(Return ([15:15-22],
                                    (Some (([15:15-22], int),
-                                          (Binop (Ast_defs.Plus,
+                                          (Binop (Plus,
                                              (([15:15-17], int),
                                               (Lvar ([15:15-17], $y))),
                                              (([15:20-22], _),
@@ -45,23 +44,22 @@
                                    ))
                                  ];
                                fnb_unsafe = false });
-                          f_fun_kind = Ast_defs.FSync;
-                          f_user_attributes = []; f_ret_by_ref = false },
+                          f_fun_kind = FSync; f_user_attributes = [];
+                          f_ret_by_ref = false },
                         [([15:15-17], $y)])))
                     ))));
              (Expr
                 (([16:3-13], int),
-                 (Binop ((Ast_defs.Eq None),
-                    (([16:3-5], int), (Lvar ([16:3-5], $l))),
+                 (Binop ((Eq None), (([16:3-5], int), (Lvar ([16:3-5], $l))),
                     (([16:8-13], int),
-                     (Call (Aast_defs.Cnormal,
+                     (Call (Cnormal,
                         (([16:8-10], [fun]), (Lvar ([16:8-10], $x))), 
                         [], [(([16:11-12], int), (Int ([16:11-12], "2")))],
                         [])))
                     ))));
              (Expr
                 (([18:3-16], [fun]),
-                 (Binop ((Ast_defs.Eq None),
+                 (Binop ((Eq None),
                     (([18:3-5], [fun]), (Lvar ([18:3-5], $x))),
                     (([18:8-16], (function($z): _)),
                      (Efun (
@@ -84,7 +82,7 @@
                              { Aast.AnnotatedAST.fnb_nast =
                                [(Return ([19:5-20],
                                    (Some (([19:12-19], int),
-                                          (Binop (Ast_defs.Plus,
+                                          (Binop (Plus,
                                              (([19:12-14], int),
                                               (Lvar ([19:12-14], $y))),
                                              (([19:17-19], _),
@@ -93,13 +91,13 @@
                                    ))
                                  ];
                                fnb_unsafe = false });
-                          f_fun_kind = Ast_defs.FSync;
-                          f_user_attributes = []; f_ret_by_ref = false },
+                          f_fun_kind = FSync; f_user_attributes = [];
+                          f_ret_by_ref = false },
                         [([18:26-28], $y)])))
                     ))));
              (Expr
                 (([23:3-9], [fun]),
-                 (Binop ((Ast_defs.Eq None),
+                 (Binop ((Eq None),
                     (([23:3-5], [fun]), (Lvar ([23:3-5], $x))),
                     (([23:8-9], (function($a, $b): _)),
                      (Efun (
@@ -129,7 +127,7 @@
                              { Aast.AnnotatedAST.fnb_nast =
                                [(Return ([23:21-28],
                                    (Some (([23:21-28], _),
-                                          (Binop (Ast_defs.Plus,
+                                          (Binop (Plus,
                                              (([23:21-23], _),
                                               (Lvar ([23:21-23], $a))),
                                              (([23:26-28], _),
@@ -138,16 +136,15 @@
                                    ))
                                  ];
                                fnb_unsafe = false });
-                          f_fun_kind = Ast_defs.FSync;
-                          f_user_attributes = []; f_ret_by_ref = false },
+                          f_fun_kind = FSync; f_user_attributes = [];
+                          f_ret_by_ref = false },
                         [])))
                     ))));
              (Expr
                 (([24:3-17], int),
-                 (Binop ((Ast_defs.Eq None),
-                    (([24:3-5], int), (Lvar ([24:3-5], $l))),
+                 (Binop ((Eq None), (([24:3-5], int), (Lvar ([24:3-5], $l))),
                     (([24:8-17], int),
-                     (Call (Aast_defs.Cnormal,
+                     (Call (Cnormal,
                         (([24:8-10], [fun]), (Lvar ([24:8-10], $x))), 
                         [],
                         [(([24:11-12], int), (Int ([24:11-12], "2")));
@@ -156,6 +153,5 @@
                     ))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
-      f_ret_by_ref = false })
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

@@ -2,7 +2,7 @@ Errors:
   [5:20-25] Binding a reference in an array is no longer supported in Hack.
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([2:17-20], (Aast_defs.Hprim Aast_defs.Tint)));
+      f_ret = (Some ([2:17-20], (Hprim Tint)));
       f_name = ([2:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
@@ -10,7 +10,7 @@ Errors:
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
                (([3:3-15], array<int>),
-                (Binop ((Ast_defs.Eq None),
+                (Binop ((Eq None),
                    (([3:3-7], array<int>), (Lvar ([3:3-7], $arr))),
                    (([3:10-15], array<int>),
                     (Array
@@ -21,27 +21,26 @@ Errors:
                    ))));
              (Expr
                 (([4:3-9], int),
-                 (Binop ((Ast_defs.Eq None),
-                    (([4:3-5], int), (Lvar ([4:3-5], $y))),
+                 (Binop ((Eq None), (([4:3-5], int), (Lvar ([4:3-5], $y))),
                     (([4:8-9], int), (Int ([4:8-9], "0")))))));
              (Foreach ((([5:12-16], array<int>), (Lvar ([5:12-16], $arr))),
                 (As_v
                    (([5:20-25], int),
-                    (Unop (Ast_defs.Uref,
-                       (([5:21-25], int), (Lvar ([5:21-25], $val))))))),
+                    (Unop (Uref, (([5:21-25], int), (Lvar ([5:21-25], $val)))
+                       )))),
                 [(Expr
                     (([6:5-17], int),
-                     (Binop ((Ast_defs.Eq (Some Ast_defs.Plus)),
+                     (Binop ((Eq (Some Plus)),
                         (([6:5-7], int), (Lvar ([6:5-7], $y))),
                         (([6:11-17], int),
-                         (Unop (Ast_defs.Upincr,
+                         (Unop (Upincr,
                             (([6:11-15], int), (Lvar ([6:11-15], $val))))))
                         ))))
                   ]
                 ));
              (Expr
                 (([8:3-17], _),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([8:3-11], (function($expression, ...): _)),
                      (Id ([8:3-11], "\\var_dump"))),
                     [],
@@ -51,6 +50,5 @@ Errors:
                 (Some (([9:10-12], int), (Lvar ([9:10-12], $y))))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
-      f_ret_by_ref = false })
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

@@ -1,6 +1,6 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:47-51], (Aast_defs.Hprim Aast_defs.Tvoid)));
+      f_ret = (Some ([3:47-51], (Hprim Tvoid)));
       f_name = ([3:10-19], "\\takes_fun"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
@@ -8,21 +8,18 @@
          ([3:42-44], (function(int): num));
          param_hint =
          (Some ([3:20-41],
-                (Aast_defs.Hfun (false, false,
-                   [([3:31-34], (Aast_defs.Hprim Aast_defs.Tint))], [None],
-                   Aast_defs.Hnon_variadic,
-                   ([3:37-40], (Aast_defs.Hprim Aast_defs.Tnum))))));
+                (Hfun (false, false, [([3:31-34], (Hprim Tint))], [None],
+                   Hnon_variadic, ([3:37-40], (Hprim Tnum))))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:42-44]; param_name = "$f"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
       (NamedBody { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
-      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
-      f_ret_by_ref = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
   (Fun
      { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([5:18-22], (Aast_defs.Hprim Aast_defs.Tvoid)));
+       f_ret = (Some ([5:18-22], (Hprim Tvoid)));
        f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
@@ -30,7 +27,7 @@
           { Aast.AnnotatedAST.fnb_nast =
             [(Expr
                 (([6:3-23], void),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([6:3-12], (function((function(int): num) $f): void)),
                      (Id ([6:3-12], "\\takes_fun"))),
                     [],
@@ -59,13 +56,12 @@
                                     ))
                                   ];
                                 fnb_unsafe = false });
-                           f_fun_kind = Ast_defs.FSync;
-                           f_user_attributes = []; f_ret_by_ref = false },
+                           f_fun_kind = FSync; f_user_attributes = [];
+                           f_ret_by_ref = false },
                          [])))
                       ],
                     []))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
-       f_ret_by_ref = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

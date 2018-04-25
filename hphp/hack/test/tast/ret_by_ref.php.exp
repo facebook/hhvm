@@ -1,14 +1,14 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:16-19], (Aast_defs.Hprim Aast_defs.Tint)));
-      f_name = ([3:11-12], "\\f"); f_tparams = []; f_where_constraints = [];
-      f_variadic = FVnonVariadic; f_params = [];
+      f_ret = (Some ([3:16-19], (Hprim Tint))); f_name = ([3:11-12], "\\f");
+      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+      f_params = [];
       f_body =
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Static_var
                [(([4:10-17], int),
-                 (Binop ((Ast_defs.Eq None),
+                 (Binop ((Eq None),
                     (([4:10-12], int), (Lvar ([4:10-12], $x))),
                     (([4:15-17], int), (Int ([4:15-17], "42"))))))
                  ]);
@@ -16,19 +16,18 @@
                 (Some (([5:10-12], int), (Lvar ([5:10-12], $x))))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
-      f_ret_by_ref = true });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = true });
   (Class
      { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
-       c_final = false; c_is_xhp = false; c_kind = Ast_defs.Cnormal;
+       c_final = false; c_is_xhp = false; c_kind = Cnormal;
        c_name = ([8:7-8], "\\C"); c_tparams = <opaque>; c_extends = [];
        c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
        c_req_extends = []; c_req_implements = []; c_implements = [];
        c_consts = []; c_typeconsts = []; c_static_vars = [];
        c_vars =
        [{ Aast.AnnotatedAST.cv_final = false; cv_is_xhp = false;
-          cv_visibility = Aast_defs.Private;
-          cv_type = (Some ([9:11-14], (Aast_defs.Hprim Aast_defs.Tint)));
+          cv_visibility = Private;
+          cv_type = (Some ([9:11-14], (Hprim Tint)));
           cv_id = ([9:15-17], "x");
           cv_expr = (Some (([9:20-22], int), (Int ([9:20-22], "42"))));
           cv_user_attributes = [] }
@@ -36,7 +35,7 @@
        c_constructor = None; c_static_methods = [];
        c_methods =
        [{ Aast.AnnotatedAST.m_annotation = (); m_final = false;
-          m_abstract = false; m_visibility = Aast_defs.Public;
+          m_abstract = false; m_visibility = Public;
           m_name = ([10:20-21], "f"); m_tparams = [];
           m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params = [];
@@ -51,9 +50,8 @@
                    ))
                  ];
                fnb_unsafe = false });
-          m_fun_kind = Ast_defs.FSync; m_user_attributes = [];
-          m_ret = (Some ([10:25-28], (Aast_defs.Hprim Aast_defs.Tint)));
-          m_ret_by_ref = true }
+          m_fun_kind = FSync; m_user_attributes = [];
+          m_ret = (Some ([10:25-28], (Hprim Tint))); m_ret_by_ref = true }
          ];
        c_user_attributes = []; c_enum = None })
   ]

@@ -1,11 +1,11 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([10:4-8], (Aast_defs.Hprim Aast_defs.Tvoid)));
+      f_ret = (Some ([10:4-8], (Hprim Tvoid)));
       f_name = ([3:10-27], "\\test_array_filter"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ Aast.AnnotatedAST.param_annotation = ([4:9-23], array);
-         param_hint = (Some ([4:3-8], (Aast_defs.Harray (None, None))));
+         param_hint = (Some ([4:3-8], (Harray (None, None))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [4:9-23]; param_name = "$untyped_array";
          param_expr = None; param_callconv = None; param_user_attributes = []
@@ -13,10 +13,8 @@
         { Aast.AnnotatedAST.param_annotation = ([5:18-31], array<?string>);
           param_hint =
           (Some ([5:3-8],
-                 (Aast_defs.Harray (
-                    (Some ([5:9-16],
-                           (Aast_defs.Hoption
-                              ([5:10-16], (Aast_defs.Hprim Aast_defs.Tstring))))),
+                 (Harray (
+                    (Some ([5:9-16], (Hoption ([5:10-16], (Hprim Tstring))))),
                     None))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [5:18-31]; param_name = "$vector_array";
@@ -26,12 +24,8 @@
           ([6:22-32], Container<?string>);
           param_hint =
           (Some ([6:3-12],
-                 (Aast_defs.Happly (([6:3-12], "\\Container"),
-                    [([6:13-20],
-                      (Aast_defs.Hoption
-                         ([6:14-20], (Aast_defs.Hprim Aast_defs.Tstring))))
-                      ]
-                    ))));
+                 (Happly (([6:3-12], "\\Container"),
+                    [([6:13-20], (Hoption ([6:14-20], (Hprim Tstring))))]))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [6:22-32]; param_name = "$container";
           param_expr = None; param_callconv = None;
@@ -40,12 +34,9 @@
           ([7:32-48], KeyedContainer<int, ?string>);
           param_hint =
           (Some ([7:3-17],
-                 (Aast_defs.Happly (([7:3-17], "\\KeyedContainer"),
-                    [([7:18-21], (Aast_defs.Hprim Aast_defs.Tint));
-                      ([7:23-30],
-                       (Aast_defs.Hoption
-                          ([7:24-30], (Aast_defs.Hprim Aast_defs.Tstring))))
-                      ]
+                 (Happly (([7:3-17], "\\KeyedContainer"),
+                    [([7:18-21], (Hprim Tint));
+                      ([7:23-30], (Hoption ([7:24-30], (Hprim Tstring))))]
                     ))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [7:32-48]; param_name = "$keyed_container";
@@ -57,7 +48,7 @@
           param_name = "$untyped"; param_expr = None; param_callconv = None;
           param_user_attributes = [] };
         { Aast.AnnotatedAST.param_annotation = ([9:8-10], bool);
-          param_hint = (Some ([9:3-7], (Aast_defs.Hprim Aast_defs.Tbool)));
+          param_hint = (Some ([9:3-7], (Hprim Tbool)));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [9:8-10]; param_name = "$b"; param_expr = None;
           param_callconv = None; param_user_attributes = [] }
@@ -67,7 +58,7 @@
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
                (([11:3-51], (Container<?string> | KeyedContainer<int, ?string>)),
-                (Binop ((Ast_defs.Eq None),
+                (Binop ((Eq None),
                    (([11:3-14], (Container<?string> | KeyedContainer<int, ?string>)),
                     (Lvar ([11:3-14], $unresolved))),
                    (([11:17-51], (Container<?string> | KeyedContainer<int, ?string>)),
@@ -80,7 +71,7 @@
                    ))));
              (Expr
                 (([13:3-31], array),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([13:3-15], (function(Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): array)),
                      (Id ([13:3-15], "\\array_filter"))),
                     [],
@@ -89,7 +80,7 @@
                     []))));
              (Expr
                 (([14:3-30], array<string>),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([14:3-15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<string>)),
                      (Id ([14:3-15], "\\array_filter"))),
                     [],
@@ -98,7 +89,7 @@
                     []))));
              (Expr
                 (([15:3-27], array<arraykey, string>),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([15:3-15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<arraykey, string>)),
                      (Id ([15:3-15], "\\array_filter"))),
                     [],
@@ -107,7 +98,7 @@
                     []))));
              (Expr
                 (([16:3-33], array<int, string>),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([16:3-15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<int, string>)),
                      (Id ([16:3-15], "\\array_filter"))),
                     [],
@@ -116,14 +107,14 @@
                     []))));
              (Expr
                 (([17:3-25], _),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([17:3-15], (function(Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): _)),
                      (Id ([17:3-15], "\\array_filter"))),
                     [], [(([17:16-24], _), (Lvar ([17:16-24], $untyped)))],
                     []))));
              (Expr
                 (([18:3-28], (array<arraykey, string> | array<int, string>)),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([18:3-15], (function(Container<?string> $input, ?(function(?string): bool) $callback): (array<arraykey, string> | array<int, string>))),
                      (Id ([18:3-15], "\\array_filter"))),
                     [],
@@ -132,16 +123,14 @@
                     []))));
              (Expr
                 (([20:3-9], (function(?string $x): bool)),
-                 (Binop ((Ast_defs.Eq None),
+                 (Binop ((Eq None),
                     (([20:3-5], (function(?string $x): bool)),
                      (Lvar ([20:3-5], $f))),
                     (([20:8-9], (function(?string $x): bool)),
                      (Efun (
                         { Aast.AnnotatedAST.f_annotation = ();
                           f_mode = <opaque>;
-                          f_ret =
-                          (Some ([20:22-26],
-                                 (Aast_defs.Hprim Aast_defs.Tbool)));
+                          f_ret = (Some ([20:22-26], (Hprim Tbool)));
                           f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = FVnonVariadic;
@@ -150,9 +139,7 @@
                              ([20:17-19], ?string);
                              param_hint =
                              (Some ([20:9-16],
-                                    (Aast_defs.Hoption
-                                       ([20:10-16],
-                                        (Aast_defs.Hprim Aast_defs.Tstring)))));
+                                    (Hoption ([20:10-16], (Hprim Tstring)))));
                              param_is_reference = false;
                              param_is_variadic = false;
                              param_pos = [20:17-19]; param_name = "$x";
@@ -166,13 +153,13 @@
                                    (Some (([20:31-35], bool), True))))
                                  ];
                                fnb_unsafe = false });
-                          f_fun_kind = Ast_defs.FSync;
-                          f_user_attributes = []; f_ret_by_ref = false },
+                          f_fun_kind = FSync; f_user_attributes = [];
+                          f_ret_by_ref = false },
                         [])))
                     ))));
              (Expr
                 (([22:3-35], array),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([22:3-15], (function(Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): array)),
                      (Id ([22:3-15], "\\array_filter"))),
                     [],
@@ -184,7 +171,7 @@
                     []))));
              (Expr
                 (([23:3-34], array<?string>),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([23:3-15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<?string>)),
                      (Id ([23:3-15], "\\array_filter"))),
                     [],
@@ -196,7 +183,7 @@
                     []))));
              (Expr
                 (([24:3-31], array<arraykey, ?string>),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([24:3-15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<arraykey, ?string>)),
                      (Id ([24:3-15], "\\array_filter"))),
                     [],
@@ -208,7 +195,7 @@
                     []))));
              (Expr
                 (([25:3-37], array<int, ?string>),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([25:3-15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<int, ?string>)),
                      (Id ([25:3-15], "\\array_filter"))),
                     [],
@@ -220,7 +207,7 @@
                     []))));
              (Expr
                 (([26:3-29], _),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([26:3-15], (function(Container<[unresolved]> $input, ?(function([unresolved]): bool) $callback): _)),
                      (Id ([26:3-15], "\\array_filter"))),
                     [],
@@ -231,7 +218,7 @@
                     []))));
              (Expr
                 (([27:3-32], (array<arraykey, ?string> | array<int, ?string>)),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([27:3-15], (function(Container<?string> $input, ?(function(?string): bool) $callback): (array<arraykey, ?string> | array<int, ?string>))),
                      (Id ([27:3-15], "\\array_filter"))),
                     [],
@@ -243,6 +230,5 @@
                     []))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
-      f_ret_by_ref = false })
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

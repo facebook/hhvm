@@ -1,6 +1,6 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([12:4-8], (Aast_defs.Hprim Aast_defs.Tvoid)));
+      f_ret = (Some ([12:4-8], (Hprim Tvoid)));
       f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
@@ -8,10 +8,8 @@
          ([4:25-27], (function(int): bool));
          param_hint =
          (Some ([4:3-24],
-                (Aast_defs.Hfun (false, false,
-                   [([4:13-16], (Aast_defs.Hprim Aast_defs.Tint))], [None],
-                   Aast_defs.Hnon_variadic,
-                   ([4:19-23], (Aast_defs.Hprim Aast_defs.Tbool))))));
+                (Hfun (false, false, [([4:13-16], (Hprim Tint))], [None],
+                   Hnon_variadic, ([4:19-23], (Hprim Tbool))))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [4:25-27]; param_name = "$f"; param_expr = None;
          param_callconv = None; param_user_attributes = [] };
@@ -19,11 +17,9 @@
           ([5:33-35], (function(int, string): bool));
           param_hint =
           (Some ([5:3-32],
-                 (Aast_defs.Hfun (false, false,
-                    [([5:13-16], (Aast_defs.Hprim Aast_defs.Tint));
-                      ([5:18-24], (Aast_defs.Hprim Aast_defs.Tstring))],
-                    [None; None], Aast_defs.Hnon_variadic,
-                    ([5:27-31], (Aast_defs.Hprim Aast_defs.Tbool))))));
+                 (Hfun (false, false,
+                    [([5:13-16], (Hprim Tint)); ([5:18-24], (Hprim Tstring))],
+                    [None; None], Hnon_variadic, ([5:27-31], (Hprim Tbool))))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [5:33-35]; param_name = "$g"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };
@@ -31,14 +27,13 @@
           ([6:48-50], (function(int, string, num): Container<int>));
           param_hint =
           (Some ([6:3-47],
-                 (Aast_defs.Hfun (false, false,
-                    [([6:13-16], (Aast_defs.Hprim Aast_defs.Tint));
-                      ([6:18-24], (Aast_defs.Hprim Aast_defs.Tstring));
-                      ([6:26-29], (Aast_defs.Hprim Aast_defs.Tnum))],
-                    [None; None; None], Aast_defs.Hnon_variadic,
+                 (Hfun (false, false,
+                    [([6:13-16], (Hprim Tint)); ([6:18-24], (Hprim Tstring));
+                      ([6:26-29], (Hprim Tnum))],
+                    [None; None; None], Hnon_variadic,
                     ([6:32-41],
-                     (Aast_defs.Happly (([6:32-41], "\\Container"),
-                        [([6:42-45], (Aast_defs.Hprim Aast_defs.Tint))])))
+                     (Happly (([6:32-41], "\\Container"),
+                        [([6:42-45], (Hprim Tint))])))
                     ))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [6:48-50]; param_name = "$h"; param_expr = None;
@@ -47,26 +42,24 @@
           ([7:25-27], (function(num): bool));
           param_hint =
           (Some ([7:3-24],
-                 (Aast_defs.Hfun (false, false,
-                    [([7:13-16], (Aast_defs.Hprim Aast_defs.Tnum))], 
-                    [None], Aast_defs.Hnon_variadic,
-                    ([7:19-23], (Aast_defs.Hprim Aast_defs.Tbool))))));
+                 (Hfun (false, false, [([7:13-16], (Hprim Tnum))], [None],
+                    Hnon_variadic, ([7:19-23], (Hprim Tbool))))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [7:25-27]; param_name = "$i"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };
         { Aast.AnnotatedAST.param_annotation = ([8:18-21], Container<int>);
           param_hint =
           (Some ([8:3-12],
-                 (Aast_defs.Happly (([8:3-12], "\\Container"),
-                    [([8:13-16], (Aast_defs.Hprim Aast_defs.Tint))]))));
+                 (Happly (([8:3-12], "\\Container"),
+                    [([8:13-16], (Hprim Tint))]))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [8:18-21]; param_name = "$ci"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };
         { Aast.AnnotatedAST.param_annotation = ([9:21-24], Container<string>);
           param_hint =
           (Some ([9:3-12],
-                 (Aast_defs.Happly (([9:3-12], "\\Container"),
-                    [([9:13-19], (Aast_defs.Hprim Aast_defs.Tstring))]))));
+                 (Happly (([9:3-12], "\\Container"),
+                    [([9:13-19], (Hprim Tstring))]))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [9:21-24]; param_name = "$cs"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };
@@ -74,15 +67,14 @@
           ([10:28-31], KeyedContainer<int, num>);
           param_hint =
           (Some ([10:3-17],
-                 (Aast_defs.Happly (([10:3-17], "\\KeyedContainer"),
-                    [([10:18-21], (Aast_defs.Hprim Aast_defs.Tint));
-                      ([10:23-26], (Aast_defs.Hprim Aast_defs.Tnum))]
+                 (Happly (([10:3-17], "\\KeyedContainer"),
+                    [([10:18-21], (Hprim Tint)); ([10:23-26], (Hprim Tnum))]
                     ))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [10:28-31]; param_name = "$cn"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };
         { Aast.AnnotatedAST.param_annotation = ([11:8-10], bool);
-          param_hint = (Some ([11:3-7], (Aast_defs.Hprim Aast_defs.Tbool)));
+          param_hint = (Some ([11:3-7], (Hprim Tbool)));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [11:8-10]; param_name = "$b"; param_expr = None;
           param_callconv = None; param_user_attributes = [] }
@@ -92,7 +84,7 @@
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
                (([13:3-31], (Container<int> | KeyedContainer<int, num>)),
-                (Binop ((Ast_defs.Eq None),
+                (Binop ((Eq None),
                    (([13:3-14], (Container<int> | KeyedContainer<int, num>)),
                     (Lvar ([13:3-14], $unresolved))),
                    (([13:17-31], (Container<int> | KeyedContainer<int, num>)),
@@ -105,7 +97,7 @@
                    ))));
              (Expr
                 (([15:3-21], array<arraykey, bool>),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([15:3-12], (function((function(int): bool), Container<int>): array<arraykey, bool>)),
                      (Id ([15:3-12], "\\array_map"))),
                     [],
@@ -116,7 +108,7 @@
                     []))));
              (Expr
                 (([16:3-26], array<bool>),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([16:3-12], (function((function(int, string): bool), Container<int>, Container<string>): array<bool>)),
                      (Id ([16:3-12], "\\array_map"))),
                     [],
@@ -129,7 +121,7 @@
                     []))));
              (Expr
                 (([17:3-31], array<Container<int>>),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([17:3-12], (function((function(int, string, num): Container<int>), Container<int>, Container<string>, Container<num>): array<Container<int>>)),
                      (Id ([17:3-12], "\\array_map"))),
                     [],
@@ -144,7 +136,7 @@
                     []))));
              (Expr
                 (([18:3-29], (array<arraykey, bool> | array<int, bool>)),
-                 (Call (Aast_defs.Cnormal,
+                 (Call (Cnormal,
                     (([18:3-12], (function((function((num | int)): bool), Container<(num | int)>): (array<arraykey, bool> | array<int, bool>))),
                      (Id ([18:3-12], "\\array_map"))),
                     [],
@@ -156,6 +148,5 @@
                     []))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
-      f_ret_by_ref = false })
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

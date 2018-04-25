@@ -1,17 +1,16 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:35-38], (Aast_defs.Hprim Aast_defs.Tint)));
+      f_ret = (Some ([3:35-38], (Hprim Tint)));
       f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ Aast.AnnotatedAST.param_annotation = ([3:19-21], int);
-         param_hint = (Some ([3:15-18], (Aast_defs.Hprim Aast_defs.Tint)));
+         param_hint = (Some ([3:15-18], (Hprim Tint)));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:19-21]; param_name = "$i"; param_expr = None;
          param_callconv = None; param_user_attributes = [] };
         { Aast.AnnotatedAST.param_annotation = ([3:30-32], string);
-          param_hint =
-          (Some ([3:23-29], (Aast_defs.Hprim Aast_defs.Tstring)));
+          param_hint = (Some ([3:23-29], (Hprim Tstring)));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [3:30-32]; param_name = "$s"; param_expr = None;
           param_callconv = None; param_user_attributes = [] }
@@ -21,7 +20,7 @@
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
                (([4:3-25], Vector<(int | string)>),
-                (Binop ((Ast_defs.Eq None),
+                (Binop ((Eq None),
                    (([4:3-9], Vector<(int | string)>),
                     (Lvar ([4:3-9], $items))),
                    (([4:12-25], Vector<(int | string)>),
@@ -30,14 +29,13 @@
                    ))));
              (Expr
                 (([5:3-9], (function(): int)),
-                 (Binop ((Ast_defs.Eq None),
+                 (Binop ((Eq None),
                     (([5:3-5], (function(): int)), (Lvar ([5:3-5], $f))),
                     (([5:8-9], (function(): int)),
                      (Efun (
                         { Aast.AnnotatedAST.f_annotation = ();
                           f_mode = <opaque>;
-                          f_ret =
-                          (Some ([5:12-15], (Aast_defs.Hprim Aast_defs.Tint)));
+                          f_ret = (Some ([5:12-15], (Hprim Tint)));
                           f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = FVnonVariadic; f_params = [];
@@ -46,7 +44,7 @@
                              { Aast.AnnotatedAST.fnb_nast =
                                [(Expr
                                    (([10:5-22], (int | string)),
-                                    (Binop ((Ast_defs.Eq None),
+                                    (Binop ((Eq None),
                                        (([10:5-10], (int | string)),
                                         (Lvar ([10:5-10], $item))),
                                        (([10:13-22], (int | string)),
@@ -63,13 +61,13 @@
                                     ))
                                  ];
                                fnb_unsafe = false });
-                          f_fun_kind = Ast_defs.FSync;
-                          f_user_attributes = []; f_ret_by_ref = false },
+                          f_fun_kind = FSync; f_user_attributes = [];
+                          f_ret_by_ref = false },
                         [([10:13-19], $items)])))
                     ))));
              (Expr
                 (([13:3-16], (int | string)),
-                 (Binop ((Ast_defs.Eq None),
+                 (Binop ((Eq None),
                     (([13:3-11], (int | string)),
                      (Array_get (
                         (([13:3-9], Vector<(int | string)>),
@@ -78,13 +76,12 @@
                     (([13:14-16], string), (Lvar ([13:14-16], $s)))))));
              (Return ([14:3-15],
                 (Some (([14:10-14], int),
-                       (Call (Aast_defs.Cnormal,
+                       (Call (Cnormal,
                           (([14:10-12], (function(): int)),
                            (Lvar ([14:10-12], $f))),
                           [], [], []))))
                 ))
              ];
            fnb_unsafe = false });
-      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
-      f_ret_by_ref = false })
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

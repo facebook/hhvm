@@ -14,7 +14,7 @@ include Ast_defs
 (*****************************************************************************)
 
 type program = def list
-[@@deriving show,
+[@@deriving show { with_path = false },
             visitors {
               variety = "endo";
               nude=true;

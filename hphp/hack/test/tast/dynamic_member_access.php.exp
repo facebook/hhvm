@@ -1,6 +1,6 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([7:33-39], (Aast_defs.Hprim Aast_defs.Tstring)));
+      f_ret = (Some ([7:33-39], (Hprim Tstring)));
       f_name = ([7:10-29], "\\returnsTheStringFoo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
@@ -10,17 +10,15 @@
                (Some (([7:49-54], string), (String ([7:49-54], "foo"))))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
-      f_ret_by_ref = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
   (Fun
      { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([9:22-26], (Aast_defs.Hprim Aast_defs.Tvoid)));
+       f_ret = (Some ([9:22-26], (Hprim Tvoid)));
        f_name = ([9:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
        [{ Aast.AnnotatedAST.param_annotation = ([9:17-19], C);
-          param_hint =
-          (Some ([9:15-16], (Aast_defs.Happly (([9:15-16], "\\C"), []))));
+          param_hint = (Some ([9:15-16], (Happly (([9:15-16], "\\C"), []))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [9:17-19]; param_name = "$c"; param_expr = None;
           param_callconv = None; param_user_attributes = [] }
@@ -30,7 +28,7 @@
           { Aast.AnnotatedAST.fnb_nast =
             [(Expr
                 (([10:3-15], string),
-                 (Binop ((Ast_defs.Eq None),
+                 (Binop ((Eq None),
                     (([10:3-7], string), (Lvar ([10:3-7], $foo))),
                     (([10:10-15], string), (String ([10:10-15], "foo")))))));
               (Expr
@@ -50,29 +48,25 @@
                       (Obj_get ((([13:3-5], C), (Lvar ([13:3-5], $c))),
                          (([13:7-8], _), Null), OG_nullthrows))),
                      (Some (([13:8-29], string),
-                            (Call (Aast_defs.Cnormal,
+                            (Call (Cnormal,
                                (([13:8-27], (function(): string)),
                                 (Id ([13:8-27], "\\returnsTheStringFoo"))),
                                [], [], []))))
                      ))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
-       f_ret_by_ref = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
   (Class
      { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
-       c_final = false; c_is_xhp = false; c_kind = Ast_defs.Cnormal;
+       c_final = false; c_is_xhp = false; c_kind = Cnormal;
        c_name = ([3:7-8], "\\C"); c_tparams = <opaque>; c_extends = [];
        c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
        c_req_extends = []; c_req_implements = []; c_implements = [];
        c_consts = []; c_typeconsts = []; c_static_vars = [];
        c_vars =
        [{ Aast.AnnotatedAST.cv_final = false; cv_is_xhp = false;
-          cv_visibility = Aast_defs.Public;
-          cv_type =
-          (Some ([4:10-14],
-                 (Aast_defs.Hoption
-                    ([4:11-14], (Aast_defs.Hprim Aast_defs.Tint)))));
+          cv_visibility = Public;
+          cv_type = (Some ([4:10-14], (Hoption ([4:11-14], (Hprim Tint)))));
           cv_id = ([4:15-19], "foo"); cv_expr = None; cv_user_attributes = []
           }
          ];

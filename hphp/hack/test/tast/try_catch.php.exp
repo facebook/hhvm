@@ -1,6 +1,6 @@
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([12:44-47], (Aast_defs.Hprim Aast_defs.Tint)));
+      f_ret = (Some ([12:44-47], (Hprim Tint)));
       f_name = ([12:10-40], "\\terminal_catch_can_do_whatever");
       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params = [];
@@ -9,13 +9,12 @@
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
                (([13:3-10], int),
-                (Binop ((Ast_defs.Eq None),
-                   (([13:3-5], int), (Lvar ([13:3-5], $a))),
+                (Binop ((Eq None), (([13:3-5], int), (Lvar ([13:3-5], $a))),
                    (([13:8-10], int), (Int ([13:8-10], "23")))))));
              (Try (
                 [(Expr
                     (([15:5-13], int),
-                     (Binop ((Ast_defs.Eq None),
+                     (Binop ((Eq None),
                         (([15:5-7], int), (Lvar ([15:5-7], $a))),
                         (([15:10-13], int), (Int ([15:10-13], "456")))))))
                   ],
@@ -26,7 +25,7 @@
                   (([18:12-23], "\\MyException"), ([18:24-26], $e),
                    [(Expr
                        (([20:5-16], string),
-                        (Binop ((Ast_defs.Eq None),
+                        (Binop ((Eq None),
                            (([20:5-7], string), (Lvar ([20:5-7], $a))),
                            (([20:10-16], string),
                             (String ([20:10-16], "duck")))
@@ -42,7 +41,7 @@
                   ],
                 [(Expr
                     (([25:5-11], int),
-                     (Binop ((Ast_defs.Eq None),
+                     (Binop ((Eq None),
                         (([25:5-7], int), (Lvar ([25:5-7], $a))),
                         (([25:10-11], int), (Int ([25:10-11], "4")))))))
                   ]
@@ -51,6 +50,5 @@
                 (Some (([28:10-12], int), (Lvar ([28:10-12], $a))))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = Ast_defs.FSync; f_user_attributes = [];
-      f_ret_by_ref = false })
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

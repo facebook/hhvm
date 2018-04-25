@@ -565,7 +565,7 @@ let hack_errors_to_lsp_diagnostic
     { Lsp.PublishDiagnostics.
       range;
       severity = Some PublishDiagnostics.Error;
-      code = Some (Errors.get_code error);
+      code = PublishDiagnostics.IntCode (Errors.get_code error);
       source = Some "Hack";
       message;
       relatedLocations;

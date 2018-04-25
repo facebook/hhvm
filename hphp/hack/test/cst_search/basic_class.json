@@ -1,0 +1,19 @@
+{
+  "patternType": "descendant-pattern",
+  "pattern": {
+    "patternType": "node-pattern",
+    "kind": "methodish_declaration",
+    "children": {
+      "methodish_function_decl_header": {
+        "patternType": "node-pattern",
+        "kind": "function_declaration_header",
+        "children": {
+          "function_name": {
+            "patternType": "match-pattern",
+            "matchName": "function name"
+          }
+        }
+      }
+    }
+  }
+}

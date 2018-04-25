@@ -1470,6 +1470,55 @@ void group(ISS& env,
   instanceOfJmpImpl(env, inst, invertJmp(jmp));
 }
 
+namespace {
+
+template<class JmpOp>
+void isTypeStructJmpImpl(ISS& env,
+                       const bc::IsTypeStruct& inst,
+                       const JmpOp& jmp) {
+  auto bail = [&] { impl(env, inst, jmp); };
+
+  auto const locId = topStkEquiv(env);
+  if (locId == NoLocalId) return bail();
+
+  auto ts_type = type_of_type_structure(inst.arr1);
+  if (!ts_type) return bail();
+
+  // TODO(T26859386): refine if ($x is nonnull) case
+
+  popC(env);
+  auto const negate = jmp.op == Op::JmpNZ;
+  auto const result = [&] (Type t, bool pass) {
+    if (!pass) {
+      if ((ts_type.value()).subtypeOf(TNull) && is_opt(t)) {
+        return unopt(std::move(t));
+      }
+      return t;
+    }
+    return intersection_of(std::move(t), std::move(ts_type.value()));
+  };
+  auto const pre  = [&] (Type t) { return result(std::move(t), negate); };
+  auto const post = [&] (Type t) { return result(std::move(t), !negate); };
+  refineLocation(env, locId, pre, jmp.target, post);
+}
+
+}
+
+template<class JmpOp>
+void group(ISS& env,
+           const bc::IsTypeStruct& inst,
+           const JmpOp& jmp) {
+  isTypeStructJmpImpl(env, inst, jmp);
+}
+
+template<class JmpOp>
+void group(ISS& env,
+           const bc::IsTypeStruct& inst,
+           const bc::Not&,
+           const JmpOp& jmp) {
+  isTypeStructJmpImpl(env, inst, invertJmp(jmp));
+}
+
 void in(ISS& env, const bc::Switch& op) {
   auto v = tv(popC(env));
 
@@ -2259,7 +2308,6 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
 }
 
 void in(ISS& env, const bc::IsTypeStruct& op) {
-  // TODO(T26877589): implement grouping for istypestruct + jmp
   assertx(op.arr1->isDictOrDArray());
   isAsTypeStructImpl<false>(env, op.arr1);
 }
@@ -4334,6 +4382,7 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
 
   switch (o1) {
   X(InstanceOfD)
+  X(IsTypeStruct)
   X(IsTypeL)
   X(IsTypeC)
   X(IsUninit)

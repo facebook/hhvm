@@ -2939,6 +2939,11 @@ let from_text (env : env) (source_text : SourceText.t) : result =
           ParserErrors.parse_errors @@ ParserErrors.make_env
             ~enable_hh_syntax:env.enable_hh_syntax
             ~disallow_elvis_space:env.disallow_elvis_space
+            (* In non-codegen scenarios(hh_server), we still want to only raise
+              parse errors that cause runtime errors. Other errors will
+              be caught in later phases.
+            *)
+            ~hhvm_compat_mode:ParserErrors.HHVMCompat
             tree
         in
         let f e = Errors.parsing_error (pos_and_message_of e) in

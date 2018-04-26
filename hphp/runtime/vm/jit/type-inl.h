@@ -33,7 +33,7 @@ namespace HPHP { namespace jit {
 
 constexpr inline Type::Type(bits_t bits, Ptr kind)
   : m_bits(bits)
-  , m_ptrKind(kind)
+  , m_ptr(kind)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
@@ -124,21 +124,21 @@ inline Type for_const(TCA)           { return TTCA; }
 
 inline Type::Type()
   : m_bits(kBottom)
-  , m_ptrKind(Ptr::Bottom)
+  , m_ptr(Ptr::Bottom)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
 
 inline Type::Type(DataType outer, DataType inner)
   : m_bits(bitsFromDataType(outer, inner))
-  , m_ptrKind(Ptr::NotPtr)
+  , m_ptr(Ptr::NotPtr)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
 
 inline size_t Type::hash() const {
   return hash_int64_pair(
-    hash_int64_pair(m_bits, static_cast<ptr_t>(m_ptrKind)) ^ m_hasConstVal,
+    hash_int64_pair(m_bits, static_cast<ptr_t>(m_ptr)) ^ m_hasConstVal,
     m_extra
   );
 }
@@ -148,7 +148,7 @@ inline size_t Type::hash() const {
 
 inline bool Type::operator==(Type rhs) const {
   return m_bits == rhs.m_bits &&
-    m_ptrKind == rhs.m_ptrKind &&
+    m_ptr == rhs.m_ptr &&
     m_hasConstVal == rhs.m_hasConstVal &&
     m_extra == rhs.m_extra;
 }
@@ -511,7 +511,7 @@ inline Type Type::unbox() const {
 
 inline Type Type::ptr(Ptr kind) const {
   assertx(*this <= TGen);
-  assertx(ptrSubsetOf(kind, Ptr::Ptr));
+  assertx(kind <= Ptr::Ptr);
   // Enforce a canonical representation for Bottom.
   if (m_bits == kBottom) return TBottom;
   return Type(m_bits, kind).specialize(spec());
@@ -535,7 +535,7 @@ inline Type Type::strip() const {
 }
 
 inline Ptr Type::ptrKind() const {
-  return m_ptrKind;
+  return m_ptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -543,7 +543,7 @@ inline Ptr Type::ptrKind() const {
 
 inline Type::Type(bits_t bits, Ptr kind, uintptr_t extra)
   : m_bits(bits)
-  , m_ptrKind(kind)
+  , m_ptr(kind)
   , m_hasConstVal(false)
   , m_extra(extra)
 {
@@ -552,7 +552,7 @@ inline Type::Type(bits_t bits, Ptr kind, uintptr_t extra)
 
 inline Type::Type(Type t, ArraySpec arraySpec)
   : m_bits(t.m_bits)
-  , m_ptrKind(t.m_ptrKind)
+  , m_ptr(t.m_ptr)
   , m_hasConstVal(false)
   , m_arrSpec(arraySpec)
 {
@@ -562,7 +562,7 @@ inline Type::Type(Type t, ArraySpec arraySpec)
 
 inline Type::Type(Type t, ClassSpec classSpec)
   : m_bits(t.m_bits)
-  , m_ptrKind(t.m_ptrKind)
+  , m_ptr(t.m_ptr)
   , m_hasConstVal(false)
   , m_clsSpec(classSpec)
 {

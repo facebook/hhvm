@@ -134,14 +134,14 @@ std::string Type::constValString() const {
     false,
     "Bad type in constValString(): {:#16x}:{}:{}:{:#16x}",
     m_bits,
-    static_cast<ptr_t>(m_ptrKind),
+    static_cast<ptr_t>(m_ptr),
     m_hasConstVal,
     m_extra
   );
 }
 
 static std::string show(Ptr ptr) {
-  always_assert(ptrSubsetOf(ptr, Ptr::Ptr));
+  always_assert(ptr <= Ptr::Ptr);
 
   switch (ptr) {
     case Ptr::Bottom:
@@ -156,7 +156,7 @@ static std::string show(Ptr ptr) {
 
   std::vector<const char*> parts;
 #define PTRT(name, ...) \
-  if (ptrSubsetOf(Ptr::name, ptr)) parts.emplace_back(#name);
+  if (Ptr::name <= ptr) parts.emplace_back(#name);
   PTR_PRIMITIVE(PTRT, PTR_NO_R)
 #undef PTRT
   return folly::sformat("{{{}}}", folly::join('|', parts));
@@ -207,7 +207,7 @@ std::string Type::toString() const {
     return ret;
   }
 
-  assertx(ptrSubsetOf(t.ptrKind(), Ptr::NotPtr));
+  assertx(t.ptrKind() <= Ptr::NotPtr);
 
   std::vector<std::string> parts;
   if (isSpecialized()) {
@@ -298,7 +298,7 @@ void Type::serialize(ProfDataSerializer& ser) const {
   Trace::Indent _;
 
   write_raw(ser, m_bits);
-  write_raw(ser, m_ptrKind);
+  write_raw(ser, m_ptr);
 
   Type t = *this;
   if (t.maybe(TNullptr)) t = t - TNullptr;
@@ -337,7 +337,7 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
     Type t{};
 
     read_raw(ser, t.m_bits);
-    read_raw(ser, t.m_ptrKind);
+    read_raw(ser, t.m_ptr);
     auto const key = read_raw<TypeKey>(ser);
     if (key == TypeKey::Const) {
       t.m_hasConstVal = true;
@@ -550,7 +550,7 @@ bool Type::operator<=(Type rhs) const {
   }
 
   // Make sure lhs's ptr kind is a subtype of rhs's.
-  if (!ptrSubsetOf(lhs.ptrKind(), rhs.ptrKind())) {
+  if (!(lhs.ptrKind() <= rhs.ptrKind())) {
     return false;
   }
 

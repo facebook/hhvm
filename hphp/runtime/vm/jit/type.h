@@ -175,12 +175,18 @@ constexpr Ptr operator&(Ptr a, Ptr b) {
 constexpr Ptr operator-(Ptr a, Ptr b) {
   return static_cast<Ptr>(static_cast<ptr_t>(a) & ~static_cast<ptr_t>(b));
 }
-bool operator<=(Ptr a, Ptr b) = delete;
-bool operator>=(Ptr, Ptr) = delete;
-bool operator<(Ptr, Ptr) = delete;
-bool operator>(Ptr, Ptr) = delete;
-constexpr bool ptrSubsetOf(Ptr a, Ptr b) {
+
+constexpr bool operator<=(Ptr a, Ptr b) {
   return (a & b) == a;
+}
+constexpr bool operator>=(Ptr a, Ptr b) {
+  return b <= a;
+}
+constexpr bool operator<(Ptr a, Ptr b) {
+  return a <= b && a != b;
+}
+constexpr bool operator>(Ptr a, Ptr b) {
+  return a >= b && a != b;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -781,7 +787,7 @@ private:
     bits_t m_bits;
     Bits m_typedBits;
   };
-  Ptr m_ptrKind;
+  Ptr m_ptr;
   bool m_hasConstVal;
 
   union {

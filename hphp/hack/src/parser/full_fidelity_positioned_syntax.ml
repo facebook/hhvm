@@ -25,39 +25,52 @@ module SyntaxWithPositionedToken =
   Full_fidelity_syntax.WithToken(Token)
 
 module PositionedSyntaxValue = struct
-  type t = {
-    source_text: SourceText.t;
-    offset: int; (* Beginning of first trivia *)
-    leading_width: int;
-    width: int; (* Width of node, not counting trivia *)
-    trailing_width: int;
-  }
+  type t =
+    (* value for a token node is token itself *)
+    | TokenValue of Token.t
+    (* value for a range denoted by pair of tokens *)
+    | TokenSpan of { left: Token.t; right: Token.t }
+    | Missing of { source_text: SourceText.t; offset: int }
 
-  let make source_text offset leading_width width trailing_width =
-    { source_text; offset; leading_width; width; trailing_width }
 
   let source_text value =
-    value.source_text
+    match value with
+    | TokenValue t
+    | TokenSpan { left = t; _  } -> Token.source_text t
+    | Missing { source_text; _ } -> source_text
 
   let start_offset value =
-    value.offset
+    match value with
+    | TokenValue t
+    | TokenSpan { left = t; _  } -> Token.leading_start_offset t
+    | Missing { offset; _ } -> offset
 
   let leading_width value =
-    value.leading_width
+    match value with
+    | TokenValue t
+    | TokenSpan { left = t; _  } -> Token.leading_width t
+    | Missing _ -> 0
 
   let width value =
-    value.width
+    match value with
+    | TokenValue t -> Token.width t
+    | TokenSpan { left; right } ->
+      (Token.end_offset right) - (Token.start_offset left) + 1
+    | Missing _ -> 0
 
   let trailing_width value =
-    value.trailing_width
+    match value with
+    | TokenValue t
+    | TokenSpan { right = t; _  } -> Token.trailing_width t
+    | Missing _ -> 0
 
   let to_json value =
     let open Hh_json in
     JSON_Object
-      [ "offset", int_ value.offset
-      ; "leading_width", int_ value.leading_width
-      ; "width", int_ value.width
-      ; "trailing_width", int_ value.trailing_width
+      [ "offset", int_ (start_offset value)
+      ; "leading_width", int_ (leading_width value)
+      ; "width", int_ (width value)
+      ; "trailing_width", int_ (trailing_width value)
       ]
 end
 
@@ -70,29 +83,33 @@ include PositionedWithValue
 
 module PositionedValueBuilder = struct
   let value_from_token token =
-    let source_text = Token.source_text token in
-    let offset = Token.leading_start_offset token in
-    let leading_width = Token.leading_width token in
-    let width = Token.width token in
-    let trailing_width = Token.trailing_width token in
-    PositionedSyntaxValue.make
-      source_text offset leading_width width trailing_width
+    if Token.kind token = Full_fidelity_token_kind.EndOfFile ||
+       Token.full_width token = 0
+    then PositionedSyntaxValue.Missing {
+      source_text = Token.source_text token;
+      offset = Token.end_offset token
+    }
+    else PositionedSyntaxValue.TokenValue token
 
   let value_from_outer_children first last =
-    let first_value = value first in
-    let last_value = value last in
-    let source_text = PositionedSyntaxValue.source_text first_value in
-    let first_offset = PositionedSyntaxValue.start_offset first_value in
-    let first_leading_width = PositionedSyntaxValue.leading_width first_value in
-    let trailing_width =
-      PositionedSyntaxValue.trailing_width last_value in
-    let last_offset = PositionedSyntaxValue.start_offset last_value in
-    let last_leading_width = PositionedSyntaxValue.leading_width last_value in
-    let last_width = PositionedSyntaxValue.width last_value in
-    let width = (last_offset + last_leading_width + last_width) -
-      (first_offset + first_leading_width) in
-    PositionedSyntaxValue.make
-      source_text first_offset first_leading_width width trailing_width
+    let module PSV = PositionedSyntaxValue in
+    match value first, value last with
+    | PSV.TokenValue l, PSV.TokenValue r
+    | PSV.TokenValue l, PSV.TokenSpan { right = r; _ }
+    | PSV.TokenSpan { left = l; _ }, PSV.TokenValue r
+    | PSV.TokenSpan { left = l; _ }, PSV.TokenSpan { right = r; _ }
+      -> if l == r
+         then PSV.TokenValue l
+         else PSV.TokenSpan { left = l; right = r }
+
+    (* can have two missing nodes if first and last child nodes of
+       the node are missing - this means that entire node is missing.
+       NOTE: offset must match otherwise it will mean that there is a real node
+       in between that should be picked instead *)
+    | (PSV.Missing { source_text; offset = o1; _} as v),
+      PSV.Missing { offset = o2; _} when o1 = o2 -> v
+
+    | _ -> assert false
 
   let width n =
     PositionedSyntaxValue.width (value n)
@@ -108,25 +125,35 @@ module PositionedValueBuilder = struct
      *)
     let have_width = List.filter ~f:(fun x -> (width x) > 0) nodes in
     match have_width with
-    | [] -> PositionedSyntaxValue.make source_text offset 0 0 0
+    | [] -> PositionedSyntaxValue.Missing { source_text; offset; }
     | first :: _ -> value_from_outer_children first (List.last_exn have_width)
 
   let value_from_syntax syntax =
-    (* We need to find the first and last nodes that have width. If there are
-      no such nodes then we can simply use the first and last nodes, period,
+    let module PSV = PositionedSyntaxValue in
+    (* We need to find the first and last nodes that are represented by tokens.
+      If there are no such nodes then we can simply use the first and last nodes, period,
       since they will have an offset and source text we can use. *)
     let f (first, first_not_zero, last_not_zero, last) node =
-      if first = None then
-        if (width node) > 0 then
-          (Some node, Some node, Some node, Some node)
-        else
-          (Some node, None, None, Some node)
-      else if (width node) > 0 then
-        if first_not_zero = None then
-          (first, Some node, Some node, Some node)
-        else
-          (first, first_not_zero, Some node, Some node)
-      else
+      match first, first_not_zero, value node with
+      | None, None, (PSV.TokenValue _ | PSV.TokenSpan _) ->
+        (* first iteration and first node has some token representation -
+           record it as first, first_non_zero, last and last_non_zero *)
+        (Some node, Some node, Some node, Some node)
+      | None, None, _ ->
+        (* first iteration - first node is missing -
+          record it as first and last *)
+        (Some node, None, None, Some node)
+      | Some _, None, (PSV.TokenValue _ | PSV.TokenSpan _) ->
+        (* in progress, found first node that include tokens -
+          record it as first_non_zero, last and last_non_zero  *)
+        (first, Some node, Some node, Some node)
+      | Some _, Some _, (PSV.TokenValue _ | PSV.TokenSpan _) ->
+        (* in progress found some node that include tokens -
+          record it as last_non_zero and last *)
+        (first, first_not_zero, Some node, Some node)
+      | _ ->
+        (* in progress, stepped on missing node -
+           record it as last and move on *)
         (first, first_not_zero, last_not_zero, Some node) in
     let (f, fnz, lnz, l) =
       fold_over_children f (None, None, None, None) syntax in

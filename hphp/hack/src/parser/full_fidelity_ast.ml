@@ -2882,6 +2882,7 @@ let from_text (env : env) (source_text : SourceText.t) : result =
     let env' =
       Full_fidelity_parser_env.make
         ~hhvm_compat_mode:env.codegen
+        ~codegen:env.codegen
         ~php5_compat_mode:env.php5_compat_mode
         ~lang:lang
         ?mode:mode

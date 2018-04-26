@@ -26,6 +26,10 @@ module WithSyntax(Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
       state ||
       Token.kind token = TokenKind.Coroutine ||
       Syntax.Token.text token = "__PPL" in
+    let token =
+      if ParserEnv.codegen !State.env
+      then Token.with_trailing [] @@  Token.with_leading [] token
+      else token in
     state, Syntax.make_token token
 
 end (* WithSyntax *)

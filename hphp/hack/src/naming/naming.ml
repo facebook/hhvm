@@ -935,6 +935,14 @@ module Make (GetLocals : GetLocals) = struct
       | nm when nm = SN.Typehints.float  -> Some (N.Hprim N.Tfloat)
       | nm when nm = SN.Typehints.string -> Some (N.Hprim N.Tstring)
       | nm when nm = SN.Typehints.array  ->
+        let tcopt = (fst env).tcopt in
+        let darray_and_varray_allowed =
+          TypecheckerOptions.experimental_feature_enabled tcopt
+            TypecheckerOptions.experimental_darray_and_varray in
+        let array_typehints_disallowed =
+          TypecheckerOptions.disallow_array_typehint tcopt in
+        if darray_and_varray_allowed && array_typehints_disallowed
+        then Errors.array_typehints_disallowed p;
         Some (match hl with
           | [] -> N.Harray (None, None)
           | [val_] -> N.Harray (Some (hint env val_), None)
@@ -2030,7 +2038,16 @@ module Make (GetLocals : GetLocals) = struct
   and oexpr env e = Option.map e (expr env)
   and expr env (p, e) = p, expr_ env p e
   and expr_ env p = function
-    | Array l -> N.Array (List.map l (afield env))
+    | Array l ->
+      let tcopt = (fst env).tcopt in
+      let darray_and_varray_allowed =
+        TypecheckerOptions.experimental_feature_enabled tcopt
+          TypecheckerOptions.experimental_darray_and_varray in
+      let array_literals_disallowed =
+        TypecheckerOptions.disallow_array_literal tcopt in
+      if darray_and_varray_allowed && array_literals_disallowed
+      then Errors.array_literals_disallowed p;
+      N.Array (List.map l (afield env))
     | ParenthesizedExpr (p, e) -> expr_ env p e
     | Darray l ->
       N.Darray (List.map l (fun (e1, e2) -> expr env e1, expr env e2))

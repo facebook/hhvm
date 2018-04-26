@@ -150,6 +150,8 @@ let parse_options () =
   let deregister_attributes = ref false in
   let disable_optional_and_unknown_shape_fields = ref false in
   let disallow_ambiguous_lambda = ref false in
+  let disallow_array_typehint = ref false in
+  let disallow_array_literal = ref false in
   let no_fallback_in_namespaces = ref false in
   let disallow_refs_in_array = ref false in
   let disallow_elvis_space = ref false in
@@ -276,6 +278,12 @@ let parse_options () =
     "--disallow-ambiguous-lambda",
       Arg.Set disallow_ambiguous_lambda,
       " Disallow definition of lambdas that require use-site checking.";
+    "--disallow-array-typehint",
+      Arg.Set disallow_array_typehint,
+      " Disallow usage of array typehints.";
+    "--disallow-array-literal",
+      Arg.Set disallow_array_literal,
+      " Disallow usage of array literals.";
     "--no-fallback-in-namespaces",
       Arg.Set no_fallback_in_namespaces,
       " Treat foo() as namespace\\foo() and MY_CONST as namespace\\MY_CONST.";
@@ -308,6 +316,8 @@ let parse_options () =
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
       GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;
       GlobalOptions.tco_disallow_ambiguous_lambda = !disallow_ambiguous_lambda;
+      GlobalOptions.tco_disallow_array_typehint = !disallow_array_typehint;
+      GlobalOptions.tco_disallow_array_literal = !disallow_array_literal;
       GlobalOptions.po_disallow_elvis_space = !disallow_elvis_space;
       GlobalOptions.tco_dynamic_view = !dynamic_view;
   } in

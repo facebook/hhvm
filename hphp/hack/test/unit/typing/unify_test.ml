@@ -18,6 +18,8 @@ let global_options =
     ~tco_dynamic_view:false
     ~po_auto_namespace_map:[]
     ~tco_disallow_ambiguous_lambda:false
+    ~tco_disallow_array_typehint:false
+    ~tco_disallow_array_literal:false
     ~po_disallow_elvis_space:false
     ~ignored_fixme_codes:ISet.empty
 

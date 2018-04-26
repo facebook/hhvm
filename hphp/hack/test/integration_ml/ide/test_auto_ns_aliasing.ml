@@ -51,6 +51,8 @@ let () =
     ~po_deregister_php_stdlib: true
     ~po_use_full_fidelity:true
     ~tco_disallow_ambiguous_lambda:false
+    ~tco_disallow_array_typehint:false
+    ~tco_disallow_array_literal:false
     ~po_disallow_elvis_space:false
     ~ignored_fixme_codes: ISet.empty
   in

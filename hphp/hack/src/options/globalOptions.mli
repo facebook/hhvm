@@ -75,10 +75,22 @@ type t = {
  po_use_full_fidelity : bool;
 
  (*
-  * Flag to disalow any lambda that has to be checked using the legacy
+  * Flag to disallow any lambda that has to be checked using the legacy
   * per-use technique
   *)
  tco_disallow_ambiguous_lambda : bool;
+
+ (*
+  * Flag to disallow array typehints if the darray_and_varray experimental
+  * feature is enabled
+  *)
+ tco_disallow_array_typehint: bool;
+
+ (*
+  * Flag to disallow array literal expressions if the darray_and_varray
+  * experimental feature is enabled
+  *)
+ tco_disallow_array_literal: bool;
 
  (*
   * Flag to stop parsing the degenerate ternary ?<whitespace>: as if it
@@ -101,6 +113,8 @@ val make :
   tco_dynamic_view: bool ->
   po_auto_namespace_map: (string * string) list ->
   tco_disallow_ambiguous_lambda: bool ->
+  tco_disallow_array_typehint: bool ->
+  tco_disallow_array_literal: bool ->
   po_disallow_elvis_space: bool ->
   ignored_fixme_codes: ISet.t -> t
 val tco_assume_php : t -> bool
@@ -116,6 +130,8 @@ val po_deregister_php_stdlib : t -> bool
 val po_use_full_fidelity : t -> bool
 val po_enable_hh_syntax_for_hhvm : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool
+val tco_disallow_array_typehint : t -> bool
+val tco_disallow_array_literal : t -> bool
 val po_disallow_elvis_space : t -> bool
 val default : t
 val make_permissive : t -> t

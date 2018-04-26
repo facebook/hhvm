@@ -20,6 +20,8 @@ type t = {
   po_deregister_php_stdlib : bool;
   po_use_full_fidelity : bool;
   tco_disallow_ambiguous_lambda : bool;
+  tco_disallow_array_typehint: bool;
+  tco_disallow_array_literal: bool;
   po_disallow_elvis_space : bool;
   ignored_fixme_codes : ISet.t;
 }
@@ -162,6 +164,8 @@ let default = {
  po_deregister_php_stdlib = false;
  po_use_full_fidelity = false;
  tco_disallow_ambiguous_lambda = false;
+ tco_disallow_array_typehint = false;
+ tco_disallow_array_literal = false;
  po_disallow_elvis_space = false;
  ignored_fixme_codes = ISet.empty;
 }
@@ -191,6 +195,8 @@ let make ~tco_assume_php
          ~tco_dynamic_view
          ~po_auto_namespace_map
          ~tco_disallow_ambiguous_lambda
+         ~tco_disallow_array_typehint
+         ~tco_disallow_array_literal
          ~po_disallow_elvis_space
          ~ignored_fixme_codes = {
                    tco_assume_php;
@@ -206,6 +212,8 @@ let make ~tco_assume_php
                    po_deregister_php_stdlib;
                    po_use_full_fidelity;
                    tco_disallow_ambiguous_lambda;
+                   tco_disallow_array_typehint;
+                   tco_disallow_array_literal;
                    po_disallow_elvis_space;
         }
 let tco_assume_php t = t.tco_assume_php
@@ -226,6 +234,8 @@ let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
 let po_use_full_fidelity t = t.po_use_full_fidelity
 let po_enable_hh_syntax_for_hhvm t = t.po_enable_hh_syntax_for_hhvm
 let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda
+let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
+let tco_disallow_array_literal t = t.tco_disallow_array_literal
 let po_disallow_elvis_space t = t.po_disallow_elvis_space
 
 let ignored_fixme_codes t = t.ignored_fixme_codes

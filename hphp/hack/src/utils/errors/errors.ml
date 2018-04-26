@@ -740,6 +740,8 @@ module Naming                               = struct
   let xhp_optional_required_attr            = 2079 (* DONT MODIFY!!!! *)
   let xhp_required_with_default             = 2080 (* DONT MODIFY!!!! *)
   let variable_variables_disallowed         = 2081 (* DONT MODIFY!!!! *)
+  let array_typehints_disallowed            = 2082 (* DONT MODIFY!!!! *)
+  let array_literals_disallowed             = 2083 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1495,6 +1497,14 @@ let xhp_required_with_default pos id =
 let variable_variables_disallowed pos =
   add Naming.variable_variables_disallowed pos
     "Variable variables are not legal; all variable identifiers must be static strings."
+
+let array_typehints_disallowed pos =
+  add Naming.array_typehints_disallowed pos
+    "Array typehints are no longer legal; use varray or darray instead"
+
+let array_literals_disallowed pos =
+  add Naming.array_literals_disallowed pos
+    "Array literals are no longer legal; use varray or darray instead"
 
 (*****************************************************************************)
 (* Init check errors *)

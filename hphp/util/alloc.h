@@ -159,11 +159,11 @@ template<typename T> inline T* GetByArenaId(unsigned id) {
 extern unsigned low_arena;
 extern unsigned high_arena;
 
-// Address ranges for the managed arenas.  Low arena is in [3G, 4G), and high
-// arena in [4G, 32G) at most.  Both grows down and can be smaller.  But things
+// Address ranges for the managed arenas.  Low arena is in [1G, 4G), and high
+// arena in [4G, 64G) at most.  Both grows down and can be smaller.  But things
 // won't work well if either overflows.
 constexpr uintptr_t kLowArenaMaxAddr = 4ull << 30;
-constexpr uintptr_t kHighArenaMaxAddr = 32ull << 30;
+constexpr uintptr_t kHighArenaMaxAddr = 64ull << 30;
 constexpr size_t kLowArenaMaxCap = 3ull << 30;
 constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
 

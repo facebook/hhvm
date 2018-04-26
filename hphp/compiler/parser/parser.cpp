@@ -2925,17 +2925,20 @@ void Parser::useNamespace(const std::string &ns, const std::string &as) {
   m_nsAliasTable.set(key, ns, AliasType::USE, line1());
 }
 
-void Parser::useClass(const std::string &ns, const std::string &as) {
-  auto const key = fully_qualified_name_as_alias_key(ns, as);
+void Parser::useClass(const std::string &type, const std::string &as) {
+  auto const key = fully_qualified_name_as_alias_key(type, as);
 
-  if (m_classAliasTable.isAliased(key)
-      && m_classAliasTable.getType(key) != AliasType::AUTO_USE) {
+  // Like namespaces, not-yet-looked-up autouses are isAliased()
+  // with AliasType::NONE
+  if (m_classAliasTable.isAliased(key) &&
+      m_classAliasTable.getType(key) != AliasType::AUTO_USE &&
+      m_classAliasTable.getType(key) != AliasType::NONE) {
     error("Cannot use type %s as %s because the name is already in use",
-          ns.c_str(), key.c_str());
+          type.c_str(), key.c_str());
     return;
   }
 
-  m_classAliasTable.set(key, ns, AliasType::USE, line1());
+  m_classAliasTable.set(key, type, AliasType::USE, line1());
 }
 
 

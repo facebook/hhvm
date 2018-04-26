@@ -104,23 +104,13 @@ let positioned_value_to_typed
   (types: Tast_type_collector.collected_type list)
   (value: PositionedSyntaxValue.t): Value.t =
   {
-    Value.source_text = value.PositionedSyntaxValue.source_text;
-    offset = value.PositionedSyntaxValue.offset;
-    leading_width = value.PositionedSyntaxValue.leading_width;
-    width = value.PositionedSyntaxValue.width;
-    trailing_width = value.PositionedSyntaxValue.trailing_width;
+    Value.source_text = PositionedSyntaxValue.source_text value;
+    offset = PositionedSyntaxValue.start_offset value;
+    leading_width = PositionedSyntaxValue.leading_width value;
+    width = PositionedSyntaxValue.width value;
+    trailing_width = PositionedSyntaxValue.trailing_width value;
     tys = types;
     position;
-  }
-
-let typed_value_to_positioned
-  (value: Value.t): PositionedSyntaxValue.t =
-  {
-    PositionedSyntaxValue.source_text = value.Value.source_text;
-    offset = value.Value.offset;
-    leading_width = value.Value.leading_width;
-    width = value.Value.width;
-    trailing_width = value.Value.trailing_width;
   }
 
 module TypedSyntax = SyntaxWithToken.WithSyntaxValue(Value)
@@ -141,22 +131,22 @@ include TypedSyntax.WithValueBuilder(TypedValueBuilder)
 
 
 let source_text node =
-  PositionedSyntaxValue.source_text (typed_value_to_positioned (value node))
+  (value node).Value.source_text
 
 let leading_width node =
-  PositionedSyntaxValue.leading_width (typed_value_to_positioned (value node))
+  (value node).Value.leading_width
 
 let width node =
-  PositionedSyntaxValue.width (typed_value_to_positioned (value node))
+  (value node).Value.width
 
 let trailing_width node =
-  PositionedSyntaxValue.trailing_width (typed_value_to_positioned (value node))
+  (value node).Value.trailing_width
 
 let full_width node =
   (leading_width node) + (width node) + (trailing_width node)
 
 let leading_start_offset node =
-  PositionedSyntaxValue.start_offset (typed_value_to_positioned (value node))
+  (value node).Value.offset
 
 let leading_end_offset node =
   let w = (leading_width node) - 1 in

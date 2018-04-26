@@ -1279,7 +1279,7 @@ let markup_errors env node errors =
     (* hashbang is allowed before <?hh *)
     (width markup_text) > 0 && not (is_hashbang markup_text) ->
     make_error_from_node node SyntaxError.error1001 :: errors
-  | MarkupSection { markup_prefix; markup_text; _ }
+  | MarkupSection { markup_prefix; _ }
     when env.is_hh_file && (token_kind markup_prefix) = Some TokenKind.QuestionGreaterThan ->
     make_error_from_node node SyntaxError.error2067 :: errors
   | MarkupSuffix { markup_suffix_less_than_question; markup_suffix_name; }

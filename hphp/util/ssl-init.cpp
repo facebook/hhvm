@@ -15,44 +15,16 @@
 */
 
 #include "hphp/util/ssl-init.h"
-#include "hphp/util/mutex.h"
-#include "hphp/util/process.h"
-#include <openssl/crypto.h>
+#include "hphp/util/assertions.h"
+#include <folly/ssl/Init.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-static Mutex *s_locks = nullptr;
-
-static unsigned long callback_thread_id() {
-  return (unsigned long)Process::GetThreadId();
-}
-
-static void
-callback_locking(int mode, int type, const char* /*file*/, int /*line*/) {
-  if (mode & CRYPTO_LOCK) {
-    s_locks[type].lock();
-  } else {
-    s_locks[type].unlock();
-  }
-}
-
 static bool s_isSSLInited = false;
-
-struct SSLUnitializer {
-  ~SSLUnitializer() {
-    delete [] s_locks;
-  }
-};
-static SSLUnitializer s_ssl_uninitializer;
 
 void SSLInit::Init() {
   assert(!s_isSSLInited);
-  s_locks = new Mutex[CRYPTO_num_locks()];
-  CRYPTO_set_id_callback((unsigned long (*)())callback_thread_id);
-  CRYPTO_set_locking_callback(
-    (void (*)(int mode, int type, const char *file, int line))
-    callback_locking);
+  folly::ssl::init();
   s_isSSLInited = true;
 }
 

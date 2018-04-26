@@ -565,12 +565,16 @@ bool canDCE(IRInstruction* inst) {
   case WIterInitK:
   case MIterInit:
   case MIterInitK:
+  case LIterInit:
+  case LIterInitK:
   case IterNext:
   case IterNextK:
   case WIterNext:
   case WIterNextK:
   case MIterNext:
   case MIterNextK:
+  case LIterNext:
+  case LIterNextK:
   case IterFree:
   case MIterFree:
   case DecodeCufIter:

@@ -580,12 +580,13 @@ let check_instruct_iterator asn i i' =
     (* This case should have been handled along with other control flow. *)
     (None,[])
   | IterInit _, _ | WIterInit _, _ | MIterInit _, _ | IterNext _, _
+  | LIterInit _, _ | LIterInitK _, _ | LIterNext _, _ | LIterNextK _, _
   | WIterNext _, _ | MIterNext _, _ | IterInitK _, _ | WIterInitK _, _
   | MIterInitK _, _ | IterNextK _, _ | WIterNextK _, _ | MIterNextK _, _ ->
     (None, [])
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | IterFree _, _ | MIterFree _, _ | CIterFree _, _  ->
+  | IterFree _, _ | MIterFree _, _ | CIterFree _, _ | LIterFree _, _ ->
     if i=i' then (Some asn,[]) else (None,[])
 
 let check_instruct_misc asn i i' =

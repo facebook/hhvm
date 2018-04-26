@@ -5412,16 +5412,21 @@ OPTBLD_INLINE void iopFCallUnpackM(PC& pc, ActRec* ar, uint32_t numArgs,
   iopFCallUnpack(pc, ar, numArgs);
 }
 
-inline bool initIterator(PC& pc, PC targetpc, Iter* it, Cell* c1) {
-  bool hasElems = it->init(c1);
+namespace {
+
+template <bool Local, bool Pop>
+bool initIterator(PC& pc, PC targetpc, Iter* it, Cell* c1) {
+  auto const hasElems = it->init<Local>(c1);
   if (!hasElems) pc = targetpc;
-  vmStack().popC();
+  if (Pop) vmStack().popC();
   return hasElems;
+}
+
 }
 
 OPTBLD_INLINE void iopIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
   Cell* c1 = vmStack().topC();
-  if (initIterator(pc, targetpc, it, c1)) {
+  if (initIterator<false, true>(pc, targetpc, it, c1)) {
     tvAsVariant(val.ptr) = it->arr().second();
   }
 }
@@ -5429,7 +5434,37 @@ OPTBLD_INLINE void iopIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
 OPTBLD_INLINE
 void iopIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
   Cell* c1 = vmStack().topC();
-  if (initIterator(pc, targetpc, it, c1)) {
+  if (initIterator<false, true>(pc, targetpc, it, c1)) {
+    tvAsVariant(val.ptr) = it->arr().second();
+    tvAsVariant(key.ptr) = it->arr().first();
+  }
+}
+
+OPTBLD_INLINE void iopLIterInit(PC& pc, Iter* it, local_var local,
+                                PC targetpc, local_var val) {
+  if (isArrayLikeType(local.ptr->m_type)) {
+    if (initIterator<true, false>(pc, targetpc, it, tvAssertCell(local.ptr))) {
+      tvAsVariant(val.ptr) = it->arr().secondLocal(local.ptr->m_data.parr);
+    }
+    return;
+  }
+
+  if (initIterator<false, false>(pc, targetpc, it, tvToCell(local.ptr))) {
+    tvAsVariant(val.ptr) = it->arr().second();
+  }
+}
+
+OPTBLD_INLINE void iopLIterInitK(PC& pc, Iter* it, local_var local,
+                                 PC targetpc, local_var val, local_var key) {
+  if (isArrayLikeType(local.ptr->m_type)) {
+    if (initIterator<true, false>(pc, targetpc, it, tvAssertCell(local.ptr))) {
+      tvAsVariant(val.ptr) = it->arr().secondLocal(local.ptr->m_data.parr);
+      tvAsVariant(key.ptr) = it->arr().firstLocal(local.ptr->m_data.parr);
+    }
+    return;
+  }
+
+  if (initIterator<false, false>(pc, targetpc, it, tvToCell(local.ptr))) {
     tvAsVariant(val.ptr) = it->arr().second();
     tvAsVariant(key.ptr) = it->arr().first();
   }
@@ -5437,7 +5472,7 @@ void iopIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
 
 OPTBLD_INLINE void iopWIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
   Cell* c1 = vmStack().topC();
-  if (initIterator(pc, targetpc, it, c1)) {
+  if (initIterator<false, true>(pc, targetpc, it, c1)) {
     tvAsVariant(val.ptr).setWithRef(it->arr().secondValPlus());
   }
 }
@@ -5445,7 +5480,7 @@ OPTBLD_INLINE void iopWIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
 OPTBLD_INLINE void
 iopWIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
   Cell* c1 = vmStack().topC();
-  if (initIterator(pc, targetpc, it, c1)) {
+  if (initIterator<false, true>(pc, targetpc, it, c1)) {
     tvAsVariant(val.ptr).setWithRef(it->arr().secondValPlus());
     tvAsVariant(key.ptr) = it->arr().first();
   }
@@ -5500,6 +5535,43 @@ void iopIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
   }
 }
 
+OPTBLD_INLINE void iopLIterNext(PC& pc,
+                                Iter* it,
+                                local_var base,
+                                PC targetpc,
+                                local_var val) {
+  jmpSurpriseCheck(targetpc - pc);
+  if (isArrayLikeType(base.ptr->m_type)) {
+    if (it->nextLocal(base.ptr->m_data.parr)) {
+      pc = targetpc;
+      tvAsVariant(val.ptr) = it->arr().secondLocal(base.ptr->m_data.parr);
+    }
+  } else if (it->next()) {
+    pc = targetpc;
+    tvAsVariant(val.ptr) = it->arr().second();
+  }
+}
+
+OPTBLD_INLINE void iopLIterNextK(PC& pc,
+                                 Iter* it,
+                                 local_var base,
+                                 PC targetpc,
+                                 local_var val,
+                                 local_var key) {
+  jmpSurpriseCheck(targetpc - pc);
+  if (isArrayLikeType(base.ptr->m_type)) {
+    if (it->nextLocal(base.ptr->m_data.parr)) {
+      pc = targetpc;
+      tvAsVariant(val.ptr) = it->arr().secondLocal(base.ptr->m_data.parr);
+      tvAsVariant(key.ptr) = it->arr().firstLocal(base.ptr->m_data.parr);
+    }
+  } else if (it->next()) {
+    pc = targetpc;
+    tvAsVariant(val.ptr) = it->arr().second();
+    tvAsVariant(key.ptr) = it->arr().first();
+  }
+}
+
 OPTBLD_INLINE void iopWIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
   jmpSurpriseCheck(targetpc - pc);
   if (it->next()) {
@@ -5534,6 +5606,10 @@ iopMIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
 }
 
 OPTBLD_INLINE void iopIterFree(Iter* it) {
+  it->free();
+}
+
+OPTBLD_INLINE void iopLIterFree(Iter* it, local_var) {
   it->free();
 }
 
@@ -6180,7 +6256,7 @@ OPTBLD_INLINE void iopContAssignDelegate(Iter* iter) {
   // returns false then we know that we have an empty iterator (like `[]`) in
   // which case just set our delegate to Null so that ContEnterDelegate and
   // YieldFromDelegate know something is up.
-  if (tvIsGenerator(param) || iter->init(&param)) {
+  if (tvIsGenerator(param) || iter->init<false>(&param)) {
     cellSet(param, gen->m_delegate);
   } else {
     cellSetNull(gen->m_delegate);

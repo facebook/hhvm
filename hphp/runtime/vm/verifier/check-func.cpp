@@ -1076,6 +1076,7 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
   bool ok = true;
   auto op = peek_op(pc);
   if (op == Op::IterInit || op == Op::IterInitK ||
+      op == Op::LIterInit || op == Op::LIterInitK ||
       op == Op::WIterInit || op == Op::WIterInitK ||
       op == Op::MIterInit || op == Op::MIterInitK ||
       op == Op::DecodeCufIter) {
@@ -1091,7 +1092,8 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
     }
     if (op == Op::IterFree ||
         op == Op::MIterFree ||
-        op == Op::CIterFree) {
+        op == Op::CIterFree ||
+        op == Op::LIterFree) {
       cur->iters[id] = false;
     }
   }
@@ -1519,7 +1521,7 @@ bool FuncChecker::checkIterBreak(State* cur, PC pc) {
 }
 
 bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
-  static const FlavorDesc outputSigs[][4] = {
+  static const FlavorDesc outputSigs[][kMaxHhbcImms] = {
   #define NOV { },
   #define FMANY { },
   #define UFMANY { },
@@ -1789,6 +1791,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     auto const last_op = peek_op(b->last);
     bool taken_state =
       (last_op == OpIterNext || last_op == OpIterNextK ||
+       last_op == OpLIterNext || last_op == OpLIterNextK ||
        last_op == OpMIterNext || last_op == OpMIterNextK ||
        last_op == OpWIterNext || last_op == OpWIterNextK);
     bool save = cur->iters[id];

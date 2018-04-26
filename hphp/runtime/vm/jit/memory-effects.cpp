@@ -336,6 +336,10 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
             MIterFree,
             MIterNext,
             MIterNextK,
+            LIterInit,
+            LIterInitK,
+            LIterNext,
+            LIterNextK,
             IterFree,
             GenericRetDecRefs,
             MemoSet);
@@ -924,6 +928,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IterInit:
   case MIterInit:
   case WIterInit:
+  case LIterInit:
+  case LIterNext:
     return iter_effects(
       inst,
       inst.src(1),
@@ -941,6 +947,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IterInitK:
   case MIterInitK:
   case WIterInitK:
+  case LIterInitK:
+  case LIterNextK:
     {
       AliasClass key = AFrame { inst.src(1), inst.extra<IterData>()->keyId };
       AliasClass val = AFrame { inst.src(1), inst.extra<IterData>()->valId };

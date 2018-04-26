@@ -57,10 +57,11 @@ int iterOffset(const BCMarker& marker, uint32_t id) {
 }
 
 void implIterInit(IRLS& env, const IRInstruction* inst) {
-  bool isInitK = inst->is(IterInitK, WIterInitK);
+  bool isInitK = inst->is(IterInitK, WIterInitK, LIterInitK);
   bool isWInit = inst->is(WIterInit, WIterInitK);
+  bool isLInit = inst->is(LIterInit, LIterInitK);
 
-  auto const extra = inst->extra<IterData>();
+  auto const extra = inst->extra<IterInitData>();
 
   auto const src = inst->src(0);
   auto const fp = srcLoc(env, inst, 1).reg();
@@ -85,11 +86,14 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
       // MSVC gets confused if we try to directly assign the template overload,
       // so use a temporary and let the optimizer sort it out.
       if (isWInit) {
-        return (TCA)new_iter_array_key<true>;
+        return (TCA)new_iter_array_key<true, false>;
+      } else if (isLInit) {
+        if (isInitK) return (TCA)new_iter_array_key<false, true>;
+        return (TCA)new_iter_array<true>;
       } else if (isInitK) {
-        return (TCA)new_iter_array_key<false>;
+        return (TCA)new_iter_array_key<false, false>;
       } else {
-        return (TCA)new_iter_array;
+        return (TCA)new_iter_array<false>;
       }
     }();
 
@@ -99,6 +103,7 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
   }
 
   always_assert(src->type() <= TObj);
+  always_assert(!isLInit);
 
   args.immPtr(inst->marker().func()->cls())
       .addr(fp, valOff);
@@ -111,12 +116,16 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
   // new_iter_object decrefs its src object if it propagates an exception
   // out, so we use SyncAdjustOne, which adjusts the stack pointer by 1 stack
   // element on an unwind, skipping over the src object.
-  cgCallHelper(v, env, CallSpec::direct(new_iter_object),
-               callDest(env, inst), SyncOptions::SyncAdjustOne, args);
+  cgCallHelper(
+    v, env, CallSpec::direct(new_iter_object),
+    callDest(env, inst),
+    extra->fromStack ? SyncOptions::SyncAdjustOne : SyncOptions::Sync,
+    args
+  );
 }
 
 void implMIterInit(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<IterData>();
+  auto const extra = inst->extra<IterInitData>();
 
   auto const fp = srcLoc(env, inst, 1).reg();
   auto const iterOff = iterOffset(inst->marker(), extra->iterId);
@@ -210,6 +219,30 @@ void implMIterNext(IRLS& env, const IRInstruction* inst) {
                callDest(env, inst), SyncOptions::Sync, args);
 }
 
+void implLIterNext(IRLS& env, const IRInstruction* inst) {
+  always_assert(inst->is(LIterNext, LIterNextK));
+  auto const isKey = inst->is(LIterNextK);
+
+  auto const extra = inst->extra<IterData>();
+
+  auto const args = [&] {
+    auto const fp = srcLoc(env, inst, 1).reg();
+    auto ret = argGroup(env, inst)
+      .addr(fp, iterOffset(inst->marker(), extra->iterId))
+      .addr(fp, localOffset(extra->valId));
+    if (isKey) ret.addr(fp, localOffset(extra->keyId));
+    ret.ssa(0);
+    return ret;
+  }();
+
+  auto const helper = isKey
+    ? (TCA)liter_next_key_ind
+    : (TCA)liter_next_ind;
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(reinterpret_cast<void (*)()>(helper)),
+               callDest(env, inst), SyncOptions::Sync, args);
+}
+
 void implIterFree(IRLS& env, const IRInstruction* inst, CallSpec meth) {
   auto const extra = inst->extra<IterId>();
   auto const fp = srcLoc(env, inst, 0).reg();
@@ -238,6 +271,14 @@ void cgWIterInit(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgWIterInitK(IRLS& env, const IRInstruction* inst) {
+  implIterInit(env, inst);
+}
+
+void cgLIterInit(IRLS& env, const IRInstruction* inst) {
+  implIterInit(env, inst);
+}
+
+void cgLIterInitK(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 
@@ -271,6 +312,14 @@ void cgMIterNext(IRLS& env, const IRInstruction* inst) {
 
 void cgMIterNextK(IRLS& env, const IRInstruction* inst) {
   implMIterNext(env, inst);
+}
+
+void cgLIterNext(IRLS& env, const IRInstruction* inst) {
+  implLIterNext(env, inst);
+}
+
+void cgLIterNextK(IRLS& env, const IRInstruction* inst) {
+  implLIterNext(env, inst);
 }
 
 void cgIterFree(IRLS& env, const IRInstruction* inst) {

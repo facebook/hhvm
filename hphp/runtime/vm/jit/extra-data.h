@@ -314,7 +314,7 @@ struct IterId : IRExtraData {
  * `keyId` set to -1u.
  */
 struct IterData : IRExtraData {
-  explicit IterData(uint32_t iter, uint32_t key, uint32_t val)
+  IterData(uint32_t iter, uint32_t key, uint32_t val)
     : iterId(iter)
     , keyId(key)
     , valId(val)
@@ -328,6 +328,15 @@ struct IterData : IRExtraData {
   uint32_t iterId;
   uint32_t keyId;
   uint32_t valId;
+};
+
+struct IterInitData : public IterData {
+  IterInitData(uint32_t iter, uint32_t key,
+               uint32_t val, bool stack)
+    : IterData{iter, key, val}
+    , fromStack{stack}
+  {}
+  bool fromStack;
 };
 
 /*
@@ -1424,18 +1433,22 @@ X(LdCufIterCtx,                 IterId);
 X(LdCufIterInvName,             IterId);
 X(LdCufIterDynamic,             IterId);
 X(KillCufIter,                  IterId);
-X(IterInit,                     IterData);
-X(IterInitK,                    IterData);
+X(IterInit,                     IterInitData);
+X(IterInitK,                    IterInitData);
 X(IterNext,                     IterData);
 X(IterNextK,                    IterData);
-X(WIterInit,                    IterData);
-X(WIterInitK,                   IterData);
+X(WIterInit,                    IterInitData);
+X(WIterInitK,                   IterInitData);
 X(WIterNext,                    IterData);
 X(WIterNextK,                   IterData);
-X(MIterInit,                    IterData);
-X(MIterInitK,                   IterData);
+X(MIterInit,                    IterInitData);
+X(MIterInitK,                   IterInitData);
 X(MIterNext,                    IterData);
 X(MIterNextK,                   IterData);
+X(LIterInit,                    IterInitData);
+X(LIterInitK,                   IterInitData);
+X(LIterNext,                    IterData);
+X(LIterNextK,                   IterData);
 X(ConstructInstance,            ClassData);
 X(CheckInitProps,               ClassData);
 X(InitProps,                    ClassData);

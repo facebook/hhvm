@@ -646,7 +646,9 @@ void first_pass(const Index& index,
           gen(bc::PopC {});
           continue;
         case Op::IterInit:
+        case Op::LIterInit:
         case Op::IterInitK:
+        case Op::LIterInitK:
           if (flags.jmpDest != blk->fallthrough) {
             /*
              * For iterators, if we'll always take the taken branch (which means
@@ -657,7 +659,9 @@ void first_pass(const Index& index,
              */
             if (!flags.wasPEI) {
               blk->fallthrough = flags.jmpDest;
-              gen(bc::PopC {});
+              if (op.op != Op::LIterInit && op.op != Op::LIterInitK) {
+                gen(bc::PopC {});
+              }
               continue;
             }
             blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
@@ -671,12 +675,19 @@ void first_pass(const Index& index,
             auto fatal = make_fatal_block(ainfo, blk, state)->id;
             if (op.op == Op::IterInit) {
               op.IterInit.target = fatal;
-            } else {
+            } else if (op.op == Op::IterInitK) {
               op.IterInitK.target = fatal;
+            } else if (op.op == Op::LIterInit) {
+              op.LIterInit.target = fatal;
+            } else if (op.op == Op::LIterInitK) {
+              op.LIterInitK.target = fatal;
             }
           }
           break;
         case Op::IterNext:
+        case Op::IterNextK:
+        case Op::LIterNext:
+        case Op::LIterNextK:
           assertx(flags.jmpDest == blk->fallthrough);
           /*
            * If we're nexting an iterator and we know we'll always fall-through
@@ -686,21 +697,26 @@ void first_pass(const Index& index,
            * branch is a fatal.
            */
           if (!flags.wasPEI) {
-            gen(bc::IterFree { op.IterNext.iter1 });
+            if (op.op == Op::IterNext) {
+              gen(bc::IterFree { op.IterNext.iter1 });
+            } else if (op.op == Op::IterNextK) {
+              gen(bc::IterFree { op.IterNextK.iter1 });
+            } else if (op.op == Op::LIterNext) {
+              gen(bc::LIterFree { op.LIterNext.iter1, op.LIterNext.loc2 });
+            } else {
+              gen(bc::LIterFree { op.LIterNextK.iter1, op.LIterNextK.loc2 });
+            }
             continue;
-          } else {
+          } else if (op.op == Op::IterNext) {
             op.IterNext.target = make_fatal_block(ainfo, blk, state)->id;
-            break;
-          }
-        case Op::IterNextK:
-          assertx(flags.jmpDest == blk->fallthrough);
-          if (!flags.wasPEI) {
-            gen(bc::IterFree { op.IterNextK.iter1 });
-            continue;
-          } else {
+          } else if (op.op == Op::IterNextK) {
             op.IterNextK.target = make_fatal_block(ainfo, blk, state)->id;
-            break;
+          } else if (op.op == Op::LIterNext) {
+            op.LIterNext.target = make_fatal_block(ainfo, blk, state)->id;
+          } else {
+            op.LIterNextK.target = make_fatal_block(ainfo, blk, state)->id;
           }
+          break;
         default:
           always_assert(0 && "unsupported jmpDest");
         }

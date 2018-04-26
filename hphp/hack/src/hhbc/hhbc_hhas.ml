@@ -616,15 +616,20 @@ let iterator_instruction_name_prefix instruction =
     match instruction with
     | IterInit _ -> "IterInit"
     | MIterInit _ -> "MIterInit"
+    | LIterInit _ -> "LIterInit"
     | IterInitK _ -> "IterInitK"
     | MIterInitK _ -> "MIterInitK"
+    | LIterInitK _ -> "LIterInitK"
     | IterNext _ -> "IterNext"
     | MIterNext _ -> "MIterNext"
+    | LIterNext _ -> "LIterNext"
     | IterNextK _ -> "IterNextK"
     | MIterNextK _ -> "MIterNextK"
+    | LIterNextK _ -> "LIterNextK"
     | IterFree _ -> "IterFree"
     | MIterFree _ -> "MIterFree"
     | CIterFree _ -> "CIterFree"
+    | LIterFree _ -> "LIterFree"
     | _ -> failwith "invalid iterator instruction"
   in
   iterator_instruction_name ^ " "
@@ -636,7 +641,13 @@ let string_of_iterator instruction =
     (iterator_instruction_name_prefix instruction) ^
     (string_of_iterator_id id) ^ " " ^
     (string_of_label label) ^ " " ^
-    (string_of_local_id value)
+      (string_of_local_id value)
+  | LIterInit (id, base, label, value) ->
+     (iterator_instruction_name_prefix instruction) ^
+     (string_of_iterator_id id) ^ " " ^
+     (string_of_local_id base) ^ " " ^
+     (string_of_label label) ^ " " ^
+     (string_of_local_id value)
   | IterInitK (id, label, key, value)
   | MIterInitK (id, label, key, value) ->
     (iterator_instruction_name_prefix instruction) ^
@@ -644,12 +655,25 @@ let string_of_iterator instruction =
     (string_of_label label) ^ " " ^
     (string_of_local_id key) ^ " " ^
     (string_of_local_id value)
+  | LIterInitK (id, base, label, key, value) ->
+     (iterator_instruction_name_prefix instruction) ^
+     (string_of_iterator_id id) ^ " " ^
+     (string_of_local_id base) ^ " " ^
+     (string_of_label label) ^ " " ^
+     (string_of_local_id key) ^ " " ^
+     (string_of_local_id value)
   | IterNext (id, label, value)
   | MIterNext (id, label, value) ->
     (iterator_instruction_name_prefix instruction) ^
     (string_of_iterator_id id) ^ " " ^
     (string_of_label label) ^ " " ^
     (string_of_local_id value)
+  | LIterNext (id, base, label, value) ->
+     (iterator_instruction_name_prefix instruction) ^
+     (string_of_iterator_id id) ^ " " ^
+     (string_of_local_id base) ^ " " ^
+     (string_of_label label) ^ " " ^
+     (string_of_local_id value)
   | IterNextK (id, label, key, value)
   | MIterNextK (id, label, key, value) ->
     (iterator_instruction_name_prefix instruction) ^
@@ -657,11 +681,22 @@ let string_of_iterator instruction =
     (string_of_label label) ^ " " ^
     (string_of_local_id key) ^ " " ^
     (string_of_local_id value)
+  | LIterNextK (id, base, label, key, value) ->
+     (iterator_instruction_name_prefix instruction) ^
+     (string_of_iterator_id id) ^ " " ^
+     (string_of_local_id base) ^ " " ^
+     (string_of_label label) ^ " " ^
+     (string_of_local_id key) ^ " " ^
+     (string_of_local_id value)
   | IterFree id
   | MIterFree id
   | CIterFree id ->
     (iterator_instruction_name_prefix instruction) ^
-    (string_of_iterator_id id)
+      (string_of_iterator_id id)
+  | LIterFree (id, base) ->
+     (iterator_instruction_name_prefix instruction) ^
+     (string_of_iterator_id id) ^ " " ^
+     (string_of_local_id base)
   | IterBreak (label, iterlist) ->
       let map_item (is_mutable, id) =
         (if is_mutable then "(MIter) " else "(Iter) ") ^

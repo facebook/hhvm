@@ -856,9 +856,11 @@ let get_input_output_count i =
     begin match i with
     | IterInit _ | IterInitK _ | WIterInit _ | WIterInitK _
     | MIterInit _ | MIterInitK _ -> (1, 0)
-    | IterNext _ | IterNextK _ | WIterNext _ | WIterNextK _
-    | MIterNext _ | MIterNextK _ | IterFree _ | MIterFree _
-    | CIterFree _ | IterBreak _ -> (0, 0)
+    | LIterInit _ | LIterInitK _
+    | IterNext _ | IterNextK _ | LIterNext _ | LIterNextK _
+    | WIterNext _ | WIterNextK _ | MIterNext _ | MIterNextK _
+    | IterFree _ | MIterFree _ | CIterFree _ | LIterFree _
+    | IterBreak _ -> (0, 0)
     end
   | IContFlow _
   | ILabel _
@@ -1015,7 +1017,8 @@ let collect_locals f instrs =
     | IFinal (SetWithRefRML l)
     | IIterator (
       IterInit (_, _, l) | WIterInit (_, _, l) | MIterInit (_, _, l) |
-      IterNext (_, _, l) | WIterNext (_, _, l) | MIterNext (_, _, l)
+      IterNext (_, _, l) | WIterNext (_, _, l) | MIterNext (_, _, l) |
+      LIterFree (_, l)
       )
     | IMisc (InitThisLoc l | StaticLocCheck (l, _) | StaticLocDef (l, _) |
              StaticLocInit (l, _) | AssertRATL (l, _) | Silence (l, _) |
@@ -1025,9 +1028,14 @@ let collect_locals f instrs =
     | IFinal (SetWithRefLML (l1, l2))
     | IIterator (
       IterInitK (_, _, l1, l2) | WIterInitK (_, _, l1, l2) | MIterInitK (_, _, l1, l2) |
-      IterNextK (_, _, l1, l2) | WIterNextK (_, _, l1, l2) | MIterNextK (_, _, l1, l2)
+      IterNextK (_, _, l1, l2) | WIterNextK (_, _, l1, l2) | MIterNextK (_, _, l1, l2) |
+      LIterInit (_, l1, _, l2) | LIterNext (_, l1, _, l2)
       )
       -> add (add acc l1) l2
+    | IIterator (
+      LIterInitK (_, l1, _, l2, l3) | LIterNextK (_, l1, _, l2, l3)
+      )
+      -> add (add (add acc l1) l2) l3
     | IBase (Dim (_, mk))
     | IFinal (QueryM (_, _, mk) | VGetM (_, mk) | FPassM (_, _, mk, _) |
               SetM (_, mk) | IncDecM (_, _, mk) | BindM (_, mk) | UnsetM (_, mk))

@@ -32,7 +32,24 @@ namespace {
  */
 Offset iterBranchTarget(const NormalizedInstruction& i) {
   assertx(instrJumpOffset(i.pc()) != nullptr);
-  return i.offset() + i.imm[1].u_BA;
+  switch (i.op()) {
+    case OpIterInit:
+    case OpIterInitK:
+    case OpIterNext:
+    case OpIterNextK:
+    case OpWIterInit:
+    case OpWIterInitK:
+    case OpWIterNext:
+    case OpWIterNextK:
+      return i.offset() + i.imm[1].u_BA;
+    case OpLIterInit:
+    case OpLIterInitK:
+    case OpLIterNext:
+    case OpLIterNextK:
+      return i.offset() + i.imm[2].u_BA;
+    default:
+      always_assert(false);
+  }
 }
 
 template<class Lambda>
@@ -69,7 +86,7 @@ void emitIterInit(IRGS& env, int32_t iterId, Offset /*relOffset*/,
     env,
     IterInit,
     TBool,
-    IterData(iterId, -1, valLocalId),
+    IterInitData(iterId, uint32_t(-1), valLocalId, true),
     src,
     fp(env)
   );
@@ -85,7 +102,7 @@ void emitIterInitK(IRGS& env, int32_t iterId, Offset /*relOffset*/,
     env,
     IterInitK,
     TBool,
-    IterData(iterId, keyLocalId, valLocalId),
+    IterInitData(iterId, keyLocalId, valLocalId, true),
     src,
     fp(env)
   );
@@ -102,7 +119,7 @@ void emitIterNext(IRGS& env,
     env,
     IterNext,
     TBool,
-    IterData(iterId, -1, valLocalId),
+    IterData(iterId, uint32_t(-1), valLocalId),
     fp(env)
   );
   implCondJmp(env, targetOffset, false, res);
@@ -125,6 +142,124 @@ void emitIterNextK(IRGS& env,
   implCondJmp(env, targetOffset, false, res);
 }
 
+void emitLIterInit(IRGS& env,
+                   int32_t iterId,
+                   int32_t baseLocalId,
+                   Offset relOffset,
+                   int32_t valLocalId) {
+  if (curFunc(env)->isPseudoMain()) PUNT(LIterInit-pseudomain);
+
+  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
+
+  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
+  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
+
+  if (base->isA(TObj)) gen(env, IncRef, base);
+  auto const res = gen(
+    env,
+    base->isA(TArrLike) ? LIterInit : IterInit,
+    TBool,
+    IterInitData(iterId, uint32_t(-1), valLocalId, false),
+    base,
+    fp(env)
+  );
+  implCondJmp(env, targetOffset, true, res);
+}
+
+void emitLIterInitK(IRGS& env,
+                    int32_t iterId,
+                    int32_t baseLocalId,
+                    Offset relOffset,
+                    int32_t valLocalId,
+                    int32_t keyLocalId) {
+  if (curFunc(env)->isPseudoMain()) PUNT(LIterInitK-pseudomain);
+
+  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
+
+  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
+  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInitK);
+
+  if (base->isA(TObj)) gen(env, IncRef, base);
+  auto const res = gen(
+    env,
+    base->isA(TArrLike) ? LIterInitK : IterInitK,
+    TBool,
+    IterInitData(iterId, keyLocalId, valLocalId, false),
+    base,
+    fp(env)
+  );
+  implCondJmp(env, targetOffset, true, res);
+}
+
+void emitLIterNext(IRGS& env,
+                   int32_t iterId,
+                   int32_t baseLocalId,
+                   Offset relOffset,
+                   int32_t valLocalId) {
+  if (curFunc(env)->isPseudoMain()) PUNT(LIterNext-pseudomain);
+
+  surpriseCheck(env, relOffset);
+  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
+
+  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
+  auto const res = [&]{
+    if (base->isA(TArrLike)) {
+      return gen(
+        env,
+        LIterNext,
+        TBool,
+        IterData(iterId, uint32_t(-1), valLocalId),
+        base,
+        fp(env)
+      );
+    } else {
+      return gen(
+        env,
+        IterNext,
+        TBool,
+        IterData(iterId, uint32_t(-1), valLocalId),
+        fp(env)
+      );
+    };
+  }();
+  implCondJmp(env, targetOffset, false, res);
+}
+
+void emitLIterNextK(IRGS& env,
+                    int32_t iterId,
+                    int32_t baseLocalId,
+                    Offset relOffset,
+                    int32_t valLocalId,
+                    int32_t keyLocalId) {
+  if (curFunc(env)->isPseudoMain()) PUNT(LIterNextK-pseudomain);
+
+  surpriseCheck(env, relOffset);
+  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
+
+  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
+  auto const res = [&]{
+    if (base->isA(TArrLike)) {
+      return gen(
+        env,
+        LIterNextK,
+        TBool,
+        IterData(iterId, keyLocalId, valLocalId),
+        base,
+        fp(env)
+      );
+    } else {
+      return gen(
+        env,
+        IterNextK,
+        TBool,
+        IterData(iterId, keyLocalId, valLocalId),
+        fp(env)
+      );
+    };
+  }();
+  implCondJmp(env, targetOffset, false, res);
+}
+
 void emitWIterInit(IRGS& env, int32_t iterId, Offset /*relOffset*/,
                    int32_t valLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
@@ -134,7 +269,7 @@ void emitWIterInit(IRGS& env, int32_t iterId, Offset /*relOffset*/,
     env,
     WIterInit,
     TBool,
-    IterData(iterId, -1, valLocalId),
+    IterInitData(iterId, uint32_t(-1), valLocalId, true),
     src,
     fp(env)
   );
@@ -150,7 +285,7 @@ void emitWIterInitK(IRGS& env, int32_t iterId, Offset /*relOffset*/,
     env,
     WIterInitK,
     TBool,
-    IterData(iterId, keyLocalId, valLocalId),
+    IterInitData(iterId, keyLocalId, valLocalId, true),
     src,
     fp(env)
   );
@@ -167,7 +302,7 @@ void emitWIterNext(IRGS& env,
     env,
     WIterNext,
     TBool,
-    IterData(iterId, -1, valLocalId),
+    IterData(iterId, uint32_t(-1), valLocalId),
     fp(env)
   );
   implCondJmp(env, targetOffset, false, res);
@@ -199,7 +334,7 @@ void emitMIterInit(IRGS& env,
       env,
       MIterInit,
       type,
-      IterData(iterId, -1, valLocalId),
+      IterInitData(iterId, uint32_t(-1), valLocalId, true),
       src,
       fp(env)
     );
@@ -216,7 +351,7 @@ void emitMIterInitK(IRGS& env,
       env,
       MIterInitK,
       type,
-      IterData(iterId, keyLocalId, valLocalId),
+      IterInitData(iterId, keyLocalId, valLocalId, true),
       src,
       fp(env)
     );
@@ -232,7 +367,7 @@ void emitMIterNext(IRGS& env,
     env,
     MIterNext,
     TBool,
-    IterData(iterId, -1, valLocalId),
+    IterData(iterId, uint32_t(-1), valLocalId),
     fp(env)
   );
   implCondJmp(env, bcOff(env) + relOffset, false, res);
@@ -262,12 +397,21 @@ void emitMIterFree(IRGS& env, int32_t iterId) {
   gen(env, MIterFree, IterId(iterId), fp(env));
 }
 
+void emitLIterFree(IRGS& env, int32_t iterId, int32_t baseLocalId) {
+  auto const baseType = env.irb->local(baseLocalId, DataTypeSpecific).type;
+  // If the base is a known array, there's nothing to actually free in the
+  // iterator. However, in debug builds we get some extra sanity checking if we
+  // call the free function anyways.
+  if (baseType <= TArrLike && !debug) return;
+  gen(env, IterFree, IterId(iterId), fp(env));
+}
+
 void emitIterBreak(IRGS& env, Offset relOffset, const IterTable& it) {
   for (auto const& ent : it) {
     switch (ent.kind) {
-    case KindOfIter:  gen(env, IterFree,  IterId(ent.id), fp(env)); break;
-    case KindOfMIter: gen(env, MIterFree, IterId(ent.id), fp(env)); break;
-    case KindOfLIter: gen(env, IterFree,  IterId(ent.id), fp(env)); break;
+    case KindOfIter:  emitIterFree(env, ent.id);  break;
+    case KindOfMIter: emitMIterFree(env, ent.id); break;
+    case KindOfLIter: emitLIterFree(env, ent.id, ent.local); break;
     case KindOfCIter: emitCIterFree(env, ent.id); break;
     }
   }

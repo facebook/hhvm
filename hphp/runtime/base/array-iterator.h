@@ -67,6 +67,7 @@ struct ArrayIter {
   };
 
   enum NoInc { noInc = 0 };
+  enum Local { local = 0 };
 
   /*
    * Constructors.  Note that sometimes ArrayIter objects are created
@@ -77,10 +78,12 @@ struct ArrayIter {
   }
   explicit ArrayIter(const ArrayData* data);
   ArrayIter(const ArrayData* data, NoInc) {
-    setArrayData(data);
-    if (data) {
-      m_pos = data->iter_begin();
-    }
+    setArrayData<false>(data);
+    if (data) m_pos = data->iter_begin();
+  }
+  ArrayIter(const ArrayData* data, Local) {
+    setArrayData<true>(data);
+    if (data) m_pos = data->iter_begin();
   }
   explicit ArrayIter(const MixedArray*) = delete;
   explicit ArrayIter(const Array& array);
@@ -141,6 +144,14 @@ struct ArrayIter {
   }
   void nextHelper();
 
+  bool nextLocal(const ArrayData* ad) {
+    assertx(ad);
+    assertx(!getArrayData());
+    assertx(m_pos != ad->iter_end());
+    m_pos = ad->iter_advance(m_pos);
+    return m_pos == ad->iter_end();
+  }
+
   Variant first() {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
@@ -152,8 +163,20 @@ struct ArrayIter {
   }
   Variant firstHelper();
 
-  TypedValue nvFirst() {
+  Variant firstLocal(const ArrayData* ad) const {
+    assertx(!getArrayData());
+    assertx(ad && m_pos != ad->iter_end());
+    return ad->getKey(m_pos);
+  }
+
+  TypedValue nvFirst() const {
     auto const ad = getArrayData();
+    assertx(ad && m_pos != ad->iter_end());
+    return ad->nvGetKey(m_pos);
+  }
+
+  TypedValue nvFirstLocal(const ArrayData* ad) const {
+    assertx(!getArrayData());
     assertx(ad && m_pos != ad->iter_end());
     return ad->nvGetKey(m_pos);
   }
@@ -162,6 +185,12 @@ struct ArrayIter {
    * Retrieve the value at the current position.
    */
   Variant second();
+
+  Variant secondLocal(const ArrayData* ad) const {
+    assertx(!getArrayData());
+    assertx(ad && m_pos != ad->iter_end());
+    return ad->getValue(m_pos);
+  }
 
   /*
    * Get a tv_rval for the current iterator position.
@@ -184,6 +213,12 @@ struct ArrayIter {
   // Inline version of secondRef.  Only for use in iterator helpers.
   tv_rval nvSecond() const {
     auto const ad = getArrayData();
+    assertx(ad && m_pos != ad->iter_end());
+    return ad->rvalPos(m_pos);
+  }
+
+  tv_rval nvSecondLocal(const ArrayData* ad) const {
+    assertx(!getArrayData());
     assertx(ad && m_pos != ad->iter_end());
     return ad->rvalPos(m_pos);
   }
@@ -225,8 +260,9 @@ struct ArrayIter {
   }
 
 private:
+  template<bool Local>
   friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
-  template<bool withRef>
+  template<bool withRef, bool Local>
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
                                     TypedValue*);
 
@@ -239,9 +275,11 @@ private:
 
   void destruct();
 
+  template <bool Local = false>
   void setArrayData(const ArrayData* ad) {
     assertx((intptr_t(ad) & 1) == 0);
-    m_data = ad;
+    assertx(!Local || ad);
+    m_data = Local ? nullptr : ad;
     m_nextHelperIdx = IterNextIndex::ArrayMixed;
     if (ad != nullptr) {
       if (ad->hasPackedLayout()) {
@@ -558,8 +596,9 @@ struct alignas(16) Iter {
         MArrayIter& marr()       { return m_u.maiter; }
         CufIter&     cuf()       { return m_u.cufiter; }
 
-  bool init(TypedValue* c1);
+  template <bool Local> bool init(TypedValue* c1);
   bool next();
+  bool nextLocal(const ArrayData*);
   void free();
   void mfree();
   void cfree();
@@ -787,8 +826,9 @@ bool IterateKV(const TypedValue& it,
 
 //////////////////////////////////////////////////////////////////////
 
+template <bool Local>
 int64_t new_iter_array(Iter* dest, ArrayData* arr, TypedValue* val);
-template <bool withRef>
+template <bool withRef, bool Local>
 int64_t new_iter_array_key(Iter* dest, ArrayData* arr, TypedValue* val,
                            TypedValue* key);
 int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
@@ -805,6 +845,9 @@ int64_t miter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
 int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
 int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);
+
+int64_t liter_next_ind(Iter*, TypedValue*, ArrayData*);
+int64_t liter_next_key_ind(Iter*, TypedValue*, TypedValue*, ArrayData*);
 
 //////////////////////////////////////////////////////////////////////
 

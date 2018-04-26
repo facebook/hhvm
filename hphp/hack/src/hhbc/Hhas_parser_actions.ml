@@ -1036,6 +1036,7 @@ match s with
  (* instruct_iterator *)
  | "IterBreak" ->
     IIterator (IterBreak (labelofiarg arg1, listofiteratorsofiarg arg2))
+ | "LIterFree" -> IIterator(LIterFree (Iterator.Id (intofiarg arg1), localidofiarg arg2))
 
  (* instruct_misc *)
  | "StaticLocCheck" ->
@@ -1140,9 +1141,23 @@ match s with
                      labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
  | "MIterNextK" -> IIterator(MIterNextK(iterofiarg arg1,
                      labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
+ | "LIterInit" -> IIterator(LIterInit (iterofiarg arg1, localidofiarg arg2,
+                                       labelofiarg arg3, localidofiarg arg4))
+ | "LIterNext" -> IIterator(LIterNext (iterofiarg arg1, localidofiarg arg2,
+                                       labelofiarg arg3, localidofiarg arg4))
  | "FPassM" ->
     IFinal(FPassM (intofiarg arg1, intofiarg arg2, memberkeyofiarg arg3, fpasshintof arg4))
  | "FCallDM" ->
     ICall(FCallDM (intofiarg arg1, intofiarg arg2,
       class_id_of_iarg arg3, function_id_of_iarg arg4))
  | _ -> failwith ("NYI quaternary: " ^ s)
+
+let makequinaryinst s arg1 arg2 arg3 arg4 arg5 =
+match s with
+  | "LIterInitK" -> IIterator(LIterInitK (iterofiarg arg1, localidofiarg arg2,
+                                          labelofiarg arg3, localidofiarg arg4,
+                                          localidofiarg arg5))
+  | "LIterNextK" -> IIterator(LIterNextK (iterofiarg arg1, localidofiarg arg2,
+                                          labelofiarg arg3, localidofiarg arg4,
+                                          localidofiarg arg5))
+  | _ -> failwith ("NYI quinary: " ^ s)

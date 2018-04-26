@@ -346,19 +346,24 @@ static const struct {
   { OpIterInit,    {Stack1,           Local,        OutUnknown      }},
   { OpMIterInit,   {Stack1,           Local,        OutUnknown      }},
   { OpWIterInit,   {Stack1,           Local,        OutUnknown      }},
+  { OpLIterInit,   {Local,            Local,        OutUnknown      }},
   { OpIterInitK,   {Stack1,           Local,        OutUnknown      }},
   { OpMIterInitK,  {Stack1,           Local,        OutUnknown      }},
   { OpWIterInitK,  {Stack1,           Local,        OutUnknown      }},
+  { OpLIterInitK,  {Local,            Local,        OutUnknown      }},
   { OpIterNext,    {None,             Local,        OutUnknown      }},
   { OpMIterNext,   {None,             Local,        OutUnknown      }},
   { OpWIterNext,   {None,             Local,        OutUnknown      }},
+  { OpLIterNext,   {Local,            Local,        OutUnknown      }},
   { OpIterNextK,   {None,             Local,        OutUnknown      }},
   { OpMIterNextK,  {None,             Local,        OutUnknown      }},
   { OpWIterNextK,  {None,             Local,        OutUnknown      }},
+  { OpLIterNextK,  {Local,            Local,        OutUnknown      }},
   { OpIterFree,    {None,             None,         OutNone         }},
   { OpMIterFree,   {None,             None,         OutNone         }},
   { OpCIterFree,   {None,             None,         OutNone         }},
-  { OpIterBreak,   {None,             None,         OutNone         }},
+  { OpLIterFree,   {Local,            None,         OutNone         }},
+  { OpIterBreak,   {Local,            None,         OutNone         }},
 
   /*** 12. Include, eval, and define instructions ***/
 
@@ -654,8 +659,7 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define THREE(a, b, c) a(0) b(1) c(2)
 #define FOUR(a, b, c, d) a(0) b(1) c(2) d(3)
 #define FIVE(a, b, c, d, e) a(0) b(1) c(2) d(3) e(4)
-// Iterator bytecodes have multiple local immediates but not the Local flag, so
-// they should never flow through this function.
+// Iterator bytecodes are handled specially here
 #define LA(n) assertx(idx == 0xff); idx = n;
 #define MA(n)
 #define BLA(n)
@@ -679,6 +683,17 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define O(name, imm, ...) case Op::name: imm break;
 
 size_t localImmIdx(Op op) {
+  switch (op) {
+    case Op::LIterInit:
+    case Op::LIterInitK:
+    case Op::LIterNext:
+    case Op::LIterNextK:
+    case Op::LIterFree:
+      return 1;
+    default:
+      break;
+  }
+
   size_t idx = 0xff;
   switch (op) {
     OPCODES
@@ -802,10 +817,19 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   if (flags & Local) {
     // (Almost) all instructions that take a Local have its index at their
     // first immediate.
-    auto const loc = ni.imm[localImmIdx(ni.op())].u_IVA;
-    SKTRACE(1, sk, "getInputs: local %d\n", loc);
-    inputs.emplace_back(Location::Local { uint32_t(loc) });
+    if (ni.op() == Op::IterBreak) {
+      for (auto const& it : ni.immIters) {
+        if (it.kind != KindOfLIter) continue;
+        SKTRACE(1, sk, "getInputs: local %d\n", it.local);
+        inputs.emplace_back(Location::Local { uint32_t(it.local) });
+      }
+    } else {
+      auto const loc = ni.imm[localImmIdx(ni.op())].u_IVA;
+      SKTRACE(1, sk, "getInputs: local %d\n", loc);
+      inputs.emplace_back(Location::Local { uint32_t(loc) });
+    }
   }
+
   if (flags & LocalRange) {
     auto const& range = ni.imm[1].u_LAR;
     SKTRACE(1, sk, "getInputs: localRange %d+%d\n",
@@ -864,6 +888,8 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::DecodeCufIter:
   case Op::IterNext:
   case Op::IterNextK:
+  case Op::LIterNext:
+  case Op::LIterNextK:
   case Op::WIterInit:
   case Op::WIterInitK:
   case Op::WIterNext:
@@ -874,6 +900,8 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::MIterNextK:
   case Op::IterInitK:
   case Op::IterInit:
+  case Op::LIterInitK:
+  case Op::LIterInit:
   case Op::JmpZ:
   case Op::JmpNZ:
   case Op::Jmp:
@@ -1020,6 +1048,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::IssetL:
   case Op::IssetS:
   case Op::IterFree:
+  case Op::LIterFree:
   case Op::LateBoundCls:
   case Op::Method:
   case Op::MIterFree:

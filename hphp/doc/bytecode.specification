@@ -876,6 +876,7 @@ descriptions:
   Dict - denotes the dict type
   Keyset - denotes the keyset type
   Obj - denotes the object type
+  ArrLike - denotes array, vec, dict, or keyset
 
 Multiple type annotations may be combined together using the "|" symbol. For
 example, the type annotation "Int|Dbl" means that a value is either integer or
@@ -3712,6 +3713,21 @@ MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
   instruction stores a copy of the name of the current property in %4 as a
   cell.
 
+LIterInit <iterator id> <local id> <rel offset> <local id>     []   ->  []
+LIterInitK <iterator id> <local id> <rel offset>
+           <local id> <local id>                               []   ->  []
+
+  Initialize iterator with local. If the local specified by %2 is not an
+  array-like, behave as IterInit or IterInitK, except loading the base value
+  from %2 instead of from the stack. Otherwise, create an array iterator,
+  rewind the array iterator to point to the beginning of the array in %2, but
+  do not store the value in %2 within the iterator. These instructions then
+  check if the iterator is at the end, and if it is, these instructions free
+  the iterator and transfer control to the location specified by %3. Since the
+  array-like in %2 was not stored within the iterator, all operations on this
+  iterator must use the LIter variants and provide the same local (containing
+  the same array-like).
+
 IterNext  <iterator id> <rel offset> <local id>               []  ->  []
 IterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
 WIterNext  <iterator id> <rel offset> <local id>              []  ->  []
@@ -3780,6 +3796,17 @@ MIterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
   instruction stores a copy of the name of the new current property in %4 as a
   cell.
 
+LIterNext <iterator id> <local id> <rel offset> <local id>     []   ->  []
+LIterNextK <iterator id> <local id> <rel offset>
+           <local id> <local id>                               []   ->  []
+
+  Iterator next with local. The iterator specified by %1 must have been
+  initialized with LIterInit or LIterNext. These instructions behave similarily
+  to IterNext and IterNextK, except they might use the value in local %2 as the
+  base, instead of one stored in the iterator. If the value in local %2 is a
+  non-array-like, the base stored in the iterator is used, otherwise the value
+  in the local is used.
+
 IterFree <iterator id>    []  ->  []
 
   Iterator free. This instruction frees the specified iterator variable.
@@ -3797,6 +3824,11 @@ MIterFree <iterator id>    []  ->  []
 CIterFree <iterator id>    []  ->  []
 
   Cuf iterator free. This instruction frees the specified iterator variable.
+
+LIterFree <iterator id> <local id>   []  ->  []
+
+  Iterator free with local. This instruction frees the specified iterator
+  variable, which has been initialized with local %2.
 
 IterBreak <rel offset> <iter-vec>    []  ->  []
 

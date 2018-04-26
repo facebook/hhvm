@@ -3559,31 +3559,33 @@ void in(ISS& env, const bc::DecodeCufIter& op) {
   env.propagate(op.target, &env.state); // before iter is modifed
 }
 
-void in(ISS& env, const bc::IterInit& op) {
-  assert(iterIsDead(env, op.iter1));
+namespace {
 
-  auto const t1 = popC(env);
-  auto ity = iter_types(t1);
+void iterInitImpl(ISS& env, IterId iter, LocalId valueLoc,
+                  BlockId target, const Type& base) {
+  assert(iterIsDead(env, iter));
+
+  auto ity = iter_types(base);
   if (!ity.mayThrowOnInit) nothrow(env);
 
   auto const taken = [&]{
     // Take the branch before setting locals if the iter is already
     // empty, but after popping.  Similar for the other IterInits
     // below.
-    freeIter(env, op.iter1);
-    env.propagate(op.target, &env.state);
+    freeIter(env, iter);
+    env.propagate(target, &env.state);
   };
 
   auto const fallthrough = [&]{
-    setLoc(env, op.loc3, ity.value);
-    setIter(env, op.iter1, LiveIter { std::move(ity) });
+    setLoc(env, valueLoc, ity.value);
+    setIter(env, iter, LiveIter { std::move(ity) });
   };
 
   switch (ity.count) {
     case IterTypes::Count::Empty:
       taken();
-      mayReadLocal(env, op.loc3);
-      jmp_setdest(env, op.target);
+      mayReadLocal(env, valueLoc);
+      jmp_setdest(env, target);
       break;
     case IterTypes::Count::Single:
     case IterTypes::Count::NonEmpty:
@@ -3596,6 +3598,147 @@ void in(ISS& env, const bc::IterInit& op) {
       fallthrough();
       break;
   }
+}
+
+void iterInitKImpl(ISS& env, IterId iter, LocalId valueLoc, LocalId keyLoc,
+                   BlockId target, const Type& base) {
+  assert(iterIsDead(env, iter));
+
+  auto ity = iter_types(base);
+  if (!ity.mayThrowOnInit) nothrow(env);
+
+  auto const taken = [&]{
+    freeIter(env, iter);
+    env.propagate(target, &env.state);
+  };
+
+  auto const fallthrough = [&]{
+    setLoc(env, valueLoc, ity.value);
+    setLoc(env, keyLoc, ity.key);
+    setIter(env, iter, LiveIter { std::move(ity) });
+  };
+
+  switch (ity.count) {
+    case IterTypes::Count::Empty:
+      taken();
+      mayReadLocal(env, valueLoc);
+      mayReadLocal(env, keyLoc);
+      jmp_setdest(env, target);
+      break;
+    case IterTypes::Count::Single:
+    case IterTypes::Count::NonEmpty:
+      fallthrough();
+      jmp_nevertaken(env);
+      break;
+    case IterTypes::Count::ZeroOrOne:
+    case IterTypes::Count::Any:
+      taken();
+      fallthrough();
+      break;
+  }
+}
+
+void iterNextImpl(ISS& env, IterId iter, LocalId valueLoc, BlockId target) {
+  auto const curLoc = locRaw(env, valueLoc);
+
+  auto const noTaken = match<bool>(
+    env.state.iters[iter],
+    [&] (DeadIter)           {
+      always_assert(false && "IterNext on dead iter");
+      return false;
+    },
+    [&] (const LiveIter& ti) {
+      if (!ti.types.mayThrowOnNext) nothrow(env);
+      switch (ti.types.count) {
+        case IterTypes::Count::Single:
+        case IterTypes::Count::ZeroOrOne:
+          return true;
+        case IterTypes::Count::NonEmpty:
+        case IterTypes::Count::Any:
+          setLoc(env, valueLoc, ti.types.value);
+          return false;
+        case IterTypes::Count::Empty:
+          always_assert(false);
+      }
+      not_reached();
+    }
+  );
+  if (noTaken) {
+    jmp_nevertaken(env);
+    freeIter(env, iter);
+    return;
+  }
+
+  env.propagate(target, &env.state);
+
+  freeIter(env, iter);
+  setLocRaw(env, valueLoc, curLoc);
+}
+
+void iterNextKImpl(ISS& env, IterId iter, LocalId valueLoc,
+                   LocalId keyLoc, BlockId target) {
+  auto const curValue = locRaw(env, valueLoc);
+  auto const curKey = locRaw(env, keyLoc);
+
+  auto const noTaken = match<bool>(
+    env.state.iters[iter],
+    [&] (DeadIter)           {
+      always_assert(false && "IterNextK on dead iter");
+      return false;
+    },
+    [&] (const LiveIter& ti) {
+      if (!ti.types.mayThrowOnNext) nothrow(env);
+      switch (ti.types.count) {
+        case IterTypes::Count::Single:
+        case IterTypes::Count::ZeroOrOne:
+          return true;
+        case IterTypes::Count::NonEmpty:
+        case IterTypes::Count::Any:
+          setLoc(env, valueLoc, ti.types.value);
+          setLoc(env, keyLoc, ti.types.key);
+          return false;
+        case IterTypes::Count::Empty:
+          always_assert(false);
+      }
+      not_reached();
+    }
+  );
+  if (noTaken) {
+    jmp_nevertaken(env);
+    freeIter(env, iter);
+    return;
+  }
+
+  env.propagate(target, &env.state);
+
+  freeIter(env, iter);
+  setLocRaw(env, valueLoc, curValue);
+  setLocRaw(env, keyLoc, curKey);
+}
+
+}
+
+void in(ISS& env, const bc::IterInit& op) {
+  iterInitImpl(env, op.iter1, op.loc3, op.target, popC(env));
+}
+
+void in(ISS& env, const bc::LIterInit& op) {
+  iterInitImpl(env, op.iter1, op.loc4, op.target, locAsCell(env, op.loc2));
+}
+
+void in(ISS& env, const bc::IterInitK& op) {
+  iterInitKImpl(env, op.iter1, op.loc3, op.loc4, op.target, popC(env));
+}
+
+void in(ISS& env, const bc::LIterInitK& op) {
+  iterInitKImpl(
+    env,
+    op.iter1,
+    op.loc4,
+    op.loc5,
+    op.target,
+    locAsCell(env, op.loc2)
+  );
 }
 
 void in(ISS& env, const bc::MIterInit& op) {
@@ -3603,44 +3746,6 @@ void in(ISS& env, const bc::MIterInit& op) {
   env.propagate(op.target, &env.state);
   unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
-}
-
-void in(ISS& env, const bc::IterInitK& op) {
-  assert(iterIsDead(env, op.iter1));
-
-  auto const t1 = popC(env);
-  auto ity = iter_types(t1);
-  if (!ity.mayThrowOnInit) nothrow(env);
-
-  auto const taken = [&]{
-    freeIter(env, op.iter1);
-    env.propagate(op.target, &env.state);
-  };
-
-  auto const fallthrough = [&]{
-    setLoc(env, op.loc3, ity.value);
-    setLoc(env, op.loc4, ity.key);
-    setIter(env, op.iter1, LiveIter { std::move(ity) });
-  };
-
-  switch (ity.count) {
-    case IterTypes::Count::Empty:
-      taken();
-      mayReadLocal(env, op.loc3);
-      mayReadLocal(env, op.loc4);
-      jmp_setdest(env, op.target);
-      break;
-    case IterTypes::Count::Single:
-    case IterTypes::Count::NonEmpty:
-      fallthrough();
-      jmp_nevertaken(env);
-      break;
-    case IterTypes::Count::ZeroOrOne:
-    case IterTypes::Count::Any:
-      taken();
-      fallthrough();
-      break;
-  }
 }
 
 void in(ISS& env, const bc::MIterInitK& op) {
@@ -3668,86 +3773,27 @@ void in(ISS& env, const bc::WIterInitK& op) {
 }
 
 void in(ISS& env, const bc::IterNext& op) {
-  auto const curLoc3 = locRaw(env, op.loc3);
+  iterNextImpl(env, op.iter1, op.loc3, op.target);
+}
 
-  auto const noTaken = match<bool>(
-    env.state.iters[op.iter1],
-    [&] (DeadIter)           {
-      always_assert(false && "IterNext on dead iter");
-      return false;
-    },
-    [&] (const LiveIter& ti) {
-      if (!ti.types.mayThrowOnNext) nothrow(env);
-      switch (ti.types.count) {
-        case IterTypes::Count::Single:
-        case IterTypes::Count::ZeroOrOne:
-          return true;
-        case IterTypes::Count::NonEmpty:
-        case IterTypes::Count::Any:
-          setLoc(env, op.loc3, ti.types.value);
-          return false;
-        case IterTypes::Count::Empty:
-          always_assert(false);
-      }
-      not_reached();
-    }
-  );
-  if (noTaken) {
-    jmp_nevertaken(env);
-    freeIter(env, op.iter1);
-    return;
-  }
+void in(ISS& env, const bc::LIterNext& op) {
+  mayReadLocal(env, op.loc2);
+  iterNextImpl(env, op.iter1, op.loc4, op.target);
+}
 
-  env.propagate(op.target, &env.state);
+void in(ISS& env, const bc::IterNextK& op) {
+  iterNextKImpl(env, op.iter1, op.loc3, op.loc4, op.target);
+}
 
-  freeIter(env, op.iter1);
-  setLocRaw(env, op.loc3, curLoc3);
+void in(ISS& env, const bc::LIterNextK& op) {
+  mayReadLocal(env, op.loc2);
+  iterNextKImpl(env, op.iter1, op.loc4, op.loc5, op.target);
 }
 
 void in(ISS& env, const bc::MIterNext& op) {
   env.propagate(op.target, &env.state);
   unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
-}
-
-void in(ISS& env, const bc::IterNextK& op) {
-  auto const curLoc3 = locRaw(env, op.loc3);
-  auto const curLoc4 = locRaw(env, op.loc4);
-
-  auto const noTaken = match<bool>(
-    env.state.iters[op.iter1],
-    [&] (DeadIter)           {
-      always_assert(false && "IterNextK on dead iter");
-      return false;
-    },
-    [&] (const LiveIter& ti) {
-      if (!ti.types.mayThrowOnNext) nothrow(env);
-      switch (ti.types.count) {
-        case IterTypes::Count::Single:
-        case IterTypes::Count::ZeroOrOne:
-          return true;
-        case IterTypes::Count::NonEmpty:
-        case IterTypes::Count::Any:
-          setLoc(env, op.loc3, ti.types.value);
-          setLoc(env, op.loc4, ti.types.key);
-          return false;
-        case IterTypes::Count::Empty:
-          always_assert(false);
-      }
-      not_reached();
-    }
-  );
-  if (noTaken) {
-    jmp_nevertaken(env);
-    freeIter(env, op.iter1);
-    return;
-  }
-
-  env.propagate(op.target, &env.state);
-
-  freeIter(env, op.iter1);
-  setLocRaw(env, op.loc3, curLoc3);
-  setLocRaw(env, op.loc4, curLoc4);
 }
 
 void in(ISS& env, const bc::MIterNextK& op) {
@@ -3773,6 +3819,11 @@ void in(ISS& env, const bc::IterFree& op) {
   nothrow(env);
   freeIter(env, op.iter1);
 }
+void in(ISS& env, const bc::LIterFree& op) {
+  nothrow(env);
+  mayReadLocal(env, op.loc2);
+  freeIter(env, op.iter1);
+}
 void in(ISS& env, const bc::MIterFree& op) {
   nothrow(env);
   freeIter(env, op.iter1);
@@ -3783,7 +3834,10 @@ void in(ISS& env, const bc::CIterFree& op) {
 }
 
 void in(ISS& env, const bc::IterBreak& op) {
-  for (auto const& it : op.iterTab) freeIter(env, it.id);
+  for (auto const& it : op.iterTab) {
+    if (it.kind == KindOfLIter) mayReadLocal(env, it.local);
+    freeIter(env, it.id);
+  }
   env.propagate(op.target, &env.state);
 }
 

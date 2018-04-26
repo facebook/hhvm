@@ -1,0 +1,9 @@
+(3,6)-(3,10) A variadic parameter ('...') may only appear at the end of a parameter list.
+(5,6)-(5,14) A variadic parameter ('...') may only appear at the end of a parameter list.
+(7,6)-(7,8) A variadic parameter ('...') may only appear at the end of a parameter list.
+(9,15)-(9,15) A variadic parameter ('...') may not be followed by a comma.
+(11,15)-(11,23) A variadic parameter ('...') may only appear at the end of a parameter list.
+(13,15)-(13,19) A variadic parameter ('...') may only appear at the end of a parameter list.
+(15,15)-(15,17) A variadic parameter ('...') may only appear at the end of a parameter list.
+(17,6)-(17,20) A variadic parameter ('...') cannot have a modifier that changes the calling convention, like 'inout'.
+(19,15)-(19,29) A variadic parameter ('...') cannot have a modifier that changes the calling convention, like 'inout'.

@@ -1,0 +1,6 @@
+(3,8)-(3,8) A concrete constant declaration must have an initializer.
+(4,12)-(4,12) A concrete constant declaration must have an initializer.
+(6,1)-(11,1) No code may exist outside of namespace {}
+(6,1)-(11,1) Namespace declaration statement has to be the very first statement in the script
+(8,10)-(8,10) A concrete constant declaration must have an initializer.
+(9,14)-(9,14) A concrete constant declaration must have an initializer.

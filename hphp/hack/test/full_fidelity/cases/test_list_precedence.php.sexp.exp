@@ -1,0 +1,62 @@
+((script 91
+  ((list 91
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (function_declaration 86
+      ((missing 0 ())
+       (function_declaration_header 12
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (() name 1 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+         (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+         (missing 0 ())))
+       (compound_statement 73
+        ((() { 1 ((end_of_line 1)))
+         (list 67
+          ((expression_statement 25
+            ((binary_expression 24
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() += 2 ((whitespace 1)))
+               (binary_expression 18
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() + 1 ((whitespace 1)))
+                 (list_expression 13
+                  ((() list 4 ((whitespace 1))) (() "(" 1 ())
+                   (list 6
+                    ((list_item 6
+                      ((binary_expression 6
+                        ((variable 2 ((() variable 2 ((whitespace 1)))))
+                         (() = 1 ((whitespace 1)))
+                         (literal 1 ((() decimal_literal 1 ())))))
+                       (missing 0 ())))))
+                   (() ")" 1 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 39
+            ((binary_expression 38
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() += 2 ((whitespace 1)))
+               (binary_expression 32
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() + 1 ((whitespace 1)))
+                 (list_expression 27
+                  ((() list 4 ((whitespace 1))) (() "(" 1 ())
+                   (list 20
+                    ((list_item 7
+                      ((binary_expression 6
+                        ((variable 2 ((() variable 2 ((whitespace 1)))))
+                         (() = 1 ((whitespace 1)))
+                         (literal 1 ((() decimal_literal 1 ())))))
+                       (() , 1 ((whitespace 1)))))
+                     (list_item 12
+                      ((prefix_unary_expression 12
+                        ((() await 5 ((whitespace 1)))
+                         (binary_expression 6
+                          ((variable 2 ((() variable 2 ((whitespace 1)))))
+                           (() = 1 ((whitespace 1)))
+                           (literal 1 ((() decimal_literal 1 ())))))))
+                       (missing 0 ())))))
+                   (() ")" 1 ())))))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

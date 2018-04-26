@@ -1,0 +1,56 @@
+((script 129
+  ((list 129
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
+       (missing 0 ())))
+     (classish_declaration 114
+      ((missing 0 ()) (list 5 ((() final 5 ((whitespace 1)))))
+       (() class 5 ((whitespace 1))) (() name 21 ((whitespace 1)))
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ())
+       (classish_body 80
+        ((() { 1 ((end_of_line 1)))
+         (list 74
+          ((trait_use 39
+            ((((whitespace 2)) use 3 ((whitespace 1)))
+             (list 34
+              ((list_item 34
+                ((generic_type_specifier 34
+                  ((() name 11 ())
+                   (type_arguments 23
+                    ((() < 1 ())
+                     (list 21
+                      ((list_item 21
+                        ((darray_type_specifier 21
+                          ((() darray 6 ()) (() < 1 ())
+                           (simple_type_specifier 6 ((() string 6 ())))
+                           (() , 1 ())
+                           (simple_type_specifier 6 ((() string 6 ())))
+                           (missing 0 ()) (() > 1 ())))
+                         (missing 0 ())))))
+                     (() > 1 ())))))
+                 (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (trait_use 32
+            ((((whitespace 2)) use 3 ((whitespace 1)))
+             (list 27
+              ((list_item 27
+                ((generic_type_specifier 27
+                  ((() name 11 ())
+                   (type_arguments 16
+                    ((() < 1 ())
+                     (list 14
+                      ((list_item 14
+                        ((varray_type_specifier 14
+                          ((() varray 6 ()) (() < 1 ())
+                           (simple_type_specifier 6 ((() string 6 ())))
+                           (missing 0 ()) (() > 1 ())))
+                         (missing 0 ())))))
+                     (() > 1 ())))))
+                 (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

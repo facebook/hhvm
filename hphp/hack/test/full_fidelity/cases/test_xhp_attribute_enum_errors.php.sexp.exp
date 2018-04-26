@@ -1,0 +1,87 @@
+((script 193
+  ((list 193
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+       (missing 0 ())))
+     (classish_declaration 178
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1)) class 5 ((whitespace 1)))
+       (() XHP_class_name 4 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 167
+        ((() { 1 ((end_of_line 1)))
+         (list 150
+          ((xhp_class_attribute_declaration 20
+            ((((whitespace 4)) attribute 9 ((whitespace 1)))
+             (list 9
+              ((list_item 9
+                ((xhp_class_attribute 9
+                  ((xhp_enum_type 7
+                    ((missing 0 ()) (() enum 4 ((whitespace 1))) (() { 1 ())
+                     (missing 0 ()) (() } 1 ((whitespace 1)))))
+                   (() XHP_element_name 1 ()) (missing 0 ()) (missing 0 ())))
+                 (missing 0 ())))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+           (xhp_class_attribute_declaration 34
+            ((((whitespace 4)) attribute 9 ((whitespace 1)))
+             (list 23
+              ((list_item 23
+                ((xhp_class_attribute 23
+                  ((xhp_enum_type 21
+                    ((missing 0 ()) (() enum 4 ((whitespace 1))) (() { 1 ())
+                     (list 14
+                      ((list_item 5
+                        ((literal 4 ((() double_quoted_string_literal 4 ())))
+                         (() , 1 ((whitespace 1)))))
+                       (list_item 4
+                        ((literal 3 ((() single_quoted_string_literal 3 ())))
+                         (() , 1 ((whitespace 1)))))
+                       (list_item 3
+                        ((literal 3 ((() decimal_literal 3 ())))
+                         (missing 0 ())))))
+                     (() } 1 ((whitespace 1)))))
+                   (() XHP_element_name 1 ()) (missing 0 ()) (missing 0 ())))
+                 (missing 0 ())))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+           (xhp_class_attribute_declaration 31
+            ((((whitespace 4)) attribute 9 ((whitespace 1)))
+             (list 20
+              ((list_item 20
+                ((xhp_class_attribute 20
+                  ((xhp_enum_type 18
+                    ((missing 0 ()) (() enum 4 ((whitespace 1))) (() { 1 ())
+                     (list 11
+                      ((list_item 5
+                        ((literal 4 ((() boolean_literal 4 ())))
+                         (() , 1 ((whitespace 1)))))
+                       (list_item 5
+                        ((literal 5 ((() boolean_literal 5 ())))
+                         (missing 0 ())))))
+                     (() } 1 ((whitespace 1)))))
+                   (() XHP_element_name 1 ()) (missing 0 ()) (missing 0 ())))
+                 (missing 0 ())))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+           (xhp_class_attribute_declaration 23
+            ((((whitespace 4)) attribute 9 ((whitespace 1)))
+             (list 12
+              ((list_item 12
+                ((xhp_class_attribute 12
+                  ((xhp_enum_type 10
+                    ((missing 0 ()) (() enum 4 ((whitespace 1))) (() { 1 ())
+                     (list 3
+                      ((list_item 3
+                        ((literal 3 ((() floating_literal 3 ())))
+                         (missing 0 ())))))
+                     (() } 1 ((whitespace 1)))))
+                   (() XHP_element_name 1 ()) (missing 0 ()) (missing 0 ())))
+                 (missing 0 ())))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

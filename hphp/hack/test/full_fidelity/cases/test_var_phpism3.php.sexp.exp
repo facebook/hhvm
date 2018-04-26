@@ -1,0 +1,61 @@
+((script 108
+  ((list 108
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
+       (missing 0 ())))
+     (classish_declaration 32
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1)) class 5 ((whitespace 1)))
+       (() name 3 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 22
+        ((() { 1 ((end_of_line 1)))
+         (list 16
+          ((property_declaration 16
+            ((missing 0 ())
+             (list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
+             (simple_type_specifier 3 ((() int 3 ((whitespace 1)))))
+             (list 4
+              ((list_item 4
+                ((property_declarator 4 ((() variable 4 ()) (missing 0 ())))
+                 (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 30
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1)) class 5 ((whitespace 1)))
+       (() name 4 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 19
+        ((() { 1 ((end_of_line 1)))
+         (list 13
+          ((property_declaration 13
+            ((missing 0 ()) (((whitespace 2)) var 3 ((whitespace 1)))
+             (simple_type_specifier 3 ((() int 3 ((whitespace 1)))))
+             (list 4
+              ((list_item 4
+                ((property_declarator 4 ((() variable 4 ()) (missing 0 ())))
+                 (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 26
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1)) class 5 ((whitespace 1)))
+       (() name 4 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 15
+        ((() { 1 ((end_of_line 1)))
+         (list 9
+          ((property_declaration 9
+            ((missing 0 ()) (((whitespace 2)) var 3 ((whitespace 1)))
+             (missing 0 ())
+             (list 4
+              ((list_item 4
+                ((property_declarator 4 ((() variable 4 ()) (missing 0 ())))
+                 (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

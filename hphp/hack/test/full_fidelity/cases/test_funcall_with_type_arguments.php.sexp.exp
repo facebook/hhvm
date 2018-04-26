@@ -1,0 +1,88 @@
+((script 327
+  ((list 327
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
+       (missing 0 ())))
+     (expression_statement 8
+      ((function_call_expression 7
+        ((((end_of_line 1) (single_line_comment 51) (end_of_line 1)) name 1
+          ())
+         (() "(" 1 ())
+         (list 4
+          ((list_item 4
+            ((literal 4 ((() single_quoted_string_literal 4 ())))
+             (missing 0 ())))))
+         (() ")" 1 ())))
+       (() ";" 1 ((whitespace 1) (single_line_comment 36) (end_of_line 1)))))
+     (expression_statement 20
+      ((function_call_with_type_arguments_expression 19
+        ((() name 2 ())
+         (type_arguments 8
+          ((() < 1 ())
+           (list 6
+            ((list_item 6
+              ((simple_type_specifier 6 ((() string 6 ()))) (missing 0 ())))))
+           (() > 1 ())))
+         (() "(" 1 ())
+         (list 7
+          ((list_item 7
+            ((literal 7 ((() single_quoted_string_literal 7 ())))
+             (missing 0 ())))))
+         (() ")" 1 ())))
+       (() ";" 1 ((whitespace 1) (single_line_comment 26) (end_of_line 1)))))
+     (expression_statement 20
+      ((function_call_expression 19
+        ((() name 3 ()) (() "(" 1 ())
+         (list 14
+          ((list_item 6
+            ((binary_expression 5
+              ((literal 1 ((() octal_literal 1 ((whitespace 1)))))
+               (() < 1 ((whitespace 1)))
+               (literal 1 ((() octal_literal 1 ())))))
+             (() , 1 ((whitespace 1)))))
+           (list_item 7
+            ((tuple_expression 7
+              ((() tuple 5 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
+             (missing 0 ())))))
+         (() ")" 1 ())))
+       (() ";" 1 ((whitespace 1) (single_line_comment 48) (end_of_line 1)))))
+     (expression_statement 24
+      ((function_call_expression 23
+        ((() name 4 ()) (() "(" 1 ())
+         (list 17
+          ((list_item 8
+            ((binary_expression 7
+              ((() name 3 ((whitespace 1))) (() < 1 ((whitespace 1)))
+               (literal 1 ((() octal_literal 1 ())))))
+             (() , 1 ((whitespace 1)))))
+           (list_item 8
+            ((binary_expression 8
+              ((literal 2 ((() decimal_literal 2 ((whitespace 1)))))
+               (() > 1 ((whitespace 1))) (() name 3 ())))
+             (missing 0 ())))))
+         (() ")" 1 ())))
+       (() ";" 1 ((whitespace 1) (single_line_comment 44) (end_of_line 1)))))
+     (expression_statement 25
+      ((function_call_expression 24
+        ((() name 5 ()) (() "(" 1 ())
+         (list 17
+          ((list_item 17
+            ((function_call_with_type_arguments_expression 17
+              ((() name 3 ())
+               (type_arguments 12
+                ((() < 1 ())
+                 (list 10
+                  ((list_item 4
+                    ((simple_type_specifier 3 ((() int 3 ()))) (() , 1 ())))
+                   (list_item 6
+                    ((simple_type_specifier 6 ((() string 6 ())))
+                     (missing 0 ())))))
+                 (() > 1 ())))
+               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
+             (missing 0 ())))))
+         (() ")" 1 ())))
+       (() ";" 1 ((whitespace 1) (single_line_comment 36) (end_of_line 1)))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

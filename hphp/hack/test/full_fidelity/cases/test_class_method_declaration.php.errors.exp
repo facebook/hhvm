@@ -1,0 +1,2 @@
+(2,1)-(7,1) Class C contains an abstract method and must therefore be declared abstract
+(4,10)-(4,17) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class C', or make 'function g' non-abstract.

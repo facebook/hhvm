@@ -1,0 +1,3 @@
+(8,3)-(8,5) Use of 'var' as synonym for 'public' in declaration disallowed in Hack. Use 'public' instead.
+(12,3)-(12,5) Use of 'var' as synonym for 'public' in declaration disallowed in Hack. Use 'public' instead.
+(12,3)-(12,11) A type annotation is required in strict mode.

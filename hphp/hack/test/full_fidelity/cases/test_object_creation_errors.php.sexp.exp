@@ -1,0 +1,79 @@
+((script 238
+  ((list 238
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
+       (missing 0 ())))
+     (expression_statement 16
+      ((binary_expression 15
+        ((variable 3 ((((end_of_line 1)) variable 3 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (object_creation_expression 9
+          ((() new 3 ((whitespace 1)))
+           (constructor_call 5
+            ((() name 5 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))))))
+       (() ";" 1 ((whitespace 5) (single_line_comment 12) (end_of_line 1)))))
+     (expression_statement 18
+      ((binary_expression 17
+        ((variable 3 ((() variable 3 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (object_creation_expression 11
+          ((() new 3 ((whitespace 1)))
+           (constructor_call 7
+            ((simple_type_specifier 5 ((() name 5 ()))) (() "(" 1 ())
+             (missing 0 ()) (() ")" 1 ())))))))
+       (() ";" 1 ((whitespace 2) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 15
+      ((binary_expression 15
+        ((variable 3 ((() variable 3 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (object_creation_expression 9
+          ((() new 3 ((whitespace 1)))
+           (constructor_call 5
+            ((() name 5 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+             (missing 0 ())))))))
+       (missing 0 ())))
+     (expression_statement 2
+      ((literal 2 ((() decimal_literal 2 ()))) (missing 0 ())))
+     (expression_statement 5
+      ((() , 1 ((whitespace 1)))
+       (((extra_token_error 2)) ";" 1
+        ((whitespace 2) (single_line_comment 26) (end_of_line 1)))))
+     (expression_statement 20
+      ((binary_expression 19
+        ((variable 3 ((() variable 3 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (object_creation_expression 13
+          ((() new 3 ((whitespace 1)))
+           (constructor_call 9
+            ((simple_type_specifier 5 ((() name 5 ()))) (() "(" 1 ())
+             (list 2
+              ((list_item 2
+                ((literal 2 ((() decimal_literal 2 ()))) (missing 0 ())))))
+             (() ")" 1 ())))))))
+       (() ";" 1 ((whitespace 3) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 39
+      ((binary_expression 38
+        ((variable 3 ((() variable 3 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (object_creation_expression 32
+          ((() new 3 ((whitespace 1)))
+           (constructor_call 28
+            ((() name 28 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))))))
+       (() ";" 1 ((whitespace 3) (single_line_comment 12) (end_of_line 1)))))
+     (expression_statement 20
+      ((binary_expression 19
+        ((variable 3 ((() variable 3 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (object_creation_expression 13
+          ((() new 3 ((whitespace 1)))
+           (constructor_call 9
+            ((simple_type_specifier 5 ((() name 5 ()))) (() "(" 1 ())
+             (list 2
+              ((list_item 2
+                ((literal 2 ((() decimal_literal 2 ()))) (missing 0 ())))))
+             (() ")" 1 ())))))))
+       (() ";" 1 ((whitespace 3) (single_line_comment 34) (end_of_line 1)))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

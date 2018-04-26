@@ -1,0 +1,7 @@
+(8,17)-(8,20) A class may extend at most one other class.
+(12,9)-(12,15) Only interfaces and classes may extend other interfaces and classes.
+(24,9)-(24,15) Only interfaces and classes may extend other interfaces and classes.
+(28,21)-(28,21) A type specifier is expected here.
+(32,17)-(32,17) A type specifier is expected here.
+(36,9)-(36,15) Only interfaces and classes may extend other interfaces and classes.
+(36,17)-(36,17) A type specifier is expected here.

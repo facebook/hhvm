@@ -1,0 +1,3 @@
+(6,3)-(6,20) Only traits and interfaces may use 'require extends'.
+(7,3)-(7,23) Only traits may use 'require implements'.
+(12,3)-(12,23) Only traits may use 'require implements'.

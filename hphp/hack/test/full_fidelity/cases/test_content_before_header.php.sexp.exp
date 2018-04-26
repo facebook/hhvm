@@ -1,0 +1,35 @@
+((script 105
+  ((list 105
+    ((markup_section 15
+      ((missing 0 ()) (() markup 11 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (classish_declaration 89
+      ((missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 3 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 79
+        ((() { 1 ((end_of_line 1)))
+         (list 53
+          ((methodish_declaration 53
+            ((missing 0 ())
+             (function_declaration_header 21
+              ((list 6
+                ((((whitespace 2) (single_line_comment 17) (end_of_line 1)
+                   (whitespace 2))
+                  public 6 ((whitespace 1)))))
+               (() function 8 ((whitespace 1))) (missing 0 ()) (() name 3 ())
+               (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+               (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+               (missing 0 ())))
+             (compound_statement 31
+              ((() { 1 ((end_of_line 1)))
+               (list 21
+                ((return_statement 21
+                  ((((whitespace 4)) return 6 ((whitespace 1)))
+                   (literal 13 ((() double_quoted_string_literal 13 ())))
+                   (() ";" 1 ((end_of_line 1)))))))
+               (((whitespace 2)) } 1 ((end_of_line 1)))))
+             (missing 0 ())))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

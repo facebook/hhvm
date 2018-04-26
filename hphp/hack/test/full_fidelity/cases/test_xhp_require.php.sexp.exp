@@ -1,0 +1,22 @@
+((script 52
+  ((list 52
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
+       (missing 0 ())))
+     (classish_declaration 37
+      ((missing 0 ()) (missing 0 ()) (() trait 5 ((whitespace 1)))
+       (() name 3 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 27
+        ((() { 1 ((end_of_line 1)))
+         (list 21
+          ((require_clause 21
+            ((((whitespace 2)) require 7 ((whitespace 1)))
+             (() extends 7 ((whitespace 1)))
+             (simple_type_specifier 4 ((() XHP_class_name 4 ())))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

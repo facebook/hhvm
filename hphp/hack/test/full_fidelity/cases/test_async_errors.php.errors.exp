@@ -1,0 +1,3 @@
+(5,10)-(5,14) The 'async' annotation cannot be used on 'abstract' methods or methods inside of interfaces.
+(11,19)-(11,23) The 'async' annotation cannot be used on 'abstract' methods or methods inside of interfaces.
+(17,19)-(17,23) The 'async' annotation cannot be used on 'abstract' methods or methods inside of interfaces.

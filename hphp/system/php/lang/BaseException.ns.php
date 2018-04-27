@@ -14,13 +14,13 @@ trait BaseException {
    * throwable_init() and createAndConstructThrowable() depend on the order
    * of properties below:
    */
-  protected $message = '';  // exception message
-  private $string = '';     // php5 has this, we don't use it
-  protected $code = 0;      // user defined exception code
-  protected $file;          // source filename of exception
-  protected $line;          // source line of exception
-  private $trace = array(); // full stacktrace
-  private $previous = null;
+  protected string $message = ''; // exception message
+  private string $string = '';    // php5 has this, we don't use it
+  protected int $code = 0;        // user defined exception code
+  protected string $file;         // source filename of exception
+  protected int $line;            // source line of exception
+  private $trace = array();       // full stacktrace
+  private ?Exception $previous = null;
 
   /*
    * There is no constructor in this trait-- It should be possible to extend

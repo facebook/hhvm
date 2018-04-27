@@ -1713,6 +1713,12 @@ and pStmt : stmt parser = fun node env ->
        us_expr = pExpr using_function_expression env;
        us_block = [Pos.none, Block [Pos.none, Noop]];
      }
+  | LetStatement
+    { let_statement_name; let_statement_type; let_statement_initializer; _ } ->
+    let id = pos_name let_statement_name env in
+    let ty = mpOptional pHint let_statement_type env in
+    let expr = pSimpleInitializer let_statement_initializer env in
+    pos, Let (id, ty, expr)
   | ForStatement
     { for_initializer; for_control; for_end_of_loop; for_body; _ } ->
     let ini = pExprL for_initializer env in

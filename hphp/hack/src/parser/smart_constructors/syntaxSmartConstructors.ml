@@ -89,6 +89,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     let make_markup_section arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_markup_section arg0 arg1 arg2 arg3
     let make_markup_suffix arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_markup_suffix arg0 arg1
     let make_unset_statement arg0 arg1 arg2 arg3 arg4 state = State.next state [arg0; arg1; arg2; arg3; arg4], Syntax.make_unset_statement arg0 arg1 arg2 arg3 arg4
+    let make_let_statement arg0 arg1 arg2 arg3 arg4 arg5 state = State.next state [arg0; arg1; arg2; arg3; arg4; arg5], Syntax.make_let_statement arg0 arg1 arg2 arg3 arg4 arg5
     let make_using_statement_block_scoped arg0 arg1 arg2 arg3 arg4 arg5 state = State.next state [arg0; arg1; arg2; arg3; arg4; arg5], Syntax.make_using_statement_block_scoped arg0 arg1 arg2 arg3 arg4 arg5
     let make_using_statement_function_scoped arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_using_statement_function_scoped arg0 arg1 arg2 arg3
     let make_declare_directive_statement arg0 arg1 arg2 arg3 arg4 state = State.next state [arg0; arg1; arg2; arg3; arg4], Syntax.make_declare_directive_statement arg0 arg1 arg2 arg3 arg4

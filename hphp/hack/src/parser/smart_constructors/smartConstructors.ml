@@ -77,6 +77,7 @@ module type SmartConstructors_S = sig
   val make_markup_section : r -> r -> r -> r -> t -> t * r
   val make_markup_suffix : r -> r -> t -> t * r
   val make_unset_statement : r -> r -> r -> r -> r -> t -> t * r
+  val make_let_statement : r -> r -> r -> r -> r -> r -> t -> t * r
   val make_using_statement_block_scoped : r -> r -> r -> r -> r -> r -> t -> t * r
   val make_using_statement_function_scoped : r -> r -> r -> r -> t -> t * r
   val make_declare_directive_statement : r -> r -> r -> r -> r -> t -> t * r
@@ -258,6 +259,7 @@ end) = struct
     let markup_section parser arg0 arg1 arg2 arg3 = call parser (SCI.make_markup_section arg0 arg1 arg2 arg3)
     let markup_suffix parser arg0 arg1 = call parser (SCI.make_markup_suffix arg0 arg1)
     let unset_statement parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_unset_statement arg0 arg1 arg2 arg3 arg4)
+    let let_statement parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_let_statement arg0 arg1 arg2 arg3 arg4 arg5)
     let using_statement_block_scoped parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_using_statement_block_scoped arg0 arg1 arg2 arg3 arg4 arg5)
     let using_statement_function_scoped parser arg0 arg1 arg2 arg3 = call parser (SCI.make_using_statement_function_scoped arg0 arg1 arg2 arg3)
     let declare_directive_statement parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_declare_directive_statement arg0 arg1 arg2 arg3 arg4)

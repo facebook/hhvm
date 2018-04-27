@@ -86,6 +86,7 @@ type t =
   | Is
   | Isset
   | Keyset
+  | Let
   | List
   | Mixed
   | Namespace
@@ -299,6 +300,7 @@ let from_string keyword =
   | "is"              -> Some Is
   | "isset"           -> Some Isset
   | "keyset"          -> Some Keyset
+  | "let"             -> Some Let
   | "list"            -> Some List
   | "mixed"           -> Some Mixed
   | "namespace"       -> Some Namespace
@@ -484,6 +486,7 @@ let to_string kind =
   | Is                            -> "is"
   | Isset                         -> "isset"
   | Keyset                        -> "keyset"
+  | Let                           -> "let"
   | List                          -> "list"
   | Mixed                         -> "mixed"
   | Namespace                     -> "namespace"

@@ -95,6 +95,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val markup_section : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val markup_suffix : t -> SC.r -> SC.r -> t * SC.r
         val unset_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val let_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val using_statement_block_scoped : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val using_statement_function_scoped : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val declare_directive_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

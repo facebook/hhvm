@@ -1349,6 +1349,7 @@ module WithStatementAndDeclAndTypeParser
     | Interface
     | Isset
     | Keyset
+    | Let
     | List
     | Mixed
     | Namespace

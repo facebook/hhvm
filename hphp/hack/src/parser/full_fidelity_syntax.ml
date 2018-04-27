@@ -103,6 +103,7 @@ module WithToken(Token: TokenType) = struct
       | MarkupSection                           _ -> SyntaxKind.MarkupSection
       | MarkupSuffix                            _ -> SyntaxKind.MarkupSuffix
       | UnsetStatement                          _ -> SyntaxKind.UnsetStatement
+      | LetStatement                            _ -> SyntaxKind.LetStatement
       | UsingStatementBlockScoped               _ -> SyntaxKind.UsingStatementBlockScoped
       | UsingStatementFunctionScoped            _ -> SyntaxKind.UsingStatementFunctionScoped
       | DeclareDirectiveStatement               _ -> SyntaxKind.DeclareDirectiveStatement
@@ -283,6 +284,7 @@ module WithToken(Token: TokenType) = struct
     let is_markup_section                               = has_kind SyntaxKind.MarkupSection
     let is_markup_suffix                                = has_kind SyntaxKind.MarkupSuffix
     let is_unset_statement                              = has_kind SyntaxKind.UnsetStatement
+    let is_let_statement                                = has_kind SyntaxKind.LetStatement
     let is_using_statement_block_scoped                 = has_kind SyntaxKind.UsingStatementBlockScoped
     let is_using_statement_function_scoped              = has_kind SyntaxKind.UsingStatementFunctionScoped
     let is_declare_directive_statement                  = has_kind SyntaxKind.DeclareDirectiveStatement
@@ -947,6 +949,21 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc unset_variables in
          let acc = f acc unset_right_paren in
          let acc = f acc unset_semicolon in
+         acc
+      | LetStatement {
+        let_statement_keyword;
+        let_statement_name;
+        let_statement_colon;
+        let_statement_type;
+        let_statement_initializer;
+        let_statement_semicolon;
+      } ->
+         let acc = f acc let_statement_keyword in
+         let acc = f acc let_statement_name in
+         let acc = f acc let_statement_colon in
+         let acc = f acc let_statement_type in
+         let acc = f acc let_statement_initializer in
+         let acc = f acc let_statement_semicolon in
          acc
       | UsingStatementBlockScoped {
         using_block_await_keyword;
@@ -2773,6 +2790,21 @@ module WithToken(Token: TokenType) = struct
         unset_right_paren;
         unset_semicolon;
       ]
+      | LetStatement {
+        let_statement_keyword;
+        let_statement_name;
+        let_statement_colon;
+        let_statement_type;
+        let_statement_initializer;
+        let_statement_semicolon;
+      } -> [
+        let_statement_keyword;
+        let_statement_name;
+        let_statement_colon;
+        let_statement_type;
+        let_statement_initializer;
+        let_statement_semicolon;
+      ]
       | UsingStatementBlockScoped {
         using_block_await_keyword;
         using_block_using_keyword;
@@ -4598,6 +4630,21 @@ module WithToken(Token: TokenType) = struct
         "unset_variables";
         "unset_right_paren";
         "unset_semicolon";
+      ]
+      | LetStatement {
+        let_statement_keyword;
+        let_statement_name;
+        let_statement_colon;
+        let_statement_type;
+        let_statement_initializer;
+        let_statement_semicolon;
+      } -> [
+        "let_statement_keyword";
+        "let_statement_name";
+        "let_statement_colon";
+        "let_statement_type";
+        "let_statement_initializer";
+        "let_statement_semicolon";
       ]
       | UsingStatementBlockScoped {
         using_block_await_keyword;
@@ -6525,6 +6572,22 @@ module WithToken(Token: TokenType) = struct
           unset_variables;
           unset_right_paren;
           unset_semicolon;
+        }
+      | (SyntaxKind.LetStatement, [
+          let_statement_keyword;
+          let_statement_name;
+          let_statement_colon;
+          let_statement_type;
+          let_statement_initializer;
+          let_statement_semicolon;
+        ]) ->
+        LetStatement {
+          let_statement_keyword;
+          let_statement_name;
+          let_statement_colon;
+          let_statement_type;
+          let_statement_initializer;
+          let_statement_semicolon;
         }
       | (SyntaxKind.UsingStatementBlockScoped, [
           using_block_await_keyword;
@@ -8691,6 +8754,25 @@ module WithToken(Token: TokenType) = struct
           unset_variables;
           unset_right_paren;
           unset_semicolon;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_let_statement
+        let_statement_keyword
+        let_statement_name
+        let_statement_colon
+        let_statement_type
+        let_statement_initializer
+        let_statement_semicolon
+      =
+        let syntax = LetStatement {
+          let_statement_keyword;
+          let_statement_name;
+          let_statement_colon;
+          let_statement_type;
+          let_statement_initializer;
+          let_statement_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

@@ -2118,6 +2118,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       end;
       t env expr;
     ]
+  | Syntax.LetStatement _ -> Nothing (* TODO: T27553263 *)
   | Syntax.ErrorSyntax _ ->
     raise Hackfmt_error.InvalidSyntax
 

@@ -176,6 +176,8 @@ class EditableSyntax
       return MarkupSuffix.from_json(json, position, source);
     case 'unset_statement':
       return UnsetStatement.from_json(json, position, source);
+    case 'let_statement':
+      return LetStatement.from_json(json, position, source);
     case 'using_statement_block_scoped':
       return UsingStatementBlockScoped.from_json(json, position, source);
     case 'using_statement_function_scoped':
@@ -835,6 +837,8 @@ class EditableToken extends EditableSyntax
        return new IssetToken(leading, trailing);
     case 'keyset':
        return new KeysetToken(leading, trailing);
+    case 'let':
+       return new LetToken(leading, trailing);
     case 'list':
        return new ListToken(leading, trailing);
     case 'mixed':
@@ -1635,6 +1639,13 @@ class KeysetToken extends EditableToken
   constructor(leading, trailing)
   {
     super('keyset', leading, trailing, 'keyset');
+  }
+}
+class LetToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('let', leading, trailing, 'let');
   }
 }
 class ListToken extends EditableToken
@@ -7726,6 +7737,158 @@ class UnsetStatement extends EditableSyntax
         'right_paren',
         'semicolon'];
     return UnsetStatement._children_keys;
+  }
+}
+class LetStatement extends EditableSyntax
+{
+  constructor(
+    keyword,
+    name,
+    colon,
+    type,
+    initializer,
+    semicolon)
+  {
+    super('let_statement', {
+      keyword: keyword,
+      name: name,
+      colon: colon,
+      type: type,
+      initializer: initializer,
+      semicolon: semicolon });
+  }
+  get keyword() { return this.children.keyword; }
+  get name() { return this.children.name; }
+  get colon() { return this.children.colon; }
+  get type() { return this.children.type; }
+  get initializer() { return this.children.initializer; }
+  get semicolon() { return this.children.semicolon; }
+  with_keyword(keyword){
+    return new LetStatement(
+      keyword,
+      this.name,
+      this.colon,
+      this.type,
+      this.initializer,
+      this.semicolon);
+  }
+  with_name(name){
+    return new LetStatement(
+      this.keyword,
+      name,
+      this.colon,
+      this.type,
+      this.initializer,
+      this.semicolon);
+  }
+  with_colon(colon){
+    return new LetStatement(
+      this.keyword,
+      this.name,
+      colon,
+      this.type,
+      this.initializer,
+      this.semicolon);
+  }
+  with_type(type){
+    return new LetStatement(
+      this.keyword,
+      this.name,
+      this.colon,
+      type,
+      this.initializer,
+      this.semicolon);
+  }
+  with_initializer(initializer){
+    return new LetStatement(
+      this.keyword,
+      this.name,
+      this.colon,
+      this.type,
+      initializer,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new LetStatement(
+      this.keyword,
+      this.name,
+      this.colon,
+      this.type,
+      this.initializer,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var initializer = this.initializer.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      name === this.name &&
+      colon === this.colon &&
+      type === this.type &&
+      initializer === this.initializer &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new LetStatement(
+        keyword,
+        name,
+        colon,
+        type,
+        initializer,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.let_statement_keyword, position, source);
+    position += keyword.width;
+    let name = EditableSyntax.from_json(
+      json.let_statement_name, position, source);
+    position += name.width;
+    let colon = EditableSyntax.from_json(
+      json.let_statement_colon, position, source);
+    position += colon.width;
+    let type = EditableSyntax.from_json(
+      json.let_statement_type, position, source);
+    position += type.width;
+    let initializer = EditableSyntax.from_json(
+      json.let_statement_initializer, position, source);
+    position += initializer.width;
+    let semicolon = EditableSyntax.from_json(
+      json.let_statement_semicolon, position, source);
+    position += semicolon.width;
+    return new LetStatement(
+        keyword,
+        name,
+        colon,
+        type,
+        initializer,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (LetStatement._children_keys == null)
+      LetStatement._children_keys = [
+        'keyword',
+        'name',
+        'colon',
+        'type',
+        'initializer',
+        'semicolon'];
+    return LetStatement._children_keys;
   }
 }
 class UsingStatementBlockScoped extends EditableSyntax
@@ -20990,6 +21153,7 @@ exports.InterfaceToken = InterfaceToken;
 exports.IsToken = IsToken;
 exports.IssetToken = IssetToken;
 exports.KeysetToken = KeysetToken;
+exports.LetToken = LetToken;
 exports.ListToken = ListToken;
 exports.MixedToken = MixedToken;
 exports.NamespaceToken = NamespaceToken;
@@ -21192,6 +21356,7 @@ exports.ExpressionStatement = ExpressionStatement;
 exports.MarkupSection = MarkupSection;
 exports.MarkupSuffix = MarkupSuffix;
 exports.UnsetStatement = UnsetStatement;
+exports.LetStatement = LetStatement;
 exports.UsingStatementBlockScoped = UsingStatementBlockScoped;
 exports.UsingStatementFunctionScoped = UsingStatementFunctionScoped;
 exports.DeclareDirectiveStatement = DeclareDirectiveStatement;

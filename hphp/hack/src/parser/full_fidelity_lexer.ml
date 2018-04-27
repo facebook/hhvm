@@ -1407,6 +1407,7 @@ let as_keyword kind lexer =
   if kind = TokenKind.Name then
     let text = as_case_insensitive_keyword (current_text lexer) in
     match TokenKind.from_string text with
+    | Some TokenKind.Let when (not (hacksperimental lexer)) -> TokenKind.Name
     | Some keyword -> keyword
     | _ -> TokenKind.Name
   else

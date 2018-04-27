@@ -294,6 +294,14 @@ module type Syntax_S = sig
     ; unset_right_paren                                  : t
     ; unset_semicolon                                    : t
     }
+  | LetStatement                            of
+    { let_statement_keyword                              : t
+    ; let_statement_name                                 : t
+    ; let_statement_colon                                : t
+    ; let_statement_type                                 : t
+    ; let_statement_initializer                          : t
+    ; let_statement_semicolon                            : t
+    }
   | UsingStatementBlockScoped               of
     { using_block_await_keyword                          : t
     ; using_block_using_keyword                          : t
@@ -1090,6 +1098,7 @@ module type Syntax_S = sig
   val make_markup_section : t -> t -> t -> t -> t
   val make_markup_suffix : t -> t -> t
   val make_unset_statement : t -> t -> t -> t -> t -> t
+  val make_let_statement : t -> t -> t -> t -> t -> t -> t
   val make_using_statement_block_scoped : t -> t -> t -> t -> t -> t -> t
   val make_using_statement_function_scoped : t -> t -> t -> t -> t
   val make_declare_directive_statement : t -> t -> t -> t -> t -> t
@@ -1262,6 +1271,7 @@ module type Syntax_S = sig
   val is_markup_section : t -> bool
   val is_markup_suffix : t -> bool
   val is_unset_statement : t -> bool
+  val is_let_statement : t -> bool
   val is_using_statement_block_scoped : t -> bool
   val is_using_statement_function_scoped : t -> bool
   val is_declare_directive_statement : t -> bool

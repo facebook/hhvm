@@ -135,6 +135,7 @@ module WithExpressionAndDeclAndTypeParser
     | Do -> parse_do_statement parser
     | While -> parse_while_statement parser
     | Declare -> parse_declare_statement parser
+    | Let when Env.hacksperimental (env parser) -> parse_let_statement parser
     | Using ->
       let (parser, missing) = Make.missing parser (pos parser) in
       parse_using_statement parser missing
@@ -414,6 +415,40 @@ module WithExpressionAndDeclAndTypeParser
       expr_node
       right_paren_token
       statement_node
+
+  (* SPEC:
+    let-statement:
+      let   name   =   expression   ;
+      let   name   :   type   =   expression   ;
+  *)
+  and parse_let_statement parser =
+    let (parser, let_keyword_token) = assert_token parser Let in
+    let (parser, name_token) = require_name parser in
+    let (parser, colon_token, type_token) =
+      match peek_token_kind parser with
+      | Colon ->
+        let (parser, colon_token) = assert_token parser Colon in
+        let (parser, type_token) = parse_type_specifier parser in
+        parser, colon_token, type_token
+      | _ ->
+        let (parser, missing_colon) = Make.missing parser (pos parser) in
+        let (parser, missing_type) = Make.missing parser (pos parser) in
+        parser, missing_colon, missing_type
+    in
+    let (parser, equal_token) = require_equal parser in
+    let (parser, expr_node) = parse_expression parser in
+    let (parser, init_node) =
+      Make.simple_initializer parser equal_token expr_node
+    in
+    let (parser, semi_token) = require_semicolon parser in
+    Make.let_statement
+      parser
+      let_keyword_token
+      name_token
+      colon_token
+      type_token
+      init_node
+      semi_token
 
   (* SPEC:
     declare-statement:

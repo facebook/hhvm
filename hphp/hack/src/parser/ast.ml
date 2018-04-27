@@ -335,6 +335,7 @@ and stmt_ =
   | Markup of pstring * expr option
   | Using of using_stmt
   | Declare of (* is_block *) bool * expr * block
+  | Let of id * hint option * expr
 
 and as_expr =
   | As_v of expr

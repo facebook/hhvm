@@ -59,6 +59,7 @@ and terminal_ tcopt nsenv ~in_try (_, st_) =
     (terminal tcopt nsenv ~in_try:true b;
      List.iter catch_l (terminal_catch tcopt nsenv ~in_try))
   | Markup _
+  | Let _ (* TODO: T27552113 *)
   | Do _
   | While _
   | Declare _
@@ -140,7 +141,7 @@ let rec stmt tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) (_, st_) =
   | Expr _ | Break _ | Continue _ | Throw _
   | Do _ | While _ | For _ | Foreach _ | Declare _
   | Return _ | GotoLabel _ | Goto _ | Static_var _
-  | Global_var _ | Def_inline _ | Noop -> acc
+  | Global_var _ | Def_inline _ | Noop | Let _ (* TODO: T27552113 *) -> acc
   | Using u -> block tcopt acc u.us_block
   | Block b -> block tcopt acc b
   | If (_, b1, b2) ->

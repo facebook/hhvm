@@ -126,6 +126,7 @@ let get_level p op e =
 
 let rec emit_stmt env (pos, st_) =
   match st_ with
+  | A.Let _ -> emit_nyi "let statement" (* TODO: T27552023 *)
   | A.Expr (_, A.Yield_break) ->
     gather [
       instr_null;

@@ -37,6 +37,7 @@ let rec collect_valid_target_labels_aux is_hh_file acc s =
   | A.If (_, then_block, else_block) ->
     let acc = collect_valid_target_labels_for_block_aux is_hh_file acc then_block in
     collect_valid_target_labels_for_block_aux is_hh_file acc else_block
+  | A.Let _
   | A.Unsafe
   | A.Fallthrough
   | A.Expr _

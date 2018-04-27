@@ -1790,6 +1790,7 @@ module Make (GetLocals : GetLocals) = struct
 
   and stmt env (p, st_ as st) =
     match st_ with
+    | Let _                -> assert false (* TODO: T27552113 *)
     | Block _              -> assert false
     | Unsafe               -> assert false
     | Fallthrough          -> N.Fallthrough

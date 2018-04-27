@@ -73,6 +73,7 @@ class type ['a] ast_visitor_type = object
   method on_int : 'a -> pstring -> 'a
   method on_is : 'a -> expr -> hint -> 'a
   method on_as : 'a -> expr -> hint -> bool -> 'a
+  method on_let : 'a -> id -> hint option -> expr -> 'a
   method on_lfun: 'a -> fun_ -> 'a
   method on_list : 'a -> expr list -> 'a
   method on_lvar : 'a -> id -> 'a
@@ -300,6 +301,16 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Some e -> this#on_expr acc e
     | None -> acc
 
+  method on_let acc id hint_opt e =
+    let acc = this#on_id acc id in
+    let acc =
+      match hint_opt with
+        | None -> acc
+        | Some h -> this#on_hint acc h
+    in
+    let acc = this#on_expr acc e in
+    acc
+
   method on_stmt_ acc = function
     | Unsafe                  -> this#on_unsafe acc
     | Expr e                  -> this#on_expr acc e
@@ -326,6 +337,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Markup (s, e)           -> this#on_markup acc s e
     | Using s                 -> this#on_using acc s
     | Declare (is_block, e, b) -> this#on_declare acc is_block e b
+    | Let (id, h, e)          -> this#on_let acc id h e
 
   method on_def_inline acc d =
     this#on_def acc d

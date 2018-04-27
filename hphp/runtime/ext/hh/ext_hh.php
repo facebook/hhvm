@@ -68,7 +68,10 @@ function serialize_memoize_param(mixed $param): arraykey;
 function set_frame_metadata(mixed $metadata): void;
 
 // class-like
-interface ClassAttribute {}
+interface ClassLikeAttribute {}
+interface ClassAttribute extends ClassLikeAttribute {}
+interface EnumAttribute extends ClassLikeAttribute {}
+
 interface TypeAliasAttribute {}
 
 // function-like

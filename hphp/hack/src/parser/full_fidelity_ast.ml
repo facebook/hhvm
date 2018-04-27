@@ -30,6 +30,7 @@ type env =
   ; fi_mode                  : FileInfo.mode
   ; file                     : Relative_path.t
   ; stats                    : Stats_container.t option
+  ; hacksperimental          : bool
   ; top_level_statements     : bool (* Whether we are (still) considering TLSs*)
   (* Changing parts; should disappear in future. `mutable` saves allocations. *)
   ; mutable ignore_pos       : bool
@@ -64,6 +65,7 @@ let make_env
   ?(fi_mode                  = FileInfo.Mpartial       )
   ?(is_hh_file               = false                   )
   ?stats
+  ?(hacksperimental          = false                   )
   (file : Relative_path.t)
   : env
   = let parser_options = ParserOptions.with_hh_syntax_for_hhvm parser_options
@@ -92,6 +94,7 @@ let make_env
     ; fail_open
     ; file
     ; stats
+    ; hacksperimental
     ; top_level_statements = true
     ; ignore_pos
     ; max_depth = 42
@@ -2886,6 +2889,7 @@ let from_text (env : env) (source_text : SourceText.t) : result =
         ~php5_compat_mode:env.php5_compat_mode
         ~lang:lang
         ?mode:mode
+        ~hacksperimental:env.hacksperimental
         ()
     in
     if env.quick_mode then

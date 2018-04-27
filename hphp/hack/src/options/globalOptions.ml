@@ -121,6 +121,11 @@ let tco_experimental_is_expression = "is_expression"
  *)
 let tco_experimental_as_expression = "as_expression"
 
+(**
+ * Typechecker support for all features behind the hacksperimental flag.
+ *)
+let tco_hacksperimental = "hacksperimental"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -141,6 +146,7 @@ let tco_experimental_all =
      tco_experimental_no_trait_reuse;
      tco_experimental_is_expression;
      tco_experimental_as_expression;
+     tco_hacksperimental;
    ]
 
 let tco_migration_flags_all =
@@ -237,5 +243,4 @@ let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda
 let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
 let tco_disallow_array_literal t = t.tco_disallow_array_literal
 let po_disallow_elvis_space t = t.po_disallow_elvis_space
-
 let ignored_fixme_codes t = t.ignored_fixme_codes

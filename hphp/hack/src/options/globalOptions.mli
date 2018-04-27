@@ -155,3 +155,4 @@ val tco_experimental_as_expression : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t
+val tco_hacksperimental: string

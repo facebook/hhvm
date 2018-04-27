@@ -67,7 +67,8 @@ module FullFidelityParseArgs = struct
     disallow_elvis_space : bool;
     fail_open : bool;
     (* Defining the input *)
-    files : string list
+    files : string list;
+    hacksperimental: bool;
   }
 
   let make
@@ -96,7 +97,8 @@ module FullFidelityParseArgs = struct
     disallow_elvis_space
     fail_open
     show_file_name
-    files = {
+    files
+    hacksperimental = {
     full_fidelity_json;
     full_fidelity_dot;
     full_fidelity_dot_edges;
@@ -122,7 +124,8 @@ module FullFidelityParseArgs = struct
     disallow_elvis_space;
     fail_open;
     show_file_name;
-    files }
+    files;
+    hacksperimental }
 
   let parse_args () =
     let usage = Printf.sprintf "Usage: %s [OPTIONS] filename\n" Sys.argv.(0) in
@@ -168,6 +171,7 @@ module FullFidelityParseArgs = struct
     let set_show_file_name () = show_file_name := true in
     let files = ref [] in
     let push_file file = files := file :: !files in
+    let hacksperimental = ref false in
     let options =  [
       (* modes *)
       "--full-fidelity-json",
@@ -274,6 +278,12 @@ No errors are filtered out.";
       "--show-file-name",
         Arg.Unit set_show_file_name,
         "Displays the file name.";
+      "--hacksperimental",
+        Arg.Set hacksperimental,
+        "Set the hacksperimental option for the parser.";
+      "--no-hacksperimental",
+        Arg.Clear hacksperimental,
+        "Unset the hacksperimental option for the parser.";
       ] in
     Arg.parse options push_file usage;
     make
@@ -303,6 +313,7 @@ No errors are filtered out.";
       !fail_open
       !show_file_name
       (List.rev !files)
+      !hacksperimental
 end
 
 open FullFidelityParseArgs
@@ -334,7 +345,8 @@ let handle_existing_file args filename =
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
-  let syntax_tree = SyntaxTree.make source_text in
+  let env = Full_fidelity_parser_env.make ~hacksperimental:args.hacksperimental () in
+  let syntax_tree = SyntaxTree.make ~env source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in
 
   (* Parse with the original parser *)
@@ -396,6 +408,7 @@ let handle_existing_file args filename =
         ~parser_options:popt
         ~fail_open:args.fail_open
         ~is_hh_file:args.is_hh_file
+        ~hacksperimental:args.hacksperimental
         file
     in
     let res = Lowerer.from_file env in

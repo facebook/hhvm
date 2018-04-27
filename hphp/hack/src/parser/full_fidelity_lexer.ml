@@ -17,9 +17,10 @@ module Lexer : sig
     text : SourceText.t;
     start : int;  (* Both start and offset are absolute offsets in the text. *)
     offset : int;
-    errors : SyntaxError.t list
+    errors : SyntaxError.t list;
+    hacksperimental : bool
   }
-  val make : SourceText.t -> t
+  val make : ?hacksperimental:bool -> SourceText.t -> t
   val start : t -> int
   val source : t -> SourceText.t
   val errors : t -> SyntaxError.t list
@@ -31,6 +32,8 @@ module Lexer : sig
   val start_new_lexeme : t -> t
   val advance : t -> int -> t
   val with_start_offset : t -> int -> int -> t
+
+  val hacksperimental : t -> bool
 end = struct
 
   let padding = String.make 100 '\x00'
@@ -41,12 +44,13 @@ end = struct
     text : SourceText.t;
     start : int;  (* Both start and offset are absolute offsets in the text. *)
     offset : int;
-    errors : SyntaxError.t list
+    errors : SyntaxError.t list;
+    hacksperimental : bool
   }
 
-  let make text =
+  let make ?(hacksperimental = false) text =
     let text' = SourceText.append_padding text padding in
-    { text = text'; start = 0; offset = 0; errors = [] }
+    { text = text'; start = 0; offset = 0; errors = []; hacksperimental }
 
   let start  x = x.start
   let source x = x.text
@@ -70,6 +74,8 @@ end = struct
 
   let advance lexer index =
     { lexer with offset = lexer.offset + index }
+
+  let hacksperimental lexer = lexer.hacksperimental
 end
 
 module WithToken(Token: Lexable_token_sig.LexableToken_S) = struct
@@ -90,6 +96,7 @@ let start_new_lexeme = Lexer.start_new_lexeme
 let advance = Lexer.advance
 let with_offset_errors = Lexer.with_offset_errors
 let with_start_offset = Lexer.with_start_offset
+let hacksperimental = Lexer.hacksperimental
 
 let start_offset = start
 let end_offset = offset

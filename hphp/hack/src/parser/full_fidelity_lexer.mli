@@ -13,11 +13,12 @@ module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
     | Literal_execution_string
     | Literal_double_quoted
     | Literal_heredoc of string
-  val make : Full_fidelity_source_text.t -> t
+  val make : ?hacksperimental:bool -> Full_fidelity_source_text.t -> t
   val source : t -> Full_fidelity_source_text.t
   val errors : t -> Full_fidelity_syntax_error.t list
   val start_offset : t -> int
   val end_offset : t -> int
+  val hacksperimental : t -> bool
   val current_text_at : t -> int -> int -> string
   val next_token : t -> t * Token.t
   val next_token_no_trailing : t -> t * Token.t

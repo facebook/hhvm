@@ -1,3 +1,4 @@
+module Env = Full_fidelity_parser_env
 module TestUtils = Full_fidelity_test_utils
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
@@ -13,8 +14,8 @@ and ultimately Make.list."
 
 exception MoreThanOneElementInTheState of Syntax.t list
 
-let verify text =
-  let parser = VerifyParser.make Full_fidelity_parser_env.default text in
+let verify ?(env = Env.default) text =
+  let parser = VerifyParser.make env text in
   try
     let (parser, root) = VerifyParser.parse_script parser in
     let sc_state = VerifyParser.sc_state parser in

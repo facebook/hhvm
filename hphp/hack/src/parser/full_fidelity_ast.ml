@@ -2844,16 +2844,17 @@ let elaborate_halt_compiler ast env source_text  =
   | None -> ast
 
 
-let lower env ~source_text ~script : result =
+let lower (env: env) ~source_text ~script : result =
+  let t = Utils.MemGuard.track script in
+  let comments, fixmes = scour_comments env.file source_text script env in
   let ast = runP pScript script env in
   let ast = elaborate_toplevel_and_std_constants ast env source_text in
   let ast = elaborate_halt_compiler ast env source_text in
-  let comments, fixmes = scour_comments env.file source_text script env in
   let comments = if env.include_line_comments then comments else
     List.filter ~f:(fun (_,c) -> not (Prim_defs.is_line_comment c)) comments
   in
   let content = if env.codegen then "" else SourceText.text source_text in
-  if env.codegen then Utils.MemGuard.gc_and_verify_value_collected script;
+  if env.codegen then Utils.MemGuard.gc_and_verify_value_collected t;
   let () = if env.keep_errors then Fixmes.HH_FIXMES.add env.file fixmes in
   { fi_mode = env.fi_mode
   ; is_hh_file = env.is_hh_file
@@ -2906,6 +2907,7 @@ let from_text (env : env) (source_text : SourceText.t) : result =
     else
       SyntaxTree.make ~env:env' source_text
   in
+  if env.codegen then Utils.MemGuard.gc();
   let lower_coroutines = env.lower_coroutines && SyntaxTree.sc_state tree in
   let () =
     if env.codegen && not lower_coroutines then

@@ -57,12 +57,13 @@ let from_ast ~is_hh_file ~is_evaled ast =
   Utils.try_finally_with ast
   ~f:begin fun ast ->
     try
+      let t = Utils.MemGuard.track ast in
       Emit_env.set_is_hh_file is_hh_file;
       (* Convert closures to top-level classes;
        * also hoist inner classes and functions *)
       let { ast_defs = closed_ast; global_state; strict_types } =
         convert_toplevel_prog ast in
-      Utils.MemGuard.gc_and_verify_value_collected ast;
+      Utils.MemGuard.gc_and_verify_value_collected t;
       let strict_types =
         (* is scalar_types is set - always assume strict_types to have value *)
         if Hhbc_options.php7_scalar_types !(Hhbc_options.compiler_options)

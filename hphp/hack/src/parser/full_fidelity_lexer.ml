@@ -45,7 +45,7 @@ end = struct
     start : int;  (* Both start and offset are absolute offsets in the text. *)
     offset : int;
     errors : SyntaxError.t list;
-    hacksperimental : bool
+    hacksperimental : bool (* write-once: record updates should not update this field *)
   }
 
   let make ?(hacksperimental = false) text =

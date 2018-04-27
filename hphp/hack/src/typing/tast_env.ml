@@ -83,3 +83,10 @@ let typedef_env t =
 let gconst_env cst =
   let env = EnvFromDef.gconst_env cst.cst_annotation.tcopt cst in
   restore_saved_env env cst.cst_annotation
+
+let def_env d =
+  match d with
+  | Fun x -> fun_env x
+  | Class x -> class_env x
+  | Typedef x -> typedef_env x
+  | Constant x -> gconst_env x

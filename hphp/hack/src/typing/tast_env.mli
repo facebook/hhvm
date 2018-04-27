@@ -93,12 +93,8 @@ val empty : TypecheckerOptions.t -> env
 (** Construct an empty {!env}. Unlikely to be the best choice; prefer using
     {!Tast_visitor} or constructing an {!env} from a {!Tast.def}. *)
 
+val def_env : Tast.def -> env
 (** Construct an {!env} from a toplevel definition. *)
-
-val fun_env     : Tast.fun_    -> env
-val class_env   : Tast.class_  -> env
-val typedef_env : Tast.typedef -> env
-val gconst_env  : Tast.gconst  -> env
 
 val restore_method_env : env -> Tast.method_ -> env
 (** Construct an {!env} from a method definition and the {!env} of the context

@@ -147,7 +147,7 @@ let process_class class_ =
     | None -> acc
 
 let typed_member_id env receiver_ty mid ~is_method ~is_const =
-  Typing_utils.get_class_ids env receiver_ty
+  Tast_env.get_class_ids env receiver_ty
   |> List.map ~f:(fun cid -> process_member cid mid ~is_method ~is_const)
   |> List.fold ~init:Result_set.empty ~f:Result_set.union
 
@@ -166,7 +166,7 @@ let typed_class_id env ty containing_expr_pos cid =
     | Tast.CIexpr ((pos, _), _) -> pos
     | Tast.CIparent | Tast.CIself | Tast.CIstatic -> containing_expr_pos
   in
-  Typing_utils.get_class_ids env ty
+  Tast_env.get_class_ids env ty
   |> List.map ~f:(fun cid -> process_class_id (pos, cid))
   |> List.fold ~init:Result_set.empty ~f:Result_set.union
 
@@ -242,20 +242,13 @@ class ['self] visitor = object (self : 'self)
     let uela = self#on_list self#on_expr env uel in
     cta + ea + hla + ela + uela
 
-  method! on_hint env hint =
+  method! on_Haccess env root ids =
     let acc =
-      match snd hint with
-      | Aast.Haccess _ ->
-        let r, ty_ = Decl_hint.hint env.Typing_env.decl_env hint in
-        let taty = match ty_ with Taccess taty -> taty | _ -> assert false in
-        let ety_env = {(Typing_phase.env_with_self env) with
-                        Typing_defs.from_class = Some Nast.CIstatic} in
-        Typing_taccess.referenced_typeconsts env ety_env r taty
-        |> List.map ~f:process_typeconst
-        |> List.fold ~init:self#zero ~f:self#plus
-      | _ -> self#zero
+      Tast_env.referenced_typeconsts env root ids
+      |> List.map ~f:process_typeconst
+      |> List.fold ~init:self#zero ~f:self#plus
     in
-    self#plus acc (super#on_hint env hint)
+    self#plus acc (super#on_Haccess env root ids)
 
   method! on_Lvar env (pos, id) =
     let acc = process_lvar_id (pos, Local_id.get_name id) in

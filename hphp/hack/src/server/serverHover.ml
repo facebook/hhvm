@@ -52,13 +52,13 @@ let make_hover_info tcopt env_and_ty file (occurrence, def_opt) =
           >>= fun c -> fst c.tc_construct
           >>| fun elt ->
             let ty = Lazy.force_val elt.ce_type in
-            Typing_print.full_with_identity env ty occurrence def_opt
+            Tast_env.print_ty_with_identity env ty occurrence def_opt
         in
         begin match snippet_opt with
         | Some s -> s
-        | None -> Typing_print.full_with_identity env ty occurrence def_opt
+        | None -> Tast_env.print_ty_with_identity env ty occurrence def_opt
         end
-    | occurrence, Some (env, ty) -> Typing_print.full_with_identity env ty occurrence def_opt
+    | occurrence, Some (env, ty) -> Tast_env.print_ty_with_identity env ty occurrence def_opt
   in
   let addendum = [
     (match def_opt with
@@ -90,7 +90,7 @@ let go env (file, line, char) =
   | [] ->
     begin match env_and_ty with
     | Some (env, ty) ->
-      [{ snippet = Typing_print.full_strip_ns env ty; addendum = []; pos = None }]
+      [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
     | None -> []
     end
   | identities ->

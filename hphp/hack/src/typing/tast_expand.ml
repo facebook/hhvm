@@ -29,7 +29,7 @@ module ETast = ExpandedTypeAnnotatedAST
  *)
 let expand_ty env ty =
   let rec exp_ty ty =
-    let _, ety = Typing_env.expand_type env ty in
+    let _, ety = Tast_env.expand_type env ty in
     match ety with
     | (_, (Tany | Tmixed | Tnonnull | Tprim _ | Tobject | Tdynamic)) -> ety
     | (p, Tclass(n, tyl)) -> (p, Tclass(n, exp_tys tyl))

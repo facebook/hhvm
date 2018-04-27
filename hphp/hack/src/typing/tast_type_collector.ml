@@ -9,7 +9,7 @@
 
 open Hh_core
 
-type collected_type = Typing_env.env * Typing_defs.phase_ty
+type collected_type = Tast_env.env * Typing_defs.phase_ty
 
 class ['self] type_collector = object (_ : 'self)
   inherit [_] Tast_visitor.reduce
@@ -28,9 +28,9 @@ class ['self] type_collector = object (_ : 'self)
         [(env, Typing_defs.LoclTy ty)]
     | _ -> Pos.AbsolutePosMap.empty
 
-  method! on_hint (env: Typing_env.env) hint =
+  method! on_hint (env: Tast_env.t) hint =
     let (pos, _) = hint in
-    let ty = Decl_hint.hint env.Typing_env.decl_env hint in
+    let ty = Tast_env.hint_to_ty env hint in
     Pos.AbsolutePosMap.singleton
       (Pos.to_absolute pos)
       [(env, Typing_defs.DeclTy ty)]
@@ -43,8 +43,8 @@ let collected_types_to_json
   : Hh_json.json list =
   List.map collected_types ~f:(fun (env, ty) ->
     match ty with
-    | Typing_defs.DeclTy ty -> Typing_print.to_json env ty
-    | Typing_defs.LoclTy ty -> Typing_print.to_json env ty
+    | Typing_defs.DeclTy ty -> Tast_env.ty_to_json env ty
+    | Typing_defs.LoclTy ty -> Tast_env.ty_to_json env ty
   )
 
 (*

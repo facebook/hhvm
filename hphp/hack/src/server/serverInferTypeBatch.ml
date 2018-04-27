@@ -69,7 +69,7 @@ let helper tcopt acc pos_infos =
           | Some (end_line, end_char) ->
             ServerInferType.type_at_range tast line char end_line end_char
         in
-        Option.map env_and_ty ~f:(fun (env, ty) -> Typing_print.to_json env ty)
+        Option.map env_and_ty ~f:(fun (env, ty) -> Tast_env.ty_to_json env ty)
       end
     in
     result_to_string result pos :: acc

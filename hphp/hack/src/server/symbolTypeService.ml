@@ -29,7 +29,7 @@ class ['self] visitor = object (self : 'self)
       | Tast.Dollardollar (_, id) ->
         Result_set.singleton {
           pos = Pos.to_relative_string pos;
-          type_ = Typing_print.full_strip_ns env ty;
+          type_ = Tast_env.print_ty env ty;
           ident_ = Local_id.to_int id
         }
       | _ -> self#zero
@@ -41,7 +41,7 @@ class ['self] visitor = object (self : 'self)
       let (pos, ty) = param.Tast.param_annotation in
       Result_set.singleton {
         pos = Pos.to_relative_string pos;
-        type_ = Typing_print.full_strip_ns env ty;
+        type_ = Tast_env.print_ty env ty;
         ident_ = Local_id.to_int (Local_id.get param.Tast.param_name);
       }
     in

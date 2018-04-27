@@ -323,7 +323,7 @@ let () =
     let compare_type expected type_at =
       let ty_str =
         match type_at with
-        | Some (env, ty) -> Typing_print.full_strip_ns env ty
+        | Some (env, ty) -> Tast_env.print_ty env ty
         | None ->
           Test.fail (Printf.sprintf "No type inferred at %s:%d:%d" file line col);
           failwith "unreachable"

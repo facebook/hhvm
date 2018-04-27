@@ -108,7 +108,7 @@ class ['self] function_following_visitor line char = object (self : 'self)
      * of the members of the unresolved union), so we return None. *)
     let rec use_containing_type env ty =
       match snd ty with
-      | Tvar _ -> use_containing_type env (Typing_expand.fully_expand env ty)
+      | Tvar _ -> use_containing_type env (Tast_env.fully_expand env ty)
       | Tanon _ | Tunresolved [] -> ty, true
       | Tunresolved [ty] -> use_containing_type env ty
       | Tunresolved tys ->
@@ -152,7 +152,7 @@ let type_at_pos
   (tast : Tast.program)
   (line : int)
   (char : int)
-: (Typing_env.env * Tast.ty) option =
+: (Tast_env.env * Tast.ty) option =
   (new base_visitor line char)#go tast
   >>| (fun (_, env, ty) -> (env, ty))
 
@@ -160,7 +160,7 @@ let returned_type_at_pos
   (tast : Tast.program)
   (line : int)
   (char : int)
-: (Typing_env.env * Tast.ty) option =
+: (Tast_env.env * Tast.ty) option =
   (new function_following_visitor line char)#go tast
   >>| (fun (_, env, ty) -> (env, ty))
 
@@ -170,7 +170,7 @@ let type_at_range
   (start_char : int)
   (end_line : int)
   (end_char : int)
-: (Typing_env.env * Tast.ty) option =
+: (Tast_env.env * Tast.ty) option =
   (new range_visitor start_line start_char end_line end_char)#go tast
 
 let go:
@@ -183,5 +183,5 @@ fun env (file, line, char, dynamic_view) ->
   let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
   returned_type_at_pos tast line char
   >>| fun (env, ty) ->
-  Typing_print.full_strip_ns env ty,
-  Typing_print.to_json env ty |> Hh_json.json_to_string
+  Tast_env.print_ty env ty,
+  Tast_env.ty_to_json env ty |> Hh_json.json_to_string

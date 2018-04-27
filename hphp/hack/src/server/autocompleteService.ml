@@ -125,7 +125,7 @@ let autocomplete_new cid env =
 
 let get_class_elt_types env class_ cid elts =
   let elts = SMap.filter elts begin fun _ x ->
-    Typing_visibility.is_visible env x.ce_visibility cid class_
+    Tast_env.is_visible env x.ce_visibility cid class_
   end in
   SMap.map elts (fun { ce_type = lazy ty; _ } -> ty)
 
@@ -440,13 +440,13 @@ let compute_complete_global
 (* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
 (* by using typing environment to convert ty information into strings. *)
 let resolve_ty
-    (env: Typing_env.env)
+    (env: Tast_env.t)
     (autocomplete_context: legacy_autocomplete_context)
     (x: partial_autocomplete_result)
     ~(delimit_on_namespaces: bool)
   : complete_autocomplete_result =
   let env, ty = match x.ty with
-    | DeclTy ty -> Phase.localize_with_self env ty
+    | DeclTy ty -> Tast_env.localize_with_self env ty
     | LoclTy ty -> env, ty
   in
   let desc_string = match x.kind_ with
@@ -455,7 +455,7 @@ let resolve_ty
     | Variable_kind
     | Property_kind
     | Class_constant_kind
-    | Constructor_kind -> Typing_print.full_strip_ns env ty
+    | Constructor_kind -> Tast_env.print_ty env ty
     | Abstract_class_kind -> "abstract class"
     | Class_kind -> "class"
     | Interface_kind -> "interface"
@@ -471,12 +471,12 @@ let resolve_ty
           param_name     = (match param.fp_name with
                              | Some n -> n
                              | None -> "");
-          param_ty       = Typing_print.full_strip_ns env param.fp_type;
+          param_ty       = Tast_env.print_ty env param.fp_type;
           param_variadic = is_variadic;
         }
       in
       Some {
-        return_ty = Typing_print.full_strip_ns env ft.ft_ret;
+        return_ty = Tast_env.print_ty env ft.ft_ret;
         min_arity = arity_min ft.ft_arity;
         params    = List.map ft.ft_params param_to_record @
           (match ft.ft_arity with
@@ -513,13 +513,13 @@ let resolve_ty
   }
 
 let tast_cid_to_nast_cid env cid =
-  let nmenv = Tast.nast_mapping_env (Typing_env.save SMap.empty env) in
+  let nmenv = Tast.nast_mapping_env (Tast_env.save env) in
   Tast.NastMapper.map_class_id_ nmenv cid
 
 let autocomplete_typed_member ~is_static env class_ty cid mid =
-  Typing_utils.get_class_ids env class_ty
+  Tast_env.get_class_ids env class_ty
   |> List.iter ~f:begin fun cname ->
-    Typing_env.get_class env cname
+    Typing_lazy_heap.get_class (Tast_env.get_tcopt env) cname
     |> Option.iter ~f:begin fun class_ ->
       let cid = Option.map cid (tast_cid_to_nast_cid env) in
       autocomplete_member ~is_static env class_ cid mid
@@ -570,7 +570,7 @@ class ['self] visitor = object (_ : 'self)
 
   method! on_Xml env sid attrs el =
     let cid = Nast.CI (sid, []) in
-    Typing_env.get_class env (snd sid)
+    Typing_lazy_heap.get_class (Tast_env.get_tcopt env) (snd sid)
     |> Option.iter ~f:begin fun c ->
       List.iter attrs ~f:begin function
         | Tast.Xhp_simple (id, _) ->
@@ -614,8 +614,8 @@ class ['self] local_types = object (self : 'self)
 
   method! on_method_ env m =
     if method_contains_cursor m then begin
-      if not (Typing_env.is_static env) then
-        self#add Typing_defs.this (Typing_env.get_self env);
+      if not (Tast_env.is_static env) then
+        self#add Typing_defs.this (Tast_env.get_self env);
       super#on_method_ env m
     end
 
@@ -673,7 +673,7 @@ let go
     if completion_type = Some Acprop then compute_complete_local tast;
     let env = match !ac_env with
       | Some e -> e
-      | None -> Typing_env.empty tcopt Relative_path.default ~droot:None
+      | None -> Tast_env.empty tcopt
     in
     let resolve (result: autocomplete_result) : complete_autocomplete_result =
       match result with

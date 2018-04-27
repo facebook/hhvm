@@ -7,40 +7,9 @@
  *
  *)
 
-module EnvFromDef = Typing_env_from_def.EnvFromDef(Tast.Annotations)
+module Env = Tast_env
 
 open Tast
-
-let restore_saved_env env saved_env =
-  let module Env = Typing_env in
-  {env with
-    Env.genv = {env.Env.genv with Env.tcopt = saved_env.Tast.tcopt};
-    Env.tenv = IMap.union env.Env.tenv saved_env.Tast.tenv;
-    Env.subst = IMap.union env.Env.subst saved_env.Tast.subst;
-    Env.global_tpenv = saved_env.Tast.tpenv;
-  }
-
-let restore_fun_env env f =
-  restore_saved_env env f.f_annotation
-
-let restore_method_env env m =
-  restore_saved_env env m.m_annotation
-
-let fun_env f =
-  let env = EnvFromDef.fun_env f.f_annotation.tcopt f in
-  restore_fun_env env f
-
-let class_env c =
-  let env = EnvFromDef.class_env c.c_annotation.tcopt c in
-  restore_saved_env env c.c_annotation
-
-let typedef_env t =
-  let env = EnvFromDef.typedef_env t.t_annotation.tcopt t in
-  restore_saved_env env t.t_annotation
-
-let gconst_env cst =
-  let env = EnvFromDef.gconst_env cst.cst_annotation.tcopt cst in
-  restore_saved_env env cst.cst_annotation
 
 class virtual ['self] iter = object (self : 'self)
   inherit [_] Tast.iter as super
@@ -55,18 +24,16 @@ class virtual ['self] iter = object (self : 'self)
     | Typedef x -> self#go_Typedef x
     | Constant x -> self#go_Constant x
 
-  method go_Fun x = self#on_Fun (fun_env x) x
-  method go_Class x = self#on_Class (class_env x) x
-  method go_Typedef x = self#on_Typedef (typedef_env x) x
-  method go_Constant x = self#on_Constant (gconst_env x) x
+  method go_Fun x = self#on_Fun (Env.fun_env x) x
+  method go_Class x = self#on_Class (Env.class_env x) x
+  method go_Typedef x = self#on_Typedef (Env.typedef_env x) x
+  method go_Constant x = self#on_Constant (Env.gconst_env x) x
 
-  method! on_fun_ env x = super#on_fun_ (restore_fun_env env x) x
-  method! on_method_ env x = super#on_method_ (restore_method_env env x) x
+  method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
+  method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
-  method! on_static_var env x =
-    super#on_static_var (Typing_env.set_static env) x
-  method! on_static_method env x =
-    super#on_static_method (Typing_env.set_static env) x
+  method! on_static_var env x = super#on_static_var (Env.set_static env) x
+  method! on_static_method env x = super#on_static_method (Env.set_static env) x
 end
 
 class virtual ['self] reduce = object (self : 'self)
@@ -82,18 +49,16 @@ class virtual ['self] reduce = object (self : 'self)
     | Typedef x -> self#go_Typedef x
     | Constant x -> self#go_Constant x
 
-  method go_Fun x = self#on_Fun (fun_env x) x
-  method go_Class x = self#on_Class (class_env x) x
-  method go_Typedef x = self#on_Typedef (typedef_env x) x
-  method go_Constant x = self#on_Constant (gconst_env x) x
+  method go_Fun x = self#on_Fun (Env.fun_env x) x
+  method go_Class x = self#on_Class (Env.class_env x) x
+  method go_Typedef x = self#on_Typedef (Env.typedef_env x) x
+  method go_Constant x = self#on_Constant (Env.gconst_env x) x
 
-  method! on_fun_ env x = super#on_fun_ (restore_fun_env env x) x
-  method! on_method_ env x = super#on_method_ (restore_method_env env x) x
+  method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
+  method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
-  method! on_static_var env x =
-    super#on_static_var (Typing_env.set_static env) x
-  method! on_static_method env x =
-    super#on_static_method (Typing_env.set_static env) x
+  method! on_static_var env x = super#on_static_var (Env.set_static env) x
+  method! on_static_method env x = super#on_static_method (Env.set_static env) x
 end
 
 class virtual ['self] map = object (self : 'self)
@@ -109,18 +74,16 @@ class virtual ['self] map = object (self : 'self)
     | Typedef x -> self#go_Typedef x
     | Constant x -> self#go_Constant x
 
-  method go_Fun x = self#on_Fun (fun_env x) x
-  method go_Class x = self#on_Class (class_env x) x
-  method go_Typedef x = self#on_Typedef (typedef_env x) x
-  method go_Constant x = self#on_Constant (gconst_env x) x
+  method go_Fun x = self#on_Fun (Env.fun_env x) x
+  method go_Class x = self#on_Class (Env.class_env x) x
+  method go_Typedef x = self#on_Typedef (Env.typedef_env x) x
+  method go_Constant x = self#on_Constant (Env.gconst_env x) x
 
-  method! on_fun_ env x = super#on_fun_ (restore_fun_env env x) x
-  method! on_method_ env x = super#on_method_ (restore_method_env env x) x
+  method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
+  method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
-  method! on_static_var env x =
-    super#on_static_var (Typing_env.set_static env) x
-  method! on_static_method env x =
-    super#on_static_method (Typing_env.set_static env) x
+  method! on_static_var env x = super#on_static_var (Env.set_static env) x
+  method! on_static_method env x = super#on_static_method (Env.set_static env) x
 end
 
 class virtual ['self] endo = object (self : 'self)
@@ -136,16 +99,14 @@ class virtual ['self] endo = object (self : 'self)
     | Typedef x -> self#go_Typedef def x
     | Constant x -> self#go_Constant def x
 
-  method go_Fun def x = self#on_Fun (fun_env x) def x
-  method go_Class def x = self#on_Class (class_env x) def x
-  method go_Typedef def x = self#on_Typedef (typedef_env x) def x
-  method go_Constant def x = self#on_Constant (gconst_env x) def x
+  method go_Fun def x = self#on_Fun (Env.fun_env x) def x
+  method go_Class def x = self#on_Class (Env.class_env x) def x
+  method go_Typedef def x = self#on_Typedef (Env.typedef_env x) def x
+  method go_Constant def x = self#on_Constant (Env.gconst_env x) def x
 
-  method! on_fun_ env x = super#on_fun_ (restore_fun_env env x) x
-  method! on_method_ env x = super#on_method_ (restore_method_env env x) x
+  method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
+  method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
-  method! on_static_var env x =
-    super#on_static_var (Typing_env.set_static env) x
-  method! on_static_method env x =
-    super#on_static_method (Typing_env.set_static env) x
+  method! on_static_var env x = super#on_static_var (Env.set_static env) x
+  method! on_static_method env x = super#on_static_method (Env.set_static env) x
 end

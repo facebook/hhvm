@@ -315,6 +315,8 @@ void checkFreeProfData() {
 }
 
 bool shouldProfileNewFuncs() {
+  if (profData() == nullptr) return false;
+
   // Don't start profiling new functions if the size of either main or
   // prof is already above Eval.JitAMaxUsage and we already filled hot.
   auto tcUsage = std::max(code().main().used(), code().prof().used());
@@ -328,7 +330,6 @@ bool shouldProfileNewFuncs() {
   // to hit the bytecode size limit first, but we keep the request limit around
   // as a safety net.
   if (RuntimeOption::EvalJitProfileBCSize > 0 &&
-      profData() &&
       profData()->profilingBCSize() >= RuntimeOption::EvalJitProfileBCSize) {
     return false;
   }

@@ -2395,9 +2395,17 @@ and switch_body env =
 
 and switch_body_word env = function
   | "case" ->
+      (* Only allow fallthrough statement as the final statement at the end of a case body *)
+      let rec filter_fallthroughs = function
+      | [] -> []
+      | [(p, Fallthrough)] as x -> x
+      | (_, Fallthrough)::xs -> filter_fallthroughs xs
+      | x::xs -> x::(filter_fallthroughs xs)
+      in
       let e = expr env in
       expect env Tcolon;
       let stl = case_body env in
+      let stl = filter_fallthroughs stl in
       Case (e, stl) :: switch_body env
   | "default" ->
       expect env Tcolon;

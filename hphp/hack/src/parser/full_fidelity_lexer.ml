@@ -1197,10 +1197,9 @@ let scan_hash_comment lexer =
 
 let scan_single_line_comment lexer =
   (* A fallthrough comment is two slashes, any amount of whitespace,
-    FALLTHROUGH, and the end of the line.
+    FALLTHROUGH, and any characters may follow.
     An unsafe comment is two slashes, any amount of whitespace,
     UNSAFE, and then any characters may follow.
-    TODO: Consider allowing trailing space for fallthrough.
     TODO: Consider allowing lowercase fallthrough.
   *)
   let lexer = advance lexer 2 in
@@ -1209,7 +1208,7 @@ let scan_single_line_comment lexer =
   let w = width lexer in
   let remainder = offset lexer - offset lexer_ws in
   let c =
-    if remainder = 11 && peek_string lexer_ws 11 = "FALLTHROUGH" then
+    if remainder >= 11 && peek_string lexer_ws 11 = "FALLTHROUGH" then
       Trivia.make_fallthrough (source lexer) (start lexer) w
     else if remainder >= 6 && peek_string lexer_ws 6 = "UNSAFE" then
       Trivia.make_unsafe (source lexer) (start lexer) w

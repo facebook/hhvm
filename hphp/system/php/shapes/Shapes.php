@@ -19,7 +19,7 @@ namespace HH {
     }
 
     public static function removeKey(
-      darray &$shape,
+      inout darray $shape,
       arraykey $index,
     ): void {
       unset($shape[$index]);

@@ -45,7 +45,7 @@ abstract final class Shapes {
    * Returns a $shape with $index field removed. Currently allowed only for
    * local variables.
    */
-  public static function removeKey(shape(...) &$shape, arraykey $index): void;
+  public static function removeKey<T as shape(...)>(inout T $shape, arraykey $index): void;
 
   public static function toArray(shape(...) $shape): array<arraykey, mixed>;
 

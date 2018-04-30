@@ -54,7 +54,7 @@
              (Expr
                 (([9:3-30], void),
                  (Call (Cnormal,
-                    (([9:3-20], (function(shape(...) $shape, arraykey $index): void)),
+                    (([9:3-20], (function(inout shape('x' => int, 'y' => int) $shape, arraykey $index): void)),
                      (Class_const (
                         (Shapes, (CI (([9:3-9], "\\Shapes"), []))),
                         ([9:11-20], "removeKey")))),

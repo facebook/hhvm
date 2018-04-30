@@ -3742,6 +3742,7 @@ and is_abstract_ft fty = match fty with
       begin fun env _ res el -> match el with
         | [shape; field] -> begin match shape with
             | (_, Lvar (_, lvar))
+            | (_, Callconv (Ast.Pinout, (_, Lvar (_, lvar))))
             | (_, Unop (Ast.Uref, (_, Lvar (_, lvar)))) ->
               let env, _te, shape_ty = expr ~is_func_arg:true env shape in
               let env, shape_ty =

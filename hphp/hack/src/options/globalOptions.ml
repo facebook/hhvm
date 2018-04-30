@@ -126,6 +126,12 @@ let tco_experimental_as_expression = "as_expression"
  *)
 let tco_hacksperimental = "hacksperimental"
 
+(**
+ * When overriding a class member: if the parent or child's member is typed,
+ * require that the user specify a typehint for the other member.
+ *)
+let tco_decl_override_require_hint = "decl_override_require_hint"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -147,6 +153,7 @@ let tco_experimental_all =
      tco_experimental_is_expression;
      tco_experimental_as_expression;
      tco_hacksperimental;
+     tco_decl_override_require_hint;
    ]
 
 let tco_migration_flags_all =

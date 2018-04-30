@@ -504,6 +504,7 @@ module type S = sig
   val wrong_expression_kind_attribute: string -> Pos.t -> string -> Pos.t -> string -> string -> unit
   val attribute_class_no_constructor_args: Pos.t -> Pos.t -> unit
   val cannot_return_borrowed_value_as_immutable: Pos.t -> Pos.t -> unit
+  val decl_override_missing_hint: Pos.t -> unit
   val onlyrx_if_rxfunc_invalid_location: Pos.t -> unit
   val no_onlyrx_if_rxfunc_for_rx_if_args: Pos.t -> unit
   val invalid_type_for_onlyrx_if_rxfunc_parameter: Pos.t -> string -> unit

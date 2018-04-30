@@ -1047,6 +1047,7 @@ module Typing                               = struct
   let invalid_type_for_onlyrx_if_rxfunc_parameter   = 4233 (* DONT MODIFY!!!! *)
   let missing_annotation_for_onlyrx_if_rxfunc_parameter = 4234 (* DONT MODIFY!!!! *)
   let cannot_return_borrowed_value_as_immutable = 4235 (* DONT MODIFY!!!! *)
+  let decl_override_missing_hint            = 4236 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -3274,6 +3275,10 @@ let cannot_return_borrowed_value_as_immutable fun_pos value_pos =
     as immutable.";
     value_pos, "This value is mutably borrowed and cannot be returned as immutable"
   ]
+
+let decl_override_missing_hint pos =
+  add Typing.decl_override_missing_hint pos
+    "When redeclaring class members, both declarations must have a typehint"
 
 let invalid_type_for_onlyrx_if_rxfunc_parameter pos type_str =
   add Typing.invalid_type_for_onlyrx_if_rxfunc_parameter pos (

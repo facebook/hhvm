@@ -38,6 +38,9 @@ val get_self : env -> Tast.ty
 val is_static : env -> bool
 (** Return {true} when in the definition of a static property or method. *)
 
+val is_strict : env -> bool
+(** Return {true} if the containing file was checked in strict mode. *)
+
 val get_tcopt : env -> TypecheckerOptions.t
 (** Return the {!TypecheckerOptions.t} with which this TAST was checked. *)
 

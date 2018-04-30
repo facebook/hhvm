@@ -411,7 +411,6 @@ and fun_def tcopt f =
    * have a guarantee that we are using a clean typing environment. *)
   let tfun_def = Env.fresh_tenv env (
     fun env ->
-      let env = Env.set_mode env f.f_mode in
       let env, constraints =
         Phase.localize_generic_parameters_with_bounds env f.f_tparams
                   ~ety_env:(Phase.env_with_self env) in
@@ -6084,7 +6083,6 @@ and class_def tcopt c =
 
 and class_def_ env c tc =
   Typing_hooks.dispatch_enter_class_def_hook c tc;
-  let env = Env.set_mode env c.c_mode in
   let env =
     let kind = match c.c_kind with
     | Ast.Cenum -> SN.AttributeKinds.enum
@@ -6478,7 +6476,6 @@ and typedef_def tcopt typedef  =
   let env = EnvFromDef.typedef_env tcopt typedef in
   let tdecl = Env.get_typedef env (snd typedef.t_name) in
   add_decl_errors (Option.(map tdecl (fun tdecl -> value_exn tdecl.td_decl_errors)));
-  let env = Typing_env.set_mode env typedef.t_mode in
   let env, constraints =
     Phase.localize_generic_parameters_with_bounds env typedef.t_tparams
               ~ety_env:(Phase.env_with_self env) in
@@ -6523,7 +6520,6 @@ and typedef_def tcopt typedef  =
 
 and gconst_def tcopt cst =
   let env = EnvFromDef.gconst_env tcopt cst in
-  let env = Typing_env.set_mode env cst.cst_mode in
   add_decl_errors (Option.map (Env.get_gconst env (snd cst.cst_name)) ~f:snd);
 
   let typed_cst_value, env =

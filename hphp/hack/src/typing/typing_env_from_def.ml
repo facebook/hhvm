@@ -26,6 +26,7 @@ module EnvFromDef(ASTAnnotations: Aast.ASTAnnotationTypes) = struct
     let file = Pos.filename (fst f.f_name) in
     let droot = Some (Typing_deps.Dep.Fun (snd f.f_name)) in
     let env = Env.empty tcopt file ~droot in
+    let env = Env.set_mode env f.f_mode in
     env
 
   (* Given a class definition construct a type consisting of the
@@ -40,6 +41,7 @@ module EnvFromDef(ASTAnnotations: Aast.ASTAnnotationTypes) = struct
     let file = Pos.filename (fst c.c_name) in
     let droot = Some (Typing_deps.Dep.Class (snd c.c_name)) in
     let env = Env.empty tcopt file ~droot in
+    let env = Env.set_mode env c.c_mode in
     (* Set up self identifier and type *)
     let env = Env.set_self_id env (snd c.c_name) in
     let self = get_self_from_c c in
@@ -56,11 +58,13 @@ module EnvFromDef(ASTAnnotations: Aast.ASTAnnotationTypes) = struct
     let file = Pos.filename (fst t.t_kind) in
     let droot = Some (Typing_deps.Dep.Class (snd t.t_name)) in
     let env = Env.empty tcopt file ~droot in
+    let env = Env.set_mode env t.t_mode in
     env
 
   let gconst_env tcopt cst =
     let file = Pos.filename (fst cst.cst_name) in
     let droot = Some (Typing_deps.Dep.GConst (snd cst.cst_name)) in
     let env = Env.empty tcopt file ~droot in
+    let env = Env.set_mode env cst.cst_mode in
     env
 end

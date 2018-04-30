@@ -27,6 +27,7 @@ let ty_to_json = Typing_print.to_json
 let get_self_id = Typing_env.get_self_id
 let get_self = Typing_env.get_self
 let is_static = Typing_env.is_static
+let is_strict = Typing_env.is_strict
 let get_tcopt = Typing_env.get_tcopt
 let expand_type = Typing_env.expand_type
 let set_static = Typing_env.set_static

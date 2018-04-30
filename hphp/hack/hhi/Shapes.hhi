@@ -29,8 +29,8 @@ abstract final class Shapes {
  *   ...
  * )
  */
-  public static function idx(
-    shape(...) $shape,
+  public static function idx<T as shape(...)>(
+    T $shape,
     arraykey $index,
     $default = null,
   );
@@ -39,16 +39,26 @@ abstract final class Shapes {
    * Check if a field in shape exists.
    * Similar to array_key_exists, but for shapes.
    */
-  public static function keyExists(shape(...) $shape, arraykey $index): bool;
+  public static function keyExists<T as shape(...)>(
+    T $shape,
+    arraykey $index
+  ): bool;
 
   /**
    * Returns a $shape with $index field removed. Currently allowed only for
    * local variables.
    */
-  public static function removeKey<T as shape(...)>(inout T $shape, arraykey $index): void;
+  public static function removeKey<T as shape(...)>(
+    inout T $shape,
+    arraykey $index
+  ): void;
 
-  public static function toArray(shape(...) $shape): array<arraykey, mixed>;
+  public static function toArray<T as shape(...)>(
+    T $shape
+  ): array<arraykey, mixed>;
 
-  public static function toDict(shape(...) $shape): dict<arraykey, mixed>;
+  public static function toDict<T as shape(...)>(
+    T $shape
+  ): dict<arraykey, mixed>;
 
 }

@@ -1733,8 +1733,10 @@ and expr_
         | _ -> env, None, None in
       let env, te1, ty1 = expr ?expected:expected1 env e1 in
       let env, ty1 = Typing_env.unbind env ty1 in
+      let env, ty1 = TUtils.unresolved env ty1 in
       let env, te2, ty2 = expr ?expected:expected2 env e2 in
       let env, ty2 = Typing_env.unbind env ty2 in
+      let env, ty2 = TUtils.unresolved env ty2 in
       let ty =
         Reason.Rwitness p, Tclass ((p, SN.Collections.cPair), [ty1; ty2]) in
       make_result env (T.Pair (te1, te2)) ty

@@ -9,7 +9,7 @@
 
 module Env = Tast_env
 
-class virtual ['self] iter = object (self : 'self)
+class virtual iter = object (self)
   inherit [_] Tast.iter as super
 
   (* Entry point *)
@@ -24,11 +24,11 @@ class virtual ['self] iter = object (self : 'self)
   method! on_static_method env x = super#on_static_method (Env.set_static env) x
 end
 
-class virtual ['self] reduce = object (self : 'self)
+class virtual ['a] reduce = object (self)
   inherit [_] Tast.reduce as super
 
   (* Entry point *)
-  method go program = self#on_list (fun () -> self#go_def) () program
+  method go program : 'a = self#on_list (fun () -> self#go_def) () program
 
   method go_def x = self#on_def (Env.def_env x) x
 
@@ -39,7 +39,7 @@ class virtual ['self] reduce = object (self : 'self)
   method! on_static_method env x = super#on_static_method (Env.set_static env) x
 end
 
-class virtual ['self] map = object (self : 'self)
+class virtual map = object (self)
   inherit [_] Tast.map as super
 
   (* Entry point *)
@@ -54,7 +54,7 @@ class virtual ['self] map = object (self : 'self)
   method! on_static_method env x = super#on_static_method (Env.set_static env) x
 end
 
-class virtual ['self] endo = object (self : 'self)
+class virtual endo = object (self)
   inherit [_] Tast.endo as super
 
   (* Entry point *)

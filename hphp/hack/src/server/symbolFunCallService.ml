@@ -32,7 +32,7 @@ let combine_name cur_class cur_caller =
 let is_pseudofunction name =
   List.mem SN.PseudoFunctions.[empty; isset; unset; freeze] name
 
-class ['self] visitor = object (self : 'self)
+class visitor = object (self)
   inherit [_] Tast_visitor.reduce as super
 
   method zero = Result_set.empty

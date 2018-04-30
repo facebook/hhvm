@@ -50,7 +50,7 @@ open Option.Monad_infix
  *)
 
 
-class ['self] base_visitor line char = object (self : 'self)
+class base_visitor line char = object (self)
   inherit [_] Tast_visitor.reduce as super
   inherit [Pos.t * _ * _] Ast.option_monoid
 
@@ -93,8 +93,8 @@ end
     returned by the Call expression).
 
 *)
-class ['self] function_following_visitor line char = object (self : 'self)
-  inherit ['self] base_visitor line char as super
+class function_following_visitor line char = object (self)
+  inherit base_visitor line char as super
 
   (* When the expression being applied has a Tfun type, replace that type with
    * its return type. This matches with legacy behavior and is better-suited
@@ -138,7 +138,7 @@ end
     When more than one node has the given range, return the type of the first
     node visited in a preorder traversal.
 *)
-class ['self] range_visitor startl startc endl endc = object (_ : 'self)
+class range_visitor startl startc endl endc = object
   inherit [_] Tast_visitor.reduce
   inherit [_] Ast.option_monoid
   method merge x _ = x

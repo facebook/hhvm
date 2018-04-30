@@ -10,21 +10,10 @@
 include Ast_defs_visitors_ancestors
 
 (*****************************************************************************)
-(* Constants *)
-(*****************************************************************************)
-
-
-type cst_kind =
-  (* The constant was introduced with: define('X', ...); *)
-  | Cst_define
-  (* The constant was introduced with: const X = ...; *)
-  | Cst_const
-
-(*****************************************************************************)
 (* The Abstract Syntax Tree *)
 (*****************************************************************************)
 
-and pos = Pos.t [@visitors.opaque]
+type pos = Pos.t [@visitors.opaque]
 and id = pos * string
 and pstring = pos * string
 
@@ -37,13 +26,6 @@ and variance =
   | Contravariant
   | Invariant
 
-and ns_kind =
-  | NSNamespace
-  | NSClass
-  | NSClassAndNamespace
-  | NSFun
-  | NSConst
-
 and constraint_kind =
   | Constraint_as
   | Constraint_eq
@@ -55,18 +37,6 @@ and class_kind =
   | Cinterface
   | Ctrait
   | Cenum
-
-and trait_req_kind =
-  | MustExtend
-  | MustImplement
-
-and kind =
-  | Final
-  | Static
-  | Abstract
-  | Private
-  | Public
-  | Protected
 
 and param_kind =
   | Pinout
@@ -142,14 +112,6 @@ let string_of_class_kind = function
   | Cinterface -> "an interface"
   | Ctrait -> "a trait"
   | Cenum -> "an enum"
-
-let string_of_kind = function
-  | Final -> "final"
-  | Static -> "static"
-  | Abstract -> "abstract"
-  | Private -> "private"
-  | Public -> "public"
-  | Protected -> "protected"
 
 let string_of_param_kind = function
   | Pinout -> "inout"

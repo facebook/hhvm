@@ -170,7 +170,7 @@ let typed_class_id env ty containing_expr_pos cid =
   |> List.map ~f:(fun cid -> process_class_id (pos, cid))
   |> List.fold ~init:Result_set.empty ~f:Result_set.union
 
-class ['self] visitor = object (self : 'self)
+let visitor = object (self)
   inherit [_] Tast_visitor.reduce as super
 
   method zero = Result_set.empty
@@ -301,7 +301,7 @@ class ['self] visitor = object (self : 'self)
 end
 
 let all_symbols tast =
-  new visitor#go tast
+  visitor#go tast
   |> Result_set.elements
 
 let go tast line char =

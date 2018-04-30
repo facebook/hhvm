@@ -529,8 +529,8 @@ let autocomplete_typed_member ~is_static env class_ty cid mid =
 let autocomplete_static_member env (ty, cid) mid =
   autocomplete_typed_member ~is_static:true env ty (Some cid) mid
 
-class ['self] visitor = object (_ : 'self)
-  inherit [_] Tast_visitor.iter as super
+let visitor = object
+  inherit Tast_visitor.iter as super
 
   method! on_Id env id =
     autocomplete_id id env;
@@ -581,7 +581,7 @@ class ['self] visitor = object (_ : 'self)
     super#on_Xml env sid attrs el
 end
 
-class ['self] auto_complete_suffix_finder = object (_ : 'self)
+let auto_complete_suffix_finder = object
   inherit [_] Tast.reduce
   method zero = false
   method plus = (||)
@@ -589,11 +589,11 @@ class ['self] auto_complete_suffix_finder = object (_ : 'self)
     matches_auto_complete_suffix (Local_id.get_name id)
 end
 
-let method_contains_cursor = new auto_complete_suffix_finder#on_method_ ()
-let fun_contains_cursor = new auto_complete_suffix_finder#on_fun_ ()
+let method_contains_cursor = auto_complete_suffix_finder#on_method_ ()
+let fun_contains_cursor = auto_complete_suffix_finder#on_fun_ ()
 
-class ['self] local_types = object (self : 'self)
-  inherit [_] Tast_visitor.iter as super
+class local_types = object (self)
+  inherit Tast_visitor.iter as super
 
   val mutable results = Local_id.Map.empty;
   val mutable after_cursor = false;
@@ -662,7 +662,7 @@ let go
     tast
   =
   reset ();
-  new visitor#go tast;
+  visitor#go tast;
   Errors.ignore_ begin fun () ->
     let completion_type = !argument_global_type in
     if completion_type = Some Acid ||

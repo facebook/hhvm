@@ -53,6 +53,31 @@ and def =
   | NamespaceUse of (ns_kind * id * id) list
   | SetNamespaceEnv of nsenv
 
+and cst_kind =
+  (* The constant was introduced with: define('X', ...); *)
+  | Cst_define
+  (* The constant was introduced with: const X = ...; *)
+  | Cst_const
+
+and ns_kind =
+  | NSNamespace
+  | NSClass
+  | NSClassAndNamespace
+  | NSFun
+  | NSConst
+
+and trait_req_kind =
+  | MustExtend
+  | MustImplement
+
+and kind =
+  | Final
+  | Static
+  | Abstract
+  | Private
+  | Public
+  | Protected
+
 and typedef = {
   t_id: id;
   t_tparams: tparam list;
@@ -443,3 +468,11 @@ type any =
   | AProgram of program
 
  (* with tarzan *)
+
+let string_of_kind = function
+  | Final -> "final"
+  | Static -> "static"
+  | Abstract -> "abstract"
+  | Private -> "private"
+  | Public -> "public"
+  | Protected -> "protected"

@@ -16,7 +16,7 @@ module Result_set = Set.Make(struct
   let compare a b = Pos.compare a.pos b.pos
 end)
 
-class ['self] visitor = object (self : 'self)
+let visitor = object (self)
   inherit [_] Tast_visitor.reduce as super
 
   method zero = Result_set.empty
@@ -50,6 +50,6 @@ end
 
 let generate_types tasts =
   tasts
-  |> List.map ~f:new visitor#go
+  |> List.map ~f:visitor#go
   |> List.fold ~init:Result_set.empty ~f:Result_set.union
   |> Result_set.elements

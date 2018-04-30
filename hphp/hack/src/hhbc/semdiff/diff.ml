@@ -638,7 +638,7 @@ let class_use_alias_string (a, b, c, d) =
     | Some c -> " as " ^ c in
   let d' =
       String.concat " " @@
-        List.map Ast_defs.string_of_kind (List.sort compare d) in
+        List.map Ast.string_of_kind (List.sort compare d) in
   a' ^ b ^ c' ^ d'
 
 let class_use_precedence_string (a, b, c) =

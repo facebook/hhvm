@@ -103,8 +103,8 @@ let expand_ty env ty =
 
 let expand_annotation env (pos, ty) = (pos, expand_ty env ty)
 
-class ['self] expander = object (_ : 'self)
-  inherit [_] Tast_visitor.endo
+let expander = object
+  inherit Tast_visitor.endo
   method! on_expr_annotation = expand_annotation
   method! on_class_id_annotation = expand_ty
 end
@@ -114,7 +114,7 @@ module ExpandAST =
 
 (* Replace all types in a program AST by their expansions *)
 let expand_program tast =
-  let tast = new expander#go tast in
+  let tast = expander#go tast in
   ExpandAST.map_program tast
     ~map_env_annotation:(fun _ -> ())
     ~map_class_id_annotation:(fun _ x -> x)

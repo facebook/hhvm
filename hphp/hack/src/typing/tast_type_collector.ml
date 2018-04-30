@@ -11,7 +11,7 @@ open Hh_core
 
 type collected_type = Tast_env.env * Typing_defs.phase_ty
 
-class ['self] type_collector = object (_ : 'self)
+let type_collector = object
   inherit [_] Tast_visitor.reduce
   method zero = Pos.AbsolutePosMap.empty
   method plus = Pos.AbsolutePosMap.union ~combine:(fun _ a b -> Some (a @ b))
@@ -36,7 +36,7 @@ class ['self] type_collector = object (_ : 'self)
       [(env, Typing_defs.DeclTy ty)]
 end
 
-let collect_types = new type_collector#go
+let collect_types = type_collector#go
 
 let collected_types_to_json
   (collected_types: collected_type list)

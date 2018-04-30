@@ -45,7 +45,7 @@ void unwindCpp(Exception* cppException);
 
 /*
  * Unwind the frame for a builtin.  Currently only used when switching modes
- * for hphpd_break, fb_enable_code_coverage, and xdebug_start_code_coverage.
+ * for hphpd_break, and fb_enable_code_coverage.
  */
 void unwindBuiltinFrame();
 

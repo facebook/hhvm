@@ -29,7 +29,6 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/xdebug/status.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/files-match.h"
 #include "hphp/runtime/server/http-protocol.h"
@@ -381,9 +380,6 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     try {
       throw;
     } catch (const Eval::DebuggerException& e) {
-      code = 200;
-      response = e.what();
-    } catch (const XDebugExitExn& e) {
       code = 200;
       response = e.what();
     } catch (Object &e) {

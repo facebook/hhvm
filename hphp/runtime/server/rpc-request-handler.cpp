@@ -309,8 +309,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   }
   int output = transport->getIntParam("output", requestMethod);
 
-  // We don't debug RPC requests, so we need to detach XDebugHook if xdebug was
-  // enabled.
+  // We don't debug RPC requests, so we need to detach the installed debugger
+  // hook (only if there is one).
   DEBUGGER_ATTACHED_ONLY(DebuggerHook::detach());
 
   int code;

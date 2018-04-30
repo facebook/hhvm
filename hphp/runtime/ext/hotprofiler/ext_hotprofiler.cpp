@@ -28,7 +28,6 @@
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
-#include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/alloc.h"
@@ -1299,9 +1298,6 @@ bool ProfilerFactory::start(ProfilerKind kind,
     break;
   case ProfilerKind::Memo:
     m_profiler = req::make_raw<MemoProfiler>(flags);
-    break;
-  case ProfilerKind::XDebug:
-    m_profiler = req::make_raw<XDebugProfiler>();
     break;
   case ProfilerKind::External:
     if (g_system_profiler) {

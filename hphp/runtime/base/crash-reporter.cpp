@@ -23,7 +23,6 @@
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
-#include "hphp/runtime/ext/xdebug/server.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -125,11 +124,6 @@ static void bt_handler(int sig, siginfo_t* info, void*) {
       return 1;
     }
 
-    // We don't have a count of xdebug clients across all requests, so just
-    // check the current request.
-    if (XDebugServer::isAttached()) {
-      return 1;
-    }
     return 0;
   }();
   st.log(strsignal(sig), fd, compilerId().begin(), debuggerCount);

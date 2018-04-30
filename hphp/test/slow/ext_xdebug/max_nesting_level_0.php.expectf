@@ -1,5 +1,0 @@
-1
-2
-3
-
-Fatal error: Maximum function nesting level of '4' reached, aborting! in %s/test/slow/ext_xdebug/max_nesting_level_0.php on line 4

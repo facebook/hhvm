@@ -54,7 +54,6 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/ext/xdebug/status.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/cli-server.h"
@@ -492,8 +491,6 @@ static void handle_exception_helper(bool& ret,
       Array argv = make_packed_array(tl_exit_code, stack);
       vm_call_user_func(context->getExitCallback(), argv);
     }
-  } catch (const XDebugExitExn&) {
-    // Do nothing, this is normal behavior.
   } catch (const PhpFileDoesNotExistException& e) {
     ret = false;
     if (where != ContextOfException::Handler) {

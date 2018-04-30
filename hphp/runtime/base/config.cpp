@@ -87,9 +87,6 @@ std::string Config::IniName(const std::string& config,
   boost::replace_first(out, ".my_sql.", ".mysql.");
   boost::replace_first(out, ".enable_hip_hop_syntax", ".force_hh");
 
-  // Fix "XDebug" turning into "x_debug".
-  boost::replace_first(out, "hhvm.debugger.x_debug_", "xdebug.");
-
   return out;
 }
 

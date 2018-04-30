@@ -156,6 +156,7 @@ let parse_options () =
   let disallow_refs_in_array = ref false in
   let disallow_elvis_space = ref false in
   let dynamic_view = ref false in
+  let hacksperimental = ref false in
   let parser = ref Legacy in
   let options = [
     "--ai",
@@ -303,6 +304,9 @@ let parse_options () =
     "--dynamic-view",
         Arg.Set (dynamic_view),
         " Turns on dynamic view, replacing Tany with dynamic";
+    "--hacksperimental",
+        Arg.Set hacksperimental,
+        " Enable experimental Hack features";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -328,6 +332,8 @@ let parse_options () =
         then !forbid_nullable_cast
         else if x = GlobalOptions.tco_experimental_disable_optional_and_unknown_shape_fields
         then !disable_optional_and_unknown_shape_fields
+        else if x = GlobalOptions.tco_hacksperimental
+        then !hacksperimental
         else true
       end tcopt.GlobalOptions.tco_experimental_features;
   } in
@@ -534,7 +540,10 @@ let parse_name_and_decl popt files_contents tcopt parser =
           match parser with
           | Legacy -> Parser_hack.program popt fn contents
           | FFP ->
-            let env = Full_fidelity_ast.make_env fn in
+            let hacksperimental =
+              GlobalOptions.tco_experimental_feature_enabled tcopt GlobalOptions.tco_hacksperimental
+            in
+            let env = Full_fidelity_ast.make_env ~hacksperimental fn in
             Full_fidelity_ast.from_text_with_legacy env contents
         end
       end

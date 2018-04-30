@@ -36,7 +36,8 @@ let type_collector = object
       [(env, Typing_defs.DeclTy ty)]
 end
 
-let collect_types = type_collector#go
+let collect_types tast =
+  Errors.ignore_ (fun () -> type_collector#go tast)
 
 let collected_types_to_json
   (collected_types: collected_type list)

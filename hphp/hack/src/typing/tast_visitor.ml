@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_core
+
 module Env = Tast_env
 
 class virtual iter = object (self)
@@ -67,4 +69,36 @@ class virtual endo = object (self)
 
   method! on_static_var env x = super#on_static_var (Env.set_static env) x
   method! on_static_method env x = super#on_static_method (Env.set_static env) x
+end
+
+(** A {!handler} is an {!iter} visitor which is not in control of the iteration
+    (and thus cannot change the order of the iteration or choose not to visit
+    some subtrees).
+
+    Intended to be used with {!iter_with} to aggregate many checks into a
+    single pass over a TAST. *)
+class type handler = object
+  method at_expr : Env.t -> Tast.expr -> unit
+  method at_stmt : Env.t -> Tast.stmt -> unit
+end
+
+(** A {!handler} which does not need to make use of every visitation method can
+    inherit from this no-op base class. *)
+class virtual handler_base : handler = object
+  method at_expr _ _ = ()
+  method at_stmt _ _ = ()
+end
+
+(** Return an {!iter} visitor which invokes all of the given handlers upon
+    visiting each node. *)
+let iter_with (handlers : handler list) : iter = object
+  inherit iter as super
+
+  method! on_expr env x =
+    List.iter handlers (fun v -> v#at_expr env x);
+    super#on_expr env x;
+
+  method! on_stmt env x =
+    List.iter handlers (fun v -> v#at_stmt env x);
+    super#on_stmt env x;
 end

@@ -6607,4 +6607,6 @@ let nast_to_tast opts nast =
       | None -> failwith @@ Printf.sprintf
           "Error in declaration of class: %s" (snd c.c_name)
   in
-  List.map nast convert_def
+  let tast = List.map nast convert_def in
+  Tast_check.program tast;
+  tast

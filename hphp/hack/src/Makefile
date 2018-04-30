@@ -79,6 +79,7 @@ MODULES=\
   third-party/core\
   third-party/ppx_deriving\
   typing\
+  typing/tast_check\
   utils\
   utils/collections\
   utils/config_file\

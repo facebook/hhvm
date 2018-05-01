@@ -35,15 +35,18 @@ find_package(LZ4)
 find_package(LibElf)
 
 if (HACK_ONLY_BUILD AND NOT LZ4_FOUND)
-  add_subdirectory("${TP_DIR}/lz4" "${TP_DIR}/lz4")
+  add_subdirectory("${TP_DIR}/lz4" "${TP_DIR}/lz4" EXCLUDE_FROM_ALL)
 endif()
 
 if (HACK_ONLY_BUILD AND NOT OCAML_FOUND)
-  add_subdirectory("${TP_DIR}/ocaml" "${TP_DIR}/ocaml")
+  add_subdirectory("${TP_DIR}/ocaml" "${TP_DIR}/ocaml" EXCLUDE_FROM_ALL)
 endif()
 
 if (HACK_ONLY_BUILD AND NOT PC_SQLITE3_FOUND)
-  add_subdirectory("${TP_DIR}/libsqlite3" "${TP_DIR}/libsqlite3")
+  add_subdirectory(
+    "${TP_DIR}/libsqlite3"
+    "${TP_DIR}/libsqlite3"
+    EXCLUDE_FROM_ALL)
 endif()
 
 # This is totally the wrong way to do this, but I am tired of fighting with

@@ -794,7 +794,7 @@ let handle_mode
       ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
       ~init:files_info
     in
-    Relative_path.Map.iter files_info begin fun fn fileinfo ->
+    Relative_path.Map.iter files_info begin fun fn _fileinfo ->
       let ast = Parser_heap.get_from_parser_heap popt fn in
       Dependency_visitors.print_deps popt ast
     end
@@ -962,7 +962,7 @@ let decl_and_run_mode {filename; mode; no_builtins; tcopt; parser} popt =
   handle_mode mode filename tcopt popt parser files_contents files_info
     (Errors.get_error_list errors)
 
-let main_hack ({filename; mode; no_builtins; tcopt; _} as opts) =
+let main_hack ({filename; mode; tcopt; _} as opts) =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);

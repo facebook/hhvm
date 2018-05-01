@@ -70,3 +70,5 @@ val from_file : env -> result
  *)
 val from_text_with_legacy : env -> string -> Parser_hack.parser_return
 val from_file_with_legacy : env -> Parser_hack.parser_return
+val legacy_compliant_parse_defensively :
+  Relative_path.t -> bool -> GlobalOptions.t -> string -> Parser_hack.parser_return

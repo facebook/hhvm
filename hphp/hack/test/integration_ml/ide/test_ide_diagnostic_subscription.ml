@@ -22,9 +22,8 @@ let foo_contents = "<?hh
 
 let foo_diagnostics = "
 /foo.php:
-File \"/foo.php\", line 3, characters 1-0:
-Expected } (Parsing[1002])
-"
+File \"/foo.php\", line 2, characters 2-2:
+A right brace ('}') is expected here. (Parsing[1002])"
 
 let foo_clear_diagnostics = "
 /foo.php:
@@ -32,16 +31,14 @@ let foo_clear_diagnostics = "
 
 let bar_name = "bar.php"
 
-let bar_contents = "
-<?hh // strict
+let bar_contents = "<?hh // strict
 function test() {} // missing return type
 "
 
 let bar_diagnostics = "
 /bar.php:
-File \"/bar.php\", line 3, characters 10-13:
-Was expecting a return type hint (Typing[4030])
-"
+File \"/bar.php\", line 2, characters 10-13:
+Was expecting a return type hint (Typing[4030])"
 
 let assert_no_push_message loop_outputs =
   match loop_outputs.push_message with

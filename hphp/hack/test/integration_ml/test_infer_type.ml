@@ -219,12 +219,10 @@ function lambda_param(): void {
 "
 
 let lambda_param_cases = [
-  (* FIXME: We're incorrectly showing the function types here because the
-     positional information produced by Parser_hack for lambda expressions is
-     wrong. When we cut over to the FFP, we'll correctly show the parameter
-     types here instead. *)
-  ("lambda_param.php", 4, 9), ("(function($s): _)", "(function($s): _)");
-  ("lambda_param.php", 6, 14), ("(function(int $x): num)", "(function(int $x): num)");
+   ("lambda_param.php", 4, 9), ("_", "_");
+   ("lambda_param.php", 6, 14), ("int", "int");
+   ("lambda_param.php", 4, 12), ("(function($s): _)", "(function($s): _)");
+   ("lambda_param.php", 6, 17), ("(function(int $x): num)", "(function(int $x): num)");
 ]
 
 let class_id = "<?hh // strict

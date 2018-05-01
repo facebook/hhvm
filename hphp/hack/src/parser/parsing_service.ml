@@ -55,8 +55,7 @@ let process_parse_result
     (* We only have to write to the disk heap on initialization, and only *)
     (* if quick mode is on: otherwise Full Asts means the ParserHeap will *)
     (* never use the DiskHeap, and the Ide services update DiskHeap directly *)
-    if quick then
-    File_heap.FileHeap.write_through fn content;
+    if quick then File_heap.FileHeap.write_through fn content;
     let mode = if quick then Parser_heap.Decl else Parser_heap.Full in
     Parser_heap.ParserHeap.write_through fn (ast, mode);
     let comments = None in
@@ -84,10 +83,12 @@ let process_parse_result
   end
 
 let really_parse ~quick popt acc fn =
-  let res =
-    Errors.do_with_context fn Errors.Parsing begin fun () ->
-      Parser_hack.from_file ~quick popt fn
-    end
+  let res = Errors.do_with_context fn Errors.Parsing @@
+    if ParserOptions.use_full_fidelity popt
+    then fun () ->
+      let cnt = try Sys_utils.cat (Relative_path.to_absolute fn) with _ -> "" in
+      Full_fidelity_ast.legacy_compliant_parse_defensively fn quick popt cnt
+    else fun () -> Parser_hack.from_file ~quick popt fn
   in
   process_parse_result ~quick acc fn res popt
 
@@ -148,7 +149,10 @@ let parse_sequential ~quick fn content acc popt =
         else
           content
       in
-      Parser_hack.program popt fn content
+      if not (ParserOptions.use_full_fidelity popt)
+      then Parser_hack.program popt fn content
+      else
+        Full_fidelity_ast.legacy_compliant_parse_defensively fn quick popt content
     end
   in
   process_parse_result ~ide:true ~quick acc fn res popt

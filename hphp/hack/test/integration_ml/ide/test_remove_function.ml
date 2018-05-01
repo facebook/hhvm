@@ -13,8 +13,7 @@ open Integration_test_base_types
 module Test = Integration_test_base
 
 let foo_name = "foo.php"
-let foo_contents = "
-<?hh // strict
+let foo_contents = "<?hh // strict
 
 function foo() : void {}
 "

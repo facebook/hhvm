@@ -11,14 +11,12 @@
 module Test = Integration_test_base
 
 let foo_name = "foo.php"
-let foo_takes_int_contents = "
-<?hh // strict
+let foo_takes_int_contents = "<?hh // strict
 
 function foo(int $x) : void {}
 "
 
-let foo_takes_string_contents = "
-<?hh // strict
+let foo_takes_string_contents = "<?hh // strict
 
 function foo(string $x) : void {}
 "
@@ -35,7 +33,7 @@ let full_diagnostics = "
 /bar.php:
 File \"/bar.php\", line 4, characters 7-7:
 Invalid argument (Typing[4110])
-File \"/foo.php\", line 4, characters 14-19:
+File \"/foo.php\", line 3, characters 14-19:
 This is a string
 File \"/bar.php\", line 4, characters 7-7:
 It is incompatible with an int

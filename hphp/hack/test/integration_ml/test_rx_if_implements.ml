@@ -5,23 +5,20 @@ module Test = Integration_test_base
 let file_a = "A.php"
 let file_b = "B.php"
 
-let content_a_0 = {|
-<?hh // strict
+let content_a_0 = {|<?hh // strict
 interface Rx {
   public function f(): int;
 }
 |}
 
-let content_a_1 = {|
-<?hh // strict
+let content_a_1 = {|<?hh // strict
 interface Rx {
   <<__Rx>>
   public function f(): int;
 }
 |}
 
-let content_b = {|
-<?hh // strict
+let content_b = {|<?hh // strict
 class A {
   <<__Rx, __OnlyRxIfImpl(Rx::class)>>
   public function f(): int {
@@ -37,16 +34,16 @@ class B extends A {
 |}
 
 let errors = {|
-File "/B.php", line 10, characters 7-7:
+File "/B.php", line 9, characters 7-7:
 Class B does not correctly implement all required methods  (Typing[4203])
-File "/B.php", line 10, characters 17-17:
+File "/B.php", line 9, characters 17-17:
 Some methods are incompatible with those declared in type A
 Read the following to see why:
-File "/B.php", line 11, characters 19-19:
+File "/B.php", line 10, characters 19-19:
 Member f has the wrong type
-File "/B.php", line 5, characters 19-19:
+File "/B.php", line 4, characters 19-19:
 This function is conditionally reactive (condition type: \Rx).
-File "/B.php", line 11, characters 19-19:
+File "/B.php", line 10, characters 19-19:
 This function is non-reactive.
 |}
 

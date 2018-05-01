@@ -356,10 +356,25 @@ Variant ini_get(String& p) {
   return p.data();
 }
 
+namespace {
+
+template<typename T>
+void add(ArrayInit& arr, const std::string& key, const T& value) {
+  auto keyStr = String(key);
+  int64_t n;
+  if (keyStr.get()->isStrictlyInteger(n)) {
+    arr.add(n, value);
+    return;
+  }
+  arr.add(keyStr.get(), value);
+}
+
+}
+
 Variant ini_get(std::unordered_map<std::string, int>& p) {
   ArrayInit ret(p.size(), ArrayInit::Map{});
   for (auto& pair : p) {
-    ret.add(String(pair.first), pair.second);
+    add(ret, pair.first, pair.second);
   }
   return ret.toArray();
 }
@@ -367,7 +382,7 @@ Variant ini_get(std::unordered_map<std::string, int>& p) {
 Variant ini_get(std::map<std::string, std::string>& p) {
   ArrayInit ret(p.size(), ArrayInit::Map{});
   for (auto& pair : p) {
-    ret.add(String(pair.first), pair.second);
+    add(ret, pair.first, pair.second);
   }
   return ret.toArray();
 }
@@ -375,7 +390,7 @@ Variant ini_get(std::map<std::string, std::string>& p) {
 Variant ini_get(std::map<std::string, std::string, stdltistr>& p) {
   ArrayInit ret(p.size(), ArrayInit::Map{});
   for (auto& pair : p) {
-    ret.add(String(pair.first), pair.second);
+    add(ret, pair.first, pair.second);
   }
   return ret.toArray();
 }
@@ -383,7 +398,7 @@ Variant ini_get(std::map<std::string, std::string, stdltistr>& p) {
 Variant ini_get(hphp_string_imap<std::string>& p) {
   ArrayInit ret(p.size(), ArrayInit::Map{});
   for (auto& pair : p) {
-    ret.add(String(pair.first), pair.second);
+    add(ret, pair.first, pair.second);
   }
   return ret.toArray();
 }

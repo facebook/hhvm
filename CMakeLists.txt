@@ -8,14 +8,7 @@ INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/VisualStudioToolset.cmake")
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-# package information
-SET(PACKAGE_NAME      "hhvm")
-SET(PACKAGE_VERSION   "3.20.0-dev")
-SET(PACKAGE_STRING    "${PACKAGE_NAME} ${PACKAGE_VERSION}")
-SET(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
-SET(PACKAGE_BUGREPORT "https://github.com/facebook/hhvm/issues")
-
-PROJECT(${PACKAGE_NAME} C CXX ASM)
+PROJECT(hhvm C CXX ASM)
 
 include(HHVMProject)
 
@@ -112,7 +105,7 @@ include(Options)
 include(HPHPCompiler)
 include(HPHPFindLibs)
 
-ADD_SUBDIRECTORY(third-party)
+ADD_SUBDIRECTORY(third-party EXCLUDE_FROM_ALL)
 ADD_SUBDIRECTORY(hphp)
 
 # use GNU install dirs (e.g. lib64 instead of lib)

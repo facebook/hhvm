@@ -164,9 +164,9 @@ let primitive_comparer to_string = {
 }
 
 let typed_value_to_string v =
-  let buf = Buffer.create 16 in
+  let buf = Mutable_accumulator.create () in
   EA.adata_to_buffer buf v;
-  Buffer.contents buf
+  String.concat "" (Mutable_accumulator.segments buf)
 
 let typed_value_comparer = primitive_comparer typed_value_to_string
 

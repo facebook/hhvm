@@ -7,7 +7,7 @@
  *
 *)
 
-val adata_to_buffer : Buffer.t -> Typed_value.t -> unit
+val adata_to_buffer : string Mutable_accumulator.t -> Typed_value.t -> unit
 val attributes_to_strings : Hhas_attribute.t list -> string list
 val get_array_identifier : Typed_value.t -> Hhbc_ast.adata_id
 val get_adata : unit -> Hhas_adata.t list

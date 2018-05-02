@@ -7,7 +7,7 @@
  *
 *)
 
-module B = Buffer
+module Acc = Mutable_accumulator
 module H = Hhbc_ast
 module A = Ast
 module SU = Hhbc_string_utils
@@ -828,8 +828,8 @@ let add_instruction_list buffer indent instructions =
     | instruction :: t ->
       begin
       let actual_indent = adjusted_indent instruction indent in
-      B.add_string buffer (String.make actual_indent ' ');
-      B.add_string buffer (string_of_instruction instruction);
+      Acc.add buffer (String.make actual_indent ' ');
+      Acc.add buffer (string_of_instruction instruction);
       aux t (new_indent instruction indent)
       end in
   aux instructions indent
@@ -1368,11 +1368,11 @@ let string_of_param env p =
 let string_of_params env ps =
   "(" ^ String.concat ", " (List.map (string_of_param env) ps) ^ ")"
 
-let add_indent buf indent = B.add_string buf (String.make indent ' ')
+let add_indent buf indent = Acc.add buf (String.make indent ' ')
 let add_indented_line buf indent str =
-  B.add_string buf "\n";
+  Acc.add buf "\n";
   add_indent buf indent;
-  B.add_string buf str
+  Acc.add buf str
 
 let add_num_cls_ref_slots buf indent num_cls_ref_slots =
   if num_cls_ref_slots <> 0
@@ -1426,7 +1426,7 @@ let add_body buf indent body =
   add_num_cls_ref_slots buf indent (Hhas_body.num_cls_ref_slots body);
   add_decl_vars buf indent (Hhas_body.decl_vars body);
   add_static_values buf indent (Hhas_body.static_inits body);
-  B.add_string buf "\n";
+  Acc.add buf "\n";
   add_instruction_list buf indent
     (Instruction_sequence.instr_seq_to_list (Hhas_body.instrs body))
 
@@ -1472,19 +1472,19 @@ let add_fun_def buf fun_def =
   let function_is_async = Hhas_function.is_async fun_def in
   let function_is_generator = Hhas_function.is_generator fun_def in
   let function_is_pair_generator = Hhas_function.is_pair_generator fun_def in
-  B.add_string buf "\n.function ";
-  B.add_string buf (function_attributes fun_def);
+  Acc.add buf "\n.function ";
+  Acc.add buf (function_attributes fun_def);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options
-  then B.add_string buf (string_of_span function_span ^ " ");
-  B.add_string buf (string_of_type_info_option function_return_type);
-  B.add_string buf (Hhbc_id.Function.to_raw_string function_name);
-  B.add_string buf (string_of_params env function_params);
-  if function_is_generator then B.add_string buf " isGenerator";
-  if function_is_async then B.add_string buf " isAsync";
-  if function_is_pair_generator then B.add_string buf " isPairGenerator";
-  B.add_string buf " {";
+  then Acc.add buf (string_of_span function_span ^ " ");
+  Acc.add buf (string_of_type_info_option function_return_type);
+  Acc.add buf (Hhbc_id.Function.to_raw_string function_name);
+  Acc.add buf (string_of_params env function_params);
+  if function_is_generator then Acc.add buf " isGenerator";
+  if function_is_async then Acc.add buf " isAsync";
+  if function_is_pair_generator then Acc.add buf " isPairGenerator";
+  Acc.add buf " {";
   add_body buf 2 function_body;
-  B.add_string buf "}\n"
+  Acc.add buf "}\n"
 
 let attributes_to_string attrs =
   let text = String.concat " " attrs in
@@ -1543,20 +1543,20 @@ let add_method_def buf method_def =
   let method_is_generator = Hhas_method.is_generator method_def in
   let method_is_pair_generator = Hhas_method.is_pair_generator method_def in
   let method_is_closure_body = Hhas_method.is_closure_body method_def in
-  B.add_string buf "\n  .method ";
-  B.add_string buf (method_attributes method_def);
+  Acc.add buf "\n  .method ";
+  Acc.add buf (method_attributes method_def);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options
-  then B.add_string buf (string_of_span method_span ^ " ");
-  B.add_string buf (string_of_type_info_option method_return_type);
-  B.add_string buf (Hhbc_id.Method.to_raw_string method_name);
-  B.add_string buf (string_of_params env method_params);
-  if method_is_generator then B.add_string buf " isGenerator";
-  if method_is_async then B.add_string buf " isAsync";
-  if method_is_pair_generator then B.add_string buf " isPairGenerator";
-  if method_is_closure_body then B.add_string buf " isClosureBody";
-  B.add_string buf " {";
+  then Acc.add buf (string_of_span method_span ^ " ");
+  Acc.add buf (string_of_type_info_option method_return_type);
+  Acc.add buf (Hhbc_id.Method.to_raw_string method_name);
+  Acc.add buf (string_of_params env method_params);
+  if method_is_generator then Acc.add buf " isGenerator";
+  if method_is_async then Acc.add buf " isAsync";
+  if method_is_pair_generator then Acc.add buf " isPairGenerator";
+  if method_is_closure_body then Acc.add buf " isClosureBody";
+  Acc.add buf " {";
   add_body buf 4 method_body;
-  B.add_string buf "  }"
+  Acc.add buf "  }"
 
 let class_special_attributes c =
   let user_attrs = Hhas_class.attributes c in
@@ -1595,8 +1595,8 @@ let add_extends buf class_base =
   | None -> ()
   | Some name ->
     begin
-      B.add_string buf " extends ";
-      B.add_string buf (Hhbc_id.Class.to_raw_string name);
+      Acc.add buf " extends ";
+      Acc.add buf (Hhbc_id.Class.to_raw_string name);
     end
 
 let add_implements buf class_implements =
@@ -1604,10 +1604,10 @@ let add_implements buf class_implements =
   | [] -> ()
   | _ ->
   begin
-    B.add_string buf " implements (";
-    B.add_string buf (String.concat " "
+    Acc.add buf " implements (";
+    Acc.add buf (String.concat " "
       (List.map Hhbc_id.Class.to_raw_string class_implements));
-    B.add_string buf ")";
+    Acc.add buf ")";
   end
 
 let property_attributes p =
@@ -1635,74 +1635,74 @@ let property_doc_comment p =
   | Some s -> Printf.sprintf "%s " (SU.triple_quote_string s)
 
 let add_property class_def buf property =
-  B.add_string buf "\n  .property ";
-  B.add_string buf (property_attributes property);
-  B.add_string buf (property_doc_comment property);
-  B.add_string buf (property_type_info property);
-  B.add_string buf (Hhbc_id.Prop.to_raw_string (Hhas_property.name property));
-  B.add_string buf " =\n    ";
+  Acc.add buf "\n  .property ";
+  Acc.add buf (property_attributes property);
+  Acc.add buf (property_doc_comment property);
+  Acc.add buf (property_type_info property);
+  Acc.add buf (Hhbc_id.Prop.to_raw_string (Hhas_property.name property));
+  Acc.add buf " =\n    ";
   let initial_value = Hhas_property.initial_value property in
   if Hhas_class.is_closure_class class_def
   || initial_value = Some Typed_value.Uninit
-  then B.add_string buf "uninit;"
+  then Acc.add buf "uninit;"
   else begin
-    B.add_string buf "\"\"\"";
+    Acc.add buf "\"\"\"";
     begin match initial_value with
-      | None -> B.add_string buf "N;"
+      | None -> Acc.add buf "N;"
       | Some value -> Emit_adata.adata_to_buffer buf value
     end;
-    B.add_string buf "\"\"\";"
+    Acc.add buf "\"\"\";"
   end
 
 let add_constant buf c =
   let name = Hhas_constant.name c in
   let value = Hhas_constant.value c in
-  B.add_string buf "\n  .const ";
-  B.add_string buf name;
+  Acc.add buf "\n  .const ";
+  Acc.add buf name;
   begin match value with
   | Some Typed_value.Uninit ->
-    B.add_string buf " = uninit"
+    Acc.add buf " = uninit"
   | Some value ->
-    B.add_string buf " = \"\"\"";
+    Acc.add buf " = \"\"\"";
     Emit_adata.adata_to_buffer buf value;
-    B.add_string buf "\"\"\""
+    Acc.add buf "\"\"\""
   | None -> ()
     end;
-  B.add_string buf ";"
+  Acc.add buf ";"
 
 let add_type_constant buf c =
-  B.add_string buf "\n  .const ";
-  B.add_string buf (Hhas_type_constant.name c);
+  Acc.add buf "\n  .const ";
+  Acc.add buf (Hhas_type_constant.name c);
   let initializer_t = Hhas_type_constant.initializer_t c in
-  B.add_string buf " isType";
+  Acc.add buf " isType";
   match initializer_t with
   | Some init ->
-    B.add_string buf " = \"\"\"";
+    Acc.add buf " = \"\"\"";
     Emit_adata.adata_to_buffer buf init;
-    B.add_string buf "\"\"\";"
-  | None -> B.add_string buf ";"
+    Acc.add buf "\"\"\";"
+  | None -> Acc.add buf ";"
 
 let add_requirement buf r =
-  B.add_string buf "\n  .require ";
+  Acc.add buf "\n  .require ";
   match r with
   | (Ast.MustExtend, name) ->
-      B.add_string buf ("extends <" ^ name ^ ">;")
+      Acc.add buf ("extends <" ^ name ^ ">;")
   | (Ast.MustImplement, name) ->
-      B.add_string buf ("implements <" ^ name ^ ">;")
+      Acc.add buf ("implements <" ^ name ^ ">;")
 
 let add_enum_ty buf c =
   match Hhas_class.enum_type c with
   | Some et ->
-    B.add_string buf "\n  .enum_ty ";
-    B.add_string buf @@ string_of_type_info ~is_enum:true et;
-    B.add_string buf ";"
+    Acc.add buf "\n  .enum_ty ";
+    Acc.add buf @@ string_of_type_info ~is_enum:true et;
+    Acc.add buf ";"
   | _ -> ()
 
 let add_use_precedence buf (id1, id2, ids) =
   let name = id1 ^ "::" ^ id2 in
   let unique_ids = List.fold_left ULS.add ULS.empty ids in
   let ids = String.concat " " @@ ULS.items unique_ids in
-  B.add_string buf @@ Printf.sprintf "\n    %s insteadof %s;" name ids
+  Acc.add buf @@ Printf.sprintf "\n    %s insteadof %s;" name ids
 
 let add_use_alias buf (ido1, id, ido2, kindl) =
   let aliasing_id =
@@ -1715,7 +1715,7 @@ let add_use_alias buf (ido1, id, ido2, kindl) =
   in
   let rest = Option.merge kind ido2 ~f:(fun x y -> x ^ " " ^ y) in
   let rest = Option.value ~default:"" rest in
-  B.add_string buf @@ Printf.sprintf "\n    %s as %s;" aliasing_id rest
+  Acc.add buf @@ Printf.sprintf "\n    %s as %s;" aliasing_id rest
 
 let add_uses buf c =
   let use_l = Hhas_class.class_uses c in
@@ -1727,28 +1727,28 @@ let add_uses buf c =
         List.fold_left (fun l e -> ULS.add l (Utils.strip_ns e)) ULS.empty use_l
       in
       let use_l = String.concat " " @@ ULS.items unique_ids in
-      B.add_string buf @@ Printf.sprintf "\n  .use %s" use_l;
+      Acc.add buf @@ Printf.sprintf "\n  .use %s" use_l;
       if use_alias_list = [] && use_precedence_list = []
-      then B.add_char buf ';' else
+      then Acc.add buf ";" else
       begin
-        B.add_string buf " {";
+        Acc.add buf " {";
         List.iter (add_use_precedence buf) use_precedence_list;
         List.iter (add_use_alias buf) use_alias_list;
-        B.add_string buf "\n  }";
+        Acc.add buf "\n  }";
       end
     end
 
 let add_class_def buf class_def =
   let class_name = Hhas_class.name class_def in
   (* TODO: user attributes *)
-  B.add_string buf "\n.class ";
-  B.add_string buf (class_special_attributes class_def);
-  B.add_string buf (Hhbc_id.Class.to_raw_string class_name);
+  Acc.add buf "\n.class ";
+  Acc.add buf (class_special_attributes class_def);
+  Acc.add buf (Hhbc_id.Class.to_raw_string class_name);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options
-  then B.add_string buf (" " ^ string_of_span (Hhas_class.span class_def));
+  then Acc.add buf (" " ^ string_of_span (Hhas_class.span class_def));
   add_extends buf (Hhas_class.base class_def);
   add_implements buf (Hhas_class.implements class_def);
-  B.add_string buf " {";
+  Acc.add buf " {";
   add_doc buf 2 (Hhas_class.doc_comment class_def);
   add_uses buf class_def;
   add_enum_ty buf class_def;
@@ -1758,49 +1758,49 @@ let add_class_def buf class_def =
   List.iter (add_property class_def buf) (Hhas_class.properties class_def);
   List.iter (add_method_def buf) (Hhas_class.methods class_def);
   (* TODO: other members *)
-  B.add_string buf "\n}\n"
+  Acc.add buf "\n}\n"
 
 let add_data_region_element buf argument =
-  B.add_string buf ".adata ";
-  B.add_string buf @@ (Hhas_adata.id argument);
-  B.add_string buf " = \"\"\"";
+  Acc.add buf ".adata ";
+  Acc.add buf @@ (Hhas_adata.id argument);
+  Acc.add buf " = \"\"\"";
   Emit_adata.adata_to_buffer buf (Hhas_adata.value argument);
-  B.add_string buf "\"\"\";\n"
+  Acc.add buf "\"\"\";\n"
 
 let add_data_region buf adata =
   List.iter (add_data_region_element buf) adata;
-  B.add_string buf "\n"
+  Acc.add buf "\n"
 
 let add_top_level buf body =
-  B.add_string buf ".main ";
+  Acc.add buf ".main ";
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options
-  then B.add_string buf "(1,1) ";
-  B.add_string buf "{";
+  then Acc.add buf "(1,1) ";
+  Acc.add buf "{";
   add_body buf 2 body;
-  B.add_string buf "}\n"
+  Acc.add buf "}\n"
 
 let add_typedef buf typedef =
   let name = Hhas_typedef.name typedef in
   let type_info = Hhas_typedef.type_info typedef in
   let opt_ts = Hhas_typedef.type_structure typedef in
-  B.add_string buf "\n.alias ";
-  B.add_string buf (typedef_attributes typedef);
-  B.add_string buf (Hhbc_id.Class.to_raw_string name);
-  B.add_string buf (" = " ^ string_of_typedef_info type_info);
+  Acc.add buf "\n.alias ";
+  Acc.add buf (typedef_attributes typedef);
+  Acc.add buf (Hhbc_id.Class.to_raw_string name);
+  Acc.add buf (" = " ^ string_of_typedef_info type_info);
   match opt_ts with
   | Some ts ->
-    B.add_string buf " \"\"\"";
+    Acc.add buf " \"\"\"";
     Emit_adata.adata_to_buffer buf ts;
-    B.add_string buf "\"\"\";\n"
+    Acc.add buf "\"\"\";\n"
   | None ->
-    B.add_string buf ";\n"
+    Acc.add buf ";\n"
 
 let add_include_region
     ?path ?doc_root ?search_paths ?include_roots ?(check_paths_exist=true)
     buf includes =
   let write_if_exists p =
     if not check_paths_exist || Sys.file_exists p
-    then (B.add_string buf ("\n  " ^ p); true)
+    then (Acc.add buf ("\n  " ^ p); true)
     else false in
   let write_include inc =
     let include_roots = Option.value include_roots ~default:SMap.empty in
@@ -1808,7 +1808,7 @@ let add_include_region
       | Hhas_symbol_refs.Absolute p -> ignore @@ write_if_exists p
       | Hhas_symbol_refs.SearchPathRelative p ->
         if not check_paths_exist
-        then B.add_string buf ("\n  " ^ p)
+        then Acc.add buf ("\n  " ^ p)
         else
           let rec try_paths = function
             | [] -> ()
@@ -1830,18 +1830,18 @@ let add_include_region
         write_if_exists resolved
   in
   if not (Hhas_symbol_refs.IncludePathSet.is_empty includes) then begin
-    B.add_string buf "\n.includes {";
+    Acc.add buf "\n.includes {";
     Hhas_symbol_refs.IncludePathSet.iter write_include includes;
-    B.add_string buf "\n}\n"
+    Acc.add buf "\n}\n"
   end
 
 let add_symbol_ref_regions buf symbol_refs =
   let add_region name refs =
     if not (SSet.is_empty refs) then begin
-      B.add_string buf ("\n." ^ name);
-      B.add_string buf " {";
-      SSet.iter (fun s -> B.add_string buf ("\n  " ^ s)) refs;
-      B.add_string buf "\n}\n";
+      Acc.add buf ("\n." ^ name);
+      Acc.add buf " {";
+      SSet.iter (fun s -> Acc.add buf ("\n  " ^ s)) refs;
+      Acc.add buf "\n}\n";
     end in
   add_region "constant_refs" symbol_refs.Hhas_symbol_refs.constants;
   add_region "function_refs" symbol_refs.Hhas_symbol_refs.functions;
@@ -1849,7 +1849,7 @@ let add_symbol_ref_regions buf symbol_refs =
 
 let add_program_content ?path dump_symbol_refs buf hhas_prog =
   let is_hh = if Hhas_program.is_hh hhas_prog then "1" else "0" in
-  B.add_string buf @@ "\n.hh_file " ^ is_hh ^ ";\n";
+  Acc.add buf @@ "\n.hh_file " ^ is_hh ^ ";\n";
   let functions = Hhas_program.functions hhas_prog in
   let top_level_body = Hhas_program.main hhas_prog in
   let classes = Hhas_program.classes hhas_prog in
@@ -1878,21 +1878,20 @@ let add_program ?path dump_symbol_refs buf hhas_prog =
   match path with
   | Some p ->
     let p = Relative_path.to_absolute p in
-    B.add_string buf
+    Acc.add buf
       (Printf.sprintf "# %s starts here\n\n%s.filepath \"%s\";\n" p strict_types p);
     add_program_content ~path:p dump_symbol_refs buf hhas_prog;
-    B.add_string buf (Printf.sprintf "\n# %s ends here\n" p)
+    Acc.add buf (Printf.sprintf "\n# %s ends here\n" p)
   | None ->
-      B.add_string buf "#starts here\n";
-      B.add_string buf strict_types;
+      Acc.add buf "#starts here\n";
+      Acc.add buf strict_types;
       add_program_content dump_symbol_refs buf hhas_prog;
-      B.add_string buf "\n#ends here\n"
+      Acc.add buf "\n#ends here\n"
 
-let to_string ?path ?(dump_symbol_refs=false) ?(original_text_length = 1024) hhas_prog =
-  (* guestimage initial buffer size as 80% of the size of original program -
-     works for most of www *)
-  let initial_buffer_size =
-    int_of_float @@ (float_of_int original_text_length) *. 1.1 in
-  let buf = Buffer.create initial_buffer_size in
+let to_segments ?path ?(dump_symbol_refs=false) hhas_prog =
+  let buf = Acc.create () in
   add_program ?path dump_symbol_refs buf hhas_prog;
-  B.contents buf
+  Acc.segments buf
+
+let to_string ?path ?dump_symbol_refs =
+  Fn.compose (String.concat "") (to_segments ?path ?dump_symbol_refs)

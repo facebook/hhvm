@@ -345,7 +345,7 @@ let log_fail compiler_options filename exc =
     ~exc:(Printexc.to_string exc ^ "\n" ^ Printexc.get_backtrace ())
 
 
-let do_compile filename compiler_options original_text_length fail_or_ast debug_time =
+let do_compile filename compiler_options fail_or_ast debug_time =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
   let hhas_prog =
@@ -369,22 +369,22 @@ let do_compile filename compiler_options original_text_length fail_or_ast debug_
         Hhbc_ast.FatalOp.Parse Pos.none "Syntax error"
       in
   let t = add_to_time_ref debug_time.codegen_t t in
-  let hhas_text = Hhbc_hhas.to_string
+  let hhas = Hhbc_hhas.to_segments
     ~path:filename
     ~dump_symbol_refs:compiler_options.dump_symbol_refs
-    ~original_text_length
     hhas_prog in
   ignore @@ add_to_time_ref debug_time.printing_t t;
   if compiler_options.debug_time
   then print_debug_time_info filename debug_time;
   if compiler_options.log_stats
   then log_success compiler_options filename debug_time;
-  hhas_text
+  hhas
 
 let extract_facts ?pretty text =
   Facts_parser.extract_as_json ~php5_compat_mode:true text
   (* return empty string if file has syntax errors *)
   |> Option.value_map ~default:"" ~f:(Hh_json.json_to_string ?pretty)
+  |> fun x -> [x]
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -398,11 +398,10 @@ let process_single_source_unit compiler_options popt handle_output
       if compiler_options.extract_facts
       then extract_facts ~pretty:true source_text
       else begin
-        let original_text_length = String.length source_text in
         let fail_or_ast = parse_file compiler_options popt filename source_text in
         let debug_time = new_debug_time () in
         ignore @@ add_to_time_ref debug_time.parsing_t t;
-        do_compile filename compiler_options original_text_length fail_or_ast debug_time
+        do_compile filename compiler_options fail_or_ast debug_time
       end in
     handle_output filename output
   with exc ->
@@ -413,6 +412,10 @@ let process_single_source_unit compiler_options popt handle_output
 let decl_and_run_mode compiler_options popt =
   let open Hh_json in
   let open Access in
+
+  let print_and_flush_strings strings =
+    Core_list.iter ~f:(P.printf "%s") strings;
+    P.printf "%!" in
 
   let set_compiler_options config_json =
     let options =
@@ -433,13 +436,15 @@ let decl_and_run_mode compiler_options popt =
     | DAEMON ->
       let handle_output filename output =
         let abs_path = Relative_path.to_absolute filename in
-        let bytes = String.length output in
+        let bytes =
+          List.fold ~f:(fun len s -> len + String.length s) ~init:0 output in
         let msg = json_to_string @@ JSON_Object
           [ ("type", JSON_String "success")
           ; ("file", JSON_String abs_path)
           ; ("bytes", int_ bytes)
           ] in
-        P.printf "%s\n%s%!" msg output in
+        P.printf "%s\n" msg;
+        print_and_flush_strings output in
       let handle_exception filename exc =
         let abs_path = Relative_path.to_absolute filename in
         let msg = json_to_string @@ JSON_Object
@@ -518,7 +523,8 @@ let decl_and_run_mode compiler_options popt =
           let handle_output _filename output =
             if compiler_options.dump_config then
               Printf.printf "===CONFIG===\n%s\n\n%!" (Lazy.force dumped_options);
-            if not compiler_options.quiet_mode then P.printf "%s%!" output
+            if not compiler_options.quiet_mode then
+              print_and_flush_strings output
           in get_lines_in_file input_file_list, handle_output
 
         | None ->
@@ -545,7 +551,7 @@ let decl_and_run_mode compiler_options popt =
                   if not compiler_options.quiet_mode
                   then P.fprintf stderr "Output file %s already exists\n" output_file)
                 else
-                  Sys_utils.write_file ~file:output_file output
+                  Sys_utils.write_strings_to_file ~file:output_file output
             in files_in_dir, handle_output
 
           (* Compile a single file *)
@@ -553,11 +559,12 @@ let decl_and_run_mode compiler_options popt =
             let handle_output _filename output =
               match compiler_options.output_file with
                 | Some output_file ->
-                  Sys_utils.write_file ~file:output_file output
+                  Sys_utils.write_strings_to_file ~file:output_file output
                 | None ->
                   if compiler_options.dump_config then
                     Printf.printf "===CONFIG===\n%s\n\n%!" (Lazy.force dumped_options);
-                  if not compiler_options.quiet_mode then P.printf "%s%!" output
+                  if not compiler_options.quiet_mode then
+                    print_and_flush_strings output
             in [compiler_options.filename], handle_output
 
       (* Actually execute the compilation(s) *)

@@ -7,7 +7,7 @@
  *
 *)
 
-module B = Buffer
+module Acc = Mutable_accumulator
 module SU = Hhbc_string_utils
 module TV = Typed_value
 module TVMap = Typed_value.TVMap
@@ -31,22 +31,25 @@ let adata_keyset_prefix = "k"
 
 let adata_mapped_argument_to_buffer b col_type pairs f =
   let num = List.length pairs in
-  Printf.bprintf b "%s:%d:{" col_type num;
+  Printf.sprintf "%s:%d:{" col_type num
+    |> Acc.add b;
   Core_list.iter pairs ~f:(f b);
-  B.add_string b "}"
+  Acc.add b "}"
 
 let rec adata_to_buffer b argument =
   match argument with
-  | TV.Uninit -> B.add_string b "uninit"
-  | TV.Null -> B.add_string b "N;"
-  | TV.Float f -> Printf.bprintf b "d:%s;" (SU.Float.to_string f)
+  | TV.Uninit -> Acc.add b "uninit"
+  | TV.Null -> Acc.add b "N;"
+  | TV.Float f -> Printf.sprintf "d:%s;" (SU.Float.to_string f)
+      |> Acc.add b
   | TV.String s ->
-    Printf.bprintf b "s:%d:%s;" (String.length s) (SU.quote_string_with_escape s)
+    Printf.sprintf "s:%d:%s;" (String.length s) (SU.quote_string_with_escape s)
+      |> Acc.add b
   (* TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why? *)
-  | TV.Bool false -> B.add_string b "b:0;"
-  | TV.Bool true -> B.add_string b "b:1;"
-  | TV.Int i -> B.add_string b @@ "i:" ^ (Int64.to_string i) ^ ";"
-  | TV.HhasAdata data -> B.add_string b data
+  | TV.Bool false -> Acc.add b "b:0;"
+  | TV.Bool true -> Acc.add b "b:1;"
+  | TV.Int i -> Acc.add b @@ "i:" ^ (Int64.to_string i) ^ ";"
+  | TV.HhasAdata data -> Acc.add b data
   | TV.Array pairs ->
       adata_dict_collection_argument_to_buffer b adata_array_prefix pairs
   | TV.VArray values ->
@@ -72,11 +75,12 @@ and adata_collection_argument_to_buffer b col_type fields =
 let attribute_to_string a =
   let name = Hhas_attribute.name a in
   let args = Hhas_attribute.arguments a in
-  let b = B.create 16 in
-  Printf.bprintf b "\"%s\"(\"\"\"a:%n:{" name (List.length args / 2);
+  let b = Acc.create () in
+  Printf.sprintf "\"%s\"(\"\"\"a:%n:{" name (List.length args / 2)
+    |> Acc.add b;
   List.iter args ~f:(adata_to_buffer b);
-  B.add_string b "}\"\"\")";
-  B.contents b
+  Acc.add b "}\"\"\")";
+  String.concat "" (Acc.segments b)
 
 let attributes_to_strings al =
   let al = List.sort

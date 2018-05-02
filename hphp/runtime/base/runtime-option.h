@@ -526,7 +526,7 @@ struct RuntimeOption {
   /* Whether to use hh_single_compile by default if available. */       \
   F(bool, HackCompilerDefault,         hackCompilerEnableDefault())     \
   /* The command to invoke to spawn hh_single_compile in server mode. */\
-  F(string, HackCompilerCommand,       "")                              \
+  F(string, HackCompilerCommand,       hackCompilerCommandDefault())    \
   /* The number of hh_single_compile daemons to keep alive. */          \
   F(uint64_t, HackCompilerWorkers,     Process::GetCPUCount())      \
   /* The number of times to retry after an infra failure communicating

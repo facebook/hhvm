@@ -4425,7 +4425,7 @@ Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
       newheight = newwidth * src_y / src_x;
     }
   }
-  if (newheight <= 0 || newwidth <= 0) {
+  if (newheight <= 0 || newheight > INT_MAX || newwidth <= 0 || newwidth > INT_MAX) {
     return false;
   }
   if (gdImageSetInterpolationMethod(im, (gdInterpolationMethod) method)) {

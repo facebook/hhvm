@@ -814,7 +814,7 @@ module NastCheck                            = struct
 end
 
 module Typing                               = struct
-  (* let abstract_class_final                  = 4001 (\* DONT MODIFY!!!! *\) *)
+  (* let abstract_class_final                  = 4001 *)
   let uninstantiable_class                  = 4002 (* DONT MODIFY!!!! *)
   let anonymous_recursive                   = 4003 (* DONT MODIFY!!!! *)
   let anonymous_recursive_call              = 4004 (* DONT MODIFY!!!! *)
@@ -1036,7 +1036,6 @@ module Typing                               = struct
   let ellipsis_strict_mode                  = 4223 (* DONT MODIFY!!!! *)
   let untyped_lambda_strict_mode            = 4224 (* DONT MODIFY!!!! *)
   let binding_ref_in_array                  = 4225 (* DONT MODIFY!!!! *)
-  let invalid_conditionally_reactive_call   = 4225 (* DONT MODIFY!!!! *)
   let echo_in_reactive_context              = 4226 (* DONT MODIFY!!!! *)
   let superglobal_in_reactive_context       = 4227 (* DONT MODIFY!!!! *)
   let static_property_in_reactive_context   = 4228 (* DONT MODIFY!!!! *)
@@ -1048,6 +1047,7 @@ module Typing                               = struct
   let missing_annotation_for_onlyrx_if_rxfunc_parameter = 4234 (* DONT MODIFY!!!! *)
   let cannot_return_borrowed_value_as_immutable = 4235 (* DONT MODIFY!!!! *)
   let decl_override_missing_hint            = 4236 (* DONT MODIFY!!!! *)
+  let invalid_conditionally_reactive_call   = 4237 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end

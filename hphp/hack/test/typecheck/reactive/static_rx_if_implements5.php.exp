@@ -1,4 +1,4 @@
 File "static_rx_if_implements5.php", line 18, characters 10-20:
-Conditionally reactive method with condition type '\Rx' cannot be called (Typing[4225])
+Conditionally reactive method with condition type '\Rx' cannot be called (Typing[4237])
 File "static_rx_if_implements5.php", line 7, characters 19-19:
 Calling such methods is allowed only from conditionally reactive methods with the same condition type or if static type of method receiver is a subtype of condition type, now '\NonRxA'.

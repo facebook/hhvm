@@ -1,4 +1,4 @@
 File "rx_if_implements30.php", line 16, characters 12-26:
-Conditionally reactive method with condition type '\Rx1' cannot be called (Typing[4225])
+Conditionally reactive method with condition type '\Rx1' cannot be called (Typing[4237])
 File "rx_if_implements30.php", line 8, characters 19-27:
 Calling such methods is allowed only from conditionally reactive methods with the same condition type or if static type of method receiver is a subtype of condition type, now '\I'.

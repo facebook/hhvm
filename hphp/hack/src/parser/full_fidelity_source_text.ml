@@ -21,14 +21,21 @@
  * abstraction when we need some of them.
  *)
 
-module OffsetMap = Line_break_map
+module OffsetMap = struct
+  (* placeholder definitions to placate open source build.
+   * These definitions will be mercilessly shadowed if deriving show fires
+   * like it's supposed to *)
+  let pp _ _ = ()
+  let show _ = ""
+  include Line_break_map
+end
 
 type t = {
   file_path : Relative_path.t;
   length : int;
   text : string;
   offset_map : OffsetMap.t
-}
+} [@@deriving show]
 
 type pos = t * int
 

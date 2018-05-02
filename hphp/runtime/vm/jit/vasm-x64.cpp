@@ -350,23 +350,10 @@ template<class Inst> void Vgen<X64Asm>::commute(Inst& i) {
   }
 }
 
-/*
- * Helper for emitting instructions whose Vptr operand specifies a segment.
- */
-template<class X64Asm>
-X64Asm& prefix(X64Asm& a, const Vptr& ptr, MemoryRef* mref) {
-  if (ptr.seg == Vptr::Segment::FS) {
-    a.fs(mref);
-  } else if (ptr.seg == Vptr::Segment::GS) {
-    a.gs(mref);
-  }
-  return a;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Returns true if the status flags necessary to take a j<a> imply that a j<b>
+ * Returns true iff the status flags necessary to take a j<a> imply that a j<b>
  * will also be taken.
  */
 bool ccImplies(ConditionCode a, ConditionCode b) {
@@ -598,7 +585,7 @@ void Vgen<X64Asm>::emit(const ldimmq& i) {
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const load& i) {
   auto mref = i.s.mr();
-  prefix(a, i.s, &mref);
+  a.prefix(mref);
   if (i.d.isGP()) {
     a.loadq(mref, i.d);
   } else {
@@ -783,13 +770,13 @@ void Vgen<X64Asm>::emit(andqi i) {
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const addlim& i) {
   auto mref = i.m.mr();
-  prefix(a, i.m, &mref).addl(i.s0, mref);
+  a.prefix(mref).addl(i.s0, mref);
 }
 
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const addqim& i) {
   auto mref = i.m.mr();
-  prefix(a, i.m, &mref).addq(i.s0, mref);
+  a.prefix(mref).addq(i.s0, mref);
 }
 
 template<class X64Asm>
@@ -886,13 +873,13 @@ void Vgen<X64Asm>::emit(const lea& i) {
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const storebi& i) {
   auto mref = i.m.mr();
-  prefix(a, i.m, &mref).storeb(i.s, mref);
+  a.prefix(mref).storeb(i.s, mref);
 }
 
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const storeqi& i) {
   auto mref = i.m.mr();
-  prefix(a, i.m, &mref).storeq(i.s, mref);
+  a.prefix(mref).storeq(i.s, mref);
 }
 
 template<class VgenImpl, typename Inst>

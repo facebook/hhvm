@@ -42,7 +42,7 @@ typedef bool(*immFitFunc)(int64_t, int);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct XedAssembler : public X64AssemblerBase {
+struct XedAssembler final : public X64AssemblerBase {
 private:
   constexpr static xed_state_t s_xedState = {
     XED_MACHINE_MODE_LONG_64,
@@ -604,6 +604,11 @@ public:
     }
   }
 
+  ALWAYS_INLINE
+  XedAssembler& prefix(const MemoryRef& mr) {
+    return *this;
+  }
+
 public:
   /*
    * The following functions use a naming convention for an older API
@@ -625,11 +630,6 @@ public:
   inline void cmov_reg64_reg64(ConditionCode cc, Reg64 rsrc, Reg64 rdest) {
     xedInstrRR(ccToXedCMov(cc), rsrc, rdest);
   }
-
-  XedAssembler& fs(MemoryRef* mr)  { mr->setSegment(int(XED_REG_FS));
-                                     return *this; }
-  XedAssembler& gs(MemoryRef* mr)  { mr->setSegment(int(XED_REG_GS));
-                                     return *this; }
 
 private:
   /*
@@ -723,11 +723,17 @@ private:
   }
 
   xed_encoder_operand_t toXedOperand(const MemoryRef& m, int memSize) {
+    static const xed_reg_enum_t segmentRegs[] = {
+      XED_REG_INVALID, //Segment::DS (no segment register override)
+      XED_REG_FS,      //Segment::FS
+      XED_REG_GS       //Segment::GS
+    };
     xed_reg_enum_t base = int(m.r.base) != -1 ?
                           xedFromReg(m.r.base) : XED_REG_INVALID;
     xed_reg_enum_t index = int(m.r.index) != -1 ?
                            xedFromReg(m.r.index) : XED_REG_INVALID;
-    return xed_mem_gbisd(xed_reg_enum_t(m.segment), base, index, m.r.scale,
+    return xed_mem_gbisd(segmentRegs[int(m.segment)],
+                         base, index, m.r.scale,
                          xedDispFromValue(m.r.disp), sizeToBits(memSize));
   }
 

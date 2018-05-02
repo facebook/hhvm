@@ -64,6 +64,8 @@ struct DispReg;
 
 const uint8_t kOpsizePrefix = 0x66;
 
+enum Segment : uint8_t { DS = 0, FS, GS };
+
 struct Reg64 {
   explicit constexpr Reg64(int rn) : rn(rn) {}
 
@@ -467,25 +469,33 @@ inline ConditionCode ccNegate(ConditionCode c) {
 }
 
 // *(reg + x)
+struct MemoryRef {
+  explicit MemoryRef(DispReg dr, Segment s = DS) : r(dr), segment(s) {}
+  explicit MemoryRef(IndexedDispReg idr, Segment s = DS) : r(idr), segment(s) {}
+  IndexedDispReg r;
+  Segment segment;
+};
 
-#ifdef HAVE_LIBXED
-// The segment field is only used by the XED assembler, when HAVE_LIBXED is
-// not defined, we can remove it from the MemoryRef structure.
-  struct MemoryRef {
-    explicit MemoryRef(DispReg dr) : r(dr), segment(0) {}
-    explicit MemoryRef(IndexedDispReg idr) : r(idr),
-                                            segment(0) {}
-    IndexedDispReg r;
-    int  segment;
-    void setSegment(int seg) { segment = seg; }
-  };
-#else
-  struct MemoryRef {
-    explicit MemoryRef(DispReg dr) : r(dr) {}
-    explicit MemoryRef(IndexedDispReg idr) : r(idr) {}
-    IndexedDispReg r;
-  };
-#endif
+/*
+ * Simple wrapper over a Segment value used to obtain MemoryRefs that have
+ * MemoryRef::segment set to something different than the default (DS) value.
+ */
+struct SegReg {
+  explicit constexpr SegReg(Segment seg) : seg(seg) {};
+  MemoryRef operator[](const IndexedDispReg& idr) {
+    return MemoryRef(idr, seg);
+  }
+  MemoryRef operator[](const ScaledIndexDisp& sid) {
+    return MemoryRef(IndexedDispReg(sid), seg);
+  }
+  MemoryRef operator[](const DispReg& dr) {
+    return MemoryRef(dr, seg);
+  }
+  MemoryRef operator[](const intptr_t disp) {
+    return MemoryRef(DispReg(disp), seg);
+  }
+  Segment seg;
+};
 
 #ifdef HAVE_LIBXED
 #define NEW_X64_ASM(var, cb)                                      \

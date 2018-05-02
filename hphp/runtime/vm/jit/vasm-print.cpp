@@ -266,11 +266,11 @@ std::string show(Vptr p) {
       // [%fs + %base + disp + %index * scale]
       str = "[";
       auto prefix = false;
-      if (p.seg == Vptr::FS) {
+      if (p.seg == Segment::FS) {
         str += "%fs";
         prefix = true;
       }
-      if (p.seg == Vptr::GS) {
+      if (p.seg == Segment::GS) {
         str += "%gs";
         prefix = true;
       }

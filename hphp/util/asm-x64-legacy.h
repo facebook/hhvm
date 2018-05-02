@@ -187,7 +187,7 @@ const X64Instr instr_cmpsd =   { { 0xF1,0xF1,0xC2,0xF1,0xF1,0xF1 }, 0x10112 };
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-struct X64Assembler : public X64AssemblerBase {
+struct X64Assembler final : public X64AssemblerBase {
 public:
   explicit X64Assembler(CodeBlock& cb) : X64AssemblerBase(cb) {}
 
@@ -222,7 +222,7 @@ public:
   void name##q(MemoryRef m, Reg64 r) { instrMR(instr, m, r); }        \
   void name##l(MemoryRef m, Reg32 r) { instrMR(instr, m, r); }        \
   void name##w(MemoryRef m, Reg16 r) { instrMR(instr, m, r); }        \
-  void name##q(RIPRelativeRef m, Reg64 r) { instrMR(instr, m, r); } \
+  void name##q(RIPRelativeRef m, Reg64 r) { instrMR(instr, m, r); }   \
   BYTE_LOAD_OP(name, instr##b)
 
 #define BYTE_STORE_OP(name, instr)                                    \
@@ -519,6 +519,19 @@ public:
     while (available() >= 2) ud2();
     if (available() > 0) int3();
     assertx(available() == 0);
+  }
+
+  ALWAYS_INLINE
+  X64Assembler& prefix(const MemoryRef& mr) {
+    static const uint8_t prefixes[] = {
+      0xFF,   // unused
+      0x64,   // Segment::FS prefix
+      0x65    // Segment::GS prefix
+    };
+    if (mr.segment != Segment::DS) {
+      byte(prefixes[int(mr.segment)]);
+    }
+    return *this;
   }
   /*
    * Low-level emitter functions.
@@ -1169,11 +1182,6 @@ public:
     }
     byte(op.table[5]);
   }
-
-  // Segment register prefixes.
-  // MemoryRef* parameter added for compatibility with XedAssembler
-  X64Assembler& fs(MemoryRef* mr)  { byte(0x64); return *this; }
-  X64Assembler& gs(MemoryRef* mr)  { byte(0x65); return *this; }
 
 public:
   /*

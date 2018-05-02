@@ -26,6 +26,7 @@ type t =
   | String of string
   | Null
   (* Classic PHP arrays with explicit (key,value) entries *)
+  | HhasAdata of string
   | Array of (t*t) list
   | VArray of t list
   | DArray of (t*t) list
@@ -87,6 +88,7 @@ let to_bool v =
   (* Empty collections cast to false *)
   | Dict [] | Array [] | VArray [] | DArray [] | Keyset [] | Vec [] -> false
   (* Non-empty collections cast to true *)
+  | HhasAdata _
   | Dict _ | Array _ | VArray _ | DArray _ | Keyset _ | Vec _-> true
 
 (* try to convert numeric

@@ -44,8 +44,6 @@ let from_file file =
     try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in
   make file content
 
-let append_padding x pad = { x with text = x.text ^ pad }
-
 let text source_text =
   source_text.text
 
@@ -59,8 +57,9 @@ let get_text t =
   t.text
 
 let get source_text index =
-  String.get source_text.text index
-
+  if index < String.length source_text.text
+  then String.get source_text.text index
+  else '\x00'
 let sub source_text start length =
   let len = String.length source_text.text in
   if start >= len then

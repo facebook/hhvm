@@ -17,6 +17,18 @@ open Hh_core
 let hack_arr_dv_arrs () =
   Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
 
+let adata_array_prefix = "a"
+
+let adata_varray_prefix = "y"
+
+let adata_vec_prefix = "v"
+
+let adata_dict_prefix = "D"
+
+let adata_darray_prefix = "Y"
+
+let adata_keyset_prefix = "k"
+
 let adata_mapped_argument_to_buffer b col_type pairs f =
   let num = List.length pairs in
   Printf.bprintf b "%s:%d:{" col_type num;
@@ -34,12 +46,19 @@ let rec adata_to_buffer b argument =
   | TV.Bool false -> B.add_string b "b:0;"
   | TV.Bool true -> B.add_string b "b:1;"
   | TV.Int i -> B.add_string b @@ "i:" ^ (Int64.to_string i) ^ ";"
-  | TV.Array pairs -> adata_dict_collection_argument_to_buffer b "a" pairs
-  | TV.VArray values -> adata_collection_argument_to_buffer b "y" values
-  | TV.Vec values -> adata_collection_argument_to_buffer b "v" values
-  | TV.Dict pairs -> adata_dict_collection_argument_to_buffer b "D" pairs
-  | TV.DArray pairs -> adata_dict_collection_argument_to_buffer b "Y" pairs
-  | TV.Keyset values -> adata_collection_argument_to_buffer b "k" values
+  | TV.HhasAdata data -> B.add_string b data
+  | TV.Array pairs ->
+      adata_dict_collection_argument_to_buffer b adata_array_prefix pairs
+  | TV.VArray values ->
+      adata_collection_argument_to_buffer b adata_varray_prefix values
+  | TV.Vec values ->
+      adata_collection_argument_to_buffer b adata_vec_prefix values
+  | TV.Dict pairs ->
+      adata_dict_collection_argument_to_buffer b adata_dict_prefix pairs
+  | TV.DArray pairs ->
+      adata_dict_collection_argument_to_buffer b adata_darray_prefix pairs
+  | TV.Keyset values ->
+      adata_collection_argument_to_buffer b adata_keyset_prefix values
 
 and adata_dict_collection_argument_to_buffer b col_type pairs =
   adata_mapped_argument_to_buffer b col_type pairs begin fun b (v1, v2) ->
@@ -109,6 +128,20 @@ let rewrite_typed_value tv =
   | TV.Int i -> Int i
   | TV.Float f -> Double (SU.Float.to_string f)
   | TV.String s -> String s
+  | TV.HhasAdata "" -> failwith "HhasAdata may not be empty"
+  | TV.HhasAdata d ->
+    let identifier = get_array_identifier tv in
+    begin match String.sub d 0 1 with
+    | s when s = adata_array_prefix -> Array identifier
+    | s when s = adata_varray_prefix && hack_arr_dv_arrs () -> Vec identifier
+    | s when s = adata_varray_prefix -> Array identifier
+    | s when s = adata_darray_prefix && hack_arr_dv_arrs () -> Dict identifier
+    | s when s = adata_darray_prefix -> Array identifier
+    | s when s = adata_vec_prefix -> Vec identifier
+    | s when s = adata_keyset_prefix -> Keyset identifier
+    | s when s = adata_dict_prefix -> Dict identifier
+    | _ -> failwith ("Unknown HhasAdata data: " ^ d)
+    end
   | TV.Array _ -> Array (get_array_identifier tv)
   | TV.VArray _ when hack_arr_dv_arrs () -> Vec (get_array_identifier tv)
   | TV.VArray _ -> Array (get_array_identifier tv)

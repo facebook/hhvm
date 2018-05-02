@@ -455,30 +455,36 @@ let prepString2 : node list -> node list =
     if width s > 0 then s :: unwind ss else unwind ss
   | x -> x (* unchanged *)
 
+let extract_unquoted_string ~start ~len content =
+  try (* Using String.sub; Invalid_argument when str too short *)
+    if len >= 3 && String.sub content 0 3 = "<<<" (* The heredoc case *)
+    then
+       (* These types of strings begin with an opening line containing <<<
+        * followed by a string to use as a terminator (which is optionally
+        * quoted) and end with a line containing only the terminator and a
+        * semicolon followed by a blank line. We need to drop the opening line
+        * as well as the blank line and preceding terminator line.
+        *)
+       let start = String.index content '\n' + 1 in
+       let end_ = String.rindex_from content (len - 2) '\n' in
+       (* An empty heredoc, this way, will have start >= end *)
+       if start >= end_ then "" else String.sub content start (end_ - start)
+    else
+      match String.get content start, String.get content (start + len - 1) with
+        | '"', '"' | '\'', '\'' | '`', '`' ->
+            String.sub content (start + 1) (len - 2)
+        | _ ->
+            if start = 0 && len = String.length content then
+              content
+            else
+              String.sub content start len
+  with Invalid_argument _ -> content
+
 let mkStr : (string -> string) -> string -> string = fun unescaper content ->
   let content = if String.length content > 0 && content.[0] = 'b'
     then String.sub content 1 (String.length content - 1) else content in
   let len = String.length content in
-  let no_quotes =
-    try (* Using String.sub; Invalid_argument when str too short *)
-      if len >= 3 && String.sub content 0 3 = "<<<" (* The heredoc case *)
-      then
-         (* These types of strings begin with an opening line containing <<<
-          * followed by a string to use as a terminator (which is optionally
-          * quoted) and end with a line containing only the terminator and a
-          * semicolon followed by a blank line. We need to drop the opening line
-          * as well as the blank line and preceding terminator line.
-          *)
-         let start = String.index content '\n' + 1 in
-         let end_ = String.rindex_from content (len - 2) '\n' in
-         (* An empty heredoc, this way, will have start >= end *)
-         if start >= end_ then "" else String.sub content start (end_ - start)
-      else
-      match String.get content 0, String.get content (len - 1) with
-        | '"', '"' | '\'', '\'' | '`', '`' -> String.sub content 1 (len - 2)
-        | _ -> content
-    with Invalid_argument _ -> content
-  in
+  let no_quotes = extract_unquoted_string ~start:0 ~len content in
   try unescaper no_quotes with
   | Php_escaping.Invalid_string _ -> raise @@
       Failure (Printf.sprintf "Malformed string literal <<%s>>" no_quotes)
@@ -985,6 +991,37 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; _ }
       -> Call (pExpr recv env, [], couldMap ~f:pExpr args env, [])
     | FunctionCallExpression
+      { function_call_receiver = recv
+      ; function_call_argument_list =
+        { syntax = SyntaxList
+          [ { syntax = ListItem
+              { list_item =
+                { syntax = LiteralExpression { literal_expression = expr }
+                ; _
+                }
+              ; _
+              }
+            ; _
+          } ]
+        ; _
+        }
+      ; _
+      } when text recv = "__hhas_adata" ->
+      let literal_expression_pos = pPos expr env in
+      let s =
+        expr
+          |> source_text
+          |> SourceText.text
+          |> extract_unquoted_string
+              ~start:(start_offset expr)
+              ~len:(width expr) in
+      Call (
+        pExpr recv env,
+        [],
+        [ literal_expression_pos, String (literal_expression_pos, s) ],
+        []
+      )
+    | FunctionCallExpression
       { function_call_receiver      = recv
       ; function_call_argument_list = args
       ; _ }
@@ -1287,7 +1324,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
                                       |> Str.split (Str.regexp "_")
                                       |> String.concat "" in
         (* TODO(17796330): Get rid of linter functionality in the lowerer *)
-        if s <> String.lowercase_ascii s then Lint.lowercase_constant pos s;
+        if not env.codegen && s <> String.lowercase_ascii s then
+          Lint.lowercase_constant pos s;
         (match location, token_kind expr with
         (* TODO(T21285960): Inside strings, int indices "should" be string indices *)
         | InDoubleQuotedString, _ when env.codegen -> String (pos, mkStr unesc_dbl s)

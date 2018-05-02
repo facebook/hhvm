@@ -257,6 +257,12 @@ function token_name(int $token): string;
 <<__Native, __IsFoldable>>
 function hphp_to_string(mixed $v): string;
 
+function __hhas_adata(string $incorrect_hhas_adata) {
+  throw new Exception(
+    "__hhas_adata may only be called with a scalar string argument."
+  );
+}
+
 }
 
 namespace __SystemLib {

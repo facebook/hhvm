@@ -121,6 +121,9 @@ let rec expr_to_typed_value
   | A.Float (_, s) -> TV.Float (float_of_string s)
   | A.Id (_, id) when id = "NAN" -> TV.Float nan
   | A.Id (_, id) when id = "INF" -> TV.Float infinity
+  | A.Call ((_, A.Id (_, "__hhas_adata")), _, [ (_, A.String (_, data)) ], [])
+    ->
+      TV.HhasAdata data
   | A.Array fields -> array_to_typed_value ns fields
   | A.Varray fields -> varray_to_typed_value ns fields
   | A.Darray fields -> darray_to_typed_value ns fields
@@ -327,6 +330,7 @@ let rec value_to_expr_ p v =
   | TV.Float f -> A.Float (p, SU.Float.to_string f)
   | TV.Vec _ -> failwith "value_to_expr: vec NYI"
   | TV.Keyset _ -> failwith "value_to_expr: keyset NYI"
+  | TV.HhasAdata _ -> failwith "value_to_expr: HhasAdata NYI"
   | TV.Array pairs -> A.Array (List.map pairs (value_pair_to_afield p))
   | TV.VArray values -> A.Varray (List.map values (value_to_expr p))
   | TV.DArray pairs ->

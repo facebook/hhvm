@@ -268,6 +268,7 @@ let is_special_function env e args =
     let n = List.length args in
     match s with
     | "isset" -> n > 0
+    | "__hhas_adata"
     | "empty" -> n = 1
     | "define" when is_global_namespace env ->
       begin match args with
@@ -1601,6 +1602,7 @@ and emit_inline_hhas s =
 
 and emit_expr env ?last_pos ?(need_ref=false) (pos, expr_ as expr) =
   match expr_ with
+  | A.Call ((_, A.Id (_, "__hhas_adata")), _, [ (_, A.String _) ], [])
   | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True ->
     let v = Ast_constant_folder.expr_to_typed_value (Emit_env.get_namespace env) expr in
     emit_pos_then pos @@

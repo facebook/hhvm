@@ -36,8 +36,6 @@ module Lexer : sig
   val hacksperimental : t -> bool
 end = struct
 
-  let padding = String.make 100 '\x00'
-
   (* text consists of a pair consisting of a string, padded by a certain, fixed
    * amount of null bytes, and then the rest of the source text *)
   type t = {
@@ -49,8 +47,7 @@ end = struct
   }
 
   let make ?(hacksperimental = false) text =
-    let text' = SourceText.append_padding text padding in
-    { text = text'; start = 0; offset = 0; errors = []; hacksperimental }
+    { text; start = 0; offset = 0; errors = []; hacksperimental }
 
   let start  x = x.start
   let source x = x.text
@@ -115,10 +112,10 @@ type string_literal_kind =
 (* Housekeeping *)
 
 let peek_char lexer index =
-  lexer.Lexer.text.SourceText.text.[offset lexer + index]
+  SourceText.get lexer.Lexer.text (offset lexer + index)
 
 let peek_string lexer size =
-  String.sub lexer.Lexer.text.SourceText.text (offset lexer) size
+  SourceText.sub lexer.Lexer.text (offset lexer) size
 
 let match_string lexer s =
   s = peek_string lexer (String.length s)

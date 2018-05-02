@@ -6229,6 +6229,36 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         makeStaticString(call->getClassScope()->getScopeName());
       e.String(name);
       return true;
+    } else if (call->isCallToFunction("__hhas_adata") &&
+               params &&
+               params->getCount() == 1) {
+      ExpressionPtr p0 = (*params)[0];
+      Variant v0;
+      if (p0->getScalarValue(v0) && v0.isString()) {
+        auto str = v0.toString();
+        VariableUnserializer vu(
+          str.data(),
+          str.size(),
+          VariableUnserializer::Type::Internal,
+          true
+        );
+        if (m_dvOverrides) {
+          vu.setDVOverrides(m_dvOverrides);
+        }
+        Variant var;
+        try {
+          var = vu.unserialize();
+        } catch (const std::exception& ex) {
+          throw IncludeTimeFatalException(
+            call,
+            "Encountered an error while unserializing the argument to "
+            "__hhas_adata. __hhas_adata argument was: %s. Exception was: %s",
+            str.c_str(),
+            ex.what());
+        }
+        emitScalarValue(e, std::move(var));
+        return true;
+      }
     }
 #define TYPE_CONVERT_INSTR_HH(what, What)                               \
     else if (((call->isCallToFunction(#what) &&                         \

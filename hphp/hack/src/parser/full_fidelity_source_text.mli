@@ -22,10 +22,6 @@ val make : Relative_path.t -> string -> t
 (** empty source_text.t located nowhere *)
 val empty : t
 
-(** given an initial Source_text.t, appending padding
- * onto the underlying structure *)
-val append_padding : t -> string -> t
-
 (** read a relative path into a source_text.t with the contents at that path *)
 val from_file : Relative_path.t -> t
 

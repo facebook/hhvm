@@ -1,0 +1,6 @@
+bool(true)
+bool(true)
+bool(true)
+
+Warning: readlink(): No such file or directory %s/fb_lazy.php in %s/fb_lazy.php on line 13
+bool(true)

@@ -77,7 +77,8 @@ const Class* getOwningClassForFunc(const Func* f) {
   // We only populate s_funcIdToClassMap when the following conditions
   // are true.
   assertx(RuntimeOption::EvalPerfDataMap ||
-          !RuntimeOption::EvalJitSerializeTo.empty());
+          RuntimeOption::EvalJitSerdesMode == JitSerdesMode::Serialize ||
+          RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit);
 
   if (s_funcIdToClassMap) {
     FuncIdToClassMap::const_accessor acc;
@@ -1877,7 +1878,8 @@ void Class::setMethods() {
       f = f->clone(f->cls());
       f->setNewFuncId();
       if (RuntimeOption::EvalPerfDataMap ||
-          !RuntimeOption::EvalJitSerializeTo.empty()) {
+          RuntimeOption::EvalJitSerdesMode == JitSerdesMode::Serialize ||
+          RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {
         if (!s_funcIdToClassMap) {
           Lock l(g_classesMutex);
           if (!s_funcIdToClassMap) {

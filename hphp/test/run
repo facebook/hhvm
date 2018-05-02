@@ -56,8 +56,8 @@ function jit_serialize_option($cmd, $test, $options, $serialize) {
   $cmds = explode(' -- ', $cmd, 2);
   $cmds[0] .=
     ' --count=' . ($serialize ? $options['jit-serialize'] : 1) .
-    " -vEval.Jit" .
-    ($serialize ? 'SerializeTo=' : 'DeserializeFrom=+') . $serialized;
+    " -vEval.JitSerdesFile=" . $serialized .
+    " -vEval.JitSerdesMode=" . ($serialize ? 'Serialize' : 'DeserializeOrFail');
   return implode(' -- ', $cmds);
 }
 

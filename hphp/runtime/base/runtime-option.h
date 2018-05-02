@@ -47,6 +47,15 @@ struct IniSettingMap;
 
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 
+enum class JitSerdesMode {
+  Off,
+  Serialize,
+  SerializeAndExit,
+  Deserialize,
+  DeserializeOrFail,
+  DeserializeOrGenerate,
+};
+
 /**
  * Configurable options set from command line or configurable file at startup
  * time.
@@ -438,6 +447,8 @@ struct RuntimeOption {
   static bool EnableHackcOnlyFeature;
   static uint32_t EvalInitialStaticStringTableSize;
   static uint32_t EvalInitialNamedEntityTableSize;
+  static JitSerdesMode EvalJitSerdesMode;
+  static std::string EvalJitSerdesFile;
 
   // ENABLED (1) selects PHP7 behavior.
   static bool PHP7_DeprecationWarnings;
@@ -498,13 +509,6 @@ struct RuntimeOption {
   F(int, JitThreads,                   4)                               \
   F(int, JitWorkerThreads,             Process::GetCPUCount() / 2)      \
   F(int, JitLdimmqSpan,                8)                               \
-  /* Serialize the profile data to this file before retranslateAll */   \
-  F(string, JitSerializeTo,            "")                              \
-  /* Deserialize the profile data from this file during process_init
-     and run retranslateAll if successful. Prepending the name with
-     a '+' char will cause hhvm to fail to start up if this is
-     unsuccessful.                                                   */ \
-  F(string, JitDeserializeFrom,        "")                              \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(bool, DisassemblerSourceMapping,   true)                            \

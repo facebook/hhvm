@@ -2339,18 +2339,44 @@ void hphp_process_init() {
   }
 
   if (RuntimeOption::RepoAuthoritative &&
-      !RuntimeOption::EvalJitDeserializeFrom.empty() &&
+      !RuntimeOption::EvalJitSerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
-    auto const name = RuntimeOption::EvalJitDeserializeFrom[0] == '+' ?
-      RuntimeOption::EvalJitDeserializeFrom.substr(1) :
-      RuntimeOption::EvalJitDeserializeFrom;
-    if (jit::deserializeProfData(name)) {
-      StructuredLog::log("", {});
-      jit::mcgen::checkRetranslateAll(true);
-    } else if (RuntimeOption::EvalJitDeserializeFrom[0] == '+') {
-      Logger::Error("Failed to deserialize jit profile.");
-      hphp_process_exit();
-      exit(1);
+    switch (RuntimeOption::EvalJitSerdesMode) {
+      case JitSerdesMode::Off:
+      case JitSerdesMode::Serialize:
+      case JitSerdesMode::SerializeAndExit:
+        break;
+      case JitSerdesMode::Deserialize:
+      case JitSerdesMode::DeserializeOrFail:
+      case JitSerdesMode::DeserializeOrGenerate:
+      if (RuntimeOption::ServerExecutionMode()) {
+        Logger::FInfo("JitDeserializeFrom: {}",
+                      RuntimeOption::EvalJitSerdesFile);
+      }
+      if (jit::deserializeProfData(RuntimeOption::EvalJitSerdesFile)) {
+        BootStats::mark("jit::deserializeProfData");
+        StructuredLog::log("", {});
+        RuntimeOption::EvalNumSingleJitRequests=0;
+        RuntimeOption::EvalJitProfileInterpRequests=0;
+        RuntimeOption::EvalJitProfileRequests=0;
+        RuntimeOption::EvalJitWorkerThreads=Process::GetCPUCount();
+        jit::mcgen::checkRetranslateAll(true);
+        BootStats::mark("mcgen::retranslateAll");
+      } else {
+        if (RuntimeOption::EvalJitSerdesMode ==
+            JitSerdesMode::DeserializeOrFail) {
+          Logger::Error("Failed to deserialize jit profile.");
+          hphp_process_exit();
+          exit(1);
+        }
+        if (RuntimeOption::EvalJitSerdesMode ==
+            JitSerdesMode::DeserializeOrGenerate) {
+          Logger::FInfo("JitDeserializeFrom: `{}' was not valid, "
+                        "scheduling one time serialization and restart",
+                        RuntimeOption::EvalJitSerdesFile);
+          RuntimeOption::EvalJitSerdesMode = JitSerdesMode::SerializeAndExit;
+        }
+      }
     }
   }
 

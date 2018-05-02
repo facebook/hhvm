@@ -42,6 +42,8 @@
 
 #include "hphp/runtime/base/program-functions.h"
 
+#include "hphp/runtime/server/http-server.h"
+
 #include "hphp/util/hfsort.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
@@ -261,15 +263,29 @@ void print(hfsort::TargetGraph& /*cg*/, const char* fileName,
 void retranslateAll() {
   const bool serverMode = RuntimeOption::ServerExecutionMode();
 
+  // Serialize profiling data if requested.
+  if (RuntimeOption::RepoAuthoritative &&
+      !RuntimeOption::EvalJitSerdesFile.empty() &&
+      (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::Serialize ||
+       RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit)) {
+    if (serverMode) Logger::Info("retranslateAll: serializing profile data");
+    auto const stop =
+      RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit;
+    serializeProfData(RuntimeOption::EvalJitSerdesFile);
+    if (serverMode) {
+      Logger::Info("retranslateAll: serializing done");
+      if (stop) {
+        HttpServer::Server->stop();
+        s_retranslateAllComplete.store(true, std::memory_order_release);
+        return;
+      }
+    }
+  }
+
   // 1) Create the call graph
 
   if (serverMode) {
     Logger::Info("retranslateAll: starting to build the call graph");
-  }
-
-  if (RuntimeOption::RepoAuthoritative &&
-      !RuntimeOption::EvalJitSerializeTo.empty()) {
-    serializeProfData(RuntimeOption::EvalJitSerializeTo);
   }
 
   jit::hash_map<hfsort::TargetId, FuncId> target2FuncId;

@@ -115,6 +115,8 @@ bool RuntimeOption::CheckParamTypeInvariance = true;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
 uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
+JitSerdesMode RuntimeOption::EvalJitSerdesMode{};
+std::string RuntimeOption::EvalJitSerdesFile;
 
 std::map<std::string, ErrorLogFileData> RuntimeOption::ErrorLogs = {
   {Logger::DEFAULT, ErrorLogFileData()},
@@ -1264,6 +1266,21 @@ void RuntimeOption::Load(
     Config::Bind(CheckParamTypeInvariance, ini, config,
                  "Eval.CheckParamTypeInvariance",
                  !EnableHipHopSyntax);
+
+    static std::string jitSerdesMode;
+    Config::Bind(jitSerdesMode, ini, config, "Eval.JitSerdesMode", "Off");
+
+    EvalJitSerdesMode = [&] {
+      #define X(x) if (jitSerdesMode == #x) return JitSerdesMode::x
+      X(Serialize);
+      X(SerializeAndExit);
+      X(Deserialize);
+      X(DeserializeOrFail);
+      X(DeserializeOrGenerate);
+      return JitSerdesMode::Off;
+    }();
+    Config::Bind(EvalJitSerdesFile, ini, config,
+                 "Eval.JitSerdesFile", EvalJitSerdesFile);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true

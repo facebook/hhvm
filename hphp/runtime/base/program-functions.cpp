@@ -863,12 +863,18 @@ static void pagein_self(void) {
   // people when they accidentally created threads before this point.
   int nThreads = Process::GetNumThreads();
   if (nThreads > 1) {
-    Logger::Error("%d threads running, cannot hugify text!", nThreads);
-    fprintf(stderr,
-            "HHVM is broken: %u threads running in hugifyText()!\n",
-            nThreads);
-    if (debug) {
-      throw std::runtime_error{"you cannot create threads before pagein_self"};
+    usleep(1000);
+    nThreads = Process::GetNumThreads();
+    if (nThreads > 1) {
+      Logger::Error("%d threads running, cannot hugify text!", nThreads);
+      fprintf(stderr,
+              "HHVM is broken: %u threads running in hugifyText()!\n",
+              nThreads);
+      if (debug) {
+        throw std::runtime_error{
+          "you cannot create threads before pagein_self"
+        };
+      }
     }
   }
 

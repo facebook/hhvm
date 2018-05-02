@@ -55,7 +55,7 @@ bool SetBreakpointsCommand::executeImpl(
 
   const std::string& path =
     StatCache::realpath(
-      File::TranslatePath(String(filePath)).toCppString().c_str());
+      File::TranslatePathKeepRelative(String(filePath)).data());
 
   BreakpointManager* bpMgr = session->getBreakpointManager();
 

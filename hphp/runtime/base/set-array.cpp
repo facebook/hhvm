@@ -129,12 +129,11 @@ ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
 ArrayData* SetArray::MakeUncounted(ArrayData* array,
                                    bool withApcTypedValue,
                                    PointerMap* seen) {
-  void** seenVal = nullptr;
-  if (seen && array->hasMultipleRefs()) {
+  auto const updateSeen = seen && array->hasMultipleRefs();
+  if (updateSeen) {
     auto it = seen->find(array);
     assertx(it != seen->end());
-    seenVal = &it->second;
-    if (auto const arr = static_cast<ArrayData*>(*seenVal)) {
+    if (auto const arr = static_cast<ArrayData*>(it->second)) {
       if (arr->uncountedIncRef()) {
         return arr;
       }
@@ -190,7 +189,7 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array,
     APCStats::getAPCStats().addAPCUncountedBlock();
   }
 
-  if (seenVal) *seenVal = dest;
+  if (updateSeen) (*seen)[array] = dest;
   return dest;
 }
 

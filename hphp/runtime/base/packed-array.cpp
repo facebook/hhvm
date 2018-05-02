@@ -1385,12 +1385,11 @@ bool PackedArray::Uasort(ArrayData* ad, const Variant&) {
 ArrayData* PackedArray::MakeUncounted(ArrayData* array,
                                       bool withApcTypedValue,
                                       PointerMap* seen) {
-  void** seenVal = nullptr;
-  if (seen && array->hasMultipleRefs()) {
+  auto const updateSeen = seen && array->hasMultipleRefs();
+  if (updateSeen) {
     auto it = seen->find(array);
     assertx(it != seen->end());
-    seenVal = &it->second;
-    if (auto const arr = static_cast<ArrayData*>(*seenVal)) {
+    if (auto const arr = static_cast<ArrayData*>(it->second)) {
       if (arr->uncountedIncRef()) {
         return arr;
       }
@@ -1433,7 +1432,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
   assertx(ad->m_pos == array->m_pos);
   assertx(ad->isUncounted());
   assertx(checkInvariants(ad));
-  if (seenVal) *seenVal = ad;
+  if (updateSeen) (*seen)[array] = ad;
   return ad;
 }
 

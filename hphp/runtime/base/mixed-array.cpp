@@ -407,12 +407,11 @@ ALWAYS_INLINE static bool UncountedMixedArrayOnHugePage() {
 ArrayData* MixedArray::MakeUncounted(ArrayData* array,
                                      bool withApcTypedValue,
                                      PointerMap* seen) {
-  void** seenVal = nullptr;
-  if (seen && array->hasMultipleRefs()) {
+  auto const updateSeen = seen && array->hasMultipleRefs();
+  if (updateSeen) {
     auto it = seen->find(array);
     assertx(it != seen->end());
-    seenVal = &it->second;
-    if (auto const arr = static_cast<ArrayData*>(*seenVal)) {
+    if (auto const arr = static_cast<ArrayData*>(it->second)) {
       if (arr->uncountedIncRef()) {
         return arr;
       }
@@ -471,7 +470,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().addAPCUncountedBlock();
   }
-  if (seenVal) *seenVal = ad;
+  if (updateSeen) (*seen)[array] = ad;
   return ad;
 }
 

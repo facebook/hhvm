@@ -23,6 +23,8 @@
 
 #include "hphp/util/functional.h"
 
+#include "folly/container/F14Map.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -73,7 +75,8 @@ using hphp_string_map = hphp_hash_map<std::string, T, string_hash>;
 
 typedef hphp_hash_set<std::string, string_hash> hphp_string_set;
 
-typedef hphp_hash_map<void*, void*, pointer_hash<void> > PointerMap;
+using PointerMap = folly::F14ValueMap<void*, void*,
+                                                     pointer_hash<void>>;
 typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;
 typedef hphp_hash_set<void*, pointer_hash<void> > PointerSet;
 

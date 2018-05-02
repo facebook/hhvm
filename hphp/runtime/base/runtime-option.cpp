@@ -35,7 +35,9 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/cpuid.h"
+#include "hphp/util/current-executable.h"
 #include "hphp/util/hdf.h"
+#include "hphp/util/hphp-config.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/network.h"
 #include "hphp/util/hardware-counter.h"
@@ -496,7 +498,7 @@ static inline bool eagerGcDefault() {
 
 static inline bool hackCompilerEnableDefault() {
 #ifndef HHVM_NO_DEFAULT_HACKC
-  return facebook;
+  return true;
 #else
   return false;
 #endif
@@ -506,6 +508,33 @@ static inline std::string hackCompilerArgsDefault() {
   return RuntimeOption::RepoAuthoritative
     ? "-v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs"
     : "-v Hack.Compiler.SourceMapping=1 --daemon";
+}
+
+static inline std::string hackCompilerCommandDefault() {
+#ifdef FACEBOOK
+  return "";
+#else
+  std::string hackc = folly::sformat(
+    "{}/hh_single_compile",
+    current_executable_directory()
+  );
+  if (::access(hackc.data(), X_OK) != 0) {
+#ifndef HACKC_FALLBACK_PATH
+    return "";
+#else
+    hackc = HACKC_FALLBACK_PATH;
+    if (::access(hackc.data(), X_OK) != 0) {
+      return "";
+    }
+#endif
+  }
+
+  return folly::sformat(
+    "{} {}",
+    hackc,
+    hackCompilerArgsDefault()
+  );
+#endif
 }
 
 static inline bool enableGcDefault() {

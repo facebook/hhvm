@@ -116,7 +116,7 @@ module Env : sig
   val found_dollardollar : genv * lenv -> Pos.t -> positioned_ident
   val inside_pipe : genv * lenv -> bool
   val new_pending_lvar : genv * lenv -> Ast.id -> unit
-  val promote_pending : genv * lenv -> unit
+  val promote_pending_lvar : genv * lenv -> string -> unit
   val lvar : genv * lenv -> Ast.id -> positioned_ident
   val global_const : genv * lenv -> Ast.id -> Ast.id
   val type_name : genv * lenv -> Ast.id -> allow_typedef:bool -> Ast.id
@@ -409,11 +409,12 @@ end = struct
         lenv.pending_locals := SMap.add x y !(lenv.pending_locals)
     | _ -> ()
 
-  let promote_pending (_, lenv as env) =
-    SMap.iter begin fun x (p, ident) ->
-      add_lvar env (p, x) (p, ident)
-    end !(lenv.pending_locals);
-    lenv.pending_locals := SMap.empty
+  let promote_pending_lvar (_, lenv) x =
+    match SMap.get x !(lenv.pending_locals) with
+    | Some (p, ident) ->
+      lenv.locals := SMap.add x (p, ident) !(lenv.locals);
+      lenv.pending_locals := SMap.remove x !(lenv.pending_locals)
+    | None -> ()
 
   let handle_undefined_variable (_genv, env) (p, x) =
     match env.unbound_mode with
@@ -1865,7 +1866,7 @@ module Make (GetLocals : GetLocals) = struct
       Env.extend_all_locals env all1;
       N.If (e, b1, b2)
    ) in
-   Env.promote_pending env;
+   SMap.iter (fun x _ -> Env.promote_pending_lvar env x) vars;
    result
 
   and do_stmt env b e =
@@ -1911,7 +1912,7 @@ module Make (GetLocals : GetLocals) = struct
       List.iter all_locals_l (Env.extend_all_locals env);
       N.Switch (e, cl)
     end in
-    Env.promote_pending env;
+    SMap.iter (fun x _ -> Env.promote_pending_lvar env x) vars;
     result
 
   and foreach_stmt env e aw ae b =
@@ -1968,7 +1969,7 @@ module Make (GetLocals : GetLocals) = struct
       Env.extend_all_locals env all_locals_b;
       N.Try (b, cl, fb)
     ) in
-    Env.promote_pending env;
+    SMap.iter (fun x _ -> Env.promote_pending_lvar env x) vars;
     result
 
   and block ?(new_scope=true) env stl =

@@ -207,8 +207,9 @@ and stmt env acc st =
       expr acc e
     | While (e, _) ->
       expr acc e
-    | Using (_, e, _) ->
-      expr acc e
+    | Using (_, e, b) ->
+      let acc = expr acc e in
+      block acc b
     | For (e1, _, _, _) ->
       expr acc e1
     | Switch (e, cl) ->

@@ -22,7 +22,11 @@
 #include <cassert>
 #include <bitset>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include <folly/Optional.h>
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/util/match.h"
@@ -36,6 +40,7 @@
 #include "hphp/hhbbc/dce.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/interp.h"
+#include "hphp/hhbbc/interp-internal.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/options-util.h"
@@ -45,8 +50,6 @@
 #include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
-
-TRACE_SET_MOD(hhbbc);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -749,7 +752,7 @@ void visit_blocks_impl(const char* what,
                        AInfo& ainfo,
                        CollectedInfo& collect,
                        const BlockContainer& rpoBlocks,
-                       Fun fun) {
+                       Fun&& fun) {
   FTRACE(1, "|---- {}\n", what);
   for (auto& blk : rpoBlocks) {
     FTRACE(2, "block #{}\n", blk->id);
@@ -771,10 +774,11 @@ void visit_blocks_mutable(const char* what,
                           const Index& index,
                           FuncAnalysis& ainfo,
                           CollectedInfo& collect,
-                          Fun fun) {
+                          Fun&& fun) {
   // Make a copy of the block list so it can be mutated by the visitor.
   auto const blocksCopy = ainfo.rpoBlocks;
-  visit_blocks_impl(what, index, ainfo, collect, blocksCopy, fun);
+  visit_blocks_impl(what, index, ainfo, collect,
+                    blocksCopy, std::forward<Fun>(fun));
 }
 
 template<class Fun>
@@ -782,8 +786,294 @@ void visit_blocks(const char* what,
                   const Index& index,
                   const FuncAnalysis& ainfo,
                   CollectedInfo& collect,
-                  Fun fun) {
-  visit_blocks_impl(what, index, ainfo, collect, ainfo.rpoBlocks, fun);
+                  Fun&& fun) {
+  visit_blocks_impl(what, index, ainfo, collect,
+                    ainfo.rpoBlocks, std::forward<Fun>(fun));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+IterId iterFromInit(const php::Func& func, BlockId initBlock) {
+  auto const& op = func.blocks[initBlock]->hhbcs.back();
+  if (op.op == Op::IterInit)   return op.IterInit.iter1;
+  if (op.op == Op::IterInitK)  return op.IterInitK.iter1;
+  if (op.op == Op::LIterInit)  return op.LIterInit.iter1;
+  if (op.op == Op::LIterInitK) return op.LIterInitK.iter1;
+  always_assert(false);
+}
+
+/*
+ * Attempt to convert normal iterators into liters. In order for an iterator to
+ * be converted to a liter, the following needs to be true:
+ *
+ * - The iterator is initialized with the value in a local at exactly one block.
+ *
+ * - That same local is not modified on all possible paths from the
+ *   initialization to every usage of that iterator.
+ *
+ * The first condition is actually more restrictive than necessary, but
+ * enforcing that the iterator is initialized at exactly one place simplifies
+ * the bookkeeping and is always true with how we currently emit bytecode.
+ */
+
+struct OptimizeIterState {
+  void operator()(const Index& index,
+                  const FuncAnalysis& ainfo,
+                  CollectedInfo& collect,
+                  borrowed_ptr<php::Block> const blk,
+                  State state) {
+    auto const ctx = ainfo.ctx;
+    auto interp = Interp { index, ctx, collect, blk, state };
+    for (uint32_t opIdx = 0; opIdx < blk->hhbcs.size(); ++opIdx) {
+      // If we've already determined that nothing is eligible, we can just stop.
+      if (!eligible.any()) break;
+
+      auto const& op = blk->hhbcs[opIdx];
+      FTRACE(2, "  == {}\n", show(ctx.func, op));
+
+      if (state.unreachable) break;
+
+      // At every op, we check the known state of all live iterators and mark it
+      // as ineligible as necessary.
+      for (IterId it = 0; it < state.iters.size(); ++it) {
+        match<void>(
+          state.iters[it],
+          []  (DeadIter) {},
+          [&] (const LiveIter& ti) {
+            FTRACE(4, "   iter {: <2}  :: {}\n",
+                   it, show(*ctx.func, state.iters[it]));
+            // The init block is unknown. This can only happen if there's more
+            // than one block where this iterator was initialized. This makes
+            // tracking the iteration loop ambiguous, and can't happen with how
+            // we currently emit bytecode, so just pessimize everything.
+            if (ti.initBlock == NoBlockId) {
+              FTRACE(2, "   - pessimize all\n");
+              eligible.clear();
+              return;
+            }
+            // Otherwise, if the iterator doesn't have an equivalent local,
+            // either it was never initialized with a local to begin with, or
+            // that local got changed within the loop. Either way, this
+            // iteration loop isn't eligible.
+            if (eligible[ti.initBlock] && ti.baseLocal == NoLocalId) {
+              FTRACE(2, "   - blk:{} ineligible\n", ti.initBlock);
+              eligible[ti.initBlock] = false;
+            }
+          }
+        );
+      }
+
+      auto const fixupForInit = [&] {
+        auto const base = topStkLocal(state);
+        if (base == NoLocalId && eligible[blk->id]) {
+          FTRACE(2, "   - blk:{} ineligible\n", blk->id);
+          eligible[blk->id] = false;
+        }
+        fixups.emplace_back(Fixup{blk->id, opIdx, blk->id, base});
+        FTRACE(2, "   + fixup ({})\n", fixups.back().show(*ctx.func));
+      };
+
+      auto const fixupFromState = [&] (IterId it) {
+        match<void>(
+          state.iters[it],
+          []  (DeadIter) {},
+          [&] (const LiveIter& ti) {
+            if (ti.initBlock != NoBlockId) {
+              assertx(iterFromInit(*ctx.func, ti.initBlock) == it);
+              fixups.emplace_back(
+                Fixup{blk->id, opIdx, ti.initBlock, ti.baseLocal}
+              );
+              FTRACE(2, "   + fixup ({})\n", fixups.back().show(*ctx.func));
+            }
+          }
+        );
+      };
+
+      // Record a fixup for this iteration op. This iteration loop may not be
+      // ultimately eligible, but we'll check that before actually doing the
+      // transformation.
+      switch (op.op) {
+        case Op::IterInit:
+        case Op::IterInitK:
+          assertx(opIdx == blk->hhbcs.size() - 1);
+          fixupForInit();
+          break;
+        case Op::IterNext:
+          fixupFromState(op.IterNext.iter1);
+          break;
+        case Op::IterNextK:
+          fixupFromState(op.IterNextK.iter1);
+          break;
+        case Op::IterFree:
+          fixupFromState(op.IterFree.iter1);
+          break;
+        case Op::IterBreak:
+          for (auto const& it : op.IterBreak.iterTab) {
+            if (it.kind == KindOfIter) fixupFromState(it.id);
+          }
+          break;
+        default:
+          break;
+      }
+
+      step(interp, op);
+    }
+  }
+
+  // We identify iteration loops by the block of the initialization op (which we
+  // enforce is exactly one block). A fixup describes a transformation to an
+  // iteration instruction which must be applied only if its associated loop is
+  // eligible.
+  struct Fixup {
+    BlockId block; // Block of the op
+    uint32_t op;   // Index into the block of the op
+    BlockId init;  // Block of the loop's initializer
+    LocalId base;  // Invariant base of the iterator
+
+    std::string show(const php::Func& f) const {
+      return folly::sformat(
+        "blk:{},{},blk:{},{}",
+        block, op, init,
+        base != NoLocalId ? local_string(f, base) : "-"
+      );
+    }
+  };
+  std::vector<Fixup> fixups;
+  // All of the associated iterator operations within an iterator loop can be
+  // optimized to liter if the iterator's initialization block is eligible.
+  boost::dynamic_bitset<> eligible;
+};
+
+void optimize_iterators(const Index& index,
+                        const FuncAnalysis& ainfo,
+                        CollectedInfo& collect) {
+  auto const func = ainfo.ctx.func;
+  // Quick exit. If there's no iterators, or if no associated local survives to
+  // the end of the iterator, there's nothing to do.
+  if (!func->numIters || !ainfo.hasInvariantIterBase) return;
+
+  OptimizeIterState state;
+  // Everything starts out as eligible. We'll remove initialization blocks as we
+  // go.
+  state.eligible.resize(func->blocks.size(), true);
+
+  // Visit all the blocks and build up the fixup state.
+  visit_blocks("optimize_iterators", index, ainfo, collect, state);
+  if (!state.eligible.any()) return;
+
+  FTRACE(2, "Rewrites:\n");
+  for (auto const& fixup : state.fixups) {
+    auto const& blk = func->blocks[fixup.block];
+    auto const& op = blk->hhbcs[fixup.op];
+
+    if (!state.eligible[fixup.init]) {
+      // This iteration loop isn't eligible, so don't apply the fixup
+      FTRACE(2, "   * ({}): {}\n", fixup.show(*func), show(func, op));
+      continue;
+    }
+
+    std::vector<Bytecode> newOps;
+    assertx(fixup.base != NoLocalId);
+
+    // Rewrite the iteration op to its liter equivalent:
+    switch (op.op) {
+      case Op::IterInit:
+        newOps = {
+          bc_with_loc(op.srcLoc, bc::PopC {}),
+          bc_with_loc(
+            op.srcLoc,
+            bc::LIterInit {
+              op.IterInit.iter1,
+                fixup.base,
+                op.IterInit.target,
+                op.IterInit.loc3
+            }
+          )
+        };
+        break;
+      case Op::IterInitK:
+        newOps = {
+          bc_with_loc(op.srcLoc, bc::PopC {}),
+          bc_with_loc(
+            op.srcLoc,
+            bc::LIterInitK {
+              op.IterInitK.iter1,
+                fixup.base,
+                op.IterInitK.target,
+                op.IterInitK.loc3,
+                op.IterInitK.loc4
+            }
+          )
+        };
+        break;
+      case Op::IterNext:
+        newOps = {
+          bc_with_loc(
+            op.srcLoc,
+            bc::LIterNext {
+              op.IterNext.iter1,
+                fixup.base,
+                op.IterNext.target,
+                op.IterNext.loc3
+            }
+          )
+        };
+        break;
+      case Op::IterNextK:
+        newOps = {
+          bc_with_loc(
+            op.srcLoc,
+            bc::LIterNextK {
+              op.IterNextK.iter1,
+                fixup.base,
+                op.IterNextK.target,
+                op.IterNextK.loc3,
+                op.IterNextK.loc4
+            }
+          )
+        };
+        break;
+      case Op::IterFree:
+        newOps = {
+          bc_with_loc(
+            op.srcLoc,
+            bc::LIterFree { op.IterFree.iter1, fixup.base }
+          )
+        };
+        break;
+      case Op::IterBreak: {
+        auto const iter = iterFromInit(*func, fixup.init);
+        newOps = { op };
+        for (auto& it : newOps.back().IterBreak.iterTab) {
+          if (it.id == iter) {
+            assertx(it.kind == KindOfIter);
+            it.kind = KindOfLIter;
+            it.local = fixup.base;
+          }
+        }
+        break;
+      }
+      default:
+        always_assert(false);
+    }
+
+    FTRACE(
+      2, "   ({}): {} ==> {}\n",
+      fixup.show(*func), show(func, op),
+      [&] {
+        using namespace folly::gen;
+        return from(newOps)
+          | map([&] (const Bytecode& bc) { return show(func, bc); })
+          | unsplit<std::string>(",");
+      }()
+    );
+
+    blk->hhbcs.erase(blk->hhbcs.begin() + fixup.op);
+    blk->hhbcs.insert(blk->hhbcs.begin() + fixup.op,
+                      newOps.begin(), newOps.end());
+  }
+
+  FTRACE(10, "{}", show(*func));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -798,6 +1088,8 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
     index, ainfo.ctx, nullptr, nullptr,
     CollectionOpts::TrackConstantArrays, &ainfo
   );
+
+  optimize_iterators(index, ainfo, *collect);
 
   do {
     again = false;

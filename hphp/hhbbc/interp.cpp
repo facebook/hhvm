@@ -3562,7 +3562,7 @@ void in(ISS& env, const bc::DecodeCufIter& op) {
 namespace {
 
 void iterInitImpl(ISS& env, IterId iter, LocalId valueLoc,
-                  BlockId target, const Type& base) {
+                  BlockId target, const Type& base, LocalId baseLoc) {
   assert(iterIsDead(env, iter));
 
   auto ity = iter_types(base);
@@ -3577,8 +3577,10 @@ void iterInitImpl(ISS& env, IterId iter, LocalId valueLoc,
   };
 
   auto const fallthrough = [&]{
-    setLoc(env, valueLoc, ity.value);
-    setIter(env, iter, LiveIter { std::move(ity) });
+    setIter(env, iter, LiveIter { ity, baseLoc, env.blk.id });
+    // Do this after setting the iterator, in case it clobbers the base local
+    // equivalency.
+    setLoc(env, valueLoc, std::move(ity.value));
   };
 
   switch (ity.count) {
@@ -3601,7 +3603,7 @@ void iterInitImpl(ISS& env, IterId iter, LocalId valueLoc,
 }
 
 void iterInitKImpl(ISS& env, IterId iter, LocalId valueLoc, LocalId keyLoc,
-                   BlockId target, const Type& base) {
+                   BlockId target, const Type& base, LocalId baseLoc) {
   assert(iterIsDead(env, iter));
 
   auto ity = iter_types(base);
@@ -3613,9 +3615,11 @@ void iterInitKImpl(ISS& env, IterId iter, LocalId valueLoc, LocalId keyLoc,
   };
 
   auto const fallthrough = [&]{
-    setLoc(env, valueLoc, ity.value);
-    setLoc(env, keyLoc, ity.key);
-    setIter(env, iter, LiveIter { std::move(ity) });
+    setIter(env, iter, LiveIter { ity, baseLoc, env.blk.id });
+    // Do this after setting the iterator, in case it clobbers the base local
+    // equivalency.
+    setLoc(env, valueLoc, std::move(ity.value));
+    setLoc(env, keyLoc, std::move(ity.key));
   };
 
   switch (ity.count) {
@@ -3649,6 +3653,7 @@ void iterNextImpl(ISS& env, IterId iter, LocalId valueLoc, BlockId target) {
     },
     [&] (const LiveIter& ti) {
       if (!ti.types.mayThrowOnNext) nothrow(env);
+      if (ti.baseLocal != NoLocalId) hasInvariantIterBase(env);
       switch (ti.types.count) {
         case IterTypes::Count::Single:
         case IterTypes::Count::ZeroOrOne:
@@ -3688,6 +3693,7 @@ void iterNextKImpl(ISS& env, IterId iter, LocalId valueLoc,
     },
     [&] (const LiveIter& ti) {
       if (!ti.types.mayThrowOnNext) nothrow(env);
+      if (ti.baseLocal != NoLocalId) hasInvariantIterBase(env);
       switch (ti.types.count) {
         case IterTypes::Count::Single:
         case IterTypes::Count::ZeroOrOne:
@@ -3719,15 +3725,34 @@ void iterNextKImpl(ISS& env, IterId iter, LocalId valueLoc,
 }
 
 void in(ISS& env, const bc::IterInit& op) {
-  iterInitImpl(env, op.iter1, op.loc3, op.target, popC(env));
+  auto const baseLoc = topStkLocal(env);
+  auto base = popC(env);
+  iterInitImpl(env, op.iter1, op.loc3, op.target, std::move(base), baseLoc);
 }
 
 void in(ISS& env, const bc::LIterInit& op) {
-  iterInitImpl(env, op.iter1, op.loc4, op.target, locAsCell(env, op.loc2));
+  iterInitImpl(
+    env,
+    op.iter1,
+    op.loc4,
+    op.target,
+    locAsCell(env, op.loc2),
+    op.loc2
+  );
 }
 
 void in(ISS& env, const bc::IterInitK& op) {
-  iterInitKImpl(env, op.iter1, op.loc3, op.loc4, op.target, popC(env));
+  auto const baseLoc = topStkLocal(env);
+  auto base = popC(env);
+  iterInitKImpl(
+    env,
+    op.iter1,
+    op.loc3,
+    op.loc4,
+    op.target,
+    std::move(base),
+    baseLoc
+  );
 }
 
 void in(ISS& env, const bc::LIterInitK& op) {
@@ -3737,7 +3762,8 @@ void in(ISS& env, const bc::LIterInitK& op) {
     op.loc4,
     op.loc5,
     op.target,
-    locAsCell(env, op.loc2)
+    locAsCell(env, op.loc2),
+    op.loc2
   );
 }
 
@@ -3817,6 +3843,15 @@ void in(ISS& env, const bc::WIterNextK& op) {
 void in(ISS& env, const bc::IterFree& op) {
   // IterFree is used for weak iterators too, so we can't assert !iterIsDead.
   nothrow(env);
+
+  match<void>(
+    env.state.iters[op.iter1],
+    []  (DeadIter) {},
+    [&] (const LiveIter& ti) {
+      if (ti.baseLocal != NoLocalId) hasInvariantIterBase(env);
+    }
+  );
+
   freeIter(env, op.iter1);
 }
 void in(ISS& env, const bc::LIterFree& op) {
@@ -3834,10 +3869,22 @@ void in(ISS& env, const bc::CIterFree& op) {
 }
 
 void in(ISS& env, const bc::IterBreak& op) {
+  nothrow(env);
+
   for (auto const& it : op.iterTab) {
+    if (it.kind == KindOfIter || it.kind == KindOfLIter) {
+      match<void>(
+        env.state.iters[it.id],
+        []  (DeadIter) {},
+        [&] (const LiveIter& ti) {
+          if (ti.baseLocal != NoLocalId) hasInvariantIterBase(env);
+        }
+      );
+    }
     if (it.kind == KindOfLIter) mayReadLocal(env, it.local);
     freeIter(env, it.id);
   }
+
   env.propagate(op.target, &env.state);
 }
 

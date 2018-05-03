@@ -89,7 +89,15 @@ struct ActRec {
  * non-mutable), so iterators not of those type are considered "dead".
  */
 struct DeadIter {};
-struct LiveIter { IterTypes types; };
+struct LiveIter {
+  IterTypes types;
+  // The local that an iterator was initialized with (and which has not been
+  // changed since).
+  LocalId baseLocal = NoLocalId;
+  // The block id where this iterator was initialized. If there's more than one
+  // such block, NoBlockId.
+  BlockId initBlock = NoBlockId;
+};
 using Iter = boost::variant<DeadIter, LiveIter>;
 
 /*
@@ -395,6 +403,7 @@ struct CollectedInfo {
   std::unordered_set<borrowed_ptr<const php::Func>> unfoldableFuncs;
   bool mayUseVV{false};
   bool effectFree{true};
+  bool hasInvariantIterBase{false};
   bool readsUntrackedConstants{false};
   const CollectionOpts opts{CollectionOpts::TrackConstantArrays};
   bool (*propagate_constants)(const Bytecode& bc, const State& state,
@@ -427,6 +436,7 @@ void widen_props(PropState&);
 std::string show(const ActRec& a);
 std::string show(const php::Func&, const Base& b);
 std::string show(const php::Func&, const State::MInstrState&);
+std::string show(const php::Func&, const Iter&);
 std::string property_state_string(const PropertiesInfo&);
 std::string state_string(const php::Func&, const State&, const CollectedInfo&);
 

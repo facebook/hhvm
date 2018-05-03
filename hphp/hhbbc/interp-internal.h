@@ -259,6 +259,10 @@ void mayUseVV(ISS& env) {
   env.collect.mayUseVV = true;
 }
 
+void hasInvariantIterBase(ISS& env) {
+  env.collect.hasInvariantIterBase = true;
+}
+
 //////////////////////////////////////////////////////////////////////
 // eval stack
 
@@ -594,10 +598,13 @@ void addLocEquiv(ISS& env,
 }
 
 // Obtain a local which is equivalent to the given stack value
-LocalId topStkLocal(ISS& env, uint32_t idx = 0) {
-  assert(idx < env.state.stack.size());
-  auto const equiv = env.state.stack[env.state.stack.size() - idx - 1].equivLoc;
+LocalId topStkLocal(const State& state, uint32_t idx = 0) {
+  assert(idx < state.stack.size());
+  auto const equiv = state.stack[state.stack.size() - idx - 1].equivLoc;
   return equiv == StackDupId ? NoLocalId : equiv;
+}
+LocalId topStkLocal(ISS& env, uint32_t idx = 0) {
+  return topStkLocal(env.state);
 }
 
 // Obtain a location which is equivalent to the given stack value
@@ -644,6 +651,28 @@ void killAllStkEquiv(ISS& env) {
   }
 }
 
+void killIterBaseEquiv(ISS& env, LocalId l) {
+  for (auto& i : env.state.iters) {
+    match<void>(
+      i,
+      []  (DeadIter) {},
+      [&] (LiveIter& iter) {
+        if (iter.baseLocal == l) iter.baseLocal = NoLocalId;
+      }
+    );
+  }
+}
+
+void killAllIterBaseEquiv(ISS& env) {
+  for (auto& i : env.state.iters) {
+    match<void>(
+      i,
+      [] (DeadIter) {},
+      [] (LiveIter& iter) { iter.baseLocal = NoLocalId; }
+    );
+  }
+}
+
 Type peekLocRaw(ISS& env, LocalId l) {
   auto ret = env.state.locals[l];
   if (is_volatile_local(env.ctx.func, l)) {
@@ -665,6 +694,7 @@ void setLocRaw(ISS& env, LocalId l, Type t) {
   mayReadLocal(env, l);
   killLocEquiv(env, l);
   killStkEquiv(env, l);
+  killIterBaseEquiv(env, l);
   killThisLocToKill(env, l);
   if (is_volatile_local(env.ctx.func, l)) {
     auto current = env.state.locals[l];
@@ -786,6 +816,7 @@ void refineLocation(ISS& env, LocalId l,
 void setLoc(ISS& env, LocalId l, Type t) {
   killLocEquiv(env, l);
   killStkEquiv(env, l);
+  killIterBaseEquiv(env, l);
   killThisLocToKill(env, l);
   modifyLocalStatic(env, l, t);
   mayReadLocal(env, l);
@@ -812,6 +843,7 @@ void loseNonRefLocalTypes(ISS& env) {
   }
   killAllLocEquiv(env);
   killAllStkEquiv(env);
+  killAllIterBaseEquiv(env);
   killThisLocToKill(env, NoLocalId);
   modifyLocalStatic(env, NoLocalId, TCell);
 }
@@ -824,6 +856,7 @@ void boxUnknownLocal(ISS& env) {
   }
   killAllLocEquiv(env);
   killAllStkEquiv(env);
+  killAllIterBaseEquiv(env);
   killThisLocToKill(env, NoLocalId);
   // Don't update the local statics here; this is called both for
   // boxing and binding, and the effects on local statics are
@@ -836,6 +869,7 @@ void unsetUnknownLocal(ISS& env) {
   for (auto& l : env.state.locals) l |= TUninit;
   killAllLocEquiv(env);
   killAllStkEquiv(env);
+  killAllIterBaseEquiv(env);
   killThisLocToKill(env, NoLocalId);
   unbindLocalStatic(env, NoLocalId);
 }
@@ -847,6 +881,7 @@ void killLocals(ISS& env) {
   for (auto& l : env.state.locals) l = TGen;
   killAllLocEquiv(env);
   killAllStkEquiv(env);
+  killAllIterBaseEquiv(env);
   killThisLocToKill(env, NoLocalId);
 }
 

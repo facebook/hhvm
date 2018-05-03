@@ -77,12 +77,20 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
             diter.types.mayThrowOnInit || siter.types.mayThrowOnInit;
           auto const throws2 =
             diter.types.mayThrowOnNext || siter.types.mayThrowOnNext;
+          auto const baseLocal = (diter.baseLocal != siter.baseLocal)
+            ? NoLocalId
+            : diter.baseLocal;
+          auto const initBlock = (diter.initBlock != siter.initBlock)
+            ? NoBlockId
+            : diter.initBlock;
           auto const changed =
-            key != diter.types.key ||
-            value != diter.types.value ||
+            !equivalently_refined(key, diter.types.key) ||
+            !equivalently_refined(value, diter.types.value) ||
             count != diter.types.count ||
             throws1 != diter.types.mayThrowOnInit ||
-            throws2 != diter.types.mayThrowOnNext;
+            throws2 != diter.types.mayThrowOnNext ||
+            baseLocal != diter.baseLocal ||
+            initBlock != diter.initBlock;
           diter.types =
             IterTypes {
               std::move(key),
@@ -91,6 +99,8 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
               throws1,
               throws2
             };
+          diter.baseLocal = baseLocal;
+          diter.initBlock = initBlock;
           return changed;
         }
       );
@@ -98,17 +108,29 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
   );
 }
 
-std::string show(const Iter& iter) {
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::string show(const php::Func& f, const Iter& iter) {
   return match<std::string>(
     iter,
     [&] (DeadIter) { return "dead"; },
     [&] (const LiveIter& ti) {
-      return folly::sformat("{}, {}", show(ti.types.key),
-                            show(ti.types.value));
+      auto str = folly::sformat(
+        "{}, {}",
+        show(ti.types.key),
+        show(ti.types.value)
+      );
+      if (ti.initBlock != NoBlockId) {
+        folly::format(&str, " (init=blk:{})", ti.initBlock);
+      }
+      if (ti.baseLocal != NoLocalId) {
+        folly::format(&str, " (base={})", local_string(f, ti.baseLocal));
+      }
+      return str;
     }
   );
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -557,7 +579,7 @@ std::string state_string(const php::Func& f, const State& st,
   }
 
   for (auto i = size_t{0}; i < st.iters.size(); ++i) {
-    folly::format(&ret, "iter {: <2}   :: {}\n", i, show(st.iters[i]));
+    folly::format(&ret, "iter {: <2}  :: {}\n", i, show(f, st.iters[i]));
   }
 
   for (auto i = size_t{0}; i < st.clsRefSlots.size(); ++i) {

@@ -559,6 +559,7 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
         final_pass(*index, *program);
         index->mark_persistent_classes_and_functions(*program);
         state_after("optimize", *program);
+        assert(check(*program));
         break;
       } catch (Index::rebuild& rebuild) {
         FTRACE(1, "whole_program: rebuilding index\n");

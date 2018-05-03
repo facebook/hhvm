@@ -6052,6 +6052,32 @@ and check_parent class_def class_type parent_type =
   then Errors.extend_final position parent_type.dc_pos parent_type.dc_name
   else ()
 
+and check_parent_sealed child_type parent_type =
+  match parent_type.dc_sealed_whitelist with
+    | Some whitelist ->
+      if not (SSet.mem child_type.tc_name whitelist)
+      then begin
+        let error = Errors.extend_sealed
+          child_type.tc_pos parent_type.dc_pos parent_type.dc_name in
+        match parent_type.dc_kind, child_type.tc_kind with
+          | Ast.Cabstract, _
+          | Ast.Cnormal, _ -> error "class" "extend"
+          | Ast.Cinterface, Ast.Cinterface -> error "interface" "extend"
+          | Ast.Cinterface, _ -> error "interface" "implement"
+          | _ -> ()
+      end
+    | None -> ()
+
+and check_parents_sealed env child_def child_type =
+  List.iter (child_def.c_extends @ child_def.c_implements) begin function
+    | _, Happly ((_, name), _) ->
+      begin match Decl_env.get_class_dep env.Env.decl_env name with
+        | Some parent_type -> check_parent_sealed child_type parent_type
+        | None -> ()
+      end
+    | _ -> ()
+  end
+
 and check_parent_abstract position parent_type class_type =
   let is_final = class_type.tc_final in
   if parent_type.dc_kind = Ast.Cabstract &&
@@ -6100,6 +6126,7 @@ and class_def_ env c tc =
   let env = add_constraints (fst c.c_name) env constraints in
   Typing_variance.class_ (Env.get_options env) (snd c.c_name) tc impl;
   List.iter impl (check_implements_tparaml env);
+  check_parents_sealed env c tc;
 
   let env, parent_id, parent = class_def_parent env c tc in
   let is_final = tc.tc_final in

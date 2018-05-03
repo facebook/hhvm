@@ -50,6 +50,7 @@ let experimental_no_trait_reuse = GlobalOptions.tco_experimental_no_trait_reuse
 let experimental_is_expression = GlobalOptions.tco_experimental_is_expression
 let experimental_as_expression = GlobalOptions.tco_experimental_as_expression
 let experimental_decl_override_require_hint = GlobalOptions.tco_decl_override_require_hint
+let experimental_sealed_classes = GlobalOptions.tco_sealed_classes
 
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

@@ -189,6 +189,7 @@ let rec ty (p, x) =
       dc_name                  = dc.dc_name                           ;
       dc_pos                   = dc.dc_pos                            ;
       dc_extends               = dc.dc_extends                        ;
+      dc_sealed_whitelist      = dc.dc_sealed_whitelist               ;
       dc_xhp_attr_deps         = dc.dc_xhp_attr_deps                  ;
       dc_req_ancestors         = List.map dc.dc_req_ancestors
         requirement                                                   ;

@@ -130,6 +130,7 @@ module UserAttributes = struct
   let uaProbabilisticModel  = "__PPL"
   let uaOnlyRxIfRxFunc      = "__OnlyRxIfRxFunc"
   let uaOnlyRxIfArgs        = "__OnlyRxIfArgs"
+  let uaSealed              = "__Sealed"
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
@@ -153,6 +154,7 @@ module UserAttributes = struct
       uaProbabilisticModel;
       uaOnlyRxIfRxFunc;
       uaOnlyRxIfArgs;
+      uaSealed;
     ]
 end
 

@@ -1048,6 +1048,8 @@ module Typing                               = struct
   let cannot_return_borrowed_value_as_immutable = 4235 (* DONT MODIFY!!!! *)
   let decl_override_missing_hint            = 4236 (* DONT MODIFY!!!! *)
   let invalid_conditionally_reactive_call   = 4237 (* DONT MODIFY!!!! *)
+  let extend_sealed                         = 4238 (* DONT MODIFY!!!! *)
+  let sealed_final                          = 4239 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -2486,6 +2488,17 @@ let extend_final extend_pos decl_pos name =
     extend_pos, ("You cannot extend final class "^name);
     decl_pos, "Declaration is here"
   ]
+
+let extend_sealed child_pos parent_pos parent_name parent_kind verb =
+  let name = (strip_ns parent_name) in
+  add_list Typing.extend_sealed [
+    child_pos, ("You cannot "^verb^" sealed "^parent_kind^" "^name);
+    parent_pos, "Declaration is here"
+  ]
+
+let sealed_final pos name =
+  let name = (strip_ns name) in
+  add Typing.sealed_final pos ("Sealed class "^name^" cannot be marked final")
 
 let read_before_write (pos, v) =
   add Typing.read_before_write pos (

@@ -1,0 +1,4 @@
+File "class.php", line 8, characters 13-13:
+You cannot extend sealed class A (Typing[4238])
+File "class.php", line 5, characters 16-16:
+Declaration is here

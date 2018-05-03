@@ -76,6 +76,7 @@ let to_class_type {
   dc_req_ancestors;
   dc_req_ancestors_extends;
   dc_extends;
+  dc_sealed_whitelist = _;
   dc_xhp_attr_deps;
   dc_enum_type;
   dc_decl_errors;

@@ -2296,7 +2296,6 @@ and expr_
         | _, T.Array_get (((_, ty1), _) as te1, Some _) ->
           let rec iter = function
             | _, Tany -> true
-            | _, Tprim Tstring -> true
             | _, (Tarraykind _ | Ttuple _ | Tshape _) -> true
             | _, Tclass ((_, cn), _)
               when cn = SN.Collections.cDict

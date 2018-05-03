@@ -41,7 +41,8 @@ function multi_request_modes() {
   return array('relocate',
                'retranslate-all',
                'recycle-tc',
-               'jit-serialize');
+               'jit-serialize',
+               'cli-server');
 }
 
 function has_multi_request_mode($options) {
@@ -1042,11 +1043,14 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
     $cmd .= " -m verify";
   }
 
-  if (isset($options['cli-server']) && can_run_server_test($test)) {
-    $config = find_file_for_dir(dirname($test), 'config.ini');
-    $socket = $options['servers']['configs'][$config]['cli-socket'];
-    $cmd .= ' -vEval.UseRemoteUnixServer=only';
-    $cmd .= ' -vEval.UnixServerPath='.$socket;
+  if (isset($options['cli-server'])) {
+    if (can_run_server_test($test)) {
+      $config = find_file_for_dir(dirname($test), 'config.ini');
+      $socket = $options['servers']['configs'][$config]['cli-socket'];
+      $cmd .= ' -vEval.UseRemoteUnixServer=only';
+      $cmd .= ' -vEval.UnixServerPath='.$socket;
+    }
+    $cmd .= ' --count=3';
   }
 
   // Special support for tests that require a path to the current
@@ -2075,6 +2079,10 @@ function run_config_post($outputs, $test, $options) {
     $repeats = $options['recycle-tc'];
   }
 
+  if (isset($options['cli-server'])) {
+    $repeats = 3;
+  }
+
   list($file, $type) = get_expect_file_and_type($test, $options);
   if ($file === null || $type === null) {
     file_put_contents(
@@ -2352,7 +2360,7 @@ function run_test($options, $test) {
 
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
   if (has_multi_request_mode($options)) {
-    if (isset($options['jit-serialize'])) {
+    if (isset($options['jit-serialize']) || isset($options['cli-server'])) {
       if (preg_grep('/ --count[ =][0-9]+ /', (array)$hhvm)) {
         return 'skip';
       }

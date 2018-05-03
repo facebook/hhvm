@@ -1986,7 +1986,7 @@ static int execute_program_impl(int argc, char** argv) {
       }
       args.insert(args.end(), po.args.begin(), po.args.end());
       run_command_on_cli_server(
-        RuntimeOption::EvalUnixServerPath.c_str(), args
+        RuntimeOption::EvalUnixServerPath.c_str(), args, po.count
       );
       if (RuntimeOption::EvalUseRemoteUnixServer == "only") {
         Logger::Error("Failed to connect to unix server.");

@@ -1347,7 +1347,7 @@ int mkdir_recursive(const char* path, int mode) {
   return 0;
 }
 
-void cli_process_command_loop(int fd) {
+folly::Optional<int> cli_process_command_loop(int fd) {
   FTRACE(1, "cli_process_command_loop({}): starting...\n", fd);
   std::string cmd;
   cli_read(fd, cmd);
@@ -1355,13 +1355,13 @@ void cli_process_command_loop(int fd) {
   if (cmd == "version_bad") {
     // Returning will cause us to re-run the script locally when not in force
     // server mode.
-    return;
+    return folly::none;
   }
 
   if (cmd != "version_ok") {
     // Server is too old / didn't send a version. Only version 0 is compatible
     // with an unversioned server.
-    if (CLI_SERVER_API_VERSION != 0) return;
+    if (CLI_SERVER_API_VERSION != 0) return folly::none;
   } else {
     cli_read(fd, cmd);
   }
@@ -1374,10 +1374,7 @@ void cli_process_command_loop(int fd) {
       cli_read(fd, ret);
       FTRACE(1, "cli_process_command_loop({}): exiting with code {}\n",
              fd, ret);
-      hphp_context_exit();
-      hphp_session_exit();
-      hphp_process_exit();
-      exit(ret);
+      return ret;
     }
 
     if (cmd == "open") {
@@ -1595,6 +1592,72 @@ void cli_process_command_loop(int fd) {
   }
 }
 
+folly::Optional<int> run_client(const char* sock_path,
+                                const std::vector<std::string>& args) {
+  if (RuntimeOption::RepoAuthoritative) {
+    Logger::Warning("Unable to use CLI server to run script in "
+                    "repo-auth mode.");
+    return folly::none;
+  }
+  FTRACE(1, "run_command_on_cli_server({}, ...): sending command...\n",
+         sock_path);
+
+  std::vector<std::string> env_vec;
+
+  for (char** env = environ; env && *env; env++) {
+    env_vec.emplace_back(*env);
+  }
+
+  int delegate = LightProcess::createDelegate();
+  if (delegate < 0) {
+    Logger::Warning("Could not create delegate for CLI server: %s",
+                    folly::errnoStr(errno).c_str());
+    return folly::none;
+  }
+  FTRACE(2, "run_command_on_cli_server(): delegate = {}\n", delegate);
+
+  afdt_error_t err = AFDT_ERROR_T_INIT;
+  int fd = afdt_connect(sock_path, &err);
+  if (fd < 0) {
+    Logger::Info("Could not attach to CLI server: %s",
+                 folly::errnoStr(errno).c_str());
+    return folly::none;
+  }
+
+  FTRACE(2, "run_command_on_cli_server(): fd = {}\n", fd);
+
+  try {
+    cli_write_ucred(fd);
+    cli_write(fd, "hello_server");
+
+    char cwd[PATH_MAX];
+    getcwd(cwd, PATH_MAX);
+    cli_write(fd, cwd);
+
+    hphp_session_init();
+    SCOPE_EXIT {
+      hphp_context_exit();
+      hphp_session_exit();
+    };
+    auto settings = IniSetting::GetAllAsJSON();
+    cli_write(fd, settings);
+
+    FTRACE(2, "run_command_on_cli_server(): sending fds...\n", fd);
+
+    cli_write_fd(fd, fileno(stdin));
+    cli_write_fd(fd, fileno(stdout));
+    cli_write_fd(fd, fileno(stderr));
+    cli_write_fd(fd, delegate);
+
+    FTRACE(2, "run_command_on_cli_server(): file/args...\n", fd);
+    cli_write(fd, 0, args, env_vec);
+    return cli_process_command_loop(fd);
+  } catch (const Exception& ex) {
+    Logger::Error("Problem communicating with CLI server: %s", ex.what());
+    exit(255);
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 }
 
@@ -1711,69 +1774,17 @@ bool is_cli_mode() { return tl_cliSock != -1; }
 ////////////////////////////////////////////////////////////////////////////////
 
 void run_command_on_cli_server(const char* sock_path,
-                               const std::vector<std::string>& args) {
-  if (RuntimeOption::RepoAuthoritative) {
-    Logger::Warning("Unable to use CLI server to run script in "
-                    "repo-auth mode.");
-    return;
+                               const std::vector<std::string>& args,
+                               int& count) {
+  int ret = 0;
+  while (count) {
+    auto r = run_client(sock_path, args);
+    if (!r) return;
+    ret = *r;
+    count--;
   }
-  FTRACE(1, "run_command_on_cli_server({}, ...): sending command...\n",
-         sock_path);
-
-  std::vector<std::string> env_vec;
-
-  for (char** env = environ; env && *env; env++) {
-    env_vec.emplace_back(*env);
-  }
-
-  int delegate = LightProcess::createDelegate();
-  if (delegate < 0) {
-    Logger::Warning("Could not create delegate for CLI server: %s",
-                    folly::errnoStr(errno).c_str());
-    return;
-  }
-  FTRACE(2, "run_command_on_cli_server(): delegate = {}\n", delegate);
-
-  afdt_error_t err = AFDT_ERROR_T_INIT;
-  int fd = afdt_connect(sock_path, &err);
-  if (fd < 0) {
-    Logger::Info("Could not attach to CLI server: %s",
-                 folly::errnoStr(errno).c_str());
-    return;
-  }
-
-  FTRACE(2, "run_command_on_cli_server(): fd = {}\n", fd);
-
-  try {
-    cli_write_ucred(fd);
-    cli_write(fd, "hello_server");
-
-    char cwd[PATH_MAX];
-    getcwd(cwd, PATH_MAX);
-    cli_write(fd, cwd);
-
-    hphp_session_init();
-    SCOPE_EXIT {
-      hphp_context_exit();
-      hphp_session_exit();
-    };
-    auto settings = IniSetting::GetAllAsJSON();
-    cli_write(fd, settings);
-
-    FTRACE(2, "run_command_on_cli_server(): sending fds...\n", fd);
-
-    cli_write_fd(fd, fileno(stdin));
-    cli_write_fd(fd, fileno(stdout));
-    cli_write_fd(fd, fileno(stderr));
-    cli_write_fd(fd, delegate);
-
-    FTRACE(2, "run_command_on_cli_server(): file/args...\n", fd);
-    cli_write(fd, 0, args, env_vec);
-    cli_process_command_loop(fd);
-  } catch (const Exception& ex) {
-    Logger::Error("Problem communicating with CLI server: %s", ex.what());
-    exit(255);
-  }
+  hphp_process_exit();
+  exit(ret);
 }
 
 }

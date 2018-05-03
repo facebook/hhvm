@@ -117,7 +117,8 @@ void teardown_cli_server();
  * The command will return iff the CLI server is unreachable.
  */
 void run_command_on_cli_server(const char* sock_path,
-                               const std::vector<std::string>& args);
+                               const std::vector<std::string>& args,
+                               int& count);
 
 /*
  * Returns the thread local ucred structure if the active thread is executing a

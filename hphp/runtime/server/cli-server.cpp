@@ -178,13 +178,13 @@ namespace HPHP {
  *
  * ===== WARNING ===== WARNING ===== WARNING ===== WARNING ===== WARNING =====
  */
-const uint64_t CLI_SERVER_API_VERSION = 1;
+const uint64_t CLI_SERVER_API_VERSION = 2;
 
 const StaticString s_hphp_cli_server_api_version("hphp.cli_server_api_version");
 
 struct CLIClientGuardedFile : PlainFile {
-  explicit CLIClientGuardedFile(int fd) :
-    PlainFile(fd)
+  explicit CLIClientGuardedFile(int fd, const char* mode) :
+    PlainFile(fdopen(fd, mode))
   { }
 
   int64_t readImpl(char *buffer, int64_t length) override {
@@ -1147,17 +1147,20 @@ req::ptr<File>
 CLIWrapper::open(const String& filename, const String& mode, int options,
                  const req::ptr<StreamContext>& /*context*/) {
   mode_t md = static_cast<mode_t>(-1);
+  const char* mstr = mode.data();
   int fl = 0;
   switch (mode[0]) {
    case 'x':
      md = 0666;
      fl = O_CREAT|O_EXCL;
      fl |= (mode.find('+') == -1) ? O_WRONLY : O_RDWR;
+     mstr = (mode.find('+') == -1) ? "xw" : "xw+";
      break;
    case 'c':
      md = 0666;
      fl = O_CREAT;
      fl |= (mode.find('+') == -1) ? O_WRONLY : O_RDWR;
+     mstr = (mode.find('+') == -1) ? "w" : "w+";
      break;
    case 'r':
      fl = (mode.find('+') == -1) ? O_RDONLY : O_RDWR;
@@ -1185,7 +1188,7 @@ CLIWrapper::open(const String& filename, const String& mode, int options,
   if (fd == -1) {
     return nullptr;
   }
-  return req::make<CLIClientGuardedFile>(fd);
+  return req::make<CLIClientGuardedFile>(fd, mstr);
 }
 
 req::ptr<Directory> CLIWrapper::opendir(const String& path) {
@@ -1265,7 +1268,17 @@ int CLIWrapper::access(const String& path, int mode) {
   return cli_send_wire(m_cli_fd, "access", path, mode);
 }
 int CLIWrapper::unlink(const String& path) {
-  return cli_send_wire(m_cli_fd, "unlink", path);
+  auto ret = cli_send_wire(m_cli_fd, "unlink", path);
+  if (ret != 0) {
+    cli_read(m_cli_fd, errno);
+    raise_warning(
+      "%s(%s): %s",
+      __FUNCTION__,
+      path.c_str(),
+      folly::errnoStr(errno).c_str()
+    );
+  }
+  return ret;
 }
 int CLIWrapper::rename(const String& oldname, const String& newname) {
   return cli_send_wire(m_cli_fd, "rename", oldname, newname);
@@ -1454,7 +1467,9 @@ folly::Optional<int> cli_process_command_loop(int fd) {
       cli_read(fd, path);
       FTRACE(2, "cli_process_command_loop({}): unlink({})\n",
              fd, path);
-      cli_write(fd, unlink(path.c_str()));
+      auto ret = unlink(path.c_str());
+      cli_write(fd, ret);
+      if (ret != 0) cli_write(fd, errno);
       continue;
     }
 

@@ -29,6 +29,8 @@ namespace detail {
 
 namespace {
 void append(std::vector<iovec>& iov, const void* addr, size_t size) {
+  if (!size) return;
+
   iovec io;
   io.iov_base = const_cast<void*>(addr);
   io.iov_len = size;
@@ -55,6 +57,8 @@ void rappend(int afdt_fd,
 }
 
 void send(int afdt_fd, std::vector<iovec>& iov) {
+  if (iov.size() == 0) return;
+
   struct msghdr msg;
   memset(&msg, 0, sizeof(msg));
   msg.msg_iov = &iov[0];
@@ -68,6 +72,8 @@ void send(int afdt_fd, std::vector<iovec>& iov) {
 }
 
 void recv(int afdt_fd, std::vector<iovec>& iov) {
+  if (iov.size() == 0) return;
+
   struct msghdr msg;
   memset(&msg, 0, sizeof(msg));
   msg.msg_iov = &iov[0];

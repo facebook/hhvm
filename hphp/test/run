@@ -1044,12 +1044,10 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   }
 
   if (isset($options['cli-server'])) {
-    if (can_run_server_test($test)) {
-      $config = find_file_for_dir(dirname($test), 'config.ini');
-      $socket = $options['servers']['configs'][$config]['cli-socket'];
-      $cmd .= ' -vEval.UseRemoteUnixServer=only';
-      $cmd .= ' -vEval.UnixServerPath='.$socket;
-    }
+    $config = find_file_for_dir(dirname($test), 'config.ini');
+    $socket = $options['servers']['configs'][$config]['cli-socket'];
+    $cmd .= ' -vEval.UseRemoteUnixServer=only';
+    $cmd .= ' -vEval.UnixServerPath='.$socket;
     $cmd .= ' --count=3';
   }
 
@@ -1655,6 +1653,10 @@ function skip_test($options, $test) {
     return true;
   }
 
+  if (isset($options['cli-server']) && !can_run_server_test($test)) {
+    return true;
+  }
+
   $skipif_test = find_test_ext($test, 'skipif');
   if (!$skipif_test) {
     return false;
@@ -1962,12 +1964,15 @@ function can_run_server_test($test) {
     !find_test_ext($test, 'opts') &&
     !is_file("$test.ini") &&
     !is_file("$test.onlyrepo") &&
+    !is_file("$test.use.for.ini.migration.testing.only.hdf") &&
     strpos($test, 'quick/debugger') === false &&
     strpos($test, 'quick/xenon') === false &&
     strpos($test, 'slow/streams/') === false &&
     strpos($test, 'slow/ext_mongo/') === false &&
     strpos($test, 'slow/ext_oauth/') === false &&
+    strpos($test, 'slow/ext_vsdebug/') === false &&
     strpos($test, 'slow/ext_yaml/') === false &&
+    strpos($test, 'slow/ext_xdebug/') === false &&
     strpos($test, 'slow/debugger/') === false &&
     strpos($test, 'slow/type_profiler/debugger/') === false &&
     strpos($test, 'zend/good/ext/standard/tests/array/') === false &&
@@ -2111,7 +2116,7 @@ function run_config_post($outputs, $test, $options) {
       }
       return $passed;
     }
-    $wanted_re = preg_quote($wanted);
+    $wanted_re = preg_quote($wanted, '/');
   } else if ((!$is_tc && ($type === 'expectf' || $type === 'hhvm.expectf')) ||
              ($is_tc && $type === 'typechecker.expectf')) {
     $wanted = trim(file_get_contents($file));
@@ -2303,7 +2308,7 @@ function run_typechecker_test($options, $test) {
 }
 
 function get_hhvm_ini_values($test, $options) {
-  // prepare script to setting values from HHVM
+  // prepa$get_ini_file = tempnam(dirname($test), "get_ini");
   $get_ini_file = tempnam(dirname($test), "get_ini");
   $tmp_file = tempnam(sys_get_temp_dir(), "output");
   file_put_contents($get_ini_file, "<?php echo json_encode(ini_get_all());");
@@ -2316,7 +2321,7 @@ function get_hhvm_compiler_frontend($options, $test) {
   $options_without_repo = $options;
   unset($options_without_repo['repo']);
 
-  $get_fe_script = tempnam(dirname($test), "get_frontend");
+  $get_fe_script = tempnam(sys_get_temp_dir(), "get_frontend");
   file_put_contents(
     $get_fe_script,
     '<?php echo __COMPILER_FRONTEND__, "\n";'
@@ -2328,7 +2333,9 @@ function get_hhvm_compiler_frontend($options, $test) {
     true
   );
   if (is_array($hhvm)) $hhvm = $hhvm[0];
-  return exec($hhvm);
+  $res = exec($hhvm);
+  unlink($get_fe_script);
+  return $res;
 }
 
 function run_test($options, $test) {
@@ -3069,7 +3076,10 @@ function start_server_proc($options, $config, $port) {
 
     // The default test config uses a small TC but we'll be running thousands
     // of tests against the same process:
-    '-vEval.JitASize=100000000',
+    '-vEval.JitASize=142606336',
+    '-vEval.JitAProfSize=251658240',
+    '-vEval.JitAColdSize=201326592',
+    '-vEval.JitAFrozenSize=251658240',
     '-vEval.JitGlobalDataSize=32000000',
 
     // load/store counters don't work on Ivy Bridge so disable for tests
@@ -3283,11 +3293,11 @@ function main($argv) {
       $configs[$config] = $config;
     }
 
-    $max_configs = 20;
+    $max_configs = 30;
     if (count($configs) > $max_configs) {
       error("More than $max_configs unique config files will be needed to run ".
             "the tests you specified. They may not be a good fit for server ".
-            "mode.");
+            "mode. (".count($configs)." required)");
     }
 
     $servers = $options['servers'] = start_servers($options, $configs);

@@ -696,7 +696,7 @@ FILE *LightProcess::popen(const char *cmd, const char *type,
       return f;
     }
     if (tl_proc) {
-      Logger::Warning("Light-weight fork failed in remote CLI mode.");
+      Logger::Verbose("Light-weight fork failed in remote CLI mode.");
       return nullptr;
     }
     Logger::Verbose("Light-weight fork failed; use the heavy one instead.");

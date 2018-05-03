@@ -130,14 +130,20 @@ PhpStreamWrapper::open(const String& filename, const String& mode,
 
   const char *req = filename.c_str() + sizeof("php://") - 1;
 
+  auto make_from = [] (const Variant& f) {
+    auto res = dyn_cast_or_null<PlainFile>(f);
+    if (!res || res->isClosed()) return res;
+    return req::make<PlainFile>(dup(res->fd()), true, s_php);
+  };
+
   if (!strcasecmp(req, "stdin")) {
-    return dyn_cast_or_null<File>(BuiltinFiles::GetSTDIN());
+    return make_from(BuiltinFiles::GetSTDIN());
   }
   if (!strcasecmp(req, "stdout")) {
-    return dyn_cast_or_null<File>(BuiltinFiles::GetSTDOUT());
+    return make_from(BuiltinFiles::GetSTDOUT());
   }
   if (!strcasecmp(req, "stderr")) {
-    return dyn_cast_or_null<File>(BuiltinFiles::GetSTDERR());
+    return make_from(BuiltinFiles::GetSTDERR());
   }
   if (!strncasecmp(req, "fd/", sizeof("fd/") - 1)) {
     return openFD(req + sizeof("fd/") - 1);

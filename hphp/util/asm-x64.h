@@ -634,7 +634,6 @@ public:
   FULL_OP(cmp)
   FULL_OP(sbb)
 
-#undef IMM64_OP
 #undef IMM64R_OP
 #undef FULL_OP
 #undef REG_OP
@@ -644,7 +643,6 @@ public:
 #undef BYTE_STORE_OP
 #undef BYTE_REG_OP
 #undef IMM64_STORE_OP
-#undef IMM64R_OP
 
   virtual void movq(Immed64 imm, Reg64 r)       = 0;
   virtual void loadzbl(MemoryRef m, Reg32 r)    = 0;

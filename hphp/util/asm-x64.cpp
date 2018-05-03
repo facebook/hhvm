@@ -40,7 +40,7 @@ const char* show(RoundDirection rd) {
 
 #ifdef HAVE_LIBXED
   static XedInit xi;
-  constexpr xed_state_t XedAssembler::s_xedState;
+  constexpr xed_state_t XedAssembler::kXedState;
 #endif
 
 namespace x64 {

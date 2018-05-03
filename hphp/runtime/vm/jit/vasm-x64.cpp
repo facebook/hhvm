@@ -1176,13 +1176,10 @@ void emitX64(Vunit& unit, Vtext& text, CGMeta& fixups,
              AsmInfo* asmInfo) {
 #ifdef HAVE_LIBXED
   if (RuntimeOption::EvalUseXedAssembler) {
-    vasm_emit<Vgen<XedAssembler>>(unit, text, fixups, asmInfo);
-  } else {
-    vasm_emit<Vgen<X64Assembler>>(unit, text, fixups, asmInfo);
+    return vasm_emit<Vgen<XedAssembler>>(unit, text, fixups, asmInfo);
   }
-#else
-  vasm_emit<Vgen<X64Assembler>>(unit, text, fixups, asmInfo);
 #endif
+  vasm_emit<Vgen<X64Assembler>>(unit, text, fixups, asmInfo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

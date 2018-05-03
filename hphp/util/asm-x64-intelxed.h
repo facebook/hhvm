@@ -44,7 +44,7 @@ typedef bool(*immFitFunc)(int64_t, int);
 
 struct XedAssembler final : public X64AssemblerBase {
 private:
-  constexpr static xed_state_t s_xedState = {
+  static constexpr xed_state_t kXedState = {
     XED_MACHINE_MODE_LONG_64,
     XED_ADDRESS_WIDTH_64b
   };
@@ -177,7 +177,6 @@ public:
   FULL_OP(sbb, XED_ICLASS_SBB)
 #undef IMMPROP
 
-#undef IMM64_OP
 #undef IMM64R_OP
 #undef FULL_OP
 #undef REG_OP
@@ -187,7 +186,6 @@ public:
 #undef BYTE_STORE_OP
 #undef BYTE_REG_OP
 #undef IMM64_STORE_OP
-#undef IMM64R_OP
 
   // 64-bit immediates work with mov to a register.
   void movq(Immed64 imm, Reg64 r) { xedInstrIR(XED_ICLASS_MOV, imm, r,
@@ -441,8 +439,6 @@ private:
 
   // XED emit functions
 
-#define DECLARE_UNUSED(type, name)  type name; static_cast<void>(name)
-
   ALWAYS_INLINE
   uint32_t xedEmitImpl(xed_iclass_enum_t instr, CodeAddress destination,
                        std::function<void(xed_encoder_instruction_t*)>
@@ -474,7 +470,7 @@ private:
                    CodeAddress destination) {
     return xedEmitImpl(instr, destination,
                         [&](xed_encoder_instruction_t* i) {
-                          xed_inst0(i, s_xedState, instr, effOperandSizeBits);
+                          xed_inst0(i, kXedState, instr, effOperandSizeBits);
                         });
   }
 
@@ -490,7 +486,7 @@ private:
                    CodeAddress destination) {
     return xedEmitImpl(instr, destination,
                         [&](xed_encoder_instruction_t* i) {
-                          xed_inst1(i, s_xedState, instr,
+                          xed_inst1(i, kXedState, instr,
                                     effOperandSizeBits, op);
                         });
   }
@@ -509,7 +505,7 @@ private:
                    CodeAddress destination) {
     return xedEmitImpl(instr, destination,
                         [&](xed_encoder_instruction_t* i) {
-                          xed_inst2(i, s_xedState, instr,
+                          xed_inst2(i, kXedState, instr,
                                     effOperandSizeBits, op_1, op_2);
                         });
   }
@@ -532,7 +528,7 @@ private:
                    CodeAddress destination) {
     return xedEmitImpl(instr, destination,
                         [&](xed_encoder_instruction_t* i) {
-                          xed_inst3(i, s_xedState, instr,
+                          xed_inst3(i, kXedState, instr,
                                     effOperandSizeBits, op_1, op_2, op_3);
                         });
   }
@@ -548,8 +544,8 @@ private:
   }
 
 public:
-#define INT3_SIZE   (sz::byte)
-#define UD2_SIZE    (sz::word)
+  static constexpr auto kInt3Size = sz::byte;
+  static constexpr auto kUd2Size = sz::word;
 
   void emitInt3s(int n) {
     static uint8_t instr = 0;
@@ -578,29 +574,29 @@ public:
     };
     // While n >= 9, emit 9 byte NOPs
     while (n >= 9) {
-      xedInstr(XED_ICLASS_NOP9, 0);
+      xedInstr(XED_ICLASS_NOP9, sz::nosize);
       n -= 9;
     }
     // Emit remaining NOPs (if any)
     if (n) {
-      xedInstr(nops[n], 0);
+      xedInstr(nops[n], sz::nosize);
     }
   }
 
   void pad() {
     auto remaining = available();
-    static uint8_t padInstructs[UD2_SIZE + INT3_SIZE] = {0};
+    static uint8_t padInstructs[kUd2Size + kInt3Size] = {0};
     if (padInstructs[0] == 0) {
-      xedEmit(XED_ICLASS_UD2, 0, padInstructs);
-      xedEmit(XED_ICLASS_INT3, 0, padInstructs + UD2_SIZE);
+      xedEmit(XED_ICLASS_UD2, sz::nosize, padInstructs);
+      xedEmit(XED_ICLASS_INT3, sz::nosize, padInstructs + kUd2Size);
     }
-    while (remaining >= UD2_SIZE) {
-      bytes(UD2_SIZE, padInstructs);
-      remaining -= UD2_SIZE;
+    while (remaining >= kUd2Size) {
+      bytes(kUd2Size, padInstructs);
+      remaining -= kUd2Size;
     }
-    while (remaining >= INT3_SIZE) {
-      byte(padInstructs[UD2_SIZE]);
-      remaining -= INT3_SIZE;
+    while (remaining >= kInt3Size) {
+      byte(padInstructs[kUd2Size]);
+      remaining -= kInt3Size;
     }
   }
 

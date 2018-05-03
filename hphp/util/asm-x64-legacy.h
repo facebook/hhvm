@@ -291,7 +291,6 @@ public:
   FULL_OP(cmp, instr_cmp)
   FULL_OP(sbb, instr_sbb)
 
-#undef IMM64_OP
 #undef IMM64R_OP
 #undef FULL_OP
 #undef REG_OP
@@ -301,7 +300,6 @@ public:
 #undef BYTE_STORE_OP
 #undef BYTE_REG_OP
 #undef IMM64_STORE_OP
-#undef IMM64R_OP
 
   // 64-bit immediates work with mov to a register.
   void movq(Immed64 imm, Reg64 r) { instrIR(instr_mov, imm, r); }

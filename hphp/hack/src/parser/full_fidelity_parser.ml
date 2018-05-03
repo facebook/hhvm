@@ -186,7 +186,8 @@ let get_language_and_mode text =
           | "strict" ->
             Some FileInfo.(if !(Ide.is_ide_mode) then Mpartial else Mstrict)
           | "" | "partial" -> Some FileInfo.Mpartial
-          | exception _ -> None
+          (* Nothing means it's a partial file *)
+          | exception _ -> if language = hh then Some FileInfo.Mpartial else None
           | _ -> None
         in
         language, mode

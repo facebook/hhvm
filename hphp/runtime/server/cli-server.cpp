@@ -611,7 +611,9 @@ struct CliStdoutHook final : ExecutionContext::StdoutHook {
   explicit CliStdoutHook(int fd) : fd(fd) {}
   void operator()(const char* s, int len) override {
     if (!(stackLimitAndSurprise().load() & CLIClientTerminated)) {
-      write(fd, s, len);
+      if (is_hphp_session_initialized() && !MemoryManager::exiting()) {
+        write(fd, s, len);
+      }
     }
   }
 };
@@ -622,8 +624,10 @@ struct CliLoggerHook final : LoggerHook {
   void operator()(const char* /*hdr*/, const char* msg, const char* ending)
        override {
     if (!(stackLimitAndSurprise().load() & CLIClientTerminated)) {
-      write(fd, msg, strlen(msg));
-      if (ending) write(fd, ending, strlen(ending));
+      if (is_hphp_session_initialized() && !MemoryManager::exiting()) {
+        write(fd, msg, strlen(msg));
+        if (ending) write(fd, ending, strlen(ending));
+      }
     }
   }
 };
@@ -1029,14 +1033,13 @@ void CLIWorker::doJob(int client) {
 
     {
       SCOPE_EXIT {
+        execute_command_line_end(xhprofFlags, true, args[0].c_str());
+        envArr.detach();
         tl_env = nullptr;
-        envArr.reset();
-        g_context->removeStdoutHook(&stdout_hook);
         clearThreadLocalIO();
         LightProcess::setThreadLocalAfdtOverride(nullptr);
         Logger::SetThreadHook(nullptr);
         Stream::setThreadLocalFileHandler(nullptr);
-        execute_command_line_end(xhprofFlags, true, args[0].c_str());
         try {
           cli_write(client, "exit", ret);
         } catch (const Exception& ex) {

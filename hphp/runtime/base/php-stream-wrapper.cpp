@@ -130,9 +130,9 @@ PhpStreamWrapper::open(const String& filename, const String& mode,
 
   const char *req = filename.c_str() + sizeof("php://") - 1;
 
-  auto make_from = [] (const Variant& f) {
+  auto make_from = [] (const Variant& f) -> req::ptr<File> {
     auto res = dyn_cast_or_null<PlainFile>(f);
-    if (!res || res->isClosed()) return res;
+    if (!res || res->isClosed()) return nullptr;
     return req::make<PlainFile>(dup(res->fd()), true, s_php);
   };
 

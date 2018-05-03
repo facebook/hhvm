@@ -1,0 +1,70 @@
+commit 029a83f67ea2da4985542a3775568455aa7d91fb
+Author: Fred Emmott <fe@fb.com>
+Date:   Thu Mar 29 09:23:05 2018 -0700
+
+    Enable use of system tzdata on mac
+    
+    Test plan:
+    
+    From http://mm.icann.org/pipermail/tz-announce/2017-October/000047.html:
+    
+    > Sudan will switch from +03 to +02 on 2017-11-01.  (Thanks to Ahmed
+    > Atyya and Yahia Abdalla.)  South Sudan is not switching, so
+    > Africa/Juba is no longer a link to Africa/Khartoum.
+    
+    So...
+    
+    ```
+    hphpd> =(new DateTime('2017-11-02 12:00', new DateTimeZone('Africa/Khartoum')))->getTimeStamp()
+    hphpd> =(new DateTime('2017-11-02 12:00', new DateTimeZone('Africa/Juba')))->getTimeStamp()
+    ```
+    
+    ... should have different output on recent tzdata. I picked 2017c
+    changes as that's what Ubuntu's shipping still.
+    
+    Mac, before this change:
+    
+    ```
+    1509613200
+    1509613200
+    ```
+    
+    Mac, with this change:
+    
+    ```
+    1509616800
+    1509613200
+    ```
+    
+    Ubuntu shell:
+    
+    ```
+    root@69fe10790484:/# TZ=Africa/Khartoum date -d '2017-11-02 12:00' +%s
+    1509616800
+    root@69fe10790484:/# TZ=Africa/Juba date -d '2017-11-02 12:00' +%s
+    1509613200
+    ```
+    
+    Bad news: turns out that we're not building linux builds with system
+    tzdata the moment as we only have the tzdata package as a runtime
+    dependency - but if we don't have /usr/share/zoneinfo at build time,
+    we won't build support for it.
+
+diff --git a/third-party/timelib/CMakeLists.txt b/third-party/timelib/CMakeLists.txt
+index b2bc560..730b228 100644
+--- a/third-party/timelib/CMakeLists.txt
++++ b/third-party/timelib/CMakeLists.txt
+@@ -35,9 +35,10 @@ CHECK_FUNCTION_EXISTS("atoll" HAVE_ATOLL)
+ CHECK_FUNCTION_EXISTS("strftime" HAVE_STRFTIME)
+ CHECK_FUNCTION_EXISTS("setlocale" HAVE_SETLOCALE)
+ 
+-# Only use /usr/share/zoneinfo on Linux for now, on the assumption that
+-# the file format is platform-specific.
+-if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND EXISTS /usr/share/zoneinfo)
++# Works on Linux and Mac; given that we don't want to (and basically don't)
++# update the bundled tzdata, if this doesn't work on some platform, please
++# blacklist the platform rather than whitelisting others.
++if (EXISTS /usr/share/zoneinfo)
+   add_definitions(-DHAVE_SYSTEM_TZDATA)
+ endif()
+ 

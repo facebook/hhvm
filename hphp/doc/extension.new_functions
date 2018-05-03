@@ -45,10 +45,6 @@ testing and some alternative PHP implementation.
 - xbox_task_status
 - xbox_task_result
 
-- fb_call_user_func_array_safe
-- fb_call_user_func_safe
-- fb_call_user_func_safe_return
-
 - fb_serialize
 - fb_unserialize
 - fb_intercept

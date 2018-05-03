@@ -9,9 +9,8 @@ class A {
 function call1($c, $x) { return $c($x); }
 function call2($c, $x) { return call_user_func($c, $x); }
 function call3($c, $x) { return forward_static_call($c, $x); }
-function call4($c, $x) { return fb_call_user_func_safe($c, $x); }
-function call5($c, $x) { return array_map($c, $x); }
-function call6($c, $x) { return array_walk($x, $c); }
+function call4($c, $x) { return array_map($c, $x); }
+function call5($c, $x) { return array_walk($x, $c); }
 
 function make_tests($tests, $c1, $c2) {
   if ($c1) $tests[] = vec['call1', $c1, count($tests)+1];
@@ -20,12 +19,10 @@ function make_tests($tests, $c1, $c2) {
   if ($c2) $tests[] = vec['call2', $c2, count($tests)+1];
   if ($c1) $tests[] = vec['call3', $c1, count($tests)+1];
   if ($c2) $tests[] = vec['call3', $c2, count($tests)+1];
-  if ($c1) $tests[] = vec['call4', $c1, count($tests)+1];
-  if ($c2) $tests[] = vec['call4', $c2, count($tests)+1];
+  if ($c1) $tests[] = vec['call4', $c1, [count($tests)+1]];
+  if ($c2) $tests[] = vec['call4', $c2, [count($tests)+1]];
   if ($c1) $tests[] = vec['call5', $c1, [count($tests)+1]];
   if ($c2) $tests[] = vec['call5', $c2, [count($tests)+1]];
-  if ($c1) $tests[] = vec['call6', $c1, [count($tests)+1]];
-  if ($c2) $tests[] = vec['call6', $c2, [count($tests)+1]];
   return $tests;
 }
 

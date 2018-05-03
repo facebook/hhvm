@@ -2,7 +2,11 @@
 function foo() { return "hello"; }
 function bar() { return "goodbye"; }
 function test() {
-  var_dump(fb_call_user_func_safe_return('foo', 0));
+  if (function_exists('foo')) {
+    var_dump(foo());
+  } else {
+    var_dump(0);
+  }
 }
 function main() {
   test();

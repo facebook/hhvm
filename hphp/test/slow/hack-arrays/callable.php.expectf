@@ -11,30 +11,16 @@ int(5)
 ====================================================
 int(6)
 ====================================================
-array(2) {
+array(1) {
   [0]=>
-  bool(true)
-  [1]=>
   int(7)
 }
 ====================================================
-array(2) {
+array(1) {
   [0]=>
-  bool(true)
-  [1]=>
   int(8)
 }
 ====================================================
-array(1) {
-  [0]=>
-  int(9)
-}
-====================================================
-array(1) {
-  [0]=>
-  int(10)
-}
-====================================================
 bool(true)
 ====================================================
 bool(true)
@@ -61,34 +47,20 @@ NULL
 Warning: Invalid argument: function: not a valid callback array in %s/callable.php on line 11
 NULL
 ====================================================
-array(2) {
-  [0]=>
-  bool(false)
-  [1]=>
-  NULL
-}
-====================================================
-array(2) {
-  [0]=>
-  bool(false)
-  [1]=>
-  NULL
-}
-====================================================
 
-Warning: array_map() expects parameter 1 to be a valid callback in %s/callable.php on line 13
+Warning: array_map() expects parameter 1 to be a valid callback in %s/callable.php on line 12
 NULL
 ====================================================
 
-Warning: array_map() expects parameter 1 to be a valid callback in %s/callable.php on line 13
+Warning: array_map() expects parameter 1 to be a valid callback in %s/callable.php on line 12
 NULL
 ====================================================
 
-Warning: Invalid argument: function: not a valid callback array in %s/callable.php on line 14
+Warning: Invalid argument: function: not a valid callback array in %s/callable.php on line 13
 bool(false)
 ====================================================
 
-Warning: Invalid argument: function: not a valid callback array in %s/callable.php on line 14
+Warning: Invalid argument: function: not a valid callback array in %s/callable.php on line 13
 bool(false)
 ====================================================
 
@@ -102,17 +74,10 @@ NULL
 Warning: Invalid argument: function: not a valid callback array in %s/callable.php on line 11
 NULL
 ====================================================
-array(2) {
-  [0]=>
-  bool(false)
-  [1]=>
-  NULL
-}
-====================================================
 
-Warning: array_map() expects parameter 1 to be a valid callback in %s/callable.php on line 13
+Warning: array_map() expects parameter 1 to be a valid callback in %s/callable.php on line 12
 NULL
 ====================================================
 
-Warning: Invalid argument: function: not a valid callback array in %s/callable.php on line 14
+Warning: Invalid argument: function: not a valid callback array in %s/callable.php on line 13
 bool(false)

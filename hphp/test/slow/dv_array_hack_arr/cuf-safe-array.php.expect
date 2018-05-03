@@ -1,6 +1,0 @@
-vec(2) {
-  bool(true)
-  string(3) "abc"
-}
-bool(true)
-bool(false)

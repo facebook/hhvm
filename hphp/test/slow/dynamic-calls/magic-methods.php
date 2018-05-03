@@ -79,9 +79,6 @@ function test_invoke() {
   Vector::fromItems([true])->map($x);
   call_user_func($x, []);
   call_user_func_array($x, [[]]);
-  fb_call_user_func_safe($x, true);
-  fb_call_user_func_safe_return($x, false, true);
-  fb_call_user_func_array_safe($x, [true]);
 }
 
 function test_debug() {

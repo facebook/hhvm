@@ -296,36 +296,6 @@ async function positive_tests() {
   A::positive_test2();
   C::positive_test2();
 
-  try { fb_call_user_func_safe('func'); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe('A::func'); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe('A::static_func'); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe('C::foobar'); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe(['A', 'func']); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe(['A', 'static_func']); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe(['C', 'foobar']); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe([new A, 'func']); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe([new A, 'static_func']); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe([new C, 'foobar']); } catch (Exception $e) { wrap($e); }
-
-  try { fb_call_user_func_safe_return('func', false); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe_return('A::func', false); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe_return('A::static_func', false); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe_return('C::foobar', false); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe_return(['A', 'func'], false); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe_return(['A', 'static_func'], false); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe_return(['C', 'foobar'], false); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe_return([new A, 'func'], false); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe_return([new A, 'static_func'], false); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_safe_return([new C, 'foobar'], false); } catch (Exception $e) { wrap($e); }
-
-  try { fb_call_user_func_array_safe('func', []); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_array_safe('A::func', []); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_array_safe('A::static_func', []); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_array_safe(['A', 'func'], []); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_array_safe(['A', 'static_func'], []); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_array_safe([new A, 'func'], []); } catch (Exception $e) { wrap($e); }
-  try { fb_call_user_func_array_safe([new A, 'static_func'], []); } catch (Exception $e) { wrap($e); }
-
   try { $x = 'cmp'; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
   try { $x = 'A::cmp'; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
   try { $x = 'A::static_cmp'; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
@@ -379,13 +349,6 @@ async function negative_tests() {
   $x->map($k ==> {});
   $x->map(new Invokable);
 
-  fb_call_user_func_safe($k ==> {}, true);
-  fb_call_user_func_safe_return($k ==> {}, false, true);
-  fb_call_user_func_array_safe($k ==> {}, [true]);
-  fb_call_user_func_safe(new Invokable, true);
-  fb_call_user_func_safe_return(new Invokable, false, true);
-  fb_call_user_func_array_safe(new Invokable, [true]);
-
   $x = [2, 1];
   usort($x, ($k1, $k2) ==> { return $k1 <=> $k2; });
 
@@ -397,9 +360,6 @@ async function negative_tests() {
   $x = Vector::fromItems([true]); $x->map('count');
   call_user_func('count', []);
   call_user_func_array('count', [[]]);
-  fb_call_user_func_safe('count', []);
-  fb_call_user_func_safe_return('count', false, []);
-  fb_call_user_func_array_safe('count', [[]]);
 
   $x = 'HH\Vector'; new $x();
   $x = 'HH\Vector::fromItems'; $x([]);
@@ -425,26 +385,11 @@ async function negative_tests() {
   call_user_func_array(['HH\Vector', 'fromItems'], [[]]);
   call_user_func_array([new Vector, 'firstValue'], []);
   call_user_func_array([new Vector, 'fromItems'], [[]]);
-  fb_call_user_func_safe('HH\Vector::fromItems', []);
-  fb_call_user_func_safe(['HH\Vector', 'fromItems'], []);
-  fb_call_user_func_safe([new Vector, 'firstValue']);
-  fb_call_user_func_safe([new Vector, 'fromItems'], []);
-  fb_call_user_func_safe_return('HH\Vector::fromItems', false, []);
-  fb_call_user_func_safe_return(['HH\Vector', 'fromItems'], false, []);
-  fb_call_user_func_safe_return([new Vector, 'firstValue'], false);
-  fb_call_user_func_safe_return([new Vector, 'fromItems'], false, []);
-  fb_call_user_func_array_safe('HH\Vector::fromItems', [[]]);
-  fb_call_user_func_array_safe(['HH\Vector', 'fromItems'], [[]]);
-  fb_call_user_func_array_safe([new Vector, 'firstValue'], []);
-  fb_call_user_func_array_safe([new Vector, 'fromItems'], [[]]);
 
   $x = 'array_map';
   $x('count', []);
 
   $obj = null; $obj?->foobar();
-  fb_call_user_func_safe('foobar');
-  fb_call_user_func_safe_return('foobar', false);
-  fb_call_user_func_array_safe('foobar', []);
 
   idx('foobar', 'key');
 
@@ -524,36 +469,6 @@ async function negative_tests() {
   call_user_func_array(['A', 'static_func2'], []);
   call_user_func_array([new A, 'func2'], []);
   call_user_func_array([new A, 'static_func2'], []);
-
-  fb_call_user_func_safe('func2');
-  fb_call_user_func_safe('A::func2');
-  fb_call_user_func_safe('A::static_func2');
-  fb_call_user_func_safe('E::foobar');
-  fb_call_user_func_safe(['A', 'func2']);
-  fb_call_user_func_safe(['A', 'static_func2']);
-  fb_call_user_func_safe(['E', 'foobar']);
-  fb_call_user_func_safe([new A, 'func2']);
-  fb_call_user_func_safe([new A, 'static_func2']);
-  fb_call_user_func_safe([new E, 'foobar']);
-
-  fb_call_user_func_safe_return('func2', false);
-  fb_call_user_func_safe_return('A::func2', false);
-  fb_call_user_func_safe_return('A::static_func2', false);
-  fb_call_user_func_safe_return('E::foobar', false);
-  fb_call_user_func_safe_return(['A', 'func2'], false);
-  fb_call_user_func_safe_return(['A', 'static_func2'], false);
-  fb_call_user_func_safe_return(['E', 'foobar'], false);
-  fb_call_user_func_safe_return([new A, 'func2'], false);
-  fb_call_user_func_safe_return([new A, 'static_func2'], false);
-  fb_call_user_func_safe_return([new E, 'foobar'], false);
-
-  fb_call_user_func_array_safe('func2', []);
-  fb_call_user_func_array_safe('A::func2', []);
-  fb_call_user_func_array_safe('A::static_func2', []);
-  fb_call_user_func_array_safe(['A', 'func2'], []);
-  fb_call_user_func_array_safe(['A', 'static_func2'], []);
-  fb_call_user_func_array_safe([new A, 'func2'], []);
-  fb_call_user_func_array_safe([new A, 'static_func2'], []);
 
   $x = 'cmp2'; $y = [2, 1]; usort($y, $x);
   $x = 'A::cmp2'; $y = [2, 1]; usort($y, $x);

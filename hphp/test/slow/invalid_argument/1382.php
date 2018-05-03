@@ -7,5 +7,5 @@ function baz($a) {
  return $a;
  }
 function foo($x) {
-  return fb_call_user_func_safe_return('baz',         fb_call_user_func_safe_return('bar', $x));
+  return call_user_func('baz', call_user_func('bar', $x));
 }

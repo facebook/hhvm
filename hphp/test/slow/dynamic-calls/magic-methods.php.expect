@@ -33,9 +33,6 @@ A::__invoke
 A::__invoke
 A::__invoke
 A::__invoke
-A::__invoke
-A::__invoke
-A::__invoke
 =============== test_debug =========================
 A::__construct
 A::__set_state(array(

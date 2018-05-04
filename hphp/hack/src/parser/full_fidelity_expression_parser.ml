@@ -65,7 +65,7 @@ module WithStatementAndDeclAndTypeParser
   include ParserHelper.WithParser(Parser)
 
   type binary_expression_prefix_kind =
-    | Prefix_byref_assignment | Prefix_assignment | Prefix_none
+    | Prefix_byref_assignment | Prefix_assignment | Prefix_none [@@deriving show]
 
   let make_and_track_prefix_unary_expression parser operator kind operand =
     let (parser, node) = Make.prefix_unary_expression parser operator operand in

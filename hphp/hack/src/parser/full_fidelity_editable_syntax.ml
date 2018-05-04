@@ -25,7 +25,7 @@ module SyntaxWithToken = Full_fidelity_syntax.WithToken(Token)
  **)
 
 module Value = struct
-  type t = NoValue
+  type t = NoValue [@@deriving show]
   let to_json value =
     let open Hh_json in
     JSON_Object [ ]

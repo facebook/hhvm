@@ -19,7 +19,7 @@ module Lexer : sig
     offset : int;
     errors : SyntaxError.t list;
     hacksperimental : bool
-  }
+  } [@@deriving show]
   val make : ?hacksperimental:bool -> SourceText.t -> t
   val start : t -> int
   val source : t -> SourceText.t
@@ -44,7 +44,7 @@ end = struct
     offset : int;
     errors : SyntaxError.t list;
     hacksperimental : bool (* write-once: record updates should not update this field *)
-  }
+  } [@@deriving show]
 
   let make ?(hacksperimental = false) text =
     { text; start = 0; offset = 0; errors = []; hacksperimental }

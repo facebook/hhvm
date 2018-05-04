@@ -9,7 +9,7 @@
 
 (* TODO: Integrate these with the rest of the Hack error messages. *)
 
-type error_type = ParseError | RuntimeError
+type error_type = ParseError | RuntimeError [@@deriving show]
 
 type t = {
   child        : t option;
@@ -17,7 +17,7 @@ type t = {
   end_offset   : int;
   error_type   : error_type;
   message      : string;
-}
+} [@@deriving show]
 
 exception ParserFatal of t * Pos.t
 

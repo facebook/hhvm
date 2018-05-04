@@ -32,7 +32,10 @@ namespace {
     TimeExtension() : Extension("hsl_time", "1.0") {}
 
     void moduleInit() override {
-      HHVM_FALIAS(HH\\request_time_ns, HH_request_time_ns);
+      HHVM_FALIAS(
+        HH\\Lib\\_Private\\Native\\request_time_ns,
+        HH_request_time_ns
+      );
       loadSystemlib();
     }
 

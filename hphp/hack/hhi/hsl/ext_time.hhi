@@ -8,6 +8,11 @@
  *
  */
 
+namespace HH\Lib\_Private\Native {
+function request_time_ns(): int;
+}
+
+// temporary BC alias
 namespace HH {
 function request_time_ns(): int;
 }

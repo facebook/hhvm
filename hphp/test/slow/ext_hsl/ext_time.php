@@ -15,4 +15,4 @@
    +----------------------------------------------------------------------+
 */
 
-var_dump(HH\request_time_ns());
+var_dump(HH\Lib\_Private\Native\request_time_ns());

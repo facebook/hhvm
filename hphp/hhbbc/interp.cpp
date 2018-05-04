@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/type-structure.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
@@ -2151,10 +2152,6 @@ void in(ISS& env, const bc::InstanceOf& /*op*/) {
 
 namespace {
 
-const StaticString s_kind("kind");
-const StaticString s_nullable("nullable");
-const StaticString s_classname("classname");
-
 bool isValidTypeOpForIsAs(const IsTypeOp& op) {
   switch (op) {
     case IsTypeOp::Null:
@@ -2218,27 +2215,22 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     return reduce(env, bc::IsTypeC { *op });
   };
 
-  auto const ts_nullable_field = ts->rval(s_nullable.get());
-  auto const is_ts_nullable =
-    ts_nullable_field != nullptr && ts_nullable_field.val().num;
+  auto const is_nullable_ts = is_ts_nullable(ts);
   auto const is_definitely_null = t.subtypeOf(TNull);
   auto const is_definitely_not_null = !t.couldBe(TNull);
 
-  if (is_ts_nullable && is_definitely_null) return result(TTrue);
+  if (is_nullable_ts && is_definitely_null) return result(TTrue);
 
   auto const ts_type = type_of_type_structure(ts);
 
-  if (is_ts_nullable && !is_definitely_not_null && ts_type == folly::none) {
+  if (is_nullable_ts && !is_definitely_not_null && ts_type == folly::none) {
     // Ts is nullable and we know that t could be null but we dont know for sure
     // Also we didn't get a type out of the type structure
     return result(TBool);
   }
 
-  auto const kind_field = ts->rval(s_kind.get());
-  assertx(kind_field != nullptr);
   if (!asExpression) constprop(env);
-  auto const ts_kind = static_cast<TypeStructure::Kind>(kind_field.val().num);
-  switch (ts_kind) {
+  switch (get_ts_kind(ts)) {
     case TypeStructure::Kind::T_int:
     case TypeStructure::Kind::T_bool:
     case TypeStructure::Kind::T_float:
@@ -2268,20 +2260,11 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface: {
       if (asExpression) return result(TBool);
-      auto const classname_field = ts->rval(s_classname.get());
-      assertx(classname_field != nullptr);
-      return reduce(
-        env,
-        bc::InstanceOfD { makeStaticString(classname_field.val().pstr) }
-      );
+      return reduce(env, bc::InstanceOfD { get_ts_classname(ts) });
     }
     case TypeStructure::Kind::T_unresolved: {
       if (asExpression) return result(TBool);
-      auto const classname_field = ts->rval(s_classname.get());
-      assertx(classname_field != nullptr);
-      auto const rcls =
-        env.index.resolve_class(
-          env.ctx, makeStaticString(classname_field.val().pstr));
+      auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
       // We can only reduce to instance of if we know for sure that this class
       // can be resolved since instanceof undefined class does not throw
       if (!rcls || !rcls->resolved() || rcls->cls()->attrs & AttrEnum) {

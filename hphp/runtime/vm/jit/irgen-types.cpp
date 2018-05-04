@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
 #include "hphp/runtime/base/type-structure-helpers.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -723,9 +724,112 @@ SSATmp* resolveTypeStructImpl(IRGS& env, const ArrayData* ts) {
   );
 }
 
+bool emitIsTypeStructWithoutResolvingIfPossible(
+  IRGS& env,
+  const ArrayData* ts
+) {
+  auto const t = topC(env);
+  auto const is_nullable_ts = is_ts_nullable(ts);
+
+  auto const cnsResult = [&] (bool value) {
+    auto const c = popC(env);
+    push(env, cns(env, value));
+    decRef(env, c);
+    return true;
+  };
+
+  auto const success = [&] { return cnsResult(true); };
+  auto const fail = [&] { return cnsResult(false); };
+
+  auto const check_nullable = [&] (SSATmp* res, SSATmp* var) {
+    return cond(
+      env,
+      [&] (Block* taken) { gen(env, JmpNZero, taken, res); },
+      [&] { return gen(env, IsType, TNull, var); },
+      [&] { return cns(env, true); }
+    );
+  };
+
+  auto const primitive = [&] (Type ty, bool should_negate = false) {
+    auto const nty = is_nullable_ts ? ty|TNull : ty;
+    if (t->isA(nty)) return should_negate ? fail() : success();
+    if (!t->type().maybe(nty)) return should_negate ? success() : fail();
+    auto const c = popC(env);
+    auto const res = gen(env, should_negate ? IsNType : IsType, ty, c);
+    push(env, is_nullable_ts ? check_nullable(res, c) : res);
+    decRef(env, c);
+    return true;
+  };
+
+  auto const unionOf = [&] (Type ty1, Type ty2) {
+    auto const ty = is_nullable_ts ? ty1|ty2|TNull : ty1|ty2;
+    if (t->isA(ty)) return success();
+    if (!t->type().maybe(ty)) return fail();
+    auto const c = popC(env);
+    ifThenElse(
+      env,
+      [&](Block* taken) {
+        auto const res = gen(env, IsType, ty1, c);
+        gen(env, JmpNZero, taken, res);
+      },
+      [&]{
+        auto const res = gen(env, IsType, ty2, c);
+        push(env, is_nullable_ts ? check_nullable(res, c) : res);
+      },
+      [&]{ // taken block
+        push(env, cns(env, true));
+      }
+    );
+    decRef(env, c);
+    return true;
+  };
+
+  if (t->isA(TNull) && is_nullable_ts) return success();
+
+  switch (get_ts_kind(ts)) {
+    case TypeStructure::Kind::T_int:         return primitive(TInt);
+    case TypeStructure::Kind::T_bool:        return primitive(TBool);
+    case TypeStructure::Kind::T_float:       return primitive(TDbl);
+    case TypeStructure::Kind::T_string:      return primitive(TStr);
+    case TypeStructure::Kind::T_resource:    return primitive(TRes);
+    case TypeStructure::Kind::T_void:        return primitive(TNull);
+    case TypeStructure::Kind::T_dict:        return primitive(TDict);
+    case TypeStructure::Kind::T_vec:         return primitive(TVec);
+    case TypeStructure::Kind::T_keyset:      return primitive(TKeyset);
+    case TypeStructure::Kind::T_nonnull:     return primitive(TNull, true);
+    case TypeStructure::Kind::T_mixed:       return success();
+    case TypeStructure::Kind::T_num:         return unionOf(TInt, TDbl);
+    case TypeStructure::Kind::T_arraykey:    return unionOf(TInt, TStr);
+    case TypeStructure::Kind::T_vec_or_dict: return unionOf(TVec, TDict);
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+      push(env, implInstanceOfD(env, t, get_ts_classname(ts)));
+      decRef(env, popC(env));
+      return true;
+    case TypeStructure::Kind::T_xhp:
+    case TypeStructure::Kind::T_noreturn:
+      return fail();
+    case TypeStructure::Kind::T_typevar:
+    case TypeStructure::Kind::T_fun:
+    case TypeStructure::Kind::T_trait:
+    case TypeStructure::Kind::T_array:
+      // Not supported, will throw an error on these at the resolution phase
+      return false;
+    case TypeStructure::Kind::T_enum:
+    case TypeStructure::Kind::T_tuple:
+    case TypeStructure::Kind::T_shape:
+    case TypeStructure::Kind::T_typeaccess:
+    case TypeStructure::Kind::T_unresolved:
+      // TODO(T28423611): Implement these
+      return false;
+  }
+  not_reached();
+}
+
 } // namespace
 
 void emitIsTypeStruct(IRGS& env, const ArrayData* a) {
+  if (emitIsTypeStructWithoutResolvingIfPossible(env, a)) return;
   auto const tc = resolveTypeStructImpl(env, a);
   auto const c = popC(env);
   push(env, gen(env, IsTypeStruct, tc, c));
@@ -739,6 +843,8 @@ void emitAsTypeStruct(IRGS& env, const ArrayData* a) {
    * run is-check first and if it fails run the as-check to generate the
    * exception
    */
+  // TODO(T28423611): Use something like
+  // emitIsTypeStructWithoutResolvingIfPossible to elide instructions
   auto const c = topC(env);
   auto const tc = resolveTypeStructImpl(env, a);
   ifThen(

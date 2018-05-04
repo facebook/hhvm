@@ -35,6 +35,10 @@ bool VSCommand::tryGetBool(
   const char* key,
   bool defaultValue
 ) {
+  if (!message.isObject()) {
+    return defaultValue;
+  }
+
   try {
     const auto& val = message[key];
     return val.isBool() ? val.getBool() : defaultValue;
@@ -49,6 +53,10 @@ const std::string& VSCommand::tryGetString(
   const char* key,
   const std::string& defaultValue
 ) {
+  if (!message.isObject()) {
+    return defaultValue;
+  }
+
   try {
     const auto& val = message[key];
     return val.isString() ? val.getString() : defaultValue;
@@ -63,6 +71,10 @@ const folly::dynamic& VSCommand::tryGetObject(
   const char* key,
   const folly::dynamic& defaultValue
 ) {
+  if (!message.isObject()) {
+    return defaultValue;
+  }
+
   try {
     const auto& val = message[key];
     return val.isObject() ? val : defaultValue;
@@ -77,13 +89,17 @@ int64_t VSCommand::tryGetInt(
   const char* key,
   const int64_t defaultValue
 ) {
- try {
-   const auto& val = message[key];
-   return val.isInt() ? val.asInt() : defaultValue;
- } catch (std::out_of_range e) {
-   // Value not present in dynamic.
-   return defaultValue;
- }
+  if (!message.isObject()) {
+    return defaultValue;
+  }
+
+  try {
+    const auto& val = message[key];
+    return val.isInt() ? val.asInt() : defaultValue;
+  } catch (std::out_of_range& e) {
+    // Value not present in dynamic.
+    return defaultValue;
+  }
 }
 
 std::string VSCommand::trimString(const std::string str) {

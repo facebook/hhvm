@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
+#include <stdio.h>
 #include <algorithm>
 #include <vector>
 
@@ -56,7 +57,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_SLASH_TMP("/tmp");
+// Linux: /tmp
+// MacOS: /var/tmp
+const StaticString s_DEFAULT_TEMP_DIR(P_tmpdir);
+
 const StaticString s_ZEND_VERSION("2.4.99");
 
 const int64_t k_ASSERT_ACTIVE      = 1;
@@ -1070,7 +1074,7 @@ String HHVM_FUNCTION(sys_get_temp_dir) {
 #else
   char *env = getenv("TMPDIR");
   if (env && *env) return String(env, CopyString);
-  return s_SLASH_TMP;
+  return s_DEFAULT_TEMP_DIR;
 #endif
 }
 

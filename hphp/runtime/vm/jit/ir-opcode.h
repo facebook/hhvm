@@ -120,7 +120,6 @@ struct SSATmp;
  *   The following abbreviations are used in this table:
  *
  *      NF    no flags
- *      Er    mayRaiseError
  *      PRc   producesRC
  *      CRc   consumesRC
  *      T     isTerminal
@@ -170,21 +169,21 @@ bool opHasExtraData(Opcode op);
 
 enum OpcodeFlag : uint64_t {
   NoFlags          = 0,
-  HasDest          = 1ULL <<  0,
-  Branch           = 1ULL <<  1,
-  ConsumesRC       = 1ULL <<  2,
-  ProducesRC       = 1ULL <<  3,
-  MInstrProp       = 1ULL <<  4,
-  MInstrElem       = 1ULL <<  5,
-  MayRaiseError    = 1ULL <<  6,
-  Terminal         = 1ULL <<  7, // has no next instruction
-  NaryDest         = 1ULL <<  8, // has 0 or more destinations
-  HasExtra         = 1ULL <<  9,
-  Passthrough      = 1ULL << 10,
+  HasDest          = 1ULL << 0,
+  Branch           = 1ULL << 1,
+  ConsumesRC       = 1ULL << 2,
+  ProducesRC       = 1ULL << 3,
+  MInstrProp       = 1ULL << 4,
+  MInstrElem       = 1ULL << 5,
+  Terminal         = 1ULL << 6, // has no next instruction
+  NaryDest         = 1ULL << 7, // has 0 or more destinations
+  HasExtra         = 1ULL << 8,
+  Passthrough      = 1ULL << 9,
 };
 
 bool hasEdges(Opcode opc);
 bool opcodeHasFlags(Opcode opc, uint64_t flags);
+bool opcodeMayRaise(Opcode opc);
 
 /*
  * Given an SSATmp of type Cls, try to find the name of the class.

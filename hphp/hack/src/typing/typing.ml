@@ -5468,18 +5468,18 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
        *   function(string, string): bool
        *   function(DateTime, DateTime): bool
        *)
-      if both_sub ty_num || both_sub ty_string || both_sub ty_datetime
-      then make_result env te1 te2 (Reason.Rcomp p, ty_result)
-      else
-        (* TODO this is questionable; PHP's semantics for conversions with "<"
-         * are pretty crazy and we may want to just disallow this? *)
-        (* This is universal:
-         *   function<T>(T, T): bool
-         *)
-        let env, _ =
-        if TUtils.is_dynamic env ty1 || TUtils.is_dynamic env ty2
-        then env, ty1 else Type.unify p Reason.URnone env ty1 ty2 in
-        make_result env te1 te2 (Reason.Rcomp p, ty_result)
+      if not (both_sub ty_num || both_sub ty_string || both_sub ty_datetime ||
+                TUtils.is_dynamic env ty1 || TUtils.is_dynamic env ty2)
+      then begin
+        let ty1 = Typing_expand.fully_expand env ty1 in
+        let ty2 = Typing_expand.fully_expand env ty2 in
+        let tys1 = Typing_print.error (snd ty1) in
+        let tys2 = Typing_print.error (snd ty2) in
+        Errors.comparison_invalid_types p
+          (Reason.to_string ("This is " ^ tys1) (fst ty1))
+          (Reason.to_string ("This is " ^ tys2) (fst ty2))
+      end;
+      make_result env te1 te2 (Reason.Rcomp p, ty_result)
   | Ast.Dot ->
     (* A bit weird, this one:
      *   function(Stringish | string, Stringish | string) : string)

@@ -46,4 +46,9 @@ File "lvar_expr_dependent2.php", line 63, characters 7-24:[2]
 File "lvar_expr_dependent2.php", line 67, characters 5-22:
   <expr#9>::T
   where <expr#9>::T as \C::T
-No errors
+File "lvar_expr_dependent2.php", line 22, characters 9-17:
+This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, or DateTime are allowed (Typing[4240])
+File "lvar_expr_dependent2.php", line 16, characters 31-31:
+This is an object of type C
+File "lvar_expr_dependent2.php", line 16, characters 31-31:
+This is an object of type C

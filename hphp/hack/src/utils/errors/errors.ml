@@ -1050,6 +1050,7 @@ module Typing                               = struct
   let invalid_conditionally_reactive_call   = 4237 (* DONT MODIFY!!!! *)
   let extend_sealed                         = 4238 (* DONT MODIFY!!!! *)
   let sealed_final                          = 4239 (* DONT MODIFY!!!! *)
+  let comparison_invalid_types              = 4240 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -3060,6 +3061,11 @@ let eq_incompatible_types p left right =
   let msg = "This equality test has incompatible types" in
   add_list Typing.eq_incompatible_types
     ((p, msg) :: left @ right)
+
+let comparison_invalid_types p left right =
+  let msg = "This comparison has invalid types.  Only comparisons in which \
+             both arguments are strings, nums, or DateTime are allowed" in
+  add_list Typing.comparison_invalid_types ((p, msg) :: left @ right)
 
 let void_usage p void_witness =
   let msg = "You are using the return value of a void function" in

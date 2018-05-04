@@ -137,6 +137,12 @@ let tco_decl_override_require_hint = "decl_override_require_hint"
  *)
 let tco_sealed_classes = "sealed_classes"
 
+(**
+ * Make void the type of null.
+ *)
+let tco_experimental_void_is_type_of_null = "void_is_type_of_null"
+
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -160,6 +166,7 @@ let tco_experimental_all =
      tco_hacksperimental;
      tco_decl_override_require_hint;
      tco_sealed_classes;
+     tco_experimental_void_is_type_of_null;
    ]
 
 let tco_migration_flags_all =

@@ -1179,6 +1179,10 @@ and sub_type_with_uenv
     let uenv_sub = {uenv_sub with TUEnv.unwrappedToption = true} in
     sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
+  (* void is the type of null and is a subtype of any option type. *)
+  | (_, Tprim Nast.Tvoid), (_, Toption _)
+    when TUtils.is_void_type_of_null env -> env
+
   (* If the nonnull type is not enabled, mixed <: ?t is equivalent
    * to mixed <: t.  Otherwise, we should not encounter mixed
    * because by this time it should have been desugared into ?nonnull.

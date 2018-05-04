@@ -157,6 +157,7 @@ let parse_options () =
   let disallow_elvis_space = ref false in
   let dynamic_view = ref false in
   let hacksperimental = ref false in
+  let void_is_type_of_null = ref false in
   let parser = ref Legacy in
   let options = [
     "--ai",
@@ -307,6 +308,9 @@ let parse_options () =
     "--hacksperimental",
         Arg.Set hacksperimental,
         " Enable experimental Hack features";
+    "--void-is-type-of-null",
+        Arg.Set void_is_type_of_null,
+        " Make void the type of null";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -334,6 +338,8 @@ let parse_options () =
         then !disable_optional_and_unknown_shape_fields
         else if x = GlobalOptions.tco_hacksperimental
         then !hacksperimental
+        else if x = GlobalOptions.tco_experimental_void_is_type_of_null
+        then !void_is_type_of_null
         else true
       end tcopt.GlobalOptions.tco_experimental_features;
   } in

@@ -874,8 +874,11 @@ module Make (GetLocals : GetLocals) = struct
           N.Hany
       | x when x = SN.Typehints.void && allow_retonly -> N.Hprim N.Tvoid
       | x when x = SN.Typehints.void ->
-        Errors.return_only_typehint p `void;
-        N.Hany
+        if TypecheckerOptions.experimental_feature_enabled
+             (fst env).tcopt
+             TypecheckerOptions.experimental_void_is_type_of_null
+        then N.Hprim N.Tvoid
+        else (Errors.return_only_typehint p `void; N.Hany)
       | x when x = SN.Typehints.noreturn && allow_retonly -> N.Hprim N.Tnoreturn
       | x when x = SN.Typehints.noreturn ->
         Errors.return_only_typehint p `noreturn;

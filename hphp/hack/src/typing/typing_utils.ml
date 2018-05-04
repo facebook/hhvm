@@ -64,6 +64,11 @@ let expand_typeconst x = !expand_typeconst_ref x
 (* Convenience function for creating `this` types *)
 let this_of ty = Tabstract (AKdependent (`this, []), Some ty)
 
+let is_void_type_of_null env =
+  TypecheckerOptions.experimental_feature_enabled
+    (Env.get_options env)
+    TypecheckerOptions.experimental_void_is_type_of_null
+
 (*****************************************************************************)
 (* Returns true if a type is optional *)
 (*****************************************************************************)
@@ -81,6 +86,7 @@ let rec is_option_non_mixed env ty =
   match snd ety with
   | Toption (_, Tnonnull) -> false
   | Toption _ -> true
+  | Tprim Nast.Tvoid -> is_void_type_of_null env
   | Tunresolved tyl ->
       List.exists tyl (is_option_non_mixed env)
   | _ -> false
@@ -480,6 +486,8 @@ let rec push_option_out env ty =
   | r, Toption ty ->
     let env, ty = push_option_out env ty in
     env, if is_option ty then ty else (r, Toption ty)
+  | r, Tprim N.Tvoid when is_void_type_of_null env ->
+    env, (r, Toption (r, Tany))
   | r, Tunresolved tyl ->
     let env, tyl = List.map_env env tyl push_option_out in
     if List.exists tyl is_option then

@@ -71,6 +71,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
       Errors.noreturn_usage p (Reason.to_string ("This always throws or exits") r)
   | (r, Tprim N.Tvoid), _
   | _, (r, Tprim N.Tvoid) ->
+      if Typing_utils.is_void_type_of_null env then () else
       (* Ideally we shouldn't hit this case, but well... *)
       Errors.void_usage p (Reason.to_string ("This is void") r)
   | (_, Tprim a), (_, Tprim b) when a <> b ->
@@ -78,7 +79,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
   | (_, Toption ty1), (_, Tprim _ as ty2)
   | (_, Tprim _ as ty1), (_, Toption ty2) ->
       assert_nontrivial p bop env ty1 ty2
-  | (_, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic 
+  | (_, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
     | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
     | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _)
     ), _ -> ()

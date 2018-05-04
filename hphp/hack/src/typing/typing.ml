@@ -683,7 +683,7 @@ and stmt env = function
       end;
       let rty = Typing_return.wrap_awaitable env p rty in
       (match snd (Env.expand_type env return_type) with
-      | r, Tprim Tvoid ->
+      | r, Tprim Tvoid when not (TUtils.is_void_type_of_null env) ->
           (* Yell about returning a value from a void function. This catches
            * more issues than just unifying with void would do -- in particular
            * just unifying allows you to return a Typing_utils.tany env from a void function,
@@ -1495,8 +1495,11 @@ and expr_
      * be null | t
      *)
   | Null ->
-      let ty = Env.fresh_type() in
-      make_result env T.Null (Reason.Rwitness p, Toption ty)
+      let ty =
+        if TUtils.is_void_type_of_null env
+        then Tprim Tvoid
+        else Toption (Env.fresh_type ()) in
+      make_result env T.Null (Reason.Rwitness p, ty)
   | String s ->
       make_result env (T.String s) (Reason.Rwitness p, Tprim Tstring)
   | String2 idl ->
@@ -2909,7 +2912,7 @@ and check_valid_rvalue p env ty =
             (Reason.to_string "A noreturn function always throws or exits" r);
           env, (r, Typing_utils.terr env)
 
-        | r, Tprim Tvoid ->
+        | r, Tprim Tvoid when not (TUtils.is_void_type_of_null env) ->
           Errors.void_usage p
             (Reason.to_string "A void function doesn't return a value" r);
           env, (r, Typing_utils.terr env)
@@ -3941,6 +3944,22 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
   let env, ety1 = Env.expand_type env ty1 in
   let arity_error (_, name) =
     Errors.array_get_arity p name (Reason.to_pos (fst ety1)) in
+  let nullable_container_get ty =
+    if lhs_of_null_coalesce
+    (* Normally, we would not allow indexing into a nullable container,
+       however, because the pattern shows up so frequently, we are allowing
+       indexing into a nullable container as long as it is on the lhs of a
+       null coalesce *)
+    then
+      array_get ~lhs_of_null_coalesce is_lvalue p env ty e2 ty2
+    else begin
+      Errors.null_container p
+        (Reason.to_string
+          "This is what makes me believe it can be null"
+          (fst ety1)
+        );
+      env, (Reason.Rwitness p, Typing_utils.terr env)
+    end in
   match snd ety1 with
   | Tunresolved tyl ->
       let env, tyl = List.map_env env tyl begin fun env ty1 ->
@@ -4128,19 +4147,9 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
           env, (Reason.Rwitness p, Typing_utils.terr env)
         | Some { sft_optional = _; sft_ty } -> env, sft_ty)
     )
-  | Toption tyl when lhs_of_null_coalesce ->
-      (* Normally, we would not allow indexing into a nullable container,
-         however, because the pattern shows up so frequently, we are allowing
-         indexing into a nullable container as long as it is on the lhs of a
-         null coalesce *)
-      array_get ~lhs_of_null_coalesce is_lvalue p env tyl e2 ty2
-  | Toption _ ->
-      Errors.null_container p
-        (Reason.to_string
-          "This is what makes me believe it can be null"
-          (fst ety1)
-        );
-      env, (Reason.Rwitness p, Typing_utils.terr env)
+  | Toption ty -> nullable_container_get ty
+  | Tprim Nast.Tvoid when TUtils.is_void_type_of_null env ->
+      nullable_container_get (Reason.Rnone, Tany)
   | Tobject ->
       if Env.is_strict env
       then error_array env p ety1
@@ -4556,6 +4565,19 @@ and obj_get_concrete_ty ~is_method ~valkind ~pos_params ?(explicit_tparams=[])
 and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(explicit_tparams=[])
     env ty1 cid (id_pos, id_str as id) k k_lhs =
   let env, ety1 = Env.expand_type env ty1 in
+  let nullable_obj_get ty = match nullsafe with
+    | Some p1 ->
+        let env, method_, x = obj_get_ ~is_method ~nullsafe ~valkind
+          ~pos_params ~explicit_tparams env ty cid id k k_lhs in
+        let env, method_ = TUtils.non_null env method_ in
+        env, (Reason.Rnullsafe_op p1, Toption method_), x
+    | None ->
+        Errors.null_member id_str id_pos
+          (Reason.to_string
+             "This is what makes me believe it can be null"
+             (fst ety1)
+          );
+        k (env, (fst ety1, Typing_utils.terr env), None) in
   match ety1 with
   | _, Tunresolved tyl ->
       let (env, vis), tyl = List.map_env (env, None) tyl
@@ -4613,20 +4635,9 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(ex
         else k res
     end
 
-  | _, Toption ty -> begin match nullsafe with
-    | Some p1 ->
-        let env, method_, x = obj_get_ ~is_method ~nullsafe ~valkind
-          ~pos_params ~explicit_tparams env ty cid id k k_lhs in
-        let env, method_ = TUtils.non_null env method_ in
-        env, (Reason.Rnullsafe_op p1, Toption method_), x
-    | None ->
-        Errors.null_member id_str id_pos
-          (Reason.to_string
-             "This is what makes me believe it can be null"
-             (fst ety1)
-          );
-        k (env, (fst ety1, Typing_utils.terr env), None)
-      end
+  | _, Toption ty -> nullable_obj_get ty
+  | r, Tprim Nast.Tvoid when TUtils.is_void_type_of_null env ->
+    nullable_obj_get (r, Tany)
   | _, _ ->
     k (obj_get_concrete_ty ~is_method ~valkind ~pos_params ~explicit_tparams env ety1 cid id k_lhs)
 
@@ -4637,7 +4648,8 @@ and type_could_be_null env ty1 =
   List.exists tyl
     (fun ety ->
       match snd ety with
-        Toption _ | Tunresolved _ | Tmixed | Tany | Terr | Tdynamic -> true
+      | Toption _ | Tunresolved _ | Tmixed | Tany | Terr | Tdynamic -> true
+      | Tprim Tvoid -> TUtils.is_void_type_of_null env
       | Tarraykind _ | Tprim _ | Tvar _ | Tfun _ | Tabstract _
       | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tobject
       | Tshape _ | Tnonnull -> false)

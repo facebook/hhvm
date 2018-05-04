@@ -19,6 +19,7 @@ let rec can_be_null env ty =
   let _, (_, ety) = Env.expand_type env ty in
   match ety with
   | Toption _ -> true
+  | Tprim Nast.Tvoid -> TUtils.is_void_type_of_null env
   | Tunresolved tyl -> List.exists tyl (can_be_null env)
   | Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
     | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
@@ -71,6 +72,8 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
     let env, ty = overload_extract_from_awaitable env p ty in
     let env, ty = TUtils.non_null env ty in
     env, (r, Toption ty)
+  | r, Tprim Nast.Tvoid when TUtils.is_void_type_of_null env ->
+    overload_extract_from_awaitable env p (r, Tany)
   | _, Tdynamic -> (* Awaiting a dynamic results in a new dynamic *)
     env, (r, Tdynamic)
   | _, (Terr | Tany | Tmixed | Tarraykind _ | Tnonnull | Tprim _

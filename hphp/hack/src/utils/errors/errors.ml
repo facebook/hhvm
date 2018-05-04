@@ -1051,6 +1051,7 @@ module Typing                               = struct
   let extend_sealed                         = 4238 (* DONT MODIFY!!!! *)
   let sealed_final                          = 4239 (* DONT MODIFY!!!! *)
   let comparison_invalid_types              = 4240 (* DONT MODIFY!!!! *)
+  let option_void                           = 4241 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -2771,6 +2772,10 @@ let null_container p null_witness =
 let option_mixed pos =
   add Typing.option_mixed pos
     "?mixed is a redundant typehint - just use mixed"
+
+let option_void pos =
+  add Typing.option_void pos
+    "?void is a redundant typehint - just use void"
 
 let declared_covariant pos1 pos2 emsg =
   add_list Typing.declared_covariant (

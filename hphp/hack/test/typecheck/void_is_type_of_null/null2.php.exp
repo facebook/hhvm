@@ -1,0 +1,6 @@
+File "null2.php", line 21, characters 12-13:
+Invalid return type (Typing[4110])
+File "null2.php", line 12, characters 17-19:
+This is an int
+File "null2.php", line 13, characters 8-11:
+It is incompatible with void

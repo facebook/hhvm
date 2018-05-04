@@ -87,6 +87,9 @@ and unify_unwrapped ?(opts=TUtils.default_unify_opt) env
   | (r2, Tmixed), (_, Toption ty1)
   | (_, Toption ty1), (r2, Tmixed) ->
     unify ~opts env ty1 (r2, Tmixed)
+  | (_, Tprim Nast.Tvoid), (_, Toption _ as ty)
+  | (_, Toption _ as ty), (_, Tprim Nast.Tvoid)
+    when TUtils.is_void_type_of_null env -> env, ty
   | (r1, ty1), (r2, ty2) ->
       let r = unify_reason r1 r2 in
       let env, ty = unify_ ~opts env r1 ty1 r2 ty2 in

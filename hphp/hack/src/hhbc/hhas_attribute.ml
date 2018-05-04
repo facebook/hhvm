@@ -10,7 +10,7 @@
 open Hh_core
 
 type t = {
-  attribute_name          : Litstr.id;
+  attribute_name          : string;
   attribute_arguments     : Typed_value.t list
 }
 

@@ -8,7 +8,7 @@
 *)
 
 type t = {
-  param_name          : Litstr.id;
+  param_name          : string;
   param_is_reference  : bool;
   param_is_variadic   : bool;
   param_is_inout      : bool;

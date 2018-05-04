@@ -152,7 +152,7 @@ module MemberKey = struct
   type t =
   | EC of stack_index
   | EL of local_id
-  | ET of Litstr.id
+  | ET of string
   | EI of int64
   | PC of stack_index
   | PL of local_id
@@ -199,9 +199,9 @@ type instruct_lit_const =
   | NewDArray of int (* capacity hint *)
   | NewLikeArrayL of local_id * int (* capacity hint *)
   | NewPackedArray of int
-  | NewStructArray of Litstr.id list
-  | NewStructDArray of Litstr.id list
-  | NewStructDict of Litstr.id list
+  | NewStructArray of string list
+  | NewStructDArray of string list
+  | NewStructDict of string list
   | NewVArray of int
   | NewVecArray of int
   | NewKeysetArray of int
@@ -214,7 +214,7 @@ type instruct_lit_const =
   | ColFromArray of CollectionType.t
   | Cns of const_id
   | CnsE of const_id
-  | CnsU of const_id * Litstr.id
+  | CnsU of const_id * string
   | ClsCns of const_id * classref_id
   | ClsCnsD of const_id * class_id
   | File
@@ -286,7 +286,7 @@ type instruct_control_flow =
   (* bounded, base, offset vector *)
   | Switch of switchkind * int * Label.t list
   (* litstr id / offset vector *)
-  | SSwitch of (Litstr.id * Label.t) list
+  | SSwitch of (string * Label.t) list
   | RetC
   | RetM of num_params
   | RetV
@@ -405,7 +405,7 @@ type instruct_mutator =
 type instruct_call =
   | FPushFunc of num_params * param_locations
   | FPushFuncD of num_params * function_id
-  | FPushFuncU of num_params * function_id * Litstr.id
+  | FPushFuncU of num_params * function_id * string
   | FPushObjMethod of num_params * Ast.og_null_flavor * param_locations
   | FPushObjMethodD of num_params * method_id * Ast.og_null_flavor
   | FPushClsMethod of num_params * classref_id * param_locations
@@ -435,7 +435,7 @@ type instruct_call =
   | FCallD of num_params * class_id * function_id
   | FCallAwait of num_params * class_id * function_id
   | FCallUnpack of num_params
-  | FCallBuiltin of num_params * num_params * Litstr.id
+  | FCallBuiltin of num_params * num_params * string
   | RaiseFPassWarning of fpass_hint * string * param_id
 
 type instruct_base =
@@ -499,7 +499,7 @@ type instruct_include_eval_define =
   | ReqOnce
   | ReqDoc
   | Eval
-  | AliasCls of Litstr.id * Litstr.id
+  | AliasCls of string * string
   | DefFunc of function_num
   | DefCls of class_num
   | DefClsNop of class_num
@@ -525,9 +525,9 @@ type instruct_misc =
   | BareThis of bare_this_op
   | CheckThis
   | InitThisLoc of local_id
-  | StaticLocCheck of local_id * Litstr.id
-  | StaticLocDef of local_id * Litstr.id
-  | StaticLocInit of local_id * Litstr.id
+  | StaticLocCheck of local_id * string
+  | StaticLocDef of local_id * string
+  | StaticLocInit of local_id * string
   | Catch
   | ChainFaults
   | OODeclExists of class_kind

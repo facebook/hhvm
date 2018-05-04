@@ -8,7 +8,7 @@
 *)
 
 type t = {
-  constant_name         : Litstr.id;
+  constant_name         : string;
   constant_value        : Typed_value.t option;
   constant_initializer_instrs : Instruction_sequence.t option;
 }

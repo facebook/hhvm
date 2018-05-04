@@ -30,10 +30,10 @@ type t = {
   class_is_immutable : bool;
   class_has_immutable : bool;
   class_no_dynamic_props : bool;
-  class_uses         : Litstr.id list;
+  class_uses         : string list;
   class_use_aliases  :
-    (Litstr.id option * Litstr.id * Litstr.id option * Ast.kind list) list;
-  class_use_precedences : (Litstr.id * Litstr.id * Litstr.id list) list;
+    (string option * string * string option * Ast.kind list) list;
+  class_use_precedences : (string * string * string list) list;
   class_enum_type    : Hhas_type_info.t option;
   class_methods      : Hhas_method.t list;
   class_properties   : Hhas_property.t list;

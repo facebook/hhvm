@@ -108,7 +108,7 @@ let from_implements ~namespace implements =
 
 let from_constant env (_hint, name, const_init) =
   (* The type hint is omitted. *)
-  let constant_name = Litstr.to_string @@ snd name in
+  let constant_name = snd name in
   match const_init with
   | None -> Hhas_constant.make constant_name None None
   | Some init ->
@@ -123,8 +123,7 @@ let from_constant env (_hint, name, const_init) =
     Hhas_constant.make constant_name constant_value initializer_instrs
 
 let from_type_constant ~namespace ast_type_constant =
-  let type_constant_name = Litstr.to_string @@
-    snd ast_type_constant.A.tconst_name
+  let type_constant_name = snd ast_type_constant.A.tconst_name
   in
   match ast_type_constant.A.tconst_type with
   | None -> Hhas_type_constant.make type_constant_name None

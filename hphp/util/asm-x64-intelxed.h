@@ -21,7 +21,6 @@ extern "C" {
 #include <xed-interface.h>
 }
 
-#include <functional>
 #include <tbb/concurrent_unordered_map.h>
 
 /*
@@ -439,10 +438,9 @@ private:
 
   // XED emit functions
 
-  ALWAYS_INLINE
+  template<typename F> ALWAYS_INLINE
   uint32_t xedEmitImpl(xed_iclass_enum_t instr, CodeAddress destination,
-                       std::function<void(xed_encoder_instruction_t*)>
-                                          xedFunc) {
+                       F xedFunc) {
     xed_encoder_instruction_t instruction;
     xed_encoder_request_t request;
     uint32_t encodedSize = 0;
@@ -465,58 +463,44 @@ private:
   }
 
   ALWAYS_INLINE
-  uint32_t xedEmit(xed_iclass_enum_t instr,
-                   xed_uint_t effOperandSizeBits,
-                   CodeAddress destination) {
-    return xedEmitImpl(instr, destination,
-                        [&](xed_encoder_instruction_t* i) {
-                          xed_inst0(i, kXedState, instr, effOperandSizeBits);
-                        });
-  }
-
-  ALWAYS_INLINE
-  void xedEmit(xed_iclass_enum_t instr, xed_uint_t effOperandSizeBits = 0) {
-    codeBlock.moveFrontier(xedEmit(instr, effOperandSizeBits, dest()));
+  uint32_t xedEmit(xed_iclass_enum_t instr, xed_uint_t effOperandSizeBits,
+                   CodeAddress destination = nullptr) {
+    auto size = xedEmitImpl(instr, destination ? destination : dest(),
+                            [&](xed_encoder_instruction_t* i) {
+                              xed_inst0(i, kXedState, instr,
+                                        effOperandSizeBits);
+                            });
+    if (!destination) codeBlock.moveFrontier(size);
+    return size;
   }
 
   ALWAYS_INLINE
   uint32_t xedEmit(xed_iclass_enum_t instr,
                    const xed_encoder_operand_t& op,
-                   xed_uint_t effOperandSizeBits,
-                   CodeAddress destination) {
-    return xedEmitImpl(instr, destination,
-                        [&](xed_encoder_instruction_t* i) {
-                          xed_inst1(i, kXedState, instr,
-                                    effOperandSizeBits, op);
-                        });
-  }
-
-  ALWAYS_INLINE
-  void xedEmit(xed_iclass_enum_t instr, const xed_encoder_operand_t& op,
-               xed_uint_t effOperandSizeBits = 0) {
-    codeBlock.moveFrontier(xedEmit(instr, op, effOperandSizeBits, dest()));
+                   xed_uint_t effOperandSizeBits = 0,
+                   CodeAddress destination = nullptr) {
+    auto size = xedEmitImpl(instr, destination ? destination : dest(),
+                            [&](xed_encoder_instruction_t* i) {
+                              xed_inst1(i, kXedState, instr,
+                                        effOperandSizeBits, op);
+                            });
+    if (!destination) codeBlock.moveFrontier(size);
+    return size;
   }
 
   ALWAYS_INLINE
   uint32_t xedEmit(xed_iclass_enum_t instr,
                    const xed_encoder_operand_t& op_1,
                    const xed_encoder_operand_t& op_2,
-                   xed_uint_t effOperandSizeBits,
-                   CodeAddress destination) {
-    return xedEmitImpl(instr, destination,
-                        [&](xed_encoder_instruction_t* i) {
-                          xed_inst2(i, kXedState, instr,
-                                    effOperandSizeBits, op_1, op_2);
-                        });
-  }
-
-  ALWAYS_INLINE
-  void xedEmit(xed_iclass_enum_t instr,
-               const xed_encoder_operand_t& op_1,
-               const xed_encoder_operand_t& op_2,
-               xed_uint_t effOperandSizeBits = 0) {
-    codeBlock.moveFrontier(xedEmit(instr, op_1, op_2, effOperandSizeBits,
-                                   dest()));
+                   xed_uint_t effOperandSizeBits = 0,
+                   CodeAddress destination = nullptr) {
+    auto size = xedEmitImpl(instr, destination ? destination : dest(),
+                            [&](xed_encoder_instruction_t* i) {
+                              xed_inst2(i, kXedState, instr,
+                                        effOperandSizeBits, op_1, op_2);
+                            });
+    if (!destination) codeBlock.moveFrontier(size);
+    return size;
   }
 
   ALWAYS_INLINE
@@ -524,23 +508,16 @@ private:
                    const xed_encoder_operand_t& op_1,
                    const xed_encoder_operand_t& op_2,
                    const xed_encoder_operand_t& op_3,
-                   xed_uint_t effOperandSizeBits,
-                   CodeAddress destination) {
-    return xedEmitImpl(instr, destination,
-                        [&](xed_encoder_instruction_t* i) {
-                          xed_inst3(i, kXedState, instr,
-                                    effOperandSizeBits, op_1, op_2, op_3);
-                        });
-  }
-
-  ALWAYS_INLINE
-  void xedEmit(xed_iclass_enum_t instr,
-               const xed_encoder_operand_t& op_1,
-               const xed_encoder_operand_t& op_2,
-               const xed_encoder_operand_t& op_3,
-               xed_uint_t effOperandSizeBits = 0) {
-    codeBlock.moveFrontier(xedEmit(instr, op_1, op_2, op_3, effOperandSizeBits,
-                                   dest()));
+                   xed_uint_t effOperandSizeBits = 0,
+                   CodeAddress destination = nullptr) {
+    auto size = xedEmitImpl(instr, destination ? destination : dest(),
+                            [&](xed_encoder_instruction_t* i) {
+                              xed_inst3(i, kXedState, instr,
+                                        effOperandSizeBits,
+                                        op_1, op_2, op_3);
+                            });
+    if (!destination) codeBlock.moveFrontier(size);
+    return size;
   }
 
 public:
@@ -773,9 +750,8 @@ private:
    */
   typedef tbb::concurrent_unordered_map<int32_t, uint32_t> XedLenCache;
 
-  ALWAYS_INLINE
-  uint32_t xedCacheLen(XedLenCache* lenCache,
-                       std::function<uint32_t(void)> xedFunc, uint32_t key) {
+  template<typename F> ALWAYS_INLINE
+  uint32_t xedCacheLen(XedLenCache* lenCache, F xedFunc, uint32_t key) {
     auto res = lenCache->find(key);
     if (res != lenCache->end()) {
       return res->second;

@@ -100,7 +100,7 @@ type t = {
 
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
-}
+} [@@deriving show]
 val make :
   tco_assume_php: bool ->
   tco_safe_array: bool ->

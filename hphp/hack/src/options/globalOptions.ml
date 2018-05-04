@@ -24,7 +24,7 @@ type t = {
   tco_disallow_array_literal: bool;
   po_disallow_elvis_space : bool;
   ignored_fixme_codes : ISet.t;
-}
+} [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
 

@@ -2,7 +2,7 @@
 keeps track of the count and the sum for
 string-keyed values *)
 
-type t
+type t [@@deriving show]
 
 exception NoSuchEntry of string
 

@@ -46,7 +46,7 @@ type env =
               HALT_COMPILER is at x bytes offset in the file.
   *)
   ; mutable saw_compiler_halt_offset : int option
-  }
+  }[@@deriving show]
 
 let make_env
   ?(codegen                  = false                   )
@@ -111,7 +111,7 @@ type result =
   ; content  : string
   ; file     : Relative_path.t
   ; comments : (Pos.t * comment) list
-  }
+  } [@@deriving show]
 
 module WithPositionedSyntax(Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
 

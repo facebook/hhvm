@@ -210,7 +210,7 @@ _build/hack.stamp: $(ALL_SRC_FILES) copy-hhis _build/ppx/ppx_gen_hhi
 	#  - means it will never relink just for C changes
 	#  - doesn't really help that much as it needs to do the bulk of the work anyway
 	rm -f $(TARGETS)
-	$(OCAMLBUILD) $(CC_DEFINES) -use-ocamlfind -no-links -cflag -g $(INCLUDE_OPTS) $(LIB_OPTS) \
+	$(OCAMLBUILD) $(CC_DEFINES) -tag-line '<**/*.ml*>: package(ppx_deriving.std)' -use-ocamlfind -no-links -cflag -g $(INCLUDE_OPTS) $(LIB_OPTS) \
 		-lflags "-g $(LINKER_FLAGS)" -tag custom \
 		$(patsubst _build/%,%,$(TARGETS))
 	touch _build/hack.stamp
@@ -223,7 +223,7 @@ _build/hackc/build-id: $(ALL_SRC_FILES)
 	INSTALL_DIR=./hphp/hack/src/_build/hackc FBCODE_DIR=./ hphp/tools/generate-build-id.sh IGNORED IGNORED hackc hphp/hack/src)
 
 _build/utils/compiler_id_impl.o: _build/hackc/build-id
-	$(OCAMLBUILD) $(CC_DEFINES) -use-ocamlfind \
+	$(OCAMLBUILD) $(CC_DEFINES) -tag-line '<**/*.ml*>: package(ppx_deriving.std)' -use-ocamlfind \
 		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -ccopt -DHACKC_COMPILER_ID=$(shell cat _build/hackc/build-id)" \
 	utils/compiler_id_impl.o
 
@@ -233,12 +233,12 @@ _build/hack/build-id: $(ALL_SRC_FILES)
 	INSTALL_DIR=./hphp/hack/src/_build/hack FBCODE_DIR=./ hphp/tools/generate-build-id.sh IGNORED IGNORED hh hphp/hack/src)
 
 _build/utils/get_build_id.o: _build/hack/build-id
-	$(OCAMLBUILD) $(CC_DEFINES) -use-ocamlfind \
+	$(OCAMLBUILD) $(CC_DEFINES) -tag-line '<**/*.ml*>: package(ppx_deriving.std)' -use-ocamlfind \
 		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -ccopt -DHH_BUILD_ID=$(shell cat _build/hack/build-id) -ccopt -DHH_BUILD_TIMESTAMP=$(shell date +%s)ul" \
 		utils/get_build_id.o
 
 build-hack-native-deps: $(NATIVE_C_FILES) $(BUILD_ID_OBJECTS)
-	$(OCAMLBUILD) $(CC_DEFINES) -use-ocamlfind \
+	$(OCAMLBUILD) $(CC_DEFINES) -tag-line '<**/*.ml*>: package(ppx_deriving.std)' -use-ocamlfind \
 		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" \
 		$(OBJECT_FILES_TO_BUILD)
 

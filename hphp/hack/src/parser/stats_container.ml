@@ -5,9 +5,27 @@ type cell = {
   mutable sum   : float;
 }
 
+let string_of_cell {count; sum} =
+  Printf.sprintf "Cell(%f, %f)" count sum
+
 (* the correctness of the implementation of find_or_add depends on
  * having a unique cell for every string *)
 type t = (string, cell) Hashtbl.t
+
+let to_string h =
+  let buf = Buffer.create 80 in
+  Buffer.add_string buf "Hashtbl{";
+  Hashtbl.iter (fun s c ->
+    Printf.bprintf buf "%s %s, " s (string_of_cell c)
+  ) h;
+  (* remove trailing space and comma *)
+  Buffer.truncate buf (-2 + Buffer.length buf);
+  Buffer.add_string buf "}";
+  buf |> Buffer.contents
+
+
+let show = to_string
+let pp : Format.formatter -> t -> unit = fun _ x -> Printf.printf "%s\n" (show x)
 
 let stats_instance_ref : t option ref = ref None
 

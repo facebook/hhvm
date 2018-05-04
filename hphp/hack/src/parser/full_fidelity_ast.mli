@@ -13,7 +13,7 @@ module SourceText = Full_fidelity_source_text
  * The `env` of the lowerer is "full request." It provides all the settings the
  * lowerer needs to produce an AST.
  *)
-type env
+type env [@@deriving show]
 
 val make_env
   (* Optional parts *)
@@ -50,7 +50,7 @@ type result =
   ; content    : string
   ; file       : Relative_path.t
   ; comments   : (Pos.t * Prim_defs.comment) list
-  }
+  } [@@deriving show]
 
 module WithPositionedSyntax : functor (Syntax : Positioned_syntax_sig.PositionedSyntax_S) -> sig
 

@@ -27,7 +27,7 @@ type t = {
   trailing_width: int;
   leading: Trivia.t list;
   trailing: Trivia.t list;
-}
+} [@@deriving show]
 
 let empty =
   {

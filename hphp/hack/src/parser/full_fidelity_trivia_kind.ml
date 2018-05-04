@@ -30,6 +30,8 @@ type t =
   | ExtraTokenError
   | AfterHaltCompiler
 
+[@@deriving show]
+
 let to_string kind =
   match kind with
   | WhiteSpace        -> "whitespace"

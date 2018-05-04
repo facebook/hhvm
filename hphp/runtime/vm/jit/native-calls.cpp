@@ -564,6 +564,7 @@ static CallMap s_callMap {
     {MethodExists, methodExistsHelper, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
 
     {GetMemoKey, HHVM_FN(serialize_memoize_param), DTV, SSync, {{TV, 0}}},
+    {GetMemoKeyScalar, HHVM_FN(serialize_memoize_param), DTV, SNone, {{TV, 0}}},
 
     /* microtime(true) */
     {GetTime, TimeStamp::CurrentSecond, DDbl, SNone, {}},

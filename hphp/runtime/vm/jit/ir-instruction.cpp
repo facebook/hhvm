@@ -425,7 +425,7 @@ Type genIterReturn(const IRInstruction* inst) {
 // Integers get mapped to integer memo keys, everything else gets mapped to
 // strings.
 Type memoKeyReturn(const IRInstruction* inst) {
-  assertx(inst->is(GetMemoKey));
+  assertx(inst->is(GetMemoKey, GetMemoKeyScalar));
   auto const srcType = inst->src(0)->type();
   if (srcType <= TInt) return TInt;
   if (!srcType.maybe(TInt)) return TStr;

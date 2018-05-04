@@ -3540,7 +3540,7 @@ SSATmp* simplifyCheckRange(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyGetMemoKey(State& env, const IRInstruction* inst) {
+SSATmp* simplifyGetMemoKeyScalar(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
 
   // Note: this all uses the fully generic memo key scheme. If we used a more
@@ -3575,6 +3575,14 @@ SSATmp* simplifyGetMemoKey(State& env, const IRInstruction* inst) {
   }
   if (src->isA(TNull)) return cns(env, s_nullMemoKey.get());
 
+  return nullptr;
+}
+
+SSATmp* simplifyGetMemoKey(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+
+  if (auto ret = simplifyGetMemoKeyScalar(env, inst)) return ret;
+  if (src->isA(TUncounted|TStr)) return gen(env, GetMemoKeyScalar, src);
   return nullptr;
 }
 
@@ -3835,6 +3843,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckRange)
   X(SpillFrame)
   X(GetMemoKey)
+  X(GetMemoKeyScalar)
   X(StrictlyIntegerConv)
   default: break;
   }

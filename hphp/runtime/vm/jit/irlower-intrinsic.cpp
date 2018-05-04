@@ -152,6 +152,7 @@ IMPL_OPCODE_CALL(PrintInt)
 IMPL_OPCODE_CALL(PrintStr)
 
 IMPL_OPCODE_CALL(GetMemoKey)
+IMPL_OPCODE_CALL(GetMemoKeyScalar)
 
 void cgRBTraceEntry(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<RBTraceEntry>();

@@ -272,6 +272,7 @@ bool canDCE(IRInstruction* inst) {
   case LdARNumArgsAndFlags:
   case IsFuncDynCallable:
   case StrictlyIntegerConv:
+  case GetMemoKeyScalar:
     assertx(!inst->isControlFlow());
     return true;
 

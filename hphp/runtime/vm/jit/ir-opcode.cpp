@@ -665,6 +665,7 @@ bool opcodeMayRaise(Opcode opc) {
   case FuncGuard:
   case FwdCtxStaticCall:
   case GenericRetDecRefs:
+  case GetMemoKeyScalar:
   case GetTime:
   case GetTimeNs:
   case GtBool:

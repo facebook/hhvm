@@ -3577,7 +3577,7 @@ void iterInitImpl(ISS& env, IterId iter, LocalId valueLoc,
   };
 
   auto const fallthrough = [&]{
-    setIter(env, iter, LiveIter { ity, baseLoc, env.blk.id });
+    setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.blk.id });
     // Do this after setting the iterator, in case it clobbers the base local
     // equivalency.
     setLoc(env, valueLoc, std::move(ity.value));
@@ -3615,11 +3615,12 @@ void iterInitKImpl(ISS& env, IterId iter, LocalId valueLoc, LocalId keyLoc,
   };
 
   auto const fallthrough = [&]{
-    setIter(env, iter, LiveIter { ity, baseLoc, env.blk.id });
+    setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.blk.id });
     // Do this after setting the iterator, in case it clobbers the base local
     // equivalency.
     setLoc(env, valueLoc, std::move(ity.value));
     setLoc(env, keyLoc, std::move(ity.key));
+    if (!locCouldBeRef(env, keyLoc)) setIterKey(env, iter, keyLoc);
   };
 
   switch (ity.count) {
@@ -3702,6 +3703,7 @@ void iterNextKImpl(ISS& env, IterId iter, LocalId valueLoc,
         case IterTypes::Count::Any:
           setLoc(env, valueLoc, ti.types.value);
           setLoc(env, keyLoc, ti.types.key);
+          if (!locCouldBeRef(env, keyLoc)) setIterKey(env, iter, keyLoc);
           return false;
         case IterTypes::Count::Empty:
           always_assert(false);

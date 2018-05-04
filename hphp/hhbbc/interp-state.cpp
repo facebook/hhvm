@@ -80,6 +80,9 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
           auto const baseLocal = (diter.baseLocal != siter.baseLocal)
             ? NoLocalId
             : diter.baseLocal;
+          auto const keyLocal = (diter.keyLocal != siter.keyLocal)
+            ? NoLocalId
+            : diter.keyLocal;
           auto const initBlock = (diter.initBlock != siter.initBlock)
             ? NoBlockId
             : diter.initBlock;
@@ -89,6 +92,7 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
             count != diter.types.count ||
             throws1 != diter.types.mayThrowOnInit ||
             throws2 != diter.types.mayThrowOnNext ||
+            keyLocal != diter.keyLocal ||
             baseLocal != diter.baseLocal ||
             initBlock != diter.initBlock;
           diter.types =
@@ -100,6 +104,7 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
               throws2
             };
           diter.baseLocal = baseLocal;
+          diter.keyLocal = keyLocal;
           diter.initBlock = initBlock;
           return changed;
         }
@@ -127,6 +132,9 @@ std::string show(const php::Func& f, const Iter& iter) {
       }
       if (ti.baseLocal != NoLocalId) {
         folly::format(&str, " (base={})", local_string(f, ti.baseLocal));
+      }
+      if (ti.keyLocal != NoLocalId) {
+        folly::format(&str, " (key={})", local_string(f, ti.keyLocal));
       }
       return str;
     }
@@ -530,8 +538,8 @@ std::string show(const php::Func& f, const State::MInstrState& s) {
     [&]{
       using namespace folly::gen;
       return from(s.arrayChain)
-        | map([&] (const std::pair<Type,Type>& p) {
-            return folly::sformat("<{},{}>", show(p.second), show(p.first));
+        | map([&] (const State::MInstrState::ArrayChainEnt& e) {
+            return folly::sformat("<{},{}>", show(e.key), show(e.base));
           })
         | unsplit<std::string>(" -> ");
     }()

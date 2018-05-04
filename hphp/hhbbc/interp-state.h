@@ -94,6 +94,9 @@ struct LiveIter {
   // The local that an iterator was initialized with (and which has not been
   // changed since).
   LocalId baseLocal = NoLocalId;
+  // The local that is known to be equivalent to the current key in the
+  // iterator. Used to detect "safe" writes.
+  LocalId keyLocal  = NoLocalId;
   // The block id where this iterator was initialized. If there's more than one
   // such block, NoBlockId.
   BlockId initBlock = NoBlockId;
@@ -277,7 +280,12 @@ struct State {
      * base,key type pair that was used at each stage. See
      * interp-minstr.cpp:resolveArrayChain().
      */
-    using ArrayChain = CompactVector<std::pair<Type,Type>>;
+    struct ArrayChainEnt {
+      Type base;
+      Type key;
+      LocalId keyLoc;
+    };
+    using ArrayChain = CompactVector<ArrayChainEnt>;
     ArrayChain arrayChain;
   };
   MInstrState mInstrState;

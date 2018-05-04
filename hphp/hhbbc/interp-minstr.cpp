@@ -316,7 +316,7 @@ void miThrow(ISS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void setLocalForBase(ISS& env, Type ty) {
+void setLocalForBase(ISS& env, Type ty, LocalId firstKeyLoc) {
   assert(mustBeInLocal(env.state.mInstrState.base));
   if (env.state.mInstrState.base.locLocal == NoLocalId) {
     return loseNonRefLocalTypes(env);
@@ -327,7 +327,12 @@ void setLocalForBase(ISS& env, Type ty) {
      : "$<unnamed>",
     show(ty)
   );
-  setLoc(env, env.state.mInstrState.base.locLocal, std::move(ty));
+  setLoc(
+    env,
+    env.state.mInstrState.base.locLocal,
+    std::move(ty),
+    firstKeyLoc
+  );
 }
 
 void setStackForBase(ISS& env, Type ty) {
@@ -380,17 +385,17 @@ Type currentChainType(ISS& env, Type val) {
   auto it = env.state.mInstrState.arrayChain.end();
   while (it != env.state.mInstrState.arrayChain.begin()) {
     --it;
-    if (it->first.subtypeOf(TArr)) {
-      val = array_set(it->first, it->second, val).first;
-    } else if (it->first.subtypeOf(TVec)) {
-      val = vec_set(it->first, it->second, val).first;
+    if (it->base.subtypeOf(TArr)) {
+      val = array_set(it->base, it->key, val).first;
+    } else if (it->base.subtypeOf(TVec)) {
+      val = vec_set(it->base, it->key, val).first;
       if (val == TBottom) val = TVec;
-    } else if (it->first.subtypeOf(TDict)) {
-      val = dict_set(it->first, it->second, val).first;
+    } else if (it->base.subtypeOf(TDict)) {
+      val = dict_set(it->base, it->key, val).first;
       if (val == TBottom) val = TDict;
     } else {
-      assert(it->first.subtypeOf(TKeyset));
-      val = keyset_set(it->first, it->second, val).first;
+      assert(it->base.subtypeOf(TKeyset));
+      val = keyset_set(it->base, it->key, val).first;
       if (val == TBottom) val = TKeyset;
     }
   }
@@ -401,8 +406,8 @@ Type resolveArrayChain(ISS& env, Type val) {
   static UNUSED const char prefix[] = "              ";
   FTRACE(5, "{}chain\n", prefix, show(val));
   do {
-    auto arr = std::move(env.state.mInstrState.arrayChain.back().first);
-    auto key = std::move(env.state.mInstrState.arrayChain.back().second);
+    auto arr = std::move(env.state.mInstrState.arrayChain.back().base);
+    auto key = std::move(env.state.mInstrState.arrayChain.back().key);
     env.state.mInstrState.arrayChain.pop_back();
     FTRACE(5, "{}  | {} := {} in {}\n", prefix,
       show(key), show(val), show(arr));
@@ -424,13 +429,15 @@ Type resolveArrayChain(ISS& env, Type val) {
   return val;
 }
 
-void updateBaseWithType(ISS& env, const Type& ty) {
+void updateBaseWithType(ISS& env,
+                        const Type& ty,
+                        LocalId firstKeyLoc = NoLocalId) {
   FTRACE(6, "    updateBaseWithType: {}\n", show(ty));
 
   auto const& base = env.state.mInstrState.base;
 
   if (mustBeInLocal(base)) {
-    setLocalForBase(env, ty);
+    setLocalForBase(env, ty, firstKeyLoc);
     return miThrow(env);
   }
   if (mustBeInStack(base)) {
@@ -455,21 +462,27 @@ void startBase(ISS& env, Base base) {
   FTRACE(5, "    startBase: {}\n", show(*env.ctx.func, oldState.base));
 }
 
-void endBase(ISS& env, bool update = true) {
+void endBase(ISS& env, bool update = true, LocalId keyLoc = NoLocalId) {
   auto& state = env.state.mInstrState;
   assert(state.base.loc != BaseLoc::None);
 
   FTRACE(5, "    endBase: {}\n", show(*env.ctx.func, state.base));
 
+  auto const firstKeyLoc = state.arrayChain.empty()
+    ? keyLoc
+    : state.arrayChain.data()->keyLoc;
   auto const& ty = state.arrayChain.empty()
     ? state.base.type
     : resolveArrayChain(env, state.base.type);
 
-  if (update) updateBaseWithType(env, ty);
+  if (update) updateBaseWithType(env, ty, firstKeyLoc);
   state.base.loc = BaseLoc::None;
 }
 
-void moveBase(ISS& env, Base newBase, bool update = true) {
+void moveBase(ISS& env,
+              Base newBase,
+              bool update = true,
+              LocalId keyLoc = NoLocalId) {
   auto& state = env.state.mInstrState;
   assert(state.base.loc != BaseLoc::None);
   assert(isDimBaseLoc(newBase.loc));
@@ -485,26 +498,38 @@ void moveBase(ISS& env, Base newBase, bool update = true) {
       );
   }
 
+  auto const firstKeyLoc = state.arrayChain.empty()
+    ? keyLoc
+    : state.arrayChain.data()->keyLoc;
   auto const& ty = state.arrayChain.empty()
     ? state.base.type
     : resolveArrayChain(env, state.base.type);
 
-  if (update) updateBaseWithType(env, ty);
+  if (update) updateBaseWithType(env, ty, firstKeyLoc);
   state.base = std::move(newBase);
 }
 
 void extendArrChain(ISS& env, Type key, Type arr,
-                    Type val, bool update = true) {
+                    Type val, bool update = true,
+                    LocalId keyLoc = NoLocalId) {
   auto& state = env.state.mInstrState;
   assert(state.base.loc != BaseLoc::None);
   assert(mustBeArrLike(arr));
 
-  state.arrayChain.emplace_back(std::move(arr), std::move(key));
+  state.arrayChain.emplace_back(
+    State::MInstrState::ArrayChainEnt{std::move(arr), std::move(key), keyLoc}
+  );
   state.base.type = std::move(val);
+
+  auto const firstKeyLoc = state.arrayChain.data()->keyLoc;
 
   FTRACE(5, "    extendArrChain: {}\n", show(*env.ctx.func, state));
   if (update) {
-    updateBaseWithType(env, currentChainType(env, state.base.type));
+    updateBaseWithType(
+      env,
+      currentChainType(env, state.base.type),
+      firstKeyLoc
+    );
   }
 }
 
@@ -723,6 +748,21 @@ folly::Optional<Type> key_type_or_fixup(ISS& env, Op op) {
   not_reached();
 }
 
+template<typename Op>
+LocalId key_local(ISS& env, Op op) {
+  switch (op.mkey.mcode) {
+    case MEC: case MPC:
+      return topStkLocal(env, op.mkey.idx);
+    case MEL: case MPL:
+      return op.mkey.local;
+    case MW:
+    case MEI:
+    case MET: case MPT: case MQT:
+      return NoLocalId;
+  }
+  not_reached();
+}
+
 //////////////////////////////////////////////////////////////////////
 // base ops
 
@@ -850,7 +890,7 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
            update);
 }
 
-void miElem(ISS& env, MOpMode mode, Type key) {
+void miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
   auto const isDefine = mode == MOpMode::Define;
   auto const isUnset  = mode == MOpMode::Unset;
   auto const update = isDefine || isUnset;
@@ -867,7 +907,8 @@ void miElem(ISS& env, MOpMode mode, Type key) {
       moveBase(
         env,
         Base { std::move(*ty), BaseLoc::Elem, env.state.mInstrState.base.type },
-        update
+        update,
+        keyLoc
       );
       return;
     }
@@ -883,7 +924,8 @@ void miElem(ISS& env, MOpMode mode, Type key) {
     extendArrChain(
       env, std::move(key), env.state.mInstrState.base.type,
       std::move(*ty),
-      update
+      update,
+      keyLoc
     );
     return;
   }
@@ -901,7 +943,7 @@ void miElem(ISS& env, MOpMode mode, Type key) {
    * init_null_variant, or inside tvScratch.  We represent this with the
    * Elem base location with locType TTop.
    */
-  moveBase(env, Base { TInitCell, BaseLoc::Elem, TTop }, update);
+  moveBase(env, Base { TInitCell, BaseLoc::Elem, TTop }, update, keyLoc);
 }
 
 void miNewElem(ISS& env) {
@@ -1152,14 +1194,17 @@ void miFinalVGetElem(ISS& env, int32_t nDiscard, const Type& key) {
   finish(TRef);
 }
 
-void miFinalSetElem(ISS& env, int32_t nDiscard, const Type& key) {
+void miFinalSetElem(ISS& env,
+                    int32_t nDiscard,
+                    const Type& key,
+                    LocalId keyLoc) {
   auto const t1  = popC(env);
 
   handleInThisElemD(env);
   handleInPublicStaticElemD(env);
 
   auto const finish = [&](Type ty) {
-    endBase(env);
+    endBase(env, true, keyLoc);
     discard(env, nDiscard);
     push(env, std::move(ty));
   };
@@ -1218,7 +1263,8 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, const Type& key) {
 }
 
 void miFinalSetOpElem(ISS& env, int32_t nDiscard,
-                      SetOpOp subop, const Type& key) {
+                      SetOpOp subop, const Type& key,
+                      LocalId keyLoc) {
   auto const rhsTy = popC(env);
   handleInThisElemD(env);
   handleInPublicStaticElemD(env);
@@ -1233,13 +1279,14 @@ void miFinalSetOpElem(ISS& env, int32_t nDiscard,
   }();
   auto const resultTy = typeSetOp(subop, lhsTy, rhsTy);
   pessimisticFinalElemD(env, key, resultTy);
-  endBase(env);
+  endBase(env, true, keyLoc);
   discard(env, nDiscard);
   push(env, resultTy);
 }
 
 void miFinalIncDecElem(ISS& env, int32_t nDiscard,
-                       IncDecOp subop, const Type& key) {
+                       IncDecOp subop, const Type& key,
+                       LocalId keyLoc) {
   handleInThisElemD(env);
   handleInPublicStaticElemD(env);
   promoteBaseElemD(env);
@@ -1253,7 +1300,7 @@ void miFinalIncDecElem(ISS& env, int32_t nDiscard,
   }();
   auto const preTy = typeIncDec(subop, postTy);
   pessimisticFinalElemD(env, key, preTy);
-  endBase(env);
+  endBase(env, true, keyLoc);
   discard(env, nDiscard);
   push(env, isPre(subop) ? preTy : postTy);
 }
@@ -1643,10 +1690,11 @@ void in(ISS& env, const bc::FPassBaseL& op) {
 void in(ISS& env, const bc::Dim& op) {
   auto const key = key_type_or_fixup(env, op);
   if (!key) return;
+  auto const keyLoc = key_local(env, op);
   if (mcodeIsProp(op.mkey.mcode)) {
     miProp(env, op.mkey.mcode == MQT, op.subop1, *key);
   } else if (mcodeIsElem(op.mkey.mcode)) {
-    miElem(env, op.subop1, *key);
+    miElem(env, op.subop1, *key, keyLoc);
   } else {
     miNewElem(env);
   }
@@ -1734,10 +1782,11 @@ void in(ISS& env, const bc::VGetM& op) {
 void in(ISS& env, const bc::SetM& op) {
   auto const key = key_type_or_fixup(env, op);
   if (!key) return;
+  auto const keyLoc = key_local(env, op);
   if (mcodeIsProp(op.mkey.mcode)) {
     miFinalSetProp(env, op.arg1, *key);
   } else if (mcodeIsElem(op.mkey.mcode)) {
-    miFinalSetElem(env, op.arg1, *key);
+    miFinalSetElem(env, op.arg1, *key, keyLoc);
   } else {
     miFinalSetNewElem(env, op.arg1);
   }
@@ -1746,10 +1795,11 @@ void in(ISS& env, const bc::SetM& op) {
 void in(ISS& env, const bc::IncDecM& op) {
   auto const key = key_type_or_fixup(env, op);
   if (!key) return;
+  auto const keyLoc = key_local(env, op);
   if (mcodeIsProp(op.mkey.mcode)) {
     miFinalIncDecProp(env, op.arg1, op.subop2, *key);
   } else if (mcodeIsElem(op.mkey.mcode)) {
-    miFinalIncDecElem(env, op.arg1, op.subop2, *key);
+    miFinalIncDecElem(env, op.arg1, op.subop2, *key, keyLoc);
   } else {
     miFinalIncDecNewElem(env, op.arg1);
   }
@@ -1758,10 +1808,11 @@ void in(ISS& env, const bc::IncDecM& op) {
 void in(ISS& env, const bc::SetOpM& op) {
   auto const key = key_type_or_fixup(env, op);
   if (!key) return;
+  auto const keyLoc = key_local(env, op);
   if (mcodeIsProp(op.mkey.mcode)) {
     miFinalSetOpProp(env, op.arg1, op.subop2, *key);
   } else if (mcodeIsElem(op.mkey.mcode)) {
-    miFinalSetOpElem(env, op.arg1, op.subop2, *key);
+    miFinalSetOpElem(env, op.arg1, op.subop2, *key, keyLoc);
   } else {
     miFinalSetOpNewElem(env, op.arg1);
   }

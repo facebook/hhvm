@@ -258,10 +258,6 @@ terminated:
   if (!im) {
     return 0;
   }
-  if (!im->colorsTotal) {
-    gdImageDestroy(im);
-    return 0;
-  }
   /* Check for open colors at the end, so
      we can reduce colorsTotal and ultimately
      BitsPerPixel */
@@ -271,6 +267,10 @@ terminated:
     } else {
       break;
     }
+  }
+  if (!im->colorsTotal) {
+    gdImageDestroy(im);
+    return 0;
   }
   return im;
 }
@@ -372,7 +372,7 @@ static int
 GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag, int *ZeroDataBlockP)
 {
   int           i, j, ret;
-  unsigned char count;
+  int           count;
 
   if (flag) {
     scd->curbit = 0;

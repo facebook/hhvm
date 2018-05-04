@@ -301,7 +301,9 @@ protected:
   int64_t getReadPosition() const { return m_data->m_readpos; }
   void setReadPosition(int64_t rpos) { m_data->m_readpos = rpos; }
 
+  friend void send_over_wire(int fd, const Resource& r);
   int getFd() const { return m_data->m_fd; }
+
   void setFd(int fd) { m_data->m_fd = fd; }
 
   void setName(std::string name) { m_data->m_name = name; }

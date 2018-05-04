@@ -31,14 +31,16 @@
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/extension-registry.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/lock.h"
+#include <boost/preprocessor.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 #include <folly/Optional.h>
-#include <openssl/ssl.h>
+#include <folly/portability/OpenSSL.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <curl/multi.h>
@@ -52,6 +54,28 @@ namespace HPHP {
 
 using std::string;
 using std::vector;
+
+// Undefining these is necessary since the curl.h tries to validate that these
+// macros are not called with more than 3 parameters. In our case, we end
+// up expanding to 3 parameters, but these macro definitions don't play well
+// with our parameter processing macros.
+// Another functions affected in a similar way can be found below
+// from code from the end of file:
+// fbsource/fbcode/third-party-buck/gcc-5-glibc-2.23/\
+// build/curl/include/curl/curl.h
+// #if defined(__STDC__) && (__STDC__ >= 1)
+/// * This preprocessor magic that replaces a call with the exact same call is
+//   only done to make sure application authors pass exactly three arguments
+//   to these functions. */
+//#define curl_easy_setopt(handle,opt,param) curl_easy_setopt(handle,opt,param)
+//#define curl_easy_getinfo(handle,info,arg) curl_easy_getinfo(handle,info,arg)
+//#define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
+//#same curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
+// #endif /* __STDC__ >= 1 */
+// #endif /* gcc >= 4.3 && !__cplusplus */
+
+#undef curl_multi_setopt
+#undef curl_share_setopt
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -69,7 +93,7 @@ using std::vector;
     return;                                                                 \
   }                                                                         \
 
-Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
+CLI_HHVM_FUNCTION(Variant, curl_init, (const Variant&, url)){
   if (url.isNull()) {
     return Variant(req::make<CurlResource>(null_string));
   } else {
@@ -77,9 +101,10 @@ Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
   }
 }
 
-Variant HHVM_FUNCTION(curl_init_pooled,
-    const String& poolName,
-    const Variant& url /* = null_string */)
+CLI_HHVM_FUNCTION(Variant,
+  curl_init_pooled,
+  (const String&, poolName),
+  (const Variant&, url)) /* = null_string */
 {
   CurlHandlePoolPtr pool;
   {
@@ -87,6 +112,7 @@ Variant HHVM_FUNCTION(curl_init_pooled,
     ReadLock lock(CurlHandlePool::namedPoolsMutex);
     bool poolExists = (CurlHandlePool::namedPools.find(cppPoolName) !=
         CurlHandlePool::namedPools.end());
+
     if (!poolExists) {
       raise_warning("Attempting to use connection pooling without "
                     "specifying an existent connection pool!");
@@ -101,15 +127,19 @@ Variant HHVM_FUNCTION(curl_init_pooled,
   }
 }
 
-void HHVM_FUNCTION(curl_create_pool, const String& poolName,
-                   int size /* = 5 */, int connGetTimeout /* = 5000 */,
-                   int reuseLimit /* = 500 */) {
+CLI_HHVM_VOID_FUNCTION(curl_create_pool,
+  (const String&, poolName),
+  (int, size),
+  (int, connGetTimeout),
+  (int, reuseLimit))
+{
   auto hp = std::make_shared<CurlHandlePool>(size, connGetTimeout, reuseLimit);
   WriteLock lock(CurlHandlePool::namedPoolsMutex);
   CurlHandlePool::namedPools[poolName.toCppString()] = hp;
 }
 
-bool HHVM_FUNCTION(curl_destroy_pool, const String& poolName) {
+CLI_HHVM_FUNCTION(bool, curl_destroy_pool, (const String&, poolName))
+{
   WriteLock lock(CurlHandlePool::namedPoolsMutex);
   return CurlHandlePool::namedPools.erase(poolName.toCppString()) > 0;
 }
@@ -123,7 +153,8 @@ const StaticString
   s_empty("empty"),
   s_fetchMs("fetchMs");
 
-Array HHVM_FUNCTION(curl_list_pools) {
+CLI_HHVM_NO_PARAM_FUNCTION(Array, curl_list_pools)
+{
   ReadLock lock(CurlHandlePool::namedPoolsMutex);
   auto size = CurlHandlePool::namedPools.size();
   if (!size) return empty_array();
@@ -144,7 +175,8 @@ Array HHVM_FUNCTION(curl_list_pools) {
   return ret.toArray();
 }
 
-Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch) {
+CLI_HHVM_FUNCTION(Variant, curl_copy_handle, (const Resource&, ch))
+{
   CHECK_RESOURCE(curl);
   return Variant(req::make<CurlResource>(curl));
 }
@@ -160,7 +192,8 @@ const StaticString
   s_libz_version("libz_version"),
   s_protocols("protocols");
 
-Variant HHVM_FUNCTION(curl_version, int uversion /* = CURLVERSION_NOW */) {
+  CLI_HHVM_FUNCTION(Variant, curl_version,
+     (int, uversion) /* = CURLVERSION_NOW */) {
   curl_version_info_data *d = curl_version_info((CURLversion)uversion);
   if (d == nullptr) {
     return false;
@@ -186,12 +219,18 @@ Variant HHVM_FUNCTION(curl_version, int uversion /* = CURLVERSION_NOW */) {
   return ret.toVariant();
 }
 
-bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, const Variant& value) {
+CLI_HHVM_FUNCTION(bool, curl_setopt, (const Resource&, ch), (int, option),
+                  (const Variant&, value))
+{
   CHECK_RESOURCE(curl);
   return curl->setOption(option, value);
 }
 
-bool HHVM_FUNCTION(curl_setopt_array, const Resource& ch, const Array& options) {
+CLI_HHVM_FUNCTION(bool,
+  curl_setopt_array,
+  (const Resource&, ch),
+  (const Array&, options))
+{
   CHECK_RESOURCE(curl);
   for (ArrayIter iter(options); iter; ++iter) {
     if (!curl->setOption(iter.first().toInt32(), iter.second())) {
@@ -201,12 +240,17 @@ bool HHVM_FUNCTION(curl_setopt_array, const Resource& ch, const Array& options) 
   return true;
 }
 
-Variant HHVM_FUNCTION(fb_curl_getopt, const Resource& ch, int64_t opt /* = 0 */) {
+CLI_HHVM_FUNCTION(Variant,
+  fb_curl_getopt,
+  (const Resource&, ch),
+  (int64_t, opt)) /* = 0 */
+{
   CHECK_RESOURCE(curl);
   return curl->getOption(opt);
 }
 
-Variant HHVM_FUNCTION(curl_exec, const Resource& ch) {
+CLI_HHVM_FUNCTION(Variant, curl_exec, (const Resource&, ch))
+{
   CHECK_RESOURCE(curl);
   return curl->execute();
 }
@@ -267,7 +311,11 @@ const StaticString
   s_certinfo("certinfo"),
   s_request_header("request_header");
 
-Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
+CLI_HHVM_FUNCTION(Variant,
+  curl_getinfo,
+  (const Resource&, ch),
+  (int, opt)) /* = 0 */
+{
   CHECK_RESOURCE(curl);
   CURL *cp = curl->get();
 
@@ -444,27 +492,27 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
   }
 }
 
-Variant HHVM_FUNCTION(curl_errno, const Resource& ch) {
+CLI_HHVM_FUNCTION(Variant, curl_errno, (const Resource&, ch)) {
   CHECK_RESOURCE(curl);
   return curl->getError();
 }
 
-Variant HHVM_FUNCTION(curl_error, const Resource& ch) {
+CLI_HHVM_FUNCTION(Variant, curl_error, (const Resource&, ch)) {
   CHECK_RESOURCE(curl);
   return curl->getErrorString();
 }
 
-String HHVM_FUNCTION(curl_strerror, int code) {
+CLI_HHVM_FUNCTION(String, curl_strerror, (int, code)) {
   return curl_easy_strerror((CURLcode)code);
 }
 
-Variant HHVM_FUNCTION(curl_close, const Resource& ch) {
+CLI_HHVM_FUNCTION(Variant, curl_close, (const Resource&, ch)){
   CHECK_RESOURCE(curl);
   curl->close();
   return init_null();
 }
 
-void HHVM_FUNCTION(curl_reset, const Resource& ch) {
+CLI_HHVM_VOID_FUNCTION(curl_reset, (const Resource&, ch)) {
   CHECK_RESOURCE_RETURN_VOID(curl);
   curl->reset();
 }
@@ -493,11 +541,11 @@ void HHVM_FUNCTION(curl_reset, const Resource& ch) {
     SystemLib::throwExceptionObject(CURLM_ARG_WARNING);                 \
   }
 
-Resource HHVM_FUNCTION(curl_multi_init) {
+CLI_HHVM_NO_PARAM_FUNCTION(Resource, curl_multi_init) {
   return Resource(req::make<CurlMultiResource>());
 }
 
-Variant HHVM_FUNCTION(curl_multi_strerror, int64_t code) {
+CLI_HHVM_FUNCTION(Variant, curl_multi_strerror, (int64_t, code)) {
   const char *str = curl_multi_strerror((CURLMcode)code);
   if (str) {
     return str;
@@ -506,21 +554,33 @@ Variant HHVM_FUNCTION(curl_multi_strerror, int64_t code) {
   }
 }
 
-Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
+CLI_HHVM_FUNCTION(Variant,
+  curl_multi_add_handle,
+  (const Resource&, mh),
+  (const Resource&, ch))
+{
   CHECK_MULTI_RESOURCE(curlm);
   auto curle = cast<CurlResource>(ch);
   curlm->add(ch);
-  return curl_multi_add_handle(curlm->get(), curle->get());
+  return ::curl_multi_add_handle(curlm->get(), curle->get());
 }
 
-Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh, const Resource& ch) {
+CLI_HHVM_FUNCTION(Variant,
+  curl_multi_remove_handle,
+  (const Resource&, mh),
+  (const Resource&, ch))
+{
   CHECK_MULTI_RESOURCE(curlm);
   auto curle = cast<CurlResource>(ch);
   curlm->remove(curle);
-  return curl_multi_remove_handle(curlm->get(), curle->get());
+  return ::curl_multi_remove_handle(curlm->get(), curle->get());
 }
 
-Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_running) {
+CLI_HHVM_FUNCTION(Variant,
+  curl_multi_exec,
+  (const Resource&, mh),
+  (VRefParam, still_running))
+{
   CHECK_MULTI_RESOURCE(curlm);
   int running = 0;
   IOStatusHelper io("curl_multi_exec");
@@ -531,8 +591,12 @@ Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_runni
   return result;
 }
 
-bool HHVM_FUNCTION(curl_multi_setopt, const Resource& mh,
-                   int option, const Variant& value) {
+CLI_HHVM_FUNCTION(bool,
+  curl_multi_setopt,
+  (const Resource&, mh),
+  (int, option),
+  (const Variant&, value))
+{
   CHECK_MULTI_RESOURCE_THROW(curlm);
   return curlm->setOption(option, value);
 }
@@ -583,8 +647,11 @@ static void hphp_curl_multi_select(CURLM *mh, int timeout_ms, int *ret) {
 #define curl_multi_select_func(mh, tm, ret) curl_multi_wait((mh), nullptr, 0, (tm), (ret))
 #endif
 
-Variant HHVM_FUNCTION(curl_multi_select, const Resource& mh,
-                                         double timeout /* = 1.0 */) {
+CLI_HHVM_FUNCTION(Variant,
+  curl_multi_select,
+  (const Resource&, mh),
+  (double, timeout)) /* = 1.0 */
+{
   CHECK_MULTI_RESOURCE(curlm);
   int ret;
   unsigned long timeout_ms = (unsigned long)(timeout * 1000.0);
@@ -593,7 +660,7 @@ Variant HHVM_FUNCTION(curl_multi_select, const Resource& mh,
   return ret;
 }
 
-Variant HHVM_FUNCTION(curl_multi_getcontent, const Resource& ch) {
+CLI_HHVM_FUNCTION(Variant, curl_multi_getcontent, (const Resource&, ch)) {
   CHECK_RESOURCE(curl);
   return curl->getContents();
 }
@@ -608,11 +675,12 @@ Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
   return ret;
 }
 
-Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
-                      VRefParam read_fd_set,
-                      VRefParam write_fd_set,
-                      VRefParam exc_fd_set,
-                      VRefParam max_fd /* = null_object */) {
+CLI_HHVM_FUNCTION(Variant, fb_curl_multi_fdset, (const Resource&, mh),
+                      (VRefParam, read_fd_set),
+                      (VRefParam, write_fd_set),
+                      (VRefParam, exc_fd_set),
+                      (VRefParam, max_fd)) /* = null_object */
+{
   CHECK_MULTI_RESOURCE(curlm);
 
   fd_set read_set;
@@ -638,12 +706,15 @@ const StaticString
   s_result("result"),
   s_handle("handle");
 
-Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
-                      VRefParam msgs_in_queue /* = null */) {
+CLI_HHVM_FUNCTION(Variant,
+  curl_multi_info_read,
+  (const Resource&, mh),
+  (VRefParam, msgs_in_queue))  /* = null */
+{
   CHECK_MULTI_RESOURCE(curlm);
 
   int queued_msgs;
-  CURLMsg *tmp_msg = curl_multi_info_read(curlm->get(), &queued_msgs);
+  CURLMsg *tmp_msg = ::curl_multi_info_read(curlm->get(), &queued_msgs);
   curlm->check_exceptions();
   if (tmp_msg == nullptr) {
     return false;
@@ -660,7 +731,7 @@ Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
   return ret;
 }
 
-Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh) {
+CLI_HHVM_FUNCTION(Variant, curl_multi_close, (const Resource&, mh)) {
   CHECK_MULTI_RESOURCE(curlm);
   curlm->close();
   return init_null();
@@ -669,11 +740,11 @@ Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh) {
 static std::string CURL_SHARE_Warning
   = "expects parameter 1 to be cURL share resource";
 
-Resource HHVM_FUNCTION(curl_share_init) {
+CLI_HHVM_NO_PARAM_FUNCTION(Resource, curl_share_init) {
   return Resource(req::make<CurlShareResource>());
 }
 
-void HHVM_FUNCTION(curl_share_close, const Resource& sh) {
+CLI_HHVM_VOID_FUNCTION(curl_share_close, (const Resource&, sh)) {
   auto curlsh = dyn_cast_or_null<CurlShareResource>(sh);
   if (!curlsh || curlsh->isInvalid()) {
     raise_warning(CURL_SHARE_Warning);
@@ -681,8 +752,12 @@ void HHVM_FUNCTION(curl_share_close, const Resource& sh) {
   curlsh->close();
 }
 
-bool HHVM_FUNCTION(curl_share_setopt, const Resource& sh,
-                   int option, const Variant& value) {
+CLI_HHVM_FUNCTION(bool,
+  curl_share_setopt,
+  (const Resource&, sh),
+  (int, option),
+  (const Variant&, value))
+{
   auto curlsh = dyn_cast_or_null<CurlShareResource>(sh);
   if (!curlsh || curlsh->isInvalid())
     SystemLib::throwExceptionObject(CURL_SHARE_Warning);
@@ -1444,37 +1519,37 @@ struct CurlExtension final : Extension {
     HHVM_RC_INT(CURLOPT_FB_TLS_CIPHER_SPEC,
                 CurlResource::fb_specific_options::CURLOPT_FB_TLS_CIPHER_SPEC);
 
-    HHVM_FE(curl_init);
-    HHVM_FALIAS(HH\\curl_init_pooled, curl_init_pooled);
-    HHVM_FALIAS(HH\\curl_create_pool, curl_create_pool);
-    HHVM_FALIAS(HH\\curl_destroy_pool, curl_destroy_pool);
-    HHVM_FALIAS(HH\\curl_list_pools, curl_list_pools);
-    HHVM_FE(curl_copy_handle);
-    HHVM_FE(curl_version);
-    HHVM_FE(curl_setopt);
-    HHVM_FE(curl_setopt_array);
-    HHVM_FE(fb_curl_getopt);
-    HHVM_FE(curl_exec);
-    HHVM_FE(curl_getinfo);
-    HHVM_FE(curl_errno);
-    HHVM_FE(curl_error);
-    HHVM_FE(curl_close);
-    HHVM_FE(curl_reset);
-    HHVM_FE(curl_multi_init);
-    HHVM_FE(curl_multi_strerror);
-    HHVM_FE(curl_multi_add_handle);
-    HHVM_FE(curl_multi_remove_handle);
-    HHVM_FE(curl_multi_exec);
-    HHVM_FE(curl_multi_select);
-    HHVM_FE(curl_multi_getcontent);
-    HHVM_FE(curl_multi_setopt);
-    HHVM_FE(fb_curl_multi_fdset);
-    HHVM_FE(curl_multi_info_read);
-    HHVM_FE(curl_multi_close);
-    HHVM_FE(curl_strerror);
-    HHVM_FE(curl_share_init);
-    HHVM_FE(curl_share_setopt);
-    HHVM_FE(curl_share_close);
+    CLI_HHVM_FE(curl_init);
+    CLI_HHVM_FALIAS(HH\\curl_init_pooled, curl_init_pooled);
+    CLI_HHVM_FALIAS(HH\\curl_create_pool, curl_create_pool);
+    CLI_HHVM_FALIAS(HH\\curl_destroy_pool, curl_destroy_pool);
+    CLI_HHVM_FALIAS(HH\\curl_list_pools, curl_list_pools);
+    CLI_HHVM_FE(curl_copy_handle);
+    CLI_HHVM_FE(curl_version);
+    CLI_HHVM_FE(curl_setopt);
+    CLI_HHVM_FE(curl_setopt_array);
+    CLI_HHVM_FE(fb_curl_getopt);
+    CLI_HHVM_FE(curl_exec);
+    CLI_HHVM_FE(curl_getinfo);
+    CLI_HHVM_FE(curl_errno);
+    CLI_HHVM_FE(curl_error);
+    CLI_HHVM_FE(curl_close);
+    CLI_HHVM_FE(curl_reset);
+    CLI_HHVM_FE(curl_multi_init);
+    CLI_HHVM_FE(curl_multi_strerror);
+    CLI_HHVM_FE(curl_multi_add_handle);
+    CLI_HHVM_FE(curl_multi_remove_handle);
+    CLI_HHVM_FE(curl_multi_exec);
+    CLI_HHVM_FE(curl_multi_select);
+    CLI_HHVM_FE(curl_multi_getcontent);
+    CLI_HHVM_FE(curl_multi_setopt);
+    CLI_HHVM_FE(fb_curl_multi_fdset);
+    CLI_HHVM_FE(curl_multi_info_read);
+    CLI_HHVM_FE(curl_multi_close);
+    CLI_HHVM_FE(curl_strerror);
+    CLI_HHVM_FE(curl_share_init);
+    CLI_HHVM_FE(curl_share_setopt);
+    CLI_HHVM_FE(curl_share_close);
 
     Extension* ext = ExtensionRegistry::get("curl");
     assertx(ext);

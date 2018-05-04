@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-namespace HH {
+namespace HH\Lib\_Private\Native {
 
 /* These functions are marked NoDoc for docs.hhvm.com:
  * - they are not intenteded to be used directly, other than by the HSL
@@ -34,7 +34,7 @@ namespace HH {
  * @throws InvalidArgumentException - If $min > $max.
  *
  */
-<<__Native,NoDoc>>
+<<__Native>>
 function pseudorandom_int(int $min = PHP_INT_MIN, int $max = PHP_INT_MAX): int;
 
 /**
@@ -46,7 +46,23 @@ function pseudorandom_int(int $min = PHP_INT_MIN, int $max = PHP_INT_MAX): int;
  *   generator.
  *
  */
-<<__Native,NoDoc>>
+<<__Native>>
 function pseudorandom_seed(int $seed): void;
+
+}
+
+namespace HH {
+
+/* Temporary BC wrapper */
+<<NoDoc>>
+function pseudorandom_int(int $min = PHP_INT_MIN, int $max = PHP_INT_MAX): int {
+  return \HH\Lib\_Private\Native\pseudorandom_int($min, $max);
+}
+
+/* Temporary BC wrapper */
+<<NoDoc>>
+function pseudorandom_seed(int $seed): void {
+  \HH\Lib\_Private\Native\pseudorandom_seed($seed);
+}
 
 }

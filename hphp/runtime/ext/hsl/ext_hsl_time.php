@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-namespace HH {
+namespace HH\Lib\_Private\Native {
 
 /* These functions are marked NoDoc for docs.hhvm.com:
  * - they are not intenteded to be used directly, other than by the HSL
@@ -28,7 +28,17 @@ namespace HH {
  *
  * @return int - The timestamp.
  */
-<<__Native,NoDoc>>
+<<__Native>>
 function request_time_ns(): int;
+
+}
+
+namespace HH {
+
+/* Temporary BC wrapper */
+<<NoDoc>>
+function request_time_ns(): int {
+  return \HH\Lib\_Private\Native\request_time_ns();
+}
 
 }

@@ -48,7 +48,7 @@ function test_range() {
     $failed = false;
 
     for ($i = 0; $i < $ITERS; $i++) {
-      $result = HH\pseudorandom_int($range_start, $range_end);
+      $result = HH\Lib\_Private\Native\pseudorandom_int($range_start, $range_end);
       if ($result < $range_start || $result > $range_end) {
         $failed = true;
         break;
@@ -186,10 +186,10 @@ function test_seed() {
     $any_valid_sequence = false;
     foreach ($expected_sequences as $expected_sequence) {
       for ($i = 0; $i < $ITERS; $i++) {
-        HH\pseudorandom_seed($seed);
+        HH\Lib\_Private\Native\pseudorandom_seed($seed);
         $valid_sequence = true;
         foreach ($expected_sequence as $number) {
-          $next_number = HH\pseudorandom_int(PHP_INT_MIN, PHP_INT_MAX);
+          $next_number = HH\Lib\_Private\Native\pseudorandom_int(PHP_INT_MIN, PHP_INT_MAX);
           if ($next_number !== $number) {
             $valid_sequence = false;
             break;

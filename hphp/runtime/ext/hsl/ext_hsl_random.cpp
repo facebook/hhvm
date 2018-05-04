@@ -32,8 +32,14 @@ namespace {
   struct RandomExtension final : Extension {
     RandomExtension() : Extension("hsl_random", "1.0") {}
     void moduleInit() override {
-      HHVM_FALIAS(HH\\pseudorandom_int, HH_pseudorandom_int);
-      HHVM_FALIAS(HH\\pseudorandom_seed, HH_pseudorandom_seed);
+      HHVM_FALIAS(
+        HH\\Lib\\_Private\\Native\\pseudorandom_int,
+        HH_pseudorandom_int
+      );
+      HHVM_FALIAS(
+        HH\\Lib\\_Private\\Native\\pseudorandom_seed,
+        HH_pseudorandom_seed
+      );
       loadSystemlib();
     }
 

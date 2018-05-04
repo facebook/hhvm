@@ -39,7 +39,7 @@ type t = {
   language : string;
   mode : string;
   state : SCI.t;
-}
+} [@@deriving show]
 
 let strip_comment_start s =
   let len = String.length s in

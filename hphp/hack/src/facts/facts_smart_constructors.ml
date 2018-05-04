@@ -13,7 +13,7 @@ module TK = Full_fidelity_token_kind
 
 (* result of parsing: simplified AST *)
 
-type get_name = unit -> string
+type get_name = unit -> string [@@deriving show]
 
 type node =
   | Ignored
@@ -53,11 +53,12 @@ type node =
   | TypeAliasDecl of node
   | NamespaceDecl of node * node
   | EmptyBody
+  [@@deriving show]
 
 module SC = struct
 
   module Token = Syntax.Token
-  type t = unit
+  type t = unit [@@deriving show]
 
   let is_zero = function
     | Ignored
@@ -90,7 +91,7 @@ module SC = struct
     | x -> List x
 
   include Flatten_smart_constructors.WithOp(struct
-    type r = node
+    type r = node [@@deriving show]
     let is_zero v = is_zero v
     let flatten l = flatten l
     let zero = Ignored

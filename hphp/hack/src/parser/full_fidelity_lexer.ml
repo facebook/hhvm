@@ -79,8 +79,8 @@ module WithToken(Token: Lexable_token_sig.LexableToken_S) = struct
 
 module Trivia = Token.Trivia
 
-type lexer = Lexer.t
-type t = lexer
+type lexer = Lexer.t [@@deriving show]
+type t = lexer [@@deriving show]
 
 let make = Lexer.make
 let start = Lexer.start
@@ -108,6 +108,7 @@ type string_literal_kind =
   | Literal_execution_string
   | Literal_double_quoted
   | Literal_heredoc of string
+[@@deriving show]
 
 (* Housekeeping *)
 

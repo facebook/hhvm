@@ -17,8 +17,12 @@
     available in the inference phase ({!module:Typing}) will be persisted in a
     {!Tast.program} (and thus available to {!Tast_visitor}). Most of the
     persisted information comes from {!Typing_env.save}. *)
+
+let show_env _ = "<env>"
+let pp_env _ _ = Printf.printf "%s\n" "<env>"
+
 type env = Typing_env.env
-type t = env
+type t = env [@@deriving show]
 
 let print_ty = Typing_print.full_strip_ns
 let print_ty_with_identity = Typing_print.full_with_identity

@@ -24,8 +24,8 @@ module ParserEnv = Full_fidelity_parser_env
 
 module type SmartConstructors_S = sig
   module Token : Lexable_token_sig.LexableToken_S
-  type t (* state *)
-  type r (* smart constructor return type *)
+  type t (* state *) [@@deriving show]
+  type r (* smart constructor return type *) [@@deriving show]
 
   val initial_state : ParserEnv.t -> t
   val make_token : Token.t -> t -> t * r
@@ -202,7 +202,7 @@ module type SmartConstructors_S = sig
 end (* SmartConstructors_S *)
 
 module ParserWrapper (Parser : sig
-  type parser_type
+  type parser_type [@@deriving show]
   module SCI : SmartConstructors_S
   val call : parser_type -> (SCI.t -> SCI.t * SCI.r) -> parser_type * SCI.r
 end) = struct

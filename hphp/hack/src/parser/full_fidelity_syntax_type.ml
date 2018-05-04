@@ -59,14 +59,14 @@
 
 module type TokenType = sig
   module Trivia : Lexable_trivia_sig.LexableTrivia_S
-  type t
+  type t [@@deriving show]
   val kind: t -> Full_fidelity_token_kind.t
   val to_json: t -> Hh_json.json
   val leading : t -> Trivia.t list
 end
 
 module type SyntaxValueType = sig
-  type t
+  type t [@@deriving show]
   val to_json: t -> Hh_json.json
 end
 
@@ -75,8 +75,8 @@ end
  * node.
  *)
 module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
-  type value = SyntaxValue.t
-  type t = { syntax : syntax ; value : value }
+  type value = SyntaxValue.t [@@deriving show]
+  type t = { syntax : syntax ; value : value } [@@deriving show]
   and function_declaration =
     { function_attribute_spec                            : t
     ; function_declaration_header                        : t
@@ -1149,7 +1149,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
 end (* MakeSyntaxType *)
 
 module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
-  type 'a value = SyntaxValue.t * 'a
+  type 'a value = SyntaxValue.t * 'a [@@deriving show]
   (* TODO: Different styles of list seem to only happen in predetermined places,
    * so split this out again into specific variants
    *)
@@ -2427,4 +2427,5 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; tuple_right_paren: Token.t value
     }
 
+[@@deriving show]
 end (* MakeValidated *)

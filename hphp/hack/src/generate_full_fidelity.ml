@@ -16,6 +16,7 @@ let facts_path_prefix = "hphp/hack/src/facts/"
 type comment_style =
   | CStyle
   | MLStyle
+[@@deriving show]
 
 let make_header comment_style (header_comment : string) : string =
   let open_char, close_char = match comment_style with
@@ -51,7 +52,7 @@ let make_header comment_style (header_comment : string) : string =
 
 
 type valign =
-  (string -> string -> string, unit, string, string -> string) format4
+  (string -> string -> string, unit, string, string -> string) format4 [@@deriving show]
 
 let all_tokens = given_text_tokens @ variable_text_tokens @ no_text_tokens
 let align_fmt : 'a . ('a -> string) -> 'a list -> valign = fun f xs ->
@@ -402,14 +403,14 @@ module GenerateFFSyntaxType = struct
 
 module type TokenType = sig
   module Trivia : Lexable_trivia_sig.LexableTrivia_S
-  type t
+  type t [@@deriving show]
   val kind: t -> Full_fidelity_token_kind.t
   val to_json: t -> Hh_json.json
   val leading : t -> Trivia.t list
 end
 
 module type SyntaxValueType = sig
-  type t
+  type t [@@deriving show]
   val to_json: t -> Hh_json.json
 end
 
@@ -418,8 +419,8 @@ end
  * node.
  *)
 module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
-  type value = SyntaxValue.t
-  type t = { syntax : syntax ; value : value }
+  type value = SyntaxValue.t [@@deriving show]
+  type t = { syntax : syntax ; value : value } [@@deriving show]
 PARSE_TREE   and syntax =
   | Token                             of Token.t
   | Missing
@@ -428,7 +429,7 @@ SYNTAX
 end (* MakeSyntaxType *)
 
 module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
-  type 'a value = SyntaxValue.t * 'a
+  type 'a value = SyntaxValue.t * 'a [@@deriving show]
   (* TODO: Different styles of list seem to only happen in predetermined places,
    * so split this out again into specific variants
    *)
@@ -438,6 +439,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | MissingList
   | SingletonList of 'a value
 AGGREGATE_TYPESVALIDATED_SYNTAX
+[@@deriving show]
 end (* MakeValidated *)
 "
 
@@ -489,8 +491,8 @@ module TokenKind = Full_fidelity_token_kind
 
 module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
-  type value
-  type t = { syntax : syntax ; value : value }
+  type value [@@deriving show]
+  type t = { syntax : syntax ; value : value } [@@deriving show]
   and syntax =
   | Token                             of Token.t
   | Missing
@@ -592,8 +594,8 @@ module ParserEnv = Full_fidelity_parser_env
 
 module type SmartConstructors_S = sig
   module Token : Lexable_token_sig.LexableToken_S
-  type t (* state *)
-  type r (* smart constructor return type *)
+  type t (* state *) [@@deriving show]
+  type r (* smart constructor return type *) [@@deriving show]
 
   val initial_state : ParserEnv.t -> t
   val make_token : Token.t -> t -> t * r
@@ -603,7 +605,7 @@ CONSTRUCTOR_METHODS
 end (* SmartConstructors_S *)
 
 module ParserWrapper (Parser : sig
-  type parser_type
+  type parser_type [@@deriving show]
   module SCI : SmartConstructors_S
   val call : parser_type -> (SCI.t -> SCI.t * SCI.r) -> parser_type * SCI.r
 end) = struct
@@ -659,7 +661,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module WithLexer(Lexer : Lexer_S) = struct
     module type Parser_S = sig
       module SC : SCWithKind_S with module Token = Token
-      type t
+      type t [@@deriving show]
       val pos : t -> Full_fidelity_source_text.pos
       val sc_call : t -> (SC.t -> SC.t * SC.r) -> t * SC.r
       val lexer : t -> Lexer.t
@@ -729,8 +731,8 @@ module GenerateFFVerifySmartConstructors = struct
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module Token = Syntax.Token
-  type t = Syntax.t list
-  type r = Syntax.t
+  type t = Syntax.t list [@@deriving show]
+  type r = Syntax.t [@@deriving show]
 
   exception NotEquals of
     string * Syntax.t list * Syntax.t list * Syntax.t list
@@ -814,8 +816,8 @@ module type SC_S = SmartConstructors.SmartConstructors_S
 module ParserEnv = Full_fidelity_parser_env
 
 module type State_S = sig
-  type r
-  type t
+  type r [@@deriving show]
+  type t [@@deriving show]
   val initial : ParserEnv.t -> t
   val next : t -> r list -> t
 end
@@ -823,8 +825,8 @@ end
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module WithState(State : State_S with type r = Syntax.t) = struct
     module Token = Syntax.Token
-    type t = State.t
-    type r = Syntax.t
+    type t = State.t [@@deriving show]
+    type r = Syntax.t [@@deriving show]
 
     let initial_state = State.initial
     let make_token token state = State.next state [], Syntax.make_token token
@@ -838,8 +840,8 @@ CONSTRUCTOR_METHODS
 
   include WithState(
     struct
-      type r = Syntax.t
-      type t = unit
+      type r = Syntax.t [@@deriving show]
+      type t = unit [@@deriving show]
       let initial _ = ()
       let next () _ = ()
     end
@@ -884,14 +886,14 @@ module GenerateFlattenSmartConstructors = struct
  ") ^ "
 
 module type Op_S = sig
-  type r
+  type r [@@deriving show]
   val is_zero: r -> bool
   val flatten: r list -> r
   val zero: r
 end
 
 module WithOp(Op : Op_S) = struct
-  type r = Op.r
+  type r = Op.r [@@deriving show]
 
   let make_token _token state = state, Op.zero
   let make_missing _ state = state, Op.zero
@@ -947,7 +949,7 @@ module SK = Full_fidelity_syntax_kind
 
 module type SyntaxKind_S = sig
   include SC_S
-  type original_sc_r
+  type original_sc_r [@@deriving show]
   val extract : r -> original_sc_r
   val is_name : r -> bool
   val is_abstract : r -> bool
@@ -963,9 +965,9 @@ module SyntaxKind(SC : SC_S)
     and type t = SC.t
   ) = struct
   module Token = SC.Token
-  type original_sc_r = SC.r
-  type t = SC.t
-  type r = SK.t * SC.r
+  type original_sc_r = SC.r [@@deriving show]
+  type t = SC.t [@@deriving show]
+  type r = SK.t * SC.r [@@deriving show]
 
   let extract (_, r) = r
   let kind_of (kind, _) = kind

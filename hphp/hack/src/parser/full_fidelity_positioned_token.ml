@@ -32,7 +32,7 @@ type t = {
   trailing_width: int;
   leading: Trivia.t list;
   trailing: Trivia.t list
-}
+} [@@deriving show]
 
 let make kind source_text offset width leading trailing =
   let folder sum trivia =

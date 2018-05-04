@@ -10,8 +10,8 @@ let ppl_macro_string = "__PPL"
 
 module WithSyntax(Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
   module State = struct
-    type r = Syntax.t
-    type t = bool
+    type r = Syntax.t [@@deriving show]
+    type t = bool [@@deriving show]
     let env : ParserEnv.t ref = ref @@ ParserEnv.make ()
 
     let initial env' = env := env'; false

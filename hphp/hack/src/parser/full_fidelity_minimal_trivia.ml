@@ -19,7 +19,7 @@ open Full_fidelity_trivia_kind
 type t = {
   kind: Full_fidelity_trivia_kind.t;
   width: int
-}
+} [@@deriving show]
 
 let make_whitespace _text _offset width =
   { kind = WhiteSpace; width }

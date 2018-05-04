@@ -20,6 +20,8 @@ module TLazyHeap = Typing_lazy_heap
 module LEnvC = Typing_lenv_cont
 module Cont = Typing_continuations
 
+let show_env _ = "<env>"
+let pp_env _ _ = Printf.printf "%s\n" "<env>"
 
 let ( ++ ) x y = Typing_set.add x y
 

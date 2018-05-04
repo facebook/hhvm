@@ -26,7 +26,7 @@ open Prim_defs
 (* TODO(t16719394): kill off file_type *)
 type file_type =
   | PhpFile
-  | HhFile
+  | HhFile [@@deriving show]
 
 val string_of_file_type : file_type -> string
 
@@ -35,6 +35,7 @@ type mode =
   | Mdecl    (* just declare signatures, don't check anything *)
   | Mstrict  (* check everything! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)
+[@@deriving show]
 
 val string_of_mode : mode -> string
 val pp_mode : Format.formatter -> mode -> unit
@@ -43,9 +44,9 @@ val pp_mode : Format.formatter -> mode -> unit
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
 
-type name_type = Fun | Class | Typedef | Const
-type pos = Full of Pos.t | File of name_type * Relative_path.t
-type id = pos  * string
+type name_type = Fun | Class | Typedef | Const [@@deriving show]
+type pos = Full of Pos.t | File of name_type * Relative_path.t [@@deriving show]
+type id = pos  * string [@@deriving show]
 val pos_full : (Pos.t * string) -> id
 val get_pos_filename : pos -> Relative_path.t
 
@@ -57,7 +58,7 @@ type t = {
   typedefs : id list;
   consts : id list;
   comments : (Pos.t * comment) list option;
-}
+} [@@deriving show]
 
 val empty_t: t
 

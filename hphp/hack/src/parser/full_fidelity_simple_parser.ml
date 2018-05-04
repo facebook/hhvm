@@ -19,13 +19,17 @@ module WithLexer(Lexer : Lexer_S) = struct
   (SC : SCWithToken_S with module Token = Syntax.Token) = struct
     module SC = SC
 
+  type context_type = Context.t
+  let show_context_type _x = "<Full_fidelity_parser_context.WithToken(Syntax.Token).t>"
+  let pp_context_type _fmt _x = Printf.printf "%s\n" "<Full_fidelity_parser_context.WithToken(Syntax.Token).t>"
+
   type t = {
     lexer : Lexer.t;
     errors : Full_fidelity_syntax_error.t list;
-    context : Context.t;
+    context : context_type;
     env : Full_fidelity_parser_env.t;
     sc_state : SC.t;
-  }
+  } [@@deriving show]
 
   let pos parser = (Lexer.source parser.lexer, Lexer.end_offset parser.lexer)
 
@@ -93,7 +97,7 @@ module WithLexer(Lexer : Lexer_S) = struct
     Context.print_expected parser.context
 
   include SmartConstructors.ParserWrapper(struct
-    type parser_type = t
+    type parser_type = t [@@deriving show]
     module SCI = SC
     let call = sc_call
   end)

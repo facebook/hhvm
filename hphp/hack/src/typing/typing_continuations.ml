@@ -12,7 +12,7 @@ module Continuations = struct
     | Next
     | Continue
     | Break
-    | Catch
+    | Catch [@@deriving show]
 
   let compare = Pervasives.compare
 
@@ -25,4 +25,8 @@ end
 
 include Continuations
 
-module Map = MyMap.Make(Continuations)
+module Map = struct
+  let show _ = "<MyMap.Make(Continuations)>";;
+  let pp _ _ = Printf.printf "%s\n" "<MyMap.Make(Continuations)>";;
+  include MyMap.Make(Continuations)
+end

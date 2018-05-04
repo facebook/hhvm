@@ -31,6 +31,7 @@ module PositionedSyntaxValue = struct
     (* value for a range denoted by pair of tokens *)
     | TokenSpan of { left: Token.t; right: Token.t }
     | Missing of { source_text: SourceText.t; offset: int }
+    [@@deriving show]
 
 
   let source_text value =

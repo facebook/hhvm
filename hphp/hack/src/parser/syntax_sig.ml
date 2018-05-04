@@ -25,8 +25,8 @@ module TokenKind = Full_fidelity_token_kind
 
 module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
-  type value
-  type t = { syntax : syntax ; value : value }
+  type value [@@deriving show]
+  type t = { syntax : syntax ; value : value } [@@deriving show]
   and syntax =
   | Token                             of Token.t
   | Missing

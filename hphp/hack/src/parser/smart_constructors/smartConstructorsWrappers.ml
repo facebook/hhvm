@@ -25,7 +25,7 @@ module SK = Full_fidelity_syntax_kind
 
 module type SyntaxKind_S = sig
   include SC_S
-  type original_sc_r
+  type original_sc_r [@@deriving show]
   val extract : r -> original_sc_r
   val is_name : r -> bool
   val is_abstract : r -> bool
@@ -208,9 +208,9 @@ module SyntaxKind(SC : SC_S)
     and type t = SC.t
   ) = struct
   module Token = SC.Token
-  type original_sc_r = SC.r
-  type t = SC.t
-  type r = SK.t * SC.r
+  type original_sc_r = SC.r [@@deriving show]
+  type t = SC.t [@@deriving show]
+  type r = SK.t * SC.r [@@deriving show]
 
   let extract (_, r) = r
   let kind_of (kind, _) = kind

@@ -70,6 +70,11 @@ let pos_to_zero_indexed_json t =
   ]
 
 module Value = struct
+  (* placeholder definitions *)
+  type absolute = Pos.absolute
+  let show_absolute _ = "<absolute>"
+  let pp_absolute _ _ = Printf.printf "%s\n" "<asbolute>"
+
   type t = {
     source_text: SourceText.t;
     offset: int; (* Beginning of first trivia *)
@@ -77,8 +82,8 @@ module Value = struct
     width: int; (* Width of node, not counting trivia *)
     trailing_width: int;
     tys: Tast_type_collector.collected_type list;
-    position: Pos.absolute;
-  }
+    position: absolute;
+  } [@@deriving show]
 
   let position value =
     SourceText.relative_pos

@@ -15,7 +15,7 @@ module SN = Naming_special_names
 type visibility =
   | Vpublic
   | Vprivate of string
-  | Vprotected of string
+  | Vprotected of string [@@deriving show]
 
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
@@ -28,7 +28,10 @@ type visibility =
 type decl = private DeclPhase
 type locl = private LoclPhase
 
-type 'phase ty = Reason.t * 'phase ty_
+let show_phase_ty _ = "<phase_ty>"
+let pp_phase_ty _ _ = Printf.printf "%s\n" "<phase_ty>"
+
+type 'phase ty = ( Reason.t * 'phase ty_ )
 
 (* A shape may specify whether or not fields are required. For example, consider
    this typedef:

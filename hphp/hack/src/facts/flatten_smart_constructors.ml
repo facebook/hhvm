@@ -21,14 +21,14 @@
  *)
 
 module type Op_S = sig
-  type r
+  type r [@@deriving show]
   val is_zero: r -> bool
   val flatten: r list -> r
   val zero: r
 end
 
 module WithOp(Op : Op_S) = struct
-  type r = Op.r
+  type r = Op.r [@@deriving show]
 
   let make_token _token state = state, Op.zero
   let make_missing _ state = state, Op.zero

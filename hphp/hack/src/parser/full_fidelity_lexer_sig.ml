@@ -9,11 +9,11 @@
 
 module WithToken(Token : Lexable_token_sig.LexableToken_S) = struct
   module type Lexer_S = sig
-    type t
+    type t [@@deriving show]
     type string_literal_kind =
       | Literal_execution_string
       | Literal_double_quoted
-      | Literal_heredoc of string
+      | Literal_heredoc of string [@@deriving show]
     val source : t -> Full_fidelity_source_text.t
     val start_offset : t -> int
     val end_offset : t -> int

@@ -15,7 +15,7 @@ type t = {
   mode: FileInfo.mode option;
   stats: Stats_container.t option;
   hacksperimental: bool;
-}
+} [@@deriving show]
 
 let default = {
   hhvm_compat_mode = false;

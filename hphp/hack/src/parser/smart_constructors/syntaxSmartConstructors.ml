@@ -24,8 +24,8 @@ module type SC_S = SmartConstructors.SmartConstructors_S
 module ParserEnv = Full_fidelity_parser_env
 
 module type State_S = sig
-  type r
-  type t
+  type r [@@deriving show]
+  type t [@@deriving show]
   val initial : ParserEnv.t -> t
   val next : t -> r list -> t
 end
@@ -33,8 +33,8 @@ end
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module WithState(State : State_S with type r = Syntax.t) = struct
     module Token = Syntax.Token
-    type t = State.t
-    type r = Syntax.t
+    type t = State.t [@@deriving show]
+    type r = Syntax.t [@@deriving show]
 
     let initial_state = State.initial
     let make_token token state = State.next state [], Syntax.make_token token
@@ -215,8 +215,8 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
   include WithState(
     struct
-      type r = Syntax.t
-      type t = unit
+      type r = Syntax.t [@@deriving show]
+      type t = unit [@@deriving show]
       let initial _ = ()
       let next () _ = ()
     end

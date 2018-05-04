@@ -26,7 +26,7 @@ open Prim_defs
 
 type file_type =
   | PhpFile
-  | HhFile
+  | HhFile [@@deriving show]
 
 let string_of_file_type = function
   | PhpFile -> "php"
@@ -37,6 +37,7 @@ type mode =
   | Mdecl    (* just declare signatures, don't check anything *)
   | Mstrict  (* check everything! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)
+[@@deriving show]
 
 let string_of_mode = function
   | Mphp     -> "php"
@@ -59,9 +60,9 @@ let pp_mode fmt mode =
  * allowing us to lazily retrieve the name's exact location if necessary.
  *)
 (*****************************************************************************)
-type name_type = Fun | Class | Typedef | Const
-type pos = Full of Pos.t | File of name_type * Relative_path.t
-type id = pos  * string
+type name_type = Fun | Class | Typedef | Const [@@deriving show]
+type pos = Full of Pos.t | File of name_type * Relative_path.t [@@deriving show]
+type id = pos  * string [@@deriving show]
 (* The hash value of a decl AST.
   We use this to see if two versions of a file are "similar", i.e. their
   declarations only differ by position information.  *)
@@ -69,8 +70,13 @@ type id = pos  * string
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
+
+type hash_type = Digest.t option
+let show_hash_type _ = "<Digest.t option>"
+let pp_hash_type _ _ _ = "<Digest.t option>"
+
 type t = {
-  hash : Digest.t option;
+  hash : hash_type;
   file_mode : mode option;
   funs : id list;
   classes : id list;
@@ -78,7 +84,7 @@ type t = {
   consts : id list;
   comments : (Pos.t * comment) list option;
     (* None if loaded from saved state *)
-}
+} [@@deriving show]
 
 let empty_t = {
   hash = None;

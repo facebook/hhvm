@@ -10,7 +10,7 @@ module TriviaKind = Full_fidelity_trivia_kind
 
 module type LexableToken_S = sig
   module Trivia : Lexable_trivia_sig.LexableTrivia_S
-  type t
+  type t[@@deriving show]
   val make:
     Full_fidelity_token_kind.t -> (* kind *)
     Full_fidelity_source_text.t -> (* source *)

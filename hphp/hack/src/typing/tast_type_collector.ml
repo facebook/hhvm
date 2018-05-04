@@ -9,7 +9,7 @@
 
 open Hh_core
 
-type collected_type = Tast_env.env * Typing_defs.phase_ty
+type collected_type = Tast_env.env * Typing_defs.phase_ty [@@deriving show]
 
 let type_collector = object
   inherit [_] Tast_visitor.reduce

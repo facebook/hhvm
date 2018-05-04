@@ -12,6 +12,8 @@ open Typing_defs
 open Typing_heap
 open Type_parameter_env
 
+val show_env : env -> string
+val pp_env : Format.formatter -> env -> unit
 val get_tcopt : env -> TypecheckerOptions.t
 val fresh : unit -> int
 val fresh_type : unit -> locl ty

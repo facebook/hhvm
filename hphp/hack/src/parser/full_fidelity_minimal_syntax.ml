@@ -20,7 +20,7 @@ module SyntaxWithMinimalToken =
   Full_fidelity_syntax.WithToken(Token)
 
 module MinimalSyntaxValue = struct
-  type t = { full_width: int }
+  type t = { full_width: int } [@@deriving show]
   let make w = { full_width = w }
   let full_width n = n.full_width
   let to_json value =

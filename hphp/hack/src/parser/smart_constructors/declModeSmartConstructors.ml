@@ -6,8 +6,8 @@ module ParserEnv = Full_fidelity_parser_env
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module State = struct
-    type r = Syntax.t
-    type t = bool list
+    type r = Syntax.t [@@deriving show]
+    type t = bool list [@@deriving show]
     let env = ref @@ ParserEnv.make ()
 
     let initial env' = env := env'; []

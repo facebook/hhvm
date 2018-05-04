@@ -22,8 +22,8 @@
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module Token = Syntax.Token
-  type t = Syntax.t list
-  type r = Syntax.t
+  type t = Syntax.t list [@@deriving show]
+  type r = Syntax.t [@@deriving show]
 
   exception NotEquals of
     string * Syntax.t list * Syntax.t list * Syntax.t list

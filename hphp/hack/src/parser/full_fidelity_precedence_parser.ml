@@ -26,18 +26,22 @@ module WithLexer(Lexer : Lexer_S) = struct
       node : SC.r;
       operator_kind : TokenKind.t;
       operand : SC.r;
-    }
+    } [@@deriving show]
+
+type context_type = Context.t
+let show_context_type _x = "<Full_fidelity_parser_context.WithToken(Syntax.Token).t>"
+let pp_context_type _fmt _x = Printf.printf "%s\n" "<Full_fidelity_parser_context.WithToken(Syntax.Token).t>"
 
 type t = {
   lexer : Lexer.t;
   errors : Full_fidelity_syntax_error.t list;
-  context: Context.t;
+  context: context_type;
   precedence : int;
   allow_as_expressions: bool;
   env : Full_fidelity_parser_env.t;
   sc_state : SC.t;
   prefix_unary_expression_stack : prefix_unary_expression_type list;
-}
+} [@@deriving show]
 
     let pos parser = (Lexer.source parser.lexer, Lexer.end_offset parser.lexer)
 
@@ -152,7 +156,7 @@ let next_xhp_body_token parser =
   (parser, token)
 
   include SmartConstructors.ParserWrapper(struct
-    type parser_type = t
+    type parser_type = t [@@deriving show]
     module SCI = SC
     let call = sc_call
   end)

@@ -8,11 +8,11 @@
  *)
 
 module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
-  type t
+  type t [@@deriving show]
   type string_literal_kind =
     | Literal_execution_string
     | Literal_double_quoted
-    | Literal_heredoc of string
+    | Literal_heredoc of string [@@deriving show]
   val make : ?hacksperimental:bool -> Full_fidelity_source_text.t -> t
   val source : t -> Full_fidelity_source_text.t
   val errors : t -> Full_fidelity_syntax_error.t list

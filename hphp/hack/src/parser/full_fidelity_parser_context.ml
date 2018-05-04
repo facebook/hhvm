@@ -27,6 +27,8 @@ module Scope = struct
   let to_string scope =
     let append elt acc = acc ^ "'" ^ (TokenKind.to_string elt) ^ "', " in
     fold append scope ">> "
+  let show scope = to_string scope
+  let pp _formatter scope = to_string scope
 end
 
 module WithToken(Token: Lexable_token_sig.LexableToken_S) = struct
@@ -34,7 +36,7 @@ module WithToken(Token: Lexable_token_sig.LexableToken_S) = struct
 type t = {
   expected : Scope.t list;
   skipped_tokens : Token.t list
-}
+} [@@deriving show]
 
 let empty =
   { expected = [ ]; skipped_tokens = [ ] }

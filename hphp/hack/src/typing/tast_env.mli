@@ -7,8 +7,8 @@
  *
  *)
 
-type env
-type t = env
+type env [@@deriving show]
+type t = env [@@deriving show]
 
 val print_ty : env -> 'a Typing_defs.ty -> string
 (** Return a string representation of the given type using Hack-like syntax. *)

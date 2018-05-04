@@ -2686,33 +2686,120 @@ let does_op_create_write_on_left = function
         | TokenKind.CaratEqual
         | TokenKind.AmpersandEqual
         | TokenKind.LessThanLessThanEqual
-        | TokenKind.GreaterThanGreaterThanEqual) -> true
+        | TokenKind.GreaterThanGreaterThanEqual
+        | TokenKind.PlusPlus
+        | TokenKind.MinusMinus
+        | TokenKind.Inout) -> true
   | _ -> false
 
 let assignment_errors _env node errors =
+  let append_errors node errors error =
+    make_error_from_node node error :: errors
+  in
+  let rec check_lvalue ?(allow_reassign_this=false) loperand errors : SyntaxError.t list =
+    let err = append_errors loperand errors in
+    match syntax loperand with
+      | ListExpression { list_members = members; _ } ->
+        let members = syntax_to_list_no_separators members in
+        List.fold_left (fun e n -> check_lvalue n e) errors members
+      | SafeMemberSelectionExpression _ ->
+        err (SyntaxError.not_allowed_in_write "?-> operator")
+      | MemberSelectionExpression { member_name; _ }
+        when token_kind member_name = Some TokenKind.XHPClassName ->
+        err (SyntaxError.not_allowed_in_write "->: operator")
+      | VariableExpression { variable_expression }
+        when not allow_reassign_this
+          && String.lowercase_ascii (text variable_expression) = SN.SpecialIdents.this ->
+        err SyntaxError.reassign_this
+      | DecoratedExpression { decorated_expression_decorator = op; _ }
+        when token_kind op = Some TokenKind.Clone ->
+        err (SyntaxError.not_allowed_in_write "Clone")
+      | DecoratedExpression { decorated_expression_decorator = op; _ }
+        when token_kind op = Some TokenKind.Await ->
+        err (SyntaxError.not_allowed_in_write "Await")
+      | DecoratedExpression { decorated_expression_decorator = op; _ }
+        when token_kind op = Some TokenKind.Suspend ->
+        err (SyntaxError.not_allowed_in_write "Suspend")
+      | DecoratedExpression { decorated_expression_decorator = op; _ }
+        when token_kind op = Some TokenKind.QuestionQuestion ->
+        err (SyntaxError.not_allowed_in_write "?? operator")
+      | DecoratedExpression { decorated_expression_decorator = op; _ }
+        when token_kind op = Some TokenKind.BarGreaterThan ->
+        err (SyntaxError.not_allowed_in_write "|> operator")
+      | DecoratedExpression { decorated_expression_decorator = op; _ }
+        when token_kind op = Some TokenKind.Inout ->
+        err (SyntaxError.not_allowed_in_write "Inout")
+      | LambdaExpression _ | AnonymousFunction _ | Php7AnonymousFunction _
+      | ArrayIntrinsicExpression _ | ArrayCreationExpression _
+      | DarrayIntrinsicExpression _
+      | VarrayIntrinsicExpression _
+      | ShapeExpression _
+      | CollectionLiteralExpression _
+      | GenericTypeSpecifier _
+      | YieldExpression _ | YieldFromExpression _
+      | CastExpression _
+      | BinaryExpression _
+      | ConditionalExpression _
+      | InstanceofExpression _
+      | IsExpression _
+      | AsExpression _ | NullableAsExpression _
+      | ConstructorCall _ | AnonymousClass _
+      | XHPExpression _
+      | InclusionExpression _
+      | TupleExpression _
+      | LiteralExpression _ ->
+        let kind = kind loperand in
+        let kind_str = Full_fidelity_syntax_kind.to_string kind in
+        err (SyntaxError.not_allowed_in_write kind_str)
+      | (PrefixUnaryExpression { prefix_unary_operator = op; _ }
+      | PostfixUnaryExpression { postfix_unary_operator = op; _ }) ->
+        begin match token_kind op with
+          | Some TokenKind.At | Some TokenKind.Dollar -> errors
+          | _ -> err (SyntaxError.not_allowed_in_write "Unary expression")
+        end (* match *)
+      (* FIXME: Array_get ((_, Class_const _), _) is not a valid lvalue. *)
+      | _ -> errors
+        (* Ideally we should put all the rest of the syntax here so everytime
+         * a new syntax is added people need to consider whether the syntax
+         * can be a valid lvalue or not. However, there are too many of them. *)
+  in
   match syntax node with
+  | (PrefixUnaryExpression
+    { prefix_unary_operator = op
+    ; prefix_unary_operand = loperand
+    }
+  | PostfixUnaryExpression
+    { postfix_unary_operator = op
+    ; postfix_unary_operand = loperand
+    }
+  | DecoratedExpression
+    { decorated_expression_decorator = op
+    ; decorated_expression_expression = loperand
+    }) when does_op_create_write_on_left (token_kind op) ->
+    check_lvalue ~allow_reassign_this:true loperand errors
   | BinaryExpression
     { binary_left_operand = loperand
     ; binary_operator = op
-    ; binary_right_operand = roperand
+    ; _
     } when does_op_create_write_on_left (token_kind op) ->
-    let result = match syntax loperand with
-      | SafeMemberSelectionExpression _ ->
-        Some SyntaxError.safe_member_selection_in_write
-      | MemberSelectionExpression { member_name; _ }
-        when token_kind member_name = Some TokenKind.XHPClassName ->
-        Some SyntaxError.safe_member_selection_in_write
-      | VariableExpression { variable_expression }
-        when String.lowercase_ascii (text variable_expression)
-          = SN.SpecialIdents.this ->
-        Some SyntaxError.reassign_this
-      | _ -> None
+    check_lvalue loperand errors
+  | ForeachStatement
+    { foreach_key = k;
+      foreach_value = v;
+      _
+    } ->
+    let allow_ref node errors = match syntax node with
+      | PrefixUnaryExpression
+        { prefix_unary_operator = op
+        ; prefix_unary_operand = loperand
+        } when token_kind op = Some (TokenKind.Ampersand) ->
+        check_lvalue loperand errors
+      | Missing -> errors
+      | loperand -> check_lvalue node errors
     in
-    begin match result with
-    | None -> errors
-    | Some error_message ->
-      make_error_from_node loperand error_message :: errors
-    end
+      let errors = allow_ref k errors in
+      let errors = allow_ref v errors in
+        errors
   | _ -> errors
 
 let trait_use_alias_item_errors _env node errors =

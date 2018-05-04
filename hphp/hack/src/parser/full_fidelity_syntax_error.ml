@@ -324,8 +324,8 @@ let coloncolonclass_on_dynamic =
   "Dynamic class names are not allowed in compile-time ::class fetch"
 let enum_elem_name_is_class =
   "Enum element cannot be named 'class'"
-let safe_member_selection_in_write =
-  "?-> is not allowed in write context"
+let not_allowed_in_write what =
+  what ^ " is not allowed in write context"
 let reassign_this =
   "Cannot re-assign $this"
 let strict_types_first_statement =

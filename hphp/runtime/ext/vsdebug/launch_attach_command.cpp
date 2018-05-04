@@ -44,10 +44,23 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   const auto& startupDoc =
     tryGetString(args, "startupDocumentPath", emptyString);
 
+  bool displayStartupMsg =
+    tryGetBool(args, "displayConsoleStartupMsg", true);
+
   if (!startupDoc.empty()) {
-    m_debugger->startDummyRequest(startupDoc, sandboxUser, sandboxName);
+    m_debugger->startDummyRequest(
+      startupDoc,
+      sandboxUser,
+      sandboxName,
+      displayStartupMsg
+    );
   } else {
-    m_debugger->startDummyRequest(emptyString, sandboxUser, sandboxName);
+    m_debugger->startDummyRequest(
+      emptyString,
+      sandboxUser,
+      sandboxName,
+      displayStartupMsg
+    );
   }
 
   const auto& logFilePath =

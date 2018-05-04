@@ -1149,7 +1149,8 @@ ClientPreferences Debugger::getClientPreferences() {
 void Debugger::startDummyRequest(
   const std::string& startupDoc,
   const std::string& sandboxUser,
-  const std::string& sandboxName
+  const std::string& sandboxName,
+  bool displayStartupMsg
 ) {
   Lock lock(m_lock);
   if (!clientConnected()) {
@@ -1157,7 +1158,12 @@ void Debugger::startDummyRequest(
   }
 
   assertx(m_session != nullptr);
-  m_session->startDummyRequest(startupDoc, sandboxUser, sandboxName);
+  m_session->startDummyRequest(
+    startupDoc,
+    sandboxUser,
+    sandboxName,
+    displayStartupMsg
+  );
 }
 
 void Debugger::setDummyThreadId(int64_t threadId) {

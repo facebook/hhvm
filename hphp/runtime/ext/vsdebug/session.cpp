@@ -26,6 +26,7 @@ namespace VSDEBUG {
 
 DebuggerSession::DebuggerSession(Debugger* debugger) :
   m_dummyRequestInfo(Debugger::createRequestInfo()),
+  m_displayStartupMsg(false),
   m_debugger(debugger),
   m_breakpointMgr(new BreakpointManager(debugger)),
   m_dummyThread(this, &DebuggerSession::runDummy),
@@ -56,14 +57,17 @@ DebuggerSession::~DebuggerSession() {
 void DebuggerSession::startDummyRequest(
   const std::string& startupDoc,
   const std::string& sandboxUser,
-  const std::string& sandboxName
+  const std::string& sandboxName,
+  bool displayStartupMsg
 ) {
 
   assertx(m_sourceRootInfo == nullptr);
   if (!sandboxUser.empty()) {
     m_sourceRootInfo = new SourceRootInfo(sandboxUser, sandboxName);
   }
+
   m_dummyStartupDoc = File::TranslatePath(startupDoc).data();
+  m_displayStartupMsg = displayStartupMsg;
 
   // Flush dirty writes to m_sourceRootInfo and m_dummyStartupDoc.
   std::atomic_thread_fence(std::memory_order_release);
@@ -72,10 +76,13 @@ void DebuggerSession::startDummyRequest(
 }
 
 void DebuggerSession::invokeDummyStartupDocument() {
-  m_debugger->sendUserMessage(
-    "Preparing your Hack/PHP console. Please wait...",
-    DebugTransport::OutputLevelWarning
-  );
+
+  if (m_displayStartupMsg) {
+    m_debugger->sendUserMessage(
+      "Preparing your Hack/PHP console. Please wait...",
+      DebugTransport::OutputLevelWarning
+    );
+  }
 
   // If a startup document was specified, invoke it now.
   bool error;
@@ -127,13 +134,18 @@ void DebuggerSession::invokeDummyStartupDocument() {
       DebugTransport::OutputLevelWarning
     );
   } else {
-    m_debugger->sendUserMessage(
-      "The Hack/PHP console is now ready to use.",
-      DebugTransport::OutputLevelSuccess
-    );
+    if (m_displayStartupMsg) {
+      m_debugger->sendUserMessage(
+        "The Hack/PHP console is now ready to use.",
+        DebugTransport::OutputLevelSuccess
+      );
+    }
   }
 
   m_dummyRequestInfo->m_flags.doNotBreak = false;
+
+  folly::dynamic event = folly::dynamic::object;
+  m_debugger->sendEventMessage(event, "readyForEvaluations", true);
 }
 
 const StaticString s_memory_limit("memory_limit");

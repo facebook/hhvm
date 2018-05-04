@@ -44,7 +44,8 @@ struct DebuggerSession final {
   void startDummyRequest(
     const std::string& startupDoc,
     const std::string& sandboxUser,
-    const std::string& sandboxName
+    const std::string& sandboxName,
+    bool displayStartupMsg
   );
 
   void enqueueDummyCommand(VSCommand* command);
@@ -80,6 +81,9 @@ struct DebuggerSession final {
 
   // RequestInfo for the dummy request thread.
   RequestInfo* const m_dummyRequestInfo;
+
+  // Indicates if the client wants output about the startup request state.
+  bool m_displayStartupMsg;
 
   folly::dynamic* getCachedVariableObject(const int key);
   void setCachedVariableObject(const int key, const folly::dynamic& value);

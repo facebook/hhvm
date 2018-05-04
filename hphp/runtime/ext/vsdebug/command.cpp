@@ -283,6 +283,11 @@ const folly::dynamic VSCommand::getDebuggerCapabilities() {
   capabilities["supportsLoadedSourcesRequest"] = false;
   capabilities["supportsTerminateThreadsRequest"] = true;
 
+  // Non-standard capability to indicate we send a custom event when
+  // the startup doc for the console REPL is complete, so that a client
+  // can wait for this event before offering the console.
+  capabilities["supportsReadyForEvaluationsEvent"] = true;
+
   folly::dynamic exceptionBreakpointFilters = folly::dynamic::array;
 
   // Filter for all breakpoints.

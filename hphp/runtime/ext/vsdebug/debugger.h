@@ -245,7 +245,8 @@ struct Debugger final {
   void startDummyRequest(
     const std::string& startupDoc,
     const std::string& sandboxUser,
-    const std::string& sandboxName
+    const std::string& sandboxName,
+    bool displayStartupMsg
   );
 
   // Sets the client initialized flag.

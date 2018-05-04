@@ -22,7 +22,7 @@ type t = {
   text: string;
   leading: Trivia.t list;
   trailing: Trivia.t list
-}
+} [@@deriving show]
 
 let create kind text leading trailing =
   { kind; text; leading; trailing }

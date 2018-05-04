@@ -230,6 +230,7 @@ type t =
   | XHPComment
   | Markup
 
+[@@deriving show]
 
 let from_string keyword =
   match keyword with

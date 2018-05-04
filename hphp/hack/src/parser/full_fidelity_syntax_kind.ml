@@ -189,6 +189,7 @@ type t =
   | ErrorSyntax
   | ListItem
 
+[@@deriving show]
 
 let to_string kind =
   match kind with

@@ -19,7 +19,7 @@ module SourceText = Full_fidelity_source_text
 type t = {
   kind: TriviaKind.t;
   text: string
-}
+} [@@deriving show]
 
 let make_ignore_error source_text offset width =
   { kind = TriviaKind.IgnoreError

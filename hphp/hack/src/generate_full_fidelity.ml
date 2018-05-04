@@ -1390,7 +1390,7 @@ module GenerateFFTriviaKind = struct
 
 type t =
 TRIVIA
-[@@deriving show]
+  [@@deriving show]
 
 let to_string kind =
   match kind with
@@ -1430,6 +1430,7 @@ type t =
   | Missing
   | SyntaxList
 TOKENS
+  [@@deriving show]
 
 let to_string kind =
   match kind with
@@ -2169,6 +2170,7 @@ type t =
 KIND_DECLARATIONS_NO_TEXT  (* Given text tokens *)
 KIND_DECLARATIONS_GIVEN_TEXT  (* Variable text tokens *)
 KIND_DECLARATIONS_VARIABLE_TEXT
+  [@@deriving show]
 
 let from_string keyword =
   match keyword with

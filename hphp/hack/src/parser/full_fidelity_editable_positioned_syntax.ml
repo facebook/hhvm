@@ -27,10 +27,10 @@ module SourceData = Full_fidelity_editable_positioned_original_source_data
 module SourceText = Full_fidelity_source_text
 
 module Value = struct
-
   type t =
     Positioned of SourceData.t
     | Synthetic
+    [@@deriving show]
 
   let from_positioned_syntax syntax =
     Positioned (SourceData.from_positioned_syntax syntax)

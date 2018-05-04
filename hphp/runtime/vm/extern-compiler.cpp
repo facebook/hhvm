@@ -699,9 +699,17 @@ void ExternCompiler::stop() {
   if (m_pid == kInvalidPid) return;
 
   SCOPE_EXIT {
+    // We must close err before in, otherwise there's a race:
+    // - hackc tries to read from stdin
+    // - stdin is closed
+    // - hackc writes an error to stderr
+    // - the error handler thread in HHVM spews out the error
+    // This makes the tests unrunnable, but probably doesn't have a practical
+    // effect on real usage other than log spew on process shutdown.
+    if (m_err) fclose(m_err);
     if (m_in) fclose(m_in);
     if (m_out) fclose(m_out);
-    m_in = m_out = nullptr;
+    m_err = m_in = m_out = nullptr;
     m_pid = kInvalidPid;
   };
 

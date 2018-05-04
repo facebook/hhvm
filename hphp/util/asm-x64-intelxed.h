@@ -525,11 +525,13 @@ public:
   static constexpr auto kUd2Size = sz::word;
 
   void emitInt3s(int n) {
-    static uint8_t instr = 0;
     if (n == 0) return;
-    if (instr == 0) {
-      xedEmit(XED_ICLASS_INT3, sz::byte, &instr);
-    }
+    static auto const instr = [&]{
+      uint8_t int3;
+      xedEmit(XED_ICLASS_INT3, sz::byte,
+              reinterpret_cast<CodeAddress>(&int3));
+      return int3;
+    }();
     for (auto i = 0; i < n; ++i) {
       byte(instr);
     }
@@ -562,17 +564,24 @@ public:
 
   void pad() {
     auto remaining = available();
-    static uint8_t padInstructs[kUd2Size + kInt3Size] = {0};
-    if (padInstructs[0] == 0) {
-      xedEmit(XED_ICLASS_UD2, sz::nosize, padInstructs);
-      xedEmit(XED_ICLASS_INT3, sz::nosize, padInstructs + kUd2Size);
-    }
+    if (remaining == 0) return;
+    static auto const instrs = [&]{
+      struct {
+        uint8_t   int3;
+        uint16_t  ud2;
+      } data;
+      xedEmit(XED_ICLASS_INT3, sz::nosize,
+              reinterpret_cast<CodeAddress>(&data.int3));
+      xedEmit(XED_ICLASS_UD2, sz::nosize,
+              reinterpret_cast<CodeAddress>(&data.ud2));
+      return data;
+    }();
     while (remaining >= kUd2Size) {
-      bytes(kUd2Size, padInstructs);
+      word(instrs.ud2);
       remaining -= kUd2Size;
     }
     while (remaining >= kInt3Size) {
-      byte(padInstructs[kUd2Size]);
+      byte(instrs.int3);
       remaining -= kInt3Size;
     }
   }

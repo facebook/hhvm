@@ -498,7 +498,7 @@ static inline bool eagerGcDefault() {
 
 static inline bool hackCompilerEnableDefault() {
 #ifndef HHVM_NO_DEFAULT_HACKC
-  return facebook;
+  return true;
 #else
   return false;
 #endif

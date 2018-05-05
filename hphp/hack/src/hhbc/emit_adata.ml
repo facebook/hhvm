@@ -49,7 +49,7 @@ let rec adata_to_buffer b argument =
   | TV.Bool false -> Acc.add b "b:0;"
   | TV.Bool true -> Acc.add b "b:1;"
   | TV.Int i -> Acc.add b @@ "i:" ^ (Int64.to_string i) ^ ";"
-  | TV.HhasAdata data -> Acc.add b data
+  | TV.HhasAdata data -> Acc.add b (String.escaped data)
   | TV.Array pairs ->
       adata_dict_collection_argument_to_buffer b adata_array_prefix pairs
   | TV.VArray values ->

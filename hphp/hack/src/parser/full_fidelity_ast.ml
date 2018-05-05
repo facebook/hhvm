@@ -457,7 +457,7 @@ let prepString2 : node list -> node list =
 
 let extract_unquoted_string ~start ~len content =
   try (* Using String.sub; Invalid_argument when str too short *)
-    if len >= 3 && String.sub content 0 3 = "<<<" (* The heredoc case *)
+    if len >= 3 && String.sub content start 3 = "<<<" (* The heredoc case *)
     then
        (* These types of strings begin with an opening line containing <<<
         * followed by a string to use as a terminator (which is optionally
@@ -465,10 +465,10 @@ let extract_unquoted_string ~start ~len content =
         * semicolon followed by a blank line. We need to drop the opening line
         * as well as the blank line and preceding terminator line.
         *)
-       let start = String.index content '\n' + 1 in
-       let end_ = String.rindex_from content (len - 2) '\n' in
+       let start_ = String.index_from content start '\n' + 1 in
+       let end_ = String.rindex_from content (start + len - 2) '\n' in
        (* An empty heredoc, this way, will have start >= end *)
-       if start >= end_ then "" else String.sub content start (end_ - start)
+       if start_ >= end_ then "" else String.sub content start_ (end_ - start_)
     else
       match String.get content start, String.get content (start + len - 1) with
         | '"', '"' | '\'', '\'' | '`', '`' ->
@@ -1006,7 +1006,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         ; _
         }
       ; _
-      } when text recv = "__hhas_adata" ->
+      } when text recv = "__hhas_adata"
+        && token_kind expr = Some TK.NowdocStringLiteral ->
       let literal_expression_pos = pPos expr env in
       let s =
         expr

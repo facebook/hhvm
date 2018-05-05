@@ -435,11 +435,15 @@ Variant HHVM_METHOD(DateTimeZone, getOffset,
   return data->m_tz->offset(ts);
 }
 
-Array HHVM_METHOD(DateTimeZone, getTransitions,
+TypedValue HHVM_METHOD(DateTimeZone, getTransitions,
                   int64_t timestamp_begin, /*=k_PHP_INT_MIN*/
                   int64_t timestamp_end /*=k_PHP_INT_MAX*/) {
   DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
-  return data->m_tz->transitions(timestamp_begin, timestamp_end);
+  auto result = data->m_tz->transitions(timestamp_begin, timestamp_end);
+  if (result.isNull()) {
+    return make_tv<KindOfBoolean>(false);
+  }
+  return tvReturn(std::move(result));
 }
 
 Array HHVM_STATIC_METHOD(DateTimeZone, listAbbreviations) {
@@ -498,6 +502,18 @@ req::ptr<TimeZone> DateTimeZoneData::unwrap(const Object& timezone) {
 }
 
 IMPLEMENT_GET_CLASS(DateTimeZoneData)
+
+Array HHVM_METHOD(DateTimeZone, __debuginfo) {
+  DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
+  return data->getDebugInfo();
+}
+
+Array DateTimeZoneData::getDebugInfo() const {
+  return make_map_array(
+    s_timezone_type, m_tz->type(),
+    s_timezone, m_tz->name()
+  );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // DateInterval
@@ -992,6 +1008,7 @@ static struct DateTimeExtension final : Extension {
     HHVM_RCC_INT(DateTimeZone, PER_COUNTRY, DateTimeZoneData::PER_COUNTRY);
 
     HHVM_ME(DateTimeZone, __construct);
+    HHVM_ME(DateTimeZone, __debuginfo);
     HHVM_ME(DateTimeZone, getLocation);
     HHVM_ME(DateTimeZone, getName);
     HHVM_ME(DateTimeZone, getOffset);

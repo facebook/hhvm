@@ -57,7 +57,7 @@ Array TimeStamp::CurrentTime() {
   gettimeofday(&tp, nullptr);
 
   timelib_time_offset *offset =
-    timelib_get_time_zone_info(tp.tv_sec, TimeZone::Current()->get());
+    timelib_get_time_zone_info(tp.tv_sec, TimeZone::Current()->getTZInfo());
 
   auto const ret = make_map_array(
     s_sec, (int)tp.tv_sec,

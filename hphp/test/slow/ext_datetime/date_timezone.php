@@ -1,7 +1,6 @@
 <?php
 
 date_default_timezone_set("America/Los_Angeles");
-
 var_dump(date_default_timezone_get());
 
 var_dump(date_default_timezone_set("Asia/Shanghai"));
@@ -51,6 +50,8 @@ var_dump(timezone_name_get($tz));
 $tz = timezone_open("PST");
 var_dump(timezone_name_get($tz));
 $tz = timezone_open("CHAST");
+var_dump(timezone_name_get($tz));
+$tz = timezone_open("+01:23");
 var_dump(timezone_name_get($tz));
 
 var_dump((bool)timezone_version_get());

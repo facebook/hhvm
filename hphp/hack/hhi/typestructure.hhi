@@ -35,6 +35,7 @@ enum TypeStructureKind : int {
   OF_DICT = 0;
   OF_VEC = 0;
   OF_KEYSET = 0;
+  OF_NONNULL = 0;
   OF_UNRESOLVED = 0;
 }
 

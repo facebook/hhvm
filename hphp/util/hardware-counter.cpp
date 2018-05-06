@@ -88,12 +88,8 @@ createTimeSeries(const std::string& name) {
 struct HardwareCounterImpl {
   HardwareCounterImpl(int type, unsigned long config, const char* desc)
     : m_desc(desc ? desc : "")
-    , m_err(0)
     , m_timeSeries(createTimeSeries(m_desc))
-    , m_timeSeriesNonPsp(createTimeSeries(m_desc + "-nonpsp"))
-    , m_fd(-1)
-    , inited(false) {
-    memset (&pe, 0, sizeof (struct perf_event_attr));
+    , m_timeSeriesNonPsp(createTimeSeries(m_desc + "-nonpsp")) {
     pe.type = type;
     pe.size = sizeof (struct perf_event_attr);
     pe.config = config;
@@ -104,7 +100,7 @@ struct HardwareCounterImpl {
     pe.exclude_hv = 1;
     pe.read_format =
       PERF_FORMAT_TOTAL_TIME_ENABLED|PERF_FORMAT_TOTAL_TIME_RUNNING;
-    }
+  }
 
   ~HardwareCounterImpl() {
     close();
@@ -129,8 +125,8 @@ struct HardwareCounterImpl {
     inited = true;
     m_fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
     if (m_fd < 0) {
-      Logger::Warning("perf_event_open failed with: %s",
-                      folly::errnoStr(errno).c_str());
+      Logger::FWarning("HardwareCounter: perf_event_open failed with: {}",
+                       folly::errnoStr(errno));
       m_err = -1;
       return;
     }
@@ -138,8 +134,8 @@ struct HardwareCounterImpl {
     fcntl(m_fd, F_SETFD, O_CLOEXEC);
 
     if (ioctl(m_fd, PERF_EVENT_IOC_ENABLE, 0) < 0) {
-      Logger::Warning("perf_event failed to enable: %s",
-                      folly::errnoStr(errno).c_str());
+      Logger::FWarning("perf_event failed to enable: {}",
+                       folly::errnoStr(errno));
       close();
       m_err = -1;
       return;
@@ -192,15 +188,15 @@ struct HardwareCounterImpl {
     extra = 0;
     if (m_fd > 0) {
       if (ioctl (m_fd, PERF_EVENT_IOC_RESET, 0) < 0) {
-        Logger::Warning("perf_event failed to reset with: %s",
-                        folly::errnoStr(errno).c_str());
+        Logger::FWarning("perf_event failed to reset with: {}",
+                         folly::errnoStr(errno));
         m_err = -1;
         return;
       }
       auto ret = ::read(m_fd, reset_values, sizeof(reset_values));
       if (ret != sizeof(reset_values)) {
-        Logger::Warning("perf_event failed to reset with: %s",
-                        folly::errnoStr(errno).c_str());
+        Logger::FWarning("perf_event failed to reset with: {}",
+                         folly::errnoStr(errno));
         m_err = -1;
         return;
       }
@@ -209,13 +205,13 @@ struct HardwareCounterImpl {
 
 public:
   std::string m_desc;
-  int m_err;
+  int m_err{0};
 private:
+  int m_fd{-1};
+  bool inited{false};
   ServiceData::ExportedTimeSeries* m_timeSeries;
   ServiceData::ExportedTimeSeries* m_timeSeriesNonPsp;
-  int m_fd;
-  struct perf_event_attr pe;
-  bool inited;
+  struct perf_event_attr pe{};
   uint64_t reset_values[3];
   uint64_t extra{0};
 
@@ -417,7 +413,7 @@ bool HardwareCounter::addPerfEvent(const char* event) {
       found = true;
       type = perfTable[i].type;
     } else if (type != perfTable[i].type) {
-      Logger::Warning("failed to find perf event: %s", event);
+      Logger::FWarning("failed to find perf event: {}", event);
       return false;
     }
     config |= perfTable[i].config;
@@ -436,12 +432,12 @@ bool HardwareCounter::addPerfEvent(const char* event) {
   }
 
   if (!found || *ev) {
-    Logger::Warning("failed to find perf event: %s", event);
+    Logger::FWarning("failed to find perf event: {}", event);
     return false;
   }
   auto hwc = std::make_unique<HardwareCounterImpl>(type, config, event);
   if (hwc->m_err) {
-    Logger::Warning("failed to set perf event: %s", event);
+    Logger::FWarning("failed to set perf event: {}", event);
     return false;
   }
   m_counters.emplace_back(std::move(hwc));

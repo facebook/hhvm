@@ -402,6 +402,7 @@ and fun_def tcopt f =
     ~f:(fun x -> Option.value_exn x.ft_decl_errors)
   );
   let env = Env.set_env_function_pos env pos in
+  let env = Typing_attributes.check_def env new_object SN.AttributeKinds.fn f.f_user_attributes in
   let reactive = Decl.fun_reactivity env.Env.decl_env f.f_user_attributes in
   let mut = TUtils.fun_mutable f.f_user_attributes in
   let env = Env.set_env_reactive env reactive in
@@ -478,8 +479,6 @@ and fun_def tcopt f =
         T.f_ret_by_ref = f.f_ret_by_ref;
       }
   ) in
-  let _ = Typing_attributes.check_def env new_object
-    SN.AttributeKinds.fn f.f_user_attributes in
   Typing_hooks.dispatch_exit_fun_def_hook f;
   tfun_def
 
@@ -6405,6 +6404,8 @@ and method_def env m =
     Env.env_with_locals env Typing_continuations.Map.empty Local_id.Map.empty
   in
   let env = Env.set_env_function_pos env pos in
+  let env = Typing_attributes.check_def env new_object
+    SN.AttributeKinds.mthd m.m_user_attributes in
   let reactive = Decl.fun_reactivity env.Env.decl_env m.m_user_attributes in
   let mut =
     TUtils.fun_mutable m.m_user_attributes ||
@@ -6472,8 +6473,6 @@ and method_def env m =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
   let env =
     Env.check_todo env in
-  let env = Typing_attributes.check_def env new_object
-    SN.AttributeKinds.mthd m.m_user_attributes in
   let m_ret =
     match m.m_ret with
     | None when

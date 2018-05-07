@@ -163,9 +163,10 @@ extern unsigned high_arena;
 // arena in [4G, 64G) at most.  Both grows down and can be smaller.  But things
 // won't work well if either overflows.
 constexpr uintptr_t kLowArenaMaxAddr = 4ull << 30;
-constexpr uintptr_t kHighArenaMaxAddr = 64ull << 30;
+constexpr uintptr_t kUncountedMaxAddr = 64ull << 30;
+constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr;
 constexpr size_t kLowArenaMaxCap = 3ull << 30;
-constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
+constexpr size_t kHighArenaMaxCap = kUncountedMaxAddr - kLowArenaMaxAddr;
 
 // Explicit per-thread tcache for the huge arenas.
 extern __thread int high_arena_tcache;
@@ -231,7 +232,7 @@ inline void low_free(void* ptr) {
 
 void low_malloc_huge_pages(int pages);
 
-inline void* malloc_huge(size_t size) {
+inline void* malloc_huge_internal(size_t size) {
 #if !USE_JEMALLOC_EXTENT_HOOKS
   return malloc(size);
 #else
@@ -240,7 +241,7 @@ inline void* malloc_huge(size_t size) {
 #endif
 }
 
-inline void free_huge(void* ptr) {
+inline void free_huge_internal(void* ptr) {
 #ifndef USE_JEMALLOC_EXTENT_HOOKS
   free(ptr);
 #else
@@ -421,108 +422,143 @@ int jemalloc_pprof_enable();
 int jemalloc_pprof_disable();
 int jemalloc_pprof_dump(const std::string& prefix, bool force);
 
+
+// For allocation of VM data.
+inline void* vm_malloc(size_t size) {
+  return malloc_huge_internal(size);
+}
+
+inline void vm_free(void* ptr) {
+  return free_huge_internal(ptr);
+}
+
+// Allocations that are guaranteed to live below kUncountedMaxAddr when
+// USE_JEMALLOC_EXTENT_HOOKS.  This provides a new way to check for countedness
+// for arrays and strings.
+inline void* uncounted_malloc(size_t size) {
+  return malloc_huge_internal(size);
+}
+
+inline void uncounted_free(void* ptr) {
+  return free_huge_internal(ptr);
+}
+
+// Allocations for the APC but do not necessarily live below kUncountedMaxAddr,
+// e.g., APCObject, or the hash table.  Currently they live below
+// kUncountedMaxAddr anyway, but this may change later.
+inline void* apc_malloc(size_t size) {
+  return malloc_huge_internal(size);
+}
+
+inline void apc_free(void* ptr) {
+  return free_huge_internal(ptr);
+}
+
 template <class T>
 struct LowAllocator {
-  typedef T              value_type;
-  typedef T*             pointer;
-  typedef const T*       const_pointer;
-  typedef T&             reference;
-  typedef const T&       const_reference;
-  typedef std::size_t    size_type;
-  typedef std::ptrdiff_t difference_type;
+  using value_type = T;
+  using pointer = T*;
+  using const_pointer = const T*;
 
   template <class U>
   struct rebind { using other = LowAllocator<U>; };
-
-  pointer address(reference value) {
-    return &value;
-  }
-  const_pointer address(const_reference value) const {
-    return &value;
-  }
 
   LowAllocator() noexcept {}
   template<class U> LowAllocator(const LowAllocator<U>&) noexcept {}
   ~LowAllocator() noexcept {}
 
-  size_type max_size() const {
-    return std::numeric_limits<std::size_t>::max() / sizeof(T);
+  pointer allocate(size_t num) {
+    return (pointer)low_malloc(num * sizeof(T));
   }
-
-  pointer allocate(size_type num, const void* = nullptr) {
-    pointer ret = (pointer)low_malloc(num * sizeof(T));
-    return ret;
+  void deallocate(pointer p, size_t /*num*/) {
+    low_free((void*)p);
   }
 
   template<class U, class... Args>
   void construct(U* p, Args&&... args) {
     ::new ((void*)p) U(std::forward<Args>(args)...);
   }
-
   void destroy(pointer p) {
     p->~T();
   }
 
-  void deallocate(pointer p, size_type /*num*/) { low_free((void*)p); }
-
   template<class U> bool operator==(const LowAllocator<U>&) const {
     return true;
   }
-
   template<class U> bool operator!=(const LowAllocator<U>&) const {
     return false;
   }
 };
 
 template <class T>
-struct HugeAllocator {
+struct VMAllocator {
   using value_type = T;
   using pointer = T*;
   using const_pointer = const T*;
-  using reference = T&;
-  using const_reference = const T&;
-  using size_type = std::size_t;
-  using difference_type = std::ptrdiff_t;
 
   template <class U>
-  struct rebind { using other = HugeAllocator<U>; };
+  struct rebind { using other = VMAllocator<U>; };
 
-  pointer address(reference value) {
-    return &value;
-  }
-  const_pointer address(const_reference value) const {
-    return &value;
-  }
+  VMAllocator() noexcept {}
+  template<class U> explicit VMAllocator(const VMAllocator<U>&) noexcept {}
+  ~VMAllocator() noexcept {}
 
-  HugeAllocator() noexcept {}
-  template<class U> explicit HugeAllocator(const HugeAllocator<U>&) noexcept {}
-  ~HugeAllocator() noexcept {}
-
-  size_type max_size() const {
-    return std::numeric_limits<std::size_t>::max() / sizeof(T);
-  }
-
-  pointer allocate(size_type num, const void* = nullptr) {
-    pointer ret = (pointer)malloc_huge(num * sizeof(T));
+  pointer allocate(size_t num, const void* = nullptr) {
+    pointer ret = (pointer)vm_malloc(num * sizeof(T));
     return ret;
+  }
+  void deallocate(pointer p, size_t /*num*/) {
+    vm_free((void*)p);
   }
 
   template<class U, class... Args>
   void construct(U* p, Args&&... args) {
     ::new ((void*)p) U(std::forward<Args>(args)...);
   }
-
   void destroy(pointer p) {
     p->~T();
   }
 
-  void deallocate(pointer p, size_type /*num*/) { free_huge((void*)p); }
-
-  template<class U> bool operator==(const HugeAllocator<U>&) const {
+  template<class U> bool operator==(const VMAllocator<U>&) const {
     return true;
   }
+  template<class U> bool operator!=(const VMAllocator<U>&) const {
+    return false;
+  }
+};
 
-  template<class U> bool operator!=(const HugeAllocator<U>&) const {
+template <class T>
+struct APCAllocator {
+  using value_type = T;
+  using pointer = T*;
+  using const_pointer = const T*;
+
+  template <class U>
+  struct rebind { using other = APCAllocator<U>; };
+
+  APCAllocator() noexcept {}
+  template<class U> explicit APCAllocator(const APCAllocator<U>&) noexcept {}
+  ~APCAllocator() noexcept {}
+
+  pointer allocate(size_t num, const void* = nullptr) {
+    return (pointer)apc_malloc(num * sizeof(T));
+  }
+  void deallocate(pointer p, size_t /*num*/) {
+    apc_free((void*)p);
+  }
+
+  template<class U, class... Args>
+  void construct(U* p, Args&&... args) {
+    ::new ((void*)p) U(std::forward<Args>(args)...);
+  }
+  void destroy(pointer p) {
+    p->~T();
+  }
+
+  template<class U> bool operator==(const APCAllocator<U>&) const {
+    return true;
+  }
+  template<class U> bool operator!=(const APCAllocator<U>&) const {
     return false;
   }
 };

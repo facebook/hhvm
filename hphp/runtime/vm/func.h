@@ -174,7 +174,7 @@ struct Func final {
   using ParamInfoVec = FixedVector<ParamInfo>;
   using SVInfoVec = FixedVector<SVInfo>;
   using EHEntVec = FixedVector<EHEnt>;
-  using FPIEntVec = FixedVector<FPIEnt,HugeAllocator<FPIEnt>>;
+  using FPIEntVec = FixedVector<FPIEnt, VMAllocator<FPIEnt>>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.

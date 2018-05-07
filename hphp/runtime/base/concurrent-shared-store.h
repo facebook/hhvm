@@ -372,13 +372,13 @@ private:
 private:
   template<typename Key, typename T, typename HashCompare>
   struct APCMap :
-      tbb::concurrent_hash_map<Key,T,HashCompare,HugeAllocator<char>> {
+      tbb::concurrent_hash_map<Key,T,HashCompare,APCAllocator<char>> {
     // Append a random entry to 'entries'. The map must be non-empty and not
     // concurrently accessed. Returns false if this operation is not supported.
     bool getRandomAPCEntry(std::vector<EntryInfo>& entries);
 
     using node = typename tbb::concurrent_hash_map<Key,T,HashCompare,
-                                                   HugeAllocator<char>>::node;
+                                                   APCAllocator<char>>::node;
     static_assert(sizeof(node) == 64, "Node should be cache-line sized");
   };
 

@@ -145,7 +145,7 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array,
   auto const used = src->m_used;
   auto const extra = withApcTypedValue ? sizeof(APCTypedValue) : 0;
   auto const mem =
-    static_cast<char*>(malloc_huge(extra + computeAllocBytes(scale)));
+    static_cast<char*>(uncounted_malloc(extra + computeAllocBytes(scale)));
   auto const dest = reinterpret_cast<SetArray*>(mem + extra);
 
   assertx(reinterpret_cast<uintptr_t>(dest) % 16 == 0);
@@ -330,8 +330,8 @@ void SetArray::ReleaseUncounted(ArrayData* in) {
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
-  free_huge(reinterpret_cast<char*>(ad) -
-            (ad->hasApcTv() ? sizeof(APCTypedValue) : 0));
+  uncounted_free(reinterpret_cast<char*>(ad) -
+           (ad->hasApcTv() ? sizeof(APCTypedValue) : 0));
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -37,7 +37,7 @@ template<class V, bool CaseSensitive, class E>
 NEVER_INLINE
 void FixedStringMap<V,CaseSensitive,E>::clear() {
   if (m_table && m_table != (Elm*)&FSM::null_key + 1) {
-    free_huge(m_table - m_mask - 1);
+    vm_free(m_table - m_mask - 1);
   }
   m_table = nullptr;
   m_mask = 0;
@@ -60,7 +60,7 @@ void FixedStringMap<V,CaseSensitive,E>::init(int num, uint32_t numExtraBytes) {
   TRACE_MOD(Trace::runtime, 1, "FixedStringMap::init: %d -> %d\n", num, capac);
   assertx(!m_table);
   auto const allocSize = capac * sizeof(Elm) + numExtraBytes;
-  auto ptr = malloc_huge(allocSize);
+  auto ptr = vm_malloc(allocSize);
   std::memset(ptr, 0, allocSize);
   m_table = (Elm*)ptr + capac;
   assertx(m_table);

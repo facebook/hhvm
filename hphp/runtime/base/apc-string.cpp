@@ -22,7 +22,7 @@ APCHandle::Pair
 APCString::MakeSharedString(APCKind kind, StringData* data) {
   auto const len    = static_cast<uint32_t>(data->size());
   auto const size   = len + 1 + sizeof(APCString);
-  auto const mem    = std::malloc(size);
+  auto const mem    = uncounted_malloc(size);
   auto apcStr       = new (mem) APCString(kind);
 
   auto const chars  = reinterpret_cast<char*>(apcStr + 1);

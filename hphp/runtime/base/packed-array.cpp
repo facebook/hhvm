@@ -637,8 +637,8 @@ void PackedArray::ReleaseUncounted(ArrayData* ad) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
 
-  free_huge(reinterpret_cast<char*>(ad) -
-            (ad->hasApcTv() ? sizeof(APCTypedValue) : 0));
+  uncounted_free(reinterpret_cast<char*>(ad) -
+                 (ad->hasApcTv() ? sizeof(APCTypedValue) : 0));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1405,7 +1405,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
   auto const size = array->m_size;
   auto const sizeIndex = capacityToSizeIndex(size);
   auto const mem = static_cast<char*>(
-    malloc_huge(extra + sizeof(ArrayData) + size * sizeof(TypedValue))
+    uncounted_malloc(extra + sizeof(ArrayData) + size * sizeof(TypedValue))
   );
   auto ad = reinterpret_cast<ArrayData*>(mem + extra);
   ad->initHeader_16(

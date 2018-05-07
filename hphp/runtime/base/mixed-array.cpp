@@ -396,14 +396,6 @@ NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
 
 //////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE static bool UncountedMixedArrayOnHugePage() {
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
-  return high_arena && RuntimeOption::EvalUncountedMixedArrayHuge;
-#else
-  return false;
-#endif
-}
-
 ArrayData* MixedArray::MakeUncounted(ArrayData* array,
                                      bool withApcTypedValue,
                                      PointerMap* seen) {
@@ -422,9 +414,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
   auto const extra = withApcTypedValue ? sizeof(APCTypedValue) : 0;
   auto const scale = a->scale();
   auto const allocSize = extra + computeAllocBytes(scale);
-  auto const mem = static_cast<char*>(
-    UncountedMixedArrayOnHugePage() ? malloc_huge(allocSize) : malloc(allocSize)
-  );
+  auto const mem = static_cast<char*>(uncounted_malloc(allocSize));
   auto const ad = reinterpret_cast<MixedArray*>(mem + extra);
   auto const used = a->m_used;
   // Do a raw copy first, without worrying about counted types or refcount
@@ -552,11 +542,7 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
     assertx(!has_strong_iterator(ad));
   }
   auto const extra = ad->hasApcTv() ? sizeof(APCTypedValue) : 0;
-  if (UncountedMixedArrayOnHugePage()) {
-    free_huge(reinterpret_cast<char*>(ad) - extra);
-  } else {
-    free(reinterpret_cast<char*>(ad) - extra);
-  }
+  uncounted_free(reinterpret_cast<char*>(ad) - extra);
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }

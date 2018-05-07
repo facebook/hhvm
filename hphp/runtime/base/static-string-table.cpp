@@ -102,7 +102,7 @@ using StringDataMap = folly::AtomicHashMap<
   rds::Link<TypedValue, rds::Mode::NonLocal>,
   strintern_hash,
   strintern_eq,
-  HugeAllocator<char>
+  VMAllocator<char>
 >;
 
 struct EmbeddedStringMap {

@@ -69,14 +69,6 @@ std::aligned_storage<
 
 //////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE static bool UncountedStringOnHugePage() {
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
-  return high_arena && RuntimeOption::EvalUncountedStringHuge;
-#else
-  return false;
-#endif
-}
-
 // Create either a static or an uncounted string.
 // Diffrence between static and uncounted is in the lifetime
 // of the string. Static are alive for the lifetime of the process.
@@ -89,9 +81,8 @@ StringData* StringData::MakeShared(folly::StringPiece sl) {
 
   auto const allocSize = sl.size() + kStringOverhead;
   StringData* sd = reinterpret_cast<StringData*>(
-    trueStatic ? low_malloc(allocSize)
-               : UncountedStringOnHugePage() ? malloc_huge(allocSize)
-               : malloc(allocSize));
+    trueStatic ? low_malloc(allocSize) : uncounted_malloc(allocSize)
+  );
   auto const data = reinterpret_cast<char*>(sd + 1);
 
 #ifndef NO_M_DATA
@@ -162,11 +153,7 @@ void StringData::ReleaseUncounted(const StringData* str) {
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
-  if (UncountedStringOnHugePage()) {
-    free_huge(const_cast<StringData*>(str));
-  } else {
-    free(const_cast<StringData*>(str));
-  }
+  uncounted_free(const_cast<StringData*>(str));
 }
 
 //////////////////////////////////////////////////////////////////////

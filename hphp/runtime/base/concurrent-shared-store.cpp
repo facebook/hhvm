@@ -222,7 +222,7 @@ struct HotCache {
     const char* operator()(const StringData* sd) const {
       if (sd->isStatic()) return sd->data();
       auto const nbytes = sd->size() + 1;
-      auto const dst = malloc_huge(nbytes);
+      auto const dst = apc_malloc(nbytes);
       assertx((reinterpret_cast<uintptr_t>(dst) & 7) == 0);
       memcpy(dst, sd->data(), nbytes);
       return reinterpret_cast<const char*>(dst);
@@ -230,7 +230,7 @@ struct HotCache {
   };
   using HotMap = folly::AtomicHashArray<const char*, std::atomic<HotValueRaw>,
                                         Hasher, EqualityTester,
-                                        HugeAllocator<char>,
+                                        APCAllocator<char>,
                                         folly::AtomicHashArrayLinearProbeFcn,
                                         KeyConverter>;
 

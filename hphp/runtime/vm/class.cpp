@@ -95,7 +95,7 @@ const Class* getOwningClassForFunc(const Func* f) {
 
 Class::PropInitVec::~PropInitVec() {
   if (m_capacity > 0) {
-    free_huge(m_data);
+    vm_free(m_data);
   }
 }
 
@@ -115,12 +115,12 @@ Class::PropInitVec::operator=(const PropInitVec& piv) {
   assertx(!reqAllocated());
   if (this != &piv) {
     if (UNLIKELY(m_capacity)) {
-      free_huge(m_data);
+      vm_free(m_data);
       m_data = nullptr;
     }
     unsigned sz = m_size = m_capacity = piv.size();
     if (sz == 0) return *this;
-    m_data = (TypedValueAux*)malloc_huge(sz * sizeof(*m_data));
+    m_data = (TypedValueAux*)vm_malloc(sz * sizeof(*m_data));
     assertx(m_data);
     memcpy(m_data, piv.m_data, sz * sizeof(*m_data));
   }
@@ -132,10 +132,10 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
   if (m_size == m_capacity) {
     unsigned newCap = folly::nextPowTwo(m_size + 1);
     m_capacity = static_cast<int32_t>(newCap);
-    auto newData = malloc_huge(newCap * sizeof(TypedValue));
+    auto newData = vm_malloc(newCap * sizeof(TypedValue));
     if (m_data) {
       memcpy(newData, m_data, m_size * sizeof(*m_data));
-      free_huge(m_data);
+      vm_free(m_data);
     }
     m_data = reinterpret_cast<TypedValueAux*>(newData);
     assertx(m_data);
@@ -464,7 +464,7 @@ Class::~Class() {
     for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
       m_sPropCache[i].~Link();
     }
-    free_huge(m_sPropCache);
+    vm_free(m_sPropCache);
   }
 
   for (auto i = size_t{}, n = numMethods(); i < n; i++) {
@@ -484,7 +484,9 @@ Class::~Class() {
   // clean enum cache
   EnumCache::deleteValues(this);
 
-  low_free(m_vtableVec.get());
+  if (auto p = m_vtableVec.get()) {
+    low_free(p);
+  }
 
 #ifdef DEBUG
   validate();
@@ -2446,7 +2448,7 @@ void Class::setProperties() {
 
   using LinkT = std::remove_pointer<decltype(m_sPropCache)>::type;
   m_sPropCache = static_cast<LinkT*>(
-    malloc_huge(numStaticProperties() * sizeof(*m_sPropCache))
+    vm_malloc(numStaticProperties() * sizeof(*m_sPropCache))
   );
   for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
     new (&m_sPropCache[i]) LinkT;

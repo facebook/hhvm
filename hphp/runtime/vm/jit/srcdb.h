@@ -272,7 +272,7 @@ struct SrcDB {
    * factor.  (See D450383.)
    */
   using THM            = TreadHashMap<SrcKey::AtomicInt, SrcRec*,
-                                      int64_hash, HugeAllocator<char>>;
+                                      int64_hash, VMAllocator<char>>;
   using iterator       = THM::iterator;
   using const_iterator = THM::const_iterator;
 

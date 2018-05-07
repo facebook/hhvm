@@ -57,7 +57,7 @@ struct APCString {
 
   static void Delete(APCString* s) {
     s->~APCString();
-    std::free(s);
+    uncounted_free(s);
   }
 
   static APCString* fromHandle(APCHandle* handle) {

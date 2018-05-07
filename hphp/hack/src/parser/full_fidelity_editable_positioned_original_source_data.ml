@@ -95,9 +95,9 @@ let start_offset data =
   leading_start_offset data + leading_width data
 
 let end_offset data =
-  let w = leading_width data - 1 in
+  let w = width data - 1 in
   let w = if w < 0 then 0 else w in
-  leading_start_offset data + w
+  start_offset data + w
 
 let full_width data =
   leading_width data + width data + trailing_width data

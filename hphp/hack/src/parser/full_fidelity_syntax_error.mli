@@ -250,3 +250,6 @@ val xhp_class_multiple_category_decls: string
 val missing_double_quote: string
 val await_in_finally_block: string
 val for_with_as_expression: string
+val sealed_val_not_classname: string
+val sealed_final: string
+val sealed_trait: string

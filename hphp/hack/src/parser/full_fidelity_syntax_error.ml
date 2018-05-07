@@ -427,3 +427,7 @@ let await_in_finally_block =
 
 let for_with_as_expression =
   "For loops can not use as-expressions. Did you mean foreach?"
+
+let sealed_val_not_classname = "Values in sealed whitelist must be classname constants."
+let sealed_final = "Classes cannot be both final and sealed."
+let sealed_trait = "Traits cannot be sealed."

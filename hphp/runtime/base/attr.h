@@ -93,6 +93,8 @@ enum Attr {
   //  but we haven't done so at this point.)     |          |         //
   AttrInterceptable        = (1 << 11), //       |          |    X    //
                                         //       |          |         //
+  // This class is sealed               //       |          |         //
+  AttrSealed               = (1 << 11), //    X  |          |         //
   // Traits have been flattened on this class.
   AttrNoExpandTrait        = (1 << 12), //    X  |          |         //
                                         //       |          |         //

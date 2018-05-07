@@ -10852,6 +10852,7 @@ Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
 }
 
 const StaticString s_Const("__Const");
+const StaticString s_Sealed("__Sealed");
 
 Id EmitterVisitor::emitClass(Emitter& e,
                              ClassScopePtr cNode,
@@ -10900,6 +10901,7 @@ Id EmitterVisitor::emitClass(Emitter& e,
     attr |= AttrIsImmutable | AttrHasImmutable | AttrForbidDynamicProps;
     classIsImmutable = true;
   }
+  if (userAttrs.count(s_Sealed.get())) { attr |= AttrSealed; }
 
   const std::vector<std::string>& bases(cNode->getBases());
   int firstInterface = cNode->getOriginalParent().empty() ? 0 : 1;

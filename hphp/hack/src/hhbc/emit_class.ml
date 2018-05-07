@@ -316,6 +316,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   let class_is_abstract = ast_class.A.c_kind = Ast.Cabstract in
   let class_is_final =
     ast_class.A.c_final || class_is_trait || (class_enum_type <> None) in
+  let class_is_sealed = Hhas_attribute.has_sealed class_attributes in
   let tparams = Emit_body.tparams_to_strings ast_class.A.c_tparams in
   (* TODO: communicate this without looking at the name *)
   let is_closure_class =
@@ -482,6 +483,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     class_id
     class_span
     class_is_final
+    class_is_sealed
     class_is_abstract
     class_is_interface
     class_is_trait

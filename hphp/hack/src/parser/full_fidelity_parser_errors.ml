@@ -2053,6 +2053,45 @@ let classish_errors env node parents namespace_name names errors =
         | [x1] -> false
         | _ -> true (* General bc empty list case is already caught by error1007 *) in
 
+    (* Given a sealed ClassishDeclaration node, test whether all the params
+     * are classnames. *)
+    let classish_sealed_arg_not_classname env _ =
+      match cd.classish_attribute.syntax with
+      | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
+        let attrs = syntax_to_list_no_separators attrs in
+        Hh_core.List.exists attrs (fun e ->
+          match syntax e with
+          | Attribute {attribute_values; attribute_name; _ } ->
+            text attribute_name = SN.UserAttributes.uaSealed &&
+            Hh_core.List.exists (syntax_to_list_no_separators attribute_values) (fun e ->
+              match syntax e with
+              | ScopeResolutionExpression {scope_resolution_name; _ } ->
+                text scope_resolution_name <> "class"
+              | _ -> true)
+          | _ -> false)
+      | _ -> false in
+
+    let classish_is_sealed =
+      match cd.classish_attribute.syntax with
+      | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
+        let attrs = syntax_to_list_no_separators attrs in
+        Hh_core.List.exists attrs (fun e ->
+          match syntax e with
+          | Attribute {attribute_name; _ } ->
+            text attribute_name = SN.UserAttributes.uaSealed
+          | _ -> false)
+      | _ -> false in
+
+    (* Given a ClassishDeclaration node, test whether it is sealed and final. *)
+    let classish_sealed_final env _ =
+      list_contains_predicate is_final cd.classish_modifiers &&
+      classish_is_sealed in
+
+    (* Given a ClassishDeclaration node, test whether it is sealed and a trait. *)
+    let classish_sealed_trait env _ =
+      token_kind cd.classish_keyword = Some TokenKind.Trait &&
+      classish_is_sealed in
+
     let errors =
       produce_error errors
       classish_duplicate_modifiers cd.classish_modifiers
@@ -2068,6 +2107,19 @@ let classish_errors env node parents namespace_name names errors =
     let errors =
       produce_error errors (classish_invalid_extends_list env) ()
       SyntaxError.error2037 cd.classish_extends_list in
+    let errors =
+      produce_error errors
+      (classish_sealed_arg_not_classname env) ()
+      SyntaxError.sealed_val_not_classname cd.classish_attribute in
+    let errors =
+      produce_error errors
+      (classish_sealed_final env) ()
+      SyntaxError.sealed_final cd.classish_attribute in
+    let errors =
+      produce_error errors
+      (classish_sealed_trait env) ()
+      SyntaxError.sealed_trait cd.classish_attribute in
+
     let errors =
       (* Extra setup for the the customized error message. *)
       let keyword_str = Option.value_map (token_kind cd.classish_keyword)

@@ -226,6 +226,7 @@ classdecl:
           (Hhbc_id.Class.from_raw_string $3)(*name*)
           $4 (*span *)
           (List.mem "final"     attrs) (*isfinal*)
+          (List.mem "sealed"    attrs) (*sealed*)
           (List.mem "abstract"  attrs) (*isabstract*)
           (List.mem "interface" attrs) (*isinterface*)
           (List.mem "trait"     attrs) (*istrait*)

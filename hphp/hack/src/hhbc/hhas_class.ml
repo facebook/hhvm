@@ -22,6 +22,7 @@ type t = {
   class_name         : Hhbc_id.Class.t;
   class_span         : Hhas_pos.span;
   class_is_final     : bool;
+  class_is_sealed    : bool;
   class_is_abstract  : bool;
   class_is_interface : bool;
   class_is_trait     : bool;
@@ -50,6 +51,7 @@ let make
   class_name
   class_span
   class_is_final
+  class_is_sealed
   class_is_abstract
   class_is_interface
   class_is_trait
@@ -75,6 +77,7 @@ let make
     class_name;
     class_span;
     class_is_final;
+    class_is_sealed;
     class_is_abstract;
     class_is_interface;
     class_is_trait;
@@ -101,6 +104,7 @@ let implements hhas_class = hhas_class.class_implements
 let name hhas_class = hhas_class.class_name
 let span hhas_class = hhas_class.class_span
 let is_final hhas_class = hhas_class.class_is_final
+let is_sealed hhas_class = hhas_class.class_is_sealed
 let is_abstract hhas_class = hhas_class.class_is_abstract
 let is_interface hhas_class = hhas_class.class_is_interface
 let is_trait hhas_class = hhas_class.class_is_trait

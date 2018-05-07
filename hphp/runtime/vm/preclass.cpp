@@ -88,6 +88,7 @@ const StringData* PreClass::manglePropName(const StringData* className,
 }
 
 void PreClass::prettyPrint(std::ostream &out) const {
+  if (m_attrs & AttrSealed) { out << "<<__Sealed()>> "; }
   out << "Class ";
   if (m_attrs & AttrAbstract) { out << "abstract "; }
   if (m_attrs & AttrFinal) { out << "final "; }

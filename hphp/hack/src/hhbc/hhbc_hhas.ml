@@ -1582,6 +1582,7 @@ let class_special_attributes c =
     if Hhas_class.is_interface c then "interface" :: attrs else attrs
   in
   let attrs = if Hhas_class.is_final c then "final" :: attrs else attrs in
+  let attrs = if Hhas_class.is_sealed c then "sealed" :: attrs else attrs in
   let attrs =
     if Hhas_class.enum_type c <> None then "enum" :: attrs else attrs
   in

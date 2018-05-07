@@ -200,7 +200,9 @@ bool UnitChecker::checkClosure(PreClass* cls){
    - Preclasses do not inherit from themselves
    - Interfaces cannot be final
    - Methods cannot be both abstract and final
+   - Classish cannot be both final and sealed
 */
+const StaticString s___Sealed("__Sealed");
 bool UnitChecker::checkPreClasses() {
   bool ok = true;
 
@@ -221,6 +223,29 @@ bool UnitChecker::checkPreClasses() {
     if (classAttrs & AttrFinal && classAttrs & AttrInterface) {
         ok = false;
         error("Class %s is a final interface\n", preclass->name()->data());
+    }
+
+    if (classAttrs & AttrSealed) {
+      const auto sealed_attr =
+        preclass->userAttributes().find(s___Sealed.get())->second;
+      IterateV(
+        sealed_attr.m_data.parr, [this, preclass, &ok](TypedValue tv) -> bool {
+          if (!isStringType(tv.m_type)) {
+            ok = false;
+            error("For Class %s, values in sealed whitelist must be strings\n",
+                  preclass->name()->data());
+          }
+          return false;
+        });
+      if (classAttrs & AttrTrait) {
+        ok = false;
+        error("Trait %s is marked as sealed, but traits cannot be sealed\n",
+              preclass->name()->data());
+      } else if (classAttrs & AttrFinal) {
+        // don't double trigger on traits since they're implicitly final
+        ok = false;
+        error("Class %s is both final and sealed\n", preclass->name()->data());
+      }
     }
 
     for(auto prop : preclass->allProperties()) {

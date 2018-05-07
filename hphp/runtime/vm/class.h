@@ -1302,6 +1302,7 @@ private:
   void setFuncVec(MethodMapBuilder& builder);
   void setRequirements();
   void setEnumType();
+  void checkNotInheritingSealedClass(const PreClass* parentPreClass) const;
   void checkRequirementConstraints() const;
   void raiseUnsatisfiedRequirement(const PreClass::ClassRequirement*) const;
   void setNativeDataInfo();

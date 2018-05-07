@@ -1363,6 +1363,10 @@ void Class::setParent() {
         );
       }
     }
+    if (!(m_preClass->attrs() & AttrTrait)){
+      // don't trigger for traits since they'll get handled by the using class
+      checkNotInheritingSealedClass(m_parent->preClass());
+    }
   }
 
   // Handle stuff specific to cppext classes
@@ -1500,6 +1504,34 @@ void Class::setSpecial() {
   }
 
   m_ctor = SystemLib::s_nullCtor;
+}
+
+const StaticString s___Sealed("__Sealed");
+void Class::checkNotInheritingSealedClass(
+  const PreClass* parentPreClass) const {
+  // if our parent isn't sealed, then we're fine.
+  if (!(parentPreClass->attrs() & AttrSealed)) {
+    return;
+  }
+  const UserAttributeMap& parent_attrs = parentPreClass->userAttributes();
+  assert(parent_attrs.find(s___Sealed.get()) != parent_attrs.end());
+  const auto& parent_sealed_attr = parent_attrs.find(s___Sealed.get())->second;
+  bool in_sealed_whitelist = false;
+  IterateV(parent_sealed_attr.m_data.parr,
+           [&in_sealed_whitelist, this](TypedValue v) -> bool {
+             if (v.m_data.pstr->same(m_preClass->name())) {
+               in_sealed_whitelist = true;
+               return true;
+             }
+             return false;
+           });
+  if (!in_sealed_whitelist) {
+    raise_error("Class %s may not inherit from sealed %s (%s) without "
+                "being in the whitelist",
+                m_preClass->name()->data(),
+                parentPreClass->attrs() & AttrInterface ? "interface" : "class",
+                parentPreClass->name()->data());
+  }
 }
 
 namespace {
@@ -2635,6 +2667,12 @@ void Class::checkInterfaceConstraints() {
       m_interfaces.contains(s_IteratorAggregate.get()))) {
     raise_error("Class %s cannot implement both IteratorAggregate and Iterator"
                 " at the same time", name()->data());
+  }
+  // don't trigger for traits since they'll get handled by the using class
+  if (!(m_preClass->attrs() & AttrTrait)) {
+    for (auto it : m_interfaces.range()) {
+      checkNotInheritingSealedClass(it->preClass());
+    }
   }
 }
 

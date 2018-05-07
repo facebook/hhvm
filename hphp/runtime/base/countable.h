@@ -280,9 +280,7 @@ ALWAYS_INLINE bool Countable::decReleaseCheck() {
   if (noop_decref) return false;
   if (one_bit_refcount) return m_count == OneReference;
 
-  if (m_count == 1) return true;
-  --m_count;
-  return false;
+  return !(--m_count);
 }
 
 ALWAYS_INLINE bool MaybeCountable::isStatic() const {

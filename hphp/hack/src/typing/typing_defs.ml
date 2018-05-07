@@ -406,6 +406,7 @@ and param_mode =
 
 and param_rx_condition =
   | Param_rxfunc
+  | Param_rx_if_impl of decl ty
 
 and 'phase fun_param = {
   fp_pos  : Pos.t;

@@ -1827,12 +1827,14 @@ let onlyrx_if_rxfunc_invalid_location pos =
 let no_onlyrx_if_rxfunc_for_rx_if_args pos =
   add NastCheck.no_onlyrx_if_rxfunc_for_rx_if_args pos (
     "Function or method annotated with <<__OnlyRxIfArgs>> attribute \
-    should have at least one parameter with <<__OnlyRxIfRxFunc>> annotation."
+    should have at least one parameter with <<__OnlyRxIfRxFunc>> or \
+    <<__OnlyRxIfImpl>> annotations."
   )
 
-let conditionally_reactive_annotation_invalid_arguments pos =
+let conditionally_reactive_annotation_invalid_arguments ~is_method pos =
+  let loc = if is_method then "Method" else "Parameter" in
   add NastCheck.conditionally_reactive_annotation_invalid_arguments pos (
-    "Method is marked with <<__OnlyRxIfImpl>> attribute that have " ^
+    loc ^ " is marked with <<__OnlyRxIfImpl>> attribute that have " ^
     "invalid arguments. This attribute must have one argument and it should be " ^
     "'::class' class constant."
   )

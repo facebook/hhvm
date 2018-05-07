@@ -44,6 +44,9 @@ let check_call env receiver_type pos reason ft arg_types =
       | None -> false
       | Some l -> Core_list.for_all l ~f:(function
         | { fp_rx_condition = None; _ }, _ ->  true
+        | { fp_rx_condition = Some Param_rx_if_impl ty; _ }, arg_ty ->
+          let _, cond_ty = Phase.localize (Phase.env_with_self env) env ty in
+          SubType.is_sub_type env arg_ty cond_ty
         | { fp_rx_condition = Some Param_rxfunc; fp_type; _ }, arg_ty ->
           let param_type = strip_maybe_reactive fp_type in
           let arg_ty = strip_maybe_reactive arg_ty in

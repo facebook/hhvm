@@ -155,7 +155,12 @@ let rec ty (p, x) =
     { param with
       fp_pos = pos param.fp_pos;
       fp_type = ty param.fp_type;
+      fp_rx_condition = param_rx_condition param.fp_rx_condition
     }
+
+  and param_rx_condition = function
+    | Some (Param_rx_if_impl t) -> Some (Param_rx_if_impl (ty t))
+    | c -> c
 
   and class_const cc =
     { cc_synthesized = cc.cc_synthesized;

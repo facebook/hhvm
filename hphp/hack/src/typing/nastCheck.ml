@@ -355,10 +355,10 @@ let is_magic =
   fun (_, s) ->
     Hashtbl.mem h s
 
-let check_conditionally_reactive_annotation_params p params =
+let check_conditionally_reactive_annotation_params p params ~is_method =
   match params with
   | [_, Class_const (_, (_, prop))] when prop = "class" -> ()
-  | _ -> Errors.conditionally_reactive_annotation_invalid_arguments p
+  | _ -> Errors.conditionally_reactive_annotation_invalid_arguments ~is_method p
 
 let check_conditionally_reactive_annotations is_reactive p method_name user_attributes =
   ignore @@ Core_list.fold user_attributes
@@ -372,7 +372,7 @@ let check_conditionally_reactive_annotations is_reactive p method_name user_attr
       end
       else begin
         if is_reactive
-        then check_conditionally_reactive_annotation_params p ua_params
+        then check_conditionally_reactive_annotation_params ~is_method:true p ua_params
         else Errors.missing_reactivity_for_condition p;
         true
       end
@@ -978,12 +978,21 @@ and check_maybe_rx_attributes_on_params env parent_attrs params =
   let parent_only_rx_if_args =
     Attributes.find SN.UserAttributes.uaOnlyRxIfArgs parent_attrs in
   let check_param seen_onlyrx_if_rxfunc p =
-    match Attributes.find SN.UserAttributes.uaOnlyRxIfRxFunc p.param_user_attributes with
-    | Some { ua_name = (p, _); _ } ->
+    let only_rx_if_rxfunc_attr =
+      Attributes.find SN.UserAttributes.uaOnlyRxIfRxFunc p.param_user_attributes in
+    let only_rx_if_impl_attr =
+      Attributes.find SN.UserAttributes.uaOnlyRxIfImpl p.param_user_attributes in
+    match only_rx_if_rxfunc_attr, only_rx_if_impl_attr with
+    | Some { ua_name = (p, _); _ }, _ ->
       if parent_only_rx_if_args = None || not env.is_reactive
       then Errors.onlyrx_if_rxfunc_invalid_location p;
       true
-    | _ -> seen_onlyrx_if_rxfunc in
+    | _, Some { ua_name = (p, _); ua_params; _ } ->
+      if parent_only_rx_if_args = None || not env.is_reactive
+      then Errors.onlyrx_if_rxfunc_invalid_location p
+      else check_conditionally_reactive_annotation_params ~is_method:false p ua_params;
+      true
+    | _ ->  seen_onlyrx_if_rxfunc in
   let has_param_with_onlyrx_if_rxfunc =
     Core_list.fold_left params ~init:false ~f:check_param in
   match parent_only_rx_if_args, has_param_with_onlyrx_if_rxfunc with

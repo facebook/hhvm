@@ -1,2 +1,2 @@
 File "only_rx_if_args2.php", line 4, characters 9-22:
-Function or method annotated with <<__OnlyRxIfArgs>> attribute should have at least one parameter with <<__OnlyRxIfRxFunc>> annotation. (NastCheck[3064])
+Function or method annotated with <<__OnlyRxIfArgs>> attribute should have at least one parameter with <<__OnlyRxIfRxFunc>> or <<__OnlyRxIfImpl>> annotations. (NastCheck[3064])

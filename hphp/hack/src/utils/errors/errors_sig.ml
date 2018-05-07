@@ -499,7 +499,7 @@ module type S = sig
   val invalid_conditionally_reactive_call : Pos.t -> Pos.t -> string -> string -> unit
   val conditionally_reactive_function : Pos.t -> unit
   val multiple_conditionally_reactive_annotations : Pos.t -> string -> unit
-  val conditionally_reactive_annotation_invalid_arguments : Pos.t -> unit
+  val conditionally_reactive_annotation_invalid_arguments : is_method:bool -> Pos.t -> unit
   val echo_in_reactive_context : Pos.t -> unit
   val superglobal_in_reactive_context : Pos.t -> string -> unit
   val static_in_reactive_context : Pos.t -> string -> unit

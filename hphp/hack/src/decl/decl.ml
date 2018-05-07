@@ -265,7 +265,10 @@ and make_param_ty env attrs reactivity param =
   let rx_condition =
     if Attributes.mem SN.UserAttributes.uaOnlyRxIfRxFunc param.param_user_attributes
     then Some Param_rxfunc
-    else None in
+    else
+      Attributes.find SN.UserAttributes.uaOnlyRxIfImpl param.param_user_attributes
+      |> Option.map ~f:(fun v -> Param_rx_if_impl (conditionally_reactive_attribute_to_hint env v))
+    in
   {
     fp_pos  = param.param_pos;
     fp_name = Some param.param_name;

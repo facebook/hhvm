@@ -145,7 +145,6 @@ type token =
   | Tline_comment
   | Topen_xhp_comment
   | Tclose_xhp_comment
-  | Tnullableas
 
 (* Fake tokens *)
   | Tyield
@@ -156,7 +155,6 @@ type token =
   | Tprint
   | Tinstanceof
   | Tis
-  | Tas
   | Tnew
   | Tclone
   | Telseif
@@ -272,8 +270,6 @@ let token_to_string = function
   | Tprint        -> "print"
   | Tinstanceof   -> "instanceof"
   | Tis           -> "is"
-  | Tas           -> "as"
-  | Tnullableas   -> "?as"
   | Tnew          -> "new"
   | Tclone        -> "clone"
   | Telseif       -> "elseif"
@@ -429,7 +425,6 @@ rule token file = parse
   | "_"                { Tunderscore  }
   | "@required"        { Trequired    }
   | "..."              { Tellipsis    }
-  | "?as"              { Tnullableas  }
   | unsafe             { Tunsafe      }
   | fallthrough        { Tfallthrough }
   | eof                { Teof         }
@@ -778,7 +773,6 @@ and format_token = parse
   | "--"               { Tdecr         }
   | "_"                { Tunderscore   }
   | "..."              { Tellipsis     }
-  | "?as"              { Tnullableas   }
   | eof                { Teof          }
   | _                  { Terror        }
 

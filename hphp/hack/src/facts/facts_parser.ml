@@ -355,13 +355,15 @@ let facts_to_json md5 facts =
     constants_json;
     type_aliases_json; ]
 
-let from_text php5_compat_mode s =
-  let env = Full_fidelity_parser_env.make ~php5_compat_mode () in
+let from_text php5_compat_mode hhvm_compat_mode s =
+  let env = Full_fidelity_parser_env.make ~php5_compat_mode ~hhvm_compat_mode () in
   let text = Full_fidelity_source_text.make Relative_path.default s in
   let (parser, root) =
     let p = FactsParser.make env text in
     FactsParser.parse_script p in
-  if not @@ Core_list.is_empty (FactsParser.errors parser)
+  let has_script_content = FactsParser.sc_state parser in
+  (* report errors only if result of parsing is non-empty *)
+  if has_script_content && not @@ Core_list.is_empty (FactsParser.errors parser)
   then None
   else begin
     let initial_facts = {
@@ -373,8 +375,8 @@ let from_text php5_compat_mode s =
     let _, facts = collect ("", initial_facts) root in
     Some facts
   end
-let extract_as_json ~php5_compat_mode text =
-  from_text php5_compat_mode text
+let extract_as_json ~php5_compat_mode ~hhvm_compat_mode text =
+  from_text php5_compat_mode hhvm_compat_mode text
   |> Option.map ~f:(fun facts ->
     let md5 = Digest.to_hex @@ Digest.string text in
     facts_to_json md5 facts)

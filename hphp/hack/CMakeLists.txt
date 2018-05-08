@@ -112,7 +112,7 @@ add_custom_target(
         export OPAMROOT=${CMAKE_CURRENT_SOURCE_DIR}/src/_build/.opam &&
         export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
         PATH=${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)
-        ${OPAM_EXECUTABLE} config exec --
+        opam config exec --
         $(MAKE) EXTRA_INCLUDE_PATHS="${extra_include_paths}"
         EXTRA_LIB_PATHS="${extra_lib_paths}"
         EXTRA_LINK_OPTS="${extra_link_opts}"
@@ -132,7 +132,7 @@ add_custom_target(
         export OPAMROOT=${CMAKE_CURRENT_SOURCE_DIR}/src/_build/.opam &&
         export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
         PATH=${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)
-        ${OPAM_EXECUTABLE} config exec --
+        opam config exec --
         $(MAKE) test EXTRA_INCLUDE_PATHS="${extra_include_paths}"
         EXTRA_LIB_PATHS="${extra_lib_paths}"
         EXTRA_LINK_OPTS="${extra_link_opts}"

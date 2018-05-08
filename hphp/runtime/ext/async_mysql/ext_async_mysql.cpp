@@ -358,9 +358,10 @@ Object HHVM_STATIC_METHOD(
   const auto& connOpts = obj->getConnectionOptions();
   connectOp->setConnectionOptions(connOpts);
   auto event = new AsyncMysqlConnectAndMultiQueryEvent(connectOp);
+  auto transformedQueries = transformQueries(queries);
   try {
-    connectOp->setCallback([clientPtr, event, queries]
-        (am::ConnectOperation& op) {
+    connectOp->setCallback([clientPtr, event, transformedQueries]
+        (am::ConnectOperation& op) mutable {
 
         if (!op.ok()) {
           // early exit must collect stats
@@ -370,7 +371,7 @@ Object HHVM_STATIC_METHOD(
         }
 
         auto query_op = am::Connection::beginMultiQuery(
-          op.releaseConnection(), transformQueries(queries));
+          op.releaseConnection(), std::move(transformedQueries));
         event->setQueryOp(query_op);
 
         try {
@@ -1357,7 +1358,7 @@ void AsyncMysqlConnectAndMultiQueryEvent::unserialize(Cell& result) {
       m_connect_op, m_clientStats);
   auto resTuple = make_packed_array(connResult, queryResults);
   if (m_multi_query_op->ok()) {
-    cellDup(make_tv<KindOfArray>(resTuple.detach()), result);
+    cellCopy(make_tv<KindOfArray>(resTuple.detach()), result);
   } else {
     throwAsyncMysqlQueryException("AsyncMysqlQueryException", m_multi_query_op,
                                   std::move(m_clientStats), queryResults);

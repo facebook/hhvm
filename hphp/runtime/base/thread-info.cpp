@@ -164,6 +164,11 @@ void raise_infinite_recursion_error() {
   }
 }
 
+NEVER_INLINE void* stack_top_ptr_conservative() {
+  DECLARE_FRAME_POINTER(fp);
+  return fp;
+}
+
 static Exception* generate_request_timeout_exception(c_WaitableWaitHandle* wh) {
   auto exceptionMsg = folly::sformat(
     !RuntimeOption::ServerExecutionMode() || is_cli_mode()

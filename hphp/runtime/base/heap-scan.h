@@ -285,7 +285,7 @@ template<class Fn> void iterateConservativeRoots(Fn fn) {
 
   // cpp stack. ensure stack contains callee-saved registers.
   CALLEE_SAVED_BARRIER();
-  auto sp = stack_top_ptr();
+  auto sp = stack_top_ptr_conservative();
   fn(sp, s_stackLimit + s_stackSize - uintptr_t(sp),
      type_scan::getIndexForScan<CppStack>());
 }

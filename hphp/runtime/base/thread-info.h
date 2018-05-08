@@ -147,6 +147,8 @@ inline void* stack_top_ptr() {
   return fp;
 }
 
+NEVER_INLINE void* stack_top_ptr_conservative();
+
 inline bool stack_in_bounds() {
   return uintptr_t(stack_top_ptr()) >= s_stackLimit + ThreadInfo::StackSlack;
 }

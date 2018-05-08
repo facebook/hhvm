@@ -640,6 +640,18 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result =
   end;
   (* client *)
   add_data ("LSP adapter state: " ^ (state_to_string state) ^ "\n");
+  (* client's log of server state *)
+  let tnow = Unix.gettimeofday () in
+  let server_state_to_string (tstate, state) =
+    let open Unix in
+    let tdiff = tnow -. tstate in
+    let state = hh_server_state_to_string state in
+    let tm = Unix.localtime tstate in
+    let ms = int_of_float (tstate *. 1000.) mod 1000 in
+    Printf.sprintf "[%02d:%02d:%02d.%03d] [%03.3fs ago] %s\n"
+      tm.tm_hour tm.tm_min tm.tm_sec ms tdiff state in
+  let server_state_strings = List.map ~f:server_state_to_string !hh_server_state in
+  add_data (String.concat "" ("LSP belief of hh_server_state:\n" :: server_state_strings));
   (* server *)
   begin match state with
     | Main_loop menv -> begin

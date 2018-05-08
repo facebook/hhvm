@@ -42,7 +42,7 @@ const int JSON_FB_EXTRA_ESCAPES = 0;
 const int JSON_FB_COLLECTIONS = 0;
 const int JSON_FB_HACK_ARRAYS = 0;
 const int JSON_FB_FORCE_PHP_ARRAYS = 0;
-const int JSON_FB_WARN_HACK_ARRAYS = 0;
+const int JSON_FB_WARN_DICTS = 0;
 const int JSON_FB_WARN_PHP_ARRAYS  = 0;
 
 <<__PHPStdLib>>

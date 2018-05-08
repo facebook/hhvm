@@ -57,7 +57,7 @@ const int64_t k_JSON_FB_COLLECTIONS    = 1<<23;
 const int64_t k_JSON_FB_STABLE_MAPS    = 1<<24;
 const int64_t k_JSON_FB_HACK_ARRAYS    = 1<<25;
 const int64_t k_JSON_FB_FORCE_PHP_ARRAYS = 1<<26;
-const int64_t k_JSON_FB_WARN_HACK_ARRAYS = 1<<27;
+const int64_t k_JSON_FB_WARN_DICTS       = 1<<27;
 const int64_t k_JSON_FB_WARN_PHP_ARRAYS  = 1<<28;
 
 const int64_t k_JSON_ERROR_NONE
@@ -123,7 +123,7 @@ TypedValue HHVM_FUNCTION(json_encode, const Variant& value,
   VariableSerializer vs(VariableSerializer::Type::JSON, options);
   vs.setDepthLimit(depth);
   if (options & k_JSON_FB_FORCE_PHP_ARRAYS) vs.setForcePHPArrays();
-  if (options & k_JSON_FB_WARN_HACK_ARRAYS) vs.setHackWarn();
+  if (options & k_JSON_FB_WARN_DICTS) vs.setDictWarn();
   if (options & k_JSON_FB_WARN_PHP_ARRAYS)  vs.setPHPWarn();
 
   String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
@@ -270,7 +270,7 @@ struct JsonExtension final : Extension {
     HHVM_RC_INT(JSON_FB_HACK_ARRAYS, k_JSON_FB_HACK_ARRAYS);
     HHVM_RC_INT(JSON_FB_STABLE_MAPS, k_JSON_FB_STABLE_MAPS);
     HHVM_RC_INT(JSON_FB_FORCE_PHP_ARRAYS, k_JSON_FB_FORCE_PHP_ARRAYS);
-    HHVM_RC_INT(JSON_FB_WARN_HACK_ARRAYS, k_JSON_FB_WARN_HACK_ARRAYS);
+    HHVM_RC_INT(JSON_FB_WARN_DICTS, k_JSON_FB_WARN_DICTS);
     HHVM_RC_INT(JSON_FB_WARN_PHP_ARRAYS, k_JSON_FB_WARN_PHP_ARRAYS);
 
     HHVM_RC_INT(JSON_ERROR_NONE, k_JSON_ERROR_NONE);

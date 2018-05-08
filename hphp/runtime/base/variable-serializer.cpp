@@ -82,8 +82,10 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   , m_keepDVArrays{type != Type::Serialize}
   , m_forcePHPArrays{false}
   , m_hackWarn{false}
+  , m_dictWarn{false}
   , m_phpWarn{false}
   , m_hasHackWarned{false}
+  , m_hasDictWarned{false}
   , m_hasPHPWarned{false}
   , m_refCount(1)
   , m_objId(0)
@@ -1535,6 +1537,10 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
     if (UNLIKELY(m_hackWarn && !m_hasHackWarned && arr->isHackArray())) {
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasHackWarned = true;
+    }
+    if (UNLIKELY(m_dictWarn && !m_hasDictWarned && arr->isDict())) {
+      raise_hack_arr_compat_serialize_notice(arr);
+      m_hasDictWarned = true;
     }
     if (UNLIKELY(m_phpWarn && !m_hasPHPWarned && arr->isPHPArray())) {
       raise_hack_arr_compat_serialize_notice(arr);

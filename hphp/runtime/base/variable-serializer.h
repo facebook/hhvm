@@ -88,6 +88,9 @@ struct VariableSerializer {
   // Emit a Hack array compat notice on Hack array serialization
   void setHackWarn()  { m_hackWarn = true; }
 
+  // Emit a Hack array compat notice on Dict serialization
+  void setDictWarn()  { m_dictWarn = true; }
+
   // Emit a Hack array compat notice on PHP array serialization
   void setPHPWarn()   { m_phpWarn = true; }
 
@@ -200,8 +203,10 @@ private:
   bool m_keepDVArrays;           // serialize d/varrays as themselves or arrays
   bool m_forcePHPArrays;         // serialize PHP and Hack arrays as PHP arrays
   bool m_hackWarn;               // warn when attempting on Hack arrays
+  bool m_dictWarn;               // warn when attempting on dicts
   bool m_phpWarn;                // warn when attempting on PHP arrays
   bool m_hasHackWarned;          // have we already warned on Hack arrays?
+  bool m_hasDictWarned;          // have we already warned on dicts?
   bool m_hasPHPWarned;           // have we already warned on PHP arrays?
   int m_refCount;                // current variable's reference count
   String m_objClass;             // for object serialization

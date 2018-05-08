@@ -15,6 +15,8 @@ module TK = Full_fidelity_token_kind
 
 type get_name = unit -> string
 
+type has_script_content = bool [@@deriving show]
+
 type node =
   | Ignored
   | List of node list
@@ -57,7 +59,7 @@ type node =
 module SC = struct
 
   module Token = Syntax.Token
-  type t = unit
+  type t = has_script_content
 
   let is_zero = function
     | Ignored
@@ -95,9 +97,10 @@ module SC = struct
     let flatten l = flatten l
     let zero = Ignored
   end)
-  let initial_state _ = ()
+  let initial_state _ = false
 
-  let make_token token () =
+  let make_token token st =
+    let kind = Token.kind token in
     let result =
       match Token.kind token with
       | TK.Name -> Name (fun () -> Token.text token)
@@ -114,92 +117,100 @@ module SC = struct
       | TK.Final -> Final
       | TK.Static -> Static
       | _ -> Ignored in
-    (), result
+    (* assume file has script content if it has any tokens
+       besides markup or EOF *)
+    let st = st ||
+      match kind with
+      | TK.EndOfFile
+      | TK.Markup -> false
+      | _ -> true
+    in
+    st, result
 
-  let make_missing _ () =
-    (), Ignored
+  let make_missing _ st =
+    st, Ignored
 
-  let make_list _ items () =
+  let make_list _ items st =
     if items <> []
-    then (), (if Core_list.for_all ~f:((=) Ignored) items then Ignored else List items)
-    else (), Ignored
+    then st, (if Core_list.for_all ~f:((=) Ignored) items then Ignored else List items)
+    else st, Ignored
 
-  let make_qualified_name arg0 () =
+  let make_qualified_name arg0 st =
     match arg0 with
-    | Ignored -> (), Ignored
-    | List nodes -> (), QualifiedName nodes
-    | node -> (), QualifiedName [node]
-  let make_simple_type_specifier arg0 () =
-    (), arg0
-  let make_literal_expression arg0 () =
-    (), arg0
-  let make_list_item item separator () =
+    | Ignored -> st, Ignored
+    | List nodes -> st, QualifiedName nodes
+    | node -> st, QualifiedName [node]
+  let make_simple_type_specifier arg0 st =
+    st, arg0
+  let make_literal_expression arg0 st =
+    st, arg0
+  let make_list_item item separator st =
     match item, separator with
-    | Ignored, Ignored -> (), Ignored
-    | x, Ignored | Ignored, x -> (), x
-    | x, y -> (), ListItem (x, y)
+    | Ignored, Ignored -> st, Ignored
+    | x, Ignored | Ignored, x -> st, x
+    | x, y -> st, ListItem (x, y)
 
-  let make_generic_type_specifier class_type _argument_list () =
-    (), class_type
+  let make_generic_type_specifier class_type _argument_list st =
+    st, class_type
   let make_enum_declaration _attributes _keyword name _colon _base _type
-    _left_brace _enumerators _right_brace () =
-    (), if name = Ignored then Ignored else EnumDecl name
+    _left_brace _enumerators _right_brace st =
+    st, if name = Ignored then Ignored else EnumDecl name
 
   let make_alias_declaration _attributes _keyword name _generic_params _constraint
-    _equal _type _semicolon () =
-    (), if name = Ignored then Ignored else TypeAliasDecl name
+    _equal _type _semicolon st =
+    st, if name = Ignored then Ignored else TypeAliasDecl name
 
-  let make_define_expression _keyword _left_paren args _right_paren () =
+  let make_define_expression _keyword _left_paren args _right_paren st =
     match args with
-    | List [String _ as name; _] -> (), Define name
-    | _ -> (), Ignored
+    | List [String _ as name; _] -> st, Define name
+    | _ -> st, Ignored
 
-  let make_function_declaration _attributes header body () =
+  let make_function_declaration _attributes header body st =
     match header, body with
-    | Ignored, Ignored -> (), Ignored
-    | v, Ignored | Ignored, v -> (), v
-    | v1, v2 -> (), List [v1; v2]
+    | Ignored, Ignored -> st, Ignored
+    | v, Ignored | Ignored, v -> st, v
+    | v1, v2 -> st, List [v1; v2]
 
   let make_function_declaration_header _modifiers _keyword _ampersand name
     _type_parameters _left_paren _param_list _right_paren
-    _colon _type _where () =
-    (), if name = Ignored then Ignored else FunctionDecl name
+    _colon _type _where st =
+    st, if name = Ignored then Ignored else FunctionDecl name
 
-  let make_trait_use _keyword names _semicolon () =
-    (), if names = Ignored then Ignored else TraitUseClause names
+  let make_trait_use _keyword names _semicolon st =
+    st, if names = Ignored then Ignored else TraitUseClause names
 
-  let make_require_clause _keyword kind name _semicolon () =
-    if name = Ignored then (), Ignored
+  let make_require_clause _keyword kind name _semicolon st =
+    if name = Ignored then st, Ignored
     else
     match kind with
-    | Extends -> (), RequireExtendsClause name
-    | Implements -> (), RequireImplementsClause name
-    | _ -> (), Ignored
+    | Extends -> st, RequireExtendsClause name
+    | Implements -> st, RequireImplementsClause name
+    | _ -> st, Ignored
 
-  let make_constant_declarator name _initializer () =
-    (), if name = Ignored then Ignored else ConstDecl name
+  let make_constant_declarator name _initializer st =
+    st, if name = Ignored then Ignored else ConstDecl name
 
-  let make_namespace_declaration _keyword name body () =
-    if body = Ignored then (), Ignored
-    else (), NamespaceDecl (name, body)
+  let make_namespace_declaration _keyword name body st =
+    if body = Ignored then st, Ignored
+    else st, NamespaceDecl (name, body)
 
-  let make_namespace_body _left_brace decls _right_brace () =
-    (), decls
+  let make_namespace_body _left_brace decls _right_brace st =
+    st, decls
 
-  let make_namespace_empty_body _semicolon () =
-    (), EmptyBody
+  let make_namespace_empty_body _semicolon st =
+    st, EmptyBody
 
   let make_methodish_declaration _attributes _function_decl_header body
-    _semicolon () =
-    if body = Ignored then (), Ignored
-    else (), MethodDecl body
+    _semicolon st =
+    if body = Ignored then st, Ignored
+    else st, MethodDecl body
 
   let make_classish_declaration _attributes modifiers keyword name _type_parameters
-    _extends_keyword extends _implements_keyword implements body () =
-    if name = Ignored then (), Ignored
-    else (), ClassDecl { modifiers; kind = keyword; name; extends; implements; body }
+    _extends_keyword extends _implements_keyword implements body st =
+    if name = Ignored then st, Ignored
+    else st, ClassDecl { modifiers; kind = keyword; name; extends; implements; body }
 
-  let make_classish_body _left_brace elements _right_brace () =
-    (), elements
+  let make_classish_body _left_brace elements _right_brace st =
+    st, elements
 
 end

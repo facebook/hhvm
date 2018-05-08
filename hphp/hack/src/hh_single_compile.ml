@@ -382,7 +382,7 @@ let do_compile filename compiler_options text fail_or_ast debug_time =
   hhas_text
 
 let extract_facts ?pretty text =
-  Facts_parser.extract_as_json ~php5_compat_mode:true text
+  Facts_parser.extract_as_json ~php5_compat_mode:true ~hhvm_compat_mode:true text
   (* return empty string if file has syntax errors *)
   |> Option.value_map ~default:"" ~f:(Hh_json.json_to_string ?pretty)
 

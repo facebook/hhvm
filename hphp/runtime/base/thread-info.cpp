@@ -49,28 +49,16 @@ namespace {
 std::set<ThreadInfo*> s_thread_infos;
 Mutex s_thread_info_mutex;
 
-/*
- * Either null, or populated by initialization of ThreadInfo as an approximation
- * of the highest address of the current thread's stack.
- */
-__thread char* t_stackbase = nullptr;
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 
 THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
 ThreadInfo::ThreadInfo() {
-  assertx(!t_stackbase);
-  t_stackbase = static_cast<char*>(stack_top_ptr());
-
   m_coverage = new CodeCoverage();
 }
 
 ThreadInfo::~ThreadInfo() {
-  assertx(t_stackbase);
-  t_stackbase = nullptr;
-
   Lock lock(s_thread_info_mutex);
   s_thread_infos.erase(this);
   delete m_coverage;

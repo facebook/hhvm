@@ -12,8 +12,8 @@ function foo(<<__Mutable>>Foo $x, <<__Mutable>>Foo ...$ys): void {
 
 <<__Rx>>
 function test(): void {
-  $y = new Foo(7);
+  $y = \HH\Rx\mutable(new Foo(7));
   \HH\Rx\freeze($y);
-  $x = new Foo(8);
-  foo($x, $x, new Foo(6), $y, $x);
+  $x = \HH\Rx\mutable(new Foo(8));
+  foo($x, $x, \HH\Rx\mutable(new Foo(6)), $y, $x);
 }

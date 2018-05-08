@@ -16,6 +16,6 @@ class A {
 
 <<__Rx>>
 function f(): void {
-  $a = A::get();
+  $a = \HH\Rx\mutable(A::get());
   $a->setX(5);
 }

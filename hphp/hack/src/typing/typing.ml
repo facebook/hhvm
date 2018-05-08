@@ -3901,11 +3901,16 @@ and is_abstract_ft fty = match fty with
       check_coroutine_call env fty;
       let env, tel, tuel, ty = call ~expected p env fty el uel in
       make_call env (T.make_typed_expr fpos fty (T.Fun_id x)) hl tel tuel ty
-  | Id x ->
+  | Id (_, id as x) ->
       Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x hl in
       check_coroutine_call env fty;
       let env, tel, tuel, ty = call ~expected p env fty el uel in
+      if id = SN.Rx.mutable_ then begin
+        Typing_mutability.check_rx_mutable_arguments p env tel;
+        if not (Env.env_local_reactive env) then
+          Errors.mutable_in_nonreactive_context p;
+      end;
       make_call env (T.make_typed_expr fpos fty (T.Id x)) hl tel tuel ty
   | _ ->
       let env, te, fty = expr env e in

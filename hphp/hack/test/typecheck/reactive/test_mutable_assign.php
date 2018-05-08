@@ -6,13 +6,13 @@ class C {
 
 <<__Rx>>
 function basic(): void {
-  $z = new C(7); // $z is mutable
+  $z = \HH\Rx\mutable(new C(7)); // $z is mutable
   $z->val = 5; // okay
   $z = 7; // also okay, $z is now immutable
   $b = $z; // can reassign an immutable object
 
   // $x is mutable(mutably owned)
-  $x = returnsMut();
+  $x = \HH\Rx\mutable(returnsMut());
   // error, cannot reassign a mutable object
   $y = $x;
 }

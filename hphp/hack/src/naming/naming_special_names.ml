@@ -356,6 +356,7 @@ end
 
 module Rx = struct
   let freeze = "\\HH\\Rx\\freeze"
+  let mutable_ = "\\HH\\Rx\\mutable"
 end
 
 module Shapes = struct

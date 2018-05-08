@@ -6,7 +6,7 @@ class C {
 
 <<__Rx>>
 function basic(): void {
-  $z = new C(7); // $z is mutable
+  $z = \HH\Rx\mutable(new C(7)); // $z is mutable
   \HH\Rx\freeze($z); // $z is immutable
   // error
   $z->val = 5;

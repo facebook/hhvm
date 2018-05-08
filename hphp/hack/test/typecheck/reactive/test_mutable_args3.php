@@ -13,9 +13,9 @@ class Foo {
 }
 <<__Rx>>
 function test(): void {
-  $x = new Test(4);
-  $y = new Test(7);
-  $z = new Foo();
+  $x = \HH\Rx\mutable(new Test(4));
+  $y = \HH\Rx\mutable(new Test(7));
+  $z = \HH\Rx\mutable(new Foo());
   $z->bar($x, $y);
   \HH\Rx\freeze($x);
   $z->bar($x, $y);

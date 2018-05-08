@@ -1052,6 +1052,8 @@ module Typing                               = struct
   let sealed_final                          = 4239 (* DONT MODIFY!!!! *)
   let comparison_invalid_types              = 4240 (* DONT MODIFY!!!! *)
   let option_void                           = 4241 (* DONT MODIFY!!!! *)
+  let mutable_in_nonreactive_context        = 4242 (* DONT MODIFY!!!! *)
+  let invalid_argument_of_rx_mutable_function = 4243 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -2697,7 +2699,18 @@ let invalid_mutable_return_result error_pos function_pos value_kind =
 
 let freeze_in_nonreactive_context pos1 =
   add Typing.freeze_in_nonreactive_context pos1
-  ("freeze only makes sense in reactive functions")
+  ("\\HH\\Rx\\freeze can only be used in reactive functions")
+
+let mutable_in_nonreactive_context pos =
+  add Typing.mutable_in_nonreactive_context pos
+  ("\\HH\\Rx\\mutable can only be used in reactive functions")
+
+let invalid_argument_of_rx_mutable_function pos =
+  add Typing.invalid_argument_of_rx_mutable_function pos (
+      "Single argument to \\HH\\Rx\\mutable should be an expression that yields new \
+       mutably-owned value, like 'new A()' or 'f()' where f is function \
+       annotated with <<__MutableReturn>> attribute."
+  )
 
 let invalid_freeze_use pos1 =
   add Typing.invalid_freeze_use pos1

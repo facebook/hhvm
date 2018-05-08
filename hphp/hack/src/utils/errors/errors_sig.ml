@@ -514,4 +514,6 @@ module type S = sig
   val no_onlyrx_if_rxfunc_for_rx_if_args: Pos.t -> unit
   val invalid_type_for_onlyrx_if_rxfunc_parameter: Pos.t -> string -> unit
   val missing_annotation_for_onlyrx_if_rxfunc_parameter: Pos.t -> unit
+  val mutable_in_nonreactive_context: Pos.t -> unit
+  val invalid_argument_of_rx_mutable_function: Pos.t -> unit
 end

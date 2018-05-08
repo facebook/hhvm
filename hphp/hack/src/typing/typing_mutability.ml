@@ -124,7 +124,16 @@ let expr_is_mutable
  | T.Lvar id ->
     Env.is_mutable env (snd id)
  | T.This when Env.function_is_mutable env -> true
- | _ -> expr_returns_owned_mutable env e
+ | T.Call(_, (_, T.Id (_, id)), _, _, _) when id = SN.Rx.mutable_ -> true
+ | _ -> false
+
+let check_rx_mutable_arguments
+  (p : Pos.t) (env : Typing_env.env) (tel : T.expr list) =
+  match tel with
+  | [e] when expr_returns_owned_mutable env e -> ()
+  | _ ->
+    (* HH\Rx\mutable function expects single fresh mutably owned value *)
+    Errors.invalid_argument_of_rx_mutable_function p
 
 let freeze_local (p : Pos.t) (env : Typing_env.env) (tel : T.expr list)
 : Typing_env.env =
@@ -254,9 +263,9 @@ let handle_assignment_mutability
      Errors.reassign_mutable_var p
    end;
    mut_env
- (* If the expression is a new owned mutable, add the var to the env *)
- | T.Lvar (_, id), _  when expr_returns_owned_mutable env te2 ->
-   LMap.add id (T.get_position te1, Mutable) mut_env
+ (* var = mutable(v) - add the var to the env since it points to a owned mutable value *)
+ | T.Lvar (_, id), T.Call(_, (_, T.Id (_, n)), _, _, _) when n = SN.Rx.mutable_ ->
+    LMap.add id (T.get_position te1, Mutable) mut_env
  (* If the Lvar gets reassigned and shadowed to something that
    isn't a mutable, it is now a regular immutable variable.
  *)

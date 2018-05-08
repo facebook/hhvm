@@ -7,7 +7,7 @@ class C {
 // freeze in multiple scopes
 <<__Rx>>
 function basic(): void {
-  $z = new C(7); // $z is mutable
+  $z = \HH\Rx\mutable(new C(7)); // $z is mutable
   \HH\Rx\freeze($z);
   // error, $z is already immutable
   \HH\Rx\freeze($z);

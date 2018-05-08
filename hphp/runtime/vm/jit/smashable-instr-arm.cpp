@@ -320,4 +320,74 @@ ConditionCode smashableJccCond(TCA inst) {
 }
 ///////////////////////////////////////////////////////////////////////////////
 
+bool optimizeSmashedCall(TCA inst) {
+  using namespace vixl;
+
+  assertx(possiblySmashableCall(inst));
+
+  auto ldr = Instruction::Cast(inst);
+  const auto blr = ldr->NextInstruction();
+  const auto callee = smashableCallTarget(inst);
+  const auto offset = (intptr_t)callee - (intptr_t)blr;
+
+  if (is_int28(offset)) {
+    CodeBlock callBlock;
+    callBlock.init(inst, 8 /* bytes */, "optimizeSmashedCall");
+    MacroAssembler a{callBlock};
+    a.nop();
+    a.bl(offset >> kInstructionSizeLog2);
+    return true;
+  }
+
+  return false;
+}
+
+bool optimizeSmashedJmp(TCA inst) {
+  using namespace vixl;
+
+  assertx(possiblySmashableJmp(inst));
+
+  auto ldr = Instruction::Cast(inst);
+  const auto br = ldr->NextInstruction();
+  const auto target = smashableJmpTarget(inst);
+  const auto offset = (intptr_t)target - (intptr_t)br;
+
+  if (is_int28(offset)) {
+    CodeBlock callBlock;
+    callBlock.init(inst, 8 /* bytes */, "optimizeSmashedJmp");
+    MacroAssembler a{callBlock};
+    a.nop();
+    a.b(offset >> kInstructionSizeLog2);
+    return true;
+  }
+
+  return false;
+}
+
+bool optimizeSmashedJcc(TCA inst) {
+  using namespace vixl;
+
+  assertx(possiblySmashableJcc(inst));
+
+  const auto b = Instruction::Cast(inst);
+  const auto target = smashableJccTarget(inst);
+  const auto offset = (intptr_t)target - (intptr_t)b;
+
+  if (is_int21(offset)) {
+    CodeBlock callBlock;
+    callBlock.init(inst, 12 /* bytes */, "optimizeSmashedJcc");
+    MacroAssembler a{callBlock};
+    const auto cond = static_cast<Condition>(b->ConditionBranch());
+    const auto invCond = InvertCondition(cond);
+    a.b(offset >> kInstructionSizeLog2, invCond);
+    a.nop();
+    a.nop();
+    return true;
+  }
+
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}}

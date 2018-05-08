@@ -243,6 +243,33 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     }
   }
 
+  decltype(meta.smashableCallData) updatedCD;
+  for (auto& cd : meta.smashableCallData) {
+    if (auto adjusted = rel.adjustedAddressAfter(cd.first)) {
+      updatedCD[adjusted] = cd.second;
+      FTRACE_MOD(Trace::mcg, 3,
+                 "adjustMetaDataForRelocation(smashableCallData): {} => {}\n",
+                 cd.first, adjusted);
+    } else {
+      updatedCD[cd.first] = cd.second;
+    }
+  }
+  updatedCD.swap(meta.smashableCallData);
+
+  decltype(meta.smashableJumpData) updatedJD;
+  for (auto& jd : meta.smashableJumpData) {
+    if (auto adjusted = rel.adjustedAddressAfter(jd.first)) {
+      updatedJD[adjusted] = jd.second;
+      FTRACE_MOD(Trace::mcg, 3,
+                 "adjustMetaDataForRelocation(smashableJumpData): {} => {}\n",
+                 jd.first, adjusted);
+    } else {
+      updatedJD[jd.first] = jd.second;
+    }
+  }
+  updatedJD.swap(meta.smashableJumpData);
+
+
   // Perform platform-specific metadata adjustments.
   ARCH_SWITCH_CALL(adjustMetaDataForRelocation, rel, asmInfo, meta);
 

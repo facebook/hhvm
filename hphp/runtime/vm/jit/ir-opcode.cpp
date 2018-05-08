@@ -616,6 +616,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CreateAGWH:
   case CreateGen:
   case CreateSSWH:
+  case DbgAssertFunc:
   case DbgAssertARFunc:
   case DbgAssertRefCount:
   case DbgTraceCall:

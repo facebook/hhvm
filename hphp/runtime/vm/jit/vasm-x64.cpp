@@ -452,6 +452,13 @@ void retargetJumps(Venv& env,
     }
     env.meta.inProgressTailJumps.swap(newTailJumps);
   }
+  // If the retarged jumps were smashable, now they aren't anymore, so remove
+  // them from smashableJumpData.
+  for (auto jmp : retargeted) {
+    if (env.meta.smashableJumpData.erase(jmp) > 0) {
+      FTRACE(3, "retargetJumps: removed {} from smashableJumpData\n", jmp);
+    }
+  }
 }
 
 void Vgen::patch(Venv& env) {

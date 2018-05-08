@@ -50,6 +50,11 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region)
   // Now that we've defined the FP, update the BC marker appropriately.
   updateMarker(*this);
   gen(*this, DefSP, FPInvOffsetData { context.initSpOffset }, frame);
+
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    // Assert that we're in the correct function.
+    gen(*this, DbgAssertFunc, frame, cns(*this, context.func));
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

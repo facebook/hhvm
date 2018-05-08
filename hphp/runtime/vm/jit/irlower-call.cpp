@@ -180,7 +180,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     : tc::ustubs().bindCallStub;
 
   auto const done = v.makeBlock();
-  v << callphp{target, php_call_regs(), {{done, catchBlock}}};
+  v << callphp{target, php_call_regs(), {{done, catchBlock}}, callee, argc};
   v = done;
 
   auto const dst = dstLoc(env, inst, 0);

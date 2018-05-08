@@ -2492,6 +2492,11 @@ To string conversions:
   Assert that S1 is the function in the ActRec given by s0+offset. If the
   assertion fails, execution is aborted via a hardware exception.
 
+| DbgAssertFunc, ND, S(FramePtr) S(Func), NF
+
+  Assert that S1 is the current function in Frame S0. If the assertion fails,
+  execution is aborted via a hardware exception.
+
 | RBTraceEntry, ND, NA, NF
 
 | RBTraceMsg, ND, NA, NF

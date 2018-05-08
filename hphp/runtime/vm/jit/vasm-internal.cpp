@@ -181,6 +181,10 @@ void registerFallbackJump(Venv& env, TCA jmp, ConditionCode cc) {
 bool emit(Venv& env, const callphp& i) {
   const auto call = emitSmashableCall(*env.cb, env.meta, i.stub);
   setJmpTransID(env, call);
+  // If the callee is known, keep metadata to be able to eagerly smash the call.
+  if (i.func != nullptr) {
+    env.meta.smashableCallData[call] = PrologueID(i.func, i.nargs);
+  }
   return true;
 }
 
@@ -188,6 +192,7 @@ bool emit(Venv& env, const bindjmp& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   env.stubs.push_back({jmp, nullptr, i});
   setJmpTransID(env, jmp);
+  env.meta.smashableJumpData[jmp] = {i.target, CGMeta::JumpKind::Bindjmp};
   return true;
 }
 
@@ -196,6 +201,7 @@ bool emit(Venv& env, const bindjcc& i) {
     emitSmashableJcc(*env.cb, env.meta, env.cb->frontier(), i.cc);
   env.stubs.push_back({nullptr, jcc, i});
   setJmpTransID(env, jcc);
+  env.meta.smashableJumpData[jcc] = {i.target, CGMeta::JumpKind::Bindjcc};
   return true;
 }
 
@@ -210,6 +216,7 @@ bool emit(Venv& env, const fallback& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   env.stubs.push_back({jmp, nullptr, i});
   registerFallbackJump(env, jmp, CC_None);
+  env.meta.smashableJumpData[jmp] = {i.target, CGMeta::JumpKind::Fallback};
   return true;
 }
 
@@ -218,6 +225,7 @@ bool emit(Venv& env, const fallbackcc& i) {
     emitSmashableJcc(*env.cb, env.meta, env.cb->frontier(), i.cc);
   env.stubs.push_back({nullptr, jcc, i});
   registerFallbackJump(env, jcc, i.cc);
+  env.meta.smashableJumpData[jcc] = {i.target, CGMeta::JumpKind::Fallbackcc};
   return true;
 }
 

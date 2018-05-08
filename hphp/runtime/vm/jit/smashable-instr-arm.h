@@ -74,6 +74,10 @@ TCA smashableJmpTarget(TCA inst);
 TCA smashableJccTarget(TCA inst);
 ConditionCode smashableJccCond(TCA inst);
 
+bool optimizeSmashedCall(TCA inst);
+bool optimizeSmashedJmp(TCA inst);
+bool optimizeSmashedJcc(TCA inst);
+
 constexpr size_t kSmashMovqImmOff = 0;
 constexpr size_t kSmashCmpqImmOff = 0;
 constexpr size_t kSmashCallTargetOff = 0;

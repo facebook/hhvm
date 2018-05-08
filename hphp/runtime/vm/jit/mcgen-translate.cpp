@@ -394,7 +394,7 @@ void retranslateAll() {
     Logger::Info("retranslateAll: %lu functions had no samples!", extra);
   }
 
-  tc::publishSortedOptFunctions(std::move(infos));
+  tc::relocatePublishSortedOptFuncs(std::move(infos));
 
   s_retranslateAllComplete.store(true, std::memory_order_release);
   tc::reportJitMaturity();
@@ -571,7 +571,7 @@ bool retranslateOpt(FuncId funcId) {
 
   tc::FuncMetaInfo info(func, tc::LocalTCBuffer());
   optimize(info);
-  tc::publishOptFunction(std::move(info));
+  tc::publishOptFunc(std::move(info));
   tc::checkFreeProfData();
 
   return true;

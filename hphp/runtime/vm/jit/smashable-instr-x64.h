@@ -65,6 +65,10 @@ TCA smashableJmpTarget(TCA inst);
 TCA smashableJccTarget(TCA inst);
 ConditionCode smashableJccCond(TCA inst);
 
+bool optimizeSmashedCall(TCA inst);
+bool optimizeSmashedJmp(TCA inst);
+bool optimizeSmashedJcc(TCA inst);
+
 /*
  * Smashable immediate and target offsets.
  *

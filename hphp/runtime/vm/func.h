@@ -1408,6 +1408,45 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * A prologue is identified by the called function and the number of arguments
+ * that the prologue handles.
+ */
+struct PrologueID {
+  PrologueID(FuncId funcId, uint32_t nargs)
+    : m_funcId(funcId)
+    , m_nargs(nargs)
+  { }
+
+  PrologueID(const Func* func, uint32_t nargs)
+    : m_funcId(func->getFuncId())
+    , m_nargs(nargs)
+  { }
+
+  PrologueID()
+  { }
+
+  FuncId      funcId() const { return m_funcId; }
+  uint32_t    nargs()  const { return m_nargs;  }
+  const Func* func()   const { return Func::fromFuncId(m_funcId); }
+
+  bool operator==(const PrologueID& other) const {
+    return m_funcId == other.m_funcId && m_nargs == other.m_nargs;
+  }
+
+  struct Hasher {
+    size_t operator()(PrologueID pid) const {
+      return pid.funcId() + (size_t(pid.nargs()) << 32);
+    }
+  };
+
+ private:
+  FuncId   m_funcId{InvalidFuncId};
+  uint32_t m_nargs{0xffffffff};
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * Whether dynamic calls to builtin functions that touch the caller's frame are
  * forbidden.
  */

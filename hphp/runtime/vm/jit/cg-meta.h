@@ -130,6 +130,23 @@ struct CGMeta {
   std::set<TCA> smashableLocations;
 
   /*
+   * Extra data kept for smashable calls.  Used to pre-smash calls before the
+   * code is published.
+   */
+  jit::hash_map<TCA,PrologueID> smashableCallData;
+
+  /*
+   * Extra data kept for smashable jumps/jccs.  Used to pre-smash jumps/jccs
+   * before code is published.
+   */
+  enum class JumpKind { Bindjmp, Bindjcc, Fallback, Fallbackcc };
+  struct JumpData {
+    SrcKey   sk;
+    JumpKind kind;
+  };
+  jit::hash_map<TCA,JumpData> smashableJumpData;
+
+  /*
    * Debug-only map from bytecode to machine code address.
    */
   std::vector<TransBCMapping> bcMap;

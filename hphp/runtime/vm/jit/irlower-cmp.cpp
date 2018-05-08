@@ -350,6 +350,15 @@ void cgDbgAssertARFunc(IRLS& env, const IRInstruction* inst) {
   ifThen(v, CC_NE, sf, [&](Vout& v) { v << trap{TRAP_REASON}; });
 }
 
+void cgDbgAssertFunc(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const func = srcLoc(env, inst, 1).reg(0);
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  v << cmpqm{func, fp[AROFF(m_func)], sf};
+  ifThen(v, CC_NE, sf, [&](Vout& v) { v << trap{TRAP_REASON}; });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgEqStrPtr(IRLS& env, const IRInstruction* inst) {

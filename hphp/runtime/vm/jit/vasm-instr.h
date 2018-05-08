@@ -776,9 +776,13 @@ struct phpret { Vreg fp; Vreg d; RegSet args; bool noframe; };
 struct callphp {
   explicit callphp(TCA stub,
                    RegSet args,
-                   std::array<Vlabel,2> targets)
+                   std::array<Vlabel,2> targets,
+                   const Func* func,
+                   uint32_t nargs)
     : stub{stub}
     , args{args}
+    , func{func}
+    , nargs{nargs}
   {
     this->targets[0] = targets[0];
     this->targets[1] = targets[1];
@@ -787,6 +791,8 @@ struct callphp {
   TCA stub;
   RegSet args;
   Vlabel targets[2];
+  const Func* func;
+  uint32_t nargs;
 };
 
 /*

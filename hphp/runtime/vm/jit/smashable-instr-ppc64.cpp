@@ -182,4 +182,18 @@ ConditionCode smashableJccCond(TCA inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool optimizeSmashedCall(TCA inst) {
+  return false;
+}
+
+bool optimizeSmashedJmp(TCA inst) {
+  return false;
+}
+
+bool optimizeSmashedJcc(TCA inst) {
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}}

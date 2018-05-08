@@ -116,6 +116,14 @@ ConditionCode smashableJccCond(TCA inst);
  */
 TCA smashableCallFromRet(TCA ret);
 
+/*
+ * Optimize a smashable instruction in place after it has been smashed.  Returns
+ * whether or not the instruction was optimized.
+ */
+bool optimizeSmashedCall(TCA inst);
+bool optimizeSmashedJmp(TCA inst);
+bool optimizeSmashedJcc(TCA inst);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

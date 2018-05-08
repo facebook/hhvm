@@ -60,14 +60,38 @@ struct TransRange {
   TransLoc loc() const;
 };
 
+using CodeViewPtr = std::unique_ptr<CodeCache::View>;
+
 struct TransMetaInfo {
   SrcKey sk;
   CodeCache::View emitView; // View code was emitted into (may be thread local)
-  TransKind viewKind; // TransKind used to select code view
-  TransKind transKind; // TransKind used for translation
-  TransRange range;
-  CGMeta meta;
-  TransRec transRec;
+  TransKind   viewKind; // TransKind used to select code view
+  TransKind   transKind; // TransKind used for translation
+  TransRange  range;
+  CodeViewPtr finalView; // View where code finally ended up (after relocation)
+  TransLoc    loc; // final location of translation (after relocation)
+  CGMeta      meta;
+  TransRec    transRec;
+  GrowableVector<IncomingBranch> tailBranches;
+};
+
+struct PrologueMetaInfo {
+  PrologueMetaInfo(ProfTransRec* rec)
+    : transRec(rec)
+  { }
+  ProfTransRec* transRec{nullptr};
+  TransID       transID{kInvalidTransID};
+  TCA           start{0};
+  TransLoc      loc;
+  CGMeta        meta;
+};
+
+struct BodyDispatchMetaInfo {
+  BodyDispatchMetaInfo(TCA tca, CodeCache::View view)
+    : tca(tca), finalView(view)
+  { }
+  TCA             tca;
+  CodeCache::View finalView;
 };
 
 struct LocalTCBuffer {
@@ -122,8 +146,9 @@ struct FuncMetaInfo {
   // vectors above, and it encodes the order in which they should be published.
   std::vector<Kind> order;
 
-  std::vector<ProfTransRec*> prologues;
-  std::vector<TransMetaInfo> translations;
+  std::unique_ptr<BodyDispatchMetaInfo> bodyDispatch;
+  std::vector<PrologueMetaInfo>         prologues;
+  std::vector<TransMetaInfo>            translations;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -162,13 +187,17 @@ folly::Optional<TransLoc> publishTranslation(
  * function. It is assumed that these translations have been emitted into per-
  * thread buffers and will need to be relocated.
  */
-void publishOptFunction(FuncMetaInfo info);
+void publishOptFunc(FuncMetaInfo info);
 
 /*
- * Acquires the code and metadata locks once and relocates all functions in
- * sorted list.
+ * Acquires the code and metadata locks once, and then processes all the
+ * functions in `infos' by:
+ *  1) relocating their translations into the TC in the order given by `infos';
+ *  2) smashing all the calls and jumps between these translations;
+ *  3) optimizing the calls and jumps smashed in step 2);
+ *  4) publishing these translations.
  */
-void publishSortedOptFunctions(std::vector<FuncMetaInfo> infos);
+void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos);
 
 /*
  * Emit a new prologue for func-- returns nullptr if the global translation
@@ -182,7 +211,7 @@ TCA emitFuncPrologue(Func* func, int argc, TransKind kind);
  * Smashes the callers of the prologue for rec and updates the cached func
  * prologue.
  */
-TCA emitFuncPrologueOpt(ProfTransRec* rec);
+void emitFuncPrologueOpt(ProfTransRec* rec);
 
 /*
  * Emit the prologue dispatch for func which contains dvs DV initializers, and

@@ -286,7 +286,6 @@ void freeTCStub(TCA stub) {
   auto metaLock = lockMetadata();
 
   assertx(code().frozen().contains(stub));
-  Debug::DebugInfo::Get()->recordRelocMap(stub, 0, "FreeStub");
 
   markStubFreed(stub);
 }

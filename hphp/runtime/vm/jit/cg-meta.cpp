@@ -172,6 +172,8 @@ void CGMeta::clear() {
   codePointers.clear();
   inProgressTailJumps.clear();
   bcMap.clear();
+  smashableCallData.clear();
+  smashableJumpData.clear();
 }
 
 bool CGMeta::empty() const {
@@ -188,7 +190,8 @@ bool CGMeta::empty() const {
     codePointers.empty() &&
     inProgressTailJumps.empty() &&
     bcMap.empty() &&
-    true;
+    smashableCallData.empty() &&
+    smashableJumpData.empty();
 }
 
 }}

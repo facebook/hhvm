@@ -119,6 +119,15 @@ struct CodeCache {
   }
   bool isValidCodeAddress(ConstCodeAddress addr) const;
 
+  bool inHotOrMain(ConstCodeAddress addr) const {
+    return m_hot.contains(addr) || m_main.contains(addr);
+  }
+
+  bool inHotOrMainOrColdOrFrozen(ConstCodeAddress addr) const {
+    return m_hot.contains(addr)  || m_main.contains(addr) ||
+           m_cold.contains(addr) || m_frozen.contains(addr);
+  }
+
   /*
    * Prevent or allow writing to the code section of this CodeCache.
    */

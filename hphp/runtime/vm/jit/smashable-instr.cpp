@@ -112,6 +112,18 @@ TCA smashableCallFromRet(TCA ret) {
   return ret - smashableCallLen();
 }
 
+bool optimizeSmashedCall(TCA inst) {
+  return ARCH_SWITCH_CALL(optimizeSmashedCall, inst);
+}
+
+bool optimizeSmashedJmp(TCA inst) {
+  return ARCH_SWITCH_CALL(optimizeSmashedJmp, inst);
+}
+
+bool optimizeSmashedJcc(TCA inst) {
+  return ARCH_SWITCH_CALL(optimizeSmashedJcc, inst);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

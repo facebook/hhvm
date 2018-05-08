@@ -55,6 +55,10 @@ type sub_type = Env.env -> locl ty -> locl ty -> Env.env
 let (sub_type_ref: sub_type ref) = ref not_implemented
 let sub_type x = !sub_type_ref x
 
+type add_constraint = Pos.Map.key -> Env.env -> Ast.constraint_kind -> locl ty -> locl ty -> Env.env
+let (add_constraint_ref: add_constraint ref) = ref not_implemented
+let add_constraint x = !add_constraint_ref x
+
 type expand_typeconst =
   expand_env -> Env.env -> Reason.t -> locl ty -> Nast.sid list ->
   Env.env * ety
@@ -709,7 +713,8 @@ end = struct
         match ak with
         | AKenum _ -> acc
         | AKdependent (`this, _) -> acc
-        (* TODO(kunalm) support `this`, type consts *)
+        | AKgeneric name when Env.is_fresh_generic_parameter name -> acc
+        (* TODO(kunalm) support type consts *)
         | _ -> update acc @@ Invalid (r, Tabstract (ak, ty_opt))
       method! on_tanon acc r arity id =
         update acc @@ Invalid (r, Tanon (arity, id))
@@ -729,7 +734,8 @@ end = struct
       method! on_tarraykind acc r array_kind =
         update acc @@  Invalid (r, Tarraykind array_kind)
       method is_wildcard = function
-        | (_r, Tclass ((_, x), _tyl)) when x = SN.Typehints.wildcard -> true
+        | _, Tabstract (AKgeneric name, _) ->
+          Env.is_fresh_generic_parameter name
         | _ -> false
     end
 

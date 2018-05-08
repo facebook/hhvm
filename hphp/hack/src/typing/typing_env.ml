@@ -242,6 +242,9 @@ let add_fresh_generic_parameter env prefix =
                       upper_bounds = empty_bounds} env.lenv.tpenv) in
   env, name
 
+let is_fresh_generic_parameter name =
+  String.contains name '#' && not (AbstractKind.is_generic_dep_ty name)
+
 let tparams_visitor env =
   object(this)
     inherit [SSet.t] Type_visitor.type_visitor

@@ -179,8 +179,17 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
           opt (localize ~ety_env) env (Env.get_enum_constraint env x) in
         env, (ety_env, (r, Tabstract (AKenum x, cstr)))
       end
-  | r, Tapply (cls, tyl) ->
-      let env, tyl = List.map_env env tyl (localize ~ety_env) in
+  | r, Tapply ((_, cid) as cls, tyl) ->
+      let env, tyl =
+        if not (tyl_contains_wildcard tyl)
+        then List.map_env env tyl (localize ~ety_env)
+        else match Env.get_class env cid with
+          | None ->
+            List.map_env env tyl (localize ~ety_env)
+          | Some class_info ->
+            let tparams = class_info.tc_tparams in
+            localize_tparams ~ety_env env (Reason.to_pos r) tyl tparams
+      in
       env, (ety_env, (r, Tclass (cls, tyl)))
   | r, Ttuple tyl ->
       let env, tyl = List.map_env env tyl (localize ~ety_env) in
@@ -191,6 +200,30 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
   | r, Tshape (fields_known, tym) ->
       let env, tym = ShapeFieldMap.map_env (localize ~ety_env) env tym in
       env, (ety_env, (r, Tshape (fields_known, tym)))
+
+and localize_tparams ~ety_env env pos tyl tparams =
+  let length = min (List.length tyl) (List.length tparams) in
+  let tyl, tparams = List.take tyl length, List.take tparams length in
+  List.map2_env env tyl tparams (localize_tparam ~ety_env pos)
+
+and localize_tparam ~ety_env pos env ty (_, (_, name), cstrl) =
+  match ty with
+    | r, Tapply ((_, x), _argl) when x = SN.Typehints.wildcard ->
+      let env, name = Env.add_fresh_generic_parameter env name in
+      let ty_fresh = (r, Tabstract (AKgeneric name, None)) in
+      let env = List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
+          (* Substitute fresh type parameters for
+           * original formals in constraint *)
+        let env, ty = localize ~ety_env env ty in
+        TUtils.add_constraint pos env ck ty_fresh ty) in
+      env, ty_fresh
+    | _ -> localize ~ety_env env ty
+
+and tyl_contains_wildcard tyl =
+  List.exists tyl begin function
+    | _, Tapply ((_, x), _) -> x = SN.Typehints.wildcard
+    | _ -> false
+  end
 
 and localize ~ety_env env ty =
   let env, (_, ty) = localize_with_env ~ety_env env ty in

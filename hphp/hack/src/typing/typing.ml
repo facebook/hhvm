@@ -5816,12 +5816,21 @@ and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
   env, obj_ty
 
 and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
-  let replace_wildcard env hint_ty tp =
+  let tparams_len = List.length class_info.tc_tparams in
+  let hint_tyl = List.take hint_tyl tparams_len in
+  let pad_len = tparams_len - (List.length hint_tyl) in
+  let hint_tyl =
+    List.map hint_tyl (fun x -> Some x) @ (List.init pad_len (fun _ -> None)) in
+  let replace_wildcard env hint_ty ((_, (_, tparam_name), _) as tp) =
     match hint_ty with
-      | _, Tabstract (AKgeneric name, _)
+      | Some (_, Tabstract (AKgeneric name, _))
         when Env.is_fresh_generic_parameter name ->
         env, (Some (tp, name), (reason, Tabstract (AKgeneric name, None)))
-      | _ -> env, (None, hint_ty)
+      | Some ty ->
+        env, (None, ty)
+      | None ->
+        let env, new_name = Env.add_fresh_generic_parameter env tparam_name in
+        env, (Some (tp, new_name), (reason, Tabstract (AKgeneric new_name, None)))
   in
   let env, tparams_and_tyl = List.map2_env env hint_tyl class_info.tc_tparams
     ~f:replace_wildcard in

@@ -24,9 +24,12 @@
 
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/embedded-vfs.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"
 
 #include <folly/Singleton.h>
+
+#include <dlfcn.h>
 
 /*
  * These are here to work around a gcc-5 lto bug. Without them,
@@ -102,3 +105,47 @@ int main(int argc, char** argv) {
   }
   return HPHP::execute_program(args.size(), &args[0]);
 }
+
+#ifdef __linux__
+
+extern "C" {
+  // Note: in glibc, fork is a weak symbol aliasing to __fork.  Here we redefine
+  // fork to intercept the call (only for Linux).  To make it works reliably,
+  // this piece of code should always be statically linked into the binary.
+  // Here we put it in the same file as main().  If you ever want to move it
+  // into a separate library, you should make sure it is always statically
+  // linked in the build system.
+
+  static bool s_forkDisabledInMainProcess = false;
+  void DisableFork() {
+    s_forkDisabledInMainProcess = true;
+  }
+
+  pid_t __fork() __attribute__((__weak__)); // defined in glibc on Linux
+  typedef pid_t (*fork_t)();
+  static fork_t real_fork = __fork;
+  static const pid_t s_mainPid = getpid();  // child process id will differ
+
+  pid_t fork() {
+    assert(__fork || !HPHP::facebook);
+    // In case __fork() isn't available, try to find the real fork() using
+    // dlsym().
+    if (!real_fork) {
+      HPHP::Logger::Error("__fork() not defined.  Is glibc used?");
+      real_fork = (fork_t)dlsym(RTLD_NEXT, "fork");
+    }
+
+    if (!s_forkDisabledInMainProcess || getpid() != s_mainPid) {
+      if (real_fork) {
+        return real_fork();
+      } else {
+        assert(false);
+        HPHP::Logger::Error("cannot find an implementation of fork()");
+      }
+    }
+    errno = ENOSYS;
+    return -1;
+  }
+}
+
+#endif

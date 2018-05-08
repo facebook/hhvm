@@ -182,6 +182,7 @@ bool RuntimeOption::ServerStatCache = false;
 bool RuntimeOption::ServerFixPathInfo = false;
 bool RuntimeOption::ServerAddVaryEncoding = true;
 bool RuntimeOption::ServerLogSettingsOnStartup = false;
+bool RuntimeOption::ServerForkEnabled = true;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
 std::string RuntimeOption::ServerCleanupRequest;
 int RuntimeOption::ServerInternalWarmupThreads = 0;
@@ -1547,6 +1548,8 @@ void RuntimeOption::Load(
                  ServerAddVaryEncoding);
     Config::Bind(ServerLogSettingsOnStartup, ini, config,
                  "Server.LogSettingsOnStartup", false);
+    Config::Bind(ServerForkEnabled, ini, config,
+                 "Server.Forking.Enabled", true);
     Config::Bind(ServerWarmupRequests, ini, config, "Server.WarmupRequests");
     Config::Bind(ServerCleanupRequest, ini, config, "Server.CleanupRequest");
     Config::Bind(ServerInternalWarmupThreads, ini, config,

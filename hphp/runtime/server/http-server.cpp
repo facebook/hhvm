@@ -37,6 +37,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
@@ -49,6 +50,12 @@
 
 #include <sys/types.h>
 #include <signal.h>
+
+extern "C" {
+#ifdef __linux__
+  void DisableFork() __attribute__((__weak__));
+#endif
+}
 
 namespace HPHP {
 
@@ -365,6 +372,23 @@ void HttpServer::runOrExitProcess() {
   {
     BootStats::mark("servers started");
     Logger::Info("all servers started");
+    if (!RuntimeOption::ServerForkEnabled) {
+#ifdef __linux__
+      if (DisableFork) {
+        // We should not fork from the server process.  Use light process
+        // instead.  This will intercept subsequent fork() calls and make them
+        // fail immediately.
+        DisableFork();
+      } else {
+        // Otherwise, the binary we are building is not HHVM.  It is probably
+        // some tests, don't intercept fork().
+        Logger::Warning("ignored runtime option Server.Forking.Enabled=false");
+      }
+#else
+      Logger::Warning("ignored Server.Forking.Enabled=false "
+                      "as it only works on Linux");
+#endif
+    }
     createPid();
     Lock lock(this);
     BootStats::done();

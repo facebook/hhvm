@@ -9,5 +9,5 @@ class Test {
 function foo(<<__Mutable>>Test $x, Test $y): void {
   $x->val = 5;
   // error, $x is borrowed
-  freeze($x);
+  \HH\Rx\freeze($x);
 }

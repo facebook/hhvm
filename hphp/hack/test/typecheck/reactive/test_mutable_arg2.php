@@ -13,7 +13,7 @@ function foo(<<__Mutable>>Foo $x, <<__Mutable>>Foo ...$ys): void {
 <<__Rx>>
 function test(): void {
   $y = new Foo(7);
-  freeze($y);
+  \HH\Rx\freeze($y);
   $x = new Foo(8);
   foo($x, $x, new Foo(6), $y, $x);
 }

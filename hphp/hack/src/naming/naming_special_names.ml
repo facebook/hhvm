@@ -218,7 +218,6 @@ module PseudoFunctions = struct
   let empty = "\\empty"
   let isset = "\\isset"
   let unset = "\\unset"
-  let freeze = "\\freeze"
   let hh_show = "\\hh_show"
   let hh_show_env = "\\hh_show_env"
   let hh_log_level = "\\hh_log_level"
@@ -353,6 +352,10 @@ module HH = struct
   let lib_tuple_gen          = "\\HH\\Lib\\Tuple\\gen"
   let rx_is_enabled          = "\\HH\\Rx\\IS_ENABLED"
 
+end
+
+module Rx = struct
+  let freeze = "\\HH\\Rx\\freeze"
 end
 
 module Shapes = struct

@@ -15,6 +15,6 @@ function test(): void {
   $x = new Foo(7);
   foo($x); // no errors
   foo(new Foo(8)); // no problemo
-  freeze($x);
+  \HH\Rx\freeze($x);
   foo($x); // error
 }

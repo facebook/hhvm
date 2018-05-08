@@ -8,7 +8,7 @@ class C {
 <<__Rx>>
 function basic(): void {
   $z = new C(7); // $z is mutable
-  freeze($z);
+  \HH\Rx\freeze($z);
   // error, $z is already immutable
-  freeze($z);
+  \HH\Rx\freeze($z);
 }

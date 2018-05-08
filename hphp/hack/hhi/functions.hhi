@@ -22,10 +22,6 @@ function isset($x): bool;
 function empty($x): bool;
 <<__Rx>>
 function unset($x): void;
-
-// freeze is a special function for mutability
-function freeze($x) : void;
-
 //
 <<__PHPStdLib, __Rx>>
 function array_fill<T>(int $start_index, int $num, T $value): array<T>;

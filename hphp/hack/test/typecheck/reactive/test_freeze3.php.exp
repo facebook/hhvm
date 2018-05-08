@@ -1,4 +1,4 @@
-File "test_freeze3.php", line 13, characters 3-12:
+File "test_freeze3.php", line 13, characters 3-19:
 Invalid argument - freeze() takes a single mutable variable (Typing[4211])
-File "test_freeze3.php", line 13, characters 10-11:
+File "test_freeze3.php", line 13, characters 17-18:
 This variable is immutable

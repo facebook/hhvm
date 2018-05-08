@@ -26,5 +26,5 @@ function test(C $c): void {
 <<__Rx>>
 function rx_test(): void {
   $c = new C();
-  freeze($c);
+  \HH\Rx\freeze($c);
 }

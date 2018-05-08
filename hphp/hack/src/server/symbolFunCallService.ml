@@ -30,7 +30,7 @@ let combine_name cur_class cur_caller =
   | c, Some f -> c ^ "::" ^ f
 
 let is_pseudofunction name =
-  List.mem SN.PseudoFunctions.[empty; isset; unset; freeze] name
+  List.mem SN.PseudoFunctions.[empty; isset; unset;] name
 
 class visitor = object (self)
   inherit [_] Tast_visitor.reduce as super

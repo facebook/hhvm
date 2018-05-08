@@ -3385,11 +3385,11 @@ and is_abstract_ft fty = match fty with
         | _ ->
           make_call_special_from_def env id tel (Tprim Tvoid))
   (* Special function `freeze` *)
-  | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.freeze ->
-      check_function_in_suspend SN.PseudoFunctions.freeze;
+  | Id ((_, freeze) as id) when freeze = SN.Rx.freeze ->
+      check_function_in_suspend SN.Rx.freeze;
       let env, tel, _ = exprs env el in
       if uel <> [] then
-        Errors.unpacking_disallowed_builtin_function p pseudo_func;
+        Errors.unpacking_disallowed_builtin_function p freeze;
       if not (Env.env_local_reactive env) then
         Errors.freeze_in_nonreactive_context p;
       let env = Typing_mutability.freeze_local p env tel in

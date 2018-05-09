@@ -866,10 +866,17 @@ module WithParser(Parser : Parser_S) = struct
     parse_list_while parser parse_item predicate
 
   let parse_alternate_if_block parser parse_item =
-    parse_list_while parser parse_item (fun parser ->
+    let parser1, block = parse_list_while parser parse_item (fun parser ->
       match peek_token_kind parser with
       | TokenKind.Elseif | TokenKind.Else | TokenKind.Endif -> false
-      | _ -> true)
+      | _ -> true) in
+    if SC.is_missing block
+    then
+      let parser, empty = Make.missing parser (pos parser) in
+      let parser, es = Make.expression_statement parser empty empty in
+      make_list parser [es]
+    else
+      parser1, block
 
   let parse_list_until_none parser parse_item =
     let rec aux parser acc =

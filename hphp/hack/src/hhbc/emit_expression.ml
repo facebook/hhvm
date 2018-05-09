@@ -395,6 +395,23 @@ let istype_op lower_fq_id =
   | "hh\\is_darray" -> Some (if hack_arr_dv_arrs () then OpDict else OpDArray)
   | _ -> None
 
+(* T29079834: Using this for the is expressions migration *)
+let is_isexp_op lower_fq_id =
+  if not (Hhbc_options.enable_is_expr_primitive_migration !Hhbc_options.compiler_options)
+  then None else
+  let h n = Pos.none, A.Happly ((Pos.none, n), []) in
+  match lower_fq_id with
+  | "is_int" | "is_integer" | "is_long" -> Some (h "int")
+  | "is_bool" -> Some (h "bool")
+  | "is_float" | "is_real" | "is_double" -> Some (h "double")
+  | "is_string" -> Some (h "string")
+  | "is_null" -> Some (h "void")
+  | "hh\\is_keyset" -> Some (h "keyset")
+  (* TODO(T29079834): Add hack array migration notices  *)
+  (* | "hh\\is_dict" -> Some (h "dict") *)
+  (* | "hh\\is_vec" -> Some (h "vec") *)
+  | _ -> None
+
 (* See EmitterVisitor::getPassByRefKind in emitter.cpp *)
 let get_passByRefKind is_splatted expr  =
   let open PassByRefKind in
@@ -687,8 +704,9 @@ and emit_as env pos e h is_nullable =
         instr_astypestruct @@ Emit_adata.get_array_identifier tv
       ] end
 
-and emit_is env pos h =
-  if not @@ Hhbc_options.enable_hackc_only_feature !Hhbc_options.compiler_options
+and emit_is ?(skip_check=false) env pos h =
+  if not skip_check &&
+    not @@ Hhbc_options.enable_hackc_only_feature !Hhbc_options.compiler_options
   then Emit_fatal.raise_fatal_runtime pos "Is expression is not allowed"
   else
     let namespace = Emit_env.get_namespace env in
@@ -3292,18 +3310,25 @@ and emit_special_function env pos id args uargs default =
     Some (emit_exit env (List.hd args), Flavor.Cell)
 
   | _ ->
-    begin match args, istype_op lower_fq_name with
-    | [(_, A.Lvar (_, arg_str as arg_id))], Some i
+    begin match args, istype_op lower_fq_name, is_isexp_op lower_fq_name with
+    | [arg_expr], _, Some h when Emit_env.is_hh_syntax_enabled () ->
+      (* T29079834:
+       * Using this as a migration from is_{int,bool,etc} to is expressions *)
+      Some (gather [
+        emit_expr ~need_ref:false env arg_expr;
+        emit_is ~skip_check:true env pos h
+      ], Flavor.Cell)
+    | [(_, A.Lvar (_, arg_str as arg_id))], Some i, _
       when SN.Superglobals.is_superglobal arg_str ->
       Some (gather [
         emit_local ~notice:NoNotice ~need_ref:false env arg_id;
         emit_pos pos;
         instr (IIsset (IsTypeC i))
       ], Flavor.Cell)
-    | [(_, A.Lvar (_, arg_str as arg_id))], Some i
+    | [(_, A.Lvar (_, arg_str as arg_id))], Some i, _
       when not (is_local_this env arg_str) ->
       Some (instr (IIsset (IsTypeL (get_local env arg_id, i))), Flavor.Cell)
-    | [arg_expr], Some i ->
+    | [arg_expr], Some i, _ ->
       Some (gather [
         emit_expr ~need_ref:false env arg_expr;
         emit_pos pos;

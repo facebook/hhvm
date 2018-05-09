@@ -313,8 +313,11 @@ function hh_codegen_cmd($options, $config_file = null, $disable_hphpc_opts = tru
     $cmd .= ' -c "'.$config_file.'"';
   }
   $cmd .= ' -v Hack.Compiler.SourceMapping=1 ';
-  if (isset($options['compare-hh-codegen']) && $disable_hphpc_opts) {
-    $cmd .= '-v Eval.DisableHphpcOpts=1';
+  if (isset($options['compare-hh-codegen'])) {
+    if ($disable_hphpc_opts) {
+      $cmd .= ' -v Eval.DisableHphpcOpts=1 ';
+    }
+    $cmd .= ' -v Hack.Lang.EnableIsExprPrimitiveMigration=0 ';
   }
   if (isset($options['hackc'])) {
     $cmd .= ' --daemon';
@@ -997,6 +1000,9 @@ function hhvm_cmd_impl() {
       $args[] = '-vEval.ReffinessInvariance=1';
       $args[] = '-vEval.HackCompilerDefault=false';
       $args[] = '-vEval.HackCompilerUseEmbedded=false';
+
+      // T29079834: Is Expr Migration
+      $args[] = '-vEval.EnableIsExprPrimitiveMigration=0';
 
       // TODO(paulbiss): support these
       $args[] = '-vEval.DisassemblerPropDocComments=0';

@@ -37,6 +37,7 @@ type t = {
   option_php7_int_semantics               : bool;
   option_autoprime_generators             : bool;
   option_enable_hackc_only_feature        : bool;
+  option_enable_is_expr_primitive_migration : bool;
   option_doc_root                         : string;
   option_include_search_paths             : string list;
   option_include_roots                    : string SMap.t;
@@ -70,6 +71,7 @@ let default = {
   option_php7_int_semantics = false;
   option_autoprime_generators = true;
   option_enable_hackc_only_feature = false;
+  option_enable_is_expr_primitive_migration = true;
   option_doc_root = "";
   option_include_search_paths = [];
   option_include_roots = SMap.empty;
@@ -99,6 +101,7 @@ let use_msrv_for_inout o = o.option_use_msrv_for_inout
 let php7_int_semantics o = o.option_php7_int_semantics
 let autoprime_generators o = o.option_autoprime_generators
 let enable_hackc_only_feature o = o.option_enable_hackc_only_feature
+let enable_is_expr_primitive_migration o = o.option_enable_is_expr_primitive_migration
 let doc_root o = o.option_doc_root
 let include_search_paths o = o.option_include_search_paths
 let include_roots o = o.option_include_roots
@@ -137,6 +140,8 @@ let to_string o =
     ; Printf.sprintf "php7_int_semantics: %B" @@ php7_int_semantics o
     ; Printf.sprintf "autoprime_generators: %B" @@ autoprime_generators o
     ; Printf.sprintf "enable_hackc_only_feature: %B" @@ enable_hackc_only_feature o
+    ; Printf.sprintf "enable_is_expr_primitive_migration: %B"
+      @@ enable_is_expr_primitive_migration o
     ; Printf.sprintf "doc_root: %s" @@ doc_root o
     ; Printf.sprintf "include_search_paths: [%s]" search_paths
     ; Printf.sprintf "include_roots: {%s}" inc_roots
@@ -202,6 +207,8 @@ let set_option options name value =
     { options with option_autoprime_generators = as_bool value }
   | "hack.lang.enablehackconlyfeature" ->
     { options with option_enable_hackc_only_feature = as_bool value }
+  | "hack.lang.enableisexprprimitivemigration" ->
+    { options with option_enable_is_expr_primitive_migration = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -306,6 +313,8 @@ let value_setters = [
     fun opts v -> { opts with option_autoprime_generators = (v = 1) });
   (set_value "hhvm.hack.lang.enable_hackc_only_feature" get_value_from_config_int @@
     fun opts v -> { opts with option_enable_hackc_only_feature = (v = 1) });
+  (set_value "hhvm.hack.lang.enable_is_expr_primitive_migration" get_value_from_config_int @@
+    fun opts v -> { opts with option_enable_is_expr_primitive_migration = (v = 1) });
   (set_value "doc_root" get_value_from_config_string @@
     fun opts v -> { opts with option_doc_root = v });
   (set_value "hhvm.server.include_search_paths" get_value_from_config_string_array @@

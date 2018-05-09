@@ -657,6 +657,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::AssertEmitted ? '1' : '0')
     + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
     + (RuntimeOption::EnableHackcOnlyFeature ? '1' : '0')
+    + (RuntimeOption::EnableIsExprPrimitiveMigration ? '1' : '0')
     + (RuntimeOption::EnableHipHopExperimentalSyntax ? '1' : '0')
     + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
     + (RuntimeOption::EnableXHP ? '1' : '0')

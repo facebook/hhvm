@@ -106,6 +106,8 @@ type state = {
   seen_strict_types: bool option;
   (* map  functions -> list of inline hhas blocks *)
   functions_with_hhas_blocks: (string list) SMap.t;
+  (* most recent definition of lexical-scoped `let` variables *)
+  let_vars: int SMap.t;
 }
 
 let set_has_finally st =
@@ -147,6 +149,7 @@ let initial_state =
   function_to_labels_map = SMap.empty;
   seen_strict_types = None;
   functions_with_hhas_blocks = SMap.empty;
+  let_vars = SMap.empty;
 }
 
 let total_class_count env st =
@@ -166,7 +169,8 @@ let is_in_lambda scope =
 let should_capture_var env var =
   let rec aux scope vars =
     match scope, vars with
-    | [], [{ all_vars; _ }] -> SSet.mem var all_vars
+    | [], [{ all_vars; _ }] ->
+      SSet.mem var all_vars
     | x :: xs, { all_vars; parameter_names; }::vs ->
       SSet.mem var all_vars ||
       SSet.mem var parameter_names ||
@@ -181,6 +185,51 @@ let should_capture_var env var =
     not (SSet.mem var parameter_names) && aux xs vs
   | _ ->
     false
+
+let get_let_var st x =
+  let let_vars = st.let_vars in
+  SMap.get x let_vars
+
+let next_let_var_id st x =
+  match get_let_var st x with
+    | Some id -> id + 1
+    | None -> 0
+
+let update_let_var_id st x =
+  let id = next_let_var_id st x in
+  id, { st with let_vars = SMap.add x id st.let_vars }
+
+(* We prefix the let variable with "$LET_VAR", and add "$%d" suffix for
+ * distinguishing shadowings
+ * This by construction does not clash with other variables, note that dollar
+ * is not allowed as part of variable name by parser, but HHVM is fine with it.
+ *)
+let transform_let_var_name name id =
+  Printf.sprintf "$LET_VAR_%s$%d" name id
+
+let append_let_vars env let_vars =
+  match env.variable_scopes with
+  | [] -> env
+  | outermost :: rest ->
+    let all_vars = outermost.all_vars in
+    let rec app var idx all_vars =
+      if idx < 0
+        then all_vars
+        else
+          let var_name = transform_let_var_name var idx in
+          if SSet.mem var_name all_vars
+            then all_vars
+            else app var (idx - 1) (SSet.add var_name all_vars)
+      in
+    let all_vars = SMap.fold app let_vars all_vars in
+    { env with variable_scopes = { outermost with all_vars = all_vars } :: rest }
+
+(* Temporary workaround for parser generating a block of a singleton Block *)
+let handle_block_of_block (b: Ast.block) =
+  match b with
+  | [(_, Unsafe); (_, Block b)] -> b
+  | [(_, Block b)] -> b
+  | b -> b
 
 (* Add a variable to the captured variables *)
 let add_var env st var =
@@ -665,8 +714,13 @@ let rec convert_expr env st (p, expr_ as expr) =
   | Id (_, id) as ast_id when String_utils.string_starts_with id "$" ->
     let st = add_var env st id in
     st, (p, ast_id)
-  | Id id ->
-    st, convert_id env p id
+  | Id (_, var as id) ->
+    (match get_let_var st var with
+      | Some idx ->
+        let lvar_name = transform_let_var_name var idx in
+        let st = add_var env st lvar_name in
+        st, (p, Lvar (p, lvar_name))
+      | None -> st, convert_id env p id)
   | Class_get (cid, n) ->
     let st, e = convert_expr env st cid in
     let st, n = convert_expr env st n in
@@ -699,6 +753,7 @@ and convert_lambda env st p fd use_vars_opt =
     ~f:(List.iter ~f:(fun ((p, id), _) ->
       if id = SN.SpecialIdents.this
       then Emit_fatal.raise_fatal_parse p "Cannot use $this as lexical variable"));
+  let env = append_let_vars env st.let_vars in
   let env = if Option.is_some use_vars_opt
             then env_with_longlambda env false fd
             else env_with_lambda env fd in
@@ -830,9 +885,11 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
     let st, b2 = convert_block env st b2 in
     st, (p, If(e, b1, b2))
   | Do (b, e) ->
-    let st, b = convert_block (reset_in_using env) st b in
+    let let_vars_copy = st.let_vars in
+    let b = handle_block_of_block b in
+    let st, b = convert_block ~scope:false (reset_in_using env) st b in
     let st, e = convert_expr env st e in
-    st, (p, Do (b, e))
+    { st with let_vars = let_vars_copy }, (p, Do (b, e))
   | While (e, b) ->
     let st, e = convert_expr env st e in
     let st, b = convert_block (reset_in_using env) st b in
@@ -840,9 +897,11 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
   | For (e1, e2, e3, b) ->
     let st, e1 = convert_expr env st e1 in
     let st, e2 = convert_expr env st e2 in
+    let let_vars_copy = st.let_vars in
+    let b = handle_block_of_block b in
+    let st, b = convert_block ~scope:false (reset_in_using env) st b in
     let st, e3 = convert_expr env st e3 in
-    let st, b = convert_block (reset_in_using env) st b in
-    st, (p, For(e1, e2, e3, b))
+    { st with let_vars = let_vars_copy }, (p, For(e1, e2, e3, b))
   | Switch (e, cl) ->
     let st, e = convert_expr env st e in
     let st, cl = List.map_env st cl (convert_case (reset_in_using env)) in
@@ -903,11 +962,23 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
   | Declare (true, _, b) ->
     let st, _ = convert_block env st b in
     st, stmt
+  | Let ((_, var), _hint, e) ->
+    let st, e = convert_expr env st e in
+    let id, st = update_let_var_id st var in
+    let var_name = transform_let_var_name var id in
+    (* We convert let statement to a simple assignment expression for simplicity *)
+    st, (p, Expr (p, Binop (Eq None, (p, Lvar (p, var_name)), e)))
   | _ ->
     st, stmt
 
-and convert_block env st stmts =
-  List.map_env st stmts (convert_stmt env)
+and convert_block ?(scope=true) env st stmts =
+  if scope
+  then
+    let let_vars_copy = st.let_vars in
+    let st, stmts = List.map_env st stmts (convert_stmt env) in
+    { st with let_vars = let_vars_copy }, stmts
+  else
+    List.map_env st stmts (convert_stmt env)
 
 and convert_function_like_body env old_st block =
   (* reset has_finally/goto_state values on the state *)
@@ -1067,16 +1138,21 @@ and convert_defs env class_count typedef_count st dl =
   match dl with
   | [] -> st, []
   | Fun fd :: dl ->
+    let let_vars_copy = st.let_vars in
+    let st = { st with let_vars = SMap.empty } in
     let st, fd = convert_fun env st fd in
     let st, dl = convert_defs env class_count typedef_count st dl in
-    st, (true, Fun fd) :: dl
+    { st with let_vars = let_vars_copy }, (true, Fun fd) :: dl
     (* Convert a top-level class definition into a true class definition and
      * a stub class that just corresponds to the DefCls instruction *)
   | Class cd :: dl ->
+    let let_vars_copy = st.let_vars in
+    let st = { st with let_vars = SMap.empty } in
     let st, cd = convert_class env st cd in
     let stub_class = make_defcls cd class_count in
     let st, dl = convert_defs env (class_count + 1) typedef_count st dl in
-    st, (true, Class cd) :: (true, Stmt (Pos.none, Def_inline (Class stub_class))) :: dl
+    { st with let_vars = let_vars_copy },
+      (true, Class cd) :: (true, Stmt (Pos.none, Def_inline (Class stub_class))) :: dl
   | Stmt stmt :: dl ->
     let st, stmt = convert_stmt env st stmt in
     let st, dl = convert_defs env class_count typedef_count st dl in

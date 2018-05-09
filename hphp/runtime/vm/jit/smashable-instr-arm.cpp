@@ -325,10 +325,10 @@ bool optimizeSmashedCall(TCA inst) {
 
   assertx(possiblySmashableCall(inst));
 
-  auto ldr = Instruction::Cast(inst);
-  const auto blr = ldr->NextInstruction();
-  const auto callee = smashableCallTarget(inst);
-  const auto offset = (intptr_t)callee - (intptr_t)blr;
+  auto const ldr = Instruction::Cast(inst);
+  auto const blr = ldr->NextInstruction();
+  auto const callee = smashableCallTarget(inst);
+  auto const offset = (intptr_t)callee - (intptr_t)blr;
 
   if (is_int28(offset)) {
     CodeBlock callBlock;
@@ -347,10 +347,10 @@ bool optimizeSmashedJmp(TCA inst) {
 
   assertx(possiblySmashableJmp(inst));
 
-  auto ldr = Instruction::Cast(inst);
-  const auto br = ldr->NextInstruction();
-  const auto target = smashableJmpTarget(inst);
-  const auto offset = (intptr_t)target - (intptr_t)br;
+  auto const ldr = Instruction::Cast(inst);
+  auto const  br = ldr->NextInstruction();
+  auto const target = smashableJmpTarget(inst);
+  auto const offset = (intptr_t)target - (intptr_t)br;
 
   if (is_int28(offset)) {
     CodeBlock callBlock;
@@ -369,16 +369,16 @@ bool optimizeSmashedJcc(TCA inst) {
 
   assertx(possiblySmashableJcc(inst));
 
-  const auto b = Instruction::Cast(inst);
-  const auto target = smashableJccTarget(inst);
-  const auto offset = (intptr_t)target - (intptr_t)b;
+  auto const b = Instruction::Cast(inst);
+  auto const target = smashableJccTarget(inst);
+  auto const offset = (intptr_t)target - (intptr_t)b;
 
   if (is_int21(offset)) {
     CodeBlock callBlock;
     callBlock.init(inst, 12 /* bytes */, "optimizeSmashedJcc");
     MacroAssembler a{callBlock};
-    const auto cond = static_cast<Condition>(b->ConditionBranch());
-    const auto invCond = InvertCondition(cond);
+    auto const cond = static_cast<Condition>(b->ConditionBranch());
+    auto const invCond = InvertCondition(cond);
     a.b(offset >> kInstructionSizeLog2, invCond);
     a.nop();
     a.nop();

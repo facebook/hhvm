@@ -62,6 +62,12 @@ type t = {
  (* Whether to treat Tany as  Tdynamic *)
  tco_dynamic_view : bool;
 
+ (*
+  * Flag to ban comparison operators (e.g. <=>, <=) for types where it
+  * doesn't make sense - everything except num, string, and DateTime
+  *)
+ tco_disallow_unsafe_comparisons : bool;
+
  (* Namespace aliasing map *)
  po_auto_namespace_map : (string * string) list;
 
@@ -111,6 +117,7 @@ val make :
   tco_experimental_features: SSet.t ->
   tco_migration_flags: SSet.t ->
   tco_dynamic_view: bool ->
+  tco_disallow_unsafe_comparisons: bool ->
   po_auto_namespace_map: (string * string) list ->
   tco_disallow_ambiguous_lambda: bool ->
   tco_disallow_array_typehint: bool ->
@@ -124,6 +131,7 @@ val tco_user_attrs : t -> SSet.t option
 val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_migration_flag_enabled : t -> SSet.elt -> bool
 val tco_dynamic_view : t -> bool
+val tco_disallow_unsafe_comparisons : t -> bool
 val tco_allowed_attribute : t -> SSet.elt -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool

@@ -46,6 +46,7 @@ let () =
     ~tco_experimental_features: GlobalOptions.tco_experimental_all
     ~tco_migration_flags: SSet.empty
     ~tco_dynamic_view: false
+    ~tco_disallow_unsafe_comparisons: false
     ~po_auto_namespace_map:
       [("ShortName", "HH\\LongName\\EvenLonger\\ShortName")]
     ~po_deregister_php_stdlib: true

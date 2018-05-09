@@ -156,6 +156,7 @@ let parse_options () =
   let disallow_refs_in_array = ref false in
   let disallow_elvis_space = ref false in
   let dynamic_view = ref false in
+  let allow_unsafe_comparisons = ref false in
   let hacksperimental = ref false in
   let void_is_type_of_null = ref false in
   let parser = ref Legacy in
@@ -305,6 +306,9 @@ let parse_options () =
     "--dynamic-view",
         Arg.Set (dynamic_view),
         " Turns on dynamic view, replacing Tany with dynamic";
+    "--allow-unsafe-comparisons",
+        Arg.Set allow_unsafe_comparisons,
+        " Allow unsafe comparisons, e.g. > where the args aren't strings/ints/DateTimes";
     "--hacksperimental",
         Arg.Set hacksperimental,
         " Enable experimental Hack features";
@@ -328,6 +332,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_array_literal = !disallow_array_literal;
       GlobalOptions.po_disallow_elvis_space = !disallow_elvis_space;
       GlobalOptions.tco_dynamic_view = !dynamic_view;
+      GlobalOptions.tco_disallow_unsafe_comparisons = not !allow_unsafe_comparisons;
   } in
   let tcopt = {
     tcopt with

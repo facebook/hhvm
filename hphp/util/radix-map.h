@@ -163,7 +163,8 @@ struct RadixMap {
     // valid pointers cannot have EmptyPrefix as their upper bits.
     assert(upper(toKey(ptr), m_root_scale) != EmptyPrefix);
     assert(uintptr_t(ptr) % Align == 0 && size % Align == 0);
-    assert(!m_root || !find(ptr).ptr);
+    // this assert is too expensive to leave enabled by default.
+    //assert(!m_root || !find(ptr).ptr);
     auto const k = toKey(ptr);
     // compute the max scale at which [ptr,size) would fit perfectly;
     // ie scale <= the lsb of both k and size/Align.

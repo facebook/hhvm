@@ -449,7 +449,7 @@ const std::array<char*,NumHeaderKinds> header_names = {{
   "Object", "NativeObject", "WaitHandle", "AsyncFuncWH", "AwaitAllWH",
   "Closure", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
   "AsyncFuncFrame", "NativeData", "ClosureHdr",
-  "SmallMalloc", "BigMalloc", "BigObj",
+  "SmallMalloc", "BigMalloc",
   "Free", "Hole", "Slab"
 }};
 
@@ -463,7 +463,6 @@ void MemoryManager::initFree() {
     initHole(m_front, (char*)m_limit - (char*)m_front);
     Slab::fromPtr(m_front)->setStart(m_front);
   }
-  m_heap.sort();
   reinitFree();
 }
 
@@ -561,7 +560,6 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
         break;
-      case HeaderKind::BigObj:
       case HeaderKind::Hole:
       case HeaderKind::Slab:
         assertx(false && "forEachHeapObject skips these kinds");
@@ -783,7 +781,7 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
     // than adding to mm_freed because we're adjusting for double-counting, not
     // actually freeing anything.
     m_stats.mm_udebt += nbytes;
-    return mallocBigSize<Unzeroed>(nbytes);
+    return mallocBigSize(nbytes);
   }
 
   auto ptr = m_front;
@@ -855,91 +853,87 @@ inline void MemoryManager::updateBigStats() {
   refreshStats();
 }
 
-template<MemoryManager::MBS Mode> NEVER_INLINE
-void* MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
-                                   type_scan::Index ty) {
+NEVER_INLINE
+void* MemoryManager::mallocBigSize(size_t bytes, bool zero) {
   if (debug) tl_heap->requestEagerGC();
-  auto ptr = Mode == Zeroed ? m_heap.callocBig(bytes, kind, ty, m_stats) :
-             m_heap.allocBig(bytes, kind, ty, m_stats);
+  auto ptr = m_heap.allocBig(bytes, zero, m_stats);
   updateBigStats();
   checkGC();
   FTRACE(3, "mallocBigSize: {} ({} requested)\n", ptr, bytes);
   return ptr;
 }
 
-template NEVER_INLINE
-void* MemoryManager::mallocBigSize<MemoryManager::Unzeroed>(
-    size_t, HeaderKind, type_scan::Index
-);
-template NEVER_INLINE
-void* MemoryManager::mallocBigSize<MemoryManager::Zeroed>(
-    size_t, HeaderKind, type_scan::Index
-);
-
-void* MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
+MallocNode* MemoryManager::reallocBig(MallocNode* n, size_t nbytes) {
   assertx(n->kind() == HeaderKind::BigMalloc);
-  auto block = m_heap.resizeBig(n + 1, nbytes, m_stats);
+  auto n2 = static_cast<MallocNode*>(
+    m_heap.resizeBig(n, nbytes, m_stats)
+  );
+  n2->nbytes = nbytes;
   updateBigStats();
-  return block;
+  return n2;
 }
 
 NEVER_INLINE
 void MemoryManager::freeBigSize(void* vp) {
-  FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp,
-         static_cast<MallocNode*>(vp)[-1].nbytes);
+  FTRACE(3, "freeBigSize: {}\n", vp);
   m_heap.freeBig(vp, m_stats);
 }
 
 // req::malloc api entry points, with support for malloc/free corner cases.
 namespace req {
 
-using MBS = MemoryManager::MBS;
-
-template<MBS Mode>
-static void* allocate(size_t nbytes, type_scan::Index ty) {
+static void* allocate(size_t nbytes, bool zero, type_scan::Index ty) {
   nbytes = std::max(nbytes, size_t(1));
   auto const npadded = nbytes + sizeof(MallocNode);
   if (LIKELY(npadded <= kMaxSmallSize)) {
     auto const ptr = static_cast<MallocNode*>(
         tl_heap->mallocSmallSize(npadded)
     );
-    ptr->nbytes = npadded;
     ptr->initHeader_32_16(HeaderKind::SmallMalloc, 0, ty);
-    return Mode == MBS::Zeroed ? memset(ptr + 1, 0, nbytes) : ptr + 1;
+    ptr->nbytes = npadded;
+    return zero ? memset(ptr + 1, 0, nbytes) : ptr + 1;
   }
-  return tl_heap->mallocBigSize<Mode>(nbytes, HeaderKind::BigMalloc, ty);
+  auto const ptr = static_cast<MallocNode*>(
+    tl_heap->mallocBigSize(npadded, zero)
+  );
+  ptr->initHeader_32_16(HeaderKind::BigMalloc, 0, ty);
+  ptr->nbytes = npadded;
+  return ptr + 1;
 }
 
 void* malloc(size_t nbytes, type_scan::Index tyindex) {
   assertx(type_scan::isKnownType(tyindex));
-  return allocate<MBS::Unzeroed>(nbytes, tyindex);
+  return allocate(nbytes, false, tyindex);
 }
 
 void* calloc(size_t count, size_t nbytes, type_scan::Index tyindex) {
   assertx(type_scan::isKnownType(tyindex));
-  return allocate<MBS::Zeroed>(count * nbytes, tyindex);
+  return allocate(count * nbytes, true, tyindex);
 }
 
 void* malloc_untyped(size_t nbytes) {
-  return tl_heap->mallocBigSize<MBS::Unzeroed>(
-      std::max(nbytes, 1ul),
-      HeaderKind::BigMalloc,
-      type_scan::kIndexUnknown
+  auto n = static_cast<MallocNode*>(
+    tl_heap->mallocBigSize(std::max(nbytes + sizeof(MallocNode), 1ul), false)
   );
+  n->initHeader_32_16(HeaderKind::BigMalloc, 0, type_scan::kIndexUnknown);
+  n->nbytes = nbytes + sizeof(MallocNode);
+  return n + 1;
 }
 
 void* calloc_untyped(size_t count, size_t bytes) {
-  return tl_heap->mallocBigSize<MBS::Zeroed>(
-      std::max(count * bytes, 1ul),
-      HeaderKind::BigMalloc,
-      type_scan::kIndexUnknown
+  auto nbytes = count * bytes + sizeof(MallocNode);
+  auto n = static_cast<MallocNode*>(
+    tl_heap->mallocBigSize(nbytes, true)
   );
+  n->initHeader_32_16(HeaderKind::BigMalloc, 0, type_scan::kIndexUnknown);
+  n->nbytes = nbytes;
+  return n + 1;
 }
 
 void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
   assertx(type_scan::isKnownType(tyindex));
   if (!ptr) {
-    return allocate<MBS::Unzeroed>(nbytes, tyindex);
+    return allocate(nbytes, false, tyindex);
   }
   if (!nbytes) {
     req::free(ptr);
@@ -949,17 +943,19 @@ void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
          ptr, nbytes, tyindex);
   auto const n = static_cast<MallocNode*>(ptr) - 1;
   assertx(n->typeIndex() == tyindex);
+  auto new_size = nbytes + sizeof(MallocNode);
   if (LIKELY(n->kind() == HeaderKind::SmallMalloc) ||
-      UNLIKELY(nbytes + sizeof(MallocNode) <= kMaxSmallSize)) {
+      UNLIKELY(new_size <= kMaxSmallSize)) {
     // either the old or new block will be small; force a copy.
-    auto newmem = allocate<MBS::Unzeroed>(nbytes, tyindex);
+    auto newmem = allocate(nbytes, false, tyindex);
     auto copy_size = std::min(n->nbytes - sizeof(MallocNode), nbytes);
     newmem = memcpy(newmem, ptr, copy_size);
     req::free(ptr);
     return newmem;
   }
   // it's a big allocation.
-  return tl_heap->resizeBig(n, nbytes);
+  auto n2 = tl_heap->reallocBig(n, new_size);
+  return n2 + 1;
 }
 
 void* realloc_untyped(void* ptr, size_t nbytes) {
@@ -976,7 +972,8 @@ void* realloc_untyped(void* ptr, size_t nbytes) {
   auto const n = static_cast<MallocNode*>(ptr) - 1;
   assertx(n->kind() == HeaderKind::BigMalloc);
   assertx(n->typeIndex() == type_scan::kIndexUnknown);
-  return tl_heap->resizeBig(n, nbytes);
+  auto n2 = tl_heap->reallocBig(n, nbytes + sizeof(MallocNode));
+  return n2 + 1;
 }
 
 char* strndup(const char* str, size_t len) {
@@ -999,7 +996,7 @@ void free(void* ptr) {
     return tl_heap->objFree(n, n->nbytes);
   }
   assertx(n->kind() == HeaderKind::BigMalloc);
-  tl_heap->freeBigSize(ptr);
+  tl_heap->freeBigSize(n);
 }
 
 } // namespace req

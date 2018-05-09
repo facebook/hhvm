@@ -28,6 +28,7 @@
 
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/radix-map.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/type-scan.h"
@@ -412,13 +413,16 @@ static_assert(std::numeric_limits<type_scan::Index>::max() <=
               "type_scan::Index must be no greater than 16-bits "
               "to fit into HeapObject");
 
-// This is the header MemoryManager uses to remember large allocations
-// so they can be auto-freed in MemoryManager::reset(), as well as large/small
-// req::malloc()'d blocks, which must track their size internally.
-// The size recorded here must be the requested size for type_scan correctness.
+/*
+ * MallocNode is the header used for req::malloced blocks.
+ * m_kind: SmallMalloc or BigMalloc indicating which allocator
+ * owns the object.
+ * nbytes: the requested size + sizeof(MallocNode), not rounded
+ * to size class, for correct type_scan.
+ * m_aux16: type_scan::Index of the allocated data.
+ */
 struct MallocNode : HeapObject {
   size_t nbytes; // requested bytes + sizeof(MallocNode)
-  uint32_t& index() { return m_aux32; }
   uint16_t& typeIndex() { return m_aux16; }
   uint16_t typeIndex() const { return m_aux16; }
 };
@@ -466,23 +470,18 @@ struct SparseHeap {
 
   /*
    * Whether `ptr' refers to slab-allocated memory.
-   *
-   * Note that memory in big blocks is explicitly excluded.
    */
-  bool contains(void* ptr) const;
+  bool contains(const void* ptr) const;
 
   /*
-   * Allocate a MemBlock of kSlabSize bytes, track in m_slabs.
+   * Allocate a Slab of kSlabSize bytes, track in m_pooled_slabs.
    */
   HeapObject* allocSlab(MemoryUsageStats& stats);
 
   /*
    * Allocation API for big blocks.
    */
-  void* allocBig(size_t size, HeaderKind kind,
-                 type_scan::Index tyindex, MemoryUsageStats& stats);
-  void* callocBig(size_t size, HeaderKind kind,
-                  type_scan::Index tyindex, MemoryUsageStats& stats);
+  void* allocBig(size_t size, bool zero, MemoryUsageStats& stats);
   void* resizeBig(void* p, size_t size, MemoryUsageStats& stats);
   void freeBig(void*, MemoryUsageStats& stats);
 
@@ -510,45 +509,30 @@ struct SparseHeap {
   template<class Fn> void iterate(Fn);
 
   /*
-   * call OnBig() on each BigObj & BigMalloc header, and OnSlab() on
+   * call OnBig() on each big HeapObject, and OnSlab() on
    * each slab, without iterating the blocks within each slab.
    */
   template<class OnBig, class OnSlab> void iterate(OnBig, OnSlab);
 
   /*
-   * Find the HeapObject* which contains `p', else nullptr if `p' is
-   * not contained in any heap allocation.
-   */
-  HeapObject* find(const void* p);
-
-  /*
-   * Sorts both slabs and big blocks.
-   */
-  void sort();
-
-  /*
    * Return the (likely sparse) address range that contains every slab.
-   * Requires that sort() has been called, so m_slabs is in address order.
    */
   MemBlock slab_range() const;
 
  protected:
-  void enlist(MallocNode*, HeaderKind kind, size_t size, type_scan::Index);
-
- protected:
   struct SlabInfo {
-    SlabInfo(void* p, size_t s) : ptr(p), size(s) {}
     SlabInfo(void* p, size_t s, uint16_t v)
-      : ptr(p), size(s), pooled(true), version(v) {}
+      : ptr(p), size(s), version(v) {}
 
     void* ptr;
     uint32_t size;
-    bool pooled{false};                 // from SlabManager
     uint16_t version{0};                // tag used with SlabManager
   };
-  std::vector<SlabInfo> m_slabs;
-  std::vector<MallocNode*> m_bigs;
-  int64_t m_pooledBytes{0};             // compare with RequestHugeMaxBytes
+  std::vector<SlabInfo> m_pooled_slabs;
+  RadixMap<HeapObject*,4,8> m_bigs;
+  uintptr_t m_slab_min{std::numeric_limits<uintptr_t>::max()};
+  uintptr_t m_slab_max{0};
+  int64_t m_hugeBytes{0};             // compare with RequestHugeMaxBytes
   SlabManager* m_slabManager{nullptr};
 };
 
@@ -624,12 +608,9 @@ struct MemoryManager {
    *
    * Pre: size > kMaxSmallSize
    */
-  enum MBS { Unzeroed, Zeroed };
-  template<MBS Mode>
-  void* mallocBigSize(size_t size, HeaderKind kind = HeaderKind::BigObj,
-                      type_scan::Index tyindex = type_scan::kIndexUnknown);
+  void* mallocBigSize(size_t size, bool zero = false);
   void freeBigSize(void* vp);
-  void* resizeBig(MallocNode* n, size_t nbytes);
+  MallocNode* reallocBig(MallocNode* n, size_t nbytes);
 
   /*
    * Allocate/deallocate objects when the size is not known to be
@@ -713,11 +694,8 @@ struct MemoryManager {
 
   /*
    * Whether `p' points into memory owned by `m_heap'.
-   *
-   * Note that this explicitly excludes allocations that are made through the
-   * big alloc API.
    */
-  bool contains(void* p) const;
+  bool contains(const void* p) const;
 
   /*
    * Heap iterator methods.  `fn' takes a HeapObject* argument.
@@ -726,10 +704,8 @@ struct MemoryManager {
    *             initializing dead space past m_front, and sorting slabs.
    * reinitFree(): like initFree() but only update the freelists.
    * iterate(): Raw iterator loop over every HeapObject in the heap.
-   *            Skips BigObj because it's just a detail of which sub-heap we
-   *            used to allocate something based on its size, and it can prefix
-   *            almost any other header kind, and also skips Hole. Clients can
-   *            call this directly to avoid unnecessary initFree()s.
+   *            Skips Holes and Slab headers. Clients can call this directly
+   *            to avoid unnecessary initFree()s.
    * forEachHeapObject(): Like iterate(), but with an eager initFree().
    * forEachObject(): Iterate just the ObjectDatas, including the kinds with
    *                  prefixes (NativeData, AsyncFuncFrame, and ClosureHdr).
@@ -745,12 +721,6 @@ struct MemoryManager {
    * call fn(ptr, size, type_scan::Index) for each root
    */
   template<class Fn> void iterateRoots(Fn) const;
-
-  /*
-   * Find the HeapObject* which contains `p', else nullptr if `p' is
-   * not contained in any heap allocation.
-   */
-  HeapObject* find(const void* p);
 
   /////////////////////////////////////////////////////////////////////////////
   // Stats.

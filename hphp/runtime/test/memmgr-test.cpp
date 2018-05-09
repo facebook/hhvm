@@ -158,29 +158,18 @@ TEST(MemoryManager, realloc) {
   req::free(p2);
 }
 
-TEST(MemoryManager, Find) {
-  for (size_t index = 0; index < 1000; ++index) {
+TEST(MemoryManager, ContainsAnySize) {
+  for (size_t i = 0; i < 1000; ++i) {
     auto p = req::malloc_noptrs(kMaxSmallSize*2);
     auto const n = static_cast<MallocNode*>(p) - 1;
     auto p2 = req::malloc_noptrs(kMaxSmallSize/2);
     auto const n2 = static_cast<MallocNode*>(p2) - 1;
-    EXPECT_TRUE(tl_heap->find(n));
-    EXPECT_TRUE(tl_heap->find(n2));
+    EXPECT_TRUE(tl_heap->contains(n));
+    EXPECT_TRUE(tl_heap->contains(n2));
     req::free(p);
     req::free(p2);
-    EXPECT_FALSE(tl_heap->find(n));
-    EXPECT_TRUE(tl_heap->find(n2));
-  }
-}
-
-TEST(MemoryManager, Contains) {
-  // note that contains() does not check BigAlloc
-  for (size_t index = 0; index < 1000; ++index) {
-    auto p = req::malloc_noptrs(kMaxSmallSize/2);
-    auto const n = static_cast<MallocNode*>(p) - 1;
-    EXPECT_TRUE(tl_heap->contains(n));
-    req::free(p);
-    EXPECT_TRUE(tl_heap->contains(n));
+    EXPECT_FALSE(tl_heap->contains(n));
+    EXPECT_TRUE(tl_heap->contains(n2));
   }
 }
 

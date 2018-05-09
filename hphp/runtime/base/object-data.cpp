@@ -921,7 +921,7 @@ ObjectData* ObjectData::newInstanceRawSmall(Class* cls, size_t size,
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
   assertx(cls->getODAttrs() == DefaultAttrs);
-  auto mem = tl_heap->mallocBigSize<MemoryManager::Unzeroed>(size);
+  auto mem = tl_heap->mallocBigSize(size);
   return new (mem) ObjectData(cls, InitRaw{}, DefaultAttrs);
 }
 
@@ -936,7 +936,7 @@ ObjectData* ObjectData::newInstanceRawAttrsSmall(Class* cls, size_t size,
 
 ObjectData* ObjectData::newInstanceRawAttrsBig(Class* cls, size_t size,
                                               uint8_t attrs) {
-  auto mem = tl_heap->mallocBigSize<MemoryManager::Unzeroed>(size);
+  auto mem = tl_heap->mallocBigSize(size);
   return new (mem) ObjectData(cls, InitRaw{}, attrs);
 }
 

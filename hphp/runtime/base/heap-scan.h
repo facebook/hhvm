@@ -164,7 +164,6 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     case HeaderKind::NativeObject:
       // should have scanned the NativeData header.
       break;
-    case HeaderKind::BigObj:
     case HeaderKind::Slab:
       // these aren't legitimate headers, and heap iteration should skip them.
       break;

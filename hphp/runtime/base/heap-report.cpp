@@ -94,7 +94,6 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::Free:
       out << "[" << static_cast<const FreeNode*>(h)->size() << "]";
       break;
-    case HeaderKind::BigObj:
     case HeaderKind::Slab:
     case HeaderKind::Hole:
       not_reached();

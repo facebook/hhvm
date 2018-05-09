@@ -195,9 +195,8 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::Closure:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::NativeObject:
-      // These headers shouldn't be found during heap or slab iteration because
-      // they are appended to ClosureHdr, AsyncFuncFrame, or NativeData.
-    case HeaderKind::BigObj:
+      // These header types should not be found during heap or slab iteration
+      // because they are appended to ClosureHdr or AsyncFuncFrame.
     case HeaderKind::Slab:
       // These header types are not allocated objects; they are handled
       // earlier and should never be queued on the gc worklist.
@@ -312,17 +311,12 @@ NEVER_INLINE void Collector::init() {
 
   heap_.iterate(
     [&](HeapObject* h, size_t size) { // onBig
-      if (h->kind() == HeaderKind::BigMalloc) {
-        ptrs_.insert(h, size);
-        if (!type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
-          ++unknown_;
-          h->setmarks(mark_version_);
-          cwork_.push_back(h);
-        }
-      } else {
-        // put the inner big object in ptrs_ without the BigObj header
-        assertx(h->kind() == HeaderKind::BigObj);
-        ptrs_.insert(static_cast<MallocNode*>(h)+1, size - sizeof(MallocNode));
+      ptrs_.insert(h, size);
+      if (h->kind() == HeaderKind::BigMalloc &&
+          !type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
+        ++unknown_;
+        h->setmarks(mark_version_);
+        cwork_.push_back(h);
       }
     },
     [&](HeapObject* h, size_t size) { // onSlab
@@ -523,11 +517,11 @@ NEVER_INLINE void Collector::sweep() {
   heap_.iterate(
     [&](HeapObject* big, size_t big_size) { // onBig
       ++num_big_;
-      if (big->kind() == HeaderKind::BigObj) {
-        HeapObject* h2 = static_cast<MallocNode*>(big) + 1;
-        if (!marked(h2) && h2->kind() != HeaderKind::SmallMalloc) {
-          mm.freeBigSize(h2);
-        }
+      auto kind = big->kind();
+      if (kind != HeaderKind::BigMalloc && kind != HeaderKind::SmallMalloc &&
+          !marked(big)) {
+        // NB: kind == SmallMalloc occurs when tl_heap->m_bypassSlabAlloc==true
+        mm.freeBigSize(big);
       }
     },
     [&](HeapObject* big, size_t /*big_size*/) { // onSlab

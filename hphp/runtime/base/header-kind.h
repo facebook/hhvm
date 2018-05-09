@@ -64,7 +64,6 @@ enum class HeaderKind : uint8_t {
   Cpp, // a managed object with associated C++ type
   SmallMalloc, // small req::malloc'd block
   BigMalloc, // big req::malloc'd block
-  BigObj, // big size-tracked object (valid header follows MallocNode)
   Free, // small block in a FreeList
   Hole, // wasted space not in any freelist
   Slab, // header for a contiguous "slab" of small objects
@@ -299,10 +298,6 @@ inline bool isWaithandleKind(HeaderKind k) {
   return k >= HeaderKind::WaitHandle && k <= HeaderKind::AwaitAllWH;
   static_assert((int)HeaderKind::AwaitAllWH - (int)HeaderKind::WaitHandle == 2,
                 "isWaithandleKind requires updating");
-}
-
-inline bool isBigKind(HeaderKind k) {
-  return k == HeaderKind::BigObj || k == HeaderKind::BigMalloc;
 }
 
 enum class CollectionType : uint8_t {

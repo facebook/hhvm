@@ -35,7 +35,7 @@ static_assert(
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool SparseHeap::empty() const {
-  return m_slabs.empty() && m_bigs.empty();
+  return m_bigs.empty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -270,7 +270,7 @@ inline void MemoryManager::freeSmallSize(void* ptr, size_t bytes) {
 ALWAYS_INLINE
 void* MemoryManager::objMalloc(size_t size) {
   if (LIKELY(size <= kMaxSmallSize)) return mallocSmallSize(size);
-  return mallocBigSize<Unzeroed>(size);
+  return mallocBigSize(size);
 }
 
 ALWAYS_INLINE
@@ -282,7 +282,7 @@ void MemoryManager::objFree(void* vp, size_t size) {
 ALWAYS_INLINE
 void* MemoryManager::objMallocIndex(size_t index) {
   if (LIKELY(index < kNumSmallSizes)) return mallocSmallIndex(index);
-  return mallocBigSize<Unzeroed>(sizeIndex2Size(index));
+  return mallocBigSize(sizeIndex2Size(index));
 }
 
 ALWAYS_INLINE
@@ -377,13 +377,8 @@ inline bool MemoryManager::empty() const {
   return m_heap.empty();
 }
 
-inline bool MemoryManager::contains(void* p) const {
+inline bool MemoryManager::contains(const void* p) const {
   return m_heap.contains(p);
-}
-
-inline HeapObject* MemoryManager::find(const void* p) {
-  initFree();
-  return m_heap.find(p);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

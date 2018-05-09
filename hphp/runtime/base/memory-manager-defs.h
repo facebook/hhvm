@@ -273,7 +273,6 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* Cpp */
     0, /* SmallMalloc */
     0, /* BigMalloc */
-    0, /* BigObj */
     0, /* Free */
     0, /* Hole */
     sizeof(Slab), /* Slab */
@@ -314,7 +313,6 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(Cpp)
   CHECKSIZE(SmallMalloc)
   CHECKSIZE(BigMalloc)
-  CHECKSIZE(BigObj)
   CHECKSIZE(Free)
   CHECKSIZE(Hole)
 #undef CHECKSIZE
@@ -402,7 +400,7 @@ inline size_t allocSize(const HeapObject* h) {
       size = native->obj_offset + Native::obj(native)->heapSize();
       break;
     }
-    case HeaderKind::BigObj:    // [MallocNode][HeapObject...]
+    // the following sizes are intentionally not rounded up to size class.
     case HeaderKind::BigMalloc: // [MallocNode][raw bytes...]
       size = static_cast<const MallocNode*>(h)->nbytes;
       assertx(size != 0);
@@ -519,47 +517,26 @@ inline void Slab::setStarts(const void* start, const void* end,
 template<class OnBig, class OnSlab>
 void SparseHeap::iterate(OnBig onBig, OnSlab onSlab) {
   // slabs and bigs are sorted; walk through both in address order
-  const auto SENTINEL = (HeapObject*) ~0LL;
-  auto slab = std::begin(m_slabs);
-  auto big = std::begin(m_bigs);
-  auto slabend = std::end(m_slabs);
-  auto bigend = std::end(m_bigs);
-  while (slab != slabend || big != bigend) {
-    HeapObject* slab_hdr = slab != slabend ? (HeapObject*)slab->ptr : SENTINEL;
-    HeapObject* big_hdr = big != bigend ? *big : SENTINEL;
-    assertx(slab_hdr < SENTINEL || big_hdr < SENTINEL);
-    if (slab_hdr < big_hdr) {
-      onSlab(slab_hdr, slab->size);
-      ++slab;
+  m_bigs.iterate([&](HeapObject* h, size_t size) {
+    if (h->kind() == HeaderKind::Slab) {
+      onSlab(h, size);
     } else {
-      assertx(big_hdr < slab_hdr);
-      onBig(big_hdr, allocSize(big_hdr));
-      ++big;
+      onBig(h, size);
     }
-  }
+  });
 }
 
 template<class Fn> void SparseHeap::iterate(Fn fn) {
   // slabs and bigs are sorted; walk through both in address order
-  const auto SENTINEL = (HeapObject*) ~0LL;
-  auto slab = std::begin(m_slabs);
-  auto big = std::begin(m_bigs);
-  auto slabend = std::end(m_slabs);
-  auto bigend = std::end(m_bigs);
-  while (slab != slabend || big != bigend) {
-    HeapObject* slab_hdr = slab != slabend ? (HeapObject*)slab->ptr : SENTINEL;
-    HeapObject* big_hdr = big != bigend ? *big : SENTINEL;
-    assertx(slab_hdr < SENTINEL || big_hdr < SENTINEL);
+  m_bigs.iterate([&](HeapObject* big, size_t big_size) {
     HeapObject *h, *end;
-    if (slab_hdr < big_hdr) {
-      h = slab_hdr;
-      end = (HeapObject*)((char*)h + slab->size);
-      ++slab;
-      assertx(end <= big_hdr); // otherwise slab overlaps next big
+    if (big->kind() == HeaderKind::Slab) {
+      assertx((char*)big + big_size == Slab::fromHeader(big)->end());
+      h = (HeapObject*)Slab::fromHeader(big)->start();
+      end = (HeapObject*)Slab::fromHeader(big)->end();
     } else {
-      h = big_hdr;
+      h = big;
       end = nullptr; // ensure we don't loop below
-      ++big;
     }
     do {
       auto size = allocSize(h);
@@ -567,16 +544,12 @@ template<class Fn> void SparseHeap::iterate(Fn fn) {
       h = (HeapObject*)((char*)h + size);
     } while (h < end);
     assertx(!end || h == end); // otherwise, last object was truncated
-  }
+  });
 }
 
 template<class Fn> void MemoryManager::iterate(Fn fn) {
   m_heap.iterate([&](HeapObject* h, size_t allocSize) {
-    if (h->kind() == HeaderKind::BigObj) {
-      // skip MallocNode
-      h = static_cast<MallocNode*>(h) + 1;
-      allocSize -= sizeof(MallocNode);
-    } else if (h->kind() >= HeaderKind::Hole) {
+    if (h->kind() >= HeaderKind::Hole) {
       assertx(unsigned(h->kind()) < NumHeaderKinds);
       // no valid pointer can point here.
       return; // continue iterating

@@ -2243,7 +2243,7 @@ and emit_store_for_simple_base ~is_base env pos elem_stack_size param_num_opt ba
    - Some Value_kind_local - expression represents local that will be
      overwritten later
    - Some Value_kind_expression - spilled non-trivial expression *)
-and get_local_temp_kind inout_param_info env e_opt =
+and get_local_temp_kind ~is_base inout_param_info env e_opt =
   match e_opt, inout_param_info with
   (* not inout case - no need to save *)
   | _, None -> None
@@ -2251,17 +2251,20 @@ and get_local_temp_kind inout_param_info env e_opt =
   | Some (_, A.Lvar (_, id)), Some (i, aliases)
     when InoutLocals.should_save_local_value id i aliases -> Some Value_kind_local
   (* non-trivial expression *)
-  | Some e, _ -> if is_trivial env e then None else Some Value_kind_expression
+  | Some e, _ ->
+    if is_trivial ~is_base env e then None else Some Value_kind_expression
   | None, _ -> None
 
-and is_trivial env (_, e) =
+and is_trivial ~is_base env (_, e) =
   match e with
   | A.Int _ | A.String _ ->
     true
   | A.Lvar (_, s) ->
     not (is_local_this env s) || Emit_env.get_needs_local_this env
-  | A.Array_get (b, None) -> is_trivial env b
-  | A.Array_get (b, Some e) -> is_trivial env b && is_trivial env e
+  | A.Array_get _ when not is_base -> false
+  | A.Array_get (b, None) -> is_trivial ~is_base env b
+  | A.Array_get (b, Some e) ->
+    is_trivial ~is_base env b && is_trivial ~is_base env e
   | _ ->
     false
 
@@ -2290,7 +2293,7 @@ and emit_array_get_worker ?(no_final=false) ?mode
     Emit_fatal.raise_fatal_runtime pos "Can't use [] for reading"
   | _ ->
   let local_temp_kind =
-    get_local_temp_kind inout_param_info env opt_elem_expr in
+    get_local_temp_kind ~is_base:false inout_param_info env opt_elem_expr in
   let param_num_hint_opt =
     if qop = QueryOp.InOut then None else param_num_hint_opt in
   let mode = Option.value mode ~default:(get_queryMOpMode need_ref qop) in
@@ -2577,7 +2580,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
   let base_mode =
     if mode = MemberOpMode.InOut then MemberOpMode.Warn else mode in
     let local_temp_kind =
-      get_local_temp_kind inout_param_info env (Some expr) in
+      get_local_temp_kind ~is_base:true inout_param_info env (Some expr) in
     (* generic handler that will try to save local into temp if this is necessary *)
     let emit_default instrs_begin instrs_end setup_instrs stack_size =
       match local_temp_kind with
@@ -2677,7 +2680,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
    | A.Array_get(base_expr, opt_elem_expr) ->
 
      let local_temp_kind =
-       get_local_temp_kind inout_param_info env opt_elem_expr in
+       get_local_temp_kind ~is_base:false inout_param_info env opt_elem_expr in
      let elem_expr_instrs, elem_stack_size =
        emit_elem_instrs ~local_temp_kind env opt_elem_expr in
      let base_result =

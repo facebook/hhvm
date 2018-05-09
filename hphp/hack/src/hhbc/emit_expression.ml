@@ -3292,6 +3292,13 @@ and emit_special_function env pos id args uargs default =
   | _ ->
     begin match args, istype_op lower_fq_name with
     | [(_, A.Lvar (_, arg_str as arg_id))], Some i
+      when SN.Superglobals.is_superglobal arg_str ->
+      Some (gather [
+        emit_local ~notice:NoNotice ~need_ref:false env arg_id;
+        emit_pos pos;
+        instr (IIsset (IsTypeC i))
+      ], Flavor.Cell)
+    | [(_, A.Lvar (_, arg_str as arg_id))], Some i
       when not (is_local_this env arg_str) ->
       Some (instr (IIsset (IsTypeL (get_local env arg_id, i))), Flavor.Cell)
     | [arg_expr], Some i ->

@@ -688,6 +688,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')
     + RuntimeOption::EvalHackCompilerCommand + '\0'
     + RuntimeOption::EvalHackCompilerArgs + '\0'
+    + (RuntimeOption::Hacksperimental ? '1' : '0')
     + (RuntimeOption::RepoDebugInfo ? '1' : '0')
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces()

@@ -279,6 +279,8 @@ let parse_text compiler_options popt fn text =
       Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
     let php5_compat_mode =
       not (Hhbc_options.enable_uniform_variable_syntax !Hhbc_options.compiler_options) in
+    let hacksperimental =
+      Hhbc_options.hacksperimental !Hhbc_options.compiler_options in
     let systemlib_compat_mode = Emit_env.is_systemlib () in
     let env = Full_fidelity_ast.make_env
       ~parser_options:popt
@@ -288,6 +290,7 @@ let parse_text compiler_options popt fn text =
       ~systemlib_compat_mode
       ~php5_compat_mode
       ~enable_hh_syntax
+      ~hacksperimental
       ~keep_errors:false
       fn
     in

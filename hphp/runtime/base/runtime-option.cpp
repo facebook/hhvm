@@ -112,6 +112,7 @@ bool RuntimeOption::IntsOverflowToInts = false;
 bool RuntimeOption::AutoprimeGenerators = true;
 bool RuntimeOption::EnableHackcOnlyFeature = false;
 bool RuntimeOption::EnableIsExprPrimitiveMigration = true;
+bool RuntimeOption::Hacksperimental = false;
 bool RuntimeOption::CheckParamTypeInvariance = true;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
@@ -1464,6 +1465,9 @@ void RuntimeOption::Load(
     Config::Bind(EnableIsExprPrimitiveMigration, ini, config,
                  "Hack.Lang.EnableIsExprPrimitiveMigration",
                  true);
+    Config::Bind(Hacksperimental, ini, config,
+                "Hack.Lang.Hacksperimental",
+                false);
   }
   {
     // Options for PHP7 features which break BC. (Features which do not break

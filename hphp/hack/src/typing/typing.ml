@@ -5472,6 +5472,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
       then Typing_equality_check.assert_nontrivial p bop env ty1 ty2;
       make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
   | Ast.Lt | Ast.Lte | Ast.Gt | Ast.Gte | Ast.Cmp ->
+      let error_enabled = TypecheckerOptions.disallow_unsafe_comparisons (Env.get_options env) in
       let ty_result = match bop with Ast.Cmp -> Tprim Tint | _ -> Tprim Tbool in
       let ty_num = (Reason.Rcomp p, Tprim Nast.Tnum) in
       let ty_string = (Reason.Rcomp p, Tprim Nast.Tstring) in
@@ -5484,7 +5485,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
        *   function(string, string): bool
        *   function(DateTime, DateTime): bool
        *)
-      if not (both_sub ty_num || both_sub ty_string || both_sub ty_datetime ||
+      if error_enabled && not (both_sub ty_num || both_sub ty_string || both_sub ty_datetime ||
                 TUtils.is_dynamic env ty1 || TUtils.is_dynamic env ty2)
       then begin
         let ty1 = Typing_expand.fully_expand env ty1 in

@@ -57,3 +57,4 @@ let experimental_void_is_type_of_null =
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
 let dynamic_view = GlobalOptions.tco_dynamic_view
+let disallow_unsafe_comparisons = GlobalOptions.tco_disallow_unsafe_comparisons

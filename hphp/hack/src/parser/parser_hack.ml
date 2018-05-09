@@ -26,6 +26,7 @@ type env = {
   in_generator : bool ref;
   popt      : ParserOptions.t;
   quick     : bool;
+  allow_as_expressions : bool ref;
 }
 
 let init_env file lb popt quick = {
@@ -37,6 +38,7 @@ let init_env file lb popt quick = {
   in_generator = ref false;
   popt     = popt;
   quick    = quick;
+  allow_as_expressions = ref true;
 }
 
 type parser_return = {
@@ -317,7 +319,7 @@ let priorities = [
   (Right, [Tsuspend]);
   (Right, [Tem]);
   (NonAssoc, [Tinstanceof]);
-  (Left, [Tis]);
+  (Left, [Tis; Tas; Tnullableas]);
   (Right, [Ttild; Tincr; Tdecr; Tcast]);
   (Right, [Tstarstar]);
   (Right, [Tat; Tref]);
@@ -2618,7 +2620,9 @@ and for_last_expr env =
 
 and statement_foreach env =
   expect env Tlp;
+  env.allow_as_expressions := false;
   let e = expr env in
+  env.allow_as_expressions := true;
   let await =
     match L.token env.file env.lb with
     | Tword when Lexing.lexeme env.lb = "await" -> Some (Pos.make env.file env.lb)
@@ -3036,10 +3040,14 @@ and expr_remain env e1 =
       expr_elvis env e1
   | Tqmqm ->
       expr_null_coalesce env e1
+  | Tnullableas when !(env.allow_as_expressions) ->
+      expr_as env ~is_nullable:true e1
   | Tword when Lexing.lexeme env.lb = "instanceof" ->
       expr_instanceof env e1
   | Tword when Lexing.lexeme env.lb = "is" ->
       expr_is env e1
+  | Tword when Lexing.lexeme env.lb = "as" && !(env.allow_as_expressions) ->
+      expr_as env ~is_nullable:false e1
   | Tword when Lexing.lexeme env.lb = "and" ->
       error env ("Do not use \"and\", it has surprising precedence. "^
         "Use \"&&\" instead");
@@ -3264,7 +3272,7 @@ and expr_atomic ~allow_class ~class_const env =
           if is_cast env
           then expr_cast env pos
           else with_base_priority env begin fun env ->
-            let e = expr env in
+            let e = expr_with_possible_as env in
             expect env Trp;
             let end_ = Pos.make env.file env.lb in
             Pos.btw pos end_, snd e
@@ -3292,6 +3300,13 @@ and expr_atomic ~allow_class ~class_const env =
   | _ ->
       error_expect env "expression";
       pos, Null
+
+and expr_with_possible_as env =
+  let is_as_allowed = !(env.allow_as_expressions) in
+  env.allow_as_expressions := true;
+  let e = expr env in
+  env.allow_as_expressions := is_as_allowed;
+  e
 
 and expr_atomic_word ~allow_class ~class_const env pos = function
   | "class" when not allow_class ->
@@ -3372,7 +3387,7 @@ and strip_variablevariable (dollars: int) token =
 and paren_expr env =
   with_base_priority env begin fun env ->
     expect env Tlp;
-    let e = expr env in
+    let e = expr_with_possible_as env in
     expect env Trp;
     e
   end
@@ -3591,13 +3606,19 @@ and expr_instanceof env e1 =
   end
 
 (*****************************************************************************)
-(* Is *)
+(* Is/As *)
 (*****************************************************************************)
 
 and expr_is env e =
   reduce env e Tis begin fun e env ->
     let h = hint env in
     btw e h, Is (e, h)
+  end
+
+and expr_as env ~is_nullable e =
+  reduce env e (if is_nullable then Tnullableas else Tas) begin fun e env ->
+    let h = hint env in
+    btw e h, As (e, h, is_nullable)
   end
 
 (*****************************************************************************)

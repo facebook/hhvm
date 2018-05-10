@@ -810,6 +810,7 @@ module NastCheck                            = struct
   let rx_is_enabled_invalid_location        = 3062 (* DONT MODIFY!!!! *)
   let maybe_rx_invalid_location             = 3063 (* DONT MODIFY!!!! *)
   let no_onlyrx_if_rxfunc_for_rx_if_args    = 3064 (* DONT MODIFY!!!! *)
+  let coroutine_in_constructor              = 3065 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1840,6 +1841,10 @@ let conditionally_reactive_annotation_invalid_arguments ~is_method pos =
     "invalid arguments. This attribute must have one argument and it should be " ^
     "'::class' class constant."
   )
+
+let coroutine_in_constructor pos =
+  add NastCheck.coroutine_in_constructor pos
+    "A class constructor may not be a coroutine"
 (*****************************************************************************)
 (* Nast terminality *)
 (*****************************************************************************)

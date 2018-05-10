@@ -66,6 +66,10 @@ let check_coroutines_enabled condition env p =
   if condition && not (coroutines_enabled env)
   then report_coroutines_not_enabled p
 
+let check_coroutine_constructor name is_coroutine p =
+  if name = SN.Members.__construct && is_coroutine
+  then Errors.coroutine_in_constructor p
+
 let error_if_has_onlyrx_if_rxfunc_attribute attrs =
   match Attributes.find SN.UserAttributes.uaOnlyRxIfRxFunc attrs with
   | Some { ua_name = (p, _); _ } ->
@@ -907,7 +911,9 @@ and method_ (env, is_static) m =
   check__toString m is_static;
 
   let p, name = m.m_name in
-  check_coroutines_enabled (m.m_fun_kind = Ast.FCoroutine) env p;
+  let is_coroutine = m.m_fun_kind = Ast.FCoroutine in
+  check_coroutines_enabled is_coroutine env p;
+  check_coroutine_constructor name is_coroutine p;
   (* Add method type parameters to environment and localize the bounds *)
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams

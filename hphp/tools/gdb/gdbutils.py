@@ -73,7 +73,7 @@ def gdbprint(val, ty=None):
     if ty is None:
         ty = val.type
     # quote names with :: in case we're in a non-c++ frame
-    ty = re.sub(r'\b(\w*(::\w+)+)\b', r"'\1'", str(ty))
+    ty = re.sub(r'\b(\w*(::\w+(\<.*\>)?)+)\b', r"'\1'", str(ty))
     gdb.execute('print (%s)%s' % (str(ty), str(val)))
 
 
@@ -106,7 +106,7 @@ def crc32q(crc, quad):
     dividend = quad ^ (crc << 32)
     divisor = 0x11edc6f41 << 31
 
-    for i in xrange(64):
+    for _i in xrange(64):
         if dividend & msb:
             dividend ^= divisor
         dividend <<= 1
@@ -159,7 +159,6 @@ def strinfo(s, keep_case=True):
     stringish gdb.Value."""
 
     data = None
-    addr = None
     h = None
 
     t = rawtype(s.type)

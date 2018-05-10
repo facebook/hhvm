@@ -50,12 +50,6 @@ namespace x64 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void alignJmpTarget(CodeBlock& cb) {
-  align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Helper for the freeLocalsHelpers which does the actual work of decrementing
  * a value's refcount or releasing it.
@@ -129,10 +123,6 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   auto const local = rarg(1);
   auto const last = rarg(2);
   auto const type = rarg(3);
-
-  // This stub is very hot; keep it cache-aligned.
-  align(cb, nullptr, Alignment::CacheLine, AlignContext::Dead);
-
   auto const start = cb.frontier();
   // We want the release function to come last; we enter the slide at
   // several different points, but always execute through to the end

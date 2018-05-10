@@ -59,6 +59,10 @@ void alignJmpTarget(CodeBlock& cb) {
   align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
 }
 
+void alignCacheLine(CodeBlock& cb) {
+  align(cb, nullptr, Alignment::CacheLine, AlignContext::Dead);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 using AFWH = c_AsyncFunctionWaitHandle;
@@ -139,7 +143,7 @@ void unblockParents(Vout& v, Vreg firstBl) {
 }
 
 TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
-  alignJmpTarget(cb);
+  alignCacheLine(cb);
 
   auto const ret = vwrap(cb, data, [] (Vout& v) {
     // Set rvmfp() to the suspending WaitHandle's parent frame.
@@ -324,7 +328,7 @@ void asyncFuncRetOnly(Vout& v, PhysReg data, PhysReg type, Vreg parentBl) {
 }
 
 TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
-  alignJmpTarget(cb);
+  alignCacheLine(cb);
 
   return vwrap(cb, data, [&] (Vout& v) {
     auto const slowPath = Vlabel(v.makeBlock());
@@ -409,7 +413,7 @@ void UniqueStubs::emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg) {
 
 #define ADD(name, stub) name = add(#name, (stub), code, dbg)
   TCA inner_stub;
-  ADD(asyncSwitchCtrl,  emitAsyncSwitchCtrl(main, data, &inner_stub));
+  ADD(asyncSwitchCtrl,  emitAsyncSwitchCtrl(hot(), data, &inner_stub));
   ADD(asyncFuncRet,     emitAsyncFuncRet(hot(), data, inner_stub));
   ADD(asyncFuncRetSlow, emitAsyncFuncRetSlow(cold, data, asyncFuncRet));
 #undef ADD

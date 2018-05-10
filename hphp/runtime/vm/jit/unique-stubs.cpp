@@ -90,6 +90,10 @@ void alignJmpTarget(CodeBlock& cb) {
   align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
 }
 
+void alignCacheLine(CodeBlock& cb) {
+  align(cb, nullptr, Alignment::CacheLine, AlignContext::Dead);
+}
+
 void assertNativeStackAligned(Vout& v) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     v << call{TCA(assert_native_stack_aligned)};
@@ -169,10 +173,12 @@ void emitStubCatch(Vout& v, const UniqueStubs& us, GenFn gen) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
+  alignCacheLine(cb);
   return ARCH_SWITCH_CALL(emitFreeLocalsHelpers, cb, data, us);
 }
 
 TCA emitCallToExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
+  alignJmpTarget(cb);
   return ARCH_SWITCH_CALL(emitCallToExit, cb, data, us);
 }
 
@@ -224,7 +230,7 @@ FCallHelperRet fcallHelper(ActRec* ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
-  alignJmpTarget(cb);
+  alignCacheLine(cb);
 
   return vwrap(cb, data, [] (Vout& v) {
     auto const func = v.makeReg();
@@ -317,7 +323,7 @@ TCA emitFuncBodyHelperThunk(CodeBlock& cb, DataBlock& data) {
 
 TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
                             DataBlock& data, UniqueStubs& us) {
-  alignJmpTarget(main);
+  alignCacheLine(main);
 
   CGMeta meta;
 
@@ -459,7 +465,7 @@ void debuggerRetImpl(Vout& v, Vreg ar) {
 }
 
 TCA emitInterpRet(CodeBlock& cb, DataBlock& data) {
-  alignJmpTarget(cb);
+  alignCacheLine(cb);
 
   auto const start = vwrap(cb, data, [] (Vout& v) {
     // Sync return regs before calling native assert function.
@@ -550,7 +556,7 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
 
 TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
                           DataBlock& data, UniqueStubs& us) {
-  align(main, nullptr, Alignment::CacheLine, AlignContext::Dead);
+  alignCacheLine(main);
 
   CGMeta meta;
 
@@ -680,7 +686,7 @@ ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb, DataBlock& data) {
 
 TCA emitResumeInterpHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
                             ResumeHelperEntryPoints& rh) {
-  alignJmpTarget(cb);
+  alignCacheLine(cb);
 
   rh = emitResumeHelpers(cb, data);
 
@@ -761,6 +767,7 @@ void emitInterpOneCFHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
 
 TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
   CGMeta meta;
+  alignCacheLine(cb);
 
   auto const start = vwrap(cb, data, meta, [] (Vout& v) {
     v << vregrestrict{};
@@ -817,6 +824,8 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& /*us*/) {
+  alignCacheLine(cb);
+
   return vwrap(cb, data, [&] (Vout& v) {
     // Eagerly save VM regs.
     storeVMRegs(v);
@@ -852,7 +861,7 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& /*us*/) {
 }
 
 TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  alignJmpTarget(cb);
+  alignCacheLine(cb);
 
   auto const sp       = rarg(0);
   auto const fp       = rarg(1);
@@ -918,7 +927,7 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 }
 
 TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
-  alignJmpTarget(cb);
+  alignCacheLine(cb);
 
   return vwrap(cb, data, [] (Vout& v) {
     storeVMRegs(v);
@@ -961,6 +970,8 @@ TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
+  alignCacheLine(cb);
+
   auto const udrspo = rvmtl()[unwinderDebuggerReturnSPOff()];
 
   auto const debuggerReturn = vwrap(cb, data, [&] (Vout& v) {
@@ -1075,7 +1086,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   // These guys are required by a number of other stubs.
   ADD(handleSRHelper, emitHandleSRHelper(hot(), data));
-  ADD(endCatchHelper, emitEndCatchHelper(frozen, data, *this));
+  ADD(endCatchHelper, emitEndCatchHelper(hot(), data, *this));
   ADD(unknownExceptionHandler, emitUnknownExceptionHandler(cold, data, *this));
 
   ADD(funcPrologueRedispatch, emitFuncPrologueRedispatch(hot(), data));
@@ -1095,11 +1106,11 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   ADD(bindCallStub,          emitBindCallStub<false>(cold, data));
   ADD(immutableBindCallStub, emitBindCallStub<true>(cold, data));
-  ADD(fcallUnpackHelper,     emitFCallUnpackHelper(hot(), frozen, data, *this));
+  ADD(fcallUnpackHelper,     emitFCallUnpackHelper(hot(), cold, data, *this));
 
-  ADD(decRefGeneric,  emitDecRefGeneric(cold, data));
+  ADD(decRefGeneric,  emitDecRefGeneric(hot(), data));
 
-  ADD(callToExit,         emitCallToExit(main, data, *this));
+  ADD(callToExit,         emitCallToExit(hot(), data, *this));
   ADD(throwSwitchMode,    emitThrowSwitchMode(frozen, data));
 
   ADD(handlePrimeCacheInit,

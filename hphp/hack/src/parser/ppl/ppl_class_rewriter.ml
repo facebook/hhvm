@@ -192,13 +192,16 @@ let rewrite_ppl_class_body classish_body =
         methodish_function_decl_header = ({
           syntax = FunctionDeclarationHeader {
             function_modifiers = m;
+            function_name = n;
             _;
           };
           _;
         } as methodish_function_decl_header);
         methodish_function_body;
         _;
-      } as method_declaration) when not @@ has_coroutine_modifier m ->
+      } as method_declaration)
+      when not @@ has_coroutine_modifier m
+        && not @@ is_specific_token TokenKind.Construct n ->
         let new_method_header =
           rewrite_ppl_method_header methodish_function_decl_header in
         let acc, new_method_body =

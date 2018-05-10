@@ -165,6 +165,7 @@ bool checkTypeStructureMatchesCellImpl(
 
   bool result = false;
   auto type = c1.m_type;
+  auto data = c1.m_data;
   if (ts.exists(s_nullable) &&
       ts[s_nullable].asBooleanVal() &&
       isNullType(type)) {
@@ -186,7 +187,9 @@ bool checkTypeStructureMatchesCellImpl(
       result = isStringType(type);
       break;
     case TypeStructure::Kind::T_resource:
-      result = isResourceType(type);
+      result =
+        isResourceType(type) &&
+        !reinterpret_cast<const Resource*>(&data.pres)->isInvalid();
       break;
     case TypeStructure::Kind::T_num:
       result = isIntType(type) || isDoubleType(type);
@@ -235,7 +238,7 @@ bool checkTypeStructureMatchesCellImpl(
         result = false;
         break;
       }
-      auto const elems = c1.m_data.parr;
+      auto const elems = data.parr;
       if (!elems->isVecOrVArray()) {
         result = false;
         break;
@@ -269,7 +272,7 @@ bool checkTypeStructureMatchesCellImpl(
         result = false;
         break;
       }
-      auto const fields = c1.m_data.parr;
+      auto const fields = data.parr;
       if (!fields->isDictOrDArray()) {
         result = false;
         break;

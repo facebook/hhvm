@@ -791,7 +791,6 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_bool:        return primitive(TBool);
     case TypeStructure::Kind::T_float:       return primitive(TDbl);
     case TypeStructure::Kind::T_string:      return primitive(TStr);
-    case TypeStructure::Kind::T_resource:    return primitive(TRes);
     case TypeStructure::Kind::T_void:        return primitive(TNull);
     case TypeStructure::Kind::T_dict:        return primitive(TDict);
     case TypeStructure::Kind::T_vec:         return primitive(TVec);
@@ -820,6 +819,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_shape:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_unresolved:
+    case TypeStructure::Kind::T_resource:
       // TODO(T28423611): Implement these
       return false;
   }

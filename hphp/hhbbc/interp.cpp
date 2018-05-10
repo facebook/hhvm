@@ -2159,9 +2159,9 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
     case IsTypeOp::Int:
     case IsTypeOp::Dbl:
     case IsTypeOp::Str:
-    case IsTypeOp::Res:
     case IsTypeOp::Obj:
       return true;
+    case IsTypeOp::Res:
     case IsTypeOp::Arr:
     case IsTypeOp::Vec:
     case IsTypeOp::Dict:
@@ -2235,7 +2235,6 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     case TypeStructure::Kind::T_bool:
     case TypeStructure::Kind::T_float:
     case TypeStructure::Kind::T_string:
-    case TypeStructure::Kind::T_resource:
     case TypeStructure::Kind::T_num:
     case TypeStructure::Kind::T_arraykey:
     case TypeStructure::Kind::T_dict:
@@ -2276,6 +2275,7 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_xhp:
     case TypeStructure::Kind::T_enum:
+    case TypeStructure::Kind::T_resource:
       // TODO(T26877589): implement
       return result(TBool);
     case TypeStructure::Kind::T_fun:

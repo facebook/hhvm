@@ -960,15 +960,15 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       WithRule (Rule.Parental, Concat [
         Split;
         Nest [
-          handle_possible_list env init;
+          handle_possible_list env ~after_each:after_each_argument init;
           t env semi1;
           Space;
           Split;
-          handle_possible_list env control;
+          handle_possible_list env ~after_each:after_each_argument control;
           t env semi2;
           Space;
           Split;
-          handle_possible_list env after_iter;
+          handle_possible_list env ~after_each:after_each_argument after_iter;
         ];
         Split;
         t env right_p;

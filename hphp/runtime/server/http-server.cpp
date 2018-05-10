@@ -48,7 +48,6 @@
 #include <folly/Format.h>
 #include <folly/portability/Unistd.h>
 
-#include <sys/types.h>
 #include <signal.h>
 
 extern "C" {
@@ -388,6 +387,19 @@ void HttpServer::runOrExitProcess() {
       Logger::Warning("ignored Server.Forking.Enabled=false "
                       "as it only works on Linux");
 #endif
+    } else {
+#if FOLLY_HAVE_PTHREAD_ATFORK
+      pthread_atfork(nullptr, nullptr,
+                     [] {
+                       Process::OOMScoreAdj(1000);
+                     });
+#endif
+    }
+    if (RuntimeOption::EvalServerOOMAdj < 0) {
+      // Avoid HHVM getting killed when a forked process uses too much memory.
+      // A positive adjustment makes it more likely for the server to be killed,
+      // and that's not what we want.
+      Process::OOMScoreAdj(RuntimeOption::EvalServerOOMAdj);
     }
     createPid();
     Lock lock(this);
@@ -442,27 +454,13 @@ static void exit_on_timeout(int sig) {
   abort();
 }
 
-// Tell OOM killer to kill this process if it has to.  This is used during
-// server shutdown.  If we are dying anyway, let's try to protect others.
-static void oom_sacrifice() {
-#ifdef __linux__
-  // Use open() instead of fopen() here to avoid additional buffering and
-  // allocation, which could go wrong if memory is really limited.
-  int fd = open("/proc/self/oom_score_adj", O_WRONLY, 0);
-  if (fd >= 0) {
-    write(fd, "800", 3);
-    close(fd);
-  }
-#endif
-}
-
 void HttpServer::stop(const char* stopReason) {
   if (m_stopping.exchange(true)) return;
   // we're shutting down flush http logs
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
+  Process::OOMScoreAdj(1000);
   MarkShutdownStat(ShutdownEvent::SHUTDOWN_INITIATED);
-  oom_sacrifice();
 
   if (RuntimeOption::ServerKillOnTimeout) {
     int totalWait =
@@ -503,8 +501,8 @@ void HttpServer::stopOnSignal(int sig) {
   // we're shutting down flush http logs
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
+  Process::OOMScoreAdj(1000);
   MarkShutdownStat(ShutdownEvent::SHUTDOWN_INITIATED);
-  oom_sacrifice();
 
   // Signal to the main server thread to exit immediately if
   // we want to die on SIGTERM

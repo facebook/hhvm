@@ -18,11 +18,9 @@
 #define incl_HPHP_PROCESS_H_
 
 #include <string>
-#include <vector>
 
 #include <folly/portability/Unistd.h>
 
-#include <sys/types.h>
 #ifdef _MSC_VER
 # include <windows.h>
 #else
@@ -200,6 +198,15 @@ struct Process {
    * Set core dump filters to make sure hugetlb pages are included in coredumps.
    */
   static void SetCoreDumpHugePages();
+
+  /*
+   * Write to /proc/self/oom_score_adj (for Linux only).  This affects the OOM
+   * killer when it decides which process to kill.  Valid values are between
+   * -1000 and 1000.  Lower values makes it less likely for the process to be
+   * killed.  In particular, -1000 disables the OOM killer completely for the
+   * current process.  Returns whether adjustment was successful.
+   */
+  static bool OOMScoreAdj(int adj = 1000);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

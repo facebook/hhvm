@@ -827,6 +827,7 @@ struct RuntimeOption {
    *                                                                    \
    */                                                                   \
   F(int32_t, ForbidDynamicCalls, 0)                                     \
+  F(int32_t, ServerOOMAdj, 0)                                           \
   F(std::string, PreludePath, "")                                       \
   /* Use the CallM/RetM ABI to return multiple values via the stack for \
      inout functions */                                                 \

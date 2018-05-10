@@ -373,5 +373,18 @@ ProcStatus::ProcStatus() {
 #endif
 }
 
+bool Process::OOMScoreAdj(int adj) {
+#ifdef __linux__
+  if (adj >= -1000 && adj < 1000) {
+    if (auto f = fopen("/proc/self/oom_score_adj", "r+")) {
+      fprintf(f, "%d", adj);
+      fclose(f);
+      return true;
+    }
+  }
+#endif
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -117,6 +117,8 @@ int popen_impl(const char* cmd, const char* mode, pid_t* out_pid) {
   if (pid == 0) {
     // child
     mprotect_1g_pages(PROT_READ);
+    // If anything goes wrong, let the OOM killer kill this child process.
+    Process::OOMScoreAdj(1000);
     // replace stdin or stdout with the appropriate end
     // of the pipe
     if (p[child_pipe] == child_pipe) {
@@ -311,6 +313,7 @@ pid_t do_proc_open_helper(int afdt_fd) {
   pid_t child = fork();
   if (child == 0) {
     mprotect_1g_pages(PROT_READ);
+    Process::OOMScoreAdj(1000);
     for (int i = 0; i < pvals.size(); i++) {
       dup2(pkeys[i], pvals[i]);
     }
@@ -535,7 +538,9 @@ bool LightProcess::initShadow(int afdt_lid,
     g_procsCount = 0;
     close_fds(inherited_fds);
     ::close(afdt_lid);
-
+    // Tell the OOM killer never to kill a light process.  Killing it will cause
+    // the entire server to exit, and won't free much memory anyway.
+    Process::OOMScoreAdj(-1000);
     runShadow(afdt_fd);
   } else if (child < 0) {
     // failed

@@ -61,6 +61,7 @@ const int64_t ONE_SEC_IN_MICROSEC = 1000000;
 struct RequestInfo {
   GenCount  startTime;
   pthread_t pthreadId;
+  SessionKind sessionKind;
 };
 
 pthread_mutex_t s_genLock = PTHREAD_MUTEX_INITIALIZER;
@@ -168,7 +169,7 @@ void enqueueInternal(std::unique_ptr<WorkItem> gt) {
   }
 }
 
-void startRequest() {
+void startRequest(SessionKind session_kind) {
   auto const threadIdx = Treadmill::threadIdx();
 
   GenCount startTime = getTime();
@@ -177,12 +178,14 @@ void startRequest() {
     refreshStats();
     checkOldest();
     if (threadIdx >= s_inflightRequests.size()) {
-      s_inflightRequests.resize(threadIdx + 1, {kIdleGenCount, 0});
+      s_inflightRequests.resize(
+        threadIdx + 1, {kIdleGenCount, 0, SessionKind::None});
     } else {
       assertx(s_inflightRequests[threadIdx].startTime == kIdleGenCount);
     }
     s_inflightRequests[threadIdx].startTime = correctTime(startTime);
     s_inflightRequests[threadIdx].pthreadId = Process::GetThreadId();
+    s_inflightRequests[threadIdx].sessionKind = session_kind;
     FTRACE(1, "threadIdx {} pthreadId {} start @gen {}\n", threadIdx,
            s_inflightRequests[threadIdx].pthreadId,
            s_inflightRequests[threadIdx].startTime);
@@ -290,6 +293,64 @@ int64_t getAgeOldestRequest() {
 
 void deferredFree(void* p) {
   enqueue([p] { free(p); });
+}
+
+char const* getSessionKindName(SessionKind value) {
+  switch(value) {
+    case SessionKind::None: return "None";
+    case SessionKind::DebuggerClient: return "DebuggerClient";
+    case SessionKind::PreloadRepo: return "PreloadRepo";
+    case SessionKind::Watchman: return "Watchman";
+    case SessionKind::Vsdebug: return "VSDebug";
+    case SessionKind::FactsWorker: return "FactsWorker";
+    case SessionKind::CLIServer: return "CLIServer";
+    case SessionKind::AdminPort: return "AdminRequest";
+    case SessionKind::HttpRequest: return "HttpRequest";
+    case SessionKind::RpcRequest: return "RpcRequest";
+    case SessionKind::TranslateWorker: return "TranslateWorker";
+    case SessionKind::Retranslate: return "Retranslate";
+    case SessionKind::ProfData: return "ProfData";
+    case SessionKind::UnitTests: return "UnitTests";
+    case SessionKind::CompileRepo: return "CompileRepo";
+    case SessionKind::HHBBC: return "HHBBC";
+    case SessionKind::CompilerEmit: return "CompilerEmit";
+    case SessionKind::CompilerAnalysis: return "CompilerAnalysis";
+    case SessionKind::CLISession: return "CLISession";
+  }
+  return "";
+}
+
+std::string dumpTreadmillInfo() {
+  std::string out;
+  GenCountGuard g;
+  int64_t oldestStart =
+    s_oldestRequestInFlight.load(std::memory_order_relaxed);
+
+  folly::format(
+      &out,
+      "OldestStartTime: {}\n",
+      oldestStart
+  );
+
+  folly::format(
+      &out,
+      "InflightRequestsSize: {}\n",
+      s_inflightRequests.size()
+  );
+
+  for (auto& req : s_inflightRequests) {
+    if (req.startTime != kIdleGenCount) {
+      folly::format(
+          &out,
+          "{} {} {}{}\n",
+          req.pthreadId,
+          req.startTime,
+          getSessionKindName(req.sessionKind),
+          req.startTime == oldestStart ? " OLDEST" : ""
+      );
+    }
+  }
+  return out;
 }
 
 }}

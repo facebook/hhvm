@@ -111,7 +111,7 @@ struct TranslateWorker : JobQueueWorker<OptimizeData*, void*, true, true> {
   void doJob(OptimizeData* d) override {
     ProfileNonVMThread nonVM;
 
-    hphp_session_init();
+    hphp_session_init(Treadmill::SessionKind::TranslateWorker);
     SCOPE_EXIT {
       hphp_context_exit();
       hphp_session_exit();
@@ -295,7 +295,7 @@ void retranslateAll() {
     Logger::Info("retranslateAll: finished building the call graph");
   }
   if (RuntimeOption::EvalJitPGODumpCallGraph) {
-    Treadmill::Session ts;
+    Treadmill::Session ts(Treadmill::SessionKind::Retranslate);
 
     cg.printDot("/tmp/cg-pgo.dot",
                 [&](hfsort::TargetId targetId) -> const char* {
@@ -331,7 +331,7 @@ void retranslateAll() {
     std::lock_guard<std::mutex> lock{s_dispatcherMutex};
 
     {
-      Treadmill::Session session;
+      Treadmill::Session session(Treadmill::SessionKind::Retranslate);
       auto bufp = codeBuffer.get();
       for (int tid = 0; tid < cg.targets.size(); ++tid, bufp += initialSize) {
         auto const fid = target2FuncId[tid];
@@ -362,7 +362,7 @@ void retranslateAll() {
   }
 
   if (RuntimeOption::EvalJitPGODumpCallGraph) {
-    Treadmill::Session ts;
+    Treadmill::Session ts(Treadmill::SessionKind::Retranslate);
 
     print(cg, "/tmp/hotfuncs-pgo.txt", clusters, target2FuncId);
     if (serverMode) {

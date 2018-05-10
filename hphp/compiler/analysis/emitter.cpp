@@ -119,6 +119,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/packed-array.h"
@@ -12757,7 +12758,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
       wp_thread = std::thread([&] {
           Timer timer(Timer::WallTime, "running HHBBC");
           hphp_thread_init();
-          hphp_session_init();
+          hphp_session_init(Treadmill::SessionKind::CompilerEmit);
           SCOPE_EXIT {
             hphp_context_exit();
             hphp_session_exit();

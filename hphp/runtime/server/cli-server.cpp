@@ -144,6 +144,7 @@ way to determine how much progress the server made.
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/util/afdt-util.h"
@@ -1682,7 +1683,7 @@ folly::Optional<int> run_client(const char* sock_path,
     getcwd(cwd, PATH_MAX);
     cli_write(fd, cwd);
 
-    hphp_session_init();
+    hphp_session_init(Treadmill::SessionKind::CLIServer);
     SCOPE_EXIT {
       hphp_context_exit();
       hphp_session_exit();

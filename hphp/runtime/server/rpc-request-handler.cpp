@@ -36,6 +36,7 @@
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
@@ -65,7 +66,7 @@ RPCRequestHandler::~RPCRequestHandler() {
 }
 
 void RPCRequestHandler::initState() {
-  hphp_session_init();
+  hphp_session_init(Treadmill::SessionKind::RpcRequest);
   bool isServer =
     RuntimeOption::ServerExecutionMode() && !is_cli_mode();
   m_context = g_context.getNoCheck();

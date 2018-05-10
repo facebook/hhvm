@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/build-info.h"
 
@@ -977,7 +978,7 @@ bool serializeProfData(const std::string& filename) {
 
     Func::s_treadmill = true;
     hphp_thread_init();
-    hphp_session_init();
+    hphp_session_init(Treadmill::SessionKind::ProfData);
     requestInitProfData();
 
     SCOPE_EXIT {

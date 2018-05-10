@@ -51,6 +51,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
@@ -242,7 +243,7 @@ class AnalyzeWorker
     }
   }
   void onThreadEnter() override {
-    hphp_session_init();
+    hphp_session_init(Treadmill::SessionKind::CompilerAnalysis);
   }
   void onThreadExit() override {
     hphp_context_exit();

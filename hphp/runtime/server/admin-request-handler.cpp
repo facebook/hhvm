@@ -43,6 +43,7 @@
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/type-profile.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/json/ext_json.h"
@@ -232,7 +233,7 @@ void AdminRequestHandler::setupRequest(Transport* transport) {
   auto const cmd = transport->getCommand();
 
   if (strncmp(cmd.c_str(), "dump-apc", 8) == 0) {
-    hphp_session_init();
+    hphp_session_init(Treadmill::SessionKind::AdminPort);
   } else {
     g_context.getCheck();
   }
@@ -337,6 +338,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/advise-out-apc:  forcibly madvise out APC prime data\n"
         "/random-apc:      dump the key and size of a random APC entry\n"
         "    count         number of entries to return\n"
+        "/treadmill:       dump treadmill information\n"
 
         "/pcre-cache-size: get pcre cache map size\n"
         "/dump-pcre-cache: dump cached pcre's to /tmp/pcre_cache\n"
@@ -730,6 +732,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         handleRandomApcRequest(cmd, transport)) {
       break;
     }
+    if (cmd == "treadmill") {
+      transport->sendString(Treadmill::dumpTreadmillInfo());
+      break;
+    }
+
     if (cmd == "load-factor") {
       auto const factorStr = transport->getParam("set");
       if (factorStr.empty()) {

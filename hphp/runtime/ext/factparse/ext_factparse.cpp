@@ -38,6 +38,7 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/server/writer.h"
 #include "hphp/runtime/vm/extern-compiler.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/file.h"
 #include "hphp/util/process.h"
@@ -167,7 +168,7 @@ struct ParseFactsWorker: public BaseWorker<T> {
     parse(m_state, *(this->m_context), job);
   }
   void onThreadEnter() override {
-    hphp_session_init();
+    hphp_session_init(Treadmill::SessionKind::FactsWorker);
     m_state = T::init_state();
   }
   void onThreadExit() override {

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {
@@ -190,7 +191,7 @@ void DebuggerSession::runDummy() {
     SystemLib::s_inited ? "TRUE" : "FALSE"
   );
 
-  hphp_session_init();
+  hphp_session_init(Treadmill::SessionKind::Vsdebug);
   init_command_line_globals(0, nullptr, environ, 0,
                             RuntimeOption::ServerVariables,
                             RuntimeOption::EnvVariables);

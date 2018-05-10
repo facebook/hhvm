@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/compiler/analysis/emitter.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
 
@@ -48,7 +49,7 @@ inline void init_for_unit_test() {
   RuntimeOption::Load(ini, config);
   compile_file(0, 0, MD5(), 0);
   hphp_process_init();
-  hphp_session_init();
+  hphp_session_init(Treadmill::SessionKind::UnitTests);
 }
 
 }

@@ -29,6 +29,7 @@
 
 #include <folly/ScopeGuard.h>
 
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/base/program-functions.h"
 
 namespace HPHP { namespace HHBBC {
@@ -62,7 +63,7 @@ void for_each(const std::vector<Item>& inputs, Func func) {
     workers.push_back(std::thread([&] {
       try {
         hphp_thread_init();
-        hphp_session_init();
+        hphp_session_init(Treadmill::SessionKind::HHBBC);
         SCOPE_EXIT {
           hphp_context_exit();
           hphp_session_exit();
@@ -113,7 +114,7 @@ auto map(Items&& inputs, Func func) -> std::vector<decltype(func(inputs[0]))> {
     workers.push_back(std::thread([&] {
       try {
         hphp_thread_init();
-        hphp_session_init();
+        hphp_session_init(Treadmill::SessionKind::HHBBC);
         SCOPE_EXIT {
           hphp_context_exit();
           hphp_session_exit();

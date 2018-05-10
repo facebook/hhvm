@@ -37,6 +37,7 @@
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/stats.h"
@@ -375,7 +376,7 @@ void compile_repo() {
   std::unique_ptr<ArrayTypeTable::Builder> arrTable;
   auto wp_thread = std::thread([&] {
     hphp_thread_init();
-    hphp_session_init();
+    hphp_session_init(Treadmill::SessionKind::CompileRepo);
     SCOPE_EXIT {
       hphp_context_exit();
       hphp_session_exit();

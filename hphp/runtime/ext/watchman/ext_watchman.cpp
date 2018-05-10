@@ -51,6 +51,7 @@
 #include "hphp/runtime/ext/asio/socket-event.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/logger.h"
 
@@ -292,7 +293,7 @@ struct ActiveSubscription {
   // (PHP-CALLBACK entry-point) This manually gets a lock where needed but
   // avoids holding one most of the time as this can be a quite slow operation.
   void runCallback() {
-    hphp_session_init();
+    hphp_session_init(Treadmill::SessionKind::Watchman);
     auto context = g_context.getNoCheck();
     SCOPE_EXIT {
       hphp_context_exit();

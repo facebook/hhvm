@@ -311,7 +311,8 @@ struct ProfData {
   ProfData& operator=(const ProfData&) = delete;
 
   struct Session final {
-    Session() { requestInitProfData(); }
+    Session() : m_ts(Treadmill::SessionKind::ProfData)
+               { requestInitProfData(); }
     ~Session() { requestExitProfData(); }
     Session(Session&&) = delete;
     Session& operator=(Session&&) = delete;

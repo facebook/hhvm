@@ -37,6 +37,7 @@
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/hardware-counter.h"
@@ -366,7 +367,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   std::string tmpfile = HttpProtocol::RecordRequest(transport);
 
   // main body
-  hphp_session_init(transport);
+  hphp_session_init(Treadmill::SessionKind::HttpRequest, transport);
   ThreadInfo::s_threadInfo->m_reqInjectionData.
     setTimeout(requestTimeoutSeconds);
 

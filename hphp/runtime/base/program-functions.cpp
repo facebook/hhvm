@@ -654,7 +654,7 @@ void init_command_line_session(int argc, char** argv) {
   }
   StackTraceNoHeap::AddExtraLogging("Arguments", args.c_str());
 
-  hphp_session_init();
+  hphp_session_init(Treadmill::SessionKind::CLISession);
   auto const context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
 }
@@ -2450,7 +2450,8 @@ static bool hphp_warmup(ExecutionContext *context,
   return ret;
 }
 
-void hphp_session_init(Transport* transport) {
+void hphp_session_init(Treadmill::SessionKind session_kind,
+                       Transport* transport) {
   assertx(!s_sessionInitialized);
   g_context.getCheck();
   AsioSession::Init();
@@ -2459,7 +2460,7 @@ void hphp_session_init(Transport* transport) {
   tl_heap->resetExternalStats();
 
   g_thread_safe_locale_handler->reset();
-  Treadmill::startRequest();
+  Treadmill::startRequest(session_kind);
 
 #ifdef ENABLE_SIMPLE_COUNTER
   SimpleCounter::Enabled = true;

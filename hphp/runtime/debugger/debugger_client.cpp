@@ -30,6 +30,7 @@
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process-exec.h"
 #include "hphp/util/process.h"
@@ -800,7 +801,7 @@ void DebuggerClient::run() {
     m_macroPlaying->m_index = 0;
   }
 
-  hphp_session_init();
+  hphp_session_init(Treadmill::SessionKind::DebuggerClient);
   if (m_options.extension.empty()) {
     hphp_invoke_simple("", true); // warm-up only
   } else {

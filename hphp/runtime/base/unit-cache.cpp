@@ -436,10 +436,12 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     return rpathAcc->second.cachedUnit->cu;
   }();
 
-  if (path != rpath) {
-    NonRepoUnitCache::accessor pathAcc;
-    cache.insert(pathAcc, path);
-    updateStatInfo(pathAcc);
+  if (!cu.unit || !cu.unit->isICE()) {
+    if (path != rpath) {
+      NonRepoUnitCache::accessor pathAcc;
+      cache.insert(pathAcc, path);
+      updateStatInfo(pathAcc);
+    }
   }
 
   return cu;

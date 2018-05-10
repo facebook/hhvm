@@ -1920,6 +1920,8 @@ function strip_hhas_file($file) {
         || substr($s, 0, 7) === ".strict") {
       continue;
     }
+    // We have separate tests for srclocs, skip over them here
+    if (substr(trim($s), 0, 7) === '.srcloc') continue;
     $buf .= $s;
   }
   fclose($h);

@@ -2616,7 +2616,10 @@ void parse_property(AsmState& as) {
   auto const userTyStr = userTy ? userTy : staticEmptyString();
 
   std::string name;
-  if (!as.in.readword(name)) {
+  as.in.skipSpaceTab();
+  as.in.consumePred(!boost::is_any_of(" \t\r\n#;="),
+                    std::back_inserter(name));
+  if (name.empty()) {
     as.error("expected name for property");
   }
 

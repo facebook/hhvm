@@ -14,10 +14,10 @@ open HoverService
 module Test = Integration_test_base
 
 let pos_at (line1, column1) (line2, column2) =
-  Some (Pos.make_from_file_pos
+  Some (Pos.make_from_lnum_bol_cnum
     Relative_path.default
-    (File_pos.of_line_column_offset line1 (column1 - 1) 0)
-    (File_pos.of_line_column_offset line2 column2 0))
+    (line1, 0, column1 - 1)
+    (line2, 0, column2))
 
 let class_members = "<?hh // strict
 abstract class ClassMembers {

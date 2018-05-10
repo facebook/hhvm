@@ -62,13 +62,9 @@ let emit_save_label_id id =
 
 let get_pos_for_error env =
   let aux_pos p =
-    let pos_file, line = match p with
-      | None -> Relative_path.default, 1
-      | Some p -> Pos.filename p, Pos.line p in
-    (* Drop column info *)
-    let pos_start = File_pos.of_line_column_offset ~line ~column:0 ~offset:0 in
-    let pos_end = pos_start in
-    Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
+    match p with
+      | None -> Pos.none
+      | Some p -> Pos.first_char_of_line p
   in
   let rec aux_scope = function
     | Ast_scope.ScopeItem.Function fd :: _ ->

@@ -236,21 +236,11 @@ let level_of_type_mapper fn =
 (* "$vc" and "$vc->getUserID()" and "$user = $vc->getUserID()".        *)
 (* That's why we sometimes want to merge adjacent/overlapping results. *)
 let merge_adjacent_results (results: result) : result =
-  let does_pos_end_after_apos_starts ~pos ~apos =
-    let comparison = File_pos.compare (Pos.pos_end pos) (Pos.pos_start apos) in
-    (comparison > 0)
-  in
-  let merge_adjacent_pos ~pos ~apos =
-    let pos_file = Pos.filename pos in
-    let pos_start = Pos.pos_start pos in
-    let pos_end = Pos.pos_end apos in
-    Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
-  in
   let maybe_merge_accu (pos, level) = function
     | [] ->
         [(pos, level)]
-    | (apos, _) :: accu when does_pos_end_after_apos_starts ~pos ~apos ->
-        (merge_adjacent_pos ~pos ~apos, level) :: accu
+    | (apos, _) :: accu when Pos.overlaps pos apos ->
+        (Pos.btw pos apos, level) :: accu
     | (apos, _) :: accu ->
         (pos, level) :: (apos, level) :: accu
   in

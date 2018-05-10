@@ -40,7 +40,7 @@ let make_docblock_finder (comments: (Pos.t * Prim_defs.comment) list) : finder =
   let comments = Array.of_list (
     List.rev_map comments ~f:begin fun (pos, cmt) ->
       let str = Prim_defs.string_of_comment cmt in
-      (File_pos.line (Pos.pos_end pos), str, Prim_defs.is_line_comment cmt)
+      (Pos.end_line pos, str, Prim_defs.is_line_comment cmt)
     end
   ) in
   { comments }

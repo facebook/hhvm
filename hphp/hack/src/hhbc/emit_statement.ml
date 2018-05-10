@@ -1189,17 +1189,7 @@ let emit_dropthrough_return env =
   match !default_dropthrough with
   | Some instrs -> instrs
   | _ ->
-    let last_pos =
-      if !function_pos = Pos.none then Pos.none
-      else begin
-        let pos_file = Pos.filename !function_pos in
-        let pos_end = Pos.pos_end !function_pos in
-        Pos.make_from_file_pos
-          ~pos_file
-          ~pos_start:pos_end
-          ~pos_end
-      end in
-    Emit_pos.emit_pos_then last_pos @@
+    Emit_pos.emit_pos_then (Pos.last_char !function_pos) @@
     gather [!default_return_value; emit_return ~need_ref:false env]
 
 let rec emit_final_statement env s =

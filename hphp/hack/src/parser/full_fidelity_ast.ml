@@ -159,10 +159,8 @@ let pFunction node env =
     begin match syntax h with
     | FunctionDeclarationHeader { function_keyword = f; _ }
       when not (is_missing f) ->
-      let pos_start = Pos.pos_start @@ pPos f env in
-      let pos_end = Pos.pos_end p in
-      let pos_file = env.file in
-      Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
+      (* For continuation compilation, we end up with spans across files :-( *)
+      Pos.btw_nocheck (pPos f env) p
     | _ -> p
     end
   | _ -> p
@@ -2686,7 +2684,7 @@ let pProgram : program parser = fun node env ->
       let () = env.ignore_pos <- false in
       let pos = pPos cur_node env in
       (* __COMPILER_HALT_OFFSET__ takes value equal to halt_compiler's end position *)
-      let s = File_pos.offset @@ Pos.pos_end pos in
+      let s = Pos.end_cnum pos in
       let () = env.saw_compiler_halt_offset <- Some s in
       env.ignore_pos <- local_ignore_pos
       end;
@@ -2840,8 +2838,8 @@ let elaborate_toplevel_and_std_constants ast env source_text =
         method! on_expr env expr =
           match expr with
           | p, True | p, False | p, Null when p <> Pos.none ->
-            let s = File_pos.offset @@ Pos.pos_start p in
-            let e = File_pos.offset @@ Pos.pos_end p in
+            let s = Pos.start_cnum p in
+            let e = Pos.end_cnum p in
             let text = SourceText.sub source_text s (e - s) in
             let was_renamed, _ =
               NS.elaborate_id_impl
@@ -2869,7 +2867,7 @@ let elaborate_halt_compiler ast env source_text  =
         method! on_expr env expr =
           match expr with
           | p, Id (_, "__COMPILER_HALT_OFFSET__") ->
-            let start_offset = File_pos.offset @@ Pos.pos_start p in
+            let start_offset = Pos.start_cnum p in
             (* Construct a new position and id *)
             let id = string_of_int x in
             let end_offset = start_offset + (String.length id) in

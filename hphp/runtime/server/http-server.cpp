@@ -50,11 +50,9 @@
 
 #include <signal.h>
 
-extern "C" {
 #ifdef __linux__
-  void DisableFork() __attribute__((__weak__));
+void DisableFork() __attribute__((__weak__));
 #endif
-}
 
 namespace HPHP {
 

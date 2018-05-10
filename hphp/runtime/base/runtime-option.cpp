@@ -588,6 +588,11 @@ static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }
 
+static inline uint32_t hotTextHugePagesDefault() {
+  if (!hugePagesSoundNice()) return 0;
+  return arch() == Arch::ARM ? 12 : 8;
+}
+
 static inline int nsjrDefault() {
   return RuntimeOption::ServerExecutionMode() ? 20 : 0;
 }

@@ -988,7 +988,7 @@ function hhvm_cmd_impl() {
       $args[] = '-vEval.HackCompilerUseEmbedded=false';
 
       // T29079834: Is Expr Migration
-      $args[] = '-vEval.EnableIsExprPrimitiveMigration=0';
+      $args[] = '-vHack.Lang.EnableIsExprPrimitiveMigration=0';
 
       // TODO(paulbiss): support these
       $args[] = '-vEval.DisassemblerPropDocComments=0';

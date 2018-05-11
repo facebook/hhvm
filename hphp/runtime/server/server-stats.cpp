@@ -199,10 +199,11 @@ void ServerStats::Aggregate(list<TimeSlot*>& slots,
   }
 
   // Hack: These two are not really page specific.
-  int load = HttpServer::Server->getPageServer()->getActiveWorker();
-  int idle = RuntimeOption::ServerThreadCount - load;
-  int queued = HttpServer::Server->getPageServer()->getQueuedJobs();
-  int health_level = (int)ServerStats::m_ServerHealthLevel;
+  auto const server = HttpServer::Server->getPageServer();
+  auto const load = server->getActiveWorker();
+  auto const idle = server->getMaxThreadCount() - load;
+  auto const queued = server->getQueuedJobs();
+  auto const health_level = (int)ServerStats::m_ServerHealthLevel;
 
   for (auto const& s : slots) {
     int sec = (s->m_time == 0 ? slotCount : 1) *

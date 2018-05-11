@@ -114,6 +114,9 @@ struct FastCGIServer : public Server,
 
   // Query information about the worker pool
   JobQueueDispatcher<FastCGIWorker>& getDispatcher() { return m_dispatcher; }
+  size_t getMaxThreadCount() override {
+    return m_dispatcher.getMaxThreadCount();
+  }
   int getActiveWorker() override { return m_dispatcher.getActiveWorker(); }
   int getQueuedJobs()   override { return m_dispatcher.getQueuedJobs();   }
 

@@ -110,6 +110,9 @@ struct ProxygenServer : Server,
   void start() override;
   void waitForEnd() override;
   void stop() override;
+  size_t getMaxThreadCount() override {
+    return m_dispatcher.getMaxThreadCount();
+  }
   int getActiveWorker() override {
     return m_dispatcher.getActiveWorker();
   }

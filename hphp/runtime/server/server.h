@@ -257,6 +257,11 @@ public:
   virtual void stop() = 0;
 
   /**
+   * How many threads can be available for handling requests.
+   */
+  virtual size_t getMaxThreadCount() = 0;
+
+  /**
    * How many threads are actively working on handling requests.
    */
   virtual int getActiveWorker() = 0;

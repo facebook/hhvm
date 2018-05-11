@@ -116,6 +116,9 @@ struct InternalPageServer : SatelliteServer {
     m_server->stop();
     m_server->waitForEnd();
   }
+  virtual size_t getMaxThreadCount() {
+    return m_server->getActiveWorker();
+  }
   virtual int getActiveWorker() {
     return m_server->getActiveWorker();
   }
@@ -162,6 +165,9 @@ struct RPCServer : SatelliteServer {
   virtual void stop() {
     m_server->stop();
     m_server->waitForEnd();
+  }
+  virtual size_t getMaxThreadCount() {
+    return m_server->getActiveWorker();
   }
   virtual int getActiveWorker() {
     return m_server->getActiveWorker();

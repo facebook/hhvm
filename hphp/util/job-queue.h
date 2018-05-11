@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_UTIL_JOB_QUEUE_H_
 #define incl_HPHP_UTIL_JOB_QUEUE_H_
 
+#include <atomic>
 #include <memory>
 #include <set>
 #include <time.h>
@@ -506,7 +507,7 @@ struct JobQueueDispatcher : IHostHealthObserver {
     if (!TWorker::CountActive) {
       // If TWorker does not support counting the number of
       // active workers, just start all of the workers eagerly
-      for (int i = 0; i < m_maxThreadCount; i++) {
+      for (int i = 0; i < maxThreadCount; i++) {
         addWorkerImpl(false);
       }
     }
@@ -519,6 +520,10 @@ struct JobQueueDispatcher : IHostHealthObserver {
     for (auto func : m_funcs) delete func;
     for (auto worker : m_stoppedWorkers) delete worker;
     for (auto worker : m_workers) delete worker;
+  }
+
+  size_t getMaxThreadCount() const {
+    return m_maxThreadCount.load(std::memory_order_acquire);
   }
 
   int getActiveWorker() {
@@ -592,8 +597,9 @@ struct JobQueueDispatcher : IHostHealthObserver {
     Lock lock(m_mutex);
     if (m_stopped) return;
 
-    auto const n = m_maxThreadCount - m_currThreadCountLimit;
-    m_currThreadCountLimit = m_maxThreadCount;
+    auto const mtc = m_maxThreadCount.load(std::memory_order_acquire);
+    auto const n = mtc - m_currThreadCountLimit;
+    m_currThreadCountLimit = mtc;
 
     if (!TWorker::CountActive) {
       for (int i = 0; i < n; ++i) {
@@ -710,11 +716,12 @@ struct JobQueueDispatcher : IHostHealthObserver {
     // maximum thread count happened to be the same, under conditions where we
     // don't want saturation (except by chance).  We rely on the client to
     // avoid this situation.
-    m_currThreadCountLimit = m_maxThreadCount == m_currThreadCountLimit
-      ? mtc
-      : std::min(mtc, m_currThreadCountLimit);
+    m_currThreadCountLimit =
+      m_maxThreadCount.load(std::memory_order_acquire) == m_currThreadCountLimit
+        ? mtc
+        : std::min(mtc, m_currThreadCountLimit);
 
-    m_maxThreadCount = mtc;
+    m_maxThreadCount.store(mtc, std::memory_order_release);
 
     // If we have fewer active threads than the new maximum, we're done.
     if (m_workers.size() <= mtc) return;
@@ -734,7 +741,7 @@ private:
   const bool m_startReaperThread;
   HealthLevel m_healthStatus{HealthLevel::Bold};
   typename TWorker::ContextType m_context;
-  int m_maxThreadCount;
+  std::atomic<int> m_maxThreadCount;
   const int m_maxQueueCount;    // not including the possible reaper
   int m_currThreadCountLimit;   // initial limit can be lower than max
   int m_hugeThreadCount{0};

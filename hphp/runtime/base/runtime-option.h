@@ -772,8 +772,9 @@ struct RuntimeOption {
    * as determined by JitSampleRate. When set to a non-empty string all
    * translations will be logged, and run_key column will be logged with
    * the value of this option. */                                       \
-  F(string,   JitLogAllInlineRegions,      "")                          \
-  F(uint32_t, JitFilterLease,              1)                           \
+  F(string,   JitLogAllInlineRegions,  "")                              \
+  F(bool, JitProfileGuardTypes,        false)                           \
+  F(uint32_t, JitFilterLease,          1)                               \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(uint64_t, PCREExpireInterval, 2 * 60 * 60)                          \

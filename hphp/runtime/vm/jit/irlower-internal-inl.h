@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/irlower.h"
+#include "hphp/runtime/vm/jit/guard-type-profile.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/type-specialization.h"
 #include "hphp/runtime/vm/jit/vasm.h"
@@ -186,6 +187,10 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
 
   // Nothing to check.
   if (type == TGen) return;
+
+  if (RuntimeOption::EvalJitProfileGuardTypes) {
+    emitProfileGuardType(v, type);
+  }
 
   auto const cc = [&] {
 

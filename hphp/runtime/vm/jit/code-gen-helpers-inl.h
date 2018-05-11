@@ -16,8 +16,11 @@
 
 #include "hphp/runtime/base/header-kind.h"
 
+#include "hphp/runtime/vm/jit/guard-type-profile.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
+
+#include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
@@ -41,6 +44,14 @@ inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
 
 inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
   v << cmpbi{s0, s1, sf};
+}
+
+template<typename TLoc>
+inline void emitCmpTVTypeRefCounted(Vout& v, Vreg sf, TLoc s1) {
+  if (RuntimeOption::EvalJitProfileGuardTypes) {
+    emitProfileGuardType(v, TUncounted);
+  }
+  emitCmpTVType(v, sf, KindOfRefCountThreshold, s1);
 }
 
 inline Vreg emitMaskTVType(Vout& v, Immed s0, Vreg s1) {

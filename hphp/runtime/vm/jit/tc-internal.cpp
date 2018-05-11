@@ -25,8 +25,9 @@
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/debugger.h"
-#include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/guard-type-profile.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
@@ -229,6 +230,9 @@ void requestInit() {
 void requestExit() {
   Stats::dump();
   Stats::clear();
+  if (RuntimeOption::EvalJitProfileGuardTypes) {
+    logGuardProfileData();
+  }
   Timer::RequestExit();
   if (profData()) profData()->maybeResetCounters();
   requestExitProfData();

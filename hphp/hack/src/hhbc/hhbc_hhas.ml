@@ -1761,9 +1761,9 @@ let add_typedef buf typedef =
     B.add_string buf " \"\"\"";
     B.add_string buf @@ SS.seq_to_string @@
       Emit_adata.adata_to_string_seq ts;
-    B.add_string buf "\"\"\";\n"
+    B.add_string buf "\"\"\";"
   | None ->
-    B.add_string buf ";\n"
+    B.add_string buf ";"
 
 let add_include_region
     ?path ?doc_root ?search_paths ?include_roots ?(check_paths_exist=true)

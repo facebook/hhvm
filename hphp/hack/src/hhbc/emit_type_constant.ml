@@ -74,14 +74,17 @@ let check_shape_key (pos, name) =
   then Emit_fatal.raise_fatal_parse
     pos "Shape key names may not start with integers"
 
-let shape_field_name = function
+let shape_field_name ~namespace = function
   | A.SFlit ((_, s) as id) ->
     check_shape_key id;
     s, false
-  | A.SFclass_const ((_, id), (_, s)) -> id ^ "::" ^ s, true
+  | A.SFclass_const (id, (_, s)) ->
+    let classname, _ = Hhbc_id.Class.elaborate_id namespace id in
+    let id = Hhbc_id.Class.to_raw_string classname in
+    id ^ "::" ^ s, true
 
 let rec shape_field_to_pair ~tparams ~namespace sf =
-  let name, is_class_const = shape_field_name sf.A.sf_name in
+  let name, is_class_const = shape_field_name ~namespace sf.A.sf_name in
   let is_optional = sf.A.sf_optional in
   let hint = sf.A.sf_hint in
   let class_const =

@@ -1190,6 +1190,18 @@ let do_documentRangeFormatting
   do_formatting_common conn ref_unblocked_time editor_open_files action
 
 
+let do_signatureHelp
+  (conn: server_conn)
+  (ref_unblocked_time: float ref)
+  (params: SignatureHelp.params)
+: SignatureHelp.result =
+  let (file, line, column) = lsp_file_position_to_hack params in
+  let command =
+    ServerCommandTypes.IDE_SIGNATURE_HELP (ServerCommandTypes.FileName file, line, column)
+  in
+  rpc conn ref_unblocked_time command
+
+
 let do_documentOnTypeFormatting
     (conn: server_conn)
     (ref_unblocked_time: float ref)
@@ -1464,7 +1476,7 @@ let do_initialize () : Initialize.result =
         resolveProvider = true;
         completion_triggerCharacters = ["$"; ">"; "\\"; ":"; "<"];
       };
-      signatureHelpProvider = None;
+      signatureHelpProvider = Some { sighelp_triggerCharacters = ["("; ","] };
       definitionProvider = true;
       referencesProvider = true;
       documentHighlightProvider = true;
@@ -2111,6 +2123,13 @@ let handle_event
   (* textDocument/didSave notification *)
   | Main_loop _menv, Client_message c when c.method_ = "textDocument/didSave" ->
     ()
+
+  (* textDocument/signatureHelp notification *)
+  | Main_loop menv, Client_message c when c.method_ = "textDocument/signatureHelp" ->
+    parse_textDocumentPositionParams c.params
+    |> do_signatureHelp menv.conn ref_unblocked_time
+    |> print_signatureHelp
+    |> Jsonrpc.respond to_stdout c
 
   (* server busy status *)
   | _, Server_message {push=ServerCommandTypes.BUSY_STATUS status; _} ->

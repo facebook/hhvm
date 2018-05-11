@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
 module SyntaxError = Full_fidelity_syntax_error
 open Prim_defs
 open Hh_core
@@ -2901,27 +2902,22 @@ let lower env ~source_text ~script : result =
 end (* FromPositionedSyntax *)
 
 (* TODO: Make these not default to positioned_syntax *)
-module PosSyntax = Full_fidelity_positioned_syntax
-
-module CoroutineSC = Coroutine_smart_constructor.WithSyntax(PosSyntax)
-
-module SyntaxTree_ = Full_fidelity_syntax_tree
-  .WithSyntax(PosSyntax)
-module SyntaxTree = SyntaxTree_.WithSmartConstructors(CoroutineSC)
-
-module ParserErrors_ = Full_fidelity_parser_errors
-  .WithSyntax(PosSyntax)
+include Full_fidelity_ast_types
+module ParserErrors_ = Full_fidelity_parser_errors.WithSyntax(PositionedSyntax)
 module ParserErrors = ParserErrors_.WithSmartConstructors(CoroutineSC)
 
 module SourceText = Full_fidelity_source_text
-module DeclModeSC = DeclModeSmartConstructors.WithSyntax(PosSyntax)
-module DeclModeParser_ = Full_fidelity_parser.WithSyntax(PosSyntax)
+module DeclModeSC = DeclModeSmartConstructors.WithSyntax(PositionedSyntax)
+module DeclModeParser_ = Full_fidelity_parser.WithSyntax(PositionedSyntax)
 module DeclModeParser = DeclModeParser_.WithSmartConstructors(DeclModeSC)
-module FromPositionedSyntax = WithPositionedSyntax(PosSyntax)
+module FromPositionedSyntax = WithPositionedSyntax(PositionedSyntax)
 module FromEditablePositionedSyntax =
   WithPositionedSyntax(Full_fidelity_editable_positioned_syntax)
 
-let from_text (env : env) (source_text : SourceText.t) : result =
+let parse_text
+  (env : env)
+  (source_text : SourceText.t)
+: (FileInfo.file_type * FileInfo.mode option * PositionedSyntaxTree.t) =
   let lang, mode = Full_fidelity_parser.get_language_and_mode source_text in
   let tree =
     let env' =
@@ -2938,11 +2934,20 @@ let from_text (env : env) (source_text : SourceText.t) : result =
       let parser = DeclModeParser.make env' source_text in
       let (parser, root) = DeclModeParser.parse_script parser in
       let errors = DeclModeParser.errors parser in
-      SyntaxTree.create source_text root errors lang mode false
+      PositionedSyntaxTree.create source_text root errors lang mode false
     else
-      SyntaxTree.make ~env:env' source_text
+      PositionedSyntaxTree.make ~env:env' source_text
   in
-  let lower_coroutines = env.lower_coroutines && SyntaxTree.sc_state tree in
+  (lang, mode, tree)
+
+let lower_tree
+  (env : env)
+  (source_text : SourceText.t)
+  (lang : FileInfo.file_type)
+  (mode : FileInfo.mode option)
+  (tree : PositionedSyntaxTree.t)
+: result =
+  let lower_coroutines = env.lower_coroutines && PositionedSyntaxTree.sc_state tree in
   let () =
     if env.codegen && not lower_coroutines then
       let hhvm_compat_mode = if env.systemlib_compat_mode
@@ -2978,7 +2983,7 @@ let from_text (env : env) (source_text : SourceText.t) : result =
       let is_hhi =
         String_utils.string_ends_with Relative_path.(suffix env.file) "hhi"
       in
-      match List.last (SyntaxTree.all_errors tree) with
+      match List.last (PositionedSyntaxTree.all_errors tree) with
       | None when is_hhi -> ()
       | None ->
         let errors : SyntaxError.t list =
@@ -3011,7 +3016,7 @@ let from_text (env : env) (source_text : SourceText.t) : result =
   let popt = ParserOptions.with_disallow_elvis_space popt
     env.disallow_elvis_space in
   let env = { env with parser_options = popt } in
-  let script = SyntaxTree.root tree in
+  let script = PositionedSyntaxTree.root tree in
   if lower_coroutines
   then
     let script =
@@ -3027,6 +3032,10 @@ let from_text (env : env) (source_text : SourceText.t) : result =
       env
       ~source_text
       ~script
+
+let from_text (env : env) (source_text : SourceText.t) : result =
+  let (lang, mode, tree) = parse_text env source_text in
+  lower_tree env source_text lang mode tree
 
 let from_file (env : env) : result =
   let source_text = SourceText.from_file env.file in

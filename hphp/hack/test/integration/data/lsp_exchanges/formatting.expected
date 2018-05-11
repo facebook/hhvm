@@ -24,6 +24,12 @@
             "<"
           ]
         },
+        "signatureHelpProvider": {
+          "triggerCharacters": [
+            "(",
+            ","
+          ]
+        },
         "definitionProvider": true,
         "referencesProvider": true,
         "documentHighlightProvider": true,
@@ -36,14 +42,6 @@
         "typeCoverageProvider": true,
         "rageProvider": true
       }
-    }
-  },
-  {
-    "jsonrpc": "2.0",
-    "method": "telemetry/event",
-    "params": {
-      "type": 4,
-      "message": "Version in hhconfig=[NoVersion]"
     }
   },
   {
@@ -69,5 +67,13 @@
     "jsonrpc": "2.0",
     "id": 3,
     "result": null
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "telemetry/event",
+    "params": {
+      "type": 4,
+      "message": "Version in hhconfig=[NoVersion]"
+    }
   }
 ]

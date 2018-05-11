@@ -16,6 +16,7 @@ type t = {
   tco_migration_flags : SSet.t;
   tco_dynamic_view : bool;
   tco_disallow_unsafe_comparisons : bool;
+  tco_disallow_non_arraykey_keys : bool;
   po_auto_namespace_map : (string * string) list;
   po_enable_hh_syntax_for_hhvm : bool;
   po_deregister_php_stdlib : bool;
@@ -187,6 +188,7 @@ let default = {
  tco_migration_flags = SSet.empty;
  tco_dynamic_view = false;
  tco_disallow_unsafe_comparisons = false;
+ tco_disallow_non_arraykey_keys = false;
  po_auto_namespace_map = [];
  po_enable_hh_syntax_for_hhvm = false;
  po_deregister_php_stdlib = false;
@@ -222,6 +224,7 @@ let make ~tco_assume_php
          ~tco_migration_flags
          ~tco_dynamic_view
          ~tco_disallow_unsafe_comparisons
+         ~tco_disallow_non_arraykey_keys
          ~po_auto_namespace_map
          ~tco_disallow_ambiguous_lambda
          ~tco_disallow_array_typehint
@@ -236,6 +239,7 @@ let make ~tco_assume_php
                    tco_migration_flags;
                    tco_dynamic_view;
                    tco_disallow_unsafe_comparisons;
+                   tco_disallow_non_arraykey_keys;
                    po_auto_namespace_map;
                    po_enable_hh_syntax_for_hhvm = false;
                    ignored_fixme_codes;
@@ -261,6 +265,8 @@ let tco_dynamic_view t =
   t.tco_dynamic_view
 let tco_disallow_unsafe_comparisons t =
   t.tco_disallow_unsafe_comparisons
+let tco_disallow_non_arraykey_keys t =
+  t.tco_disallow_non_arraykey_keys
 let po_auto_namespace_map t = t.po_auto_namespace_map
 let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
 let po_use_full_fidelity t = t.po_use_full_fidelity

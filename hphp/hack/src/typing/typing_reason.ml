@@ -76,6 +76,7 @@ type t =
   | Rusing           of Pos.t
   | Rdynamic_prop    of Pos.t
   | Rdynamic_call    of Pos.t
+  | Ridx_dict        of Pos.t
 
 and expr_dep_type_reason =
   | ERexpr of int
@@ -213,7 +214,8 @@ let rec to_string prefix r =
     [(p, prefix ^ ", the result of accessing a property of a dynamic type")]
   | Rdynamic_call p ->
     [(p, prefix ^ ", the result of calling a dynamic type as a function")]
-
+  | Ridx_dict _ -> [(p, prefix ^
+    " because only array keys can be used to index into a Map, dict, darray, Set, or keyset")]
 
 
 and to_pos = function
@@ -279,6 +281,7 @@ and to_pos = function
   | Rusing p -> p
   | Rdynamic_prop p -> p
   | Rdynamic_call p -> p
+  | Ridx_dict p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -373,6 +376,7 @@ let pp fmt r =
     | Rusing _ -> "Rusing"
     | Rdynamic_prop _ -> "Rdynamic_prop"
     | Rdynamic_call _ -> "Rdynamic_call"
+    | Ridx_dict _ -> "Ridx_dict"
 
 type ureason =
   | URnone

@@ -89,6 +89,7 @@ let rec reason = function
   | Rusing p                 -> Rusing (pos p)
   | Rdynamic_prop p          -> Rdynamic_prop (pos p)
   | Rdynamic_call p          -> Rdynamic_call (pos p)
+  | Ridx_dict p              -> Ridx_dict (pos p)
 let string_id (p, x) = pos p, x
 
 let rec ty (p, x) =

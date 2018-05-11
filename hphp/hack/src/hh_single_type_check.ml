@@ -157,6 +157,7 @@ let parse_options () =
   let disallow_elvis_space = ref false in
   let dynamic_view = ref false in
   let allow_unsafe_comparisons = ref false in
+  let allow_non_arraykey_keys = ref false in
   let hacksperimental = ref false in
   let void_is_type_of_null = ref false in
   let parser = ref Legacy in
@@ -309,6 +310,10 @@ let parse_options () =
     "--allow-unsafe-comparisons",
         Arg.Set allow_unsafe_comparisons,
         " Allow unsafe comparisons, e.g. > where the args aren't strings/ints/DateTimes";
+    "--allow-non-arraykey-keys",
+        Arg.Set allow_non_arraykey_keys,
+        " Allow values of types other than int and string as keys \
+        in literal Maps, Sets, dicts, keysets, and darrays";
     "--hacksperimental",
         Arg.Set hacksperimental,
         " Enable experimental Hack features";
@@ -333,6 +338,7 @@ let parse_options () =
       GlobalOptions.po_disallow_elvis_space = !disallow_elvis_space;
       GlobalOptions.tco_dynamic_view = !dynamic_view;
       GlobalOptions.tco_disallow_unsafe_comparisons = not !allow_unsafe_comparisons;
+      GlobalOptions.tco_disallow_non_arraykey_keys = not !allow_non_arraykey_keys;
   } in
   let tcopt = {
     tcopt with

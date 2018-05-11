@@ -1639,11 +1639,11 @@ function skip_test($options, $test) {
   if (isset($options['hack-only']) &&
       substr($test, -5) !== '.hhas' &&
       !is_hack_file($options, $test)) {
-    return true;
+    return 'skip-hack-only';
   }
 
   if (isset($options['cli-server']) && !can_run_server_test($test)) {
-    return true;
+    return 'skip-server';
   }
 
   $skipif_test = find_test_ext($test, 'skipif');
@@ -1685,7 +1685,7 @@ function skip_test($options, $test) {
     return false;
   }
 
-  return strlen($output) != 0;
+  return strlen($output) === 0 ? false : 'skip-skipif';
 }
 
 function comp_line($l1, $l2, $is_reg) {
@@ -2199,7 +2199,7 @@ function run_config_post($outputs, $test, $options) {
   if ($passed === false && $repeats) {
     // $repeats can cause the regex to become too big, and fail
     // to compile.
-    return 'skip';
+    return 'skip-repeats-fail';
   }
   if (!$passed) {
     $diff = generate_diff($wanted_re, $wanted_re, $output);
@@ -2224,7 +2224,7 @@ function timeout_prefix() {
 
 function run_one_config($options, $test, $cmd, $cmd_env) {
   if (is_array($cmd)) {
-    $result = 'skip';
+    $result = 'skip-empty-cmd';
     foreach ($cmd as $c) {
       $result = run_one_config($options, $test, $c, $cmd_env);
       if (!$result) return $result;
@@ -2275,10 +2275,12 @@ function run_and_lock_test($options, $test) {
   }
   if ($failmsg !== "") {
     Status::fail($test, $time, $stime, $etime, $failmsg);
-  } else if ($status === 'skip') {
-    Status::skip($test, null, $time, $stime, $etime);
-  } else if (is_string($status) && substr($status, 0, 5) === 'skip-') {
-    Status::skip($test, substr($status, 5), $time, $stime, $etime);
+  } else if (is_string($status) && substr($status, 0, 4) === 'skip') {
+    if (strlen($status) > 5 && substr($status, 0, 5) === 'skip-') {
+      Status::skip($test, substr($status, 5), $time, $stime, $etime);
+    } else {
+      Status::fail($test, $time, $stime, $etime, "invalid skip status $status");
+    }
   } else if ($status) {
     Status::pass($test, $status, $time, $stime, $etime);
   } else {
@@ -2287,8 +2289,9 @@ function run_and_lock_test($options, $test) {
 }
 
 function run_typechecker_test($options, $test) {
-  if (skip_test($options, $test)) return 'skip';
-  if (!file_exists($test . ".hhconfig")) return 'skip';
+  $skip_reason = skip_test($options, $test);
+  if ($skip_reason !== false) return $skip_reason;
+  if (!file_exists($test . ".hhconfig")) return 'skip-no-hhconfig';
   list($hh_server, $hh_server_env, $temp_dir) = hh_server_cmd($options, $test);
   $result =  run_one_config($options, $test, $hh_server, $hh_server_env);
   // Remove the temporary directory.
@@ -2330,7 +2333,8 @@ function get_hhvm_compiler_frontend($options, $test) {
 }
 
 function run_test($options, $test) {
-  if (skip_test($options, $test)) return 'skip';
+  $skip_reason = skip_test($options, $test);
+  if ($skip_reason !== false) return $skip_reason;
 
   // Skip any tests that would require HPHPC for HackC-only features
   // If the test_name.onlyhackc exists or the folder has .onlyhackc
@@ -2360,12 +2364,12 @@ function run_test($options, $test) {
   if (has_multi_request_mode($options)) {
     if (isset($options['jit-serialize']) || isset($options['cli-server'])) {
       if (preg_grep('/ --count[ =][0-9]+ /', (array)$hhvm)) {
-        return 'skip';
+        return 'skip-count';
       }
     } else {
       if (preg_grep('/ --count[ =][0-9]+ .* --count[ =][0-9]+ /',
                     (array)$hhvm)) {
-        return 'skip';
+        return 'skip-count';
       }
     }
   }
@@ -2445,7 +2449,7 @@ function run_test($options, $test) {
   }
 
   if (isset($options['hhas-round-trip'])) {
-    if (substr($test, -5) === ".hhas") return 'skip';
+    if (substr($test, -5) === ".hhas") return 'skip-hhas';
     $hhas_temp = dump_hhas_to_temp($hhvm, $test);
     if ($hhas_temp === false) {
       $err = "system failed: " .
@@ -2459,7 +2463,7 @@ function run_test($options, $test) {
 
   // Compare the output of Hack code gen with that of HHVM
   if (isset($options['compare-hh-codegen'])) {
-    if (substr($test, -5) === ".hhas") return 'skip';
+    if (substr($test, -5) === ".hhas") return 'skip-hhas';
 
     $diff = $test.'.diff';
 
@@ -2630,6 +2634,7 @@ function print_commands($tests, $options) {
 function msg_loop($num_tests, $queue) {
   $passed = 0;
   $skipped = 0;
+  $skip_reasons = array();
   $failed = 0;
 
   $do_progress =
@@ -2717,6 +2722,7 @@ function msg_loop($num_tests, $queue) {
       case Status::MSG_TEST_SKIP:
         $skipped++;
         list($test, $reason, $time, $stime, $etime) = $message;
+        $skip_reasons[$reason]++;
 
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
@@ -2804,6 +2810,10 @@ function msg_loop($num_tests, $queue) {
     print "\033[2K\033[1G";
     if ($skipped > 0) {
       print "$skipped tests \033[1;33mskipped\033[0m\n";
+      arsort($skip_reasons);
+      foreach ($skip_reasons as $reason => $count) {
+        printf("%12s: %d\n", $reason, $count);
+      }
     }
   }
 }

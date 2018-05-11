@@ -1792,9 +1792,9 @@ let add_typedef buf typedef =
   | Some ts ->
     Acc.add buf " \"\"\"";
     Emit_adata.adata_to_buffer buf ts;
-    Acc.add buf "\"\"\";\n"
+    Acc.add buf "\"\"\";"
   | None ->
-    Acc.add buf ";\n"
+    Acc.add buf ";"
 
 let add_include_region
     ?path ?doc_root ?search_paths ?include_roots ?(check_paths_exist=true)

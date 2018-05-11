@@ -1,0 +1,92 @@
+array(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  array(1) {
+    ["Herp"]=>
+    array(1) {
+      ["kind"]=>
+      int(4)
+    }
+  }
+  ["alias"]=>
+  string(12) "MyNS\MyShape"
+}
+array(3) {
+  ["kind"]=>
+  int(18)
+  ["classname"]=>
+  string(11) "MyNS\MyEnum"
+  ["alias"]=>
+  string(6) "MyNS\T"
+}
+array(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  array(1) {
+    ["SomeNS\Foo"]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(12) "MyNS\UsesFoo"
+}
+array(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  array(1) {
+    ["SomeNS\Bar"]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(12) "MyNS\UsesBar"
+}
+array(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  array(1) {
+    ["SomeNS\Baz"]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(12) "MyNS\UsesBaz"
+}
+array(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  array(1) {
+    ["Herp"]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(21) "MyNS\ExplicitRelative"
+}
+array(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  array(1) {
+    ["Herp"]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["alias"]=>
+  string(21) "MyNS\ImplicitRelative"
+}

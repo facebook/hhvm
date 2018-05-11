@@ -716,6 +716,7 @@ and stmt env = function
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
       let env, tb = Env.in_loop env begin
           iter_n_acc alias_depth begin fun env ->
+            (* Reset let variables *)
             let env = condition env true e in
             let env, tb = block env b in
             env, tb
@@ -734,6 +735,7 @@ and stmt env = function
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
       let env, tb = Env.in_loop env begin
         iter_n_acc alias_depth begin fun env ->
+          (* Reset let variables *)
           let env = condition env true e in
           (* TODO TAST: avoid repeated generation of block *)
           let env, tb = block env b in
@@ -762,6 +764,7 @@ and stmt env = function
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
       let env, (tb, te3) = Env.in_loop env begin
         iter_n_acc alias_depth begin fun env ->
+          (* Reset let variables *)
           let env = condition env true e2 in (* iteration 0 *)
           let env, tb = block env b in
           let (env, te3, _) = expr env e3 in
@@ -840,8 +843,33 @@ and stmt env = function
     env, T.Continue p
   | Break p ->
     env, T.Break p
-  | Let _
-    -> assert false (* TODO T27552113 *)
+  | Let ((p, x) as id, h, rhs) ->
+    let env, hint_ty, expected = match h with
+      | Some (p, h) ->
+        let ety_env =
+          { (Phase.env_with_self env) with from_class = Some CIstatic; } in
+        let hint_ty = Decl_hint.hint env.Env.decl_env (p, h) in
+        let env, hint_ty = Phase.localize ~ety_env env hint_ty in
+        env, Some hint_ty, Some (p, Reason.URhint, hint_ty)
+      | None -> env, None, None
+      in
+    let env, t_rhs, rhs_ty = expr env rhs in
+    let env, _ = match hint_ty with
+      | Some ty ->
+        let env = check_expected_ty "Let" env rhs_ty expected in
+        set_valid_rvalue p env x ty
+      | None -> set_valid_rvalue p env x rhs_ty
+    in
+    (* Transfer expression ID with RHS to let varible if RHS is another variable *)
+    let env = match rhs with
+    | _, ImmutableVar (_, x_rhs) | _, Lvar (_, x_rhs) ->
+      let eid_rhs = Env.get_local_expr_id env x_rhs in
+        Option.value_map
+          eid_rhs ~default:env
+          ~f:(Env.set_local_expr_id env x)
+    | _ -> env
+    in
+    env, T.Let (id, h, t_rhs)
 
 and check_exhaustiveness env pos ty caselist =
   check_exhaustiveness_ env pos ty caselist false
@@ -1738,6 +1766,9 @@ and expr_
       then check_escaping_var env id;
       let ty = Env.get_local env x in
       make_result env (T.Lvar id) ty
+  | ImmutableVar ((_, x) as id) ->
+    let ty = Env.get_local env x in
+    make_result env (T.ImmutableVar id) ty
   | Dollar e ->
     let env, te, _ty = expr env e in
     (** Can't easily track any typing information for variable variable. *)
@@ -1836,6 +1867,11 @@ and expr_
         | (_, Array_get _), (_, Unop (Ast.Uref, _))
         | _, (_, Unop (Ast.Uref, (_, Array_get _))) -> true
         | _ -> false in
+      begin match e1 with
+        | _, ImmutableVar (p, x) ->
+          Errors.let_var_immutability_violation p (Local_id.get_name x)
+        | _ -> ()
+      end;
       let env, te2, ty2 = raw_expr ~in_cond ~forbid_uref env e2 in
       let env, te1, ty = assign p env e1 ty2 in
       let env =
@@ -1847,6 +1883,7 @@ and expr_
        * the expression ID associated with e2 is transferred to e1
        *)
       (match e1, e2 with
+      | (_, Lvar (_, x1)), (_, ImmutableVar (_, x2))
       | (_, Lvar (_, x1)), (_, Lvar (_, x2)) ->
           let eid2 = Env.get_local_expr_id env x2 in
           let env =
@@ -5266,6 +5303,11 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
   in
   let make_result env te result_ty =
     env, T.make_typed_expr p result_ty (T.Unop(uop, te)), result_ty in
+  let check_arithmetic env ty =
+    check_dynamic env ty ~f:begin fun () ->
+      Type.sub_type p Reason.URnone env ty (Reason.Rarith p, Tprim Tnum), ty
+    end
+  in
   match uop with
   | Ast.Unot ->
       Async.enforce_nullable_or_not_awaitable env p ty;
@@ -5283,14 +5325,26 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
   | Ast.Uincr
   | Ast.Upincr
   | Ast.Updecr
-  | Ast.Udecr
+  | Ast.Udecr ->
+      (* increment and decrement operators modify the value,
+       * check for immutability violation here *)
+      begin match te with
+      | _, T.ImmutableVar (p, x) ->
+          Errors.let_var_immutability_violation p (Local_id.get_name x);
+          expr_error env p (Reason.Rwitness p)
+      | _ ->
+      let env, ty = check_arithmetic env ty in
+      let env =
+        if Env.env_local_reactive env then
+        Typing_mutability.handle_assignment_mutability env te te
+        else env
+      in
+      make_result env te ty
+      end (* match *)
   | Ast.Uplus
   | Ast.Uminus ->
       (* math operators work with int or floats, so we call sub_type *)
-      let env, ty = check_dynamic env ty ~f:begin fun () ->
-          Type.sub_type p Reason.URnone env ty (Reason.Rarith p, Tprim Tnum), ty
-        end
-      in
+      let env, ty = check_arithmetic env ty in
       make_result env te ty
   | Ast.Uref ->
       (* We basically just ignore references in non-strict files *)
@@ -5556,6 +5610,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
 
 and condition_var_non_null env = function
   | _, Lvar x
+  | _, ImmutableVar x
   | _, Dollardollar x ->
       let x_ty = Env.get_local env (snd x) in
       let env, x_ty = TUtils.non_null env x_ty in

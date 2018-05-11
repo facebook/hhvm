@@ -88,9 +88,8 @@ end = struct
     | Expr _
     | Static_var _
     | Global_var _
-      -> ()
     | Let _
-      -> assert false (* TODO T27552113 *)
+      -> ()
 
   and terminal_catchl env inside_case = function
     | [] -> raise Exit
@@ -173,9 +172,8 @@ end = struct
     | Expr _
     | Static_var _
     | Global_var _
-      -> ()
     | Let _
-      -> assert false (* TODO T27552113 *)
+      -> ()
 
   and terminal_catchl env = function
     | [] -> raise Exit

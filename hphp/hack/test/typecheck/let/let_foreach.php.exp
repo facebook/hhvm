@@ -1,0 +1,2 @@
+File "let_foreach.php", line 7, characters 8-8:
+Unbound name: x (a global constant) (Naming[2049])

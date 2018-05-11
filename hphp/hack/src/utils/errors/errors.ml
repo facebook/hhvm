@@ -1055,6 +1055,7 @@ module Typing                               = struct
   let option_void                           = 4241 (* DONT MODIFY!!!! *)
   let mutable_in_nonreactive_context        = 4242 (* DONT MODIFY!!!! *)
   let invalid_argument_of_rx_mutable_function = 4243 (* DONT MODIFY!!!! *)
+  let let_var_immutability_violation        = 4244 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -3323,6 +3324,10 @@ let cannot_return_borrowed_value_as_immutable fun_pos value_pos =
 let decl_override_missing_hint pos =
   add Typing.decl_override_missing_hint pos
     "When redeclaring class members, both declarations must have a typehint"
+
+let let_var_immutability_violation pos id =
+  add Typing.let_var_immutability_violation pos
+    ("Let variables are immutable. Using let variable " ^ id ^ " in write context is not allowed.")
 
 let invalid_type_for_onlyrx_if_rxfunc_parameter pos type_str =
   add Typing.invalid_type_for_onlyrx_if_rxfunc_parameter pos (

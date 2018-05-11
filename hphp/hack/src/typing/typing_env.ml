@@ -844,7 +844,8 @@ let set_using_var env x =
 
 let unset_local env local =
   let {fake_members; local_types ; local_type_history;
-       local_using_vars; tpenv; local_mutability;local_reactive; } = env.lenv in
+       local_using_vars; tpenv;
+       local_mutability; local_reactive; } = env.lenv in
   let local_types = LEnvC.remove_from_cont Cont.Next local local_types in
   let local_using_vars = Local_id.Set.remove local local_using_vars in
   let local_type_history = Local_id.Map.remove local local_type_history in

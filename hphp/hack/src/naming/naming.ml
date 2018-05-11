@@ -2201,7 +2201,7 @@ module Make (GetLocals : GetLocals) = struct
       (** TODO: Emit proper error messages T28473207. Currently the error message
         * emitted has reason Naming[2049] unbound name for global constant *)
       begin match Env.let_local env x with
-        | Some x -> N.Lvar x
+        | Some x -> N.ImmutableVar x
         | None -> N.Id (Env.global_const env x)
       end (* match *)
     | Id_type_arguments (_x, _hl) ->
@@ -2351,7 +2351,7 @@ module Make (GetLocals : GetLocals) = struct
       begin match Env.let_local env f with
       | Some x ->
         (* Translate into local id *)
-        let f = (p, N.Lvar x) in
+        let f = (p, N.ImmutableVar x) in
         N.Call (N.Cnormal, f, hintl_funcall env hl, exprl env el, exprl env uel)
       | None ->
         (* The name is not a local `let` binding *)

@@ -234,10 +234,11 @@ and stmt env acc st =
       (* the finally block executes even if *none* of try and catch do *)
       let acc = SSet.union acc f in
       SSet.union acc c
-  | Fallthrough
-  | Noop -> acc
-  | Let _
-    -> assert false (* TODO T27552113 *)
+    | Fallthrough
+    | Noop -> acc
+    | Let (_, _, e) ->
+      (* Scoped local variable cannot escape the block *)
+      expr acc e
 
 and toplevel env acc l =
   try List.fold_left ~f:(stmt env) ~init:acc l
@@ -283,6 +284,7 @@ and expr_ env acc p e =
   | Typename _
   | Id _ -> acc
   | Lvar _
+  | ImmutableVar _
   | Lplaceholder _ | Dollardollar _ -> acc
   | Obj_get ((_, This), (_, Id (_, vx as v)), _) ->
       if SSet.mem vx env.props && not (SSet.mem vx acc)

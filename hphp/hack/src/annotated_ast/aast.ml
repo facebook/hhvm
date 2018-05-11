@@ -118,6 +118,7 @@ and expr_ =
   (* TODO: to match AST we need Id_type_arguments as well *)
   | Id of sid
   | Lvar of lid
+  | ImmutableVar of lid
   | Dollar of expr
   | Dollardollar of lid
   | Clone of expr
@@ -375,6 +376,7 @@ let expr_to_string expr =
   | This -> "This"
   | Id _ -> "Id"
   | Lvar _ -> "Lvar"
+  | ImmutableVar _ -> "ImmutableVar"
   | Dollar _ -> "Dollar"
   | Lplaceholder _ -> "Lplaceholder"
   | Dollardollar _ -> "Dollardollar"
@@ -468,6 +470,7 @@ class type ['a] visitor_type = object
   method on_this : 'a -> 'a
   method on_id : 'a -> sid -> 'a
   method on_lvar : 'a -> id -> 'a
+  method on_immutablevar : 'a -> id -> 'a
   method on_dollar : 'a -> expr -> 'a
   method on_dollardollar : 'a -> id -> 'a
   method on_fun_id : 'a -> sid -> 'a
@@ -679,6 +682,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Lplaceholder _pos -> acc
    | Dollardollar id -> this#on_dollardollar acc id
    | Lvar id     -> this#on_lvar acc id
+   | ImmutableVar id -> this#on_immutablevar acc id
    | Dollar e    -> this#on_dollar acc e
    | Fun_id sid  -> this#on_fun_id acc sid
    | Method_id (expr, pstr) -> this#on_method_id acc expr pstr
@@ -737,6 +741,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
   method on_this acc = acc
   method on_id acc _ = acc
   method on_lvar acc _ = acc
+  method on_immutablevar acc _ = acc
   method on_dollardollar acc id =
     this#on_lvar acc id
 

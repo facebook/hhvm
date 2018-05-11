@@ -138,8 +138,11 @@ module CheckFunctionBody = struct
         List.iter cl (catch f_type env);
         block f_type { env with t_is_finally = true } fb;
         ()
-    | _, Let _
-      -> assert false (* TODO T27552113 *)
+    | _, Let ((p, x), _, e) ->
+        (* We treat let statement as an assignment expression *)
+        let fake_expr = (p, Binop (Ast.Eq None, (p, Lvar (p, x)), e)) in
+        expr_allow_await f_type env fake_expr;
+        ()
 
   and found_await ftype p =
     match ftype with
@@ -223,6 +226,7 @@ module CheckFunctionBody = struct
 
     | _, Dollar e ->
         expr f_type env e
+    | _, ImmutableVar _
     | _, Lvar _ ->
         ()
     | _, Pipe (_, l, r) ->
@@ -767,7 +771,7 @@ and check_class_property_initialization prop =
       | NullCoalesce (expr1, expr2) ->
         rec_assert_static_literal expr1;
         rec_assert_static_literal expr2;
-      | This | Lvar _ | Lplaceholder _ | Dollardollar _ | Fun_id _
+      | This | Lvar _ | ImmutableVar _ | Lplaceholder _ | Dollardollar _ | Fun_id _
       | Method_id _ | Dollar _
       | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
       | Call _ | Special_func _ | Yield_break | Yield _ | Suspend _
@@ -1092,8 +1096,11 @@ and stmt env = function
       List.iter cl (catch env);
       block { env with t_is_finally = true } fb;
       ()
-  | Let _
-    -> assert false (* TODO T27552113 *)
+  | Let ((p, x), _, e) ->
+      (* We treat let statement as assignment expresssions *)
+      let fake_expr = (p, Binop (Ast.Eq None, (p, Lvar (p, x)), e)) in
+      expr env fake_expr;
+      ()
 
 and as_expr env = function
   | As_v e
@@ -1124,6 +1131,7 @@ and expr_ env p = function
   | Class_const _
   | Typename _
   | Lvar _
+  | ImmutableVar _
   | Lplaceholder _ | Dollardollar _ -> ()
   | Dollar e ->
     expr env e

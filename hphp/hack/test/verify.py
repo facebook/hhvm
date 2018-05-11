@@ -191,11 +191,15 @@ if __name__ == '__main__':
 
     def get_flags(test_dir):
         if args.flags is not None:
-            return args.flags
+            flags = args.flags
         else:
             if test_dir not in flags_cache:
                 flags_cache[test_dir] = get_hh_flags(test_dir)
-            return flags_cache[test_dir]
+            flags = flags_cache[test_dir]
+        hacksperimental_file = os.path.join(test_dir, '.hacksperimental')
+        if os.path.isfile(hacksperimental_file):
+            flags += ["--hacksperimental"]
+        return flags
 
     failures = run_test_program(
         files, args.program, args.expect_extension, get_flags, args.stdin)

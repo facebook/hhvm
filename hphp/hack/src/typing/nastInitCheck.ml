@@ -236,6 +236,8 @@ and stmt env acc st =
       SSet.union acc c
   | Fallthrough
   | Noop -> acc
+  | Let _
+    -> assert false (* TODO T27552113 *)
 
 and toplevel env acc l =
   try List.fold_left ~f:(stmt env) ~init:acc l

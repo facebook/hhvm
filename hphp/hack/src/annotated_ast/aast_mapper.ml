@@ -192,6 +192,7 @@ struct
       T.Try(map_block menv b1, List.map cl map_catch, map_block menv b2)
     | S.Noop -> T.Noop
     | S.Fallthrough -> T.Fallthrough
+    | S.Let(x, h, e) -> T.Let(x, h, map_expr menv e)
 
   and map_block menv sl = List.map sl (map_stmt menv)
 

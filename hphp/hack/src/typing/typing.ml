@@ -840,6 +840,8 @@ and stmt env = function
     env, T.Continue p
   | Break p ->
     env, T.Break p
+  | Let _
+    -> assert false (* TODO T27552113 *)
 
 and check_exhaustiveness env pos ty caselist =
   check_exhaustiveness_ env pos ty caselist false

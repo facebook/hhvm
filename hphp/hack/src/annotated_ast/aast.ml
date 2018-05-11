@@ -81,6 +81,7 @@ and stmt =
   (* Dropped the Pos.t option *)
   | Foreach of expr * as_expr * block
   | Try of block * catch list * block
+  | Let of lid * hint option * expr
   | Noop
 
 and as_expr =
@@ -456,6 +457,7 @@ class type ['a] visitor_type = object
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> is_terminal -> expr -> 'a
   method on_try : 'a -> block -> catch list -> block -> 'a
+  method on_let : 'a -> id -> hint option -> expr -> 'a
   method on_while : 'a -> expr -> block -> 'a
   method on_using : 'a -> bool -> expr -> block -> 'a
   method on_as_expr : 'a -> as_expr -> 'a
@@ -601,6 +603,14 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     let acc = this#on_block acc fb in
     acc
 
+  method on_let acc x h e =
+    let acc = this#on_lvar acc x in
+    let acc = match h with
+      | Some h -> this#on_hint acc h
+      | None -> acc in
+    let acc = this#on_expr acc e in
+    acc
+
   method on_block acc b =
     List.fold_left this#on_stmt acc b
 
@@ -646,6 +656,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Fallthrough             -> this#on_fallthrough acc
     | Static_var el           -> this#on_static_var acc el
     | Global_var el           -> this#on_global_var acc el
+    | Let     (x, h, e)       -> this#on_let acc x h e
 
   method on_expr acc (_, e) =
     this#on_expr_ acc e

@@ -138,6 +138,8 @@ module CheckFunctionBody = struct
         List.iter cl (catch f_type env);
         block f_type { env with t_is_finally = true } fb;
         ()
+    | _, Let _
+      -> assert false (* TODO T27552113 *)
 
   and found_await ftype p =
     match ftype with
@@ -1090,6 +1092,8 @@ and stmt env = function
       List.iter cl (catch env);
       block { env with t_is_finally = true } fb;
       ()
+  | Let _
+    -> assert false (* TODO T27552113 *)
 
 and as_expr env = function
   | As_v e

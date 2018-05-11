@@ -710,8 +710,11 @@ let watchman_expression_terms =
   [
     J.pred "not" @@ [
       J.pred "anyof" @@ [
+        J.strlist ["name"; ".hg"];
         J.strlist ["dirname"; ".hg"];
+        J.strlist ["name"; ".git"];
         J.strlist ["dirname"; ".git"];
+        J.strlist ["name"; ".svn"];
         J.strlist ["dirname"; ".svn"];
       ]
     ]

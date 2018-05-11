@@ -98,7 +98,6 @@ bool is_pure_licmable(const IRInstruction* inst) {
   case LdLocAddr:
   case LdPropAddr:
   case LdRDSAddr:
-  case IsScalarType:
   case ExtendsClass:
   case InstanceOf:
   case InstanceOfIface:

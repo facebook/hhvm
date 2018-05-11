@@ -329,7 +329,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case HasToString:
   case IsType:
   case IsNType:
-  case IsScalarType:
   case IsWaitHandle:
   case IsCol:
   case IsDVArray:

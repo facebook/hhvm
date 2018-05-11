@@ -424,17 +424,19 @@ Type typeOpToType(IsTypeOp op) {
   not_reached();
 }
 
-void implIsScalarL(IRGS& env, int32_t id) {
-  auto const ldrefExit = makeExit(env);
-  auto const ldPMExit = makePseudoMainExit(env);
-  auto const src = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
-  push(env, gen(env, IsScalarType, src));
-}
+SSATmp* isScalarImpl(IRGS& env, SSATmp* val) {
+  // The simplifier works fine when val has a known DataType, but do some
+  // checks first in case val has a type like {Int|Str}.
+  auto const scalar = TBool | TInt | TDbl | TStr;
+  if (val->isA(scalar)) return cns(env, true);
+  if (!val->type().maybe(scalar)) return cns(env, false);
 
-void implIsScalarC(IRGS& env) {
-  auto const src = popC(env);
-  push(env, gen(env, IsScalarType, src));
-  decRef(env, src);
+  SSATmp* result = nullptr;
+  for (auto t : {TBool, TInt, TDbl, TStr}) {
+    auto const is_t = gen(env, ConvBoolToInt, gen(env, IsType, t, val));
+    result = result ? gen(env, OrInt, result, is_t) : is_t;
+  }
+  return gen(env, ConvIntToBool, result);
 }
 
 SSATmp* isDVArrayImpl(IRGS& env, SSATmp* val, IsTypeOp op) {
@@ -929,8 +931,6 @@ void emitEmptyL(IRGS& env, int32_t id) {
 }
 
 void emitIsTypeC(IRGS& env, IsTypeOp subop) {
-  if (subop == IsTypeOp::Scalar) return implIsScalarC(env);
-
   auto const src = popC(env, DataTypeSpecific);
 
   if (subop == IsTypeOp::VArray || subop == IsTypeOp::DArray) {
@@ -941,6 +941,8 @@ void emitIsTypeC(IRGS& env, IsTypeOp subop) {
     push(env, isVecImpl(env, src));
   } else if (subop == IsTypeOp::Dict) {
     push(env, isDictImpl(env, src));
+  } else if (subop == IsTypeOp::Scalar) {
+    push(env, isScalarImpl(env, src));
   } else {
     auto const t = typeOpToType(subop);
     if (t <= TObj) {
@@ -953,8 +955,6 @@ void emitIsTypeC(IRGS& env, IsTypeOp subop) {
 }
 
 void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
-  if (subop == IsTypeOp::Scalar) return implIsScalarL(env, id);
-
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const val =
@@ -968,6 +968,8 @@ void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
     push(env, isVecImpl(env, val));
   } else if (subop == IsTypeOp::Dict) {
     push(env, isDictImpl(env, val));
+  } else if (subop == IsTypeOp::Scalar) {
+    push(env, isScalarImpl(env, val));
   } else {
     auto const t = typeOpToType(subop);
     if (t <= TObj) {

@@ -714,7 +714,6 @@ bool opcodeMayRaise(Opcode opc) {
   case IsFuncDynCallable:
   case IsNType:
   case IsNTypeMem:
-  case IsScalarType:
   case IsType:
   case IsTypeMem:
   case IsTypeStruct:

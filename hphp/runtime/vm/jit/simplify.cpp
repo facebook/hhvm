@@ -1771,14 +1771,6 @@ SSATmp* simplifyIsNType(State& env, const IRInstruction* i) {
   return isTypeImpl(env, i);
 }
 
-SSATmp* simplifyIsScalarType(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  if (src->type().isKnownDataType()) {
-    return cns(env, src->isA(TInt | TDbl | TStr | TBool));
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyMethodExists(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
@@ -3702,7 +3694,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(InstanceOf)
   X(InstanceOfIface)
   X(IsNType)
-  X(IsScalarType)
   X(IsType)
   X(IsWaitHandle)
   X(IsCol)

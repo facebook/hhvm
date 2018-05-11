@@ -1169,7 +1169,7 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
     gather [
       emit_expr ~need_ref:false env e;
       emit_pos outer_pos;
-      instr (IIsset IssetG)
+      instr_issetg
     ]
   | A.Array_get (base_expr, opt_elem_expr) ->
     emit_array_get ~need_ref:false env pos None QueryOp.Isset base_expr opt_elem_expr
@@ -1177,6 +1177,13 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
     emit_class_get env None QueryOp.Isset false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get ~need_ref:false env pos None QueryOp.Isset expr prop nullflavor
+  | A.Lvar (_, n) when SN.Superglobals.is_superglobal n ->
+    gather [
+      emit_pos outer_pos;
+      instr_string @@ SU.Locals.strip_dollar n;
+      emit_pos outer_pos;
+      instr_issetg
+    ]
   | A.Lvar ((_, name) as id)
     when is_local_this env name && not (Emit_env.get_needs_local_this env) ->
     gather [

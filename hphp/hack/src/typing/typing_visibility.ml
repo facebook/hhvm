@@ -24,6 +24,7 @@ let is_protected_visible env x self_id =
      * parents can call children's protected methods (like a
      * constructor) *)
     if SSet.mem x my_class.tc_extends
+       || SMap.mem x my_class.tc_ancestors
        || SSet.mem self_id their_class.tc_extends
        || SSet.mem x my_class.tc_req_ancestors_extends
        || not my_class.tc_members_fully_known

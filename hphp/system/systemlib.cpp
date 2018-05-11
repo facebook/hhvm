@@ -152,6 +152,10 @@ Object AllocInvalidArgumentExceptionObject(const Variant& message) {
   return createAndConstructThrowable(s_InvalidArgumentExceptionClass, message);
 }
 
+Object AllocTypeAssertionExceptionObject(const Variant& message) {
+  return createAndConstructThrowable(s_TypeAssertionExceptionClass, message);
+}
+
 Object AllocRuntimeExceptionObject(const Variant& message) {
   return createAndConstructThrowable(s_RuntimeExceptionClass, message);
 }
@@ -235,6 +239,10 @@ void throwBadMethodCallExceptionObject(const Variant& message) {
 
 void throwInvalidArgumentExceptionObject(const Variant& message) {
   throw_object(AllocInvalidArgumentExceptionObject(message));
+}
+
+void throwTypeAssertionExceptionObject(const Variant& message) {
+  throw_object(AllocTypeAssertionExceptionObject(message));
 }
 
 void throwRuntimeExceptionObject(const Variant& message) {

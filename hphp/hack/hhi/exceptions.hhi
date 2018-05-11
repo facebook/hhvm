@@ -114,3 +114,4 @@ class UnderflowException extends RuntimeException {}
 class UnexpectedValueException extends RuntimeException {}
 
 class InvariantException extends Exception {}
+final class TypeAssertionException extends Exception {}

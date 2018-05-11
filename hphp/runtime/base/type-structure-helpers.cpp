@@ -480,7 +480,7 @@ void throwTypeStructureDoesNotMatchCellException(
     error = folly::sformat("Expected {} at {}, got {}",
       expectedType, errorKey, givenType);
   }
-  SystemLib::throwInvalidArgumentExceptionObject(error);
+  SystemLib::throwTypeAssertionExceptionObject(error);
 }
 
 } // namespace HPHP

@@ -37,6 +37,7 @@ namespace HPHP { namespace SystemLib {
   x(Exception)                                  \
   x(BadMethodCallException)                     \
   x(InvalidArgumentException)                   \
+  x(TypeAssertionException)                     \
   x(RuntimeException)                           \
   x(OutOfBoundsException)                       \
   x(InvalidOperationException)                  \
@@ -102,6 +103,7 @@ Object AllocParseErrorObject(const Variant& message);
 Object AllocTypeErrorObject(const Variant& message);
 Object AllocBadMethodCallExceptionObject(const Variant& message);
 Object AllocInvalidArgumentExceptionObject(const Variant& message);
+Object AllocTypeAssertionExceptionObject(const Variant& message);
 Object AllocRuntimeExceptionObject(const Variant& message);
 Object AllocOutOfBoundsExceptionObject(const Variant& message);
 Object AllocInvalidOperationExceptionObject(const Variant& message);
@@ -130,6 +132,7 @@ Object AllocLazyKeyedIterableViewObject(const Variant& iterable);
 void throwBadMethodCallExceptionObject(const Variant& message);
 [[noreturn]]
 void throwInvalidArgumentExceptionObject(const Variant& message);
+[[noreturn]] void throwTypeAssertionExceptionObject(const Variant& message);
 [[noreturn]] void throwRuntimeExceptionObject(const Variant& message);
 [[noreturn]] void throwOutOfBoundsExceptionObject(const Variant& message);
 [[noreturn]]

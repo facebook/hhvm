@@ -132,3 +132,8 @@ class UnderflowException extends RuntimeException {}
  *
  */
 class UnexpectedValueException extends RuntimeException {}
+
+/**
+ * Exception thrown if as-expression type assertion is violated
+ */
+final class TypeAssertionException extends RuntimeException {}

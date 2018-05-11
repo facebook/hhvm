@@ -294,7 +294,7 @@ int64_t HardwareCounter::GetLoadCount() {
 }
 
 int64_t HardwareCounter::getLoadCount() {
-  return m_loadCounter->read();
+  return m_loadCounter ? m_loadCounter->read() : 0;
 }
 
 int64_t HardwareCounter::GetStoreCount() {
@@ -302,7 +302,7 @@ int64_t HardwareCounter::GetStoreCount() {
 }
 
 int64_t HardwareCounter::getStoreCount() {
-  return m_storeCounter->read();
+  return m_storeCounter ? m_storeCounter->read() : 0;
 }
 
 void HardwareCounter::IncInstructionCount(int64_t amount) {

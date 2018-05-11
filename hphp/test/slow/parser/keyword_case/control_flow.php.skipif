@@ -1,2 +1,0 @@
-<?php
-if (__COMPILER_FRONTEND__ === 'hackc') { echo 'skip'; }

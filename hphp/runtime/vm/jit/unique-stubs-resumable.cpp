@@ -56,11 +56,15 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 void alignJmpTarget(CodeBlock& cb) {
-  align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
+  if (RuntimeOption::EvalJitAlignUniqueStubs) {
+    align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
+  }
 }
 
 void alignCacheLine(CodeBlock& cb) {
-  align(cb, nullptr, Alignment::CacheLine, AlignContext::Dead);
+  if (RuntimeOption::EvalJitAlignUniqueStubs) {
+    align(cb, nullptr, Alignment::CacheLine, AlignContext::Dead);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

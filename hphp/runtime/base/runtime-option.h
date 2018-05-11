@@ -737,8 +737,6 @@ struct RuntimeOption {
   F(uint32_t, Num1GPagesForSlabs,      0)                               \
   F(uint32_t, Num2MPagesForSlabs,      0)                               \
   F(bool, LowStaticArrays,             true)                            \
-  F(bool, UncountedMixedArrayHuge,     true)                            \
-  F(bool, UncountedStringHuge,         true)                            \
   F(int64_t, HeapPurgeWindowSize,      5 * 1000000)                     \
   F(uint64_t, HeapPurgeThreshold,      128 * 1024 * 1024)               \
   /* GC Options: See heap-collect.cpp for more details */               \

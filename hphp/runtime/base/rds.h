@@ -38,6 +38,7 @@ struct Class;
 namespace jit {
 struct ArrayKindProfile;
 struct ArrayOffsetProfile;
+struct CallTargetProfile;
 struct ClsCnsProfile;
 struct DecRefProfile;
 struct MethProfile;
@@ -216,6 +217,7 @@ using Symbol = boost::variant< StaticLocal
                              , StaticMethodF
                              , Profile<jit::ArrayKindProfile>
                              , Profile<jit::ArrayOffsetProfile>
+                             , Profile<jit::CallTargetProfile>
                              , Profile<jit::ClsCnsProfile>
                              , Profile<jit::DecRefProfile>
                              , Profile<jit::MethProfile>

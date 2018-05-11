@@ -709,6 +709,7 @@ struct RuntimeOption {
   F(uint32_t, JitPGORelaxPercent,      100)                             \
   F(uint32_t, JitPGORelaxUncountedToGenPercent, 20)                     \
   F(uint32_t, JitPGORelaxCountedToGenPercent, 75)                       \
+  F(uint32_t, JitPGOBindCallThreshold, 50)                              \
   F(bool,     JitPGODumpCallGraph,     false)                           \
   F(bool,     JitPGORacyProfiling,     false)                           \
   F(uint64_t, FuncCountHint,           10000)                           \

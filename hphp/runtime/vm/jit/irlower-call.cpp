@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
+#include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
@@ -47,6 +48,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -63,6 +65,47 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+const StaticString callTargetProfileKey{"CallTargetProfile"};
+
+TCA getCallTarget(IRLS& env, const IRInstruction* inst, Vreg sp) {
+  auto const extra = inst->extra<Call>();
+  auto const callee = extra->callee;
+  if (callee != nullptr) return tc::ustubs().immutableBindCallStub;
+
+  auto profile = TargetProfile<CallTargetProfile>(env.unit.context(),
+                                                  inst->marker(),
+                                                  callTargetProfileKey.get());
+  if (profile.profiling()) {
+    auto const spOff = cellsToBytes(extra->spOffset.offset + extra->numParams);
+    auto const args = argGroup(env, inst)
+      .addr(rvmtl(), safe_cast<int32_t>(profile.handle()))
+      .addr(sp, spOff);
+    cgCallHelper(vmain(env), env, CallSpec::method(&CallTargetProfile::report),
+                 kVoidDest, SyncOptions::Sync, args);
+    return tc::ustubs().bindCallStub;
+  }
+
+  if (profile.optimizing()) {
+    // Get the result of the profiling data.  If it's strongly biased towards
+    // one function, bind the call.  Otherwise, call funcPrologueRedispatch
+    // directly.
+    auto const data = profile.data();
+    auto const bias = data.bias();
+    if (bias * 100 >= RuntimeOption::EvalJitPGOBindCallThreshold) {
+      return tc::ustubs().bindCallStub;
+    }
+    return tc::ustubs().funcPrologueRedispatch;
+  }
+
+  return tc::ustubs().bindCallStub;
+}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 1).reg();
@@ -76,6 +119,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 
   auto const calleeSP = sp[cellsToBytes(extra->spOffset.offset)];
   auto const calleeAR = calleeSP + cellsToBytes(argc);
+
+  auto const target = getCallTarget(env, inst, sp);
 
   v << store{fp, calleeAR + AROFF(m_sfp)};
   v << storeli{safe_cast<int32_t>(extra->after), calleeAR + AROFF(m_soff)};
@@ -175,10 +220,6 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   // Emit a smashable call that initially calls a recyclable service request
   // stub.  The stub and the eventual targets take rvmfp() as an argument,
   // pointing to the callee ActRec.
-  auto const target = callee
-    ? tc::ustubs().immutableBindCallStub
-    : tc::ustubs().bindCallStub;
-
   auto const done = v.makeBlock();
   v << callphp{target, php_call_regs(), {{done, catchBlock}}, callee, argc};
   v = done;

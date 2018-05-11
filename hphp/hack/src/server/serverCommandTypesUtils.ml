@@ -7,6 +7,7 @@ let debug_describe_t : type a. a t -> string = function
   | TYPED_AST                _ -> "TYPED_AST"
   | IDE_HOVER                _ -> "IDE_HOVER"
   | DOCBLOCK_AT              _ -> "DOCBLOCK_AT"
+  | IDE_SIGNATURE_HELP       _ -> "SIGNATURE_HELP"
   | COVERAGE_LEVELS          _ -> "COVERAGE_LEVELS"
   | AUTOCOMPLETE             _ -> "AUTOCOMPLETE"
   | IDENTIFY_FUNCTION        _ -> "IDENTIFY_FUNCTION"
@@ -56,3 +57,10 @@ let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc
   | Stream _ -> "Stream"
   | Debug -> "Debug"
+
+let source_tree_of_file_input file_input =
+  match file_input with
+  | ServerCommandTypes.FileName filename ->
+    Full_fidelity_source_text.from_file (Relative_path.create_detect_prefix filename)
+  | ServerCommandTypes.FileContent content ->
+    Full_fidelity_source_text.make Relative_path.default content

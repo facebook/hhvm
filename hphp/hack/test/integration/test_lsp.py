@@ -222,6 +222,11 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         # self.load_and_run('didchange', variables)
         return
 
+    def test_signature_help(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('signaturehelp.php')
+        self.load_and_run('signaturehelp', variables)
+
     def test_non_existing_method(self):
         self.prepare_environment()
         variables = self.setup_php_file('nomethod.php')

@@ -121,6 +121,7 @@ type _ t =
   | IDE_HOVER : file_input * int * int ->
       HoverService.result t
   | DOCBLOCK_AT : (string * int * int * string option) -> DocblockService.result t
+  | IDE_SIGNATURE_HELP : (file_input * int * int) -> Lsp.SignatureHelp.result t
   | COVERAGE_LEVELS : file_input -> Coverage_level.result t
   | AUTOCOMPLETE : string -> AutocompleteTypes.result t
   | IDENTIFY_FUNCTION : file_input * int * int ->

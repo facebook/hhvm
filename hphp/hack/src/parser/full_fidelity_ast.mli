@@ -7,7 +7,9 @@
  *
  *)
 
-module SourceText = Full_fidelity_source_text
+include module type of struct
+  include Full_fidelity_ast_types
+end
 
 (**
  * The `env` of the lowerer is "full request." It provides all the settings the
@@ -55,13 +57,26 @@ module WithPositionedSyntax : functor (Syntax : Positioned_syntax_sig.Positioned
 
   val lower
     :  env
-    -> source_text:SourceText.t
+    -> source_text:Full_fidelity_source_text.t
     -> script:Syntax.t
     -> result
 
 end (* WithPositionedSyntax *)
 
-val from_text : env -> SourceText.t -> result
+val parse_text
+  :  env
+  -> Full_fidelity_source_text.t
+  -> (FileInfo.file_type *
+      FileInfo.mode option *
+      PositionedSyntaxTree.t)
+val lower_tree
+  :  env
+  -> Full_fidelity_source_text.t
+  -> FileInfo.file_type
+  -> FileInfo.mode option
+  -> PositionedSyntaxTree.t
+  -> result
+val from_text : env -> Full_fidelity_source_text.t -> result
 val from_file : env -> result
 
 (**

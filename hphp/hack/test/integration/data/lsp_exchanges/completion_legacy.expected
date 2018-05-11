@@ -24,6 +24,12 @@
             "<"
           ]
         },
+        "signatureHelpProvider": {
+          "triggerCharacters": [
+            "(",
+            ","
+          ]
+        },
         "definitionProvider": true,
         "referencesProvider": true,
         "documentHighlightProvider": true,

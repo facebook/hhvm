@@ -63,7 +63,8 @@ let make_hover_info tcopt env_and_ty file (occurrence, def_opt) =
   let addendum = [
     (match def_opt with
       | Some def ->
-        ServerDocblockAt.go_def tcopt def ~base_class_name:(SymbolOccurrence.enclosing_class occurrence) ~file
+        let base_class_name = SymbolOccurrence.enclosing_class occurrence in
+        ServerDocblockAt.go_def tcopt def ~base_class_name ~file
         |> Option.to_list
       | None -> []);
     (match occurrence, env_and_ty with

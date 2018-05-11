@@ -40,9 +40,6 @@ let filter_redundant results =
 
 let is_target target_line target_char { pos; _ } =
   let l, start, end_ = Pos.info_pos pos in
-  (* We need to filter out by filename too, due to lazy decl firing hooks in
-   * unrelated files *)
-  (Pos.filename pos = ServerIdeUtils.path) &&
   l = target_line && start <= target_char && target_char - 1 <= end_
 
 let process_class_id ?(is_declaration=false) cid =

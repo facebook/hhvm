@@ -257,6 +257,12 @@ let trailing_text node =
 let text node =
   SourceText.sub (source_text node) (start_offset node) (width node)
 
+let trailing_token node =
+  match value node with
+  | PositionedSyntaxValue.TokenValue token -> Some token
+  | PositionedSyntaxValue.TokenSpan {right; _} -> Some right
+  | PositionedSyntaxValue.Missing _ -> None
+
 let extract_text node =
   Some (text node)
 

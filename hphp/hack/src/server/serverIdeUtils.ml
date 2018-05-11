@@ -68,22 +68,13 @@ let make_then_revert_local_changes f () =
   result
 
 let path = Relative_path.default
-(* This will parse, declare and check all functions and classes in content
- * buffer.
- *
- * Declaring will overwrite definitions on shared heap, so before doing this,
- * the function will also "shelve" them (see functions above and
- * SharedMem.S.shelve_batch) - after working with local content is done,
- * original definitions can (and should) be restored using "unshelve".
- *)
-let declare_and_check content ~f tcopt =
+
+let declare_and_check_ast ~make_ast ~f tcopt =
   let tcopt = TypecheckerOptions.make_permissive tcopt in
   Autocomplete.auto_complete := false;
   Errors.ignore_ @@ make_then_revert_local_changes begin fun () ->
     Fixmes.HH_FIXMES.(remove_batch @@ KeySet.singleton path);
-    let {Parser_hack.file_mode = _; comments = _; content = _; ast; is_hh_file = _ } =
-      Parser_hack.program tcopt path content
-    in
+    let ast = make_ast () in
     let funs, classes, typedefs, consts =
       List.fold_left ast ~f:begin fun (funs, classes, typedefs, consts) def ->
         match def with
@@ -121,9 +112,21 @@ let declare_and_check content ~f tcopt =
     f path file_info tast
   end
 
+
+(* This will parse, declare and check all functions and classes in content
+ * buffer.
+ *
+ * Declaring will overwrite definitions on shared heap, so before doing this,
+ * the function will also "shelve" them (see functions above and
+ * SharedMem.S.shelve_batch) - after working with local content is done,
+ * original definitions can (and should) be restored using "unshelve".
+ *)
 let declare_and_check content ~f tcopt =
   try
-     declare_and_check content ~f tcopt
+    declare_and_check_ast
+      ~make_ast:(fun () -> (Parser_hack.program tcopt path content).Parser_hack.ast)
+      ~f
+      tcopt
   with Decl_class.Decl_heap_elems_bug -> begin
     Hh_logger.log "%s" content;
     Exit_status.(exit Decl_heap_elems_bug)
@@ -144,3 +147,6 @@ let check_file_input tcopt files_info fi =
       match Relative_path.Map.get files_info path with
       | Some fileinfo -> List.hd_exn (recheck tcopt [(path, fileinfo)])
       | None -> path, []
+
+let check_ast tcopt ast =
+  declare_and_check_ast ~make_ast:(fun () -> ast) ~f:(fun _ _ tast -> tast) tcopt

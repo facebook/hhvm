@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/type-constraint.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -102,38 +103,6 @@ bool isOptionalShapeField(const ArrayData* field) {
   return field->exists(property) && tvCastToBoolean(field->at(property));
 }
 
-ALWAYS_INLINE
-std::string expressionTypeToString(DataType type) {
-  switch (type) {
-    case KindOfInt64:
-      return "Int";
-    case KindOfPersistentString:
-    case KindOfString:
-      return "String";
-    case KindOfPersistentVec:
-    case KindOfVec:
-      return "Vec";
-    case KindOfPersistentDict:
-    case KindOfDict:
-      return "Dict";
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-      return "Keyset";
-    case KindOfPersistentArray:
-    case KindOfArray:
-      return "Array";
-    case KindOfNull:
-    case KindOfBoolean:
-    case KindOfDouble:
-    case KindOfUninit:
-    case KindOfRef:
-    case KindOfObject:
-    case KindOfResource:
-      return tname(type);
-  }
-  not_reached();
-}
-
 template <bool genErrorMessage>
 bool checkTypeStructureMatchesCellImpl(
   const Array& ts,
@@ -142,10 +111,10 @@ bool checkTypeStructureMatchesCellImpl(
   std::string& expectedType,
   std::string& errorKey
 ) {
-  auto errOnLen = [&givenType](auto type, auto len) {
+  auto errOnLen = [&givenType](auto cell, auto len) {
     if (genErrorMessage) {
       givenType = folly::sformat("{} of length {}",
-        expressionTypeToString(type), len);
+        describe_actual_type(&cell, true), len);
     }
   };
 
@@ -246,7 +215,7 @@ bool checkTypeStructureMatchesCellImpl(
       assertx(ts.exists(s_elem_types));
       auto const tsElems = ts[s_elem_types].getArrayData();
       if (elems->size() != tsElems->size()) {
-        errOnLen(type, elems->size());
+        errOnLen(c1, elems->size());
         result = false;
         break;
       }
@@ -290,13 +259,13 @@ bool checkTypeStructureMatchesCellImpl(
         }
       );
       if (numFields < numRequiredFields) {
-        errOnLen(type, numFields);
+        errOnLen(c1, numFields);
         result = false;
         break;
       }
       auto const allowsUnknownFields = shapeAllowsUnknownFields(ts);
       if (!allowsUnknownFields && numFields > numDefinedFields) {
-        errOnLen(type, numFields);
+        errOnLen(c1, numFields);
         result = false;
         break;
       }
@@ -347,7 +316,7 @@ bool checkTypeStructureMatchesCellImpl(
       always_assert(false);
   }
   if (genErrorMessage && !result) {
-    if (givenType.empty()) givenType = expressionTypeToString(type);
+    if (givenType.empty()) givenType = describe_actual_type(&c1, true);
     if (expectedType.empty()) {
       expectedType = TypeStructure::toString(ts).toCppString();
     }

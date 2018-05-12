@@ -84,6 +84,19 @@ Array resolve(const Array& ts,
               const Class* declCls,
               bool& persistent);
 
+/*
+ * Allows partially resolving a type structure.
+ * Does not call the autoloader.
+ * If the resulting type structure is persistent, persistent will be set.
+ * If the resulting type structure is only partially resolved,
+ * partial will be set, otherwise it will be unset.
+ */
+Array resolvePartial(const Array& ts,
+                     const Class* typeCnsCls,
+                     const Class* declCls,
+                     bool& persistent,
+                     bool& partial);
+
 }
 
 }

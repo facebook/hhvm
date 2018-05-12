@@ -309,7 +309,7 @@ function hhvm_path() {
 function hh_codegen_cmd($options, $config_file = null, $disable_hphpc_opts = true) {
   $cmd = hh_codegen_path();
   if (isset($config_file)) {
-    $cmd .= ' -c "'.$config_file.'"';
+    $cmd .= ' -c '.escapeshellarg($config_file);
   }
   $cmd .= ' -v Hack.Compiler.SourceMapping=1 ';
   if (isset($options['compare-hh-codegen']) && $disable_hphpc_opts) {
@@ -1863,7 +1863,7 @@ function dump_hhas_cmd($hhvm_cmd, $test, $hhas_file) {
   $dump_flags = implode(' ', array(
     '-vEval.HackCompilerDefault=false',
     '-vEval.DumpHhas=1',
-    "-vEval.DumpHhasToFile=$hhas_file",
+    '-vEval.DumpHhasToFile='.escapeshellarg($hhas_file),
     '-vEval.LoadFilepathFromUnitCache=0',
   ));
   $cmd = str_replace(' -- ', " $dump_flags -- ", $hhvm_cmd);
@@ -1890,8 +1890,19 @@ function dump_hh_codegen($options, $test, $test_config) {
   else {
     $cmd = hh_codegen_cmd($options, null, $disable_hphpc_opts);
   }
-  system("/usr/bin/timeout " . TIMEOUT_SECONDS .
-         " $cmd $test > $temp_file 2> $msgs_file", $ret);
+  system(
+    implode(' ', array(
+      "/usr/bin/timeout",
+      TIMEOUT_SECONDS,
+      $cmd,
+      escapeshellarg($test),
+      ">",
+      escapeshellarg($temp_file),
+      "2>",
+      escapeshellarg($msgs_file),
+    )),
+    $ret
+  );
   return $ret === 0 ? $temp_file : false;
 }
 
@@ -1902,9 +1913,20 @@ function semdiff_output($options, $test) {
   $hhvm_output = $test.'.round_trip.hhas';
   $cmd = hh_semdiff_cmd($options);
   $ret = false;
-  system("/usr/bin/timeout " . TIMEOUT_SECONDS .
-         " $cmd $hhcodegen_output $hhvm_output > $temp_file 2> $msgs_file",
-         $ret);
+  system(
+    implode(' ', array(
+      "/usr/bin/timeout",
+      TIMEOUT_SECONDS,
+      $cmd,
+      escapeshellarg($hhcodegen_output),
+      escapeshellarg($hhvm_output),
+      ">",
+      escapeshellarg($temp_file),
+      "2>",
+      escapeshellarg($msgs_file),
+    )),
+    $ret
+  );
   return array($ret, $temp_file);
 }
 
@@ -2517,7 +2539,17 @@ function run_test($options, $test) {
     strip_hhas_file($hhas);
     strip_hhas_file($hhcg);
 
-    system("diff -B $hhcg $hhas > $diff", $ret);
+    system(
+      implode(' ', array(
+        "diff",
+        "-B",
+        escapeshellarg($hhcg),
+        escapeshellarg($hhas),
+        ">",
+        escapeshellarg($diff),
+      )),
+      $ret
+    );
 
     // If identical, don't bother dropping through to roundtrip stage
     if ($ret === 0) {
@@ -2540,7 +2572,17 @@ function run_test($options, $test) {
 
     strip_hhas_file($hhcg2);
 
-    system("diff $hhcg2 $hhas > $diff", $ret);
+    system(
+      implode(' ', array(
+        "diff",
+        escapeshellarg($hhcg2),
+        escapeshellarg($hhas),
+        ">",
+        escapeshellarg($diff),
+      )),
+      $ret
+    );
+
     if ($ret === 0) {
       if ($rv) unlink($diff);
       return $rv;

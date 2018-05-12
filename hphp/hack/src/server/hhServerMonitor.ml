@@ -110,7 +110,6 @@ let monitor_daemon_main (options: ServerArgs.options) =
         lock_file = ServerFiles.lock_file www_root;
         server_log_file = ServerFiles.log_link www_root;
         monitor_log_file = ServerFiles.monitor_log_link www_root;
-        load_script_log_file = ServerFiles.load_log www_root;
       })
 
 let daemon_entry =

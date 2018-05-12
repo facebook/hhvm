@@ -54,8 +54,6 @@ module Tools = struct
       Path.to_string (Path.concat temp_dir "test_server.log");
     monitor_log_file =
       Path.to_string (Path.concat temp_dir "test_server.monitor_log");
-    load_script_log_file =
-      Path.to_string (Path.concat temp_dir "test_load_script.log");
   }
 
   let simple_informant_options temp_dir = {

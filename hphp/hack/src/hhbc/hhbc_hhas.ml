@@ -1878,7 +1878,7 @@ let add_program ?path dump_symbol_refs buf hhas_prog =
     | None -> "" in
   match path with
   | Some p ->
-    let p = Relative_path.to_absolute p in
+    let p = Php_escaping.escape @@ Relative_path.to_absolute p in
     Acc.add buf
       (Printf.sprintf "# %s starts here\n\n%s.filepath \"%s\";\n" p strict_types p);
     add_program_content ~path:p dump_symbol_refs buf hhas_prog;

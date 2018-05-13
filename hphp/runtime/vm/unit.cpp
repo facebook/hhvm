@@ -1246,14 +1246,6 @@ TypeAliasReq resolveTypeAlias(Unit* unit, const TypeAlias* thisType) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-const TypeAliasReq* Unit::lookupTypeAlias(const StringData* name,
-                                          bool* persistent) {
-  auto ne = NamedEntity::get(name);
-  auto target = ne->getCachedTypeAlias();
-  if (persistent) *persistent = ne->isPersistentTypeAlias();
-  return target;
-}
-
 const TypeAliasReq* Unit::loadTypeAlias(const StringData* name,
                                         bool* persistent) {
   auto ne = NamedEntity::get(name);

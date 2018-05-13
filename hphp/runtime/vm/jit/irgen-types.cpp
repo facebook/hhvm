@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
-#include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
@@ -710,6 +709,9 @@ void emitInstanceOf(IRGS& env) {
 namespace {
 
 SSATmp* resolveTypeStructImpl(IRGS& env, const ArrayData* ts) {
+  // TODO(T28423611): If we know that the type structure cannot contain `this`
+  // references, we should be able to resolve the type structure at compile time
+  // and elide this instruction altogether.
   auto const declaringCls = curFunc(env) ? curClass(env) : nullptr;
   auto const calledCls =
     declaringCls && typeStructureCouldBeNonStatic(ArrNR(ts))
@@ -722,25 +724,6 @@ SSATmp* resolveTypeStructImpl(IRGS& env, const ArrayData* ts) {
     cns(env, ts),
     calledCls
   );
-}
-
-const ArrayData* staticallyResolveTypeStructure(
-  IRGS& env,
-  const ArrayData* ts,
-  bool& partial
-) {
-  auto const declaringCls = curFunc(env) ? curClass(env) : nullptr;
-  bool persistent = false;
-  try {
-    auto newTS = TypeStructure::resolvePartial(
-      ArrNR(ts), nullptr, declaringCls, persistent, partial);
-    if (persistent) return newTS.detach();
-    return ts;
-  } catch (Exception& e) {
-    // indicating that we didn't fully resolve, infact we didn't resolve at all
-    partial = true;
-    return ts;
-  }
 }
 
 bool emitIsTypeStructWithoutResolvingIfPossible(
@@ -848,11 +831,8 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
 } // namespace
 
 void emitIsTypeStruct(IRGS& env, const ArrayData* a) {
-  bool partial = true;
-  auto newTS = staticallyResolveTypeStructure(env, a, partial);
-  if (emitIsTypeStructWithoutResolvingIfPossible(env, newTS)) return;
-
-  auto const tc = partial ? resolveTypeStructImpl(env, a) : cns(env, newTS);
+  if (emitIsTypeStructWithoutResolvingIfPossible(env, a)) return;
+  auto const tc = resolveTypeStructImpl(env, a);
   auto const c = popC(env);
   push(env, gen(env, IsTypeStruct, tc, c));
   decRef(env, c);
@@ -868,9 +848,7 @@ void emitAsTypeStruct(IRGS& env, const ArrayData* a) {
   // TODO(T28423611): Use something like
   // emitIsTypeStructWithoutResolvingIfPossible to elide instructions
   auto const c = topC(env);
-  bool partial = true;
-  auto newTS = staticallyResolveTypeStructure(env, a, partial);
-  auto const tc = partial ? resolveTypeStructImpl(env, a) : cns(env, newTS);
+  auto const tc = resolveTypeStructImpl(env, a);
   ifThen(
     env,
     [&](Block* taken) {

@@ -1857,6 +1857,7 @@ function dump_repo_to_hhas_file($test, $program, $hhas_target) {
 function dump_hhas_cmd($hhvm_cmd, $test, $hhas_file) {
   $dump_flags = implode(' ', array(
     '-vEval.HackCompilerDefault=false',
+    '-vEval.AllowHhas=true',
     '-vEval.DumpHhas=1',
     '-vEval.DumpHhasToFile='.escapeshellarg($hhas_file),
     '-vEval.LoadFilepathFromUnitCache=0',
@@ -1933,8 +1934,7 @@ function strip_hhas_file($file) {
       fclose($h);
       return false;
     }
-    if ($s === "" || $s[0] === "#" || substr($s, 0, 10) === ".filepath "
-        || substr($s, 0, 7) === ".strict") {
+    if ($s === "" || $s[0] === "#" || substr($s, 0, 10) === ".filepath ") {
       continue;
     }
     // We have separate tests for srclocs, skip over them here
@@ -2566,7 +2566,7 @@ function run_test($options, $test) {
     }
 
     // If it failed, do a round-trip through HHVM and try again
-    list($hhvm2, $hhvm2_env) = hhvm_cmd($options, $hhcg);
+    list($hhvm2, $hhvm2_env) = hhvm_cmd($options, $test, $hhcg);
     $hhcg2 = dump_hhas_to_temp($hhvm2, $hhcg);
     $rv = true;
     if (

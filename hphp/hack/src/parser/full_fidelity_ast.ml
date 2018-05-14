@@ -603,6 +603,24 @@ let mpClosureParameter : ('a, hint * param_kind option) metaparser =
         cp_hint, cp_kind
     | _ -> missing_syntax "closure parameter" node env
 
+(* In some cases, we need to unwrap an extra layer of Block due to lowering
+ * from CompoundStatement. This applies to `if`, `while` and other control flow
+ * statements which allow optional curly braces.
+ *
+ * In other words, we want these to be lowered into the same Ast
+ * `if ($b) { func(); }` and `if ($b) func();`
+ * rather than the left hand side one having an extra `Block` in the Ast
+ *)
+let unwrap_extra_block (stmt : block) : block =
+  let de_noop = function
+  | [_, Noop] -> []
+  | stmts -> stmts
+  in
+  match stmt with
+  | [pos, Unsafe; _, Block b] -> (pos, Unsafe) :: de_noop b
+  | [_, Block b] -> de_noop b
+  | blk -> blk
+
 let rec pHint : hint parser = fun node env ->
   let rec pHint_ : hint_ parser = fun node env ->
     match syntax node with
@@ -1671,12 +1689,8 @@ and pStmt : stmt parser = fun node env ->
     (* Because consistency is for the weak-willed, Parser_hack does *not*
      * produce `Noop`s for compound statements **in if statements**
      *)
-    let de_noop = function
-    | [p, Block [_, Noop]] -> [p, Block []]
-    | stmts -> stmts
-    in
     let if_condition = pExpr cond env in
-    let if_statement = de_noop (pStmtUnsafe stmt env) in
+    let if_statement = unwrap_extra_block @@ pStmtUnsafe stmt env in
     let if_elseif_statement =
       let pElseIf : (block -> block) parser = fun node env ->
         match syntax node with
@@ -1685,7 +1699,7 @@ and pStmt : stmt parser = fun node env ->
           alternate_elseif_statement=ei_stmt; _ } ->
           fun next_clause ->
             let elseif_condition = pExpr ei_cond env in
-            let elseif_statement = de_noop (pStmtUnsafe ei_stmt env) in
+            let elseif_statement = unwrap_extra_block @@ pStmtUnsafe ei_stmt env in
             [ pos, If (elseif_condition, elseif_statement, next_clause) ]
         | _ -> missing_syntax "elseif clause" node env
       in
@@ -1694,7 +1708,7 @@ and pStmt : stmt parser = fun node env ->
           ~init:( match syntax else_clause with
             | ElseClause { else_statement=e_stmt; _ }
             | AlternateElseClause { alternate_else_statement=e_stmt; _ } ->
-              de_noop (pStmtUnsafe e_stmt env)
+              unwrap_extra_block @@ pStmtUnsafe e_stmt env
             | Missing -> [Pos.none, Noop]
             | _ -> missing_syntax "else clause" else_clause env
           )
@@ -1718,14 +1732,14 @@ and pStmt : stmt parser = fun node env ->
   | ThrowStatement { throw_expression; _ } ->
     pos, Throw (pExpr throw_expression env)
   | DoStatement { do_body; do_condition; _ } ->
-    pos, Do ([pos, Block (pBlock do_body env)], pExpr do_condition env)
+    pos, Do (pBlock do_body env, pExpr do_condition env)
   | WhileStatement { while_condition; while_body; _ } ->
-    pos, While (pExpr while_condition env, pStmtUnsafe while_body env)
+    pos, While (pExpr while_condition env, unwrap_extra_block @@ pStmtUnsafe while_body env)
   | DeclareDirectiveStatement { declare_directive_expression; _ } ->
     pos, Declare (false, pExpr declare_directive_expression env, [])
   | DeclareBlockStatement { declare_block_expression; declare_block_body; _ } ->
     pos, Declare (true, pExpr declare_block_expression env,
-             pStmtUnsafe declare_block_body env)
+             unwrap_extra_block @@ pStmtUnsafe declare_block_body env)
   | UsingStatementBlockScoped
     { using_block_await_keyword
     ; using_block_expressions
@@ -1735,7 +1749,7 @@ and pStmt : stmt parser = fun node env ->
       us_is_block_scoped = true;
       us_has_await = not (is_missing using_block_await_keyword);
       us_expr = pExprL using_block_expressions env;
-      us_block = [pos, Block (pBlock using_block_body env)];
+      us_block = pBlock using_block_body env;
     }
   | UsingStatementFunctionScoped
     { using_function_await_keyword
@@ -1749,7 +1763,7 @@ and pStmt : stmt parser = fun node env ->
        us_is_block_scoped = false;
        us_has_await = not (is_missing using_function_await_keyword);
        us_expr = pExpr using_function_expression env;
-       us_block = [Pos.none, Block [Pos.none, Noop]];
+       us_block = [Pos.none, Noop];
      }
   | LetStatement
     { let_statement_name; let_statement_type; let_statement_initializer; _ } ->
@@ -1762,7 +1776,7 @@ and pStmt : stmt parser = fun node env ->
     let ini = pExprL for_initializer env in
     let ctr = pExprL for_control env in
     let eol = pExprL for_end_of_loop env in
-    let blk = pStmtUnsafe for_body env in
+    let blk = unwrap_extra_block @@ pStmtUnsafe for_body env in
     pos, For (ini, ctr, eol, blk)
   | ForeachStatement
     { foreach_collection
@@ -1784,28 +1798,24 @@ and pStmt : stmt parser = fun node env ->
         ~default:(As_v value)
         ~f:(fun key -> As_kv (key, value))
     in
-    let blk =
-      match pStmtUnsafe foreach_body env with
-      | [p, Block [_, Noop]] -> [p, Block []]
-      | blk -> blk
-    in
+    let blk = unwrap_extra_block @@ pStmtUnsafe foreach_body env in
     pos, Foreach (col, akw, akv, blk)
   | TryStatement
     { try_compound_statement; try_catch_clauses; try_finally_clause; _ } ->
     pos, Try
-    ( [ pPos try_compound_statement env, Block (pBlock try_compound_statement env) ]
+    ( pBlock try_compound_statement env
     , couldMap try_catch_clauses env ~f:begin fun node env ->
       match syntax node with
       | CatchClause { catch_type; catch_variable; catch_body; _ } ->
         ( pos_name catch_type env
         , pos_name catch_variable env
-        , [ pPos catch_body env, Block (mpStripNoop pBlock catch_body env) ]
+        , mpStripNoop pBlock catch_body env
         )
       | _ -> missing_syntax "catch clause" node env
       end
     , match syntax try_finally_clause with
       | FinallyClause { finally_body; _ } ->
-        [ pPos finally_body env, Block (pBlock finally_body env) ]
+        pBlock finally_body env
       | _ -> []
     )
   | FunctionStaticStatement { static_declarations; _ } ->
@@ -2072,7 +2082,7 @@ and handle_loop_body pos stmts tail env =
         us_is_block_scoped = false;
         us_has_await = not (is_missing await_kw);
         us_expr = pExprL expression env;
-        us_block = [pos, Block body]; } in
+        us_block = body; } in
       List.concat @@ List.rev ([pos, using] :: acc)
     | h :: rest ->
       let h = pStmtUnsafe h env in

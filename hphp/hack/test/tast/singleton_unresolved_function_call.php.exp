@@ -22,7 +22,7 @@
       f_body =
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
-           [(If ((([4:7-9], bool), (Lvar ([4:7-9], $b))), [], [Noop]));
+           [(If ((([4:7-9], bool), (Lvar ([4:7-9], $b))), [Noop], [Noop]));
              (Return ([5:3-16],
                 (Some (([5:10-15], int),
                        (Call (Cnormal,

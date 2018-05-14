@@ -224,13 +224,6 @@ let append_let_vars env let_vars =
     let all_vars = SMap.fold app let_vars all_vars in
     { env with variable_scopes = { outermost with all_vars = all_vars } :: rest }
 
-(* Temporary workaround for parser generating a block of a singleton Block *)
-let handle_block_of_block (b: Ast.block) =
-  match b with
-  | [(_, Unsafe); (_, Block b)] -> b
-  | [(_, Block b)] -> b
-  | b -> b
-
 (* Add a variable to the captured variables *)
 let add_var env st var =
   (* Don't bother if it's $this, as this is captured implicitly *)
@@ -886,7 +879,6 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
     st, (p, If(e, b1, b2))
   | Do (b, e) ->
     let let_vars_copy = st.let_vars in
-    let b = handle_block_of_block b in
     let st, b = convert_block ~scope:false (reset_in_using env) st b in
     let st, e = convert_expr env st e in
     { st with let_vars = let_vars_copy }, (p, Do (b, e))
@@ -898,7 +890,6 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
     let st, e1 = convert_expr env st e1 in
     let st, e2 = convert_expr env st e2 in
     let let_vars_copy = st.let_vars in
-    let b = handle_block_of_block b in
     let st, b = convert_block ~scope:false (reset_in_using env) st b in
     let st, e3 = convert_expr env st e3 in
     { st with let_vars = let_vars_copy }, (p, For(e1, e2, e3, b))

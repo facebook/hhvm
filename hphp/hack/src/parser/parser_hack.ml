@@ -277,6 +277,12 @@ let rec check_lvalue env = function
 let check_foreach_lvalue env = function
   | (_, Unop (Uref, e)) | e -> check_lvalue env e
 
+let handle_block (stmt : Ast.stmt) : Ast.block =
+  match stmt with
+  | p, Block [] -> [p, Noop]
+  | _, Block b -> b
+  | stmt -> [stmt]
+
 (*****************************************************************************)
 (* Operator priorities.
  *
@@ -2122,6 +2128,8 @@ and statement_list ~is_block_scope env =
   | Tlcb ->
     let pos = Pos.make env.file env.lb in
     let block = statement_list ~is_block_scope:true env in
+    (* Distinguish between an empty block and a non-existing block *)
+    let block = if block = [] then [pos, Noop] else block in
       (pos, Block block) :: statement_list ~is_block_scope env
   | Tsc ->
       statement_list ~is_block_scope env
@@ -2447,7 +2455,7 @@ and statement_if env =
   let e = paren_expr env in
   let st1 = statement env in
   let st2 = statement_else env in
-  If (e, [st1], [st2])
+  If (e, handle_block st1, handle_block st2)
 
 and statement_else env =
   let pos = Pos.make env.file env.lb in
@@ -2469,12 +2477,12 @@ and statement_do env =
   expect_word env "while";
   let e = paren_expr env in
   expect env Tsc;
-  Do ([st], e)
+  Do (handle_block st, e)
 
 and statement_while env =
   let e = paren_expr env in
   let st = statement env in
-  While (e, [st])
+  While (e, handle_block st)
 
 (* Comma-separated expression list between parentheses *)
 and using_expr_list_rest env =
@@ -2570,7 +2578,7 @@ and statement_for env =
   let last, el = for_last_expr env in
   let e3 = Pos.btw start last, Expr_list el in
   let st = statement env in
-  For (e1, e2, e3, [st])
+  For (e1, e2, e3, handle_block st)
 
 and for_expr env =
   match L.token env.file env.lb with
@@ -2630,7 +2638,7 @@ and statement_foreach env =
   expect_word env "as";
   let as_expr = foreach_as env in
   let st = statement env in
-  Foreach (e, await, as_expr, [st])
+  Foreach (e, await, as_expr, handle_block st)
 
 and foreach_as env =
   let e1 = expr env in
@@ -2657,8 +2665,8 @@ and statement_try env =
   let fin = finally env in
   (* At least one catch or finally block must be provided after every try *)
   match cl, fin with
-  | [], [] -> error_expect env "catch or finally"; Try([st], [], [])
-  | _ -> Try ([st], cl, fin)
+  | [], [] -> error_expect env "catch or finally"; Try(handle_block st, [], [])
+  | _ -> Try (handle_block st, cl, fin)
 
 and catch_list env =
   match L.token env.file env.lb with
@@ -2668,14 +2676,14 @@ and catch_list env =
       let e = variable env in
       expect env Trp;
       let st = statement env in
-      (name, e, [st]) :: catch_list env
+      (name, e, handle_block st) :: catch_list env
   | _ -> L.back env.lb; []
 
 and finally env =
   match L.token env.file env.lb with
   | Tword when Lexing.lexeme env.lb = "finally" ->
     let st = statement env in
-    [st]
+    handle_block st
   | _ -> L.back env.lb; []
 
 (*****************************************************************************)

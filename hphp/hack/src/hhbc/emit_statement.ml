@@ -634,7 +634,10 @@ and emit_switch env pos scrutinee_expr cl =
   ]
   end
 
-and block_pos b = Pos.btw (fst (List.hd_exn b)) (fst (List.last_exn b))
+and block_pos b =
+  if b = []
+    then Pos.none
+    else Pos.btw (fst (List.hd_exn b)) (fst (List.last_exn b))
 
 and emit_catch env pos end_label (catch_type, (_, catch_local), b) =
     (* Note that this is a "regular" label; we're not going to branch to

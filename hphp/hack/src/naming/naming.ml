@@ -725,47 +725,6 @@ let arg_unpack_unexpected = function
   | [] -> ()
   | (pos, _) :: _ -> Errors.naming_too_few_arguments pos; ()
 
-(* Unwrap one layer of block.
- * This is a temporary workaround to a minor parser sadness.
- *
- * `If`, `While` and other statements with Ast Node having a `block` field
- * is not handled properly. Due to the fact that there can be either a single
- * statement or a block of statements, the parser decides to preserve the `Block`
- * node and then put whatever statement into a singleton list.
- *
- * This can cause extra issues with lexical scoping because we would like to
- * take care of always-execute `Block`s and make sure variables are not escaping
- * the scope. This implicit extra scope causes troubles when we want to distinguish
- * an always execute block and a implicit block added by the parser.
- *
- * This becomes an issue for statements for which the scope of variable needs to
- * be extended beyond the scope. For example `do` statements
- *
- *  ```
- *    do {
- *      let value = func();
- *    } while (value < 42);
- *  ```
- *
- *  v.s.
- *
- *  ```
- *    do
- *      let value = func();
- *    while (value < 42);
- *  ```
- *
- * The first example is parsed with an extra `Block`, this leads to `value` to
- * be out of scope when referred to in the condition. This is not desirable, so
- * we need to unwrap 1 layer of `Block` and not treat the curly braces as an
- * explicit scope.
- *)
-let unwrap_block (b: block) : block =
-  match b with
-  | [p, Unsafe; _, Block b] -> (p, Unsafe) :: b
-  | [_, Block b] -> b
-  | b -> b
-
 module type GetLocals = sig
   val stmt : TypecheckerOptions.t -> Namespace_env.env * Pos.t SMap.t ->
     Ast.stmt -> Namespace_env.env * Pos.t SMap.t
@@ -1966,7 +1925,6 @@ module Make (GetLocals : GetLocals) = struct
   and do_stmt env b e =
     (* lexical block of `do` is extended to the expr of loop termination *)
     Env.scope_lexical env (fun env ->
-      let b = unwrap_block b in
       let b = block ~new_scope:false env b in
       let e = expr env e in
       N.Do (b, e)
@@ -1996,7 +1954,6 @@ module Make (GetLocals : GetLocals) = struct
     fun env ->
       (* The third expression (iteration step) should have the same scope as the
        * block, as it is not always executed. *)
-      let b = unwrap_block b in
       let b = block ~new_scope:false env b in
       let e3 = expr env e3 in
       N.For (e1, e2, e3, b)

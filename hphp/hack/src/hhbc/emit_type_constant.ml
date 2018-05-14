@@ -69,6 +69,10 @@ and is_resolved_classname = function
   | "HH\\vec_or_dict" -> true
   | _ -> false
 
+let add_ns ~namespace id =
+  let classname, _ = Hhbc_id.Class.elaborate_id namespace id in
+  Hhbc_id.Class.to_raw_string classname
+
 let check_shape_key (pos, name) =
   if String.length name > 0 && String_utils.is_decimal_digit name.[0]
   then Emit_fatal.raise_fatal_parse
@@ -79,9 +83,7 @@ let shape_field_name ~namespace = function
     check_shape_key id;
     s, false
   | A.SFclass_const (id, (_, s)) ->
-    let classname, _ = Hhbc_id.Class.elaborate_id namespace id in
-    let id = Hhbc_id.Class.to_raw_string classname in
-    id ^ "::" ^ s, true
+    add_ns ~namespace id ^ "::" ^ s, true
 
 let rec shape_field_to_pair ~tparams ~namespace sf =
   let name, is_class_const = shape_field_name ~namespace sf.A.sf_name in
@@ -120,9 +122,7 @@ and type_constant_access_list sl =
   in if hack_arr_dv_arrs () then (TV.Vec l) else (TV.VArray l)
 
 and resolve_classname ~tparams ~namespace (p, s) =
-  let s = Types.fix_casing s in
-  let classname, _ = Hhbc_id.Class.elaborate_id namespace (p, s) in
-  let s = Hhbc_id.Class.to_raw_string classname in
+  let s = add_ns namespace (p, Types.fix_casing s) in
   if is_prim s || is_resolved_classname s then [], s
   else
     let id = if List.mem tparams s then "name" else "classname" in
@@ -135,9 +135,9 @@ and get_generic_types ~tparams ~namespace = function
 
 and get_kind ~tparams s = [TV.String "kind", TV.Int (get_kind_num ~tparams s)]
 
-and root_to_string s =
+and root_to_string ~namespace s =
   if s = "this" then prefix_namespace "HH" s
-  else s
+  else add_ns namespace (Pos.none, s)
 
 and get_typevars = function
  | [] -> []
@@ -159,7 +159,7 @@ and hint_to_type_constant_list ~tparams ~namespace h =
     @ [TV.String "fields", shape_info_to_typed_value ~tparams ~namespace si]
   | A.Haccess ((_, s0), s1, sl) ->
     get_kind ~tparams "typeaccess" @
-     [TV.String "root_name", TV.String (root_to_string s0);
+     [TV.String "root_name", TV.String (root_to_string ~namespace s0);
      TV.String "access_list", type_constant_access_list @@ s1::sl]
   | A.Hfun (true, _, _, _, _) ->
     failwith "Codegen for coroutine functions is not supported"

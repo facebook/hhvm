@@ -33,11 +33,15 @@ type conn = {
   tail_env: Tail.env option
 }
 
-let tty_progress_reporter (status: string option) : unit =
+let tty_progress_reporter () =
+  let angery_reaccs_only =
+    Tty.supports_emoji () && ClientMessages.angery_reaccs_only () in
+  fun (status: string option) : unit ->
   if Tty.spinner_used () then Tty.print_clear_line stderr;
   match status with
   | None -> ()
-  | Some s -> Tty.eprintf "hh_server is busy: %s %s%!" s (Tty.spinner())
+  | Some s -> Tty.eprintf "hh_server is busy: %s %s%!" s
+    (Tty.spinner ~angery_reaccs_only ())
 
 let null_progress_reporter (_status: string option) : unit =
   ()

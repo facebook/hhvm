@@ -22,7 +22,7 @@ let main env =
     expiry = None;
     no_load = false;
     profile_log = false;
-    progress_callback = ClientConnect.tty_progress_reporter;
+    progress_callback = ClientConnect.tty_progress_reporter ();
     do_post_handoff_handshake = true;
     ignore_hh_version = false;
   } in

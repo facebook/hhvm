@@ -82,7 +82,7 @@ let connect args =
     no_load = args.no_load;
     profile_log = args.profile_log;
     ai_mode = args.ai_mode;
-    progress_callback = ClientConnect.tty_progress_reporter;
+    progress_callback = ClientConnect.tty_progress_reporter ();
     do_post_handoff_handshake = true;
     ignore_hh_version = args.ignore_hh_version;
   }

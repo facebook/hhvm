@@ -74,7 +74,7 @@ let main_exn env =
     no_load = false;
     profile_log = false;
     ai_mode = None;
-    progress_callback = ClientConnect.tty_progress_reporter;
+    progress_callback = ClientConnect.tty_progress_reporter ();
     do_post_handoff_handshake = true;
     ignore_hh_version = false;
   } in

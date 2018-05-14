@@ -5835,8 +5835,6 @@ and condition ?lhs_of_null_coalesce env tparamet =
     let env, hint_ty = Phase.hint_locl env h in
     let reason = Reason.Ris ivar_pos in
     let rec safely_refine_type env ivar_ty hint_ty =
-      (* Expand so that we don't modify ivar *)
-      let env, hint_ty = Env.expand_type env hint_ty in
       match snd ivar_ty, snd hint_ty with
         | _, Tclass ((_, cid) as _c, tyl) ->
           begin match Env.get_class env cid with
@@ -5867,7 +5865,12 @@ and condition ?lhs_of_null_coalesce env tparamet =
       | IsAsExprHint.Invalid _ -> env
       | IsAsExprHint.Partial _
       | IsAsExprHint.Valid ->
-        let env, hint_ty = safely_refine_type env ivar_ty hint_ty in
+        (* Expand so that we don't modify ivar *)
+        let env, hint_ty = Env.expand_type env hint_ty in
+        let env, hint_ty =
+          if snd hint_ty <> Tdynamic && SubType.is_sub_type env ivar_ty hint_ty
+          then env, ivar_ty
+          else safely_refine_type env ivar_ty hint_ty in
         set_local env ivar hint_ty
     end
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null))

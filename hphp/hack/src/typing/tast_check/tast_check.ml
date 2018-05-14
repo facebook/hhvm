@@ -8,6 +8,7 @@
  *)
 
 let visitor = Tast_visitor.iter_with [
+  Sketchy_null_check.handler;
 ]
 
 let program = visitor#go

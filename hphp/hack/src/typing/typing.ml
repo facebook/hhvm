@@ -5663,13 +5663,9 @@ and condition ?lhs_of_null_coalesce env tparamet =
   | _, Call (Cnormal, (_, Id (_, func)), _, [e], [])
     when not tparamet && SN.StdlibFunctions.is_null = func ->
       condition_var_non_null env e
-  | r, Binop ((Ast.Eqeq | Ast.EQeqeq as bop),
-              (_, Null), e)
-  | r, Binop ((Ast.Eqeq | Ast.EQeqeq as bop),
-              e, (_, Null)) when not tparamet ->
-      let env, x_ty = expr env e in
-      let env =
-        if bop == Ast.Eqeq then check_null_wtf env r x_ty else env in
+  | _, Binop ((Ast.Eqeq | Ast.EQeqeq), (_, Null), e)
+  | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null)) when not tparamet ->
+      let env, _ = expr env e in
       condition_var_non_null env e
   | (p, (Lvar _ | Obj_get _ | Class_get _) as e) ->
       let env, ty = expr env e in
@@ -5682,9 +5678,8 @@ and condition ?lhs_of_null_coalesce env tparamet =
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
         ) ->
           condition env (not tparamet) (p, Binop (Ast.Eqeq, e, (p, Null))))
-  | r, Binop (Ast.Eq None, var, e) when tparamet ->
-      let env, e_ty = expr env e in
-      let env = check_null_wtf env r e_ty in
+  | _, Binop (Ast.Eq None, var, e) when tparamet ->
+      let env, _ = expr env e in
       condition_var_non_null env var
   | p1, Binop (Ast.Eq None, (_, (Lvar _ | Obj_get _) as lv), (p2, _)) ->
       let env, _ = expr env (p1, Binop (Ast.Eq None, lv, (p2, Null))) in
@@ -6007,31 +6002,6 @@ and get_instance_var env = function
   | _, Lvar (p, x) -> env, (p, x)
   | p, This -> env, (p, this)
   | _ -> failwith "Should only be called when is_instance_var is true"
-
-and check_null_wtf env p ty =
-  if not (Env.is_strict env) then env else
-    let env, ty = TUtils.fold_unresolved env ty in
-    let env, ety = TUtils.push_option_out env ty in
-    match ety with
-      | _, Toption ty ->
-        (* Find sketchy nulls hidden under singleton Tunresolved *)
-        let env, ty = TUtils.fold_unresolved env ty in
-        let env, ety = Env.expand_type env ty in
-        (match ety with
-          | _, (Tmixed | Tnonnull) ->
-            Errors.sketchy_null_check p
-          | _, Tprim _ ->
-            Errors.sketchy_null_check_primitive p
-          | _, Tunresolved tyl ->
-             if List.exists tyl (function _, Tprim _ -> true | _ -> false) then
-               Errors.sketchy_null_check_primitive p
-          | _, (Terr | Tany | Tarraykind _ | Toption _ | Tvar _ | Tfun _
-          | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
-          | Tobject | Tshape _ | Tdynamic) -> ());
-        env
-      | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _ | Tdynamic
-        | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
-        | Tunresolved _ | Tobject | Tshape _ ) -> env
 
 and is_type env e tprim r =
   match e with

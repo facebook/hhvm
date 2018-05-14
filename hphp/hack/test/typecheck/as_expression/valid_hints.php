@@ -12,9 +12,9 @@ function foo(mixed $x): void {
     expect_C($x);
   } else if ($x as MyEnum) {
     expect_MyEnum($x);
-  } else if ($x as mixed) {
+  } else if ($x as mixed !== null) {
     expect_mixed($x);
-  } else if ($x as ?string) {
+  } else if ($x as ?string !== null) {
     expect_nstring($x);
   } else if ($x as int) {
     expect_int($x);

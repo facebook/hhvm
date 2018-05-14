@@ -40,6 +40,8 @@ let save = Typing_env.save SMap.empty
 let fully_expand = Typing_expand.fully_expand
 
 let get_class_ids = Typing_utils.get_class_ids
+let fold_unresolved = Typing_utils.fold_unresolved
+let push_option_out = Typing_utils.push_option_out
 
 let is_visible = Typing_visibility.is_visible
 

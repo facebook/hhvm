@@ -55,6 +55,13 @@ val get_class_ids : env -> Tast.ty -> string list
 (** Given some class type or unresolved union of class types, return the
     identifiers of all classes the type may represent. *)
 
+val fold_unresolved : env -> Tast.ty -> env * Tast.ty
+(** Try to unify all the types in an intersection. *)
+
+val push_option_out : env -> Tast.ty -> env * Tast.ty
+(** Strip away all Toptions that we possibly can in a type, expanding type
+    variables along the way, turning ?T -> T. *)
+
 val is_visible :
   env ->
   Typing_defs.visibility ->

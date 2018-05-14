@@ -1,1 +1,3 @@
-No errors
+File "ternary3.php", line 25, characters 10-13:
+You are using a sketchy null check on a primitive type ...
+Use $x ?? $default instead of $x ?: $default (Typing[4089])

@@ -17,14 +17,14 @@ module TypeCanonHeap : CanonHeap = SharedMem.NoCache (StringKey) (struct
   type t = string
   let prefix = Prefix.make()
   let description = "TypeCanon"
-  let use_sqlite_fallback = SharedMem.get_file_info_on_disk
+  let use_sqlite_fallback = fun () -> false
 end)
 
 module FunCanonHeap : CanonHeap = SharedMem.NoCache (StringKey) (struct
   type t = string
   let prefix = Prefix.make()
   let description = "FunCanon"
-  let use_sqlite_fallback = SharedMem.get_file_info_on_disk
+  let use_sqlite_fallback = fun () -> false
 end)
 
 let check_valid key pos =

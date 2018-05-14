@@ -82,9 +82,12 @@ let save_state ~file_info_on_disk files_info fn =
   | None ->
     let t = Unix.gettimeofday () in
     dump_filesinfo fn files_info;
-    let () = if file_info_on_disk then
-      save_all_file_info_sqlite db_name |> ignore
-    else () in
+    let () = if file_info_on_disk then begin
+      Hh_logger.log "do save all file info sqlite\n";
+      (save_all_file_info_sqlite db_name files_info : unit)
+    end else begin
+      Hh_logger.log "skip save all file info sqlite\n"
+    end in
     let edges_added = SharedMem.save_dep_table_sqlite db_name Build_id.build_revision in
     let _ : float = Hh_logger.log_duration "Saving saved state took" t in
     edges_added

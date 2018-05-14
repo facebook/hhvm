@@ -65,7 +65,7 @@ let helper tcopt acc pos_infos =
         let env_and_ty =
           match range_end with
           | None ->
-            ServerInferType.returned_type_at_pos tast line char
+            ServerInferType.type_at_pos tast line char
           | Some (end_line, end_char) ->
             ServerInferType.type_at_range tast line char end_line end_char
         in

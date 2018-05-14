@@ -7,7 +7,6 @@
  *
  *)
 
-open Hh_core
 open Option.Monad_infix
 
 (** Return the type of the smallest expression node whose associated span
@@ -50,7 +49,7 @@ open Option.Monad_infix
  *)
 
 
-class base_visitor line char = object (self)
+let base_visitor line char = object (self)
   inherit [_] Tast_visitor.reduce as super
   inherit [Pos.t * _ * _] Ast.option_monoid
 
@@ -85,60 +84,12 @@ class base_visitor line char = object (self)
     self#plus acc (super#on_class_id env cid)
 end
 
-(** Same as `base_visitor`, except:
-
-    If the smallest expression containing the given position has a function type
-    and is being invoked in a Call expression, return that function's return
-    type rather than the type of the function (i.e., the type of the expression
-    returned by the Call expression).
-
-*)
-class function_following_visitor line char = object (self)
-  inherit base_visitor line char as super
-
-  (* When the expression being applied has a Tfun type, replace that type with
-   * its return type. This matches with legacy behavior and is better-suited
-   * for IDE hover (at present, since full function types are presented in a
-   * way which makes them difficult to read). *)
-  method! on_Call env ct e hl el uel =
-    let open Typing_defs in
-    (* If the function has a Tanon or Tunresolved type, it is easier to use
-     * the type of the containing expression (which is the return type of this
-     * usage of the anonymous function, or a supertype of the return types
-     * of the members of the unresolved union), so we return None. *)
-    let rec use_containing_type env ty =
-      match snd ty with
-      | Tvar _ -> use_containing_type env (Tast_env.fully_expand env ty)
-      | Tanon _ | Tunresolved [] -> ty, true
-      | Tunresolved [ty] -> use_containing_type env ty
-      | Tunresolved tys ->
-        let results = List.map tys (use_containing_type env) in
-        let ty = (fst ty, Tunresolved (List.map results fst)) in
-        let is_fun = function (_, Tfun _) -> true | _ -> false in
-        let use_containing =
-          List.exists results (fun (ty, uc) -> is_fun ty || uc) in
-        ty, use_containing
-      | _ -> ty, false
-    in
-    let return_type ty =
-      match snd ty with Tfun ft -> ft.ft_ret | _ -> ty
-    in
-    let (receiver_pos, _) = fst e in
-    if Pos.inside receiver_pos line char
-    then begin
-      self#on_expr env e >>= fun (p, env, ty) ->
-      let ty, use_containing = use_containing_type env ty in
-      if use_containing then None else Some (p, env, return_type ty)
-    end
-    else super#on_Call env ct e hl el uel
-end
-
 (** Return the type of the node associated with exactly the given range.
 
     When more than one node has the given range, return the type of the first
     node visited in a preorder traversal.
 *)
-class range_visitor startl startc endl endc = object
+let range_visitor startl startc endl endc = object
   inherit [_] Tast_visitor.reduce
   inherit [_] Ast.option_monoid
   method merge x _ = x
@@ -153,15 +104,7 @@ let type_at_pos
   (line : int)
   (char : int)
 : (Tast_env.env * Tast.ty) option =
-  (new base_visitor line char)#go tast
-  >>| (fun (_, env, ty) -> (env, ty))
-
-let returned_type_at_pos
-  (tast : Tast.program)
-  (line : int)
-  (char : int)
-: (Tast_env.env * Tast.ty) option =
-  (new function_following_visitor line char)#go tast
+  (base_visitor line char)#go tast
   >>| (fun (_, env, ty) -> (env, ty))
 
 let type_at_range
@@ -171,7 +114,7 @@ let type_at_range
   (end_line : int)
   (end_char : int)
 : (Tast_env.env * Tast.ty) option =
-  (new range_visitor start_line start_char end_line end_char)#go tast
+  (range_visitor start_line start_char end_line end_char)#go tast
 
 let go:
   ServerEnv.env ->
@@ -181,7 +124,7 @@ fun env (file, line, char, dynamic_view) ->
   let ServerEnv.{tcopt; files_info; _} = env in
   let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view; } in
   let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
-  returned_type_at_pos tast line char
+  type_at_pos tast line char
   >>| fun (env, ty) ->
   Tast_env.print_ty env ty,
   Tast_env.ty_to_json env ty |> Hh_json.json_to_string

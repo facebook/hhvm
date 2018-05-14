@@ -22,22 +22,12 @@ let symbols_at (file, line, char) tcopt =
   | Some contents -> ServerIdentifyFunction.go contents line char tcopt
 
 let type_at (file, line, char) tcopt files_info =
-  let open Typing_defs in
   let tcopt = {
     tcopt with
     GlobalOptions.tco_dynamic_view = ServerDynamicView.dynamic_view_on ();
   } in
   let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
-  match ServerInferType.type_at_pos tast line char with
-  | Some (_, (_, Tanon _) as infer_type_results1) ->
-    (* The Tanon type doesn't include argument or return types, so it's
-       displayed as "[fun]". To try to show something a little more useful, we
-       call `returned_type_at_pos`. This will give us the function's return type
-       (if it is being invoked). *)
-    Some (Option.value
-      (ServerInferType.returned_type_at_pos tast line char)
-      ~default:infer_type_results1)
-  | results -> results
+  ServerInferType.type_at_pos tast line char
 
 let make_hover_info tcopt env_and_ty file (occurrence, def_opt) =
   let open SymbolOccurrence in

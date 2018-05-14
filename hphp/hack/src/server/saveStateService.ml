@@ -58,9 +58,11 @@ let update_save_state ~file_info_on_disk files_info fn =
   if not (Disk.file_exists db_name) then
     failwith "Given existing save state SQL file missing";
   dump_filesinfo fn files_info;
-  let () = if file_info_on_disk then
-    save_all_file_info_sqlite db_name |> ignore
-  else () in
+  let () = if file_info_on_disk then begin
+    failwith "incrementally updating file info on disk not yet implemented"
+  end else begin
+    Hh_logger.log "skip writing file info to sqlite table"
+  end in
   let edges_added = SharedMem.update_dep_table_sqlite db_name Build_id.build_revision in
   ignore @@ Hh_logger.log_duration "Updating saved state took" t;
   edges_added

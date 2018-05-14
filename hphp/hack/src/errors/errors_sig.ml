@@ -12,8 +12,22 @@ module type S = sig
   type error = Pos.t error_
   type applied_fixme = Pos.t * int
 
+  module type Error_category = sig
+    type t
+    val min : int
+    val max : int
+    val of_enum : int -> t option
+    val show : t -> string
+    val err_code : t -> int
+  end
+
   (* The analysis phase that the error is coming from. *)
   type phase = Parsing | Naming | Decl | Typing
+
+  module Parsing : Error_category
+  module Naming : Error_category
+  module NastCheck : Error_category
+  module Typing : Error_category
 
   val ignored_fixme_codes : ISet.t ref
 

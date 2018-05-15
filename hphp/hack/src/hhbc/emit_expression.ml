@@ -266,7 +266,7 @@ let is_special_function env e args =
   | A.Id (_, s) ->
   begin
     let n = List.length args in
-    match String.lowercase_ascii s with
+    match s with
     | "isset" -> n > 0
     | "empty" -> n = 1
     | "define" when is_global_namespace env ->
@@ -1657,20 +1657,17 @@ and emit_expr env ?last_pos ?(need_ref=false) (pos, expr_ as expr) =
   | A.Obj_get (expr, prop, nullflavor) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
     emit_obj_get ~need_ref env pos None query_op expr prop nullflavor
-
-  | A.Call ((_, A.Id (_, id)), _, exprs, [])
-    when String.lowercase_ascii id = "isset" ->
+  | A.Call ((_, A.Id (_, "isset")), _, exprs, []) ->
     emit_box_if_necessary pos need_ref @@ emit_call_isset_exprs env pos exprs
-  | A.Call ((_, A.Id (_, id)), _, [expr], [])
-    when String.lowercase_ascii id = "empty" ->
+  | A.Call ((_, A.Id (_, "empty")), _, [expr], []) ->
     emit_box_if_necessary pos need_ref @@ emit_call_empty_expr env pos expr
-  | A.Call ((_, A.Id (_, id)), _, ([_; _] | [_; _; _] as es), _)
-    when  String.lowercase_ascii id = "idx" && not (jit_enable_rename_function ()) ->
+  | A.Call ((_, A.Id (_, "idx")), _, ([_; _] | [_; _; _] as es), _)
+    when not (jit_enable_rename_function ()) ->
     emit_box_if_necessary pos need_ref @@ emit_idx env pos es
-  | A.Call ((_, A.Id (_, id)), _, [(_, A.String (_, s)); e], _)
-    when String.lowercase_ascii id = "define" && is_global_namespace env ->
+  | A.Call ((_, A.Id (_, "define")), _, [(_, A.String (_, s)); e], _)
+    when is_global_namespace env ->
     emit_box_if_necessary pos need_ref @@ emit_define env pos s e
-  | A.Call ((_, A.Id (_, id)), _, [expr], _) when String.lowercase_ascii id = "eval" ->
+  | A.Call ((_, A.Id (_, "eval")), _, [expr], _) ->
     emit_box_if_necessary pos need_ref @@ emit_eval env pos expr
   | A.Call ((_, A.Id (_, "class_alias")), _, es, _)
     when is_global_namespace env ->
@@ -1678,8 +1675,7 @@ and emit_expr env ?last_pos ?(need_ref=false) (pos, expr_ as expr) =
     emit_box_if_necessary pos need_ref @@ emit_class_alias es
   | A.Call ((_, A.Id (_, "get_class")), _, [], _) ->
     emit_box_if_necessary pos need_ref @@ emit_get_class_no_args ()
-  | A.Call ((_, A.Id (_, s)), _, es, _)
-    when (String.lowercase_ascii s = "exit" || String.lowercase_ascii s = "die") ->
+  | A.Call ((_, A.Id (_, ("exit" | "die"))), _, es, _) ->
     emit_pos_then pos @@
     emit_exit env (List.hd es)
   | A.Call _

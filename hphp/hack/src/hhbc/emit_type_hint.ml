@@ -109,7 +109,7 @@ let rec hint_to_type_constraint
     then TC.make None []
     else TC.make (Some "mixed") []
 
-  | A.Happly ((_, s), []) when String.lowercase_ascii s = "void" && kind <> TypeDef ->
+  | A.Happly ((_, "void"), []) when kind <> TypeDef ->
     if Emit_env.is_hh_syntax_enabled ()
     || Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options
     then TC.make None []

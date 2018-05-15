@@ -207,7 +207,7 @@ module Function = struct
     | Some id ->
       if List.mem builtins_in_hh id && (Emit_env.is_hh_syntax_enabled ())
       then SU.prefix_namespace "HH" id, Some id
-      else if List.mem builtins_at_top (String.lowercase_ascii id)
+      else if List.mem builtins_at_top id
       then id, None
       else fq_id, backoff_id
       (* Likewise for top-level, with no namespace *)

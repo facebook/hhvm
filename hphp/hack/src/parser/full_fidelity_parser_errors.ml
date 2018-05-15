@@ -489,8 +489,13 @@ let class_destructor_has_non_visibility_modifier env node parents =
 let async_magic_method node parents =
   match node with
   | FunctionDeclarationHeader node ->
-    SSet.mem (String.lowercase_ascii @@ text node.function_name) SN.Members.as_set &&
-    list_contains_predicate is_async node.function_modifiers
+    let name = String.lowercase_ascii @@ text node.function_name in
+    begin match name with
+    | _ when name = String.lowercase_ascii SN.Members.__disposeAsync -> false
+    | _ when SSet.mem name SN.Members.as_lowercase_set ->
+      list_contains_predicate is_async node.function_modifiers
+    | _ -> false
+    end
   | _ -> false
 
 
@@ -1110,7 +1115,7 @@ let special_method_param_errors node parents errors =
   match syntax node with
   | FunctionDeclarationHeader {function_name; function_parameter_list; _}
     when SSet.mem (String.lowercase_ascii @@ text function_name)
-                  SN.Members.as_set ->
+                  SN.Members.as_lowercase_set ->
     let params = syntax_to_list_no_separators function_parameter_list in
     let len = Hh_core.List.length params in
     let name = text function_name in
@@ -1122,7 +1127,7 @@ let special_method_param_errors node parents errors =
     let num_args_opt =
       match s with
       | _ when s = SN.Members.__call && len <> 2 -> Some 2
-      | _ when s = SN.Members.__callStatic && len <> 2 -> Some 2
+      | _ when s = String.lowercase_ascii SN.Members.__callStatic && len <> 2 -> Some 2
       | _ when s = SN.Members.__get && len <> 1 -> Some 1
       | _ when s = SN.Members.__set && len <> 2 -> Some 2
       | _ when s = SN.Members.__isset && len <> 1 -> Some 1
@@ -1136,7 +1141,7 @@ let special_method_param_errors node parents errors =
           node (SyntaxError.invalid_number_of_args full_name n) :: errors
     in
     let errors = if (s = SN.Members.__call
-                  || s = SN.Members.__callStatic
+                  || s = String.lowercase_ascii SN.Members.__callStatic
                   || s = SN.Members.__get
                   || s = SN.Members.__set
                   || s = SN.Members.__isset
@@ -1656,10 +1661,17 @@ let invalid_shape_field_check node errors =
     invalid_shape_initializer_name field_initializer_name errors
   | _ -> make_error_from_node node SyntaxError.error2059 :: errors
 
-let is_in_magic_method parents =
+let is_in_unyieldable_magic_method parents =
   match first_parent_function_name parents with
   | None -> false
-  | Some s -> SSet.mem s SN.Members.as_set
+  | Some s ->
+    let s = String.lowercase_ascii s in
+    begin match s with
+    | _ when s = SN.Members.__call -> false
+    | _ when s = SN.Members.__invoke -> false
+    | _ when s = String.lowercase_ascii SN.Members.__callStatic -> false
+    | _ -> SSet.mem s SN.Members.as_lowercase_set
+    end
 
 let is_in_finally_block ~stop_on_lambda parents =
   let n =
@@ -1845,7 +1857,7 @@ let expression_errors env node parents errors =
   | YieldFromExpression _
   | YieldExpression _ ->
     let errors =
-      if is_in_magic_method parents then
+      if is_in_unyieldable_magic_method parents then
       make_error_from_node node SyntaxError.yield_in_magic_methods :: errors
       else errors in
     let errors =

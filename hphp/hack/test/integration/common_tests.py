@@ -206,6 +206,53 @@ class CommonTestDriver(object):
             ], env={})
         return DebugSubscription(proc)
 
+    def start_hh_loop_forever_assert_timeout(self):
+        # create a file with 10 dependencies. Only "big" jobs, that use
+        # workers can be interrupted at the moment.
+        with open(os.path.join(self.repo_dir, '__hh_loop_forever_foo.php'), 'w') as f:
+            f.write("""<?hh //strict
+            function __hh_loop_forever_foo(): int {
+              return 4;
+            }""")
+
+        for i in range(1, 10):
+            with open(
+                os.path.join(self.repo_dir, "__hh_loop_forever_bar%d.php" % i),
+                "w"
+            ) as f:
+                f.write("""<?hh //strict
+                function __hh_loop_forever_bar%d(): int {
+                  return __hh_loop_forever_foo();
+                }""" % i)
+
+        self.check_cmd(['No errors!'])
+
+        # trigger rechecking of all 11 files, and make one of them loop
+        # until cancelled
+        with open(os.path.join(self.repo_dir, '__hh_loop_forever_foo.php'), 'w') as f:
+            f.write("""<?hh //strict
+            function __hh_loop_forever_foo(): string {
+              hh_loop_forever();
+            }""")
+
+        # this should timeout due to infinite loop
+        try:
+            # empty output means no results due to timeout
+            self.check_cmd([], options=['--retries', '1'])
+        except AssertionError:
+            # one of the test drivers doesn't like timeouts
+            pass
+
+    def stop_hh_loop_forever(self):
+        # subsequent change should interrupt the "loop forever" part
+        with open(os.path.join(self.repo_dir, '__hh_loop_forever_foo.php'), 'w') as f:
+            f.write("""<?hh //strict
+            function __hh_loop_forever_foo(): int {
+              return 4;
+            }""")
+
+        self.check_cmd(['No errors!'])
+
 
 class DebugSubscription(object):
     """
@@ -972,44 +1019,5 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
                     )
 
         self.start_hh_server()
-        # create a file with 10 dependencies. Only "big" jobs, that use
-        # workers can be interrupted at the moment.
-        with open(os.path.join(self.repo_dir, 'foo.php'), 'w') as f:
-            f.write("""<?hh //strict
-            function foo(): int {
-              return 4;
-            }""")
-
-        for i in range(1, 10):
-            with open(os.path.join(self.repo_dir, 'bar%d.php' % i), 'w') as f:
-                f.write("""<?hh //strict
-                function bar%d(): int {
-                  return foo();
-                }""" % i)
-
-        self.check_cmd(['No errors!'])
-
-        # trigger rechecking of all 11 files, and make one of them loop
-        # until cancelled
-        with open(os.path.join(self.repo_dir, 'foo.php'), 'w') as f:
-            f.write("""<?hh //strict
-            function foo(): string {
-              hh_loop_forever();
-            }""")
-
-        # this should timeout due to infinite loop
-        try:
-            # empty output means no results due to timeout
-            self.check_cmd([], options=['--retries', '1'])
-        except AssertionError:
-            # one of the test drivers doesn't like timoeuts
-            pass
-
-        # subsequent change should interrupt the "loop forever" part
-        with open(os.path.join(self.repo_dir, 'foo.php'), 'w') as f:
-            f.write("""<?hh //strict
-            function foo(): int {
-              return 4;
-            }""")
-
-        self.check_cmd(['No errors!'])
+        self.start_hh_loop_forever_assert_timeout()
+        self.stop_hh_loop_forever()

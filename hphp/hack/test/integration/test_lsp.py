@@ -15,7 +15,7 @@ from lspcommand import LspCommandProcessor
 class LspTestDriver(common_tests.CommonTestDriver):
 
     def write_load_config(self, *changed_files):
-        # use default .hhconfig in the template repo
+        # use default .hhconfig and hh.conf in the template repo
         pass
 
     def assertEqualString(self, first, second, msg=None):
@@ -118,8 +118,9 @@ class TestLsp(LspTestDriver, unittest.TestCase):
             self.sanitize_exceptions(self.sort_responses(responses))
         )
 
-    def run_lsp_test(self, test_name, test, expected):
-        self.run_check()  # wait until hh_server is ready before starting lsp
+    def run_lsp_test(self, test_name, test, expected, wait_for_server):
+        if wait_for_server:  # wait until hh_server is ready before starting lsp
+            self.run_check()
         with LspCommandProcessor.create(self.test_env) as lsp:
             observed_transcript = lsp.communicate(test)
 
@@ -155,11 +156,12 @@ class TestLsp(LspTestDriver, unittest.TestCase):
             raise unittest.SkipTest('Hack server could not be launched')
         self.assertEqual(output.strip(), 'No errors!')
 
-    def load_and_run(self, test_name, variables):
+    def load_and_run(self, test_name, variables, wait_for_server=True):
         test, expected = self.load_test_data(test_name, variables)
         self.run_lsp_test(test_name=test_name,
                           test=test,
-                          expected=expected)
+                          expected=expected,
+                          wait_for_server=wait_for_server)
 
     def setup_php_file(self, test_php):
         # We want the path to the builtins directory. This is best we can do.
@@ -236,3 +238,10 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         self.prepare_environment()
         variables = self.setup_php_file('bad_call.php')
         self.load_and_run('bad_call', variables)
+
+    def test_non_blocking(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('non_blocking.php')
+        self.start_hh_loop_forever_assert_timeout()
+        self.load_and_run('non_blocking', variables, wait_for_server=False)
+        self.stop_hh_loop_forever()

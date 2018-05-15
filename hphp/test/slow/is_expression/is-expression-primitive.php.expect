@@ -3,6 +3,3 @@ int
 float
 string
 resource
-vec
-dict
-keyset

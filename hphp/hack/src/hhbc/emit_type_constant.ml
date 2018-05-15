@@ -37,7 +37,7 @@ let get_kind_num ~tparams p =
   | "hh\\varray" -> if hack_arr_dv_arrs () then 20 else 12
   | "hh\\varray_or_darray" ->  if hack_arr_dv_arrs () then 22 else 12
   | "array" -> 12
-  | "typevar" -> 13 (* corresponds to user OF_GENERIC *)
+  | "typevar" | "hh\\_" -> 13 (* corresponds to user OF_GENERIC *)
   | "shape" -> 14
   | "class" -> 15
   | "interface" -> 16

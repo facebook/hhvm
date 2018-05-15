@@ -60,6 +60,7 @@ let alias_map = List.fold_left ~f:add_alias ~init:SMap.empty
   HH_ONLY_TYPE("keyset");
   HH_ONLY_TYPE("varray");
   HH_ONLY_TYPE("darray");
+  HH_ONLY_TYPE("_");
 
   HH_ONLY_TYPE("Awaitable");
   HH_ONLY_TYPE("AsyncGenerator");

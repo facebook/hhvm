@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 
 #include "hphp/util/trace.h"
 
@@ -154,6 +155,28 @@ std::string CallTargetProfile::toString() const {
   }
   out << folly::format("Untracked: {}", m_untracked);
   return out.str();
+}
+
+void CallTargetProfile::serialize(ProfDataSerializer& ser) const {
+  for (size_t i = 0; i < kMaxEntries; i++) {
+    auto const funcId = m_entries[i].funcId;
+    const Func* func = funcId == kInvalidId ? nullptr
+                                            : Func::fromFuncId(funcId);
+    write_func(ser, func);
+    write_raw(ser, m_entries[i].count);
+  }
+  write_raw(ser, m_untracked);
+  write_raw(ser, m_init);
+}
+
+void CallTargetProfile::deserialize(ProfDataDeserializer& ser) {
+  for (size_t i = 0; i < kMaxEntries; i++) {
+    auto const func = read_func(ser);
+    m_entries[i].funcId = func != nullptr ? func->getFuncId() : kInvalidId;
+    read_raw(ser, m_entries[i].count);
+  }
+  read_raw(ser, m_untracked);
+  read_raw(ser, m_init);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

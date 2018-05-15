@@ -29,6 +29,9 @@ namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
+
 /*
  * Profiles the target functions for a given call site to determine how biased
  * it is.
@@ -43,6 +46,10 @@ struct CallTargetProfile {
   double bias() const;
 
   std::string toString() const;
+
+  void serialize(ProfDataSerializer&) const;
+
+  void deserialize(ProfDataDeserializer&);
 
  private:
   struct Entry {

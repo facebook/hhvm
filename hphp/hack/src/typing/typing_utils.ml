@@ -682,7 +682,7 @@ module IsAsExprHint : sig
     | Partial: locl ty -> t
     | Invalid: 'a ty -> t
 
-  val validate: locl ty -> t
+  val validate: Env.env -> locl ty -> t
   val print: 'a ty_ -> string
 end = struct
 
@@ -691,15 +691,23 @@ end = struct
     | Partial: locl ty -> t
     | Invalid: 'a ty -> t
 
-  let update old_acc new_acc =
+  type state = {
+    env: Env.env;
+    validity: t;
+  }
+
+  let update state new_validity = {
     (* Invalid > Partial > Valid *)
-    match old_acc, new_acc with
-    | Valid, _ | Partial _, Invalid _ -> new_acc
-    | _ -> old_acc
+    state with validity =
+      match state.validity, new_validity with
+        | Valid, _
+        | Partial _, Invalid _ -> new_validity
+        | v, _ -> v;
+  }
 
   let visitor =
     object(this)
-      inherit [t] Type_visitor.type_visitor as super
+      inherit [state] Type_visitor.type_visitor as super
       method! on_tany acc r = update acc @@ Invalid (r, Tany)
       method! on_terr acc r = update acc @@ Invalid (r, Terr)
       method! on_tprim acc r prim =
@@ -714,7 +722,9 @@ end = struct
         | AKenum _ -> acc
         | AKdependent (`this, _) -> acc
         | AKgeneric name when Env.is_fresh_generic_parameter name -> acc
-        (* TODO(kunalm) support type consts *)
+        | AKgeneric name when AbstractKind.is_generic_dep_ty name ->
+          let bounds = TySet.elements (Env.get_upper_bounds acc.env name) in
+          List.fold_left bounds ~f:this#on_type ~init:acc
         | _ -> update acc @@ Invalid (r, Tabstract (ak, ty_opt))
       method! on_tanon acc r arity id =
         update acc @@ Invalid (r, Tanon (arity, id))
@@ -727,7 +737,7 @@ end = struct
           | tyl when List.for_all tyl this#is_wildcard -> acc
           | _ ->
             let acc = super#on_tclass acc r cls tyl in
-            begin match acc with
+            begin match acc.validity with
               | Valid -> update acc @@  Partial (r, Tclass (cls, tyl))
               | _ -> acc
             end
@@ -739,7 +749,9 @@ end = struct
         | _ -> false
     end
 
-  let validate ty = visitor#on_type Valid ty
+  let validate env ty =
+    let state = visitor#on_type {env = env; validity = Valid} ty in
+    state.validity
 
   let print : type a. a ty_ -> string = function
     | Tclass (_, tyl) when tyl <> [] ->

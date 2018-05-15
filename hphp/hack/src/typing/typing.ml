@@ -2146,7 +2146,7 @@ and expr_
       end else begin
         let env, te, _ = expr env e in
         let env, hint_ty = Phase.hint_locl env hint in
-        match (IsAsExprHint.validate hint_ty) with
+        match IsAsExprHint.validate env hint_ty with
           | IsAsExprHint.Valid ->
             make_result env (T.Is (te, hint)) (Reason.Rwitness p, Tprim Tbool)
           | IsAsExprHint.Partial (r, ty_) ->
@@ -2175,7 +2175,7 @@ and expr_
           | _ , Toption _ -> hint_ty
           | _ -> Reason.Rwitness p, Toption (hint_ty) in
       let env, te, ty = assign p env e hint_ty in
-      match (IsAsExprHint.validate hint_ty) with
+      match IsAsExprHint.validate env hint_ty with
         | IsAsExprHint.Valid ->
           make_result env (T.As (te, hint, is_nullable)) ty
         | IsAsExprHint.Partial (r, ty_) ->
@@ -5856,7 +5856,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
           (* TODO(kunalm) Implement the type refinement for each type *)
           env, hint_ty
     in
-    begin match (IsAsExprHint.validate hint_ty) with
+    begin match IsAsExprHint.validate env hint_ty with
       | IsAsExprHint.Invalid _ -> env
       | IsAsExprHint.Partial _
       | IsAsExprHint.Valid ->

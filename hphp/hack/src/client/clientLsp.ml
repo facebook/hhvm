@@ -1446,6 +1446,7 @@ let rec connect_client
       progress_callback = ClientConnect.null_progress_reporter; (* we're fast! *)
       do_post_handoff_handshake = false;
       ignore_hh_version = false;
+      use_priority_pipe = true;
     } in
   try
     let ClientConnect.{channels = ic, oc; _} =

@@ -97,6 +97,7 @@ let should_start env =
   let root_s = Path.to_string env.root in
   let handoff_options = MonitorRpc.{
     force_dormant_start = false;
+    pipe_name = HhServerMonitorConfig.(pipe_type_to_string Default);
   } in
   match ServerUtils.connect_to_monitor
     ~timeout:3

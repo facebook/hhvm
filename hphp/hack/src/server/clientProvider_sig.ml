@@ -13,7 +13,7 @@ module type S = sig
 
   exception Client_went_away
 
-  val provider_from_file_descriptor : Unix.file_descr -> t
+  val provider_from_file_descriptors : (Unix.file_descr * Unix.file_descr) -> t
   val provider_for_test : unit -> t
 
   val sleep_and_check : t ->
@@ -25,7 +25,6 @@ module type S = sig
     (** Returns an optional new client, and a boolean for whether there is
      * a request on the persistent client. *)
     client option * bool
-  val accept_client : t -> client
   val read_connection_type : client -> ServerCommandTypes.connection_type
   val send_response_to_client : client -> 'a -> float -> unit
   val send_push_message_to_client : client -> ServerCommandTypes.push -> unit

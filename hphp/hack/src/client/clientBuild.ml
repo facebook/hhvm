@@ -77,6 +77,7 @@ let main_exn env =
     progress_callback = ClientConnect.tty_progress_reporter ();
     do_post_handoff_handshake = true;
     ignore_hh_version = false;
+    use_priority_pipe = false;
   } in
   let old_svnrev = Option.try_with begin fun () ->
     Sys_utils.read_file ServerBuild.svnrev_path

@@ -7,16 +7,18 @@
  *
  *)
 
+open Hh_core
 open ServerCommandTypes
 
 exception Client_went_away
 
-type t = Unix.file_descr
+(* default pipe, priority pipe *)
+type t = Unix.file_descr * Unix.file_descr
 type client =
   | Non_persistent_client of Timeout.in_channel * out_channel
   | Persistent_client of Unix.file_descr
 
-let provider_from_file_descriptor x = x
+let provider_from_file_descriptors x = x
 let provider_for_test () = failwith "for use in tests only"
 
 (** Retrieve channels to client from monitor process. *)
@@ -38,27 +40,32 @@ let accept_client_opt parent_in_fd =
 (* - If we should read from persistent_client, then (None, true)            *)
 (* - If we should read from in_fd, then (Some (Non_persist in_fd)), false)  *)
 (* - If there's nothing to read, then (None, false)                         *)
-let sleep_and_check in_fd persistent_client_opt ~ide_idle =
+let sleep_and_check (default_in_fd, priority_in_fd) persistent_client_opt
+    ~ide_idle =
+  (* TODO: ability to select priority only *)
+  let in_fds = [default_in_fd; priority_in_fd] in
+  let is_persistent x = match persistent_client_opt with
+    | Some (Persistent_client fd) when fd = x -> true
+    | _ -> false
+  in
   let l = match persistent_client_opt with
     | Some (Persistent_client fd) ->
       (* If we are not sure that there are no more IDE commands, do not even
        * look at non-persistent client to avoid race conditions.*)
-      if not ide_idle then [fd] else [in_fd; fd;]
+      if not ide_idle then [fd] else fd::in_fds
     | Some (Non_persistent_client _) ->
         (* The arguments for "sleep_and_check" are "the source of new clients"
          * and the "client we already store in the env". We only store
          * persistent clients *)
         assert false
-    | None -> [in_fd]
+    | None -> in_fds
   in
   let ready_fd_l, _, _ = Unix.select l [] [] (0.1) in
-  match ready_fd_l with
-    | [_; _] ->
-        (* Prioritize persistent client requests over command line ones *)
-        None, true
-    | [fd] when fd = in_fd -> accept_client_opt in_fd, false
-    | [fd] when fd <> in_fd -> None, true
-    | _ -> None, false
+  (* Prioritize existing persistent client requests over command line ones *)
+  if List.exists ready_fd_l ~f:is_persistent then None, true else
+  match List.hd ready_fd_l with
+  | Some fd -> accept_client_opt fd, false
+  | None -> None, false
 
 let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in

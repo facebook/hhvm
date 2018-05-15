@@ -85,6 +85,7 @@ let connect args =
     progress_callback = ClientConnect.tty_progress_reporter ();
     do_post_handoff_handshake = true;
     ignore_hh_version = args.ignore_hh_version;
+    use_priority_pipe = false;
   }
 
 let rpc args command =

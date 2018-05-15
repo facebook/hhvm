@@ -473,20 +473,8 @@ module FullCheckKind : CheckKindType = struct
       ~diag_subscribe =
     let full_check = if Relative_path.Set.is_empty needs_recheck then
       Full_check_done else old_env.full_check in
-    {
-      files_info = old_env.files_info;
-      tcopt = old_env.tcopt;
-      popt = old_env.popt;
-      errorl = errorl;
-      failed_naming = old_env.failed_naming;
-      persistent_client = old_env.persistent_client;
-      ide_idle = old_env.ide_idle;
-      last_command_time = old_env.last_command_time;
-      last_notifier_check_time = old_env.last_notifier_check_time;
-      last_idle_job_time = old_env.last_idle_job_time;
-      editor_open_files = old_env.editor_open_files;
-      ide_needs_parsing = old_env.ide_needs_parsing;
-      disk_needs_parsing = old_env.disk_needs_parsing;
+    { old_env with
+      errorl;
       needs_phase2_redecl = Relative_path.Set.empty;
       needs_recheck;
       full_check;
@@ -494,9 +482,6 @@ module FullCheckKind : CheckKindType = struct
         needs_full_init = false;
       };
       diag_subscribe;
-      recent_recheck_loop_stats = old_env.recent_recheck_loop_stats;
-      can_interrupt = old_env.can_interrupt;
-      interrupt_handler = old_env.interrupt_handler;
     }
 
     let is_full = true

@@ -214,7 +214,9 @@ void ExecutionContext::write(const String& s) {
 }
 
 void ExecutionContext::addStdoutHook(StdoutHook* hook) {
-  m_stdoutHooks.insert(hook);
+  if (hook != nullptr) {
+    m_stdoutHooks.insert(hook);
+  }
 }
 
 bool ExecutionContext::removeStdoutHook(StdoutHook* hook) {
@@ -242,6 +244,7 @@ void ExecutionContext::writeStdout(const char *s, int len) {
     m_stdoutBytesWritten += len;
   } else {
     for (auto const hook : m_stdoutHooks) {
+      assertx(hook != nullptr);
       (*hook)(s, len);
     }
   }

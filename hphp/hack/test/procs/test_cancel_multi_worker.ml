@@ -43,8 +43,7 @@ let run_interrupter fd_in fd_out =
   done;
   assert false
 
-let interrupt_handler acc fds =
-  let fd = List.hd_exn fds in
+let interrupt_handler fd acc =
   let exclamation_mark = Bytes.create 1 in
   begin try
     while true do
@@ -67,8 +66,7 @@ let rec run_until_done fd_in workers (acc, iterations) = function
       ~neutral:0
       ~next:(Bucket.make ~num_workers:num_workers ~max_size:10 work)
       ~interrupt:{ MultiThreadedCall.
-        fds = [fd_in];
-        handler = interrupt_handler;
+        handlers = (fun () -> [fd_in, interrupt_handler fd_in]);
         env = ();
       }
   in

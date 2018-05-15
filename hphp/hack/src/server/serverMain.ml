@@ -419,25 +419,32 @@ let serve_one_iteration genv env client_provider =
       env)
   else env
 
+let watchman_interrupt_handler genv env =
+  let t = Unix.gettimeofday () in
+  let env, updates, updates_stale = query_notifier genv env `Async t in
+  (* Async updates can always be stale, so we don't care *)
+  ignore updates_stale;
+  let size = Relative_path.Set.cardinal updates in
+  if size > 0 then begin
+    Hh_logger.log
+      "Interrupted by Watchman message: %d files changed" size;
+    { env with disk_needs_parsing =
+        Relative_path.Set.union env.disk_needs_parsing updates },
+    MultiThreadedCall.Cancel
+  end else
+    env, MultiThreadedCall.Continue
+
 let setup_interrupts genv env = { env with
-  interrupt_handler =
-    if not genv.local_config.ServerLocalConfig.interrupt_on_watchman then None
-    else Some (
-    fun env _watchman_fd ->
-      let t = Unix.gettimeofday () in
-      let env, updates, updates_stale = query_notifier genv env `Async t in
-      (* Async updates can always be stale, so we don't care *)
-      ignore updates_stale;
-      let size = Relative_path.Set.cardinal updates in
-      if size > 0 then begin
-        Hh_logger.log
-          "Interrupted by Watchman message: %d files changed" size;
-        { env with disk_needs_parsing =
-            Relative_path.Set.union env.disk_needs_parsing updates },
-        MultiThreadedCall.Cancel
-      end else
-        env, MultiThreadedCall.Continue
-  );
+  interrupt_handlers = fun env ->
+    let {ServerLocalConfig.interrupt_on_watchman; _ }
+      = genv.local_config in
+    let interrupt_on_watchman = interrupt_on_watchman && env.can_interrupt in
+    let handlers = match genv.notifier_async_fd () with
+      | Some fd when interrupt_on_watchman ->
+        [fd, watchman_interrupt_handler genv]
+      | _ -> []
+    in
+    handlers
 }
 
 let serve genv env in_fd _ =

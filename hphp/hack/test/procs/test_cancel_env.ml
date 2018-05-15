@@ -63,16 +63,13 @@ let rec make_work acc = function
 let make_work () = make_work [] num_workers_and_jobs
 
 (* read the pings, count them in env, and cancel after second one *)
-let interrupt_handler env fds =
+let interrupt_handler fd env =
   let exclamation_mark = Bytes.create 1 in
-  match fds with
-  | [fd] ->
-    let read = Unix.read fd exclamation_mark 0 1 in
-    assert (read = 1 && exclamation_mark = "!");
-    let env = env+1 in
-    let result = MultiThreadedCall.(if env = 2 then Cancel else Continue) in
-    env, result
-  | _ -> assert false
+  let read = Unix.read fd exclamation_mark 0 1 in
+  assert (read = 1 && exclamation_mark = "!");
+  let env = env+1 in
+  let result = MultiThreadedCall.(if env = 2 then Cancel else Continue) in
+  env, result
 
 let test_cancel_env () =
   Tempfile.with_tempdir @@ fun tempdir ->
@@ -98,8 +95,7 @@ let test_cancel_env () =
       ~neutral:0
       ~next
       ~interrupt:{ MultiThreadedCall.
-         fds = [interrupt_fd];
-         handler = interrupt_handler;
+         handlers = (fun _ -> [interrupt_fd, interrupt_handler interrupt_fd]);
          env = 0; (* counting number of times interrupt handler ran *)
       }
   in

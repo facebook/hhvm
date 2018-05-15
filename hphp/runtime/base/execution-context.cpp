@@ -705,8 +705,6 @@ void ExecutionContext::onShutdownPostSend() {
         bump_counter_and_rethrow(true /* isPsp */);
       } catch (const ExitException& e) {
         // do nothing
-      } catch (const HostOutOfMemoryException& e) {
-        onOOMKill(e);
       } catch (const Exception& e) {
         onFatalError(e);
       } catch (const Object& e) {
@@ -1032,19 +1030,6 @@ bool ExecutionContext::onUnhandledException(Object e) {
     Logger::Error("\nFatal error: Uncaught %s", err.data());
   }
   return false;
-}
-
-void ExecutionContext::onOOMKill(const HostOutOfMemoryException& e) {
-  // When host is out of memory, we don't have the luxury of continue running
-  // things such as PSP, custom error handlers, etc.  Some counters are bumped
-  // in `bump_counter_and_rethrow()`.  Here we log some additional details about
-  // the killed request to help people debug.
-  Logger::Error("Request killed due to memory pressure. "
-                "URL %s, bytes used %zu",
-                g_context->getRequestUrl().c_str(),
-                e.m_bytes);
-  // TODO(T25950158): consider writing some StructuredLog when we have a
-  // better way to describe the request beyond URL.
 }
 
 ///////////////////////////////////////////////////////////////////////////////

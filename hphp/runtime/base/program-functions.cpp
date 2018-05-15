@@ -447,7 +447,7 @@ void bump_counter_and_rethrow(bool isPsp) {
 #endif
 
     throw;
-  } catch (const HostOutOfMemoryException& e) {
+  } catch (const RequestOOMKilledException& e) {
     if (isPsp) {
       static auto requestHostOOMPSPCounter = ServiceData::createTimeSeries(
         "requests_oom_killed_psp", {ServiceData::StatsType::COUNT});
@@ -501,11 +501,6 @@ static void handle_exception_helper(bool& ret,
     if (richErrorMsg) {
       handle_exception_append_bt(errorMsg, e);
     }
-  } catch (const HostOutOfMemoryException& e) {
-    ret = false;
-    error = true;
-    errorMsg = "OOM";
-    context->onOOMKill(e);
   } catch (const Exception& e) {
     bool oldRet = ret;
     bool origError = error;

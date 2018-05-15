@@ -264,7 +264,6 @@ public:
   void clearLastError();
   bool onFatalError(const Exception& e); // returns handled
   bool onUnhandledException(Object e);
-  void onOOMKill(const HostOutOfMemoryException& e);
   ErrorState getErrorState() const;
   void setErrorState(ErrorState);
   String getLastError() const;

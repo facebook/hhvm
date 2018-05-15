@@ -288,7 +288,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
       }
       if (p.shouldOOMAbort()) {
         pendingException =
-          new HostOutOfMemoryException(static_cast<size_t>(currUsage));
+          new RequestOOMKilledException(static_cast<size_t>(currUsage));
         // In case this exception doesn't stop other pieces of code from
         // running, keep aborting them until all are dead.
         p.setHostOOMFlag();

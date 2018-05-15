@@ -132,6 +132,16 @@ struct RequestMemoryExceededException : ResourceExceededException {
   EXCEPTION_COMMON_IMPL(RequestMemoryExceededException);
 };
 
+struct RequestOOMKilledException : ResourceExceededException {
+  RequestOOMKilledException(size_t usedBytes)
+    : ResourceExceededException(
+        folly::sformat("request aborted due to memeory presure, "
+                       "used {} bytes", usedBytes),
+        empty_array())
+  {}
+  EXCEPTION_COMMON_IMPL(RequestOOMKilledException);
+};
+
 //////////////////////////////////////////////////////////////////////
 
 extern __thread int tl_exit_code;

@@ -26,6 +26,7 @@
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/jit/array-kind-profile.h"
 #include "hphp/runtime/vm/jit/array-offset-profile.h"
 #include "hphp/runtime/vm/jit/call-target-profile.h"
@@ -990,6 +991,8 @@ bool serializeProfData(const std::string& filename) {
       Func::s_treadmill = false;
     };
 
+    InstanceBits::init();
+    InstanceBits::serialize(ser);
     write_global_array_map(ser);
 
     auto const pd = profData();
@@ -1020,6 +1023,7 @@ bool deserializeProfData(const std::string& filename) {
       throw std::runtime_error("Mismatched repo-schema");
     }
 
+    InstanceBits::deserialize(ser);
     read_global_array_map(ser);
 
     ProfData::Session pds;

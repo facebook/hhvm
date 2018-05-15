@@ -25,7 +25,15 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
 
-namespace HPHP { struct StringData; }
+namespace HPHP {
+
+struct StringData;
+namespace jit {
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
+}
+
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -103,6 +111,12 @@ unsigned lookup(const StringData* name);
  * Pre: initFlag == true.
  */
 bool getMask(const StringData* name, int& offset, uint8_t& mask);
+
+/*
+ * Serialize and deserialize.
+ */
+void serialize(jit::ProfDataSerializer&);
+void deserialize(jit::ProfDataDeserializer&);
 
 //////////////////////////////////////////////////////////////////////
 

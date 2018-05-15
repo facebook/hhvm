@@ -349,7 +349,7 @@ Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
 folly::Synchronized<InlineCostCache, folly::RWSpinLock> s_inlCostCache;
 
 int computeTranslationCost(SrcKey at, Op callerFPushOp,
-                           const RegionDesc& region, uint64_t adjustedMaxCost) {
+                           const RegionDesc& region) {
   InlineRegionKey irk{region};
   SYNCHRONIZED_CONST(s_inlCostCache) {
     auto f = s_inlCostCache.find(irk);
@@ -359,17 +359,27 @@ int computeTranslationCost(SrcKey at, Op callerFPushOp,
   auto const info = computeTranslationCostSlow(at, callerFPushOp, region);
   auto cost = info.cost;
 
-  // If the region wasn't complete, don't cache the result, unless we already
-  // know it will be too expensive, or we've stopped profiling it
+  // We normally store the computed cost into the cache.  However, if the region
+  // is incomplete, and it's cost is still within the maximum allowed cost, and
+  // we're still profiling that function, then we don't want to cache that
+  // result yet.  The reason for this exception is that we may still gather
+  // additional profiling information that will allow us to create a complete
+  // region with acceptable cost.
+  bool cacheResult = true;
+
   if (info.incomplete) {
-    auto const fid = region.entry()->func()->getFuncId();
-    auto const profData = jit::profData();
-    auto const profiling = profData && profData->profiling(fid);
+    if (info.cost <= RuntimeOption::EvalHHIRInliningMaxVasmCostLimit) {
+      auto const fid = region.entry()->func()->getFuncId();
+      auto const profData = jit::profData();
+      auto const profiling = profData && profData->profiling(fid);
+      if (profiling) cacheResult = false;
+    }
+
+    // Set cost very high to prevent inlining of incomplete regions.
     cost = std::numeric_limits<int>::max();
-    if (profiling && info.cost <= adjustedMaxCost) return cost;
   }
 
-  if (!s_inlCostCache.asConst()->count(irk)) {
+  if (cacheResult && !s_inlCostCache.asConst()->count(irk)) {
     s_inlCostCache->emplace(irk, cost);
   }
   FTRACE(3, "computeTranslationCost(at {}) = {}\n", showShort(at), cost);
@@ -426,8 +436,7 @@ int InliningDecider::accountForInlining(SrcKey callerSk,
                                         const Func* callee,
                                         const RegionDesc& region,
                                         const irgen::IRGS& irgs) {
-  const auto maxCost = adjustedMaxVasmCost(irgs, region);
-  int cost = computeTranslationCost(callerSk, callerFPushOp, region, maxCost);
+  int cost = computeTranslationCost(callerSk, callerFPushOp, region);
   m_costStack.push_back(cost);
   m_cost       += cost;
   m_callDepth  += 1;
@@ -528,8 +537,7 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
   // certain threshold.  (Note that we do not measure the total cost of all the
   // inlined calls for a given caller---just the cost of each nested stack.)
   const int maxCost = maxTotalCost - m_cost;
-  const int cost = computeTranslationCost(callerSk, callerFPushOp, region,
-                                          maxCost);
+  const int cost = computeTranslationCost(callerSk, callerFPushOp, region);
   if (cost > maxCost) {
     return refuse("too expensive");
   }

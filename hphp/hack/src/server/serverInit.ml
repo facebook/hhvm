@@ -460,7 +460,10 @@ module ServerInitCommon = struct
         Hh_logger.log "Could not load mini state: %s" err_str;
       end;
       let get_next, t = indexing genv in
-      let env, t = parsing ~lazy_parse:true genv env ~get_next t in
+      (* The full_fidelity_parser currently works better in both memory and time
+        with a full parse rather than parsing decl asts and then parsing full ones *)
+      let lazy_parse = not genv.local_config.SLC.use_full_fidelity_parser in
+      let env, t = parsing ~lazy_parse genv env ~get_next t in
       SearchServiceRunner.update_fileinfo_map env.files_info;
       let t = update_files genv env.files_info t in
       let env, t = naming env t in

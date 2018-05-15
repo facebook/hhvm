@@ -100,6 +100,7 @@ module Members = struct
       __get; __invoke; __isset; __set; __set_state; __sleep; __toString;
       __unset; __wakeup;
     ]
+  let as_lowercase_set = SSet.map String.lowercase_ascii as_set
 
   (* Any data- or aria- attribute is always valid, even if it is not declared
    * for a given XHP element *)

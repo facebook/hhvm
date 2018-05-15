@@ -505,8 +505,10 @@ private:
 
   void setIsAsync();
 
-  static bool canBeAsyncOrGenerator(const std::string& funcName,
-                                    const std::string& clsName);
+  static bool canBeAsync(const std::string& funcName,
+                         const std::string& clsName);
+  static bool canBeGenerator(const std::string& funcName,
+                             const std::string& clsName);
   void checkFunctionContext(const std::string& funcName,
                             FunctionContext& funcContext,
                             ModifierExpressionPtr modifiers,

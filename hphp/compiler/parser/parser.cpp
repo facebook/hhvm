@@ -1215,7 +1215,7 @@ void Parser::checkFunctionContext(const std::string& funcName,
                 funcName.c_str());
   }
 
-  if (modifiers->isAsync() && !canBeAsyncOrGenerator(funcName, clsName())) {
+  if (modifiers->isAsync() && !canBeAsync(funcName, clsName())) {
     PARSE_ERROR("cannot declare constructors, destructors, and "
                     "magic methods such as '%s' as async",
                 funcName.c_str());
@@ -1979,8 +1979,9 @@ void Parser::onReturn(Token &out, Token *expr) {
   }
 }
 
-bool Parser::canBeAsyncOrGenerator(const std::string& funcName,
-                                   const std::string& clsName) {
+static bool can_be_async_or_generator(const std::string& funcName,
+                                      const std::string& clsName,
+                                      const bool isAsync) {
   if (clsName.empty()) {
     return true;
   }
@@ -1995,13 +1996,28 @@ bool Parser::canBeAsyncOrGenerator(const std::string& funcName,
         !strcasecmp(fname, "set") ||
         !strcasecmp(fname, "isset") ||
         !strcasecmp(fname, "unset") ||
-        !strcasecmp(fname, "call") ||
-        !strcasecmp(fname, "callstatic") ||
-        !strcasecmp(fname, "invoke")) {
+        !strcasecmp(fname, "dispose") ||
+        (isAsync ? (
+          !strcasecmp(fname, "call") ||
+          !strcasecmp(fname, "callstatic") ||
+          !strcasecmp(fname, "invoke")
+        ) : ( // generator
+          !strcasecmp(fname, "disposeasync")
+        ))) {
       return false;
     }
   }
   return true;
+}
+
+bool Parser::canBeGenerator(const std::string& funcName,
+                            const std::string& clsName) {
+  return can_be_async_or_generator(funcName, clsName, /*isAsync=*/ false);
+}
+
+bool Parser::canBeAsync(const std::string& funcName,
+                        const std::string& clsName) {
+  return can_be_async_or_generator(funcName, clsName, /*isAsync=*/ true);
 }
 
 void Parser::setIsGenerator() {
@@ -2009,7 +2025,7 @@ void Parser::setIsGenerator() {
     PARSE_ERROR("Yield can only be used inside a function");
   }
 
-  if (!canBeAsyncOrGenerator(funcName(), clsName())) {
+  if (!canBeGenerator(funcName(), clsName())) {
     PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
                 "magic methods");
   }
@@ -2044,7 +2060,7 @@ void Parser::setIsAsync() {
     PARSE_ERROR("'await' can only be used inside a function");
   }
 
-  if (!canBeAsyncOrGenerator(funcName(), clsName())) {
+  if (!canBeAsync(funcName(), clsName())) {
     PARSE_ERROR("'await' is not allowed in constructors, destructors, or "
                     "magic methods.");
   }

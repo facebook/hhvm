@@ -1,0 +1,40 @@
+array(3) {
+  [0]=>
+  string(12) "__callStatic"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  array(3) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+    [2]=>
+    string(1) "c"
+  }
+}
+array(4) {
+  [0]=>
+  string(8) "__invoke"
+  [1]=>
+  string(1) "d"
+  [2]=>
+  string(1) "e"
+  [3]=>
+  string(1) "f"
+}
+array(3) {
+  [0]=>
+  string(6) "__call"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  array(3) {
+    [0]=>
+    string(1) "d"
+    [1]=>
+    string(1) "e"
+    [2]=>
+    string(1) "f"
+  }
+}

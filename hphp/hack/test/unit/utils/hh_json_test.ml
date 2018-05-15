@@ -73,7 +73,7 @@ let test_jget_string () =
   let open Hh_json_helpers in
   let results = "" in
 
-  let str = match Jget.string_opt json_string "foo" with Some "hello" -> true | _ -> false in
+  let str = Jget.string_opt json_string "foo" = Some "hello" in
   let num = Jget.string_opt json_number "foo" |> Option.is_none in
   let nul = Jget.string_opt json_number "foo" |> Option.is_none in
   let abs = Jget.string_opt json_absent "foo" |> Option.is_none in
@@ -89,13 +89,37 @@ let test_jget_string () =
   let results = results ^ (Printf.sprintf "string_d: str=%B num=%B nul=%B abs=%B non=%B\n"
     str num nul abs non) in
 
-  let str = match Jget.string_exn json_string "foo" with "hello" -> true | _ -> false in
+  let str = Jget.string_exn json_string "foo" = "hello" in
   let num = throws (fun () -> Jget.string_exn json_number "foo") in
   let nul = throws (fun () -> Jget.string_exn json_null "foo") in
   let abs = throws (fun () -> Jget.string_exn json_absent "foo") in
   let non = throws (fun () -> Jget.string_exn json_none "foo") in
   let results = results ^ (Printf.sprintf "string_exn: str=%B num=%B nul=%B abs=%B non=%B\n"
     str num nul abs non) in
+
+  let failed = String_utils.is_substring "false" results in
+  if failed then Printf.eprintf "%s" results;
+  not failed
+
+
+let test_jget_number () =
+  let json_int = Some (Hh_json.json_of_string "{ \"foo\": 1 }") in
+  let json_float = Some (Hh_json.json_of_string "{ \"foo\": 1.0 }") in
+  let json_string = Some (Hh_json.json_of_string "{ \"foo\": \"hello\" }") in
+  let open Hh_json_helpers in
+  let results = "" in
+
+  let iint = Jget.int_opt json_int "foo" = Some 1 in
+  let ifloat = throws (fun () -> Jget.int_opt json_float "foo") in
+  let istring = Jget.int_opt json_string "foo" |> Option.is_none in
+  let results = results ^ (Printf.sprintf "int_opt: int=%B float=%B string=%B\n"
+    iint ifloat istring) in
+
+  let fint = Jget.float_opt json_int "foo" = Some 1.0 in
+  let ffloat = Jget.float_opt json_float "foo" = Some 1.0 in
+  let fstring = Jget.float_opt json_string "foo" |> Option.is_none in
+  let results = results ^ (Printf.sprintf "float_opt: int=%B float=%B string=%B\n"
+    fint ffloat fstring) in
 
   let failed = String_utils.is_substring "false" results in
   if failed then Printf.eprintf "%s" results;
@@ -315,6 +339,7 @@ let tests = [
   "test_whitespace_string", test_whitespace_string;
   "test_access_string", test_access_string;
   "test_jget_string", test_jget_string;
+  "test_jget_number", test_jget_number;
   "test_access_object_string", test_access_object_string;
   "test_access_object_bool", test_access_object_bool;
   "test_access_object_number", test_access_object_number;

@@ -13,7 +13,7 @@ let test_process_data =
     pid = 2758734;
     start_t = 0.0;
     in_fd = Unix.stdin;
-    out_fd = Unix.stdout;
+    out_fds = ["default", Unix.stdout];
     last_request_handoff = ref 0.0;
   }
 

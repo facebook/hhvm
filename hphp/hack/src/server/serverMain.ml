@@ -447,7 +447,8 @@ let setup_interrupts genv env = { env with
     handlers
 }
 
-let serve genv env in_fd _ =
+let serve genv env in_fds =
+  let in_fd = fst in_fds in (* TODO: nothing is sent to priority pipe yet *)
   let client_provider = ClientProvider.provider_from_file_descriptor in_fd in
   (* This is needed when typecheck_after_init option is disabled. *)
   if not env.init_env.needs_full_init then finalize_init genv env.init_env;
@@ -605,10 +606,8 @@ let run_once options handle =
  * The server monitor will pass client connections to this process
  * via ic.
  *)
-let daemon_main_exn ~informant_managed options monitor_pid (ic, oc) =
+let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   Printexc.record_backtrace true;
-  let in_fd = Daemon.descr_of_in_channel ic in
-  let out_fd = Daemon.descr_of_out_channel oc in
   let config, _ = ServerConfig.(load filename options) in
   let handle = SharedMem.init (ServerConfig.sharedmem_config config) in
   SharedMem.connect handle ~is_master:true;
@@ -619,9 +618,13 @@ let daemon_main_exn ~informant_managed options monitor_pid (ic, oc) =
     (Hh_logger.log "Invalid program args - can't run daemon in check mode.";
     Exit_status.(exit Input_error));
   let env = MainInit.go genv options init_id (fun () -> program_init genv) in
-  serve genv env in_fd out_fd
+  serve genv env in_fds
 
-let daemon_main (informant_managed, state, options, monitor_pid) (ic, oc) =
+let daemon_main (informant_managed, state, options, monitor_pid, priority_in_fd)
+  (default_ic, _) =
+  (* Avoid leaking this fd further *)
+  let () = Unix.set_close_on_exec priority_in_fd in
+  let default_in_fd = Daemon.descr_of_in_channel default_ic in
   (* Restore the root directory and other global states from monitor *)
   ServerGlobalState.restore state;
   (* Restore hhi files every time the server restarts
@@ -629,7 +632,8 @@ let daemon_main (informant_managed, state, options, monitor_pid) (ic, oc) =
   ignore (Hhi.get_hhi_root());
 
   ServerUtils.with_exit_on_exception @@ fun () ->
-  daemon_main_exn ~informant_managed options monitor_pid (ic, oc)
+  daemon_main_exn ~informant_managed options monitor_pid
+    (default_in_fd, priority_in_fd)
 
 
 let entry =

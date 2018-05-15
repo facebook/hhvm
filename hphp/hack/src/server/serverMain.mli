@@ -12,7 +12,8 @@
  * these phantom types because OCaml doesn't allow polymorphic values that
  * are not functions. *)
 val entry:
-  (bool * ServerGlobalState.t * ServerArgs.options * int, unit, unit) Daemon.entry
+  (bool * ServerGlobalState.t * ServerArgs.options * int * Unix.file_descr,
+    unit, unit) Daemon.entry
 
 val run_once: ServerArgs.options -> SharedMem.handle -> 'a
 

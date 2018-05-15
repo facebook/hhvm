@@ -11,6 +11,14 @@
 
 module SP = ServerProcess
 
+type pipe_type =
+  | Default
+  | Priority
+
+let pipe_type_to_string = function
+  | Default -> "default"
+  | Priority -> "priority"
+
 let start_server_daemon ~informant_managed options log_link daemon_entry =
   let log_fds =
     let in_fd = Daemon.null_fd () in
@@ -29,18 +37,28 @@ let start_server_daemon ~informant_managed options log_link daemon_entry =
   let start_t = Unix.time () in
   let state = ServerGlobalState.save () in
   let monitor_pid = Unix.getpid () in
+  (* Setting some additional channels between monitor and server *)
+  let parent_priority_fd, child_priority_fd =
+    Unix.socketpair Unix.PF_UNIX Unix.SOCK_STREAM 0 in
+  let () = Unix.set_close_on_exec parent_priority_fd in
+  let () = Unix.clear_close_on_exec child_priority_fd in
+
   let {Daemon.pid; Daemon.channels = (ic, oc)} =
     Daemon.spawn
       ~channel_mode:`socket
       log_fds
       daemon_entry
-      (informant_managed, state, options, monitor_pid) in
+      (informant_managed, state, options, monitor_pid, child_priority_fd) in
+  Unix.close child_priority_fd;
   Hh_logger.log "Just started typechecker server with pid: %d." pid;
   let server =
     SP.({
       pid = pid;
       in_fd = Daemon.descr_of_in_channel ic;
-      out_fd = Daemon.descr_of_out_channel oc;
+      out_fds = [
+        pipe_type_to_string Default, Daemon.descr_of_out_channel oc;
+        pipe_type_to_string Priority, parent_priority_fd;
+      ];
       start_t = start_t;
       last_request_handoff = ref (Unix.time());
     }) in

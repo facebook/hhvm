@@ -83,7 +83,7 @@ let make_test test =
       ServerProcess.pid = 0;
       start_t = 0.0;
       in_fd = null_fd;
-      out_fd = null_fd;
+      out_fds = [];
       last_request_handoff = ref 0.0;
     }
 

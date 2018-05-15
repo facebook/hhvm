@@ -546,7 +546,7 @@ RegionDescPtr form_region(Env& env) {
 
     // Break translation if there's already a translation starting at the
     // current SrcKey.
-    if (!firstInst) {
+    if (!firstInst && env.irgs.context.kind == TransKind::Profile) {
       auto const sr = tc::findSrcRec(env.sk);
       if (sr != nullptr && sr->getTopTranslation() != nullptr) {
         FTRACE(1, "selectTracelet: breaking region at TC entry: {}\n",

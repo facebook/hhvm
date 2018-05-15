@@ -338,6 +338,10 @@ exceptions depending on how coercion is implemented.
   Returns S0, with Nullptr removed from its type. This instruction currently
   supports a very limited range of types but can be expanded if needed.
 
+| AssertARFunc<spOff>, ND, S(StkPtr) S(Func), NF
+
+  Asserts that the ActRec at offset spOff from S0 contains function S1.
+
 2. Arithmetic
 
 | AddInt, D(Int), S(Int) S(Int), NF
@@ -3125,6 +3129,10 @@ fields of that struct for holding intermediate values.
   Profile the type of S0.
 
 | ProfileMethod<rdsHandle,spOff>, ND, S(StkPtr) S(Cls,Nullptr), NF
+
+  Profile the Func in the ActRec that was just pushed onto the stack.
+
+| ProfileFunc<rdsHandle,spOff>, ND, S(StkPtr), NF
 
   Profile the Func in the ActRec that was just pushed onto the stack.
 

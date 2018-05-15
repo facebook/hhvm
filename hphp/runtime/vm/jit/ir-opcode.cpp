@@ -515,6 +515,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AssertNonNull:
   case AssertStk:
   case AssertType:
+  case AssertARFunc:
   case AsyncFuncRet:
   case AsyncFuncRetSlow:
   case AsyncSwitchFast:
@@ -869,6 +870,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileDictOffset:
   case ProfileInstanceCheck:
   case ProfileKeysetOffset:
+  case ProfileFunc:
   case ProfileMethod:
   case ProfileMixedArrayOffset:
   case ProfileSubClsCns:

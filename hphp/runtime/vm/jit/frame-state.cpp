@@ -686,6 +686,32 @@ void FrameStateMgr::update(const IRInstruction* inst) {
                     cur().bcSPOff, inst);
     break;
 
+  case AssertARFunc: {
+    auto funcTmp = inst->src(1);
+    if (funcTmp->hasConstVal(TFunc)) {
+      auto sp = inst->src(0);
+      auto offset = inst->extra<AssertARFunc>()->offset;
+      auto const invOff = offset.to<FPInvOffset>(cur().irSPOff) -
+                          kNumActRecCells;
+      auto func = funcTmp->funcVal();
+      for (auto& fpi : cur().fpiStack) {
+        if (fpi.returnSP == sp && fpi.returnSPOff == invOff) {
+          if (fpi.func == nullptr) {
+            fpi.func = func;
+            // we know the func, so it's eligible for inlining
+            fpi.inlineEligible = true;
+            if (func->isStaticInPrologue()) fpi.ctxType = TCctx;
+            ITRACE(3, "FrameStateMgr::update(AssertARFunc): setting function "
+                   "to {}\n", func->fullName());
+          } else {
+            assertx(fpi.func == func);
+          }
+        }
+      }
+    }
+    break;
+  }
+
   case LookupClsMethod:
     writeToSpilledFrame(inst->extra<LookupClsMethod>()->calleeAROffset,
                         inst->src(2));

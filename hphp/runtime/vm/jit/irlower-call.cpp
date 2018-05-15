@@ -74,6 +74,8 @@ TCA getCallTarget(IRLS& env, const IRInstruction* inst, Vreg sp) {
   auto const callee = extra->callee;
   if (callee != nullptr) return tc::ustubs().immutableBindCallStub;
 
+  if (!RuntimeOption::RepoAuthoritative) return tc::ustubs().bindCallStub;
+
   auto profile = TargetProfile<CallTargetProfile>(env.unit.context(),
                                                   inst->marker(),
                                                   callTargetProfileKey.get());
@@ -92,7 +94,8 @@ TCA getCallTarget(IRLS& env, const IRInstruction* inst, Vreg sp) {
     // one function, bind the call.  Otherwise, call funcPrologueRedispatch
     // directly.
     auto const data = profile.data();
-    auto const bias = data.bias();
+    double bias = 0;
+    data.choose(bias);
     if (bias * 100 >= RuntimeOption::EvalJitPGOBindCallThreshold) {
       return tc::ustubs().bindCallStub;
     }
@@ -573,5 +576,20 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void cgProfileFunc(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<ProfileCallTargetData>();
+  auto const sp = srcLoc(env, inst, 0).reg();
+
+  auto const args = argGroup(env, inst)
+    .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
+    .addr(sp, cellsToBytes(extra->bcSPOff.offset));
+
+  cgCallHelper(vmain(env), env, CallSpec::method(&CallTargetProfile::report),
+               kVoidDest, SyncOptions::None, args);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 }}}

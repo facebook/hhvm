@@ -33,8 +33,8 @@ struct ProfDataSerializer;
 struct ProfDataDeserializer;
 
 /*
- * Profiles the target functions for a given call site to determine how biased
- * it is.
+ * Profiles the target functions for a given call site to determine the most
+ * common callee along with the expected probability of calling it.
  */
 struct CallTargetProfile {
 
@@ -43,7 +43,7 @@ struct CallTargetProfile {
   static void reduce(CallTargetProfile& profile,
                      const CallTargetProfile& other);
 
-  double bias() const;
+  const Func* choose(double& probability) const;
 
   std::string toString() const;
 

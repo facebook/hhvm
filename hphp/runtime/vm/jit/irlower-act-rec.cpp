@@ -248,6 +248,8 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgAssertARFunc(IRLS&, const IRInstruction*) {}
+
 void cgLdARFuncPtr(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const sp = srcLoc(env, inst, 0).reg();

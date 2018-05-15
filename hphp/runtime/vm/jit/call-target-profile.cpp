@@ -119,12 +119,15 @@ void CallTargetProfile::reduce(CallTargetProfile& profile,
   }
 }
 
-double CallTargetProfile::bias() const {
-  if (!m_init) return 0;
+const Func* CallTargetProfile::choose(double& probability) const {
+  if (!m_init) {
+    probability = 0;
+    return nullptr;
+  }
 
   assertx(m_entries[0].funcId != InvalidFuncId);
 
-  FTRACE(3, "CallTargetProfile::bias(): {}\n", *this);
+  FTRACE(3, "CallTargetProfile::choose(): {}\n", *this);
 
   size_t bestIdx = 0;
   uint64_t total = m_untracked + m_entries[0].count;
@@ -139,10 +142,12 @@ double CallTargetProfile::bias() const {
   }
 
   auto const& best = m_entries[bestIdx];
-  auto const bias = (double)best.count / total;
-  FTRACE(2, "CallTargetProfile::bias(): best funcId {} ({}), bias = {:.2}\n",
-         best.funcId, Func::fromFuncId(best.funcId)->fullName(), bias);
-  return bias;
+  auto bestFunc = Func::fromFuncId(best.funcId);
+  probability = (double)best.count / total;
+  FTRACE(2, "CallTargetProfile::choose(): best funcId {} ({}), "
+         "probability = {:.2}\n",
+         best.funcId, bestFunc->fullName(), probability);
+  return bestFunc;
 }
 
 std::string CallTargetProfile::toString() const {

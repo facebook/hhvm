@@ -294,6 +294,7 @@ bool canDCE(IRInstruction* inst) {
   case AssertLoc:
   case AssertStk:
   case AssertMBase:
+  case AssertARFunc:
   case CastStk:
   case CastMem:
   case CoerceStk:
@@ -655,6 +656,7 @@ bool canDCE(IRInstruction* inst) {
   case EmptyElem:
   case ProfileArrayKind:
   case ProfileType:
+  case ProfileFunc:
   case ProfileMethod:
   case ProfileSubClsCns:
   case CheckPackedArrayDataBounds:

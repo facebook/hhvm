@@ -1494,6 +1494,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertLoc:
   case AssertStk:
   case AssertMBase:
+  case AssertARFunc:
   case FuncGuard:
   case DefFP:
   case DefSP:
@@ -1825,10 +1826,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store(effects, effects);
     }
 
+  case ProfileFunc:
   case ProfileMethod:
     {
       AliasClass effects =
-        actrec(inst.src(0), inst.extra<ProfileMethod>()->bcSPOff);
+        actrec(inst.src(0), inst.extra<ProfileCallTargetData>()->bcSPOff);
       return may_load_store(effects, AEmpty);
     }
 

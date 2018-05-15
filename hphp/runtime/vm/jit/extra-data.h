@@ -1283,13 +1283,15 @@ struct LookupClsMethodData : IRExtraData {
 };
 
 
-struct ProfileMethodData : IRExtraData {
-  ProfileMethodData(IRSPRelOffset bcSPOff, rds::Handle handle)
+struct ProfileCallTargetData : IRExtraData {
+  ProfileCallTargetData(IRSPRelOffset bcSPOff, rds::Handle handle)
     : bcSPOff(bcSPOff)
     , handle(handle)
   {}
 
-  std::string show() const { return folly::to<std::string>(handle); }
+  std::string show() const {
+    return folly::to<std::string>(bcSPOff.offset, ",", handle);
+  }
 
   IRSPRelOffset bcSPOff;
   rds::Handle handle;
@@ -1551,7 +1553,8 @@ X(ProfileMixedArrayOffset,      RDSHandleData);
 X(ProfileDictOffset,            RDSHandleData);
 X(ProfileKeysetOffset,          RDSHandleData);
 X(ProfileType,                  RDSHandleData);
-X(ProfileMethod,                ProfileMethodData);
+X(ProfileFunc,                  ProfileCallTargetData);
+X(ProfileMethod,                ProfileCallTargetData);
 X(LdRDSAddr,                    RDSHandleData);
 X(BaseG,                        MOpModeData);
 X(PropX,                        MOpModeData);
@@ -1576,6 +1579,7 @@ X(StArResumeAddr,               ResumeOffset);
 X(StContArState,                GeneratorState);
 X(ContEnter,                    ContEnterData);
 X(DbgAssertARFunc,              IRSPRelOffsetData);
+X(AssertARFunc,                 IRSPRelOffsetData);
 X(LdARFuncPtr,                  IRSPRelOffsetData);
 X(LdARIsDynamic,                IRSPRelOffsetData);
 X(LdARCtx,                      IRSPRelOffsetData);

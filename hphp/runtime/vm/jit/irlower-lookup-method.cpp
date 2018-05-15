@@ -197,7 +197,7 @@ void cgLookupClsMethod(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<ProfileMethodData>();
+  auto const extra = inst->extra<ProfileCallTargetData>();
   auto const sp = srcLoc(env, inst, 0).reg();
 
   auto const args = argGroup(env, inst)

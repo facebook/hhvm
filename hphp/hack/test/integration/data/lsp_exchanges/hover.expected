@@ -95,13 +95,5 @@
     "jsonrpc": "2.0",
     "id": 8,
     "result": null
-  },
-  {
-    "jsonrpc": "2.0",
-    "method": "telemetry/event",
-    "params": {
-      "type": 4,
-      "message": "Version in hhconfig=[NoVersion]"
-    }
   }
 ]

@@ -8,13 +8,5 @@
       "message": "Waiting for hh_server to be ready...",
       "actions": []
     }
-  },
-  {
-    "jsonrpc": "2.0",
-    "method": "telemetry/event",
-    "params": {
-      "type": 4,
-      "message": "Version in hhconfig=[NoVersion]"
-    }
   }
 ]

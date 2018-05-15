@@ -1975,7 +1975,8 @@ let handle_event
     hhconfig_version := read_hhconfig_version ();
     state := connect !state;
     do_initialize () |> print_initialize |> Jsonrpc.respond to_stdout c;
-    Lsp_helpers.telemetry_log to_stdout ("Version in hhconfig=" ^ !hhconfig_version)
+    if not @@ Sys_utils.is_test_mode () then
+      Lsp_helpers.telemetry_log to_stdout ("Version in hhconfig=" ^ !hhconfig_version)
 
   (* any request/notification if we haven't yet initialized *)
   | Pre_init, Client_message _c ->

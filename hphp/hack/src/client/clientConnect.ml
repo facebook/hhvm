@@ -322,7 +322,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
           no_load = env.no_load;
           profile_log = env.profile_log;
           silent = false;
-          exit_on_failure = true;
+          exit_on_failure = false;
           ai_mode = env.ai_mode;
           debug_port = None;
           ignore_hh_version = env.ignore_hh_version;

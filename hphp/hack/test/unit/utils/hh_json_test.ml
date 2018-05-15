@@ -10,6 +10,9 @@
 
 open Hh_core
 
+let throws f =
+  try let _ = f() in false with _ -> true
+
 let test_escape_unescape_data = [
   "newline\n";
   "\"quoted string\"";
@@ -39,6 +42,65 @@ let test_whitespace_string () =
   (match Hh_json.json_of_string "\" \"" with
   | Hh_json.JSON_String " " -> true
   | _ -> false)
+
+let test_access_string () =
+  let json_string = Hh_json.json_of_string "{ \"foo\": \"hello\" }" in
+  let json_number = Hh_json.json_of_string "{ \"foo\": 1 }" in
+  let json_null = Hh_json.json_of_string "{ \"foo\": null }" in
+  let json_absent = Hh_json.json_of_string "{ }" in
+  let open Hh_json.Access in
+  let r1 = match (return json_string) >>= get_string "foo" with
+    | Ok("hello", _) -> true
+    | _ -> false in
+  let r2 = match (return json_number) >>= get_string "foo" with
+    | Error (Wrong_type_error(["foo"], Hh_json.String_t)) -> true
+    | _ -> false in
+  let r3 = match (return json_null) >>= get_string "foo" with
+    | Error (Wrong_type_error(["foo"], Hh_json.String_t)) -> true
+    | _ -> false in
+  let r4 = match (return json_absent) >>= get_string "foo" with
+    | Error (Missing_key_error("foo", [])) -> true
+    | _ -> false
+  in
+  r1 && r2 && r3 && r4
+
+let test_jget_string () =
+  let json_string = Some (Hh_json.json_of_string "{ \"foo\": \"hello\" }") in
+  let json_number = Some (Hh_json.json_of_string "{ \"foo\": 1 }") in
+  let json_null = Some (Hh_json.json_of_string "{ \"foo\": null }") in
+  let json_absent = Some (Hh_json.json_of_string "{ }") in
+  let json_none = None in
+  let open Hh_json_helpers in
+  let results = "" in
+
+  let str = match Jget.string_opt json_string "foo" with Some "hello" -> true | _ -> false in
+  let num = Jget.string_opt json_number "foo" |> Option.is_none in
+  let nul = Jget.string_opt json_number "foo" |> Option.is_none in
+  let abs = Jget.string_opt json_absent "foo" |> Option.is_none in
+  let non = Jget.string_opt json_none "foo" |> Option.is_none in
+  let results = results ^ (Printf.sprintf "string_opt: str=%B num=%B nul=%B abs=%B non=%B\n"
+    str num nul abs non) in
+
+  let str = Jget.string_d json_string "foo" ~default:"d" = "hello" in
+  let num = Jget.string_d json_absent "foo" ~default:"d" = "d" in
+  let nul = Jget.string_d json_absent "foo" ~default:"d" = "d" in
+  let abs = Jget.string_d json_absent "foo" ~default:"d" = "d" in
+  let non = Jget.string_d json_none "foo" ~default:"d" = "d" in
+  let results = results ^ (Printf.sprintf "string_d: str=%B num=%B nul=%B abs=%B non=%B\n"
+    str num nul abs non) in
+
+  let str = match Jget.string_exn json_string "foo" with "hello" -> true | _ -> false in
+  let num = throws (fun () -> Jget.string_exn json_number "foo") in
+  let nul = throws (fun () -> Jget.string_exn json_null "foo") in
+  let abs = throws (fun () -> Jget.string_exn json_absent "foo") in
+  let non = throws (fun () -> Jget.string_exn json_none "foo") in
+  let results = results ^ (Printf.sprintf "string_exn: str=%B num=%B nul=%B abs=%B non=%B\n"
+    str num nul abs non) in
+
+  let failed = String_utils.is_substring "false" results in
+  if failed then Printf.eprintf "%s" results;
+  not failed
+
 
 let test_access_object_string () =
   let json = Hh_json.json_of_string
@@ -251,6 +313,8 @@ let tests = [
   "test_escape_unescape", test_escape_unescape;
   "test_empty_string", test_empty_string;
   "test_whitespace_string", test_whitespace_string;
+  "test_access_string", test_access_string;
+  "test_jget_string", test_jget_string;
   "test_access_object_string", test_access_object_string;
   "test_access_object_bool", test_access_object_bool;
   "test_access_object_number", test_access_object_number;

@@ -71,7 +71,7 @@ open Hh_core
  * Watcher.
  *)
 
-module J = Hh_json_helpers
+module J = Hh_json_helpers.AdhocJsonHelpers
 module Config = WatchmanEventWatcherConfig
 module Responses = Config.Responses
 

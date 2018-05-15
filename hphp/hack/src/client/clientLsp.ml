@@ -10,6 +10,7 @@
 open Hh_core
 open Lsp
 open Lsp_fmt
+open Hh_json_helpers
 
 (* All hack-specific code relating to LSP goes in here. *)
 
@@ -1699,7 +1700,7 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
   in
   let handle_result ~result state =
     let state = state |> clear_dialog_flag in
-    let result = Lsp_fmt.Jget.string_d result "title" ~default:"" in
+    let result = Jget.string_d result "title" ~default:"" in
     match result, state with
     | "Restart", Lost_server _ ->
       if p.start_on_click then begin
@@ -1941,7 +1942,6 @@ let handle_event
       | Some callbacks -> callbacks
       | None -> failwith "response id doesn't correspond to an outstanding request" in
     if Option.is_some c.error then
-      let open Lsp_fmt in
       let code = Jget.int_exn c.error "code" in
       let message = Jget.string_exn c.error "message" in
       let data = Jget.val_opt c.error "data" in

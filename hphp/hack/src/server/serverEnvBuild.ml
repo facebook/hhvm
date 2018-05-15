@@ -15,7 +15,7 @@ open ServerEnv
 
 module SLC = ServerLocalConfig
 
-module J = Hh_json_helpers
+module J = Hh_json_helpers.AdhocJsonHelpers
 
 let hg_dirname = J.strlist ["dirname"; ".hg"]
 let git_dirname = J.strlist ["dirname"; ".git"]

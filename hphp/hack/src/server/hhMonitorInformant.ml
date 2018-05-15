@@ -706,7 +706,7 @@ type t =
   | Resigned
 
 let watchman_expression_terms =
-  let module J = Hh_json_helpers in
+  let module J = Hh_json_helpers.AdhocJsonHelpers in
   [
     J.pred "not" @@ [
       J.pred "anyof" @@ [

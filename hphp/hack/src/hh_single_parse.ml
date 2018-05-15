@@ -38,6 +38,7 @@ type parser_config =
   | FFP
   | ValidatedFFP
   | Benchmark
+  | Benchmark_batch of int
   | Compare of string
 
 let exit_with : result -> 'a = fun r -> exit (exit_code r)
@@ -58,7 +59,7 @@ let run_ast ?(quick=false) file =
   handle_errors errorl;
   result
 
-let run_ffp (file : Relative_path.t) : Lowerer.result =
+let run_ffp ?(iters = 0) (file : Relative_path.t) : Lowerer.result =
   let env =
     Lowerer.make_env
       ~codegen:true
@@ -66,8 +67,11 @@ let run_ffp (file : Relative_path.t) : Lowerer.result =
       ~fail_open:false
       file
   in
+  if iters < 1 then () else
+  for i = 1 to iters do
+    ignore(Lowerer.from_file env : Lowerer.result);
+  done;
   Lowerer.from_file env
-
 let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
   let open SyntaxTree in
   let source_text = SourceText.from_file file in
@@ -313,6 +317,19 @@ let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash =
       Printf.printf "FAIL, %s\n" filename;
       exit_with CmpDifferent
     end
+  | Benchmark_batch iters ->
+    let filename = Relative_path.S.to_string file in
+    let _ =
+      try (run_ffp ~iters file)
+      with _ -> begin
+        Printf.printf "FAIL, %s\n" filename;
+        exit_with ParseError
+      end
+    in
+    let res = Printf.sprintf
+      "PASS, %s\n"
+      filename in
+    print_endline res
 
 let () =
   Printexc.record_backtrace true;
@@ -321,12 +338,14 @@ let () =
   let hash       = ref false in
   let dumper     = ref Debug.dump_ast in
   let filename   = ref ""     in
+  let num_runs   = ref 100 in
+  let benchmark_files      = ref [] in
   Arg.(parse
     [ ("--parser", Set_string use_parser,
         "Which parser to use (ast, ffp, compare) [def: ast]"
       )
     ; ("--diff", Set_string use_diff,
-        "Which diff tool to compare different S-Expressions with [def: vimdiff]"
+        "Which diff tool to compare different S-Expressions with [default: vimdiff]"
       )
     ; ("--hash", Set hash,
         "Get the decl level parsing hash of a given file "
@@ -338,8 +357,15 @@ let () =
     ; ("--show-pos", Unit (fun () -> Sof.show_pos := true),
         "Show positional information on the AST"
       )
+    ; ("--num-runs", Int (fun x -> num_runs := x),
+        "How many times to benchmark if in benchmark mode [default: 100]"
+      )
+    ; ("--benchmark_batch", Rest (fun fn -> benchmark_files := fn::!benchmark_files),
+        "Run benchmarking on a list of files"
+    );
     ]) (fun fn -> filename := fn) usage;
   let parse_function = match !use_parser with
+    | _ when !benchmark_files <> [] -> Benchmark_batch !num_runs
     | "ast"       -> AST
     | "ffp"       -> FFP
     | "validated" -> ValidatedFFP
@@ -347,11 +373,14 @@ let () =
     | "compare"   -> Compare !use_diff
     | s -> raise (Failure (Printf.sprintf "Unknown parser '%s'\n" s))
   in
-  if String.length !filename = 0 then raise (Failure "No filename given");
+  if String.length !filename = 0 && !benchmark_files = [] then failwith "No filename given";
   EventLogger.init EventLogger.Event_logger_fake 0.0;
   let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   let dumper ast = !dumper (Ast.AProgram ast) in
-  Unix.handle_unix_error (fun fn ->
+  let parse_file fn =
     let file = Relative_path.create Relative_path.Dummy fn in
-    run_parsers dumper file ~hash:!hash parse_function
-  ) !filename
+    run_parsers dumper file ~hash:!hash parse_function in
+  if !benchmark_files <> [] then
+    List.iter parse_file !benchmark_files
+  else
+    Unix.handle_unix_error (parse_file) !filename

@@ -1392,12 +1392,17 @@ let as_case_insensitive_keyword text =
   non-lower versions in our codebase. *)
   let lower = String.lowercase_ascii text in
   match lower with
-  | "eval" | "isset" | "unset" | "empty" | "const" | "new"
-  | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
-  | "true" | "false" | "null" | "array" | "instanceof"
-  | "trait" | "class" | "interface" | "using" | "static" | "inout"
-  | "self" | "parent" | "__halt_compiler" | "foreach" | "echo"
-  | "abstract" | "final" -> lower
+  | "__halt_compiler" | "abstract" | "and" | "array" | "as" | "bool"  | "break" | "callable"
+  | "case" | "catch" | "class" | "clone" | "const" | "continue" | "declare" | "default"
+  | "die" | "do" | "echo" | "else" | "elseif" | "empty" | "enddeclare" | "endfor"
+  | "endforeach" | "endif" | "endswitch" | "endwhile" | "eval" | "exit" | "extends" | "false"
+  | "final" | "finally" | "for" | "foreach" | "function" | "global" | "goto" | "if"
+  | "implements" | "include" | "include_once" | "inout" | "instanceof" | "insteadof" | "int"
+  | "interface" | "isset" | "list" | "namespace" | "new" | "null" | "or" | "parent"
+  | "print" | "private" | "protected" | "public" | "require" | "require_once"
+  | "return" | "self" | "static" | "switch" | "throw" | "trait"
+  | "try" | "true" | "unset" | "use" | "using" | "var" | "void" | "while"
+  | "xor" | "yield" -> lower
   | _ -> text
 
 let as_keyword kind lexer =

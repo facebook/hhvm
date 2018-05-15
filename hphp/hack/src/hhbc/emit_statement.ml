@@ -132,7 +132,8 @@ let rec emit_stmt env (pos, st_) =
       instr_null;
       emit_return ~need_ref:false env;
     ]
-  | A.Expr (_, A.Call ((_, A.Id (_, "unset")), _, exprl, [])) ->
+  | A.Expr (_, A.Call ((_, A.Id (_, s)), _, exprl, []))
+    when String.lowercase_ascii s = "unset" ->
     gather (List.map exprl (emit_unset_expr env))
   | A.Return (Some (inner_pos, A.Await e)) ->
     gather [

@@ -391,8 +391,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   bool propEmptyImpl(const Class* ctx, const StringData* key);
 
-  template<typename K>
-  TypedValue* makeDynProp(K key, AccessFlags);
+  void setDynProp(const StringData* key, Cell val);
 
   bool invokeSet(const StringData* key, Cell val);
   InvokeResult invokeGet(const StringData* key);
@@ -427,10 +426,13 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   void unsetProp(Class* ctx, const StringData* key);
 
+  TypedValue* makeDynProp(const StringData* key);
+
   static void raiseObjToIntNotice(const char*);
   static void raiseObjToDoubleNotice(const char*);
   static void raiseAbstractClassError(Class*);
   void raiseUndefProp(const StringData*);
+  void raiseCreateDynamicProp(const StringData*);
 
   static constexpr ptrdiff_t getVMClassOffset() {
     return offsetof(ObjectData, m_cls);

@@ -303,6 +303,12 @@ Array& ObjectData::setDynPropArray(const Array& newArr) {
   if (m_cls->forbidsDynamicProps()) {
     throw_object_forbids_dynamic_props(getClassName().data());
   }
+  if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
+    IterateKV(newArr.get(), [&] (Cell k, TypedValue v) {
+      auto const key = tvCastToString(k);
+      raiseCreateDynamicProp(key.get());
+    });
+  }
 
   auto& arr = g_context->dynPropTable[this].arr();
   assertx(arr.isPHPArray());
@@ -311,10 +317,19 @@ Array& ObjectData::setDynPropArray(const Array& newArr) {
   return arr;
 }
 
-template<typename K>
-TypedValue* ObjectData::makeDynProp(K key, AccessFlags flags) {
+TypedValue* ObjectData::makeDynProp(const StringData* key) {
+  if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
+    raiseCreateDynamicProp(key);
+  }
   SuppressHackArrCompatNotices shacn;
-  return reserveProperties().lvalAt(key, flags).tv_ptr();
+  return reserveProperties().lvalAt(StrNR(key), AccessFlags::Key).tv_ptr();
+}
+
+void ObjectData::setDynProp(const StringData* key, Cell val) {
+  if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
+    raiseCreateDynamicProp(key);
+  }
+  reserveProperties().set(StrNR(key), val, true);
 }
 
 Variant ObjectData::o_get(const String& propName, bool error /* = true */,
@@ -393,7 +408,7 @@ void ObjectData::o_set(const String& propName, const Variant& v,
   if (useSet) {
     invokeSet(propName.get(), *v.asCell());
   } else if (!prop) {
-    reserveProperties().set(propName, tvToInitCell(*v.asTypedValue()), true);
+    setDynProp(propName.get(), tvToInitCell(*v.asTypedValue()));
   }
 }
 
@@ -1347,7 +1362,7 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
   }
 
   if (mode == PropMode::ReadWarn) raiseUndefProp(key);
-  if (write) return makeDynProp(StrNR(key), AccessFlags::Key);
+  if (write) return makeDynProp(key);
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 
@@ -1485,7 +1500,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
     if (UNLIKELY(!*key->data())) {
       throw_invalid_property_name(StrNR(key));
     }
-    reserveProperties().set(StrNR(key), val, true);
+    setDynProp(key, val);
     return;
   }
 }
@@ -1556,7 +1571,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
     tvUnboxIfNeeded(r.val);
 
     if (prop) raise_error("Cannot access protected property");
-    prop = makeDynProp(StrNR(key), AccessFlags::Key);
+    prop = makeDynProp(key);
 
     // Normally this code path is defining a new dynamic property, but
     // unlike the non-magic case below, we may have already created it
@@ -1584,7 +1599,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   // No visible/accessible property, and no applicable magic method:
   // create a new dynamic property.  (We know this is a new property,
   // or it would've hit the visible && accessible case above.)
-  prop = makeDynProp(StrNR(key), AccessFlags::Key);
+  prop = makeDynProp(key);
   assertx(prop->m_type == KindOfNull); // cannot exist yet
   setopBody(prop, op, val);
   return prop;
@@ -1647,7 +1662,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     tvUnboxIfNeeded(r.val);
     auto const dest = IncDecBody(op, tvAssertCell(&r.val));
     if (prop) raise_error("Cannot access protected property");
-    prop = makeDynProp(StrNR(key), AccessFlags::Key);
+    prop = makeDynProp(key);
 
     // Normally this code path is defining a new dynamic property, but
     // unlike the non-magic case below, we may have already created it
@@ -1672,7 +1687,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   // No visible/accessible property, and no applicable magic method:
   // create a new dynamic property.  (We know this is a new property,
   // or it would've hit the visible && accessible case above.)
-  prop = makeDynProp(StrNR(key), AccessFlags::Key);
+  prop = makeDynProp(key);
   assertx(prop->m_type == KindOfNull); // cannot exist yet
   return IncDecBody(op, prop);
 }
@@ -1736,6 +1751,21 @@ void ObjectData::raiseAbstractClassError(Class* cls) {
 void ObjectData::raiseUndefProp(const StringData* key) {
   raise_notice("Undefined property: %s::$%s",
                m_cls->name()->data(), key->data());
+}
+
+void ObjectData::raiseCreateDynamicProp(const StringData* key) {
+  if (m_cls == SystemLib::s_stdclassClass ||
+      m_cls == SystemLib::s___PHP_Incomplete_ClassClass) {
+    // these classes (but not classes derived from them) don't get notices
+    return;
+  }
+  if (key->isStatic()) {
+    raise_notice("Created dynamic property with static name %s::%s",
+                 m_cls->name()->data(), key->data());
+  } else {
+    raise_notice("Created dynamic property with dynamic name %s::%s",
+                 m_cls->name()->data(), key->data());
+  }
 }
 
 void ObjectData::getProp(const Class* klass,

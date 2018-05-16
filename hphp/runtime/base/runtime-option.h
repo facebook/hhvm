@@ -815,6 +815,7 @@ struct RuntimeOption {
   F(bool, HackArrCompatSerializeNotices, false)                         \
   F(bool, HackArrDVArrs, false)                                         \
   /* Switches on miscellaneous junk. */                                 \
+  F(bool, NoticeOnCreateDynamicProp, false)                             \
   F(bool, CreateInOutWrapperFunctions, true)                            \
   F(bool, ReffinessInvariance, false)                                   \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \

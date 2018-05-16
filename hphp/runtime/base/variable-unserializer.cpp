@@ -571,9 +571,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
     // pre-allocate space in the array to ensure the elements don't move during
     // unserialization.
     SuppressHackArrCompatNotices shacn;
-    t = &tvAsVariant(obj->reserveProperties(nProp).lvalAt(
-      realKey, AccessFlags::Key
-    ).tv_ptr());
+    t = &tvAsVariant(obj->makeDynProp(realKey.get()));
   } else if (UNLIKELY(cls->declProperties()[slot].attrs & AttrNoSerialize)) {
     // Ignore fields which are marked as NoSerialize
     Variant temp;
@@ -1071,6 +1069,9 @@ void VariableUnserializer::unserializeVariant(
                                            remainingProps--);
                   hasSerializedNativeData = true;
                 } else {
+                  if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
+                    obj->raiseCreateDynamicProp(key.get());
+                  }
                   auto t = [&]() -> decltype(auto) {
                     SuppressHackArrCompatNotices shacn;
                     return &tvAsVariant(arr.lvalAt(key, AccessFlags::Key).tv_ptr());

@@ -1087,18 +1087,19 @@ void MemoryManager::requestInit() {
 
 #ifdef USE_JEMALLOC
   // Reset jemalloc stats.
-  if (mallctlCall("prof.reset", true) != 0) {
+  if (mallctlCall<true>("prof.reset") != 0) {
     return;
   }
 
   // Enable jemalloc thread-local heap dumps.
-  if (mallctlReadWrite("prof.active", &profctx.prof_active, true, true)
+  if (mallctlReadWrite<bool, true>("prof.active", &profctx.prof_active, true)
       != 0) {
     profctx = ReqProfContext{};
     return;
   }
-  if (mallctlReadWrite("thread.prof.active", &profctx.thread_prof_active,
-                       true, true) != 0) {
+  if (mallctlReadWrite<bool, true>("thread.prof.active",
+                                   &profctx.thread_prof_active,
+                                   true) != 0) {
     mallctlWrite("prof.active", profctx.prof_active);
     profctx = ReqProfContext{};
     return;

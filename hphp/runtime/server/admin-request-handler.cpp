@@ -844,153 +844,134 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 #endif
 
 #ifdef USE_JEMALLOC
-    if (mallctl) {
-      assertx(mallctlnametomib && mallctlbymib);
-      if (cmd == "jemalloc-stats") {
-        // Force jemalloc to update stats cached for use by mallctl().
-        uint32_t error = 0;
-        if (mallctlWrite<uint64_t>("epoch", 1, true) != 0) {
+    assertx(mallctlnametomib && mallctlbymib);
+    if (cmd == "jemalloc-stats") {
+      // Force jemalloc to update stats cached for use by mallctl().
+      uint32_t error = 0;
+      if (mallctlWrite<uint64_t, true>("epoch", 1) != 0) {
+        error = 1;
+      }
+
+      auto call_mallctl = [&](const char* statName) {
+        size_t value = 0;
+        if (mallctlRead<size_t, true>(statName, &value) != 0) {
           error = 1;
         }
-
-        auto call_mallctl = [&](const char* statName) {
-          size_t value = 0;
-          if (mallctlRead(statName, &value, true) != 0) {
-            error = 1;
-          }
-          return value;
-        };
-        size_t allocated = call_mallctl("stats.allocated");
-        size_t active = call_mallctl("stats.active");
-        size_t mapped = call_mallctl("stats.mapped");
+        return value;
+      };
+      size_t allocated = call_mallctl("stats.allocated");
+      size_t active = call_mallctl("stats.active");
+      size_t mapped = call_mallctl("stats.mapped");
 #if !USE_JEMALLOC_EXTENT_HOOKS
-        unsigned low_arena = dss_arena;
+      unsigned low_arena = dss_arena;
 #endif
-        size_t low_mapped = call_mallctl(
-            folly::format("stats.arenas.{}.mapped",
-              low_arena).str().c_str());
-        size_t low_small_allocated = call_mallctl(
-            folly::format("stats.arenas.{}.small.allocated",
-              low_arena).str().c_str());
-        size_t low_large_allocated = call_mallctl(
-            folly::format("stats.arenas.{}.large.allocated",
-              low_arena).str().c_str());
-        size_t low_active = call_mallctl(
-            folly::format("stats.arenas.{}.pactive",
-              low_arena).str().c_str()) *
-            sysconf(_SC_PAGESIZE);
+      size_t low_mapped = call_mallctl(
+          folly::sformat("stats.arenas.{}.mapped",
+                         low_arena).c_str());
+      size_t low_small_allocated = call_mallctl(
+          folly::sformat("stats.arenas.{}.small.allocated",
+                         low_arena).c_str());
+      size_t low_large_allocated = call_mallctl(
+          folly::sformat("stats.arenas.{}.large.allocated",
+                         low_arena).c_str());
+      size_t low_active = call_mallctl(
+          folly::sformat("stats.arenas.{}.pactive",
+                         low_arena).c_str()) * sysconf(_SC_PAGESIZE);
 
-
-        std::ostringstream stats;
-        stats << "<jemalloc-stats>" << endl;
-        stats << "  <allocated>" << allocated << "</allocated>" << endl;
-        stats << "  <active>" << active << "</active>" << endl;
-        stats << "  <mapped>" << mapped << "</mapped>" << endl;
-        stats << "  <low_mapped>" << low_mapped << "</low_mapped>" << endl;
-        stats << "  <low_allocated>"
-              << (low_small_allocated + low_large_allocated)
-              << "</low_allocated>" << endl;
-        stats << "  <low_active>"
-              << low_active
-              << "</low_active>" << endl;
-        stats << "  <error>" << error << "</error>" << endl;
-        stats << "</jemalloc-stats>" << endl;
-        transport->sendString(stats.str());
-        break;
-      }
-      if (cmd == "jemalloc-stats-print") {
-        malloc_write mwo;
-
-        malloc_write_init(&mwo);
-        malloc_stats_print(malloc_write_cb, (void *)&mwo, "");
-        if (mwo.oom) {
-          malloc_write_fini(&mwo);
-          transport->sendString("OOM\n");
-          break;
-        }
-
-        transport->sendString(mwo.s == nullptr ? "" : mwo.s);
-        malloc_write_fini(&mwo);
-        break;
-      }
-      if (cmd == "jemalloc-prof-activate") {
-        int err = jemalloc_pprof_enable();
-        if (err) {
-          std::ostringstream estr;
-          estr << "Error " << err << " in mallctl(\"prof.active\", ...)"
-            << endl;
-          transport->sendString(estr.str());
-        } else {
-          transport->sendString("OK\n");
-        }
-        break;
-      }
-      if (cmd == "jemalloc-prof-deactivate") {
-        int err = jemalloc_pprof_disable();
-        if (err) {
-          std::ostringstream estr;
-          estr << "Error " << err << " in mallctl(\"prof.active\", ...)"
-            << endl;
-          transport->sendString(estr.str());
-        } else {
-          transport->sendString("OK\n");
-        }
-        break;
-      }
-      if (cmd == "jemalloc-prof-dump") {
-        string f = transport->getParam("file");
-        int err = jemalloc_pprof_dump(f, true);
-        if (err) {
-          std::ostringstream estr;
-          estr << "Error " << err << " in mallctl(\"prof.dump\", ...";
-          if (!f.empty()) {
-            estr << ", \"" << f << "\", ...";
-          }
-          estr << ")" << endl;
-          transport->sendString(estr.str());
-          break;
-        }
-        transport->sendString("OK\n");
-        break;
-      }
-      if (cmd == "jemalloc-prof-request") {
-        auto f = transport->getParam("file");
-        bool success = MemoryManager::triggerProfiling(f);
-
-        if (success) {
-          transport->sendString("OK\n");
-        } else {
-          transport->sendString("Request profiling already triggered\n");
-        }
-        break;
-      }
-#ifdef ENABLE_HHPROF
-      if (cmd == "hhprof/start") {
-        HHProf::HandleHHProfStart(transport);
-        break;
-      }
-      if (cmd == "hhprof/status") {
-        HHProf::HandleHHProfStatus(transport);
-        break;
-      }
-      if (cmd == "hhprof/stop") {
-        HHProf::HandleHHProfStop(transport);
-        break;
-      }
-      if (cmd == "pprof/cmdline") {
-        HHProf::HandlePProfCmdline(transport);
-        break;
-      }
-      if (cmd == "pprof/heap") {
-        HHProf::HandlePProfHeap(transport);
-        break;
-      }
-      if (cmd == "pprof/symbol") {
-        HHProf::HandlePProfSymbol(transport);
-        break;
-      }
-#endif // ENABLE_HHPROF
+      std::ostringstream stats;
+      stats << "<jemalloc-stats>" << endl;
+      stats << "  <allocated>" << allocated << "</allocated>" << endl;
+      stats << "  <active>" << active << "</active>" << endl;
+      stats << "  <mapped>" << mapped << "</mapped>" << endl;
+      stats << "  <low_mapped>" << low_mapped << "</low_mapped>" << endl;
+      stats << "  <low_allocated>"
+            << (low_small_allocated + low_large_allocated)
+            << "</low_allocated>" << endl;
+      stats << "  <low_active>"
+            << low_active
+            << "</low_active>" << endl;
+      stats << "  <error>" << error << "</error>" << endl;
+      stats << "</jemalloc-stats>" << endl;
+      transport->sendString(stats.str());
+      break;
     }
+    if (cmd == "jemalloc-stats-print") {
+      malloc_write mwo;
+
+      malloc_write_init(&mwo);
+      malloc_stats_print(malloc_write_cb, (void *)&mwo, "");
+      if (mwo.oom) {
+        malloc_write_fini(&mwo);
+        transport->sendString("OOM\n");
+        break;
+      }
+
+      transport->sendString(mwo.s == nullptr ? "" : mwo.s);
+      malloc_write_fini(&mwo);
+      break;
+    }
+    if (cmd == "jemalloc-prof-activate") {
+      if (jemalloc_pprof_enable()) {
+        transport->sendString("Error in mallctl(\"prof.active\", true)\n");
+      } else {
+        transport->sendString("OK\n");
+      }
+      break;
+    }
+    if (cmd == "jemalloc-prof-deactivate") {
+      if (jemalloc_pprof_disable()) {
+        transport->sendString("Error in mallctl(\"prof.active\", false)\n");
+      } else {
+        transport->sendString("OK\n");
+      }
+      break;
+    }
+    if (cmd == "jemalloc-prof-dump") {
+      string f = transport->getParam("file");
+      if (jemalloc_pprof_dump(f, true)) {
+        transport->sendString("Error in mallctl(\"prof.dump\", " + f + ")\n");
+      } else {
+        transport->sendString("OK\n");
+      }
+      break;
+    }
+    if (cmd == "jemalloc-prof-request") {
+      auto f = transport->getParam("file");
+      bool success = MemoryManager::triggerProfiling(f);
+
+      if (success) {
+        transport->sendString("OK\n");
+      } else {
+        transport->sendString("Request profiling already triggered\n");
+      }
+      break;
+    }
+#ifdef ENABLE_HHPROF
+    if (cmd == "hhprof/start") {
+      HHProf::HandleHHProfStart(transport);
+      break;
+    }
+    if (cmd == "hhprof/status") {
+      HHProf::HandleHHProfStatus(transport);
+      break;
+    }
+    if (cmd == "hhprof/stop") {
+      HHProf::HandleHHProfStop(transport);
+      break;
+    }
+    if (cmd == "pprof/cmdline") {
+      HHProf::HandlePProfCmdline(transport);
+      break;
+    }
+    if (cmd == "pprof/heap") {
+      HHProf::HandlePProfHeap(transport);
+      break;
+    }
+    if (cmd == "pprof/symbol") {
+      HHProf::HandlePProfSymbol(transport);
+      break;
+    }
+#endif // ENABLE_HHPROF
 #endif // USE_JEMALLOC
 
     transport->sendString("Unknown command: " + cmd + "\n", 404);

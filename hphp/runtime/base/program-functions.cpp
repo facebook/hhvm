@@ -837,17 +837,17 @@ static void pagein_self(void) {
 #if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 5)
   // jemalloc 5 has background threads, which handle purging asynchronously.
   bool background_threads = false;
-  if (mallctlRead("background_thread", &background_threads, /* errOK */ true)) {
+  if (mallctlRead<bool, true>("background_thread", &background_threads)) {
     background_threads = false;
     Logger::Warning("Failed to determine jemalloc background thread state");
   }
   if (background_threads &&
-      mallctlWrite("background_thread", false, /* errOK */ true)) {
+      mallctlWrite<bool, true>("background_thread", false)) {
     Logger::Warning("Failed to disable jemalloc background threads");
   }
   SCOPE_EXIT {
     if (background_threads &&
-        mallctlWrite("background_thread", true, /* errOK */ true)) {
+        mallctlWrite<bool, true>("background_thread", true)) {
       Logger::Warning("Failed to enable jemalloc background threads");
     }
   };
@@ -1186,8 +1186,8 @@ static int start_server(const std::string &username, int xhprof) {
     unsigned narenas;
     size_t mib[3];
     size_t miblen = 3;
-    if (mallctlWrite<uint64_t>("epoch", 1, true) == 0 &&
-        mallctlRead("arenas.narenas", &narenas, true) == 0 &&
+    if (mallctlWrite<uint64_t, true>("epoch", 1) == 0 &&
+        mallctlRead<unsigned, true>("arenas.narenas", &narenas) == 0 &&
         mallctlnametomib("arena.0.purge", mib, &miblen) == 0) {
       mib[1] = size_t(narenas);
       mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0);

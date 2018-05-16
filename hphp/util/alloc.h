@@ -51,10 +51,11 @@
 # endif
 #else
 # include <jemalloc/jemalloc.h>
-# if (JEMALLOC_VERSION_MAJOR == 5) && defined(__linux__)
+# if (JEMALLOC_VERSION_MAJOR >= 5) && defined(__linux__)
 #  define USE_JEMALLOC_EXTENT_HOOKS 1
-#  ifdef FACEBOOK
-// Requires customizable extent hooks on arena 0 (will ship in jemalloc 5.1)
+#  if (JEMALLOC_VERSION_MAJOR > 5) ||                               \
+      (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR >= 1)
+// Requires jemalloc 5.1
 #   define USE_JEMALLOC_METADATA_1G_PAGES 1
 #  endif
 # endif
@@ -73,18 +74,6 @@ extern "C" {
   MallocExtension* MallocExtensionInstance() __attribute__((__weak__));
 #endif
 
-#ifdef USE_JEMALLOC
-
-  int mallctl(const char *name, void *oldp, size_t *oldlenp, void *newp,
-              size_t newlen) __attribute__((__weak__));
-  int mallctlnametomib(const char *name, size_t* mibp, size_t*miblenp)
-              __attribute__((__weak__));
-  int mallctlbymib(const size_t* mibp, size_t miblen, void *oldp,
-              size_t *oldlenp, void *newp, size_t newlen) __attribute__((__weak__));
-  void malloc_stats_print(void (*write_cb)(void *, const char *),
-                          void *cbopaque, const char *opts)
-    __attribute__((__weak__));
-#endif
 }
 
 enum class NotNull {};
@@ -372,8 +361,8 @@ void* mallocx_on_node(size_t size, int node, size_t align);
  * Call mallctl, reading/writing values of type <T> if out/in are non-null,
  * respectively.  Assert/log on error, depending on errOk.
  */
-template <typename T>
-int mallctlHelper(const char *cmd, T* out, T* in, bool errOk) {
+template <typename T, bool ErrOK>
+int mallctlHelper(const char *cmd, T* out, T* in) {
 #ifdef USE_JEMALLOC
   assert(mallctl != nullptr);
   size_t outLen = sizeof(T);
@@ -385,7 +374,7 @@ int mallctlHelper(const char *cmd, T* out, T* in, bool errOk) {
   int err = ENOENT;
 #endif
   if (err != 0) {
-    if (!errOk) {
+    if (!ErrOK) {
       std::string errStr =
         folly::format("mallctl {}: {} ({})", cmd, strerror(err), err).str();
       // Do not use Logger here because JEMallocInitializer() calls this
@@ -398,22 +387,25 @@ int mallctlHelper(const char *cmd, T* out, T* in, bool errOk) {
   return err;
 }
 
-template <typename T>
-int mallctlReadWrite(const char *cmd, T* out, T in, bool errOk=false) {
-  return mallctlHelper(cmd, out, &in, errOk);
+template <typename T, bool ErrOK = false>
+int mallctlReadWrite(const char *cmd, T* out, T in) {
+  return mallctlHelper<T, ErrOK>(cmd, out, &in);
 }
 
-template <typename T>
-int mallctlRead(const char* cmd, T* out, bool errOk=false) {
-  return mallctlHelper(cmd, out, static_cast<T*>(nullptr), errOk);
+template <typename T, bool ErrOK = false>
+int mallctlRead(const char* cmd, T* out) {
+  return mallctlHelper<T, ErrOK>(cmd, out, static_cast<T*>(nullptr));
 }
 
-template <typename T>
-int mallctlWrite(const char* cmd, T in, bool errOk=false) {
-  return mallctlHelper(cmd, static_cast<T*>(nullptr), &in, errOk);
+template <typename T, bool ErrOK = false>
+int mallctlWrite(const char* cmd, T in) {
+  return mallctlHelper<T, ErrOK>(cmd, static_cast<T*>(nullptr), &in);
 }
 
-int mallctlCall(const char* cmd, bool errOk=false);
+template <bool ErrOK = false> int mallctlCall(const char* cmd) {
+  // Use <unsigned> rather than <void> to avoid sizeof(void).
+  return mallctlHelper<unsigned, ErrOK>(cmd, nullptr, nullptr);
+}
 
 /*
  * jemalloc pprof utility functions.

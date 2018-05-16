@@ -39,9 +39,7 @@ namespace HPHP {
 
 void flush_thread_caches() {
 #ifdef USE_JEMALLOC
-  if (mallctl) {
-    mallctlCall("thread.tcache.flush", true);
-  }
+  mallctlCall<true>("thread.tcache.flush");
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
   high_arena_tcache_flush();
 #endif
@@ -55,36 +53,34 @@ void flush_thread_caches() {
 
 bool purge_all(std::string* errStr) {
 #ifdef USE_JEMALLOC
-  if (mallctl) {
-    assert(mallctlnametomib && mallctlbymib);
-    unsigned allArenas = 0;
+  assert(mallctlnametomib && mallctlbymib);
+  unsigned allArenas = 0;
 #ifndef MALLCTL_ARENAS_ALL
-    if (mallctlRead("arenas.narenas", &allArenas, true)) {
-      if (errStr) {
-        *errStr = "arenas.narena";
-      }
-      return false;
+  if (mallctlRead<unsigned, true>("arenas.narenas", &allArenas)) {
+    if (errStr) {
+      *errStr = "arenas.narena";
     }
+    return false;
+  }
 #else
-    allArenas = MALLCTL_ARENAS_ALL;
+  allArenas = MALLCTL_ARENAS_ALL;
 #endif
 
-    size_t mib[3];
-    size_t miblen = 3;
-    if (mallctlnametomib("arena.0.purge", mib, &miblen)) {
-      if (errStr) {
-        *errStr = "mallctlnametomib(arena.0.purge)";
-      }
-      return false;
+  size_t mib[3];
+  size_t miblen = 3;
+  if (mallctlnametomib("arena.0.purge", mib, &miblen)) {
+    if (errStr) {
+      *errStr = "mallctlnametomib(arena.0.purge)";
     }
+    return false;
+  }
 
-    mib[1] = allArenas;
-    if (mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0)) {
-      if (errStr) {
-        *errStr = "mallctlbymib(arena.all.purge)";
-      }
-      return false;
+  mib[1] = allArenas;
+  if (mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0)) {
+    if (errStr) {
+      *errStr = "mallctlbymib(arena.all.purge)";
     }
+    return false;
   }
 #endif
 #ifdef USE_TCMALLOC
@@ -241,13 +237,11 @@ static bool threads_bind_local = false;
 void enable_numa(bool local) {
   if (!numa_node_mask) return;
 
-  // TODO: Turning off local doesn't really work,
-  // see #2941881
   if (local) {
     threads_bind_local = true;
 
     unsigned arenas;
-    if (mallctlRead("arenas.narenas", &arenas, true) != 0) {
+    if (mallctlRead<unsigned, true>("arenas.narenas", &arenas) != 0) {
       return;
     }
 
@@ -264,7 +258,7 @@ void enable_numa(bool local) {
       } else
 #endif
       {
-        ret = mallctlRead(JEMALLOC_NEW_ARENA_CMD, &arena, true);
+        ret = mallctlRead<int, true>(JEMALLOC_NEW_ARENA_CMD, &arena);
       }
 
       if (ret != 0) {
@@ -532,13 +526,13 @@ struct JEMallocInitializer {
     // Create the legacy low arena that uses brk() instead of mmap().  When
     // using newer versions of jemalloc, we use extent hooks to get more
     // control.
-    if (mallctlRead(JEMALLOC_NEW_ARENA_CMD, &dss_arena, true) != 0) {
+    if (mallctlRead<unsigned, true>(JEMALLOC_NEW_ARENA_CMD, &dss_arena) != 0) {
       // Error; bail out.
       return;
     }
     char buf[32];
     snprintf(buf, sizeof(buf), "arena.%u.dss", dss_arena);
-    if (mallctlWrite(buf, "primary", true) != 0) {
+    if (mallctlWrite<const char*, true>(buf, "primary") != 0) {
       // Error; bail out.
       return;
     }
@@ -664,17 +658,12 @@ void low_malloc_huge_pages(int pages) {
 #endif
 }
 
-int mallctlCall(const char* cmd, bool errOk) {
-  // Use <unsigned> rather than <void> to avoid sizeof(void).
-  return mallctlHelper<unsigned>(cmd, nullptr, nullptr, errOk);
-}
-
 int jemalloc_pprof_enable() {
-  return mallctlWrite("prof.active", true, true);
+  return mallctlWrite<bool, true>("prof.active", true);
 }
 
 int jemalloc_pprof_disable() {
-  return mallctlWrite("prof.active", false, true);
+  return mallctlWrite<bool, true>("prof.active", false);
 }
 
 int jemalloc_pprof_dump(const std::string& prefix, bool force) {
@@ -682,8 +671,8 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
     bool enabled = false;
     bool active = false;
     // Check if profiling is active before trying to dump.
-    int err = mallctlRead("opt.prof", &enabled, true) ||
-      (enabled && mallctlRead("prof.active", &active, true));
+    int err = mallctlRead<bool, true>("opt.prof", &enabled) ||
+      (enabled && mallctlRead<bool, true>("prof.active", &active));
     if (err || !active) {
       return 0; // nothing to do
     }
@@ -691,9 +680,9 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
 
   if (prefix != "") {
     const char *s = prefix.c_str();
-    return mallctlWrite("prof.dump", s, true);
+    return mallctlWrite<const char*, true>("prof.dump", s);
   } else {
-    return mallctlCall("prof.dump", true);
+    return mallctlCall<true>("prof.dump");
   }
 }
 
@@ -706,19 +695,19 @@ void* malloc_huge_impl(size_t size) {
 
 void high_arena_tcache_create() {
   assert(high_arena_tcache == -1);
-  mallctlRead("tcache.create", &high_arena_tcache, true);
+  mallctlRead<int, true>("tcache.create", &high_arena_tcache);
 }
 
 void high_arena_tcache_flush() {
   // It is OK if flushing fails
   if (MALLOCX_TCACHE(high_arena_tcache) != MALLOCX_TCACHE_NONE) {
-    mallctlWrite("tcache.flush", high_arena_tcache, true);
+    mallctlWrite<int, true>("tcache.flush", high_arena_tcache);
   }
 }
 
 void high_arena_tcache_destroy() {
   if (MALLOCX_TCACHE(high_arena_tcache) != MALLOCX_TCACHE_NONE) {
-    mallctlWrite("tcache.destroy", high_arena_tcache, true);
+    mallctlWrite<int, true>("tcache.destroy", high_arena_tcache);
     high_arena_tcache = -1;
   }
 }

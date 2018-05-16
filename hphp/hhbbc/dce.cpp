@@ -1239,7 +1239,6 @@ void cgetImpl(Env& env, LocalId loc, bool quiet) {
         return PushFlags::MarkUnused;
       }
       if (!isLocLive(env, loc) &&
-          could_copy_on_write(locRaw(env, loc)) &&
           !setCouldHaveSideEffects(locRaw(env, loc)) &&
           !readCouldHaveSideEffects(locRaw(env, loc))) {
         // note: PushL does not deal with Uninit, so we need the

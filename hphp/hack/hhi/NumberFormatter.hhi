@@ -83,20 +83,36 @@ class NumberFormatter {
   const TYPE_DOUBLE                        = 71;
   const TYPE_CURRENCY                      = 72;
 
+  <<__Rx>>
   public function __construct(string $locale, int $style, string $pattern = "#,##0.###");
+  <<__Rx>>
   public function formatCurrency(float $value, string $currency) : string;
-  public function format(mixed $value, int $type = NumberFormatter::TYPE_DEFAULT) : string;
+  <<__Rx>>
+ public function format(mixed $value, int $type = NumberFormatter::TYPE_DEFAULT) : string;
+  <<__Rx>>
   public function getAttribute(int $attr) : int;
+  <<__Rx>>
   public function getErrorCode() : int;
+  <<__Rx>>
   public function getErrorMessage() : string;
+  <<__Rx>>
   public function getLocale(int $type = Locale::ACTUAL_LOCALE) : string;
+  <<__Rx>>
   public function getPattern() : string;
+  <<__Rx>>
   public function getSymbol(int $attr) : string;
+  <<__Rx>>
   public function getTextAttribute(int $attr) : string;
+  <<__Rx>>
   public function parseCurrency(string $value, string &$currency, int &$position = 0) : float;
+  <<__Rx>>
   public function parse(string $value, int $type = NumberFormatter::TYPE_DOUBLE, int &$position = 0) : mixed;
+  <<__Rx, __Mutable>>
   public function setAttribute(int $attr, int $value) : bool;
+  <<__Rx, __Mutable>>
   public function setPattern(string $pattern) : bool;
+  <<__Rx, __Mutable>>
   public function setSymbol(int $attr, string $value) : bool;
+  <<__Rx, __Mutable>>
   public function setTextAttribute(int $attr, string $value) : bool;
 }

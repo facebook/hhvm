@@ -34,6 +34,7 @@ class Error implements Throwable {
   protected int $line;
 
   /* Methods */
+  <<__Rx>>
   public function __construct (
     string $message = "",
     int $code = 0,
@@ -41,8 +42,11 @@ class Error implements Throwable {
   );
   final public function getMessage(): string;
   final public function getPrevious(): ?Throwable;
+  <<__Rx>>
   final public function getCode(): mixed;
+  <<__Rx>>
   final public function getFile(): string;
+  <<__Rx>>
   final public function getLine(): int;
   final public function getTrace(): array<mixed>;
   final public function getTraceAsString(): string;
@@ -57,6 +61,16 @@ class DivisionByZeroError extends Error {}
 class ParseError extends Error {}
 class TypeError extends Error {}
 
+namespace HH\Rx {
+interface Exception {
+  require extends \Exception;
+  <<__Rx>>
+  public function getMessage(): string;
+  <<__Rx>>
+  public function getCode(): int;
+}
+}
+
 class Exception implements Throwable {
   // $code should be untyped, or mixed because some subclasses set it
   // to a string, the main example being PDOException
@@ -65,16 +79,21 @@ class Exception implements Throwable {
   protected int $line;
   protected array $trace;
 
+  <<__Rx>>
   public function __construct (
     protected string $message = '',
     int $code = 0,
     protected ?Exception $previous = null,
   );
+  <<__Rx, __OnlyRxIfImpl(HH\Rx\Exception::class)>>
   public function getMessage(): string;
   final public function getPrevious(): ?Exception;
   public final function setPrevious(Exception $previous): void;
+  <<__Rx, __OnlyRxIfImpl(HH\Rx\Exception::class)>>
   public function getCode(): int;
+  <<__Rx>>
   final public function getFile(): string;
+  <<__Rx>>
   final public function getLine(): int;
   final public function getTrace(): array<mixed>;
   final protected function __prependTrace(array $trace): void;
@@ -87,6 +106,7 @@ class Exception implements Throwable {
 }
 
 class ErrorException extends Exception {
+  <<__Rx>>
   public function __construct(
     $message = "",
     int $code = 0,
@@ -95,6 +115,7 @@ class ErrorException extends Exception {
     int $lineno = 0 /* __LINE__ */,
     ?Exception $previous = null
   );
+  <<__Rx>>
   public final function getSeverity(): int;
 }
 

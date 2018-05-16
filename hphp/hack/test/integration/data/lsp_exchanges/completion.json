@@ -596,7 +596,7 @@
       },
       "data": {
         "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
-        "line": 46,
+        "line": 49,
         "char": 32
       }
     }

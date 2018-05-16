@@ -732,7 +732,7 @@
           },
           "data": {
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
-            "line": 46,
+            "line": 49,
             "char": 32,
             "base_class": "\\Elsa"
           }
@@ -759,7 +759,7 @@
           },
           "data": {
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
-            "line": 33,
+            "line": 34,
             "char": 32,
             "base_class": "\\Elsa"
           }
@@ -786,7 +786,7 @@
           },
           "data": {
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
-            "line": 41,
+            "line": 43,
             "char": 32,
             "base_class": "\\Elsa"
           }
@@ -813,7 +813,7 @@
           },
           "data": {
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
-            "line": 52,
+            "line": 56,
             "char": 32,
             "base_class": "\\Elsa"
           }
@@ -840,7 +840,7 @@
           },
           "data": {
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
-            "line": 64,
+            "line": 70,
             "char": 32,
             "base_class": "\\Elsa"
           }
@@ -867,7 +867,7 @@
           },
           "data": {
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
-            "line": 58,
+            "line": 63,
             "char": 32,
             "base_class": "\\Elsa"
           }
@@ -901,7 +901,7 @@
       },
       "data": {
         "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
-        "line": 46,
+        "line": 49,
         "char": 32
       }
     }

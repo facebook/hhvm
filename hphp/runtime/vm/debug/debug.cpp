@@ -254,14 +254,6 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
 #undef O
   };
 
-  static const char* acoldOpcodeName[] = {
-    "OpAcoldStart",
-#define O(name, imm, push, pop, flags) \
-#name "-Acold",
-    OPCODES
-#undef O
-  };
-
   static const char* highOpcodeName[] = {
     "OpHighStart",
 #define O(name) \
@@ -276,8 +268,6 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
     const char* name;
     if (op < Op_count) {
       name = opcodeName[op];
-    } else if (op < OpAcoldCount) {
-      name = acoldOpcodeName[op - OpAcoldStart];
     } else {
       name = highOpcodeName[op - OpHighStart];
     }

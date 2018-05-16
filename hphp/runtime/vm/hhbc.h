@@ -788,20 +788,12 @@ inline MOpMode getQueryMOpMode(QueryMOp op) {
   always_assert(false);
 }
 
-enum AcoldOp {
-  OpAcoldStart = Op_count-1,
-#define O(name, imm, pop, push, flags) OpAcold##name,
-  OPCODES
-#undef O
-  OpAcoldCount
-};
-
 #define HIGH_OPCODES \
   O(FuncPrologue) \
   O(TraceletGuard)
 
 enum HighOp {
-  OpHighStart = OpAcoldCount-1,
+  OpHighStart = Op_count-1,
 #define O(name) Op##name,
   HIGH_OPCODES
 #undef O

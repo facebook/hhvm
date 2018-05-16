@@ -72,6 +72,7 @@ struct SetArrayElm {
 
   void setTombstone() {
     tv.m_type = kTombstone;
+    static_assert(!isRefcountedType(kTombstone), "");
   }
 
   bool isEmpty() const {

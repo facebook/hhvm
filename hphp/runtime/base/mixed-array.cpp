@@ -499,7 +499,9 @@ void MixedArray::Release(ArrayData* in) {
     auto const stop = data + ad->m_used;
 
     for (auto ptr = data; ptr != stop; ++ptr) {
-      if (isTombstone(ptr->data.m_type)) continue;
+      // Tombstones will appear to be an integer => invalid_obj.  We can safely
+      // do tvDecRefGen() on a TypedValue with invalid data type (appear
+      // uncounted).
       if (ptr->hasStrKey()) {
         decRefStr(ptr->skey);
         // Keep GC from asserting on freed string in debug mode. GC will ignore
@@ -1178,10 +1180,12 @@ void MixedArray::eraseNoCompact(ssize_t pos) {
   }
 
   auto& e = elms[pos];
-  // Mark the value as a tombstone.
-  TypedValue* tv = &e.data;
-  auto const oldTV = *tv;
-  tv->m_type = kInvalidDataType;
+  auto const oldTV = e.data;
+  if (e.hasStrKey()) {
+    decRefStr(e.skey);
+  }
+  e.setTombstone();
+
   --m_size;
   // Mark the hash entry as "deleted".
   assertx(m_used <= capacity());

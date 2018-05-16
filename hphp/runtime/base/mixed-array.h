@@ -77,6 +77,15 @@ struct MixedArrayElm {
                   "high bit indicates int key");
   }
 
+  void setTombstone() {
+    // We don't explicitly check for tombstones in MixedArray::release(),
+    // instead make the deleted element appear to contain uncounted values.
+    data.m_type = kInvalidDataType;
+    static_assert(!isRefcountedType(kInvalidDataType), "");
+    data.hash() = -1;
+    assertx(hasIntKey());
+  }
+
   hash_t probe() const {
     return hash();
   }

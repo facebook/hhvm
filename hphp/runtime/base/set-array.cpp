@@ -292,7 +292,8 @@ void SetArray::Release(ArrayData* in) {
     auto const used = ad->m_used;
     for (uint32_t i = 0; i < used; ++i) {
       auto& elm = elms[i];
-      if (UNLIKELY(elm.isTombstone())) continue;
+      // It is OK to decref a TypedValue with kInvalidDataType.  It will appear
+      // uncounted.
       assertx(!elm.isEmpty());
       tvDecRefGen(&elm.tv);
     }

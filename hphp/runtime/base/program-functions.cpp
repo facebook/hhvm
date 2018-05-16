@@ -1652,6 +1652,7 @@ static int execute_program_impl(int argc, char** argv) {
     return 0;
   }
   if (vm.count("modules")) {
+    tl_heap.getCheck();
     Array exts = ExtensionRegistry::getLoaded();
     cout << "[PHP Modules]" << "\n";
     for (ArrayIter iter(exts); iter; ++iter) {

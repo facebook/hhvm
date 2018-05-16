@@ -746,6 +746,11 @@ G |- shape ( sft1 , ... , sftn ) <: shape ( sft1' , ... , sftn' )
 ------------------------------------------------------------------------------------------------------ :: shape_narrow
 G |- shape ( sft1, ..., sftm , sft1', ... , sftn', vardots ) <: shape ( sft1 , ... , sftm , vardots )
 
+{{ com Width subtyping on open shapes: optional fields of type $[[mixed]]$ can be introduced }}
+
+--------------------------------------------------------------------------------------------------------------- :: shape_widen
+G |- shape ( sft1, ..., sftm, vardots ) <: shape (sft1, ..., sftm, ?sfn1' => mixed, ..., ?sfnn' => mixed, vardots )
+
 {{ com \subsection{Class and interface inheritance} }}
 
 class C < var1 T1 constraint1, ... , varn Tn constraintn > cextends cimpls

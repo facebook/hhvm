@@ -31,6 +31,7 @@ type autocomplete_type =
   | Actype
   | Acclass_get
   | Acprop
+  | Actrait_only
 
 let (argument_global_type: autocomplete_type option ref) = ref None
 let auto_complete_for_global = ref ""
@@ -118,6 +119,8 @@ let autocomplete_id id env = autocomplete_token Acid (Some env) id
 
 let autocomplete_hint = autocomplete_token Actype None
 
+let autocomplete_trait_only = autocomplete_token Actrait_only None
+
 let autocomplete_new cid env =
   match cid with
   | Nast.CI (sid, _) -> autocomplete_token Acnew (Some env) sid
@@ -164,6 +167,7 @@ let should_complete_class completion_type class_kind =
   | Some Acid, Some Ast.Cnormal
   | Some Acid, Some Ast.Cabstract
   | Some Acnew, Some Ast.Cnormal
+  | Some Actrait_only, Some Ast.Ctrait
   | Some Actype, Some _ -> true
   | _ -> false
 
@@ -529,7 +533,7 @@ let autocomplete_typed_member ~is_static env class_ty cid mid =
 let autocomplete_static_member env (ty, cid) mid =
   autocomplete_typed_member ~is_static:true env ty (Some cid) mid
 
-let visitor = object
+let visitor = object (self)
   inherit Tast_visitor.iter as super
 
   method! on_Id env id =
@@ -579,6 +583,18 @@ let visitor = object
       end
     end;
     super#on_Xml env sid attrs el
+
+  method! on_class_ env cls =
+    List.iter cls.Tast.c_uses ~f:begin fun hint ->
+      match snd hint with
+      | Aast.Happly (sid, params) ->
+        autocomplete_trait_only sid;
+        List.iter params (self#on_hint env)
+      | _ -> ()
+    end;
+    (* If we don't clear out c_uses we'll end up overwriting the trait
+       completion as soon as we get to on_Happly. *)
+    super#on_class_ env {cls with Tast.c_uses = []}
 end
 
 let auto_complete_suffix_finder = object
@@ -667,13 +683,24 @@ let go
     let completion_type = !argument_global_type in
     if completion_type = Some Acid ||
        completion_type = Some Acnew ||
-       completion_type = Some Actype
+       completion_type = Some Actype ||
+       completion_type = Some Actrait_only
     then compute_complete_global
       ~tcopt ~delimit_on_namespaces ~autocomplete_context ~content_funs ~content_classes;
     if completion_type = Some Acprop then compute_complete_local tast;
     let env = match !ac_env with
       | Some e -> e
       | None -> Tast_env.empty tcopt
+    in
+    let filter_results (result: autocomplete_result) : bool =
+      let kind = match result with
+        | Partial res -> res.kind_
+        | Complete res -> res.res_kind
+      in
+      match completion_type, kind with
+      | Some Actrait_only, Trait_kind -> true
+      | Some Actrait_only, _ -> false
+      | _ -> true
     in
     let resolve (result: autocomplete_result) : complete_autocomplete_result =
       match result with
@@ -682,6 +709,6 @@ let go
     in
     {
       With_complete_flag.is_complete = !autocomplete_is_complete;
-      value = !autocomplete_results |> List.map ~f:resolve;
+      value = !autocomplete_results |> List.filter ~f:filter_results |> List.map ~f:resolve;
     }
   end

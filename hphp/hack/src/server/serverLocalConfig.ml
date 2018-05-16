@@ -45,6 +45,7 @@ type t = {
   load_script_config: LoadScriptConfig.t;
   use_full_fidelity_parser : bool;
   interrupt_on_watchman : bool;
+  interrupt_on_client : bool;
 }
 
 let default = {
@@ -78,6 +79,7 @@ let default = {
   load_script_config = LoadScriptConfig.default;
   use_full_fidelity_parser = false;
   interrupt_on_watchman = false;
+  interrupt_on_client = false;
 }
 
 let path =
@@ -176,6 +178,8 @@ let load_ fn ~silent =
     ~default:default.max_bucket_size config in
   let interrupt_on_watchman = bool_ "interrupt_on_watchman"
     ~default:default.interrupt_on_watchman config in
+  let interrupt_on_client = bool_ "interrupt_on_client"
+    ~default:default.interrupt_on_client config in
   let load_script_config = LoadScriptConfig.default in
   let use_full_fidelity_parser = bool_ "use_full_fidelity_parser"
     ~default:default.use_full_fidelity_parser config in
@@ -209,6 +213,7 @@ let load_ fn ~silent =
     load_script_config;
     use_full_fidelity_parser;
     interrupt_on_watchman;
+    interrupt_on_client;
   }
 
 let load ~silent =

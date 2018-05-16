@@ -157,8 +157,13 @@ let handle_connection_ genv env client =
         | None -> env
       in
       ClientProvider.send_response_to_client client Connected t;
-      ServerUtils.Done { env with persistent_client =
-          Some (ClientProvider.make_persistent client)}
+      let env = { env with persistent_client =
+          Some (ClientProvider.make_persistent client)} in
+      (* If the client connected in the middle of recheck, let them know it's
+       * happening. *)
+      if env.full_check = Full_check_started then
+        ServerBusyStatus.send env ServerCommandTypes.Doing_global_typecheck;
+      ServerUtils.Done env
     | Non_persistent ->
       ServerCommand.handle genv env client
   with
@@ -448,15 +453,45 @@ let watchman_interrupt_handler genv env =
   end else
     env, MultiThreadedCall.Continue
 
-let setup_interrupts genv env = { env with
+let priority_client_interrupt_handler genv client_provider env  =
+  let client, has_persistent_connection_request =
+    ClientProvider.sleep_and_check
+      client_provider
+      env.persistent_client
+      ~ide_idle:env.ide_idle
+      `Priority
+  in
+  (* we should only be looking at new priority clients, not existing persistent
+   * connection *)
+  assert (not has_persistent_connection_request);
+  let env = match client with
+    (* This is possible because client might have went away during
+     * sleep_and_check. *)
+    | None -> env
+    | Some client -> match handle_connection genv env client false with
+      | ServerUtils.Needs_full_recheck _ ->
+        failwith "unexpected command needing full recheck in priority channel"
+      | ServerUtils.Needs_writes _ ->
+        failwith "unexpected command needing writes in priority channel"
+      | ServerUtils.Done env -> env
+  in
+  env, MultiThreadedCall.Continue
+
+let setup_interrupts genv env client_provider = { env with
   interrupt_handlers = fun env ->
-    let {ServerLocalConfig.interrupt_on_watchman; _ }
+    let {ServerLocalConfig.interrupt_on_watchman; interrupt_on_client; _ }
       = genv.local_config in
     let interrupt_on_watchman = interrupt_on_watchman && env.can_interrupt in
+    let interrupt_on_client = interrupt_on_client && env.can_interrupt in
     let handlers = match genv.notifier_async_fd () with
       | Some fd when interrupt_on_watchman ->
         [fd, watchman_interrupt_handler genv]
       | _ -> []
+    in
+    let handlers = match ClientProvider.priority_fd client_provider with
+      | Some fd when interrupt_on_client ->
+        (fd, priority_client_interrupt_handler genv client_provider)::handlers
+      | _ -> handlers
     in
     handlers
 }
@@ -465,7 +500,7 @@ let serve genv env in_fds =
   let client_provider = ClientProvider.provider_from_file_descriptors in_fds in
   (* This is needed when typecheck_after_init option is disabled. *)
   if not env.init_env.needs_full_init then finalize_init genv env.init_env;
-  let env = setup_interrupts genv env in
+  let env = setup_interrupts genv env client_provider in
   let env = ref env in
   while true do
     let new_env = serve_one_iteration genv !env client_provider in

@@ -59,6 +59,9 @@ function jit_serialize_option($cmd, $test, $options, $serialize) {
     ' --count=' . ($serialize ? $options['jit-serialize'] : 1) .
     " -vEval.JitSerdesFile=" . $serialized .
     " -vEval.JitSerdesMode=" . ($serialize ? 'Serialize' : 'DeserializeOrFail');
+  if (isset($options['jitsample']) && $serialize) {
+    $cmds[0] .= ' -vDeploymentId="' . $options['jitsample'] . '-serialize"';
+  }
   return implode(' -- ', $cmds);
 }
 
@@ -547,7 +550,8 @@ function get_options($argv) {
     'srcloc' => '',
     'hack-only' => '',
     'ignore-oids' => '',
-    'hphpc' => ''
+    'hphpc' => '',
+    'jitsample:' => ''
   );
   $options = array();
   $files = array();
@@ -1070,6 +1074,12 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
     $hhbbc_repo = "\"$test.repo/$program.hhbbc\"";
     $cmd .= ' -vRepo.Authoritative=true -vRepo.Commit=0';
     $cmd .= " -vRepo.Central.Path=$hhbbc_repo";
+  }
+
+  if (isset($options['jitsample'])) {
+    $cmd .= ' -vDeploymentId="' . $options['jitsample'] . '"';
+    $cmd .= ' --instance-id="' . $test . '"';
+    $cmd .= ' -vEval.JitSampleRate=1';
   }
 
   // Command line arguments

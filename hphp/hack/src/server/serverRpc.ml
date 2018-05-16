@@ -182,8 +182,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | DISCONNECT ->
         ServerFileSync.clear_sync_data env, ()
     | SUBSCRIBE_DIAGNOSTIC id ->
+        let init = if env.full_check = Full_check_done
+          then env.errorl else Errors.empty in
         let new_env = { env with
-          diag_subscribe = Some (Diagnostic_subscription.of_id id env.errorl)
+          diag_subscribe = Some (Diagnostic_subscription.of_id id init)
         } in
         new_env, ()
     | UNSUBSCRIBE_DIAGNOSTIC id ->

@@ -72,6 +72,9 @@ void optimize(tc::FuncMetaInfo& info) {
     bumpLoads.emplace(Trace::hhir_load, -10);
     bumpStores.emplace(Trace::hhir_store, -10);
     bumpPrint.emplace(Trace::printir, -10);
+  } else if (RuntimeOption::EvalJitPrintOptimizedIR) {
+    bumpPrint.emplace(Trace::printir,
+                      -RuntimeOption::EvalJitPrintOptimizedIR);
   }
 
   // Regenerate the prologues and DV funclets before the actual function body.
@@ -120,11 +123,10 @@ struct TranslateWorker : JobQueueWorker<OptimizeData*, void*, true, true> {
     // Check if the func was treadmilled before the job started
     if (!Func::isFuncIdValid(d->id)) return;
 
-    VMProtect _;
-
     if (profData()->optimized(d->id)) return;
     profData()->setOptimized(d->id);
 
+    VMProtect _;
     optimize(d->info);
   }
 };

@@ -157,15 +157,15 @@ let handle_connection_ genv env client =
         | None -> env
       in
       ClientProvider.send_response_to_client client Connected t;
-      { env with persistent_client =
+      ServerUtils.Done { env with persistent_client =
           Some (ClientProvider.make_persistent client)}
     | Non_persistent ->
       ServerCommand.handle genv env client
   with
   | ServerCommand.Nonfatal_rpc_exception (e, stack, env) ->
-    handle_connection_exception env client e (Some stack)
+    ServerUtils.Done (handle_connection_exception env client e (Some stack))
   | e ->
-    handle_connection_exception env client e None
+    ServerUtils.Done (handle_connection_exception env client e None)
 
 let report_persistent_exception
     ~(e: exn)
@@ -193,14 +193,14 @@ let handle_persistent_connection_ genv env client =
    | Sys_error("Broken pipe")
    | ServerCommandTypes.Read_command_timeout
    | ServerClientProvider.Client_went_away ->
-     shutdown_persistent_client env client
+     ServerUtils.Done (shutdown_persistent_client env client)
    | ServerCommand.Nonfatal_rpc_exception (e, stack, env) ->
      report_persistent_exception ~e ~stack ~client ~is_fatal:false;
-     env
+     ServerUtils.Done env
    | e ->
      let stack = Printexc.get_backtrace () in
      report_persistent_exception ~e ~stack ~client ~is_fatal:true;
-     shutdown_persistent_client env client
+     ServerUtils.Done (shutdown_persistent_client env client)
 
 let handle_connection genv env client is_from_existing_persistent_client =
   ServerIdle.stamp_connection ();
@@ -317,6 +317,17 @@ let recheck_loop genv env client has_persistent_connection_request =
 let new_serve_iteration_id () =
   Random_id.short_string ()
 
+(* Force completion of the command, running any rechecks necessary for this.
+ * This is safe to run only in the main loop, when workers are not doing
+ * anything. *)
+let fully_handle_command genv result =
+  match result with
+  | ServerUtils.Done env ->  env
+  | ServerUtils.Needs_full_recheck (env, f, ignore_ide) ->
+    let env = ServerCommand.full_recheck_if_needed genv env ignore_ide in
+    f env
+  | ServerUtils.Needs_writes (env, f) -> f env
+
 let serve_one_iteration genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
   ServerMonitorUtils.exit_if_parent_dead ();
@@ -394,7 +405,8 @@ let serve_one_iteration genv env client_provider =
     try
       (* client here is the new client (not the existing persistent client) *)
       (* whose request we're going to handle.                               *)
-      let env = handle_connection genv env client false in
+      let env =
+        fully_handle_command genv (handle_connection genv env client false) in
       HackEventLogger.handled_connection start_t;
       env
     with
@@ -409,7 +421,8 @@ let serve_one_iteration genv env client_provider =
     (* whose request we're going to handle.          *)
     HackEventLogger.got_persistent_client_channels start_t;
     (try
-      let env = handle_connection genv env client true in
+      let env =
+        fully_handle_command genv (handle_connection genv env client true) in
       HackEventLogger.handled_persistent_connection start_t;
       env
     with

@@ -9,6 +9,16 @@
 
 module MC = MonitorConnection
 
+type 'env handle_command_result =
+  (* Command was fully handled, and this is the new environment. *)
+  | Done of 'env
+  (* Returned continuation needs to be run with an environment after finished
+   * full check to complete handling of command. The boolean indicates whether
+   * IDE contents should be ignored during this recheck. *)
+  | Needs_full_recheck of 'env * ('env -> 'env) * bool
+  (* Commands that want to modify global state, by modifying file contents *)
+  | Needs_writes of 'env * ('env -> 'env)
+
 let shutdown_client (_ic, oc) =
   let cli = Unix.descr_of_out_channel oc in
   try

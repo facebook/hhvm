@@ -47,14 +47,25 @@ let command_needs_full_check = function
   | Stream LIST_FILES -> true (* Same as Rpc STATUS *)
   | _ -> false
 
-let full_recheck_if_needed' genv env msg =
-  if
-    ServerEnv.(env.full_check = Full_check_done) &&
-    (Relative_path.Set.is_empty env.ServerEnv.ide_needs_parsing)
-  then
-    env
-  else
-  if not @@ command_needs_full_check msg then env else
+let rpc_command_needs_writes : type a. a t -> bool  = function
+  | OPEN_FILE _ -> true
+  | EDIT_FILE _ -> true
+  | CLOSE_FILE _ -> true
+  (* DISCONNECT involves CLOSE-ing all previously opened files *)
+  | DISCONNECT -> true
+  | _ -> false
+
+let commands_needs_writes = function
+  | Rpc x -> rpc_command_needs_writes x
+  | _ -> false
+
+let full_recheck_if_needed' genv env =
+if
+  ServerEnv.(env.full_check = Full_check_done) &&
+  (Relative_path.Set.is_empty env.ServerEnv.ide_needs_parsing)
+then
+  env
+else
   let env, _, _ = ServerTypeCheck.(check genv env Full_check) in
   assert (ServerEnv.(env.full_check = Full_check_done));
   env
@@ -74,14 +85,14 @@ let get_unsaved_changes env  =
   let changes = ServerFileSync.get_unsaved_changes env in
   Relative_path.Map.(map ~f:fst changes, map ~f:snd changes)
 
-let full_recheck_if_needed genv env msg =
-  if ignore_ide msg then
+let full_recheck_if_needed genv env ignore_ide =
+  if ignore_ide then
     let ide, disk = get_unsaved_changes env in
     let env = apply_changes env disk in
-    let env = full_recheck_if_needed' genv env msg in
+    let env = full_recheck_if_needed' genv env in
     apply_changes env ide
   else
-    full_recheck_if_needed' genv env msg
+    full_recheck_if_needed' genv env
 
 (****************************************************************************)
 (* Called by the client *)
@@ -240,13 +251,15 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
       BuildMain.go build_opts genv env oc;
       ServerUtils.shutdown_client (ic, oc)
 
-let handle
-    (genv: ServerEnv.genv)
-    (env: ServerEnv.env)
-    (client: ClientProvider.client)
-  : ServerEnv.env =
-  let msg = ClientProvider.read_client_msg client in
-  let env = full_recheck_if_needed genv env msg in
+(* Construct a continuation that will finish handling the command and update
+ * the environment. Server can execute the continuation immediately, or store it
+ * to be completed later (when full recheck is completed, when workers are
+ * available, when current recheck is cancelled... *)
+let actually_handle genv client msg full_recheck_needed = fun env ->
+  assert (
+    (not full_recheck_needed) ||
+    ServerEnv.(env.full_check = Full_check_done)
+  );
   match msg with
   | Rpc cmd ->
     begin try
@@ -277,3 +290,17 @@ let handle
       genv.ServerEnv.debug_channels <- Some (ic, oc);
       ServerDebug.say_hello genv;
       env
+let handle
+    (genv: ServerEnv.genv)
+    (env: ServerEnv.env)
+    (client: ClientProvider.client)
+  : ServerEnv.env ServerUtils.handle_command_result =
+  let msg = ClientProvider.read_client_msg client in
+  let full_recheck_needed = command_needs_full_check msg in
+  let continuation = actually_handle genv client msg full_recheck_needed in
+  if commands_needs_writes msg then
+    ServerUtils.Needs_writes (env, continuation)
+  else if full_recheck_needed then
+    ServerUtils.Needs_full_recheck (env, continuation, ignore_ide msg)
+  else
+    ServerUtils.Done (continuation env)

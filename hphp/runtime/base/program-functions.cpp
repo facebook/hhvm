@@ -2336,6 +2336,10 @@ void hphp_process_init() {
   if (RuntimeOption::RepoAuthoritative &&
       !RuntimeOption::EvalJitSerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
+    if (RuntimeOption::EvalJitWorkerThreadsForSerdes) {
+      RuntimeOption::EvalJitWorkerThreads =
+        RuntimeOption::EvalJitWorkerThreadsForSerdes;
+    }
     switch (RuntimeOption::EvalJitSerdesMode) {
       case JitSerdesMode::Off:
       case JitSerdesMode::Serialize:
@@ -2354,7 +2358,9 @@ void hphp_process_init() {
         RuntimeOption::EvalNumSingleJitRequests=0;
         RuntimeOption::EvalJitProfileInterpRequests=0;
         RuntimeOption::EvalJitProfileRequests=0;
-        RuntimeOption::EvalJitWorkerThreads=Process::GetCPUCount();
+        if (!RuntimeOption::EvalJitWorkerThreadsForSerdes) {
+          RuntimeOption::EvalJitWorkerThreads=Process::GetCPUCount();
+        }
         jit::mcgen::checkRetranslateAll(true);
         BootStats::mark("mcgen::retranslateAll");
       } else {

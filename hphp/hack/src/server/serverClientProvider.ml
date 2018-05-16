@@ -41,24 +41,24 @@ let accept_client_opt parent_in_fd =
 (* - If we should read from in_fd, then (Some (Non_persist in_fd)), false)  *)
 (* - If there's nothing to read, then (None, false)                         *)
 let sleep_and_check (default_in_fd, priority_in_fd) persistent_client_opt
-    ~ide_idle =
-  (* TODO: ability to select priority only *)
+    ~ide_idle kind =
   let in_fds = [default_in_fd; priority_in_fd] in
   let is_persistent x = match persistent_client_opt with
     | Some (Persistent_client fd) when fd = x -> true
     | _ -> false
   in
-  let l = match persistent_client_opt with
-    | Some (Persistent_client fd) ->
+  let l = match kind, persistent_client_opt with
+    | `Priority, _ -> [priority_in_fd]
+    | `Any, Some (Persistent_client fd) ->
       (* If we are not sure that there are no more IDE commands, do not even
        * look at non-persistent client to avoid race conditions.*)
       if not ide_idle then [fd] else fd::in_fds
-    | Some (Non_persistent_client _) ->
+    | `Any, Some (Non_persistent_client _) ->
         (* The arguments for "sleep_and_check" are "the source of new clients"
          * and the "client we already store in the env". We only store
          * persistent clients *)
         assert false
-    | None -> in_fds
+    | `Any, None -> in_fds
   in
   let ready_fd_l, _, _ = Unix.select l [] [] (0.1) in
   (* Prioritize existing persistent client requests over command line ones *)
@@ -66,6 +66,18 @@ let sleep_and_check (default_in_fd, priority_in_fd) persistent_client_opt
   match List.hd ready_fd_l with
   | Some fd -> accept_client_opt fd, false
   | None -> None, false
+
+let has_persistent_connection_request = function
+  | Persistent_client fd ->
+    let ready, _, _ = Unix.select [fd] [] [] 0.0 in
+    ready <> []
+  | _ -> false
+
+let priority_fd (_, x) = Some x
+
+let get_client_fd = function
+  | Persistent_client fd -> Some fd
+  | Non_persistent_client _ -> failwith "not implemented"
 
 let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in

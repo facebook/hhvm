@@ -22,9 +22,13 @@ module type S = sig
     (* Whether the most recent message received from persistent client
      * was IDE_IDLE *)
     ide_idle:bool ->
+    [`Any | `Priority] ->
     (** Returns an optional new client, and a boolean for whether there is
      * a request on the persistent client. *)
     client option * bool
+  val has_persistent_connection_request: client -> bool
+  val priority_fd  : t -> Unix.file_descr option
+  val get_client_fd: client -> Unix.file_descr option
   val read_connection_type : client -> ServerCommandTypes.connection_type
   val send_response_to_client : client -> 'a -> float -> unit
   val send_push_message_to_client : client -> ServerCommandTypes.push -> unit

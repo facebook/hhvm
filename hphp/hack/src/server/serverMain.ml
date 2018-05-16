@@ -336,6 +336,7 @@ let serve_one_iteration genv env client_provider =
       client_provider
       env.persistent_client
       ~ide_idle:env.ide_idle
+      `Any
   in
   (* client here is "None" if we should either handle from our existing  *)
   (* persistent client (i.e. has_persistent_connection_request), or if   *)

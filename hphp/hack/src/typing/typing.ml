@@ -5608,31 +5608,38 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast.Eq _ ->
       assert false
 
-and condition_var_non_null env = function
+(* This function captures the common bits of logic behind refinement
+ * of the type of a local variable or a class member variable as a
+ * result of a dynamic check (e.g., nullity check, simple type check
+ * using functions like is_int, is_string, is_array etc.).  The
+ * argument refine is a function that takes the type of the variable
+ * and returns a refined type (making necessary changes to the
+ * environment, which is threaded through).
+ *)
+and refine_lvalue_type env e ~refine = match e with
   | _, Lvar x
   | _, ImmutableVar x
   | _, Dollardollar x ->
-      let x_ty = Env.get_local env (snd x) in
-      let env, x_ty = TUtils.non_null env x_ty in
-      set_local env x x_ty
-  | p, Class_get (((), cname), (_, member_name)) as e ->
+      let ty = Env.get_local env (snd x) in
+      let env, refined_ty = refine env ty in
+      set_local env x refined_ty
+  | p, Class_get (((), cname), (_, member_name)) ->
       let env, _te, ty = expr env e in
+      let env, refined_ty = refine env ty in
       let env, local = Env.FakeMembers.make_static p env cname member_name in
       let lvar = (p, local) in
-      let env = set_local env lvar ty in
-      let local = p, Lvar lvar in
-      condition_var_non_null env local
-    (* TODO TAST: generate an assignment to the fake local in the TAST *)
-  | p, Obj_get ((_, This | _, Lvar _ as obj),
-                (_, Id (_, member_name)),
-                _) as e ->
+      set_local env lvar refined_ty
+    (* TODO TAST: generate as assignment to the fake local in the TAST *)
+  | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
       let env, _te, ty = expr env e in
+      let env, refined_ty = refine env ty in
       let env, local = Env.FakeMembers.make p env obj member_name in
       let lvar = (p, local) in
-      let env = set_local env lvar ty in
-      let local = p, Lvar lvar in
-      condition_var_non_null env local
+      set_local env lvar refined_ty
   | _ -> env
+
+and condition_var_non_null env e =
+  refine_lvalue_type env e ~refine:TUtils.non_null
 
 and condition_isset env = function
   | _, Array_get (x, _) -> condition_isset env x
@@ -5727,9 +5734,9 @@ and condition ?lhs_of_null_coalesce env tparamet =
   | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_resource ->
       is_type env lv Tresource (Reason.Rpredicated (p, f))
-  | _, Call (Cnormal,  (p, Class_const (((), CI ((_, class_name), _)), (_, method_name))), _, [shape; field], [])
+  | _, Call (Cnormal,  (_, Class_const (((), CI ((_, class_name), _)), (_, method_name))), _, [shape; field], [])
     when tparamet && class_name = SN.Shapes.cShapes && method_name = SN.Shapes.keyExists ->
-      key_exists env p shape field
+      key_exists env shape field
   | _, Unop (Ast.Unot, e) ->
       condition env (not tparamet) e
   | p, InstanceOf (ivar, ((), cid)) when tparamet && is_instance_var ivar ->
@@ -6007,16 +6014,7 @@ and get_instance_var env = function
   | _ -> failwith "Should only be called when is_instance_var is true"
 
 and is_type env e tprim r =
-  match e with
-    | p, Class_get (((), cname), (_, member_name)) ->
-      let env, local = Env.FakeMembers.make_static p env cname member_name in
-      set_local env (p, local) (r, Tprim tprim)
-    | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
-      let env, local = Env.FakeMembers.make p env obj member_name in
-      set_local env (p, local) (r, Tprim tprim)
-    | _, Lvar lvar ->
-      set_local env lvar (r, Tprim tprim)
-    | _ -> env
+  refine_lvalue_type env e ~refine:(fun env _ -> env, (r, Tprim tprim))
 
 (* Refine type for is_array, is_vec, is_keyset and is_dict tests
  * `pred_name` is the function name itself (e.g. 'is_vec')
@@ -6024,60 +6022,43 @@ and is_type env e tprim r =
  * `arg_expr` is the argument to the function
  *)
 and is_array env ty p pred_name arg_expr =
-  let env, _te, arg_ty = expr env arg_expr in
-  let r = Reason.Rpredicated (p, pred_name) in
-  let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" in
-  let tarrkey = (r, Tabstract (AKgeneric tarrkey_name, None)) in
-  let env = SubType.add_constraint p env Ast.Constraint_as
+  refine_lvalue_type env arg_expr ~refine:begin fun env arg_ty ->
+    let r = Reason.Rpredicated (p, pred_name) in
+    let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" in
+    let tarrkey = (r, Tabstract (AKgeneric tarrkey_name, None)) in
+    let env = SubType.add_constraint p env Ast.Constraint_as
       tarrkey (r, Tprim Tarraykey) in
-  let env, tfresh_name = Env.add_fresh_generic_parameter env "T" in
-  let tfresh = (r, Tabstract (AKgeneric tfresh_name, None)) in
-  (* This is the refined type of e inside the branch *)
-  let refined_ty =
-    (r, (match ty with
-    | `HackDict ->
-      Tclass ((Pos.none, SN.Collections.cDict), [tarrkey; tfresh])
-    | `HackVec ->
-      Tclass ((Pos.none, SN.Collections.cVec), [tfresh])
-    | `HackKeyset ->
-      Tclass ((Pos.none, SN.Collections.cKeyset), [tarrkey])
-    | `PHPArray ->
-      let safe_isarray_enabled =
-        TypecheckerOptions.experimental_feature_enabled
-        (Env.get_options env) TypecheckerOptions.experimental_isarray in
-      if safe_isarray_enabled
-      then Tarraykind (AKvarray_or_darray tfresh)
-      else Tarraykind AKany)) in
-  (* Add constraints on generic parameters that must
-   * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>
-   * and refined_ty is keyset<T#1> then we know T#1 <: T *)
-  let env = SubType.add_constraint p env Ast.Constraint_as refined_ty arg_ty in
-  match arg_expr with
-  | (_, Class_get (((), cname), (_, member_name))) ->
-      let env, local = Env.FakeMembers.make_static p env cname member_name in
-      set_local env (p, local) refined_ty
-  | (_, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _)) ->
-      let env, local = Env.FakeMembers.make p env obj member_name in
-      set_local env (p, local) refined_ty
-  | (_, Lvar lvar) ->
-      set_local env lvar refined_ty
-  | _ -> env
+    let env, tfresh_name = Env.add_fresh_generic_parameter env "T" in
+    let tfresh = (r, Tabstract (AKgeneric tfresh_name, None)) in
+    (* This is the refined type of e inside the branch *)
+    let refined_ty = (r,
+      match ty with
+      | `HackDict ->
+        Tclass ((Pos.none, SN.Collections.cDict), [tarrkey; tfresh])
+      | `HackVec ->
+        Tclass ((Pos.none, SN.Collections.cVec), [tfresh])
+      | `HackKeyset ->
+        Tclass ((Pos.none, SN.Collections.cKeyset), [tarrkey])
+      | `PHPArray ->
+        let safe_isarray_enabled =
+          TypecheckerOptions.experimental_feature_enabled
+          (Env.get_options env) TypecheckerOptions.experimental_isarray in
+        if safe_isarray_enabled
+        then Tarraykind (AKvarray_or_darray tfresh)
+        else Tarraykind AKany) in
+    (* Add constraints on generic parameters that must
+     * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>
+     * and refined_ty is keyset<T#1> then we know T#1 <: T *)
+    let env = SubType.add_constraint p env Ast.Constraint_as refined_ty arg_ty in
+    env, refined_ty
+  end
 
-and key_exists env p shape field =
-  let env, _tshape, shape_ty = expr env shape in
-  let env, refined_ty = match TUtils.shape_field_name env (fst field) (snd field) with
+and key_exists env shape field =
+  refine_lvalue_type env shape ~refine:begin fun env shape_ty ->
+    match TUtils.shape_field_name env (fst field) (snd field) with
     | None -> env, shape_ty
-    | Some field_name -> Typing_shapes.refine_shape field_name env shape_ty in
-  match shape with
-  | (_, Class_get (((), cname), (_, member_name))) ->
-      let env, local = Env.FakeMembers.make_static p env cname member_name in
-      set_local env (p, local) refined_ty
-  | (_, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _)) ->
-      let env, local = Env.FakeMembers.make p env obj member_name in
-      set_local env (p, local) refined_ty
-  | (_, Lvar lvar) ->
-      set_local env lvar refined_ty
-  | _ -> env
+    | Some field_name -> Typing_shapes.refine_shape field_name env shape_ty
+  end
 
 and string2 env idl =
   let env, tel =

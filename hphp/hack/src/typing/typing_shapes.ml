@@ -16,6 +16,41 @@ module Reason       = Typing_reason
 module TUtils       = Typing_utils
 module Type         = Typing_ops
 
+let rec refine_shape field_name env shape =
+  let env, shape = Env.expand_type env shape in
+  match shape with
+  | shape_r, Tshape (fields_known, fields) ->
+    let refine_shape_field_type refined_sft_ty =
+      let refined_sft = {sft_optional = false; sft_ty = refined_sft_ty} in
+      let refined_fields = ShapeMap.add field_name refined_sft fields in
+      env, (shape_r, Tshape (fields_known, refined_fields)) in
+    begin match fields_known with
+    | FieldsFullyKnown ->
+      (* Closed shape *)
+      begin match ShapeMap.get field_name fields with
+      | None -> env, shape
+      | Some {sft_ty; _} -> refine_shape_field_type sft_ty
+      end
+    | FieldsPartiallyKnown unset_fields ->
+      (* Open shape *)
+      if ShapeMap.mem field_name unset_fields
+      then env, shape
+      else
+        let refined_sft_ty = match ShapeMap.get field_name fields with
+          | None ->
+            let printable_field_name =
+              TUtils.get_printable_shape_field_name field_name in
+            let sft_ty_r = Reason.Rmissing_optional_field
+              (Reason.to_pos shape_r, printable_field_name) in
+            (sft_ty_r, TUtils.desugar_mixed sft_ty_r)
+          | Some {sft_ty; _} -> sft_ty in
+        refine_shape_field_type refined_sft_ty
+    end
+  | r, Tunresolved tyl ->
+    let env, tyl = List.map_env env tyl (refine_shape field_name) in
+    env, (r, Tunresolved tyl)
+  | _ -> env, shape
+
 (*****************************************************************************)
 (* Remove a field from all the shapes found in a given type.
  * The function leaves all the other types (non-shapes) unchanged.

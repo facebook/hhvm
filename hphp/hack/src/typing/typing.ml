@@ -5727,6 +5727,9 @@ and condition ?lhs_of_null_coalesce env tparamet =
   | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_resource ->
       is_type env lv Tresource (Reason.Rpredicated (p, f))
+  | _, Call (Cnormal,  (p, Class_const (((), CI ((_, class_name), _)), (_, method_name))), _, [shape; field], [])
+    when tparamet && class_name = SN.Shapes.cShapes && method_name = SN.Shapes.keyExists ->
+      key_exists env p shape field
   | _, Unop (Ast.Unot, e) ->
       condition env (not tparamet) e
   | p, InstanceOf (ivar, ((), cid)) when tparamet && is_instance_var ivar ->
@@ -6050,6 +6053,22 @@ and is_array env ty p pred_name arg_expr =
    * and refined_ty is keyset<T#1> then we know T#1 <: T *)
   let env = SubType.add_constraint p env Ast.Constraint_as refined_ty arg_ty in
   match arg_expr with
+  | (_, Class_get (((), cname), (_, member_name))) ->
+      let env, local = Env.FakeMembers.make_static p env cname member_name in
+      set_local env (p, local) refined_ty
+  | (_, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _)) ->
+      let env, local = Env.FakeMembers.make p env obj member_name in
+      set_local env (p, local) refined_ty
+  | (_, Lvar lvar) ->
+      set_local env lvar refined_ty
+  | _ -> env
+
+and key_exists env p shape field =
+  let env, _tshape, shape_ty = expr env shape in
+  let env, refined_ty = match TUtils.shape_field_name env (fst field) (snd field) with
+    | None -> env, shape_ty
+    | Some field_name -> Typing_shapes.refine_shape field_name env shape_ty in
+  match shape with
   | (_, Class_get (((), cname), (_, member_name))) ->
       let env, local = Env.FakeMembers.make_static p env cname member_name in
       set_local env (p, local) refined_ty

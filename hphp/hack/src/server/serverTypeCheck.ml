@@ -773,7 +773,7 @@ end = functor(CheckKind:CheckKindType) -> struct
       | Some ai_opt ->
         let fast_infos = reparse_infos files_info fast in
         let ae = Ai.go_incremental
-          Typing_check_utils.check_defs
+          Typing_check_utils.type_file
           genv.workers fast_infos env.tcopt ai_opt in
         (Errors.merge errorl' ae)
     in

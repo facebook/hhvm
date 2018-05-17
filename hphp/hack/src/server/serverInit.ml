@@ -734,7 +734,7 @@ let ai_check genv files_info env t =
     else begin
       let check_mode = ServerArgs.check_mode genv.options in
       let errorl = Ai.go
-          Typing_check_utils.check_defs genv.workers files_info
+          Typing_check_utils.type_file genv.workers files_info
           env.tcopt ai_opt check_mode in
       let env = { env with
                   errorl = Errors.merge errorl env.errorl;

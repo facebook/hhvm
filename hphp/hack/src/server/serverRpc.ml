@@ -114,7 +114,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | DUMP_SYMBOL_INFO file_list ->
         env, SymbolInfoService.go genv.workers file_list env
     | DUMP_AI_INFO file_list ->
-        env, Ai.InfoService.go Typing_check_utils.check_defs genv.workers
+        env, Ai.InfoService.go Typing_check_utils.type_file genv.workers
           file_list (ServerArgs.ai_mode genv.options) env.tcopt
     | IN_MEMORY_DEP_TABLE_SIZE ->
       env, SaveStateService.get_in_memory_dep_table_entry_count ()
@@ -146,7 +146,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | HH_FORMAT (editor_open_files, action, use_hackfmt) ->
         env, ServerFormat.go_ide editor_open_files action use_hackfmt
     | TRACE_AI action ->
-        env, Ai.TraceService.go action Typing_check_utils.check_defs
+        env, Ai.TraceService.go action Typing_check_utils.type_file
            (ServerArgs.ai_mode genv.options) env.tcopt
     | AI_QUERY json ->
         env, Ai.QueryService.go json

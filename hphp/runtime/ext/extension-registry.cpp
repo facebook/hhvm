@@ -4,7 +4,6 @@
 
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/litstr-table.h"
 #include "hphp/runtime/version.h"
 #include "hphp/system/systemlib.h"
@@ -24,9 +23,7 @@
 # endif
 #endif
 
-namespace HPHP {
-
-namespace ExtensionRegistry {
+namespace HPHP { namespace ExtensionRegistry {
 /////////////////////////////////////////////////////////////////////////////
 
 // s_exts isn't necessarily initialized by the time Extensions
@@ -241,11 +238,6 @@ void moduleInit() {
     ext->moduleInit();
   }
   s_initialized = true;
-
-  // When all the ext modules are loaded,
-  // notify the OverCLI extension that all the functions were registered.
-  // Note: More that one ext module could register client side functions.
-  OverCLI::RegisterClientSideFunc::finishedAllRegistering();
 }
 
 void moduleShutdown() {

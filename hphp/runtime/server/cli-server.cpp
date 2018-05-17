@@ -157,7 +157,6 @@ way to determine how much progress the server made.
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/portability/Sockets.h>
-#include <folly/Singleton.h>
 
 #include <afdt.h>
 #include <errno.h>
@@ -257,35 +256,11 @@ void cli_write(int afdt_fd, Args&&... args) {
   }
 }
 
-template<>
-void cli_write(int afdt_fd, const std::string& args) {
-  FTRACE(4, "cli_write({}, nargs={})\n", afdt_fd, 2);
-  FTRACE(5, "cli_write({}, {})\n", afdt_fd, args);
-  try {
-    afdt::sendx(afdt_fd, args);
-  } catch (const std::runtime_error& ex) {
-    throw Exception("Failed in afdt::sendRaw: %s [%s]",
-                    ex.what(), folly::errnoStr(errno).c_str());
-  }
-}
-
 template<class... Args>
 void cli_read(int afdt_fd, Args&&... args) {
   FTRACE(4, "cli_read({}, nargs={})\n", afdt_fd, sizeof...(args) + 1);
   try {
     afdt::recvx(afdt_fd, std::forward<Args>(args)...);
-  } catch (const std::runtime_error& ex) {
-    throw Exception("Failed in afdt::recvRaw: %s [%s]",
-                    ex.what(), folly::errnoStr(errno).c_str());
-  }
-}
-
-template<>
-void cli_read(int afdt_fd, std::string& args) {
-  FTRACE(4, "cli_read({}, nargs={})\n", afdt_fd, 2);
-  try {
-    afdt::recvx(afdt_fd, args);
-    FTRACE(5, "{} = cli_read of string\n", args);
   } catch (const std::runtime_error& ex) {
     throw Exception("Failed in afdt::recvRaw: %s [%s]",
                     ex.what(), folly::errnoStr(errno).c_str());
@@ -309,8 +284,6 @@ void cli_write_fd(int afdt_fd, int fd) {
                     folly::errnoStr(errno).c_str());
   }
 }
-
-
 
 #ifdef SCM_CREDENTIALS
 
@@ -1635,9 +1608,6 @@ folly::Optional<int> cli_process_command_loop(int fd) {
       cli_write(fd, true, out);
       continue;
     }
-
-    OverCLI::RunClientCommand(cmd, fd);
-
   }
 }
 
@@ -1819,264 +1789,6 @@ Array cli_env() {
 }
 
 bool is_cli_mode() { return tl_cliSock != -1; }
-
-////////////////////////////////////////////////////////////////////////////////
-
-namespace OverCLI {
-namespace {
-
-struct InitCLIFuncMap {
-  InitCLIFuncMap() : pMap(nullptr) {}
-  req::hash_map<std::string, std::function<void(int)>>* pMap;
-};
-folly::Singleton<InitCLIFuncMap> initSingleton_;
-
-// This function returns a map from strings to functions for registering
-// functions that the cli may use on the client
-// It is assumed that only one thread is registering functions
-req::hash_map<std::string, std::function<void(int)>>*
-getInitialCLIFuncMap(bool init = true) {
-  req::hash_map<std::string, std::function<void(int)>>* CLIFuncMap =
-    initSingleton_.try_get()->pMap;
-
-  if (init && !CLIFuncMap) {
-    CLIFuncMap = initSingleton_.try_get()->pMap =
-      new req::hash_map<std::string, std::function<void(int)>>();
-  }
-  return CLIFuncMap;
-}
-
-
-struct CompletedCLIFuncMap {
-  CompletedCLIFuncMap() : pMap(nullptr) {}
-  req::hash_map<std::string, std::function<void(int)>>* pMap;
-};
-folly::Singleton<CompletedCLIFuncMap> completedSingleton_;
-
-// This function returns the completed map of functions.  It is not assumed
-// that the thread that populates this map (via the above function) is the
-// same thread that tries to get this map
-const req::hash_map<std::string, std::function<void(int)>>* getCompleteCLIMap(
-  req::hash_map<std::string, std::function<void(int)>>* complete_map = nullptr)
-{
-  static std::condition_variable cv;
-  static std::mutex local_lock;
-
-  std::unique_lock<std::mutex> lock(local_lock);
-  if ((completedSingleton_.try_get()->pMap == nullptr) && complete_map) {
-    completedSingleton_.try_get()->pMap = complete_map;
-    lock.unlock();
-    cv.notify_all();
-    return completedSingleton_.try_get()->pMap;
-  } else if (completedSingleton_.try_get()->pMap != nullptr) {
-    cv.wait(lock, [&] { return completedSingleton_.try_get()->pMap; });
-  }
-
-  return completedSingleton_.try_get()->pMap;
-}
-} // namespace
-
-void RunClientCommand(const std::string& cmd, int fd) {
-  const auto CLIFuncMap = getCompleteCLIMap();
-  auto it = CLIFuncMap->find(cmd);
-  FTRACE(2, "Searching for client function in map of size {}\n",
-         CLIFuncMap->size());
-  if (it != CLIFuncMap->end()) {
-    FTRACE(2, "Found client function\n");
-    it->second(fd);
-  } else {
-    FTRACE(1, "Failed to find client function!\n");
-  }
-}
-
-RegisterClientSideFunc::RegisterClientSideFunc(const std::string& a,
-                                               std::function<void(int)> f) {
-  auto CLIFuncMap = getInitialCLIFuncMap();
-  FTRACE(2, "Registering client function: {}\n", a.c_str());
-  (*CLIFuncMap)[a] = f;
-}
-
-void RegisterClientSideFunc::finishedAllRegistering() {
-  if (should_use_cli_hhvm_fe())
-  {
-    auto ptr = getInitialCLIFuncMap(false /* dont create it */);
-    assert(ptr); // assert that it was created
-    getCompleteCLIMap(ptr); // let the readers know it was created
-  }
-}
-
-} // namespace OverCLI
-
-void run_command_on_cli_client(const std::string& name,
-                               std::function<void(int)> cmd) {
-  FTRACE(5, "run_command_on_cli_client({},...)\n", name);
-  // make sure the value is there.
-  assert(OverCLI::getCompleteCLIMap()->count(name) != 0);
-  cli_write(tl_cliSock, name);
-  cmd(tl_cliSock);
-}
-
-static const std::string CLIENT_RESOURCE = "client_resource";
-static const std::string FILE_RESOURCE = "file_resource";
-
-bool should_use_cli_hhvm_fe()
-{
-  // This checks to see if in server mode we have the right flags to
-  // allow CLI_HHVM_FE o to fall back to the faster HHVM_FE macros.
-  // The second 'or' of the statement does the
-  // same for the client function registration.
-  return (!RuntimeOption::EvalUnixServerPath.empty() &&
-      RuntimeOption::ServerExecutionMode() &&
-      !RuntimeOption::RepoAuthoritative) ||
-      (!RuntimeOption::EvalUnixServerPath.empty() &&
-          !RuntimeOption::ServerExecutionMode());
-}
-
-bool is_cli_server_mode() {
-  return is_cli_mode();
-}
-
-void receive_over_wire(int fd, Resource& r) {
-  Variant v;
-  receive_over_wire(fd, v);
-  r = v.toResource();
-}
-
-void receive_over_wire(int fd, Variant& v) {
-  std::string serialized;
-  cli_read(fd, serialized);
-  FTRACE(5, "receive_over_wire got {}\n", serialized);
-  // Resource is handled differently - nothing else is right now
-  if (serialized == CLIENT_RESOURCE) {
-    int index;
-    cli_read(fd, index);
-    if (is_cli_server_mode()) {
-      v = Variant(req::make<OverCLI::ClientSideResource>(index));
-      return;
-    } else {
-      v = OverCLI::ClientSideResource::fromIndex(index);
-      return;
-    }
-  } else if (serialized == FILE_RESOURCE) {
-    int fd_from_server = cli_read_fd(fd);
-    v = Variant(req::make<PlainFile>(fd_from_server));
-    return;
-  } else {
-    VariableUnserializer vun(serialized.data(), serialized.length(),
-                             VariableUnserializer::Type::Internal);
-    v = vun.unserialize();
-    return;
-  }
-}
-
-void send_over_wire(int fd, const Variant& v, bool try_resource /* = true*/) {
-  if (try_resource && v.isResource()) {
-    send_over_wire(fd, v.toResource());
-    return;
-  }
-  VariableSerializer s(VariableSerializer::Type::Internal);
-  auto serialized = s.serialize(v, true).toCppString();
-  FTRACE(5, "sending over wire: {}\n", serialized);
-  cli_write(fd, serialized);
-  return;
-}
-
-void send_over_wire(int fd, const Variant& v) {
-  send_over_wire(fd, v, true);
-}
-
-void send_over_wire(int fd, const Resource& r) {
-  auto cli_resource = dyn_cast_or_null<OverCLI::ClientSideResource>(r);
-  if (cli_resource) {
-    FTRACE(5, "sending client resource over wire!\n");
-    cli_write(fd, CLIENT_RESOURCE);
-    cli_write(fd, cli_resource->index);
-    return;
-  }
-
-  auto files = dyn_cast_or_null<File>(r);
-  if (files) {
-    FTRACE(5, "sending file resource over wire!\n");
-    cli_write(fd, FILE_RESOURCE);
-    cli_write_fd(fd, files->getFd());
-    return;
-  }
-
-  if (!is_cli_server_mode()) {
-    FTRACE(5, "sending converting to client resource for over wire!\n");
-    Resource v2 = r;
-    int index = OverCLI::ClientSideResource::fromResource(std::move(v2));
-    cli_write(fd, CLIENT_RESOURCE);
-    cli_write(fd, index);
-    return;
-  }
-
-  FTRACE(5, "Raw Resource sent over the wire - this is unlikely to work!\n");
-  send_over_wire(fd, Variant(r), false);
-}
-void receive_over_wire(int fd, int& v) {
-  Variant m;
-  receive_over_wire(fd, m);
-  v = m.toInt32();
-}
-void receive_over_wire(int fd, double& d) {
-  Variant m;
-  receive_over_wire(fd, m);
-  d = m.toDouble();
-}
-void receive_over_wire(int fd, int64_t& v) {
-  Variant m;
-  receive_over_wire(fd, m);
-  v = m.toInt64();
-}
-void receive_over_wire(int fd, bool& v) {
-  Variant m;
-  receive_over_wire(fd, m);
-  v = m.toBoolean();
-}
-void receive_over_wire(int fd, String& s) {
-  Variant m;
-  receive_over_wire(fd, m);
-  s = m.toString();
-}
-void receive_over_wire(int fd, VRefParam& vrp) {
-  Variant m;
-  receive_over_wire(fd, m);
-  vrp.assignIfRef(m);
-}
-void receive_over_wire(int fd, Array& a) {
-  Variant va;
-  receive_over_wire(fd, va);
-  a = va.toArray();
-}
-void send_over_wire(int fd, const int v) {
-  Variant m(v);
-  send_over_wire(fd, m);
-}
-void send_over_wire(int fd, const double d) {
-  Variant m(d);
-  send_over_wire(fd, m);
-}
-void send_over_wire(int fd, const int64_t v) {
-  Variant m(v);
-  send_over_wire(fd, m);
-}
-void send_over_wire(int fd, const bool v) {
-  Variant m(v);
-  send_over_wire(fd, m);
-}
-void send_over_wire(int fd, const String& s) {
-  Variant m(s);
-  send_over_wire(fd, m);
-}
-void send_over_wire(int fd, VRefParam& vrp) {
-  send_over_wire(fd, (Variant&)vrp);
-}
-void send_over_wire(int fd, const Array& a)
-{
-  Variant va(a);
-  send_over_wire(fd, va);
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 

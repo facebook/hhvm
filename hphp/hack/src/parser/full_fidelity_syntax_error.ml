@@ -330,8 +330,8 @@ let reassign_this =
   "Cannot re-assign $this"
 let strict_types_first_statement =
   "strict_types declaration must be the very first statement in the script"
-let async_magic_method =
-  "cannot declare constructors, destructors, and magic methods such as as async"
+let async_magic_method ~name =
+  "cannot declare constructors, destructors, and magic methods such as '"^ name ^ "' async"
 
 let reserved_keyword_as_class_name =
   "You may not use a reserved keyword for a class name"

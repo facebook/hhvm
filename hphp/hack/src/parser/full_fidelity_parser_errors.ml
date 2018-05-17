@@ -1200,7 +1200,7 @@ let methodish_errors env node parents errors =
       (SyntaxError.class_destructor_cannot_be_static class_name method_name) modifiers in
     let errors =
       produce_error_for_header errors async_magic_method header_node [node]
-      SyntaxError.async_magic_method modifiers in
+      (SyntaxError.async_magic_method ~name:method_name) modifiers in
     let errors =
       produce_error_for_header errors
       (clone_destruct_takes_no_arguments method_name) header_node [node]

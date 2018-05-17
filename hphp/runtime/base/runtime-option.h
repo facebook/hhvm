@@ -816,6 +816,9 @@ struct RuntimeOption {
   F(bool, HackArrCompatDVCmpNotices, false)                             \
   F(bool, HackArrCompatSerializeNotices, false)                         \
   F(bool, HackArrDVArrs, false)                                         \
+  /* Warn if is expression are used with type aliases that cannot be    |
+   * resolved */                                                        \
+  F(bool, IsExprEnableUnresolvedWarning, false)                         \
   /* Switches on miscellaneous junk. */                                 \
   F(bool, NoticeOnCreateDynamicProp, false)                             \
   F(bool, CreateInOutWrapperFunctions, true)                            \

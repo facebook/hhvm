@@ -2627,7 +2627,7 @@ OPTBLD_INLINE void iopInstanceOfD(Id id) {
 
 namespace {
 
-Array resolveAndVerifyTypeStructureHelper(const Array& ts) {
+Array resolveAndVerifyTypeStructureHelper(const Array& ts, bool suppress) {
   Class* declaringCls = nullptr;
   Class* calledCls = nullptr;
   if (typeStructureCouldBeNonStatic(ts)) {
@@ -2639,7 +2639,7 @@ Array resolveAndVerifyTypeStructureHelper(const Array& ts) {
         : frame->getThis()->getVMClass();
     }
   }
-  return resolveAndVerifyTypeStructure(ts, declaringCls, calledCls);
+  return resolveAndVerifyTypeStructure(ts, declaringCls, calledCls, suppress);
 }
 
 } // namespace
@@ -2647,7 +2647,7 @@ Array resolveAndVerifyTypeStructureHelper(const Array& ts) {
 OPTBLD_INLINE void iopIsTypeStruct(const ArrayData* a) {
   auto c1 = vmStack().topC();
   assertx(c1 != nullptr);
-  auto resolved = resolveAndVerifyTypeStructureHelper(ArrNR(a));
+  auto resolved = resolveAndVerifyTypeStructureHelper(ArrNR(a), true);
   auto b = checkTypeStructureMatchesCell(resolved, *c1);
   vmStack().replaceC<KindOfBoolean>(b);
 }
@@ -2656,7 +2656,7 @@ OPTBLD_INLINE void iopAsTypeStruct(const ArrayData* a) {
   auto c1 = vmStack().topC();
   assertx(c1 != nullptr);
   std::string givenType, expectedType, errorKey;
-  auto resolved = resolveAndVerifyTypeStructureHelper(ArrNR(a));
+  auto resolved = resolveAndVerifyTypeStructureHelper(ArrNR(a), false);
   if (!checkTypeStructureMatchesCell(
         resolved, *c1, givenType, expectedType, errorKey)) {
     throwTypeStructureDoesNotMatchCellException(

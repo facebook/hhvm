@@ -36,6 +36,7 @@ const StaticString s_fields("fields");
 const StaticString s_kind("kind");
 const StaticString s_nullable("nullable");
 const StaticString s_optional_shape_field("optional_shape_field");
+const StaticString s_unresolved("[unresolved]");
 
 bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
   assertx(tv->m_type != KindOfRef);
@@ -448,7 +449,8 @@ bool typeStructureCouldBeNonStatic(const Array& ts) {
 Array resolveAndVerifyTypeStructure(
   const Array& ts,
   const Class* declaringCls,
-  const Class* calledCls
+  const Class* calledCls,
+  bool suppress
 ) {
   assertx(!ts.empty());
   assertx(ts.isDictOrDArray());
@@ -458,7 +460,15 @@ Array resolveAndVerifyTypeStructure(
     resolved = TypeStructure::resolve(ts, calledCls, declaringCls, persistent);
   } catch (Exception& e) {
     // Catch and throw again so we get a line number
-    raise_error(e.getMessage());
+    auto const errMsg = e.getMessage();
+    if (!suppress) raise_error(errMsg);
+    if (RuntimeOption::EvalIsExprEnableUnresolvedWarning) raise_warning(errMsg);
+    // Lets just return an unresolved array instead
+    resolved = Array::CreateDArray();
+    resolved.add(s_kind,
+                 Variant(static_cast<uint8_t>(
+                         TypeStructure::Kind::T_unresolved)));
+    resolved.add(s_classname, Variant(s_unresolved));
   }
   assertx(!resolved.empty());
   assertx(resolved.isDictOrDArray());

@@ -136,21 +136,23 @@ struct ClassData : IRExtraData {
 };
 
 /*
- * Class pointer.
+ * Class pointer and suppress flag needed for resolve type struct instruction
  *
- * Could be null.
+ * Class pointer could be null.
  */
-struct OptClassData : IRExtraData {
-  explicit OptClassData(const Class* cls)
-    : cls(cls)
+struct ResolveTypeStructData : IRExtraData {
+  explicit ResolveTypeStructData(const Class* cls, bool suppress = false)
+    : cls(cls), suppress(suppress)
   {}
 
   std::string show() const {
-    return cls ? folly::to<std::string>(cls->name()->data()) : "nullptr";
+    return folly::sformat("{}{}",
+                          cls ? cls->name()->data() : "nullptr",
+                          suppress ? ":suppress" : "");
   }
 
-  bool equals(const OptClassData& o) const {
-    return cls == o.cls;
+  bool equals(const ResolveTypeStructData& o) const {
+    return cls == o.cls && suppress == o.suppress;
   }
 
   size_t hash() const {
@@ -158,6 +160,7 @@ struct OptClassData : IRExtraData {
   }
 
   const Class* cls;
+  bool suppress;
 };
 
 /*
@@ -1459,7 +1462,7 @@ X(InitSProps,                   ClassData);
 X(NewInstanceRaw,               ClassData);
 X(InitObjProps,                 ClassData);
 X(InstanceOfIfaceVtable,        ClassData);
-X(ResolveTypeStruct,            OptClassData);
+X(ResolveTypeStruct,            ResolveTypeStructData);
 X(ExtendsClass,                 ExtendsClassData);
 X(SpillFrame,                   ActRecInfo);
 X(CheckStk,                     IRSPRelOffsetData);

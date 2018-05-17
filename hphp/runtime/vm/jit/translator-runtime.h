@@ -208,7 +208,8 @@ bool methodExistsHelper(Class*, StringData*);
 ArrayData* resolveTypeStructHelper(
   const ArrayData*,
   const Class* declaringCls,
-  const Class* calledCls
+  const Class* calledCls,
+  bool suppress
 );
 bool isTypeStructHelper(ArrayData*, Cell);
 void asTypeStructHelper(ArrayData*, Cell);

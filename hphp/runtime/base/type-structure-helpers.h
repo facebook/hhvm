@@ -37,7 +37,11 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne);
  * Resolves the given Array as a type structure.
  *
  * Raises an error if the type structure contains a trait, typevar or a function
- * type. May throw if the type structure cannot be resolved.
+ * type.
+ * If suppress is not set, will raise an error if the type structure cannot be
+ * resolved.
+ * Otherwise, if suppress and RuntimeOption::EvalIsExprEnableUnresolvedWarning
+ * are set, will raise a warning instead.
  *
  * Because the type structure might contain unresolved nested structures, we
  * must manually supply the called class and the declaring class so that `this`,
@@ -47,7 +51,8 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne);
 Array resolveAndVerifyTypeStructure(
   const Array& ts,
   const Class* declaringCls,
-  const Class* calledCls
+  const Class* calledCls,
+  bool suppress
 );
 
 /**

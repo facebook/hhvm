@@ -971,10 +971,12 @@ bool methodExistsHelper(Class* cls, StringData* meth) {
 ArrayData* resolveTypeStructHelper(
   const ArrayData* a,
   const Class* declaringCls,
-  const Class* calledCls
+  const Class* calledCls,
+  bool suppress
 ) {
   auto const ts = ArrNR(a);
-  auto resolved = resolveAndVerifyTypeStructure(ts, declaringCls, calledCls);
+  auto resolved =
+    resolveAndVerifyTypeStructure(ts, declaringCls, calledCls, suppress);
   return resolved.detach();
 }
 

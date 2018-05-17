@@ -708,7 +708,7 @@ void emitInstanceOf(IRGS& env) {
 
 namespace {
 
-SSATmp* resolveTypeStructImpl(IRGS& env, const ArrayData* ts) {
+SSATmp* resolveTypeStructImpl(IRGS& env, const ArrayData* ts, bool suppress) {
   // TODO(T28423611): If we know that the type structure cannot contain `this`
   // references, we should be able to resolve the type structure at compile time
   // and elide this instruction altogether.
@@ -720,7 +720,7 @@ SSATmp* resolveTypeStructImpl(IRGS& env, const ArrayData* ts) {
   return gen(
     env,
     ResolveTypeStruct,
-    OptClassData(declaringCls),
+    ResolveTypeStructData(declaringCls, suppress),
     cns(env, ts),
     calledCls
   );
@@ -832,7 +832,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
 
 void emitIsTypeStruct(IRGS& env, const ArrayData* a) {
   if (emitIsTypeStructWithoutResolvingIfPossible(env, a)) return;
-  auto const tc = resolveTypeStructImpl(env, a);
+  auto const tc = resolveTypeStructImpl(env, a, true);
   auto const c = popC(env);
   push(env, gen(env, IsTypeStruct, tc, c));
   decRef(env, c);
@@ -848,7 +848,7 @@ void emitAsTypeStruct(IRGS& env, const ArrayData* a) {
   // TODO(T28423611): Use something like
   // emitIsTypeStructWithoutResolvingIfPossible to elide instructions
   auto const c = topC(env);
-  auto const tc = resolveTypeStructImpl(env, a);
+  auto const tc = resolveTypeStructImpl(env, a, false);
   ifThen(
     env,
     [&](Block* taken) {

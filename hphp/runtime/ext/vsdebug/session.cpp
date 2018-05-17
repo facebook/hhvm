@@ -31,8 +31,7 @@ DebuggerSession::DebuggerSession(Debugger* debugger) :
   m_debugger(debugger),
   m_breakpointMgr(new BreakpointManager(debugger)),
   m_dummyThread(this, &DebuggerSession::runDummy),
-  m_dummyStartupDoc(""),
-  m_sourceRootInfo(nullptr) {
+  m_dummyStartupDoc("") {
 
   assertx(m_debugger != nullptr);
 }
@@ -43,11 +42,6 @@ DebuggerSession::~DebuggerSession() {
 
   if (m_breakpointMgr != nullptr) {
     delete m_breakpointMgr;
-  }
-
-  if (m_sourceRootInfo != nullptr) {
-    delete m_sourceRootInfo;
-    m_sourceRootInfo = nullptr;
   }
 
   if (m_dummyRequestInfo != nullptr) {
@@ -61,16 +55,12 @@ void DebuggerSession::startDummyRequest(
   const std::string& sandboxName,
   bool displayStartupMsg
 ) {
-
-  assertx(m_sourceRootInfo == nullptr);
-  if (!sandboxUser.empty()) {
-    m_sourceRootInfo = new SourceRootInfo(sandboxUser, sandboxName);
-  }
-
+  m_sandboxUser = sandboxUser;
+  m_sandboxName = sandboxName;
   m_dummyStartupDoc = File::TranslatePath(startupDoc).data();
   m_displayStartupMsg = displayStartupMsg;
 
-  // Flush dirty writes to m_sourceRootInfo and m_dummyStartupDoc.
+  // Flush dirty writes to m_sandboxUser and m_dummyStartupDoc.
   std::atomic_thread_fence(std::memory_order_release);
 
   m_dummyThread.start();
@@ -221,7 +211,6 @@ void DebuggerSession::runDummy() {
 
   // Remove the artificial memory limit for this request since there is a
   // debugger attached to it.
-  IniSetting::SetUser(s_memory_limit, std::numeric_limits<int64_t>::max());
   m_dummyRequestInfo->m_flags.memoryLimitRemoved = true;
 
   std::atomic_thread_fence(std::memory_order_acquire);
@@ -233,17 +222,18 @@ void DebuggerSession::runDummy() {
   g_context->obSetImplicitFlush(true);
 
   // Setup sandbox variables for dummy request context.
-  if (m_sourceRootInfo != nullptr) {
+  if (!m_sandboxUser.empty()) {
+    SourceRootInfo sourceRootInfo(m_sandboxUser, m_sandboxName);
     auto server = php_global_exchange(s__SERVER, init_null());
     forceToArray(server);
     Array arr = server.toArrRef();
     server.unset();
     php_global_set(
       s__SERVER,
-      m_sourceRootInfo->setServerVariables(std::move(arr))
+      sourceRootInfo.setServerVariables(std::move(arr))
     );
 
-    g_context->setSandboxId(m_sourceRootInfo->getSandboxInfo().id());
+    g_context->setSandboxId(sourceRootInfo.getSandboxInfo().id());
   }
 
   if (!m_dummyStartupDoc.empty()) {

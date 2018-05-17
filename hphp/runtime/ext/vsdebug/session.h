@@ -131,7 +131,8 @@ private:
   // the target is paused. Items in this cache are global, not per-request.
   std::unordered_map<int, folly::dynamic> m_globalVariableCache;
 
-  SourceRootInfo* m_sourceRootInfo;
+  std::string m_sandboxUser;
+  std::string m_sandboxName;
 };
 
 }

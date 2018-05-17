@@ -138,8 +138,8 @@ type env = {
     (* Not every caller of rechecks expects that they can be interrupted,
      * so making it opt-in by setting this flag at call site *)
     can_interrupt : bool;
-    interrupt_handlers:
-      env -> (Unix.file_descr * env MultiThreadedCall.interrupt_handler) list;
+    interrupt_handlers: genv -> env ->
+      (Unix.file_descr * env MultiThreadedCall.interrupt_handler) list;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;
     recent_recheck_loop_stats : recheck_loop_stats;

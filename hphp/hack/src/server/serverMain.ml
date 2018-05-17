@@ -11,6 +11,7 @@ open Hh_core
 open ServerEnv
 open Reordered_argument_collections
 open String_utils
+open Option.Monad_infix
 
 (*****************************************************************************)
 (* Main initialization *)
@@ -421,6 +422,19 @@ let serve_one_iteration genv env client_provider =
       Hh_logger.log "Handling client failed. Ignoring.";
       env
   end in
+  let has_persistent_connection_request =
+    (* has_persistent_connection_request means that at the beginning of this
+     * iteration of main loop there was a request to read and handle.
+     * We'll now try to do it, but it's possible that we have ran a recheck
+     * in-between  those two events, and if this recheck was non-blocking, we
+     * might have already handled this command there. Proceeding to
+     * handle_connection would then block reading a request that is not there
+     * anymore, so we need to check and update has_persistent_connection_request
+     * again. *)
+    Option.value_map env.persistent_client
+      ~f:ClientProvider.has_persistent_connection_request
+      ~default:false
+  in
   if has_persistent_connection_request then
     let client = Utils.unsafe_opt env.persistent_client in
     (* client here is the existing persistent client *)
@@ -477,8 +491,20 @@ let priority_client_interrupt_handler genv client_provider env  =
   in
   env, MultiThreadedCall.Continue
 
-let setup_interrupts genv env client_provider = { env with
-  interrupt_handlers = fun env ->
+let persistent_client_interrupt_handler genv env =
+  match env.persistent_client with
+  (* Several handlers can become ready simultaneously and one of them can remove
+   * the persistent client before we get to it. *)
+  | None -> env, MultiThreadedCall.Continue
+  | Some client -> match handle_connection genv env client true with
+    | ServerUtils.Needs_full_recheck _ ->
+      failwith "unexpected command needing full recheck from persistent client"
+    | ServerUtils.Needs_writes _ ->
+      failwith "unexpected command needing writes from persistent client"
+    | ServerUtils.Done env -> env, MultiThreadedCall.Continue
+
+let setup_interrupts env client_provider = { env with
+  interrupt_handlers = fun genv env ->
     let {ServerLocalConfig.interrupt_on_watchman; interrupt_on_client; _ }
       = genv.local_config in
     let interrupt_on_watchman = interrupt_on_watchman && env.can_interrupt in
@@ -493,6 +519,12 @@ let setup_interrupts genv env client_provider = { env with
         (fd, priority_client_interrupt_handler genv client_provider)::handlers
       | _ -> handlers
     in
+    let handlers =
+        match env.persistent_client >>= ClientProvider.get_client_fd with
+      | Some fd when interrupt_on_client ->
+        (fd, persistent_client_interrupt_handler genv)::handlers
+      | _ -> handlers
+    in
     handlers
 }
 
@@ -500,7 +532,7 @@ let serve genv env in_fds =
   let client_provider = ClientProvider.provider_from_file_descriptors in_fds in
   (* This is needed when typecheck_after_init option is disabled. *)
   if not env.init_env.needs_full_init then finalize_init genv env.init_env;
-  let env = setup_interrupts genv env client_provider in
+  let env = setup_interrupts env client_provider in
   let env = ref env in
   while true do
     let new_env = serve_one_iteration genv !env client_provider in

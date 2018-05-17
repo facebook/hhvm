@@ -30,9 +30,6 @@ class LspCommandProcessor:
             writer = JsonRpcStreamWriter(proc.stdin)
             yield cls(proc, reader, writer)
         finally:
-            # TODO: temporary until we can handle shutdown command in
-            # non blocking manner
-            proc.terminate()
             proc.stdin.close()
             proc.stdout.close()
             proc.stderr.close()

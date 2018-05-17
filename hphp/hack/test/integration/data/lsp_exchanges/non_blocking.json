@@ -9,5 +9,19 @@
       "rootPath": "${root_path}",
       "capabilities": {}
     }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "textDocument/definition",
+    "id": 2,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 7,
+        "character": 11
+      }
+    }
   }
 ]

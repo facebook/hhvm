@@ -43,5 +43,24 @@
         "rageProvider": true
       }
     }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": [
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 2,
+            "character": 9
+          },
+          "end": {
+            "line": 2,
+            "character": 32
+          }
+        }
+      }
+    ]
   }
 ]

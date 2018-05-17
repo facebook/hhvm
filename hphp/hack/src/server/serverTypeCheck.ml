@@ -340,8 +340,8 @@ let union_set_and_map_keys set map =
     ~init:set
     ~f:(fun k _ acc  -> Relative_path.Set.add acc k)
 
-let get_interrupt_config env =
-  MultiThreadedCall.{handlers = env.interrupt_handlers ; env;}
+let get_interrupt_config genv env =
+  MultiThreadedCall.{handlers = env.interrupt_handlers genv ; env;}
 
 (*****************************************************************************)
 (* Where the action is! *)
@@ -765,7 +765,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let dynamic_view_files = if ServerDynamicView.dynamic_view_on ()
     then env.editor_open_files
     else Relative_path.Set.empty in
-    let interrupt = get_interrupt_config env in
+    let interrupt = get_interrupt_config genv env in
     let errorl', env , cancelled = Typing_check_service.go_with_interrupt
       genv.workers env.tcopt dynamic_view_files fast ~interrupt in
     let errorl' = match ServerArgs.ai_mode genv.options with

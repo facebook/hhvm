@@ -1,2 +1,2 @@
-string(42) "Expected HH\int at ["h\\'\"i"], got string"
-string(43) "Expected HH\string at ["w\\'o\\w"], got int"
+string(39) "Expected int at ["h\\'\"i"], got string"
+string(40) "Expected string at ["w\\'o\\w"], got int"

@@ -66,28 +66,29 @@ const StaticString
 ;
 
 const std::string
-  s_void("HH\\void"),
-  s_int("HH\\int"),
-  s_bool("HH\\bool"),
-  s_float("HH\\float"),
-  s_string("HH\\string"),
-  s_resource("HH\\resource"),
-  s_num("HH\\num"),
-  s_arraykey("HH\\arraykey"),
-  s_noreturn("HH\\noreturn"),
-  s_mixed("HH\\mixed"),
-  s_nonnull("HH\\nonnull"),
+  s_void("void"),
+  s_int("int"),
+  s_bool("bool"),
+  s_float("float"),
+  s_string("string"),
+  s_resource("resource"),
+  s_num("num"),
+  s_arraykey("arraykey"),
+  s_noreturn("noreturn"),
+  s_mixed("mixed"),
+  s_nonnull("nonnull"),
   s_array("array"),
-  s_shape("HH\\shape"),
-  s_dict("HH\\dict"),
-  s_vec("HH\\vec"),
-  s_keyset("HH\\keyset"),
-  s_vec_or_dict("HH\\vec_or_dict")
+  s_shape("shape"),
+  s_hh_vec("HH\\vec"),
+  s_hh_dict("HH\\dict"),
+  s_hh_keyset("HH\\keyset"),
+  s_hh_vec_or_dict("HH\\vec_or_dict"),
+  s_hh("HH\\")
 ;
 
-std::string fullName(const Array& arr);
+std::string fullName(const Array& arr, bool forDisplay);
 
-void functionTypeName(const Array& arr, std::string& name) {
+void functionTypeName(const Array& arr, std::string& name, bool forDisplay) {
   name += "(function (";
 
   assertx(arr.exists(s_return_type));
@@ -100,12 +101,12 @@ void functionTypeName(const Array& arr, std::string& name) {
   auto const sz = params.size();
   for (auto i = 0; i < sz; i++) {
     auto const param = params[i].toCArrRef();
-    folly::toAppend(sep, fullName(param), &name);
+    folly::toAppend(sep, fullName(param, forDisplay), &name);
     sep = ", ";
   }
 
   // add funciton return type
-  folly::toAppend("): ", fullName(retType), ")", &name);
+  folly::toAppend("): ", fullName(retType, forDisplay), ")", &name);
 }
 
 void accessTypeName(const Array& arr, std::string& name) {
@@ -139,7 +140,7 @@ void xhpTypeName(const Array& arr, std::string& name) {
   replaceAll(name, "_", "-");
 }
 
-void tupleTypeName(const Array& arr, std::string& name) {
+void tupleTypeName(const Array& arr, std::string& name, bool forDisplay) {
   name += "(";
   assertx(arr.exists(s_elem_types));
   auto const elems = arr[s_elem_types].toCArrRef();
@@ -147,14 +148,14 @@ void tupleTypeName(const Array& arr, std::string& name) {
   auto sep = "";
   for (auto i = 0; i < sz; i++) {
     auto const elem = elems[i].toCArrRef();
-    folly::toAppend(sep, fullName(elem), &name);
+    folly::toAppend(sep, fullName(elem, forDisplay), &name);
     sep = ", ";
   }
 
   name += ")";
 }
 
-void genericTypeName(const Array& arr, std::string& name) {
+void genericTypeName(const Array& arr, std::string& name, bool forDisplay) {
   name += "<";
   assertx(arr.exists(s_generic_types));
   auto const args = arr[s_generic_types].toCArrRef();
@@ -162,13 +163,13 @@ void genericTypeName(const Array& arr, std::string& name) {
   auto sep = "";
   for (auto i = 0; i < sz; i++) {
     auto const arg = args[i].toCArrRef();
-    folly::toAppend(sep, fullName(arg), &name);
+    folly::toAppend(sep, fullName(arg, forDisplay), &name);
     sep = ", ";
   }
   name += ">";
 }
 
-void shapeTypeName(const Array& arr, std::string& name) {
+void shapeTypeName(const Array& arr, std::string& name, bool forDisplay) {
   // works for both resolved and unresolved TypeStructures
   name += "(";
   assertx(arr.exists(s_fields));
@@ -195,7 +196,11 @@ void shapeTypeName(const Array& arr, std::string& name) {
       folly::toAppend(field.toInt64Val(), &name);
     }
 
-    folly::toAppend("=>", fullName(value), &name);
+    folly::toAppend(
+      forDisplay ? " => " : "=>",
+      fullName(value, forDisplay),
+      &name
+    );
     sep = ", ";
   }
 
@@ -206,7 +211,7 @@ void shapeTypeName(const Array& arr, std::string& name) {
   name += ")";
 }
 
-std::string fullName(const Array& arr) {
+std::string fullName(const Array& arr, bool forDisplay) {
   std::string name;
   if (arr.exists(s_nullable)) {
     assertx(arr[s_nullable].toBoolean());
@@ -219,76 +224,76 @@ std::string fullName(const Array& arr) {
     TypeStructure::Kind(arr[s_kind].toInt64Val());
   switch (kind) {
     case TypeStructure::Kind::T_void:
-      name += s_void;
+      name += forDisplay ? s_void : s_hh + s_void;
       break;
     case TypeStructure::Kind::T_int:
-      name += s_int;
+      name += forDisplay ? s_int : s_hh + s_int;
       break;
     case TypeStructure::Kind::T_bool:
-      name += s_bool;
+      name += forDisplay ? s_bool : s_hh + s_bool;
       break;
     case TypeStructure::Kind::T_float:
-      name += s_float;
+      name += forDisplay ? s_float : s_hh + s_float;
       break;
     case TypeStructure::Kind::T_string:
-      name += s_string;
+      name += forDisplay ? s_string : s_hh + s_string;
       break;
     case TypeStructure::Kind::T_resource:
-      name += s_resource;
+      name += forDisplay ? s_resource : s_hh + s_resource;
       break;
     case TypeStructure::Kind::T_num:
-      name += s_num;
+      name += forDisplay ? s_num : s_hh + s_num;
       break;
     case TypeStructure::Kind::T_arraykey:
-      name += s_arraykey;
+      name += forDisplay ? s_arraykey : s_hh + s_arraykey;
       break;
     case TypeStructure::Kind::T_noreturn:
-      name += s_noreturn;
+      name += forDisplay ? s_noreturn : s_hh + s_noreturn;
       break;
     case TypeStructure::Kind::T_mixed:
-      name += s_mixed;
+      name += forDisplay ? s_mixed : s_hh + s_mixed;
       break;
     case TypeStructure::Kind::T_nonnull:
-      name += s_nonnull;
+      name += forDisplay ? s_nonnull : s_hh + s_nonnull;
       break;
     case TypeStructure::Kind::T_tuple:
-      tupleTypeName(arr, name);
+      tupleTypeName(arr, name, forDisplay);
       break;
     case TypeStructure::Kind::T_fun:
-      functionTypeName(arr, name);
+      functionTypeName(arr, name, forDisplay);
       break;
     case TypeStructure::Kind::T_array:
       name += s_array;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name);
+        genericTypeName(arr, name, forDisplay);
       }
       break;
     case TypeStructure::Kind::T_shape:
-      name += s_shape;
-      shapeTypeName(arr, name);
+      name += forDisplay ? s_shape : s_hh + s_shape;
+      shapeTypeName(arr, name, forDisplay);
       break;
     case TypeStructure::Kind::T_dict:
-      name += s_dict;
+      name += s_hh_dict;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name);
+        genericTypeName(arr, name, forDisplay);
       }
       break;
     case TypeStructure::Kind::T_vec:
-      name += s_vec;
+      name += s_hh_vec;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name);
+        genericTypeName(arr, name, forDisplay);
       }
       break;
     case TypeStructure::Kind::T_keyset:
-      name += s_keyset;
+      name += s_hh_keyset;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name);
+        genericTypeName(arr, name, forDisplay);
       }
       break;
     case TypeStructure::Kind::T_vec_or_dict:
-      name += s_vec_or_dict;
+      name += s_hh_vec_or_dict;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name);
+        genericTypeName(arr, name, forDisplay);
       }
       break;
     case TypeStructure::Kind::T_typevar:
@@ -308,7 +313,7 @@ std::string fullName(const Array& arr) {
     case TypeStructure::Kind::T_unresolved:
       assertx(arr.exists(s_classname));
       name += arr[s_classname].toCStrRef().toCppString();
-      if (arr.exists(s_generic_types)) genericTypeName(arr, name);
+      if (arr.exists(s_generic_types)) genericTypeName(arr, name, forDisplay);
       break;
   }
 
@@ -698,7 +703,13 @@ Array resolveTS(const Array& arr,
 String TypeStructure::toString(const Array& arr) {
   if (arr.empty()) return String();
 
-  return String(fullName(arr));
+  return String(fullName(arr, false));
+}
+
+String TypeStructure::toStringForDisplay(const Array& arr) {
+  if (arr.empty()) return String();
+
+  return String(fullName(arr, true));
 }
 
 /*

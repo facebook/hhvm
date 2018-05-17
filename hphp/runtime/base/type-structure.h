@@ -69,6 +69,7 @@ enum class Kind : uint8_t {
 };
 
 String toString(const Array& arr);
+String toStringForDisplay(const Array& arr);
 
 Array resolve(const Class::Const& typeCns,
               const Class* typeCnsCls,

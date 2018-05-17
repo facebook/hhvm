@@ -319,7 +319,7 @@ bool checkTypeStructureMatchesCellImpl(
   if (genErrorMessage && !result) {
     if (givenType.empty()) givenType = describe_actual_type(&c1, true);
     if (expectedType.empty()) {
-      expectedType = TypeStructure::toString(ts).toCppString();
+      expectedType = TypeStructure::toStringForDisplay(ts).toCppString();
     }
   }
   return result;

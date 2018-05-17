@@ -83,6 +83,7 @@ void DebuggerSession::invokeDummyStartupDocument() {
   // the rest of the debugger is not prepared to deal with a bp yet and the
   // dummy thread would get stuck.
   m_dummyRequestInfo->m_flags.doNotBreak = true;
+  std::atomic_thread_fence(std::memory_order_release);
 
   bool ret = hphp_invoke(g_context.getCheck(),
                          m_dummyStartupDoc,
@@ -134,6 +135,7 @@ void DebuggerSession::invokeDummyStartupDocument() {
   }
 
   m_dummyRequestInfo->m_flags.doNotBreak = false;
+  std::atomic_thread_fence(std::memory_order_release);
 
   folly::dynamic event = folly::dynamic::object;
   m_debugger->sendEventMessage(event, "readyForEvaluations", true);
@@ -194,6 +196,8 @@ void DebuggerSession::runDummy() {
       m_dummyRequestInfo->m_flags.hookAttached = false;
     }
 
+    std::atomic_thread_fence(std::memory_order_release);
+
     hphp_context_exit();
     hphp_session_exit();
   };
@@ -213,7 +217,7 @@ void DebuggerSession::runDummy() {
   // debugger attached to it.
   m_dummyRequestInfo->m_flags.memoryLimitRemoved = true;
 
-  std::atomic_thread_fence(std::memory_order_acquire);
+  std::atomic_thread_fence(std::memory_order_release);
 
   // Redirect the dummy's stdout and stderr and enable implicit flushing
   // so output is sent to the client right away, instead of being buffered.

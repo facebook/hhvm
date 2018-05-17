@@ -155,6 +155,7 @@ void Debugger::setClientConnected(bool connected) {
             assertx(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
             assertx(ri->m_breakpointInfo->m_unresolvedBreakpoints.empty());
           }
+          updateUnresolvedBpFlag(ri);
         },
         true /* includeDummyRequest */
       );
@@ -213,6 +214,7 @@ request_id_t Debugger::getCurrentThreadId() {
 }
 
 void Debugger::cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri) {
+  std::atomic_thread_fence(std::memory_order_acquire);
   if (ri->m_flags.hookAttached && ti != nullptr) {
     DebuggerHook::detach(ti);
   }
@@ -678,6 +680,7 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
     }
   }
 
+  updateUnresolvedBpFlag(requestInfo);
   return requestInfo;
 }
 
@@ -1191,6 +1194,7 @@ void Debugger::onBreakpointAdded(int bpId) {
       }
 
       ri->m_breakpointInfo->m_pendingBreakpoints.emplace(bpId);
+      updateUnresolvedBpFlag(ri);
 
       // If the program is running, the request thread will pick up and install
       // the breakpoint the next time it calls into the opcode hook, except for
@@ -1233,73 +1237,80 @@ void Debugger::tryInstallBreakpoints(RequestInfo* ri) {
   // and install them, or mark them as unresolved.
   BreakpointManager* bpMgr = m_session->getBreakpointManager();
   auto& pendingBps = ri->m_breakpointInfo->m_pendingBreakpoints;
+
   for (auto it = pendingBps.begin(); it != pendingBps.end();) {
     const int breakpointId = *it;
     const Breakpoint* bp = bpMgr->getBreakpointById(breakpointId);
 
+    // Remove the breakpoint from "pending". After this point, it will
+    // either be resolved, or unresolved, and no longer pending install.
+    it = pendingBps.erase(it);
+
     // It's ok if bp was not found. The client could have removed the
     // breakpoint before this request got a chance to install it.
-    if (bp != nullptr) {
-      bool resolved = tryResolveBreakpoint(ri, breakpointId, bp);
-
-      if (!resolved) {
-        if (!RuntimeOption::RepoAuthoritative) {
-          // It's possible this compilation unit just isn't loaded yet. Try
-          // to force a pre-load and compile of the unit and place the bp.
-          HPHP::String unitPath(bp->m_path.c_str());
-          const auto compilationUnit = lookupUnit(unitPath.get(), "", nullptr);
-
-          if (compilationUnit != nullptr) {
-            ri->m_breakpointInfo->m_loadedUnits[bp->m_path] = compilationUnit;
-            resolved = tryResolveBreakpoint(ri, breakpointId, bp);
-          }
-
-          // In debugger clients that support multiple languages like Nuclide,
-          // users tend to leave breakpoints set in files that are for other
-          // debuggers. It's annoying to see warnings in those cases. Assume
-          // any file path that doesn't end in PHP is ok not to tell the user
-          // that the breakpoint failed to set.
-          const bool phpFile =
-            bp->m_path.size() >= 4 &&
-            std::equal(
-              bp->m_path.rbegin(),
-              bp->m_path.rend(),
-              std::string(".php").rbegin()
-            );
-
-          if (phpFile && !resolved) {
-            std::string resolveMsg = "Warning: request ";
-            resolveMsg += std::to_string(getCurrentThreadId());
-            resolveMsg += " could not resolve breakpoint #";
-            resolveMsg += std::to_string(breakpointId);
-            resolveMsg += ". The Hack/PHP file at ";
-            resolveMsg += bp->m_path;
-
-            if (compilationUnit == nullptr) {
-              resolveMsg += " could not be loaded, or failed to compile.";
-            } else {
-              resolveMsg += " was loaded, but the breakpoint did not resolve "
-                "to any executable instruction.";
-            }
-
-            sendUserMessage(
-              resolveMsg.c_str(),
-              DebugTransport::OutputLevelWarning
-            );
-          }
-        }
-
-        // This breakpoint could not be resolved yet. As new compilation units
-        // are loaded, we'll try again.
-        if (!resolved) {
-          ri->m_breakpointInfo->m_unresolvedBreakpoints.emplace(breakpointId);
-        }
-      }
+    if (bp == nullptr) {
+      continue;
     }
 
-    it = pendingBps.erase(it);
+    bool resolved = tryResolveBreakpoint(ri, breakpointId, bp);
+    if (!resolved) {
+      if (!RuntimeOption::RepoAuthoritative &&
+          bp->m_type == BreakpointType::Source) {
+
+        // It's possible this compilation unit just isn't loaded yet. Try
+        // to force a pre-load and compile of the unit and place the bp.
+        HPHP::String unitPath(bp->m_path.c_str());
+        const auto compilationUnit = lookupUnit(unitPath.get(), "", nullptr);
+
+        if (compilationUnit != nullptr) {
+          ri->m_breakpointInfo->m_loadedUnits[bp->m_path] = compilationUnit;
+          resolved = tryResolveBreakpoint(ri, breakpointId, bp);
+        }
+
+        // In debugger clients that support multiple languages like Nuclide,
+        // users tend to leave breakpoints set in files that are for other
+        // debuggers. It's annoying to see warnings in those cases. Assume
+        // any file path that doesn't end in PHP is ok not to tell the user
+        // that the breakpoint failed to set.
+        const bool phpFile =
+          bp->m_path.size() >= 4 &&
+          std::equal(
+            bp->m_path.rbegin(),
+            bp->m_path.rend(),
+            std::string(".php").rbegin()
+          );
+
+        if (phpFile && !resolved) {
+          std::string resolveMsg = "Warning: request ";
+          resolveMsg += std::to_string(getCurrentThreadId());
+          resolveMsg += " could not resolve breakpoint #";
+          resolveMsg += std::to_string(breakpointId);
+          resolveMsg += ". The Hack/PHP file at ";
+          resolveMsg += bp->m_path;
+
+          if (compilationUnit == nullptr) {
+            resolveMsg += " could not be loaded, or failed to compile.";
+          } else {
+            resolveMsg += " was loaded, but the breakpoint did not resolve "
+              "to any executable instruction.";
+          }
+
+          sendUserMessage(
+            resolveMsg.c_str(),
+            DebugTransport::OutputLevelWarning
+          );
+        }
+      }
+
+      // This breakpoint could not be resolved yet. As new compilation units
+      // are loaded, we'll try again.
+      if (!resolved) {
+        ri->m_breakpointInfo->m_unresolvedBreakpoints.emplace(breakpointId);
+      }
+    }
   }
 
+  updateUnresolvedBpFlag(ri);
   assertx(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
 }
 
@@ -1308,13 +1319,36 @@ bool Debugger::tryResolveBreakpoint(
   const int bpId,
   const Breakpoint* bp
 ) {
-  // Search all compilation units loaded by this request for a matching location
-  // for this breakpoint.
-  const auto& loadedUnits = ri->m_breakpointInfo->m_loadedUnits;
-  for (auto it = loadedUnits.begin(); it != loadedUnits.end(); it++) {
-    if (tryResolveBreakpointInUnit(ri, bpId, bp, it->first, it->second)) {
-      // Found a match, and installed the breakpoint!
-      return true;
+  if (bp->m_type == BreakpointType::Source) {
+    // Search all compilation units loaded by this request for a matching
+    // location for this breakpoint.
+    const auto& loadedUnits = ri->m_breakpointInfo->m_loadedUnits;
+    for (auto it = loadedUnits.begin(); it != loadedUnits.end(); it++) {
+      if (tryResolveBreakpointInUnit(ri, bpId, bp, it->first, it->second)) {
+        // Found a match, and installed the breakpoint!
+        return true;
+      }
+    }
+  } else {
+    assert(bp->m_type == BreakpointType::Function);
+
+    const HPHP::String functionName(bp->m_function);
+    Func* func = Unit::lookupFunc(functionName.get());
+
+    if (func != nullptr) {
+      BreakpointManager* bpMgr = m_session->getBreakpointManager();
+
+      if ((func->fullName() != nullptr &&
+            bp->m_function == func->fullName()->toCppString()) ||
+           (func->name() != nullptr &&
+              bp->m_function == func->name()->toCppString())) {
+
+        // Found a matching function!
+        phpAddBreakPointFuncEntry(func);
+        bpMgr->onFuncBreakpointResolved(*const_cast<Breakpoint*>(bp), func);
+
+        return true;
+      }
     }
   }
 
@@ -1326,7 +1360,7 @@ bool Debugger::tryResolveBreakpointInUnit(const RequestInfo* /*ri*/, int bpId,
                                           const std::string& unitFilePath,
                                           const HPHP::Unit* compilationUnit) {
 
-  if (bp->m_path != unitFilePath) {
+  if (bp->m_type != BreakpointType::Source || bp->m_path != unitFilePath) {
     return false;
   }
 
@@ -1432,6 +1466,36 @@ std::pair<int, int> Debugger::calibrateBreakpointLineInUnit(
   return bestLocation;
 }
 
+void Debugger::onFunctionDefined(
+  RequestInfo* ri,
+  const HPHP::Func* func
+) {
+  Lock lock(m_lock);
+
+  if (!clientConnected()) {
+    return;
+  }
+
+  BreakpointManager* bpMgr = m_session->getBreakpointManager();
+  auto& unresolvedBps = ri->m_breakpointInfo->m_unresolvedBreakpoints;
+
+  for (auto it = unresolvedBps.begin(); it != unresolvedBps.end(); ) {
+    const int bpId = *it;
+    const Breakpoint* bp = bpMgr->getBreakpointById(bpId);
+    if (bp->m_type == BreakpointType::Function &&
+        tryResolveBreakpoint(ri, bpId, bp)) {
+
+      // Breakpoint is no longer unresolved!
+      it = unresolvedBps.erase(it);
+    } else {
+      // Still no match, move on to the next unresolved function breakpoint.
+      it++;
+    }
+  }
+
+  updateUnresolvedBpFlag(ri);
+}
+
 void Debugger::onCompilationUnitLoaded(
   RequestInfo* ri,
   const HPHP::Unit* compilationUnit
@@ -1488,6 +1552,19 @@ void Debugger::onCompilationUnitLoaded(
       it++;
     }
   }
+
+  updateUnresolvedBpFlag(ri);
+}
+
+void Debugger::onFuncBreakpointHit(
+  RequestInfo* ri,
+  const HPHP::Func* func
+) {
+  Lock lock(m_lock);
+
+  if (func != nullptr) {
+    onBreakpointHit(ri, func->unit(), func, func->line1());
+  }
 }
 
 void Debugger::onLineBreakpointHit(
@@ -1496,6 +1573,15 @@ void Debugger::onLineBreakpointHit(
   int line
 ) {
   Lock lock(m_lock);
+  onBreakpointHit(ri, compilationUnit, nullptr, line);
+}
+
+void Debugger::onBreakpointHit(
+  RequestInfo* ri,
+  const HPHP::Unit* compilationUnit,
+  const HPHP::Func* func,
+  int line
+) {
   std::string stopReason;
   int matchingBpId = -1;
   const std::string filePath = getFilePathForUnit(compilationUnit);
@@ -1507,6 +1593,17 @@ void Debugger::onLineBreakpointHit(
   BreakpointManager* bpMgr = m_session->getBreakpointManager();
   const auto fileBps = bpMgr->getBreakpointIdsByFile(filePath);
 
+  const auto removeBreakpoint =
+    [&](BreakpointType type) {
+      if (type == BreakpointType::Source) {
+        phpRemoveBreakPointLine(compilationUnit, line);
+      } else {
+        assert(type == BreakpointType::Function);
+        assert(func != nullptr);
+        phpRemoveBreakPointFuncEntry(func);
+      }
+    };
+
   for (auto it = fileBps.begin(); it != fileBps.end(); it++) {
     const int bpId = *it;
     Breakpoint* bp = bpMgr->getBreakpointById(bpId);
@@ -1515,7 +1612,13 @@ void Debugger::onLineBreakpointHit(
         bpMgr->isBreakConditionSatisified(ri, bp)) {
 
       matchingBpId = bpId;
-      stopReason = getStopReasonForBp(matchingBpId, bp->m_path, bp->m_line);
+      stopReason = getStopReasonForBp(
+        matchingBpId,
+        !bp->m_resolvedLocation.m_path.empty()
+          ? bp->m_resolvedLocation.m_path
+          : bp->m_path,
+        bp->m_line
+      );
 
       // Breakpoint hit!
       pauseTarget(ri, stopReason.c_str());
@@ -1555,7 +1658,7 @@ void Debugger::onLineBreakpointHit(
     }
 
     if (!realBp) {
-      phpRemoveBreakPointLine(compilationUnit, line);
+      removeBreakpoint(BreakpointType::Source);
     }
 
     pauseTarget(ri, stopReason.c_str());
@@ -1574,7 +1677,11 @@ void Debugger::onLineBreakpointHit(
       filePath.c_str(),
       line
     );
-    phpRemoveBreakPointLine(compilationUnit, line);
+    removeBreakpoint(
+      func != nullptr
+        ? BreakpointType::Function
+        : BreakpointType::Source
+    );
   }
 }
 
@@ -1805,6 +1912,8 @@ SilentEvaluationContext::SilentEvaluationContext(
 ) : m_ri(ri), m_suppressOutput(suppressOutput) {
   // Disable hitting breaks of any kind due to this eval.
   m_ri->m_flags.doNotBreak = true;
+  std::atomic_thread_fence(std::memory_order_release);
+
   g_context->m_dbgNoBreak = true;
 
   RequestInjectionData& rid = RID();
@@ -1828,6 +1937,8 @@ SilentEvaluationContext::SilentEvaluationContext(
 
 SilentEvaluationContext::~SilentEvaluationContext() {
   m_ri->m_flags.doNotBreak = false;
+  std::atomic_thread_fence(std::memory_order_release);
+
   g_context->m_dbgNoBreak = false;
 
   RequestInjectionData& rid = RID();

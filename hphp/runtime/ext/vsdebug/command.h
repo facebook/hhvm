@@ -109,6 +109,11 @@ struct VSCommand {
     const folly::dynamic& defaultValue
   );
 
+  static const folly::dynamic& tryGetArray(
+    const folly::dynamic& message,
+    const char* key
+  );
+
   static int64_t tryGetInt(
     const folly::dynamic& message,
     const char* key,
@@ -183,6 +188,13 @@ public:
 //////  Handles SetBreakpoints commands from the debugger client.     //////
 struct SetBreakpointsCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(SetBreakpointsCommand, CommandTarget::None, false);
+private:
+
+  void setFnBreakpoints(
+    DebuggerSession* session,
+    const folly::dynamic& args,
+    folly::dynamic& responseBps
+  );
 };
 
 struct ResolveBreakpointsCommand : public VSCommand {

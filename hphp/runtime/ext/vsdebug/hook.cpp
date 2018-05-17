@@ -53,8 +53,17 @@ void VSDebugHook::onOpcode(PC /*pc*/) {
   BreakContext breakContext(true);
 }
 
-void VSDebugHook::onFuncEntryBreak(const Func* /*func*/) {
-  // TODO: (Ericblue) NOT IMPLEMENTED
+void VSDebugHook::onFuncEntryBreak(const Func* func) {
+  BreakContext breakContext(true);
+
+  if (breakContext.m_debugger != nullptr &&
+      breakContext.m_requestInfo != nullptr) {
+
+    breakContext.m_debugger->onFuncBreakpointHit(
+      breakContext.m_requestInfo,
+      func
+    );
+  }
 }
 
 void VSDebugHook::onFuncExitBreak(const Func* /*func*/) {
@@ -195,9 +204,29 @@ void VSDebugHook::onFileLoad(Unit* efile) {
 
 void VSDebugHook::onDefClass(const Class* /*cls*/) {}
 
-void VSDebugHook::onDefFunc(const Func* /*func*/) {
-  // TODO: (Ericblue) This routine is not needed unless we add support for
-  // function entry breakpoints.
+void VSDebugHook::onDefFunc(const Func* func) {
+  BreakContext breakContext(true);
+
+  // Resolve any breakpoints that are set on entry of this function.
+  if (breakContext.m_debugger != nullptr &&
+      breakContext.m_requestInfo != nullptr) {
+
+    // Acquire semantics around reading requestInfo->m_flags lock-free.
+    std::atomic_thread_fence(std::memory_order_acquire);
+
+    if (breakContext.m_requestInfo->m_flags.unresolvedBps) {
+      breakContext.m_debugger->onFunctionDefined(
+        breakContext.m_requestInfo,
+        func
+      );
+
+      tryEnterDebugger(
+        breakContext.m_debugger,
+        breakContext.m_requestInfo,
+        true
+      );
+    }
+  }
 }
 
 void VSDebugHook::tryEnterDebugger(
@@ -205,6 +234,9 @@ void VSDebugHook::tryEnterDebugger(
   RequestInfo* requestInfo,
   bool breakNoStepOnly
 ) {
+  // Acquire semantics around reading requestInfo->m_flags lock-free.
+  std::atomic_thread_fence(std::memory_order_acquire);
+
   if (requestInfo->m_flags.terminateRequest) {
     std::string message = "Request " +
       std::to_string(debugger->getCurrentThreadId()) +
@@ -271,7 +303,9 @@ void VSDebugHook::tryEnterDebugger(
   }
 
   // Install any breakpoints that have not yet been set on this request.
-  debugger->tryInstallBreakpoints(requestInfo);
+  if (requestInfo->m_flags.unresolvedBps) {
+    debugger->tryInstallBreakpoints(requestInfo);
+  }
 }
 
 const StaticString VSDebugHook::s_memoryLimit {"memory_limit"};

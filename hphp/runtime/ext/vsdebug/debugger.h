@@ -72,15 +72,23 @@ struct StepNextFilterInfo {
 
 // Structure to represent the state of a single request.
 struct RequestInfo {
-  struct {
-    bool hookAttached;
-    bool memoryLimitRemoved;
-    bool compilationUnitsMapped;
-    bool doNotBreak;
-    bool outputHooked;
-    bool requestUrlInitialized;
-    bool terminateRequest;
-  } m_flags;
+  // Request flags are read by the debugger hook prior to acquiring
+  // the debugger lock, so we can short-circuit and avoid calling
+  // into the debugger in certain cases.
+  union {
+    struct {
+      uint32_t hookAttached : 1;
+      uint32_t memoryLimitRemoved : 1;
+      uint32_t compilationUnitsMapped : 1;
+      uint32_t doNotBreak : 1;
+      uint32_t outputHooked : 1;
+      uint32_t requestUrlInitialized : 1;
+      uint32_t terminateRequest : 1;
+      uint32_t unresolvedBps : 1;
+      uint32_t unused : 24;
+    } m_flags;
+    uint32_t m_allFlags;
+  };
   const char* m_stepReason;
   CommandQueue m_commandQueue;
   RequestBreakpointInfo* m_breakpointInfo;
@@ -283,11 +291,23 @@ struct Debugger final {
     const HPHP::Unit* compilationUnit
   );
 
-  // Called when a request thinks it has hit a breakpoint.
+  // Called when the request defines a new function.
+  void onFunctionDefined(
+    RequestInfo* ri,
+    const HPHP::Func* func
+  );
+
+  // Called when a request thinks it has hit a source breakpoint.
   void onLineBreakpointHit(
     RequestInfo* ri,
     const HPHP::Unit* compilationUnit,
     int line
+  );
+
+  // Called when a request thinks it has hit a function breakpoint.
+  void onFuncBreakpointHit(
+    RequestInfo* ri,
+    const HPHP::Func* func
   );
 
   // Called when a request hits an exception.
@@ -425,6 +445,13 @@ private:
     }
   }
 
+  void onBreakpointHit(
+    RequestInfo* ri,
+    const HPHP::Unit* compilationUnit,
+    const HPHP::Func* func,
+    int line
+  );
+
   // Reports faiure to process a message from the debugger client to the
   // front-end.
   void reportClientMessageError(
@@ -463,6 +490,17 @@ private:
     const std::string& unitFilePath,
     const HPHP::Unit* compilationUnit
   );
+
+  // Caches a flag on the request info indicating if there are any pending
+  // or unresolved breakpoints, so that the hook can skip calling into the
+  // debugger (and acquiring the debugger lock) every time a new func or
+  // compilation unit is defined if there are no unresolved breakpoints.
+  static inline void updateUnresolvedBpFlag(RequestInfo* ri) {
+    ri->m_flags.unresolvedBps =
+      !ri->m_breakpointInfo->m_unresolvedBreakpoints.empty() ||
+      !ri->m_breakpointInfo->m_pendingBreakpoints.empty();
+    std::atomic_thread_fence(std::memory_order_release);
+  }
 
   // Notifies all threads that they need to switch to interpreted mode so we
   // can interrupt them.

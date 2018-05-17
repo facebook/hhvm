@@ -35,23 +35,41 @@ Breakpoint::Breakpoint(
   int id,
   int line,
   int column,
-  const std::string path,
-  const std::string condition,
-  const std::string hitCondition
+  const std::string& path,
+  const std::string& condition,
+  const std::string& hitCondition
 ) : m_id(id),
     m_type(BreakpointType::Source),
     m_line(line),
     m_column(column),
     m_path(path),
+    m_function(""),
     m_resolvedLocation({0}),
     m_hitCount(0) {
 
   updateConditions(condition, hitCondition);
 }
 
+Breakpoint::Breakpoint(
+  int id,
+  const std::string& function,
+  const std::string& condition,
+  const std::string& hitCondition
+) : m_id(id),
+    m_type(BreakpointType::Function),
+    m_line(-1),
+    m_column(-1),
+    m_path(""),
+    m_function(function),
+    m_resolvedLocation({0}),
+    m_hitCount(0) {
+
+    updateConditions(condition, hitCondition);
+}
+
 void Breakpoint::updateConditions(
-  std::string condition,
-  std::string hitCondition
+  const std::string& condition,
+  const std::string& hitCondition
 ) {
   m_condition = condition;
   m_hitCondition = hitCondition;
@@ -88,7 +106,7 @@ const std::unordered_set<int> BreakpointManager::getAllBreakpointIds() const {
   return ids;
 }
 
-int BreakpointManager::addBreakpoint(
+int BreakpointManager::addSourceLineBreakpoint(
   int line,
   int column,
   const std::string& path,
@@ -127,6 +145,90 @@ int BreakpointManager::addBreakpoint(
   return id;
 }
 
+void BreakpointManager::onFuncBreakpointResolved(
+  Breakpoint& bp,
+  Func* func
+) {
+  if (func == nullptr ||
+      func->unit() == nullptr ||
+      func->unit()->filepath() == nullptr) {
+    return;
+  }
+
+  std::string filePath = func->unit()->filepath()->toCppString();
+
+  auto it = m_sourceBreakpoints.find(filePath);
+  if (it == m_sourceBreakpoints.end()) {
+    m_sourceBreakpoints.emplace(filePath, std::unordered_set<int>());
+    it = m_sourceBreakpoints.find(filePath);
+  }
+
+  // Add this ID to the set of breakpoints in this file.
+  assertx(it != m_sourceBreakpoints.end());
+  std::unordered_set<int>& fileBreakpoints = it->second;
+  fileBreakpoints.emplace(bp.m_id);
+
+  ClientPreferences preferences = m_debugger->getClientPreferences();
+  onBreakpointResolved(
+    bp.m_id,
+    adjustLineNumber(
+      preferences,
+      func->line1(),
+      false
+    ),
+    adjustLineNumber(
+      preferences,
+      func->line1(),
+      false
+    ),
+    adjustLineNumber(
+      preferences,
+      1,
+      true
+    ),
+    adjustLineNumber(
+      preferences,
+      1,
+      true
+    ),
+    filePath
+  );
+}
+
+int BreakpointManager::addFunctionBreakpoint(
+  const std::string& function,
+  const std::string& condition,
+  const std::string& hitCondition
+) {
+  const int id = ++g_nextBreakpointId;
+  Breakpoint bp = Breakpoint(id, function, condition, hitCondition);
+
+  // Add the new breakpoint to the function breakpoint map.
+  m_breakpoints.emplace(id, bp);
+  m_fnBreakpoints.emplace(function, id);
+
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Stored new function breakpoint request (id = %d), (func = %s)",
+    id,
+    function.c_str()
+  );
+
+  // Tell the client the bp was installed.
+  sendBreakpointEvent(id, ReasonNew);
+
+  return id;
+}
+
+const std::unordered_set<int>
+BreakpointManager::getFunctionBreakpoints() const {
+  std::unordered_set<int> ids;
+  for (const auto& pair : m_fnBreakpoints) {
+    ids.insert(pair.second);
+  }
+  return ids;
+}
+
 void BreakpointManager::removeBreakpoint(int id) {
   const auto it = m_breakpoints.find(id);
   if (it == m_breakpoints.end()) {
@@ -140,6 +242,7 @@ void BreakpointManager::removeBreakpoint(int id) {
 
   // Remove the breakpoint.
   const std::string filePath = it->second.m_path;
+  const std::string function = it->second.m_function;
   m_breakpoints.erase(it);
 
   // If it was resolved, remove it from the resolved set.
@@ -160,6 +263,12 @@ void BreakpointManager::removeBreakpoint(int id) {
     if (set.empty()) {
       m_sourceBreakpoints.erase(fileIt);
     }
+  }
+
+  // Remove it from the function breakpoint list.
+  const auto fnIt = m_fnBreakpoints.find(function);
+  if (fnIt != m_fnBreakpoints.end()) {
+      m_fnBreakpoints.erase(fnIt);
   }
 
   VSDebugLogger::Log(

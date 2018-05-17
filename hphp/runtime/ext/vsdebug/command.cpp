@@ -42,7 +42,7 @@ bool VSCommand::tryGetBool(
   try {
     const auto& val = message[key];
     return val.isBool() ? val.getBool() : defaultValue;
-  } catch (std::out_of_range e) {
+  } catch (std::out_of_range& e) {
     // Value not present in dynamic.
     return defaultValue;
   }
@@ -60,7 +60,7 @@ const std::string VSCommand::tryGetString(
   try {
     const auto& val = message[key];
     return val.isString() ? val.getString() : defaultValue;
-  } catch (std::out_of_range e) {
+  } catch (std::out_of_range& e) {
     // Value not present in dynamic.
     return defaultValue;
   }
@@ -78,10 +78,28 @@ const folly::dynamic& VSCommand::tryGetObject(
   try {
     const auto& val = message[key];
     return val.isObject() ? val : defaultValue;
-  } catch (std::out_of_range e) {
+  } catch (std::out_of_range& e) {
     // Value not present in dynamic.
     return defaultValue;
   }
+}
+
+static const folly::dynamic s_emptyArray = folly::dynamic::array;
+const folly::dynamic& VSCommand::tryGetArray(
+  const folly::dynamic& message,
+  const char* key
+) {
+  if (message.isObject()) {
+    try {
+      const auto& val = message[key];
+      if (val.isArray()) {
+        return val;
+      }
+    } catch (std::out_of_range& e) {
+    }
+  }
+
+  return s_emptyArray;
 }
 
 int64_t VSCommand::tryGetInt(
@@ -205,7 +223,8 @@ bool VSCommand::parseCommand(
 
     *command = new ScopesCommand(debugger, clientMessage);
 
-  } else if (cmdString == "setBreakpoints") {
+  } else if (cmdString == "setBreakpoints" ||
+             cmdString == "setFunctionBreakpoints") {
 
     *command = new SetBreakpointsCommand(debugger, clientMessage);
 
@@ -265,7 +284,7 @@ const folly::dynamic VSCommand::getDebuggerCapabilities() {
   capabilities["supportsCompletionsRequest"] = true;
   capabilities["supportsConfigurationDoneRequest"] = true;
   capabilities["supportsConditionalBreakpoints"] = true;
-  // capabilities["supportsFunctionBreakpoints"] = false;
+  capabilities["supportsFunctionBreakpoints"] = true;
   capabilities["supportsHitConditionalBreakpoints"] = false;
   capabilities["supportsEvaluateForHovers"] = true;
   capabilities["supportsStepBack"] = false;

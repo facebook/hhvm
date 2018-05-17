@@ -52,18 +52,29 @@ struct Breakpoint {
     int id,
     int line,
     int column,
-    const std::string path,
-    const std::string condition,
-    const std::string hitCondition
+    const std::string& path,
+    const std::string& condition,
+    const std::string& hitCondition
   );
 
-  void updateConditions(std::string condition, std::string hitCondition);
+  Breakpoint(
+    int id,
+    const std::string& function,
+    const std::string& condition,
+    const std::string& hitCondition
+  );
+
+  void updateConditions(
+    const std::string& condition,
+    const std::string& hitCondition
+  );
 
   const int m_id;
   const BreakpointType m_type;
   const int m_line;
   const int m_column;
   const std::string m_path;
+  const std::string m_function;
 
   ResolvedLocation m_resolvedLocation;
   int m_hitCount;
@@ -126,10 +137,21 @@ struct BreakpointManager {
 
   bool isBreakpointResolved(int id) const;
 
-  int addBreakpoint(
+  void onFuncBreakpointResolved(
+    Breakpoint& bp,
+    Func* func
+  );
+
+  int addSourceLineBreakpoint(
     int line,
     int column,
     const std::string& path,
+    const std::string& condition,
+    const std::string& hitCondition
+  );
+
+  int addFunctionBreakpoint(
+    const std::string& function,
     const std::string& condition,
     const std::string& hitCondition
   );
@@ -143,6 +165,8 @@ struct BreakpointManager {
   const std::unordered_set<int> getBreakpointIdsByFile(
     const std::string& sourcePath
   ) const;
+
+  const std::unordered_set<int> getFunctionBreakpoints() const;
 
   bool isBreakConditionSatisified(
     RequestInfo* ri,
@@ -179,6 +203,9 @@ private:
 
   // Map of source file name to list of breakpoints in that file.
   std::unordered_map<std::string, std::unordered_set<int>> m_sourceBreakpoints;
+
+  // Map of function names to function breakpoints.
+  std::unordered_map<std::string, int> m_fnBreakpoints;
 
   // Verified breakpoints. A breakpoint is verified if at least one request
   // has resolved it in a compilation unit since it was set. This is a bit odd

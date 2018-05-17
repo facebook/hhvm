@@ -113,6 +113,7 @@ let finalize_init genv init_env =
 
 let shutdown_persistent_client env client =
   ClientProvider.shutdown_client client;
+  let env = { env with pending_command_needs_writes = None } in
   ServerFileSync.clear_sync_data env
 
 (*****************************************************************************)
@@ -251,12 +252,16 @@ let query_notifier genv env query_kind t =
     HackEventLogger.notifier_returned t (SSet.cardinal raw_updates);
   env, updates, updates_stale
 
-(* When a rebase occurs, dfind takes a while to give us the full list of
- * updates, and it often comes in batches. To get an accurate measurement
+(* When a rebase occurs, Watchman/dfind takes a while to give us the full list
+ * of updates, and it often comes in batches. To get an accurate measurement
  * of rebase time, we use the heuristic that any changes that come in
  * right after one rechecking round finishes to be part of the same
  * rebase, and we don't log the recheck_end event until the update list
- * is no longer getting populated. *)
+ * is no longer getting populated.
+ *
+ * The above doesn't apply in presence of interruptions / cancellations -
+ * it's possible for client to request current recheck to be stopped.
+ *)
 let rec recheck_loop acc genv env new_client has_persistent_connection_request =
   let t = Unix.gettimeofday () in
   (** When a new client connects, we use the synchronous notifier.
@@ -311,8 +316,12 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
     } in
     (* Avoid batching ide rechecks with disk rechecks - there might be
       * other ide edits to process first and we want to give the main loop
-      * a chance to process them first. *)
-    if lazy_check then acc, env else
+      * a chance to process them first.
+      * Similarly, if a recheck was interrupted because of arrival of command
+      * that needs writes, break the recheck loop to give that command chance
+      * to be handled in main loop *)
+    if lazy_check || Option.is_some env.pending_command_needs_writes
+      then acc, env else
       recheck_loop acc genv env new_client has_persistent_connection_request
   end
 
@@ -436,7 +445,7 @@ let serve_one_iteration genv env client_provider =
       ~f:ClientProvider.has_persistent_connection_request
       ~default:false
   in
-  if has_persistent_connection_request then
+  let env = if has_persistent_connection_request then
     let client = Utils.unsafe_opt env.persistent_client in
     (* client here is the existing persistent client *)
     (* whose request we're going to handle.          *)
@@ -451,7 +460,16 @@ let serve_one_iteration genv env client_provider =
       HackEventLogger.handle_persistent_connection_exception e;
       Hh_logger.log "Handling persistent client failed. Ignoring.";
       env)
-  else env
+  else env in
+  let env = match env.pending_command_needs_writes with
+    | Some f ->
+      let f = ServerUtils.Needs_writes (env, f) in
+      { (fully_handle_command genv f) with
+        pending_command_needs_writes = None
+      }
+    | None -> env
+  in
+  env
 
 let watchman_interrupt_handler genv env =
   let t = Unix.gettimeofday () in
@@ -500,8 +518,11 @@ let persistent_client_interrupt_handler genv env =
   | Some client -> match handle_connection genv env client true with
     | ServerUtils.Needs_full_recheck _ ->
       failwith "unexpected command needing full recheck from persistent client"
-    | ServerUtils.Needs_writes _ ->
-      failwith "unexpected command needing writes from persistent client"
+    | ServerUtils.Needs_writes (env, f) ->
+      (* this should not be possible, because persistent client will not send
+       * the next command before receiving results from the previous one *)
+      assert (Option.is_none env.pending_command_needs_writes);
+      {env with pending_command_needs_writes = Some f}, MultiThreadedCall.Cancel
     | ServerUtils.Done env -> env, MultiThreadedCall.Continue
 
 let setup_interrupts env client_provider = { env with

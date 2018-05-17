@@ -203,6 +203,7 @@ let make_env config =
     full_check = Full_check_done;
     can_interrupt = false;
     interrupt_handlers = (fun _ _ -> []);
+    pending_command_needs_writes = None;
     init_env = {
       needs_full_init = false;
       init_start_t = Unix.gettimeofday ();

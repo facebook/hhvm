@@ -244,4 +244,3 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         variables = self.setup_php_file('non_blocking.php')
         self.start_hh_loop_forever_assert_timeout()
         self.load_and_run('non_blocking', variables, wait_for_server=False)
-        self.stop_hh_loop_forever()

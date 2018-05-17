@@ -97,7 +97,7 @@ struct VSCommand {
     bool defaultValue
   );
 
-  static const std::string& tryGetString(
+  static const std::string tryGetString(
     const folly::dynamic& message,
     const char* key,
     const std::string& defaultValue
@@ -282,7 +282,7 @@ private:
   // Helper for sorting variable names - converts a variable name to uppercase
   // for case-insensitive sort, and caches the result on the folly::dynamic
   // object to avoid doing a UC conversion on each iteration of the sort loop.
-  static const std::string& getUcVariableName(
+  static const std::string getUcVariableName(
     folly::dynamic& var,
     const char* ucKey
   );

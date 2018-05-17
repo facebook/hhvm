@@ -48,7 +48,7 @@ bool VSCommand::tryGetBool(
   }
 }
 
-const std::string& VSCommand::tryGetString(
+const std::string VSCommand::tryGetString(
   const folly::dynamic& message,
   const char* key,
   const std::string& defaultValue

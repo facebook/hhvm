@@ -75,7 +75,7 @@ request_id_t VariablesCommand::targetThreadId(DebuggerSession* session) {
   throw DebuggerCommandException("Unexpected server object type");
 }
 
-const std::string& VariablesCommand::getUcVariableName(
+const std::string VariablesCommand::getUcVariableName(
   folly::dynamic& var,
   const char* ucKey
 ) {
@@ -83,7 +83,7 @@ const std::string& VariablesCommand::getUcVariableName(
   // cache the result on the object so we don't do this every
   // iteration of the sort operation.
   const std::string& str = var["name"].getString();
-  const std::string& ucStr = tryGetString(var, ucKey, "");
+  const std::string ucStr = tryGetString(var, ucKey, "");
 
   if (!ucStr.empty() || str.empty()) {
     return ucStr;

@@ -17,7 +17,8 @@ exception Nonfatal_rpc_exception of exn * string * ServerEnv.env
 
 (* Some client commands require full check to be run in order to update global
  * state that they depend on *)
-let rpc_command_needs_full_check : type a. a t -> bool = function
+let rpc_command_needs_full_check : type a. ServerEnv.genv -> a t -> bool =
+    fun genv msg -> match msg with
   (* global error list is not updated during small checks *)
   | STATUS _ -> true
   (* some Ai stuff - calls to those will likely never be interleaved with IDE
@@ -36,11 +37,18 @@ let rpc_command_needs_full_check : type a. a t -> bool = function
   | CREATE_CHECKPOINT _ -> true
   | RETRIEVE_CHECKPOINT _ -> true
   | DELETE_CHECKPOINT _ -> true
+  | SEARCH _ ->
+    (* ugly hack - when fuzzy search is enabled, we need workers to run it.
+     * Even though it doesn't require full check, saying that it does will
+     * ensure that we don't attempt to do it in the middle of recheck where
+     * workers are not available. This should be removed when we gain the
+     * ability to use workers during interruptions. *)
+    genv.ServerEnv.local_config.ServerLocalConfig.enable_fuzzy_search
   | IN_MEMORY_DEP_TABLE_SIZE -> false
   | _ -> false
 
-let command_needs_full_check = function
-  | Rpc x -> rpc_command_needs_full_check x
+let command_needs_full_check genv = function
+  | Rpc x -> rpc_command_needs_full_check genv x
   | Stream BUILD _ -> true (* Build doesn't fully support lazy decl *)
   | Stream LIST_FILES -> true (* Same as Rpc STATUS *)
   | _ -> false
@@ -60,6 +68,40 @@ let rpc_command_needs_writes : type a. a t -> bool  = function
 let commands_needs_writes = function
   | Rpc x -> rpc_command_needs_writes x
   | _ -> false
+
+(* To ensure smooth, non-blocking IDE experience, commands issued by clientLsp
+ * should avoid using workers. If they do use workers, handling that
+ * (and any subsequent) commands would be blocked on typechecking finishing
+ * and freeing the workers. *)
+let rpc_command_needs_workers: type a. ServerEnv.genv -> a t -> bool =
+    fun genv msg -> match msg with
+  | UNSUBSCRIBE_DIAGNOSTIC _ -> false
+  | DISCONNECT -> false
+  | DYNAMIC_VIEW _ -> false
+  | RAGE -> false
+  | OPEN_FILE _ -> false
+  | CLOSE_FILE _ -> false
+  | EDIT_FILE _ -> false
+  | INFER_TYPE _ -> false
+  | IDE_HOVER _ -> false
+  | IDENTIFY_FUNCTION _ -> false
+  | IDE_FFP_AUTOCOMPLETE _ -> false
+  | IDE_AUTOCOMPLETE _ -> false
+  | DOCBLOCK_AT _ -> false
+  | SEARCH _ ->
+      genv.ServerEnv.local_config.ServerLocalConfig.enable_fuzzy_search
+  | OUTLINE _ -> false
+  | IDE_FIND_REFS _ -> false
+  | IDE_HIGHLIGHT_REFS _ -> false
+  | COVERAGE_LEVELS _ -> false
+  | HH_FORMAT _ -> false
+  | SUBSCRIBE_DIAGNOSTIC _ -> false
+  | IDE_IDLE -> false
+| _ -> true (* assume yes unless whitelisted just to be safe *)
+
+let command_needs_workers genv = function
+  | Rpc x -> rpc_command_needs_workers genv x
+  | _ -> true (* assume yes unless whitelisted just to be safe *)
 
 let full_recheck_if_needed' genv env reason =
 if
@@ -299,7 +341,7 @@ let handle
     (client: ClientProvider.client)
   : ServerEnv.env ServerUtils.handle_command_result =
   let msg = ClientProvider.read_client_msg client in
-  let full_recheck_needed = command_needs_full_check msg in
+  let full_recheck_needed = command_needs_full_check genv msg in
   let continuation = actually_handle genv client msg full_recheck_needed in
   if commands_needs_writes msg then
     (* IDE edits can come in quick succession and be immediately followed
@@ -311,5 +353,7 @@ let handle
   else if full_recheck_needed then
     let reason = ServerCommandTypesUtils.debug_describe_cmd msg in
     ServerUtils.Needs_full_recheck (env, continuation, ignore_ide msg, reason)
+  else if command_needs_workers genv msg then
+    ServerUtils.Needs_workers (env, continuation)
   else
     ServerUtils.Done (continuation env)

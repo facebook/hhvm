@@ -22,6 +22,9 @@ type 'env handle_command_result =
    * The boolean indicates whether current recheck should be automatically
    * restarted after applying the writes *)
   | Needs_writes of 'env * ('env -> 'env) * bool
+  (* Command that arrived when workers required to execute it were unavailable
+   *)
+  | Needs_workers of 'env * ('env -> 'env)
 
 let shutdown_client (_ic, oc) =
   let cli = Unix.descr_of_out_channel oc in

@@ -6138,19 +6138,28 @@ and check_parent class_def class_type parent_type =
 
 and check_parent_sealed child_type parent_type =
   match parent_type.dc_sealed_whitelist with
-    | Some whitelist ->
-      if not (SSet.mem child_type.tc_name whitelist)
-      then begin
-        let error = Errors.extend_sealed
-          child_type.tc_pos parent_type.dc_pos parent_type.dc_name in
-        match parent_type.dc_kind, child_type.tc_kind with
-          | Ast.Cabstract, _
-          | Ast.Cnormal, _ -> error "class" "extend"
-          | Ast.Cinterface, Ast.Cinterface -> error "interface" "extend"
-          | Ast.Cinterface, _ -> error "interface" "implement"
-          | _ -> ()
-      end
     | None -> ()
+    | Some whitelist ->
+      begin match child_type.tc_kind with
+        | Ast.Cabstract
+        | Ast.Cnormal
+        | Ast.Cinterface ->
+          if not (SSet.mem child_type.tc_name whitelist)
+          then begin
+            let error = Errors.extend_sealed
+              child_type.tc_pos parent_type.dc_pos parent_type.dc_name in
+            match parent_type.dc_kind, child_type.tc_kind with
+              | Ast.Cabstract, _
+              | Ast.Cnormal, _ -> error "class" "extend"
+              | Ast.Cinterface, Ast.Cinterface -> error "interface" "extend"
+              | Ast.Cinterface, _ -> error "interface" "implement"
+              | _ -> ()
+          end
+        | Ast.Ctrait ->
+          Errors.trait_implement_sealed
+            child_type.tc_pos parent_type.dc_pos parent_type.dc_name
+        | Ast.Cenum -> ()
+      end
 
 and check_parents_sealed env child_def child_type =
   List.iter (child_def.c_extends @ child_def.c_implements) begin function

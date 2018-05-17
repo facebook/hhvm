@@ -217,6 +217,7 @@ module type S = sig
   val sketchy_null_check_primitive : Pos.t -> string option -> [< `Coalesce | `Eq | `Neq ] -> unit
   val extend_final : Pos.t -> Pos.t -> string -> unit
   val extend_sealed : Pos.t -> Pos.t -> string -> string -> string -> unit
+  val trait_implement_sealed : Pos.t -> Pos.t -> string -> unit
   val sealed_final : Pos.t -> string -> unit
   val read_before_write : Pos.t * string -> unit
   val interface_final : Pos.t -> unit

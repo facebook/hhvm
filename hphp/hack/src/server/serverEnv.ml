@@ -143,6 +143,10 @@ type env = {
     (* When persistent client sends a command that cannot be handled (due to
      * thread safety) we put the continuation that finishes handling it here. *)
     pending_command_needs_writes : (env -> env) option;
+    (* When persistent client sends a command that cannot be immediately handled
+     * (due to needing full check) we put the continuation that finishes handling
+     * it here. *)
+    pending_command_needs_full_check : (env -> env) option;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;
     recent_recheck_loop_stats : recheck_loop_stats;

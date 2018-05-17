@@ -113,7 +113,10 @@ let finalize_init genv init_env =
 
 let shutdown_persistent_client env client =
   ClientProvider.shutdown_client client;
-  let env = { env with pending_command_needs_writes = None } in
+  let env = { env with
+    pending_command_needs_writes = None;
+    pending_command_needs_full_check = None;
+  } in
   ServerFileSync.clear_sync_data env
 
 (*****************************************************************************)
@@ -469,6 +472,14 @@ let serve_one_iteration genv env client_provider =
       }
     | None -> env
   in
+  let env = match env.pending_command_needs_full_check with
+    | Some f ->
+      let f = ServerUtils.Needs_full_recheck (env, f, false) in
+      { (fully_handle_command genv f) with
+        pending_command_needs_full_check = None
+      }
+    | None -> env
+  in
   env
 
 let watchman_interrupt_handler genv env =
@@ -516,8 +527,15 @@ let persistent_client_interrupt_handler genv env =
    * the persistent client before we get to it. *)
   | None -> env, MultiThreadedCall.Continue
   | Some client -> match handle_connection genv env client true with
-    | ServerUtils.Needs_full_recheck _ ->
-      failwith "unexpected command needing full recheck from persistent client"
+    | ServerUtils.Needs_full_recheck (env, f, ignore_ide) ->
+      (* This is only possible for STATUS, which is not a persistent client
+       * command. *)
+      assert (not ignore_ide);
+      (* This should not be possible, because persistent client will not send
+       * the next command before receiving results from the previous one. *)
+      assert (Option.is_none env.pending_command_needs_full_check);
+      {env with pending_command_needs_full_check = Some f},
+        MultiThreadedCall.Continue
     | ServerUtils.Needs_writes (env, f) ->
       (* this should not be possible, because persistent client will not send
        * the next command before receiving results from the previous one *)

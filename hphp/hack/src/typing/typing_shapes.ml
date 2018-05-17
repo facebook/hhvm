@@ -47,39 +47,28 @@ let experiment_enabled env experiment =
     (Env.get_options env)
     experiment
 
-(* Helper function to create a temporary "fake" type for use by Shapes::idx,
-  which will be used as the supertype of the first argument passed to
-  Shapes::idx (arg_ty). In most cases, the returned supertype will be
-    shape(?field_name: res, ...)
-
-  We will return shape(...) for the case where field_name does not exist in the
-  arg_ty and arg_ty is partial but does not unset field_name.
-
-  If experimental_optional_shape_field is disabled, then a nullable type will be
-  used instead of an optional type in the returned supertype.
-*)
+(* Create a temporary "fake" type shape(?field_name: res, ...), which
+   will be used as the supertype of the first argument passed to
+   Shapes::idx (arg_ty). *)
 let make_idx_fake_super_shape _env p (_, arg_ty) field_name res =
   let fake_shape_field = {
     sft_optional = true;
     sft_ty = Reason.Rnone, Toption res;
   } in
-  match arg_ty with
+  begin match arg_ty with
   | Tshape (FieldsPartiallyKnown unset_fields, fdm)
       when not (ShapeMap.mem field_name fdm
                 || ShapeMap.mem field_name unset_fields) ->
-    (* Special logic for when arg_ty does not have field and does not
-      explicitly unset field. We want to relax Shapes::idx to allow accessing
-      field in this case, so we will only require that arg_ty be a shape. *)
     (* This is dangerous because the shape may later be instantiated with a
       field that conflicts with the return type of Shapes::idx. Programmers
       should instead use direct accessing (i.e. shape[field]) when possible to
       get stricter behavior. *)
     Lint.shape_idx_access_unknown_field
       p
-      (Env.get_shape_field_name field_name);
-    (* But we allow it anyhow *)
-    Nast.ShapeMap.empty
-  | _ -> Nast.ShapeMap.singleton field_name fake_shape_field
+      (Env.get_shape_field_name field_name)
+  | _ -> ()
+  end;
+  Nast.ShapeMap.singleton field_name fake_shape_field
 
 let apply_on_field ~f ~default field_name (_, ty) =
   match ty with

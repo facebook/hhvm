@@ -368,17 +368,41 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
             (Reason.to_pos required)
             (Env.get_shape_field_name name);
           env, acc in
-      let on_missing_optional_field (env, acc) name missing_shape_field_type =
+      let on_missing_omittable_optional_field
+          (env, acc)
+          name
+          missing_shape_field_type =
         env, Nast.ShapeMap.add name missing_shape_field_type acc in
+      let on_missing_non_omittable_optional_field
+          pos_shape_missing
+          (env, acc)
+          name
+          missing_shape_field_type =
+        let r = Reason.Rmissing_optional_field (
+          pos_shape_missing,
+          TUtils.get_printable_shape_field_name name
+        ) in
+        let env, _ = unify env
+          (r, TUtils.desugar_mixed r)
+          missing_shape_field_type.sft_ty in
+        env, acc in
       (* We do it both directions to verify that no field is missing *)
       let res = Nast.ShapeMap.empty in
+      let p1 = Reason.to_pos r1 in
+      let p2 = Reason.to_pos r2 in
       let env, res = TUtils.apply_shape
         ~on_common_field
-        ~on_missing_optional_field
+        ~on_missing_omittable_optional_field
+        ~on_missing_non_omittable_optional_field:(
+          on_missing_non_omittable_optional_field p2
+        )
         (env, res) (r1, fields_known1, fdm1) (r2, fields_known2, fdm2) in
       let env, res = TUtils.apply_shape
         ~on_common_field
-        ~on_missing_optional_field
+        ~on_missing_omittable_optional_field
+        ~on_missing_non_omittable_optional_field:(
+          on_missing_non_omittable_optional_field p1
+        )
         (env, res) (r2, fields_known2, fdm2) (r1, fields_known1, fdm1) in
         (* After doing apply_shape in both directions we can be sure that
          * fields_known1 = fields_known2 *)

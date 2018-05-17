@@ -1273,25 +1273,38 @@ and sub_type_with_uenv
        *   2. A's type <: B.type
        *)
       let on_common_field
-          (env, acc)
+          (env, ())
           name
           { sft_optional = optional_super; sft_ty = ty_super }
           { sft_optional = optional_sub; sft_ty = ty_sub } =
         match optional_super, optional_sub with
           | true, _ | false, false ->
-            sub_type env ty_sub ty_super, acc
+            sub_type env ty_sub ty_super, ()
           | false, true ->
             Errors.required_field_is_optional
               (Reason.to_pos r_sub)
               (Reason.to_pos r_super)
               (Env.get_shape_field_name name);
-            env, acc in
-      fst (TUtils.apply_shape
+            env, () in
+      let on_missing_omittable_optional_field (env, ()) _ _ = (env, ()) in
+      let on_missing_non_omittable_optional_field
+          (env, ())
+          name
+          { sft_ty = ty_super; _ } =
+        let r = Reason.Rmissing_optional_field (
+          Reason.to_pos r_sub,
+          TUtils.get_printable_shape_field_name name
+        ) in
+        let env = sub_type env (r, TUtils.desugar_mixed r) ty_super in
+        (env, ()) in
+      let env, () = TUtils.apply_shape
         ~on_common_field
-        ~on_missing_optional_field:(fun acc _ _ -> acc)
-        (env, None)
+        ~on_missing_omittable_optional_field
+        ~on_missing_non_omittable_optional_field
+        (env, ())
         (r_super, fields_known_super, fdm_super)
-        (r_sub, fields_known_sub, fdm_sub))
+        (r_sub, fields_known_sub, fdm_sub) in
+      env
   | (_, Tabstract (AKnewtype (name_sub, tyl_sub), _)),
     (_, Tabstract (AKnewtype (name_super, tyl_super), _))
     when name_super = name_sub ->

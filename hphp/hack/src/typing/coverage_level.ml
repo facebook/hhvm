@@ -146,6 +146,7 @@ let incr_reason_stats r p reason_stats =
     | Rdynamic_prop _ -> "Rdynamic_prop"
     | Rdynamic_call _ -> "Rdynamic_call"
     | Ridx_dict _ -> "Ridx_dict"
+    | Rmissing_optional_field _ -> "Rmissing_optional_field"
     in
   let pos_stats_map = match SMap.get string_key reason_stats with
     | Some x -> x

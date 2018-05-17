@@ -348,8 +348,13 @@ let get_printable_shape_field_name = Env.get_shape_field_name
     We prevent this by making sure that (apply_changes ... t s) fails because
     t has an optional field 'z' that is not unset by s.
 *)
-let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
-  (r1, fields_known1, fdm1) (r2, fields_known2, fdm2) =
+let apply_shape
+  ~on_common_field
+  ~on_missing_omittable_optional_field
+  ~on_missing_non_omittable_optional_field
+  (env, acc)
+  (r1, fields_known1, fdm1)
+  (r2, fields_known2, fdm2) =
   begin match fields_known1, fields_known2 with
     | FieldsFullyKnown, FieldsFullyKnown ->
         (* If both shapes are FieldsFullyKnown, then we must ensure that the
@@ -387,14 +392,11 @@ let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
           | FieldsFullyKnown -> true
           | FieldsPartiallyKnown unset_fields ->
               ShapeMap.mem name unset_fields in
-        if can_omit then
-          on_missing_optional_field (env, acc) name shape_field_type_1
-        else
-          let pos1 = Reason.to_pos r1 in
-          let pos2 = Reason.to_pos r2 in
-          Errors.missing_optional_field pos2 pos1
-            (get_printable_shape_field_name name);
-        (env, acc)
+        let on_missing_optional_field =
+          if can_omit
+          then on_missing_omittable_optional_field
+          else on_missing_non_omittable_optional_field in
+        on_missing_optional_field (env, acc) name shape_field_type_1
     | None ->
         let pos1 = Reason.to_pos r1 in
         let pos2 = Reason.to_pos r2 in

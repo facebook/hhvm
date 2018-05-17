@@ -1,6 +1,6 @@
 File "shape24.php", line 21, characters 10-11:
-Invalid return type (Typing[4140])
+Invalid return type (Typing[4110])
+File "shape24.php", line 14, characters 12-15:
+This is a bool
 File "shape24.php", line 20, characters 15-15:
-The field 'z' may be set to an unknown type. Explicitly null out the field, or remove it (with Shapes::removeKey(...))
-File "shape24.php", line 20, characters 22-22:
-The field 'z' is defined as optional
+It is incompatible with a nonnull value because the field 'z' may be set to any type in this shape

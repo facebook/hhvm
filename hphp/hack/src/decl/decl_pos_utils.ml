@@ -90,6 +90,7 @@ let rec reason = function
   | Rdynamic_prop p          -> Rdynamic_prop (pos p)
   | Rdynamic_call p          -> Rdynamic_call (pos p)
   | Ridx_dict p              -> Ridx_dict (pos p)
+  | Rmissing_optional_field (p, n) -> Rmissing_optional_field (pos p, n)
 let string_id (p, x) = pos p, x
 
 let rec ty (p, x) =

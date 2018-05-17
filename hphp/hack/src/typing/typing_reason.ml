@@ -77,6 +77,7 @@ type t =
   | Rdynamic_prop    of Pos.t
   | Rdynamic_call    of Pos.t
   | Ridx_dict        of Pos.t
+  | Rmissing_optional_field of Pos.t * string
 
 and expr_dep_type_reason =
   | ERexpr of int
@@ -216,7 +217,8 @@ let rec to_string prefix r =
     [(p, prefix ^ ", the result of calling a dynamic type as a function")]
   | Ridx_dict _ -> [(p, prefix ^
     " because only array keys can be used to index into a Map, dict, darray, Set, or keyset")]
-
+  | Rmissing_optional_field (p, name) ->
+    [(p, prefix ^ " because the field '" ^ name ^ "' may be set to any type in this shape")]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -282,6 +284,7 @@ and to_pos = function
   | Rdynamic_prop p -> p
   | Rdynamic_call p -> p
   | Ridx_dict p -> p
+  | Rmissing_optional_field (p, _) -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -377,6 +380,7 @@ let pp fmt r =
     | Rdynamic_prop _ -> "Rdynamic_prop"
     | Rdynamic_call _ -> "Rdynamic_call"
     | Ridx_dict _ -> "Ridx_dict"
+    | Rmissing_optional_field _ -> "Rmissing_optional_field"
 
 type ureason =
   | URnone

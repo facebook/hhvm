@@ -1,4 +1,1 @@
-(5,5)-(5,27) Method declarations require a visibility modifier such as public, private or protected.
-(5,19)-(5,19) A type annotation is required in strict mode.
 (6,1)-(6,1) A type specifier is expected here.
-(6,1)-(6,1) Unexpected method body: interfaces may contain only method signatures, and not method implementations.

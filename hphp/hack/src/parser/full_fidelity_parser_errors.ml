@@ -420,12 +420,6 @@ let has_static node parents f =
     (matches_first (methodish_contains_static) parents)
   | _ -> false
 
-(* test the methodish node contains any non-visibility modifiers *)
-let methodish_contains_non_visibility env node =
-  if is_hhvm_compat env then false
-  else
-  let is_non_visibility x = not (is_visibility x) in
-  methodish_modifier_contains_helper is_non_visibility node
 
 (* checks if a methodish decl or property has multiple visibility modifiers *)
 let declaration_multiple_visibility node =
@@ -463,28 +457,7 @@ let class_non_constructor_has_visibility_param node parents =
     (not (is_construct label)) && (List.exists has_visibility params)
   | _ -> false
 
-(* Given a function declaration header, confirm that it is a destructor
- * and that the methodish containing it has non-empty parameters *)
-let class_destructor_has_param env node parents =
-  match node with
-  | FunctionDeclarationHeader node ->
-    let label = node.function_name in
-    let param = node.function_parameter_list in
-    not (is_hhvm_compat env)
-    && (is_destruct label)
-    && not (is_missing param)
-  | _ -> false
 
-(* Given a function declaration header, confirm that it is a destructor
- * and that the methodish containing it has non-visibility modifiers *)
-let class_destructor_has_non_visibility_modifier env node parents =
-  match node with
-  | FunctionDeclarationHeader node ->
-    let label = node.function_name in
-    not (is_hhvm_compat env) &&
-    (is_destruct label) &&
-    (matches_first (methodish_contains_non_visibility env) parents)
-  | _ -> false
 
 let async_magic_method node parents =
   match node with
@@ -504,25 +477,6 @@ let clone_destruct_takes_no_arguments method_name node parents =
   | FunctionDeclarationHeader { function_parameter_list = l; function_name = name; _} ->
     let num_params = List.length (syntax_to_list_no_separators l) in
     ((is_clone name) || (is_destruct name)) && num_params <> 0
-  | _ -> false
-
-(* check that a constructor or a destructor is type annotated *)
-let class_constructor_destructor_has_non_void_type env node parents =
-  if is_hhvm_compat env then false
-  else
-  match node with
-  | FunctionDeclarationHeader node ->
-    let label = node.function_name in
-    let type_ano = node.function_type in
-    let function_colon = node.function_colon in
-    let is_missing = is_missing type_ano && is_missing function_colon in
-    let is_void = match syntax type_ano with
-      | SimpleTypeSpecifier spec ->
-        is_void spec.simple_type_specifier
-      | _ -> false
-    in
-    (is_construct label || is_destruct label) &&
-    not (is_missing || is_void)
   | _ -> false
 
 (* whether a methodish has duplicate modifiers *)
@@ -563,15 +517,6 @@ let methodish_inside_interface parents =
     end
   | _ -> false
 
-(* Test whether node is an abstract method with a body.
- * Here node is the methodish node *)
-let methodish_abstract_with_body env node =
-  if is_hhvm_compat env then false
-  else
-  let is_abstract = methodish_contains_abstract node in
-  let has_body = methodish_has_body node in
-  is_abstract && has_body
-
 (* Test whether node is a non-abstract method without a body and not native.
  * Here node is the methodish node
  * And methods inside interfaces are inherently considered abstract *)
@@ -581,10 +526,6 @@ let methodish_non_abstract_without_body_not_native node parents =
   let not_has_body = not (methodish_has_body node) in
   let not_native = not (methodish_is_native node) in
   non_abstract && not_has_body && not_native
-
-let methodish_in_interface_has_body env node parents =
-  not (is_hhvm_compat env) &&
-  methodish_inside_interface parents && methodish_has_body node
 
 (* Test whether node is a method that is both abstract and private
  *)
@@ -660,19 +601,8 @@ let is_invalid_xhp_attr_enum_item node =
       is_invalid_xhp_attr_enum_item_literal literal_expression
   | _ -> true
 
-let xhp_errors env node errors =
-  match syntax node with
-  |  XHPEnumType enumType when
-    not (is_hhvm_compat env) &&
-    (is_missing enumType.xhp_enum_values) ->
-      make_error_from_node enumType.xhp_enum_values SyntaxError.error2055 :: errors
-  |  XHPEnumType enumType when
-    not (is_hhvm_compat env) ->
-    let invalid_enum_items = List.filter is_invalid_xhp_attr_enum_item
-      (syntax_to_list_no_separators enumType.xhp_enum_values) in
-    let mapper errors item =
-      make_error_from_node item SyntaxError.error2063 :: errors in
-    List.fold_left mapper errors invalid_enum_items
+  let xhp_errors env node errors =
+    match syntax node with
   |  XHPExpression
     { xhp_open =
       { syntax = XHPOpen { xhp_open_name; _ }; _ }
@@ -684,11 +614,11 @@ let xhp_errors env node errors =
       ~close_tag:(text xhp_close_name)) :: errors
   | _ -> errors
 
+
+
 let classish_duplicate_modifiers node =
   list_contains_duplicate node
 
-let type_contains_array_in_strict env node =
-  not (is_hhvm_compat env) && is_array node && env.is_strict
 
 (* helper since there are so many kinds of errors *)
 let produce_error acc check node error error_node =
@@ -715,16 +645,6 @@ let produce_error_for_header acc check node error error_node =
   produce_error_parents acc (function_header_check_helper check) node
     error error_node
 
-(* Given a particular TokenKind.(Trait/Interface/Class), tests if a given
- * classish_declaration node is both of that kind and declared abstract. *)
-let is_classish_kind_declared_abstract env classish_kind cd_node =
-  if is_hhvm_compat env then false
-  else
-  match syntax cd_node with
-  | ClassishDeclaration { classish_keyword; classish_modifiers; _ }
-    when is_token_kind classish_keyword classish_kind ->
-      list_contains_predicate is_abstract classish_modifiers
-  | _ -> false
 
 let is_reserved_keyword env classish_name =
   let name = text classish_name in
@@ -826,19 +746,6 @@ let is_abstract_declaration declaration_node =
 let is_final_declaration declaration_node =
   not (Option.is_none (extract_keyword is_final declaration_node))
 
-(* Given a methodish_declaration node and a list of parents, tests if that
- * node declares an abstract method inside of a no-nabstract class. *)
-let abstract_method_in_nonabstract_class env md_node parents =
-  if is_hhvm_compat env then false
-  else
-  let is_abstract_method = is_abstract_declaration md_node in
-  let parent_class_node = first_parent_classish_node TokenKind.Class parents in
-  let is_in_nonabstract_class =
-    match parent_class_node with
-    | None -> false
-    | Some node -> not (is_abstract_declaration node) in
-  is_abstract_method && is_in_nonabstract_class
-
 (* Given a list of parents, tests if the immediate classish parent is an
  * interface. *)
 let is_inside_interface parents =
@@ -848,12 +755,6 @@ let is_inside_interface parents =
  * trait. *)
 let is_inside_trait parents =
   Option.is_some (first_parent_classish_node TokenKind.Trait parents)
-
-(* Given a methodish_declaration node and a list of parents, tests if that
- * node declares an abstract method inside of an interface. *)
-let abstract_method_in_interface env md_node parents =
-  not (is_hhvm_compat env) &&
-  is_abstract_declaration md_node && is_inside_interface parents
 
 (* Tests if md_node is either explicitly declared abstract or is
  * defined inside an interface *)
@@ -1002,12 +903,6 @@ let has_valid_interface_visibility node =
     Option.value_map visibility_kind
       ~f:is_valid_methodish_visibility ~default:true)
 
-(* Tests if a given node is a method definition (inside an interface) with
- * either private or protected visibility. *)
-let invalid_methodish_visibility_inside_interface env node parents =
-  not (is_hhvm_compat env) &&
-  is_inside_interface parents && not (has_valid_interface_visibility node)
-
 (* Test if (a list_expression is the left child of a binary_expression,
  * and the operator is '=') *)
 let is_left_of_simple_assignment le_node p1 =
@@ -1043,19 +938,6 @@ let is_abstract_const declaration =
   | ConstDeclaration x -> not (is_missing x.const_abstract)
   | _ -> false
 
-(* Given a ConstDeclarator node, test whether it is concrete, but has no
-   initializer. *)
-let concrete_no_initializer env init parents =
-  if is_hhvm_compat env then false
-  else
-  let is_concrete =
-    match parents with
-    | _ :: _ :: p3 :: _ when is_concrete_const p3 -> true
-    | _ -> false
-    in
-  let has_no_initializer =
-    is_missing init in
-  is_concrete && has_no_initializer
 
 (* Given a ConstDeclarator node, test whether it is abstract, but has an
    initializer. *)
@@ -1086,16 +968,6 @@ let abstract_final_parent_class parents =
 
 (* Given a PropertyDeclaration node, tests whether parent class is abstract
   final but child variable is non-static *)
-let abstract_final_with_inst_var env cd parents =
-  not (is_hhvm_compat env) &&
-  (abstract_final_parent_class parents) &&
-    not (property_modifier_contains_helper is_static cd)
-
-(* Given a MethodishDeclaration, tests whether parent class is abstract final
-    but child method is non-static *)
-let abstract_final_with_method env cd parents =
-  not (is_hhvm_compat env) &&
-  (abstract_final_parent_class parents) && not (methodish_contains_static cd)
 
 let is_byref_expression node =
   is_decorated_expression ~f:is_ampersand node
@@ -1159,14 +1031,6 @@ let methodish_errors env node parents errors =
   (* TODO how to narrow the range of error *)
   | FunctionDeclarationHeader { function_parameter_list; function_type; _} ->
     let errors =
-      produce_error_for_header errors
-      (class_destructor_has_param env) node parents
-      SyntaxError.error2011 function_parameter_list in
-    let errors =
-      produce_error_for_header errors
-      (class_constructor_destructor_has_non_void_type env)
-      node parents SyntaxError.error2018 function_type in
-    let errors =
       produce_error_for_header errors class_non_constructor_has_visibility_param
       node parents SyntaxError.error2010 function_parameter_list in
     errors
@@ -1181,18 +1045,6 @@ let methodish_errors env node parents errors =
       produce_error_for_header errors
       (class_constructor_has_static) header_node
       [node] (SyntaxError.error2009 class_name method_name) modifiers in
-    let errors =
-      let missing_modifier env modifiers =
-        not (is_hhvm_compat env)
-        && is_hack env
-        && is_missing modifiers in
-      produce_error errors (missing_modifier env) modifiers
-      SyntaxError.error2054 header_node in
-    let errors =
-      produce_error_for_header errors
-      (class_destructor_has_non_visibility_modifier env)
-      header_node [node]
-      SyntaxError.error2012 modifiers in
     let errors =
       produce_error_for_header errors
       (class_destructor_cannot_be_static)
@@ -1214,10 +1066,6 @@ let methodish_errors env node parents errors =
     let errors =
       produce_error errors methodish_duplicate_modifier node
       SyntaxError.error2013 modifiers in
-    let fun_body = md.methodish_function_body in
-    let errors =
-      produce_error errors (methodish_abstract_with_body env) node
-      SyntaxError.error2014 fun_body in
     let fun_semicolon = md.methodish_semicolon in
     let errors =
       produce_error errors
@@ -1232,36 +1080,11 @@ let methodish_errors env node parents errors =
       methodish_abstract_conflict_with_final
       node (SyntaxError.error2019 class_name method_name) modifiers in
     let errors =
-      produce_error errors
-      (methodish_in_interface_has_body env node) parents
-      SyntaxError.error2041 md.methodish_function_body in
-    let errors =
-      (* default will never be used, since existence of abstract_keyword is a
-       * necessary condition for the production of an error. *)
-      let abstract_keyword = Option.value (extract_keyword is_abstract node)
-        ~default:node in
-      produce_error errors
-      (abstract_method_in_nonabstract_class env node) parents
-      (SyntaxError.error2044 class_name method_name) abstract_keyword in
-    let errors =
-      let abstract_keyword = Option.value (extract_keyword is_abstract node)
-        ~default:node in
-      produce_error errors
-      (abstract_method_in_interface env node) parents
-      SyntaxError.error2045 abstract_keyword in
-    let errors =
       let async_annotation = Option.value (extract_async_node node)
         ~default:node in
       produce_error errors
       (is_abstract_and_async_method node) parents
       SyntaxError.error2046 async_annotation in
-    let errors =
-      let visibility_node = Option.value (extract_visibility_node modifiers)
-        ~default:node in
-      let visibility_text = text visibility_node in (* is this option? *)
-      produce_error errors
-      (invalid_methodish_visibility_inside_interface env node)
-      parents (SyntaxError.error2047 visibility_text) visibility_node in
     let errors =
       special_method_param_errors
         md.methodish_function_decl_header parents errors in
@@ -1287,18 +1110,7 @@ let markup_errors env node errors =
   | MarkupSection { markup_prefix; _ }
     when env.is_hh_file && (token_kind markup_prefix) = Some TokenKind.QuestionGreaterThan ->
     make_error_from_node node SyntaxError.error2067 :: errors
-  | MarkupSuffix { markup_suffix_less_than_question; markup_suffix_name; }
-    when not (is_hhvm_compat env)
-    && not env.is_hh_file
-    && ((token_kind markup_suffix_less_than_question) = Some TokenKind.LessThanQuestion)
-    && (Syntax.extract_text markup_suffix_name <> Some "php") ->
-    make_error_from_node node SyntaxError.error2068 :: errors
   | _ -> errors
-
-let default_value_params env params =
-  match param_missing_default_value params with
-  | Some param when not (is_hhvm_compat env) && is_hack env -> Some param
-  | _ -> None
 
 let is_in_namespace parents =
   Hh_core.List.exists parents ~f:(fun node ->
@@ -1336,13 +1148,6 @@ let is_in_construct_method parents =
     String.lowercase_ascii s1 = String.lowercase_ascii s2
   | _ -> false
 
-(* Test if the parameter is missing a type annotation but one is required *)
-let missing_param_type_check env parameter_type parents =
-  let is_required = parameter_type_is_required parents in
-  not (is_hhvm_compat env)
-  && env.is_strict
-  && is_missing parameter_type
-  && is_required
 
 (* If a variadic parameter has a default value, return it *)
 let variadic_param_with_default_value params =
@@ -1369,9 +1174,6 @@ let param_with_callconv_is_byref node =
   | _ -> None
 
 let params_errors env params namespace_name names errors =
-  let errors =
-    produce_error_from_check errors (default_value_params env)
-    params SyntaxError.error2066 in
   let errors =
     produce_error_from_check errors ends_with_variadic_comma
     params SyntaxError.error2022 in
@@ -1410,9 +1212,7 @@ let decoration_errors node errors =
 let parameter_errors env node parents namespace_name names errors =
   match syntax node with
   | ParameterDeclaration p ->
-    let errors =
-      produce_error_parents errors (missing_param_type_check env)
-      p.parameter_type parents SyntaxError.error2001 node in
+
     let callconv_text = Option.value (extract_callconv_node node) ~default:node
       |> text in
     let errors =
@@ -1473,31 +1273,12 @@ let parameter_errors env node parents namespace_name names errors =
 let function_errors env node parents errors =
   match syntax node with
   | FunctionDeclarationHeader f ->
-    let missing_type_annot_check env _ =
-      let label = f.function_name in
-      let is_function = not (is_construct label) && not (is_destruct label) in
-      not (is_hhvm_compat env)
-      && env.is_strict
-      && is_missing f.function_type
-      && is_function in
-
-    let function_reference_check env _ =
-      not (is_hhvm_compat env)
-      && env.is_strict
-      && not (is_missing f.function_ampersand) in
 
     let special_autoload_function hhvm_compat_mode _ =
       let is_autoload =
         String.lowercase_ascii @@ (text f.function_name) = SN.SpecialFunctions.autoload in
       let num_params = List.length (syntax_to_list_no_separators f.function_parameter_list) in
       hhvm_compat_mode && is_autoload && num_params > 1 in
-
-    let errors =
-      produce_error errors (missing_type_annot_check env) ()
-      SyntaxError.error2001 f.function_right_paren in
-    let errors =
-      produce_error errors (function_reference_check env) ()
-      SyntaxError.error2064 f.function_ampersand in
     let errors =
       produce_error errors (special_autoload_function (is_hhvm_compat env)) ()
       SyntaxError.autoload_takes_one_argument node in
@@ -1554,12 +1335,6 @@ let is_foreach_in_for for_initializer =
 
 let statement_errors env node parents errors =
   let result = match syntax node with
-  | BreakStatement _
-    when not (is_hhvm_compat env || break_is_legal parents) ->
-    Some (node, SyntaxError.error2005)
-  | ContinueStatement _
-    when not (is_hhvm_compat env || continue_is_legal parents) ->
-    Some (node, SyntaxError.error2006)
   | TryStatement { try_catch_clauses; try_finally_clause; _ }
     when (is_missing try_catch_clauses) && (is_missing try_finally_clause) ->
     Some (node, SyntaxError.error2007)
@@ -1578,22 +1353,6 @@ let statement_errors env node parents errors =
 let property_errors env node errors =
   match syntax node with
   | PropertyDeclaration p ->
-      let missing_property_check env _ =
-        not (is_hhvm_compat env)
-        && env.is_strict
-        && is_missing (p.property_type) in
-      let invalid_var_check env _ =
-        not (is_hhvm_compat env)
-        && is_hack env
-        && (is_var p.property_modifiers) in
-
-      let errors =
-        produce_error errors (missing_property_check env) ()
-        SyntaxError.error2001 node in
-      let errors =
-        produce_error errors (invalid_var_check env) ()
-        SyntaxError.error2053 p.property_modifiers in
-
       let modifiers = syntax_to_list_no_separators p.property_modifiers in
       let errors = if Hh_core.List.exists ~f:is_final modifiers then
         make_error_from_node node SyntaxError.final_property :: errors
@@ -1766,10 +1525,6 @@ let expression_errors env node parents errors =
     end
   | SafeMemberSelectionExpression _ when not (is_hack env) ->
     make_error_from_node node SyntaxError.error2069 :: errors
-  | SubscriptExpression { subscript_left_bracket; _}
-    when not (is_hhvm_compat env)
-      && is_left_brace subscript_left_bracket ->
-    make_error_from_node node SyntaxError.error2020 :: errors
   | HaltCompilerExpression { halt_compiler_argument_list = args; _ } ->
     let errors =
       if Core_list.is_empty (syntax_to_list_no_separators args) then errors
@@ -1797,23 +1552,6 @@ let expression_errors env node parents errors =
     let errors =
       function_call_on_xhp_name_errors function_call_receiver errors in
     errors
-  | ConstructorCall ctr_call
-    when not (is_hhvm_compat env)
-      && is_hack env ->
-    if is_missing ctr_call.constructor_call_left_paren &&
-        is_missing ctr_call.constructor_call_right_paren
-    then
-      let start_node = ctr_call.constructor_call_type in
-      let end_node = ctr_call.constructor_call_type in
-      let constructor_name = text ctr_call.constructor_call_type in
-      make_error_from_nodes start_node end_node
-        (SyntaxError.error2038 constructor_name) :: errors
-    else
-      errors
-  | ListExpression le
-    when not (is_hhvm_compat env)
-      && (is_invalid_list_expression node parents) ->
-    make_error_from_node node SyntaxError.error2040 :: errors
   | ListExpression { list_members; _ }
     when is_hhvm_compat env ->
     begin match parents with
@@ -2000,9 +1738,6 @@ let require_errors env node parents trait_use_clauses errors =
     in
     let errors =
       match (containing_classish_kind parents, req_kind) with
-      | (Some TokenKind.Class, Some TokenKind.Extends)
-        when not (is_hhvm_compat env) ->
-        make_error_from_node node SyntaxError.error2029 :: errors
       | (Some TokenKind.Interface, Some TokenKind.Implements)
       | (Some TokenKind.Class, Some TokenKind.Implements) ->
         make_error_from_node node SyntaxError.error2030 :: errors
@@ -2039,31 +1774,12 @@ let check_type_name syntax_tree name namespace_name name_text location names err
 let classish_errors env node parents namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
-    (* Given a ClassishDeclaration node, test whether or not it contains
-     * an invalid use of 'implements'. *)
-    let classish_invalid_implements_keyword env _ =
-      (* Invalid if uses 'implements' and isn't a class. *)
-      not (is_hhvm_compat env) &&
-      token_kind cd.classish_implements_keyword = Some TokenKind.Implements &&
-        token_kind cd.classish_keyword <> Some TokenKind.Class in
-
     (* Given a ClassishDeclaration node, test whether or not it's a trait
      * invoking the 'extends' keyword. *)
     let classish_invalid_extends_keyword _ =
       (* Invalid if uses 'extends' and is a trait. *)
       token_kind cd.classish_extends_keyword = Some TokenKind.Extends &&
         token_kind cd.classish_keyword = Some TokenKind.Trait in
-
-    (* Given a ClassishDeclaration node, test whether or not length of
-     * extends_list is appropriate for the classish_keyword. *)
-    let classish_invalid_extends_list env _ =
-      (* Invalid if is a class and has list of length greater than one. *)
-      not (is_hhvm_compat env) &&
-      token_kind cd.classish_keyword = Some TokenKind.Class &&
-        token_kind cd.classish_extends_keyword = Some TokenKind.Extends &&
-        match syntax_to_list_no_separators cd.classish_extends_list with
-        | [x1] -> false
-        | _ -> true (* General bc empty list case is already caught by error1007 *) in
 
     (* Given a sealed ClassishDeclaration node, test whether all the params
      * are classnames. *)
@@ -2110,19 +1826,12 @@ let classish_errors env node parents namespace_name names errors =
       SyntaxError.error2031 cd.classish_modifiers in
     let errors =
       produce_error errors
-      (classish_invalid_implements_keyword env) ()
-      SyntaxError.error2035 cd.classish_implements_keyword in
+      (classish_sealed_arg_not_classname env) ()
+      SyntaxError.sealed_val_not_classname cd.classish_attribute in
     let errors =
       produce_error errors
       classish_invalid_extends_keyword ()
       SyntaxError.error2036 cd.classish_extends_keyword in
-    let errors =
-      produce_error errors (classish_invalid_extends_list env) ()
-      SyntaxError.error2037 cd.classish_extends_list in
-    let errors =
-      produce_error errors
-      (classish_sealed_arg_not_classname env) ()
-      SyntaxError.sealed_val_not_classname cd.classish_attribute in
     let errors =
       produce_error errors
       (classish_sealed_final env) ()
@@ -2131,39 +1840,6 @@ let classish_errors env node parents namespace_name names errors =
       produce_error errors
       (classish_sealed_trait env) ()
       SyntaxError.sealed_trait cd.classish_attribute in
-
-    let errors =
-      (* Extra setup for the the customized error message. *)
-      let keyword_str = Option.value_map (token_kind cd.classish_keyword)
-        ~default:"" ~f:TokenKind.to_string in
-      let declared_name_str =
-        Option.value ~default:"" (Syntax.extract_text cd.classish_name)
-      in
-      let function_str = Option.value (first_parent_function_name parents)
-        ~default:"" in
-      (* To avoid iterating through the whole parents list again, do a simple
-       * check on function_str rather than a harder one on cd or parents. *)
-      produce_error errors
-      (fun str -> not (is_hhvm_compat env)
-        && String.length str != 0) function_str
-      (SyntaxError.error2039 keyword_str declared_name_str function_str)
-      cd.classish_keyword in
-    let errors =
-      (* default will never be used, since existence of abstract_keyword is a
-       * necessary condition for the production of an error. *)
-      let abstract_keyword = Option.value (extract_keyword is_abstract node)
-        ~default:node in
-      produce_error errors
-      (is_classish_kind_declared_abstract env TokenKind.Interface)
-      node SyntaxError.error2042 abstract_keyword in
-    let errors =
-      (* default will never be used, since existence of abstract_keyword is a
-       * necessary condition for the production of an error. *)
-      let abstract_keyword = Option.value (extract_keyword is_abstract node)
-        ~default:node in
-      produce_error errors
-      (is_classish_kind_declared_abstract env TokenKind.Trait)
-      node SyntaxError.error2043 abstract_keyword in
     let errors =
       produce_error errors
       (is_reserved_keyword env) cd.classish_name
@@ -2228,12 +1904,6 @@ let class_element_errors _env node parents errors =
     make_error_from_node node SyntaxError.const_in_trait :: errors
   | _ -> errors
 
-let type_errors env node parents errors =
-  match syntax node with
-  | SimpleTypeSpecifier t ->
-    produce_error errors (type_contains_array_in_strict env)
-    t.simple_type_specifier SyntaxError.error2032 t.simple_type_specifier
-  | _ -> errors
 
 let alias_errors env node namespace_name names errors =
   match syntax node with
@@ -2579,10 +2249,6 @@ let const_decl_errors env node parents namespace_name names errors =
   match syntax node with
   | ConstantDeclarator cd ->
     let errors =
-      produce_error_parents errors
-      (concrete_no_initializer env) cd.constant_declarator_initializer parents
-      SyntaxError.error2050 cd.constant_declarator_initializer in
-    let errors =
       produce_error_parents errors abstract_with_initializer cd.constant_declarator_initializer parents
       SyntaxError.error2051 cd.constant_declarator_initializer in
     let errors =
@@ -2627,13 +2293,6 @@ let const_decl_errors env node parents namespace_name names errors =
     names, errors
   | _ -> names, errors
 
-let abstract_final_class_nonstatic_var_error env node parents errors =
-  match syntax node with
-  | PropertyDeclaration cd ->
-    produce_error_parents errors
-    (abstract_final_with_inst_var env) node parents
-    SyntaxError.error2061 cd.property_modifiers
-  | _ -> errors
 
 let class_property_multiple_visibility_error _env node parents errors =
   match syntax node with
@@ -2644,14 +2303,6 @@ let class_property_multiple_visibility_error _env node parents errors =
     (SyntaxError.property_has_multiple_visibilities first_parent_name) cd.property_modifiers
   | _ -> errors
 
-
-let abstract_final_class_nonstatic_method_error env node parents errors =
-  match syntax node with
-  | MethodishDeclaration cd ->
-    produce_error_parents errors
-    (abstract_final_with_method env) node parents
-    SyntaxError.error2062 cd.methodish_function_decl_header
-  | _ -> errors
 
 let mixed_namespace_errors env node parents namespace_type errors =
   match syntax node with
@@ -2915,14 +2566,6 @@ let declare_errors env node parents errors =
             make_error_from_node
               node SyntaxError.strict_types_first_statement :: errors
         in
-        let errors =
-          match syntax node with
-          | DeclareBlockStatement _
-            when not (is_hhvm_compat env) ->
-            make_error_from_node ~error_type:SyntaxError.RuntimeError
-              node SyntaxError.strict_types_in_declare_block_mode :: errors
-          | _ -> errors
-        in
         errors
       | _ -> errors
     in
@@ -2968,20 +2611,14 @@ let find_syntax_errors env =
       classish_errors env node parents namespace_name names errors in
     let errors =
       class_element_errors env node parents errors in
-    let errors =
-      type_errors env node parents errors in
     let names, errors = alias_errors env node namespace_name names errors in
     let errors = group_use_errors env node errors in
     let names, errors =
       const_decl_errors env node parents namespace_name names errors in
     let errors =
-      abstract_final_class_nonstatic_var_error env node parents errors in
+      mixed_namespace_errors env node parents namespace_type errors in
     let errors =
       class_property_multiple_visibility_error env node parents errors in
-    let errors =
-      abstract_final_class_nonstatic_method_error env node parents errors in
-    let errors =
-      mixed_namespace_errors env node parents namespace_type errors in
     let names, errors =
       namespace_use_declaration_errors env node
         (namespace_name = global_namespace_name) names errors in

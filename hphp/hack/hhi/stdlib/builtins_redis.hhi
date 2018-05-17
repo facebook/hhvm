@@ -8,6 +8,7 @@
  *
  */
 
+<<__PHPStdLib>>
 class Redis {
   const int REDIS_NOT_FOUND = 0;
   const int REDIS_STRING = 1;
@@ -195,9 +196,11 @@ class Redis {
   public function time() {}
 }
 
+<<__PHPStdLib>>
 class RedisException extends RuntimeException {
 }
 
+<<__PHPStdLib>>
 class RedisArray {
   public function __call($function_name, $arguments) {}
   public function __construct($name = '', array $hosts = array(), array $opts = array()) {}

@@ -281,22 +281,23 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
       * 60/200 = 0.3 *)
      t -. env.last_command_time > 0.3 in
 
-  let disk_recheck =
-    (* We have some new updates *)
-    (not @@ Relative_path.Set.is_empty updates) ||
-    (* ... or previously unprocessed ones *)
-    env.full_check = Full_check_started
+  let env = if Relative_path.Set.is_empty updates then env else { env with
+    disk_needs_parsing = Relative_path.Set.union updates env.disk_needs_parsing;
+    (* saving any file is our trigger to start full recheck *)
+    full_check = Full_check_started;
+  } in
+
+  (* We have some new, or previously un-processed updates *)
+  let full_check = env.full_check = Full_check_started
+    (* Prioritize building search index over full rechecks. *)
+    && Queue.is_empty SearchServiceRunner.SearchServiceRunner.queue
   in
-  let ide_recheck =
+  let lazy_check =
     (not @@ Relative_path.Set.is_empty env.ide_needs_parsing) && is_idle in
-  if (not disk_recheck) && (not ide_recheck) then
+  if (not full_check) && (not lazy_check) then
     acc, env
   else begin
-    let disk_needs_parsing =
-      Relative_path.Set.union updates env.disk_needs_parsing in
-
-    let env = { env with disk_needs_parsing } in
-    let check_kind = if disk_recheck
+    let check_kind = if full_check
       then ServerTypeCheck.Full_check
       else ServerTypeCheck.Lazy_check
     in
@@ -311,7 +312,7 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
     (* Avoid batching ide rechecks with disk rechecks - there might be
       * other ide edits to process first and we want to give the main loop
       * a chance to process them first. *)
-    if ide_recheck then acc, env else
+    if lazy_check then acc, env else
       recheck_loop acc genv env new_client has_persistent_connection_request
   end
 

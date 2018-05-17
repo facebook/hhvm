@@ -45,6 +45,10 @@ let command_needs_full_check = function
   | Stream LIST_FILES -> true (* Same as Rpc STATUS *)
   | _ -> false
 
+let is_edit : type a. a command -> bool = function
+  | Rpc EDIT_FILE _ -> true
+  | _ -> false
+
 let rpc_command_needs_writes : type a. a t -> bool  = function
   | OPEN_FILE _ -> true
   | EDIT_FILE _ -> true
@@ -297,7 +301,12 @@ let handle
   let full_recheck_needed = command_needs_full_check msg in
   let continuation = actually_handle genv client msg full_recheck_needed in
   if commands_needs_writes msg then
-    ServerUtils.Needs_writes (env, continuation)
+    (* IDE edits can come in quick succession and be immediately followed
+     * by time sensitivie queries (like autocomplete). There is a constant cost
+     * to stopping and resuming the global typechecking jobs, which leads to
+     * flaky experience. To avoid this, we don't restart the global rechecking
+     * after IDE edits - you need to save the file againg to restart it. *)
+    ServerUtils.Needs_writes (env, continuation, not (is_edit msg))
   else if full_recheck_needed then
     ServerUtils.Needs_full_recheck (env, continuation, ignore_ide msg)
   else

@@ -345,7 +345,7 @@ let fully_handle_command genv result =
   | ServerUtils.Needs_full_recheck (env, f, ignore_ide) ->
     let env = ServerCommand.full_recheck_if_needed genv env ignore_ide in
     f env
-  | ServerUtils.Needs_writes (env, f) -> f env
+  | ServerUtils.Needs_writes (env, f, _) -> f env
 
 let serve_one_iteration genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
@@ -466,7 +466,7 @@ let serve_one_iteration genv env client_provider =
   else env in
   let env = match env.pending_command_needs_writes with
     | Some f ->
-      let f = ServerUtils.Needs_writes (env, f) in
+      let f = ServerUtils.Needs_writes (env, f, true) in
       { (fully_handle_command genv f) with
         pending_command_needs_writes = None
       }
@@ -536,11 +536,19 @@ let persistent_client_interrupt_handler genv env =
       assert (Option.is_none env.pending_command_needs_full_check);
       {env with pending_command_needs_full_check = Some f},
         MultiThreadedCall.Continue
-    | ServerUtils.Needs_writes (env, f) ->
+    | ServerUtils.Needs_writes (env, f, should_restart_recheck) ->
+      let full_check = match env.full_check with
+        | Full_check_started when not should_restart_recheck ->
+            Full_check_needed
+        | x -> x
+      in
       (* this should not be possible, because persistent client will not send
        * the next command before receiving results from the previous one *)
       assert (Option.is_none env.pending_command_needs_writes);
-      {env with pending_command_needs_writes = Some f}, MultiThreadedCall.Cancel
+      { env with
+        pending_command_needs_writes = Some f;
+        full_check;
+      }, MultiThreadedCall.Cancel
     | ServerUtils.Done env -> env, MultiThreadedCall.Continue
 
 let setup_interrupts env client_provider = { env with

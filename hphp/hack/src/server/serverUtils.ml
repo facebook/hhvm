@@ -16,8 +16,10 @@ type 'env handle_command_result =
    * full check to complete handling of command. The boolean indicates whether
    * IDE contents should be ignored during this recheck. *)
   | Needs_full_recheck of 'env * ('env -> 'env) * bool
-  (* Commands that want to modify global state, by modifying file contents *)
-  | Needs_writes of 'env * ('env -> 'env)
+  (* Commands that want to modify global state, by modifying file contents.
+   * The boolean indicates whether current recheck should be automatically
+   * restarted after applying the writes *)
+  | Needs_writes of 'env * ('env -> 'env) * bool
 
 let shutdown_client (_ic, oc) =
   let cli = Unix.descr_of_out_channel oc in

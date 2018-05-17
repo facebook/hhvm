@@ -81,7 +81,7 @@ namespace {
 inline ArrayData* alloc_packed_static(size_t cap) {
   auto size = sizeof(ArrayData) + cap * sizeof(TypedValue);
   auto ret = RuntimeOption::EvalLowStaticArrays ? low_malloc(size)
-                                                : malloc(size);
+                                                : uncounted_malloc(size);
   return static_cast<ArrayData*>(ret);
 }
 

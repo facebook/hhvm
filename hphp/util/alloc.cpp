@@ -634,14 +634,7 @@ void* low_malloc_impl(size_t size) {
   void* ptr = mallocx(size, low_mallocx_flags());
 #ifndef USE_LOWPTR
   if (!ptr) {
-    if (size < size2m) {
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
-      low_arena = 0;
-#else
-      dss_arena = 0;
-#endif
-    }
-    return malloc(size);
+    return uncounted_malloc(size);
   }
 #endif
   return ptr;

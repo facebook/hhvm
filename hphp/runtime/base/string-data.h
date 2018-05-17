@@ -60,7 +60,7 @@ enum CopyStringMode { CopyString };
  * StringDatas can also be allocated in multiple ways.  Normally, they
  * are created through one of the Make overloads, which drops them in
  * the request-local heap.  They can also be low-malloced (for static
- * strings), or malloc'd (MakeMalloc) for APC shared or uncounted strings.
+ * strings), or uncounted-malloced for APC shared or uncounted strings.
  *
  * Here's a breakdown of string modes, and which configurations are
  * allowed in which allocation mode:

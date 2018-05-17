@@ -726,9 +726,10 @@ SSATmp* resolveTypeStructImpl(IRGS& env, const ArrayData* ts, bool suppress) {
   );
 }
 
-bool emitIsTypeStructWithoutResolvingIfPossible(
+bool emitIsAsTypeStructWithoutResolvingIfPossible(
   IRGS& env,
-  const ArrayData* ts
+  const ArrayData* ts,
+  bool asExpr
 ) {
   auto const t = topC(env);
   auto const is_nullable_ts = is_ts_nullable(ts);
@@ -740,8 +741,10 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     return true;
   };
 
-  auto const success = [&] { return cnsResult(true); };
-  auto const fail = [&] { return cnsResult(false); };
+  // For as expressions, if the check succeeds, we want to return true without
+  // doing anything whereas if it fails, we want the full asTypeStruct to run
+  auto const success = [&] { return asExpr ? true : cnsResult(true); };
+  auto const fail = [&] { return asExpr ? false : cnsResult(false); };
 
   auto const check_nullable = [&] (SSATmp* res, SSATmp* var) {
     return cond(
@@ -756,6 +759,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     auto const nty = is_nullable_ts ? ty|TNull : ty;
     if (t->isA(nty)) return should_negate ? fail() : success();
     if (!t->type().maybe(nty)) return should_negate ? success() : fail();
+    if (asExpr) return false;
     auto const c = popC(env);
     auto const res = gen(env, should_negate ? IsNType : IsType, ty, c);
     push(env, is_nullable_ts ? check_nullable(res, c) : res);
@@ -767,6 +771,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     auto const ty = is_nullable_ts ? ty1|ty2|TNull : ty1|ty2;
     if (t->isA(ty)) return success();
     if (!t->type().maybe(ty)) return fail();
+    if (asExpr) return false;
     auto const c = popC(env);
     ifThenElse(
       env,
@@ -804,6 +809,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_vec_or_dict: return unionOf(TVec, TDict);
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
+      if (asExpr) return false;
       push(env, implInstanceOfD(env, t, get_ts_classname(ts)));
       decRef(env, popC(env));
       return true;
@@ -831,7 +837,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
 } // namespace
 
 void emitIsTypeStruct(IRGS& env, const ArrayData* a) {
-  if (emitIsTypeStructWithoutResolvingIfPossible(env, a)) return;
+  if (emitIsAsTypeStructWithoutResolvingIfPossible(env, a, false)) return;
   auto const tc = resolveTypeStructImpl(env, a, true);
   auto const c = popC(env);
   push(env, gen(env, IsTypeStruct, tc, c));
@@ -845,8 +851,11 @@ void emitAsTypeStruct(IRGS& env, const ArrayData* a) {
    * run is-check first and if it fails run the as-check to generate the
    * exception
    */
-  // TODO(T28423611): Use something like
-  // emitIsTypeStructWithoutResolvingIfPossible to elide instructions
+  if (emitIsAsTypeStructWithoutResolvingIfPossible(env, a, true)) {
+    // This means that the check will succeed, so this instruction is a no-op
+    push(env, popC(env));
+    return;
+  }
   auto const c = topC(env);
   auto const tc = resolveTypeStructImpl(env, a, false);
   ifThen(

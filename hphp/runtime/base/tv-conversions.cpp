@@ -1293,23 +1293,8 @@ static bool tvCanBeCoercedToNumber(const TypedValue* tv,
       return !RuntimeOption::PHP7_ScalarTypes || builtin;
 
     case KindOfPersistentString:
-    case KindOfString: {
-      // Simplified version of is_numeric_string
-      // which also allows for non-numeric garbage
-      // Because PHP
-      auto str = tv->m_data.pstr;
-      auto p = str->data();
-      auto l = tv->m_data.pstr->size();
-      while (l && isspace(*p)) { ++p; --l; }
-      if (l && (*p == '+' || *p == '-')) { ++p; --l; }
-      if (l && *p == '.') { ++p; --l; }
-      bool okay = l && isdigit(*p);
-      // In PHP7 garbage at the end of a numeric string will trigger a notice
-      if (RuntimeOption::PHP7_ScalarTypes && okay && !str->isNumeric()) {
-        raise_notice("A non well formed numeric value encountered");
-      }
-      return okay;
-    }
+    case KindOfString:
+      return tv->m_data.pstr->isNumeric();
 
     case KindOfPersistentVec:
     case KindOfVec:

@@ -844,7 +844,8 @@ let type_check genv env kind =
       ServerBusyStatus.send env ServerCommandTypes.Done_local_typecheck;
       res
     | Full_check ->
-      ServerBusyStatus.send env ServerCommandTypes.Doing_global_typecheck;
+      ServerBusyStatus.send env
+        (ServerCommandTypes.Doing_global_typecheck env.can_interrupt);
       let (env, _, _) as res = FC.type_check genv env in
       if env.full_check = Full_check_done then
         ServerBusyStatus.send env ServerCommandTypes.Done_global_typecheck;

@@ -167,7 +167,8 @@ let handle_connection_ genv env client =
       (* If the client connected in the middle of recheck, let them know it's
        * happening. *)
       if env.full_check = Full_check_started then
-        ServerBusyStatus.send env ServerCommandTypes.Doing_global_typecheck;
+        ServerBusyStatus.send env
+          (ServerCommandTypes.Doing_global_typecheck env.can_interrupt);
       ServerUtils.Done env
     | Non_persistent ->
       ServerCommand.handle genv env client
@@ -342,8 +343,8 @@ let new_serve_iteration_id () =
 let fully_handle_command genv result =
   match result with
   | ServerUtils.Done env ->  env
-  | ServerUtils.Needs_full_recheck (env, f, ignore_ide) ->
-    let env = ServerCommand.full_recheck_if_needed genv env ignore_ide in
+  | ServerUtils.Needs_full_recheck (env, f, ignore_ide, reason) ->
+    let env = ServerCommand.full_recheck_if_needed genv env ignore_ide reason in
     f env
   | ServerUtils.Needs_writes (env, f, _) -> f env
 
@@ -473,8 +474,8 @@ let serve_one_iteration genv env client_provider =
     | None -> env
   in
   let env = match env.pending_command_needs_full_check with
-    | Some f ->
-      let f = ServerUtils.Needs_full_recheck (env, f, false) in
+    | Some (f, reason) ->
+      let f = ServerUtils.Needs_full_recheck (env, f, false, reason) in
       { (fully_handle_command genv f) with
         pending_command_needs_full_check = None
       }
@@ -527,14 +528,14 @@ let persistent_client_interrupt_handler genv env =
    * the persistent client before we get to it. *)
   | None -> env, MultiThreadedCall.Continue
   | Some client -> match handle_connection genv env client true with
-    | ServerUtils.Needs_full_recheck (env, f, ignore_ide) ->
+    | ServerUtils.Needs_full_recheck (env, f, ignore_ide, reason) ->
       (* This is only possible for STATUS, which is not a persistent client
        * command. *)
       assert (not ignore_ide);
       (* This should not be possible, because persistent client will not send
        * the next command before receiving results from the previous one. *)
       assert (Option.is_none env.pending_command_needs_full_check);
-      {env with pending_command_needs_full_check = Some f},
+      {env with pending_command_needs_full_check = Some (f, reason)},
         MultiThreadedCall.Continue
     | ServerUtils.Needs_writes (env, f, should_restart_recheck) ->
       let full_check = match env.full_check with
@@ -666,6 +667,7 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     load_tiny_state;
     use_full_fidelity_parser;
     interrupt_on_watchman;
+    interrupt_on_client;
     _
   } as local_config = local_config in
   List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
@@ -689,6 +691,7 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     load_tiny_state
     use_full_fidelity_parser
     interrupt_on_watchman
+    interrupt_on_client
     ;
   let root_s = Path.to_string root in
   let check_mode = ServerArgs.check_mode options in

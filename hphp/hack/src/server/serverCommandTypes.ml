@@ -218,7 +218,7 @@ and busy_status =
   | Needs_local_typecheck
   | Doing_local_typecheck
   | Done_local_typecheck
-  | Doing_global_typecheck
+  | Doing_global_typecheck of bool (* interruptible? *)
   | Done_global_typecheck
 
 type 'a persistent_connection_message_type =

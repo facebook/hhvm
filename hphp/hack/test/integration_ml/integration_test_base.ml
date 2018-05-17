@@ -276,7 +276,7 @@ let assert_has_diagnostics loop_output =
       | Needs_local_typecheck -> "Needs_local_typecheck"
       | Doing_local_typecheck -> "Doing_local_typecheck"
       | Done_local_typecheck -> "Done_local_typecheck"
-      | Doing_global_typecheck -> "Doing_global_typecheck"
+      | Doing_global_typecheck _ -> "Doing_global_typecheck"
       | Done_global_typecheck -> "Done_global_typecheck"
     in
     let msg =

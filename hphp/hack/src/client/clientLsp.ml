@@ -48,7 +48,8 @@ type hh_server_state =
   | Hh_server_denying_connection
   | Hh_server_unknown
   | Hh_server_typechecking_local
-  | Hh_server_typechecking_global
+  | Hh_server_typechecking_global_blocking
+  | Hh_server_typechecking_global_interruptible
   | Hh_server_stolen
   | Hh_server_forgot
 
@@ -203,7 +204,8 @@ let hh_server_state_to_string (hh_server_state: hh_server_state) : string =
   | Hh_server_stopped -> "hh_server stopped"
   | Hh_server_stolen -> "hh_server stolen"
   | Hh_server_typechecking_local -> "hh_server typechecking (local)"
-  | Hh_server_typechecking_global -> "hh_server typechecking (global)"
+  | Hh_server_typechecking_global_blocking -> "hh_server typechecking (global, blocking)"
+  | Hh_server_typechecking_global_interruptible -> "hh_server typechecking (global, interruptible)"
   | Hh_server_handling_or_ready -> "hh_server ready"
   | Hh_server_unknown -> "hh_server unknown state"
   | Hh_server_forgot -> "hh_server forgotten state"
@@ -287,7 +289,9 @@ let update_hh_server_state_if_necessary (event: event) : unit =
     | BUSY_STATUS Done_local_typecheck
     | BUSY_STATUS Done_global_typecheck -> set_hh_server_state Hh_server_handling_or_ready
     | BUSY_STATUS Doing_local_typecheck -> set_hh_server_state Hh_server_typechecking_local
-    | BUSY_STATUS Doing_global_typecheck -> set_hh_server_state Hh_server_typechecking_global
+    | BUSY_STATUS Doing_global_typecheck can_interrupt -> set_hh_server_state
+      (if can_interrupt then Hh_server_typechecking_global_interruptible
+      else Hh_server_typechecking_global_blocking)
     | NEW_CLIENT_CONNECTED -> set_hh_server_state Hh_server_stolen
     | DIAGNOSTIC _
     | FATAL_EXCEPTION _
@@ -1240,7 +1244,8 @@ let do_server_busy (state: state) (status: ServerCommandTypes.busy_status) : sta
     | Needs_local_typecheck -> (Some "Hack: preparing to check edits", None)
     | Doing_local_typecheck -> (Some "Hack: checking edits", None)
     | Done_local_typecheck -> (None, Some "Hack: save any file to do a whole-program check")
-    | Doing_global_typecheck -> (Some "Hack: checking entire project", None)
+    | Doing_global_typecheck true -> (Some "Hack: checking entire project (interruptible)", None)
+    | Doing_global_typecheck false -> (Some "Hack: checking entire project (blocking)", None)
     | Done_global_typecheck -> (None, None)
   in
   (* Following code is subtle. Thanks to the magic of the notify_ functions,  *)

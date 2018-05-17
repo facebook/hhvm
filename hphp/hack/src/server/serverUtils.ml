@@ -14,8 +14,10 @@ type 'env handle_command_result =
   | Done of 'env
   (* Returned continuation needs to be run with an environment after finished
    * full check to complete handling of command. The boolean indicates whether
-   * IDE contents should be ignored during this recheck. *)
-  | Needs_full_recheck of 'env * ('env -> 'env) * bool
+   * IDE contents should be ignored during this recheck. The string specifies a
+   * reason why this command needs full recheck (for logging/debugging purposes)
+   *)
+  | Needs_full_recheck of 'env * ('env -> 'env) * bool * string
   (* Commands that want to modify global state, by modifying file contents.
    * The boolean indicates whether current recheck should be automatically
    * restarted after applying the writes *)

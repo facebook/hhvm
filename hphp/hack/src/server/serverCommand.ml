@@ -61,13 +61,14 @@ let commands_needs_writes = function
   | Rpc x -> rpc_command_needs_writes x
   | _ -> false
 
-let full_recheck_if_needed' genv env =
+let full_recheck_if_needed' genv env reason =
 if
   ServerEnv.(env.full_check = Full_check_done) &&
   (Relative_path.Set.is_empty env.ServerEnv.ide_needs_parsing)
 then
   env
 else
+  let () = Hh_logger.log "Starting a blocking type-check due to %s" reason in
   let env, _, _ = ServerTypeCheck.(check genv env Full_check) in
   assert (ServerEnv.(env.full_check = Full_check_done));
   env
@@ -87,14 +88,14 @@ let get_unsaved_changes env  =
   let changes = ServerFileSync.get_unsaved_changes env in
   Relative_path.Map.(map ~f:fst changes, map ~f:snd changes)
 
-let full_recheck_if_needed genv env ignore_ide =
+let full_recheck_if_needed genv env ignore_ide reason =
   if ignore_ide then
     let ide, disk = get_unsaved_changes env in
     let env = apply_changes env disk in
-    let env = full_recheck_if_needed' genv env in
+    let env = full_recheck_if_needed' genv env reason in
     apply_changes env ide
   else
-    full_recheck_if_needed' genv env
+    full_recheck_if_needed' genv env reason
 
 (****************************************************************************)
 (* Called by the client *)
@@ -308,6 +309,7 @@ let handle
      * after IDE edits - you need to save the file againg to restart it. *)
     ServerUtils.Needs_writes (env, continuation, not (is_edit msg))
   else if full_recheck_needed then
-    ServerUtils.Needs_full_recheck (env, continuation, ignore_ide msg)
+    let reason = ServerCommandTypesUtils.debug_describe_cmd msg in
+    ServerUtils.Needs_full_recheck (env, continuation, ignore_ide msg, reason)
   else
     ServerUtils.Done (continuation env)

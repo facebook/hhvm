@@ -1656,14 +1656,33 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* instanceOfImpl(State& env, ClassSpec spec1, ClassSpec spec2) {
-  if (!spec1 || !spec2) return nullptr;
-
-  auto const cls1 = spec1.cls();
+SSATmp* instanceOfImpl(State& env, SSATmp* ssatmp1, ClassSpec spec2) {
+  assertx(ssatmp1->type() <= TCls);
+  if (!spec2) return nullptr;
   auto const cls2 = spec2.cls();
 
+  ClassSpec spec1 = ssatmp1->type().clsSpec();
+  if (spec2.exact() && spec1 && spec1.cls()->classof(cls2)) {
+    return cns(env, true);
+  }
+
+  // If spec2 is exact and we have an instance bit for it, use
+  // InstanceOfBitmask.
+  const bool useInstanceBits = InstanceBits::initted() ||
+                               env.unit.context().kind == TransKind::Optimize;
+  if (spec2.exact() && useInstanceBits) {
+    InstanceBits::init();
+    if (InstanceBits::lookup(cls2->name()) != 0) {
+      return gen(env, InstanceOfBitmask, ssatmp1, cns(env, cls2->name()));
+    }
+  }
+
+  if (!spec1) return nullptr;
+  auto const cls1 = spec1.cls();
+
   if (cls1->classof(cls2)) {
-    return spec2.exact() ? cns(env, true) : nullptr;
+    assertx(!spec2.exact()); // the exact case is handled above
+    return nullptr;
   }
 
   if (isInterface(cls1)) return nullptr;
@@ -1704,7 +1723,7 @@ SSATmp* simplifyInstanceOf(State& env, const IRInstruction* inst) {
     }
   }
 
-  return instanceOfImpl(env, src1->type().clsSpec(), src2->type().clsSpec());
+  return instanceOfImpl(env, src1, src2->type().clsSpec());
 }
 
 SSATmp* simplifyExtendsClass(State& env, const IRInstruction* inst) {
@@ -1712,7 +1731,7 @@ SSATmp* simplifyExtendsClass(State& env, const IRInstruction* inst) {
   auto const cls2 = inst->extra<ExtendsClassData>()->cls;
   assertx(cls2 && isNormalClass(cls2));
   auto const spec2 = ClassSpec{cls2, ClassSpec::ExactTag{}};
-  return instanceOfImpl(env, src1->type().clsSpec(), spec2);
+  return instanceOfImpl(env, src1, spec2);
 }
 
 SSATmp* simplifyInstanceOfBitmask(State& env, const IRInstruction* inst) {
@@ -1760,7 +1779,7 @@ SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
   assertx(cls2 && isInterface(cls2));
   auto const spec2 = ClassSpec{cls2, ClassSpec::ExactTag{}};
 
-  return instanceOfImpl(env, src1->type().clsSpec(), spec2);
+  return instanceOfImpl(env, src1, spec2);
 }
 
 SSATmp* simplifyIsType(State& env, const IRInstruction* i) {

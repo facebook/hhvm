@@ -80,6 +80,11 @@ void profile(const StringData* name) {
   assertx(name->isStatic());
   unsigned inc = 1;
   Class* c = Unit::lookupClass(name);
+
+  // Don't profile final classes since they can be checked more efficiently via
+  // direct pointer comparison through ExtendsClass than via InstanceOfBitmask.
+  if (c && (c->attrs() & AttrNoOverride)) return;
+
   if (c && (c->attrs() & AttrInterface)) {
     // Favor interfaces
     inc = 250;

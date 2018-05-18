@@ -1782,6 +1782,21 @@ SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
   return instanceOfImpl(env, src1, spec2);
 }
 
+SSATmp* simplifyInstanceOfIfaceVtable(State& env, const IRInstruction* inst) {
+  auto const src0 = inst->src(0);
+  auto const iface = inst->extra<InstanceOfIfaceVtable>()->cls;
+  const bool useInstanceBits = InstanceBits::initted() ||
+                               env.unit.context().kind == TransKind::Optimize;
+  if (useInstanceBits) {
+    InstanceBits::init();
+    auto const ifaceName = iface->name();
+    if (InstanceBits::lookup(ifaceName) != 0) {
+      return gen(env, InstanceOfBitmask, src0, cns(env, ifaceName));
+    }
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyIsType(State& env, const IRInstruction* i) {
   return isTypeImpl(env, i);
 }
@@ -3712,6 +3727,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(InitObjProps)
   X(InstanceOf)
   X(InstanceOfIface)
+  X(InstanceOfIfaceVtable)
   X(IsNType)
   X(IsType)
   X(IsWaitHandle)

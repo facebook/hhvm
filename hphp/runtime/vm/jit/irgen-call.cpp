@@ -319,6 +319,7 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
 bool optimizeProfiledPushMethod(IRGS& env,
                                 TargetProfile<MethProfile>& profile,
                                 SSATmp* objOrCls,
+                                const Class* knownClass,
                                 Block* sideExit,
                                 const StringData* methodName,
                                 uint32_t numParams,
@@ -391,14 +392,17 @@ bool optimizeProfiledPushMethod(IRGS& env,
     return true;
   }
 
+  // If we know anything about the class, other than it's an interface, the
+  // remaining cases aren't worth the extra check.
+  if (knownClass != nullptr && !isInterface(knownClass)) return false;
+
   if (auto const baseMeth = data.baseMeth()) {
     if (!baseMeth->name()->isame(methodName)) {
       return false;
     }
 
-    // The method was defined in a common base class.  We just need to
-    // check for an instance of the class, and then use the method
-    // from the right slot.
+    // The method was defined in a common base class.  We just need to check for
+    // an instance of the class, and then use the method from the right slot.
     auto const ctx = getCtx(baseMeth, objOrCls, nullptr);
     auto const cls = isStaticCall ? objOrCls : gen(env, LdObjClass, objOrCls);
     auto flag = gen(env, ExtendsClass,
@@ -417,11 +421,17 @@ bool optimizeProfiledPushMethod(IRGS& env,
     return true;
   }
 
+  // If we know anything about the class, the other cases below are not worth
+  // the extra checks they insert.
+  if (knownClass != nullptr) return false;
+
   if (auto const intfMeth = data.interfaceMeth()) {
     if (!intfMeth->name()->isame(methodName)) {
       return false;
     }
-    // The method was defined in a common interface
+
+    // The method was defined in a common interface, so check for that and use
+    // LdIfaceMethod.
     auto const ctx = getCtx(intfMeth, objOrCls, nullptr);
     auto const cls = isStaticCall ? objOrCls : gen(env, LdObjClass, objOrCls);
     auto flag = gen(env, InstanceOfIfaceVtable,
@@ -448,29 +458,37 @@ void fpushObjMethod(IRGS& env,
   emitIncStat(env, Stats::ObjMethod_total, 1);
 
   assertx(obj->type() <= TObj);
+  const Class* knownClass = nullptr;
+  bool exactClass = false;
+
   if (auto cls = obj->type().clsSpec().cls()) {
     if (!env.irb->constrainValue(obj, TypeConstraint(cls).setWeak())) {
-      // If we know the class without having to specialize a guard any further,
-      // use it.
-      fpushObjMethodWithBaseClass(
-        env, obj, cls, methodName, numParams, shouldFatal,
-        obj->type().clsSpec().exact() || cls->attrs() & AttrNoOverride);
-      return;
+      // We know the class without having to specialize a guard any further.  We
+      // may still want to use MethProfile to gather more information in case
+      // the class isn't known exactly.
+      knownClass = cls;
+      exactClass = obj->type().clsSpec().exact() ||
+                   cls->attrs() & AttrNoOverride;
     }
   }
 
+  // If we don't know anything about the object's class, or all we know is an
+  // interface that it implements, then enable PGO.
+  const bool usePGO = !knownClass || isInterface(knownClass);
+
   folly::Optional<TargetProfile<MethProfile>> profile;
-  if (RuntimeOption::RepoAuthoritative) {
+  if (usePGO && RuntimeOption::RepoAuthoritative) {
     profile.emplace(env.context, env.irb->curMarker(), methProfileKey.get());
 
-    if (optimizeProfiledPushMethod(env, *profile, obj, sideExit,
+    // If we know the class exactly without profiling, then we don't need PGO.
+    if (optimizeProfiledPushMethod(env, *profile, obj, knownClass, sideExit,
                                    methodName, numParams, false)) {
       return;
     }
   }
 
-  fpushObjMethodWithBaseClass(env, obj, nullptr, methodName, numParams,
-                              shouldFatal, false);
+  fpushObjMethodWithBaseClass(env, obj, knownClass, methodName, numParams,
+                              shouldFatal, exactClass);
 
   if (profile && profile->profiling()) {
     gen(env,
@@ -1169,7 +1187,7 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
         !forward) {
       profile.emplace(env.context, env.irb->curMarker(), methProfileKey.get());
 
-      if (optimizeProfiledPushMethod(env, *profile, clsVal, sideExit,
+      if (optimizeProfiledPushMethod(env, *profile, clsVal, nullptr, sideExit,
                                      methodName, numParams, dynamic)) {
         killCls();
         return;

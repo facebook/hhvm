@@ -1,0 +1,14 @@
+File "dict.php", line 4, characters 9-12:
+The type dict expects 2 type parameter(s) (Typing[4101])
+File "dict.php", line 6, characters 16-17:
+Invalid argument (Typing[4110])
+  File "dict.php", line 22, characters 28-30:
+  This is an int
+  File "dict.php", line 4, characters 3-4:
+  It is incompatible with a value of generic type Tk#1 from this "as" assertion
+File "dict.php", line 12, characters 16-17:
+Invalid argument (Typing[4110])
+  File "dict.php", line 22, characters 28-30:
+  This is an int
+  File "dict.php", line 10, characters 3-4:
+  It is incompatible with a value of generic type Tk#1 from this "as" assertion

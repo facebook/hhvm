@@ -1,4 +1,4 @@
 File "invalid_hint_generic.php", line 5, characters 3-13:
-  T
+  mixed
 File "invalid_hint_generic.php", line 4, characters 9-9:
 The "as" operator cannot be used with a value of generic type T (Typing[4195])

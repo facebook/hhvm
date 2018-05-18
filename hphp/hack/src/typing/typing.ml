@@ -2166,7 +2166,7 @@ and expr_
       Errors.experimental_feature p "as expression";
       expr_error env p (Reason.Rnone)
     end else begin
-      let env, _, _ = expr env e in
+      let env, te, _ = expr env e in
       let env, hint_ty = Phase.hint_locl env hint in
       let hint_ty =
         if not is_nullable then hint_ty else
@@ -2174,14 +2174,32 @@ and expr_
           (* Dont create ??hint *)
           | _ , Toption _ -> hint_ty
           | _ -> Reason.Rwitness p, Toption (hint_ty) in
-      let env, te, ty = assign p env e hint_ty in
+      let refine_type () =
+        if not (is_instance_var e)
+        then env, hint_ty
+        else begin
+          let env, _, ivar_ty = raw_expr ~in_cond:false env e in
+          let env, ((ivar_pos, _) as ivar) = get_instance_var env e in
+          let env, hint_ty = Env.expand_type env hint_ty in
+          let env, hint_ty =
+            if snd hint_ty <> Tdynamic && SubType.is_sub_type env ivar_ty hint_ty
+            then env, ivar_ty
+            else begin
+              let reason = Reason.Ras ivar_pos in
+              safely_refine_type env p reason ivar_pos ivar_ty hint_ty
+            end in
+          let env = set_local env ivar hint_ty in
+          env, hint_ty
+        end in
       match IsAsExprHint.validate env hint_ty with
         | IsAsExprHint.Valid ->
-          make_result env (T.As (te, hint, is_nullable)) ty
+          let env, hint_ty = refine_type () in
+          make_result env (T.As (te, hint, is_nullable)) hint_ty
         | IsAsExprHint.Partial (r, ty_) ->
           Errors.partially_valid_is_as_expression_hint (Reason.to_pos r) "as"
             (IsAsExprHint.print ty_);
-          make_result env (T.As (te, hint, is_nullable)) ty
+          let env, hint_ty = refine_type () in
+          make_result env (T.As (te, hint, is_nullable)) hint_ty
         | IsAsExprHint.Invalid (r, ty_) ->
           Errors.invalid_is_as_expression_hint (Reason.to_pos r) "as"
             (IsAsExprHint.print ty_);
@@ -5839,33 +5857,6 @@ and condition ?lhs_of_null_coalesce env tparamet =
     (* Resolve the typehint to a type *)
     let env, hint_ty = Phase.hint_locl env h in
     let reason = Reason.Ris ivar_pos in
-    let rec safely_refine_type env ivar_ty hint_ty =
-      match snd ivar_ty, snd hint_ty with
-        | _, Tclass ((_, cid) as _c, tyl) ->
-          begin match Env.get_class env cid with
-            | Some class_info ->
-              let env, tparams_with_new_names, tyl_fresh =
-                isexpr_generate_fresh_tparams env class_info reason tyl in
-              safely_refine_class_type
-                env p _c class_info ivar_ty hint_ty tparams_with_new_names
-                tyl_fresh
-            | None ->
-              env, (Reason.Rwitness ivar_pos, Tobject)
-          end
-        | Ttuple ivar_tyl, Ttuple hint_tyl
-          when (List.length ivar_tyl) = (List.length hint_tyl) ->
-          let env, tyl = List.map2_env env ivar_tyl hint_tyl safely_refine_type in
-          env, (reason, Ttuple tyl)
-        | _, Tnonnull ->
-          TUtils.non_null env ivar_ty
-        | _, Tabstract (AKdependent (`this, []), Some (_, Tclass _)) ->
-          ExprDepTy.make env CIstatic hint_ty
-        | _, (Tany | Tmixed | Tprim _ | Toption _ | Ttuple _
-            | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
-            | Tunresolved _ | Tobject | Terr | Tfun _  | Tdynamic) ->
-          (* TODO(kunalm) Implement the type refinement for each type *)
-          env, hint_ty
-    in
     begin match IsAsExprHint.validate env hint_ty with
       | IsAsExprHint.Invalid _ -> env
       | IsAsExprHint.Partial _
@@ -5875,7 +5866,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
         let env, hint_ty =
           if snd hint_ty <> Tdynamic && SubType.is_sub_type env ivar_ty hint_ty
           then env, ivar_ty
-          else safely_refine_type env ivar_ty hint_ty in
+          else safely_refine_type env p reason ivar_pos ivar_ty hint_ty in
         set_local env ivar hint_ty
     end
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null))
@@ -5885,6 +5876,37 @@ and condition ?lhs_of_null_coalesce env tparamet =
   | e ->
       let env, _ = expr env e in
       env
+
+and safely_refine_type env p reason ivar_pos ivar_ty hint_ty =
+  match snd ivar_ty, snd hint_ty with
+    | _, Tclass ((_, cid) as _c, tyl) ->
+      begin match Env.get_class env cid with
+        | Some class_info ->
+          let env, tparams_with_new_names, tyl_fresh =
+            isexpr_generate_fresh_tparams env class_info reason tyl in
+          safely_refine_class_type
+            env p _c class_info ivar_ty hint_ty tparams_with_new_names
+            tyl_fresh
+        | None ->
+          env, (Reason.Rwitness ivar_pos, Tobject)
+      end
+    | Ttuple ivar_tyl, Ttuple hint_tyl
+      when (List.length ivar_tyl) = (List.length hint_tyl) ->
+      let env, tyl =
+        List.map2_env env ivar_tyl hint_tyl begin fun env ivar_ty hint_ty ->
+          safely_refine_type env p reason ivar_pos ivar_ty hint_ty
+        end
+      in
+      env, (reason, Ttuple tyl)
+    | _, Tnonnull ->
+      TUtils.non_null env ivar_ty
+    | _, Tabstract (AKdependent (`this, []), Some (_, Tclass _)) ->
+      ExprDepTy.make env CIstatic hint_ty
+    | _, (Tany | Tmixed | Tprim _ | Toption _ | Ttuple _
+        | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
+        | Tunresolved _ | Tobject | Terr | Tfun _  | Tdynamic) ->
+      (* TODO(kunalm) Implement the type refinement for each type *)
+      env, hint_ty
 
 and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
   (* Generate fresh names consisting of formal type parameter name

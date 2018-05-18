@@ -129,7 +129,7 @@ struct ClassData : IRExtraData {
   }
 
   size_t hash() const {
-    return hash_int64(reinterpret_cast<intptr_t>(cls));
+    return pointer_hash<Class>()(cls);
   }
 
   const Class* cls;
@@ -156,7 +156,7 @@ struct ResolveTypeStructData : IRExtraData {
   }
 
   size_t hash() const {
-    return hash_int64(reinterpret_cast<intptr_t>(cls));
+    return pointer_hash<Class>()(cls) ^ (suppress ? -1 : 0);
   }
 
   const Class* cls;
@@ -183,7 +183,7 @@ struct ExtendsClassData : IRExtraData {
   }
 
   size_t hash() const {
-    return pointer_hash<Class>()(cls);
+    return pointer_hash<Class>()(cls) ^ (strictLikely ? -1 : 0);
   }
 
   const Class* cls;

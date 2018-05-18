@@ -58,6 +58,8 @@ val status :
   ServerEnv.env *
     (ServerCommandTypes.Server_status.t, 'a) loop_outputs
 
+val full_check : ServerEnv.env -> ServerEnv.env * ('a, unit) loop_outputs
+
 val prepend_root: string -> string
 
 val errors_to_string : Pos.absolute Errors.error_ list -> string

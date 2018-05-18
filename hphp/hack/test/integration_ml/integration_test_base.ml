@@ -264,6 +264,11 @@ let status ?(ignore_ide=false) env =
     new_client = Some (RequestResponse (ServerCommandTypes.STATUS ignore_ide))
   }
 
+let full_check env =
+  run_loop_once env { default_loop_input with
+    disk_changes = ["__dummy_file_to_trigger_full_check.php", ""]
+  }
+
 let assert_no_diagnostics loop_output =
   match loop_output.push_message with
   | Some (DIAGNOSTIC _) ->

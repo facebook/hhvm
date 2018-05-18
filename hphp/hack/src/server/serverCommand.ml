@@ -307,12 +307,16 @@ let actually_handle genv client msg full_recheck_needed = fun env ->
   );
   match msg with
   | Rpc cmd ->
-    begin try
       ClientProvider.ping client;
       let t = Unix.gettimeofday () in
-      let new_env, response = ServerRpc.handle
+      let new_env, response = try ServerRpc.handle
         ~is_stale:env.ServerEnv.recent_recheck_loop_stats.ServerEnv.updates_stale
-        genv env cmd in
+        genv env cmd
+      with e ->
+        let stack = Printexc.get_backtrace () in
+        if ServerCommandTypes.is_critical_rpc cmd then raise e
+        else raise (Nonfatal_rpc_exception (e, stack, env))
+      in
       let cmd_string = ServerCommandTypesUtils.debug_describe_t cmd in
       HackEventLogger.handled_command cmd_string t;
       ClientProvider.send_response_to_client client response t;
@@ -321,11 +325,6 @@ let actually_handle genv client msg full_recheck_needed = fun env ->
         then ClientProvider.shutdown_client client;
       if ServerCommandTypes.is_kill_rpc cmd then ServerUtils.die_nicely ();
       new_env
-    with e ->
-      let stack = Printexc.get_backtrace () in
-      if ServerCommandTypes.is_critical_rpc cmd then raise e
-      else raise (Nonfatal_rpc_exception (e, stack, env))
-    end
   | Stream cmd ->
       let ic, oc = ClientProvider.get_channels client in
       stream_response genv env (ic, oc) ~cmd;

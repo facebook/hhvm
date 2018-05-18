@@ -18,6 +18,8 @@
 
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/emulate-zend.h"
+#include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/compiler/compiler.h"
 #include "hphp/hhbbc/hhbbc.h"
@@ -25,6 +27,8 @@
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/embedded-vfs.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/stack-trace.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/text-util.h"
 
 #include <folly/Format.h>
@@ -111,10 +115,40 @@ int main(int argc, char** argv) {
 #ifdef __linux__
 
 static bool s_forkDisabledInMainProcess = false;
+static bool s_forkLoggedInMainProcess = false;
 static const pid_t s_mainPid = getpid();  // child process id will differ
 
 void DisableFork() {
   s_forkDisabledInMainProcess = true;
+}
+
+void EnableForkLogging() {
+  s_forkLoggedInMainProcess = true;
+}
+
+static void logForkAttempt(const char* func_name) {
+  try {
+    HPHP::StructuredLogEntry sample;
+    HPHP::StackTrace st(HPHP::StackTrace::Force{});
+    sample.setStr("function", func_name);
+    sample.setStackTrace("cpp_stack", st);
+
+    if (!HPHP::g_context.isNull() && !HPHP::tl_sweeping) {
+      auto bt = HPHP::createBacktrace(
+        HPHP::BacktraceArgs().ignoreArgs(true)
+      );
+      HPHP::addBacktraceToStructLog(bt, sample);
+      auto transport = HPHP::g_context->getTransport();
+      if (transport) {
+        sample.setStr("url", transport->getUrl());
+        sample.setStr("host_header", transport->getHeader("Host"));
+      }
+    }
+
+    HPHP::StructuredLog::log("hhvm_forking", sample);
+  } catch (...) {
+    HPHP::Logger::Warning("Failed to log forking attempt");
+  }
 }
 
 // Shared logic around all forking function wrappers:
@@ -127,6 +161,12 @@ template<class FUNC_PTR>
 static FUNC_PTR forking_wrapper(FUNC_PTR* real_func, const char* func_name) {
   if (*real_func == nullptr) {
     *real_func = (FUNC_PTR)dlsym(RTLD_NEXT, func_name);
+  }
+
+  if (s_forkLoggedInMainProcess &&
+      getpid() == s_mainPid &&
+      HPHP::StructuredLog::enabled()) {
+    logForkAttempt(func_name);
   }
 
   if (!s_forkDisabledInMainProcess || getpid() != s_mainPid) {

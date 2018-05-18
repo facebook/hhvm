@@ -52,6 +52,7 @@
 
 #ifdef __linux__
 void DisableFork() __attribute__((__weak__));
+void EnableForkLogging() __attribute__((__weak__));
 #endif
 
 namespace HPHP {
@@ -391,6 +392,20 @@ void HttpServer::runOrExitProcess() {
                      [] {
                        Process::OOMScoreAdj(1000);
                      });
+#endif
+    }
+    if (RuntimeOption::ServerForkLogging) {
+#ifdef __linux__
+      if (EnableForkLogging) {
+        EnableForkLogging();
+      } else {
+        // the binary we are building is not HHVM.  It is probably
+        // some tests, don't intercept fork().
+        Logger::Warning("ignored runtime option Server.Forking.Log=true");
+      }
+#else
+      Logger::Warning("ignored Server.Forking.Log=true "
+                      "as it only works on Linux");
 #endif
     }
     if (RuntimeOption::EvalServerOOMAdj < 0) {

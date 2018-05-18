@@ -165,6 +165,7 @@ struct RuntimeOption {
   static bool ServerAddVaryEncoding;
   static bool ServerLogSettingsOnStartup;
   static bool ServerForkEnabled;
+  static bool ServerForkLogging;
   static std::vector<std::string> ServerWarmupRequests;
   static std::string ServerCleanupRequest;
   static int ServerInternalWarmupThreads;

@@ -697,7 +697,7 @@ and emit_as env pos e h is_nullable =
     end else begin
       let namespace = Emit_env.get_namespace env in
       let tv = Emit_type_constant.hint_to_type_constant
-        ~is_typedef:true ~tparams:["HH\\_"] ~namespace h in
+        ~tparams:[] ~namespace h in
       gather [
         emit_expr ~need_ref:false env e;
         instr_astypestruct @@ Emit_adata.get_array_identifier tv
@@ -710,7 +710,7 @@ and emit_is ?(skip_check=false) env pos h =
   else
     let namespace = Emit_env.get_namespace env in
     let ts = Emit_type_constant.hint_to_type_constant
-      ~is_typedef:true ~tparams:["HH\\_"] ~namespace h in
+      ~tparams:[] ~namespace h in
     instr_istypestruct @@ Emit_adata.get_array_identifier ts
 
 and emit_null_coalesce env pos e1 e2 =

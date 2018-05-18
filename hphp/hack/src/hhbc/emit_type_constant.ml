@@ -125,7 +125,8 @@ and resolve_classname ~tparams ~namespace (p, s) =
   let s = add_ns namespace (p, Types.fix_casing s) in
   if is_prim s || is_resolved_classname s then [], s
   else
-    let id = if List.mem tparams s then "name" else "classname" in
+    let is_tparam = List.mem tparams s || (String.lowercase_ascii s) = "hh\\_" in
+    let id = if is_tparam then "name" else "classname" in
     [TV.String id, TV.String s], s
 
 and get_generic_types ~tparams ~namespace = function

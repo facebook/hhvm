@@ -35,6 +35,20 @@ struct StaticString;
 
 namespace {
 
+struct TSEnv {
+  bool allow_partial{};
+
+  // Passed in by ref variables from the caller
+
+  // Initial value true since something can only lose persistence
+  bool persistent{true};
+  // Initial value false since unless we have to resort to partial
+  // evaluation, nothing is partial
+  bool partial{};
+  // Initial value false since unless proven there are no invalid types
+  bool invalidType{};
+};
+
 /*
  * These static strings are the same as the ones in
  * hphp/compiler/type_annotation.cpp, where the typeAnnotArrays are
@@ -320,23 +334,23 @@ std::string fullName(const Array& arr, bool forDisplay) {
   return name;
 }
 
-Array resolveTS(const Array& arr,
+Array resolveTS(TSEnv& env,
+                const Array& arr,
                 const Class::Const& typeCns,
                 const Class* typeCnsCls,
-                const Array& generics,
-                bool& persistent);
+                const Array& generics);
 
-Array resolveList(const Array& arr,
+Array resolveList(TSEnv& env,
+                  const Array& arr,
                   const Class::Const& typeCns,
                   const Class* typeCnsCls,
-                  const Array& generics,
-                  bool& persistent) {
+                  const Array& generics) {
   auto const sz = arr.size();
 
   VArrayInit newarr(sz);
   for (auto i = 0; i < sz; i++) {
     auto elemArr = arr[i].toArray();
-    auto elem = resolveTS(elemArr, typeCns, typeCnsCls, generics, persistent);
+    auto elem = resolveTS(env, elemArr, typeCns, typeCnsCls, generics);
     newarr.append(Variant(elem));
   }
 
@@ -360,27 +374,32 @@ std::string resolveContextMsg(const Class::Const& typeCns,
 
 /* returns the unresolved TypeStructure; if aliasName is not an alias,
  * return an empty Array. */
-Array getAlias(const String& aliasName, bool& persistent) {
+Array getAlias(TSEnv& env, const String& aliasName) {
   if (aliasName.same(s_this) || Unit::lookupClass(aliasName.get())) {
     return Array::CreateDArray();
   }
 
   auto persistentTA = true;
-  auto typeAliasReq = Unit::loadTypeAlias(aliasName.get(), &persistentTA);
-  if (!typeAliasReq) return Array::CreateDArray();
+  auto typeAliasReq = env.allow_partial
+    ? Unit::lookupTypeAlias(aliasName.get(), &persistentTA)
+    : Unit::loadTypeAlias(aliasName.get(), &persistentTA);
+  if (!typeAliasReq) {
+    env.partial = true;
+    return Array::CreateDArray();
+  }
 
   // this returned type structure is unresolved.
   assertx(typeAliasReq->typeStructure.isDictOrDArray());
-  persistent &= persistentTA;
+  env.persistent &= persistentTA;
   return typeAliasReq->typeStructure;
 }
 
-const Class* getClass(const String& clsName,
+const Class* getClass(TSEnv& env,
+                      const String& clsName,
                       const Class::Const& typeCns,
-                      const Class* typeCnsCls,
-                      bool& persistent) {
-  auto checkPersistent = [&persistent](const Class* cls) {
-    persistent &= classHasPersistentRDS(cls);
+                      const Class* typeCnsCls) {
+  auto checkPersistent = [&](const Class* cls) {
+    env.persistent &= classHasPersistentRDS(cls);
     return cls;
   };
 
@@ -411,7 +430,7 @@ const Class* getClass(const String& clsName,
   }
 
   auto name = clsName;
-  auto ts = getAlias(name, persistent);
+  auto ts = getAlias(env, name);
   while (!ts.empty()) {
     assertx(ts.exists(s_kind));
     if (!ts.exists(s_classname)) {
@@ -422,11 +441,14 @@ const Class* getClass(const String& clsName,
         name.data());
     }
     name = ts[s_classname].toCStrRef();
-    ts = getAlias(name, persistent);
+    ts = getAlias(env, name);
   }
 
-  auto const cls = Unit::loadClass(name.get());
+  auto const cls = env.allow_partial ? Unit::lookupClass(name.get())
+                                     : Unit::loadClass(name.get());
   if (!cls) {
+    env.partial = true;
+    if (env.allow_partial) return nullptr;
     throw Exception(
       "%s, class %s not found",
       resolveContextMsg(typeCns, typeCnsCls).c_str(),
@@ -439,11 +461,11 @@ const Class* getClass(const String& clsName,
 /* Given an unresolved T_shape TypeStructure, returns the __fields__
  * portion of the array with all the field names resolved to string
  * literals. */
-Array resolveShape(const Array& arr,
+Array resolveShape(TSEnv& env,
+                   const Array& arr,
                    const Class::Const& typeCns,
                    const Class* typeCnsCls,
-                   const Array& generics,
-                   bool& persistent) {
+                   const Array& generics) {
   assertx(arr.exists(s_kind));
   assertx(static_cast<TypeStructure::Kind>(arr[s_kind].toInt64Val())
          == TypeStructure::Kind::T_shape);
@@ -463,7 +485,8 @@ Array resolveShape(const Array& arr,
       folly::split("::", clsCns, clsName, cnsName);
 
       // look up clsName::cnsName
-      auto cls = getClass(String(clsName), typeCns, typeCnsCls, persistent);
+      auto cls = getClass(env, String(clsName), typeCns, typeCnsCls);
+      if (!cls) throw Exception("failed to resolve shape classname");
       auto cnsValue = cls->clsCnsGet(String(cnsName).get());
 
       if (isStringType(cnsValue.m_type) || isIntType(cnsValue.m_type)) {
@@ -477,8 +500,7 @@ Array resolveShape(const Array& arr,
     }
     assertx(wrapper.exists(s_value));
     auto valueArr = wrapper[s_value].toArray();
-    auto value =
-      resolveTS(valueArr, typeCns, typeCnsCls, generics, persistent);
+    auto value = resolveTS(env, valueArr, typeCns, typeCnsCls, generics);
 
     if (wrapper.exists(s_optional_shape_field)) {
       value.add(s_optional_shape_field, true_varNR.tv());
@@ -490,12 +512,13 @@ Array resolveShape(const Array& arr,
   return newfields;
 }
 
-void resolveClass(Array& ret,
+bool resolveClass(TSEnv& env,
+                  Array& ret,
                   const String& clsName,
                   const Class::Const& typeCns,
-                  const Class* typeCnsCls,
-                  bool& persistent) {
-  auto const cls = getClass(clsName, typeCns, typeCnsCls, persistent);
+                  const Class* typeCnsCls) {
+  auto const cls = getClass(env, clsName, typeCns, typeCnsCls);
+  if (!cls) return false;
 
   TypeStructure::Kind resolvedKind;
   if (isNormalClass(cls)) {
@@ -504,6 +527,7 @@ void resolveClass(Array& ret,
     resolvedKind = TypeStructure::Kind::T_interface;
   } else if (isTrait(cls)) {
     resolvedKind = TypeStructure::Kind::T_trait;
+    env.invalidType = true;
   } else if (isEnum(cls)) {
     resolvedKind = TypeStructure::Kind::T_enum;
   } else {
@@ -512,22 +536,23 @@ void resolveClass(Array& ret,
 
   ret.set(s_kind, Variant(static_cast<uint8_t>(resolvedKind)));
   ret.add(s_classname, Variant(makeStaticString(cls->name())));
+  return true;
 }
 
-Array resolveGenerics(const Array& arr,
+Array resolveGenerics(TSEnv& env,
+                      const Array& arr,
                       const Class::Const& typeCns,
                       const Class* typeCnsCls,
-                      const Array& generics,
-                      bool& persistent) {
+                      const Array& generics) {
   auto genericsArr = arr[s_generic_types].toArray();
-  return resolveList(genericsArr, typeCns, typeCnsCls, generics, persistent);
+  return resolveList(env, genericsArr, typeCns, typeCnsCls, generics);
 }
 
-Array resolveTS(const Array& arr,
+Array resolveTS(TSEnv& env,
+                const Array& arr,
                 const Class::Const& typeCns,
                 const Class* typeCnsCls,
-                const Array& generics,
-                bool& persistent) {
+                const Array& generics) {
   assertx(arr.exists(s_kind));
   auto const kind = static_cast<TypeStructure::Kind>(
     arr[s_kind].toInt64Val());
@@ -545,21 +570,22 @@ Array resolveTS(const Array& arr,
       assertx(arr.exists(s_elem_types));
       auto const elemsArr = arr[s_elem_types].toCArrRef();
       auto const elemTypes =
-        resolveList(elemsArr, typeCns, typeCnsCls, generics, persistent);
+        resolveList(env, elemsArr, typeCns, typeCnsCls, generics);
       newarr.add(s_elem_types, Variant(elemTypes));
       break;
     }
     case TypeStructure::Kind::T_fun: {
+      env.invalidType = true;
       assertx(arr.exists(s_return_type));
       auto const returnArr = arr[s_return_type].toCArrRef();
       auto const returnType =
-        resolveTS(returnArr, typeCns, typeCnsCls, generics, persistent);
+        resolveTS(env, returnArr, typeCns, typeCnsCls, generics);
       newarr.add(s_return_type, Variant(returnType));
 
       assertx(arr.exists(s_param_types));
       auto const paramsArr = arr[s_param_types].toCArrRef();
       auto const paramTypes =
-        resolveList(paramsArr, typeCns, typeCnsCls, generics, persistent);
+        resolveList(env, paramsArr, typeCns, typeCnsCls, generics);
       newarr.add(s_param_types, Variant(paramTypes));
       break;
     }
@@ -568,23 +594,32 @@ Array resolveTS(const Array& arr,
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict: {
+      if (kind == TypeStructure::Kind::T_array) env.invalidType = true;
       if (arr.exists(s_generic_types)) {
         newarr.add(s_generic_types,
-                   Variant(resolveGenerics(arr, typeCns, typeCnsCls,
-                                           generics, persistent)));
+                   Variant(resolveGenerics(env, arr, typeCns, typeCnsCls,
+                                           generics)));
       }
       break;
     }
     case TypeStructure::Kind::T_shape: {
-      auto const fields =
-        resolveShape(arr, typeCns, typeCnsCls, generics, persistent);
+      auto const fields = resolveShape(env, arr, typeCns, typeCnsCls, generics);
       newarr.add(s_fields, Variant(fields));
       break;
     }
     case TypeStructure::Kind::T_unresolved: {
       assertx(arr.exists(s_classname));
       auto const clsName = arr[s_classname].toCStrRef();
-      auto ts = getAlias(clsName, persistent);
+      auto ts = getAlias(env, clsName);
+
+      auto resolve = [&] (const Array& generics = Array()) {
+        Class::Const typeCns;
+        typeCns.name = clsName.get();
+        auto resolved = resolveTS(env, ts, typeCns, nullptr, generics);
+        resolved.add(s_alias, Variant(clsName));
+        return resolved;
+      };
+
       if (!ts.empty()) {
         if (ts.exists(s_typevars) && arr.exists(s_generic_types)) {
           std::vector<std::string> typevars;
@@ -592,7 +627,7 @@ Array resolveTS(const Array& arr,
           ts.remove(s_typevars);
 
           auto generic_types =
-            resolveGenerics(arr, typeCns, typeCnsCls, generics, persistent);
+            resolveGenerics(env, arr, typeCns, typeCnsCls, generics);
 
           auto const sz = std::min(static_cast<ssize_t>(typevars.size()),
                                    generic_types.size());
@@ -601,10 +636,10 @@ Array resolveTS(const Array& arr,
             newarr.add(String(typevars[i]), generic_types[i]);
           }
           auto generics = newarr.toArray();
-          ts = TypeStructure::resolve(clsName, ts, persistent, generics);
+          ts = resolve(generics);
           ts.add(s_typevar_types, Variant(generics));
         } else {
-          ts = TypeStructure::resolve(clsName, ts, persistent);
+          ts = resolve();
         }
         if (arr.exists(s_nullable)) {
           ts.add(s_nullable, true_varNR.tv());
@@ -623,11 +658,19 @@ Array resolveTS(const Array& arr,
         newarr.add(s_classname, Variant(clsName));
         break;
       }
-      resolveClass(newarr, clsName, typeCns, typeCnsCls, persistent);
+      if (!resolveClass(env, newarr, clsName, typeCns, typeCnsCls) &&
+          env.allow_partial) {
+        env.partial = true;
+        newarr.add(s_kind,
+                   Variant(static_cast<uint8_t>(
+                           TypeStructure::Kind::T_unresolved)));
+        newarr.add(s_classname, Variant(clsName));
+        break;
+      }
       if (arr.exists(s_generic_types)) {
         newarr.add(s_generic_types,
-                   Variant(resolveGenerics(arr, typeCns, typeCnsCls,
-                                           generics, persistent)));
+                   Variant(resolveGenerics(env, arr, typeCns, typeCnsCls,
+                                           generics)));
       }
       break;
     }
@@ -643,7 +686,8 @@ Array resolveTS(const Array& arr,
       auto const sz = accList.size();
       Array typeCnsVal;
       for (auto i = 0; i < sz; i++) {
-        auto const cls = getClass(clsName, typeCns, typeCnsCls, persistent);
+        auto const cls = getClass(env, clsName, typeCns, typeCnsCls);
+        if (!cls) throw Exception("failed to resolve type access");
         auto const cnsName = accList[i].toCStrRef();
         if (!cls->hasTypeConstant(cnsName.get())) {
           throw Exception(
@@ -684,6 +728,7 @@ Array resolveTS(const Array& arr,
       return typeCnsVal;
     }
     case TypeStructure::Kind::T_typevar: {
+      env.invalidType = true;
       assertx(arr.exists(s_name));
       auto const name = arr[s_name].toCStrRef();
       return generics.exists(name) ? generics[name].toDArray() : arr.toDArray();
@@ -724,8 +769,11 @@ Array TypeStructure::resolve(const Class::Const& typeCns,
   assertx(typeCns.name);
   assertx(typeCnsCls);
 
+  TSEnv env;
   Array arr(typeCns.val.m_data.parr);
-  return resolveTS(arr, typeCns, typeCnsCls, Array(), persistent);
+  auto resolved = resolveTS(env, arr, typeCns, typeCnsCls, Array());
+  persistent = env.persistent;
+  return resolved;
 }
 
 /*
@@ -738,10 +786,11 @@ Array TypeStructure::resolve(const String& aliasName,
   // use a bogus constant to store the name
   Class::Const typeCns;
   typeCns.name = aliasName.get();
-
-  auto newarr = resolveTS(arr, typeCns, nullptr, generics, persistent);
-  newarr.add(s_alias, Variant(aliasName));
-  return newarr;
+  TSEnv env;
+  auto resolved = resolveTS(env, arr, typeCns, nullptr, generics);
+  resolved.add(s_alias, Variant(aliasName));
+  persistent = env.persistent;
+  return resolved;
 }
 
 /*
@@ -755,7 +804,33 @@ Array TypeStructure::resolve(const Array& ts,
   Class::Const typeCns;
   typeCns.name = nullptr;
   typeCns.cls = declCls;
-  return resolveTS(ts, typeCns, typeCnsCls, Array(), persistent);
+  TSEnv env;
+  auto resolved = resolveTS(env, ts, typeCns, typeCnsCls, Array());
+  persistent = env.persistent;
+  return resolved;
+}
+
+/*
+ * Called when resolving anonymous type structures, e.g. from `is` expressions
+ * while allowing partial resolution.
+ */
+Array TypeStructure::resolvePartial(const Array& ts,
+                                    const Class* typeCnsCls,
+                                    const Class* declCls,
+                                    bool& persistent,
+                                    bool& partial,
+                                    bool& invalidType) {
+  // Use a bogus constant, because the type structure is anonymous.
+  Class::Const typeCns;
+  typeCns.name = nullptr;
+  typeCns.cls = declCls;
+  TSEnv env;
+  env.allow_partial = true;
+  auto resolved = resolveTS(env, ts, typeCns, typeCnsCls, Array());
+  persistent = env.persistent;
+  partial = env.partial;
+  invalidType = env.invalidType;
+  return resolved;
 }
 
 } // namespace HPHP

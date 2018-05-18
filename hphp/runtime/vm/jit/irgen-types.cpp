@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
+#include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
@@ -709,9 +710,6 @@ void emitInstanceOf(IRGS& env) {
 namespace {
 
 SSATmp* resolveTypeStructImpl(IRGS& env, const ArrayData* ts, bool suppress) {
-  // TODO(T28423611): If we know that the type structure cannot contain `this`
-  // references, we should be able to resolve the type structure at compile time
-  // and elide this instruction altogether.
   auto const declaringCls = curFunc(env) ? curClass(env) : nullptr;
   auto const calledCls =
     declaringCls && typeStructureCouldBeNonStatic(ArrNR(ts))
@@ -724,6 +722,25 @@ SSATmp* resolveTypeStructImpl(IRGS& env, const ArrayData* ts, bool suppress) {
     cns(env, ts),
     calledCls
   );
+}
+
+const ArrayData* staticallyResolveTypeStructure(
+  IRGS& env,
+  const ArrayData* ts,
+  bool& partial,
+  bool& invalidType
+) {
+  auto const declaringCls = curFunc(env) ? curClass(env) : nullptr;
+  bool persistent = false;
+  try {
+    auto newTS = TypeStructure::resolvePartial(
+      ArrNR(ts), nullptr, declaringCls, persistent, partial, invalidType);
+    if (persistent) return ArrayData::GetScalarArray(std::move(newTS));
+  } catch (Exception& e) {}
+  // We are here because either we threw in the resolution or it wasn't
+  // persistent resolution which means we didn't really resolve it
+  partial = true;
+  return ts;
 }
 
 bool emitIsAsTypeStructWithoutResolvingIfPossible(
@@ -846,8 +863,15 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
 } // namespace
 
 void emitIsTypeStruct(IRGS& env, const ArrayData* a) {
-  if (emitIsAsTypeStructWithoutResolvingIfPossible(env, a, false)) return;
-  auto const tc = resolveTypeStructImpl(env, a, true);
+  bool partial = true;
+  bool invalidType = true;
+  auto const newTS =
+    staticallyResolveTypeStructure(env, a, partial, invalidType);
+  if (emitIsAsTypeStructWithoutResolvingIfPossible(env, newTS, false)) return;
+
+  auto const tc = partial || invalidType
+    ? resolveTypeStructImpl(env, a, true)
+    : cns(env, newTS);
   auto const c = popC(env);
   push(env, gen(env, IsTypeStruct, tc, c));
   decRef(env, c);
@@ -860,13 +884,19 @@ void emitAsTypeStruct(IRGS& env, const ArrayData* a) {
    * run is-check first and if it fails run the as-check to generate the
    * exception
    */
-  if (emitIsAsTypeStructWithoutResolvingIfPossible(env, a, true)) {
+  bool partial = true;
+  bool invalidType = true;
+  auto const newTS =
+    staticallyResolveTypeStructure(env, a, partial, invalidType);
+  if (emitIsAsTypeStructWithoutResolvingIfPossible(env, newTS, true)) {
     // This means that the check will succeed, so this instruction is a no-op
     push(env, popC(env));
     return;
   }
   auto const c = topC(env);
-  auto const tc = resolveTypeStructImpl(env, a, false);
+  auto const tc = partial || invalidType
+    ? resolveTypeStructImpl(env, a, false)
+    : cns(env, newTS);
   ifThen(
     env,
     [&](Block* taken) {

@@ -71,6 +71,11 @@ enum class Kind : uint8_t {
 String toString(const Array& arr);
 String toStringForDisplay(const Array& arr);
 
+/*
+ * All resolve functions ignore the initial value present in the
+ * persistent flag
+ */
+
 Array resolve(const Class::Const& typeCns,
               const Class* typeCnsCls,
               bool& persistent);
@@ -84,6 +89,22 @@ Array resolve(const Array& ts,
               const Class* typeCnsCls,
               const Class* declCls,
               bool& persistent);
+
+/*
+ * Allows partially resolving a type structure.
+ * Does not call the autoloader.
+ * If the resulting type structure is persistent, persistent will be set.
+ * If the resulting type structure is only partially resolved,
+ * partial will be set, otherwise it will be unset.
+ * If the type structure contains an invalid type for is/as expressions,
+ * invalidType will be set.
+ */
+Array resolvePartial(const Array& ts,
+                     const Class* typeCnsCls,
+                     const Class* declCls,
+                     bool& persistent,
+                     bool& partial,
+                     bool& invalidType);
 
 }
 

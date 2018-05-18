@@ -17,6 +17,7 @@ module type RefsType = sig
 
   val set_client_request: 'a ServerCommandTypes.t option -> unit
   val set_client_response: 'a option -> unit
+  val set_unclean_disconnect: bool -> unit
 
   val set_persistent_client_request: 'a ServerCommandTypes.t option -> unit
   val set_persistent_client_response: 'a option  -> unit
@@ -26,6 +27,7 @@ module type RefsType = sig
 
   val get_client_request: unit -> 'a ServerCommandTypes.t option
   val get_client_response: unit -> 'a option
+  val get_unclean_disconnect: unit -> bool
 
   val get_persistent_client_request: unit -> 'b
   val get_persistent_client_response: unit -> 'a option
@@ -40,6 +42,7 @@ module Refs : RefsType = struct
    * function, which is untypeable. Hence, Obj.magic *)
   let client_request = Obj.magic (ref None)
   let client_response = Obj.magic (ref None)
+  let unclean_disconnect = ref false
   let persistent_client_request = Obj.magic (ref None)
   let persistent_client_response = Obj.magic (ref None)
 
@@ -48,12 +51,14 @@ module Refs : RefsType = struct
   let set_new_client_type x = new_client_type := x
   let set_client_request x = client_request := x
   let set_client_response x = client_response := x
+  let set_unclean_disconnect x = unclean_disconnect := x
   let set_persistent_client_request x = persistent_client_request := x
   let set_persistent_client_response x = persistent_client_response := x
   let set_push_message x = push_message := x
 
   let get_new_client_type () = !new_client_type
   let get_client_response () = !client_response
+  let get_unclean_disconnect () = !unclean_disconnect
   let get_client_request () = !client_request
   let get_persistent_client_request () = !persistent_client_request
   let get_persistent_client_response () = !persistent_client_response
@@ -63,6 +68,7 @@ module Refs : RefsType = struct
     set_new_client_type None;
     set_client_request None;
     set_client_response None;
+    set_unclean_disconnect false;
     set_persistent_client_request None;
     set_persistent_client_response None;
     set_persistent_client_response None;
@@ -75,6 +81,8 @@ let mock_new_client_type x = Refs.set_new_client_type (Some x)
 
 let mock_client_request x = Refs.set_client_request (Some x)
 
+let mock_unclean_disconnect () = Refs.set_unclean_disconnect true
+
 let mock_persistent_client_request x =
   Refs.set_persistent_client_request (Some x)
 
@@ -85,6 +93,12 @@ let get_mocked_client_request = function
       Refs.get_client_request ()
   | Persistent ->
       Refs.get_persistent_client_request ()
+
+let get_mocked_unclean_disconnect = function
+  | Non_persistent ->
+    false
+  | Persistent ->
+    Refs.get_unclean_disconnect ()
 
 let record_client_response x = function
   | Non_persistent ->
@@ -127,7 +141,9 @@ let accept_client _ = Non_persistent
 
 let read_connection_type _ = Utils.unsafe_opt (get_mocked_new_client_type ())
 
-let send_response_to_client c x _t = record_client_response x c
+let send_response_to_client c x _t =
+  if get_mocked_unclean_disconnect c then raise Client_went_away else
+  record_client_response x c
 
 let send_push_message_to_client _ x = record_push_message x
 

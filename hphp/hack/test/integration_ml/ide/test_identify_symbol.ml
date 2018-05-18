@@ -51,7 +51,7 @@ let () =
   let env = Test.connect_persistent_client env in
 
   let _, loop_output = Test.(run_loop_once env { default_loop_input with
-    persistent_client_request = Some identify_foo_request
+    persistent_client_request = Some (Request identify_foo_request)
   }) in
 
   check_identify_foo_response loop_output.persistent_client_response

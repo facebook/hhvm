@@ -86,8 +86,13 @@ let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
   | ConnectPersistent ->
     TestClientProvider.mock_new_client_type Persistent);
 
-  Option.iter inputs.persistent_client_request
-    TestClientProvider.mock_persistent_client_request;
+  Option.iter inputs.persistent_client_request (function
+    | Request x ->
+      TestClientProvider.mock_persistent_client_request x
+    | UncleanDisconect x ->
+      TestClientProvider.mock_persistent_client_request x;
+      TestClientProvider.mock_unclean_disconnect ()
+  );
 
   let client_provider = ClientProvider.provider_for_test () in
 
@@ -199,9 +204,9 @@ let assertSingleError expected err_list =
 
 let subscribe_diagnostic ?(id=4) env =
   let env, _ = run_loop_once env { default_loop_input with
-    persistent_client_request = Some (
+    persistent_client_request = Some (Request (
       SUBSCRIBE_DIAGNOSTIC id
-    )
+    ))
   } in
   fail_on_none "Expected to subscribe to push diagnostics"
     env.ServerEnv.diag_subscribe;
@@ -214,23 +219,23 @@ let open_file env ?contents file_name =
     | _ -> TestDisk.get file_name
   in
   let env, loop_output = run_loop_once env { default_loop_input with
-    persistent_client_request = Some (OPEN_FILE (file_name, contents))
+    persistent_client_request = Some (Request (OPEN_FILE (file_name, contents)))
   } in
   assert_responded "Expected OPEN_FILE to be processeded" loop_output;
   env
 
 let edit_file env name contents =
   let env, loop_output = run_loop_once env { default_loop_input with
-    persistent_client_request = Some (EDIT_FILE
+    persistent_client_request = Some (Request (EDIT_FILE
       (root ^ name, [{Ide_api_types.range = None; text = contents;}])
-    )
+    ))
   } in
   assert_responded "Expected EDIT_FILE to be processed" loop_output;
   env, loop_output
 
 let close_file env name =
   let env, loop_output = run_loop_once env { default_loop_input with
-    persistent_client_request = Some (CLOSE_FILE (root ^ name))
+    persistent_client_request = Some (Request (CLOSE_FILE (root ^ name)))
   } in
   assert_responded "Expected CLOSE_FILE to be processeded" loop_output;
   env, loop_output
@@ -243,15 +248,15 @@ let wait env =
 
 let autocomplete env contents =
   run_loop_once env { default_loop_input with
-    persistent_client_request = Some (AUTOCOMPLETE contents)
+    persistent_client_request = Some (Request (AUTOCOMPLETE contents))
   }
 
 let ide_autocomplete env (path, line, column) =
   let delimit_on_namespaces = false in
   run_loop_once env { default_loop_input with
-    persistent_client_request = Some (IDE_AUTOCOMPLETE
+    persistent_client_request = Some (Request (IDE_AUTOCOMPLETE
       (root ^ path, Ide_api_types.{line; column}, delimit_on_namespaces)
-    )
+    ))
   }
 
 let status ?(ignore_ide=false) env =

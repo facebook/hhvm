@@ -59,10 +59,10 @@ let run_ast ?(quick=false) file =
   handle_errors errorl;
   result
 
-let run_ffp ?(iters = 0) (file : Relative_path.t) : Lowerer.result =
+let run_ffp ?(codegen = true)?(iters = 0) (file : Relative_path.t) : Lowerer.result =
   let env =
     Lowerer.make_env
-      ~codegen:true
+      ~codegen
       ~include_line_comments:true
       ~fail_open:false
       file
@@ -100,9 +100,9 @@ let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
   let module Lowerer = Lowerer.WithPositionedSyntax(Full_fidelity_editable_positioned_syntax) in
     Lowerer.lower env ~source_text ~script:invalidated
 
-let measure : ('a -> 'b) -> 'a -> 'b * float = fun f x ->
+let measure : (unit -> 'a) -> 'a * float = fun f ->
   let start = Unix.gettimeofday () in
-  let res = f x in
+  let res = f () in
   let stop = Unix.gettimeofday () in
   res, stop -. start
 
@@ -269,7 +269,7 @@ let compare_comments filename ast_result ffp_result =
   " filename (String.concat "" diff);
   end
 
-let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash =
+let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash ~codegen =
   match conf with
   | AST ->
     let ast = (run_ast file).Parser_hack.ast in
@@ -279,7 +279,7 @@ let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash =
         Digest.to_hex decl_hash
     in
     Printf.printf "%s" output
-  | FFP -> Printf.printf "%s" (dumper (run_ffp file).Lowerer.ast)
+  | FFP -> Printf.printf "%s" (dumper (run_ffp ~codegen file).Lowerer.ast)
   | ValidatedFFP ->
     Printf.printf "%s" (dumper (run_validated_ffp file).Lowerer.ast)
   | Compare diff_cmd ->
@@ -298,7 +298,8 @@ let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash =
   | Benchmark ->
     let filename = Relative_path.S.to_string file in
     let (ast_result, ast_duration), (ffp_result, ffp_duration) =
-      try (measure run_ast file, measure run_ffp file)
+      try (measure (fun () -> run_ast file),
+           measure (fun () -> run_ffp ~codegen file))
       with _ -> begin
         Printf.printf "FAIL, %s\n" filename;
         exit_with ParseError
@@ -319,16 +320,16 @@ let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash =
     end
   | Benchmark_batch iters ->
     let filename = Relative_path.S.to_string file in
-    let _ =
-      try (run_ffp ~iters file)
+    let _, duration =
+      try (measure (fun () -> run_ffp ~codegen ~iters file))
       with _ -> begin
         Printf.printf "FAIL, %s\n" filename;
         exit_with ParseError
       end
     in
     let res = Printf.sprintf
-      "PASS, %s\n"
-      filename in
+      "PASS, %s, %12.10f\n"
+      filename duration in
     print_endline res
 
 let () =
@@ -340,6 +341,7 @@ let () =
   let filename   = ref ""     in
   let num_runs   = ref 100 in
   let benchmark_files      = ref [] in
+  let no_codegen    = ref false in
   Arg.(parse
     [ ("--parser", Set_string use_parser,
         "Which parser to use (ast, ffp, compare) [def: ast]"
@@ -362,7 +364,10 @@ let () =
       )
     ; ("--benchmark_batch", Rest (fun fn -> benchmark_files := fn::!benchmark_files),
         "Run benchmarking on a list of files"
-    );
+    )
+    ; ("--no-codegen", Set no_codegen,
+        "Turn off codegen mode when parsing with FFP [default: true]"
+    ) ;
     ]) (fun fn -> filename := fn) usage;
   let parse_function = match !use_parser with
     | _ when !benchmark_files <> [] -> Benchmark_batch !num_runs
@@ -379,7 +384,7 @@ let () =
   let dumper ast = !dumper (Ast.AProgram ast) in
   let parse_file fn =
     let file = Relative_path.create Relative_path.Dummy fn in
-    run_parsers dumper file ~hash:!hash parse_function in
+    run_parsers dumper file ~hash:!hash parse_function ~codegen:(not !no_codegen) in
   if !benchmark_files <> [] then
     List.iter parse_file !benchmark_files
   else

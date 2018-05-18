@@ -407,9 +407,8 @@ let is_isexp_op lower_fq_id =
   | "is_string" -> Some (h "string")
   | "is_null" -> Some (h "void")
   | "hh\\is_keyset" -> Some (h "keyset")
-  (* TODO(T29079834): Add hack array migration notices  *)
-  (* | "hh\\is_dict" -> Some (h "dict") *)
-  (* | "hh\\is_vec" -> Some (h "vec") *)
+  | "hh\\is_dict" -> Some (h "dict")
+  | "hh\\is_vec" -> Some (h "vec")
   | _ -> None
 
 (* See EmitterVisitor::getPassByRefKind in emitter.cpp *)

@@ -2205,9 +2205,16 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     return push(env, newT);
   };
 
-  auto check = [&] (const Type& test) {
-    if (t.subtypeOf(test))  return result(TTrue);
-    if (!t.couldBe(test))   return result(TFalse);
+  auto check = [&] (
+    const folly::Optional<Type> type,
+    const folly::Optional<Type> deopt = folly::none
+  ) {
+    if (!type) return result(TBool);
+    auto const test = type.value();
+    if (t.subtypeOf(test)) return result(TTrue);
+    if (!t.couldBe(test) && (!deopt || !t.couldBe(deopt.value()))) {
+      return result(TFalse);
+    }
     auto const op = type_to_istypeop(test);
     if (asExpression || !op || !isValidTypeOpForIsAs(op.value())) {
       return result(TBool, test);
@@ -2237,14 +2244,16 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     case TypeStructure::Kind::T_string:
     case TypeStructure::Kind::T_num:
     case TypeStructure::Kind::T_arraykey:
-    case TypeStructure::Kind::T_dict:
-    case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_tuple:
     case TypeStructure::Kind::T_shape:
-      return !ts_type ? result(TBool) : check(ts_type.value());
+      return check(ts_type);
+    case TypeStructure::Kind::T_dict:
+      return check(ts_type, TDArr);
+    case TypeStructure::Kind::T_vec:
+      return check(ts_type, TVArr);
     case TypeStructure::Kind::T_noreturn:
       return result(TFalse);
     case TypeStructure::Kind::T_mixed:

@@ -793,20 +793,29 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
 
   if (t->isA(TNull) && is_nullable_ts) return success();
 
-  switch (get_ts_kind(ts)) {
+  auto kind = get_ts_kind(ts);
+  switch (kind) {
     case TypeStructure::Kind::T_int:         return primitive(TInt);
     case TypeStructure::Kind::T_bool:        return primitive(TBool);
     case TypeStructure::Kind::T_float:       return primitive(TDbl);
     case TypeStructure::Kind::T_string:      return primitive(TStr);
     case TypeStructure::Kind::T_void:        return primitive(TNull);
-    case TypeStructure::Kind::T_dict:        return primitive(TDict);
-    case TypeStructure::Kind::T_vec:         return primitive(TVec);
     case TypeStructure::Kind::T_keyset:      return primitive(TKeyset);
     case TypeStructure::Kind::T_nonnull:     return primitive(TNull, true);
     case TypeStructure::Kind::T_mixed:       return success();
     case TypeStructure::Kind::T_num:         return unionOf(TInt, TDbl);
     case TypeStructure::Kind::T_arraykey:    return unionOf(TInt, TStr);
     case TypeStructure::Kind::T_vec_or_dict: return unionOf(TVec, TDict);
+    case TypeStructure::Kind::T_dict:
+    case TypeStructure::Kind::T_vec: {
+      auto const c = popC(env);
+      auto const res = kind == TypeStructure::Kind::T_dict
+        ? isDictImpl(env, c)
+        : isVecImpl(env, c);
+      push(env, is_nullable_ts ? check_nullable(res, c) : res);
+      decRef(env, c);
+      return true;
+    }
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
       if (asExpr) return false;

@@ -168,9 +168,19 @@ bool checkTypeStructureMatchesCellImpl(
       result = isIntType(type) || isStringType(type);
       break;
     case TypeStructure::Kind::T_dict:
+      if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+        if (isArrayType(type) && data.parr->isDArray()) {
+          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
+        }
+      }
       result = isDictType(type);
       break;
     case TypeStructure::Kind::T_vec:
+      if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+        if (isArrayType(type) && data.parr->isVArray()) {
+          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_VEC);
+        }
+      }
       result = isVecType(type);
       break;
     case TypeStructure::Kind::T_keyset:

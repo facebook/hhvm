@@ -148,10 +148,21 @@ let handle_connection_exception env client e stack = match e with
     ClientProvider.shutdown_client client;
     env
 
+(* f represents a non-persistent command coming from client. If executing f
+ * throws, we need to dispopose of this client (possibly recovering updated
+ * environment from Nonfatal_rpc_exception). "return" is a constructor
+ * wrapping the return value to make it match return type of f *)
+let handle_connection_try return client env f =
+  try f () with
+  | ServerCommand.Nonfatal_rpc_exception (e, stack, env) ->
+    return (handle_connection_exception env client e (Some stack))
+  | e ->
+    return (handle_connection_exception env client e None)
+
 let handle_connection_ genv env client =
   let open ServerCommandTypes in
   let t = Unix.gettimeofday () in
-  try
+  handle_connection_try (fun x -> ServerUtils.Done x) client env @@ fun () ->
     match ClientProvider.read_connection_type client with
     | Persistent ->
       let env = match env.persistent_client with
@@ -172,11 +183,6 @@ let handle_connection_ genv env client =
       ServerUtils.Done env
     | Non_persistent ->
       ServerCommand.handle genv env client
-  with
-  | ServerCommand.Nonfatal_rpc_exception (e, stack, env) ->
-    ServerUtils.Done (handle_connection_exception env client e (Some stack))
-  | e ->
-    ServerUtils.Done (handle_connection_exception env client e None)
 
 let report_persistent_exception
     ~(e: exn)
@@ -192,32 +198,39 @@ let report_persistent_exception
   EventLogger.master_exception e (Some stack);
   Printf.eprintf "Error: %s\n%s\n%!" message stack
 
+(* Same as handle_connection_try, but for persistent clients *)
+let handle_persistent_connection_try return client env f =
+  try f () with
+  (** TODO: Make sure the pipe exception is really about this client. *)
+  | Unix.Unix_error (Unix.EPIPE, _, _)
+  | Sys_error("Connection reset by peer")
+  | Sys_error("Broken pipe")
+  | ServerCommandTypes.Read_command_timeout
+  | ServerClientProvider.Client_went_away ->
+    return (shutdown_persistent_client env client)
+  | ServerCommand.Nonfatal_rpc_exception (e, stack, env) ->
+    report_persistent_exception ~e ~stack ~client ~is_fatal:false;
+    return env
+  | e ->
+    let stack = Printexc.get_backtrace () in
+    report_persistent_exception ~e ~stack ~client ~is_fatal:true;
+    return (shutdown_persistent_client env client)
 
 let handle_persistent_connection_ genv env client =
-   try
+  handle_persistent_connection_try (fun x -> ServerUtils.Done x) client env
+      @@ fun () ->
     let env = { env with ide_idle = false; } in
-     ServerCommand.handle genv env client
-   with
-   (** TODO: Make sure the pipe exception is really about this client. *)
-   | Unix.Unix_error (Unix.EPIPE, _, _)
-   | Sys_error("Connection reset by peer")
-   | Sys_error("Broken pipe")
-   | ServerCommandTypes.Read_command_timeout
-   | ServerClientProvider.Client_went_away ->
-     ServerUtils.Done (shutdown_persistent_client env client)
-   | ServerCommand.Nonfatal_rpc_exception (e, stack, env) ->
-     report_persistent_exception ~e ~stack ~client ~is_fatal:false;
-     ServerUtils.Done env
-   | e ->
-     let stack = Printexc.get_backtrace () in
-     report_persistent_exception ~e ~stack ~client ~is_fatal:true;
-     ServerUtils.Done (shutdown_persistent_client env client)
+    ServerCommand.handle genv env client
 
 let handle_connection genv env client is_from_existing_persistent_client =
   ServerIdle.stamp_connection ();
   match is_from_existing_persistent_client with
-    | true -> handle_persistent_connection_ genv env client
-    | false -> handle_connection_ genv env client
+    | true ->
+      handle_persistent_connection_ genv env client |>
+      ServerUtils.wrap (handle_persistent_connection_try (fun x -> x) client)
+    | false ->
+      handle_connection_ genv env client |>
+      ServerUtils.wrap (handle_connection_try (fun x -> x) client)
 
 let recheck genv old_env check_kind =
   let can_interrupt = check_kind = ServerTypeCheck.Full_check in

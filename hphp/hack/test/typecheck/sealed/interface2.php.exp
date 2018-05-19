@@ -1,4 +1,2 @@
-File "interface2.php", line 8, characters 13-13:
-You cannot implement sealed interface A (Typing[4238])
 File "interface2.php", line 5, characters 11-11:
-Declaration is here
+An interface cannot be sealed (Typing[4245])

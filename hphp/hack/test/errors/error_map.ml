@@ -448,4 +448,5 @@ let%expect_test "error_map" =
     MutableInNonreactiveContext = 4242
     InvalidArgumentOfRxMutableFunction = 4243
     LetVarImmutabilityViolation = 4244
+    Unsealable = 4245
   |}]

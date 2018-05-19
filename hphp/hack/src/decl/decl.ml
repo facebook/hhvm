@@ -620,16 +620,24 @@ and get_sealed_whitelist env c =
   else match Attrs.find SN.UserAttributes.uaSealed c.c_user_attributes with
     | None -> None
     | Some {ua_params = params; _} ->
-      if c.c_final then begin
-        let p, name = c.c_name in Errors.sealed_final p name
-      end;
-      let add_class_name names param =
-        match param with
-          | _, Class_const ((_, CI cls), (_, name))
-            when name = SN.Members.mClass ->
-            SSet.add (get_instantiated_sid_name cls) names
-          | _ -> names in
-      Some (List.fold_left params ~f:add_class_name ~init:SSet.empty)
+      begin match c.c_kind with
+        | Ast.Cinterface | Ast.Ctrait | Ast.Cenum ->
+          let pos = fst c.c_name in
+          let kind = String.capitalize_ascii (Ast.string_of_class_kind c.c_kind) in
+          Errors.unsealable pos kind;
+          None
+        | Ast.Cabstract | Ast.Cnormal ->
+          if c.c_final then begin
+            let p, name = c.c_name in Errors.sealed_final p name
+          end;
+          let add_class_name names param =
+            match param with
+              | _, Class_const ((_, CI cls), (_, name))
+                when name = SN.Members.mClass ->
+                SSet.add (get_instantiated_sid_name cls) names
+              | _ -> names in
+          Some (List.fold_left params ~f:add_class_name ~init:SSet.empty)
+      end
 
 and get_implements env ht =
   let _r, (_p, c), paraml = Decl_utils.unwrap_class_type ht in

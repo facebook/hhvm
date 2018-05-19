@@ -219,6 +219,7 @@ module type S = sig
   val extend_sealed : Pos.t -> Pos.t -> string -> string -> string -> unit
   val trait_implement_sealed : Pos.t -> Pos.t -> string -> unit
   val sealed_final : Pos.t -> string -> unit
+  val unsealable : Pos.t -> string -> unit
   val read_before_write : Pos.t * string -> unit
   val interface_final : Pos.t -> unit
   val trait_final : Pos.t -> unit

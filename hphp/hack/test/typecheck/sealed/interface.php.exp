@@ -1,4 +1,2 @@
-File "interface.php", line 8, characters 11-11:
-You cannot extend sealed interface A (Typing[4238])
 File "interface.php", line 5, characters 11-11:
-Declaration is here
+An interface cannot be sealed (Typing[4245])

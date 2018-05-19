@@ -1081,6 +1081,7 @@ module Typing                               = struct
   | MutableInNonreactiveContext
   | InvalidArgumentOfRxMutableFunction
   | LetVarImmutabilityViolation
+  | Unsealable
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum
@@ -2559,6 +2560,9 @@ let trait_implement_sealed child_pos parent_pos parent_name =
 let sealed_final pos name =
   let name = (strip_ns name) in
   add (Typing.err_code Typing.SealedFinal) pos ("Sealed class "^name^" cannot be marked final")
+
+let unsealable pos kind =
+  add (Typing.err_code Typing.Unsealable) pos (kind^" cannot be sealed")
 
 let read_before_write (pos, v) =
   add (Typing.err_code Typing.ReadBeforeWrite) pos (

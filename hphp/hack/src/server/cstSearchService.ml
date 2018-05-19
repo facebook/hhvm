@@ -355,11 +355,19 @@ let job
   List.fold inputs
     ~init:acc
     ~f:(fun acc (path, pattern) ->
-      let source_text = Full_fidelity_source_text.from_file path in
-      let syntax_tree = SyntaxTree.make source_text in
-      match search ~syntax_tree pattern with
-      | Some result -> (path, result) :: acc
-      | None -> acc
+      try
+        let source_text = Full_fidelity_source_text.from_file path in
+        let syntax_tree = SyntaxTree.make source_text in
+        match search ~syntax_tree pattern with
+        | Some result -> (path, result) :: acc
+        | None -> acc
+      with e ->
+        let prefix = Printf.sprintf
+          "Error while running CST search on path %s:\n"
+          (Relative_path.to_absolute path)
+        in
+        Hh_logger.exc e ~prefix;
+        raise e
     )
 
 let go

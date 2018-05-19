@@ -216,8 +216,21 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           env.tcopt env.popt class_name meth_name
       end
     | CST_SEARCH input ->
-      let all_hack_files = Relative_path.Map.keys env.files_info
-        |> List.filter ~f:(fun path ->
-          Relative_path.prefix path = Relative_path.Root)
-      in
-      env, CstSearchService.go ~workers:genv.workers all_hack_files input
+      try
+        let all_hack_files = Relative_path.Map.keys env.files_info
+          |> List.filter ~f:(fun path ->
+            Relative_path.prefix path = Relative_path.Root)
+        in
+        env, CstSearchService.go ~workers:genv.workers all_hack_files input
+      with
+      | MultiThreadedCall.Coalesced_failures failures ->
+        let failures = failures
+          |> List.map ~f:WorkerController.failure_to_string
+          |> String.concat "\n"
+        in
+        env, Error (Printf.sprintf
+          "Worker failures - check the logs for more details:\n%s\n" failures)
+      | e ->
+        let msg = Printexc.to_string e in
+        let stack = Printexc.get_backtrace () in
+        env, Error (Printf.sprintf "%s\n%s" msg stack)

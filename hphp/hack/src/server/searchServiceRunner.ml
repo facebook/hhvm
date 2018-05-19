@@ -59,10 +59,12 @@ module SearchServiceRunner  = struct
 
     HackSearchService.MasterApi.update_search_index
       ~fuzzy:!HackSearchService.fuzzy (List.map fast fst);
-    if (List.length fast > 0) then
-    let str = Printf.sprintf "Updating %d search files:" (List.length fast) in
-    ignore(Hh_logger.log_duration (str) t)
-    else ()
+    if (List.length fast > 0) then begin
+      let str = Printf.sprintf "Updating %d search files:" (List.length fast) in
+      ignore(Hh_logger.log_duration (str) t);
+      if Queue.is_empty queue
+      then Hh_logger.log "Done updating search files"
+    end
 
   (* Completely clears the queue *)
   let run_completely genv =

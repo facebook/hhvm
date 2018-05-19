@@ -543,6 +543,11 @@ and unify_funs env r1 ft1 r2 ft2 =
   then Errors.return_disposable_mismatch ft1.ft_return_disposable p1 p;
   if ft1.ft_returns_mutable <> ft2.ft_returns_mutable
   then Errors.mutable_return_result_mismatch ft1.ft_returns_mutable p1 p;
+  if ft1.ft_returns_void_to_rx <> ft2.ft_returns_void_to_rx
+  then begin
+      Errors.return_void_to_rx_mismatch
+        ~pos1_has_attribute:ft1.ft_returns_void_to_rx p1 p
+  end;
   if not (unify_arities ~ellipsis_is_variadic:false ft1.ft_arity ft2.ft_arity)
   then Errors.fun_arity_mismatch p p1;
   let env, var_opt, arity = match ft1.ft_arity, ft2.ft_arity with

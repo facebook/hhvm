@@ -387,6 +387,7 @@ and 'phase fun_type = {
   ft_mutable : bool                   ;
   ft_returns_mutable : bool           ;
   ft_decl_errors : Errors.t option    ;
+  ft_returns_void_to_rx: bool         ;
 }
 
 (* Arity information for a fun_type; indicating the minimum number of

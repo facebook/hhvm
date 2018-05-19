@@ -1,0 +1,4 @@
+File "returns_void_to_rx2.php", line 20, characters 3-14:
+Cannot use result of function annotated with <<__ReturnsVoidToRx>> in reactive context (Typing[4247])
+File "returns_void_to_rx2.php", line 6, characters 19-24:
+This is function declaration.

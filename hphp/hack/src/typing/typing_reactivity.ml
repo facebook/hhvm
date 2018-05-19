@@ -119,3 +119,9 @@ let disallow_onlyrx_if_rxfunc_on_non_functions env param param_ty =
         (Reason.to_pos (fst param_ty))
         (Typing_print.full env param_ty)
   end
+
+let verify_void_return_to_rx ~is_expr_statement p env ft =
+  if ft.ft_returns_void_to_rx && not is_expr_statement
+  then Env.error_if_reactive_context env @@ begin fun () ->
+    Errors.returns_void_to_rx_function_as_non_expression_statement p ft.ft_pos
+  end

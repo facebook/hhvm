@@ -449,4 +449,6 @@ let%expect_test "error_map" =
     InvalidArgumentOfRxMutableFunction = 4243
     LetVarImmutabilityViolation = 4244
     Unsealable = 4245
+    ReturnVoidToRxMismatch = 4246
+    ReturnsVoidToRxAsNonExpressionStatement = 4247
   |}]

@@ -95,6 +95,7 @@ and hint_ p env = function
       ft_mutable = false;
       ft_returns_mutable = false;
       ft_decl_errors = None;
+      ft_returns_void_to_rx = false;
     }
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->

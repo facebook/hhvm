@@ -105,6 +105,7 @@ let make_ft p reactivity is_coroutine params ret_ty =
     ft_returns_mutable = false;
     ft_mutable = false;
     ft_decl_errors = None;
+    ft_returns_void_to_rx = false;
   }
 
 let get_shape_field_name = function
@@ -317,6 +318,7 @@ let empty tcopt file ~droot = {
       return_mutable = false;
       return_explicit = false;
       return_by_ref = false;
+      return_void_to_rx = false;
     };
     params  = Local_id.Map.empty;
     self_id = "";

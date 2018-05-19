@@ -27,4 +27,7 @@ type t = {
 
   (* Is the function expected to return a reference? *)
   return_by_ref: bool;
+
+  (* Is function return type in rx context treated as void? *)
+  return_void_to_rx: bool;
 }

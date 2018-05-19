@@ -47,9 +47,14 @@ let has_return_disposable_attribute attrs =
 let has_mutable_return_attribute attrs =
   has_attribute SN.UserAttributes.uaMutableReturn attrs
 
+let has_return_void_to_rx_attribute attrs =
+  has_attribute SN.UserAttributes.uaReturnsVoidToRx attrs
+
+
 let make_info fun_kind attributes env ~is_explicit ~is_by_ref ty =
   let return_disposable = has_return_disposable_attribute attributes in
   let return_mutable = has_mutable_return_attribute attributes in
+  let return_void_to_rx = has_return_void_to_rx_attribute attributes in
   if not return_disposable
   then enforce_return_not_disposable fun_kind env ty;
   {
@@ -58,6 +63,7 @@ let make_info fun_kind attributes env ~is_explicit ~is_by_ref ty =
     return_mutable;
     return_explicit = is_explicit;
     return_by_ref = is_by_ref;
+    return_void_to_rx;
   }
 
 (* For async functions, wrap Awaitable<_> around the return type *)

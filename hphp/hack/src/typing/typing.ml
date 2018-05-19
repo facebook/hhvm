@@ -602,7 +602,7 @@ and stmt env = function
   | Noop ->
       env, T.Noop
   | Expr e ->
-      let env, te, ty = expr env e in
+      let env, te, ty = expr ~is_expr_statement:true env e in
       (* NB: this check does belong here and not in expr, even though it only
        * applies to expressions -- we actually want to perform the check on
        * statements that are expressions, e.g., "foo();" we want to check, but
@@ -658,8 +658,8 @@ and stmt env = function
       let env = check_inout_return env in
       let pos = fst e in
       let Typing_env_return_info.{
-        return_type; return_disposable; return_mutable; return_explicit; return_by_ref } =
-        Env.get_return env in
+        return_type; return_disposable; return_mutable; return_explicit; return_by_ref;
+        return_void_to_rx } = Env.get_return env in
       let expected =
         if return_explicit
         then Some (pos, Reason.URreturn,
@@ -671,6 +671,7 @@ and stmt env = function
       then begin
         Typing_mutability.check_function_return_value
           ~function_returns_mutable:return_mutable
+          ~function_returns_void_for_rx: return_void_to_rx
           env
           env.Env.function_pos
           te
@@ -1097,6 +1098,7 @@ and expr
     ?expected
     ?(accept_using_var = false)
     ?(is_using_clause = false)
+    ?(is_expr_statement = false)
     ?is_func_arg
     ?forbid_uref
     env e =
@@ -1106,12 +1108,14 @@ and expr
     Typing_log.log_types 1 (fst e) env
     [Typing_log.Log_sub ("Typing.expr " ^ Typing_reason.string_of_ureason r,
        [Typing_log.Log_type ("expected_ty", ty)])] end;
-  raw_expr ~accept_using_var ~is_using_clause ?is_func_arg ?forbid_uref ?expected ~in_cond:false env e
+  raw_expr ~accept_using_var ~is_using_clause ~is_expr_statement
+    ?is_func_arg ?forbid_uref ?expected ~in_cond:false env e
 
 and raw_expr
   ~in_cond
   ?(accept_using_var = false)
   ?(is_using_clause = false)
+  ?(is_expr_statement = false)
   ?expected
   ?lhs_of_null_coalesce
   ?is_func_arg
@@ -1120,7 +1124,7 @@ and raw_expr
   env e =
   debug_last_pos := fst e;
   let env, te, ty =
-    expr_ ~in_cond ~accept_using_var ~is_using_clause ?expected
+    expr_ ~in_cond ~accept_using_var ~is_using_clause ~is_expr_statement ?expected
       ?lhs_of_null_coalesce ?is_func_arg ?forbid_uref
       ~valkind env e in
   let () = match !expr_hook with
@@ -1225,6 +1229,7 @@ and expr_
   ~in_cond
   ?(accept_using_var = false)
   ?(is_using_clause = false)
+  ?(is_expr_statement = false)
   ?lhs_of_null_coalesce
   ?(is_func_arg=false)
   ?(forbid_uref=false)
@@ -1278,9 +1283,9 @@ and expr_
     let ty_arraykey = Reason.Ridx_dict key_pos, Tprim Tarraykey in
     Type.sub_type p (Reason.index_class class_name) env key_ty ty_arraykey in
 
-  let check_call ~is_using_clause ~expected env p call_type e hl el uel ~in_suspend=
+  let check_call ~is_using_clause ~expected ~is_expr_statement env p call_type e hl el uel ~in_suspend=
     let env, te, result =
-      dispatch_call ~is_using_clause ~expected p env call_type e hl el uel ~in_suspend in
+      dispatch_call ~is_using_clause ~expected ~is_expr_statement p env call_type e hl el uel ~in_suspend in
     let env = Env.forget_members env p in
     env, te, result in
 
@@ -1688,6 +1693,7 @@ and expr_
               ft_returns_mutable = fty.ft_returns_mutable;
               ft_return_disposable = fty.ft_return_disposable;
               ft_decl_errors = None;
+              ft_returns_void_to_rx = fty.ft_returns_void_to_rx;
             } in
             make_result env (T.Method_caller(pos_cname, meth_name))
               (reason, Tfun caller)
@@ -1846,7 +1852,8 @@ and expr_
           tel,
           [])) (Env.fresh_type())
   | Call (call_type, e, hl, el, uel) ->
-      let env, te, ty = check_call ~is_using_clause ~expected env p call_type e hl el uel ~in_suspend:false in
+      let env, te, ty = check_call ~is_using_clause ~expected ~is_expr_statement
+        env p call_type e hl el uel ~in_suspend:false in
       Typing_mutability.enforce_mutable_call env te;
       env, te, ty
     (* For example, e1 += e2. This is typed and translated as if
@@ -2089,14 +2096,15 @@ and expr_
       make_result env (T.Yield taf) (Reason.Ryield_send p, Toption send)
   | Await e ->
       (* Await is permitted in a using clause e.g. using (await make_handle()) *)
-      let env, te, rty = expr ~is_using_clause env e in
+      let env, te, rty = expr ~is_using_clause ~is_expr_statement env e in
       let env, ty = Async.overload_extract_from_awaitable env p rty in
       make_result env (T.Await te) ty
   | Suspend (e) ->
       let env, te, ty =
         match e with
         | _, Call (call_type, e, hl, el, uel) ->
-          check_call ~is_using_clause ~expected env p call_type e hl el uel ~in_suspend:true
+          check_call ~is_using_clause ~expected ~is_expr_statement
+            env p call_type e hl el uel ~in_suspend:true
         | (epos, _)  ->
           let env, te, (r, ty) = expr env e in
           (* not a call - report an error *)
@@ -3343,7 +3351,7 @@ and is_abstract_ft fty = match fty with
  * The typing of call is different.
  *)
 
- and dispatch_call ~expected ~is_using_clause p env call_type
+ and dispatch_call ~expected ~is_using_clause ~is_expr_statement p env call_type
     (fpos, fun_expr as e) hl el uel ~in_suspend =
   let make_call env te thl tel tuel ty =
     env, T.make_typed_expr p ty (T.Call (call_type, te, thl, tel, tuel)), ty in
@@ -3642,6 +3650,7 @@ and is_abstract_ft fty = match fty with
                 ft_returns_mutable = fty.ft_returns_mutable;
                 ft_return_disposable = fty.ft_return_disposable;
                 ft_decl_errors = None;
+                ft_returns_void_to_rx = fty.ft_returns_void_to_rx;
               }
             ) in
             let containers = List.map vars (fun var ->
@@ -3875,7 +3884,8 @@ and is_abstract_ft fty = match fty with
           class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
         let fty = check_abstract_parent_meth (snd m) p fty in
         check_coroutine_call env fty;
-        let env, tel, tuel, ty = call ~expected ~receiver_type:ty1 p env fty el uel in
+        let env, tel, tuel, ty =
+          call ~expected ~is_expr_statement ~receiver_type:ty1 p env fty el uel in
         make_call env (T.make_typed_expr fpos fty
           (T.Class_const (tcid, m))) hl tel tuel ty
       end
@@ -3950,7 +3960,8 @@ and is_abstract_ft fty = match fty with
             ())
         | _ -> () in
       check_coroutine_call env fty;
-      let env, tel, tuel, ty = call ~expected ~receiver_type:ty1 p env fty el uel in
+      let env, tel, tuel, ty =
+        call ~expected ~receiver_type:ty1 ~is_expr_statement p env fty el uel in
       make_call env (T.make_typed_expr fpos fty
         (T.Class_const(te1, m))) hl tel tuel ty
 
@@ -3966,7 +3977,8 @@ and is_abstract_ft fty = match fty with
       let tel = ref [] and tuel = ref [] and tftyl = ref [] in
       let fn = (fun (env, fty, _) ->
         check_coroutine_call env fty;
-        let env, tel_, tuel_, method_ = call ~expected ~receiver_type:ty1 p env fty el uel in
+        let env, tel_, tuel_, method_ =
+          call ~expected ~receiver_type:ty1 ~is_expr_statement p env fty el uel in
         tel := tel_; tuel := tuel_;
         tftyl := fty :: !tftyl;
         env, method_, None) in
@@ -3985,13 +3997,15 @@ and is_abstract_ft fty = match fty with
       Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x hl in
       check_coroutine_call env fty;
-      let env, tel, tuel, ty = call ~expected p env fty el uel in
+      let env, tel, tuel, ty =
+        call ~expected ~is_expr_statement p env fty el uel in
       make_call env (T.make_typed_expr fpos fty (T.Fun_id x)) hl tel tuel ty
   | Id (_, id as x) ->
       Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x hl in
       check_coroutine_call env fty;
-      let env, tel, tuel, ty = call ~expected p env fty el uel in
+      let env, tel, tuel, ty =
+        call ~expected ~is_expr_statement p env fty el uel in
       if id = SN.Rx.mutable_ then begin
         Typing_mutability.check_rx_mutable_arguments p env tel;
         if not (Env.env_local_reactive env) then
@@ -4001,7 +4015,8 @@ and is_abstract_ft fty = match fty with
   | _ ->
       let env, te, fty = expr env e in
       check_coroutine_call env fty;
-      let env, tel, tuel, ty = call ~expected p env fty el uel in
+      let env, tel, tuel, ty =
+        call ~expected ~is_expr_statement p env fty el uel in
       make_call env te hl tel tuel ty
 
 and fun_type_of_id env x hl =
@@ -5040,8 +5055,8 @@ and inout_write_back env { fp_type; _ } (_, e) =
       env
     | _ -> env
 
-and call ~expected ?receiver_type pos env fty el uel =
-  let env, tel, tuel, ty = call_ ~expected ~receiver_type pos env fty el uel in
+and call ~expected ?(is_expr_statement=false) ?receiver_type pos env fty el uel =
+  let env, tel, tuel, ty = call_ ~expected ~is_expr_statement ~receiver_type pos env fty el uel in
   (* We need to solve the constraints after every single function call.
    * The type-checker is control-flow sensitive, the same value could
    * have different type depending on the branch that we are in.
@@ -5050,7 +5065,7 @@ and call ~expected ?receiver_type pos env fty el uel =
   let env = Env.check_todo env in
   env, tel, tuel, ty
 
-and call_ ~expected ~receiver_type pos env fty el uel =
+and call_ ~expected ~receiver_type ~is_expr_statement pos env fty el uel =
   let make_unpacked_traversable_ty pos ty =
     let unpack_r = Reason.Runpack_param pos in
     unpack_r, Tclass ((pos, SN.Collections.cTraversable), [ty])
@@ -5095,9 +5110,10 @@ and call_ ~expected ~receiver_type pos env fty el uel =
     (* Typing of format string functions. It is dependent on the arguments (el)
      * so it cannot be done earlier.
      *)
+    Typing_reactivity.verify_void_return_to_rx ~is_expr_statement pos env ft;
+    let pos_def = Reason.to_pos r2 in
     let env, ft = Typing_exts.retype_magic_func env ft el in
     check_deprecated pos ft;
-    let pos_def = Reason.to_pos r2 in
     let env, var_param = variadic_param env ft in
 
     (* Force subtype with expected result *)

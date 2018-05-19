@@ -1082,6 +1082,8 @@ module Typing                               = struct
   | InvalidArgumentOfRxMutableFunction
   | LetVarImmutabilityViolation
   | Unsealable
+  | ReturnVoidToRxMismatch
+  | ReturnsVoidToRxAsNonExpressionStatement
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum
@@ -2977,6 +2979,16 @@ let return_disposable_mismatch pos1_return_disposable pos1 pos2 =
       pos2, if pos1_return_disposable then m2 else m1;
     ]
 
+let return_void_to_rx_mismatch ~pos1_has_attribute pos1 pos2 =
+  let m1 = "This is marked <<__ReturnsVoidToRx>>." in
+  let m2 = "This is not marked <<__ReturnsVoidToRx>>." in
+  add_list
+    (Typing.err_code Typing.ReturnVoidToRxMismatch)
+    [
+      pos1, if pos1_has_attribute then m1 else m2;
+      pos2, if pos1_has_attribute then m2 else m1;
+    ]
+
 let this_as_lexical_variable pos =
   add (Naming.err_code Naming.ThisAsLexicalVariable) pos "Cannot use $this as lexical variable"
 
@@ -3422,6 +3434,13 @@ let static_in_reactive_context pos name =
   add (Typing.err_code Typing.StaticInReactiveContext) pos (
     "Static " ^ name ^ " cannot be used in a reactive context."
   )
+
+let returns_void_to_rx_function_as_non_expression_statement pos fpos =
+  add_list (Typing.err_code Typing.ReturnsVoidToRxAsNonExpressionStatement) [
+    pos, "Cannot use result of function annotated with <<__ReturnsVoidToRx>> \
+    in reactive context";
+    fpos, "This is function declaration."
+  ]
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

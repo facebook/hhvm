@@ -286,6 +286,7 @@ let default_constructor_ce class_ =
              ft_returns_mutable = false;
              ft_return_disposable = false;
              ft_decl_errors = None;
+             ft_returns_void_to_rx = false;
            }
   in { ce_final       = false;
        ce_is_xhp_attr = false;

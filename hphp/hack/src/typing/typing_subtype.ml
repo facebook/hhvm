@@ -643,6 +643,28 @@ and subtype_funs_generic
     && ft_super.ft_returns_mutable
     && ft_sub.ft_reactive <> Nonreactive
   then Errors.mutable_return_result_mismatch ft_super.ft_returns_mutable p_super p_sub;
+  if ft_super.ft_reactive <> Nonreactive
+    && not ft_super.ft_returns_void_to_rx
+    && ft_sub.ft_returns_void_to_rx
+  then begin
+    (*  __ReturnsVoidToRx can be omitted on subtype, in this case using subtype
+       via reference to supertype in rx context will be ok since result will be
+       discarded. The opposite is not true:
+       class A {
+         <<__Rx, __Mutable>>
+         public function f(): A { return new A(); }
+       }
+       class B extends A {
+         <<__Rx, __Mutable, __ReturnsVoidToRx>>
+         public function f(): A { return $this; }
+       }
+
+       <<__Rx, __MutableReturn>>
+       function f(): A { return new B(); }
+       $a = HH\Rx\mutable(f());
+       $a1 = $a->f(); // immutable alias to mutable reference *)
+      Errors.return_void_to_rx_mismatch ~pos1_has_attribute:true p_sub p_super
+  end;
   if (arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity)
   then Errors.fun_too_many_args p_sub p_super;
   (match ft_sub.ft_arity, ft_super.ft_arity with

@@ -54,6 +54,7 @@ let rec expr_returns_owned_mutable
 
 let check_function_return_value
   ~function_returns_mutable
+  ~function_returns_void_for_rx
   (env: Typing_env.env)
   fun_pos
   (e: T.expr) =
@@ -81,14 +82,20 @@ let check_function_return_value
       | Some (_, mut) when function_returns_mutable ->
         error_mutable e (Some mut)
       | Some (_, Borrowed) when not function_returns_mutable ->
-        (* attempt to return borrowed value as immutable *)
-        error_borrowed_as_immutable e
+        (* attempt to return borrowed value as immutable
+           unless function is marked with __ReturnsVoidToRx in which case caller
+           will not be able to alias the value *)
+        if not function_returns_void_for_rx
+        then error_borrowed_as_immutable e
       | _ ->
         if function_returns_mutable then error_mutable e None
       end
     | T.This when not function_returns_mutable && Env.function_is_mutable env ->
-      (* mutable this is treated as borrowed and this cannot be returned as immutable *)
-      error_borrowed_as_immutable e
+      (* mutable this is treated as borrowed and this cannot be returned as immutable
+         unless function is marked with __ReturnsVoidToRx in which case caller
+         will not be able to alias the value *)
+      if not function_returns_void_for_rx
+      then error_borrowed_as_immutable e
     | T.Eif (_, e1_opt, e2) ->
       Option.iter e1_opt ~f:aux;
       aux e2

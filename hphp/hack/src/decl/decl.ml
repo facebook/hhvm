@@ -236,6 +236,9 @@ let has_return_disposable_attribute user_attributes =
 let fun_returns_mutable user_attributes =
   Attributes.mem SN.UserAttributes.uaMutableReturn user_attributes
 
+let fun_returns_void_to_rx user_attributes =
+  Attributes.mem SN.UserAttributes.uaReturnsVoidToRx user_attributes
+
 let has_mutable_attribute user_attributes =
   Attributes.mem SN.UserAttributes.uaMutable user_attributes
 
@@ -313,6 +316,7 @@ and fun_decl_in_env env f =
   check_params env f.f_params;
   let reactivity = fun_reactivity env f.f_user_attributes in
   let returns_mutable = fun_returns_mutable f.f_user_attributes in
+  let returns_void_to_rx = fun_returns_void_to_rx f.f_user_attributes in
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let arity_min = minimum_arity f.f_params in
   let params = make_params env f.f_user_attributes reactivity f.f_params in
@@ -347,6 +351,7 @@ and fun_decl_in_env env f =
     ft_returns_mutable = returns_mutable;
     ft_return_disposable = return_disposable;
     ft_decl_errors = None;
+    ft_returns_void_to_rx = returns_void_to_rx;
   } in
   ft
 
@@ -888,6 +893,7 @@ and method_decl env m =
   let reactivity = fun_reactivity env m.m_user_attributes in
   let mut = has_mutable_attribute m.m_user_attributes in
   let returns_mutable = fun_returns_mutable m.m_user_attributes in
+  let returns_void_to_rx = fun_returns_void_to_rx m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
   let arity_min = minimum_arity m.m_params in
   let params = make_params env m.m_user_attributes reactivity m.m_params in
@@ -922,6 +928,7 @@ and method_decl env m =
     ft_returns_mutable = returns_mutable;
     ft_return_disposable = return_disposable;
     ft_decl_errors = None;
+    ft_returns_void_to_rx = returns_void_to_rx;
   }
 
 and method_check_override c m acc  =

@@ -85,6 +85,14 @@ type pattern =
       pattern: pattern;
     }
 
+  (**
+   * Matches a given node if its raw text is exactly the specified string. The
+   * "raw" text doesn't include trivia.
+   *)
+  | RawTextPattern of {
+      raw_text: string;
+    }
+
 type matched_node = {
   match_name: match_name;
   node: Syntax.t;
@@ -168,6 +176,11 @@ let rec search_node
   | DescendantPattern { pattern } ->
     search_descendants ~env ~pattern ~node
 
+  | RawTextPattern { raw_text } ->
+    if Syntax.text node = raw_text
+    then (env, empty_result)
+    else (env, None)
+
 (* TODO: this will likely have to become more intelligent *)
 and search_descendants
     ~(env: env)
@@ -213,6 +226,8 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
       compile_match_pattern ~json ~keytrace
     | "descendant_pattern" ->
       compile_descendant_pattern ~json ~keytrace
+    | "raw_text_pattern" ->
+      compile_raw_text_pattern ~json ~keytrace
     | pattern_type ->
       error_at_keytrace ~keytrace:pattern_type_keytrace
         (Printf.sprintf "Unknown pattern type '%s'" pattern_type)
@@ -291,6 +306,13 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
     compile_pattern ~json:pattern ~keytrace:pattern_keytrace >>| fun pattern ->
     DescendantPattern {
       pattern;
+    }
+
+  and compile_raw_text_pattern ~json ~keytrace =
+    get_string "raw_text" (json, keytrace)
+    >>| fun (raw_text, _raw_text_keytrace) ->
+    RawTextPattern {
+      raw_text;
     }
 
   in

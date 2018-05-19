@@ -67,6 +67,8 @@ let type_decl_re = Str.regexp_string "Type-decl"
 
 let type_check_re = Str.regexp_string "Type-check"
 
+let cst_search_re = Str.regexp_string "CST search"
+
 let server_ready_re = Str.regexp_string "Server is READY"
 
 let begin_re = Str.regexp_string "Begin"
@@ -90,6 +92,7 @@ let re_list =
    tls_bug_re;
    type_decl_re;
    type_check_re;
+   cst_search_re;
    server_ready_re;
   ]
 
@@ -150,6 +153,8 @@ let msg_of_tail tail_env =
     "[evaluating type declarations of" ^ (count_suffix line) ^ final_suffix
   else if matches_re type_check_re line then
     "[typechecking" ^ (count_suffix line) ^ final_suffix
+  else if matches_re cst_search_re line then
+    "[CST search - processed" ^ (count_suffix line) ^ "]"
   else
     "[processing]"
 

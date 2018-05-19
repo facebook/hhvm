@@ -392,6 +392,8 @@ let go
   compile_pattern input >>| fun pattern ->
 
   let num_files_searched = ref 0 in
+  let last_printed_num_files_searched = ref 0 in
+  let done_searching = ref false in
   let indexer = genv.ServerEnv.indexer FindUtils.is_php in
   let next_files () =
     let files = indexer ()
@@ -400,8 +402,20 @@ let go
         (path, pattern)
       )
     in
-    Hh_logger.log "CST search: searched %d files..." !num_files_searched;
-    num_files_searched := !num_files_searched + (List.length files);
+
+    if not !done_searching then begin
+      num_files_searched := !num_files_searched + (List.length files);
+      if (
+        !num_files_searched - !last_printed_num_files_searched >= 10000
+        || List.is_empty files
+      ) then begin
+        Hh_logger.log "CST search: searched %d files..." !num_files_searched;
+        last_printed_num_files_searched := !num_files_searched;
+      end
+    end;
+    if List.is_empty files
+    then done_searching := true;
+
     Bucket.of_list files
   in
   let results = MultiWorker.call

@@ -209,7 +209,7 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
   Venv env { unit, text, fixups };
   env.addrs.resize(unit.blocks.size());
 
-  auto labels = layoutBlocks(unit, text);
+  auto labels = layoutBlocks(unit);
 
   IRMetadataUpdater irmu(env, asm_info);
 

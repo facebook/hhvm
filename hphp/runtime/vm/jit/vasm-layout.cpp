@@ -62,7 +62,7 @@ TRACE_SET_MOD(layout);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> rpoLayout(const Vunit& unit, const Vtext& text) {
+jit::vector<Vlabel> rpoLayout(const Vunit& unit) {
   auto labels = sortBlocks(unit);
 
   auto const blk = [&] (Vlabel b) -> const Vblock& { return unit.blocks[b]; };
@@ -87,8 +87,7 @@ jit::vector<Vlabel> rpoLayout(const Vunit& unit, const Vtext& text) {
   assertx(n < 2 ||
     IMPLIES(
       blk(labels.back()).code.back().op == Vinstr::fallthru,
-      text.area(blk(labels.back()).area_idx) ==
-        text.area(blk(labels[n - 2]).area_idx)
+      blk(labels.back()).area_idx == blk(labels[n - 2]).area_idx
     )
   );
 
@@ -499,7 +498,7 @@ void Clusterizer::splitHotColdClusters() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> pgoLayout(Vunit& unit, const Vtext& text) {
+jit::vector<Vlabel> pgoLayout(Vunit& unit) {
   // Make sure block weights are consistent.
   fixBlockWeights(unit);
 
@@ -514,12 +513,12 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit, const Vtext& text) {
   // Partition by actual code area without changing relative order.
   auto cold_iter = std::stable_partition(labels.begin(), labels.end(),
     [&] (Vlabel b) {
-      return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Main);
+      return unit.blocks[b].area_idx == AreaIndex::Main;
     });
   if (cold_iter != labels.end()) {
     std::stable_partition(cold_iter, labels.end(),
       [&] (Vlabel b) {
-        return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Cold);
+        return unit.blocks[b].area_idx == AreaIndex::Cold;
       });
   }
 
@@ -538,12 +537,12 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit, const Vtext& text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> layoutBlocks(Vunit& unit, const Vtext& text) {
+jit::vector<Vlabel> layoutBlocks(Vunit& unit) {
   Timer timer(Timer::vasm_layout);
 
   return unit.context && unit.context->kind == TransKind::Optimize
-    ? pgoLayout(unit, text)
-    : rpoLayout(unit, text);
+    ? pgoLayout(unit)
+    : rpoLayout(unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

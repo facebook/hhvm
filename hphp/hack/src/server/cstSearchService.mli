@@ -18,8 +18,7 @@ val result_to_json: result option -> Hh_json.json
     user. *)
 
 val go:
-  workers:MultiWorker.worker list option ->
-  Relative_path.t list ->
+  ServerEnv.genv ->
   Hh_json.json ->
   (Hh_json.json, string) Core_result.t
 (** Search for the given pattern across the given set of files. *)

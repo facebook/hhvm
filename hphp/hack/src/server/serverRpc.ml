@@ -217,11 +217,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       end
     | CST_SEARCH input ->
       try
-        let all_hack_files = Relative_path.Map.keys env.files_info
-          |> List.filter ~f:(fun path ->
-            Relative_path.prefix path = Relative_path.Root)
-        in
-        env, CstSearchService.go ~workers:genv.workers all_hack_files input
+        env, CstSearchService.go genv input
       with
       | MultiThreadedCall.Coalesced_failures failures ->
         let failures = failures

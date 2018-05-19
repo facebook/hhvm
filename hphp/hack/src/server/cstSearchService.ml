@@ -384,20 +384,32 @@ let job
     )
 
 let go
-    ~(workers: MultiWorker.worker list option)
-    (files: Relative_path.t list)
+    (genv: ServerEnv.genv)
     (input: Hh_json.json)
     : (Hh_json.json, string) Core_result.t
   =
   let open Core_result.Monad_infix in
   compile_pattern input >>| fun pattern ->
-  let inputs = List.map files ~f:(fun path -> (path, pattern)) in
+
+  let num_files_searched = ref 0 in
+  let indexer = genv.ServerEnv.indexer FindUtils.is_php in
+  let next_files () =
+    let files = indexer ()
+      |> List.map ~f:(fun path ->
+        let path = Relative_path.create Relative_path.Root path in
+        (path, pattern)
+      )
+    in
+    Hh_logger.log "CST search: searched %d files..." !num_files_searched;
+    num_files_searched := !num_files_searched + (List.length files);
+    Bucket.of_list files
+  in
   let results = MultiWorker.call
-    workers
+    genv.ServerEnv.workers
     ~job
     ~neutral:[]
     ~merge:List.rev_append
-    ~next:(MultiWorker.next workers inputs)
+    ~next:next_files
   in
 
   Hh_json.JSON_Object (List.map results ~f:(fun (path, result) ->

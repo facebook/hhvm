@@ -95,7 +95,9 @@ type pattern =
 
 type matched_node = {
   match_name: match_name;
-  node: Syntax.t;
+  kind: node_kind;
+  start_offset: int;
+  end_offset: int;
 }
 
 type result = {
@@ -168,7 +170,12 @@ let rec search_node
   | MatchPattern { match_name } ->
     let result = {
       matched_nodes = [
-        { match_name; node }
+        {
+          match_name;
+          kind = NodeKind (SyntaxKind.to_string (Syntax.kind node));
+          start_offset = Syntax.start_offset node;
+          end_offset = Syntax.end_offset node;
+        }
       ]
     } in
     (env, Some result)
@@ -330,9 +337,15 @@ let result_to_json (result: result option): Hh_json.json =
         match matched_node.match_name
         with MatchName match_name -> match_name
       in
+      let kind =
+        match matched_node.kind
+        with NodeKind kind -> kind
+      in
       JSON_Object [
         "match_name", JSON_String match_name;
-        "node", Syntax.to_json matched_node.node;
+        "kind", JSON_String kind;
+        "start_offset", Hh_json.int_ matched_node.start_offset;
+        "end_offset", Hh_json.int_ matched_node.end_offset;
       ])
     in
     JSON_Object [

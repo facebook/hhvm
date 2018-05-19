@@ -1,21 +1,5 @@
 {
   "matched_nodes":[
-    {
-      "match_name":"function name",
-      "node":{
-        "kind":"token",
-        "token":{
-          "kind":"name",
-          "text":"bar",
-          "offset":46,
-          "leading_width":0,
-          "width":3,
-          "trailing_width":0,
-          "leading":[],
-          "trailing":[],
-          "line_number":4
-        }
-      }
-    }
+    {"match_name":"function name","kind":"token","start_offset":46,"end_offset":48}
   ]
 }

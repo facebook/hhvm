@@ -433,7 +433,7 @@ struct ActiveSubscription {
     auto res_future = promise.getFuture();
     if (timeout != std::chrono::milliseconds::zero()) {
       res_future = res_future.within(timeout)
-        .onError([](folly::TimedOut) {
+        .onError([](folly::FutureTimeout) {
           return false;
         });
     }

@@ -927,6 +927,13 @@ struct Index::IndexData {
     std::set<borrowed_ptr<php::Func>>
   > classExtraMethodMap;
 
+  // Map from every interface to the list of instantiable classes which can
+  // implement it.
+  std::unordered_map<
+    borrowed_ptr<const php::Class>,
+    CompactVector<borrowed_ptr<ClassInfo>>
+  > ifaceImplementerMap;
+
   /*
    * Map from each class name to ClassInfo objects for all
    * not-known-to-be-impossible resolutions of the class at runtime.
@@ -1389,6 +1396,91 @@ bool build_class_properties(BuildClsInfo& info,
   }
 
   return true;
+}
+
+void build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
+  std::vector<SString> names;
+  auto& impls = data.ifaceImplementerMap[iface->cls];
+  if (impls.empty()) return;
+
+  // We start by collecting the list of methods shared across all classes which
+  // implement iface (including indirectly). And then add the public methods
+  // which are not constructors and have no private ancestors to the method
+  // families of iface. Note that this set may be larger than the methods
+  // declared on iface and may also be missing methods declared on iface. In
+  // practice this is the set of methods we can depend on having accessible
+  // given any object which is known to implement iface.
+  auto it = impls.begin();
+  for (auto& par : (*it)->methods) names.push_back(par.first);
+
+  while (++it != impls.end()) {
+    auto& methods = (*it)->methods;
+    for (auto nameIt = names.begin(); nameIt != names.end();) {
+      if (!methods.count(*nameIt)) nameIt = names.erase(nameIt);
+      else ++nameIt;
+    }
+  }
+
+  std::unordered_set<SString> added;
+
+  auto add_method = [&] (SString name) {
+    res::Func::FuncFamily ff;
+    std::unordered_set<borrowed_ptr<const php::Func>> seen;
+    auto& funcs = ff.possibleFuncs;
+    for (auto cinfo : impls) {
+      auto methIt = cinfo->methods.find(name);
+      assertx(methIt != cinfo->methods.end());
+      auto mte = mteFromIt(methIt);
+
+      // Don't create method families for interfaces with non-public methods
+      // or methods which may be constructors. We won't always know from context
+      // which implementer we are referring to and whether we share a common
+      // context. In practice interfaces generally declare public methods.
+      if (cinfo->ctor == mte || !(mte->second.attrs & AttrPublic)) return;
+
+      // If the method has a private ancestor we won't be able to determine from
+      // context if a given resolution should be for the private ancestor or the
+      // interface method. In theory we could dump all of the private ancestors
+      // into the family too but as is noted above we also don't currently
+      // handle non-public resolution.
+      if (mte->second.hasPrivateAncestor) return;
+
+      if (mte->second.attrs & AttrInterceptable) {
+        ff.containsInterceptables = true;
+      }
+
+      // Avoid adding duplicate entries to the list
+      if (seen.emplace(mte->second.func).second) funcs.push_back(mte);
+    }
+
+    if (!funcs.empty()) {
+      data.funcFamilies.push_back(std::make_unique<FuncFamily>());
+      *data.funcFamilies.back() = std::move(ff);
+      iface->methodFamilies.emplace(name, borrow(data.funcFamilies.back()));
+      added.emplace(name);
+    }
+  };
+
+  for (auto name : names) {
+    add_method(name);
+  }
+
+  for (auto& m : iface->cls->methods) {
+    if (added.count(m->name)) {
+      iface->methods.emplace(
+        m->name,
+        MethTabEntry { borrow(m), m->attrs, false, true }
+      );
+    }
+  }
+}
+
+void build_iface_methods(IndexData& data) {
+  for (auto& info : data.allClassInfos) {
+    if (info->cls->attrs & AttrInterface) {
+      build_methods_for_iface(data, borrow(info));
+    }
+  }
 }
 
 /*
@@ -2637,6 +2729,7 @@ void compute_iface_vtables(IndexData& index) {
 
     for (auto& ipair : cinfo->implInterfaces) {
       ++iface_uses[ipair.second->cls];
+      index.ifaceImplementerMap[ipair.second->cls].push_back(cinfo.get());
       for (auto& jpair : cinfo->implInterfaces) {
         cg.add(ipair.second->cls, jpair.second->cls);
       }
@@ -3256,6 +3349,7 @@ Index::Index(borrowed_ptr<php::Program> program,
   find_magic_methods(*m_data);          // uses the subclass lists
   find_mocked_classes(*m_data);
   compute_iface_vtables(*m_data);
+  build_iface_methods(*m_data);
 
   check_invariants(*m_data);
 
@@ -3603,6 +3697,24 @@ res::Func Index::resolve_method(Context ctx,
   auto const dcls  = dcls_of(clsType);
   auto const cinfo = dcls.cls.val.right();
   if (!cinfo) return name_only();
+
+  // Interfaces may have more method families than methods, so look at the
+  // method families first. Note that interfaces only have methods and method
+  // families for which all methods are public on all implementer classes and
+  // no methods have private ancestors. This avoids the need for context checks
+  // which would be difficult as the base class is unknown. Interfaces are
+  // generally used to declare public methods so this trade-off is unlikely to
+  // cost anything in practice.
+  if (cinfo->cls->attrs & AttrInterface) {
+    auto methIt = cinfo->methodFamilies.find(name);
+    if (methIt == end(cinfo->methodFamilies)) return name_only();
+    if (methIt->second->possibleFuncs.size() == 1) {
+      return res::Func { this, methIt->second->possibleFuncs[0] };
+    }
+    // If there was a sole implementer we can resolve to a single method, even
+    // if the method was not declared on the interface itself.
+    return res::Func { this, methIt->second };
+  }
 
   /*
    * Whether or not the context class has a private method with the
@@ -4025,6 +4137,11 @@ bool Index::is_async_func(res::Func rfunc) const {
     },
     [&](borrowed_ptr<FuncFamily> fam) {
       for (auto const pf : fam->possibleFuncs) {
+        // Abstract functions will always be overridden by concrete base
+        // classes, and in practice are not marked as async even when all of
+        // concrete implementations are async as this is not considered part of
+        // the interface but merely an implementation detail.
+        if (pf->second.attrs & AttrAbstract) continue;
         if (!pf->second.func->isAsync || pf->second.func->isGenerator) {
           return false;
         }

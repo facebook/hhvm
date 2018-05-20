@@ -58,7 +58,10 @@ void MethProfile::reportMethHelper(const Class* cls, const Func* meth) {
       // fall through
     case Tag::BaseMeth: {
       assertx(curMeth->baseCls() == curMeth->cls());
-      if (curMeth->baseCls() == meth->baseCls()) return;
+      if (curMeth->baseCls() == meth->baseCls()) {
+        InstanceBits::profile(curMeth->baseCls()->name());
+        return;
+      }
       for (auto iface : curMeth->baseCls()->allInterfaces().range()) {
         if (auto imeth = iface->lookupMethod(curMeth->name())) {
           if (meth->cls()->classof(iface)) {
@@ -71,7 +74,10 @@ void MethProfile::reportMethHelper(const Class* cls, const Func* meth) {
     }
     case Tag::InterfaceMeth:
       assertx(curMeth->cls()->attrs() & AttrInterface);
-      if (meth->cls()->classof(curMeth->cls())) return;
+      if (meth->cls()->classof(curMeth->cls())) {
+        InstanceBits::profile(curMeth->cls()->name());
+        return;
+      }
       break;
   }
 

@@ -432,6 +432,27 @@ and subtype_reactivity
   let localize ty =
     let _, t = Phase.localize ~ety_env env ty in
     t in
+  let localize_condition_type ty =
+    (* if condition type is generic - we cannot specify type argument in attribute.
+       For cases when we check if containing type is a subtype of condition type
+       if condition type is generic instantiate it with TAny's *)
+    let ty =
+      match TUtils.try_unwrap_class_type ty with
+      | None -> ty
+      | Some (_, ((p, x) as sid), _) ->
+      begin match Env.get_class env x with
+      | None -> ty
+      | Some cls when cls.tc_tparams = [] -> ty
+      | Some cls ->
+      let params =
+        Core_list.map cls.tc_tparams
+          ~f:(fun (_, (p, x), _) -> Reason.Rwitness p, Tgeneric x) in
+      let subst =
+        Decl_instantiate.make_subst cls.tc_tparams [] in
+      let ty = Reason.Rwitness p, (Tapply (sid, params)) in
+      Decl_instantiate.instantiate subst ty
+    end in
+    localize ty in
   let maybe_localize ty =
     match ty with
     | LoclTy t -> t
@@ -456,11 +477,17 @@ and subtype_reactivity
   let rec effective_reactivity r containing_ty =
     match r, containing_ty with
     | Local (Some t), Some containing_ty
-      when is_sub_type env (maybe_localize containing_ty) (localize t) -> Local None
+      when is_sub_type env
+        (maybe_localize containing_ty)
+        (localize_condition_type t) -> Local None
     | Shallow (Some t), Some containing_ty
-      when is_sub_type env (maybe_localize containing_ty) (localize t) -> Shallow None
+      when is_sub_type env
+        (maybe_localize containing_ty)
+        (localize_condition_type t) -> Shallow None
     | Reactive (Some t), Some containing_ty
-      when is_sub_type env (maybe_localize containing_ty) (localize t) -> Reactive None
+      when is_sub_type env
+        (maybe_localize containing_ty)
+        (localize_condition_type t) -> Reactive None
     | MaybeReactive r, _ -> MaybeReactive (effective_reactivity r containing_ty)
     | _ -> r in
   let r_sub =
@@ -546,13 +573,13 @@ and subtype_reactivity
   | Reactive (Some t), Reactive (Some t1), _
   | (Shallow (Some t) | Reactive (Some t)), Shallow (Some t1), _
   | (Local (Some t) | Shallow (Some t) | Reactive (Some t)), Local (Some t1), _ ->
-    is_sub_type env (localize t1) (localize t)
+    is_sub_type env (localize_condition_type t1) (localize_condition_type t)
 
   (* call_site specific cases *)
   (* shallow can call into local *)
   | Local None, Shallow None, _ when is_call_site -> true
   | Local (Some t), Shallow (Some t1), _ when is_call_site ->
-    is_sub_type env (localize t1) (localize t)
+    is_sub_type env (localize_condition_type t1) (localize_condition_type t)
   (* local can call into non-reactive *)
   | Nonreactive, Local _, _ when is_call_site -> true
   | _ -> false

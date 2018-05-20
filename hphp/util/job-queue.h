@@ -483,7 +483,7 @@ struct JobQueueDispatcher : IHostHealthObserver {
   /**
    * Constructor.
    */
-  JobQueueDispatcher(int maxThreadCount, int maxQueueCount,
+  JobQueueDispatcher(int maxThreadCount, int maxQueueCountConfig,
                      int dropCacheTimeout, bool dropStack,
                      typename TWorker::ContextType context,
                      int lifoSwitchThreshold = INT_MAX,
@@ -493,14 +493,22 @@ struct JobQueueDispatcher : IHostHealthObserver {
     : m_startReaperThread(maxJobQueuingMs > 0)
     , m_context(context)
     , m_maxThreadCount(maxThreadCount)
-    , m_maxQueueCount(maxQueueCount)
+    , m_maxQueueCount(std::max(maxQueueCountConfig, maxThreadCount))
     , m_currThreadCountLimit(initThreadCount)
     , m_hugeThreadCount(hugeCount)
-    , m_queue(maxQueueCount, dropCacheTimeout, dropStack,
+    , m_queue(m_maxQueueCount, dropCacheTimeout, dropStack,
               lifoSwitchThreshold, maxJobQueuingMs, numPriorities,
               this)
   {
     assertx(maxThreadCount >= 1);
+    assertx(m_maxQueueCount >= maxThreadCount);
+    if (maxQueueCountConfig < maxThreadCount) {
+      Logger::Warning(
+        "JobQueueDispatcher: QueueCount %d < ThreadCount %d, using %d\n",
+        maxQueueCountConfig,
+        maxThreadCount,
+        maxThreadCount);
+    }
     if (initThreadCount < 0 || initThreadCount > maxThreadCount) {
       m_currThreadCountLimit = maxThreadCount;
     }

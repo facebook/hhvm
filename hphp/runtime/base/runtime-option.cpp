@@ -1326,6 +1326,7 @@ void RuntimeOption::Load(
                                      EvalProfileHWEvents.size()).toCppString(),
                           false,
                           EvalProfileHWExcludeKernel,
+                          EvalProfileHWFastReads,
                           EvalProfileHWExportInterval);
 
     Config::Bind(EnableEmitterStats, ini, config, "Eval.EnableEmitterStats",

@@ -37,7 +37,7 @@ void test(uint64_t count, uint64_t reps, int thread) {
 
 void usage(int argc, const char** argv) {
   std::printf("usage: %s [--count=n] [--reps=n] [--threads=n] "
-              "[--events=s] [--disable]\n",
+              "[--events=s] [--disable] [--fast[={1,0}]]\n",
               argc ? argv[0] : "hwctr-perf");
 }
 
@@ -57,6 +57,7 @@ int run(int argc, const char** argv) {
   int nthread = -1;
   const char* events = "";
   bool enabled = true;
+  bool fast = false;
   for (int i = 1; i < argc; i++) {
     if (auto const arg = check_arg("--count=", argv[i])) {
       count = atol(arg);
@@ -80,12 +81,18 @@ int run(int argc, const char** argv) {
         continue;
       }
     }
+    if (auto const arg = check_arg("--fast", argv[i])) {
+      if (!*arg || (*arg == '=' && atol(arg))) {
+        fast = true;
+        continue;
+      }
+    }
     std::printf("Invalid argument: %s\n", argv[i]);
     usage(argc, argv);
     exit(1);
   }
 
-  HardwareCounter::Init(enabled, events, false, false, -1);
+  HardwareCounter::Init(enabled, events, false, false, fast, -1);
 
   if (nthread == 0) {
     test(count, reps, 0);

@@ -621,6 +621,7 @@ struct RuntimeOption {
   F(bool, ProfileHWEnable,             true)                            \
   F(string, ProfileHWEvents,           std::string(""))                 \
   F(bool, ProfileHWExcludeKernel,      false)                           \
+  F(bool, ProfileHWFastReads,          false)                           \
   F(bool, ProfileHWStructLog,          false)                           \
   F(int32_t, ProfileHWExportInterval,  30)                              \
   F(bool, JitAlwaysInterpOne,          false)                           \

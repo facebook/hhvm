@@ -63,6 +63,7 @@ struct HardwareCounter {
                    const std::string& events,
                    bool subProc,
                    bool excludeKernel,
+                   bool fastReads,
                    int exportInterval);
   static void RecordSubprocessTimes();
   static void ExcludeKernel();
@@ -120,7 +121,8 @@ struct HardwareCounter {
                    const std::string& events,
                    bool subProc,
                    bool excludeKernel,
-                   bool exportInterval) {}
+                   bool fastReads,
+                   int exportInterval) {}
   static void RecordSubprocessTimes() {}
   static void ExcludeKernel() {}
 

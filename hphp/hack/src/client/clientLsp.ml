@@ -1131,11 +1131,12 @@ let do_typeCoverage
 
 let do_formatting_common
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
-    (args: ServerFormatTypes.ide_action)
+    (action: ServerFormatTypes.ide_action)
+    (options: DocumentFormatting.formattingOptions)
   : TextEdit.t list =
   let open ServerFormatTypes in
   let response: ServerFormatTypes.ide_result =
-    ServerFormat.go_ide editor_open_files args in
+    ServerFormat.go_ide editor_open_files action options in
   match response with
   | Error "File failed to parse without errors" ->
     (* If LSP issues a formatting request at a given line+char, but we can't *)
@@ -1167,7 +1168,7 @@ let do_documentRangeFormatting
         file_range = lsp_range_to_ide params.range;
       }
   in
-  do_formatting_common editor_open_files action
+  do_formatting_common editor_open_files action params.options
 
 
 let do_signatureHelp
@@ -1193,7 +1194,7 @@ let do_documentOnTypeFormatting
         filename = lsp_uri_to_path params.textDocument.uri;
         position = lsp_position_to_ide params.position;
       } in
-  do_formatting_common editor_open_files action
+  do_formatting_common editor_open_files action params.options
 
 
 let do_documentFormatting
@@ -1203,7 +1204,7 @@ let do_documentFormatting
   let open DocumentFormatting in
   let open TextDocumentIdentifier in
   let action = ServerFormatTypes.Document (lsp_uri_to_path params.textDocument.uri) in
-  do_formatting_common editor_open_files action
+  do_formatting_common editor_open_files action params.options
 
 
 (* do_server_busy: controls the progress / action-required indicator          *)

@@ -139,7 +139,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | STATS -> env, Stats.get_stats ()
     | KILL -> env, ()
     | FORMAT (content, from, to_) ->
-        env, ServerFormat.go content from to_
+        let legacy_format_options =
+          { Lsp.DocumentFormatting.
+            tabSize = 2;
+            insertSpaces = true;
+          } in
+        env, ServerFormat.go content from to_ legacy_format_options
     | TRACE_AI action ->
         env, Ai.TraceService.go action Typing_check_utils.check_defs
            (ServerArgs.ai_mode genv.options) env.tcopt

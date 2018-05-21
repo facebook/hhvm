@@ -35,7 +35,6 @@ let debug_describe_t : type a. a t -> string = function
   | STATS                      -> "STATS"
   | KILL                       -> "KILL"
   | FORMAT                   _ -> "FORMAT"
-  | HH_FORMAT                _ -> "HH_FORMAT"
   | TRACE_AI                 _ -> "TRACE_AI"
   | AI_QUERY                 _ -> "AI_QUERY"
   | DUMP_FULL_FIDELITY_PARSE _ -> "DUMP_FULL_FIDELITY_PARSE"

@@ -139,12 +139,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | STATS -> env, Stats.get_stats ()
     | KILL -> env, ()
     | FORMAT (content, from, to_) ->
-      let open ServerLocalConfig in
-      let local_config = load ~silent:true in
-      let use_hackfmt = local_config.use_hackfmt in
-        env, ServerFormat.go content from to_ use_hackfmt
-    | HH_FORMAT (editor_open_files, action, use_hackfmt) ->
-        env, ServerFormat.go_ide editor_open_files action use_hackfmt
+        env, ServerFormat.go content from to_
     | TRACE_AI action ->
         env, Ai.TraceService.go action Typing_check_utils.check_defs
            (ServerArgs.ai_mode genv.options) env.tcopt

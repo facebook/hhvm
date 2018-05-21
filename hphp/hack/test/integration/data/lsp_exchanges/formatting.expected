@@ -38,6 +38,12 @@
         "codeActionProvider": false,
         "documentFormattingProvider": true,
         "documentRangeFormattingProvider": true,
+        "documentOnTypeFormattingProvider": {
+          "firstTriggerCharacter": ";",
+          "moreTriggerCharacter": [
+            "}"
+          ]
+        },
         "renameProvider": false,
         "typeCoverageProvider": true,
         "rageProvider": true

@@ -16,7 +16,6 @@ type t = {
   watchman_subscribe: bool;
   watchman_synchronous_timeout : int; (* in seconds *)
   use_mini_state: bool;
-  use_hackfmt: bool;
   load_mini_script_timeout: int; (* in seconds *)
   (** Prefer using Ocaml implementation over load script. *)
   load_state_natively: bool;
@@ -54,7 +53,6 @@ let default = {
   watchman_subscribe = false;
   watchman_synchronous_timeout = 120;
   use_mini_state = false;
-  use_hackfmt = false;
   load_mini_script_timeout = 20;
   load_state_natively = false;
   type_decl_bucket_size = 1000;
@@ -136,8 +134,6 @@ let load_ fn ~silent =
     ~default:default.load_mini_script_timeout config in
   let load_state_natively = bool_ "load_state_natively_v4"
     ~default:default.load_state_natively config in
-  let use_hackfmt = bool_ "use_hackfmt"
-    ~default:default.use_hackfmt config in
   let state_loader_timeouts = state_loader_timeouts_
     ~default:State_loader_config.default_timeouts config in
   let use_dummy_informant = bool_ "use_dummy_informant"
@@ -185,7 +181,6 @@ let load_ fn ~silent =
     watchman_subscribe;
     watchman_synchronous_timeout;
     use_mini_state;
-    use_hackfmt;
     load_mini_script_timeout;
     load_state_natively;
     max_purgatory_clients;

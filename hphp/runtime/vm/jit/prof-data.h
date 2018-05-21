@@ -212,21 +212,29 @@ struct ProfTransRec {
    *
    * Precondition: kind() == TransKind::ProfPrologue
    */
-  std::vector<TCA>& mainCallers() {
+  auto& mainCallers() {
     assertx(m_kind == TransKind::ProfPrologue);
     m_callers->lock.assertOwnedBySelf();
     return m_callers->main;
   }
-  const std::vector<TCA>& mainCallers() const {
+  auto const& mainCallers() const {
     return const_cast<ProfTransRec*>(this)->mainCallers();
   }
-  std::vector<TCA>& guardCallers() {
+  auto& guardCallers() {
     assertx(m_kind == TransKind::ProfPrologue);
     m_callers->lock.assertOwnedBySelf();
     return m_callers->guard;
   }
-  const std::vector<TCA>& guardCallers() const {
+  auto const& guardCallers() const {
     return const_cast<ProfTransRec*>(this)->guardCallers();
+  }
+  auto& profCallers() {
+    assertx(m_kind == TransKind::ProfPrologue);
+    m_callers->lock.assertOwnedBySelf();
+    return m_callers->profCallers;
+  }
+  auto const& profCallers() const {
+    return const_cast<ProfTransRec*>(this)->profCallers();
   }
   std::unique_lock<Mutex> lockCallerList() const {
     assertx(m_kind == TransKind::ProfPrologue);
@@ -269,16 +277,22 @@ struct ProfTransRec {
   }
 private:
   struct CallerRec {
-    std::vector<TCA> main;
-    std::vector<TCA> guard;
+    // main and guard are populated by profiling, and are used both to
+    // smash callers when we optimize, and to build the
+    // call-graph. profCallers is only populated via deserialization
+    // (where main and guard are not used), and is only used to build
+    // the call-graph.
+    CompactVector<TCA> main;
+    CompactVector<TCA> guard;
+    CompactVector<TransID> profCallers;
     mutable Mutex lock;
   };
   using CallerRecPtr = std::unique_ptr<CallerRec>;
 
-  void removeCaller(std::vector<TCA>& v, TCA caller) {
+  void removeCaller(CompactVector<TCA>& v, TCA caller) {
     assertx(m_kind == TransKind::ProfPrologue);
     m_callers->lock.assertOwnedBySelf();
-    auto pos = std::find(v.begin(), v.end(), caller);
+    auto const pos = std::find(v.begin(), v.end(), caller);
     if (pos != v.end()) v.erase(pos);
   }
 

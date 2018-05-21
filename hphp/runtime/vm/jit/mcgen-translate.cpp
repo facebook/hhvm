@@ -184,24 +184,31 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
 
   // Add arcs with weights
 
-  auto addCallersCount = [&](TargetId calleeTargetId,
-                             const std::vector<TCA>& callerAddrs,
+  auto addCallerCount = [&] (TCA callAddr,
+                             TargetId calleeTargetId,
+                             TransID callerTransId,
                              uint32_t& totalCalls) {
+    assertx(callerTransId != kInvalidTransID);
+    auto const callerFuncId = pd->transRec(callerTransId)->funcId();
+    if (!Func::isFuncIdValid(callerFuncId)) return;
+    auto const callerTargetId = targetID[callerFuncId];
+    auto const callCount = pd->transCounter(callerTransId);
+    // Don't create arcs with zero weight
+    if (callCount) {
+      cg.incArcWeight(callerTargetId, calleeTargetId, callCount);
+      totalCalls += callCount;
+      FTRACE(3, "  - adding arc @ {} : {} => {} [weight = {}] \n",
+             callAddr, callerTargetId, calleeTargetId, callCount);
+    }
+  };
+
+  auto addCallersCount = [&] (TargetId calleeTargetId,
+                              const auto& callerAddrs,
+                              uint32_t& totalCalls) {
     for (auto callAddr : callerAddrs) {
       if (!tc::isProfileCodeAddress(callAddr)) continue;
-      const auto callerTransId = pd->jmpTransID(callAddr);
-      assertx(callerTransId != kInvalidTransID);
-      const auto callerFuncId = pd->transRec(callerTransId)->funcId();
-      if (!Func::isFuncIdValid(callerFuncId)) continue;
-      const auto callerTargetId = targetID[callerFuncId];
-      const auto callCount = pd->transCounter(callerTransId);
-      // Don't create arcs with zero weight
-      if (callCount) {
-        cg.incArcWeight(callerTargetId, calleeTargetId, callCount);
-        totalCalls += callCount;
-        FTRACE(3, "  - adding arc @ {} : {} => {} [weight = {}] \n",
-               callAddr, callerTargetId, calleeTargetId, callCount);
-      }
+      auto const callerTransId = pd->jmpTransID(callAddr);
+      addCallerCount(callAddr, calleeTargetId, callerTransId, totalCalls);
     }
   };
 
@@ -221,6 +228,9 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
       const auto trec = pd->transRec(transId);
       assertx(trec->kind() == TransKind::ProfPrologue);
       auto lock = trec->lockCallerList();
+      for (auto const callerTransId : trec->profCallers()) {
+        addCallerCount(nullptr, calleeTargetId, callerTransId, totalCalls);
+      }
       addCallersCount(calleeTargetId, trec->mainCallers(),  totalCalls);
       addCallersCount(calleeTargetId, trec->guardCallers(), totalCalls);
       profCount += pd->transCounter(transId);

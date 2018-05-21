@@ -304,7 +304,7 @@ void adjustProfiledCallers(RelocationInfo& rel) {
   auto pd = profData();
   if (!pd) return;
 
-  auto updateCallers = [&] (std::vector<TCA>& callers) {
+  auto updateCallers = [&] (auto& callers) {
     for (auto& caller : callers) {
       if (auto adjusted = rel.adjustedAddressAfter(caller)) {
         caller = adjusted;

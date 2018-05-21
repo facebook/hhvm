@@ -350,7 +350,9 @@ RegionDescPtr read_region_desc(ProfDataDeserializer& ser) {
   return ret;
 }
 
-void write_prof_trans_rec(ProfDataSerializer& ser, const ProfTransRec* ptr) {
+void write_prof_trans_rec(ProfDataSerializer& ser,
+                          const ProfTransRec* ptr,
+                          ProfData* pd) {
   if (!ptr) return write_raw(ser, TransKind{});
   write_raw(ser, ptr->kind());
   write_srckey(ser, ptr->srcKey());
@@ -358,8 +360,19 @@ void write_prof_trans_rec(ProfDataSerializer& ser, const ProfTransRec* ptr) {
     write_raw(ser, ptr->lastBcOff());
     write_region_desc(ser, ptr->region().get());
   } else {
-    // No need to preserve callers; there won't be any when we use this data.
     write_raw(ser, ptr->prologueArgs());
+
+    auto lock = ptr->lockCallerList();
+    std::vector<TransID> callers;
+    auto addCaller = [&] (TCA caller) {
+      if (!tc::isProfileCodeAddress(caller)) return;
+      auto const callerTransId = pd->jmpTransID(caller);
+      assertx(callerTransId != kInvalidTransID);
+      callers.push_back(callerTransId);
+    };
+    for (auto const caller : ptr->mainCallers()) addCaller(caller);
+    for (auto const caller : ptr->guardCallers()) addCaller(caller);
+    write_container(ser, callers, write_raw<TransID>);
   }
 }
 
@@ -376,7 +389,14 @@ std::unique_ptr<ProfTransRec> read_prof_trans_rec(ProfDataDeserializer& ser) {
     return std::make_unique<ProfTransRec>(lastBcOff, sk, region);
   }
 
-  return std::make_unique<ProfTransRec>(sk, read_raw<int>(ser));
+  auto ret = std::make_unique<ProfTransRec>(sk, read_raw<int>(ser));
+
+  read_container(ser,
+                 [&] {
+                   ret->profCallers().push_back(read_raw<TransID>(ser));
+                 });
+
+  return ret;
 }
 
 void write_profiled_funcs(ProfDataSerializer& ser, ProfData* pd) {
@@ -406,7 +426,7 @@ void write_prof_data(ProfDataSerializer& ser, ProfData* pd) {
         ptr->region()->entry()->profTransID() :
         pd->proflogueTransId(ptr->func(), ptr->prologueArgs());
       write_raw(ser, transID);
-      write_prof_trans_rec(ser, ptr);
+      write_prof_trans_rec(ser, ptr, pd);
       // forEachTransRec already grabs a read lock, and we're not
       // going to add a *new* counter here (so we don't need a write
       // lock).

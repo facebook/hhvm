@@ -94,7 +94,6 @@ let rpc_command_needs_workers: type a. ServerEnv.genv -> a t -> bool =
   | IDE_FIND_REFS _ -> false
   | IDE_HIGHLIGHT_REFS _ -> false
   | COVERAGE_LEVELS _ -> false
-  | HH_FORMAT _ -> false
   | SUBSCRIBE_DIAGNOSTIC _ -> false
   | IDE_IDLE -> false
 | _ -> true (* assume yes unless whitelisted just to be safe *)

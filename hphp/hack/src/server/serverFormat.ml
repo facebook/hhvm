@@ -50,36 +50,26 @@ let go_hackfmt ?filename ~content args =
     | None -> args
   in
   Hh_logger.log "%s" (String.concat " " args);
-  let path = Path.make BuildOptions.default_hackfmt_path |> Path.to_string in
-  if Sys.file_exists path
-  then call_external_formatter path content args
-  else begin
+  let dirname = Filename.dirname Sys.argv.(0) in
+  let paths = List.map (fun x -> Path.make x |> Path.to_string) [
+    (* if running from build tree *)
+    dirname ^ "/hackfmt";
+    dirname ^ "/../hackfmt/hackfmt";
+    (* look for system installation *)
+    BuildOptions.default_hackfmt_path;
+  ] in
+  let path = List.find_opt Sys.file_exists paths in
+  match path with
+  | Some path -> call_external_formatter path content args
+  | _ ->
     Hh_logger.log "Formatter not found";
-    Error ("Could not locate formatter on provided path: " ^ path)
-  end
-
-let hh_format_result_to_response x =
-  let open Format_hack in
-  match x with
-  | Disabled_mode -> Error ("Not a Hack file")
-  | Parsing_error _ -> Error ("File has parse errors")
-  | Internal_error -> Error ("Formatter internal error")
-  | Success s -> Ok s
-
-let go_hh_format content from to_ =
-    let modes = [Some FileInfo.Mstrict; Some FileInfo.Mpartial] in
-    hh_format_result_to_response @@
-      Format_hack.region modes Path.dummy_path from to_ content
+    Error ("Could not locate formatter - looked in: " ^ (String.concat " " paths))
 
 (* This function takes 1-based offsets, and 'to_' is exclusive. *)
-let go ?filename ~content from to_ use_hackfmt =
-    if use_hackfmt
-    then
-      let args = range_offsets_to_args from to_ in
-      go_hackfmt ?filename ~content args >>| fun lines ->
-      (String.concat "\n" lines) ^ "\n"
-    else
-    go_hh_format content from to_
+let go ?filename ~content from to_ =
+    let args = range_offsets_to_args from to_ in
+    go_hackfmt ?filename ~content args >>| fun lines ->
+    (String.concat "\n" lines) ^ "\n"
 
 (* Our formatting engine can only handle ranges that span entire rows.  *)
 (* This is signified by a range that starts at column 1 on one row,     *)
@@ -114,7 +104,6 @@ let range_regexp = Str.regexp "^\\([0-9]+\\) \\([0-9]+\\)$"
 let go_ide
   (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
   (action: ServerFormatTypes.ide_action)
-  (use_hackfmt: bool)
   : ServerFormatTypes.ide_result =
   let open File_content in
   let open ServerFormatTypes in
@@ -145,14 +134,14 @@ let go_ide
     let ed = offset_to_position content to0 in
     let range = {st = {line = 1; column = 1;}; ed;} in
     (* hackfmt currently takes one-indexed integers for range formatting. *)
-    go ~filename ~content (from0 + 1) (to0 + 1) use_hackfmt
+    go ~filename ~content (from0 + 1) (to0 + 1)
       |> convert_to_ide_result ~range
 
   | Range range ->
     let file_range = range.Ide_api_types.file_range |> Ide_api_types.ide_range_to_fc in
     let (range, from0, to0) =
       expand_range_to_whole_rows content file_range in
-    go ~filename ~content (from0 + 1) (to0 + 1) use_hackfmt
+    go ~filename ~content (from0 + 1) (to0 + 1)
       |> convert_to_ide_result ~range
 
   | Position { Ide_api_types.position; _} ->

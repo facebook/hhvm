@@ -156,7 +156,6 @@ type _ t =
   | STATS : Stats.t t
   | KILL : unit t
   | FORMAT : ServerFormatTypes.action -> ServerFormatTypes.result t
-  | HH_FORMAT : Lsp.TextDocumentItem.t SMap.t * ServerFormatTypes.ide_action * bool -> ServerFormatTypes.ide_result t
   | TRACE_AI : Ai.TraceService.action -> string t
   | AI_QUERY : string -> string t
   | DUMP_FULL_FIDELITY_PARSE : string -> string t

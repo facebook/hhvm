@@ -1144,21 +1144,12 @@ let do_typeCoverage
 
 
 let do_formatting_common
-    (conn: server_conn)
-    (ref_unblocked_time: float ref)
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (args: ServerFormatTypes.ide_action)
   : TextEdit.t list =
-  let open ServerLocalConfig in
   let open ServerFormatTypes in
-  let local_config = load ~silent:true in
-  let use_hackfmt = local_config.use_hackfmt in
   let response: ServerFormatTypes.ide_result =
-    if use_hackfmt then ServerFormat.go_ide editor_open_files args use_hackfmt
-    else
-      let command = ServerCommandTypes.HH_FORMAT (editor_open_files, args, use_hackfmt) in
-      rpc conn ref_unblocked_time command
-  in
+    ServerFormat.go_ide editor_open_files args in
   match response with
   | Error "File failed to parse without errors" ->
     (* If LSP issues a formatting request at a given line+char, but we can't *)
@@ -1179,8 +1170,6 @@ let do_formatting_common
 
 
 let do_documentRangeFormatting
-    (conn: server_conn)
-    (ref_unblocked_time: float ref)
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: DocumentRangeFormatting.params)
   : DocumentRangeFormatting.result =
@@ -1192,7 +1181,7 @@ let do_documentRangeFormatting
         file_range = lsp_range_to_ide params.range;
       }
   in
-  do_formatting_common conn ref_unblocked_time editor_open_files action
+  do_formatting_common editor_open_files action
 
 
 let do_signatureHelp
@@ -1208,8 +1197,6 @@ let do_signatureHelp
 
 
 let do_documentOnTypeFormatting
-    (conn: server_conn)
-    (ref_unblocked_time: float ref)
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: DocumentOnTypeFormatting.params)
   : DocumentOnTypeFormatting.result =
@@ -1220,19 +1207,17 @@ let do_documentOnTypeFormatting
         filename = lsp_uri_to_path params.textDocument.uri;
         position = lsp_position_to_ide params.position;
       } in
-  do_formatting_common conn ref_unblocked_time editor_open_files action
+  do_formatting_common editor_open_files action
 
 
 let do_documentFormatting
-    (conn: server_conn)
-    (ref_unblocked_time: float ref)
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: DocumentFormatting.params)
   : DocumentFormatting.result =
   let open DocumentFormatting in
   let open TextDocumentIdentifier in
   let action = ServerFormatTypes.Document (lsp_uri_to_path params.textDocument.uri) in
-  do_formatting_common conn ref_unblocked_time editor_open_files action
+  do_formatting_common editor_open_files action
 
 
 (* do_server_busy: controls the progress / action-required indicator          *)
@@ -1468,7 +1453,6 @@ let rec connect_client
 
 let do_initialize () : Initialize.result =
   let open Initialize in
-  let local_config = ServerLocalConfig.load ~silent:true in
   {
     server_capabilities = {
       textDocumentSync = {
@@ -1493,12 +1477,10 @@ let do_initialize () : Initialize.result =
       codeLensProvider = None;
       documentFormattingProvider = true;
       documentRangeFormattingProvider = true;
-      documentOnTypeFormattingProvider =
-        Option.some_if local_config.ServerLocalConfig.use_hackfmt
-          {
-            firstTriggerCharacter = ";";
-            moreTriggerCharacter = ["}"];
-          };
+      documentOnTypeFormattingProvider = Some {
+        firstTriggerCharacter = ";";
+        moreTriggerCharacter = ["}"];
+      };
       renameProvider = false;
       documentLinkProvider = None;
       executeCommandProvider = None;
@@ -2095,21 +2077,21 @@ let handle_event
   (* textDocument/formatting *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/formatting" ->
     parse_documentFormatting c.params
-    |> do_documentFormatting menv.conn ref_unblocked_time menv.editor_open_files
+    |> do_documentFormatting menv.editor_open_files
     |> print_documentFormatting |> Jsonrpc.respond to_stdout c
 
   (* textDocument/formatting *)
   | Main_loop menv, Client_message c
     when c.method_ = "textDocument/rangeFormatting" ->
     parse_documentRangeFormatting c.params
-    |> do_documentRangeFormatting menv.conn ref_unblocked_time menv.editor_open_files
+    |> do_documentRangeFormatting menv.editor_open_files
     |> print_documentRangeFormatting |> Jsonrpc.respond to_stdout c
 
   (* textDocument/onTypeFormatting *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/onTypeFormatting" ->
     cancel_if_stale client c short_timeout;
     parse_documentOnTypeFormatting c.params
-    |> do_documentOnTypeFormatting menv.conn ref_unblocked_time menv.editor_open_files
+    |> do_documentOnTypeFormatting menv.editor_open_files
     |> print_documentOnTypeFormatting |> Jsonrpc.respond to_stdout c
 
   (* textDocument/didOpen notification *)

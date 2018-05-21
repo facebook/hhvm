@@ -168,6 +168,18 @@ void DebugTransport::processOutgoingMessages() {
     return;
   }
 
+  constexpr int abortIdx = 0;
+  constexpr int transportIdx = 1;
+  std::array<struct pollfd, 2> pollFds;
+
+  pollFds[abortIdx] = {0};
+  pollFds[abortIdx].fd = m_abortPipeFd[0];
+  pollFds[abortIdx].events = POLLIN | POLLERR | POLLHUP;
+
+  pollFds[transportIdx] = {0};
+  pollFds[transportIdx].fd = fd;
+  pollFds[transportIdx].events = POLLOUT | POLLERR | POLLHUP;
+
   while (true) {
     std::list<std::string> messagesToSend;
     {
@@ -193,15 +205,61 @@ void DebugTransport::processOutgoingMessages() {
 
       // Write out the entire string, *including* its terminating NULL char.
       const char* output = it->c_str();
-      if (write(fd, output, strlen(output) + 1) < 0) {
-        VSDebugLogger::Log(
-          VSDebugLogger::LogLevelError,
-          "Sending message failed:\n%s\nWrite returned %d",
-          output,
-          errno
-        );
-        onClientDisconnected();
-        return;
+      size_t bytesToSend = strlen(output) + 1;
+
+      while (bytesToSend > 0) {
+        int ret = poll(pollFds.data(), 2, -1);
+        if (ret < 0) {
+          if (ret == -EINTR) {
+            // Interrupted syscall, resume polling.
+            continue;
+          }
+
+          VSDebugLogger::Log(
+            VSDebugLogger::LogLevelError,
+            "Polling inputs failed: %d (%s)",
+            errno,
+            folly::errnoStr(errno).c_str()
+          );
+          onClientDisconnected();
+          return;
+        }
+
+        if ((pollFds[transportIdx].revents & POLLOUT) != 0) {
+          // Output transport is ready to accept writes.
+          ret = write(fd, output, bytesToSend);
+          if (ret < 0) {
+            // Error writing.
+            VSDebugLogger::Log(
+              VSDebugLogger::LogLevelError,
+              "Sending message failed:\n%s\nWrite returned %d",
+              output,
+              errno
+            );
+            onClientDisconnected();
+            return;
+          }
+
+          bytesToSend -= ret;
+          output += ret;
+
+        } else if (pollFds[abortIdx].revents != 0) {
+          // Termination event received.
+          VSDebugLogger::Log(
+            VSDebugLogger::LogLevelInfo,
+            "Transport write thread: termination signal received."
+          );
+          return;
+        } else {
+          // TransportFD hangup or error.
+          assert((pollFds[transportIdx].revents & (POLLERR | POLLHUP)) != 0);
+          VSDebugLogger::Log(
+            VSDebugLogger::LogLevelInfo,
+            "Transport write thread: error event on fd."
+          );
+          onClientDisconnected();
+          return;
+        }
       }
     }
   }
@@ -292,7 +350,7 @@ void DebugTransport::processIncomingMessages() {
         VSDebugLogger::LogLevelError,
         "Polling inputs failed: %d (%s)",
         errno,
-        strerror(errno)
+        folly::errnoStr(errno).c_str()
       );
       break;
     }

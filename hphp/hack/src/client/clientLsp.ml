@@ -1199,14 +1199,21 @@ let do_signatureHelp
 
 let do_documentOnTypeFormatting
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
+    (from: string)
     (params: DocumentOnTypeFormatting.params)
   : DocumentOnTypeFormatting.result =
   let open DocumentOnTypeFormatting in
   let open TextDocumentIdentifier in
+  let fixup_position position =
+    (* temporary workaround for T29372533: Nuclide points at the trigger character... *)
+    if from = "nuclide" then position
+    (* ... but other LSP editors such as vscode point one character later *)
+    else {position with character = position.character - 1}
+  in
   let action = ServerFormatTypes.Position
       { Ide_api_types.
         filename = lsp_uri_to_path params.textDocument.uri;
-        position = lsp_position_to_ide params.position;
+        position = lsp_position_to_ide (fixup_position params.position);
       } in
   do_formatting_common editor_open_files action params.options
 
@@ -2092,7 +2099,7 @@ let handle_event
   | Main_loop menv, Client_message c when c.method_ = "textDocument/onTypeFormatting" ->
     cancel_if_stale client c short_timeout;
     parse_documentOnTypeFormatting c.params
-    |> do_documentOnTypeFormatting menv.editor_open_files
+    |> do_documentOnTypeFormatting menv.editor_open_files env.from
     |> print_documentOnTypeFormatting |> Jsonrpc.respond to_stdout c
 
   (* textDocument/didOpen notification *)

@@ -27,7 +27,10 @@
 namespace HPHP {
 namespace VSDEBUG {
 
-Debugger::Debugger() {
+Debugger::Debugger() :
+  m_sessionCleanupThread(this, &Debugger::runSessionCleanupThread) {
+
+  m_sessionCleanupThread.start();
 }
 
 void Debugger::setTransport(DebugTransport* transport) {
@@ -36,11 +39,53 @@ void Debugger::setTransport(DebugTransport* transport) {
   setClientConnected(m_transport->clientConnected());
 }
 
-void Debugger::setClientConnected(bool connected) {
+void Debugger::runSessionCleanupThread() {
+  bool terminating = false;
+  std::unordered_set<DebuggerSession*> sessionsToDelete;
+
+  while (true) {
+    {
+      std::unique_lock<std::mutex> lock(m_sessionCleanupLock);
+      m_sessionCleanupCondition.wait(lock);
+
+      terminating = m_sessionCleanupTerminating;
+
+      // Make a local copy of the session pointers to delete and drop
+      // the lock.
+      sessionsToDelete = m_cleanupSessions;
+      m_cleanupSessions.clear();
+    }
+
+    // Free the sessions.
+    for (DebuggerSession* sessionToDelete : sessionsToDelete) {
+      delete sessionToDelete;
+    }
+
+    if (terminating) {
+      break;
+    }
+  }
+
+}
+
+void Debugger::setClientConnected(
+  bool connected,
+  bool synchronous /*= false*/
+) {
   DebuggerSession* sessionToDelete = nullptr;
   SCOPE_EXIT {
     if (sessionToDelete != nullptr) {
-      delete sessionToDelete;
+      // Unless the debugger is shutting down (in which case we need to
+      // join with the worker threads), delete the session asynchronously.
+      // The session destructor needs to wait to join with the dummy thread,
+      // which could take a while if it's running native code.
+      if (synchronous) {
+        delete sessionToDelete;
+      } else {
+        std::unique_lock<std::mutex> lock(m_sessionCleanupLock);
+        m_cleanupSessions.insert(sessionToDelete);
+        m_sessionCleanupCondition.notify_all();
+      }
     }
   };
 
@@ -304,13 +349,21 @@ void Debugger::shutdown() {
   trySendTerminatedEvent();
 
   m_transport->shutdown();
-  setClientConnected(false);
+  setClientConnected(false, true);
 
   // m_session is deleted and set to nullptr by setClientConnected(false).
   assertx(m_session == nullptr);
 
   delete m_transport;
   m_transport = nullptr;
+
+  {
+    std::unique_lock<std::mutex> lock(m_sessionCleanupLock);
+    m_sessionCleanupTerminating = true;
+    m_sessionCleanupCondition.notify_all();
+  }
+
+  m_sessionCleanupThread.waitForEnd();
 }
 
 void Debugger::trySendTerminatedEvent() {

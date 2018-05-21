@@ -176,7 +176,7 @@ struct Debugger final {
   // connected or not. Many debugger events will be skipped if no client is
   // connected to avoid impacting perf when there is no debugger client
   // attached.
-  void setClientConnected(bool connected);
+  void setClientConnected(bool connected, bool synchronous = false);
 
   // Shuts down the debugger session and cleans up any resources. This will also
   // unblock any requests that are broken in to the debugger.
@@ -552,6 +552,9 @@ private:
   // Returns the next unused synthetic request thread ID.
   request_id_t nextThreadId();
 
+  // Worker routine to clean up old debugger sessions.
+  void runSessionCleanupThread();
+
   Mutex m_lock;
   DebugTransport* m_transport {nullptr};
 
@@ -607,6 +610,16 @@ private:
   // also issue a pause
   std::mutex m_resumeMutex;
   std::condition_variable m_resumeCondition;
+
+  // Worker thread to clean up old session objects as debugger clients
+  // disconnect. Cleaning the session object requires joining with the
+  // dummy thread, which can block if it's in native code or a loop
+  // or something, so we need to do this in the background.
+  std::mutex m_sessionCleanupLock;
+  bool m_sessionCleanupTerminating {false};
+  std::condition_variable m_sessionCleanupCondition;
+  AsyncFunc<Debugger> m_sessionCleanupThread;
+  std::unordered_set<DebuggerSession*> m_cleanupSessions;
 
   // Pending event messages that are queued to be sent after the current
   // client command is processed and responded to.

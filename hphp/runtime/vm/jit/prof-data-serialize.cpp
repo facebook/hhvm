@@ -48,6 +48,7 @@
 #include "hphp/util/build-info.h"
 
 #include <folly/portability/Unistd.h>
+#include <folly/String.h>
 
 namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
@@ -573,15 +574,51 @@ void read_target_profiles(ProfDataDeserializer& ser) {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-ProfDataSerializer::ProfDataSerializer(const std::string& name) {
-  fd = open(name.c_str(), O_CLOEXEC | O_CREAT | O_TRUNC | O_WRONLY, 0644);
-  if (fd == -1) throw std::runtime_error("Failed to open: " + name);
+ProfDataSerializer::ProfDataSerializer(const std::string& name)
+  : fileName(name) {
+  // Delete old profile data to avoid confusion.  This should've happened from
+  // outside the process, but in case it didn't happen, try to do it here.
+  unlink(name.c_str());
+
+  std::string partialFile = name + ".part";
+  fd = open(partialFile.c_str(),
+            O_CLOEXEC | O_CREAT | O_TRUNC | O_WRONLY, 0644);
+  if (fd == -1) {
+    auto const msg =
+      folly::sformat("Failed to open file for write {}, {}", name,
+                     folly::errnoStr(errno));
+    Logger::Error(msg);
+    throw std::runtime_error(msg);
+  }
+}
+
+void ProfDataSerializer::finalize() {
+  assertx(fd != -1);
+  if (offset) ::write(fd, buffer, offset);
+  offset = 0;
+  close(fd);
+  fd = -1;
+  std::string partialFile = fileName + ".part";
+  if (rename(partialFile.c_str(), fileName.c_str()) == -1) {
+    auto const msg =
+      folly::sformat("Failed to rename {} to {}, {}",
+                     partialFile, fileName, folly::errnoStr(errno));
+    Logger::Error(msg);
+    throw std::runtime_error(msg);
+  } else {
+    FTRACE(1, "Finished serializing profile data to " + fileName);
+  }
 }
 
 ProfDataSerializer::~ProfDataSerializer() {
-  assertx(fd != -1);
-  if (offset) ::write(fd, buffer, offset);
-  close(fd);
+  if (fd != -1) {
+    // We didn't finalize(), maybe because an exception was thrown while writing
+    // the data.  The file is likely corrupt or incomplete, so discard it.
+    ftruncate(fd, 0);
+    close(fd);
+    std::string partialFile = fileName + ".part";
+    unlink(partialFile.c_str());
+  }
 }
 
 ProfDataDeserializer::ProfDataDeserializer(const std::string& name) {
@@ -1023,6 +1060,7 @@ bool serializeProfData(const std::string& filename) {
 
     InliningDecider::serializeForbiddenInlines(ser);
 
+    ser.finalize();
     return true;
   } catch (std::runtime_error& err) {
     FTRACE(1, "serializeProfData - Failed: {}\n", err.what());

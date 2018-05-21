@@ -53,11 +53,15 @@ struct ProfDataSerializer {
   bool serialize(const ArrayData* arr) {
     return serializedStatics.emplace(arr).second;
   }
+
+  // Atomically create the output file, or throw runtime error upon failure.
+  void finalize();
 private:
   int fd;
   static constexpr uint32_t buffer_size = 8192;
   uint32_t offset{0};
   char buffer[buffer_size];
+  const std::string& fileName;
   // keep track of which static strings and arrays have already been serialized
   std::unordered_set<const void*> serializedStatics;
 };

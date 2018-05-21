@@ -1852,7 +1852,13 @@ void Debugger::onAsyncBreak() {
     "Debugger paused due to async-break request from client."
   );
 
-  pauseTarget(nullptr, "Async-break");
+  constexpr char* reason = "Async-break";
+  pauseTarget(nullptr, reason);
+
+  if (m_showDummyOnAsyncPause) {
+    // Show the dummy request as stopped.
+    sendStoppedEvent(reason, reason, 0, false);
+  }
 }
 
 void Debugger::onError(RequestInfo* requestInfo,

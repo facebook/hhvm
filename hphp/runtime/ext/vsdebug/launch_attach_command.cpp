@@ -47,6 +47,9 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   bool displayStartupMsg =
     tryGetBool(args, "displayConsoleStartupMsg", true);
 
+  bool showDummyOnAsyncPause =
+     tryGetBool(args, "showDummyOnAsyncPause", false);
+
   if (!startupDoc.empty()) {
     m_debugger->startDummyRequest(
       startupDoc,
@@ -62,6 +65,8 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
       displayStartupMsg
     );
   }
+
+  m_debugger->setShowDummyOnAsyncPause(showDummyOnAsyncPause);
 
   const auto& logFilePath =
     tryGetString(args, "logFilePath", emptyString);

@@ -383,6 +383,11 @@ struct Debugger final {
     return (int64_t)Process::GetThreadId() == m_dummyThreadId;
   }
 
+  void setShowDummyOnAsyncPause(bool show) {
+    Lock lock(m_lock);
+    m_showDummyOnAsyncPause = show;
+  }
+
   // Populates the specified folly::dynamic array with a list of thread IDs.
   void getAllThreadInfo(folly::dynamic& threads);
 
@@ -576,6 +581,10 @@ private:
 
   // State of the program.
   ProgramState m_state {ProgramState::LoaderBreakpoint};
+
+  // Tracks if the current client wants to see the dummy in the thread
+  // list when the debugger async-breaks.
+  bool m_showDummyOnAsyncPause {false};
 
   // Information about all the requests that the debugger is aware of.
   std::unordered_map<ThreadInfo*, RequestInfo*> m_requests;

@@ -19,8 +19,9 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/types.h"
 
@@ -658,10 +659,15 @@ ALWAYS_INLINE Array empty_vec_array() {
  *
  * asArrRef() unconditionally removes Persistent bits from the referenced type.
  */
-ALWAYS_INLINE Array& asArrRef(tv_lval lval) {
-  assertx(isArrayLikeType(lval.type()));
-  lval.type() = lval.val().parr->toDataType();
-  return *reinterpret_cast<Array*>(&lval.val().parr);
+ALWAYS_INLINE Array& asArrRef(tv_lval tv) {
+  assertx(tvIsArrayLike(tv));
+  tv.type() = tv.val().parr->toDataType();
+  return *reinterpret_cast<Array*>(&val(tv).parr);
+}
+
+ALWAYS_INLINE const Array& asCArrRef(tv_rval tv) {
+  assertx(tvIsArrayLike(tv));
+  return *reinterpret_cast<const Array*>(&val(tv).parr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

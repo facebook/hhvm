@@ -68,9 +68,8 @@ public:
   using tv_t = maybe_const_t<TypedValue>;
 
   tv_val();
-  tv_val(tv_t* lval);
+  /* implicit */ tv_val(tv_t* lval);
 
-public:
   bool operator==(tv_val other) const;
 
   /*
@@ -80,6 +79,19 @@ public:
   explicit operator bool() const;
   bool operator==(std::nullptr_t) const;
   bool operator!=(std::nullptr_t) const;
+
+  /*
+   * Implicit cast to tv_rval.
+   */
+  /* implicit */ operator tv_val<true>() const;
+
+  /*
+   * Explicit cast to tv_lval.
+   *
+   * This is the moral equivalent of:
+   *   const_cast<TypedValue*>(const TypedValue*)
+   */
+  tv_val<false> as_lval() const;
 
   /*
    * References to the value and type.
@@ -105,10 +117,11 @@ public:
    * @requires: is_set()
    */
   TypedValue tv() const;
+  TypedValue operator*() const;
 
 
   /*
-   * Return `this' if the referenced value is already unboxed, else a rval to
+   * Return `this' if the referenced value is already unboxed, else a tv_val to
    * the inner value.
    */
   tv_val unboxed() const;

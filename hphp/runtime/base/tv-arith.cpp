@@ -290,17 +290,17 @@ struct Div {
 };
 
 template<class Op>
-void cellOpEq(Op op, Cell& c1, Cell c2) {
+void cellOpEq(Op op, tv_lval c1, Cell c2) {
 again:
-  if (c1.m_type == KindOfInt64) {
+  if (type(c1) == KindOfInt64) {
     for (;;) {
       if (c2.m_type == KindOfInt64) {
-        c1.m_data.num = op(c1.m_data.num, c2.m_data.num);
+        val(c1).num = op(val(c1).num, c2.m_data.num);
         return;
       }
       if (c2.m_type == KindOfDouble) {
-        c1.m_type = KindOfDouble;
-        c1.m_data.dbl = op(c1.m_data.num, c2.m_data.dbl);
+        type(c1) = KindOfDouble;
+        val(c1).dbl = op(val(c1).num, c2.m_data.dbl);
         return;
       }
       cellCopy(numericConvHelper(c2), c2);
@@ -308,14 +308,14 @@ again:
     }
   }
 
-  if (c1.m_type == KindOfDouble) {
+  if (type(c1) == KindOfDouble) {
     for (;;) {
       if (c2.m_type == KindOfInt64) {
-        c1.m_data.dbl = op(c1.m_data.dbl, c2.m_data.num);
+        val(c1).dbl = op(val(c1).dbl, c2.m_data.num);
         return;
       }
       if (c2.m_type == KindOfDouble) {
-        c1.m_data.dbl = op(c1.m_data.dbl, c2.m_data.dbl);
+        val(c1).dbl = op(val(c1).dbl, c2.m_data.dbl);
         return;
       }
       cellCopy(numericConvHelper(c2), c2);
@@ -323,19 +323,19 @@ again:
     }
   }
 
-  if (isArrayLikeType(c1.m_type) && isArrayLikeType(c2.m_type)) {
-    auto const ad1    = c1.m_data.parr;
+  if (isArrayLikeType(type(c1)) && isArrayLikeType(c2.m_type)) {
+    auto const ad1    = val(c1).parr;
     auto const newArr = op(ad1, c2.m_data.parr);
     if (newArr != ad1) {
-      c1.m_data.parr = newArr;
-      c1.m_type = newArr->toDataType();
+      val(c1).parr = newArr;
+      type(c1) = newArr->toDataType();
       decRefArr(ad1);
     }
     return;
   }
 
-  cellSet(numericConvHelper(c1), c1);
-  assertx(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
+  cellSet(numericConvHelper(*c1), c1);
+  assertx(type(c1) == KindOfInt64 || type(c1) == KindOfDouble);
   goto again;
 }
 
@@ -423,19 +423,19 @@ Cell cellBitOp(StrLenOp strLenOp, Cell c1, Cell c2) {
 }
 
 template<class Op>
-void cellBitOpEq(Op op, Cell& c1, Cell c2) {
-  auto const result = op(c1, c2);
-  auto const old = c1;
+void cellBitOpEq(Op op, tv_lval c1, Cell c2) {
+  auto const result = op(*c1, c2);
+  auto const old = *c1;
   tvCopy(result, c1);
   tvDecRefGen(old);
 }
 
 // Op must implement the interface described for cellIncDecOp.
 template<class Op>
-void stringIncDecOp(Op op, Cell& cell) {
-  assertx(isStringType(cell.m_type));
+void stringIncDecOp(Op op, tv_lval cell) {
+  assertx(isStringType(type(cell)));
 
-  auto const sd = cell.m_data.pstr;
+  auto const sd = val(cell).pstr;
   if (sd->empty()) {
     decRefStr(sd);
     cellCopy(op.emptyString(), cell);
@@ -472,10 +472,10 @@ void stringIncDecOp(Op op, Cell& cell) {
  * abstracts out the common parts from those differences.
  */
 template<class Op>
-void cellIncDecOp(Op op, Cell& cell) {
-  assertx(cellIsPlausible(cell));
+void cellIncDecOp(Op op, tv_lval cell) {
+  assertx(cellIsPlausible(*cell));
 
-  switch (cell.m_type) {
+  switch (type(cell)) {
     case KindOfUninit:
     case KindOfNull:
       op.nullCase(cell);
@@ -517,15 +517,15 @@ const StaticString s_1("1");
 
 
 struct IncBase {
-  void dblCase(Cell& cell) const { ++cell.m_data.dbl; }
-  void nullCase(Cell& cell) const { cellCopy(make_int(1), cell); }
+  void dblCase(tv_lval cell) const { ++val(cell).dbl; }
+  void nullCase(tv_lval cell) const { cellCopy(make_int(1), cell); }
 
   Cell emptyString() const {
     return make_tv<KindOfPersistentString>(s_1.get());
   }
 
-  void nonNumericString(Cell& cell) const {
-    auto const sd = cell.m_data.pstr;
+  void nonNumericString(tv_lval cell) const {
+    auto const sd = val(cell).pstr;
     auto const newSd = [&]() -> StringData* {
       auto const tmp = StringData::Make(sd, CopyString);
       auto const tmp2 = tmp->increment();
@@ -542,13 +542,13 @@ struct IncBase {
 };
 
 struct Inc : IncBase {
-  void intCase(Cell& cell) const { ++cell.m_data.num; }
+  void intCase(tv_lval cell) const { ++val(cell).num; }
 };
 
 struct IncO : IncBase {
-  void intCase(Cell& cell) const {
-    if (add_overflow(cell.m_data.num, int64_t{1})) {
-      cellCopy(cellAddO(cell, make_int(1)), cell);
+  void intCase(tv_lval cell) const {
+    if (add_overflow(val(cell).num, int64_t{1})) {
+      cellCopy(cellAddO(*cell, make_int(1)), cell);
     } else {
       Inc().intCase(cell);
     }
@@ -556,24 +556,24 @@ struct IncO : IncBase {
 };
 
 struct DecBase {
-  void dblCase(Cell& cell) { --cell.m_data.dbl; }
+  void dblCase(tv_lval cell) { --val(cell).dbl; }
   Cell emptyString() const { return make_int(-1); }
-  void nullCase(Cell&) const {}
-  void nonNumericString(Cell& cell) const {
+  void nullCase(tv_lval) const {}
+  void nonNumericString(tv_lval cell) const {
     if (RuntimeOption::EnableHipHopSyntax) {
-      raise_notice("Decrement on string '%s'", cell.m_data.pstr->data());
+      raise_notice("Decrement on string '%s'", val(cell).pstr->data());
     }
   }
 };
 
 struct Dec : DecBase {
-  void intCase(Cell& cell) { --cell.m_data.num; }
+  void intCase(tv_lval cell) { --val(cell).num; }
 };
 
 struct DecO : DecBase {
-  void intCase(Cell& cell) {
-    if (sub_overflow(cell.m_data.num, int64_t{1})) {
-      cellCopy(cellSubO(cell, make_int(1)), cell);
+  void intCase(tv_lval cell) {
+    if (sub_overflow(val(cell).num, int64_t{1})) {
+      cellCopy(cellSubO(*cell, make_int(1)), cell);
     } else {
       Dec().intCase(cell);
     }
@@ -696,58 +696,58 @@ Cell cellShr(Cell c1, Cell c2) {
   return make_int(lhs >> (shift & 63));
 }
 
-void cellAddEq(Cell& c1, Cell c2) {
+void cellAddEq(tv_lval c1, Cell c2) {
   cellOpEq(AddEq(), c1, c2);
 }
 
-void cellSubEq(Cell& c1, Cell c2) {
+void cellSubEq(tv_lval c1, Cell c2) {
   cellOpEq(SubEq(), c1, c2);
 }
 
-void cellMulEq(Cell& c1, Cell c2) {
+void cellMulEq(tv_lval c1, Cell c2) {
   cellOpEq(MulEq(), c1, c2);
 }
 
-void cellAddEqO(Cell& c1, Cell c2) { cellSet(cellAddO(c1, c2), c1); }
-void cellSubEqO(Cell& c1, Cell c2) { cellSet(cellSubO(c1, c2), c1); }
-void cellMulEqO(Cell& c1, Cell c2) { cellSet(cellMulO(c1, c2), c1); }
+void cellAddEqO(tv_lval c1, Cell c2) { cellSet(cellAddO(*c1, c2), c1); }
+void cellSubEqO(tv_lval c1, Cell c2) { cellSet(cellSubO(*c1, c2), c1); }
+void cellMulEqO(tv_lval c1, Cell c2) { cellSet(cellMulO(*c1, c2), c1); }
 
-void cellDivEq(Cell& c1, Cell c2) {
-  assertx(cellIsPlausible(c1));
+void cellDivEq(tv_lval c1, Cell c2) {
+  assertx(cellIsPlausible(*c1));
   assertx(cellIsPlausible(c2));
-  if (!isIntType(c1.m_type) && !isDoubleType(c1.m_type)) {
-    cellSet(numericConvHelper(c1), c1);
+  if (!isIntType(type(c1)) && !isDoubleType(type(c1))) {
+    cellSet(numericConvHelper(*c1), c1);
   }
-  cellCopy(cellDiv(c1, c2), c1);
+  cellCopy(cellDiv(*c1, c2), c1);
 }
 
-void cellPowEq(Cell& c1, Cell c2) {
-  cellSet(cellPow(c1, c2), c1);
+void cellPowEq(tv_lval c1, Cell c2) {
+  cellSet(cellPow(*c1, c2), c1);
 }
 
-void cellModEq(Cell& c1, Cell c2) {
-  cellSet(cellMod(c1, c2), c1);
+void cellModEq(tv_lval c1, Cell c2) {
+  cellSet(cellMod(*c1, c2), c1);
 }
 
-void cellBitAndEq(Cell& c1, Cell c2) {
+void cellBitAndEq(tv_lval c1, Cell c2) {
   cellBitOpEq(cellBitAnd, c1, c2);
 }
 
-void cellBitOrEq(Cell& c1, Cell c2) {
+void cellBitOrEq(tv_lval c1, Cell c2) {
   cellBitOpEq(cellBitOr, c1, c2);
 }
 
-void cellBitXorEq(Cell& c1, Cell c2) {
+void cellBitXorEq(tv_lval c1, Cell c2) {
   cellBitOpEq(cellBitXor, c1, c2);
 }
 
-void cellShlEq(Cell& c1, Cell c2) { cellSet(cellShl(c1, c2), c1); }
-void cellShrEq(Cell& c1, Cell c2) { cellSet(cellShr(c1, c2), c1); }
+void cellShlEq(tv_lval c1, Cell c2) { cellSet(cellShl(*c1, c2), c1); }
+void cellShrEq(tv_lval c1, Cell c2) { cellSet(cellShr(*c1, c2), c1); }
 
-void cellInc(Cell& cell) { cellIncDecOp(Inc(), cell); }
-void cellIncO(Cell& cell) { cellIncDecOp(IncO(), cell); }
-void cellDec(Cell& cell) { cellIncDecOp(Dec(), cell); }
-void cellDecO(Cell& cell) { cellIncDecOp(DecO(), cell); }
+void cellInc(tv_lval cell) { cellIncDecOp(Inc(), cell); }
+void cellIncO(tv_lval cell) { cellIncDecOp(IncO(), cell); }
+void cellDec(tv_lval cell) { cellIncDecOp(Dec(), cell); }
+void cellDecO(tv_lval cell) { cellIncDecOp(DecO(), cell); }
 
 void cellBitNot(Cell& cell) {
   assertx(cellIsPlausible(cell));

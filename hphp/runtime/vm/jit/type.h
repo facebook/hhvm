@@ -823,7 +823,7 @@ using OptType = folly::Optional<Type>;
  * Return the most refined Type that can be used to represent the type of a
  * live TypedValue or a RepoAuthType.
  */
-Type typeFromTV(const TypedValue* tv, const Class* ctx);
+Type typeFromTV(tv_rval tv, const Class* ctx);
 Type typeFromRAT(RepoAuthType ty, const Class* ctx);
 
 

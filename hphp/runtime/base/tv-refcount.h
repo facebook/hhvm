@@ -158,6 +158,10 @@ ALWAYS_INLINE void tvDecRefArr(const TypedValue* tv) {
   decRefArr(tv->m_data.parr);
 }
 
+ALWAYS_INLINE void tvDecRefArr(TypedValue tv) {
+  tvDecRefArr(&tv);
+}
+
 ALWAYS_INLINE void tvDecRefObj(const TypedValue* tv) {
   assertx(tv->m_type == KindOfObject);
   decRefObj(tv->m_data.pobj);

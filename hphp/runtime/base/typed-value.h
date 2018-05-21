@@ -313,7 +313,7 @@ typename std::enable_if<
  * See tv-mutate.h for usage examples.
  */
 template<typename T, typename Ret = void>
-struct enable_if_lval : std::enable_if<
+using enable_if_lval_t = typename std::enable_if<
   conjunction<
     std::is_same<
       ident_t<decltype((type(std::declval<T>())))>,
@@ -329,10 +329,26 @@ struct enable_if_lval : std::enable_if<
     >
   >::value,
   Ret
-> {};
+>::type;
 
 template<typename T, typename Ret = void>
-using enable_if_lval_t = typename enable_if_lval<T,Ret>::type;
+using enable_if_tv_val_t = typename std::enable_if<
+  conjunction<
+    std::is_convertible<
+      ident_t<decltype((type(std::declval<T>())))>,
+      DataType
+    >,
+    std::is_convertible<
+      ident_t<decltype((val(std::declval<T>())))>,
+      Value
+    >,
+    std::is_convertible<
+      ident_t<decltype((as_tv(std::declval<T>())))>,
+      TypedValue
+    >
+  >::value,
+  Ret
+>::type;
 
 /*
  * TV-lval API for TypedValue.
@@ -340,6 +356,11 @@ using enable_if_lval_t = typename enable_if_lval<T,Ret>::type;
 ALWAYS_INLINE DataType& type(TypedValue& tv) { return tv.m_type; }
 ALWAYS_INLINE Value& val(TypedValue& tv) { return tv.m_data; }
 ALWAYS_INLINE TypedValue as_tv(TypedValue& tv) { return tv; }
+ALWAYS_INLINE DataType& type(TypedValue* tv) { return tv->m_type; }
+ALWAYS_INLINE Value& val(TypedValue* tv) { return tv->m_data; }
+ALWAYS_INLINE DataType type(const TypedValue* tv) { return tv->m_type; }
+ALWAYS_INLINE Value val(const TypedValue* tv) { return tv->m_data; }
+ALWAYS_INLINE TypedValue as_tv(const TypedValue* tv) { return *tv; }
 
 ///////////////////////////////////////////////////////////////////////////////
 

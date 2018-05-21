@@ -56,6 +56,16 @@ inline bool tv_val<is_const>::operator!=(std::nullptr_t) const {
 }
 
 template<bool is_const>
+inline tv_val<is_const>::operator tv_val<true>() const {
+  return tv_val<true>{m_tv};
+}
+
+template<bool is_const>
+inline tv_val<false> tv_val<is_const>::as_lval() const {
+  return tv_val<false>{const_cast<TypedValue*>(m_tv)};
+}
+
+template<bool is_const>
 inline typename tv_val<is_const>::value_t& tv_val<is_const>::val() const {
   assertx(is_set());
   return m_tv->m_data;
@@ -77,6 +87,11 @@ inline TypedValue tv_val<is_const>::tv() const {
   // Explicitly drop m_aux, since users of tv_val shouldn't care about it.
   assertx(is_set());
   return TypedValue{val(), type()};
+}
+
+template<bool is_const>
+inline TypedValue tv_val<is_const>::operator*() const {
+  return tv();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

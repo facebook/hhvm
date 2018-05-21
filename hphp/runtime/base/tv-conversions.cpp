@@ -320,30 +320,33 @@ const StaticString
 void tvCastToStringInPlace(TypedValue* tv) {
   assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
+  cellCastToStringInPlace(tv);
+}
 
+void cellCastToStringInPlace(tv_lval tv) {
   auto string = [&](StringData* s) {
-    tv->m_type = KindOfString;
-    tv->m_data.pstr = s;
+    type(tv) = KindOfString;
+    val(tv).pstr = s;
   };
   auto persistentString = [&](StringData* s) {
     assertx(!s->isRefCounted());
-    tv->m_type = KindOfPersistentString;
-    tv->m_data.pstr = s;
+    type(tv) = KindOfPersistentString;
+    val(tv).pstr = s;
   };
 
-  switch (tv->m_type) {
+  switch (type(tv)) {
     case KindOfUninit:
     case KindOfNull:
       return persistentString(staticEmptyString());
 
     case KindOfBoolean:
-      return persistentString(tv->m_data.num ? s_1.get() : staticEmptyString());
+      return persistentString(val(tv).num ? s_1.get() : staticEmptyString());
 
     case KindOfInt64:
-      return string(buildStringData(tv->m_data.num));
+      return string(buildStringData(val(tv).num));
 
     case KindOfDouble:
-      return string(buildStringData(tv->m_data.dbl));
+      return string(buildStringData(val(tv).dbl));
 
     case KindOfPersistentString:
     case KindOfString:
@@ -352,35 +355,39 @@ void tvCastToStringInPlace(TypedValue* tv) {
     case KindOfVec:
     case KindOfPersistentVec:
       raise_notice("Vec to string conversion");
-      if (tv->m_type == KindOfVec) tvDecRefArr(tv);
+      if (type(tv) == KindOfVec) tvDecRefArr(*tv);
       return persistentString(vec_string.get());
 
     case KindOfDict:
     case KindOfPersistentDict:
       raise_notice("Dict to string conversion");
-      if (tv->m_type == KindOfDict) tvDecRefArr(tv);
+      if (type(tv) == KindOfDict) tvDecRefArr(*tv);
       return persistentString(dict_string.get());
 
     case KindOfKeyset:
     case KindOfPersistentKeyset:
       raise_notice("Keyset to string conversion");
-      if (tv->m_type == KindOfKeyset) tvDecRefArr(tv);
+      if (type(tv) == KindOfKeyset) tvDecRefArr(*tv);
       return persistentString(keyset_string.get());
 
     case KindOfArray:
     case KindOfPersistentArray:
       raise_notice("Array to string conversion");
-      if (tv->m_type == KindOfArray) tvDecRefArr(tv);
+      if (type(tv) == KindOfArray) tvDecRefArr(*tv);
       return persistentString(array_string.get());
 
     case KindOfObject:
-      // For objects, we fall back on the Variant machinery
-      tvAsVariant(tv) = tv->m_data.pobj->invokeToString();
+      cellMove(
+        make_tv<KindOfString>(val(tv).pobj->invokeToString().detach()),
+        tv
+      );
       return;
 
     case KindOfResource:
-      // For resources, we fall back on the Variant machinery
-      tvAsVariant(tv) = tv->m_data.pres->data()->o_toString();
+      cellMove(
+        make_tv<KindOfString>(val(tv).pres->data()->o_toString().detach()),
+        tv
+      );
       return;
 
     case KindOfRef:
@@ -394,6 +401,11 @@ StringData* tvCastToStringData(TypedValue tv) {
   if (tv.m_type == KindOfRef) {
     tv = *tv.m_data.pref->tv();
   }
+  return cellCastToStringData(tv);
+}
+
+StringData* cellCastToStringData(Cell tv) {
+  assert(tv.m_type != KindOfRef);
 
   switch (tv.m_type) {
     case KindOfUninit:

@@ -216,7 +216,7 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvResToStr,       convResToStrHelper, DSSA, SSync,
                            {{SSA, 0}}},
-    {ConvCellToStr,      convCellToStrHelper, DSSA, SSync,
+    {ConvCellToStr,      cellCastToStringData, DSSA, SSync,
                            {{TV, 0}}},
 
     {CoerceStrToInt,     coerceStrToIntHelper, DSSA, SSync,

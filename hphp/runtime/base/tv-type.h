@@ -33,29 +33,28 @@ ALWAYS_INLINE bool cellIsNull(const Cell* tv) {
   return cellIsNull(*tv);
 }
 
-ALWAYS_INLINE bool tvIsString(const TypedValue* tv) {
-  return isStringType(tv->m_type);
-}
+#define CASE(ty)                                                        \
+  template<typename T>                                                  \
+  ALWAYS_INLINE enable_if_tv_val_t<T&&, bool> tvIs##ty(T&& tv) {        \
+    return is##ty##Type(type(tv));                                      \
+  }
 
-ALWAYS_INLINE bool tvIsArray(const TypedValue* tv) {
-  return isArrayType(tv->m_type);
-}
+CASE(Null)
+CASE(Bool)
+CASE(Int)
+CASE(Double)
+CASE(String)
+CASE(Array)
+CASE(ArrayLike)
+CASE(HackArray)
+CASE(Vec)
+CASE(Dict)
+CASE(Keyset)
+CASE(Object)
+CASE(Resource)
+CASE(Ref)
 
-ALWAYS_INLINE bool tvIsHackArray(const TypedValue* tv) {
-  return isHackArrayType(tv->m_type);
-}
-
-ALWAYS_INLINE bool tvIsVecArray(const TypedValue* tv) {
-  return isVecType(tv->m_type);
-}
-
-ALWAYS_INLINE bool tvIsDict(const TypedValue* tv) {
-  return isDictType(tv->m_type);
-}
-
-ALWAYS_INLINE bool tvIsKeyset(const TypedValue* tv) {
-  return isKeysetType(tv->m_type);
-}
+#undef CASE
 
 ALWAYS_INLINE bool tvIsReferenced(TypedValue tv) {
   return tv.m_type == KindOfRef &&

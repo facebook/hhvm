@@ -1250,7 +1250,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
           if (!val2.isString()) {
             break;
           }
-          concat_assign(val, val2.toString());
+          concat_assign(val.asTypedValue(), val2.toString());
           node = node->next;
         }
       } else {

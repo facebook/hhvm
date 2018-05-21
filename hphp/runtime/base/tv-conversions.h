@@ -33,7 +33,8 @@ struct StringData;
  * TypedValue conversions that update `tv' in place (decrefing the old value,
  * if necessary).
  *
- * We have two kinds of type conversions:
+ * We have two kinds of type conversions, both of which unbox their argument
+ * before doing anything:
  *
  * - Cast forcibly changes the value to the new type and will not fail (though
  *   the result may be silly).
@@ -59,6 +60,7 @@ X(Resource)
 
 void tvCastToVArrayInPlace(TypedValue* tv);
 void tvCastToDArrayInPlace(TypedValue* tv);
+void cellCastToStringInPlace(tv_lval tv);
 
 ALWAYS_INLINE void tvCastInPlace(TypedValue* tv, DataType DType) {
 #define X(kind) \
@@ -108,6 +110,7 @@ Array tvCastToArrayLike(TypedValue tv);
 Object tvCastToObject(TypedValue tv);
 
 StringData* tvCastToStringData(TypedValue tv);
+StringData* cellCastToStringData(Cell c);
 ArrayData* tvCastToArrayLikeData(TypedValue tv);
 ObjectData* tvCastToObjectData(TypedValue tv);
 

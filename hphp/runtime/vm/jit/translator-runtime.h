@@ -128,7 +128,6 @@ StringData* convDblToStrHelper(int64_t i);
 StringData* convIntToStrHelper(int64_t i);
 StringData* convObjToStrHelper(ObjectData* o);
 StringData* convResToStrHelper(ResourceHdr* o);
-StringData* convCellToStrHelper(TypedValue tv);
 
 
 bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func);
@@ -235,8 +234,8 @@ void setWithRefElem(TypedValue*, TypedValue, TypedValue);
 template<bool intishWarn>
 TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op);
 void bindNewElem(TypedValue* base, RefData* val);
-TypedValue* elemVecID(TypedValue* base, int64_t key);
-TypedValue* elemVecIU(TypedValue* base, int64_t key);
+tv_lval elemVecID(tv_lval base, int64_t key);
+tv_lval elemVecIU(tv_lval base, int64_t key);
 }
 
 /*

@@ -692,11 +692,11 @@ Type Type::operator-(Type rhs) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Conversions.
 
-Type typeFromTV(const TypedValue* tv, const Class* ctx) {
+Type typeFromTV(tv_rval tv, const Class* ctx) {
   assertx(tvIsPlausible(*tv));
 
-  if (tv->m_type == KindOfObject) {
-    auto const cls = tv->m_data.pobj->getVMClass();
+  if (type(tv) == KindOfObject) {
+    auto const cls = val(tv).pobj->getVMClass();
 
     // We only allow specialization on classes that can't be overridden for
     // now.  If this changes, then this will need to specialize on sub object
@@ -709,9 +709,9 @@ Type typeFromTV(const TypedValue* tv, const Class* ctx) {
     return Type::ExactObj(cls);
   }
 
-  if (tvIsArray(tv)) return Type::Array(tv->m_data.parr->kind());
+  if (tvIsArray(tv)) return Type::Array(val(tv).parr->kind());
 
-  auto outer = tv->m_type;
+  auto outer = type(tv);
   auto inner = KindOfUninit;
 
   if (outer == KindOfPersistentString) outer = KindOfString;
@@ -720,7 +720,7 @@ Type typeFromTV(const TypedValue* tv, const Class* ctx) {
   else if (outer == KindOfPersistentKeyset) outer = KindOfKeyset;
 
   if (outer == KindOfRef) {
-    inner = tv->m_data.pref->tv()->m_type;
+    inner = val(tv).pref->tv()->m_type;
     if (inner == KindOfPersistentString) inner = KindOfString;
     else if (inner == KindOfPersistentArray) inner = KindOfArray;
     else if (inner == KindOfPersistentVec) inner = KindOfVec;

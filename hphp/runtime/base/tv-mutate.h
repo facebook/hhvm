@@ -95,8 +95,9 @@ ALWAYS_INLINE Cell* tvToCell(TypedValue* tv) {
 ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
 }
-ALWAYS_INLINE tv_lval tvToCell(tv_lval lval) {
-  return lval.unboxed();
+template<bool is_const>
+ALWAYS_INLINE tv_val<is_const> tvToCell(tv_val<is_const> tv) {
+  return tv.unboxed();
 }
 template<bool is_const>
 inline tv_val<is_const> tv_val<is_const>::unboxed() const {
@@ -132,6 +133,11 @@ ALWAYS_INLINE Cell* tvAssertCell(TypedValue* tv) {
   return tv;
 }
 ALWAYS_INLINE const Cell* tvAssertCell(const TypedValue* tv) {
+  assertx(cellIsPlausible(*tv));
+  return tv;
+}
+template<bool is_const>
+ALWAYS_INLINE tv_val<is_const> tvAssertCell(tv_val<is_const> tv) {
   assertx(cellIsPlausible(*tv));
   return tv;
 }

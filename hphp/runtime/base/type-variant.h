@@ -1509,21 +1509,12 @@ ALWAYS_INLINE Variant init_null() {
   return Variant(Variant::NullInit());
 }
 
-inline Variant &concat_assign(Variant &v1, const char* s2) = delete;
+inline void concat_assign(Variant &v1, const char* s2) = delete;
 
-inline Variant &concat_assign(Variant &v1, const String& s2) {
-  if (v1.getType() == KindOfString) {
-    auto& str = v1.asStrRef();
-    if (!str.get()->cowCheck()) {
-      str += s2.slice();
-      return v1;
-    }
-  }
-
-  auto s1 = v1.toString();
-  s1 += s2;
-  v1 = s1;
-  return v1;
+inline void concat_assign(tv_lval lhs, const String& s2) {
+  lhs = tvToCell(lhs);
+  if (!isStringType(type(lhs))) cellCastToStringInPlace(lhs);
+  asStrRef(lhs) += s2;
 }
 
 //////////////////////////////////////////////////////////////////////

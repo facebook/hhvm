@@ -181,9 +181,9 @@ Type typeIncDec(IncDecOp op, Type t) {
   auto resultTy = eval_cell([inc,overflowToDbl,val] {
     auto c = *val;
     if (inc) {
-      (overflowToDbl ? cellIncO : cellInc)(c);
+      (overflowToDbl ? cellIncO : cellInc)(&c);
     } else {
-      (overflowToDbl ? cellDecO : cellDec)(c);
+      (overflowToDbl ? cellDecO : cellDec)(&c);
     }
     return c;
   });

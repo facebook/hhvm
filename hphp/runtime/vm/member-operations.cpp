@@ -36,11 +36,12 @@ StringData* prepareAnyKey(TypedValue* tv) {
   }
 }
 
-void unknownBaseType(const TypedValue* tv) {
+void unknownBaseType(DataType type) {
   always_assert_flog(
     false,
     "Unknown KindOf: {} in member operation base",
-    static_cast<uint8_t>(tv->m_type));
+    static_cast<uint8_t>(type)
+  );
 }
 
 void objArrayAccess(ObjectData* base) {
@@ -219,50 +220,45 @@ void raise_inout_undefined_index(const StringData* sd) {
   raise_notice("Undefined index on inout parameter: %s", sd->data());
 }
 
-Cell incDecBodySlow(IncDecOp op, Cell* fr) {
+Cell incDecBodySlow(IncDecOp op, tv_lval fr) {
   assertx(cellIsPlausible(*fr));
-  assertx(fr->m_type != KindOfUninit);
+  assertx(type(fr) != KindOfUninit);
 
   auto dup = [&]() { tvIncRefGen(*fr); return *fr; };
 
   switch (op) {
   case IncDecOp::PreInc:
-    cellInc(*fr);
+    cellInc(fr);
     return dup();
   case IncDecOp::PostInc: {
     auto const tmp = dup();
-    cellInc(*fr);
+    cellInc(fr);
     return tmp;
   }
   case IncDecOp::PreDec:
-    cellDec(*fr);
+    cellDec(fr);
     return dup();
   case IncDecOp::PostDec: {
     auto const tmp = dup();
-    cellDec(*fr);
+    cellDec(fr);
     return tmp;
   }
-  default: break;
-  }
-
-  switch (op) {
   case IncDecOp::PreIncO:
-    cellIncO(*fr);
+    cellIncO(fr);
     return dup();
   case IncDecOp::PostIncO: {
     auto const tmp = dup();
-    cellIncO(*fr);
+    cellIncO(fr);
     return tmp;
   }
   case IncDecOp::PreDecO:
-    cellDecO(*fr);
+    cellDecO(fr);
     return dup();
   case IncDecOp::PostDecO: {
     auto const tmp = dup();
-    cellDecO(*fr);
+    cellDecO(fr);
     return tmp;
   }
-  default: break;
   }
   not_reached();
 }

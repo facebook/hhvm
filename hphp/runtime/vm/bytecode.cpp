@@ -1851,19 +1851,20 @@ static inline Class* lookupClsRef(Cell* input) {
   return class_;
 }
 
-static UNUSED int innerCount(const TypedValue* tv) {
-  if (isRefcountedType(tv->m_type)) {
-    return tvGetCount(*tv);
+static UNUSED int innerCount(TypedValue tv) {
+  if (isRefcountedType(tv.m_type)) {
+    return tvGetCount(tv);
   }
   return -1;
 }
 
-static inline TypedValue* ratchetRefs(TypedValue* result, TypedValue& tvRef,
-                                      TypedValue& tvRef2) {
+static inline tv_lval ratchetRefs(tv_lval result,
+                                  TypedValue& tvRef,
+                                  TypedValue& tvRef2) {
   TRACE(5, "Ratchet: result %p(k%d c%d), ref %p(k%d c%d) ref2 %p(k%d c%d)\n",
-        result, result->m_type, innerCount(result),
-        &tvRef, tvRef.m_type, innerCount(&tvRef),
-        &tvRef2, tvRef2.m_type, innerCount(&tvRef2));
+        result.tv_ptr(), result.type(), innerCount(result.tv()),
+        &tvRef, tvRef.m_type, innerCount(tvRef),
+        &tvRef2, tvRef2.m_type, innerCount(tvRef2));
   // Due to complications associated with ArrayAccess, it is possible to acquire
   // a reference as a side effect of vector operation processing. Such a
   // reference must be retained until after the next iteration is complete.
@@ -1884,11 +1885,11 @@ static inline TypedValue* ratchetRefs(TypedValue* result, TypedValue& tvRef,
     // unconditionally here because we maintain the invariant throughout that
     // either tvRef is KindOfUninit, or tvRef contains a valid object that
     // result points to.
-    assertx(result == &tvRef);
-    return &tvRef2;
+    assertx(result.tv_ptr() == &tvRef);
+    return tv_lval(&tvRef2);
   }
 
-  assertx(result != &tvRef);
+  assertx(result.tv_ptr() != &tvRef);
   return result;
 }
 
@@ -3444,7 +3445,7 @@ OPTBLD_INLINE void iopFPassBaseGL(ActRec* ar, uint32_t paramId, local_var loc) {
   baseGImpl(tvToCell(loc.ptr), mode);
 }
 
-static inline TypedValue* baseSImpl(TypedValue* key,
+static inline tv_lval baseSImpl(TypedValue* key,
                                     clsref_slot slot) {
   auto const class_ = slot.take();
 
@@ -3457,7 +3458,7 @@ static inline TypedValue* baseSImpl(TypedValue* key,
                 name->data());
   }
 
-  return lookup.prop;
+  return tv_lval(lookup.prop);
 }
 
 OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, clsref_slot slot) {
@@ -3509,7 +3510,7 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key,
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
 
-  auto result = [&]{
+  auto const result = [&]{
     switch (mode) {
       case MOpMode::None:
         assertx(!reffy);
@@ -3519,11 +3520,11 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key,
         return Prop<MOpMode::Warn>(mstate.tvRef, ctx, mstate.base, key);
       case MOpMode::Define:
         if (reffy) {
-          return Prop<MOpMode::Define,KeyType::Any,true>(mstate.tvRef, ctx,
-                                                         mstate.base, key);
+          return Prop<MOpMode::Define,KeyType::Any,true>(
+            mstate.tvRef, ctx, mstate.base, key);
         } else {
-          return Prop<MOpMode::Define,KeyType::Any,false>(mstate.tvRef, ctx,
-                                                          mstate.base, key);
+          return Prop<MOpMode::Define,KeyType::Any,false>(
+            mstate.tvRef, ctx, mstate.base, key);
         }
       case MOpMode::Unset:
         assertx(!reffy);
@@ -3542,20 +3543,22 @@ static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key,
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
 
-  TypedValue* result;
-  switch (mode) {
-    case MOpMode::None:
-    case MOpMode::Warn:
-      assertx(key.m_type == KindOfPersistentString);
-      result = nullSafeProp(mstate.tvRef, ctx, mstate.base, key.m_data.pstr);
-      break;
-    case MOpMode::Define:
-      if (reffy) raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
-    case MOpMode::InOut:
-      always_assert_flog(false, "MOpMode::InOut can only occur on Elem");
-    case MOpMode::Unset:
-      always_assert(false);
-  }
+  auto const result = [&] {
+    switch (mode) {
+      case MOpMode::None:
+      case MOpMode::Warn:
+        assertx(key.m_type == KindOfPersistentString);
+        return nullSafeProp(mstate.tvRef, ctx,
+                            mstate.base, key.m_data.pstr);
+      case MOpMode::Define:
+        if (reffy) raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
+      case MOpMode::InOut:
+        always_assert_flog(false, "MOpMode::InOut can only occur on Elem");
+      case MOpMode::Unset:
+        always_assert(false);
+    }
+    not_reached();
+  }();
 
   mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
@@ -3563,51 +3566,42 @@ static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key,
 static OPTBLD_INLINE
 void elemDispatch(MOpMode mode, TypedValue key, bool reffy) {
   auto& mstate = vmMInstrState();
+  auto const b = mstate.base;
 
-  auto result = [&] {
+  auto const result = [&]() -> tv_rval {
     switch (mode) {
       case MOpMode::None:
-        // We're not actually going to modify it, so this is "safe".
-        return const_cast<TypedValue*>(
+        return
           UNLIKELY(checkHACIntishCast())
-            ? Elem<MOpMode::None, true>(mstate.tvRef, mstate.base, key)
-            : Elem<MOpMode::None, false>(mstate.tvRef, mstate.base, key)
-        );
+            ? Elem<MOpMode::None, true>(mstate.tvRef, b, key)
+            : Elem<MOpMode::None, false>(mstate.tvRef, b, key);
       case MOpMode::Warn:
-        // We're not actually going to modify it, so this is "safe".
-        return const_cast<TypedValue*>(
+        return
           UNLIKELY(checkHACIntishCast())
-            ? Elem<MOpMode::Warn, true>(mstate.tvRef, mstate.base, key)
-            : Elem<MOpMode::Warn, false>(mstate.tvRef, mstate.base, key)
-        );
+            ? Elem<MOpMode::Warn, true>(mstate.tvRef, b, key)
+            : Elem<MOpMode::Warn, false>(mstate.tvRef, b, key);
       case MOpMode::InOut:
-        // We're not actually going to modify it, so this is "safe".
-        return const_cast<TypedValue*>(
+        return
           UNLIKELY(checkHACIntishCast())
-            ? Elem<MOpMode::InOut, true>(mstate.tvRef, mstate.base, key)
-            : Elem<MOpMode::InOut, false>(mstate.tvRef, mstate.base, key)
-        );
+            ? Elem<MOpMode::InOut, true>(mstate.tvRef, b, key)
+            : Elem<MOpMode::InOut, false>(mstate.tvRef, b, key);
       case MOpMode::Define:
         if (UNLIKELY(checkHACIntishCast())) {
           return reffy
-            ? ElemD<MOpMode::Define, true, true>(mstate.tvRef, mstate.base,
-                                                 key)
-            : ElemD<MOpMode::Define, false, true>(mstate.tvRef, mstate.base,
-                                                  key);
+            ? ElemD<MOpMode::Define, true, true>(mstate.tvRef, b, key)
+            : ElemD<MOpMode::Define, false, true>(mstate.tvRef, b, key);
         } else {
           return reffy
-            ? ElemD<MOpMode::Define, true, false>(mstate.tvRef, mstate.base,
-                                                  key)
-            : ElemD<MOpMode::Define, false, false>(mstate.tvRef, mstate.base,
-                                                   key);
+            ? ElemD<MOpMode::Define, true, false>(mstate.tvRef, b, key)
+            : ElemD<MOpMode::Define, false, false>(mstate.tvRef, b, key);
         }
       case MOpMode::Unset:
         return UNLIKELY(checkHACIntishCast())
-          ? ElemU<true>(mstate.tvRef, mstate.base, key)
-          : ElemU<false>(mstate.tvRef, mstate.base, key);
+          ? ElemU<true>(mstate.tvRef, b, key)
+          : ElemU<false>(mstate.tvRef, b, key);
     }
     always_assert(false);
-  }();
+  }().as_lval();
 
   mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
@@ -3647,16 +3641,17 @@ static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk,
     if (mode == MOpMode::Warn) raise_error("Cannot use [] for reading");
 
     auto& mstate = vmMInstrState();
-
-    TypedValue* result;
-    if (reffy) {
-      if (UNLIKELY(isHackArrayType(mstate.base->m_type))) {
-        throwRefInvalidArrayValueException(mstate.base->m_data.parr);
+    auto const base = mstate.base;
+    auto const result = [&] {
+      if (reffy) {
+        if (UNLIKELY(isHackArrayType(type(base)))) {
+          throwRefInvalidArrayValueException(val(base).parr);
+        }
+        return NewElem<true>(mstate.tvRef, base);
+      } else {
+        return NewElem<false>(mstate.tvRef, base);
       }
-      result = NewElem<true>(mstate.tvRef, mstate.base);
-    } else {
-      result = NewElem<false>(mstate.tvRef, mstate.base);
-    }
+    }();
     mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
   }
 }
@@ -3731,7 +3726,7 @@ static OPTBLD_INLINE void vGetMImpl(MemberKey mk, int32_t nDiscard) {
   auto& mstate = vmMInstrState();
   TypedValue result;
   dimDispatch(MOpMode::Define, mk, true);
-  if (mstate.base->m_type != KindOfRef) tvBox(*mstate.base);
+  if (type(mstate.base) != KindOfRef) tvBox(mstate.base);
   refDup(*mstate.base, result);
   mFinal(mstate, nDiscard, result);
 }
@@ -3822,7 +3817,7 @@ OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
   auto const rhs = vmStack().topC();
 
   auto& mstate = vmMInstrState();
-  TypedValue* result;
+  tv_lval result;
   if (mcodeIsProp(mk.mcode)) {
     result = SetOpProp(mstate.tvRef, arGetContextClass(vmfp()), subop,
                        mstate.base, key, rhs);
@@ -3845,7 +3840,7 @@ OPTBLD_INLINE void iopBindM(uint32_t nDiscard, MemberKey mk) {
   auto const rhs = *vmStack().topV();
 
   dimDispatch(MOpMode::Define, mk, true);
-  tvBind(rhs, *mstate.base);
+  tvBind(rhs, mstate.base);
 
   vmStack().discard();
   mFinal(mstate, nDiscard, rhs);
@@ -3883,7 +3878,7 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
       // See the comment in SetWithRefMLElem() for an explanation of this check
       // and the notice suppressor below.
       if (RuntimeOption::EvalHackArrCompatCheckRefBind &&
-          !mstate.base->m_data.parr->isGlobalsArray()) {
+          !val(mstate.base).parr->isGlobalsArray()) {
         raiseHackArrCompatRefBind(key);
       }
 
@@ -3897,7 +3892,7 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
       ? ElemD<MOpMode::Define, true, false>(mstate.tvRef, mstate.base, key)
       : ElemD<MOpMode::Define, false, false>(mstate.tvRef, mstate.base, key);
   }
-  tvAsVariant(mstate.base).setWithRef(tvAsVariant(value));
+  tvSetWithRef(*value, mstate.base);
 
   mFinal(mstate, 0, folly::none);
 }

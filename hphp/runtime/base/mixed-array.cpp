@@ -1905,7 +1905,7 @@ bool MixedArray::DictNotSame(const ArrayData* ad1, const ArrayData* ad2) {
 
 //////////////////////////////////////////////////////////////////////
 
-Cell MixedArray::MemoGet(const TypedValue* base,
+Cell MixedArray::MemoGet(tv_rval base,
                          const TypedValue* keys,
                          uint32_t nkeys) {
   assertx(nkeys > 0);
@@ -1927,7 +1927,7 @@ Cell MixedArray::MemoGet(const TypedValue* base,
 
   // Consume all but the last key, walking through the chain of nested
   // dictionaries.
-  auto current = asMixed(arr->m_data.parr);
+  auto current = asMixed(val(arr).parr);
   assertx(current->isDict());
   for (auto i = uint32_t{0}; i < nkeys - 1; ++i) {
     auto const pos = getPos(*tvAssertCell(keys - i), current);
@@ -1949,7 +1949,7 @@ Cell MixedArray::MemoGet(const TypedValue* base,
   return out;
 }
 
-void MixedArray::MemoSet(TypedValue* startBase,
+void MixedArray::MemoSet(tv_lval startBase,
                          const Cell* keys, uint32_t nkeys,
                          Cell val) {
   assertx(nkeys > 0);
@@ -1969,7 +1969,7 @@ void MixedArray::MemoSet(TypedValue* startBase,
   // updated in place because the only reference to it will be the memo
   // cache. However reflection can get copies of it, so its not guaranteed to
   // always have a ref-count of 1.
-  auto const cow = [](bool copy, MixedArray* a, Cell& base) {
+  auto const cow = [](bool copy, MixedArray* a, tv_lval base) {
     auto copied = a->prepareForInsert(copy);
     if (a != copied) {
       a = copied;
@@ -1984,10 +1984,10 @@ void MixedArray::MemoSet(TypedValue* startBase,
 
   // Consume all but the last key, walking through the chain of nested
   // dictionaries, cowing them as necessary.
-  auto current = asMixed(base->m_data.parr);
+  auto current = asMixed(HPHP::val(base).parr);
   assertx(current->isDict());
   for (auto i = uint32_t{0}; i < nkeys - 1; ++i) {
-    current = cow(current->cowCheck(), current, *base);
+    current = cow(current->cowCheck(), current, base);
     auto const p = getInsert(*tvAssertCell(keys - i), current);
     if (!p.found) {
       // Extend the chain
@@ -2004,7 +2004,7 @@ void MixedArray::MemoSet(TypedValue* startBase,
   current = cow(
     current->cowCheck() || (tvIsDict(&val) && val.m_data.parr == current),
     current,
-    *base
+    base
   );
   // Consume the last key, storing the actual value (and overwriting a previous
   // value if present).

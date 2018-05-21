@@ -290,8 +290,8 @@ struct MixedArray final : ArrayData,
    * MemoSet will store the given Cell at the location corresponding to the
    * keys, updating the base if the underlying dicts are mutated.
    */
-  static Cell MemoGet(const TypedValue*, const Cell*, uint32_t);
-  static void MemoSet(TypedValue*, const Cell*, uint32_t, Cell);
+  static Cell MemoGet(tv_rval, const Cell*, uint32_t);
+  static void MemoSet(tv_lval, const Cell*, uint32_t, Cell);
 
   using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;

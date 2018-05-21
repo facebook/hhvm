@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_RUNTIME_VM_MINSTR_STATE_H_
 #define incl_HPHP_RUNTIME_VM_MINSTR_STATE_H_
 
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
@@ -49,7 +50,7 @@ struct MInstrState {
 
   TypedValue tvRef;
   TypedValue tvRef2;
-  TypedValue* base;
+  tv_lval base;
 
   // type-scan driven scanner
   TYPE_SCAN_IGNORE_FIELD(base);

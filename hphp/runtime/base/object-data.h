@@ -492,12 +492,6 @@ ALWAYS_INLINE void tvWriteObject(ObjectData* pobj, TypedValue* to) {
   to->m_data.pobj->incRefCount();
 }
 
-inline ObjectData* instanceFromTv(TypedValue* tv) {
-  assertx(tv->m_type == KindOfObject);
-  assertx(dynamic_cast<ObjectData*>(tv->m_data.pobj));
-  return tv->m_data.pobj;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 #define DECLARE_CLASS_NO_SWEEP(originalName)                           \

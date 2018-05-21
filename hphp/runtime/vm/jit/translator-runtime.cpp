@@ -544,40 +544,6 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
   not_reached();
 }
 
-const StaticString
-  s_empty(""),
-  s_1("1");
-
-StringData* convCellToStrHelper(TypedValue tv) {
-  switch (tv.m_type) {
-    case KindOfUninit:
-    case KindOfNull:          return s_empty.get();
-    case KindOfBoolean:       return tv.m_data.num ? s_1.get() : s_empty.get();
-    case KindOfInt64:         return convIntToStrHelper(tv.m_data.num);
-    case KindOfDouble:        return convDblToStrHelper(tv.m_data.num);
-    case KindOfString:        tv.m_data.pstr->incRefCount();
-                              /* fallthrough */
-    case KindOfPersistentString:
-                              return tv.m_data.pstr;
-    case KindOfPersistentVec:
-    case KindOfVec:           raise_notice("Vec to string conversion");
-                              return vec_string.get();
-    case KindOfPersistentDict:
-    case KindOfDict:          raise_notice("Dict to string conversion");
-                              return dict_string.get();
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:        raise_notice("Keyset to string conversion");
-                              return keyset_string.get();
-    case KindOfPersistentArray:
-    case KindOfArray:         raise_notice("Array to string conversion");
-                              return array_string.get();
-    case KindOfObject:        return convObjToStrHelper(tv.m_data.pobj);
-    case KindOfResource:      return convResToStrHelper(tv.m_data.pres);
-    case KindOfRef:           break;
-  }
-  not_reached();
-}
-
 void raiseUndefProp(ObjectData* base, const StringData* name) {
   base->raiseUndefProp(name);
 }
@@ -1055,7 +1021,7 @@ void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
     return;
   }
 
-  tvBindRef(val, *elem);
+  tvBindRef(val, elem);
 }
 
 template void bindElemC<true>(TypedValue*, TypedValue, RefData*);
@@ -1103,18 +1069,18 @@ void bindNewElem(TypedValue* base, RefData* val) {
     return;
   }
 
-  tvBindRef(val, *elem);
+  tvBindRef(val, elem);
 }
 
-TypedValue* elemVecID(TypedValue* base, int64_t key) {
+tv_lval elemVecID(tv_lval base, int64_t key) {
   auto cbase = tvToCell(base);
-  assertx(isVecType(cbase->m_type));
+  assertx(isVecType(type(cbase)));
   return ElemDVec<false, KeyType::Int>(cbase, key);
 }
 
-TypedValue* elemVecIU(TypedValue* base, int64_t key) {
+tv_lval elemVecIU(tv_lval base, int64_t key) {
   auto cbase = tvToCell(base);
-  assertx(isVecType(cbase->m_type));
+  assertx(isVecType(type(cbase)));
   return ElemUVec<KeyType::Int>(cbase, key);
 }
 

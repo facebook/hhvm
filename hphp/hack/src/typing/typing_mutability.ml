@@ -234,13 +234,16 @@ let rec is_byval_collection_type env ty =
   let _, tl = Typing_utils.get_all_supertypes env ty in
   Core_list.for_all tl ~f:check
 
-let rec is_byval_collection_value env v =
+let rec is_valid_mutable_subscript_expression_target env v =
   match v with
   | (_, ty), T.Lvar _ ->
     is_byval_collection_type env ty
   | (_, ty), T.Array_get (e, _) ->
     is_byval_collection_type env ty &&
-    is_byval_collection_value env e
+    is_valid_mutable_subscript_expression_target env e
+  | (_, ty), T.Obj_get (e, _, _) ->
+    is_byval_collection_type env ty &&
+    (is_valid_mutable_subscript_expression_target env e || expr_is_mutable env e)
   | _ -> false
 
 (* Checks for assignment errors as a pass on the TAST *)
@@ -254,7 +257,8 @@ let handle_assignment_mutability
   (* Setting mutable locals is okay *)
  | T.Obj_get (e1, _, _) when expr_is_mutable env e1 -> ()
  | T.Array_get (e1, _)
-   when expr_is_mutable env e1 || is_byval_collection_value env e1 -> ()
+   when expr_is_mutable env e1 ||
+        is_valid_mutable_subscript_expression_target env e1 -> ()
  | T.Class_get _
  | T.Obj_get _
  | T.Array_get _ ->

@@ -30,6 +30,9 @@ struct SrcKey;
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
+
 struct RegionDesc;
 namespace irgen { struct IRGS; }
 
@@ -156,6 +159,8 @@ struct InliningDecider {
    * being inlined in the future.
    */
   static void forbidInliningOf(const Func* callee);
+  static void serializeForbiddenInlines(ProfDataSerializer&);
+  static void deserializeForbiddenInlines(ProfDataDeserializer&);
 
 private:
   // The function being inlined into.

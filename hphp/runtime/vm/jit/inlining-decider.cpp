@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
@@ -162,6 +163,22 @@ void InliningDecider::forbidInliningOf(const Func* callee) {
   hasCalledDisableInliningIntrinsic.store(true);
   SimpleLock locker(forbiddenInlineesLock);
   forbiddenInlinees.insert(callee->fullName());
+}
+
+void InliningDecider::serializeForbiddenInlines(ProfDataSerializer& ser) {
+  SimpleLock locker(forbiddenInlineesLock);
+  for (auto sd : forbiddenInlinees) {
+    write_string(ser, sd);
+  }
+  write_raw(ser, uintptr_t{});
+}
+
+void InliningDecider::deserializeForbiddenInlines(ProfDataDeserializer& ser) {
+  SimpleLock locker(forbiddenInlineesLock);
+  while (auto const sd = read_string(ser)) {
+    forbiddenInlinees.insert(sd);
+  }
+  if (forbiddenInlinees.size()) hasCalledDisableInliningIntrinsic.store(true);
 }
 
 bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {

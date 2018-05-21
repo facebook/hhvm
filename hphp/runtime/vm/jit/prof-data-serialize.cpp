@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/array-offset-profile.h"
 #include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
+#include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/meth-profile.h"
 #include "hphp/runtime/vm/jit/profile-refcount.h"
 #include "hphp/runtime/vm/jit/release-vv-profile.h"
@@ -1020,6 +1021,8 @@ bool serializeProfData(const std::string& filename) {
 
     write_target_profiles(ser);
 
+    InliningDecider::serializeForbiddenInlines(ser);
+
     return true;
   } catch (std::runtime_error& err) {
     FTRACE(1, "serializeProfData - Failed: {}\n", err.what());
@@ -1052,6 +1055,8 @@ bool deserializeProfData(const std::string& filename) {
     pd->setDeserialized();
 
     read_target_profiles(ser);
+
+    InliningDecider::deserializeForbiddenInlines(ser);
 
     always_assert(ser.done());
     return true;

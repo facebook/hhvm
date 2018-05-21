@@ -25,6 +25,14 @@ function is_keyset_(mixed $x): void {
   }
 }
 
+function is_vec_or_dict_(mixed $x): void {
+  if ($x is vec_or_dict<_>) {
+    echo "vec_or_dict\n";
+  } else {
+    echo "not vec_or_dict\n";
+  }
+}
+
 is_vec_(1);
 is_vec_(true);
 is_vec_(1.5);
@@ -61,3 +69,16 @@ is_keyset_(array());
 is_keyset_(vec[]);
 is_keyset_(dict[]);
 is_keyset_(keyset[]);
+
+echo "---\n";
+
+is_vec_or_dict_(1);
+is_vec_or_dict_(true);
+is_vec_or_dict_(1.5);
+is_vec_or_dict_('foo');
+is_vec_or_dict_(null);
+is_vec_or_dict_(STDIN);
+is_vec_or_dict_(array());
+is_vec_or_dict_(vec[]);
+is_vec_or_dict_(dict[]);
+is_vec_or_dict_(keyset[]);

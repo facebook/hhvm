@@ -2245,7 +2245,6 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     case TypeStructure::Kind::T_num:
     case TypeStructure::Kind::T_arraykey:
     case TypeStructure::Kind::T_keyset:
-    case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_tuple:
     case TypeStructure::Kind::T_shape:
@@ -2280,12 +2279,14 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
       }
       return reduce(env, bc::InstanceOfD { rcls->name() });
     }
+    case TypeStructure::Kind::T_enum:
+    case TypeStructure::Kind::T_resource:
+    case TypeStructure::Kind::T_vec_or_dict:
+      // TODO(T29232862): implement
+      return result(TBool);
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_xhp:
-    case TypeStructure::Kind::T_enum:
-    case TypeStructure::Kind::T_resource:
-      // TODO(T26877589): implement
       return result(TBool);
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_typevar:

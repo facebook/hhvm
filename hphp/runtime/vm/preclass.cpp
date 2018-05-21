@@ -133,6 +133,36 @@ void PreClass::prettyPrint(std::ostream &out) const {
   }
 }
 
+const StaticString s___Sealed("__Sealed");
+void PreClass::enforceInMaybeSealedParentWhitelist(
+  const PreClass* parentPreClass) const {
+  // if our parent isn't sealed, then we're fine. If we're a mock, YOLO
+  if (!(parentPreClass->attrs() & AttrSealed) ||
+      m_userAttributes.find(s___MockClass.get()) != m_userAttributes.end()) {
+    return;
+  }
+  const UserAttributeMap& parent_attrs = parentPreClass->userAttributes();
+  assert(parent_attrs.find(s___Sealed.get()) != parent_attrs.end());
+  const auto& parent_sealed_attr = parent_attrs.find(s___Sealed.get())->second;
+  bool in_sealed_whitelist = false;
+  IterateV(parent_sealed_attr.m_data.parr,
+           [&in_sealed_whitelist, this](TypedValue v) -> bool {
+             if (v.m_data.pstr->same(name())) {
+               in_sealed_whitelist = true;
+               return true;
+             }
+             return false;
+           });
+  if (!in_sealed_whitelist) {
+    raise_error("Class %s may not inherit from sealed %s (%s) without "
+                "being in the whitelist",
+                name()->data(),
+                parentPreClass->attrs() & AttrInterface ? "interface" : "class",
+                parentPreClass->name()->data());
+  }
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // PreClass::Prop.
 

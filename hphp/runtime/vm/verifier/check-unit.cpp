@@ -234,15 +234,11 @@ bool UnitChecker::checkPreClasses() {
             ok = false;
             error("For Class %s, values in sealed whitelist must be strings\n",
                   preclass->name()->data());
+            return true;
           }
           return false;
         });
-      if (classAttrs & AttrTrait) {
-        ok = false;
-        error("Trait %s is marked as sealed, but traits cannot be sealed\n",
-              preclass->name()->data());
-      } else if (classAttrs & AttrFinal) {
-        // don't double trigger on traits since they're implicitly final
+      if (classAttrs & AttrFinal && !(classAttrs & AttrTrait)) {
         ok = false;
         error("Class %s is both final and sealed\n", preclass->name()->data());
       }

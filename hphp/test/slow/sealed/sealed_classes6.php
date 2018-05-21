@@ -1,6 +1,6 @@
 <?hh
 
-<<__Sealed(SomeClass::class)>>
+<<__Sealed(SomeTrait::class)>>
 interface SomeSealedInteface {}
 
 trait SomeTrait implements SomeSealedInteface {}
@@ -9,6 +9,8 @@ class SomeClass {
   use SomeTrait;
 }
 
-class SomeOtherClass {
+trait SomeOtherTrait {
   use SomeTrait;
 }
+
+trait SomeOtherOtherTrait implements SomeSealedInteface {}

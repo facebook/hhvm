@@ -1644,22 +1644,34 @@ bool build_class_methods(BuildClsInfo& info) {
   return true;
 }
 
+bool enforce_in_maybe_sealed_parent_whitelist(
+  const borrowed_ptr<const ClassInfo> cls,
+  const borrowed_ptr<const ClassInfo> parent);
+
 bool build_cls_info_rec(BuildClsInfo& info,
                         borrowed_ptr<const ClassInfo> rparent,
                         bool fromTrait) {
   if (!rparent) return true;
-
+  if (!enforce_in_maybe_sealed_parent_whitelist(rparent, rparent->parent)) {
+    return false;
+  }
   if (!build_cls_info_rec(info, rparent->parent, false)) {
     return false;
   }
 
   for (auto const iface : rparent->declInterfaces) {
+    if (!enforce_in_maybe_sealed_parent_whitelist(rparent, iface)) {
+      return false;
+    }
     if (!build_cls_info_rec(info, iface, fromTrait)) {
       return false;
     }
   }
 
   for (auto const trait : rparent->usedTraits) {
+    if (!enforce_in_maybe_sealed_parent_whitelist(rparent, trait)) {
+      return false;
+    }
     if (!build_cls_info_rec(info, trait, true)) return false;
   }
 
@@ -1686,6 +1698,27 @@ bool build_cls_info_rec(BuildClsInfo& info,
   if (!build_class_constants(info, rparent, fromTrait)) return false;
 
   return true;
+}
+
+const StaticString s___Sealed("__Sealed");
+bool enforce_in_maybe_sealed_parent_whitelist(
+  const borrowed_ptr<const ClassInfo> cls,
+  const borrowed_ptr<const ClassInfo> parent) {
+  // if our parent isn't sealed, then we're fine.
+  if (!parent || !(parent->cls->attrs & AttrSealed)) return true;
+  const UserAttributeMap& parent_attrs = parent->cls->userAttributes;
+  assert(parent_attrs.find(s___Sealed.get()) != parent_attrs.end());
+  const auto& parent_sealed_attr = parent_attrs.find(s___Sealed.get())->second;
+  bool in_sealed_whitelist = false;
+  IterateV(parent_sealed_attr.m_data.parr,
+           [&in_sealed_whitelist, cls](TypedValue v) -> bool {
+             if (v.m_data.pstr->same(cls->cls->name)) {
+               in_sealed_whitelist = true;
+               return true;
+             }
+             return false;
+           });
+  return in_sealed_whitelist;
 }
 
 bool find_constructor(borrowed_ptr<ClassInfo> cinfo) {

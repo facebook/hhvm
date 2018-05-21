@@ -1815,11 +1815,6 @@ let classish_errors env node parents namespace_name names errors =
       list_contains_predicate is_final cd.classish_modifiers &&
       classish_is_sealed in
 
-    (* Given a ClassishDeclaration node, test whether it is sealed and a trait. *)
-    let classish_sealed_trait env _ =
-      token_kind cd.classish_keyword = Some TokenKind.Trait &&
-      classish_is_sealed in
-
     let errors =
       produce_error errors
       classish_duplicate_modifiers cd.classish_modifiers
@@ -1836,10 +1831,6 @@ let classish_errors env node parents namespace_name names errors =
       produce_error errors
       (classish_sealed_final env) ()
       SyntaxError.sealed_final cd.classish_attribute in
-    let errors =
-      produce_error errors
-      (classish_sealed_trait env) ()
-      SyntaxError.sealed_trait cd.classish_attribute in
     let errors =
       produce_error errors
       (is_reserved_keyword env) cd.classish_name

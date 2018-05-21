@@ -338,6 +338,14 @@ public:
   const UserAttributeMap& userAttributes()   const { return m_userAttributes; }
 
   /*
+   * If the parent is sealed, enforce that we are in the whitelist.
+   * Note that parent may be derived through a using, extending, or
+   * implementing relationship.
+   */
+  void
+  enforceInMaybeSealedParentWhitelist(const PreClass* parentPreClass) const;
+
+  /*
    * Funcs, Consts, and Props all behave similarly.  Define raw accessors
    * foo() and numFoos() for people munging by hand, and ranges.
    *

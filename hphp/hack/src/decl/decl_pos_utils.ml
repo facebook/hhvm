@@ -92,6 +92,9 @@ let rec reason = function
   | Rdynamic_call p          -> Rdynamic_call (pos p)
   | Ridx_dict p              -> Ridx_dict (pos p)
   | Rmissing_optional_field (p, n) -> Rmissing_optional_field (pos p, n)
+  | Rcontravariant_generic (r1, n) -> Rcontravariant_generic (reason r1, n)
+  | Rinvariant_generic (r1, n) -> Rcontravariant_generic (reason r1, n)
+
 let string_id (p, x) = pos p, x
 
 let rec ty (p, x) =

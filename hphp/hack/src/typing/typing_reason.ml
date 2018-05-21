@@ -79,6 +79,8 @@ type t =
   | Rdynamic_call    of Pos.t
   | Ridx_dict        of Pos.t
   | Rmissing_optional_field of Pos.t * string
+  | Rcontravariant_generic of t * string
+  | Rinvariant_generic of t * string
 
 and expr_dep_type_reason =
   | ERexpr of int
@@ -222,6 +224,12 @@ let rec to_string prefix r =
     " because only array keys can be used to index into a Map, dict, darray, Set, or keyset")]
   | Rmissing_optional_field (p, name) ->
     [(p, prefix ^ " because the field '" ^ name ^ "' may be set to any type in this shape")]
+  | Rcontravariant_generic (r_orig, class_name) ->
+    (to_string prefix r_orig) @
+    [(p, "Considering that this type argument is contravariant with respect to " ^ class_name)]
+  | Rinvariant_generic (r_orig, class_name) ->
+    (to_string prefix r_orig) @
+    [(p, "Considering that this type argument is invariant with respect to " ^ class_name)]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -289,6 +297,8 @@ and to_pos = function
   | Rdynamic_call p -> p
   | Ridx_dict p -> p
   | Rmissing_optional_field (p, _) -> p
+  | Rcontravariant_generic (r, _) -> to_pos r
+  | Rinvariant_generic (r, _) -> to_pos r
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -318,74 +328,78 @@ and expr_dep_type_reason_string = function
       "where the class '"^(strip_ns c)^"' was referenced here via the keyword \
        'self'"
 
+let to_constructor_string r =
+match r with
+  | Rnone -> "Rnone"
+  | Rwitness _ -> "Rwitness"
+  | Ridx _ -> "Ridx"
+  | Ridx_vector _ -> "Ridx_vector"
+  | Rappend _ -> "Rappend"
+  | Rfield _ -> "Rfield"
+  | Rforeach _ -> "Rforeach"
+  | Rasyncforeach _ -> "Rasyncforeach"
+  | Raccess _ -> "Raccess"
+  | Rarith _ -> "Rarith"
+  | Rarith_ret _ -> "Rarith_ret"
+  | Rarray_plus_ret _ -> "Rarray_plus_ret"
+  | Rstring2 _ -> "Rstring2"
+  | Rcomp _ -> "Rcomp"
+  | Rconcat _ -> "Rconcat"
+  | Rconcat_ret _ -> "Rconcat_ret"
+  | Rlogic _ -> "Rlogic"
+  | Rlogic_ret _ -> "Rlogic_ret"
+  | Rbitwise _ -> "Rbitwise"
+  | Rbitwise_ret _ -> "Rbitwise_ret"
+  | Rstmt _ -> "Rstmt"
+  | Rno_return _ -> "Rno_return"
+  | Rno_return_async _ -> "Rno_return_async"
+  | Rret_fun_kind _ -> "Rret_fun_kind"
+  | Rhint _ -> "Rhint"
+  | Rnull_check _ -> "Rnull_check"
+  | Rnot_in_cstr _ -> "Rnot_in_cstr"
+  | Rthrow _ -> "Rthrow"
+  | Rplaceholder _ -> "Rplaceholder"
+  | Rattr _ -> "Rattr"
+  | Rxhp _ -> "Rxhp"
+  | Rret_div _ -> "Rret_div"
+  | Ryield_gen _ -> "Ryield_gen"
+  | Ryield_asyncgen _ -> "Ryield_asyncgen"
+  | Ryield_asyncnull _ -> "Ryield_asyncnull"
+  | Ryield_send _ -> "Ryield_send"
+  | Rlost_info _ -> "Rlost_info"
+  | Rcoerced _ -> "Rcoerced"
+  | Rformat _ -> "Rformat"
+  | Rclass_class _ -> "Rclass_class"
+  | Runknown_class _ -> "Runknown_class"
+  | Rdynamic_yield _ -> "Rdynamic_yield"
+  | Rmap_append _ -> "Rmap_append"
+  | Rvar_param _ -> "Rvar_param"
+  | Runpack_param _ -> "Runpack_param"
+  | Rinout_param _ -> "Rinout_param"
+  | Rinstantiate _ -> "Rinstantiate"
+  | Rarray_filter _ -> "Rarray_filter"
+  | Rtype_access _ -> "Rtype_access"
+  | Rexpr_dep_type _ -> "Rexpr_dep_type"
+  | Rnullsafe_op _ -> "Rnullsafe_op"
+  | Rtconst_no_cstr _ -> "Rtconst_no_cstr"
+  | Rused_as_map _ -> "Rused_as_map"
+  | Rused_as_shape _ -> "Rused_as_shape"
+  | Rpredicated _ -> "Rpredicated"
+  | Rinstanceof _ -> "Rinstanceof"
+  | Ris _ -> "Ris"
+  | Ras _ -> "Ras"
+  | Rfinal_property _ -> "Rfinal_property"
+  | Rvarray_or_darray_key _ -> "Rvarray_or_darray_key"
+  | Rusing _ -> "Rusing"
+  | Rdynamic_prop _ -> "Rdynamic_prop"
+  | Rdynamic_call _ -> "Rdynamic_call"
+  | Ridx_dict _ -> "Ridx_dict"
+  | Rmissing_optional_field _ -> "Rmissing_optional_field"
+  | Rcontravariant_generic _ -> "Rcontravariant_generic"
+  | Rinvariant_generic _ -> "Rinvariant_generic"
+
 let pp fmt r =
-  Format.pp_print_string fmt @@
-    match r with
-    | Rnone -> "Rnone"
-    | Rwitness _ -> "Rwitness"
-    | Ridx _ -> "Ridx"
-    | Ridx_vector _ -> "Ridx_vector"
-    | Rappend _ -> "Rappend"
-    | Rfield _ -> "Rfield"
-    | Rforeach _ -> "Rforeach"
-    | Rasyncforeach _ -> "Rasyncforeach"
-    | Raccess _ -> "Raccess"
-    | Rarith _ -> "Rarith"
-    | Rarith_ret _ -> "Rarith_ret"
-    | Rarray_plus_ret _ -> "Rarray_plus_ret"
-    | Rstring2 _ -> "Rstring2"
-    | Rcomp _ -> "Rcomp"
-    | Rconcat _ -> "Rconcat"
-    | Rconcat_ret _ -> "Rconcat_ret"
-    | Rlogic _ -> "Rlogic"
-    | Rlogic_ret _ -> "Rlogic_ret"
-    | Rbitwise _ -> "Rbitwise"
-    | Rbitwise_ret _ -> "Rbitwise_ret"
-    | Rstmt _ -> "Rstmt"
-    | Rno_return _ -> "Rno_return"
-    | Rno_return_async _ -> "Rno_return_async"
-    | Rret_fun_kind _ -> "Rret_fun_kind"
-    | Rhint _ -> "Rhint"
-    | Rnull_check _ -> "Rnull_check"
-    | Rnot_in_cstr _ -> "Rnot_in_cstr"
-    | Rthrow _ -> "Rthrow"
-    | Rplaceholder _ -> "Rplaceholder"
-    | Rattr _ -> "Rattr"
-    | Rxhp _ -> "Rxhp"
-    | Rret_div _ -> "Rret_div"
-    | Ryield_gen _ -> "Ryield_gen"
-    | Ryield_asyncgen _ -> "Ryield_asyncgen"
-    | Ryield_asyncnull _ -> "Ryield_asyncnull"
-    | Ryield_send _ -> "Ryield_send"
-    | Rlost_info _ -> "Rlost_info"
-    | Rcoerced _ -> "Rcoerced"
-    | Rformat _ -> "Rformat"
-    | Rclass_class _ -> "Rclass_class"
-    | Runknown_class _ -> "Runknown_class"
-    | Rdynamic_yield _ -> "Rdynamic_yield"
-    | Rmap_append _ -> "Rmap_append"
-    | Rvar_param _ -> "Rvar_param"
-    | Runpack_param _ -> "Runpack_param"
-    | Rinout_param _ -> "Rinout_param"
-    | Rinstantiate _ -> "Rinstantiate"
-    | Rarray_filter _ -> "Rarray_filter"
-    | Rtype_access _ -> "Rtype_access"
-    | Rexpr_dep_type _ -> "Rexpr_dep_type"
-    | Rnullsafe_op _ -> "Rnullsafe_op"
-    | Rtconst_no_cstr _ -> "Rtconst_no_cstr"
-    | Rused_as_map _ -> "Rused_as_map"
-    | Rused_as_shape _ -> "Rused_as_shape"
-    | Rpredicated _ -> "Rpredicated"
-    | Rinstanceof _ -> "Rinstanceof"
-    | Ris _ -> "Ris"
-    | Ras _ -> "Ras"
-    | Rfinal_property _ -> "Rfinal_property"
-    | Rvarray_or_darray_key _ -> "Rvarray_or_darray_key"
-    | Rusing _ -> "Rusing"
-    | Rdynamic_prop _ -> "Rdynamic_prop"
-    | Rdynamic_call _ -> "Rdynamic_call"
-    | Ridx_dict _ -> "Ridx_dict"
-    | Rmissing_optional_field _ -> "Rmissing_optional_field"
+  Format.pp_print_string fmt @@ to_constructor_string r
 
 type ureason =
   | URnone

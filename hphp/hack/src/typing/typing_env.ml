@@ -141,14 +141,16 @@ let get_equal_bounds env name =
   let upper = get_upper_bounds env name in
   TySet.inter lower upper
 
-let is_generic_param ty name =
+let rec is_generic_param ~elide_nullable ty name =
   match ty with
   | (_, Tabstract (AKgeneric name', None)) -> name = name'
+  | (_, Toption ty) when elide_nullable -> is_generic_param ~elide_nullable ty name
   | _ -> false
 
 (* Add a single new upper bound [ty] to generic parameter [name] in [tpenv] *)
 let add_upper_bound_ tpenv name ty =
-  if is_generic_param ty name
+  (* Don't add superfluous T <: T or T <: ?T to environment *)
+  if is_generic_param ~elide_nullable:true ty name
   then tpenv
   else match SMap.get name tpenv with
   | None ->
@@ -160,7 +162,8 @@ let add_upper_bound_ tpenv name ty =
 
 (* Add a single new lower bound [ty] to generic parameter [name] in [tpenv] *)
 let add_lower_bound_ tpenv name ty =
-  if is_generic_param ty name
+  (* Don't add superfluous T <: T to environment *)
+  if is_generic_param ~elide_nullable:false ty name
   then tpenv
   else
   match SMap.get name tpenv with

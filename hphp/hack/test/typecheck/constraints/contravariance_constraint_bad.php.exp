@@ -6,3 +6,5 @@ Some type constraint(s) here are violated (Typing[4110])
   This is an object of type IHasFoo
   File "contravariance_constraint_bad.php", line 29, characters 60-66:
   It is incompatible with an object of type IHasBar
+  File "contravariance_constraint_bad.php", line 29, characters 60-66:
+  Considering that this type argument is contravariant with respect to ICanCallFoo

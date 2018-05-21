@@ -316,6 +316,17 @@ let main args =
       let results = rpc args @@ Rpc.METHOD_JUMP (class_, filter, false) in
       ClientMethodJumps.go results false args.output_json;
       Exit_status.No_error
+    | MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, filter) ->
+      let filter =
+        match MethodJumps.string_filter_to_method_jump_filter filter with
+        | Some filter -> filter
+        | None ->
+          Printf.eprintf "Invalid method jump filter %s\n" filter;
+          raise Exit_status.(Exit_with Input_error)
+      in
+      let results = rpc args @@ Rpc.METHOD_JUMP_BATCH (classes, filter) in
+      ClientMethodJumps.go results false args.output_json;
+      Exit_status.No_error
     | MODE_IN_MEMORY_DEP_TABLE_SIZE ->
       let result = rpc args @@ Rpc.IN_MEMORY_DEP_TABLE_SIZE in
       ClientResultPrinter.Int_printer.go result args.output_json;

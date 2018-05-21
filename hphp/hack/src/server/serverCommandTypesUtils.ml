@@ -12,6 +12,7 @@ let debug_describe_t : type a. a t -> string = function
   | AUTOCOMPLETE             _ -> "AUTOCOMPLETE"
   | IDENTIFY_FUNCTION        _ -> "IDENTIFY_FUNCTION"
   | METHOD_JUMP              _ -> "METHOD_JUMP"
+  | METHOD_JUMP_BATCH        _ -> "METHOD_JUMP_BATCH"
   | FIND_DEPENDENT_FILES     _ -> "FIND_DEPENDENT_FILES"
   | FIND_REFS                _ -> "FIND_REFS"
   | IDE_FIND_REFS            _ -> "IDE_FIND_REFS"

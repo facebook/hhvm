@@ -249,14 +249,41 @@ let parse_check_args cmd =
       Arg.String
       (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS (x, "Class")) ()),
       " (mode) prints a list of classes that this class extends";
+    "--inheritance-ancestor-classes-batch",
+      Arg.Rest begin fun class_ ->
+        mode := match !mode with
+          | None -> Some (MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Class"))
+          | Some (MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, "Class")) ->
+            Some (MODE_METHOD_JUMP_ANCESTORS_BATCH ((class_::classes, "Class")))
+          | _ -> raise (Arg.Bad "only a single mode should be specified")
+        end,
+      " (mode) prints a list of classes that these classes extend";
     "--inheritance-ancestor-interfaces",
       Arg.String
       (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS (x, "Interface")) ()),
       " (mode) prints a list of interfaces that this class implements";
+    "--inheritance-ancestor-interfaces-batch",
+      Arg.Rest begin fun class_ ->
+        mode := match !mode with
+          | None -> Some (MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Interface"))
+          | Some (MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, "Interface")) ->
+            Some (MODE_METHOD_JUMP_ANCESTORS_BATCH ((class_::classes, "Interface")))
+          | _ -> raise (Arg.Bad "only a single mode should be specified")
+        end,
+      " (mode) prints a list of interfaces that these classes implement";
     "--inheritance-ancestor-traits",
       Arg.String
       (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS (x, "Trait")) ()),
       " (mode) prints a list of traits that this class uses";
+    "--inheritance-ancestor-traits-batch",
+      Arg.Rest begin fun class_ ->
+        mode := match !mode with
+          | None -> Some (MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Trait"))
+          | Some (MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, "Trait")) ->
+            Some (MODE_METHOD_JUMP_ANCESTORS_BATCH ((class_::classes, "Trait")))
+          | _ -> raise (Arg.Bad "only a single mode should be specified")
+        end,
+      " (mode) prints a list of traits that these classes use";
     "--show",
       Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
       " (mode) show human-readable type info for the given name; \

@@ -63,6 +63,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | METHOD_JUMP (class_, filter, find_children) ->
       env, MethodJumps.get_inheritance env.tcopt class_ ~filter ~find_children
         env.files_info genv.workers
+    | METHOD_JUMP_BATCH (classes, filter) ->
+      env, ServerMethodJumpsBatch.go genv.workers classes filter env
     | FIND_DEPENDENT_FILES file_list ->
         env, Ai.ServerFindDepFiles.go genv.workers file_list
           (ServerArgs.ai_mode genv.options)

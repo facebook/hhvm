@@ -128,6 +128,8 @@ type _ t =
       Identify_symbol.result t
   | METHOD_JUMP : (string * Method_jumps.filter * bool) ->
       Method_jumps.result list t
+  | METHOD_JUMP_BATCH : (string list * Method_jumps.filter) ->
+      Method_jumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t
   | FIND_REFS : Find_refs.action -> Find_refs.result t
   | IDE_FIND_REFS : file_input * int * int * bool ->

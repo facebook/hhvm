@@ -65,7 +65,7 @@
             "character": 0
           }
         },
-        "newText": "<?hh //strict\n\nfunction x(): string {\n  /* @lint-ignore TXT2 3 tabs on purpose */\n  $a = \"this\";\n\n  /* @lint-ignore TXT2 2 tabs on purpose */\n  $b = \"is\";\n\n  /* lint-ignore TXT2 1 tab on purpose */\n  $c = \"messy\"; // 1 tab\n\n  $d = \".\"; // 4 spaces\n  return \"$a\".\"$b\".\"$c\".\"d\";\n}\n"
+        "newText": "<?hh //strict\n\nfunction x(): string {\n     /* @lint-ignore TXT2 3 tabs on purpose */\n     $a = \"this\";\n\n     /* @lint-ignore TXT2 2 tabs on purpose */\n     $b = \"is\";\n\n     /* lint-ignore TXT2 1 tab on purpose */\n     $c = \"messy\"; // 1 tab\n\n     $d = \".\"; // 4 spaces\n     return \"$a\".\"$b\".\"$c\".\"d\";\n}\n"
       }
     ]
   },

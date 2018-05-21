@@ -41,6 +41,14 @@ let call_external_formatter
     cmd
     args
 
+let formatting_options_to_args (options: Lsp.DocumentFormatting.formattingOptions) =
+  let open Lsp.DocumentFormatting in
+  let args = [ "--indent-width"; string_of_int options.tabSize ] in
+  if not options.insertSpaces then
+    args@[ "--tabs" ]
+  else
+    args
+
 let range_offsets_to_args from to_ =
   ["--range"; string_of_int from; string_of_int to_]
 
@@ -66,8 +74,10 @@ let go_hackfmt ?filename ~content args =
     Error ("Could not locate formatter - looked in: " ^ (String.concat " " paths))
 
 (* This function takes 1-based offsets, and 'to_' is exclusive. *)
-let go ?filename ~content from to_ =
-    let args = range_offsets_to_args from to_ in
+let go ?filename ~content from to_ options =
+    let format_args = formatting_options_to_args options in
+    let range_args = range_offsets_to_args from to_ in
+    let args = format_args @ range_args in
     go_hackfmt ?filename ~content args >>| fun lines ->
     (String.concat "\n" lines) ^ "\n"
 
@@ -104,6 +114,7 @@ let range_regexp = Str.regexp "^\\([0-9]+\\) \\([0-9]+\\)$"
 let go_ide
   (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
   (action: ServerFormatTypes.ide_action)
+  (options: Lsp.DocumentFormatting.formattingOptions)
   : ServerFormatTypes.ide_result =
   let open File_content in
   let open ServerFormatTypes in
@@ -134,14 +145,14 @@ let go_ide
     let ed = offset_to_position content to0 in
     let range = {st = {line = 1; column = 1;}; ed;} in
     (* hackfmt currently takes one-indexed integers for range formatting. *)
-    go ~filename ~content (from0 + 1) (to0 + 1)
+    go ~filename ~content (from0 + 1) (to0 + 1) options
       |> convert_to_ide_result ~range
 
   | Range range ->
     let file_range = range.Ide_api_types.file_range |> Ide_api_types.ide_range_to_fc in
     let (range, from0, to0) =
       expand_range_to_whole_rows content file_range in
-    go ~filename ~content (from0 + 1) (to0 + 1)
+    go ~filename ~content (from0 + 1) (to0 + 1) options
       |> convert_to_ide_result ~range
 
   | Position { Ide_api_types.position; _} ->
@@ -150,6 +161,7 @@ let go_ide
     let position = position |> Ide_api_types.ide_pos_to_fc in
     let offset = get_offset content position in
     let args = ["--at-char"; string_of_int offset] in
+    let args = args @ (formatting_options_to_args options) in
     go_hackfmt ~filename ~content args >>= fun lines ->
 
     (* `hackfmt --at-char` returns the range that was formatted, as well as the

@@ -136,9 +136,6 @@ void DebuggerSession::invokeDummyStartupDocument() {
 
   m_dummyRequestInfo->m_flags.doNotBreak = false;
   std::atomic_thread_fence(std::memory_order_release);
-
-  folly::dynamic event = folly::dynamic::object;
-  m_debugger->sendEventMessage(event, "readyForEvaluations", true);
 }
 
 const StaticString s_memory_limit("memory_limit");
@@ -253,6 +250,9 @@ void DebuggerSession::runDummy() {
       DebugTransport::OutputLevelWarning
     );
   }
+
+  folly::dynamic event = folly::dynamic::object;
+  m_debugger->sendEventMessage(event, "readyForEvaluations", true);
 
   m_dummyRequestInfo->m_commandQueue.processCommands();
 }

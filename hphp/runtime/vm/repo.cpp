@@ -660,8 +660,16 @@ static int busyHandler(void* opaque, int nCalls) {
   Repo* repo UNUSED = static_cast<Repo*>(opaque);
   // yield to allow other threads access to the machine
   // spin-wait can starve other threads.
-  usleep(1000 * nCalls);
-  return 1; // Tell SQLite to retry.
+  // We need to give up eventually or we will wait forever in the event of a
+  // deadlock. We've already waited nCalls * (nCalls - 1) / 2 ms; at nCalls
+  // of 300 that's just under 45 seconds.
+  if (nCalls < 300) {
+    usleep(1000 * nCalls);
+    return 1; // Tell SQLite to retry.
+  } else {
+    Logger::Error("Failed to acquire SQLite lock during repository operation");
+    return 0; // Tell SQLite to give up.
+  }
 }
 
 namespace {

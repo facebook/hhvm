@@ -20,71 +20,6 @@ module TUEnv = Typing_unification_env
 module SN = Naming_special_names
 module Phase = Typing_phase
 
-let decompose_array
-  (env : Env.env)
-  (r : Reason.t)
-  (ak_sub : array_kind)
-  (ak_super : array_kind)
-  (sub : Env.env -> locl ty -> locl ty -> Env.env)
-  (fail : Env.env -> Env.env) : Env.env =
-  match ak_sub, ak_super with
-  (* An array of any kind is a subtype of an array of AKany *)
-  | _, AKany ->
-    env
-
-  (* array is a subtype of varray_or_darray *)
-  | AKany, AKvarray_or_darray (_, Tany) ->
-    env
-
-  (* varray_or_darray<ty1> <: varray_or_darray<ty2> iff t1 <: ty2
-     But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
-  | AKvarray_or_darray ty_sub, AKvarray_or_darray ty_super ->
-    sub env ty_sub ty_super
-
-  | (AKvarray ty_sub | AKvec ty_sub),
-    (AKvarray ty_super | AKvec ty_super | AKvarray_or_darray ty_super) ->
-    sub env ty_sub ty_super
-
-  | (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
-    (AKdarray (tk_super, tv_super) | AKmap (tk_super, tv_super)) ->
-    let env = sub env tk_sub tk_super in
-    sub env tv_sub tv_super
-
-  | (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
-    (AKvarray_or_darray tv_super) ->
-    let tk_super =
-      Reason.Rvarray_or_darray_key (Reason.to_pos r),
-      Tprim Nast.Tarraykey in
-    let env = sub env tk_sub tk_super in
-    sub env tv_sub tv_super
-
-  | _ ->
-    fail env
-
-(* Given two types that we know are in a subtype relationship
- *   ty_sub <: ty_super
- * add to env.tpenv any bounds on generic type parameters that must
- * hold for ty_sub <: ty_super to be valid.
- *
- * For example, suppose we know Cov<T> <: Cov<D> for a covariant class Cov.
- * Then it must be the case that T <: D so we add an upper bound D to the
- * bounds for T.
- *
- * Although some of this code is similar to that for subtype_with_uenv, its
- * purpose is different. subtype_with_uenv takes two types t and u and makes
- * updates to the substitution of type variables (through unification) to
- * make t <: u true.
- *
- * decompose_subtype takes two types t and u for which t <: u is *assumed* to
- * hold, and makes updates to bounds on generic parameters that *necessarily*
- * hold in order for t <: u.
- *
- * If it turns out that there is no situation in which t <: u (for example, we
- * are given string and int, or Cov<Derived> <: Cov<Base>) then evaluate the
- * failure continuation `fail`
- *)
-
-
 (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
  * and add to `acc` any necessary and sufficient [(t1,ck1,u1);...;(tn,ckn,un)] such that
  *   ty_sub <: ty_super iff t1 ck1 u1, ..., tn ckn un
@@ -115,10 +50,13 @@ let rec simplify_subtype
   (ty_super : locl ty)
   (res : Env.env * (locl ty * Ast.constraint_kind * locl ty) list * (locl ty * locl ty) option) =
   let env, acc, fail = res in
+  let types = [
+    Typing_log.Log_type ("ty_sub", ty_sub);
+    Typing_log.Log_type ("ty_super", ty_super)] in
+  let types = Option.value_map this_ty
+    ~default:types ~f:(fun ty -> Typing_log.Log_type ("this_ty", ty)::types) in
   Typing_log.log_types 2 (Reason.to_pos (fst ty_sub)) env
-    [Typing_log.Log_sub ("Typing_subtype.simplify_subtype",
-     [Typing_log.Log_type ("ty_sub", ty_sub);
-      Typing_log.Log_type ("ty_super", ty_super)])];
+    [Typing_log.Log_sub ("Typing_subtype.simplify_subtype", types)];
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
   let again env res ty_sub =
@@ -214,10 +152,12 @@ let rec simplify_subtype
       | AKvarray_or_darray tv
       | AKmap (_, tv) -> simplify_subtype ~deep ~this_ty tv tv_super res
       | AKshape fdm ->
-        let env, (acc, fail) = Typing_arrays.fold_akshape_as_akmap_with_acc again env (acc, fail) r fdm
+        let env, (acc, fail) =
+          Typing_arrays.fold_akshape_as_akmap_with_acc again env (acc, fail) r fdm
         in env, acc, fail
       | AKtuple fields ->
-        let env, (acc, fail) = Typing_arrays.fold_aktuple_as_akvec_with_acc again env (acc, fail) r fields
+        let env, (acc, fail) =
+          Typing_arrays.fold_aktuple_as_akvec_with_acc again env (acc, fail) r fields
         in env, acc, fail
     )
 
@@ -246,16 +186,24 @@ let rec simplify_subtype
         simplify_subtype ~deep ~this_ty tk tk_super |>
         simplify_subtype ~deep ~this_ty tv tv_super
       | AKshape fdm ->
-        let env, (acc, fail) = Typing_arrays.fold_akshape_as_akmap_with_acc again env (acc, fail) r fdm
+        let env, (acc, fail) =
+          Typing_arrays.fold_akshape_as_akmap_with_acc again env (acc, fail) r fdm
         in env, acc, fail
       | AKtuple fields ->
-        let env, (acc, fail) = Typing_arrays.fold_aktuple_as_akvec_with_acc again env (acc, fail) r fields
+        let env, (acc, fail) =
+          Typing_arrays.fold_aktuple_as_akvec_with_acc again env (acc, fail) r fields
         in env, acc, fail
       )
 
   (* C<ts> <: ?D<ts'> iff C<ts> <: D<ts'> *)
   | (_, Tclass _), (_, Toption ((_, Tclass _) as ty_super')) ->
     simplify_subtype ~deep ~this_ty ty_sub ty_super' res
+
+  (* (t1,...,tn) <: (u1,...,un) iff t1<:u1, ... , tn <: un *)
+  | (_, Ttuple tyl_sub), (_, Ttuple tyl_super)
+    when List.length tyl_super = List.length tyl_sub ->
+    wfold_left2 (fun res ty_sub ty_super ->
+      simplify_subtype ~deep ~this_ty:None ty_sub ty_super res) res tyl_sub tyl_super
 
   | (p_sub, (Tclass (x_sub, tyl_sub))), (_, (Tclass (x_super, tyl_super))) ->
     let env, _, _ = res in
@@ -275,7 +223,7 @@ let rec simplify_subtype
            * where vi is the variance of the i'th generic parameter of C,
            * and <:v denotes the appropriate direction of subtyping for variance v
            *)
-          simplify_subtype_variance ~deep ~this_ty cid_sub
+          simplify_subtype_variance ~deep cid_sub
             class_sub.tc_tparams tyl_sub tyl_super res
         end
     else
@@ -349,13 +297,34 @@ let rec simplify_subtype
          )
       end
 
+      (* void is the type of null and is a subtype of any option type. *)
+      | (_, Tprim Nast.Tvoid), (_, Toption _)
+        when TUtils.is_void_type_of_null env -> valid ()
+
+      | _, (_, Tmixed) -> valid ()
+      | _, (_, Tdynamic) -> valid ()
+      | _, (_, Toption (_, Tnonnull)) -> valid ()
+      | (_, Tprim (Nast.Tint | Nast.Tfloat)), (_, Tprim Nast.Tnum) -> valid ()
+      | (_, Tprim (Nast.Tint | Nast.Tstring)), (_, Tprim Nast.Tarraykey) -> valid ()
+      | (_, Tabstract ((AKenum _), _)), (_, Tprim Nast.Tarraykey) -> valid ()
+      | (_,
+         (Tprim Nast.(Tint | Tbool | Tfloat | Tstring
+                      | Tresource | Tnum | Tarraykey | Tnoreturn)
+          | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _
+          | Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _))),
+        (_, Tnonnull) -> valid ()
+      | (_, Tprim Nast.Tstring), (_, Tclass ((_, stringish), _))
+          when stringish = SN.Classes.cStringish -> valid ()
+      | (_, Tarraykind _), (_, Tclass ((_, xhp_child), _))
+      | (_, Tprim (Nast.Tarraykey | Nast.Tint | Nast.Tfloat | Nast.Tstring | Nast.Tnum)),
+        (_, Tclass ((_, xhp_child), _))
+          when xhp_child = SN.Classes.cXHPChild -> valid ()
   | _, _ ->
     default ()
 
 
 and simplify_subtype_variance
   ~(deep : bool)
-  ~(this_ty : locl ty option)
   (cid : string)
   (tparams : decl tparam list)
   (children_tyl : locl ty list)
@@ -369,24 +338,24 @@ and simplify_subtype_variance
     let res =
       begin match variance with
       | Ast.Covariant ->
-        simplify_subtype ~deep ~this_ty child super res
+        simplify_subtype ~deep ~this_ty:None child super res
       | Ast.Contravariant ->
         let super = (Reason.Rcontravariant_generic (fst super,
           Utils.strip_ns cid), snd super) in
-        simplify_subtype ~deep ~this_ty super child res
+        simplify_subtype ~deep ~this_ty:None super child res
       | Ast.Invariant ->
         if deep
         then
           res |>
-          simplify_subtype ~deep ~this_ty child super |>
-          simplify_subtype ~deep ~this_ty super child
+          simplify_subtype ~deep ~this_ty:None child super |>
+          simplify_subtype ~deep ~this_ty:None super child
         else
           let env, acc, fail = res in
           let super = (Reason.Rinvariant_generic (fst super,
             Utils.strip_ns cid), snd super) in
           env, (child, Ast.Constraint_eq, super) :: acc, fail
       end in
-    simplify_subtype_variance ~deep ~this_ty cid tparams childrenl superl res
+    simplify_subtype_variance ~deep cid tparams childrenl superl res
 
 let decompose_subtype_add_bound
   p
@@ -422,6 +391,28 @@ let decompose_subtype_add_bound
   | _, _ ->
     env
 
+(* Given two types that we know are in a subtype relationship
+ *   ty_sub <: ty_super
+ * add to env.tpenv any bounds on generic type parameters that must
+ * hold for ty_sub <: ty_super to be valid.
+ *
+ * For example, suppose we know Cov<T> <: Cov<D> for a covariant class Cov.
+ * Then it must be the case that T <: D so we add an upper bound D to the
+ * bounds for T.
+ *
+ * Although some of this code is similar to that for subtype_with_uenv, its
+ * purpose is different. subtype_with_uenv takes two types t and u and makes
+ * updates to the substitution of type variables (through unification) to
+ * make t <: u true.
+ *
+ * decompose_subtype takes two types t and u for which t <: u is *assumed* to
+ * hold, and makes updates to bounds on generic parameters that *necessarily*
+ * hold in order for t <: u.
+ *
+ * If it turns out that there is no situation in which t <: u (for example, we
+ * are given string and int, or Cov<Derived> <: Cov<Base>) then evaluate the
+ * failure continuation `fail`
+ *)
 let rec decompose_subtype
   p
   (env : Env.env)
@@ -1086,19 +1077,7 @@ and sub_type
   (env : Env.env)
   (ty_sub : locl ty)
   (ty_super : locl ty) : Env.env =
-  let env, acc, fail = simplify_subtype ~deep:false ~this_ty:None ty_sub ty_super (env, [], None) in
-  match fail with
-  | Some (ty_sub, ty_super) ->
-    (* Force error *)
-    fst (Unify.unify env ty_super ty_sub)
-  | None ->
-    List.fold_right ~f:(fun (ty1,ck,ty2) env ->
-      match ck with
-      | Ast.Constraint_eq -> fst (Unify.unify env ty2 ty1)
-      | Ast.Constraint_as -> sub_type_with_uenv env (TUEnv.empty, ty1) (TUEnv.empty, ty2)
-      | Ast.Constraint_super -> sub_type_with_uenv env (TUEnv.empty, ty2) (TUEnv.empty, ty1)
-      )
-      ~init:env acc
+    sub_type_with_uenv env (TUEnv.empty, ty_sub) (TUEnv.empty, ty_super)
 
 (**
  * Checks that ty_sub is a subtype of ty_super, and returns an env.
@@ -1124,6 +1103,25 @@ and sub_type_with_uenv
       "Typing_subtype.sub_type_with_uenv uenv_sub.unwrappedToption=%b uenv_super.unwrappedToption=%b"
         uenv_sub.TUEnv.unwrappedToption uenv_super.TUEnv.unwrappedToption,
       types)];
+  let env, acc, fail =
+    simplify_subtype ~deep:false ~this_ty:uenv_sub.TUEnv.this_ty ty_sub ty_super (env, [], None) in
+    match fail with
+    | Some (ty_sub, ty_super) ->
+      (* Force error *)
+      fst (Unify.unify env ty_super ty_sub)
+    | None ->
+      List.fold_right ~f:(fun (ty1,ck,ty2) env ->
+        match ck with
+        | Ast.Constraint_eq -> fst (Unify.unify env ty2 ty1)
+        | Ast.Constraint_as ->
+          sub_type_with_uenv_helper env (uenv_sub, ty1) (uenv_super, ty2)
+        | Ast.Constraint_super ->
+          sub_type_with_uenv_helper env (uenv_super, ty2) (uenv_sub, ty1)
+        )
+        ~init:env acc
+
+(* Deal with the cases not dealt with by simplify_subtype *)
+and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   let env, ety_super =
     Env.expand_type env ty_super in
   let env, ety_sub =
@@ -1344,102 +1342,10 @@ and sub_type_with_uenv
            )
       )
     end
-  | _, (_, Tmixed) -> env
-  | _, (_, Tdynamic) -> env
-  | _, (_, Toption (_, Tnonnull)) -> env
-  | (_,
-     (Tprim Nast.(Tint | Tbool | Tfloat | Tstring
-                  | Tresource | Tnum | Tarraykey | Tnoreturn)
-      | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _
-      | Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _))),
-    (_, Tnonnull) -> env
+
   | (_, (Tprim Nast.Tvoid | Tmixed | Tdynamic | Toption _ | Tvar _
          | Tabstract ((AKnewtype _ | AKdependent _), None))),
     (_, Tnonnull) -> fst (Unify.unify env ty_super ty_sub)
-  | (_, Tprim (Nast.Tint | Nast.Tfloat)), (_, Tprim Nast.Tnum) -> env
-  | (_, Tprim (Nast.Tint | Nast.Tstring)), (_, Tprim Nast.Tarraykey) -> env
-  | (_, Tabstract ((AKenum _), _)), (_, Tprim Nast.Tarraykey) -> env
-  | (r, Tarraykind akind), (_, Tclass ((_, coll), [tv_super]))
-    when (coll = SN.Collections.cTraversable ||
-        coll = SN.Collections.cContainer) ->
-      (match akind with
-      | AKany -> env
-      | AKempty -> env
-      | AKvarray tv
-      | AKvec tv
-      | AKdarray (_, tv)
-      | AKvarray_or_darray tv
-      | AKmap (_, tv) ->
-          sub_type env tv tv_super
-      | AKshape fdm ->
-          Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
-            sub_type env ty_sub ty_super
-          end env r fdm
-      | AKtuple fields ->
-          Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
-            sub_type env ty_sub ty_super
-          end env r fields
-      )
-  | (r, Tarraykind akind), (_, Tclass ((_, coll), [tk_super; tv_super]))
-    when (coll = SN.Collections.cKeyedTraversable
-         || coll = SN.Collections.cKeyedContainer
-         || coll = SN.Collections.cIndexish) ->
-      (match akind with
-      | AKany -> env
-      | AKempty -> env
-      | AKvarray tv
-      | AKvec tv ->
-        let env = sub_type env (r, Tprim Nast.Tint) tk_super in
-        sub_type env tv tv_super
-      | AKvarray_or_darray tv ->
-        let tk_sub =
-          Reason.Rvarray_or_darray_key (Reason.to_pos r),
-          Tprim Nast.Tarraykey in
-        let env = sub_type env tk_sub tk_super in
-        sub_type env tv tv_super
-      | AKdarray (tk, tv)
-      | AKmap (tk, tv) ->
-        let env = sub_type env tk tk_super in
-        sub_type env tv tv_super
-      | AKshape fdm ->
-        Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
-          sub_type env ty_sub ty_super
-        end env r fdm
-      | AKtuple fields ->
-          Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
-            sub_type env ty_sub ty_super
-          end env r fields
-      )
-
-  | (_, Tprim Nast.Tstring), (_, Tclass ((_, stringish), _))
-    when stringish = SN.Classes.cStringish -> env
-  | (_, Tarraykind _), (_, Tclass ((_, xhp_child), _))
-  | (_, Tprim (Nast.Tarraykey | Nast.Tint | Nast.Tfloat | Nast.Tstring | Nast.Tnum)), (_, Tclass ((_, xhp_child), _))
-    when xhp_child = SN.Classes.cXHPChild -> env
-  | (_, Tarraykind (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub))),
-    (r, Tarraykind (AKvarray_or_darray tv_super)) ->
-      let tk_super =
-        Reason.Rvarray_or_darray_key (Reason.to_pos r),
-        Tprim Nast.Tarraykey in
-      let env = sub_type env tk_sub tk_super in
-      sub_type env tv_sub tv_super
-  | (reason, Tarraykind (AKvarray elt_ty | AKvec elt_ty)),
-    (_, Tarraykind (AKdarray _ | AKmap _))
-    when not (TypecheckerOptions.safe_vector_array (Env.get_options env)) ->
-      let int_reason = Reason.Ridx (Reason.to_pos reason, Reason.Rnone) in
-      let int_type = int_reason, Tprim Nast.Tint in
-      sub_type env (reason, Tarraykind (AKmap (int_type, elt_ty))) ty_super
-  | (r, Tarraykind AKshape fdm_sub), _ ->
-      Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
-        sub_type env ty_sub ty_super
-      end env r fdm_sub
-  | (r, Tarraykind AKtuple fields_sub), _ ->
-      Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
-        sub_type env ty_sub ty_super
-      end env r fields_sub
-
-  | (r, Tarraykind ak_sub), (_, Tarraykind ak_super) ->
-    decompose_array env r ak_sub ak_super sub_type (fun env -> fst (Unify.unify env ty_super ty_sub))
 
   (* If ?t1 <: ?t2, then from t1 <: ?t1 (widening) and transitivity
    * of <: it follows that t1 <: ?t2.  Conversely, if t1 <: ?t2, then
@@ -1449,10 +1355,6 @@ and sub_type_with_uenv
   | (_, Toption ty_sub), (_, Toption _) ->
     let uenv_sub = {uenv_sub with TUEnv.unwrappedToption = true} in
     sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
-
-  (* void is the type of null and is a subtype of any option type. *)
-  | (_, Tprim Nast.Tvoid), (_, Toption _)
-    when TUtils.is_void_type_of_null env -> env
 
   (* If the nonnull type is not enabled, mixed <: ?t is equivalent
    * to mixed <: t.  Otherwise, we should not encounter mixed
@@ -1508,9 +1410,6 @@ and sub_type_with_uenv
     let env, ty_sub = Env.get_type env r_sub v in
     sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
-  | (_, Ttuple tyl_sub), (_, Ttuple tyl_super)
-    when List.length tyl_super = List.length tyl_sub ->
-    wfold_left2 sub_type env tyl_sub tyl_super
   | (r_sub, Tfun ft_sub), (r_super, Tfun ft_super) ->
     subtype_funs_generic  ~check_return:true
       env r_sub ft_sub r_super ft_super
@@ -1669,10 +1568,8 @@ and sub_type_with_uenv
   | _, (_, Tabstract (AKgeneric _, _)) ->
     sub_generic_params SSet.empty env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
-  | _, (_, (Tarraykind _ | Tprim _ | Tvar _
-    | Tabstract (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tobject | Tshape _ | Tclass (_, _))
-    ) -> fst (Unify.unify env ty_super ty_sub)
+  | _, _ ->
+    fst (Unify.unify env ty_super ty_sub)
 
 and sub_generic_params
   (seen : SSet.t)

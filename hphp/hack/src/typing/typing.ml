@@ -6022,6 +6022,9 @@ and safely_refine_class_type
             TySet.elements (Env.get_lower_bounds env newname),
             TySet.elements (Env.get_equal_bounds env newname),
             TySet.elements (Env.get_upper_bounds env newname) with
+            (* Special case for mixed=?nonnull as a lower bound *)
+            | _, [(_, Toption (_, Tnonnull)) as ty], _, _ -> ty
+            | _, [(_, Tmixed) as ty], _, _ -> ty
             | _, _, [ty], _ -> ty
             | Ast.Covariant, _, _, [ty]
             | Ast.Contravariant, [ty], _, _

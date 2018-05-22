@@ -30,6 +30,14 @@ let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
 and unify_unwrapped ?(opts=TUtils.default_unify_opt) env
     ~unwrappedToption1 ty1 ~unwrappedToption2 ty2 =
   if ty1 == ty2 then env, ty1 else
+  let types =
+    [Typing_log.Log_type ("ty1", ty1);
+     Typing_log.Log_type ("ty2", ty2)]  in
+  Typing_log.log_types 2 (Reason.to_pos (fst ty2)) env
+    [Typing_log.Log_sub (Printf.sprintf
+      "Typing_unify.unify_unwrapped unwrappedToption1=%b unwrappedToption2=%b"
+        unwrappedToption1 unwrappedToption2,
+      types)];
   match ty1, ty2 with
   | (_, (Tany | Terr)), ty | ty, (_, (Tany | Terr)) -> env, ty
   | (r1, Tvar n1), (r2, Tvar n2) ->

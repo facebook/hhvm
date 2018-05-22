@@ -2090,11 +2090,11 @@ and ignore_body env =
     (* this covers the async case as well *)
     let pos = Pos.make env.file env.lb in
     with_ignored_yield env
-      (fun () -> ignore (expr_anon_fun env pos ~sync:FDeclSync));
+      (fun () -> ignore (expr_anon_fun env pos ~attrs:[] ~sync:FDeclSync));
     ignore_body env
   | Tlp ->
     with_ignored_yield env
-      (fun () -> ignore (try_short_lambda env));
+      (fun () -> ignore (try_short_lambda ~attrs:[] env));
     ignore_body env
   | Tlt when is_xhp env ->
     ignore (xhp env);
@@ -3129,7 +3129,7 @@ and lambda_expr_body : env -> block = fun env ->
   let (p, e1) = expr env in
   [p, Return (Some (p, e1))]
 
-and lambda_body ~sync env params ret =
+and lambda_body ~sync env ~attrs params ret =
   let is_generator, body_stmts =
     (if peek env = Tlcb
      (** e.g.
@@ -3159,7 +3159,7 @@ and lambda_body ~sync env params ret =
     f_ret = ret;
     f_ret_by_ref = false;
     f_body = body_stmts;
-    f_user_attributes = [];
+    f_user_attributes = attrs;
     f_fun_kind;
     f_mode = env.mode;
     f_namespace = Namespace_env.empty env.popt;
@@ -3181,11 +3181,11 @@ and make_lambda_param : id -> fun_param = fun var_id ->
     param_user_attributes = [];
   }
 
-and lambda_single_arg ~(sync:fun_decl_kind) env var_id : expr_ =
+and lambda_single_arg ~(sync:fun_decl_kind) ~attrs env var_id : expr_ =
   expect env Tlambda;
-  lambda_body ~sync env [make_lambda_param var_id] None
+  lambda_body ~sync ~attrs env [make_lambda_param var_id] None
 
-and try_short_lambda env =
+and try_short_lambda ~attrs env =
   try_parse env begin fun env ->
     let error_state = !(env.errors) in
     let param_list = parameter_list_remain env in
@@ -3201,7 +3201,7 @@ and try_short_lambda env =
       then None
       else begin
         drop env;
-        Some (lambda_body ~sync:FDeclSync env param_list ret)
+        Some (lambda_body ~sync:FDeclSync ~attrs env param_list ret)
       end
     end
   end
@@ -3258,7 +3258,7 @@ and expr_atomic ~allow_class ~class_const env =
       let tok_value = Lexing.lexeme env.lb in
       let dollars, var_id = strip_variablevariable 0 tok_value in
       pos, if peek env = Tlambda
-        then lambda_single_arg ~sync:FDeclSync env (pos, var_id)
+        then lambda_single_arg ~sync:FDeclSync ~attrs:[] env (pos, var_id)
         else
           let rec make n =
             if n = 0 then Lvar (pos, var_id) else Dollar (pos, make (n-1)) in
@@ -3273,9 +3273,9 @@ and expr_atomic ~allow_class ~class_const env =
       with_priority env Tat expr
   | Tword ->
       let word = Lexing.lexeme env.lb in
-      expr_atomic_word ~allow_class ~class_const env pos word
+      expr_atomic_word ~allow_class ~class_const ~attrs:[] env pos word
   | Tlp ->
-      (match try_short_lambda env with
+      (match try_short_lambda ~attrs:[] env with
       | None ->
           if is_cast env
           then expr_cast env pos
@@ -3305,6 +3305,32 @@ and expr_atomic ~allow_class ~class_const env =
       let e = expr env in
       let end_ = Pos.make env.file env.lb in
       Pos.btw pos end_, Unsafeexpr e
+  | Tltlt ->
+    (* attribute before lambda *)
+    let attrs = attribute_remain env in
+    (* make lambda *)
+    let tok1 = L.token env.file env.lb in
+    let pos1 = Pos.make env.file env.lb in
+    let lambda_expected () =
+      error_expect env "lambda";
+      pos1, Null in
+    begin match tok1 with
+    | Tword ->
+      let word = Lexing.lexeme env.lb in
+      expr_atomic_word ~allow_class ~class_const ~attrs env pos word
+    | Tlvar ->
+        let tok_value = Lexing.lexeme env.lb in
+        let dollars, var_id = strip_variablevariable 0 tok_value in
+        if peek env = Tlambda
+        then pos1, lambda_single_arg ~sync:FDeclSync ~attrs env (pos, var_id)
+        else lambda_expected ()
+    | Tlp ->
+        begin match try_short_lambda ~attrs env with
+        | None -> lambda_expected ()
+        | Some r -> pos1, r
+        end
+    | _ -> lambda_expected ()
+    end
   | _ ->
       error_expect env "expression";
       pos, Null
@@ -3316,7 +3342,7 @@ and expr_with_possible_as env =
   env.allow_as_expressions := is_as_allowed;
   e
 
-and expr_atomic_word ~allow_class ~class_const env pos = function
+and expr_atomic_word ~allow_class ~class_const ~attrs env pos = function
   | "class" when not allow_class ->
       error_expect env "expression";
       pos, Null
@@ -3340,11 +3366,11 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
   | "new" ->
       expr_new env pos
   | "async" ->
-      expr_anon_async env pos
+      expr_anon_async ~attrs env pos
   | "coroutine" ->
-      expr_anon_coroutine env pos
+      expr_anon_coroutine ~attrs env pos
   | "function" ->
-      expr_anon_fun env pos ~sync:FDeclSync
+      expr_anon_fun env pos ~attrs ~sync:FDeclSync
   | name when is_collection env name ->
       expr_collection env pos name
   | "await" ->
@@ -3680,33 +3706,33 @@ and expr_php_list env start =
 (* Anonymous functions *)
 (*****************************************************************************)
 
-and expr_anon_async env pos =
-  expr_anon_function_like env pos FDeclAsync "async"
+and expr_anon_async ~attrs env pos =
+  expr_anon_function_like ~attrs env pos FDeclAsync "async"
 
-and expr_anon_coroutine env pos =
-  expr_anon_function_like env pos FDeclCoroutine "coroutine"
+and expr_anon_coroutine ~attrs env pos =
+  expr_anon_function_like ~attrs env pos FDeclCoroutine "coroutine"
 
-and expr_anon_function_like env pos kind kind_text =
+and expr_anon_function_like ~attrs env pos kind kind_text =
   match L.token env.file env.lb with
   | Tword when Lexing.lexeme env.lb = "function" ->
-      expr_anon_fun env pos ~sync:kind
+      expr_anon_fun env pos ~attrs ~sync:kind
   | Tlvar ->
       let var_pos = Pos.make env.file env.lb in
-      pos, lambda_single_arg ~sync:kind env (var_pos, Lexing.lexeme env.lb)
+      pos, lambda_single_arg ~sync:kind ~attrs env (var_pos, Lexing.lexeme env.lb)
   | Tlp ->
       let param_list = parameter_list_remain env in
       let ret = hint_return_opt env in
       expect env Tlambda;
-      pos, lambda_body ~sync:kind env param_list ret
+      pos, lambda_body ~sync:kind ~attrs env param_list ret
   | Tlcb -> (* <kind> { ... } *)
       L.back env.lb;
-      let lambda = pos, lambda_body ~sync:kind env [] None in
+      let lambda = pos, lambda_body ~sync:kind ~attrs env [] None in
       pos, Call (lambda, [], [], [])
   | _ ->
       L.back env.lb;
       pos, Id (pos, kind_text)
 
-and expr_anon_fun env pos ~(sync:fun_decl_kind) =
+and expr_anon_fun env pos ~attrs  ~(sync:fun_decl_kind) =
   let env = { env with priority = 0 } in
   let params = parameter_list env in
   let ret = hint_return_opt env in
@@ -3720,7 +3746,7 @@ and expr_anon_fun env pos ~(sync:fun_decl_kind) =
     f_ret = ret;
     f_ret_by_ref = false;
     f_body = body_stmts;
-    f_user_attributes = [];
+    f_user_attributes = attrs;
     f_fun_kind = fun_kind sync is_generator;
     f_mode = env.mode;
     f_namespace = Namespace_env.empty env.popt;

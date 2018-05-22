@@ -1587,13 +1587,8 @@ and expr_
       | None ->
           make_result env (T.Id id) (Reason.Rwitness cst_pos, Typing_utils.tany env)
       | Some (ty, _) ->
-        if cst_name = SN.HH.rx_is_enabled
-        then begin
-          if Env.is_checking_lambda ()
-          then Errors.rx_enabled_in_lambdas cst_pos
-          else if Env.env_reactivity env = Nonreactive
-          then Errors.rx_enabled_in_non_rx_context cst_pos
-        end;
+        if cst_name = SN.HH.rx_is_enabled && Env.env_reactivity env = Nonreactive
+        then Errors.rx_enabled_in_non_rx_context cst_pos;
         let env, ty =
           Phase.localize_with_self env ty in
         make_result env (T.Id id) ty
@@ -2232,13 +2227,14 @@ and expr_
       end;
       (* Is the return type declared? *)
       let is_explicit_ret = Option.is_some f.f_ret in
+      let reactivity = Decl.fun_reactivity env.Env.decl_env f.f_user_attributes in
       let check_body_under_known_params ?ret_ty ft =
+        let old_reactivity = Env.env_reactivity env in
+        let env = Env.set_env_reactive env reactivity in
         let (is_coroutine, _counter, _, anon) = anon_make env p f ft idl in
-        let ft = { ft with ft_is_coroutine = is_coroutine } in
-        let ft = { ft with ft_reactive = Nonreactive } in
-        let is_reactive, (env, tefun, ty) =
-          Env.check_lambda_reactive (fun () -> anon ?ret_ty env ft.ft_params ft.ft_arity) in
-        let ft = { ft with ft_reactive = is_reactive } in
+        let ft = { ft with ft_is_coroutine = is_coroutine; ft_reactive = reactivity } in
+        let (env, tefun, ty) = anon ?ret_ty env ft.ft_params ft.ft_arity in
+        let env = Env.set_env_reactive env old_reactivity in
         let inferred_ty =
           if is_explicit_ret
           then (Reason.Rwitness p, Tfun { ft with ft_ret = declared_ft.ft_ret })
@@ -2336,12 +2332,13 @@ and expr_
                 ("Typing.expr Efun unknown params",
                   [Typing_log.Log_type ("declared_ft", (Reason.Rwitness p, Tfun declared_ft))])];
             (* check for recursive function calls *)
+            let reactivity = Decl.fun_reactivity env.Env.decl_env f.f_user_attributes in
+            let old_reactivity = Env.env_reactivity env in
+            let env = Env.set_env_reactive env reactivity in
             let is_coroutine, counter, pos, anon = anon_make env p f declared_ft idl in
             let env, tefun, _, anon_id = Errors.try_with_error
               (fun () ->
-                let reactivity, (_, tefun, ty) =
-                  Env.check_lambda_reactive
-                    (fun () -> anon env declared_ft.ft_params declared_ft.ft_arity) in
+                let (_, tefun, ty) = anon env declared_ft.ft_params declared_ft.ft_arity in
                 let anon_fun = reactivity, is_coroutine, counter, pos, anon in
                 let env, anon_id = Env.add_anonymous env anon_fun in
                 env, tefun, ty, anon_id)
@@ -2350,11 +2347,11 @@ and expr_
                    them in any subsequent usages. *)
                 let anon_ign ?el:_ ?ret_ty:_ env fun_params =
                   Errors.ignore_ (fun () -> (anon env fun_params)) in
-                let reactivity, (_, tefun, ty)
-                  = Env.check_lambda_reactive (fun () -> anon_ign env declared_ft.ft_params declared_ft.ft_arity) in
+                let (_, tefun, ty) = anon_ign env declared_ft.ft_params declared_ft.ft_arity in
                 let anon_fun = reactivity, is_coroutine, counter, pos, anon in
                 let env, anon_id = Env.add_anonymous env anon_fun in
                 env, tefun, ty, anon_id) in
+            let env = Env.set_env_reactive env old_reactivity in
             env, tefun, (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id))
         end
       end
@@ -3134,7 +3131,6 @@ and assign_ p ur env e1 ty2 =
 
   | _, Class_get _
   | _, Obj_get _ ->
-      Env.not_lambda_reactive ();
       let lenv = env.Env.lenv in
       let no_fakes = LEnv.env_with_empty_fakes env in
       (* In this section, we check that the assignment is compatible with

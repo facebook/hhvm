@@ -17,5 +17,5 @@ class B extends A {
 <<__Rx>>
 function rx(): void {
   // Error: B does not implement Rx
-  (new B())->f(() ==> 1);
+  (new B())->f(<<__Rx>> () ==> 1);
 }

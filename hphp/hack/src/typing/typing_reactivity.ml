@@ -62,13 +62,6 @@ let check_call env receiver_type pos reason ft arg_types =
       env
       callee_reactivity
       (Env.env_reactivity env) in
-  let allow_call =
-    if not allow_call && Env.is_checking_lambda () then begin
-      (* if we are inferring reactivity of lambda - now we know it is non-reactive *)
-      Env.not_lambda_reactive ();
-      true
-    end
-    else allow_call in
   (* call is not allowed, report error *)
   if not allow_call then begin
     begin match Env.env_reactivity env, callee_reactivity with

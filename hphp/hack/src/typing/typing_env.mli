@@ -116,9 +116,6 @@ val get_env_mutability : env -> Typing_mutability_env.mutability_env
 val env_with_global_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val get_generic_parameters : env -> string list
-val check_lambda_reactive : (unit -> 'a) -> reactivity * 'a
-val not_lambda_reactive : unit -> unit
-val is_checking_lambda : unit -> bool
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
 val add_fresh_generic_parameter : env -> string -> env * string

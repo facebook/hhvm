@@ -1,6 +1,5 @@
 <?hh // strict
 
-// OK
 <<__Rx, __OnlyRxIfArgs>>
 function mayberx(<<__OnlyRxIfRxFunc>>(function(): int) $a): int {
   return $a() + 1;
@@ -8,7 +7,8 @@ function mayberx(<<__OnlyRxIfRxFunc>>(function(): int) $a): int {
 
 <<__Rx>>
 function rx(): int {
-  return mayberx(<<__Rx>> () ==> {
+  // error, non-rx lambda
+  return mayberx(function() {
     return 1;
   });
 }

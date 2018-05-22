@@ -343,10 +343,8 @@ let set_env_reactive env reactive =
 let set_env_function_pos env function_pos =
   { env with function_pos }
 
-let lambda_reactive = ref None
-
 let env_reactivity env =
-  Option.value !lambda_reactive ~default:env.lenv.local_reactive
+  env.lenv.local_reactive
 
 (* Some form (strict/shallow/local) of reactivity *)
 let env_local_reactive env =
@@ -358,34 +356,12 @@ let function_is_mutable env =
 let set_fun_mutable env mut =
   { env with genv = {env.genv with fun_mutable = mut }}
 
-(* Takes in the typechecking function of a lambda
-  block and checks if it breaks reactivity rules *)
-let check_lambda_reactive f =
-  let old_lambda_reactive = !lambda_reactive in
-  lambda_reactive := Some (Reactive None);
-  let results = f () in
-  let result = !lambda_reactive in
-  lambda_reactive := old_lambda_reactive;
-  match result with
-  | Some c -> c, results
-  | None -> assert false
-
-let not_lambda_reactive () =
-  lambda_reactive := (match !lambda_reactive with
-  | Some _ -> Some Nonreactive
-  | None -> None)
-
-let is_checking_lambda () =
-  Option.is_some !lambda_reactive
-
 let error_if_reactive_context env f =
-  not_lambda_reactive ();
   if env_local_reactive env then f ()
 
 let error_if_shallow_reactive_context env f =
-  not_lambda_reactive ();
   match env_reactivity env with
-  | Reactive _ | Shallow _ -> f()
+  | Reactive _ | Shallow _ -> f ()
   | _ -> ()
 
 let add_wclass env x =

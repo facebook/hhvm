@@ -7,7 +7,7 @@ function f(<<__OnlyRxIfRxFunc>>?(function(): int) $f): void {
 <<__Rx>>
 function g1(): void {
   // OK
-  f(() ==> {
+  f(<<__Rx>> () ==> {
     return 1;
   });
 }

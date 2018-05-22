@@ -21,7 +21,7 @@ class B extends A implements Rx1 {
 
 <<__Rx>>
 function f(B $b): void {
-  $a = () ==> {
+  $a = <<__Rx>> () ==> {
     $b->mayberx();
   };
   // OK - lambda is reactive

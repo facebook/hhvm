@@ -1,7 +1,7 @@
 <?hh // strict
 <<__Rx>>
 function test(): Rx<(function(): int)> {
-  $x = function() {
+  $x = <<__Rx>> function() {
     return 5;
   };
   return $x;
@@ -9,7 +9,7 @@ function test(): Rx<(function(): int)> {
 
 // $x is reactive, no error
 function test2(): Rx<(function(): int)> {
-  $x = function() {
+  $x = <<__Rx>> function() {
     return 5;
   };
   return $x;

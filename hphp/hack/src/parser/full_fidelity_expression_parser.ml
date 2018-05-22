@@ -1284,232 +1284,13 @@ module WithStatementAndDeclAndTypeParser
         parse_parenthesized_expression parser
       end
 
-  and token_implies_cast kind =
-    (* See comments below. *)
-    match kind with
-    (* Keywords that imply cast *)
-    | Abstract
-    | Array
-    | Arraykey
-    | Async
-    | TokenKind.Attribute
-    | Await
-    | Bool
-    | Break
-    | Case
-    | Catch
-    | Category
-    | Children
-    | Class
-    | Classname
-    | Clone
-    | Const
-    | Construct
-    | Continue
-    | Coroutine
-    | Darray
-    | Dict
-    | Default
-    | Define
-    | HaltCompiler
-    | Declare
-    | Destruct
-    | Do
-    | Double
-    | Echo
-    | Else
-    | Elseif
-    | Empty
-    | Endfor
-    | Endforeach
-    | Enddeclare
-    | Endif
-    | Endswitch
-    | Endwhile
-    | Enum
-    | Eval
-    | Extends
-    | Fallthrough
-    | Float
-    | Final
-    | Finally
-    | For
-    | Foreach
-    | From
-    | Function
-    | Global
-    | Goto
-    | If
-    | Implements
-    | Include
-    | Include_once
-    | Inout
-    | Insteadof
-    | Int
-    | Interface
-    | Isset
-    | Keyset
-    | Let
-    | List
-    | Mixed
-    | Namespace
-    | New
-    | Newtype
-    | Noreturn
-    | Num
-    | Object
-    | Parent
-    | Print
-    | Private
-    | Protected
-    | Public
-    | Require
-    | Require_once
-    | Required
-    | Resource
-    | Return
-    | Self
-    | Shape
-    | Static
-    | String
-    | Super
-    | Suspend
-    | Switch
-    | This
-    | Throw
-    | Trait
-    | Try
-    | Tuple
-    | Type
-    | Unset
-    | Use
-    | Using
-    | Var
-    | Varray
-    | Vec
-    | Void
-    | Where
-    | While
-    | Yield -> true
-    (* Names that imply cast *)
-    | Name
-    | Backslash
-    | Variable -> true
-    (* Symbols that imply cast *)
-    | At
-    | DollarDollar
-    | Exclamation
-    | LeftParen
-    | Minus
-    | MinusMinus
-    | Dollar
-    | Plus
-    | PlusPlus
-    | Tilde -> true
-    (* Literals that imply cast *)
-    | BinaryLiteral
-    | BooleanLiteral
-    | DecimalLiteral
-    | DoubleQuotedStringLiteral
-    | DoubleQuotedStringLiteralHead
-    | StringLiteralBody
-    | DoubleQuotedStringLiteralTail
-    | ExecutionStringLiteral
-    | ExecutionStringLiteralHead
-    | ExecutionStringLiteralTail
-    | FloatingLiteral
-    | HeredocStringLiteral
-    | HeredocStringLiteralHead
-    | HeredocStringLiteralTail
-    | HexadecimalLiteral
-    | NowdocStringLiteral
-    | NullLiteral
-    | OctalLiteral
-    | SingleQuotedStringLiteral -> true
-    (* Keywords that imply parenthesized expression *)
-    | And
-    | As
-    | Instanceof
-    | Is
-    | QuestionAs
-    | Or
-    | Xor -> false
-    (* Symbols that imply parenthesized expression *)
-    | Ampersand
-    | AmpersandAmpersand
-    | AmpersandEqual
-    | Bar
-    | BarBar
-    | BarEqual
-    | BarGreaterThan
-    | Carat
-    | CaratEqual
-    | Colon
-    | ColonColon
-    | Comma
-    | Dot
-    | DotEqual
-    | DotDotDot
-    | Equal
-    | EqualEqual
-    | EqualEqualEqual
-    | EqualEqualGreaterThan
-    | EqualGreaterThan
-    | ExclamationEqual
-    | LessThanGreaterThan
-    | ExclamationEqualEqual
-    | GreaterThan
-    | GreaterThanEqual
-    | GreaterThanGreaterThan
-    | GreaterThanGreaterThanEqual
-    | LessThanLessThanEqual
-    | MinusEqual
-    | MinusGreaterThan
-    | Question
-    | QuestionMinusGreaterThan
-    | QuestionQuestion
-    | QuestionColon
-    | RightBrace
-    | RightBracket
-    | RightParen
-    | LeftBrace
-    | LeftBracket
-    | LessThan
-    | LessThanEqual
-    | LessThanEqualGreaterThan
-    | LessThanLessThan
-    | Percent
-    | PercentEqual
-    | PlusEqual
-    | Semicolon
-    | Slash
-    | SlashEqual
-    | SlashGreaterThan
-    | Star
-    | StarEqual
-    | StarStar
-    | StarStarEqual -> false
-    (* Misc *)
-    | Markup
-    | LessThanQuestion
-    | QuestionGreaterThan
-    | ErrorToken
-    | TokenKind.EndOfFile -> false
-    (* TODO: Sort out rules for interactions between casts and XHP. *)
-    | LessThanSlash
-    | XHPCategoryName
-    | XHPElementName
-    | XHPClassName
-    | XHPStringLiteral
-    | XHPBody
-    | XHPComment -> false
-
   and possible_cast_expression parser =
     (* SPEC:
     cast-expression:
       (  cast-type  ) unary-expression
     cast-type:
-      array, bool, double, float, int, object, string, unset or a name
+      array, bool, double, float, real, int, integer, object, string, binary,
+      unset
 
     TODO: This implies that a cast "(name)" can only be a simple name, but
     I would expect that (\Foo\Bar), (:foo), (array<int>), and the like
@@ -1536,14 +1317,11 @@ module WithStatementAndDeclAndTypeParser
     let (parser, type_token) = next_token parser in
     let type_token_kind = Token.kind type_token in
     let (parser, right_paren) = next_token parser in
-    let is_easy_cast_type_or_at_least_name =
-      match type_token_kind with
-      | Array | Bool | Double | Float | Int | Object | String | Unset -> Some true
-      | Name -> Some false
-      | _ -> None in
     let is_cast = Token.kind right_paren = RightParen &&
-      Option.value_map ~default:false is_easy_cast_type_or_at_least_name
-        ~f:(fun b -> b || token_implies_cast (peek_token_kind parser)) in
+      match type_token_kind with
+      | Array | Bool | Boolean | Double | Float | Real | Int | Integer
+      | Object | String | Binary | Unset -> true
+      | _ -> false in
     if is_cast then
       let (parser, type_token) = Make.token parser type_token in
       let (parser, right_paren) = Make.token parser right_paren in

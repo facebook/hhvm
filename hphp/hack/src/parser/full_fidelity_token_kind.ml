@@ -30,7 +30,9 @@ type t =
   | Attribute
   | Await
   | Backslash
+  | Binary
   | Bool
+  | Boolean
   | Break
   | Case
   | Catch
@@ -82,6 +84,7 @@ type t =
   | Instanceof
   | Insteadof
   | Int
+  | Integer
   | Interface
   | Is
   | Isset
@@ -101,6 +104,7 @@ type t =
   | Private
   | Protected
   | Public
+  | Real
   | Require
   | Require_once
   | Required
@@ -230,7 +234,7 @@ type t =
   | XHPComment
   | Markup
 
-[@@deriving show]
+  [@@deriving show]
 
 let from_string keyword =
   match keyword with
@@ -245,7 +249,9 @@ let from_string keyword =
   | "attribute"       -> Some Attribute
   | "await"           -> Some Await
   | "\\"             -> Some Backslash
+  | "binary"          -> Some Binary
   | "bool"            -> Some Bool
+  | "boolean"         -> Some Boolean
   | "break"           -> Some Break
   | "case"            -> Some Case
   | "catch"           -> Some Catch
@@ -297,6 +303,7 @@ let from_string keyword =
   | "instanceof"      -> Some Instanceof
   | "insteadof"       -> Some Insteadof
   | "int"             -> Some Int
+  | "integer"         -> Some Integer
   | "interface"       -> Some Interface
   | "is"              -> Some Is
   | "isset"           -> Some Isset
@@ -316,6 +323,7 @@ let from_string keyword =
   | "private"         -> Some Private
   | "protected"       -> Some Protected
   | "public"          -> Some Public
+  | "real"            -> Some Real
   | "require"         -> Some Require
   | "require_once"    -> Some Require_once
   | "required"        -> Some Required
@@ -431,7 +439,9 @@ let to_string kind =
   | Attribute                     -> "attribute"
   | Await                         -> "await"
   | Backslash                     -> "\\"
+  | Binary                        -> "binary"
   | Bool                          -> "bool"
+  | Boolean                       -> "boolean"
   | Break                         -> "break"
   | Case                          -> "case"
   | Catch                         -> "catch"
@@ -483,6 +493,7 @@ let to_string kind =
   | Instanceof                    -> "instanceof"
   | Insteadof                     -> "insteadof"
   | Int                           -> "int"
+  | Integer                       -> "integer"
   | Interface                     -> "interface"
   | Is                            -> "is"
   | Isset                         -> "isset"
@@ -502,6 +513,7 @@ let to_string kind =
   | Private                       -> "private"
   | Protected                     -> "protected"
   | Public                        -> "public"
+  | Real                          -> "real"
   | Require                       -> "require"
   | Require_once                  -> "require_once"
   | Required                      -> "required"

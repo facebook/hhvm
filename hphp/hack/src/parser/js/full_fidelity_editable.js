@@ -725,8 +725,12 @@ class EditableToken extends EditableSyntax
        return new AwaitToken(leading, trailing);
     case '\':
        return new BackslashToken(leading, trailing);
+    case 'binary':
+       return new BinaryToken(leading, trailing);
     case 'bool':
        return new BoolToken(leading, trailing);
+    case 'boolean':
+       return new BooleanToken(leading, trailing);
     case 'break':
        return new BreakToken(leading, trailing);
     case 'case':
@@ -829,6 +833,8 @@ class EditableToken extends EditableSyntax
        return new InsteadofToken(leading, trailing);
     case 'int':
        return new IntToken(leading, trailing);
+    case 'integer':
+       return new IntegerToken(leading, trailing);
     case 'interface':
        return new InterfaceToken(leading, trailing);
     case 'is':
@@ -867,6 +873,8 @@ class EditableToken extends EditableSyntax
        return new ProtectedToken(leading, trailing);
     case 'public':
        return new PublicToken(leading, trailing);
+    case 'real':
+       return new RealToken(leading, trailing);
     case 'require':
        return new RequireToken(leading, trailing);
     case 'require_once':
@@ -1249,11 +1257,25 @@ class BackslashToken extends EditableToken
     super('\', leading, trailing, '\');
   }
 }
+class BinaryToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('binary', leading, trailing, 'binary');
+  }
+}
 class BoolToken extends EditableToken
 {
   constructor(leading, trailing)
   {
     super('bool', leading, trailing, 'bool');
+  }
+}
+class BooleanToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('boolean', leading, trailing, 'boolean');
   }
 }
 class BreakToken extends EditableToken
@@ -1613,6 +1635,13 @@ class IntToken extends EditableToken
     super('int', leading, trailing, 'int');
   }
 }
+class IntegerToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('integer', leading, trailing, 'integer');
+  }
+}
 class InterfaceToken extends EditableToken
 {
   constructor(leading, trailing)
@@ -1744,6 +1773,13 @@ class PublicToken extends EditableToken
   constructor(leading, trailing)
   {
     super('public', leading, trailing, 'public');
+  }
+}
+class RealToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('real', leading, trailing, 'real');
   }
 }
 class RequireToken extends EditableToken
@@ -21097,7 +21133,9 @@ exports.AsyncToken = AsyncToken;
 exports.AttributeToken = AttributeToken;
 exports.AwaitToken = AwaitToken;
 exports.BackslashToken = BackslashToken;
+exports.BinaryToken = BinaryToken;
 exports.BoolToken = BoolToken;
+exports.BooleanToken = BooleanToken;
 exports.BreakToken = BreakToken;
 exports.CaseToken = CaseToken;
 exports.CatchToken = CatchToken;
@@ -21149,6 +21187,7 @@ exports.InoutToken = InoutToken;
 exports.InstanceofToken = InstanceofToken;
 exports.InsteadofToken = InsteadofToken;
 exports.IntToken = IntToken;
+exports.IntegerToken = IntegerToken;
 exports.InterfaceToken = InterfaceToken;
 exports.IsToken = IsToken;
 exports.IssetToken = IssetToken;
@@ -21168,6 +21207,7 @@ exports.PrintToken = PrintToken;
 exports.PrivateToken = PrivateToken;
 exports.ProtectedToken = ProtectedToken;
 exports.PublicToken = PublicToken;
+exports.RealToken = RealToken;
 exports.RequireToken = RequireToken;
 exports.Require_onceToken = Require_onceToken;
 exports.RequiredToken = RequiredToken;

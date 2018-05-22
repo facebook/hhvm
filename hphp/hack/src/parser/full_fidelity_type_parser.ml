@@ -81,8 +81,12 @@ let rec parse_type_specifier ?(allow_var=false) parser =
    *)
   | Double (* TODO: Specification does not mention double; fix it. *)
   | Bool
+  | Boolean
+  | Binary
   | Int
+  | Integer
   | Float
+  | Real
   | Num
   | String
   | Arraykey

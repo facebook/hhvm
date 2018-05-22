@@ -2994,7 +2994,7 @@ let lower_tree
         String_utils.string_ends_with Relative_path.(suffix env.file) "hhi"
       in
       match List.last (PositionedSyntaxTree.all_errors tree) with
-      | None when is_hhi -> ()
+      | None when env.quick_mode || is_hhi -> ()
       | None ->
         let errors : SyntaxError.t list =
           ParserErrors.parse_errors @@ ParserErrors.make_env

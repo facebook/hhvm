@@ -59,3 +59,4 @@ let migration_flags_all = GlobalOptions.tco_migration_flags_all
 let dynamic_view = GlobalOptions.tco_dynamic_view
 let disallow_unsafe_comparisons = GlobalOptions.tco_disallow_unsafe_comparisons
 let disallow_non_arraykey_keys = GlobalOptions.tco_disallow_non_arraykey_keys
+let disallow_array_as_tuple = GlobalOptions.tco_disallow_array_as_tuple

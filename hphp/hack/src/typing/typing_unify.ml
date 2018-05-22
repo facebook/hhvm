@@ -299,7 +299,8 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
       unify_ env r2 ty2 r1 ty1
 
   | (Ttuple _ as ty), Tarraykind AKany
-  | Tarraykind AKany, (Ttuple _ as ty) ->
+  | Tarraykind AKany, (Ttuple _ as ty)
+    when not (TypecheckerOptions.disallow_array_as_tuple (Env.get_options env)) ->
       env, ty
 
   | Ttuple tyl1, Ttuple tyl2 ->

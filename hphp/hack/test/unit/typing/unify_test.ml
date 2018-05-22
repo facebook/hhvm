@@ -18,6 +18,7 @@ let global_options =
     ~tco_dynamic_view:false
     ~tco_disallow_unsafe_comparisons:false
     ~tco_disallow_non_arraykey_keys:false
+    ~tco_disallow_array_as_tuple:false
     ~po_auto_namespace_map:[]
     ~tco_disallow_ambiguous_lambda:false
     ~tco_disallow_array_typehint:false

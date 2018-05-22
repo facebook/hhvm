@@ -158,6 +158,7 @@ let parse_options () =
   let dynamic_view = ref false in
   let allow_unsafe_comparisons = ref false in
   let allow_non_arraykey_keys = ref false in
+  let allow_array_as_tuple = ref false in
   let hacksperimental = ref false in
   let void_is_type_of_null = ref false in
   let parser = ref Legacy in
@@ -314,6 +315,9 @@ let parse_options () =
         Arg.Set allow_non_arraykey_keys,
         " Allow values of types other than int and string as keys \
         in literal Maps, Sets, dicts, keysets, and darrays";
+    "--allow-array-as-tuple",
+        Arg.Set allow_array_as_tuple,
+        " Allow tuples to be passed as untyped arrays and vice versa";
     "--hacksperimental",
         Arg.Set hacksperimental,
         " Enable experimental Hack features";
@@ -339,6 +343,7 @@ let parse_options () =
       GlobalOptions.tco_dynamic_view = !dynamic_view;
       GlobalOptions.tco_disallow_unsafe_comparisons = not !allow_unsafe_comparisons;
       GlobalOptions.tco_disallow_non_arraykey_keys = not !allow_non_arraykey_keys;
+      GlobalOptions.tco_disallow_array_as_tuple = not !allow_array_as_tuple;
   } in
   let tcopt = {
     tcopt with

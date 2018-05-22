@@ -9,7 +9,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2018-03-15-0001"
+let full_fidelity_schema_version_number = "2018-03-15-0002"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -139,8 +139,10 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Async"; "async" ];
   [ "Attribute"; "attribute" ];
   [ "Await"; "await" ];
-  [ "Backslash"; "\\"];
+  [ "Backslash"; "\\" ];
+  [ "Binary"; "binary" ];
   [ "Bool"; "bool" ];
+  [ "Boolean"; "boolean" ];
   [ "Break"; "break" ];
   [ "Case"; "case" ];
   [ "Catch"; "catch" ];
@@ -192,6 +194,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Instanceof"; "instanceof" ];
   [ "Insteadof"; "insteadof" ];
   [ "Int"; "int" ];
+  [ "Integer"; "integer" ];
   [ "Interface"; "interface" ];
   [ "Is"; "is"];
   [ "Isset"; "isset" ];
@@ -210,6 +213,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Private"; "private" ];
   [ "Protected"; "protected" ];
   [ "Public"; "public" ];
+  [ "Real"; "real" ];
   [ "Require"; "require" ];
   [ "Require_once"; "require_once" ];
   [ "Required"; "required" ];

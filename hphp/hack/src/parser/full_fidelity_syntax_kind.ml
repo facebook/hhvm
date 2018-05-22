@@ -188,7 +188,6 @@ type t =
   | ErrorSyntax
   | ListItem
 
-
 let to_string kind =
   match kind with
   | Token _                           -> "token"

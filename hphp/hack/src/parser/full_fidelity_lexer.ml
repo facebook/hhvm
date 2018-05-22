@@ -1390,15 +1390,17 @@ let as_case_insensitive_keyword text =
   non-lower versions in our codebase. *)
   let lower = String.lowercase_ascii text in
   match lower with
-  | "__halt_compiler" | "abstract" | "and" | "array" | "as" | "bool"  | "break" | "callable"
+  | "__halt_compiler" | "abstract" | "and" | "array" | "as" | "bool"  | "boolean" | "break"
+  | "callable"
   | "case" | "catch" | "class" | "clone" | "const" | "continue" | "declare" | "default"
   | "die" | "do" | "echo" | "else" | "elseif" | "empty" | "enddeclare" | "endfor"
   | "endforeach" | "endif" | "endswitch" | "endwhile" | "eval" | "exit" | "extends" | "false"
   | "final" | "finally" | "for" | "foreach" | "function" | "global" | "goto" | "if"
   | "implements" | "include" | "include_once" | "inout" | "instanceof" | "insteadof" | "int"
+  | "integer"
   | "interface" | "isset" | "list" | "namespace" | "new" | "null" | "or" | "parent"
   | "print" | "private" | "protected" | "public" | "require" | "require_once"
-  | "return" | "self" | "static" | "switch" | "throw" | "trait"
+  | "return" | "self" | "static" | "string" | "switch" | "throw" | "trait"
   | "try" | "true" | "unset" | "use" | "using" | "var" | "void" | "while"
   | "xor" | "yield" -> lower
   | _ -> text

@@ -1508,7 +1508,8 @@ module WithStatementAndDeclAndTypeParser
     cast-expression:
       (  cast-type  ) unary-expression
     cast-type:
-      array, bool, double, float, int, object, string, unset or a name
+      array, bool, double, float, real, int, integer, object, string, binary,
+      unset
 
     TODO: This implies that a cast "(name)" can only be a simple name, but
     I would expect that (\Foo\Bar), (:foo), (array<int>), and the like
@@ -1535,14 +1536,11 @@ module WithStatementAndDeclAndTypeParser
     let (parser, type_token) = next_token parser in
     let type_token_kind = Token.kind type_token in
     let (parser, right_paren) = next_token parser in
-    let is_easy_cast_type_or_at_least_name =
-      match type_token_kind with
-      | Array | Bool | Double | Float | Int | Object | String | Unset -> Some true
-      | Name -> Some false
-      | _ -> None in
     let is_cast = Token.kind right_paren = RightParen &&
-      Option.value_map ~default:false is_easy_cast_type_or_at_least_name
-        ~f:(fun b -> b || token_implies_cast (peek_token_kind parser)) in
+      match type_token_kind with
+      | Array | Bool | Boolean | Double | Float | Real | Int | Integer
+      | Object | String | Binary | Unset -> true
+      | _ -> false in
     if is_cast then
       let (parser, type_token) = Make.token parser type_token in
       let (parser, right_paren) = Make.token parser right_paren in

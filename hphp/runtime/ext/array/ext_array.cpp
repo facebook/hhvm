@@ -193,8 +193,7 @@ TypedValue HHVM_FUNCTION(array_combine,
        iter1; ++iter1, ++iter2) {
     auto const key = iter1.secondRvalPlus().unboxed();
     if (key.type() == KindOfInt64 || isStringType(key.type())) {
-      ret.setWithRef(iter1.secondValPlus(),
-                     iter2.secondValPlus());
+      ret.setWithRef(key.tv(), iter2.secondValPlus());
     } else {
       ret.setWithRef(tvCastToString(key.tv()), iter2.secondValPlus());
     }

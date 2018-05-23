@@ -97,6 +97,7 @@ class ReflectionClass implements Reflector {
   public function isTrait(): bool;
   public function isUserDefined(): bool;
   public function newInstance(...$args);
+  /* HH_IGNORE_ERROR[2083] */
   public function newInstanceArgs(Traversable<mixed> $args = array());
   public function newInstanceWithoutConstructor();
   public function setStaticPropertyValue(string $name, mixed $value): void;
@@ -322,6 +323,7 @@ class ReflectionTypeAlias implements Reflector {
 class ReflectionType {
   final private function __clone();
   public function __construct(?Reflector $param_or_ret = null,
+                              /* HH_IGNORE_ERROR[2083] */
                               array $type_hint_info = array());
   public function allowsNull(): bool;
   public function isBuiltin(): bool;

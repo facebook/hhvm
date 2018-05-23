@@ -16,9 +16,11 @@
 
 trait StrictIterable<+Tv> implements Iterable<Tv> {
   public function toArray(): array {
+    /* HH_IGNORE_ERROR[2083] */
     return array();
   }
   public function toValuesArray(): array {
+    /* HH_IGNORE_ERROR[2083] */
     return array();
   }
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
@@ -82,12 +84,15 @@ trait StrictIterable<+Tv> implements Iterable<Tv> {
 
 trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
   public function toArray(): array {
+    /* HH_IGNORE_ERROR[2083] */
     return array();
   }
   public function toValuesArray(): array {
+    /* HH_IGNORE_ERROR[2083] */
     return array();
   }
   public function toKeysArray(): array {
+    /* HH_IGNORE_ERROR[2083] */
     return array();
   }
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
@@ -181,9 +186,11 @@ trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
 
 trait LazyIterable<+Tv> implements Iterable<Tv> {
   public function toArray(): array {
+    /* HH_IGNORE_ERROR[2083] */
     return array();
   }
   public function toValuesArray(): array {
+    /* HH_IGNORE_ERROR[2083] */
     return array();
   }
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
@@ -247,12 +254,15 @@ trait LazyIterable<+Tv> implements Iterable<Tv> {
 
 trait LazyKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
   public function toArray(): array {
+    /* HH_IGNORE_ERROR[2083] */
     return array();
   }
   public function toValuesArray(): array {
+    /* HH_IGNORE_ERROR[2083] */
     return array();
   }
   public function toKeysArray(): array {
+    /* HH_IGNORE_ERROR[2083] */
     return array();
   }
   /* HH_FIXME[4120]: While this violates our variance annotations, we are

@@ -43,11 +43,13 @@ namespace HH {
 
 function objprof_get_data(
   int $flags = OBJPROF_FLAGS_DEFAULT,
+  /* HH_IGNORE_ERROR[2083] */
   array<string> $exclude_list = array()
 ): array<string, ObjprofObjectStats>; // auto-imported from HH namespace
 
 function objprof_get_paths(
   int $flags = OBJPROF_FLAGS_DEFAULT,
+  /* HH_IGNORE_ERROR[2083] */
   array<string> $exclude_list = array()
 ): array<string, ObjprofObjectStats>; // auto-imported from HH namespace
 

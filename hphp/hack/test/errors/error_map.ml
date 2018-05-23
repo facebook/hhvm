@@ -451,4 +451,5 @@ let%expect_test "error_map" =
     Unsealable = 4245
     ReturnVoidToRxMismatch = 4246
     ReturnsVoidToRxAsNonExpressionStatement = 4247
+    NonawaitedAwaitableInReactiveContext = 4248
   |}]

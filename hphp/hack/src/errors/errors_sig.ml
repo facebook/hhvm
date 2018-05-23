@@ -536,4 +536,5 @@ module type S = sig
   val invalid_argument_of_rx_mutable_function: Pos.t -> unit
   val return_void_to_rx_mismatch: pos1_has_attribute:bool -> Pos.t -> Pos.t -> unit
   val returns_void_to_rx_function_as_non_expression_statement: Pos.t -> Pos.t -> unit
+  val non_awaited_awaitable_in_rx: Pos.t -> unit
 end

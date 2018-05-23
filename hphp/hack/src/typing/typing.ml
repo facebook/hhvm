@@ -1099,6 +1099,7 @@ and expr
     ?(accept_using_var = false)
     ?(is_using_clause = false)
     ?(is_expr_statement = false)
+    ?(allow_non_awaited_awaitable_in_rx=false)
     ?is_func_arg
     ?forbid_uref
     env e =
@@ -1109,6 +1110,7 @@ and expr
     [Typing_log.Log_sub ("Typing.expr " ^ Typing_reason.string_of_ureason r,
        [Typing_log.Log_type ("expected_ty", ty)])] end;
   raw_expr ~accept_using_var ~is_using_clause ~is_expr_statement
+    ~allow_non_awaited_awaitable_in_rx
     ?is_func_arg ?forbid_uref ?expected ~in_cond:false env e
 
 and raw_expr
@@ -1116,6 +1118,7 @@ and raw_expr
   ?(accept_using_var = false)
   ?(is_using_clause = false)
   ?(is_expr_statement = false)
+  ?(allow_non_awaited_awaitable_in_rx=false)
   ?expected
   ?lhs_of_null_coalesce
   ?is_func_arg
@@ -1130,6 +1133,12 @@ and raw_expr
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
     | None -> () in
+  if Env.env_local_reactive env && not allow_non_awaited_awaitable_in_rx
+  then begin match ty with
+  | _, Tclass ((_, cls), _) when cls = SN.Classes.cAwaitable ->
+    Errors.non_awaited_awaitable_in_rx (fst e);
+  | _ -> ()
+  end;
   env, te, ty
 
 and lvalue env e =
@@ -1203,14 +1212,17 @@ and check_escaping_var env (pos, x) =
     else Errors.escaping_disposable pos
   else ()
 
-and exprs ?(accept_using_var = false) ?is_func_arg ?expected env el =
+and exprs ?(accept_using_var = false) ?(allow_non_awaited_awaitable_in_rx=false)
+  ?is_func_arg ?expected env el =
   match el with
   | [] ->
     env, [], []
 
   | e::el ->
-    let env, te, ty = expr ~accept_using_var ?is_func_arg ?expected env e in
-    let env, tel, tyl = exprs ~accept_using_var ?is_func_arg ?expected env el in
+    let env, te, ty = expr ~accept_using_var ~allow_non_awaited_awaitable_in_rx
+      ?is_func_arg ?expected env e in
+    let env, tel, tyl = exprs ~accept_using_var ~allow_non_awaited_awaitable_in_rx
+      ?is_func_arg ?expected env el in
     env, te::tel, ty::tyl
 
 and exprs_expected (pos, ur, expected_tyl) env el =
@@ -1929,7 +1941,9 @@ and expr_
       (** id is the ID of the $$ that is implicitly declared by the pipe.
        * Set the local type for the $$ in the RHS. *)
       let env = set_local env e0 ty in
-      let env, te2, ty2 = expr env e2 in
+      (* do not error on awaitable being returned from RHS *)
+      let env, te2, ty2 =
+        expr env ~allow_non_awaited_awaitable_in_rx:true e2 in
       (**
        * Return ty2 since the type of the pipe expression is the type of the
        * RHS.
@@ -2091,7 +2105,9 @@ and expr_
       make_result env (T.Yield taf) (Reason.Ryield_send p, Toption send)
   | Await e ->
       (* Await is permitted in a using clause e.g. using (await make_handle()) *)
-      let env, te, rty = expr ~is_using_clause ~is_expr_statement env e in
+      let env, te, rty =
+        expr ~is_using_clause ~is_expr_statement
+          ~allow_non_awaited_awaitable_in_rx:true env e in
       let env, ty = Async.overload_extract_from_awaitable env p rty in
       make_result env (T.Await te) ty
   | Suspend (e) ->
@@ -2755,7 +2771,7 @@ and special_func env p func =
       let env, ty = Async.gena env p ety in
       env, T.Gena te, ty
   | Genva el ->
-      let env, tel, etyl = exprs env el in
+      let env, tel, etyl = exprs ~allow_non_awaited_awaitable_in_rx:true  env el in
       let env, ty = Async.genva env p etyl in
       env, T.Genva tel, ty
   | Gen_array_rec e ->

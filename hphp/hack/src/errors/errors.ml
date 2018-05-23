@@ -1084,6 +1084,7 @@ module Typing                               = struct
   | Unsealable
   | ReturnVoidToRxMismatch
   | ReturnsVoidToRxAsNonExpressionStatement
+  | NonawaitedAwaitableInReactiveContext
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum
@@ -3441,6 +3442,12 @@ let returns_void_to_rx_function_as_non_expression_statement pos fpos =
     in reactive context";
     fpos, "This is function declaration."
   ]
+
+let non_awaited_awaitable_in_rx pos =
+  add (Typing.err_code Typing.NonawaitedAwaitableInReactiveContext) pos (
+    "This value has Awaitable type. Awaitable typed values in reactive code \
+    must be either immediately await'ed or passed as arguments to 'genva' function."
+  )
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

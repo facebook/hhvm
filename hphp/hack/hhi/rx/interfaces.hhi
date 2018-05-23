@@ -9,126 +9,41 @@
  */
 
 /**
- * This file provides type information for some of PHP's predefined interfaces
+ * This file provides type information for some of hack's reactive interfaces
  *
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-/**
- * Represents an entity that can be iterated over using `foreach`, without
- * requiring a key.
- *
- * The iteration variable will have a type of `T`.
- *
- * In addition to Hack collections, PHP `array`s and anything that implement
- * `Iterator` are `Traversable`.
- *
- * In general, if you are implementing your own Hack class, you will want to
- * implement `Iterable` instead of `Traversable` since `Traversable` is more
- * of a bridge for PHP `array`s to work well with Hack collections.
- *
- * @guide /hack/collections/introduction
- * @guide /hack/collections/interfaces
- */
-interface Traversable<+Tv> {}
+namespace HH\Rx;
 
-/**
- * Represents an entity that can be iterated over using `foreach`, allowing
- * a key.
- *
- * The iteration variables will have a type of `Tk` for the key and `Tv` for the
- * value.
- *
- * In addition to Hack collections, PHP `array`s and anything that implement
- * `KeyedIterator` are `KeyedTraversable`.
- *
- * In general, if you are implementing your own Hack class, you will want to
- * implement `KeyedIterable` instead of `KeyedTraversable` since
- * `KeyedTraversable` is more of a bridge for PHP `array`s to work well with
- * Hack collections.
- *
- * @guide /hack/collections/introduction
- * @guide /hack/collections/interfaces
- */
-interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
+/* See documentation for \Traversable */
+interface Traversable<+Tv> extends \Traversable<Tv> {}
 
-/**
- * Represents an entity that can be iterated over using `foreach`, without
- * requiring a key, except it does not include objects that implement
- * `Iterator`.
- *
- * The iteration variable will have a type of `T`.
- *
- * In addition to Hack collections, PHP `array`s are `Container`s.
- *
- * @guide /hack/collections/introduction
- * @guide /hack/collections/interfaces
- */
-interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {}
+/* See documentation for \KeyedTraversable */
+interface KeyedTraversable<+Tk, +Tv>
+  extends namespace\Traversable<Tv>, \KeyedTraversable<Tk, Tv> {}
 
-/**
- * Represents an entity that can be iterated over using `foreach`, allowing
- * a key, except it does not include objects that implement `KeyedIterator` nor
- * `Set` and `ImmSet`.
- *
- * The iteration variables will have a type of `Tk` for the key and `Tv` for the
- * value.
- *
- * In addition to Hack collections, PHP `array`s are `KeyedContainer`s.
- *
- * @guide /hack/collections/introduction
- * @guide /hack/collections/interfaces
- */
-interface KeyedContainer<+Tk, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Container<Tv> {}
-
-/**
- * Represents an entity that can be indexed using square-bracket syntax.
- *
- * Square bracket syntax is:
- *
- * ```
- * $indexish[$key]
- * ```
- *
- * At this point, this includes entities with keys of `int` and `string`.
- *
- * In addition to Hack collections, PHP `array`s are `Indexish`.
- *
- * @guide /hack/collections/introduction
- * @guide /hack/collections/interfaces
- * @guide /hack/collections/read-write
- */
-interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}
-
-/**
- * For those entities that are `Traversable`, the `Iterator` interfaces provides
- * the methods of iteration.
- *
- * If a class implements `Iterator`, then it provides the infrastructure to be
- * iterated over using a `foreach` loop.
- *
- * @guide /hack/collections/introduction
- * @guide /hack/collections/interfaces
- *
- * @link http://php.net/manual/en/class.iterator.php
- */
-interface Iterator<+Tv> extends Traversable<Tv> {
+/* See documentation for \Iterator */
+interface Iterator<+Tv> extends namespace\Traversable<Tv>, \Iterator<Tv> {
   /**
    * Return the current value at the current iterator position.
    *
    * @return - The current value of type `Tv`.
    */
+  <<__Rx>>
   public function current(): Tv;
   /**
    * Move the iterator position to the next element.
    *
    */
+  <<__Rx, __Mutable>>
   public function next(): void;
   /**
    * Rewind the iterator position to its beginning.
    *
    * This rewinds back to the first element of the `Iterator`.
    */
+  <<__Rx, __Mutable>>
   public function rewind(): void;
   /**
    * Checks to see if the current iterator position is valid.
@@ -138,28 +53,26 @@ interface Iterator<+Tv> extends Traversable<Tv> {
    *
    * @return - `true` if the position is valid; `false` otherwise.
    */
+  <<__Rx>>
   public function valid(): bool;
 }
 
-/**
- * Allows for the iteration over the values provided by an `async` function.
- *
- * If an `async` function returns an `AsyncIterator<T>`, then you can iterate
- * over the `T` values returned from that function.
- *
- * ```
- * async function countdown(int $start): AsyncIterator<int> { ... }
- *
- * async function use_countdown(): Awaitable<void> {
- *   $async_iter = countdown(100);
- *   foreach ($async_iter await as $value) { ... }
- * }
- * ```
- *
- * @guide /hack/async/introduction
- * @guide /hack/async/guidelines
- */
-interface AsyncIterator<+Tv> {
+interface KeyedIterator<+Tk, +Tv>
+  extends
+    namespace\KeyedTraversable<Tk, Tv>,
+    namespace\Iterator<Tv>,
+    \KeyedIterator<Tk, Tv> {
+  /**
+   * Return the current key at the current iterator position.
+   *
+   * @return - The current key of type `Tk`.
+   */
+  <<__Rx>>
+  public function key(): Tk;
+}
+
+/* See documentation for \AsyncIterator */
+interface AsyncIterator<+Tv> extends \AsyncIterator<Tv> {
   /**
    * Move the async iterator to the next `Awaitable` position.
    *
@@ -171,29 +84,13 @@ interface AsyncIterator<+Tv> {
    *
    * @return - The next `Awaitable` in the iterator sequence.
    */
+  <<__Rx, __Mutable>>
   public function next(): Awaitable<?(mixed, Tv)>;
 }
 
-/**
- * Allows for the iteration over the keys and values provided by an `async`
- * function.
- *
- * If an `async` function returns an `AsyncIterator<Tk, Tv>`, then you can
- * iterate over the `Tk` and `Tv` values returned from that function.
- *
- * ```
- * async function countdown(int $start): AsyncIterator<int, string> { ... }
- *
- * async function use_countdown(): Awaitable<void> {
- *   $async_iter = countdown(100);
- *   foreach ($async_gen await as $num => $str) { ... }
- * }
- * ```
- *
- * @guide /hack/async/introduction
- * @guide /hack/async/guidelines
- */
-interface AsyncKeyedIterator<+Tk, +Tv> extends AsyncIterator<Tv> {
+/* See documentation for \AsyncKeyedIterator */
+interface AsyncKeyedIterator<+Tk, +Tv>
+  extends namespace\AsyncIterator<Tv>, \AsyncKeyedIterator<Tk, Tv> {
   /**
    * Move the async iterator to the next `Awaitable` position.
    *
@@ -205,71 +102,37 @@ interface AsyncKeyedIterator<+Tk, +Tv> extends AsyncIterator<Tv> {
    *
    * @return - The next `Awaitable` in the iterator sequence.
    */
+  <<__Rx, __Mutable>>
   public function next(): Awaitable<?(Tk, Tv)>;
 }
 
-/**
- * For those entities that are `KeyedTraversable`, the `KeyedIterator`
- * interfaces provides the methods of iteration, included being able to get
- * the key.
- *
- * If a class implements `KeyedIterator`, then it provides the infrastructure
- * to be iterated over using a `foreach` loop.
- *
- * @guide /hack/collections/introduction
- * @guide /hack/collections/interfaces
- */
-interface KeyedIterator<+Tk, +Tv> extends KeyedTraversable<Tk,Tv>, Iterator<Tv> {
-  /**
-   * Return the current key at the current iterator position.
-   *
-   * @return - The current key of type `Tk`.
-   */
-  public function key(): Tk;
-}
-
-/**
- * Represents objects that can produce an `Iterator` object to iterate over
- * their contents using `foreach`.
- *
- * Normally, this interface won't be used in type annotations; rather `Iterable`
- * or `Traversable` will be the better interface.
- *
- * @guide /hack/collections/introduction
- * @guide /hack/collections/interfaces
- *
- * @link http://php.net/manual/en/class.iteratoraggregate.php
- */
-interface IteratorAggregate<+Tv> extends Traversable<Tv> {
+/* See documentation for \IteratorAggregate */
+interface IteratorAggregate<+Tv>
+  extends namespace\Traversable<Tv>, \IteratorAggregate<Tv> {
   /**
    * Returns an iterator to be used to iterate over the object's elements.
    *
    * @return - An `Iterator` for iteration.
    */
-  public function getIterator(): Iterator<Tv>;
+  <<__Rx, __MutableReturn>>
+  public function getIterator(): namespace\Iterator<Tv>;
 }
 
-/**
- * Represents any entity that can be iterated over using something like
- * `foreach`. The entity does not necessarily have to have a key, just values.
- *
- * `Iterable` does not include `array`s.
- *
- * @guide /hack/collections/introduction
- * @guide /hack/collections/interfaces
- */
-interface Iterable<+Tv> extends IteratorAggregate<Tv> {
+interface Iterable<+Tv>
+  extends namespace\IteratorAggregate<Tv>, \Iterable<Tv> {
   /**
    * Returns an iterator that points to beginning of the current `Iterable`.
    *
    * @return - An `Iterator` that allows you to traverse the current `Iterable`.
    */
-  public function getIterator(): Iterator<Tv>;
+  <<__Rx, __MutableReturn>>
+  public function getIterator(): namespace\Iterator<Tv>;
   /**
    * Returns an `array` converted from the current `Iterable`.
    *
    * @return - an array converted from the current `Iterable`.
    */
+  <<__Rx>>
   public function toArray(): array;
   /**
    * Returns an `array` with the values from the current `Iterable`.
@@ -279,10 +142,8 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an `array` containing the values from the current `Iterable`.
    */
+  <<__Rx>>
   public function toValuesArray(): array;
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
   /**
    * Returns a `Vector` converted from the current `Iterable`.
    *
@@ -291,6 +152,10 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - a `Vector` converted from the current `Iterable`.
    */
+  <<__Rx, __MutableReturn>>
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toVector(): Vector<Tv>;
   /**
    * Returns an immutable vector (`ImmVector`) converted from the current
@@ -301,10 +166,8 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an `ImmVector` converted from the current `Iterable`.
    */
+  <<__Rx>>
   public function toImmVector(): ImmVector<Tv>;
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe.
-   * See #6853603. */
   /**
    * Returns a `Set` converted from the current `Iterable`.
    *
@@ -312,6 +175,10 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - a `Set` converted from the current `Iterable`.
    */
+  <<__Rx, __MutableReturn>>
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe.
+   * See #6853603. */
   public function toSet(): Set<Tv>;
   /**
    * Returns an immutable set (`ImmSet`) converted from the current `Iterable`.
@@ -320,6 +187,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an `ImmSet` converted from the current `Iterable`.
    */
+  <<__Rx>>
   public function toImmSet(): ImmSet<Tv>;
   /**
    * Returns a lazy, access elements only when needed view of the current
@@ -334,7 +202,8 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function lazy(): Iterable<Tv>;
+  <<__Rx, __MutableReturn>>
+  public function lazy(): namespace\Iterable<Tv>;
   /**
    * Returns an `Iterable` containing the current `Iterable`'s values.
    *
@@ -342,7 +211,8 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return An `Iterable` with the values of the current `Iterable`.
    */
-  public function values(): Iterable<Tv>;
+  <<__Rx, __MutableReturn>>
+  public function values(): namespace\Iterable<Tv>;
   /**
    * Returns an `Iterable` containing the values after an operation has been
    * applied to each value in the current `Iterable`.
@@ -359,7 +229,10 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function map<Tu>((function(Tv): Tu) $fn): Iterable<Tu>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function map<Tu>(
+    <<__OnlyRxIfRxFunc>>(function(Tv): Tu) $fn,
+  ): namespace\Iterable<Tu>;
   /**
    * Returns an `Iterable` containing the values of the current `Iterable` that
    * meet a supplied condition.
@@ -375,8 +248,11 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function filter((function(Tv): bool) $fn): Iterable<Tv>;
-  /**
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function filter(
+    <<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn,
+  ): namespace\Iterable<Tv>;
+  /**s
    *  Returns an `Iterable` where each element is a `Pair` that combines the
    *  element of the current `Iterable` and the provided `Traversable`.
    *
@@ -391,7 +267,10 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *  @return - The `Iterable` that combines the values of the current
    *            `Itearable` with the provided `Traversable`.
    */
-  public function zip<Tu>(Traversable<Tu> $traversable): Iterable<Pair<Tv, Tu>>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function zip<Tu>(
+    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> \Traversable<Tu> $traversable,
+  ): namespace\Iterable<Pair<Tv, Tu>>;
   /**
    * Returns an `Iterable` containing the first `n` values of the current
    * `Iterable`.
@@ -407,7 +286,8 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    * @return - An `Iterable that is a proper subset of the current `Iterable`
    *           up to `n` elements.
    */
-  public function take(int $n): Iterable<Tv>;
+  <<__Rx, __MutableReturn>>
+  public function take(int $n): namespace\Iterable<Tv>;
   /**
    * Returns an `Iterable` containing the values of the current `Iterable` up
    * to but not including the first value that produces `false` when passed to
@@ -422,7 +302,10 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    * @return - An `Iterable` that is a proper subset of the current `Iterable`
    *           up until the callback returns `false`.
    */
-  public function takeWhile((function(Tv): bool) $fn): Iterable<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function takeWhile(
+    <<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn,
+  ): namespace\Iterable<Tv>;
   /**
    * Returns an `Iterable` containing the values after the `n`-th element of the
    * current `Iterable`.
@@ -438,7 +321,8 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    * @return - An `Iterable` that is a proper subset of the current `Iterable`
    *           containing values after the specified `n`-th element.
    */
-  public function skip(int $n): Iterable<Tv>;
+  <<__Rx, __MutableReturn>>
+  public function skip(int $n): namespace\Iterable<Tv>;
   /**
    * Returns an `Iterable` containing the values of the current `Iterable`
    * starting after and including the first value that produces `true` when
@@ -453,7 +337,10 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    * @return - An `Iterable` that is a proper subset of the current `Iterable`
    *           starting after the callback returns `true`.
    */
-  public function skipWhile((function(Tv): bool) $fn): Iterable<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function skipWhile(
+    <<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn,
+  ): namespace\Iterable<Tv>;
   /**
    * Returns a subset of the current `Iterable` starting from a given key up
    * to, but not including, the element at the provided length from the
@@ -473,7 +360,8 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *           starting at `$start` up to but not including the element
    *           `$start + $len`.
    */
-  public function slice(int $start, int $len): Iterable<Tv>;
+  <<__Rx, __MutableReturn>>
+  public function slice(int $start, int $len): namespace\Iterable<Tv>;
   /**
    * Returns an `Iterable` that is the concatenation of the values of the
    * current `Iterable` and the values of the provided `Traversable`.
@@ -488,15 +376,17 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @guide /hack/generics/constraints
    */
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
   public function concat<Tu super Tv>(
-    Traversable<Tu> $traversable
-  ): Iterable<Tu>;
+    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> \Traversable<Tu> $traversable,
+  ): namespace\Iterable<Tu>;
   /**
    * Returns the first value in the current `Iterable`.
    *
    * @return - The first value in the current `Iterable`, or `null` if the
    *           current `Iterable` is empty.
    */
+  <<__Rx>>
   public function firstValue(): ?Tv;
   /**
    * Returns the last value in the current `Iterable`.
@@ -504,19 +394,15 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    * @return - The last value in the current `Iterable`, or `null` if the
    *           current `Iterable` is empty.
    */
+  <<__Rx>>
   public function lastValue(): ?Tv;
 }
 
-/**
- * Represents any entity that can be iterated over using something like
- * `foreach`. The entity is required to have a key in addition to values.
- *
- * `KeyedIterable` does not include `array`s.
- *
- * @guide /hack/collections/introduction
- * @guide /hack/collections/interfaces
- */
-interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {
+interface KeyedIterable<Tk, +Tv>
+  extends
+    namespace\KeyedTraversable<Tk, Tv>,
+    namespace\Iterable<Tv>,
+    \KeyedIterable<Tk, Tv> {
   /**
    * Returns an iterator that points to beginning of the current
    * `KeyedIterable`.
@@ -524,17 +410,16 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - A `KeyedIterator` that allows you to traverse the current
    *           `KeyedIterable`.
    */
-  public function getIterator(): KeyedIterator<Tk, Tv>;
+  <<__Rx, __MutableReturn>>
+  public function getIterator(): namespace\KeyedIterator<Tk, Tv>;
   /**
    * Returns an `array` with the keys from the current `KeyedIterable`.
    *
    * @return - an `array` containing the values from the current
    *           `KeyedIterable`.
    */
+  <<__Rx>>
   public function toKeysArray(): array;
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
   /**
    * Returns a `Map` based on the keys and values of the current
    * `KeyedIterable`.
@@ -542,7 +427,11 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - a `Map` that has the keys and associated values of the current
    *           `KeyedIterable`.
    */
-  public function toMap(): Map<Tk, Tv>;
+  <<__Rx, __MutableReturn>>
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
+  public function toMap(): \Map<Tk, Tv>;
   /**
    * Returns an immutable map (`ImmMap`) based on the keys and values of the
    * current `KeyedIterable`.
@@ -550,7 +439,8 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - an `ImmMap` that has the keys and associated values of the
    *           current `KeyedIterable`.
    */
-  public function toImmMap(): ImmMap<Tk, Tv>;
+  <<__Rx>>
+  public function toImmMap(): \ImmMap<Tk, Tv>;
   /**
    * Returns a lazy, access elements only when needed view of the current
    * `KeyedIterable`.
@@ -564,7 +454,8 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *
    * @guide /hack/collections/examples
    */
-  public function lazy(): KeyedIterable<Tk, Tv>;
+  <<__Rx, __MutableReturn>>
+  public function lazy(): namespace\KeyedIterable<Tk, Tv>;
   /**
    * Returns an `Iterable` containing the current `KeyedIterable`'s values.
    *
@@ -572,7 +463,8 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *
    * @return An `Iterable` with the values of the current `KeyedIterable`.
    */
-  public function values(): Iterable<Tv>;
+  <<__Rx, __MutableReturn>>
+  public function values(): namespace\Iterable<Tv>;
   /**
    * Returns an `Iterable` containing the current `KeyedIterable`'s keys.
    *
@@ -580,7 +472,8 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *
    * @return An `Iterable` with the keys of the current `KeyedIterable`.
    */
-  public function keys(): Iterable<Tk>;
+  <<__Rx, __MutableReturn>>
+  public function keys(): namespace\Iterable<Tk>;
   /**
    * Returns a `KeyedIterable` containing the values after an operation has been
    * applied to each value in the current `KeyedIterable`.
@@ -597,7 +490,10 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *
    * @guide /hack/collections/examples
    */
-  public function map<Tu>((function(Tv): Tu) $fn): KeyedIterable<Tk, Tu>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function map<Tu>(
+    <<__OnlyRxIfRxFunc>>(function(Tv): Tu) $fn,
+  ): namespace\KeyedIterable<Tk, Tu>;
   /**
    * Returns a `KeyedIterable` containing the values after an operation has
    * been applied to each key and value in the current `KeyedIterable`.
@@ -613,8 +509,10 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *           operation on the current `KeyedIterable`'s keys and values is
    *           applied.
    */
-  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn):
-    KeyedIterable<Tk, Tu>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function mapWithKey<Tu>(
+    <<__OnlyRxIfRxFunc>>(function(Tk, Tv): Tu) $fn,
+  ): namespace\KeyedIterable<Tk, Tu>;
   /**
    * Returns a `KeyedIterable` containing the values of the current
    * `KeyedIterable` that meet a supplied condition.
@@ -630,7 +528,10 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *
    * @guide /hack/collections/examples
    */
-  public function filter((function(Tv): bool) $fn): KeyedIterable<Tk, Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function filter(
+    <<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn,
+  ): namespace\KeyedIterable<Tk, Tv>;
   /**
    * Returns a `KeyedIterable` containing the values of the current
    * `KeyedIterable` that meet a supplied condition applied to its keys and
@@ -648,8 +549,10 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *           `KeyedIterable`.
    *
    */
-  public function filterWithKey((function(Tk, Tv): bool) $fn):
-    KeyedIterable<Tk, Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function filterWithKey(
+    <<__OnlyRxIfRxFunc>>(function(Tk, Tv): bool) $fn,
+  ): namespace\KeyedIterable<Tk, Tv>;
   /**
    *  Returns a `KeyedIterable` where each element is a `Pair` that combines the
    *  element of the current `KeyedIterable` and the provided `Traversable`.
@@ -665,8 +568,10 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *  @return - The `KeyedIterable` that combines the values of the current
    *            `KeyedItearable` with the provided `Traversable`.
    */
-  public function zip<Tu>(Traversable<Tu> $traversable):
-    KeyedIterable<Tk, Pair<Tv, Tu>>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function zip<Tu>(
+    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> \Traversable<Tu> $traversable,
+  ): namespace\KeyedIterable<Tk, Pair<Tv, Tu>>;
   /**
    * Returns a `KeyedIterable` containing the first `n` values of the current
    * `KeyedIterable`.
@@ -682,7 +587,8 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - A `KeyedIterable that is a proper subset of the current
    *           `KeyedIterable` up to `n` elements.
    */
-  public function take(int $n): KeyedIterable<Tk, Tv>;
+  <<__Rx, __MutableReturn>>
+  public function take(int $n): namespace\KeyedIterable<Tk, Tv>;
   /**
    * Returns a `KeyedIterable` containing the values of the current
    * `KeyedIterable` up to but not including the first value that produces
@@ -697,7 +603,10 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - A `KeyedIterable` that is a proper subset of the current
    *           `KeyedIterable` up until the callback returns `false`.
    */
-  public function takeWhile((function(Tv): bool) $fn): KeyedIterable<Tk, Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function takeWhile(
+    <<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn,
+  ): namespace\KeyedIterable<Tk, Tv>;
   /**
    * Returns a `KeyedIterable` containing the values after the `n`-th element
    * of the current `KeyedIterable`.
@@ -714,7 +623,8 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *           `KeyedIterable`  containing values after the specified `n`-th
    *           element.
    */
-  public function skip(int $n): KeyedIterable<Tk, Tv>;
+  <<__Rx, __MutableReturn>>
+  public function skip(int $n): namespace\KeyedIterable<Tk, Tv>;
   /**
    * Returns a `KeyedIterable` containing the values of the current
    * `KeyedIterable` starting after and including the first value that produces
@@ -729,7 +639,10 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - A `KeyedIterable` that is a proper subset of the current
    *           `KeyedIterable` starting after the callback returns `true`.
    */
-  public function skipWhile((function(Tv): bool) $fn): KeyedIterable<Tk, Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function skipWhile(
+    <<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn,
+  ): namespace\KeyedIterable<Tk, Tv>;
   /**
    * Returns a subset of the current `KeyedIterable` starting from a given key
    * up to, but not including, the element at the provided length from the
@@ -749,7 +662,8 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *           `KeyedIterable` starting at `$start` up to but not including the
    *           element `$start + $len`.
    */
-  public function slice(int $start, int $len): KeyedIterable<Tk, Tv>;
+  <<__Rx, __MutableReturn>>
+  public function slice(int $start, int $len): namespace\KeyedIterable<Tk, Tv>;
   /**
    * Returns an `Iterable` that is the concatenation of the values of the
    * current `KeyedIterable` and the values of the provided `Traversable`.
@@ -764,15 +678,17 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *
    * @guide /hack/generics/constraints
    */
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
   public function concat<Tu super Tv>(
-    Traversable<Tu> $traversable
-  ): Iterable<Tu>;
+    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> \Traversable<Tu> $traversable,
+  ): namespace\Iterable<Tu>;
   /**
    * Returns the first value in the current `KeyedIterable`.
    *
    * @return - The first value in the current `KeyedIterable`, or `null` if the
    *           current `KeyedIterable` is empty.
    */
+  <<__Rx>>
   public function firstValue(): ?Tv;
   /**
    * Returns the first key in the current `KeyedIterable`.
@@ -780,6 +696,7 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - The first key in the current `KeyedIterable`, or `null` if the
    *           current `KeyedIterable` is empty.
    */
+  <<__Rx>>
   public function firstKey(): ?Tk;
   /**
    * Returns the last value in the current `KeyedIterable`.
@@ -787,6 +704,7 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - The last value in the current `KeyedIterable`, or `null` if the
    *           current `KeyedIterable` is empty.
    */
+  <<__Rx>>
   public function lastValue(): ?Tv;
   /**
    * Returns the last key in the current `KeyedIterable`.
@@ -794,103 +712,11 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - The last key in the current `KeyedIterable`, or `null` if the
    *           current `KeyedIterable` is empty.
    */
+  <<__Rx>>
   public function lastKey(): ?Tk;
 }
 
-interface Serializable {
-  public function serialize(): string;
-  public function unserialize($serialized): void;
-}
-
-interface Countable {
+interface Countable extends \Countable {
+  <<__Rx>>
   public function count(): int;
-}
-
-interface RecursiveIterator<Tv> extends Iterator<Tv> {
-  public function getChildren(): this;
-  public function hasChildren(): bool;
-}
-
-interface SeekableIterator<Tv> extends Iterator<Tv> {
-  public function seek(int $position): void;
-}
-
-interface OuterIterator<Tv> extends Iterator<Tv> {
-  public function getInnerIterator(): Iterator<Tv>;
-}
-
-interface ArrayAccess<Tk, Tv> {
-  public function offsetExists(Tk $key): bool;
-  public function offsetGet(Tk $key): Tv;
-  public function offsetSet(Tk $key, Tv $val): void;
-  public function offsetUnset(Tk $key): void;
-}
-
-/**
- * @see http://www.php.net/manual/en/jsonserializable.jsonserialize.php
- */
-interface JsonSerializable {
-  /**
-   * Return data which can be serialized with json_encode.
-   */
-  public function jsonSerialize(): mixed;
-}
-
-/**
- * XHPChild is the base type of values that can be children of XHP elements.
- * Most primitive types implement XHPChild: string, int, float, and array.
- *
- * Classes that implement XHPChild must do so by implementing the XHPChildClass
- * subinterface.
- */
-interface XHPChild {}
-
-/**
- * Stringish is a type that matches strings as well as string-convertible
- * objects: that is, objects that provide the __toString method
- */
-<<__HipHopSpecific>>
-interface Stringish extends XHPChild {
-  <<__Deprecated('Use string coercion syntax `(string) <expression>` instead.')>>
-  public function __toString(): string;
-}
-
-/**
-  * Classes that implement IMemoizeParam may be used as parameters on
-  * <<__Memoize>> functions
-  *
- * @guide /hack/attributes/introduction
- * @guide /hack/attributes/special
-  */
-<<__HipHopSpecific>>
-interface IMemoizeParam {
-   /**
-   * Serialize this object to a string that can be used as a
-   * dictionary key to differentiate instances of this class.
-   */
-  public function getInstanceKey(): string;
-}
-
-/**
-  * Objects that implement IDisposable may be used in using statements
-  */
-<<__HipHopSpecific>>
-interface IDisposable {
-  /**
-   * This method is invoked exactly once at the end of the scope of the
-   * using statement, unless the program terminates with a fatal error.
-   */
-  public function __dispose(): void;
-}
-
-/**
-  * Objects that implement IAsyncDisposable may be used in await using statements
-  */
-<<__HipHopSpecific>>
-interface IAsyncDisposable {
-  /**
-   * This method is invoked exactly once at the end of the scope of the
-   * await using statement, unless the program terminates with a fatal error.
-   */
-  public function __disposeAsync(): Awaitable<void>;
 }

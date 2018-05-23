@@ -26,13 +26,19 @@ open Namespace_env
  * canonical list of functions. *)
 let autoimport_classes = [
   "Traversable";
+  "HH\\Rx\\Traversable";
   "KeyedTraversable";
+  "HH\\Rx\\KeyedTraversable";
   "Container";
   "KeyedContainer";
   "Iterator";
+  "HH\\Rx\\Iterator";
   "KeyedIterator";
+  "HH\\Rx\\KeyedIterator";
   "Iterable";
+  "HH\\Rx\\Iterable";
   "KeyedIterable";
+  "HH\\Rx\\KeyedIterable";
   "Collection";
   "Vector";
   "ImmVector";
@@ -47,8 +53,10 @@ let autoimport_classes = [
   "Pair";
   "Awaitable";
   "AsyncIterator";
+  "HH\\Rx\\AsyncIterator";
   "IMemoizeParam";
   "AsyncKeyedIterator";
+  "HH\\Rx\\AsyncKeyedIterator";
   "InvariantException";
   "AsyncGenerator";
   "StaticWaitHandle";

@@ -49,13 +49,15 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @param $it - any `Traversable` object from which to create the `ImmSet`
    *              (e.g., `array`). If `null`, then an empty `ImmSet` is created.
    */
-  public function __construct(?Traversable<Tv> $it);
+  <<__Rx, __OnlyRxIfArgs>>
+  public function __construct(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
 
   /**
    * Checks if the current `ImmSet` is empty.
    *
    * @return - `true` if the current `ImmSet` is empty; `false` otherwise.
    */
+  <<__Rx>>
   public function isEmpty(): bool;
 
   /**
@@ -63,6 +65,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @return - The number of elements in the current `ImmSet`.
    */
+  <<__Rx>>
   public function count(): int;
 
   /**
@@ -72,6 +75,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - `true` if the specified value is present in the current `ImmSet`;
    *           `false` otherwise.
    */
+  <<__Rx>>
   public function contains<Tu super Tv>(Tu $k): bool;
 
   /**
@@ -82,6 +86,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - an `array` containing the values from the current `ImmSet`,
    *           where each key of the `array` are the same as each value.
    */
+  <<__Rx>>
   public function toArray(): array<Tv, Tv>;
 
   /**
@@ -94,6 +99,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - an integer-indexed `array` containing the values from the
    *           current `ImmSet`.
    */
+  <<__Rx>>
   public function toKeysArray(): array<Tv>;
 
   /**
@@ -104,6 +110,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - an integer-indexed `array` containing the values from the
    *           current `ImmSet`.
    */
+  <<__Rx>>
   public function toValuesArray(): array<Tv>;
 
   /**
@@ -115,7 +122,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - A `KeyedIterator` that allows you to traverse the current
    *           `ImmSet`.
    */
-  public function getIterator(): KeyedIterator<mixed, Tv>;
+  <<__Rx, __MutableReturn>>
+  public function getIterator(): HH\Rx\KeyedIterator<mixed, Tv>;
 
   /**
    * Creates an `ImmSet` from the given `Traversable`, or an empty `ImmSet` if
@@ -131,7 +139,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - An `ImmSet` with the values from the `Traversable`; or an empty
    *           `ImmSet` if the `Traversable` is `null`.
    */
-  public static function fromItems(?Traversable<Tv> $items): ImmSet<Tv>;
+  <<__Rx, __OnlyRxIfArgs>>
+  public static function fromItems(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): ImmSet<Tv>;
 
   /**
    * Returns an `ImmSet` containing all the values from the specified
@@ -141,6 +150,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @return - An `ImmSet` with the values from the passed `array`(s).
    */
+  <<__Rx>>
   public static function fromArrays(...): ImmSet<Tv>;
 
   /**
@@ -153,6 +163,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @return - An `ImmSet` built from the keys of the specified container.
    */
+  <<__Rx>>
   public static function fromKeysOf<Tk, Tv2>(
     ?KeyedContainer<Tk,Tv2> $container
   ): ImmSet<Tk>;
@@ -162,17 +173,19 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @return - The `string` `"ImmSet"`.
    */
+  <<__Rx>>
   public function __toString(): string;
 
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
   /**
    * Returns a `Vector` of the current `ImmSet` values.
    *
    * @return - a `Vector` (integer-indexed) that contains the values of the
    *           current `ImmSet`.
    */
+  <<__Rx, __MutableReturn>>
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toVector(): Vector<Tv>;
 
   /**
@@ -182,11 +195,9 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - an `ImmVector` (integer-indexed) with the values of the current
    *           `ImmSet`.
    */
+  <<__Rx>>
   public function toImmVector(): ImmVector<Tv>;
 
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
   /**
    * Returns a `Map` based on the values of the current `ImmSet`.
    *
@@ -195,6 +206,9 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - a `Map` that that contains the values of the current `ImmSet`,
    *           with each key of the `Map` being the same as its value.
    */
+  <<__Rx, __MutableReturn>>  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toMap(): Map<mixed, Tv>;
 
   /**
@@ -207,16 +221,18 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           `ImmSet`, with each key of the `ImmMap` being the same as its
    *           value.
    */
+  <<__Rx>>
   public function toImmMap(): ImmMap<mixed, Tv>;
 
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
   /**
    * Returns a mutable copy (`Set`) of the current `ImmSet`.
    *
    * @return - a `Set` that is a copy of the current `ImmSet`.
    */
+  <<__Rx, __MutableReturn>>
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toSet(): Set<Tv>;
 
   /**
@@ -226,6 +242,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @return - an `ImmSet` that is a copy of the current `ImmSet`.
    */
+  <<__Rx>>
   public function toImmSet(): ImmSet<Tv>;
 
   /**
@@ -235,6 +252,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @return - an `ImmSet` that is a copy of the current `ImmSet`.
    */
+  <<__Rx>>
   public function immutable(): ImmSet<Tv>;
 
   /**
@@ -245,7 +263,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @return - The `Iterable` view of the current `ImmSet`.
    */
-  public function items(): Iterable<Tv>;
+  <<__Rx, __MutableReturn>>
+  public function items(): HH\Rx\Iterable<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `ImmSet`.
@@ -254,6 +273,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @return - an `ImmVector` containing the values of the current `ImmSet`.
    */
+  <<__Rx, __MutableReturn>>
   public function values(): ImmVector<Tv>;
 
   /**
@@ -265,6 +285,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @return - an `ImmVector` containing the values of the current `ImmSet`.
    */
+  <<__Rx, __MutableReturn>>
   public function keys(): ImmVector<mixed>;
 
   /**
@@ -280,7 +301,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function lazy(): KeyedIterable<mixed, Tv>;
+  <<__Rx, __MutableReturn>>
+  public function lazy(): HH\Rx\KeyedIterable<mixed, Tv>;
 
   /**
    * Returns an `ImmSet` containing the values after an operation has been
@@ -298,7 +320,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function map<Tu>((function(Tv): Tu) $callback): ImmSet<Tu>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $callback): ImmSet<Tu>;
 
   /**
    * Returns an `ImmSet` containing the values after an operation has been
@@ -317,7 +340,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - an `ImmSet` containing the values after a user-specified
    *           operation on the current `ImmSet`'s values is applied.
    */
-  public function mapWithKey<Tu>((function(mixed, Tv): Tu) $callback):
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): Tu) $callback):
     ImmSet<Tu>;
 
   /**
@@ -335,7 +359,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function filter((function(Tv): bool) $callback): ImmSet<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $callback): ImmSet<Tv>;
 
   /**
    * Returns an `ImmSet` containing the values of the current `ImmSet` that
@@ -355,7 +380,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           condition is applied to the values of the current `ImmSet`.
    *
    */
-  public function filterWithKey((function(mixed, Tv): bool) $callback):
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): bool) $callback):
     ImmSet<Tv>;
 
   /**
@@ -374,7 +400,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           with the provided `Traversable`; one of these must be empty or
    *           an exception is thrown.
    */
-  public function zip<Tu>(Traversable<Tu> $traversable): ImmSet<Pair<Tv, Tu>>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function zip<Tu>(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): ImmSet<Pair<Tv, Tu>>;
 
   /**
    * Returns an `ImmSet` containing the first n values of the current `ImmSet`.
@@ -390,6 +417,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - An `ImmSet` that is a proper subset of the current `ImmSet` up
    *           to `n` elements.
    */
+  <<__Rx, __MutableReturn>>
   public function take(int $n): ImmSet<Tv>;
 
   /**
@@ -405,7 +433,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - An `ImmSet` that is a proper subset of the current `ImmSet` up
    *           until the callback returns `false`.
    */
-  public function takeWhile((function(Tv): bool) $fn): ImmSet<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ImmSet<Tv>;
 
   /**
    * Returns an `ImmSet` containing the values after the `n`-th element of the
@@ -422,6 +451,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - An `ImmSet` that is a proper subset of the current `ImmSet`
    *           containing values after the specified `n`-th element.
    */
+  <<__Rx, __MutableReturn>>
   public function skip(int $n): ImmSet<Tv>;
 
   /**
@@ -438,7 +468,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - An `ImmSet` that is a proper subset of the current `ImmSet`
    *           starting after the callback returns `true`.
    */
-  public function skipWhile((function(Tv): bool) $fn): ImmSet<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ImmSet<Tv>;
 
   /**
    * Returns a subset of the current `ImmSet` starting from a given key up to,
@@ -459,6 +490,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           starting at `$start` up to but not including the element
    *           `$start + $len`.
    */
+  <<__Rx, __MutableReturn>>
   public function slice(int $start, int $len): ImmSet<Tv>;
 
   /**
@@ -475,8 +507,9 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @guide /hack/generics/constraints
    */
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
   public function concat<Tu super Tv>(
-    Traversable<Tu> $traversable
+    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
   ): ImmVector<Tu>;
 
   /**
@@ -487,6 +520,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - The first value in the current `ImmSet`, or `null` if the
    *           current `ImmSet` is empty.
    */
+  <<__Rx>>
   public function firstValue(): ?Tv;
 
   /**
@@ -499,6 +533,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - The first value in the current `ImmSet`, or `null` if the
    *           current `ImmSet` is empty.
    */
+  <<__Rx>>
   public function firstKey(): mixed;
 
   /**
@@ -509,6 +544,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - The last value in the current `ImmSet`, or `null` if the current
    *           `ImmSet` is empty.
    */
+  <<__Rx>>
   public function lastValue(): ?Tv;
 
   /**
@@ -521,10 +557,11 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - The last value in the current `ImmSet`, or `null` if the current
    *           `ImmSet` is empty.
    */
+  <<__Rx>>
   public function lastKey(): mixed;
 
-  /* HH_FIXME[0002] */
+  <<__Rx>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;
-  /* HH_FIXME[0001] */
+  <<__Rx>> /* HH_FIXME[0001] */
   public function toDArray(): darray<Tv, Tv>;
 }

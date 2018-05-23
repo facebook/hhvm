@@ -54,7 +54,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @param $it - any `Traversable` object from which to create the `Set`
    *              (e.g., `array`). If `null`, then an empty `Set` is created.
    */
-  public function __construct(?Traversable<Tv> $it);
+  <<__Rx, __OnlyRxIfArgs>>
+  public function __construct(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
 
   /**
    * Returns an `array` containing the values from the current `Set`.
@@ -64,6 +65,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - an `array` containing the values from the current `Set`, where
    *           each key of the `array` are the same as each value.
    */
+  <<__Rx>>
   public function toArray(): array<Tv, Tv>;
 
   /**
@@ -76,6 +78,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - an integer-indexed `array` containing the values from the
    *           current `Set`.
    */
+  <<__Rx>>
   public function toKeysArray(): array<Tv>;
 
   /**
@@ -86,6 +89,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - an integer-indexed `array` containing the values from the
    *           current `Set`.
    */
+  <<__Rx>>
   public function toValuesArray(): array<Tv>;
 
   /**
@@ -94,6 +98,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - a `Vector` (integer-indexed) that contains the values of the
    *           current `Set`.
    */
+  <<__Rx, __MutableReturn>>
   public function toVector(): Vector<Tv>;
 
   /**
@@ -103,6 +108,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - an `ImmVector` (integer-indexed) with the values of the current
    *           `Set`.
    */
+  <<__Rx>>
   public function toImmVector(): ImmVector<Tv>;
 
   /**
@@ -113,6 +119,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - a `Map` that that contains the values of the current `Set`, with
    *           each key of the `Map` being the same as its value.
    */
+  <<__Rx, __MutableReturn>>
   public function toMap(): Map<mixed, Tv>;
 
   /**
@@ -124,6 +131,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - an `ImmMap` that that contains the values of the current `Set`,
    *           with each key of the Map being the same as its value.
    */
+  <<__Rx>>
   public function toImmMap(): ImmMap<mixed, Tv>;
 
   /**
@@ -131,6 +139,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - a `Set` that is a deep copy of the current `Set`.
    */
+  <<__Rx, __MutableReturn>>
   public function toSet(): Set<Tv>;
 
   /**
@@ -140,6 +149,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - an `ImmSet` that is a deep copy of the current `Set`.
    */
+  <<__Rx>>
   public function toImmSet(): ImmSet<Tv>;
 
   /**
@@ -149,6 +159,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - an `ImmSet` that is a deep copy of the current `Set`.
    */
+  <<__Rx>>
   public function immutable(): ImmSet<Tv>;
 
   /**
@@ -164,7 +175,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function lazy(): KeyedIterable<mixed, Tv>;
+  <<__Rx, __MutableReturn>>
+  public function lazy(): HH\Rx\KeyedIterable<mixed, Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Set`.
@@ -174,6 +186,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - a `Vector` (integer-indexed) containing the values of the
    *           current `Set`.
    */
+  <<__Rx, __MutableReturn>>
   public function values(): Vector<Tv>;
 
   /**
@@ -186,6 +199,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - a `Vector` (integer-indexed) containing the values of the
    *           current `Set`.
    */
+  <<__Rx, __MutableReturn>>
   public function keys(): Vector<mixed>;
 
   /**
@@ -203,7 +217,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function map<Tu>((function(Tv): Tu) $callback): Set<Tu>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $callback): Set<Tu>;
 
   /**
    * Returns a `Set` containing the values after an operation has been applied
@@ -222,7 +237,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - a `Set` containing the values after a user-specified operation
    *           on the current `Set`'s values is applied.
    */
-  public function mapWithKey<Tu>((function(mixed, Tv): Tu) $callback): Set<Tu>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): Tu) $callback): Set<Tu>;
 
   /**
    * Returns a `Set` containing the values of the current `Set` that meet
@@ -239,7 +255,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function filter((function(Tv): bool) $callback): Set<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $callback): Set<Tv>;
 
   /**
    * Returns a `Set` containing the values of the current `Set` that meet
@@ -259,7 +276,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           is applied to the values of the current `Set`.
    *
    */
-  public function filterWithKey((function(mixed, Tv): bool) $callback): Set<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): bool) $callback): Set<Tv>;
 
   /**
    * Alters the current `Set` so that it only contains the values that meet a
@@ -276,7 +294,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  public function retain((function(Tv): bool) $callback): Set<Tv>;
+  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  public function retain(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $callback): Set<Tv>;
 
   /**
    * Alters the current `Set` so that it only contains the values that meet a
@@ -296,7 +315,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  public function retainWithKey((function(mixed, Tv): bool) $callback): Set<Tv>;
+  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  public function retainWithKey(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): bool) $callback): Set<Tv>;
 
   /**
    * Throws an exception unless the current `Set` or the `Traversable` is
@@ -314,7 +334,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           the provided `Traversable`; one of these must be empty or an
    *           exception is thrown.
    */
-  public function zip<Tu>(Traversable<Tu> $traversable): Set<Pair<Tv, Tu>>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function zip<Tu>(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Set<Pair<Tv, Tu>>;
 
   /**
    * Returns a `Set` containing the first `n` values of the current `Set`.
@@ -328,6 +349,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `Set` that is a proper subset of the current `Set` up to `n`
    *           elements.
    */
+  <<__Rx, __MutableReturn>>
   public function take(int $n): Set<Tv>;
 
   /**
@@ -342,7 +364,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `Set` that is a proper subset of the current `Set` up until
    *           the callback returns `false`.
    */
-  public function takeWhile((function(Tv): bool) $fn): Set<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): Set<Tv>;
 
   /**
    * Returns a `Set` containing the values after the `n`-th element of the
@@ -358,6 +381,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `Set` that is a proper subset of the current `Set` containing
    *           values after the specified `n`-th element.
    */
+  <<__Rx, __MutableReturn>>
   public function skip(int $n): Set<Tv>;
 
   /**
@@ -373,7 +397,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `Set` that is a proper subset of the current `Set` starting
    *           after the callback returns `true`.
    */
-  public function skipWhile((function(Tv): bool) $fn): Set<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): Set<Tv>;
 
   /**
    * Returns a subset of the current `Set` starting from a given key up to, but
@@ -391,6 +416,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `Set` that is a proper subset of the current `Set` starting at
    *           `$start` up to but not including the element `$start + $len`.
    */
+  <<__Rx, __MutableReturn>>
   public function slice(int $start, int $len): Set<Tv>;
 
   /**
@@ -407,7 +433,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Vector<Tu>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function concat<Tu super Tv>(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Tu>;
 
   /**
    * Returns the first value in the current `Set`.
@@ -415,6 +442,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - The first value in the current `Set`, or `null` if the `Set` is
    *           empty.
    */
+  <<__Rx>>
   public function firstValue(): ?Tv;
 
   /**
@@ -427,6 +455,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - The first value in the current `Set`, or `null` if the `Set` is
    *           empty.
    */
+  <<__Rx>>
   public function firstKey(): mixed;
 
   /**
@@ -435,6 +464,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - The last value in the current `Set`, or `null` if the current
    *           `Set` is empty.
    */
+  <<__Rx>>
   public function lastValue(): ?Tv;
 
   /**
@@ -447,6 +477,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - The last value in the current `Set`, or `null` if the current
    *           `Set` is empty.
    */
+  <<__Rx>>
   public function lastKey(): mixed;
 
   /**
@@ -454,6 +485,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - `true` if the current `Set` is empty; `false` otherwise.
    */
+  <<__Rx>>
   public function isEmpty(): bool;
 
   /**
@@ -461,6 +493,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - The number of elements in the current `Set`.
    */
+  <<__Rx>>
   public function count(): int;
 
   /**
@@ -471,6 +504,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function clear(): Set<Tv>;
 
   /**
@@ -480,6 +514,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - `true` if the specified value is present in the current `Set`;
    *           `false` otherwise.
    */
+  <<__Rx>>
   public function contains<Tu super Tv>(Tu $v): bool;
 
   /**
@@ -495,6 +530,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function add(Tv $v): Set<Tv>;
 
   /**
@@ -509,7 +545,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  public function addAll(?Traversable<Tv> $it): Set<Tv>;
+  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  public function addAll(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it): Set<Tv>;
 
   /**
    * Adds the keys of the specified container to the current `Set` as new
@@ -522,6 +559,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function addAllKeysOf<Tv2>(
     ?KeyedContainer<Tv,Tv2> $container,
   ): Set<Tv>;
@@ -534,6 +572,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @param $sz - The pre-determined size you want for the current `Set`.
    */
+  <<__Rx, __Mutable>>
   public function reserve(int $sz): void;
 
   /**
@@ -546,6 +585,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function remove(Tv $v): Set<Tv>;
 
   /**
@@ -562,14 +602,16 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  public function removeAll(Traversable<Tv> $other): Set<Tv>;
+  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  public function removeAll(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tv> $other): Set<Tv>;
 
   /**
    * Returns an iterator that points to beginning of the current `Set`.
    *
    * @return - A `KeyedIterator` that allows you to traverse the current `Set`.
    */
-  public function getIterator(): KeyedIterator<mixed, Tv>;
+  <<__Rx, __MutableReturn>>
+  public function getIterator(): HH\Rx\KeyedIterator<mixed, Tv>;
 
   /**
    * Returns a `Set` containing the values from the specified `array`.
@@ -590,6 +632,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - A `Set` with the values from the passed `array`(s).
    */
+  <<__Rx, __MutableReturn>>
   public static function fromArrays(...): Set<Tv>;
 
   /**
@@ -604,7 +647,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `Set` with the values from the `Traversable`; or an empty `Set`
    *           if the `Traversable` is `null`.
    */
-  public static function fromItems<Tv2>(?Traversable<Tv2> $items): Set<Tv2>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public static function fromItems<Tv2>(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv2> $items): Set<Tv2>;
 
   /**
    * Creates a `Set` from the keys of the specified container.
@@ -615,6 +659,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - A `Set` built from the keys of the specified container.
    */
+  <<__Rx, __MutableReturn>>
   public static function fromKeysOf<Tk, Tv2>(
     ?KeyedContainer<Tk,Tv2> $container,
   ): Set<Tk>;
@@ -624,6 +669,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - The `string` `"Set"`.
    */
+  <<__Rx>>
   public function __toString(): string;
 
   /**
@@ -634,11 +680,12 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - The `Iterable` view of the current `Set`.
    */
-  public function items(): Iterable<Tv>;
+  <<__Rx, __MutableReturn>>
+  public function items(): HH\Rx\Iterable<Tv>;
 
-  /* HH_FIXME[0002] */
+  <<__Rx>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;
-  /* HH_FIXME[0001] */
+  <<__Rx>> /* HH_FIXME[0001] */
   public function toDArray(): darray<Tv, Tv>;
 }
 
@@ -647,11 +694,17 @@ final class Set<Tv> implements MutableSet<Tv> {
  *
  * Methods and functions should take and return the KeyedIterator interface.
  */
-class SetIterator<+Tv> implements KeyedIterator<mixed, Tv> {
+class SetIterator<+Tv> implements HH\Rx\KeyedIterator<mixed, Tv> {
+  <<__Rx>>
   public function __construct();
+  <<__Rx>>
   public function current(): Tv;
+  <<__Rx>>
   public function key(): mixed;
+  <<__Rx>>
   public function valid(): bool;
+  <<__Rx, __Mutable>>
   public function next(): void;
+  <<__Rx, __Mutable>>
   public function rewind(): void;
 }

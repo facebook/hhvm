@@ -14,11 +14,12 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-namespace HH\Rx {
-  // freeze is a special function for mutability
-  function freeze($x) : void;
-  // mutable is a special function to indicate ownership
-  // transfer for fresh mutable values
-  <<__Rx>>
-  function mutable<T>(T $x): T;
-}
+namespace HH\Rx;
+
+// freeze is a special function for mutability
+function freeze($x) : void;
+
+// mutable is a special function to indicate ownership
+// transfer for fresh mutable values
+<<__Rx>>
+function mutable<T>(T $x): T;

@@ -61,16 +61,6 @@ class DivisionByZeroError extends Error {}
 class ParseError extends Error {}
 class TypeError extends Error {}
 
-namespace HH\Rx {
-interface Exception {
-  require extends \Exception;
-  <<__Rx>>
-  public function getMessage(): string;
-  <<__Rx>>
-  public function getCode(): int;
-}
-}
-
 class Exception implements Throwable {
   // $code should be untyped, or mixed because some subclasses set it
   // to a string, the main example being PDOException

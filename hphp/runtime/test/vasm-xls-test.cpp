@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
-#include <gtest/gtest.h>
+#include <folly/portability/GTest.h>
 
 namespace HPHP { namespace jit {
 using namespace reg;
@@ -99,7 +99,7 @@ TEST(Vasm, XlsByteXmm) {
   // DataType is actually mapped to uint64_t constants, for some reason,
   // but if that changes we still want to test them as bytes here.
   EXPECT_EQ(test_const(KindOfUninit), 0);
-  EXPECT_EQ(test_const(KindOfArray), KindOfArray);
+  EXPECT_EQ(static_cast<DataType>(test_const(KindOfArray)), KindOfArray);
 }
 
 TEST(Vasm, XlsIntXmm) {

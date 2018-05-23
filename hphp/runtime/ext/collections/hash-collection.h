@@ -561,9 +561,7 @@ struct HashCollection : ObjectData {
   }
 
   static bool isTombstoneType(DataType t) {
-    assertx(isRealType(t) || t == kInvalidDataType);
-    return t < KindOfUninit;
-    static_assert(KindOfUninit == 0 && kInvalidDataType < 0, "");
+    return t == kInvalidDataType;
   }
 
   static bool isTombstone(const Elm* e) {

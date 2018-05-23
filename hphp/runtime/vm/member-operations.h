@@ -98,7 +98,7 @@ template<KeyType kt> using key_type = typename KeyTypeTraits<kt>::type;
 /* initScratchKey is used in scenarios where we want a TypedValue key
  * regardless of what the current function was given. */
 inline TypedValue initScratchKey(TypedValue tv) {
-  assertx(tv.m_type != KindOfRef);
+  assertx(!isRefType(tv.m_type));
   return tv;
 }
 

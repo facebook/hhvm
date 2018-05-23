@@ -404,10 +404,10 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (tv.m_type == KindOfUninit) return false;
     // fallthrough
   case T::Cell:
-    return tv.m_type != KindOfRef;
+    return !isRefType(tv.m_type);
 
   case T::Ref:
-    return tv.m_type == KindOfRef;
+    return isRefType(tv.m_type);
 
   case T::InitGen:
     if (tv.m_type == KindOfUninit) return false;

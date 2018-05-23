@@ -55,7 +55,7 @@ static void nativeArgHelper(const Func* func, int i,
   auto val = arg.m_data.num;
   if (!type) {
     if (func->byRef(i)) {
-      if (arg.m_type != KindOfRef) {
+      if (!isRefType(arg.m_type)) {
         // For OutputArgs, if the param is not a KindOfRef,
         // we give it a nullptr
         val = 0;
@@ -63,7 +63,7 @@ static void nativeArgHelper(const Func* func, int i,
     } else {
       GP_args[GP_count++] = val;
       assertx((GP_count + 1) < kMaxBuiltinArgs);
-      val = arg.m_type;
+      val = static_cast<data_type_t>(arg.m_type);
     }
   }
   GP_args[GP_count++] = val;

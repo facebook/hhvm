@@ -29,7 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool cellIsPlausible(const Cell cell) {
-  assertx(cell.m_type != KindOfRef);
+  assertx(!isRefType(cell.m_type));
 
   auto assertPtr = [](void* ptr) {
     assertx(ptr && (uintptr_t(ptr) % sizeof(ptr) == 0));
@@ -127,7 +127,7 @@ bool cellIsPlausible(const Cell cell) {
 }
 
 bool tvIsPlausible(TypedValue tv) {
-  if (tv.m_type == KindOfRef) {
+  if (isRefType(tv.m_type)) {
     assertx(tv.m_data.pref);
     assertx(uintptr_t(tv.m_data.pref) % sizeof(void*) == 0);
     assertx(tv.m_data.pref->kindIsValid());
@@ -138,7 +138,7 @@ bool tvIsPlausible(TypedValue tv) {
 }
 
 bool refIsPlausible(const Ref ref) {
-  assertx(ref.m_type == KindOfRef);
+  assertx(isRefType(ref.m_type));
   return tvIsPlausible(ref);
 }
 

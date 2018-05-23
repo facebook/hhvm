@@ -68,7 +68,7 @@ public:
   void set(int64_t k, const Variant& v) { set(k, *v.asCell()); }
   void set(StringData* k, const Variant& v) { set(k, *v.asCell()); }
   void set(TypedValue k, TypedValue v) {
-    assertx(k.m_type != KindOfRef);
+    assertx(!isRefType(k.m_type));
     if (k.m_type == KindOfInt64) {
       set(k.m_data.num, v);
     } else if (isStringType(k.m_type)) {
@@ -89,7 +89,7 @@ public:
   static bool ToBool(const ObjectData* obj);
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
-    assertx(key->m_type != KindOfRef);
+    assertx(!isRefType(key->m_type));
     auto map = static_cast<BaseMap*>(obj);
     if (key->m_type == KindOfInt64) {
       return throwOnMiss ? map->at(key->m_data.num)
@@ -191,7 +191,7 @@ protected:
   void setRaw(StringData* k, const Variant& v) { setRaw(k, *v.asCell()); }
 
   void setRaw(TypedValue k, TypedValue v) {
-    assertx(k.m_type != KindOfRef);
+    assertx(!isRefType(k.m_type));
     if (k.m_type == KindOfInt64) {
       setRaw(k.m_data.num, v);
     } else if (isStringType(k.m_type)) {

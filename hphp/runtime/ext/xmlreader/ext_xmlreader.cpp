@@ -553,7 +553,7 @@ struct XMLPropertyAccessor {
   const char *name;
   int (*getter_int)(xmlTextReaderPtr);
   const xmlChar* (*getter_char)(xmlTextReaderPtr);
-  int return_type;
+  DataType return_type;
 };
 
 struct XMLPropertyAccessorMap
@@ -635,7 +635,7 @@ Variant HHVM_METHOD(XMLReader, __get,
     }
   }
 
-  switch (DataType(propertyMap->return_type)) {
+  switch (propertyMap->return_type) {
     case KindOfBoolean:
       return retint ? true : false;
     case KindOfInt64:

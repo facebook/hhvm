@@ -253,7 +253,8 @@ void cgCheckInit(IRLS& env, const IRInstruction* inst) {
   assertx(type != InvalidReg);
   auto& v = vmain(env);
 
-  static_assert(KindOfUninit == 0, "cgCheckInit assumes KindOfUninit == 0");
+  static_assert(KindOfUninit == static_cast<DataType>(0),
+                "cgCheckInit assumes KindOfUninit == 0");
 
   auto const sf = v.makeReg();
   v << testb{type, type, sf};

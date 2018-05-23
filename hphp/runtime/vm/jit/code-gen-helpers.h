@@ -80,8 +80,8 @@ Vreg zeroExtendIfBool(Vout& v, Type type, Vreg reg);
  */
 void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vreg s1);
 void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vptr s1);
-void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1);
-void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1);
+void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vptr s1);
+void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vreg s1);
 
 Vreg emitMaskTVType(Vout& v, Immed s0, Vreg s1);
 Vreg emitMaskTVType(Vout& v, Immed s0, Vptr s1);

@@ -353,7 +353,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     auto& e = elms[i];
     if (UNLIKELY(e.isTombstone())) continue;
     if (e.hasStrKey()) e.skey->incRefCount();
-    if (UNLIKELY(e.data.m_type == KindOfRef)) {
+    if (UNLIKELY(isRefType(e.data.m_type))) {
       auto ref = e.data.m_data.pref;
       // See also tvDupWithRef()
       if (!ref->isReferenced() && ref->tv()->m_data.parr != &other) {
@@ -799,7 +799,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
     for (auto const end = elm + ad->m_used; elm < end; ++elm) {
       if (UNLIKELY(elm->isTombstone())) continue;
       if (elm->hasStrKey()) elm->skey->incRefCount();
-      if (UNLIKELY(elm->data.m_type == KindOfRef)) {
+      if (UNLIKELY(isRefType(elm->data.m_type))) {
         auto ref = elm->data.m_data.pref;
         // See also tvDupWithRef()
         if (!ref->isReferenced() && ref->tv()->m_data.parr != old) {

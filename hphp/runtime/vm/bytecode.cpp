@@ -519,7 +519,7 @@ void VarEnv::bind(const StringData* name, TypedValue* tv) {
 }
 
 void VarEnv::setWithRef(const StringData* name, TypedValue* tv) {
-  if (tv->m_type == KindOfRef) {
+  if (isRefType(tv->m_type)) {
     bind(name, tv);
   } else {
     set(name, tv);
@@ -754,8 +754,8 @@ void flush_evaluation_stack() {
 static std::string toStringElm(const TypedValue* tv) {
   std::ostringstream os;
 
-  if (tv->m_type < kMinDataType || tv->m_type > kMaxDataType) {
-    os << " ??? type " << tv->m_type << "\n";
+  if (!isRealType(tv->m_type)) {
+    os << " ??? type " << static_cast<data_type_t>(tv->m_type) << "\n";
     return os.str();
   }
   if (isRefcountedType(tv->m_type) &&
@@ -1371,7 +1371,7 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
       TypedValue* to = stack.allocTV();
       if (LIKELY(!f->byRef(i))) {
         cellDup(tvToCell(from), *to);
-      } else if (LIKELY(from.m_type == KindOfRef &&
+      } else if (LIKELY(isRefType(from.m_type) &&
                         from.m_data.pref->hasMultipleRefs())) {
         if (checkRefAnnot) {
           WRAP(raiseParamRefMismatchForFunc(f, i));
@@ -1441,7 +1441,7 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
       for (int i = nextra_regular - 1; i >= 0; --i) {
         TypedValue* to = extraArgs->getExtraArg(nextra_regular - i - 1);
         const TypedValue* from = stack.indTV(i);
-        if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
+        if (isRefType(from->m_type) && from->m_data.pref->isReferenced()) {
           refCopy(*from, *to);
         } else {
           cellCopy(*tvToCell(from), *to);
@@ -1852,19 +1852,17 @@ static inline Class* lookupClsRef(Cell* input) {
 }
 
 static UNUSED int innerCount(TypedValue tv) {
-  if (isRefcountedType(tv.m_type)) {
-    return tvGetCount(tv);
-  }
-  return -1;
+  return isRefcountedType(tv.m_type) ? tvGetCount(tv) : -1;
 }
 
 static inline tv_lval ratchetRefs(tv_lval result,
                                   TypedValue& tvRef,
                                   TypedValue& tvRef2) {
   TRACE(5, "Ratchet: result %p(k%d c%d), ref %p(k%d c%d) ref2 %p(k%d c%d)\n",
-        result.tv_ptr(), result.type(), innerCount(result.tv()),
-        &tvRef, tvRef.m_type, innerCount(tvRef),
-        &tvRef2, tvRef2.m_type, innerCount(tvRef2));
+        result.tv_ptr(), static_cast<data_type_t>(result.type()),
+        innerCount(*result),
+        &tvRef, static_cast<data_type_t>(tvRef.m_type), innerCount(tvRef),
+        &tvRef2, static_cast<data_type_t>(tvRef2.m_type), innerCount(tvRef2));
   // Due to complications associated with ArrayAccess, it is possible to acquire
   // a reference as a side effect of vector operation processing. Such a
   // reference must be retained until after the next iteration is complete.
@@ -1923,7 +1921,7 @@ OPTBLD_INLINE void iopPopV() {
 }
 
 OPTBLD_INLINE void iopPopR() {
-  if (vmStack().topTV()->m_type != KindOfRef) {
+  if (!isRefType(vmStack().topTV()->m_type)) {
     vmStack().popC();
   } else {
     vmStack().popV();
@@ -1937,7 +1935,7 @@ OPTBLD_INLINE void iopPopU() {
 OPTBLD_INLINE void iopPopL(local_var to) {
   assertx(to.index < vmfp()->m_func->numLocals());
   Cell* fr = vmStack().topC();
-  if (to->m_type == KindOfRef || vmfp()->m_func->isPseudoMain()) {
+  if (isRefType(to->m_type) || vmfp()->m_func->isPseudoMain()) {
     // Manipulate the ref-counts as if this was a SetL, PopC pair to preserve
     // destructor ordering.
     tvSet(*fr, *to);
@@ -1962,7 +1960,7 @@ OPTBLD_INLINE void iopUnbox() {
 
 OPTBLD_INLINE void iopBoxR() {
   TypedValue* tv = vmStack().topTV();
-  if (tv->m_type != KindOfRef) {
+  if (!isRefType(tv->m_type)) {
     tvBox(*tv);
   }
 }
@@ -1972,7 +1970,7 @@ OPTBLD_INLINE void iopBoxRNop() {
 }
 
 OPTBLD_INLINE void iopUnboxR() {
-  if (vmStack().topTV()->m_type == KindOfRef) {
+  if (isRefType(vmStack().topTV()->m_type)) {
     vmStack().unbox();
   }
 }
@@ -3274,7 +3272,7 @@ OPTBLD_INLINE void iopCGetL2(local_var fr) {
 
 OPTBLD_INLINE void iopPushL(local_var locVal) {
   assertx(locVal->m_type != KindOfUninit);
-  assertx(locVal->m_type != KindOfRef);
+  assertx(!isRefType(locVal->m_type));
   TypedValue* dest = vmStack().allocTV();
   *dest = *locVal;
   locVal->m_type = KindOfUninit;
@@ -3356,7 +3354,7 @@ template<bool box> void getS(clsref_slot slot) {
                 ss.name->data());
   }
   if (box) {
-    if (ss.val->m_type != KindOfRef) {
+    if (!isRefType(ss.val->m_type)) {
       tvBox(*ss.val);
     }
     refDup(*ss.val, *ss.output);
@@ -3726,7 +3724,7 @@ static OPTBLD_INLINE void vGetMImpl(MemberKey mk, int32_t nDiscard) {
   auto& mstate = vmMInstrState();
   TypedValue result;
   dimDispatch(MOpMode::Define, mk, true);
-  if (type(mstate.base) != KindOfRef) tvBox(mstate.base);
+  tvBoxIfNeeded(mstate.base);
   refDup(*mstate.base, result);
   mFinal(mstate, nDiscard, result);
 }
@@ -3868,7 +3866,7 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
   auto& mstate = vmMInstrState();
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
     mstate.base = [&] {
-      if (LIKELY(value->m_type != KindOfRef)) {
+      if (LIKELY(!isRefType(value->m_type))) {
         SuppressHackArrCompatNotices shacn;
         return ElemD<MOpMode::Define, false, false>(
           mstate.tvRef, mstate.base, key
@@ -3888,7 +3886,7 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
       );
     }();
   } else {
-    mstate.base = UNLIKELY(value->m_type == KindOfRef)
+    mstate.base = UNLIKELY(isRefType(value->m_type))
       ? ElemD<MOpMode::Define, true, false>(mstate.tvRef, mstate.base, key)
       : ElemD<MOpMode::Define, false, false>(mstate.tvRef, mstate.base, key);
   }
@@ -3938,7 +3936,7 @@ OPTBLD_INLINE void iopMemoSet(uint32_t nDiscard,
 }
 
 static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
-  if (fr->m_type != KindOfRef) {
+  if (!isRefType(fr->m_type)) {
     tvBox(*fr);
   }
   refDup(*fr, *to);
@@ -5168,11 +5166,11 @@ OPTBLD_INLINE void iopFPassR(ActRec* ar, uint32_t paramId, FPassHint hint) {
   const Func* func = ar->m_func;
   if (func->byRef(paramId)) {
     TypedValue* tv = vmStack().topTV();
-    if (tv->m_type != KindOfRef) {
+    if (!isRefType(tv->m_type)) {
       tvBox(*tv);
     }
   } else {
-    if (vmStack().topTV()->m_type == KindOfRef) {
+    if (isRefType(vmStack().topTV()->m_type)) {
       vmStack().unbox();
     }
   }
@@ -5495,7 +5493,7 @@ inline bool initIteratorM(Iter* it, Ref* r1, TypedValue *val, TypedValue *key) {
 
 OPTBLD_INLINE void iopMIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
   Ref* r1 = vmStack().topV();
-  assertx(r1->m_type == KindOfRef);
+  assertx(isRefType(r1->m_type));
   if (!initIteratorM(it, r1, val.ptr, nullptr)) {
     pc = targetpc; // nothing to iterate; exit foreach loop.
   }
@@ -5505,7 +5503,7 @@ OPTBLD_INLINE void iopMIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
 OPTBLD_INLINE void
 iopMIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
   Ref* r1 = vmStack().topV();
-  assertx(r1->m_type == KindOfRef);
+  assertx(isRefType(r1->m_type));
   if (!initIteratorM(it, r1, val.ptr, key.ptr)) {
     pc = targetpc; // nothing to iterate; exit foreach loop.
   }
@@ -5831,7 +5829,7 @@ OPTBLD_INLINE void iopStaticLocCheck(local_var loc, const StringData* var) {
       if (val->m_type == KindOfUninit) {
         return nullptr;
       }
-      assertx(val->m_type == KindOfRef);
+      assertx(isRefType(val->m_type));
       return val->m_data.pref;
     }
 

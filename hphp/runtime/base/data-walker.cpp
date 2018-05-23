@@ -47,7 +47,7 @@ void DataWalker::traverseData(ArrayData* data,
   }
 
   auto const fn = [&] (TypedValue rval) {
-    if (rval.m_type == KindOfRef) {
+    if (isRefType(rval.m_type)) {
       if (rval.m_data.pref->isReferenced()) {
         if (markVisited(rval.m_data.pref->var(), features, visited)) {
           // Don't recurse forever; we already went down this path, and

@@ -38,20 +38,12 @@ inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
   v << testbim{s0, s1, sf};
 }
 
-inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
-  v << cmpbim{s0, s1, sf};
+inline void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vptr s1) {
+  v << cmpbim{static_cast<data_type_t>(s0), s1, sf};
 }
 
-inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
-  v << cmpbi{s0, s1, sf};
-}
-
-template<typename TLoc>
-inline void emitCmpTVTypeRefCounted(Vout& v, Vreg sf, TLoc s1) {
-  if (RuntimeOption::EvalJitProfileGuardTypes) {
-    emitProfileGuardType(v, TUncounted);
-  }
-  emitCmpTVType(v, sf, KindOfRefCountThreshold, s1);
+inline void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vreg s1) {
+  v << cmpbi{static_cast<data_type_t>(s0), s1, sf};
 }
 
 inline Vreg emitMaskTVType(Vout& v, Immed s0, Vreg s1) {
@@ -64,6 +56,15 @@ inline Vreg emitMaskTVType(Vout& v, Immed s0, Vptr s1) {
   auto const reg = v.makeReg();
   v << loadb{s1, reg};
   return emitMaskTVType(v, s0, reg);
+}
+
+template<typename TLoc>
+inline ConditionCode emitIsTVTypeRefCounted(Vout& v, Vreg sf, TLoc s1) {
+  if (RuntimeOption::EvalJitProfileGuardTypes) {
+    emitProfileGuardType(v, TUncounted);
+  }
+  emitCmpTVType(v, sf, KindOfRefCountThreshold, s1);
+  return CC_G;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

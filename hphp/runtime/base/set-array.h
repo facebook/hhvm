@@ -123,24 +123,11 @@ struct SetArrayElm {
   }
 
   ALWAYS_INLINE bool isTombstone() const {
-    static_assert(
-      kEmpty == 0 && kTombstone < 0 &&
-      KindOfString > kEmpty && KindOfInt64 > kEmpty,
-      "Fix the check below."
-    );
-    return tv.m_type < kEmpty;
+    return tv.m_type == kTombstone;
   }
 
   ALWAYS_INLINE bool isInvalid() const {
-    // An element is invalid if it is a tombstone or empty.
-    static_assert(
-      kTombstone < kEmpty &&
-      kEmpty < KindOfInt64 &&
-      kEmpty < KindOfString &&
-      kEmpty < KindOfPersistentString,
-      "Revise m_type choices."
-    );
-    return tv.m_type <= kEmpty;
+    return tv.m_type == kEmpty || isTombstone();
   }
 
   static constexpr ptrdiff_t keyOff() {

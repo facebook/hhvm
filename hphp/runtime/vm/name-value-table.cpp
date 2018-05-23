@@ -157,7 +157,7 @@ TypedValue* NameValueTable::set(const StringData* name, const TypedValue* val) {
 
 TypedValue* NameValueTable::bind(const StringData* name, TypedValue* val) {
   TypedValue* target = findTypedValue(name);
-  if (val->m_type != KindOfRef) {
+  if (!isRefType(val->m_type)) {
     tvBox(*val);
   }
   tvBind(*val, *target);

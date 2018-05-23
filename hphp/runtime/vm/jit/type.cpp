@@ -408,8 +408,8 @@ bool Type::checkValid() const {
 }
 
 Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
-  assertx(inner != KindOfRef);
-  assertx(inner == KindOfUninit || outer == KindOfRef);
+  assertx(!isRefType(inner));
+  assertx(inner == KindOfUninit || isRefType(outer));
 
   switch (outer) {
     case KindOfUninit           : return kUninit;
@@ -719,7 +719,7 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
   else if (outer == KindOfPersistentDict) outer = KindOfDict;
   else if (outer == KindOfPersistentKeyset) outer = KindOfKeyset;
 
-  if (outer == KindOfRef) {
+  if (isRefType(outer)) {
     inner = val(tv).pref->tv()->m_type;
     if (inner == KindOfPersistentString) inner = KindOfString;
     else if (inner == KindOfPersistentArray) inner = KindOfArray;

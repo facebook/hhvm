@@ -131,7 +131,7 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
     // If a magic getter or array access method returned by reference, we have
     // to incref the inner cell and drop our reference to the RefData.
     // Otherwise we do nothing, since we already own a reference to result.
-    if (UNLIKELY(localTvRef.m_type == KindOfRef)) {
+    if (UNLIKELY(isRefType(localTvRef.m_type))) {
       auto inner = *localTvRef.m_data.pref->tv();
       tvIncRefGen(inner);
       decRefRef(localTvRef.m_data.pref);
@@ -201,7 +201,7 @@ inline RefData* vGetRefShuffle(const TypedValue& localTvRef,
     return ref;
   }
 
-  if (localTvRef.m_type != KindOfRef) {
+  if (!isRefType(localTvRef.m_type)) {
     // RefData::Make takes ownership of the reference that lives in localTvRef
     // so no refcounting is necessary.
     return RefData::Make(localTvRef);
@@ -324,14 +324,14 @@ inline TypedValue setOpPropCO(Class* ctx, ObjectData* base, TypedValue key,
 inline TypedValue incDecPropC(Class* ctx, tv_lval base, TypedValue key,
                               IncDecOp op) {
   auto const result = HPHP::IncDecProp(ctx, op, base, key);
-  assertx(result.m_type != KindOfRef);
+  assertx(!isRefType(result.m_type));
   return result;
 }
 
 inline TypedValue incDecPropCO(Class* ctx, ObjectData* base, TypedValue key,
                                IncDecOp op) {
   auto const result = HPHP::IncDecPropObj(ctx, op, base, key);
-  assertx(result.m_type != KindOfRef);
+  assertx(!isRefType(result.m_type));
   return result;
 }
 

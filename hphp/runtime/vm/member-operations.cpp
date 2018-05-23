@@ -61,7 +61,7 @@ TypedValue objOffsetGet(
   }
 
   assertx(!base->isCollection());
-  assertx(offset.m_type != KindOfRef);
+  assertx(!isRefType(offset.m_type));
 
   auto const method = base->methodNamed(s_offsetGet.get());
   assertx(method != nullptr);
@@ -79,7 +79,7 @@ static OffsetExistsResult objOffsetExists(ObjectData* base, TypedValue offset) {
   objArrayAccess(base);
 
   assertx(!base->isCollection());
-  assertx(offset.m_type != KindOfRef);
+  assertx(!isRefType(offset.m_type));
 
   auto const method = base->methodNamed(s_offsetExists.get());
   assertx(method != nullptr);
@@ -155,7 +155,7 @@ void objOffsetSet(
   }
 
   assertx(!base->isCollection());
-  assertx(offset.m_type != KindOfRef);
+  assertx(!isRefType(offset.m_type));
 
   auto const method = base->methodNamed(s_offsetSet.get());
   assertx(method != nullptr);
@@ -168,7 +168,7 @@ void objOffsetUnset(ObjectData* base, TypedValue offset) {
   objArrayAccess(base);
 
   assertx(!base->isCollection());
-  assertx(offset.m_type != KindOfRef);
+  assertx(!isRefType(offset.m_type));
 
   auto const method = base->methodNamed(s_offsetUnset.get());
   assertx(method != nullptr);

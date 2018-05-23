@@ -1105,7 +1105,7 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
         sorted.set(k, arr->atPos(pos));
       }
     }
-    if (opaque.original->getRawType() == KindOfRef) {
+    if (isRefType(opaque.original->getRawType())) {
       *opaque.original->getRefData() = sorted;
     }
   }

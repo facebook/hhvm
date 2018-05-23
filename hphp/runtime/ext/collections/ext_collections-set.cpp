@@ -335,7 +335,7 @@ BaseSet::Clone(ObjectData* obj) {
 }
 
 bool BaseSet::OffsetIsset(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     return set->contains(key->m_data.num);
@@ -348,7 +348,7 @@ bool BaseSet::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseSet::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     return set->contains(key->m_data.num) ? !cellToBool(*key) : true;
@@ -361,7 +361,7 @@ bool BaseSet::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseSet::OffsetContains(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     return set->contains(key->m_data.num);
@@ -374,7 +374,7 @@ bool BaseSet::OffsetContains(ObjectData* obj, const TypedValue* key) {
 }
 
 void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     set->remove(key->m_data.num);

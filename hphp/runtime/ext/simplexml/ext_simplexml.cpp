@@ -887,7 +887,7 @@ next_iter:
   }
 }
 
-Variant SimpleXMLElement_objectCast(const ObjectData* obj, int8_t type) {
+Variant SimpleXMLElement_objectCast(const ObjectData* obj, DataType type) {
   assertx(obj->instanceof(SimpleXMLElement_classof()));
   auto sxe = Native::data<SimpleXMLElement>(const_cast<ObjectData*>(obj));
   if (type == KindOfBoolean) {

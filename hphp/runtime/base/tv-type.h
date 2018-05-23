@@ -57,7 +57,7 @@ CASE(Ref)
 #undef CASE
 
 ALWAYS_INLINE bool tvIsReferenced(TypedValue tv) {
-  return tv.m_type == KindOfRef &&
+  return isRefType(tv.m_type) &&
          tv.m_data.pref->isReferenced();
 }
 

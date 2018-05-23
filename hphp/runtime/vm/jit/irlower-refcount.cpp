@@ -87,13 +87,13 @@ void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
     return;
   }
   auto const sf = v.makeReg();
-  auto cond = CC_NLE;
+  ConditionCode cond;
   if (ty <= TCtx) {
     v << testqi{ActRec::kHasClassBit, loc.reg(0), sf};
     cond = CC_E;
   } else {
     assertx(ty <= TGen);
-    emitCmpTVTypeRefCounted(v, sf, loc.reg(1));
+    cond = emitIsTVTypeRefCounted(v, sf, loc.reg(1));
   }
   unlikelyIfThen(v, vtaken, cond, sf, then);
 }
@@ -697,9 +697,9 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
       auto const type = srcLoc(env, inst, 0).reg(1);
 
       auto const sf = v.makeReg();
-      emitCmpTVTypeRefCounted(v, sf, type);
+      auto const cc = emitIsTVTypeRefCounted(v, sf, type);
 
-      unlikelyIfThen(v, vcold(env), CC_NLE, sf, [&] (Vout& v) {
+      unlikelyIfThen(v, vcold(env), cc, sf, [&] (Vout& v) {
         auto const stub = tc::ustubs().decRefGeneric;
         v << copy2{data, type, rarg(0), rarg(1)};
         v << callfaststub{stub, makeFixup(inst->marker()), arg_regs(2)};

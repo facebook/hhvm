@@ -545,7 +545,7 @@ CufIter::~CufIter() {
 
 template <bool Local>
 bool Iter::init(TypedValue* c1) {
-  assertx(c1->m_type != KindOfRef);
+  assertx(!isRefType(c1->m_type));
   bool hasElems = true;
   if (isArrayLikeType(c1->m_type)) {
     if (!c1->m_data.parr->empty()) {
@@ -653,7 +653,7 @@ void Iter::cfree() {
 template <bool typeArray, bool withRef>
 static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   auto const oldVal = *out;
-  assertx(withRef || oldVal.m_type != KindOfRef);
+  assertx(withRef || !isRefType(oldVal.m_type));
   TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
            __func__, typeArray ? "true" : "false", iter, out);
   assertx((typeArray && iter->arr().getIterType() == ArrayIter::TypeArray) ||
@@ -661,7 +661,7 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   ArrayIter& arrIter = iter->arr();
   if (typeArray) {
     auto const cur = arrIter.nvSecond();
-    if (cur.type() == KindOfRef) {
+    if (isRefType(cur.type())) {
       if (!withRef || !cur.val().pref->isReferenced()) {
         cellDup(*(cur.val().pref->tv()), *out);
       } else {
@@ -672,7 +672,7 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
     }
   } else {
     Variant val = arrIter.second();
-    assertx(val.getRawType() != KindOfRef);
+    assertx(!isRefType(val.getRawType()));
     cellDup(*val.asTypedValue(), *out);
   }
   tvDecRefGen(oldVal);
@@ -681,7 +681,7 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
 template <bool typeArray, bool withRef>
 static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
   auto const oldVal = *out;
-  assertx(withRef || oldVal.m_type != KindOfRef);
+  assertx(withRef || !isRefType(oldVal.m_type));
   TRACE(2, "%s: I %p, out %p\n", __func__, iter, out);
   assertx((typeArray && iter->arr().getIterType() == ArrayIter::TypeArray) ||
          (!typeArray && iter->arr().getIterType() == ArrayIter::TypeIterator));
@@ -701,7 +701,7 @@ inline void liter_value_cell_local_impl(Iter* iter,
                                         TypedValue* out,
                                         const ArrayData* ad) {
   auto const oldVal = *out;
-  assertx(oldVal.m_type != KindOfRef);
+  assertx(!isRefType(oldVal.m_type));
   auto const& arrIter = iter->arr();
   assertx(arrIter.getIterType() == ArrayIter::TypeArray);
   assertx(!arrIter.getArrayData());
@@ -714,7 +714,7 @@ inline void liter_key_cell_local_impl(Iter* iter,
                                       TypedValue* out,
                                       const ArrayData* ad) {
   auto const oldVal = *out;
-  assertx(oldVal.m_type != KindOfRef);
+  assertx(!isRefType(oldVal.m_type));
   auto const& arr = iter->arr();
   assertx(arr.getIterType() == ArrayIter::TypeArray);
   assertx(!arr.getArrayData());
@@ -1111,7 +1111,7 @@ static int64_t iter_next_apc_array(Iter* iter,
 
   // Note that APCLocalArray can never return KindOfRefs.
   auto const rval = APCLocalArray::RvalAtPos(arr->asArrayData(), pos);
-  assertx(rval.type() != KindOfRef);
+  assertx(!isRefType(rval.type()));
   cellSet(rval.tv(), *valOut);
   if (LIKELY(!keyOut)) return 1;
 

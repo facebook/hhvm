@@ -275,7 +275,7 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
 TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
   // Memoize throws in the emitter if any function parameters are references, so
   // we can just assert that the param is cell here
-  assertx(param.m_type != KindOfRef);
+  assertx(!isRefType(param.m_type));
   auto const type = param.m_type;
 
   if (type == KindOfInt64) {

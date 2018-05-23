@@ -384,7 +384,7 @@ BaseVector::php_keys() {
 }
 
 bool BaseVector::OffsetIsset(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto vec = static_cast<BaseVector*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -397,7 +397,7 @@ bool BaseVector::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseVector::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto vec = static_cast<BaseVector*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -410,7 +410,7 @@ bool BaseVector::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseVector::OffsetContains(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto vec = static_cast<BaseVector*>(obj);
   if (key->m_type == KindOfInt64) {
     return vec->contains(key->m_data.num);
@@ -427,7 +427,7 @@ bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
 }
 
 void BaseVector::addFront(TypedValue tv) {
-  assertx(tv.m_type != KindOfRef);
+  assertx(!isRefType(tv.m_type));
   dropImmCopy();
   auto oldAd = arrayData();
   m_arr = PackedArray::PrependVec(oldAd, tv, oldAd->cowCheck());

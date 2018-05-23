@@ -108,7 +108,7 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
     for (; ptr != stop; ptr++) {
       assertx(ptr->m_type != KindOfUninit);
       assertx(tvIsPlausible(*ptr));
-      assertx(!arr->isVecArray() || ptr->m_type != KindOfRef);
+      assertx(!arr->isVecArray() || !isRefType(ptr->m_type));
     }
   }
   return true;
@@ -325,7 +325,7 @@ bool PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
 
   // Copy counted types correctly, especially RefData.
   for (auto elm = packedData(ad), end = elm + size; elm < end; ++elm) {
-    if (UNLIKELY(elm->m_type == KindOfRef)) {
+    if (UNLIKELY(isRefType(elm->m_type))) {
       assertx(!adIn->isVecArray());
       auto ref = elm->m_data.pref;
       // See also tvDupWithRef()

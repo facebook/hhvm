@@ -136,11 +136,11 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     auto const sf = v.makeReg();
 
     // We can't do a byte load here---we have to sign-extend since we use
-    // `type' as a 32-bit array index to the destructor table.
+    // `type' as a 64-bit array index to the destructor table.
     v << loadzbl{local[TVOFF(m_type)], type};
-    emitCmpTVTypeRefCounted(v, sf, type);
+    auto const cc = emitIsTVTypeRefCounted(v, sf, type);
 
-    ifThen(v, CC_G, sf, [&] (Vout& v) {
+    ifThen(v, cc, sf, [&] (Vout& v) {
       v << call{releaseFake, local | type};
     });
   };

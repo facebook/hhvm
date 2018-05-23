@@ -39,7 +39,7 @@ const StaticString s_optional_shape_field("optional_shape_field");
 const StaticString s_unresolved("[unresolved]");
 
 bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
-  assertx(tv->m_type != KindOfRef);
+  assertx(!isRefType(tv->m_type));
   Class* cls = nullptr;
   switch (tv->m_type) {
     case KindOfUninit:

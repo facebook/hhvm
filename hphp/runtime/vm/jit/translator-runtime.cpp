@@ -202,7 +202,7 @@ void setNewElemVec(TypedValue* base, Cell val) {
 }
 
 RefData* boxValue(TypedValue tv) {
-  assertx(tv.m_type != KindOfRef);
+  assertx(!isRefType(tv.m_type));
   if (tv.m_type == KindOfUninit) tv = make_tv<KindOfNull>();
   return RefData::Make(tv);
 }
@@ -1032,7 +1032,7 @@ void setWithRefElem(TypedValue* base, TypedValue keyTV, TypedValue val) {
   TypedValue localTvRef;
   auto const keyC = tvToCell(keyTV);
 
-  if (UNLIKELY(val.m_type == KindOfRef)) {
+  if (UNLIKELY(isRefType(val.m_type))) {
     HPHP::SetWithRefMLElem<MOpMode::Define, true, intishWarn>(
       localTvRef, base, keyC, val);
   } else {
@@ -1047,7 +1047,7 @@ template void setWithRefElem<false>(TypedValue*, TypedValue, TypedValue);
 template <bool intishWarn>
 TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op) {
   auto const result = HPHP::IncDecElem<intishWarn>(op, base, key);
-  assertx(result.m_type != KindOfRef);
+  assertx(!isRefType(result.m_type));
   return result;
 }
 

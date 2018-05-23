@@ -504,7 +504,7 @@ Variant HHVM_FUNCTION(fprintf,
                       const String& format,
                       const Array& args /* = null_array */) {
   if (!handle.isResource()) {
-    raise_param_type_warning("fprintf", 1, DataType::KindOfResource,
+    raise_param_type_warning("fprintf", 1, KindOfResource,
                              handle.getType());
     return false;
   }

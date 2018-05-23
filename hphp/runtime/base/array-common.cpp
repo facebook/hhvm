@@ -78,7 +78,7 @@ ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
   IterateV(
     a,
     [&](TypedValue v) {
-      if (UNLIKELY(v.m_type == KindOfRef)) {
+      if (UNLIKELY(isRefType(v.m_type))) {
         if (v.m_data.pref->isReferenced()) {
           throwRefInvalidArrayValueException(init.toArray());
         }
@@ -96,7 +96,7 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
   IterateKV(
     a,
     [&](Cell k, TypedValue v) {
-      if (UNLIKELY(v.m_type == KindOfRef)) {
+      if (UNLIKELY(isRefType(v.m_type))) {
         if (v.m_data.pref->isReferenced()) {
           throwRefInvalidArrayValueException(init.toArray());
         }
@@ -114,12 +114,12 @@ ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
   IterateV(
     a,
     [&](TypedValue v) {
-      if (UNLIKELY(v.m_type == KindOfRef)) {
+      if (UNLIKELY(isRefType(v.m_type))) {
         if (v.m_data.pref->isReferenced()) {
           throwRefInvalidArrayValueException(init.toArray());
         }
         v = *v.m_data.pref->tv();
-        assertx(v.m_type != KindOfRef);
+        assertx(!isRefType(v.m_type));
       }
 
       if (LIKELY(isStringType(v.m_type))) {
@@ -163,7 +163,7 @@ ArrayCommon::CheckForRefs(const ArrayData* ad) {
   IterateV(
     ad,
     [&](TypedValue v) {
-      if (UNLIKELY(v.m_type == KindOfRef)) {
+      if (UNLIKELY(isRefType(v.m_type))) {
         auto const ref = v.m_data.pref;
         if (ref->isReferenced() || ref->tv()->m_data.parr == ad) {
           result = RefCheckResult::Fail;

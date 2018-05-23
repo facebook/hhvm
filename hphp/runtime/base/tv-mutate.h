@@ -48,13 +48,13 @@ enable_if_lval_t<T&&, void> tvBox(T&& tv) {
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvBoxIfNeeded(T&& tv) {
-  if (type(tv) != KindOfRef) tvBox(tv);
+  if (!isRefType(type(tv))) tvBox(tv);
 }
 
 /*
  * Unbox `tv' in place.
  *
- * @requires: tv->m_type == KindOfRef
+ * @requires: isRefType(tv->m_type)
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvUnbox(T&& tv) {
@@ -77,23 +77,23 @@ enable_if_lval_t<T&&, void> tvUnbox(T&& tv) {
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvUnboxIfNeeded(T&& tv) {
-  if (type(tv) == KindOfRef) tvUnbox(tv);
+  if (isRefType(type(tv))) tvUnbox(tv);
 }
 
 /*
  * Return a reference to an unboxed `tv'.
  */
 ALWAYS_INLINE Cell& tvToCell(TypedValue& tv) {
-  return LIKELY(tv.m_type != KindOfRef) ? tv : *tv.m_data.pref->tv();
+  return LIKELY(!isRefType(tv.m_type)) ? tv : *tv.m_data.pref->tv();
 }
 ALWAYS_INLINE Cell tvToCell(const TypedValue& tv) {
-  return LIKELY(tv.m_type != KindOfRef) ? tv : *tv.m_data.pref->tv();
+  return LIKELY(!isRefType(tv.m_type)) ? tv : *tv.m_data.pref->tv();
 }
 ALWAYS_INLINE Cell* tvToCell(TypedValue* tv) {
-  return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
+  return LIKELY(!isRefType(tv->m_type)) ? tv : tv->m_data.pref->tv();
 }
 ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
-  return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
+  return LIKELY(!isRefType(tv->m_type)) ? tv : tv->m_data.pref->tv();
 }
 template<bool is_const>
 ALWAYS_INLINE tv_val<is_const> tvToCell(tv_val<is_const> tv) {
@@ -101,7 +101,7 @@ ALWAYS_INLINE tv_val<is_const> tvToCell(tv_val<is_const> tv) {
 }
 template<bool is_const>
 inline tv_val<is_const> tv_val<is_const>::unboxed() const {
-  return LIKELY(type() != KindOfRef) ? *this : tv_val { val().pref->tv() };
+  return LIKELY(!isRefType(type())) ? *this : tv_val { val().pref->tv() };
 }
 
 /*
@@ -113,7 +113,7 @@ inline tv_val<is_const> tv_val<is_const>::unboxed() const {
  *  - is the identity otherwise.
  */
 ALWAYS_INLINE Cell tvToInitCell(TypedValue tv) {
-  if (UNLIKELY(tv.m_type == KindOfRef)) {
+  if (UNLIKELY(isRefType(tv.m_type))) {
     assertx(tv.m_data.pref->tv()->m_type != KindOfUninit);
     return *tv.m_data.pref->tv();
   }
@@ -223,7 +223,7 @@ tvDupWithRef(const TypedValue& fr, T&& to, Fn should_demote) {
 
   tvCopy(fr, to);
   if (!isRefcountedType(fr.m_type)) return;
-  if (fr.m_type != KindOfRef) {
+  if (!isRefType(fr.m_type)) {
     tvIncRefCountable(as_tv(to));
     return;
   }
@@ -232,7 +232,7 @@ tvDupWithRef(const TypedValue& fr, T&& to, Fn should_demote) {
     cellDup(*ref->tv(), to);
     return;
   }
-  assertx(type(to) == KindOfRef);
+  assertx(isRefType(type(to)));
   val(to).pref->incRefCount();
 }
 
@@ -424,11 +424,11 @@ enable_if_lval_t<T&&, void> tvSetWithRef(const TypedValue fr, T&& to) {
  * to the RefData of `fr'---it does not set the inner value of `to' to be that
  * of `fr'.
  *
- * @requires: fr->m_type == KindOfRef
+ * @requires: isRefType(fr->m_type)
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvBind(const TypedValue fr, T&& to) {
-  assertx(fr.m_type == KindOfRef);
+  assertx(isRefType(fr.m_type));
   auto const old = as_tv(to);
   refDup(fr, to);
   tvDecRefGen(old);

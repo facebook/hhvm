@@ -143,7 +143,7 @@ public:
 
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
-    assertx(key->m_type != KindOfRef);
+    assertx(!isRefType(key->m_type));
     auto vec = static_cast<BaseVector*>(obj);
     if (key->m_type == KindOfInt64) {
       return throwOnMiss ? vec->at(key->m_data.num)
@@ -167,7 +167,7 @@ public:
     return &data()[key];
   }
   TypedValue* at(const TypedValue* key) {
-    assertx(key->m_type != KindOfRef);
+    assertx(!isRefType(key->m_type));
     if (LIKELY(key->m_type == KindOfInt64)) {
       return at(key->m_data.num);
     }
@@ -183,7 +183,7 @@ public:
     return &data()[key];
   }
   TypedValue* get(const TypedValue* key) {
-    assertx(key->m_type != KindOfRef);
+    assertx(!isRefType(key->m_type));
     if (LIKELY(key->m_type == KindOfInt64)) {
       return get(key->m_data.num);
     }
@@ -249,7 +249,7 @@ public:
     set(key, val.asCell());
   }
   void set(const TypedValue* key, const TypedValue* val) {
-    assertx(key->m_type != KindOfRef);
+    assertx(!isRefType(key->m_type));
     if (key->m_type != KindOfInt64) {
       throwBadKeyType();
     }
@@ -322,7 +322,7 @@ protected:
 
   template<bool raw> ALWAYS_INLINE
   void addImpl(TypedValue tv) {
-    assertx(tv.m_type != KindOfRef);
+    assertx(!isRefType(tv.m_type));
     auto oldAd = arrayData();
     if (raw) {
       assertx(canMutateBuffer());
@@ -347,7 +347,7 @@ protected:
   // check for an immutable buffer, so it's only safe to use in some cases.
   // If you're not sure, use set() instead.
   void setRaw(int64_t key, const TypedValue* val) {
-    assertx(val->m_type != KindOfRef);
+    assertx(!isRefType(val->m_type));
     assertx(canMutateBuffer());
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       collections::throwOOB(key);
@@ -362,7 +362,7 @@ protected:
     setRaw(key, val.asCell());
   }
   void setRaw(const TypedValue* key, const TypedValue* val) {
-    assertx(key->m_type != KindOfRef);
+    assertx(!isRefType(key->m_type));
     if (key->m_type != KindOfInt64) {
       throwBadKeyType();
     }

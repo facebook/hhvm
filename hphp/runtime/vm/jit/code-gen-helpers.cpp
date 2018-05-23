@@ -283,9 +283,9 @@ Vreg emitDecRef(Vout& v, Vreg base, Reason reason) {
 
 void emitIncRefWork(Vout& v, Vreg data, Vreg type, Reason reason) {
   auto const sf = v.makeReg();
-  emitCmpTVTypeRefCounted(v, sf, type);
+  auto const cc = emitIsTVTypeRefCounted(v, sf, type);
   // ifRefCountedType
-  ifThen(v, CC_G, sf, [&] (Vout& v) {
+  ifThen(v, cc, sf, [&] (Vout& v) {
     // One-bit mode: do the IncRef if m_count == OneReference (0). Normal mode:
     // do the IncRef if m_count >= 0.
     auto const sf2 = emitCmpRefCount(v, 0, data);

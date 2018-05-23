@@ -133,7 +133,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
     auto tvTo = frame_local(fp, id);
     Variant varFrom(m_responseHeaders);
     const auto tvFrom(varFrom.asTypedValue());
-    if (tvTo->m_type == KindOfRef) {
+    if (isRefType(tvTo->m_type)) {
       tvTo = tvTo->m_data.pref->tv();
     }
     tvDup(*tvFrom, *tvTo);

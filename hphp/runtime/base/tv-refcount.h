@@ -173,7 +173,7 @@ ALWAYS_INLINE void tvDecRefRes(const TypedValue* tv) {
 }
 
 ALWAYS_INLINE void tvDecRefRef(const TypedValue* tv) {
-  assertx(tv->m_type == KindOfRef);
+  assertx(isRefType(tv->m_type));
   decRefRef(tv->m_data.pref);
 }
 

@@ -1286,7 +1286,7 @@ Array VariableUnserializer::unserializeDict() {
       putInOverwrittenList(val);
     }
     unserializeVariant(val, UnserializeMode::DictValue);
-    assertx(val.getRawType() != KindOfRef);
+    assertx(!isRefType(val.getRawType()));
 
     if (i < (size - 1)) {
       auto lastChar = peekBack();
@@ -1330,7 +1330,7 @@ Array VariableUnserializer::unserializeVec() {
     assertx(lval.arr == arr.get());
     auto& val = tvAsVariant(lval.tv_ptr());
     unserializeVariant(val, UnserializeMode::VecValue);
-    assertx(val.getRawType() != KindOfRef);
+    assertx(!isRefType(val.getRawType()));
 
     if (i < (size - 1)) {
       auto lastChar = peekBack();
@@ -1412,7 +1412,7 @@ Array VariableUnserializer::unserializeVArray() {
 
     auto& val = tvAsVariant(lval.tv_ptr());
     unserializeVariant(val, mode);
-    assertx(!arr.isHackArray() || val.getRawType() != KindOfRef);
+    assertx(!arr.isHackArray() || !isRefType(val.getRawType()));
 
     if (i < (size - 1)) {
       auto lastChar = peekBack();
@@ -1483,7 +1483,7 @@ Array VariableUnserializer::unserializeDArray() {
     }
 
     unserializeVariant(value, mode);
-    assertx(!arr.isHackArray() || value.getRawType() != KindOfRef);
+    assertx(!arr.isHackArray() || !isRefType(value.getRawType()));
 
     if (i < (size - 1)) {
       auto lastChar = peekBack();

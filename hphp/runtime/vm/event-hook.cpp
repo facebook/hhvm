@@ -304,7 +304,7 @@ static Variant call_intercept_handler(
                           nullptr, invName, ExecutionContext::InvokeCuf,
                           false, dynamic, false)
   );
-  if (UNLIKELY(ret.getRawType() == KindOfRef)) {
+  if (UNLIKELY(isRefType(ret.getRawType()))) {
     tvUnbox(*ret.asTypedValue());
   }
 

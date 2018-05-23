@@ -1783,7 +1783,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
     for (ssize_t i = 0; i < argc; ++i) {
       const TypedValue *from = &argv[i];
       TypedValue *to = vmStack().allocTV();
-      if (LIKELY(from->m_type != KindOfRef || !f->byRef(i))) {
+      if (LIKELY(!isRefType(from->m_type) || !f->byRef(i))) {
         cellDup(*tvToCell(from), *to);
       } else {
         refDup(*from, *to);

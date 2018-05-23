@@ -763,9 +763,9 @@ static Variant to_double(UncheckedBuffer &buf) {
   return ret;
 }
 
-static void json_create_zval(Variant &z, UncheckedBuffer &buf, int type,
+static void json_create_zval(Variant &z, UncheckedBuffer &buf, DataType type,
                              int64_t options) {
-  switch (DataType(type)) {
+  switch (type) {
     case KindOfBoolean:
       z = (buf.data() && (*buf.data() == 't'));
       return;
@@ -1020,10 +1020,10 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   UncheckedBuffer *key = &json->sb_key;
   static const int kMaxPersistentStringBufferCapacity = 256 * 1024;
 
-  int type = -1;
+  DataType type = kInvalidDataType;
   unsigned short utf16 = 0;
 
-  auto reset_type = [&] { type = -1; };
+  auto reset_type = [&] { type = kInvalidDataType; };
 
   json->depth = depth;
   // Since the stack is maintainined on a per request basis, for performance
@@ -1163,7 +1163,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
         }
         /*** END Facebook: json_utf8_loose ***/
 
-        if (type != -1 &&
+        if (type != kInvalidDataType &&
             json->stack[json->top].mode == Mode::OBJECT) {
           Variant mval;
           json_create_zval(mval, *buf, type, options);
@@ -1219,7 +1219,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
         */
       case -5:
         {
-          if (type != -1 &&
+          if (type != kInvalidDataType &&
                json->stack[json->top].mode == Mode::ARRAY) {
             Variant mval;
             json_create_zval(mval, *buf, type, options);
@@ -1274,7 +1274,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
       case -3:
         {
           Variant mval;
-          if (type != -1 &&
+          if (type != kInvalidDataType &&
               (json->stack[json->top].mode == Mode::OBJECT ||
                json->stack[json->top].mode == Mode::ARRAY)) {
             json_create_zval(mval, *buf, type, options);
@@ -1284,7 +1284,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           case Mode::OBJECT:
             if (pop(json, Mode::OBJECT) &&
                 push(json, Mode::KEY)) {
-              if (type != -1) {
+              if (type != kInvalidDataType) {
                 Variant &top = json->stack[json->top].val;
                 object_set(
                   top,
@@ -1298,7 +1298,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             }
             break;
           case Mode::ARRAY:
-            if (type != -1) {
+            if (type != kInvalidDataType) {
               auto& top = json->stack[json->top].val;
               if (container_type == JSONContainerType::COLLECTIONS) {
                 collections::append(top.getObjectData(), mval.asCell());
@@ -1380,26 +1380,27 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           utf16 += dehexchar(b);
           utf16_to_utf8(*buf, utf16);
         }
-      } else if ((type < 0 || type == KindOfNull) &&
+      } else if ((type == kInvalidDataType || type == KindOfNull) &&
                  (c == S_DIG || c == S_ZER)) {
         type = KindOfInt64;
         buf->append((char)b);
       } else if (type == KindOfInt64 && s == 24) {
         type = KindOfDouble;
         buf->append((char)b);
-      } else if ((type < 0 || type == KindOfNull || type == KindOfInt64) &&
+      } else if ((type == kInvalidDataType || type == KindOfNull ||
+                  type == KindOfInt64) &&
                  c == S_DOT) {
         type = KindOfDouble;
         buf->append((char)b);
       } else if (type != KindOfString && c == S_QUO) {
         type = KindOfString;
         /*<fb>*/qchr = b;/*</fb>*/
-      } else if ((type < 0 || type == KindOfNull || type == KindOfInt64 ||
-                  type == KindOfDouble) &&
+      } else if ((type == kInvalidDataType || type == KindOfNull ||
+                  type == KindOfInt64 || type == KindOfDouble) &&
                  ((state == 12 && s == 9) ||
                   (state == 16 && s == 9))) {
         type = KindOfBoolean;
-      } else if (type < 0 && state == 19 && s == 9) {
+      } else if (type == kInvalidDataType && state == 19 && s == 9) {
         type = KindOfNull;
       } else if (type != KindOfString && c > S_WSP) {
         utf16_to_utf8(*buf, b);

@@ -306,7 +306,7 @@ private:
 // any reference to refcounted values.
 ALWAYS_INLINE
 void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
-  if (source->m_type == KindOfRef) {
+  if (isRefType(source->m_type)) {
     // unbox
     auto const inner = source->m_data.pref->tv();
     tvCopy(*inner, *source);

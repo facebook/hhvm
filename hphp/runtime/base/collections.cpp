@@ -295,7 +295,7 @@ void deepCopy(TypedValue* tv) {
 
 template <bool throwOnMiss>
 static inline TypedValue* atImpl(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   switch (obj->collectionType()) {
 #define X(type) case CollectionType::type: \
                   return c_##type::OffsetAt<throwOnMiss>(obj, key);
@@ -313,7 +313,7 @@ TypedValue* get(ObjectData* obj, const TypedValue* key) {
 }
 
 TypedValue* atLval(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   TypedValue* ret;
   switch (obj->collectionType()) {
     case CollectionType::Pair:
@@ -375,7 +375,7 @@ TypedValue* atLval(ObjectData* obj, const TypedValue* key) {
 }
 
 TypedValue* atRw(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   switch (obj->collectionType()) {
     case CollectionType::Vector:
       // Since we're exposing an element of a Vector in an read/write context,
@@ -415,7 +415,7 @@ bool contains(ObjectData* obj, const Variant& offset) {
 }
 
 bool isset(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   switch (obj->collectionType()) {
     case CollectionType::Vector:
     case CollectionType::ImmVector:
@@ -433,7 +433,7 @@ bool isset(ObjectData* obj, const TypedValue* key) {
 }
 
 bool empty(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   switch (obj->collectionType()) {
     case CollectionType::Vector:
     case CollectionType::ImmVector:
@@ -451,7 +451,7 @@ bool empty(ObjectData* obj, const TypedValue* key) {
 }
 
 void unset(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   switch (obj->collectionType()) {
     case CollectionType::Vector:
       c_Vector::OffsetUnset(obj, key);
@@ -471,7 +471,7 @@ void unset(ObjectData* obj, const TypedValue* key) {
 }
 
 void append(ObjectData* obj, TypedValue* val) {
-  assertx(val->m_type != KindOfRef);
+  assertx(!isRefType(val->m_type));
   assertx(val->m_type != KindOfUninit);
   switch (obj->collectionType()) {
     case CollectionType::Vector:
@@ -492,8 +492,8 @@ void append(ObjectData* obj, TypedValue* val) {
 }
 
 void set(ObjectData* obj, const TypedValue* key, const TypedValue* val) {
-  assertx(key->m_type != KindOfRef);
-  assertx(val->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
+  assertx(!isRefType(val->m_type));
   assertx(val->m_type != KindOfUninit);
   switch (obj->collectionType()) {
     case CollectionType::Vector:

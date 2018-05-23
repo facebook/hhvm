@@ -83,7 +83,7 @@ void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
     auto const mask = [&] { return uint64_t{(*aux).u_raw} << 32; };
 
     if (!retLoc.hasReg(1)) {
-      auto const dt = retVal->type().toDataType();
+      auto const dt = static_cast<data_type_t>(retVal->type().toDataType());
       return aux ? v.cns(dt | mask()) : v.cns(dt);
     }
     auto const type = retLoc.reg(1);

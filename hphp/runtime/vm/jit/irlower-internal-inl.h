@@ -188,15 +188,16 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
   // Nothing to check.
   if (type == TGen) return;
 
-  if (RuntimeOption::EvalJitProfileGuardTypes) {
+  // Profile the type being guarded. We skip TUncounted here because that's
+  // handled in emitIsTVTypeRefCounted, which has a number of other callers.
+  if (RuntimeOption::EvalJitProfileGuardTypes && type != TUncounted) {
     emitProfileGuardType(v, type);
   }
 
   auto const cc = [&] {
-
     auto const mask_cmp = [&] (int mask, int bits, ConditionCode cc) {
       auto const masked = emitMaskTVType(v, mask, typeSrc);
-      emitCmpTVType(v, sf, bits, masked);
+      emitCmpTVType(v, sf, static_cast<DataType>(bits), masked);
       return cc;
     };
 
@@ -227,7 +228,9 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
     // These are intentionally == and not <=.
     if (type == TNull)          return cmp(KindOfNull, CC_LE);
     if (type == TUncountedInit) return test(KindOfUncountedInitBit, CC_NZ);
-    if (type == TUncounted)     return cmp(KindOfRefCountThreshold, CC_LE);
+    if (type == TUncounted) {
+      return ccNegate(emitIsTVTypeRefCounted(v, sf, typeSrc));
+    }
     if (type == TCell)          return cmp(KindOfRef, CC_NE);
 
     always_assert(type.isKnownDataType());

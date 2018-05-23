@@ -84,7 +84,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
       // Avoid 'this' pointer overwriting by reserving it as an argument.
       // There's no need for a fixup, because we setup a frame on the c++
       // stack.
-      v << callm{lookupDestructor(v, type), arg_regs(1)};
+      v << callm{lookupDestructor(v, type, true), arg_regs(1)};
       // fallthru
     };
 
@@ -130,12 +130,12 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     auto const sf = v.makeReg();
 
     // We can't use emitLoadTVType() here because it does a byte load, and we
-    // need to sign-extend since we use `type' as a 32-bit array index to the
+    // need to sign-extend since we use `type' as a 64-bit array index to the
     // destructor table.
     v << loadzbl{local[TVOFF(m_type)], type};
-    emitCmpTVTypeRefCounted(v, sf, type);
+    auto const cc = emitIsTVTypeRefCounted(v, sf, type);
 
-    ifThen(v, CC_G, sf, [&] (Vout& v) {
+    ifThen(v, cc, sf, [&] (Vout& v) {
       v << call{release, local | type};
     });
   };

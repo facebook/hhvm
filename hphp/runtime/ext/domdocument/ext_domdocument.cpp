@@ -2416,7 +2416,7 @@ Variant HHVM_METHOD(DOMNode, lookupNamespaceUri,
                     const Variant& namespaceuri) {
   if (!namespaceuri.isString() && !namespaceuri.isNull()) {
     raise_param_type_warning("DOMNode::lookupNamespaceUri", 1,
-                             DataType::KindOfString, namespaceuri.getType());
+                             KindOfString, namespaceuri.getType());
     return init_null();
   }
 

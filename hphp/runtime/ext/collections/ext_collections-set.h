@@ -38,7 +38,7 @@ protected:
   void addRaw(int64_t k);
   void addRaw(StringData* k);
   void addRaw(Cell tv) {
-    assertx(tv.m_type != KindOfRef);
+    assertx(!isRefType(tv.m_type));
     if (tv.m_type == KindOfInt64) {
       addRaw(tv.m_data.num);
     } else if (isStringType(tv.m_type)) {
@@ -56,7 +56,7 @@ public:
   void add(int64_t k);
   void add(StringData* k);
   void add(Cell tv) {
-    assertx(tv.m_type != KindOfRef);
+    assertx(!isRefType(tv.m_type));
     if (tv.m_type == KindOfInt64) {
       add(tv.m_data.num);
     } else if (isStringType(tv.m_type)) {
@@ -97,7 +97,7 @@ public:
 
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
-    assertx(key->m_type != KindOfRef);
+    assertx(!isRefType(key->m_type));
     auto set = static_cast<BaseSet*>(obj);
     ssize_t p;
     if (key->m_type == KindOfInt64) {

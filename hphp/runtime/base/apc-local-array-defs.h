@@ -31,7 +31,8 @@ inline APCLocalArray::APCLocalArray(const APCArray* source)
   m_size = m_arr->size();
   source->reference();
   tl_heap->addApcArray(this);
-  memset(localCache(), KindOfUninit, m_size * sizeof(TypedValue));
+  memset(localCache(), static_cast<data_type_t>(KindOfUninit),
+         m_size * sizeof(TypedValue));
   assertx(hasExactlyOneRef());
 }
 

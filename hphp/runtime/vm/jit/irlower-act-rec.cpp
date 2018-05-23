@@ -472,7 +472,7 @@ void shuffleExtraArgsVariadic(ActRec* ar) {
     ar,
     std::reverse_iterator<TypedValue*>(tvArgs + numExtra),
     std::reverse_iterator<TypedValue*>(tvArgs),
-    [](TypedValue v)  { return v.m_type == KindOfRef; },
+    [](TypedValue v)  { return isRefType(v.m_type); },
     [&](TypedValue v) { ai.appendWithRef(v); },
     [&](TypedValue v) { ai.appendWithRef(v); }
   );
@@ -482,7 +482,7 @@ void shuffleExtraArgsVariadic(ActRec* ar) {
     tvArgs + numExtra,
     /* If the value wasn't a ref, we'll have definitely inc-reffed it, so we
      * won't re-enter. */
-    [](TypedValue v){ return v.m_type == KindOfRef; },
+    [](TypedValue v){ return isRefType(v.m_type); },
     [](TypedValue v){ tvDecRefGenNZ(v); },
     [](TypedValue v){ tvDecRefGen(v); }
   );
@@ -511,7 +511,7 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
       ar,
       std::reverse_iterator<TypedValue*>(tvArgs + numExtra),
       std::reverse_iterator<TypedValue*>(tvArgs),
-      [](TypedValue v)  { return v.m_type == KindOfRef; },
+      [](TypedValue v)  { return isRefType(v.m_type); },
       [&](TypedValue v) { ai.appendWithRef(v); },
       [&](TypedValue v) { ai.appendWithRef(v); }
     );

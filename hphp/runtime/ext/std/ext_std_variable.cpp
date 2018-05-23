@@ -540,7 +540,7 @@ int64_t HHVM_FUNCTION(extract,
                       const String& prefix = "") {
   auto arrByRef = false;
   auto arr_tv = vref_array.wrapped().asTypedValue();
-  if (arr_tv->m_type == KindOfRef) {
+  if (isRefType(arr_tv->m_type)) {
     arr_tv = arr_tv->m_data.pref->tv();
     arrByRef = true;
   }

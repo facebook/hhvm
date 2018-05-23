@@ -460,7 +460,7 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
                           nullptr, invName, ExecutionContext::InvokeCuf,
                           false, dynamic, checkRef)
   );
-  if (UNLIKELY(ret.getRawType() == KindOfRef)) {
+  if (UNLIKELY(isRefType(ret.getRawType()))) {
     tvUnbox(*ret.asTypedValue());
   }
   return ret;
@@ -489,7 +489,7 @@ invoke(const String& function, const Variant& params, strhash_t /*hash*/,
                             nullptr, nullptr, ExecutionContext::InvokeNormal,
                             useWeakTypes)
     );
-    if (UNLIKELY(ret.getRawType() == KindOfRef)) {
+    if (UNLIKELY(isRefType(ret.getRawType()))) {
       tvUnbox(*ret.asTypedValue());
     }
     return ret;
@@ -522,7 +522,7 @@ Variant invoke_static_method(const String& s, const String& method,
   auto ret = Variant::attach(
     g_context->invokeFunc(f, params, nullptr, class_)
   );
-  if (UNLIKELY(ret.getRawType() == KindOfRef)) {
+  if (UNLIKELY(isRefType(ret.getRawType()))) {
     tvUnbox(*ret.asTypedValue());
   }
   return ret;

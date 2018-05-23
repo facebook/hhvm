@@ -125,7 +125,8 @@ void implInitObjPropsFast(Vout& v, IRLS& env, const IRInstruction* inst,
       if (!isNullType(initTV.m_type)) {
         emitImmStoreq(v, initTV.m_data.num, dst[propOffset + TVOFF(m_data)]);
       }
-      v << storebi{initTV.m_type, dst[propOffset + TVOFF(m_type)]};
+      v << storebi{static_cast<data_type_t>(initTV.m_type),
+                   dst[propOffset + TVOFF(m_type)]};
     }
     return;
   }

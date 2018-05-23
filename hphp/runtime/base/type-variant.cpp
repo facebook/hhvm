@@ -158,7 +158,7 @@ void tweak_variant_dtors() {
   void Variant::set(argType v) noexcept {                 \
     if (isPrimitive()) {                                  \
       setOp;                                              \
-    } else if (m_type == KindOfRef) {                     \
+    } else if (isRefType(m_type)) {                     \
       m_data.pref->var()->set(v);                         \
     } else {                                              \
       auto const old = *asTypedValue();                   \
@@ -181,7 +181,7 @@ IMPLEMENT_SET(const StaticString&,
 
 #define IMPLEMENT_PTR_SET(ptr, member, dtype)                           \
   void Variant::set(ptr *v) noexcept {                                  \
-    Variant *self = m_type == KindOfRef ? m_data.pref->var() : this;    \
+    Variant *self = isRefType(m_type) ? m_data.pref->var() : this;    \
     if (UNLIKELY(!v)) {                                                 \
       self->setNull();                                                  \
     } else {                                                            \
@@ -205,7 +205,7 @@ IMPLEMENT_PTR_SET(ResourceHdr, pres, KindOfResource)
 
 #define IMPLEMENT_STEAL(ptr, member, dtype)                             \
   void Variant::steal(ptr* v) noexcept {                                \
-    Variant* self = (m_type == KindOfRef) ? m_data.pref->var() : this;  \
+    Variant* self = isRefType(m_type) ? m_data.pref->var() : this;  \
     if (UNLIKELY(!v)) {                                                 \
       self->setNull();                                                  \
     } else {                                                            \
@@ -361,12 +361,11 @@ inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
 // type conversions
 
 bool Variant::toBooleanHelper() const {
-  assertx(m_type > KindOfInt64);
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:
-    case KindOfInt64:         return m_data.num;
+    case KindOfInt64:         assertx(false); return m_data.num;
     case KindOfDouble:        return m_data.dbl != 0;
     case KindOfPersistentString:
     case KindOfString:        return m_data.pstr->toBoolean();
@@ -386,12 +385,11 @@ bool Variant::toBooleanHelper() const {
 }
 
 int64_t Variant::toInt64Helper(int base /* = 10 */) const {
-  assertx(m_type > KindOfInt64);
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:
-    case KindOfInt64:         return m_data.num;
+    case KindOfInt64:         assertx(false); return m_data.num;
     case KindOfDouble:        return double_to_int64(m_data.dbl);
     case KindOfPersistentString:
     case KindOfString:        return m_data.pstr->toInt64(base);

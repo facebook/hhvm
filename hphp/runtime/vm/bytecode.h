@@ -279,7 +279,7 @@ void frame_free_locals_no_hook(ActRec* fp);
   ([&] {                                                                \
     TypedValue val_;                                                    \
     new (&val_) Variant(x);                                             \
-    assertx(val_.m_type != KindOfRef && val_.m_type != KindOfUninit);    \
+    assertx(!isRefType(val_.m_type) && val_.m_type != KindOfUninit);    \
     return val_;                                                        \
   }())
 
@@ -531,7 +531,7 @@ public:
   void dup() {
     assertx(m_top != m_base);
     assertx(m_top != m_elms);
-    assertx(m_top->m_type != KindOfRef);
+    assertx(!isRefType(m_top->m_type));
     Cell* fr = m_top;
     m_top--;
     Cell* to = m_top;
@@ -541,7 +541,7 @@ public:
   ALWAYS_INLINE
   void box() {
     assertx(m_top != m_base);
-    assertx(m_top->m_type != KindOfRef);
+    assertx(!isRefType(m_top->m_type));
     tvBox(*m_top);
   }
 
@@ -766,7 +766,7 @@ public:
   ALWAYS_INLINE
   void replaceC(const Cell c) {
     assertx(m_top != m_base);
-    assertx(m_top->m_type != KindOfRef);
+    assertx(!isRefType(m_top->m_type));
     tvDecRefGen(m_top);
     *m_top = c;
   }
@@ -775,7 +775,7 @@ public:
   ALWAYS_INLINE
   void replaceC() {
     assertx(m_top != m_base);
-    assertx(m_top->m_type != KindOfRef);
+    assertx(!isRefType(m_top->m_type));
     tvDecRefGen(m_top);
     *m_top = make_tv<DT>();
   }
@@ -784,7 +784,7 @@ public:
   ALWAYS_INLINE
   void replaceC(T value) {
     assertx(m_top != m_base);
-    assertx(m_top->m_type != KindOfRef);
+    assertx(!isRefType(m_top->m_type));
     tvDecRefGen(m_top);
     *m_top = make_tv<DT>(value);
   }
@@ -821,7 +821,7 @@ public:
   ALWAYS_INLINE
   Ref* topV() {
     assertx(m_top != m_base);
-    assertx(m_top->m_type == KindOfRef);
+    assertx(isRefType(m_top->m_type));
     return (Ref*)m_top;
   }
 
@@ -834,7 +834,7 @@ public:
   ALWAYS_INLINE
   Cell* indC(size_t ind) {
     assertx(m_top != m_base);
-    assertx(m_top[ind].m_type != KindOfRef);
+    assertx(!isRefType(m_top[ind].m_type));
     return tvAssertCell(&m_top[ind]);
   }
 

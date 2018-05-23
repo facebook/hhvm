@@ -420,7 +420,8 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   if (returnType <= TCell || returnType <= TBoxedCell) {
     // The return type is Variant; fold KindOfUninit to KindOfNull.
     assertx(isBuiltinByRef(funcReturnType) && !isReqPtrRef(funcReturnType));
-    static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
+    static_assert(KindOfUninit == static_cast<DataType>(0),
+                  "KindOfUninit must be 0 for test");
 
     v << load{rvmtl()[returnOffset + TVOFF(m_data)], dstData};
 
@@ -430,6 +431,8 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
 
       auto const sf = v.makeReg();
       auto const nulltype = v.cns(KindOfNull);
+      static_assert(KindOfUninit == static_cast<DataType>(0),
+                    "Codegen assumes KindOfUninit == 0");
       v << testb{rtype, rtype, sf};
       v << cmovb{CC_Z, sf, rtype, nulltype, dstType};
     }

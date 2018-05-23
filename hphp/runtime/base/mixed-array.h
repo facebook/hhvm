@@ -145,8 +145,7 @@ struct MixedArrayElm {
   // Elm's data.m_type == kInvalidDataType for deleted slots.
   ALWAYS_INLINE bool isTombstone() const {
     assertx(isRealType(data.m_type) || data.m_type == kInvalidDataType);
-    return data.m_type < KindOfUninit;
-    static_assert(KindOfUninit == 0 && kInvalidDataType < 0, "");
+    return data.m_type == kInvalidDataType;
   }
 
   static constexpr ptrdiff_t keyOff() {
@@ -531,9 +530,7 @@ public:
   bool isTombstone(ssize_t pos) const;
   // Elm's data.m_type == kInvalidDataType for deleted slots.
   static bool isTombstone(DataType t) {
-    assertx(isRealType(t) || t == kInvalidDataType);
-    return t < KindOfUninit;
-    static_assert(KindOfUninit == 0 && kInvalidDataType < 0, "");
+    return t == kInvalidDataType;
   }
 
 private:

@@ -529,8 +529,9 @@ void implCheckMixedArrayLikeOffset(IRLS& env, const IRInstruction* inst,
   }
   { // Fail if the Elm is a tombstone.  See MixedArray::isTombstone().
     auto const sf = v.makeReg();
-    v << cmpbim{KindOfUninit, arr[elmOff + Elm::dataOff() + TVOFF(m_type)], sf};
-    ifThen(v, CC_L, sf, branch);
+    v << cmpbim{static_cast<data_type_t>(kInvalidDataType),
+                arr[elmOff + Elm::dataOff() + TVOFF(m_type)], sf};
+    ifThen(v, CC_E, sf, branch);
   }
 }
 
@@ -604,8 +605,9 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
   }
   { // Fail if the Elm is a tombstone.  See SetArray::isTombstone().
     auto const sf = v.makeReg();
-    v << cmpbim{KindOfUninit, keyset[tvOff + TVOFF(m_type)], sf};
-    ifThen(v, CC_L, sf, branch);
+    v << cmpbim{static_cast<data_type_t>(kInvalidDataType),
+                keyset[tvOff + TVOFF(m_type)], sf};
+    ifThen(v, CC_E, sf, branch);
   }
 }
 

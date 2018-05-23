@@ -1389,7 +1389,7 @@ void VariableSerializer::decNestedLevel(const TypedValue& tv) {
 }
 
 void VariableSerializer::serializeRef(const TypedValue* tv, bool isArrayKey) {
-  assertx(tv->m_type == KindOfRef);
+  assertx(isRefType(tv->m_type));
   // Ugly, but behavior is different for serialize
   if (getType() == VariableSerializer::Type::Serialize ||
       getType() == VariableSerializer::Type::Internal ||

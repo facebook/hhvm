@@ -63,7 +63,7 @@ getArg(ActRec *ar, unsigned arg) {
     raise_warning("Required parameter %d not passed", (int)arg);
     return nullptr;
   }
-  if (tv->m_type != KindOfRef) {
+  if (!isRefType(tv->m_type)) {
     raise_warning("Argument %d not passed as reference", (int)arg);
     return nullptr;
   }

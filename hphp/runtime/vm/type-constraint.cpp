@@ -423,7 +423,7 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
   assertx(hasConstraint() && !isTypeVar() && !isMixed() && !isTypeConstant());
 
   // This is part of the interpreter runtime; perf matters.
-  if (tv->m_type == KindOfRef) {
+  if (isRefType(tv->m_type)) {
     tv = tv->m_data.pref->tv();
   }
 
@@ -681,7 +681,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
         // HNI conversions implicitly unbox references, this behavior is wrong,
         // in particular it breaks the way type conversion works for PHP 7
         // scalar type hints
-        if (tv->m_type == KindOfRef) {
+        if (isRefType(tv->m_type)) {
           auto inner = tv->m_data.pref->var()->asTypedValue();
           if (tvCoerceParamInPlace(inner, *dt, func->isBuiltin())) {
             tvAsVariant(tv) = tvAsVariant(inner);

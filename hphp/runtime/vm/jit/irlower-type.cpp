@@ -68,7 +68,7 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
     if (srcType != InvalidReg) {
       v << copy{srcType, dstType};
     } else {
-      v << ldimmq{src->type().toDataType(), dstType};
+      v << ldimmb{static_cast<data_type_t>(src->type().toDataType()), dstType};
     }
   };
 

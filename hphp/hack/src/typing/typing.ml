@@ -1923,8 +1923,6 @@ and expr_
                         && (bop = Ast.EQeqeq || bop = Ast.Diff2) ->
       let e, ne = if snd e2 = Nast.Null then e1, e2 else e2, e1 in
       let _, te, ty = raw_expr in_cond env e in
-      if not in_cond
-      then Typing_equality_check.assert_nullable p bop env ty;
       let tne = T.make_typed_expr (fst ne) ty T.Null in
       let te1, te2 = if snd e2 = Nast.Null then te, tne else tne, te in
       make_result env (T.Binop(bop, te1, te2))
@@ -5599,8 +5597,6 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast.Eqeq  | Ast.Diff  ->
       make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
   | Ast.EQeqeq | Ast.Diff2 ->
-      if not in_cond
-      then Typing_equality_check.assert_nontrivial p bop env ty1 ty2;
       make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
   | Ast.Lt | Ast.Lte | Ast.Gt | Ast.Gte | Ast.Cmp ->
       let error_enabled = TypecheckerOptions.disallow_unsafe_comparisons (Env.get_options env) in

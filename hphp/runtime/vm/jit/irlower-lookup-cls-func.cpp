@@ -202,8 +202,9 @@ void implLdCached(IRLS& env, const IRInstruction* inst,
       }
     );
   } else {
+    auto const pptr = rds::handleToPtr<LowPtr<T>, rds::Mode::Persistent>(ch);
     auto const ptr = v.makeReg();
-    emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<T>));
+    emitLdLowPtr(v, *v.cns(pptr), ptr, sizeof(LowPtr<T>));
 
     auto const sf = v.makeReg();
     v << testq{ptr, ptr, sf};
@@ -223,8 +224,12 @@ void implLdCachedSafe(IRLS& env, const IRInstruction* inst,
   if (rds::isNormalHandle(ch)) {
     auto const sf = checkRDSHandleInitialized(v, ch);
     fwdJcc(v, env, CC_NE, sf, inst->taken());
+    emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<T>));
+  } else {
+    assertx(rds::isPersistentHandle(ch));
+    auto const pptr = rds::handleToPtr<LowPtr<T>, rds::Mode::Persistent>(ch);
+    emitLdLowPtr(v, *v.cns(pptr), dst, sizeof(LowPtr<T>));
   }
-  emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<T>));
 }
 
 }

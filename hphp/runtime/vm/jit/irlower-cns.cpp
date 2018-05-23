@@ -90,22 +90,21 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
     }
     return;
   }
-  assertx(rds::isPersistentHandle(ch));
 
-  auto const& cns = rds::handleToRef<TypedValue, rds::Mode::Persistent>(ch);
+  auto const pcns = rds::handleToPtr<TypedValue, rds::Mode::Persistent>(ch);
 
-  if (cns.m_type == KindOfUninit) {
-    loadTV(v, inst->dst(), dst, rvmtl()[ch]);
+  if (pcns->m_type == KindOfUninit) {
+    loadTV(v, inst->dst(), dst, *v.cns(pcns));
     checkUninit();
   } else {
     // Statically known constant.
     assertx(!dst.isFullSIMD());
-    switch (cns.m_type) {
+    switch (pcns->m_type) {
       case KindOfNull:
         v << copy{v.cns(nullptr), dst.reg(0)};
         break;
       case KindOfBoolean:
-        v << copy{v.cns(!!cns.m_data.num), dst.reg(0)};
+        v << copy{v.cns(!!pcns->m_data.num), dst.reg(0)};
         break;
       case KindOfInt64:
       case KindOfPersistentString:
@@ -121,15 +120,15 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
       case KindOfObject:
       case KindOfResource:
       case KindOfRef:
-        v << copy{v.cns(cns.m_data.num), dst.reg(0)};
+        v << copy{v.cns(pcns->m_data.num), dst.reg(0)};
         break;
       case KindOfDouble:
-        v << copy{v.cns(cns.m_data.dbl), dst.reg(0)};
+        v << copy{v.cns(pcns->m_data.dbl), dst.reg(0)};
         break;
       case KindOfUninit:
         not_reached();
     }
-    v << copy{v.cns(cns.m_type), dst.reg(1)};
+    v << copy{v.cns(pcns->m_type), dst.reg(1)};
   }
 }
 
@@ -264,7 +263,7 @@ void implLookupCns(IRLS& env, const IRInstruction* inst) {
   assertx(rds::isHandleBound(ch));
 
   auto const args = argGroup(env, inst)
-    .imm(safe_cast<int32_t>(ch))
+    .imm(ch)
     .immPtr(cnsName)
     .imm(inst->is(LookupCnsE));
 
@@ -297,7 +296,7 @@ void cgLookupCnsU(IRLS& env, const IRInstruction* inst) {
   assertx(rds::isHandleBound(fallbackCh));
 
   auto const args = argGroup(env, inst)
-    .imm(safe_cast<int32_t>(fallbackCh))
+    .imm(fallbackCh)
     .immPtr(cnsName)
     .immPtr(fallbackName);
 
@@ -390,6 +389,7 @@ Cell lookupClsCnsHelper(TypedValue* cache, const NamedEntity* ne,
 void cgInitClsCns(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<InitClsCns>();
   auto const link = rds::bindClassConstant(extra->clsName, extra->cnsName);
+  assertx(link.isNormal());
   auto& v = vmain(env);
 
   auto const args = argGroup(env, inst)

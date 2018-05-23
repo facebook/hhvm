@@ -333,7 +333,14 @@ IMPL_OPCODE_CALL(LdClsPropAddrOrRaise)
 
 void cgLdRDSAddr(IRLS& env, const IRInstruction* inst) {
   auto const handle = inst->extra<LdRDSAddr>()->handle;
-  vmain(env) << lea{rvmtl()[handle], dstLoc(env, inst, 0).reg()};
+  if (rds::isPersistentHandle(handle)) {
+    // Persistent RDS handles are not relative to RDS base.
+    auto const addr = rds::handleToPtr<void, rds::Mode::Persistent>(handle);
+    auto& v = vmain(env);
+    v << copy{v.cns(addr), dstLoc(env, inst, 0).reg()};
+  } else {
+    vmain(env) << lea{rvmtl()[handle], dstLoc(env, inst, 0).reg()};
+  }
 }
 
 void cgLdTVAux(IRLS& env, const IRInstruction* inst) {

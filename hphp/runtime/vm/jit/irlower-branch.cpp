@@ -279,6 +279,7 @@ void cgCheckInitMem(IRLS& env, const IRInstruction* inst) {
 
 void cgProfileSwitchDest(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ProfileSwitchDest>();
+  assertx(!rds::isPersistentHandle(extra->handle));
   auto const idx = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 

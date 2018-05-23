@@ -284,6 +284,7 @@ void cgLdClsMethodCacheCls(IRLS& env, const IRInstruction* inst) {
     extra->methodName,
     ctxName(inst->marker())
   );
+  assertx(rds::isNormalHandle(ch));
 
   // The StaticMethodCache here is guaranteed to already be initialized in RDS
   // by the pre-conditions of this instruction.
@@ -329,6 +330,7 @@ void cgLdClsMethodFCacheFunc(IRLS& env, const IRInstruction* inst) {
     extra->methodName,
     ctxName(inst->marker())
   );
+  assertx(rds::isNormalHandle(ch));
 
   auto const sf = checkRDSHandleInitialized(v, ch);
   fwdJcc(v, env, CC_NE, sf, inst->taken());

@@ -221,6 +221,10 @@ using FreeLists = folly::sorted_vector_map<unsigned,
 FreeLists s_normal_free_lists;
 FreeLists s_persistent_free_lists;
 
+#if RDS_FIXED_PERSISTENT_BASE
+// Allocate 2M from low memory each time.
+constexpr size_t kPersistentChunkSize = 16u << 10;
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -230,13 +234,25 @@ namespace detail {
 // Current allocation frontier for the non-persistent region.
 size_t s_normal_frontier = sizeof(Header);
 
-// Frontier and base of the persistent region.
-size_t s_persistent_base = 0;
-size_t s_persistent_frontier = 0;
-
 // Frontier for the "local" part of the persistent region (data not
 // shared between threads, but not zero'd)---downward-growing.
 size_t s_local_frontier = 0;
+size_t s_local_base = 0;
+
+#if !RDS_FIXED_PERSISTENT_BASE
+uintptr_t s_persistent_base = 0;
+size_t s_persistent_size = 0;
+#else
+// It is a constexpr equal to 0 defined in rds-inl.h
+#endif
+
+// Persistent region grows down from frontier towards limit, when it runs out of
+// space, we can allocate another chunk and redefine the frontier and the limit,
+// as guarded by s_allocMutex.
+uintptr_t s_persistent_frontier = 0;
+uintptr_t s_persistent_limit = 0;
+
+size_t s_persistent_usage = 0;
 
 AllocDescriptorList s_normal_alloc_descs;
 AllocDescriptorList s_local_alloc_descs;
@@ -270,9 +286,9 @@ folly::Optional<Handle> findFreeBlock(FreeLists& lists, size_t size,
     for (auto list_it = it->second.begin();
          list_it != it->second.end();
          ++list_it) {
-      auto const raw = *list_it;
+      auto const raw = static_cast<size_t>(*list_it);
+      static_assert(sizeof(raw) > 4, "avoid 32-bit overflow");
       auto const end = raw + blockSize;
-
       auto const handle = roundUp(raw, align);
 
       if (handle + size > end) continue;
@@ -290,8 +306,37 @@ folly::Optional<Handle> findFreeBlock(FreeLists& lists, size_t size,
   return folly::none;
 }
 
+// Create a new chunk for use in persistent RDS, but don't add to
+// 's_persistent_free_lists' yet.
+NEVER_INLINE void addNewPersistentChunk(size_t size) {
+  assertx(size > 0 && size < kMaxHandle && size % 4096 == 0);
+  auto const raw = static_cast<char*>(low_malloc(size));
+  auto const addr = reinterpret_cast<uintptr_t>(raw);
+  memset(raw, 0, size);
+#if !RDS_FIXED_PERSISTENT_BASE
+  // This is only called once in processInit() if we don't have a persistent
+  // base.
+  always_assert(s_persistent_base == 0);
+  s_persistent_limit = addr;
+  s_persistent_frontier = addr + size;
+  s_persistent_base = s_persistent_frontier - size4g;
+#else
+  always_assert_flog(addr >= kMinPersistentHandle && addr < size4g,
+                     "low_malloc() failed to return suitable address for RDS");
+  assertx(s_persistent_frontier >= s_persistent_limit);
+  if (s_persistent_frontier != s_persistent_limit) {
+    addFreeBlock(s_persistent_free_lists,
+                 ptrToHandle<Mode::Persistent>(s_persistent_limit),
+                 s_persistent_frontier - s_persistent_limit);
+  }
+  s_persistent_limit = addr;
+  s_persistent_frontier = addr + size;
+#endif
+}
+
 Handle alloc(Mode mode, size_t numBytes,
              size_t align, type_scan::Index tyIndex) {
+  assertx(align <= 16);
   switch (mode) {
     case Mode::Normal: {
       align = folly::nextPowTwo(std::max(align, alignof(GenNumber)));
@@ -344,25 +389,33 @@ Handle alloc(Mode mode, size_t numBytes,
     case Mode::Persistent: {
       align = folly::nextPowTwo(align);
       always_assert(align <= numBytes);
+      s_persistent_usage += numBytes;
 
       if (auto free = findFreeBlock(s_persistent_free_lists, numBytes, align)) {
         return *free;
       }
 
-      // Note: it's ok not to zero new allocations, because we've never done
-      // anything with this part of the page yet, so it must still be zero.
-      auto const oldFrontier = s_persistent_frontier;
-      s_persistent_frontier = roundUp(s_persistent_frontier, align);
-      addFreeBlock(s_persistent_free_lists, oldFrontier,
-                   s_persistent_frontier - oldFrontier);
-      s_persistent_frontier += numBytes;
+      auto const newFrontier =
+        (s_persistent_frontier - numBytes) & ~(align - 1);
+      if (newFrontier >= s_persistent_limit) {
+        s_persistent_frontier = newFrontier;
+        return ptrToHandle<Mode::Persistent>(newFrontier);
+      }
 
+#if RDS_FIXED_PERSISTENT_BASE
+      // Allocate on demand, add kPersistentChunkSize each time.
+      assertx(numBytes <= kPersistentChunkSize);
+      addNewPersistentChunk(kPersistentChunkSize);
+      return alloc(mode, numBytes, align, tyIndex); // retry after a new chunk
+#else
+      // We reserved plenty of space in s_persistent_free_lists in the beginning
+      // of the process, but maybe it is time to increase the size in the
+      // config.
       always_assert_flog(
-        s_persistent_frontier < RuntimeOption::EvalJitTargetCacheSize,
+        false,
         "Ran out of RDS space (mode=Persistent)"
       );
-
-      return s_persistent_frontier - numBytes;
+#endif
     }
     case Mode::Local: {
       align = folly::nextPowTwo(align);
@@ -387,8 +440,6 @@ Handle alloc(Mode mode, size_t numBytes,
     default:
       not_reached();
   }
-
-  not_reached();
 }
 
 Handle allocUnlocked(Mode mode, size_t numBytes,
@@ -503,18 +554,29 @@ std::vector<void*> s_tlBaseList;
 
 static size_t s_next_bit;
 static size_t s_bits_to_go;
-static int s_tc_fd;
-
-// Mapping from names to targetcache locations.
-typedef tbb::concurrent_hash_map<const StringData*, Handle,
-        StringDataHashICompare>
-  HandleMapIS;
-
-typedef tbb::concurrent_hash_map<const StringData*, Handle,
-        StringDataHashCompare>
-  HandleMapCS;
 
 //////////////////////////////////////////////////////////////////////
+
+void processInit() {
+  assertx(!s_local_base);
+  if (RuntimeOption::EvalJitTargetCacheSize > 1u << 30) {
+    // The encoding of RDS handles require that the normal and local regions
+    // together be smaller than 1G.
+    RuntimeOption::EvalJitTargetCacheSize = 1u << 30;
+  }
+  s_local_base = RuntimeOption::EvalJitTargetCacheSize * 3 / 4;
+  s_local_frontier = s_local_base;
+
+#if RDS_FIXED_PERSISTENT_BASE
+  auto constexpr allocSize = kPersistentChunkSize;
+#else
+  auto const allocSize = RuntimeOption::EvalJitTargetCacheSize / 4;
+#endif
+  addNewPersistentChunk(allocSize),
+
+  s_persistentTrue.bind(Mode::Persistent);
+  *s_persistentTrue = true;
+}
 
 void requestInit() {
   assertx(tl_base);
@@ -560,7 +622,7 @@ void flush() {
       !jit::mcgen::retranslateAllPending()) {
     size_t offset = s_local_frontier & ~0xfff;
     if (madvise(static_cast<char*>(tl_base) + offset,
-                s_persistent_base - offset, MADV_DONTNEED)) {
+                s_local_base - offset, MADV_DONTNEED)) {
       Logger::Warning("RDS local madvise failure: %s\n",
                       folly::errnoStr(errno).c_str());
     }
@@ -582,14 +644,16 @@ void flush() {
  * |  Local      | ^^^
  * |    region   | growing lower
  * |             |
- * +-------------+ <-- tl_base + s_persistent_base
- * |             |
- * | Persistent  | growing higher
- * |     region  | vvv
- * |             |
- * +-------------+ <-- tl_base + s_persistent_frontier
+ * +-------------+ <-- tl_base + s_local_base
  * | \ \ \ \ \ \ |
  * +-------------+ higher addresses
+ *
+ * +-------------+ <--- s_persistent_base
+ * |             |
+ * | Persistent  | not necessarily contiguous when RDS_FIXED_PERSISTENT_BASE
+ * |     region  |
+ * |             |
+ * +-------------+
  */
 
 size_t usedBytes() {
@@ -597,11 +661,11 @@ size_t usedBytes() {
 }
 
 size_t usedLocalBytes() {
-  return s_persistent_base - s_local_frontier;
+  return s_local_base - s_local_frontier;
 }
 
 size_t usedPersistentBytes() {
-  return s_persistent_frontier - s_persistent_base;
+  return s_persistent_usage;
 }
 
 folly::Range<const char*> normalSection() {
@@ -616,45 +680,6 @@ Array& s_constants() {
   return *reinterpret_cast<Array*>(&s_constantsStorage.m_p);
 }
 
-//////////////////////////////////////////////////////////////////////
-
-namespace {
-
-constexpr std::size_t kAllocBitNumBytes = 8;
-
-int allocateSpace(int fd, size_t size) {
-#ifdef __APPLE__
-  fstore_t fst;
-  fst.fst_flags = F_ALLOCATECONTIG;  // All or nothing
-  fst.fst_posmode = F_PEOFPOSMODE;  // Allocate from EOF
-  fst.fst_offset = 0;
-  fst.fst_length = size;
-
-  auto ret = fcntl(fd, F_PREALLOCATE, &fst);
-  if (ret < 0) {
-    fst.fst_flags = F_ALLOCATEALL;  // Try non contiguous
-    ret = fcntl(fd, F_PREALLOCATE, &fst);
-    if (ret < 0) {
-      return ret;
-    }
-  }
-  return ftruncate(fd, size);  // We may have overallocated.
-#elif _MSC_VER
-  // We don't know for sure if the space has actually been reserved.
-  return ftruncate(fd, size);
-#else
-  auto ret = posix_fallocate(fd, 0, size);
-  if (ret < 0) {
-    return ret;
-  }
-  return posix_fadvise(fd, 0, size, POSIX_FADV_DONTNEED);
-#endif
-}
-
-}
-
-/////////////////////////////////////////////////////////////////////
-
 GenNumber currentGenNumber() {
   return header()->currentGen;
 }
@@ -662,6 +687,8 @@ GenNumber currentGenNumber() {
 Handle currentGenNumberHandle() {
   return offsetof(Header, currentGen);
 }
+
+constexpr size_t kAllocBitNumBytes = 8;
 
 size_t allocBit() {
   Guard g(s_allocMutex);
@@ -697,68 +724,28 @@ bool testAndSetBit(size_t bit) {
 }
 
 bool isValidHandle(Handle handle) {
-  return handle >= sizeof(Header) &&
-    handle < RuntimeOption::EvalJitTargetCacheSize;
-}
-
-static void initPersistentCache() {
-  Guard g(s_allocMutex);
-  if (s_tc_fd) return;
-  // Create a file to back our persistent shared RDS region.  We create the file
-  // in /tmp in the hopes that /tmp will be disk backed.  This way the in memory
-  // representation can be sparse even if there is no swap partition.  This also
-  // guarantees us space in the filesystem at startup so we can fail cleanly.
-  s_persistent_base = RuntimeOption::EvalJitTargetCacheSize * 3 / 4;
-  s_persistent_base -= s_persistent_base & (4 * 1024 - 1);
-  char tmpName[] = "/tmp/tcXXXXXX";
-  s_tc_fd = mkstemp(tmpName);
-  always_assert_flog(s_tc_fd != -1,
-                     "Could not create backing file for shared RDS.");
-  unlink(tmpName);
-  auto const fail = allocateSpace(
-    s_tc_fd,
-    RuntimeOption::EvalJitTargetCacheSize - s_persistent_base
-  );
-  if (fail) {
-    close(s_tc_fd);
-    always_assert_flog(false,
-                       "Out of space for shared persistent RDS region.");
-  }
-  s_local_frontier = s_persistent_frontier = s_persistent_base;
+  return handle >= kMinPersistentHandle ||
+    (handle >= sizeof(Header) && handle < s_normal_frontier) ||
+    (handle >= s_local_frontier && handle < s_local_base);
 }
 
 void threadInit(bool shouldRegister) {
-  assertx(tl_base == nullptr);
-
-  if (!s_tc_fd) {
-    initPersistentCache();
+  if (!s_local_base) {
+    processInit();
   }
-
-  tl_base = mmap(nullptr, RuntimeOption::EvalJitTargetCacheSize,
-                 PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+  assertx(tl_base == nullptr);
+  tl_base = mmap(nullptr, s_local_base, PROT_READ | PROT_WRITE,
+                 MAP_ANON | MAP_PRIVATE, -1, 0);
   always_assert_flog(
     tl_base != MAP_FAILED,
-    "Failed to mmap persistent RDS region. errno = {}",
+    "Failed to mmap RDS region. errno = {}",
     folly::errnoStr(errno).c_str()
   );
-#ifdef _MSC_VER
-  // MapViewOfFileEx() requires "the specified memory region is not already in
-  // use by the calling process" when mapping the shared area below. Otherwise
-  // it will return MAP_FAILED. We first map the full size to make sure the
-  // memory area is available. Then we unmap and map the lower portion of the
-  // RDS at the same address.
-  munmap(tl_base, RuntimeOption::EvalJitTargetCacheSize);
-  void* tl_same = mmap(tl_base, s_persistent_base,
-                       PROT_READ | PROT_WRITE,
-                       MAP_ANON | MAP_PRIVATE | MAP_FIXED,
-                       -1, 0);
-  always_assert(tl_same == tl_base);
-#endif
-  numa_bind_to(tl_base, s_persistent_base, s_numaNode);
+  numa_bind_to(tl_base, s_local_base, s_numaNode);
 #ifdef NDEBUG
   // A huge-page RDS is incompatible with VMProtect in vm-regs.cpp
   if (RuntimeOption::EvalMapTgtCacheHuge) {
-    hintHuge(tl_base, RuntimeOption::EvalJitTargetCacheSize);
+    hintHuge(tl_base, s_local_base);
   }
 #endif
 
@@ -769,33 +756,14 @@ void threadInit(bool shouldRegister) {
     s_tlBaseList.push_back(tl_base);
   }
 
-  void* shared_base = (char*)tl_base + s_persistent_base;
-  /*
-   * Map the upper portion of the RDS to a shared area. This is used
-   * for persistent classes and functions, so they are always defined,
-   * and always visible to all threads.
-   */
-  void* mem = mmap(shared_base,
-                   RuntimeOption::EvalJitTargetCacheSize - s_persistent_base,
-                   PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED, s_tc_fd, 0);
-  always_assert(mem == shared_base);
-
   if (RuntimeOption::EvalPerfDataMap) {
     Debug::DebugInfo::recordDataMap(
       tl_base,
-      (char*)tl_base + RuntimeOption::EvalJitTargetCacheSize,
+      (char*)tl_base + s_local_base,
       "rds");
   }
 
   header()->currentGen = 1;
-
-  s_persistentTrue.bind([] {
-      Guard g(s_allocMutex);
-      auto h = alloc(Mode::Persistent, sizeof(bool), alignof(bool),
-                     type_scan::getIndexForScan<bool>());
-      handleToRef<bool, Mode::Persistent>(h) = true;
-      return h;
-    });
 }
 
 void threadExit(bool shouldUnregister) {
@@ -810,19 +778,13 @@ void threadExit(bool shouldUnregister) {
   if (RuntimeOption::EvalPerfDataMap) {
     Debug::DebugInfo::recordDataMap(
       tl_base,
-      (char*)tl_base + RuntimeOption::EvalJitTargetCacheSize,
+      (char*)tl_base + s_local_base,
       "-rds");
   }
 
   auto const base = tl_base;
   auto do_unmap = [base] {
-#ifdef _MSC_VER
-    munmap(base, s_persistent_base);
-    munmap((char*)base + s_persistent_base,
-           RuntimeOption::EvalJitTargetCacheSize - s_persistent_base);
-#else
-    munmap(base, RuntimeOption::EvalJitTargetCacheSize);
-#endif
+    munmap(base, s_local_base);
   };
 
   // Other requests may be reading from this rds section via the s_tlBaseList.

@@ -27,10 +27,22 @@
 
 #include "hphp/runtime/base/types.h"
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/type-scan.h"
 
-namespace HPHP {
+#ifndef RDS_FIXED_PERSISTENT_BASE
+// If RDS_FIXED_PERSISTENT_BASE is defined from compiler command line, don't
+// mess with it.  This makes it possible not to use fixed persistent base when
+// linking against jemalloc 5+.
+#ifndef incl_HPHP_UTIL_ALLOC_H_
+#error "please include alloc.h before determining RDS implementation!"
+#endif
+#if USE_JEMALLOC_EXTENT_HOOKS
+#define RDS_FIXED_PERSISTENT_BASE 1
+#endif
+#endif
 
+namespace HPHP {
 struct Array;
 struct StringData;
 struct Class;
@@ -49,7 +61,6 @@ struct ReleaseVVProfile;
 }
 
 }
-
 //////////////////////////////////////////////////////////////////////
 
 namespace HPHP { namespace rds {
@@ -71,24 +82,25 @@ namespace HPHP { namespace rds {
  * value across requests.  The final section contains shared "persistent" data,
  * which is data that retains the same values across requests.
  *
- * The shared persistent segment is           RDS Layout:
- * implemented by mapping the same physical
- * pages to different virtual addresses, so      +-------------+ <-- tl_base
- * are all accessible from the                   |  Header     |
- * per-thread RDS base.  The normal              +-------------+
- * region is perhaps analogous to .bss,          |             |
- * while the persistent region is                |  Normal     |
- * analogous to .rodata, and the local region    |    region   |
- * is similar to .data.                          |             | growing higher
- *                                               +-------------+  vvv
- * When we're running in C++, the base of RDS    | \ \ \ \ \ \ |
- * is available via a thread local exported      +-------------+  ^^^
- * from this module (tl_base).  When running     |  Local      | growing lower
- * in JIT-compiled code, a machine register      |    region   |
+ * The shared persistent segment is allocated     RDS Layout:
+ * within [1G, 4G) offset from the persistent
+ * base (0 if RDS_FIXED_PERSISTENT_BASE is       +-------------+ <-- tl_base
+ * defined as 1, which is safe if address from   |  Header     |
+ * low_malloc() is below 4G).                    +-------------+
+ *                                               |             |
+ * The normal region is perhaps analogous to     |  Normal     |
+ * .bss, while the persistent region is          |    region   |
+ * analogous to .rodata, and the local region    |             | growing higher
+ * is similar to .data.                          +-------------+  vvv
+ *                                               | \ \ \ \ \ \ |
+ * When we're running in C++, the base of RDS    +-------------+  ^^^
+ * is available via a thread local exported      |  Local      | growing lower
+ * from this module (tl_base).  When running     |    region   |
+ * in JIT-compiled code, a machine register      +-------------+ higher address
  * is reserved to always point at the base of    +-------------+
  * RDS.                                          | Persistent  |
- *                                               |     region  | higher
- *                                               +-------------+   addresses
+ *                                               |     region  |
+ *                                               +-------------+
  *
  * Every element in the "normal" segment has an associated generation number,
  * and the segment as a whole has a "current" generation number.  A particular
@@ -132,6 +144,7 @@ void requestInit();
 void requestExit();
 void threadInit(bool shouldRegister = true);
 void threadExit(bool shouldUnregister = true);
+void processInit();
 
 /*
  * Flushing RDS means to madvise the memory away.  Should only be done
@@ -257,12 +270,21 @@ constexpr bool pure(Mode mask) {
 }
 
 /*
- * Handles into Request Data Segment.  These are offsets from rds::tl_base.
+ * Handles into Request Data Segment.
+ *
+ * For `Normal` and `Local` mode, it is an offset from rds::tl_base. The offset
+ * must be smaller than 1 << 30.
+ *
+ * For `Persistent` mode, the handle is an offset from `s_persistent_base`.
+ * When `RDS_FIXED_PERSISTENT_BASE` is defined, `s_persistent_base` is always 0,
+ * and the handle is the same as the address, and must be at least 1 << 30.
  */
 using Handle = uint32_t;
 constexpr Handle kUninitHandle = 0;
 constexpr Handle kBeingBound = 1;
 constexpr Handle kBeingBoundWithWaiters = 2;
+constexpr Handle kMinPersistentHandle = 1u << 30;
+constexpr Handle kMaxHandle = std::numeric_limits<Handle>::max();
 
 /*
  * Normal segment element generation numbers.
@@ -295,7 +317,10 @@ template<class T, Mode M>
 struct Link {
   explicit Link(Handle handle = kUninitHandle);
 
-  // We allow construction or assignment from a Link of a narrower Mode.
+  /*
+   * We allow copy construction or assignment from a Link of a narrower Mode,
+   * but it is a compile-time error if we try to do it the other way.
+   */
   Link(const Link<T,M>&);
   Link<T,M>& operator=(const Link<T,M>&);
 
@@ -513,6 +538,7 @@ template<class T, Mode M> T& handleToRef(void* base, Handle h);
  */
 template<class T = void, Mode M> T* handleToPtr(Handle h);
 template<Mode M> Handle ptrToHandle(const void* ptr);
+template<Mode M> Handle ptrToHandle(uintptr_t ptr);
 
 /*
  * Whether `handle' looks valid---i.e., whether it lies within the RDS bounds.

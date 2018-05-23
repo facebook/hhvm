@@ -59,6 +59,7 @@ void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr) {
 
 void cgProfileArrayKind(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<RDSHandleData>();
+  assertx(!rds::isPersistentHandle(extra->handle));
   auto& v = vmain(env);
 
   auto const profile = v.makeReg();

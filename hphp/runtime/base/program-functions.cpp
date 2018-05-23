@@ -2261,6 +2261,8 @@ void hphp_process_init() {
   compilers_start();
   BootStats::mark("compilers_start");
 
+  rds::processInit();
+
   hphp_thread_init();
 
 #ifndef _MSC_VER

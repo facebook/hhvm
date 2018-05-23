@@ -40,11 +40,16 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
                     std::function<Handle()> fun,
                     type_scan::Index tyIndex);
 
-
 extern size_t s_normal_frontier;
-extern size_t s_persistent_base;
-extern size_t s_persistent_frontier;
+extern size_t s_local_base;
 extern size_t s_local_frontier;
+constexpr size_t size4g = 1ull << 32;
+#if RDS_FIXED_PERSISTENT_BASE
+constexpr uintptr_t s_persistent_base = 0;
+#else
+extern uintptr_t s_persistent_base;
+extern size_t s_persistent_size;
+#endif
 
 struct AllocDescriptor {
   Handle handle;
@@ -61,8 +66,18 @@ extern AllocDescriptorList s_local_alloc_descs;
 
 template<class T, Mode M>
 T* handleToPtr(void* base, Handle h) {
+  using namespace detail;
+  if (M == Mode::Persistent) {
+    assertx(isPersistentHandle(h));
+    return reinterpret_cast<T*>(s_persistent_base + h);
+  }
+  if (maybe<Mode::Persistent>(M) && isPersistentHandle(h)) {
+    return reinterpret_cast<T*>(s_persistent_base + h);
+  }
+  assertx(maybe<Mode::NonPersistent>(M));
+  assertx(!isPersistentHandle(h));
   void* vp = static_cast<char*>(base) + h;
-  return static_cast<T*>(vp);
+  return reinterpret_cast<T*>(vp);
 }
 
 template<class T, Mode M>
@@ -82,8 +97,38 @@ T& handleToRef(Handle h) {
 
 template<Mode M>
 Handle ptrToHandle(const void* ptr) {
-  return safe_cast<Handle>(reinterpret_cast<uintptr_t>(ptr) -
-                           reinterpret_cast<uintptr_t>(tl_base));
+  using namespace detail;
+  auto const iptr = reinterpret_cast<uintptr_t>(ptr);
+  if (M == Mode::Persistent) {
+    auto h = safe_cast<Handle>(iptr - s_persistent_base);
+    assertx(isPersistentHandle(h));
+    return h;
+  }
+  if (maybe<Mode::Persistent>(M)) {
+#if RDS_FIXED_PERSISTENT_BASE
+    if (iptr < s_persistent_base + size4g) {
+      auto h = safe_cast<Handle>(iptr);
+      assertx(isPersistentHandle(h));
+      return h;
+    }
+#else
+    if (iptr < s_persistent_base + size4g &&
+        iptr >= s_persistent_base + size4g - s_persistent_size) {
+      auto h = safe_cast<Handle>(iptr - s_persistent_base);
+      assertx(isPersistentHandle(h));
+      return h;
+    }
+#endif
+  }
+  assertx(maybe<Mode::NonPersistent>(M));
+  auto h = safe_cast<Handle>(iptr - reinterpret_cast<uintptr_t>(tl_base));
+  assertx(!isPersistentHandle(h));
+  return h;
+}
+
+template<Mode M>
+Handle ptrToHandle(uintptr_t ptr) {
+  return ptrToHandle<M>(reinterpret_cast<void*>(ptr));
 }
 
 template<class T, Mode M>
@@ -280,19 +325,18 @@ Link<T,M> alloc() {
 
 inline bool isNormalHandle(Handle handle) {
   assertx(isValidHandle(handle));
-  return handle < static_cast<Handle>(detail::s_normal_frontier);
+  return handle < safe_cast<uint32_t>(detail::s_normal_frontier);
 }
 
 inline bool isLocalHandle(Handle handle) {
   assertx(isValidHandle(handle));
-  return !isNormalHandle(handle) && !isPersistentHandle(handle);
+  return handle >= safe_cast<uint32_t>(detail::s_local_frontier) &&
+    handle < safe_cast<uint32_t>(detail::s_local_base);
 }
 
 inline bool isPersistentHandle(Handle handle) {
-  static_assert(std::is_unsigned<Handle>::value,
-                "Handle is supposed to be unsigned");
   assertx(isValidHandle(handle));
-  return handle >= (unsigned)detail::s_persistent_base;
+  return handle >= kMinPersistentHandle;
 }
 
 ////////////////////////////////////////////////////////////////////

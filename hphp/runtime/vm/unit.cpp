@@ -733,7 +733,7 @@ void Unit::bindFunc(Func *func) {
       if (RuntimeOption::EvalPerfDataMap) {
         rds::recordRds(
           handle,
-          sizeof(void*),
+          sizeof(LowPtr<const Func>),
           "Func",
           func->name()->toCppString()
         );

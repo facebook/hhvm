@@ -76,6 +76,18 @@ ALWAYS_INLINE RefCount tvGetCount(TypedValue tv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ALWAYS_INLINE RawDestructor& destructorForType(DataType dt) {
+  // We want g_destructors[(dt - kMinRefCountedDataType) >> 1]. Unfortunately,
+  // gcc and clang can't quite figure out the optimal way to emit this, so we
+  // do the address arithmetic manually. This results in smaller code on both
+  // x86 and ARM.
+  auto const elem_sz = int{sizeof(g_destructors[0])} / 2;
+  auto const table = reinterpret_cast<char*>(g_destructors) -
+    kMinRefCountedDataType * elem_sz;
+  auto const addr = table + static_cast<int64_t>(dt) * elem_sz;
+  return *reinterpret_cast<RawDestructor*>(addr);
+}
+
 /*
  * Decref `tv'.
  *
@@ -87,11 +99,10 @@ ALWAYS_INLINE void tvDecRefCountable(TypedValue tv) {
   if (noop_decref) return;
 
   if (tv.m_data.pcnt->decReleaseCheck()) {
-    g_destructors[typeToDestrIdx(tv.m_type)](
-      reinterpret_cast<void*>(tv.m_data.pcnt)
-    );
+    destructorForType(tv.m_type)(tv.m_data.pcnt);
   }
 }
+
 ALWAYS_INLINE void tvDecRefCountable(const TypedValue* tv) {
   tvDecRefCountable(*tv);
 }

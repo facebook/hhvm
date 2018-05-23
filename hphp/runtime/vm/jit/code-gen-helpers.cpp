@@ -351,30 +351,24 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
   not_reached();
 }
 
-Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsLong) {
-  auto const table = reinterpret_cast<intptr_t>(g_destructors);
+Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad) {
+  auto const elem_sz = static_cast<int>(sizeof(g_destructors[0]) / 2);
+  auto const table = reinterpret_cast<intptr_t>(g_destructors) -
+    kMinRefCountedDataType * elem_sz;
 
-  auto const index = v.makeReg();
-  auto const indexl = v.makeReg();
-  auto const typel = [&] {
-    if (!typeIsLong) {
-      auto r = v.makeReg();
-      // the caller didn't zero extend the type, so we need to here
-      v << movzbl{type, r};
-      return r;
-    }
-    return type;
+  auto const index = [&] {
+    if (typeIsQuad) return type;
+    auto const r = v.makeReg();
+    v << movsbq{type, r};
+    return r;
   }();
-
-  v << shrli{kShiftDataTypeToDestrIndex, typel, indexl, v.makeReg()};
-  v << movzlq{indexl, index};
 
   // The baseless form is more compact, but isn't supported for 64-bit
   // displacements.
   if (table <= std::numeric_limits<int>::max()) {
-    return baseless(index * 8 + safe_cast<int>(table));
+    return baseless(index * elem_sz + safe_cast<int>(table));
   }
-  return v.cns(table)[index * 8];
+  return v.cns(table)[index * elem_sz];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

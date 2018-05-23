@@ -269,6 +269,7 @@ struct Vunit;
   O(loadsd, Inone, U(s), D(d))\
   O(loadzbl, Inone, U(s), D(d))\
   O(loadzbq, Inone, U(s), D(d))\
+  O(loadsbq, Inone, U(s), D(d))\
   O(loadzlq, Inone, U(s), D(d))\
   O(loadtqb, Inone, U(s), D(d))\
   O(loadtql, Inone, U(s), D(d))\
@@ -1103,6 +1104,8 @@ struct loadsd { Vptr64 s; VregDbl d; };
 struct loadzbl { Vptr8 s; Vreg32 d; };
 struct loadzbq { Vptr8 s; Vreg64 d; };
 struct loadzlq { Vptr32 s; Vreg64 d; };
+// sign-extended s to d
+struct loadsbq { Vptr8 s; Vreg64 d; };
 // truncated s to d
 struct loadtqb { Vptr64 s; Vreg8 d; };
 struct loadtql { Vptr64 s; Vreg32 d; };

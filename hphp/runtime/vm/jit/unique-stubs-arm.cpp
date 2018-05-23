@@ -132,7 +132,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // We can't use emitLoadTVType() here because it does a byte load, and we
     // need to sign-extend since we use `type' as a 64-bit array index to the
     // destructor table.
-    v << loadzbl{local[TVOFF(m_type)], type};
+    v << loadsbq{local[TVOFF(m_type)], type};
     auto const cc = emitIsTVTypeRefCounted(v, sf, type);
 
     ifThen(v, cc, sf, [&] (Vout& v) {

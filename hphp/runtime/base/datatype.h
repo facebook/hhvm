@@ -34,38 +34,48 @@ namespace HPHP {
 /*
  * DataType is the type tag for a TypedValue (see typed-value.h).
  *
- * Beware if you change the order, as we may have a few type checks in the code
- * that depend on the order.  Also beware of adding to the number of bits
- * needed to represent this.
+ * If you want to add a new type, beware of the following restrictions:
+ * - KindOfUninit must be 0. Many places rely on zero-initialized memory
+ *   being a valid, KindOfUninit TypedValue.
+ * - KindOfNull must be 2, and 1 must not be a valid type. This allows for
+ *   a fast implementation of isNullType().
+ * - The Array and String types are positioned to allow for fast array/string
+ *   checks, ignoring persistence (see isArrayType and isStringType).
+ * - Refcounted types are odd, and uncounted types are even, to allow fast
+ *   countness checks.
+ * - Types with persistent and non-persistent versions must be negative, for
+ *   equivDataTypes(). Other types may be negative, as long as dropping the low
+ *   bit does not give another valid type.
+ * - -128 and -127 are used as invalid types and can't be real DataTypes.
+ *
+ * If you think you need to change any of these restrictions, be prepared to
+ * deal with subtle bugs and/or performance regressions while you sort out the
+ * consequences. At a minimum, you must:
+ * - Audit every helper function in this file.
+ * - Audit jit::emitTypeTest().
  */
 #define DATATYPES \
-                              /*      Hack array bit        */ \
-                              /*      |PHP array bit        */ \
-                              /*      ||string bit          */ \
-                              /*      |||uncounted init bit */ \
-                              /*      ||||                  */ \
-  DT(Uninit,           0x00)  /*  00000000 */ \
-  DT(Null,             0x01)  /*  00000001 */ \
-  DT(Int64,            0x11)  /*  00010001 */ \
-  DT(PersistentVec,    0x19)  /*  00011001 */ \
-  DT(Boolean,          0x21)  /*  00100001 */ \
-  DT(PersistentString, 0x23)  /*  00100011 */ \
-  DT(PersistentDict,   0x29)  /*  00101001 */ \
-  DT(Double,           0x31)  /*  00110001 */ \
-  DT(PersistentArray,  0x35)  /*  00110101 */ \
-  DT(PersistentKeyset, 0x39)  /*  00111001 */ \
-  DT(Object,           0x40)  /*  01000000 */ \
-  DT(Resource,         0x50)  /*  01010000 */ \
-  DT(Vec,              0x58)  /*  01011000 */ \
-  DT(String,           0x62)  /*  01100010 */ \
-  DT(Dict,             0x68)  /*  01101000 */ \
-  DT(Ref,              0x70)  /*  01110000 */ \
-  DT(Array,            0x74)  /*  01110100 */ \
-  DT(Keyset,           0x78)  /*  01111000 */
+  DT(PersistentArray,  -10) \
+  DT(Array,             -9) \
+  DT(PersistentKeyset,  -8) \
+  DT(Keyset,            -7) \
+  DT(PersistentDict,    -6) \
+  DT(Dict,              -5) \
+  DT(PersistentVec,     -4) \
+  DT(Vec,               -3) \
+  DT(PersistentString,  -2) \
+  DT(String,            -1) \
+  DT(Uninit,             0) \
+  /* isNullType relies on a hole here */ \
+  DT(Null,               2) \
+  DT(Object,             3) \
+  DT(Boolean,            4) \
+  DT(Resource,           5) \
+  DT(Int64,              6) \
+  DT(Ref,                7) \
+  DT(Double,             8)
 
 enum class DataType : int8_t {
-  // Any code that static_asserts about the value of KindOfNull may also depend
-  // on there not being any values between KindOfUninit and KindOfNull.
 #define DT(name, value) name = value,
 DATATYPES
 #undef DT
@@ -95,15 +105,23 @@ DATATYPES
  * These should only be used where MaybeDataType cannot be (e.g., in
  * TypedValues, such as for MixedArray tombstones).
  */
-constexpr DataType kInvalidDataType      = static_cast<DataType>(-1);
-constexpr DataType kExtraInvalidDataType = static_cast<DataType>(-2);
+constexpr DataType kInvalidDataType      = static_cast<DataType>(-128);
+constexpr DataType kExtraInvalidDataType = static_cast<DataType>(-127);
 
 /*
  * DataType limits.
  */
-auto constexpr kMinDataType = dt_t(KindOfUninit);
-auto constexpr kMaxDataType = dt_t(KindOfKeyset);
+auto constexpr kMinDataType = dt_t(KindOfPersistentArray);
+auto constexpr kMaxDataType = dt_t(KindOfDouble);
+auto constexpr kMinRefCountedDataType = dt_t(KindOfArray);
+auto constexpr kMaxRefCountedDataType = dt_t(KindOfRef);
 
+/*
+ * A DataType is a refcounted type if and only if it has this bit set.
+ */
+constexpr int kRefCountedBit = 0x1;
+
+///////////////////////////////////////////////////////////////////////////////
 /*
  * Optional DataType.
  *
@@ -125,85 +143,6 @@ MaybeDataType get_datatype(
   bool is_nullable,
   bool is_soft
 );
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * All DataTypes are expressible in seven bits.
- */
-constexpr unsigned kDataTypeMask = 0x7f;
-
-/*
- * KindOfStringBit must be set in KindOfPersistentString and KindOfString,
- * and it must be 0 in any other DataType.
- */
-constexpr int KindOfStringBit = 0x02;
-
-/*
- * KindOfArrayBit must be set in KindOfPersistentArray and KindOfArray, and
- * it must be 0 in any other DataType.
- */
-constexpr int KindOfArrayBit = 0x04;
-
-/*
- * KindOfHackArrayBit must be set in KindOfPersistentVec, KindOfVec,
- * KindOfPersistentDict, KindOfDict, KindOfPersistentKeyset, and KindOfKeyset,
- * and it must be 0 in any other DataType.
- */
-constexpr int KindOfHackArrayBit = 0x08;
-
-/*
- * The result of ANDing KindOfArrayLikeMask against KindOfPersistentVec,
- * KindOfVec, KindOfPersistentDict, KindOfDict, KindOfPersistentKeyset,
- * KindOfKeyset, KindOfPersistentArray, or KindOfArray must be non-zero, and 0
- * against any other DataType.
- */
-constexpr int KindOfArrayLikeMask = KindOfArrayBit | KindOfHackArrayBit;
-
-/*
- * KindOfUncountedInitBit must be set for Null, Boolean, Int64, Double,
- * PersistentString, PersistentArray, and it must be 0 for any other DataType.
- */
-constexpr int KindOfUncountedInitBit = 0x01;
-
-/*
- * One of KindOfHashPersistentBits must be set for KindOfString,
- * KindOfPersistentString, KindOfArray, KindOfPersistentArray, KindOfVec,
- * KindOfPersistentVec, KindOfPersistentKeyset, KindOfKeyset, KindOfDict, and
- * KindOfPersistentDict. It signifies the type has both persistent and
- * non-persistent variants.
- */
-constexpr int KindOfHasPersistentBits =
-  KindOfStringBit | KindOfArrayBit | KindOfHackArrayBit;
-
-/*
- * The result of ANDing kDataTypeEquivalentMask against KindOf[Persistent]Array,
- * KindOf[Persistent]String, KindOf[Persistent]Vec, KindOf[Persistent]Dict,
- * KindOf[Persistent]Keyset, or KindOfNull/KindOfUninit yields some unspecified
- * value which is the same for each persistent/non-persistent pair, and
- * different for all else. Used to check for equivalency between persistent and
- * non-persistent DataTypes.
- */
-constexpr int kDataTypeEquivalentMask = 0x3e;
-
-/*
- * The result of ANDing kDataTypeEquivalentMask against KindOfPersistentVec and
- * KindOfVec results in KindOfHackArrayVecType. ANDing against
- * KindOfPersistentDict and KindOfDict results in
- * KindOfHackArrayDictType. ANDing against KindOfPersistentKeyset and
- * KindOfKeyset results in KindOfHackArrayKeysetType. For any other DataType,
- * some other value other than KindOfHackArrayVecType or KindOfHackArrayDictType
- * is the result.
- */
-constexpr int KindOfHackArrayVecType = 0x18;
-constexpr int KindOfHackArrayDictType = 0x28;
-constexpr int KindOfHackArrayKeysetType = 0x38;
-
-/*
- * All DataTypes greater than this value are refcounted.
- */
-constexpr DataType KindOfRefCountThreshold = KindOfPersistentKeyset;
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // DataTypeCategory
@@ -258,15 +197,14 @@ inline std::string typeCategoryName(DataTypeCategory c) {
 /*
  * These are used in type-variant.cpp.
  */
-constexpr int kShiftDataTypeToDestrIndex = 2;
-constexpr int kDestrTableSize = 31;
+constexpr int kDestrTableSize =
+  (kMaxRefCountedDataType - kMinRefCountedDataType) / 2 + 1;
 
 constexpr unsigned typeToDestrIdx(DataType t) {
   // t must be a refcounted type, but we can't actually assert that and still
   // be constexpr.
-  return dt_t(t) >> kShiftDataTypeToDestrIndex;
+  return (static_cast<int64_t>(t) - kMinRefCountedDataType) / 2;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Is-a macros.
@@ -283,11 +221,7 @@ constexpr bool isRealType(DataType t) {
  * Whether a type is refcounted.
  */
 constexpr bool isRefcountedType(DataType t) {
-  return t > KindOfRefCountThreshold;
-}
-
-constexpr bool isUncountedInitType(DataType t) {
-  return dt_t(t) & KindOfUncountedInitBit;
+  return dt_t(t) & kRefCountedBit;
 }
 
 /*
@@ -315,58 +249,62 @@ constexpr bool hasNumData(DataType t) {
  */
 constexpr bool isNullType(DataType t) {
   static_assert(KindOfUninit == static_cast<DataType>(0) &&
-                KindOfNull == static_cast<DataType>(1),
-                "isNullType requires Uninit and Null to be 0 and 1");
-  return t <= KindOfNull;
+                KindOfNull == static_cast<DataType>(2),
+                "isNullType requires Uninit and Null to be 0 and 2");
+  return static_cast<uint8_t>(t) <= static_cast<uint8_t>(KindOfNull);
 }
 
 /*
  * Whether a type is any kind of string or array.
  */
 constexpr bool isStringType(DataType t) {
-  return dt_t(t) & KindOfStringBit;
+  return
+    static_cast<uint8_t>(t) >= static_cast<uint8_t>(KindOfPersistentString);
 }
 inline bool isStringType(MaybeDataType t) {
   return t && isStringType(*t);
 }
 
 constexpr bool isArrayLikeType(DataType t) {
-  return dt_t(t) & KindOfArrayLikeMask;
+  return t <= KindOfVec;
 }
 inline bool isArrayLikeType(MaybeDataType t) {
   return t && isArrayLikeType(*t);
 }
 
 constexpr bool isArrayType(DataType t) {
-  return dt_t(t) & KindOfArrayBit;
+  return t <= KindOfArray;
 }
 inline bool isArrayType(MaybeDataType t) {
   return t && isArrayType(*t);
 }
 
 constexpr bool isHackArrayType(DataType t) {
-  return dt_t(t) & KindOfHackArrayBit;
+  return t >= KindOfPersistentKeyset && t <= KindOfVec;
 }
 inline bool isHackArrayType(MaybeDataType t) {
   return t && isHackArrayType(*t);
 }
 
 constexpr bool isVecType(DataType t) {
-  return (dt_t(t) & kDataTypeEquivalentMask) == KindOfHackArrayVecType;
+  return
+    static_cast<DataType>(dt_t(t) & ~kRefCountedBit) == KindOfPersistentVec;
 }
 inline bool isVecType(MaybeDataType t) {
   return t && isVecType(*t);
 }
 
 constexpr bool isDictType(DataType t) {
-  return (dt_t(t) & kDataTypeEquivalentMask) == KindOfHackArrayDictType;
+  return
+    static_cast<DataType>(dt_t(t) & ~kRefCountedBit) == KindOfPersistentDict;
 }
 inline bool isDictType(MaybeDataType t) {
   return t && isDictType(*t);
 }
 
 constexpr bool isKeysetType(DataType t) {
-  return (dt_t(t) & kDataTypeEquivalentMask) == KindOfHackArrayKeysetType;
+  return
+    static_cast<DataType>(dt_t(t) & ~kRefCountedBit) == KindOfPersistentKeyset;
 }
 inline bool isKeysetType(MaybeDataType t) {
   return t && isKeysetType(*t);
@@ -382,6 +320,8 @@ constexpr bool isObjectType(DataType t) { return t == KindOfObject; }
 constexpr bool isResourceType(DataType t) { return t == KindOfResource; }
 constexpr bool isRefType(DataType t) { return t == KindOfRef; }
 
+constexpr int kHasPersistentMask = -128;
+
 /*
  * Return whether two DataTypes for primitive types are "equivalent" as far as
  * user-visible PHP types are concerned (i.e. ignoring different types of
@@ -389,11 +329,9 @@ constexpr bool isRefType(DataType t) { return t == KindOfRef; }
  * not considered equivalent.
  */
 constexpr bool equivDataTypes(DataType t1, DataType t2) {
-  return
-    t1 == t2 ||
-    ((dt_t(t1) & dt_t(t2) & KindOfHasPersistentBits) &&
-     ((dt_t(t1) & kDataTypeEquivalentMask) ==
-      (dt_t(t2) & kDataTypeEquivalentMask)));
+  return t1 == t2 ||
+    ((dt_t(t1) & dt_t(t2) & kHasPersistentMask) &&
+     (dt_t(t1) & ~kRefCountedBit) == (dt_t(t2) & ~kRefCountedBit));
 }
 
 /*

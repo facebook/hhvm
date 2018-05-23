@@ -48,7 +48,7 @@ const TypedValue* ClsCnsProfile::reportClsCns(const Class* cls,
   if (cnsSlot == kInvalidSlot ||
       (tv &&
        (static_cast<const TypedValueAux*>(tv)->constModifiers().isType ||
-        !isUncountedInitType(tv->m_type)))) {
+        isRefcountedType(tv->m_type) || tv->m_type == KindOfUninit))) {
     // The constant we found isn't suitable - so we ignore it. This is
     // fine, because we'll be guarding the actual uses anyway.
     return uninit_variant.asTypedValue();

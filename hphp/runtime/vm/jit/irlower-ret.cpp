@@ -97,6 +97,8 @@ void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
     auto const extended = v.makeReg();
     auto const result = v.makeReg();
 
+    // DataType is signed. We're using movzbq here to clear out the upper 7
+    // bytes of the register, not to actually extend the type value.
     v << movzbq{type, extended};
     v << orq{extended, v.cns(mask()), result, v.makeReg()};
     return result;

@@ -83,9 +83,6 @@ void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vptr s1);
 void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vptr s1);
 void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vreg s1);
 
-Vreg emitMaskTVType(Vout& v, Immed s0, Vreg s1);
-Vreg emitMaskTVType(Vout& v, Immed s0, Vptr s1);
-
 /*
  * Store `loc', the registers representing `src', to `dst'.
  */
@@ -185,7 +182,7 @@ void emitCall(Vout& v, CallSpec call, RegSet args);
 /*
  * Return a Vptr to the native destructor function for values of type `type'.
  */
-Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsLong = false);
+Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class metadata.

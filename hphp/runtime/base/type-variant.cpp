@@ -101,56 +101,34 @@ Variant::Variant(const Variant& v) noexcept {
  * ResourceHdr, and RefData classes.
  */
 
-static_assert(typeToDestrIdx(KindOfObject)   == 16, "Object destruct index");
-static_assert(typeToDestrIdx(KindOfResource) == 20, "Resource destruct index");
-static_assert(typeToDestrIdx(KindOfVec)      == 22, "Vec destruct index");
-static_assert(typeToDestrIdx(KindOfString)   == 24, "String destruct index");
-static_assert(typeToDestrIdx(KindOfDict)     == 26, "Dict destruct index");
-static_assert(typeToDestrIdx(KindOfRef)      == 28, "Ref destruct index");
-static_assert(typeToDestrIdx(KindOfArray)    == 29, "Array destruct index");
-static_assert(typeToDestrIdx(KindOfKeyset)   == 30, "Keyset destruct index");
+static_assert(typeToDestrIdx(KindOfArray)    == 0, "Array destruct index");
+static_assert(typeToDestrIdx(KindOfKeyset)   == 1, "Keyset destruct index");
+static_assert(typeToDestrIdx(KindOfDict)     == 2, "Dict destruct index");
+static_assert(typeToDestrIdx(KindOfVec)      == 3, "Vec destruct index");
+static_assert(typeToDestrIdx(KindOfString)   == 4, "String destruct index");
+static_assert(typeToDestrIdx(KindOfObject)   == 6, "Object destruct index");
+static_assert(typeToDestrIdx(KindOfResource) == 7, "Resource destruct index");
+static_assert(typeToDestrIdx(KindOfRef)      == 8, "Ref destruct index");
 
-static_assert(kDestrTableSize == 31,
+static_assert(kDestrTableSize == 9,
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  (RawDestructor)getMethodPtr(&ObjectData::release),  // may replace at runtime
-                                                      // KindOfObject
-  nullptr,
-  nullptr,
-  nullptr,
-  (RawDestructor)getMethodPtr(&ResourceHdr::release), // KindOfResource
-  nullptr,
-  (RawDestructor)&PackedArray::Release,               // KindOfVec
-  nullptr,
-  (RawDestructor)getMethodPtr(&StringData::release),  // KindOfString
-  nullptr,
-  (RawDestructor)&MixedArray::Release,                // KindOfDict
-  nullptr,
-  (RawDestructor)getMethodPtr(&RefData::release),     // KindOfRef
   (RawDestructor)getMethodPtr(&ArrayData::release),   // KindOfArray
   (RawDestructor)&SetArray::Release,                  // KindOfKeyset
+  (RawDestructor)&MixedArray::Release,                // KindOfDict
+  (RawDestructor)&PackedArray::Release,               // KindOfVec
+  (RawDestructor)getMethodPtr(&StringData::release),  // KindOfString
+  nullptr, // hole
+  (RawDestructor)getMethodPtr(&ObjectData::release),  // may replace at runtime
+                                                      // KindOfObject
+  (RawDestructor)getMethodPtr(&ResourceHdr::release), // KindOfResource
+  (RawDestructor)getMethodPtr(&RefData::release),     // KindOfRef
 };
 
 void tweak_variant_dtors() {
   if (RuntimeOption::EnableObjDestructCall) return;
-  g_destructors[typeToDestrIdx(KindOfObject)] =
+  destructorForType(KindOfObject) =
     (RawDestructor)getMethodPtr(&ObjectData::releaseNoObjDestructCheck);
 }
 

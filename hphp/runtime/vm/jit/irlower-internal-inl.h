@@ -195,39 +195,38 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
   }
 
   auto const cc = [&] {
-    auto const mask_cmp = [&] (int mask, int bits, ConditionCode cc) {
-      auto const masked = emitMaskTVType(v, mask, typeSrc);
-      emitCmpTVType(v, sf, static_cast<DataType>(bits), masked);
-      return cc;
-    };
-
     auto const cmp = [&] (DataType kind, ConditionCode cc) {
       emitCmpTVType(v, sf, kind, typeSrc);
       return cc;
     };
 
-    auto const test = [&] (int bits, ConditionCode cc) {
-      emitTestTVType(v, sf, bits, typeSrc);
-      return cc;
+    auto const persistent_type = [&](DataType dt) {
+      auto const masked = emitMaskTVType(v, ~kRefCountedBit, typeSrc);
+      emitCmpTVType(v, sf, dt, masked);
+      return CC_E;
     };
 
     if (type <= TPersistentStr) return cmp(KindOfPersistentString, CC_E);
-    if (type <= TStr)           return test(KindOfStringBit, CC_NZ);
-    if (type <= TArr)           return test(KindOfArrayBit, CC_NZ);
-    if (type <= TVec)           return mask_cmp(kDataTypeEquivalentMask,
-                                                KindOfHackArrayVecType,
-                                                CC_E);
-    if (type <= TDict)          return mask_cmp(kDataTypeEquivalentMask,
-                                                KindOfHackArrayDictType,
-                                                CC_E);
-    if (type <= TKeyset)        return mask_cmp(kDataTypeEquivalentMask,
-                                                KindOfHackArrayKeysetType,
-                                                CC_E);
-    if (type <= TArrLike)       return test(KindOfArrayLikeMask, CC_NZ);
+    if (type <= TStr)           return cmp(KindOfPersistentString, CC_AE);
+    if (type <= TArr)           return cmp(KindOfArray, CC_LE);
+    if (type <= TVec)           return persistent_type(KindOfPersistentVec);
+    if (type <= TDict)          return persistent_type(KindOfPersistentDict);
+    if (type <= TKeyset)        return persistent_type(KindOfPersistentKeyset);
+    if (type <= TArrLike)       return cmp(KindOfVec, CC_LE);
 
     // These are intentionally == and not <=.
-    if (type == TNull)          return cmp(KindOfNull, CC_LE);
-    if (type == TUncountedInit) return test(KindOfUncountedInitBit, CC_NZ);
+    if (type == TNull)          return cmp(KindOfNull, CC_BE);
+    if (type == TUncountedInit) {
+      auto const rtype = emitGetTVType(v, typeSrc);
+      auto const sf2 = v.makeReg();
+      emitTestTVType(v, sf2, kRefCountedBit, rtype);
+      doJcc(CC_Z, sf2);
+
+      static_assert(KindOfUninit == static_cast<DataType>(0),
+                    "KindOfUninit == 0 in codegen");
+      v << testb{rtype, rtype, sf};
+      return CC_NZ;
+    }
     if (type == TUncounted) {
       return ccNegate(emitIsTVTypeRefCounted(v, sf, typeSrc));
     }

@@ -199,6 +199,7 @@ struct Vgen {
   void emit(const loadsd& i) { a.movsd(i.s, i.d); }
   void emit(const loadzbl& i) { a.loadzbl(i.s, i.d); }
   void emit(const loadzbq& i) { a.loadzbl(i.s, Reg32(i.d)); }
+  void emit(const loadsbq& i) { a.loadsbq(i.s, i.d); }
   void emit(const loadzlq& i) { a.loadl(i.s, Reg32(i.d)); }
   void emit(const movb& i) { a.movb(i.s, i.d); }
   void emit(const movl& i) { a.movl(i.s, i.d); }
@@ -208,6 +209,7 @@ struct Vgen {
   void emit(const movzwl& i) { a.movzwl(i.s, i.d); }
   void emit(const movzwq& i) { a.movzwl(i.s, Reg32(i.d)); }
   void emit(const movzlq& i) { a.movl(i.s, Reg32(i.d)); }
+  void emit(const movsbq& i) { a.movsbq(i.s, i.d); }
   void emit(mulsd i) { commute(i); a.mulsd(i.s0, i.d); }
   void emit(neg i) { unary(i); a.neg(i.d); }
   void emit(const nop& /*i*/) { a.nop(); }

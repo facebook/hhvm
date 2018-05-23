@@ -210,29 +210,8 @@ static_assert(!equivDataTypes(KindOfString, KindOfPersistentVec),   "");
 static_assert(!equivDataTypes(KindOfString, KindOfPersistentDict),  "");
 static_assert(!equivDataTypes(KindOfString, KindOfPersistentKeyset),"");
 
-static_assert(isUncountedInitType(KindOfNull),             "");
-static_assert(isUncountedInitType(KindOfBoolean),          "");
-static_assert(isUncountedInitType(KindOfInt64),            "");
-static_assert(isUncountedInitType(KindOfDouble),           "");
-static_assert(isUncountedInitType(KindOfPersistentString), "");
-static_assert(isUncountedInitType(KindOfPersistentArray),  "");
-static_assert(isUncountedInitType(KindOfPersistentVec),    "");
-static_assert(isUncountedInitType(KindOfPersistentDict),   "");
-static_assert(isUncountedInitType(KindOfPersistentKeyset), "");
-static_assert(!isUncountedInitType(KindOfUninit),          "");
-static_assert(!isUncountedInitType(KindOfString),          "");
-static_assert(!isUncountedInitType(KindOfArray),           "");
-static_assert(!isUncountedInitType(KindOfVec),             "");
-static_assert(!isUncountedInitType(KindOfDict),            "");
-static_assert(!isUncountedInitType(KindOfKeyset),          "");
-static_assert(!isUncountedInitType(KindOfObject),          "");
-static_assert(!isUncountedInitType(KindOfResource),        "");
-static_assert(!isUncountedInitType(KindOfRef),             "");
-
 static_assert(KindOfUninit == static_cast<DataType>(0),
               "Several things assume this tag is 0, especially RDS");
-
-static_assert(kMaxDataType <= kDataTypeMask, "");
 
 ///////////////////////////////////////////////////////////////////////////////
 

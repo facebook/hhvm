@@ -120,7 +120,7 @@ static uint64_t rdpmc(uint32_t counter) {
   if (counter == PERF_COUNT_HW_CPU_CYCLES)
     asm volatile("mrs %0, pmccntr_el0" : "=r" (ret));
   else {
-    asm volatile("msr pmselr_el0, %0" : : "r" ((counter-1)));
+    asm volatile("msr pmselr_el0, %0" : : "r" ((uint64_t)(counter-1)));
     asm volatile("mrs %0, pmxevcntr_el0" : "=r" (ret));
   }
 

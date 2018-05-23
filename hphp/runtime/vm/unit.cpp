@@ -1318,23 +1318,26 @@ bool Unit::defTypeAlias(Id id) {
 
   nameList->m_cachedTypeAlias.bind(
     [&] {
-      rds::Handle handle;
-      auto const isNormal =
-        !(thisType->attrs & AttrPersistent) ||
-        (resolved.klass && !classHasPersistentRDS(resolved.klass));
-      if (isNormal) {
-        handle = rds::alloc<TypeAliasReq, rds::Mode::Normal>().handle();
-      } else {
-        handle = rds::alloc<TypeAliasReq, rds::Mode::Persistent>().handle();
-      }
+      auto const handle = [&] {
+        if (!(thisType->attrs & AttrPersistent) ||
+            (resolved.klass && !classHasPersistentRDS(resolved.klass))) {
+          return rds::alloc<TypeAliasReq, rds::Mode::Normal>().handle();
+        }
+
+        auto link = rds::alloc<TypeAliasReq, rds::Mode::Persistent>();
+        *link = resolved;
+        return link.handle();
+      }();
       rds::recordRds(handle,
                      sizeof(TypeAliasReq),
                      "TypeAlias", typeName->data());
       return handle;
     }
   );
+  if (nameList->m_cachedTypeAlias.isPersistent()) return true;
+
   nameList->setCachedTypeAlias(resolved);
-  return nameList->m_cachedTypeAlias.isPersistent();
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

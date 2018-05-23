@@ -330,12 +330,13 @@ struct Vgen {
   void emit(const loadw& i) { a->Ldrh(W(i.d), M(i.s)); }
   void emit(const loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadzbq& i) { a->Ldrb(W(i.d), M(i.s)); }
-  void emit(const loadsbq& i) { a->Ldrsb(W(i.d), M(i.s)); }
+  void emit(const loadsbq& i) { a->Ldrsb(X(i.d), M(i.s)); }
   void emit(const loadzlq& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const movb& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movw& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movl& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movsbl& i) { a->Sxtb(W(i.d), W(i.s)); }
+  void emit(const movsbq& i) { a->Sxtb(X(i.d), W(i.s).X()); }
   void emit(const movswl& i) { a->Sxth(W(i.d), W(i.s)); }
   void emit(const movtqb& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movtqw& i) { a->Uxth(W(i.d), W(i.s)); }

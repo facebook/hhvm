@@ -52,6 +52,10 @@ let hint_to_ty env = Decl_hint.hint env.Typing_env.decl_env
 
 let localize_with_self = Typing_phase.localize_with_self
 
+let get_upper_bounds = Typing_env.get_upper_bounds
+
+let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
+
 let referenced_typeconsts env root ids =
   let root = hint_to_ty env root in
   let ety_env = {(Typing_phase.env_with_self env) with

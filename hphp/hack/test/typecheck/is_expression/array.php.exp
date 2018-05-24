@@ -1,15 +1,15 @@
 File "array.php", line 5, characters 5-15:
-  mixed
+  array
 File "array.php", line 7, characters 5-15:
-  mixed
+  array<_>
 File "array.php", line 9, characters 5-15:
-  mixed
+  array<_, _>
 File "array.php", line 11, characters 5-15:
-  mixed
+  varray<_>
 File "array.php", line 13, characters 5-15:
-  mixed
+  darray<_, _>
 File "array.php", line 15, characters 5-15:
-  mixed
+  varray_or_darray<_>
 File "array.php", line 4, characters 13-17:
 The "is" operator cannot be used with an untyped array (Typing[4195])
 File "array.php", line 6, characters 20-27:

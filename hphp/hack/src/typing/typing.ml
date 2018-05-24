@@ -1736,6 +1736,7 @@ and expr_
           substs = SMap.empty;
           this_ty = cid_ty;
           from_class = Some cid;
+          validate_dty = None;
         } in
         match ty with
         | (r, Tfun ft) ->
@@ -2861,6 +2862,7 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
                 substs = SMap.empty;
                 this_ty = obj_ty;
                 from_class = None;
+                validate_dty = None;
               } in
               let _, ctor_fty = Phase.localize ~ety_env env ty in
               check_abstract_parent_meth SN.Members.__construct p ctor_fty
@@ -4368,6 +4370,7 @@ and class_get ~is_method ~is_const ?(explicit_tparams=[]) ?(incl_tc=false)
     this_ty = this_ty;
     substs = SMap.empty;
     from_class = Some cid;
+    validate_dty = None;
   } in
   class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
              ~pos_params env cid cty (p, mid)
@@ -4590,6 +4593,7 @@ and obj_get_concrete_ty ~is_method ~valkind ~pos_params ?(explicit_tparams=[])
               this_ty = this_ty;
               substs = Subst.make class_info.tc_tparams paraml;
               from_class = Some class_id;
+              validate_dty = None;
             } in
             let env, ft = Phase.localize_ft ~use_pos:id_pos ~ety_env env ft in
 
@@ -4618,6 +4622,7 @@ and obj_get_concrete_ty ~is_method ~valkind ~pos_params ?(explicit_tparams=[])
         this_ty = this_ty;
         substs = Subst.make class_info.tc_tparams paraml;
         from_class = Some class_id;
+        validate_dty = None;
       } in
       let env, member_ty =
         begin match member_ty with
@@ -4950,6 +4955,7 @@ and call_construct p env class_ params el uel cid =
     this_ty = cid_ty;
     substs = Subst.make class_.tc_tparams params;
     from_class = Some cid;
+    validate_dty = None;
   } in
   let env = Phase.check_tparams_constraints ~use_pos:p ~ety_env env class_.tc_tparams in
   if class_.tc_is_xhp then env, tcid, [], [], (Reason.Rnone, TUtils.tany env) else
@@ -5960,6 +5966,7 @@ and safely_refine_class_type
     substs = Subst.make class_info.tc_tparams tyl_fresh;
     this_ty = obj_ty; (* In case `this` appears in constraints *)
     from_class = None;
+    validate_dty = None;
   } in
   let add_bounds env ((_, _, cstr_list), ty_fresh) =
       List.fold_left cstr_list ~init:env ~f:begin fun env (ck, ty) ->

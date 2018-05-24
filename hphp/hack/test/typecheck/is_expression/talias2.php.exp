@@ -1,0 +1,2 @@
+File "talias2.php", line 4, characters 12-22:
+The "is" operator cannot be used with a type with generics, because generics are erased at runtime (Typing[4195])

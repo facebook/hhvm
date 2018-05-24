@@ -88,6 +88,7 @@ and get_spread_attributes env pos onto_xhp cty =
       this_ty = xhp_ty;
       substs = Subst.make xhp_info.tc_tparams tparams;
       from_class = None;
+      validate_dty = None;
     } in
     List.map_env ~f:begin fun env (k, ce) ->
       let lazy ty = ce.ce_type in

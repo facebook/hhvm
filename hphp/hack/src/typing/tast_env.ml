@@ -51,6 +51,7 @@ let assert_nullable = Typing_equality_check.assert_nullable
 let hint_to_ty env = Decl_hint.hint env.Typing_env.decl_env
 
 let localize_with_self = Typing_phase.localize_with_self
+let localize_with_dty_validator = Typing_phase.localize_with_dty_validator
 
 let get_upper_bounds = Typing_env.get_upper_bounds
 

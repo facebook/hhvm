@@ -257,6 +257,7 @@ let rec simplify_subtype
             (* TODO: do we need this? *)
             this_ty = Option.value this_ty ~default:ty_sub;
             from_class = None;
+            validate_dty = None;
           } in
             let up_obj = SMap.get cid_super class_sub.tc_ancestors in
             match up_obj with
@@ -1277,6 +1278,7 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
             substs = Subst.make class_.tc_tparams tyl_sub;
             this_ty = Option.value uenv_sub.TUEnv.this_ty ~default:ty_sub;
             from_class = None;
+            validate_dty = None;
           } in
           let rec try_reqs reqs =
               match reqs with

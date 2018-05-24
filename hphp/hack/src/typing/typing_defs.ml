@@ -539,6 +539,7 @@ type expand_env = {
    * dependent types for type constants.
    *)
   from_class : Nast.class_id_ option;
+  validate_dty : (decl ty -> unit) option;
 }
 
 type ety = expand_env * locl ty

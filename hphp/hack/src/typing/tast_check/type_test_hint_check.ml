@@ -43,7 +43,7 @@ let visitor = object(this)
       | Aast.Tvoid
       | Aast.Tnoreturn -> update acc @@ Invalid (r, Tprim prim)
       | _ -> acc
-  method! on_tfun acc r fun_type = update acc @@  Invalid (r, Tfun fun_type)
+  method! on_tfun acc r fun_type = update acc @@ Invalid (r, Tfun fun_type)
   method! on_tvar acc r id = update acc @@ Invalid (r, Tvar id)
   method! on_tabstract acc r ak ty_opt =
     match ak with
@@ -66,11 +66,15 @@ let visitor = object(this)
       | _ ->
         let acc = super#on_tclass acc r cls tyl in
         begin match acc.validity with
-          | Valid -> update acc @@  Partial (r, Tclass (cls, tyl))
+          | Valid -> update acc @@ Partial (r, Tclass (cls, tyl))
           | _ -> acc
         end
+  method! on_tapply acc r ((_, name) as id) tyl =
+    if tyl <> [] && Typing_env.is_typedef name
+    then update acc @@ Invalid (r, Tapply (id, tyl))
+    else acc
   method! on_tarraykind acc r array_kind =
-    update acc @@  Invalid (r, Tarraykind array_kind)
+    update acc @@ Invalid (r, Tarraykind array_kind)
   method is_wildcard = function
     | _, Tabstract (AKgeneric name, _) ->
       Env.is_fresh_generic_parameter name
@@ -80,20 +84,26 @@ end
 let print_type: type a. a ty_ -> string = function
   | Tclass (_, tyl) when tyl <> [] ->
       "a type with generics, because generics are erased at runtime"
+  | Tapply (_, tyl) when tyl <> [] ->
+      "a type with generics, because generics are erased at runtime"
   | ty_ -> Typing_print.error ty_
 
 let validate_hint env hint op =
   let hint_ty = Env.hint_to_ty env hint in
-  let env, hint_ty = Env.localize_with_self env hint_ty in
-  let state = visitor#on_type {env = env; validity = Valid} hint_ty in
-  match state.validity with
-    | Invalid (r, ty_) ->
-      Errors.invalid_is_as_expression_hint
-        (Reason.to_pos r) op (print_type ty_)
-    | Partial (r, ty_) ->
-      Errors.partially_valid_is_as_expression_hint
-        (Reason.to_pos r) op (print_type ty_)
-    | Valid -> ()
+  let validate_type env ty =
+    let state = visitor#on_type {env = env; validity = Valid} ty in
+    match state.validity with
+      | Invalid (r, ty_) ->
+        Errors.invalid_is_as_expression_hint
+          (Reason.to_pos r) op (print_type ty_)
+      | Partial (r, ty_) ->
+        Errors.partially_valid_is_as_expression_hint
+          (Reason.to_pos r) op (print_type ty_)
+      | Valid -> ()
+  in
+  let env, hint_ty = Env.localize_with_dty_validator
+    env hint_ty (validate_type env) in
+  validate_type env hint_ty
 
 let handler = object
   inherit Tast_visitor.handler_base

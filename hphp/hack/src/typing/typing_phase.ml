@@ -83,6 +83,7 @@ let env_with_self env =
     substs = SMap.empty;
     this_ty = Reason.none, TUtils.this_of (Env.get_self env);
     from_class = None;
+    validate_dty = None;
   }
 (*****************************************************************************)
 (* Transforms a declaration phase type into a localized type. This performs
@@ -98,6 +99,7 @@ let env_with_self env =
 (*****************************************************************************)
 
 let rec localize_with_env ~ety_env env (dty: decl ty) =
+  Option.iter ety_env.validate_dty (fun validate_dty -> validate_dty dty);
   match dty with
   | r, Terr ->
       env, (ety_env, (r, TUtils.terr env))
@@ -423,6 +425,10 @@ and check_where_constraints ~use_pos ~ety_env ~definition_pos env cstrl =
  *)
 and localize_with_self env ty =
   localize env ty ~ety_env:(env_with_self env)
+
+and localize_with_dty_validator env ty validate_dty =
+  let ety_env = {(env_with_self env) with validate_dty = Some validate_dty;} in
+  localize ~ety_env env ty
 
 and hint_locl env h =
   let h = Decl_hint.hint env.Env.decl_env h in

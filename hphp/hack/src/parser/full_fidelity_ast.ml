@@ -145,10 +145,44 @@ let mode_annotation = function
   | FileInfo.Mphp -> FileInfo.Mdecl
   | m -> m
 
+let syntax_to_list include_separators node  =
+  let rec aux acc syntax_list =
+    match syntax_list with
+    | [] -> acc
+    | h :: t ->
+      begin
+        match syntax h with
+        | ListItem { list_item; list_separator } ->
+          let acc = list_item :: acc in
+          let acc =
+            if include_separators then (list_separator :: acc ) else acc in
+          aux acc t
+        | _ -> aux (h :: acc) t
+      end in
+  match syntax node with
+  | Missing -> [ ]
+  | SyntaxList s -> List.rev (aux [] s)
+  | ListItem { list_item; list_separator } ->
+    if include_separators then [ list_item; list_separator ] else [ list_item ]
+  | _ -> [ node ]
+
+let syntax_to_list_no_separators = syntax_to_list false
+
 let pPos : Pos.t parser = fun node env ->
   if env.ignore_pos
   then Pos.none
   else Option.value ~default:Pos.none (position_exclusive env.file node)
+
+let raise_parsing_error env node msg =
+  if not env.quick_mode && env.keep_errors then
+    let p = pPos node env in
+    Errors.parsing_error (p, msg)
+  else if env.codegen && not env.lower_coroutines then
+    let p = (Option.value (position env.file node) ~default:Pos.none) in
+    let (s, e) = Pos.info_raw p in
+    let e = SyntaxError.make ~error_type:SyntaxError.ParseError s e msg in
+    raise @@ SyntaxError.ParserFatal (e, p)
+  else ()
 
 (* HHVM starts range of function declaration from the 'function' keyword *)
 let pFunction node env =
@@ -1888,9 +1922,24 @@ and pStmt : stmt parser = fun node env ->
   pop_docblock ();
   result
 
+and is_hashbang text =
+  match Syntax.extract_text text with
+  | None -> false
+  | Some text ->
+    let r = Str.regexp "^#!.*\n" in
+    let count = List.length @@ String_utils.split_on_newlines text in
+    count = 1 && Str.string_match r text 0 && Str.matched_string text = text
+
 and pMarkup node env =
   match syntax node with
-  | MarkupSection { markup_text; markup_expression; _ } ->
+  | MarkupSection { markup_prefix; markup_text; markup_expression; _ } ->
+    let pos = pPos node env in
+    if env.is_hh_file then
+      if (is_missing markup_prefix) &&
+      (width markup_text) > 0 && not (is_hashbang markup_text) then
+        raise_parsing_error env node SyntaxError.error1001
+      else if (token_kind markup_prefix) = Some TK.QuestionGreaterThan then
+        raise_parsing_error env node SyntaxError.error2067;
     let expr =
       match syntax markup_expression with
       | Missing -> None
@@ -1899,7 +1948,7 @@ and pMarkup node env =
         ; _} -> Some (pExpr e env)
       | _ -> failwith "expression expected"
     in
-    pPos node env, Markup ((pPos node env, text markup_text), expr)
+    pos, Markup ((pos, text markup_text), expr)
   | _ -> failwith "invalid node"
 
 and pBreak_or_continue_level env level =
@@ -1954,6 +2003,12 @@ and pFunHdr : fun_hdr parser = fun node env ->
     ; function_parameter_list
     ; function_type
     ; _ } ->
+      let is_autoload =
+        String.lowercase_ascii @@ (text function_name)
+          = Naming_special_names.SpecialFunctions.autoload in
+      let num_params = List.length (syntax_to_list_no_separators function_parameter_list) in
+      if is_autoload && num_params > 1 then
+        raise_parsing_error env node SyntaxError.autoload_takes_one_argument;
       let modifiers = pModifiers function_modifiers env in
       let fh_parameters = couldMap ~f:pFunParam function_parameter_list env in
       let fh_return_type = mpOptional pHint function_type env in
@@ -2993,6 +3048,7 @@ let lower_tree
       let is_hhi =
         String_utils.string_ends_with Relative_path.(suffix env.file) "hhi"
       in
+
       match List.last (PositionedSyntaxTree.all_errors tree) with
       | None when env.quick_mode || is_hhi -> ()
       | None ->

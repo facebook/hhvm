@@ -1099,18 +1099,6 @@ let is_hashbang text =
     let count = List.length @@ String_utils.split_on_newlines text in
     count = 1 && Str.string_match r text 0 && Str.matched_string text = text
 
-let markup_errors env node errors =
-  match syntax node with
-  | MarkupSection { markup_prefix; markup_text; _ }
-    (* only report the error on the first markup section of a hack file *)
-    when env.is_hh_file && (is_missing markup_prefix) &&
-    (* hashbang is allowed before <?hh *)
-    (width markup_text) > 0 && not (is_hashbang markup_text) ->
-    make_error_from_node node SyntaxError.error1001 :: errors
-  | MarkupSection { markup_prefix; _ }
-    when env.is_hh_file && (token_kind markup_prefix) = Some TokenKind.QuestionGreaterThan ->
-    make_error_from_node node SyntaxError.error2067 :: errors
-  | _ -> errors
 
 let is_in_namespace parents =
   Hh_core.List.exists parents ~f:(fun node ->
@@ -1270,21 +1258,6 @@ let parameter_errors env node parents namespace_name names errors =
   | DecoratedExpression _ -> names, decoration_errors node errors
   | _ -> names, errors
 
-let function_errors env node parents errors =
-  match syntax node with
-  | FunctionDeclarationHeader f ->
-
-    let special_autoload_function hhvm_compat_mode _ =
-      let is_autoload =
-        String.lowercase_ascii @@ (text f.function_name) = SN.SpecialFunctions.autoload in
-      let num_params = List.length (syntax_to_list_no_separators f.function_parameter_list) in
-      hhvm_compat_mode && is_autoload && num_params > 1 in
-    let errors =
-      produce_error errors (special_autoload_function (is_hhvm_compat env)) ()
-      SyntaxError.autoload_takes_one_argument node in
-
-    errors
-  | _ -> errors
 
 let redeclaration_errors env node parents namespace_name names errors =
   match syntax node with
@@ -2578,12 +2551,8 @@ let find_syntax_errors env =
         ; namespace_name
         ; trait_require_clauses
         } = acc in
-    let errors =
-      markup_errors env node errors in
     let names, errors =
       parameter_errors env node parents namespace_name names errors in
-    let errors =
-      function_errors env node parents errors in
     let names, errors =
       redeclaration_errors env node parents namespace_name names errors in
     let errors =

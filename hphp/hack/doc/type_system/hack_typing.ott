@@ -742,6 +742,11 @@ G |- sft1 <: sft1' ... G |- sftn <: sftn'
 -------------------------------------------------- :: shape_co
 G |- shape ( sft1 , ... , sftn ) <: shape ( sft1' , ... , sftn' )
 
+{{ com Closed shapes can be opened }}
+
+------------------------------------------------------------------------ :: shape_open
+G |- shape ( sft1 , ... , sftn ) <: shape (sft1 , ... , sftn , vardots )
+
 {{ com Width subtyping on open shapes: fields can be forgotten }}
 ------------------------------------------------------------------------------------------------------ :: shape_narrow
 G |- shape ( sft1, ..., sftm , sft1', ... , sftn', vardots ) <: shape ( sft1 , ... , sftm , vardots )

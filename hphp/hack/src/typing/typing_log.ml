@@ -278,3 +278,7 @@ let log_types level p env items =
             lnewline ()) in
       go items)
   else ()
+
+let increment_feature_count env s =
+  if GlobalOptions.tco_language_feature_logging (Env.get_options env)
+  then Measure.sample s 1.0

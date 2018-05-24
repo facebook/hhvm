@@ -25,6 +25,7 @@ type t = {
   tco_disallow_ambiguous_lambda : bool;
   tco_disallow_array_typehint: bool;
   tco_disallow_array_literal: bool;
+  tco_language_feature_logging : bool;
   po_disallow_elvis_space : bool;
   ignored_fixme_codes : ISet.t;
 } [@@deriving show]
@@ -198,6 +199,7 @@ let default = {
  tco_disallow_ambiguous_lambda = false;
  tco_disallow_array_typehint = false;
  tco_disallow_array_literal = false;
+ tco_language_feature_logging = false;
  po_disallow_elvis_space = false;
  ignored_fixme_codes = ISet.empty;
 }
@@ -232,6 +234,7 @@ let make ~tco_assume_php
          ~tco_disallow_ambiguous_lambda
          ~tco_disallow_array_typehint
          ~tco_disallow_array_literal
+         ~tco_language_feature_logging
          ~po_disallow_elvis_space
          ~ignored_fixme_codes = {
                    tco_assume_php;
@@ -252,6 +255,7 @@ let make ~tco_assume_php
                    tco_disallow_ambiguous_lambda;
                    tco_disallow_array_typehint;
                    tco_disallow_array_literal;
+                   tco_language_feature_logging;
                    po_disallow_elvis_space;
         }
 let tco_assume_php t = t.tco_assume_php
@@ -280,5 +284,6 @@ let po_enable_hh_syntax_for_hhvm t = t.po_enable_hh_syntax_for_hhvm
 let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda
 let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
 let tco_disallow_array_literal t = t.tco_disallow_array_literal
+let tco_language_feature_logging t = t.tco_language_feature_logging
 let po_disallow_elvis_space t = t.po_disallow_elvis_space
 let ignored_fixme_codes t = t.ignored_fixme_codes

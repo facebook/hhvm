@@ -110,6 +110,12 @@ type t = {
  tco_disallow_array_literal: bool;
 
  (*
+  * Flag to enable logging of statistics regarding use of language features.
+  * Currently used for lambdas.
+  *)
+ tco_language_feature_logging : bool;
+
+ (*
   * Flag to stop parsing the degenerate ternary ?<whitespace>: as if it
   * were the Elvis operator ?:
   *)
@@ -135,6 +141,7 @@ val make :
   tco_disallow_ambiguous_lambda: bool ->
   tco_disallow_array_typehint: bool ->
   tco_disallow_array_literal: bool ->
+  tco_language_feature_logging: bool ->
   po_disallow_elvis_space: bool ->
   ignored_fixme_codes: ISet.t -> t
 val tco_assume_php : t -> bool
@@ -155,6 +162,7 @@ val po_enable_hh_syntax_for_hhvm : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool
 val tco_disallow_array_typehint : t -> bool
 val tco_disallow_array_literal : t -> bool
+val tco_language_feature_logging : t -> bool
 val po_disallow_elvis_space : t -> bool
 val default : t
 val make_permissive : t -> t

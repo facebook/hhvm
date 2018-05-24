@@ -809,6 +809,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let t = Hh_logger.log_duration (logstring total_rechecked_count) t in
 
     Hh_logger.log "Total: %f\n%!" (t -. start_t);
+    Measure.print_stats ();
     ServerDebug.info genv "incremental_done";
 
     let new_env = CheckKind.get_env_after_typing

@@ -2304,7 +2304,7 @@ and expr_
           match expected_ft.ft_ret with
           | _, Tprim Tvoid when not is_explicit_ret -> None
           | _ -> Some expected_ft.ft_ret in
-        Measure.sample "Lambda [contextual params]" 1.0;
+        Typing_log.increment_feature_count env "Lambda [contextual params]";
         check_body_under_known_params ?ret_ty expected_ft
       | _ ->
         let explicit_variadic_param_or_non_variadic =
@@ -2320,9 +2320,8 @@ and expr_
           List.for_all f.f_params (fun param -> Option.is_some param.param_hint) in
         if all_explicit_params && explicit_variadic_param_or_non_variadic
         then begin
-          if List.is_empty f.f_params
-          then Measure.sample "Lambda [no params]" 1.0
-          else Measure.sample "Lambda [explicit params]" 1.0;
+          Typing_log.increment_feature_count env
+            (if List.is_empty f.f_params then "Lambda [no params]" else "Lambda [explicit params]");
           check_body_under_known_params declared_ft
         end
         else begin
@@ -2330,17 +2329,17 @@ and expr_
           | Some (_, _, (_, Tany)) ->
             (* If the expected type is Tany env then we're passing a lambda to an untyped
              * function and we just assume every parameter has type Tany env *)
-            Measure.sample "Lambda [untyped context]" 1.0;
+            Typing_log.increment_feature_count env "Lambda [untyped context]";
             check_body_under_known_params declared_ft
           | Some _ ->
             (* If the expected type is something concrete but not a function
              * then we should reject in strict mode. Check body anyway *)
             if Env.is_strict env
             then Errors.untyped_lambda_strict_mode p;
-            Measure.sample "Lambda [non-function typed context]" 1.0;
+            Typing_log.increment_feature_count env "Lambda [non-function typed context]";
             check_body_under_known_params declared_ft
           | _ ->
-            Measure.sample "Lambda [unknown params]" 1.0;
+            Typing_log.increment_feature_count env "Lambda [unknown params]";
             Typing_log.log_types 1 p env
               [Typing_log.Log_sub
                 ("Typing.expr Efun unknown params",

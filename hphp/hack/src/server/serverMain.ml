@@ -39,6 +39,7 @@ end = struct
     Hh_logger.log "Server is partially ready";
     let t' = Unix.gettimeofday () in
     Hh_logger.log "Took %f seconds." (t' -. t);
+
     env
 end
 

@@ -39,6 +39,8 @@ type t = {
   config_hash      : string option;
   (* A list of regexps for paths to ignore *)
   ignored_paths    : string list;
+  (* A list of extra paths to search for declarations *)
+  extra_paths      : Path.t list;
 }
 
 let filename = Relative_path.from_root ".hhconfig"
@@ -155,7 +157,6 @@ let process_ignored_paths config =
   SMap.get config "ignored_paths"
   |> Option.value_map ~f:convert_ignored_paths ~default:[]
 
-
 let maybe_relative_path fn =
   (* Note: this is not the same as calling realpath; the cwd is not
    * necessarily the same as hh_server's root!!! *)
@@ -164,6 +165,11 @@ let maybe_relative_path fn =
     then Relative_path.(to_absolute (from_root fn))
     else fn
   end
+
+let process_extra_paths config =
+  match SMap.get config "extra_paths" with
+  | Some s -> Str.split config_list_regexp s |> List.map ~f:maybe_relative_path
+  | _ -> []
 
 let extract_auto_namespace_element ns_map element =
   match element with
@@ -195,6 +201,7 @@ let load config_filename options =
   let local_config = ServerLocalConfig.load ~silent:false in
   let version = SMap.get config "version" in
   let ignored_paths = process_ignored_paths config in
+  let extra_paths = process_extra_paths config in
   let load_script =
     Option.map (SMap.get config "load_script") maybe_relative_path in
   (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means
@@ -236,6 +243,7 @@ let load config_filename options =
     formatter_override = formatter_override;
     config_hash = config_hash;
     ignored_paths = ignored_paths;
+    extra_paths = extra_paths;
   }, local_config
 
 (* useful in testing code *)
@@ -251,6 +259,7 @@ let default_config = {
   formatter_override = None;
   config_hash = None;
   ignored_paths = [];
+  extra_paths = [];
 }
 
 let set_parser_options config popt = { config with parser_options = popt }
@@ -263,3 +272,4 @@ let parser_options config = config.parser_options
 let formatter_override config = config.formatter_override
 let config_hash config = config.config_hash
 let ignored_paths config = config.ignored_paths
+let extra_paths config = config.extra_paths;

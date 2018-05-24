@@ -18,6 +18,7 @@ val is_compatible : t -> t -> bool
 val default_config : t
 
 val ignored_paths       : t -> string list
+val extra_paths         : t -> Path.t list
 val gc_control          : t -> Gc.control
 val sharedmem_config    : t -> SharedMem.config
 val state_prefetcher_script : t -> Path.t option

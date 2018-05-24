@@ -72,11 +72,26 @@ module ServerInitCommon = struct
       (List.map ~f:(Relative_path.(create Hhi)))
       (Find.make_next_files
          ~name:"hhi" ~filter:hhi_filter hhi_root) in
+    let rec concat_next_files l () =
+      begin match l with
+      | [] -> []
+      | hd::tl -> begin match hd () with
+        | [] -> concat_next_files tl ()
+        | x -> x
+        end
+      end
+    in
+    let extra_roots = ServerConfig.extra_paths genv.config in
+    let next_files_extra = List.map extra_roots
+      (fun root -> compose
+        (List.map ~f:Relative_path.create_detect_prefix)
+        (Find.make_next_files
+          ~filter:ServerEnv.file_filter
+          root)
+      ) |> concat_next_files
+    in
     fun () ->
-      let next = match next_files_hhi () with
-      | [] -> next_files_root ()
-      | x -> x
-      in
+      let next = concat_next_files [next_files_hhi; next_files_extra; next_files_root] () in
       Bucket.of_list next
 
   let with_loader_timeout timeout stage f =

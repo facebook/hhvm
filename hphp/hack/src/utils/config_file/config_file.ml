@@ -26,6 +26,7 @@ let parse_contents contents =
       let parts = Str.bounded_split (Str.regexp "=") line 2 in
       match parts with
       | [k; v] -> SMap.add (String.trim k) (String.trim v) acc
+      | [k] -> SMap.add (String.trim k) "" acc
       | _ -> failwith "failed to parse config";
   end ~init:SMap.empty
 

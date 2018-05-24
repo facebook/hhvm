@@ -9,6 +9,7 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -217,7 +218,19 @@ Variant CurlResource::execute() {
   {
     IOStatusHelper io("curl_easy_perform", m_url.data());
     SYNC_VM_REGS_SCOPED();
-    m_error_no = curl_easy_perform(m_cp);
+    if (m_in_exec) {
+      log_native_stack("unexpected re-entry into curl_exec");
+    }
+    m_in_exec = true;
+    // T29358191: curl_easy_perform should not throw... trust but verify
+    try {
+      m_error_no = curl_easy_perform(m_cp);
+    } catch (...) {
+      m_in_exec = false;
+      log_native_stack("unexpected exception from curl_easy_perform");
+      throw;
+    }
+    m_in_exec = false;
     check_exception();
   }
   set_curl_statuses(m_cp, m_url.data());
@@ -1084,6 +1097,10 @@ void CurlResource::handle_exception() {
 size_t CurlResource::curl_read(char *data,
                                size_t size, size_t nmemb, void *ctx) {
   CurlResource *ch = (CurlResource *)ctx;
+  if (!ch->m_in_exec) {
+    // T29358191: who's calling, and are they dealing with m_exception?
+    log_native_stack("unexpected curl_read");
+  }
   ReadHandler *t  = &ch->m_read;
 
   int length = -1;
@@ -1126,6 +1143,10 @@ size_t CurlResource::curl_read(char *data,
 size_t CurlResource::curl_write(char *data,
                                 size_t size, size_t nmemb, void *ctx) {
   CurlResource *ch = (CurlResource *)ctx;
+  if (!ch->m_in_exec) {
+    // T29358191: who's calling, and are they dealing with m_exception?
+    log_native_stack("unexpected curl_write");
+  }
   WriteHandler *t  = &ch->m_write;
   size_t length = size * nmemb;
 
@@ -1163,6 +1184,10 @@ size_t CurlResource::curl_write(char *data,
 size_t CurlResource::curl_write_header(char *data,
                                        size_t size, size_t nmemb, void *ctx) {
   CurlResource *ch = (CurlResource *)ctx;
+  if (!ch->m_in_exec) {
+    // T29358191: who's calling, and are they dealing with m_exception?
+    log_native_stack("unexpected curl_write_header");
+  }
   WriteHandler *t  = &ch->m_write_header;
   size_t length = size * nmemb;
 
@@ -1215,6 +1240,10 @@ int CurlResource::curl_progress(void* p,
                                 double ultotal, double ulnow) {
   assertx(p);
   CurlResource* curl = static_cast<CurlResource*>(p);
+  if (!curl->m_in_exec) {
+    // T29358191: who's calling, and are they dealing with m_exception?
+    log_native_stack("unexpected curl_progress");
+  }
 
   PackedArrayInit pai(5);
   pai.append(Resource(curl));

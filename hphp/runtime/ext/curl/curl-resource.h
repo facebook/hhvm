@@ -137,16 +137,18 @@ struct CurlResource : SweepableResourceData {
   String m_header;
   Array  m_opts;
 
-  bool m_in_callback{false};
   WriteHandler m_write;
   WriteHandler m_write_header;
   ReadHandler  m_read;
   Variant      m_progress_callback;
 
+  bool m_in_callback{false};
+  bool m_in_exec{false};
   bool m_emptyPost;
   bool m_safeUpload;
   CurlHandlePoolPtr m_connPool;
   PooledCurlHandle* m_pooledHandle;
+  friend struct CurlMultiResource;
 };
 
 /////////////////////////////////////////////////////////////////////////////

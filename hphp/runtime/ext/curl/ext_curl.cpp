@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -38,7 +39,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 #include <folly/Optional.h>
-#include <openssl/ssl.h>
+#include <folly/portability/OpenSSL.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <curl/multi.h>
@@ -506,26 +507,42 @@ Variant HHVM_FUNCTION(curl_multi_strerror, int64_t code) {
   }
 }
 
-Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
+Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh,
+                      const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
   auto curle = cast<CurlResource>(ch);
   curlm->add(ch);
   return curl_multi_add_handle(curlm->get(), curle->get());
 }
 
-Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh, const Resource& ch) {
+Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh,
+                      const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
   auto curle = cast<CurlResource>(ch);
   curlm->remove(curle);
   return curl_multi_remove_handle(curlm->get(), curle->get());
 }
 
-Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_running) {
+Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh,
+                      VRefParam still_running) {
   CHECK_MULTI_RESOURCE(curlm);
   int running = 0;
   IOStatusHelper io("curl_multi_exec");
   SYNC_VM_REGS_SCOPED();
-  int result = curl_multi_perform(curlm->get(), &running);
+  if (curlm->anyInExec()) {
+    log_native_stack("unexpected reentry into curl_multi_exec");
+  }
+  curlm->setInExec(true);
+  // T29358191: curl_multi_perform should not throw... trust but verify
+  int result;
+  try {
+    result = curl_multi_perform(curlm->get(), &running);
+  } catch (...) {
+    curlm->setInExec(false);
+    log_native_stack("unexpcted exception from curl_multi_perform");
+    throw;
+  }
+  curlm->setInExec(false);
   curlm->check_exceptions();
   still_running.assignIfRef(running);
   return result;

@@ -33,6 +33,9 @@ struct CurlMultiResource : SweepableResourceData {
   CURLM* get();
   void check_exceptions();
 
+  void setInExec(bool b);
+  bool anyInExec() const;
+
  private:
   CURLM *m_multi;
   // CURLM is a typedef to void

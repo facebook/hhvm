@@ -83,6 +83,21 @@ Resource CurlMultiResource::find(CURL *cp) {
   return Resource();
 }
 
+void CurlMultiResource::setInExec(bool b) {
+  for (ArrayIter iter(m_easyh); iter; ++iter) {
+    auto const curl = cast<CurlResource>(iter.second());
+    curl->m_in_exec = b;
+  }
+}
+
+bool CurlMultiResource::anyInExec() const {
+  for (ArrayIter iter(m_easyh); iter; ++iter) {
+    auto const curl = cast<CurlResource>(iter.second());
+    if (curl->m_in_exec) return true;
+  }
+  return false;
+}
+
 void CurlMultiResource::check_exceptions() {
   Exception* cppException = nullptr;
   Object phpException;
@@ -114,6 +129,10 @@ void CurlMultiResource::check_exceptions() {
       delete cppException;
       cppException = e;
     }
+  }
+  for (ArrayIter iter(m_easyh); iter; ++iter) {
+    auto const curl = cast<CurlResource>(iter.second());
+    assertx(!curl->m_exception);
   }
   if (cppException) cppException->throwException();
   if (!phpException.isNull()) throw_object(phpException);

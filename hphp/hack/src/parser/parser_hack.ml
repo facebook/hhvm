@@ -481,8 +481,10 @@ let rec program
     Fixmes.HH_FIXMES.add env.file fixmes;
     Option.iter (List.last !(env.errors)) Errors.parsing_error
   end;
+  let autoimport =
+    is_hh_file || ParserOptions.enable_hh_syntax_for_hhvm env.popt in
   let ast = if elaborate_namespaces
-    then Namespaces.elaborate_toplevel_defs env.popt ast
+    then Namespaces.elaborate_toplevel_defs ~autoimport env.popt ast
     else ast in
   {file_mode; is_hh_file; comments; ast; content}
 

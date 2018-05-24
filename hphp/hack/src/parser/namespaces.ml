@@ -260,8 +260,8 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
       (ParserOptions.auto_namespace_map nsenv.ns_popt) fully_qualified in
   was_renamed, (p, translated)
 
-let elaborate_id nsenv kind id =
-  let _, newid = elaborate_id_impl ~autoimport:true nsenv kind id in
+let elaborate_id ?(autoimport=true) nsenv kind id =
+  let _, newid = elaborate_id_impl ~autoimport nsenv kind id in
   newid
 
 (* First pass of flattening namespaces, run super early in the pipeline, right
@@ -278,14 +278,14 @@ let elaborate_id nsenv kind id =
  * allow us to fix those up during a second pass during naming.
  *)
 module ElaborateDefs = struct
-  let hint nsenv = function
+  let hint ~autoimport nsenv = function
     | p, Happly (id, args) ->
-        p, Happly (elaborate_id nsenv ElaborateClass id, args)
+        p, Happly (elaborate_id ~autoimport nsenv ElaborateClass id, args)
     | other -> other
 
-  let class_def nsenv = function
-    | ClassUse h -> ClassUse (hint nsenv h)
-    | XhpAttrUse h -> XhpAttrUse (hint nsenv h)
+  let class_def ~autoimport nsenv = function
+    | ClassUse h -> ClassUse (hint ~autoimport nsenv h)
+    | XhpAttrUse h -> XhpAttrUse (hint ~autoimport nsenv h)
     | other -> other
 
   let finish nsenv updated_nsenv stmt =
@@ -293,7 +293,7 @@ module ElaborateDefs = struct
     then nsenv, [stmt; SetNamespaceEnv nsenv]
     else nsenv, [stmt]
 
-  let rec def map_def nsenv = function
+  let rec def ~autoimport map_def nsenv = function
     (*
       The default namespace in php is the global namespace specified by
       the empty string. In the case of an empty string, we model it as
@@ -311,7 +311,7 @@ module ElaborateDefs = struct
           | "" -> None
           | _ -> Some (parent_nsname ^ nsname) in
         let new_nsenv = {nsenv with ns_name = nsname} in
-        nsenv, SetNamespaceEnv new_nsenv :: program map_def new_nsenv prog
+        nsenv, SetNamespaceEnv new_nsenv :: program ~autoimport map_def new_nsenv prog
       end
     | NamespaceUse l -> begin
         let nsenv =
@@ -346,9 +346,9 @@ module ElaborateDefs = struct
         elaborate_defined_id nsenv ElaborateClass c.c_name in
       finish nsenv updated_nsenv @@ map_def nsenv (Class {c with
         c_name = name;
-        c_extends = List.map c.c_extends (hint nsenv);
-        c_implements = List.map c.c_implements (hint nsenv);
-        c_body = List.map c.c_body (class_def nsenv);
+        c_extends = List.map c.c_extends (hint ~autoimport nsenv);
+        c_implements = List.map c.c_implements (hint ~autoimport nsenv);
+        c_body = List.map c.c_body (class_def ~autoimport nsenv);
         c_namespace = nsenv;
       })
     | Fun f ->
@@ -386,10 +386,10 @@ module ElaborateDefs = struct
       }]
     | other -> nsenv, [map_def nsenv other]
 
-  and program f nsenv p =
+  and program ~autoimport f nsenv p =
     let _, acc =
       List.fold_left p ~init:(nsenv, []) ~f:begin fun (nsenv, acc) item ->
-        let nsenv, item = def f nsenv item in
+        let nsenv, item = def ~autoimport f nsenv item in
         nsenv, item :: acc
       end in
     List.concat (List.rev acc)
@@ -397,14 +397,14 @@ end
 
 let noop _ x = x
 
-let elaborate_toplevel_defs_ ?(map_def = noop) popt ast  =
-  ElaborateDefs.program map_def (Namespace_env.empty popt) ast
+let elaborate_toplevel_defs_ ~autoimport ?(map_def = noop) popt ast  =
+  ElaborateDefs.program ~autoimport map_def (Namespace_env.empty popt) ast
 
-let elaborate_toplevel_defs popt ast =
-  elaborate_toplevel_defs_ popt ast
+let elaborate_toplevel_defs ~autoimport popt ast =
+  elaborate_toplevel_defs_ ~autoimport popt ast
 
-let elaborate_map_toplevel_defs popt ast map_def =
-  elaborate_toplevel_defs_ ~map_def popt ast
+let elaborate_map_toplevel_defs ~autoimport popt ast map_def =
+  elaborate_toplevel_defs_ ~autoimport ~map_def popt ast
 
 let elaborate_def nsenv def =
-  ElaborateDefs.def noop nsenv def
+  ElaborateDefs.def ~autoimport:true noop nsenv def

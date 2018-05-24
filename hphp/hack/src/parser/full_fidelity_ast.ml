@@ -2784,7 +2784,10 @@ let scour_comments
  * Front-end matter
 )*****************************************************************************)
 
-let elaborate_toplevel_and_std_constants ast env source_text =
+let elaborate_toplevel_and_std_constants ast (env: env) source_text =
+  let autoimport =
+    env.is_hh_file || ParserOptions.enable_hh_syntax_for_hhvm env.parser_options
+  in
   match env.elaborate_namespaces, env.saw_std_constant_redefinition with
   | true, true ->
     let elaborate_std_constants nsenv def =
@@ -2808,9 +2811,10 @@ let elaborate_toplevel_and_std_constants ast env source_text =
       end in
       visitor#on_def nsenv def in
     let parser_options = env.parser_options in
-    NS.elaborate_map_toplevel_defs parser_options ast elaborate_std_constants
+    NS.elaborate_map_toplevel_defs
+      ~autoimport parser_options ast elaborate_std_constants
   | true, false ->
-    NS.elaborate_toplevel_defs env.parser_options ast
+    NS.elaborate_toplevel_defs ~autoimport env.parser_options ast
   | _ -> ast
 
 let elaborate_halt_compiler ast env source_text  =

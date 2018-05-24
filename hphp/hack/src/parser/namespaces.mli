@@ -12,7 +12,7 @@ type elaborate_kind =
   | ElaborateClass
   | ElaborateConst
 
-val elaborate_id : Namespace_env.env ->
+val elaborate_id : ?autoimport:bool -> Namespace_env.env ->
                    elaborate_kind ->
                    Ast.id ->
                    Ast.id
@@ -26,8 +26,9 @@ val elaborate_id_impl : autoimport:bool -> Namespace_env.env ->
   incur a perf hit that everybody will have to pay. For codegen purposed
   namespaces are propagated to inline declarations
   during closure conversion process *)
-val elaborate_toplevel_defs : ParserOptions.t -> Ast.program -> Ast.program
+val elaborate_toplevel_defs : autoimport:bool -> ParserOptions.t -> Ast.program -> Ast.program
 val elaborate_map_toplevel_defs :
+  autoimport:bool ->
   ParserOptions.t ->
   Ast.program ->
   (Namespace_env.env -> Ast.def -> Ast.def) ->

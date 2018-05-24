@@ -1,0 +1,4 @@
+string(24) "AutoimportTest\Container"
+string(27) "AutoimportTest\ContainerExt"
+string(26) "AutoimportTest\Traversable"
+string(29) "AutoimportTest\TraversableExt"

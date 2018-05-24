@@ -1,6 +1,6 @@
 <?php
 
-namespace HH\Rx;
+namespace HH\Rx {
 
 interface KeyedIterable extends
   namespace\KeyedTraversable,
@@ -12,4 +12,6 @@ interface KeyedIterable extends
   public function filterWithKey(<<__OnlyRxIfRxFunc>> $callback);
   <<__Rx, __MutableReturn>>
   public function keys();
+}
+
 }

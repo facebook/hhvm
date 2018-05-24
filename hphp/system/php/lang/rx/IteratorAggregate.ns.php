@@ -1,6 +1,6 @@
 <?php
 
-namespace HH\Rx;
+namespace HH\Rx {
 
 interface IteratorAggregate extends namespace\Traversable, \IteratorAggregate {
   <<__Rx, __MutableReturn>>
@@ -8,3 +8,5 @@ interface IteratorAggregate extends namespace\Traversable, \IteratorAggregate {
 }
 
 interface Iterable extends namespace\IteratorAggregate, \HH\Iterable {}
+
+}

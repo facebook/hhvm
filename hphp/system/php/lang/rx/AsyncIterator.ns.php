@@ -1,6 +1,6 @@
 <?php
 
-namespace HH\Rx;
+namespace HH\Rx {
 
 interface AsyncIterator extends \HH\AsyncIterator {
   /**
@@ -10,4 +10,6 @@ interface AsyncIterator extends \HH\AsyncIterator {
    */
   <<__Rx, __Mutable>>
   public function next();
+}
+
 }

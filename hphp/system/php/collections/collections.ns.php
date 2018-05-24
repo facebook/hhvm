@@ -2,15 +2,22 @@
 
 namespace {
 
-interface ConstCollection extends Countable {
+interface ConstCollection extends HH\Rx\Countable {
+  <<__Rx>>
   public function isEmpty();
+  <<__Rx>>
   public function count();
+  <<__Rx, __MutableReturn>>
   public function items();
 }
 
 interface OutputCollection {
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function add($e);
-  public function addAll($iterable);
+  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  public function addAll(
+    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> $iterable
+  );
 }
 
 }
@@ -19,6 +26,7 @@ namespace HH {
 
 interface Collection extends \ConstCollection,
                              \OutputCollection {
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function clear();
 }
 
@@ -27,22 +35,32 @@ interface Collection extends \ConstCollection,
 namespace {
 
 interface ConstSetAccess {
+  <<__Rx>>
   public function contains($m);
 }
 
 interface SetAccess extends ConstSetAccess {
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function remove($m);
 }
 
 interface ConstIndexAccess {
+  <<__Rx>>
   public function at($k);
+  <<__Rx>>
   public function get($k);
+  <<__Rx>>
   public function containsKey($k);
 }
 
 interface IndexAccess extends ConstIndexAccess {
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function set($k,$v);
-  public function setAll($iterable);
+  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  public function setAll(
+    <<__OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> $iterable
+  );
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function removeKey($k);
 }
 
@@ -60,7 +78,7 @@ interface Indexish extends \HH\KeyedContainer {
 
 interface ConstVector extends ConstCollection,
                               ConstIndexAccess,
-                              \HH\KeyedIterable,
+                              \HH\Rx\KeyedIterable,
                               Indexish {
 }
 
@@ -71,7 +89,7 @@ interface MutableVector extends ConstVector,
 
 interface ConstMap extends ConstCollection,
                            ConstMapAccess,
-                           \HH\KeyedIterable,
+                           \HH\Rx\KeyedIterable,
                            Indexish {
 }
 
@@ -82,7 +100,7 @@ interface MutableMap extends ConstMap,
 
 interface ConstSet extends ConstCollection,
                            ConstSetAccess,
-                           \HH\KeyedIterable,
+                           \HH\Rx\KeyedIterable,
                            \HH\Container {
 }
 

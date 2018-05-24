@@ -1,6 +1,6 @@
 <?php
 
-namespace HH\Rx;
+namespace HH\Rx {
 
 interface Iterator extends namespace\Traversable, \HH\Iterator {
   <<__Rx>>
@@ -13,4 +13,6 @@ interface Iterator extends namespace\Traversable, \HH\Iterator {
   public function rewind();
   <<__Rx>>
   public function valid();
+}
+
 }

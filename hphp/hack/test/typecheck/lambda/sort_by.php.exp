@@ -2,5 +2,5 @@ File "sort_by.php", line 20, characters 70-76:
 Invalid return type (Typing[4110])
 File "sort_by.php", line 13, characters 23-25:
 This is an int
-File "sort_by.php", line 10, characters 22-23:
+File "sort_by.php", line 5, characters 31-35:
 It is incompatible with a float

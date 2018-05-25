@@ -792,6 +792,9 @@ let set_local env x new_type =
   let {fake_members; local_types; local_type_history; local_using_vars;
        tpenv; local_mutability; local_reactive} = env.lenv in
   let env, new_type = unbind env new_type in
+  let new_type = match new_type with
+    | _, Tunresolved [ty] -> ty
+    | _ -> new_type in
   let next_cont = LEnvC.get_cont Cont.Next local_types in
   let all_types, expr_id =
     match

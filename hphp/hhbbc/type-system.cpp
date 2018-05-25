@@ -3148,6 +3148,13 @@ Type Type::unionArrLike(Type a, Type b) {
 Type union_of(Type a, Type b) {
   if (a.subtypeOfImpl<true>(b)) return b;
   if (b.subtypeOfImpl<true>(a)) return a;
+  // We need to double check that both unopt(a) is not a subtype of b, and
+  // that unopt(b) is not a subtype of a.  This is important because:
+  // unopt(a) <= b  implies that a and b <= opt(b)
+  // Most cases would be caught by the commonAncestor check below, but cases
+  // involving an interface can be missed.
+  if (is_opt(a) && !is_opt(b) && unopt(a).subtypeOfImpl<true>(b)) return opt(b);
+  if (is_opt(b) && !is_opt(a) && unopt(b).subtypeOfImpl<true>(a)) return opt(a);
 
   /*
    * We need to check this before specialized objects, including the case where

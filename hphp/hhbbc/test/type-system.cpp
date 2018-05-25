@@ -1408,6 +1408,11 @@ TEST(Type, Interface) {
   // failing if we ever do:
   EXPECT_TRUE(clsExactATy.couldBe(objcls(subObjIAATy)));
 
+  EXPECT_TRUE(union_of(opt(exactObjATy), opt(subObjIATy)) == opt(subObjIATy));
+  // Since we have invariants in the index that types only improve, it is
+  // important that the below union is more or equally refined than the
+  // above union.
+  EXPECT_TRUE(union_of(opt(exactObjATy), subObjIATy) == opt(subObjIATy));
 }
 
 TEST(Type, NonUnique) {

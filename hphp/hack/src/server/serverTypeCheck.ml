@@ -675,6 +675,8 @@ end = functor(CheckKind:CheckKindType) -> struct
     let fast = extend_fast fast files_info failed_naming in
 
     (* COMPUTES WHAT MUST BE REDECLARED  *)
+    let deptable_unlocked =
+      Typing_deps.allow_dependency_table_reads true in
     let failed_decl = CheckKind.get_defs_to_redecl files_to_parse env in
     let fast = extend_fast fast files_info failed_decl in
     let fast = add_old_decls env.files_info fast in
@@ -750,6 +752,8 @@ end = functor(CheckKind:CheckKindType) -> struct
     let env = CheckKind.get_env_after_decl
       ~old_env:env ~files_info ~failed_naming in
 
+    let _ : bool = Typing_deps.allow_dependency_table_reads
+      deptable_unlocked in
     (* TYPE CHECKING *)
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck
       files_to_parse fast files_info to_recheck env in

@@ -89,6 +89,10 @@ module Graph = struct
   external hh_add_dep: int -> unit     = "hh_add_dep"
   external hh_get_dep: int -> int list = "hh_get_dep"
   external hh_get_dep_sqlite: int -> int list = "hh_get_dep_sqlite"
+  external hh_allow_dependency_table_reads : bool -> bool
+    = "hh_allow_dependency_table_reads"
+  external hh_assert_allow_dependency_table_reads : unit -> unit
+    = "hh_assert_allow_dependency_table_reads"
 
   let hh_add_dep x =
     SharedMem.with_worker_exit (fun () -> hh_add_dep x)
@@ -101,6 +105,7 @@ module Graph = struct
   let union_deps l1 l2 = List.dedup (List.append l1 l2)
 
   let get x =
+    hh_assert_allow_dependency_table_reads ();
     let l = union_deps (hh_get_dep x) (hh_get_dep_sqlite x) in
     List.fold_left l ~f:begin fun acc node ->
       DepSet.add acc node
@@ -110,6 +115,8 @@ end
 (*****************************************************************************)
 (* Module keeping track of what object depends on what. *)
 (*****************************************************************************)
+
+let allow_dependency_table_reads = Graph.hh_allow_dependency_table_reads
 
 let get_ideps_from_hash x =
   Graph.get x

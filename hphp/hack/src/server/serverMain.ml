@@ -653,6 +653,12 @@ let setup_interrupts env client_provider = { env with
 }
 
 let serve genv env in_fds =
+  (* During server lifetime dependency table can be not up-to-date. Because of
+   * that, we ban access to it be default, forcing the code trying to read it to
+   * take it into account, either by explcitely enabling reads (and being fine
+   * with stale results), or declaring (in ServerCommand) that it requires full
+   * check to be completed before being executed. *)
+  let _ : bool = Typing_deps.allow_dependency_table_reads false in
   let client_provider = ClientProvider.provider_from_file_descriptors in_fds in
   (* This is needed when typecheck_after_init option is disabled. *)
   if not env.init_env.needs_full_init then finalize_init genv env.init_env;

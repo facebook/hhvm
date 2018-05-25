@@ -43,6 +43,9 @@ val debug_trace : debug_trace_type ref
 val print_string_hash_set : string HashSet.t -> unit
 val dump_debug_deps : unit -> unit
 
+(* returns the previous value of the flag *)
+val allow_dependency_table_reads: bool -> bool
+
 val add_idep : Dep.variant -> Dep.variant -> unit
 val get_ideps_from_hash : Dep.t -> DepSet.t
 val get_ideps : Dep.variant -> DepSet.t

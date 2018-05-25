@@ -30,7 +30,11 @@ let rpc_command_needs_full_check : type a. ServerEnv.genv -> a t -> bool =
   (* Finding references uses global dependency table *)
   | FIND_REFS _ -> true
   | IDE_FIND_REFS _ -> true
+  | METHOD_JUMP (_, _, find_children) -> find_children (* uses find refs *)
   | SAVE_STATE _ -> true
+  (* COVERAGE_COUNTS (unnecessarily) uses GlobalStorage, so it cannot safely run
+   * during interruptions *)
+  | COVERAGE_COUNTS _ -> true
   (* Codebase-wide rename, uses find references *)
   | REFACTOR _ -> true
   (* Same case as Ai commands *)
@@ -298,11 +302,26 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
       BuildMain.go build_opts genv env oc;
       ServerUtils.shutdown_client (ic, oc)
 
+(* Only grant access to dependency table to commands that declared that they
+ * need full check - without full check, there are no guarantees about
+ * dependency table being up to date. *)
+let with_dependency_table_reads full_recheck_needed f =
+  let deptable_unlocked = if full_recheck_needed then
+    Some (Typing_deps.allow_dependency_table_reads true) else None in
+  try_finally ~f ~finally:begin fun () ->
+    Option.iter deptable_unlocked ~f:begin fun deptable_unlocked ->
+      ignore (
+        Typing_deps.allow_dependency_table_reads deptable_unlocked : bool
+      )
+    end
+  end
+
 (* Construct a continuation that will finish handling the command and update
  * the environment. Server can execute the continuation immediately, or store it
  * to be completed later (when full recheck is completed, when workers are
  * available, when current recheck is cancelled... *)
 let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
+    with_dependency_table_reads full_recheck_needed @@ fun () ->
   assert (
     (not full_recheck_needed) ||
     ServerEnv.(env.full_check = Full_check_done)
@@ -339,6 +358,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
       genv.ServerEnv.debug_channels <- Some (ic, oc);
       ServerDebug.say_hello genv;
       env
+
 let handle
     (genv: ServerEnv.genv)
     (env: ServerEnv.env)

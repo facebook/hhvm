@@ -16,7 +16,6 @@ module Unify = Typing_unify
 module Env = Typing_env
 module Subst = Decl_subst
 module TUtils = Typing_utils
-module TUEnv = Typing_unification_env
 module SN = Naming_special_names
 module Phase = Typing_phase
 
@@ -1047,13 +1046,14 @@ and subtype_tparam
           let pos = Reason.to_pos r_super in
           Errors.explain_invariance pos c_name suggestion err; env)
 
-(* Distinction b/w sub_type and sub_type_with_uenv similar to unify and
- * unify_with_uenv, see comment there. *)
+(* Distinction b/w sub_type and sub_type_unwrapped similar to unify and
+ * unify_unwrapped, see comment there. *)
 and sub_type
   (env : Env.env)
   (ty_sub : locl ty)
   (ty_super : locl ty) : Env.env =
-    sub_type_with_uenv env (TUEnv.empty, ty_sub) (TUEnv.empty, ty_super)
+    sub_type_unwrapped env ~this_ty:None
+      ~unwrappedToption_sub:false ~unwrappedToption_super:false ty_sub ty_super
 
 (**
  * Checks that ty_sub is a subtype of ty_super, and returns an env.
@@ -1063,24 +1063,25 @@ and sub_type
  *      sub_type env ?int alpha => env where alpha==?int
  *      sub_type env int string => error
 *)
-and sub_type_with_uenv
+and sub_type_unwrapped
   (env : Env.env)
-  ((uenv_sub, ty_sub) : TUEnv.uenv * locl ty)
-  ((uenv_super, ty_super) : TUEnv.uenv * locl ty) : Env.env =
+  ~(this_ty : locl ty option)
+  ~(unwrappedToption_sub: bool)
+  ~(unwrappedToption_super: bool)
+  (ty_sub: locl ty)
+  (ty_super: locl ty) : Env.env =
   let types =
     [Typing_log.Log_type ("ty_sub", ty_sub);
      Typing_log.Log_type ("ty_super", ty_super)]  in
-  let types = Option.value_map uenv_sub.TUEnv.this_ty ~default:types
-    ~f:(fun ty -> Typing_log.Log_type ("uenv_sub.this_type", ty) :: types) in
-  let types = Option.value_map uenv_super.TUEnv.this_ty ~default:types
-    ~f:(fun ty -> Typing_log.Log_type ("uenv_super.this_type", ty) :: types) in
+  let types = Option.value_map this_ty ~default:types
+    ~f:(fun ty -> Typing_log.Log_type ("this_ty", ty) :: types) in
   Typing_log.log_types 2 (Reason.to_pos (fst ty_sub)) env
     [Typing_log.Log_sub (Printf.sprintf
-      "Typing_subtype.sub_type_with_uenv uenv_sub.unwrappedToption=%b uenv_super.unwrappedToption=%b"
-        uenv_sub.TUEnv.unwrappedToption uenv_super.TUEnv.unwrappedToption,
+      "Typing_subtype.sub_type_unwrapped unwrappedToption_sub=%b unwrappedToption_super=%b"
+        unwrappedToption_sub unwrappedToption_super,
       types)];
   let env, acc, fail =
-    simplify_subtype ~deep:false ~this_ty:uenv_sub.TUEnv.this_ty ty_sub ty_super (env, [], None) in
+    simplify_subtype ~deep:false ~this_ty ty_sub ty_super (env, [], None) in
     match fail with
     | Some (ty_sub, ty_super) ->
       (* Force error *)
@@ -1090,14 +1091,16 @@ and sub_type_with_uenv
         match ck with
         | Ast.Constraint_eq -> fst (Unify.unify env ty2 ty1)
         | Ast.Constraint_as ->
-          sub_type_with_uenv_helper env (uenv_sub, ty1) (uenv_super, ty2)
+          sub_type_unwrapped_helper env ~this_ty
+            ~unwrappedToption_sub ~unwrappedToption_super ty1 ty2
         | Ast.Constraint_super ->
-          sub_type_with_uenv_helper env (uenv_super, ty2) (uenv_sub, ty1)
+          failwith "subtype simplification should not produce super constraints"
         )
         ~init:env acc
 
 (* Deal with the cases not dealt with by simplify_subtype *)
-and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
+and sub_type_unwrapped_helper env ~this_ty
+  ~unwrappedToption_sub ~unwrappedToption_super ty_sub ty_super =
   let env, ety_super =
     Env.expand_type env ty_super in
   let env, ety_sub =
@@ -1114,8 +1117,8 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
 
   | (_, Tunresolved _), (_, Tunresolved _) ->
       let env, _ =
-        Unify.unify_unwrapped env uenv_super.TUEnv.unwrappedToption ty_super
-                                  uenv_sub.TUEnv.unwrappedToption ty_sub in
+        Unify.unify_unwrapped env unwrappedToption_super ty_super
+                                  unwrappedToption_sub ty_sub in
       env
 (****************************************************************************)
 (* ### Begin Tunresolved madness ###
@@ -1144,8 +1147,8 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       let ty_sub = (r_sub, Tunresolved [ty_sub]) in
       let env, _ =
         Unify.unify_unwrapped
-          env ~unwrappedToption1:uenv_super.TUEnv.unwrappedToption ty_super
-              ~unwrappedToption2:uenv_sub.TUEnv.unwrappedToption ty_sub in
+          env ~unwrappedToption1:unwrappedToption_super ty_super
+              ~unwrappedToption2:unwrappedToption_sub ty_sub in
       env
   | (_, Tunresolved _), (_, Tany) ->
       (* This branch is necessary in the following case:
@@ -1158,8 +1161,8 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
        * type.
        *)
     fst (Unify.unify_unwrapped
-        env ~unwrappedToption1:uenv_super.TUEnv.unwrappedToption ty_super
-            ~unwrappedToption2:uenv_sub.TUEnv.unwrappedToption ty_sub)
+        env ~unwrappedToption1:unwrappedToption_super ty_super
+            ~unwrappedToption2:unwrappedToption_sub ty_sub)
 
     (* If the subtype is a type variable bound to an empty unresolved, record
      * this in the todo list to be checked later. But make sure that we wrap
@@ -1198,7 +1201,8 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   | (_, Tunresolved tyl), _ ->
     let env =
       List.fold_left tyl ~f:begin fun env x ->
-        sub_type_with_uenv env (uenv_sub, x) (uenv_super, ty_super)
+        sub_type_unwrapped env ~this_ty
+          ~unwrappedToption_sub:false ~unwrappedToption_super x ty_super
       end ~init:env in
     env
 
@@ -1212,9 +1216,8 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   | (_,   Tabstract (AKdependent d_sub, Some ty_sub)),
     (_, Tabstract (AKdependent d_super, Some ty_super))
         when d_sub = d_super ->
-      let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub in
-      let uenv_super = TUEnv.update_this_if_unset uenv_super ety_super in
-      sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
+      let this_ty = if Option.is_none this_ty then Some ety_sub else this_ty in
+      sub_type_unwrapped env ~this_ty ~unwrappedToption_sub ~unwrappedToption_super ty_sub ty_super
 
   (* This is sort of a hack because our handling of Toption is highly
    * dependent on how the type is structured. When we see a bare
@@ -1222,19 +1225,20 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
    * relevant to subtyping any more.
    *)
   | (_, Tabstract (AKdependent (`expr _, []), Some ty_sub)), _ ->
-      let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub  in
-      sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
+      let this_ty = if Option.is_none this_ty then Some ety_sub else this_ty in
+      sub_type_unwrapped env ~this_ty ~unwrappedToption_sub ~unwrappedToption_super ty_sub ty_super
 
   | (_, Tabstract (AKdependent d_sub, Some sub)),
     (_,     Tabstract (AKdependent d_super, _)) when d_sub <> d_super ->
-      let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub in
+      let this_ty = if Option.is_none this_ty then Some ety_sub else this_ty in
       (* If an error occurred while subtyping, we produce a unification error
        * so we get the full information on how the dependent type was
        * generated
        *)
       Errors.try_when
         (fun () ->
-          sub_type_with_uenv env (uenv_sub, sub) (uenv_super, ty_super))
+          sub_type_unwrapped env ~this_ty
+            ~unwrappedToption_sub ~unwrappedToption_super sub ty_super)
         ~when_: begin fun () ->
           match sub, TUtils.get_base_type env ty_super with
           | (_, Tclass ((_, y), _)), (_, Tclass ((_, x), _)) when x = y -> false
@@ -1276,7 +1280,7 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
           {
             type_expansions = [];
             substs = Subst.make class_.tc_tparams tyl_sub;
-            this_ty = Option.value uenv_sub.TUEnv.this_ty ~default:ty_sub;
+            this_ty = Option.value this_ty ~default:ty_sub;
             from_class = None;
             validate_dty = None;
           } in
@@ -1309,16 +1313,16 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
    * Therefore, this step preserves the set of solutions.
    *)
   | (_, Toption ty_sub), (_, Toption _) ->
-    let uenv_sub = {uenv_sub with TUEnv.unwrappedToption = true} in
-    sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
+    sub_type_unwrapped env ~this_ty
+      ~unwrappedToption_sub:true ~unwrappedToption_super ty_sub ty_super
 
   (* If the nonnull type is not enabled, mixed <: ?t is equivalent
    * to mixed <: t.  Otherwise, we should not encounter mixed
    * because by this time it should have been desugared into ?nonnull.
    *)
   | (_, (Tmixed | Tdynamic)), (_, Toption ty_super) ->
-    let uenv_super = {uenv_super with TUEnv.unwrappedToption = true} in
-    sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
+    sub_type_unwrapped env
+      ~this_ty ~unwrappedToption_sub ~unwrappedToption_super:true ty_sub ty_super
 
   (* If t1 <: ?t2, where t1 is guaranteed not to contain null, then
    * t1 <: t2, and the converse is obviously true as well.
@@ -1327,8 +1331,8 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
          Tobject | Tclass _ | Tarraykind _ |
          Tabstract ((AKdependent _ | AKnewtype _| AKenum _), None))),
     (_, Toption ty_super) ->
-    let uenv_super = {uenv_super with TUEnv.unwrappedToption = true} in
-    sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
+    sub_type_unwrapped env ~this_ty
+      ~unwrappedToption_sub ~unwrappedToption_super:true ty_sub ty_super
 
   (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
    * then t1 <: t2 or t1' <: ?t2.  The converse is obviously
@@ -1339,32 +1343,33 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
     (_, Toption arg_ty_super) ->
     Errors.try_
       (fun () ->
-        let uenv_super = {uenv_super with TUEnv.unwrappedToption = true} in
-        sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, arg_ty_super))
+        sub_type_unwrapped env ~this_ty
+          ~unwrappedToption_sub ~unwrappedToption_super:true ty_sub arg_ty_super)
       (fun _ ->
-        sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
+        sub_type_unwrapped env ~this_ty
+          ~unwrappedToption_sub ~unwrappedToption_super ty ty_super)
 
   | (_, Tabstract (AKdependent _, Some ty)), (_, Toption arg_ty_super) ->
     Errors.try_
       (fun () ->
-        let uenv_super = {uenv_super with TUEnv.unwrappedToption = true} in
-        sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, arg_ty_super))
+        sub_type_unwrapped env ~this_ty
+          ~unwrappedToption_sub ~unwrappedToption_super:true ty_sub arg_ty_super)
       (fun _ ->
-        let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub in
-        sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
+        let this_ty = if Option.is_none this_ty then Some ty_sub else this_ty in
+        sub_type_unwrapped env ~this_ty ~unwrappedToption_sub ~unwrappedToption_super ty ty_super)
 
   | (_, Tabstract (AKgeneric _, _)), (_, Toption arg_ty_super) ->
     Errors.try_
       (fun () ->
-        let uenv_super = {uenv_super with TUEnv.unwrappedToption = true} in
-        sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, arg_ty_super))
+        sub_type_unwrapped env ~this_ty
+          ~unwrappedToption_sub ~unwrappedToption_super:true ty_sub arg_ty_super)
       (fun _ ->
-        sub_generic_params SSet.empty env
-          (uenv_sub, ty_sub) (uenv_super, ty_super))
+        sub_generic_params SSet.empty env ~this_ty
+          ~unwrappedToption_sub ~unwrappedToption_super ty_sub ty_super)
 
   | (r_sub, Tvar v), (_, Toption _) ->
     let env, ty_sub = Env.get_type env r_sub v in
-    sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
+    sub_type_unwrapped env ~this_ty ~unwrappedToption_sub ~unwrappedToption_super ty_sub ty_super
 
   | (r_sub, Tfun ft_sub), (r_super, Tfun ft_super) ->
     subtype_funs_generic  ~check_return:true
@@ -1455,17 +1460,19 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
        (fun _ ->
           Errors.try_
            (fun () ->
-             sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
+             sub_type_unwrapped env ~this_ty
+               ~unwrappedToption_sub ~unwrappedToption_super ty ty_super)
            (fun _ ->
-              sub_generic_params SSet.empty env (uenv_sub, ty_sub)
-                (uenv_super, ty_super)))
+              sub_generic_params SSet.empty env ~this_ty
+                ~unwrappedToption_sub ~unwrappedToption_super ty_sub ty_super))
 
   | (_, Tabstract ((AKnewtype (_, _) | AKenum _), Some ty)), _ ->
     Errors.try_
       (fun () ->
          fst @@ Unify.unify env ty_super ty_sub
       )
-      (fun _ ->  sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
+      (fun _ ->  sub_type_unwrapped env ~this_ty
+        ~unwrappedToption_sub ~unwrappedToption_super ty ty_super)
 
   (* Supertype is generic parameter *and* subtype is dependent.
    * We need to make this a special case because there is a *choice*
@@ -1497,32 +1504,36 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       (fun _ ->
          Errors.try_
           (fun () ->
-            let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub in
-            sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
+            let this_ty = if Option.is_none this_ty then Some ety_sub else this_ty in
+            sub_type_unwrapped env ~this_ty
+              ~unwrappedToption_sub ~unwrappedToption_super ty ty_super)
           (fun _ ->
-             sub_generic_params SSet.empty env (uenv_sub, ty_sub)
-               (uenv_super, ty_super)))
+             sub_generic_params SSet.empty env ~this_ty
+               ~unwrappedToption_sub ~unwrappedToption_super ty_sub ty_super))
 
   | (_, Tabstract (AKdependent _, Some ty)), _ ->
       Errors.try_
         (fun () -> fst (Unify.unify env ty_super ty_sub))
         (fun _ ->
-          let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub in
-          sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
+          let this_ty = if Option.is_none this_ty then Some ety_sub else this_ty in
+          sub_type_unwrapped env ~this_ty
+            ~unwrappedToption_sub ~unwrappedToption_super ty ty_super)
 
   (* Subtype is generic parameter
    * We delegate this case to a separate function in order to catch cycles
    * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
    *)
   | (_, Tabstract (AKgeneric _, _)), _ ->
-    sub_generic_params SSet.empty env (uenv_sub, ty_sub) (uenv_super, ty_super)
+    sub_generic_params SSet.empty env ~this_ty
+      ~unwrappedToption_sub ~unwrappedToption_super ty_sub ty_super
 
   (* Supertype is generic parameter
    * We delegate this case to a separate function in order to catch cycles
    * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
   *)
   | _, (_, Tabstract (AKgeneric _, _)) ->
-    sub_generic_params SSet.empty env (uenv_sub, ty_sub) (uenv_super, ty_super)
+    sub_generic_params SSet.empty env ~this_ty
+      ~unwrappedToption_sub ~unwrappedToption_super ty_sub ty_super
 
   | _, _ ->
     fst (Unify.unify env ty_super ty_sub)
@@ -1530,8 +1541,11 @@ and sub_type_with_uenv_helper env (uenv_sub, ty_sub) (uenv_super, ty_super) =
 and sub_generic_params
   (seen : SSet.t)
   (env : Env.env)
-  ((uenv_sub, ty_sub) : TUEnv.uenv * locl ty)
-  ((uenv_super, ty_super) : TUEnv.uenv * locl ty) : Env.env =
+  ~(this_ty : locl ty option)
+  ~(unwrappedToption_sub : bool)
+  ~(unwrappedToption_super : bool)
+  (ty_sub: locl ty)
+  (ty_super: locl ty) : Env.env =
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
   match ety_sub, ety_super with
@@ -1546,8 +1560,8 @@ and sub_generic_params
     (* If the generic is actually an expression dependent type,
       we need to update the Unification environment's this_ty
     *)
-    let uenv_sub = if AbstractKind.is_generic_dep_ty name_sub then
-    TUEnv.update_this_if_unset uenv_sub ety_sub else uenv_sub in
+    let this_ty = if AbstractKind.is_generic_dep_ty name_sub &&
+      Option.is_none this_ty then Some ety_sub else this_ty in
     (* If we've seen this type parameter before then we must have gone
      * round a cycle so we fail
      *)
@@ -1568,8 +1582,8 @@ and sub_generic_params
         | ty::tyl ->
           Errors.try_
             (fun () ->
-              sub_generic_params seen env (uenv_sub, ty)
-                                          (uenv_super, ty_super))
+              sub_generic_params seen env ~this_ty ~unwrappedToption_sub
+                                          ~unwrappedToption_super ty ty_super)
             (fun l ->
               (* Right now we report constraint failure based on the last
                * error. This should change when we start supporting
@@ -1583,11 +1597,6 @@ and sub_generic_params
 
   (* Supertype is generic parameter *)
   | _, (r_super, Tabstract (AKgeneric name_super, _)) ->
-    (* If the generic is actually an expression dependent type,
-      we need to update the Unification environment's this_ty
-    *)
-    let uenv_super =  if AbstractKind.is_generic_dep_ty name_super then
-    TUEnv.update_this_if_unset uenv_super ety_super else uenv_super in
     (* If we've seen this type parameter before then we must have gone
      * round a cycle so we fail
      *)
@@ -1606,8 +1615,8 @@ and sub_generic_params
 
         | ty::tyl ->
           Errors.try_
-            (fun () -> sub_generic_params seen env (uenv_sub, ty_sub)
-                                                   (uenv_super, ty))
+            (fun () -> sub_generic_params seen ~this_ty env ~unwrappedToption_sub
+                                            ~unwrappedToption_super ty_sub ty)
           (fun l ->
            (* Right now we report constraint failure based on the last
             * error. This should change when we start supporting
@@ -1619,7 +1628,8 @@ and sub_generic_params
       in try_bounds (Typing_set.elements (Env.get_lower_bounds env name_super))
 
   | _, _ ->
-    sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
+    sub_type_unwrapped env ~this_ty
+      ~unwrappedToption_sub ~unwrappedToption_super ty_sub ty_super
 
 (* BEWARE: hack upon hack here.
  * To implement a predicate that tests whether `ty_sub` is a subtype of

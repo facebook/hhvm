@@ -116,7 +116,7 @@ let shutdown_persistent_client env client =
   ClientProvider.shutdown_client client;
   let env = { env with
     pending_command_needs_writes = None;
-    pending_command_needs_full_check = None;
+    persistent_client_pending_command_needs_full_check = None;
   } in
   ServerFileSync.clear_sync_data env
 
@@ -223,13 +223,13 @@ let handle_persistent_connection_ genv env client =
     let env = { env with ide_idle = false; } in
     ServerCommand.handle genv env client
 
-let handle_connection genv env client is_from_existing_persistent_client =
+let handle_connection genv env client client_kind =
   ServerIdle.stamp_connection ();
-  match is_from_existing_persistent_client with
-    | true ->
+  match client_kind with
+    | `Persistent ->
       handle_persistent_connection_ genv env client |>
       ServerUtils.wrap (handle_persistent_connection_try (fun x -> x) client)
-    | false ->
+    | `Non_persistent  ->
       handle_connection_ genv env client |>
       ServerUtils.wrap (handle_connection_try (fun x -> x) client)
 
@@ -238,7 +238,7 @@ let recheck genv old_env check_kind =
   let old_env = { old_env with can_interrupt } in
   let new_env, to_recheck, total_rechecked =
     ServerTypeCheck.check genv old_env check_kind in
-  let new_env = { new_env with can_interrupt = false } in
+  let new_env = { new_env with can_interrupt = true } in
   if old_env.init_env.needs_full_init &&
       not new_env.init_env.needs_full_init then
         finalize_init genv new_env.init_env;
@@ -442,7 +442,9 @@ let serve_one_iteration genv env client_provider =
       (* client here is the new client (not the existing persistent client) *)
       (* whose request we're going to handle.                               *)
       let env =
-        fully_handle_command genv (handle_connection genv env client false) in
+        handle_connection genv env client `Non_persistent |>
+        fully_handle_command genv
+      in
       HackEventLogger.handled_connection start_t;
       env
     with
@@ -471,7 +473,9 @@ let serve_one_iteration genv env client_provider =
     HackEventLogger.got_persistent_client_channels start_t;
     (try
       let env =
-        fully_handle_command genv (handle_connection genv env client true) in
+        handle_connection genv env client `Persistent |>
+        fully_handle_command genv
+      in
       HackEventLogger.handled_persistent_connection start_t;
       env
     with
@@ -488,11 +492,11 @@ let serve_one_iteration genv env client_provider =
       }
     | None -> env
   in
-  let env = match env.pending_command_needs_full_check with
+  let env = match env.persistent_client_pending_command_needs_full_check with
     | Some (f, reason) ->
       let f = ServerUtils.Needs_full_recheck (env, f, false, reason) in
       { (fully_handle_command genv f) with
-        pending_command_needs_full_check = None
+        persistent_client_pending_command_needs_full_check = None
       }
     | None -> env
   in
@@ -528,7 +532,7 @@ let priority_client_interrupt_handler genv client_provider env  =
     (* This is possible because client might have went away during
      * sleep_and_check. *)
     | None -> env
-    | Some client -> match handle_connection genv env client false with
+    | Some client -> match handle_connection genv env client `Non_persistent with
       | ServerUtils.Needs_full_recheck _ ->
         failwith "unexpected command needing full recheck in priority channel"
       | ServerUtils.Needs_writes _ ->
@@ -544,16 +548,19 @@ let persistent_client_interrupt_handler genv env =
   (* Several handlers can become ready simultaneously and one of them can remove
    * the persistent client before we get to it. *)
   | None -> env, MultiThreadedCall.Continue
-  | Some client -> match handle_connection genv env client true with
+  | Some client -> match handle_connection genv env client `Persistent with
     | ServerUtils.Needs_full_recheck (env, f, ignore_ide, reason) ->
       (* This is only possible for STATUS, which is not a persistent client
        * command. *)
       assert (not ignore_ide);
       (* This should not be possible, because persistent client will not send
        * the next command before receiving results from the previous one. *)
-      assert (Option.is_none env.pending_command_needs_full_check);
-      {env with pending_command_needs_full_check = Some (f, reason)},
-        MultiThreadedCall.Continue
+      assert (Option.is_none
+        env.persistent_client_pending_command_needs_full_check);
+      { env with
+        persistent_client_pending_command_needs_full_check = Some (f, reason)
+      },
+      MultiThreadedCall.Continue
     | ServerUtils.Needs_writes (env, f, should_restart_recheck) ->
       let full_check = match env.full_check with
         | Full_check_started when not should_restart_recheck ->

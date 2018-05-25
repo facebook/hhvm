@@ -149,6 +149,9 @@ type env = {
      * recheck (for logging/debugging purposes) *)
     persistent_client_pending_command_needs_full_check:
       ((env -> env) * string) option;
+    (* Same as above, but for non-persistent clients *)
+    default_client_pending_command_needs_full_check:
+      ((env -> env) * string * ClientProvider.client) option;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;
     recent_recheck_loop_stats : recheck_loop_stats;

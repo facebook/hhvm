@@ -310,6 +310,30 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
     full_check = Full_check_started;
   } in
 
+  let env = match env.default_client_pending_command_needs_full_check with
+    (* We need to auto-restart the recheck to make progress towards handling
+     * this command... *)
+    | Some (_command, reason, client) when env.full_check = Full_check_needed
+    (*... but we don't want to get into a battle with IDE edits stopping
+     * rechecks and us restarting them. We're going to heavily favor edits and
+     * restart only after a longer period since last edit. Note that we'll still
+     * start full recheck immediately after any file save. *)
+    && t -. env.last_command_time > 5.0 ->
+      let still_there = try
+          ClientProvider.ping client;
+          true
+        with ClientProvider.Client_went_away -> false
+      in
+      if still_there then begin
+        Hh_logger.log "Restarting full check due to %s" reason;
+        { env with full_check = Full_check_started }
+      end else begin
+        ClientProvider.shutdown_client client;
+        { env with default_client_pending_command_needs_full_check = None }
+      end
+    | _ -> env
+  in
+
   (* We have some new, or previously un-processed updates *)
   let full_check = env.full_check = Full_check_started
     (* Prioritize building search index over full rechecks. *)
@@ -320,9 +344,9 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
   if (not full_check) && (not lazy_check) then
     acc, env
   else begin
-    let check_kind = if full_check
-      then ServerTypeCheck.Full_check
-      else ServerTypeCheck.Lazy_check
+    let check_kind = if lazy_check
+      then ServerTypeCheck.Lazy_check
+      else ServerTypeCheck.Full_check
     in
     let env, rechecked, total_rechecked = recheck genv env check_kind in
 
@@ -351,27 +375,48 @@ let recheck_loop genv env client has_persistent_connection_request =
 let new_serve_iteration_id () =
   Random_id.short_string ()
 
-(* Force completion of the command, running any rechecks necessary for this.
- * This is safe to run only in the main loop, when workers are not doing
- * anything. *)
-let fully_handle_command genv result =
+ (* This is safe to run only in the main loop, when workers are not doing
+  * anything. *)
+let main_loop_command_handler client_kind client result  =
   match result with
   | ServerUtils.Done env ->  env
-  | ServerUtils.Needs_full_recheck (env, f, ignore_ide, reason) ->
-    let env = ServerCommand.full_recheck_if_needed genv env ignore_ide reason in
-    f env
+  | ServerUtils.Needs_full_recheck (env, f, reason) ->
+    begin match client_kind with
+    | `Non_persistent ->
+      (* We should not accept any new clients until this is cleared *)
+      assert (Option.is_none
+        env.default_client_pending_command_needs_full_check);
+      { env with
+        default_client_pending_command_needs_full_check =
+          Some (f, reason, client)
+      }
+    | `Persistent ->
+      (* Persistent client will not send any further commands until previous one
+       * is handled. *)
+      assert (Option.is_none
+        env.persistent_client_pending_command_needs_full_check);
+      { env with
+        persistent_client_pending_command_needs_full_check = Some (f, reason)
+      }
+    end
   | ServerUtils.Needs_writes (env, f, _) -> f env
   | ServerUtils.Needs_workers (env, f) -> f env
 
 let serve_one_iteration genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
   ServerMonitorUtils.exit_if_parent_dead ();
+  let client_kind =
+    (* If we are already blocked on some client, do not accept more of them.
+     * Other clients (that connect through priority pipe, or persistent clients)
+     * can still be handled *)
+    if Option.is_some env.default_client_pending_command_needs_full_check
+    then `Priority else `Any in
   let client, has_persistent_connection_request =
     ClientProvider.sleep_and_check
       client_provider
       env.persistent_client
       ~ide_idle:env.ide_idle
-      `Any
+      client_kind
   in
   (* client here is "None" if we should either handle from our existing  *)
   (* persistent client (i.e. has_persistent_connection_request), or if   *)
@@ -443,7 +488,7 @@ let serve_one_iteration genv env client_provider =
       (* whose request we're going to handle.                               *)
       let env =
         handle_connection genv env client `Non_persistent |>
-        fully_handle_command genv
+          main_loop_command_handler `Non_persistent client
       in
       HackEventLogger.handled_connection start_t;
       env
@@ -474,7 +519,7 @@ let serve_one_iteration genv env client_provider =
     (try
       let env =
         handle_connection genv env client `Persistent |>
-        fully_handle_command genv
+        main_loop_command_handler `Persistent client
       in
       HackEventLogger.handled_persistent_connection start_t;
       env
@@ -486,19 +531,24 @@ let serve_one_iteration genv env client_provider =
   else env in
   let env = match env.pending_command_needs_writes with
     | Some f ->
-      let f = ServerUtils.Needs_writes (env, f, true) in
-      { (fully_handle_command genv f) with
+      { (f env) with
         pending_command_needs_writes = None
       }
     | None -> env
   in
   let env = match env.persistent_client_pending_command_needs_full_check with
-    | Some (f, reason) ->
-      let f = ServerUtils.Needs_full_recheck (env, f, false, reason) in
-      { (fully_handle_command genv f) with
+    | Some (f, _reason) when env.full_check = Full_check_done ->
+      { (f env) with
         persistent_client_pending_command_needs_full_check = None
       }
-    | None -> env
+    | _ -> env
+  in
+  let env = match env.default_client_pending_command_needs_full_check with
+    | Some (f, _reason, _client) when env.full_check = Full_check_done ->
+      { (f env) with
+        default_client_pending_command_needs_full_check = None
+      }
+    | _ -> env
   in
   env
 
@@ -549,10 +599,7 @@ let persistent_client_interrupt_handler genv env =
    * the persistent client before we get to it. *)
   | None -> env, MultiThreadedCall.Continue
   | Some client -> match handle_connection genv env client `Persistent with
-    | ServerUtils.Needs_full_recheck (env, f, ignore_ide, reason) ->
-      (* This is only possible for STATUS, which is not a persistent client
-       * command. *)
-      assert (not ignore_ide);
+    | ServerUtils.Needs_full_recheck (env, f, reason) ->
       (* This should not be possible, because persistent client will not send
        * the next command before receiving results from the previous one. *)
       assert (Option.is_none

@@ -205,6 +205,7 @@ let make_env config =
     interrupt_handlers = (fun _ _ -> []);
     pending_command_needs_writes = None;
     persistent_client_pending_command_needs_full_check = None;
+    default_client_pending_command_needs_full_check = None;
     init_env = {
       needs_full_init = false;
       init_start_t = Unix.gettimeofday ();

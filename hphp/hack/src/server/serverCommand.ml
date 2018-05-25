@@ -131,14 +131,15 @@ let get_unsaved_changes env  =
   let changes = ServerFileSync.get_unsaved_changes env in
   Relative_path.Map.(map ~f:fst changes, map ~f:snd changes)
 
-let full_recheck_if_needed genv env ignore_ide reason =
-  if ignore_ide then
+let reason = ServerCommandTypesUtils.debug_describe_cmd
+
+let full_recheck_if_needed genv env msg =
+  if ignore_ide msg then begin
     let ide, disk = get_unsaved_changes env in
     let env = apply_changes env disk in
-    let env = full_recheck_if_needed' genv env reason in
+    let env = full_recheck_if_needed' genv env (reason msg) in
     apply_changes env ide
-  else
-    full_recheck_if_needed' genv env reason
+  end else env
 
 (****************************************************************************)
 (* Called by the client *)
@@ -301,18 +302,21 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
  * the environment. Server can execute the continuation immediately, or store it
  * to be completed later (when full recheck is completed, when workers are
  * available, when current recheck is cancelled... *)
-let actually_handle genv client msg full_recheck_needed = fun env ->
+let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
   assert (
     (not full_recheck_needed) ||
     ServerEnv.(env.full_check = Full_check_done)
   );
+  (* There might be additional rechecking required when there are unsaved IDE
+   * changes and we asked for an answer that requires ignoring those.
+   * This is very rare. *)
+  let env = full_recheck_if_needed genv env msg in
   match msg with
   | Rpc cmd ->
       ClientProvider.ping client;
       let t = Unix.gettimeofday () in
-      let new_env, response = try ServerRpc.handle
-        ~is_stale:env.ServerEnv.recent_recheck_loop_stats.ServerEnv.updates_stale
-        genv env cmd
+      let new_env, response = try
+        ServerRpc.handle ~is_stale genv env cmd
       with e ->
         let stack = Printexc.get_backtrace () in
         if ServerCommandTypes.is_critical_rpc cmd then raise e
@@ -342,7 +346,9 @@ let handle
   : ServerEnv.env ServerUtils.handle_command_result =
   let msg = ClientProvider.read_client_msg client in
   let full_recheck_needed = command_needs_full_check genv msg in
-  let continuation = actually_handle genv client msg full_recheck_needed in
+  let is_stale = ServerEnv.(env.recent_recheck_loop_stats.updates_stale) in
+  let continuation =
+    actually_handle genv client msg full_recheck_needed ~is_stale in
   if commands_needs_writes msg then
     (* IDE edits can come in quick succession and be immediately followed
      * by time sensitivie queries (like autocomplete). There is a constant cost
@@ -351,8 +357,7 @@ let handle
      * after IDE edits - you need to save the file againg to restart it. *)
     ServerUtils.Needs_writes (env, continuation, not (is_edit msg))
   else if full_recheck_needed then
-    let reason = ServerCommandTypesUtils.debug_describe_cmd msg in
-    ServerUtils.Needs_full_recheck (env, continuation, ignore_ide msg, reason)
+    ServerUtils.Needs_full_recheck (env, continuation, reason msg)
   else if command_needs_workers genv msg then
     ServerUtils.Needs_workers (env, continuation)
   else

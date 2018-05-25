@@ -13,11 +13,9 @@ type 'env handle_command_result =
   (* Command was fully handled, and this is the new environment. *)
   | Done of 'env
   (* Returned continuation needs to be run with an environment after finished
-   * full check to complete handling of command. The boolean indicates whether
-   * IDE contents should be ignored during this recheck. The string specifies a
-   * reason why this command needs full recheck (for logging/debugging purposes)
-   *)
-  | Needs_full_recheck of 'env * ('env -> 'env) * bool * string
+   * full check to complete handling of command. The string specifies a reason
+   * why this command needs full recheck (for logging/debugging purposes) *)
+  | Needs_full_recheck of 'env * ('env -> 'env) * string
   (* Commands that want to modify global state, by modifying file contents.
    * The boolean indicates whether current recheck should be automatically
    * restarted after applying the writes *)
@@ -31,8 +29,8 @@ let wrap try_ f = fun env -> try_ env (fun () -> f env)
 (* Wrap all the continuations inside result in provided try function *)
 let wrap try_ = function
   | Done env -> Done env
-  | Needs_full_recheck (env, f, ignore_ide, reason) ->
-    Needs_full_recheck (env, wrap try_ f, ignore_ide, reason)
+  | Needs_full_recheck (env, f, reason) ->
+    Needs_full_recheck (env, wrap try_ f, reason)
   | Needs_writes (env, f, reason) -> Needs_writes (env, wrap try_ f, reason)
   | Needs_workers (env, f) -> Needs_workers (env, wrap try_ f)
 

@@ -3164,7 +3164,7 @@ Type union_of(Type a, Type b) {
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
       *a.m_data.dobj.whType.mutate() |= *b.m_data.dobj.whType;
-      return a;
+      return is_opt(a) || !is_opt(b) ? a : opt(a);
     }
     if (b == TInitNull) return opt(a);
   }

@@ -754,6 +754,25 @@ TEST(Type, OptUnionOf) {
   auto const rcls = index.builtin_class(s_Awaitable.get());
 
   EXPECT_TRUE(union_of(TObj, opt(objExact(rcls))) == TOptObj);
+
+  auto wh1 = wait_handle(index, TInt);
+  auto wh2 = wait_handle(index, ival(2));
+  auto wh3 = wait_handle(index, ival(3));
+
+  EXPECT_TRUE(union_of(wh1, wh2) == wh1);
+  auto owh1 = opt(wh1);
+  auto owh2 = opt(wh2);
+  auto owh3 = opt(wh3);
+
+  EXPECT_TRUE(union_of(owh1, owh2) == owh1);
+  EXPECT_TRUE(union_of(owh1, wh2) == owh1);
+  EXPECT_TRUE(union_of(owh2, wh1) == owh1);
+
+  EXPECT_TRUE(union_of(wh1, owh2) == owh1);
+  EXPECT_TRUE(union_of(wh2, owh1) == owh1);
+
+  EXPECT_TRUE(union_of(wh2, owh3) == owh1);
+  EXPECT_TRUE(union_of(owh2, wh3) == owh1);
 }
 
 TEST(Type, OptTV) {

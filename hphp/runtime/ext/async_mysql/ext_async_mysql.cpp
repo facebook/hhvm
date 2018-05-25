@@ -1169,6 +1169,11 @@ static bool HHVM_METHOD(AsyncMysqlQueryResult, noIndexUsed) {
   return data->m_no_index_used;
 }
 
+static String HHVM_METHOD(AsyncMysqlQueryResult, recvGtid) {
+  auto* data = Native::data<AsyncMysqlQueryResult>(this_);
+  return String(data->m_query_result->recvGtid(), CopyString);
+}
+
 namespace {
 Variant buildTypedValue(const am::RowFields* row_fields,
                         const am::Row& row,
@@ -1813,6 +1818,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlQueryResult, vectorRowsTyped);
     HHVM_ME(AsyncMysqlQueryResult, rowBlocks);
     HHVM_ME(AsyncMysqlQueryResult, noIndexUsed);
+    HHVM_ME(AsyncMysqlQueryResult, recvGtid);
     Native::registerNativeDataInfo<AsyncMysqlQueryResult>(
       AsyncMysqlQueryResult::s_className.get(), Native::NDIFlags::NO_COPY);
 

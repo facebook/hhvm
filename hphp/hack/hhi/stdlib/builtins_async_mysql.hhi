@@ -200,6 +200,7 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
   **/
   public function rowBlocks() { }
   public function noIndexUsed() : bool { }
+  public function recvGtid(): string { }
 }
 class AsyncMysqlRowBlock implements Countable, KeyedTraversable<int, AsyncMysqlRow> {
   public function __construct() { }

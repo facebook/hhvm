@@ -1217,6 +1217,16 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    */
   <<__HipHopSpecific, __Native>>
   function noIndexUsed(): bool;
+
+  /**
+   * The GTID of database returned for the current commit.
+   *
+   * This is particularly useful for `INSERT`, `DELETE`, `UPDATE` statements.
+   *
+   * @return - The gtid of the current commit as a `string`.
+   */
+  <<__HipHopSpecific, __Native>>
+  function recvGtid(): string;
 }
 
 /**

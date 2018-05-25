@@ -19,7 +19,7 @@
 
 #include "hphp/util/alloc.h"
 
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
 
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/extent-hooks.h"

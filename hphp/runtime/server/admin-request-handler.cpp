@@ -155,7 +155,7 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
   mw->slen += slen;
 }
 
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
 extern unsigned low_arena;
 #else
 extern unsigned dss_arena;
@@ -629,7 +629,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (strncmp(cmd.c_str(), "hugepage", 9) == 0) {
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
       std::string msg =
         folly::sformat("{} 1G huge pages active\n", num_1g_pages());
       if (auto a = alloc::lowArena()) {

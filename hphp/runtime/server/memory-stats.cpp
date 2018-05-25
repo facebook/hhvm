@@ -53,7 +53,7 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
     return;
   }
   // Subtract unused size in hugetlb arenas
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
   size_t unused = 0;
   if (auto a = alloc::lowArena()) unused += a->unusedSize();
   if (auto a = alloc::highArena()) unused += a->unusedSize();

@@ -91,6 +91,7 @@
 #ifndef _MSC_VER
 #include "hphp/util/light-process.h"
 #endif
+#include "hphp/util/maphuge.h"
 #include "hphp/util/perf-event.h"
 #include "hphp/util/process-exec.h"
 #include "hphp/util/process.h"
@@ -1861,7 +1862,7 @@ static int execute_program_impl(int argc, char** argv) {
                              inherited_fds);
   }
 #endif
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
   // Set up extent hook so that we can place jemalloc metadata on 1G pages.
   // This needs to be done after initializing LightProcess (which forks),
   // because the child process does malloc which won't work with jemalloc
@@ -2195,7 +2196,7 @@ static void update_constants_and_options() {
 }
 
 void hphp_thread_init() {
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
   high_arena_tcache_create();
 #endif
   ServerStats::GetLogger();
@@ -2221,7 +2222,7 @@ void hphp_thread_exit() {
   InitFiniNode::ThreadFini();
   ExtensionRegistry::threadShutdown();
   if (!g_context.isNull()) g_context.destroy();
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
   high_arena_tcache_destroy();
 #endif
 }

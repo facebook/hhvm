@@ -16,7 +16,7 @@
 
 #include "hphp/util/managed-arena.h"
 
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
 
 namespace HPHP {
 

@@ -40,7 +40,7 @@ namespace HPHP {
 void flush_thread_caches() {
 #ifdef USE_JEMALLOC
   mallctlCall<true>("thread.tcache.flush");
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
   high_arena_tcache_flush();
 #endif
 #endif
@@ -195,7 +195,7 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
 
 #ifdef USE_JEMALLOC
 
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
 unsigned low_arena = 0;
 unsigned high_arena = 0;
 
@@ -249,7 +249,7 @@ void enable_numa(bool local) {
     for (int i = 0; i < numa_num_nodes; i++) {
       int arena, ret;
 
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
       if (jemallocMetadataCanUseHuge.load() && enableNumaArenaMetadata1GPage) {
         size_t size = sizeof(unsigned);
         extent_hooks_t *hooks = &huge_page_metadata_hooks;
@@ -333,7 +333,7 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
 
 #endif // HAVE_NUMA
 
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
 static void set_arena_retain_grow_limit(unsigned id) {
   size_t mib[3];
   size_t miblen = sizeof(mib) / sizeof(size_t);
@@ -643,7 +643,7 @@ void* low_malloc_impl(size_t size) {
 #endif // USE_JEMALLOC
 
 void low_malloc_huge_pages(int pages) {
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
   if (pages <= 0) return;
   if (low_2m_mapper) {
     low_2m_mapper->setMaxPages(pages);
@@ -679,7 +679,7 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
   }
 }
 
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
 
 void* malloc_huge_impl(size_t size) {
   if (size == 0) return nullptr;

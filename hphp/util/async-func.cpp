@@ -27,6 +27,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/hugetlb.h"
+#include "hphp/util/maphuge.h"
 #include "hphp/util/numa.h"
 
 namespace HPHP {

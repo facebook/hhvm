@@ -16,7 +16,9 @@
 
 #include "hphp/util/extent-hooks.h"
 
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#include <folly/portability/SysMman.h>
+
+#if USE_JEMALLOC_EXTENT_HOOKS
 
 namespace HPHP { namespace alloc {
 

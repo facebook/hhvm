@@ -51,10 +51,10 @@
 # endif
 #else
 # include <jemalloc/jemalloc.h>
-# if (JEMALLOC_VERSION_MAJOR >= 5) && defined(__linux__)
+# if (JEMALLOC_VERSION_MAJOR >= 5) && defined(__linux__) && \
+     !defined(USE_JEMALLOC_EXTENT_HOOKS)
 #  define USE_JEMALLOC_EXTENT_HOOKS 1
-#  if (JEMALLOC_VERSION_MAJOR > 5) ||                               \
-      (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR >= 1)
+#  if (JEMALLOC_VERSION_MAJOR > 5) || (JEMALLOC_VERSION_MINOR >= 1)
 // Requires jemalloc 5.1
 #   define USE_JEMALLOC_METADATA_1G_PAGES 1
 #  endif
@@ -66,14 +66,11 @@
 # endif
 #endif
 
-#include "hphp/util/maphuge.h"
-
 extern "C" {
 #ifdef USE_TCMALLOC
 #define MallocExtensionInstance _ZN15MallocExtension8instanceEv
   MallocExtension* MallocExtensionInstance() __attribute__((__weak__));
 #endif
-
 }
 
 enum class NotNull {};
@@ -183,7 +180,7 @@ inline int low_mallocx_flags() {
   // Allocate from low_arena if extend hooks are available, otherwise allocate
   // from dss_arena.  Bypass the implicit tcache to assure that the result
   // actually comes from the desired arena.
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
   return MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
 #elif defined(MALLOCX_TCACHE_NONE)
   return MALLOCX_ARENA(dss_arena) | MALLOCX_TCACHE_NONE;
@@ -231,7 +228,7 @@ inline void* malloc_huge_internal(size_t size) {
 }
 
 inline void free_huge_internal(void* ptr) {
-#ifndef USE_JEMALLOC_EXTENT_HOOKS
+#if !USE_JEMALLOC_EXTENT_HOOKS
   free(ptr);
 #else
   if (LIKELY(reinterpret_cast<uintptr_t>(ptr) < kHighArenaMaxAddr)) {

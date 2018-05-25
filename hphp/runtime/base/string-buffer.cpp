@@ -319,11 +319,6 @@ void StringBuffer::growBy(int spaceRequired) {
 
 //////////////////////////////////////////////////////////////////////
 
-CstrBuffer::CstrBuffer(int cap)
-  : m_buffer((char*)safe_malloc(cap + 1)), m_len(0), m_cap(cap) {
-  assertx(unsigned(cap) <= kMaxCap);
-}
-
 CstrBuffer::CstrBuffer(const char *filename)
   : m_buffer(nullptr), m_len(0) {
   struct stat sb;
@@ -334,13 +329,13 @@ CstrBuffer::CstrBuffer(const char *filename)
       );
       throw StringBufferLimitException(kMaxCap, String(str.c_str()));
     }
-    m_cap = sb.st_size;
-    m_buffer = (char *)safe_malloc(m_cap + 1);
+    unsigned cap = sb.st_size;
+    m_buffer = (char *)safe_malloc(cap + 1);
 
     int fd = ::open(filename, O_RDONLY);
     if (fd != -1) {
-      while (m_len < m_cap) {
-        int buffer_size = m_cap - m_len;
+      while (m_len < cap) {
+        int buffer_size = cap - m_len;
         int len = ::read(fd, m_buffer + m_len, buffer_size);
         if (len == -1 && errno == EINTR) continue;
         if (len <= 0) break;
@@ -351,44 +346,8 @@ CstrBuffer::CstrBuffer(const char *filename)
   }
 }
 
-CstrBuffer::CstrBuffer(char* data, int len)
-  : m_buffer(data), m_len(len), m_cap(len) {
-  assertx(unsigned(len) < kMaxCap);
-}
-
 CstrBuffer::~CstrBuffer() {
   free(m_buffer);
-}
-
-void CstrBuffer::append(folly::StringPiece slice) {
-  auto const data = slice.data();
-  auto const len = slice.size();
-
-  static_assert(std::is_unsigned<decltype(len)>::value,
-                "len is supposed to be unsigned");
-  assertx(m_buffer);
-
-  unsigned newlen = m_len + len;
-  if (newlen + 1 > m_cap) {
-    if (newlen + 1 > kMaxCap) {
-      throw StringBufferLimitException(kMaxCap, detach());
-    }
-    unsigned newcap = folly::nextPowTwo(newlen + 1);
-    m_buffer = (char*)safe_realloc(m_buffer, newcap);
-    m_cap = newcap - 1;
-    assertx(newlen + 1 <= m_cap);
-  }
-  memcpy(m_buffer + m_len, data, len);
-  m_buffer[m_len = newlen] = 0;
-}
-
-String CstrBuffer::detach() {
-  assertx(m_len <= m_cap);
-  m_buffer[m_len] = 0;
-  String s(m_buffer, m_len, AttachString);
-  m_buffer = 0;
-  m_len = m_cap = 0;
-  return s;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -584,7 +584,7 @@ void HttpServer::killPid() {
   if (!RuntimeOption::PidFile.empty()) {
     CstrBuffer sb(RuntimeOption::PidFile.c_str());
     if (sb.size()) {
-      int64_t pid = sb.detach().toInt64();
+      int64_t pid = strtoll(sb.data(), nullptr, 10);
       if (pid) {
         kill((pid_t)pid, SIGKILL);
         return;

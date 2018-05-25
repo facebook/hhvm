@@ -233,7 +233,7 @@ struct CstrBuffer {
    *
    * Pre: len <= kMaxCap
    */
-  explicit CstrBuffer(int len);
+  explicit CstrBuffer(int len) = delete;
 
   /*
    * Take ownership of an existing malloc'd buffer containing a
@@ -242,7 +242,7 @@ struct CstrBuffer {
    *
    * Pre: len < kMaxCap
    */
-  CstrBuffer(char* data, int len);
+  CstrBuffer(char* data, int len) = delete;
 
   /*
    * Create a CstrBuffer, attempting to read the contents of a given
@@ -259,12 +259,6 @@ struct CstrBuffer {
   CstrBuffer& operator=(const CstrBuffer&) = delete;
   ~CstrBuffer();
 
-  /*
-   * Read-only access to the data this buffer contains.  Guaranteed to
-   * be null-terminated.
-   *
-   * Pre: valid()
-   */
   const char* data() const;
   unsigned size() const { return m_len; }
 
@@ -274,29 +268,12 @@ struct CstrBuffer {
    */
   bool valid() const { return m_buffer != nullptr; }
 
-  /*
-   * Append the supplied data to this string.
-   *
-   * Pre: valid()
-   */
-  void append(folly::StringPiece);
-
-  /*
-   * Create a request-local string from this buffer.
-   *
-   * Pre: valid()
-   * Post: !valid()
-   */
-  String detach();
-
 private:
   char* m_buffer;
   unsigned m_len;
-  unsigned m_cap; // doesn't include the space for the \0
 };
 
 inline const char* CstrBuffer::data() const {
-  assertx(m_len <= m_cap);
   m_buffer[m_len] = 0;
   return m_buffer;
 }

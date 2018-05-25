@@ -2341,6 +2341,13 @@ and pClassElt : class_elt list parser = fun node env ->
           | _ -> None, pos_name aliasing_name env
         in
         let modifiers = pKinds modifiers env in
+        Core_list.iter modifiers ~f:(fun modifier ->
+          match modifier with
+          | Public | Private | Protected | Final ->  ();
+          | _ ->
+            raise_parsing_error env node
+              SyntaxError.trait_alias_rule_allows_only_final_and_visibility_modifiers
+        );
         let is_visibility = function
         | Public | Private | Protected -> true
         | _ -> false in

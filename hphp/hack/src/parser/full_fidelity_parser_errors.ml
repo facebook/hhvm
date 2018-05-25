@@ -2471,25 +2471,6 @@ let assignment_errors _env node errors =
         errors
   | _ -> errors
 
-let trait_use_alias_item_errors _env node errors =
-  let is_public_private_protected_or_final token =
-    let open TokenKind in
-    match Token.kind token with
-    | Public | Private | Protected | Final -> true
-    | _ -> false
-  in
-  match syntax node with
-  | TraitUseAliasItem { trait_use_alias_item_modifiers = l; _ } ->
-    syntax_to_list_no_separators l
-    |> Core_list.fold_left ~init:errors ~f:(fun errors n ->
-      match syntax n with
-      | Token token when is_public_private_protected_or_final token -> errors
-      | _ ->
-        let e =
-          make_error_from_node n
-            SyntaxError.trait_alias_rule_allows_only_final_and_visibility_modifiers in
-        e :: errors)
-  | _ -> errors
 
 let declare_errors env node parents errors =
   match syntax node with
@@ -2573,7 +2554,6 @@ let find_syntax_errors env =
     let errors = enum_errors env node errors in
     let errors = assignment_errors env node errors in
     let errors = declare_errors env node parents errors in
-    let errors = trait_use_alias_item_errors env node errors in
 
     match syntax node with
     | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->

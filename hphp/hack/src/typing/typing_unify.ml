@@ -14,30 +14,16 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module TURecursive = Typing_unify_recursive
 
-(* Most code -- notably the cases in unify_ -- do *not* need to thread through
- * unwrappedToptionX, since for example just because we know an array<foo, bar>
- * can't itself be null, that doesn't mean that foo and bar can't be null.
- *)
-let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
-  unify_unwrapped ~opts env
-    ~unwrappedToption1:false ty1 ~unwrappedToption2:false ty2
-
 (* If result is (env', ty) then env' extends env,
  * and ty1 <: ty and ty2 <: ty under env'
- *
- * If unwrappedToptionX = true then elide Toption before recursing.
  *)
-and unify_unwrapped ?(opts=TUtils.default_unify_opt) env
-    ~unwrappedToption1 ty1 ~unwrappedToption2 ty2 =
+let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
   if ty1 == ty2 then env, ty1 else
   let types =
     [Typing_log.Log_type ("ty1", ty1);
      Typing_log.Log_type ("ty2", ty2)]  in
   Typing_log.log_types 2 (Reason.to_pos (fst ty2)) env
-    [Typing_log.Log_sub (Printf.sprintf
-      "Typing_unify.unify_unwrapped unwrappedToption1=%b unwrappedToption2=%b"
-        unwrappedToption1 unwrappedToption2,
-      types)];
+    [Typing_log.Log_sub ("Typing_unify.unify", types)];
   match ty1, ty2 with
   | (_, (Tany | Terr)), ty | ty, (_, (Tany | Terr)) -> env, ty
   | (r1, Tvar n1), (r2, Tvar n2) ->
@@ -50,8 +36,7 @@ and unify_unwrapped ?(opts=TUtils.default_unify_opt) env
     let n' = Env.fresh() in
     let env = Env.rename env n1 n' in
     let env = Env.rename env n2 n' in
-    let env, ty = unify_unwrapped ~opts env
-        ~unwrappedToption1 ty1 ~unwrappedToption2 ty2 in
+    let env, ty = unify ~opts env ty1 ty2 in
     let env = TURecursive.add env n' ty in
     env, (r, Tvar n')
   | (r, Tvar n), ty2
@@ -59,13 +44,11 @@ and unify_unwrapped ?(opts=TUtils.default_unify_opt) env
     let env, ty1 = Env.get_type env r n in
     let n' = Env.fresh() in
     let env = Env.rename env n n' in
-    let env, ty = unify_unwrapped ~opts env
-        ~unwrappedToption1 ty1 ~unwrappedToption2 ty2 in
+    let env, ty = unify ~opts env ty1 ty2 in
     let env = TURecursive.add env n ty in
     env, (r, Tvar n')
   | (r1, Tunresolved tyl1), (r2, Tunresolved tyl2) ->
       let r = unify_reason r1 r2 in
-      (* TODO this should probably pass through unwrappedToptions? *)
       let env, tyl = TUtils.normalize_inter env tyl1 tyl2 in
       env, (r, Tunresolved tyl)
   | (r, Tunresolved tyl), (_, ty_ as ty)
@@ -76,18 +59,9 @@ and unify_unwrapped ?(opts=TUtils.default_unify_opt) env
       let env = List.fold_left tyl
         ~f:(fun env x -> TUtils.sub_type env x ty) ~init:env in
       env, (r, ty_)
-  | (_, Toption ty1), _ when unwrappedToption1 ->
-      unify_unwrapped env unwrappedToption1 ty1 unwrappedToption2 ty2
-  | _, (_, Toption ty2) when unwrappedToption2 ->
-    unify_unwrapped env unwrappedToption1 ty1 unwrappedToption2 ty2
-  (* We are trying to solve ?ty1 against ?ty2, so recursively solve
-   * ty1 against ty2, but strip any subsequent uses of Toption because
-   * ??t is regarded as equivalent to ?t
-   *)
   | (r1, Toption ty1), (r2, Toption ty2) ->
       let r = unify_reason r1 r2 in
-      let env, ty = unify_unwrapped env ~unwrappedToption1:true ty1
-                                        ~unwrappedToption2:true ty2 in
+      let env, ty = unify env ty1 ty2 in
       env, (r, Toption ty)
   (* Mixed is nullable and we want it to unify with both ?T and T at
    * the same time. If we try to unify mixed with an option,

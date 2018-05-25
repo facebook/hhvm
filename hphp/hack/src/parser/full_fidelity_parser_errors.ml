@@ -1323,16 +1323,6 @@ let statement_errors env node parents errors =
   | Some (error_node, error_message) ->
     make_error_from_node error_node error_message :: errors
 
-let property_errors env node errors =
-  match syntax node with
-  | PropertyDeclaration p ->
-      let modifiers = syntax_to_list_no_separators p.property_modifiers in
-      let errors = if Hh_core.List.exists ~f:is_final modifiers then
-        make_error_from_node node SyntaxError.final_property :: errors
-        else errors in
-      errors
-  | _ -> errors
-
 let string_starts_with_int s =
   if String.length s = 0 then false else
   try let _ = int_of_string (String.make 1 s.[0]) in true with _ -> false
@@ -2561,8 +2551,6 @@ let find_syntax_errors env =
       statement_errors env node parents errors in
     let errors =
       methodish_errors env node parents errors in
-    let errors =
-      property_errors env node errors in
     let errors =
       expression_errors env node parents errors in
     let trait_require_clauses, errors =

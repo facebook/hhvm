@@ -2215,6 +2215,10 @@ and pClassElt : class_elt list parser = fun node env ->
        * the middle of the declaration, to be associated with individual
        * properties, right now we don't handle this *)
       let doc_comment_opt = extract_docblock node in
+      let modifiers = syntax_to_list_no_separators property_modifiers in
+      if Hh_core.List.exists ~f:is_final modifiers then
+        raise_parsing_error env node SyntaxError.final_property;
+
       [ ClassVars
         { cv_kinds = pKinds property_modifiers env
         ; cv_hint = mpOptional pHint property_type env

@@ -29,6 +29,9 @@ module type S = sig
   module NastCheck : Error_category
   module Typing : Error_category
 
+  (* Error codes that can never be suppressed with a FIXME. *)
+  val default_ignored_fixme_codes : ISet.t
+  (* Error codes that cannot be suppressed with a FIXME based on configuration. *)
   val ignored_fixme_codes : ISet.t ref
 
   val set_ignored_fixmes : Relative_path.t list option -> unit

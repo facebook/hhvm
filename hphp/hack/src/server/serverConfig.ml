@@ -194,7 +194,7 @@ let prepare_ignored_fixme_codes config =
   SMap.get config "ignored_fixme_codes"
   |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
   |> List.map ~f:int_of_string
-  |> List.fold_right ~init:ISet.empty ~f:ISet.add
+  |> List.fold_right ~init:Errors.default_ignored_fixme_codes ~f:ISet.add
 
 let load config_filename options =
   let config_hash, config = Config_file.parse (Relative_path.to_absolute config_filename) in

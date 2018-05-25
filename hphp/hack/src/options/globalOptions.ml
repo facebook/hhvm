@@ -201,7 +201,7 @@ let default = {
  tco_disallow_array_literal = false;
  tco_language_feature_logging = false;
  po_disallow_elvis_space = false;
- ignored_fixme_codes = ISet.empty;
+ ignored_fixme_codes = Errors.default_ignored_fixme_codes;
 }
 
 (* Use this instead of default when you don't have access to a project

@@ -13,3 +13,26 @@ let make_workers n =
 
 let cleanup () =
   WorkerController.killall ()
+
+let run_interrupter limit =
+  let fd_in, fd_out = Unix.pipe () in
+  let interrupter_pid = match Unix.fork () with
+    | 0 ->
+        Unix.close fd_in;
+        let rec aux x = match x with
+          | Some 0 -> exit 0
+          | _ ->
+            let written = Unix.write fd_out "!" 0 1 in
+            assert (written = 1);
+            aux (Option.map x (fun x -> x-1))
+        in
+        aux limit
+    | pid -> pid
+  in
+  Unix.close fd_out;
+  fd_in, interrupter_pid
+
+let read_exclamation_mark fd =
+  let exclamation_mark = Bytes.create 1 in
+  let read = Unix.read fd exclamation_mark 0 1 in
+  assert (read = 1 && exclamation_mark = "!")

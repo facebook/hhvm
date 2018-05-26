@@ -3,26 +3,6 @@ open Procs_test_utils
 let do_work () (_ : unit list) : unit  =
   Unix.sleep 3
 
-let run_interrupter () =
-  let fd_in, fd_out = Unix.pipe () in
-  let interrupter_pid = match Unix.fork () with
-    | 0 ->
-        Unix.close fd_in;
-        for i = 1 to 10 do
-          let written = Unix.write fd_out "!" 0 1 in
-          assert (written = 1)
-        done;
-        exit 0;
-    | pid -> pid
-  in
-  Unix.close fd_out;
-  fd_in, interrupter_pid
-
-let read_exclamation_mark fd =
-  let exclamation_mark = Bytes.create 1 in
-  let read = Unix.read fd exclamation_mark 0 1 in
-  assert (read = 1 && exclamation_mark = "!")
-
 let handler1 fd (x, y) =
   let () = read_exclamation_mark fd in
   (x+1, y), MultiThreadedCall.Continue
@@ -43,8 +23,8 @@ let test_interrupt_handler () =
   let workers = Some (make_workers 1) in
   let merge = fun () _ -> () in
 
-  let interrupt_fd1, interrupter_pid1 = run_interrupter () in
-  let interrupt_fd2, interrupter_pid2 = run_interrupter () in
+  let interrupt_fd1, interrupter_pid1 = run_interrupter (Some 10) in
+  let interrupt_fd2, interrupter_pid2 = run_interrupter (Some 10) in
 
   let (), (x, y), cancelled =
     MultiWorker.call_with_interrupt workers

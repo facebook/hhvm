@@ -421,21 +421,6 @@ let main args =
         else apply_patches file_map;
         Exit_status.No_error
       end end
-    | MODE_IGNORE_FIXMES files ->
-      let conn = connect args in
-      let {
-        Rpc.Ignore_fixmes_result.has_unsaved_changes;
-        error_list;
-      } = ClientConnect.rpc conn @@ Rpc.IGNORE_FIXMES files in
-      if args.output_json || args.from <> "" || error_list = []
-      then begin
-        let oc = if args.output_json then stderr else stdout in
-        ServerError.print_errorl None args.output_json error_list oc
-      end else begin
-        List.iter error_list ClientCheckStatus.print_error_color;
-        if has_unsaved_changes then ClientCheckStatus.warn_unsaved_changes ()
-      end;
-      if error_list = [] then Exit_status.No_error else Exit_status.Type_error
     | MODE_FORMAT (from, to_) ->
       let content = Sys_utils.read_stdin_to_string () in
       let result =

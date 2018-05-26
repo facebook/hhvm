@@ -95,25 +95,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, `Ok (ServerRefactor.get_fixme_patches codes env)
       end else
         env, (`Error remove_dead_fixme_warning)
-    | IGNORE_FIXMES files ->
-      let paths = List.map files Relative_path.from_root in
-      let disk_needs_parsing =
-        List.fold_left
-          paths
-          ~init:env.disk_needs_parsing
-          ~f:Relative_path.Set.add
-      in
-      Errors.set_ignored_fixmes (Some paths);
-      let original_env = env in
-      let env = {env with disk_needs_parsing} in
-      (* Everything should happen on the master process *)
-      let genv = {genv with workers = None} in
-      let env, _, _ = ServerTypeCheck.(check genv env Full_check) in
-      let error_list = Errors.get_sorted_error_list env.errorl in
-      let error_list = List.map ~f:Errors.to_absolute error_list in
-      Errors.set_ignored_fixmes None;
-      let has_unsaved_changes = ServerFileSync.has_unsaved_changes env in
-      original_env, { Ignore_fixmes_result.has_unsaved_changes; error_list; }
     | DUMP_SYMBOL_INFO file_list ->
         env, SymbolInfoService.go genv.workers file_list env
     | DUMP_AI_INFO file_list ->

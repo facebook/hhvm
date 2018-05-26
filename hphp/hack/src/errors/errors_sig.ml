@@ -34,7 +34,6 @@ module type S = sig
   (* Error codes that cannot be suppressed with a FIXME based on configuration. *)
   val ignored_fixme_codes : ISet.t ref
 
-  val set_ignored_fixmes : Relative_path.t list option -> unit
   val is_hh_fixme : (Pos.t -> int -> bool) ref
   val get_hh_fixme_pos : (Pos.t -> int -> Pos.t option) ref
   val to_list : 'a error_ -> ('a * string) list

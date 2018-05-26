@@ -19,13 +19,6 @@ module Server_status = struct
   }
 end
 
-module Ignore_fixmes_result = struct
-  type t = {
-    has_unsaved_changes : bool;
-    error_list : Pos.absolute  Errors.error_ list;
-  }
-end
-
 module Identify_symbol = struct
   type single_result = (string SymbolOccurrence.t) * (string SymbolDefinition.t option)
   type result = single_result list
@@ -143,7 +136,6 @@ type _ t =
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
   | REMOVE_DEAD_FIXMES : int list -> [`Ok of ServerRefactorTypes.patch list | `Error of string] t
-  | IGNORE_FIXMES : string list -> Ignore_fixmes_result.t t
   | IN_MEMORY_DEP_TABLE_SIZE : ((int, string) Pervasives.result) t
   | SAVE_STATE : string -> ((int, string) Pervasives.result) t
   | SEARCH : string * string -> HackSearchService.result t

@@ -237,10 +237,10 @@ class OptionalPrinter(object):
         self.val = val
 
     def to_string(self):
-        if not self.val['storage_']['hasValue_']:
+        if not self.val['storage_']['hasValue']:
             return 'folly::none'
         inner = self.val.type.template_argument(0)
-        ptr = self.val['storage_']['value_'].address.cast(inner.pointer())
+        ptr = self.val['storage_']['value'].address.cast(inner.pointer())
         return ptr.dereference()
 
 #------------------------------------------------------------------------------

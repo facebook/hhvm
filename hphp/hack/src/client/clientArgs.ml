@@ -373,6 +373,9 @@ let parse_check_args cmd =
         "";
     "--full-fidelity-schema",
       Arg.Unit (set_mode MODE_FULL_FIDELITY_SCHEMA), "";
+    "--single",
+      Arg.String (fun x -> set_mode (MODE_STATUS_SINGLE x) ()),
+      "Return errors in file with provided name (give '-' for stdin)";
     (* flags *)
     "--json",
       Arg.Set output_json,

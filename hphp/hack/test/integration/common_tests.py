@@ -1026,3 +1026,30 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             options=['--type-at-pos', '{root}foo_3.php:11:14']
         )
         self.stop_hh_loop_forever()
+
+    def test_status_single(self):
+        """
+        Test hh_client check --single
+        """
+        self.start_hh_server()
+
+        with open(os.path.join(self.repo_dir, 'typing_error.php'), 'w') as f:
+            f.write("<?hh //strict\n function aaaa(): int { return h(); }")
+
+        self.check_cmd([
+            '{root}typing_error.php:2:32,34: Invalid return type (Typing[4110])',
+            '  {root}typing_error.php:2:19,21: This is an int',
+            '  {root}foo_3.php:3:23,28: It is incompatible with a string',
+        ],
+            options=['--single', '{root}typing_error.php'],
+            stdin=''
+        )
+
+        self.check_cmd([
+            ':2:32,34: Invalid return type (Typing[4110])',
+            '  :2:19,21: This is an int',
+            '  {root}foo_3.php:3:23,28: It is incompatible with a string',
+        ],
+            options=['--single', '-'],
+            stdin='<?hh //strict\n function aaaa(): int { return h(); }'
+        )

@@ -18,6 +18,7 @@ type client_mode =
 | MODE_IN_MEMORY_DEP_TABLE_SIZE
 | MODE_SAVE_STATE of string
 | MODE_STATUS
+| MODE_STATUS_SINGLE of string (* filename *)
 | MODE_SHOW of string
 | MODE_COLORING of string
 | MODE_COVERAGE of string
@@ -83,6 +84,7 @@ let mode_to_string = function
   | MODE_IN_MEMORY_DEP_TABLE_SIZE -> "MODE_IN_MEMORY_DEP_TABLE_SIZE"
   | MODE_SAVE_STATE _ -> "MODE_SAVE_STATE"
   | MODE_STATUS -> "MODE_STATUS"
+  | MODE_STATUS_SINGLE _ -> "MODE_STATUS_SINGLE"
   | MODE_SHOW _ -> "MODE_SHOW"
   | MODE_COLORING _ -> "MODE_COLORING"
   | MODE_COVERAGE _ -> "MODE_COVERAGE"

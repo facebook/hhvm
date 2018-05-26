@@ -114,6 +114,7 @@ type lint_stdin_input = { filename: string; contents: string }
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
   | STATUS : bool -> Server_status.t t
+  | STATUS_SINGLE : file_input -> Pos.absolute Errors.error_ list t
   | INFER_TYPE : file_input * int * int * bool ->
       InferAtPosService.result t
   | INFER_TYPE_BATCH : (string * int * int * (int * int) option) list * bool -> string list t

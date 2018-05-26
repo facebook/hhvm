@@ -331,6 +331,20 @@ let main args =
       let ignore_ide = ClientMessages.ignore_ide_from args.from in
       let status = rpc args (Rpc.STATUS ignore_ide) in
       ClientCheckStatus.go status args.output_json args.from
+    | MODE_STATUS_SINGLE filename ->
+      let file_input = match filename with
+        | "-" ->
+          ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ())
+        | _ ->
+          ServerCommandTypes.FileName (expand_path filename)
+      in
+      let error_list = rpc args (Rpc.STATUS_SINGLE file_input) in
+      let status = {
+        error_list;
+        Rpc.Server_status.liveness = Rpc.Live_status;
+        has_unsaved_changes = false;
+      } in
+      ClientCheckStatus.go status args.output_json args.from
     | MODE_SHOW classname ->
       let ClientConnect.{channels = ic, oc; _} = connect args in
       Cmd.stream_request oc (ServerCommandTypes.SHOW classname);

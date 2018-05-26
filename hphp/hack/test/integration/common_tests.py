@@ -1015,9 +1015,14 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'a') as f:
             f.write("use_watchman = true\n" +
                     "interrupt_on_watchman = true\n" +
+                    "interrupt_on_client = true\n" +
                     "watchman_subscribe_v2 = true\n"
                     )
 
         self.start_hh_server()
         self.start_hh_loop_forever_assert_timeout()
+        self.check_cmd(
+            ["string"],
+            options=['--type-at-pos', '{root}foo_3.php:11:14']
+        )
         self.stop_hh_loop_forever()

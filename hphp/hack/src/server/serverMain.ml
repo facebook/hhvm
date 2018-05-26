@@ -566,7 +566,24 @@ let watchman_interrupt_handler genv env =
   end else
     env, MultiThreadedCall.Continue
 
-let priority_client_interrupt_handler genv client_provider env  =
+let priority_client_interrupt_handler genv client_provider env =
+  let t = Unix.gettimeofday () in
+  (* For non-persistent clients that don't synchronize file contents, users
+   * expect that a query they do immediately after saving a file will reflect
+   * this file contents. Async notifications are not always fast enough to
+   * quarantee it, so we need an additional sync query before accepting such
+   * client *)
+  let env, updates, _ = query_notifier genv env `Sync t in
+
+  let size = Relative_path.Set.cardinal updates in
+  if size > 0 then begin
+    Hh_logger.log
+      "Interrupted by Watchman sync query: %d files changed" size;
+    { env with disk_needs_parsing =
+        Relative_path.Set.union env.disk_needs_parsing updates },
+    MultiThreadedCall.Cancel
+  end else
+
   let client, has_persistent_connection_request =
     ClientProvider.sleep_and_check
       client_provider

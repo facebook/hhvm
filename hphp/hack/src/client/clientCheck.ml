@@ -72,7 +72,7 @@ let parse_position_string arg =
     Printf.eprintf "Invalid position\n";
     raise Exit_status.(Exit_with Input_error)
 
-let connect args =
+let connect ?(use_priority_pipe=false) args =
   ClientConnect.connect { ClientConnect.
     root = args.root;
     autostart = args.autostart;
@@ -85,11 +85,15 @@ let connect args =
     progress_callback = ClientConnect.tty_progress_reporter ();
     do_post_handoff_handshake = true;
     ignore_hh_version = args.ignore_hh_version;
-    use_priority_pipe = false;
+    use_priority_pipe;
   }
 
 let rpc args command =
-  let conn = connect args in
+  let use_priority_pipe =
+    (not @@ ServerCommand.rpc_command_needs_full_check command) &&
+    (not @@ ServerCommand.rpc_command_needs_writes command)
+  in
+  let conn = connect args ~use_priority_pipe in
   ClientConnect.rpc conn @@ command
 
 let is_stale_msg liveness =

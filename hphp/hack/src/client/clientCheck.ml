@@ -96,22 +96,6 @@ let rpc args command =
   let conn = connect args ~use_priority_pipe in
   ClientConnect.rpc conn @@ command
 
-let is_stale_msg liveness =
-   match liveness with
-    | Rpc.Stale_status ->
-      Some ("(but this may be stale, probably due to" ^
-      " watchman being unresponsive)\n")
-    | Rpc.Live_status -> None
-
-let warn_unsaved_changes () =
-  (* Make sure any buffered diagnostics are printed before printing this
-     warning. *)
-  flush stdout;
-  Tty.cprintf (Tty.Bold Tty.Yellow) "Warning: " ~out_channel:stderr;
-  prerr_endline
-{|there is an editor connected to the Hack server.
-The errors below may reflect your unsaved changes in the editor.|}
-
 let main args =
   let mode_s = ClientEnv.mode_to_string args.mode in
   HackEventLogger.client_set_from args.from;
@@ -345,25 +329,8 @@ let main args =
       Exit_status.No_error
     | MODE_STATUS ->
       let ignore_ide = ClientMessages.ignore_ide_from args.from in
-      let {
-        Rpc.Server_status.liveness;
-        has_unsaved_changes;
-        error_list;
-      } = rpc args (Rpc.STATUS ignore_ide) in
-      let stale_msg = is_stale_msg liveness in
-      if args.output_json || args.from <> "" || error_list = []
-      then begin
-        (* this should really go to stdout but we need to adapt the various
-         * IDE plugins first *)
-        let oc = if args.output_json then stderr else stdout in
-        ServerError.print_errorl
-          stale_msg args.output_json error_list oc
-      end else begin
-        List.iter error_list ClientCheckStatus.print_error_color;
-        Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
-        if has_unsaved_changes then warn_unsaved_changes ()
-      end;
-      if error_list = [] then Exit_status.No_error else Exit_status.Type_error
+      let status = rpc args (Rpc.STATUS ignore_ide) in
+      ClientCheckStatus.go status args.output_json args.from
     | MODE_SHOW classname ->
       let ClientConnect.{channels = ic, oc; _} = connect args in
       Cmd.stream_request oc (ServerCommandTypes.SHOW classname);
@@ -452,7 +419,7 @@ let main args =
         ServerError.print_errorl None args.output_json error_list oc
       end else begin
         List.iter error_list ClientCheckStatus.print_error_color;
-        if has_unsaved_changes then warn_unsaved_changes ()
+        if has_unsaved_changes then ClientCheckStatus.warn_unsaved_changes ()
       end;
       if error_list = [] then Exit_status.No_error else Exit_status.Type_error
     | MODE_FORMAT (from, to_) ->

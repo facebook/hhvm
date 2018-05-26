@@ -9,6 +9,7 @@
 
 open Hh_core
 open Ocaml_overrides
+open ServerCommandTypes
 open String_utils
 
 module C = Tty
@@ -55,3 +56,39 @@ let print_error_color e =
   let msg_list = Errors.to_list e in
   print_reason_color ~first:true ~code (List.hd_exn msg_list);
   List.iter (List.tl_exn msg_list) (print_reason_color ~first:false ~code)
+
+let is_stale_msg liveness =
+   match liveness with
+    | Stale_status ->
+      Some ("(but this may be stale, probably due to" ^
+      " watchman being unresponsive)\n")
+    | Live_status -> None
+
+let warn_unsaved_changes () =
+  (* Make sure any buffered diagnostics are printed before printing this
+     warning. *)
+  flush stdout;
+  Tty.cprintf (Tty.Bold Tty.Yellow) "Warning: " ~out_channel:stderr;
+  prerr_endline
+{|there is an editor connected to the Hack server.
+The errors below may reflect your unsaved changes in the editor.|}
+
+let go status output_json from =
+  let {
+    Server_status.liveness;
+    has_unsaved_changes;
+    error_list;
+  } = status in
+  let stale_msg = is_stale_msg liveness in
+  if output_json || from <> "" || error_list = []
+  then begin
+    (* this should really go to stdout but we need to adapt the various
+     * IDE plugins first *)
+    let oc = if output_json then stderr else stdout in
+    ServerError.print_errorl stale_msg output_json error_list oc
+  end else begin
+    List.iter error_list print_error_color;
+    Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
+    if has_unsaved_changes then warn_unsaved_changes ()
+  end;
+  if error_list = [] then Exit_status.No_error else Exit_status.Type_error

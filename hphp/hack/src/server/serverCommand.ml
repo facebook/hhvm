@@ -21,12 +21,14 @@ let rpc_command_needs_full_check : type a. a t -> bool =
     fun msg -> match msg with
   (* global error list is not updated during small checks *)
   | STATUS _ -> true
+  | REMOVE_DEAD_FIXMES _ -> true (* needs same information as STATUS *)
   (* some Ai stuff - calls to those will likely never be interleaved with IDE
    * file sync commands (and resulting small checks), but putting it here just
    * to be safe *)
   | FIND_DEPENDENT_FILES _ -> true
   | TRACE_AI _ -> true
   | AI_QUERY _ -> true
+  | DUMP_AI_INFO _ -> true
   (* Finding references uses global dependency table *)
   | FIND_REFS _ -> true
   | IDE_FIND_REFS _ -> true
@@ -37,18 +39,54 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | COVERAGE_COUNTS _ -> true
   (* Codebase-wide rename, uses find references *)
   | REFACTOR _ -> true
+  | IDE_REFACTOR _ -> true
   (* Same case as Ai commands *)
   | CREATE_CHECKPOINT _ -> true
   | RETRIEVE_CHECKPOINT _ -> true
   | DELETE_CHECKPOINT _ -> true
-  | IN_MEMORY_DEP_TABLE_SIZE -> false
-  | _ -> false
+  | IN_MEMORY_DEP_TABLE_SIZE -> true
+  | STATS -> false
+  | DISCONNECT -> false
+  | STATUS_SINGLE _ -> false
+  | INFER_TYPE _ -> false
+  | INFER_TYPE_BATCH _ -> false
+  | TYPED_AST _ -> false
+  | IDE_HOVER _ -> false
+  | DOCBLOCK_AT _ -> false
+  | IDE_SIGNATURE_HELP _ -> false
+  | COVERAGE_LEVELS _ -> false
+  | AUTOCOMPLETE _ -> false
+  | IDENTIFY_FUNCTION _ -> false
+  | METHOD_JUMP_BATCH _ -> false
+  | IDE_HIGHLIGHT_REFS _ -> false
+  | DUMP_SYMBOL_INFO _ -> false
+  | LINT _ -> false
+  | LINT_STDIN _ -> false
+  | LINT_ALL _ -> false
+  | FORMAT _ -> false
+  | DUMP_FULL_FIDELITY_PARSE _ -> false
+  | IDE_AUTOCOMPLETE _ -> false
+  | IDE_FFP_AUTOCOMPLETE _ -> false
+  | SUBSCRIBE_DIAGNOSTIC _ -> false
+  | UNSUBSCRIBE_DIAGNOSTIC _ -> false
+  | OUTLINE _ -> false
+  | IDE_IDLE -> false
+  | INFER_RETURN_TYPE _ -> false
+  | RAGE -> false
+  | DYNAMIC_VIEW _ -> false
+  | CST_SEARCH _ -> false
+  | SEARCH _ -> false
+  | OPEN_FILE _ -> false
+  | CLOSE_FILE _ -> false
+  | EDIT_FILE _ -> false
 
 let command_needs_full_check = function
   | Rpc x -> rpc_command_needs_full_check x
   | Stream BUILD _ -> true (* Build doesn't fully support lazy decl *)
   | Stream LIST_FILES -> true (* Same as Rpc STATUS *)
-  | _ -> false
+  | Stream LIST_MODES -> false
+  | Stream SHOW _ -> false
+  | Debug -> false
 
 let is_edit : type a. a command -> bool = function
   | Rpc EDIT_FILE _ -> true

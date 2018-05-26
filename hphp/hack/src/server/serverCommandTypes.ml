@@ -147,7 +147,6 @@ type _ t =
   | RETRIEVE_CHECKPOINT : string -> string list option t
   | DELETE_CHECKPOINT : string -> bool t
   | STATS : Stats.t t
-  | KILL : unit t
   | FORMAT : ServerFormatTypes.action -> ServerFormatTypes.result t
   | TRACE_AI : Ai.TraceService.action -> string t
   | AI_QUERY : string -> string t
@@ -172,15 +171,11 @@ let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true
   | _ -> false
 
-let is_kill_rpc : type a. a t -> bool = function
-  | KILL -> true
-  | _ -> false
 
 let is_critical_rpc : type a. a t -> bool = function
   (* An exception during any critical rpc should shutdown the persistent connection. *)
   (* The critical ones are those that affect the state.                              *)
   | DISCONNECT -> true
-  | KILL -> true
   | CREATE_CHECKPOINT _ -> true
   | DELETE_CHECKPOINT _ -> true
   | OPEN_FILE _ -> true

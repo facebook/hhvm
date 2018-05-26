@@ -34,7 +34,6 @@ let debug_describe_t : type a. a t -> string = function
   | IN_MEMORY_DEP_TABLE_SIZE   -> "IN_MEMORY_DEP_TABLE_SIZE"
   | SAVE_STATE               _ -> "SAVE_STATE"
   | STATS                      -> "STATS"
-  | KILL                       -> "KILL"
   | FORMAT                   _ -> "FORMAT"
   | TRACE_AI                 _ -> "TRACE_AI"
   | AI_QUERY                 _ -> "AI_QUERY"

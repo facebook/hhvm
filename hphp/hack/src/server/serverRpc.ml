@@ -121,7 +121,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | RETRIEVE_CHECKPOINT x -> env, ServerCheckpoint.retrieve_checkpoint x
     | DELETE_CHECKPOINT x -> env, ServerCheckpoint.delete_checkpoint x
     | STATS -> env, Stats.get_stats ()
-    | KILL -> env, ()
     | FORMAT (content, from, to_) ->
         let legacy_format_options =
           { Lsp.DocumentFormatting.

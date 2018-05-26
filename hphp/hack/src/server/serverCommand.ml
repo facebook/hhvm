@@ -307,7 +307,6 @@ let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
       if ServerCommandTypes.is_disconnect_rpc cmd ||
           not @@ (ClientProvider.is_persistent client)
         then ClientProvider.shutdown_client client;
-      if ServerCommandTypes.is_kill_rpc cmd then ServerUtils.die_nicely ();
       new_env
   | Stream cmd ->
       let ic, oc = ClientProvider.get_channels client in

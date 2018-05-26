@@ -50,16 +50,6 @@ let shut_down_server root =
 let connect_to_monitor ~timeout root =
   MC.connect_once ~timeout (hh_monitor_config root)
 
-let die_nicely () =
-  HackEventLogger.killed ();
-  (** Monitor will exit on its next check loop when it sees that
-   * the typechecker process has exited. *)
-  Hh_logger.log "Sent KILL command by client. Dying.";
-  (* XXX when we exit, the dfind process will attempt to read from the broken
-   * pipe and then exit with SIGPIPE, so it is unnecessary to kill it
-   * explicitly *)
-  exit 0
-
 let print_hash_stats () =
   Core_result.try_with SharedMem.dep_stats
   |> Core_result.map_error ~f:Hh_logger.exc

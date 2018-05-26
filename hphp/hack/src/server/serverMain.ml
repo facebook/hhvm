@@ -400,7 +400,6 @@ let main_loop_command_handler client_kind client result  =
       }
     end
   | ServerUtils.Needs_writes (env, f, _) -> f env
-  | ServerUtils.Needs_workers (env, f) -> f env
 
 let serve_one_iteration genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
@@ -587,8 +586,6 @@ let priority_client_interrupt_handler genv client_provider env  =
         failwith "unexpected command needing full recheck in priority channel"
       | ServerUtils.Needs_writes _ ->
         failwith "unexpected command needing writes in priority channel"
-      | ServerUtils.Needs_workers _ ->
-        failwith "unexpected command needing workers in priority channel"
       | ServerUtils.Done env -> env
   in
   env, MultiThreadedCall.Continue
@@ -621,10 +618,6 @@ let persistent_client_interrupt_handler genv env =
         pending_command_needs_writes = Some f;
         full_check;
       }, MultiThreadedCall.Cancel
-    | ServerUtils.Needs_workers _ ->
-      (* The only persistent client command needing workers is FIND_REFS, which
-       * is already handled by Needs_full_recheck branch *)
-      failwith "unexpected command needing workers from persistent client"
     | ServerUtils.Done env -> env, MultiThreadedCall.Continue
 
 let setup_interrupts env client_provider = { env with

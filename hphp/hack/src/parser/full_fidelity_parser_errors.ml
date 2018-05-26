@@ -1798,6 +1798,12 @@ let classish_errors env node parents namespace_name names errors =
       produce_error errors
       (is_reserved_keyword env) cd.classish_name
       SyntaxError.reserved_keyword_as_class_name cd.classish_name in
+    let errors =
+      if is_token_kind cd.classish_keyword TokenKind.Interface &&
+        not (is_missing cd.classish_implements_keyword)
+      then make_error_from_node node
+        SyntaxError.interface_implements :: errors
+      else errors in
     let name = text cd.classish_name in
     let errors =
       match syntax cd.classish_body with

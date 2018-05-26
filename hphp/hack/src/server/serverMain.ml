@@ -337,7 +337,9 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
   (* We have some new, or previously un-processed updates *)
   let full_check = env.full_check = Full_check_started
     (* Prioritize building search index over full rechecks. *)
-    && Queue.is_empty SearchServiceRunner.SearchServiceRunner.queue
+    && (Queue.is_empty SearchServiceRunner.SearchServiceRunner.queue
+      (* Unless there is something actively waiting for this *)
+      || Option.is_some env.default_client_pending_command_needs_full_check)
   in
   let lazy_check =
     (not @@ Relative_path.Set.is_empty env.ide_needs_parsing) && is_idle in

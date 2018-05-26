@@ -37,6 +37,7 @@ val check_ast :
 val declare_and_check : string ->
   f:(Relative_path.t -> FileInfo.t -> Tast.program -> 'a) -> TypecheckerOptions.t -> 'a
 
+val get_errors: Relative_path.t ->  string -> TypecheckerOptions.t -> Errors.t
 
 (* Run the typing phase on a list of files and definitions they contain. *)
 val recheck :

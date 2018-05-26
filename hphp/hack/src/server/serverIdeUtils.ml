@@ -71,10 +71,10 @@ let make_then_revert_local_changes f () =
 
 let path = Relative_path.default
 
-let declare_and_check_ast ~make_ast ~f tcopt =
+let declare_and_check_ast ?(path=path) ~make_ast ~f tcopt =
   let tcopt = TypecheckerOptions.make_permissive tcopt in
   Autocomplete.auto_complete := false;
-  Errors.ignore_ @@ make_then_revert_local_changes begin fun () ->
+  Errors.do_ @@ make_then_revert_local_changes begin fun () ->
     Fixmes.HH_FIXMES.(remove_batch @@ KeySet.singleton path);
     let ast = make_ast () in
     let funs, classes, typedefs, consts =
@@ -123,16 +123,22 @@ let declare_and_check_ast ~make_ast ~f tcopt =
  * SharedMem.S.shelve_batch) - after working with local content is done,
  * original definitions can (and should) be restored using "unshelve".
  *)
-let declare_and_check content ~f tcopt =
+let declare_and_check ?(path=path) content ~f tcopt =
   try
     declare_and_check_ast
       ~make_ast:(fun () -> (Parser_hack.program tcopt path content).Parser_hack.ast)
       ~f
+      ~path
       tcopt
   with Decl_class.Decl_heap_elems_bug -> begin
     Hh_logger.log "%s" content;
     Exit_status.(exit Decl_heap_elems_bug)
   end
+
+let get_errors path content tcopt =
+  fst (declare_and_check content tcopt ~f:(fun _ _ _ -> ()) ~path)
+
+let declare_and_check content ~f tcopt = snd (declare_and_check content ~f tcopt)
 
 let recheck tcopt filetuple_l =
   SharedMem.invalidate_caches();
@@ -151,4 +157,4 @@ let check_file_input tcopt files_info fi =
       | None -> path, []
 
 let check_ast tcopt ast =
-  declare_and_check_ast ~make_ast:(fun () -> ast) ~f:(fun _ _ tast -> tast) tcopt
+  snd @@ declare_and_check_ast ~make_ast:(fun () -> ast) ~f:(fun _ _ tast -> tast) tcopt

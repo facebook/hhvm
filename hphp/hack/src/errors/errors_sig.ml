@@ -90,6 +90,7 @@ module type S = sig
   val variable_variables_disallowed : Pos.t -> unit
   val array_typehints_disallowed : Pos.t -> unit
   val array_literals_disallowed : Pos.t -> unit
+  val wildcard_disallowed : Pos.t -> unit
   val void_cast: Pos.t -> unit
   val object_cast: Pos.t -> string -> unit
   val unset_cast: Pos.t -> unit

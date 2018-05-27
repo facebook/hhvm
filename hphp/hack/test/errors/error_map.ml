@@ -135,6 +135,7 @@ let%expect_test "error_map" =
     VariableVariablesDisallowed = 2081
     ArrayTypehintsDisallowed = 2082
     ArrayLiteralsDisallowed = 2083
+    WildcardDisallowed = 2084
 
     NastCheck Errors:
     AbstractBody = 3001

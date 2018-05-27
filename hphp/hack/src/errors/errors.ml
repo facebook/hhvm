@@ -1082,6 +1082,10 @@ let array_literals_disallowed pos =
   add (Naming.err_code Naming.ArrayLiteralsDisallowed) pos
     "Array literals are no longer legal; use varray or darray instead"
 
+let wildcard_disallowed pos =
+  add (Naming.err_code Naming.WildcardDisallowed) pos
+    "Wildcard typehints are not allowed in this position"
+
 (*****************************************************************************)
 (* Init check errors *)
 (*****************************************************************************)

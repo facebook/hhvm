@@ -771,6 +771,7 @@ module Make (GetLocals : GetLocals) = struct
       ?(allow_typedef=true)
       ?(allow_wildcard=false)
       ?(in_where_clause=false)
+      ?(tp_depth=0)
       env (p, h) =
     p, hint_
       ~forbid_this
@@ -778,6 +779,7 @@ module Make (GetLocals : GetLocals) = struct
       ~allow_typedef
       ~allow_wildcard
       ~in_where_clause
+      ~tp_depth
       is_static_var env h
 
   and shape_field_to_shape_field_info env { sf_optional; sf_name=_; sf_hint } =
@@ -803,7 +805,7 @@ module Make (GetLocals : GetLocals) = struct
     }
 
   and hint_ ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
-            ~in_where_clause
+            ~in_where_clause ?(tp_depth=0)
         is_static_var env x =
     let hint =
       hint ~is_static_var ~forbid_this ~allow_typedef ~allow_wildcard in
@@ -835,7 +837,7 @@ module Make (GetLocals : GetLocals) = struct
                 hint ~allow_retonly:true env h)
     | Happly ((p, _x) as id, hl) ->
       let hint_id =
-        hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
+        hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
           env is_static_var id
           hl in
       (match hint_id with
@@ -864,7 +866,7 @@ module Make (GetLocals : GetLocals) = struct
             TypecheckerOptions.experimental_tconst_on_generics in
           let h =
             hint_id ~forbid_this ~allow_retonly
-              ~allow_typedef ~allow_wildcard:false env is_static_var root [] in
+              ~allow_typedef ~allow_wildcard:false ~tp_depth env is_static_var root [] in
           (match h with
           | N.Hthis | N.Happly _ as h -> h
           | N.Habstr _ when in_where_clause && tconst_on_generics_enabled ->
@@ -876,7 +878,7 @@ module Make (GetLocals : GetLocals) = struct
     | Hshape ast_shape_info ->
       N.Hshape (ast_shape_info_to_nast_shape_info env ast_shape_info)
 
-  and hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
+  and hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
     env is_static_var (p, x as id) hl =
     let params = (fst env).type_params in
     if   is_alok_type_name id && not (SMap.mem x params)
@@ -886,16 +888,19 @@ module Make (GetLocals : GetLocals) = struct
     (* some common Xhp screw ups *)
     if   (x = "Xhp") || (x = ":Xhp") || (x = "XHP")
     then Errors.disallowed_xhp_type p x;
-    match try_castable_hint ~forbid_this env p x hl with
+    match try_castable_hint ~forbid_this ~allow_wildcard ~tp_depth env p x hl with
     | Some h -> h
     | None -> begin
       match x with
-        | x when x = SN.Typehints.wildcard && allow_wildcard ->
+        | x when x = SN.Typehints.wildcard && allow_wildcard && tp_depth = 1 ->
           if hl <> [] then
             (Errors.tparam_with_tparam p x;
             N.Hany)
           else
             N.Happly(id, [])
+        | x when x = SN.Typehints.wildcard ->
+          Errors.wildcard_disallowed p;
+          N.Hany
         | x when x.[0] = '\\' &&
           ( x = ("\\"^SN.Typehints.void)
           || x = ("\\"^SN.Typehints.noreturn)
@@ -967,15 +972,15 @@ module Make (GetLocals : GetLocals) = struct
          * In general, generics arguments can be typedefs -- there is no
          * runtime restriction. *)
         N.Happly (name, hintl ~allow_wildcard ~forbid_this ~allow_typedef:true
-          ~allow_retonly:true env hl)
+          ~allow_retonly:true ~tp_depth:(tp_depth+1) env hl)
     end
 
   (* Hints that are valid both as casts and type annotations.  Neither
    * casts nor annotations are a strict subset of the other: For
    * instance, 'object' is not a valid annotation.  Thus callers will
    * have to handle the remaining cases. *)
-  and try_castable_hint ?(forbid_this=false) env p x hl =
-    let hint = hint ~forbid_this ~allow_retonly:false in
+  and try_castable_hint ?(forbid_this=false) ?(allow_wildcard=false) ~tp_depth env p x hl =
+    let hint = hint ~forbid_this ~tp_depth:(tp_depth+1) ~allow_wildcard ~allow_retonly:false in
     let canon = String.lowercase_ascii x in
     let opt_hint = match canon with
       | nm when nm = SN.Typehints.int    -> Some (N.Hprim N.Tint)
@@ -1057,15 +1062,16 @@ module Make (GetLocals : GetLocals) = struct
 
   and constraint_ ?(forbid_this=false) env (ck, h) = ck, hint ~forbid_this env h
 
-  and hintl ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard env l =
+  and hintl ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth env l =
     List.map l
-      (hint ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard env)
+      (hint ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth env)
   and hintl_funcall env l =
     hintl
       ~allow_wildcard:true
       ~forbid_this:false
       ~allow_typedef:true
       ~allow_retonly:true
+      ~tp_depth:1
       env
       l
 
@@ -2372,7 +2378,7 @@ module Make (GetLocals : GetLocals) = struct
         let (p, x), hl = match ty with
         | _, Happly (id, hl) -> (id, hl)
         | _                  -> assert false in
-        let ty = match try_castable_hint env p x hl with
+        let ty = match try_castable_hint ~tp_depth:1 env p x hl with
         | Some ty -> p, ty
         | None    -> begin
         match x with
@@ -2611,7 +2617,7 @@ module Make (GetLocals : GetLocals) = struct
       | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
       | _ -> N.CI (Env.type_name env cid ~allow_typedef:false,
         hintl ~allow_wildcard:true ~forbid_this:false
-          ~allow_typedef:true ~allow_retonly:true env hl
+          ~allow_typedef:true ~allow_retonly:true ~tp_depth:1 env hl
         )
 
   and casel env l =

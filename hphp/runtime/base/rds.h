@@ -617,7 +617,7 @@ void uninitHandle(Handle handle);
  * msg identifies this particular entry (eg function-name:local-name)
  */
 void recordRds(Handle h, size_t size,
-               const std::string& type, const std::string& msg);
+               folly::StringPiece type, folly::StringPiece msg);
 void recordRds(Handle h, size_t size, const Symbol& sym);
 
 void visitSymbols(std::function<void(const Symbol&,Handle,uint32_t)> fun);

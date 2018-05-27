@@ -730,7 +730,7 @@ void Unit::bindFunc(Func *func) {
           handle,
           sizeof(LowPtr<const Func>),
           "Func",
-          func->name()->toCppString()
+          func->name()->slice()
         );
       }
       return handle;
@@ -1313,7 +1313,7 @@ bool Unit::defTypeAlias(Id id) {
   }
 
   nameList->m_cachedTypeAlias.bind(
-    [&] {
+    [thisType, &resolved] {
       auto const persistent = (thisType->attrs & AttrPersistent) &&
         (!resolved.klass || classHasPersistentRDS(resolved.klass));
 
@@ -1323,7 +1323,7 @@ bool Unit::defTypeAlias(Id id) {
 
       rds::recordRds(handle,
                      sizeof(TypeAliasReq),
-                     "TypeAlias", typeName->data());
+                     "TypeAlias", thisType->value->slice());
       return handle;
     },
     resolved

@@ -70,7 +70,7 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
     rds::alloc<Entry, rds::Mode::Normal, sizeof(Entry)>().handle();
   if (RuntimeOption::EvalPerfDataMap) {
     rds::recordRds(handle, sizeof(TypedValue), "MethodCache",
-                   inst->marker().func()->fullName()->toCppString());
+                   inst->marker().func()->fullName()->slice());
   }
 
   auto const mc_handler = extra->fatal ? tc::ustubs().handlePrimeCacheInitFatal

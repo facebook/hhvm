@@ -78,7 +78,7 @@ void implLdMeta(IRLS& env, const IRInstruction* inst) {
 
   auto const ch = TargetCache::alloc();
   rds::recordRds(ch, sizeof(TargetCache), is_func ? "FuncCache" : "ClassCache",
-                 inst->marker().func()->fullName()->data());
+                 inst->marker().func()->fullName()->slice());
 
   auto args = argGroup(env, inst).imm(ch).ssa(0 /* name */);
   if (is_func) {

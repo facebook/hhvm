@@ -803,7 +803,7 @@ void threadExit(bool shouldUnregister) {
 }
 
 void recordRds(Handle h, size_t size,
-               const std::string& type, const std::string& msg) {
+               folly::StringPiece type, folly::StringPiece msg) {
   if (RuntimeOption::EvalPerfDataMap) {
     if (isNormalHandle(h)) {
       h = genNumberHandleFrom(h);
@@ -812,7 +812,7 @@ void recordRds(Handle h, size_t size,
     Debug::DebugInfo::recordDataMap(
       (char*)(intptr_t)h,
       (char*)(intptr_t)h + size,
-      folly::format("rds+{}-{}", type, msg).str());
+      folly::sformat("rds+{}-{}", type, msg));
   }
 }
 

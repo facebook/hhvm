@@ -915,7 +915,7 @@ void Class::initSPropHandles() const {
     m_sPropCacheInit.bind(rds::Mode::Normal);
   }
   rds::recordRds(m_sPropCacheInit.handle(),
-                 sizeof(bool), "SPropCacheInit", name()->data());
+                 sizeof(bool), "SPropCacheInit", name()->slice());
 }
 
 Class::PropInitVec* Class::getPropData() const {

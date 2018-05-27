@@ -285,7 +285,7 @@ bool bindPersistentCns(const StringData* cnsName, const Cell& value) {
       auto const handle =
         rds::alloc<TypedValue, rds::Mode::Persistent, kTVSimdAlign>().handle();
       rds::recordRds(handle, sizeof(TypedValue),
-                     "Cns", cnsName->data());
+                     "Cns", cnsName->slice());
       return handle;
     },
     value
@@ -317,7 +317,7 @@ rds::Handle makeCnsHandle(const StringData* cnsName) {
     it->second.bind<kTVSimdAlign>(rds::Mode::Normal);
 
     rds::recordRds(it->second.handle(), sizeof(TypedValue),
-                   "Cns", cnsName->data());
+                   "Cns", cnsName->slice());
   }
   return it->second.handle();
 }

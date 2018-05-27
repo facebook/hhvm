@@ -38,6 +38,7 @@ void bindOnLinkImpl(std::atomic<Handle>& handle, Mode mode,
                     type_scan::Index tyIndex);
 void bindOnLinkImpl(std::atomic<Handle>& handle,
                     std::function<Handle()> fun,
+                    const void* init, size_t size,
                     type_scan::Index tyIndex);
 
 extern size_t s_normal_frontier;
@@ -272,10 +273,11 @@ void Link<T,M>::bind(Mode mode) {
 
 template<class T, Mode M>
 template<typename F>
-void Link<T,M>::bind(F fun) {
+void Link<T,M>::bind(F fun, const T& init) {
   if (LIKELY(bound())) return;
   detail::bindOnLinkImpl(
-    m_handle, std::move(fun), type_scan::getIndexForScan<T>()
+      m_handle, std::move(fun), &init, sizeof init,
+      type_scan::getIndexForScan<T>()
   );
   checkSanity();
 }

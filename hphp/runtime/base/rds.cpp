@@ -480,13 +480,18 @@ Handle attachImpl(Symbol key) {
 
 NEVER_INLINE
 void bindOnLinkImpl(std::atomic<Handle>& handle, std::function<Handle()> fun,
+                    const void* init, size_t size,
                     type_scan::Index /*tyIndex*/) {
   Handle c = kUninitHandle;
   if (handle.compare_exchange_strong(c, kBeingBound,
                                      std::memory_order_relaxed,
                                      std::memory_order_relaxed)) {
     // we flipped it from kUninitHandle, so we get to fill in the value.
-    if (handle.exchange(fun(), std::memory_order_relaxed) ==
+    auto const h = fun();
+    if (size && isPersistentHandle(h)) {
+      memcpy(handleToPtr<void, Mode::Persistent>(h), init, size);
+    }
+    if (handle.exchange(h, std::memory_order_relaxed) ==
         kBeingBoundWithWaiters) {
       futex_wake(&handle, INT_MAX);
     }
@@ -515,7 +520,7 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
                    Guard g(s_allocMutex);
                    return alloc(mode, sizeBytes, align, tyIndex);
                  },
-                 tyIndex);
+                 nullptr, 0, tyIndex);
 }
 
 }

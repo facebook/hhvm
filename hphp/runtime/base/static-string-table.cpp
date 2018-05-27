@@ -282,13 +282,13 @@ bool bindPersistentCns(const StringData* cnsName, const Cell& value) {
   assertx(it != s_stringDataMap->end());
   it->second.bind(
     [&] {
-      auto const link =
-        rds::alloc<TypedValue, rds::Mode::Persistent, kTVSimdAlign>();
-      *link = value;
-      rds::recordRds(link.handle(), sizeof(TypedValue),
+      auto const handle =
+        rds::alloc<TypedValue, rds::Mode::Persistent, kTVSimdAlign>().handle();
+      rds::recordRds(handle, sizeof(TypedValue),
                      "Cns", cnsName->data());
-      return link.handle();
-    }
+      return handle;
+    },
+    value
   );
   return it->second.isPersistent();
 }

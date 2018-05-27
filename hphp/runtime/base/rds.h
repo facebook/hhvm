@@ -349,6 +349,8 @@ struct Link {
    *  - if another thread is already calling fun to bind it, wait until its
    *    bound;
    *  - otherwise call fun to obtain a handle.
+   *  - for persistent handles, value is used to initialize the corresponding
+   *    rds data; for normal handles its ignored.
    *
    * The intent is to ensure that only one thread allocates the
    * handle, and that in the case of persistent handles, fun has a
@@ -358,7 +360,8 @@ struct Link {
    *
    * Post: bound()
    */
-  template<typename F> void bind(F fun);
+  template<typename F>
+  void bind(F fun, const T& value);
 
   /*
    * Dereference a Link and access its RDS memory for the current thread.

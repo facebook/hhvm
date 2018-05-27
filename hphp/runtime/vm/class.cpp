@@ -876,15 +876,18 @@ void Class::initSPropHandles() const {
 
     if (sProp.cls == this) {
       if (usePersistentHandles && (sProp.attrs & AttrPersistent)) {
+        static_assert(sizeof(StaticPropData) == sizeof(sProp.val),
+                      "StaticPropData must be a simple wrapper "
+                      "around TypedValue");
         propHandle.bind(
           [&] {
-            auto const link =
-              rds::alloc<StaticPropData, rds::Mode::Persistent>();
-            link->val = sProp.val;
-            rds::recordRds(link.handle(), sizeof(StaticPropData),
+            auto const handle =
+              rds::alloc<StaticPropData, rds::Mode::Persistent>().handle();
+            rds::recordRds(handle, sizeof(StaticPropData),
                            rds::SPropCache{this, slot});
-            return link.handle();
-          }
+            return handle;
+          },
+          *reinterpret_cast<const StaticPropData*>(&sProp.val)
         );
       } else {
         propHandle = rds::bind<StaticPropData, rds::Mode::Local>(

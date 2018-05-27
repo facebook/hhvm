@@ -719,16 +719,11 @@ void Unit::bindFunc(Func *func) {
       auto const isPersistent =
         (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) &&
         (func->attrs() & AttrPersistent);
-      rds::Handle handle;
-      if (isPersistent) {
-        auto link = rds::alloc<LowPtr<const Func>, rds::Mode::Persistent>();
-        *link = func;
-        handle = link.handle();
-      } else {
-        auto link = rds::alloc<LowPtr<const Func>, rds::Mode::Normal>();
-        *link = func;
-        handle = link.handle();
-      }
+
+      auto const handle = isPersistent ?
+        rds::alloc<LowPtr<const Func>, rds::Mode::Persistent>().handle() :
+        rds::alloc<LowPtr<const Func>, rds::Mode::Normal>().handle();
+
       if (func->isUnique()) ne->setUniqueFunc(func);
       if (RuntimeOption::EvalPerfDataMap) {
         rds::recordRds(
@@ -739,7 +734,8 @@ void Unit::bindFunc(Func *func) {
         );
       }
       return handle;
-    }
+    },
+    func
   );
   func->setFuncHandle(ne->m_cachedFunc);
 }
@@ -1318,21 +1314,19 @@ bool Unit::defTypeAlias(Id id) {
 
   nameList->m_cachedTypeAlias.bind(
     [&] {
-      auto const handle = [&] {
-        if (!(thisType->attrs & AttrPersistent) ||
-            (resolved.klass && !classHasPersistentRDS(resolved.klass))) {
-          return rds::alloc<TypeAliasReq, rds::Mode::Normal>().handle();
-        }
+      auto const persistent = (thisType->attrs & AttrPersistent) &&
+        (!resolved.klass || classHasPersistentRDS(resolved.klass));
 
-        auto link = rds::alloc<TypeAliasReq, rds::Mode::Persistent>();
-        *link = resolved;
-        return link.handle();
-      }();
+      auto const handle = persistent ?
+        rds::alloc<TypeAliasReq, rds::Mode::Persistent>().handle() :
+        rds::alloc<TypeAliasReq, rds::Mode::Normal>().handle();
+
       rds::recordRds(handle,
                      sizeof(TypeAliasReq),
                      "TypeAlias", typeName->data());
       return handle;
-    }
+    },
+    resolved
   );
   if (nameList->m_cachedTypeAlias.isPersistent()) return true;
 

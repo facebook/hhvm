@@ -626,12 +626,12 @@ and get_sealed_whitelist env c =
     | None -> None
     | Some {ua_params = params; _} ->
       begin match c.c_kind with
-        | Ast.Cinterface | Ast.Ctrait | Ast.Cenum ->
+        | Ast.Ctrait | Ast.Cenum ->
           let pos = fst c.c_name in
           let kind = String.capitalize_ascii (Ast.string_of_class_kind c.c_kind) in
           Errors.unsealable pos kind;
           None
-        | Ast.Cabstract | Ast.Cnormal ->
+        | Ast.Cabstract | Ast.Cinterface | Ast.Cnormal ->
           if c.c_final then begin
             let p, name = c.c_name in Errors.sealed_final p name
           end;

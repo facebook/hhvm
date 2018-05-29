@@ -733,27 +733,39 @@ G |- function (t1 , .. , tn , t' vardots ) : t <: function ( u1 , .. , un , u1',
 
 sk1 : t ... skn : t
 G |- t1 <: u ... G |- tn <: u
----------------------------------------------------- :: shape_as_indexish
+-------------------------------------------------- :: shape_as_indexish
 G |- shape ( sk1 => t1 , ... , skn => tn ) <: `Indexish`<t,u>
 
-{{ com Depth subtyping on shapes: types of fields behave covariantly }}
+{{ com Depth subtyping on closed shapes: types of fields behave covariantly }}
 
 G |- sft1 <: sft1' ... G |- sftn <: sftn'
--------------------------------------------------- :: shape_co
+-------------------------------------------------- :: closed_shape_co
 G |- shape ( sft1 , ... , sftn ) <: shape ( sft1' , ... , sftn' )
+
+{{ com Width subtyping on closed shapes: optional fields can be introduced }}
+
+-------------------------------------------------- :: closed_shape_widen
+G |- shape ( sft1 , ... , sftm ) <: shape ( sft1 , ... , sftm , ?sfn1' => t1' , ... , ?sfnn' => tn' )
 
 {{ com Closed shapes can be opened }}
 
------------------------------------------------------------------------- :: shape_open
-G |- shape ( sft1 , ... , sftn ) <: shape (sft1 , ... , sftn , vardots )
+-------------------------------------------------- :: shape_open
+G |- shape ( sft1 , ... , sftn ) <: shape ( sft1 , ... , sftn , vardots )
+
+{{ com Depth subtyping on open shapes: types of fields behave covariantly }}
+
+G |- sft1 <: sft1' ... G |- sftn <: sftn'
+-------------------------------------------------- :: open_shape_co
+G |- shape ( sft1 , ... , sftn , vardots ) <: shape ( sft1' , ... , sftn' , vardots )
 
 {{ com Width subtyping on open shapes: fields can be forgotten }}
------------------------------------------------------------------------------------------------------- :: shape_narrow
-G |- shape ( sft1, ..., sftm , sft1', ... , sftn', vardots ) <: shape ( sft1 , ... , sftm , vardots )
+
+-------------------------------------------------- :: open_shape_narrow
+G |- shape ( sft1 , ..., sftm , sft1' , ... , sftn', vardots ) <: shape ( sft1 , ... , sftm , vardots )
 
 {{ com Width subtyping on open shapes: optional fields of type $[[mixed]]$ can be introduced }}
 
---------------------------------------------------------------------------------------------------------------- :: shape_widen
+-------------------------------------------------- :: open_shape_widen
 G |- shape ( sft1, ..., sftm, vardots ) <: shape (sft1, ..., sftm, ?sfn1' => mixed, ..., ?sfnn' => mixed, vardots )
 
 {{ com \subsection{Class and interface inheritance} }}

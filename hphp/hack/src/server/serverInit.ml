@@ -113,7 +113,9 @@ module ServerInitCommon = struct
     end in
     let native_load_error e = raise (Native_loader_failure (State_loader.error_string e)) in
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
+    let devinfra_saved_state_lookup = genv.local_config.SLC.devinfra_saved_state_lookup in
     State_loader.mk_state_future ~config:genv.local_config.SLC.state_loader_timeouts
+      ~devinfra_saved_state_lookup
       ~use_canary ?mini_state_handle
       ~config_hash:(ServerConfig.config_hash genv.config) root ~tiny
       ~ignore_hh_version

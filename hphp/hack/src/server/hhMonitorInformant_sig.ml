@@ -17,6 +17,7 @@ module Types = struct
     (** Informant should check the XDB table for a saved state when
      * making a decision. *)
     use_xdb : bool;
+    devinfra_saved_state_lookup : bool;
     (** Informant should ignore the hh_version column when looking up a saved
      * state from XDB. *)
      ignore_hh_version : bool;

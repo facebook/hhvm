@@ -16,6 +16,7 @@ type t = {
   watchman_subscribe: bool;
   watchman_synchronous_timeout : int; (* in seconds *)
   use_mini_state: bool;
+  devinfra_saved_state_lookup: bool;
   load_mini_script_timeout: int; (* in seconds *)
   (** Prefer using Ocaml implementation over load script. *)
   load_state_natively: bool;
@@ -54,6 +55,7 @@ let default = {
   watchman_subscribe = false;
   watchman_synchronous_timeout = 120;
   use_mini_state = false;
+  devinfra_saved_state_lookup = false;
   load_mini_script_timeout = 20;
   load_state_natively = false;
   type_decl_bucket_size = 1000;
@@ -118,6 +120,8 @@ let load_ fn ~silent =
     ~default:default.use_watchman config in
   let use_mini_state = bool_ "use_mini_state"
     ~default:default.use_mini_state config in
+  let devinfra_saved_state_lookup = bool_ "devinfra_saved_state_lookup"
+    ~default:default.devinfra_saved_state_lookup config in
   let enable_on_nfs = bool_ "enable_on_nfs"
     ~default:default.enable_on_nfs config in
   let enable_fuzzy_search = bool_ "enable_fuzzy_search"
@@ -185,6 +189,7 @@ let load_ fn ~silent =
     watchman_subscribe;
     watchman_synchronous_timeout;
     use_mini_state;
+    devinfra_saved_state_lookup;
     load_mini_script_timeout;
     load_state_natively;
     max_purgatory_clients;

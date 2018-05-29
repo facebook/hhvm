@@ -601,8 +601,8 @@ let is_invalid_xhp_attr_enum_item node =
       is_invalid_xhp_attr_enum_item_literal literal_expression
   | _ -> true
 
-  let xhp_errors env node errors =
-    match syntax node with
+let xhp_errors env node errors =
+  match syntax node with
   |  XHPExpression
     { xhp_open =
       { syntax = XHPOpen { xhp_open_name; _ }; _ }
@@ -2528,38 +2528,101 @@ let find_syntax_errors env =
         ; namespace_name
         ; trait_require_clauses
         } = acc in
+
     let names, errors =
       parameter_errors env node parents namespace_name names errors in
-    let names, errors =
-      redeclaration_errors env node parents namespace_name names errors in
-    let errors =
-      xhp_errors env node errors in
-    let errors =
-      statement_errors env node parents errors in
-    let errors =
-      methodish_errors env node parents errors in
-    let errors =
-      expression_errors env node parents errors in
-    let trait_require_clauses, errors =
-      require_errors env node parents trait_require_clauses errors in
-    let names, errors =
-      classish_errors env node parents namespace_name names errors in
-    let errors =
-      class_element_errors env node parents errors in
-    let names, errors = alias_errors env node namespace_name names errors in
-    let errors = group_use_errors env node errors in
-    let names, errors =
-      const_decl_errors env node parents namespace_name names errors in
-    let errors =
-      mixed_namespace_errors env node parents namespace_type errors in
-    let errors =
-      class_property_multiple_visibility_error env node parents errors in
-    let names, errors =
-      namespace_use_declaration_errors env node
-        (namespace_name = global_namespace_name) names errors in
-    let errors = enum_errors env node errors in
-    let errors = assignment_errors env node errors in
-    let errors = declare_errors env node parents errors in
+    let trait_require_clauses, names, errors =
+      match syntax node with
+      | TryStatement _
+      | UsingStatementFunctionScoped _
+      | ForStatement _ ->
+        let errors = statement_errors env node parents errors in
+        trait_require_clauses, names, errors
+      | MethodishDeclaration _
+      | FunctionDeclarationHeader _ ->
+        let names, errors =
+          redeclaration_errors env node parents namespace_name names errors in
+        let errors =
+          methodish_errors env node parents errors in
+        trait_require_clauses, names, errors
+      | LiteralExpression _
+      | SafeMemberSelectionExpression _
+      | HaltCompilerExpression _
+      | FunctionCallExpression _
+      | ListExpression _
+      | ShapeExpression _
+      | DecoratedExpression _
+      | VectorIntrinsicExpression _
+      | DictionaryIntrinsicExpression _
+      | KeysetIntrinsicExpression _
+      | VarrayIntrinsicExpression _
+      | DarrayIntrinsicExpression _
+      | YieldFromExpression _
+      | YieldExpression _
+      | ScopeResolutionExpression _
+      | PrefixUnaryExpression _
+      | LambdaExpression _
+      | IsExpression _
+      | AsExpression _
+      | ConditionalExpression _ ->
+        let errors =
+          expression_errors env node parents errors in
+        let errors = assignment_errors env node errors in
+        trait_require_clauses, names, errors
+      | RequireClause _ ->
+        let trait_require_clauses, errors =
+          require_errors env node parents trait_require_clauses errors in
+        trait_require_clauses, names, errors
+      | ClassishDeclaration _ ->
+        let names, errors =
+          classish_errors env node parents namespace_name names errors in
+          trait_require_clauses, names, errors
+      | ConstDeclaration _ ->
+        let errors =
+          class_element_errors env node parents errors in
+        trait_require_clauses, names, errors
+      | AliasDeclaration _ ->
+        let names, errors = alias_errors env node namespace_name names errors in
+        trait_require_clauses, names, errors
+      | ConstantDeclarator _ ->
+        let names, errors =
+          const_decl_errors env node parents namespace_name names errors in
+        trait_require_clauses, names, errors
+      | NamespaceBody _
+      | NamespaceEmptyBody _
+      | NamespaceDeclaration _ ->
+        let errors =
+          mixed_namespace_errors env node parents namespace_type errors in
+        trait_require_clauses, names, errors
+      | NamespaceUseDeclaration _
+      | NamespaceGroupUseDeclaration _ ->
+        let errors = group_use_errors env node errors in
+        let names, errors =
+          namespace_use_declaration_errors env node
+            (namespace_name = global_namespace_name) names errors in
+        trait_require_clauses, names, errors
+      | PropertyDeclaration _ ->
+        let errors =
+          class_property_multiple_visibility_error env node parents errors in
+        trait_require_clauses, names, errors
+      | Enumerator { enumerator_name = name; _}
+        when String.lowercase_ascii @@ text name = "class" ->
+        let errors =
+          make_error_from_node node SyntaxError.enum_elem_name_is_class :: errors in
+        trait_require_clauses, names, errors
+      | PostfixUnaryExpression _
+      | BinaryExpression _
+      | ForeachStatement _ ->
+        let errors = assignment_errors env node errors in
+        trait_require_clauses, names, errors
+      | DeclareDirectiveStatement _
+      | DeclareBlockStatement _ ->
+        let errors = declare_errors env node parents errors in
+        trait_require_clauses, names, errors
+      | XHPExpression _ ->
+        let errors = xhp_errors env node errors in
+        trait_require_clauses, names, errors
+      | _ -> trait_require_clauses, names, errors in
 
     match syntax node with
     | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->

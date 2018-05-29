@@ -414,7 +414,11 @@ end
  * Omitting gratuitous indentation. *)
 module Errors_with_mode(M: Errors_modes) = struct
 
-include Error_codes
+module Temporary = Error_codes.Temporary
+module Parsing = Error_codes.Parsing
+module Naming = Error_codes.Naming
+module NastCheck = Error_codes.NastCheck
+module Typing = Error_codes.Typing
 
 (*****************************************************************************)
 (* Types *)

@@ -95,10 +95,10 @@ let validate_hint env hint op =
     match state.validity with
       | Invalid (r, ty_) ->
         Errors.invalid_is_as_expression_hint
-          (Reason.to_pos r) op (print_type ty_)
+          op (fst hint) (Reason.to_pos r) (print_type ty_)
       | Partial (r, ty_) ->
         Errors.partially_valid_is_as_expression_hint
-          (Reason.to_pos r) op (print_type ty_)
+          op (fst hint) (Reason.to_pos r) (print_type ty_)
       | Valid -> ()
   in
   let env, hint_ty = Env.localize_with_dty_validator

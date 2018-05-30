@@ -2606,17 +2606,21 @@ let trait_reuse p_pos p_name class_name trait =
  * This error should be unfixmeable, because the `is` expression does not
  * support it at all.
  *)
-let invalid_is_as_expression_hint pos name ty_str =
-  add (Typing.err_code Typing.InvalidIsAsExpressionHint) pos
-    ("The \"" ^ name ^ "\" operator cannot be used with " ^ ty_str)
+let invalid_is_as_expression_hint op hint_pos ty_pos ty_str =
+  add_list (Typing.err_code Typing.InvalidIsAsExpressionHint) [
+    hint_pos, ("Invalid \"" ^ op ^ "\" expression hint");
+    ty_pos, ("The \"" ^ op ^ "\" operator cannot be used with " ^ ty_str);
+  ]
 
 (**
  * This error is fixmeable, because the typechecker will still refine the type
  * despite the hint not being completely valid.
  *)
-let partially_valid_is_as_expression_hint pos name ty_str =
-  add (Typing.err_code Typing.PartiallyValidIsAsExpressionHint) pos
-    ("The \"" ^ name ^ "\" operator should not be used with " ^ ty_str)
+let partially_valid_is_as_expression_hint op hint_pos ty_pos ty_str =
+  add_list (Typing.err_code Typing.PartiallyValidIsAsExpressionHint) [
+    hint_pos, ("Invalid \"" ^ op ^ "\" expression hint");
+    ty_pos, ("The \"" ^ op ^ "\" operator should not be used with " ^ ty_str);
+  ]
 
 let override_final ~parent ~child =
   add_list (Typing.err_code Typing.OverrideFinal) [child, "You cannot override this method";

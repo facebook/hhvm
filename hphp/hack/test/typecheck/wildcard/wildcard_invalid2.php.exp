@@ -1,8 +1,12 @@
 File "wildcard_invalid2.php", line 10, characters 25-25:
 Wildcard typehints are not allowed in this position (Naming[2084])
-File "wildcard_invalid2.php", line 10, characters 25-25:
-The "is" operator cannot be used with an untyped value (Typing[4195])
+File "wildcard_invalid2.php", line 10, characters 16-18:
+Invalid "is" expression hint (Typing[4195])
+  File "wildcard_invalid2.php", line 10, characters 25-25:
+  The "is" operator cannot be used with an untyped value
 File "wildcard_invalid2.php", line 14, characters 16-16:
 Wildcard typehints are not allowed in this position (Naming[2084])
 File "wildcard_invalid2.php", line 14, characters 16-16:
-The "is" operator cannot be used with an untyped value (Typing[4195])
+Invalid "is" expression hint (Typing[4195])
+  File "wildcard_invalid2.php", line 14, characters 16-16:
+  The "is" operator cannot be used with an untyped value

@@ -115,6 +115,7 @@ module Env : sig
   val new_lvar : genv * lenv -> Ast.id -> positioned_ident
   val new_let_local : genv * lenv -> Ast.id -> positioned_ident
   val found_dollardollar : genv * lenv -> Pos.t -> positioned_ident
+  val has_dollardollar : all_locals -> Pos.t option
   val inside_pipe : genv * lenv -> bool
   val new_pending_lvar : genv * lenv -> Ast.id -> unit
   val promote_pending_lvar : genv * lenv -> string -> unit
@@ -420,6 +421,10 @@ end = struct
     if not !(lenv.inside_pipe) then
       Errors.undefined p SN.SpecialIdents.dollardollar;
     new_lvar (genv, lenv) (p, SN.SpecialIdents.dollardollar)
+
+  (* Check if dollardollar is defined in the current environment *)
+  let has_dollardollar locals =
+    SMap.get SN.SpecialIdents.dollardollar locals
 
   let inside_pipe (_, lenv) =
     !(lenv.inside_pipe)
@@ -2433,8 +2438,27 @@ module Make (GetLocals : GetLocals) = struct
         (* The order matters here, of course -- e1 can define vars that need to
          * be available in e2 and e3. *)
         let e1 = expr env e1 in
-        let e2opt = oexpr env e2opt in
-        let e3 = expr env e3 in
+        let nsenv = (fst env).namespace in
+        let get_lvalues = function e ->
+          snd @@ GetLocals.stmt (fst env).tcopt (nsenv, SMap.empty) (p, Expr e) in
+        let e2_lvalues =
+          Option.value (Option.map e2opt get_lvalues) ~default:SMap.empty
+        in
+        let e3_lvalues = get_lvalues e3 in
+        let lvalues = smap_inter e2_lvalues e3_lvalues in
+        SMap.iter (fun x p -> Env.new_pending_lvar env (p, x)) lvalues;
+        let e2opt, e3, dollar_dollar = Env.scope env (fun env ->
+          let all2, e2opt = Env.scope_all env (fun env -> oexpr env e2opt) in
+          let dollardollar_e2 = Env.has_dollardollar all2 in
+          let all3, e3 = Env.scope_all env (fun env -> expr env e3) in
+          let dollardollar_e3 = Env.has_dollardollar all3 in
+          Env.extend_all_locals env all2;
+          Env.extend_all_locals env all3;
+          e2opt, e3, Option.first_some dollardollar_e2 dollardollar_e3
+        ) in
+        SMap.iter (fun x _ -> Env.promote_pending_lvar env x) lvalues;
+        if Env.inside_pipe env then
+          ignore (Option.map dollar_dollar (Env.found_dollardollar env));
         N.Eif (e1, e2opt, e3)
     | NullCoalesce (e1, e2) ->
         let e1 = expr env e1 in

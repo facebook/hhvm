@@ -1,0 +1,4 @@
+File "conditional.php", line 5, characters 10-11:
+The variable $x is defined (Naming[2007])
+File "conditional.php", line 4, characters 14-15:
+But in a different scope

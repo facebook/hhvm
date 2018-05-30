@@ -131,21 +131,40 @@ let rec lvalue tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) = function
 let rec stmt tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) (_, st_) =
   let nsenv = fst acc in
   match st_ with
-  | Expr (_, Binop (Eq None, lv, rv))
-  | Expr (_, Eif ((_, Binop (Eq None, lv, rv)), _, _)) ->
-    let acc = stmt tcopt acc (Pos.none, Expr rv) in
-    lvalue tcopt acc lv
+  | Expr e -> expr tcopt acc e
   | Unsafe
   | Fallthrough
   | Markup _
-  | Expr _ | Break _ | Continue _ | Throw _
-  | Do _ | While _ | For _ | Foreach _ | Declare _
+  | Break _ | Continue _ | Throw _ -> acc
+  | Do (b, e) ->
+    let acc = block tcopt acc b in
+    let acc = expr tcopt acc e in
+    acc
+  | While (e, _b) -> expr tcopt acc e
+  | For (e1, e2, _e3, _b) ->
+    let acc = expr tcopt acc e1 in
+    let acc = expr tcopt acc e2 in
+    acc
+  | Foreach (e, _await, as_e, _b) ->
+    let acc = expr tcopt acc e in
+    begin match as_e with
+      | As_v v -> expr tcopt acc v
+      | As_kv (k, v) ->
+        let acc = expr tcopt acc k in
+        let acc = expr tcopt acc v in
+        acc
+    end (* match *)
+  | Declare _
   | Return _ | GotoLabel _ | Goto _ | Static_var _
   | Global_var _ | Def_inline _ | Noop -> acc
-  | Let _ -> acc (* We would like to exclude scoped locals here *)
+  | Let (_x, _h, e) ->
+    (* We would like to exclude scoped locals here, but gather the locals in
+     * expression *)
+    expr tcopt acc e
   | Using u -> block tcopt acc u.us_block
   | Block b -> block tcopt acc b
-  | If (_, b1, b2) ->
+  | If (e, b1, b2) ->
+    let acc = expr tcopt acc e in
     let term1 = is_terminal tcopt nsenv b1 in
     let term2 = is_terminal tcopt nsenv b2 in
     if term1 && term2
@@ -164,7 +183,8 @@ let rec stmt tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) (_, st_) =
       let (m:Pos.t SMap.t) = (smap_inter m1 m2) in
       smap_union acc m
     end
-  | Switch (_e, cl) ->
+  | Switch (e, cl) ->
+    let acc = expr tcopt acc e in
     let cl = List.filter cl begin function
       | Case (_, b)
       | Default b -> not (is_terminal tcopt nsenv b)
@@ -193,3 +213,99 @@ and casel tcopt nsenv = function
 
 and catch tcopt nsenv (_, _, b) =
   snd (block tcopt (nsenv, SMap.empty) b)
+
+and expr tcopt acc (_, e) =
+  let expr_expr acc e1 e2 =
+    let acc = expr tcopt acc e1 in
+    let acc = expr tcopt acc e2 in
+    acc
+  in
+  let field acc f =
+    match f with
+    | AFvalue e -> expr tcopt acc e
+    | AFkvalue (k, v) -> expr_expr acc k v
+  in
+  let exprs acc es =
+    List.fold_left es ~init:acc ~f:(expr tcopt)
+  in
+  match e with
+  | Binop (Eq None, lv, rv) ->
+    let acc = expr tcopt acc rv in
+    lvalue tcopt acc lv
+  | Array fields
+  | Collection (_, fields) ->
+    List.fold_left fields ~init:acc ~f:field
+  | Varray es
+  | List es
+  | Expr_list es
+  | Execution_operator es
+  | String2 es ->
+    exprs acc es
+  | Darray exprexprs ->
+    List.fold_left exprexprs ~init:acc ~f:(fun acc -> fun (e1, e2) -> expr_expr acc e1 e2)
+  | Shape fields ->
+    List.fold_left fields ~init:acc ~f:(fun acc -> fun (_, e) -> expr tcopt acc e)
+  | Dollar e
+  | Clone e
+  | Await e
+  | Is (e, _)
+  | As (e, _, _)
+  | BracedExpr e
+  | ParenthesizedExpr e
+  | Cast (_, e)
+  | Unop (_, e)
+  | Class_const (e, _)
+  | Callconv (_, e)
+  | Import (_, e)
+  | Yield_from e
+  | NullCoalesce (e, _)
+  | Suspend e -> expr tcopt acc e
+  | Obj_get (e1, e2, _)
+  | Binop (_, e1, e2)
+  | Pipe (e1, e2)
+  | InstanceOf (e1, e2)
+  | Class_get (e1, e2) -> expr_expr acc e1 e2
+  | Array_get (e1, oe2) ->
+    let acc = expr tcopt acc e1 in
+    let acc = Option.value_map oe2 ~default:acc ~f:(expr tcopt acc) in
+    acc
+  | New (e1, es2, es3)
+  | Call (e1, _, es2, es3) ->
+    let acc = expr tcopt acc e1 in
+    let acc = exprs acc es2 in
+    let acc = exprs acc es3 in
+    acc
+  | Yield f ->
+    field acc f
+  | Eif (e1, oe2, e3) ->
+    let acc = expr tcopt acc e1 in
+    let _, acc2 = Option.value_map oe2 ~default:acc ~f:(expr tcopt acc) in
+    let _, acc3 = expr tcopt acc e3 in
+    smap_union acc (smap_inter acc2 acc3)
+  | NewAnonClass (es1, es2, _) ->
+    let acc = exprs acc es1 in
+    let acc = exprs acc es2 in
+    acc
+  | Xml (_, attribs, es) ->
+    let attrib acc a =
+      match a with
+      | Xhp_simple (_, e)
+      | Xhp_spread e -> expr tcopt acc e
+    in
+    let acc = List.fold_left attribs ~init:acc ~f:attrib in
+    let acc = exprs acc es in
+    acc
+  | Null
+  | True
+  | False
+  | Omitted
+  | Id _
+  | Id_type_arguments _
+  | Yield_break
+  | Int _
+  | Float _
+  | String _
+  | Efun _
+  | Lfun _
+  | Lvar _
+  | Unsafeexpr _ -> acc

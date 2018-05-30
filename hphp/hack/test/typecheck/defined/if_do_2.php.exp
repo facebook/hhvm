@@ -1,0 +1,4 @@
+File "if_do_2.php", line 14, characters 10-11:
+The variable $y is defined (Naming[2007])
+File "if_do_2.php", line 7, characters 7-8:
+But in a different scope

@@ -2997,14 +2997,22 @@ let shapes_key_exists_always_true pos1 name pos2 =
     pos2, "The field '" ^ name ^ "' exists because of this definition"
   ]
 
+let shape_field_non_existence_reason name = function
+  | `Undefined ->
+    "The field '" ^ name ^ "' is not defined in this shape"
+  | `Unset ->
+    "The field '" ^ name ^ "' was unset here"
+
 let shapes_key_exists_always_false pos1 name pos2 reason =
   add_list (Typing.err_code Typing.ShapesKeyExistsAlwaysFalse) [
     pos1, "This Shapes::keyExists() check is always false";
-    pos2, match reason with
-      | `Undefined ->
-        "The field '" ^ name ^ "' is not defined in this shape"
-      | `Unset ->
-        "The field '" ^ name ^ "' was unset here"
+    pos2, shape_field_non_existence_reason name reason
+  ]
+
+let shapes_idx_with_non_existent_field pos1 name pos2 reason =
+  add_list (Typing.err_code Typing.ShapesIdxWithNonExistentField) [
+    pos1, "You are calling Shapes::idx() on a field known to not exist";
+    pos2, shape_field_non_existence_reason name reason
   ]
 
 (*****************************************************************************)

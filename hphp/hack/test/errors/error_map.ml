@@ -455,4 +455,5 @@ let%expect_test "error_map" =
     NonawaitedAwaitableInReactiveContext = 4248
     ShapesKeyExistsAlwaysTrue = 4249
     ShapesKeyExistsAlwaysFalse = 4250
+    ShapesIdxWithNonExistentField = 4251
   |}]

@@ -541,4 +541,5 @@ module type S = sig
   val non_awaited_awaitable_in_rx: Pos.t -> unit
   val shapes_key_exists_always_true: Pos.t -> string -> Pos.t -> unit
   val shapes_key_exists_always_false: Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
+  val shapes_idx_with_non_existent_field: Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
 end

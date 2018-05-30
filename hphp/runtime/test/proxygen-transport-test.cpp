@@ -78,8 +78,8 @@ std::unique_ptr<HTTPMessage> getRequest(HTTPMethod type) {
   return req;
 }
 
-struct ProxygenTransportTest : testing::Test {
-  ProxygenTransportTest()
+struct ProxygenTransportBasicTest : testing::Test {
+  ProxygenTransportBasicTest()
       : m_timeouts(folly::HHWheelTimer::newTimer(
             &m_eventBase,
             std::chrono::milliseconds(
@@ -96,6 +96,23 @@ struct ProxygenTransportTest : testing::Test {
     m_transport->setTransactionReference(m_transport);
     m_transport->setTransaction(&m_txn);
   }
+
+  void SetUp() override {
+  }
+
+  void TearDown() override {
+  }
+
+ protected:
+  folly::EventBase m_eventBase;
+  folly::HHWheelTimer::UniquePtr m_timeouts;
+  proxygen::HTTP2PriorityQueue m_egressQueue;
+  StrictMock<MockProxygenServer> m_server;
+  StrictMock<MockHTTPTransaction> m_txn;
+  std::shared_ptr<ProxygenTransport> m_transport;
+};
+
+struct ProxygenTransportTest : ProxygenTransportBasicTest {
 
   // Initiates a simple GET request to the transport
   void SetUp() override {
@@ -162,14 +179,6 @@ struct ProxygenTransportTest : testing::Test {
     EXPECT_CALL(m_txn, sendEOM());
     m_server.deliverMessages();
   }
-
- protected:
-  folly::EventBase m_eventBase;
-  folly::HHWheelTimer::UniquePtr m_timeouts;
-  proxygen::HTTP2PriorityQueue m_egressQueue;
-  MockProxygenServer m_server;
-  MockHTTPTransaction m_txn;
-  std::shared_ptr<ProxygenTransport> m_transport;
 };
 
 struct ProxygenTransportRepostTest : ProxygenTransportTest {
@@ -189,6 +198,15 @@ struct ProxygenTransportRepostTest : ProxygenTransportTest {
 
 TEST_F(ProxygenTransportTest, basic) {
   sendResponse("12345");
+}
+
+TEST_F(ProxygenTransportBasicTest, unsupported_method) {
+  auto req = getRequest(HTTPMethod::UNSUB);
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(400)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+  m_transport->onEOM();
 }
 
 TEST_F(ProxygenTransportTest, push) {
@@ -322,6 +340,8 @@ TEST_F(ProxygenTransportTest, client_timeout) {
   // invalid
   EXPECT_CALL(m_txn, canSendHeaders()).WillOnce(Return(true));
   EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(408)));
+  EXPECT_CALL(m_txn, sendEOM());
+  EXPECT_CALL(m_server, onRequestError(_));
   m_transport->onError(ex);
 }
 
@@ -346,6 +366,7 @@ TEST_F(ProxygenTransportRepostTest, no_body) {
   InSequence enforceOrder;
   auto req = getRequest(HTTPMethod::POST);
 
+  EXPECT_CALL(m_txn, canSendHeaders());
   EXPECT_CALL(m_txn, sendHeaders(_));
   EXPECT_CALL(m_txn, sendEOM());
   m_transport->onHeadersComplete(std::move(req));
@@ -359,6 +380,7 @@ TEST_F(ProxygenTransportRepostTest, mid_body) {
   auto body1 = folly::IOBuf::copyBuffer(std::string("hello"));
   auto body2 = folly::IOBuf::copyBuffer(std::string("world"));
 
+  EXPECT_CALL(m_txn, canSendHeaders());
   EXPECT_CALL(m_txn, sendHeaders(_));
   EXPECT_CALL(m_txn, sendBody(_))
     .Times(2);
@@ -376,6 +398,7 @@ TEST_F(ProxygenTransportRepostTest, after_body) {
   auto body1 = folly::IOBuf::copyBuffer(std::string("hello"));
   auto body2 = folly::IOBuf::copyBuffer(std::string("world"));
 
+  EXPECT_CALL(m_txn, canSendHeaders());
   EXPECT_CALL(m_txn, sendHeaders(_));
   EXPECT_CALL(m_txn, sendBody(_));
   EXPECT_CALL(m_txn, sendEOM());
@@ -392,9 +415,11 @@ TEST_F(ProxygenTransportRepostTest, mid_body_abort) {
   auto body1 = folly::IOBuf::copyBuffer(std::string("hello"));
   auto body2 = folly::IOBuf::copyBuffer(std::string("world"));
 
+  EXPECT_CALL(m_txn, canSendHeaders());
   EXPECT_CALL(m_txn, sendHeaders(_));
   EXPECT_CALL(m_txn, sendBody(_))
     .Times(2);
+  EXPECT_CALL(m_txn, sendAbort());
   m_transport->onHeadersComplete(std::move(req));
   m_transport->onBody(std::move(body1));
   m_transport->beginPartialPostEcho();

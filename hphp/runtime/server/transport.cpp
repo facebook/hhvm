@@ -103,6 +103,12 @@ const char *Transport::getMethodName() {
     const char *m = getExtendedMethod();
     return m ? m : "POST";
   }
+  case Method::Unknown: {
+    // m should really never be nullptr. "Unknown" is an actionable log line
+    // since it indicates a missing HTTP method (since it is not capitalized).
+    const char *m = getExtendedMethod();
+    return m ? m : "Unknown";
+  }
   default:
     break;
   }

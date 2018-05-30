@@ -205,6 +205,7 @@ void ProxygenTransport::onHeadersComplete(
   m_request->dumpMessage(4);
   auto method = m_request->getMethod();
   const auto& methodStr = m_request->getMethodString();
+  m_extended_method = methodStr.c_str();
   if (method == HTTPMethod::GET) {
     m_method = Transport::Method::GET;
   } else if (method == HTTPMethod::POST ||
@@ -220,10 +221,10 @@ void ProxygenTransport::onHeadersComplete(
     // than libevent:
     //   TRACE, COPY, MOVE, MKACTIVITY, CHECKOUT, MERGE, MSEARCH, NOTIFY,
     //   SUBSCRIBE, UNSUBSCRIBE, PATCH
+    m_method = Transport::Method::Unknown;
     sendErrorResponse(400 /* Bad Request */);
     return;
   }
-  m_extended_method = methodStr.c_str();
 
   const auto& headers = m_request->getHeaders();
   headers.forEach([&] (const std::string &header, const std::string &val) {
@@ -349,7 +350,15 @@ void ProxygenTransport::onEOM() noexcept {
         m_currentBodyBuf->length();
     }
     m_clientComplete = true;
-    m_server->onRequest(shared_from_this());
+    // If we've already responded to the request (most likely with a call to
+    // sendErrorResponse), then we have nothing to do and don't want to service
+    // this request further.
+    if (m_sendEnded) {
+      LOG(WARNING) << "Transaction " << *m_clientTxn << " has already been "
+              << "sent a response.";
+    } else {
+      m_server->onRequest(shared_from_this());
+    }
     return;
   } else {
     requestDoneLocking();
@@ -534,6 +543,7 @@ void ProxygenTransport::sendErrorResponse(uint32_t code) noexcept {
   CHECK(!m_sendStarted);
   m_sendStarted = true;
   m_sendEnded = true;
+  m_headerSent = true;
   m_responseCode = code;
   m_responseCodeInfo = response.getStatusMessage();
   m_server->onRequestError(this);

@@ -590,8 +590,8 @@ void Vgen::emit(const vasm_opc& i) {          \
   }                                           \
 }
 
-Y(ldimmb, b, 8, W, i.s.ub())
-Y(ldimmw, w, 16, W, i.s.uw())
+Y(ldimmb, ub, 8, W, i.s.ub())
+Y(ldimmw, uw, 16, W, i.s.uw())
 Y(ldimml, l, 32, W, i.s.l())
 Y(ldimmq, q, 64, X, i.s.q())
 

@@ -672,7 +672,8 @@ module ServerLazyInit : InitKind = struct
       let old_info = FileInfo.saved_to_info old_saved in
       (* Parse dirty files only *)
       let next = MultiWorker.next genv.workers parsing_files_list in
-      let env, t = parsing genv env ~lazy_parse:true ~get_next:next
+      let lazy_parse = not genv.local_config.SLC.use_full_fidelity_parser in
+      let env, t = parsing genv env ~lazy_parse ~get_next:next
         ~count:(List.length parsing_files_list) t in
       SearchServiceRunner.update_fileinfo_map env.files_info;
 

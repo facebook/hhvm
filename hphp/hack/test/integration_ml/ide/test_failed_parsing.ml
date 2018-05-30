@@ -17,7 +17,8 @@ let foo_contents = Printf.sprintf
 
 function foo(): %s {
   // UNSAFE
-}"
+}
+"
 
 let foo_returns_int_contents = foo_contents "int"
 let foo_returns_string_contents = foo_contents "string"
@@ -29,12 +30,14 @@ let bar_contents =
 
 function bar() : void {
   foo();
-}"
+}
+"
 
 let parse_error =
 "<?hh // strict
 
-{"
+{
+"
 
 let bar_parse_error_diagnostics = "
 /bar.php:
@@ -67,4 +70,4 @@ let () =
   let _, loop_output = Test.(run_loop_once env default_loop_input) in
   (* Bar depends on foo, so change of foo will trigger recheck of bar.
    * Verify that doing this doesn't change previous parsing stage errors *)
-  Test.assert_no_diagnostics loop_output
+   Test.assert_no_diagnostics loop_output

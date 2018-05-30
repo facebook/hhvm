@@ -146,6 +146,13 @@ let tco_sealed_classes = "sealed_classes"
  *)
 let tco_experimental_void_is_type_of_null = "void_is_type_of_null"
 
+(**
+ * Enable extra shape field checks; e.g., if an existence test for a field
+ * name using Shapes::keyExists() will always succeed or always fail,
+ * or if a field that is known to not exist in a given shape is accessed
+ * using Shapes::idx().
+ *)
+let tco_experimental_shape_field_check = "shape_field_check"
 
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
@@ -171,6 +178,7 @@ let tco_experimental_all =
      tco_decl_override_require_hint;
      tco_sealed_classes;
      tco_experimental_void_is_type_of_null;
+     tco_experimental_shape_field_check;
    ]
 
 let tco_migration_flags_all =

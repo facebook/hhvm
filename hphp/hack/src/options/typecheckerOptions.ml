@@ -54,6 +54,8 @@ let experimental_decl_override_require_hint = GlobalOptions.tco_decl_override_re
 let experimental_sealed_classes = GlobalOptions.tco_sealed_classes
 let experimental_void_is_type_of_null =
   GlobalOptions.tco_experimental_void_is_type_of_null
+let experimental_shape_field_check =
+  GlobalOptions.tco_experimental_shape_field_check
 
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

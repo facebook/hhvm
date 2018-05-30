@@ -363,8 +363,8 @@ let%expect_test "error_map" =
     KeysetSet = 4156
     EqIncompatibleTypes = 4157
     ContravariantThis = 4158
-    InstanceofAlwaysFalse = 4159
-    InstanceofAlwaysTrue = 4160
+    InstanceofAlwaysFalseDEPRECATED = 4159
+    InstanceofAlwaysTrueDEPRECATED = 4160
     AmbiguousMember = 4161
     InstanceofGenericClassname = 4162
     RequiredFieldIsOptional = 4163
@@ -453,4 +453,6 @@ let%expect_test "error_map" =
     ReturnVoidToRxMismatch = 4246
     ReturnsVoidToRxAsNonExpressionStatement = 4247
     NonawaitedAwaitableInReactiveContext = 4248
+    ShapesKeyExistsAlwaysTrue = 4249
+    ShapesKeyExistsAlwaysFalse = 4250
   |}]

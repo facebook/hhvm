@@ -161,6 +161,7 @@ let parse_options () =
   let allow_array_as_tuple = ref false in
   let hacksperimental = ref false in
   let void_is_type_of_null = ref false in
+  let enable_shape_field_check = ref false in
   let parser = ref Legacy in
   let options = [
     "--ai",
@@ -324,6 +325,11 @@ let parse_options () =
     "--void-is-type-of-null",
         Arg.Set void_is_type_of_null,
         " Make void the type of null";
+    "--enable-shape-field-check",
+        Arg.Set enable_shape_field_check,
+        " Enable extra shape field checks, e.g., if a Shapes::keyExist() \
+        test will always succeed or fail, or if Shapes::idx() is used to \
+        access a field known to not exist in a given shape";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -356,6 +362,8 @@ let parse_options () =
         then !hacksperimental
         else if x = GlobalOptions.tco_experimental_void_is_type_of_null
         then !void_is_type_of_null
+        else if x = GlobalOptions.tco_experimental_shape_field_check
+        then !enable_shape_field_check
         else true
       end tcopt.GlobalOptions.tco_experimental_features;
   } in

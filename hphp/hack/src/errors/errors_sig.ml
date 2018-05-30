@@ -377,8 +377,6 @@ module type S = sig
     -> (Pos.t * string) list -> unit
   val comparison_invalid_types : Pos.t -> (Pos.t * string) list
     -> (Pos.t * string) list -> unit
-  val instanceof_always_false : Pos.t -> unit
-  val instanceof_always_true : Pos.t -> unit
   val instanceof_generic_classname : Pos.t -> string -> unit
   val final_property : Pos.t -> unit
   val pass_by_ref_annotation_missing : Pos.t -> Pos.t -> unit
@@ -541,4 +539,6 @@ module type S = sig
   val return_void_to_rx_mismatch: pos1_has_attribute:bool -> Pos.t -> Pos.t -> unit
   val returns_void_to_rx_function_as_non_expression_statement: Pos.t -> Pos.t -> unit
   val non_awaited_awaitable_in_rx: Pos.t -> unit
+  val shapes_key_exists_always_true: Pos.t -> string -> Pos.t -> unit
+  val shapes_key_exists_always_false: Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
 end

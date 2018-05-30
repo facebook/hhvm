@@ -2437,14 +2437,6 @@ let abstract_concrete_override pos parent_pos kind =
     parent_pos, "Previously defined here"
   ])
 
-let instanceof_always_false pos =
-  add (Typing.err_code Typing.InstanceofAlwaysFalse) pos
-    "This 'instanceof' test will never succeed"
-
-let instanceof_always_true pos =
-  add (Typing.err_code Typing.InstanceofAlwaysTrue) pos
-    "This 'instanceof' test will always succeed"
-
 let instanceof_generic_classname pos name =
   add (Typing.err_code Typing.InstanceofGenericClassname) pos
     ("'instanceof' cannot be used on 'classname<" ^ name ^ ">' because '" ^
@@ -2998,6 +2990,22 @@ let non_awaited_awaitable_in_rx pos =
     "This value has Awaitable type. Awaitable typed values in reactive code \
     must be either immediately await'ed or passed as arguments to 'genva' function."
   )
+
+let shapes_key_exists_always_true pos1 name pos2 =
+  add_list (Typing.err_code Typing.ShapesKeyExistsAlwaysTrue) [
+    pos1, "This Shapes::keyExists() check is always true";
+    pos2, "The field '" ^ name ^ "' exists because of this definition"
+  ]
+
+let shapes_key_exists_always_false pos1 name pos2 reason =
+  add_list (Typing.err_code Typing.ShapesKeyExistsAlwaysFalse) [
+    pos1, "This Shapes::keyExists() check is always false";
+    pos2, match reason with
+      | `Undefined ->
+        "The field '" ^ name ^ "' is not defined in this shape"
+      | `Unset ->
+        "The field '" ^ name ^ "' was unset here"
+  ]
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

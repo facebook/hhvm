@@ -31,3 +31,5 @@ val pop_errors :
   t ->
   global_errors:Errors.t ->
   t * (Pos.absolute Errors.error_ list) SMap.t
+
+val get_pushed_error_length : t -> bool * int

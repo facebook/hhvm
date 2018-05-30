@@ -577,6 +577,7 @@ and incremental_update_map ~old ~new_ ~rechecked phase =
 and empty = (Relative_path.Map.empty, Relative_path.Map.empty)
 and is_empty (err, _fixmes) = Relative_path.Map.is_empty err
 
+and count (err, _fixmes) = files_t_fold err ~f:(fun _ _ x acc -> acc + List.length x) ~init:0
 and get_error_list (err, _fixmes) = files_t_to_list err
 and get_applied_fixmes (_err, fixmes) = files_t_to_list fixmes
 and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)

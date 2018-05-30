@@ -421,6 +421,7 @@ module type S = sig
 
   val empty : t
   val is_empty : t -> bool
+  val count : t -> int
   val get_error_list : t -> error list
   val get_sorted_error_list : t -> error list
   val from_error_list : error list -> t

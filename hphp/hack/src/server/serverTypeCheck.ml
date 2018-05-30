@@ -857,8 +857,14 @@ let type_check_unsafe genv env kind =
       ServerBusyStatus.send env
         (ServerCommandTypes.Doing_global_typecheck env.can_interrupt);
       let (env, _) as res = FC.type_check_core genv env in
-      if env.full_check = Full_check_done then
-        ServerBusyStatus.send env ServerCommandTypes.Done_global_typecheck;
+      if env.full_check = Full_check_done then begin
+        let total = Errors.count env.ServerEnv.errorl in
+        let is_truncated, shown = match env.ServerEnv.diag_subscribe with
+          | None -> false, 0
+          | Some ds -> Diagnostic_subscription.get_pushed_error_length ds in
+        let msg = ServerCommandTypes.Done_global_typecheck {is_truncated; shown; total} in
+        ServerBusyStatus.send env msg
+      end;
       res
   end
 

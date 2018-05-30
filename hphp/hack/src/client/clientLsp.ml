@@ -287,7 +287,7 @@ let update_hh_server_state_if_necessary (event: event) : unit =
   let helper push = match push with
     | BUSY_STATUS Needs_local_typecheck
     | BUSY_STATUS Done_local_typecheck
-    | BUSY_STATUS Done_global_typecheck -> set_hh_server_state Hh_server_handling_or_ready
+    | BUSY_STATUS (Done_global_typecheck _) -> set_hh_server_state Hh_server_handling_or_ready
     | BUSY_STATUS Doing_local_typecheck -> set_hh_server_state Hh_server_typechecking_local
     | BUSY_STATUS Doing_global_typecheck can_interrupt -> set_hh_server_state
       (if can_interrupt then Hh_server_typechecking_global_interruptible
@@ -1247,7 +1247,7 @@ let do_server_busy (state: state) (status: ServerCommandTypes.busy_status) : sta
     | Done_local_typecheck -> (None, Some "Hack: save any file to do a whole-program check")
     | Doing_global_typecheck true -> (Some "Hack: checking entire project (interruptible)", None)
     | Doing_global_typecheck false -> (Some "Hack: checking entire project (blocking)", None)
-    | Done_global_typecheck -> (None, None)
+    | Done_global_typecheck _ -> (None, None)
   in
   (* Following code is subtle. Thanks to the magic of the notify_ functions,  *)
   (* it will either create a new progress/action notification, or update an   *)

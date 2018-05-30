@@ -45,6 +45,7 @@ type t = {
   (* Union of all values in local_errors *)
   sources : Relative_path.Set.t;
   has_new_errors : bool;
+  is_truncated : bool; (* was 'local_errors' truncated with respect to all the errors? *)
 }
 
 let filter_filter map_map ~f  =
@@ -127,28 +128,30 @@ let update ds
 
   (* If we've done a full check, that it's safe to look through all of the
    * errors in global_errors, no only those that were just rechecked *)
-  let local_errors = if not full_check_done then local_errors else begin
+  let is_truncated, local_errors = if not full_check_done then
+    false, local_errors
+  else begin
     Errors.fold_errors global_errors
-      ~init:local_errors
-      ~f:begin fun source e acc ->
+      ~init:(false, local_errors)
+      ~f:begin fun source e (is_truncated, acc) ->
         let file = error_filename e in
         match RP.Map.get acc file with
         | Some sources ->
           (* Add a source to already tracked file *)
-          RP.Map.add acc file (RP.Set.add sources source)
+          is_truncated, RP.Map.add acc file (RP.Set.add sources source)
         | None when (RP.Map.cardinal acc < errors_limit) ->
           (* not an IDE-relevant file, but we still have room for it *)
-          RP.Map.add acc file (RP.Set.singleton source)
+          is_truncated, RP.Map.add acc file (RP.Set.singleton source)
         | None ->
           (* we're at error limit, ignore *)
-          acc
+          true, acc
       end
   end in
   let sources = RP.Map.fold local_errors
     ~init:RP.Set.empty
     ~f:(fun _ x acc  -> RP.Set.union acc x)
   in
-  { ds with local_errors; has_new_errors = true; sources }
+  { ds with local_errors; has_new_errors = true; is_truncated; sources }
 
 let of_id ~id ~init =
   let res = {
@@ -157,6 +160,7 @@ let of_id ~id ~init =
     pushed_errors = RP.Map.empty;
     sources = RP.Set.empty;
     has_new_errors = false;
+    is_truncated = false;
   } in
   update res
     ~priority_files:Relative_path.Set.empty
@@ -198,3 +202,8 @@ let pop_errors ds ~global_errors =
       (Relative_path.to_absolute path) (List.map el ~f:Errors.to_absolute)
   end in
   { ds with pushed_errors = new_pushed_errors; has_new_errors = false }, results
+
+let get_pushed_error_length ds =
+  let length =  RP.Map.fold ds.pushed_errors ~init:0
+    ~f:(fun _rp errors acc -> acc + List.length errors) in
+  ds.is_truncated, length

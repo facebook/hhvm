@@ -1,0 +1,2 @@
+File "immutable_catch_scope_3.php", line 14, characters 10-10:
+Unbound name: a (a global constant) (Naming[2049])

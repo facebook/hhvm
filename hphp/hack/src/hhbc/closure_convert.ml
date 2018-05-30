@@ -18,6 +18,9 @@ module SU = Hhbc_string_utils
 let constant_folding () =
   Hhbc_options.constant_folding !Hhbc_options.compiler_options
 
+let hacksperimental () =
+  Hhbc_options.hacksperimental !Hhbc_options.compiler_options
+
 type convert_result = {
   ast_defs: (bool * Ast.def) list;
   global_state: Emit_env.global_state;
@@ -900,9 +903,10 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
   | Foreach (e, p_opt, ae, b) ->
     if p_opt <> None then check_if_in_async_context env;
     let st, e = convert_expr env st e in
+    let let_vars_copy = st.let_vars in
     let st, ae = convert_as_expr env st ae in
     let st, b = convert_block env st b in
-    st, (p, Foreach (e, p_opt, ae, b))
+    { st with let_vars = let_vars_copy } , (p, Foreach (e, p_opt, ae, b))
   | Try (b1, cl, b2) ->
     let st, b1 = convert_block env st b1 in
     let st, cl = List.map_env st cl (convert_catch env) in
@@ -984,9 +988,20 @@ and convert_function_like_body env old_st block =
   let st = { st with current_function_state = old_st.current_function_state } in
   st, r, function_state
 
-and convert_catch env st (id1, id2, b) =
+and convert_catch env st (ty, (p, catch_var), b) =
+  let let_vars_copy = st.let_vars in
+  (* hacksperimental feature:
+     variables with name not beginning with dollar are treated as immutable *)
+  let st, catch_var = if catch_var.[0] = '$' || not (hacksperimental ())
+    then
+      st, catch_var
+    else
+      let id, st = update_let_var_id st catch_var in
+      let var_name = transform_let_var_name catch_var id in
+      st, var_name
+  in
   let st, b = convert_block env st b in
-  st, (id1, id2, b)
+  { st with let_vars = let_vars_copy }, (ty, (p, catch_var), b)
 
 and convert_case env st case =
   match case with
@@ -999,6 +1014,13 @@ and convert_case env st case =
     st, Case (e, b)
 
 and convert_as_expr env st aexpr =
+  let convert_expr env st e = match e with
+    | p1, Id (p2, var) when hacksperimental () ->
+      let id, st = update_let_var_id st var in
+      let var_name = transform_let_var_name var id in
+      st, (p1, Lvar (p2, var_name))
+    | _ -> convert_expr env st e
+  in
   match aexpr with
   | As_v e ->
     let st, e = convert_expr env st e in

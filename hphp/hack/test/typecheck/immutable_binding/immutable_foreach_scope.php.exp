@@ -1,0 +1,2 @@
+File "immutable_foreach_scope.php", line 8, characters 8-13:
+Unbound name: number (a global constant) (Naming[2049])

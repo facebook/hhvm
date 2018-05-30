@@ -765,6 +765,10 @@ end
  * phase.
  *)
 module Make (GetLocals : GetLocals) = struct
+  let hacksperimental (genv, _) =
+    let tcopt = genv.tcopt in
+    TypecheckerOptions.experimental_feature_enabled tcopt
+      GlobalOptions.tco_hacksperimental
 
   (************************************************************************)
   (* Naming of type hints *)
@@ -1991,33 +1995,47 @@ module Make (GetLocals : GetLocals) = struct
       N.Foreach (e, ae, b)
     end
 
-  and as_expr env aw = function
+  and as_expr env aw =
+    let handle_v ev = match ev with
+    | p, Id x when hacksperimental env ->
+      let x = Env.new_let_local env x in
+      let ev = (p, N.ImmutableVar x) in
+      ev
+    | p, Id _ ->
+      Errors.expected_variable p;
+      p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder"))
+    | ev ->
+      let nsenv = (fst env).namespace in
+      let _, vars =
+        GetLocals.lvalue (fst env).tcopt (nsenv, SMap.empty) ev in
+      SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
+      let ev = expr env ev in
+      ev
+    in
+    let handle_k ek = match ek with
+    | p, Lvar x ->
+      p, N.Lvar (Env.new_lvar env x)
+    | p, Id x when hacksperimental env ->
+        p, N.ImmutableVar (Env.new_let_local env x)
+    | p, _ ->
+      Errors.expected_variable p;
+      p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder"))
+    in
+    begin function
     | As_v ev ->
-      let nsenv = (fst env).namespace in
-      let _, vars =
-        GetLocals.lvalue (fst env).tcopt (nsenv, SMap.empty) ev in
-      SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
-      let ev = expr env ev in
-      (match aw with
-        | None -> N.As_v ev
-        | Some p -> N.Await_as_v (p, ev))
-    | As_kv ((p1, Lvar k), ev) ->
-      let k = p1, N.Lvar (Env.new_lvar env k) in
-      let nsenv = (fst env).namespace in
-      let _, vars =
-        GetLocals.lvalue (fst env).tcopt (nsenv, SMap.empty) ev in
-      SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
-      let ev = expr env ev in
-      (match aw with
+      let ev = handle_v ev in
+      begin match aw with
+      | None -> N.As_v ev
+      | Some p -> N.Await_as_v (p, ev)
+      end (* match *)
+    | As_kv (k, ev) ->
+      let k = handle_k k in
+      let ev = handle_v ev in
+      begin match aw with
         | None -> N.As_kv (k, ev)
-        | Some p -> N.Await_as_kv (p, k, ev))
-    | As_kv ((p, _), _) ->
-        Errors.expected_variable p;
-        let x1 = p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")) in
-        let x2 = p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")) in
-        (match aw with
-          | None -> N.As_kv (x1, x2)
-          | Some p -> N.Await_as_kv (p, x1, x2))
+        | Some p -> N.Await_as_kv (p, k, ev)
+      end (* match *)
+    end (* function *)
 
   and try_stmt env st b cl fb =
     let nsenv = (fst env).namespace in
@@ -2662,7 +2680,11 @@ module Make (GetLocals : GetLocals) = struct
   and catch env acc (x1, x2, b) =
     Env.scope env (
     fun env ->
-      let x2 = Env.new_lvar env x2 in
+      (* If the variable does not begin with $, it is an immutable binding *)
+      let x2 = if (snd x2).[0] = '$' (* This is always true if hacksperimental is off *)
+        then Env.new_lvar env x2
+        else Env.new_let_local env x2
+      in
       let all_locals, b = branch env b in
       all_locals :: acc, (Env.type_name env x1 ~allow_typedef:true, x2, b)
     )

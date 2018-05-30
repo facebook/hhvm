@@ -1082,10 +1082,12 @@ and bind_as_expr env loop_ty ty aexpr =
     | Await_as_v (p, ev) ->
       let env, te, _ = assign p env ev ty2 in
       env, T.Await_as_v(p, te)
+    | As_kv ((p, ImmutableVar ((_, k) as id)), ev)
     | As_kv ((p, Lvar ((_, k) as id)), ev) ->
       let env, ty1' = set_valid_rvalue p env k ty1 in
       let env, te, _ = assign p env ev ty2 in
       env, T.As_kv(T.make_typed_expr p ty1' (T.Lvar id), te)
+    | Await_as_kv (p, (p1, ImmutableVar ((_, k) as id)), ev)
     | Await_as_kv (p, (p1, Lvar ((_, k) as id)), ev) ->
       let env, ty1' = set_valid_rvalue p env k ty1 in
       let env, te, _ = assign p env ev ty2 in

@@ -90,14 +90,18 @@ let print_type: type a. a ty_ -> string = function
 
 let validate_hint env hint op =
   let hint_ty = Env.hint_to_ty env hint in
+  let should_suppress = ref false in
   let validate_type env ty =
     let state = visitor#on_type {env = env; validity = Valid} ty in
     match state.validity with
       | Invalid (r, ty_) ->
-        Errors.invalid_is_as_expression_hint
-          op (fst hint) (Reason.to_pos r) (print_type ty_)
+        if not !should_suppress
+        then Errors.invalid_is_as_expression_hint
+          op (fst hint) (Reason.to_pos r) (print_type ty_);
+        should_suppress := true
       | Partial (r, ty_) ->
-        Errors.partially_valid_is_as_expression_hint
+        if not !should_suppress
+        then Errors.partially_valid_is_as_expression_hint
           op (fst hint) (Reason.to_pos r) (print_type ty_)
       | Valid -> ()
   in

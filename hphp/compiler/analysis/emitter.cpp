@@ -1376,7 +1376,6 @@ public:
   void unregisterControlTarget(ControlTarget* t);
 
   void registerReturn(StatementPtr s, Region* entry, char sym);
-  void registerYieldAwait(ExpressionPtr e);
   ControlTargetPtr registerBreak(StatementPtr s, Region* entry, int depth,
                                  bool alloc);
   ControlTargetPtr registerContinue(StatementPtr s, Region* entry, int depth,
@@ -2709,16 +2708,6 @@ EmitterVisitor::registerGoto(StatementPtr /*s*/, Region* region,
     r->m_gotoTargets[name] = ControlTargetInfo(t, alloc && r->isTryFinally());
   }
   return t;
-}
-
-void EmitterVisitor::registerYieldAwait(ExpressionPtr e) {
-  Region* region = m_regions.back().get();
-  for (; region; region = region->m_parent.get()) {
-    if (region->isFinally()) {
-      throw EmitterVisitor::IncludeTimeFatalException(e,
-              "Yield expression inside a finally block is not supported");
-    }
-  }
 }
 
 ControlTargetPtr
@@ -6922,7 +6911,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   case Construct::KindOfYieldExpression: {
     auto y = static_pointer_cast<YieldExpression>(node);
 
-    registerYieldAwait(y);
     assert(m_evalStack.size() == 0);
     assert(m_evalStack.clsRefSlotStackEmpty());
 
@@ -6954,7 +6942,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   case Construct::KindOfYieldFromExpression: {
     auto yf = static_pointer_cast<YieldFromExpression>(node);
 
-    registerYieldAwait(yf);
     assert(m_evalStack.size() == 0);
     assert(m_evalStack.clsRefSlotStackEmpty());
 
@@ -6965,7 +6952,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   case Construct::KindOfAwaitExpression: {
     auto await = static_pointer_cast<AwaitExpression>(node);
 
-    registerYieldAwait(await);
     assert(m_evalStack.size() == 0);
     assert(m_evalStack.clsRefSlotStackEmpty());
 

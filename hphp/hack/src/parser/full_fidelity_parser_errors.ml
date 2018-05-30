@@ -1395,18 +1395,6 @@ let is_in_unyieldable_magic_method parents =
     | _ -> SSet.mem s SN.Members.as_lowercase_set
     end
 
-let is_in_finally_block ~stop_on_lambda parents =
-  let n =
-    Hh_core.List.find parents ~f:(fun node ->
-      match syntax node with
-      | FinallyClause _ -> true
-      | AnonymousFunction _
-      | Php7AnonymousFunction _
-      | LambdaExpression _
-      | AwaitableCreationExpression _ when stop_on_lambda -> true
-      | _ -> false) in
-  Option.value_map n ~default:false ~f:Syntax.is_finally_clause
-
 let is_in_function parents =
   Hh_core.List.exists parents ~f:begin fun node ->
     match syntax node with
@@ -1562,11 +1550,6 @@ let expression_errors env node parents errors =
       make_error_from_node node SyntaxError.yield_in_magic_methods :: errors
       else errors in
     let errors =
-      if is_in_finally_block ~stop_on_lambda:true parents then
-      make_error_from_node ~error_type:SyntaxError.RuntimeError
-        node SyntaxError.yield_in_finally_block :: errors
-      else errors in
-    let errors =
       if not (is_in_function parents) then
       make_error_from_node node SyntaxError.yield_outside_function :: errors
       else errors in
@@ -1620,11 +1603,6 @@ let expression_errors env node parents errors =
           SyntaxError.reference_to_static_scope_resolution :: errors
       | _ -> errors
     end
-  | PrefixUnaryExpression { prefix_unary_operator; _ }
-    when token_kind prefix_unary_operator = Some TokenKind.Await
-      && is_in_finally_block ~stop_on_lambda:true parents ->
-    make_error_from_node ~error_type:SyntaxError.RuntimeError
-      node SyntaxError.await_in_finally_block :: errors
   (* TODO(T21285960): Remove this bug-port, stemming from T22184312 *)
   | LambdaExpression { lambda_async; lambda_coroutine; lambda_signature; _ }
     when is_hhvm_compat env

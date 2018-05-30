@@ -315,8 +315,6 @@ let reference_not_allowed_on_value = "Value of collection element cannot " ^
   "be marked as reference"
 let reference_not_allowed_on_element = "Collection element cannot " ^
   "be marked as reference"
-let yield_in_finally_block =
-  "Yield expression inside a finally block is not supported"
 let yield_outside_function =
   "Yield can only be used inside a function"
 
@@ -421,9 +419,6 @@ let namespace_not_a_classname =
 
 let missing_double_quote = (* error0010 analogue *)
   "A double quote is expected here."
-
-let await_in_finally_block =
-  "Await inside a finally block is not supported"
 
 let for_with_as_expression =
   "For loops can not use as-expressions. Did you mean foreach?"

@@ -44,6 +44,11 @@ type check_kind =
    * disk updates and typechecks the full fanout of accumulated changes. *)
   | Full_check
 
+type check_results = {
+  reparse_count: int;
+  total_rechecked_count: int;
+}
+
 (*****************************************************************************)
 (* Debugging *)
 (*****************************************************************************)
@@ -584,7 +589,7 @@ module Make: functor(CheckKind:CheckKindType) -> sig
   val type_check_core :
     ServerEnv.genv ->
     ServerEnv.env ->
-    ServerEnv.env * int * int
+    ServerEnv.env * check_results
 end = functor(CheckKind:CheckKindType) -> struct
 
   let get_defs fast =
@@ -824,7 +829,7 @@ end = functor(CheckKind:CheckKindType) -> struct
       diag_subscribe
     in
 
-    new_env, reparse_count, total_rechecked_count
+    new_env, {reparse_count; total_rechecked_count;}
 end
 
 let check_kind_to_string = function
@@ -851,7 +856,7 @@ let type_check_unsafe genv env kind =
     | Full_check ->
       ServerBusyStatus.send env
         (ServerCommandTypes.Doing_global_typecheck env.can_interrupt);
-      let (env, _, _) as res = FC.type_check_core genv env in
+      let (env, _) as res = FC.type_check_core genv env in
       if env.full_check = Full_check_done then
         ServerBusyStatus.send env ServerCommandTypes.Done_global_typecheck;
       res

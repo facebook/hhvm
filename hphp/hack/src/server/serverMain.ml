@@ -236,15 +236,14 @@ let handle_connection genv env client client_kind =
 let recheck genv old_env check_kind =
   let can_interrupt = check_kind = ServerTypeCheck.Full_check in
   let old_env = { old_env with can_interrupt } in
-  let new_env, to_recheck, total_rechecked =
-    ServerTypeCheck.check genv old_env check_kind in
+  let new_env, res = ServerTypeCheck.check genv old_env check_kind in
   let new_env = { new_env with can_interrupt = true } in
   if old_env.init_env.needs_full_init &&
       not new_env.init_env.needs_full_init then
         finalize_init genv new_env.init_env;
   ServerStamp.touch_stamp_errors (Errors.get_error_list old_env.errorl)
                                  (Errors.get_error_list new_env.errorl);
-  new_env, to_recheck, total_rechecked
+  new_env, res
 
 let query_notifier genv env query_kind t =
   let open ServerNotifierTypes in
@@ -350,13 +349,13 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
       then ServerTypeCheck.Lazy_check
       else ServerTypeCheck.Full_check
     in
-    let env, rechecked, total_rechecked = recheck genv env check_kind in
+    let env, res = recheck genv env check_kind in
 
     let acc = {
       updates_stale = acc.updates_stale;
       rechecked_batches = acc.rechecked_batches + 1;
-      rechecked_count = acc.rechecked_count + rechecked;
-      total_rechecked_count = acc.total_rechecked_count + total_rechecked;
+      rechecked_count = acc.rechecked_count + res.ServerTypeCheck.reparse_count;
+      total_rechecked_count = acc.total_rechecked_count + res.ServerTypeCheck.total_rechecked_count;
     } in
     (* Avoid batching ide rechecks with disk rechecks - there might be
       * other ide edits to process first and we want to give the main loop

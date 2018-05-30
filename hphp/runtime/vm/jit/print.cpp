@@ -542,6 +542,10 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
   BCMarker curMarker;
   static bool dotBodies = getenv("HHIR_DOT_BODIES");
 
+  os << "TransKind: " << show(unit.context().kind) << "\n";
+  if (unit.context().kind == TransKind::Optimize) {
+    os << "OptIndex : " << unit.context().optIndex << "\n";
+  }
   auto blocks = rpoSortCfg(unit);
   // Partition into main, cold and frozen, without changing relative order.
   auto cold = std::stable_partition(blocks.begin(), blocks.end(),

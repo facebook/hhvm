@@ -25,8 +25,9 @@ namespace HPHP { namespace jit {
 
 inline TransContext::TransContext(
   TransID id, TransKind kind, TransFlags flags,
-  SrcKey sk, FPInvOffset spOff, Op fpushOff)
+  SrcKey sk, FPInvOffset spOff, int optIndex, Op fpushOff)
   : transID(id)
+  , optIndex(optIndex)
   , kind(kind)
   , flags(flags)
   , initSpOffset(spOff)

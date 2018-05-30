@@ -320,6 +320,9 @@ void logTranslation(const TransEnv& env, const TransRange& range) {
   if (context.func) {
     cols.setStr("func", context.func->fullName()->data());
   }
+  if (context.kind == TransKind::Optimize) {
+    cols.setInt("opt_index", context.optIndex);
+  }
   cols.setInt("jit_sample_rate", RuntimeOption::EvalJitSampleRate);
   // timing info
   cols.setInt("jit_micros", nanos / 1000);

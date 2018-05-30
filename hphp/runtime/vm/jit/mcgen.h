@@ -47,6 +47,10 @@ struct TransArgs {
   Annotations annotations;
   TransFlags flags{0};
   TransID transId{kInvalidTransID};
+  // A sequential per function index to identify optimized
+  // translations in TRACE and StructuredLog output (in particular to
+  // make it possible to cross reference between the two).
+  int optIndex{0};
   TransKind kind{TransKind::Invalid};
   RegionDescPtr region{nullptr};
 };

@@ -85,6 +85,7 @@ void optimize(tc::FuncMetaInfo& info) {
   auto const regions = includedBody ? std::vector<RegionDescPtr>{}
                                     : regionizeFunc(func, transCFGAnnot);
 
+  auto optIndex = 0;
   for (auto region : regions) {
     always_assert(!region->empty());
     auto regionSk = region->start();
@@ -94,6 +95,7 @@ void optimize(tc::FuncMetaInfo& info) {
     }
     transArgs.region = region;
     transArgs.kind = TransKind::Optimize;
+    transArgs.optIndex = optIndex++;
 
     auto const spOff = region->entry()->initialSpOffset();
     tc::createSrcRec(regionSk, spOff);
@@ -467,7 +469,7 @@ translate(TransArgs args, FPInvOffset spOff,
     }
     auto const transContext =
       TransContext{env.transID, args.kind, args.flags, args.sk,
-                   env.initSpOffset};
+                   env.initSpOffset, args.optIndex};
 
     env.unit = irGenRegion(*args.region, transContext,
                            env.pconds, env.annotations);

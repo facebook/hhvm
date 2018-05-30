@@ -71,7 +71,8 @@ struct Env {
     , blockFinished(false)
     // TODO(#5703534): this is using a different TransContext than actual
     // translation will use.
-    , unit(TransContext{kInvalidTransID, kind, TransFlags{}, sk, ctx.spOffset})
+    , unit(TransContext{kInvalidTransID, kind, TransFlags{},
+                        sk, ctx.spOffset, 0})
     , irgs(unit, nullptr)
     , arStates(1)
     , numJmps(0)

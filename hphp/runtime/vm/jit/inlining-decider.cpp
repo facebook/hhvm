@@ -353,6 +353,7 @@ Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
     // We can pretend the stack is empty, but we at least need to account for
     // the locals, iters, and slots, etc.
     FPInvOffset{at.func()->numSlotsInFrame()},
+    0,
     callerFPushOp
   };
 

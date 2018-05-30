@@ -78,6 +78,11 @@ end
     Intended to be used with {!iter_with} to aggregate many checks into a
     single pass over a TAST. *)
 class type handler = object
+  method at_fun_ : Env.t -> Tast.fun_ -> unit
+  method at_class_ : Env.t -> Tast.class_ -> unit
+  method at_typedef : Env.t -> Tast.typedef -> unit
+  method at_gconst : Env.t -> Tast.gconst -> unit
+
   method at_expr : Env.t -> Tast.expr -> unit
   method at_stmt : Env.t -> Tast.stmt -> unit
 end
@@ -85,6 +90,11 @@ end
 (** A {!handler} which does not need to make use of every visitation method can
     inherit from this no-op base class. *)
 class virtual handler_base : handler = object
+  method at_fun_ _ _ = ()
+  method at_class_ _ _ = ()
+  method at_typedef _ _ = ()
+  method at_gconst _ _ = ()
+
   method at_expr _ _ = ()
   method at_stmt _ _ = ()
 end
@@ -93,6 +103,22 @@ end
     visiting each node. *)
 let iter_with (handlers : handler list) : iter = object
   inherit iter as super
+
+  method! on_fun_ env x =
+    List.iter handlers (fun v -> v#at_fun_ env x);
+    super#on_fun_ env x;
+
+  method! on_class_ env x =
+    List.iter handlers (fun v -> v#at_class_ env x);
+    super#on_class_ env x;
+
+  method! on_typedef env x =
+    List.iter handlers (fun v -> v#at_typedef env x);
+    super#on_typedef env x;
+
+  method! on_gconst env x =
+    List.iter handlers (fun v -> v#at_gconst env x);
+    super#on_gconst env x;
 
   method! on_expr env x =
     List.iter handlers (fun v -> v#at_expr env x);

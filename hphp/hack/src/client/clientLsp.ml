@@ -538,7 +538,14 @@ let lsp_range_to_ide (range: Lsp.range) : Ide_api_types.range =
     ed = lsp_position_to_ide range.end_;
   }
 
-let hack_symbol_definition_to_lsp_location
+let hack_symbol_definition_to_lsp_construct_location
+    (symbol: string SymbolDefinition.t)
+    ~(default_path: string)
+  : Lsp.Location.t =
+  let open SymbolDefinition in
+  hack_pos_to_lsp_location symbol.span ~default_path
+
+let hack_symbol_definition_to_lsp_identifier_location
     (symbol: string SymbolDefinition.t)
     ~(default_path: string)
   : Lsp.Location.t =
@@ -791,7 +798,8 @@ let do_definition (conn: server_conn) (ref_unblocked_time: float ref) (params: D
     | [] -> []
     | (_occurrence, None) :: l -> hack_to_lsp l
     | (_occurrence, Some definition) :: l ->
-      (hack_symbol_definition_to_lsp_location definition ~default_path:file) :: (hack_to_lsp l)
+      (hack_symbol_definition_to_lsp_identifier_location definition ~default_path:file)
+        :: (hack_to_lsp l)
   in
   hack_to_lsp filtered_results
 
@@ -1039,7 +1047,7 @@ let do_documentSymbol
     { SymbolInformation.
       name = definition.name;
       kind = hack_to_lsp_kind definition.kind;
-      location = hack_symbol_definition_to_lsp_location definition ~default_path:filename;
+      location = hack_symbol_definition_to_lsp_construct_location definition ~default_path:filename;
       containerName;
     }
   in

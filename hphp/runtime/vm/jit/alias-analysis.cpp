@@ -586,12 +586,22 @@ std::string show(ALocBits bits) {
 
 std::string show(const AliasAnalysis& ainfo) {
   auto ret = std::string{};
+  std::vector<const decltype(ainfo.locations)::value_type*> sorted;
+  sorted.reserve(ainfo.locations.size());
   for (auto& kv : ainfo.locations) {
-    auto conf = kv.second.conflicts;
-    conf.set(kv.second.index);
+    sorted.push_back(&kv);
+  }
+  std::sort(sorted.begin(), sorted.end(),
+            [](auto const* a, auto const* b) {
+              return a->second.index < b->second.index;
+            });
+
+  for (auto const* kv : sorted) {
+    auto conf = kv->second.conflicts;
+    conf.set(kv->second.index);
     folly::format(&ret, " {: <20} = {: >3} : {}\n",
-      show(kv.first),
-      kv.second.index,
+      show(kv->first),
+      kv->second.index,
       show(conf));
   }
   folly::format(&ret, " {: <20}       : {}\n"

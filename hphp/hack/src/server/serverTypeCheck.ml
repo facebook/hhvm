@@ -581,7 +581,7 @@ module LazyCheckKind : CheckKindType = struct
 end
 
 module Make: functor(CheckKind:CheckKindType) -> sig
-  val type_check :
+  val type_check_core :
     ServerEnv.genv ->
     ServerEnv.env ->
     ServerEnv.env * int * int
@@ -615,7 +615,7 @@ end = functor(CheckKind:CheckKindType) -> struct
         end
     end
 
-  let type_check genv env =
+  let type_check_core genv env =
     let env = if CheckKind.is_full
       then { env with full_check = Full_check_started } else env in
     let start_t = Unix.gettimeofday () in
@@ -834,7 +834,7 @@ let check_kind_to_string = function
 module FC = Make(FullCheckKind)
 module LC = Make(LazyCheckKind)
 
-let type_check genv env kind =
+let type_check_unsafe genv env kind =
   (match kind with
   | Lazy_check -> HackEventLogger.set_lazy_incremental ()
   | Full_check -> ());
@@ -845,13 +845,13 @@ let type_check genv env kind =
     match kind with
     | Lazy_check ->
       ServerBusyStatus.send env ServerCommandTypes.Doing_local_typecheck;
-      let res = LC.type_check genv env in
+      let res = LC.type_check_core genv env in
       ServerBusyStatus.send env ServerCommandTypes.Done_local_typecheck;
       res
     | Full_check ->
       ServerBusyStatus.send env
         (ServerCommandTypes.Doing_global_typecheck env.can_interrupt);
-      let (env, _, _) as res = FC.type_check genv env in
+      let (env, _, _) as res = FC.type_check_core genv env in
       if env.full_check = Full_check_done then
         ServerBusyStatus.send env ServerCommandTypes.Done_global_typecheck;
       res
@@ -859,7 +859,7 @@ let type_check genv env kind =
 
 let type_check genv env kind =
   ServerUtils.with_exit_on_exception @@ fun () ->
-  type_check genv env kind
+  type_check_unsafe genv env kind
 
 (*****************************************************************************)
 (* Checks that the working directory is clean *)

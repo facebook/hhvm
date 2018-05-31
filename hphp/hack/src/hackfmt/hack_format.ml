@@ -1365,8 +1365,51 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       binary_left_operand;
       binary_operator;
       binary_right_operand; } ->
-    transform_binary_expression env ~is_nested:false
-      (binary_left_operand, binary_operator, binary_right_operand)
+    let open Syntax in
+    begin
+      match syntax binary_left_operand, syntax binary_right_operand with
+      | ListExpression {
+          list_keyword;
+          list_left_paren;
+          list_members;
+          list_right_paren;
+        },
+        PrefixUnaryExpression {
+          prefix_unary_operator = {
+            syntax = Token {Token.kind = TokenKind.Await; _}; _
+          } as await_keyword;
+          prefix_unary_operand = {
+            syntax = FunctionCallExpression {
+              function_call_receiver = {
+                syntax = Token {Token.kind = TokenKind.Name; text = "genva"; _}; _
+              } as genva_token;
+              function_call_left_paren;
+              function_call_right_paren;
+              function_call_argument_list;
+            }; _
+          };
+        } ->
+        Concat [
+          t env list_keyword;
+          WithRule (Rule.Parental,
+          Concat [
+            t env list_left_paren;
+            nest env list_right_paren [transform_arg_list env list_members];
+            Space;
+            t env binary_operator;
+            Space;
+            t env await_keyword;
+            Space;
+            t env genva_token;
+            t env function_call_left_paren;
+            nest env function_call_right_paren
+              [transform_arg_list env function_call_argument_list];
+          ])
+        ]
+      | _ ->
+        transform_binary_expression env ~is_nested:false
+          (binary_left_operand, binary_operator, binary_right_operand)
+    end
   | Syntax.InstanceofExpression {
       instanceof_left_operand = left;
       instanceof_operator = kw;

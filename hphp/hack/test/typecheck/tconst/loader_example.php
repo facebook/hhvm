@@ -34,8 +34,15 @@ class OtherALoader extends Loader {
 }
 
 async function test(): Awaitable<void> {
-  list($a, $b, $o) =
-    await genva(ALoader::gen(), BLoader::gen(), OtherALoader::gen());
+  list(
+    $a,
+    $b,
+    $o,
+  ) = await genva(
+    ALoader::gen(),
+    BLoader::gen(),
+    OtherALoader::gen(),
+  );
 
   $a->set($o);
 }

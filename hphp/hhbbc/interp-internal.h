@@ -368,7 +368,9 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
     auto const func = ar.func->exactFunc();
     if (!func) return false;
     if (func->attrs & AttrTakesInOutParams) return false;
-    if (env.collect.unfoldableFuncs.count(func)) return false;
+    if (env.collect.unfoldableFuncs.count(std::make_pair(func, env.blk.id))) {
+      return false;
+    }
     // Foldable builtins are always worth trying
     if (ar.func->isFoldable()) return true;
     // Any native functions at this point are known to be
@@ -431,7 +433,7 @@ void fpiNotFoldable(ISS& env) {
   assertx(ar.func && ar.foldable);
   auto const func = ar.func->exactFunc();
   assertx(func);
-  env.collect.unfoldableFuncs.emplace(func);
+  env.collect.unfoldableFuncs.emplace(func, ar.pushBlk);
   env.propagate(ar.pushBlk, nullptr);
   ar.foldable = false;
   // we're going to reprocess the whole fpi region; any results we've

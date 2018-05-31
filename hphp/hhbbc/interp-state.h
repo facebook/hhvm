@@ -408,7 +408,8 @@ struct CollectedInfo {
   PropertiesInfo props;
   PublicSPropIndexer* const publicStatics;
   ConstantMap cnsMap;
-  std::unordered_set<borrowed_ptr<const php::Func>> unfoldableFuncs;
+  std::unordered_set<std::pair<borrowed_ptr<const php::Func>, BlockId>>
+    unfoldableFuncs;
   bool mayUseVV{false};
   bool effectFree{true};
   bool hasInvariantIterBase{false};

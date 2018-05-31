@@ -106,10 +106,10 @@ struct FuncAnalysisResult {
   bool hasInvariantIterBase{false};
 
   /*
-   * A set of functions that are called with constant args, but which
-   * are not foldable.
+   * A set of pair of functions and their push blocks that we failed to fold.
    */
-  std::unordered_set<borrowed_ptr<const php::Func>> unfoldableFuncs;
+  std::unordered_set<std::pair<borrowed_ptr<const php::Func>, BlockId>>
+    unfoldableFuncs;
 
   /*
    * Known types of local statics.

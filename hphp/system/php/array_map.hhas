@@ -9,7 +9,7 @@ call_cpp_impl_with_extra:
           FPassL 0 $func Any
           FPassL 1 $arr Any
           FPassL 2 $res Any
-          FPassL 3 $extra Any
+          CGetL $extra
           FCallUnpack 4
           UnboxR
           RetC

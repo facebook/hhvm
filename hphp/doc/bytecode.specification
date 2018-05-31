@@ -2342,7 +2342,7 @@ FCallAwait <num params> <class name> <func name> [F..F] -> [R]
   but may enable the runtime to avoid creating a StaticWaitHandle in the event
   that the called function returns eagerly.
 
-FCallUnpack <num params> [F..F] -> [R]
+FCallUnpack <num params> [F..F] [C:Arr] -> [R]
 
   FPI call with params and array. This instruction gets the bytecode address of
   the function associated with the current FPI (the callee), transfers the top
@@ -2356,7 +2356,7 @@ FCallUnpack <num params> [F..F] -> [R]
 
 FCallM <num params> <num returns> [F..F] -> [C..C]
 FCallDM <num params> <num returns> <class name> <func name> [F..F] -> [C..C]
-FCallUnpackM <num params> <num returns> [F..F] -> [C..C]
+FCallUnpackM <num params> <num returns> [F..F] [C:Arr] -> [C..C]
 
   These "M" variants of FCall behave similarly to FCall, FCallD, and FCallUnpack
   respectively. These instructions must be used iff the callee returns via the

@@ -1509,7 +1509,9 @@ struct OpEmitContext {
 #define COUNT_C_MFINAL 0
 #define COUNT_V_MFINAL 0
 #define COUNT_FMANY 0
+#define COUNT_C_FMANY 0
 #define COUNT_UFMANY 0
+#define COUNT_C_UFMANY 0
 #define COUNT_CVUMANY 0
 #define COUNT_CMANY 0
 #define COUNT_SMANY 0
@@ -1577,8 +1579,15 @@ struct OpEmitContext {
   getEmitterVisitor().popEvalStackMMany()
 #define POP_FMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
+#define POP_C_FMANY \
+  getEmitterVisitor().popEvalStack(StackSym::C); \
+  getEmitterVisitor().popEvalStackMany(a1 - 1, StackSym::F)
 #define POP_UFMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::F); \
+  getEmitterVisitor().popEvalStackMany(a2 - 1, StackSym::C)
+#define POP_C_UFMANY \
+  getEmitterVisitor().popEvalStack(StackSym::C); \
+  getEmitterVisitor().popEvalStackMany(a1 - 1, StackSym::F); \
   getEmitterVisitor().popEvalStackMany(a2 - 1, StackSym::C)
 #define POP_CVUMANY \
   getEmitterVisitor().popEvalStackCVMany(a1)
@@ -2012,7 +2021,9 @@ struct OpEmitContext {
 #undef POP_FV
 #undef POP_LREST
 #undef POP_FMANY
+#undef POP_C_FMANY
 #undef POP_UFMANY
+#undef POP_C_UFMANY
 #undef POP_CVUMANY
 #undef POP_CMANY
 #undef POP_SMANY
@@ -8042,10 +8053,6 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
   visit(exp);
   if (checkIfStackEmpty("FPass*")) return;
 
-  // TODO(4599379): if dealing with an unpack, here is where we'd want to
-  // emit a bytecode to traverse any containers;
-
-  auto kind = getPassByRefKind(exp);
   if (isUnpack) {
     // This deals with the case where the called function has a
     // by ref param at the index of the unpack (because we don't
@@ -8055,9 +8062,9 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
     // still get warnings, and the array elements will not be
     // passed by reference.
     emitConvertToCell(e);
-    kind = PassByRefKind::AllowCell;
+  } else {
+    emitFPass(e, paramId, getPassByRefKind(exp), getPassByRefHint(exp));
   }
-  emitFPass(e, paramId, kind, getPassByRefHint(exp));
 }
 
 EmitterVisitor::MInstrChain EmitterVisitor::emitInOutArg(
@@ -9306,7 +9313,10 @@ void EmitterVisitor::emitInOutToRefWrapper(PostponedMeth& p,
     p,
     fe,
     [&] (Emitter& e, int i) {
-      if (fe->params[i].byRef && !fe->params[i].variadic) {
+      if (fe->params[i].variadic) {
+        emitVirtualLocal(i);
+        e.PushL(i);
+      } else if (fe->params[i].byRef) {
         fe->params[i].byRef = false;
         fe->params[i].inout = true;
         inoutParams.push_back(i);
@@ -9355,7 +9365,9 @@ void EmitterVisitor::emitRefToInOutWrapper(PostponedMeth& p,
         emitVirtualLocal(i);
         e.PushL(i);
       }
-      e.FPassC(i, FPassHint::Any);
+      if (!fe->params[i].variadic) {
+        e.FPassC(i, FPassHint::Any);
+      }
     },
     [&] (Emitter& e) {
       emitUnpackInOutCall(

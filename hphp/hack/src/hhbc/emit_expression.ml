@@ -412,7 +412,7 @@ let is_isexp_op lower_fq_id =
   | _ -> None
 
 (* See EmitterVisitor::getPassByRefKind in emitter.cpp *)
-let get_passByRefKind is_splatted expr  =
+let get_passByRefKind expr  =
   let open PassByRefKind in
   let rec from_non_list_assignment permissive_kind expr =
     match snd expr with
@@ -434,7 +434,7 @@ let get_passByRefKind is_splatted expr  =
     | A.Xml _ ->
       AllowCell
     | A.NewAnonClass _ -> ErrorOnCell
-    | _ -> if is_splatted then AllowCell else ErrorOnCell in
+    | _ -> ErrorOnCell in
   from_non_list_assignment AllowCell expr
 
 let get_queryMOpMode need_ref op =
@@ -2909,26 +2909,6 @@ and emit_args_and_call env call_pos args uargs =
     then InoutLocals.collect_written_variables env args
     else SMap.empty in
 
-  (* generic emit function *)
-  let default_emit i expr hint =
-    let instrs, flavor = emit_flavored_expr env ~last_pos:call_pos expr in
-    let is_splatted = i >= args_count in
-    let instrs =
-      if is_splatted && flavor = Flavor.ReturnVal
-      then gather [ instrs; instr_unboxr ] else instrs
-    in
-    let fpass_kind =
-      match is_splatted, flavor with
-      | false, Flavor.Ref -> instr_fpassv i hint
-      | false, Flavor.ReturnVal -> instr_fpassr i hint
-      | false, Flavor.Cell
-      | true, _ -> instr_fpass (get_passByRefKind is_splatted expr) i hint
-    in
-    gather [
-      instrs;
-      emit_pos call_pos;
-      fpass_kind; ]
-  in
   let rec aux i args inout_setters =
     match args with
     | [] ->
@@ -2945,6 +2925,7 @@ and emit_args_and_call env call_pos args uargs =
       | (true, true)   -> instr (ICall (FCallUnpackM (nargs, num_inout + 1))) in
       gather [
         (* emit call*)
+        emit_pos call_pos;
         instr_call;
         (* propagate inout values back *)
         if List.is_empty inout_setters
@@ -2966,10 +2947,11 @@ and emit_args_and_call env call_pos args uargs =
         | _ -> false, expr
       in
       let hint = get_pass_by_ref_hint expr in
-      let pos, expr_ = strip_ref expr in
+      let expr = strip_ref expr in
       if i >= args_count then
-        next @@ default_emit i expr hint
+        next @@ emit_expr ~need_ref:false env expr
       else
+      let pos, expr_ = expr in
       match expr_ with
       | A.Lvar (name_pos, x) when SN.Superglobals.is_superglobal x ->
         next @@ gather [
@@ -3061,12 +3043,19 @@ and emit_args_and_call env call_pos args uargs =
           set_instrs;
           instr_fpassl i local hint;
         ]
-      | _ when expr_starts_with_ref expr ->
-        (* pass expression with a stripped reference but
-           use hint from the original expression *)
-        next @@ default_emit i (pos, expr_) hint
       | _ ->
-        next @@ default_emit i expr hint
+        let instrs, flavor = emit_flavored_expr env ~last_pos:call_pos expr in
+        let fpass_kind =
+          match flavor with
+          | Flavor.Ref -> instr_fpassv i hint
+          | Flavor.ReturnVal -> instr_fpassr i hint
+          | Flavor.Cell -> instr_fpass (get_passByRefKind expr) i hint
+        in
+        next @@ gather [
+          instrs;
+          emit_pos call_pos;
+          fpass_kind
+        ]
   in
   Local.scope @@ fun () -> aux 0 all_args []
 

@@ -768,7 +768,9 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][kMaxHhbcImms] = {
   #define NOV { },
   #define FMANY { },
+  #define C_FMANY { },
   #define UFMANY { },
+  #define C_UFMANY { },
   #define CVUMANY { },
   #define CMANY { },
   #define SMANY { },
@@ -789,7 +791,9 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef C_MFINAL
   #undef V_MFINAL
   #undef FMANY
+  #undef C_FMANY
   #undef UFMANY
+  #undef C_UFMANY
   #undef CVUMANY
   #undef CMANY
   #undef SMANY
@@ -826,19 +830,30 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FCall:        // ONE(IVA),            FMANY,   ONE(RV)
   case Op::FCallD:       // THREE(IVA,SA,SA),    FMANY,   ONE(RV)
   case Op::FCallAwait:   // THREE(IVA,SA,SA),    FMANY,   ONE(CV)
-  case Op::FCallUnpack:  // ONE(IVA),            FMANY,   ONE(RV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
     }
     return m_tmp_sig;
+  case Op::FCallUnpack:  // ONE(IVA),            C_FMANY, ONE(RV)
+    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+      m_tmp_sig[i] = (i < n - 1) ? FV : CV;
+    }
+    return m_tmp_sig;
   case Op::FCallM:       // TWO(IVA,IVA),        UFMANY,   CMANY
   case Op::FCallDM:      // FOUR(IVA,IVA,SA,SA), UFMANY,   CMANY
-  case Op::FCallUnpackM: // TWO(IVA,IVA),        UFMANY,   CMANY
     for (int i = 0, n = getImm(pc, 1).u_IVA - 1; i < n; ++i) {
       m_tmp_sig[i] = UV;
     }
     for (int i = getImm(pc, 1).u_IVA - 1, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
+    }
+    return m_tmp_sig;
+  case Op::FCallUnpackM: // TWO(IVA,IVA),        C_UFMANY, CMANY
+    for (int i = 0, n = getImm(pc, 1).u_IVA - 1; i < n; ++i) {
+      m_tmp_sig[i] = UV;
+    }
+    for (int i = getImm(pc, 1).u_IVA - 1, n = instrNumPops(pc); i < n; ++i) {
+      m_tmp_sig[i] = (i < n - 1) ? FV : CV;
     }
     return m_tmp_sig;
   case Op::FCallBuiltin: //TWO(IVA, SA), CVUMANY,  ONE(RV)
@@ -1013,6 +1028,9 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* /*b*/) {
   auto const op = peek_op(pc);
 
   if (isFCallStar(op)) {
+    // Account for the variadic arg not using FPass*
+    if (op == Op::FCallUnpack || op == Op::FCallUnpackM) fpi.next++;
+
     --cur->fpilen;
     int call_params = getImmIva(pc);
     int push_params = getImmIva(at(fpi.fpush));
@@ -1524,7 +1542,9 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   static const FlavorDesc outputSigs[][kMaxHhbcImms] = {
   #define NOV { },
   #define FMANY { },
+  #define C_FMANY { },
   #define UFMANY { },
+  #define C_UFMANY { },
   #define CMANY { },
   #define SMANY { },
   #define ONE(a) { a },
@@ -1537,7 +1557,9 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     OPCODES
   #undef O
   #undef FMANY
+  #undef C_FMANY
   #undef UFMANY
+  #undef C_UFMANY
   #undef CMANY
   #undef SMANY
   #undef INS_1

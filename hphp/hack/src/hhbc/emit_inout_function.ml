@@ -29,7 +29,9 @@ let emit_body_instrs_inout params call_instrs =
             instr_popl (Local.Named (Hhas_param.name p))
           ]
           else instr_pushl (Local.Named (Hhas_param.name p));
-          instr_fpass H.PassByRefKind.AllowCell i H.Any
+          if not (Hhas_param.is_variadic p)
+          then instr_fpass H.PassByRefKind.AllowCell i H.Any
+          else empty
         ]) in
   let inout_params = List.filter_map params ~f:(fun p ->
       if not @@ Hhas_param.is_inout p then None else
@@ -60,7 +62,9 @@ let emit_body_instrs_ref params call_instrs =
   let param_instrs = gather @@
     List.mapi params ~f:(fun i p ->
       let local = Local.Named (Hhas_param.name p) in
-      if Hhas_param.is_reference p then
+      if Hhas_param.is_variadic p then
+        instr_pushl local
+      else if Hhas_param.is_reference p then
         gather [
           instr_vgetl local;
           instr_fpassvnop i H.Any

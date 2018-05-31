@@ -606,10 +606,10 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallM,          TWO(IVA,IVA),     UFMANY,          CMANY,      CF_FF) \
   O(FCallDM,         FOUR(IVA,IVA,SA,SA),UFMANY,        CMANY,      CF_FF) \
-  O(FCallUnpackM,    TWO(IVA,IVA),     UFMANY,          CMANY,      CF_FF) \
+  O(FCallUnpackM,    TWO(IVA,IVA),     C_UFMANY,        CMANY,      CF_FF) \
   O(FCallAwait,      THREE(IVA,SA,SA), FMANY,           ONE(CV),    CF_FF) \
   O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
-  O(FCallUnpack,     ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
+  O(FCallUnpack,     ONE(IVA),         C_FMANY,         ONE(RV),    CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(MIterInit,       THREE(IA,BA,LA),  ONE(VV),         NOV,        CF) \

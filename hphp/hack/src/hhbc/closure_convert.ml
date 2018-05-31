@@ -297,7 +297,8 @@ let rec make_scope_name ns scope =
   | ScopeItem.Method md :: scope ->
     make_scope_name ns scope ^ "::" ^ strip_id md.m_name
   | ScopeItem.Class cd :: _ ->
-    make_class_name cd
+    let n = make_class_name cd in
+    if Hhbc_string_utils.Classes.is_anonymous_class_name n then n ^ "::" else n
   | _ :: scope ->
     make_scope_name ns scope
 
@@ -680,6 +681,9 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st = { st with
       anon_cls_cnt_per_fun = st.anon_cls_cnt_per_fun + 1;
       hoisted_classes = cls :: st.hoisted_classes } in
+    let env = env_with_class env cls in
+    let st, args = convert_exprs env st args in
+    let st, varargs = convert_exprs env st varargs in
     st, (p, NewAnonClass (args, varargs, cls_condensed))
   | Efun (fd, use_vars) ->
     convert_lambda env st p fd (Some use_vars)

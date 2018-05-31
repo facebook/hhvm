@@ -4,3 +4,7 @@ Invalid argument (Typing[4098])
   This tuple has 3 elements
   File "tuple3.php", line 6, characters 9-21:
   This one has 2 elements
+File "tuple3.php", line 6, characters 9-21:
+Invalid "as" expression hint (Typing[4195])
+  File "tuple3.php", line 6, characters 9-21:
+  The "as" operator cannot be used with a tuple

@@ -1,1 +1,4 @@
-No errors
+File "tuple.php", line 6, characters 13-30:
+Invalid "is" expression hint (Typing[4195])
+  File "tuple.php", line 6, characters 13-30:
+  The "is" operator cannot be used with a tuple

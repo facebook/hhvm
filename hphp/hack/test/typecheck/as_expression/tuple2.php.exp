@@ -4,3 +4,7 @@ Invalid argument (Typing[4110])
   This is an int
   File "tuple2.php", line 6, characters 15-20:
   It is incompatible with a string
+File "tuple2.php", line 6, characters 9-29:
+Invalid "as" expression hint (Typing[4195])
+  File "tuple2.php", line 6, characters 9-29:
+  The "as" operator cannot be used with a tuple

@@ -1,1 +1,8 @@
-No errors
+File "valid_hints.php", line 21, characters 20-43:
+Invalid "as" expression hint (Typing[4195])
+  File "valid_hints.php", line 21, characters 20-43:
+  The "as" operator cannot be used with a shape
+File "valid_hints.php", line 23, characters 20-33:
+Invalid "as" expression hint (Typing[4195])
+  File "valid_hints.php", line 23, characters 20-33:
+  The "as" operator cannot be used with a tuple

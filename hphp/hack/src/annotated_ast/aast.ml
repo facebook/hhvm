@@ -263,6 +263,7 @@ and user_attribute = {
 
 and static_var = class_var
 and static_method = method_
+and constructor = method_
 
 and class_ = {
   c_annotation     : env_annotation   ;
@@ -288,7 +289,7 @@ and class_ = {
   c_typeconsts     : class_typeconst list   ;
   c_static_vars    : static_var list  ;
   c_vars           : class_var list   ;
-  c_constructor    : method_ option   ;
+  c_constructor    : constructor option;
   c_static_methods : static_method list;
   c_methods        : method_ list     ;
   c_user_attributes : user_attribute list;

@@ -122,6 +122,10 @@ val set_static : env -> env
 (** Return an {!env} for which {!is_static} will return {true}.
     If you are using {!Tast_visitor}, you should have no need of this. *)
 
+val set_inside_constructor : env -> env
+(** Returns an {!env} for which {!inside_constructor} is set to {true}.
+    If you are using {!Tast_visitor}, you should have no need of this. *)
+
 val save : env -> Tast.saved_env
 (** Return the subset of this {!env} which is persisted in a TAST.
     It should usually not be necessary to invoke this. *)

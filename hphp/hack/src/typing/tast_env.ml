@@ -35,6 +35,7 @@ let is_strict = Typing_env.is_strict
 let get_tcopt = Typing_env.get_tcopt
 let expand_type = Typing_env.expand_type
 let set_static = Typing_env.set_static
+let set_inside_constructor env = { env with Typing_env.inside_constructor = true }
 let save = Typing_env.save SMap.empty
 
 let fully_expand = Typing_expand.fully_expand

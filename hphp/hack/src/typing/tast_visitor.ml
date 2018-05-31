@@ -22,6 +22,7 @@ class virtual iter = object (self)
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
   method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
+  method! on_constructor env x = super#on_constructor (Env.set_inside_constructor env) x
   method! on_static_var env x = super#on_static_var (Env.set_static env) x
   method! on_static_method env x = super#on_static_method (Env.set_static env) x
 end
@@ -37,6 +38,7 @@ class virtual ['a] reduce = object (self)
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
   method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
+  method! on_constructor env x = super#on_constructor (Env.set_inside_constructor env) x
   method! on_static_var env x = super#on_static_var (Env.set_static env) x
   method! on_static_method env x = super#on_static_method (Env.set_static env) x
 end
@@ -52,6 +54,7 @@ class virtual map = object (self)
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
   method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
+  method! on_constructor env x = super#on_constructor (Env.set_inside_constructor env) x
   method! on_static_var env x = super#on_static_var (Env.set_static env) x
   method! on_static_method env x = super#on_static_method (Env.set_static env) x
 end
@@ -67,6 +70,7 @@ class virtual endo = object (self)
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
   method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
+  method! on_constructor env x = super#on_constructor (Env.set_inside_constructor env) x
   method! on_static_var env x = super#on_static_var (Env.set_static env) x
   method! on_static_method env x = super#on_static_method (Env.set_static env) x
 end

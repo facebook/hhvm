@@ -64,11 +64,11 @@ let get_text t =
   t.text
 
 let get source_text index =
-  if index < String.length source_text.text
-  then String.get source_text.text index
+  if index < source_text.length
+  then String.unsafe_get source_text.text index
   else '\x00'
 let sub source_text start length =
-  let len = String.length source_text.text in
+  let len = source_text.length in
   if start >= len then
     ""
   else if start + length > len then

@@ -114,6 +114,20 @@ let rec simplify_subtype
        begin fun env acc ty ->
          simplify_subtype ~deep ~this_ty ty ty_super (env, acc)
        end env (snd res) r fdm
+
+    | AKtuple fields,
+      (
+        AKvarray _
+      | AKvec _
+      | AKdarray _
+      | AKvarray_or_darray _
+      | AKmap _
+      ) ->
+      Typing_arrays.fold_aktuple_as_akvec_with_acc
+       begin fun env acc ty ->
+         simplify_subtype ~deep ~this_ty ty ty_super (env, acc)
+       end env (snd res) r fields
+
     (* varray_or_darray<ty1> <: varray_or_darray<ty2> iff t1 <: ty2
        But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
     | AKvarray_or_darray ty_sub, AKvarray_or_darray ty_super ->

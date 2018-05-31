@@ -677,6 +677,14 @@ let rec convert_expr env st (p, expr_ as expr) =
     let cls_condensed = { cls with
       c_name = (fst cls.c_name, string_of_int class_idx);
       c_body = [] } in
+    let add_ns_to_hint = function
+      | p, Happly (id, args) ->
+        let classname, _ = Hhbc_id.Class.elaborate_id st.namespace id in
+        p, Happly ((p, Hhbc_id.Class.to_raw_string classname), args)
+      | other -> other in
+    let cls = { cls with
+      c_extends = List.map cls.c_extends add_ns_to_hint;
+      c_implements = List.map cls.c_implements add_ns_to_hint } in
     let st, cls = convert_class env st cls in
     let st = { st with
       anon_cls_cnt_per_fun = st.anon_cls_cnt_per_fun + 1;

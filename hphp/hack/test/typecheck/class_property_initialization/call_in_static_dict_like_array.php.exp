@@ -1,0 +1,2 @@
+File "call_in_static_dict_like_array.php", line 7, characters 28-33:
+Initialization of class property must be a static literal expression. (Typing[4152])

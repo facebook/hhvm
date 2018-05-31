@@ -738,7 +738,7 @@ and check_class_property_initialization prop =
   Option.iter prop.cv_expr ~f:begin fun e ->
     let rec rec_assert_static_literal e =
       match (snd e) with
-      | Any | Shape _ | Typename _
+      | Any | Typename _
       | Id _ | Class_const _ | True | False | Int _ | Float _
       | Null | String _ | Pipe _ ->
         ()
@@ -751,6 +751,7 @@ and check_class_property_initialization prop =
         end
       | Darray fl -> List.iter fl assert_static_literal_for_field_list
       | Varray el -> List.iter el rec_assert_static_literal
+      | Shape fl -> ShapeMap.iter (fun _ -> rec_assert_static_literal) fl
       | List el
       | Expr_list el
       | String2 el

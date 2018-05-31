@@ -1,0 +1,2 @@
+File "call_in_static_darray.php", line 7, characters 29-34:
+Initialization of class property must be a static literal expression. (Typing[4152])

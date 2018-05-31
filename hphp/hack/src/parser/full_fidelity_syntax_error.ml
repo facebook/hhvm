@@ -428,3 +428,6 @@ let sealed_final = "Classes cannot be both final and sealed."
 
 let interface_implements =
   "Interfaces may not implement other interfaces or classes"
+
+let memoize_on_lambda = "<<__Memoize>> attribute is not allowed on lambdas or \
+  anonymous functions."

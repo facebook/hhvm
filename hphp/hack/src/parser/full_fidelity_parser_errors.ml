@@ -1456,6 +1456,25 @@ let function_call_on_xhp_name_errors node errors =
     end
   | _ -> errors
 
+let no_memoize_attribute_on_lambda node errors =
+  match syntax node with
+  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
+    Core_list.fold (syntax_node_to_list attrs) ~init:errors ~f:begin fun errors n ->
+      match syntax n with
+      | ListItem {
+          list_item = ({ syntax = Attribute { attribute_name; _ }; _ } as attr);_
+        } ->
+        begin match Syntax.extract_text attribute_name with
+        | Some n when n = SN.UserAttributes.uaMemoize ->
+          let e =
+            make_error_from_node attr SyntaxError.memoize_on_lambda in
+          e::errors
+        | _ -> errors
+        end
+      | _ -> errors
+    end
+  | _ -> errors
+
 let expression_errors env node parents errors =
   let is_decimal_or_hexadecimal_literal token =
     match Token.kind token with
@@ -1637,6 +1656,11 @@ let expression_errors env node parents errors =
       && env.disallow_elvis_space
       && is_hack env ->
     make_error_from_node node SyntaxError.elvis_operator_space :: errors
+  | LambdaExpression { lambda_attribute_spec = s; _}
+  | AnonymousFunction { anonymous_attribute_spec = s; _ }
+  | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
+  | AwaitableCreationExpression { awaitable_attribute_spec = s; _ }
+    -> no_memoize_attribute_on_lambda s errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let check_repeated_properties namespace_name class_name (errors, p_names) prop =
@@ -2542,6 +2566,9 @@ let find_syntax_errors env =
       | LambdaExpression _
       | IsExpression _
       | AsExpression _
+      | AnonymousFunction _
+      | Php7AnonymousFunction _
+      | AwaitableCreationExpression _
       | ConditionalExpression _ ->
         let errors =
           expression_errors env node parents errors in

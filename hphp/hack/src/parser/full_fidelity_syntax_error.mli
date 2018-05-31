@@ -251,3 +251,4 @@ val for_with_as_expression: string
 val sealed_val_not_classname: string
 val sealed_final: string
 val interface_implements: string
+val memoize_on_lambda: string

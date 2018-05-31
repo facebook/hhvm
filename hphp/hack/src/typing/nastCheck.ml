@@ -740,7 +740,7 @@ and check_class_property_initialization prop =
       match (snd e) with
       | Any | Typename _
       | Id _ | Class_const _ | True | False | Int _ | Float _
-      | Null | String _ | Pipe _ ->
+      | Null | String _ ->
         ()
       | Array field_list ->
         List.iter field_list begin function
@@ -777,7 +777,7 @@ and check_class_property_initialization prop =
       | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
       | Call _ | Special_func _ | Yield_break | Yield _ | Suspend _
       | Await _ | InstanceOf _ | Is _ | New _ | Efun _ | Xml _ | Callconv _
-      | Assert _ | Clone _ | As _ ->
+      | Assert _ | Clone _ | As _ | Pipe _ ->
         Errors.class_property_only_static_literal (fst e)
     and assert_static_literal_for_field_list (expr1, expr2) =
       rec_assert_static_literal expr1;

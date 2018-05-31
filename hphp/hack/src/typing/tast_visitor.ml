@@ -89,6 +89,14 @@ class type handler = object
 
   method at_expr : Env.t -> Tast.expr -> unit
   method at_stmt : Env.t -> Tast.stmt -> unit
+  method at_Call :
+    Env.t ->
+    Aast.call_type ->
+    Tast.expr ->
+    Aast.hint list ->
+    Tast.expr list ->
+    Tast.expr list ->
+    unit
 end
 
 (** A {!handler} which does not need to make use of every visitation method can
@@ -101,6 +109,7 @@ class virtual handler_base : handler = object
 
   method at_expr _ _ = ()
   method at_stmt _ _ = ()
+  method at_Call _ _ _ _ _ _ = ()
 end
 
 (** Return an {!iter} visitor which invokes all of the given handlers upon
@@ -131,4 +140,8 @@ let iter_with (handlers : handler list) : iter = object
   method! on_stmt env x =
     List.iter handlers (fun v -> v#at_stmt env x);
     super#on_stmt env x;
+
+  method! on_Call env ct e hl el uel =
+    List.iter handlers (fun v -> v#at_Call env ct e hl el uel);
+    super#on_Call env ct e hl el uel;
 end

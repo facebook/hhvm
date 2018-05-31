@@ -189,7 +189,7 @@ possibleampersand:
 paramdefaultvalueopt:
   | /* empty */  {None}
   | EQUALS ID LPAR TRIPLEQUOTEDSTRING RPAR
-   {Some (makelabel $2, (Pos.none, Ast.String(Pos.none,$4)))}
+   {Some (makelabel $2, (Pos.none, Ast.String $4))}
   | EQUALS ID
    {Some (makelabel $2, (Pos.none, Ast.Omitted))}
 ;

@@ -765,7 +765,7 @@ and define_or_stmt env = function
     Constant {
       cst_mode = env.mode;
       cst_kind = Cst_define;
-      cst_name = name;
+      cst_name = (pos, name);
       cst_type = None;
       cst_value = value;
       cst_namespace = Namespace_env.empty env.popt;
@@ -1367,7 +1367,7 @@ and xhp_enum_decl_value env =
   match tok with
   | Tint ->
       let tok_value = eliminate_underscores (Lexing.lexeme env.lb) in
-      pos, Int (pos, tok_value)
+      pos, Int tok_value
   | Tquote ->
       let absolute_pos = env.lb.Lexing.lex_curr_pos in
       expr_string env pos absolute_pos
@@ -3247,10 +3247,10 @@ and expr_atomic ~allow_class ~class_const env =
   match tok with
   | Tint ->
       let tok_value = eliminate_underscores (Lexing.lexeme env.lb) in
-      pos, Int (pos, tok_value)
+      pos, Int tok_value
   | Tfloat ->
       let tok_value = Lexing.lexeme env.lb in
-      pos, Float (pos, tok_value)
+      pos, Float tok_value
   | Tquote ->
       let absolute_pos = env.lb.Lexing.lex_curr_pos in
       expr_string env pos absolute_pos
@@ -3954,7 +3954,7 @@ and make_string env pos content f_unescape =
   let unescaped =
     try f_unescape content with
       | Php_escaping.Invalid_string error -> error_at env pos error; ""
-  in String (pos, unescaped)
+  in String unescaped
 
 and expr_string env start abs_start =
   match L.string env.file env.lb with
@@ -3965,7 +3965,7 @@ and expr_string env start abs_start =
       pos, make_string env pos content Php_escaping.unescape_single
   | Teof ->
       error_at env start "string not closed";
-      start, String (start, "")
+      start, String ""
   | _ -> assert false
 
 and expr_encapsed env start =
@@ -3975,8 +3975,8 @@ and expr_encapsed env start =
   let pos = Pos.btw pos_start pos_end in
   (* Represent purely literal strings as just String *)
   match el with
-  | [] -> pos, String (pos, "")
-  | [_, String (_, s)] -> pos, String (pos, s)
+  | [] -> pos, String ""
+  | [_, String s] -> pos, String s
   | el -> pos, String2 el
 
 and encapsed_nested start env =
@@ -4082,7 +4082,7 @@ and encapsed_expr env =
   | Tint ->
       let pos = Pos.make env.file env.lb in
       let tok_value = eliminate_underscores (Lexing.lexeme env.lb) in
-      pos, Int (pos, tok_value)
+      pos, Int tok_value
   | Tword ->
       let pid = Pos.make env.file env.lb in
       let id = Lexing.lexeme env.lb in
@@ -4114,7 +4114,7 @@ and encapsed_expr_reduce_left start env e1 =
              *)
             let pid = Pos.make env.file env.lb in
             let id = Lexing.lexeme env.lb in
-            pid, (String (pid, id))
+            pid, (String id)
         | _ ->
             L.back env.lb;
             expr { env with priority = 0 }
@@ -4150,7 +4150,7 @@ and expr_heredoc env =
   heredoc_body tag env;
   let len = env.lb.Lexing.lex_curr_pos - abs_start - 1 in
   let content = String.sub env.lb.Lexing.lex_buffer abs_start len in
-  fst tag, String (fst tag, content)
+  fst tag, String content
 
 and heredoc_tag env =
   match L.token env.file env.lb with
@@ -4160,7 +4160,7 @@ and heredoc_tag env =
       let pos = Pos.make env.file env.lb in
       let abs_pos = env.lb.Lexing.lex_curr_pos in
       (match expr_string env pos abs_pos with
-      | _, String x -> x
+      | pos, String x -> pos, x
       | _ -> assert false)
   | _ ->
       error_expect env "heredoc or nowdoc identifier";
@@ -4359,7 +4359,7 @@ and shape_field env =
 and shape_field_name env =
   let pos, e = expr env in
   match e with
-  | String p -> SFlit p
+  | String p -> SFlit (pos, p)
   | Class_const ((_, Id id), ps) -> SFclass_const (id, ps)
   | _ -> error_expect env "string literal or class constant";
     SFlit (pos, "")
@@ -4495,18 +4495,18 @@ and xhp_attribute_value env =
   | _ ->
       error_expect env "attribute value";
       let pos = Pos.make env.file env.lb in
-      pos, String (pos, "")
+      pos, String ""
 
 and xhp_attribute_string env start abs_start =
   match L.string2 env.file env.lb with
   | Teof ->
       error_at env start "Xhp attribute not closed";
-      start, String (start, "")
+      start, String ""
   | Tdquote ->
       let len = env.lb.Lexing.lex_curr_pos - abs_start - 1 in
       let content = String.sub env.lb.Lexing.lex_buffer abs_start len in
       let pos = Pos.btw start (Pos.make env.file env.lb) in
-      pos, String (pos, content)
+      pos, String content
   | _ ->
       xhp_attribute_string env start abs_start
 
@@ -4538,7 +4538,7 @@ and xhp_text env start abs_start =
     let squished = Regexp_utils.squash_whitespace content in
     (* if it is empty or all whitespace just ignore it *)
     if squished = "" || squished = " " then [] else
-      [pos, String (pos, squished)]
+      [pos, String squished]
     (* TODO: xhp can contain html/xhp entities that need to be decoded. *)
 
   | _ -> xhp_text env start abs_start

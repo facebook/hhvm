@@ -23,10 +23,10 @@ type static_array_access_type =
   | AKother
 
 let static_array_access env = function
-  | Some (_, x) -> begin match x with
-    | Nast.Int (_, x) ->
+  | Some (p, x) -> begin match x with
+    | Nast.Int x ->
       (try AKtuple_index (int_of_string x) with Failure _ -> AKother)
-    | _ -> begin match TUtils.maybe_shape_field_name env x with
+    | _ -> begin match TUtils.maybe_shape_field_name env (p, x) with
       | Some x -> AKshape_key x
       | None -> AKother
       end
@@ -162,7 +162,7 @@ let is_shape_like_array env = function
   | [] -> false
   | x::rl ->
     let field_name = function
-      | Nast.AFkvalue (ex, _) -> TUtils.maybe_shape_field_name env (snd ex)
+      | Nast.AFkvalue (ex, _) -> TUtils.maybe_shape_field_name env ex
       | _ -> None in
     let x_field_name = field_name x in
     Option.is_some x_field_name && List.for_all rl begin fun y ->

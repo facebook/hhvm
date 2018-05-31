@@ -891,7 +891,7 @@ and string_of_afield_list ~env afl =
 
 and shape_field_name_to_expr = function
   | A.SFlit (pos, s)
-  | A.SFclass_const (_, (pos, s)) -> (pos, A.String (pos, s))
+  | A.SFclass_const (_, (pos, s)) -> (pos, A.String s)
 
 and string_of_bop = function
   | A.Plus -> "+"
@@ -1093,10 +1093,10 @@ and string_of_xml ~env (_, id) attributes children =
   ^ ", __FILE__, __LINE__)"
 
 and string_of_xhp_attr p attr (spread_id, attrs) = match attr with
-  | A.Xhp_simple (id, e) -> (spread_id, ((p, A.String id), e)::attrs)
+  | A.Xhp_simple ((_, s), e) -> (spread_id, ((p, A.String s), e)::attrs)
   | A.Xhp_spread e ->
-    let id = (p, "...$" ^ (string_of_int spread_id)) in
-    (spread_id + 1, ((p, A.String id), e)::attrs)
+    let s = "...$" ^ (string_of_int spread_id) in
+    (spread_id + 1, ((p, A.String s), e)::attrs)
 
 and string_of_param_default_value ~env expr =
   let p = Pos.none in
@@ -1145,7 +1145,7 @@ and string_of_param_default_value ~env expr =
       let s1 = get_class_name_from_id
         ~env:env.codegen_env ~should_format:false ~is_class_constant:false s1 in
       let e =
-        (fst expr, if is_array_get then A.Id (p, s1) else A.String (p, s1)) in
+        (fst expr, if is_array_get then A.Id (p, s1) else A.String s1) in
       Some (string_of_param_default_value ~env e)
     | _ -> None
   in
@@ -1170,9 +1170,9 @@ and string_of_param_default_value ~env expr =
     Php_escaping.escape id
   | A.Id_type_arguments ((_, litstr), _)
   | A.Lvar (_, litstr) -> Php_escaping.escape litstr
-  | A.Float (_, litstr) -> SU.Float.with_scientific_notation litstr
-  | A.Int (_, litstr) -> SU.Integer.to_decimal litstr
-  | A.String (_, litstr) ->
+  | A.Float litstr -> SU.Float.with_scientific_notation litstr
+  | A.Int litstr -> SU.Integer.to_decimal litstr
+  | A.String litstr ->
     SU.quote_string_with_escape ~f:escape_fn litstr
   | A.Null -> "NULL"
   | A.True -> "true"

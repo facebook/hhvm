@@ -463,15 +463,15 @@ let inline_class_name_if_possible env ~trait ~fallback_to_empty_string p pe =
   let get_class_call =
     p, Call ((pe, Id (pe, "get_class")), [], [], [])
   in
-  let name c = p, String (pe, SU.Xhp.mangle @@ strip_id c.c_name) in
-  let empty_str = p, String (pe, "") in
+  let name c = p, String (SU.Xhp.mangle @@ strip_id c.c_name) in
+  let empty_str = p, String ("") in
   match Scope.get_class env.scope with
   | Some c when trait ->
     if c.c_kind = Ctrait then name c else empty_str
   | Some c ->
     if c.c_kind = Ctrait then get_class_call else name c
   | None ->
-    if fallback_to_empty_string then p, String (pe, "")
+    if fallback_to_empty_string then p, String ("")
     else get_class_call
 
 (* Translate special identifiers __CLASS__, __METHOD__ and __FUNCTION__ into
@@ -479,7 +479,7 @@ let inline_class_name_if_possible env ~trait ~fallback_to_empty_string p pe =
  * because the enclosing class will be changed. *)
 let convert_id (env:env) p (pid, str as id) =
   let str = String.uppercase_ascii str in
-  let return newstr = (p, String (pid, newstr)) in
+  let return newstr = (p, String newstr) in
   match str with
   | "__CLASS__" | "__TRAIT__"->
     inline_class_name_if_possible
@@ -527,7 +527,7 @@ let convert_id (env:env) p (pid, str as id) =
   | "__LINE__" ->
     (* If the expression goes on multi lines, we return the last line *)
     let _, line, _, _ = Pos.info_pos_extended pid in
-    p, Int (pid, string_of_int line)
+    p, Int (string_of_int line)
   | _ ->
     (p, Id id)
 
@@ -613,7 +613,7 @@ let rec convert_expr env st (p, expr_ as expr) =
   | Call (e, el1, el2, el3) ->
     let st =
       begin match snd e, el2 with
-      | Id (_, s), [_, String (_, arg)] when
+      | Id (_, s), [_, String arg] when
         String.lowercase_ascii @@ SU.strip_global_ns s = "hh\\asm"->
         set_inline_hhas st arg
       | _ -> st
@@ -963,7 +963,7 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
     (* record the fact that function has goto *)
     let st = set_has_goto st in
     st, stmt
-  | Declare (_, (_, Binop (Eq None, (_, Id (_, "strict_types")), (_, Int (_, v)))), _) ->
+  | Declare (_, (_, Binop (Eq None, (_, Id (_, "strict_types")), (_, Int v))), _) ->
     let st = { st with seen_strict_types = Some (v = "1") } in
     st, stmt
   | Declare (true, _, b) ->

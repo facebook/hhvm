@@ -75,7 +75,7 @@ let emit_markup env s echo_expr_opt ~check_for_hashbang =
   in
   let emit_ignored_call_for_non_empty_string f s =
     if String.length s = 0 then empty
-    else emit_ignored_call_expr f (Pos.none, A.String (Pos.none, s))
+    else emit_ignored_call_expr f (Pos.none, A.String s)
   in
   let markup =
     if String.length s = 0

@@ -2247,9 +2247,9 @@ module Make (GetLocals : GetLocals) = struct
         arg_unpack_unexpected uel ;
         (match el with
         | [] -> Errors.naming_too_few_arguments p; N.Any
-        | [_, String (_p2, s)] when String.contains s ':' ->
+        | [_, String s] when String.contains s ':' ->
           Errors.illegal_meth_fun p; N.Any
-        | [_, String x] -> N.Fun_id (Env.fun_id env x)
+        | [p, String x] -> N.Fun_id (Env.fun_id env (p, x))
         | [p, _] ->
             Errors.illegal_fun p;
             N.Any
@@ -2261,8 +2261,8 @@ module Make (GetLocals : GetLocals) = struct
         (match el with
         | [] -> Errors.naming_too_few_arguments p; N.Any
         | [_] -> Errors.naming_too_few_arguments p; N.Any
-        | instance::(_, String meth)::[] ->
-          N.Method_id (expr env instance, meth)
+        | instance::(p, String meth)::[] ->
+          N.Method_id (expr env instance, (p, meth))
         | (p, _)::(_)::[] ->
           Errors.illegal_inst_meth p;
           N.Any
@@ -2276,11 +2276,11 @@ module Make (GetLocals : GetLocals) = struct
         | [_] -> Errors.naming_too_few_arguments p; N.Any
         | e1::e2::[] ->
             (match (expr env e1), (expr env e2) with
-            | (_, N.String cl), (_, N.String meth) ->
-              N.Method_caller (Env.type_name env cl ~allow_typedef:false, meth)
-            | (_, N.Class_const (((), N.CI (cl, _)), (_, mem))), (_, N.String meth)
+            | (pc, N.String cl), (pm, N.String meth) ->
+              N.Method_caller (Env.type_name env (pc, cl) ~allow_typedef:false, (pm, meth))
+            | (_, N.Class_const (((), N.CI (cl, _)), (_, mem))), (pm, N.String meth)
               when mem = SN.Members.mClass ->
-              N.Method_caller (Env.type_name env cl ~allow_typedef:false, meth)
+              N.Method_caller (Env.type_name env cl ~allow_typedef:false, (pm, meth))
             | (p, _), (_) ->
               Errors.illegal_meth_caller p;
               N.Any
@@ -2295,9 +2295,9 @@ module Make (GetLocals : GetLocals) = struct
         | [_] -> Errors.naming_too_few_arguments p; N.Any
         | e1::e2::[] ->
             (match (expr env e1), (expr env e2) with
-            | (_, N.String cl), (_, N.String meth) ->
-              N.Smethod_id (Env.type_name env cl ~allow_typedef:false, meth)
-            | (_, N.Id (_, const)), (_, N.String meth)
+            | (pc, N.String cl), (pm, N.String meth) ->
+              N.Smethod_id (Env.type_name env (pc, cl) ~allow_typedef:false, (pm, meth))
+            | (_, N.Id (_, const)), (pm, N.String meth)
               when const = SN.PseudoConsts.g__CLASS__  ->
               (* All of these that use current_cls aren't quite correct
                * inside a trait, as the class should be the using class.
@@ -2306,15 +2306,15 @@ module Make (GetLocals : GetLocals) = struct
                * declarations).
                *)
               (match (fst env).current_cls with
-                | Some (cid, _) -> N.Smethod_id (cid, meth)
+                | Some (cid, _) -> N.Smethod_id (cid, (pm, meth))
                 | None -> Errors.illegal_class_meth p; N.Any)
-            | (_, N.Class_const (((), N.CI (cl, _)), (_, mem))), (_, N.String meth)
+            | (_, N.Class_const (((), N.CI (cl, _)), (_, mem))), (pm, N.String meth)
               when mem = SN.Members.mClass ->
-              N.Smethod_id (Env.type_name env cl ~allow_typedef:false, meth)
+              N.Smethod_id (Env.type_name env cl ~allow_typedef:false, (pm, meth))
             | (p, N.Class_const (((), (N.CIself|N.CIstatic)), (_, mem))),
-                (_, N.String meth) when mem = SN.Members.mClass ->
+                (pm, N.String meth) when mem = SN.Members.mClass ->
               (match (fst env).current_cls with
-                | Some (cid, _) -> N.Smethod_id (cid, meth)
+                | Some (cid, _) -> N.Smethod_id (cid, (pm, meth))
                 | None -> Errors.illegal_class_meth p; N.Any)
             | (p, _), (_) -> Errors.illegal_class_meth p; N.Any
             )

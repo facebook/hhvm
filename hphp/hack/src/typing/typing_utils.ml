@@ -408,9 +408,9 @@ let apply_shape
 
 let shape_field_name_ env field =
   let open Nast in match field with
-    | String name -> Ok (Ast.SFlit name)
-    | Class_const (((), CI (x, _)), y) -> Ok (Ast.SFclass_const (x, y))
-    | Class_const (((), CIself), y) ->
+    | p, String name -> Ok (Ast.SFlit (p, name))
+    | _, Class_const (((), CI (x, _)), y) -> Ok (Ast.SFclass_const (x, y))
+    | _, Class_const (((), CIself), y) ->
       let _, c_ty = Env.get_self env in
       (match c_ty with
       | Tclass (sid, _) ->
@@ -424,8 +424,8 @@ let maybe_shape_field_name env field =
     | Ok x -> Some x
     | Error _ -> None
 
-let shape_field_name env p field =
-  match shape_field_name_ env field with
+let shape_field_name env (p, field) =
+  match shape_field_name_ env (p, field) with
     | Ok x -> Some x
     | Error `Expected_class ->
         Errors.expected_class p;

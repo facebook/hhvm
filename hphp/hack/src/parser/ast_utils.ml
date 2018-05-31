@@ -134,7 +134,7 @@ type break_continue_level =
 let get_break_continue_level level_opt =
   match level_opt with
   | None -> Level_ok None
-  | Some (_, Ast.Int (_, s)) ->
+  | Some (_, Ast.Int s) ->
     let i = int_of_string s in
     if i <= 0 then Level_non_positive
     else Level_ok (Some i)

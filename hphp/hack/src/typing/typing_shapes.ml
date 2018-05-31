@@ -143,7 +143,7 @@ let field_has_nullable_type env =
 let idx env p fty shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
   let env, res = Env.fresh_unresolved_type env in
-  match TUtils.shape_field_name env (fst field) (snd field) with
+  match TUtils.shape_field_name env field with
   | None -> env, (Reason.Rwitness (fst field), TUtils.tany env)
   | Some field_name ->
     let fake_shape = (
@@ -184,7 +184,7 @@ let idx env p fty shape_ty field default =
         env, res
 
 let remove_key p env shape_ty field  =
-  match TUtils.shape_field_name env (fst field) (snd field) with
+  match TUtils.shape_field_name env field with
    | None -> env, (Reason.Rwitness (fst field), TUtils.tany env)
    | Some field_name -> shrink_shape p field_name env shape_ty
 

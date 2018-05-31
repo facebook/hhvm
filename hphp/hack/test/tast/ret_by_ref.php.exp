@@ -10,7 +10,7 @@
                [(([4:10-17], int),
                  (Binop ((Eq None),
                     (([4:10-12], int), (Lvar ([4:10-12], $x))),
-                    (([4:15-17], int), (Int ([4:15-17], "42"))))))
+                    (([4:15-17], int), (Int "42")))))
                  ]);
              (Return ([5:3-13],
                 (Some (([5:10-12], int), (Lvar ([5:10-12], $x))))))
@@ -29,7 +29,7 @@
           cv_visibility = Private;
           cv_type = (Some ([9:11-14], (Hprim Tint)));
           cv_id = ([9:15-17], "x");
-          cv_expr = (Some (([9:20-22], int), (Int ([9:20-22], "42"))));
+          cv_expr = (Some (([9:20-22], int), (Int "42")));
           cv_user_attributes = [] }
          ];
        c_constructor = None; c_static_methods = [];

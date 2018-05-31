@@ -56,7 +56,7 @@ class type ['a] ast_visitor_type = object
   method on_fallthrough : 'a -> 'a
   method on_false : 'a -> 'a
   method on_field: 'a -> field -> 'a
-  method on_float : 'a -> pstring -> 'a
+  method on_float : 'a -> string -> 'a
   method on_for : 'a -> expr -> expr -> expr -> block -> 'a
   method on_foreach : 'a -> expr -> Pos.t option -> as_expr -> block -> 'a
   method on_goto_label : 'a -> pstring -> 'a
@@ -70,7 +70,7 @@ class type ['a] ast_visitor_type = object
   method on_include: 'a -> 'a
   method on_includeOnce: 'a -> 'a
   method on_instanceOf : 'a -> expr -> expr -> 'a
-  method on_int : 'a -> pstring -> 'a
+  method on_int : 'a -> string -> 'a
   method on_is : 'a -> expr -> hint -> 'a
   method on_as : 'a -> expr -> hint -> bool -> 'a
   method on_let : 'a -> id -> hint option -> expr -> 'a
@@ -96,7 +96,7 @@ class type ['a] ast_visitor_type = object
   method on_stmt : 'a -> stmt -> 'a
   method on_stmt_ : 'a -> stmt_ -> 'a
   method on_string2 : 'a -> expr list -> 'a
-  method on_string : 'a -> pstring -> 'a
+  method on_string : 'a -> string -> 'a
   method on_suspend: 'a -> expr -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> expr -> 'a
@@ -472,18 +472,13 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_true acc = acc
   method on_false acc = acc
 
-  method on_int acc pstr =
-    let acc = this#on_pstring acc pstr in
-    acc
+  method on_int acc _ = acc
 
-  method on_float acc pstr =
-    let acc = this#on_pstring acc pstr in
-    acc
+  method on_float acc _ = acc
 
   method on_null acc = acc
-  method on_string acc pstr =
-    let acc = this#on_pstring acc pstr in
-    acc
+
+  method on_string acc _ = acc
 
   method on_string2 acc el =
     let acc = List.fold_left this#on_expr acc el in

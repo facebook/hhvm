@@ -209,7 +209,7 @@ class dependency_visitor = object(this)
     | _, Id (_, "class_meth") ->
       begin match el with
       (* String literals are valid as a classname for some reason *)
-      | (_, String (p, s))::_ ->
+      | (p, String s)::_ ->
         add_class_dep dep_env (p, s)
       (* Here, it could be a classname of the form Test::class, but that
         gets caught by on_hint. *)
@@ -219,7 +219,7 @@ class dependency_visitor = object(this)
     | _, Id (_, "fun") ->
       begin
         match el with
-        | (_, String (p, s))::[] ->
+        | (p, String s)::[] ->
           add_fun_dep dep_env (p,s)
           (* Anything but a string here and it won't typecheck *)
         | _ -> ()

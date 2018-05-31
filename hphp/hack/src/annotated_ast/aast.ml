@@ -131,9 +131,9 @@ and expr_ =
     * hint list (* explicit type annotations *)
     * expr list (* positional args *)
     * expr list (* unpacked args *)
-  | Int of pstring
-  | Float of pstring
-  | String of pstring
+  | Int of string
+  | Float of string
+  | String of string
   | String2 of expr list
   | Yield of afield
   | Yield_break
@@ -485,10 +485,10 @@ class type ['a] visitor_type = object
   method on_call : 'a -> call_type -> expr -> expr list -> expr list -> 'a
   method on_true : 'a -> 'a
   method on_false : 'a -> 'a
-  method on_int : 'a -> pstring -> 'a
-  method on_float : 'a -> pstring -> 'a
+  method on_int : 'a -> string -> 'a
+  method on_float : 'a -> string -> 'a
   method on_null : 'a -> 'a
-  method on_string : 'a -> pstring -> 'a
+  method on_string : 'a -> string -> 'a
   method on_string2 : 'a -> expr list -> 'a
   method on_special_func : 'a -> special_func -> 'a
   method on_yield_break : 'a -> 'a

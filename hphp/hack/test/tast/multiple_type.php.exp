@@ -66,9 +66,7 @@
           m_body =
           (NamedBody
              { Aast.AnnotatedAST.fnb_nast =
-               [(Return ([6:5-14],
-                   (Some (([6:12-13], int), (Int ([6:12-13], "5"))))))
-                 ];
+               [(Return ([6:5-14], (Some (([6:12-13], int), (Int "5")))))];
                fnb_unsafe = false });
           m_fun_kind = FSync; m_user_attributes = [];
           m_ret = (Some ([5:26-29], (Hprim Tint))); m_ret_by_ref = false }
@@ -92,8 +90,7 @@
           (NamedBody
              { Aast.AnnotatedAST.fnb_nast =
                [(Return ([12:5-16],
-                   (Some (([12:12-15], string), (String ([12:12-15], "s"))))
-                   ))
+                   (Some (([12:12-15], string), (String "s")))))
                  ];
                fnb_unsafe = false });
           m_fun_kind = FSync; m_user_attributes = [];

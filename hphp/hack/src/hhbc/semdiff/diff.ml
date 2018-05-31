@@ -192,7 +192,7 @@ let default_value_text_comparer =
         let _, values = Hh_core.List.map_env (Some 0L) values (fun exp_i el ->
           match el, exp_i with
           | Ast.AFvalue _, Some exp_i -> Some (Int64.add exp_i 1L), el
-          | Ast.AFkvalue ((_, Ast.Int (_, k)), v), _ ->
+          | Ast.AFkvalue ((_, Ast.Int k), v), _ ->
             let i_opt =
               Typed_value.string_to_int_opt
                 ~allow_following:false ~allow_inf:false k in
@@ -494,7 +494,7 @@ let param_ti_name_reference_comparer =
     param_variadic_type_info_comparer
     param_name_reference_comparer
 let param_default_value_expression_comparer =
-  wrap (function (_, (_, Ast.String (_, s))) -> s | _ -> "")
+  wrap (function (_, (_, Ast.String s)) -> s | _ -> "")
     (fun _e s -> s) default_value_text_comparer
 let param_default_value_comparer = wrap Hhas_param.default_value
     (fun _p s -> s)

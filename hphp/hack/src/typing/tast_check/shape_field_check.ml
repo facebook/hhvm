@@ -67,15 +67,15 @@ let handler = object
     if not shape_field_check_enabled
     then fun _ -> ()
     else function
-      | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI ((_, class_name), _)), (_, method_name))), _, [shape; _, String field_name], [])
+      | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI ((_, class_name), _)), (_, method_name))), _, [shape; (pos, _), String field_name], [])
         when
           class_name = SN.Shapes.cShapes &&
           method_name = SN.Shapes.keyExists ->
-        trivial_shapes_key_exists_check p env shape field_name
-      | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI ((_, class_name), _)), (_, method_name))), _, [shape; _, String field_name], [])
+        trivial_shapes_key_exists_check p env shape (pos, field_name)
+      | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI ((_, class_name), _)), (_, method_name))), _, [shape; (pos, _), String field_name], [])
         when
           class_name = SN.Shapes.cShapes &&
           method_name = SN.Shapes.idx ->
-        shapes_idx_invalid_key_check p env shape field_name
+        shapes_idx_invalid_key_check p env shape (pos, field_name)
       | _ -> ()
 end

@@ -106,7 +106,7 @@ let rec expr_to_typed_value
   ?(restrict_keys=false)
   ns (_, expr_) =
   match expr_ with
-  | A.Int (_, s) -> begin
+  | A.Int s -> begin
     match try_type_intlike s with
     | Some v -> v
     | None ->
@@ -117,11 +117,11 @@ let rec expr_to_typed_value
   | A.True -> TV.Bool true
   | A.False -> TV.Bool false
   | A.Null -> TV.null
-  | A.String (_, s) -> TV.String s
-  | A.Float (_, s) -> TV.Float (float_of_string s)
+  | A.String s -> TV.String s
+  | A.Float s -> TV.Float (float_of_string s)
   | A.Id (_, id) when id = "NAN" -> TV.Float nan
   | A.Id (_, id) when id = "INF" -> TV.Float infinity
-  | A.Call ((_, A.Id (_, "__hhas_adata")), _, [ (_, A.String (_, data)) ], [])
+  | A.Call ((_, A.Id (_, "__hhas_adata")), _, [ (_, A.String data) ], [])
     ->
       TV.HhasAdata data
   | A.Array fields -> array_to_typed_value ns fields
@@ -210,7 +210,7 @@ and array_to_typed_value ns fields =
         match afield with
           (* Special treatment for explicit integer key, or string that
            * parses successfully as integer *)
-        | A.AFkvalue (((_, (A.Int (_, s) | A.String (_, s))) as key), value) ->
+        | A.AFkvalue (((_, (A.Int s | A.String s)) as key), value) ->
           begin match Int64.of_string s with
           | newindex when SU.Integer.is_decimal_int s ->
             begin match key with
@@ -245,8 +245,8 @@ and darray_to_typed_value ns fields =
     List.map
       fields
       ~f:(fun (v1,v2) ->
-        match v1 with
-        | (_, A.String (_, s)) ->
+        match snd v1 with
+        | A.String s ->
            begin match Int64.of_string s with
            | index when (SU.Integer.is_decimal_int s) && not (hack_arr_dv_arrs ()) ->
               (TV.Int index, expr_to_typed_value ns v2)
@@ -323,11 +323,11 @@ let rec value_to_expr_ p v =
   match v with
   | TV.Uninit -> failwith "value_to_expr: uninit value"
   | TV.Null -> A.Null
-  | TV.Int i -> A.Int (p, Int64.to_string i)
+  | TV.Int i -> A.Int (Int64.to_string i)
   | TV.Bool false -> A.False
   | TV.Bool true -> A.True
-  | TV.String s -> A.String (p, s)
-  | TV.Float f -> A.Float (p, SU.Float.to_string f)
+  | TV.String s -> A.String s
+  | TV.Float f -> A.Float (SU.Float.to_string f)
   | TV.Vec _ -> failwith "value_to_expr: vec NYI"
   | TV.Keyset _ -> failwith "value_to_expr: keyset NYI"
   | TV.HhasAdata _ -> failwith "value_to_expr: HhasAdata NYI"

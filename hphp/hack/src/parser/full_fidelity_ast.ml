@@ -1070,7 +1070,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       Call (
         pExpr recv env,
         [],
-        [ literal_expression_pos, String (literal_expression_pos, s) ],
+        [ literal_expression_pos, String s ],
         []
       )
     | FunctionCallExpression
@@ -1119,7 +1119,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       Call (pExpr recv env, hints, couldMap ~f:pExpr args env, [])
     | QualifiedName _ ->
       if in_string location
-      then String (pos_qualified_name node env)
+      then
+        let _, n = pos_qualified_name node env in
+        String n
       else Id (pos_qualified_name node env)
 
     | VariableExpression { variable_expression } ->
@@ -1195,10 +1197,10 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Some TK.Print                   ->
           Call ((pos, Id (pos, "echo")), [], [expr], [])
         | Some TK.Dollar                  ->
-          (match snd expr with
-          | String (p, s)
-          | Int (p, s)
-          | Float (p, s) when location <> InGlobalVar -> Lvar (p, "$" ^ s)
+          (match expr with
+          | p, String s
+          | p, Int s
+          | p, Float s when location <> InGlobalVar -> Lvar (p, "$" ^ s)
           | _ -> Dollar expr
           )
         | _ -> missing_syntax "unary operator" node env
@@ -1216,9 +1218,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       | InDoubleQuotedString, TK.HeredocStringLiteral
       | InDoubleQuotedString, TK.HeredocStringLiteralHead
       | InDoubleQuotedString, TK.HeredocStringLiteralTail ->
-          String (pos, Php_escaping.unescape_heredoc (text node))
-      | InDoubleQuotedString, _ -> String (pos, unesc_dbl (text node))
-      | InBacktickedString, _ -> String (pos, Php_escaping.unescape_backtick (text node))
+          String (Php_escaping.unescape_heredoc (text node))
+      | InDoubleQuotedString, _ -> String (unesc_dbl (text node))
+      | InBacktickedString, _ -> String (Php_escaping.unescape_backtick (text node))
       | MemberSelect, _
       | InGlobalVar, _
       | TopLevel, _ -> Id (pos_name node env)
@@ -1261,8 +1263,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         Class_get (qual, name)
       | _ ->
         let name = pExpr scope_resolution_name env in
-        begin match snd name with
-        | String id | Id id -> Class_const (qual, id)
+        begin match name with
+        | p, String id | _, Id (p, id) -> Class_const (qual, (p, id))
         | _ -> Class_get (qual, name)
         end
       end
@@ -1380,17 +1382,17 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           Lint.lowercase_constant pos s;
         (match location, token_kind expr with
         (* TODO(T21285960): Inside strings, int indices "should" be string indices *)
-        | InDoubleQuotedString, _ when env.codegen -> String (pos, mkStr unesc_dbl s)
-        | InBacktickedString, _ when env.codegen -> String (pos, mkStr Php_escaping.unescape_backtick s)
+        | InDoubleQuotedString, _ when env.codegen -> String (mkStr unesc_dbl s)
+        | InBacktickedString, _ when env.codegen -> String (mkStr Php_escaping.unescape_backtick s)
         | _, Some TK.DecimalLiteral
         | _, Some TK.OctalLiteral
         | _, Some TK.HexadecimalLiteral
-        | _, Some TK.BinaryLiteral             -> Int    (pos, eliminate_underscores s)
-        | _, Some TK.FloatingLiteral           -> Float  (pos, s)
-        | _, Some TK.SingleQuotedStringLiteral -> String (pos, mkStr Php_escaping.unescape_single s)
-        | _, Some TK.DoubleQuotedStringLiteral -> String (pos, mkStr Php_escaping.unescape_double s)
-        | _, Some TK.HeredocStringLiteral      -> String (pos, mkStr Php_escaping.unescape_heredoc s)
-        | _, Some TK.NowdocStringLiteral       -> String (pos, mkStr Php_escaping.unescape_nowdoc s)
+        | _, Some TK.BinaryLiteral             -> Int    (eliminate_underscores s)
+        | _, Some TK.FloatingLiteral           -> Float  s
+        | _, Some TK.SingleQuotedStringLiteral -> String (mkStr Php_escaping.unescape_single s)
+        | _, Some TK.DoubleQuotedStringLiteral -> String (mkStr Php_escaping.unescape_double s)
+        | _, Some TK.HeredocStringLiteral      -> String (mkStr Php_escaping.unescape_heredoc s)
+        | _, Some TK.NowdocStringLiteral       -> String (mkStr Php_escaping.unescape_nowdoc s)
         | _, Some TK.NullLiteral               -> Null
         | _, Some TK.BooleanLiteral            ->
           (match String.lowercase_ascii s with
@@ -1399,7 +1401,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | _       -> missing_syntax ("boolean (not: " ^ s ^ ")") expr env
           )
         | _, Some TK.ExecutionStringLiteral ->
-          Execution_operator [pos, String (pos, mkStr Php_escaping.unescape_backtick s)]
+          Execution_operator [pos, String (mkStr Php_escaping.unescape_backtick s)]
         | _ -> missing_syntax "literal" expr env
         )
       | SyntaxList ({ syntax = Token token; _ } :: _ as ts)
@@ -1543,16 +1545,16 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
               value from quotes and decode HTML entities  *)
           let text =
             Html_entities.decode @@ get_quoted_content (full_text node) in
-          p, String (p, text)
+          p, String text
         | Token token
           when env.codegen && Token.kind token = TK.XHPBody ->
           let p = pPos node env in
           (* for XHP body - only decode HTML entities *)
           let text = Html_entities.decode @@ unesc_xhp (full_text node) in
-          p, String (p, text)
+          p, String text
         | Token _ ->
           let p = pPos node env in
-          p, String (p, escaper (full_text node))
+          p, String (escaper (full_text node))
         | _ ->
           match pExpr node env with
           | _, BracedExpr e -> e
@@ -2734,7 +2736,7 @@ let pProgram : program parser = fun node env ->
       )))) :: el) -> Constant
         { cst_mode      = mode_annotation env.fi_mode
         ; cst_kind      = Cst_define
-        ; cst_name      = name
+        ; cst_name      = pos, name
         ; cst_type      = None
         ; cst_value     = value
         ; cst_namespace = Namespace_env.empty env.parser_options
@@ -2779,10 +2781,10 @@ let pProgram : program parser = fun node env ->
     ; _ } as cur_node :: nodel when not env.quick_mode ->
       let def =
         match List.map ~f:(fun x -> pExpr x env) (as_list args) with
-        | [ _, String name; e ] -> Constant
+        | [ pos, String name; e ] -> Constant
           { cst_mode      = mode_annotation env.fi_mode
           ; cst_kind      = Cst_define
-          ; cst_name      = name
+          ; cst_name      = pos, name
           ; cst_type      = None
           ; cst_value     = e
           ; cst_namespace = Namespace_env.empty env.parser_options
@@ -2954,7 +2956,7 @@ let elaborate_halt_compiler ast env source_text  =
             let end_offset = start_offset + (String.length id) in
             let pos_file = Pos.filename p in
             let pos = SourceText.relative_pos pos_file source_text start_offset end_offset in
-            pos, Ast.Int (pos, id)
+            pos, Ast.Int id
           | _ -> super#on_expr env expr
       end in
       visitor#on_program () defs in

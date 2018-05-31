@@ -18,7 +18,7 @@ let rec static_string_exn = function
     let s1 = static_string_exn s1 in
     let s2 = static_string_exn s2 in
     s1 ^ s2
-  | _, String (_p, s) -> s
+  | _, String s -> s
   | p, _ -> raise (Not_static_exn p)
 
 let static_string expr =

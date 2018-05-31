@@ -12,12 +12,9 @@
                    (([13:3-5], array<string, _>), (Lvar ([13:3-5], $x))),
                    (([13:8-13], array<string, _>),
                     (Array
-                       [(AFkvalue (
-                           (([13:14-17], string), (String ([13:14-17], "k"))),
-                           (([13:21-22], int), (Int ([13:21-22], "0")))));
-                         (AFkvalue (
-                            (([13:24-28], string),
-                             (String ([13:24-28], "k2"))),
+                       [(AFkvalue ((([13:14-17], string), (String "k")),
+                           (([13:21-22], int), (Int "0"))));
+                         (AFkvalue ((([13:24-28], string), (String "k2")),
                             (([13:32-49], _),
                              (Call (Cnormal,
                                 (([13:32-47], _),
@@ -32,8 +29,7 @@
                     (([14:3-5], array<_>), (Lvar ([14:3-5], $y))),
                     (([14:8-13], array<_>),
                      (Array
-                        [(AFvalue
-                            (([14:14-15], int), (Int ([14:14-15], "0"))));
+                        [(AFvalue (([14:14-15], int), (Int "0")));
                           (AFvalue
                              (([14:17-34], _),
                               (Call (Cnormal,

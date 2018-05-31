@@ -6,8 +6,8 @@
       f_body =
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
-           [(Return ([7:42-55],
-               (Some (([7:49-54], string), (String ([7:49-54], "foo"))))))
+           [(Return ([7:42-55], (Some (([7:49-54], string), (String "foo")))
+               ))
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
@@ -30,7 +30,7 @@
                 (([10:3-15], string),
                  (Binop ((Eq None),
                     (([10:3-7], string), (Lvar ([10:3-7], $foo))),
-                    (([10:10-15], string), (String ([10:10-15], "foo")))))));
+                    (([10:10-15], string), (String "foo"))))));
               (Expr
                  (([11:3-10], ?int),
                   (Obj_get ((([11:3-5], C), (Lvar ([11:3-5], $c))),

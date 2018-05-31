@@ -1847,7 +1847,7 @@ and expr_
       else
       if s = SN.PseudoFunctions.hh_log_level
       then match el with
-        | [(_, Int (_, level_str))] ->
+        | [(_, Int level_str)] ->
           Typing_log.hh_log_level (int_of_string level_str)
         | _ -> ()
       else
@@ -3242,7 +3242,7 @@ and akshape_field env = function
       let env, tv = Typing_env.unbind env tv in
       let env, tv = TUtils.unresolved env tv in
       let field_name =
-        match TUtils.shape_field_name env Pos.none (snd k) with
+        match TUtils.shape_field_name env k with
         | Some field_name -> field_name
         | None -> assert false in  (* Typing_arrays.is_shape_like_array
                                     * should have prevented this *)
@@ -3571,7 +3571,7 @@ and is_abstract_ft fty = match fty with
             | _, Class_const (cid, (_, x))
             | _, Class_get (cid, (_, x)) when x = SN.Members.mClass -> cid
             | _ -> ((), Nast.CIexpr e1)) in
-          class_const ~incl_tc:true env p (cid, cst)
+          class_const ~incl_tc:true env p (cid, (p, cst))
         | _ ->
           Errors.illegal_type_structure p "second argument is not a string";
           expr_error env p (Reason.Rwitness p))
@@ -4178,7 +4178,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       (match e2 with
       | p, Int n ->
           (try
-            let idx = int_of_string (snd n) in
+            let idx = int_of_string n in
             let nth = List.nth_exn tyl idx in
             env, nth
           with _ ->
@@ -4200,7 +4200,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       (match e2 with
       | p, Int n ->
           (try
-            let idx = int_of_string (snd n) in
+            let idx = int_of_string n in
             let nth = List.nth_exn [ty1; ty2] idx in
             env, nth
           with _ ->
@@ -4213,8 +4213,8 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
           env, (Reason.Rwitness p, Typing_utils.terr env)
       )
   | Tshape (_, fdm) ->
-    let p, e2' = e2 in
-    (match TUtils.shape_field_name env p e2' with
+    let p = fst e2 in
+    (match TUtils.shape_field_name env e2 with
       | None ->
           (* there was already an error in shape_field name,
              don't report another one for a missing field *)
@@ -6083,7 +6083,7 @@ and is_array env ty p pred_name arg_expr =
 
 and key_exists env shape field =
   refine_lvalue_type env shape ~refine:begin fun env shape_ty ->
-    match TUtils.shape_field_name env (fst field) (snd field) with
+    match TUtils.shape_field_name env field with
     | None -> env, shape_ty
     | Some field_name -> Typing_shapes.refine_shape field_name env shape_ty
   end

@@ -81,10 +81,10 @@ let emit_generator_method name params is_async =
 
 let emit_native_opcode_impl name params = function
   | [{ A.ua_name = (_, "__NativeData");
-       A.ua_params = [_, A.String (_, "HH\\AsyncGenerator")]}] ->
+       A.ua_params = [_, A.String "HH\\AsyncGenerator"]}] ->
     emit_generator_method name params true
   | [{ A.ua_name = (_, "__NativeData");
-       A.ua_params = [_, A.String (_, "Generator")]}] ->
+       A.ua_params = [_, A.String "Generator"]}] ->
     emit_generator_method name params false
   | _ ->
     Emit_fatal.raise_fatal_runtime

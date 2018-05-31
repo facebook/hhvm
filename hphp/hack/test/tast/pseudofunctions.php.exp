@@ -16,13 +16,11 @@
            [(Expr
                (([9:3-7], void),
                 (Call (Cnormal, (([9:3-7], _), (Id ([9:3-7], "echo"))), 
-                   [], [(([9:7-14], string), (String ([9:8-13], "foo")))], 
-                   []))));
+                   [], [(([9:7-14], string), (String "foo"))], []))));
              (Expr
                 (([10:3-8], void),
                  (Call (Cnormal, (([10:3-8], _), (Id ([10:3-8], "echo"))),
-                    [], [(([10:8-15], string), (String ([10:9-14], "foo")))],
-                    []))));
+                    [], [(([10:8-15], string), (String "foo"))], []))));
              (Expr
                 (([12:3-15], void),
                  (Assert (AE_assert (([12:10-14], bool), True)))));
@@ -34,9 +32,7 @@
                      (Call (Cnormal,
                         (([13:3-12], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
                          (Id ([13:3-12], "\\invariant_violation"))),
-                        [],
-                        [(([13:19-24], string), (String ([13:19-24], "foo")))
-                          ],
+                        [], [(([13:19-24], string), (String "foo"))], 
                         []))))
                   ],
                 [Noop]));
@@ -45,9 +41,7 @@
                  (Call (Cnormal,
                     (([14:3-22], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
                      (Id ([14:3-22], "\\invariant_violation"))),
-                    [],
-                    [(([14:23-28], string), (String ([14:23-28], "foo")))],
-                    []))));
+                    [], [(([14:23-28], string), (String "foo"))], []))));
              (Expr
                 (([16:3-14], (function(C $c): void)),
                  (Fun_id ([16:7-13], "\\test"))));

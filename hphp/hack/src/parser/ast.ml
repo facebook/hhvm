@@ -399,9 +399,9 @@ and expr_ =
   | Class_get of expr * expr
   | Class_const of expr * pstring
   | Call of expr * hint list * expr list * expr list
-  | Int of pstring
-  | Float of pstring
-  | String of pstring
+  | Int of string
+  | Float of string
+  | String of string
   | String2 of expr list
   | Yield of afield
   | Yield_break

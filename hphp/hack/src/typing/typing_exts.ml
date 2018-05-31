@@ -125,7 +125,7 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
     | Left p, _ -> Left p
     | _, Left p -> Left p in
     match e with
-    | _, Nast.String (_, s) -> env, Right s
+    | _, Nast.String s -> env, Right s
     (* It's an invariant that this is going to fail, but look for the best
      * evidence *)
     | p, Nast.String2 xs ->

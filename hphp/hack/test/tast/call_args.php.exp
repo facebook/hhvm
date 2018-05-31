@@ -26,9 +26,7 @@
                  (Call (Cnormal,
                     (([6:3-15], (function(string $s): void)),
                      (Id ([6:3-15], "\\takes_string"))),
-                    [],
-                    [(([6:16-23], string), (String ([6:16-23], "hello")))],
-                    []))))
+                    [], [(([6:16-23], string), (String "hello"))], []))))
               ];
             fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })

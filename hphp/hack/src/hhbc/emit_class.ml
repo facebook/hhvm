@@ -310,7 +310,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   in
   let class_xhp_categories =
     List.find_map ast_class.A.c_body (function
-      | A.XhpCategory (p, c) -> Some (p, c)
+      | A.XhpCategory (p, c) -> Some (p, List.map c ~f:snd)
       | _ -> None)
   in
   let class_is_abstract = ast_class.A.c_kind = Ast.Cabstract in

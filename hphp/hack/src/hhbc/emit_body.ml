@@ -53,7 +53,7 @@ let rec emit_def env def =
         let p0 = Pos.none in
         let p_name = fst c.Ast.cst_name in
         let args = [
-          p_name, Ast.String (p_name, SU.strip_global_ns cns_name);
+          p_name, Ast.String (SU.strip_global_ns cns_name);
           c.Ast.cst_value] in
         p0, Ast.Expr(p0, Ast.Call ((p0, Ast.Id (p0, "define")), [], args, [])) in
       Emit_statement.emit_stmt env define_call

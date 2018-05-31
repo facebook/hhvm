@@ -10,14 +10,14 @@
                (([9:4-21], :foo),
                 (Xml (([9:4-7], "\\:foo"),
                    [(Xhp_simple (([9:8-11], "bar"),
-                       (([9:12-18], string), (String ([9:12-18], "herp")))))
+                       (([9:12-18], string), (String "herp"))))
                      ],
                    []))));
              (Expr
                 (([10:3-17], string),
                  (Binop ((Eq None),
                     (([10:3-8], string), (Lvar ([10:3-8], $derp))),
-                    (([10:11-17], string), (String ([10:11-17], "derp")))))));
+                    (([10:11-17], string), (String "derp"))))));
              (Expr
                 (([11:4-22], :foo),
                  (Xml (([11:4-7], "\\:foo"),
@@ -29,22 +29,17 @@
                 (([14:4-18:9], :foo),
                  (Xml (([14:4-7], "\\:foo"),
                     [(Xhp_simple (([14:8-11], "bar"),
-                        (([14:12-18], string), (String ([14:12-18], "herp")))
-                        ))
+                        (([14:12-18], string), (String "herp"))))
                       ],
                     [(([15:6-17:11], :foo),
                       (Xml (([15:6-9], "\\:foo"),
                          [(Xhp_simple (([15:10-13], "bar"),
-                             (([15:14-20], string),
-                              (String ([15:14-20], "derp")))
-                             ))
+                             (([15:14-20], string), (String "derp"))))
                            ],
                          [(([16:8-25], :foo),
                            (Xml (([16:8-11], "\\:foo"),
                               [(Xhp_simple (([16:12-15], "bar"),
-                                  (([16:16-22], string),
-                                   (String ([16:16-22], "herp")))
-                                  ))
+                                  (([16:16-22], string), (String "herp"))))
                                 ],
                               [])))
                            ]

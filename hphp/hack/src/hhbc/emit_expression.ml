@@ -446,16 +446,17 @@ let get_queryMOpMode need_ref op =
 
 let extract_shape_field_name_pstring = function
   | A.SFlit s ->
-    Emit_type_constant.check_shape_key s; A.String s
+    Emit_type_constant.check_shape_key s;
+    A.String (snd s)
   | A.SFclass_const ((pn, _) as id, p) -> A.Class_const ((pn, A.Id id), p)
 
-let rec text_of_expr e_ = match e_ with
+let rec text_of_expr e = match e with
   (* Note we force string literals to become single-quoted, regardless of
      whether they were single- or double-quoted in the source. Gross. *)
-  | A.String (p, s) -> (p, "'" ^ s ^ "'")
-  | A.Id id | A.Lvar id -> id
-  | A.Array_get ((p, A.Lvar (_, id)), Some (_, e_)) ->
-    (p, id ^ "[" ^ snd (text_of_expr e_) ^ "]")
+  | p, A.String s -> (p, "'" ^ s ^ "'")
+  | _, A.Id id | _, A.Lvar id -> id
+  | _, A.Array_get ((p, A.Lvar (_, id)), Some e) ->
+    (p, id ^ "[" ^ snd (text_of_expr e) ^ "]")
   | _ -> Pos.none, "unknown" (* TODO: get text of expression *)
 
 let parse_include e =
@@ -469,8 +470,8 @@ let parse_include e =
       then let var, lit = split_var_lit e1 in var, lit ^ l
       else v, ""
     end
-    | _, A.String (_, lit) -> "", lit
-    | _, e_ -> snd (text_of_expr e_), "" in
+    | _, A.String lit -> "", lit
+    | e -> snd (text_of_expr e), "" in
   let var, lit = split_var_lit e in
   let var, lit =
     if var = "__DIR__" then ("", strip_backslash lit) else (var, lit) in
@@ -1047,7 +1048,7 @@ and emit_execution_operator env pos exprs =
   let instrs =
     match exprs with
     (* special handling of ``*)
-    | [_, A.String (_, "") as e] -> emit_expr ~need_ref:false env e
+    | [_, A.String "" as e] -> emit_expr ~need_ref:false env e
     | _ ->  emit_string2 env pos exprs in
   gather [
     instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "shell_exec");
@@ -1173,7 +1174,7 @@ and emit_import env pos flavor e =
       let include_roots = Hhbc_options.include_roots !Hhbc_options.compiler_options in
       match Hhas_symbol_refs.resolve_to_doc_root_relative inc ~include_roots with
         | Hhas_symbol_refs.DocRootRelative path ->
-          (pos, A.String (fst e, path)), IIncludeEvalDefine ReqDoc
+          (pos, A.String path), IIncludeEvalDefine ReqDoc
         | _ -> e, IIncludeEvalDefine ReqOnce
   in
   gather [
@@ -1332,7 +1333,7 @@ and emit_eval env pos e =
 
 and emit_xhp_obj_get_raw env pos e s nullflavor =
   let fn_name = pos, A.Obj_get (e, (pos, A.Id (pos, "getAttribute")), nullflavor) in
-  let args = [pos, A.String (pos, SU.Xhp.clean s)] in
+  let args = [pos, A.String (SU.Xhp.clean s)] in
   fst (emit_call env pos fn_name args [])
 
 and emit_xhp_obj_get ~need_ref env pos param_num_opt e s nullflavor =
@@ -1351,7 +1352,7 @@ and emit_get_class_no_args () =
 
 and emit_class_alias es =
   let c1, c2 = match es with
-    | (_, A.String (_, c1)) :: (_, A.String (_, c2)) :: _ -> c1, c2
+    | (_, A.String c1) :: (_, A.String c2) :: _ -> c1, c2
     | _ -> failwith "emit_class_alias: impossible"
   in
   let default = if List.length es = 2 then instr_true else instr_string c2 in
@@ -1687,7 +1688,7 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
   | A.Call ((_, A.Id (_, id)), _, ([_; _] | [_; _; _] as es), _)
     when  String.lowercase_ascii id = "idx" && not (jit_enable_rename_function ()) ->
     emit_box_if_necessary pos need_ref @@ emit_idx env pos es
-  | A.Call ((_, A.Id (_, id)), _, [(_, A.String (_, s)); e], _)
+  | A.Call ((_, A.Id (_, id)), _, [(_, A.String s); e], _)
     when String.lowercase_ascii id = "define" && is_global_namespace env ->
     emit_box_if_necessary pos need_ref @@ emit_define env pos s e
   | A.Call ((_, A.Id (_, id)), _, [expr], _) when String.lowercase_ascii id = "eval" ->
@@ -1840,7 +1841,7 @@ and emit_struct_array env pos es ctor =
             let ns = Emit_env.get_namespace env in
             (* TODO: Consider reusing folded keys from is_struct_init *)
             begin match snd @@ Ast_constant_folder.fold_expr ns k with
-            | A.String (_, s) -> s, emit_expr ~need_ref:false env v
+            | A.String s -> s, emit_expr ~need_ref:false env v
             | _ -> failwith "impossible"
             end
           | _ -> failwith "impossible")
@@ -1859,11 +1860,11 @@ and is_packed_init ?(hack_arr_compat=true) es =
   in
   let keys_are_zero_indexed_properly_formed =
     List.foldi es ~init:true ~f:(fun i b f -> b && match f with
-      | A.AFkvalue ((_, A.Int (_, k)), _) ->
+      | A.AFkvalue ((_, A.Int k), _) ->
         int_of_string k = i
       (* arrays with int-like string keys are still considered packed
          and should be emitted via NewArray *)
-      | A.AFkvalue ((_, A.String (_, k)), _) when not hack_arr_compat ->
+      | A.AFkvalue ((_, A.String k), _) when not hack_arr_compat ->
         (try int_of_string k = i with Failure _ -> false)
       (* True and False are considered 1 and 0, respectively *)
       | A.AFkvalue ((_, A.True), _) ->
@@ -1903,7 +1904,7 @@ and is_struct_init env es allow_numerics =
       | A.AFkvalue (key, _) ->
         let ns = Emit_env.get_namespace env in
         begin match snd @@ Ast_constant_folder.fold_expr ns key with
-        | A.String (_, s) ->
+        | A.String s ->
           b && (Option.is_none
             @@ Typed_value.string_to_int_opt
                 ~allow_following:false ~allow_inf:false s),
@@ -2500,7 +2501,7 @@ and get_elem_member_key env stack_index opt_expr =
   | Some (_, A.Lvar id) when not (is_local_this env (snd id)) ->
     MemberKey.EL (get_local env id)
   (* Special case for literal integer *)
-  | Some (_, A.Int (_, str) as int_expr)->
+  | Some (_, A.Int str as int_expr)->
     let open Ast_constant_folder in
     let namespace = Emit_env.get_namespace env in
     begin match expr_to_typed_value namespace int_expr with
@@ -2508,7 +2509,7 @@ and get_elem_member_key env stack_index opt_expr =
     | _ -> failwith (str ^ " is not a valid integer index")
     end
   (* Special case for literal string *)
-  | Some (_, A.String (_, str)) -> MemberKey.ET str
+  | Some (_, A.String str) -> MemberKey.ET str
   (* Special case for class name *)
   | Some (_, (A.Class_const ((_, A.Id (p, cName as cid)), (_, id))))
     when is_special_class_constant_accessed_with_class_id env cid id ->
@@ -2540,7 +2541,7 @@ and emit_prop_expr env null_flavor stack_index prop_expr =
       MemberKey.PL (get_local env id)
     (* Special case for known property name *)
     | A.Id (_, id)
-    | A.String (_, id) ->
+    | A.String id ->
       let pid = Hhbc_id.Prop.from_ast_name id in
       begin match null_flavor with
       | Ast.OG_nullthrows -> MemberKey.PT pid
@@ -3095,7 +3096,7 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
       instr_cgetl (get_local env id);
       instr_fpushobjmethod nargs null_flavor inout_arg_positions;
     ]
-  | A.Obj_get (obj, (_, A.String (_, id)), null_flavor)
+  | A.Obj_get (obj, (_, A.String id), null_flavor)
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
     let name = Hhbc_id.Method.from_ast_name id in
     let name =
@@ -3199,7 +3200,7 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
     | Some id -> instr (ICall (FPushFuncU (nargs, fq_id, id)))
     | None -> instr (ICall (FPushFuncD (nargs, fq_id)))
     end
-  | A.String (_, s) ->
+  | A.String s ->
     emit_pos_then outer_pos @@
     instr_fpushfuncd nargs (Hhbc_id.Function.from_raw_string s)
   | _ ->
@@ -3256,7 +3257,7 @@ and emit_special_function env pos id args uargs default =
     Some (emit_call env pos (p,
         A.Id (p, "\\__SystemLib\\func_slice_args")) [count] [])
 
-  | "hh\\asm", [_, A.String (_, s)] ->
+  | "hh\\asm", [_, A.String s] ->
     Some (emit_inline_hhas s, Flavor.Cell)
 
   | "hh\\invariant", e::rest when hh_enabled ->
@@ -3442,7 +3443,7 @@ and emit_final_static_op cid prop op =
   | LValOp.IncDec op -> instr (IMutator (IncDecS (op, 0)))
   | LValOp.Unset ->
     let cid = text_of_expr cid in
-    let id = text_of_expr (snd prop) in
+    let id = text_of_expr prop in
     Emit_fatal.emit_fatal_runtime (fst id)
       ("Attempt to unset static property " ^ snd cid ^ "::" ^ snd id)
 
@@ -3790,7 +3791,7 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
       (Emit_env.get_scope env) cid in
     begin match snd prop with
     | A.Dollar (_, A.Lvar _ as e) ->
-      let final_instr = emit_final_static_op (snd cid) prop op in
+      let final_instr = emit_final_static_op cid prop op in
       let instrs, under_top = emit_first_expr env e in
       if under_top
       then
@@ -3804,7 +3805,7 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
     | _ ->
       let final_instr =
         emit_pos_then pos @@
-        emit_final_static_op (snd cid) prop op in
+        emit_final_static_op cid prop op in
       of_pair @@ emit_class_expr env cexpr prop,
       rhs_instrs,
       final_instr

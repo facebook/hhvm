@@ -21,10 +21,10 @@ and expr_ f = function
   | Shape sh -> Shape (shape f sh)
   | True -> True
   | False -> False
-  | Int n -> Int (pstring f n)
-  | Float n -> Float (pstring f n)
+  | Int n -> Int n
+  | Float n -> Float n
   | Null -> Null
-  | String s -> String (pstring f s)
+  | String s -> String s
   | This -> This
   | Id sid -> Id (pstring f sid)
   | Lplaceholder pos -> Lplaceholder (f pos)

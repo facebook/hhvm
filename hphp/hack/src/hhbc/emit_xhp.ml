@@ -79,10 +79,10 @@ let emit_xhp_attribute_array ~ns xal =
     let id, _ = Hhbc_id.Class.elaborate_id ns (p, id) in
     let id = Hhbc_id.Class.to_raw_string id in
     let type_ = hint_to_num id in
-    let type_ident = (p, A.Int (p, string_of_int type_)) in
+    let type_ident = (p, A.Int (string_of_int type_)) in
     let class_name = match type_ with
       (* regular class names is type 5 *)
-      | 5 -> (p, A.String (p, id))
+      | 5 -> (p, A.String id)
       (* enums are type 7 *)
       | 7 -> get_enum_attributes enumo
       | _ -> (p, A.Null)
@@ -102,7 +102,7 @@ let emit_xhp_attribute_array ~ns xal =
         -> get_attribute_array_values id enumo
       | _ -> failwith "There are no other possible xhp attribute hints"
     in
-    let is_required = (p, A.Int (p, if is_req then "1" else "0")) in
+    let is_required = (p, A.Int (if is_req then "1" else "0")) in
     [hint; class_name; e; is_required]
   in
   let aux xa =
@@ -113,7 +113,7 @@ let emit_xhp_attribute_array ~ns xal =
       Option.map ~f:(fun (p, _, e) -> p, e) (Hhas_xhp_attribute.maybe_enum xa)
     in
     let is_req = Hhas_xhp_attribute.is_required xa in
-    let k = p, A.String (p, SU.Xhp.clean name) in
+    let k = p, A.String (SU.Xhp.clean name) in
     let v = p, A.Varray (inner_array ho expo enumo is_req) in
     (k, v)
   in
@@ -181,35 +181,35 @@ let xhp_child_op_to_int = function
 let rec emit_xhp_child_decl ~unary = function
   | A.ChildList l ->
     get_array3
-      (A.Int (p, unary))
-      (A.Int (p, "5"))
+      (A.Int unary)
+      (A.Int "5")
       (emit_xhp_children_decl_expr ~unary:"0" l)
   | A.ChildName (_, name) when String.lowercase_ascii name = "any" ->
     get_array3
-      (A.Int (p, unary))
-      (A.Int (p, "1"))
+      (A.Int unary)
+      (A.Int "1")
       (A.Null)
   | A.ChildName (_, name) when String.lowercase_ascii name = "pcdata"->
     get_array3
-      (A.Int (p, unary))
-      (A.Int (p, "2"))
+      (A.Int unary)
+      (A.Int "2")
       (A.Null)
   | A.ChildName (_, s) when s.[0] = '%' ->
     get_array3
-      (A.Int (p, unary))
-      (A.Int (p, "4"))
-      (A.String (p, SU.Xhp.mangle (String.sub s 1 ((String.length s) - 1))))
+      (A.Int unary)
+      (A.Int "4")
+      (A.String (SU.Xhp.mangle (String.sub s 1 ((String.length s) - 1))))
   | A.ChildName (_, s) ->
     get_array3
-      (A.Int (p, unary))
-      (A.Int (p, "3"))
-      (A.String (p, SU.Xhp.mangle s))
+      (A.Int unary)
+      (A.Int "3")
+      (A.String (SU.Xhp.mangle s))
   | A.ChildUnary (c, op) ->
     emit_xhp_children_decl_expr [c]
       ~unary:(string_of_int @@ xhp_child_op_to_int @@ Some op)
   | A.ChildBinary (c1, c2) ->
     get_array3
-      (A.Int (p, "5"))
+      (A.Int "5")
       (emit_xhp_children_decl_expr ~unary [c1])
       (emit_xhp_children_decl_expr ~unary [c2])
 
@@ -220,12 +220,12 @@ and emit_xhp_children_decl_expr ~unary l =
   | c1 :: c2 :: cs ->
     let first_two =
       get_array3
-        (A.Int (p, "4"))
+        (A.Int "4")
         (emit_xhp_child_decl ~unary c1)
         (emit_xhp_child_decl ~unary c2) in
     Core_list.fold_left cs ~init:first_two ~f:(fun acc n ->
       get_array3
-        (A.Int (p, "4"))
+        (A.Int "4")
         acc
         (emit_xhp_child_decl ~unary n))
 
@@ -238,14 +238,14 @@ let emit_xhp_children_paren_expr c =
                   "plain binary or unary without an inside list"
   in
   let arr = emit_xhp_children_decl_expr ~unary:"0" l in
-  get_array3 (A.Int (p, string_of_int op_num)) (A.Int (p, "5")) arr
+  get_array3 (A.Int (string_of_int op_num)) (A.Int "5") arr
 
 let emit_xhp_children_array = function
-  | [] -> A.Int (Pos.none, "0")
+  | [] -> A.Int "0"
   | [A.ChildName (_, n) as c] ->
     begin match String.lowercase_ascii n with
-    | "empty" -> A.Int (Pos.none, "0")
-    | "any" -> A.Int (Pos.none, "1")
+    | "empty" -> A.Int "0"
+    | "any" -> A.Int "1"
     | _ -> emit_xhp_children_paren_expr c
     end
   | [c] -> emit_xhp_children_paren_expr c
@@ -274,7 +274,7 @@ let from_children_declaration ast_class (child_pos, children) =
 let get_category_array categories =
   (* TODO: is this always 1? *)
   List.map categories
-    ~f:(fun s -> ((p, A.String s), (p, A.Int (p, "1"))))
+    ~f:(fun s -> ((p, A.String s), (p, A.Int "1")))
 
 (* AST transformations taken from hphp/parser/hphp.y *)
 let from_category_declaration ast_class (cat_pos, categories) =

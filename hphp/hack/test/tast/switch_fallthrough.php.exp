@@ -27,15 +27,15 @@ File "switch_fallthrough.php", line 37, characters 3-13:
            [(Expr
                (([5:3-9], int),
                 (Binop ((Eq None), (([5:3-5], int), (Lvar ([5:3-5], $x))),
-                   (([5:8-9], int), (Int ([5:8-9], "0")))))));
+                   (([5:8-9], int), (Int "0"))))));
              (Expr
                 (([6:3-14], _),
                  (Call (Cnormal,
                     (([6:3-10], _), (Id ([6:3-10], "\\hh_show"))), [],
                     [(([6:11-13], int), (Lvar ([6:11-13], $x)))], []))));
              (Switch ((([7:11-13], int), (Lvar ([7:11-13], $x))),
-                [(Case ((([8:10-11], int), (Int ([8:10-11], "0"))), []));
-                  (Case ((([10:10-11], int), (Int ([10:10-11], "1"))),
+                [(Case ((([8:10-11], int), (Int "0")), []));
+                  (Case ((([10:10-11], int), (Int "1")),
                      [(Expr
                          (([12:7-18], _),
                           (Call (Cnormal,
@@ -47,9 +47,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                           (([14:7-14], string),
                            (Binop ((Eq None),
                               (([14:7-9], string), (Lvar ([14:7-9], $x))),
-                              (([14:12-14], string),
-                               (String ([14:12-14], "")))
-                              ))));
+                              (([14:12-14], string), (String ""))))));
                        (Expr
                           (([15:7-18], _),
                            (Call (Cnormal,
@@ -60,7 +58,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                               []))));
                        Fallthrough]
                      ));
-                  (Case ((([17:10-11], int), (Int ([17:10-11], "3"))),
+                  (Case ((([17:10-11], int), (Int "3")),
                      [(Expr
                          (([19:7-18], _),
                           (Call (Cnormal,
@@ -83,7 +81,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                               []))));
                        Fallthrough]
                      ));
-                  (Case ((([24:10-11], int), (Int ([24:10-11], "4"))),
+                  (Case ((([24:10-11], int), (Int "4")),
                      [(Expr
                          (([26:7-18], _),
                           (Call (Cnormal,
@@ -94,7 +92,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                              []))));
                        (Break [27:7-13])]
                      ));
-                  (Case ((([28:10-11], int), (Int ([28:10-11], "4"))),
+                  (Case ((([28:10-11], int), (Int "4")),
                      [(Expr
                          (([30:7-18], _),
                           (Call (Cnormal,
@@ -106,9 +104,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                           (([32:7-15], float),
                            (Binop ((Eq None),
                               (([32:7-9], float), (Lvar ([32:7-9], $x))),
-                              (([32:12-15], float),
-                               (Float ([32:12-15], "1.0")))
-                              ))));
+                              (([32:12-15], float), (Float "1.0"))))));
                        (Expr
                           (([33:7-18], _),
                            (Call (Cnormal,

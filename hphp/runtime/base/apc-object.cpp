@@ -131,7 +131,7 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
   auto const propCount = odProps.size();
 
   auto size = sizeof(APCObject) + sizeof(Prop) * propCount;
-  auto const apcObj = new (uncounted_malloc(size)) APCObject(name, propCount);
+  auto const apcObj = new (apc_malloc(size)) APCObject(name, propCount);
   if (!propCount) return {apcObj->getHandle(), size};
 
   auto prop = apcObj->props();
@@ -196,9 +196,11 @@ APCObject::~APCObject() {
 
 void APCObject::Delete(APCHandle* handle) {
   auto const obj = fromHandle(handle);
+  auto const allocSize = sizeof(APCObject) + obj->m_propCount *
+    (obj->m_persistent ? sizeof(APCHandle*) : sizeof(Prop));
   obj->~APCObject();
   // No need to run Prop destructors.
-  apc_free(obj);
+  apc_sized_free(obj, allocSize);
 }
 
 //////////////////////////////////////////////////////////////////////

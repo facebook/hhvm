@@ -95,7 +95,7 @@ const Class* getOwningClassForFunc(const Func* f) {
 
 Class::PropInitVec::~PropInitVec() {
   if (m_capacity > 0) {
-    vm_free(m_data);
+    vm_sized_free(m_data, m_capacity * sizeof(TypedValue));
   }
 }
 
@@ -134,8 +134,9 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
     m_capacity = static_cast<int32_t>(newCap);
     auto newData = vm_malloc(newCap * sizeof(TypedValue));
     if (m_data) {
-      memcpy(newData, m_data, m_size * sizeof(*m_data));
-      vm_free(m_data);
+      auto const oldSize = m_size * sizeof(*m_data);
+      memcpy(newData, m_data, oldSize);
+      vm_sized_free(m_data, oldSize);
     }
     m_data = reinterpret_cast<TypedValueAux*>(newData);
     assertx(m_data);
@@ -465,7 +466,7 @@ Class::~Class() {
     for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
       m_sPropCache[i].~Link();
     }
-    vm_free(m_sPropCache);
+    vm_sized_free(m_sPropCache, numStaticProperties() * sizeof(*m_sPropCache));
   }
 
   for (auto i = size_t{}, n = numMethods(); i < n; i++) {
@@ -2419,12 +2420,12 @@ void Class::setProperties() {
   m_declProperties.create(curPropMap);
   m_staticProperties.create(curSPropMap);
 
-  using LinkT = std::remove_pointer<decltype(m_sPropCache)>::type;
-  m_sPropCache = static_cast<LinkT*>(
-    vm_malloc(numStaticProperties() * sizeof(*m_sPropCache))
-  );
-  for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
-    new (&m_sPropCache[i]) LinkT;
+  if (unsigned n = numStaticProperties()) {
+    using LinkT = std::remove_pointer<decltype(m_sPropCache)>::type;
+    m_sPropCache = static_cast<LinkT*>(vm_malloc(n * sizeof(LinkT)));
+    for (unsigned i = 0; i < n; ++i) {
+      new (&m_sPropCache[i]) LinkT;
+    }
   }
 
   m_declPropNumAccessible = m_declProperties.size() - numInaccessible;

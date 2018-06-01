@@ -36,8 +36,12 @@ void SparseHeap::reset() {
     });
   }
   auto const do_free = [](void* ptr, size_t size) {
-#if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 4)
+#ifdef USE_JEMALLOC
+#if JEMALLOC_VERSION_MAJOR >= 4
     sdallocx(ptr, size, 0);
+#else
+    dallocx(ptr, 0);
+#endif
 #else
     free(ptr);
 #endif
@@ -141,7 +145,12 @@ void SparseHeap::freeBig(void* ptr, MemoryUsageStats& stats) {
   stats.mm_freed += cap;
   stats.malloc_cap -= cap;
 #ifdef USE_JEMALLOC
+  assertx(nallocx(cap, 0) == sallocx(ptr, 0));
+#if JEMALLOC_VERSION_MAJOR >= 4
+  sdallocx(ptr, cap, 0);
+#else
   dallocx(ptr, 0);
+#endif
 #else
   free(ptr);
 #endif

@@ -521,7 +521,6 @@ void MixedArray::Release(ArrayData* in) {
 
 NEVER_INLINE
 void MixedArray::ReleaseUncounted(ArrayData* in) {
-
   auto const ad = asMixed(in);
   if (!ad->uncountedDecRef()) return;
 
@@ -544,7 +543,8 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
     assertx(!has_strong_iterator(ad));
   }
   auto const extra = ad->hasApcTv() ? sizeof(APCTypedValue) : 0;
-  uncounted_free(reinterpret_cast<char*>(ad) - extra);
+  uncounted_sized_free(reinterpret_cast<char*>(ad) - extra,
+                       computeAllocBytes(ad->scale()) + extra);
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }

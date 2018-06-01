@@ -183,7 +183,7 @@ inline void* malloc_huge_internal(size_t size) {
 #if !USE_JEMALLOC_EXTENT_HOOKS
   return malloc(size);
 #else
-  if (!size) return nullptr;
+  assert(size);
   return mallocx(size, high_arena_flags);
 #endif
 }
@@ -192,7 +192,18 @@ inline void free_huge_internal(void* ptr) {
 #if !USE_JEMALLOC_EXTENT_HOOKS
   free(ptr);
 #else
-  if (ptr) dallocx(ptr, high_arena_flags);
+  assert(ptr);
+  dallocx(ptr, high_arena_flags);
+#endif
+}
+
+inline void sized_free_huge_internal(void* ptr, size_t size) {
+#if !USE_JEMALLOC_EXTENT_HOOKS
+  free(ptr);
+#else
+  assert(ptr);
+  assert(sallocx(ptr, high_arena_flags) == nallocx(size, high_arena_flags));
+  sdallocx(ptr, size, high_arena_flags);
 #endif
 }
 
@@ -370,6 +381,10 @@ inline void vm_free(void* ptr) {
   return free_huge_internal(ptr);
 }
 
+inline void vm_sized_free(void* ptr, size_t size) {
+  return sized_free_huge_internal(ptr, size);
+}
+
 // Allocations that are guaranteed to live below kUncountedMaxAddr when
 // USE_JEMALLOC_EXTENT_HOOKS.  This provides a new way to check for countedness
 // for arrays and strings.
@@ -381,6 +396,10 @@ inline void uncounted_free(void* ptr) {
   return free_huge_internal(ptr);
 }
 
+inline void uncounted_sized_free(void* ptr, size_t size) {
+  return sized_free_huge_internal(ptr, size);
+}
+
 // Allocations for the APC but do not necessarily live below kUncountedMaxAddr,
 // e.g., APCObject, or the hash table.  Currently they live below
 // kUncountedMaxAddr anyway, but this may change later.
@@ -390,6 +409,10 @@ inline void* apc_malloc(size_t size) {
 
 inline void apc_free(void* ptr) {
   return free_huge_internal(ptr);
+}
+
+inline void apc_sized_free(void* ptr, size_t size) {
+  return sized_free_huge_internal(ptr, size);
 }
 
 inline void* low_malloc(size_t size) {
@@ -466,12 +489,13 @@ struct VMAllocator {
   template<class U> explicit VMAllocator(const VMAllocator<U>&) noexcept {}
   ~VMAllocator() noexcept {}
 
-  pointer allocate(size_t num, const void* = nullptr) {
-    pointer ret = (pointer)vm_malloc(num * sizeof(T));
-    return ret;
+  pointer allocate(size_t num) {
+    if (!num) return nullptr;
+    return (pointer)vm_malloc(num * sizeof(T));
   }
-  void deallocate(pointer p, size_t /*num*/) {
-    vm_free((void*)p);
+  void deallocate(pointer p, size_t num) {
+    if (!p) return;
+    vm_sized_free((void*)p, num * sizeof(T));
   }
 
   template<class U, class... Args>
@@ -504,10 +528,12 @@ struct APCAllocator {
   ~APCAllocator() noexcept {}
 
   pointer allocate(size_t num, const void* = nullptr) {
+    if (!num) return nullptr;
     return (pointer)apc_malloc(num * sizeof(T));
   }
-  void deallocate(pointer p, size_t /*num*/) {
-    apc_free((void*)p);
+  void deallocate(pointer p, size_t num) {
+    if (!p) return;
+    apc_sized_free((void*)p, num * sizeof(T));
   }
 
   template<class U, class... Args>

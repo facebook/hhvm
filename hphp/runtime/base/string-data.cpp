@@ -153,7 +153,8 @@ void StringData::ReleaseUncounted(const StringData* str) {
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
-  uncounted_free(const_cast<StringData*>(str));
+  auto const allocSize = str->size() + kStringOverhead;
+  uncounted_sized_free(const_cast<StringData*>(str), allocSize);
 }
 
 //////////////////////////////////////////////////////////////////////

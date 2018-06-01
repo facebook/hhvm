@@ -174,12 +174,14 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
   auto num = arr->size();
   auto cap = num > 2 ? folly::nextPowTwo(num) : 2;
 
-  auto size = sizeof(APCArray) + sizeof(int) * cap + sizeof(Bucket) * num;
-  auto p = apc_malloc(size);
+  auto const allocSize = sizeof(APCArray) +
+    sizeof(int) * cap + sizeof(Bucket) * num;
+  auto p = apc_malloc(allocSize);
   APCArray* ret = new (p) APCArray(HashedCtor{}, kind, cap);
 
   for (int i = 0; i < cap; i++) ret->hash()[i] = -1;
 
+  auto size = allocSize;
   try {
     IterateKV(
       arr,
@@ -196,7 +198,7 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
     );
   } catch (...) {
     ret->~APCArray();
-    apc_free(p);
+    apc_sized_free(p, allocSize);
     throw;
   }
 
@@ -249,12 +251,13 @@ APCHandle* APCArray::MakeUncountedKeyset(ArrayData* keyset) {
 
 APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
                                      bool unserializeObj) {
-  auto num_elems = arr->size();
-  auto size = sizeof(APCArray) + sizeof(APCHandle*) * num_elems;
-  auto p = apc_malloc(size);
+  auto const num_elems = arr->size();
+  auto const allocSize = sizeof(APCArray) + sizeof(APCHandle*) * num_elems;
+  auto p = apc_malloc(allocSize);
   auto ret = new (p) APCArray(PackedCtor{}, kind, num_elems);
 
   size_t i = 0;
+  auto size = allocSize;
   try {
     IterateV(
       arr,
@@ -270,7 +273,7 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
   } catch (...) {
     ret->m_size = i;
     ret->~APCArray();
-    apc_free(p);
+    apc_sized_free(p, allocSize);
     throw;
   }
 

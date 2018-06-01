@@ -141,6 +141,9 @@ struct Allocator {
   typedef std::size_t    size_type;
   typedef std::ptrdiff_t difference_type;
 
+  typedef std::true_type folly_has_default_object_construct;
+  typedef std::true_type folly_has_default_object_destroy;
+
   template <class U>
   struct rebind {
     typedef Allocator<U, Action> other;

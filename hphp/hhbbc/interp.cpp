@@ -3196,62 +3196,6 @@ void in(ISS& env, const bc::FPassC& op) {
   if (op.subop2 != FPassHint::Ref) effect_free(env);
 }
 
-void fpassCXHelper(ISS& env, uint32_t param, bool error, FPassHint hint) {
-  auto const& fpi = fpiTop(env);
-  auto const kind = prepKind(env, param);
-  if (!fpassCanThrow(env, kind, hint)) hint = FPassHint::Any;
-  if (shouldKillFPass(env, hint, param)) {
-    switch (kind) {
-      case PrepKind::Unknown:
-        not_reached();
-      case PrepKind::Ref:
-      {
-        auto const& params = fpi.func->exactFunc()->params;
-        if (param >= params.size() || params[param].mustBeRef) {
-          if (error) {
-            return killFPass(
-              env,
-              kind,
-              hint,
-              param,
-              bc::String { s_byRefError.get() },
-              bc::Fatal { FatalOp::Runtime }
-            );
-          } else {
-            return killFPass(
-              env,
-              kind,
-              hint,
-              param,
-              bc::String { s_byRefWarn.get() },
-              bc::Int { (int)ErrorMode::STRICT },
-              bc::FCallBuiltin { 2, 2, s_trigger_error.get() },
-              bc::PopC {}
-            );
-          }
-        }
-        // fall through
-      }
-      case PrepKind::Val:
-        return reduce(env, bc::Nop {});
-    }
-    not_reached();
-  }
-  switch (kind) {
-    case PrepKind::Unknown: return;
-    case PrepKind::Val:     return reduce(env, bc::FPassC { param, hint });
-    case PrepKind::Ref:     /* will warn/fatal at runtime */ return;
-  }
-}
-
-void in(ISS& env, const bc::FPassCW& op) {
-  fpassCXHelper(env, op.arg1, false, op.subop2);
-}
-
-void in(ISS& env, const bc::FPassCE& op) {
-  fpassCXHelper(env, op.arg1, true, op.subop2);
-}
-
 constexpr int32_t kNoUnpack = -1;
 
 void pushCallReturnType(ISS& env, Type&& ty, int32_t unpack = kNoUnpack) {

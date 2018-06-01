@@ -1093,12 +1093,6 @@ public:
                  MInstrOpts opts, bool includeLast = false);
   void emitQueryMOp(int iFirst, int iLast, Emitter& e, QueryMOp op);
 
-  enum class PassByRefKind {
-    AllowCell,
-    WarnOnCell,
-    ErrorOnCell,
-  };
-  PassByRefKind getPassByRefKind(ExpressionPtr exp);
   void emitPrePush(Emitter& e, ExpressionListPtr params);
   void emitCall(Emitter& e, FunctionCallPtr func,
                 ExpressionListPtr params, Offset fpiStart);
@@ -1126,8 +1120,8 @@ public:
   void emitConvertToCellOrLoc(Emitter& e);
   void emitConvertSecondToCell(Emitter& e);
   void emitConvertToVar(Emitter& e);
-  void emitFPass(Emitter& e, int paramID, PassByRefKind passByRefKind,
-                 FPassHint hint, bool isInOut = false, bool canMove = false);
+  void emitFPass(Emitter& e, int paramID, FPassHint hint, bool isInOut = false,
+                 bool canMove = false);
   Offset emitFPushClsMethod(Emitter& e, ExpressionListPtr params);
   void emitVirtualLocal(int localId);
   template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
@@ -6059,7 +6053,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         emitConvertToCell(e);
         visit((*params)[1]);
         emitConvertToCell(e);
-        call->changeToBytecode();
         e.AKExists();
         return true;
       }
@@ -6080,7 +6073,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           visit((*params)[2]);
           emitConvertToCell(e);
         }
-        call->changeToBytecode();
         e.Idx();
         return true;
       }
@@ -6092,7 +6084,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         emitConvertToCell(e);
         visit((*params)[2]);
         emitConvertToCell(e);
-        call->changeToBytecode();
         e.ArrayIdx();
         return true;
       }
@@ -7955,73 +7946,6 @@ void EmitterVisitor::emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal,
   m_curFunc->freeUnnamedLocal(tempLocal);
 }
 
-EmitterVisitor::PassByRefKind
-EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
-  auto permissiveKind = PassByRefKind::AllowCell;
-
-  // The PassByRefKind of a list assignment expression is determined
-  // by the PassByRefKind of the RHS. This loop will repeatedly recurse
-  // on the RHS until it encounters an expression other than a list
-  // assignment expression.
-  while (exp->is(Expression::KindOfListAssignment)) {
-    exp = static_pointer_cast<ListAssignment>(exp)->getArray();
-    permissiveKind = PassByRefKind::WarnOnCell;
-  }
-
-  switch (exp->getKindOf()) {
-    case Expression::KindOfSimpleFunctionCall: {
-      auto sfc = static_pointer_cast<SimpleFunctionCall>(exp);
-      // this only happens for calls that have been morphed into bytecode
-      // e.g. idx(), abs(), strlen(), etc..
-      // It is to allow the following code to work
-      // function f(&$arg) {...}
-      // f(idx($array, 'key')); <- this fails otherwise
-      if (sfc->hasBeenChangedToBytecode()) {
-        return PassByRefKind::AllowCell;
-      }
-    } break;
-    case Expression::KindOfNewObjectExpression:
-    case Expression::KindOfIncludeExpression:
-    case Expression::KindOfSimpleVariable:
-      // New and include/require
-      return PassByRefKind::AllowCell;
-    case Expression::KindOfArrayElementExpression:
-      // Allow if bare; warn if inside list assignment
-      return permissiveKind;
-    case Expression::KindOfAssignmentExpression:
-      // Assignment (=) and binding assignment (=&)
-      return PassByRefKind::WarnOnCell;
-    case Expression::KindOfBinaryOpExpression: {
-      auto b = static_pointer_cast<BinaryOpExpression>(exp);
-      // Assignment op (+=, -=, *=, etc)
-      if (b->isAssignmentOp()) return PassByRefKind::WarnOnCell;
-    } break;
-    case Expression::KindOfUnaryOpExpression: {
-      auto u = static_pointer_cast<UnaryOpExpression>(exp);
-      int op = u->getOp();
-      if (op == T_CLONE) {
-        // clone
-        return PassByRefKind::AllowCell;
-      } else if (op == '@' || op == T_EVAL ||
-                 ((op == T_INC || op == T_DEC) && u->getFront())) {
-        // Silence operator, eval, preincrement, and predecrement
-        return PassByRefKind::WarnOnCell;
-      }
-    } break;
-    case Expression::KindOfExpressionList: {
-      auto el = static_pointer_cast<ExpressionList>(exp);
-      if (el->getListKind() != ExpressionList::ListKindParam) {
-        return el->getListKind() == ExpressionList::ListKindWrappedNoWarn ?
-          PassByRefKind::AllowCell : PassByRefKind::WarnOnCell;
-      }
-    } break;
-    default:
-      break;
-  }
-  // All other cases
-  return PassByRefKind::ErrorOnCell;
-}
-
 void EmitterVisitor::emitClosureUseVar(Emitter& e, ExpressionPtr exp,
                                        int /*paramId*/, bool byRef) {
   visit(exp);
@@ -8063,7 +7987,7 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
     // passed by reference.
     emitConvertToCell(e);
   } else {
-    emitFPass(e, paramId, getPassByRefKind(exp), getPassByRefHint(exp));
+    emitFPass(e, paramId, getPassByRefHint(exp));
   }
 }
 
@@ -8107,13 +8031,11 @@ EmitterVisitor::MInstrChain EmitterVisitor::emitInOutArg(
     return false;
   }();
 
-  emitFPass(e, paramId, getPassByRefKind(exp), getPassByRefHint(exp), true,
-            canMove);
+  emitFPass(e, paramId, getPassByRefHint(exp), true, canMove);
   return chain;
 }
 
 void EmitterVisitor::emitFPass(Emitter& e, int paramId,
-                               PassByRefKind passByRefKind,
                                FPassHint hint,
                                bool isInOut,
                                bool canMove) {
@@ -8147,14 +8069,7 @@ void EmitterVisitor::emitFPass(Emitter& e, int paramId,
     }
     switch (sym) {
       case StackSym::L: e.FPassL(paramId, m_evalStack.getLoc(i), hint); break;
-      case StackSym::C:
-        switch (passByRefKind) {
-          case PassByRefKind::AllowCell:   e.FPassC(paramId, hint); break;
-          case PassByRefKind::WarnOnCell:  e.FPassCW(paramId, hint); break;
-          case PassByRefKind::ErrorOnCell: e.FPassCE(paramId, hint); break;
-          default: assert(false);
-        }
-        break;
+      case StackSym::C: e.FPassC(paramId, hint); break;
       case StackSym::LN: e.CGetL(m_evalStack.getLoc(i));  // fall through
       case StackSym::CN: e.FPassN(paramId, hint); break;
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
@@ -10410,7 +10325,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
       FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
       for (uint32_t i = 0; i < numParams; i++) {
         emitVirtualLocal(i);
-        emitFPass(e, i, PassByRefKind::ErrorOnCell, FPassHint::Cell);
+        emitFPass(e, i, FPassHint::Cell);
       }
     }
     e.FCall(numParams);

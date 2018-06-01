@@ -1097,7 +1097,6 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
         param.builtinType,
         param.inout,
         param.byRef,
-        param.byRef,
         param.variadic
       }
     );
@@ -1208,15 +1207,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
     ret->nativeInfo                   = std::make_unique<php::NativeInfo>();
     ret->nativeInfo->returnType       = fe.hniReturnType;
     if (f && ret->params.size()) {
-      if (!f->cls()) {
-        // There are a handful of functions whose first parameter is by
-        // ref, but which don't require a reference.  There is also
-        // array_multisort, which has this property for all its
-        // parameters; but that
-        if (ret->params[0].byRef && !f->mustBeRef(0)) {
-          ret->params[0].mustBeRef = false;
-        }
-      }
       for (auto i = 0; i < ret->params.size(); i++) {
         auto& pi = ret->params[i];
         if (pi.isVariadic || !f->params()[i].hasDefaultValue()) continue;

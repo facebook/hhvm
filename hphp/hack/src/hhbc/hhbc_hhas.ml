@@ -503,10 +503,6 @@ let string_of_call instruction =
     sep ["FPushCufIter"; string_of_int n; string_of_iterator_id id]
   | FPassC (i, h) ->
     sep ["FPassC"; string_of_param_num i; string_of_fpasshint h]
-  | FPassCW (i, h) ->
-    sep ["FPassCW"; string_of_param_num i; string_of_fpasshint h]
-  | FPassCE (i, h) ->
-    sep ["FPassCE"; string_of_param_num i; string_of_fpasshint h]
   | FPassV (i, h) ->
     sep ["FPassV"; string_of_param_num i; string_of_fpasshint h]
   | FPassVNop (i, h) ->

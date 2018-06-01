@@ -130,13 +130,6 @@ namespace HPHP {
 
 TRACE_SET_MOD(bcinterp);
 
-// TODO: #1746957, #1756122
-// we should skip the call in call_user_func_array, if
-// by reference params are passed by value, or if its
-// argument is not an array, but currently lots of tests
-// depend on actually making the call.
-const bool skipCufOnInvalidParams = false;
-
 // RepoAuthoritative has been raptured out of runtime_option.cpp. It needs
 // to be closer to other bytecode.cpp data.
 bool RuntimeOption::RepoAuthoritative = false;
@@ -1335,8 +1328,7 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
 // always 0; for unpacked arguments, it may be greater if normally passed
 // params precede the unpack.
 bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
-                      int nregular, bool doCufRefParamChecks,
-                      TypedValue* retval, bool checkRefAnnot) {
+                      int nregular, TypedValue* retval, bool checkRefAnnot) {
   assertx(!cellIsNull(&args));
   assertx(nregular >= 0);
   assertx((stack.top() + nregular) == (void*) ar);
@@ -1380,15 +1372,6 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
       } else {
         if (checkRefAnnot) {
           WRAP(raiseParamRefMismatchForFunc(f, i));
-        }
-        if (doCufRefParamChecks && f->mustBeRef(i)) {
-          WRAP(raise_warning("Parameter %d to %s() expected to be a reference, "
-                             "value given", i + 1, f->fullName()->data()));
-          if (skipCufOnInvalidParams) {
-            stack.discard();
-            if (retval) { tvWriteNull(*retval); }
-            return false;
-          }
         }
         cellDup(tvToCell(from), *to);
       }
@@ -5132,22 +5115,6 @@ OPTBLD_INLINE void iopFPassC(ActRec* ar, uint32_t paramId, FPassHint hint) {
   checkFPassHint(ar, paramId, hint);
 }
 
-OPTBLD_INLINE void iopFPassCW(ActRec* ar, uint32_t paramId, FPassHint hint) {
-  checkFPassHint(ar, paramId, hint);
-  auto const func = ar->m_func;
-  if (func->mustBeRef(paramId)) {
-    raise_strict_warning("Only variables should be passed by reference");
-  }
-}
-
-OPTBLD_INLINE void iopFPassCE(ActRec* ar, uint32_t paramId, FPassHint hint) {
-  checkFPassHint(ar, paramId, hint);
-  auto const func = ar->m_func;
-  if (func->mustBeRef(paramId)) {
-    raise_error("Cannot pass parameter %d by reference", paramId+1);
-  }
-}
-
 OPTBLD_INLINE void iopFPassV(ActRec* ar, uint32_t paramId, FPassHint hint) {
   checkFPassHint(ar, paramId, hint);
   const Func* func = ar->m_func;
@@ -5351,8 +5318,7 @@ static bool doFCallUnpack(PC& pc, ActRec* ar, int numStackValues,
     }
 
     auto prepResult = prepareArrayArgs(ar, args, vmStack(), numStackValues,
-                                       /* ref param checks */ true, nullptr,
-                                       /* check ref annot */ true);
+                                       nullptr, /* check ref annot */ true);
     if (UNLIKELY(!prepResult)) {
       vmStack().pushNull(); // return value is null if args are invalid
       return false;
@@ -6860,8 +6826,6 @@ ALWAYS_INLINE ActRec* ar_for_inst(Op op, PC origpc,
                                   int iva_count, uint32_t* ivas) {
   switch (op) {
     case Op::FPassC:
-    case Op::FPassCW:
-    case Op::FPassCE:
     case Op::FPassV:
     case Op::FPassVNop:
     case Op::FPassR:

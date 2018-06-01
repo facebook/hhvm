@@ -438,7 +438,6 @@ public:
 
   enum InvokeFlags {
     InvokeNormal,
-    InvokeCuf,
     InvokePseudoMain
   };
 

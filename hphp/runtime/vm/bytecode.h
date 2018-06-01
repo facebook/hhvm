@@ -926,8 +926,7 @@ enum class StackArgsState { // tells prepareFuncEntry how much work to do
 void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv);
 void enterVMAtCurPC();
 bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
-                      int nregular, bool doCufRefParamChecks,
-                      TypedValue* retval, bool checkRefAnnot);
+                      int nregular, TypedValue* retval, bool checkRefAnnot);
 
 ///////////////////////////////////////////////////////////////////////////////
 

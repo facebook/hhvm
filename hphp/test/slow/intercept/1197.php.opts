@@ -1,1 +1,1 @@
-../rename_functions.opts
+-vEval.JitEnableRenameFunction=true -vEval.WarnOnCallByRefAnnotationMismatch=1

@@ -1,5 +1,5 @@
 
-Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 6
+Warning: foo() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 6
 int(1)
 array(1) {
   [0]=>
@@ -10,7 +10,7 @@ array(1) {
   int(1)
 }
 
-Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 8
+Warning: foo() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 8
 int(1)
 array(1) {
   [0]=>
@@ -21,7 +21,7 @@ array(1) {
   int(1)
 }
 
-Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 10
+Warning: foo() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 10
 int(1)
 array(1) {
   [0]=>
@@ -32,7 +32,7 @@ array(1) {
   int(1)
 }
 
-Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 12
+Warning: foo() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 12
 int(1)
 array(1) {
   [0]=>

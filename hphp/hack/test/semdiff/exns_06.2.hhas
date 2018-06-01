@@ -3,27 +3,27 @@
 .main {
   FPushFuncD 1 "foo"
   String "lop"
-  FPassCE 0 Cell
+  FPassC 0 Cell
   FCall 1
   PopR
   FPushFuncD 1 "foo"
   String "goo"
-  FPassCE 0 Cell
+  FPassC 0 Cell
   FCall 1
   PopR
   FPushFuncD 1 "foo"
   String "blah"
-  FPassCE 0 Cell
+  FPassC 0 Cell
   FCall 1
   PopR
   FPushFuncD 1 "foo"
   String "baz"
-  FPassCE 0 Cell
+  FPassC 0 Cell
   FCall 1
   PopR
   FPushFuncD 1 "foo"
   String "bar"
-  FPassCE 0 Cell
+  FPassC 0 Cell
   FCall 1
   PopR
   Int 1
@@ -35,7 +35,7 @@
     .try {
       FPushCtorD 1 "Exception"
       String "one"
-      FPassCE 0 Cell
+      FPassC 0 Cell
       FCall 1
       PopR
       Throw
@@ -44,7 +44,7 @@
       UnsetL _1
       FPushCtorD 1 "Exception"
       String "two"
-      FPassCE 0 Cell
+      FPassC 0 Cell
       FCall 1
       PopR
       Throw
@@ -62,7 +62,7 @@ F0:
   .try {
     FPushCtorD 1 "Exception"
     String "one"
-    FPassCE 0 Cell
+    FPassC 0 Cell
     FCall 1
     PopR
     Throw
@@ -121,7 +121,7 @@ F2:
     PopC
     FPushCtorD 1 "Exception"
     String "one"
-    FPassCE 0 Cell
+    FPassC 0 Cell
     FCall 1
     PopR
     Throw
@@ -132,7 +132,7 @@ F2:
     PopC
     FPushCtorD 1 "Exception"
     String "two"
-    FPassCE 0 Cell
+    FPassC 0 Cell
     FCall 1
     PopR
     Throw
@@ -162,7 +162,7 @@ F2:
   .try {
       FPushCtorD 1 "Exception"
       String "one"
-      FPassCE 0 Cell
+      FPassC 0 Cell
       FCall 1
       PopR
       Throw
@@ -171,7 +171,7 @@ F2:
         UnsetL _1
         FPushCtorD 1 "Exception"
         String "two"
-        FPassCE 0 Cell
+        FPassC 0 Cell
         FCall 1
         PopR
         Throw
@@ -192,7 +192,7 @@ F1:
   .try {
       FPushCtorD 1 "Exception"
       String "bar"
-      FPassCE 0 Cell
+      FPassC 0 Cell
       FCall 1
       PopR
       Throw

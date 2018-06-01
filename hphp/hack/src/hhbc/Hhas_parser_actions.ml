@@ -1002,8 +1002,6 @@ match s with
  | "DecodeCufIter" -> ICall (DecodeCufIter (iterofiarg arg1, labelofiarg arg2))
  | "FPushCufIter" -> ICall (FPushCufIter (intofiarg arg1, iterofiarg arg2))
  | "FPassC" -> ICall(FPassC (intofiarg arg1, fpasshintof arg2))
- | "FPassCW" -> ICall(FPassCW (intofiarg arg1, fpasshintof arg2))
- | "FPassCE" -> ICall(FPassCE (intofiarg arg1, fpasshintof arg2))
  | "FPassV" -> ICall(FPassV (intofiarg arg1, fpasshintof arg2))
  | "FPassVNop" -> ICall(FPassVNop (intofiarg arg1, fpasshintof arg2))
  | "FPassR" -> ICall(FPassR (intofiarg arg1, fpasshintof arg2))

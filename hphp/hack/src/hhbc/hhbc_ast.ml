@@ -50,11 +50,6 @@ module Flavor = struct
   type t = Cell | Ref | ReturnVal
 end
 
-(* When using the PassX instructions we need to emit the right kind *)
-module PassByRefKind = struct
-  type t = AllowCell | WarnOnCell | ErrorOnCell
-end
-
 (* Indicates whether a call site was annotated as pass-by-ref or not *)
 type fpass_hint =
   | Any
@@ -419,8 +414,6 @@ type instruct_call =
   | DecodeCufIter of Iterator.t * Label.t
   | FPushCufIter of num_params * Iterator.t
   | FPassC of param_num * fpass_hint
-  | FPassCW of param_num * fpass_hint
-  | FPassCE of param_num * fpass_hint
   | FPassV of param_num * fpass_hint
   | FPassVNop of param_num * fpass_hint
   | FPassR of param_num * fpass_hint

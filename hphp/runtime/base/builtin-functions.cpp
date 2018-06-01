@@ -457,7 +457,7 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
   }
   auto ret = Variant::attach(
     g_context->invokeFunc(f, params, obj, cls,
-                          nullptr, invName, ExecutionContext::InvokeCuf,
+                          nullptr, invName, ExecutionContext::InvokeNormal,
                           false, dynamic, checkRef)
   );
   if (UNLIKELY(isRefType(ret.getRawType()))) {

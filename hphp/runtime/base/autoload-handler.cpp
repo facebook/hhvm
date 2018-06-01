@@ -84,7 +84,7 @@ Variant vm_call_user_func_cufiter(const CufIter& cufIter,
   }
   return Variant::attach(
     g_context->invokeFunc(f, params, obj, cls, nullptr, invName,
-                          ExecutionContext::InvokeCuf, false,
+                          ExecutionContext::InvokeNormal, false,
                           cufIter.dynamic())
   );
 }

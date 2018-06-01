@@ -446,8 +446,8 @@ let check_instruct_call asn i i' =
   | FPushObjMethodD _, _ | FPushClsMethod _, _
   | FPushClsMethodS _, _ | FPushClsMethodSD _, _
   | FPushClsMethodD _, _ | FPushCtor _, _ | FPushCtorD _, _ | FPushCtorI _, _
-  | FPushCtorS _, _ | FPushCufIter _, _ | FPassC _, _ | FPassCW _, _
-  | FPassCE _, _ | FPassV _, _ | FPassVNop _, _ | FPassR _, _ | FPassN _, _
+  | FPushCtorS _, _ | FPushCufIter _, _ | FPassC _, _
+  | FPassV _, _ | FPassVNop _, _ | FPassR _, _ | FPassN _, _
   | FPassG _, _ | FPassS _, _ | FCall _, _ | FCallD _, _
   | FCallAwait _, _ | FCallUnpack _, _ | FCallBuiltin _, _
   | FCallM _, _ | FCallUnpackM _, _ | FCallDM _, _ ->
@@ -1401,7 +1401,7 @@ let equiv prog prog' startlabelpairs =
       instructions will get checked again when we move forward (we only consume
       the FPassL even though the pattern is complex). *)
     let createcl_and_pass_pattern =
-      (cugetl_list_createcl_pattern $$ (uFPassC $| uFPassCW $| uFPassCE))
+      (cugetl_list_createcl_pattern $$ uFPassC)
       $> (fun (_l,pi) -> pi) in
     let fpassl_fpassl_pattern =
       uFPassL $*$ uFPassL
@@ -1410,7 +1410,7 @@ let equiv prog prog' startlabelpairs =
 
     let any_pass_pattern =
       createcl_and_pass_pattern
-      $| uFPassC $| uFPassCW $| uFPassCE $| uFPassV $| uFPassVNop $| uFPassR
+      $| uFPassC $| uFPassV $| uFPassVNop $| uFPassR
       $| uFPassN $| uFPassG
       $| (uFPassL $> (fun (param,_,h) -> (param,h)))
       $| (uFPassS $> (fun (param,_,h) -> (param,h))) in

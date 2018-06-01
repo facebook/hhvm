@@ -154,16 +154,9 @@ let instr_fpassv i hint = instr (ICall (FPassV (i, hint)))
 let instr_fpassn i hint = instr (ICall (FPassN (i, hint)))
 let instr_fpassg i hint = instr (ICall (FPassG (i, hint)))
 let instr_fpassc i hint = instr (ICall (FPassC (i, hint)))
-let instr_fpasscw i hint = instr (ICall (FPassCW (i, hint)))
-let instr_fpassce i hint = instr (ICall (FPassCE (i, hint)))
 let instr_fpassvnop i hint = instr (ICall (FPassVNop (i, hint)))
 let instr_raise_fpass_warning hint name i =
   instr (ICall (RaiseFPassWarning (hint, name, i)))
-let instr_fpass kind =
-  match kind with
-  | PassByRefKind.AllowCell -> instr_fpassc
-  | PassByRefKind.WarnOnCell -> instr_fpasscw
-  | PassByRefKind.ErrorOnCell -> instr_fpassce
 
 let instr_popu = instr (IBasic PopU)
 let instr_popr = instr (IBasic PopR)
@@ -788,7 +781,7 @@ let get_input_output_count i =
     | FPushObjMethod _ -> (2, 0)
     | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPassL _
     | FPushCtorS _ -> (0, 1)
-    | FPassC _ | FPassCW _ | FPassCE _ | FPassV _ | FPassVNop _ | FPassR _
+    | FPassC _ | FPassV _ | FPassVNop _ | FPassR _
     | FPassN _ | FPassG _ | FPassS _ -> (1, 1)
     | FCall n | FCallD (n, _, _) | FCallAwait (n, _, _)| FCallUnpack n
     | FCallBuiltin (n, _, _) -> (n, 1) | FCallM (n1, n2) -> (n1, n2)

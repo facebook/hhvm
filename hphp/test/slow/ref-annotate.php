@@ -82,7 +82,7 @@ function main($foo_str, $cuf, $cufa) {
   echo "fb_intercept:\n";
   if (!ini_get('hhvm.repo.authoritative')) intercept();
 
-  echo "Fatal call:\n";
+  echo "Literal array:\n";
   foo('x', 'y', array());
 }
 

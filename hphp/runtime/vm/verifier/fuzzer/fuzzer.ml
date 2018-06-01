@@ -365,10 +365,6 @@ let mut_imms (is : IS.t) : IS.t =
                                               mutate_fpasshint  h)
     | FPassC        (i, h)     -> FPassC     (mutate_int        i  !mag,
                                               mutate_fpasshint  h)
-    | FPassCW       (i, h)     -> FPassCW    (mutate_int        i  !mag,
-                                              mutate_fpasshint  h)
-    | FPassCE       (i, h)     -> FPassCE    (mutate_int        i  !mag,
-                                              mutate_fpasshint  h)
     | FPassV        (i, h)     -> FPassV     (mutate_int        i  !mag,
                                               mutate_fpasshint  h)
     | FPassVNop     (i, h)     -> FPassVNop  (mutate_int        i  !mag,

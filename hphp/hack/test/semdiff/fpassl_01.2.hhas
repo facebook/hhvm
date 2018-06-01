@@ -21,7 +21,7 @@
 # and the two above construct the parameter inline
 # so needed the extension to the fpassl special-case
 # semdiff pattern
-    FPassCE 1 Cell
+    FPassC 1 Cell
     FCall 2
     UnboxR
   }

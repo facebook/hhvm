@@ -1,5 +1,5 @@
 
-Warning: Parameter 65 to has_ref() expected to be a reference, value given in %s/unpack_call_ref.php on line 75
+Warning: has_ref() expects parameter 65 by reference, but the call was not annotated with '&' in %s/unpack_call_ref.php on line 75
 array(65) {
   [0]=>
   int(0)

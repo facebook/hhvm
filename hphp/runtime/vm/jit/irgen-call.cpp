@@ -1409,22 +1409,6 @@ void emitFPassV(IRGS& env, uint32_t argNum, FPassHint hint) {
   decRef(env, tmp);
 }
 
-void emitFPassCE(IRGS& env, uint32_t argNum, FPassHint hint) {
-  if (env.currentNormalizedInstruction->preppedByRef) {
-    // Need to raise an error
-    PUNT(FPassCE-byRef);
-  }
-  checkFPassHint(env, argNum, argNum + 1, hint, false);
-}
-
-void emitFPassCW(IRGS& env, uint32_t argNum, FPassHint hint) {
-  if (env.currentNormalizedInstruction->preppedByRef) {
-    // Need to raise a warning
-    PUNT(FPassCW-byRef);
-  }
-  checkFPassHint(env, argNum, argNum + 1, hint, false);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void emitCallerDynamicCallChecks(IRGS& env,

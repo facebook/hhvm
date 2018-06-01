@@ -411,32 +411,6 @@ let is_isexp_op lower_fq_id =
   | "hh\\is_vec" -> Some (h "vec")
   | _ -> None
 
-(* See EmitterVisitor::getPassByRefKind in emitter.cpp *)
-let get_passByRefKind expr  =
-  let open PassByRefKind in
-  let rec from_non_list_assignment permissive_kind expr =
-    match snd expr with
-    | A.New _ | A.Lvar _ | A.Clone _
-    | A.Import ((A.Include | A.IncludeOnce | A.Require), _) -> AllowCell
-    | A.Binop(A.Eq None, (_, A.List _), e) ->
-      from_non_list_assignment WarnOnCell e
-    | A.Array_get(_, Some _) -> permissive_kind
-    | A.Binop(A.Eq _, _, _) -> WarnOnCell
-    | A.Unop((A.Uincr | A.Udecr | A.Usilence), _) -> WarnOnCell
-    | A.Call((_, A.Id (_, "eval")), _, [_], []) ->
-      WarnOnCell
-    | A.Call((_, A.Id (_, "array_key_exists")), _, [_; _], []) ->
-      AllowCell
-    | A.Call((_, A.Id (_, ("idx"))), _, ([_; _] | [_; _; _]), []) ->
-      AllowCell
-    | A.Call((_, A.Id (_, ("hphp_array_idx"))), _, [_; _; _], []) ->
-      AllowCell
-    | A.Xml _ ->
-      AllowCell
-    | A.NewAnonClass _ -> ErrorOnCell
-    | _ -> ErrorOnCell in
-  from_non_list_assignment AllowCell expr
-
 let get_queryMOpMode need_ref op =
   match op with
   | QueryOp.InOut -> MemberOpMode.InOut
@@ -1053,7 +1027,7 @@ and emit_execution_operator env pos exprs =
   gather [
     instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "shell_exec");
     instrs;
-    instr_fpass PassByRefKind.AllowCell 0 Cell;
+    instr_fpassc 0 Cell;
     instr_fcall 1;
   ]
 
@@ -3050,7 +3024,7 @@ and emit_args_and_call env call_pos args uargs =
           match flavor with
           | Flavor.Ref -> instr_fpassv i hint
           | Flavor.ReturnVal -> instr_fpassr i hint
-          | Flavor.Cell -> instr_fpass (get_passByRefKind expr) i hint
+          | Flavor.Cell -> instr_fpassc i hint
         in
         next @@ gather [
           instrs;

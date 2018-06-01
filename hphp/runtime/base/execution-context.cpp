@@ -1736,8 +1736,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
         ? make_array_like_tv(staticEmptyVArray())
         : args;
       auto prepResult = prepareArrayArgs(ar, prepArgs, vmStack(), 0,
-                                         flags & InvokeCuf, &retval,
-                                         checkRefAnnot);
+                                         &retval, checkRefAnnot);
       if (UNLIKELY(!prepResult)) {
         assertx(KindOfNull == retval.m_type);
         return true;

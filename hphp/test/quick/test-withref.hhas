@@ -62,9 +62,9 @@
   # line 13
     FPushFuncD 2 "sprintf"
     String "%d"
-    FPassCE 0 Any
+    FPassC 0 Any
     Int 11
-    FPassCE 1 Any
+    FPassC 1 Any
     FCall 2
     UnboxR
     SetL $k
@@ -72,9 +72,9 @@
   # line 14
     FPushFuncD 2 "sprintf"
     String "%d"
-    FPassCE 0 Any
+    FPassC 0 Any
     Int 22
-    FPassCE 1 Any
+    FPassC 1 Any
     FCall 2
     UnboxR
     SetL $v

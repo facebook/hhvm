@@ -31,7 +31,7 @@ for lop:
 + } .catch {
 - FPushCtorD 1 "Exception"
 - String "two"
-- FPassCE 0 Cell
+- FPassC 0 Cell
 - FCall 1
 - PopR
 - Throw
@@ -94,7 +94,7 @@ for blah:
 - PopC
 - FPushCtorD 1 "Exception"
 - String "two"
-- FPassCE 0 Cell
+- FPassC 0 Cell
 - FCall 1
 - PopR
 - Throw
@@ -145,7 +145,7 @@ for baz:
 - RetC
 - FPushCtorD 1 "Exception"
 - String "two"
-- FPassCE 0 Cell
+- FPassC 0 Cell
 - FCall 1
 - PopR
 - Throw

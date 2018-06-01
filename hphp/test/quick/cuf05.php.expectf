@@ -10,7 +10,7 @@ array(1) {
   &int(1)
 }
 
-Warning: Parameter 1 to bar() expected to be a reference, value given in %s on line 11
+Warning: bar() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 11
 int(1)
 array(1) {
   [0]=>

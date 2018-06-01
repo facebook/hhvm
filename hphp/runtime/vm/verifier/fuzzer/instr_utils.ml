@@ -218,8 +218,6 @@ let stk_data : instruct -> stack_sig = function
   | IMisc MaybeMemoType
   | ILitConst ColFromArray _               -> ["C"], ["C"]
   | IMisc VerifyRetTypeV                   -> ["V"], ["V"]
-  | ICall FPassCW _
-  | ICall FPassCE _
   | ICall FPassN _
   | ICall FPassG _
   | ICall FPassS _

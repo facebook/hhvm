@@ -317,8 +317,6 @@ static const struct {
   { OpRaiseFPassWarning,
                    {None,             None,         OutNone         }},
   { OpFPassC,      {FuncdRef,         None,         OutSameAsInput1 }},
-  { OpFPassCW,     {FuncdRef,         None,         OutSameAsInput1 }},
-  { OpFPassCE,     {FuncdRef,         None,         OutSameAsInput1 }},
   { OpFPassVNop,   {FuncdRef,         None,         OutSameAsInput1 }},
   { OpFPassV,      {Stack1|FuncdRef,  Stack1,       OutUnknown      }},
   { OpFPassR,      {Stack1|FuncdRef,  Stack1,       OutFInputR      }},
@@ -911,8 +909,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FCallUnpack:
   case Op::FCallAwait:
   case Op::ClsCnsD:
-  case Op::FPassCW:
-  case Op::FPassCE:
   case Op::FPassR:
   case Op::FPassV:
   case Op::FPassG:

@@ -30,7 +30,7 @@ let emit_body_instrs_inout params call_instrs =
           ]
           else instr_pushl (Local.Named (Hhas_param.name p));
           if not (Hhas_param.is_variadic p)
-          then instr_fpass H.PassByRefKind.AllowCell i H.Any
+          then instr_fpassc i H.Any
           else empty
         ]) in
   let inout_params = List.filter_map params ~f:(fun p ->

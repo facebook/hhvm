@@ -347,9 +347,7 @@ let final_instrs (_ : IS.t) : lazy_instruct list =
 (* Generators for FPass* instructions *)
 let fpass_instrs (fn : IS.t) : lazy_instruct list =
   let cls_ref_slts = IS.get_num_cls_ref_slots fn in
-  [(fun () -> ICall (FPassCW (Random.int 10, random_fpasshint ())));
-   (fun () -> ICall (FPassCE (Random.int 10, random_fpasshint ())));
-   (fun () -> ICall (FPassV (Random.int 10, random_fpasshint ())));
+  [(fun () -> ICall (FPassV (Random.int 10, random_fpasshint ())));
    (fun () -> ICall (FPassVNop (Random.int 10, random_fpasshint ())));
    (fun () -> ICall (FPassR (Random.int 10, random_fpasshint ())));
    (fun () -> ICall (FPassL (Random.int 10, random_local (),

@@ -15,7 +15,7 @@
   # alive past the end of test_unwind_dirty_stack_regs.
   FPushClsMethodD 1 "setTraceOptions" "Exception"
     Cns "DEBUG_BACKTRACE_IGNORE_ARGS"
-    FPassCE 0 Any
+    FPassC 0 Any
   FCall 1
   PopR
 

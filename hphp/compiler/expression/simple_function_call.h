@@ -67,13 +67,6 @@ public:
   bool isCallToFunction(folly::StringPiece name) const;
   std::string getFullName() const;
 
-  void changeToBytecode() {
-    m_changedToBytecode = true;
-  }
-  bool hasBeenChangedToBytecode() {
-    return m_changedToBytecode;
-  }
-
 protected:
   enum class FunType {
     Unknown,
@@ -102,7 +95,6 @@ protected:
   unsigned m_builtinFunction : 1;
   unsigned m_dynamicInvoke : 1;
   unsigned m_transformed : 1;
-  unsigned m_changedToBytecode : 1; // true if it morphed into a bytecode
   unsigned m_optimizable : 1; // true if it can be morphed into a bytecode
 
   int m_safe;

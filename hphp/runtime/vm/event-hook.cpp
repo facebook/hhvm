@@ -301,7 +301,7 @@ static Variant call_intercept_handler(
 
   auto ret = Variant::attach(
     g_context->invokeFunc(f, intArgs, obj, cls,
-                          nullptr, invName, ExecutionContext::InvokeCuf,
+                          nullptr, invName, ExecutionContext::InvokeNormal,
                           false, dynamic, false)
   );
   if (UNLIKELY(isRefType(ret.getRawType()))) {

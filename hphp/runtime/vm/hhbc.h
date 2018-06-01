@@ -583,10 +583,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        PF) \
   O(FPassC,          TWO(IVA,OA(FPassHint)),                            \
                                        ONE(CV),         ONE(FV),    FF) \
-  O(FPassCW,         TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(CV),         ONE(FV),    FF) \
-  O(FPassCE,         TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(CV),         ONE(FV),    FF) \
   O(FPassV,          TWO(IVA,OA(FPassHint)),                            \
                                        ONE(VV),         ONE(FV),    FF) \
   O(FPassVNop,       TWO(IVA,OA(FPassHint)),                            \
@@ -1071,8 +1067,6 @@ inline bool isFCallStar(Op opcode) {
 inline bool isFPassStar(Op opcode) {
   switch (opcode) {
     case OpFPassC:
-    case OpFPassCW:
-    case OpFPassCE:
     case OpFPassV:
     case OpFPassR:
     case OpFPassL:

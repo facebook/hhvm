@@ -231,13 +231,6 @@ struct Param {
   bool byRef: 1;
 
   /*
-   * Whether this parameter must be passed by reference.
-   * The FPassCE and FPassCW opcodes will only produce
-   * an error/warning if this is set.
-   */
-  bool mustBeRef: 1;
-
-  /*
    * Whether this parameter is a variadic capture.
    */
   bool isVariadic: 1;

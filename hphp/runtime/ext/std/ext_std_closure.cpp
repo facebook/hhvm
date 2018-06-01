@@ -281,7 +281,7 @@ static Variant HHVM_METHOD(Closure, call,
     g_context->invokeFunc(c_Closure::fromObject(this_)->getInvokeFunc(),
                           params, bound.toObject().get(),
                           nullptr, nullptr, nullptr,
-                          ExecutionContext::InvokeCuf,
+                          ExecutionContext::InvokeNormal,
                           false, false)
   );
 }

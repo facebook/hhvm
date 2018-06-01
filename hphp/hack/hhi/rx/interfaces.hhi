@@ -269,7 +269,7 @@ interface Iterable<+Tv>
    */
   <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
   public function zip<Tu>(
-    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> \Traversable<Tu> $traversable,
+    <<__OnlyRxIfImpl(namespace\Traversable::class)>> \Traversable<Tu> $traversable,
   ): namespace\Iterable<Pair<Tv, Tu>>;
   /**
    * Returns an `Iterable` containing the first `n` values of the current
@@ -378,7 +378,7 @@ interface Iterable<+Tv>
    */
   <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
   public function concat<Tu super Tv>(
-    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> \Traversable<Tu> $traversable,
+    <<__OnlyRxIfImpl(namespace\Traversable::class)>> \Traversable<Tu> $traversable,
   ): namespace\Iterable<Tu>;
   /**
    * Returns the first value in the current `Iterable`.
@@ -570,7 +570,7 @@ interface KeyedIterable<Tk, +Tv>
    */
   <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
   public function zip<Tu>(
-    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> \Traversable<Tu> $traversable,
+    <<__OnlyRxIfImpl(namespace\Traversable::class)>> \Traversable<Tu> $traversable,
   ): namespace\KeyedIterable<Tk, Pair<Tv, Tu>>;
   /**
    * Returns a `KeyedIterable` containing the first `n` values of the current
@@ -680,7 +680,7 @@ interface KeyedIterable<Tk, +Tv>
    */
   <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
   public function concat<Tu super Tv>(
-    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> \Traversable<Tu> $traversable,
+    <<__OnlyRxIfImpl(namespace\Traversable::class)>> \Traversable<Tu> $traversable,
   ): namespace\Iterable<Tu>;
   /**
    * Returns the first value in the current `KeyedIterable`.

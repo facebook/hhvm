@@ -5,38 +5,39 @@ namespace {
 /* An iterator implementation for iterating over a Vector/ImmVector.
  */
 <<__NativeData("VectorIterator")>>
-final class VectorIterator implements HH\KeyedIterator {
+final class VectorIterator implements HH\Rx\KeyedIterator {
 
   /* Do nothing */
+  <<__Rx>>
   public function __construct(): void { }
 
   /* Returns the current value that the iterator points to.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function current(): mixed;
 
   /* Returns the current key that the iterator points to.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function key(): mixed;
 
   /* Returns true if the iterator points to a valid value, returns false
    * otherwise.
    * @return bool
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function valid(): bool;
 
   /* Advance this iterator forward one position.
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable>>
   public function next(): void;
 
   /* Move this iterator back to the first position.
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable>>
   public function rewind(): void;
 }
 
@@ -51,12 +52,13 @@ final class Vector implements \MutableVector {
   /* Returns a Vector built from the values produced by the specified Iterable.
    * @param mixed $iterable
    */
-  <<__Native>>
-  public function __construct(mixed $iterable = null): void;
+  <<__Native, __Rx, __OnlyRxIfArgs>>
+  public function __construct(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the Vector is empty, false otherwise.
    * @return bool
    */
+  <<__Rx>>
   public function isEmpty(): bool {
     return !$this->count();
   }
@@ -64,12 +66,13 @@ final class Vector implements \MutableVector {
   /* Returns the number of values in the Vector.
    * @return int
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function count(): int;
 
   /* Returns an Iterable that produces the values from this Vector.
    * @return object
    */
+  <<__Rx, __MutableReturn>>
   public function items(): \LazyIterableView {
     return new \LazyIterableView($this);
   }
@@ -77,12 +80,13 @@ final class Vector implements \MutableVector {
   /* Returns a Vector built from the keys of this Vector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function keys(): object;
 
   /* Returns a clone of this Vector.
    * @return object
    */
+  <<__Rx, __MutableReturn>>
   public function values(): this {
     return clone $this;
   }
@@ -90,6 +94,7 @@ final class Vector implements \MutableVector {
   /* Returns a lazy iterable view of this Vector.
    * @return object
    */
+  <<__Rx, __MutableReturn>>
   public function lazy(): \LazyKeyedIterableView {
     return new \LazyKeyedIterableView($this);
   }
@@ -99,7 +104,7 @@ final class Vector implements \MutableVector {
    * @param mixed $key
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function at(mixed $key): mixed;
 
   /* Returns the value at the specified key. If the key is not present, null is
@@ -107,7 +112,7 @@ final class Vector implements \MutableVector {
    * @param mixed $key
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function get(mixed $key): mixed;
 
   /* Stores a value into the Vector with the specified key, overwriting any
@@ -117,7 +122,7 @@ final class Vector implements \MutableVector {
    * @param mixed $value
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable, __ReturnsVoidToRx>>
   public function set(mixed $key,
                       mixed $value): object;
 
@@ -128,13 +133,13 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function setAll(mixed $iterable): object;
+  <<__Native, __Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  public function setAll(<<__OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $iterable): object;
 
   /* Removes all values from the Vector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable, __ReturnsVoidToRx>>
   public function clear(): object;
 
   /* Returns true if the specified key is present in the Vector, returns false
@@ -159,6 +164,7 @@ final class Vector implements \MutableVector {
    * @param mixed $key
    * @return bool
    */
+  <<__Rx>>
   public function containsKey(mixed $key): bool {
     if (!\is_int($key)) {
       throw new \InvalidArgumentException(
@@ -173,7 +179,7 @@ final class Vector implements \MutableVector {
    * @param mixed $key
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable, __ReturnsVoidToRx>>
   public function removeKey(mixed $key): object;
 
   /* @param mixed $val
@@ -187,7 +193,7 @@ final class Vector implements \MutableVector {
    * @param mixed $val
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable, __ReturnsVoidToRx>>
   public function add(mixed $val): object;
 
   /* Adds the values produced by the specified Iterable to the end of this
@@ -195,26 +201,26 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function addAll(mixed $iterable): object;
+  <<__Native, __Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  public function addAll(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Adds the keys of the specified KeyedContainer to the end of this Vector
    * using the next available integer keys.
    * @param mixed $container
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable, __ReturnsVoidToRx>>
   public function addAllKeysOf(mixed $container): object;
 
   /* @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable>>
   public function pop(): mixed;
 
   /* @param mixed $sz
    * @param mixed $value
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable>>
   public function resize(mixed $sz,
                          mixed $value): void;
 
@@ -223,24 +229,25 @@ final class Vector implements \MutableVector {
    * calls to fill that reserved capacity.
    * @param mixed $sz
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable>>
   public function reserve(mixed $sz): void;
 
   /* Returns an array built from the values from this Vector.
    * @return array
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function toArray(): array;
 
-  <<__Native>>
+  <<__Native, __Rx>>
   public function toVArray(): varray;
 
-  <<__Native>>
+  <<__Native, __Rx>>
   public function toDArray(): darray;
 
   /* Returns a copy of this Vector.
    * @return object
    */
+  <<__Rx, __MutableReturn>>
   public function toVector(): this {
     return clone $this;
   }
@@ -248,12 +255,13 @@ final class Vector implements \MutableVector {
   /* Returns a ImmVector built from the values of this Vector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function toImmVector(): object;
 
   /* Returns an immutable version of this collection.
    * @return object
    */
+  <<__Rx>>
   public function immutable(): \HH\ImmVector {
     return $this->toImmVector();
   }
@@ -261,30 +269,31 @@ final class Vector implements \MutableVector {
   /* Returns a Map built from the keys and values of this Vector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function toMap(): object;
 
   /* Returns a ImmMap built from the keys and values of this Vector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function toImmMap(): object;
 
   /* Returns a Set built from the values of this Vector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function toSet(): object;
 
   /* Returns a ImmSet built from the values of this Vector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function toImmSet(): object;
 
   /* Returns an array built from the keys from this Vector.
    * @return array
    */
+  <<__Rx>>
   public function toKeysArray(): array {
     $count = $this->count();
     return $count ? range(0, $count - 1) : array();
@@ -293,6 +302,7 @@ final class Vector implements \MutableVector {
   /* Returns an array built from the values from this Vector.
    * @return array
    */
+  <<__Rx>>
   public function toValuesArray(): array {
     return $this->toArray();
   }
@@ -300,7 +310,7 @@ final class Vector implements \MutableVector {
   /* Returns an iterator that points to beginning of this Vector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function getIterator(): object;
 
   /* Returns a Vector of the values produced by applying the specified callback
@@ -308,46 +318,46 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native>>
-  public function map(mixed $callback): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector of the values produced by applying the specified callback
    * on each key and value from this Vector.
    * @param mixed $callback
    * @return object
    */
-  <<__Native>>
-  public function mapWithKey(mixed $callback): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector of all the values from this Vector for which the specified
    * callback returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native>>
-  public function filter(mixed $callback): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector of all the values from this Vector for which the specified
    * callback returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native>>
-  public function filterWithKey(mixed $callback): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a KeyedIterable produced by combined the specified Iterables
    * pair-wise.
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function zip(mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function zip(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Vector containing the first n values of this Vector.
    * @param mixed $n
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function take(mixed $n): object;
 
   /* Returns a Vector containing the values of this Vector up to but not
@@ -356,15 +366,15 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native>>
-  public function takeWhile(mixed $callback): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector containing all the values except the first n of this
    * Vector.
    * @param mixed $n
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function skip(mixed $n): object;
 
   /* Returns a Vector containing the values of this Vector excluding the first
@@ -372,8 +382,8 @@ final class Vector implements \MutableVector {
    * @param mixed $fn
    * @return object
    */
-  <<__Native>>
-  public function skipWhile(mixed $fn): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
 
   /* Returns a Vector containing the specified range of values from this Vector.
    * The range is specified by two non-negative integers: a starting position
@@ -382,7 +392,7 @@ final class Vector implements \MutableVector {
    * @param mixed $len
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function slice(mixed $start,
                         mixed $len): object;
 
@@ -391,18 +401,19 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function concat(mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function concat(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this Vector, or null if this Vector is empty.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function firstValue(): mixed;
 
   /* Returns the first key from this Vector, or null if this Vector is empty.
    * @return mixed
    */
+  <<__Rx>>
   public function firstKey(): mixed {
     return $this->count() ? 0 : null;
   }
@@ -410,12 +421,13 @@ final class Vector implements \MutableVector {
   /* Returns the last value from this Vector, or null if this Vector is empty.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function lastValue(): mixed;
 
   /* Returns the last key from this Vector, or null if this Vector is empty.
    * @return mixed
    */
+  <<__Rx>>
   public function lastKey(): mixed {
     $count = $this->count();
     return $count ? ($count - 1) : null;
@@ -423,7 +435,7 @@ final class Vector implements \MutableVector {
 
   /* Reverses the values of the Vector in place.
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable>>
   public function reverse(): void;
 
   /* Splices the values of the Vector in place (see the documentation for
@@ -432,7 +444,7 @@ final class Vector implements \MutableVector {
    * @param mixed $len
    * @param mixed $replacement
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable>>
   public function splice(mixed $offset,
                          mixed $len = null,
                          mixed $replacement = null): void;
@@ -441,16 +453,17 @@ final class Vector implements \MutableVector {
    * @param mixed $search_value
    * @return int
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function linearSearch(mixed $search_value): int;
 
   /* Shuffles the values of the Vector randomly in place.
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable>>
   public function shuffle(): void;
 
   /* @return string
    */
+  <<__Rx>>
   public function __toString(): string { return "Vector"; }
 
   /* @param mixed $name
@@ -491,14 +504,14 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public static function fromItems(mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public static function fromItems(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Vector built from the keys of the specified container.
    * @param mixed $container
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public static function fromKeysOf(mixed $container): object;
 
   /* Returns a Vector built from the values from the specified array.
@@ -518,27 +531,28 @@ final class ImmVector implements \ConstVector {
    * Iterable.
    * @param mixed $iterable
    */
-  <<__Native>>
-  public function __construct(mixed $iterable = null): void;
+  <<__Native, __Rx, __OnlyRxIfArgs>>
+  public function __construct(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable = null): void;
 
   /* Returns an ImmVector built from the values produced by the specified
    * Iterable.
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public static function fromItems(mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs>>
+  public static function fromItems(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmVector built from the keys of the specified container.
    * @param mixed $container
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public static function fromKeysOf(mixed $container): object;
 
   /* Returns true if the ImmVector is empty, false otherwise.
    * @return bool
    */
+  <<__Rx>>
   public function isEmpty(): bool {
     return !$this->count();
   }
@@ -546,12 +560,13 @@ final class ImmVector implements \ConstVector {
   /* Returns the number of values in the ImmVector.
    * @return int
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function count(): int;
 
   /* Returns an Iterable that produces the values from this ImmVector.
    * @return object
    */
+  <<__Rx, __MutableReturn>>
   public function items(): \LazyIterableView {
     return new \LazyIterableView($this);
   }
@@ -561,6 +576,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $key
    * @return bool
    */
+  <<__Rx>>
   public function containsKey(mixed $key): bool {
     if (!\is_int($key)) {
       throw new \InvalidArgumentException(
@@ -575,7 +591,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $key
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function at(mixed $key): mixed;
 
   /* Returns the value at the specified key. If the key is not present, null is
@@ -583,13 +599,13 @@ final class ImmVector implements \ConstVector {
    * @param mixed $key
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function get(mixed $key): mixed;
 
   /* Returns an iterator that points to beginning of this ImmVector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function getIterator(): object;
 
   /* Returns a Vector of the values produced by applying the specified callback
@@ -597,46 +613,46 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native>>
-  public function map(mixed $callback): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector of the values produced by applying the specified callback
    * on each key and value from this ImmVector.
    * @param mixed $callback
    * @return object
    */
-  <<__Native>>
-  public function mapWithKey(mixed $callback): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector of all the values from this ImmVector for which the
    * specified callback returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native>>
-  public function filter(mixed $callback): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector of all the values from this ImmVector for which the
    * specified callback returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native>>
-  public function filterWithKey(mixed $callback): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a KeyedIterable produced by combined the specified Iterables
    * pair-wise.
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function zip(mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function zip(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmVector containing the first n values of this ImmVector.
    * @param mixed $n
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function take(mixed $n): object;
 
   /* Returns a ImmVector containing the values of this ImmVector up to but not
@@ -645,15 +661,15 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native>>
-  public function takeWhile(mixed $callback): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a ImmVector containing all values except the first n of this
    * ImmVector.
    * @param mixed $n
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function skip(mixed $n): object;
 
   /* Returns a ImmVector containing the values of this ImmVector excluding the
@@ -661,8 +677,8 @@ final class ImmVector implements \ConstVector {
    * @param mixed $fn
    * @return object
    */
-  <<__Native>>
-  public function skipWhile(mixed $fn): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
 
   /* Returns an ImmVector containing the specified range of values from this
    * ImmVector. The range is specified by two non-negative integers: a starting
@@ -671,7 +687,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $len
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function slice(mixed $start,
                         mixed $len): object;
 
@@ -680,20 +696,21 @@ final class ImmVector implements \ConstVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function concat(mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  public function concat(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this ImmVector, or null if this ImmVector is
    * empty.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function firstValue(): mixed;
 
   /* Returns the first key from this ImmVector, or null if this ImmVector is
    * empty.
    * @return mixed
    */
+  <<__Rx>>
   public function firstKey(): mixed {
     return $this->count() ? 0 : null;
   }
@@ -702,13 +719,14 @@ final class ImmVector implements \ConstVector {
    * empty.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function lastValue(): mixed;
 
   /* Returns the last key from this ImmVector, or null if this ImmVector is
    * empty.
    * @return mixed
    */
+  <<__Rx>>
   public function lastKey(): mixed {
     $count = $this->count();
     return $count ? ($count - 1) : null;
@@ -717,11 +735,12 @@ final class ImmVector implements \ConstVector {
   /* Returns an Iterable that produces the keys from this ImmVector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function keys(): object;
 
   /* @return string
    */
+  <<__Rx>>
   public function __toString(): string { return "ImmVector"; }
 
   /* @param mixed $name
@@ -761,12 +780,13 @@ final class ImmVector implements \ConstVector {
   /* Returns a Vector built from the values of this ImmVector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function toVector(): object;
 
   /* Returns an immutable version of this collection.
    * @return object
    */
+  <<__Rx>>
   public function toImmVector(): this {
     return $this;
   }
@@ -774,30 +794,31 @@ final class ImmVector implements \ConstVector {
   /* Returns a Map built from the keys and values of this ImmVector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function toMap(): object;
 
   /* Returns a ImmMap built from the keys and values of this ImmVector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function toImmMap(): object;
 
   /* Returns a Set built from the values of this ImmVector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn>>
   public function toSet(): object;
 
   /* Returns a ImmSet built from the values of this ImmVector.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function toImmSet(): object;
 
   /* Returns an immutable version of this collection.
    * @return object
    */
+  <<__Rx>>
   public function immutable(): this {
     return $this;
   }
@@ -805,6 +826,7 @@ final class ImmVector implements \ConstVector {
   /* Returns a clone of this ImmVector.
    * @return object
    */
+  <<__Rx, __MutableReturn>>
   public function values(): this {
     return clone $this;
   }
@@ -812,6 +834,7 @@ final class ImmVector implements \ConstVector {
   /* Returns a lazy iterable view of this ImmVector.
    * @return object
    */
+  <<__Rx, __MutableReturn>>
   public function lazy(): \LazyKeyedIterableView {
     return new \LazyKeyedIterableView($this);
   }
@@ -819,18 +842,19 @@ final class ImmVector implements \ConstVector {
   /* Returns an array built from the values from this ImmVector.
    * @return array
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function toArray(): array;
 
-  <<__Native>>
+  <<__Native, __Rx>>
   public function toVArray(): varray;
 
-  <<__Native>>
+  <<__Native, __Rx>>
   public function toDArray(): darray;
 
   /* Returns an array built from the keys from this ImmVector.
    * @return array
    */
+  <<__Rx>>
   public function toKeysArray(): array {
     $count = $this->count();
     return $count ? range(0, $count - 1) : array();
@@ -839,6 +863,7 @@ final class ImmVector implements \ConstVector {
   /* Returns an array built from the values from this ImmVector.
    * @return array
    */
+  <<__Rx>>
   public function toValuesArray(): array {
     return $this->toArray();
   }
@@ -847,7 +872,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $search_value
    * @return int
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   public function linearSearch(mixed $search_value): int;
 }
 

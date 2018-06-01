@@ -140,10 +140,14 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static void php_libxml_node_free_resource(xmlNodePtr node, bool force);
+
 void XMLNodeData::sweep() {
   if (m_node) {
     assertx(this == m_node->_private);
-    php_libxml_node_free_resource(m_node);
+
+    m_node->_private = nullptr;
+    php_libxml_node_free_resource(m_node, true);
   }
 
   if (m_doc) m_doc->detachNode();
@@ -366,9 +370,14 @@ void libxml_add_error(const std::string &msg) {
   error_copy.str3 = nullptr;
 }
 
-void php_libxml_node_free(xmlNodePtr node) {
+void php_libxml_node_free(xmlNodePtr node, bool force) {
   if (node) {
     if (node->_private) {
+      // When running in Eval.LibXMLUseSafeSubtrees, linked nodes should only be
+      // freed out from under their resources when in requestShutdown() or
+      // sweeping. In all other cases release should be deferred.
+      assertx(!RuntimeOption::EvalLibXMLUseSafeSubtrees || force);
+
       // XXX: we may be sweeping- so don't create a smart pointer
       reinterpret_cast<XMLNodeData*>(node->_private)->reset();
     }
@@ -405,71 +414,189 @@ void php_libxml_node_free(xmlNodePtr node) {
   }
 }
 
-void php_libxml_node_free_list(xmlNodePtr node) {
+namespace {
+
+template<class F1, class F2>
+void walk_tree(xmlNodePtr node, F1 preaction, F2 postaction) {
   xmlNodePtr curnode;
 
-  if (node != NULL) {
+  if (node != nullptr) {
     curnode = node;
-    while (curnode != NULL) {
+    while (curnode != nullptr) {
       node = curnode;
+      preaction(node);
       switch (node->type) {
       /* Skip property freeing for the following types */
       case XML_NOTATION_NODE:
       case XML_ENTITY_DECL:
         break;
       case XML_ENTITY_REF_NODE:
-        php_libxml_node_free_list((xmlNodePtr) node->properties);
+        walk_tree((xmlNodePtr) node->properties, preaction, postaction);
         break;
       case XML_ATTRIBUTE_NODE:
-        if ((node->doc != NULL) &&
-            (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
-          xmlRemoveID(node->doc, (xmlAttrPtr) node);
-        }
       case XML_ATTRIBUTE_DECL:
       case XML_DTD_NODE:
       case XML_DOCUMENT_TYPE_NODE:
       case XML_NAMESPACE_DECL:
       case XML_TEXT_NODE:
-        php_libxml_node_free_list(node->children);
+        walk_tree(node->children, preaction, postaction);
         break;
       default:
-        php_libxml_node_free_list(node->children);
-        php_libxml_node_free_list((xmlNodePtr) node->properties);
+        walk_tree(node->children, preaction, postaction);
+        walk_tree((xmlNodePtr) node->properties, preaction, postaction);
       }
 
       curnode = node->next;
-      xmlUnlinkNode(node);
-      php_libxml_node_free(node);
+      postaction(node);
     }
   }
 }
 
-void php_libxml_node_free_resource(xmlNodePtr node) {
+void php_libxml_node_free_list(xmlNodePtr node, bool force) {
+  walk_tree(
+    node,
+    [&] (xmlNodePtr node) {
+      if (node->type == XML_ATTRIBUTE_NODE &&
+          node->doc &&
+          ((xmlAttrPtr)node)->atype == XML_ATTRIBUTE_ID) {
+        xmlRemoveID(node->doc, (xmlAttrPtr) node);
+      }
+    },
+    [&] (xmlNodePtr node) {
+      xmlUnlinkNode(node);
+      php_libxml_node_free(node, force);
+    }
+  );
+}
+
+bool isOrphanedRoot(xmlNodePtr node) {
+  return !node->_private && (!node->parent || node->type == XML_NAMESPACE_DECL);
+}
+
+}
+
+struct LibXmlDeferredTrees;
+THREAD_LOCAL(LibXmlDeferredTrees, tl_libxml_trees);
+
+// Unfortunately this struct can't be declared with internal linkage as it
+// contains pointers to request allocated resources
+struct LibXmlDeferredTrees final {
+  ~LibXmlDeferredTrees() {
+    // We won't have access to the list of orphaned tree-roots while sweeping,
+    // they need to be dealt with now. We can't just walk the list because some
+    // of these nodes may actually be in the same tree so first find the ones
+    // that are definitely orphaned (and therefore the roots of their trees)
+    std::vector<xmlNodePtr> toFree;
+    for (auto par : m_refCounts) {
+      if (isOrphanedRoot(par.first)) toFree.push_back(par.first);
+    }
+
+    for (auto node : toFree) php_libxml_node_free_resource(node, true);
+  }
+
+  static void decref(xmlNodePtr root) {
+    if (!root) return;
+
+    auto it = tl_libxml_trees->m_refCounts.find(root);
+    assertx(it != tl_libxml_trees->m_refCounts.end() && it->second > 0);
+    if (!--it->second) {
+      tl_libxml_trees->m_refCounts.erase(it);
+
+      // There may be new undiscovered roots, this free will find them and
+      // re-add the root to the deferred list.
+      if (isOrphanedRoot(root)) php_libxml_node_free_resource(root, false);
+    }
+  }
+
+  static bool hasRefs(xmlNodePtr root) {
+    if (!RuntimeOption::EvalLibXMLUseSafeSubtrees) return false;
+
+    // If we are cleaning up the request then all roots must be freed, don't
+    // bother with additional work. Callers of php_libxml_node_free_resource
+    // should force unconditional cleanup.
+    assertx(!MemoryManager::sweeping());
+
+    auto it = tl_libxml_trees->m_refCounts.find(root);
+    if (it != tl_libxml_trees->m_refCounts.end()) {
+      assertx(it->second != 0);
+      return true;
+    }
+    uint32_t count = 0;
+    walk_tree(
+      root,
+      [&] (xmlNodePtr node) {
+        if (node->_private) {
+          // If rootOf(node) == root then we would have found a refcount above
+          assertx(rootOf(node) != root);
+          decref(rootOf(node));
+          rootOf(node) = root;
+          ++count;
+        }
+      },
+      [&] (xmlNodePtr node) {}
+    );
+    if (!count) return false;
+    tl_libxml_trees->m_refCounts.emplace(root, count);
+    return true;
+  }
+
+private:
+  static xmlNodePtr& rootOf(xmlNodePtr node) {
+    assertx(node->_private);
+    return reinterpret_cast<XMLNodeData*>(node->_private)->m_lastSeenRoot;
+  }
+
+  req::hash_map<xmlNodePtr,uint32_t> m_refCounts;
+};
+
+static void php_libxml_node_free_resource(xmlNodePtr node, bool force) {
+  // If we are sweeping or otherwise iterating the list of roots or ref counts
+  // it is unsafe to perform hasRefs as that may allocate a new tl_libxml_trees
+  // or invalidate an active iterator. When called with force we are always
+  // shutting down and therefore about to lose track of any stored root data
+  // so the loss of consistency is fine.
+  assertx(!MemoryManager::sweeping() || force);
+  if (!isOrphanedRoot(node)) return;
+
+  // If we are running in Eval.LibXMLUseSafeSubtrees mode and a subtree still
+  // holds a reference to the root then don't do anything here.
+  if (!force && LibXmlDeferredTrees::hasRefs(node)) {
+    // We shouldn't have even attempted to free the document until all of its
+    // children have been released (it's shared/reference counted).
+    assertx(node->type != XML_DOCUMENT_NODE);
+    assertx(node->type != XML_HTML_DOCUMENT_NODE);
+    return;
+  }
+
   if (node) {
     switch (node->type) {
     case XML_DOCUMENT_NODE:
     case XML_HTML_DOCUMENT_NODE:
       break;
     default:
-      if (node->parent == NULL || node->type == XML_NAMESPACE_DECL) {
-        php_libxml_node_free_list((xmlNodePtr) node->children);
-        switch (node->type) {
-        /* Skip property freeing for the following types */
-        case XML_ATTRIBUTE_DECL:
-        case XML_DTD_NODE:
-        case XML_DOCUMENT_TYPE_NODE:
-        case XML_ENTITY_DECL:
-        case XML_ATTRIBUTE_NODE:
-        case XML_NAMESPACE_DECL:
-        case XML_TEXT_NODE:
-          break;
-        default:
-          php_libxml_node_free_list((xmlNodePtr) node->properties);
-        }
-        php_libxml_node_free(node);
+      assertx(isOrphanedRoot(node));
+      php_libxml_node_free_list((xmlNodePtr) node->children, force);
+      switch (node->type) {
+      /* Skip property freeing for the following types */
+      case XML_ATTRIBUTE_DECL:
+      case XML_DTD_NODE:
+      case XML_DOCUMENT_TYPE_NODE:
+      case XML_ENTITY_DECL:
+      case XML_ATTRIBUTE_NODE:
+      case XML_NAMESPACE_DECL:
+      case XML_TEXT_NODE:
+        break;
+      default:
+        php_libxml_node_free_list((xmlNodePtr) node->properties, force);
       }
+      php_libxml_node_free(node, force);
     }
   }
+}
+
+void php_libxml_node_free_resource(xmlNodePtr node, xmlNodePtr root) {
+  php_libxml_node_free_resource(node, false);
+  LibXmlDeferredTrees::decref(root);
 }
 
 String libxml_get_valid_file_path(const char* source) {
@@ -688,7 +815,12 @@ struct LibXMLExtension final : Extension {
     }
 
     void requestInit() override {
+      assertx(tl_libxml_trees.isNull());
       xmlResetLastError();
+    }
+
+    void requestShutdown() override {
+      tl_libxml_trees.destroy();
     }
 
 } s_libxml_extension;

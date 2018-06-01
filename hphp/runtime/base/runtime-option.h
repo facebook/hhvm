@@ -598,6 +598,7 @@ struct RuntimeOption {
   F(bool, HardTypeHints,               RepoAuthoritative)               \
   F(bool, PromoteEmptyObject,          !EnableHipHopSyntax)             \
   F(bool, AllowObjectDestructors,      !one_bit_refcount)               \
+  F(bool, LibXMLUseSafeSubtrees,       true)                            \
   F(bool, AllDestructorsOptional,      false)                           \
   F(bool, AllowScopeBinding,           true)                            \
   F(bool, JitNoGdb,                    true)                            \

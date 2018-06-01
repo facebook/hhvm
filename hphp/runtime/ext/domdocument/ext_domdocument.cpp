@@ -1339,6 +1339,14 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
 }
 
 static void node_list_unlink(xmlNodePtr node) {
+  // This recursive walk is designed to protect actively referenced LibXML
+  // elements from having their subtrees freed. When running with the option
+  // Eval.LibXMLUseSafeSubtrees set this can't happen as nodes collectively
+  // share ownership of their subtree. Short-circuit this logic to prevent the
+  // early destruction of XMLNodes from being observed via the linkage of their
+  // respective subtrees.
+  if (RuntimeOption::EvalLibXMLUseSafeSubtrees) return;
+
   while (node != nullptr) {
     if (node->_private) {
       libxml_register_node(node)->unlink(); // release node if unused
@@ -1780,7 +1788,7 @@ static void domnode_nodevalue_write(const Object& obj, const Variant& value) {
   case XML_ATTRIBUTE_NODE:
     if (nodep->children) {
       node_list_unlink(nodep->children);
-      php_libxml_node_free_list((xmlNodePtr) nodep->children);
+      php_libxml_node_free_resource((xmlNodePtr) nodep->children);
       nodep->children = nullptr;
     }
   case XML_TEXT_NODE:
@@ -2018,7 +2026,7 @@ static void domnode_textcontent_write(const Object& obj, const Variant& value) {
   if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE) {
     if (nodep->children) {
       node_list_unlink(nodep->children);
-      php_libxml_node_free_list((xmlNodePtr) nodep->children);
+      php_libxml_node_free_resource((xmlNodePtr) nodep->children);
       nodep->children = nullptr;
     }
   }

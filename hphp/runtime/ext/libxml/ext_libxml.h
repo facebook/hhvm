@@ -35,9 +35,7 @@ int libxml_streams_IO_write(void* context, const char* buffer, int len);
 int libxml_streams_IO_close(void* context);
 int libxml_streams_IO_nop_close(void* context);
 
-void php_libxml_node_free(xmlNodePtr node);
-void php_libxml_node_free_list(xmlNodePtr node);
-void php_libxml_node_free_resource(xmlNodePtr node);
+void php_libxml_node_free_resource(xmlNodePtr node, xmlNodePtr root = nullptr);
 
 bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable = true);
 
@@ -118,9 +116,11 @@ struct XMLNodeData : SweepableResourceData {
 private:
   ObjectData* m_cache {nullptr}; // XXX: to avoid a cycle this is a weak ref
   xmlNodePtr m_node {nullptr};
+  xmlNodePtr m_lastSeenRoot {nullptr}; // subtree node last belonged too
   req::ptr<XMLDocumentData> m_doc {nullptr};
 
   friend struct XMLDocumentData;
+  friend struct LibXmlDeferredTrees;
 };
 
 struct XMLDocumentData : XMLNodeData {
@@ -211,7 +211,7 @@ inline XMLNodeData::~XMLNodeData() {
     assertx(!m_cache && m_node->_private == this);
 
     m_node->_private = nullptr;
-    php_libxml_node_free_resource(m_node);
+    php_libxml_node_free_resource(m_node, m_lastSeenRoot);
   }
   if (m_doc) m_doc->detachNode();
 }

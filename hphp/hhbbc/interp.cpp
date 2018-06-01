@@ -2668,10 +2668,10 @@ void in(ISS& env, const bc::FPushFunc& op) {
   }
   popC(env);
   if (t1.subtypeOf(TObj)) {
-    return fpiPush(env, ActRec { FPIKind::ObjInvoke, t1 });
+    return fpiPushNoFold(env, ActRec { FPIKind::ObjInvoke, t1 });
   }
   if (t1.subtypeOf(TArr)) {
-    return fpiPush(env, ActRec { FPIKind::CallableArr, TTop });
+    return fpiPushNoFold(env, ActRec { FPIKind::CallableArr, TTop });
   }
   if (t1.subtypeOf(TStr)) {
     fpiPush(
@@ -2681,7 +2681,7 @@ void in(ISS& env, const bc::FPushFunc& op) {
       true);
     return;
   }
-  fpiPush(env, ActRec { FPIKind::Unknown, TTop });
+  fpiPushNoFold(env, ActRec { FPIKind::Unknown, TTop });
 }
 
 void in(ISS& env, const bc::FPushFuncU& op) {
@@ -2693,7 +2693,7 @@ void in(ISS& env, const bc::FPushFuncU& op) {
       bc::FPushFuncD { op.arg1, rfuncPair.first.name(), op.has_unpack }
     );
   }
-  fpiPush(
+  fpiPushNoFold(
     env,
     ActRec {
       FPIKind::Func,
@@ -2705,60 +2705,67 @@ void in(ISS& env, const bc::FPushFuncU& op) {
   );
 }
 
+const StaticString s_nullFunc { "__SystemLib\\__86null" };
+
 void in(ISS& env, const bc::FPushObjMethodD& op) {
-  auto t1 = topC(env);
-  if (op.subop3 == ObjMethodOp::NullThrows) {
-    if (!t1.couldBe(TObj)) {
-      fpiPush(env, ActRec { FPIKind::ObjMeth, t1 }, op.arg1, false);
-      popC(env);
-      return unreachable(env);
-    }
-    if (is_opt(t1)) {
-      t1 = unopt(std::move(t1));
-    }
-  } else if (!t1.couldBe(TOptObj)) {
-    fpiPush(env, ActRec { FPIKind::ObjMeth, t1 }, op.arg1, false);
+  auto const nullThrows = op.subop3 == ObjMethodOp::NullThrows;
+  auto const input = topC(env);
+  auto const mayCallMethod = input.couldBe(TObj);
+  auto const mayCallNullsafe = !nullThrows && input.couldBe(TNull);
+  auto const mayThrowNonObj = !input.subtypeOf(nullThrows ? TObj : TOptObj);
+
+  if (!mayCallMethod && !mayCallNullsafe) {
+    // This FPush may only throw, make sure it's not optimized away.
+    fpiPushNoFold(env, ActRec { FPIKind::ObjMeth, TBottom });
     popC(env);
     return unreachable(env);
   }
-  auto const clsTy = objcls(t1);
-  auto const rcls = [&]() -> folly::Optional<res::Class> {
-    if (is_specialized_cls(clsTy)) return dcls_of(clsTy).cls;
-    return folly::none;
-  }();
 
-  if (fpiPush(
-        env,
-        ActRec {
-          FPIKind::ObjMeth,
-            t1,
-            rcls,
-            env.index.resolve_method(env.ctx, clsTy, op.str2)
-            },
-        op.arg1,
-        false
-      )) {
+  if (!mayCallMethod && !mayThrowNonObj) {
+    // Null input, this may only call the nullsafe helper, so do that.
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FPushFuncD { op.arg1, s_nullFunc.get(), op.has_unpack }
+    );
+  }
+
+  auto const ar = [&] {
+    assertx(mayCallMethod);
+    auto const kind = mayCallNullsafe ? FPIKind::ObjMethNS : FPIKind::ObjMeth;
+    auto const ctxTy = intersection_of(input, TObj);
+    auto const clsTy = objcls(ctxTy);
+    auto const rcls = is_specialized_cls(clsTy)
+      ? folly::Optional<res::Class>(dcls_of(clsTy).cls)
+      : folly::none;
+    auto const func = env.index.resolve_method(env.ctx, clsTy, op.str2);
+    return ActRec { kind, ctxTy, rcls, func };
+  };
+
+  if (!mayCallMethod) {
+    // Calls nullsafe helper, but can't fold as we may still throw.
+    assertx(mayCallNullsafe && mayThrowNonObj);
+    auto const func = env.index.resolve_func(env.ctx, s_nullFunc.get());
+    assertx(func.exactFunc());
+    fpiPushNoFold(env, ActRec { FPIKind::Func, TBottom, folly::none, func });
+  } else if (mayCallNullsafe || mayThrowNonObj) {
+    // Can't optimize away as FCall may push null instead of the folded value
+    // or FCall may throw.
+    fpiPushNoFold(env, ar());
+  } else if (fpiPush(env, ar(), op.arg1, false)) {
     return reduce(env, bc::PopC {});
   }
 
-  auto location = topStkEquiv(env);
-  popC(env);
+  auto const location = topStkEquiv(env);
   if (location != NoLocalId) {
-    auto ty = peekLocation(env, location);
-    if (ty.subtypeOf(TCell)) {
-      refineLocation(env, location,
-                     [&] (Type t) {
-                       if (!is_specialized_obj(t)) {
-                         return op.subop3 == ObjMethodOp::NullThrows ?
-                           TObj : TOptObj;
-                       }
-                       if (is_opt(t) && op.subop3 == ObjMethodOp::NullThrows) {
-                         return unopt(t);
-                       }
-                       return t;
-                     });
+    auto locTy = peekLocation(env, location);
+    if (locTy.subtypeOf(TCell)) {
+      auto const okTy = intersection_of(input, nullThrows ? TObj : TOptObj);
+      refineLocation(env, location, [&] (Type t) { return okTy; });
     }
   }
+
+  popC(env);
 }
 
 void in(ISS& env, const bc::FPushObjMethod& op) {
@@ -2996,17 +3003,17 @@ void in(ISS& env, const bc::FPushCtor& op) {
 
     auto const& t2 = takeClsRefSlot(env, op.slot);
     push(env, toobj(t2));
-    fpiPush(env, ActRec { FPIKind::Ctor, t2, dcls.cls, rfunc });
+    fpiPushNoFold(env, ActRec { FPIKind::Ctor, t2, dcls.cls, rfunc });
     return;
   }
   takeClsRefSlot(env, op.slot);
   push(env, TObj);
-  fpiPush(env, ActRec { FPIKind::Ctor, TCls });
+  fpiPushNoFold(env, ActRec { FPIKind::Ctor, TCls });
 }
 
 void in(ISS& env, const bc::FPushCufIter&) {
   nothrow(env);
-  fpiPush(env, ActRec { FPIKind::Unknown, TTop });
+  fpiPushNoFold(env, ActRec { FPIKind::Unknown, TTop });
 }
 
 void in(ISS& /*env*/, const bc::RaiseFPassWarning& /*op*/) {}
@@ -3338,6 +3345,9 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs, int32_t unpack = kNoUnpack) {
     CallContext { env.ctx, args, ar.context },
     *ar.func
   );
+  if (ar.kind == FPIKind::ObjMethNS) {
+    ty = union_of(std::move(ty), TInitNull);
+  }
   if (!ar.fallbackFunc) {
     pushCallReturnType(env, std::move(ty), unpack);
     return;
@@ -3384,7 +3394,8 @@ void in(ISS& env, const bc::FCall& op) {
           bc::FCallD { op.arg1, ar.cls->name(), ar.func->name() }
         );
       }
-
+      // fallthrough
+    case FPIKind::ObjMethNS:
       // If we didn't return a reduce above, we still can compute a
       // partially-known FCall effect with our res::Func.
       return fcallKnownImpl(env, op.arg1);
@@ -3504,7 +3515,8 @@ void in(ISS& env, const bc::FCallM& op) {
           bc::FCallDM { op.arg1, op.arg2, ar.cls->name(), ar.func->name() }
         );
       }
-
+      // fallthrough
+    case FPIKind::ObjMethNS:
       // If we didn't return a reduce above, we still can compute a
       // partially-known FCall effect with our res::Func.
       return fcallKnownImpl(env, op.arg1, op.arg2);

@@ -469,6 +469,7 @@ static std::string fpiKindStr(FPIKind k) {
   case FPIKind::Func:        return "func";
   case FPIKind::Ctor:        return "ctor";
   case FPIKind::ObjMeth:     return "objm";
+  case FPIKind::ObjMethNS:   return "objm?";
   case FPIKind::ClsMeth:     return "clsm";
   case FPIKind::ObjInvoke:   return "invoke";
   case FPIKind::Builtin:     return "builtin";

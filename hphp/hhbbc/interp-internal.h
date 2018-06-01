@@ -406,8 +406,12 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
   return foldable;
 }
 
-void fpiPush(ISS& env, ActRec ar) {
-  fpiPush(env, std::move(ar), -1, true);
+void fpiPushNoFold(ISS& env, ActRec ar) {
+  ar.foldable = false;
+  ar.pushBlk = env.blk.id;
+
+  FTRACE(2, "    fpi+: {}\n", show(ar));
+  env.state.fpiStack.push_back(std::move(ar));
 }
 
 ActRec fpiPop(ISS& env) {
@@ -980,6 +984,7 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
     break;
   case FPIKind::Ctor:
   case FPIKind::ObjMeth:
+  case FPIKind::ObjMethNS:
   case FPIKind::ClsMeth:
   case FPIKind::ObjInvoke:
   case FPIKind::CallableArr:

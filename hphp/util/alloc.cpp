@@ -194,11 +194,12 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
 #endif
 
 #ifdef USE_JEMALLOC
-
-#if USE_JEMALLOC_EXTENT_HOOKS
 unsigned low_arena = 0;
 unsigned high_arena = 0;
+int low_arena_flags = 0;
+__thread int high_arena_flags = 0;
 
+#if USE_JEMALLOC_EXTENT_HOOKS
 // Keep track of the size of recently freed memory that might be in the high1g
 // arena when it is disabled, so that we know when to reenable it.
 std::atomic_uint g_highArenaRecentlyFreed;
@@ -223,11 +224,6 @@ static std::atomic<size_t> a0ReservedLeft(0);
 // In jemalloc/include/jemalloc/jemalloc_macros.h.in, we have
 // #define MALLOCX_TCACHE_NONE MALLOCX_TCACHE(-1)
 __thread int high_arena_tcache = -1;
-static_assert(MALLOCX_TCACHE(-1) == MALLOCX_TCACHE_NONE,
-              "Are you using jemalloc 5.x?");
-#else
-// legacy implementation of low arena using brk
-unsigned dss_arena = 0;
 #endif
 
 #ifdef HAVE_NUMA
@@ -319,7 +315,7 @@ void set_numa_binding(int node) {
 }
 
 void* mallocx_on_node(size_t size, int node, size_t align) {
-  assertx((align & (align - 1)) == 0);
+  assert((align & (align - 1)) == 0);
   int flags = MALLOCX_ALIGN(align);
   if (node < 0 || !use_numa) return mallocx(size, flags);
   int arena = base_arena + node;
@@ -396,6 +392,7 @@ void setup_low_arena(unsigned n1GPages) {
                                    kLowArenaMaxCap, false, mapper);
   set_arena_retain_grow_limit(ma->id());
   low_arena = ma->id();
+  low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
 }
 
 void setup_high_arena(unsigned n1GPages) {
@@ -408,6 +405,7 @@ void setup_high_arena(unsigned n1GPages) {
                                 false, mapper);
   set_arena_retain_grow_limit(ma->id());
   high_arena = ma->id();
+  high_arena_tcache_create();           // set up high_arena_flags
 }
 
 void* huge_page_extent_alloc(extent_hooks_t* extent_hooks, void* addr,
@@ -454,10 +452,10 @@ default_alloc:
  */
 void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
                                          size_t reserved) {
-  assert(!jemallocMetadataCanUseHuge.load());
-#ifndef USE_JEMALLOC_METADATA_1G_PAGES
+#if !JEMALLOC_METADATA_1G_PAGES
   return;
 #endif
+  assert(!jemallocMetadataCanUseHuge.load());
   enableArenaMetadata1GPage = enable;
   enableNumaArenaMetadata1GPage = enable_numa_arena;
   a0MetadataReservedSize = reserved;
@@ -477,17 +475,43 @@ void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
   a0ReservedLeft.store(a0MetadataReservedSize);
 
   extent_hooks_t* orig_hooks;
-  int err = mallctlRead("arena.0.extent_hooks", &orig_hooks);
+  int err = mallctlRead<extent_hooks_t*, true>("arena.0.extent_hooks",
+                                               &orig_hooks);
   if (err) return;
 
   orig_alloc = orig_hooks->alloc;
   huge_page_metadata_hooks = *orig_hooks;
   huge_page_metadata_hooks.alloc = &huge_page_extent_alloc;
 
-  err = mallctlWrite("arena.0.extent_hooks", &huge_page_metadata_hooks);
+  err = mallctlWrite<extent_hooks_t*, true>("arena.0.extent_hooks",
+                                            &huge_page_metadata_hooks);
   if (err) return;
 
   jemallocMetadataCanUseHuge.store(true);
+}
+
+void high_arena_tcache_create() {
+  if (high_arena_tcache == -1) {
+    mallctlRead<int, true>("tcache.create", &high_arena_tcache);
+    high_arena_flags =
+      MALLOCX_ARENA(high_arena) | MALLOCX_TCACHE(high_arena_tcache);
+  }
+}
+
+void high_arena_tcache_flush() {
+  // It is OK if flushing fails
+  if (high_arena_tcache != -1) {
+    mallctlWrite<int, true>("tcache.flush", high_arena_tcache);
+  }
+}
+
+void high_arena_tcache_destroy() {
+  if (high_arena_tcache != -1) {
+    mallctlWrite<int, true>("tcache.destroy", high_arena_tcache);
+    high_arena_tcache = -1;
+    // Ideally we shouldn't read high_arena_flags any more, but just in case.
+    high_arena_flags = MALLOCX_ARENA(high_arena);
+  }
 }
 
 #endif // USE_JEMALLOC_EXTENT_HOOKS
@@ -525,17 +549,22 @@ struct JEMallocInitializer {
 #if !USE_JEMALLOC_EXTENT_HOOKS
     // Create the legacy low arena that uses brk() instead of mmap().  When
     // using newer versions of jemalloc, we use extent hooks to get more
-    // control.
-    if (mallctlRead<unsigned, true>(JEMALLOC_NEW_ARENA_CMD, &dss_arena) != 0) {
-      // Error; bail out.
+    // control.  If the mallctl fails, it will always_assert in mallctlHelper.
+    if (mallctlRead<unsigned, true>(JEMALLOC_NEW_ARENA_CMD, &low_arena)) {
       return;
     }
     char buf[32];
-    snprintf(buf, sizeof(buf), "arena.%u.dss", dss_arena);
+    snprintf(buf, sizeof(buf), "arena.%u.dss", low_arena);
     if (mallctlWrite<const char*, true>(buf, "primary") != 0) {
       // Error; bail out.
       return;
     }
+    low_arena_flags = MALLOCX_ARENA(low_arena);
+#ifdef MALLOCX_TCACHE_NONE
+    low_arena_flags |= MALLOCX_TCACHE_NONE;
+    // Earlier versions of jemalloc do not have MALLOCX_TCACHE_NONE, but will
+    // still bypass tcache when arena is specified.
+#endif
 
     // We normally maintain the invariant that the region surrounding the
     // current brk is mapped huge, but we don't know yet whether huge pages
@@ -628,20 +657,6 @@ struct JEMallocInitializer {
 
 static JEMallocInitializer initJEMalloc MAX_CONSTRUCTOR_PRIORITY;
 
-#ifdef USE_JEMALLOC
-void* low_malloc_impl(size_t size) {
-  if (size == 0) return nullptr;
-  void* ptr = mallocx(size, low_mallocx_flags());
-#ifndef USE_LOWPTR
-  if (!ptr) {
-    return uncounted_malloc(size);
-  }
-#endif
-  return ptr;
-}
-
-#endif // USE_JEMALLOC
-
 void low_malloc_huge_pages(int pages) {
 #if USE_JEMALLOC_EXTENT_HOOKS
   if (pages <= 0) return;
@@ -678,34 +693,6 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
     return mallctlCall<true>("prof.dump");
   }
 }
-
-#if USE_JEMALLOC_EXTENT_HOOKS
-
-void* malloc_huge_impl(size_t size) {
-  if (size == 0) return nullptr;
-  return mallocx(size, mallocx_huge_flags());
-}
-
-void high_arena_tcache_create() {
-  assert(high_arena_tcache == -1);
-  mallctlRead<int, true>("tcache.create", &high_arena_tcache);
-}
-
-void high_arena_tcache_flush() {
-  // It is OK if flushing fails
-  if (MALLOCX_TCACHE(high_arena_tcache) != MALLOCX_TCACHE_NONE) {
-    mallctlWrite<int, true>("tcache.flush", high_arena_tcache);
-  }
-}
-
-void high_arena_tcache_destroy() {
-  if (MALLOCX_TCACHE(high_arena_tcache) != MALLOCX_TCACHE_NONE) {
-    mallctlWrite<int, true>("tcache.destroy", high_arena_tcache);
-    high_arena_tcache = -1;
-  }
-}
-
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -56,7 +56,7 @@
 #  define USE_JEMALLOC_EXTENT_HOOKS 1
 #  if (JEMALLOC_VERSION_MAJOR > 5) || (JEMALLOC_VERSION_MINOR >= 1)
 // Requires jemalloc 5.1
-#   define USE_JEMALLOC_METADATA_1G_PAGES 1
+#   define JEMALLOC_METADATA_1G_PAGES 1
 #  endif
 # endif
 # if (JEMALLOC_VERSION_MAJOR > 4)
@@ -116,8 +116,18 @@ struct OutOfMemoryException : Exception {
 
 #ifdef USE_JEMALLOC
 
+// Low arena uses ManagedArena if extent hooks are used, otherwise it is using
+// DSS.  It should always be available for supported versions of jemalloc.  High
+// arena is 0 if extent hook API isn't used, but mallocx/dallocx could use 0 as
+// flags and behave similarly to malloc/free.  Low arena doesn't use tcache, but
+// we need tcache for the high arena, so the flags are thread-local.
+extern unsigned low_arena;
+extern unsigned high_arena;
+extern int low_arena_flags;
+extern __thread int high_arena_flags;
+
 #if !USE_JEMALLOC_EXTENT_HOOKS
-extern unsigned dss_arena;
+
 extern std::atomic<int> low_huge_pages;
 
 #else // USE_JEMALLOC_EXTENT_HOOKS
@@ -142,9 +152,6 @@ template<typename T> inline T* GetByArenaId(unsigned id) {
   return nullptr;
 }
 
-extern unsigned low_arena;
-extern unsigned high_arena;
-
 // Address ranges for the managed arenas.  Low arena is in [1G, 4G), and high
 // arena in [4G, 128G) at most.  Both grows down and can be smaller.  But things
 // won't work well if either overflows.
@@ -157,14 +164,6 @@ constexpr size_t kHighArenaMaxCap = kUncountedMaxAddr - kLowArenaMaxAddr;
 // Explicit per-thread tcache for the huge arenas.
 extern __thread int high_arena_tcache;
 
-inline int mallocx_huge_flags() {
-  return MALLOCX_ARENA(high_arena) | MALLOCX_TCACHE(high_arena_tcache);
-}
-
-inline int dallocx_huge_flags() {
-  return MALLOCX_TCACHE(high_arena_tcache);
-}
-
 /* Set up extent hooks to use 1g pages for jemalloc metadata. */
 void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
                                          size_t reserved);
@@ -176,45 +175,7 @@ void high_arena_tcache_destroy();       // tcache.destroy
 
 #endif // USE_JEMALLOC_EXTENT_HOOKS
 
-inline int low_mallocx_flags() {
-  // Allocate from low_arena if extend hooks are available, otherwise allocate
-  // from dss_arena.  Bypass the implicit tcache to assure that the result
-  // actually comes from the desired arena.
-#if USE_JEMALLOC_EXTENT_HOOKS
-  return MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
-#elif defined(MALLOCX_TCACHE_NONE)
-  return MALLOCX_ARENA(dss_arena) | MALLOCX_TCACHE_NONE;
-#else
-  return MALLOCX_ARENA(dss_arena);
-#endif
-}
-
-inline int low_dallocx_flags() {
-#ifdef MALLOCX_TCACHE_NONE
-  return MALLOCX_TCACHE_NONE;
-#else
-  return MALLOCX_ARENA(dss_arena);
-#endif
-}
-
 #endif // USE_JEMALLOC
-
-inline void* low_malloc(size_t size) {
-#ifndef USE_JEMALLOC
-  return malloc(size);
-#else
-  extern void* low_malloc_impl(size_t size);
-  return low_malloc_impl(size);
-#endif
-}
-
-inline void low_free(void* ptr) {
-#ifndef USE_JEMALLOC
-  free(ptr);
-#else
-  if (ptr) dallocx(ptr, low_dallocx_flags());
-#endif
-}
 
 void low_malloc_huge_pages(int pages);
 
@@ -222,8 +183,8 @@ inline void* malloc_huge_internal(size_t size) {
 #if !USE_JEMALLOC_EXTENT_HOOKS
   return malloc(size);
 #else
-  extern void* malloc_huge_impl(size_t);
-  return malloc_huge_impl(size);
+  if (!size) return nullptr;
+  return mallocx(size, high_arena_flags);
 #endif
 }
 
@@ -231,12 +192,7 @@ inline void free_huge_internal(void* ptr) {
 #if !USE_JEMALLOC_EXTENT_HOOKS
   free(ptr);
 #else
-  if (LIKELY(reinterpret_cast<uintptr_t>(ptr) < kHighArenaMaxAddr)) {
-    if (ptr) dallocx(ptr, dallocx_huge_flags());
-  } else {
-    // Not from the high 1G arena
-    free(ptr);
-  }
+  if (ptr) dallocx(ptr, high_arena_flags);
 #endif
 }
 
@@ -361,7 +317,6 @@ void* mallocx_on_node(size_t size, int node, size_t align);
 template <typename T, bool ErrOK>
 int mallctlHelper(const char *cmd, T* out, T* in) {
 #ifdef USE_JEMALLOC
-  assert(mallctl != nullptr);
   size_t outLen = sizeof(T);
   int err = mallctl(cmd,
                     out, out ? &outLen : nullptr,
@@ -370,16 +325,10 @@ int mallctlHelper(const char *cmd, T* out, T* in) {
 #else
   int err = ENOENT;
 #endif
-  if (err != 0) {
-    if (!ErrOK) {
-      std::string errStr =
-        folly::format("mallctl {}: {} ({})", cmd, strerror(err), err).str();
-      // Do not use Logger here because JEMallocInitializer() calls this
-      // function and JEMallocInitializer has the highest constructor priority.
-      // The static variables in Logger are not initialized yet.
-      fprintf(stderr, "%s\n", errStr.c_str());
-      always_assert(false);
-    }
+  if (!ErrOK && err != 0) {
+    char msg[128];
+    snprintf(msg, sizeof(msg), "mallctl %s failed with error %d", cmd, err);
+    throw std::runtime_error{msg};
   }
   return err;
 }
@@ -441,6 +390,31 @@ inline void* apc_malloc(size_t size) {
 
 inline void apc_free(void* ptr) {
   return free_huge_internal(ptr);
+}
+
+inline void* low_malloc(size_t size) {
+#ifndef USE_JEMALLOC
+  return malloc(size);
+#else
+  if (!size) return nullptr;
+  auto ptr = mallocx(size, low_arena_flags);
+#ifndef USE_LOWPTR
+  // low_malloc isn't required to return 32-bit addresses, but we still want to
+  // make sure it is below kUncountedMaxAddr, when ManagedArena is used.
+  if (!ptr) {
+    return uncounted_malloc(size);
+  }
+#endif
+  return ptr;
+#endif
+}
+
+inline void low_free(void* ptr) {
+#ifndef USE_JEMALLOC
+  free(ptr);
+#else
+  if (ptr) dallocx(ptr, low_arena_flags);
+#endif
 }
 
 template <class T>

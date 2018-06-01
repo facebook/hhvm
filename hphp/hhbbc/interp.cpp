@@ -2758,11 +2758,13 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
 
   auto const location = topStkEquiv(env);
   if (location != NoLocalId) {
-    auto locTy = peekLocation(env, location);
-    if (locTy.subtypeOf(TCell)) {
-      auto const okTy = intersection_of(input, nullThrows ? TObj : TOptObj);
-      refineLocation(env, location, [&] (Type t) { return okTy; });
-    }
+    refineLocation(env, location, [&] (Type t) {
+      assertx(t.subtypeOf(TCell));
+      if (nullThrows) return intersection_of(t, TObj);
+      if (!t.couldBe(TUninit)) return intersection_of(t, TOptObj);
+      if (!t.couldBe(TObj)) return intersection_of(t, TNull);
+      return t;
+    });
   }
 
   popC(env);

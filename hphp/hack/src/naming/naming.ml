@@ -998,12 +998,9 @@ module Make (GetLocals : GetLocals) = struct
       | nm when nm = SN.Typehints.string -> Some (N.Hprim N.Tstring)
       | nm when nm = SN.Typehints.array  ->
         let tcopt = (fst env).tcopt in
-        let darray_and_varray_allowed =
-          TypecheckerOptions.experimental_feature_enabled tcopt
-            TypecheckerOptions.experimental_darray_and_varray in
         let array_typehints_disallowed =
           TypecheckerOptions.disallow_array_typehint tcopt in
-        if darray_and_varray_allowed && array_typehints_disallowed
+        if array_typehints_disallowed
         then Errors.array_typehints_disallowed p;
         Some (match hl with
           | [] -> N.Harray (None, None)
@@ -1013,11 +1010,6 @@ module Make (GetLocals : GetLocals) = struct
           | _ -> Errors.too_many_type_arguments p; N.Hany
         )
       | nm when nm = SN.Typehints.darray ->
-        let darray_and_varray_allowed =
-          TypecheckerOptions.experimental_feature_enabled
-            (fst env).tcopt
-            TypecheckerOptions.experimental_darray_and_varray in
-        if not darray_and_varray_allowed then Errors.darray_not_supported p;
         Some (match hl with
           | [] ->
               if (fst env).in_mode = FileInfo.Mstrict then
@@ -1027,11 +1019,6 @@ module Make (GetLocals : GetLocals) = struct
           | [key_; val_] -> N.Hdarray (hint env key_, hint env val_)
           | _ -> Errors.too_many_type_arguments p; N.Hany)
       | nm when nm = SN.Typehints.varray ->
-        let darray_and_varray_allowed =
-          TypecheckerOptions.experimental_feature_enabled
-            (fst env).tcopt
-            TypecheckerOptions.experimental_darray_and_varray in
-        if not darray_and_varray_allowed then Errors.varray_not_supported p;
         Some (match hl with
           | [] ->
               if (fst env).in_mode = FileInfo.Mstrict then
@@ -1040,12 +1027,6 @@ module Make (GetLocals : GetLocals) = struct
           | [val_] -> N.Hvarray (hint env val_)
           | _ -> Errors.too_many_type_arguments p; N.Hany)
       | nm when nm = SN.Typehints.varray_or_darray ->
-        let darray_and_varray_allowed =
-          TypecheckerOptions.experimental_feature_enabled
-            (fst env).tcopt
-            TypecheckerOptions.experimental_darray_and_varray in
-        if not darray_and_varray_allowed then
-          Errors.varray_or_darray_not_supported p;
         Some (match hl with
           | [] ->
               if (fst env).in_mode = FileInfo.Mstrict then
@@ -2136,12 +2117,9 @@ module Make (GetLocals : GetLocals) = struct
   and expr_ env p = function
     | Array l ->
       let tcopt = (fst env).tcopt in
-      let darray_and_varray_allowed =
-        TypecheckerOptions.experimental_feature_enabled tcopt
-          TypecheckerOptions.experimental_darray_and_varray in
       let array_literals_disallowed =
         TypecheckerOptions.disallow_array_literal tcopt in
-      if darray_and_varray_allowed && array_literals_disallowed
+      if array_literals_disallowed
       then Errors.array_literals_disallowed p;
       N.Array (List.map l (afield env))
     | ParenthesizedExpr (p, e) -> expr_ env p e

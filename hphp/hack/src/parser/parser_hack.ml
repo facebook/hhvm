@@ -4256,11 +4256,6 @@ and array_field env =
       AFvalue e1
 
 and expr_darray env pos =
-  let darray_and_varray_allowed =
-    TypecheckerOptions.experimental_feature_enabled
-      env.popt
-      TypecheckerOptions.experimental_darray_and_varray in
-  if not darray_and_varray_allowed then Errors.darray_not_supported pos;
   expect env Tlb;
   pos, Darray (darray_field_list_remain env [])
 
@@ -4289,11 +4284,6 @@ and darray_field env =
   e1, e2
 
 and expr_varray env pos =
-  let darray_and_varray_allowed =
-    TypecheckerOptions.experimental_feature_enabled
-      env.popt
-      TypecheckerOptions.experimental_darray_and_varray in
-  if not darray_and_varray_allowed then Errors.varray_not_supported pos;
   expect env Tlb;
   pos, Varray (varray_field_list_remain env [])
 

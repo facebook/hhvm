@@ -24,8 +24,6 @@ let default = GlobalOptions.default
 let make_permissive = GlobalOptions.make_permissive
 let experimental_instanceof = GlobalOptions.tco_experimental_instanceof
 let experimental_isarray = GlobalOptions.tco_experimental_isarray
-let experimental_darray_and_varray =
-  GlobalOptions.tco_experimental_darray_and_varray
 let experimental_goto = GlobalOptions.tco_experimental_goto
 let experimental_tconst_on_generics =
   GlobalOptions.tco_experimental_tconst_on_generics

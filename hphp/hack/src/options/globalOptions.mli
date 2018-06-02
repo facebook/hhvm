@@ -98,14 +98,12 @@ type t = {
  tco_disallow_ambiguous_lambda : bool;
 
  (*
-  * Flag to disallow array typehints if the darray_and_varray experimental
-  * feature is enabled
+  * Flag to disallow array typehints
   *)
  tco_disallow_array_typehint: bool;
 
  (*
-  * Flag to disallow array literal expressions if the darray_and_varray
-  * experimental feature is enabled
+  * Flag to disallow array literal expressions
   *)
  tco_disallow_array_literal: bool;
 
@@ -168,7 +166,6 @@ val default : t
 val make_permissive : t -> t
 val tco_experimental_instanceof : string
 val tco_experimental_isarray : string
-val tco_experimental_darray_and_varray : string
 val tco_experimental_goto : string
 val tco_experimental_tconst_on_generics : string
 val tco_experimental_disable_shape_and_tuple_arrays : string

@@ -34,9 +34,6 @@ let tco_experimental_instanceof = "instanceof"
 
 let tco_experimental_isarray = "is_array"
 
-(* Whether darray and varray are enabled. *)
-let tco_experimental_darray_and_varray = "darray_and_varray"
-
 let tco_experimental_goto = "goto"
 
 (* Whether allow accessing tconsts on generics *)
@@ -159,7 +156,6 @@ let tco_experimental_all =
    [
      tco_experimental_instanceof;
      tco_experimental_isarray;
-     tco_experimental_darray_and_varray;
      tco_experimental_goto;
      tco_experimental_tconst_on_generics;
      tco_experimental_disable_shape_and_tuple_arrays;

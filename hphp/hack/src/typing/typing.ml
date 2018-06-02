@@ -301,13 +301,7 @@ let make_param_local_ty attrs env param =
        * argument, "f(C ...$args)", $args is a varray<C> *)
       let r = Reason.Rvar_param param.param_pos in
       let arr_values = r, t in
-      let akind =
-        if TypecheckerOptions.experimental_feature_enabled
-          (Env.get_options env)
-          TypecheckerOptions.experimental_darray_and_varray
-        then AKvarray arr_values
-        else AKvec arr_values in
-      r, Tarraykind akind
+      r, Tarraykind (AKvarray arr_values)
     | x -> x
   in
   Typing_reactivity.disallow_onlyrx_if_rxfunc_on_non_functions env param ty;
@@ -2577,13 +2571,7 @@ and anon_bind_variadic env vparam variadic_ty =
   in
   let r = Reason.Rvar_param pos in
   let arr_values = r, (snd ty) in
-  let akind =
-    if TypecheckerOptions.experimental_feature_enabled
-      (Env.get_options env)
-      TypecheckerOptions.experimental_darray_and_varray
-    then AKvarray arr_values
-    else AKvec arr_values in
-  let ty = r, Tarraykind akind in
+  let ty = r, Tarraykind (AKvarray arr_values) in
   let env, t_variadic = bind_param env (ty, vparam) in
   env, t_variadic
 

@@ -3018,7 +3018,7 @@ void in(ISS& env, const bc::FPushCufIter&) {
   fpiPushNoFold(env, ActRec { FPIKind::Unknown, TTop });
 }
 
-void in(ISS& /*env*/, const bc::RaiseFPassWarning& /*op*/) {}
+void in(ISS& /*env*/, const bc::FHandleRefMismatch& /*op*/) {}
 
 void in(ISS& env, const bc::FPassL& op) {
   auto const kind = prepKind(env, op.arg1);

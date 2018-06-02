@@ -1476,11 +1476,12 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       // by the runtime.
       cur->silences.clear();
       break;
-    case Op::RaiseFPassWarning: {
+    case Op::FHandleRefMismatch: {
       auto new_pc = pc;
       decode_op(new_pc);
+      decode_iva(new_pc);
       if (decode_oa<FPassHint>(new_pc) == FPassHint::Any) {
-        ferror("RaiseFPassWarning at PC {} with immediate value 'Any',"
+        ferror("FHandleRefMismatch at PC {} with immediate value 'Any',"
                "allowable FPassHint values for this opcode are 'Cell' and "
                "'Ref'\n", offset(pc));
         return false;

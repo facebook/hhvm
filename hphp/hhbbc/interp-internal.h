@@ -477,7 +477,7 @@ void killFPass(ISS& env, PrepKind kind, FPassHint hint, uint32_t arg,
     return reduce(
       env,
       std::forward<Bytecodes>(bcs)...,
-      bc::RaiseFPassWarning { hint, ar.func->name(), arg }
+      bc::FHandleRefMismatch { arg, hint, ar.func->name() }
     );
   }
   return reduce(env, std::forward<Bytecodes>(bcs)...);

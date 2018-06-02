@@ -314,7 +314,7 @@ static const struct {
   { OpFPushCtorI,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCtorS,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCufIter,{None,             FStack,       OutFDesc        }},
-  { OpRaiseFPassWarning,
+  { OpFHandleRefMismatch,
                    {None,             None,         OutNone         }},
   { OpFPassC,      {FuncdRef,         None,         OutSameAsInput1 }},
   { OpFPassVNop,   {FuncdRef,         None,         OutSameAsInput1 }},
@@ -1189,7 +1189,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::IsMemoType:
     return true;
 
-  case Op::RaiseFPassWarning:
+  case Op::FHandleRefMismatch:
   case Op::FPassVNop:
   case Op::FPassN:
   case Op::FPassC:

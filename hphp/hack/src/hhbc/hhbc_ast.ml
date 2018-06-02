@@ -429,7 +429,7 @@ type instruct_call =
   | FCallAwait of num_params * class_id * function_id
   | FCallUnpack of num_params
   | FCallBuiltin of num_params * num_params * string
-  | RaiseFPassWarning of fpass_hint * string * param_id
+  | FHandleRefMismatch of param_num * fpass_hint * string
 
 type instruct_base =
   | BaseNC of stack_index * MemberOpMode.t

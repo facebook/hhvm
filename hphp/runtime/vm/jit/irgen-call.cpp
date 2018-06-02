@@ -1313,9 +1313,8 @@ void checkFPassHint(IRGS& env, uint32_t paramId, int off, FPassHint hint,
   );
 }
 
-void emitRaiseFPassWarning(
-  IRGS& env, FPassHint hint, const StringData* fname, uint32_t arg
-) {
+void emitFHandleRefMismatch(IRGS& env, uint32_t paramId, FPassHint hint,
+                            const StringData* funcName) {
   if (!RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
       !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
     return;
@@ -1325,8 +1324,8 @@ void emitRaiseFPassWarning(
   gen(
     env,
     RaiseParamRefMismatchForFuncName,
-    ParamData { (int32_t)arg },
-    cns(env, fname),
+    ParamData { (int32_t)paramId },
+    cns(env, funcName),
     cns(env, hint == FPassHint::Cell)
   );
 }

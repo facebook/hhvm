@@ -155,8 +155,8 @@ let instr_fpassn i hint = instr (ICall (FPassN (i, hint)))
 let instr_fpassg i hint = instr (ICall (FPassG (i, hint)))
 let instr_fpassc i hint = instr (ICall (FPassC (i, hint)))
 let instr_fpassvnop i hint = instr (ICall (FPassVNop (i, hint)))
-let instr_raise_fpass_warning hint name i =
-  instr (ICall (RaiseFPassWarning (hint, name, i)))
+let instr_fhandle_ref_mismatch i hint name =
+  instr (ICall (FHandleRefMismatch (i, hint, name)))
 
 let instr_popu = instr (IBasic PopU)
 let instr_popr = instr (IBasic PopR)
@@ -777,7 +777,7 @@ let get_input_output_count i =
     | FPushObjMethodD _ | FPushClsMethod _ | FPushClsMethodS _ | DecodeCufIter _
     | FPushFunc _ -> (1, 0)
     | FPushFuncU _ | FPushClsMethodD _ | FPushClsMethodSD _ | FPushCufIter _
-    | FPushFuncD _ | RaiseFPassWarning _ -> (0, 0)
+    | FPushFuncD _ | FHandleRefMismatch _ -> (0, 0)
     | FPushObjMethod _ -> (2, 0)
     | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPassL _
     | FPushCtorS _ -> (0, 1)

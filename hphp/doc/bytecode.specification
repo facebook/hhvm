@@ -2255,7 +2255,8 @@ Reffiness hints
   All of the FPass* instructions take a parameter id, %1, and a reffiness hint,
   %2, which may be 'Any', 'Cell', or 'Ref'. If the reffiness hint %2 is not
   'Any' and does not match the reffiness of parameter %1 the runtime may raise
-  a warning. The value of %2 has no other effect on these instructions.
+  a warning or throw an exception. The value of %2 has no other effect on these
+  instructions.
 
 FPassC <param id> <reffiness hint>     [C]  ->  [F]
 
@@ -2301,11 +2302,11 @@ FPassS <param id> <class-ref slot> <reffiness hint>    [C]  ->  [F]
   FPI pass parameter. This instruction behaves as CGetS if parameter %1 is pass
   by value, or it behaves like VGetS if parameter %1 is pass by reference.
 
-RaiseFPassWarning <reffiness hint> <func name> <param id> []  -> []
+FHandleRefMismatch <param id> <reffiness hint> <func name>   []  ->  []
 
-  Raise a warning as if the FPass* instruction for parameter %3 to function
-  %2, with a reffiness hint of %1, did not match the reffiness of the
-  corresponding parameter for that function.
+  Handle known mismatch between reffiness of the parameter %1 of the function
+  named %3 and the reffiness hint %2, which may be 'Cell', or 'Ref'. Depending
+  on the runtime configuration, may raise a warning or throw an exception.
 
 FCall <num params>    [F..F]  ->  [R]
 

@@ -5104,11 +5104,10 @@ OPTBLD_INLINE void iopFPushCufIter(uint32_t numArgs, Iter* it) {
   setTypesFlag(vmfp(), ar);
 }
 
-OPTBLD_INLINE void iopRaiseFPassWarning(
-  FPassHint hint, const StringData* fname, uint32_t arg
-) {
+OPTBLD_INLINE void iopFHandleRefMismatch(uint32_t paramId, FPassHint hint,
+                                         const StringData* funcName) {
   assertx(hint != FPassHint::Any);
-  raiseParamRefMismatchForFuncName(fname, arg, hint == FPassHint::Cell);
+  raiseParamRefMismatchForFuncName(funcName, paramId, hint == FPassHint::Cell);
 }
 
 OPTBLD_INLINE void iopFPassC(ActRec* ar, uint32_t paramId, FPassHint hint) {

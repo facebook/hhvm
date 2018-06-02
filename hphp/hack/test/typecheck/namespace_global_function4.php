@@ -1,5 +1,4 @@
 //// global.php
-
 <?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
@@ -16,7 +15,6 @@ function f(): int {
 }
 
 //// local.php
-
 <?hh // strict
 
 namespace N {

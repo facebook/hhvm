@@ -9,7 +9,6 @@ newtype Foo = int;
 newtype Bar = string;
 
 //// file3.php
-
 <?hh // strict
 
 function test(Foo $foo, Bar $bar): void {

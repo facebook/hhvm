@@ -1,6 +1,6 @@
 
 // hello
- <?hh
+<?hh
 class foo {
   // comment inside
   public function bar() {

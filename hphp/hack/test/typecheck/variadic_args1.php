@@ -33,7 +33,6 @@ function takes_vec_array<Tv>(array<Tv> $c): void {}
 function takes_hash_array<Tk,Tv>(array<Tk,Tv> $c): void {}
 
 //// partial.php
-
 <?hh // partial
 
 function f2(string $x, ...$args): void {}

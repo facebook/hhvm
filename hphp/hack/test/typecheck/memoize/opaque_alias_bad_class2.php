@@ -1,5 +1,4 @@
 //// file1.php
-
 <?hh
 
 class BarImpl {
@@ -8,7 +7,6 @@ class BarImpl {
 newtype Bar = BarImpl;
 
 //// file2.php
-
 <?hh
 
 <<__Memoize>>

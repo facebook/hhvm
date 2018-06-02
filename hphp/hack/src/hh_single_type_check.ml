@@ -452,7 +452,7 @@ let rec make_files = function
 let file_to_files file =
   let abs_fn = Relative_path.to_absolute file in
   let content = cat abs_fn in
-  let delim = Str.regexp "////.*" in
+  let delim = Str.regexp "////.*\n" in
   if Str.string_match delim content 0
   then
     let contentl = Str.full_split delim content in

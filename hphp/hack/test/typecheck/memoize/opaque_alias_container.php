@@ -1,11 +1,9 @@
 //// file1.php
-
 <?hh
 
 newtype Bar = array<int>;
 
 //// file2.php
-
 <?hh
 
 class Foo {

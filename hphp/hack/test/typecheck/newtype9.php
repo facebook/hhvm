@@ -1,4 +1,5 @@
 //// _comments
+<?hh
 
 // opaque type should not implicitly convert to string.
 // even when the type backing it does implicit convert to

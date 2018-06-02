@@ -1,5 +1,4 @@
 //// file1.php
-
 <?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
@@ -14,7 +13,6 @@
 newtype ID as int = int;
 
 //// file2.php
-
 <?hh
 
 function test(ID $x): void {}

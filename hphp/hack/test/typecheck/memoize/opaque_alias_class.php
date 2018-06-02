@@ -1,5 +1,4 @@
 //// file1.php
-
 <?hh
 
 class BarImpl implements IMemoizeParam {
@@ -11,7 +10,6 @@ class BarImpl implements IMemoizeParam {
 newtype Bar = BarImpl;
 
 //// file2.php
-
 <?hh
 
 class Foo {

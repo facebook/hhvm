@@ -1,5 +1,4 @@
 //// file1.php
-
 <?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
@@ -17,7 +16,6 @@ class Y {}
 newtype opaque_duck as Y = Duck;
 
 //// file2.php
-
 <?hh // strict
 
 function test(opaque_duck $x): Duck {

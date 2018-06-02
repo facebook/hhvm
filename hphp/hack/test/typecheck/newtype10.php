@@ -1,4 +1,5 @@
 //// _comments
+<?hh
 
 // Instances of an opaque type should be comparable using === .
 // Some languages have a notion of types that don't permit

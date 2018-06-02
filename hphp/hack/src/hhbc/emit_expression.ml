@@ -2840,7 +2840,10 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
        base_expr_instrs
        empty
        (emit_pos_then pos @@
-       instr_basenc base_offset base_mode)
+         match param_num_opt with
+           | None -> instr_basenc base_offset base_mode
+           | Some i -> instr (IBase (FPassBaseNC (i, base_offset))
+       ))
        1
    | _ ->
      let base_expr_instrs, flavor = emit_flavored_expr env expr in

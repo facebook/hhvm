@@ -390,7 +390,7 @@ let string_of_base x =
   | BaseNL (id, m) ->
     sep ["BaseNL"; string_of_local_id id; MemberOpMode.to_string m]
   | FPassBaseNC (i, si) ->
-    sep ["FBaseBaseNC"; string_of_param_num i; string_of_stack_index si]
+    sep ["FPassBaseNC"; string_of_param_num i; string_of_stack_index si]
   | FPassBaseNL (i, lid) ->
     sep ["FPassBaseNL"; string_of_param_num i; string_of_local_id lid]
   | BaseGC (si, m) ->

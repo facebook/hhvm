@@ -2343,11 +2343,14 @@ let mixed_namespace_errors env node parents namespace_type errors =
     errors
   | _ -> errors
 
-let enum_errors _env node errors =
+let enum_errors node errors =
   match syntax node with
-  | Enumerator { enumerator_name = name; _}
-      when String.lowercase_ascii @@ text name = "class" ->
-    make_error_from_node node SyntaxError.enum_elem_name_is_class :: errors
+  | Enumerator { enumerator_name = name; enumerator_value = value; _} ->
+    let errors = if String.lowercase_ascii @@ text name = "class" then
+      make_error_from_node node SyntaxError.enum_elem_name_is_class :: errors
+      else errors in
+    let errors = check_constant_expression errors value in
+    errors
   | _ -> errors
 
 let does_op_create_write_on_left = function
@@ -2610,10 +2613,8 @@ let find_syntax_errors env =
         let errors =
           class_property_multiple_visibility_error env node parents errors in
         trait_require_clauses, names, errors
-      | Enumerator { enumerator_name = name; _}
-        when String.lowercase_ascii @@ text name = "class" ->
-        let errors =
-          make_error_from_node node SyntaxError.enum_elem_name_is_class :: errors in
+      | Enumerator _ ->
+        let errors = enum_errors node errors in
         trait_require_clauses, names, errors
       | PostfixUnaryExpression _
       | BinaryExpression _

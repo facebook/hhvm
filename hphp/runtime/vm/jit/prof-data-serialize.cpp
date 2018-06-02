@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
@@ -40,6 +41,8 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
+#include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit.h"
@@ -402,6 +405,199 @@ std::unique_ptr<ProfTransRec> read_prof_trans_rec(ProfDataDeserializer& ser) {
   return ret;
 }
 
+bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td);
+
+bool write_type_alias_or_class(ProfDataSerializer& ser, const NamedEntity* ne) {
+  if (!ne) return false;
+  if (auto const cls = ne->clsList()) {
+    if (!(cls->attrs() & AttrUnique)) return false;
+    if (!cls->wasSerialized()) write_class(ser, cls);
+    return true;
+  }
+  if (!ne->isPersistentTypeAlias()) return false;
+  return write_type_alias(ser, ne->getCachedTypeAlias());
+}
+
+bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
+  SCOPE_EXIT {
+    ITRACE(2, "TypeAlias: {}\n", td->name);
+  };
+  ITRACE(2, "TypeAlias>\n");
+  // we're writing out Class* and TypeAliasReq* intermingled here. Set
+  // bit 1 for TypeAliasReq's so we can distinguish when reading back
+  // in. We also need to keep track of both whether we already tried
+  // serialize this one, and whether it was successful. Use td2 for
+  // that too.
+  auto const td2 = reinterpret_cast<const char*>(td) + 2;
+  if (!ser.serialize(td)) {
+    return ser.wasSerialized(td2);
+  }
+  Trace::Indent _;
+
+  auto const unit = td->unit;
+  auto const name = td->name;
+  auto const tas = unit->typeAliases();
+  for (auto const& ta : tas) {
+    if (ta.name == name) {
+      switch (get_ts_kind(ta.typeStructure.get())) {
+        case TypeStructure::Kind::T_unresolved: {
+          auto const clsname = get_ts_classname(ta.typeStructure.get());
+          if (!write_type_alias_or_class(ser,
+                                         NamedEntity::get(clsname, false))) {
+            return false;
+          }
+          break;
+        }
+        case TypeStructure::Kind::T_void:
+        case TypeStructure::Kind::T_int:
+        case TypeStructure::Kind::T_bool:
+        case TypeStructure::Kind::T_float:
+        case TypeStructure::Kind::T_string:
+        case TypeStructure::Kind::T_resource:
+        case TypeStructure::Kind::T_num:
+        case TypeStructure::Kind::T_arraykey:
+        case TypeStructure::Kind::T_noreturn:
+        case TypeStructure::Kind::T_tuple:
+        case TypeStructure::Kind::T_array:
+        case TypeStructure::Kind::T_dict:
+        case TypeStructure::Kind::T_vec:
+        case TypeStructure::Kind::T_keyset:
+        case TypeStructure::Kind::T_vec_or_dict:
+        case TypeStructure::Kind::T_nonnull:
+          break;
+
+        case TypeStructure::Kind::T_fun:
+        case TypeStructure::Kind::T_typevar:
+        case TypeStructure::Kind::T_shape:
+        case TypeStructure::Kind::T_typeaccess:
+        case TypeStructure::Kind::T_xhp:
+        case TypeStructure::Kind::T_mixed:
+          return false;
+
+        case TypeStructure::Kind::T_class:
+        case TypeStructure::Kind::T_interface:
+        case TypeStructure::Kind::T_trait:
+        case TypeStructure::Kind::T_enum:
+          // these types don't occur in unresolved TypeStructures
+          always_assert(false);
+      }
+
+      if (!ser.serialize(td2)) always_assert(false);
+      write_serialized_ptr(ser, td2);
+      write_unit(ser, td->unit);
+      write_string(ser, td->name);
+      return true;
+    }
+  }
+  return false;
+}
+
+Class* read_class_internal(ProfDataDeserializer& ser) {
+  auto const id = read_raw<decltype(std::declval<PreClass*>()->id())>(ser);
+  auto const unit = read_unit(ser);
+
+  read_container(ser,
+                 [&] {
+                   auto const dep = read_class(ser);
+                   auto const ne = dep->preClass()->namedEntity();
+                   // if it's not persistent, make sure that dep
+                   // is the active class for this NamedEntity
+                   assertx(ne->m_cachedClass.bound());
+                   if (ne->m_cachedClass.isNormal()) {
+                     ne->setCachedClass(dep);
+                   }
+                   auto const depName = read_string(ser);
+                   if (!dep->name()->isame(depName)) {
+                     // this dependent was referred to via a
+                     // class_alias, so we need to make sure
+                     // *that* points to the class too
+                     auto const aliasNe = NamedEntity::get(depName);
+                     aliasNe->m_cachedClass.bind(rds::Mode::Normal);
+                     if (aliasNe->m_cachedClass.isNormal()) {
+                       aliasNe->m_cachedClass.markUninit();
+                     }
+                     aliasNe->setCachedClass(dep);
+                   }
+                 });
+
+  auto const preClass = unit->lookupPreClassId(id);
+  folly::Optional<TypeAliasReq> enumBaseReq;
+  SCOPE_EXIT {
+    if (enumBaseReq) {
+      preClass->enumBaseTy().namedEntity()->m_cachedTypeAlias.markUninit();
+    }
+  };
+  if (preClass->attrs() & AttrEnum &&
+      preClass->enumBaseTy().isObject()) {
+    auto const dt = read_raw<DataType>(ser);
+    auto const ne = preClass->enumBaseTy().namedEntity();
+    if (!ne->m_cachedTypeAlias.bound() ||
+        !ne->m_cachedTypeAlias.isInit()) {
+      enumBaseReq.emplace();
+      enumBaseReq->type = dt == KindOfInt64 ?
+        AnnotType::Int : AnnotType::String;
+      enumBaseReq->name = preClass->enumBaseTy().typeName();
+      ne->m_cachedTypeAlias.bind(rds::Mode::Normal);
+      ne->m_cachedTypeAlias.initWith(*enumBaseReq);
+    }
+  }
+  auto const ne = preClass->namedEntity();
+  // If it's not persistent, make sure its NamedEntity is
+  // unbound, ready for DefClass
+  if (ne->m_cachedClass.bound() &&
+      ne->m_cachedClass.isNormal()) {
+    ne->m_cachedClass.markUninit();
+  }
+
+  auto const cls = Unit::defClass(preClass, true);
+  if (cls->pinitVec().size()) cls->initPropHandle();
+  if (cls->numStaticProperties()) cls->initSPropHandles();
+
+  if (cls->parent() == c_Closure::classof()) {
+    auto const ctx = read_class(ser);
+    if (ctx != cls) return cls->rescope(ctx);
+  }
+  return cls;
+}
+
+/*
+ * This reads in TypeAliases and Classes that are used for code gen,
+ * but otherwise aren't needed for profiling. We just need them to be
+ * loaded into the NamedEntity table, so this function just returns
+ * whether or not to continue (the end of the list is marked by a
+ * null pointer).
+ */
+bool read_type_alias_or_class(ProfDataDeserializer& ser) {
+  auto const ptr = read_raw<uintptr_t>(ser);
+  if (!ptr) return false;
+  assertx(ptr & 1);
+
+  if (!(ptr & 2)) {
+    ITRACE(2, "Class>\n");
+    Trace::Indent _;
+    auto& ent = ser.getEnt(reinterpret_cast<Class*>(ptr - 1));
+    assertx(!ent);
+    ent = read_class_internal(ser);
+    assertx(ent);
+    ITRACE(2, "Class: {}\n", ent->name());
+    return true;
+  }
+
+  auto const unit = read_unit(ser);
+  auto const name = read_string(ser);
+  ITRACE(2, "TypeAlias: {}\n", name);
+  auto const tas = unit->typeAliases();
+  Id id = 0;
+  for (auto const& ta : tas) {
+    if (ta.name == name) {
+      unit->defTypeAlias(id);
+      return true;
+    }
+    ++id;
+  }
+  always_assert(false);
+}
+
 void write_profiled_funcs(ProfDataSerializer& ser, ProfData* pd) {
   auto const maxFuncId = pd->maxProfilingFuncId();
 
@@ -409,13 +605,41 @@ void write_profiled_funcs(ProfDataSerializer& ser, ProfData* pd) {
     if (!Func::isFuncIdValid(fid) || !pd->profiling(fid)) continue;
     write_func(ser, Func::fromFuncId(fid));
   }
-
   write_raw(ser, uintptr_t{});
 }
 
 void read_profiled_funcs(ProfDataDeserializer& ser, ProfData* pd) {
   while (auto const func = read_func(ser)) {
     pd->setProfiling(func->getFuncId());
+  }
+}
+
+void write_classes_and_type_aliases(ProfDataSerializer& ser, ProfData* pd) {
+  auto const maxFuncId = pd->maxProfilingFuncId();
+
+  // in an attempt to get a sensible order for these, start with the
+  // ones referenced by params and return constraints.
+  for (FuncId fid = 0; fid <= maxFuncId; fid++) {
+    if (!Func::isFuncIdValid(fid) || !pd->profiling(fid)) continue;
+    auto const func = Func::fromFuncId(fid);
+    for (auto const& p : func->params()) {
+      write_type_alias_or_class(ser, p.typeConstraint.namedEntity());
+    }
+  }
+
+  // Now just iterate and write anything that remains
+  NamedEntity::foreach_name(
+    [&] (NamedEntity& ne) {
+      write_type_alias_or_class(ser, &ne);
+    }
+  );
+  write_raw(ser, uintptr_t{});
+}
+
+void read_classes_and_type_aliases(ProfDataDeserializer& ser) {
+  while (read_type_alias_or_class(ser)) {
+    // nothing to do. this was just to make sure everything is loaded
+    // into the NamedEntity table
   }
 }
 
@@ -900,6 +1124,15 @@ void write_class(ProfDataSerializer& ser, const Class* cls) {
                     write_string(ser, dep.second);
                   });
 
+  if (cls->attrs() & AttrEnum &&
+      cls->preClass()->enumBaseTy().isObject()) {
+    if (cls->enumBaseTy()) {
+      write_raw(ser, *cls->enumBaseTy());
+    } else {
+      write_raw(ser, KindOfUninit);
+    }
+  }
+
   if (cls->parent() == c_Closure::classof()) {
     auto const func = cls->lookupMethod(s_invoke.get());
     assertx(func);
@@ -913,51 +1146,7 @@ Class* read_class(ProfDataDeserializer& ser) {
     ser,
     [&] () -> Class* {
       Trace::Indent _;
-      auto const id = read_raw<decltype(std::declval<PreClass*>()->id())>(ser);
-      auto const unit = read_unit(ser);
-
-      read_container(ser,
-                     [&] {
-                       auto const dep = read_class(ser);
-                       auto const ne = dep->preClass()->namedEntity();
-                       // if its not persistent, make sure that dep
-                       // is the active class for this NamedEntity
-                       assertx(ne->m_cachedClass.bound());
-                       if (ne->m_cachedClass.isNormal()) {
-                         ne->setCachedClass(dep);
-                       }
-                       auto const depName = read_string(ser);
-                       if (!dep->name()->isame(depName)) {
-                         // this dependent was referred to via a
-                         // class_alias, so we need to make sure
-                         // *that* points to the class too
-                         auto const aliasNe = NamedEntity::get(depName);
-                         aliasNe->m_cachedClass.bind(rds::Mode::Normal);
-                         if (aliasNe->m_cachedClass.isNormal()) {
-                           aliasNe->m_cachedClass.markUninit();
-                         }
-                         aliasNe->setCachedClass(dep);
-                       }
-                     });
-
-      auto const preClass = unit->lookupPreClassId(id);
-      auto const ne = preClass->namedEntity();
-      // If its not persistent, make sure its NamedEntity is
-      // unbound, ready for DefClass
-      if (ne->m_cachedClass.bound() &&
-          ne->m_cachedClass.isNormal()) {
-        ne->m_cachedClass.markUninit();
-      }
-
-      auto const cls = Unit::defClass(preClass, true);
-      if (cls->pinitVec().size()) cls->initPropHandle();
-      if (cls->numStaticProperties()) cls->initSPropHandles();
-
-      if (cls->parent() == c_Closure::classof()) {
-        auto const ctx = read_class(ser);
-        if (ctx != cls) return cls->rescope(ctx);
-      }
-      return cls;
+      return read_class_internal(ser);
     }
   );
 
@@ -1103,7 +1292,14 @@ bool serializeProfData(const std::string& filename) {
 
     InliningDecider::serializeForbiddenInlines(ser);
 
+    // We've written everything directly referenced by the profile
+    // data, but jitted code might still use Classes and TypeAliasReqs
+    // that haven't been otherwise mentioned (eg VerifyParamType,
+    // InstanceOfD etc).
+    write_classes_and_type_aliases(ser, pd);
+
     ser.finalize();
+
     return true;
   } catch (std::runtime_error& err) {
     FTRACE(1, "serializeProfData - Failed: {}\n", err.what());
@@ -1138,6 +1334,8 @@ bool deserializeProfData(const std::string& filename, int numWorkers) {
     read_target_profiles(ser);
 
     InliningDecider::deserializeForbiddenInlines(ser);
+
+    read_classes_and_type_aliases(ser);
 
     always_assert(ser.done());
 

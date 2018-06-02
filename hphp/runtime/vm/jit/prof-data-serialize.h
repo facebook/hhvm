@@ -32,6 +32,7 @@ struct Func;
 struct StringData;
 struct ArrayData;
 struct SrcKey;
+struct TypeAliasReq;
 
 namespace jit {
 //////////////////////////////////////////////////////////////////////
@@ -46,12 +47,13 @@ struct ProfDataSerializer {
   bool serialize(const Func* func);
   bool serialize(const Class* cls);
 
-  bool serialize(const StringData* str) {
-    return serializedStatics.emplace(str).second;
+  template<typename T>
+  bool serialize(const T* x) {
+    return serializedStatics.emplace(x).second;
   }
-
-  bool serialize(const ArrayData* arr) {
-    return serializedStatics.emplace(arr).second;
+  template<typename T>
+  bool wasSerialized(const T* x) {
+    return serializedStatics.count(x);
   }
 
   // Atomically create the output file, or throw runtime error upon failure.
@@ -62,7 +64,7 @@ private:
   uint32_t offset{0};
   char buffer[buffer_size];
   const std::string& fileName;
-  // keep track of which static strings and arrays have already been serialized
+  // keep track of things that have already been serialized.
   std::unordered_set<const void*> serializedStatics;
 };
 

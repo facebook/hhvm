@@ -191,6 +191,7 @@ struct NamedEntity {
   template<class Fn> static void foreach_class(Fn fn);
   template<class Fn> static void foreach_cached_class(Fn fn);
   template<class Fn> static void foreach_cached_func(Fn fn);
+  template<class Fn> static void foreach_name(Fn);
 
   /*
    * Size of the global NamedEntity table.
@@ -203,7 +204,6 @@ struct NamedEntity {
   static std::vector<std::pair<const char*, int64_t>> tableStats();
 
 private:
-  template<class Fn> static void foreach_name(Fn);
   static Map* table();
 
   /////////////////////////////////////////////////////////////////////////////

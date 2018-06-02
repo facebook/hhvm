@@ -1012,7 +1012,11 @@ constexpr bool isConditionalJmp(Op opcode) {
 }
 
 constexpr bool isJmp(Op opcode) {
-  return opcode >= Op::Jmp && opcode <= Op::JmpNZ;
+  return
+    opcode == Op::Jmp   ||
+    opcode == Op::JmpNS ||
+    opcode == Op::JmpZ  ||
+    opcode == Op::JmpNZ;
 }
 
 constexpr bool isFPush(Op opcode) {
@@ -1046,7 +1050,10 @@ constexpr bool isFPushCtor(Op opcode) {
 }
 
 constexpr bool isFPushFunc(Op opcode) {
-  return opcode >= OpFPushFunc && opcode <= OpFPushFuncU;
+  return
+    opcode == OpFPushFunc  ||
+    opcode == OpFPushFuncD ||
+    opcode == OpFPushFuncU;
 }
 
 inline bool isFCallStar(Op opcode) {

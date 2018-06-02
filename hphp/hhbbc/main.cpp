@@ -54,6 +54,7 @@ namespace fs = boost::filesystem;
 std::string output_repo;
 std::string input_repo;
 bool logging = true;
+bool print_bytecode_stats_and_exit = false;
 
 
 //////////////////////////////////////////////////////////////////////
@@ -141,6 +142,7 @@ void parse_options(int argc, char** argv) {
     ("analyze-func-wlimit",  po::value(&options.analyzeFuncWideningLimit))
     ("analyze-class-wlimit", po::value(&options.analyzeClassWideningLimit))
     ("return-refine-limit",  po::value(&options.returnTypeRefineLimit))
+    ("bytecode-stats",       po::bool_switch(&print_bytecode_stats_and_exit))
     ;
 
   po::options_description oflags("Optimization Flags");
@@ -391,6 +393,27 @@ void compile_repo() {
   wp_thread.join();
 }
 
+void print_repo_bytecode_stats() {
+  std::array<uint64_t,Op_count> op_counts{};
+
+  auto const input = load_input();
+  for (auto const& ue : input.first) {
+    auto pc = ue->bc();
+    auto const end = pc + ue->bcPos();
+    for (; pc < end; pc += instrLen(pc)) {
+      op_counts[static_cast<uint16_t>(peek_op(pc))]++;
+    }
+  }
+
+  for (auto i = uint32_t{}; i < op_counts.size(); ++i) {
+    std::cout << folly::format(
+      "{: <20} {}\n",
+      opcodeToName(static_cast<Op>(i)),
+      op_counts[i]
+    );
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -398,7 +421,7 @@ void compile_repo() {
 int main(int argc, char** argv) try {
   parse_options(argc, argv);
 
-  if (fs::exists(output_repo)) {
+  if (!print_bytecode_stats_and_exit && fs::exists(output_repo)) {
     std::cout << "output repo already exists; removing it\n";
     if (unlink(output_repo.c_str())) {
       std::cerr << "failed to unlink output repo: "
@@ -454,6 +477,11 @@ int main(int argc, char** argv) try {
   SCOPE_EXIT { hphp_process_exit(); };
 
   Repo::shutdown();
+
+  if (print_bytecode_stats_and_exit) {
+    print_repo_bytecode_stats();
+    return 0;
+  }
 
   Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
   compile_repo(); // NOTE: errors ignored

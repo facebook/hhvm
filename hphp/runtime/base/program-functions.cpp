@@ -2355,15 +2355,21 @@ void hphp_process_init() {
         Logger::FInfo("JitDeserializeFrom: {}",
                       RuntimeOption::EvalJitSerdesFile);
       }
-      if (jit::deserializeProfData(RuntimeOption::EvalJitSerdesFile)) {
+      auto const numWorkers = RuntimeOption::EvalJitWorkerThreadsForSerdes ?
+        RuntimeOption::EvalJitWorkerThreadsForSerdes : Process::GetCPUCount();
+      if (jit::deserializeProfData(RuntimeOption::EvalJitSerdesFile,
+                                   numWorkers)) {
+        if (RuntimeOption::ServerExecutionMode()) {
+          Logger::FInfo("JitDeserialize: Loaded {} Units",
+                        numLoadedUnits());
+        }
         BootStats::mark("jit::deserializeProfData");
         StructuredLog::log("", {});
         RuntimeOption::EvalNumSingleJitRequests=0;
         RuntimeOption::EvalJitProfileInterpRequests=0;
         RuntimeOption::EvalJitProfileRequests=0;
-        if (!RuntimeOption::EvalJitWorkerThreadsForSerdes) {
-          RuntimeOption::EvalJitWorkerThreads=Process::GetCPUCount();
-        }
+        RuntimeOption::EvalJitWorkerThreads=numWorkers;
+
         jit::mcgen::checkRetranslateAll(true);
         BootStats::mark("mcgen::retranslateAll");
       } else {
@@ -2375,10 +2381,14 @@ void hphp_process_init() {
         }
         if (RuntimeOption::EvalJitSerdesMode ==
             JitSerdesMode::DeserializeOrGenerate) {
-          Logger::FInfo("JitDeserializeFrom: `{}' was not valid, "
+          Logger::FInfo("JitDeserialize: `{}' was not valid, "
                         "scheduling one time serialization and restart",
                         RuntimeOption::EvalJitSerdesFile);
           RuntimeOption::EvalJitSerdesMode = JitSerdesMode::SerializeAndExit;
+        } else {
+          Logger::FInfo("JitDeserialize: `{}' was not valid, "
+                        "will profile then retranslateAll",
+                        RuntimeOption::EvalJitSerdesFile);
         }
       }
     }

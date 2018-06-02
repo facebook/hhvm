@@ -160,7 +160,7 @@ void write_func(ProfDataSerializer& ser, const Func* func);
 Func* read_func(ProfDataDeserializer& ser);
 
 bool serializeProfData(const std::string& filanme);
-bool deserializeProfData(const std::string& filanme);
+bool deserializeProfData(const std::string& filanme, int numWorkers);
 
 //////////////////////////////////////////////////////////////////////
 } }

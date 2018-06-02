@@ -46,6 +46,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/build-info.h"
+#include "hphp/util/process.h"
 
 #include <folly/portability/Unistd.h>
 #include <folly/String.h>
@@ -571,6 +572,48 @@ void read_target_profiles(ProfDataDeserializer& ser) {
   }
 }
 
+void merge_loaded_units(int numWorkers) {
+  auto units = loadedUnitsRepoAuth();
+
+  std::vector<std::thread> workers;
+  // Compute a batch size that causes each thread to process approximately 16
+  // batches.  Even if the batches are somewhat imbalanced in what they contain,
+  // the straggler workers are very unlikey to take more than 10% longer than
+  // the first worker to finish.
+  auto const batchSize{std::max(units.size() / numWorkers / 16, size_t(1))};
+  std::atomic<size_t> index{0};
+  for (auto worker = 0; worker < numWorkers; ++worker) {
+    workers.push_back(std::thread([&] {
+      hphp_thread_init();
+      hphp_session_init(Treadmill::SessionKind::PreloadRepo);
+
+      while (true) {
+        auto begin = index.fetch_add(batchSize);
+        auto end = std::min(begin + batchSize, units.size());
+        if (begin >= end) break;
+        auto unitCount = end - begin;
+        for (auto i = size_t{0}; i < unitCount; ++i) {
+          auto const unit = units[begin + i];
+          try {
+            unit->merge();
+          } catch (...) {
+            // swallow errors silently. persistent things should raise
+            // errors, and we don't really care about merging
+            // non-persistent things.
+          }
+        }
+      }
+
+      hphp_context_exit();
+      hphp_session_exit();
+      hphp_thread_exit();
+    }));
+  }
+  for (auto& worker : workers) {
+    worker.join();
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 }
 
@@ -1068,7 +1111,7 @@ bool serializeProfData(const std::string& filename) {
   }
 }
 
-bool deserializeProfData(const std::string& filename) {
+bool deserializeProfData(const std::string& filename, int numWorkers) {
   try {
     ProfDataDeserializer ser{filename};
 
@@ -1097,6 +1140,18 @@ bool deserializeProfData(const std::string& filename) {
     InliningDecider::deserializeForbiddenInlines(ser);
 
     always_assert(ser.done());
+
+    // During deserialization we didn't merge the loaded units because
+    // we wanted to pick and choose the hot Funcs and Classes. But we
+    // need to merge them before we start serving traffic to ensure we
+    // don't have inconsistentcies (eg a persistent memoized Func
+    // wrapper might have been merged, while its implementation was
+    // not; since the implementation has an internal name, there won't
+    // be an autoload entry for it, so unless something else causes
+    // the unit to be loaded the implementation might never get pulled
+    // in (resulting in fatals when the wrapper tries to call it).
+    merge_loaded_units(numWorkers);
+
     return true;
   } catch (std::runtime_error& err) {
     FTRACE(1, "deserializeProfData - Failed: {}\n", err.what());

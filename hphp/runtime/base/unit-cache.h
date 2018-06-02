@@ -18,6 +18,7 @@
 #define incl_HPHP_UNIT_CACHE_H_
 
 #include <string>
+#include <vector>
 
 struct stat;
 
@@ -72,6 +73,14 @@ std::string mangleUnitMd5(const std::string& fileMd5);
  * Exported for the admin request handler.
  */
 size_t numLoadedUnits();
+
+/*
+ * Return a std::vector of all the units currently loaded. Must be
+ * called from a single threaded context (wrt other unit-cache functions).
+ *
+ * Precondition: RepoAuthoritative
+ */
+std::vector<Unit*> loadedUnitsRepoAuth();
 
 /*
  * Resolve an include path, for the supplied path and directory, using the same

@@ -705,6 +705,16 @@ size_t numLoadedUnits() {
   return s_nonRepoUnitCache.size();
 }
 
+std::vector<Unit*> loadedUnitsRepoAuth() {
+  always_assert(RuntimeOption::RepoAuthoritative);
+  std::vector<Unit*> units;
+  units.reserve(s_repoUnitCache.size());
+  for (auto const& elm : s_repoUnitCache) {
+    units.push_back(elm.second.unit);
+  }
+  return units;
+}
+
 String resolveVmInclude(StringData* path,
                         const char* currentDir,
                         struct stat* s,

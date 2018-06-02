@@ -453,8 +453,8 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     case Flavor::F:  not_reached();    break;
     case Flavor::U:  not_reached();    break;
     case Flavor::CR: not_reached();    break;
-    case Flavor::CUV:
-      // We only support C's for CUV right now.
+    case Flavor::CU:
+      // We only support C's for CU right now.
       gen(bc::PopC {});
       break;
     case Flavor::CVU:

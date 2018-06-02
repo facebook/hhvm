@@ -458,7 +458,7 @@ namespace imm {
 #define POP_VV  if (i == 0) return Flavor::V
 #define POP_FV  if (i == 0) return Flavor::F
 #define POP_RV  if (i == 0) return Flavor::R
-#define POP_CUV if (i == 0) return Flavor::CUV
+#define POP_CUV if (i == 0) return Flavor::CU
 
 #define POP_NOV             uint32_t numPop() const { return 0; } \
                             Flavor popFlavor(uint32_t) const { not_reached(); }

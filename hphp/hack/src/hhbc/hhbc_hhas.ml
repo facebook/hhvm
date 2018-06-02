@@ -126,7 +126,6 @@ let string_of_lit_const instruction =
       sep ["ClsCnsD"; string_of_const_id cnsid; string_of_class_id cid]
     | File -> "File"
     | Dir -> "Dir"
-    | NYI text -> nyi ^ ": " ^ text
     | NullUninit -> "NullUninit"
     | AddElemV -> "AddElemV"
     | AddNewElemV -> "AddNewElemV"
@@ -449,7 +448,7 @@ let string_of_final instruction =
     sep ["IncDecM";
       string_of_param_num i; string_of_incdec_op op; string_of_member_key mk]
   | _ ->
-    "# string_of_final " ^ nyi
+    failwith "unreachable final instruction"
 (*
 | IncDecM of num_params * incdec_op * MemberKey.t
 | SetOpM of num_params  * eq_op * MemberKey.t
@@ -1060,7 +1059,7 @@ and string_of_statement ~env ~indent ((_, stmt_) : A.stmt) =
       (if String.length else_text <> 0 then " else " ^ else_text else ""),
       false
     | A.Noop -> "", false
-    | _ -> nyi, false in
+    | _ -> (* TODO(T29869930) *) "NYI: Default value printing", false in
   let text =
     if is_single_line then indent ^ text ^ ";\\n"
     else text in
@@ -1191,7 +1190,7 @@ and string_of_param_default_value ~env expr =
         if String.length elems <> 0 then " " ^ elems ^ " " else elems in
       "HH\\\\" ^ name ^ " {" ^ elems ^ "}"
     | _ ->
-      nyi ^ " - Default value for an unknown collection - " ^ name
+      failwith ("Default value for an unknown collection - " ^ name)
     end
   | A.Shape fl ->
     let fl =

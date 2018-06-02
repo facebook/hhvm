@@ -676,7 +676,7 @@ let check_instruct_lit_const asn i i' =
   | NewLikeArrayL _, _ -> None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | NYI _, _ | Null, _ | True, _ | False, _ | NullUninit, _ | Int _, _
+  | Null, _ | True, _ | False, _ | NullUninit, _ | Int _, _
   | String _, _ | TypedValue _, _ | NewArray _, _
   | NewMixedArray _, _ | NewDictArray _, _ | NewPackedArray _, _
   | NewStructArray _, _ | NewStructDict _, _

@@ -300,10 +300,6 @@ let hack_arr_dv_arrs () =
 let php7_ltr_assign () =
   Hhbc_options.php7_ltr_assign !Hhbc_options.compiler_options
 
-(* Emit a comment in lieu of instructions for not-yet-implemented features *)
-let emit_nyi description =
-  instr (IComment (H.nyi ^ ": " ^ description))
-
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
   let ints_overflow_to_ints =
@@ -331,7 +327,7 @@ let from_binop op =
   | A.Percent -> instr (IOp Mod)
   | A.Xor -> instr (IOp BitXor)
   | A.LogXor -> instr (IOp Xor)
-  | A.Eq _ -> emit_nyi "Eq"
+  | A.Eq _ -> failwith "assignment is emitted differently"
   | A.AMpamp
   | A.BArbar ->
     failwith "short-circuiting operator cannot be generated as a simple binop"
@@ -358,11 +354,11 @@ let unop_to_incdec_op op =
   let ints_overflow_to_ints =
     Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options in
   match op with
-  | A.Uincr -> Some (if ints_overflow_to_ints then PreInc else PreIncO)
-  | A.Udecr -> Some (if ints_overflow_to_ints then PreDec else PreDecO)
-  | A.Upincr -> Some (if ints_overflow_to_ints then PostInc else PostIncO)
-  | A.Updecr -> Some (if ints_overflow_to_ints then PostDec else PostDecO)
-  | _ -> None
+  | A.Uincr -> if ints_overflow_to_ints then PreInc else PreIncO
+  | A.Udecr -> if ints_overflow_to_ints then PreDec else PreDecO
+  | A.Upincr -> if ints_overflow_to_ints then PostInc else PostIncO
+  | A.Updecr -> if ints_overflow_to_ints then PostDec else PostDecO
+  | _ -> failwith "invalid incdec op"
 
 let collection_type = function
   | "Vector"    -> CollectionType.Vector
@@ -569,7 +565,7 @@ and emit_binop ~need_ref env pos op e1 e2 =
     emit_lval_op ~need_ref env pos LValOp.Set e1 (Some e2)
   | A.Eq (Some obop) ->
     begin match binop_to_eqop obop with
-    | None -> emit_nyi "illegal eq op"
+    | None -> failwith "illegal eq op"
     | Some op -> emit_lval_op ~need_ref env pos (LValOp.SetOp op) e1 (Some e2)
     end
   | _ ->
@@ -721,10 +717,10 @@ and emit_cast env pos hint expr =
             || id = SN.Typehints.double
             || id = SN.Typehints.float -> instr (IOp CastDouble)
       | _ when id = "unset" -> gather [ instr_popc; instr_null ]
-      | _ -> emit_nyi "cast type"
+      | _ -> Emit_fatal.raise_fatal_parse pos ("Invalid cast type: " ^ id)
       end
     | _ ->
-      emit_nyi "cast type"
+      Emit_fatal.raise_fatal_parse pos "Invalid cast type"
     end in
   gather [
     emit_expr ~last_pos:pos ~need_ref:false env expr;
@@ -1252,7 +1248,8 @@ and emit_unset_expr env expr =
 
 and emit_call_isset_exprs env pos exprs =
   match exprs with
-  | [] -> emit_nyi "isset()"
+  | [] -> Emit_fatal.raise_fatal_parse
+    pos "cannot call isset without any arguments"
   | [expr] -> emit_call_isset_expr env pos expr
   | _ ->
     let n = List.length exprs in
@@ -3791,7 +3788,7 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
     rhs_instrs,
     gather [
       emit_lval_op_nonlist env pos op e empty rhs_stack_size;
-      from_unop uop;
+      from_unop uop
     ]
 
   | _ ->
@@ -3807,40 +3804,39 @@ and from_unop op =
   | A.Uplus -> instr (IOp (if ints_overflow_to_ints then Add else AddO))
   | A.Uminus -> instr (IOp (if ints_overflow_to_ints then Sub else SubO))
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usilence ->
-    emit_nyi "unop - probably does not need translation"
+    failwith "this unary operation cannot be translated"
 
 and emit_expr_as_ref env e =
   emit_expr ~need_ref:true { env with Emit_env.env_allows_array_append = true} e
 
 and emit_unop ~need_ref env pos op e =
-  let unop_instr = emit_pos_then pos @@ from_unop op in
   match op with
   | A.Utild ->
     emit_box_if_necessary pos need_ref @@ gather [
-      emit_expr ~last_pos:pos ~need_ref:false env e; unop_instr
+      emit_expr ~last_pos:pos ~need_ref:false env e;
+      emit_pos_then pos @@ from_unop op
     ]
   | A.Unot ->
     emit_box_if_necessary pos need_ref @@ gather [
-      emit_expr ~last_pos:pos ~need_ref:false env e; unop_instr
+      emit_expr ~last_pos:pos ~need_ref:false env e;
+      emit_pos_then pos @@ from_unop op
     ]
   | A.Uplus ->
-    emit_box_if_necessary pos need_ref @@ gather
-    [emit_pos pos;
-    instr (ILitConst (Int (Int64.zero)));
-    emit_expr ~last_pos:pos ~need_ref:false env e;
-    unop_instr]
+    emit_box_if_necessary pos need_ref @@ gather [
+      emit_pos pos;
+      instr (ILitConst (Int (Int64.zero)));
+      emit_expr ~last_pos:pos ~need_ref:false env e;
+      emit_pos_then pos @@ from_unop op
+    ]
   | A.Uminus ->
-    emit_box_if_necessary pos need_ref @@ gather
-    [emit_pos pos;
-    instr (ILitConst (Int (Int64.zero)));
-    emit_expr ~last_pos:pos ~need_ref:false env e;
-    unop_instr]
+    emit_box_if_necessary pos need_ref @@ gather [
+      emit_pos pos;
+      instr (ILitConst (Int (Int64.zero)));
+      emit_expr ~last_pos:pos ~need_ref:false env e;
+      emit_pos_then pos @@ from_unop op
+    ]
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
-    begin match unop_to_incdec_op op with
-    | None -> emit_nyi "incdec"
-    | Some incdec_op ->
-      emit_lval_op ~need_ref env pos (LValOp.IncDec incdec_op) e None
-    end
+    emit_lval_op ~need_ref env pos (LValOp.IncDec (unop_to_incdec_op op)) e None
   | A.Uref -> emit_expr_as_ref env e
   | A.Usilence ->
     Local.scope @@ fun () ->

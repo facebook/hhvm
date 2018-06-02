@@ -730,8 +730,7 @@ let get_input_output_count i =
     | AddElemC | AddElemV -> (3, 1)
     | NewPair | AddNewElemC | AddNewElemV -> (2, 1)
     | ColFromArray _ -> (1, 1)
-    | TypedValue _
-    | NYI _ -> failwith "this pseudo-instruction is internal to HackC"
+    | TypedValue _ -> failwith "this pseudo-instruction is internal to HackC"
     end
   | IIncludeEvalDefine i ->
     begin match i with

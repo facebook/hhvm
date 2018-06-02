@@ -375,7 +375,7 @@ and emit_global_vars env p es =
         instr_popv;
       ]
     | _ ->
-      emit_nyi "global expression"
+      failwith "Global var - impossible"
   in
   (* Deduplicate global variable declarations *)
   let _, instrs = List.fold es ~init:([], [])

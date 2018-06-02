@@ -1027,7 +1027,7 @@ and emit_execution_operator env pos exprs =
   gather [
     instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "shell_exec");
     instrs;
-    instr_fpassc 0 Cell;
+    instr_fpassc 0 Any;
     instr_fcall 1;
   ]
 
@@ -1421,7 +1421,8 @@ and inline_gena_call env arg = Local.scope @@ fun () ->
             (Hhbc_id.Method.from_raw_string
                (if hack_arr_dv_arrs () then "fromDict" else "fromDArray"))
             (Hhbc_id.Class.from_raw_string "HH\\AwaitAllWaitHandle");
-          instr_fpassl 0 arr_local Cell;
+          instr_cgetl arr_local;
+          instr_fpassc 0 Any;
           instr_fcall 1;
           instr_unboxr;
           instr_await;

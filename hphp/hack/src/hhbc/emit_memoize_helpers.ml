@@ -41,8 +41,9 @@ let param_code_sets params local =
         instr_popc ])
 
 let param_code_gets params =
-  gather @@ List.mapi params (fun index param ->
-      instr_fpassl index (Local.Named (Hhas_param.name param)) Hhbc_ast.Cell)
+  gather @@ List.concat_mapi params (fun index param ->
+      [ instr_cgetl (Local.Named (Hhas_param.name param));
+        instr_fpassc index Hhbc_ast.Any ])
 
 (* Return true if method or function with this kind and return type
  * definitely cannot return null *)

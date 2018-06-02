@@ -5982,7 +5982,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     if (el->getType() == '`') {
       emitConvertToCell(e);
-      e.FPassC(0, FPassHint::Cell);
+      e.FPassC(0, FPassHint::Any);
       delete fpi;
       e.FCall(1);
     }
@@ -7249,7 +7249,8 @@ bool EmitterVisitor::emitInlineGena(
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fromDArrayStart);
     emitVirtualLocal(array);
-    e.FPassL(0, array, FPassHint::Cell);
+    emitCGet(e);
+    e.FPassC(0, FPassHint::Any);
   }
   e.FCall(1);
   e.UnboxR();
@@ -10325,7 +10326,8 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
       FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
       for (uint32_t i = 0; i < numParams; i++) {
         emitVirtualLocal(i);
-        emitFPass(e, i, FPassHint::Cell);
+        emitCGet(e);
+        e.FPassC(i, FPassHint::Any);
       }
     }
     e.FCall(numParams);

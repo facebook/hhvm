@@ -105,6 +105,7 @@ namespace Trace {
       TM(dispatchBB)    \
       TM(ehframe)       \
       TM(emitter)       \
+      TM(extern_compiler) \
       TM(fixup)         \
       TM(fr)            \
       TM(gc)            \

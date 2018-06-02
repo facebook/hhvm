@@ -42,6 +42,7 @@ type t = {
   option_doc_root                         : string;
   option_include_search_paths             : string list;
   option_include_roots                    : string SMap.t;
+  option_enable_perf_logging              : bool;
 }
 
 let default = {
@@ -77,6 +78,7 @@ let default = {
   option_doc_root = "";
   option_include_search_paths = [];
   option_include_roots = SMap.empty;
+  option_enable_perf_logging = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -108,6 +110,7 @@ let hacksperimental o = o.option_hacksperimental
 let doc_root o = o.option_doc_root
 let include_search_paths o = o.option_include_search_paths
 let include_roots o = o.option_include_roots
+let enable_perf_logging o = o.option_enable_perf_logging
 
 let to_string o =
   let dynamic_invokes =
@@ -149,6 +152,7 @@ let to_string o =
     ; Printf.sprintf "doc_root: %s" @@ doc_root o
     ; Printf.sprintf "include_search_paths: [%s]" search_paths
     ; Printf.sprintf "include_roots: {%s}" inc_roots
+    ; Printf.sprintf "enable_perf_logging: %B" @@ enable_perf_logging o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -215,6 +219,8 @@ let set_option options name value =
     { options with option_enable_is_expr_primitive_migration = as_bool value }
   | "hack.lang.hacksperimental" ->
     { options with option_hacksperimental = as_bool value }
+  | "eval.logexterncompilerperf" ->
+    { options with option_enable_perf_logging = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -329,6 +335,8 @@ let value_setters = [
      fun opts v -> { opts with option_include_search_paths = v });
   (set_value "hhvm.include_roots" get_value_from_config_string_to_string_map @@
      fun opts v -> { opts with option_include_roots = v });
+  (set_value "hhvm.log_extern_compiler_perf" get_value_from_config_int @@
+     fun opts v -> { opts with option_enable_perf_logging = (v = 1) });
 ]
 
 let extract_config_options_from_json ~init config_json =

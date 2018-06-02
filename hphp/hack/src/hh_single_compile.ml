@@ -396,17 +396,17 @@ let extract_facts ?pretty text =
 let process_single_source_unit compiler_options popt handle_output
   handle_exception filename source_text =
   try
+    let debug_time = new_debug_time () in
     let t = Unix.gettimeofday () in
     let output =
       if compiler_options.extract_facts
       then extract_facts ~pretty:true source_text
       else begin
         let fail_or_ast = parse_file compiler_options popt filename source_text in
-        let debug_time = new_debug_time () in
         ignore @@ add_to_time_ref debug_time.parsing_t t;
         do_compile filename compiler_options fail_or_ast debug_time
       end in
-    handle_output filename output
+    handle_output filename output debug_time
   with exc ->
     if compiler_options.log_stats
     then log_fail compiler_options filename exc;
@@ -437,16 +437,26 @@ let decl_and_run_mode compiler_options popt =
 
   match compiler_options.mode with
     | DAEMON ->
-      let handle_output filename output =
+      let handle_output filename output debug_time =
         let abs_path = Relative_path.to_absolute filename in
         let bytes =
           List.fold ~f:(fun len s -> len + String.length s) ~init:0 output in
-        let msg = json_to_string @@ JSON_Object
+        let msg =
           [ ("type", JSON_String "success")
           ; ("file", JSON_String abs_path)
           ; ("bytes", int_ bytes)
           ] in
-        P.printf "%s\n" msg;
+        let msg =
+          if Hhbc_options.enable_perf_logging !Hhbc_options.compiler_options
+          then
+            let json_microsec t = int_ @@ int_of_float @@ t *. 1000000.0 in
+               ("parsing_time", json_microsec !(debug_time.parsing_t))
+            :: ("codegen_time", json_microsec !(debug_time.codegen_t))
+            :: ("printing_time", json_microsec !(debug_time.printing_t))
+            :: msg
+          else msg
+        in
+        P.printf "%s\n" (json_to_string @@ JSON_Object msg);
         print_and_flush_strings output in
       let handle_exception filename exc =
         let abs_path = Relative_path.to_absolute filename in
@@ -496,6 +506,7 @@ let decl_and_run_mode compiler_options popt =
           handle_output
             (Relative_path.create Relative_path.Dummy filename)
             (extract_facts body))
+            (new_debug_time ())
         )} in
       dispatch_loop handlers
 
@@ -523,7 +534,7 @@ let decl_and_run_mode compiler_options popt =
               | line -> go (String.trim line :: lines)
               | exception End_of_file -> lines in
             go [] in
-          let handle_output _filename output =
+          let handle_output _filename output _debug_time =
             if compiler_options.dump_config then
               Printf.printf "===CONFIG===\n%s\n\n%!" (Lazy.force dumped_options);
             if not compiler_options.quiet_mode then
@@ -545,7 +556,7 @@ let decl_and_run_mode compiler_options popt =
                 |> List.partition_tf ~f: Sys.is_directory in
                   fs @ go (ds @ dirs) in
               go [compiler_options.filename] in
-            let handle_output filename output =
+            let handle_output filename output _debug_time =
               let abs_path = Relative_path.to_absolute filename in
               if Filename.check_suffix abs_path ".php" then
                 let output_file = Filename.chop_suffix abs_path ".php" ^ ".hhas" in
@@ -559,7 +570,7 @@ let decl_and_run_mode compiler_options popt =
 
           (* Compile a single file *)
           else
-            let handle_output _filename output =
+            let handle_output _filename output _debug_time =
               match compiler_options.output_file with
                 | Some output_file ->
                   Sys_utils.write_strings_to_file ~file:output_file output

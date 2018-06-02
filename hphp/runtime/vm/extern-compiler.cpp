@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/extern-compiler.h"
 
+#include <cinttypes>
 #include <condition_variable>
 #include <mutex>
 #include <signal.h>
@@ -39,10 +40,14 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
 #include "hphp/util/md5.h"
+#include "hphp/util/struct-log.h"
+#include "hphp/util/timer.h"
 
 #include <iostream>
 
 namespace HPHP {
+
+TRACE_SET_MOD(extern_compiler);
 
 namespace {
 
@@ -201,7 +206,7 @@ struct ExternCompiler {
     std::string facts;
     try {
       writeExtractFacts(filename, code);
-      return readResult();
+      return readResult(nullptr /* structured log entry */);
     }
     catch (CompileException& ex) {
       stop();
@@ -210,6 +215,21 @@ struct ExternCompiler {
       }
       throw;
     }
+  }
+
+  int64_t logTime(
+    StructuredLogEntry& log,
+    int64_t t,
+    const char* name,
+    bool first = false
+  ) {
+    if (!RuntimeOption::EvalLogExternCompilerPerf) return 0;
+    int64_t current = Timer::GetCurrentTimeMicros();
+    if (first) return current;
+    int64_t diff = current - t;
+    log.setInt(name, diff);
+    FTRACE(2, "{} took {} us\n", name, diff);
+    return current;
   }
 
   std::unique_ptr<UnitEmitter> compile(
@@ -230,16 +250,25 @@ struct ExternCompiler {
     std::unique_ptr<Unit> u;
     try {
       m_compilations++;
+      StructuredLogEntry log;
+      log.setStr("filename", filename);
+      int64_t t = logTime(log, 0, nullptr, true);
       writeProgram(filename, md5, code);
-      prog = readResult();
-      return assemble_string(
-        prog.data(),
-        prog.length(),
-        filename,
-        md5,
-        false /* swallow errors */,
-        callbacks
-      );
+      t = logTime(log, t, "send_source");
+      prog = readResult(&log);
+      t = logTime(log, t, "receive_hhas");
+      auto ue = assemble_string(prog.data(),
+                                prog.length(),
+                                filename,
+                                md5,
+                                false /* swallow errors */,
+                                callbacks
+                              );
+      logTime(log, t, "assemble_hhas");
+      if (RuntimeOption::EvalLogExternCompilerPerf) {
+        StructuredLog::log("hhvm_detailed_frontend_performance", log);
+      }
+      return ue;
     } catch (CompileException& ex) {
       stop();
       if (m_options.verboseErrors) {
@@ -294,7 +323,7 @@ private:
   void writeExtractFacts(const std::string& filename, folly::StringPiece code);
 
   std::string readVersion() const;
-  std::string readResult() const;
+  std::string readResult(StructuredLogEntry* log) const;
 
   pid_t m_pid{kInvalidPid};
   FILE* m_in{nullptr};
@@ -525,11 +554,28 @@ std::string ExternCompiler::readVersion() const {
   return folly::parseJson(line).at("version").asString();
 }
 
-std::string ExternCompiler::readResult() const {
+std::string ExternCompiler::readResult(StructuredLogEntry* log) const {
   const auto line = readline(m_out);
   const auto header = folly::parseJson(line);
   const std::string type = header.getDefault("type", "").asString();
   const std::size_t bytes = header.getDefault("bytes", 0).asInt();
+
+  const auto logResult = [&] (auto name, auto t) {
+    if (log != nullptr) log->setInt(name, t);
+    FTRACE(2, "{} took {} us\n", name, t);
+  };
+
+  if (RuntimeOption::EvalLogExternCompilerPerf) {
+    if (auto parsing_time = header.get_ptr("parsing_time")) {
+      logResult("extern_parsing", parsing_time->asInt());
+    }
+    if (auto codegen_time = header.get_ptr("codegen_time")) {
+      logResult("extern_codegen", codegen_time->asInt());
+    }
+    if (auto printing_time = header.get_ptr("printing_time")) {
+      logResult("extern_printing", printing_time->asInt());
+    }
+  }
 
   if (type == "success") {
     std::string program(bytes, '\0');

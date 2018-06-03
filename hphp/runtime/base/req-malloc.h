@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_RUNTIME_BASE_REQ_MALLOC_H_
 #define incl_HPHP_RUNTIME_BASE_REQ_MALLOC_H_
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/type-scan.h"
 
 /*
@@ -177,7 +178,7 @@ struct Allocator {
 
   template<class U, class... Args>
   void construct(U* p, Args&&... args) {
-    ::new ((void*)p) U(std::forward<Args>(args)...);
+    ::new (NotNull{}, p) U(std::forward<Args>(args)...);
   }
 
   void destroy(pointer p) {
@@ -211,15 +212,14 @@ template<class T> T* make_raw_array(size_t count) {
   T* ret = static_cast<T*>(
     req::malloc(count * sizeof(T), type_scan::getIndexForMalloc<T>())
   );
-  size_t i = 0;
+  auto p = ret;
   try {
-    for (; i < count; ++i) {
-      new (&ret[i]) T();
+    for (auto e = ret + count; p < e; ++p) {
+      ::new (NotNull{}, p) T();
     }
   } catch (...) {
-    size_t j = i;
-    while (j-- > 0) {
-      ret[j].~T();
+    while (p-- > ret) {
+      p->~T();
     }
     req::free(ret);
     throw;

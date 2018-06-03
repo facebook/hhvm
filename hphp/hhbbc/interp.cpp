@@ -2759,7 +2759,7 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto const location = topStkEquiv(env);
   if (location != NoLocalId) {
     refineLocation(env, location, [&] (Type t) {
-      assertx(t.subtypeOf(TCell));
+      if (!t.subtypeOf(TCell)) return t;
       if (nullThrows) return intersection_of(t, TObj);
       if (!t.couldBe(TUninit)) return intersection_of(t, TOptObj);
       if (!t.couldBe(TObj)) return intersection_of(t, TNull);

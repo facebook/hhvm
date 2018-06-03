@@ -1143,12 +1143,13 @@ let do_typeCoverage
     | Ide_api_types.Checked -> None
     | Ide_api_types.Unchecked -> Some
         { range;
-          message = "Un-type checked code. Consider adding type annotations.";
+          message = None;
         }
   in
   {
     coveredPercent;
     uncoveredRanges = List.filter_map results ~f:hack_coverage_to_lsp;
+    defaultMessage = "Un-type checked code. Consider adding type annotations.";
   }
 
 

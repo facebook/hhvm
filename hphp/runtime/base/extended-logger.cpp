@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/base/extended-logger.h"
+
+#include <sstream>
+
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/array-iterator.h"

@@ -1068,9 +1068,10 @@ let do_findReferences
     (params: FindReferences.params)
   : FindReferences.result =
   let open FindReferences in
+  let open TextDocumentPositionParams in
 
-  let {Ide_api_types.line; column;} = lsp_position_to_ide params.position in
-  let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument in
+  let {Ide_api_types.line; column;} = lsp_position_to_ide params.loc.position in
+  let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.loc.textDocument in
   let include_defs = params.context.includeDeclaration in
   let command = ServerCommandTypes.IDE_FIND_REFS
       (ServerCommandTypes.FileName filename, line, column, include_defs) in

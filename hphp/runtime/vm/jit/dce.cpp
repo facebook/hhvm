@@ -155,7 +155,6 @@ bool canDCE(IRInstruction* inst) {
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:
   case HasToString:
-  case IsTypeStruct:
   case IsType:
   case IsNType:
   case IsTypeMem:
@@ -711,6 +710,9 @@ bool canDCE(IRInstruction* inst) {
   case SameArr:
   case NSameArr:
     return !RuntimeOption::EvalHackArrCompatDVCmpNotices;
+
+  case IsTypeStruct:
+    return !RuntimeOption::EvalHackArrCompatIsArrayNotices;
   }
   not_reached();
 }

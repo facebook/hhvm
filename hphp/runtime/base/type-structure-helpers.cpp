@@ -220,8 +220,13 @@ bool checkTypeStructureMatchesCellImpl(
       }
       auto const elems = data.parr;
       if (!elems->isVecOrVArray()) {
-        result = false;
-        break;
+        if (!RuntimeOption::EvalHackArrDVArrs && elems->isDArray()) {
+          // TODO(T29967020) If this is pre-migration, we should allow darrays
+          // for tuples and log a warning. Fall through here.
+        } else {
+          result = false;
+          break;
+        }
       }
       assertx(ts.exists(s_elem_types));
       auto const tsElems = ts[s_elem_types].getArrayData();
@@ -231,10 +236,15 @@ bool checkTypeStructureMatchesCellImpl(
         break;
       }
       bool elemsDidMatch = true;
-      PackedArray::IterateKV(
+      bool keysDidMatch = true;
+      int index = 0;
+      IterateKV(
         elems,
         [&](Cell k, TypedValue elem) {
-          assertx(k.m_type == KindOfInt64);
+          if (!isIntType(k.m_type) || k.m_data.num != index++) {
+            keysDidMatch = false;
+            return true;
+          }
           auto const ts2 = tsElems->getValue(k.m_data.num).asCArrRef();
           if (!checkTypeStructureMatchesCellImpl<genErrorMessage>(
               ts2, tvToCell(elem), givenType, expectedType, errorKey)) {
@@ -245,6 +255,17 @@ bool checkTypeStructureMatchesCellImpl(
           return false;
         }
       );
+      if (!keysDidMatch) {
+        result = false;
+        break;
+      }
+      if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+        if (elemsDidMatch && elems->isDArray()) {
+          // TODO(T29967020) If this is pre-migration, we should allow darrays
+          // for tuples and log a warning.
+          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_TUPLE_IS_DARR);
+        }
+      }
       return elemsDidMatch;
     }
     case TypeStructure::Kind::T_shape: {
@@ -254,8 +275,13 @@ bool checkTypeStructureMatchesCellImpl(
       }
       auto const fields = data.parr;
       if (!fields->isDictOrDArray()) {
-        result = false;
-        break;
+        if (!RuntimeOption::EvalHackArrDVArrs && fields->isVArray()) {
+          // TODO(T29967020) If this is pre-migration, we should allow varrays
+          // for shapes and log a warning. Fall through here.
+        } else {
+          result = false;
+          break;
+        }
       }
       assertx(ts.exists(s_fields));
       auto const tsFields = ts[s_fields].getArrayData();
@@ -311,7 +337,15 @@ bool checkTypeStructureMatchesCellImpl(
         result = false;
         break;
       }
-      return allowsUnknownFields || numFields == numExpectedFields;
+      bool didSucceed = allowsUnknownFields || numFields == numExpectedFields;
+      if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+        if (didSucceed && fields->isVArray()) {
+          // TODO(T29967020) If this is pre-migration, we should allow varrays
+          // for shapes and log a warning.
+          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_SHAPE_IS_VARR);
+        }
+      }
+      return didSucceed;
     }
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_unresolved:

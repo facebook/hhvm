@@ -873,7 +873,10 @@ void emitIsTypeStruct(IRGS& env, const ArrayData* a) {
     ? resolveTypeStructImpl(env, a, true)
     : cns(env, newTS);
   auto const c = popC(env);
-  push(env, gen(env, IsTypeStruct, tc, c));
+  auto block = RuntimeOption::EvalHackArrCompatIsArrayNotices
+    ? create_catch_block(env, [&]{ decRef(env, tc); })
+    : nullptr;
+  push(env, gen(env, IsTypeStruct, block, tc, c));
   decRef(env, c);
   decRef(env, tc);
 }
@@ -900,7 +903,10 @@ void emitAsTypeStruct(IRGS& env, const ArrayData* a) {
   ifThen(
     env,
     [&](Block* taken) {
-      auto const res = gen(env, IsTypeStruct, tc, c);
+      auto block = RuntimeOption::EvalHackArrCompatIsArrayNotices
+        ? create_catch_block(env, [&]{ decRef(env, tc); })
+        : nullptr;
+      auto const res = gen(env, IsTypeStruct, block, tc, c);
       gen(env, JmpZero, taken, res);
     },
     [&]{

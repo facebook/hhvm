@@ -12,9 +12,9 @@ function f($x) {
   }
   if (is_array($x) && $x) {
 
-    g($x);
-    g($x[0]);
-    g($x[0][1]);
+    g(&$x);
+    g(&$x[0]);
+    g(&$x[0][1]);
   }
 }
 f(null);

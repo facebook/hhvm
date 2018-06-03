@@ -3,7 +3,7 @@
 $g = array(1,2,3);
 function cmp($a, $b) {
   global $g;
-  usort($g, 'cmp');
+  usort(&$g, 'cmp');
   fiz();
 }
 

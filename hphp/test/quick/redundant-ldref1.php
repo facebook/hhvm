@@ -5,5 +5,5 @@ function foo(&$x) {
 }
 
 $x = 1;
-var_dump(foo($x));
+var_dump(foo(&$x));
 var_dump($x);

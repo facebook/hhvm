@@ -7,7 +7,7 @@ function bar($a, $k) {
 
 async function gen($a) {
   error_log('In gen');
-  array_walk($a, 'bar');
+  array_walk(&$a, 'bar');
   error_log('Finished in gen');
   if ($a[0]) {
     await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O

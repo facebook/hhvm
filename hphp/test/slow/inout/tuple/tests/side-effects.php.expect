@@ -23,6 +23,6 @@ string(5) "FOO:A"
 string(5) "FOO:B"
 string(5) "FOO:C"
 foo()
-string(5) "FOO:A"
+string(3) "yep"
 string(5) "FOO:B"
 string(3) "yep"

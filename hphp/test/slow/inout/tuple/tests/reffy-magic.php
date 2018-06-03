@@ -14,7 +14,7 @@ function main() {
   $x = 10;
   $GLOBALS['FOO'] =& $x;
   bar($x);
-  foo($x);
+  foo(&$x);
   bar($x);
 }
 

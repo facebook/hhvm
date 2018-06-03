@@ -13,7 +13,7 @@ function checkStatic() {
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
-  foo($a[1]);
+  foo(&$a[1]);
   foo(&$a[5][10]);
   var_dump($a);
 }
@@ -40,7 +40,7 @@ function checkNonStatic($a) {
   getTwo(inout $a, 'apple', 'orange');
   getTwo(inout $a, 50, 100);
   try {
-    foo($a[1]);
+    foo(&$a[1]);
   } catch (Exception $e) {
     echo "Caught: ".$e->getMessage()."\n";
   }

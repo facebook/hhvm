@@ -110,7 +110,7 @@ function with_keyset($k1) {
   var_dump(array_keys($k1));
   $k = $k1;
   echo "array_pop: ";
-  var_dump(array_pop($k));
+  var_dump(array_pop(&$k));
   var_dump($k);
   echo "array_product: ";
   var_dump(array_product($k1));
@@ -124,35 +124,36 @@ function with_keyset($k1) {
   echo "array_search 2: ";
   var_dump(array_search('x', $k1));
   echo "array_shift: ";
-  var_dump(array_shift($k));
+  var_dump(array_shift(&$k));
   var_dump($k);
   echo "array_sum: ";
   var_dump(array_sum($k1));
   echo "current 1: ";
-  var_dump(current($k));
+  var_dump(current(&$k));
   echo "each: ";
-  var_dump(each($k));
+  var_dump(each(&$k));
   echo "current 2: ";
-  var_dump(current($k));
+  var_dump(current(&$k));
   echo "end: ";
-  var_dump(end($k));
+  var_dump(end(&$k));
   echo "extract: ";
-  var_dump(extract(keyset['php_is_awesome', 42]));
+  $ks = keyset['php_is_awesome', 42];
+  var_dump(extract(&$ks));
   var_dump($php_is_awesome);
   echo "in_array: ";
   var_dump([in_array('x', $k1), in_array('q', $k1)]);
   echo "key: ";
-  var_dump(key($k));
+  var_dump(key(&$k));
   // list() could be tested here, but it's just weird with keysets
   echo "next: ";
-  var_dump(next($k));
+  var_dump(next(&$k));
   echo "prev 1: ";
-  var_dump(prev($k));
-  end($k);
+  var_dump(prev(&$k));
+  end(&$k);
   echo "prev 2: ";
-  var_dump(prev($k));
+  var_dump(prev(&$k));
   echo "reset: ";
-  var_dump(reset($k));
+  var_dump(reset(&$k));
   echo "count: ";
   var_dump(count($k1));
   echo "array_pad 1: ";
@@ -168,8 +169,8 @@ function with_keyset($k1) {
 
   // Those two must work with keysets and preserve the type.
   //
-  var_dump(array_push($k, 'i'));
-  var_dump(array_unshift($k, 'q'));
+  var_dump(array_push(&$k, 'i'));
+  var_dump(array_unshift(&$k, 'q'));
   var_dump($k);
 
 }
@@ -194,13 +195,13 @@ var_dump(array_replace_recursive($ar1, ["colors" => ["green" => "blue"]]));
 //
 $k1 = keyset[];
 echo "array_splice: ";
-var_dump(array_splice($k1, 2));
+var_dump(array_splice(&$k1, 2));
 echo "array_multisort: ";
-var_dump(array_multisort($k1));
+var_dump(array_multisort(&$k1));
 echo "array_walk: ";
-var_dump(array_walk($k1, function($foo) { return "bar"; }));
+var_dump(array_walk(&$k1, function($foo) { return "bar"; }));
 echo "array_walk_recursive: ";
-var_dump(array_walk_recursive($k1, function($foo) { return "bar"; }));
+var_dump(array_walk_recursive(&$k1, function($foo) { return "bar"; }));
 
 // Those should simply return a php array.
 //

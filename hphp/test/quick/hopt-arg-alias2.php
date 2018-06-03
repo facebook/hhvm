@@ -8,6 +8,6 @@ function run(&$a, &$b) {
 
 $a = 5;
 $b = 4;
-var_dump(run($a, $b));
+var_dump(run(&$a, &$b));
 var_dump($a);
 var_dump($b);

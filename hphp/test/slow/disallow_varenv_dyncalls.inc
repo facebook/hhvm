@@ -40,7 +40,7 @@ function test_compact_walk() {
   $var2 = 200;
   $f = 'compact';
   $args = [['var1', 'var2']];
-  array_walk($args, $f);
+  array_walk(&$args, $f);
 }
 
 function test_compact_errors() {
@@ -97,7 +97,7 @@ function test_extract_walk() {
 
   $f = 'extract';
   $args = [['var1' => '101', 'var2' => '201']];
-  array_walk($args, $f);
+  array_walk(&$args, $f);
   var_dump($var1, $var2);
 }
 
@@ -108,7 +108,7 @@ function test_extract_errors() {
   $f('foo', 'foo', 'foo', 'foo');
   array_map($f, ['foo']);
   $args = ['foo'];
-  array_walk($args, $f);
+  array_walk(&$args, $f);
 }
 
 function make_parse_str_str($v1, $v2) {
@@ -162,7 +162,7 @@ function test_parse_str_walk() {
 
   $f = 'parse_str';
   $args = [make_parse_str_str(101, 201)];
-  array_walk($args, $f);
+  array_walk(&$args, $f);
   var_dump($var1, $var2);
 }
 
@@ -214,7 +214,7 @@ function test_framemeta_errors() {
   $f();
   $f('abc', 'def', 'ghi');
   $args = ['foo'];
-  array_walk($args, $f);
+  array_walk(&$args, $f);
 }
 
 function test_getargs_dyncall_impl($a, $b, $c) {
@@ -253,7 +253,7 @@ function test_getargs_errors() {
   $f = 'func_get_args';
   $f('abc', 100, false);
   $args = [1];
-  array_walk($args, $f);
+  array_walk(&$args, $f);
 }
 
 function test_assert_dyncall_pass() {
@@ -368,14 +368,14 @@ function test_assert_walk_pass() {
   var_dump($var1, $var2);
   $f = 'assert';
   $args = ['($var1 = \'300\') && true', '($var2 = \'400\') && true'];
-  array_walk($args, $f);
+  array_walk(&$args, $f);
   var_dump($var1, $var2);
 }
 
 function test_assert_walk_pass2() {
   $f = 'assert';
   $args = [true, true];
-  array_walk($args, $f);
+  array_walk(&$args, $f);
 }
 
 function test_assert_walk_fail() {
@@ -384,14 +384,14 @@ function test_assert_walk_fail() {
   var_dump($var1, $var2);
   $f = 'assert';
   $args = ['($var1 = \'300\') && false', '($var2 = \'400\') && false'];
-  array_walk($args, $f);
+  array_walk(&$args, $f);
   var_dump($var1, $var2);
 }
 
 function test_assert_walk_fail2() {
   $f = 'assert';
   $args = [true, true];
-  array_walk($args, $f);
+  array_walk(&$args, $f);
 }
 
 function test_assert_chained() {
@@ -420,7 +420,7 @@ function get_current_test($all) {
     }
   }
   if (empty($tests)) return null;
-  $current = array_shift($tests);
+  $current = array_shift(&$tests);
   apc_store('tests', $tests);
   return $current;
 }

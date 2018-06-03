@@ -17,7 +17,7 @@ function show($fn, $class=null) {
   foreach ($params as $param) {
     echo "{$param->getName()}:\n";
     $attrs = $param->getAttributes();
-    ksort($attrs);
+    ksort(&$attrs);
     var_dump($attrs);
   }
 }
@@ -33,7 +33,7 @@ function showr($fn, $class=null) {
   foreach ($params as $param) {
     echo "{$param->getName()}:\n";
     $attrs = $param->getAttributesRecursive();
-    ksort($attrs);
+    ksort(&$attrs);
     var_dump($attrs);
   }
 }

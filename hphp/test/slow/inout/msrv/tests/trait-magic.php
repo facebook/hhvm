@@ -69,7 +69,7 @@ function main() {
   var_dump($r, $x);
 
   var_dump(HerpDerp::s1(inout $x), $x);
-  var_dump(HerpDerp::s2($x), $x);
+  var_dump(HerpDerp::s2(&$x), $x);
   var_dump(HerpDerp::s2(inout $x));
   var_dump(HerpDerp::orange($x));
 }

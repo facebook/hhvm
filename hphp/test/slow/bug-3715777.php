@@ -10,7 +10,7 @@ function array_extend(&$dest, array $src): void {
 function getImpliedChecks(array $arg): array {
   $implied_checks = array();
   foreach ($arg as $key => $val) {
-    array_extend($implied_checks, $val);
+    array_extend(&$implied_checks, $val);
   }
 
   return $implied_checks;

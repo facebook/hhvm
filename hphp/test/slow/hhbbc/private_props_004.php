@@ -19,7 +19,7 @@ class MVecFinalOps {
   public function foo() {
     var_dump(isset($this->s));
     var_dump(empty($this->s));
-    reffy($this->igen);
+    reffy(&$this->igen);
     $this->icell += 2;
     $this->icell++;
     $x = array();

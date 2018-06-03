@@ -9,7 +9,7 @@ foreach (f(10, 'x') as $x) {
  var_dump($x);
  }
 function g() {
-  extract(func_get_args(), EXTR_PREFIX_ALL, 'foo');
+  extract(&func_get_args(), EXTR_PREFIX_ALL, 'foo');
   yield $foo_0;
   yield $foo_1;
 }

@@ -4,7 +4,7 @@
 function serde($v) {
   try {
     $ser = fb_serialize($v, FB_SERIALIZE_HACK_ARRAYS);
-    $unser = fb_unserialize($ser, $ret, FB_SERIALIZE_HACK_ARRAYS);
+    $unser = fb_unserialize($ser, &$ret, FB_SERIALIZE_HACK_ARRAYS);
     var_dump($ret);
     var_dump($unser);
   } catch (Exception $e) {

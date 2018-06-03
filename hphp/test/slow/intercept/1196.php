@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $a = 10;
 $b = 20;
@@ -27,6 +27,6 @@ fb_intercept('foo', 'fb_stubout_intercept_handler', 'bar');
 
 $n = 0;
 $d = 3;
-$c = &foo($n, $d);
+$c = &foo(&$n, $d);
 var_dump($c, $d);
 $c = 30;

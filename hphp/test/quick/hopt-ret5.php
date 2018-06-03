@@ -5,7 +5,7 @@ function &foo(&$x) {
 }
 
 $x = 34;
-$y =& foo($x);
+$y =& foo(&$x);
 $y++;
 
 var_dump($x);

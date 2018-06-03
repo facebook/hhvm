@@ -16,6 +16,6 @@ function &retToSmash() {
 
 smashByVal(retToSmash());
 echo $toSmash . "\n";
-smashByRef(retToSmash());
+smashByRef(&retToSmash());
 echo $toSmash . "\n";
 

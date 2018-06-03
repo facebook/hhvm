@@ -9,7 +9,7 @@ function gen(&$x) {
 }
 function test() {
   $x = 0;
-  foreach (gen($x) as $y) {
+  foreach (gen(&$x) as $y) {
     var_dump($y);
   }
   var_dump($x);

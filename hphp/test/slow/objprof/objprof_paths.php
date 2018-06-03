@@ -90,5 +90,5 @@ foreach ($objs as $name => $metrics) {
     $pathstrs[] = $path.' '.idx($path_metrics,'refs',-1);
   }
 }
-sort($pathstrs);
+sort(&$pathstrs);
 echo implode("\n", $pathstrs)."\n";

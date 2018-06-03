@@ -49,7 +49,7 @@ function main() {
       $callee,
       $caller,
     ),
-  ) = fuzz($arr[0][12][0]['bar']['x']);
+  ) = fuzz(&$arr[0][12][0]['bar']['x']);
 
   var_dump($original, $new, $callee, $caller, $arr);
 
@@ -60,7 +60,7 @@ function main() {
       $callee,
       $caller,
     ),
-  ) = fuzz($arr[18][0]['hello']['y']);
+  ) = fuzz(&$arr[18][0]['hello']['y']);
   var_dump($original, $new, $callee, $caller, $arr);
 
   $a = array(Vector{1, 2});

@@ -38,9 +38,9 @@ class A {
     $a = "foo";
     $b = "bar";
     $c = function(&$foo) use (&$b) {
-      $this->double($foo, $b);
+      $this->double(&$foo, &$b);
     };
-    $c($a);
+    $c(&$a);
     return $a.$b;
   }
 
@@ -48,7 +48,7 @@ class A {
     $a = "foo";
     $b = "bar";
     $c = function($foo) use ($b) {
-      $this->double($foo, $b);
+      $this->double(&$foo, &$b);
     };
     $c($a);
     return $a.$b;

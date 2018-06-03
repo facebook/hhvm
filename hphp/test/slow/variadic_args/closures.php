@@ -16,7 +16,7 @@ class CWithClosures {
       var_dump($args);
       var_dump($a);
       var_dump($this->a);
-      $this->variadic($a, $this->a, reset($args));
+      $this->variadic($a, $this->a, reset(&$args));
     };
     $f('a', 'b');
   }

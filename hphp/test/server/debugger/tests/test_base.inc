@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $LOG_ROOT = '/tmp/hphpd';
 require __DIR__ . '/../../util/server_tests.inc';
@@ -30,7 +30,7 @@ function startDebuggerClient($debugPort, $input_path, &$pipes) {
   $env["TERM"] = "dumb";
 
   tlog('Starting debugger client with command: '.$cmd);
-  $process = proc_open("$cmd 2>&1", $descriptorspec, $pipes, null, $env);
+  $process = proc_open("$cmd 2>&1", $descriptorspec, &$pipes, null, $env);
   if (!is_resource($process)) {
     tlog('Failed to start a shell process for the server');
     dumpLogFilesToStdoutAndDie();
@@ -44,9 +44,9 @@ function runTest($testName, $testController) {
     $clientProcessId = 0;
 
     $serverPort = $adminPort = $debugPort = null;
-    $serverProc = startServer($serverPort, $adminPort, $debugPort,
+    $serverProc = startServer(&$serverPort, &$adminPort, &$debugPort,
                               __DIR__.'/..', __DIR__.'/../debugger');
-    startDebuggerClient($debugPort, "/debugger/$testName.in", $pipes);
+    startDebuggerClient($debugPort, "/debugger/$testName.in", &$pipes);
     $clientProcessId = getClientProcessId($pipes[1]);
     if (!$clientProcessId ||
         ($clientProcessId = intval($clientProcessId)) <= 0) {

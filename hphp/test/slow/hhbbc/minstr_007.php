@@ -8,7 +8,7 @@ class Foo {
   private $bar = 2;
 
   public function heh($obj, string $heh) {
-    $obj->go($this->bar);
+    $obj->go(&$this->bar);
     return $heh;
   }
 

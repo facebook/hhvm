@@ -53,7 +53,7 @@ function echo_buffer($str) {
 function echo_flush() {
   global $echobuf;
   $echobuf_uniq = array_unique($echobuf);
-  sort($echobuf_uniq);
+  sort(&$echobuf_uniq);
   foreach ($echobuf_uniq as $str) {
     echo $str;
   }

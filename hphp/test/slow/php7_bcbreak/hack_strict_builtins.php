@@ -8,7 +8,7 @@ $result = [];
 // Hack ones.
 //
 // First argument should be a string, not null.
-parse_str(null, $result);
+parse_str(null, &$result);
 var_dump($result);
 
 // But, non-builtins should be strict in PHP7 mode - this should error:

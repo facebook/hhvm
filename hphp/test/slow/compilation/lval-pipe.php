@@ -11,7 +11,7 @@ class X {
       return;
     }
 
-    return $x |> array_shift($$);
+    return $x |> array_shift(&$$);
   }
 }
 

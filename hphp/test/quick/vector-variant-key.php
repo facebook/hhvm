@@ -12,7 +12,7 @@ class asshat {
 }
 function main($cond) {
   $x = 1;
-  $o = new asshat($x);
+  $o = new asshat(&$x);
   if ($cond) {
     var_dump($o->blah[$x]);
   }

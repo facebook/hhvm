@@ -1,11 +1,11 @@
-<?php
+<?hh
 
 require_once('test_base.inc');
 
 
 function createSocketStream($serverPort) {
   $stream = stream_socket_client(php_uname('n').":".$serverPort,
-    $errorCode, $errorMessage, 3.0);
+    &$errorCode, &$errorMessage, 3.0);
   if (!$stream) {
       die($errorMessage);
   }

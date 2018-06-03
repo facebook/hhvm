@@ -10,7 +10,7 @@ class CatWrapper {
       0 => array("pipe", "r"),
       1 => array("pipe", "w"),
     );
-    $this->proc = proc_open("cat", $descriptorspec, $this->pipes);
+    $this->proc = proc_open("cat", $descriptorspec, &$this->pipes);
     if (!is_resource($this->proc) ||
         !is_resource($this->pipes[0]) ||
         !is_resource($this->pipes[0])) {

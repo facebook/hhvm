@@ -15,4 +15,4 @@ function test(&$a, $b) {
 }
 
 $y = null;
-test($y, 5);
+test(&$y, 5);

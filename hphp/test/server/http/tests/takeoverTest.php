@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $LOG_ROOT = '/tmp/hhvm_server';
 require __DIR__ . '/../../util/server_tests.inc';
@@ -14,7 +14,7 @@ function runTakeoverTest() {
   $customArgs = " -vServer.TakeoverFilename=${takeoverFile}";
 
   try {
-    $serverProc = startServer($serverPort, $adminPort, $debugPort,
+    $serverProc = startServer(&$serverPort, &$adminPort, &$debugPort,
                               $serverHome, $serverRoot,
                               $customArgs);
     if ($serverProc === null) {

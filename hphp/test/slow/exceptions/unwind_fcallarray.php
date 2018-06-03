@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function handle_error() {
   throw new Exception("die rebel scum");

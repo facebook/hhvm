@@ -1,12 +1,12 @@
-<?php
+<?hh
 
 function f($x, $y) {
   var_dump($x[$y]);
-  if ($x[$y]) print 'HI';
+  if ($x[$y]) print "HI\n";
 }
 function g(&$x, $y) {
   var_dump($x[$y]);
-  if ($x[$y]) print 'HI';
+  if ($x[$y]) print "HI\n";
 }
 f(null, 0);
 f(array(0), 0);

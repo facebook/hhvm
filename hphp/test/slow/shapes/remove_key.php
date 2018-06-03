@@ -4,9 +4,9 @@ $s = shape(
   'x' => 4
 );
 
-Shapes::removeKey($s, 'y');
+Shapes::removeKey(&$s, 'y');
 var_dump($s);
-Shapes::removeKey($s, 'x');
+Shapes::removeKey(&$s, 'x');
 var_dump($s);
 
 class C {
@@ -17,4 +17,4 @@ $t = shape(
   C::FOO => 5
 );
 
-Shapes::removeKey($t, C::FOO);
+Shapes::removeKey(&$t, C::FOO);

@@ -9,8 +9,8 @@ function foo() {
 function bar() {
  var_dump(__FUNCTION__);
  }
-reset($arr);
-while ($func = each($arr)) {
+reset(&$arr);
+while ($func = each(&$arr)) {
  $f = $func[1];
  $f();
  }

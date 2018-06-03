@@ -5,7 +5,7 @@ function foo() {
   $a = 123;
   $GLOBALS['a'] = "the"; // violate type inference via SetG
   var_dump($a);
-  
+
   $a = 123;
   $GLOBALS['a'] .= "duke"; // via SetOpG
   var_dump($a);
@@ -78,19 +78,19 @@ class B {
 
 function bar() {
   $x = 123;
-  $a = new B($x);
+  $a = new B(&$x);
   $a = null;
   var_dump($x);
 
   $y = 123;
-  $b = new B($y);
+  $b = new B(&$y);
   $c = &$b;
   $b = null;
   var_dump($y);
 
   $z = 123;
   $d = array();
-  $d[] = new B($z);
+  $d[] = new B(&$z);
   $d = null;
   var_dump($z);
 }
@@ -181,7 +181,8 @@ function main3() {
     $c = randarr();
     // Read/write them while implicitly mutating them through the temporary
     // object's destructor.
-    $unused = (tmpobj($aliases) === tmpobj($aliases)) === (($a === $b) === $c);
+    $unused =
+      (tmpobj(&$aliases) === tmpobj(&$aliases)) === (($a === $b) === $c);
     echo " --------> \n";
     // ...and use them again.
     var_dump($a, $b, $c);

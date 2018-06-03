@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $test_run_id = posix_getpid();
 $error_log_file = fopen("${LOG_ROOT}_test$test_run_id.log", 'w');
@@ -140,7 +140,7 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
                         $customArgs, $serverId);
     tlog('Starting server with command: '.$cmd);
     $pipes = array();
-    $serverProc = proc_open($cmd, array(), $pipes);
+    $serverProc = proc_open($cmd, array(), &$pipes);
     if (!is_resource($serverProc)) {
       tlog('Failed to start a shell process for the server');
     } else if (waitForServerToGetGoing($serverPort, $serverProc, $serverId)) {
@@ -156,7 +156,7 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
 function checkServerId($serverPort, $expectedIds) {
   $host = php_uname('n');
   $r = request($host, $serverPort, "hello.php");
-  if (preg_match('/Hello, World!(.*+)/', $r, $matches)) {
+  if (preg_match('/Hello, World!(.*+)/', $r, &$matches)) {
     foreach ((array)$expectedIds as $id) {
       if ($matches[1] == $id) return true;
     }
@@ -227,7 +227,7 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
   $cmd = getServerCmd($serverPort, $adminPort, false, $home, $root,
                       $customArgs, $serverId);
   $pipes = array();
-  $serverProc = proc_open($cmd, array(), $pipes);
+  $serverProc = proc_open($cmd, array(), &$pipes);
   if (!is_resource($serverProc)) {
     tlog('Failed to start a shell process for the server');
     return;
@@ -255,7 +255,7 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
     "--silent $curl_opts --connect-timeout $timeout ".
     "-H 'Host: $host_name' $headers --url \"$url\"";
   tlog("Requesting page with command: $cmd");
-  if (exec($cmd, $result) === null) return null;
+  if (exec($cmd, &$result) === null) return null;
   return implode("\n", $result);
 }
 

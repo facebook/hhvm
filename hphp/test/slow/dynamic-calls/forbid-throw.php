@@ -296,16 +296,16 @@ async function positive_tests() {
   A::positive_test2();
   C::positive_test2();
 
-  try { $x = 'cmp'; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = 'A::cmp'; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = 'A::static_cmp'; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = 'CCmp::foobar'; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = ['A', 'cmp']; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = ['A', 'static_cmp']; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = ['CCmp', 'foobar']; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = [new A, 'cmp']; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = [new A, 'static_cmp']; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = [new CCmp, 'foobar']; $y = [2, 1]; usort($y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = 'cmp'; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = 'A::cmp'; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = 'A::static_cmp'; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = 'CCmp::foobar'; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = ['A', 'cmp']; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = ['A', 'static_cmp']; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = ['CCmp', 'foobar']; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = [new A, 'cmp']; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = [new A, 'static_cmp']; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
+  try { $x = [new CCmp, 'foobar']; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
 }
 
 async function negative_tests() {
@@ -350,10 +350,10 @@ async function negative_tests() {
   $x->map(new Invokable);
 
   $x = [2, 1];
-  usort($x, ($k1, $k2) ==> { return $k1 <=> $k2; });
+  usort(&$x, ($k1, $k2) ==> { return $k1 <=> $k2; });
 
   $x = [2, 1];
-  usort($x, new InvokableCmp);
+  usort(&$x, new InvokableCmp);
 
   $x = 'count'; $x([]);
   array_map('count', [[]]);
@@ -470,16 +470,16 @@ async function negative_tests() {
   call_user_func_array([new A, 'func2'], []);
   call_user_func_array([new A, 'static_func2'], []);
 
-  $x = 'cmp2'; $y = [2, 1]; usort($y, $x);
-  $x = 'A::cmp2'; $y = [2, 1]; usort($y, $x);
-  $x = 'A::static_cmp2'; $y = [2, 1]; usort($y, $x);
-  $x = 'CCmp2::foobar'; $y = [2, 1]; usort($y, $x);
-  $x = ['A', 'cmp2']; $y = [2, 1]; usort($y, $x);
-  $x = ['A', 'static_cmp2']; $y = [2, 1]; usort($y, $x);
-  $x = ['CCmp2', 'foobar']; $y = [2, 1]; usort($y, $x);
-  $x = [new A, 'cmp2']; $y = [2, 1]; usort($y, $x);
-  $x = [new A, 'static_cmp2']; $y = [2, 1]; usort($y, $x);
-  $x = [new CCmp2, 'foobar']; $y = [2, 1]; usort($y, $x);
+  $x = 'cmp2'; $y = [2, 1]; usort(&$y, $x);
+  $x = 'A::cmp2'; $y = [2, 1]; usort(&$y, $x);
+  $x = 'A::static_cmp2'; $y = [2, 1]; usort(&$y, $x);
+  $x = 'CCmp2::foobar'; $y = [2, 1]; usort(&$y, $x);
+  $x = ['A', 'cmp2']; $y = [2, 1]; usort(&$y, $x);
+  $x = ['A', 'static_cmp2']; $y = [2, 1]; usort(&$y, $x);
+  $x = ['CCmp2', 'foobar']; $y = [2, 1]; usort(&$y, $x);
+  $x = [new A, 'cmp2']; $y = [2, 1]; usort(&$y, $x);
+  $x = [new A, 'static_cmp2']; $y = [2, 1]; usort(&$y, $x);
+  $x = [new CCmp2, 'foobar']; $y = [2, 1]; usort(&$y, $x);
 }
 
 echo "=============== positive tests =====================\n";

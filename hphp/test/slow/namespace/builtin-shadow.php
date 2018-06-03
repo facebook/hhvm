@@ -13,9 +13,11 @@ function main() {
   var_dump(compact('var'));
   var_dump(\compact('var'));
   var_dump($var);
-  extract(['var' => '200']);
+  $arr = ['var' => '200'];
+  extract(&$arr);
   var_dump($var);
-  \extract(['var' => '300']);
+  $arr = ['var' => '300'];
+  \extract(&$arr);
   var_dump($var);
 }
 main();

@@ -9,7 +9,7 @@ function test($b, $c) {
 
   $x += false ? $b : $c;
   $x += true ? $b : $c;
-  f($x);
+  f(&$x);
 }
 
 test(2, 3);

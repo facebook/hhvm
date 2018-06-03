@@ -9,7 +9,7 @@ class somecls {
 
 function foo(somecls $z) {
  try {
- $z->x($y?->z);
+ $z->x(&$y?->z);
  } catch (exception $e) {
  set_error_handler(null);
  var_dump($y);

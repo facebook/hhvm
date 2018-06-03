@@ -522,7 +522,7 @@ struct RuntimeOption {
   F(bool, DisassemblerPropDocComments, true)                            \
   F(bool, LoadFilepathFromUnitCache,   false)                           \
   F(bool, ThrowOnCallByRefAnnotationMismatch, false)                    \
-  F(bool, WarnOnCallByRefAnnotationMismatch, false)                     \
+  F(bool, WarnOnCallByRefAnnotationMismatch, true)                      \
   /* Whether to use the embedded hackc binary */                        \
   F(bool, HackCompilerUseEmbedded,     facebook)                        \
   /* Whether to trust existing versions of the extracted compiler */    \

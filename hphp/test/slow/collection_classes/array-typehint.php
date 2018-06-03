@@ -38,10 +38,10 @@ function f1(array $x) { helper($x); }
 function f2(?array $x) { helper($x); }
 function f3(@array $x) { helper($x); }
 function f4(@?array $x) { helper($x); }
-function f5(array &$x) { helper_ref($x); }
-function f6(?array &$x) { helper_ref($x); }
-function f7(@array &$x) { helper_ref($x); }
-function f8(@?array &$x) { helper_ref($x); }
+function f5(array &$x) { helper_ref(&$x); }
+function f6(?array &$x) { helper_ref(&$x); }
+function f7(@array &$x) { helper_ref(&$x); }
+function f8(@?array &$x) { helper_ref(&$x); }
 
 function main() {
   $containers = Map {
@@ -59,7 +59,7 @@ function main() {
       echo "$fn:\n";
       $x = ($c instanceof Collection) ? clone $c : $c;
       try {
-        $fn($x);
+        $i <= 4 ? $fn($x) : $fn(&$x);
       } catch (Exception $e) {
         echo $fn . "() threw an exception\n";
       }

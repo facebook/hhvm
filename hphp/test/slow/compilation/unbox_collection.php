@@ -2,7 +2,7 @@
 
 function foo($feature1) {
   $feats = Vector{$feature1};
-  sort($feats);
+  sort(&$feats);
   return $feats[0];
 }
 

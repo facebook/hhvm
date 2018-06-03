@@ -1,7 +1,7 @@
 <?hh
 
 function fsort($a) {
-  sort($a);
+  sort(&$a);
   return $a;
 }
 

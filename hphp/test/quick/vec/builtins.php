@@ -14,7 +14,7 @@ function main($v) {
 
   echo "array_pop: ";
   $copy_v = $v;
-  var_dump(array_pop($copy_v));
+  var_dump(array_pop(&$copy_v));
   var_dump($copy_v);
 
   echo "array_product: ";
@@ -22,7 +22,7 @@ function main($v) {
 
   echo "array_push: ";
   $copy_v = $v;
-  var_dump(array_push($copy_v, "pushed1", "pushed2", "pushed3"));
+  var_dump(array_push(&$copy_v, "pushed1", "pushed2", "pushed3"));
   var_dump($copy_v);
 
   echo "array_search (2): ";
@@ -36,7 +36,7 @@ function main($v) {
 
   echo "array_shift: ";
   $copy_v = $v;
-  var_dump(array_shift($copy_v));
+  var_dump(array_shift(&$copy_v));
   var_dump($copy_v);
 
   echo "array_sum: ";
@@ -44,7 +44,7 @@ function main($v) {
 
   echo "array_unshift: ";
   $copy_v = $v;
-  var_dump(array_unshift($copy_v, "prepend1", "prepend2"));
+  var_dump(array_unshift(&$copy_v, "prepend1", "prepend2"));
   var_dump($copy_v);
 
   echo "array_values: ";
@@ -67,32 +67,32 @@ function main($v) {
 
   echo "sort: ";
   $copy_v = $v;
-  var_dump(sort($copy_v));
+  var_dump(sort(&$copy_v));
   var_dump($copy_v);
 
   echo "rsort: ";
   $copy_v = $v;
-  var_dump(rsort($copy_v));
+  var_dump(rsort(&$copy_v));
   var_dump($copy_v);
 
   echo "asort: ";
   $copy_v = $v;
-  var_dump(asort($copy_v));
+  var_dump(asort(&$copy_v));
   var_dump($copy_v);
 
   echo "arsort: ";
   $copy_v = $v;
-  var_dump(arsort($copy_v));
+  var_dump(arsort(&$copy_v));
   var_dump($copy_v);
 
   echo "ksort: ";
   $copy_v = $v;
-  var_dump(ksort($copy_v));
+  var_dump(ksort(&$copy_v));
   var_dump($copy_v);
 
   echo "krsort: ";
   $copy_v = $v;
-  var_dump(krsort($copy_v));
+  var_dump(krsort(&$copy_v));
   var_dump($copy_v);
 
   echo "array_slice (0): ";

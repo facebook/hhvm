@@ -8,5 +8,5 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
 }
 
 set_error_handler("myErrorHandler");
-var_dump( is_callable( array(1,2,3), true, $name ) );
+var_dump( is_callable( array(1,2,3), true, &$name ) );
 echo $name . "\n";

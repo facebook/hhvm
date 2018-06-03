@@ -18,5 +18,5 @@ function main2(&$a) {
   $a = array();
   $a['foo'] = 'flee';
 }
-main2($z);
+main2(&$z);
 var_dump($z);

@@ -30,7 +30,7 @@ var_dump($rm->getAttribute('Y'));
 var_dump($rm->getAttribute('Z'));
 
 $attrs = $rm->getAttributes();
-ksort($attrs);
+ksort(&$attrs);
 var_dump($attrs);
 
 var_dump($rm->getAttributeRecursive('W'));
@@ -39,5 +39,5 @@ var_dump($rm->getAttributeRecursive('Y'));
 var_dump($rm->getAttributeRecursive('Z'));
 
 $attrs = $rm->getAttributesRecursive();
-ksort($attrs);
+ksort(&$attrs);
 var_dump($attrs);

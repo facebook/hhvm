@@ -7,5 +7,5 @@ function run(&$a, &$b) {
 }
 
 $a = 5;
-var_dump(run($a, $a));
+var_dump(run(&$a, &$a));
 var_dump($a);

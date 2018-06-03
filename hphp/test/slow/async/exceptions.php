@@ -15,7 +15,7 @@ async function aaThrow() { await aThrow(); }
 async function bThrow() { await block(); throw new Exception(__function__); }
 async function bbThrow() { await block(); await bThrow(); }
 
-function verify(&$a, &$e) {
+function verify($a, $e) {
   try { \HH\Asio\result($a); }
   catch (Exception $ae) {}
   assert($ae->getMessage() == $e->getMessage());

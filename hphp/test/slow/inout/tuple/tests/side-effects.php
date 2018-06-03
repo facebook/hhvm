@@ -94,27 +94,27 @@ function main() {
   $b = 'nope';
   $c = 'nope';
   foo(
-    &$a,
+    $a,
     inout $a,
     inout $b,
     $b,
     inout $c,
     $a,
-    &$c,
+    $c,
   );
   var_dump($a, $b, $c);
 
-  $a = array('nope');
+  $a = array('yep');
   $b = array('nope');
   $c = array('yep');
   foo(
-    &$a,
+    $a,
     inout $a[0],
     inout $b[0],
     $b,
     inout $c[0],
-    ref($a),
-    ref(ref(ref(&$c))),
+    ref(&$a),
+    ref(&ref(&ref(&$c))),
   );
   var_dump($a[0], $b[0], $c[0]);
 

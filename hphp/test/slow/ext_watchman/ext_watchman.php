@@ -53,7 +53,7 @@ class WatchmanInstance {
       0 => array('file', '/dev/null', 'r'),
       1 => array('file', $this->logfile, 'a'),
       2 => array('file', $this->logfile, 'a'),
-    ), $pipes, $this->repo_root);
+    ), &$pipes, $this->repo_root);
     if (!$this->proc) {
       throw new Exception("Failed to spawn $cmd");
     }

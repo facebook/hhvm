@@ -1,4 +1,4 @@
-<?php /* ref in array */
+<?hh /* ref in array */
 function foo(&$x) { var_dump($x); $x = 5; }
 function main() {
   $x = array(1);

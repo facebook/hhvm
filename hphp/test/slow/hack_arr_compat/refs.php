@@ -8,15 +8,15 @@ function &ret_by_ref($d, $key) { return $d[$key]; }
 function ref_param($name, $orig) {
   echo "========== ref_param ($name) ===============================\n";
   $a = $orig;
-  pass_by_ref($a[3]);
+  pass_by_ref(&$a[3]);
   $a = $orig;
-  pass_by_ref($a[4]);
+  pass_by_ref(&$a[4]);
   $a = $orig;
-  pass_by_ref($a[10]);
+  pass_by_ref(&$a[10]);
   $a = $orig;
-  pass_by_ref($a["key1"]);
+  pass_by_ref(&$a["key1"]);
   $a = $orig;
-  pass_by_ref($a["key2"]);
+  pass_by_ref(&$a["key2"]);
 }
 
 function elem_ref($name, $orig) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $LOG_ROOT = '/tmp/hhvm_server';
 require __DIR__ . '/../../util/server_tests.inc';
@@ -8,7 +8,7 @@ function runTest($testController, $customArgs = '') {
   try {
     $serverProc = $serverPort = $adminPort = null;
     $debugPort = false;
-    $serverProc = startServer($serverPort, $adminPort, $debugPort,
+    $serverProc = startServer(&$serverPort, &$adminPort, &$debugPort,
                               __DIR__.'/..', __DIR__.'/../server_root',
                               $customArgs);
     $testController($serverPort);

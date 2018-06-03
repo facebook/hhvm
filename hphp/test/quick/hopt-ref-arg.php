@@ -8,5 +8,5 @@ function run(&$a) {
 }
 
 $a = 5;
-run($a);
+run(&$a);
 var_dump($a);

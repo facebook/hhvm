@@ -8,5 +8,5 @@ function foo(&$x, $y) {
 
 $x = 0;
 $y = 0;
-var_dump(foo($x, $y));
+var_dump(foo(&$x, $y));
 var_dump($x);

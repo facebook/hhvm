@@ -80,8 +80,8 @@ function is_equal($result1, $result2) {
   $keys1 = array_keys($result1);
   $keys2 = array_keys($result2);
 
-  sort($keys1);
-  sort($keys2);
+  sort(&$keys1);
+  sort(&$keys2);
 
   if ($keys1 !== $keys2) {
     report('Mismatched keys', $keys1, $keys2);

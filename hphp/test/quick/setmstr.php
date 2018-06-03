@@ -6,5 +6,5 @@ function foo(&$str) {
 }
 
 $a = "abc";
-foo($a);
+foo(&$a);
 var_dump($a);

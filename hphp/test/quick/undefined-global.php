@@ -8,5 +8,5 @@ function foo() {
 }
 foo();
 $x = array_keys($GLOBALS);
-sort($x);
+sort(&$x);
 foreach ($x as $k) { echo "$k->".$GLOBALS[$k]."\n"; }

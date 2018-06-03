@@ -14,7 +14,8 @@ function gurgle($g) {
       echo "wtf??\n";
       break;
   }
-  extract(array('this' => 43));
+  $arr = array('this' => 43);
+  extract(&$arr);
   var_dump($this);
 }
 

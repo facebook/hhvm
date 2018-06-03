@@ -19,14 +19,14 @@ function main($foo, $bar) {
   $b = null;
   $c = null;
   $g1 = $foo(inout $a);
-  $g2 = $foo($b);
+  $g2 = $foo(&$b);
   $g3 = $foo(&$c);
   var_dump($a, $b, $c);
 
   $x = null;
   $y = null;
   $z = null;
-  $h1 = $bar($x);
+  $h1 = $bar(&$x);
   $h2 = $bar(&$y);
   $h3 = $bar(inout $z);
   var_dump($x, $y, $z);

@@ -8,27 +8,27 @@ function &ret_by_ref($d, $key) { return $d[$key]; }
 function ref_param($d) {
   echo "========== ref_param ===============================\n";
   try {
-    pass_by_ref($d[1]);
+    pass_by_ref(&$d[1]);
   } catch (Exception $e) {
     echo "ref_param exception: \"", $e->getMessage(), "\"\n";
   }
   try {
-    pass_by_ref($d[10]);
+    pass_by_ref(&$d[10]);
   } catch (Exception $e) {
     echo "ref_param exception: \"", $e->getMessage(), "\"\n";
   }
   try {
-    pass_by_ref($d["key1"]);
+    pass_by_ref(&$d["key1"]);
   } catch (Exception $e) {
     echo "ref_param exception: \"", $e->getMessage(), "\"\n";
   }
   try {
-    pass_by_ref($d["key2"]);
+    pass_by_ref(&$d["key2"]);
   } catch (Exception $e) {
     echo "ref_param exception: \"", $e->getMessage(), "\"\n";
   }
   try {
-    pass_by_ref($d[false]);
+    pass_by_ref(&$d[false]);
   } catch (Exception $e) {
     echo "ref_param exception: \"", $e->getMessage(), "\"\n";
   }
@@ -175,7 +175,7 @@ function ref_unserialize() {
 // Its fine to have subelements with refs in them
 function nested_refs($d) {
   echo "========== nested_refs =============================\n";
-  pass_by_ref($d[4][0]);
+  pass_by_ref(&$d[4][0]);
   $elem = &$d[4][1];
   $value = 100;
   $d[4][2] = &$value;

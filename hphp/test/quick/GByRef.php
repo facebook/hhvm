@@ -10,7 +10,7 @@ function byRef(&$a) {
 
 var_dump($GLOBALS['foo']);
 var_dump($GLOBALS['bar']);
-byRef($GLOBALS['foo']['bar']);
-byRef($GLOBALS['bar']);
+byRef(&$GLOBALS['foo']['bar']);
+byRef(&$GLOBALS['bar']);
 var_dump($GLOBALS['foo']);
 var_dump($GLOBALS['bar']);

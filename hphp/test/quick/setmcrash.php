@@ -9,5 +9,5 @@ class X {
 
 $x = new X;
 $t = null;
-$x->foo($t);
+$x->foo(&$t);
 

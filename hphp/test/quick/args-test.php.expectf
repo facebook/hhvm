@@ -820,6 +820,10 @@ array(150) {
   [149]=>
   int(149)
 }
+
+Warning: gr() expects parameter 65 by reference, but the call was not annotated with '&' in %s/args-test.php on line 79
+
+Warning: gr() expects parameter 66 by reference, but the call was not annotated with '&' in %s/args-test.php on line 80
 array(150) {
   [0]=>
   int(0)

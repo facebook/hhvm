@@ -10,7 +10,7 @@ function call1($c, $x) { return $c($x); }
 function call2($c, $x) { return call_user_func($c, $x); }
 function call3($c, $x) { return forward_static_call($c, $x); }
 function call4($c, $x) { return array_map($c, $x); }
-function call5($c, $x) { return array_walk($x, $c); }
+function call5($c, $x) { return array_walk(&$x, $c); }
 
 function make_tests($tests, $c1, $c2) {
   if ($c1) $tests[] = vec['call1', $c1, count($tests)+1];

@@ -840,6 +840,49 @@ bool simplify(Env& env, const setcc& vsetcc, Vlabel b, size_t i) {
   });
 }
 
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Or with constant values
+ */
+
+bool simplify(Env& env, const orqi& inst, Vlabel b, size_t i) {
+  if (inst.s0.q() == 0 && env.use_counts[inst.sf] == 0) {
+    return simplify_impl(env, b, i, copy{inst.s1, inst.d});
+  }
+  return false;
+}
+
+bool simplify(Env& env, const orq& inst, Vlabel b, size_t i) {
+  if (env.use_counts[inst.sf] != 0) return false;
+
+  auto it0 = env.unit.regToConst.find(inst.s0);
+  auto it1 = env.unit.regToConst.find(inst.s1);
+  if (it0 != env.unit.regToConst.end() && !it0->second.isUndef) {
+    if (it1 != env.unit.regToConst.end() && !it1->second.isUndef) {
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        auto s = v.cns(it0->second.val | it1->second.val);
+        v << copy{s, inst.d};
+        return 1;
+      });
+    }
+    if (it0->second.val == 0) {
+      return simplify_impl(env, b, i, copy{inst.s1, inst.d});
+    }
+  } else if (it1 != env.unit.regToConst.end() && !it1->second.isUndef) {
+    if (it1->second.val == 0) {
+      return simplify_impl(env, b, i, copy{inst.s0, inst.d});
+    }
+  }
+  return false;
+}
+
+bool simplify(Env& env, const orqim& inst, Vlabel b, size_t i) {
+  if (inst.s0.q() == 0 && env.use_counts[inst.sf] == 0) {
+    return simplify_impl(env, b, i, nop{});
+  }
+  return false;
+}
+
 /*
  * Fold a cmov of a certain width into a copy if both values are the same
  * register or have the same known constant value.

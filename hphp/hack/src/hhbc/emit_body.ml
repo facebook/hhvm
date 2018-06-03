@@ -277,11 +277,19 @@ let rec is_awaitable h =
   | _, (A.Hsoft h | A.Hoption h) -> is_awaitable h
   | _ -> false
 
+let is_mixed_or_dynamic t =
+ String_utils.string_ends_with t "HH\\mixed" ||
+ String_utils.string_ends_with t "HH\\dynamic"
+
 let emit_verify_out params =
   let msrv = Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
   let param_instrs = List.filter_mapi params ~f:(fun i p ->
     if not @@ Hhas_param.is_inout p then None else
-      let b = Hhas_param.type_info p <> None in
+      let b = match Hhas_param.type_info p with
+        | None -> false
+        | Some { Hhas_type_info.type_info_user_type = Some t; _ } ->
+          not @@ is_mixed_or_dynamic t
+        | _ -> true in
       Some (
         gather [
           instr_cgetl (Local.Named (Hhas_param.name p));

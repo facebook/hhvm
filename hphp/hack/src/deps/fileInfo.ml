@@ -71,9 +71,9 @@ type id = pos  * string [@@deriving show]
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
 
-type hash_type = Digest.t option
-let show_hash_type _ = "<Digest.t option>"
-let pp_hash_type _ _ _ = "<Digest.t option>"
+type hash_type = OpaqueDigest.t option
+let show_hash_type _ = "<OpaqueDigest.t option>"
+let pp_hash_type _ _ _ = "<OpaqueDigest.t option>"
 
 type t = {
   hash : hash_type;
@@ -117,7 +117,7 @@ type names = {
 (* Data structure stored in the saved state *)
 type saved = {
   s_names : names;
-  s_hash : Digest.t option;
+  s_hash : OpaqueDigest.t option;
   s_mode: mode option;
 }
 

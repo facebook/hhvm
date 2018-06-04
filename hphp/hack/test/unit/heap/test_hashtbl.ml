@@ -8,7 +8,7 @@
  *
 *)
 
-type key = Digest.t
+type key = OpaqueDigest.t
 
 external hh_add    : key -> string -> unit = "hh_add"
 external hh_mem    : key -> bool           = "hh_mem"
@@ -26,7 +26,7 @@ let expect ~msg bool =
     exit 1
   end
 
-let to_key = Digest.string
+let to_key = OpaqueDigest.string
 
 let add key value = hh_add (to_key key) value
 let mem key = hh_mem (to_key key)

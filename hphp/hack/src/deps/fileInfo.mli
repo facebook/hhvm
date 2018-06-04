@@ -51,7 +51,7 @@ val pos_full : (Pos.t * string) -> id
 val get_pos_filename : pos -> Relative_path.t
 
 type t = {
-  hash : Digest.t option;
+  hash : OpaqueDigest.t option;
   file_mode : mode option;
   funs : id list;
   classes : id list;

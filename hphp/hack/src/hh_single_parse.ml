@@ -276,7 +276,7 @@ let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash ~co
     let output =
       if not hash then dumper (run_ast file).Parser_hack.ast else
         let decl_hash = Ast_utils.generate_ast_decl_hash ast in
-        Digest.to_hex decl_hash
+        OpaqueDigest.to_hex decl_hash
     in
     Printf.printf "%s" output
   | FFP -> Printf.printf "%s" (dumper (run_ffp ~codegen file).Lowerer.ast)

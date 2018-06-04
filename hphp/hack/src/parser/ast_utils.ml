@@ -110,7 +110,7 @@ let generate_ast_decl_hash ast =
     primitive type, which we hash.
   *)
   let str = Marshal.to_string (remove_pos ast) [] in
-  Digest.string str
+  OpaqueDigest.string str
 
 
 let get_def_nodes ast =

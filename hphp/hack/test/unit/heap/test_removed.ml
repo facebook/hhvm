@@ -8,7 +8,7 @@
  *
 *)
 
-type key = Digest.t
+type key = OpaqueDigest.t
 
 module IntVal = struct
   type t = int

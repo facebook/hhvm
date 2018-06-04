@@ -378,5 +378,5 @@ let from_text php5_compat_mode hhvm_compat_mode s =
 let extract_as_json ~php5_compat_mode ~hhvm_compat_mode text =
   from_text php5_compat_mode hhvm_compat_mode text
   |> Option.map ~f:(fun facts ->
-    let md5 = Digest.to_hex @@ Digest.string text in
+    let md5 = OpaqueDigest.to_hex @@ OpaqueDigest.string text in
     facts_to_json md5 facts)

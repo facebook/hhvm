@@ -712,7 +712,7 @@ module ServerLazyInit : InitKind = struct
           | Some x, Some y ->
             (match x.FileInfo.hash, y.FileInfo.hash with
             | Some x, Some y ->
-              Digest.equal x y
+              OpaqueDigest.equal x y
             | _ ->
               false)
           | _ ->

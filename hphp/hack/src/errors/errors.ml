@@ -471,10 +471,9 @@ let add_ignored_fixme_code_error pos code =
 
 let add_applied_fixme code pos =
   if ServerLoadFlag.get_no_load () then
-    ()
-  else
     let applied_fixmes_list = Common.get_current_list !applied_fixmes in
     Common.set_current_list applied_fixmes ((pos, code) :: applied_fixmes_list)
+  else ()
 
 let rec add_error = M.add_error
 

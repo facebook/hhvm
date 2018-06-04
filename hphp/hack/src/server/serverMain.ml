@@ -773,20 +773,19 @@ let setup_server ~informant_managed ~monitor_pid options handle =
   then EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
   else HackEventLogger.init
     ~exit_on_parent_exit
-    root
-    init_id
-    informant_managed
-    (Unix.gettimeofday ())
-    saved_state_load_type
-    use_sql
-    search_chunk_size
-    max_workers
-    max_bucket_size
-    load_tiny_state
-    use_full_fidelity_parser
-    interrupt_on_watchman
-    interrupt_on_client
-    ;
+    ~root
+    ~init_id
+    ~informant_managed
+    ~time:(Unix.gettimeofday ())
+    ~saved_state_load_type
+    ~use_sql
+    ~search_chunk_size
+    ~max_workers
+    ~max_bucket_size
+    ~load_tiny_state
+    ~use_full_fidelity_parser
+    ~interrupt_on_watchman
+    ~interrupt_on_client;
   let root_s = Path.to_string root in
   let check_mode = ServerArgs.check_mode options in
   if not check_mode && Sys_utils.is_nfs root_s && not enable_on_nfs then begin

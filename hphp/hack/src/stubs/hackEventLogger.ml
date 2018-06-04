@@ -13,7 +13,22 @@ let set_use_full_fidelity_parser _ = ()
 let set_lazy_incremental _ = ()
 let set_search_chunk_size _ = ()
 let bad_exit _ _ _ ~is_oom:_ = ()
-let init ?exit_on_parent_exit:_ _ _ _ _ _ _ _ _ _ _ _ _ _ = ()
+let init
+  ~exit_on_parent_exit:_
+  ~root:_
+  ~init_id:_
+  ~informant_managed:_
+  ~time:_
+  ~saved_state_load_type:_
+  ~use_sql:_
+  ~search_chunk_size:_
+  ~max_workers:_
+  ~max_bucket_size:_
+  ~load_tiny_state:_
+  ~use_full_fidelity_parser:_
+  ~interrupt_on_watchman:_
+  ~interrupt_on_client:_
+  = ()
 let init_monitor ?exit_on_parent_exit:_ _ _ _ _ = ()
 let init_end ~state_distance:_ ~approach_name:_ ~init_error:_ _ _ = ()
 let starting_first_server _ = ()

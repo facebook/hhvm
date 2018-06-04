@@ -68,13 +68,31 @@ def run_test_program(files, program, expect_ext, get_flags, use_stdin):
     results = [f.result() for f in futures]
     return [r for r in results if r is not None]
 
+def filter_ocaml_stacktrace(text):
+    """take a string and remove all the lines that look like
+    they're part of an OCaml stacktrace"""
+    assert isinstance(text, str)
+    it = text.splitlines()
+    out = []
+    for x in it:
+        drop_line = (
+            x.lstrip().startswith("Called") or
+            x.lstrip().startswith("Raised")
+        )
+        if drop_line:
+            pass
+        else:
+            out.append(x)
+    # force trailing newline
+    return "\n".join(out) + "\n"
+
 def check_result(fname, expect_exp, out):
     try:
         with open(fname + expect_exp, 'rt') as fexp:
             exp = fexp.read()
     except FileNotFoundError:
         exp = ''
-    if exp != out:
+    if exp != out and exp != filter_ocaml_stacktrace(out):
         return Failure(fname=fname, expected=exp, output=out)
 
 def record_failures(failures, out_ext):

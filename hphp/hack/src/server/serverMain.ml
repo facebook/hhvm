@@ -19,6 +19,8 @@ open Option.Monad_infix
 
 let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
 
+let () = Printexc.record_backtrace true
+
 module MainInit : sig
   val go:
     genv ->

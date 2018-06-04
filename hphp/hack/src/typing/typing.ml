@@ -4382,14 +4382,29 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
       end in
       let env, method_ = TUtils.in_var env (fst cty, Tunresolved tyl) in
       env, method_, None
-
-  | _, Tabstract _ ->
-      begin match TUtils.get_concrete_supertypes env cty with
-      | env, [cty] ->
+  | _, Tabstract (_, Some ty) ->
+      class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
+        ~pos_params env cid ty (p, mid)
+  | _, Tabstract (_, None) ->
+      let resl = try_over_concrete_supertypes env cty (fun env ty ->
         class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
-                   ~pos_params env cid cty (p, mid)
-      | env, _ ->
-        env, (Reason.Rwitness p, Typing_utils.tany env), None
+          ~pos_params env cid ty (p, mid)) in
+      begin match resl with
+      | [] ->
+        Errors.non_class_member
+          mid p (Typing_print.error (snd cty))
+          (Reason.to_pos (fst cty));
+        (env, err_witness env p, None)
+      | ((_, (_, ty), _) as res)::rest ->
+        if List.exists rest (fun (_, (_, ty'), _) -> ty' <> ty)
+        then
+          begin
+            Errors.ambiguous_member
+              mid p (Typing_print.error (snd cty))
+              (Reason.to_pos (fst cty));
+            (env, err_witness env p, None)
+          end
+        else res
       end
   | _, Tclass ((_, c), paraml) ->
       let class_ = Env.get_class env c in

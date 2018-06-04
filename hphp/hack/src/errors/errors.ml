@@ -2373,6 +2373,16 @@ let non_object_member s pos1 ty pos2 =
   "Check this out"
   ]
 
+let non_class_member s pos1 ty pos2 =
+  add_list (Typing.err_code Typing.NonClassMember) [
+  pos1,
+  ("You are trying to access the member "^s^
+   " but this is not a class, it is "^
+   ty);
+  pos2,
+  "Check this out"
+  ]
+
 let ambiguous_member s pos1 ty pos2 =
   add_list (Typing.err_code Typing.AmbiguousMember) [
   pos1,

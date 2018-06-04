@@ -6,7 +6,7 @@ function foo(inout mixed $thing) {
 
 function main() {
   $a = 2;
-  foo($a);
+  foo(&$a);
   var_dump($a);
 }
 

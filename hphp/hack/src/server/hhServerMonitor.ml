@@ -37,17 +37,24 @@ let set_file_info options =
  * listening to socket requests from hh_client, checking Build ID, and relaying
  * requests to the typechecker process. *)
 let monitor_daemon_main (options: ServerArgs.options) =
+  let www_root = (ServerArgs.root options) in
+  Relative_path.set_path_prefix Relative_path.Root www_root;
   let () = set_file_info options in
   let () = ServerLoadFlag.set_no_load (ServerArgs.no_load options) in
   let init_id = Random_id.short_string () in
+  let config, local_config  =
+    ServerConfig.(load filename options) in
   if Sys_utils.is_test_mode ()
-  then EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
-  else HackEventLogger.init_monitor ~exit_on_parent_exit (ServerArgs.root options) init_id
-      (Unix.gettimeofday ()) false;
+  then EventLogger.init ~exit_on_parent_exit
+    EventLogger.Event_logger_fake 0.0
+  else HackEventLogger.init_monitor
+    ~exit_on_parent_exit
+    ~devinfra_saved_state_lookup:local_config.ServerLocalConfig.devinfra_saved_state_lookup
+    ~search_chunk_size:local_config.ServerLocalConfig.search_chunk_size
+    (ServerArgs.root options) init_id
+    (Unix.gettimeofday ()) false;
   Utils.profile := ServerArgs.profile_log options;
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
-
-  let www_root = (ServerArgs.root options) in
 
   if not (ServerArgs.check_mode options) then begin
     (** Make sure to lock the lockfile before doing *anything*, especially
@@ -61,17 +68,11 @@ let monitor_daemon_main (options: ServerArgs.options) =
   ignore @@ Sys_utils.setsid ();
   ignore (make_tmp_dir());
   ignore (Hhi.get_hhi_root());
-  Relative_path.set_path_prefix Relative_path.Root www_root;
 
-  let config, local_config  =
-    ServerConfig.(load filename options) in
   if local_config.ServerLocalConfig.use_full_fidelity_parser then
     HackEventLogger.set_use_full_fidelity_parser true;
   HackEventLogger.set_use_tiny_state
     local_config.ServerLocalConfig.load_tiny_state;
-
-  HackEventLogger.set_search_chunk_size
-    local_config.ServerLocalConfig.search_chunk_size;
 
   HackSearchService.fuzzy := local_config.ServerLocalConfig.enable_fuzzy_search;
   if ServerArgs.save_filename options <> None

@@ -18,6 +18,7 @@ let init
   ~root:_
   ~init_id:_
   ~informant_managed:_
+  ~devinfra_saved_state_lookup:_
   ~time:_
   ~saved_state_load_type:_
   ~use_sql:_
@@ -29,7 +30,11 @@ let init
   ~interrupt_on_watchman:_
   ~interrupt_on_client:_
   = ()
-let init_monitor ?exit_on_parent_exit:_ _ _ _ _ = ()
+let init_monitor
+  ?exit_on_parent_exit:_
+  ~search_chunk_size:_
+  ~devinfra_saved_state_lookup:_
+  _ _ _ _ = ()
 let init_end ~state_distance:_ ~approach_name:_ ~init_error:_ _ _ = ()
 let starting_first_server _ = ()
 let init_lazy_end

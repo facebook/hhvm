@@ -2344,6 +2344,8 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
     } else {
       equivLoc = op.loc1;
     }
+  } else {
+    equivLoc = NoLocalId;
   }
   auto val = popC(env);
   setLoc(env, op.loc1, val);
@@ -2764,7 +2766,6 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto const location = topStkEquiv(env);
   if (location != NoLocalId) {
     refineLocation(env, location, [&] (Type t) {
-      if (!t.subtypeOf(TCell)) return t;
       if (nullThrows) return intersection_of(t, TObj);
       if (!t.couldBe(TUninit)) return intersection_of(t, TOptObj);
       if (!t.couldBe(TObj)) return intersection_of(t, TNull);

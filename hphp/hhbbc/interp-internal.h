@@ -585,7 +585,7 @@ void killAllLocEquiv(ISS& env) {
 void addLocEquiv(ISS& env,
                  LocalId from,
                  LocalId to) {
-  always_assert(!is_volatile_local(env.ctx.func, from));
+  always_assert(peekLocRaw(env, from).subtypeOf(TCell));
   always_assert(!is_volatile_local(env.ctx.func, to));
   always_assert(from != to && findLocEquiv(env, from) == NoLocalId);
 
@@ -621,6 +621,7 @@ LocalId topStkEquiv(ISS& env, uint32_t idx = 0) {
 
 void setStkLocal(ISS& env, LocalId loc, uint32_t idx = 0) {
   assertx(loc <= MaxLocalId);
+  always_assert(peekLocRaw(env, loc).subtypeOf(TCell));
   while (true) {
     auto equiv = topStkEquiv(env, idx);
     if (equiv != StackDupId) {
@@ -781,16 +782,13 @@ bool locCouldBeRef(ISS& env, LocalId l) {
  */
 void refineLocHelper(ISS& env, LocalId l, Type t) {
   auto v = peekLocRaw(env, l);
-  if (is_volatile_local(env.ctx.func, l)) {
-    always_assert_flog(v == TGen, "volatile local was not TGen");
-    return;
-  }
   if (v.subtypeOf(TCell)) env.state.locals[l] = std::move(t);
 }
 
 template<typename F>
 void refineLocation(ISS& env, LocalId l, F fun) {
   auto refine = [&] (Type t) {
+    always_assert(t.subtypeOf(TCell));
     auto r1 = fun(t);
     auto r2 = intersection_of(r1, t);
     // In unusual edge cases (mainly intersection of two unrelated

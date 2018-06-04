@@ -506,11 +506,21 @@ let lsp_file_position_to_hack (params: Lsp.TextDocumentPositionParams.t)
   (filename, line, column)
 
 let hack_pos_to_lsp_range (pos: 'a Pos.pos) : Lsp.range =
-  let line1, col1, line2, col2 = Pos.destruct_range pos in
-  {
-    start = {line = line1 - 1; character = col1 - 1;};
-    end_ = {line = line2 - 1; character = col2 - 1;};
+  (* .hhconfig errors are Positions with a filename, but dummy start/end
+   * positions. Handle that case - and Pos.none - specially, as the LSP
+   * specification requires line and character >= 0, and VSCode silently
+   * drops diagnostics that violate the spec in this way *)
+  if (pos = Pos.make_from (Pos.filename pos))
+  then {
+    start = {line = 0; character = 0;};
+    end_ = {line = 0; character = 0;};
   }
+  else
+    let line1, col1, line2, col2 = Pos.destruct_range pos in
+    {
+      start = {line = line1 - 1; character = col1 - 1;};
+      end_ = {line = line2 - 1; character = col2 - 1;};
+    }
 
 let hack_pos_to_lsp_location (pos: string Pos.pos) ~(default_path: string): Lsp.Location.t =
   let open Lsp.Location in

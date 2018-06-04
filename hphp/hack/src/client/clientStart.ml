@@ -21,6 +21,7 @@ let get_hhserver () =
 type env = {
   root: Path.t;
   no_load : bool;
+  watchman_debug_logging : bool;
   profile_log : bool;
   silent : bool;
   exit_on_failure : bool;
@@ -46,6 +47,7 @@ let start_server env =
     Array.concat [
       [|hh_server; "-d"; Path.to_string env.root|];
       if env.no_load then [| "--no-load" |] else [||];
+      if env.watchman_debug_logging then [| "--watchman-debug-logging" |] else [||];
       if env.profile_log then [| "--profile-log" |] else [||];
       ai_options;
       (** If the client starts up a server monitor process, the output of that

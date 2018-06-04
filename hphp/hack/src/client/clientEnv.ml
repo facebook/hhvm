@@ -66,6 +66,7 @@ type client_check_env = {
   timeout: float option;
   autostart: bool;
   force_dormant_start: bool;
+  watchman_debug_logging: bool;
   no_load: bool;
   profile_log: bool;
   ai_mode: string option;

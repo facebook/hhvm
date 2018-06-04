@@ -20,6 +20,11 @@ module Common_argspecs = struct
       " If server is dormant, force start a new one instead of waiting for"^
       " the next one to start up automatically (default: false)")
 
+  let watchman_debug_logging value_ref =
+    ("--watchman-debug-logging",
+      Arg.Set value_ref,
+      " Enable debug logging on Watchman client. This is very noisy")
+
   let retries value_ref =
     ("--retries",
       Arg.Set_int value_ref,
@@ -65,6 +70,7 @@ let parse_check_args cmd =
   let retries = ref 800 in
   let output_json = ref false in
   let no_load = ref false in
+  let watchman_debug_logging = ref false in
   let profile_log = ref false in
   let timeout = ref None in
   let autostart = ref true in
@@ -375,6 +381,7 @@ let parse_check_args cmd =
     "--no-load",
       Arg.Set no_load,
       " start from a fresh state";
+    Common_argspecs.watchman_debug_logging watchman_debug_logging;
     "--profile-log",
       Arg.Set profile_log,
       " enable profile logging";
@@ -466,6 +473,7 @@ let parse_check_args cmd =
       | Some (MODE_REMOVE_DEAD_FIXMES _) -> true
       | _ -> false
     );
+    watchman_debug_logging = !watchman_debug_logging;
     profile_log = !profile_log;
     ai_mode = !ai_mode;
     ignore_hh_version = !ignore_hh_version;
@@ -480,6 +488,7 @@ let parse_start_env command =
       WWW-ROOT is assumed to be current directory if unspecified\n"
       Sys.argv.(0) command (String.capitalize_ascii command) in
   let no_load = ref false in
+  let watchman_debug_logging = ref false in
   let profile_log = ref false in
   let ai_mode = ref None in
   let ignore_hh_version = ref false in
@@ -491,6 +500,7 @@ let parse_start_env command =
     " this flag is deprecated and does nothing!";
     "--no-load", Arg.Set no_load,
     " start from a fresh state";
+    Common_argspecs.watchman_debug_logging watchman_debug_logging;
     "--profile-log", Arg.Set profile_log,
     " enable profile logging";
     "--ai", Arg.String (fun x -> ai_mode := Some x),
@@ -510,6 +520,7 @@ let parse_start_env command =
   { ClientStart.
     root = root;
     no_load = !no_load;
+    watchman_debug_logging = !watchman_debug_logging;
     profile_log = !profile_log;
     ai_mode = !ai_mode;
     silent = false;

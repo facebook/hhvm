@@ -72,6 +72,7 @@ let main_exn env =
     retries = if env.wait then None else Some env.retries;
     expiry = None;
     no_load = false;
+    watchman_debug_logging = false; (** Start a server manually in terminal if you want this. *)
     profile_log = false;
     ai_mode = None;
     progress_callback = ClientConnect.tty_progress_reporter ();

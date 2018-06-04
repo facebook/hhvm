@@ -1456,6 +1456,7 @@ let rec connect_client
       root;
       autostart;
       force_dormant_start = false;
+      watchman_debug_logging = false; (* If you want this, start the server manually in terminal. *)
       retries = Some 3; (* each retry takes up to 1 second *)
       expiry = None; (* we can limit retries by time as well as by count *)
       no_load = false; (* only relevant when autostart=true *)
@@ -1530,6 +1531,7 @@ let start_server (root: Path.t) : unit =
     { ClientStart.
       root;
       no_load = false;
+      watchman_debug_logging = false;
       profile_log = false;
       ai_mode = None;
       silent = true;

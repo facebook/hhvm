@@ -740,6 +740,7 @@ let init {
   saved_state_cache_limit;
   use_xdb;
   devinfra_saved_state_lookup;
+  watchman_debug_logging;
   ignore_hh_version;
 } =
   if use_dummy then
@@ -754,6 +755,7 @@ let init {
       Watchman.subscribe_mode = Some Watchman.Scm_aware;
       init_timeout = 30;
       expression_terms = watchman_expression_terms;
+      debug_logging = watchman_debug_logging;
       root;
     } in
     match watchman with

@@ -18,6 +18,7 @@ type env = {
   retries : int option;
   expiry : float option;
   no_load : bool;
+  watchman_debug_logging : bool;
   profile_log : bool;
   ai_mode : string option;
   progress_callback: string option -> unit;
@@ -325,6 +326,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
         ClientStart.start_server { ClientStart.
           root = env.root;
           no_load = env.no_load;
+          watchman_debug_logging = env.watchman_debug_logging;
           profile_log = env.profile_log;
           silent = false;
           exit_on_failure = false;

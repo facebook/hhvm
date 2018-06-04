@@ -21,6 +21,7 @@ let main env =
     retries = Some 800;
     expiry = None;
     no_load = false;
+    watchman_debug_logging = false;
     profile_log = false;
     progress_callback = ClientConnect.tty_progress_reporter ();
     do_post_handoff_handshake = true;

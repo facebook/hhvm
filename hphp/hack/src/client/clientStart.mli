@@ -10,6 +10,7 @@
 type env = {
   root: Path.t;
   no_load: bool;
+  watchman_debug_logging : bool;
   profile_log : bool;
   silent: bool;
   exit_on_failure: bool;

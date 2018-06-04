@@ -80,6 +80,7 @@ let connect ?(use_priority_pipe=false) args =
     retries = Some args.retries;
     expiry = args.timeout;
     no_load = args.no_load;
+    watchman_debug_logging = args.watchman_debug_logging;
     profile_log = args.profile_log;
     ai_mode = args.ai_mode;
     progress_callback = ClientConnect.tty_progress_reporter ();

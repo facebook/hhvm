@@ -28,6 +28,7 @@ type options = {
   save_filename    : string option;
   use_gen_deps     : bool;
   waiting_client   : Unix.file_descr option;
+  watchman_debug_logging : bool;
   ignore_hh_version : bool;
   file_info_on_disk : bool;
   dynamic_view      : bool;
@@ -78,6 +79,8 @@ module Messages = struct
                         mini_state_json_descr
   let waiting_client= " send message to fd/handle when server has begun \
                       \ starting and again when it's done starting"
+  let watchman_debug_logging =
+    " Enable debug logging on Watchman client. This is very noisy"
   let ignore_hh_version = " ignore hh_version check when loading saved states"
   let file_info_on_disk = " [experimental] store file-info in sqlite db."
   let dynamic_view      = " start with dynamic view for IDE files on by default."
@@ -175,6 +178,7 @@ let parse_options () =
   let load_state_canary = ref false in
   let with_mini_state = ref None in
   let version       = ref false in
+  let watchman_debug_logging = ref false in
   let waiting_client= ref None in
   let ignore_hh     = ref false in
   let dynamic_view  = ref false in 
@@ -211,6 +215,8 @@ let parse_options () =
        Messages.with_mini_state;
      "--version"       , Arg.Set version         , "";
      "--waiting-client", Arg.Int set_wait        , Messages.waiting_client;
+     "--watchman-debug-logging", Arg.Set watchman_debug_logging,
+       Messages.watchman_debug_logging;
      "--ignore-hh-version", Arg.Set ignore_hh  , Messages.ignore_hh_version;
      "--file-info-on-disk", Arg.Set file_info_on_disk , Messages.file_info_on_disk;
      "--dynamic-view", Arg.Set dynamic_view,     Messages.dynamic_view;
@@ -261,6 +267,7 @@ let parse_options () =
     with_mini_state = with_mini_state;
     save_filename = !save;
     waiting_client= !waiting_client;
+    watchman_debug_logging = !watchman_debug_logging;
     ignore_hh_version = !ignore_hh;
     file_info_on_disk = !file_info_on_disk;
     dynamic_view      = !dynamic_view;
@@ -282,6 +289,7 @@ let default_options ~root = {
   save_filename = None;
   use_gen_deps = false;
   waiting_client = None;
+  watchman_debug_logging = false;
   ignore_hh_version = false;
   file_info_on_disk = false;
   dynamic_view = false;
@@ -305,6 +313,7 @@ let with_mini_state options = options.with_mini_state
 let save_filename options = options.save_filename
 let use_gen_deps options = options.use_gen_deps
 let waiting_client options = options.waiting_client
+let watchman_debug_logging options = options.watchman_debug_logging
 let ignore_hh_version options = options.ignore_hh_version
 let file_info_on_disk options = options.file_info_on_disk
 let dynamic_view options = options.dynamic_view
@@ -340,6 +349,7 @@ let to_string
     with_mini_state;
     save_filename;
     waiting_client;
+    watchman_debug_logging;
     ignore_hh_version;
     file_info_on_disk;
     dynamic_view;
@@ -375,6 +385,7 @@ let to_string
       "with_mini_state: "; mini_state_str; ", ";
       "save_filename: "; save_filename_str; ", ";
       "waiting_client: "; waiting_client_str; ", ";
+      "watchman_debug_logging: "; string_of_bool watchman_debug_logging; ", ";
       "ignore_hh_version: "; string_of_bool ignore_hh_version; ", ";
       "file_info_on_disk: "; string_of_bool file_info_on_disk; ", ";
       "dynamic_view: "; string_of_bool dynamic_view;

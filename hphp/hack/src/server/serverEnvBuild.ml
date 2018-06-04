@@ -73,6 +73,7 @@ let make_genv options config local_config handle =
         then Some Watchman.Defer_changes
         else None;
       expression_terms = watchman_expression_terms;
+      debug_logging = ServerArgs.watchman_debug_logging options;
       root = root;
     }
   in

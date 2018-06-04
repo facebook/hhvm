@@ -61,6 +61,7 @@ module Tools = struct
     allow_subscriptions = true;
     state_prefetcher = State_prefetcher.dummy;
     use_dummy = false;
+    watchman_debug_logging = false;
     min_distance_restart = 100;
     use_xdb = true;
     saved_state_cache_limit = 20;

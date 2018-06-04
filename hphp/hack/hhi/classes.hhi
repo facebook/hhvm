@@ -94,7 +94,7 @@ final class AsyncGenerator<Tk, +Tv, -Ts>
   public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}
 }
 
-final class Generator<Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
+final class Generator<+Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
   public function getOrigFuncName(): string {}
   public function current(): Tv {}
   public function key(): Tk {}

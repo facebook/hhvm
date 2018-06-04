@@ -1825,6 +1825,11 @@ void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
   if (key->isA(TNull | TStr)) return finish(def);
 
   if (!key->isA(TInt)) {
+    // TODO(T11019533): Fix the underlying issue with unreachable code rather
+    // than papering over it by pushing an unused value here.
+    finish(def);
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, stack_base, key);
     return;
   }
@@ -1864,6 +1869,11 @@ void implDictKeysetIdx(IRGS& env,
   if (key->isA(TNull)) return finish(def);
 
   if (!key->isA(TInt) && !key->isA(TStr)) {
+    // TODO(T11019533): Fix the underlying issue with unreachable code rather
+    // than papering over it by pushing an unused value here.
+    finish(def);
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, stack_base, key);
     return;
   }

@@ -602,7 +602,7 @@ struct Generator::IndexedType {
   folly::Optional<LayoutError> errors;
 };
 
-constexpr size_t kNumThreads = 24;
+size_t NumThreads = 24;
 
 Generator::Generator(const std::string& filename, bool skip) {
   // Either this platform has no support for parsing debug information, or the
@@ -657,7 +657,7 @@ Generator::Generator(const std::string& filename, bool skip) {
 
     std::vector<std::thread> threads;
     // No point in creating more threads than there are blocks.
-    for (auto i = size_t{0}; i < std::min(block_count, kNumThreads); ++i) {
+    for (auto i = size_t{0}; i < std::min(block_count, NumThreads); ++i) {
       threads.emplace_back(std::thread(run));
     }
     for (auto& t : threads) t.join();
@@ -3314,7 +3314,8 @@ int main(int argc, char** argv) {
     ("output_file",
      po::value<std::string>()->required(),
      "filename of generated scanners")
-    ("skip", "do not scan dwarf, generate conservative scanners");
+    ("skip", "do not scan dwarf, generate conservative scanners")
+    ("num_threads", po::value<int>(), "number of parallel threads");
 
   try {
     po::variables_map vm;
@@ -3344,6 +3345,16 @@ int main(int argc, char** argv) {
         vm["output_file"].as<std::string>()
       ) :
       vm["output_file"].as<std::string>();
+
+    if (vm.count("num_threads")) {
+      auto n = vm["num_threads"].as<int>();
+      if (n > 0) {
+        NumThreads = n;
+      } else {
+        std::cerr << "\nIllegal num_threads=" << n << "\n";
+        return 1;
+      }
+    }
 
     try {
       const auto source_executable = vm["source_file"].as<std::string>();

@@ -22,6 +22,7 @@ module Phase   = Typing_phase
 (* Exporting. *)
 (*****************************************************************************)
 
+(* Tries to add constraint that ty_sub is subtype of ty_super in envs *)
 let sub_type p ur env ty_sub ty_super =
   Typing_log.log_types 2 p env
     [Typing_log.Log_sub ("Typing_ops.sub_type",

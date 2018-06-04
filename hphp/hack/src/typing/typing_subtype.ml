@@ -350,6 +350,9 @@ let rec simplify_subtype
     | Tabstract ((AKnewtype _ | AKdependent _), None))), (_, Tnonnull) ->
     invalid ()
 
+  (* Tvoid is not allowed to subtype Tdynamic *)
+  | (_, Tprim Nast.Tvoid), (_, Tdynamic) -> invalid ()
+
   | _, (_, Tmixed) -> valid ()
   | _, (_, Tdynamic) -> valid ()
   | _, (_, Toption (_, Tnonnull)) -> valid ()

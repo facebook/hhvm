@@ -155,6 +155,11 @@ bool dumpTCAnnotation(const Func& func, TransKind transKind);
 bool retranslateAllPending();
 
 /*
+ * Whether retranslateAll has been scheduled but has not complete.
+ */
+bool pendingRetranslateAllScheduled();
+
+/*
  * How many JIT worker threads are active.
  */
 int getActiveWorker();

@@ -2489,7 +2489,7 @@ void hphp_session_init(Treadmill::SessionKind session_kind,
   // started.
   g_context->acceptRequestEventHandlers(true);
 
-  g_context->requestInit();
+  g_context->requestInit();             // must happen after treadmill start
   if (transport != nullptr) g_context->setTransport(transport);
   s_sessionInitialized = true;
 

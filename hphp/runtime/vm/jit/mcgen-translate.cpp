@@ -57,6 +57,7 @@ namespace HPHP { namespace jit { namespace mcgen {
 namespace {
 
 std::thread s_retranslateAllThread;
+std::atomic<bool> s_retranslateAllScheduled{false};
 std::atomic<bool> s_retranslateAllComplete{false};
 
 void optimize(tc::FuncMetaInfo& info) {
@@ -599,17 +600,16 @@ bool retranslateAllEnabled() {
 }
 
 void checkRetranslateAll(bool force) {
-  static std::atomic<bool> scheduled(false);
-
-  if (!retranslateAllEnabled() ||
-      scheduled.load(std::memory_order_relaxed) ||
+  if (s_retranslateAllScheduled.load(std::memory_order_relaxed) ||
+      !retranslateAllEnabled() ||
       !(force || hasEnoughProfDataToRetranslateAll())) {
     return;
   }
-  if (scheduled.exchange(true)) {
+  if (s_retranslateAllScheduled.exchange(true)) {
     // Another thread beat us.
     return;
   }
+
   // We schedule a one-time call to retranslateAll() via the treadmill.  We use
   // the treadmill to ensure that no additional Profile translations are being
   // emitted when retranslateAll() runs, which avoids the need for additional
@@ -629,6 +629,11 @@ void checkRetranslateAll(bool force) {
 bool retranslateAllPending() {
   return
     retranslateAllEnabled() &&
+    !s_retranslateAllComplete.load(std::memory_order_acquire);
+}
+
+bool pendingRetranslateAllScheduled() {
+  return s_retranslateAllScheduled.load(std::memory_order_acquire) &&
     !s_retranslateAllComplete.load(std::memory_order_acquire);
 }
 

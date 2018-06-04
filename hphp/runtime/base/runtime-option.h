@@ -453,6 +453,7 @@ struct RuntimeOption {
   static uint32_t EvalInitialNamedEntityTableSize;
   static JitSerdesMode EvalJitSerdesMode;
   static std::string EvalJitSerdesFile;
+  static bool DumpPreciseProfileData;
 
   // ENABLED (1) selects PHP7 behavior.
   static bool PHP7_DeprecationWarnings;

@@ -114,6 +114,7 @@ bool RuntimeOption::EnableHackcOnlyFeature = false;
 bool RuntimeOption::EnableIsExprPrimitiveMigration = true;
 bool RuntimeOption::Hacksperimental = false;
 bool RuntimeOption::CheckParamTypeInvariance = true;
+bool RuntimeOption::DumpPreciseProfileData = true;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
 uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
@@ -1290,6 +1291,19 @@ void RuntimeOption::Load(
     }();
     Config::Bind(EvalJitSerdesFile, ini, config,
                  "Eval.JitSerdesFile", EvalJitSerdesFile);
+    // DumpPreciseProfileData defaults to true only when we can possibly write
+    // profile data to disk.  It can be set to false to avoid the performance
+    // penalty of only running the interpreter during retranslateAll.  We will
+    // assume that DumpPreciseProfileData implies (JitSerdesMode::Serialize ||
+    // JitSerdesMode::SerializeAndExit), to avoid checking too many flags in a
+    // few places.  The config file should never need to explicitly set
+    // DumpPreciseProfileData to true.
+    auto const couldDump = !EvalJitSerdesFile.empty() &&
+      ((EvalJitSerdesMode == JitSerdesMode::Serialize) ||
+       (EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) ||
+       (EvalJitSerdesMode == JitSerdesMode::DeserializeOrGenerate));
+    Config::Bind(DumpPreciseProfileData, ini, config,
+                 "Eval.DumpPreciseProfileData", couldDump);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true
@@ -1319,6 +1333,15 @@ void RuntimeOption::Load(
     }
     if (!jit::mcgen::retranslateAllEnabled()) {
       EvalJitWorkerThreads = 0;
+      if (EvalJitSerdesMode != JitSerdesMode::Off) {
+        if (ServerMode) {
+          Logger::Warning("Eval.JitSerdesMode reset from " + jitSerdesMode +
+                          " to off, becasue JitRetranslateAll isn't enabled.");
+        }
+        EvalJitSerdesMode = JitSerdesMode::Off;
+      }
+      EvalJitSerdesFile.clear();
+      DumpPreciseProfileData = false;
     }
     low_malloc_huge_pages(EvalMaxLowMemHugePages);
     HardwareCounter::Init(EvalProfileHWEnable,

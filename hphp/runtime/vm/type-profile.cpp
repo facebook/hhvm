@@ -33,10 +33,11 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/write-lease.h"
-#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/boot-stats.h"
@@ -217,13 +218,31 @@ static inline RequestKind getRequestKind() {
 void profileRequestStart() {
   requestKind = getRequestKind();
 
-  bool okToJit = requestKind == RequestKind::Standard;
-  if (okToJit) {
-    jit::setMayAcquireLease(true);
-    jit::setMayAcquireConcurrentLease(true);
-    assertx(!acquiredSingleJit);
-    assertx(!acquiredSingleJitConcurrent);
+  // Force the request to use interpreter (not even running jitted code) when it
+  // is not a standard kind, and during retranslateAll when we need to dump out
+  // precise profile data.
+  auto const retranslateAllScheduled =
+    jit::mcgen::pendingRetranslateAllScheduled();
+  auto const forceInterp =
+    (retranslateAllScheduled && RuntimeOption::DumpPreciseProfileData) ||
+    (requestKind != RequestKind::Standard);
 
+  // When retranslateAll is scheduled to run, we don't want to generate more
+  // profiling or live translations, but the request is allowed to execute
+  // jitted code that is already there.
+  bool okToJit = !forceInterp && !retranslateAllScheduled;
+  if (!ThreadInfo::s_threadInfo.isNull()) {
+    if (RID().isJittingDisabled()) {
+      okToJit = false;
+    } else if (!okToJit) {
+      RID().setJittingDisabled(true);
+    }
+  }
+  jit::setMayAcquireLease(okToJit);
+  jit::setMayAcquireConcurrentLease(okToJit);
+  assertx(!acquiredSingleJit);
+  assertx(!acquiredSingleJitConcurrent);
+  if (okToJit) {
     if (singleJitRequests < RuntimeOption::EvalNumSingleJitRequests) {
       if (!singleJitLock.exchange(true, std::memory_order_relaxed)) {
         acquiredSingleJit = true;
@@ -247,10 +266,12 @@ void profileRequestStart() {
       }
     }
   }
-  if (standardRequest != okToJit) {
-    standardRequest = okToJit;
+
+  // Force interpretation if needed.
+  if (standardRequest == forceInterp) {
+    standardRequest = !forceInterp;
     if (!ThreadInfo::s_threadInfo.isNull()) {
-      ThreadInfo::s_threadInfo->m_reqInjectionData.updateJit();
+      RID().updateJit();
     }
   }
 

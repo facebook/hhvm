@@ -2146,34 +2146,35 @@ void rc_analyze_inst(Env& env,
   FTRACE(2, "  {}\n", inst);
 
   switch (inst.op()) {
-  case DefLabel:
-    for (auto i = 0; i < inst.numDsts(); i++) {
-      for_aset(
-        env, state, inst.dst(i),
-        [&] (ASetID dstID) {
-          auto& dset = state.asets[dstID];
-
-          auto lb = std::numeric_limits<int>::max();
-          inst.block()->forEachSrc(
-            i,
-            [&](IRInstruction*, SSATmp* src) {
-              for_aset(env, state, src,
-                       [&] (ASetID asetID) {
-                         auto const& aset = state.asets[asetID];
-                         if (aset.lower_bound < lb) lb = aset.lower_bound;
-                       });
-            }
-          );
-
-          if (dset.lower_bound < lb) {
-            FTRACE(3, "    {} DefLabel lb += {}\n",
-                   dstID, lb - dset.lower_bound);
-            dset.unsupported_refs += lb - dset.lower_bound;
-            dset.lower_bound = lb;
-            state.has_unsupported_refs = true;
+  case Jmp:
+    if (inst.numSrcs()) {
+      auto const& defLabel = inst.taken()->front();
+      assertx(defLabel.is(DefLabel));
+      for (auto i = 0; i < inst.numSrcs(); i++) {
+        for_aset(
+          env, state, inst.src(i),
+          [&] (ASetID srcID) {
+            auto& srcSet = state.asets[srcID];
+            for_aset(
+              env, state, defLabel.dst(i),
+              [&] (ASetID dstID) {
+                auto& dstSet = state.asets[dstID];
+                if (dstSet.lower_bound < srcSet.lower_bound) {
+                  auto const delta = srcSet.lower_bound - dstSet.lower_bound;
+                  dstSet.unsupported_refs += delta;
+                  dstSet.lower_bound = srcSet.lower_bound;
+                  state.has_unsupported_refs = true;
+                  FTRACE(3,
+                         "    {} DefLabel lb({}) += {}\n",
+                         dstID, dstSet.lower_bound, delta);
+                }
+              }
+            );
           }
-        });
+        );
+      }
     }
+    propagate(inst.taken());
     return;
   case IncRef:
     for_aset(env, state, inst.src(0), [&] (ASetID asetID) {

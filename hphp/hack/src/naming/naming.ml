@@ -320,7 +320,7 @@ end = struct
   let set_unsafe (_genv, lenv) x =
     lenv.has_unsafe := x
 
-  let lookup genv env (p, x) =
+  let lookup genv (env : string -> FileInfo.pos option) (p, x) =
     let v = env x in
     match v with
     | None ->
@@ -340,11 +340,11 @@ end = struct
     if List.mem tparaml name then Errors.generic_at_runtime p;
     ()
 
-  let handle_unbound_name genv get_pos get_canon (p, name) kind =
+  let handle_unbound_name genv get_full_pos get_canon (p, name) kind =
     match get_canon name with
       | Some canonical ->
         canonical
-        |> get_pos
+        |> get_full_pos
         |> Option.iter ~f:(fun p_canon ->
           Errors.did_you_mean_naming p name p_canon canonical);
         (* Recovering from the capitalization error means
@@ -362,10 +362,11 @@ end = struct
         );
         p, name
 
-  let canonicalize genv get_pos get_canon (p, name) kind =
+  let canonicalize genv get_pos get_full_pos get_canon (p, name) kind =
+    (* Get the canonical name to check if the name exists in the heap *)
     match get_pos name with
     | Some _ -> p, name
-    | None -> handle_unbound_name genv get_pos get_canon (p, name) kind
+    | None -> handle_unbound_name genv get_full_pos get_canon (p, name) kind
 
   let check_variable_scoping env (p, x) =
     match SMap.get x !(env.all_locals) with
@@ -470,11 +471,14 @@ end = struct
       | Some lcl -> Some (p, snd lcl)
       | None -> None
 
-  let get_name genv namespace x =
-    lookup genv namespace x; x
+  let get_name genv get_pos x =
+    lookup genv get_pos x; x
 
   (* For dealing with namespace fallback on constants *)
-  let elaborate_and_get_name_with_fallback mk_dep genv get_pos x =
+  let elaborate_and_get_name_with_fallback
+    mk_dep
+    genv
+    (get_pos : string -> FileInfo.pos option) x =
     let get_name x = get_name genv get_pos x in
     let fq_x = NS.elaborate_id genv.namespace NS.ElaborateConst x in
     let need_fallback =
@@ -510,9 +514,12 @@ end = struct
 
   (* For dealing with namespace resolution on functions *)
   let elaborate_and_get_name_with_canonicalized_fallback
-      genv get_pos get_canon x =
+      genv
+      (get_pos : string -> FileInfo.pos option)
+      (get_full_pos : string -> Pos.t option)
+      get_canon x =
     let get_name x = get_name genv get_pos x in
-    let canonicalize = canonicalize genv get_pos get_canon in
+    let canonicalize = canonicalize genv get_pos get_full_pos get_canon in
     let fq_x = NS.elaborate_id genv.namespace NS.ElaborateFun x in
     let fq_x = canonicalize fq_x `func in
     get_name fq_x
@@ -522,14 +529,14 @@ end = struct
       (* Same idea as Dep.FunName, see below. *)
       (fun x -> Typing_deps.Dep.GConstName x)
       genv
-      (GEnv.gconst_pos genv.tcopt)
+      (Naming_heap.ConstPosHeap.get)
       x
 
   let type_name (genv, _) x ~allow_typedef =
     (* Generic names are not allowed to shadow class names *)
     check_no_runtime_generic genv x;
     let (pos, name) as x = NS.elaborate_id genv.namespace NS.ElaborateClass x in
-    match GEnv.type_info genv.tcopt name with
+    match Naming_heap.TypeIdHeap.get name with
     | Some (_def_pos, `Class) ->
       (* Don't let people use strictly internal classes
        * (except when they are being declared in .hhi files) *)
@@ -538,7 +545,8 @@ end = struct
       then Errors.using_internal_class pos (strip_ns name);
       pos, name
     | Some (def_pos, `Typedef) when not allow_typedef ->
-      Errors.unexpected_typedef pos def_pos;
+      let full_pos, _ = GEnv.get_full_pos genv.tcopt (def_pos, name) in
+      Errors.unexpected_typedef pos full_pos;
       pos, name
     | Some (_def_pos, `Typedef) -> pos, name
     | None ->
@@ -549,6 +557,7 @@ end = struct
   let fun_id (genv, _) x =
     elaborate_and_get_name_with_canonicalized_fallback
       genv
+      (Naming_heap.FunPosHeap.get)
       (GEnv.fun_pos genv.tcopt)
       GEnv.fun_canon_name
       x
@@ -2203,10 +2212,12 @@ module Make (GetLocals : GetLocals) = struct
     | Class_const ((_, Lvar x1), x2) ->
       let (genv, _) = env in
       let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
-      if GEnv.typedef_pos (genv.tcopt) name <> None && (snd x2) = "class" then
+      begin match Naming_heap.TypeIdHeap.get name with
+      | Some (_, `Typedef) when (snd x2) = "class" ->
         N.Typename (Env.type_name env x1 ~allow_typedef:true)
-      else
+      | _ ->
         N.Class_const (make_class_id env x1 [], x2)
+      end
     | Class_const _ ->
       (* TODO: report error in strict mode *)
       N.Any

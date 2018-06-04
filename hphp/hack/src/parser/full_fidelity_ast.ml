@@ -141,6 +141,13 @@ let non_tls env = if not env.top_level_statements then env else
 type +'a parser = node -> env -> 'a
 type ('a, 'b) metaparser = 'a parser -> 'b parser
 
+let underscore = Str.regexp "_"
+let quoted = Str.regexp "[ \t\n\r\012]*\"\\(\\(.\\|\n\\)*\\)\""
+let whitespace = Str.regexp "[ \t\n\r\012]+"
+let hashbang = Str.regexp "^#!.*\n"
+let ignore_error = Str.regexp "HH_\\(FIXME\\|IGNORE_ERROR\\)[ \\t\\n]*\\[?\\([0-9]+\\)\\]?"
+let namespace_use = Str.regexp "[^\\\\]*$"
+
 let mode_annotation = function
   | FileInfo.Mphp -> FileInfo.Mdecl
   | m -> m
@@ -527,11 +534,10 @@ let unempty_str = function
 let unesc_dbl s = unempty_str @@ Php_escaping.unescape_double s
 let get_quoted_content s =
   let open Str in
-  if string_match (regexp "[ \t\n\r\012]*\"\\(\\(.\\|\n\\)*\\)\"") s 0
+  if string_match (quoted) s 0
   then matched_group 1 s
   else s
 let unesc_xhp s =
-  let whitespace = Str.regexp "[ \t\n\r\012]+" in
   Str.global_replace whitespace " " s
 let unesc_xhp_attr s =
   unesc_dbl @@ get_quoted_content s
@@ -914,6 +920,14 @@ and pString2: expr_location -> node list -> env -> expr list =
   fun loc l env -> aux loc l env []
 and pExprL node env =
   (pPos node env, Expr_list (couldMap ~f:pExpr node env))
+
+(* TODO: this function is a hotspot, deep recursion on huge files, attempt more optimization *)
+and pMember node env =
+  match syntax node with
+  | ElementInitializer { element_key; element_value; _ } ->
+    (pExpr element_key env, pExpr element_value env)
+  | _ -> missing_syntax "darray intrinsic expression element" node env
+
 and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
   let split_args_varargs arg_list =
     match List.rev (as_list arg_list) with
@@ -1013,12 +1027,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | VarrayIntrinsicExpression { varray_intrinsic_members = members; _ } ->
       Varray (couldMap ~f:pExpr members env)
     | DarrayIntrinsicExpression { darray_intrinsic_members = members; _ } ->
-      let pMember node env =
-        match syntax node with
-        | ElementInitializer { element_key; element_value; _ } ->
-          (pExpr element_key env, pExpr element_value env)
-        | _ -> missing_syntax "darray intrinsic expression element" node env
-      in
       Darray (couldMap ~f:pMember members env)
     | ArrayIntrinsicExpression { array_intrinsic_members = members; _ }
     | ArrayCreationExpression  { array_creation_members  = members; _ }
@@ -1372,11 +1380,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       (match syntax expr with
       | Token _ ->
         let s = text expr in
-        (* We allow underscores while lexing the integer literals. This function gets
-         * rid of them before the literal is created. *)
-        let eliminate_underscores s = s
-                                      |> Str.split (Str.regexp "_")
-                                      |> String.concat "" in
         (* TODO(17796330): Get rid of linter functionality in the lowerer *)
         if not env.codegen && s <> String.lowercase_ascii s then
           Lint.lowercase_constant pos s;
@@ -1387,7 +1390,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | _, Some TK.DecimalLiteral
         | _, Some TK.OctalLiteral
         | _, Some TK.HexadecimalLiteral
-        | _, Some TK.BinaryLiteral             -> Int    (eliminate_underscores s)
+        (* We allow underscores while lexing the integer literals. This gets rid of them before
+         * the literal is created. *)
+        | _, Some TK.BinaryLiteral             -> Int    (Str.global_replace (underscore) "" s)
         | _, Some TK.FloatingLiteral           -> Float  s
         | _, Some TK.SingleQuotedStringLiteral -> String (mkStr Php_escaping.unescape_single s)
         | _, Some TK.DoubleQuotedStringLiteral -> String (mkStr Php_escaping.unescape_double s)
@@ -1928,9 +1933,8 @@ and is_hashbang text =
   match Syntax.extract_text text with
   | None -> false
   | Some text ->
-    let r = Str.regexp "^#!.*\n" in
     let count = List.length @@ String_utils.split_on_newlines text in
-    count = 1 && Str.string_match r text 0 && Str.matched_string text = text
+    count = 1 && Str.string_match hashbang text 0 && String.equal (Str.matched_string text) text
 
 and pMarkup node env =
   match syntax node with
@@ -2463,7 +2467,7 @@ and pNamespaceUseClause ~prefix env kind node =
       | None, (p, n) -> (p, n)
       | Some prefix, (p, n) -> p, (snd @@ pos_name prefix env) ^ n
     in
-    let x = Str.search_forward (Str.regexp "[^\\\\]*$") n 0 in
+    let x = Str.search_forward (namespace_use) n 0 in
     let key = drop_pstr x name in
     let kind = if is_missing clause_kind then kind else clause_kind in
     let alias = if is_missing alias then key else pos_name alias env in
@@ -2873,9 +2877,8 @@ let scour_comments
            let pos = pPos node env in
            let line = Pos.line pos in
            let ignores = try IMap.find line fm with Not_found -> IMap.empty in
-           let reg = regexp "HH_\\(FIXME\\|IGNORE_ERROR\\)[ \\t\\n]*\\[?\\([0-9]+\\)\\]?" in
            let txt = Trivia.text t in
-           (try ignore (search_forward reg txt 0) with
+           (try ignore (search_forward ignore_error txt 0) with
            | Not_found ->
              let msg = Printf.sprintf
                "Inconsistent trivia classification: Received %s, but failed to \

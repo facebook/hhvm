@@ -90,8 +90,7 @@ private:
     sdlPtr sdl;
     time_t time;
   };
-  using sdlCache =
-        hphp_string_hash_map<std::shared_ptr<sdlCacheBucket>,sdlCacheBucket>;
+  using sdlCache = hphp_string_map<std::shared_ptr<sdlCacheBucket>>;
 
 public:
   SoapData();

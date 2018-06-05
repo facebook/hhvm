@@ -78,7 +78,7 @@ private:
     Acl();
     BinaryPrefixTrie m_networks; // prefix => true: allow; false: deny
   };
-  hphp_string_hash_map<std::shared_ptr<Acl>,Acl> m_acls; // location => acl
+  hphp_string_map<std::shared_ptr<Acl>> m_acls; // location => acl
 
   static void LoadIpList(std::shared_ptr<Acl> acl, const IniSetting::Map& ini,
                          const Hdf& hdf, const std::string& name, bool allow);

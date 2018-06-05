@@ -213,7 +213,7 @@ struct encode {
                        xmlNodePtr parent);
 };
 using encodePtr = std::shared_ptr<encode>;
-using encodeMap = hphp_string_hash_map<encodePtr,encode>;
+using encodeMap = hphp_string_map<encodePtr>;
 using encodeMapPtr = std::shared_ptr<encodeMap>;
 
 struct encodeStatic {

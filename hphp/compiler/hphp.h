@@ -29,6 +29,10 @@ struct FunctionScope;
 
 // ClassScope and FunctionScope are compared case-insensitively.
 
+template<class type, class T> struct hphp_string_hash_map :
+  public hphp_hash_map<std::string,type,string_hash> {
+};
+
 template<class V>
 struct hphp_string_hash_map<V, ClassScope> :
   hphp_hash_map<std::string, V, string_hashi, string_eqstri> {};

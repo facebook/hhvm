@@ -82,12 +82,12 @@ struct sdlRestrictionInt;
 
 using sdlTypePtr = std::shared_ptr<sdlType>;
 using sdlTypePtrVec = std::vector<std::shared_ptr<sdlType>>;
-using sdlTypeMap = hphp_string_hash_map<std::shared_ptr<sdlType>,sdlType>;
+using sdlTypeMap = hphp_string_map<std::shared_ptr<sdlType>>;
 using sdlAttributePtr = std::shared_ptr<sdlAttribute>;
-using sdlAttributeMap =
-      hphp_string_hash_map<std::shared_ptr<sdlAttribute>,sdlAttribute>;
-using sdlExtraAttributeMap =
-     hphp_string_hash_map<std::shared_ptr<sdlExtraAttribute>,sdlExtraAttribute>;
+using sdlAttributeMap = hphp_string_map<std::shared_ptr<sdlAttribute>>;
+using sdlExtraAttributeMap = hphp_string_map<
+  std::shared_ptr<sdlExtraAttribute>
+>;
 
 struct sdlBinding;
 struct sdlContentModel;
@@ -231,17 +231,13 @@ struct sdlParam;
 struct sdlFault;
 struct sdlFunction;
 
-using sdlBindingMap =
-      hphp_string_hash_map<std::shared_ptr<sdlBinding>,sdlBinding>;
+using sdlBindingMap = hphp_string_map<std::shared_ptr<sdlBinding>>;
 using sdlSoapBindingFunctionHeaderMap =
-      hphp_string_hash_map<std::shared_ptr<sdlSoapBindingFunctionHeader>,
-                           sdlSoapBindingFunctionHeader>;
+      hphp_string_map<std::shared_ptr<sdlSoapBindingFunctionHeader>>;
 using sdlParamPtr = std::shared_ptr<sdlParam>;
 using sdlParamVec = std::vector<std::shared_ptr<sdlParam>>;
-typedef hphp_string_hash_map<std::shared_ptr<sdlFault>,sdlFault>
-        sdlFaultMap;
-typedef hphp_string_hash_map<std::shared_ptr<sdlFunction>,sdlFunction>
-        sdlFunctionMap;
+using sdlFaultMap = hphp_string_map<std::shared_ptr<sdlFault>>;
+using sdlFunctionMap = hphp_string_map<std::shared_ptr<sdlFunction>>;
 
 struct sdlSoapBinding {
   sdlEncodingStyle  style;

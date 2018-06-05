@@ -63,34 +63,26 @@ struct hphp_hash_set : std::unordered_set<T,V,W> {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class type, class T> struct hphp_string_hash_map :
-  public hphp_hash_map<std::string,type,string_hash> {
-};
-
-template<class T> using hphp_const_char_map =
-  hphp_hash_map<const char*,T,cstr_hash,eqstr>;
-
+// std::string keyed tables, stable entries do not move on rehash.
 template<typename T>
 using hphp_string_map = hphp_hash_map<std::string, T, string_hash>;
-
-typedef hphp_hash_set<std::string, string_hash> hphp_string_set;
-
-using PointerMap = folly::F14ValueMap<void*, void*,
-                                                     pointer_hash<void>>;
-typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;
-typedef hphp_hash_set<void*, pointer_hash<void> > PointerSet;
-
-template<typename T>
-using hphp_const_char_imap = hphp_hash_map<const char *, T, hashi, eqstri>;
-
-using hphp_const_char_iset = hphp_hash_set<const char *, hashi, eqstri>;
-
+using hphp_string_set = hphp_hash_set<std::string, string_hash>;
 template<typename T>
 using hphp_string_imap =
   hphp_hash_map<std::string, T, string_hashi, string_eqstri>;
-
 using hphp_string_iset =
   hphp_hash_set<std::string, string_hashi, string_eqstri>;
+
+// void* keyed tables
+using PointerMap = folly::F14ValueMap<void*, void*, pointer_hash<void>>;
+using PointerSet = hphp_hash_set<void*, pointer_hash<void>>;
+
+// c_str-keyed tables, entries do not move on rehash
+template<typename T>
+using hphp_const_char_imap = hphp_hash_map<const char *, T, hashi, eqstri>;
+using hphp_const_char_iset = hphp_hash_set<const char *, hashi, eqstri>;
+template<class T>
+using hphp_const_char_map = hphp_hash_map<const char*, T, cstr_hash, eqstr>;
 
 //////////////////////////////////////////////////////////////////////
 

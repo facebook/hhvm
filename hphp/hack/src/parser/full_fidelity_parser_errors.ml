@@ -160,8 +160,8 @@ let make_acc
   if acc.errors == errors &&
      acc.namespace_type == namespace_type &&
      acc.names == names &&
-     acc.namespace_name = namespace_name &&
-     acc.trait_require_clauses = trait_require_clauses
+     acc.namespace_name == namespace_name &&
+     acc.trait_require_clauses == trait_require_clauses
   then acc
   else { errors
        ; namespace_type

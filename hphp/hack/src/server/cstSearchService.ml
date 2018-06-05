@@ -121,6 +121,17 @@ type pattern =
       patterns: pattern list;
     }
 
+  (**
+   * Matches only if the given pattern does not match.
+   *
+   * Regardless of whether the child pattern matches or not, any matches that it
+   * produced are thrown away. (In the case that it doesn't match, we don't keep
+   * around "witness" matches explaining why this `NotPattern` didn't match.)
+   *)
+  | NotPattern of {
+      pattern: pattern;
+    }
+
 type matched_node = {
   match_name: match_name;
   kind: node_kind;
@@ -210,6 +221,13 @@ let rec search_node
   | OrPattern { patterns } ->
     let patterns = List.map patterns ~f:(fun pattern -> (node, pattern)) in
     search_or ~env ~patterns
+
+  | NotPattern { pattern } ->
+    let (env, result) = search_node ~env ~node ~pattern in
+    begin match result with
+    | Some _ -> (env, None)
+    | None -> (env, empty_result)
+    end
 
 (* TODO: this will likely have to become more intelligent *)
 and search_descendants
@@ -301,6 +319,8 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
       compile_and_pattern ~json ~keytrace
     | "or_pattern" ->
       compile_or_pattern ~json ~keytrace
+    | "not_pattern" ->
+      compile_not_pattern ~json ~keytrace
     | pattern_type ->
       error_at_keytrace ~keytrace:pattern_type_keytrace
         (Printf.sprintf "Unknown pattern type '%s'" pattern_type)
@@ -406,6 +426,13 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
     compile_child_patterns_helper ~json ~keytrace >>| fun patterns ->
     OrPattern {
       patterns;
+    }
+
+  and compile_not_pattern ~json ~keytrace =
+    get_obj "pattern" (json, keytrace) >>= fun (json, keytrace) ->
+    compile_pattern ~json ~keytrace >>| fun pattern ->
+    NotPattern {
+      pattern;
     }
 
   in

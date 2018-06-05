@@ -1907,11 +1907,10 @@ and expr_
   | Binop ((Ast.AMpamp | Ast.BArbar as bop), e1, e2) ->
       let c = bop = Ast.AMpamp in
       let lenv = env.Env.lenv in
-      let env, te1, ty1 = expr env e1 in
+      let env, te1, _ = expr env e1 in
       let env = condition env c e1 in
-      let env, te2, ty2 = raw_expr in_cond env e2 in
+      let env, te2, _ = raw_expr in_cond env e2 in
       let env = { env with Env.lenv = lenv } in
-      Typing_hooks.dispatch_binop_hook p bop ty1 ty2;
       make_result env (T.Binop(bop, te1, te2))
         (Reason.Rlogic_ret p, Tprim Tbool)
   | Binop (bop, e1, e2) when Env.is_strict env
@@ -1928,7 +1927,6 @@ and expr_
       let env, te2, ty2 = raw_expr in_cond env e2 in
       let env, te3, ty =
         binop in_cond p env bop (fst e1) te1 ty1 (fst e2) te2 ty2 in
-      Typing_hooks.dispatch_binop_hook p bop ty1 ty2;
       env, te3, ty
   | Pipe (e0, e1, e2) ->
       let env, te1, ty = expr env e1 in

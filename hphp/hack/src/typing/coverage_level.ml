@@ -20,7 +20,7 @@ let sample_rate = 0
 let display_limit = 10
 let samples_limit = 5
 
-type result = (Pos.t * coverage_level) list
+type result = (Pos.absolute * coverage_level) list
 
 let string_of_level = function
   | Checked   -> "checked"
@@ -170,22 +170,31 @@ let level_of_type_mapper fn =
 (* Coverage analysis will return multiple overlapping ranges, e.g. for *)
 (* "$user = $vc->getUserID()" it can report three uncovered ranges:    *)
 (* "$vc" and "$vc->getUserID()" and "$user = $vc->getUserID()".        *)
-(* That's why we sometimes want to merge adjacent/overlapping results. *)
+(* It will be most actionable for the user to show the smallest range  *)
+(* only, i.e. the root cause of all these cascading reports.           *)
 let merge_adjacent_results (results: result) : result =
-  let maybe_merge_accu (pos, level) = function
-    | [] ->
-        [(pos, level)]
-    | (apos, _) :: accu when Pos.overlaps pos apos ->
-        (Pos.btw pos apos, level) :: accu
-    | (apos, _) :: accu ->
-        (pos, level) :: (apos, level) :: accu
+  (* Imagine a tree of uncovered spans based on range inclusion. *)
+  (* This sorted function gives a pre-order flattening of that tree, *)
+  (* by sorting forwards on start and then backwards on end. *)
+  let pos_compare_by_inclusion x y =
+    let (xstart, xend), (ystart, yend) = Pos.info_raw x, Pos.info_raw y in
+    let r = xstart - ystart in if r <> 0 then r else yend - xend
   in
-  let pos_compare (pos1, _) (pos2, _) = Pos.compare pos1 pos2 in
   let filter_sort_merge (filter: coverage_level) (results: result) : result =
-    let filtered = List.filter results ~f:(fun (_, level) -> level = filter) in
-    let sorted = List.sort pos_compare filtered in
-    let merged = List.fold_right sorted ~init:[] ~f:maybe_merge_accu in
-    merged
+    let filtered = Core_list.filter_map results ~f:(fun (loc, level) ->
+      if level = filter then Some loc else None) in
+    let sorted = Core_list.sort filtered ~cmp:pos_compare_by_inclusion in
+    (* We can use that sorted list to remove any span which contains another, so *)
+    (* the user only sees actionable reports of the smallest causes of untypedness. *)
+    (* The algorithm: accept a range if its immediate successor isn't contained by it. *)
+    let f (candidate, acc) loc =
+      if Pos.contains candidate loc then (loc, acc) else (loc, candidate :: acc) in
+    let merged = match sorted with
+      | [] -> []
+      | (first::_) ->
+        let (final_candidate, singles) = Core_list.fold sorted ~init:(first,[]) ~f in
+        final_candidate :: singles in
+    Core_list.map merged ~f:(fun loc -> (loc, filter))
   in
   (filter_sort_merge Checked results)
   @ (filter_sort_merge Unchecked results)

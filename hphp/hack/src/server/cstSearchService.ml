@@ -100,6 +100,27 @@ type pattern =
       patterns: pattern list;
     }
 
+  (**
+   * Matches if any of the children patterns match.
+   *
+   * Note that currently:
+   *
+   *   * This short-circuits, so the after any pattern succeeds, no other
+   *   patterns will be evaluated. This means that if two patterns have
+   *   `MatchPattern`s somewhere underneath them, then the `MatchPattern`s from
+   *   at most one of these patterns will be included in the results.
+   *   * The order in which the provided patterns are evaluated is not
+   *   specified. (For example, in the future, we may want to order it so that
+   *   patterns that rely only on syntactic information are executed before
+   *   patterns that rely on type information.)
+   *
+   * Consequently, you shouldn't rely on `MatchPattern`s that are nested inside
+   * the constituent patterns.
+   *)
+  | OrPattern of {
+      patterns: pattern list;
+    }
+
 type matched_node = {
   match_name: match_name;
   kind: node_kind;
@@ -186,6 +207,10 @@ let rec search_node
     let patterns = List.map patterns ~f:(fun pattern -> (node, pattern)) in
     search_and ~env ~patterns
 
+  | OrPattern { patterns } ->
+    let patterns = List.map patterns ~f:(fun pattern -> (node, pattern)) in
+    search_or ~env ~patterns
+
 (* TODO: this will likely have to become more intelligent *)
 and search_descendants
     ~(env: env)
@@ -225,6 +250,23 @@ and search_and
             (env, merge_results result pattern_result)
       )
 
+and search_or
+  ~(env: env)
+  ~(patterns: (Syntax.t * pattern) list)
+  : env * result option =
+    List.fold_left_env
+      env
+      patterns
+      ~init:None
+      ~f:(fun env result (node, pattern) ->
+        match result with
+        | Some _ as result ->
+          (* Short-circuit. *)
+          (env, result)
+        | None ->
+          search_node ~env ~pattern ~node
+      )
+
 let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
   let open Core_result in
   let open Core_result.Monad_infix in
@@ -257,6 +299,8 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
       compile_raw_text_pattern ~json ~keytrace
     | "and_pattern" ->
       compile_and_pattern ~json ~keytrace
+    | "or_pattern" ->
+      compile_or_pattern ~json ~keytrace
     | pattern_type ->
       error_at_keytrace ~keytrace:pattern_type_keytrace
         (Printf.sprintf "Unknown pattern type '%s'" pattern_type)
@@ -355,6 +399,12 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
   and compile_and_pattern ~json ~keytrace =
     compile_child_patterns_helper ~json ~keytrace >>| fun patterns ->
     AndPattern {
+      patterns;
+    }
+
+  and compile_or_pattern ~json ~keytrace =
+    compile_child_patterns_helper ~json ~keytrace >>| fun patterns ->
+    OrPattern {
       patterns;
     }
 

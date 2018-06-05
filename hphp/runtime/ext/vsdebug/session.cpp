@@ -180,6 +180,7 @@ void DebuggerSession::runDummy() {
     SystemLib::s_inited ? "TRUE" : "FALSE"
   );
 
+  bool hookAttached = false;
   hphp_session_init(Treadmill::SessionKind::Vsdebug);
   init_command_line_globals(0, nullptr, environ, 0,
                             RuntimeOption::ServerVariables,
@@ -188,9 +189,8 @@ void DebuggerSession::runDummy() {
     g_context->removeStdoutHook(m_debugger->getStdoutHook());
     Logger::SetThreadHook(nullptr);
 
-    if (m_dummyRequestInfo->m_flags.hookAttached) {
+    if (hookAttached) {
       DebuggerHook::detach();
-      m_dummyRequestInfo->m_flags.hookAttached = false;
     }
 
     std::atomic_thread_fence(std::memory_order_release);
@@ -208,7 +208,7 @@ void DebuggerSession::runDummy() {
     return;
   }
 
-  m_dummyRequestInfo->m_flags.hookAttached = true;
+  hookAttached = true;
 
   // Remove the artificial memory limit for this request since there is a
   // debugger attached to it.

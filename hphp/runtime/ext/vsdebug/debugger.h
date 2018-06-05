@@ -65,19 +65,19 @@ struct RequestBreakpointInfo {
 };
 
 struct StepNextFilterInfo {
-  const Unit* stepStartUnit;
-  int skipLine0;
-  int skipLine1;
+  const Unit* stepStartUnit {nullptr};
+  int skipLine0 {0};
+  int skipLine1 {0};
 };
 
 // Structure to represent the state of a single request.
 struct RequestInfo {
+
   // Request flags are read by the debugger hook prior to acquiring
   // the debugger lock, so we can short-circuit and avoid calling
   // into the debugger in certain cases.
   union {
     struct {
-      uint32_t hookAttached : 1;
       uint32_t memoryLimitRemoved : 1;
       uint32_t compilationUnitsMapped : 1;
       uint32_t doNotBreak : 1;
@@ -85,18 +85,19 @@ struct RequestInfo {
       uint32_t requestUrlInitialized : 1;
       uint32_t terminateRequest : 1;
       uint32_t unresolvedBps : 1;
-      uint32_t unused : 24;
+      uint32_t unused : 25;
     } m_flags;
     uint32_t m_allFlags;
   };
-  const char* m_stepReason;
+
+  const char* m_stepReason {nullptr};
   CommandQueue m_commandQueue;
-  RequestBreakpointInfo* m_breakpointInfo;
+  RequestBreakpointInfo* m_breakpointInfo {nullptr};
   std::unordered_map<unsigned int, ServerObject*> m_serverObjects;
 
   struct {
-    std::string path;
-    int line;
+    std::string path {""};
+    int line {0};
   } m_runToLocationInfo;
 
   // Info for allowing us to step over multi-line statements without hitting
@@ -104,20 +105,20 @@ struct RequestInfo {
   std::vector<StepNextFilterInfo> m_nextFilterInfo;
 
   // Number of evaluation frames on this request's stack right now.
-  int m_evaluateCommandDepth;
+  int m_evaluateCommandDepth {0};
 
   // Number of recursive calls into processCommandsQueue for this request
   // right now.
-  int m_pauseRecurseCount;
+  int m_pauseRecurseCount {0};
 
   // Number of times this request has entered the command queue since starting.
-  unsigned int m_totalPauseCount;
+  unsigned int m_totalPauseCount {0};
 
   // Non-TLS copy of the request's URL to display in the client. Each request
   // has this string in its ExecutionContext, but since that is thread-local,
   // we cannot get at that copy when responding to a ThreadsRequest from the
   // debugger client, so the debugger needs a copy.
-  std::string m_requestUrl;
+  std::string m_requestUrl {""};
 };
 
 // An exception to be thrown when a message from the client cannot be processed.

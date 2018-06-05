@@ -86,6 +86,8 @@ void Debugger::setClientConnected(
         m_cleanupSessions.insert(sessionToDelete);
         m_sessionCleanupCondition.notify_all();
       }
+
+      VSDebugLogger::LogFlush();
     }
   };
 
@@ -260,7 +262,7 @@ request_id_t Debugger::getCurrentThreadId() {
 
 void Debugger::cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri) {
   std::atomic_thread_fence(std::memory_order_acquire);
-  if (ri->m_flags.hookAttached && ti != nullptr) {
+  if (ti != nullptr && isDebuggerAttached(ti)) {
     DebuggerHook::detach(ti);
   }
 
@@ -642,12 +644,22 @@ RequestInfo* Debugger::createRequestInfo() {
   RequestInfo* requestInfo = new RequestInfo();
   if (requestInfo == nullptr) {
     // Failed to allocate request info.
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Failed to allocate request info!"
+    );
     return nullptr;
   }
+
+  assert(requestInfo->m_allFlags == 0);
 
   requestInfo->m_breakpointInfo = new RequestBreakpointInfo();
   if (requestInfo->m_breakpointInfo == nullptr) {
     // Failed to allocate breakpoint info.
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Failed to allocate request breakpoint info!"
+    );
     delete requestInfo;
     return nullptr;
   }
@@ -693,11 +705,26 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
     m_requests.emplace(std::make_pair(ti, requestInfo));
     m_requestIdMap.emplace(std::make_pair(threadId, ti));
     m_requestInfoMap.emplace(std::make_pair(ti, threadId));
+
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Created new request info for thread %d, flags=%u",
+      getCurrentThreadId(),
+      static_cast<unsigned int>(requestInfo->m_allFlags)
+    );
+
   } else {
     requestInfo = it->second;
     auto idIt = m_requestInfoMap.find(ti);
     assertx(idIt != m_requestInfoMap.end());
     threadId = idIt->second;
+
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Found existing request info for thread %d, flags=%u",
+      getCurrentThreadId(),
+      static_cast<unsigned int>(requestInfo->m_allFlags)
+    );
   }
 
   assertx(requestInfo != nullptr && requestInfo->m_breakpointInfo != nullptr);
@@ -712,11 +739,9 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   }
 
   // Try to attach our debugger hook to the request.
-  if (!requestInfo->m_flags.hookAttached) {
+  if (!isDebuggerAttached(ti)) {
     if (DebuggerHook::attach<VSDebugHook>(ti)) {
       ti->m_reqInjectionData.setFlag(DebuggerSignalFlag);
-
-      requestInfo->m_flags.hookAttached = true;
 
       // Install all breakpoints as pending for this request.
       const std::unordered_set<int> breakpoints =
@@ -730,7 +755,19 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
           "attached.",
         DebugTransport::OutputLevelError
       );
+
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelError,
+        "Failed to attach to new HHVM request: another debugger is already "
+          "attached."
+      );
     }
+  } else {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Not attaching to request %d, a debug hook is already attached.",
+      threadId
+    );
   }
 
   updateUnresolvedBpFlag(requestInfo);
@@ -1640,6 +1677,10 @@ void Debugger::onBreakpointHit(
   const std::string filePath = getFilePathForUnit(compilationUnit);
 
   if (prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "onBreakpointHit: Not pausing target, the client disconnected."
+    );
     return;
   }
 
@@ -1660,23 +1701,34 @@ void Debugger::onBreakpointHit(
   for (auto it = fileBps.begin(); it != fileBps.end(); it++) {
     const int bpId = *it;
     Breakpoint* bp = bpMgr->getBreakpointById(bpId);
-    if (line >= bp->m_resolvedLocation.m_startLine &&
-        line <= bp->m_resolvedLocation.m_endLine &&
-        bpMgr->isBreakConditionSatisified(ri, bp)) {
 
-      matchingBpId = bpId;
-      stopReason = getStopReasonForBp(
-        matchingBpId,
-        !bp->m_resolvedLocation.m_path.empty()
-          ? bp->m_resolvedLocation.m_path
-          : bp->m_path,
-        bp->m_line
-      );
+    bool lineInRange = line >= bp->m_resolvedLocation.m_startLine &&
+        line <= bp->m_resolvedLocation.m_endLine;
 
-      // Breakpoint hit!
-      pauseTarget(ri, stopReason.c_str());
-      bpMgr->onBreakpointHit(bpId);
-      break;
+    bool conditionSatisfied = bpMgr->isBreakConditionSatisified(ri, bp);
+    if (lineInRange) {
+      if (conditionSatisfied) {
+        matchingBpId = bpId;
+        stopReason = getStopReasonForBp(
+          matchingBpId,
+          !bp->m_resolvedLocation.m_path.empty()
+            ? bp->m_resolvedLocation.m_path
+            : bp->m_path,
+          bp->m_line
+        );
+
+        // Breakpoint hit!
+        pauseTarget(ri, stopReason.c_str());
+        bpMgr->onBreakpointHit(bpId);
+        break;
+      } else {
+        VSDebugLogger::Log(
+          VSDebugLogger::LogLevelInfo,
+          "onBreakpointHit: Not pausing target, breakpoint found but the bp "
+            " condition (%s) is not satisfied.",
+          bp->getCondition().c_str()
+        );
+      }
     }
   }
 

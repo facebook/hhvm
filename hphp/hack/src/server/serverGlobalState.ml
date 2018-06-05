@@ -40,7 +40,8 @@ let restore state =
   Utils.profile := state.profile_log;
   Errors.ignored_fixme_codes := state.fixme_codes;
   FilesToIgnore.set_paths_to_ignore state.paths_to_ignore;
-  ServerLoadFlag.set_no_load state.no_load;;
+  ServerLoadFlag.set_no_load state.no_load;
+  Errors.set_allow_errors_in_default_path false
 
 let to_string state =
   let saved_root = Path.to_string state.saved_root in

@@ -25,6 +25,8 @@ let default_context = (Relative_path.default, Typing)
 (* The file and phase of analysis being currently performed *)
 let current_context: (Relative_path.t * error_phase) ref = ref default_context
 
+let allow_errors_in_default_path = ref true
+
 module PhaseMap = Reordered_argument_map(MyMap.Make(struct
   type t = error_phase
 
@@ -301,6 +303,13 @@ module NonTracingErrors: Errors_modes = struct
 
   let add_error error =
     if !accumulate_errors then
+      let () = match !current_context with
+        | (path, _) when path = Relative_path.default &&
+            (not !allow_errors_in_default_path) ->
+            Hh_logger.log "WARNING: adding an error in default path\n%s\n"
+              (Printexc.raw_backtrace_to_string (Printexc.get_callstack 100))
+        | _ -> ()
+      in
       (* Cheap test to avoid duplicating most recent error *)
       let error_list = Common.get_current_list !error_map in
       match error_list with
@@ -450,6 +459,8 @@ let default_ignored_fixme_codes = ISet.of_list [
   Typing.err_code Typing.InvalidIsAsExpressionHint;
 ]
 let ignored_fixme_codes = ref default_ignored_fixme_codes
+
+let set_allow_errors_in_default_path x = allow_errors_in_default_path := x
 
 let is_ignored_code code = ISet.mem code !ignored_fixme_codes
 
@@ -3082,7 +3093,10 @@ let run_in_context = M.run_in_context
 let run_in_decl_mode = M.run_in_decl_mode
 
 let ignore_ f =
+  let allow_errors_in_default_path_copy = !allow_errors_in_default_path in
+  set_allow_errors_in_default_path true;
   let _, result =  (do_ f) in
+  set_allow_errors_in_default_path allow_errors_in_default_path_copy;
   result
 
 let try_when f ~when_ ~do_ =

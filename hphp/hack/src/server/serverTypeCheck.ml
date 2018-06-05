@@ -822,7 +822,10 @@ end = functor(CheckKind:CheckKindType) -> struct
       Parser_heap.LocalParserCache.clear ()
       end;
     Hh_logger.log "Total: %f\n%!" (t -. start_t);
-    Measure.print_stats ();
+    begin if
+      SharedMem.hh_log_level() > 0 ||
+      GlobalOptions.tco_language_feature_logging env.tcopt
+    then Measure.print_stats () end;
     ServerDebug.info genv "incremental_done";
 
     let new_env = CheckKind.get_env_after_typing

@@ -276,26 +276,34 @@ void print(hfsort::TargetGraph& /*cg*/, const char* fileName,
  *   4) Relocate the functions in the TC according to the selected order.
  */
 void retranslateAll() {
-  const bool serverMode = RuntimeOption::ServerExecutionMode();
-
-  // Serialize profiling data if requested.
-  if (RuntimeOption::RepoAuthoritative &&
-      !RuntimeOption::EvalJitSerdesFile.empty() &&
-      (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::Serialize ||
-       RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit)) {
-    if (serverMode) Logger::Info("retranslateAll: serializing profile data");
-    auto const stop =
-      RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit;
-    serializeProfData(RuntimeOption::EvalJitSerdesFile);
-    if (serverMode) {
-      Logger::Info("retranslateAll: serializing done");
-      if (stop) {
-        HttpServer::Server->stop();
-        s_retranslateAllComplete.store(true, std::memory_order_release);
-        return;
+  // Return true if we have stopped the server in SerializeAndExit mode.
+  auto const checkSerializeProfData = [] () -> bool {
+    auto const serverMode = RuntimeOption::ServerExecutionMode();
+    auto const mode = RuntimeOption::EvalJitSerdesMode;
+    if (RuntimeOption::RepoAuthoritative &&
+        !RuntimeOption::EvalJitSerdesFile.empty() &&
+        (mode == JitSerdesMode::Serialize ||
+         mode == JitSerdesMode::SerializeAndExit)) {
+      if (serverMode) Logger::Info("retranslateAll: serializing profile data");
+      serializeProfData(RuntimeOption::EvalJitSerdesFile);
+      if (serverMode) {
+        Logger::Info("retranslateAll: serializing done");
+        if (mode == JitSerdesMode::SerializeAndExit) {
+          s_retranslateAllComplete.store(true, std::memory_order_release);
+          HttpServer::Server->stop();
+          return true;
+        }
       }
     }
+    return false;
+  };
+
+  // 0) Check if we should dump profile data in the beginning
+  if (!RuntimeOption::EvalJitDesProfDataAfterRetranslateAll) {
+    if (checkSerializeProfData()) return;
   }
+
+  const bool serverMode = RuntimeOption::ServerExecutionMode();
 
   // 1) Create the call graph
 
@@ -415,10 +423,18 @@ void retranslateAll() {
   tc::reportJitMaturity();
 
   if (serverMode) {
-    ProfData::Session pds;
-
     Logger::Info("retranslateAll: finished retranslating all optimized "
                  "translations!");
+  }
+
+  // 5) Check if we should dump profile data after retranslateAll
+
+  if (RuntimeOption::EvalJitDesProfDataAfterRetranslateAll) {
+    if (checkSerializeProfData()) return;
+  }
+
+  if (serverMode) {
+    ProfData::Session pds;
     // The ReusableTC mode assumes that ProfData is never freed, so don't
     // discard ProfData in this mode.
     if (!RuntimeOption::EvalEnableReusableTC) {

@@ -3002,8 +3002,16 @@ module FromEditablePositionedSyntax =
 let parse_text
   (env : env)
   (source_text : SourceText.t)
-: (FileInfo.file_type * FileInfo.mode option * PositionedSyntaxTree.t) =
+: (FileInfo.file_type * FileInfo.mode * PositionedSyntaxTree.t) =
   let lang, mode = Full_fidelity_parser.get_language_and_mode source_text in
+  let mode = Option.value ~default:FileInfo.Mphp mode in
+  let env =  { env with fi_mode = mode } in
+  let env = { env with quick_mode = not env.codegen
+      && (match mode with
+         | FileInfo.Mdecl
+         | FileInfo.Mphp -> true
+         | _ -> env.quick_mode
+         ) } in
   let tree =
     let env' =
       Full_fidelity_parser_env.make
@@ -3011,7 +3019,7 @@ let parse_text
         ~codegen:env.codegen
         ~php5_compat_mode:env.php5_compat_mode
         ~lang:lang
-        ?mode:mode
+        ~mode
         ~hacksperimental:env.hacksperimental
         ()
     in
@@ -3019,7 +3027,7 @@ let parse_text
       let parser = DeclModeParser.make env' source_text in
       let (parser, root) = DeclModeParser.parse_script parser in
       let errors = DeclModeParser.errors parser in
-      PositionedSyntaxTree.create source_text root errors lang mode false
+      PositionedSyntaxTree.create source_text root errors lang (Some mode) false
     else
       PositionedSyntaxTree.make ~env:env' source_text
   in
@@ -3029,7 +3037,7 @@ let lower_tree
   (env : env)
   (source_text : SourceText.t)
   (lang : FileInfo.file_type)
-  (mode : FileInfo.mode option)
+  (mode : FileInfo.mode)
   (tree : PositionedSyntaxTree.t)
 : result =
   let lower_coroutines = env.lower_coroutines && PositionedSyntaxTree.sc_state tree in
@@ -3087,7 +3095,6 @@ let lower_tree
         List.iter ~f errors
       | Some e -> Errors.parsing_error (pos_and_message_of e)
   in
-  let mode = Option.value ~default:FileInfo.Mpartial mode in
   let mode = if lang = FileInfo.PhpFile then FileInfo.Mphp else mode in
   let mode = if mode = FileInfo.Mdecl && env.codegen then FileInfo.Mphp else mode in
   let env = { env with fi_mode = mode } in
@@ -3151,7 +3158,6 @@ let from_file_with_legacy env = legacy (from_file env)
  * For cut-over purposes only; this should be removed as soon as Parser_hack
  * is removed.
 )******************************************************************************)
-let parse_failure_scuba_table = Scuba.Table.of_name "hh_parse_failure"
 
 let legacy_compliant_parse_defensively fn quick_mode parser_options content =
   try begin
@@ -3161,12 +3167,6 @@ let legacy_compliant_parse_defensively fn quick_mode parser_options content =
   end with e ->
     let err = Printexc.to_string e in
     let fn = Relative_path.suffix fn in
-    let () =
-      Scuba.new_sample (Some parse_failure_scuba_table)
-      |> Scuba.add_normal "file" fn
-      |> Scuba.add_normal "error" err
-      |> EventLogger.log
-    in
     let () =
       !Utils.log (Printf.sprintf "!! FAILED FOR %s\n  - error: %s\n" fn err)
     in

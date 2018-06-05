@@ -68,13 +68,13 @@ val parse_text
   :  env
   -> Full_fidelity_source_text.t
   -> (FileInfo.file_type *
-      FileInfo.mode option *
+      FileInfo.mode *
       PositionedSyntaxTree.t)
 val lower_tree
   :  env
   -> Full_fidelity_source_text.t
   -> FileInfo.file_type
-  -> FileInfo.mode option
+  -> FileInfo.mode
   -> PositionedSyntaxTree.t
   -> result
 val from_text : env -> Full_fidelity_source_text.t -> result

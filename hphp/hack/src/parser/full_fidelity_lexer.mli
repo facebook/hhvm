@@ -14,6 +14,7 @@ module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
     | Literal_double_quoted
     | Literal_heredoc of string [@@deriving show]
   val make : ?hacksperimental:bool -> Full_fidelity_source_text.t -> t
+  val make_at : ?hacksperimental:bool -> Full_fidelity_source_text.t -> int -> t
   val source : t -> Full_fidelity_source_text.t
   val errors : t -> Full_fidelity_syntax_error.t list
   val start_offset : t -> int
@@ -47,4 +48,8 @@ module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
   val is_next_xhp_category_name : t -> bool
   val next_xhp_category_name : t -> t * Token.t
   val rescan_halt_compiler : t -> Token.t -> t * Token.t
+  val scan_leading_php_trivia : t -> t * Token.Trivia.t list
+  val scan_trailing_php_trivia : t -> t * Token.Trivia.t list
+  val scan_leading_xhp_trivia : t -> t * Token.Trivia.t list
+  val scan_trailing_xhp_trivia : t -> t * Token.Trivia.t list
 end

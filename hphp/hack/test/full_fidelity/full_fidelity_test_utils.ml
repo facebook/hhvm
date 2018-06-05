@@ -8,57 +8,43 @@
  *
  *)
 
-module Syntax = Full_fidelity_positioned_syntax
-module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
-module Token = Syntax.Token
-module Trivia = Token.Trivia
 module SourceText = Full_fidelity_source_text
 module SyntaxKind = Full_fidelity_syntax_kind
 module TriviaKind = Full_fidelity_trivia_kind
 module TokenKind = Full_fidelity_token_kind
-module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 
 module EditableSyntax = Full_fidelity_editable_syntax
-module EditableToken = Full_fidelity_editable_token
+module EditableSyntaxTree = Full_fidelity_syntax_tree.WithSyntax(EditableSyntax)
+module EditableToken = EditableSyntax.Token
+module EditableTrivia = EditableToken.Trivia
 module EditableRewriter = Full_fidelity_rewriter.WithSyntax(EditableSyntax)
+
+module PositionedSyntax = Full_fidelity_positioned_syntax
+module PositionedSyntaxTree = Full_fidelity_syntax_tree.WithSyntax(PositionedSyntax)
+module PositionedToken = Full_fidelity_positioned_token
 
 open Hh_core
 
 let identity x = x
 
-let rewrite_editable_tree_no_trivia node =
-  let trivia = ref [] in
+let rewrite_tree_no_trivia source_text node =
   let rewrite n =
     match EditableSyntax.syntax n with
     | EditableSyntax.Token t ->
       let kind = EditableToken.kind t in
-      let text = EditableToken.text t in
-      let leading = EditableToken.leading t in
-      let trailing = EditableToken.trailing t in
-      let token = EditableToken.create kind text [] [] in
-      trivia := !trivia @ leading @ trailing;
+      let width = EditableToken.width t in
+      let token = EditableToken.make kind source_text 0 width [] [] in
       EditableRewriter.Replace (EditableSyntax.make_token token)
     | _ -> EditableRewriter.Keep in
-  let no_trivia_tree = EditableRewriter.rewrite_post rewrite node in
-  (no_trivia_tree, !trivia)
+  EditableRewriter.rewrite_post rewrite node
 
-let rewrite_tree_no_trivia node =
-  let rewrite n =
-    match Syntax.syntax n with
-    | Syntax.Token t ->
-      let kind = Token.kind t in
-      let width = Token.width t in
-      let token = Token.make kind SourceText.empty 0 width [] [] in
-      Rewriter.Replace (Syntax.make_token token)
-    | _ -> Rewriter.Keep in
-  Rewriter.rewrite_post rewrite node
-
-let rewrite_tree_no_whitespace node =
+let rewrite_tree_no_whitespace source_text node =
+  let original_source_text = source_text in
   let filter_whitespace trivia_list =
     List.filter
       trivia_list
       ~f:(fun t ->
-        match Trivia.kind t with
+        match EditableTrivia.kind t with
           | TriviaKind.ExtraTokenError
           | TriviaKind.FallThrough
           | TriviaKind.Unsafe
@@ -74,45 +60,48 @@ let rewrite_tree_no_whitespace node =
   in
 
   let rewrite n =
-    match Syntax.syntax n with
-    | Syntax.Token t ->
-      let token = Token.(make
+    match EditableSyntax.syntax n with
+    | EditableSyntax.Token t ->
+      let leading_triv = EditableToken.leading t in
+      let trailing_triv = EditableToken.trailing t in
+      let token = EditableToken.(make
         (kind t)
-        SourceText.empty
+        original_source_text
         0
         (width t)
-        (filter_whitespace (leading t))
-        (filter_whitespace (trailing t))
+        (filter_whitespace leading_triv)
+        (filter_whitespace trailing_triv)
       ) in
-      Rewriter.Replace (Syntax.make_token token)
-    | _ -> Rewriter.Keep in
-  Rewriter.rewrite_post rewrite node
+      EditableRewriter.Replace (EditableSyntax.make_token token)
+    | _ -> EditableRewriter.Keep
+  in
+  EditableRewriter.rewrite_post rewrite node
 
 let trivia_to_sexp trivia =
-  let name = TriviaKind.to_string (Trivia.kind trivia) in
+  let name = TriviaKind.to_string (EditableTrivia.kind trivia) in
   Sexp.List [ Sexp.Atom name ]
 
 let trivia_list trivia_list =
   List.map trivia_list ~f:trivia_to_sexp
 
 let token_to_sexp token =
-  let leading = trivia_list (Token.leading token) in
-  let name = TokenKind.to_string (Token.kind token) in
+  let leading = trivia_list (EditableToken.leading token) in
+  let name = TokenKind.to_string (EditableToken.kind token) in
   let name =
     if name = "(" then "lparen"
     else if name = ")" then "rparen"
     else name in
-  let trailing = trivia_list (Token.trailing token) in
+  let trailing = trivia_list (EditableToken.trailing token) in
   let name = Sexp.List [Sexp.Atom name] in
   Sexp.List (leading @ [name] @ trailing)
 
 let rec to_sexp node =
-  match Syntax.syntax node with
-  | Syntax.Token token ->
+  match EditableSyntax.syntax node with
+  | EditableSyntax.Token token ->
     token_to_sexp token
   | _ ->
-    let name = SyntaxKind.to_string (Syntax.kind node) in
-    let children = Syntax.children node in
+    let name = SyntaxKind.to_string (EditableSyntax.kind node) in
+    let children = EditableSyntax.children node in
     let children = List.map children ~f:to_sexp in
     Sexp.List ((Sexp.Atom name) :: children)
 
@@ -122,8 +111,8 @@ let to_formatted_sexp_string node =
 
 let tree_to_sexp_string_ignore_trivia tree =
   tree
-  |> SyntaxTree.root
-  |> rewrite_tree_no_trivia
+  |> SyntaxTransforms.editable_from_positioned
+  |> rewrite_tree_no_trivia (PositionedSyntaxTree.text tree)
   |> to_sexp
   |> Sexp.to_string_hum
 
@@ -137,14 +126,14 @@ let tree_dump_node node =
     Buffer.contents buf
   in
   let rec aux level node =
-    match Syntax.syntax node with
-    | Syntax.Token token ->
-      [print level (TokenKind.to_string (Token.kind token))]
+    match PositionedSyntax.syntax node with
+    | PositionedSyntax.Token token ->
+      [print level (TokenKind.to_string (PositionedToken.kind token))]
     | _ ->
       let children =
-        List.concat_map ~f:(aux @@ level + 1) (Syntax.children node)
+        List.concat_map ~f:(aux @@ level + 1) (PositionedSyntax.children node)
       in
-      let name = print level (SyntaxKind.to_string (Syntax.kind node)) in
+      let name = print level (SyntaxKind.to_string (PositionedSyntax.kind node)) in
       children @ [name]
   in
   aux 0 node

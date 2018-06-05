@@ -11,7 +11,7 @@ module SourceText = Full_fidelity_source_text
 module TriviaKind = Full_fidelity_trivia_kind
 
 module type LexableTrivia_S = sig
-  type t
+  type t[@@deriving show]
   val make_whitespace: SourceText.t -> int -> int -> t
   val make_eol: SourceText.t -> int ->int -> t
   val make_single_line_comment: SourceText.t -> int ->int -> t

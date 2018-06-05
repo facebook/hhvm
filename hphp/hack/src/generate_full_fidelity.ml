@@ -1392,7 +1392,7 @@ module GenerateFFTriviaKind = struct
 
 type t =
 TRIVIA
-  [@@deriving show]
+  [@@deriving show, enum]
 
 let to_string kind =
   match kind with

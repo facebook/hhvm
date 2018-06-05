@@ -30,7 +30,7 @@ type t =
   | ExtraTokenError
   | AfterHaltCompiler
 
-  [@@deriving show]
+  [@@deriving show, enum]
 
 let to_string kind =
   match kind with

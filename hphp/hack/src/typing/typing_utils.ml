@@ -17,6 +17,14 @@ module Env = Typing_env
 module ShapeMap = Nast.ShapeMap
 module TySet = Typing_set
 
+(* This can be useful to debug type which blow up in size *)
+let ty_size ty =
+  let ty_size_visitor = object
+    inherit [int] Type_visitor.type_visitor as super
+    method! on_type acc ty = 1 + super#on_type acc ty
+    end in
+  ty_size_visitor#on_type 0 ty
+
 (*****************************************************************************)
 (* Importing what is necessary *)
 (*****************************************************************************)

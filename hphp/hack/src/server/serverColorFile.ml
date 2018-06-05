@@ -14,7 +14,7 @@ let get_level_list check =
     (fun (p, _) ty -> Hashtbl.replace type_acc p ty) check in
   let level_of_type x = snd (Coverage_level.level_of_type_mapper fn x) in
   let result = Hashtbl.fold (fun p ty xs ->
-    (p, level_of_type (p, ty)) :: xs) type_acc [] in
+    (Pos.to_absolute p, level_of_type (p, ty)) :: xs) type_acc [] in
   result
 
 let go env f_in =

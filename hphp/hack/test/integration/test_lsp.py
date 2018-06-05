@@ -206,6 +206,11 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         variables = self.setup_php_file('hover.php')
         self.load_and_run('hover', variables)
 
+    def test_coverage(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('coverage.php')
+        self.load_and_run('coverage', variables)
+
     def test_highlight(self):
         self.prepare_environment()
         variables = self.setup_php_file('highlight.php')

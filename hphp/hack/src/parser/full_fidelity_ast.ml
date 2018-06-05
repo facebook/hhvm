@@ -1597,7 +1597,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | None -> true
     | Some t ->
       let us =
-        Token.filter_leading_trivia_by_kind t TriviaKind.UnsafeExpression
+        if Token.has_trivia_kind t TriviaKind.UnsafeExpression
+        then Token.filter_leading_trivia_by_kind t TriviaKind.UnsafeExpression
+        else []
       in
       let f acc u = ISet.add (Trivia.start_offset u) acc in
       let us = List.fold ~f ~init:ISet.empty us in
@@ -2896,14 +2898,21 @@ let scour_comments
            cmts, IMap.add line ignores fm
     in
     let rec aux (cmts, fm as acc : accumulator) (node : node) : accumulator =
+      let recurse () = List.fold_left ~f:aux ~init:acc (children node) in
       match syntax node with
       | Token t ->
-        let f = go node in
-        let trivia = Token.leading t in
-        let acc = List.fold_left ~f ~init:acc trivia in
-        let trivia = Token.trailing t in
-        List.fold_left ~f ~init:acc trivia
-      | _ -> List.fold_left ~f:aux ~init:acc (children node)
+        if Token.has_trivia_kind t TriviaKind.DelimitedComment
+        || Token.has_trivia_kind t TriviaKind.SingleLineComment
+        || Token.has_trivia_kind t TriviaKind.FixMe
+        || Token.has_trivia_kind t TriviaKind.IgnoreError
+        then
+          let f = go node in
+          let trivia = Token.leading t in
+          let acc = List.fold_left ~f ~init:acc trivia in
+          let trivia = Token.trailing t in
+          List.fold_left ~f ~init:acc trivia
+        else recurse ()
+      | _ -> recurse ()
     in
     aux ([], IMap.empty) tree
 

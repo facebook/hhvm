@@ -66,6 +66,14 @@ let trailing token =
 let with_trailing trailing token =
   { token with trailing }
 
+let filter_leading_trivia_by_kind token kind =
+  token.leading
+  |> List.filter (fun trivia -> trivia.Trivia.kind = kind)
+
+let has_trivia_kind token kind =
+  [token.leading; token.trailing]
+  |> List.exists (List.exists (fun trivia -> trivia.Trivia.kind = kind))
+
 let text token =
   token.text
 

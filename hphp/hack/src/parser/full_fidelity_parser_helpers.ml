@@ -39,7 +39,7 @@ module WithParser(Parser : Parser_S) = struct
       let lexer = lexer parser in
       let (lexer, token) = Lexer.next_token lexer in
       let parser = with_lexer parser lexer in
-      (* ERROR RECOVERY: Check if the parser's carring ExtraTokenError trivia.
+      (* ERROR RECOVERY: Check if the parser's carrying ExtraTokenError trivia.
        * If so, clear it and add it to the leading trivia of the current token. *)
        let (parser, token) =
          match skipped_tokens parser with

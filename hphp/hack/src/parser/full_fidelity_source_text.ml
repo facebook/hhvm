@@ -33,7 +33,7 @@ end
 type t = {
   file_path : Relative_path.t;
   length : int;
-  text : string;
+  text : string[@opaque];
   offset_map : OffsetMap.t
 } [@@deriving show]
 

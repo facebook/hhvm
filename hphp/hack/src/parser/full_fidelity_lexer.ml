@@ -21,6 +21,7 @@ module Lexer : sig
     hacksperimental : bool
   } [@@deriving show]
   val make : ?hacksperimental:bool -> SourceText.t -> t
+  val make_at : ?hacksperimental:bool -> SourceText.t -> int -> t
   val start : t -> int
   val source : t -> SourceText.t
   val errors : t -> SyntaxError.t list
@@ -62,6 +63,9 @@ end = struct
 
   let with_start_offset lexer start offset = {lexer with start = start; offset = offset}
 
+  let make_at ?hacksperimental text start_offset =
+    with_start_offset (make ?hacksperimental text) start_offset start_offset
+
   let with_offset_errors lexer offset errors = {
     lexer with offset = offset; errors = errors
   }
@@ -83,6 +87,7 @@ type lexer = Lexer.t [@@deriving show]
 type t = lexer [@@deriving show]
 
 let make = Lexer.make
+let make_at = Lexer.make_at
 let start = Lexer.start
 let source = Lexer.source
 let errors = Lexer.errors

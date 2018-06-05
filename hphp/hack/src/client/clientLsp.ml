@@ -587,7 +587,7 @@ let hack_errors_to_lsp_diagnostic
       | [] -> failwith "Expected at least one error in the error list"
     in
     let ({range; _}, message) = first_message in
-    let relatedLocations = additional_messages |> List.map ~f:(fun (location, message) ->
+    let relatedInformation = additional_messages |> List.map ~f:(fun (location, message) ->
       { PublishDiagnostics.
         relatedLocation = location;
         relatedMessage = message;
@@ -598,7 +598,8 @@ let hack_errors_to_lsp_diagnostic
       code = PublishDiagnostics.IntCode (Errors.get_code error);
       source = Some "Hack";
       message;
-      relatedLocations;
+      relatedInformation;
+      relatedLocations = relatedInformation; (* legacy FB extension *)
     }
   in
   (* The caller is required to give us a non-empty filename. If it is empty,  *)

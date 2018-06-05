@@ -93,6 +93,13 @@ type pattern =
       raw_text: string;
     }
 
+  (**
+   * Matches if all of the children patterns match.
+   *)
+  | AndPattern of {
+      patterns: pattern list;
+    }
+
 type matched_node = {
   match_name: match_name;
   kind: node_kind;
@@ -146,26 +153,13 @@ let rec search_node
     if (node |> Syntax.kind |> SyntaxKind.to_string) <> kind
     then (env, None)
     else
-    let (env, result) = List.fold_left_env env children
-      ~init:empty_result
-      ~f:(fun env acc_result (child_type, pattern) ->
-        match acc_result with
-        (* We failed to match a previous child pattern; short-circuit. *)
-        | None -> (env, None)
 
-        | Some _ as result ->
-          let child_node = find_child_with_type node child_type in
-          let child_node = Option.value_exn child_node in
-          let (env, child_result) =
-            search_node ~env ~pattern ~node:child_node in
-          match child_result with
-          | None -> (env, None)
-          | Some _ as child_result ->
-            let result = merge_results result child_result in
-            (env, result)
-      )
-    in
-    (env, result)
+    let patterns = List.map children ~f:(fun (child_type, pattern) ->
+      let child_node = find_child_with_type node child_type in
+      let child_node = Option.value_exn child_node in
+      (child_node, pattern)
+    ) in
+    search_and ~env ~patterns
 
   | MatchPattern { match_name } ->
     let result = {
@@ -188,6 +182,10 @@ let rec search_node
     then (env, empty_result)
     else (env, None)
 
+  | AndPattern { patterns } ->
+    let patterns = List.map patterns ~f:(fun pattern -> (node, pattern)) in
+    search_and ~env ~patterns
+
 (* TODO: this will likely have to become more intelligent *)
 and search_descendants
     ~(env: env)
@@ -206,6 +204,27 @@ and search_descendants
       (env, (merge_results result acc_result))
     )
 
+and search_and
+  ~(env: env)
+  ~(patterns: (Syntax.t * pattern) list)
+  : env * result option =
+    List.fold_left_env
+      env
+      patterns
+      ~init:empty_result
+      ~f:(fun env result (node, pattern) ->
+        match result with
+        | None ->
+          (* Short-circuit. *)
+          (env, None)
+        | Some _ as result ->
+          let (env, pattern_result) = search_node ~env ~pattern ~node in
+          match pattern_result with
+          | None -> (env, None)
+          | Some _ as pattern_result ->
+            (env, merge_results result pattern_result)
+      )
+
 let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
   let open Core_result in
   let open Core_result.Monad_infix in
@@ -217,6 +236,7 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
 
   let get_string x = wrap_json_accessor (Hh_json.Access.get_string x) in
   let get_obj x = wrap_json_accessor (Hh_json.Access.get_obj x) in
+  let get_array x = wrap_json_accessor (Hh_json.Access.get_array x) in
   let keytrace_to_string = Hh_json.Access.keytrace_to_string in
   let error_at_keytrace ~keytrace error_message =
     Error (error_message ^ (keytrace_to_string keytrace))
@@ -235,6 +255,8 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
       compile_descendant_pattern ~json ~keytrace
     | "raw_text_pattern" ->
       compile_raw_text_pattern ~json ~keytrace
+    | "and_pattern" ->
+      compile_and_pattern ~json ~keytrace
     | pattern_type ->
       error_at_keytrace ~keytrace:pattern_type_keytrace
         (Printf.sprintf "Unknown pattern type '%s'" pattern_type)
@@ -320,6 +342,20 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
     >>| fun (raw_text, _raw_text_keytrace) ->
     RawTextPattern {
       raw_text;
+    }
+
+  and compile_child_patterns_helper ~json ~keytrace =
+    get_array "patterns" (json, keytrace) >>= fun (pattern_list, pattern_list_keytrace) ->
+    let compiled_patterns = List.mapi pattern_list (fun i json ->
+      let keytrace = (string_of_int i) :: pattern_list_keytrace in
+      compile_pattern ~json ~keytrace
+    ) in
+    Core_result.all compiled_patterns
+
+  and compile_and_pattern ~json ~keytrace =
+    compile_child_patterns_helper ~json ~keytrace >>| fun patterns ->
+    AndPattern {
+      patterns;
     }
 
   in

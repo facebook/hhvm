@@ -710,7 +710,6 @@ and stmt env = function
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
       let env, tb = Env.in_loop env begin
           iter_n_acc alias_depth begin fun env ->
-            (* Reset let variables *)
             let env = condition env true e in
             let env, tb = block env b in
             env, tb
@@ -729,7 +728,6 @@ and stmt env = function
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
       let env, tb = Env.in_loop env begin
         iter_n_acc alias_depth begin fun env ->
-          (* Reset let variables *)
           let env = condition env true e in
           (* TODO TAST: avoid repeated generation of block *)
           let env, tb = block env b in
@@ -758,7 +756,6 @@ and stmt env = function
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
       let env, (tb, te3) = Env.in_loop env begin
         iter_n_acc alias_depth begin fun env ->
-          (* Reset let variables *)
           let env = condition env true e2 in (* iteration 0 *)
           let env, tb = block env b in
           let (env, te3, _) = expr env e3 in

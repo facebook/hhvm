@@ -64,6 +64,7 @@ interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(KeyedContainer::class, ConstSet::class)>>
 interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {}
 
 /**
@@ -79,6 +80,7 @@ interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {}
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(Indexish::class)>>
 interface KeyedContainer<+Tk, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Container<Tv> {}
 
 /**
@@ -98,6 +100,7 @@ interface KeyedContainer<+Tk, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Cont
  * @guide /hack/collections/interfaces
  * @guide /hack/collections/read-write
  */
+<<__Sealed(ConstVector::class, ConstMap::class, ImmMap::class, dict::class, keyset::class, vec::class)>>
 interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}
 
 /**

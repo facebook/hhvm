@@ -8,5 +8,5 @@ File "constmap.php", line 13, characters 20-25:
 It is incompatible with a string
 File "hhi_lib__srcs/collections/Map.hhi", line 57, characters 47-48:
   via this generic Tk
-File "hhi_lib__srcs/collections/interfaces.hhi", line 1113, characters 47-48:
+File "hhi_lib__srcs/collections/interfaces.hhi", line 1126, characters 47-48:
   via this generic Tk

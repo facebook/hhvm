@@ -1,0 +1,76 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "initializationOptions": {},
+      "processId": null,
+      "rootPath": "${root_path}",
+      "capabilities": {}
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "textDocument/didOpen",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}",
+        "languageId": "hack",
+        "version": 1,
+        "text": "${php_file}"
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 17
+      },
+      "newName": "function_b"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 10,
+        "character": 15
+      },
+      "newName": "AnotherClass"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 4,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 20,
+        "character": 26
+      },
+      "newName": "some_other_method"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "method": "shutdown",
+    "params": {}
+  }
+]

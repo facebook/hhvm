@@ -505,6 +505,14 @@ let lsp_file_position_to_hack (params: Lsp.TextDocumentPositionParams.t)
   in
   (filename, line, column)
 
+let rename_params_to_document_position (params: Lsp.Rename.params)
+  : Lsp.TextDocumentPositionParams.t =
+  let open Rename in
+  { TextDocumentPositionParams.
+    textDocument = params.textDocument;
+    position = params.position
+  }
+
 let hack_pos_to_lsp_range (pos: 'a Pos.pos) : Lsp.range =
   (* .hhconfig errors are Positions with a filename, but dummy start/end
    * positions. Handle that case - and Pos.none - specially, as the LSP
@@ -1217,6 +1225,65 @@ let do_signatureHelp
   rpc conn ref_unblocked_time command
 
 
+let patch_to_workspace_edit_change
+  (patch: ServerRefactorTypes.patch)
+ : string * TextEdit.t =
+  let open ServerRefactorTypes in
+  let open Pos in
+  let text_edit = match patch with
+    | Insert insert_patch
+    | Replace insert_patch ->
+      { TextEdit.
+        range = hack_pos_to_lsp_range insert_patch.pos;
+        newText = insert_patch.text;
+      }
+    | Remove pos ->
+      {
+        TextEdit.
+        range = hack_pos_to_lsp_range pos;
+        newText = "";
+      }
+  in
+  let uri = match patch with
+    | Insert insert_patch
+    | Replace insert_patch -> File_url.create (filename insert_patch.pos)
+    | Remove pos -> File_url.create (filename pos)
+  in
+  (uri, text_edit)
+
+
+let patches_to_workspace_edit
+  (patches: ServerRefactorTypes.patch list)
+: WorkspaceEdit.t =
+  let changes = List.map patches ~f:patch_to_workspace_edit_change in
+  let changes =
+    List.fold changes
+      ~init:SMap.empty
+      ~f:(fun acc (uri, text_edit) ->
+        let current_edits = Option.value ~default:[] (SMap.get uri acc) in
+        let new_edits = text_edit :: current_edits in
+        SMap.add uri new_edits acc
+      )
+  in
+  { WorkspaceEdit.changes; }
+
+let do_documentRename
+    (conn: server_conn)
+    (ref_unblocked_time: float ref)
+    (params: Rename.params)
+  : WorkspaceEdit.t =
+  let (file, line, column) =
+    lsp_file_position_to_hack (rename_params_to_document_position params) in
+  let open Rename in
+  let newName = params.newName in
+  let command =
+    ServerCommandTypes.IDE_REFACTOR (ServerCommandTypes.FileName file, line, column, newName) in
+  let patches =
+    rpc conn ref_unblocked_time command
+  in
+  patches_to_workspace_edit patches
+
+
 let do_documentOnTypeFormatting
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (from: string)
@@ -1510,7 +1577,7 @@ let do_initialize () : Initialize.result =
         firstTriggerCharacter = ";";
         moreTriggerCharacter = ["}"];
       };
-      renameProvider = false;
+      renameProvider = true;
       documentLinkProvider = None;
       executeCommandProvider = None;
       typeCoverageProvider = true;
@@ -2092,6 +2159,13 @@ let handle_event
     cancel_if_stale client c long_timeout;
     parse_findReferences c.params |> do_findReferences menv.conn ref_unblocked_time
     |> print_findReferences |> Jsonrpc.respond to_stdout c
+
+  (* textDocument/rename *)
+  | Main_loop menv, Client_message c when c.method_ = "textDocument/rename" ->
+    parse_documentRename c.params
+    |> do_documentRename menv.conn ref_unblocked_time
+    |> print_documentRename
+    |> Jsonrpc.respond to_stdout c
 
   (* textDocument/documentHighlight *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/documentHighlight" ->

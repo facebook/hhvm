@@ -1,0 +1,179 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "capabilities": {
+        "textDocumentSync": {
+          "openClose": true,
+          "change": 2,
+          "willSave": false,
+          "willSaveWaitUntil": false,
+          "save": {
+            "includeText": false
+          }
+        },
+        "hoverProvider": true,
+        "completionProvider": {
+          "resolveProvider": true,
+          "triggerCharacters": [
+            "$",
+            ">",
+            "\\",
+            ":",
+            "<"
+          ]
+        },
+        "signatureHelpProvider": {
+          "triggerCharacters": [
+            "(",
+            ","
+          ]
+        },
+        "definitionProvider": true,
+        "referencesProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": false,
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "documentOnTypeFormattingProvider": {
+          "firstTriggerCharacter": ";",
+          "moreTriggerCharacter": [
+            "}"
+          ]
+        },
+        "renameProvider": true,
+        "typeCoverageProvider": true,
+        "rageProvider": true
+      }
+    }
+  },
+    {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "result": {
+        "changes": {
+          "${php_file_uri}": [
+              {
+                "range": {
+                  "start": {
+                    "line": 6,
+                    "character": 9
+                  },
+                  "end": {
+                    "line": 6,
+                    "character": 17
+                  }
+                },
+                "newText": "function_b"
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 3,
+                    "character": 9
+                  },
+                  "end": {
+                    "line": 3,
+                    "character": 17
+                  }
+                },
+                "newText": "function_b"
+              }
+            ]
+        }
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "changes": {
+          "${php_file_uri}": [
+              {
+                "range": {
+                  "start": {
+                    "line": 10,
+                    "character": 6
+                  },
+                  "end": {
+                    "line": 10,
+                    "character": 15
+                  }
+                },
+                "newText": "AnotherClass"
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 19,
+                    "character": 20
+                  },
+                  "end": {
+                    "line": 19,
+                    "character": 29
+                  }
+                },
+                "newText": "AnotherClass"
+              }
+            ]
+        }
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 4,
+      "result": {
+        "changes": {
+          "${php_file_uri}": [
+              {
+                "range": {
+                  "start": {
+                    "line": 13,
+                    "character": 18
+                  },
+                  "end": {
+                    "line": 13,
+                    "character": 29
+                  }
+                },
+                "newText": "some_other_method"
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 20,
+                    "character": 43
+                  },
+                  "end": {
+                    "line": 20,
+                    "character": 54
+                  }
+                },
+                "newText": "some_other_method"
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 20,
+                    "character": 15
+                  },
+                  "end": {
+                    "line": 20,
+                    "character": 26
+                  }
+                },
+                "newText": "some_other_method"
+              }
+            ]
+        }
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 999,
+      "result": null
+    }
+]

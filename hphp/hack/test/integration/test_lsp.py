@@ -45,7 +45,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
 
     def replace_variable(self, json, variable, text):
         if isinstance(json, dict):
-            return {k:
+            return {self.replace_variable(k, variable, text):
                     self.replace_variable(v, variable, text) for k, v in json.items()}
         elif isinstance(json, list):
             return [self.replace_variable(i, variable, text) for i in json]
@@ -228,6 +228,11 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         self.prepare_environment()
         variables = self.setup_php_file('signaturehelp.php')
         self.load_and_run('signaturehelp', variables)
+
+    def test_rename(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('rename.php')
+        self.load_and_run('rename', variables)
 
     def test_non_existing_method(self):
         self.prepare_environment()

@@ -17,23 +17,9 @@ class MyArray implements ArrayAccess {
   }
 }
 
-class MyIndex extends MyArray implements ConstIndexAccess {
-  public function at($index) {
-    return $this->arr[$index];
-  }
-  public function get($index) {
-    return $this->arr[$index];
-  }
-  public function containsKey($index) {
-    return true;
-  }
-}
-
 function main() {
   $o = new stdClass();
   $a = new MyArray();
-  $op = new MyIndex();
-  $op['prop_name'] = 43;
   $v = Vector { 'a' , 'b' };
   $m = Map { 'a' => 2, 'b' => 'c' };
   $s = 'hello';
@@ -80,13 +66,6 @@ function main() {
   var_dump(idx($a, 'c', 'orange'));
   var_dump(idx($a, 'absent'));
   var_dump(idx($a, null, 'orange'));
-  echo "\n";
-
-  // ConstIndexAccess
-  var_dump(idx($op, 'not_real', 43)); // absent property despite containsKey
-  var_dump(idx($op, 'prop_name', 43));
-  var_dump(idx($op, 'absent')); // absent property despite containsKey
-  var_dump(idx($op, null, 43));
   echo "\n";
 
   // null (because PHP)

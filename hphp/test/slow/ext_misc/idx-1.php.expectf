@@ -35,15 +35,6 @@ string(6) "orange"
 NULL
 string(6) "orange"
 
-
-Notice: Undefined index: not_real in %s on line 10
-NULL
-int(43)
-
-Notice: Undefined index: absent in %s on line 10
-NULL
-int(43)
-
 NULL
 string(3) "wtf"
 

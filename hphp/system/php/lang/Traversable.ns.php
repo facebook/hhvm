@@ -31,12 +31,14 @@ namespace HH {
 interface Traversable {
 }
 
+<<__Sealed(\HH\KeyedContainer::class, \ConstSet::class)>>
 interface Container extends \HH\Traversable {
 }
 
 interface KeyedTraversable extends \HH\Traversable {
 }
 
+<<__Sealed(\Indexish::class)>>
 interface KeyedContainer extends \HH\Container, \HH\KeyedTraversable {
 }
 

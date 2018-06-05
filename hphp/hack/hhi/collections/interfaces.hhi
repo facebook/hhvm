@@ -9,6 +9,7 @@
  * @guide /hack/collections/interfaces
  *
  */
+<<__Sealed(Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
 interface ConstCollection<+Te> extends HH\Rx\Countable {
   /**
    * Is the collection empty?
@@ -48,6 +49,7 @@ interface ConstCollection<+Te> extends HH\Rx\Countable {
  * @guide /hack/collections/interfaces
  *
  */
+<<__Sealed(Collection::class)>>
 interface OutputCollection<-Te> {
   /**
    * Add a value to the collection and return the collection itself.
@@ -88,6 +90,7 @@ interface OutputCollection<-Te> {
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(MutableMap::class, MutableSet::class, MutableVector::class)>>
 interface Collection<Te> extends ConstCollection<Te>,
                                  OutputCollection<Te> {
   /**
@@ -103,6 +106,7 @@ interface Collection<Te> extends ConstCollection<Te>,
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(ConstMapAccess::class, SetAccess::class, ConstSet::class)>>
 interface ConstSetAccess<+Tm> {
   /**
    * Checks whether a value is in the current `Set`.
@@ -120,6 +124,7 @@ interface ConstSetAccess<+Tm> {
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(MapAccess::class, MutableSet::class)>>
 interface SetAccess<Tm> extends ConstSetAccess<Tm> {
   /**
    * Removes the provided value from the current `Set`.
@@ -143,6 +148,7 @@ interface SetAccess<Tm> extends ConstSetAccess<Tm> {
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(ConstMapAccess::class, IndexAccess::class, ConstVector::class)>>
 interface ConstIndexAccess<Tk, +Tv> {
   /**
    * Returns the value at the specified key in the current collection.
@@ -191,6 +197,7 @@ interface ConstIndexAccess<Tk, +Tv> {
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(MapAccess::class, MutableVector::class)>>
 interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
   /**
    * Stores a value into the current collection with the specified key,
@@ -259,6 +266,7 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(ConstMap::class, MapAccess::class)>>
 interface ConstMapAccess<Tk, +Tv> extends ConstSetAccess<Tk>,
                                           ConstIndexAccess<Tk, Tv> {
 }
@@ -273,6 +281,7 @@ interface ConstMapAccess<Tk, +Tv> extends ConstSetAccess<Tk>,
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(MutableMap::class)>>
 interface MapAccess<Tk, Tv> extends ConstMapAccess<Tk, Tv>,
                                     SetAccess<Tk>,
                                     IndexAccess<Tk, Tv> {
@@ -285,6 +294,7 @@ interface MapAccess<Tk, Tv> extends ConstMapAccess<Tk, Tv>,
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(ImmVector::class, MutableVector::class, Pair::class)>>
 interface ConstVector<+Tv> extends ConstCollection<Tv>,
                                    ConstIndexAccess<int, Tv>,
                                    HH\Rx\KeyedIterable<int, Tv>,
@@ -561,6 +571,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(Vector::class)>>
 interface MutableVector<Tv> extends ConstVector<Tv>,
                                     Collection<Tv>,
                                     IndexAccess<int, Tv> {
@@ -838,6 +849,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(ImmMap::class, MutableMap::class)>>
 interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
                                     ConstMapAccess<Tk, Tv>,
                                     HH\Rx\KeyedIterable<Tk, Tv>,
@@ -1110,6 +1122,7 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(Map::class)>>
 interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
                                      Collection<Pair<Tk, Tv>>,
                                      MapAccess<Tk, Tv> {
@@ -1386,6 +1399,7 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(ImmSet::class, MutableSet::class)>>
 interface ConstSet<+Tv> extends ConstCollection<Tv>,
                                 ConstSetAccess<Tv>,
                                 HH\Rx\KeyedIterable<mixed, Tv>,
@@ -1662,6 +1676,7 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(Set::class)>>
 interface MutableSet<Tv> extends ConstSet<Tv>,
                                  Collection<Tv>,
                                  SetAccess<Tv> {

@@ -2,6 +2,7 @@
 
 namespace {
 
+<<__Sealed(\HH\Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
 interface ConstCollection extends HH\Rx\Countable {
   <<__Rx>>
   public function isEmpty();
@@ -11,6 +12,7 @@ interface ConstCollection extends HH\Rx\Countable {
   public function items();
 }
 
+<<__Sealed(\HH\Collection::class)>>
 interface OutputCollection {
   <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function add($e);
@@ -24,6 +26,7 @@ interface OutputCollection {
 
 namespace HH {
 
+<<__Sealed(\MutableMap::class, \MutableSet::class, \MutableVector::class)>>
 interface Collection extends \ConstCollection,
                              \OutputCollection {
   <<__Rx, __Mutable, __ReturnsVoidToRx>>
@@ -34,16 +37,19 @@ interface Collection extends \ConstCollection,
 
 namespace {
 
+<<__Sealed(ConstMapAccess::class, SetAccess::class, ConstSet::class)>>
 interface ConstSetAccess {
   <<__Rx>>
   public function contains($m);
 }
 
+<<__Sealed(MapAccess::class, MutableSet::class)>>
 interface SetAccess extends ConstSetAccess {
   <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function remove($m);
 }
 
+<<__Sealed(ConstMapAccess::class, IndexAccess::class, ConstVector::class)>>
 interface ConstIndexAccess {
   <<__Rx>>
   public function at($k);
@@ -53,6 +59,7 @@ interface ConstIndexAccess {
   public function containsKey($k);
 }
 
+<<__Sealed(MapAccess::class, MutableVector::class)>>
 interface IndexAccess extends ConstIndexAccess {
   <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function set($k,$v);
@@ -64,46 +71,55 @@ interface IndexAccess extends ConstIndexAccess {
   public function removeKey($k);
 }
 
+<<__Sealed(ConstMap::class, MapAccess::class)>>
 interface ConstMapAccess extends ConstSetAccess,
                                  ConstIndexAccess {
 }
 
+<<__Sealed(MutableMap::class)>>
 interface MapAccess extends ConstMapAccess,
                             SetAccess,
                             IndexAccess {
 }
 
+<<__Sealed(ConstVector::class, ConstMap::class, ImmMap::class, dict::class, keyset::class, vec::class)>>
 interface Indexish extends \HH\KeyedContainer {
 }
 
+<<__Sealed(ImmVector::class, MutableVector::class, Pair::class)>>
 interface ConstVector extends ConstCollection,
                               ConstIndexAccess,
                               \HH\Rx\KeyedIterable,
                               Indexish {
 }
 
+<<__Sealed(Vector::class)>>
 interface MutableVector extends ConstVector,
                                 \HH\Collection,
                                 IndexAccess {
 }
 
+<<__Sealed(ImmMap::class, MutableMap::class)>>
 interface ConstMap extends ConstCollection,
                            ConstMapAccess,
                            \HH\Rx\KeyedIterable,
                            Indexish {
 }
 
+<<__Sealed(Map::class)>>
 interface MutableMap extends ConstMap,
                              \HH\Collection,
                              MapAccess {
 }
 
+<<__Sealed(ImmSet::class, MutableSet::class)>>
 interface ConstSet extends ConstCollection,
                            ConstSetAccess,
                            \HH\Rx\KeyedIterable,
                            \HH\Container {
 }
 
+<<__Sealed(Set::class)>>
 interface MutableSet extends ConstSet,
                              \HH\Collection,
                              SetAccess {

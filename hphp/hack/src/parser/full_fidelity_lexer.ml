@@ -18,10 +18,9 @@ module Lexer : sig
     start : int;  (* Both start and offset are absolute offsets in the text. *)
     offset : int;
     errors : SyntaxError.t list;
-    hack_typecheck : bool;
     hacksperimental : bool
   } [@@deriving show]
-  val make : ?env:Full_fidelity_parser_env.t -> SourceText.t -> t
+  val make : ?hacksperimental:bool -> SourceText.t -> t
   val start : t -> int
   val source : t -> SourceText.t
   val errors : t -> SyntaxError.t list
@@ -44,20 +43,11 @@ end = struct
     start : int;  (* Both start and offset are absolute offsets in the text. *)
     offset : int;
     errors : SyntaxError.t list;
-    hack_typecheck : bool;
     hacksperimental : bool (* write-once: record updates should not update this field *)
   } [@@deriving show]
 
-  let make ?env text =
-    let hack_typecheck, hacksperimental = match env with
-    | Some env ->
-      let hh = begin match env.Full_fidelity_parser_env.lang with
-      | Some FileInfo.HhFile -> not env.Full_fidelity_parser_env.codegen
-      | _ -> false end in
-      let hs = Full_fidelity_parser_env.hacksperimental env in
-      hh, hs
-    | None -> false, false in
-    { text; start = 0; offset = 0; errors = []; hack_typecheck; hacksperimental }
+  let make ?(hacksperimental = false) text =
+    { text; start = 0; offset = 0; errors = []; hacksperimental }
 
   let start  x = x.start
   let source x = x.text
@@ -111,19 +101,6 @@ let end_offset = offset
 let invalid = '\000'
 
 let empty = make SourceText.empty
-
-let keyword_insensitive_map = SMap.from_keys [
-  "__halt_compiler"; "abstract"; "and"; "array"; "as"; "bool"; "boolean"; "break";
-  "callable"; "case"; "catch"; "class"; "clone"; "const"; "continue"; "declare";
-  "default"; "die"; "do"; "echo"; "else"; "elseif"; "empty"; "enddeclare"; "endfor";
-  "endforeach"; "endif"; "endswitch"; "endwhile"; "eval"; "exit"; "extends";
-  "false"; "final"; "finally"; "for"; "foreach"; "function"; "global"; "goto";
-  "if"; "implements"; "include"; "include_once"; "inout"; "instanceof"; "insteadof";
-  "int"; "integer"; "interface"; "isset"; "list"; "namespace"; "new"; "null"; "or";
-  "parent"; "print"; "private"; "protected"; "public"; "require"; "require_once";
-  "return"; "self"; "static"; "string"; "switch"; "throw"; "trait"; "try"; "true";
-  "unset"; "use"; "using"; "var"; "void"; "while"; "xor"; "yield"
-] ~f:(fun _ -> true)
 
 let source_text_string (l : lexer) = SourceText.text (source l)
 
@@ -1407,17 +1384,32 @@ let is_next_xhp_class_name lexer =
   let (lexer, _) = scan_leading_php_trivia lexer in
   is_xhp_class_name lexer
 
-let as_case_insensitive_keyword (hack_typecheck: bool) text =
-  if hack_typecheck then
-    text
-  else
-    (* Some keywords are case-insensitive in PHP. *)
-    let lower = String.lowercase_ascii text in
-    if SMap.mem lower keyword_insensitive_map then lower else text
+let as_case_insensitive_keyword text =
+  (* Some keywords are case-insensitive in Hack or PHP. *)
+  (* TODO: Consider making non-lowercase versions of these keywords errors
+     in strict mode. *)
+  (* TODO: Consider making these illegal, period, and code-modding away all
+  non-lower versions in our codebase. *)
+  let lower = String.lowercase_ascii text in
+  match lower with
+  | "__halt_compiler" | "abstract" | "and" | "array" | "as" | "bool"  | "boolean" | "break"
+  | "callable"
+  | "case" | "catch" | "class" | "clone" | "const" | "continue" | "declare" | "default"
+  | "die" | "do" | "echo" | "else" | "elseif" | "empty" | "enddeclare" | "endfor"
+  | "endforeach" | "endif" | "endswitch" | "endwhile" | "eval" | "exit" | "extends" | "false"
+  | "final" | "finally" | "for" | "foreach" | "function" | "global" | "goto" | "if"
+  | "implements" | "include" | "include_once" | "inout" | "instanceof" | "insteadof" | "int"
+  | "integer"
+  | "interface" | "isset" | "list" | "namespace" | "new" | "null" | "or" | "parent"
+  | "print" | "private" | "protected" | "public" | "require" | "require_once"
+  | "return" | "self" | "static" | "string" | "switch" | "throw" | "trait"
+  | "try" | "true" | "unset" | "use" | "using" | "var" | "void" | "while"
+  | "xor" | "yield" -> lower
+  | _ -> text
 
 let as_keyword kind lexer =
   if kind = TokenKind.Name then
-    let text = as_case_insensitive_keyword lexer.Lexer.hack_typecheck (current_text lexer) in
+    let text = as_case_insensitive_keyword (current_text lexer) in
     match TokenKind.from_string text with
     | Some TokenKind.Let when (not (hacksperimental lexer)) -> TokenKind.Name
     | Some keyword -> keyword
@@ -1426,7 +1418,7 @@ let as_keyword kind lexer =
     kind
 
 (* scanner takes a lexer, returns a lexer and a kind *)
-let scan_token_and_leading_trivia scanner as_name lexer =
+let scan_token_and_leading_trivia scanner as_name lexer  =
   (* Get past the leading trivia *)
   let (lexer, leading) = scan_leading_php_trivia lexer in
   (* Remember where we were when we started this token *)

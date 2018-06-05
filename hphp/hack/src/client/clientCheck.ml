@@ -484,8 +484,9 @@ let main args =
         Exit_status.No_error
       end
     | MODE_CST_SEARCH ->
+      let sort_results = args.sort_results in
       let input = Sys_utils.read_stdin_to_string () |> Hh_json.json_of_string in
-      let result = rpc args @@ Rpc.CST_SEARCH input in
+      let result = rpc args @@ Rpc.CST_SEARCH { Rpc.sort_results; input } in
       begin match result with
       | Ok result ->
         print_endline (Hh_json.json_to_string result);

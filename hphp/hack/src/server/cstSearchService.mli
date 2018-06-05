@@ -13,12 +13,13 @@ type result
 val compile_pattern: Hh_json.json -> (pattern, string) Core_result.t
 (** Compile JSON input into a pattern that can be searched for. *)
 
-val result_to_json: result option -> Hh_json.json
+val result_to_json: sort_results:bool -> result option -> Hh_json.json
 (** Convert the result of a search into JSON output that can be sent back to the
     user. *)
 
 val go:
   ServerEnv.genv ->
+  sort_results:bool ->
   Hh_json.json ->
   (Hh_json.json, string) Core_result.t
 (** Search for the given pattern across the given set of files. *)

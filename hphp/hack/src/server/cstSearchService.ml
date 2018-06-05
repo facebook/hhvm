@@ -325,28 +325,33 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
   in
   compile_pattern ~json ~keytrace:[]
 
-(* TODO(T28496995): This only converts a single result to JSON. We also need to
-convert an entire response -- a mapping from file path to result -- to JSON. *)
-let result_to_json (result: result option): Hh_json.json =
+let result_to_json ~(sort_results: bool) (result: result option): Hh_json.json =
   let open Hh_json in
   match result with
   | None -> JSON_Null
   | Some result ->
-    let matched_nodes = List.map result.matched_nodes ~f:(fun matched_node ->
-      let match_name =
-        match matched_node.match_name
-        with MatchName match_name -> match_name
-      in
-      let kind =
-        match matched_node.kind
-        with NodeKind kind -> kind
-      in
-      JSON_Object [
-        "match_name", JSON_String match_name;
-        "kind", JSON_String kind;
-        "start_offset", Hh_json.int_ matched_node.start_offset;
-        "end_offset", Hh_json.int_ matched_node.end_offset;
-      ])
+    let matched_nodes = result.matched_nodes in
+    let matched_nodes =
+      if sort_results
+      then List.sort matched_nodes ~cmp:Pervasives.compare
+      else matched_nodes
+    in
+    let matched_nodes =
+      List.map matched_nodes ~f:(fun matched_node ->
+        let match_name =
+          match matched_node.match_name
+          with MatchName match_name -> match_name
+        in
+        let kind =
+          match matched_node.kind
+          with NodeKind kind -> kind
+        in
+        JSON_Object [
+          "match_name", JSON_String match_name;
+          "kind", JSON_String kind;
+          "start_offset", Hh_json.int_ matched_node.start_offset;
+          "end_offset", Hh_json.int_ matched_node.end_offset;
+        ])
     in
     JSON_Object [
       "matched_nodes", JSON_Array matched_nodes;
@@ -385,6 +390,7 @@ let job
 
 let go
     (genv: ServerEnv.genv)
+    ~(sort_results: bool)
     (input: Hh_json.json)
     : (Hh_json.json, string) Core_result.t
   =
@@ -426,6 +432,12 @@ let go
     ~next:next_files
   in
 
+  let results =
+    if sort_results
+    then List.sort results ~cmp:Pervasives.compare
+    else results
+  in
+
   Hh_json.JSON_Object (List.map results ~f:(fun (path, result) ->
-    (Relative_path.to_absolute path, result_to_json (Some result))
+    (Relative_path.to_absolute path, result_to_json ~sort_results (Some result))
   ))

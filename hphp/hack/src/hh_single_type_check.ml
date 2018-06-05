@@ -770,7 +770,7 @@ let handle_mode
       |> Hh_json.json_of_string
       |> CstSearchService.compile_pattern
       >>| CstSearchService.search ~syntax_tree
-      >>| CstSearchService.result_to_json
+      >>| CstSearchService.result_to_json ~sort_results:true
       >>| Hh_json.json_to_string ~pretty:true
     in
     begin match result with

@@ -72,6 +72,7 @@ type client_check_env = {
   ai_mode: string option;
   ignore_hh_version: bool;
   dynamic_view: bool;
+  sort_results: bool;
 }
 
 let mode_to_string = function

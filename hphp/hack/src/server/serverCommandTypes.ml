@@ -103,6 +103,11 @@ type file_input =
 
 type lint_stdin_input = { filename: string; contents: string }
 
+type cst_search_input = {
+  sort_results: bool;
+  input: Hh_json.json;
+}
+
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
@@ -165,7 +170,7 @@ type _ t =
       Infer_return_type.result t
   | RAGE : ServerRageTypes.result t
   | DYNAMIC_VIEW: bool -> unit t
-  | CST_SEARCH: Hh_json.json -> (Hh_json.json, string) result t
+  | CST_SEARCH: cst_search_input -> (Hh_json.json, string) result t
 
 let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true

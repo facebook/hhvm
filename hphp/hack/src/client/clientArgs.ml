@@ -85,6 +85,7 @@ let parse_check_args cmd =
   let ai_mode = ref None in
   let ignore_hh_version = ref false in
   let dynamic_view = ref false in
+  let sort_results = ref false in
 
   (* custom behaviors *)
   let set_from x () = from := x in
@@ -182,7 +183,8 @@ let parse_check_args cmd =
       " Replace occurrences of untyped code with dynamic";
     "--cst-search",
       Arg.Unit (set_mode MODE_CST_SEARCH),
-      " Search the concrete syntax trees of the codebase files for a pattern";
+      " (mode) Search the concrete syntax trees of files in the codebase" ^
+      " for a given pattern";
     "--dump-symbol-info",
       Arg.String (fun files -> set_mode (MODE_DUMP_SYMBOL_INFO files) ()),
       (*  Input format:
@@ -407,6 +409,9 @@ let parse_check_args cmd =
     "--ignore-hh-version",
       Arg.Set ignore_hh_version,
       " ignore hh_version check when loading saved states (default: false)";
+    "--sort-results",
+      Arg.Set sort_results,
+      " sort output for CST search.";
 
     (* deprecated *)
     "--retry-if-init",
@@ -478,6 +483,7 @@ let parse_check_args cmd =
     ai_mode = !ai_mode;
     ignore_hh_version = !ignore_hh_version;
     dynamic_view = !dynamic_view;
+    sort_results = !sort_results;
   }
 
 let parse_start_env command =

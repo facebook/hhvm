@@ -2613,6 +2613,13 @@ let find_syntax_errors env =
         let errors =
           class_property_multiple_visibility_error env node parents errors in
         trait_require_clauses, names, errors
+      | PropertyDeclarator { property_initializer; _ } ->
+        let is_static_prop = match parents with
+          | _ :: _ :: x :: _ -> property_modifier_contains_helper is_static x
+          | _ -> false in
+        let errors = if is_static_prop then
+          check_constant_expression errors property_initializer else errors in
+        trait_require_clauses, names, errors
       | Enumerator _ ->
         let errors = enum_errors node errors in
         trait_require_clauses, names, errors
@@ -2627,6 +2634,9 @@ let find_syntax_errors env =
         trait_require_clauses, names, errors
       | XHPExpression _ ->
         let errors = xhp_errors env node errors in
+        trait_require_clauses, names, errors
+      | StaticDeclarator { static_initializer; _ } ->
+        let errors = check_constant_expression errors static_initializer in
         trait_require_clauses, names, errors
       | _ -> trait_require_clauses, names, errors in
 

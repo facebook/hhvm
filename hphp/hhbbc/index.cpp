@@ -1398,10 +1398,11 @@ bool build_class_properties(BuildClsInfo& info,
   return true;
 }
 
-void build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
+auto build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
   std::vector<SString> names;
+  CompactVector<std::unique_ptr<res::Func::FuncFamily>> ret;
   auto& impls = data.ifaceImplementerMap[iface->cls];
-  if (impls.empty()) return;
+  if (impls.empty()) return ret;
 
   // We start by collecting the list of methods shared across all classes which
   // implement iface (including indirectly). And then add the public methods
@@ -1428,6 +1429,8 @@ void build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
     std::unordered_set<borrowed_ptr<const php::Func>> seen;
     auto& funcs = ff.possibleFuncs;
     for (auto cinfo : impls) {
+      assertx(!(cinfo->cls->attrs & AttrInterface));
+
       auto methIt = cinfo->methods.find(name);
       assertx(methIt != cinfo->methods.end());
       auto mte = mteFromIt(methIt);
@@ -1454,10 +1457,10 @@ void build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
     }
 
     if (!funcs.empty()) {
-      data.funcFamilies.push_back(std::make_unique<FuncFamily>());
-      *data.funcFamilies.back() = std::move(ff);
-      iface->methodFamilies.emplace(name, borrow(data.funcFamilies.back()));
+      auto ffp = std::make_unique<FuncFamily>(std::move(ff));
+      iface->methodFamilies.emplace(name, borrow(ffp));
       added.emplace(name);
+      ret.push_back(std::move(ffp));
     }
   };
 
@@ -1473,12 +1476,24 @@ void build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
       );
     }
   }
+  return ret;
 }
 
 void build_iface_methods(IndexData& data) {
-  for (auto& info : data.allClassInfos) {
-    if (info->cls->attrs & AttrInterface) {
-      build_methods_for_iface(data, borrow(info));
+  trace_time tracer("build interface methods");
+  auto families = parallel::map(
+    data.allClassInfos,
+    [&] (const std::unique_ptr<ClassInfo>& info) ->
+      CompactVector<std::unique_ptr<res::Func::FuncFamily>> {
+      if (info->cls->attrs & AttrInterface) {
+        return build_methods_for_iface(data, borrow(info));
+      }
+      return {};
+    }
+  );
+  for (auto &fams : families) {
+    for (auto &ff : fams) {
+      data.funcFamilies.push_back(std::move(ff));
     }
   }
 }

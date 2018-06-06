@@ -993,12 +993,14 @@ and emit_class_const_impl env cid id =
   let fq_id, _id_opt =
     Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
   let fq_id_str = Hhbc_id.Class.to_raw_string fq_id in
-  Emit_symbol_refs.add_class fq_id_str;
   emit_pos_then (fst cid) @@
   if SU.is_class id
   then instr_string fq_id_str
-  else instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id, fq_id)))
-
+  else
+    begin
+    Emit_symbol_refs.add_class fq_id_str;
+    instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id, fq_id)))
+    end
 and emit_yield env pos = function
   | A.AFvalue e ->
     gather [

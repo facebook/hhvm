@@ -436,6 +436,10 @@ let main ~hacksperimental (env: Env.t) (options: format_options) =
       end
 
 let () =
+  (* no-op, needed at entry point for the Daemon module (used by
+     HackfmtEventLogger) to behave correctly *)
+  Daemon.check_entry_point ();
+
   let options, (debug, test, hacksperimental) = parse_options () in
   let env = { Env.
     debug;

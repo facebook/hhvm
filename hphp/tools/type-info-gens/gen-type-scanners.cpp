@@ -2817,7 +2817,10 @@ void Generator::assignUniqueLayouts() {
     // Finally, if there's a suffix layout, and the suffix begins at offset 0,
     // than the suffix layout can completely subsume the original layout.
     if (indexed.layout.suffix && indexed.layout.suffix_begin == 0) {
-     indexed.layout = std::move(*indexed.layout.suffix);
+      // avoid indeterminate evaluation order by moving indexed.layout.suffix
+      // to a temp before overwriting indexed.layout
+      auto suffix = std::move(*indexed.layout.suffix);
+      indexed.layout = std::move(suffix);
     }
   }
 

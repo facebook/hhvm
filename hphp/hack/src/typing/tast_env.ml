@@ -38,6 +38,8 @@ let set_static = Typing_env.set_static
 let set_inside_constructor env = { env with Typing_env.inside_constructor = true }
 let save = Typing_env.save SMap.empty
 
+let error_if_forward_compat_ge = Typing_env.error_if_forward_compat_ge
+
 let fully_expand = Typing_expand.fully_expand
 
 let get_class_ids = Typing_utils.get_class_ids

@@ -55,6 +55,8 @@ let sketchy_null_check env ((p, ty), e) kind =
 let handler = object
   inherit Tast_visitor.handler_base
 
+  method! minimum_forward_compat_level = 2018_05_17
+
   method! at_expr env x =
     match snd x with
     | Eif (e, None, _) -> sketchy_null_check env e `Coalesce

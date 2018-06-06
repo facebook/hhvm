@@ -59,6 +59,8 @@ let shapes_idx_invalid_key_check pos1 env ((_, shape), _) field_name =
 let handler = object
   inherit Tast_visitor.handler_base
 
+  method! minimum_forward_compat_level = 2018_05_31
+
   method! at_expr env =
     let shape_field_check_enabled =
       TypecheckerOptions.experimental_feature_enabled

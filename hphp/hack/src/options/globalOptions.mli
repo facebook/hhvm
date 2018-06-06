@@ -121,6 +121,9 @@ type t = {
 
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
+
+ (* What version of Hack the current codebase was designed for *)
+ forward_compatibility_level : ForwardCompatibilityLevel.t;
 } [@@deriving show]
 val make :
   tco_assume_php: bool ->
@@ -141,7 +144,9 @@ val make :
   tco_disallow_array_literal: bool ->
   tco_language_feature_logging: bool ->
   po_disallow_elvis_space: bool ->
-  ignored_fixme_codes: ISet.t -> t
+  ignored_fixme_codes: ISet.t ->
+  forward_compatibility_level: ForwardCompatibilityLevel.t ->
+  t
 val tco_assume_php : t -> bool
 val tco_safe_array : t -> bool
 val tco_safe_vector_array : t -> bool
@@ -188,3 +193,4 @@ val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t
 val tco_hacksperimental: string
+val forward_compatibility_level : t -> ForwardCompatibilityLevel.t

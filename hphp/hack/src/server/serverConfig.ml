@@ -41,6 +41,9 @@ type t = {
   ignored_paths    : string list;
   (* A list of extra paths to search for declarations *)
   extra_paths      : Path.t list;
+
+  (* what version of the typechecker is targetted *)
+  forward_compatibility_level : ForwardCompatibilityLevel.t;
 }
 
 let filename = Relative_path.from_root Config_file.file_path_relative_to_repo_root
@@ -157,6 +160,10 @@ let process_ignored_paths config =
   SMap.get config "ignored_paths"
   |> Option.value_map ~f:convert_ignored_paths ~default:[]
 
+let process_forward_compatibility_level config =
+  SMap.get config "forward_compatibility_level"
+  |> Option.value_map ~f:ForwardCompatibilityLevel.from_string ~default:ForwardCompatibilityLevel.HEAD
+
 let maybe_relative_path fn =
   (* Note: this is not the same as calling realpath; the cwd is not
    * necessarily the same as hh_server's root!!! *)
@@ -211,6 +218,7 @@ let load config_filename options =
     Option.map (SMap.get config "state_prefetcher_script") maybe_relative_path in
   let formatter_override =
     Option.map (SMap.get config "formatter_override") maybe_relative_path in
+  let forward_compat_level = process_forward_compatibility_level config in
   let global_opts = GlobalOptions.make
     (bool_ "assume_php" ~default:true config)
     (bool_ "safe_array" ~default:true config)
@@ -234,6 +242,7 @@ let load config_filename options =
     (bool_ "language_feature_logging" ~default:false config)
     (bool_ "disallow_elvis_space" ~default:false config)
     (prepare_ignored_fixme_codes config)
+    forward_compat_level
   in
   Errors.ignored_fixme_codes :=
     (GlobalOptions.ignored_fixme_codes global_opts);
@@ -250,6 +259,7 @@ let load config_filename options =
     config_hash = config_hash;
     ignored_paths = ignored_paths;
     extra_paths = extra_paths;
+    forward_compatibility_level = forward_compat_level;
   }, local_config
 
 (* useful in testing code *)
@@ -266,6 +276,7 @@ let default_config = {
   config_hash = None;
   ignored_paths = [];
   extra_paths = [];
+  forward_compatibility_level = ForwardCompatibilityLevel.HEAD;
 }
 
 let set_parser_options config popt = { config with parser_options = popt }
@@ -280,3 +291,4 @@ let config_hash config = config.config_hash
 let ignored_paths config = config.ignored_paths
 let extra_paths config = config.extra_paths
 let version config = config.version
+let forward_compatibility_level config = config.forward_compatibility_level

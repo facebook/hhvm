@@ -814,6 +814,18 @@ let init ?load_mini_approach genv =
   let load_mini_approach = Core_result.of_option load_mini_approach
     ~error:No_loader in
   let env = ServerEnvBuild.make_env genv.config in
+  let init_errors, () = Errors.do_with_context ServerConfig.filename Errors.Init begin fun() ->
+    let fcl = ServerConfig.forward_compatibility_level genv.config in
+    let older_than = ForwardCompatibilityLevel.greater_than fcl in
+    if older_than ForwardCompatibilityLevel.current then
+      let pos = Pos.make_from ServerConfig.filename in
+      if older_than ForwardCompatibilityLevel.minimum
+      then Errors.forward_compatibility_below_minimum pos fcl
+      else Errors.forward_compatibility_not_current pos fcl
+  end in
+  let env = { env with
+    errorl = init_errors
+  } in
   let root = ServerArgs.root genv.options in
   let (env, t), state =
     match lazy_lev with

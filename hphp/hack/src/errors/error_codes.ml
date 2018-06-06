@@ -467,3 +467,18 @@ module Typing                               = struct
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum
 end
+
+(* 5xxx: reserved for FB lint *)
+(* 6xxx: reserved for FB ai *)
+(* 7xxx: reserved for FB ai *)
+
+module Init = struct
+  type t =
+  | ForwardCompatibilityNotCurrent [@value 8001]
+  | ForwardCompatibilityBelowMinimum
+  [@@ deriving enum, show { with_path = false } ]
+  let err_code = to_enum
+end
+
+(* 9xxx: reserved for FB ai *)
+(* 10xxx: reserved for FB ai *)

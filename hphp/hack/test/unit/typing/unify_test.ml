@@ -26,6 +26,7 @@ let global_options =
     ~tco_language_feature_logging:false
     ~po_disallow_elvis_space:false
     ~ignored_fixme_codes:ISet.empty
+    ~forward_compatibility_level:ForwardCompatibilityLevel.default
 
 let empty_env = Typing_env.empty global_options Relative_path.default None
 

@@ -22,7 +22,7 @@ module type S = sig
   end
 
   (* The analysis phase that the error is coming from. *)
-  type phase = Parsing | Naming | Decl | Typing
+  type phase = Init | Parsing | Naming | Decl | Typing
 
   module Parsing : Error_category
   module Naming : Error_category
@@ -545,4 +545,7 @@ module type S = sig
   val shapes_key_exists_always_true: Pos.t -> string -> Pos.t -> unit
   val shapes_key_exists_always_false: Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
   val shapes_idx_with_non_existent_field: Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
+
+  val forward_compatibility_not_current: Pos.t -> ForwardCompatibilityLevel.t -> unit
+  val forward_compatibility_below_minimum: Pos.t -> ForwardCompatibilityLevel.t -> unit
 end

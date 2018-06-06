@@ -44,6 +44,9 @@ val is_strict : env -> bool
 val get_tcopt : env -> TypecheckerOptions.t
 (** Return the {!TypecheckerOptions.t} with which this TAST was checked. *)
 
+val error_if_forward_compat_ge : int -> env -> (unit -> unit) -> unit
+(** Call the func if the forward compatibility level is new enough *)
+
 val expand_type : env -> Tast.ty -> env * Tast.ty
 (** Expand a type variable ({!Typing_defs.Tvar}) to the type it refers to. *)
 

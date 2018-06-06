@@ -85,6 +85,19 @@ let rec simplify_subtype
   | (_, Toption ty_sub'), (_, Toption _) ->
     simplify_subtype ~deep ~this_ty ty_sub' ty_super res
 
+  (* If ty_sub <: ?ty_super' and ty_sub does not contain null then we
+   * must also have ty_sub <: ty_super'.  The converse follows by
+   * widening and transitivity.  Therefore, this step preserves the set
+   * of solutions.
+   *)
+  | (_,
+     (Tprim Nast.(Tint | Tbool | Tfloat | Tstring
+                  | Tresource | Tnum | Tarraykey | Tnoreturn)
+      | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _
+      | Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _))),
+    (_, Toption ty_super') ->
+    simplify_subtype ~deep ~this_ty ty_sub ty_super' res
+
   (* Arrays *)
   | (r, Tarraykind ak_sub), (_, Tarraykind ak_super) ->
     begin match ak_sub, ak_super with
@@ -221,10 +234,6 @@ let rec simplify_subtype
       | AKtuple fields ->
         Typing_arrays.fold_aktuple_as_akvec_with_acc again env (snd res) r fields
       )
-
-  (* C<ts> <: ?D<ts'> iff C<ts> <: D<ts'> *)
-  | (_, Tclass _), (_, Toption ((_, Tclass _) as ty_super')) ->
-    simplify_subtype ~deep ~this_ty ty_sub ty_super' res
 
   (* (t1,...,tn) <: (u1,...,un) iff t1<:u1, ... , tn <: un *)
   | (_, Ttuple tyl_sub), (_, Ttuple tyl_super)
@@ -1335,14 +1344,6 @@ and sub_type_unwrapped_helper env ~this_ty
     when unwrappedToption_super ->
     sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty_sub ty
 
-  (* If ?t1 <: ?t2, then from t1 <: ?t1 (widening) and transitivity
-   * of <: it follows that t1 <: ?t2.  Conversely, if t1 <: ?t2, then
-   * by covariance and idempotence of ?, we have ?t1 <: ??t2 <: ?t2.
-   * Therefore, this step preserves the set of solutions.
-   *)
-  | (_, Toption ty_sub), (_, Toption _) ->
-    sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty_sub ty_super
-
   (* If the nonnull type is not enabled, mixed <: ?t is equivalent
    * to mixed <: t.  Otherwise, we should not encounter mixed
    * because by this time it should have been desugared into ?nonnull.
@@ -1353,9 +1354,7 @@ and sub_type_unwrapped_helper env ~this_ty
   (* If t1 <: ?t2, where t1 is guaranteed not to contain null, then
    * t1 <: t2, and the converse is obviously true as well.
    *)
-  | (_, (Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ |
-         Tobject | Tclass _ | Tarraykind _ |
-         Tabstract ((AKdependent _ | AKnewtype _| AKenum _), None))),
+  | (_, (Tprim Nast.Tvoid | Tabstract ((AKdependent _ | AKnewtype _), None))),
     (_, Toption ty_super) ->
     sub_type_unwrapped env ~this_ty ~unwrappedToption_super:true ty_sub ty_super
 

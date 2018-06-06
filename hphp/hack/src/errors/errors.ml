@@ -17,7 +17,7 @@ type error_code = int
  * before sending it to the client *)
 type 'a message = 'a * string
 
-type error_phase = Parsing | Naming | Decl | Typing
+type error_phase = Init | Parsing | Naming | Decl | Typing
 
 (* For callers that don't care about tracking error origins *)
 let default_context = (Relative_path.default, Typing)
@@ -29,10 +29,11 @@ module PhaseMap = Reordered_argument_map(MyMap.Make(struct
   type t = error_phase
 
   let rank = function
-    | Parsing -> 0
-    | Naming -> 1
-    | Decl -> 2
-    | Typing -> 3
+    | Init -> 0
+    | Parsing -> 1
+    | Naming -> 2
+    | Decl -> 3
+    | Typing -> 4
 
   let compare x y = (rank x) - (rank y)
 end))
@@ -155,6 +156,7 @@ module Common = struct
     | 3 -> "NastCheck"
     | 4 -> "Typing"
     | 5 -> "Lint"
+    | 8 -> "Init"
     | _ -> "Other"
 
   let error_code_to_string error_code =
@@ -419,6 +421,7 @@ module Parsing = Error_codes.Parsing
 module Naming = Error_codes.Naming
 module NastCheck = Error_codes.NastCheck
 module Typing = Error_codes.Typing
+module Init = Error_codes.Init
 
 (*****************************************************************************)
 (* Types *)
@@ -429,7 +432,7 @@ type error = Pos.t error_
 type applied_fixme = M.applied_fixme
 type t = error files_t * applied_fixme files_t
 
-type phase = error_phase = Parsing | Naming | Decl | Typing
+type phase = error_phase = Init | Parsing | Naming | Decl | Typing
 
 module type Error_category = sig
   type t
@@ -532,6 +535,7 @@ and incremental_update :
   let res = files_t_merge old new_ ~f:begin fun phase path old new_ ->
     if path = Relative_path.default then begin
       let phase = match phase with
+        | Init -> "Init"
         | Parsing -> "Parsing"
         | Naming -> "Naming"
         | Decl -> "Decl"
@@ -3023,6 +3027,33 @@ let shapes_idx_with_non_existent_field pos1 name pos2 reason =
     pos1, "You are calling Shapes::idx() on a field known to not exist";
     pos2, shape_field_non_existence_reason name reason
   ]
+
+let forward_compatibility_not_current pos value =
+  let current = ForwardCompatibilityLevel.current in
+  add (Init.err_code Init.ForwardCompatibilityNotCurrent)
+    pos
+    (Printf.sprintf
+      "forward_compatibility_level is set to '%s' (%d), which is stale; current is '%s' (%d). Errors may be missing."
+      (ForwardCompatibilityLevel.as_string value)
+      (ForwardCompatibilityLevel.as_int value)
+      (ForwardCompatibilityLevel.as_string current)
+      (ForwardCompatibilityLevel.as_int current)
+    )
+
+let forward_compatibility_below_minimum pos value =
+  let minimum = ForwardCompatibilityLevel.minimum in
+  let current = ForwardCompatibilityLevel.current in
+  add (Init.err_code Init.ForwardCompatibilityBelowMinimum)
+    pos
+    (Printf.sprintf
+      "forward_compatibility_level is set to '%s' (%d), which is below the minimum of '%s' (%d); current is '%s' (%d)"
+      (ForwardCompatibilityLevel.as_string value)
+      (ForwardCompatibilityLevel.as_int value)
+      (ForwardCompatibilityLevel.as_string minimum)
+      (ForwardCompatibilityLevel.as_int minimum)
+      (ForwardCompatibilityLevel.as_string current)
+      (ForwardCompatibilityLevel.as_int current)
+    )
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

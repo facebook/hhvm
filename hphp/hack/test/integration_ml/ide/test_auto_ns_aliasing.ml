@@ -59,6 +59,7 @@ let () =
     ~tco_language_feature_logging:false
     ~po_disallow_elvis_space:false
     ~ignored_fixme_codes: ISet.empty
+    ~forward_compatibility_level: ForwardCompatibilityLevel.default
   in
   let custom_config = ServerConfig.default_config in
   let custom_config = ServerConfig.set_parser_options

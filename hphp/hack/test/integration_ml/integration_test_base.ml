@@ -38,6 +38,7 @@ let global_opts = GlobalOptions.make
   ~tco_language_feature_logging:false
   ~po_disallow_elvis_space:false
   ~ignored_fixme_codes: ISet.empty
+  ~forward_compatibility_level: ForwardCompatibilityLevel.default
 
 let server_config = ServerConfig.set_tc_options server_config global_opts
 let server_config = ServerConfig.set_parser_options

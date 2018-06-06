@@ -28,6 +28,7 @@ type t = {
   tco_language_feature_logging : bool;
   po_disallow_elvis_space : bool;
   ignored_fixme_codes : ISet.t;
+  forward_compatibility_level : ForwardCompatibilityLevel.t;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -206,6 +207,7 @@ let default = {
  tco_language_feature_logging = false;
  po_disallow_elvis_space = false;
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
+ forward_compatibility_level = ForwardCompatibilityLevel.default;
 }
 
 (* Use this instead of default when you don't have access to a project
@@ -240,7 +242,8 @@ let make ~tco_assume_php
          ~tco_disallow_array_literal
          ~tco_language_feature_logging
          ~po_disallow_elvis_space
-         ~ignored_fixme_codes = {
+         ~ignored_fixme_codes
+         ~forward_compatibility_level = {
                    tco_assume_php;
                    tco_safe_array;
                    tco_safe_vector_array;
@@ -261,6 +264,7 @@ let make ~tco_assume_php
                    tco_disallow_array_literal;
                    tco_language_feature_logging;
                    po_disallow_elvis_space;
+                   forward_compatibility_level;
         }
 let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
@@ -291,3 +295,4 @@ let tco_disallow_array_literal t = t.tco_disallow_array_literal
 let tco_language_feature_logging t = t.tco_language_feature_logging
 let po_disallow_elvis_space t = t.po_disallow_elvis_space
 let ignored_fixme_codes t = t.ignored_fixme_codes
+let forward_compatibility_level t = t.forward_compatibility_level

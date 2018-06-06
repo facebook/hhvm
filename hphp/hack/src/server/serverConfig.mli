@@ -26,3 +26,4 @@ val typechecker_options : t -> TypecheckerOptions.t
 val parser_options      : t -> ParserOptions.t
 val formatter_override  : t -> Path.t option
 val config_hash         : t -> string option
+val forward_compatibility_level : t -> ForwardCompatibilityLevel.t

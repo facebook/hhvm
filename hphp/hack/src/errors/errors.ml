@@ -2719,7 +2719,8 @@ let eq_incompatible_types p left right =
 
 let comparison_invalid_types p left right =
   let msg = "This comparison has invalid types.  Only comparisons in which \
-             both arguments are strings, nums, or DateTime are allowed" in
+             both arguments are strings, nums, DateTime, or DateTimeImmutable \
+             are allowed" in
   add_list (Typing.err_code Typing.ComparisonInvalidTypes) ((p, msg) :: left @ right)
 
 let void_usage p void_witness =

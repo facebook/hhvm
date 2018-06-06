@@ -1,5 +1,5 @@
 File "do_cond2.php", line 17, characters 14-19:
-This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, or DateTime are allowed (Typing[4240])
+This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
 File "do_cond2.php", line 16, characters 12-15:
 This is a nullable type
 File "do_cond2.php", line 17, characters 19-19:

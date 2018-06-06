@@ -30,6 +30,7 @@ module Classes = struct
   let cThrowable= "\\Throwable"
   let cStdClass = "\\stdClass"
   let cDateTime = "\\DateTime"
+  let cDateTimeImmutable = "\\DateTimeImmutable"
 
   let cAsyncIterator = "\\AsyncIterator"
   let cAsyncKeyedIterator = "\\AsyncKeyedIterator"

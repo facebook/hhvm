@@ -24,6 +24,7 @@ class Exception implements Throwable {
    * @previous   mixed   The previous exception used for the exception
    *                     chaining.
    */
+  <<__Rx>>
   public function __construct($message = '', $code = 0,
                               Throwable $previous = null) {
 

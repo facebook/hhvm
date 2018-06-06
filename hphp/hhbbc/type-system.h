@@ -381,11 +381,33 @@ enum trep : uint64_t {
   BTop      = static_cast<uint64_t>(-1),
 };
 
+constexpr trep operator~(trep a) {
+  return static_cast<trep>(~static_cast<int64_t>(a));
+}
+
+constexpr trep operator&(trep a, trep b) {
+  return static_cast<trep>(static_cast<int64_t>(a) & b);
+}
+
+constexpr trep operator|(trep a, trep b) {
+  return static_cast<trep>(static_cast<int64_t>(a) | b);
+}
+
+constexpr const trep& operator&=(trep&a, trep b) {
+  a = a & b;
+  return a;
+}
+
+constexpr const trep& operator|=(trep&a, trep b) {
+  a = a | b;
+  return a;
+}
+
 // Useful constants. Don't put them in the enum itself, because they
 // can't actually occur, but are convenient masks.
-constexpr auto BArrLikeE = static_cast<trep>(BArrE | BVecE | BDictE | BKeysetE);
-constexpr auto BArrLikeN = static_cast<trep>(BArrN | BVecN | BDictN | BKeysetN);
-constexpr auto BSArrLike = static_cast<trep>(BSArr | BSVec | BSDict | BSKeyset);
+constexpr auto BArrLikeE = BArrE | BVecE | BDictE | BKeysetE;
+constexpr auto BArrLikeN = BArrN | BVecN | BDictN | BKeysetN;
+constexpr auto BSArrLike = BSArr | BSVec | BSDict | BSKeyset;
 
 #define DATATAGS                                                \
   DT(Str, SString, sval)                                        \

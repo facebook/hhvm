@@ -368,11 +368,11 @@ bool canBeOptional(trep bits) {
  */
 template<trep B>
 trep combine_arrish_bits(trep a, trep b) {
-  DEBUG_ONLY constexpr trep OptB = static_cast<trep>(BInitNull | B);
-  auto const combined = static_cast<trep>(a | b);
+  DEBUG_ONLY constexpr trep OptB = BInitNull | B;
+  auto const combined = a | b;
   assert((combined & OptB) == combined);
-  auto const arr_part = static_cast<trep>(combined & B);
-  if (!isPredefined(arr_part)) return static_cast<trep>(combined|B);
+  auto const arr_part = combined & B;
+  if (!isPredefined(arr_part)) return combined | B;
   assert(isPredefined(combined));
   return combined;
 }
@@ -384,10 +384,10 @@ trep combine_arrish_bits(trep a, trep b) {
  * and emptiness bits.
  */
 trep combine_dv_arrish_bits(trep a, trep b) {
-  auto const combined = static_cast<trep>(a | b);
-  auto const nonopt = trep(combined & ~BInitNull);
-  auto const check = [&](trep x) { return (nonopt & x) == nonopt; };
-  auto const ret = [&](trep x) {
+  auto const combined = a | b;
+  auto const nonopt = combined & ~BInitNull;
+  auto const check = [&] (trep x) { return (nonopt & x) == nonopt; };
+  auto const ret = [&] (trep x) {
     return (combined & BInitNull) ? trep(x | BInitNull) : x;
   };
   if (check(BSArrE)) return ret(BSArrE);
@@ -471,8 +471,8 @@ trep combine_dv_arr_like_bits(trep a, trep b) {
 }
 
 trep maybe_promote_varray(trep a) {
-  auto const check = [&](trep b, trep c){
-    if (a & b) a = static_cast<trep>(a | c);
+  auto const check = [&] (trep b, trep c) {
+    if (a & b) a |= c;
   };
   assert(isPredefined(a));
   check(BSVArrE, BSArrE);
@@ -484,8 +484,8 @@ trep maybe_promote_varray(trep a) {
 }
 
 trep promote_varray(trep a) {
-  auto const check = [&](trep b, trep c){
-    if (a & b) a = static_cast<trep>((a | c) & ~b);
+  auto const check = [&] (trep b, trep c) {
+    if (a & b) a = (a | c) & ~b;
   };
   assert(isPredefined(a));
   // If the array is more than just a varray, we can't just switch the bits and
@@ -1796,7 +1796,7 @@ bool Type::subtypeOfImpl(const Type& o) const {
   // NB: We don't assert checkInvariants() here because this can be called from
   // checkInvariants() and it all takes too long if the type is deeply nested.
 
-  auto const isect = static_cast<trep>(m_bits & o.m_bits);
+  auto const isect = m_bits & o.m_bits;
   if (isect != m_bits) return false;
 
   // No data is always more general.
@@ -1830,7 +1830,7 @@ bool Type::couldBe(const Type& o) const {
   assert(checkInvariants());
   assert(o.checkInvariants());
 
-  auto const isect = static_cast<trep>(m_bits & o.m_bits);
+  auto const isect = m_bits & o.m_bits;
   if (isect == 0) return false;
   // just an optimization; if the intersection contains one of these,
   // we're done because they don't support data.
@@ -2361,13 +2361,13 @@ Type sarr_mapn(Type k, Type v) {
 Type opt(Type t) {
   assert(canBeOptional(t.m_bits));
   auto ret = t;
-  ret.m_bits = static_cast<trep>(ret.m_bits | BInitNull);
+  ret.m_bits |= BInitNull;
   return ret;
 }
 
 Type unopt(Type t) {
   assert(is_opt(t));
-  t.m_bits = static_cast<trep>(t.m_bits & ~BInitNull);
+  t.m_bits &= ~BInitNull;
   assert(!is_opt(t));
   return t;
 }
@@ -2375,7 +2375,7 @@ Type unopt(Type t) {
 bool is_opt(const Type& t) {
   if (t.m_bits == BInitNull) return false;
   if (!t.couldBe(TInitNull)) return false;
-  auto const nonNullBits = static_cast<trep>(t.m_bits & ~BInitNull);
+  auto const nonNullBits = t.m_bits & ~BInitNull;
   return isPredefined(nonNullBits) && canBeOptional(nonNullBits);
 }
 
@@ -2760,8 +2760,7 @@ Type scalarize(Type t) {
     case DataTag::Str:
       return t;
     case DataTag::ArrLikeVal:
-      t.m_bits = static_cast<trep>(t.m_bits &
-                                   (BSArrN | BSVecN | BSDictN | BSKeysetN));
+      t.m_bits &= BSArrN | BSVecN | BSDictN | BSKeysetN;
       return t;
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikePacked:
@@ -3033,7 +3032,7 @@ Type from_hni_constraint(SString s) {
 }
 
 Type intersection_of(Type a, Type b) {
-  auto const isect = static_cast<trep>(a.m_bits & b.m_bits);
+  auto const isect = a.m_bits & b.m_bits;
   if (!mayHaveData(isect)) return Type { isect };
 
   auto fix = [&] (Type& t) {
@@ -3132,7 +3131,7 @@ Type intersection_of(Type a, Type b) {
   if (t != TBottom) return t;
   auto const bits =
     isect & ~(BInt|BDbl|BSStr|BArrN|BVecN|BDictN|BKeysetN|BObj|BRef);
-  return Type { static_cast<trep>(bits) };
+  return Type { bits };
 }
 
 Type Type::unionArrLike(Type a, Type b) {
@@ -3401,7 +3400,7 @@ Emptiness emptiness(const Type& t) {
 void widen_type_impl(Type& t, uint32_t depth) {
   // Right now to guarantee termination we need to just limit the nesting depth
   // of the type to a fixed degree.
-  auto const checkDepth = [&]{
+  auto const checkDepth = [&] {
     if (depth >= kTypeWidenMaxDepth) {
       t = Type { t.m_bits };
       return true;
@@ -3486,8 +3485,8 @@ Type stack_flav(Type a) {
 }
 
 Type loosen_staticness(Type t) {
-  auto const check = [&](trep a){
-    if (t.m_bits & a) t.m_bits = static_cast<trep>(t.m_bits | a);
+  auto const check = [&] (trep a) {
+    if (t.m_bits & a) t.m_bits |= a;
   };
   // Need to remove any constant value from a string because a TStr cannot have
   // one.
@@ -3508,8 +3507,8 @@ Type loosen_staticness(Type t) {
 }
 
 Type loosen_dvarrayness(Type t) {
-  auto const check = [&](trep a) {
-    if (t.m_bits & a) t.m_bits = static_cast<trep>(t.m_bits | a);
+  auto const check = [&] (trep a) {
+    if (t.m_bits & a) t.m_bits |= a;
   };
   if (t.couldBe(TArr) && t.m_dataTag == DataTag::ArrLikeVal) {
     // We need to drop any static array from the type because TArr unions cannot
@@ -3561,8 +3560,8 @@ Type loosen_values(Type a) {
 }
 
 Type loosen_emptiness(Type t) {
-  auto const check = [&](trep a, trep b){
-    if (t.m_bits & a) t.m_bits = static_cast<trep>(t.m_bits | b);
+  auto const check = [&] (trep a, trep b) {
+    if (t.m_bits & a) t.m_bits |= b;
   };
   check(BSPArr,   BSPArr);
   check(BCPArr,   BPArr);
@@ -3590,8 +3589,8 @@ Type loosen_all(Type t) {
 }
 
 Type add_nonemptiness(Type t) {
-  auto const check = [&](trep a, trep b){
-    if (t.m_bits & a) t.m_bits = static_cast<trep>(t.m_bits | b);
+  auto const check = [&] (trep a, trep b) {
+    if (t.m_bits & a) t.m_bits |= b;
   };
   check(BSPArrE,   BSPArrN);
   check(BCPArrE,   BPArrN);
@@ -3628,7 +3627,7 @@ Type assert_emptiness(Type t) {
 
   auto remove = [&] (trep m, trep e) {
     if ((t.m_bits & m) == t.m_bits) {
-      auto bits = static_cast<trep>(t.m_bits & e);
+      auto bits = t.m_bits & e;
       if (t.hasData() && !mayHaveData(bits)) {
         t = Type { bits };
       } else {
@@ -3666,7 +3665,7 @@ Type assert_nonemptiness(Type t) {
 
   auto remove = [&] (trep m, trep e) {
     if ((t.m_bits & m) == t.m_bits) {
-      t.m_bits = static_cast<trep>(t.m_bits & e);
+      t.m_bits &= e;
       return true;
     }
     return false;
@@ -4191,7 +4190,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
   const bool validKey   = key.type.subtypeOf(isVector ? TInt : TArrKey);
 
   trep bits = combine_dv_arr_like_bits(arr.m_bits, BArrLikeN);
-  if (validKey) bits = static_cast<trep>(bits & ~BArrLikeE);
+  if (validKey) bits &= ~BArrLikeE;
 
   auto const fixRef  = !isPhpArray && valIn.couldBe(TRef);
   auto const throwMode = !fixRef && validKey && !key.mayThrow ?
@@ -4345,7 +4344,7 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
   const bool isVArray = (arr.m_bits & BOptVArr) == arr.m_bits;
 
   trep bits = combine_dv_arr_like_bits(arr.m_bits, BArrLikeN);
-  bits = static_cast<trep>(bits & ~BArrLikeE);
+  bits &= ~BArrLikeE;
 
   if (!(arr.m_bits & BArrLikeN)) {
     assert(maybeEmpty);

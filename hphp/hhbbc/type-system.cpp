@@ -216,9 +216,11 @@ bool canBeOptional(trep bits) {
   case BBottom:
     return false;
 
+  case BNull:
   case BUninit:
   case BInitNull:
     return false;
+
   case BFalse:
   case BTrue:
   case BInt:
@@ -256,7 +258,6 @@ bool canBeOptional(trep bits) {
   case BDArr:
     return true;
 
-  case BNull:
   case BNum:
   case BBool:
   case BStr:

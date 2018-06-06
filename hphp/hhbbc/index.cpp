@@ -1401,8 +1401,8 @@ bool build_class_properties(BuildClsInfo& info,
 auto build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
   std::vector<SString> names;
   CompactVector<std::unique_ptr<res::Func::FuncFamily>> ret;
-  auto& impls = data.ifaceImplementerMap[iface->cls];
-  if (impls.empty()) return ret;
+  auto const impls = data.ifaceImplementerMap.find(iface->cls);
+  if (impls == data.ifaceImplementerMap.end()) return ret;
 
   // We start by collecting the list of methods shared across all classes which
   // implement iface (including indirectly). And then add the public methods
@@ -1411,10 +1411,10 @@ auto build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
   // declared on iface and may also be missing methods declared on iface. In
   // practice this is the set of methods we can depend on having accessible
   // given any object which is known to implement iface.
-  auto it = impls.begin();
+  auto it = impls->second.begin();
   for (auto& par : (*it)->methods) names.push_back(par.first);
 
-  while (++it != impls.end()) {
+  while (++it != impls->second.end()) {
     auto& methods = (*it)->methods;
     for (auto nameIt = names.begin(); nameIt != names.end();) {
       if (!methods.count(*nameIt)) nameIt = names.erase(nameIt);
@@ -1428,7 +1428,7 @@ auto build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
     res::Func::FuncFamily ff;
     std::unordered_set<borrowed_ptr<const php::Func>> seen;
     auto& funcs = ff.possibleFuncs;
-    for (auto cinfo : impls) {
+    for (auto cinfo : impls->second) {
       assertx(!(cinfo->cls->attrs & AttrInterface));
 
       auto methIt = cinfo->methods.find(name);

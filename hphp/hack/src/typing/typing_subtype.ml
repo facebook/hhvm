@@ -251,6 +251,25 @@ let rec simplify_subtype
         | None -> default ()
       end
 
+  | (_, Tabstract (AKnewtype _, None)),
+    (_, (Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ |
+         Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _))) ->
+    invalid ()
+
+  | (_, Tabstract (AKnewtype (name_sub, _), None)),
+    (_, Tabstract (AKnewtype (name_super, _), _))
+    when name_sub <> name_super -> invalid()
+
+  | (_, Tabstract (AKnewtype _, Some ty)),
+    (_, (Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ |
+         Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _))) ->
+    simplify_subtype ~deep ~this_ty ty ty_super res
+
+  | (_, Tabstract (AKnewtype (name_sub, _), Some ty)),
+    (_, Tabstract (AKnewtype (name_super, _), _))
+    when name_sub <> name_super ->
+    simplify_subtype ~deep ~this_ty ty ty_super res
+
   | (r_sub,   Tshape (fields_known_sub, fdm_sub)),
     (r_super, Tshape (fields_known_super, fdm_super)) ->
       (**
@@ -356,7 +375,7 @@ let rec simplify_subtype
 
   (* Subtype is known to be nullable, so never a subtype of nonnull *)
   | (_, (Tprim Nast.Tvoid | Tmixed | Tdynamic | Toption _
-    | Tabstract ((AKnewtype _ | AKdependent _), None))), (_, Tnonnull) ->
+    | Tabstract (AKdependent _, None))), (_, Tnonnull) ->
     invalid ()
 
   (* Tvoid is not allowed to subtype Tdynamic *)

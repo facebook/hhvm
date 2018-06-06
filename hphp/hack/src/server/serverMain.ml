@@ -68,7 +68,14 @@ module Program =
       match ServerArgs.convert genv.options with
       | None ->
          WorkerController.killall ();
-         exit (if Errors.is_empty env.errorl then 0 else 1)
+         (* as Warnings shouldn't break CI, don't change the exit status except
+          * for Errors *)
+         let has_errors = if Errors.is_empty env.errorl
+           then false
+           else
+             List.exists ~f:(fun e -> Errors.get_severity e = Errors.Error) (Errors.get_error_list env.errorl)
+         in
+         exit (if has_errors then 1 else 0)
       | Some dirname ->
          ServerConvert.go genv env dirname;
          WorkerController.killall ();

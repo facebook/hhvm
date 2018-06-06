@@ -23,6 +23,7 @@ module type S = sig
 
   (* The analysis phase that the error is coming from. *)
   type phase = Init | Parsing | Naming | Decl | Typing
+  type severity = Warning | Error
 
   module Parsing : Error_category
   module Naming : Error_category
@@ -39,6 +40,7 @@ module type S = sig
   val to_list : 'a error_ -> ('a * string) list
   val get_code : 'a error_ -> int
   val get_pos : error -> Pos.t
+  val get_severity : 'a error_ -> severity
   val make_error : int -> (Pos.t * string) list -> error
 
   val error_code_to_string : int -> string

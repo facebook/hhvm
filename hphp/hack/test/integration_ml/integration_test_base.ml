@@ -36,6 +36,7 @@ let global_opts = GlobalOptions.make
   ~tco_disallow_array_typehint:false
   ~tco_disallow_array_literal:false
   ~tco_language_feature_logging:false
+  ~tco_unsafe_rx:false
   ~po_disallow_elvis_space:false
   ~ignored_fixme_codes: ISet.empty
   ~forward_compatibility_level: ForwardCompatibilityLevel.default

@@ -16,6 +16,7 @@ let disallow_ambiguous_lambda = GlobalOptions.tco_disallow_ambiguous_lambda
 let disallow_array_typehint = GlobalOptions.tco_disallow_array_typehint
 let disallow_array_literal = GlobalOptions.tco_disallow_array_literal
 let language_feature_logging = GlobalOptions.tco_language_feature_logging
+let unsafe_rx = GlobalOptions.tco_unsafe_rx
 let experimental_feature_enabled =
   GlobalOptions.tco_experimental_feature_enabled
 let migration_flag_enabled =

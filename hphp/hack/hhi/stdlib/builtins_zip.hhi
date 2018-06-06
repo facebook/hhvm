@@ -87,20 +87,17 @@ class ZipArchive {
   public function addGlob(
     string $pattern,
     int $flags = 0,
-    /* HH_IGNORE_ERROR[2083] */
-    array $options = array(),
+    darray $options = darray[],
   ): bool;
   public function addPattern(
     string $pattern,
     string $path = ".",
-    /* HH_IGNORE_ERROR[2083] */
-    array $options = array(),
+    darray $options = darray[],
   ): bool;
   public function close(): bool;
   public function deleteIndex(int $index): bool;
   public function deleteName(string $name): bool;
-  /* HH_IGNORE_ERROR[2083] */
-  public function extractTo(string $destination, $entries = array()): bool;
+  public function extractTo(string $destination, $entries = varray[]): bool;
   public function getArchiveComment(int $flags = 0): string;
   public function getCommentIndex(int $index, int $flags = 0): string;
   public function getCommentName(string $name, int $flags = 0): string;

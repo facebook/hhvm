@@ -18,6 +18,7 @@ type error_code = int
 type 'a message = 'a * string
 
 type error_phase = Init | Parsing | Naming | Decl | Typing
+type error_severity = Warning | Error
 
 (* For callers that don't care about tracking error origins *)
 let default_context = (Relative_path.default, Typing)
@@ -75,6 +76,11 @@ let list_to_files_t = function
      * See assert in incremental_update. *)
     Relative_path.Map.singleton Relative_path.default
       (PhaseMap.singleton Typing x)
+
+let get_code_severity code =
+  if code = Error_codes.Init.err_code Error_codes.Init.ForwardCompatibilityNotCurrent
+  then Warning
+  else Error
 
 module Common = struct
 
@@ -222,6 +228,7 @@ module type Errors_modes = sig
 
   val get_code: 'a error_ -> error_code
   val get_pos: error -> Pos.t
+  val get_severity: 'a error_ -> error_severity
   val to_list: 'a error_ -> 'a message list
   val to_absolute : error -> Pos.absolute error_
 
@@ -274,6 +281,9 @@ module NonTracingErrors: Errors_modes = struct
 
   and get_code (error: 'a error_) = ((fst error): error_code)
   let get_pos (error : error) = fst (List.hd_exn (snd error))
+
+  let get_severity (error: 'a error_) = get_code_severity (get_code error)
+
   let to_list (error : 'a error_) = snd error
   let to_absolute error =
     let code, msg_l = (get_code error), (to_list error) in
@@ -370,6 +380,8 @@ module TracingErrors: Errors_modes = struct
   let get_pos ((_, _, msg_l): error) =
     fst (List.hd_exn msg_l)
 
+  let get_severity (error: 'a error_) = get_code_severity (get_code error)
+
   let get_bt ((bt, _, _): 'a error_) = bt
 
   let to_list ((_, _, l): 'a error_) = l
@@ -442,6 +454,7 @@ type applied_fixme = M.applied_fixme
 type t = error files_t * applied_fixme files_t
 
 type phase = error_phase = Init | Parsing | Naming | Decl | Typing
+type severity = error_severity = Warning | Error
 
 module type Error_category = sig
   type t
@@ -602,6 +615,7 @@ and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)
 
 and get_code = M.get_code
 and get_pos = M.get_pos
+and get_severity = M.get_severity
 and to_list = M.to_list
 
 and make_error = M.make_error

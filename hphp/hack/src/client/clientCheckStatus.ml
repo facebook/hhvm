@@ -91,4 +91,8 @@ let go status output_json from =
     Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
     if has_unsaved_changes then warn_unsaved_changes ()
   end;
-  if error_list = [] then Exit_status.No_error else Exit_status.Type_error
+  (* don't indicate errors in exit code for warnings; warnings shouldn't break
+   * CI *)
+  if List.exists ~f:(fun e -> Errors.get_severity e = Errors.Error) error_list
+  then Exit_status.Type_error
+  else Exit_status.No_error

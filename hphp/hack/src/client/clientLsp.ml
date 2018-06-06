@@ -592,9 +592,13 @@ let hack_errors_to_lsp_diagnostic
         relatedLocation = location;
         relatedMessage = message;
       }) in
+    let severity = match Errors.get_severity error with
+      | Errors.Error -> Some PublishDiagnostics.Error
+      | Errors.Warning -> Some PublishDiagnostics.Warning
+    in
     { Lsp.PublishDiagnostics.
       range;
-      severity = Some PublishDiagnostics.Error;
+      severity;
       code = PublishDiagnostics.IntCode (Errors.get_code error);
       source = Some "Hack";
       message;

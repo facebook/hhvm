@@ -21,6 +21,7 @@
 #include <memory>
 #include <vector>
 
+#include <folly/container/F14Set.h>
 #include <folly/Format.h>
 
 #include "hphp/util/embedded-data.h"
@@ -31,7 +32,7 @@ namespace {
 
 // List of types which should be ignored (including any bases) by the generated
 // scanners. Add as needed.
-const std::unordered_set<std::string> ignored = {
+const folly::F14FastSet<std::string> ignored = {
   "pthread_cond_t",
   "std::condition_variable",
   "st_mysql_bind",
@@ -39,7 +40,7 @@ const std::unordered_set<std::string> ignored = {
 
 // List of templates which should not be used to store request heap allocated
 // values (because scanner aware variants exist).
-const std::unordered_set<std::string> forbidden_template = {
+const folly::F14FastSet<std::string> forbidden_template = {
   "boost::container::flat_map",
   "boost::container::flat_multimap",
   "boost::container::flat_multiset",
@@ -65,7 +66,7 @@ const std::unordered_set<std::string> forbidden_template = {
   "std::vector"
 };
 
-const std::unordered_set<std::string> forced_conservative = {
+const folly::F14FastSet<std::string> forced_conservative = {
   "boost::variant",
   "folly::Optional",
   "std::optional",

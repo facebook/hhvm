@@ -21,6 +21,8 @@
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
+#include <folly/container/F14Map.h>
+#include <folly/container/F14Set.h>
 #include <folly/portability/Unistd.h>
 
 #include <errno.h>
@@ -221,8 +223,8 @@ struct TypeParserImpl : TypeParser {
   }
 
   struct LinkageDependents {
-    std::unordered_set<Dwarf_Off> template_uses;
-    std::unordered_set<Dwarf_Off> children;
+    folly::F14FastSet<Dwarf_Off> template_uses;
+    folly::F14FastSet<Dwarf_Off> children;
   };
 
   // All of the parser's persistent state is stored in some number of
@@ -239,8 +241,8 @@ struct TypeParserImpl : TypeParser {
   // always be true.
   struct StateBlock {
     std::vector<ObjectType> all_objs;
-    std::unordered_map<Dwarf_Off, size_t> obj_offsets;
-    std::unordered_map<Dwarf_Off, LinkageDependents> linkage_dependents;
+    folly::F14FastMap<Dwarf_Off, size_t> obj_offsets;
+    folly::F14FastMap<Dwarf_Off, LinkageDependents> linkage_dependents;
     std::unordered_multimap<Dwarf_Off, Dwarf_Off> static_definitions;
   };
   std::vector<std::unique_ptr<StateBlock>> m_states;
@@ -442,14 +444,15 @@ TypeParserImpl::getObjectBlock(size_t index) const {
  * recorded in linkage_dependents, which is used here.
  */
 void TypeParserImpl::fixTemplateLinkage(StateBlock& state) {
-  std::unordered_set<Dwarf_Off> changed;
+  using ChangedSet = folly::F14FastSet<Dwarf_Off>;
+  ChangedSet changed;
 
   for (const auto& pair : state.linkage_dependents) {
     if (pair.second.template_uses.empty()) continue;
     changed.emplace(pair.first);
   }
 
-  std::unordered_set<Dwarf_Off> old_changed;
+  ChangedSet old_changed;
   while (!changed.empty()) {
     std::swap(changed, old_changed);
 

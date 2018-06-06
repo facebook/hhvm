@@ -27,6 +27,8 @@
 #include <folly/Memory.h>
 #include <folly/Singleton.h>
 #include <folly/String.h>
+#include <folly/container/F14Map.h>
+#include <folly/container/F14Set.h>
 
 #include <boost/program_options.hpp>
 #include <boost/variant.hpp>
@@ -117,6 +119,21 @@
 
 namespace {
 
+// fast_map/set maps to F14{Value,Vector}Map/Set depending on K+V size.
+// Entries are moved (if possible) or copied (if necessary) on rehash & erase.
+template<class K, class V, class H=std::hash<K>, class C=std::equal_to<K>>
+using fast_map = folly::F14FastMap<K,V,H,C>;
+template<class T, class H=std::hash<T>, class C=std::equal_to<T>>
+using fast_set = folly::F14FastSet<T,H,C>;
+
+// node_map/set allocate K+V separately like std::unordered_map; K+V don't
+// move during rehash. Saves memory compared to fast_map/set when when K+V
+// is large.
+template<class K, class V, class H=std::hash<K>, class C=std::equal_to<K>>
+using node_map = folly::F14NodeMap<K,V,H,C>;
+template<class T, class H=std::hash<T>, class C=std::equal_to<T>>
+using node_set = folly::F14NodeSet<T,H,C>;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 using namespace debug_parser;
@@ -167,27 +184,27 @@ struct Generator {
     // If a custom scanner for the object type is specified, it will only be
     // invoked if any of the types in the custom guards list is interesting. If
     // the list is empty, the custom scanner is always invoked.
-    std::unordered_set<const Type*> custom_guards;
+    fast_set<const Type*> custom_guards;
 
     // List of fields in the object which should be ignored.
-    std::unordered_set<std::string> ignore_fields;
+    fast_set<std::string> ignore_fields;
 
     // List of fields in the object which should always be conservative scanned.
-    std::unordered_set<std::string> conservative_fields;
+    fast_set<std::string> conservative_fields;
 
     // Map of field names to symbols of custom scanners for that field.
-    std::unordered_map<std::string, std::string> custom_fields;
+    fast_map<std::string, std::string> custom_fields;
 
     // List of immediate base classes which should be ignored.
-    std::unordered_set<const Object*> ignored_bases;
+    fast_set<const Object*> ignored_bases;
 
     // List of immediate bases which the "forbidden template" check should not
     // be applied to. Mainly used internally.
-    std::unordered_set<const Object*> silenced_bases;
+    fast_set<const Object*> silenced_bases;
 
     // If a custom scanner function for bases is specified, the list of
     // immediate bases which the scanner applies to.
-    std::unordered_set<const Object*> custom_bases;
+    fast_set<const Object*> custom_bases;
 
     // For certain actions it can immediately be known that its associated
     // object will always be interesting. Therefore, any indexed type with such
@@ -338,20 +355,20 @@ struct Generator {
     ObjectNameEquals
   > m_objects_by_name;
 
-  mutable std::unordered_map<
+  mutable node_map<
     std::string,
     Object
   > m_external_objects;
 
-  mutable std::unordered_map<
+  mutable node_map<
     CompileUnitId,
-    std::unordered_map<
+    node_map<
       std::string,
       Object
     >
   > m_internal_objects;
 
-  mutable std::unordered_map<
+  mutable node_map<
     ObjectTypeId,
     Object
   > m_unique_objects;
@@ -359,7 +376,7 @@ struct Generator {
   // Mapping of object types to their computed actions. We could compute the
   // action everytime we needed it, but they're stored in this table for
   // memoization. This table is mutable as well since its a cache.
-  mutable std::unordered_map<const Object*, Action> m_actions;
+  mutable node_map<const Object*, Action> m_actions; // XXX must be node
 
   // List of all indexed types in the debug information.
   std::vector<IndexedType> m_indexed_types;
@@ -368,9 +385,9 @@ struct Generator {
   // collectable. The collectable set is set once, and should never change,
   // while the pointer followable set can grow as more pointer followable types
   // are discovered (it must grow monotonically, never removing anything).
-  std::unordered_set<const Object*> m_ptr_followable;
-  std::unordered_set<const Object*> m_collectable;
-  std::unordered_set<const Object*> m_scannable_collectable;
+  fast_set<const Object*> m_ptr_followable;
+  fast_set<const Object*> m_collectable;
+  fast_set<const Object*> m_scannable_collectable;
 
   // List of all layouts. Once computed, the indexed types will have an index
   // into this table for its associated layout.

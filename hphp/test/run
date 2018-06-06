@@ -542,6 +542,7 @@ function get_options($argv) {
     'jit-serialize:' => '',
     'hhvm-binary-path:' => 'b:',
     'typechecker' => '',
+    'vendor:' => '',
     'hhserver-binary-path:' => '',
     'compare-hh-codegen' => '',
     'no-semdiff' => '',
@@ -906,8 +907,15 @@ function mode_cmd($options) {
   }
 }
 
-function extra_args($options) {
-  return idx($options, 'args', '');
+function extra_args($options): string {
+  $args = $options['args'] ?? '';
+
+  $vendor = $options['vendor'] ?? null;
+  if ($vendor !== null) {
+    $args .= ' -d auto_prepend_file=';
+    $args .= escapeshellarg($vendor.'/hh_autoload.php');
+  }
+  return $args;
 }
 
 function hhvm_cmd_impl() {
@@ -1305,6 +1313,20 @@ function hh_server_cmd($options, $test) {
     copy($inc_file, $temp_dir . '/' . basename($inc_file));
   }
   $cmd = hh_server_path() .  ' --check ' . $temp_dir;
+
+  $vendor = $options['vendor'] ?? null;
+  if ($vendor !== null) {
+    $f = fopen($temp_dir.'/.hhconfig', 'a+');
+    if (!is_resource($f)) {
+      throw new Exception('failed to open hhconfig for append');
+    }
+    fprintf(
+      $f,
+      "\nextra_paths=%s\n",
+      $vendor
+    );
+    fclose($f);
+  }
   return array($cmd, ' ', $temp_dir);
 }
 
@@ -3210,6 +3232,10 @@ function drain_queue($queue) {
 }
 
 function get_num_threads($options, $tests) {
+  if ($options['typechecker'] ?? false) {
+    // hh_server spawns a child per CPU; things get flakey with CPU^2 forks
+    return 1;
+  }
   $cpus = isset($options['server']) || isset($options['cli-server'])
     ? num_cpus() * 2 : num_cpus();
   return min(count($tests), idx($options, 'threads', $cpus));

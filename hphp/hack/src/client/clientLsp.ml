@@ -1291,16 +1291,24 @@ let do_documentRename
 
 let do_documentOnTypeFormatting
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
-    (from: string)
     (params: DocumentOnTypeFormatting.params)
   : DocumentOnTypeFormatting.result =
   let open DocumentOnTypeFormatting in
   let open TextDocumentIdentifier in
   let fixup_position position =
-    (* temporary workaround for T29372533: Nuclide points at the trigger character... *)
-    if from = "nuclide" then position
-    (* ... but other LSP editors such as vscode point one character later *)
-    else {position with character = position.character - 1}
+    (* temporary workaround for T29372533: Nuclide points at the trigger character...
+        Temporarily checks if current position points to trigger character,
+        otherwise returns the previous position
+     *)
+    let uri = params.textDocument.uri in
+    let lsp_doc = SMap.get uri editor_open_files in
+    let open Lsp.TextDocumentItem in
+    let content = Option.value_map ~default:"" ~f:(fun item -> item.text) lsp_doc in
+    let current_char = Lsp_helpers.get_char_from_lsp_position content position in
+    let prev_position = {position with character = position.character - 1}
+    in
+    if ((current_char = ';') || (current_char = '}')) then position
+    else prev_position
   in
   let action = ServerFormatTypes.Position
       { Ide_api_types.
@@ -2200,7 +2208,7 @@ let handle_event
   | Main_loop menv, Client_message c when c.method_ = "textDocument/onTypeFormatting" ->
     cancel_if_stale client c short_timeout;
     parse_documentOnTypeFormatting c.params
-    |> do_documentOnTypeFormatting menv.editor_open_files env.from
+    |> do_documentOnTypeFormatting menv.editor_open_files
     |> print_documentOnTypeFormatting |> Jsonrpc.respond to_stdout c
 
   (* textDocument/didOpen notification *)

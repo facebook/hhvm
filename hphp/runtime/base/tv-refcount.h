@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/assertions.h"

@@ -123,6 +123,7 @@
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -12783,6 +12784,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     // !RuntimeOption::EvalHackCompilerFallback. (Otherwise ue should be a fatal
     // unit.)
     if (!ue) {
+      log_hphpc_invoke(filename);
       auto parseit = [=] (AnalysisResultPtr ar) {
         Scanner scanner(code, codeLen,
                         RuntimeOption::GetScannerType(), filename);

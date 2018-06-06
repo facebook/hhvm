@@ -87,6 +87,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
     SharedMem.connect handle ~is_master:true;
     ServerMain.run_once options handle
   else
+    let current_version = ServerConfig.(version config) in
     let waiting_client = ServerArgs.waiting_client options in
     let informant_options = {
       HhMonitorInformant.root = ServerArgs.root options;
@@ -105,7 +106,9 @@ let monitor_daemon_main (options: ServerArgs.options) =
     } in
     let max_purgatory_clients =
       local_config.ServerLocalConfig.max_purgatory_clients in
-    SM.start_monitoring ~waiting_client
+    SM.start_monitoring
+      ?current_version
+      ~waiting_client
       ~max_purgatory_clients
       options informant_options
       ServerMonitorUtils.({

@@ -12,6 +12,8 @@ open Sys_utils
 
 type t = string SMap.t
 
+let file_path_relative_to_repo_root = ".hhconfig"
+
 (*
  * Config file format:
  * # Some comment. Indicate by a pound sign at the start of a new line

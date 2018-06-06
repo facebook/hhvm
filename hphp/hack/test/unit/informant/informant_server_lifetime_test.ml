@@ -8,6 +8,9 @@ module Target_mini_state_comparator = struct
 end;;
 
 
+module Int_asserter = Asserter.Int_asserter
+
+
 module Target_mini_state_opt_comparator =
   Asserter.Make_option_comparator (Target_mini_state_comparator);;
 
@@ -38,7 +41,9 @@ module Start_server_args_opt_asserter = Asserter.Make_asserter
 
 module type Mock_server_config_sig = sig
   include ServerMonitorUtils.Server_config with type server_start_options = unit
+  val get_start_server_count : unit -> int
   val get_last_start_server_call : unit -> Start_server_args_comparator.t option
+  val get_kill_server_count : unit -> int
 end;;
 
 
@@ -89,17 +94,27 @@ let make_test test =
       last_request_handoff = ref 0.0;
     }
 
+    let start_server_count = ref 0
+
     let last_start_server_call = ref None
 
     let start_server ?(target_mini_state:_) ~informant_managed:_ ~prior_exit_status:_ start_options =
       last_start_server_call := (Some target_mini_state);
+      start_server_count := !start_server_count + 1;
       fake_process_data
+
+    let get_start_server_count () = !start_server_count
 
     let get_last_start_server_call () = !last_start_server_call
 
     let on_server_exit : ServerMonitorUtils.monitor_config -> unit = fun _ -> ()
 
-    let kill_server _ = ()
+    let kill_server_count = ref 0
+
+    let kill_server _ =
+      kill_server_count := !kill_server_count + 1
+
+    let get_kill_server_count () = !kill_server_count
 
     let wait_for_server_exit _ _ = ()
 
@@ -174,6 +189,64 @@ let test_restart_server_with_target_saved_state mock_server_config temp_dir =
     "Should be starting fresh server with target saved state after significant Changed_merge_base";
   true
 
+let test_server_restart_suppressed_on_hhconfig_version_change mock_server_config temp_dir =
+  (** The first part of this is mostly copy-pasta.
+   * Can't reuse code because of First Class Modules :(  *)
+  (** ---- Start of copy-pasta from test_restart_server_with_target_saved_state -------- *)
+  (** ------------------------ This sets up an Informant-directed restart -------------- *)
+  let module Mock_server_config = (val mock_server_config : Mock_server_config_sig) in
+  let module Test_monitor = ServerMonitor.Make_monitor (Mock_server_config) (HhMonitorInformant) in
+  Watchman.Mocking.init_returns @@ Some "Fake name for watchman instance";
+  let last_call = Mock_server_config.get_last_start_server_call () in
+  let expected = None in
+  Start_server_args_opt_asserter.assert_equals expected last_call
+    "Before starting monitor, start_server should not have been called.";
+  Hg.Mocking.current_working_copy_base_rev_returns
+    (Future.of_value Tools.svn_1);
+  let monitor = Test_monitor.start_monitor
+    (** ------ Except we want to specify a version ------- *)
+    ~current_version:"aaa"
+    ~waiting_client:None
+    ~max_purgatory_clients:10
+    ()
+    (Tools.simple_informant_options temp_dir)
+    (Tools.monitor_config temp_dir)
+  in
+  let monitor = Test_monitor.check_and_run_loop_once monitor in
+  let last_call = Mock_server_config.get_last_start_server_call () in
+  let expected = Some None in
+  Start_server_args_opt_asserter.assert_equals expected last_call
+    "First call of start server should have no target saved state";
+  (** ----------------------------- End of copy-pasta ---------------------------- *)
+  let start_server_count = Mock_server_config.get_start_server_count () in
+  Int_asserter.assert_equals 1 start_server_count
+    "Start server called once to start the first server.";
+  (** Next we set up next check_and_run_loop to trigger an Informant-directed restart *)
+  Tools.set_xdb ~state_svn_rev:200
+    ~for_svn_rev:200 ~everstore_handle:"dummy_handle_for_svn_200" ~tiny:false;
+  Tools.set_next_watchman_state_transition Tools.Changed_merge_base Tools.hg_rev_200;
+  (** ...except we want version to mismatch when we look it up *)
+  Sys_utils.write_file
+    ~file:(Relative_path.to_absolute (Relative_path.create Relative_path.Root "/tmp/.hhconfig"))
+    "version = def";
+  let monitor = Test_monitor.check_and_run_loop_once monitor in
+  ignore monitor;
+  let kill_server_count = Mock_server_config.get_kill_server_count () in
+  let start_server_count = Mock_server_config.get_start_server_count () in
+  Int_asserter.assert_equals 1 start_server_count
+    "Informant tried to do a restart with the better saved state, but it should not go through.";
+  Int_asserter.assert_equals 1 kill_server_count
+    "Kill should still be called, even though the next server instance isn't started.";
+  (** Pump the monitor's run loop again and ensure server stil hasn't tbeen started. *)
+  let monitor = Test_monitor.check_and_run_loop_once monitor in
+  ignore monitor;
+  let start_server_count = Mock_server_config.get_start_server_count () in
+  Int_asserter.assert_equals 1 start_server_count
+    "Start server still shouldn't be called";
+  (** Testing for a server actually being restarted on the next client connection
+   * happens in the integration tests. *)
+  true
+
 
 let setup_global_test_state () =
   EventLogger.init EventLogger.Event_logger_fake 0.0;
@@ -188,6 +261,8 @@ let tests =
       make_test test_no_event;
     "test_restart_server_with_target_saved_state",
       make_test test_restart_server_with_target_saved_state;
+    "test_server_restart_suppressed_on_hhconfig_version_change",
+      make_test test_server_restart_suppressed_on_hhconfig_version_change;
   ]
 
 let () =

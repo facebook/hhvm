@@ -43,7 +43,7 @@ type t = {
   extra_paths      : Path.t list;
 }
 
-let filename = Relative_path.from_root ".hhconfig"
+let filename = Relative_path.from_root Config_file.file_path_relative_to_repo_root
 
 let is_compatible c1 c2 =
   (* This comparison can eventually be made more complex; we may not always
@@ -278,4 +278,5 @@ let parser_options config = config.parser_options
 let formatter_override config = config.formatter_override
 let config_hash config = config.config_hash
 let ignored_paths config = config.ignored_paths
-let extra_paths config = config.extra_paths;
+let extra_paths config = config.extra_paths
+let version config = config.version

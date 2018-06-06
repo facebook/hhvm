@@ -1128,7 +1128,9 @@ and raw_expr
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
     | None -> () in
-  if Env.env_local_reactive env && not allow_non_awaited_awaitable_in_rx
+  if Env.env_local_reactive env
+    && not allow_non_awaited_awaitable_in_rx
+    && not (TypecheckerOptions.unsafe_rx (Env.get_options env))
   then begin match ty with
   | _, Tclass ((_, cls), _) when cls = SN.Classes.cAwaitable ->
     Errors.non_awaited_awaitable_in_rx (fst e);
@@ -1594,7 +1596,9 @@ and expr_
       | None ->
           make_result env (T.Id id) (Reason.Rwitness cst_pos, Typing_utils.tany env)
       | Some (ty, _) ->
-        if cst_name = SN.HH.rx_is_enabled && Env.env_reactivity env = Nonreactive
+        if cst_name = SN.HH.rx_is_enabled
+          && Env.env_reactivity env = Nonreactive
+          && not (TypecheckerOptions.unsafe_rx (Env.get_options env))
         then Errors.rx_enabled_in_non_rx_context cst_pos;
         let env, ty =
           Phase.localize_with_self env ty in

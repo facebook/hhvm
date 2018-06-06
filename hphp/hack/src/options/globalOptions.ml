@@ -26,6 +26,7 @@ type t = {
   tco_disallow_array_typehint: bool;
   tco_disallow_array_literal: bool;
   tco_language_feature_logging : bool;
+  tco_unsafe_rx : bool;
   po_disallow_elvis_space : bool;
   ignored_fixme_codes : ISet.t;
   forward_compatibility_level : ForwardCompatibilityLevel.t;
@@ -205,6 +206,7 @@ let default = {
  tco_disallow_array_typehint = false;
  tco_disallow_array_literal = false;
  tco_language_feature_logging = false;
+ tco_unsafe_rx = true;
  po_disallow_elvis_space = false;
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
  forward_compatibility_level = ForwardCompatibilityLevel.default;
@@ -241,6 +243,7 @@ let make ~tco_assume_php
          ~tco_disallow_array_typehint
          ~tco_disallow_array_literal
          ~tco_language_feature_logging
+         ~tco_unsafe_rx
          ~po_disallow_elvis_space
          ~ignored_fixme_codes
          ~forward_compatibility_level = {
@@ -263,6 +266,7 @@ let make ~tco_assume_php
                    tco_disallow_array_typehint;
                    tco_disallow_array_literal;
                    tco_language_feature_logging;
+                   tco_unsafe_rx;
                    po_disallow_elvis_space;
                    forward_compatibility_level;
         }
@@ -293,6 +297,7 @@ let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda
 let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
 let tco_disallow_array_literal t = t.tco_disallow_array_literal
 let tco_language_feature_logging t = t.tco_language_feature_logging
+let tco_unsafe_rx t = t.tco_unsafe_rx
 let po_disallow_elvis_space t = t.po_disallow_elvis_space
 let ignored_fixme_codes t = t.ignored_fixme_codes
 let forward_compatibility_level t = t.forward_compatibility_level

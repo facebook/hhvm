@@ -114,6 +114,16 @@ type t = {
  tco_language_feature_logging : bool;
 
  (*
+  * Flag to disable enforcement of requirements for reactive Hack.
+  *
+  * Currently defaults to true as Reactive Hack is experimental and
+  * undocumented; the HSL is compatible with it, but we don't want to
+  * raise errors that can't be fully understood without knowledge of
+  * undocumented features.
+  *)
+ tco_unsafe_rx : bool;
+
+ (*
   * Flag to stop parsing the degenerate ternary ?<whitespace>: as if it
   * were the Elvis operator ?:
   *)
@@ -143,6 +153,7 @@ val make :
   tco_disallow_array_typehint: bool ->
   tco_disallow_array_literal: bool ->
   tco_language_feature_logging: bool ->
+  tco_unsafe_rx: bool ->
   po_disallow_elvis_space: bool ->
   ignored_fixme_codes: ISet.t ->
   forward_compatibility_level: ForwardCompatibilityLevel.t ->
@@ -166,6 +177,7 @@ val tco_disallow_ambiguous_lambda : t -> bool
 val tco_disallow_array_typehint : t -> bool
 val tco_disallow_array_literal : t -> bool
 val tco_language_feature_logging : t -> bool
+val tco_unsafe_rx : t -> bool
 val po_disallow_elvis_space : t -> bool
 val default : t
 val make_permissive : t -> t

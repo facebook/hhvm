@@ -357,11 +357,11 @@ let set_fun_mutable env mut =
   { env with genv = {env.genv with fun_mutable = mut }}
 
 let error_if_reactive_context env f =
-  if env_local_reactive env then f ()
+  if env_local_reactive env && not (TypecheckerOptions.unsafe_rx env.genv.tcopt) then f ()
 
 let error_if_shallow_reactive_context env f =
   match env_reactivity env with
-  | Reactive _ | Shallow _ -> f ()
+  | Reactive _ | Shallow _ when not (TypecheckerOptions.unsafe_rx env.genv.tcopt) -> f ()
   | _ -> ()
 
 let error_if_forward_compat_ge min env f =

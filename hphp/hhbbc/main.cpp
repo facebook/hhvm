@@ -99,6 +99,7 @@ void parse_options(int argc, char** argv) {
   std::vector<std::string> trace_fns;
   std::vector<std::string> trace_bcs;
   bool no_logging = false;
+  bool no_cores = false;
 
   po::options_description basic("Options");
   basic.add_options()
@@ -118,6 +119,9 @@ void parse_options(int argc, char** argv) {
     ("no-logging",
       po::bool_switch(&no_logging),
       "turn off logging")
+    ("no-cores",
+      po::bool_switch(&no_cores),
+      "turn off core dumps (useful when running lots of tests in parallel)")
     ("extended-stats",
       po::bool_switch(&options.extendedStats),
       "Spend time to produce extra stats")
@@ -200,6 +204,11 @@ void parse_options(int argc, char** argv) {
 "and -fno-flag arguments.  The various optimization flags are documented\n"
 "in the code.\n";
     std::exit(0);
+  }
+
+  if (no_cores) {
+    struct rlimit rl{};
+    setrlimit(RLIMIT_CORE, &rl);
   }
 
   options.TraceFunctions         = make_method_map(trace_fns);

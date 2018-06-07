@@ -1605,6 +1605,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Select:
     return IrrelevantEffects {};
 
+  case StClosureArg:
+    return PureStore {
+      AProp {
+        inst.src(0),
+        safe_cast<uint32_t>(inst.extra<StClosureArg>()->offsetBytes)
+      },
+      inst.src(1)
+    };
+
   //////////////////////////////////////////////////////////////////////
   // Instructions that technically do some things w/ memory, but not in any way
   // we currently care about.  They however don't return IrrelevantEffects
@@ -1617,7 +1626,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IncRef:
   case LdClosureCtx:
   case StClosureCtx:
-  case StClosureArg:
   case StContArKey:
   case StContArValue:
   case LdRetVal:

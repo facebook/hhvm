@@ -122,11 +122,12 @@ bool PreClassEmitter::addMethod(FuncEmitter* method) {
 
 void PreClassEmitter::renameMethod(const StringData* oldName,
                                    const StringData* newName) {
-  MethodMap::const_iterator it = m_methodMap.find(oldName);
-  assertx(it != m_methodMap.end());
-  it->second->name = newName;
-  m_methodMap[newName] = it->second;
-  m_methodMap.erase(oldName);
+  assertx(m_methodMap.count(oldName));
+  auto it = m_methodMap.find(oldName);
+  auto fe = it->second;
+  m_methodMap.erase(it);
+  fe->name = newName;
+  m_methodMap[newName] = fe;
 }
 
 bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,

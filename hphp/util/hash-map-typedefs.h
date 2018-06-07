@@ -16,14 +16,13 @@
 #ifndef incl_HPHP_HASH_MAP_TYPEDEFS_H_
 #define incl_HPHP_HASH_MAP_TYPEDEFS_H_
 
-#include <unordered_map>
-#include <unordered_set>
 #include <functional>
 #include <string>
 
 #include "hphp/util/functional.h"
 
 #include "folly/container/F14Map.h"
+#include "folly/container/F14Set.h"
 
 namespace HPHP {
 
@@ -47,19 +46,11 @@ namespace HPHP {
 #define GOOD_UNORDERED_CTOR (0)
 #endif
 
-template <class T, class U,
-          class V = std::hash<T>,
-          class W = std::equal_to<T> >
-struct hphp_hash_map : std::unordered_map<T,U,V,W> {
-  hphp_hash_map() : std::unordered_map<T,U,V,W> GOOD_UNORDERED_CTOR {}
-};
+template <class T, class U, class V=std::hash<T>, class W=std::equal_to<T>>
+using hphp_hash_map = folly::F14NodeMap<T,U,V,W>;
 
-template <class T,
-          class V = std::hash<T>,
-          class W = std::equal_to<T> >
-struct hphp_hash_set : std::unordered_set<T,V,W> {
-  hphp_hash_set() : std::unordered_set<T,V,W> GOOD_UNORDERED_CTOR {}
-};
+template <class T, class V=std::hash<T>, class W=std::equal_to<T>>
+using hphp_hash_set = folly::F14NodeSet<T,V,W>;
 
 //////////////////////////////////////////////////////////////////////
 

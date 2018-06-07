@@ -2105,7 +2105,7 @@ and extract_docblock = fun node ->
           | `MaybeDoc, _                -> go start `EmbeddedCmt next
           | `MaybeDoc2, '/'             -> go next  `Free        next
           (* Doc comments have a space after the second star *)
-          | `MaybeDoc2, (' ' | '\t' | '\n') -> go start `DocComment idx
+          | `MaybeDoc2, (' ' | '\t' | '\n' | '\r') -> go start `DocComment idx
           | `MaybeDoc2, _               -> go start `EmbeddedCmt  next
           | `DocComment, '*'            -> go start `EndDoc      next
           | `DocComment, _              -> go start `DocComment  next
@@ -2115,7 +2115,7 @@ and extract_docblock = fun node ->
           | `EndEmbedded, '*'           -> go start `EndEmbedded next
           | `EndEmbedded,  _            -> go start `EmbeddedCmt next
           (* Whitespace skips everywhere else *)
-          | _, (' ' | '\t' | '\n')      -> go start state        next
+          | _, (' ' | '\t' | '\n' | '\r')      -> go start state        next
           (* When scanning comments, anything else is accepted *)
           | `LineCmt,     _             -> go start state        next
           | `EmbeddedCmt, _             -> go start state        next

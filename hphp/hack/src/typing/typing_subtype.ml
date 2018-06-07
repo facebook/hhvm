@@ -252,22 +252,29 @@ let rec simplify_subtype
       end
 
   | (_, Tabstract (AKnewtype _, None)),
-    (_, (Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ |
-         Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _))) ->
+    (_, (Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
+         Tclass _ | Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
     invalid ()
 
-  | (_, Tabstract (AKnewtype (name_sub, _), None)),
-    (_, Tabstract (AKnewtype (name_super, _), _))
-    when name_sub <> name_super -> invalid()
-
   | (_, Tabstract (AKnewtype _, Some ty)),
-    (_, (Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ |
-         Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _))) ->
+    (_, (Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
+         Tclass _ | Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
     simplify_subtype ~deep ~this_ty ty ty_super res
 
-  | (_, Tabstract (AKnewtype (name_sub, _), Some ty)),
-    (_, Tabstract (AKnewtype (name_super, _), _))
-    when name_sub <> name_super ->
+  | (_, Tabstract (AKenum e_sub, _)), (_, Tabstract (AKenum e_super, _))
+    when e_sub = e_super -> valid ()
+
+  | (_, Tabstract ((AKenum _), _)), (_, (Tnonnull | Tprim Nast.Tarraykey)) ->
+    valid ()
+
+  | (_, Tabstract (AKenum _, None)),
+    (_, (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
+         Tclass _ | Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
+    invalid ()
+
+  | (_, Tabstract (AKenum _, Some ty)),
+    (_, (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
+         Tclass _ | Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
     simplify_subtype ~deep ~this_ty ty ty_super res
 
   | (r_sub,   Tshape (fields_known_sub, fdm_sub)),
@@ -386,12 +393,11 @@ let rec simplify_subtype
   | _, (_, Toption (_, Tnonnull)) -> valid ()
   | (_, Tprim (Nast.Tint | Nast.Tfloat)), (_, Tprim Nast.Tnum) -> valid ()
   | (_, Tprim (Nast.Tint | Nast.Tstring)), (_, Tprim Nast.Tarraykey) -> valid ()
-  | (_, Tabstract ((AKenum _), _)), (_, Tprim Nast.Tarraykey) -> valid ()
   | (_,
      (Tprim Nast.(Tint | Tbool | Tfloat | Tstring
                   | Tresource | Tnum | Tarraykey | Tnoreturn)
       | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _
-      | Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _))),
+      | Tobject | Tclass _ | Tarraykind _)),
     (_, Tnonnull) -> valid ()
   | (_, Tprim Nast.Tstring), (_, Tclass ((_, stringish), _))
       when stringish = SN.Classes.cStringish -> valid ()
@@ -401,10 +407,6 @@ let rec simplify_subtype
       when xhp_child = SN.Classes.cXHPChild -> valid ()
   | (_, Tprim p1), (_, Tprim p2) ->
     if p1 = p2 then valid () else invalid ()
-  | (_, Tabstract (AKenum e1, _)), (_, Tabstract (AKenum e2, _)) when e1 = e2 ->
-    valid ()
-  | (_, Tabstract (AKenum _, Some ty)), (_, Tprim _) ->
-    simplify_subtype ~deep ~this_ty ty ty_super res
   | _, _ ->
     default ()
 

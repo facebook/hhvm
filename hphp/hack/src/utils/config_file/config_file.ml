@@ -57,5 +57,25 @@ module Getters = struct
 
   let string_list ~delim key ~default config =
     Option.value_map (SMap.get key config) ~default ~f:(Str.split delim)
-
+  (*
+    Version aware toggling for boolean parameters:
+    take in either:
+    - a single boolean, true or false. Then this acts just like bool_
+    - a string list of version hashes, e.g.
+       use_watchman = 8a0f4290c3fd218988864e06b7dea3aaf447efaf, master
+      this would enable watchman for hack versions
+        8a0f4290c3fd218988864e06b7dea3aaf447efaf and master.
+      master is a special string to represent master in fbcode
+      (master's build revision is the empty string, but master is a lot \
+       cleaner to write)
+  *)
+  let bool_if_version key ~default config =
+      let versions = string_list ~delim:(Str.regexp ",")
+        key ~default:([string_of_bool default]) config in
+      match versions with
+      | ["true"] -> true
+      | ["false"] -> false
+      | x -> List.exists ~f:(fun s ->
+          let s = if s = "master" then "" else s in
+          s = Build_id.build_revision) x
 end

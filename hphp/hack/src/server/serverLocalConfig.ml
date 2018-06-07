@@ -116,21 +116,21 @@ let load_ fn ~silent =
   let contents = Sys_utils.cat fn in
   if not silent then Printf.eprintf "%s:\n%s\n" fn contents;
   let config = Config_file.parse_contents contents in
-  let use_watchman = bool_ "use_watchman"
+  let use_watchman = bool_if_version "use_watchman"
     ~default:default.use_watchman config in
-  let use_mini_state = bool_ "use_mini_state"
+  let use_mini_state = bool_if_version "use_mini_state"
     ~default:default.use_mini_state config in
-  let devinfra_saved_state_lookup = bool_ "devinfra_saved_state_lookup"
+  let devinfra_saved_state_lookup = bool_if_version "devinfra_saved_state_lookup"
     ~default:default.devinfra_saved_state_lookup config in
-  let enable_on_nfs = bool_ "enable_on_nfs"
+  let enable_on_nfs = bool_if_version "enable_on_nfs"
     ~default:default.enable_on_nfs config in
-  let enable_fuzzy_search = bool_ "enable_fuzzy_search"
+  let enable_fuzzy_search = bool_if_version "enable_fuzzy_search"
     ~default:default.enable_fuzzy_search config in
-  let lazy_parse = bool_ "lazy_parse"
+  let lazy_parse = bool_if_version "lazy_parse"
     ~default:default.lazy_parse config in
-  let lazy_init = bool_ "lazy_init2"
+  let lazy_init = bool_if_version "lazy_init2"
     ~default:default.lazy_init config in
-  let load_tiny_state = bool_ "load_tiny_state"
+  let load_tiny_state = bool_if_version "load_tiny_state"
     ~default:default.load_tiny_state config in
   let max_purgatory_clients = int_ "max_purgatory_clients"
     ~default:default.max_purgatory_clients config in
@@ -138,21 +138,21 @@ let load_ fn ~silent =
     ~default:default.search_chunk_size config in
   let load_mini_script_timeout = int_ "load_mini_script_timeout"
     ~default:default.load_mini_script_timeout config in
-  let load_state_natively = bool_ "load_state_natively_v4"
+  let load_state_natively = bool_if_version "load_state_natively_v4"
     ~default:default.load_state_natively config in
   let state_loader_timeouts = state_loader_timeouts_
     ~default:State_loader_config.default_timeouts config in
-  let use_dummy_informant = bool_ "use_dummy_informant"
+  let use_dummy_informant = bool_if_version "use_dummy_informant"
     ~default:default.use_dummy_informant config in
   let informant_min_distance_restart = int_ "informant_min_distance_restart"
     ~default:default.informant_min_distance_restart config in
-  let informant_use_xdb = bool_ "informant_use_xdb_v5"
+  let informant_use_xdb = bool_if_version "informant_use_xdb_v5"
     ~default:default.informant_use_xdb config in
   let type_decl_bucket_size = int_ "type_decl_bucket_size"
     ~default:default.type_decl_bucket_size config in
   let watchman_init_timeout = int_ "watchman_init_timeout"
     ~default:default.watchman_init_timeout config in
-  let watchman_subscribe = bool_ "watchman_subscribe_v2"
+  let watchman_subscribe = bool_if_version "watchman_subscribe_v2"
     ~default:default.watchman_subscribe config in
   let watchman_synchronous_timeout = int_ "watchman_synchronous_timeout"
     ~default:default.watchman_synchronous_timeout config in
@@ -176,12 +176,12 @@ let load_ fn ~silent =
   let max_workers = min GlobalConfig.nbr_procs max_workers in
   let max_bucket_size = int_ "max_bucket_size"
     ~default:default.max_bucket_size config in
-  let interrupt_on_watchman = bool_ "interrupt_on_watchman"
+  let interrupt_on_watchman = bool_if_version "interrupt_on_watchman"
     ~default:default.interrupt_on_watchman config in
-  let interrupt_on_client = bool_ "interrupt_on_client"
+  let interrupt_on_client = bool_if_version "interrupt_on_client"
     ~default:default.interrupt_on_client config in
   let load_script_config = LoadScriptConfig.default in
-  let use_full_fidelity_parser = bool_ "use_full_fidelity_parser"
+  let use_full_fidelity_parser = bool_if_version "use_full_fidelity_parser"
     ~default:default.use_full_fidelity_parser config in
   {
     use_watchman;

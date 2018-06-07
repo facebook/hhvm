@@ -231,9 +231,7 @@ decl :: 'decl_' ::= {{ com top level declarations }}
   | enum N : t asdecl :: :: enumdef
   | type N < T1 , .. , Tn > = t :: :: alias {{ com type alias }}
   | newtype N < T1 , .. , Tn > = t asdecl :: :: opaque {{ com opaque type definition }}
-  | function id ( t1 lvar1 , .. , tn lvarn ) : t { s1 .. sm } :: :: function {{ com top-level function definition }}
-  | function id ( t1 lvar1 , .. , tn lvarn , t0 vardots lvar0 ) : t { s1 .. sm } :: :: function_variadic
-    {{ com top-level variadic function definition }}
+  | function id F { s1 .. sm } :: :: function {{ com top-level function definition }}
 
 lvar :: '' ::= {{ com local variable }}
   | $ x                        ::   :: lvar_id        {{ com local variable }}
@@ -271,6 +269,15 @@ args {{ ocaml args }} :: '' ::= {{ com argument list }}
 isvariadic :: 'is_variadic_' ::= {{ com optional variadic }}
   |                              :: :: no            {{ com not variadic  parameter }}
   | vardots                      :: :: yes           {{ com variadic parameter }}
+
+funparam :: 'function_' ::= {{ com function or method parameter }}
+  | t isvariadic lvar            :: :: param
+
+funparams :: 'function_' ::= {{ com function or method parameters }}
+    | ( funparam1 , .. , funparamn ) :: :: params       {{ com list }}
+
+F {{ ocaml funsig }} :: 'function_'     ::= {{ com function or method signature }}
+  | funparams : t :: :: sig
 
 lamparam :: 'lambda_param_' ::= {{ com lambda parameter }}
   | isvariadic lvar              :: :: notype         {{ com without type }}
@@ -875,8 +882,8 @@ So we define a relation that fills in types when they are omitted. It's the type
 }}
 
 defn
-  lamparam ~> lamparam' :: :: lambda_param_expand :: 'lambda_param_expand_'
-  {{ com declaration [[lamparam]] rewrites to typed declaration [[lamparam']] }}
+  lamparam ~> funparam :: :: lambda_param_expand :: 'lambda_param_expand_'
+  {{ com declaration [[lamparam]] rewrites to typed parameter [[funparam]] }}
 by
 
   -------------------------------------- :: type
@@ -888,17 +895,17 @@ by
 {{ com \\\\ }}
 
 defn
-  lamparams lamreturn ~> lamparams' lamreturn' :: :: lambda_return_expand :: 'lambda_return_expand_'
-  {{ com declarations [[lamparams]] [[lamreturn]] rewrite to typed declarations [[lamparams']] [[lamreturn']] }}
+  lamparams lamreturn ~> funparams lamreturn' :: :: lambda_return_expand :: 'lambda_return_expand_'
+  {{ com declarations [[lamparams]] [[lamreturn]] rewrite to typed declarations [[funparams]] [[lamreturn']] }}
 by
 
-  lamparam1 ~> lamparam1' ..  lamparamn ~> lamparamn'
+  lamparam1 ~> funparam1 ..  lamparamn ~> funparamn
   ------------------------------------------------------------------------- :: type
-  ( lamparam1 , .. , lamparamn) : t ~> ( lamparam1' , .. , lamparamn' ) : t
+  ( lamparam1 , .. , lamparamn) : t ~> ( funparam1 , .. , funparamn ) : t
 
-  lamparam1 ~> lamparam1'  ..  lamparamn ~> lamparamn'
+  lamparam1 ~> funparam1  ..  lamparamn ~> funparamn
   ------------------------------------------------------------------------- :: notype
-  ( lamparam1 , .. , lamparamn) ~> ( lamparam1' , .. , lamparamn' ) : t
+  ( lamparam1 , .. , lamparamn) ~> ( funparam1 , .. , funparamn ) : t
 
 {{ com \\\section*{Expression sequencing} }}
 
@@ -1056,12 +1063,6 @@ G ; K |- < e1 : `DateTime` , e2 : `DateTime` >
 ------------------------------------------ :: lt_datetime
 G ; K |- e1 < e2 : bool
 
-{{ com In fact, the current type checker supports this rule. }}
-
-G ; K |- < e1 : t , e2 : t >
-------------------------------------- :: lt
-G ; K |- e1 < e2 : bool
-
 {{ com \subsection{Conditionals and logical operators} }}
 
 {{ com The condition in a conditional expression can be used to
@@ -1098,17 +1099,15 @@ G ; K |- !e : bool
 But the continuation environment is initially empty, except for the return continuation (for statement bodies), which accepts anything.
 For void functions with statement bodies, we support implicit return by including a skip continuation. }}
 
-{{ com TBC set up return type }}
-
 {{ com TBC variadics }}
 
 lamparams lamreturn ~> ( t1 $x1 , .. , tn $xn) : t
-G [x1 := t1 , .. , xn := tn ] ; { return : G' } |- { s1 .. sm }
+( t1 $x1 , .. , tn $xn) : t ; G [x1 := t1 , .. , xn := tn ] ; { return : G' } |- { s1 .. sm }
 ------------------------------------------------------------------------ :: lambda_stmt
 G ; K |- lamparams lamreturn ==> { s1 .. sm } : function(t1,..,tn):t
 
 lamparams lamreturn ~> ( t1 $x1 , .. , tn $xn) : void
-G [ x1 := t1 , .. , xn := tn ] ; { return : G', skip : G' } |- { s1 .. sm }
+( t1 $x1 , .. , tn $xn) : void ; G [ x1 := t1 , .. , xn := tn ] ; { return : G', skip : G' } |- { s1 .. sm }
 ------------------------------------------------------------------------ :: lambda_void
 G ; K |- lamparams lamreturn ==> { s1 .. sm } : function(t1,..,tn):void
 
@@ -1264,64 +1263,69 @@ G ; K , skip : G'' |- list ( e1 , e2 ) := `Pair` < t1 , t2> , U1[U2]
 {{ com \section*{Statements} }}
 
 defn
-  G ; K |- s :: :: st :: 'st_'
-  {{ com statement [[s]] can be executed under locals [[G]] and continuations [[K]] }}
+  F ; G ; K |- s :: :: st :: 'st_'
+  {{ com statement [[s]] can be executed under locals [[G]] and continuations [[K]]
+     with enclosing function signature [[F]] }}
 by
 
 G ; K[skip:=G1] |- e truthy
 G ; K[skip:=G2] |- !e truthy
-G1; K |- s1
-G2; K |- s2
+F ; G1; K |- s1
+F ; G2; K |- s2
 ------------------------------------- :: if
-G ; K |- if ( e ) s1 else s2
+F ; G ; K |- if ( e ) s1 else s2
 
 
-G ; K |- if ( e ) s else { }
------------------------------ :: if_then
-G ; K |- if ( e ) s
+F ; G ; K |- if ( e ) s else { }
+-------------------------------- :: if_then
+F ; G ; K |- if ( e ) s
 
 
 {{ com Break and continue just require that the continuation exists and accepts the current state. }}
 
 --------------------------- :: break
-G; K , break : G |- break ;
+F ; G ; K , break : G |- break ;
 
 -------------------------------- :: continue
-G; K, continue : G |- continue ;
+F ; G ; K, continue : G |- continue ;
 
----------------------------- :: return
-G; K, return : G |- return ;
+--------------------------------------------------------------------- :: return_void
+funparams : void ; G ; K, return : G |- return ;
+
+G ; K |- e : t
+--------------------------------------------- :: return
+funparams : t ; G; K, return : G |- return e ;
 
 {{ com To simplify rules for while, we define a primitive rule for infinite loops. }}
 
-G ; K [continue := G, break := G', skip := G] |- s
+F ; G ; K [continue := G, break := G', skip := G] |- s
 --------------------------------------------------------- :: while_true
-G; K, skip : G' |- while ( true ) s
+F ; G ; K, skip : G' |- while ( true ) s
 
 {{ com All looping constructs are defined in terms of this infinite loop rule. }}
 
-G ; K |- while ( true ) { if ( ! e ) break; s; }
+F ; G ; K |- while ( true ) { if ( ! e ) break; s; }
 ---------------------------------------------------------- :: while
-G ; K |- while ( e ) s
+F ; G ; K |- while ( e ) s
 
-G ; K |- while ( true ) { s ; if ( ! e ) break ; }
+F ; G ; K |- while ( true ) { s ; if ( ! e ) break ; }
 ---------------------------------------------------- :: do
-G ; K |- do s while ( e )
+F ; G ; K |- do s while ( e )
 
-G ; K |- { e1 ; while ( e2 ) { s ; e3 ; } }
+F ; G ; K |- { e1 ; while ( e2 ) { s ; e3 ; } }
 ------------------------------------------------------------ :: for
-G ; K |- for ( e1 ; e2 ; e3 ) s
+F ; G ; K |- for ( e1 ; e2 ; e3 ) s
 
 
 G ; K |- e : `Traversable` < t >
-G ; K , skip : G[x := t] |- while ( true ) s
+F ; G ; K , skip : G[x := t] |- while ( true ) s
 -------------------------------------------------- :: foreach_value
-G ; K |- foreach ( e as $x ) s
+F ; G ; K |- foreach ( e as $x ) s
 
 G ; K |- e : `KeyedTraversable` < t1 , t2 >
-G ; K , skip : G[x1 := t1, x2 := t2] |- while (true) s
+F ; G ; K , skip : G[x1 := t1, x2 := t2] |- while (true) s
 ------------------------------------------------------ :: foreach_key_value
-G ; K |- foreach ( e as $x1 => $x2 ) s
+F ; G ; K |- foreach ( e as $x1 => $x2 ) s
 
 {{ com Exception handling }}
 
@@ -1330,26 +1334,27 @@ continue or return statement in the try block, so we need to union them all. }}
 {{ com If the premise does not have the required continuations, we would use
 ST\textunderscore CONTINUATION\textunderscore EXTENSION to add the appropriate ones. }}
 
-G ; { skip : G1, break : G1, continue : G1, return : G1 , catch : G2 } |- s
-G2 , x : C1 ; K [ skip := G1, break := G1, continue := G1, return := G1 ] |- s1 .. G2 , x : Cn ; K [ skip := G1, break := G1, continue := G1, return := G1 ] |- sn
-G1 ; K' |- s'
+F ; G ; { skip : G1, break : G1, continue : G1, return : G1 , catch : G2 } |- s
+F ; G2 , x : C1 ; K [ skip := G1, break := G1, continue := G1, return := G1 ] |- s1 .. F ; G2 , x : Cn ; K [ skip := G1, break := G1, continue := G1, return := G1 ] |- sn
+F ; G1 ; K' |- s'
 ---------------------------------------------------- :: try_catch
-G ; K' |- try s catch ( C1 $x1 ) s1 .. catch ( Cn $xn ) sn finally s'
+F ; G ; K' |- try s catch ( C1 $x1 ) s1 .. catch ( Cn $xn ) sn finally s'
 
 G ; K |- e : t
 ---------------------------------- :: expr
-G ; K |- e ;
+F ; G ; K |- e ;
 
 ---------------------------- :: block_empty
-G ; K , skip : G |- { }
+F ; G ; K , skip : G |- { }
 
 {{ com Sequencing just threads the environment.
   This is just the Composition rule from program logic, written in a continuation-passing style }}
 
-G ; K [ skip := G' ] |- s
-G' ; K |- { s1 .. sn }
+F ; G ; K [ skip := G' ] |- s
+F ; G' ; K |- { s1 .. sn }
 ------------------------------- :: seq
-G ; K |- { s s1 .. sn }
+F ; G ; K |- { s s1 .. sn }
+
 
 {{ com \section*{Top level declarations} }}
 
@@ -1362,20 +1367,18 @@ Top-level functions are typed under an initial typing for locals that provides t
 The continuation environment is initially empty, except for the return continuation, which accepts anything.
 For void functions, we support implicit return by including a skip continuation. }}
 
-{{ com TBC set up return type }}
-
-{ x1 : t1 , .. , xn : tn } ; { return : G } |- { s1 .. sm }
------------------------------------------------------------ :: function
+( t1 $x1 , .. , tn $xn ) : t ; { x1 : t1 , .. , xn : tn } ; { return : G } |- { s1 .. sm }
+------------------------------------------------------------------------------------------ :: function
 |- function id ( t1 $x1 , .. , tn $xn ) : t { s1 .. sm }
 
-{ x1 : t1 , .. , xn : tn , x0 : vec<t0> } ; { return : G } |- { s1 .. sm }
+( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : t ; { x1 : t1 , .. , xn : tn , x0 : vec<t0> } ; { return : G } |- { s1 .. sm }
 ----------------------------------------------------------- :: function_variadic
 |- function id ( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : t { s1 .. sm }
 
-{ x1 : t1 , .. , xn : tn } ; { return : G, skip : G } |- { s1 .. sm }
+( t1 $x1 , .. , tn $xn ) : void ; { x1 : t1 , .. , xn : tn } ; { return : G, skip : G } |- { s1 .. sm }
 --------------------------------------------------------------- :: function_void
 |- function id ( t1 $x1 , .. , tn $xn ) : void { s1 .. sm }
 
-{ x1 : t1 , .. , xn : tn , x0 : vec<t0> } ; { return : G, skip : G } |- { s1 .. sm }
+( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : void ; { x1 : t1 , .. , xn : tn , x0 : vec<t0> } ; { return : G, skip : G } |- { s1 .. sm }
 --------------------------------------------------------------- :: function_void_variadic
 |- function id ( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : void { s1 .. sm }

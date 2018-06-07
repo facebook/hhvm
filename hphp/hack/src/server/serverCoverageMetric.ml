@@ -11,7 +11,6 @@ open Hh_core
 open Coverage_level
 open Option.Monad_infix
 open Reordered_argument_collections
-open Utils
 open String_utils
 
 module FileInfoStore = GlobalStorage.Make(struct
@@ -112,10 +111,8 @@ let get_coverage root tcopt neutral fnl  =
 let go_ fn genv env =
   let root = Path.make fn in
   let module RP = Relative_path in
-  let next_files = compose
-    (fun paths -> paths |> List.map ~f:(RP.create RP.Root) |> Bucket.of_list)
-    (genv.ServerEnv.indexer FindUtils.is_php)
-  in
+  let next_files = MultiWorker.next
+    genv.ServerEnv.workers (Relative_path.Map.keys env.ServerEnv.files_info) in
   FileInfoStore.store env.ServerEnv.files_info;
   let tcopt = env.ServerEnv.tcopt in
   let result =

@@ -41,6 +41,9 @@ val is_static : env -> bool
 val is_strict : env -> bool
 (** Return {true} if the containing file was checked in strict mode. *)
 
+val in_loop : env -> bool
+(** Return {true} when inside any For, Do, While, or Foreach statement. *)
+
 val get_tcopt : env -> TypecheckerOptions.t
 (** Return the {!TypecheckerOptions.t} with which this TAST was checked. *)
 
@@ -127,6 +130,10 @@ val set_static : env -> env
 
 val set_inside_constructor : env -> env
 (** Returns an {!env} for which {!inside_constructor} is set to {true}.
+    If you are using {!Tast_visitor}, you should have no need of this. *)
+
+val set_in_loop : env -> env
+(** Return an {!env} for which {!in_loop} will return {true}.
     If you are using {!Tast_visitor}, you should have no need of this. *)
 
 val save : env -> Tast.saved_env

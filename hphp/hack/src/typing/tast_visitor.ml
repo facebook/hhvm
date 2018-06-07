@@ -22,9 +22,14 @@ class virtual iter = object (self)
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
   method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
-  method! on_constructor env x = super#on_constructor (Env.set_inside_constructor env) x
-  method! on_static_var env x = super#on_static_var (Env.set_static env) x
-  method! on_static_method env x = super#on_static_method (Env.set_static env) x
+  method! on_constructor env = super#on_constructor (Env.set_inside_constructor env)
+  method! on_static_var env = super#on_static_var (Env.set_static env)
+  method! on_static_method env = super#on_static_method (Env.set_static env)
+
+  method! on_Do env = super#on_Do (Env.set_in_loop env)
+  method! on_While env = super#on_While (Env.set_in_loop env)
+  method! on_For env = super#on_For (Env.set_in_loop env)
+  method! on_Foreach env = super#on_Foreach (Env.set_in_loop env)
 end
 
 class virtual ['a] reduce = object (self)
@@ -38,9 +43,14 @@ class virtual ['a] reduce = object (self)
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
   method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
-  method! on_constructor env x = super#on_constructor (Env.set_inside_constructor env) x
-  method! on_static_var env x = super#on_static_var (Env.set_static env) x
-  method! on_static_method env x = super#on_static_method (Env.set_static env) x
+  method! on_constructor env = super#on_constructor (Env.set_inside_constructor env)
+  method! on_static_var env = super#on_static_var (Env.set_static env)
+  method! on_static_method env = super#on_static_method (Env.set_static env)
+
+  method! on_Do env = super#on_Do (Env.set_in_loop env)
+  method! on_While env = super#on_While (Env.set_in_loop env)
+  method! on_For env = super#on_For (Env.set_in_loop env)
+  method! on_Foreach env = super#on_Foreach (Env.set_in_loop env)
 end
 
 class virtual map = object (self)
@@ -54,9 +64,14 @@ class virtual map = object (self)
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
   method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
-  method! on_constructor env x = super#on_constructor (Env.set_inside_constructor env) x
-  method! on_static_var env x = super#on_static_var (Env.set_static env) x
-  method! on_static_method env x = super#on_static_method (Env.set_static env) x
+  method! on_constructor env = super#on_constructor (Env.set_inside_constructor env)
+  method! on_static_var env = super#on_static_var (Env.set_static env)
+  method! on_static_method env = super#on_static_method (Env.set_static env)
+
+  method! on_Do env = super#on_Do (Env.set_in_loop env)
+  method! on_While env = super#on_While (Env.set_in_loop env)
+  method! on_For env = super#on_For (Env.set_in_loop env)
+  method! on_Foreach env = super#on_Foreach (Env.set_in_loop env)
 end
 
 class virtual endo = object (self)
@@ -70,9 +85,14 @@ class virtual endo = object (self)
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
   method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
-  method! on_constructor env x = super#on_constructor (Env.set_inside_constructor env) x
-  method! on_static_var env x = super#on_static_var (Env.set_static env) x
-  method! on_static_method env x = super#on_static_method (Env.set_static env) x
+  method! on_constructor env = super#on_constructor (Env.set_inside_constructor env)
+  method! on_static_var env = super#on_static_var (Env.set_static env)
+  method! on_static_method env = super#on_static_method (Env.set_static env)
+
+  method! on_Do env = super#on_Do (Env.set_in_loop env)
+  method! on_While env = super#on_While (Env.set_in_loop env)
+  method! on_For env = super#on_For (Env.set_in_loop env)
+  method! on_Foreach env = super#on_Foreach (Env.set_in_loop env)
 end
 
 (** A {!handler} is an {!iter} visitor which is not in control of the iteration

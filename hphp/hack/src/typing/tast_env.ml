@@ -36,6 +36,8 @@ let get_tcopt = Typing_env.get_tcopt
 let expand_type = Typing_env.expand_type
 let set_static = Typing_env.set_static
 let set_inside_constructor env = { env with Typing_env.inside_constructor = true }
+let in_loop env = env.Typing_env.in_loop
+let set_in_loop env = { env with Typing_env.in_loop = true }
 let save = Typing_env.save SMap.empty
 
 let error_if_forward_compat_ge = Typing_env.error_if_forward_compat_ge

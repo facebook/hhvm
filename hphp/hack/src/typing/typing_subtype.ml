@@ -1204,7 +1204,8 @@ and sub_type_unwrapped_helper env ~this_ty
 (****************************************************************************)
   | (r_sub, _), (_, Tunresolved _) ->
       let ty_sub = (r_sub, Tunresolved [ty_sub]) in
-      fst (Unify.unify env ty_super ty_sub)
+      sub_type_unwrapped_helper env ~this_ty
+        ~unwrappedToption_super ty_sub ty_super
   | (_, Tunresolved _), (_, Tany) ->
       (* This branch is necessary in the following case:
        * function foo<T as I>(T $x)
@@ -1536,6 +1537,9 @@ and sub_generic_params
   (ty_super: locl ty) : Env.env =
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
+  let fail () =
+    TUtils.uerror (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub);
+    env in
   match ety_sub, ety_super with
   (* If subtype and supertype are the same generic parameter, we're done *)
   | (_, Tabstract (AKgeneric name_sub, _)),
@@ -1554,7 +1558,7 @@ and sub_generic_params
      * round a cycle so we fail
      *)
     if SSet.mem name_sub seen
-    then fst (Unify.unify env ty_super ty_sub)
+    then fail ()
     else
       let seen = SSet.add name_sub seen in
       (* Otherwise, we collect all the upper bounds ("as" constraints) on
@@ -1564,8 +1568,7 @@ and sub_generic_params
       let rec try_bounds tyl =
         match tyl with
         | [] ->
-          (* There are no bounds so force an error *)
-           fst (Unify.unify env ty_super ty_sub)
+          fail ()
 
         | ty::tyl ->
           Errors.try_
@@ -1588,7 +1591,7 @@ and sub_generic_params
      * round a cycle so we fail
      *)
     if SSet.mem name_super seen
-    then fst (Unify.unify env ty_super ty_sub)
+    then fail ()
     else
       let seen = SSet.add name_super seen in
       (* Collect all the lower bounds ("super" constraints) on the
@@ -1597,7 +1600,8 @@ and sub_generic_params
       let rec try_bounds tyl =
         match tyl with
         | [] ->
-          (* There are no bounds so force an error *)
+          (* Should just fail here. But unification sometimes succeeds.
+           * TODO: investigate why *)
           fst (Unify.unify env ty_super ty_sub)
 
         | ty::tyl ->
@@ -1642,6 +1646,10 @@ and sub_string
   (env : Env.env)
   (ty2 : locl ty) : Env.env =
   let env, ety2 = Env.expand_type env ty2 in
+  let fail () =
+    TUtils.uerror (Reason.Rwitness p) (Tprim Nast.Tstring) (fst ety2) (snd ety2);
+    env in
+
   match ety2 with
   | (_, Toption ty2) -> sub_string p env ty2
   | (_, Tunresolved tyl) ->
@@ -1654,8 +1662,8 @@ and sub_string
       env
   | (_, Tabstract _) ->
     begin match TUtils.get_concrete_supertypes env ty2 with
-      | env, [] ->
-        fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
+      | _, [] ->
+        fail ()
       | env, tyl ->
         List.fold_left tyl ~f:(sub_string p) ~init:env
     end
@@ -1678,7 +1686,7 @@ and sub_string
   | _, Tobject -> env
   | _, (Tmixed | Tnonnull | Tarraykind _ | Tvar _
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
-      fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
+      fail ()
 
 (*****************************************************************************)
 (* Exporting *)

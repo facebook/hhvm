@@ -354,8 +354,9 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   | Some children -> additional_methods
       @ Emit_xhp.from_children_declaration ast_class children
   in
+  let no_xhp_attributes = class_xhp_attributes = [] && class_xhp_use_attributes = [] in
   let additional_methods =
-    if class_xhp_attributes = [] && class_xhp_use_attributes = []
+    if no_xhp_attributes
     then additional_methods
     else additional_methods
       @ Emit_xhp.from_attribute_declaration
@@ -470,6 +471,14 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     List.filter_map class_body (from_class_elt_typeconsts ~namespace) in
   let info = Emit_memoize_method.make_info ast_class class_id methods in
   let additional_properties = Emit_memoize_method.emit_properties info methods in
+  let additional_properties =
+    if no_xhp_attributes
+    then additional_properties
+    else additional_properties
+      @ Emit_xhp.properties_for_cache
+          ~ns:namespace
+          ast_class
+          class_is_immutable in
   let additional_methods =
     Emit_memoize_method.emit_wrapper_methods env info ast_class methods in
   let doc_comment = ast_class.A.c_doc_comment in

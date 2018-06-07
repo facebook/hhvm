@@ -318,7 +318,21 @@ static void xhp_attribute_list(Parser *_p, Token &out, Token *list,
   }
 }
 
-static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
+static void xhp_attribute_property_stmt(Parser *_p, Token &out) {
+  // private static darray $__xhpAttributeDeclarationCache = null;
+  Token modifiers;
+  {
+    Token m;
+    Token m1; m1 = T_PRIVATE; _p->onMemberModifier(m, NULL, m1);
+    Token m2; m2 = T_STATIC;  _p->onMemberModifier(modifiers, &m, m2);
+  }
+  Token var;      var.set(T_VARIABLE, "__xhpAttributeDeclarationCache");
+  Token null;     scalar_null(_p, null);
+  Token cvout;    _p->onClassVariable(cvout, 0, var, &null);
+  _p->onClassVariableStart(out, &modifiers, cvout, NULL, NULL);
+}
+
+static void xhp_attribute_method_stmt(Parser *_p, Token &out, Token &attributes) {
   Token modifiers;
   Token fname; fname.setText("__xhpAttributeDeclaration");
   {
@@ -329,81 +343,136 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
   _p->pushFuncLocation();
   _p->onMethodStart(fname, modifiers);
 
+  Token dummy;
+
   std::vector<std::string> classes;
   folly::split(':', attributes.text(), classes, true);
   Token arrAttributes; _p->onDArray(arrAttributes, attributes);
 
-  Token dummy;
+  auto _cache = [&]() {
+    // self::__xhpAttributeDeclarationCache
+    const char *cacheName = "__xhpAttributeDeclarationCache";
+    Token self;  self.set(T_STRING, "self");
+    Token cls;   _p->onName(cls, self, Parser::StringName);
+    Token var;   var.set(T_VARIABLE, cacheName);
+    Token sv;    _p->onSimpleVariable(sv, var);
+    Token out;
+    _p->onStaticMember(out, cls, sv);
+    return out;
+  };
 
-  Token stmts0;
+  auto _r = [&]() {
+    // $r
+    Token r; r.set(T_VARIABLE, "r");
+    Token out; _p->onSimpleVariable(out, r);
+    return out;
+  };
+
+  auto _assign_stmt = [&](Token &dest, Token &src) {
+    // [dest] = [src];
+    Token assign; _p->onAssign(assign, dest, src, 0);
+    Token stmt; _p->onExpStatement(stmt, assign);
+    return stmt;
+  };
+
+  auto _start_statements = [&]() {
+    Token stmts;
+    _p->onStatementListStart(stmts);
+    return stmts;
+  };
+
+  auto _add_statement = [&](Token &stmts, Token &new_stmt) {
+    Token stmts_in = stmts;
+    _p->addStatement(stmts, stmts_in, new_stmt);
+  };
+
+  auto _invoke = [&](std::string clsName) {
+    // Invokes clsName::__xhpAttributeDeclaration()
+    Token dummy;
+    Token name;    name.set(T_STRING, clsName);
+    Token cls;     _p->onName(cls, name, Parser::StringName);
+    Token fname;   fname.setText("__xhpAttributeDeclaration");
+    Token out;
+    _p->onCall(out, 0, fname, dummy, &cls);
+    return out;
+  };
+
+  auto _add_call_param_first = [&](Token &newParam) {
+    Token out;
+    _p->onCallParam(out, NULL, newParam, ParamMode::In, false);
+    return out;
+  };
+
+  auto _add_call_param = [&](Token &params, Token &newParam) {
+    Token params_in = params;
+    _p->onCallParam(params, &params_in, newParam, ParamMode::In, false);
+  };
+
+  Token body = _start_statements();
   {
-    _p->onStatementListStart(stmts0);
+    // $r = self::$__xhpAttributeDeclarationCache;
+    Token src = _cache();
+    Token dest = _r();
+    Token stmt = _assign_stmt(dest, src);
+    _add_statement(body, stmt);
   }
-  Token stmts1;
+
   {
-    // static $_ = null;
-    Token null;    scalar_null(_p, null);
-    Token var;     var.set(T_VARIABLE, "_");
-    Token decl;    _p->onStaticVariable(decl, 0, var, &null);
-    Token sdecl;   _p->onStatic(sdecl, decl);
-    _p->addStatement(stmts1, stmts0, sdecl);
-  }
-  Token stmts2;
-  {
-    // if ($_ === null) {
-    //   $_ = __SystemLib\\merge_xhp_attr_declarations(
+    // if ($r === null) {
+    //   self::$__xhpAttributeDeclarationCache =
+    //     __SystemLib\\merge_xhp_attr_declarations(
     //          parent::__xhpAttributeDeclaration(),
+    //          firstInheritedClass::__xhpAttributeDeclaration(),
+    //          ...
+    //          lastInheritedClass::__xhpAttributeDeclaration(),
     //          attributes
     //        );
+    //   $r = self::$__xhpAttributeDeclarationCache;
     // }
-    Token parent;  parent.set(T_STRING, "parent");
-    Token cls;     _p->onName(cls, parent, Parser::StringName);
-    Token fname2;   fname2.setText("__xhpAttributeDeclaration");
-    Token param1;  _p->onCall(param1, 0, fname2, dummy, &cls);
-    Token params1; _p->onCallParam(params1, NULL, param1, ParamMode::In, false);
+    Token blockbody = _start_statements();
+    {
+      Token param1 = _invoke("parent");
+      Token params = _add_call_param_first(param1);
+      for (unsigned int i = 0; i < classes.size(); i++) {
+        Token param = _invoke(classes[i]);
+        _add_call_param(params, param);
+      }
+      _add_call_param(params, arrAttributes);
 
-    for (unsigned int i = 0; i < classes.size(); i++) {
-      Token parent2;  parent2.set(T_STRING, classes[i]);
-      Token cls2;     _p->onName(cls2, parent2, Parser::StringName);
-      Token fname3;   fname3.setText("__xhpAttributeDeclaration");
-      Token param;   _p->onCall(param, 0, fname3, dummy, &cls2);
-
-      Token params; _p->onCallParam(params, &params1, param, ParamMode::In,
-                                    false);
-      params1 = params;
-    }
-
-    Token params2; _p->onCallParam(params2, &params1, arrAttributes,
-                                   ParamMode::In, false);
-
-    Token name;    name.set(T_STRING, "__SystemLib\\merge_xhp_attr_declarations");
+      Token name;    name.set(T_STRING, "__SystemLib\\merge_xhp_attr_declarations");
                    name = name.num() | 2; // WTH???
-    Token call;    _p->onCall(call, 0, name, params2, NULL);
-    Token tvar;    tvar.set(T_VARIABLE, "_");
-    Token var;     _p->onSimpleVariable(var, tvar);
-    Token assign;  _p->onAssign(assign, var, call, 0);
-    Token exp;     _p->onExpStatement(exp, assign);
-    Token block;   _p->onBlock(block, exp);
+      Token call;    _p->onCall(call, 0, name, params, NULL);
+      Token dest = _cache();
+      Token stmt = _assign_stmt(dest, call);
+      _add_statement(blockbody, stmt);
+    }
+    {
+      Token dest = _r();
+      Token src = _cache();
+      Token stmt = _assign_stmt(dest, src);
+      _add_statement(blockbody, stmt);
+    }
+    Token block;   _p->onBlock(block, blockbody);
 
-    Token tvar2;   tvar2.set(T_VARIABLE, "_");
-    Token var2;    _p->onSimpleVariable(var2, tvar2);
-    Token null;    scalar_null(_p, null);
-    Token cond;    BEXP(cond, var2, null, T_IS_IDENTICAL);
-    Token dummy1, dummy2;
-    Token sif;     _p->onIf(sif, cond, block, dummy1, dummy2);
-    _p->addStatement(stmts2, stmts1, sif);
+    {
+      Token r = _r();
+      Token null;    scalar_null(_p, null);
+      Token cond;    BEXP(cond, r, null, T_IS_IDENTICAL);
+      Token dummy1, dummy2;
+      Token sif;     _p->onIf(sif, cond, block, dummy1, dummy2);
+      _add_statement(body, sif);
+    }
   }
-  Token stmts3;
+
   {
-    // return $_;
-    Token tvar;    tvar.set(T_VARIABLE, "_");
-    Token var;     _p->onSimpleVariable(var, tvar);
-    Token ret;     _p->onReturn(ret, &var);
-    _p->addStatement(stmts3, stmts2, ret);
+    // return $r;
+    Token r = _r();
+    Token ret; _p->onReturn(ret, &r);
+    _add_statement(body, ret);
   }
   Token stmt;
   {
-    _p->finishStatement(stmt, stmts3);
+    _p->finishStatement(stmt, body);
     stmt = 1;
   }
   {
@@ -412,12 +481,24 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
   }
 }
 
+static void xhp_attribute_stmts(Parser *_p, Token &out, Token &stmts, Token &attr) {
+    Token stmts1;
+    {
+      Token stmt;
+      xhp_attribute_property_stmt(_p, stmt);
+      _p->onClassStatement(stmts1, stmts, stmt);
+    }
+    {
+      Token stmt;
+      xhp_attribute_method_stmt(_p, stmt, attr);
+      _p->onClassStatement(out, stmts1, stmt);
+    }
+}
+
 static void xhp_collect_attributes(Parser *_p, Token &out, Token &stmts) {
   Token *attr = _p->xhpGetAttributes();
   if (attr) {
-    Token stmt;
-    xhp_attribute_stmt(_p, stmt, *attr);
-    _p->onClassStatement(out, stmts, stmt);
+    xhp_attribute_stmts(_p, out, stmts, *attr);
   } else {
     out = stmts;
   }
@@ -436,24 +517,14 @@ static void xhp_category_stmt(Parser *_p, Token &out, Token &categories) {
   }
   Token stmts1;
   {
-    // static $_ = categories;
+    // return categories;
     Token arr;     _p->onDArray(arr, categories);
-    Token var;     var.set(T_VARIABLE, "_");
-    Token decl;    _p->onStaticVariable(decl, 0, var, &arr);
-    Token sdecl;   _p->onStatic(sdecl, decl);
-    _p->addStatement(stmts1, stmts0, sdecl);
-  }
-  Token stmts2;
-  {
-    // return $_;
-    Token tvar;    tvar.set(T_VARIABLE, "_");
-    Token var;     _p->onSimpleVariable(var, tvar);
-    Token ret;     _p->onReturn(ret, &var);
-    _p->addStatement(stmts2, stmts1, ret);
+    Token ret;     _p->onReturn(ret, &arr);
+    _p->addStatement(stmts1, stmts0, ret);
   }
   Token stmt;
   {
-    _p->finishStatement(stmt, stmts2);
+    _p->finishStatement(stmt, stmts1);
     stmt = 1;
   }
   {
@@ -517,7 +588,7 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
   }
   Token stmts1;
   {
-    // static $_ = children;
+    // return children;
     Token arr;
     if (children.num() == 2) {
       arr = children;
@@ -526,22 +597,12 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
     } else {
       HPHP_PARSER_ERROR("XHP: XHP unknown children declaration", _p);
     }
-    Token var;     var.set(T_VARIABLE, "_");
-    Token decl;    _p->onStaticVariable(decl, 0, var, &arr);
-    Token sdecl;   _p->onStatic(sdecl, decl);
-    _p->addStatement(stmts1, stmts0, sdecl);
-  }
-  Token stmts2;
-  {
-    // return $_;
-    Token tvar;    tvar.set(T_VARIABLE, "_");
-    Token var;     _p->onSimpleVariable(var, tvar);
-    Token ret;     _p->onReturn(ret, &var);
-    _p->addStatement(stmts2, stmts1, ret);
+    Token ret;     _p->onReturn(ret, &arr);
+    _p->addStatement(stmts1, stmts0, ret);
   }
   Token stmt;
   {
-    _p->finishStatement(stmt, stmts2);
+    _p->finishStatement(stmt, stmts1);
     stmt = 1;
   }
   {

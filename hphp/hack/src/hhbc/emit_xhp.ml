@@ -131,20 +131,38 @@ let emit_xhp_use_attributes xual =
   in
   List.map ~f:aux xual
 
+let properties_for_cache ~ns ast_class class_is_immutable =
+  let prop = Emit_property.from_ast
+    ast_class
+    []
+    [Ast.Private; A.Static]
+    class_is_immutable
+    None
+    []
+    ns
+    None
+    (p, (p, "__xhpAttributeDeclarationCache"), None)
+  in
+  [prop]
+
 (* AST transformations taken from hphp/parser/hphp.y *)
 let from_attribute_declaration ~ns ast_class xal xual =
-  let var_dollar_ = p, A.Lvar (p, "$_") in
-  let null_ = p, A.Null in
-  (* static $_ = null; *)
-  let token1 = p, A.Static_var [p, A.Binop (A.Eq None, var_dollar_, null_)] in
-  (* if ($_ === null) {
-   *   $_ = __SystemLib\\merge_xhp_attr_declarations(
+  (* $r = self::$__xhpAttributeDeclarationCache; *)
+  let var_r = p, A.Lvar (p, "$r") in
+  let self = p, A.Id (p, "self") in
+  let cache = p, A.Class_get (self, (p, A.Lvar (p, "$__xhpAttributeDeclarationCache"))) in
+  let token1 = p, A.Expr (p, A.Binop (A.Eq None, var_r, cache)) in
+  (* if ($r === null) {
+   *   self::$__xhpAttributeDeclarationCache =
+   *       __SystemLib\\merge_xhp_attr_declarations(
    *          parent::__xhpAttributeDeclaration(),
    *          attributes
    *        );
+   *   $r = self::$__xhpAttributeDeclarationCache;
    * }
    *)
-  let cond = p, A.Binop (A.EQeqeq, var_dollar_, null_) in
+  let null_ = p, A.Null in
+  let cond = p, A.Binop (A.EQeqeq, var_r, null_) in
   let arg1 =
     p, A.Call (
       (p, A.Class_const ((p, A.Id (p, "parent")), (p, "__xhpAttributeDeclaration"))),
@@ -157,12 +175,12 @@ let from_attribute_declaration ~ns ast_class xal xual =
   in
   let array_merge_call =
     p, A.Call ((p, A.Id (p, "__SystemLib\\merge_xhp_attr_declarations")), [], args, []) in
-  let true_branch =
-    [p, A.Expr (p, A.Binop (A.Eq None, var_dollar_, array_merge_call))]
-  in
+  let set_cache = p, A.Expr (p, A.Binop (A.Eq None, cache, array_merge_call)) in
+  let set_r = p, A.Expr (p, A.Binop (A.Eq None, var_r, cache)) in
+  let true_branch = [set_cache; set_r] in
   let token2 = p, A.If (cond, true_branch, []) in
-  (* return $_; *)
-  let token3 = p, A.Return (Some var_dollar_) in
+  (* return $r; *)
+  let token3 = p, A.Return (Some var_r) in
   let body = [token1; token2; token3] in
   let m =
     xhp_attribute_declaration_method
@@ -253,15 +271,10 @@ let emit_xhp_children_array = function
 
 (* AST transformations taken from hphp/parser/hphp.y *)
 let from_children_declaration ast_class (child_pos, children) =
-  let var_dollar_ = p, A.Lvar (p, "$_") in
-  (* static $_ = children; *)
-  let children_arr = child_pos, emit_xhp_children_array children in
-  let token1 =
-    p, A.Static_var [p, A.Binop (A.Eq None, var_dollar_, children_arr)]
-  in
-  (* return $_; *)
-  let token2 = p, A.Return (Some var_dollar_) in
-  let body = [token1; token2] in
+  (* return children; *)
+  let children_arr = p, emit_xhp_children_array children in
+  let token1 = child_pos, A.Return (Some children_arr) in
+  let body = [token1] in
   let m =
     xhp_attribute_declaration_method
       ~p:child_pos
@@ -278,15 +291,10 @@ let get_category_array categories =
 
 (* AST transformations taken from hphp/parser/hphp.y *)
 let from_category_declaration ast_class (cat_pos, categories) =
-  let var_dollar_ = p, A.Lvar (p, "$_") in
-  (* static $_ = categories; *)
+  (* return categories; *)
   let category_arr = p, A.Darray (get_category_array categories) in
-  let token1 =
-    p, A.Static_var [p, A.Binop (A.Eq None, var_dollar_, category_arr)]
-  in
-  (* return $_; *)
-  let token2 = p, A.Return (Some var_dollar_) in
-  let body = [token1; token2] in
+  let token1 = p, A.Return (Some category_arr) in
+  let body = [token1] in
   let m =
     xhp_attribute_declaration_method
       ~p:cat_pos

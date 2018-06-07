@@ -341,6 +341,13 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
       end
     | _ -> env
   in
+  (* Same as above, but for persistent clients *)
+  let env = match env.persistent_client_pending_command_needs_full_check with
+    | Some (_command, reason) when env.full_check = Full_check_needed ->
+        Hh_logger.log "Restarting full check due to %s" reason;
+        { env with full_check = Full_check_started }
+    | _ -> env
+  in
 
   (* We have some new, or previously un-processed updates *)
   let full_check = env.full_check = Full_check_started

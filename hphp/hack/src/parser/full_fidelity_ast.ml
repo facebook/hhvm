@@ -46,7 +46,7 @@ type env =
     Some x -> COMPILER_HALT_OFFSET is in the source file,
               HALT_COMPILER is at x bytes offset in the file.
   *)
-  ; mutable saw_compiler_halt_offset : int option
+  ; saw_compiler_halt_offset : (int option) ref
   }[@@deriving show]
 
 let make_env
@@ -102,7 +102,7 @@ let make_env
     ; saw_yield = false
     ; unsafes = ISet.empty
     ; saw_std_constant_redefinition = false
-    ; saw_compiler_halt_offset = None
+    ; saw_compiler_halt_offset = ref None
     }
 
 type result =
@@ -320,7 +320,7 @@ let rec pos_name node env =
   let local_ignore_pos = env.ignore_pos in
   (* Special case for __LINE__; never ignore position for that special name *)
   if name = "__LINE__" then env.ignore_pos <- false;
-  if name = "__COMPILER_HALT_OFFSET__" then env.saw_compiler_halt_offset <- Some 0;
+  if name = "__COMPILER_HALT_OFFSET__" then env.saw_compiler_halt_offset := Some 0;
   let p = pPos node env in
   env.ignore_pos <- local_ignore_pos;
   p, name
@@ -2761,14 +2761,14 @@ let pProgram : program parser = fun node env ->
         { syntax = HaltCompilerExpression _ ; _ } ; _ } ; _ } as cur_node :: nodel
     ->
     (* If we saw COMPILER_HALT_OFFSET, calculate the position of HALT_COMPILER *)
-    if env.saw_compiler_halt_offset <> None then
+    if !(env.saw_compiler_halt_offset) <> None then
       begin
       let local_ignore_pos = env.ignore_pos in
       let () = env.ignore_pos <- false in
       let pos = pPos cur_node env in
       (* __COMPILER_HALT_OFFSET__ takes value equal to halt_compiler's end position *)
       let s = Pos.end_cnum pos in
-      let () = env.saw_compiler_halt_offset <- Some s in
+      let () = env.saw_compiler_halt_offset := Some s in
       env.ignore_pos <- local_ignore_pos
       end;
     aux env acc nodel
@@ -2945,7 +2945,7 @@ let elaborate_toplevel_and_std_constants ast (env: env) source_text =
   | _ -> ast
 
 let elaborate_halt_compiler ast env source_text  =
-  match env.saw_compiler_halt_offset with
+  match !(env.saw_compiler_halt_offset) with
     | Some x ->
     let elaborate_halt_compiler_const defs =
       let visitor = object(self)

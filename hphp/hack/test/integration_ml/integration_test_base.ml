@@ -13,6 +13,7 @@ open Integration_test_base_types
 open Reordered_argument_collections
 open ServerCommandTypes
 open SearchServiceRunner
+open Coverage_level
 
 let root = "/"
 let hhi = "/hhi"
@@ -250,6 +251,11 @@ let wait env =
    * counters. *)
   ServerEnv.{ env with last_command_time = env.last_command_time -. 1.0 }
 
+let coverage_levels env file_input =
+  run_loop_once env { default_loop_input with
+    persistent_client_request = Some (Request (COVERAGE_LEVELS file_input))
+  }
+
 let autocomplete env contents =
   run_loop_once env { default_loop_input with
     persistent_client_request = Some (Request (AUTOCOMPLETE contents))
@@ -359,6 +365,22 @@ let list_to_string l =
   let buf = Buffer.create 1024 in
   List.iter l ~f:(Printf.bprintf buf "%s ");
   Buffer.contents buf
+
+let coverage_levels_to_str_helper (pos, cl) =
+  let cl_str = string_of_level cl in
+  let interval = Pos.string pos in
+  interval^" "^cl_str
+
+let assert_coverage_levels loop_output expected =
+  let results = match loop_output.persistent_client_response with
+    | Some res -> res
+    | _ -> fail "Expected coverage levels response"
+  in
+  let results_as_string =
+    List.map results coverage_levels_to_str_helper |>
+      List.sort ~cmp:compare |> list_to_string in
+  let expected_as_string = list_to_string expected in
+  assertEqual expected_as_string results_as_string
 
 let assert_autocomplete loop_output expected =
   let results = match loop_output.persistent_client_response with

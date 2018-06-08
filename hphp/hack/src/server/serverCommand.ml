@@ -320,6 +320,7 @@ let with_dependency_table_reads full_recheck_needed f =
  * available, when current recheck is cancelled... *)
 let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
     with_dependency_table_reads full_recheck_needed @@ fun () ->
+    Errors.ignore_ @@ fun () ->
   assert (
     (not full_recheck_needed) ||
     ServerEnv.(env.full_check = Full_check_done)

@@ -105,10 +105,16 @@ module Common = struct
     let accumulate_errors_copy = !accumulate_errors in
     error_map := Relative_path.Map.empty;
     accumulate_errors := true;
-    let result = f1 () in
-    let errors = !error_map in
-    error_map := error_map_copy;
-    accumulate_errors := accumulate_errors_copy;
+    let result, errors = Utils.try_finally
+      ~f:begin fun () ->
+        let result = f1 () in
+        result, !error_map
+      end
+      ~finally:begin fun () ->
+        error_map := error_map_copy;
+        accumulate_errors := accumulate_errors_copy;
+      end
+    in
     match get_last errors with
     | None -> result
     | Some l -> f2 result l
@@ -120,21 +126,26 @@ module Common = struct
     error_map := Relative_path.Map.empty;
     applied_fixmes := Relative_path.Map.empty;
     accumulate_errors := true;
-    let result = f () in
-    let out_errors = !error_map in
-    let out_applied_fixmes = !applied_fixmes in
-    error_map := error_map_copy;
-    applied_fixmes := applied_fixmes_copy;
-    accumulate_errors := accumulate_errors_copy;
+    let result, out_errors, out_applied_fixmes = Utils.try_finally
+      ~f:begin fun () ->
+        let result = f () in
+        result, !error_map, !applied_fixmes
+      end
+      ~finally:begin fun () ->
+        error_map := error_map_copy;
+        applied_fixmes := applied_fixmes_copy;
+        accumulate_errors := accumulate_errors_copy;
+      end
+    in
     let out_errors = files_t_map ~f:(List.rev) out_errors in
     (out_errors, out_applied_fixmes), result
 
   let run_in_context path phase f =
     let context_copy = !current_context in
     current_context := (path, phase);
-    let res = f () in
-    current_context := context_copy;
-    res
+    Utils.try_finally ~f ~finally:begin fun () ->
+      current_context := context_copy;
+    end
 
   (* Log important data if lazy_decl triggers a crash *)
   let lazy_decl_error_logging error error_map to_absolute to_string =
@@ -269,9 +280,9 @@ module NonTracingErrors: Errors_modes = struct
   let run_in_decl_mode filename f =
     let old_in_lazy_decl = !in_lazy_decl in
     in_lazy_decl := Some filename;
-    let result = f () in
-    in_lazy_decl := old_in_lazy_decl;
-    result
+    Utils.try_finally ~f ~finally:begin fun () ->
+      in_lazy_decl := old_in_lazy_decl;
+    end
 
   and make_error code (x: (Pos.t * string) list) = ((code, x): error)
 
@@ -366,10 +377,9 @@ module TracingErrors: Errors_modes = struct
   *)
   let run_in_decl_mode filename f =
     in_lazy_decl := Some filename;
-    let result = f () in
-    in_lazy_decl := None;
-    result
-
+    Utils.try_finally ~f ~finally:begin fun () ->
+      in_lazy_decl := None;
+    end
 
   let make_error code (x: (Pos.t * string) list) =
     let bt = Printexc.get_callstack 25 in

@@ -158,6 +158,7 @@ struct DebuggerHook {
   virtual void onFileLoad(Unit* /*efile*/) {}
   virtual void onDefClass(const Class* /*cls*/) {}
   virtual void onDefFunc(const Func* /*func*/) {}
+  virtual void onRegisterFuncIntercept(const String& /*name*/) {}
 
   // Called whenever the program counter is at a location that could be
   // interesting to a debugger. Such as when have hit a registered breakpoint
@@ -224,6 +225,7 @@ void phpDebuggerEvalHook(const Func* f);
 void phpDebuggerFileLoadHook(Unit* efile);
 void phpDebuggerDefClassHook(const Class* cls);
 void phpDebuggerDefFuncHook(const Func* func);
+void phpDebuggerInterceptRegisterHook(const String& name);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Flow commands

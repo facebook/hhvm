@@ -366,6 +366,14 @@ void phpDebuggerDefFuncHook(const Func* func) {
   getDebuggerHook()->onDefFunc(func);
 }
 
+// Called by the VM when a function intercept is registered.
+void phpDebuggerInterceptRegisterHook(const String& name) {
+  VMRegAnchor anchor;
+  auto hook = getDebuggerHook();
+  if (hook != nullptr) {
+    hook->onRegisterFuncIntercept(name);
+  }
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Flow Control

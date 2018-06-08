@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -92,7 +93,14 @@ static void flag_maybe_intercepted(std::vector<int8_t*> &flags) {
 }
 
 bool register_intercept(const String& name, const Variant& callback,
-                        const Variant& data) {
+                        const Variant& data, bool checkForDebugger) {
+
+  SCOPE_EXIT {
+    if (checkForDebugger) {
+      DEBUGGER_ATTACHED_ONLY(phpDebuggerInterceptRegisterHook(name));
+    }
+  };
+
   if (!callback.toBoolean()) {
     if (name.empty()) {
       s_intercept_data->global_handler().unset();
@@ -107,6 +115,7 @@ bool register_intercept(const String& name, const Variant& callback,
         }
       }
     }
+
     return true;
   }
 

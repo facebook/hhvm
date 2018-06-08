@@ -1006,7 +1006,7 @@ String HHVM_FUNCTION(fb_utf8_substr, const String& str, int64_t start,
 
 bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
                                  const Variant& data /* = uninit_variant */) {
-  return register_intercept(name, handler, data);
+  return register_intercept(name, handler, data, true);
 }
 
 bool is_dangerous_varenv_function(const StringData* name) {

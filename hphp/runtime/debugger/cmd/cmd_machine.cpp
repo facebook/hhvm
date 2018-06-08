@@ -314,11 +314,11 @@ bool CmdMachine::onServer(DebuggerProxy &proxy) {
   if (m_body == "rpc") {
     String host = m_rpcConfig[s_host_string].toString();
     if (host.empty()) {
-      register_intercept("", false, uninit_null());
+      register_intercept("", false, uninit_null(), false);
     } else {
       int port = m_rpcConfig[s_port].toInt32();
       LibEventHttpClient::SetCache(host.data(), port, 1);
-      register_intercept("", "fb_rpc_intercept_handler", m_rpcConfig);
+      register_intercept("", "fb_rpc_intercept_handler", m_rpcConfig, false);
     }
     return proxy.sendToClient(this);
   }

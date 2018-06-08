@@ -429,6 +429,39 @@ void BreakpointManager::onBreakpointResolved(
   bp->m_resolvedLocation.m_path = path;
 
   sendBreakpointEvent(id, ReasonChanged);
+
+  // If calibration moved the breakpoint, tell the user that this was
+  // intentional.
+  if (m_debugger->getDebuggerOptions().notifyOnBpCalibration &&
+      (startLine != bp->m_line || endLine != bp->m_line)) {
+
+    std::string msg = "The breakpoint at line ";
+    msg += std::to_string(bp->m_line);
+    msg += " of ";
+    msg += path;
+
+    if (startLine == endLine) {
+      // Single-line expression.
+      msg += " was resolved to line ";
+      msg += std::to_string(startLine);
+      msg += ", which is actually where the nearest executable instruction in ";
+      msg += "the source map for this file is.";
+    } else {
+      // Multi-line expression.
+      msg += " resolved to a multi-line expression. (Lines ";
+      msg += std::to_string(startLine);
+      msg += "-";
+      msg += std::to_string(endLine);
+      msg += ") The breakpoint will be displayed at the first executable ";
+      msg += "instruction of the expression that would be hit when ";
+      msg += "single-stepping through this function.";
+    }
+
+    m_debugger->sendUserMessage(
+      msg.c_str(),
+      DebugTransport::OutputLevelInfo
+    );
+  }
 }
 
 // Helper to honor client's lines start at 0 or 1 preference.

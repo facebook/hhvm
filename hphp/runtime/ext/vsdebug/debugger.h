@@ -170,6 +170,9 @@ struct DebuggerOptions {
 
   // Warn if the client sets a breakpoint in a function that is intercepted.
   bool warnOnInterceptedFunctions;
+
+  // Tell the user if breakpoint calibration moves their bp.
+  bool notifyOnBpCalibration;
 };
 
 struct Debugger final {
@@ -448,9 +451,16 @@ struct Debugger final {
       "Client options set:\n"
         "showDummyOnAsyncPause: %s\n"
         "warnOnInterceptedFunctions: %s\n",
+        "notifyOnBpCalibration: %s\n",
       options.showDummyOnAsyncPause ? "YES" : "NO",
-      options.warnOnInterceptedFunctions ? "YES" : "NO"
+      options.warnOnInterceptedFunctions ? "YES" : "NO",
+      options.notifyOnBpCalibration ? "YES" : "NO"
     );
+  }
+
+  DebuggerOptions getDebuggerOptions() {
+    Lock lock(m_lock);
+    return m_debuggerOptions;
   }
 
 private:

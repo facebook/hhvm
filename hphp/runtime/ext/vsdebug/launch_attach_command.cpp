@@ -53,6 +53,9 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   bool warnOnInterceptedFunctions =
     tryGetBool(args, "warnOnInterceptedFunctions", false);
 
+  bool notifyOnBpCalibration =
+    tryGetBool(args, "notifyOnBpCalibration", false);
+
   const auto& logFilePath =
     tryGetString(args, "logFilePath", emptyString);
 
@@ -90,6 +93,7 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   DebuggerOptions options = {0};
   options.showDummyOnAsyncPause = showDummyOnAsyncPause;
   options.warnOnInterceptedFunctions = warnOnInterceptedFunctions;
+  options.notifyOnBpCalibration = notifyOnBpCalibration;
   m_debugger->setDebuggerOptions(options);
 
   // Send the InitializedEvent to indicate to the front-end that we are up

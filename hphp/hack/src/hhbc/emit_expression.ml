@@ -2917,13 +2917,58 @@ and emit_args_and_call env call_pos args uargs =
           ]
         end; ]
 
+    | (_, A.Callconv (A.Pinout, expr)) :: rest -> begin
+      let pos, expr_ = strip_ref expr in
+      match expr_ with
+      | A.Lvar (name_pos, s) ->
+        let inout_setters =
+          (instr_setl @@ Local.Named s) :: inout_setters in
+        let not_in_try = not (Emit_env.is_in_try env) in
+        let move_instrs =
+          if not_in_try && (InoutLocals.should_move_local_value s aliases)
+          then gather [ instr_null; instr_popl @@ Local.Named s ]
+          else empty in
+        gather [
+          emit_pos name_pos;
+          instr_cgetl @@ Local.Named s;
+          move_instrs;
+          emit_pos call_pos;
+          instr_fpassc i Any;
+          aux (i + 1) rest inout_setters
+        ]
+      | A.Array_get (base_expr, opt_elem_expr) -> begin
+        let array_get_result =
+          emit_array_get_worker ~need_ref:false
+            ~inout_param_info:(Some (i, aliases)) env pos None
+            QueryOp.InOut base_expr opt_elem_expr in
+        match array_get_result with
+        | Array_get_regular instrs ->
+          let setter =
+            let base =
+              emit_array_get ~no_final:true ~need_ref:false
+                ~mode:MemberOpMode.Define
+                env pos None QueryOp.InOut base_expr opt_elem_expr in
+            gather [
+              base;
+              instr_setm 0 (get_elem_member_key env 0 opt_elem_expr);
+            ] in
+          gather [
+            instrs;
+            instr_fpassc i Any;
+            aux (i + 1) rest (setter :: inout_setters) ]
+        | Array_get_inout { load; store } ->
+          rebuild_sequence load @@ begin fun () ->
+            gather [
+              instr_fpassc i Any;
+              aux (i + 1) rest (store :: inout_setters)
+            ]
+          end
+        end
+      | _ -> failwith "emit_args_and_call: Unexpected inout expression type"
+      end
+
     | expr :: rest ->
       let next c = gather [ c; aux (i + 1) rest inout_setters ] in
-      let is_inout, expr =
-        match snd expr with
-        | A.Callconv (A.Pinout, e) -> true, e
-        | _ -> false, expr
-      in
       let hint = get_pass_by_ref_hint expr in
       let expr = strip_ref expr in
       if i >= args_count then
@@ -2936,21 +2981,6 @@ and emit_args_and_call env call_pos args uargs =
           emit_pos name_pos;
           instr_string (SU.Locals.strip_dollar x);
           instr_fpassg i hint;
-        ]
-      | A.Lvar ((_, s) as id) when is_inout ->
-        let inout_setters =
-          (instr_setl @@ Local.Named s) :: inout_setters in
-        let not_in_try = not (Emit_env.is_in_try env) in
-        let move_instrs =
-          if not_in_try && (InoutLocals.should_move_local_value s aliases)
-            then gather [ instr_null; instr_popl (get_local env id) ]
-            else empty in
-        gather [
-          emit_expr ~need_ref:false env expr;
-          move_instrs;
-          emit_pos call_pos;
-          instr_fpassc i hint;
-          aux (i + 1) rest inout_setters
         ]
       | A.Lvar ((_, str) as id)
         when not (is_local_this env str) || Emit_env.get_needs_local_this env ->
@@ -2970,41 +3000,11 @@ and emit_args_and_call env call_pos args uargs =
         ]
 
       | A.Array_get (base_expr, opt_elem_expr) ->
-        if is_inout
-        then begin
-          let array_get_result =
-            emit_array_get_worker ~need_ref:false
-              ~inout_param_info:(Some (i, aliases)) env pos (Some (i, hint))
-              QueryOp.InOut base_expr opt_elem_expr in
-          match array_get_result with
-          | Array_get_regular instrs ->
-            let setter =
-              let base =
-                emit_array_get ~no_final:true ~need_ref:false
-                  ~mode:MemberOpMode.Define
-                  env pos None QueryOp.InOut base_expr opt_elem_expr in
-              gather [
-                base;
-                instr_setm 0 (get_elem_member_key env 0 opt_elem_expr);
-              ] in
-            gather [
-              instrs;
-              instr_fpassc i hint;
-              aux (i + 1) rest (setter :: inout_setters) ]
-          | Array_get_inout { load; store } ->
-            rebuild_sequence load @@ begin fun () ->
-              gather [
-                instr_fpassc i hint;
-                aux (i + 1) rest (store :: inout_setters)
-              ]
-            end
-        end
-        else
-          next @@ emit_array_get
-            ~need_ref:false
-            { env with Emit_env.env_allows_array_append = true }
-            pos (Some (i, hint))
-          QueryOp.CGet base_expr opt_elem_expr
+        next @@ emit_array_get
+          ~need_ref:false
+          { env with Emit_env.env_allows_array_append = true }
+          pos (Some (i, hint))
+        QueryOp.CGet base_expr opt_elem_expr
 
       | A.Obj_get (e1, e2, nullflavor) ->
         next @@ emit_obj_get ~need_ref:false env pos (Some (i, hint)) QueryOp.CGet e1 e2 nullflavor

@@ -1121,8 +1121,7 @@ public:
   void emitConvertToCellOrLoc(Emitter& e);
   void emitConvertSecondToCell(Emitter& e);
   void emitConvertToVar(Emitter& e);
-  void emitFPass(Emitter& e, int paramID, FPassHint hint, bool isInOut = false,
-                 bool canMove = false);
+  void emitFPass(Emitter& e, int paramID, FPassHint hint);
   Offset emitFPushClsMethod(Emitter& e, ExpressionListPtr params);
   void emitVirtualLocal(int localId);
   template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
@@ -8020,27 +8019,54 @@ EmitterVisitor::MInstrChain EmitterVisitor::emitInOutArg(
     );
   }
 
-  auto const canMove = [&] {
-    if (auto sv = dynamic_pointer_cast<SimpleVariable>(exp)) {
-      if (!sv->isThis() && !sv->isSuperGlobal()) {
-        auto const var_id =
-          m_curFunc->lookupVarId(makeStaticString(sv->getName()));
-        // If more than one reference to this parameter exists in the argument
-        // list then it isn't safe to "move" it by unsetting the local.
-        return seen[var_id] < 2;
-      }
-    }
-    return false;
-  }();
+  LocationGuard locGuard(e, m_tempLoc);
+  m_tempLoc.clear();
 
-  emitFPass(e, paramId, getPassByRefHint(exp), true, canMove);
+  emitClsIfSPropBase(e);
+  int iLast = m_evalStack.size()-1;
+  int i = scanStackForLocation(iLast);
+  int sz = iLast - i;
+
+  assert(sz >= 0);
+  char sym = m_evalStack.get(i);
+  if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
+    if (sym != StackSym::L) {
+      throw EmitterVisitor::IncludeTimeFatalException(e.getNode(),
+        "Parameters marked inout must be contained in locals, vecs, dicts, "
+        "keysets, and arrays");
+    }
+
+    auto const loc = m_evalStack.getLoc(i);
+    auto const canMove = [&] {
+      if (m_inTry) return false;
+      if (auto sv = dynamic_pointer_cast<SimpleVariable>(exp)) {
+        if (!sv->isThis() && !sv->isSuperGlobal()) {
+          // If more than one reference to this parameter exists in the argument
+          // list then it isn't safe to "move" it by unsetting the local.
+          return seen[loc] < 2;
+        }
+      }
+      return false;
+    }();
+
+    emitCGet(e);
+    if (canMove) {
+      emitVirtualLocal(loc);
+      e.Null();
+      e.PopL(loc);
+    }
+    e.FPassC(paramId, FPassHint::Any);
+  } else {
+    auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{MOpMode::InOut});
+    e.QueryM(
+      stackCount, QueryMOp::InOut, symToMemberKey(e, iLast, false /* allowW */)
+    );
+    e.FPassC(paramId, FPassHint::Any);
+  }
   return chain;
 }
 
-void EmitterVisitor::emitFPass(Emitter& e, int paramId,
-                               FPassHint hint,
-                               bool isInOut,
-                               bool canMove) {
+void EmitterVisitor::emitFPass(Emitter& e, int paramId, FPassHint hint) {
   if (checkIfStackEmpty("FPass*")) return;
   LocationGuard locGuard(e, m_tempLoc);
   m_tempLoc.clear();
@@ -8053,22 +8079,6 @@ void EmitterVisitor::emitFPass(Emitter& e, int paramId,
   assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
-    if (isInOut) {
-      if (sym != StackSym::L) {
-        throw EmitterVisitor::IncludeTimeFatalException(e.getNode(),
-          "Parameters marked inout must be contained in locals, vecs, dicts, "
-          "keysets, and arrays");
-      }
-      auto const loc = m_evalStack.getLoc(i);
-      emitCGet(e);
-      if (!m_inTry && canMove) {
-        emitVirtualLocal(loc);
-        e.Null();
-        e.PopL(loc);
-      }
-      e.FPassC(paramId, hint);
-      return;
-    }
     switch (sym) {
       case StackSym::L: e.FPassL(paramId, m_evalStack.getLoc(i), hint); break;
       case StackSym::C: e.FPassC(paramId, hint); break;
@@ -8087,12 +8097,6 @@ void EmitterVisitor::emitFPass(Emitter& e, int paramId,
         break;
       }
     }
-  } else if (isInOut) {
-    auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{MOpMode::InOut});
-    e.QueryM(
-      stackCount, QueryMOp::InOut, symToMemberKey(e, iLast, false /* allowW */)
-    );
-    e.FPassC(paramId, hint);
   } else {
     auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{paramId});
     e.FPassM(

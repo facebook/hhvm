@@ -1305,6 +1305,29 @@ void dce(Env& env, const bc::Throw&) { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Fatal&) { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Exit&)  { stack_ops(env); readDtorLocs(env); }
 
+void dce(Env& env, const bc::IsTypeC& op) {
+  stack_ops(env, [&] (UseInfo& ui) {
+      if (allUnused(ui) &&
+          !is_type_might_raise(type_of_istype(op.subop1), topC(env))) {
+        return PushFlags::MarkUnused;
+      }
+      return PushFlags::MarkLive;
+    });
+}
+
+void dce(Env& env, const bc::IsTypeL& op) {
+  auto const ty = locRaw(env, op.loc1);
+  stack_ops(env, [&] (UseInfo& ui) {
+      scheduleGenLoc(env, op.loc1);
+      if (allUnused(ui) &&
+          !readCouldHaveSideEffects(ty) &&
+          !is_type_might_raise(type_of_istype(op.subop2), ty)) {
+        return PushFlags::MarkUnused;
+      }
+      return PushFlags::MarkLive;
+    });
+}
+
 void dce(Env& env, const bc::Array& op) {
   stack_ops(env, [&] (UseInfo& ui) {
       if (allUnusedIfNotLastRef(ui)) return PushFlags::MarkUnused;

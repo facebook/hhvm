@@ -4630,6 +4630,18 @@ bool could_copy_on_write(const Type& t) {
   return t.m_bits & (BCStr | BCArrN | BCVecN | BCDictN | BCKeysetN);
 }
 
+bool is_type_might_raise(const Type& testTy, const Type& valTy) {
+  if (!RuntimeOption::EvalHackArrCompatIsArrayNotices) return false;
+  if (testTy.subtypeOf(TVArr)) return valTy.couldBe(TVec);
+  if (testTy.subtypeOf(TDArr)) return valTy.couldBe(TDict);
+  if (testTy.subtypeOf(TArr))  return valTy.couldBeAny(TVArr, TDArr,
+                                                       TVec, TDict,
+                                                       TKeyset);
+  if (testTy.subtypeOf(TVec))  return valTy.couldBe(TVArr);
+  if (testTy.subtypeOf(TDict)) return valTy.couldBe(TDArr);
+  return false;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 ArrKey disect_vec_key(const Type& keyTy) {

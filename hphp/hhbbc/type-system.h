@@ -1483,6 +1483,11 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder&, const Type& t);
  */
 bool could_run_destructor(const Type& t);
 
+/*
+ * Returns true iff an IsType testing for testTy on valTy might raise.
+ */
+bool is_type_might_raise(const Type& testTy, const Type& valTy);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

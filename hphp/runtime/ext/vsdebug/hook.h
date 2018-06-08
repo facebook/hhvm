@@ -48,6 +48,7 @@ struct VSDebugHook final : DebuggerHook {
   void onFileLoad(Unit* efile) override;
   void onDefClass(const Class* cls) override;
   void onDefFunc(const Func* func) override;
+  void onRegisterFuncIntercept(const String& name) override;
 
   static DebuggerHook* GetInstance() {
     static VSDebugHook* hook = new VSDebugHook();

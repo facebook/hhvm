@@ -76,6 +76,9 @@ struct Breakpoint {
   const std::string m_path;
   const std::string m_function;
 
+  bool m_intercepted;
+  std::string m_functionFullName;
+
   ResolvedLocation m_resolvedLocation;
   int m_hitCount;
 
@@ -130,7 +133,8 @@ struct BreakpointManager {
     int endLine,
     int startColumn,
     int endColumn,
-    const std::string& path
+    const std::string& path,
+    std::string functionName
   );
 
   void onBreakpointHit(int id);
@@ -175,6 +179,8 @@ struct BreakpointManager {
 
   void onRequestShutdown(request_id_t requestId);
 
+  void onFuncIntercepted(request_id_t requestId, std::string name);
+
 private:
 
   static constexpr char* ReasonNew = "new";
@@ -196,6 +202,11 @@ private:
     bool column
   );
 
+  void sendBpInterceptedWarning(
+    int bpId,
+    std::string& name
+  );
+
   ExceptionBreakpointSettings m_exceptionSettings;
 
   // The authoratative list of the current breakpoints set by the client.
@@ -206,6 +217,14 @@ private:
 
   // Map of function names to function breakpoints.
   std::unordered_map<std::string, int> m_fnBreakpoints;
+
+  // List of intercepted functions per request.
+  std::unordered_map<
+    request_id_t,
+    std::unordered_set<std::string>> m_interceptedFuncs;
+  std::unordered_map<
+    request_id_t,
+    std::unordered_set<std::string>> m_interceptNotifyFuncs;
 
   // Verified breakpoints. A breakpoint is verified if at least one request
   // has resolved it in a compilation unit since it was set. This is a bit odd

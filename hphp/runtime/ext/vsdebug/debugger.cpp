@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
@@ -1493,13 +1494,36 @@ bool Debugger::tryResolveBreakpointInUnit(const RequestInfo* /*ri*/, int bpId,
     return false;
   }
 
+  // Warn the user if the breakpoint is going into a unit that has intercepted
+  // functions. We can't be certain this breakpoint is reachable in code
+  // anymore.
+  std::string functionName = "";
+  if (!bp->m_intercepted) {
+    compilationUnit->forEachFunc([&](const Func* func) {
+      if (functionName == "" &&
+          func != nullptr &&
+          func->name() != nullptr &&
+          func->line1() <= lines.first &&
+          func->line2() >= lines.second) {
+
+          std::string cls =
+            func->cls() != nullptr && func->cls()->name() != nullptr
+              ? std::string(func->cls()->name()->data()) + "::"
+              : "";
+          functionName = cls;
+          functionName += func->name()->data();
+      }
+    });
+  }
+
   m_session->getBreakpointManager()->onBreakpointResolved(
     bpId,
     lines.first,
     lines.second,
     0,
     0,
-    unitFilePath
+    unitFilePath,
+    functionName
   );
 
   return true;
@@ -1644,6 +1668,17 @@ void Debugger::onCompilationUnitLoaded(
   }
 
   updateUnresolvedBpFlag(ri);
+}
+
+void Debugger::onFuncIntercepted(std::string funcName) {
+  Lock lock(m_lock);
+
+  if (!clientConnected()) {
+    return;
+  }
+
+  BreakpointManager* bpMgr = m_session->getBreakpointManager();
+  bpMgr->onFuncIntercepted(getCurrentThreadId(), funcName);
 }
 
 void Debugger::onFuncBreakpointHit(
@@ -1907,7 +1942,7 @@ void Debugger::onAsyncBreak() {
   constexpr char* reason = "Async-break";
   pauseTarget(nullptr, reason);
 
-  if (m_showDummyOnAsyncPause) {
+  if (m_debuggerOptions.showDummyOnAsyncPause) {
     // Show the dummy request as stopped.
     sendStoppedEvent(reason, reason, 0, false);
   }

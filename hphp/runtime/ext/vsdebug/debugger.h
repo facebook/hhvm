@@ -161,6 +161,17 @@ private:
   Debugger* m_debugger;
 };
 
+// Custom options that clients can pass in launch/attach messages
+// to control optional debugger behavior.
+struct DebuggerOptions {
+  // Show the dummy thread in the threads list when the debugger is
+  // responding to a stop command.
+  bool showDummyOnAsyncPause;
+
+  // Warn if the client sets a breakpoint in a function that is intercepted.
+  bool warnOnInterceptedFunctions;
+};
+
 struct Debugger final {
   Debugger();
   virtual ~Debugger() {
@@ -292,6 +303,9 @@ struct Debugger final {
     const HPHP::Unit* compilationUnit
   );
 
+  // Called when a function is intercepted.
+  void onFuncIntercepted(std::string funcName);
+
   // Called when the request defines a new function.
   void onFunctionDefined(
     RequestInfo* ri,
@@ -384,11 +398,6 @@ struct Debugger final {
     return (int64_t)Process::GetThreadId() == m_dummyThreadId;
   }
 
-  void setShowDummyOnAsyncPause(bool show) {
-    Lock lock(m_lock);
-    m_showDummyOnAsyncPause = show;
-  }
-
   // Populates the specified folly::dynamic array with a list of thread IDs.
   void getAllThreadInfo(folly::dynamic& threads);
 
@@ -429,6 +438,20 @@ struct Debugger final {
     request_id_t requestId,
     VSCommand* command
   );
+
+  void setDebuggerOptions(DebuggerOptions options) {
+    Lock lock(m_lock);
+    m_debuggerOptions = options;
+
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Client options set:\n"
+        "showDummyOnAsyncPause: %s\n"
+        "warnOnInterceptedFunctions: %s\n",
+      options.showDummyOnAsyncPause ? "YES" : "NO",
+      options.warnOnInterceptedFunctions ? "YES" : "NO"
+    );
+  }
 
 private:
 
@@ -583,10 +606,6 @@ private:
   // State of the program.
   ProgramState m_state {ProgramState::LoaderBreakpoint};
 
-  // Tracks if the current client wants to see the dummy in the thread
-  // list when the debugger async-breaks.
-  bool m_showDummyOnAsyncPause {false};
-
   // Information about all the requests that the debugger is aware of.
   std::unordered_map<ThreadInfo*, RequestInfo*> m_requests;
 
@@ -620,6 +639,9 @@ private:
   // also issue a pause
   std::mutex m_resumeMutex;
   std::condition_variable m_resumeCondition;
+
+  // Client options.
+  DebuggerOptions m_debuggerOptions {0};
 
   // Worker thread to clean up old session objects as debugger clients
   // disconnect. Cleaning the session object requires joining with the

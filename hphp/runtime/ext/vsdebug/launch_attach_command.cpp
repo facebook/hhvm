@@ -50,23 +50,8 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   bool showDummyOnAsyncPause =
      tryGetBool(args, "showDummyOnAsyncPause", false);
 
-  if (!startupDoc.empty()) {
-    m_debugger->startDummyRequest(
-      startupDoc,
-      sandboxUser,
-      sandboxName,
-      displayStartupMsg
-    );
-  } else {
-    m_debugger->startDummyRequest(
-      emptyString,
-      sandboxUser,
-      sandboxName,
-      displayStartupMsg
-    );
-  }
-
-  m_debugger->setShowDummyOnAsyncPause(showDummyOnAsyncPause);
+  bool warnOnInterceptedFunctions =
+    tryGetBool(args, "warnOnInterceptedFunctions", false);
 
   const auto& logFilePath =
     tryGetString(args, "logFilePath", emptyString);
@@ -85,6 +70,27 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
       );
     }
   }
+
+  if (!startupDoc.empty()) {
+    m_debugger->startDummyRequest(
+      startupDoc,
+      sandboxUser,
+      sandboxName,
+      displayStartupMsg
+    );
+  } else {
+    m_debugger->startDummyRequest(
+      emptyString,
+      sandboxUser,
+      sandboxName,
+      displayStartupMsg
+    );
+  }
+
+  DebuggerOptions options = {0};
+  options.showDummyOnAsyncPause = showDummyOnAsyncPause;
+  options.warnOnInterceptedFunctions = warnOnInterceptedFunctions;
+  m_debugger->setDebuggerOptions(options);
 
   // Send the InitializedEvent to indicate to the front-end that we are up
   // and ready for breakpoint requests.

@@ -204,6 +204,22 @@ void VSDebugHook::onFileLoad(Unit* efile) {
 
 void VSDebugHook::onDefClass(const Class* /*cls*/) {}
 
+void VSDebugHook::onRegisterFuncIntercept(const String& name) {
+  BreakContext breakContext(true);
+
+  // This callback is invoked when a function is intercepted in HHVM.
+  // Intercepts are used by things like mocking and testing frameworks
+  // and some autoload infrastructure.  The debugger is interested in
+  // this so that we can warn the user if a breakpoint is in a function that's
+  // been detoured.
+
+  if (breakContext.m_debugger != nullptr) {
+    breakContext.m_debugger->onFuncIntercepted(
+      name.toCppString()
+    );
+  }
+}
+
 void VSDebugHook::onDefFunc(const Func* func) {
   BreakContext breakContext(true);
 

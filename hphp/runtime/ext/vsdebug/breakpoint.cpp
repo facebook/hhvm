@@ -191,8 +191,83 @@ void BreakpointManager::onFuncBreakpointResolved(
       1,
       true
     ),
-    filePath
+    filePath,
+    func->name()->toCppString()
   );
+}
+
+void BreakpointManager::sendBpInterceptedWarning(
+  int bpId,
+  std::string& name
+) {
+  request_id_t requestId = m_debugger->getCurrentThreadId();
+  auto notifyIt = m_interceptNotifyFuncs.find(requestId);
+  if (notifyIt == m_interceptNotifyFuncs.end()) {
+    m_interceptNotifyFuncs.emplace(
+      requestId,
+      std::unordered_set<std::string>()
+    );
+    notifyIt = m_interceptNotifyFuncs.find(requestId);
+  }
+
+  // Only warn once per breakpoint per request.
+  auto funcIt = notifyIt->second.find(name);
+  if (funcIt != notifyIt->second.end()) {
+    return;
+  }
+
+  notifyIt->second.insert(name);
+
+  std::string msg = "Breakpoint #";
+  msg += std::to_string(bpId);
+  msg += " may resolve to a location ";
+  msg += "that is intercepted or mocked in request ";
+  msg += std::to_string(requestId);
+  msg += ". It might therefore not be reachable. ";
+  msg += "Double check the breakpoint location. ";
+  msg += "If you are using any testing or mocking frameworks, check ";
+  msg += "that you have configured them correctly. ";
+  msg += "Function ";
+  msg += name;
+  msg += " has an intercept handler registered.";
+
+  m_debugger->sendUserMessage(
+    msg.c_str(),
+    DebugTransport::OutputLevelWarning
+  );
+}
+
+void BreakpointManager::onFuncIntercepted(
+  request_id_t requestId,
+  std::string name
+) {
+  if (name == "") {
+    return;
+  }
+
+  // Always use lowercase, case-insensitive compare.
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
+  auto requestIt = m_interceptedFuncs.find(requestId);
+  if (requestIt == m_interceptedFuncs.end()) {
+    m_interceptedFuncs.emplace(requestId, std::unordered_set<std::string>());
+    requestIt = m_interceptedFuncs.find(requestId);
+  }
+
+  auto interceptedFuncs = requestIt->second;
+  if (interceptedFuncs.find(name) == interceptedFuncs.end()) {
+    interceptedFuncs.insert(name);
+  }
+
+  // Warn about any breakpoints in this request that resolved to
+  // functions that match the intercepted function name.
+  for (auto pair : m_breakpoints) {
+    auto bpId = pair.first;
+    const auto& bp = pair.second;
+    if (bp.m_functionFullName == name) {
+      sendBpInterceptedWarning(bpId, name);
+    }
+  }
 }
 
 int BreakpointManager::addFunctionBreakpoint(
@@ -289,7 +364,8 @@ void BreakpointManager::onBreakpointResolved(
   int endLine,
   int startColumn,
   int endColumn,
-  const std::string& path
+  const std::string& path,
+  std::string functionName
 ) {
   Breakpoint* bp = nullptr;
   const auto it = m_breakpoints.find(id);
@@ -301,6 +377,29 @@ void BreakpointManager::onBreakpointResolved(
     // This is okay, the breakpoint could have been deleted by the client
     // before a request thread had a chance to resolve it.
     return;
+  }
+
+  if (functionName != "") {
+    // Lowercase function names and compare case-insensitive.
+    std::transform(
+      functionName.begin(),
+      functionName.end(),
+      functionName.begin(),
+      ::tolower
+    );
+
+    bp->m_functionFullName = functionName;
+
+    auto interceptedFuncs =
+      m_interceptedFuncs.find(m_debugger->getCurrentThreadId());
+
+    if (interceptedFuncs != m_interceptedFuncs.end()) {
+      auto interceptIt = interceptedFuncs->second.find(functionName);
+      if (interceptIt != interceptedFuncs->second.end()) {
+        // This function is already intercepted.
+        sendBpInterceptedWarning(id, functionName);
+      }
+    }
   }
 
   if (isBreakpointResolved(id)) {
@@ -494,6 +593,19 @@ void BreakpointManager::onRequestShutdown(request_id_t requestId) {
   for (auto it = m_breakpoints.begin(); it != m_breakpoints.end(); it++) {
     Breakpoint& bp = it->second;
     bp.clearCachedConditionUnit(requestId);
+  }
+
+  // When a request ends, it no longer has any intercepted functions.
+  auto interceptIt = m_interceptedFuncs.find(requestId);
+  if (interceptIt != m_interceptedFuncs.end()) {
+    interceptIt->second.clear();
+    m_interceptedFuncs.erase(interceptIt);
+  }
+
+  auto notifyIt = m_interceptNotifyFuncs.find(requestId);
+  if (notifyIt != m_interceptNotifyFuncs.end()) {
+    notifyIt->second.clear();
+    m_interceptNotifyFuncs.erase(notifyIt);
   }
 }
 

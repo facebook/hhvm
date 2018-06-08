@@ -252,7 +252,7 @@ let from_ast_wrapper : bool -> _ ->
       is_memoize (*method_is_memoize_impl*)
   in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_method.body normal_function in
-  if has_inout_args
+  if has_inout_args && not (method_is_abstract && has_ref_params)
   then
     let wrapper =
       Emit_inout_function.emit_wrapper_method

@@ -1495,10 +1495,16 @@ bool Debugger::tryResolveBreakpointInUnit(const RequestInfo* /*ri*/, int bpId,
   }
 
   // Warn the user if the breakpoint is going into a unit that has intercepted
-  // functions. We can't be certain this breakpoint is reachable in code
-  // anymore.
+  // functions or a memoized function. We can't be certain this breakpoint is
+  // reachable in code anymore.
+  request_id_t requestId = getCurrentThreadId();
+  BreakpointManager* bpMgr = m_session->getBreakpointManager();
+
   std::string functionName = "";
-  if (!bp->m_intercepted) {
+  const HPHP::Func* function = nullptr;
+  if (m_debuggerOptions.notifyOnBpCalibration &&
+      !bpMgr->warningSentForBp(requestId, bpId)) {
+
     compilationUnit->forEachFunc([&](const Func* func) {
       if (functionName == "" &&
           func != nullptr &&
@@ -1512,11 +1518,22 @@ bool Debugger::tryResolveBreakpointInUnit(const RequestInfo* /*ri*/, int bpId,
               : "";
           functionName = cls;
           functionName += func->name()->data();
+          function = func;
       }
     });
+
+    if (function != nullptr &&
+          (function->isMemoizeWrapper() || function->isMemoizeImpl())) {
+        // This breakpoint looks like it's going into either a memoized
+        // function, or the wrapper for a memoized function. That means after
+        // the first time this routine executes, it might not execute again,
+        // even if the code is invoked again. Warn the user because this can
+        // cause confusion.
+        bpMgr->sendMemoizeWarning(requestId, bpId);
+    }
   }
 
-  m_session->getBreakpointManager()->onBreakpointResolved(
+  bpMgr->onBreakpointResolved(
     bpId,
     lines.first,
     lines.second,

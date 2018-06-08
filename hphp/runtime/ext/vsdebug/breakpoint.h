@@ -76,7 +76,6 @@ struct Breakpoint {
   const std::string m_path;
   const std::string m_function;
 
-  bool m_intercepted;
   std::string m_functionFullName;
 
   ResolvedLocation m_resolvedLocation;
@@ -141,6 +140,13 @@ struct BreakpointManager {
 
   bool isBreakpointResolved(int id) const;
 
+  // Returns true if the user was already sent a warning notification
+  // about a breakpoint's calibration / resolve location.
+  bool warningSentForBp(
+    request_id_t requestId,
+    int bpId
+  ) const;
+
   void onFuncBreakpointResolved(
     Breakpoint& bp,
     Func* func
@@ -181,6 +187,8 @@ struct BreakpointManager {
 
   void onFuncIntercepted(request_id_t requestId, std::string name);
 
+  void sendMemoizeWarning(request_id_t requestId, int bpId);
+
 private:
 
   static constexpr char* ReasonNew = "new";
@@ -195,6 +203,12 @@ private:
     const std::string& condition
   );
 
+  void sendWarningForBp(
+    request_id_t requestId,
+    int bpId,
+    std::string& warningMessage
+  );
+
   // Helper to honor client's lines start at 0 or 1 preference.
   static int adjustLineNumber(
     const ClientPreferences& preferences,
@@ -203,6 +217,7 @@ private:
   );
 
   void sendBpInterceptedWarning(
+    request_id_t requestId,
     int bpId,
     std::string& name
   );
@@ -222,9 +237,12 @@ private:
   std::unordered_map<
     request_id_t,
     std::unordered_set<std::string>> m_interceptedFuncs;
+
+  // Breakpoints per-request for which the user has been notified something
+  // is odd.
   std::unordered_map<
     request_id_t,
-    std::unordered_set<std::string>> m_interceptNotifyFuncs;
+    std::unordered_set<int>> m_userNotifyBps;
 
   // Verified breakpoints. A breakpoint is verified if at least one request
   // has resolved it in a compilation unit since it was set. This is a bit odd

@@ -138,6 +138,8 @@ let with_exit_on_exception f =
     Exit_status.(exit File_heap_stale)
   | Decl_class.Decl_heap_elems_bug ->
     Exit_status.(exit Decl_heap_elems_bug)
+  | Decl.Decl_not_found _->
+    Exit_status.(exit Decl_not_found)
   | SharedMem.C_assertion_failure _ as e ->
     Hh_logger.exc e;
     Exit_status.(exit Shared_mem_assertion_failure)

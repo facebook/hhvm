@@ -44,19 +44,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | IDE_SIGNATURE_HELP (fn, line, char) ->
         env, ServerSignatureHelp.go env (fn, line, char)
     | AUTOCOMPLETE content ->
-        let result = try
-          let autocomplete_context = { AutocompleteTypes.
-            is_xhp_classname = false;
-            is_instance_member = false;
-            is_after_single_colon = false;
-          } in (* feature not implemented here; it only works for LSP *)
-          ServerAutoComplete.auto_complete
-            ~tcopt:env.tcopt ~delimit_on_namespaces:false ~autocomplete_context content
-          with Decl.Decl_not_found s ->
-            let s = s ^ "-- Autocomplete File contents: " ^ content in
-            Printexc.print_backtrace stderr;
-            raise (Decl.Decl_not_found s)
-        in
+        let autocomplete_context = { AutocompleteTypes.
+          is_xhp_classname = false;
+          is_instance_member = false;
+          is_after_single_colon = false;
+        } in (* feature not implemented here; it only works for LSP *)
+        let result = ServerAutoComplete.auto_complete
+          ~tcopt:env.tcopt ~delimit_on_namespaces:false ~autocomplete_context content in
         env, result.With_complete_flag.value
     | IDENTIFY_FUNCTION (file_input, line, char) ->
         let content = ServerFileSync.get_file_content file_input in

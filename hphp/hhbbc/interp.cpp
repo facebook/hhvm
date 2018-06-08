@@ -834,7 +834,7 @@ void sameJmpImpl(ISS& env, const Same& same, const JmpOp& jmp) {
         addLocEquiv(env, loc, loc1);
       }
     }
-    refineLocation(env, loc1 != NoLocalId ? loc1 : loc0, [&] (Type ty) {
+    return refineLocation(env, loc1 != NoLocalId ? loc1 : loc0, [&] (Type ty) {
       if (!ty.couldBe(TUninit) || !isect.couldBe(TNull)) {
         auto ret = intersection_of(std::move(ty), isect);
         return ty.subtypeOf(TUnc) ? ret : loosen_staticness(ret);
@@ -849,33 +849,38 @@ void sameJmpImpl(ISS& env, const Same& same, const JmpOp& jmp) {
   };
 
   auto handle_differ_side = [&] (LocalId location, const Type& ty) {
-    if (ty.subtypeOf(TInitNull) || ty.strictSubtypeOf(TBool)) {
-      refineLocation(env, location, [&] (Type t) {
-          if (ty.subtypeOf(TNull)) {
-            t = remove_uninit(std::move(t));
-            if (is_opt(t)) t = unopt(std::move(t));
-            return t;
-          } else if (ty.strictSubtypeOf(TBool) && t.subtypeOf(TBool)) {
-            return ty == TFalse ? TTrue : TFalse;
-          }
-          return t;
-        });
-    }
+    if (!ty.subtypeOf(TInitNull) && !ty.strictSubtypeOf(TBool)) return true;
+    return refineLocation(env, location, [&] (Type t) {
+      if (ty.subtypeOf(TNull)) {
+        t = remove_uninit(std::move(t));
+        if (is_opt(t)) t = unopt(std::move(t));
+        return t;
+      } else if (ty.strictSubtypeOf(TBool) && t.subtypeOf(TBool)) {
+        return ty == TFalse ? TTrue : TFalse;
+      }
+      return t;
+    });
   };
 
   auto handle_differ = [&] {
-    if (loc0 != NoLocalId) handle_differ_side(loc0, ty1);
-    if (loc1 != NoLocalId) handle_differ_side(loc1, ty0);
+    return
+      (loc0 == NoLocalId || handle_differ_side(loc0, ty1)) &&
+      (loc1 == NoLocalId || handle_differ_side(loc1, ty0));
   };
 
   auto const sameIsJmpTarget =
     (Same::op == Op::Same) == (JmpOp::op == Op::JmpNZ);
 
   auto save = env.state;
-  sameIsJmpTarget ? handle_same() : handle_differ();
-  env.propagate(jmp.target, &env.state);
+  if (sameIsJmpTarget ? handle_same() : handle_differ()) {
+    env.propagate(jmp.target, &env.state);
+  } else {
+    jmp_nevertaken(env);
+  }
   env.state = std::move(save);
-  sameIsJmpTarget ? handle_differ() : handle_same();
+  if (!(sameIsJmpTarget ? handle_differ() : handle_same())) {
+    jmp_setdest(env, jmp.target);
+  }
 }
 
 bc::JmpNZ invertJmp(const bc::JmpZ& jmp) { return bc::JmpNZ { jmp.target }; }
@@ -1150,23 +1155,11 @@ void isTypeHelper(ISS& env,
 
   auto const negate = jmp.op == Op::JmpNZ;
   auto const was_true = [&] (Type t) {
-    if (testTy.subtypeOf(TUninit)) {
-      return TUninit;
-    }
-    if (testTy.subtypeOf(TNull)) {
-      return t.couldBe(TUninit) ?
-        t.couldBe(TInitNull) ? TNull : TUninit : TInitNull;
-    }
-    if (is_opt(t)) {
-      auto const unopted = unopt(t);
-      if (unopted.subtypeOf(testTy)) return unopted;
-    }
-    return testTy;
+    if (testTy.subtypeOf(TNull)) return intersection_of(t, TNull);
+    assertx(!testTy.couldBe(TNull));
+    return intersection_of(t, testTy);
   };
   auto const was_false = [&] (Type t) {
-    if (testTy.subtypeOf(TUninit)) {
-      return remove_uninit(t);
-    }
     if (testTy.subtypeOf(TNull)) {
       t = remove_uninit(std::move(t));
       return is_opt(t) ? unopt(t) : t;
@@ -2187,9 +2180,16 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
 
     assertx(out == TBool);
     if (!test) return push(env, t);
-    auto const newT = intersection_of(test.value(), t);
-    if (newT == TBottom) unreachable(env);
-    refineLocation(env, location, [&] (Type t) { return newT; });
+    auto const newT = intersection_of(*test, t);
+    if (newT == TBottom || !refineLocation(env, location, [&] (Type t) {
+          auto ret = intersection_of(*test, t);
+          if (test->couldBe(TInitNull) && t.couldBe(TUninit)) {
+            ret |= TUninit;
+          }
+          return ret;
+        })) {
+      unreachable(env);
+    }
     return push(env, newT);
   };
 
@@ -2753,12 +2753,14 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
 
   auto const location = topStkEquiv(env);
   if (location != NoLocalId) {
-    refineLocation(env, location, [&] (Type t) {
+    if (!refineLocation(env, location, [&] (Type t) {
       if (nullThrows) return intersection_of(t, TObj);
       if (!t.couldBe(TUninit)) return intersection_of(t, TOptObj);
       if (!t.couldBe(TObj)) return intersection_of(t, TNull);
       return t;
-    });
+    })) {
+      unreachable(env);
+    }
   }
 
   popC(env);

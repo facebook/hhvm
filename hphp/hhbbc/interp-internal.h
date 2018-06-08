@@ -786,7 +786,8 @@ void refineLocHelper(ISS& env, LocalId l, Type t) {
 }
 
 template<typename F>
-void refineLocation(ISS& env, LocalId l, F fun) {
+bool refineLocation(ISS& env, LocalId l, F fun) {
+  bool ok = true;
   auto refine = [&] (Type t) {
     always_assert(t.subtypeOf(TCell));
     auto r1 = fun(t);
@@ -794,7 +795,11 @@ void refineLocation(ISS& env, LocalId l, F fun) {
     // In unusual edge cases (mainly intersection of two unrelated
     // interfaces) the intersection may not be a subtype of its inputs.
     // In that case, always choose fun's type.
-    if (r2.subtypeOf(r1)) return r2;
+    if (r2.subtypeOf(r1)) {
+      if (r2.subtypeOf(TBottom)) ok = false;
+      return r2;
+    }
+    if (r1.subtypeOf(TBottom)) ok = false;
     return r1;
   };
   if (l == StackDupId) {
@@ -807,7 +812,7 @@ void refineLocation(ISS& env, LocalId l, F fun) {
     }
     l = stk->equivLoc;
   }
-  if (l == NoLocalId) return;
+  if (l == NoLocalId) return ok;
   auto equiv = findLocEquiv(env, l);
   if (equiv != NoLocalId) {
     do {
@@ -816,16 +821,22 @@ void refineLocation(ISS& env, LocalId l, F fun) {
     } while (equiv != l);
   }
   refineLocHelper(env, l, refine(peekLocRaw(env, l)));
+  return ok;
 }
 
 template<typename PreFun, typename PostFun>
 void refineLocation(ISS& env, LocalId l,
                     PreFun pre, BlockId target, PostFun post) {
   auto state = env.state;
-  refineLocation(env, l, pre);
-  env.propagate(target, &env.state);
+  if (refineLocation(env, l, pre)) {
+    env.propagate(target, &env.state);
+  } else {
+    jmp_nevertaken(env);
+  }
   env.state = std::move(state);
-  refineLocation(env, l, post);
+  if (!refineLocation(env, l, post)) {
+    jmp_setdest(env, target);
+  }
 }
 
 /*

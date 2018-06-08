@@ -338,6 +338,7 @@ and expr_ env acc p e =
   | String2 _ -> acc
   | Assert (AE_assert e) -> expr acc e
   | Yield e -> afield acc e
+  | Yield_from e -> expr acc e
   | Yield_break -> acc
   | Dollar e -> expr acc e
   | Await e -> expr acc e

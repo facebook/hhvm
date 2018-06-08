@@ -2096,6 +2096,32 @@ and expr_
         Type.sub_type p (Reason.URyield) env rty expected_return in
       let env = Env.forget_members env p in
       make_result env (T.Yield taf) (Reason.Ryield_send p, Toption send)
+  | Yield_from e ->
+    let key = Env.fresh_type () in
+    let value = Env.fresh_type () in
+    (* Expected type of `e` in `yield from e` is KeyedTraversable<Tk,Tv> *)
+    let expected_yield_from_ty =
+      (Reason.Ryield_gen p,
+        Tclass ((p, SN.Collections.cKeyedTraversable), [key; value])) in
+    let env, te, yield_from_ty =
+      expr ~is_using_clause ~is_expr_statement env e in
+    let env =
+      Type.sub_type p Reason.URyield_from env yield_from_ty expected_yield_from_ty in
+    let rty = match Env.get_fn_kind env with
+      | Ast.FCoroutine ->
+        (* yield in coroutine is already reported as error in NastCheck *)
+        let _, _, ty = expr_error env p (Reason.Rwitness p) in
+        ty
+      | Ast.FGenerator ->
+        Reason.Ryield_gen p,
+        Tclass ((p, SN.Classes.cGenerator), [key; value; (Reason.Rwitness p, Tprim Tvoid)])
+    | Ast.FSync | Ast.FAsync | Ast.FAsyncGenerator ->
+        failwith "Parsing should never allow this" in
+    let Typing_env_return_info.{ return_type = expected_return; _ } = Env.get_return env in
+    let env =
+      Type.sub_type p (Reason.URyield_from) env rty expected_return in
+    let env = Env.forget_members env p in
+    make_result env (T.Yield_from te) (Reason.Rwitness p, Tprim Tvoid)
   | Await e ->
       (* Await is permitted in a using clause e.g. using (await make_handle()) *)
       let env, te, rty =

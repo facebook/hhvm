@@ -416,6 +416,7 @@ type ureason =
   | URif
   | URawait
   | URyield
+  | URyield_from
   (* Name of XHP class, Name of XHP attribute *)
   | URxhp of string * string
   | URxhp_spread
@@ -457,6 +458,7 @@ let string_of_ureason = function
   | URif -> "The two branches of ? must have the same type"
   | URawait -> "await can only operate on an Awaitable"
   | URyield -> "Invalid yield"
+  | URyield_from -> "Invalid yield from"
   | URxhp (cls, attr) ->
       "Invalid xhp value for attribute " ^ attr ^ " in " ^ (strip_ns cls)
   | URxhp_spread -> "The attribute spread operator cannot be called on non-XHP"

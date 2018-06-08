@@ -306,13 +306,11 @@ module CheckFunctionBody = struct
     | Ast.FAsyncGenerator, Yield_break -> ()
     | Ast.FGenerator, Yield af
     | Ast.FAsyncGenerator, Yield af -> afield f_type env af; ()
-
+    | Ast.FGenerator, Yield_from e
+    | Ast.FAsyncGenerator, Yield_from e -> expr f_type env e; ()
     (* Should never happen -- presence of yield should make us FGenerator or
      * FAsyncGenerator. *)
-    | Ast.FSync, Yield_break
-    | Ast.FAsync, Yield_break
-    | Ast.FSync, Yield _
-    | Ast.FAsync, Yield _ -> assert false
+    | (Ast.FSync | Ast.FAsync), (Yield _ | Yield_from _ | Yield_break) -> assert false
 
     | (Ast.FGenerator | Ast.FSync | Ast.FCoroutine), Await _ ->
       found_await f_type p
@@ -320,7 +318,7 @@ module CheckFunctionBody = struct
     | Ast.FAsync, Await _
     | Ast.FAsyncGenerator, Await _ -> Errors.await_not_allowed p
 
-    | Ast.FCoroutine, (Yield _ | Yield_break) ->
+    | Ast.FCoroutine, (Yield _ | Yield_break | Yield_from _) ->
       Errors.yield_in_coroutine p
     | (Ast.FSync | Ast.FAsync | Ast.FGenerator | Ast.FAsyncGenerator), Suspend _ ->
       if not (coroutines_enabled env)
@@ -775,7 +773,7 @@ and check_class_property_initialization prop =
       | This | Lvar _ | ImmutableVar _ | Lplaceholder _ | Dollardollar _ | Fun_id _
       | Method_id _ | Dollar _
       | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
-      | Call _ | Special_func _ | Yield_break | Yield _ | Suspend _
+      | Call _ | Special_func _ | Yield_break | Yield _ | Yield_from _ | Suspend _
       | Await _ | InstanceOf _ | Is _ | New _ | Efun _ | Xml _ | Callconv _
       | Assert _ | Clone _ | As _ | Pipe _ ->
         Errors.class_property_only_static_literal (fst e)
@@ -1207,6 +1205,9 @@ and expr_ env p = function
       ()
   | Yield e ->
       afield env e;
+      ()
+  | Yield_from e ->
+      expr env e;
       ()
   | Await e ->
       expr env e;

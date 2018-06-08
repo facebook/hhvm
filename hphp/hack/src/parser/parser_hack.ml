@@ -3667,6 +3667,9 @@ and expr_yield env start =
     | Tword when Lexing.lexeme env.lb = "break" ->
         let end_ = Pos.make env.file env.lb in
         Pos.btw start end_, Yield_break
+    | Tword when Lexing.lexeme env.lb = "from" ->
+        let e = expr env in
+        start, Yield_from e
     | _ ->
         L.back env.lb;
         let af = array_field env in

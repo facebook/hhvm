@@ -2578,9 +2578,8 @@ module Make (GetLocals : GetLocals) = struct
     | Dollar _ ->
       Errors.variable_variables_disallowed p;
       N.Any
-    | Yield_from _ ->
-      Errors.unimplemented_feature p "yield from expressions";
-      N.Any
+    | Yield_from e ->
+      N.Yield_from (expr env e)
     | Import _ ->
       N.Any
     | Omitted ->

@@ -88,6 +88,7 @@ struct
     | S.String2 el -> T.String2 (map_exprl menv el)
     | S.Dollar e -> T.Dollar (map_expr menv e)
     | S.Yield af -> T.Yield (map_afield menv af)
+    | S.Yield_from e -> T.Yield_from (map_expr menv e)
     | S.Await e -> T.Await (map_expr menv e)
     | S.Suspend e -> T.Suspend (map_expr menv e)
     | S.List el -> T.List (map_exprl menv el)

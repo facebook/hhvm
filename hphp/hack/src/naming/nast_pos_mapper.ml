@@ -38,6 +38,7 @@ and expr_ f = function
   | Yield_break -> Yield_break
   | Dollar e -> Dollar (expr f e)
   | Yield e -> Yield (afield f e)
+  | Yield_from e -> Yield_from (expr f e)
   | Await e -> Await (expr f e)
   | Suspend e -> Suspend (expr f e)
   | List el -> List (List.map el (expr f))

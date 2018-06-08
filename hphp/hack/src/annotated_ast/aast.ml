@@ -137,6 +137,7 @@ and expr_ =
   | String2 of expr list
   | Yield of afield
   | Yield_break
+  | Yield_from of expr
   | Await of expr
   | Suspend of expr
   | List of expr list
@@ -400,6 +401,7 @@ let expr_to_string expr =
   | Special_func _  -> "Special_func"
   | Yield_break -> "Yield_break"
   | Yield _  -> "Yield"
+  | Yield_from _ -> "Yield_from"
   | Await _  -> "Await"
   | Suspend _ -> "Suspend"
   | List _  -> "List"
@@ -493,6 +495,7 @@ class type ['a] visitor_type = object
   method on_special_func : 'a -> special_func -> 'a
   method on_yield_break : 'a -> 'a
   method on_yield : 'a -> afield -> 'a
+  method on_yield_from : 'a -> expr -> 'a
   method on_await : 'a -> expr -> 'a
   method on_suspend : 'a -> expr -> 'a
   method on_list : 'a -> expr list -> 'a
@@ -691,6 +694,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Smethod_id (sid, pstr) -> this#on_smethod_id acc sid pstr
    | Yield_break -> this#on_yield_break acc
    | Yield e     -> this#on_yield acc e
+   | Yield_from e -> this#on_yield_from acc e
    | Await e     -> this#on_await acc e
    | Suspend e   -> this#on_suspend acc e
    | List el     -> this#on_list acc el
@@ -794,6 +798,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
 
   method on_yield_break acc = acc
   method on_yield acc e = this#on_afield acc e
+  method on_yield_from acc e = this#on_expr acc e
   method on_await acc e = this#on_expr acc e
   method on_dollar acc e = this#on_expr acc e
   method on_suspend acc e = this#on_expr acc e

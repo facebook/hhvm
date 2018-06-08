@@ -809,16 +809,16 @@ interface Countable {
   public function count(): int;
 }
 
-interface RecursiveIterator<Tv> extends Iterator<Tv> {
+interface RecursiveIterator<+Tv> extends Iterator<Tv> {
   public function getChildren(): this;
   public function hasChildren(): bool;
 }
 
-interface SeekableIterator<Tv> extends Iterator<Tv> {
+interface SeekableIterator<+Tv> extends Iterator<Tv> {
   public function seek(int $position): void;
 }
 
-interface OuterIterator<Tv> extends Iterator<Tv> {
+interface OuterIterator<+Tv> extends Iterator<Tv> {
   public function getInnerIterator(): Iterator<Tv>;
 }
 

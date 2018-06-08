@@ -620,10 +620,10 @@ transitivity of subtyping.
 
 {{ com
 
-Because legacy arrays and shapes are $\kwd{Indexish}$ it follows by
-transitivity of subtyping and \ottdrulename{sub\_class\_as\_nonnull}
-that arrays are subtypes of $[[nonnull]]$.  Do we need separate rules
-for Hack arrays and tuples, or should we make them $\kwd{Indexish}$
+Because legacy arrays are $\kwd{Indexish}$ it follows by transitivity
+of subtyping and \ottdrulename{sub\_class\_as\_nonnull} that arrays
+are subtypes of $[[nonnull]]$.  Do we need separate rules for Hack
+arrays, shapes, and tuples, or should we make them $\kwd{Indexish}$
 too?
 
 }}
@@ -735,13 +735,6 @@ G |- t <: u
 G |- function (t1 , .. , tn , t' vardots ) : t <: function ( u1 , .. , un , u1', .. , um' , u' vardots ) : u
 
 {{ com \subsection{Shapes} }}
-
-{{ com Shapes can be indexed }}
-
-sk1 : t ... skn : t
-G |- t1 <: u ... G |- tn <: u
--------------------------------------------------- :: shape_as_indexish
-G |- shape ( sk1 => t1 , ... , skn => tn ) <: `Indexish`<t,u>
 
 {{ com Depth subtyping on closed shapes: types of fields behave covariantly }}
 

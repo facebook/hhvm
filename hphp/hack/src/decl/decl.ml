@@ -326,7 +326,6 @@ and fun_decl_in_env env f =
   let arity = match f.f_variadic with
     | FVvariadicArg param ->
       assert param.param_is_variadic;
-      assert (param.param_expr = None);
       Fvariadic (arity_min, make_param_ty env f.f_user_attributes reactivity param)
     | FVellipsis    -> Fellipsis (arity_min)
     | FVnonVariadic -> Fstandard (arity_min, List.length f.f_params)

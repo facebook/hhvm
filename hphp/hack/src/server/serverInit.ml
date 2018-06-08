@@ -42,6 +42,20 @@ let load_mini_exn_to_string err = match err with
     Printf.sprintf "%s\n%s" (Future.error_to_string e) (Printexc.get_backtrace ())
   | e -> Printexc.to_string e
 
+type files_changed_while_parsing = Relative_path.Set.t
+
+type loaded_info =
+ {
+   saved_state_fn : string;
+   corresponding_rev : Hg.rev;
+   dirty_files : Relative_path.Set.t;
+   old_saved : FileInfo.saved_state_info;
+   state_distance: int option;
+ }
+
+type state_result = (loaded_info * files_changed_while_parsing, exn) result
+
+
 module ServerInitCommon = struct
 
   let lock_and_load_deptable fn ~ignore_hh_version =
@@ -124,7 +138,7 @@ module ServerInitCommon = struct
     lock_and_load_deptable result.State_loader.deptable_fn ~ignore_hh_version;
     let old_saved = open_in result.State_loader.saved_state_fn
       |> Marshal.from_channel in
-    let get_dirty_files = (fun () ->
+    let get_loaded_info = (fun () ->
       let t = Unix.time () in
       result.State_loader.dirty_files
         (** Mercurial can respond with 90 thousand file changes in about 3 minutes. *)
@@ -134,15 +148,15 @@ module ServerInitCommon = struct
       let () = HackEventLogger.state_loader_dirty_files t in
       let dirty_files = List.map dirty_files Relative_path.from_root in
       let dirty_files = Relative_path.set_of_list dirty_files in
-      Ok (
-        result.State_loader.saved_state_fn,
-        result.State_loader.corresponding_rev,
-        dirty_files,
-        old_saved,
-        Some result.State_loader.state_distance
-      )
+      Ok {
+        saved_state_fn = result.State_loader.saved_state_fn;
+        corresponding_rev = result.State_loader.corresponding_rev;
+        dirty_files;
+        old_saved;
+        state_distance = Some result.State_loader.state_distance;
+      }
     ) in
-    Ok get_dirty_files
+    Ok get_loaded_info
 
   let invoke_approach genv root approach ~tiny =
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
@@ -153,14 +167,14 @@ module ServerInitCommon = struct
       let changes = Relative_path.set_of_list changes in
       let chan = open_in saved_state_fn in
       let old_saved = Marshal.from_channel chan in
-      let get_dirty_files = (fun () -> Ok (
-        saved_state_fn,
-        (Hg.Svn_rev (int_of_string (corresponding_base_revision))),
-        changes,
-        old_saved,
-        None
-      )) in
-      Core_result.try_with (fun () -> fun () -> Ok get_dirty_files)
+      let get_loaded_info = (fun () -> Ok {
+        saved_state_fn;
+        corresponding_rev = (Hg.Svn_rev (int_of_string (corresponding_base_revision)));
+        dirty_files = changes;
+        old_saved;
+        state_distance = None;
+      }) in
+      Core_result.try_with (fun () -> fun () -> Ok get_loaded_info)
     | Load_state_natively use_canary ->
       Ok (fun () ->
         try
@@ -437,15 +451,9 @@ module ServerInitCommon = struct
     Relative_path.set_of_list untracked, Relative_path.set_of_list tracked
 
   let get_state_future genv root state_future timeout =
-    let state = state_future
+    state_future
     >>= with_loader_timeout timeout "wait_for_changes"
-    >>= fun (
-      saved_state_fn,
-      corresponding_rev,
-      dirty_files,
-      old_saved,
-      state_distance
-    ) ->
+    >>= fun loaded_info ->
     genv.wait_until_ready ();
     let root = Path.to_string root in
     let updates = genv.notifier_async () in
@@ -459,14 +467,7 @@ module ServerInitCommon = struct
     let updates = SSet.filter updates (fun p ->
       string_starts_with p root && ServerEnv.file_filter p) in
     let changed_while_parsing = Relative_path.(relativize_set Root updates) in
-    Ok (saved_state_fn,
-      corresponding_rev,
-      dirty_files,
-      changed_while_parsing,
-      old_saved,
-      state_distance)
-    in
-    state
+    Ok (loaded_info, changed_while_parsing)
 
     (* If we fail to load a saved state, fall back to typechecking everything *)
     let fallback_init genv env err =
@@ -489,17 +490,6 @@ module ServerInitCommon = struct
       type_check genv env fast t
 
 end
-
-type saved_state_fn = string
-type corresponding_rev = Hg.rev
-(** Newer versions of load script also output the distance of the
- * saved state's revision to the node's merge base. *)
-type state_distance = int option
-
-type state_result =
- (saved_state_fn * corresponding_rev * Relative_path.Set.t
-   * Relative_path.Set.t * FileInfo.saved_state_info * state_distance, exn)
- result
 
 (* Laziness *)
 type lazy_level = Off | Decl | Parse | Init
@@ -570,13 +560,10 @@ module ServerEagerInit : InitKind = struct
 
     let state = get_state_future genv root state_future timeout in
     match state with
-    | Ok (
-      _saved_state_fn,
-      _corresponding_rev,
-      dirty_files,
-      changed_while_parsing,
-      old_saved,
-      _state_distance) ->
+    | Ok ({
+      dirty_files;
+      old_saved;
+      _}, changed_while_parsing) ->
       let old_fast = FileInfo.saved_to_fast old_saved in
       (* During eager init, we don't need to worry about tracked targets since
          they we end up parsing everything anyways
@@ -635,9 +622,11 @@ module ServerLazyInit : InitKind = struct
     let state = get_state_future genv root state_future timeout in
 
     match state with
-    | Ok (
-      _saved_state_fn, _corresponding_rev,
-      dirty_files, changed_while_parsing, old_saved, _state_distance) ->
+    | Ok ({
+        dirty_files;
+        old_saved;
+        _},
+      changed_while_parsing) ->
       let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
       let t = Unix.gettimeofday () in
@@ -839,14 +828,8 @@ let init ?load_mini_approach genv =
   SharedMem.init_done ();
   ServerUtils.print_hash_stats ();
   let result = match state with
-    | Ok (
-      _saved_state_fn,
-      _corresponding_rev,
-      _dirty_files,
-      _changed_while_parsing,
-      _old_saved,
-      state_distance) ->
-        Mini_load state_distance
+    | Ok ({state_distance; _}, _) ->
+      Mini_load state_distance
     | Error (Future.Failure e) ->
       Mini_load_failed (Future.error_to_string e)
     | Error e ->

@@ -255,6 +255,10 @@ let coverage_levels env file_input =
   run_loop_once env { default_loop_input with
     persistent_client_request = Some (Request (COVERAGE_LEVELS file_input))
   }
+let coverage_counts env contents =
+  run_loop_once env { default_loop_input with
+    persistent_client_request = Some (Request (COVERAGE_COUNTS contents))
+  }
 
 let autocomplete env contents =
   run_loop_once env { default_loop_input with
@@ -401,6 +405,40 @@ let assert_ide_autocomplete loop_output expected =
   let results = List.map results.AutocompleteTypes.completions
     ~f:(fun x -> x.AutocompleteTypes.res_name) in
   let results_as_string = list_to_string results in
+  let expected_as_string = list_to_string expected in
+  assertEqual expected_as_string results_as_string
+
+let smap_to_str_list (f : 'a -> string) (m : 'a SMap.t) =
+  (m |> SMap.ordered_keys |> List.map) (fun s -> s^"< "^(m |> SMap.find s |> f)^">")
+
+let level_stats_to_str (ls : level_stats) =
+  let lvls =
+    [Ide_api_types.Checked; Ide_api_types.Partial; Ide_api_types.Unchecked] in
+  let str_list = List.map lvls
+    (fun lvl ->
+      (string_of_level lvl)^"="^(string_of_int (CLMap.find lvl ls).count)) in
+  list_to_string str_list
+
+let rec trie_to_string (base : string) (f : 'a -> string) (t : 'a trie) =
+  match t with
+  | Leaf a -> base^"( "^(f a)^")"
+  | Node (_, smap_of_tr) -> (*TODO: figure out why the first of the pair is duplicated*)
+    List.map (SMap.ordered_keys smap_of_tr)
+      (fun k -> trie_to_string (base^"/"^k) f (SMap.find k smap_of_tr))
+      |> list_to_string
+
+let assert_coverage_counts loop_output expected =
+  let resOpt = match loop_output.persistent_client_response with
+    | Some res -> res
+    | None -> fail "Expected coverage count response"
+  in
+  let results = match resOpt with
+    | Some res -> res
+    | None -> fail "Expected some coverage count response"
+  in
+  let results_as_string = trie_to_string ""
+    (fun x -> x |> smap_to_str_list level_stats_to_str |> list_to_string)
+      results in
   let expected_as_string = list_to_string expected in
   assertEqual expected_as_string results_as_string
 

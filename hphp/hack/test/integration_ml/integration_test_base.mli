@@ -46,6 +46,10 @@ val coverage_levels :
   ServerEnv.env ->
   ServerCommandTypes.file_input ->
   ServerEnv.env * ('a, Coverage_level.result) loop_outputs
+val coverage_counts :
+  ServerEnv.env ->
+  string ->
+  ServerEnv.env * ('a, ServerCoverageMetricTypes.result) loop_outputs
 
 val autocomplete :
   ServerEnv.env ->
@@ -98,6 +102,9 @@ val assert_coverage_levels :
   ('a, Coverage_level.result) loop_outputs ->
   string list ->
   unit
+
+val assert_coverage_counts :
+  ('a, ServerCoverageMetricTypes.result) loop_outputs -> string list -> unit
 
 val assert_autocomplete :
   ('a, AutocompleteTypes.result) loop_outputs -> string list -> unit

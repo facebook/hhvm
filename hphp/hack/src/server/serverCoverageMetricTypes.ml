@@ -8,4 +8,13 @@
  *)
 
 open Coverage_level
+
+(**
+ * The type result is an optional trie.
+ * The trie leaves are maps from strings of filenames to level_stats for those
+ * files.
+ * The trie nodes are leaves paired with a map from strings of directory names
+ * to another trie.
+ *
+ *)
 type result = level_stats SMap.t trie option

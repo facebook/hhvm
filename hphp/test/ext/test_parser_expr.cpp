@@ -471,14 +471,14 @@ bool TestParserExpr::TestXHP() {
   V("<?hh class :thing { attribute Thing a, Thing b; }",
 
     "class xhp_thing {\n"
+    "private static $__xhpAttributeDeclarationCache = null;\n"
     "protected static function __xhpAttributeDeclaration() {\n"
-    "static $_ = null;\n"
-    "if ($_ === null) {\n"
-    "$_ = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), "
-    "darray['a' => varray[5, 'Thing', null, 0], "
-    "'b' => varray[5, 'Thing', null, 0]]);\n"
+    "$r = self::$__xhpAttributeDeclarationCache;\n"
+    "if ($r === null) {\n"
+    "self::$__xhpAttributeDeclarationCache = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), darray['a' => varray[5, 'Thing', null, 0], 'b' => varray[5, 'Thing', null, 0]]);\n"
+    "$r = self::$__xhpAttributeDeclarationCache;\n"
     "}\n"
-    "return $_;\n"
+    "return $r;\n"
     "}\n"
     "}\n");
 
@@ -486,13 +486,14 @@ bool TestParserExpr::TestXHP() {
   V("<?hh class :thing { attribute enum { 123, 456 } a; }",
 
     "class xhp_thing {\n"
+    "private static $__xhpAttributeDeclarationCache = null;\n"
     "protected static function __xhpAttributeDeclaration() {\n"
-    "static $_ = null;\n"
-    "if ($_ === null) {\n"
-    "$_ = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), "
-    "darray['a' => varray[7, varray[123, 456], null, 0]]);\n"
+    "$r = self::$__xhpAttributeDeclarationCache;\n"
+    "if ($r === null) {\n"
+    "self::$__xhpAttributeDeclarationCache = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), darray['a' => varray[7, varray[123, 456], null, 0]]);\n"
+    "$r = self::$__xhpAttributeDeclarationCache;\n"
     "}\n"
-    "return $_;\n"
+    "return $r;\n"
     "}\n"
     "}\n");
 
@@ -501,25 +502,25 @@ bool TestParserExpr::TestXHP() {
     " class :bar { attribute :foo, :foo, string bar; }",
 
     "class xhp_foo {\n"
+    "private static $__xhpAttributeDeclarationCache = null;\n"
     "protected static function __xhpAttributeDeclaration() {\n"
-    "static $_ = null;\n"
-    "if ($_ === null) {\n"
-    "$_ = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), "
-    "darray['foo' => varray[1, null, null, 0]]);\n"
+    "$r = self::$__xhpAttributeDeclarationCache;\n"
+    "if ($r === null) {\n"
+    "self::$__xhpAttributeDeclarationCache = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), darray['foo' => varray[1, null, null, 0]]);\n"
+    "$r = self::$__xhpAttributeDeclarationCache;\n"
     "}\n"
-    "return $_;\n"
+    "return $r;\n"
     "}\n"
     "}\n"
     "class xhp_bar {\n"
+    "private static $__xhpAttributeDeclarationCache = null;\n"
     "protected static function __xhpAttributeDeclaration() {\n"
-    "static $_ = null;\n"
-    "if ($_ === null) {\n"
-    "$_ = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), "
-    "xhp_foo::__xhpAttributeDeclaration(), "
-    "xhp_foo::__xhpAttributeDeclaration(), "
-    "darray['bar' => varray[1, null, null, 0]]);\n"
+    "$r = self::$__xhpAttributeDeclarationCache;\n"
+    "if ($r === null) {\n"
+    "self::$__xhpAttributeDeclarationCache = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), xhp_foo::__xhpAttributeDeclaration(), xhp_foo::__xhpAttributeDeclaration(), darray['bar' => varray[1, null, null, 0]]);\n"
+    "$r = self::$__xhpAttributeDeclarationCache;\n"
     "}\n"
-    "return $_;\n"
+    "return $r;\n"
     "}\n"
     "}\n");
 
@@ -527,13 +528,14 @@ bool TestParserExpr::TestXHP() {
   V("<?hh class :thing { attribute int a = 123 @required, var b; }",
 
     "class xhp_thing {\n"
+    "private static $__xhpAttributeDeclarationCache = null;\n"
     "protected static function __xhpAttributeDeclaration() {\n"
-    "static $_ = null;\n"
-    "if ($_ === null) {\n"
-    "$_ = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), "
-    "darray['a' => varray[3, null, 123, 1], 'b' => varray[6, null, null, 0]]);\n"
+    "$r = self::$__xhpAttributeDeclarationCache;\n"
+    "if ($r === null) {\n"
+    "self::$__xhpAttributeDeclarationCache = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), darray['a' => varray[3, null, 123, 1], 'b' => varray[6, null, null, 0]]);\n"
+    "$r = self::$__xhpAttributeDeclarationCache;\n"
     "}\n"
-    "return $_;\n"
+    "return $r;\n"
     "}\n"
     "}\n");
 
@@ -542,8 +544,7 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected function __xhpCategoryDeclaration() {\n"
-    "static $_ = darray['a:foo' => 1, 'b' => 1];\n"
-    "return $_;\n"
+    "return darray['a:foo' => 1, 'b' => 1];\n"
     "}\n"
     "}\n");
 
@@ -552,9 +553,8 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected function __xhpChildrenDeclaration() {\n"
-    "static $_ = varray[0, 5, varray[4, varray[0, 1, null], "
+    "return varray[0, 5, varray[4, varray[0, 1, null], "
     "varray[0, 1, null]]];\n"
-    "return $_;\n"
     "}\n"
     "}\n");
 
@@ -562,8 +562,7 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected function __xhpChildrenDeclaration() {\n"
-    "static $_ = 1;\n"
-    "return $_;\n"
+    "return 1;\n"
     "}\n"
     "}\n");
 
@@ -571,10 +570,9 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected function __xhpChildrenDeclaration() {\n"
-    "static $_ = varray[0, 5, varray[4, varray[3, 5, "
+    "return varray[0, 5, varray[4, varray[3, 5, "
     "varray[5, varray[0, 3, 'xhp_a__foo'], varray[0, 4, 'b__bar']]], "
     "varray[0, 2, null]]];\n"
-    "return $_;\n"
     "}\n"
     "}\n");
 
@@ -585,12 +583,10 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected function __xhpCategoryDeclaration() {\n"
-    "static $_ = darray['a:foo' => 1, 'b' => 1];\n"
-    "return $_;\n"
+    "return darray['a:foo' => 1, 'b' => 1];\n"
     "}\n"
     "protected function __xhpChildrenDeclaration() {\n"
-    "static $_ = 1;\n"
-    "return $_;\n"
+    "return 1;\n"
     "}\n"
     "}\n");
 
@@ -605,25 +601,23 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected function __xhpCategoryDeclaration() {\n"
-    "static $_ = darray['a' => 1];\n"
-    "return $_;\n"
+    "return darray['a' => 1];\n"
     "}\n"
     "protected function __xhpChildrenDeclaration() {\n"
-    "static $_ = 1;\n"
-    "return $_;\n"
+    "return 1;\n"
     "}\n"
     "public function foo() {\n"
     "}\n"
     "public function bar() {\n"
     "}\n"
+    "private static $__xhpAttributeDeclarationCache = null;\n"
     "protected static function __xhpAttributeDeclaration() {\n"
-    "static $_ = null;\n"
-    "if ($_ === null) {\n"
-    "$_ = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), "
-    "darray['a' => varray[5, 'Thing', null, 0], "
-    "'b' => varray[5, 'Thing', null, 0]]);\n"
+    "$r = self::$__xhpAttributeDeclarationCache;\n"
+    "if ($r === null) {\n"
+    "self::$__xhpAttributeDeclarationCache = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), darray['a' => varray[5, 'Thing', null, 0], 'b' => varray[5, 'Thing', null, 0]]);\n"
+    "$r = self::$__xhpAttributeDeclarationCache;\n"
     "}\n"
-    "return $_;\n"
+    "return $r;\n"
     "}\n"
     "}\n");
 

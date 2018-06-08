@@ -148,7 +148,6 @@ struct Option {
   /**
    * Output options
    */
-  static bool GenerateDocComments;
   static bool DumpAst;
   static bool WholeProgram;
   static bool RecordErrors;

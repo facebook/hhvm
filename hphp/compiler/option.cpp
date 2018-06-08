@@ -107,8 +107,6 @@ bool Option::RecordErrors = true;
 
 bool Option::AllVolatile = false;
 
-bool Option::GenerateDocComments = true;
-
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
 
@@ -312,7 +310,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(AllVolatile, ini, config, "AllVolatile");
 
-  Config::Bind(GenerateDocComments, ini, config, "GenerateDocComments", true);
+  Config::Bind(RuntimeOption::EvalGenerateDocComments, ini, config,
+               "GenerateDocComments", RuntimeOption::EvalGenerateDocComments);
   Config::Bind(DumpAst, ini, config, "DumpAst", false);
   Config::Bind(WholeProgram, ini, config, "WholeProgram", true);
   Config::Bind(RuntimeOption::EvalUseHHBBC, ini, config, "UseHHBBC",

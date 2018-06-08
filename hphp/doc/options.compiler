@@ -194,11 +194,6 @@ How many threads to use when parsing PHP files. By default, it's 2x CPU count.
 
 Facebook specific. Ignore.
 
-= GenerateDocComments
-
-Default is true. Whether to store doc comments in class map, so they can be
-queried from reflection.
-
 = PregenerateCPP
 
 Default is false. In case clustering of output files has been requested and this

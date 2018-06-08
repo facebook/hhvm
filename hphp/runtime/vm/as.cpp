@@ -116,6 +116,11 @@ AssemblerError::AssemblerError(int where, const std::string& what)
 
 namespace {
 
+StringData* makeDocComment(const String& s) {
+  if (RuntimeOption::EvalGenerateDocComments) return makeStaticString(s);
+  return staticEmptyString();
+}
+
 struct AsmState;
 typedef void (*ParserFunc)(AsmState& as);
 
@@ -1853,7 +1858,7 @@ void parse_func_doccomment(AsmState& as) {
   auto const doc = parse_long_string(as);
   as.in.expectWs(';');
 
-  as.fe->docComment = makeStaticString(doc);
+  as.fe->docComment = makeDocComment(doc);
 }
 
 /*
@@ -2834,7 +2839,7 @@ void parse_cls_doccomment(AsmState& as) {
   auto const doc = parse_long_string(as);
   as.in.expectWs(';');
 
-  as.pce->setDocComment(makeStaticString(doc));
+  as.pce->setDocComment(makeDocComment(doc));
 }
 
 /*

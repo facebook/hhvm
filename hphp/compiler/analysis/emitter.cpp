@@ -9505,9 +9505,9 @@ Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   }
 
   fe->setLocation(meth->line0(), meth->line1());
-  fe->docComment = makeStaticString(
-    Option::GenerateDocComments ? meth->getDocComment().c_str() : ""
-  );
+  fe->docComment = RuntimeOption::EvalGenerateDocComments ?
+    makeStaticString(meth->getDocComment()) : staticEmptyString();
+
   auto retType = meth->retTypeAnnotation();
   assert(retType ||
          meth->isNamed("__construct") ||
@@ -9634,7 +9634,7 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     fe->originalFilename = makeStaticString(originalFilename);
   }
 
-  StringData* methDoc = Option::GenerateDocComments ?
+  StringData* methDoc = RuntimeOption::EvalGenerateDocComments ?
     makeStaticString(meth->getDocComment()) : staticEmptyString();
 
   fe->init(meth->line0(),
@@ -10787,7 +10787,7 @@ Id EmitterVisitor::emitClass(Emitter& e,
   if (UNLIKELY(parentName->toCppString() == std::string("Closure"))) {
     throw IncludeTimeFatalException(is, "Class cannot extend Closure");
   }
-  StringData* classDoc = Option::GenerateDocComments ?
+  StringData* classDoc = RuntimeOption::EvalGenerateDocComments ?
     makeStaticString(cNode->getDocComment()) : staticEmptyString();
   Attr attr = cNode->isInterface() ? AttrInterface :
               cNode->isTrait()     ? AttrTrait     :
@@ -10919,7 +10919,7 @@ Id EmitterVisitor::emitClass(Emitter& e,
           }
 
           auto const propName = makeStaticString(var->getName());
-          auto const propDoc = Option::GenerateDocComments ?
+          auto const propDoc = RuntimeOption::EvalGenerateDocComments ?
             makeStaticString(var->getDocComment()) : staticEmptyString();
           TypedValue tvVal;
           // Some properties may need to be marked with the AttrDeepInit

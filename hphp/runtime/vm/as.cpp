@@ -3325,8 +3325,14 @@ std::unique_ptr<UnitEmitter> assemble_string(
     if (ue->m_isHHFile) {
       ue->m_useStrictTypes = true;
     }
-  } catch (const std::exception& e) {
+  } catch (const AssemblerError& e) {
     if (!swallowErrors) throw;
+    ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));
+  } catch (const std::exception& e) {
+    if (!swallowErrors) {
+      // the assembler should throw only AssemblerErrors
+      throw AssemblerError(folly::sformat("AssemblerError: {}", e.what()));
+    }
     ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));
   }
 

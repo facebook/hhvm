@@ -91,6 +91,7 @@ type pattern =
    *)
   | ListPattern of {
       children: (int * pattern) list;
+      max_length: int option;
     }
 
   (**
@@ -182,13 +183,6 @@ let find_child_with_type
   | None -> None
   | Some index -> List.nth (Syntax.children node) index
 
-let find_list_child_at_index (node: Syntax.t) (index: int) : Syntax.t option =
-  let open Syntax in
-  match node.syntax with
-  | SyntaxList nodes ->
-    List.nth nodes index
-  | _ -> None
-
 let rec search_node
     ~(env: env)
     ~(pattern: pattern)
@@ -224,19 +218,37 @@ let rec search_node
   | DescendantPattern { pattern } ->
     search_descendants ~env ~pattern ~node
 
-  | ListPattern { children } ->
-    let open Option.Monad_infix in
-    let patterns = List.map children ~f:(fun (index, pattern) ->
-      find_list_child_at_index node index >>| fun child_node ->
-      (child_node, pattern)
-    ) in
-    begin match Option.all patterns with
-    | Some patterns ->
-      search_and ~env ~patterns
-    | None ->
-      (* We tried to match a pattern for the child at at index N, but the syntax
-      list didn't have an Nth element. *)
-      (env, None)
+  | ListPattern { children; max_length } ->
+    let syntax_list =
+      let open Syntax in
+      match node.syntax with
+      | SyntaxList syntax_list ->
+        begin match max_length with
+        | None -> Some syntax_list
+        | Some max_length ->
+          if List.length syntax_list <= max_length
+          then Some syntax_list
+          else None
+        end
+      | _ -> None
+    in
+
+    begin match syntax_list with
+    | None -> (env, None)
+    | Some syntax_list ->
+      let open Option.Monad_infix in
+      let patterns = List.map children ~f:(fun (index, pattern) ->
+        List.nth syntax_list index >>| fun child_node ->
+        (child_node, pattern)
+      ) in
+      begin match Option.all patterns with
+      | Some patterns ->
+        search_and ~env ~patterns
+      | None ->
+        (* We tried to match a pattern for the child at at index N, but the syntax
+        list didn't have an Nth element. *)
+        (env, None)
+      end
     end
 
   | RawTextPattern { raw_text } ->
@@ -434,6 +446,11 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
     }
 
   and compile_list_pattern ~json ~keytrace =
+    let max_length = Hh_json.get_field_opt
+      (Hh_json.Access.get_number_int "max_length")
+      json
+    in
+
     get_obj "children" (json, keytrace)
     >>= fun (children_json, children_keytrace) ->
 
@@ -468,7 +485,10 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
       )
     in
     Core_result.all children_patterns >>| fun children ->
-    ListPattern { children }
+    ListPattern {
+      children;
+      max_length;
+    }
 
   and compile_raw_text_pattern ~json ~keytrace =
     get_string "raw_text" (json, keytrace)

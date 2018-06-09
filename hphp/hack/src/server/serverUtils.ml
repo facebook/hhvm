@@ -73,8 +73,7 @@ let print_hash_stats () =
       used_slots slots load_factor nonempty_slots
   end
 
-let with_exit_on_exception f =
-  try f () with
+let exit_on_exception = function
   | SharedMem.Out_of_shared_memory ->
     print_hash_stats ();
     Printf.eprintf "Error: failed to allocate in the shared heap.\n%!";
@@ -157,3 +156,6 @@ let with_exit_on_exception f =
   | e ->
     Hh_logger.exc e;
     Exit_status.(exit Uncaught_exception)
+
+let with_exit_on_exception f =
+  try f () with | x -> exit_on_exception x

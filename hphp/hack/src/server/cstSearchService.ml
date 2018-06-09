@@ -86,6 +86,14 @@ type pattern =
     }
 
   (**
+   * Matches a list node (such as a statement list) only if all the children at
+   * the given indexes match their respective patterns.
+   *)
+  | ListPattern of {
+      children: (int * pattern) list;
+    }
+
+  (**
    * Matches a given node if its raw text is exactly the specified string. The
    * "raw" text doesn't include trivia.
    *)
@@ -174,6 +182,13 @@ let find_child_with_type
   | None -> None
   | Some index -> List.nth (Syntax.children node) index
 
+let find_list_child_at_index (node: Syntax.t) (index: int) : Syntax.t option =
+  let open Syntax in
+  match node.syntax with
+  | SyntaxList nodes ->
+    List.nth nodes index
+  | _ -> None
+
 let rec search_node
     ~(env: env)
     ~(pattern: pattern)
@@ -208,6 +223,21 @@ let rec search_node
 
   | DescendantPattern { pattern } ->
     search_descendants ~env ~pattern ~node
+
+  | ListPattern { children } ->
+    let open Option.Monad_infix in
+    let patterns = List.map children ~f:(fun (index, pattern) ->
+      find_list_child_at_index node index >>| fun child_node ->
+      (child_node, pattern)
+    ) in
+    begin match Option.all patterns with
+    | Some patterns ->
+      search_and ~env ~patterns
+    | None ->
+      (* We tried to match a pattern for the child at at index N, but the syntax
+      list didn't have an Nth element. *)
+      (env, None)
+    end
 
   | RawTextPattern { raw_text } ->
     if Syntax.text node = raw_text
@@ -313,6 +343,8 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
       compile_match_pattern ~json ~keytrace
     | "descendant_pattern" ->
       compile_descendant_pattern ~json ~keytrace
+    | "list_pattern" ->
+      compile_list_pattern ~json ~keytrace
     | "raw_text_pattern" ->
       compile_raw_text_pattern ~json ~keytrace
     | "and_pattern" ->
@@ -400,6 +432,43 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
     DescendantPattern {
       pattern;
     }
+
+  and compile_list_pattern ~json ~keytrace =
+    get_obj "children" (json, keytrace)
+    >>= fun (children_json, children_keytrace) ->
+
+    (* This has already been verified to be an object above. *)
+    let children = Hh_json.get_object_exn children_json in
+    let children_patterns =
+      List.map children ~f:(fun (index_str, pattern_json) ->
+        let child_keytrace = index_str :: children_keytrace in
+        begin match int_of_string_opt index_str with
+          | Some index -> Ok index
+          | None ->
+            error_at_keytrace
+              (Printf.sprintf "Invalid integer key: %s" index_str)
+              ~keytrace:child_keytrace
+        end
+        >>= fun index ->
+
+        begin
+          if index >= 0
+          then
+            Ok index
+          else
+            error_at_keytrace "Integer key must be non-negative"
+              ~keytrace:child_keytrace
+        end
+        >>= fun index ->
+
+        compile_pattern ~json:pattern_json ~keytrace:child_keytrace
+        >>| fun pattern ->
+
+        (index, pattern)
+      )
+    in
+    Core_result.all children_patterns >>| fun children ->
+    ListPattern { children }
 
   and compile_raw_text_pattern ~json ~keytrace =
     get_string "raw_text" (json, keytrace)

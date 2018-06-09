@@ -1,0 +1,12 @@
+{
+  "pattern_type": "list_pattern",
+  "children": {
+    "-1": {
+      "pattern_type": "descendant_pattern",
+      "pattern": {
+        "pattern_type": "raw_text_pattern",
+        "raw_text": "$foo"
+      }
+    }
+  }
+}

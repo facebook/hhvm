@@ -132,6 +132,7 @@ module Naming                               = struct
   | ArrayTypehintsDisallowed
   | ArrayLiteralsDisallowed
   | WildcardDisallowed
+  | AttributeClassNameConflict
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

@@ -188,21 +188,42 @@ module Env = struct
       FunCanonHeap.add name_key name;
       ()
 
+  let attr_prefix, attr_prefix_len =
+    let a = "\\__attribute__" in (* lowercase because canon_key call *)
+    a, String.length a
+
   let new_cid popt cid_kind (p, name) =
-    if not (check_not_typehint popt (p, name)) then () else
-    let name_key = canon_key name in
-    match TypeCanonHeap.get name_key with
-    | Some canonical ->
+    let validate canonical error =
       let (p', _) = unsafe_opt @@ TypeIdHeap.get canonical in
       if not @@ GEnv.compare_pos p' p
       then
       let p, name = GEnv.get_full_pos popt (p, name) in
       let p', canonical = GEnv.get_full_pos popt (p', canonical) in
-      Errors.error_name_already_bound name canonical p p'
+      error name canonical p p'
+    in
+    if not (check_not_typehint popt (p, name)) then () else
+    let name_key = canon_key name in
+    match TypeCanonHeap.get name_key with
+    | Some canonical ->
+      validate canonical Errors.error_name_already_bound
     | None ->
+      (* Check to prevent collision with attribute classes
+       * If we are checking \A, check \__Attribute__A and vice versa *)
+      let name_len = String.length name_key in
+      let alt_name_key =
+        if name_len > attr_prefix_len &&
+          String.equal attr_prefix (String.sub name_key 0 attr_prefix_len)
+        then
+          "\\" ^ String.sub name_key attr_prefix_len (name_len - attr_prefix_len)
+        else
+          attr_prefix ^ String.sub name_key 1 (name_len - 1) in
+      begin match TypeCanonHeap.get alt_name_key with
+      | Some alt_canonical ->
+        validate alt_canonical Errors.error_class_attribute_already_bound
+      | None ->
+        () end;
       TypeIdHeap.write_through name (p, cid_kind);
-      TypeCanonHeap.add name_key name;
-      ()
+      TypeCanonHeap.add name_key name
 
   let new_class popt = new_cid popt `Class
 

@@ -793,6 +793,15 @@ let error_name_already_bound name name_prev p p_prev =
     else errs in
   add_list (Naming.err_code Naming.ErrorNameAlreadyBound) errs
 
+let error_class_attribute_already_bound name name_prev p p_prev =
+  let name = Utils.strip_ns name in
+  let name_prev = Utils.strip_ns name_prev in
+  let errs = [
+    p, "A class and an attribute class cannot share the same name. Conflicting class: "^name;
+    p_prev, "Previous definition: "^name_prev
+  ] in
+  add_list (Naming.err_code Naming.AttributeClassNameConflict) errs
+
 let unbound_name pos name kind =
   let kind_str = match kind with
     | `cls -> "an object type"

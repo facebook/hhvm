@@ -136,6 +136,7 @@ VariableVariablesDisallowed = 2081
 ArrayTypehintsDisallowed = 2082
 ArrayLiteralsDisallowed = 2083
 WildcardDisallowed = 2084
+AttributeClassNameConflict = 2085
 
 NastCheck Errors:
 AbstractBody = 3001

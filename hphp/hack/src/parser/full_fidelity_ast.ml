@@ -1380,9 +1380,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       (match syntax expr with
       | Token _ ->
         let s = text expr in
-        (* TODO(17796330): Get rid of linter functionality in the lowerer *)
-        if not env.codegen && s <> String.lowercase_ascii s then
-          Lint.lowercase_constant pos s;
         (match location, token_kind expr with
         (* TODO(T21285960): Inside strings, int indices "should" be string indices *)
         | InDoubleQuotedString, _ when env.codegen -> String (mkStr unesc_dbl s)
@@ -1398,8 +1395,13 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | _, Some TK.DoubleQuotedStringLiteral -> String (mkStr Php_escaping.unescape_double s)
         | _, Some TK.HeredocStringLiteral      -> String (mkStr Php_escaping.unescape_heredoc s)
         | _, Some TK.NowdocStringLiteral       -> String (mkStr Php_escaping.unescape_nowdoc s)
-        | _, Some TK.NullLiteral               -> Null
+        | _, Some TK.NullLiteral               ->
+          if not env.codegen && s <> String.lowercase_ascii s then
+            Lint.lowercase_constant pos s;
+          Null
         | _, Some TK.BooleanLiteral            ->
+          if not env.codegen && s <> String.lowercase_ascii s then
+            Lint.lowercase_constant pos s;
           (match String.lowercase_ascii s with
           | "false" -> False
           | "true"  -> True

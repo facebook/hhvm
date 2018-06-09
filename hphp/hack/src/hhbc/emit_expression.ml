@@ -2971,10 +2971,50 @@ and emit_args_and_call env call_pos args uargs =
 
     | expr :: rest ->
       let next c = gather [ c; aux (i + 1) rest inout_setters ] in
+      let param_pos, _ = expr in
       let hint = get_pass_by_ref_hint expr in
       let expr = strip_ref expr in
       if i >= args_count then
         next @@ emit_expr ~need_ref:false env expr
+      else
+      let throw_on_mismatch =
+        Hhbc_options.throw_on_call_by_ref_annotation_mismatch
+        !Hhbc_options.compiler_options in
+      if throw_on_mismatch && hint = Cell then
+        next @@ gather [
+          emit_expr ~need_ref:false env expr;
+          emit_pos param_pos;
+          instr_fthrow_on_ref_mismatch i Cell;
+          instr_fpassc i Any
+        ]
+      else if throw_on_mismatch && hint = Ref then
+        next @@ match snd expr with
+        | A.Lvar _
+        | A.Dollar _
+        | A.Array_get _
+        | A.Obj_get _
+        | A.Class_get _
+        | A.Binop (A.Eq None, (_, A.List _), (_, A.Lvar _)) ->
+          gather [
+            emit_expr_as_ref env expr;
+            emit_pos param_pos;
+            instr_fthrow_on_ref_mismatch i Ref;
+            instr_fpassvnop i Any
+          ]
+        | _ ->
+          let instrs, flavor = emit_flavored_expr env ~last_pos:call_pos expr in
+          let instr_fpass =
+            match flavor with
+            | Flavor.Ref -> instr_fpassvnop i Any
+            | Flavor.ReturnVal -> gather [ instr_boxr; instr_fpassvnop i Any ]
+            | Flavor.Cell -> instr_fpassc i Any
+          in
+          gather [
+            instrs;
+            emit_pos param_pos;
+            instr_fthrow_on_ref_mismatch i Ref;
+            instr_fpass
+          ]
       else
       let pos, expr_ = expr in
       match expr_ with
@@ -2987,8 +3027,6 @@ and emit_args_and_call env call_pos args uargs =
       | A.Lvar ((_, str) as id)
         when not (is_local_this env str) || Emit_env.get_needs_local_this env ->
         next @@ instr_fpassl i (get_local env id) hint
-      | A.BracedExpr e ->
-        next @@ emit_expr ~need_ref:false env e
       | A.Dollar e ->
         check_non_pipe_local e;
         next @@ gather [
@@ -3025,7 +3063,7 @@ and emit_args_and_call env call_pos args uargs =
         ]
       | _ ->
         let instrs, flavor = emit_flavored_expr env ~last_pos:call_pos expr in
-        let fpass_kind =
+        let instr_fpass =
           match flavor with
           | Flavor.Ref -> instr_fpassv i hint
           | Flavor.ReturnVal -> instr_fpassr i hint
@@ -3034,7 +3072,7 @@ and emit_args_and_call env call_pos args uargs =
         next @@ gather [
           instrs;
           emit_pos call_pos;
-          fpass_kind
+          instr_fpass
         ]
   in
   Local.scope @@ fun () -> aux 0 all_args []

@@ -5115,6 +5115,20 @@ OPTBLD_INLINE void iopFPushCufIter(uint32_t numArgs, Iter* it) {
   setTypesFlag(vmfp(), ar);
 }
 
+OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, uint32_t paramId,
+                                          FPassHint hint) {
+  assertx(hint != FPassHint::Any);
+  assertx(paramId < ar->numArgs());
+  auto const byRef = ar->func()->byRef(paramId);
+  if (hint == (byRef ? FPassHint::Ref : FPassHint::Cell)) {
+    return;
+  }
+
+  SystemLib::throwInvalidArgumentExceptionObject(
+    formatParamRefMismatch(
+      ar->func()->fullDisplayName()->data(), paramId, byRef));
+}
+
 OPTBLD_INLINE void iopFHandleRefMismatch(uint32_t paramId, FPassHint hint,
                                          const StringData* funcName) {
   assertx(hint != FPassHint::Any);

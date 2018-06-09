@@ -27,6 +27,7 @@ type t = {
   option_php7_ltr_assign                  : bool;
   option_create_inout_wrapper_functions   : bool;
   option_reffiness_invariance             : bool;
+  option_throw_on_call_by_ref_annotation_mismatch : bool;
   option_hack_arr_compat_notices          : bool;
   option_hack_arr_dv_arrs                 : bool;
   option_dynamic_invoke_functions         : SSet.t;
@@ -63,6 +64,7 @@ let default = {
   option_relabel = true;
   option_create_inout_wrapper_functions = true;
   option_reffiness_invariance = false;
+  option_throw_on_call_by_ref_annotation_mismatch = false;
   option_hack_arr_compat_notices = false;
   option_hack_arr_dv_arrs = false;
   option_dynamic_invoke_functions = SSet.empty;
@@ -95,6 +97,8 @@ let enable_uniform_variable_syntax o = o.option_php7_uvs
 let php7_ltr_assign o = o.option_php7_ltr_assign
 let create_inout_wrapper_functions o = o.option_create_inout_wrapper_functions
 let reffiness_invariance o = o.option_reffiness_invariance
+let throw_on_call_by_ref_annotation_mismatch o =
+  o.option_throw_on_call_by_ref_annotation_mismatch
 let hack_arr_compat_notices o = o.option_hack_arr_compat_notices
 let hack_arr_dv_arrs o = o.option_hack_arr_dv_arrs
 let dynamic_invoke_functions o = o.option_dynamic_invoke_functions
@@ -135,6 +139,8 @@ let to_string o =
     ; Printf.sprintf "create_inout_wrapper_functions: %B"
       @@ create_inout_wrapper_functions o
     ; Printf.sprintf "reffiness_invariance: %B" @@ reffiness_invariance o
+    ; Printf.sprintf "throw_on_call_by_ref_annotation_mismatch: %B"
+      @@ throw_on_call_by_ref_annotation_mismatch o
     ; Printf.sprintf "hack_arr_compat_notices: %B" @@ hack_arr_compat_notices o
     ; Printf.sprintf "hack_arr_dv_arrs: %B" @@ hack_arr_dv_arrs o
     ; Printf.sprintf "dynamic_invoke_functions: [%s]" dynamic_invokes
@@ -195,6 +201,8 @@ let set_option options name value =
     { options with option_create_inout_wrapper_functions = as_bool value }
   | "eval.reffinessinvariance" ->
     { options with option_reffiness_invariance = as_bool value }
+  | "eval.throwoncallbyrefannotationmismatch" ->
+    { options with option_throw_on_call_by_ref_annotation_mismatch = as_bool value }
   | "eval.hackarrcompatnotices" ->
     { options with option_hack_arr_compat_notices = as_bool value }
   | "eval.hackarrdvarrs" ->
@@ -306,6 +314,8 @@ let value_setters = [
     fun opts v -> { opts with option_create_inout_wrapper_functions = (v = 1)});
   (set_value "hhvm.reffiness_invariance" get_value_from_config_int @@
     fun opts v -> { opts with option_reffiness_invariance = (v = 1) });
+  (set_value "hhvm.throw_on_call_by_ref_annotation_mismatch" get_value_from_config_int @@
+    fun opts v -> { opts with option_throw_on_call_by_ref_annotation_mismatch = (v = 1) });
   (set_value "hhvm.hack_arr_compat_notices" get_value_from_config_int @@
     fun opts v -> { opts with option_hack_arr_compat_notices = (v = 1) });
   (set_value "hhvm.hack_arr_dv_arrs" get_value_from_config_int @@

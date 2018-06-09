@@ -1313,6 +1313,16 @@ void checkFPassHint(IRGS& env, uint32_t paramId, int off, FPassHint hint,
   );
 }
 
+void emitFThrowOnRefMismatch(IRGS& env, uint32_t paramId, FPassHint hint) {
+  assertx(hint != FPassHint::Any);
+  auto const byRef = env.currentNormalizedInstruction->preppedByRef;
+  if (hint == (byRef ? FPassHint::Ref : FPassHint::Cell)) {
+    return;
+  }
+
+  PUNT(FThrowOnRefMismatch-RefMismatch);
+}
+
 void emitFHandleRefMismatch(IRGS& env, uint32_t paramId, FPassHint hint,
                             const StringData* funcName) {
   if (!RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&

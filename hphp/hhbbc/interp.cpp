@@ -3014,6 +3014,35 @@ void in(ISS& env, const bc::FPushCufIter&) {
   fpiPushNoFold(env, ActRec { FPIKind::Unknown, TTop });
 }
 
+void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
+  auto const kind = prepKind(env, op.arg1);
+  auto const hint = op.subop2;
+  assertx(hint != FPassHint::Any);
+
+  if (kind == PrepKind::Unknown) return;
+
+  if ((kind == PrepKind::Val && hint == FPassHint::Cell) ||
+      (kind == PrepKind::Ref && hint == FPassHint::Ref)) {
+    reduce(env, bc::Nop {});
+  } else {
+    auto const ar = fpiTop(env);
+    auto const exCls = makeStaticString("InvalidArgumentException");
+    auto const err = makeStaticString(formatParamRefMismatch(
+      ar.func->name()->data(), op.arg1, hint == FPassHint::Cell));
+
+    reduce(
+      env,
+      bc::FPushCtorD { 1, exCls, false },
+      bc::String { err },
+      bc::FPassC { 0, FPassHint::Any},
+      bc::FCall { 1 },
+      bc::UnboxRNop {},
+      bc::PopC {},
+      bc::Throw {}
+    );
+  }
+}
+
 void in(ISS& /*env*/, const bc::FHandleRefMismatch& /*op*/) {}
 
 void in(ISS& env, const bc::FPassL& op) {

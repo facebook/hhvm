@@ -410,6 +410,8 @@ type instruct_call =
   | FPushCtorS of num_params * SpecialClsRef.t
   | DecodeCufIter of Iterator.t * Label.t
   | FPushCufIter of num_params * Iterator.t
+  | FThrowOnRefMismatch of param_num * fpass_hint
+  | FHandleRefMismatch of param_num * fpass_hint * string
   | FPassC of param_num * fpass_hint
   | FPassV of param_num * fpass_hint
   | FPassVNop of param_num * fpass_hint
@@ -426,7 +428,6 @@ type instruct_call =
   | FCallAwait of num_params * class_id * function_id
   | FCallUnpack of num_params
   | FCallBuiltin of num_params * num_params * string
-  | FHandleRefMismatch of param_num * fpass_hint * string
 
 type instruct_base =
   | BaseNC of stack_index * MemberOpMode.t

@@ -1065,7 +1065,8 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* /*b*/) {
              param_id, fpi.next);
       ok = false;
     }
-    if (isMemberBaseOp(op) || isMemberDimOp(op)) {
+    if (isMemberBaseOp(op) || isMemberDimOp(op) ||
+        op == Op::FThrowOnRefMismatch) {
       // The argument isn't pushed until the final member operation. Skip the
       // last two checks.
       return ok;
@@ -1476,14 +1477,15 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       // by the runtime.
       cur->silences.clear();
       break;
+    case Op::FThrowOnRefMismatch:
     case Op::FHandleRefMismatch: {
       auto new_pc = pc;
       decode_op(new_pc);
       decode_iva(new_pc);
       if (decode_oa<FPassHint>(new_pc) == FPassHint::Any) {
-        ferror("FHandleRefMismatch at PC {} with immediate value 'Any',"
-               "allowable FPassHint values for this opcode are 'Cell' and "
-               "'Ref'\n", offset(pc));
+        ferror("{} at PC {} with immediate value 'Any', allowable FPassHint "
+               "values for this opcode are 'Cell' and 'Ref'\n",
+               opcodeToName(op), offset(pc));
         return false;
       }
       break;
@@ -1629,7 +1631,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   }
 
   if (cur->fpilen > 0 && (op == Op::RetC || op == Op::RetV || op == Op::RetM ||
-                          op == Op::Unwind || op == Op::Throw)) {
+                          op == Op::Unwind)) {
     error("%s instruction encountered inside of FPI region\n",
           opcodeToName(op));
     ok = false;

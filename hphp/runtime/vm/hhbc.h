@@ -597,6 +597,8 @@ constexpr uint32_t kMaxConcatN = 4;
                                        ONE(CV),         ONE(FV),    FF) \
   O(FPassS,          THREE(IVA,CAR,OA(FPassHint)),                      \
                                        ONE(CV),         ONE(FV),    FF) \
+  O(FThrowOnRefMismatch, TWO(IVA,OA(FPassHint)),                        \
+                                       NOV,             NOV,        FF) \
   O(FHandleRefMismatch, THREE(IVA,OA(FPassHint),SA),                    \
                                        NOV,             NOV,        NF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \

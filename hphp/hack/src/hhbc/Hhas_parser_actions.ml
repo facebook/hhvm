@@ -1001,6 +1001,8 @@ match s with
  | "FPushCtorS" -> ICall (FPushCtorS (intofiarg arg1, specialclsrefofiarg arg2))
  | "DecodeCufIter" -> ICall (DecodeCufIter (iterofiarg arg1, labelofiarg arg2))
  | "FPushCufIter" -> ICall (FPushCufIter (intofiarg arg1, iterofiarg arg2))
+ | "FThrowOnRefMismatch" ->
+    ICall (FThrowOnRefMismatch (intofiarg arg1, fpasshintof arg2))
  | "FPassC" -> ICall(FPassC (intofiarg arg1, fpasshintof arg2))
  | "FPassV" -> ICall(FPassV (intofiarg arg1, fpasshintof arg2))
  | "FPassVNop" -> ICall(FPassVNop (intofiarg arg1, fpasshintof arg2))

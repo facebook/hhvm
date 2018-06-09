@@ -8067,6 +8067,27 @@ EmitterVisitor::MInstrChain EmitterVisitor::emitInOutArg(
 }
 
 void EmitterVisitor::emitFPass(Emitter& e, int paramId, FPassHint hint) {
+  if (RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch) {
+    switch (hint) {
+      case FPassHint::Any:
+        break;
+      case FPassHint::Cell:
+        emitCGet(e);
+        e.FThrowOnRefMismatch(paramId, FPassHint::Cell);
+        e.FPassC(paramId, FPassHint::Any);
+        return;
+      case FPassHint::Ref:
+        if (emitVGet(e, true)) {
+          e.FThrowOnRefMismatch(paramId, FPassHint::Ref);
+          e.FPassC(paramId, FPassHint::Any);
+        } else {
+          e.FThrowOnRefMismatch(paramId, FPassHint::Ref);
+          e.FPassVNop(paramId, FPassHint::Any);
+        }
+        return;
+    }
+  }
+
   if (checkIfStackEmpty("FPass*")) return;
   LocationGuard locGuard(e, m_tempLoc);
   m_tempLoc.clear();

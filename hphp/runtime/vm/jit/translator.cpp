@@ -314,6 +314,8 @@ static const struct {
   { OpFPushCtorI,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCtorS,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCufIter,{None,             FStack,       OutFDesc        }},
+  { OpFThrowOnRefMismatch,
+                   {FuncdRef,         None,         OutNone         }},
   { OpFHandleRefMismatch,
                    {None,             None,         OutNone         }},
   { OpFPassC,      {FuncdRef,         None,         OutSameAsInput1 }},
@@ -909,6 +911,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FCallUnpack:
   case Op::FCallAwait:
   case Op::ClsCnsD:
+  case Op::FThrowOnRefMismatch:
   case Op::FPassR:
   case Op::FPassV:
   case Op::FPassG:

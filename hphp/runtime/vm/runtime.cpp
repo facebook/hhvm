@@ -230,8 +230,6 @@ void raiseArrayKeyNotice(const StringData* key, bool isInOut) {
                isInOut ? " on inout parameter" : "", key->data());
 }
 
-namespace {
-
 std::string formatParamRefMismatch(const char* fname, uint32_t index,
                                    bool funcByRef) {
   if (funcByRef) {
@@ -245,8 +243,6 @@ std::string formatParamRefMismatch(const char* fname, uint32_t index,
       "annotated with '&'", fname, index + 1
     );
   }
-}
-
 }
 
 void raiseParamRefMismatchForFuncName(const StringData* fname, uint32_t index,

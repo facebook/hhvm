@@ -500,6 +500,11 @@ let string_of_call instruction =
     sep ["DecodeCufIter"; string_of_iterator_id id; string_of_label l]
   | FPushCufIter (n, id) ->
     sep ["FPushCufIter"; string_of_int n; string_of_iterator_id id]
+  | FThrowOnRefMismatch (i, h) ->
+    sep ["FThrowOnRefMismatch"; string_of_param_num i; string_of_fpasshint h]
+  | FHandleRefMismatch (i, h, f) ->
+    sep ["FHandleRefMismatch"; string_of_param_num i; string_of_fpasshint h;
+         "\"" ^ f ^ "\""]
   | FPassC (i, h) ->
     sep ["FPassC"; string_of_param_num i; string_of_fpasshint h]
   | FPassV (i, h) ->
@@ -530,8 +535,6 @@ let string_of_call instruction =
     sep ["FCallUnpack"; string_of_int n]
   | FCallBuiltin (n1, n2, id) ->
     sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; SU.quote_string id]
-  | FHandleRefMismatch (i, h, f) ->
-    sep ["FHandleRefMismatch"; string_of_param_num i; string_of_fpasshint h; "\"" ^ f ^ "\""]
   | FCallM (n1, n2) ->
     sep ["FCallM"; string_of_int n1; string_of_int n2]
   | FCallUnpackM (n1, n2) ->

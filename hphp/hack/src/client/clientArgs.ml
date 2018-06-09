@@ -182,9 +182,21 @@ let parse_check_args cmd =
       Arg.Set dynamic_view,
       " Replace occurrences of untyped code with dynamic";
     "--cst-search",
-      Arg.Unit (set_mode MODE_CST_SEARCH),
+      Arg.Unit (set_mode (MODE_CST_SEARCH None)),
       " (mode) Search the concrete syntax trees of files in the codebase" ^
       " for a given pattern";
+    "--cst-search-files",
+      Arg.Rest begin fun fn ->
+        mode := match !mode with
+          | None
+          | Some (MODE_CST_SEARCH (None)) ->
+            Some (MODE_CST_SEARCH (Some [fn]))
+          | Some (MODE_CST_SEARCH (Some fnl)) ->
+            Some (MODE_CST_SEARCH (Some (fn :: fnl)))
+          | _ -> raise (Arg.Bad "only a single mode should be specified")
+      end,
+      " Run CST search on this set of files," ^
+      " rather than all the files in the codebase.";
     "--dump-symbol-info",
       Arg.String (fun files -> set_mode (MODE_DUMP_SYMBOL_INFO files) ()),
       (*  Input format:

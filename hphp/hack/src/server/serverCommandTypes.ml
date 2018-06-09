@@ -106,6 +106,7 @@ type lint_stdin_input = { filename: string; contents: string }
 type cst_search_input = {
   sort_results: bool;
   input: Hh_json.json;
+  files_to_search: string list option; (* if None, search all files *)
 }
 
 (* The following datatypes can be interpreted as follows:

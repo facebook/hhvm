@@ -192,9 +192,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, InferReturnTypeService.get_meth_return_ty
           env.tcopt env.popt class_name meth_name
       end
-    | CST_SEARCH { sort_results; input }->
+    | CST_SEARCH { sort_results; input; files_to_search }->
       try
-        env, CstSearchService.go genv ~sort_results input
+        env, CstSearchService.go genv ~sort_results ~files_to_search input
       with
       | MultiThreadedCall.Coalesced_failures failures ->
         let failures = failures

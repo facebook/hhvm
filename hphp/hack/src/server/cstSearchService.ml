@@ -504,6 +504,7 @@ let job
 let go
     (genv: ServerEnv.genv)
     ~(sort_results: bool)
+    ~(files_to_search: string list option)
     (input: Hh_json.json)
     : (Hh_json.json, string) Core_result.t
   =
@@ -513,29 +514,43 @@ let go
   let num_files_searched = ref 0 in
   let last_printed_num_files_searched = ref 0 in
   let done_searching = ref false in
-  let indexer = genv.ServerEnv.indexer FindUtils.is_php in
-  let next_files () =
-    let files = indexer ()
-      |> List.map ~f:(fun path ->
-        let path = Relative_path.create Relative_path.Root path in
-        (path, pattern)
-      )
-    in
-
+  let progress_fn ~total:_total ~start:_start ~(length: int): unit =
+    let is_bucket_empty = (length = 0) in
     if not !done_searching then begin
-      num_files_searched := !num_files_searched + (List.length files);
+      num_files_searched := !num_files_searched + length;
       if (
         !num_files_searched - !last_printed_num_files_searched >= 10000
-        || List.is_empty files
+        || is_bucket_empty
       ) then begin
         Hh_logger.log "CST search: searched %d files..." !num_files_searched;
         last_printed_num_files_searched := !num_files_searched;
       end
     end;
-    if List.is_empty files
+    if is_bucket_empty
     then done_searching := true;
+  in
 
-    Bucket.of_list files
+  let next_files: (Relative_path.t * pattern) list Bucket.next =
+    let with_relative_path path =
+      (Relative_path.create_detect_prefix path, pattern)
+    in
+    match files_to_search with
+    | Some files_to_search ->
+      let files_to_search =
+        Sys_utils.parse_path_list files_to_search
+        |> List.map ~f:with_relative_path
+      in
+      MultiWorker.next
+        genv.ServerEnv.workers
+        files_to_search
+        ~progress_fn
+    | None ->
+      let indexer = genv.ServerEnv.indexer FindUtils.is_php in
+      begin fun () ->
+        let files = indexer () |> List.map ~f:with_relative_path in
+        progress_fn ~total:0 ~start:0 ~length:(List.length files);
+        Bucket.of_list files
+      end
   in
   let results = MultiWorker.call
     genv.ServerEnv.workers

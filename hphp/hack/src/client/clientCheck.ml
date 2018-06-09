@@ -483,10 +483,14 @@ let main args =
           print_endline ty;
         Exit_status.No_error
       end
-    | MODE_CST_SEARCH ->
+    | MODE_CST_SEARCH files_to_search ->
       let sort_results = args.sort_results in
       let input = Sys_utils.read_stdin_to_string () |> Hh_json.json_of_string in
-      let result = rpc args @@ Rpc.CST_SEARCH { Rpc.sort_results; input } in
+      let result = rpc args @@ Rpc.CST_SEARCH { Rpc.
+        sort_results;
+        input;
+        files_to_search;
+      } in
       begin match result with
       | Ok result ->
         print_endline (Hh_json.json_to_string result);

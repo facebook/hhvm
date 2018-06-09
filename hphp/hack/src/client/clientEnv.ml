@@ -55,7 +55,7 @@ type client_mode =
 | MODE_FULL_FIDELITY_PARSE of string
 | MODE_FULL_FIDELITY_SCHEMA
 | MODE_INFER_RETURN_TYPE of string
-| MODE_CST_SEARCH
+| MODE_CST_SEARCH of string list option
 
 type client_check_env = {
   mode: client_mode;
@@ -121,4 +121,4 @@ let mode_to_string = function
   | MODE_FULL_FIDELITY_PARSE _ -> "MODE_FULL_FIDELITY_PARSE"
   | MODE_FULL_FIDELITY_SCHEMA -> "MODE_FULL_FIDELITY_SCHEMA"
   | MODE_INFER_RETURN_TYPE _ -> "MODE_INFER_RETURN_TYPE"
-  | MODE_CST_SEARCH -> "MODE_CST_SEARCH"
+  | MODE_CST_SEARCH _ -> "MODE_CST_SEARCH"

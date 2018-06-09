@@ -20,6 +20,7 @@ val result_to_json: sort_results:bool -> result option -> Hh_json.json
 val go:
   ServerEnv.genv ->
   sort_results:bool ->
+  files_to_search:string list option  ->
   Hh_json.json ->
   (Hh_json.json, string) Core_result.t
 (** Search for the given pattern across the given set of files. *)

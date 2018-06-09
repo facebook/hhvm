@@ -677,6 +677,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalHackCompilerDefault ? '1' : '0')
     + (RuntimeOption::EvalUseExternCompilerForSystemLib ? '1' : '0')
     + (RuntimeOption::EvalHackCompilerUseEmbedded ? '1' : '0')
+    + (RuntimeOption::EvalHackCompilerVerboseErrors ? '1' : '0')
     + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
     + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
     + (RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch  ? '1' : '0')

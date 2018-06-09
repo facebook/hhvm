@@ -276,9 +276,7 @@ struct ExternCompiler {
       }
       throw;
     } catch (CompilerFatal& ex) {
-      if (m_options.verboseErrors) {
-        Logger::FError("ExternCompiler Fatal: {}", ex.what());
-      }
+      // this catch is here so we don't fall into the std::runtime_error one
       throw;
     } catch (AssemblerError& ex) {
       if (m_options.verboseErrors) {

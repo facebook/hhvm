@@ -43,7 +43,7 @@ static Variant HHVM_FUNCTION(readline, const Variant& prompt /* = null */) {
   if (result == nullptr) {
     return false;
   } else {
-    auto str = String::FromCStr(result);
+    auto str = Variant{result};
     free(result);
     return str;
   }

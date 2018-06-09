@@ -489,7 +489,9 @@ Variant HHVM_FUNCTION(stream_set_chunk_size,
 
 const StaticString
   s_sec("sec"),
-  s_usec("usec");
+  s_usec("usec"),
+  s_options("options"),
+  s_notification("notification");
 
 bool HHVM_FUNCTION(stream_set_timeout,
                    const Resource& stream,
@@ -975,12 +977,11 @@ bool StreamContext::validateParams(const Variant& params) {
     return false;
   }
   const Array& arr = params.toArray();
-  const String& options_key = String::FromCStr("options");
   for (ArrayIter it(arr); it; ++it) {
     if (!it.first().isString()) {
       return false;
     }
-    if (it.first().toString() == options_key) {
+    if (it.first().toString() == s_options) {
       if (!StreamContext::validateOptions(it.second())) {
         return false;
       }
@@ -993,14 +994,12 @@ void StreamContext::mergeParams(const Array& params) {
   if (m_params.isNull()) {
     m_params = Array::Create();
   }
-  const String& notification_key = String::FromCStr("notification");
-  if (params.exists(notification_key)) {
-    m_params.set(notification_key, params[notification_key]);
+  if (params.exists(s_notification)) {
+    m_params.set(s_notification, params[s_notification]);
   }
-  const String& options_key = String::FromCStr("options");
-  if (params.exists(options_key)) {
-    assertx(params[options_key].isArray());
-    mergeOptions(params[options_key].toArray());
+  if (params.exists(s_options)) {
+    assertx(params[s_options].isArray());
+    mergeOptions(params[s_options].toArray());
   }
 }
 
@@ -1009,8 +1008,7 @@ Array StreamContext::getParams() const {
   if (params.isNull()) {
     params = Array::Create();
   }
-  const String& options_key = String::FromCStr("options");
-  params.set(options_key, getOptions());
+  params.set(s_options, getOptions());
   return params;
 }
 

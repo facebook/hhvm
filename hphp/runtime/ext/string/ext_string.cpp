@@ -2484,7 +2484,7 @@ entity_doctype determine_doctype(int flags) {
 
 String encode_as_utf8(int code_point) {
   auto res = folly::codePointToUtf8(code_point);
-  return String::FromCStr(res.data());
+  return String(res);
 }
 
 Array HHVM_FUNCTION(get_html_translation_table,

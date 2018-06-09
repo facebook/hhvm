@@ -467,8 +467,9 @@ HHVM_METHOD(AsyncMysqlConnectionPool, __construct, const Array& options) {
         am::Duration(options[s_age_timeout_micros].toInt64()));
   }
   if (options.exists(s_expiration_policy)) {
+    static StaticString s_IdleTime{"IdleTime"};
     pool_options.setExpPolicy(options[s_expiration_policy].toString() ==
-                                      String::FromCStr("IdleTime")
+                                      s_IdleTime
                                   ? am::ExpirationPolicy::IdleTime
                                   : am::ExpirationPolicy::Age);
   }

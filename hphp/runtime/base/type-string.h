@@ -90,9 +90,6 @@ public:
   static String FromChar(char ch) {
     return String{makeStaticString(ch)};
   }
-  static String FromCStr(const char* str) {
-    return String{makeStaticString(str)};
-  }
 
   static const StringData *ConvertInteger(int64_t n);
   static const StringData *GetIntegerStringData(int64_t n) {

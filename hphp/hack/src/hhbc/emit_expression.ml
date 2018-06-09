@@ -2861,9 +2861,11 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
                      then BaseR base_offset else BaseC base_offset)))
        1
 
+and use_pass_by_ref_hint () =
+  Emit_env.is_hh_syntax_enabled () && not (Emit_env.is_systemlib ())
+
 and get_pass_by_ref_hint expr =
-  if Emit_env.is_systemlib () || not (Emit_env.is_hh_syntax_enabled ())
-  then Any else (if expr_starts_with_ref expr then Ref else Cell)
+  if expr_starts_with_ref expr then Ref else Cell
 
 and strip_ref e =
   match snd e with
@@ -2888,9 +2890,13 @@ and emit_args_and_call env call_pos args uargs =
     if has_inout_args args
     then InoutLocals.collect_written_variables env args
     else SMap.empty in
+  let use_hint = use_pass_by_ref_hint () in
+  let throw_on_mismatch = use_hint &&
+    Hhbc_options.throw_on_call_by_ref_annotation_mismatch
+    !Hhbc_options.compiler_options in
 
-  let rec aux i args inout_setters =
-    match args with
+  let rec aux i rem_args inout_setters =
+    match rem_args with
     | [] ->
       let msrv =
         Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
@@ -2903,9 +2909,16 @@ and emit_args_and_call env call_pos args uargs =
       | (false, true)  -> instr (ICall (FCallUnpack nargs))
       | (true, false)  -> instr (ICall (FCallM (nargs, num_inout + 1)))
       | (true, true)   -> instr (ICall (FCallUnpackM (nargs, num_inout + 1))) in
+      let instr_enforce_hint = if throw_on_mismatch
+      then gather @@ List.mapi args ~f:
+        begin fun i arg ->
+          instr_fthrow_on_ref_mismatch i (get_pass_by_ref_hint arg)
+        end
+      else empty in
       gather [
         (* emit call*)
         emit_pos call_pos;
+        instr_enforce_hint;
         instr_call;
         (* propagate inout values back *)
         if List.is_empty inout_setters
@@ -2972,19 +2985,15 @@ and emit_args_and_call env call_pos args uargs =
     | expr :: rest ->
       let next c = gather [ c; aux (i + 1) rest inout_setters ] in
       let param_pos, _ = expr in
-      let hint = get_pass_by_ref_hint expr in
+      let hint = if use_hint then get_pass_by_ref_hint expr else Any in
       let expr = strip_ref expr in
       if i >= args_count then
         next @@ emit_expr ~need_ref:false env expr
       else
-      let throw_on_mismatch =
-        Hhbc_options.throw_on_call_by_ref_annotation_mismatch
-        !Hhbc_options.compiler_options in
       if throw_on_mismatch && hint = Cell then
         next @@ gather [
           emit_expr ~need_ref:false env expr;
           emit_pos param_pos;
-          instr_fthrow_on_ref_mismatch i Cell;
           instr_fpassc i Any
         ]
       else if throw_on_mismatch && hint = Ref then
@@ -2998,7 +3007,6 @@ and emit_args_and_call env call_pos args uargs =
           gather [
             emit_expr_as_ref env expr;
             emit_pos param_pos;
-            instr_fthrow_on_ref_mismatch i Ref;
             instr_fpassvnop i Any
           ]
         | _ ->
@@ -3012,7 +3020,6 @@ and emit_args_and_call env call_pos args uargs =
           gather [
             instrs;
             emit_pos param_pos;
-            instr_fthrow_on_ref_mismatch i Ref;
             instr_fpass
           ]
       else

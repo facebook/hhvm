@@ -5149,7 +5149,6 @@ OPTBLD_INLINE void iopFPassV(ActRec* ar, uint32_t paramId, FPassHint hint) {
 
 OPTBLD_INLINE void iopFPassVNop(ActRec* ar, uint32_t paramId, FPassHint hint) {
   checkFPassHint(ar, paramId, hint);
-  assertx(ar->m_func->byRef(paramId));
 }
 
 OPTBLD_INLINE void iopFPassR(ActRec* ar, uint32_t paramId, FPassHint hint) {

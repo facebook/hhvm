@@ -1121,7 +1121,6 @@ public:
   void emitConvertToCellOrLoc(Emitter& e);
   void emitConvertSecondToCell(Emitter& e);
   void emitConvertToVar(Emitter& e);
-  void emitFPass(Emitter& e, int paramID, FPassHint hint);
   Offset emitFPushClsMethod(Emitter& e, ExpressionListPtr params);
   void emitVirtualLocal(int localId);
   template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
@@ -1201,8 +1200,8 @@ public:
   void emitFuncCall(Emitter& e, FunctionCallPtr node,
                     const char* nameOverride = nullptr,
                     ExpressionListPtr paramsOverride = nullptr);
-  void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId,
-                       bool isUnpack);
+  void emitFPass(Emitter& e, ExpressionPtr exp, int paramId);
+  void emitFPassStrict(Emitter& e, ExpressionPtr exp, int paramId);
   void emitClosureUseVar(Emitter& e, ExpressionPtr exp, int paramId,
                          bool byRef);
   bool emitScalarValue(Emitter& e, Variant&& value);
@@ -1377,13 +1376,17 @@ public:
   ControlTargetPtr registerGoto(StatementPtr s, Region* entry,
                                 StringData* name, bool alloc);
 
-  FPassHint getPassByRefHint(ExpressionPtr exp) {
-    if (!SystemLib::s_inited || exp->getFunctionScope()->isSystem()) {
-      return FPassHint::Any;
+  bool usePassByRefHint(FunctionScopePtr func) {
+    if (!SystemLib::s_inited || func->isSystem()) {
+      return false;
     }
     if (!m_ue.m_isHHFile && !RuntimeOption::EnableHipHopSyntax) {
-      return FPassHint::Any;
+      return false;
     }
+    return true;
+  }
+
+  FPassHint getPassByRefHint(ExpressionPtr exp) {
     return exp->hasContext(Expression::RefParameter)
       ? FPassHint::Ref
       : FPassHint::Cell;
@@ -4804,19 +4807,38 @@ void EmitterVisitor::emitCall(Emitter& e,
   }
 
   auto const callm = anyInOut && RuntimeOption::EvalUseMSRVForInOut;
+  auto const fpassStrict =
+    RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
+    usePassByRefHint(func->getFunctionScope());
 
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     for (int i = 0; i < numParams; i++) {
       auto param = (*params)[i];
-      if (!param->hasContext(Expression::InOutParameter)) {
-        emitFuncCallArg(e, param, i, param->isUnpack());
+      if (param->isUnpack()) {
+        visit(param);
+        emitConvertToCell(e);
+      } else if (!param->hasContext(Expression::InOutParameter)) {
+        if (fpassStrict) {
+          emitFPassStrict(e, param, i);
+        } else {
+          emitFPass(e, param, i);
+        }
       } else if (dynamic_pointer_cast<SimpleVariable>(param)) {
         // If the param writes directly to a local then it doesn't need to be
         // shadowed. If it gets shadowed that's fine, the final write will win.
         chains.push_back(emitInOutArg(e, param, i, nullptr, seen));
       } else {
         chains.push_back(emitInOutArg(e, param, i, &varMap, seen));
+      }
+    }
+
+    if (fpassStrict) {
+      for (int i = 0; i < numParams; i++) {
+        auto param = (*params)[i];
+        if (!param->isUnpack()) {
+          e.FThrowOnRefMismatch(i, getPassByRefHint(param));
+        }
       }
     }
   }
@@ -7402,12 +7424,25 @@ bool EmitterVisitor::emitHHInvariant(Emitter& e, SimpleFunctionCallPtr call) {
   emitCGet(e);
   e.JmpNZ(ok);
 
+  auto const fpassStrict =
+    RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
+    usePassByRefHint(call->getFunctionScope());
   auto const fpiStart = m_ue.bcPos();
   e.FPushFuncD(params->getCount() - 1, s_hh_invariant_violation.get());
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     for (auto i = uint32_t{1}; i < params->getCount(); ++i) {
-      emitFuncCallArg(e, (*params)[i], i - 1, false);
+      if (fpassStrict) {
+        emitFPassStrict(e, (*params)[i], i - 1);
+      } else {
+        emitFPass(e, (*params)[i], i - 1);
+      }
+    }
+
+    if (fpassStrict) {
+      for (auto i = uint32_t{1}; i < params->getCount(); ++i) {
+        e.FThrowOnRefMismatch(i - 1, getPassByRefHint((*params)[i]));
+      }
     }
   }
   e.FCall(params->getCount() - 1);
@@ -7971,27 +8006,6 @@ void EmitterVisitor::emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp) {
   e.CUGetL(locId);
 }
 
-void EmitterVisitor::emitFuncCallArg(Emitter& e,
-                                     ExpressionPtr exp,
-                                     int paramId,
-                                     bool isUnpack) {
-  visit(exp);
-  if (checkIfStackEmpty("FPass*")) return;
-
-  if (isUnpack) {
-    // This deals with the case where the called function has a
-    // by ref param at the index of the unpack (because we don't
-    // want to box the unpack itself).
-    // But note that unless the user created the array manually,
-    // and added reference params at the correct places, we'll
-    // still get warnings, and the array elements will not be
-    // passed by reference.
-    emitConvertToCell(e);
-  } else {
-    emitFPass(e, paramId, getPassByRefHint(exp));
-  }
-}
-
 EmitterVisitor::MInstrChain EmitterVisitor::emitInOutArg(
   Emitter& e,
   ExpressionPtr exp,
@@ -8066,29 +8080,30 @@ EmitterVisitor::MInstrChain EmitterVisitor::emitInOutArg(
   return chain;
 }
 
-void EmitterVisitor::emitFPass(Emitter& e, int paramId, FPassHint hint) {
-  if (RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch) {
-    switch (hint) {
-      case FPassHint::Any:
-        break;
-      case FPassHint::Cell:
-        emitCGet(e);
-        e.FThrowOnRefMismatch(paramId, FPassHint::Cell);
-        e.FPassC(paramId, FPassHint::Any);
-        return;
-      case FPassHint::Ref:
-        if (emitVGet(e, true)) {
-          e.FThrowOnRefMismatch(paramId, FPassHint::Ref);
-          e.FPassC(paramId, FPassHint::Any);
-        } else {
-          e.FThrowOnRefMismatch(paramId, FPassHint::Ref);
-          e.FPassVNop(paramId, FPassHint::Any);
-        }
-        return;
-    }
-  }
-
+void EmitterVisitor::emitFPassStrict(Emitter& e, ExpressionPtr exp,
+                                     int paramId) {
+  assertx(RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch);
+  assertx(usePassByRefHint(exp->getFunctionScope()));
+  visit(exp);
   if (checkIfStackEmpty("FPass*")) return;
+
+  if (!exp->hasContext(Expression::RefParameter)) {
+    emitCGet(e);
+    e.FPassC(paramId, FPassHint::Any);
+  } else if (emitVGet(e, true)) {
+    e.FPassC(paramId, FPassHint::Any);
+  } else {
+    e.FPassVNop(paramId, FPassHint::Any);
+  }
+}
+
+void EmitterVisitor::emitFPass(Emitter& e, ExpressionPtr exp, int paramId) {
+  visit(exp);
+  if (checkIfStackEmpty("FPass*")) return;
+
+  auto const hint = usePassByRefHint(exp->getFunctionScope())
+    ? getPassByRefHint(exp) : FPassHint::Any;
+
   LocationGuard locGuard(e, m_tempLoc);
   m_tempLoc.clear();
 

@@ -1060,7 +1060,7 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* /*b*/) {
              push_params);
       return false;
     }
-    if (param_id != fpi.next) {
+    if (param_id != fpi.next && op != Op::FThrowOnRefMismatch) {
       error("FPass* out of order; got id %d expected %d\n",
              param_id, fpi.next);
       ok = false;

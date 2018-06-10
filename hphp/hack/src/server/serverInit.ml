@@ -726,28 +726,31 @@ end
 let ai_check genv files_info env t =
   match ServerArgs.ai_mode genv.options with
   | Some ai_opt ->
-    let failed_parsing, failed_decl, failed_check =
-      Errors.get_failed_files env.errorl Errors.Parsing,
-      Errors.get_failed_files env.errorl Errors.Decl,
-      Errors.get_failed_files env.errorl Errors.Typing
+    let failures =
+      List.map ~f:(fun k -> (k, Errors.get_failed_files env.errorl k))
+          [ Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing ]
     in
-    let all_passed = List.for_all
-      [failed_parsing; failed_decl; failed_check;]
-      (fun m -> Relative_path.Set.is_empty m) in
-    if not all_passed then begin
-      Hh_logger.log "Cannot run AI because of errors in source";
-      env, t
-    end
-    else begin
-      let check_mode = ServerArgs.check_mode genv.options in
-      let errorl = Ai.go
-          Typing_check_utils.type_file genv.workers files_info
-          env.tcopt ai_opt check_mode in
-      let env = { env with
-                  errorl = Errors.merge errorl env.errorl;
-                } in
-      env, (Hh_logger.log_duration "Ai" t)
-    end
+    let phase_to_string = function  (* Not exposed in Errors module *)
+      | Errors.Init -> "Init"
+      | Errors.Parsing -> "Parsing"
+      | Errors.Naming -> "Naming"
+      | Errors.Decl -> "Decl"
+      | Errors.Typing -> "Typing"
+    in
+    let () = List.iter failures
+        ~f:(fun (k, m) ->
+          if not (Relative_path.Set.is_empty m) then
+            Hh_logger.log "%d Hack errors in phase %s"
+              (Relative_path.Set.cardinal m)
+              (phase_to_string k)) in
+    let check_mode = ServerArgs.check_mode genv.options in
+    let errorl = Ai.go
+        Typing_check_utils.type_file genv.workers files_info
+        env.tcopt ai_opt check_mode in
+    let env = { env with
+                errorl  (* Ignore hack errors. *)
+              } in
+    env, (Hh_logger.log_duration "Ai" t)
   | None -> env, t
 
 let run_search genv t =

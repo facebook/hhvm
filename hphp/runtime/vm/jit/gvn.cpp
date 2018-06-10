@@ -54,31 +54,6 @@ struct CongruenceHasher {
   {
   }
 
-  size_t hashDefLabel(KeyType key) const {
-    auto inst = key.first;
-    auto idx = key.second;
-
-    // We use a set (instead of an unordered_set) because we want a fixed and
-    // well-defined iteration order while we're accumulating the hash below.
-    jit::set<SSATmp*> values;
-    for (auto& pred : inst->block()->preds()) {
-      auto fromBlock = pred.from();
-      auto& jmp = fromBlock->back();
-      auto src = canonical(jmp.src(idx));
-      assertx(m_globalTable[src].value);
-      values.emplace(m_globalTable[src].value);
-    }
-
-    auto result = static_cast<size_t>(inst->op());
-    for (auto value : values) {
-      result = folly::hash::hash_128_to_64(
-        result,
-        reinterpret_cast<size_t>(value)
-      );
-    }
-    return hashSharedImpl(inst, result);
-  }
-
   size_t hashSharedImpl(IRInstruction* inst, size_t result) const {
     if (inst->hasExtra()) {
       result = folly::hash::hash_128_to_64(
@@ -110,8 +85,6 @@ struct CongruenceHasher {
   size_t operator()(KeyType key) const {
     auto inst = key.first;
 
-    if (inst->is(DefLabel)) return hashDefLabel(key);
-
     // Note: this doesn't take commutativity or associativity into account, but
     // it might be nice to do so for the opcodes where it makes sense.
     size_t result = static_cast<size_t>(inst->op());
@@ -129,36 +102,6 @@ struct CongruenceComparator {
   explicit CongruenceComparator(const ValueNumberTable& globalTable)
     : m_globalTable(globalTable)
   {
-  }
-
-  bool compareDefLabelSrcs(KeyType keyA, KeyType keyB) const {
-    auto instA = keyA.first;
-    auto instB = keyB.first;
-    auto idxA = keyA.second;
-    auto idxB = keyB.second;
-
-    assertx(instA->op() == instB->op());
-    assertx(instA->is(DefLabel));
-
-    jit::hash_set<SSATmp*> valuesA;
-    jit::hash_set<SSATmp*> valuesB;
-
-    auto fillValueSet = [&](
-        IRInstruction* inst,
-        int32_t idx,
-        std::unordered_set<SSATmp*>& values
-    ) {
-      for (auto& pred : inst->block()->preds()) {
-        auto fromBlock = pred.from();
-        auto& jmp = fromBlock->back();
-        auto src = canonical(jmp.src(idx));
-        assertx(m_globalTable[src].value);
-        values.emplace(m_globalTable[src].value);
-      }
-    };
-    fillValueSet(instA, idxA, valuesA);
-    fillValueSet(instB, idxB, valuesB);
-    return valuesA == valuesB;
   }
 
   bool compareSrcs(KeyType keyA, KeyType keyB) const {
@@ -196,9 +139,7 @@ struct CongruenceComparator {
       }
     }
 
-    if (instA->is(DefLabel)) {
-      if (!compareDefLabelSrcs(keyA, keyB)) return false;
-    } else if (!compareSrcs(keyA, keyB)) {
+    if (!compareSrcs(keyA, keyB)) {
       return false;
     }
 

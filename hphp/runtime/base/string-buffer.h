@@ -220,64 +220,6 @@ private:
   uint32_t m_len;
 };
 
-/*
- * StringBuffer-like wrapper for a malloc'd, null-terminated C-style
- * string.
- */
-struct CstrBuffer {
-  static const unsigned kMaxCap = INT_MAX;
-
-  /*
-   * Create a buffer with enough space for a string of length `len'.
-   * (I.e. an allocation of size len + 1.)
-   *
-   * Pre: len <= kMaxCap
-   */
-  explicit CstrBuffer(int len) = delete;
-
-  /*
-   * Take ownership of an existing malloc'd buffer containing a
-   * null-terminated string of length `len'.  It is assumed the
-   * capacity is also len.
-   *
-   * Pre: len < kMaxCap
-   */
-  CstrBuffer(char* data, int len) = delete;
-
-  /*
-   * Create a CstrBuffer, attempting to read the contents of a given
-   * file.
-   *
-   * I/O errors are not reported.  size() will just be zero in that
-   * case.
-   *
-   * Post: valid()
-   */
-  explicit CstrBuffer(const char* filename);
-
-  CstrBuffer(const CstrBuffer&) = delete;
-  CstrBuffer& operator=(const CstrBuffer&) = delete;
-  ~CstrBuffer();
-
-  const char* data() const;
-  unsigned size() const { return m_len; }
-
-  /*
-   * Returns whether this CstrBuffer contains a buffer.  This can only
-   * return false if detach() has been called.
-   */
-  bool valid() const { return m_buffer != nullptr; }
-
-private:
-  char* m_buffer;
-  unsigned m_len;
-};
-
-inline const char* CstrBuffer::data() const {
-  m_buffer[m_len] = 0;
-  return m_buffer;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

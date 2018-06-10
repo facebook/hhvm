@@ -317,38 +317,5 @@ void StringBuffer::growBy(int spaceRequired) {
   m_cap = m_str->capacity();
 }
 
-//////////////////////////////////////////////////////////////////////
-
-CstrBuffer::CstrBuffer(const char *filename)
-  : m_buffer(nullptr), m_len(0) {
-  struct stat sb;
-  if (stat(filename, &sb) == 0) {
-    if (sb.st_size > kMaxCap - 1) {
-      auto const str = folly::to<std::string>(
-        "file ", filename, " is too large"
-      );
-      throw StringBufferLimitException(kMaxCap, String(str.c_str()));
-    }
-    unsigned cap = sb.st_size;
-    m_buffer = (char *)safe_malloc(cap + 1);
-
-    int fd = ::open(filename, O_RDONLY);
-    if (fd != -1) {
-      while (m_len < cap) {
-        int buffer_size = cap - m_len;
-        int len = ::read(fd, m_buffer + m_len, buffer_size);
-        if (len == -1 && errno == EINTR) continue;
-        if (len <= 0) break;
-        m_len += len;
-      }
-      ::close(fd);
-    }
-  }
-}
-
-CstrBuffer::~CstrBuffer() {
-  free(m_buffer);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

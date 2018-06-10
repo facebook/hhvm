@@ -339,17 +339,9 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
     if (RuntimeOption::EnableStaticContentFromDisk) {
       String translated = File::TranslatePath(String(absPath));
-      if (!translated.empty()) {
-        CstrBuffer sb(translated.data());
-        if (sb.valid()) {
-          struct stat st;
-          st.st_mtime = 0;
-          stat(translated.data(), &st);
-          sendStaticContent(transport, sb.data(), sb.size(), st.st_mtime,
-                            false, path, ext);
-          ServerStats::LogPage(path, 200);
-          return;
-        }
+      if (!translated.empty() &&
+          handleFileRequest(transport, translated, path, ext)) {
+        return;
       }
     }
   }
@@ -575,6 +567,44 @@ bool HttpRequestHandler::handleProxyRequest(Transport *transport, bool force) {
   }
   transport->sendRaw((void*)respData, response.size(), code);
   return true;
+}
+
+bool HttpRequestHandler::handleFileRequest(Transport* transport,
+                                           const String& translated,
+                                           const std::string& path,
+                                           const char* ext) {
+  static constexpr size_t kMaxCap = INT_MAX - 1;
+  auto filename = translated.data();
+  int fd = ::open(filename, O_RDONLY);
+  if (fd != -1) {
+    struct stat stat_buf;
+    stat_buf.st_mtime = 0;
+    if (fstat(fd, &stat_buf) == 0) {
+      size_t cap = stat_buf.st_size;
+      if (cap > kMaxCap) {
+        ::close(fd);
+        auto const str = folly::to<std::string>(
+          "file ", filename, " is too large"
+        );
+        throw StringBufferLimitException(kMaxCap, String(str.c_str()));
+      }
+      auto buffer = (char*)safe_malloc(cap + 1);
+      size_t len = 0;
+      while (len < cap) {
+        auto n = ::read(fd, buffer + len, cap - len);
+        if (n == -1 && errno == EINTR) continue;
+        if (n <= 0) break;
+        len += n;
+      }
+      ::close(fd);
+      buffer[len] = 0;
+      sendStaticContent(transport, buffer, len, stat_buf.st_mtime,
+                        false, path, ext);
+      ServerStats::LogPage(path, 200);
+      return true;
+    }
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

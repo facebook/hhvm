@@ -49,6 +49,7 @@
 #include <folly/portability/Unistd.h>
 
 #include <signal.h>
+#include <fstream>
 
 #ifdef __linux__
 void DisableFork() __attribute__((__weak__));
@@ -582,13 +583,12 @@ void HttpServer::removePid() {
 
 void HttpServer::killPid() {
   if (!RuntimeOption::PidFile.empty()) {
-    CstrBuffer sb(RuntimeOption::PidFile.c_str());
-    if (sb.size()) {
-      int64_t pid = strtoll(sb.data(), nullptr, 10);
-      if (pid) {
-        kill((pid_t)pid, SIGKILL);
-        return;
-      }
+    std::ifstream in(RuntimeOption::PidFile);
+    int64_t pid;
+    if ((in >> pid) && pid > 0) {
+      in.close();
+      kill((pid_t)pid, SIGKILL);
+      return;
     }
     Logger::Error("Unable to read pid file %s for any meaningful pid",
                   RuntimeOption::PidFile.c_str());

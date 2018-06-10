@@ -84,6 +84,7 @@ struct PrologueMetaInfo {
   TCA           start{0};
   TransLoc      loc;
   CGMeta        meta;
+  CodeViewPtr   finalView;
 };
 
 struct BodyDispatchMetaInfo {

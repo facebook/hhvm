@@ -123,6 +123,8 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
     }
   }
 
+  info.finalView = std::make_unique<CodeCache::View>(codeView);
+
   assertx(funcGuardMatches(funcGuardFromPrologue(info.start, func), func));
   assertx(code().isValidCodeAddress(info.start));
 }
@@ -165,7 +167,7 @@ bool publishFuncPrologueMeta(Func* func, int nArgs, TransKind kind,
 
   const int nparams = func->numNonVariadicParams();
   const int paramIndex = nArgs <= nparams ? nArgs : nparams + 1;
-  auto codeView = code().view(kind);
+  auto codeView = *info.finalView;
   auto const funcBody = SrcKey{func, func->getEntryForNumArgs(nArgs),
                                SrcKey::PrologueTag{}};
 

@@ -1126,7 +1126,7 @@ template<class T> folly::Optional<T> nameToSubop(const char* str) {
 // Not all subops start indexing at 0
 /*Subop Name      Numerically first value */
 X(InitPropOp,     static_cast<int>(InitPropOp::Static))
-X(IsTypeOp,       static_cast<int>(IsTypeOp::Uninit))
+X(IsTypeOp,       static_cast<int>(IsTypeOp::Null))
 X(FatalOp,        static_cast<int>(FatalOp::Runtime))
 X(SetOpOp,        static_cast<int>(SetOpOp::PlusEqual))
 X(IncDecOp,       static_cast<int>(IncDecOp::PreInc))

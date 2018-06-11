@@ -2151,7 +2151,6 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
     case IsTypeOp::DArray:
     case IsTypeOp::ArrLike:
     case IsTypeOp::Scalar:
-    case IsTypeOp::Uninit:
       return false;
   }
   not_reached();

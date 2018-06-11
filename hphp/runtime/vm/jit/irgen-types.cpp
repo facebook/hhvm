@@ -405,7 +405,6 @@ void verifyTypeImpl(IRGS& env, int32_t const id, bool isReturnType,
 
 Type typeOpToType(IsTypeOp op) {
   switch (op) {
-  case IsTypeOp::Uninit:  return TUninit;
   case IsTypeOp::Null:    return TInitNull;
   case IsTypeOp::Int:     return TInt;
   case IsTypeOp::Dbl:     return TDbl;

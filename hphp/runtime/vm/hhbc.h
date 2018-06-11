@@ -182,7 +182,6 @@ inline bool isIncDecO(IncDecOp op) {
 }
 
 #define ISTYPE_OPS                             \
-  ISTYPE_OP(Uninit)                            \
   ISTYPE_OP(Null)                              \
   ISTYPE_OP(Bool)                              \
   ISTYPE_OP(Int)                               \

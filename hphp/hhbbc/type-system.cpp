@@ -2777,7 +2777,6 @@ Type scalarize(Type t) {
 
 Type type_of_istype(IsTypeOp op) {
   switch (op) {
-  case IsTypeOp::Uninit: return TUninit;
   case IsTypeOp::Null:   return TNull;
   case IsTypeOp::Bool:   return TBool;
   case IsTypeOp::Int:    return TInt;

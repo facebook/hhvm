@@ -4020,7 +4020,6 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
   assertx(cellIsPlausible(*val));
 
   switch (op) {
-  case IsTypeOp::Uninit: return val->m_type == KindOfUninit;
   case IsTypeOp::Null:   return is_null(tvAsCVarRef(val));
   case IsTypeOp::Bool:   return is_bool(tvAsCVarRef(val));
   case IsTypeOp::Int:    return is_int(tvAsCVarRef(val));

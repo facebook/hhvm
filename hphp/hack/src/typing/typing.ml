@@ -4576,101 +4576,98 @@ and obj_get_with_visibility ~is_method ~nullsafe ~valkind ~pos_params
 and obj_get_concrete_ty ~is_method ~valkind ~pos_params ?(explicit_tparams=[])
     env concrete_ty class_id (id_pos, id_str as id) k_lhs =
   let default () = env, (Reason.Rwitness id_pos, Typing_utils.tany env), None in
+  let mk_ety_env r class_info x paraml =
+    let this_ty = k_lhs (r, (Tclass(x, paraml))) in
+    {
+      type_expansions = [];
+      this_ty = this_ty;
+      substs = Subst.make class_info.tc_tparams paraml;
+      from_class = Some class_id;
+      validate_dty = None;
+    }
+  in
   match concrete_ty with
   | (r, Tclass(x, paraml)) ->
-    begin
-      match Env.get_class env (snd x) with
-      | None ->
+    begin match Env.get_class env (snd x) with
+    | None ->
+      default ()
+
+    | Some class_info when not is_method
+        && not (Env.is_strict env)
+        && class_info.tc_name = SN.Classes.cStdClass ->
+      default ()
+
+    | Some class_info ->
+      let paraml =
+        if List.length paraml = 0
+        then List.map class_info.tc_tparams
+            (fun _ -> Reason.Rwitness id_pos, Typing_utils.tany env)
+        else paraml in
+      let member_info = Env.get_member is_method env class_info id_str in
+      Typing_hooks.dispatch_cmethod_hook class_info paraml ~pos_params id
+        env (Some class_id) ~is_method;
+
+      begin match member_info with
+      | None when not is_method ->
+        if not (SN.Members.is_special_xhp_attribute id_str)
+        then member_not_found id_pos ~is_method class_info id_str r;
         default ()
 
-      | Some class_info when not is_method
-          && not (Env.is_strict env)
-          && class_info.tc_name = SN.Classes.cStdClass ->
-          default ()
-
-      | Some class_info ->
-        let paraml =
-          if List.length paraml = 0
-          then List.map class_info.tc_tparams
-              (fun _ -> Reason.Rwitness id_pos, Typing_utils.tany env)
-          else paraml in
-        let member_info = Env.get_member is_method env class_info id_str in
-        Typing_hooks.dispatch_cmethod_hook class_info paraml ~pos_params id
-          env (Some class_id) ~is_method;
-
-        match member_info with
-        | None when not is_method ->
-          if not (SN.Members.is_special_xhp_attribute id_str)
-          then member_not_found id_pos ~is_method class_info id_str r;
-          default ()
-
+      | None ->
+        begin match Env.get_member is_method env class_info SN.Members.__call with
         | None ->
-          begin
-          match Env.get_member is_method env class_info SN.Members.__call with
-          | None ->
-            member_not_found id_pos ~is_method class_info id_str r;
-            default ()
+          member_not_found id_pos ~is_method class_info id_str r;
+          default ()
 
-          | Some {ce_visibility = vis; ce_type = lazy (r, Tfun ft); _}  ->
-            let mem_pos = Reason.to_pos r in
-            TVis.check_obj_access id_pos env (mem_pos, vis);
+        | Some {ce_visibility = vis; ce_type = lazy (r, Tfun ft); _}  ->
+          let mem_pos = Reason.to_pos r in
+          TVis.check_obj_access id_pos env (mem_pos, vis);
 
-            (* the return type of __call can depend on the
-             * class params or be this *)
-            let this_ty = k_lhs (r, (Tclass(x, paraml))) in
-            let ety_env = {
-              type_expansions = [];
-              this_ty = this_ty;
-              substs = Subst.make class_info.tc_tparams paraml;
-              from_class = Some class_id;
-              validate_dty = None;
-            } in
-            let env, ft = Phase.localize_ft ~use_pos:id_pos ~ety_env env ft in
+          (* the return type of __call can depend on the class params or be this *)
+          let ety_env = mk_ety_env r class_info x paraml in
+          let env, ft = Phase.localize_ft ~use_pos:id_pos ~ety_env env ft in
 
-            (* we change the params of the underlying
-             * declaration to act as a variadic function
-             * ... this transform cannot be done when
-             * processing the declaration of call because
-             * direct calls to $inst->__call are also
-             * valid.  *)
-            let ft = {ft with
-              ft_arity = Fellipsis 0; ft_tparams = []; ft_params = []; } in
+          (* we change the params of the underlying declaration to act as a
+           * variadic function ... this transform cannot be done when processing
+           * the declaration of call because direct calls to $inst->__call are also
+           * valid.
+          *)
+          let ft = {ft with
+            ft_arity = Fellipsis 0; ft_tparams = []; ft_params = []; } in
 
-            let member_ty = (r, Tfun ft) in
-            env, member_ty, Some (mem_pos, vis)
+          let member_ty = (r, Tfun ft) in
+          env, member_ty, Some (mem_pos, vis)
 
           | _ -> assert false
-          end
 
-    | Some ({ce_visibility = vis; ce_type = lazy member_; ce_const; _ } as member_ce) ->
-      let mem_pos = Reason.to_pos (fst member_) in
-      TVis.check_obj_access id_pos env (mem_pos, vis);
-      let member_ty = Typing_enum.member_type env member_ce in
-      let this_ty = k_lhs (r, (Tclass(x, paraml))) in
-      let ety_env = {
-        type_expansions = [];
-        this_ty = this_ty;
-        substs = Subst.make class_info.tc_tparams paraml;
-        from_class = Some class_id;
-        validate_dty = None;
-      } in
-      let env, member_ty =
-        begin match member_ty with
-          | (r, Tfun ft) ->
-            (* We special case function types here to be able to pass explicit type parameters. *)
-            let (env, ft) = Phase.localize_ft ~use_pos:id_pos ~explicit_tparams ~ety_env env ft in
-            (env, (r, Tfun ft))
-          | _ -> Phase.localize ~ety_env env member_ty
-        end in
+        end (* match Env.get_member is_method env class_info SN.Members.__call *)
 
-      if ce_const && valkind = `lvalue then
-        if not (env.Env.inside_constructor &&
-          (* expensive call behind short circuiting && *)
-          SubType.is_sub_type env (Env.get_self env) concrete_ty) then
-          Errors.assigning_to_const id_pos;
+      | Some ({ce_visibility = vis; ce_type = lazy member_; ce_const; _ } as member_ce) ->
+        let mem_pos = Reason.to_pos (fst member_) in
+        TVis.check_obj_access id_pos env (mem_pos, vis);
+        let member_ty = Typing_enum.member_type env member_ce in
+        let ety_env = mk_ety_env r class_info x paraml in
+        let env, member_ty =
+          begin match member_ty with
+            | (r, Tfun ft) ->
+              (* We special case function types here to be able to pass explicit type
+               * parameters. *)
+              let (env, ft) =
+                Phase.localize_ft ~use_pos:id_pos ~explicit_tparams ~ety_env env ft in
+              (env, (r, Tfun ft))
+            | _ -> Phase.localize ~ety_env env member_ty
+          end in
 
-      env, member_ty, Some (mem_pos, vis)
-    end
+        if ce_const && valkind = `lvalue then
+          if not (env.Env.inside_constructor &&
+            (* expensive call behind short circuiting && *)
+            SubType.is_sub_type env (Env.get_self env) concrete_ty) then
+            Errors.assigning_to_const id_pos;
+
+        env, member_ty, Some (mem_pos, vis)
+      end (* match member_info *)
+
+    end (* match Env.get_class env (snd x) *)
   | _, Tdynamic ->
     let ty = Reason.Rdynamic_prop id_pos, Tdynamic in
     env, ty, None

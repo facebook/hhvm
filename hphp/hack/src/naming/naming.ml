@@ -1634,8 +1634,10 @@ module Make (GetLocals : GetLocals) = struct
       then Some (fst x, N.Any)
       else e
     in
+    let is_xhp = try ((String.sub (snd x) 0 1) = ":") with Invalid_argument _ -> false
+    in
     { N.cv_final = false;
-      N.cv_is_xhp = ((String.sub (snd x) 0 1) = ":");
+      N.cv_is_xhp = is_xhp;
       N.cv_visibility = N.Public;
       N.cv_type = None;
       N.cv_id = x;

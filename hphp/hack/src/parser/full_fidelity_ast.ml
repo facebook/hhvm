@@ -453,14 +453,14 @@ let pParamKind : param_kind parser = fun node env ->
   | _ -> missing_syntax "param kind" node env
 
 (* TODO: Clean up string escaping *)
-let prepString2 : node list -> node list =
+let prepString2 env : node list -> node list =
   let is_double_quote_or_backtick ch = ch = '"' || ch = '`' in
   let is_binary_string_header s =
     (String.length s > 1) && (s.[0] = 'b') && (s.[1] = '"') in
   let trimLeft = Token.trim_left in
   let trimRight = Token.trim_right in
   function
-  | ({ syntax = Token t; _ }::ss)
+  | ({ syntax = Token t; _ } as node::ss)
   when (Token.width t) > 0 &&
     ((is_double_quote_or_backtick (Token.text t).[0])
       || is_binary_string_header (Token.text t)) ->
@@ -471,13 +471,13 @@ let prepString2 : node list -> node list =
         let s = make_token (trimRight ~n:1 t) in
         if width s > 0 then [s] else []
       | x :: xs -> x :: unwind xs
-      | _ -> raise (Invalid_argument "Malformed String2 SyntaxList")
+      | _ -> raise_parsing_error env node "Malformed String2 SyntaxList"; []
     in
     (* Trim the starting b and double quote *)
     let left_trim = if (Token.text t).[0] = 'b' then 2 else 1 in
     let s = make_token (trimLeft ~n:left_trim t) in
     if width s > 0 then s :: unwind ss else unwind ss
-  | ({ syntax = Token t; _ }::ss)
+  | ({ syntax = Token t; _ } as node ::ss)
   when (Token.width t) > 3 && String.sub (Token.text t) 0 3 = "<<<" ->
     let rec unwind = function
       | [{ syntax = Token t; _ }] when (Token.width t) > 0 ->
@@ -487,7 +487,7 @@ let prepString2 : node list -> node list =
         let s = make_token (trimRight ~n t) in
         if width s > 0 then [s] else []
       | x :: xs -> x :: unwind xs
-      | _ -> raise (Invalid_argument "Malformed String2 SyntaxList")
+      | _ -> raise_parsing_error env node "Malformed String2 SyntaxList"; []
     in
     let content = Token.text t in
     let n = (String.index content '\n') + 1 in
@@ -520,14 +520,17 @@ let extract_unquoted_string ~start ~len content =
               String.sub content start len
   with Invalid_argument _ -> content
 
-let mkStr : (string -> string) -> string -> string = fun unescaper content ->
+let mkStr env node : (string -> string) -> string -> string = fun unescaper content ->
   let content = if String.length content > 0 && content.[0] = 'b'
     then String.sub content 1 (String.length content - 1) else content in
   let len = String.length content in
   let no_quotes = extract_unquoted_string ~start:0 ~len content in
   try unescaper no_quotes with
-  | Php_escaping.Invalid_string _ -> raise @@
-      Failure (Printf.sprintf "Malformed string literal <<%s>>" no_quotes)
+  | Php_escaping.Invalid_string _ ->
+    raise_parsing_error env
+      node (Printf.sprintf "Malformed string literal <<%s>>" no_quotes);
+    ""
+
 let unempty_str = function
   | "''" | "\"\"" -> ""
   | s -> s
@@ -605,7 +608,7 @@ let pShapeFieldName : shape_field_name parser = fun name env ->
       ( pos_name scope_resolution_qualifier env
       , pos_name scope_resolution_name env
       )
-  | _ -> let p, n = pos_name name env in SFlit (p, mkStr unesc_dbl n)
+  | _ -> let p, n = pos_name name env in SFlit (p, mkStr env name unesc_dbl n)
 
 let mpShapeExpressionField : ('a, (shape_field_name * 'a)) metaparser =
   fun hintParser node env ->
@@ -1382,8 +1385,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         let s = text expr in
         (match location, token_kind expr with
         (* TODO(T21285960): Inside strings, int indices "should" be string indices *)
-        | InDoubleQuotedString, _ when env.codegen -> String (mkStr unesc_dbl s)
-        | InBacktickedString, _ when env.codegen -> String (mkStr Php_escaping.unescape_backtick s)
+        | InDoubleQuotedString, _ when env.codegen -> String (mkStr env expr unesc_dbl s)
+        | InBacktickedString, _ when env.codegen ->
+          String (mkStr env expr Php_escaping.unescape_backtick s)
         | _, Some TK.DecimalLiteral
         | _, Some TK.OctalLiteral
         | _, Some TK.HexadecimalLiteral
@@ -1391,10 +1395,14 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
          * the literal is created. *)
         | _, Some TK.BinaryLiteral             -> Int    (Str.global_replace (underscore) "" s)
         | _, Some TK.FloatingLiteral           -> Float  s
-        | _, Some TK.SingleQuotedStringLiteral -> String (mkStr Php_escaping.unescape_single s)
-        | _, Some TK.DoubleQuotedStringLiteral -> String (mkStr Php_escaping.unescape_double s)
-        | _, Some TK.HeredocStringLiteral      -> String (mkStr Php_escaping.unescape_heredoc s)
-        | _, Some TK.NowdocStringLiteral       -> String (mkStr Php_escaping.unescape_nowdoc s)
+        | _, Some TK.SingleQuotedStringLiteral ->
+          String (mkStr env expr Php_escaping.unescape_single s)
+        | _, Some TK.DoubleQuotedStringLiteral ->
+          String (mkStr env expr Php_escaping.unescape_double s)
+        | _, Some TK.HeredocStringLiteral      ->
+          String (mkStr env expr Php_escaping.unescape_heredoc s)
+        | _, Some TK.NowdocStringLiteral       ->
+          String (mkStr env expr Php_escaping.unescape_nowdoc s)
         | _, Some TK.NullLiteral               ->
           if not env.codegen && s <> String.lowercase_ascii s then
             Lint.lowercase_constant pos s;
@@ -1408,13 +1416,13 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | _       -> missing_syntax ("boolean (not: " ^ s ^ ")") expr env
           )
         | _, Some TK.ExecutionStringLiteral ->
-          Execution_operator [pos, String (mkStr Php_escaping.unescape_backtick s)]
+          Execution_operator [pos, String (mkStr env expr Php_escaping.unescape_backtick s)]
         | _ -> missing_syntax "literal" expr env
         )
       | SyntaxList ({ syntax = Token token; _ } :: _ as ts)
         when Token.kind token = TK.ExecutionStringLiteralHead ->
-        Execution_operator (pString2 InBacktickedString (prepString2 ts) env)
-      | SyntaxList ts -> String2 (pString2 InDoubleQuotedString (prepString2 ts) env)
+        Execution_operator (pString2 InBacktickedString (prepString2 env ts) env)
+      | SyntaxList ts -> String2 (pString2 InDoubleQuotedString (prepString2 env ts) env)
       | _ -> missing_syntax "literal expression" expr env
       )
 
@@ -1704,7 +1712,7 @@ and pStmt : stmt parser = fun node env ->
         let rec null_out cont = function
           | [x] -> [x cont]
           | (x::xs) -> x [] :: null_out cont xs
-          | _ -> raise (Failure "Malformed block result")
+          | _ -> raise_parsing_error env node "Malformed block result"; []
         in
         let blk = List.concat @@
           couldMap ~f:pStmtUnsafe switch_section_statements env in
@@ -2882,22 +2890,16 @@ let scour_comments
            let line = Pos.line pos in
            let ignores = try IMap.find line fm with Not_found -> IMap.empty in
            let txt = Trivia.text t in
-           (try ignore (search_forward ignore_error txt 0) with
+           try
+             ignore (search_forward ignore_error txt 0);
+             let p = pos_of_offset (Trivia.start_offset t) (Pos.start_cnum pos) in
+             let code = int_of_string (matched_group 2 txt) in
+             let ignores = IMap.add code p ignores in
+             cmts, IMap.add line ignores fm
+           with
            | Not_found ->
-             let msg = Printf.sprintf
-               "Inconsistent trivia classification: Received %s, but failed to \
-                match regexp for FIXME or IGNORE_ERROR. Either the lexer has a \
-                bug in its trivia classification, or the lowerer is more \
-                restrictive than the lexer. Source: %s"
-               (TriviaKind.to_string (Trivia.kind t))
-               (Pos.string (Pos.to_absolute pos))
-             in
-             failwith msg;
-           );
-           let p = pos_of_offset (Trivia.start_offset t) (Pos.start_cnum pos) in
-           let code = int_of_string (matched_group 2 txt) in
-           let ignores = IMap.add code p ignores in
-           cmts, IMap.add line ignores fm
+             Errors.fixme_format pos;
+             cmts, fm
     in
     let rec aux (cmts, fm as acc : accumulator) (node : node) : accumulator =
       let recurse () = List.fold_left ~f:aux ~init:acc (children node) in

@@ -27,7 +27,7 @@ function ldap_mod_replace($link, $dn, $entry) { }
 <<__PHPStdLib>>
 function ldap_modify($link, $dn, $entry) { }
 <<__PHPStdLib>>
-function ldap_modify_batch($link, string $dn, array $modifs): bool { return false; }
+function ldap_modify_batch($link, string $dn, array $modifs) { }
 <<__PHPStdLib>>
 function ldap_bind($link, $bind_rdn = null, $bind_password = null) { }
 <<__PHPStdLib>>

@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 
 #include "hphp/runtime/ext/vsdebug/logging.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -59,6 +60,11 @@ int VSDebugLogger::OpenLogFile() {
   // the session started.
   Log(VSDebugLogger::LogLevelInfo, "-------------------------------");
   Log(VSDebugLogger::LogLevelInfo, "Created new log file.");
+  Log(VSDebugLogger::LogLevelInfo,
+      "Debugger version: %s",
+      VSDEBUG_DEBUGGER_VERSION_STR
+  );
+
   return 0;
 }
 

@@ -240,6 +240,7 @@ bool checkCfg(const IRUnit& unit) {
     for (auto& inst : blk->instrs()) {
       for (auto src : inst.srcs()) {
         if (src->inst()->is(DefConst)) continue;
+        if (src->type() <= TBottom) continue;
 
         always_assert_flog(
           src->inst()->dsts().contains(src),

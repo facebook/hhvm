@@ -1058,8 +1058,6 @@ void Debugger::pauseTarget(RequestInfo* ri, const char* stopReason) {
 
   m_state = ProgramState::Paused;
 
-  sendStoppedEvent("pause", stopReason, getCurrentThreadId(), false);
-
   if (ri != nullptr) {
     clearStepOperation(ri);
   }

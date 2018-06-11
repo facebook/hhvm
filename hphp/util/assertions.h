@@ -84,8 +84,6 @@ void assert_fail_no_log(const char* e,
                         const char* func,
                         const std::string& msg);
 
-void assert_log_failure(const char* title, const std::string& msg);
-
 /*
  * Register a function for auxiliary assert logging.
  */

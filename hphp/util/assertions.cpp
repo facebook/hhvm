@@ -28,6 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 static AssertFailLogger s_logger;
+static bool s_assert_failed{false};
 
 __thread AssertDetailImpl* AssertDetailImpl::s_head = nullptr;
 
@@ -50,8 +51,8 @@ bool AssertDetailImpl::log() { return log_impl(s_head); }
 
 //////////////////////////////////////////////////////////////////////
 
-void assert_log_failure(const char* e, const std::string& msg) {
-  fprintf(stderr, "\nAssertion failure: %s\n%s\n", e, msg.c_str());
+static void assert_log_failure(const char* e, const std::string& msg) {
+  fprintf(stderr, "\nAssertion failure: %s\n\n%s\n", e, msg.c_str());
 
   if (s_logger) {
     s_logger("Assertion Failure", e);
@@ -66,13 +67,19 @@ void assert_log_failure(const char* e, const std::string& msg) {
   // through all the detail to find it.  We also printed it first, just in case
   // one of the detailers wanted to segfault.
   if (detailed) {
-    fprintf(stderr, "\nAssertion failure: %s\n%s\n", e, msg.c_str());
+    fprintf(stderr, "\nAssertion failure: %s\n\n%s\n", e, msg.c_str());
   }
 }
 
 void assert_fail(const char* e, const char* file,
                  unsigned int line, const char* func,
                  const std::string& msg) {
+  // If we re-enter this function it's because we hit a second assertion while
+  // processing the first. The second assertion is meaningless, so just
+  // short-circuit straight to abort().
+  if (s_assert_failed) std::abort();
+  s_assert_failed = true;
+
   auto const assertion = folly::format("{}:{}: {}: assertion `{}' failed.",
                                        file, line, func, e).str();
   assert_log_failure(assertion.c_str(), msg);

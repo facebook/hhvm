@@ -112,6 +112,7 @@ bool EvaluateCommand::executeImpl(
   // so we know if we need to re-send a stop event after the evaluation.
   int previousPauseCount = ri->m_totalPauseCount;
   bool isDummy = m_debugger->isDummyRequest();
+  bool exitDummyContext = false;
 
   // Put everything back on scope exit.
   SCOPE_EXIT {
@@ -133,7 +134,9 @@ bool EvaluateCommand::executeImpl(
         Debugger::ThreadEventType::ThreadExited
       );
 
-      g_context->exitDebuggerDummyEnv();
+      if (exitDummyContext) {
+        g_context->exitDebuggerDummyEnv();
+      }
     }
 
     // It is difficult to prove if this evaluation expression wrote to any
@@ -155,7 +158,10 @@ bool EvaluateCommand::executeImpl(
   if (ri->m_evaluateCommandDepth == 1 && isDummy) {
     // Set up the dummy evaluation environment unless we have recursively
     // re-entered eval on the dummy thread, in which case it's already set.
-    g_context->enterDebuggerDummyEnv();
+    if (vmfp() == nullptr && vmStack().count() == 0) {
+      g_context->enterDebuggerDummyEnv();
+      exitDummyContext = true;
+    }
 
     // Show the dummy thread while it is doing an evaluation so it can
     // present a call stack if it hits a breakpoint during the eval.

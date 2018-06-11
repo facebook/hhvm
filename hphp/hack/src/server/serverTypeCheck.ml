@@ -816,11 +816,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let total_rechecked_count = Relative_path.Map.cardinal fast in
     HackEventLogger.type_check_end to_recheck_count total_rechecked_count t;
     let t = Hh_logger.log_duration (logstring total_rechecked_count) t in
-    if CheckKind.is_full then
-      begin
-      Parser_heap.ParserHeap.remove_batch (Relative_path.Set.of_list (Relative_path.Map.keys fast));
-      Parser_heap.LocalParserCache.clear ()
-      end;
+
     Hh_logger.log "Total: %f\n%!" (t -. start_t);
     begin if
       SharedMem.hh_log_level() > 0 ||

@@ -43,7 +43,6 @@ val oldify_type_decl :
   unit
 
 val remove_defs :
-  MultiWorker.worker list option ->
   FileInfo.names ->
   Decl_class_elements.t SMap.t ->
   collect_garbage:bool ->

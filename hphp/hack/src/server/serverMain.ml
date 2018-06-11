@@ -450,7 +450,7 @@ let serve_one_iteration genv env client_provider =
       last_stats.rechecked_batches
       last_stats.rechecked_count
       last_stats.total_rechecked_count
-      (fun () -> WorkerCollect.go genv.workers `aggressive);
+      (fun () -> SharedMem.collect `aggressive);
     let t = Unix.gettimeofday () in
     if t -. env.last_idle_job_time > 0.5 then begin
       ServerIdle.go ();

@@ -314,6 +314,11 @@ let rec simplify_subtype
         (r_super, fields_known_super, fdm_super)
         (r_sub, fields_known_sub, fdm_sub)
 
+  | (_, Tshape _),
+    (_, (Tprim _ | Tfun _ | Ttuple _ | Tanon _ | Tobject | Tclass _ |
+         Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
+    invalid ()
+
   | (p_sub, (Tclass (x_sub, tyl_sub))), (_, (Tclass (x_super, tyl_super))) ->
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
     if cid_super = cid_sub

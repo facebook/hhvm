@@ -746,7 +746,12 @@ struct PreBlockInfo {
     {}
 
   uint32_t   rpoId;
-  uint32_t   genId;
+  uint32_t   genId{};
+
+  // On a DefLabel block, this is a bitvector indicating which SSATmps
+  // should be considered equivalent to the corresponding phi inputs
+  // so that we can pair IncRefs and DecRefs across the join.
+  std::bitset<64> phiPropagate{};
 
   // Bits set here block Incs and Decs of the corresponding ASetID
   IncDecBits altLoc;
@@ -783,7 +788,6 @@ struct PreEnv {
     uint32_t id = 0;
     for (auto const blk : env.rpoBlocks) {
       auto& s = state[blk];
-      s.genId = 0;
       s.rpoId = id;
       avlQ.push(id);
       antQ.push(id);
@@ -1613,10 +1617,17 @@ bool is_same(const RCState &dstState, const RCState& srcState) {
 //////////////////////////////////////////////////////////////////////
 
 template <class Fn>
-void for_aset(Env& env, RCState& /*state*/, SSATmp* tmp, Fn fn) {
+void if_aset(Env& env, SSATmp* tmp, Fn fn) {
   auto const asetID = env.asetMap[tmp];
   if (asetID == -1) { assertx(!tmp->type().maybe(TCounted)); return; }
   fn(asetID);
+}
+
+folly::Optional<ASetID> lookup_aset(Env& env, SSATmp* tmp) {
+  auto const asetID = env.asetMap[tmp];
+  if (asetID != -1) return asetID;
+  assertx(!tmp->type().maybe(TCounted));
+  return folly::none;
 }
 
 void reduce_lower_bound(Env& /*env*/, RCState& state, uint32_t asetID) {
@@ -1889,7 +1900,7 @@ void drop_support_bits(Env& env, RCState& state, ALocBits bits) {
 
 void create_store_support(Env& env, RCState& state, AliasClass dst, SSATmp* tmp,
                           PreAdder /*add_node*/) {
-  for_aset(env, state, tmp, [&] (ASetID asetID) {
+  if_aset(env, tmp, [&] (ASetID asetID) {
     auto& aset = state.asets[asetID];
 
     auto const meta = env.ainfo.find(dst);
@@ -1978,7 +1989,7 @@ void pure_load(Env& env,
     return;
   }
 
-  for_aset(env, state, dst, [&] (ASetID asetID) {
+  if_aset(env, dst, [&] (ASetID asetID) {
     FTRACE(2, "    {} adding support: {}\n", asetID, show(src));
     auto& aset = state.asets[asetID];
     ++aset.lower_bound;
@@ -2151,33 +2162,27 @@ void rc_analyze_inst(Env& env,
       auto const& defLabel = inst.taken()->front();
       assertx(defLabel.is(DefLabel));
       for (auto i = 0; i < inst.numSrcs(); i++) {
-        for_aset(
-          env, state, inst.src(i),
-          [&] (ASetID srcID) {
-            auto& srcSet = state.asets[srcID];
-            for_aset(
-              env, state, defLabel.dst(i),
-              [&] (ASetID dstID) {
-                auto& dstSet = state.asets[dstID];
-                if (dstSet.lower_bound < srcSet.lower_bound) {
-                  auto const delta = srcSet.lower_bound - dstSet.lower_bound;
-                  dstSet.unsupported_refs += delta;
-                  dstSet.lower_bound = srcSet.lower_bound;
-                  state.has_unsupported_refs = true;
-                  FTRACE(3,
-                         "    {} DefLabel lb({}) += {}\n",
-                         dstID, dstSet.lower_bound, delta);
-                }
-              }
-            );
-          }
-        );
+        auto const srcID = lookup_aset(env, inst.src(i));
+        if (!srcID) continue;
+        auto& srcSet = state.asets[*srcID];
+        auto const dstID = lookup_aset(env, defLabel.dst(i));
+        if (!dstID) continue;
+        auto& dstSet = state.asets[*dstID];
+        if (dstSet.lower_bound < srcSet.lower_bound) {
+          auto const delta = srcSet.lower_bound - dstSet.lower_bound;
+          dstSet.unsupported_refs += delta;
+          dstSet.lower_bound = srcSet.lower_bound;
+          state.has_unsupported_refs = true;
+          FTRACE(3,
+                 "    {} DefLabel lb({}) += {}\n",
+                 *dstID, dstSet.lower_bound, delta);
+        }
       }
     }
     propagate(inst.taken());
     return;
   case IncRef:
-    for_aset(env, state, inst.src(0), [&] (ASetID asetID) {
+    if_aset(env, inst.src(0), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];
       if (!aset.lower_bound) {
         FTRACE(3, "    {} unsupported_refs += 1\n", asetID);
@@ -2195,7 +2200,7 @@ void rc_analyze_inst(Env& env,
   case DecRefNZ:
     {
       auto old_lb = int32_t{0};
-      for_aset(env, state, inst.src(0), [&] (ASetID asetID) {
+      if_aset(env, inst.src(0), [&] (ASetID asetID) {
         auto& aset = state.asets[asetID];
         if (inst.op() == DecRefNZ && aset.lower_bound < 2) {
           FTRACE(3, "    {} unsupported_refs += {}\n",
@@ -2232,7 +2237,7 @@ void rc_analyze_inst(Env& env,
    */
   for (auto srcID = uint32_t{0}; srcID < inst.numSrcs(); ++srcID) {
     if (observes_reference(inst, srcID)) {
-      for_aset(env, state, inst.src(srcID), [&] (ASetID asetID) {
+      if_aset(env, inst.src(srcID), [&] (ASetID asetID) {
         observe(env, state, asetID, add_node);
       });
     }
@@ -2249,7 +2254,7 @@ void rc_analyze_inst(Env& env,
   if (auto const taken = inst.taken()) {
     for (auto srcID = uint32_t{0}; srcID < inst.numSrcs(); ++srcID) {
       if (consumes_reference_taken(inst, srcID)) {
-        for_aset(env, state, inst.src(srcID), [&] (ASetID asetID) {
+        if_aset(env, inst.src(srcID), [&] (ASetID asetID) {
           may_decref(env, state, asetID, add_node);
         });
       }
@@ -2269,19 +2274,19 @@ void rc_analyze_inst(Env& env,
   for (auto srcID = uint32_t{0}; srcID < inst.numSrcs(); ++srcID) {
     if (consumes_reference_next_not_taken(inst, srcID)) {
       assertx(!consumes_reference_taken(inst, srcID));
-      for_aset(env, state, inst.src(srcID), [&] (ASetID asetID) {
-          if (inst.movesReference(srcID)) {
-            auto& aset = state.asets[asetID];
-            if (!aset.lower_bound) {
-              aset.lower_bound = aset.unsupported_refs = 1;
-              state.has_unsupported_refs = true;
-            } else if (aset.lower_bound > aset.unsupported_refs) {
-              aset.unsupported_refs++;
-              state.has_unsupported_refs = true;
-            }
-            return;
+      if_aset(env, inst.src(srcID), [&] (ASetID asetID) {
+        if (inst.movesReference(srcID)) {
+          auto& aset = state.asets[asetID];
+          if (!aset.lower_bound) {
+            aset.lower_bound = aset.unsupported_refs = 1;
+            state.has_unsupported_refs = true;
+          } else if (aset.lower_bound > aset.unsupported_refs) {
+            aset.unsupported_refs++;
+            state.has_unsupported_refs = true;
           }
-          may_decref(env, state, asetID, add_node);
+          return;
+        }
+        may_decref(env, state, asetID, add_node);
       });
     }
   }
@@ -2291,7 +2296,7 @@ void rc_analyze_inst(Env& env,
    * defines corresponds to a new increment on the lower_bound.
    */
   if (inst.producesReference()) {
-    for_aset(env, state, inst.dst(), [&] (ASetID asetID) {
+    if_aset(env, inst.dst(), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];
       ++aset.lower_bound;
       FTRACE(3, "    {} produced: lb {}\n", asetID, aset.lower_bound);
@@ -2324,7 +2329,7 @@ void rc_analyze_inst(Env& env,
    * the actual context object should be copy propagated.
    */
   if (inst.is(LdCtx) && inst.src(0) == env.unit.mainFP()) {
-    for_aset(env, state, inst.dst(), [&] (ASetID asetID) {
+    if_aset(env, inst.dst(), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];
       aset.lower_bound = std::max(aset.lower_bound, 1);
       FTRACE(3, "    {} lb: {}({})\n",
@@ -2579,8 +2584,9 @@ void sink_incs(Env& env) {
 //
 // Note that being partially redundant doesn't necessarily mean we can
 // improve things - eg in the following case, both I and D are
-// partially redundant, but there's nowhere we can insert Is or Ds to
-// make them redundant:
+// partially redundant, but we would have to insert both a D and an I
+// to make them redundant; and then we could redo the optimization to
+// put things back to how they started.
 //
 //  AntLoc +---+     +---+
 //  AntIn  | D |     |   |
@@ -2731,6 +2737,28 @@ void pre_compute_available(PreEnv& penv) {
         first = false;
       }
     );
+    if (s.phiPropagate.any()) {
+      bitset_for_each_set(
+        s.phiPropagate,
+        [&] (int i) {
+          auto avl = true;
+          auto pavl = false;
+          blk->forEachPred(
+            [&] (Block* pred) {
+              auto const sid = lookup_aset(penv.env, pred->back().src(i));
+              if (!sid) return;
+              auto& ps = penv.state[pred];
+              if (!ps.avlOut.test(*sid)) avl = false;
+              if (ps.pavlOut.test(*sid)) pavl = true;
+            }
+          );
+          auto const id = lookup_aset(penv.env, blk->front().dst(i));
+          assertx(id);
+          if (avl) s.avlIn.set(*id);
+          if (pavl) s.pavlIn.set(*id);
+        }
+      );
+    }
     auto avlOut = (s.avlIn - s.altLoc) | s.avlLoc;
     auto pavlOut = (s.pavlIn - s.altLoc) | s.avlLoc;
     auto changed = false;
@@ -2761,14 +2789,27 @@ void pre_compute_anticipated(PreEnv& penv) {
     blk->forEachSucc(
       [&] (Block* succ) {
         auto &ss = penv.state[succ];
-        if (first) {
-          s.antOut = ss.antIn;
-          s.pantOut = ss.pantIn;
-        } else {
+        if (!first) {
           s.antOut &= ss.antIn;
           s.pantOut |= ss.pantIn;
+          return;
         }
         first = false;
+        s.antOut = ss.antIn;
+        s.pantOut = ss.pantIn;
+        if (!ss.phiPropagate.any()) return;
+        bitset_for_each_set(
+          ss.phiPropagate,
+          [&] (int i) {
+            auto const did = lookup_aset(penv.env, succ->front().dst(i));
+            assertx(did);
+            if (!ss.antIn.test(*did)) return;
+            auto const sid = lookup_aset(penv.env, blk->back().src(i));
+            if (!sid) return;
+            s.antOut.set(*sid);
+            s.pantOut.set(*sid);
+          }
+        );
       }
     );
     auto antIn = (s.antOut - s.altLoc) | s.antLoc;
@@ -2790,6 +2831,52 @@ void pre_compute_anticipated(PreEnv& penv) {
       );
     }
   }
+}
+
+/*
+ * Find places where we can potentially kill IncRef/DecRef pairs
+ * across a phi node.
+ *
+ * Such cases are when the dst of a DefLabel is anticipated, and the
+ * src of at least one of the corresponding Jmps is partially available.
+ *
+ * We also avoid cases where the dst is partially available in to
+ * avoid overlap between the srcs and the dsts.
+ */
+bool pre_adjust_for_phis(PreEnv& penv) {
+  auto ret = false;
+  for (auto& blk : penv.env.rpoBlocks) {
+    auto const& front = blk->front();
+    if (!front.is(DefLabel)) continue;
+
+    auto& s = penv.state[blk];
+    auto newProp = s.phiPropagate;
+    for (auto i = 0; i < front.numDsts(); i++) {
+      if (i == s.phiPropagate.size()) break;
+      if (s.phiPropagate.test(i)) continue;
+      auto const did = lookup_aset(penv.env, front.dst(i));
+      if (!did || !s.antIn.test(*did) || s.pavlIn.test(*did)) continue;
+      blk->forEachPred(
+        [&] (Block* pred) {
+          auto const sid = lookup_aset(penv.env, pred->back().src(i));
+          if (!sid) return;
+          auto& ps = penv.state[pred];
+          if (ps.pavlOut.test(*sid)) {
+            penv.antQ.push(ps.rpoId);
+            newProp.set(i);
+            FTRACE(3, "setting phiPropagate[{}] in blk({})\n", i, blk->id());
+          }
+        }
+      );
+    }
+    if (s.phiPropagate != newProp) {
+      s.phiPropagate = newProp;
+      penv.avlQ.push(s.rpoId);
+      ret = true;
+    }
+  }
+
+  return ret;
 }
 
 void pre_insert(PreEnv& penv, bool incDec) {
@@ -2829,7 +2916,8 @@ void pre_insert(PreEnv& penv, bool incDec) {
   }
 }
 
-bool pre_find_insertions(PreEnv& penv, Block* blk, bool atFront, SSATmp* tmp);
+bool pre_insertions_for_delete_recur(PreEnv& penv, Block* blk,
+                                     bool atFront, SSATmp* tmp);
 
 bool pre_find_insertions_helper(PreEnv& penv,
                                 Block* blk, bool atFront, SSATmp* tmp) {
@@ -2911,26 +2999,83 @@ bool pre_find_insertions_helper(PreEnv& penv,
     // Its pavlOut but not avlOut, and not altered, so
     assertx(s.pavlIn.test(id) && !s.avlIn.test(id));
   }
-  return pre_find_insertions(penv, blk, atFront, tmp);
+  return pre_insertions_for_delete_recur(penv, blk, atFront, tmp);
 }
 
-bool pre_find_insertions(PreEnv& penv, Block* blk, bool atFront, SSATmp* tmp) {
+// Recursive walker for pre_insertions_for_delete.  Essentially, this
+// either walks forwards or backwards (depending on atFront), calling
+// pre_find_insertions_helper on each block, which will decide either
+//
+//  - we can't insert in this block (because eg the SSATmp isn't
+//    available there, or because we've found a case where we would
+//    have to insert both Incs and Decs), in which case we bail out of
+//    the walk.
+//  - there's no need to insert in this block (because its already
+//    Anticipated/Available, depending on atFront)
+//  - we need to insert here, in which case it adds it to penv.to_insert.
+//
+// phi nodes complicate this a little, because as we pass through
+// them, we might have to change which SSATmp to follow.
+bool pre_insertions_for_delete_recur(PreEnv& penv, Block* blk,
+                                     bool atFront, SSATmp* tmp) {
   auto ret = true;
-  auto helper = [&] (Block* blk) {
-    if (ret && !pre_find_insertions_helper(penv, blk, atFront, tmp)) {
+  auto helper = [&] (Block* other) {
+    if (ret && !pre_find_insertions_helper(penv, other, atFront, tmp)) {
       ret = false;
     }
   };
+
+  // Check to see if tmp is a src/dst of a phi that we want to follow
+  auto find_phi_index = [&] (Block* b) -> int {
+    auto const& bitset = penv.state[b].phiPropagate;
+    if (!bitset.any()) return -1;
+    for (auto i = bitset_find_first(bitset);
+         i < bitset.size();
+         i = bitset_find_next(bitset, i)) {
+      auto const t = atFront ? b->back().src(i) : b->front().dst(i);
+      if (t == tmp) return i;
+    }
+    return -1;
+  };
+
   if (atFront) {
+    if (auto const succ = blk->taken()) {
+      auto i = find_phi_index(succ);
+      if (i >= 0) {
+        // The SSATmp we're following was the i'th src of a phi;
+        // follow the dst on the other side.
+        auto const dst = succ->front().dst(i);
+        assertx(lookup_aset(penv.env, dst));
+        return pre_find_insertions_helper(penv, succ, atFront, dst);
+      }
+    }
     blk->forEachSucc(helper);
-  } else {
-    blk->forEachPred(helper);
+    return ret;
   }
+
+  auto i = find_phi_index(blk);
+  if (i < 0) {
+    blk->forEachPred(helper);
+    return ret;
+  }
+  // The SSATmp we're following was the i'th dst of a phi; follow the
+  // srcs on the other side.
+  blk->forEachPred(
+    [&] (Block* pred) {
+      if (!ret) return;
+      auto const src = pred->back().src(i);
+      if (lookup_aset(penv.env, src) &&
+          !pre_find_insertions_helper(penv, pred, atFront, src)) {
+        ret = false;
+      }
+    }
+  );
   return ret;
 }
 
 // Try to find places to insert copies of incOrDec that would make
-// it redundant.
+// it redundant. See the ascii art in the comment block headed
+// "Partial redundancy elimination of IncRef/DecRef pairs" above.
 bool pre_insertions_for_delete(PreEnv& penv,
                                IRInstruction* incOrDec, bool insertAtFront) {
   auto const tmp = incOrDec->src(0);
@@ -2951,7 +3096,9 @@ bool pre_insertions_for_delete(PreEnv& penv,
   // about AvlIn.
   if ((insertAtFront ? s.antOut : s.avlIn).test(id)) return true;
 
-  if (!pre_find_insertions(penv, blk, insertAtFront, tmp)) return false;
+  if (!pre_insertions_for_delete_recur(penv, blk, insertAtFront, tmp)) {
+    return false;
+  }
 
   for (auto const& elm : penv.to_insert) {
     auto const key = std::make_tuple(elm.first,
@@ -3037,6 +3184,8 @@ bool pre_apply(PreEnv& penv, bool incDec) {
     auto& s = penv.state[blk];
     auto delBack = s.avlLoc & s.pantOut;
     auto delFront = s.antLoc & s.pavlIn;
+
+    s.phiPropagate.reset();
 
     FTRACE(delBack.any() || delFront.any() ? 3 : 4,
            "PREApply Blk(B{}) <-{}\n"
@@ -3164,7 +3313,9 @@ void pre_incdecs(Env& env, RCAnalysis& rca, bool incDec) {
     pre_compute_available(penv);
     FTRACE(4, "pre_compute_anticipated\n");
     pre_compute_anticipated(penv);
-  } while (!pre_apply(penv, incDec));
+    FTRACE(4, "pre_adjust_for_phis\n");
+  } while (pre_adjust_for_phis(penv) ||
+           !pre_apply(penv, incDec));
 }
 
 //////////////////////////////////////////////////////////////////////

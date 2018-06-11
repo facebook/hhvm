@@ -205,6 +205,7 @@ module NastCheck                            = struct
   | MaybeRxInvalidLocation
   | NoOnlyrxIfRxfuncForRxIfArgs
   | CoroutineInConstructor
+  | IllegalReturnByRef
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

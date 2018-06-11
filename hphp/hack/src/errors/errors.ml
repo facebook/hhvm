@@ -1469,6 +1469,11 @@ let conditionally_reactive_annotation_invalid_arguments ~is_method pos =
 let coroutine_in_constructor pos =
   add (NastCheck.err_code NastCheck.CoroutineInConstructor) pos
     "A class constructor may not be a coroutine"
+
+let illegal_return_by_ref pos =
+  add (NastCheck.err_code NastCheck.IllegalReturnByRef) pos
+    "Returning by reference from a function is no longer supported in Hack."
+
 (*****************************************************************************)
 (* Nast terminality *)
 (*****************************************************************************)

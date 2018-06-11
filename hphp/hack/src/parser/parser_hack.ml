@@ -585,15 +585,13 @@ and ignore_toplevel attr_start ~attr acc env terminate =
               let def = toplevel_word def_start ~attr env "function" in
               ignore_toplevel None ~attr:[] (def @ acc) env terminate
           (* function &foo(...), we still want them in decl mode *)
+          | Tamp when peek env = Tword ->
+              L.back env.lb;
+              let def = toplevel_word def_start ~attr env "function" in
+              ignore_toplevel None ~attr:[] (def @ acc) env terminate
           | Tamp ->
-            (match L.token env.file env.lb with
-            | Tword ->
-                L.back env.lb;
-                let def = toplevel_word def_start ~attr env "function" in
-                ignore_toplevel None ~attr:[] (def @ acc) env terminate
-            | _ ->
+              let _ = L.token env.file env.lb in
               ignore_toplevel attr_start ~attr acc env terminate
-            )
           | _ ->
               ignore_toplevel attr_start ~attr acc env terminate
           )

@@ -239,6 +239,7 @@ let load config_filename options =
     (bool_ "disallow_ambiguous_lambda" ~default:false config)
     (bool_ "disallow_array_typehint" ~default:false config)
     (bool_ "disallow_array_literal" ~default:false config)
+    (bool_ "disallow_return_by_ref" ~default:false config)
     (bool_ "language_feature_logging" ~default:false config)
     (bool_ "unsafe_rx" ~default:true config)
     (bool_ "disallow_elvis_space" ~default:false config)

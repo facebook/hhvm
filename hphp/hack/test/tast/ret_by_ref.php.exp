@@ -1,3 +1,6 @@
+Errors:
+  [3:11-12] Returning by reference from a function is no longer supported in Hack.
+  [10:20-21] Returning by reference from a function is no longer supported in Hack.
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:16-19], (Hprim Tint))); f_name = ([3:11-12], "\\f");

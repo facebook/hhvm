@@ -153,12 +153,12 @@ let parse_options () =
   let disallow_array_typehint = ref false in
   let disallow_array_literal = ref false in
   let no_fallback_in_namespaces = ref false in
-  let disallow_refs_in_array = ref false in
   let disallow_elvis_space = ref false in
   let dynamic_view = ref false in
   let allow_unsafe_comparisons = ref false in
   let allow_non_arraykey_keys = ref false in
   let allow_array_as_tuple = ref false in
+  let allow_return_by_ref = ref false in
   let hacksperimental = ref false in
   let void_is_type_of_null = ref false in
   let enable_shape_field_check = ref false in
@@ -293,9 +293,6 @@ let parse_options () =
     "--no-fallback-in-namespaces",
       Arg.Set no_fallback_in_namespaces,
       " Treat foo() as namespace\\foo() and MY_CONST as namespace\\MY_CONST.";
-    "--disallow-refs-in-array",
-      Arg.Set disallow_refs_in_array,
-      " Forbid creation of references inside arrays.";
     "--disallow-elvis-space",
       Arg.Set disallow_elvis_space,
       " Stop parsing the degenerate ternary ? : (when the halves are" ^
@@ -319,6 +316,9 @@ let parse_options () =
     "--allow-array-as-tuple",
         Arg.Set allow_array_as_tuple,
         " Allow tuples to be passed as untyped arrays and vice versa";
+    "--allow-return-by-ref",
+        Arg.Set allow_return_by_ref,
+        " Allow returning references from functions";
     "--hacksperimental",
         Arg.Set hacksperimental,
         " Enable experimental Hack features";
@@ -351,6 +351,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_unsafe_comparisons = not !allow_unsafe_comparisons;
       GlobalOptions.tco_disallow_non_arraykey_keys = not !allow_non_arraykey_keys;
       GlobalOptions.tco_disallow_array_as_tuple = not !allow_array_as_tuple;
+      GlobalOptions.tco_disallow_return_by_ref = not !allow_return_by_ref;
   } in
   let tcopt = {
     tcopt with

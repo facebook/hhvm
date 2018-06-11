@@ -538,6 +538,7 @@ module type S = sig
   val onlyrx_if_rxfunc_invalid_location: Pos.t -> unit
   val no_onlyrx_if_rxfunc_for_rx_if_args: Pos.t -> unit
   val coroutine_in_constructor: Pos.t -> unit
+  val illegal_return_by_ref: Pos.t -> unit
   val invalid_type_for_onlyrx_if_rxfunc_parameter: Pos.t -> string -> unit
   val missing_annotation_for_onlyrx_if_rxfunc_parameter: Pos.t -> unit
   val mutable_in_nonreactive_context: Pos.t -> unit

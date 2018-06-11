@@ -59,7 +59,7 @@ abstract final class Shapes {
   <<__Rx>>
   public static function toArray<T as shape(...)>(
     T $shape
-  ): array<arraykey, mixed>;
+  ): darray<arraykey, mixed>;
 
   <<__Rx>>
   public static function toDict<T as shape(...)>(

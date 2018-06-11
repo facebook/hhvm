@@ -1,5 +1,5 @@
 File "shape_to_array.php", line 14, characters 3-30:
-  array<arraykey, mixed>
+  darray<arraykey, mixed>
 File "shape_to_array.php", line 15, characters 3-35:
   array<^[unresolved], ^[unresolved]>
 File "shape_to_array.php", line 16, characters 3-57:

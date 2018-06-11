@@ -3,4 +3,4 @@ File "tuple5.php", line 9, characters 5-15:
 File "tuple5.php", line 8, characters 13-23:
 Invalid "is" expression hint (Typing[4195])
   File "tuple5.php", line 8, characters 13-23:
-  The "is" operator cannot be used with a tuple
+  The "is" operator cannot be used with a tuple of size 2

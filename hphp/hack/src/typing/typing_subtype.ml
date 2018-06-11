@@ -241,6 +241,16 @@ let rec simplify_subtype
     wfold_left2 (fun res ty_sub ty_super ->
       simplify_subtype ~deep ~this_ty:None ty_sub ty_super res) res tyl_sub tyl_super
 
+  | (_, Ttuple _), (_, Tarraykind AKany) ->
+    if TypecheckerOptions.disallow_array_as_tuple (Env.get_options env)
+    then invalid ()
+    else valid ()
+
+  | (_, Ttuple _),
+    (_, (Tprim _ | Tfun _ | Ttuple _ | Tanon _ | Tobject | Tclass _ |
+         Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
+    invalid ()
+
   | (_, Tabstract (AKnewtype (name_sub, tyl_sub), _)),
     (_, Tabstract (AKnewtype (name_super, tyl_super), _))
     when name_super = name_sub ->

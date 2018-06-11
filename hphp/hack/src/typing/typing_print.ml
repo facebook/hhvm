@@ -71,7 +71,7 @@ module ErrorString = struct
                          -> "an array (used like a shape)"
     | Tarraykind (AKtuple _)
                          -> "an array (used like a tuple)"
-    | Ttuple _           -> "a tuple"
+    | Ttuple l           -> "a tuple of size " ^ string_of_int (List.length l)
     | Tmixed             -> "a mixed value"
     | Tnonnull           -> "a nonnull value"
     | Toption (_, Tnonnull) -> "a mixed value"

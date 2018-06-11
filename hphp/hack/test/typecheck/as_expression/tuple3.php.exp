@@ -1,10 +1,10 @@
 File "tuple3.php", line 7, characters 5-6:
-Invalid argument (Typing[4098])
+Invalid argument (Typing[4110])
   File "tuple3.php", line 3, characters 12-29:
-  This tuple has 3 elements
+  This is a tuple of size 3
   File "tuple3.php", line 6, characters 9-21:
-  This one has 2 elements
+  It is incompatible with a tuple of size 2
 File "tuple3.php", line 6, characters 9-21:
 Invalid "as" expression hint (Typing[4195])
   File "tuple3.php", line 6, characters 9-21:
-  The "as" operator cannot be used with a tuple
+  The "as" operator cannot be used with a tuple of size 2

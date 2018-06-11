@@ -1,4 +1,4 @@
 File "tuple.php", line 6, characters 9-26:
 Invalid "as" expression hint (Typing[4195])
   File "tuple.php", line 6, characters 9-26:
-  The "as" operator cannot be used with a tuple
+  The "as" operator cannot be used with a tuple of size 3

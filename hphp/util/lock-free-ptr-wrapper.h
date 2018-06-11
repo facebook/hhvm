@@ -61,6 +61,12 @@ struct LockFreePtrWrapper {
     val.~T();
   }
 
+  /*
+   * We can't return a T* to callers because a valid T doesn't always exist in
+   * LockFreePtrWrapper. Holder is a convenience wrapper around a bitwise copy
+   * of T that avoids calling T's constructor or destructor, giving nearly the
+   * same effect as returning a T*.
+   */
   struct Holder {
     const T* get() { return &val; }
     T* operator->() { return &val; }

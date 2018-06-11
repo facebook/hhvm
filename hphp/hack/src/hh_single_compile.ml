@@ -300,7 +300,7 @@ let parse_text compiler_options popt fn text =
     let () = write_stats_if_enabled ~compiler_options in
     (ast, is_hh_file)
   | Legacy ->
-    let {Parser_hack.ast; Parser_hack.is_hh_file; _} =
+    let {Parser_return.ast; Parser_return.is_hh_file; _} =
       Parser_hack.program popt fn text in
     (ast, is_hh_file)
 

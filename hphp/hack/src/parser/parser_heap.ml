@@ -54,7 +54,7 @@ let get_from_local_cache ~full popt file_name =
           && not (FilesToIgnore.should_ignore fn))
           && Parser_hack.get_file_mode popt file_name contents <> None then
           contents else "" in
-        let { Parser_hack.ast;
+        let { Parser_return.ast;
           _ } = Parser_hack.program ~quick:(not full) popt file_name contents in
         let ast = if (Relative_path.prefix file_name = Relative_path.Hhi)
         && ParserOptions.deregister_php_stdlib popt
@@ -79,7 +79,7 @@ let get_from_local_cache ~full popt file_name =
           false
           popt
           contents
-        ).Parser_hack.ast
+        ).Parser_return.ast
     in
     let ast = Option.value_map ~default:[] ~f (File_heap.get_contents file_name) in
     let ast =

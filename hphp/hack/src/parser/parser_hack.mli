@@ -7,14 +7,6 @@
  *
  *)
 
-type parser_return = {
-    file_mode  : FileInfo.mode option; (* None if PHP *)
-    is_hh_file : bool;
-    comments   : (Pos.t * Prim_defs.comment) list;
-    ast        : Ast.program;
-    content   : string;
-  }
-
 val program :
   ?quick:bool ->
   ?elaborate_namespaces:bool ->
@@ -22,20 +14,20 @@ val program :
   ?keep_errors:bool ->
   ParserOptions.t ->
   Relative_path.t ->
-  string -> parser_return
+  string -> Parser_return.t
 
 val program_with_default_popt :
   ?elaborate_namespaces:bool ->
   ?include_line_comments:bool ->
   ?keep_errors:bool ->
   Relative_path.t ->
-  string -> parser_return
+  string -> Parser_return.t
 
 (* Parses a file *)
 val from_file_with_default_popt :
-  ?quick:bool -> Relative_path.t -> parser_return
+  ?quick:bool -> Relative_path.t -> Parser_return.t
 val from_file :
-  ?quick:bool -> ParserOptions.t -> Relative_path.t -> parser_return
+  ?quick:bool -> ParserOptions.t -> Relative_path.t -> Parser_return.t
 val get_file_mode :
   ParserOptions.t -> Relative_path.t -> string -> FileInfo.mode option
 

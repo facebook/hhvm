@@ -358,7 +358,7 @@ let outline popt content =
     ~keep_errors:false
     Relative_path.default
   in
-  let {Parser_hack.ast; comments; _} = Parser.from_text_with_legacy env content in
+  let {Parser_return.ast; comments; _} = Parser.from_text_with_legacy env content in
   let result = outline_ast ast in
   add_docblocks result comments
 

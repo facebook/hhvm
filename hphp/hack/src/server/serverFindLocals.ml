@@ -512,7 +512,7 @@ let parse tcopt content =
   Errors.ignore_ begin fun () ->
     let open Full_fidelity_ast in
     let env = make_env ~parser_options:tcopt Relative_path.default in
-    let {Parser_hack.ast; _} = from_text_with_legacy env content in
+    let {Parser_return.ast; _} = from_text_with_legacy env content in
     ast
   end
 

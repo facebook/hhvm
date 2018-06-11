@@ -3149,16 +3149,16 @@ let from_file (env : env) : result =
  * Backward compatibility matter (should be short-lived)
 )*****************************************************************************)
 
-let legacy (x : result) : Parser_hack.parser_return =
-  { Parser_hack.file_mode = Option.some_if (x.fi_mode <> FileInfo.Mphp) x.fi_mode
-  ; Parser_hack.is_hh_file = x.is_hh_file
-  ; Parser_hack.comments  = x.comments
-  ; Parser_hack.ast       = x.ast
-  ; Parser_hack.content   = x.content
+let legacy (x : result) : Parser_return.t =
+  { Parser_return.file_mode = Option.some_if (x.fi_mode <> FileInfo.Mphp) x.fi_mode
+  ; Parser_return.is_hh_file = x.is_hh_file
+  ; Parser_return.comments  = x.comments
+  ; Parser_return.ast       = x.ast
+  ; Parser_return.content   = x.content
   }
 
 let from_text_with_legacy (env : env) (content : string)
-  : Parser_hack.parser_return =
+  : Parser_return.t =
     let source_text = SourceText.make env.file content in
     legacy @@ from_text env source_text
 
@@ -3181,9 +3181,9 @@ let legacy_compliant_parse_defensively fn quick_mode parser_options content =
     let () =
       !Utils.log (Printf.sprintf "!! FAILED FOR %s\n  - error: %s\n" fn err)
     in
-    { Parser_hack.file_mode = None
-    ; Parser_hack.comments = []
-    ; Parser_hack.ast = []
-    ; Parser_hack.content = content
-    ; Parser_hack.is_hh_file = false
+    { Parser_return.file_mode = None
+    ; Parser_return.comments = []
+    ; Parser_return.ast = []
+    ; Parser_return.content = content
+    ; Parser_return.is_hh_file = false
     }

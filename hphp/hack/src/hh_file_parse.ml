@@ -23,7 +23,7 @@ let parse_with_regular file content =
     end
   in
   let funs, classes, typedefs, consts =
-    Ast_utils.get_defs parser_ret.Parser_hack.ast in
+    Ast_utils.get_defs parser_ret.Parser_return.ast in
   let defs =
     {FileInfo.funs; classes; typedefs; consts;
      comments = Some []; file_mode = None; hash = None;}

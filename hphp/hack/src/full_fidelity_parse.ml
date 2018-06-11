@@ -419,7 +419,7 @@ let handle_existing_file args filename =
     Errors.iter_error_list print_error original_errors
   end;
   if args.original_parser_s_expr then begin
-    let ast = Ast.AProgram original_parse.Parser_hack.ast in
+    let ast = Ast.AProgram original_parse.Parser_return.ast in
     let str = Debug.dump_ast ast in
     Printf.printf "%s\n" str
   end;

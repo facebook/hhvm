@@ -1206,7 +1206,7 @@ let rec entry ~keep_source_metadata ~no_trailing_commas ~modes
   try
     let errorl, () = Errors.do_ begin fun () ->
       let rp = Relative_path.(create Dummy (file :> string)) in
-      let {Parser_hack.file_mode; _} =
+      let {Parser_return.file_mode; _} =
         Parser_hack.program_with_default_popt rp content in
       if not (List.mem modes file_mode) then raise PHP;
     end in

@@ -581,7 +581,7 @@ let parse_name_and_decl popt files_contents tcopt parser =
     in
     let files_info =
       Relative_path.Map.mapi ~f:begin fun fn parsed_file ->
-        let {Parser_hack.file_mode; comments; ast; _} = parsed_file in
+        let {Parser_return.file_mode; comments; ast; _} = parsed_file in
         let ast = if ParserOptions.deregister_php_stdlib popt then
           Ast_utils.deregister_ignored_attributes ast else ast in
 

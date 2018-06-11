@@ -22,7 +22,7 @@ let usage   = Printf.sprintf
   purpose
   extra
 
-type parser_return = Parser_hack.parser_return * float
+type parser_return = Parser_return.t * float
 type result =
   | CmpDifferent
   | Unsupported
@@ -109,7 +109,7 @@ let measure : (unit -> 'a) -> 'a * float = fun f ->
 let compare_asts dumper filename diff_cmd ast_result ffp_result =
   let open Unix in
   let open Printf in
-  let ast_sexpr = dumper ast_result.Parser_hack.ast in
+  let ast_sexpr = dumper ast_result.Parser_return.ast in
   let ffp_sexpr =
     match ffp_result.Lowerer.ast with
     | Ast.Stmt (_, Ast.Markup ((_, ""), _)) :: defs
@@ -188,7 +188,7 @@ let compare_pos ast_result ffp_result =
   let ast = List.rev @@ fetch_posses ast_result in
   let ffp =
     match List.rev @@ fetch_posses ffp_result with
-    | (p::ps) when Pos.line p = 1 -> ps (* header is dropped by Parser_hack *)
+    | (p::ps) when Pos.line p = 1 -> ps (* header is dropped by Parser_return *)
     | ps -> ps
   in
   let ast_count = List.length ast in
@@ -221,7 +221,7 @@ let compare_comments filename ast_result ffp_result =
     | Not_found -> true
   in
   let by_pos (p, _) (p', _) = Pos.compare p p' in
-  let ast_comments = List.sort by_pos ast_result.Parser_hack.comments in
+  let ast_comments = List.sort by_pos ast_result.Parser_return.comments in
   let ffp_comments = List.filter is_pragma_free ffp_result.Lowerer.comments in
   let ffp_comments = List.sort by_pos ffp_comments in
   let only_exp (p,s) =
@@ -272,9 +272,9 @@ let compare_comments filename ast_result ffp_result =
 let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash ~codegen =
   match conf with
   | AST ->
-    let ast = (run_ast file).Parser_hack.ast in
+    let ast = (run_ast file).Parser_return.ast in
     let output =
-      if not hash then dumper (run_ast file).Parser_hack.ast else
+      if not hash then dumper (run_ast file).Parser_return.ast else
         let decl_hash = Ast_utils.generate_ast_decl_hash ast in
         OpaqueDigest.to_hex decl_hash
     in
@@ -291,7 +291,7 @@ let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash ~co
     let ffp_result = run_ffp file in
     let ffp_fixmes = Fixmes.HH_FIXMES.get file in
     let sexpr = compare_asts dumper filename diff_cmd ast_result ffp_result in
-    let () = compare_pos ast_result.Parser_hack.ast ffp_result.Lowerer.ast in
+    let () = compare_pos ast_result.Parser_return.ast ffp_result.Lowerer.ast in
     let () = compare_fixmes ast_fixmes ffp_fixmes in
     let () = compare_comments filename ast_result ffp_result in
     printf "%s\n" sexpr
@@ -305,7 +305,7 @@ let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash ~co
         exit_with ParseError
       end
     in
-    let ast_sexpr = dumper ast_result.Parser_hack.ast in
+    let ast_sexpr = dumper ast_result.Parser_return.ast in
     let ffp_sexpr = dumper ffp_result.Lowerer.ast in
     if ast_sexpr = ffp_sexpr
     then

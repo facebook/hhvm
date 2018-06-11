@@ -9,8 +9,7 @@
 open Ast
 open Hh_core
 open Lexer_hack
-open Prim_defs
-
+open Parser_return
 module L = Lexer_hack
 
 (*****************************************************************************)
@@ -39,14 +38,6 @@ let init_env file lb popt quick = {
   popt     = popt;
   quick    = quick;
   allow_as_expressions = ref true;
-}
-
-type parser_return = {
-  file_mode  : FileInfo.mode option; (* None if PHP *)
-  is_hh_file : bool;
-  comments   : (Pos.t * comment) list;
-  ast        : Ast.program;
-  content    : string;
 }
 
 (*****************************************************************************)

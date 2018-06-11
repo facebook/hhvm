@@ -36,7 +36,7 @@ let debug () fnl =
           Relative_path.create Relative_path.Dummy (filepath :> string) in
         Full_fidelity_ast.(from_file_with_legacy (make_env ~fail_open:false rp))
       end in
-      if parser_output1.Parser_hack.file_mode = None
+      if parser_output1.Parser_return.file_mode = None
         || not (Errors.is_empty parsing_errors1)
       then raise Exit;
 
@@ -47,7 +47,7 @@ let debug () fnl =
           (filepath :> string);
       end;
 
-      let content = parser_output1.Parser_hack.content in
+      let content = parser_output1.Parser_return.content in
       let content =
         match Format_hack.program modes filepath content with
         | Format_hack.Success content -> content

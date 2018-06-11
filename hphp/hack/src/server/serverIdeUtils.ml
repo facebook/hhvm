@@ -128,7 +128,7 @@ let declare_and_check_ast ?(path=path) ~make_ast ~f tcopt =
 let declare_and_check ?(path=path) content ~f tcopt =
   try
     declare_and_check_ast
-      ~make_ast:(fun () -> (Parser_hack.program tcopt path content).Parser_hack.ast)
+      ~make_ast:(fun () -> (Parser_hack.program tcopt path content).Parser_return.ast)
       ~f
       ~path
       tcopt

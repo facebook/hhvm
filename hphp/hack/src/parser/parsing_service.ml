@@ -39,7 +39,7 @@ let legacy_php_file_info = ref (fun fn ->
  *)
 let process_parse_result
   ?(ide = false) ~quick (acc, errorl, error_files) fn res popt =
-  let errorl', {Parser_hack.file_mode; comments = _; ast; content; is_hh_file = _} = res in
+  let errorl', {Parser_return.file_mode; comments = _; ast; content; is_hh_file = _} = res in
   let ast =
   if (Relative_path.prefix fn = Relative_path.Hhi)
   && ParserOptions.deregister_php_stdlib popt

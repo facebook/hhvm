@@ -322,6 +322,7 @@ struct Emitter {
 #define IMM_SLA const std::vector<StrOff>&
 #define IMM_ILA const std::vector<IterPair>&
 #define IMM_I32LA const std::vector<uint32_t>&
+#define IMM_BLLA const std::vector<bool>&
 #define IMM_IVA uint32_t
 #define IMM_LA int32_t
 #define IMM_IA int32_t
@@ -351,6 +352,7 @@ struct Emitter {
 #undef IMM_SLA
 #undef IMM_ILA
 #undef IMM_I32LA
+#undef IMM_BLLA
 #undef IMM_IVA
 #undef IMM_LA
 #undef IMM_IA
@@ -1528,6 +1530,7 @@ struct OpEmitContext {
 #define DEC_SLA const std::vector<StrOff>&
 #define DEC_ILA const std::vector<IterPair>&
 #define DEC_I32LA const std::vector<uint32_t>&
+#define DEC_BLLA const std::vector<bool>&
 #define DEC_IVA uint32_t
 #define DEC_LA int32_t
 #define DEC_IA int32_t
@@ -1627,6 +1630,7 @@ struct OpEmitContext {
 #define POP_LA_SLA(i)
 #define POP_LA_ILA(i)
 #define POP_LA_I32LA(i)
+#define POP_LA_BLLA(i)
 #define POP_LA_IVA(i)
 #define POP_LA_IA(i)
 #define POP_LA_CAR(i)
@@ -1673,6 +1677,7 @@ struct OpEmitContext {
 #define POP_CAR_SLA(i)
 #define POP_CAR_ILA(i)
 #define POP_CAR_I32LA(i)
+#define POP_CAR_BLLA(i)
 #define POP_CAR_IVA(i)
 #define POP_CAR_LA(i)
 #define POP_CAR_IA(i)
@@ -1717,6 +1722,7 @@ struct OpEmitContext {
 #define PUSH_CAW_SLA(i)
 #define PUSH_CAW_ILA(i)
 #define PUSH_CAW_I32LA(i)
+#define PUSH_CAW_BLLA(i)
 #define PUSH_CAW_IVA(i)
 #define PUSH_CAW_LA(i)
 #define PUSH_CAW_IA(i)
@@ -1829,6 +1835,26 @@ struct OpEmitContext {
 #define IMPL3_I32LA IMPL_I32LA(a3)
 #define IMPL4_I32LA IMPL_I32LA(a4)
 #define IMPL5_I32LA IMPL_I32LA(a5)
+
+#define IMPL_BLLA(var) do {    \
+  auto& ue = getUnitEmitter(); \
+  ue.emitIVA(var.size());      \
+  uint32_t i = 0;              \
+  uint8_t tmp = 0;             \
+  while (i < var.size()) {     \
+    tmp |= var[i] << (i % 8);  \
+    if ((++i % 8) == 0) {      \
+      ue.emitByte(tmp);        \
+      tmp = 0;                 \
+    }                          \
+  }                            \
+  if (i % 8) ue.emitByte(tmp); \
+} while(0)
+#define IMPL1_BLLA IMPL_BLLA(a1)
+#define IMPL2_BLLA IMPL_BLLA(a2)
+#define IMPL3_BLLA IMPL_BLLA(a3)
+#define IMPL4_BLLA IMPL_BLLA(a4)
+#define IMPL5_BLLA IMPL_BLLA(a5)
 
 #define IMPL_SLA(var) do {                      \
   auto& ue = getUnitEmitter();                  \
@@ -2128,6 +2154,11 @@ struct OpEmitContext {
 #undef IMPL2_I32LA
 #undef IMPL3_I32LA
 #undef IMPL4_I32LA
+#undef IMPL_BLLA
+#undef IMPL1_BLLA
+#undef IMPL2_BLLA
+#undef IMPL3_BLLA
+#undef IMPL4_BLLA
 #undef IMPL_IVA
 #undef IMPL1_IVA
 #undef IMPL2_IVA

@@ -666,6 +666,7 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define SLA(n)
 #define ILA(n)
 #define I32LA(n)
+#define BLLA(n)
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
@@ -726,6 +727,7 @@ size_t memberKeyImmIdx(Op op) {
 #undef SLA
 #undef ILA
 #undef I32LA
+#undef BLLA
 #undef IVA
 #undef I64A
 #undef IA
@@ -1233,6 +1235,7 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 #define IMM_SLA(n)     ni.immVec
 #define IMM_ILA(n)     ni.immIters
 #define IMM_I32LA(n)   ni.immVec
+#define IMM_BLLA(n)   ni.immVec
 #define IMM_VSA(n)     ni.immVec
 #define IMM_IVA(n)     ni.imm[n].u_IVA
 #define IMM_I64A(n)    ni.imm[n].u_I64A
@@ -1275,6 +1278,7 @@ static void translateDispatch(irgen::IRGS& irgs,
 #undef IMM_SLA
 #undef IMM_ILA
 #undef IMM_I32LA
+#undef IMM_BLLA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

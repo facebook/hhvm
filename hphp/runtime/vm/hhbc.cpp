@@ -156,19 +156,22 @@ int immSize(PC origPC, int idx) {
     if (idx >= 3) pc += immSize(origPC, 2);
     if (idx >= 4) pc += immSize(origPC, 3);
     auto start = pc;
-    auto const size = decode_iva(pc);
+    auto size = decode_iva(pc);
     int vecElemSz;
     auto itype = immType(op, idx);
-    if (itype == BLA) {
-      vecElemSz = sizeof(Offset);
-    } else if (itype == VSA) {
-      vecElemSz = sizeof(Id);
-    } else if (itype == I32LA) {
-      vecElemSz = sizeof(uint32_t);
-    } else {
-      assertx(itype == SLA);
-      vecElemSz = sizeof(StrVecItem);
+    switch (itype) {
+      case BLA:   vecElemSz = sizeof(Offset);     break;
+      case SLA:   vecElemSz = sizeof(StrVecItem); break;
+      case I32LA: vecElemSz = sizeof(uint32_t);   break;
+      case BLLA:  vecElemSz = sizeof(uint8_t);    break;
+      case VSA:   vecElemSz = sizeof(Id);         break;
+      default: not_reached();
     }
+
+    if (itype == BLLA) {
+      size = (size + 7) / 8;
+    }
+
     return pc - start + vecElemSz * size;
   }
 
@@ -193,7 +196,8 @@ int immSize(PC origPC, int idx) {
 
 bool immIsVector(Op opcode, int idx) {
   ArgType type = immType(opcode, idx);
-  return type == BLA || type == SLA || type == VSA || type == I32LA;
+  return
+    type == BLA || type == SLA || type == VSA || type == I32LA || type == BLLA;
 }
 
 bool immIsIterTable(Op opcode, int idx) {
@@ -291,6 +295,7 @@ Offset* instrJumpOffset(PC const origPC) {
 #define IMM_BLA 0  // these are jump offsets, but must be handled specially
 #define IMM_ILA 0
 #define IMM_I32LA 0
+#define IMM_BLLA 0
 #define IMM_SLA 0
 #define IMM_LA 0
 #define IMM_IA 0
@@ -322,6 +327,7 @@ Offset* instrJumpOffset(PC const origPC) {
 #undef IMM_BLA
 #undef IMM_ILA
 #undef IMM_I32LA
+#undef IMM_BLLA
 #undef IMM_SLA
 #undef IMM_OA
 #undef IMM_VSA
@@ -860,6 +866,17 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
   out += ">";                                                  \
 } while (false)
 
+#define READBOOLVEC() do {                                     \
+  int sz = decode_iva(it);                                     \
+  uint8_t tmp = 0;                                             \
+  out += " \"";                                                \
+  for (int i = 0; i < sz; ++i) {                               \
+    if (i % 8 == 0) tmp = decode_raw<uint8_t>(it);             \
+    out += ((tmp >> (i % 8)) & 1) ? "1" : "0";                 \
+  }                                                            \
+  out += "\"";                                                 \
+} while (false)
+
 #define READITERTAB() do {                              \
   auto const sz = decode_iva(it);                       \
   out += " <";                                          \
@@ -892,6 +909,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define H_SLA READSVEC()
 #define H_ILA READITERTAB()
 #define H_I32LA READI32VEC()
+#define H_BLLA READBOOLVEC()
 #define H_IVA READIVA()
 #define H_I64A READ(int64_t)
 #define H_LA READLA()
@@ -940,6 +958,7 @@ OPCODES
 #undef H_SLA
 #undef H_ILA
 #undef H_I32LA
+#undef H_BLLA
 #undef H_IVA
 #undef H_I64A
 #undef H_LA
@@ -1188,7 +1207,7 @@ ImmVector getImmVector(PC opcode) {
   int numImm = numImmediates(op);
   for (int k = 0; k < numImm; ++k) {
     ArgType t = immType(op, k);
-    if (t == BLA || t == SLA || t == I32LA || t == VSA) {
+    if (t == BLA || t == SLA || t == I32LA || t == BLLA || t == VSA) {
       PC vp = getImmPtr(opcode, k)->bytes;
       auto const size = decode_iva(vp);
       return ImmVector(vp, size, t == VSA ? size : 0);

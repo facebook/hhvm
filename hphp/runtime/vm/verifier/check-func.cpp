@@ -471,6 +471,12 @@ bool FuncChecker::checkImmI32LA(PC& pc, PC const instr) {
   return true;
 }
 
+bool FuncChecker::checkImmBLLA(PC& pc, PC const /*instr*/) {
+  auto const len = decode_iva(pc);
+  pc += (len + 7) / 8;
+  return true;
+}
+
 bool FuncChecker::checkImmILA(PC& pc, PC const /*instr*/) {
   auto const ids = iterBreakIds(pc);
   if (ids.size() < 1) {
@@ -1165,6 +1171,7 @@ std::set<int> localImmediates(Op op) {
 #define SLA(n)
 #define ILA(n)
 #define I32LA(n)
+#define BLLA(n)
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
@@ -1194,6 +1201,7 @@ std::set<int> localImmediates(Op op) {
 #undef SLA
 #undef ILA
 #undef I32LA
+#undef BLLA
 #undef IVA
 #undef I64A
 #undef IA

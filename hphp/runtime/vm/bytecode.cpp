@@ -312,6 +312,20 @@ template<class T> struct imm_array {
   }
 };
 
+template<> struct imm_array<bool> {
+  uint32_t const size;
+  PC const ptr;
+
+  explicit imm_array(uint32_t size, PC pc)
+    : size{size}
+    , ptr{pc}
+  {}
+
+  bool operator[](uint32_t i) const {
+    return ptr[i / 8] & (1 << (i % 8));
+  }
+};
+
 ALWAYS_INLINE local_var decode_local(PC& pc) {
   auto la = decode_iva(pc);
   assertx(la < vmfp()->m_func->numLocals());
@@ -335,6 +349,14 @@ OPTBLD_INLINE imm_array<T> decode_imm_array(PC& pc) {
   auto const arr_pc = pc;
   pc += size * sizeof(T);
   return imm_array<T>{size, arr_pc};
+}
+
+template<>
+OPTBLD_INLINE imm_array<bool> decode_imm_array(PC& pc) {
+  auto const size = decode_iva(pc);
+  auto const arr_pc = pc;
+  pc += (size + 7) / 8;
+  return imm_array<bool>{size, arr_pc};
 }
 
 OPTBLD_INLINE IterTable decode_iter_table(PC& pc) {
@@ -6922,6 +6944,7 @@ struct litstr_id {
 #define DECODE_SLA decode_imm_array<StrVecItem>(pc)
 #define DECODE_ILA decode_iter_table(pc)
 #define DECODE_I32LA decode_imm_array<uint32_t>(pc)
+#define DECODE_BLLA decode_imm_array<bool>(pc)
 #define DECODE_VSA decode_imm_array<Id>(pc)
 
 #define DECODE_NA
@@ -6977,6 +7000,7 @@ OPCODES
 #undef DECODE_SLA
 #undef DECODE_ILA
 #undef DECODE_I32LA
+#undef DECODE_BLLA
 #undef DECODE_VSA
 
 #undef DECODE_NA

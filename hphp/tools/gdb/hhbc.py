@@ -33,7 +33,7 @@ def iva_imm_types():
 @memoized
 def vec_imm_types():
     # keep this in sync with vec_elm_sizes()
-    return [V('HPHP::' + t) for t in ['BLA', 'VSA', 'SLA', 'I32LA']]
+    return [V('HPHP::' + t) for t in ['BLA', 'VSA', 'SLA', 'I32LA', 'BLLA']]
 
 @memoized
 def vec_elm_sizes():
@@ -41,7 +41,8 @@ def vec_elm_sizes():
         'HPHP::Offset',      # BLA
         'HPHP::Id',          # VSA
         'HPHP::StrVecItem',  # SLA
-        'uint32_t'           # I32LA
+        'uint32_t',          # I32LA
+        'uint8_t'            # BLLA
     ]]
 
 @memoized
@@ -173,6 +174,8 @@ class HHBC(object):
             elm_size = vec_elm_sizes()[vec_imm_types().index(immtype)]
             vec_size = HHBC.decode_iva(ptr)
             num_elms = vec_size['value']
+            if immtype == V('HPHP::BLLA'):
+                num_elms = (num_elms + 7) / 8
 
             info['size'] = vec_size['size'] + elm_size * num_elms
             info['value'] = '<vector>'

@@ -744,11 +744,22 @@ void populate_block(ParseUnitState& puState,
     return ret;
   };
 
-  auto decode_argv = [&] {
+  auto decode_argv32 = [&] {
     CompactVector<uint32_t> ret;
     auto const vecLen = decode_iva(pc);
     for (uint32_t i = 0; i < vecLen; ++i) {
       ret.emplace_back(decode<uint32_t>(pc));
+    }
+    return ret;
+  };
+
+  UNUSED auto decode_argvb = [&] {
+    CompactVector<bool> ret;
+    auto const vecLen = decode_iva(pc);
+    uint8_t tmp = 0;
+    for (uint32_t i = 0; i < vecLen; ++i) {
+      if (i % 8 == 0) tmp = decode<uint8_t>(pc);
+      ret.emplace_back((tmp >> (i % 8)) & 1);
     }
     return ret;
   };
@@ -791,7 +802,8 @@ void populate_block(ParseUnitState& puState,
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
 #define IMM_SLA(n)     auto targets = decode_sswitch(opPC);
 #define IMM_ILA(n)     auto iterTab = decode_itertab();
-#define IMM_I32LA(n)   auto argv = decode_argv();
+#define IMM_I32LA(n)   auto argv = decode_argv32();
+#define IMM_BLLA(n)    auto argv = decode_argvb();
 #define IMM_IVA(n)     auto arg##n = decode_iva(pc);
 #define IMM_I64A(n)    auto arg##n = decode<int64_t>(pc);
 #define IMM_LA(n)      auto loc##n = [&] {                       \
@@ -960,6 +972,7 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_SLA
 #undef IMM_ILA
 #undef IMM_I32LA
+#undef IMM_BLLA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

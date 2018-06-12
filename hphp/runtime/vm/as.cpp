@@ -1118,7 +1118,7 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
 
 // Read a vector of IVAs, with format <int, int, int, ...>, the vector may be
 // excluded entirely if it is empty.
-std::vector<uint32_t> read_argv(AsmState& as) {
+std::vector<uint32_t> read_argv32(AsmState& as) {
   as.in.skipSpaceTab();
   if (as.in.peek() != '<') return {};
   as.in.getc();
@@ -1133,6 +1133,23 @@ std::vector<uint32_t> read_argv(AsmState& as) {
     as.in.expectWs(',');
   }
   as.in.expectWs('>');
+
+  return result;
+}
+
+// Read a vector of booleans formatted as a quoted string of '0' and '1'.
+std::vector<bool> read_argvb(AsmState& as) {
+  as.in.skipSpaceTab();
+  std::string strVal;
+  if (!as.in.readQuotedStr(strVal)) {
+    as.error("expected quoted string literal");
+  }
+
+  std::vector<bool> result;
+  for (auto c : strVal) {
+    if (c != '0' && c != '1') as.error("Was expecting a boolean (0 or 1)");
+    result.push_back(c == '1');
+  }
 
   return result;
 }
@@ -1370,12 +1387,27 @@ std::map<std::string,ParserFunc> opcode_parsers;
   }                                                \
 } while (0)
 
-#define IMM_I32LA do {                          \
-  std::vector<uint32_t> vecImm = read_argv(as); \
-  as.ue->emitIVA(vecImm.size());                \
-  for (auto i : vecImm) {                       \
-    as.ue->emitInt32(i);                        \
-  }                                             \
+#define IMM_I32LA do {                             \
+  std::vector<uint32_t> vecImm = read_argv32(as);  \
+  as.ue->emitIVA(vecImm.size());                   \
+  for (auto i : vecImm) {                          \
+    as.ue->emitInt32(i);                           \
+  }                                                \
+} while (0)
+
+#define IMM_BLLA do {                              \
+  std::vector<bool> vecImm = read_argvb(as);       \
+  as.ue->emitIVA(vecImm.size());                   \
+  uint32_t i = 0;                                  \
+  uint8_t tmp = 0;                                 \
+  while (i < vecImm.size()) {                      \
+    tmp |= vecImm[i] << (i % 8);                   \
+    if ((++i % 8) == 0) {                          \
+      as.ue->emitByte(tmp);                        \
+      tmp = 0;                                     \
+    }                                              \
+  }                                                \
+  if (i % 8) as.ue->emitByte(tmp);                 \
 } while (0)
 
 #define IMM_BLA do {                                    \
@@ -1516,6 +1548,9 @@ OPCODES
 #undef IMM_CAR
 #undef IMM_CAW
 #undef IMM_BA
+#undef IMM_ILA
+#undef IMM_I32LA
+#undef IMM_BLLA
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_OA

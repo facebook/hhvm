@@ -58,8 +58,8 @@ std::string show(const LocalRange&);
  * and the byte is the value. Otherwise, it's 4 bytes, and bits 8..31 must be
  * logical-shifted to the right by one to get rid of the flag bit.
  *
- * The types in this macro for BLA , SLA, ILA, I32LA and VSA are meaningless
- * since they are never read out of ArgUnion (they use ImmVector).
+ * The types in this macro for BLA, SLA, ILA, I32LA, BLLA and VSA are
+ * meaningless since they are never read out of ArgUnion (they use ImmVector).
  *
  * ArgTypes and their various decoding helpers should be kept in sync with the
  * `hhx' bytecode inspection GDB command.
@@ -70,6 +70,7 @@ std::string show(const LocalRange&);
   ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */            \
   ARGTYPEVEC(ILA, Id)            /* IterKind/IterId pair vector */             \
   ARGTYPEVEC(I32LA,uint32_t)     /* Vector of 32-bit uint */                   \
+  ARGTYPEVEC(BLLA,bool)          /* Vector of booleans */                      \
   ARGTYPE(IVA,    uint32_t)      /* Variable size: 8 or 32-bit uint */         \
   ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                          \
   ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */      \

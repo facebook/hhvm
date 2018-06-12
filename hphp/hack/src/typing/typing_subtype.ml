@@ -505,18 +505,14 @@ let decompose_subtype_add_bound
  * Then it must be the case that T <: D so we add an upper bound D to the
  * bounds for T.
  *
- * Although some of this code is similar to that for subtype_with_uenv, its
- * purpose is different. subtype_with_uenv takes two types t and u and makes
+ * Although some of this code is similar to that for sub_type_unwrapped, its
+ * purpose is different. sub_type_unwrapped takes two types t and u and makes
  * updates to the substitution of type variables (through unification) to
  * make t <: u true.
  *
  * decompose_subtype takes two types t and u for which t <: u is *assumed* to
  * hold, and makes updates to bounds on generic parameters that *necessarily*
  * hold in order for t <: u.
- *
- * If it turns out that there is no situation in which t <: u (for example, we
- * are given string and int, or Cov<Derived> <: Cov<Base>) then evaluate the
- * failure continuation `fail`
  *)
 let rec decompose_subtype
   p
@@ -534,7 +530,8 @@ let rec decompose_subtype
   List.fold_left ~f:(fun env (ty1,ck,ty2) ->
     match ck with
     | Ast.Constraint_as -> decompose_subtype_add_bound p env ty1 ty2
-    | Ast.Constraint_super -> decompose_subtype_add_bound p env ty2 ty1
+    | Ast.Constraint_super ->
+      failwith "subtype simplification should not produce super constraints"
     | Ast.Constraint_eq ->
       let env = decompose_subtype_add_bound p env ty1 ty2 in
       decompose_subtype_add_bound p env ty2 ty1)
@@ -576,18 +573,18 @@ and decompose_constraint
  * We repeat this process until no further bounds are added to the
  * environment, or some limit is reached. (It's possible to construct
  * types that expand forever under inheritance.)
- *
- * If the constraint turns out to be unsatisfiable, invoke
- * the failure continuation fail.
 *)
 let constraint_iteration_limit = 20
-let add_constraint_with_fail
+let add_constraint
   p
   (env : Env.env)
   (ck : Ast.constraint_kind)
   (ty_sub : locl ty)
-  (ty_super : locl ty)
-  (_fail : Env.env -> Env.env): Env.env =
+  (ty_super : locl ty): Env.env =
+  Typing_log.log_types 2 p env
+    [Typing_log.Log_sub ("Typing_subtype.add_constraint",
+       [Typing_log.Log_type ("ty_sub", ty_sub);
+        Typing_log.Log_type ("ty_super", ty_super)])];
   let oldsize = Env.get_tpenv_size env in
   let env' = decompose_constraint p env ck ty_sub ty_super in
   if Env.get_tpenv_size env' = oldsize
@@ -610,22 +607,6 @@ let add_constraint_with_fail
       else iter (n+1) env'
   in
     iter 0 env'
-
-(* Default is to ignore unsatisfiable constraints; in future we might
- * want to produce an error. (For example, if after instantiation a
- * constraint becomes C<string> as C<int>)
- *)
-let add_constraint
-  (p : Pos.Map.key)
-  (env : Env.env)
-  (ck : Ast.constraint_kind)
-  (ty_sub : locl ty)
-  (ty_super : locl ty) : Env.env =
-  Typing_log.log_types 2 p env
-    [Typing_log.Log_sub ("Typing_subtype.add_constraint",
-       [Typing_log.Log_type ("ty_sub", ty_sub);
-        Typing_log.Log_type ("ty_super", ty_super)])];
-  add_constraint_with_fail p env ck ty_sub ty_super (fun env -> env)
 
 type reactivity_extra_info = {
   method_info: ((* method_name *) string * (* is_static *) bool) option;

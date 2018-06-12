@@ -121,7 +121,7 @@ let finalize_init genv init_env =
     ~init_error:init_env.init_error
     init_env.init_type
 
-let shutdown_persistent_client env client =
+let shutdown_persistent_client client env  =
   ClientProvider.shutdown_client client;
   let env = { env with
     pending_command_needs_writes = None;
@@ -175,22 +175,29 @@ let handle_connection_ genv env client =
   handle_connection_try (fun x -> ServerUtils.Done x) client env @@ fun () ->
     match ClientProvider.read_connection_type client with
     | Persistent ->
-      let env = match env.persistent_client with
-        | Some old_client ->
-          ClientProvider.send_push_message_to_client old_client
-            NEW_CLIENT_CONNECTED;
-          shutdown_persistent_client env old_client
-        | None -> env
+      let f = fun env ->
+        let env = match env.persistent_client with
+          | Some old_client ->
+            ClientProvider.send_push_message_to_client old_client
+              NEW_CLIENT_CONNECTED;
+            shutdown_persistent_client old_client env
+          | None -> env
+        in
+        ClientProvider.send_response_to_client client Connected t;
+        let env = { env with persistent_client =
+            Some (ClientProvider.make_persistent client)} in
+        (* If the client connected in the middle of recheck, let them know it's
+         * happening. *)
+        if env.full_check = Full_check_started then
+          ServerBusyStatus.send env
+            (ServerCommandTypes.Doing_global_typecheck env.can_interrupt);
+        env
       in
-      ClientProvider.send_response_to_client client Connected t;
-      let env = { env with persistent_client =
-          Some (ClientProvider.make_persistent client)} in
-      (* If the client connected in the middle of recheck, let them know it's
-       * happening. *)
-      if env.full_check = Full_check_started then
-        ServerBusyStatus.send env
-          (ServerCommandTypes.Doing_global_typecheck env.can_interrupt);
-      ServerUtils.Done env
+      if Option.is_some env.persistent_client
+        (* Cleaning up after existing client (in shutdown_persistent_client)
+         * will attempt to write to shared memory *)
+        then ServerUtils.Needs_writes (env, f, true)
+        else ServerUtils.Done (f env)
     | Non_persistent ->
       ServerCommand.handle genv env client
 
@@ -217,27 +224,35 @@ let handle_persistent_connection_try return client env f =
   | Sys_error("Broken pipe")
   | ServerCommandTypes.Read_command_timeout
   | ServerClientProvider.Client_went_away ->
-    return (shutdown_persistent_client env client)
+    return env (shutdown_persistent_client client) ~needs_writes:true
   | ServerCommand.Nonfatal_rpc_exception (e, stack, env) ->
     report_persistent_exception ~e ~stack ~client ~is_fatal:false;
-    return env
+    return env (fun env -> env) ~needs_writes:false
   | e ->
     let stack = Printexc.get_backtrace () in
     report_persistent_exception ~e ~stack ~client ~is_fatal:true;
-    return (shutdown_persistent_client env client)
+    return env (shutdown_persistent_client client) ~needs_writes:true
 
 let handle_persistent_connection_ genv env client =
-  handle_persistent_connection_try (fun x -> ServerUtils.Done x) client env
+  let return env f ~needs_writes =
+    if needs_writes then ServerUtils.Needs_writes (env, f, true)
+    else ServerUtils.Done (f env)
+  in
+  handle_persistent_connection_try return client env
       @@ fun () ->
     let env = { env with ide_idle = false; } in
     ServerCommand.handle genv env client
 
 let handle_connection genv env client client_kind =
   ServerIdle.stamp_connection ();
+  (* This "return" is guaranteed to be run as part of main loop, when workers
+   * are not busy, so we can ignore whether it needs writes or not - it's always
+   * safe for it to write. *)
+  let return env f ~needs_writes:_ = f env in
   match client_kind with
     | `Persistent ->
       handle_persistent_connection_ genv env client |>
-      ServerUtils.wrap (handle_persistent_connection_try (fun x -> x) client)
+      ServerUtils.wrap (handle_persistent_connection_try return client)
     | `Non_persistent  ->
       handle_connection_ genv env client |>
       ServerUtils.wrap (handle_connection_try (fun x -> x) client)

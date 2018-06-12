@@ -24,10 +24,8 @@
 namespace HPHP { namespace alloc {
 
 /*
- * Bump allocation policy within the fixed address range [m_base -
- * m_maxCapacity, m_base), allocate from higher address to lower address.
- * Specifying an upper bound is useful when, e.g., we want to make sure the
- * address is in low memory.
+ * Bump allocation policy within the fixed address range [m_base, m_base +
+ * m_maxCapacity).  Lower address will be used first.
  */
 struct BumpAllocState {
   // Number of bytes mapped in memory.
@@ -37,7 +35,7 @@ struct BumpAllocState {
   // Maximum number of bytes allowed for the arena.
   size_t maxCapacity() const { return m_maxCapacity; }
   // Lowest mapped address.
-  uintptr_t frontier() const { return m_base - m_currCapacity; }
+  uintptr_t frontier() const { return m_base + m_currCapacity; }
 
   const uintptr_t m_base{0};
   const size_t m_maxCapacity{0};

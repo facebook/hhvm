@@ -382,14 +382,10 @@ static BumpMapper* getHugeMapperWithFallback(unsigned n1GPages,
 }
 
 void setup_low_arena(unsigned n1GPages) {
+  assert(reinterpret_cast<uintptr_t>(sbrk(0)) <= kLowArenaMinAddr);
   auto mapper = getHugeMapperWithFallback(n1GPages, true, 0);
-  if (n1GPages == 0) {
-    // If we are using 2M pages, save this so we can change how many 2M huge
-    // pages to use.
-    low_2m_mapper = dynamic_cast<Bump2MMapper*>(mapper);
-  }
-  auto ma = LowArena::CreateAt(&g_lowArena, kLowArenaMaxAddr,
-                                   kLowArenaMaxCap, false, mapper);
+  auto ma = LowArena::CreateAt(&g_lowArena, kLowArenaMinAddr,
+                               kLowArenaMaxCap, false, mapper);
   set_arena_retain_grow_limit(ma->id());
   low_arena = ma->id();
   low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
@@ -401,7 +397,7 @@ void setup_high_arena(unsigned n1GPages) {
   auto mapper = getHugeMapperWithFallback(n1GPages, false,
                                           num_numa_nodes() / 2 + 1);
   auto ma = HighArena::CreateAt(&g_highArena,
-                                kHighArenaMaxAddr, kHighArenaMaxCap,
+                                kLowArenaMaxAddr, kHighArenaMaxCap,
                                 false, mapper);
   set_arena_retain_grow_limit(ma->id());
   high_arena = ma->id();

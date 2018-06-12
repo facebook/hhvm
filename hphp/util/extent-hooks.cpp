@@ -88,14 +88,14 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
   BumpExtentAllocator* extAlloc = GetByArenaId<BumpExtentAllocator>(arena_ind);
   do {
     size_t oldSize = extAlloc->m_size.load(std::memory_order_relaxed);
-    uintptr_t newFrontier = (extAlloc->m_base - oldSize - size) & mask;
-    size_t newSize = extAlloc->m_base - newFrontier;
+    uintptr_t ret = (extAlloc->m_base + oldSize + alignment - 1) & mask;
+    size_t newSize = ret + size - extAlloc->m_base;
     if (newSize <= extAlloc->m_currCapacity) {
       // Looks like existing capacity is enough.
       if (extAlloc->m_size.compare_exchange_weak(oldSize, newSize)) {
         *zero = true;
         *commit = true;
-        return reinterpret_cast<void*>(newFrontier);
+        return reinterpret_cast<void*>(ret);
       }
     } else {
       if (newSize > extAlloc->m_maxCapacity) return nullptr;

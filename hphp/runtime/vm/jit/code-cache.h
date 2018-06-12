@@ -50,17 +50,17 @@ struct CodeCache {
     std::numeric_limits<uint32_t>::max();
 
   /* Code block sizes read from configs. */
-  static uint64_t AHotSize;
-  static uint64_t ASize;
-  static uint64_t AProfSize;
-  static uint64_t AColdSize;
-  static uint64_t AFrozenSize;
+  static uint32_t AHotSize;
+  static uint32_t ASize;
+  static uint32_t AProfSize;
+  static uint32_t AColdSize;
+  static uint32_t AFrozenSize;
 
-  static uint64_t GlobalDataSize;
+  static uint32_t GlobalDataSize;
 
-  static uint64_t AMaxUsage;
-  static uint64_t AColdMaxUsage;
-  static uint64_t AFrozenMaxUsage;
+  static uint32_t AMaxUsage;
+  static uint32_t AColdMaxUsage;
+  static uint32_t AFrozenMaxUsage;
 
   static bool MapTCHuge;
 

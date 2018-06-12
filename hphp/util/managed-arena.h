@@ -75,9 +75,9 @@ struct ManagedArena : public ExtentAllocator {
   unsigned m_arenaId{0};
 };
 
-// Eventually we'd just call it LowArena, when we kill the current low_arena.
 using LowArena = alloc::ManagedArena<alloc::BumpExtentAllocator>;
 using HighArena = alloc::ManagedArena<alloc::BumpExtentAllocator>;
+
 // Not using std::aligned_storage<> because zero initialization can be useful.
 extern uint8_t g_lowArena[sizeof(LowArena)];
 extern uint8_t g_highArena[sizeof(HighArena)];

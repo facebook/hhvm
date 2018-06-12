@@ -47,7 +47,6 @@ bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
   }
   auto const currFrontier = state.frontier();
   if (currFrontier % size1g != 0) return false;
-  auto const newPageStart = currFrontier - size1g;
 
   HugePageInfo info = get_huge1g_info();
   if (info.nr_hugepages == num_1g_pages()) {
@@ -64,6 +63,9 @@ bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
     // 1G alignment in the frontier.
     return false;
   }
+
+  auto const newPageStart = currFrontier;
+
 #ifdef HAVE_NUMA
   assert((m_interleaveMask & ~numa_node_set) == 0);
   if (const int numAllowedNodes = __builtin_popcount(m_interleaveMask)) {
@@ -99,9 +101,9 @@ bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
 constexpr size_t Bump4KMapper::kChunkSize;
 
 bool Bump4KMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
-  auto const currFrontier = state.m_base - state.m_currCapacity;
+  auto const currFrontier = state.frontier();
   if (currFrontier % size4k != 0) return false;
-  void* newPageStart = reinterpret_cast<void*>(currFrontier - kChunkSize);
+  void* newPageStart = reinterpret_cast<void*>(currFrontier);
   void* newPages = mmap(newPageStart, kChunkSize,
                         PROT_READ | PROT_WRITE,
                         MAP_ANONYMOUS | MAP_PRIVATE,
@@ -134,7 +136,7 @@ bool Bump2MMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
     }
     return false;
   }
-  auto newPageBase = state.m_base - state.m_currCapacity;
+  auto newPageBase = state.frontier();
   // Add some 4K pages before madvise()
   if (!Bump4KMapper::addMappingImpl(state, newSize)) {
     return false;

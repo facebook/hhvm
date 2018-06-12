@@ -51,11 +51,10 @@
 # endif
 #else
 # include <jemalloc/jemalloc.h>
-# if (JEMALLOC_VERSION_MAJOR >= 5) && defined(__linux__) && \
-     !defined(USE_JEMALLOC_EXTENT_HOOKS)
+# if (JEMALLOC_VERSION_MAJOR >= 5) && defined(USE_LOWPTR) && \
+     defined(__linux__) && !defined(USE_JEMALLOC_EXTENT_HOOKS)
 #  define USE_JEMALLOC_EXTENT_HOOKS 1
 #  if (JEMALLOC_VERSION_MAJOR > 5) || (JEMALLOC_VERSION_MINOR >= 1)
-// Requires jemalloc 5.1
 #   define JEMALLOC_METADATA_1G_PAGES 1
 #  endif
 # endif
@@ -155,10 +154,11 @@ template<typename T> inline T* GetByArenaId(unsigned id) {
 // Address ranges for the managed arenas.  Low arena is in [1G, 4G), and high
 // arena in [4G, 128G) at most.  Both grows down and can be smaller.  But things
 // won't work well if either overflows.
+constexpr uintptr_t kLowArenaMinAddr = 1ull << 30;
 constexpr uintptr_t kLowArenaMaxAddr = 4ull << 30;
 constexpr uintptr_t kUncountedMaxAddr = 128ull << 30;
 constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr;
-constexpr size_t kLowArenaMaxCap = 3ull << 30;
+constexpr size_t kLowArenaMaxCap = kLowArenaMaxAddr - kLowArenaMinAddr;
 constexpr size_t kHighArenaMaxCap = kUncountedMaxAddr - kLowArenaMaxAddr;
 
 // Explicit per-thread tcache for the huge arenas.

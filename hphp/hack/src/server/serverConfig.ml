@@ -178,6 +178,42 @@ let process_extra_paths config =
   | Some s -> Str.split config_list_regexp s |> List.map ~f:maybe_relative_path
   | _ -> []
 
+let process_untrusted_mode config =
+  match SMap.get config "untrusted_mode" with
+  | Some s ->
+    if bool_of_string s
+    then
+      let blacklist = [
+        (* out of tree file access*)
+        "extra_paths";
+        (* arbitrary code execution *)
+        "load_script";
+        (* potential resource abuse *)
+        "language_feature_logging";
+      ] in
+      let prefix_blacklist = [
+        (* potential resource abuse *)
+        "gc_";
+        "sharedmem_";
+        (* arbitrary code execution *)
+        "state_";
+      ] in
+      let invalid_keys = SMap.filter ~f:(fun ck _ ->
+        let ck = String.lowercase_ascii ck in
+        let exact_match = List.find ~f:(fun bli -> bli = ck) blacklist in
+        let prefix_match = List.find
+          ~f:(fun blp -> String_utils.string_starts_with ck blp)
+          prefix_blacklist
+        in
+        match exact_match, prefix_match with
+          | (None, None) -> false
+          | _ -> true
+      ) config |> SMap.keys in
+      if not (List.is_empty invalid_keys)
+      then failwith ("option not permitted in untrusted_mode: "^(String.concat ", " invalid_keys))
+    else failwith "untrusted_mode can only be enabled, not disabled"
+  | _ -> ()
+
 let extract_auto_namespace_element ns_map element =
   match element with
     | (source, Hh_json.JSON_String target) ->
@@ -205,6 +241,7 @@ let prepare_ignored_fixme_codes config =
 
 let load config_filename options =
   let config_hash, config = Config_file.parse (Relative_path.to_absolute config_filename) in
+  process_untrusted_mode config;
   let local_config = ServerLocalConfig.load ~silent:false in
   let version = SMap.get config "version" in
   let ignored_paths = process_ignored_paths config in

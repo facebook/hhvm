@@ -1163,6 +1163,10 @@ struct Func final {
     return offsetof(SharedData, m_base);
   }
 
+  static constexpr ptrdiff_t sharedRefBitPtrOff() {
+    return offsetof(SharedData, m_refBitPtr);
+  }
+
 
   /////////////////////////////////////////////////////////////////////////////
   // SharedData.

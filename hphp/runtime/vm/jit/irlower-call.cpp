@@ -514,7 +514,9 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
       bitsOff = Func::refBitValOff();
       bitsPtr = func;
     } else {
-      v << load{func[Func::sharedOff()], bitsPtr};
+      auto const shared = v.makeReg();
+      v << load{func[Func::sharedOff()], shared};
+      v << load{shared[Func::sharedRefBitPtrOff()], bitsPtr};
       bitsOff -= sizeof(uint64_t);
     }
 

@@ -12,19 +12,16 @@ open Integration_test_base_types
 
 module Test = Integration_test_base
 
-let foo_contents = "<?hh
-
-        function h(): int {
-          $a : int = 5;
-          $v = vec[1];
-          $a = $v[0];
-          return $a;
-        }
-        function f(): int {
-          return h() + 2
-        }
-
-
+let foo_contents =
+"<?hh
+function h($b): int {
+  $v = vec[1];
+  $a = $v[0];
+  return $a + $b;
+}
+function f(): int {
+  return h(1) + 2
+}
 "
 let foo_name = "foo.php"
 

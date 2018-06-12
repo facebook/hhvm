@@ -18,6 +18,10 @@ function g(string $x) : int  {
   /* HH_FIXME[4110] purposeful bad type */
   return $x;
 }
+function h($x) : int {
+  $a = g('a');
+  return $a + $x;
+}
 "
 let foo_name = "foo.php"
 
@@ -42,4 +46,10 @@ let () =
   Test.assert_coverage_levels loop_output
     [
     "File \"/foo.php\", line 4, characters 10-11: partial";
+    "File \"/foo.php\", line 7, characters 10-12: checked";
+    "File \"/foo.php\", line 7, characters 3-13: checked";
+    "File \"/foo.php\", line 7, characters 8-13: checked";
+    "File \"/foo.php\", line 8, characters 10-11: checked";
+    "File \"/foo.php\", line 8, characters 10-16: checked";
+    "File \"/foo.php\", line 8, characters 15-16: unchecked";
     ];

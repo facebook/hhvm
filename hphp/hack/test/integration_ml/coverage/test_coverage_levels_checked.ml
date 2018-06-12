@@ -12,10 +12,11 @@ open Integration_test_base_types
 
 module Test = Integration_test_base
 
-let foo_contents = "<?hh
-        function g(): string {
-            return 'a';
-        }
+let foo_contents =
+"<?hh
+function g(): string {
+  return 'a';
+}
 "
 let foo_name = "foo.php"
 
@@ -38,4 +39,4 @@ let () =
     Test.coverage_levels env (ServerCommandTypes.FileName "/foo.php") in
 
   Test.assert_coverage_levels loop_output
-    ["File \"/foo.php\", line 3, characters 20-22: checked"];
+    ["File \"/foo.php\", line 3, characters 10-12: checked"];

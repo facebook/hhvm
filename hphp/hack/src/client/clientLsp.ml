@@ -566,9 +566,13 @@ let hack_symbol_definition_to_lsp_construct_location
 let hack_symbol_definition_to_lsp_identifier_location
     (symbol: string SymbolDefinition.t)
     ~(default_path: string)
-  : Lsp.Location.t =
+  : Lsp.DefinitionLocation.t =
   let open SymbolDefinition in
-  hack_pos_to_lsp_location symbol.pos ~default_path
+  let location = hack_pos_to_lsp_location symbol.pos ~default_path in
+  Lsp.DefinitionLocation.{
+    location;
+    title = Some (Utils.strip_ns symbol.SymbolDefinition.full_name)
+  }
 
 let hack_errors_to_lsp_diagnostic
     (filename: string)
@@ -803,7 +807,10 @@ let do_definition (conn: server_conn) (ref_unblocked_time: float ref) (params: D
   let (file, line, column) = lsp_file_position_to_hack params in
   let command =
     ServerCommandTypes.(IDENTIFY_FUNCTION (FileName file, line, column)) in
-  let results = rpc conn ref_unblocked_time command in
+  let results =
+    rpc conn ref_unblocked_time command
+    |> List.filter_map ~f:Utils.unwrap_snd
+  in
   (* What's it like when we return multiple definitions? For instance, if you ask *)
   (* for the definition of "new C()" then we've now got the definition of the     *)
   (* class "\C" and also of the constructor "\\C::__construct". I think that      *)
@@ -811,16 +818,54 @@ let do_definition (conn: server_conn) (ref_unblocked_time: float ref) (params: D
   (* as to jump straight to it without the fuss of clicking to select which one.  *)
   (* That indeed is what Typescript does -- it only gives the constructor.        *)
   (* (VSCode displays multiple definitions with a peek view of them all;          *)
-  (*  Atom displays them with a small popup showing just file+line of each).      *)
+  (* Atom displays them with a small popup showing just title+file+line of each). *)
   (* There's one subtlety. If you declare a base class "B" with a constructor,    *)
   (* and a derived class "C" without a constructor, and click on "new C()", then  *)
-  (* both Hack and Typescript will take you to the constructor of B. As desired!  *)
-  (* Conclusion: given a class+method, we'll return only the method.              *)
-  let filtered_results = IdentifySymbolService.filter_redundant results in
+  (* Typescript and VS Code will pop up a little window with both options. This   *)
+  (* seems like a reasonable compromise, so Hack should do the same.              *)
+  let cls = List.fold results ~init:`None ~f:begin fun class_opt (occ, _) ->
+    match class_opt, SymbolOccurrence.enclosing_class occ with
+    | `None, Some c -> `Single c
+    | `Single c, Some c2 when c = c2 -> `Single c
+    | `Single _, Some _ ->
+      (* Symbol occurrences for methods/properties that only exist in a base
+         class still have the derived class as their enclosing class, even
+         though it doesn't explicitly override that member. Because of that, if
+         we hit this case then we know that we're dealing with a union type. In
+         that case, it's not really possible to do the rest of this filtration,
+         since it would have to be decided on a per-class basis. *)
+      `Multiple
+    | class_opt, _ -> class_opt
+  end in
+  let filtered_results = match cls with
+    | `None
+    | `Multiple -> results
+    | `Single _ ->
+      let open SymbolOccurrence in
+      let explicitly_defined = List.fold results ~init:[] ~f:begin fun acc (occ, def) ->
+        let cls = get_class_name occ in
+        match cls with
+        | None -> acc
+        | Some cls ->
+          if String_utils.string_starts_with def.SymbolDefinition.full_name (Utils.strip_ns cls)
+          then (occ, def) :: acc
+          else acc
+      end |> List.rev in
+      let is_result_constructor (occ, _) = is_constructor occ in
+      let has_explicit_constructor = List.exists explicitly_defined ~f:is_result_constructor in
+      let has_constructor = List.exists results ~f:is_result_constructor in
+      let has_class = List.exists results ~f:(fun (occ, _) -> is_class occ) in
+      (* If we have a constructor but it's derived, then we'd like to show both
+         the class and the constructor. If the constructor is explicitly
+         defined, though, we'd like to filter the class out and only show the
+         constructor. *)
+      if has_constructor && has_class && has_explicit_constructor
+      then List.filter results ~f:is_result_constructor
+      else results
+  in
   let rec hack_to_lsp = function
     | [] -> []
-    | (_occurrence, None) :: l -> hack_to_lsp l
-    | (_occurrence, Some definition) :: l ->
+    | (_occurrence, definition) :: l ->
       (hack_symbol_definition_to_lsp_identifier_location definition ~default_path:file)
         :: (hack_to_lsp l)
   in

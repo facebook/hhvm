@@ -65,7 +65,8 @@
             "line": 2,
             "character": 32
           }
-        }
+        },
+        "title": "non_blocking_definition"
       }
     ]
   },

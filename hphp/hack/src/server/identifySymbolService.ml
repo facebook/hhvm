@@ -16,28 +16,6 @@ module Result_set = Set.Make(struct
   let compare = Pervasives.compare
 end)
 
-(** Filters out redundant elements.
-
-  An example of a redundant element would be a Class occurrence when we also
-  have a Method occurrence, since that means that the user is hovering over an
-  invocation of the constructor, and would therefore only want to see
-  information about the constructor, rather than getting both the class and
-  constructor back in the hover. *)
-let filter_redundant results =
-  let result_is_method result =
-    match result with
-    | { SymbolOccurrence.type_ = SymbolOccurrence.Method _; _ }, _ -> true
-    | _ -> false in
-  let result_is_class result =
-    match result with
-    | { SymbolOccurrence.type_ = SymbolOccurrence.Class; _ }, _ -> true
-    | _ -> false in
-  let has_class = List.exists results ~f:result_is_class in
-  let has_method = List.exists results ~f:result_is_method in
-  if has_class && has_method
-  then List.filter results ~f:result_is_method
-  else results
-
 let is_target target_line target_char { pos; _ } =
   let l, start, end_ = Pos.info_pos pos in
   l = target_line && start <= target_char && target_char - 1 <= end_
@@ -65,9 +43,6 @@ let process_member ?(is_declaration=false) c_name id ~is_method ~is_const =
     is_declaration;
     pos = fst id
   }
-
-let process_method c_name mid =
-  process_member c_name mid ~is_method:true ~is_const:false
 
 let process_fun_id ?(is_declaration=false) id =
   Result_set.singleton {

@@ -65,7 +65,8 @@
             "line": 6,
             "character": 21
           }
-        }
+        },
+        "title": "b_definition"
       }
     ]
   },
@@ -84,7 +85,8 @@
             "line": 11,
             "character": 29
           }
-        }
+        },
+        "title": "BB::__construct"
       }
     ]
   },
@@ -96,21 +98,16 @@
         "uri": "${php_file_uri}",
         "range": {
           "start": {
-            "line": 11,
-            "character": 18
+            "line": 14,
+            "character": 6
           },
           "end": {
-            "line": 11,
-            "character": 29
+            "line": 14,
+            "character": 8
           }
-        }
-      }
-    ]
-  },
-  {
-    "jsonrpc": "2.0",
-    "id": 5,
-    "result": [
+        },
+        "title": "CC"
+      },
       {
         "uri": "${php_file_uri}",
         "range": {
@@ -122,7 +119,42 @@
             "line": 11,
             "character": 29
           }
-        }
+        },
+        "title": "BB::__construct"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 5,
+    "result": [
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 17,
+            "character": 6
+          },
+          "end": {
+            "line": 17,
+            "character": 8
+          }
+        },
+        "title": "DD"
+      },
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 11,
+            "character": 18
+          },
+          "end": {
+            "line": 11,
+            "character": 29
+          }
+        },
+        "title": "BB::__construct"
       }
     ]
   },
@@ -141,7 +173,8 @@
             "line": 21,
             "character": 29
           }
-        }
+        },
+        "title": "EE::__construct"
       }
     ]
   },
@@ -160,7 +193,8 @@
             "line": 26,
             "character": 8
           }
-        }
+        },
+        "title": "FF"
       }
     ]
   },

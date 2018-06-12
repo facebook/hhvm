@@ -1475,6 +1475,12 @@ let no_memoize_attribute_on_lambda node errors =
     end
   | _ -> errors
 
+let is_assignment node =
+  match syntax node with
+  | BinaryExpression { binary_operator = { syntax = Token token; _ }; _ } ->
+    Token.kind token = TokenKind.Equal
+  | _ -> false
+
 let expression_errors env node parents errors =
   let is_decimal_or_hexadecimal_literal token =
     match Token.kind token with
@@ -1661,6 +1667,36 @@ let expression_errors env node parents errors =
   | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
   | AwaitableCreationExpression { awaitable_attribute_spec = s; _ }
     -> no_memoize_attribute_on_lambda s errors
+  | DecoratedExpression { decorated_expression_decorator = op; _ }
+  | PrefixUnaryExpression { prefix_unary_operator = op; _ }
+    when token_kind op = Some TokenKind.Await ->
+    begin match parents with
+      | si :: le :: _ when is_simple_initializer si && is_let_statement le ->
+        errors
+      | le :: _ when is_lambda_expression le -> errors
+      | rs :: _ when is_return_statement rs -> errors
+      | es :: _ when is_expression_statement es -> errors
+      | be :: es :: _
+        when is_binary_expression be && is_assignment be &&
+          is_expression_statement es -> errors
+      | li :: l :: us :: _
+        when is_list_item li && is_list l &&
+          (is_using_statement_block_scoped us ||
+           is_using_statement_function_scoped us) -> errors
+      | be :: li :: l :: us :: _
+        when is_binary_expression be && is_assignment be &&
+          is_list_item li && is_list l &&
+          (is_using_statement_block_scoped us ||
+           is_using_statement_function_scoped us) -> errors
+      | be :: us :: _
+         when is_binary_expression be && is_assignment be &&
+           (is_using_statement_block_scoped us ||
+            is_using_statement_function_scoped us) -> errors
+      | us :: _
+         when (is_using_statement_block_scoped us ||
+               is_using_statement_function_scoped us) -> errors
+      | _ -> make_error_from_node node SyntaxError.invalid_await_use :: errors
+    end
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let check_repeated_properties namespace_name class_name (errors, p_names) prop =

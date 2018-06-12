@@ -8878,6 +8878,7 @@ FuncEmitter* EmitterVisitor::createInOutWrapper(MethodStatementPtr m,
     !scope->isAsync() &&
     !scope->isGenerator() &&
     !scope->isAbstract() &&
+    !(m->getClassScope() && m->getClassScope()->isInterface()) &&
     !scope->hasRefVariadicParam() &&
     !m->isRef();
 

@@ -433,3 +433,6 @@ let memoize_on_lambda = "<<__Memoize>> attribute is not allowed on lambdas or \
   anonymous functions."
 
 let invalid_await_use = "Await cannot be used as an expression"
+
+let invalid_constructor_method_call = "Method call following immediate constructor call \
+  requires parentheses around constructor call."

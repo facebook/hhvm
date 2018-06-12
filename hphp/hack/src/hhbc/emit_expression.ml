@@ -1709,9 +1709,7 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
   | A.Shape fl ->
     emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@ emit_shape env expr fl
-  | A.Await e ->
-    if Emit_env.is_in_using_decl env then emit_await env pos e
-    else failwith "await as an expressions is not allowed"
+  | A.Await e -> emit_await env pos e
   | A.Yield e -> emit_yield env pos e
   | A.Yield_break ->
     failwith "yield break should be in statement position"

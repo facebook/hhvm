@@ -454,14 +454,14 @@ and emit_using env pos is_block_scoped has_await e b =
       | A.Binop (A.Eq None, (_, A.Lvar (_, id)), _)
       | A.Lvar (_, id) ->
         Local.Named id, gather [
-          emit_expr ~need_ref:false (Emit_env.with_using_decl env) e;
+          emit_expr ~need_ref:false env e;
           Emit_pos.emit_pos (fst b);
           instr_popc;
         ]
       | _ ->
         let l = Local.get_unnamed_local () in
         l, gather [
-          emit_expr ~need_ref:false (Emit_env.with_using_decl env) e;
+          emit_expr ~need_ref:false env e;
           instr_setl l;
           instr_popc
         ]

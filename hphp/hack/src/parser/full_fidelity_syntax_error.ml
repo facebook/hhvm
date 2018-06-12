@@ -431,3 +431,5 @@ let interface_implements =
 
 let memoize_on_lambda = "<<__Memoize>> attribute is not allowed on lambdas or \
   anonymous functions."
+
+let invalid_await_use = "Await cannot be used as an expression"

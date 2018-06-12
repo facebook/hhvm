@@ -126,8 +126,8 @@ class ZipArchive {
     int $comp_method,
     int $comp_flags = 0,
   ): bool;
-  public function statIndex(int $index, int $flags = 0): array;
-  public function statName(string $name, int $flags = 0): array;
+  public function statIndex(int $index, int $flags = 0): darray;
+  public function statName(string $name, int $flags = 0): darray;
   public function unchangeAll(): bool;
   public function unchangeArchive(): bool;
   public function unchangeIndex(int $index): bool;

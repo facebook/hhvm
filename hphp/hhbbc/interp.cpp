@@ -2233,6 +2233,7 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     case TypeStructure::Kind::T_arraykey:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_void:
+      return check(ts_type);
     case TypeStructure::Kind::T_tuple:
       return RuntimeOption::EvalHackArrCompatIsArrayNotices
         ? check(ts_type, TDArr)

@@ -205,6 +205,7 @@ MaybeRxInvalidLocation = 3063
 NoOnlyrxIfRxfuncForRxIfArgs = 3064
 CoroutineInConstructor = 3065
 IllegalReturnByRef = 3066
+IllegalByRefExpr = 3067
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001

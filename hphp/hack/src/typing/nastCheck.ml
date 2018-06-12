@@ -1199,7 +1199,17 @@ and expr_ env p = function
   | String2 el ->
       List.iter el (expr env);
       ()
-  | Unop (_, e) -> expr env e
+  | Unop (Ast.Uref, e) ->
+    expr env e;
+    begin match snd e with
+      | This ->
+        Errors.illegal_by_ref_expr p SN.SpecialIdents.this
+      | Dollardollar (_, id)
+        when Local_id.to_string id = SN.SpecialIdents.dollardollar ->
+        Errors.illegal_by_ref_expr p SN.SpecialIdents.dollardollar
+      | _ -> ()
+    end
+  | Unop (_, e) -> expr env e;
   | Yield_break -> ()
   | Special_func func ->
       (match func with

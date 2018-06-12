@@ -1474,6 +1474,10 @@ let illegal_return_by_ref pos =
   add (NastCheck.err_code NastCheck.IllegalReturnByRef) pos
     "Returning by reference from a function is no longer supported in Hack."
 
+let illegal_by_ref_expr pos str =
+  add (NastCheck.err_code NastCheck.IllegalByRefExpr) pos
+  (str ^ " cannot be passed by reference")
+
 (*****************************************************************************)
 (* Nast terminality *)
 (*****************************************************************************)

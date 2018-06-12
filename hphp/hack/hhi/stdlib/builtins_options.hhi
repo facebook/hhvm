@@ -15,6 +15,7 @@ const int CLOCK_THREAD_CPUTIME_ID = 3;
 
 <<__PHPStdLib>>
 function assert_options($what, $value = null);
+<<__PHPStdLib>>
 function assert($assertion);
 <<__PHPStdLib>>
 function dl($library);

@@ -42,6 +42,7 @@ struct StructuredLogEntry {
   void setStackTrace(folly::StringPiece key, const StackTrace& st);
   void clear();
 
+  bool force_init{false};
   folly::dynamic ints, strs, sets, vecs;
 };
 

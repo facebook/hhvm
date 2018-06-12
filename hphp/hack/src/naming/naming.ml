@@ -1873,7 +1873,7 @@ module Make (GetLocals : GetLocals) = struct
     | Foreach (e, aw, ae, b)-> foreach_stmt env e aw ae b
     | Try (b, cl, fb)      -> try_stmt env st b cl fb
     | Def_inline _ ->
-      failwith "Naming of inlined definitions not (yet) supported."
+      Errors.experimental_feature p "inlined definitions"; N.Expr (p, N.Any)
     | Expr (cp, Call ((p, Id (fp, fn)), hl, el, uel))
         when fn = SN.SpecialFunctions.invariant ->
       (* invariant is subject to a source-code transform in the HHVM

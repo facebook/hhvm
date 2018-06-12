@@ -80,7 +80,7 @@ let make_genv options config local_config handle =
   if Option.is_some watchman_env then Hh_logger.log "Using watchman";
   let max_bucket_size = local_config.SLC.max_bucket_size in
   Bucket.set_max_bucket_size max_bucket_size;
-  let indexer, notifier_async, notifier_async_fd, notifier, wait_until_ready =
+  let indexer, notifier_async, notifier_async_reader, notifier, wait_until_ready =
     match watchman_env with
     | Some watchman_env ->
       let indexer filter =
@@ -115,8 +115,8 @@ let make_genv options config local_config handle =
         | Watchman.Watchman_synchronous changes ->
           Notifier_synchronous_changes changes
       in
-      let notifier_async_fd () =
-        Watchman.get_fd !watchman
+      let notifier_async_reader () =
+        Watchman.get_reader !watchman
       in
       let notifier () =
         let watchman', changes =
@@ -130,7 +130,7 @@ let make_genv options config local_config handle =
       (* The initial watch-project command blocks until watchman's crawl is
        * done, so we don't have anything else to wait for here. *)
       let wait_until_ready () = () in
-      indexer, notifier_async, notifier_async_fd, notifier, wait_until_ready
+      indexer, notifier_async, notifier_async_reader, notifier, wait_until_ready
     | None ->
       let indexer filter = Find.make_next_files ~name:"root" ~filter root in
       let in_fd = Daemon.null_fd () in
@@ -164,7 +164,7 @@ let make_genv options config local_config handle =
     workers;
     indexer;
     notifier_async;
-    notifier_async_fd;
+    notifier_async_reader;
     notifier;
     wait_until_ready;
     debug_channels = None;
@@ -179,7 +179,7 @@ let default_genv =
     indexer          = (fun _ -> fun () -> []);
     notifier_async   = (fun () ->
       ServerNotifierTypes.Notifier_synchronous_changes SSet.empty);
-    notifier_async_fd = (fun () -> None);
+    notifier_async_reader = (fun () -> None);
     notifier         = (fun () -> SSet.empty);
     wait_until_ready = (fun () -> ());
     debug_channels   = None;

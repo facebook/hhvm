@@ -46,7 +46,7 @@ type genv = {
     notifier_async   : unit -> ServerNotifierTypes.notifier_changes;
     (* If this FD is readable, next call to notifier_async () should read
      * something from it. *)
-    notifier_async_fd : unit -> Unix.file_descr option;
+    notifier_async_reader : unit -> Buffered_line_reader.t option;
     notifier         : unit -> SSet.t;
     (* If daemons are spawned as part of the init process, wait for them here *)
     wait_until_ready : unit -> unit;

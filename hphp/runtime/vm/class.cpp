@@ -2606,20 +2606,25 @@ void Class::setInitializers() {
     pinits.assign(m_parent->m_pinitVec.begin(), m_parent->m_pinitVec.end());
   }
 
-  // This class only has a __[ps]init() method if it's needed.  Append to the
-  // vectors of __[ps]init() methods, so that reverse iteration of the vectors
-  // runs this class's __[ps]init() first, in case multiple classes in the
-  // hierarchy initialize the same property.
+  // Clone 86pinit methods from traits
+  addTraitPropInitializers(pinits, false);
+
+  // If this class has an 86pinit method, append it last so that
+  // reverse iteration of the vector runs this class's 86pinit
+  // first, in case multiple classes in the hierarchy initialize
+  // the same property.
   const Func* meth86pinit = findSpecialMethod(this, s_86pinit.get());
   if (meth86pinit != nullptr) {
     pinits.push_back(meth86pinit);
   }
-  addTraitPropInitializers(pinits, false);
+
+  // If this class has an 86sinit method, it must be the last element
+  // in the vector. See get86sinit().
+  addTraitPropInitializers(sinits, true);
   const Func* sinit = findSpecialMethod(this, s_86sinit.get());
   if (sinit) {
     sinits.push_back(sinit);
   }
-  addTraitPropInitializers(sinits, true);
 
   m_pinitVec = pinits;
   m_sinitVec = sinits;

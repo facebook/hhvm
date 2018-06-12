@@ -266,13 +266,25 @@ let query_notifier genv env query_kind t =
     | `Skip ->
       env, Notifier_async_changes SSet.empty
   in
-  let updates_stale, raw_updates = match raw_updates with
+  let unpack_updates = function
     | Notifier_unavailable -> true, SSet.empty
     | Notifier_state_enter _ -> true, SSet.empty
     | Notifier_state_leave _ -> true, SSet.empty
     | Notifier_async_changes updates -> true, updates
     | Notifier_synchronous_changes updates -> false, updates
   in
+
+  let updates_stale, raw_updates = unpack_updates raw_updates in
+
+  let rec pump_async_updates acc = match genv.notifier_async_reader () with
+    | Some reader when Buffered_line_reader.is_readable reader ->
+      let _, raw_updates = unpack_updates (genv.notifier_async ()) in
+      pump_async_updates (SSet.union acc raw_updates)
+    | _ -> acc
+  in
+
+  let raw_updates = pump_async_updates raw_updates in
+
   let updates = Program.process_updates genv raw_updates in
   if not @@ Relative_path.Set.is_empty updates then
     HackEventLogger.notifier_returned t (SSet.cardinal raw_updates);

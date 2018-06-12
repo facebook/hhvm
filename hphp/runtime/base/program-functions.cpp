@@ -2373,6 +2373,11 @@ void hphp_process_init() {
   ExtensionRegistry::moduleInit();
   BootStats::mark("ExtensionRegistry::moduleInit");
 
+  if (!RuntimeOption::DeploymentId.empty()) {
+    StackTraceNoHeap::AddExtraLogging(
+      "DeploymentId", RuntimeOption::DeploymentId);
+  }
+
   // Now that constants have been bound we can update options using constants
   // in ini files (e.g., E_ALL) and sync some other options
   update_constants_and_options();

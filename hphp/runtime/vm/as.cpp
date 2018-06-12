@@ -1323,7 +1323,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_VSA \
   std::vector<std::string> vecImm = read_strvector(as);                 \
   auto const vecImmStackValues = vecImm.size();                         \
-  as.ue->emitInt32(vecImmStackValues);                                  \
+  as.ue->emitIVA(vecImmStackValues);                                    \
   for (size_t i = 0; i < vecImmStackValues; ++i) {                      \
     as.ue->emitInt32(as.ue->mergeLitstr(String(vecImm[i]).get()));      \
   }
@@ -1372,7 +1372,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 
 #define IMM_I32LA do {                          \
   std::vector<uint32_t> vecImm = read_argv(as); \
-  as.ue->emitInt32(vecImm.size());              \
+  as.ue->emitIVA(vecImm.size());                \
   for (auto i : vecImm) {                       \
     as.ue->emitInt32(i);                        \
   }                                             \
@@ -1380,7 +1380,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 
 #define IMM_BLA do {                                    \
   std::vector<std::string> vecImm = read_jmpvector(as); \
-  as.ue->emitInt32(vecImm.size());                      \
+  as.ue->emitIVA(vecImm.size());                        \
   for (auto const& imm : vecImm) {                      \
     labelJumps.emplace_back(imm, as.ue->bcPos());       \
     as.ue->emitInt32(0); /* to be patched */            \
@@ -1389,7 +1389,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 
 #define IMM_SLA do {                                       \
   auto vecImm = read_sswitch_jmpvector(as);                \
-  as.ue->emitInt32(vecImm.size());                         \
+  as.ue->emitIVA(vecImm.size());                           \
   for (auto const& pair : vecImm) {                        \
     as.ue->emitInt32(pair.first);                          \
     labelJumps.emplace_back(pair.second, as.ue->bcPos());  \

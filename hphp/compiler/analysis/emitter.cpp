@@ -1791,7 +1791,7 @@ struct OpEmitContext {
   IMPL5_##t5
 
 #define IMPL_BLA(var) do {                            \
-  getUnitEmitter().emitInt32(var.size());             \
+  getUnitEmitter().emitIVA(var.size());               \
   for (unsigned int i = 0; i < var.size(); ++i) {     \
     IMPL_BA(*var[i]);                                 \
   }                                                   \
@@ -1819,7 +1819,7 @@ struct OpEmitContext {
 
 #define IMPL_I32LA(var) do {   \
   auto& ue = getUnitEmitter(); \
-  ue.emitInt32(var.size());    \
+  ue.emitIVA(var.size());      \
   for (auto& i : var) {        \
     ue.emitInt32(i);           \
   }                            \
@@ -1832,7 +1832,7 @@ struct OpEmitContext {
 
 #define IMPL_SLA(var) do {                      \
   auto& ue = getUnitEmitter();                  \
-  ue.emitInt32(var.size());                     \
+  ue.emitIVA(var.size());                       \
   for (auto& i : var) {                         \
     ue.emitInt32(i.str);                        \
     IMPL_BA(*i.dest);                           \
@@ -1846,7 +1846,7 @@ struct OpEmitContext {
 
 #define IMPL_VSA(var) do {                          \
   auto n = var.size();                              \
-  getUnitEmitter().emitInt32(n);                    \
+  getUnitEmitter().emitIVA(n);                      \
   for (size_t i = 0; i < n; ++i) {                  \
     IMPL_SA((HPHP::String(var[i])).get());          \
   }                                                 \

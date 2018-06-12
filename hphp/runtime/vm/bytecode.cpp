@@ -297,15 +297,15 @@ struct clsref_slot {
 
 // wrapper to handle unaligned access to variadic immediates
 template<class T> struct imm_array {
-  int32_t const size;
+  uint32_t const size;
   PC const ptr;
 
-  explicit imm_array(int32_t size, PC pc)
+  explicit imm_array(uint32_t size, PC pc)
     : size{size}
     , ptr{pc}
   {}
 
-  T operator[](int32_t i) const {
+  T operator[](uint32_t i) const {
     T e;
     memcpy(&e, ptr + i * sizeof(T), sizeof(T));
     return e;
@@ -331,7 +331,7 @@ ALWAYS_INLINE clsref_slot decode_clsref_slot(PC& pc) {
 
 template<typename T>
 OPTBLD_INLINE imm_array<T> decode_imm_array(PC& pc) {
-  auto const size = decode<int32_t>(pc);
+  auto const size = decode_iva(pc);
   auto const arr_pc = pc;
   pc += size * sizeof(T);
   return imm_array<T>{size, arr_pc};

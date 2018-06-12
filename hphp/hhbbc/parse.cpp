@@ -689,7 +689,7 @@ void populate_block(ParseUnitState& puState,
   auto const& ue = fe.ue();
 
   auto decode_stringvec = [&] {
-    auto const vecLen = decode<int32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     CompactVector<LSString> keys;
     for (auto i = size_t{0}; i < vecLen; ++i) {
       keys.push_back(ue.lookupLitstr(decode<int32_t>(pc)));
@@ -699,7 +699,7 @@ void populate_block(ParseUnitState& puState,
 
   auto decode_switch = [&] (PC opPC) {
     SwitchTab ret;
-    auto const vecLen = decode<int32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     for (int32_t i = 0; i < vecLen; ++i) {
       ret.push_back(findBlock(
         opPC + decode<Offset>(pc) - ue.bc()
@@ -711,7 +711,7 @@ void populate_block(ParseUnitState& puState,
   auto decode_sswitch = [&] (PC opPC) {
     SSwitchTab ret;
 
-    auto const vecLen = decode<int32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     for (int32_t i = 0; i < vecLen - 1; ++i) {
       auto const id = decode<Id>(pc);
       auto const offset = decode<Offset>(pc);
@@ -746,7 +746,7 @@ void populate_block(ParseUnitState& puState,
 
   auto decode_argv = [&] {
     CompactVector<uint32_t> ret;
-    auto const vecLen = decode<uint32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     for (uint32_t i = 0; i < vecLen; ++i) {
       ret.emplace_back(decode<uint32_t>(pc));
     }

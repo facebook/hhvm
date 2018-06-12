@@ -437,7 +437,7 @@ bool FuncChecker::checkString(PC /*pc*/, Id id) {
 }
 
 bool FuncChecker::checkImmVec(PC& pc, size_t elemSize) {
-  auto const len = decode_raw<int32_t>(pc);
+  auto const len = decode_iva(pc);
   if (len < 1) {
     error("invalid length of immediate vector %d at Offset %d\n",
           len, offset(pc));
@@ -460,7 +460,7 @@ bool FuncChecker::checkImmI32LA(PC& pc, PC const instr) {
   auto inst_copy = instr;
   decode_op(inst_copy);
   auto const nargs = decode_iva(inst_copy);
-  auto const count = decode_raw<uint32_t>(pc);
+  auto const count = decode_iva(pc);
   for (int i = 0; i < count; ++i) {
     auto const num = decode_raw<uint32_t>(pc);
     if (nargs <= num) {
@@ -592,7 +592,7 @@ bool FuncChecker::checkImmBA(PC& pc, PC const instr) {
 }
 
 bool FuncChecker::checkImmVSA(PC& pc, PC const /*instr*/) {
-  auto const len = decode_raw<int32_t>(pc);
+  auto const len = decode_iva(pc);
   if (len < 1 || len > ArrayData::MaxElemsOnStack) {
     error("invalid length of immedate VSA vector %d at offset %d\n",
           len, offset(pc));

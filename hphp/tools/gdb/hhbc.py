@@ -32,7 +32,17 @@ def iva_imm_types():
 
 @memoized
 def vec_imm_types():
-    return [V('HPHP::' + t) for t in ['BLA', 'VSA', 'SLA']]
+    # keep this in sync with vec_elm_sizes()
+    return [V('HPHP::' + t) for t in ['BLA', 'VSA', 'SLA', 'I32LA']]
+
+@memoized
+def vec_elm_sizes():
+    return [T(t).sizeof for t in [
+        'HPHP::Offset',      # BLA
+        'HPHP::Id',          # VSA
+        'HPHP::StrVecItem',  # SLA
+        'uint32_t'           # I32LA
+    ]]
 
 @memoized
 def iter_table_types():
@@ -45,16 +55,6 @@ def cell_loc_mcodes():
 @memoized
 def str_imm_mcodes():
     return [V('HPHP::' + t) for t in ['MET', 'MPT', 'MQT']]
-
-@memoized
-def vec_elm_sizes():
-    return [T(t).sizeof for t in [
-        'uint8_t',
-        'HPHP::Offset',
-        'uint64_t',
-        'HPHP::Id',
-        'HPHP::StrVecItem'
-    ]]
 
 @memoized
 def rata_arrs():
@@ -171,10 +171,10 @@ class HHBC(object):
 
         elif immtype in vec_imm_types():
             elm_size = vec_elm_sizes()[vec_imm_types().index(immtype)]
+            vec_size = HHBC.decode_iva(ptr)
+            num_elms = vec_size['value']
 
-            num_elms = ptr.cast(T('int32_t').pointer()).dereference()
-
-            info['size'] = T('int32_t').sizeof + elm_size * num_elms
+            info['size'] = vec_size['size'] + elm_size * num_elms
             info['value'] = '<vector>'
 
         elif immtype in iter_table_types():

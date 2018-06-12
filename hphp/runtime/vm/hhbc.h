@@ -58,8 +58,8 @@ std::string show(const LocalRange&);
  * and the byte is the value. Otherwise, it's 4 bytes, and bits 8..31 must be
  * logical-shifted to the right by one to get rid of the flag bit.
  *
- * The types in this macro for BLA and SLA are meaningless since they are never
- * read out of ArgUnion (they use ImmVector and ImmVectorO).
+ * The types in this macro for BLA , SLA, ILA, I32LA and VSA are meaningless
+ * since they are never read out of ArgUnion (they use ImmVector).
  *
  * ArgTypes and their various decoding helpers should be kept in sync with the
  * `hhx' bytecode inspection GDB command.
@@ -96,7 +96,7 @@ enum ArgType {
 
 union ArgUnion {
   ArgUnion() : u_LA{0} {}
-  char bytes[0];
+  uint8_t bytes[0];
 #define ARGTYPE(name, type) type u_##name;
 #define ARGTYPEVEC(name, type) type u_##name;
   ARGTYPES
@@ -811,27 +811,6 @@ struct ImmVector {
     , m_numStack(numStack)
     , m_start(start)
   {}
-
-  /*
-   * Returns an ImmVector from a pointer to the immediate vector
-   * itself.  Use getImmVector() if you want to get it from an Opcode*
-   * that points to the opcode.
-   */
-  static ImmVector createFromStream(const uint8_t* opcode) {
-    int32_t size = reinterpret_cast<const int32_t*>(opcode)[0];
-    int32_t stackCount = reinterpret_cast<const int32_t*>(opcode)[1];
-    const uint8_t* start = opcode + sizeof(int32_t) + sizeof(int32_t);
-    return ImmVector(start, size, stackCount);
-  }
-
-  /*
-   * Returns an ImmVector of 32-bit ints from a pointer to the
-   * immediate vector itself.
-   */
-  static ImmVector createFromStream(const int32_t* stream) {
-    int32_t size = stream[0];
-    return ImmVector(reinterpret_cast<const uint8_t*>(stream + 1), size, 0);
-  }
 
   bool isValid() const { return m_start != 0; }
 

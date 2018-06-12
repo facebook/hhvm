@@ -155,6 +155,8 @@ int immSize(PC origPC, int idx) {
     if (idx >= 2) pc += immSize(origPC, 1);
     if (idx >= 3) pc += immSize(origPC, 2);
     if (idx >= 4) pc += immSize(origPC, 3);
+    auto start = pc;
+    auto const size = decode_iva(pc);
     int vecElemSz;
     auto itype = immType(op, idx);
     if (itype == BLA) {
@@ -167,7 +169,7 @@ int immSize(PC origPC, int idx) {
       assertx(itype == SLA);
       vecElemSz = sizeof(StrVecItem);
     }
-    return sizeof(int32_t) + vecElemSz * decode_raw<int32_t>(pc);
+    return pc - start + vecElemSz * size;
   }
 
   if (immIsIterTable(op, idx)) {
@@ -831,7 +833,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 } while (false)
 
 #define READSVEC() do {                                 \
-  int sz = decode_raw<int>(it);                         \
+  int sz = decode_iva(it);                              \
   out += " <";                                          \
   const char* sep = "";                                 \
   for (int i = 0; i < sz; ++i) {                        \
@@ -848,7 +850,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 } while (false)
 
 #define READI32VEC() do {                                      \
-  int sz = decode_raw<uint32_t>(it);                           \
+  int sz = decode_iva(it);                                     \
   out += " <";                                                 \
   const char* sep = "";                                        \
   for (int i = 0; i < sz; ++i) {                               \
@@ -906,7 +908,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
   staticArrayStreamer(lookupArrayId(decode_raw<Id>(it)), out);   \
 } while (false)
 #define H_VSA do {                                      \
-  int sz = decode_raw<int32_t>(it);                     \
+  int sz = decode_iva(it);                              \
   out += " <";                                          \
   for (int i = 0; i < sz; ++i) {                        \
     H_SA;                                               \
@@ -1186,16 +1188,10 @@ ImmVector getImmVector(PC opcode) {
   int numImm = numImmediates(op);
   for (int k = 0; k < numImm; ++k) {
     ArgType t = immType(op, k);
-    if (t == BLA || t == SLA || t == I32LA) {
-      void* vp = getImmPtr(opcode, k);
-      return ImmVector::createFromStream(
-        static_cast<const int32_t*>(vp)
-      );
-    }
-    if (t == VSA) {
-      const int32_t* vp = (int32_t*)getImmPtr(opcode, k);
-      return ImmVector(reinterpret_cast<const uint8_t*>(vp + 1),
-                       vp[0], vp[0]);
+    if (t == BLA || t == SLA || t == I32LA || t == VSA) {
+      PC vp = getImmPtr(opcode, k)->bytes;
+      auto const size = decode_iva(vp);
+      return ImmVector(vp, size, t == VSA ? size : 0);
     }
   }
 

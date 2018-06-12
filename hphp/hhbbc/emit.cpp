@@ -535,7 +535,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto emit_vsa = [&] (const CompactVector<LSString>& keys) {
       auto n = keys.size();
-      ue.emitInt32(n);
+      ue.emitIVA(n);
       for (size_t i = 0; i < n; ++i) {
         ue.emitInt32(ue.mergeLitstr(keys[i]));
       }
@@ -555,12 +555,12 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
 
     auto emit_switch = [&] (const SwitchTab& targets) {
-      ue.emitInt32(targets.size());
+      ue.emitIVA(targets.size());
       for (auto t : targets) emit_branch(t);
     };
 
     auto emit_sswitch = [&] (const SSwitchTab& targets) {
-      ue.emitInt32(targets.size());
+      ue.emitIVA(targets.size());
       for (size_t i = 0; i < targets.size() - 1; ++i) {
         ue.emitInt32(ue.mergeLitstr(targets[i].first));
         emit_branch(targets[i].second);
@@ -584,7 +584,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
 
     auto emit_argvec = [&] (const CompactVector<uint32_t>& argv) {
-      ue.emitInt32(argv.size());
+      ue.emitIVA(argv.size());
       for (auto i : argv) {
         ue.emitInt32(i);
       }

@@ -259,7 +259,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   };
 
   auto print_switch = [&] {
-    auto const vecLen = decode<int32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     out.fmt(" <");
     for (auto i = int32_t{0}; i < vecLen; ++i) {
       auto const off = decode<Offset>(pc);
@@ -270,7 +270,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   };
 
   auto print_sswitch = [&] {
-    auto const vecLen = decode<int32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     out.fmt(" <");
     for (auto i = int32_t{0}; i < vecLen; ++i) {
       auto const strId  = decode<Id>(pc);
@@ -313,7 +313,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   };
 
   auto print_argv = [&] {
-    auto const vecLen = decode<uint32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     if (!vecLen) return;
     out.fmt(" <");
     for (auto i = uint32_t{0}; i < vecLen; ++i) {
@@ -324,7 +324,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   };
 
   auto print_stringvec = [&] {
-    auto const vecLen = decode<int32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     out.fmt(" <");
     for (auto i = uint32_t{0}; i < vecLen; ++i) {
       auto const str = finfo.unit->lookupLitstrId(decode<int32_t>(pc));

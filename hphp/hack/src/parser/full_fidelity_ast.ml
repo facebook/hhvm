@@ -550,15 +550,17 @@ type suspension_kind =
   | SKAsync
   | SKCoroutine
 
-let mk_suspension_kind_ has_async has_coroutine =
+let mk_suspension_kind_ node env has_async has_coroutine =
   match has_async, has_coroutine with
   | false, false -> SKSync
   | true, false -> SKAsync
-  | false, true-> SKCoroutine
-  | true, true -> raise (Failure "Couroutine functions may not be async")
+  | false, true -> SKCoroutine
+  | true, true ->
+    raise_parsing_error env node "Coroutine functions may not be async";
+    SKCoroutine
 
-let mk_suspension_kind is_async is_coroutine =
-  mk_suspension_kind_
+let mk_suspension_kind node env is_async is_coroutine =
+  mk_suspension_kind_ node env
     (not (is_missing is_async))
     (not (is_missing is_coroutine))
 
@@ -568,8 +570,8 @@ let mk_fun_kind suspension_kind yield =
   | SKAsync, true  -> FAsyncGenerator
   | SKSync,  false -> FSync
   | SKAsync, false -> FAsync
-  | SKCoroutine, false -> FCoroutine
-  | SKCoroutine, true -> raise (Failure "Couroutine functions may not yield")
+  | SKCoroutine, _ -> FCoroutine
+  (* Yield in coroutine is not permitted, the error will be reported at NastCheck *)
 
 let fun_template yielding node suspension_kind env =
   let p = pFunction node env in
@@ -953,8 +955,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | LambdaExpression {
         lambda_async; lambda_coroutine; lambda_signature; lambda_body;
         lambda_attribute_spec; _ } ->
-      let suspension_kind =
-        mk_suspension_kind lambda_async lambda_coroutine in
+      let suspension_kind = mk_suspension_kind node env lambda_async lambda_coroutine in
       let f_params, f_ret =
         match syntax lambda_signature with
         | LambdaSignature { lambda_parameters; lambda_type; _ } ->
@@ -1488,6 +1489,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           in
         let suspension_kind =
           mk_suspension_kind
+            node
+            env
             anonymous_async_keyword
             anonymous_coroutine_keyword in
         let f_body, yield =
@@ -1515,7 +1518,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       { awaitable_async; awaitable_coroutine; awaitable_compound_statement;
         awaitable_attribute_spec; } ->
       let suspension_kind =
-        mk_suspension_kind awaitable_async awaitable_coroutine in
+        mk_suspension_kind node env awaitable_async awaitable_coroutine in
       let blk, yld = mpYielding pFunctionBody awaitable_compound_statement env in
       let body =
         { (fun_template yld node suspension_kind env) with
@@ -2031,7 +2034,7 @@ and pFunHdr : fun_hdr parser = fun node env ->
       let fh_parameters = couldMap ~f:pFunParam function_parameter_list env in
       let fh_return_type = mpOptional pHint function_type env in
       let fh_suspension_kind =
-        mk_suspension_kind_ modifiers.has_async modifiers.has_coroutine in
+        mk_suspension_kind_ node env modifiers.has_async modifiers.has_coroutine in
       let fh_name = pos_name function_name env in
       let fh_constrs =
         match syntax function_where_clause with

@@ -430,6 +430,11 @@ let main_loop_command_handler client_kind client result  =
     end
   | ServerUtils.Needs_writes (env, f, _) -> f env
 
+let has_pending_disk_changes genv =
+  match genv.notifier_async_reader () with
+  | Some reader when Buffered_line_reader.is_readable reader -> true
+  | _ -> false
+
 let serve_one_iteration genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
   ServerMonitorUtils.exit_if_parent_dead ();
@@ -493,6 +498,7 @@ let serve_one_iteration genv env client_provider =
     if ClientProvider.client_has_message client then env else
     (* We processed some edits but didn't recheck them yet. *)
     if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then env else
+    if has_pending_disk_changes genv then env else
 
     let sub, errors = Diagnostic_subscription.pop_errors sub env.errorl in
 

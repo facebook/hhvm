@@ -4,7 +4,3 @@ Invalid argument (Typing[4110])
   This is a tuple of size 3
   File "tuple3.php", line 6, characters 13-25:
   It is incompatible with a tuple of size 2
-File "tuple3.php", line 6, characters 13-25:
-Invalid "is" expression hint (Typing[4195])
-  File "tuple3.php", line 6, characters 13-25:
-  The "is" operator cannot be used with a tuple of size 2

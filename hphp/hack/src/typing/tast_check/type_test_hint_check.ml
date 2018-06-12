@@ -75,10 +75,6 @@ let visitor = object(this)
     else acc
   method! on_tarraykind acc r array_kind =
     update acc @@ Invalid (r, Tarraykind array_kind)
-  method! on_ttuple acc r tyl =
-    update acc @@ Invalid (r, Ttuple tyl)
-  method! on_tshape acc r fields_known fdm =
-    update acc @@ Invalid (r, Tshape (fields_known, fdm))
   method is_wildcard = function
     | _, Tabstract (AKgeneric name, _) ->
       Env.is_fresh_generic_parameter name

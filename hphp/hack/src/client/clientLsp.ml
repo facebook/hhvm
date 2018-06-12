@@ -884,7 +884,7 @@ let make_ide_completion_response
   : [`InsertText of string | `TextEdit of TextEdit.t list] * Completion.insertTextFormat =
     let use_textedits =
       let open Initialize in
-      p.initializationOptions.use_textedit_autocomplete
+      p.initializationOptions.useTextEditAutocomplete
     in
     match completion.func_details, use_textedits with
     | Some details, _ when Lsp_helpers.supports_snippets p && not is_caret_followed_by_lparen ->

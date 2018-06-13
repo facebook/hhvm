@@ -248,3 +248,41 @@ module MasterApi = struct
   let update_search_index ~fuzzy files =
     SS.MasterApi.update_search_index ~fuzzy files
 end
+
+module ClassMethods = struct
+  let get_class_definition_file class_name =
+    let class_def = Naming_heap.TypeIdHeap.get class_name in
+    match class_def with
+    | Some (pos, `Class) ->
+      let file =
+        match pos with
+        | FileInfo.Full pos -> Pos.filename pos
+        | FileInfo.File (_, file) -> file
+      in
+      Some file
+    | _ -> None
+
+  let query tcopt class_name method_query =
+    let open Option.Monad_infix in
+    let method_query = String.lowercase_ascii method_query in
+    let matches_query str =
+      let str = String.lowercase_ascii str in
+      String_utils.string_starts_with str method_query
+    in
+    get_class_definition_file class_name
+    >>= (fun file -> Parser_heap.find_class_in_file tcopt file class_name)
+    >>| (fun class_ -> class_.Ast.c_body)
+    >>| List.filter_map ~f:begin fun class_elt ->
+      match class_elt with
+      | Ast.Method Ast.{m_kind; m_name = (pos, name); _}
+          when matches_query name ->
+        let is_static = List.mem m_kind Ast.Static in
+        Some SearchUtils. {
+          name;
+          pos;
+          result_type = Method (is_static, class_name)
+        }
+      | _ -> None
+    end
+    |> Option.value ~default:[]
+end

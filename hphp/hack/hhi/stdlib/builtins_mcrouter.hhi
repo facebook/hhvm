@@ -1,5 +1,6 @@
 <?hh // decl
 
+<<__PHPStdLib>>
 class MCRouterException extends Exception {
   public function getKey(): string;
   public function getOp(): int;
@@ -12,11 +13,13 @@ class MCRouterException extends Exception {
   );
 }
 
+<<__PHPStdLib>>
 class MCRouterOptionException extends Exception {
   public function getErrors(): array<array<string,string>>;
   public function __construct(protected array<array<string,string>> $errors);
 }
 
+<<__PHPStdLib>>
 class MCRouter {
   public function __construct(
     array<string,mixed> $options,

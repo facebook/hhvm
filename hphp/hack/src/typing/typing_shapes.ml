@@ -175,8 +175,7 @@ let idx env p fty shape_ty field default =
          * result is nullable, point to Shapes::idx definition as reason *)
         env, (fst fty, Toption res)
       | Some (default_pos, default_ty) ->
-        let env, default_ty = Typing_utils.unresolved env default_ty in
-        let env, res = Type.sub_type default_pos Reason.URparam env res default_ty, res in
+        let env = Type.sub_type default_pos Reason.URparam env default_ty res in
         let res =
           if field_has_nullable_type env field_name shape_ty
           then (fst fty, Toption res)

@@ -422,6 +422,10 @@ let rec simplify_subtype
       when xhp_child = SN.Classes.cXHPChild -> valid ()
   | (_, Tprim p1), (_, Tprim p2) ->
     if p1 = p2 then valid () else invalid ()
+  | (_, Tprim _),
+    (_, (Tfun _ | Ttuple _ | Tshape _ | Tanon _  | Tobject | Tclass _ |
+         Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
+    invalid ()
   | _, _ ->
     default ()
 

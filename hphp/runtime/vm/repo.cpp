@@ -209,6 +209,8 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
     RuntimeOption::EvalHackArrDVArrs        = s_globalData.HackArrDVArrs;
     RuntimeOption::DisallowDynamicVarEnvFuncs =
       s_globalData.DisallowDynamicVarEnvFuncs;
+    RuntimeOption::EvalAllowObjectDestructors =
+      s_globalData.AllowObjectDestructors;
 
     if (s_globalData.HardReturnTypeHints) {
       RuntimeOption::EvalCheckReturnTypeHints = 3;

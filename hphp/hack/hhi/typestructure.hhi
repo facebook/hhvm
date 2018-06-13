@@ -47,17 +47,24 @@ newtype TypeStructure<T> as shape(
   'kind' => TypeStructureKind,
   'name' => ?string,
   'classname' => ?classname<T>,
-  'elem_types' => ?array,
-  'return_type' => ?array,
-  'param_types' => ?array,
-  'generic_types' => ?array,
+  /* HH_IGNORE_ERROR[2071] */
+  'elem_types' => ?varray,
+  /* HH_IGNORE_ERROR[2071] */
+  'return_type' => ?darray,
+  /* HH_IGNORE_ERROR[2071] */
+  'param_types' => ?varray,
+  /* HH_IGNORE_ERROR[2071] */
+  'generic_types' => ?varray,
   'root_name' => ?string,
-  'access_list' => ?array,
-  'fields' => ?array,
+  /* HH_IGNORE_ERROR[2071] */
+  'access_list' => ?varray,
+  /* HH_IGNORE_ERROR[2071] */
+  'fields' => ?darray,
   'allows_unknown_fields' => ?bool,
   'is_cls_cns' => ?bool,
   'optional_shape_field' => ?bool,
-  'value' => ?array,
+  /* HH_IGNORE_ERROR[2071] */
+  'value' => ?darray,
   'typevars' => ?string,
   'alias' => ?string,
 ) = shape(
@@ -68,20 +75,27 @@ newtype TypeStructure<T> as shape(
   // classname for classes, interfaces, enums, or traits
   'classname' => ?classname<T>,
   // for tuples
-  'elem_types' => ?array,
-  'return_type' => ?array,
+  /* HH_IGNORE_ERROR[2071] */
+  'elem_types' => ?varray,
+  /* HH_IGNORE_ERROR[2071] */
+  'return_type' => ?darray,
   // for functions
-  'param_types' => ?array,
+  /* HH_IGNORE_ERROR[2071] */
+  'param_types' => ?varray,
   // for arrays, classes
-  'generic_types' => ?array,
+  /* HH_IGNORE_ERROR[2071] */
+  'generic_types' => ?varray,
   'root_name' => ?string,
-  'access_list' => ?array,
+  /* HH_IGNORE_ERROR[2071] */
+  'access_list' => ?varray,
   // for shapes
-  'fields' => ?array,
+  /* HH_IGNORE_ERROR[2071] */
+  'fields' => ?darray,
   'allows_unknown_fields' => ?bool,
   'is_cls_cns' => ?bool,
   'optional_shape_field' => ?bool,
-  'value' => ?array,
+  /* HH_IGNORE_ERROR[2071] */
+  'value' => ?darray,
   // Comma-separated string
   'typevars' => ?string,
   // for type aliases

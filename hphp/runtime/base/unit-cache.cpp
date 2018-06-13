@@ -713,7 +713,9 @@ std::vector<Unit*> loadedUnitsRepoAuth() {
   std::vector<Unit*> units;
   units.reserve(s_repoUnitCache.size());
   for (auto const& elm : s_repoUnitCache) {
-    units.push_back(elm.second.unit);
+    if (elm.second.unit) {
+      units.push_back(elm.second.unit);
+    }
   }
   return units;
 }

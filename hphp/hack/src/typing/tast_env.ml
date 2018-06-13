@@ -24,12 +24,29 @@ let pp_env _ _ = Printf.printf "%s\n" "<env>"
 type env = Typing_env.env
 type t = env [@@deriving show]
 
+exception Not_in_class
+
 let print_ty = Typing_print.full_strip_ns
 let print_ty_with_identity = Typing_print.full_with_identity
 let ty_to_json = Typing_print.to_json
 
-let get_self_id = Typing_env.get_self_id
-let get_self = Typing_env.get_self
+let get_self_id_exn env =
+  match Typing_env.get_self_id env with
+  | "" -> raise Not_in_class
+  | id -> id
+
+let get_self_id env =
+  try Some (get_self_id_exn env) with
+  | Not_in_class -> None
+
+let get_self_exn env =
+  let _ = get_self_id_exn env in
+  Typing_env.get_self env
+
+let get_self env =
+  try Some (get_self_exn env) with
+  | Not_in_class -> None
+
 let is_static = Typing_env.is_static
 let is_strict = Typing_env.is_strict
 let get_tcopt = Typing_env.get_tcopt

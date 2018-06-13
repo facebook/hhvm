@@ -26,8 +26,8 @@ end)
 let combine_name cur_class cur_caller =
   match cur_class, cur_caller with
   | _, None -> "" (* Top-level function call *)
-  | "", Some f -> f
-  | c, Some f -> c ^ "::" ^ f
+  | None, Some f -> f
+  | Some c, Some f -> c ^ "::" ^ f
 
 let is_pseudofunction name =
   List.mem SN.PseudoFunctions.[empty; isset; unset;] name
@@ -44,7 +44,7 @@ class visitor = object (self)
     if is_pseudofunction name then self#zero else
     let name = Utils.strip_ns name in
     if name = SN.SpecialFunctions.echo then self#zero else
-    let cur_class = Tast_env.get_self_id env |> Utils.strip_ns in
+    let cur_class = Tast_env.get_self_id env |> Option.map ~f:Utils.strip_ns in
     Result_set.singleton {
       name;
       type_ = target_type;
@@ -54,7 +54,7 @@ class visitor = object (self)
 
   method method_call env target_type class_name method_id =
     let pos, method_name = method_id in
-    let method_fullname = combine_name class_name (Some method_name) in
+    let method_fullname = combine_name (Some class_name) (Some method_name) in
     self#fun_call env target_type method_fullname pos
 
   method! on_fun_ env f =

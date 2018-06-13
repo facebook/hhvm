@@ -10,6 +10,8 @@
 type env [@@deriving show]
 type t = env [@@deriving show]
 
+exception Not_in_class
+
 val print_ty : env -> 'a Typing_defs.ty -> string
 (** Return a string representation of the given type using Hack-like syntax. *)
 
@@ -27,13 +29,21 @@ val print_ty_with_identity :
 val ty_to_json : env -> 'a Typing_defs.ty -> Hh_json.json
 (** Return a JSON representation of the given type. *)
 
-val get_self_id : env -> string
+val get_self_id_exn : env -> string
 (** Return the name of the enclosing class definition.
-    When not in a class definition, return the empty string. *)
+    When not in a class definition, raise {!Not_in_class}. *)
 
-val get_self : env -> Tast.ty
+val get_self_id : env -> string option
+(** Return the name of the enclosing class definition.
+    When not in a class definition, return {!None}. *)
+
+val get_self_exn : env -> Tast.ty
 (** Return the type of the enclosing class definition.
-    When not in a class definition, return a {!Typing_defs.Tany}) type. *)
+    When not in a class definition, raise {!Not_in_class}. *)
+
+val get_self : env -> Tast.ty option
+(** Return the type of the enclosing class definition.
+    When not in a class definition, return {!None}. *)
 
 val is_static : env -> bool
 (** Return {true} when in the definition of a static property or method. *)

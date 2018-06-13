@@ -31,7 +31,7 @@ abstract class BuiltinEnum<T> {
    * @return array ('CONST_NAME' => $value, ....)
    */
   <<__Rx>>
-  final public static function getValues(): array<string, T>;
+  final public static function getValues(): darray<string, T>;
 
   /**
    * Get the names of all the const values, indexed by value. Calls
@@ -40,7 +40,7 @@ abstract class BuiltinEnum<T> {
    * @return array($value => 'CONST_NAME', ....)
    */
   <<__Rx>>
-  final public static function getNames(): array<T, string>;
+  final public static function getNames(): darray<T, string>;
 
   /**
    * Returns whether or not the value is defined as a constant.

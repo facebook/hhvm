@@ -494,9 +494,9 @@
         {
           "label": "getValues",
           "kind": 2,
-          "detail": "function(): array<string, enum Elsa>",
+          "detail": "function(): darray<string, enum Elsa>",
           "inlineDetail": "()",
-          "itemType": "array<string, enum Elsa>",
+          "itemType": "darray<string, enum Elsa>",
           "insertText": "getValues",
           "insertTextFormat": 1,
           "data": {
@@ -509,9 +509,9 @@
         {
           "label": "getNames",
           "kind": 2,
-          "detail": "function(): array<enum Elsa, string>",
+          "detail": "function(): darray<enum Elsa, string>",
           "inlineDetail": "()",
-          "itemType": "array<enum Elsa, string>",
+          "itemType": "darray<enum Elsa, string>",
           "insertText": "getNames",
           "insertTextFormat": 1,
           "data": {

@@ -1032,27 +1032,25 @@ and catch parent_lenv after_try env (sid, exn, b) =
   (* Only keep the local bindings if this catch is non-terminal *)
   env, env.Env.lenv, (sid, exn, tb)
 
-and as_expr env pe =
-let make_result ty = env, ty in
-function
+and as_expr env pe = function
   | As_v _ ->
-      let ty = Env.fresh_type() in
+      let env, ty = Env.fresh_unresolved_type env in
       let tvector = Tclass ((pe, SN.Collections.cTraversable), [ty]) in
-      make_result (Reason.Rforeach pe, tvector)
+      env, (Reason.Rforeach pe, tvector)
   | As_kv _ ->
-      let ty1 = Env.fresh_type() in
-      let ty2 = Env.fresh_type() in
+      let env, ty1 = Env.fresh_unresolved_type env in
+      let env, ty2 = Env.fresh_unresolved_type env in
       let tmap = Tclass((pe, SN.Collections.cKeyedTraversable), [ty1; ty2]) in
-      make_result (Reason.Rforeach pe, tmap)
+      env, (Reason.Rforeach pe, tmap)
   | Await_as_v _ ->
-      let ty = Env.fresh_type() in
+      let env, ty = Env.fresh_unresolved_type env in
       let tvector = Tclass ((pe, SN.Classes.cAsyncIterator), [ty]) in
-      make_result (Reason.Rasyncforeach pe, tvector)
+      env, (Reason.Rasyncforeach pe, tvector)
   | Await_as_kv _ ->
-      let ty1 = Env.fresh_type() in
-      let ty2 = Env.fresh_type() in
+      let env, ty1 = Env.fresh_unresolved_type env in
+      let env, ty2 = Env.fresh_unresolved_type env in
       let tmap = Tclass ((pe, SN.Classes.cAsyncKeyedIterator), [ty1; ty2]) in
-      make_result (Reason.Rasyncforeach pe, tmap)
+      env, (Reason.Rasyncforeach pe, tmap)
 
 and bind_as_expr env loop_ty ty aexpr =
   let env, ety = Env.expand_type env ty in

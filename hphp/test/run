@@ -3085,7 +3085,7 @@ function print_failure($argv, $results, $options) {
         $rerun .= " --" . $option . ' ' . escapeshellarg($value);
       }
     }
-    $rerun .= ' ' . implode(' ', array_map('escapeshellarg', $failed)) . "\n";
+    $rerun .= sprintf(' $(cat %s)%s', $failing_tests_file, "\n");
     print $rerun;
   }
 }

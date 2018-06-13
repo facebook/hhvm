@@ -128,13 +128,17 @@ class DOMNode {
   public function replaceChild<T as DOMNode>(DOMNode $newchildobj, T $oldchildobj): T;
   public function C14N(bool $exclusive = false,
                        bool $with_comments = false,
-                       ?array $xpath = null,
-                       ?array $ns_prefixes = null): string;
+                       /* HH_IGNORE_ERROR[2071] */
+                       ?darray $xpath = null,
+                       /* HH_IGNORE_ERROR[2071] */
+                       ?varray $ns_prefixes = null): string;
   public function C14NFile(string $uri,
                            bool $exclusive = false,
                            bool $with_comments = false,
-                           ?array $xpath = null,
-                           ?array $ns_prefixes = null): int;
+                           /* HH_IGNORE_ERROR[2071] */
+                           ?darray $xpath = null,
+                           /* HH_IGNORE_ERROR[2071] */
+                           ?varray $ns_prefixes = null): int;
   public function getNodePath();
 }
 
@@ -276,7 +280,8 @@ class DOMDocumentType extends DOMNode {
   /* readonly */ public string $internalSubset;
 
   // Methods
-  public function __debuginfo(): array;
+  /* HH_IGNORE_ERROR[2071] */
+  public function __debuginfo(): darray;
 
 }
 

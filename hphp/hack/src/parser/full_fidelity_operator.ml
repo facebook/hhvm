@@ -22,6 +22,7 @@ not how they look on the page. *)
 | ConditionalColonOperator
 | DegenerateConditionalOperator
 | CoalesceOperator
+| CoalesceAssignmentOperator
 | PHPOrOperator
 | PHPExclusiveOrOperator
 | PHPAndOperator
@@ -114,6 +115,7 @@ let precedence operator =
   | AndAssignmentOperator
   | OrAssignmentOperator | ExclusiveOrAssignmentOperator
   | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
+  | CoalesceAssignmentOperator
     -> 6
   | PipeOperator -> 7
   | ConditionalQuestionOperator | ConditionalColonOperator
@@ -176,7 +178,7 @@ let associativity operator =
   (* else *)
   (* endif *)
     -> LeftAssociative
-  | CoalesceOperator| LogicalNotOperator | NotOperator | CastOperator
+  | CoalesceOperator | CoalesceAssignmentOperator | LogicalNotOperator | NotOperator | CastOperator
   | DollarOperator | UnaryPlusOperator | UnaryMinusOperator  (* TODO: Correct? *)
   | ErrorControlOperator | ReferenceOperator (* TODO: Correct? *)
   | PostfixIncrementOperator | PostfixDecrementOperator
@@ -230,6 +232,7 @@ let is_trailing_operator_token token =
   | TokenKind.BarGreaterThan
   | TokenKind.Question
   | TokenKind.QuestionQuestion
+  | TokenKind.QuestionQuestionEqual
   | TokenKind.QuestionColon
   | TokenKind.BarBar
   | TokenKind.Carat
@@ -283,6 +286,7 @@ let trailing_from_token token =
   | TokenKind.Question -> ConditionalQuestionOperator
   | TokenKind.Colon -> ConditionalColonOperator
   | TokenKind.QuestionQuestion -> CoalesceOperator
+  | TokenKind.QuestionQuestionEqual -> CoalesceAssignmentOperator
   | TokenKind.QuestionColon -> DegenerateConditionalOperator
   | TokenKind.BarBar -> LogicalOrOperator
   | TokenKind.Carat -> ExclusiveOrOperator
@@ -346,6 +350,7 @@ let is_binary_operator_token token =
   | TokenKind.Ampersand
   | TokenKind.BarGreaterThan
   | TokenKind.QuestionQuestion
+  | TokenKind.QuestionQuestionEqual
   | TokenKind.QuestionColon
   | TokenKind.BarBar
   | TokenKind.Carat
@@ -398,7 +403,8 @@ let is_assignment operator =
   | OrAssignmentOperator
   | ExclusiveOrAssignmentOperator
   | LeftShiftAssignmentOperator
-  | RightShiftAssignmentOperator -> true
+  | RightShiftAssignmentOperator
+  | CoalesceAssignmentOperator -> true
   | _ -> false
 
 let is_comparison operator =

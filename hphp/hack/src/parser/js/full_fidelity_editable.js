@@ -1013,6 +1013,8 @@ class EditableToken extends EditableSyntax
        return new QuestionColonToken(leading, trailing);
     case '??':
        return new QuestionQuestionToken(leading, trailing);
+    case '??=':
+       return new QuestionQuestionEqualToken(leading, trailing);
     case ':':
        return new ColonToken(leading, trailing);
     case ';':
@@ -2263,6 +2265,13 @@ class QuestionQuestionToken extends EditableToken
   constructor(leading, trailing)
   {
     super('??', leading, trailing, '??');
+  }
+}
+class QuestionQuestionEqualToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('??=', leading, trailing, '??=');
   }
 }
 class ColonToken extends EditableToken
@@ -21277,6 +21286,7 @@ exports.QuestionToken = QuestionToken;
 exports.QuestionAsToken = QuestionAsToken;
 exports.QuestionColonToken = QuestionColonToken;
 exports.QuestionQuestionToken = QuestionQuestionToken;
+exports.QuestionQuestionEqualToken = QuestionQuestionEqualToken;
 exports.ColonToken = ColonToken;
 exports.SemicolonToken = SemicolonToken;
 exports.EqualToken = EqualToken;

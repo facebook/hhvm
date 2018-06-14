@@ -24,6 +24,7 @@ not how they look on the page. *)
 | ConditionalColonOperator
 | DegenerateConditionalOperator
 | CoalesceOperator
+| CoalesceAssignmentOperator
 | PHPOrOperator
 | PHPExclusiveOrOperator
 | PHPAndOperator

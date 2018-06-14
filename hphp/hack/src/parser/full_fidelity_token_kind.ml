@@ -174,6 +174,7 @@ type t =
   | QuestionAs
   | QuestionColon
   | QuestionQuestion
+  | QuestionQuestionEqual
   | Colon
   | Semicolon
   | Equal
@@ -393,6 +394,7 @@ let from_string keyword =
   | "?as"             -> Some QuestionAs
   | "?:"              -> Some QuestionColon
   | "??"              -> Some QuestionQuestion
+  | "??="             -> Some QuestionQuestionEqual
   | ":"               -> Some Colon
   | ";"               -> Some Semicolon
   | "="               -> Some Equal
@@ -583,6 +585,7 @@ let to_string kind =
   | QuestionAs                    -> "?as"
   | QuestionColon                 -> "?:"
   | QuestionQuestion              -> "??"
+  | QuestionQuestionEqual         -> "??="
   | Colon                         -> ":"
   | Semicolon                     -> ";"
   | Equal                         -> "="

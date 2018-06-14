@@ -905,7 +905,8 @@ module WithStatementAndDeclAndTypeParser
     | GreaterThanGreaterThan
     | Carat
     | BarGreaterThan
-    | QuestionQuestion ->
+    | QuestionQuestion
+    | QuestionQuestionEqual ->
       parse_remaining_binary_expression parser term assignment_prefix_kind
     | Instanceof ->
       parse_instanceof_expression parser term

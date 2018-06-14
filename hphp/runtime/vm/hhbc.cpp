@@ -415,7 +415,7 @@ int numSuccs(PC const origPC) {
         decode_raw<SwitchKind>(pc); // skip bounded flag
         decode_raw<int64_t>(pc); // skip base
       }
-      return decode_raw<int32_t>(pc); // vector length
+      return decode_iva(pc); // vector length
     }
     if (isUnconditionalJmp(op) || op == OpIterBreak) return 1;
     return 0;

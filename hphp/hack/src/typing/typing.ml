@@ -1447,13 +1447,10 @@ and expr_
         | _ -> env, None in
       let env, tel, tyl = exprs ?expected:elem_expected env el in
       let env, tyl = List.map_env env tyl Typing_env.unbind in
-      let env, elem_ty, tyl =
+      let env, elem_ty =
         match elem_expected with
-        | Some (_, _, ty) -> env, ty, tyl
-        | None ->
-          let env, elem_ty = Env.fresh_unresolved_type env in
-          let env, tyl = List.map_env env tyl TUtils.unresolved in
-          env, elem_ty, tyl in
+        | Some (_, _, ty) -> env, ty
+        | None -> Env.fresh_unresolved_type env in
       let class_name = vc_kind_to_name kind in
       let subtype_val env ((pos, _), ty) =
         let env = Type.sub_type p Reason.URvector env ty elem_ty in
@@ -1487,21 +1484,15 @@ and expr_
       let env, tkl, kl = exprs ?expected:kexpected env kl in
       let env, tvl, vl = exprs ?expected:vexpected env vl in
       let env, kl = List.map_env env kl Typing_env.unbind in
-      let env, k, kl =
+      let env, k =
         match kexpected with
-        | Some (_, _, k) -> env, k, kl
-        | None ->
-          let env, k = Env.fresh_unresolved_type env in
-          let env, kl = List.map_env env kl TUtils.unresolved in
-          env, k, kl in
+        | Some (_, _, k) -> env, k
+        | None -> Env.fresh_unresolved_type env in
       let env, vl = List.map_env env vl Typing_env.unbind in
-      let env, v, vl =
+      let env, v =
         match vexpected with
-        | Some (_, _, v) -> env, v, vl
-        | None ->
-          let env, v = Env.fresh_unresolved_type env in
-          let env, vl = List.map_env env vl TUtils.unresolved in
-          env, v, vl in
+        | Some (_, _, v) -> env, v
+        | None -> Env.fresh_unresolved_type env in
       let class_name = kvc_kind_to_name kind in
       let subtype_key env (((key_pos, _), _), ty) =
         let env = Type.sub_type p Reason.URkey env ty k in

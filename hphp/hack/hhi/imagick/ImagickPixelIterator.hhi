@@ -9,8 +9,8 @@
  */
 
 class ImagickPixelIterator implements
-  KeyedTraversable<int, array<int, ImagickPixel>>,
-  Iterator<array<int, ImagickPixel>> {
+  KeyedTraversable<int, darray<int, ImagickPixel>>,
+  Iterator<darray<int, ImagickPixel>> {
 
   // Methods
   public static function getPixelIterator(
@@ -23,7 +23,7 @@ class ImagickPixelIterator implements
     int $columns,
     int $rows,
   ): ImagickPixelIterator;
-  public function current(): array<int, ImagickPixel>;
+  public function current(): darray<int, ImagickPixel>;
   public function key(): int;
   public function next(): void;
   public function rewind(): void;
@@ -31,10 +31,10 @@ class ImagickPixelIterator implements
   public function clear(): bool;
   public function __construct(Imagick $wand);
   public function destroy(): bool;
-  public function getCurrentIteratorRow(): array<int, ImagickPixel>;
+  public function getCurrentIteratorRow(): darray<int, ImagickPixel>;
   public function getIteratorRow(): int;
-  public function getNextIteratorRow(): array<int, ImagickPixel>;
-  public function getPreviousIteratorRow(): array<int, ImagickPixel>;
+  public function getNextIteratorRow(): darray<int, ImagickPixel>;
+  public function getPreviousIteratorRow(): darray<int, ImagickPixel>;
   public function newPixelIterator(Imagick $wand): bool;
   public function newPixelRegionIterator(
     Imagick $wand,

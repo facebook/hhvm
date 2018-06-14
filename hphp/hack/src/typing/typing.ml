@@ -1252,7 +1252,6 @@ and expr_
       | None -> Env.fresh_unresolved_type env
       | Some (_, _, ty) -> env, ty in
     let has_unknown = List.exists tys (fun (_, ty) -> ty = Typing_utils.tany env) in
-    let env, tys = List.map_env env tys TUtils.unresolved in
     let subtype_value env ty =
       Type.sub_type p Reason.URarray_value env ty supertype in
     if has_unknown then

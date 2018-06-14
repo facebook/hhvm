@@ -33,7 +33,7 @@ function count(mixed $x, int $mode = COUNT_NORMAL): int; // count takes Countabl
 <<__PHPStdLib, __Rx>>
 function dechex(int $number): string;
 <<__Rx>>
-function func_get_args(): array;
+function func_get_args(): varray;
 <<__PHPStdLib, __Rx>>
 function implode(string $glue, $pieces): string; // could be Container<Stringish>
 <<__PHPStdLib, __Rx>>

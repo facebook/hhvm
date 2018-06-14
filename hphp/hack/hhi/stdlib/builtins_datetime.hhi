@@ -166,7 +166,7 @@ class DateTime implements DateTimeInterface {
     mixed $time,
     ?DateTimeZone $timezone = null,
   );
-  public static function getLastErrors(): array;
+  public static function getLastErrors(): darray;
 }
 
 class DateTimeImmutable implements DateTimeInterface {
@@ -192,7 +192,7 @@ class DateTimeImmutable implements DateTimeInterface {
     ?DateTimeZone $timezone = null,
   );
   public static function createFromMutable(DateTime $datetime);
-  public static function getLastErrors(): array;
+  public static function getLastErrors(): darray;
   public function __clone();
 }
 
@@ -212,7 +212,7 @@ class DateTimeZone {
   const ALL_WITH_BC = 0;
   const PER_COUNTRY = 0;
   public function __construct(string $timezone);
-  public function getLocation(): array { }
+  public function getLocation(): darray { }
   public function getName(): string { }
   public function getOffset(DateTime $datetime);
   public function getTransitions(int $timestamp_begin = PHP_INT_MIN,

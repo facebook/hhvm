@@ -323,7 +323,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     out.fmt(">");
   };
 
-  UNUSED auto print_argvb = [&] {
+  auto print_argvb = [&] {
     out.fmt(" \"");
     auto const vecLen = decode_iva(pc);
     uint32_t tmp = 0;

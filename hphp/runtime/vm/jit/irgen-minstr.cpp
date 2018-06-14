@@ -2044,10 +2044,10 @@ void emitVGetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
 void emitFPassM(IRGS& env, uint32_t arg, uint32_t nDiscard, MemberKey mk,
                 FPassHint hint) {
   if (fpassFlags(env, arg) == MOpMode::Warn) {
-    checkFPassHint(env, arg, arg + nDiscard, hint, false);
+    checkFPassHint(env, arg, hint, false);
     return emitQueryM(env, nDiscard, QueryMOp::CGet, mk);
   }
-  checkFPassHint(env, arg, arg + nDiscard, hint, true);
+  checkFPassHint(env, arg, hint, true);
   emitVGetM(env, nDiscard, mk);
 }
 

@@ -315,7 +315,7 @@ static const struct {
   { OpFPushCtorS,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCufIter,{None,             FStack,       OutFDesc        }},
   { OpFThrowOnRefMismatch,
-                   {FuncdRef,         None,         OutNone         }},
+                   {None,             None,         OutNone         }},
   { OpFHandleRefMismatch,
                    {None,             None,         OutNone         }},
   { OpFPassC,      {FuncdRef,         None,         OutSameAsInput1 }},

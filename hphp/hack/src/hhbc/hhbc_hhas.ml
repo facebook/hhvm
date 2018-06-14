@@ -460,6 +460,11 @@ let string_of_param_locations pl =
   if List.length pl = 0 then "" else
   "<" ^ (String.concat ", " (List.map string_of_int pl)) ^ ">"
 
+let string_of_list_of_bools l =
+  if List.length l = 0 then "" else
+  let bool_to_str b = if b then "1" else "0" in
+  "\"" ^ (String.concat "" (List.map bool_to_str l)) ^ "\""
+
 let string_of_call instruction =
   match instruction with
   | FPushFunc (n, pl) ->
@@ -500,8 +505,8 @@ let string_of_call instruction =
     sep ["DecodeCufIter"; string_of_iterator_id id; string_of_label l]
   | FPushCufIter (n, id) ->
     sep ["FPushCufIter"; string_of_int n; string_of_iterator_id id]
-  | FThrowOnRefMismatch (i, h) ->
-    sep ["FThrowOnRefMismatch"; string_of_param_num i; string_of_fpasshint h]
+  | FThrowOnRefMismatch l ->
+    sep ["FThrowOnRefMismatch"; string_of_list_of_bools l]
   | FHandleRefMismatch (i, h, f) ->
     sep ["FHandleRefMismatch"; string_of_param_num i; string_of_fpasshint h;
          "\"" ^ f ^ "\""]

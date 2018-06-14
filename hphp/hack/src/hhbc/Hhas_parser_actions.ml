@@ -683,6 +683,22 @@ let listofintofiarg arg =
   | IAArglist args -> List.map intofiarg args
   | _ -> report_error "expected list of ints"
 
+let listofboolofiarg arg =
+  match arg with
+  | IAString args ->
+    let parse_char c =
+      match c with
+      | '0' -> false
+      | '1' -> true
+      | _ -> report_error "expected list of bools"
+    in
+    let len = String.length args in
+    let rec aux i =
+      if i == len then []
+      else (parse_char (String.get args i)) :: (aux (i + 1))
+    in aux 0
+  | _ -> report_error "expected list of bools"
+
 let initpropopofiarg arg =
   match arg with
   | IAId "Static" -> Static
@@ -913,6 +929,7 @@ let makeunaryinst s arg = match s with
 
    (* instruct_call *)
    | "FPushFunc" -> ICall(FPushFunc (intofiarg arg, []))
+   | "FThrowOnRefMismatch" -> ICall(FThrowOnRefMismatch (listofboolofiarg arg))
    | "RetM" -> IContFlow(RetM (intofiarg arg))
    | "FCall" -> ICall(FCall (intofiarg arg))
    | "FCallUnpack" -> ICall(FCallUnpack (intofiarg arg))
@@ -1001,8 +1018,6 @@ match s with
  | "FPushCtorS" -> ICall (FPushCtorS (intofiarg arg1, specialclsrefofiarg arg2))
  | "DecodeCufIter" -> ICall (DecodeCufIter (iterofiarg arg1, labelofiarg arg2))
  | "FPushCufIter" -> ICall (FPushCufIter (intofiarg arg1, iterofiarg arg2))
- | "FThrowOnRefMismatch" ->
-    ICall (FThrowOnRefMismatch (intofiarg arg1, fpasshintof arg2))
  | "FPassC" -> ICall(FPassC (intofiarg arg1, fpasshintof arg2))
  | "FPassV" -> ICall(FPassV (intofiarg arg1, fpasshintof arg2))
  | "FPassVNop" -> ICall(FPassVNop (intofiarg arg1, fpasshintof arg2))

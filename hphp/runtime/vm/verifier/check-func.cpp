@@ -1057,6 +1057,14 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* /*b*/) {
       error("%s", "FCall didn't consume the proper param count\n");
       ok = false;
     }
+  } else if (op == Op::FThrowOnRefMismatch) {
+    int num_checked_params = getImmVector(pc).size();
+    int push_params = getImmIva(at(fpi.fpush));
+    if (num_checked_params > push_params) {
+      error("num_checked_params %d out of range [0:%d]\n", num_checked_params,
+             push_params);
+      return false;
+    }
   } else {
     // FPass*
     int param_id = getImmIva(pc);
@@ -1066,13 +1074,12 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* /*b*/) {
              push_params);
       return false;
     }
-    if (param_id != fpi.next && op != Op::FThrowOnRefMismatch) {
+    if (param_id != fpi.next) {
       error("FPass* out of order; got id %d expected %d\n",
              param_id, fpi.next);
       ok = false;
     }
-    if (isMemberBaseOp(op) || isMemberDimOp(op) ||
-        op == Op::FThrowOnRefMismatch) {
+    if (isMemberBaseOp(op) || isMemberDimOp(op)) {
       // The argument isn't pushed until the final member operation. Skip the
       // last two checks.
       return ok;
@@ -1485,7 +1492,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       // by the runtime.
       cur->silences.clear();
       break;
-    case Op::FThrowOnRefMismatch:
     case Op::FHandleRefMismatch: {
       auto new_pc = pc;
       decode_op(new_pc);

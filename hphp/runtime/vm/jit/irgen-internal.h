@@ -893,8 +893,7 @@ inline void decRefThis(IRGS& env) {
   decRef(env, ctx);
 }
 
-void checkFPassHint(IRGS& env, uint32_t paramId, int off, FPassHint hint,
-                    bool byRef);
+void checkFPassHint(IRGS& env, uint32_t paramId, FPassHint hint, bool byRef);
 
 template<class F>
 SSATmp* boxHelper(IRGS& env, SSATmp* value, F rewrite) {

@@ -590,7 +590,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       }
     };
 
-    UNUSED auto emit_argvecb = [&] (const CompactVector<bool>& argv) {
+    auto emit_argvecb = [&] (const CompactVector<bool>& argv) {
       ue.emitIVA(argv.size());
       uint32_t i = 0;
       uint8_t tmp = 0;

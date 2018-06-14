@@ -3015,32 +3015,36 @@ void in(ISS& env, const bc::FPushCufIter&) {
 }
 
 void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
-  auto const kind = prepKind(env, op.arg1);
-  auto const hint = op.subop2;
-  assertx(hint != FPassHint::Any);
+  auto& ar = fpiTop(env);
+  if (!ar.func || ar.fallbackFunc) return;
 
-  if (kind == PrepKind::Unknown) return;
+  for (auto i = 0; i < op.argv.size(); ++i) {
+    auto const kind = env.index.lookup_param_prep(env.ctx, *ar.func, i);
+    if (ar.foldable && kind != PrepKind::Val) {
+      fpiNotFoldable(env);
+      return;
+    }
+    if (kind == PrepKind::Unknown) return;
 
-  if ((kind == PrepKind::Val && hint == FPassHint::Cell) ||
-      (kind == PrepKind::Ref && hint == FPassHint::Ref)) {
-    reduce(env, bc::Nop {});
-  } else {
-    auto const ar = fpiTop(env);
-    auto const exCls = makeStaticString("InvalidArgumentException");
-    auto const err = makeStaticString(formatParamRefMismatch(
-      ar.func->name()->data(), op.arg1, hint == FPassHint::Cell));
+    if (kind != (op.argv[i] ? PrepKind::Ref : PrepKind::Val)) {
+      auto const exCls = makeStaticString("InvalidArgumentException");
+      auto const err = makeStaticString(formatParamRefMismatch(
+        ar.func->name()->data(), i, !op.argv[i]));
 
-    reduce(
-      env,
-      bc::FPushCtorD { 1, exCls, false },
-      bc::String { err },
-      bc::FPassC { 0, FPassHint::Any},
-      bc::FCall { 1 },
-      bc::UnboxRNop {},
-      bc::PopC {},
-      bc::Throw {}
-    );
+      return reduce(
+        env,
+        bc::FPushCtorD { 1, exCls, false },
+        bc::String { err },
+        bc::FPassC { 0, FPassHint::Any},
+        bc::FCall { 1 },
+        bc::UnboxRNop {},
+        bc::PopC {},
+        bc::Throw {}
+      );
+    }
   }
+
+  reduce(env, bc::Nop {});
 }
 
 void in(ISS& /*env*/, const bc::FHandleRefMismatch& /*op*/) {}

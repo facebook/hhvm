@@ -155,8 +155,8 @@ let instr_fpassn i hint = instr (ICall (FPassN (i, hint)))
 let instr_fpassg i hint = instr (ICall (FPassG (i, hint)))
 let instr_fpassc i hint = instr (ICall (FPassC (i, hint)))
 let instr_fpassvnop i hint = instr (ICall (FPassVNop (i, hint)))
-let instr_fthrow_on_ref_mismatch i hint =
-  instr (ICall (FThrowOnRefMismatch (i, hint)))
+let instr_fthrow_on_ref_mismatch by_refs =
+  instr (ICall (FThrowOnRefMismatch by_refs))
 let instr_fhandle_ref_mismatch i hint name =
   instr (ICall (FHandleRefMismatch (i, hint, name)))
 

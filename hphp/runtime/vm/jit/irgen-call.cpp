@@ -1277,7 +1277,25 @@ void emitFPushClsMethodSD(IRGS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-void checkFPassHint(IRGS& env, uint32_t paramId, int off, FPassHint hint,
+namespace {
+
+SSATmp* ldPreLiveFunc(IRGS& env) {
+  auto const& fpiStack = env.irb->fs().fpiStack();
+  if (!fpiStack.empty() && fpiStack.back().func) {
+    return cns(env, fpiStack.back().func);
+  }
+
+  auto off = instrFpToArDelta(curFunc(env), curSrcKey(env).pc());
+  if (resumeMode(env) != ResumeMode::None) {
+    off -= curFunc(env)->numSlotsInFrame();
+  }
+  auto const actRecOff = offsetFromIRSP(env, FPInvOffset { off });
+  return gen(env, LdARFuncPtr, TFunc, IRSPRelOffsetData { actRecOff }, sp(env));
+}
+
+}
+
+void checkFPassHint(IRGS& env, uint32_t paramId, FPassHint hint,
                     bool byRef) {
   if (!RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
       !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
@@ -1294,33 +1312,46 @@ void checkFPassHint(IRGS& env, uint32_t paramId, int off, FPassHint hint,
     break;
   }
 
-  auto const funcptr = [&] {
-    auto const& fpiStack = env.irb->fs().fpiStack();
-    if (!fpiStack.empty() && fpiStack.back().func) {
-      return cns(env, fpiStack.back().func);
-    }
-
-    auto const actRecOff = offsetFromIRSP(env, BCSPRelOffset { off });
-    return gen(env, LdARFuncPtr, TFunc,
-               IRSPRelOffsetData { actRecOff }, sp(env));
-  }();
-
-  gen(
-    env,
-    RaiseParamRefMismatchForFunc,
-    ParamData { (int32_t)paramId },
-    funcptr
-  );
+  auto const func = ldPreLiveFunc(env);
+  gen(env, RaiseParamRefMismatchForFunc, ParamData { (int32_t)paramId }, func);
 }
 
-void emitFThrowOnRefMismatch(IRGS& env, uint32_t paramId, FPassHint hint) {
-  assertx(hint != FPassHint::Any);
-  auto const byRef = env.currentNormalizedInstruction->preppedByRef;
-  if (hint == (byRef ? FPassHint::Ref : FPassHint::Cell)) {
+void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
+  if (!immVec.size()) return;
+
+  auto const func = ldPreLiveFunc(env);
+  auto const byRefs = immVec.vecu8();
+  if (func->hasConstVal(TFunc)) {
+    auto const f = func->funcVal();
+    for (auto i = 0; i < immVec.size(); ++i) {
+      if (f->byRef(i) != ((byRefs[i / 8] >> (i % 8)) & 1)) {
+        PUNT(FThrowOnRefMismatch-RefMismatch);
+      }
+    }
     return;
   }
 
-  PUNT(FThrowOnRefMismatch-RefMismatch);
+  auto const exitSlow = makeExitSlow(env);
+
+  // CheckRefs only needs to know the number of parameters when there are more
+  // than 64 args.
+  SSATmp* numParams = immVec.size() <= 64
+    ? cns(env, 64) : gen(env, LdFuncNumParams, func);
+
+  for (uint32_t i = 0; i * 8 < immVec.size(); i += 8) {
+    uint64_t vals = 0;
+    for (uint32_t j = 0; j < 8 && (i + j) * 8 < immVec.size(); ++j) {
+      vals |= ((uint64_t)byRefs[i + j]) << (8 * j);
+    }
+
+    uint64_t bits = immVec.size() - i * 8;
+    uint64_t mask = bits >= 64
+      ? std::numeric_limits<uint64_t>::max()
+      : (1UL << bits) - 1;
+
+    gen(env, CheckRefs, exitSlow, CheckRefsData { i * 8, mask, vals }, func,
+        numParams);
+  }
 }
 
 void emitFHandleRefMismatch(IRGS& env, uint32_t paramId, FPassHint hint,
@@ -1354,50 +1385,50 @@ void emitFHandleRefMismatch(IRGS& env, uint32_t paramId, FPassHint hint,
  */
 
 void emitFPassC(IRGS& env, uint32_t argNum, FPassHint hint) {
-  checkFPassHint(env, argNum, argNum + 1, hint,
+  checkFPassHint(env, argNum, hint,
                  env.currentNormalizedInstruction->preppedByRef);
 }
 
 void emitFPassVNop(IRGS& env, uint32_t argNum, FPassHint hint) {
-  checkFPassHint(env, argNum, argNum + 1, hint, true);
+  checkFPassHint(env, argNum, hint, true);
 }
 
 void emitFPassL(IRGS& env, uint32_t argNum, int32_t id, FPassHint hint) {
   if (env.currentNormalizedInstruction->preppedByRef) {
-    checkFPassHint(env, argNum, argNum, hint, true);
+    checkFPassHint(env, argNum, hint, true);
     emitVGetL(env, id);
   } else {
-    checkFPassHint(env, argNum, argNum, hint, false);
+    checkFPassHint(env, argNum, hint, false);
     emitCGetL(env, id);
   }
 }
 
 void emitFPassS(IRGS& env, uint32_t argNum, uint32_t slot, FPassHint hint) {
   if (env.currentNormalizedInstruction->preppedByRef) {
-    checkFPassHint(env, argNum, argNum + 1, hint, true);
+    checkFPassHint(env, argNum, hint, true);
     emitVGetS(env, slot);
   } else {
-    checkFPassHint(env, argNum, argNum + 1, hint, false);
+    checkFPassHint(env, argNum, hint, false);
     emitCGetS(env, slot);
   }
 }
 
 void emitFPassG(IRGS& env, uint32_t argNum, FPassHint hint) {
   if (env.currentNormalizedInstruction->preppedByRef) {
-    checkFPassHint(env, argNum, argNum + 1, hint, true);
+    checkFPassHint(env, argNum, hint, true);
     emitVGetG(env);
   } else {
-    checkFPassHint(env, argNum, argNum + 1, hint, false);
+    checkFPassHint(env, argNum, hint, false);
     emitCGetG(env);
   }
 }
 
 void emitFPassR(IRGS& env, uint32_t argNum, FPassHint hint) {
   if (env.currentNormalizedInstruction->preppedByRef) {
-    checkFPassHint(env, argNum, argNum + 1, hint, true);
+    checkFPassHint(env, argNum, hint, true);
     implBoxR(env);
   } else {
-    checkFPassHint(env, argNum, argNum + 1, hint, false);
+    checkFPassHint(env, argNum, hint, false);
     implUnboxR(env);
   }
 }
@@ -1408,11 +1439,11 @@ void emitBoxR(IRGS& env) { implBoxR(env); }
 void emitFPassV(IRGS& env, uint32_t argNum, FPassHint hint) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     // FPassV is a no-op when the callee expects by ref.
-    checkFPassHint(env, argNum, argNum + 1, hint, true);
+    checkFPassHint(env, argNum, hint, true);
     return;
   }
 
-  checkFPassHint(env, argNum, argNum + 1, hint, false);
+  checkFPassHint(env, argNum, hint, false);
   auto const tmp = popV(env);
   pushIncRef(env, gen(env, LdRef, TInitCell, tmp));
   decRef(env, tmp);

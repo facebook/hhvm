@@ -2907,12 +2907,11 @@ and emit_args_and_call env call_pos args uargs =
       | (false, true)  -> instr (ICall (FCallUnpack nargs))
       | (true, false)  -> instr (ICall (FCallM (nargs, num_inout + 1)))
       | (true, true)   -> instr (ICall (FCallUnpackM (nargs, num_inout + 1))) in
-      let instr_enforce_hint = if throw_on_mismatch
-      then gather @@ List.mapi args ~f:
-        begin fun i arg ->
-          instr_fthrow_on_ref_mismatch i (get_pass_by_ref_hint arg)
-        end
-      else empty in
+      let instr_enforce_hint =
+        if throw_on_mismatch && (args != [])
+        then instr_fthrow_on_ref_mismatch (List.map args expr_starts_with_ref)
+        else empty
+      in
       gather [
         (* emit call*)
         emit_pos call_pos;

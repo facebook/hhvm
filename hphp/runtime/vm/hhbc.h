@@ -597,8 +597,7 @@ constexpr uint32_t kMaxConcatN = 4;
                                        ONE(CV),         ONE(FV),    FF) \
   O(FPassS,          THREE(IVA,CAR,OA(FPassHint)),                      \
                                        ONE(CV),         ONE(FV),    FF) \
-  O(FThrowOnRefMismatch, TWO(IVA,OA(FPassHint)),                        \
-                                       NOV,             NOV,        FF) \
+  O(FThrowOnRefMismatch, ONE(BLLA),    NOV,             NOV,        FF) \
   O(FHandleRefMismatch, THREE(IVA,OA(FPassHint),SA),                    \
                                        NOV,             NOV,        NF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
@@ -815,6 +814,7 @@ struct ImmVector {
 
   bool isValid() const { return m_start != 0; }
 
+  const uint8_t* vecu8() const { return m_start; }
   const int32_t* vec32() const {
     return reinterpret_cast<const int32_t*>(m_start);
   }

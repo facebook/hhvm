@@ -753,7 +753,7 @@ void populate_block(ParseUnitState& puState,
     return ret;
   };
 
-  UNUSED auto decode_argvb = [&] {
+  auto decode_argvb = [&] {
     CompactVector<bool> ret;
     auto const vecLen = decode_iva(pc);
     uint8_t tmp = 0;

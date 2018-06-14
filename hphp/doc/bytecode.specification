@@ -2302,11 +2302,12 @@ FPassS <param id> <class-ref slot> <reffiness hint>    [C]  ->  [F]
   FPI pass parameter. This instruction behaves as CGetS if parameter %1 is pass
   by value, or it behaves like VGetS if parameter %1 is pass by reference.
 
-FThrowOnRefMismatch <param id> <reffiness hint>   []  ->  []
+FThrowOnRefMismatch <reffiness bool vector>   []  ->  []
 
-  Check whether reffiness of the parameter %1 of the function associated with
-  the current FPI matches the reffiness hint %2. Throws an exception if there
-  is a mismatch. Only used when ThrowOnCallByRefAnnotationMismatch is enabled.
+  Check whether reffiness of parameters 0..N-1 of the function associated with
+  the current FPI matches the corresponding reffiness values specified by the
+  vector %1 of size N. Throws an exception if there is a mismatch. Only used
+  when ThrowOnCallByRefAnnotationMismatch is enabled.
 
 FHandleRefMismatch <param id> <reffiness hint> <func name>   []  ->  []
 

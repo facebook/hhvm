@@ -339,7 +339,7 @@ std::string show(const php::Func& func, const Bytecode& bc) {
     }
   };
 
-  UNUSED auto append_argvb = [&] (const CompactVector<bool>& argv) {
+  auto append_argvb = [&] (const CompactVector<bool>& argv) {
     ret += folly::sformat(" \"{}\"", folly::join("", argv));
   };
 

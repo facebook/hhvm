@@ -4865,12 +4865,16 @@ void EmitterVisitor::emitCall(Emitter& e,
     }
 
     if (fpassStrict) {
+      std::vector<bool> byRefs;
       for (int i = 0; i < numParams; i++) {
         auto param = (*params)[i];
-        if (!param->isUnpack()) {
-          e.FThrowOnRefMismatch(i, getPassByRefHint(param));
+        if (param->isUnpack()) {
+          assertx(i == numParams - 1);
+          break;
         }
+        byRefs.push_back(param->hasContext(Expression::RefParameter));
       }
+      if (!byRefs.empty()) e.FThrowOnRefMismatch(byRefs);
     }
   }
 
@@ -7471,9 +7475,11 @@ bool EmitterVisitor::emitHHInvariant(Emitter& e, SimpleFunctionCallPtr call) {
     }
 
     if (fpassStrict) {
+      std::vector<bool> byRefs;
       for (auto i = uint32_t{1}; i < params->getCount(); ++i) {
-        e.FThrowOnRefMismatch(i - 1, getPassByRefHint((*params)[i]));
+        byRefs.push_back((*params)[i]->hasContext(Expression::RefParameter));
       }
+      if (!byRefs.empty()) e.FThrowOnRefMismatch(byRefs);
     }
   }
   e.FCall(params->getCount() - 1);

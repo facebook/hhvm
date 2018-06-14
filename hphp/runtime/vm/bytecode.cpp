@@ -270,6 +270,8 @@ ALWAYS_INLINE MOpMode fpass_mode(ActRec* ar, int paramId) {
   return ar->m_func->byRef(paramId) ? MOpMode::Define : MOpMode::Warn;
 }
 
+namespace {
+
 // wrapper for local variable LA operand
 struct local_var {
   TypedValue* ptr;
@@ -325,6 +327,8 @@ template<> struct imm_array<bool> {
     return ptr[i / 8] & (1 << (i % 8));
   }
 };
+
+}
 
 ALWAYS_INLINE local_var decode_local(PC& pc) {
   auto la = decode_iva(pc);
@@ -5136,18 +5140,16 @@ OPTBLD_INLINE void iopFPushCufIter(uint32_t numArgs, Iter* it) {
   setTypesFlag(vmfp(), ar);
 }
 
-OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, uint32_t paramId,
-                                          FPassHint hint) {
-  assertx(hint != FPassHint::Any);
-  assertx(paramId < ar->numArgs());
-  auto const byRef = ar->func()->byRef(paramId);
-  if (hint == (byRef ? FPassHint::Ref : FPassHint::Cell)) {
-    return;
+OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, imm_array<bool> byRefs) {
+  assertx(byRefs.size <= ar->numArgs());
+  auto const func = ar->func();
+  for (auto i = 0; i < byRefs.size; ++i) {
+    auto const byRef = func->byRef(i);
+    if (byRef != byRefs[i]) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        formatParamRefMismatch(func->fullDisplayName()->data(), i, byRef));
+    }
   }
-
-  SystemLib::throwInvalidArgumentExceptionObject(
-    formatParamRefMismatch(
-      ar->func()->fullDisplayName()->data(), paramId, byRef));
 }
 
 OPTBLD_INLINE void iopFHandleRefMismatch(uint32_t paramId, FPassHint hint,

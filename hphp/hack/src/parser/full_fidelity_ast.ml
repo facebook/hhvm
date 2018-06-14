@@ -396,13 +396,13 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   | Some TK.LessThanGreaterThan         -> Binop (Diff,              lhs, rhs)
   | Some TK.ExclamationEqualEqual       -> Binop (Diff2,             lhs, rhs)
   | Some TK.LessThanEqualGreaterThan    -> Binop (Cmp,               lhs, rhs)
-  (* The ugly ducklings; In the FFP, `|>` and '??' are parsed as
-   * `BinaryOperator`s, whereas the typed AST has separate constructors for
-   * NullCoalesce, Pipe and Binop. This is why we don't just project onto a
+  | Some TK.QuestionQuestion            -> Binop (QuestionQuestion,  lhs, rhs)
+  (* The ugly duckling; In the FFP, `|>` is parsed as a
+   * `BinaryOperator`, whereas the typed AST has separate constructors for
+   * Pipe and Binop. This is why we don't just project onto a
    * `bop`, but a `expr -> expr -> expr_`.
    *)
   | Some TK.BarGreaterThan              -> Pipe         (lhs, rhs)
-  | Some TK.QuestionQuestion            -> NullCoalesce (lhs, rhs)
   | Some TK.QuestionColon               -> Eif          (lhs, None, rhs)
   (* TODO: Figure out why this fails silently when used in a pBlock; probably
      just caught somewhere *)

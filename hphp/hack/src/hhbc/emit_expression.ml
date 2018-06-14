@@ -328,6 +328,7 @@ let from_binop op =
   | A.Xor -> instr (IOp BitXor)
   | A.LogXor -> instr (IOp Xor)
   | A.Eq _ -> failwith "assignment is emitted differently"
+  | A.QuestionQuestion -> failwith "null coalescence is emitted differently"
   | A.AMpamp
   | A.BArbar ->
     failwith "short-circuiting operator cannot be generated as a simple binop"
@@ -568,6 +569,18 @@ and emit_binop ~need_ref env pos op e1 e2 =
     | None -> failwith "illegal eq op"
     | Some op -> emit_lval_op ~need_ref env pos (LValOp.SetOp op) e1 (Some e2)
     end
+  | A.QuestionQuestion -> emit_box_if_necessary pos need_ref @@
+    let end_label = Label.next_regular () in
+    gather [
+      emit_quiet_expr env pos e1;
+      instr_dup;
+      instr_istypec OpNull;
+      instr_not;
+      instr_jmpnz end_label;
+      instr_popc;
+      emit_expr ~need_ref:false env e2;
+      instr_label end_label;
+    ]
   | _ ->
     if not (optimize_null_check ())
     then default ()
@@ -685,19 +698,6 @@ and emit_is ?(skip_check=false) env pos h =
     let ts = Emit_type_constant.hint_to_type_constant
       ~tparams:[] ~namespace h in
     instr_istypestruct @@ Emit_adata.get_array_identifier ts
-
-and emit_null_coalesce env pos e1 e2 =
-  let end_label = Label.next_regular () in
-  gather [
-    emit_quiet_expr env pos e1;
-    instr_dup;
-    instr_istypec OpNull;
-    instr_not;
-    instr_jmpnz end_label;
-    instr_popc;
-    emit_expr ~need_ref:false env e2;
-    instr_label end_label;
-  ]
 
 and emit_cast env pos hint expr =
   let op =
@@ -1632,8 +1632,6 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
     ]
   | A.As (e, h, is_nullable) ->
     emit_box_if_necessary pos need_ref @@ emit_as env pos e h is_nullable
-  | A.NullCoalesce (e1, e2) ->
-    emit_box_if_necessary pos need_ref @@ emit_null_coalesce env pos e1 e2
   | A.Cast((_, hint), e) ->
     emit_box_if_necessary pos need_ref @@ emit_cast env pos hint e
   | A.Eif (etest, etrue, efalse) ->
@@ -3508,7 +3506,6 @@ and can_use_as_rhs_in_list_assignment expr =
   | A.New _
   | A.Expr_list _
   | A.Yield _
-  | A.NullCoalesce _
   | A.Cast _
   | A.Eif _
   | A.Array _
@@ -3522,6 +3519,7 @@ and can_use_as_rhs_in_list_assignment expr =
   | A.Binop ((A.Eq None), (_, A.List _), (_, r)) ->
     can_use_as_rhs_in_list_assignment r
   | A.Binop (A.Plus, _, _)
+  | A.Binop (A.QuestionQuestion, _, _)
   | A.Binop (A.Eq _, _, _) -> true
   | _ -> false
 

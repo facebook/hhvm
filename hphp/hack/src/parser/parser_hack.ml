@@ -257,7 +257,7 @@ let rec check_lvalue env = function
   | Class_const _ | Call _ | Int _ | Float _
   | String _ | String2 _ | Yield _ | Yield_break | Yield_from _
   | Await _ | Suspend _ | Expr_list _ | Cast _ | Unop _
-  | Binop _ | Eif _ | NullCoalesce _ | InstanceOf _
+  | Binop _ | Eif _ | InstanceOf _
   | New _ | NewAnonClass _ | Efun _ | Lfun _
   | Xml _ | Import _ | Pipe _ | Callconv _ | Is _ | Execution_operator _ | As _
   | ParenthesizedExpr _) ->
@@ -3035,7 +3035,7 @@ and expr_remain env e1 =
   | Telvis ->
       expr_elvis env e1
   | Tqmqm ->
-      expr_null_coalesce env e1
+      expr_binop env Tqmqm QuestionQuestion e1
   | Tnullableas when !(env.allow_as_expressions) ->
       expr_as env ~is_nullable:true e1
   | Tword when Lexing.lexeme env.lb = "instanceof" ->
@@ -3923,16 +3923,6 @@ and expr_elvis env e1 =
   reduce env e1 Telvis begin fun e1 env ->
     let e2 = expr env in
     Pos.btw (fst e1) (fst e2), Eif (e1, None, e2)
-  end
-
-(*****************************************************************************)
-(* Null coalesce expression: _??_ *)
-(*****************************************************************************)
-
-and expr_null_coalesce env e1 =
-  reduce env e1 Tqmqm begin fun e1 env ->
-    let e2 = expr env in
-    btw e1 e2, NullCoalesce (e1, e2)
   end
 
 (*****************************************************************************)

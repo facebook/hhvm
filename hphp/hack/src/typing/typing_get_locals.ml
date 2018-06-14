@@ -258,7 +258,6 @@ and expr tcopt acc (_, e) =
   | Callconv (_, e)
   | Import (_, e)
   | Yield_from e
-  | NullCoalesce (e, _)
   | Suspend e -> expr tcopt acc e
   | Obj_get (e1, e2, _)
   | Binop (_, e1, e2)

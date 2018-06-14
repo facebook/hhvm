@@ -47,7 +47,6 @@ class type ['a] ast_visitor_type = object
   method on_dollar : 'a -> expr -> 'a
   method on_efun : 'a -> fun_ -> (id * bool) list -> 'a
   method on_eif : 'a -> expr -> expr option -> expr -> 'a
-  method on_nullCoalesce : 'a -> expr -> expr -> 'a
   method on_expr : 'a -> expr -> 'a
   method on_omitted: 'a -> 'a
   method on_execution_operator : 'a -> expr list -> 'a
@@ -397,7 +396,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Binop       (bop, e1, e2)    -> this#on_binop acc bop e1 e2
    | Pipe        (e1, e2)    -> this#on_pipe acc e1 e2
    | Eif         (e1, e2, e3)     -> this#on_eif acc e1 e2 e3
-   | NullCoalesce (e1, e2)     -> this#on_nullCoalesce acc e1 e2
    | InstanceOf  (e1, e2)         -> this#on_instanceOf acc e1 e2
    | Is          (e, h) -> this#on_is acc e h
    | As          (e, h, b) -> this#on_as acc e h b
@@ -526,11 +524,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       | Some e -> this#on_expr acc e
     in
     let acc = this#on_expr acc e3 in
-    acc
-
-  method on_nullCoalesce acc e1 e2 =
-    let acc = this#on_expr acc e1 in
-    let acc = this#on_expr acc e2 in
     acc
 
   method on_instanceOf acc e1 e2 =

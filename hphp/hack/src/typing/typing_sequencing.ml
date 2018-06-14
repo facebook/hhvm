@@ -222,7 +222,7 @@ let sequence_visitor ~require_used used_vars =
 
     (* leave && and || sequenced before making all
      * the other binops unsequenced *)
-    | Binop ((Ast.AMpamp | Ast.BArbar), _, _) -> parent#on_expr env e
+    | Binop ((Ast.AMpamp | Ast.BArbar | Ast.QuestionQuestion), _, _) -> parent#on_expr env e
 
     (* These operations have unsequenced subexpressions. *)
     | Binop (_, e1, e2)

@@ -379,9 +379,6 @@ and expr_ env acc p e =
       let acc = expr acc e1 in
       let acc = expr acc e2 in
       expr acc e3
-  | NullCoalesce (e1, e2) ->
-      let acc = expr acc e1 in
-      expr acc e2
   | InstanceOf (e, _) -> expr acc e
   | Is (e, _) -> expr acc e
   | As (e, _, _) -> expr acc e

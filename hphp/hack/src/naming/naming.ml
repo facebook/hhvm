@@ -2469,10 +2469,6 @@ module Make (GetLocals : GetLocals) = struct
         if Env.inside_pipe env then
           ignore (Option.map dollar_dollar (Env.found_dollardollar env));
         N.Eif (e1, e2opt, e3)
-    | NullCoalesce (e1, e2) ->
-        let e1 = expr env e1 in
-        let e2 = expr env e2 in
-        N.NullCoalesce (e1, e2)
     | InstanceOf (e, (p, Id x)) ->
       let id = match x with
         | px, n when n = SN.Classes.cParent ->

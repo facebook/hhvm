@@ -657,10 +657,6 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, opt_e2 = convert_opt_expr env st opt_e2 in
     let st, e3 = convert_expr env st e3 in
     st, (p, Eif(e1, opt_e2, e3))
-  | NullCoalesce (e1, e2) ->
-    let st, e1 = convert_expr env st e1 in
-    let st, e2 = convert_expr env st e2 in
-    st, (p, NullCoalesce (e1, e2))
   | InstanceOf (e1, e2) ->
     let st, e1 = convert_expr env st e1 in
     let st, e2 = convert_expr env st e2 in

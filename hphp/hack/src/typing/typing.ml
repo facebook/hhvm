@@ -1190,7 +1190,7 @@ and eif env ~expected ~coalesce ~in_cond p c e1 e2 =
   let env, ty1 = TUtils.unresolved env ty1 in
   let env, ty2 = TUtils.unresolved env ty2 in
   let env, ty = Unify.unify env ty1 ty2 in
-  let te = if coalesce then T.NullCoalesce(tc, te2) else T.Eif(tc, te1, te2) in
+  let te = if coalesce then T.Binop(Ast.QuestionQuestion, tc, te2) else T.Eif(tc, te1, te2) in
   env, T.make_typed_expr p ty te, ty
 
 and check_escaping_var env (pos, x) =
@@ -1848,6 +1848,8 @@ and expr_
         env p call_type e hl el uel ~in_suspend:false in
       Typing_mutability.enforce_mutable_call env te;
       env, te, ty
+  | Binop (Ast.QuestionQuestion, e1, e2) ->
+      eif env ~expected ~coalesce:true ~in_cond p e1 None e2
     (* For example, e1 += e2. This is typed and translated as if
      * written e1 = e1 + e2.
      * TODO TAST: is this right? e1 will get evaluated more than once
@@ -1942,7 +1944,6 @@ and expr_
       let env, te, ty = raw_expr in_cond env e in
       unop ~is_func_arg ~forbid_uref p env uop te ty
   | Eif (c, e1, e2) -> eif env ~expected ~coalesce:false ~in_cond p c e1 e2
-  | NullCoalesce (e1, e2) -> eif env ~expected ~coalesce:true ~in_cond p e1 None e2
   | Typename sid ->
       begin match Env.get_typedef env (snd sid) with
         | Some {td_tparams = tparaml; _} ->
@@ -5677,6 +5678,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
                    then env, ty2 else
                    enforce_sub_ty env ty2 (Reason.Rbitwise p2, Tprim Tint) in
       make_result env te1 te2 (Reason.Rbitwise_ret p, Tprim Tint)
+  | Ast.QuestionQuestion
   | Ast.Eq _ ->
       assert false
 

@@ -148,7 +148,6 @@ and expr_ =
   (** The ID of the $$ that is implicitly declared by this pipe. *)
   | Pipe of lid * expr * expr
   | Eif of expr * expr option * expr
-  | NullCoalesce of expr * expr
   | InstanceOf of expr * class_id
   | Is of expr * hint
   | As of expr * hint * (* is nullable *) bool
@@ -412,7 +411,6 @@ let expr_to_string expr =
   | Binop _  -> "Binop"
   | Pipe _  -> "Pipe"
   | Eif _  -> "Eif"
-  | NullCoalesce _  -> "NullCoalesce"
   | InstanceOf _  -> "InstanceOf"
   | Is _ -> "Is"
   | As _ -> "As"
@@ -506,7 +504,6 @@ class type ['a] visitor_type = object
   method on_binop : 'a -> Ast.bop -> expr -> expr -> 'a
   method on_pipe : 'a -> id -> expr -> expr -> 'a
   method on_eif : 'a -> expr -> expr option -> expr -> 'a
-  method on_nullCoalesce : 'a -> expr -> expr -> 'a
   method on_typename : 'a -> sid -> 'a
   method on_instanceOf : 'a -> expr -> class_id -> 'a
   method on_is : 'a -> expr -> hint -> 'a
@@ -714,7 +711,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Binop       (bop, e1, e2)    -> this#on_binop acc bop e1 e2
    | Pipe        (id, e1, e2)         -> this#on_pipe acc id e1 e2
    | Eif         (e1, e2, e3)     -> this#on_eif acc e1 e2 e3
-   | NullCoalesce (e1, e2)     -> this#on_nullCoalesce acc e1 e2
    | InstanceOf  (e1, e2)         -> this#on_instanceOf acc e1 e2
    | Is          (e, h)           -> this#on_is acc e h
    | As          (e, h, b)           -> this#on_as acc e h b
@@ -834,11 +830,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
       | Some e -> this#on_expr acc e
     in
     let acc = this#on_expr acc e3 in
-    acc
-
-  method on_nullCoalesce acc e1 e2 =
-    let acc = this#on_expr acc e1 in
-    let acc = this#on_expr acc e2 in
     acc
 
   method on_instanceOf acc e1 e2 =

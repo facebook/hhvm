@@ -415,7 +415,6 @@ and expr_ =
   | Binop of bop * expr * expr
   | Pipe of expr * expr
   | Eif of expr * expr option * expr
-  | NullCoalesce of expr * expr
   | InstanceOf of expr * expr
   | Is of expr * hint
   | As of expr * hint * (* is nullable *) bool

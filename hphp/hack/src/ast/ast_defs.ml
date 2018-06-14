@@ -58,6 +58,7 @@ and bop =
 | Diff | Diff2 | AMpamp | BArbar | LogXor | Lt
 | Lte | Gt | Gte | Dot | Amp | Bar | Ltlt
 | Gtgt | Percent | Xor | Cmp
+| QuestionQuestion
 | Eq of bop option
 
 and uop =

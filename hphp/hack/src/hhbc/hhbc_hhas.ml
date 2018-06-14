@@ -923,6 +923,7 @@ and string_of_bop = function
   | A.LogXor -> "xor"
   | A.Diff -> "!="
   | A.Diff2 -> "!=="
+  | A.QuestionQuestion -> "\\?\\?"
 
 and string_of_uop = function
   | A.Utild -> "~"
@@ -1301,7 +1302,6 @@ and string_of_param_default_value ~env expr =
     let e = string_of_param_default_value ~env e in
     "(" ^ h ^ ")" ^ e
   | A.Pipe (e1, e2) -> middle_aux e1 " |> " e2
-  | A.NullCoalesce (e1, e2) -> middle_aux e1 " \\?\\? " e2
   | A.InstanceOf (e1, e2) -> middle_aux e1 " instanceof " e2
   | A.Is (e, h) ->
     let e = string_of_param_default_value ~env e in

@@ -14,7 +14,7 @@
          { Aast.AnnotatedAST.fnb_nast =
            [(Return ([4:3-18],
                (Some (([4:10-17], int),
-                      (NullCoalesce (
+                      (Binop (QuestionQuestion,
                          (([4:10-12], ?int), (Lvar ([4:10-12], $x))),
                          (([4:16-17], int), (Int "0"))))))
                ))

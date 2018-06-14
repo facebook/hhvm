@@ -40,7 +40,7 @@ let rec expr_returns_owned_mutable
    expr_returns_owned_mutable env e2
  (* ?? operator returns owned mutable if both left hand side and right hand side
     return owned mutable *)
- | T.NullCoalesce (l, r) ->
+ | T.Binop (Ast.QuestionQuestion, l, r) ->
    expr_returns_owned_mutable env l && expr_returns_owned_mutable env r
  (* cast returns owned mutable if its expression part is owned mutable *)
  | T.Cast (_, e) ->
@@ -101,7 +101,7 @@ let check_function_return_value
       aux e2
       (* ?? operator returns owned mutable if both left hand side and right hand side
       return owned mutable *)
-    | T.NullCoalesce (l, r) ->
+    | T.Binop (Ast.QuestionQuestion, l, r) ->
       aux l;
       aux r;
     (* cast returns owned mutable if its expression part is owned mutable *)

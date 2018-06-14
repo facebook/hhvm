@@ -287,9 +287,6 @@ module CheckFunctionBody = struct
     | _, Eif (e1, Some e2, e3) ->
         List.iter [e1; e2; e3] (expr f_type env);
         ()
-    | _, NullCoalesce (e1, e2) ->
-        List.iter [e1; e2] (expr f_type env);
-        ()
     | _, New (_, el, uel) ->
       List.iter el (expr f_type env);
       List.iter uel (expr f_type env);
@@ -775,9 +772,6 @@ and check_class_property_initialization prop =
       | Eif (expr1, optional_expr, expr2) ->
         rec_assert_static_literal expr1;
         Option.iter optional_expr rec_assert_static_literal;
-        rec_assert_static_literal expr2;
-      | NullCoalesce (expr1, expr2) ->
-        rec_assert_static_literal expr1;
         rec_assert_static_literal expr2;
       | This | Lvar _ | ImmutableVar _ | Lplaceholder _ | Dollardollar _ | Fun_id _
       | Method_id _ | Dollar _
@@ -1272,10 +1266,6 @@ and expr_ env p = function
       expr env e1;
       expr env e2;
       expr env e3;
-      ()
-  | NullCoalesce (e1, e2) ->
-      expr env e1;
-      expr env e2;
       ()
   | Assert (AE_assert e)
   | InstanceOf (e, _) ->

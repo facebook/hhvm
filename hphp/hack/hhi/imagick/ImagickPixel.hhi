@@ -14,11 +14,11 @@ class ImagickPixel {
   public function clear(): bool;
   public function __construct(string $color = "");
   public function destroy(): bool;
-  public function getColor(bool $normalized = false): array;
+  public function getColor(bool $normalized = false): darray;
   public function getColorAsString(): string;
   public function getColorCount(): int;
   public function getColorValue(int $color): float;
-  public function getHSL(): array;
+  public function getHSL(): darray;
   public function isPixelSimilar($color, float $fuzz): bool;
   public function isSimilar($color, float $fuzz): bool;
   public function setColor(string $color): bool;

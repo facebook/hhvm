@@ -74,7 +74,8 @@ let make_genv options config local_config handle =
         else None;
       expression_terms = watchman_expression_terms;
       debug_logging = ServerArgs.watchman_debug_logging options;
-      root = root;
+      subscription_prefix = "hh_type_check_watcher";
+      roots = [root];
     }
   in
   if Option.is_some watchman_env then Hh_logger.log "Using watchman";

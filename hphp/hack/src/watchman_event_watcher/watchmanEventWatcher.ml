@@ -264,7 +264,8 @@ let init_watchman root =
     init_timeout = 30;
     debug_logging = false;
     expression_terms = watchman_expression_terms;
-    root;
+    subscription_prefix = "hh_event_watcher";
+    roots = [root];
   }
 
 let init root =

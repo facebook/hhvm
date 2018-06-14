@@ -756,7 +756,8 @@ let init {
       init_timeout = 30;
       expression_terms = watchman_expression_terms;
       debug_logging = watchman_debug_logging;
-      root;
+      subscription_prefix = "hh_informant_watcher";
+      roots = [root];
     } in
     match watchman with
     | None ->

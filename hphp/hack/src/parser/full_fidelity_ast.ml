@@ -397,6 +397,7 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   | Some TK.ExclamationEqualEqual       -> Binop (Diff2,             lhs, rhs)
   | Some TK.LessThanEqualGreaterThan    -> Binop (Cmp,               lhs, rhs)
   | Some TK.QuestionQuestion            -> Binop (QuestionQuestion,  lhs, rhs)
+  | Some TK.QuestionQuestionEqual       -> Binop (Eq (Some QuestionQuestion), lhs, rhs)
   (* The ugly duckling; In the FFP, `|>` is parsed as a
    * `BinaryOperator`, whereas the typed AST has separate constructors for
    * Pipe and Binop. This is why we don't just project onto a

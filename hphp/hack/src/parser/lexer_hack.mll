@@ -119,6 +119,7 @@ type token =
   | Tqm
   | Telvis
   | Tqmqm
+  | Tqmqmeq
   | Tamp
   | Ttild
   | Tincr
@@ -243,6 +244,7 @@ let token_to_string = function
   | Tqm           -> "?"
   | Telvis        -> "?:"
   | Tqmqm         -> "??"
+  | Tqmqmeq       -> "??="
   | Tamp          -> "&"
   | Ttild         -> "~"
   | Tincr         -> "++"
@@ -423,6 +425,7 @@ rule token file = parse
   | '?'                { Tqm          }
   | "?:"               { Telvis       }
   | "??"               { Tqmqm        }
+  | "??="              { Tqmqmeq      }
   | '&'                { Tamp         }
   | '~'                { Ttild        }
   | "++"               { Tincr        }
@@ -773,6 +776,7 @@ and format_token = parse
   | '?'                { Tqm           }
   | "?:"               { Telvis        }
   | "??"               { Tqmqm         }
+  | "??="              { Tqmqmeq       }
   | '&'                { Tamp          }
   | '~'                { Ttild         }
   | "++"               { Tincr         }

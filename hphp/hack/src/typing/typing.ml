@@ -1850,6 +1850,9 @@ and expr_
       env, te, ty
   | Binop (Ast.QuestionQuestion, e1, e2) ->
       eif env ~expected ~coalesce:true ~in_cond p e1 None e2
+  | Binop (Ast.Eq (Some Ast.QuestionQuestion), _e1, _e2) ->
+      Errors.experimental_feature p "is expression";
+      expr_error env p (Reason.Rnone)
     (* For example, e1 += e2. This is typed and translated as if
      * written e1 = e1 + e2.
      * TODO TAST: is this right? e1 will get evaluated more than once

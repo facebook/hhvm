@@ -325,7 +325,7 @@ let priorities = [
   (Left, [Tlb]);
   (Right, [Teq; Tpluseq; Tminuseq; Tstareq; Tstarstareq;
            Tslasheq; Tdoteq; Tpercenteq;
-           Tampeq; Tbareq; Txoreq; Tlshifteq; Trshifteq]);
+           Tampeq; Tbareq; Txoreq; Tlshifteq; Trshifteq; Tqmqmeq]);
   (Left, [Tarrow; Tnsarrow]);
   (Left, [Telseif]);
   (Left, [Telse]);
@@ -3036,6 +3036,8 @@ and expr_remain env e1 =
       expr_elvis env e1
   | Tqmqm ->
       expr_binop env Tqmqm QuestionQuestion e1
+  | Tqmqmeq ->
+      expr_binop env Tqmqmeq (Eq (Some QuestionQuestion)) e1
   | Tnullableas when !(env.allow_as_expressions) ->
       expr_as env ~is_nullable:true e1
   | Tword when Lexing.lexeme env.lb = "instanceof" ->

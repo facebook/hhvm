@@ -25,7 +25,11 @@ let rec expr_returns_owned_mutable
  (env : Typing_env.env) (e : T.expr)
  : bool =
  match snd e with
- | T.New _ -> true
+ | T.New _
+ | T.KeyValCollection ((`Map | `ImmMap), _)
+ | T.ValCollection ((`Vector | `ImmVector | `Set | `ImmSet), _)
+ | T.Pair _ ->
+  true
  (* Function call *)
  | T.Call (_, (_, T.Id id), _, _, _)
  | T.Call (_, (_, T.Fun_id id), _, _, _) ->

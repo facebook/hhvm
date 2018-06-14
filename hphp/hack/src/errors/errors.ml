@@ -2375,7 +2375,7 @@ let mutable_in_nonreactive_context pos =
 let invalid_argument_of_rx_mutable_function pos =
   add (Typing.err_code Typing.InvalidArgumentOfRxMutableFunction) pos (
       "Single argument to \\HH\\Rx\\mutable should be an expression that yields new \
-       mutably-owned value, like 'new A()' or 'f()' where f is function \
+       mutably-owned value, like 'new A()', Hack collection literal or 'f()' where f is function \
        annotated with <<__MutableReturn>> attribute."
   )
 

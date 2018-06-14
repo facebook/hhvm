@@ -86,7 +86,7 @@ let test_mock_basic () =
     (SSet.of_list ["some_file.php"]) in
   Watchman.Mocking.get_changes_returns expected_changes;
   let _, actual_changes = Watchman.get_changes
-    (Watchman.Watchman_alive Watchman.Testing.test_env) in
+    (Watchman.Watchman_alive (Watchman.Testing.get_test_env ())) in
   Watchman_changes_asserter.assert_equals
     expected_changes actual_changes "get_changes_returns";
   true

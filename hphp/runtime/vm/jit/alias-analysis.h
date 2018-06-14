@@ -112,6 +112,7 @@ struct AliasAnalysis {
   ALocBits all_frame;
   ALocBits all_stack;
   ALocBits all_clsRefSlot;
+  ALocBits all_rds;
   ALocBits all_ref;
   ALocBits all_iterPos;
   ALocBits all_iterBase;

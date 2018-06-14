@@ -240,6 +240,8 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   ret |= may_alias_component(*this, acls, acls.clsRefSlot(), clsref_sets,
                              AClsRefSlotAny, all_clsRefSlot);
 
+  ret |= may_alias_part(*this, acls, acls.rds(), ARdsAny, all_rds);
+
   if (auto const mis = acls.mis()) {
     auto const add_mis = [&] (AliasClass cls) {
       assertx(cls.isSingleLocation());
@@ -298,6 +300,8 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
                           AFrameAny, all_frame);
   ret |= expand_component(*this, acls, acls.clsRefSlot(), clsref_sets,
                           AClsRefSlotAny, all_clsRefSlot);
+
+  ret |= expand_part(*this, acls, acls.rds(), ARdsAny, all_rds);
 
   if (auto const mis = acls.mis()) {
     auto const add_mis = [&] (AliasClass cls) {
@@ -358,6 +362,11 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       if (auto const index = add_class(ret, acls)) {
         conflict_array_index[elemI->idx].set(*index);
       }
+      return;
+    }
+
+    if (acls.is_rds()) {
+      add_class(ret, acls);
       return;
     }
 
@@ -511,6 +520,11 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
+    if (acls.is_rds()) {
+      ret.all_rds.set(meta.index);
+      return;
+    }
+
     if (acls.is_mis()) {
       // We don't maintain an all_mistate set so there's nothing to do here but
       // avoid hitting the assert below.
@@ -604,28 +618,32 @@ std::string show(const AliasAnalysis& ainfo) {
       kv->second.index,
       show(conf));
   }
-  folly::format(&ret, " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n",
-    "all props",          show(ainfo.all_props),
-    "all elemIs",         show(ainfo.all_elemIs),
-    "all refs",           show(ainfo.all_ref),
-    "all iterPos",        show(ainfo.all_iterPos),
-    "all iterBase",       show(ainfo.all_iterBase),
-    "all cufIterFunc",    show(ainfo.all_cufIterFunc),
-    "all cufIterCtx",     show(ainfo.all_cufIterCtx),
-    "all cufIterInvName", show(ainfo.all_cufIterInvName),
-    "all cufIterDynamic", show(ainfo.all_cufIterDynamic),
-    "all frame",          show(ainfo.all_frame),
-    "all clsRefSlot",     show(ainfo.all_clsRefSlot)
+  folly::format(
+      &ret,
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n",
+
+      "all props",          show(ainfo.all_props),
+      "all elemIs",         show(ainfo.all_elemIs),
+      "all refs",           show(ainfo.all_ref),
+      "all iterPos",        show(ainfo.all_iterPos),
+      "all iterBase",       show(ainfo.all_iterBase),
+      "all cufIterFunc",    show(ainfo.all_cufIterFunc),
+      "all cufIterCtx",     show(ainfo.all_cufIterCtx),
+      "all cufIterInvName", show(ainfo.all_cufIterInvName),
+      "all cufIterDynamic", show(ainfo.all_cufIterDynamic),
+      "all frame",          show(ainfo.all_frame),
+      "all clsRefSlot",     show(ainfo.all_clsRefSlot),
+      "all rds",            show(ainfo.all_rds)
   );
   for (auto& kv : ainfo.local_sets) {
     folly::format(&ret, " ex {: <17}       : {}\n",

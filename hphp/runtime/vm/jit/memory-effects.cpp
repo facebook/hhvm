@@ -56,6 +56,10 @@ AliasClass pointee(
     return ARefAny | pointee(sinst->src(0), visited_labels);
   }
 
+  if (sinst->is(LdRDSAddr)) {
+    return ARds { sinst->extra<LdRDSAddr>()->handle };
+  }
+
   // For phis, union all incoming values, taking care to not recurse infinitely
   // in the presence of loops.
   if (sinst->is(DefLabel)) {
@@ -202,6 +206,7 @@ AliasClass pointee(
   if (typeNR.maybe(TPtrToMISGen))     ret = ret | AMIStateTV;
   if (typeNR.maybe(TPtrToClsInitGen)) ret = ret | AHeapAny;
   if (typeNR.maybe(TPtrToClsCnsGen))  ret = ret | AHeapAny;
+  if (typeNR.maybe(TPtrToSPropGen))   ret = ret | ARdsAny;
   return ret;
 }
 
@@ -440,8 +445,8 @@ GeneralEffects iter_effects(const IRInstruction& inst,
  */
 GeneralEffects interp_one_effects(const IRInstruction& inst) {
   auto const extra  = inst.extra<InterpOne>();
-  auto loads  = AHeapAny | AStackAny | AFrameAny;
-  auto stores = AHeapAny | AStackAny;
+  auto loads  = AHeapAny | AStackAny | AFrameAny | ARdsAny;
+  auto stores = AHeapAny | AStackAny | ARdsAny;
   if (extra->smashesAllLocals) {
     stores = stores | AFrameAny;
   } else {

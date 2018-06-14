@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_ALIAS_CLASS_H_
 #define incl_HPHP_ALIAS_CLASS_H_
 
+#include "hphp/runtime/base/rds.h"
+
 #include "hphp/runtime/vm/minstr-state.h"
 
 #include "hphp/runtime/vm/jit/alias-id-set.h"
@@ -56,12 +58,12 @@ struct SSATmp;
  *                    |               |          |              |
  *                    |              ...        ...            ...
  *                    |
- *      +---------+---+---------------+-------------------------+
- *      |         |                   |                         |
- *      |         |                   |                         |
- *      |         |                   |                         |
- *      |         |                   |                         |
- *      |         |                HeapAny*                     |
+ *      +---------+---+---------------+-------------------------+----+
+ *      |         |                   |                         |    |
+ *      |         |                   |                         |    |
+ *      |         |                   |                         | RdsAny
+ *      |         |                   |                         |    |
+ *      |         |                HeapAny*                     |   ...
  *      |         |                   |                         |
  *      |         |            +------+------+---------+        |
  *      |         |            |             |         |        |
@@ -69,15 +71,18 @@ struct SSATmp;
  *      |         |          /    \          |         |        |
  *     ...       ...   ElemIAny  ElemSAny   ...       ...       |
  *                        |         |                           |
- *                       ...       ...          ----------------+-------------
- *                                              |         |        |         |
- *                                         MITempBase  MITvRef  MITvRef2  MIBase
+ *                       ...       ...       +---------+--------+---------+
+ *                                           |         |        |         |
+ *                                      MITempBase  MITvRef  MITvRef2  MIBase**
  *
  *
  *   (*) AHeapAny contains some things other than ElemAny, PropAny and RefAny
  *       that don't have explicit nodes in the lattice yet.  (Like the
  *       lvalBlackhole, etc.)  It's hard for this to matter to client code for
  *       now because we don't expose an intersection or difference operation.
+ *
+ *  (**) MIBase is a pointer, so isn't UnknownTV, but its hard to find
+ *       the right spot in this diagram.
  */
 struct AliasClass;
 
@@ -196,6 +201,14 @@ struct ARef { SSATmp* boxed; };
  */
 struct AClsRefSlot { SSATmp* fp; AliasIdSet ids; };
 
+/*
+ * A TypedValue stored in rds.
+ *
+ * Assumes this handle uniquely identifies a TypedValue in rds - it's
+ * not required that the tv is at the start of the rds storage.
+ */
+struct ARds { rds::Handle handle; };
+
 //////////////////////////////////////////////////////////////////////
 
 struct AliasClass {
@@ -216,12 +229,13 @@ struct AliasClass {
     BCufIterCtx     = 1U << 10,
     BCufIterInvName = 1U << 11,
     BCufIterDynamic = 1U << 12,
+    BRds            = 1U << 13,
 
     // Have no specialization, put them last.
-    BMITempBase = 1U << 13,
-    BMITvRef    = 1U << 14,
-    BMITvRef2   = 1U << 15,
-    BMIBase     = 1U << 16,
+    BMITempBase = 1U << 14,
+    BMITvRef    = 1U << 15,
+    BMITvRef2   = 1U << 16,
+    BMIBase     = 1U << 17,
 
     BElem      = BElemI | BElemS,
     BHeap      = BElem | BProp | BRef,
@@ -232,7 +246,7 @@ struct AliasClass {
     BCufIter   = BCufIterFunc | BCufIterCtx | BCufIterInvName | BCufIterDynamic,
     BIterSlot  = BIter | BCufIter,
 
-    BUnknownTV = ~(BIterSlot | BMIBase),
+    BUnknownTV = ~(BIterSlot | BMIBase | BClsRefSlot),
 
     BUnknown   = static_cast<uint32_t>(-1),
   };
@@ -265,6 +279,7 @@ struct AliasClass {
   /* implicit */ AliasClass(AStack);
   /* implicit */ AliasClass(ARef);
   /* implicit */ AliasClass(AClsRefSlot);
+  /* implicit */ AliasClass(ARds);
 
   /*
    * Exact equality.
@@ -329,6 +344,7 @@ struct AliasClass {
   folly::Optional<AStack>          stack() const;
   folly::Optional<ARef>            ref() const;
   folly::Optional<AClsRefSlot>     clsRefSlot() const;
+  folly::Optional<ARds>            rds() const;
 
   /*
    * Conditionally access specific known information, but also checking that
@@ -351,6 +367,7 @@ struct AliasClass {
   folly::Optional<AStack>          is_stack() const;
   folly::Optional<ARef>            is_ref() const;
   folly::Optional<AClsRefSlot>     is_clsRefSlot() const;
+  folly::Optional<ARds>            is_rds() const;
 
   /*
    * Like the other foo() and is_foo() methods, but since we don't have an
@@ -375,6 +392,7 @@ private:
     Stack,
     Ref,
     ClsRefSlot,
+    Rds,
 
     IterBoth,  // A union of base and pos for the same iter.
     CufIterAll, // A union of all fields for the same CufIter.
@@ -417,6 +435,7 @@ private:
     AStack          m_stack;
     ARef            m_ref;
     AClsRefSlot     m_clsRefSlot;
+    ARds            m_rds;
 
     UIterBoth       m_iterBoth;
     UCufIterAll     m_cufIterAll;
@@ -440,6 +459,7 @@ auto const AHeapAny           = AliasClass{AliasClass::BHeap};
 auto const ARefAny            = AliasClass{AliasClass::BRef};
 auto const AStackAny          = AliasClass{AliasClass::BStack};
 auto const AClsRefSlotAny     = AliasClass{AliasClass::BClsRefSlot};
+auto const ARdsAny            = AliasClass{AliasClass::BRds};
 auto const AElemIAny          = AliasClass{AliasClass::BElemI};
 auto const AElemSAny          = AliasClass{AliasClass::BElemS};
 auto const AElemAny           = AliasClass{AliasClass::BElem};

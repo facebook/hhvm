@@ -215,7 +215,7 @@ struct
   and map_fun_variadicity menv v =
     match v with
     | S.FVvariadicArg fp -> T.FVvariadicArg (map_fun_param menv fp)
-    | S.FVellipsis -> T.FVellipsis
+    | S.FVellipsis p -> T.FVellipsis p
     | S.FVnonVariadic -> T.FVnonVariadic
 
   and map_class menv c =

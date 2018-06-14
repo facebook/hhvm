@@ -322,7 +322,7 @@ and fun_decl_in_env env f =
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       Fvariadic (arity_min, make_param_ty env f.f_user_attributes reactivity param)
-    | FVellipsis    -> Fellipsis (arity_min)
+    | FVellipsis p  -> Fellipsis (arity_min, p)
     | FVnonVariadic -> Fstandard (arity_min, List.length f.f_params)
   in
   let tparams = List.map f.f_tparams (type_param env) in
@@ -899,7 +899,7 @@ and method_decl env m =
       assert param.param_is_variadic;
       assert (param.param_expr = None);
       Fvariadic (arity_min, make_param_ty env m.m_user_attributes reactivity param)
-    | FVellipsis    -> Fellipsis arity_min
+    | FVellipsis p  -> Fellipsis (arity_min, p)
     | FVnonVariadic -> Fstandard (arity_min, List.length m.m_params)
   in
   let tparams = List.map m.m_tparams (type_param env) in

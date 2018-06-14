@@ -113,7 +113,7 @@ let check: Env.env -> Nast.user_attribute list ->
     List.iter ~f:(check_param env) params;
     match variadic with
     | FVvariadicArg vparam -> check_param env vparam
-    | FVellipsis
+    | FVellipsis _
     | FVnonVariadic -> ()
   end
 

@@ -949,7 +949,7 @@ module PrintFun = struct
     | Fstandard (min, max) -> Printf.sprintf "non-variadic: %d to %d" min max
     | Fvariadic (min, _) ->
       Printf.sprintf "variadic: ...$arg-style (PHP 5.6); min: %d" min
-    | Fellipsis min -> Printf.sprintf "variadic: ...-style (Hack); min: %d" min
+    | Fellipsis (min, _) -> Printf.sprintf "variadic: ...-style (Hack); min: %d" min
 
   let fparams tcopt l =
     List.fold_right l ~f:(fun x acc -> (fparam tcopt x)^acc) ~init:""

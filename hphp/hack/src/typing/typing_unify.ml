@@ -489,15 +489,15 @@ and generic_param_matches ~opts env x ty =
 
 and unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =
   match anon_arity, func_arity with
-    | Fellipsis a_min, Fvariadic (f_min, _) when ellipsis_is_variadic ->
+    | Fellipsis (a_min, _), Fvariadic (f_min, _) when ellipsis_is_variadic ->
       (* we want to allow use the "..." syntax in the declaration of
        * anonymous function types to match named variadic arguments
        * of the "...$args" form as well as unnamed ones *)
       a_min = f_min
     | Fvariadic (a_min, _), Fstandard (f_min, _)
     | Fvariadic (a_min, _), Fvariadic (f_min, _)
-    | Fellipsis a_min, Fstandard (f_min, _)
-    | Fellipsis a_min, Fellipsis f_min ->
+    | Fellipsis (a_min, _), Fstandard (f_min, _)
+    | Fellipsis (a_min, _), Fellipsis (f_min, _) ->
       a_min <= f_min
     | Fstandard (a_min, a_max), Fstandard (f_min, f_max) ->
       a_min = f_min && a_max = f_max

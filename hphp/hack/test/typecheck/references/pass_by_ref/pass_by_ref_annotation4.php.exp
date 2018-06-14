@@ -17,11 +17,11 @@ This argument should not be annotated with & (Typing[4181])
 File "pass_by_ref_annotation4.php", line 22, characters 19-21:
 This argument should not be annotated with & (Typing[4181])
   File "pass_by_ref_annotation4.php", line 3, characters 35-37:
-  Because this parameter is passed by value
+  Because variadic parameters are passed by value
 File "pass_by_ref_annotation4.php", line 22, characters 32-34:
 This argument should not be annotated with & (Typing[4181])
   File "pass_by_ref_annotation4.php", line 3, characters 35-37:
-  Because this parameter is passed by value
+  Because variadic parameters are passed by value
 File "pass_by_ref_annotation4.php", line 26, characters 6-7:
 This argument should be annotated with & (Typing[4168])
   File "pass_by_ref_annotation4.php", line 6, characters 24-25:

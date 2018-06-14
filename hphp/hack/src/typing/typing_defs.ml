@@ -398,7 +398,7 @@ and 'phase fun_arity =
   (* PHP5.6-style ...$args finishes the func declaration *)
   | Fvariadic of int * 'phase fun_param (* min ; variadic param type *)
   (* HH-style ... anonymous variadic arg; body presumably uses func_get_args *)
-  | Fellipsis of int       (* min *)
+  | Fellipsis of int * Pos.t  (* min ; position of ... *)
 
 and param_mode =
   | FPnormal
@@ -554,7 +554,7 @@ let has_expanded {type_expansions; _} x =
 let this = Local_id.make "$this"
 
 let arity_min ft_arity : int = match ft_arity with
-  | Fstandard (min, _) | Fvariadic (min, _) | Fellipsis min -> min
+  | Fstandard (min, _) | Fvariadic (min, _) | Fellipsis (min, _) -> min
 
 let get_param_mode ~is_ref callconv =
   (* If a param has both & and inout, this should have errored in parsing. *)

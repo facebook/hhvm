@@ -490,10 +490,12 @@ fun fmt fa ->
     Format.fprintf fmt ",@ ";
     pp_fun_param fmt a1;
     Format.fprintf fmt "@,))@]"
-  | Fellipsis a0 ->
-    Format.fprintf fmt "(@[<2>Fellipsis@ ";
+  | Fellipsis (a0,a1) ->
+    Format.fprintf fmt "(@[<2>Fellipsis (@,";
     Format.fprintf fmt "%d" a0;
-    Format.fprintf fmt "@])"
+    Format.fprintf fmt ",@ ";
+    Pos.pp fmt a1;
+    Format.fprintf fmt "@,))@]"
 
 and show_fun_arity : type a. a fun_arity -> string = fun x ->
   Format.asprintf "%a" pp_fun_arity x

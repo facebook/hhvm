@@ -2888,9 +2888,12 @@ let pass_by_ref_annotation_missing pos1 pos2 =
   let msg2 = pos2, "Because this parameter is passed by reference" in
   add_list (Typing.err_code Typing.PassByRefAnnotationMissing) [msg1; msg2]
 
-let pass_by_ref_annotation_unexpected pos1 pos2 =
+let pass_by_ref_annotation_unexpected pos1 pos2 pos2_is_variadic =
   let msg1 = pos1, "This argument should not be annotated with &" in
-  let msg2 = pos2, "Because this parameter is passed by value" in
+  let param_str = if pos2_is_variadic
+    then "variadic parameters are"
+    else "this parameter is" in
+  let msg2 = pos2, "Because " ^ param_str ^ " passed by value" in
   add_list (Typing.err_code Typing.PassByRefAnnotationUnexpected) [msg1; msg2]
 
 let reffiness_invariant pos1 pos2 mode2 =
@@ -2906,9 +2909,11 @@ let inout_annotation_missing pos1 pos2 =
   let msg2 = pos2, "Because this is an inout parameter" in
   add_list (Typing.err_code Typing.InoutAnnotationMissing) [msg1; msg2]
 
-let inout_annotation_unexpected pos1 pos2 =
+let inout_annotation_unexpected pos1 pos2 pos2_is_variadic =
   let msg1 = pos1, "Unexpected inout annotation for argument" in
-  let msg2 = pos2, "This is a normal parameter (does not have 'inout')" in
+  let msg2 = pos2, if pos2_is_variadic
+    then "A variadic parameter can never be inout"
+    else "This is a normal parameter (does not have 'inout')" in
   add_list (Typing.err_code Typing.InoutAnnotationUnexpected) [msg1; msg2]
 
 let inoutness_mismatch pos1 pos2 =

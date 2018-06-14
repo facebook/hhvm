@@ -1746,7 +1746,7 @@ module Make (GetLocals : GetLocals) = struct
         match x.param_is_variadic, x.param_id with
           | false, _ -> N.FVnonVariadic, [x]
           (* NOTE: variadic params are removed from the list *)
-          | true, (_, "...") -> N.FVellipsis, []
+          | true, (p, "...") -> N.FVellipsis p, []
           | true, _ -> N.FVvariadicArg (fun_param env x), []
       )
       | x :: rl ->
@@ -2721,7 +2721,7 @@ module Make (GetLocals : GetLocals) = struct
         let env =
           List.fold_left ~f:Env.add_param f.N.f_params ~init:env in
         let env = match f.N.f_variadic with
-          | N.FVellipsis | N.FVnonVariadic -> env
+          | N.FVellipsis _ | N.FVnonVariadic -> env
           | N.FVvariadicArg param -> Env.add_param env param
         in
         let body = block env fub_ast in
@@ -2742,7 +2742,7 @@ module Make (GetLocals : GetLocals) = struct
         let env =
           List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
         let env = match m.N.m_variadic with
-          | N.FVellipsis | N.FVnonVariadic -> env
+          | N.FVellipsis _ | N.FVnonVariadic -> env
           | N.FVvariadicArg param -> Env.add_param env param
         in
         let body = block env fub_ast in

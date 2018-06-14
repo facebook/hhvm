@@ -438,10 +438,10 @@ and fun_def tcopt f =
             check_param env vparam ty;
           let env, t_vparam = bind_param env (ty, vparam) in
           env, T.FVvariadicArg t_vparam
-        | FVellipsis ->
+        | FVellipsis p ->
           if Env.is_strict env then
             Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
-          env, T.FVellipsis
+          env, T.FVellipsis p
         | FVnonVariadic -> env, T.FVnonVariadic in
       let local_tpenv = env.Env.lenv.Env.tpenv in
       let env, tb = fun_ env return pos nb f.f_fun_kind in
@@ -1676,7 +1676,7 @@ and expr_
             let fun_arity = match fty.ft_arity with
               | Fstandard (min, max) -> Fstandard (min + 1, max + 1)
               | Fvariadic (min, x) -> Fvariadic (min + 1, x)
-              | Fellipsis min -> Fellipsis (min + 1) in
+              | Fellipsis (min, p) -> Fellipsis (min + 1, p) in
             let caller = {
               ft_pos = pos;
               ft_deprecated = None;
@@ -2306,7 +2306,7 @@ and expr_
         let explicit_variadic_param_or_non_variadic =
           begin match f.f_variadic with
           | FVvariadicArg {param_hint; _} -> Option.is_some param_hint
-          | FVellipsis -> false
+          | FVellipsis _ -> false
           | _ -> true
           end
         in
@@ -2672,6 +2672,7 @@ and anon_make tenv p f ft idl =
             make_variadic_arg env arg [variadic.fp_type]
           | FVvariadicArg arg, Fstandard _ ->
             make_variadic_arg env arg []
+          | FVellipsis pos, _ -> env, T.FVellipsis pos
           | _, _ -> env, T.FVnonVariadic
           end in
         let params = ref f.f_params in
@@ -2684,7 +2685,22 @@ and anon_make tenv p f ft idl =
             iter2_shortest Unify.unify_param_modes ft.ft_params supplied_params;
             env
           | Some x ->
-            iter2_shortest param_modes ft.ft_params x;
+            let var_param = match f.f_variadic with
+              | FVellipsis pos ->
+                let param = TUtils.default_fun_param ~pos
+                  (Reason.Rvar_param pos, Tany) in
+                Some param
+              | _ -> None in
+            let rec iter l1 l2 =
+              match l1, l2, var_param with
+              | _, [], _ -> ()
+              | [], _, None -> ()
+              | [], x2::rl2, Some def1 ->
+                param_modes ~is_variadic:true def1 x2;
+                iter [] rl2
+              | x1::rl1, x2::rl2, _ -> param_modes x1 x2; iter rl1 rl2
+            in
+            iter ft.ft_params x;
             wfold_left2 inout_write_back env ft.ft_params x in
         let env = Env.set_fn_kind env f.f_fun_kind in
         let env, hret =
@@ -4474,8 +4490,12 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
                 TVis.check_class_access p env (p_vis, vis) cid class_;
                 let env, ft =
                   Phase.localize_ft ~use_pos:p ~ety_env ~explicit_tparams:explicit_tparams env ft in
+                let arity_pos = match ft.ft_params with
+                  | [_; { fp_pos; fp_kind = FPnormal; _ }] -> fp_pos
+                  (* we should really assert here but this is not yet validated *)
+                  | _ -> p_vis in
                 let ft = { ft with
-                  ft_arity = Fellipsis 0;
+                  ft_arity = Fellipsis (0, arity_pos);
                   ft_tparams = []; ft_params = [];
                 } in
                 env, (r, Tfun ft), None
@@ -4625,18 +4645,23 @@ and obj_get_concrete_ty ~is_method ~valkind ~pos_params ?(explicit_tparams=[])
           let ety_env = mk_ety_env r class_info x paraml in
           let env, ft = Phase.localize_ft ~use_pos:id_pos ~ety_env env ft in
 
+          let arity_pos = match ft.ft_params with
+          | [_; { fp_pos; fp_kind = FPnormal; _ }] -> fp_pos
+          (* we should really assert here but this is not yet validated *)
+          | _ -> mem_pos in
+
           (* we change the params of the underlying declaration to act as a
            * variadic function ... this transform cannot be done when processing
            * the declaration of call because direct calls to $inst->__call are also
            * valid.
           *)
           let ft = {ft with
-            ft_arity = Fellipsis 0; ft_tparams = []; ft_params = []; } in
+            ft_arity = Fellipsis (0, arity_pos); ft_tparams = []; ft_params = []; } in
 
           let member_ty = (r, Tfun ft) in
           env, member_ty, Some (mem_pos, vis)
 
-          | _ -> assert false
+        | _ -> assert false
 
         end (* match Env.get_member is_method env class_info SN.Members.__call *)
 
@@ -5032,15 +5057,17 @@ and check_deprecated p { ft_pos; ft_deprecated; _ } =
  * should not unify with it *)
 and variadic_param env ft =
   match ft.ft_arity with
-    | Fvariadic (_, p_ty) -> env, Some p_ty
-    | Fellipsis _ | Fstandard _ -> env, None
+    | Fvariadic (_, param) -> env, Some param
+    | Fellipsis (_, pos) ->
+      env, Some (TUtils.default_fun_param ~pos (Reason.Rvar_param pos, Tany))
+    | Fstandard _ -> env, None
 
-and param_modes { fp_pos; fp_kind; _ } (pos, e) =
+and param_modes ?(is_variadic=false) { fp_pos; fp_kind; _ } (pos, e) =
   match fp_kind, e with
   | FPnormal, Unop (Ast.Uref, _) ->
-    Errors.pass_by_ref_annotation_unexpected pos fp_pos
+    Errors.pass_by_ref_annotation_unexpected pos fp_pos is_variadic
   | FPnormal, Callconv _ ->
-    Errors.inout_annotation_unexpected pos fp_pos
+    Errors.inout_annotation_unexpected pos fp_pos is_variadic
   | FPnormal, _
   | FPref, Unop (Ast.Uref, _) -> ()
   | FPref, Callconv (kind, _) ->
@@ -5140,9 +5167,9 @@ and call_ ~expected ~receiver_type ~is_expr_statement pos env fty el uel =
     let get_next_param_info paraml =
       match paraml with
       | param::paraml ->
-        Some param, paraml
+        false, Some param, paraml
       | [] ->
-        var_param, paraml in
+        true, var_param, paraml in
 
     (* Given an expected function type ft, check types for the non-unpacked
      * arguments. Don't check lambda expressions if check_lambdas=false *)
@@ -5151,7 +5178,7 @@ and call_ ~expected ~receiver_type ~is_expr_statement pos env fty el uel =
       (* We've got an argument *)
       | ((pos, _ as e), opt_result) :: el ->
         (* Pick up next parameter type info *)
-        let opt_param, paraml = get_next_param_info paraml in
+        let is_variadic, opt_param, paraml = get_next_param_info paraml in
         let env, one_result =
           if is_lambda e && not check_lambdas || Option.is_some opt_result
           then env, opt_result
@@ -5161,7 +5188,7 @@ and call_ ~expected ~receiver_type ~is_expr_statement pos env fty el uel =
               let env, te, ty =
                 expr ~is_func_arg:true ~accept_using_var:param.fp_accept_disposable
                   ~expected:(pos, Reason.URparam, param.fp_type) env e in
-              let env = call_param env param (e, ty) in
+              let env = call_param env param (e, ty) ~is_variadic in
               env, Some (te, ty)
             | None ->
               let env, te, ty = expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Typing_utils.tany env))
@@ -5202,11 +5229,11 @@ and call_ ~expected ~receiver_type ~is_expr_statement pos env fty el uel =
             match tyl with
             | [] -> env
             | ty::tyl ->
-              let opt_param, paraml = get_next_param_info paraml in
+              let is_variadic, opt_param, paraml = get_next_param_info paraml in
               match opt_param with
               | None -> env
               | Some param ->
-                let env = call_param env param (e, ty) in
+                let env = call_param env param (e, ty) ~is_variadic in
                 check_elements env tyl paraml in
           let env = check_elements env tyl paraml in
           env, [te], List.length el + List.length tyl, false
@@ -5307,12 +5334,12 @@ and call_ ~expected ~receiver_type ~is_expr_statement pos env fty el uel =
     env, [], [], err_witness env pos
   )
 
-and call_param env param ((pos, _ as e), arg_ty) =
+and call_param env param ((pos, _ as e), arg_ty) ~is_variadic =
   (match param.fp_name with
   | None -> ()
   | Some name -> Typing_suggest.save_param name env param.fp_type arg_ty
   );
-  param_modes param e;
+  param_modes ~is_variadic param e;
   let env, arg_ty = check_valid_rvalue pos env arg_ty in
 
   (* When checking params the type 'x' may be expression dependent. Since
@@ -6606,7 +6633,7 @@ and method_def env m =
         check_param env vparam ty;
       let env, t_variadic = bind_param env (ty, vparam) in
       env, (T.FVvariadicArg t_variadic)
-    | FVellipsis -> env, T.FVellipsis
+    | FVellipsis p -> env, T.FVellipsis p
     | FVnonVariadic -> env, T.FVnonVariadic in
   let nb = Nast.assert_named_body m.m_body in
   let local_tpenv = env.Env.lenv.Env.tpenv in

@@ -686,8 +686,8 @@ end
 (* Function parameters *)
 (*****************************************************************************)
 
-let default_fun_param ty : 'a fun_param = {
-  fp_pos = Pos.none;
+let default_fun_param ?(pos=Pos.none) ty : 'a fun_param = {
+  fp_pos = pos;
   fp_name = None;
   fp_type = ty;
   fp_kind = FPnormal;

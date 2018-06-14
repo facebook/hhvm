@@ -215,7 +215,7 @@ and fun_param = {
 
 and fun_variadicity = (* does function take varying number of args? *)
   | FVvariadicArg of fun_param (* PHP5.6 ...$args finishes the func declaration *)
-  | FVellipsis    (* HH ... finishes the declaration; deprecate for ...$args? *)
+  | FVellipsis of pos (* HH ... finishes the declaration; deprecate for ...$args? *)
   | FVnonVariadic (* standard non variadic function *)
 
 and fun_ = {

@@ -25,7 +25,7 @@ class ArrayIterator<T> implements KeyedIterator<arraykey, T>,
   public function asort(): void;
   public function count(): int;
   public function current(): T;
-  public function getArrayCopy(): array;
+  public function getArrayCopy(): varray_or_darray<T>;
   public function getFlags(): void;
   public function key(): arraykey;
   public function ksort(): void;

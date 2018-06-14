@@ -4111,7 +4111,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
               let any = err_witness env p in
               any, any
         in
-        let env, ty2 = TUtils.unresolved env ty2 in
+        let env, ty2 = Env.unbind env ty2 in
         let env = Type.sub_type p (Reason.index_class cn) env ty2 k in
         env, v
   (* Certain container/collection types are intended to be immutable/const,
@@ -4151,7 +4151,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
         (cn = SN.Collections.cConstVector || cn = SN.Collections.cImmVector) ->
     error_const_mutation env p ety1
   | Tarraykind (AKdarray (k, v) | AKmap (k, v)) ->
-      let env, ty2 = TUtils.unresolved env ty2 in
+      let env, ty2 = Env.unbind env ty2 in
       let env = Type.sub_type p Reason.index_array env ty2 k in
       env, v
   | Tarraykind ((AKshape  _ |  AKtuple _) as akind) ->
@@ -4168,7 +4168,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
         | Typing_arrays.AKshape_key field_name, AKshape fdm ->
             begin match Nast.ShapeMap.get field_name fdm with
               | Some (k, v) ->
-                  let env, ty2 = TUtils.unresolved env ty2 in
+                  let env, ty2 = Env.unbind env ty2 in
                   let env = Type.sub_type p Reason.index_array env ty2 k in
                   env, Some v
               | None -> env, None

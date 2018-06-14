@@ -151,7 +151,8 @@ function nl_langinfo($item);
 function vprintf($format, $args);
 <<__PHPStdLib, __Rx>>
 function vsprintf($format, $args);
-function sscanf($str, $format, ...);
+/* HH_IGNORE_ERROR[3068] this is a builtin */
+function sscanf($str, $format, &...$vars);
 <<__PHPStdLib>>
 function money_format($format, $number);
 <<__PHPStdLib, __Rx>>

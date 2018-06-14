@@ -1478,6 +1478,10 @@ let illegal_by_ref_expr pos str =
   add (NastCheck.err_code NastCheck.IllegalByRefExpr) pos
   (str ^ " cannot be passed by reference")
 
+let variadic_byref_param pos =
+  add (NastCheck.err_code NastCheck.VariadicByRefParam) pos
+    "Variadic parameters should not be taken by reference"
+
 (*****************************************************************************)
 (* Nast terminality *)
 (*****************************************************************************)

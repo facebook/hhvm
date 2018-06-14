@@ -206,6 +206,7 @@ NoOnlyrxIfRxfuncForRxIfArgs = 3064
 CoroutineInConstructor = 3065
 IllegalReturnByRef = 3066
 IllegalByRefExpr = 3067
+VariadicByRefParam = 3068
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001

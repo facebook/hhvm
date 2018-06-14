@@ -2802,13 +2802,10 @@ and param env =
         (string_of_param_kind pk)))
   end;
   let param_is_variadic = ellipsis_opt env in
-  if param_is_variadic then begin
-    if param_is_reference then
-      error env "A variadic parameter may not be passed by reference.";
+  if param_is_variadic then
     Option.iter param_callconv ~f:(fun pk ->
       error env (Printf.sprintf "A variadic parameter cannot be marked %s."
-        (string_of_param_kind pk)))
-  end;
+        (string_of_param_kind pk)));
   let param_id = variable env in
   let param_expr =
     parameter_default_with_checks param_callconv param_is_variadic env in

@@ -131,7 +131,8 @@ function array_merge($array1, ...);
 function array_replace_recursive($array1, ...);
 <<__Rx>>
 function array_replace($array1, ...);
-function array_multisort(&$arr1, ...);
+/* HH_IGNORE_ERROR[3068] this is a builtin */
+function array_multisort(&$arr1, &...$rest);
 <<__PHPStdLib, __Rx>>
 function array_pad($input, $pad_size, $pad_value);
 <<__PHPStdLib>>

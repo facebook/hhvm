@@ -473,6 +473,12 @@ and func env f named_body =
       ()
     | _ -> ()
   );
+  (match f.f_variadic with
+    | FVvariadicArg vparam ->
+      if vparam.param_is_reference then
+        Errors.variadic_byref_param vparam.param_pos
+    | _ -> ()
+  );
   block env named_body.fnb_nast;
   CheckFunctionBody.start
     f.f_fun_kind
@@ -969,6 +975,12 @@ and method_ (env, is_static) m =
       then Errors.inout_params_memoize p param.param_pos;
       if m.m_ret_by_ref then Errors.inout_params_ret_by_ref p param.param_pos;
       ()
+    | _ -> ()
+  );
+  (match m.m_variadic with
+    | FVvariadicArg vparam ->
+      if vparam.param_is_reference then
+        Errors.variadic_byref_param vparam.param_pos
     | _ -> ()
   );
   List.iter m.m_tparams (tparam env);

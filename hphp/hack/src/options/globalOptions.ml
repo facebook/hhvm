@@ -137,11 +137,6 @@ let tco_hacksperimental = "hacksperimental"
 let tco_decl_override_require_hint = "decl_override_require_hint"
 
 (**
- * Classes may be extended by only a limited whitelist of child classes.
- *)
-let tco_sealed_classes = "sealed_classes"
-
-(**
  * Make void the type of null.
  *)
 let tco_experimental_void_is_type_of_null = "void_is_type_of_null"
@@ -175,7 +170,6 @@ let tco_experimental_all =
      tco_experimental_as_expression;
      tco_hacksperimental;
      tco_decl_override_require_hint;
-     tco_sealed_classes;
      tco_experimental_void_is_type_of_null;
      tco_experimental_shape_field_check;
    ]

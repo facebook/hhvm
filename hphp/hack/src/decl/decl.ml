@@ -129,11 +129,6 @@ let experimental_no_trait_reuse_enabled env =
   env.Decl_env.decl_tcopt
   TypecheckerOptions.experimental_no_trait_reuse)
 
-let experimental_sealed_classes_enabled env =
-  (TypecheckerOptions.experimental_feature_enabled
-  env.Decl_env.decl_tcopt
-  TypecheckerOptions.experimental_sealed_classes)
-
 let report_reused_trait parent_type class_nast =
   Errors.trait_reuse parent_type.dc_pos parent_type.dc_name class_nast.c_name
 
@@ -574,7 +569,7 @@ and class_decl tcopt c =
   let consts = Decl_enum.rewrite_class c.c_name enum impl consts in
   let has_own_cstr = has_concrete_cstr && (None <> c.c_constructor) in
   let deferred_members = Decl_init_check.class_ ~has_own_cstr env c in
-  let sealed_whitelist = get_sealed_whitelist env c in
+  let sealed_whitelist = get_sealed_whitelist c in
   let tc = {
     dc_final = c.c_final;
     dc_const = const;
@@ -621,10 +616,8 @@ and class_decl tcopt c =
   end impl;
   tc
 
-and get_sealed_whitelist env c =
-  if not (experimental_sealed_classes_enabled env)
-  then None
-  else match Attrs.find SN.UserAttributes.uaSealed c.c_user_attributes with
+and get_sealed_whitelist c =
+  match Attrs.find SN.UserAttributes.uaSealed c.c_user_attributes with
     | None -> None
     | Some {ua_params = params; _} ->
       begin match c.c_kind with
@@ -634,9 +627,8 @@ and get_sealed_whitelist env c =
           Errors.unsealable pos kind;
           None
         | Ast.Cabstract | Ast.Cinterface | Ast.Cnormal ->
-          if c.c_final then begin
-            let p, name = c.c_name in Errors.sealed_final p name
-          end;
+          let p, name = c.c_name in
+          if c.c_final then Errors.sealed_final p name;
           let add_class_name names param =
             match param with
               | _, Class_const ((_, CI cls), (_, name))

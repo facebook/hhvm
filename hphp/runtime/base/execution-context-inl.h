@@ -198,7 +198,7 @@ inline TypedValue ExecutionContext::invokeFunc(
   VarEnv* varEnv
 ) {
   return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, varEnv,
-                    ctx.invName, InvokeNormal, false, ctx.dynamic);
+                    ctx.invName, InvokeNormal, ctx.dynamic);
 }
 
 inline TypedValue ExecutionContext::invokeFuncFew(
@@ -226,7 +226,6 @@ inline TypedValue ExecutionContext::invokeFuncFew(
     ctx.invName,
     argc,
     argv,
-    false,
     ctx.dynamic
   );
 }
@@ -243,7 +242,6 @@ inline TypedValue ExecutionContext::invokeMethod(
     nullptr /* invName */,
     args.size(),
     args.start(),
-    false,
     dynamic
   );
 }

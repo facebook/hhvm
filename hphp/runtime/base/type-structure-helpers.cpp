@@ -245,7 +245,7 @@ bool checkTypeStructureMatchesCellImpl(
             keysDidMatch = false;
             return true;
           }
-          auto const ts2 = tsElems->getValue(k.m_data.num).asCArrRef();
+          auto const& ts2 = asCArrRef(tsElems->rval(k.m_data.num));
           if (!checkTypeStructureMatchesCellImpl<genErrorMessage>(
               ts2, tvToCell(elem), givenType, expectedType, errorKey)) {
             elemsDidMatch = false;
@@ -321,7 +321,7 @@ bool checkTypeStructureMatchesCellImpl(
             errOnKey(k);
             return true;
           }
-          auto const tsField = Array(tsFieldData);
+          auto const tsField = ArrNR(tsFieldData);
           auto const field = fields->at(k);
           if (!checkTypeStructureMatchesCellImpl<genErrorMessage>(
               tsField, tvToCell(field), givenType, expectedType, errorKey)) {
@@ -394,7 +394,7 @@ void errorOnIsAsExpressionInvalidTypesList(const ArrayData* tsFields) {
     tsFields,
     [&](TypedValue v) {
       assertx(isArrayLikeType(v.m_type));
-      errorOnIsAsExpressionInvalidTypes(Array(v.m_data.parr));
+      errorOnIsAsExpressionInvalidTypes(ArrNR(v.m_data.parr));
     }
   );
 }

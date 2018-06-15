@@ -712,7 +712,7 @@ bool canDCE(IRInstruction* inst) {
     return !RuntimeOption::EvalHackArrCompatDVCmpNotices;
 
   case IsTypeStruct:
-    return !RuntimeOption::EvalHackArrCompatIsArrayNotices;
+    return !opcodeMayRaise(IsTypeStruct);
   }
   not_reached();
 }

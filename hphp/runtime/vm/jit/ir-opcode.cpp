@@ -279,10 +279,11 @@ bool opcodeMayRaise(Opcode opc) {
   case SameArr:
     return RuntimeOption::EvalHackArrCompatDVCmpNotices;
 
-  // IsTypeStruct may only raise errors when the option
-  // EvalHackArrCompatIsArrayNotices is set.
+  // Same thing for IsTypeStruct, but for EvalHackArrCompatIsArrayNotices
+  // and EvalIsExprEnableUnresolvedWarning.
   case IsTypeStruct:
-    return RuntimeOption::EvalHackArrCompatIsArrayNotices;
+    return RuntimeOption::EvalHackArrCompatIsArrayNotices
+      || RuntimeOption::EvalIsExprEnableUnresolvedWarning;
 
   case AddElemIntKey:
   case AddElemStrKey:

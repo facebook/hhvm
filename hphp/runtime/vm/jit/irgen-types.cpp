@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
@@ -872,7 +873,7 @@ void emitIsTypeStruct(IRGS& env, const ArrayData* a) {
     ? resolveTypeStructImpl(env, a, true)
     : cns(env, newTS);
   auto const c = popC(env);
-  auto block = RuntimeOption::EvalHackArrCompatIsArrayNotices
+  auto block = opcodeMayRaise(IsTypeStruct)
     ? create_catch_block(env, [&]{ decRef(env, tc); })
     : nullptr;
   push(env, gen(env, IsTypeStruct, block, tc, c));
@@ -902,7 +903,7 @@ void emitAsTypeStruct(IRGS& env, const ArrayData* a) {
   ifThen(
     env,
     [&](Block* taken) {
-      auto block = RuntimeOption::EvalHackArrCompatIsArrayNotices
+      auto block = opcodeMayRaise(IsTypeStruct)
         ? create_catch_block(env, [&]{ decRef(env, tc); })
         : nullptr;
       auto const res = gen(env, IsTypeStruct, block, tc, c);

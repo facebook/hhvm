@@ -1,0 +1,5 @@
+Fatal error: Uncaught exception 'Exception' with message 'when resolving anonymous type structure, class BlerpityBlerp not found' in %s
+Stack trace:
+#0 %s(%d): Closure$()
+#1 %s(%d): is_nonexistent()
+#2 {main}

@@ -523,15 +523,15 @@ let go_from_ast ast line char =
   LocalMap.results localmap
 
  (**
-  * This is the entrypoint to this module. The contents of a file, and a
-  * position within it, identifying a local, are given. The result is a
-  * list of the positions of other uses of that local in the file.
+  * This is the entrypoint to this module. The relative path of a file,
+  * the contents of a file, and a position within it, identifying a local, are given.
+  * The result is a list of the positions of other uses of that local in the file.
   *)
-let go tcopt content line char =
+let go tcopt path content line char =
   try
     let ast = parse tcopt content in
     let results_list = go_from_ast ast line char in
-    List.map results_list Pos.to_absolute
+    List.map results_list (fun pos -> Pos.set_file path pos)
   with Failure error ->
     failwith (
       (Printf.sprintf "Find locals service failed with error %s:\n" error) ^

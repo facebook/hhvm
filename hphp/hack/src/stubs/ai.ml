@@ -61,6 +61,7 @@ module ServerFindRefs = struct
     | Member of string * member
     | Function of string
     | GConst of string
+    | LocalVar of { filename: Relative_path.t; file_content: string; line: int; char: int }
 
   let go _  _ _ = []
 end
@@ -77,6 +78,7 @@ module TraceService = struct
     | Member of string * member
     | Function of string
     | GConst of string
+    | LocalVar of { filename: Relative_path.t; file_content: string; line: int; char: int }
 
   let go _ _ _ _ = ""
 end

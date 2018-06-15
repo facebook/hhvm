@@ -73,6 +73,15 @@ let search_class class_name include_defs genv env =
       genv.ServerEnv.workers (SSet.singleton class_name) in
   search (FindRefsService.IClass class_name) include_defs files genv env
 
+let search_localvar path content line char env =
+  let results = ServerFindLocals.go
+    env.tcopt path content line char in
+  match results with
+  | first_pos :: _ ->
+    let var_text = Pos.get_text_from_pos ~content first_pos in
+    List.map results (fun x -> (var_text, x))
+  | [] -> []
+
 let get_refs action include_defs genv env =
   match action with
   | Member (class_name, member) ->
@@ -83,13 +92,15 @@ let get_refs action include_defs genv env =
       search_class class_name include_defs genv env
   | GConst cst_name ->
       search_gconst cst_name include_defs genv env
+  | LocalVar { filename; file_content; line; char } ->
+      search_localvar filename file_content line char env
 
 let go action include_defs genv env =
   let res = get_refs action include_defs genv env in
   let res = List.map res (fun (r, pos) -> (r, Pos.to_absolute pos)) in
   res
 
-let get_action symbol =
+let get_action symbol (filename, file_content, line, char) =
   let name = symbol.SymbolOccurrence.name in
   begin match symbol.SymbolOccurrence.type_ with
     | SymbolOccurrence.Class -> Some (Class name)
@@ -107,16 +118,26 @@ let get_action symbol =
         Some (Member
           (class_name, Typeconst tconst_name))
     | SymbolOccurrence.GConst -> Some (GConst name)
-    | _ -> None
+    | SymbolOccurrence.LocalVar ->
+        Some (LocalVar { filename; file_content; line; char })
   end
 
-let go_from_file (content, line, char, include_defs) genv env =
+let go_from_file (labelled_file, line, char, include_defs) genv env =
+  let (filename, content) =
+    let open ServerCommandTypes in
+    match labelled_file with
+    | LabelledFileContent ({ filename; content; }) ->
+      (filename, ServerFileSync.get_file_content (FileContent content))
+    | LabelledFileName filename ->
+      (filename, ServerFileSync.get_file_content (FileName filename))
+    in
+  let filename = Relative_path.create_detect_prefix filename in
   (* Find the symbol at given position *)
   ServerIdentifyFunction.go content line char env.ServerEnv.tcopt |>
   (* If there are few, arbitrarily pick the first *)
   List.hd >>= fun (occurrence, definition) ->
   (* Ignore symbols that lack definitions *)
   definition >>= fun definition ->
-  get_action occurrence >>= fun action ->
+  get_action occurrence (filename, content, line, char) >>= fun action ->
   let results = go action include_defs genv env |> List.map ~f:snd in
   Some (definition.SymbolDefinition.full_name, results)

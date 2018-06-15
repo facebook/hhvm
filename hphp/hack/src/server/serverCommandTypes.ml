@@ -53,6 +53,7 @@ module Find_refs = struct
     | Member of string * member
     | Function of string
     | GConst of string
+    | LocalVar of { filename: Relative_path.t; file_content: string; line: int; char: int }
 
     type result = (string * Pos.absolute) list
     type ide_result = (string * Pos.absolute list) option
@@ -101,6 +102,10 @@ type file_input =
   | FileName of string
   | FileContent of string
 
+type labelled_file =
+  | LabelledFileName of string
+  | LabelledFileContent of { filename: string; content: string }
+
 type lint_stdin_input = { filename: string; contents: string }
 
 type cst_search_input = {
@@ -132,7 +137,7 @@ type _ t =
       Method_jumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t
   | FIND_REFS : Find_refs.action -> Find_refs.result t
-  | IDE_FIND_REFS : file_input * int * int * bool ->
+  | IDE_FIND_REFS : labelled_file * int * int * bool ->
       Find_refs.ide_result t
   | IDE_HIGHLIGHT_REFS : file_input * int * int ->
       ServerHighlightRefsTypes.result t

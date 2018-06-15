@@ -863,7 +863,7 @@ let handle_mode
     end
   | Find_local (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in
-    let result = ServerFindLocals.go popt file line column in
+    let result = ServerFindLocals.go popt filename file line column in
     let print pos = Printf.printf "%s\n" (Pos.string_no_file pos) in
     List.iter result print
   | Outline ->
@@ -929,15 +929,20 @@ let handle_mode
     Printf.printf "%s\n" (Nast.show_program nast)
   | Find_refs (line, column) ->
     Typing_deps.update_files files_info;
+    Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
+    Relative_path.set_path_prefix Relative_path.Hhi (Path.make "hhi");
+    Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
     let genv = ServerEnvBuild.default_genv in
     let env = {(ServerEnvBuild.make_env genv.ServerEnv.config) with
       ServerEnv.files_info;
       ServerEnv.tcopt = tcopt;
     } in
-    let file = cat (Relative_path.to_absolute filename) in
+    let filename = Relative_path.to_absolute filename in
+    let content = cat filename in
     let include_defs = false in
+    let labelled_file = ServerCommandTypes.LabelledFileContent { filename; content; } in
     let results = ServerFindRefs.go_from_file
-      (file, line, column, include_defs) genv env in
+      (labelled_file, line, column, include_defs) genv env in
     ClientFindRefs.print_ide_readable results;
   | Highlight_refs (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in

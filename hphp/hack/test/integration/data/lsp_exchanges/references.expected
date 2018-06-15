@@ -1,0 +1,200 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "capabilities": {
+        "textDocumentSync": {
+          "openClose": true,
+          "change": 2,
+          "willSave": false,
+          "willSaveWaitUntil": false,
+          "save": {
+            "includeText": false
+          }
+        },
+        "hoverProvider": true,
+        "completionProvider": {
+          "resolveProvider": true,
+          "triggerCharacters": [
+            "$",
+            ">",
+            "\\",
+            ":",
+            "<"
+          ]
+        },
+        "signatureHelpProvider": {
+          "triggerCharacters": [
+            "(",
+            ","
+          ]
+        },
+        "definitionProvider": true,
+        "referencesProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": false,
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "documentOnTypeFormattingProvider": {
+          "firstTriggerCharacter": ";",
+          "moreTriggerCharacter": [
+            "}"
+          ]
+        },
+        "renameProvider": true,
+        "typeCoverageProvider": true,
+        "rageProvider": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 11,
+    "result": [
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 5,
+            "character": 11
+          },
+          "end": {
+            "line": 5,
+            "character": 13
+          }
+        }
+      },
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 6,
+            "character": 9
+          },
+          "end": {
+            "line": 6,
+            "character": 11
+          }
+        }
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 12,
+    "result": [
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 18,
+            "character": 24
+          },
+          "end": {
+            "line": 18,
+            "character": 26
+          }
+        }
+      },
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 19,
+            "character": 2
+          },
+          "end": {
+            "line": 19,
+            "character": 4
+          }
+        }
+      },
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 20,
+            "character": 4
+          },
+          "end": {
+            "line": 20,
+            "character": 6
+          }
+        }
+      },
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 20,
+            "character": 10
+          },
+          "end": {
+            "line": 20,
+            "character": 12
+          }
+        }
+      },
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 20,
+            "character": 24
+          },
+          "end": {
+            "line": 20,
+            "character": 26
+          }
+        }
+      },
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 22,
+            "character": 20
+          },
+          "end": {
+            "line": 22,
+            "character": 22
+          }
+        }
+      },
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 25,
+            "character": 30
+          },
+          "end": {
+            "line": 25,
+            "character": 32
+          }
+        }
+      },
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 26,
+            "character": 11
+          },
+          "end": {
+            "line": 26,
+            "character": 13
+          }
+        }
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "result": null
+  }
+]

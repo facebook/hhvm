@@ -239,6 +239,11 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         variables = self.setup_php_file('rename.php')
         self.load_and_run('rename', variables)
 
+    def test_references(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('references.php')
+        self.load_and_run('references', variables)
+
     def test_non_existing_method(self):
         self.prepare_environment()
         variables = self.setup_php_file('nomethod.php')

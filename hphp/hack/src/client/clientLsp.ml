@@ -1141,8 +1141,8 @@ let do_findReferences
   let {Ide_api_types.line; column;} = lsp_position_to_ide params.loc.position in
   let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.loc.textDocument in
   let include_defs = params.context.includeDeclaration in
-  let command = ServerCommandTypes.IDE_FIND_REFS
-      (ServerCommandTypes.FileName filename, line, column, include_defs) in
+  let labelled_file = ServerCommandTypes.LabelledFileName filename in
+  let command = ServerCommandTypes.IDE_FIND_REFS (labelled_file, line, column, include_defs) in
   let results = rpc conn ref_unblocked_time command in
   (* TODO: respect params.context.include_declaration *)
   match results with

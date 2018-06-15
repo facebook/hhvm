@@ -195,7 +195,7 @@ let main args =
           match tpos with
           | [filename; line; char; new_name] ->
             let filename = expand_path filename in
-            ServerCommandTypes.FileName filename,
+              filename,
               int_of_string line,
               int_of_string char,
               new_name

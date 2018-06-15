@@ -69,6 +69,21 @@
   },
   {
     "jsonrpc": "2.0",
+    "id": 5,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 27,
+        "character": 21
+      },
+      "newName": "$unicorns"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 999,
     "method": "shutdown",
     "params": {}

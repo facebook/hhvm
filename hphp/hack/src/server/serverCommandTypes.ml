@@ -98,6 +98,15 @@ module Infer_return_type = struct
   type result = (string, string) Pervasives.result
 end
 
+module Ide_refactor_type = struct
+  type t = {
+    filename: string;
+    line: int;
+    char: int;
+    new_name: string;
+  }
+end
+
 type file_input =
   | FileName of string
   | FileContent of string
@@ -142,8 +151,7 @@ type _ t =
   | IDE_HIGHLIGHT_REFS : file_input * int * int ->
       ServerHighlightRefsTypes.result t
   | REFACTOR : ServerRefactorTypes.action -> ServerRefactorTypes.patch list t
-  | IDE_REFACTOR : file_input * int * int * string ->
-      ServerRefactorTypes.patch list t
+  | IDE_REFACTOR : Ide_refactor_type.t -> ServerRefactorTypes.patch list t
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
   | REMOVE_DEAD_FIXMES : int list -> [`Ok of ServerRefactorTypes.patch list | `Error of string] t

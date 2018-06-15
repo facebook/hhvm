@@ -112,7 +112,13 @@ let print_patches_json file_map =
 
 let go_ide conn args filename line char new_name =
   let patches = ClientConnect.rpc conn @@
-    ServerCommandTypes.IDE_REFACTOR (filename, line, char, new_name) in
+    ServerCommandTypes.IDE_REFACTOR {
+      ServerCommandTypes.Ide_refactor_type.
+      filename;
+      line;
+      char;
+      new_name;
+    } in
   let file_map = List.fold_left patches
     ~f:map_patches_to_filename ~init:SMap.empty in
   if args.output_json

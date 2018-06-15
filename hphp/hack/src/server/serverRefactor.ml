@@ -25,7 +25,9 @@ let go action genv env =
         Types.Member (class_name, Types.Method old_name),
           new_name
     | FunctionRename (old_name, new_name) ->
-      Types.Function old_name, new_name in
+        Types.Function old_name, new_name
+    | LocalVarRename { filename; file_content; line; char; new_name } ->
+        Types.LocalVar { filename; file_content; line; char }, new_name in
   let include_defs = true in
   let refs = ServerFindRefs.get_refs find_refs_action include_defs genv env in
   let changes = List.fold_left refs ~f:begin fun acc x ->
@@ -38,8 +40,10 @@ let go action genv env =
   end ~init:[] in
   changes
 
-let go_ide definitions new_name genv env =
+let go_ide (filename, line, char) new_name genv env =
   let open SymbolDefinition in
+  let file_content = ServerFileSync.get_file_content (ServerCommandTypes.FileName filename) in
+  let definitions = ServerIdentifyFunction.go_absolute file_content line char env.tcopt in
   match definitions with
   | (_, Some definition) :: [] -> begin
     let {full_name; kind; _} = definition in
@@ -56,6 +60,16 @@ let go_ide definitions new_name genv env =
     | Method, [class_name; method_name] ->
       let command =
         ServerRefactorTypes.MethodRename (class_name, method_name, new_name) in
+      go command genv env
+    | LocalVar, _ ->
+      let command =
+        ServerRefactorTypes.LocalVarRename {
+          filename = Relative_path.create_detect_prefix filename;
+          file_content;
+          line;
+          char;
+          new_name;
+        } in
       go command genv env
     | _, _ -> [] end
   | _ -> [] (* We have 0 or >1 definitions so correct behavior is unknown *)

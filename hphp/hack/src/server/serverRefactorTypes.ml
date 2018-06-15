@@ -22,3 +22,10 @@ type action =
   | MethodRename of string * string * string
     (* class_name * old_name * new_name*)
   | FunctionRename of string * string (* old_name * new_name *)
+  | LocalVarRename of {
+      filename: Relative_path.t;
+      file_content: string;
+      line: int;
+      char: int;
+      new_name: string;
+    }

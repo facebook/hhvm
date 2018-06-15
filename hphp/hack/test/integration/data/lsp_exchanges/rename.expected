@@ -173,6 +173,120 @@
     },
     {
       "jsonrpc": "2.0",
+      "id": 5,
+      "result": {
+        "changes": {
+          "${php_file_uri}": [
+            {
+              "range": {
+                "start": {
+                  "line": 23,
+                  "character": 34
+                },
+                "end": {
+                  "line": 23,
+                  "character": 36
+                }
+              },
+              "newText": "$unicorns"
+            },
+            {
+              "range": {
+                "start": {
+                  "line": 24,
+                  "character": 2
+                },
+                "end": {
+                  "line": 24,
+                  "character": 4
+                }
+              },
+              "newText": "$unicorns"
+            },
+            {
+              "range": {
+                "start": {
+                  "line": 25,
+                  "character": 4
+                },
+                "end": {
+                  "line": 25,
+                  "character": 6
+                }
+              },
+              "newText": "$unicorns"
+            },
+            {
+              "range": {
+                "start": {
+                  "line": 25,
+                  "character": 10
+                },
+                "end": {
+                  "line": 25,
+                  "character": 12
+                }
+              },
+              "newText": "$unicorns"
+            },
+            {
+              "range": {
+                "start": {
+                  "line": 25,
+                  "character": 24
+                },
+                "end": {
+                  "line": 25,
+                  "character": 26
+                }
+              },
+              "newText": "$unicorns"
+            },
+            {
+              "range": {
+                "start": {
+                  "line": 27,
+                  "character": 20
+                },
+                "end": {
+                  "line": 27,
+                  "character": 22
+                }
+              },
+              "newText": "$unicorns"
+            },
+            {
+              "range": {
+                "start": {
+                  "line": 30,
+                  "character": 30
+                },
+                "end": {
+                  "line": 30,
+                  "character": 32
+                }
+              },
+              "newText": "$unicorns"
+            },
+            {
+              "range": {
+                "start": {
+                  "line": 31,
+                  "character": 11
+                },
+                "end": {
+                  "line": 31,
+                  "character": 13
+                }
+              },
+              "newText": "$unicorns"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "jsonrpc": "2.0",
       "id": 999,
       "result": null
     }

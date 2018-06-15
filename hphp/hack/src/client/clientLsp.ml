@@ -1322,12 +1322,13 @@ let do_documentRename
     (ref_unblocked_time: float ref)
     (params: Rename.params)
   : WorkspaceEdit.t =
-  let (file, line, column) =
+  let (filename, line, char) =
     lsp_file_position_to_hack (rename_params_to_document_position params) in
   let open Rename in
-  let newName = params.newName in
+  let new_name = params.newName in
   let command =
-    ServerCommandTypes.IDE_REFACTOR (ServerCommandTypes.FileName file, line, column, newName) in
+    ServerCommandTypes.IDE_REFACTOR
+      { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name } in
   let patches =
     rpc conn ref_unblocked_time command
   in

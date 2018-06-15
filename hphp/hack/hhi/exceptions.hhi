@@ -62,9 +62,7 @@ class ParseError extends Error {}
 class TypeError extends Error {}
 
 class Exception implements Throwable {
-  // $code should be untyped, or mixed because some subclasses set it
-  // to a string, the main example being PDOException
-  protected $code;
+  protected int $code;
   protected string $file;
   protected int $line;
   protected array $trace;

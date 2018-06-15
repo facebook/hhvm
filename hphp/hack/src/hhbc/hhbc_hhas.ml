@@ -992,7 +992,11 @@ and string_of_fun ~env f use_list =
       ^ (String.concat ", " @@ List.map use_list_helper use_list)
       ^ ") "
   in
-  (if f.A.f_static then "static " else "")
+  let async = match f.A.f_fun_kind with
+  | A.FAsync | A.FAsyncGenerator -> "async "
+  | _ -> "" in
+  async
+  ^ (if f.A.f_static then "static " else "")
   ^ "function ("
   ^ args
   ^ ") "
@@ -1313,11 +1317,22 @@ and string_of_param_default_value ~env expr =
     let h = string_of_hint ~ns:true h in
     e ^ o ^ h
   | A.Varray es ->
-     let es = List.map (string_of_param_default_value ~env) es in
-     "varray[" ^ (String.concat ", " es) ^ "]"
+    let es = List.map (string_of_param_default_value ~env) es in
+    "varray[" ^ (String.concat ", " es) ^ "]"
   | A.Darray es ->
-     let es = List.map (fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
-     "darray[" ^ (string_of_afield_list ~env es) ^ "]"
+    let es = List.map (fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
+    "darray[" ^ (string_of_afield_list ~env es) ^ "]"
+  | A.List l ->
+    let l = List.map (string_of_param_default_value ~env) l in
+    "list(" ^ (String.concat ", " l) ^ ")"
+  | A.Yield y ->
+    "yield " ^ (string_of_afield ~env y)
+  | A.Await a ->
+    "await " ^ (string_of_param_default_value ~env a)
+  | A.Yield_break ->
+    "return"
+  | A.Yield_from e ->
+    "yield from " ^ (string_of_param_default_value ~env e)
   | A.Import (fl, e) ->
     let fl = string_of_import_flavor fl in
     let e = string_of_param_default_value ~env e in
@@ -1328,12 +1343,7 @@ and string_of_param_default_value ~env expr =
   | A.Omitted -> ""
   | A.Lfun _ ->
     failwith "expected Lfun to be converted to Efun during closure conversion"
-  | A.Yield _
-  | A.Yield_break
-  | A.Yield_from _
-  | A.Await _
   | A.Suspend _
-  | A.List _
   | A.Callconv _
   | A.Expr_list _ -> failwith "illegal default value"
 

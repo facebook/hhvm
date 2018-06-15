@@ -809,6 +809,23 @@ let rec pSimpleInitializer node env =
     pExpr simple_initializer_value env
   | _ -> missing_syntax "simple initializer" node env
 
+and pFunParamDefaultValue node env =
+  match syntax node with
+  | SimpleInitializer { simple_initializer_value; _ } ->
+    begin match syntax simple_initializer_value with
+    | ListExpression _ ->
+      raise_parsing_error env node (SyntaxError.invalid_default_argument "A list destructuring")
+    | YieldExpression _
+    | YieldFromExpression _ ->
+      raise_parsing_error env node (SyntaxError.invalid_default_argument "A yield")
+    | PrefixUnaryExpression {
+      prefix_unary_operator = { syntax = Token t; _ }; _ } when Token.kind t = TK.Await ->
+      raise_parsing_error env node (SyntaxError.invalid_default_argument "An await")
+    | _ -> () end;
+    mpOptional pExpr simple_initializer_value env
+  | _ -> None
+
+
 and pFunParam : fun_param parser = fun node env ->
   match syntax node with
   | ParameterDeclaration
@@ -844,8 +861,7 @@ and pFunParam : fun_param parser = fun node env ->
     ; param_is_reference    = is_reference
     ; param_is_variadic     = is_variadic
     ; param_id              = pos_name name env
-    ; param_expr            =
-      mpOptional pSimpleInitializer parameter_default_value env
+    ; param_expr            = pFunParamDefaultValue parameter_default_value env
     ; param_user_attributes = pUserAttributes env parameter_attribute
     ; param_callconv        =
       mpOptional pParamKind parameter_call_convention env

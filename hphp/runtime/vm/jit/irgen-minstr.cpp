@@ -2213,7 +2213,7 @@ void emitSetWithRefRML(IRGS& env, int32_t keyLoc) {
 void emitMemoGet(IRGS& env, uint32_t ndiscard, LocalRange locals) {
   assertx(curFunc(env)->isMemoizeWrapper());
   assertx(!curFunc(env)->isReturnRef());
-  assertx(locals.first + locals.restCount < curFunc(env)->numLocals());
+  assertx(locals.first + locals.count <= curFunc(env)->numLocals());
 
   auto const base = ldMBase(env);
   auto const ret = gen(env, MemoGet, MemoData { locals }, fp(env), base);
@@ -2232,7 +2232,7 @@ void emitMemoGet(IRGS& env, uint32_t ndiscard, LocalRange locals) {
 
 void emitMemoSet(IRGS& env, uint32_t ndiscard, LocalRange locals) {
   assertx(curFunc(env)->isMemoizeWrapper());
-  assertx(locals.first + locals.restCount < curFunc(env)->numLocals());
+  assertx(locals.first + locals.count <= curFunc(env)->numLocals());
 
   auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
   gen(env, MemoSet, MemoData { locals }, fp(env), ldMBase(env), value);

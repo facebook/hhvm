@@ -837,8 +837,8 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   if (flags & LocalRange) {
     auto const& range = ni.imm[1].u_LAR;
     SKTRACE(1, sk, "getInputs: localRange %d+%d\n",
-            range.first, range.restCount);
-    for (int i = 0; i < range.restCount+1; ++i) {
+            range.first, range.count);
+    for (int i = 0; i < range.count; ++i) {
       inputs.emplace_back(Location::Local { uint32_t(range.first + i) });
       inputs.back().dontGuard = true;
       inputs.back().dontBreak = true;

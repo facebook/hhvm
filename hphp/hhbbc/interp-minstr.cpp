@@ -1876,8 +1876,8 @@ void in(ISS& env, const bc::FPassM& op) {
 
 void in(ISS& env, const bc::MemoGet& op) {
   always_assert(env.ctx.func->isMemoizeWrapper);
-  always_assert(op.locrange.first + op.locrange.restCount
-                < env.ctx.func->locals.size());
+  always_assert(op.locrange.first + op.locrange.count
+                <= env.ctx.func->locals.size());
   always_assert(env.state.mInstrState.base.loc == BaseLoc::Local ||
                 env.state.mInstrState.base.loc == BaseLoc::StaticProp ||
                 env.state.mInstrState.base.loc == BaseLoc::Prop);
@@ -1888,12 +1888,12 @@ void in(ISS& env, const bc::MemoGet& op) {
   if (equiv != op.locrange.first) {
     return reduce(
       env,
-      bc::MemoGet { op.arg1, LocalRange { equiv, op.locrange.restCount } }
+      bc::MemoGet { op.arg1, LocalRange { equiv, op.locrange.count } }
     );
   }
 
   nothrow(env);
-  for (uint32_t i = 0; i < op.locrange.restCount + 1; ++i) {
+  for (uint32_t i = 0; i < op.locrange.count; ++i) {
     mayReadLocal(env, op.locrange.first + i);
   }
   endBase(env, false);
@@ -1905,8 +1905,8 @@ void in(ISS& env, const bc::MemoGet& op) {
 
 void in(ISS& env, const bc::MemoSet& op) {
   always_assert(env.ctx.func->isMemoizeWrapper);
-  always_assert(op.locrange.first + op.locrange.restCount
-                < env.ctx.func->locals.size());
+  always_assert(op.locrange.first + op.locrange.count
+                <= env.ctx.func->locals.size());
   always_assert(env.state.mInstrState.base.loc == BaseLoc::Local ||
                 env.state.mInstrState.base.loc == BaseLoc::StaticProp ||
                 env.state.mInstrState.base.loc == BaseLoc::Prop);
@@ -1917,12 +1917,12 @@ void in(ISS& env, const bc::MemoSet& op) {
   if (equiv != op.locrange.first) {
     return reduce(
       env,
-      bc::MemoSet { op.arg1, LocalRange { equiv, op.locrange.restCount } }
+      bc::MemoSet { op.arg1, LocalRange { equiv, op.locrange.count } }
     );
   }
 
   nothrow(env);
-  for (uint32_t i = 0; i < op.locrange.restCount + 1; ++i) {
+  for (uint32_t i = 0; i < op.locrange.count; ++i) {
     mayReadLocal(env, op.locrange.first + i);
   }
 

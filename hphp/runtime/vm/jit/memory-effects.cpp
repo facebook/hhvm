@@ -1184,7 +1184,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AliasIdSet{
         AliasIdSet::IdRange{
           extra->locals.first,
-          extra->locals.first + extra->locals.restCount + 1
+          extra->locals.first + extra->locals.count
         }
       }
     };
@@ -1198,7 +1198,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AliasIdSet{
         AliasIdSet::IdRange{
           extra->locals.first,
-          extra->locals.first + extra->locals.restCount + 1
+          extra->locals.first + extra->locals.count
         }
       }
     };

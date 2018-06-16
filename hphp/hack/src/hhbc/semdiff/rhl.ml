@@ -610,10 +610,11 @@ let check_instruct_misc asn i i' =
     when s = s' -> Some asn
   | GetMemoKeyL _, _
   | _, GetMemoKeyL _ -> None (* wimp out if not same named local *)
-  | MemoSet (count, Local.Unnamed first, local_count),
-    MemoSet(count', Local.Unnamed first', local_count')
-  | MemoGet (count, Local.Unnamed first, local_count),
-    MemoGet(count', Local.Unnamed first', local_count')
+
+  | MemoSet (count, Some (Local.Unnamed first, local_count)),
+    MemoSet (count', Some (Local.Unnamed first', local_count'))
+  | MemoGet (count, Some (Local.Unnamed first, local_count)),
+    MemoGet (count', Some (Local.Unnamed first', local_count'))
     when count=count' && local_count = local_count' ->
       let rec loop loop_asn local local' count =
         match reads loop_asn (Local.Unnamed local) (Local.Unnamed local') with
@@ -623,10 +624,10 @@ let check_instruct_misc asn i i' =
           else loop new_asn (local + 1) (local' + 1) (count - 1)
         in
       loop asn first first' local_count
-  | MemoSet (_,_,_), _
-  | _, MemoSet (_,_,_)
-  | MemoGet (_,_,_), _
-  | _, MemoGet(_,_,_) ->
+  | MemoSet _, _
+  | _, MemoSet _
+  | MemoGet _, _
+  | _, MemoGet _ ->
     (* COMPLETENESS: wimp out again *)
     None
   | CreateCl(npars,cln), CreateCl(npars',cln') ->
@@ -723,8 +724,8 @@ let check_instruct_async_functions asn i i' =
     (e.g. they do not access locals). *)
   | WHResult, _ | Await, _ ->
     if i = i' then Some asn else None
-  | AwaitAll (Local.Unnamed first1, count1),
-    AwaitAll (Local.Unnamed first2, count2) when count1 = count2 ->
+  | AwaitAll Some (Local.Unnamed first1, count1),
+    AwaitAll Some (Local.Unnamed first2, count2) when count1 = count2 ->
     let rec loop loop_asn local local' count =
       match reads loop_asn (Local.Unnamed local) (Local.Unnamed local') with
       | None -> None

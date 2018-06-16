@@ -136,11 +136,11 @@ let stk_data : instruct -> stack_sig = function
   (*| IOp ConcatN n *)
   | IFinal QueryM (n, _, _)
   | IFinal IncDecM (n, _, _)
-  | IMisc MemoGet (n, _, _)
+  | IMisc MemoGet (n, _)
   | IMisc CreateCl (n, _)
   | ILitConst NewPackedArray n             -> produce "C" n, ["C"]
   | IFinal SetOpM (n, _, _)
-  | IMisc MemoSet (n, _, _)
+  | IMisc MemoSet (n, _)
   | IFinal SetM (n, _)                     -> produce "C" (n + 1), ["C"]
   | IFinal FPassM (_, n, _, _)
   | IFinal VGetM (n, _)                    -> produce "C" n, ["V"]

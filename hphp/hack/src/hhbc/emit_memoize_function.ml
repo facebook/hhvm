@@ -100,7 +100,7 @@ let make_memoize_function_with_params_code
     instr_staticlocinit static_local static_memoize_cache;
     param_code_sets params (param_count + 1);
     instr_basel static_local Warn;
-    instr_memoget 0 first_local param_count;
+    instr_memoget 0 (Some (first_local, param_count));
     instr_isuninit;
     instr_jmpnz label;
     instr_cgetcunop;
@@ -113,7 +113,7 @@ let make_memoize_function_with_params_code
     instr_fcall param_count;
     instr_unboxr;
     instr_basel static_local Define;
-    instr_memoset 0 first_local param_count;
+    instr_memoset 0 (Some (first_local, param_count));
     instr_retc;
     default_value_setters
   ]

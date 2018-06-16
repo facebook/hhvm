@@ -584,13 +584,17 @@ let string_of_misc instruction =
       sep ["StaticLocDef"; string_of_local_id local; "\"" ^ text ^ "\""]
     | StaticLocInit (local, text) ->
       sep ["StaticLocInit"; string_of_local_id local; "\"" ^ text ^ "\""]
-    | MemoGet (count, Local.Unnamed first, local_count) ->
+    | MemoGet (count, Some (Local.Unnamed first, local_count)) ->
       Printf.sprintf "MemoGet %s L:%d+%d"
-        (string_of_int count) first (local_count - 1)
+                     (string_of_int count) first local_count
+    | MemoGet (count, None) ->
+      Printf.sprintf "MemoGet %s L:0+0" (string_of_int count)
     | MemoGet _ -> failwith "MemoGet needs an unnamed local"
-    | MemoSet (count, Local.Unnamed first, local_count) ->
+    | MemoSet (count, Some (Local.Unnamed first, local_count)) ->
       Printf.sprintf "MemoSet %s L:%d+%d"
-        (string_of_int count) first (local_count - 1)
+        (string_of_int count) first local_count
+    | MemoSet (count, None) ->
+      Printf.sprintf "MemoSet %s L:0+0" (string_of_int count)
     | MemoSet _ -> failwith "MemoSet needs an unnamed local"
     | GetMemoKeyL local ->
       sep ["GetMemoKeyL"; string_of_local_id local]
@@ -725,8 +729,10 @@ let string_of_try instruction =
 let string_of_async = function
   | Await -> "Await"
   | WHResult -> "WHResult"
-  | AwaitAll (Local.Unnamed local, count) ->
+  | AwaitAll (Some (Local.Unnamed local, count)) ->
     Printf.sprintf "AwaitAll L:%d+%d" local count
+  | AwaitAll None ->
+    Printf.sprintf "AwaitAll L:0+0"
   | AwaitAll _ -> failwith "AwaitAll needs an unnamed local"
 
 let string_of_generator = function

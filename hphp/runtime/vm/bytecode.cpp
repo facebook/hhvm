@@ -3965,12 +3965,12 @@ OPTBLD_INLINE void iopSetWithRefRML(local_var local) {
 OPTBLD_INLINE void iopMemoGet(uint32_t nDiscard,
                               LocalRange locals) {
   assertx(vmfp()->m_func->isMemoizeWrapper());
-  assertx(locals.first + locals.restCount < vmfp()->m_func->numLocals());
+  assertx(locals.first + locals.count <= vmfp()->m_func->numLocals());
   auto mstate = vmMInstrState();
   auto const res = MixedArray::MemoGet(
     mstate.base,
     frame_local(vmfp(), locals.first),
-    locals.restCount + 1
+    locals.count
   );
   mFinal(mstate, nDiscard, res);
 }
@@ -3978,13 +3978,13 @@ OPTBLD_INLINE void iopMemoGet(uint32_t nDiscard,
 OPTBLD_INLINE void iopMemoSet(uint32_t nDiscard,
                               LocalRange locals) {
   assertx(vmfp()->m_func->isMemoizeWrapper());
-  assertx(locals.first + locals.restCount < vmfp()->m_func->numLocals());
+  assertx(locals.first + locals.count <= vmfp()->m_func->numLocals());
   auto const value = *vmStack().topC();
   auto mstate = vmMInstrState();
   MixedArray::MemoSet(
     mstate.base,
     frame_local(vmfp(), locals.first),
-    locals.restCount + 1,
+    locals.count,
     value
   );
   vmStack().discard();
@@ -6538,7 +6538,7 @@ OPTBLD_INLINE TCA iopAwait(PC& pc) {
 
 OPTBLD_INLINE TCA iopAwaitAll(PC& pc, LocalRange locals) {
   uint32_t cnt = 0;
-  for (auto i = locals.first; i < locals.first + locals.restCount + 1; ++i) {
+  for (auto i = locals.first; i < locals.first + locals.count; ++i) {
     auto const local = *frame_local(vmfp(), i);
     if (cellIsNull(local)) continue;
     auto const awaitable = c_Awaitable::fromCell(local);
@@ -6556,7 +6556,7 @@ OPTBLD_INLINE TCA iopAwaitAll(PC& pc, LocalRange locals) {
   }
 
   auto obj = Object::attach(c_AwaitAllWaitHandle::fromFrameNoCheck(
-    locals.restCount + 1, cnt, frame_local(vmfp(), locals.first)
+    locals.count, cnt, frame_local(vmfp(), locals.first)
   ));
   assertx(obj->isWaitHandle());
   assertx(!static_cast<c_Awaitable*>(obj.get())->isFinished());

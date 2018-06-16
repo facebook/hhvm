@@ -368,8 +368,12 @@ std::string show(const php::Func& func, const Bytecode& bc) {
   };
 
   auto append_lar = [&](const LocalRange& range) {
-    folly::toAppend("L:", local_string(func, range.first), "+",
-                    range.restCount, &ret);
+    if (!range.count) {
+      folly::toAppend("L:-", &ret);
+    } else {
+      folly::toAppend("L:", local_string(func, range.first), "+",
+                      range.count, &ret);
+    }
   };
 
 #define IMM_BLA(n)     ret += " "; append_switch(data.targets);

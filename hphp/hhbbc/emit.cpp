@@ -667,11 +667,9 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
 
     auto emit_lar  = [&](const LocalRange& range) {
-      always_assert(range.first + range.restCount < func.locals.size());
-      auto const first = map_local(range.first);
-      DEBUG_ONLY auto const last = map_local(range.first + range.restCount);
-      assert(last - first == range.restCount);
-      encodeLocalRange(ue, HPHP::LocalRange{first, range.restCount});
+      always_assert(range.first + range.count <= func.locals.size());
+      auto const first = (range.count > 0) ? map_local(range.first) : 0;
+      encodeLocalRange(ue, HPHP::LocalRange{first, range.count});
     };
 
 #define IMM_BLA(n)     emit_switch(data.targets);

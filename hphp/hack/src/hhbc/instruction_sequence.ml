@@ -216,10 +216,10 @@ let instr_fcallunpack count = instr (ICall(FCallUnpack count))
 let instr_isuninit = instr (IMisc IsUninit)
 let instr_cgetcunop = instr (IMisc CGetCUNop)
 let instr_ugetcunop = instr (IMisc UGetCUNop)
-let instr_memoget count local local_count =
-  instr (IMisc (MemoGet(count, local, local_count)))
-let instr_memoset count local local_count =
-  instr (IMisc (MemoSet(count, local, local_count)))
+let instr_memoget count range =
+  instr (IMisc (MemoGet(count, range)))
+let instr_memoset count range =
+  instr (IMisc (MemoSet(count, range)))
 let instr_getmemokeyl local = instr (IMisc (GetMemoKeyL local))
 let instr_ismemotype = instr (IMisc IsMemoType)
 let instr_maybememotype = instr (IMisc MaybeMemoType)
@@ -255,7 +255,7 @@ let instr_await = instr (IAsync Await)
 let instr_yield = instr (IGenerator Yield)
 let instr_yieldk = instr (IGenerator YieldK)
 let instr_createcont = instr (IGenerator CreateCont)
-let instr_awaitall l count = instr (IAsync (AwaitAll (l, count)))
+let instr_awaitall range = instr (IAsync (AwaitAll range))
 
 let instr_static_loc_check name =
   instr (IMisc (StaticLocCheck (Local.Named name,
@@ -799,10 +799,10 @@ let get_input_output_count i =
     | OODeclExists _ | AKExists -> (2, 1)
     | VerifyOutType _ | VerifyRetTypeC | VerifyRetTypeV | CGetCUNop
     | UGetCUNop | IsMemoType | MaybeMemoType -> (1, 1)
-    | CreateCl (n, _) | MemoGet (n, _, _) -> (n, 1)
+    | CreateCl (n, _) | MemoGet (n, _) -> (n, 1)
     | Idx | ArrayIdx -> (3, 1)
     | IsUninit -> (1, 2)
-    | MemoSet (n, _, _) -> (n + 1, 1)
+    | MemoSet (n, _) -> (n + 1, 1)
     end
   | IGet i ->
     begin match i with
@@ -1017,8 +1017,8 @@ let collect_locals f instrs =
       )
     | IMisc (InitThisLoc l | StaticLocCheck (l, _) | StaticLocDef (l, _) |
              StaticLocInit (l, _) | AssertRATL (l, _) | Silence (l, _) |
-             GetMemoKeyL l | MemoGet (_, l, _) | MemoSet (_, l, _))
-    | IAsync (AwaitAll (l, _))
+             GetMemoKeyL l | MemoGet (_, Some (l, _)) | MemoSet (_, Some (l, _)))
+    | IAsync (AwaitAll (Some (l, _)))
       -> add acc l
     | IFinal (SetWithRefLML (l1, l2))
     | IIterator (

@@ -197,7 +197,7 @@ let make_memoize_instance_method_with_params_code ~pos
     param_code_sets params first_parameter_local;
     instr_baseh;
     instr_dim_warn_pt (shared_multi_memoize_cache info.memoize_class_prefix);
-    instr_memoget 0 first_local local_count;
+    instr_memoget 0 (Some (first_local, local_count));
     instr_isuninit;
     instr_jmpnz label;
     instr_cgetcunop;
@@ -212,7 +212,7 @@ let make_memoize_instance_method_with_params_code ~pos
     instr_unboxr;
     instr_baseh;
     instr_dim_define_pt (shared_multi_memoize_cache info.memoize_class_prefix);
-    instr_memoset 0 first_local local_count;
+    instr_memoset 0 (Some (first_local, local_count));
     instr_retc;
     default_value_setters ]
 
@@ -314,7 +314,7 @@ let make_memoize_static_method_with_params_code ~pos
       ^ multi_memoize_cache info.memoize_class_prefix);
     get_self info;
     instr_basesc 0;
-    instr_memoget 1 first_local param_count;
+    instr_memoget 1 (Some (first_local, param_count));
     instr_isuninit;
     instr_jmpnz label;
     instr_cgetcunop;
@@ -331,7 +331,7 @@ let make_memoize_static_method_with_params_code ~pos
     instr_fcall param_count;
     instr_unboxr;
     instr_basesc 1;
-    instr_memoset 1 first_local param_count;
+    instr_memoset 1 (Some (first_local, param_count));
     instr_retc;
     default_value_setters ]
 

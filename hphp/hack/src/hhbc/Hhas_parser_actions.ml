@@ -620,7 +620,9 @@ let memberkeyofiarg arg =
 let memoargofiarg arg =
   match arg with
   | IAMemberkey ("L", IAArglist [IAInt64 n; IAInt64 m]) ->
-    (Local.Unnamed (Int64.to_int n), Int64.to_int m)
+     let l = Int64.to_int n in
+     let c = Int64.to_int m in
+     if (c = 0) then None else Some (Local.Unnamed l, c)
   | _ -> report_error "bad memo arg"
 
 let incdecopofiarg arg =
@@ -949,7 +951,7 @@ let makeunaryinst s arg = match s with
    (* async_functions
       TODO: double-check the +1 in this case
    *)
-   | "AwaitAll" -> let l,i = memoargofiarg arg in IAsync(AwaitAll (l,i+1))
+   | "AwaitAll" -> let l = memoargofiarg arg in IAsync(AwaitAll l)
 
    (* instruct_include_eval_define *)
    | "DefFunc" -> IIncludeEvalDefine(DefFunc (function_num_of_iarg arg))
@@ -1075,11 +1077,11 @@ match s with
 
  (* instruct_misc *)
  | "MemoSet" ->
-   let l, n = memoargofiarg arg2 in
-   IMisc(MemoSet(intofiarg arg1, l, n+1))
+   let l = memoargofiarg arg2 in
+   IMisc (MemoSet(intofiarg arg1, l))
  | "MemoGet" ->
-   let l, n = memoargofiarg arg2 in
-   IMisc(MemoGet(intofiarg arg1, l, n+1))
+   let l = memoargofiarg arg2 in
+   IMisc (MemoGet(intofiarg arg1, l))
 
  | "AliasCls" ->
    IIncludeEvalDefine (AliasCls(stringofiarg arg1, stringofiarg arg2))

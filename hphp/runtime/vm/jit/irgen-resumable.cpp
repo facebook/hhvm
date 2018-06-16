@@ -342,17 +342,17 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
   auto const exitSlow = makeExitSlow(env);
 
   auto const cnt = [&] {
-    if (locals.restCount + 1 > RuntimeOption::EvalJitMaxAwaitAllUnroll) {
+    if (locals.count > RuntimeOption::EvalJitMaxAwaitAllUnroll) {
       return gen(
         env,
         CountWHNotDone,
-        CountWHNotDoneData { locals.first, locals.restCount + 1 },
+        CountWHNotDoneData { locals.first, locals.count },
         exitSlow,
         fp(env)
       );
     }
     auto cnt = cns(env, 0);
-    for (int i = 0; i < locals.restCount + 1; ++i) {
+    for (int i = 0; i < locals.count; ++i) {
       auto const loc = ldLoc(env, locals.first + i, nullptr, DataTypeSpecific);
       if (loc->isA(TNull)) continue;
       if (!loc->isA(TObj)) PUNT(Await-NonObject);
@@ -378,7 +378,7 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
       auto const wh = gen(
         env,
         CreateAAWH,
-        CreateAAWHData { locals.first, locals.restCount + 1 },
+        CreateAAWHData { locals.first, locals.count },
         fp(env),
         cnt
       );

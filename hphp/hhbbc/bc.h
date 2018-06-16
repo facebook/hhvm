@@ -99,15 +99,16 @@ inline bool operator!=(MKey a, MKey b) {
   return !(a == b);
 }
 
-// Represents a non-empty range of locals. There's always a first local,
-// followed by a count of additional ones.
+// A contiguous range of locals. The count is the number of locals including the
+// first. If the range is empty, count will be zero and first's value is
+// arbitrary.
 struct LocalRange {
   LocalId  first;
-  uint32_t restCount;
+  uint32_t count;
 };
 
 inline bool operator==(const LocalRange& a, const LocalRange& b) {
-  return a.first == b.first && a.restCount == b.restCount;
+  return a.first == b.first && a.count == b.count;
 }
 
 inline bool operator!=(const LocalRange& a, const LocalRange& b) {
@@ -182,7 +183,7 @@ struct hasher_impl {
   }
 
   static size_t hash(LocalRange range) {
-    return HPHP::hash_int64_pair(range.first, range.restCount);
+    return HPHP::hash_int64_pair(range.first, range.count);
   }
 
   template<class T>

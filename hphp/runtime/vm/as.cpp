@@ -1304,12 +1304,13 @@ LocalRange read_local_range(AsmState& as) {
   if (pos == std::string::npos) as.error("expecting `+' in local range");
   auto const rest = first.substr(pos + 1);
   first = first.substr(0, pos);
+  auto const count = folly::to<uint32_t>(rest);
+  if (!count) return LocalRange{0, 0};
   auto const firstLoc = as.getLocalId(first);
-  auto const restCount = folly::to<uint32_t>(rest);
-  if (firstLoc + restCount > as.maxUnnamed) {
-    as.maxUnnamed = firstLoc + restCount;
+  if (firstLoc + count - 1 > as.maxUnnamed) {
+    as.maxUnnamed = firstLoc + count - 1;
   }
-  return LocalRange{uint32_t(firstLoc), restCount};
+  return LocalRange{uint32_t(firstLoc), count};
 }
 
 Id create_litstr_id(AsmState& as) {

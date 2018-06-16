@@ -837,11 +837,11 @@ void populate_block(ParseUnitState& puState,
 #define IMM_OA(type)   type IMM_OA_IMPL
 #define IMM_VSA(n)     auto keys = decode_stringvec();
 #define IMM_KA(n)      auto mkey = make_mkey(func, decode_member_key(pc, &ue));
-#define IMM_LAR(n)     auto locrange = [&] {                                 \
-                         auto const range = decodeLocalRange(pc);            \
-                         always_assert(range.first + range.restCount         \
-                                       < func.locals.size());                \
-                         return LocalRange { range.first, range.restCount }; \
+#define IMM_LAR(n)     auto locrange = [&] {                             \
+                         auto const range = decodeLocalRange(pc);        \
+                         always_assert(range.first + range.count         \
+                                       <= func.locals.size());           \
+                         return LocalRange { range.first, range.count }; \
                        }();
 
 #define IMM_NA

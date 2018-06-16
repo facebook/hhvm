@@ -41,12 +41,12 @@ struct Func;
 
 constexpr size_t kMaxHhbcImms = 5;
 
-// A contiguous range of locals. The range always includes at least a single
-// local (first), plus some number of additional locals immediately after
-// (restCount).
+// A contiguous range of locals. The count is the number of locals
+// including the first. If the range is empty, count will be zero and
+// first's value is arbitrary.
 struct LocalRange {
   uint32_t first;
-  uint32_t restCount;
+  uint32_t count;
 };
 
 std::string show(const LocalRange&);

@@ -7170,7 +7170,7 @@ bool EmitterVisitor::emitInlineGenva(
   Offset start = m_ue.bcPos();
   e.AwaitAll(LocalRange{
     (uint32_t)waithandles.back(),
-    (uint32_t)(waithandles.size() - 1)
+    (uint32_t)waithandles.size()
   });
 
   // result of AwaitAllWaitHandle does not matter
@@ -10313,12 +10313,12 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
     if (read) {
       auto const count = emitMOp(i, iLast, e, MInstrOpts{MOpMode::Warn}, true);
       always_assert(keysBegin + keyCount <= m_curFunc->numLocals());
-      e.MemoGet(count, LocalRange{ keysBegin, keyCount - 1 });
+      e.MemoGet(count, LocalRange{ keysBegin, keyCount });
     } else {
       auto const count =
         emitMOp(i, iLast, e, MInstrOpts{MOpMode::Define}.rhs(), true);
       always_assert(keysBegin + keyCount <= m_curFunc->numLocals());
-      e.MemoSet(count, LocalRange{ keysBegin, keyCount - 1});
+      e.MemoSet(count, LocalRange{ keysBegin, keyCount });
     }
   };
 

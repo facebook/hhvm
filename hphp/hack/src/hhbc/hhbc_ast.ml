@@ -544,8 +544,8 @@ type instruct_misc =
   | IsUninit
   | CGetCUNop
   | UGetCUNop
-  | MemoSet of int * local_id * int
-  | MemoGet of int * local_id * int
+  | MemoSet of int * (local_id * int) option
+  | MemoGet of int * (local_id * int) option
   | IsMemoType
   | MaybeMemoType
 
@@ -571,7 +571,7 @@ type gen_delegation =
 type async_functions =
   | WHResult
   | Await
-  | AwaitAll of Local.t * int
+  | AwaitAll of (Local.t * int) option
 
 type instruct_try =
   | TryCatchBegin

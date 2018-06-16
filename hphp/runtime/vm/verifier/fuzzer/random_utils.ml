@@ -278,8 +278,8 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IMisc (Silence (random_local (), random_silence ())));
     (fun () -> IMisc (GetMemoKeyL (random_local ())));
     (*(fun () -> IMisc VarEnvDynCall);*)
-    (fun () -> IMisc (MemoSet (Random.int 10, random_local (), Random.int 10)));
-    (fun () -> IMisc (MemoGet (Random.int 10, random_local (), Random.int 10)));
+    (fun () -> IMisc (MemoSet (Random.int 10, Some (random_local (), Random.int 10))));
+    (fun () -> IMisc (MemoGet (Random.int 10, Some (random_local (), Random.int 10))));
     (fun () -> IAsync WHResult);
     (fun () -> IAsync Await)] @
     begin

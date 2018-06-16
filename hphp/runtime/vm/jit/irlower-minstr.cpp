@@ -1284,7 +1284,7 @@ void cgMemoGet(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(1)
     .addr(fp, localOffset(extra->locals.first))
-    .imm(extra->locals.restCount + 1);
+    .imm(extra->locals.count);
   cgCallHelper(
     v, env, CallSpec::direct(MixedArray::MemoGet),
     callDestTV(env, inst), SyncOptions::None, args
@@ -1299,7 +1299,7 @@ void cgMemoSet(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(1)
     .addr(fp, localOffset(extra->locals.first))
-    .imm(extra->locals.restCount + 1)
+    .imm(extra->locals.count)
     .typedValue(2);
   cgCallHelper(
     v, env, CallSpec::direct(MixedArray::MemoSet),

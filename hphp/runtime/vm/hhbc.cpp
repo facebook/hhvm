@@ -1256,7 +1256,7 @@ int instrFpToArDelta(const Func* func, PC opcode) {
 
 std::string show(const LocalRange& range) {
   return folly::sformat(
-    "L:{}+{}", range.first, range.restCount
+    "L:{}+{}", range.first, range.count
   );
 }
 

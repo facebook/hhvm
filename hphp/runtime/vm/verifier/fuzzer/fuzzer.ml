@@ -500,10 +500,10 @@ let mut_imms (is : IS.t) : IS.t =
                                                   mutate_int      i'  !mag)
     | GetMemoKeyL    id       -> GetMemoKeyL     (mutate_local_id id !mag)
     | Silence (id, op) -> Silence (mutate_local_id id !mag, mutate_silence op)
-    | MemoSet     (i, id, i') ->
-        MemoSet (mutate_int i !mag, mutate_local_id id !mag, mutate_int i' !mag)
-    | MemoGet     (i, id, i') ->
-        MemoGet (mutate_int i !mag, mutate_local_id id !mag, mutate_int i' !mag)
+    | MemoSet     (i, Some (id, i')) ->
+        MemoSet (mutate_int i !mag, Some (mutate_local_id id !mag, mutate_int i' !mag))
+    | MemoGet     (i, Some (id, i')) ->
+        MemoGet (mutate_int i !mag, Some (mutate_local_id id !mag, mutate_int i' !mag))
     | _ -> s in
   let change_imms data (i : instruct) : instruct list =
     [match i with

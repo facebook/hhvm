@@ -71,7 +71,7 @@ void encode_member_key(MemberKey mk, UnitEmitter& ue) {
 
 void encodeLocalRange(UnitEmitter& ue, const LocalRange& range) {
   ue.emitIVA(range.first);
-  ue.emitIVA(range.restCount);
+  ue.emitIVA(range.count);
 }
 
 LocalRange decodeLocalRange(const unsigned char*& pc) {

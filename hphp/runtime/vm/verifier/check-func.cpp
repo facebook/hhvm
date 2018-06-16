@@ -661,7 +661,7 @@ bool FuncChecker::checkImmKA(PC& pc, PC const /*instr*/) {
 bool FuncChecker::checkImmLAR(PC& pc, PC const instr) {
   auto ok = true;
   auto const range = decodeLocalRange(pc);
-  for (auto i = uint32_t{0}; i < range.restCount+1; ++i) {
+  for (auto i = uint32_t{0}; i < range.count; ++i) {
     ok &= checkLocal(instr, range.first + i);
   }
   return ok;
@@ -1459,9 +1459,17 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       }
       break;
     }
-    case Op::FCallAwait:
-    case Op::Await:
+
     case Op::AwaitAll: {
+      auto const& range = getImm(pc, 0).u_LAR;
+      if (range.count == 0) {
+        ferror("{} must have a non-empty local range\n", opcodeToName(op));
+        return false;
+      }
+      // Fall-through
+    }
+    case Op::FCallAwait:
+    case Op::Await: {
       if (!m_func->isAsync()) {
         ferror("{} may only appear in an async function\n", opcodeToName(op));
         return false;

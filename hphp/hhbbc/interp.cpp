@@ -168,7 +168,7 @@ LocalId equivLocalRange(ISS& env, const LocalRange& range) {
           return false;
         }
 
-        for (uint32_t i = 1; i <= range.restCount; ++i) {
+        for (uint32_t i = 1; i < range.count; ++i) {
           if (!locsAreEquiv(env, equivFirst + i, range.first + i) ||
               peekLocRaw(env, equivFirst + i) !=
               peekLocRaw(env, range.first + i)) {
@@ -4479,11 +4479,11 @@ void in(ISS& env, const bc::AwaitAll& op) {
   if (equiv != op.locrange.first) {
     return reduce(
       env,
-      bc::AwaitAll {LocalRange {equiv, op.locrange.restCount}}
+      bc::AwaitAll {LocalRange {equiv, op.locrange.count}}
     );
   }
 
-  for (uint32_t i = 0; i < op.locrange.restCount + 1; ++i) {
+  for (uint32_t i = 0; i < op.locrange.count; ++i) {
     mayReadLocal(env, op.locrange.first + i);
   }
 

@@ -1635,7 +1635,9 @@ let expression_errors env node parents errors =
       && trailing_width lambda_async = 0
       && full_width lambda_coroutine = 0
       && leading_width lambda_signature = 0
-      -> failwith "syntax error, unexpected T_LAMBDA_ARROW";
+      ->
+        make_error_from_node node
+          (SyntaxError.error1057 "==>") :: errors
     (* End of bug-port *)
   | IsExpression
     { is_right_operand = hint
